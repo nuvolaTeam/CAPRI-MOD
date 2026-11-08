@@ -28,11 +28,11 @@ Written: capri_data/2017/environment/histosol.csv, per model region and class (c
   cs0_<c>, cs1_<c>, maxshare_<c>, pmp_lin_<c>, pmp_sqr_<c>, cost_lin_<c>   (EUR per ha of histosol,
                     2017 money: CAPRI's 2030 marginals over its 2030/2017 input deflator)
 
-Sources: sources/raw/capri/dat/envind/orgsoil_share_p_orgsoilori.csv, ipcc_wetlands_p_emifacOrganicSoil_ori.csv,
-sources/raw/capri/dat/envind/fao_peatland/fao_peatland_P.csv and lulucf_emissions_original_source_p_PEATSH_def.csv (the fallbacks of the
+Sources: sources/raw/capri/dat/envind/orgsoil_share_p_orgsoilori.parquet, ipcc_wetlands_p_emifacOrganicSoil_ori.parquet,
+sources/raw/capri/dat/envind/fao_peatland/fao_peatland_P.parquet and lulucf_emissions_original_source_p_PEATSH_def.parquet (the fallbacks of the
 Western Balkans and Turkey; the WBA6 set from sets.gms),
-fao_landuse_2000_P.csv (the project lead's gdxdumps, converted by tools/build/convert_sources_to_csv.py); FAO
-country codes from the GAMS source (global/fao_codes_new.gms FAORegions_map); sources/intermediate/ghgtech/capri_costsavings_2030.csv; CROP and GRAS 2030 levels
+fao_landuse_2000_P.parquet (the project lead's gdxdumps, converted by tools/build/convert_sources.py); FAO
+country codes from the GAMS source (global/fao_codes_new.gms FAORegions_map); sources/intermediate/ghgtech/capri_costsavings_2030.parquet; CROP and GRAS 2030 levels
 from validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz; deflator from
 trajectories/capri_price_ratios_2030.csv.
 
@@ -50,6 +50,7 @@ import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources"
@@ -68,10 +69,8 @@ TAG = {"crop": "crop", "grslnd": "grass"}
 
 
 def _records(name):
-    """The records of a gdxdump converted to CSV (capri_data/sources/raw/capri/dat/envind, tools/build/convert_sources_to_csv.py)."""
-    with open(SRC / "raw" / "capri" / "dat" / "envind" / name, newline="", encoding="utf-8") as fh:
-        rows = list(csv.DictReader(fh))
-    return rows
+    """The records of a gdxdump converted to CSV (capri_data/sources/raw/capri/dat/envind, tools/build/convert_sources.py)."""
+    return source_records(SRC / "raw" / "capri" / "dat" / "envind" / name)
 
 
 def _load(path):
@@ -130,12 +129,12 @@ def main():
     ap.add_argument("--gams-dir", type=Path, default=SOURCES / "gams")
     a = ap.parse_args()
     org = defaultdict(dict)
-    for r in _records("orgsoil_share_p_orgsoilori.csv"):
+    for r in _records("orgsoil_share_p_orgsoilori.parquet"):
         org[r["region"]][r["item"]] = float(r["value"])
     ef = {(r["gas"], r["land_use"], r["climate_zone"]): float(r["value"])
-          for r in _records("ipcc_wetlands_p_emifacOrganicSoil_ori.csv")}
+          for r in _records("ipcc_wetlands_p_emifacOrganicSoil_ori.parquet")}
     lu = defaultdict(lambda: defaultdict(float))
-    for r in _records("fao_landuse_2000_P.csv"):
+    for r in _records("fao_landuse_2000_P.parquet"):
         lu[r["fao_code"]][(r["climate_zone"], r["land_use"])] += float(r["value"])
     c2f = fao_map(a.gams_dir)
     clim = defaultdict(lambda: defaultdict(float))        # MS -> (zone, lu) -> area
@@ -144,10 +143,10 @@ def main():
             for k, v in lu.get(code, {}).items():
                 clim[ms][k] += v
     gap = gap_countries(a.gams_dir)
-    peat = {r["fao_code"]: float(r["value"]) for r in csv.DictReader(open(
-        SRC / "raw" / "capri" / "dat" / "envind" / "fao_peatland" / "fao_peatland_P.csv", newline=""))}
-    peat_def = {r["region"]: float(r["value"]) for r in csv.DictReader(open(
-        SRC / "raw" / "capri" / "dat_local" / "envind" / "lulucf_emissions_original_source_p_PEATSH_def.csv", newline=""))}
+    peat = {r["fao_code"]: float(r["value"]) for r in source_records(
+        SRC / "raw" / "capri" / "dat" / "envind" / "fao_peatland" / "fao_peatland_P.parquet")}
+    peat_def = {r["region"]: float(r["value"]) for r in source_records(
+        SRC / "raw" / "capri" / "dat_local" / "envind" / "lulucf_emissions_original_source_p_PEATSH_def.parquet")}
 
     def national_crop_share(ms):
         """CAPRI's cropland share of a country that fills its gaps (prep_lulucf_carbon.gms l. 245-259): its JRC record,
@@ -171,7 +170,7 @@ def main():
         t = sum(z.values())
         return {k: v / t for k, v in z.items()} if t > 0 else {}
 
-    cs = _read_csv(SRC / "intermediate" / "ghgtech" / "capri_costsavings_2030.csv")
+    cs = read_source(SRC / "intermediate" / "ghgtech" / "capri_costsavings_2030.parquet")
     cs = cs[cs["technology"] == "FALLOW"]
     terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz",
                         header=None, names=["region", "act", "item", "value"], dtype=str)

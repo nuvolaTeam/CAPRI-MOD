@@ -88,7 +88,8 @@ def main() -> None:
     cross = pela[pela.crop != pela.wrt][
         ["model_region", "crop", "wrt", "value"]]
 
-    own.to_csv(out / "pela_own_price.csv")
+    from _sources_io import write_source
+    write_source(own, out / "pela_own_price.parquet")
     # (the cross-price records were also written to pela_cross_by_region.json for the supply module's legacy cross
     # terms; that path and the file were removed on 29 October 2026: KNOWN_ISSUES K105)
     print(f"PELA {PELA_YEAR}: {len(pela):,} records reaching "

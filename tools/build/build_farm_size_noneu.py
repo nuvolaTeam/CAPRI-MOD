@@ -54,6 +54,7 @@ sys.path.insert(0, str(ROOT / "tools" / "lib"))
 import gams_text as G  # noqa: E402
 import _model_regions as mr  # noqa: E402
 from paths import SOURCES  # noqa: E402
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 SRC = ROOT / "capri_data" / "sources"
 AMM = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
@@ -61,6 +62,8 @@ LEVELS = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal
 
 
 def _rd(path):
+    if str(path).endswith(".parquet"):
+        return source_records(path)            # a table of capri_data/sources
     with open(path, newline="") as fh:
         return list(csv.DictReader(fh))
 
@@ -121,10 +124,10 @@ def targets(c: dict):
     """CAPRI's l. 200-266 for the fallback regions: {name: {cell: value}} shared by every loop region (none has data
     of its own)."""
     heads = defaultdict(dict)
-    for r in _rd(SRC / "raw" / "capri" / "dat" / "scen" / "ghgtech" / "AD_basedata_p_Heads.csv"):
+    for r in _rd(SRC / "raw" / "capri" / "dat" / "scen" / "ghgtech" / "AD_basedata_p_Heads.parquet"):
         heads[r["dim1"]][(r["dim2"].upper(), r["dim3"])] = float(r["level"])
     sf = defaultdict(dict)
-    for r in _rd(SRC / "raw" / "capri" / "dat" / "scen" / "ghgtech" / "AD_basedata_p_sf.csv"):
+    for r in _rd(SRC / "raw" / "capri" / "dat" / "scen" / "ghgtech" / "AD_basedata_p_sf.parquet"):
         sf[r["dim1"]][r["dim2"]] = float(r["level"])
     hold = defaultdict(lambda: defaultdict(float))
     for r in _rd(AMM / "p_holdLSU.csv"):
@@ -280,7 +283,7 @@ def main():
     a = ap.parse_args()
     c = capri_constants(a.gams_dir)
     tg, A, F = targets(c)
-    lu = {r["act"].upper(): float(r["value"]) for r in _rd(SRC / "raw" / "capri" / "dat" / "policy" / "livestock_units_p_LUUnits.csv")}
+    lu = {r["act"].upper(): float(r["value"]) for r in _rd(SRC / "raw" / "capri" / "dat" / "policy" / "livestock_units_p_LUUnits.parquet")}
     t = pd.read_csv(LEVELS, dtype=str)
     t = t[t["item"] == "LEVL"]
     lev = {(r.region, r.activity): float(r.value) for r in t.itertuples()}

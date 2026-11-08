@@ -31,7 +31,7 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "tools" / "pipeline" / "builders.json"
 sys.path.insert(0, str(ROOT / "tools" / "check"))
 from reproduce_builders import placeholder  # noqa: E402  ($EXPORTS, $SOURCES, $REFERENCE)
-#: the repository's git store: a builder reading the repository's history (convert_sources_to_csv, git show) reads it;
+#: the repository's git store: a builder reading the repository's history (convert_sources, git show) reads it;
 #: those objects are the repository, not an external source
 GIT_DIR = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=ROOT,
                          capture_output=True, text=True).stdout.strip()

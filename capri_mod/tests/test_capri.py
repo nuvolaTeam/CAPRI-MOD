@@ -11,6 +11,7 @@ Covers the invariants that matter for a trustworthy model:
 Run:  pytest capri_mod/tests/ -v
 """
 from pathlib import Path
+from capri_mod.tests._sources import read_source, source_records  # noqa: E402
 import os
 import sys
 
@@ -1105,13 +1106,13 @@ def test_greendeal_surplus_rules():
 def test_option_costsaving_drop_follows_capri(model):
     """K67 F2: the animal options' PMP slope nets CAPRI's cost-saving drop between its ini and max calibration runs
     (breeding.gms l. 447-458): dsav per model head = sum_m MaxShare_m (M0_m - M1_m) / (ratio x sum_m MaxShare_m LEVL_m)
-    from capri_costsavings_2030.csv, per unit of the technology parameter (the runs at ghgTechFEff 0.1). Checked
+    from capri_costsavings_2030.parquet, per unit of the technology parameter (the runs at ghgTechFEff 0.1). Checked
     against the source for DE11's bulls (genet_eff) and dairy cows (nitrate); signs as CAPRI's runs: the breeding
     option's marginal value rises towards the max run, the supplements' and low-N feed's fall."""
     import pandas as pd
     from pathlib import Path
     root = Path(__file__).resolve().parents[2]
-    cs = pd.read_csv(root / "capri_data" / "sources" / "intermediate" / "ghgtech" / "capri_costsavings_2030.csv")
+    cs = read_source(root / "capri_data" / "sources" / "intermediate" / "ghgtech" / "capri_costsavings_2030.parquet")
     md = pd.read_csv(root / "capri_data" / "2017" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
     ratio = model.data["capri_level_ratio"]
     lev = {(r.region, r.activity): float(r.value) for r in md[md["item"] == "LEVL"].itertuples()}
@@ -1302,7 +1303,7 @@ def test_data_headers_are_ascii():
         bad = [h for h in header if any(ord(ch) > 127 for ch in h)]
         if bad:
             offenders.append(f"{p.name}: {bad}")
-    # the builders' intermediates kept as Parquet (27 October 2026): their column names
+    # the Parquet tables (capri_data/sources since 8 November 2026): their column names
     import pyarrow.parquet as _pq
     for p in (_repo_root() / "capri_data").rglob("*.parquet"):
         bad = [h for h in _pq.read_schema(p).names if any(ord(ch) > 127 for ch in h)]
@@ -1971,9 +1972,9 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
     from capri_mod.projection import scenario_io
     tp = os.path.join(str(DATA_DIR), "scenarios", "capri_ref_2030")
-    src = os.path.join(str(DATA_DIR), "sources", "raw", "capri", "results", "res_2_1730greendeal_refpol_endotech_all_inidefaulta", "capri_ref_levl_yild_2030_2017.csv.xz")
+    src = os.path.join(str(DATA_DIR), "sources", "raw", "capri", "results", "res_2_1730greendeal_refpol_endotech_all_inidefaulta", "capri_ref_levl_yild_2030_2017.parquet")
     t = scenario_io.read(tp)
-    raw = pd.read_csv(src)
+    raw = read_source(src)
     v = {(r.capri_region, r.activity, r.item, str(r.year)): r.value for r in raw.itertuples()}
     f = v[("DE110000", "SWHE", "LEVL", "2030")] / v[("DE110000", "SWHE", "LEVL", "2017")]
     assert abs(t["regional"]["herds"]["DE110000"]["SWHE"]["2030"] - f) < 1e-12          # written to the last digit
@@ -2839,7 +2840,7 @@ def test_farm_size_estimate_of_the_balkans_and_turkey_holds_capris_constraints()
         lo, hi = bounds[r.size_class]
         assert lo - tol <= r.sf <= hi + tol
     # the ammonia cost curves now cover them (CAPRI's ammo_tech.gms on the estimated p_Heads, p_holdLSU)
-    cc = pd.read_parquet(D / "ammonia_cost_curves.parquet")
+    cc = read_source(D.parents[2] / "sources" / "intermediate" / "ammonia" / "ammonia_cost_curves.parquet")
     assert set(d.region) <= set(cc.region)
 
 def test_ad_option_of_croatia_and_the_balkans_as_capri():
@@ -3656,9 +3657,8 @@ def test_eu_trade_blocks_data_and_split(data):
     assert abs(we - 15041.0) < 1.0
     eu = ("EU_WEST", "EU_EAST")
     # the EU's imports from outside: CAPRI's (its extract, the two blocks' ImportQ from every non-EU market region)
-    import lzma
-    with lzma.open(DATA_DIR / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "bilateral_dataout_2030.csv.xz", "rt") as fh:
-        src = pd.read_csv(fh, keep_default_na=False)
+    src = read_source(DATA_DIR / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717"
+                      / "bilateral_dataout_2030.parquet", keep_default_na=False)
     for c, k in (("SWHE", "WHEA"), ("BEEF", "BEEF"), ("SOYA", "SOYA")):
         s = src[(src["item"] == "ImportQ") & (src["product"] == k) & src.r1.isin(["A_EU_WEST", "A_EU_EAST"])
                 & ~src.r2.isin(["A_EU_WEST", "A_EU_EAST", ""])
@@ -3753,10 +3753,10 @@ def test_processing_inpe_and_nonEU_feed_are_capris_2030():
     from capri_mod.data.nested_tables import read_feed_demand
     fd = read_feed_demand(MK / "feed_demand_nonEU.csv")
     assert "MED|SOYC" in fd and "SKOR|SOYC" in fd and "ROW|SOYC" not in fd and "EU27|SWHE" not in fd
-    us = pd.read_csv(DATA_DIR / "sources" / "raw" / "capri" / "results" / "data_market_1730defaulta" / "feed_demand_nonEU_use_2030.csv")
+    us = read_source(DATA_DIR / "sources" / "raw" / "capri" / "results" / "data_market_1730defaulta" / "feed_demand_nonEU_use_2030.parquet")
     u = us[(us.rms == "USA") & (us["product"] == "MAIZ")].set_index("item")["value"]
     assert abs(fd["USA|CORN"]["feed_share"] - u["FEED"] / u[["HCON", "FEED", "PROC", "BIOF"]].sum()) < 1e-4
-    el = pd.read_csv(DATA_DIR / "sources" / "raw" / "capri" / "results" / "elas_2_1730defaulta" / "feed_demand_nonEU_elas_2030.csv")
+    el = read_source(DATA_DIR / "sources" / "raw" / "capri" / "results" / "elas_2_1730defaulta" / "feed_demand_nonEU_elas_2030.parquet")
     e = el[(el.rms == "USA") & (el.feed == "SOYC") & (el.price_of == "SOYC")]["value"].iloc[0]
     assert abs(fd["USA|SOYC"]["elasticities"]["SOYC"] - e) < 1e-4
 
@@ -3953,7 +3953,7 @@ def test_n_leaching_follows_capri():
     from capri_mod.supply import n_cascade as nc, n_leaching as nl
     root = Path(__file__).resolve().parents[2] / "capri_data"
     D = defaultdict(dict)
-    for r in csv.DictReader(open(root / "sources" / "intermediate" / "capri_res" / "gd2030_endotech_ini_nbalance.csv")):
+    for r in source_records(root / "sources" / "intermediate" / "capri_res" / "gd2030_endotech_ini_nbalance.parquet"):
         D[r["region"]][r["item"]] = float(r["value"])
     R = defaultdict(dict)
     for r in csv.DictReader(open(root / "validation" / "n_cascade_capri_gd2030.csv")):
@@ -4252,20 +4252,20 @@ def test_recipe_pmp_terms_reproduce_capris_own():
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "check")]
     import pmp_recipe_check as C
     src = DATA_DIR / "sources"
-    cp = pd.read_csv(src / "intermediate" / "capreg" / "pmp_quad_pact.csv")
-    rp = pd.read_csv(src / "intermediate" / "baseline_pmp" / "recipe_2017_quad_pact.csv")
+    cp = read_source(src / "intermediate" / "capreg" / "pmp_quad_pact.parquet")
+    rp = read_source(src / "intermediate" / "baseline_pmp" / "recipe_2017_quad_pact.parquet")
     rp["model_region"] = rp.region
     k = cp.merge(rp, on=["model_region", "group1", "group2"])
     r = k.value_y / k.value_x
     assert len(k) > 1000 and ((r - 1).abs() < 0.01).mean() > 0.99
-    cap = pd.read_csv(src / "intermediate" / "capreg" / "pmp_quad_techn.csv")
-    rec = pd.read_csv(src / "intermediate" / "baseline_pmp" / "recipe_2017_quad_techn.csv")
+    cap = read_source(src / "intermediate" / "capreg" / "pmp_quad_techn.parquet")
+    rec = read_source(src / "intermediate" / "baseline_pmp" / "recipe_2017_quad_techn.parquet")
     rec = rec[(rec.tech1 == rec.tech2) & rec.tech1.isin(["T1", "T"])].drop_duplicates(["region", "activity"]).copy()
     rec["model_region"] = rec.region
     j = cap.merge(rec, on=["model_region", "activity"], suffixes=("_c", "_r"))
     assert ((j.value_r / j.value_c - 1).abs() < 0.05).mean() > 0.88
-    ex = C.collapsed(pd.read_csv(src / "intermediate" / "baseline_pmp" / "pmp_quad_techn_2030.csv"))
-    rc = C.collapsed(pd.read_csv(src / "intermediate" / "baseline_pmp" / "recipe_2030_quad_techn.csv"))
+    ex = C.collapsed(read_source(src / "intermediate" / "baseline_pmp" / "pmp_quad_techn_2030.parquet"))
+    rc = C.collapsed(read_source(src / "intermediate" / "baseline_pmp" / "recipe_2030_quad_techn.parquet"))
     jj = pd.concat({"c": ex, "r": rc}, axis=1).dropna()
     assert len(jj) > 10000 and ((jj.r / jj.c - 1).abs() < 0.05).mean() > 0.79
 
@@ -4571,7 +4571,7 @@ def test_3nop_from_capris_digestibility_table():
     """K93: 3-NOP (envind/line_nitr.gms) for dairy and suckler cows: CAPRI's digestibility table read as GAMS reads it
     (a value under the header it overlaps: rye has no PAF, its 87.3 is dry matter), CH4ENT cut by CAPRI's formula in the
     ration's fibre and fat, 0.09% of dry matter, no requirement effect, no cost saving."""
-    t = pd.read_csv(DATA_DIR / "sources" / "intermediate" / "envind" / "capri_digestpar.csv")
+    t = read_source(DATA_DIR / "sources" / "intermediate" / "envind" / "capri_digestpar.parquet")
     rye = t[t.feed == "RYEM"].set_index("item")["value"]
     assert "PAF" not in rye.index and rye["DM"] == 87.3 and rye["NDF"] == 14.1 and rye["EE"] == 1.2
     import sys

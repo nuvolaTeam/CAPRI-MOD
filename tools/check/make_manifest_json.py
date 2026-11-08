@@ -37,7 +37,11 @@ import validate_data as V  # noqa: E402
 
 
 def _shape(path: Path):
-    """(rows, columns) of a CSV file: its data lines and its header's fields."""
+    """(rows, columns) of a CSV file (its data lines and its header's fields) or of a Parquet table."""
+    if path.suffix == ".parquet":
+        import pyarrow.parquet as pq
+        md = pq.read_metadata(path)
+        return md.num_rows, md.num_columns
     with open(path, newline="", encoding="utf-8") as fh:
         r = csv.reader(fh)
         header = next(r, [])

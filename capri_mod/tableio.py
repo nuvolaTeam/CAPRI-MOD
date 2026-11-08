@@ -1,9 +1,10 @@
 """Reading and writing the model's builder-written inputs as Parquet (the project lead's decision, 27 October 2026).
 
-Every model input that a builder in tools/build writes is stored as Parquet: float64 values are kept bit for bit, the
-column types travel with the file, and no parser setting can lose a digit. Sources (capri_data/sources: CAPRI,
-Eurostat and FAO extracts) and supplied or hand-maintained tables stay CSV (capri_mod/csvio.py), and so do the
-validation tables.
+Used for the tables of capri_data/sources, Parquet since 8 November 2026 (the data layout's step (c), through
+tools/lib/_sources_io.py): float64 values are kept bit for bit, the column types travel with the file, and no parser
+setting can lose a digit. The model's inputs stay CSV (capri_mod/csvio.py; the project's rule), and so do the
+validation tables. (The decision of 27 October 2026 to store the builder-written model inputs as Parquet was deferred;
+tools/build/convert_inputs_to_parquet.py is its unused conversion step.)
 
 A table is stored as its CSV would be read without an index (every column a column, the types pandas infers), so that
 read_input gives what read_csv gives for the options the model uses (index_col, usecols, nrows, dtype); write_table

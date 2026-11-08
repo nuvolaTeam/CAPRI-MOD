@@ -10,14 +10,14 @@ Mapping, in three steps, each from a published correspondence:
      not have (Norway's NO08, NO09, NO0A) are taken at 2021 directly. A member state without regional detail (DK, EE,
      LT, LV, SI, CY, MT, HR) maps to all of its regions.
   2. NUTS 2016 -> NUTS 2021: Eurostat's NUTS 2021 classification, 'Changes detailed NUTS 2016-2021'
-     (sources/raw/nuts/nuts2016_2021.csv): codes kept or recoded; HR04 -> HR02, HR05, HR06; Norway's NO01, NO03, NO04,
+     (sources/raw/nuts/nuts2016_2021.parquet): codes kept or recoded; HR04 -> HR02, HR05, HR06; Norway's NO01, NO03, NO04,
      NO05 -> NO08, NO09, NO0A.
-  3. NUTS 2021 -> NUTS 2024: Eurostat's 'NUTS2021- NUTS2024' (sources/raw/nuts/nuts2021_2024.csv) and its NUTS-2 change
+  3. NUTS 2021 -> NUTS 2024: Eurostat's 'NUTS2021- NUTS2024' (sources/raw/nuts/nuts2021_2024.parquet) and its NUTS-2 change
      notes: NL31, NL33 -> NL35, NL36 (boundary shift); PT16, PT18 -> PT19, PT1C, PT1D; PT17 -> PT1A, PT1B.
 The units and NUTS-2024 regions linked by these steps form groups (connected sets). A group's results are spread over
 its NUTS-2024 regions by their utilised agricultural area (Eurostat ef_lus_main, UAA, ha, farm structure survey 2023,
 NUTS 2024; the 2020 census, NUTS 2021, for the member states without NUTS-2 data for 2023, whose NUTS-2 codes are the
-same in 2024; sources/raw/eurostat/ef_lus_main_uaa_nuts2024.csv): weight = the region's UAA / the group's UAA.
+same in 2024; sources/raw/eurostat/ef_lus_main_uaa_nuts2024.parquet): weight = the region's UAA / the group's UAA.
 Norway is not in the EU's NUTS 2024 tables; Eurostat publishes its 2023 farm structure data under the 2021 statistical
 regions (NO02, NO06, NO07, NO08, NO09, NO0A), which are taken as its 2024 regions.
 CAPRI has no unit for Brussels (BE10), Berlin (DE30), Bremen (DE50), Hamburg (DE60), Ceuta and Melilla (ES63, ES64) and
@@ -39,8 +39,11 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
+import sys as _sys_sio  # noqa: E402
+_sys_sio.path.insert(0, str(ROOT / "tools" / "lib"))
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 NUTS = ROOT / "capri_data" / "sources" / "raw" / "nuts"
-UAA = ROOT / "capri_data" / "sources" / "raw" / "eurostat" / "ef_lus_main_uaa_nuts2024.csv"
+UAA = ROOT / "capri_data" / "sources" / "raw" / "eurostat" / "ef_lus_main_uaa_nuts2024.parquet"
 DEST = ROOT / "capri_data" / "shared" / "capri_units_nuts2024.csv"
 API = ("https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/ef_lus_main?format=JSON&lang=EN"
        "&crops=UAA&unit=HA&statinfo=TOTAL&farmtype=TOTAL&so_eur=TOTAL&uaarea=TOTAL&time=")
@@ -106,12 +109,12 @@ def main():
     _ru = pd.read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv", dtype=str)
     ctry = {u: c for u, c in zip(_ru.region, _ru.country) if u in set(units)}
 
-    t13 = pd.read_csv(NUTS / "nuts2013_2016.csv", dtype=str).fillna("")
+    t13 = read_source(NUTS / "nuts2013_2016.parquet").astype(object).fillna("").astype(str)
     n16 = sorted(level2(t13.code_2016) & {c for c in t13.code_2016 if c[:2] in set(ctry.values()) | {"EL"}})
-    t21 = pd.read_csv(NUTS / "nuts2016_2021.csv", dtype=str).fillna("")
+    t21 = read_source(NUTS / "nuts2016_2021.parquet").astype(object).fillna("").astype(str)
     t21 = t21[(t21.code_2016.str.len() == 4) | (t21.code_2021.str.len() == 4)]
     n21 = sorted(level2(t21.code_2021))
-    t24 = pd.read_csv(NUTS / "nuts2021_2024.csv", dtype=str).fillna("")
+    t24 = read_source(NUTS / "nuts2021_2024.parquet").astype(object).fillna("").astype(str)
     t24 = t24[(t24.code_2021.str.len() == 4) | (t24.code_2024.str.len() == 4)]
     n24 = level2(t24.code_2024)
     in24 = {c[:2] for c in n24}
@@ -171,7 +174,7 @@ def main():
     gid = {}
     for u, n in links:
         gid.setdefault(find(("u", u)), len(gid))
-    uaa_t = pd.read_csv(UAA, float_precision="round_trip")
+    uaa_t = read_source(UAA)
     uaa = uaa_t.set_index("nuts")["uaa_ha"]
     old = uaa_t[uaa_t.year == 2020].nuts
     assert not [c for c in old if c in n21 and c not in n24 and c[:2] in set(ctry.values())], \

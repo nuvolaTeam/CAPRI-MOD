@@ -17,7 +17,7 @@ capri-mod has no tillage, buffer strips, biodiversity or biochar options: B2 is 
 Deal reference with endogenous technologies (the 'ini' run): R = leach_ini / (leach_base x B1 at CAPRI's initial
 shares), computed in capri_mod/supply/n_leaching.py from this file's leach_ini (REGISTERED).
 
-Data read: capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_nbalance.csv, CAPRI's regional N balance of the run
+Data read: capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_nbalance.parquet, CAPRI's regional N balance of the run
 (tools/build/extract_gd2030_nbalance.py; this builder extracted it until 29 October 2026)
 
 Data written
@@ -34,13 +34,16 @@ import csv
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "intermediate" / "capri_res" / "gd2030_endotech_ini_nbalance.csv"
+import sys as _sys_sio  # noqa: E402
+_sys_sio.path.insert(0, str(ROOT / "tools" / "lib"))
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
+SRC = ROOT / "capri_data" / "sources" / "intermediate" / "capri_res" / "gd2030_endotech_ini_nbalance.parquet"
 OUT = ROOT / "capri_data" / "2017" / "abatement" / "ammonia" / "n_leaching_region.csv"
 
 
 def build():
     d = {}
-    for r in csv.DictReader(open(SRC)):
+    for r in source_records(SRC):
         d.setdefault(r["region"], {})[r["item"]] = float(r["value"])
     base = {}
     for r in csv.DictReader(open(ROOT / "capri_data" / "2017" / "abatement" / "ammonia" / "n_cascade_region.csv")):

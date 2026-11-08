@@ -24,7 +24,7 @@ CAPRI's territory group gets the curvature of its share, so each region's relati
 Animals keep the model's elasticity-calibrated terms (CAPRI's animal terms include intensity variants DCOL/DCOH,
 BULL/BULH and CAPRI's feed PMP terms, a separate step).
 
-Sources: capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.csv, pmp_quad_pact_2030.csv (tools/build/build_pmp_2030.py,
+Sources: capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.parquet, pmp_quad_pact_2030.parquet (tools/build/build_pmp_2030.py,
 exported from the project lead's CAPRI 2030 baseline calibration); CAPRI 2030 levels LEVL from the 2030 reference
 the model's trajectory is built from (res_2_1730greendeal_refpol_endotech_all_inidefaulta).
 Outputs: capri_data/2017/supply/pmp_capri_2030_mix.csv (S1's mix columns, mix_terms; the default run only) and
@@ -47,6 +47,7 @@ import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
@@ -153,8 +154,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--ref", type=Path, default=REF)
     ap.add_argument("--techn", type=Path, default=None,
-                    help="CAPRI-format technology terms (default: CAPRI's 2030 export, pmp_quad_techn_2030.csv); e.g. "
-                         "recipe_2017_quad_techn.csv of tools/build/build_pmp_recipe.py")
+                    help="CAPRI-format technology terms (default: CAPRI's 2030 export, pmp_quad_techn_2030.parquet); e.g. "
+                         "recipe_2017_quad_techn.parquet of tools/build/build_pmp_recipe.py")
     ap.add_argument("--year", type=int, choices=(2017, 2030), default=2030,
                     help="levels of the calibration point: 2030 CAPRI's 2030 reference, 2017 CAPRI's 2017 results")
     ap.add_argument("--out", type=Path, default=None)
@@ -164,9 +165,9 @@ def main() -> None:
     import _money
     # CAPRI's terms of the year's calibration are in its money of that year; the model's in 2017 money (K108)
     money = _money.deflator(a.year)
-    ap_t = a.techn or SRC / "pmp_quad_techn_2030.csv"
-    techn = _read_csv(ap_t)
-    pact = _read_csv(Path(str(ap_t).replace("_quad_techn", "_quad_pact")))
+    ap_t = a.techn or SRC / "pmp_quad_techn_2030.parquet"
+    techn = read_source(ap_t)
+    pact = read_source(Path(str(ap_t).replace("_quad_techn", "_quad_pact")))
     lev = ref_levels(a.ref) if a.year == 2030 else levels_2017_dumps(set(CAPRI_TO_MODEL))
     OUT = a.out or (ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030.csv")
     regions = mr.model_regions()

@@ -4,7 +4,7 @@
 What was wrong. tools/build/build_capri_base.py rebuilt areas and herds from all 27 dumps but its per-hectare pass took only
 the FIRST CAPRI activity of each model crop and skipped wine costs and the textile crops; premiums were never rebuilt
 at all. So:
-  - CAP premiums came from a 192-region extraction (capreg_cap_premium.csv, CAPRI codes); the other 56 regions, and
+  - CAP premiums came from a 192-region extraction (capreg_cap_premium.parquet, CAPRI codes); the other 56 regions, and
     fodder, set-aside, wine and fibre everywhere (codes OFAR, SETA/FALL, TWIN, TEXT never matched), fell back to
     cap_payments.csv's BPS - the loader's random generator written to disk (1,957 region x crop cells);
   - wine and fibre costs were template fills (wine 1,313 EUR/ha against CAPRI's 4,500-8,000); fibre yields a
@@ -27,7 +27,7 @@ Outputs (this builder is the one writer of the three tables, 29 October 2026):
       build_animal_yields.build(); the animal costs of DCOW, BULL, PIGF, OANI from build_capri_base.intensive_values
       (TOIN) and of SHGM, SHGF from tools/lib/_sheep_goat.costs
   capri_data/2017/supply/crop_premium.csv               (new: region x model crop, EUR/ha)
-  capri_data/sources/intermediate/capreg/capreg_producer_prices.csv  CAPRI's extract (capreg_producer_prices_extract.csv) with
+  capri_data/sources/intermediate/capreg/capreg_producer_prices.parquet  CAPRI's extract (capreg_producer_prices_extract.parquet) with
       the model-coded crop columns written for all regions and the four animal columns from intensive_values (MPRI)
   capri_data/2017/policy/cap_payments.csv               (the payment engine's per-region rates: BPS = CAPRI's
       premiums per ha of UAA, UAAR PRME; ANC, AES, ORGANIC, COUPLED = 0 - CAPRI's results carry no split by
@@ -45,6 +45,7 @@ import pandas as pd
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
@@ -58,7 +59,7 @@ sys.path.insert(0, str(ROOT))
 from capri_mod.data import definitions as D  # noqa: E402
 
 #: CAPRI's regional producer prices as extracted (tools/build/extract_all_from_data2.py), CAPRI's codes
-PRICES_EXTRACT = ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_producer_prices_extract.csv"
+PRICES_EXTRACT = ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_producer_prices_extract.parquet"
 
 ITEMS = ("LEVL", "YILD", "TOIN", "MPRI", "PRME", "MREV", "GRAS")
 #: CAPRI's grassland activities (the GRAS item is their grass output); the model's own since S2 (7 November 2026)
@@ -119,7 +120,7 @@ def main(dump_dir: Path):
     cols = list(D.CROPS) + list(D.ANIMALS)
     yields = pd.DataFrame(index=pd.Index(regs, name="region"), columns=cols, dtype=float)
     costs = pd.DataFrame(index=pd.Index(regs, name="region"), columns=cols, dtype=float)
-    ext = _read_csv(PRICES_EXTRACT, index_col=0)
+    ext = read_source(PRICES_EXTRACT, index_col=0)
     prices = ext.reindex(regs).astype(float)
     prices.index.name = ext.index.name
     price_cols = [c for c in prices.columns if c in B.CROP_MAP or c in B.COST_ANIMALS]
@@ -206,7 +207,7 @@ def main(dump_dir: Path):
     dm.to_csv(GRASS_DM)
     yields.to_csv(B.YIELDS)
     costs.to_csv(B.COSTS)
-    prices.to_csv(B.PRICES)
+    write_source(prices, B.PRICES)
     prem.index.name = "region"
     prem.to_csv(PREMIUM)
     print(f"{n_reg} region x crop cells from the region's own CAPRI rows, {n_nat} from its member state; "

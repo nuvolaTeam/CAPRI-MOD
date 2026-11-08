@@ -5,9 +5,9 @@ feed, item) (NRC 2001, partly INRA 2002; the commented alternatives are not CAPR
 products whose values fill a feed's missing items (digestibility.gms l. 37-38). This builder reads the table as GAMS
 reads it (a value belongs to the column whose header it overlaps; lines starting with * are comments) and writes:
 
-  capri_data/sources/intermediate/envind/capri_digestpar.csv           feed, item, value     (items PAF, DM, CP, NDICP, ADICP, EE,
+  capri_data/sources/intermediate/envind/capri_digestpar.parquet           feed, item, value     (items PAF, DM, CP, NDICP, ADICP, EE,
                                                                                  NDF, ADF, LI, ASH, CAT)
-  capri_data/sources/intermediate/envind/capri_digest_default_prd.csv  default, feed         (DEF_PRD: feed takes default's values)
+  capri_data/sources/intermediate/envind/capri_digest_default_prd.parquet  default, feed         (DEF_PRD: feed takes default's values)
 
     python tools/build/build_digestibility_table.py [CAPRI gams folder, default capri_sources/gams]
 """
@@ -18,6 +18,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -70,9 +71,9 @@ def main(gams: Path):
     d = pd.DataFrame(parse_def_prd(text), columns=["default", "feed"])
     if d.duplicated("feed").any():
         raise SystemExit("a feed with two default products")
-    to_csv(t, OUT / "capri_digestpar.csv", index=False)
-    to_csv(d, OUT / "capri_digest_default_prd.csv", index=False)
-    print(f"capri_digestpar.csv: {t.feed.nunique()} feeds, {len(t)} values; capri_digest_default_prd.csv: {len(d)} pairs")
+    write_source(t, OUT / "capri_digestpar.parquet", index=False)
+    write_source(d, OUT / "capri_digest_default_prd.parquet", index=False)
+    print(f"capri_digestpar.parquet: {t.feed.nunique()} feeds, {len(t)} values; capri_digest_default_prd.parquet: {len(d)} pairs")
 
 
 if __name__ == "__main__":

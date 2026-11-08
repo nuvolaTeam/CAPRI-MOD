@@ -26,6 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 
 def _read_csv(*a, **k):
@@ -37,7 +38,7 @@ def _read_csv(*a, **k):
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_data" / "scenarios" / "capri_ref_2030"
 REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
-KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refpol_endotech_all_inidefaulta" / "capri_ref_levl_yild_2030_2017.csv.xz"
+KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refpol_endotech_all_inidefaulta" / "capri_ref_levl_yild_2030_2017.parquet"
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
 from _model_regions import FALLBACK_UNITS, UNITS  # noqa: E402  (capri_data/shared/regional_units.csv)
 #: the first two letters of the model's regional units (CAPRI's codes: BL, IR, EL, NO ...): the countries whose 2030
@@ -80,9 +81,9 @@ def main():
                                       "FALL", "VSET", "DCOL", "DCOH", "BULH", "HEIL", "HEIH", "PIGF", "ROOF"}
         rows = [r_ for r_ in rows if r_[1] in keep]
         KEEP.parent.mkdir(parents=True, exist_ok=True)
-        pd.DataFrame(rows, columns=["capri_region", "activity", "item", "year", "value"]).to_csv(KEEP, index=False)
+        write_source(pd.DataFrame(rows, columns=["capri_region", "activity", "item", "year", "value"]), KEEP, index=False)
         print(f"extracted {len(rows)} rows -> {KEEP.relative_to(ROOT)}")
-    t = _read_csv(KEEP)
+    t = read_source(KEEP)
     v = {(r.capri_region, r.activity, r.item, str(r.year)): float(r.value) for r in t.itertuples()}
     # CAPRI's calves are several activities; the model has one (CALV): their
     # levels as sums (CAPTRD carries the same totals as SHGT and CACR). The model's set-aside SETA is CAPRI's fallow FALL

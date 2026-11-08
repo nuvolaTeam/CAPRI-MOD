@@ -97,7 +97,11 @@ def _effects(pairs, _unused, rows_a, frs):
     for r in rows_a:
         F[(r[0], r[1])][r[2]] = r[3]
     E = defaultdict(dict)
-    for r in pd.read_parquet(D / "ammonia_technology_effects.parquet").itertuples():
+    import sys as _sys_sio
+    _sys_sio.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+    from _sources_io import read_source, write_source
+    for r in read_source(Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "intermediate" / "ammonia"
+                         / "ammonia_technology_effects.parquet").itertuples():
         E[(r.region, r.activity)][(r.technology, r.item)] = float(r.reduction)
     LIT = defaultdict(dict)
     for r in _read_csv(D / "p_litRevAmmoTechsAdd.csv").itertuples():

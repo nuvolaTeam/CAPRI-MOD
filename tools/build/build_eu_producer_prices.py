@@ -1,13 +1,13 @@
 """EU-wide crop producer prices (producer_prices.csv), the fallback where a region has no CAPRI price (October 2026).
 
-Every region's crop price comes from CAPRI's regional or national MPRI (capreg_producer_prices.csv, written by
+Every region's crop price comes from CAPRI's regional or national MPRI (capreg_producer_prices.parquet, written by
 tools/build/build_crop_economics_2017.py); the EU-wide file only fills a crop a member state does not grow. Its crop rows
 were of unrecorded source and far from CAPRI's (other vegetables 30.8 EUR/t against a CAPRI median of about 500,
 tomatoes 33.5, olives 49.5, tobacco 43.8, wine 95.5). They are rewritten as CAPRI's production-weighted EU price over
 the model regions: sum(area x yield x price) / sum(area x yield), CAPRI's 2017 values. This builder is the table's one
 writer (29 October 2026), built from scratch: the crop rows above; SHGM and SHGF, CAPREG's prices weighted by the herds
 (tools/lib/_sheep_goat.py, as the retired build_shg_split.py); the rows no builder computes from
-sources/raw/unsourced/producer_prices_no_builder.csv (set-aside's 0). The ten livestock rows of unrecorded origin that file
+sources/raw/unsourced/producer_prices_no_builder.parquet (set-aside's 0). The ten livestock rows of unrecorded origin that file
 held were removed on 29 October 2026 (KNOWN_ISSUES K72): no model code reads an animal's EU producer price (livestock
 revenue is CAPRI's output value per head, livestock_output_value_coef.csv). Rows in the model's activity order. Grass keeps its own price basis (dry matter, build_crop_economics).
 Other marketable and industrial crops, nurseries and flowers get no row (CAPRI carries them as values).
@@ -25,11 +25,12 @@ ROOT = Path(__file__).resolve().parents[2]
 SUP = ROOT / "capri_data" / "2017" / "supply"
 DEST = ROOT / "capri_data" / "2017" / "market" / "producer_prices.csv"
 #: the rows no builder computes (set-aside's 0 by convention; the livestock rows of unrecorded origin, KNOWN_ISSUES K72)
-NO_BUILDER = ROOT / "capri_data" / "sources" / "raw" / "unsourced" / "producer_prices_no_builder.csv"
+NO_BUILDER = ROOT / "capri_data" / "sources" / "raw" / "unsourced" / "producer_prices_no_builder.parquet"
 import sys as _sys  # noqa: E402
 _sys.path[:0] = [str(ROOT / "tools" / "lib"), str(ROOT)]
 import _sheep_goat as SG  # noqa: E402
 from _model_regions import FALLBACK_UNITS  # noqa: E402
+from _sources_io import read_source  # noqa: E402  (capri_data/sources: Parquet)
 from capri_mod.data import definitions as D  # noqa: E402
 
 
@@ -37,7 +38,7 @@ def main() -> None:
     areas = _read_csv(SUP / "base_areas.csv", index_col=0)
     ylds = _read_csv(SUP / "yields.csv", index_col=0)
     herds = _read_csv(SUP / "animal_numbers.csv", index_col=0)
-    prices = _read_csv(ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_producer_prices.csv", index_col=0)
+    prices = read_source(ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_producer_prices.parquet", index_col=0)
     # the EU-wide price over the units it was taken over before CAPRI's other 29 were listed (FALLBACK_UNITS, 4 November
     # 2026); over the EU's member states only, with a unit outside the EU at its own country's price, is the project
     # lead's decision of 31 October 2026 (docs/design/SUPPLY_NONEU_DESIGN.md section 4), a separate change
@@ -59,7 +60,7 @@ def main() -> None:
     # sheep and goats: CAPREG's regional prices weighted by the herds (tools/lib/_sheep_goat.py)
     rows.update(SG.eu_prices(herds, prices))
     # the rows no builder computes, declared with their note (set-aside's 0; the other livestock of K72)
-    nb = _read_csv(NO_BUILDER, index_col=0)
+    nb = read_source(NO_BUILDER, index_col=0)
     for a, v in nb["price"].items():
         if a in rows:
             raise ValueError(f"{NO_BUILDER.name}: {a} is computed here as well")

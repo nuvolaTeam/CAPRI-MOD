@@ -6596,7 +6596,7 @@
    "file": "capri_data/pipeline/captrd/dat/p_byproduct.csv",
    "declared_in": "29_captrd_more.sql",
    "layout": [],
-   "comment": "CAPRI's p_ByProduct(byproduct, stock): by-product (DDGS, GLYC) per ton of feedstock converted to biofuel, from dat/biofuel/biofuel_technology_params.gms (as CSV: capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_ByProduct.csv, tools/build/convert_sources_to_csv.py), which captrd.gms l. 340-341 includes; 14 rows (tools/build/build_captrd_dat.py).",
+   "comment": "CAPRI's p_ByProduct(byproduct, stock): by-product (DDGS, GLYC) per ton of feedstock converted to biofuel, from dat/biofuel/biofuel_technology_params.gms (as CSV: capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_ByProduct.parquet, tools/build/convert_sources.py), which captrd.gms l. 340-341 includes; 14 rows (tools/build/build_captrd_dat.py).",
    "columns": [
     {
      "name": "byproduct",
@@ -6649,7 +6649,7 @@
    "file": "capri_data/pipeline/captrd/dat/p_extrrates.csv",
    "declared_in": "29_captrd_more.sql",
    "layout": [],
-   "comment": "CAPRI's p_ExtrRates(fuel, stock): biofuel (BIOE, BIOD) per ton of feedstock, from dat/biofuel/biofuel_technology_params.gms (as CSV: capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_ExtrRates.csv, tools/build/convert_sources_to_csv.py), which captrd.gms l. 340-341 includes; 17 rows (tools/build/build_captrd_dat.py).",
+   "comment": "CAPRI's p_ExtrRates(fuel, stock): biofuel (BIOE, BIOD) per ton of feedstock, from dat/biofuel/biofuel_technology_params.gms (as CSV: capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_ExtrRates.parquet, tools/build/convert_sources.py), which captrd.gms l. 340-341 includes; 17 rows (tools/build/build_captrd_dat.py).",
    "columns": [
     {
      "name": "fuel",
@@ -6702,7 +6702,7 @@
    "file": "capri_data/pipeline/captrd/dat/p_luunits.csv",
    "declared_in": "29_captrd_more.sql",
    "layout": [],
-   "comment": "CAPRI's p_LUUnits(act): livestock units per head of an animal activity, from dat/policy/livestock_units.gms (as CSV: capri_data/sources/raw/capri/dat/policy/livestock_units_p_LUUnits.csv, tools/build/convert_sources_to_csv.py), included at captrd.gms l. 349 and used for the stocking density LU (prep_data_for_estimation.gms l. 202-203); 18 rows (tools/build/build_captrd_dat.py).",
+   "comment": "CAPRI's p_LUUnits(act): livestock units per head of an animal activity, from dat/policy/livestock_units.gms (as CSV: capri_data/sources/raw/capri/dat/policy/livestock_units_p_LUUnits.parquet, tools/build/convert_sources.py), included at captrd.gms l. 349 and used for the stocking density LU (prep_data_for_estimation.gms l. 202-203); 18 rows (tools/build/build_captrd_dat.py).",
    "columns": [
     {
      "name": "act",
@@ -6749,7 +6749,7 @@
    "file": "capri_data/pipeline/captrd/dat/p_minlabourperact.csv",
    "declared_in": "33_captrd_labour_policy.sql",
    "layout": [],
-   "comment": "CAPRI's p_minLabourPerAct(act): minimum labour per activity unit (h, 2008), from baseline/labour_ageline.gms l. 92-153 (as CSV: capri_data/sources/raw/capri/gams/baseline/labour_ageline_p_minLabourPerAct.csv, tools/build/convert_sources_to_csv.py) by tools/build/build_captrd_dat.py",
+   "comment": "CAPRI's p_minLabourPerAct(act): minimum labour per activity unit (h, 2008), from baseline/labour_ageline.gms l. 92-153 (as CSV: capri_data/sources/raw/capri/gams/baseline/labour_ageline_p_minLabourPerAct.parquet, tools/build/convert_sources.py) by tools/build/build_captrd_dat.py",
    "columns": [
     {
      "name": "act",
@@ -6796,7 +6796,7 @@
    "file": "capri_data/pipeline/captrd/dat/p_mquotadat.csv",
    "declared_in": "33_captrd_labour_policy.sql",
    "layout": [],
-   "comment": "CAPRI's p_MQuotaDat(MS, info, year): milk quotas, deliveries and direct sales (DG AGRI), from dat/coco/milk_quota_dat.gms (as CSV: capri_data/sources/raw/capri/dat/coco/milk_quota_dat_p_MQuotaDat.csv, tools/build/convert_sources_to_csv.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
+   "comment": "CAPRI's p_MQuotaDat(MS, info, year): milk quotas, deliveries and direct sales (DG AGRI), from dat/coco/milk_quota_dat.gms (as CSV: capri_data/sources/raw/capri/dat/coco/milk_quota_dat_p_MQuotaDat.parquet, tools/build/convert_sources.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
    "columns": [
     {
      "name": "region",
@@ -6853,7 +6853,7 @@
    "file": "capri_data/pipeline/captrd/dat/p_mquotareg.csv",
    "declared_in": "33_captrd_labour_policy.sql",
    "layout": [],
-   "comment": "CAPRI's PMQuotaReg(MS, QUTtot, year): total milk quotas 2004-2014 (1000 t), from pol_input/mquota_update.gms (as CSV: capri_data/sources/raw/capri/gams/pol_input/mquota_update_PMQuotaReg.csv, tools/build/convert_sources_to_csv.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
+   "comment": "CAPRI's PMQuotaReg(MS, QUTtot, year): total milk quotas 2004-2014 (1000 t), from pol_input/mquota_update.gms (as CSV: capri_data/sources/raw/capri/gams/pol_input/mquota_update_PMQuotaReg.parquet, tools/build/convert_sources.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
    "columns": [
     {
      "name": "region",
@@ -6910,7 +6910,7 @@
    "file": "capri_data/pipeline/captrd/dat/p_ppsqcbuyback.csv",
    "declared_in": "33_captrd_labour_policy.sql",
    "layout": [],
-   "comment": "CAPRI's p_PPSQCBuyBack(MSALL, year): sugar quota buy-back, from CAPRI's input_load_sugar_quotas.gdx (capri_data/sources/raw/capri/dat/sugar/p_PPSQCBuyBack.csv), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
+   "comment": "CAPRI's p_PPSQCBuyBack(MSALL, year): sugar quota buy-back, from CAPRI's input_load_sugar_quotas.gdx (capri_data/sources/raw/capri/dat/sugar/p_PPSQCBuyBack.parquet), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
    "columns": [
     {
      "name": "region",
@@ -6967,7 +6967,7 @@
    "file": "capri_data/pipeline/captrd/dat/p_ppsqrenounce.csv",
    "declared_in": "33_captrd_labour_policy.sql",
    "layout": [],
-   "comment": "CAPRI's p_PPSQRenounce(MSALL, year): renounced sugar quota, from CAPRI's input_load_sugar_quotas.gdx (capri_data/sources/raw/capri/dat/sugar/p_PPSQRenounce.csv), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
+   "comment": "CAPRI's p_PPSQRenounce(MSALL, year): renounced sugar quota, from CAPRI's input_load_sugar_quotas.gdx (capri_data/sources/raw/capri/dat/sugar/p_PPSQRenounce.parquet), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
    "columns": [
     {
      "name": "region",
@@ -7018,7 +7018,7 @@
    "file": "capri_data/pipeline/captrd/dat/p_smallprodshare.csv",
    "declared_in": "33_captrd_labour_policy.sql",
    "layout": [],
-   "comment": "CAPRI's p_smallProdShare(year, MS): small producers' share outside compulsory set-aside, from dat/policy/smal_pshar.gms (as CSV: capri_data/sources/raw/capri/dat/policy/smal_pshar_p_smallProdShare.csv, tools/build/convert_sources_to_csv.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
+   "comment": "CAPRI's p_smallProdShare(year, MS): small producers' share outside compulsory set-aside, from dat/policy/smal_pshar.gms (as CSV: capri_data/sources/raw/capri/dat/policy/smal_pshar_p_smallProdShare.parquet, tools/build/convert_sources.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
    "columns": [
     {
      "name": "year",
@@ -7069,7 +7069,7 @@
    "file": "capri_data/pipeline/captrd/dat/p_squotas.csv",
    "declared_in": "33_captrd_labour_policy.sql",
    "layout": [],
-   "comment": "CAPRI's p_SQuotas(MSALL, QUOTAS, year): sugar quotas (1000 t white sugar), from CAPRI's input_load_sugar_quotas.gdx (capri_data/sources/raw/capri/dat/sugar/p_SQuotas.csv), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
+   "comment": "CAPRI's p_SQuotas(MSALL, QUOTAS, year): sugar quotas (1000 t white sugar), from CAPRI's input_load_sugar_quotas.gdx (capri_data/sources/raw/capri/dat/sugar/p_SQuotas.parquet), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
    "columns": [
     {
      "name": "region",
@@ -22533,7 +22533,7 @@
    "layout": [
     "unnamed"
    ],
-   "comment": "EU producer prices 2017 (build_eu_producer_prices.py): crops from CAPRI's regional prices; SHGM, SHGF from tools/lib/_sheep_goat.eu_prices; VSET's and FALL's 0 (SETA's until S2, 7 November 2026) from sources/unsourced/producer_prices_no_builder.csv",
+   "comment": "EU producer prices 2017 (build_eu_producer_prices.py): crops from CAPRI's regional prices; SHGM, SHGF from tools/lib/_sheep_goat.eu_prices; VSET's and FALL's 0 (SETA's until S2, 7 November 2026) from sources/unsourced/producer_prices_no_builder.parquet",
    "columns": [
     {
      "name": "activity",
@@ -22599,7 +22599,7 @@
      "item": "FALL",
      "unit": "U_EuPerTon",
      "status": "builder",
-     "basis": "0 by convention (producer_prices_no_builder.csv)"
+     "basis": "0 by convention (producer_prices_no_builder.parquet)"
     },
     {
      "item": "GRAE",
@@ -22767,7 +22767,7 @@
      "item": "VSET",
      "unit": "U_EuPerTon",
      "status": "builder",
-     "basis": "0 by convention (producer_prices_no_builder.csv)"
+     "basis": "0 by convention (producer_prices_no_builder.parquet)"
     },
     {
      "item": "WINE",
@@ -22785,7 +22785,7 @@
    "notes": [
     {
      "kind": "origin",
-     "note": "An EU-wide price per activity (32 rows, EUR/t), only the fallback under the regional prices. Each crop row is CAPRI's production-weighted EU price from capreg_producer_prices.csv (CAPRI's regional MPRI, national MPRI where no regional). SHGM and SHGF are herd-weighted. SETA 0 comes from sources/unsourced/producer_prices_no_builder.csv. The model reads it and overrides it per region with capreg_producer_prices.csv (loaders.load_regional_producer_prices, supply_module._region_prices).",
+     "note": "An EU-wide price per activity (32 rows, EUR/t), only the fallback under the regional prices. Each crop row is CAPRI's production-weighted EU price from capreg_producer_prices.parquet (CAPRI's regional MPRI, national MPRI where no regional). SHGM and SHGF are herd-weighted. SETA 0 comes from sources/unsourced/producer_prices_no_builder.parquet. The model reads it and overrides it per region with capreg_producer_prices.parquet (loaders.load_regional_producer_prices, supply_module._region_prices).",
      "evidence": "tools/build/build_eu_producer_prices.py:1-15, :35-60; capri_mod/data/loaders.py:299-362 (regional, national fallback), :373-382; capri_mod/supply/supply_module.py:5478-5488; CSV: 32 rows (OVEG 509.1, TOBA 3003.4, OFRU 889.2)",
      "checked": "2026-10-29"
     }
@@ -23938,7 +23938,7 @@
    }
   },
   "src_ad_basedata_p_b0": {
-   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_B0.csv",
+   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_B0.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's p_B0 (m3 CH4 per kg VS, per docs/AD_SPEC.md) per region (EU000000) and animal group, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
@@ -24002,7 +24002,7 @@
    }
   },
   "src_ad_basedata_p_heads": {
-   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_Heads.csv",
+   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_Heads.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's p_Heads, heads per region, AD animal activity and farm-size class (dim1-dim3), level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
@@ -24073,7 +24073,7 @@
    }
   },
   "src_ad_basedata_p_housshar": {
-   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_HousShar.csv",
+   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_HousShar.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's p_HousShar, housing share per country and animal group (DAIRY, NDAIRY, ...), level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
@@ -24137,7 +24137,7 @@
    }
   },
   "src_ad_basedata_p_mitishar0": {
-   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_MitiShar0.csv",
+   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_MitiShar0.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's p_MitiShar0, initial anaerobic digestion share per country and animal group, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
@@ -24201,7 +24201,7 @@
    }
   },
   "src_ad_basedata_p_sf": {
-   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_sf.csv",
+   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_sf.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's p_sf, farm size (LSU per farm, per docs/AD_SPEC.md) per region and farm-size class, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
@@ -24266,7 +24266,7 @@
    }
   },
   "src_ad_basedata_p_sharliq": {
-   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_SharLiq.csv",
+   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_SharLiq.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's p_SharLiq, liquid manure share per country and animal group, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
@@ -24330,7 +24330,7 @@
    }
   },
   "src_ad_basedata_p_vser": {
-   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_VSER.csv",
+   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_VSER.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's p_VSER (kg VS per head and day, per docs/AD_SPEC.md) per country and AD animal activity, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
@@ -24394,7 +24394,7 @@
    }
   },
   "src_aei_pr_gnb_nitrogen": {
-   "file": "capri_data/sources/raw/eurostat/aei_pr_gnb_nitrogen.csv",
+   "file": "capri_data/sources/raw/eurostat/aei_pr_gnb_nitrogen.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "Eurostat gross nitrogen balance aei_pr_gnb per country, indicator, year (1985-2023), value and flag (tonnes and kg/ha, per capri_data/DATA_DICTIONARY.md); supplied by the project lead, no builder; read by tools/check/validate_gnb_eurostat.py.",
@@ -24447,14 +24447,188 @@
    "read_by": {
     "model": [],
     "builders": [],
-    "checks": [
-     "tools/check/validate_gnb_eurostat.py"
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_ammonia_cost_curves": {
+   "file": "capri_data/sources/intermediate/ammonia/ammonia_cost_curves.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's ammonia abatement cost curves per region, activity, manure system and technology (ammo_tech.gms on the farm-size classes: alpha, beta, the lower bound, the number of size classes and the heads they cover), the intermediate tools/build/build_ammonia_cost_curves.py writes for build_ammonia_technologies.py (in capri_data/2017/abatement/ammonia until 8 November 2026).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "manure_system",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "technology",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "alpha",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "beta",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "lower_bound",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "n_classes",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "heads",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "manure_system",
+    "technology"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "alpha",
+     "unit": null,
+     "status": "open",
+     "basis": "ammonia_cost_curves.alpha: unit to be established"
+    },
+    {
+     "item": "beta",
+     "unit": null,
+     "status": "open",
+     "basis": "ammonia_cost_curves.beta: unit to be established"
+    },
+    {
+     "item": "heads",
+     "unit": null,
+     "status": "open",
+     "basis": "ammonia_cost_curves.heads: unit to be established"
+    },
+    {
+     "item": "lower_bound",
+     "unit": null,
+     "status": "open",
+     "basis": "ammonia_cost_curves.lower_bound: unit to be established"
+    },
+    {
+     "item": "n_classes",
+     "unit": null,
+     "status": "open",
+     "basis": "ammonia_cost_curves.n_classes: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_ammonia_cost_curves",
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/ammo_tech.gms; $SOURCES/gams/envind/prep_farm_size_data_for_miti.gms; $SOURCES/gams/sets.gms"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_technologies"
     ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_ammonia_technology_effects": {
+   "file": "capri_data/sources/intermediate/ammonia/ammonia_technology_effects.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's emission reduction per region, activity, ammonia technology and item (p_reducEm* and p_ghgMiti entries), the intermediate tools/build/build_ammonia_technologies.py writes for build_n_cascade.py, build_ammonia_tech_model.py and build_manure_n2o.py (in capri_data/2017/abatement/ammonia until 8 November 2026).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "technology",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "reduction",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "technology",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "reduction",
+     "unit": null,
+     "status": "open",
+     "basis": "ammonia_technology_effects.reduction: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_ammonia_technologies",
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/ammo_tech.gms; $SOURCES/gams/envind/prep_farm_size_data_for_miti.gms; $SOURCES/gams/sets.gms"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_tech_model",
+     "build_manure_n2o",
+     "build_n_cascade"
+    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_anim_req_corr_2017": {
-   "file": "capri_data/sources/intermediate/envind/anim_req_corr_2017.csv",
+   "file": "capri_data/sources/intermediate/envind/anim_req_corr_2017.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's requirement correction factors p_animReqCorrFac1(region, animal activity, 'T', CRPR or ENNE) from the animReq_* dumps (animReq_SK.zip), used for the low-N feeding option (tools/build/build_lownfeed_effects.py).",
@@ -24510,8 +24684,140 @@
     "tests": []
    }
   },
+  "src_bilateral_dataout_2017": {
+   "file": "capri_data/sources/raw/capri/results/market_base_1717/bilateral_dataout_2017.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's 2017 market data per pair of market regions (r2 empty for a region's own items) and product, the items the bilateral market is built from, extracted from market_base_1717 (tools/build/build_bilateral_market.py).",
+   "columns": [
+    {
+     "name": "r1",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "r2",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [],
+   "unique": [
+    [
+     "r1",
+     "r2",
+     "item",
+     "product"
+    ]
+   ],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "bilateral_dataout_2017.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_bilateral_market",
+    "sources": "$EXPORTS/market_base_1717.txt; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_doubleZero.csv.gz; $REFERENCE/simini/simini_21730/p_entryPriceFac.csv.gz; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/special_ch/market1_ch.gms"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_supply_elas_nonEU"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_bilateral_dataout_2030": {
+   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/bilateral_dataout_2030.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's 2030 reference market data per pair of market regions (r2 empty for a region's own items) and product, extracted from markmarket_greendeal_1730et_base_1717 (tools/build/build_bilateral_market.py).",
+   "columns": [
+    {
+     "name": "r1",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "r2",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [],
+   "unique": [
+    [
+     "r1",
+     "r2",
+     "item",
+     "product"
+    ]
+   ],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "bilateral_dataout_2030.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_bilateral_market",
+    "sources": "$EXPORTS/market_base_1717.txt; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_doubleZero.csv.gz; $REFERENCE/simini/simini_21730/p_entryPriceFac.csv.gz; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/special_ch/market1_ch.gms"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "src_bilateral_trq_dataout_2017": {
-   "file": "capri_data/sources/raw/capri/results/market_base_1717/bilateral_trq_dataout_2017.csv",
+   "file": "capri_data/sources/raw/capri/results/market_base_1717/bilateral_trq_dataout_2017.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's tariff-rate quota items (TRQNT, TAMFN, TAPREF, TSMFN, TSPREF, PREFTRIGPRICE) of every importer and exporter of the listing (policy blocks, market regions and reporting aggregates; exporter World: the global quotas), per product, from market_base_1717 dataOut, 2017 (tools/build/build_bilateral_market.py build_trq).",
@@ -24569,7 +24875,7 @@
    }
   },
   "src_bilateral_trq_dataout_2030": {
-   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/bilateral_trq_dataout_2030.csv",
+   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/bilateral_trq_dataout_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's tariff-rate quota items (TRQNT, TAMFN, TAPREF, TSMFN, TSPREF, PREFTRIGPRICE) of every importer and exporter of the listing (policy blocks, market regions and reporting aggregates; exporter World: the global quotas), per product, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_bilateral_market.py build_trq).",
@@ -24626,8 +24932,122 @@
     "tests": []
    }
   },
+  "src_biofuel_dataout_2017": {
+   "file": "capri_data/sources/raw/capri/results/market_base_1717/biofuel_dataout_2017.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's 2017 biofuel market items per market region and product, extracted from market_base_1717 (tools/build/build_biofuel_market.py).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "item",
+    "product"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_dataout_2017.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_biofuel_market:year_2017_dump_market_base_1717.txt_elas_elas_2_1717defaulta.csv",
+    "sources": "$EXPORTS/elas_2_1717defaulta.csv; $EXPORTS/market_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_biofuel_dataout_2030": {
+   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/biofuel_dataout_2030.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's 2030 reference biofuel market items per market region and product, extracted from markmarket_greendeal_1730et_base_1717 (tools/build/build_biofuel_market.py).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "item",
+    "product"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_dataout_2030.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_biofuel_market:year_2030_dump_markmarket_greendeal_1730et_base_1717.txt_elas_elas_2_1730default",
+    "sources": "$EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "src_biofuel_proc_hessian_2017": {
-   "file": "capri_data/sources/raw/capri/results/elas_2_1717defaulta/biofuel_proc_hessian_2017.csv",
+   "file": "capri_data/sources/raw/capri/results/elas_2_1717defaulta/biofuel_proc_hessian_2017.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's p_hessNQProc(region, product, price_of, 'CAL') rows of the biofuels BIOE and BIOD, own and cross terms, per market region, from elas_2_1717defaulta (tools/build/build_biofuel_market.py).",
@@ -24684,7 +25104,7 @@
    }
   },
   "src_biofuel_proc_hessian_2030": {
-   "file": "capri_data/sources/raw/capri/results/elas_2_1730defaulta/biofuel_proc_hessian_2030.csv",
+   "file": "capri_data/sources/raw/capri/results/elas_2_1730defaulta/biofuel_proc_hessian_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's p_hessNQProc(region, product, price_of, 'CAL') rows of the biofuels BIOE and BIOD, own and cross terms, per market region, from elas_2_1730defaulta (tools/build/build_biofuel_market.py).",
@@ -24741,10 +25161,10 @@
    }
   },
   "src_biofuel_technology_params_p_byproduct": {
-   "file": "capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_ByProduct.csv",
+   "file": "capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_ByProduct.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_ByProduct(byproduct, stock) from dat/biofuel/biofuel_technology_params.gms l. 52-69 (\"processing coefficient per ton of product converted to bio fuel\", t/t, DDGS and glycerine), every record as the file writes it, converted to CSV by tools/build/convert_sources_to_csv.py; read (upper-cased) by tools/build/build_captrd_dat.py.",
+   "comment": "CAPRI's p_ByProduct(byproduct, stock) from dat/biofuel/biofuel_technology_params.gms l. 52-69 (\"processing coefficient per ton of product converted to bio fuel\", t/t, DDGS and glycerine), every record as the file writes it, converted to CSV by tools/build/convert_sources.py; read (upper-cased) by tools/build/build_captrd_dat.py.",
    "columns": [
     {
      "name": "byproduct",
@@ -24780,7 +25200,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -24794,10 +25214,10 @@
    }
   },
   "src_biofuel_technology_params_p_extrrates": {
-   "file": "capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_ExtrRates.csv",
+   "file": "capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_ExtrRates.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_ExtrRates(fuel, stock) from dat/biofuel/biofuel_technology_params.gms l. 24-47 (\"Conversion rates biofuel from feedstock\", t/t, RED 2009 and Aglink 2005), every record as the file writes it (labels in its case: BIOE, BioE, BioD), converted to CSV by tools/build/convert_sources_to_csv.py; read (upper-cased) by tools/build/build_captrd_dat.py.",
+   "comment": "CAPRI's p_ExtrRates(fuel, stock) from dat/biofuel/biofuel_technology_params.gms l. 24-47 (\"Conversion rates biofuel from feedstock\", t/t, RED 2009 and Aglink 2005), every record as the file writes it (labels in its case: BIOE, BioE, BioD), converted to CSV by tools/build/convert_sources.py; read (upper-cased) by tools/build/build_captrd_dat.py.",
    "columns": [
     {
      "name": "fuel",
@@ -24833,7 +25253,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -24847,7 +25267,7 @@
    }
   },
   "src_capmod_world_reference_2017": {
-   "file": "capri_data/sources/raw/capri/capmod/capmod_world_reference_2017.csv",
+   "file": "capri_data/sources/raw/capri/capmod/capmod_world_reference_2017.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "Per CAPRI market commodity: Fob, ImportP and ImportQ (71 rows); no builder. Read by tools/check/validate_world_prices.py and report_world_price_divergence.py; the latter describes it as the (World, World) cell of capmod's 2017 base result; how it was extracted is not documented.",
@@ -24909,15 +25329,12 @@
    "read_by": {
     "model": [],
     "builders": [],
-    "checks": [
-     "tools/check/report_world_price_divergence.py",
-     "tools/check/validate_world_prices.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_capreg_activity_levels": {
-   "file": "capri_data/sources/intermediate/capreg/capreg_activity_levels.csv",
+   "file": "capri_data/sources/intermediate/capreg/capreg_activity_levels.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's activity levels LEVL per regional unit (rows) and activity (columns), land categories excluded, from the CAPREG DATA2_<CC>.txt dumps, year column Y; MAIZ renamed CORN (tools/build/extract_remaining_nine.py).",
@@ -26417,7 +26834,7 @@
    }
   },
   "src_capreg_cap_premium": {
-   "file": "capri_data/sources/intermediate/capreg/capreg_cap_premium.csv",
+   "file": "capri_data/sources/intermediate/capreg/capreg_cap_premium.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's premium PRME per regional unit (rows) and activity (columns), per ha or per head, from the CAPREG DATA2_<CC>.txt dumps, year column Y; MAIZ renamed CORN (tools/build/extract_remaining_nine.py).",
@@ -27279,7 +27696,7 @@
    }
   },
   "src_capreg_national_prices": {
-   "file": "capri_data/sources/intermediate/capreg/capreg_national_prices.csv",
+   "file": "capri_data/sources/intermediate/capreg/capreg_national_prices.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's producer price MPRI of the national row <MS>000000 per country (two-letter code) and activity, from the 2017 dumps res_17<MS>.txt, column Y, under CAPRI's code and also the model's where it differs (CORN = MAIZ) (tools/build/build_capreg_national_prices.py).",
@@ -28118,10 +28535,10 @@
    }
   },
   "src_capreg_producer_prices": {
-   "file": "capri_data/sources/intermediate/capreg/capreg_producer_prices.csv",
+   "file": "capri_data/sources/intermediate/capreg/capreg_producer_prices.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
-   "comment": "Producer prices (EUR/t) per regional unit and activity: CAPRI's MPRI extract (capreg_producer_prices_extract.csv) with the model-coded crop columns written for all regions and the animal columns DCOW, BULL, PIGF, OANI (MPRI) from CAPRI's 2017 dumps (tools/build/build_crop_economics_2017.py).",
+   "comment": "Producer prices (EUR/t) per regional unit and activity: CAPRI's MPRI extract (capreg_producer_prices_extract.parquet) with the model-coded crop columns written for all regions and the animal columns DCOW, BULL, PIGF, OANI (MPRI) from CAPRI's 2017 dumps (tools/build/build_crop_economics_2017.py).",
    "columns": [
     {
      "name": "model_region",
@@ -28942,14 +29359,12 @@
      "build_eu_producer_prices",
      "build_model_premium_prices"
     ],
-    "checks": [
-     "tools/check/validate_world_prices.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_capreg_producer_prices_extract": {
-   "file": "capri_data/sources/intermediate/capreg/capreg_producer_prices_extract.csv",
+   "file": "capri_data/sources/intermediate/capreg/capreg_producer_prices_extract.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's regional producer price MPRI (EUR/t per the builder) per regional unit (rows) and activity (columns), from the CAPREG DATA2_<CC>.txt dumps; MAIZ renamed CORN (tools/build/extract_all_from_data2.py).",
@@ -29766,7 +30181,7 @@
    }
   },
   "src_capri_costsavings_2030": {
-   "file": "capri_data/sources/intermediate/ghgtech/capri_costsavings_2030.csv",
+   "file": "capri_data/sources/intermediate/ghgtech/capri_costsavings_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "Level and marginal of CAPRI's v_Miti per EU region, activity, mitigation technology and target, in the calibration runs ini and max (costsavings_ini/max_21730_jul15.gdx dumps, 2030); options other than NOC (tools/build/extract_capri_costsavings.py).",
@@ -29847,13 +30262,11 @@
      "build_supplement_effects"
     ],
     "checks": [],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "tests": []
    }
   },
   "src_capri_dat_sugar_p_ppsqcbuyback": {
-   "file": "capri_data/sources/raw/capri/dat/sugar/p_PPSQCBuyBack.csv",
+   "file": "capri_data/sources/raw/capri/dat/sugar/p_PPSQCBuyBack.parquet",
    "declared_in": "33_captrd_labour_policy.sql",
    "layout": [],
    "comment": "CAPRI's p_PPSQCBuyBack(MSALL, year) of input_load_sugar_quotas.gdx (sugar/load_quotas.gms), as the parquet mirror of CAPRI's dat folder holds it, columns renamed (README in the folder); no builder",
@@ -29914,14 +30327,12 @@
     "builders": [
      "build_captrd_dat"
     ],
-    "checks": [
-     "tools/check/make_provenance.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_capri_dat_sugar_p_ppsqrenounce": {
-   "file": "capri_data/sources/raw/capri/dat/sugar/p_PPSQRenounce.csv",
+   "file": "capri_data/sources/raw/capri/dat/sugar/p_PPSQRenounce.parquet",
    "declared_in": "33_captrd_labour_policy.sql",
    "layout": [],
    "comment": "CAPRI's p_PPSQRenounce(MSALL, year) of input_load_sugar_quotas.gdx (sugar/load_quotas.gms), as the parquet mirror of CAPRI's dat folder holds it, columns renamed (README in the folder); no builder",
@@ -29976,14 +30387,12 @@
     "builders": [
      "build_captrd_dat"
     ],
-    "checks": [
-     "tools/check/make_provenance.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_capri_dat_sugar_p_squotas": {
-   "file": "capri_data/sources/raw/capri/dat/sugar/p_SQuotas.csv",
+   "file": "capri_data/sources/raw/capri/dat/sugar/p_SQuotas.parquet",
    "declared_in": "33_captrd_labour_policy.sql",
    "layout": [],
    "comment": "CAPRI's p_SQuotas(MSALL, QUOTAS, year) of input_load_sugar_quotas.gdx (sugar/load_quotas.gms; 1000 t white sugar), as the parquet mirror of CAPRI's dat folder holds it, columns renamed (README in the folder); no builder",
@@ -30044,14 +30453,12 @@
     "builders": [
      "build_captrd_dat"
     ],
-    "checks": [
-     "tools/check/make_provenance.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_capri_digest_default_prd": {
-   "file": "capri_data/sources/intermediate/envind/capri_digest_default_prd.csv",
+   "file": "capri_data/sources/intermediate/envind/capri_digest_default_prd.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's set DEF_PRD: per row, a feed and the default product whose values fill the feed's missing digestibility items, from envind/def_digestibility.gms (tools/build/build_digestibility_table.py).",
@@ -30092,7 +30499,7 @@
    }
   },
   "src_capri_digestpar": {
-   "file": "capri_data/sources/intermediate/envind/capri_digestpar.csv",
+   "file": "capri_data/sources/intermediate/envind/capri_digestpar.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's feed composition p_digestPar('EU', 'DCOL', feed, item) (items PAF, DM, CP, NDICP, ADICP, EE, NDF, ADF, LI, ASH, CAT), from the table in envind/def_digestibility.gms (tools/build/build_digestibility_table.py).",
@@ -30141,13 +30548,11 @@
      "build_supplement_effects"
     ],
     "checks": [],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "tests": []
    }
   },
   "src_capri_manure_trade_2030": {
-   "file": "capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/capri_manure_trade_2030.csv",
+   "file": "capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/capri_manure_trade_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's manure N excretion EXCRET and net manure trade MTRADE (kt N, positive = net export) per CAPRI region, item NITF, from res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/build_manure_trade_base.py).",
@@ -30198,7 +30603,7 @@
    }
   },
   "src_capri_market_prices_1730": {
-   "file": "capri_data/sources/raw/capri/capri_baseline/capri_market_prices_1730.csv",
+   "file": "capri_data/sources/raw/capri/capri_baseline/capri_market_prices_1730.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's market prices PPRI and CPRI per region and product at the base point BAS (2017) and the 2030 calibration point CAL; no builder: per capri_data/DATA_DICTIONARY.md a gdxdump of results/baseline/data_market_1730defaulta.",
@@ -30262,8 +30667,71 @@
     "tests": []
    }
   },
+  "src_capri_ref_levl_yild_2030_2017": {
+   "file": "capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/capri_ref_levl_yild_2030_2017.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's levels and yields (LEVL, YILD) per region and activity in 2017 and 2030 of the 2030 reference, extracted from res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/build_trajectory_capri_ref.py).",
+   "columns": [
+    {
+     "name": "capri_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "capri_region",
+    "activity",
+    "item",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_ref_levl_yild_2030_2017.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_trajectory_capri_ref",
+    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "src_capri_uvag_store_1730": {
-   "file": "capri_data/sources/raw/capri/capri_baseline/capri_uvag_store_1730.csv",
+   "file": "capri_data/sources/raw/capri/capri_baseline/capri_uvag_store_1730.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's calibrated 2030 unit values p_uvagStore per region and product (uvag_2030); no builder: per capri_data/DATA_DICTIONARY.md a gdxdump of results/baseline/data_uvag1730defaulta.",
@@ -30316,10 +30784,10 @@
    }
   },
   "src_cropwat_p_cropwatreq": {
-   "file": "capri_data/sources/raw/capri/dat/water/cropwat_p_cropwatReq.csv",
+   "file": "capri_data/sources/raw/capri/dat/water/cropwat_p_cropwatReq.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_cropwatReq(region, crop, item) (\"crop water requirements (mm) from CROPWAT\": CPET, CRAIN, CNIR in mm; YRATIO, YFACT ratios), every record of the gdxdump cropwat.gms (as uploaded), converted from the gdxdump text by tools/build/convert_sources_to_csv.py; read by tools/build/build_irrigation_2017.py (CNIR).",
+   "comment": "CAPRI's p_cropwatReq(region, crop, item) (\"crop water requirements (mm) from CROPWAT\": CPET, CRAIN, CNIR in mm; YRATIO, YFACT ratios), every record of the gdxdump cropwat.gms (as uploaded), converted from the gdxdump text by tools/build/convert_sources.py; read by tools/build/build_irrigation_2017.py (CNIR).",
    "columns": [
     {
      "name": "region",
@@ -30361,7 +30829,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -30375,7 +30843,7 @@
    }
   },
   "src_dairy_dataout_2030": {
-   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/dairy_dataout_2030.csv",
+   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/dairy_dataout_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's dairy market items (PROD, PROC, GROF, HCOM, PPRI, FATS, PROT, ...) per member state and 'EU' and dairy product, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_dairy_processing.py).",
@@ -30432,7 +30900,7 @@
    }
   },
   "src_dairy_elasticities_2030": {
-   "file": "capri_data/sources/raw/capri/results/elas_2_1730defaulta/dairy_elasticities_2030.csv",
+   "file": "capri_data/sources/raw/capri/results/elas_2_1730defaulta/dairy_elasticities_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's dairy parameters p_hessNQDairy, p_ElasDair and p_ElasDem (param, member state, row, col; CAL) between dairy products, from elas_2_1730defaulta (tools/build/build_dairy_processing.py).",
@@ -30495,7 +30963,7 @@
    }
   },
   "src_dairy_world_dataout_2030": {
-   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/dairy_world_dataout_2030.csv",
+   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/dairy_world_dataout_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's dairy market items (PROD, PROC, FATS, PROT, PPRI, HCON, FEED, Imports_noIntra, Exports_noIntra) per market region and dairy product, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_dairy_world_blocks.py).",
@@ -30552,7 +31020,7 @@
    }
   },
   "src_dairy_world_elasticities_2030": {
-   "file": "capri_data/sources/raw/capri/results/elas_2_1730defaulta/dairy_world_elasticities_2030.csv",
+   "file": "capri_data/sources/raw/capri/results/elas_2_1730defaulta/dairy_world_elasticities_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's p_hessNQDairy, p_ElasDem (between dairy products) and p_hessNQSupp (MILK own term) per market region, CAL, from elas_2_1730defaulta (param, rms, row, col, value) (tools/build/build_dairy_world_blocks.py).",
@@ -30615,7 +31083,7 @@
    }
   },
   "src_data_prod_grof_rmssup": {
-   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/data_prod_grof_rmssup.csv",
+   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/data_prod_grof_rmssup.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's DATA(RMSSUP, \"PROD\", row, \"CAL\") and DATA(RMSSUP, \"GROF\", row, \"TRD\") of the market products of the supply models and their gross rows, from sim_ini_21730.gdx (tools/build/build_market_prod_grof_2030.py).",
@@ -30678,7 +31146,7 @@
    }
   },
   "src_ef_lus_main_uaa_nuts2024": {
-   "file": "capri_data/sources/raw/eurostat/ef_lus_main_uaa_nuts2024.csv",
+   "file": "capri_data/sources/raw/eurostat/ef_lus_main_uaa_nuts2024.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "Utilised agricultural area (ha) per NUTS-2 region from Eurostat ef_lus_main (2023; the 2020 census where 2023 has no NUTS-2 data), with year and source text; written by tools/build/build_nuts2024_reporting.py (with --download or when the file is missing), which reads it.",
@@ -30742,7 +31210,7 @@
    }
   },
   "src_estnlp_vb": {
-   "file": "capri_data/sources/intermediate/baseline_pmp/estnlp_vb.csv",
+   "file": "capri_data/sources/intermediate/baseline_pmp/estnlp_vb.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's econometric estimate VB.L(region, group1, group2) from dat/estnlp/results.gdx (around 2004), the crop-group terms CAPRI derives its PMP terms from; kept for the record and for checks (tools/build/build_pmp_2030.py).",
@@ -30801,7 +31269,7 @@
    }
   },
   "src_estnlp_vd": {
-   "file": "capri_data/sources/intermediate/baseline_pmp/estnlp_vd.csv",
+   "file": "capri_data/sources/intermediate/baseline_pmp/estnlp_vd.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's econometric estimate VD.L(region, activity) from dat/estnlp/results.gdx (around 2004), the activity slopes CAPRI derives its PMP terms from; kept for the record and for checks (tools/build/build_pmp_2030.py).",
@@ -30854,7 +31322,7 @@
    }
   },
   "src_fao_agg_dairy_products_bas": {
-   "file": "capri_data/sources/raw/capri/results/fao_agg_17_datamarket/fao_agg_dairy_products_bas.csv",
+   "file": "capri_data/sources/raw/capri/results/fao_agg_17_datamarket/fao_agg_dairy_products_bas.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's FAO_agg base-period balances (p_dataMarket, year BAS: MAPR, DOMM, IMPT, EXPT; tonnes) of the dairy products per CAPRI region, from fao_agg_17_datamarket.txt (tools/build/build_dairy_world_markets.py).",
@@ -30911,7 +31379,7 @@
    }
   },
   "src_fao_agg_market_balances_bas": {
-   "file": "capri_data/sources/raw/capri/results/fao_agg_17_datamarket/fao_agg_market_balances_bas.csv",
+   "file": "capri_data/sources/raw/capri/results/fao_agg_17_datamarket/fao_agg_market_balances_bas.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's FAO_agg base-period balances (p_dataMarket, year BAS: MAPR, DOMM, IMPT, EXPT; tonnes) of the market products per CAPRI region, from fao_agg_17_datamarket.txt (tools/build/build_world_market_baseline.py).",
@@ -30968,10 +31436,10 @@
    }
   },
   "src_fao_landuse_2000_p": {
-   "file": "capri_data/sources/raw/capri/dat/envind/fao_landuse_2000_P.csv",
+   "file": "capri_data/sources/raw/capri/dat/envind/fao_landuse_2000_P.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "P(fao_code, climate_zone, land_use) of CAPRI's FAO land use 2000 by country and climate zone (gdxdump of fao_landuse_2000.gdx, \"FROM MDB2GMS\"), every record as dumped, converted from the gdxdump text fao_landuse_2000_P.txt by tools/build/convert_sources_to_csv.py; read by tools/build/build_histosol.py (which leaves out the last record, as its former parser did).",
+   "comment": "P(fao_code, climate_zone, land_use) of CAPRI's FAO land use 2000 by country and climate zone (gdxdump of fao_landuse_2000.gdx, \"FROM MDB2GMS\"), every record as dumped, converted from the gdxdump text fao_landuse_2000_P.txt by tools/build/convert_sources.py; read by tools/build/build_histosol.py (which leaves out the last record, as its former parser did).",
    "columns": [
     {
      "name": "fao_code",
@@ -31013,7 +31481,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -31022,14 +31490,12 @@
     "builders": [
      "build_histosol"
     ],
-    "checks": [
-     "tools/check/make_provenance.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_fao_peatland_p": {
-   "file": "capri_data/sources/raw/capri/dat/envind/fao_peatland/fao_peatland_P.csv",
+   "file": "capri_data/sources/raw/capri/dat/envind/fao_peatland/fao_peatland_P.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's P(FAOregions) of dat/envind/fao_peatland.gdx, loaded as p_PEATSH \"Share of peatland in arable land\" (envind/lulucf_carbon_decl.gms l. 695-697): FAO's share by FAO country code, the organic-soil fallback of the Western Balkans and Turkey (prep_lulucf_carbon.gms l. 255-256). From capri_sources/dat (tools/build/extract_capri_dat.py).",
@@ -31076,7 +31542,7 @@
    }
   },
   "src_feed_bulks_dataout_2030": {
-   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/feed_bulks_dataout_2030.csv",
+   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/feed_bulks_dataout_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's FEED per EU member state and product, ARM1P of the EU trade block EU27yr19 and Norway, and Norway's use items, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_feed_bulks.py).",
@@ -31133,7 +31599,7 @@
    }
   },
   "src_feed_demand_noneu_elas_2030": {
-   "file": "capri_data/sources/raw/capri/results/elas_2_1730defaulta/feed_demand_nonEU_elas_2030.csv",
+   "file": "capri_data/sources/raw/capri/results/elas_2_1730defaulta/feed_demand_nonEU_elas_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's feed demand elasticities p_ElasFeed(rms, feed, price_of, 'CAL') per behavioural market region, for the products the model trades, from elas_2_1730defaulta (tools/build/build_feed_demand_nonEU.py).",
@@ -31186,13 +31652,11 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "tests": []
    }
   },
   "src_feed_demand_noneu_use_2030": {
-   "file": "capri_data/sources/raw/capri/results/data_market_1730defaulta/feed_demand_nonEU_use_2030.csv",
+   "file": "capri_data/sources/raw/capri/results/data_market_1730defaulta/feed_demand_nonEU_use_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's uses HCON, FEED, PROC, BIOF per market region (EU member states included) and product at the 2030 calibration point CAL, from data_market_1730defaulta (tools/build/build_feed_demand_nonEU.py).",
@@ -31245,16 +31709,71 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "tests": []
+   }
+  },
+  "src_fert_dist_dataout_2030": {
+   "file": "capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/fert_dist_dataout_2030.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's 2030 reference fertiliser distribution items per region, extracted from res_2_1730greendeal_refdefaulta (tools/build/build_fert_dist_priors.py).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "item",
+    "product"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "fert_dist_dataout_2030.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_fert_dist_priors",
+    "sources": "$EXPORTS/priFertDist_1730defaulta.zip; $EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
    }
   },
   "src_fertpar_doublemaxf": {
-   "file": "capri_data/sources/raw/capri/gams/fert/fertpar_doubleMaxf.csv",
+   "file": "capri_data/sources/raw/capri/gams/fert/fertpar_doubleMaxf.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's set doubleMaxf(PACT) from gams/fert/fertpar.gms l. 393 (\"Activities for which the above maximum loads are doubled\"), extracted by the pattern of tools/build/build_npk_balance_2030.py (moved to tools/build/convert_sources_to_csv.py), which reads it.",
+   "comment": "CAPRI's set doubleMaxf(PACT) from gams/fert/fertpar.gms l. 393 (\"Activities for which the above maximum loads are doubled\"), extracted by the pattern of tools/build/build_npk_balance_2030.py (moved to tools/build/convert_sources.py), which reads it.",
    "columns": [
     {
      "name": "activity",
@@ -31272,7 +31791,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -31286,10 +31805,10 @@
    }
   },
   "src_fertpar_maxf": {
-   "file": "capri_data/sources/raw/capri/gams/fert/fertpar_MAXF.csv",
+   "file": "capri_data/sources/raw/capri/gams/fert/fertpar_MAXF.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's MAXF(FNUT) from gams/fert/fertpar.gms: value the assignments MAXF(\"NITF\"|\"PHOF\"|\"POTF\") = v (l. 387-389), multiplier the following MAXF(FNUT) = MAXF(FNUT) * 2.0 (l. 391) (\"Maximum input of nutrient for activities without yield dependency\", l. 384); extracted by the patterns of tools/build/build_npk_balance_2030.py (moved to tools/build/convert_sources_to_csv.py), which reads value x multiplier.",
+   "comment": "CAPRI's MAXF(FNUT) from gams/fert/fertpar.gms: value the assignments MAXF(\"NITF\"|\"PHOF\"|\"POTF\") = v (l. 387-389), multiplier the following MAXF(FNUT) = MAXF(FNUT) * 2.0 (l. 391) (\"Maximum input of nutrient for activities without yield dependency\", l. 384); extracted by the patterns of tools/build/build_npk_balance_2030.py (moved to tools/build/convert_sources.py), which reads value x multiplier.",
    "columns": [
     {
      "name": "nutrient",
@@ -31330,7 +31849,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -31344,10 +31863,10 @@
    }
   },
   "src_fertpar_p_nfixrate_gras": {
-   "file": "capri_data/sources/raw/capri/gams/fert/fertpar_p_nfixRate_gras.csv",
+   "file": "capri_data/sources/raw/capri/gams/fert/fertpar_p_nfixRate_gras.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_nfixRate_gras(RALL) from gams/fert/fertpar.gms l. 265-293 (\"Regional N fixation rate for grassland\", per member state), extracted by the patterns of tools/lib/_capri_digest.py (moved to tools/build/convert_sources_to_csv.py), which reads it (for tools/build/build_supplement_effects.py).",
+   "comment": "CAPRI's p_nfixRate_gras(RALL) from gams/fert/fertpar.gms l. 265-293 (\"Regional N fixation rate for grassland\", per member state), extracted by the patterns of tools/lib/_capri_digest.py (moved to tools/build/convert_sources.py), which reads it (for tools/build/build_supplement_effects.py).",
    "columns": [
     {
      "name": "region",
@@ -31377,7 +31896,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -31391,10 +31910,10 @@
    }
   },
   "src_fertpar_p_nitrfact_rall_grae_biofix": {
-   "file": "capri_data/sources/raw/capri/gams/fert/fertpar_p_nitrFact_RALL_GRAE_BioFix.csv",
+   "file": "capri_data/sources/raw/capri/gams/fert/fertpar_p_nitrFact_RALL_GRAE_BioFix.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_nitrFact(\"RALL\", \"GRAE\", \"BioFix\") from gams/fert/fertpar.gms l. 236 (TABLE p_nitrFact l. 209), the default of p_nfixRate_gras (l. 295), the one cell tools/lib/_capri_digest.py read with a pattern (moved to tools/build/convert_sources_to_csv.py); read by tools/lib/_capri_digest.py.",
+   "comment": "CAPRI's p_nitrFact(\"RALL\", \"GRAE\", \"BioFix\") from gams/fert/fertpar.gms l. 236 (TABLE p_nitrFact l. 209), the default of p_nfixRate_gras (l. 295), the one cell tools/lib/_capri_digest.py read with a pattern (moved to tools/build/convert_sources.py); read by tools/lib/_capri_digest.py.",
    "columns": [
     {
      "name": "region",
@@ -31436,7 +31955,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -31450,7 +31969,7 @@
    }
   },
   "src_gains_ad_p_gainsdata": {
-   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/gains_ad_p_gainsdata.csv",
+   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/gains_ad_p_gainsdata.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's p_gainsdata (dim1-dim3: GAINS country, sector, item; level, marginal) from dat/scen/ghgtech/gains_ad.gdx (loaded at envind/ad_data_and_cali.gms l. 265); no builder; tools/build/build_ad_option.py reads its energy prices (EUR/kWh, per docs/AD_SPEC.md).",
@@ -31520,10 +32039,10 @@
    }
   },
   "src_gascoeff_p_nutcontcropoutput_stra": {
-   "file": "capri_data/sources/raw/capri/gams/envind/gascoeff_p_nutContCropOutput_STRA.csv",
+   "file": "capri_data/sources/raw/capri/gams/envind/gascoeff_p_nutContCropOutput_STRA.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_nutContCropOutput(\"STRA\", FNUT) from gams/envind/gascoeff.gms l. 359 (TABLE p_nutContCropOutput l. 347: \"retention of pure nutrient in kg per t harvested material\"), the straw row tools/build/build_npk_balance_2030.py read with a pattern (its extraction moved to tools/build/convert_sources_to_csv.py), the numbers as written (5., 3., 18.); read by tools/build/build_npk_balance_2030.py.",
+   "comment": "CAPRI's p_nutContCropOutput(\"STRA\", FNUT) from gams/envind/gascoeff.gms l. 359 (TABLE p_nutContCropOutput l. 347: \"retention of pure nutrient in kg per t harvested material\"), the straw row tools/build/build_npk_balance_2030.py read with a pattern (its extraction moved to tools/build/convert_sources.py), the numbers as written (5., 3., 18.); read by tools/build/build_npk_balance_2030.py.",
    "columns": [
     {
      "name": "output",
@@ -31559,7 +32078,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -31573,7 +32092,7 @@
    }
   },
   "src_gd2030_endotech_ini_nbalance": {
-   "file": "capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_nbalance.csv",
+   "file": "capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_nbalance.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's regional N balance items (dataOut '' . item . NITF . 2030, 1000 t N: MINFER, EXCRET, SURSOI, ...) plus UAAR LEVL (1000 ha) and N2OLEA, per region, from res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/extract_gd2030_nbalance.py).",
@@ -31625,13 +32144,11 @@
      "build_regional_units"
     ],
     "checks": [],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "tests": []
    }
   },
   "src_gd2030_endotech_ini_pbalance": {
-   "file": "capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_pbalance.csv",
+   "file": "capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_pbalance.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's P2O5 balance items (1000 t P2O5) per region, per-crop LEVL, PRET, PCRD and per-animal LEVL, MANP, MANN, RUNANI (kg per head), from res_2_1730greendeal_refpol_endotech_all_inidefaulta (region, col, row, value); validation only (tools/build/build_p_balance.py).",
@@ -31684,13 +32201,11 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": [
-     "capri_mod/tests/test_p_balance.py"
-    ]
+    "tests": []
    }
   },
   "src_gd2030_ref_pbalance": {
-   "file": "capri_data/sources/intermediate/capri_res/gd2030_ref_pbalance.csv",
+   "file": "capri_data/sources/intermediate/capri_res/gd2030_ref_pbalance.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's P2O5 balance items (1000 t P2O5) per region, UAAR LEVL and per-crop LEVL, PRET, PCRD, from the Green Deal 2030 reference res_2_1730greendeal_refdefaulta (region, col, row, value) (tools/build/build_p_balance.py).",
@@ -31743,13 +32258,11 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": [
-     "capri_mod/tests/test_p_balance.py"
-    ]
+    "tests": []
    }
   },
   "src_intensity_q_capri2030": {
-   "file": "capri_data/sources/intermediate/baseline_pmp/intensity_q_capri2030.csv",
+   "file": "capri_data/sources/intermediate/baseline_pmp/intensity_q_capri2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "Per model region (a CAPRI regional unit) and activity of the intensity splits (DCOL/DCOH, BULL/BULH, HEIL/HEIH, GRAE/GRAI, ...): the curvature on the activity level, its technology block of CAPRI's exported 2030 p_pmpQuadTechn collapsed, c = 1/(1' Q^-1 1) (tools/build/build_intensity_q_2030.py).",
@@ -31803,10 +32316,10 @@
    }
   },
   "src_intensity_q_recipe2030": {
-   "file": "capri_data/sources/intermediate/baseline_pmp/intensity_q_recipe2030.csv",
+   "file": "capri_data/sources/intermediate/baseline_pmp/intensity_q_recipe2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
-   "comment": "Per model region (a CAPRI regional unit) and activity of the intensity splits: the curvature on the activity level, c = 1/(1' Q^-1 1), from capri-mod's own 2030 terms by CAPRI's recipe (recipe_2030_quad_techn.csv) (tools/build/build_intensity_q_2030.py).",
+   "comment": "Per model region (a CAPRI regional unit) and activity of the intensity splits: the curvature on the activity level, c = 1/(1' Q^-1 1), from capri-mod's own 2030 terms by CAPRI's recipe (recipe_2030_quad_techn.parquet) (tools/build/build_intensity_q_2030.py).",
    "columns": [
     {
      "name": "model_region",
@@ -31857,10 +32370,10 @@
    }
   },
   "src_ipcc_wetlands_p_emifacorganicsoil_ori": {
-   "file": "capri_data/sources/raw/capri/dat/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.csv",
+   "file": "capri_data/sources/raw/capri/dat/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_emifacOrganicSoil_ori(gas, land_use, climate_zone), IPCC 2013 Wetlands Supplement emission factors of drained organic soils (gdxdump of ipcc_wetlands.gdx), every record as dumped, converted from the gdxdump text by tools/build/convert_sources_to_csv.py; read by tools/build/build_histosol.py (which leaves out the last record, N2O grslnd tropical, as its former parser did).",
+   "comment": "CAPRI's p_emifacOrganicSoil_ori(gas, land_use, climate_zone), IPCC 2013 Wetlands Supplement emission factors of drained organic soils (gdxdump of ipcc_wetlands.gdx), every record as dumped, converted from the gdxdump text by tools/build/convert_sources.py; read by tools/build/build_histosol.py (which leaves out the last record, N2O grslnd tropical, as its former parser did).",
    "columns": [
     {
      "name": "gas",
@@ -31902,7 +32415,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -31911,17 +32424,15 @@
     "builders": [
      "build_histosol"
     ],
-    "checks": [
-     "tools/check/make_provenance.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_irrishare_p_irrishare": {
-   "file": "capri_data/sources/raw/capri/dat/water/irrishare_p_irriShare.csv",
+   "file": "capri_data/sources/raw/capri/dat/water/irrishare_p_irriShare.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_irriShare(region, item, type, year) (\"share of irrigable and irrigated area in UAAR (%)\": IRRI irrigable, IRR2 irrigated once a year; Eurostat FSS), every record of the gdxdump irrishare.gms (as uploaded), converted from the gdxdump text by tools/build/convert_sources_to_csv.py; read by tools/build/build_irrigation_2017.py (IRR2 IRSH).",
+   "comment": "CAPRI's p_irriShare(region, item, type, year) (\"share of irrigable and irrigated area in UAAR (%)\": IRRI irrigable, IRR2 irrigated once a year; Eurostat FSS), every record of the gdxdump irrishare.gms (as uploaded), converted from the gdxdump text by tools/build/convert_sources.py; read by tools/build/build_irrigation_2017.py (IRR2 IRSH).",
    "columns": [
     {
      "name": "region",
@@ -31969,7 +32480,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -31983,10 +32494,10 @@
    }
   },
   "src_labour_ageline_p_minlabourperact": {
-   "file": "capri_data/sources/raw/capri/gams/baseline/labour_ageline_p_minLabourPerAct.csv",
+   "file": "capri_data/sources/raw/capri/gams/baseline/labour_ageline_p_minLabourPerAct.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_minLabourPerAct(act) from gams/baseline/labour_ageline.gms l. 92-153 (minimum labour requirement per activity, h, the average of the 5 lowest countries in 2008), as written, converted to CSV by tools/build/convert_sources_to_csv.py (the statement only; the file is CAPRI code); read (upper-cased) by tools/build/build_captrd_dat.py.",
+   "comment": "CAPRI's p_minLabourPerAct(act) from gams/baseline/labour_ageline.gms l. 92-153 (minimum labour requirement per activity, h, the average of the 5 lowest countries in 2008), as written, converted to CSV by tools/build/convert_sources.py (the statement only; the file is CAPRI code); read (upper-cased) by tools/build/build_captrd_dat.py.",
    "columns": [
     {
      "name": "act",
@@ -32016,7 +32527,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -32030,7 +32541,7 @@
    }
   },
   "src_land_rents_capri_2017": {
-   "file": "capri_data/sources/intermediate/capri_land_rents/land_rents_capri_2017.csv",
+   "file": "capri_data/sources/intermediate/capri_land_rents/land_rents_capri_2017.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "Land rent (EUR/ha) and level (1000 ha) per CAPRI region and land type ARAC, FRUN, GRAS from CAPRI's 2017 results (res_17<MS> dumps, D_AREA, column Y), non-positive rents replaced by CAPRI's calibration rent (cal_land_nests.gms l. 204-226) (tools/build/build_land_rents.py --year 2017).",
@@ -32094,7 +32605,7 @@
    }
   },
   "src_land_rents_capri_2030": {
-   "file": "capri_data/sources/intermediate/capri_land_rents/land_rents_capri_2030.csv",
+   "file": "capri_data/sources/intermediate/capri_land_rents/land_rents_capri_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "Land rent (EUR/ha) and level (1000 ha) per CAPRI region and land type ARAC, FRUN, GRAS from CAPRI's 2030 reference res_2_1730greendeal_refpol_endotech_all_inidefaulta (D_AREA), non-positive rents replaced by CAPRI's calibration rent (cal_land_nests.gms l. 204-226) (tools/build/build_land_rents.py).",
@@ -32158,10 +32669,10 @@
    }
   },
   "src_litrevferttech_p_litrevferttechs": {
-   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs.csv",
+   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
-   "comment": "CAPRI's p_litRevFertTechs(region, technology, activity, system, item): relative change in emissions of a fertiliser technology, the records used, from the gdxdump of dat/scen/ghgtech/LitRevFertTech.gdx (the full dump beside it, LitRevFertTech_p_litRevFertTechs_all.csv); no builder; read by tools/build/build_fert_side_effects.py.",
+   "comment": "CAPRI's p_litRevFertTechs(region, technology, activity, system, item): relative change in emissions of a fertiliser technology, the records used, from the gdxdump of dat/scen/ghgtech/LitRevFertTech.gdx (the full dump beside it, LitRevFertTech_p_litRevFertTechs_all.parquet); no builder; read by tools/build/build_fert_side_effects.py.",
    "columns": [
     {
      "name": "region",
@@ -32229,10 +32740,10 @@
    }
   },
   "src_litrevferttech_p_litrevferttechs_all": {
-   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs_all.csv",
+   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs_all.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_litRevFertTechs(region, technology, activity, system, item) (\"outputs regarding fertilizer technologies\"), every record of the project lead's gdxdump of dat/scen/ghgtech/LitRevFertTech.gdx (15 significant digits; capri_dat/ghgtech/LitRevFertTech_p_litRevFertTechs.csv holds the same records at full precision), converted from the gdxdump text by tools/build/convert_sources_to_csv.py; read by tools/build/build_fert_side_effects.py (the NO3 records of NITR_INH -> LitRevFertTech_p_litRevFertTechs_no3.csv).",
+   "comment": "CAPRI's p_litRevFertTechs(region, technology, activity, system, item) (\"outputs regarding fertilizer technologies\"), every record of the project lead's gdxdump of dat/scen/ghgtech/LitRevFertTech.gdx (15 significant digits; capri_dat/ghgtech/LitRevFertTech_p_litRevFertTechs.parquet holds the same records at full precision), converted from the gdxdump text by tools/build/convert_sources.py; read by tools/build/build_fert_side_effects.py (the NO3 records of NITR_INH -> LitRevFertTech_p_litRevFertTechs_no3.parquet).",
    "columns": [
     {
      "name": "region",
@@ -32286,7 +32797,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -32295,17 +32806,15 @@
     "builders": [
      "build_fert_side_effects"
     ],
-    "checks": [
-     "tools/check/make_provenance.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_litrevferttech_p_litrevferttechs_no3": {
-   "file": "capri_data/sources/intermediate/ghgtech/LitRevFertTech_p_litRevFertTechs_no3.csv",
+   "file": "capri_data/sources/intermediate/ghgtech/LitRevFertTech_p_litRevFertTechs_no3.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
-   "comment": "The nitrate leaching and runoff records (NO3...) of CAPRI's p_litRevFertTechs(region, technology, activity, system, item), taken from the full dump LitRevFertTech_p_litRevFertTechs_all.csv (the gdxdump text converted by tools/build/convert_sources_to_csv.py) (tools/build/build_fert_side_effects.py).",
+   "comment": "The nitrate leaching and runoff records (NO3...) of CAPRI's p_litRevFertTechs(region, technology, activity, system, item), taken from the full dump LitRevFertTech_p_litRevFertTechs_all.parquet (the gdxdump text converted by tools/build/convert_sources.py) (tools/build/build_fert_side_effects.py).",
    "columns": [
     {
      "name": "region",
@@ -32371,10 +32880,10 @@
    }
   },
   "src_livestock_units_p_luunits": {
-   "file": "capri_data/sources/raw/capri/dat/policy/livestock_units_p_LUUnits.csv",
+   "file": "capri_data/sources/raw/capri/dat/policy/livestock_units_p_LUUnits.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_LUUnits(act) from dat/policy/livestock_units.gms l. 25-82 (\"Livestock units\" per animal and year, Eurostat's LSU glossary; HENS and POUF per 1000 animals), as written, converted to CSV by tools/build/convert_sources_to_csv.py; read (upper-cased) by tools/build/build_captrd_dat.py.",
+   "comment": "CAPRI's p_LUUnits(act) from dat/policy/livestock_units.gms l. 25-82 (\"Livestock units\" per animal and year, Eurostat's LSU glossary; HENS and POUF per 1000 animals), as written, converted to CSV by tools/build/convert_sources.py; read (upper-cased) by tools/build/build_captrd_dat.py.",
    "columns": [
     {
      "name": "act",
@@ -32404,7 +32913,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -32419,7 +32928,7 @@
    }
   },
   "src_lulucf_emissions_original_source_p_peatsh_def": {
-   "file": "capri_data/sources/raw/capri/dat_local/envind/lulucf_emissions_original_source_p_PEATSH_def.csv",
+   "file": "capri_data/sources/raw/capri/dat_local/envind/lulucf_emissions_original_source_p_PEATSH_def.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's PARAMETER p_PEATSH_def(rAll) \"Share of peatland in arable land\" from dat/envind/lulucf_emissions_original_source.gms l. 688-774 (Carre et al. 2009; the Western Balkans take Croatia's, per the file), as written; the organic-soil fallback of the Western Balkans and Turkey (envind/prep_lulucf_carbon.gms l. 258-259, divided by 100). From the project lead's CAPRI installation, not in the Hugging Face mirror (tools/build/extract_capri_dat_local.py).",
@@ -32466,10 +32975,10 @@
    }
   },
   "src_milk_quota_dat_p_mquotadat": {
-   "file": "capri_data/sources/raw/capri/dat/coco/milk_quota_dat_p_MQuotaDat.csv",
+   "file": "capri_data/sources/raw/capri/dat/coco/milk_quota_dat_p_MQuotaDat.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's TABLE p_MQuotaDat(region, info, year) from dat/coco/milk_quota_dat.gms l. 17-135 (\"Milk quota data from DG Agri used in coco, captrd, capmod\": quotas for deliveries QUTdel and direct sales QUTdir, deliveries Delivs, direct sales DSTOTL, 1993-2014), every cell with a number, as written, converted to CSV by tools/build/convert_sources_to_csv.py; read (upper-cased) by tools/build/build_captrd_dat.py.",
+   "comment": "CAPRI's TABLE p_MQuotaDat(region, info, year) from dat/coco/milk_quota_dat.gms l. 17-135 (\"Milk quota data from DG Agri used in coco, captrd, capmod\": quotas for deliveries QUTdel and direct sales QUTdir, deliveries Delivs, direct sales DSTOTL, 1993-2014), every cell with a number, as written, converted to CSV by tools/build/convert_sources.py; read (upper-cased) by tools/build/build_captrd_dat.py.",
    "columns": [
     {
      "name": "region",
@@ -32511,7 +33020,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -32525,10 +33034,10 @@
    }
   },
   "src_minfert_redu_by_crop_limcres": {
-   "file": "capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_limCres.csv",
+   "file": "capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_limCres.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's relaxations of the limCres regulation (crop residues to a group at most 1.3 x baseline per ha) by +add for listed (ru, NGRP) in pol_input/greendeal/minfert_redu_by_crop.gms ($ife lines l. 281-356), each with its simulation-year condition ($ifthene %simy%>YYYY: after_year, strict), as tools/build/build_mineral_redu_rules.py parsed them (its parse moved unchanged to tools/build/convert_sources_to_csv.py; numbers as the parse's floats); read by tools/build/build_mineral_redu_rules.py.",
+   "comment": "CAPRI's relaxations of the limCres regulation (crop residues to a group at most 1.3 x baseline per ha) by +add for listed (ru, NGRP) in pol_input/greendeal/minfert_redu_by_crop.gms ($ife lines l. 281-356), each with its simulation-year condition ($ifthene %simy%>YYYY: after_year, strict), as tools/build/build_mineral_redu_rules.py parsed them (its parse moved unchanged to tools/build/convert_sources.py; numbers as the parse's floats); read by tools/build/build_mineral_redu_rules.py.",
    "columns": [
     {
      "name": "capri_region",
@@ -32575,7 +33084,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -32584,17 +33093,15 @@
     "builders": [
      "build_mineral_redu_rules"
     ],
-    "checks": [
-     "tools/check/make_provenance.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_minfert_redu_by_crop_p_checksmallmine": {
-   "file": "capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_p_checkSmallMine.csv",
+   "file": "capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_p_checkSmallMine.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's listed exemptions p_checkSmallMine(ru, NGRP) = factor x p_minfertBaseline (adhoc fixes for unclear infeasibilities; factor 1 where the statement has none) in pol_input/greendeal/minfert_redu_by_crop.gms (l. 110-228), each with its simulation-year condition ($ifthene %simy%>YYYY: after_year, strict) and othPol == high (othpol_high 1), as tools/build/build_mineral_redu_rules.py parsed them (its parse moved unchanged to tools/build/convert_sources_to_csv.py; numbers as the parse's floats); read by tools/build/build_mineral_redu_rules.py.",
+   "comment": "CAPRI's listed exemptions p_checkSmallMine(ru, NGRP) = factor x p_minfertBaseline (adhoc fixes for unclear infeasibilities; factor 1 where the statement has none) in pol_input/greendeal/minfert_redu_by_crop.gms (l. 110-228), each with its simulation-year condition ($ifthene %simy%>YYYY: after_year, strict) and othPol == high (othpol_high 1), as tools/build/build_mineral_redu_rules.py parsed them (its parse moved unchanged to tools/build/convert_sources.py; numbers as the parse's floats); read by tools/build/build_mineral_redu_rules.py.",
    "columns": [
     {
      "name": "capri_region",
@@ -32653,7 +33160,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -32662,17 +33169,15 @@
     "builders": [
      "build_mineral_redu_rules"
     ],
-    "checks": [
-     "tools/check/make_provenance.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_miti_data_jul15_p_ghgmiti": {
-   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/miti_data_jul15_p_ghgMiti.csv",
+   "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/miti_data_jul15_p_ghgMiti.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_ghgMiti(region, activity, technology, target, info) (\"information for CAPRI activities without specification of production system\") of the project lead's gdxdump of dat/scen/ghgtech/miti_data_jul15.gdx (the mitigation data of the Green Deal runs, miti_data_type = _jul15), every record as dumped, converted from the gdxdump text miti_data_jul15_p_ghgMiti.txt by tools/build/convert_sources_to_csv.py; read by tools/build/build_fert_options_jul15.py (cropMiti, N2OSYN).",
+   "comment": "CAPRI's p_ghgMiti(region, activity, technology, target, info) (\"information for CAPRI activities without specification of production system\") of the project lead's gdxdump of dat/scen/ghgtech/miti_data_jul15.gdx (the mitigation data of the Green Deal runs, miti_data_type = _jul15), every record as dumped, converted from the gdxdump text miti_data_jul15_p_ghgMiti.txt by tools/build/convert_sources.py; read by tools/build/build_fert_options_jul15.py (cropMiti, N2OSYN).",
    "columns": [
     {
      "name": "region",
@@ -32726,7 +33231,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -32735,17 +33240,15 @@
     "builders": [
      "build_fert_options_jul15"
     ],
-    "checks": [
-     "tools/check/make_provenance.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_mquota_update_pmquotareg": {
-   "file": "capri_data/sources/raw/capri/gams/pol_input/mquota_update_PMQuotaReg.csv",
+   "file": "capri_data/sources/raw/capri/gams/pol_input/mquota_update_PMQuotaReg.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's TABLE PMQuotaReg(region, QUTtot, year) from gams/pol_input/mquota_update.gms l. 35-65 (\"Total quota\", deliveries and direct sales incl. the restructuring reserve, 2004-2014, per member state), every cell with a number, as written, converted to CSV by tools/build/convert_sources_to_csv.py (the statement only; the file is CAPRI code); read (upper-cased) by tools/build/build_captrd_dat.py.",
+   "comment": "CAPRI's TABLE PMQuotaReg(region, QUTtot, year) from gams/pol_input/mquota_update.gms l. 35-65 (\"Total quota\", deliveries and direct sales incl. the restructuring reserve, 2004-2014, per member state), every cell with a number, as written, converted to CSV by tools/build/convert_sources.py (the statement only; the file is CAPRI code); read (upper-cased) by tools/build/build_captrd_dat.py.",
    "columns": [
     {
      "name": "region",
@@ -32787,7 +33290,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -32801,7 +33304,7 @@
    }
   },
   "src_no_mirror_bnumanirains": {
-   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_bNumAniRains.csv",
+   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_bNumAniRains.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's p_NO_bNumAniRains of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
@@ -32854,7 +33357,7 @@
    }
   },
   "src_no_mirror_controlstrategies": {
-   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_non_changeable_parameters_norway/mirror_non_changeable_parameters_norway_p_NO_ControlStrategies.csv",
+   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_non_changeable_parameters_norway/mirror_non_changeable_parameters_norway_p_NO_ControlStrategies.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's p_NO_ControlStrategies of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
@@ -32913,7 +33416,7 @@
    }
   },
   "src_no_mirror_emfracfert": {
-   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_EmFracFert.csv",
+   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_EmFracFert.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's p_NO_EmFracFert of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
@@ -32966,7 +33469,7 @@
    }
   },
   "src_no_mirror_fracemappl": {
-   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_FracEmAppl.csv",
+   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_FracEmAppl.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's p_NO_FracEmAppl of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
@@ -33019,7 +33522,7 @@
    }
   },
   "src_no_mirror_fracemgrazing": {
-   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_non_changeable_parameters_norway/mirror_non_changeable_parameters_norway_p_NO_FracEmGrazing.csv",
+   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_non_changeable_parameters_norway/mirror_non_changeable_parameters_norway_p_NO_FracEmGrazing.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's p_NO_FracEmGrazing of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
@@ -33072,7 +33575,7 @@
    }
   },
   "src_no_mirror_fracemhouse": {
-   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_FracEmHouse.csv",
+   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_FracEmHouse.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's p_NO_FracEmHouse of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
@@ -33125,7 +33628,7 @@
    }
   },
   "src_no_mirror_fracemstorage": {
-   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_FracEmStorage.csv",
+   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_FracEmStorage.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's p_NO_FracEmStorage of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
@@ -33178,7 +33681,7 @@
    }
   },
   "src_no_mirror_fracusefert": {
-   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_FracUseFert.csv",
+   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_FracUseFert.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's p_NO_FracUseFert of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
@@ -33225,7 +33728,7 @@
    }
   },
   "src_no_mirror_nn_corrfertfactdeviation": {
-   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_NN_CorrFertFactDeviation.csv",
+   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_NN_CorrFertFactDeviation.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's p_NO_NN_CorrFertFactDeviation of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
@@ -33278,7 +33781,7 @@
    }
   },
   "src_no_mirror_rcemissions": {
-   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_non_changeable_parameters_norway/mirror_non_changeable_parameters_norway_p_NO_RCEmissions.csv",
+   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_non_changeable_parameters_norway/mirror_non_changeable_parameters_norway_p_NO_RCEmissions.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's p_NO_RCEmissions of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
@@ -33331,7 +33834,7 @@
    }
   },
   "src_no_mirror_reduccontrolstrategies": {
-   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_non_changeable_parameters_norway/mirror_non_changeable_parameters_norway_p_NO_ReducControlStrategies.csv",
+   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_non_changeable_parameters_norway/mirror_non_changeable_parameters_norway_p_NO_ReducControlStrategies.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's p_NO_ReducControlStrategies of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
@@ -33390,7 +33893,7 @@
    }
   },
   "src_no_mirror_reducemhouse": {
-   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_ReducEmhouse.csv",
+   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_ReducEmhouse.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's p_NO_ReducEmhouse of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
@@ -33449,7 +33952,7 @@
    }
   },
   "src_no_mirror_reducemstorage": {
-   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_ReducEmstorage.csv",
+   "file": "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_ReducEmstorage.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "CAPRI's p_NO_ReducEmstorage of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
@@ -33507,11 +34010,76 @@
     "tests": []
    }
   },
+  "src_npk_dataout_2030": {
+   "file": "capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/npk_dataout_2030.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's 2030 reference nutrient (N, P, K) balance items per region (item empty for the region's balance rows), extracted from res_2_1730greendeal_refdefaulta (tools/build/build_npk_balance_2030.py).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "row",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "col",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [],
+   "unique": [
+    [
+     "region",
+     "item",
+     "row",
+     "col"
+    ]
+   ],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "npk_dataout_2030.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_npk_balance_2030",
+    "sources": "$EXPORTS/priFertDist_1730defaulta.zip; $EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "src_nutrient_cont_usda_p_nutrientcont": {
-   "file": "capri_data/sources/raw/capri/dat/arm/nutrient_cont_usda_p_nutrientCont.csv",
+   "file": "capri_data/sources/raw/capri/dat/arm/nutrient_cont_usda_p_nutrientCont.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_nutrientCont(product, item) of dat/arm/nutrient_cont_usda.gdx (USDA nutrient contents), from its Excel export nutrient_cont_usda_export.xlsx (sheet p_nutrientCont, 1320 rows, no header), integers as integers and other numbers as repr of the cell's float, converted to CSV by tools/build/convert_sources_to_csv.py; read by tools/build/build_feed_energy.py (item Energ_cal: kcal per kg).",
+   "comment": "CAPRI's p_nutrientCont(product, item) of dat/arm/nutrient_cont_usda.gdx (USDA nutrient contents), from its Excel export nutrient_cont_usda_export.xlsx (sheet p_nutrientCont, 1320 rows, no header), integers as integers and other numbers as repr of the cell's float, converted to CSV by tools/build/convert_sources.py; read by tools/build/build_feed_energy.py (item Energ_cal: kcal per kg).",
    "columns": [
     {
      "name": "product",
@@ -33547,7 +34115,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "USDA via CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -33556,17 +34124,15 @@
     "builders": [
      "build_feed_energy"
     ],
-    "checks": [
-     "tools/check/make_provenance.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_nuts2013_2016": {
-   "file": "capri_data/sources/raw/nuts/nuts2013_2016.csv",
+   "file": "capri_data/sources/raw/nuts/nuts2013_2016.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
-   "comment": "Correspondence NUTS 2013 to NUTS 2016 (codes, names by level, change), from Eurostat's workbook NUTS2013-NUTS2016__1_.xlsx (removed 30 October 2026, read from git history; sheet 'NUTS2013-NUTS2016', the rows with a code, columns B-H, text as written, CRLF line ends as committed before), written by tools/build/convert_sources_to_csv.py; read by tools/build/build_nuts2024_reporting.py.",
+   "comment": "Correspondence NUTS 2013 to NUTS 2016 (codes, names by level, change), from Eurostat's workbook NUTS2013-NUTS2016__1_.xlsx (removed 30 October 2026, read from git history; sheet 'NUTS2013-NUTS2016', the rows with a code, columns B-H, text as written, CRLF line ends as committed before), written by tools/build/convert_sources.py; read by tools/build/build_nuts2024_reporting.py.",
    "columns": [
     {
      "name": "code_2013",
@@ -33612,7 +34178,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "Eurostat",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -33626,10 +34192,10 @@
    }
   },
   "src_nuts2016_2021": {
-   "file": "capri_data/sources/raw/nuts/nuts2016_2021.csv",
+   "file": "capri_data/sources/raw/nuts/nuts2016_2021.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
-   "comment": "Correspondence NUTS 2016 to NUTS 2021 (codes, names by level, changes), from Eurostat's workbook NUTS2021.xlsx (sheet 'Changes detailed NUTS 2016-2021', the rows with a code, columns A-H, the text stripped of surrounding white space as committed before), written by tools/build/convert_sources_to_csv.py; read by tools/build/build_nuts2024_reporting.py.",
+   "comment": "Correspondence NUTS 2016 to NUTS 2021 (codes, names by level, changes), from Eurostat's workbook NUTS2021.xlsx (sheet 'Changes detailed NUTS 2016-2021', the rows with a code, columns A-H, the text stripped of surrounding white space as committed before), written by tools/build/convert_sources.py; read by tools/build/build_nuts2024_reporting.py.",
    "columns": [
     {
      "name": "code_2016",
@@ -33687,7 +34253,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "Eurostat",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -33701,10 +34267,10 @@
    }
   },
   "src_nuts2021_2024": {
-   "file": "capri_data/sources/raw/nuts/nuts2021_2024.csv",
+   "file": "capri_data/sources/raw/nuts/nuts2021_2024.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
-   "comment": "Correspondence NUTS 2021 to NUTS 2024 (country, codes, names by level, change), from Eurostat's workbook NUTS2021-NUTS2024.xlsx (removed 30 October 2026, read from git history; sheet 'NUTS2021- NUTS2024', the rows with a code, columns B-H, the text stripped of surrounding white space as committed before), written by tools/build/convert_sources_to_csv.py; read by tools/build/build_nuts2024_reporting.py.",
+   "comment": "Correspondence NUTS 2021 to NUTS 2024 (country, codes, names by level, change), from Eurostat's workbook NUTS2021-NUTS2024.xlsx (removed 30 October 2026, read from git history; sheet 'NUTS2021- NUTS2024', the rows with a code, columns B-H, the text stripped of surrounding white space as committed before), written by tools/build/convert_sources.py; read by tools/build/build_nuts2024_reporting.py.",
    "columns": [
     {
      "name": "country",
@@ -33750,7 +34316,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "Eurostat",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -33764,10 +34330,10 @@
    }
   },
   "src_nuts2024": {
-   "file": "capri_data/sources/raw/nuts/nuts2024.csv",
+   "file": "capri_data/sources/raw/nuts/nuts2024.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
-   "comment": "NUTS 2024 codes with country, label and level, from Eurostat's workbook NUTS2021-NUTS2024.xlsx (removed 30 October 2026, read from git history; sheet 'NUTS2024', the rows with a code, columns A-D, as committed before), written by tools/build/convert_sources_to_csv.py; read by capri_mod/tests/test_nuts_reporting.py.",
+   "comment": "NUTS 2024 codes with country, label and level, from Eurostat's workbook NUTS2021-NUTS2024.xlsx (removed 30 October 2026, read from git history; sheet 'NUTS2024', the rows with a code, columns A-D, as committed before), written by tools/build/convert_sources.py; read by capri_mod/tests/test_nuts_reporting.py.",
    "columns": [
     {
      "name": "country",
@@ -33809,7 +34375,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "Eurostat",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -33817,16 +34383,14 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": [
-     "capri_mod/tests/test_nuts_reporting.py"
-    ]
+    "tests": []
    }
   },
   "src_orgsoil_share_p_orgsoilori": {
-   "file": "capri_data/sources/raw/capri/dat/envind/orgsoil_share_p_orgsoilori.csv",
+   "file": "capri_data/sources/raw/capri/dat/envind/orgsoil_share_p_orgsoilori.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_OrgSoilOri(region, item) (\"Original information related to organic soils for CAPRI NUTS2 regions (and MS aggregates)\": shares sog/soc/sof_regN2_rk and areas O/C/G/F_regN2), gdxdump of orgsoil_share.gdx, every record as dumped, converted from the gdxdump text by tools/build/convert_sources_to_csv.py; read by tools/build/build_histosol.py (which leaves out the last record, as its former parser did).",
+   "comment": "CAPRI's p_OrgSoilOri(region, item) (\"Original information related to organic soils for CAPRI NUTS2 regions (and MS aggregates)\": shares sog/soc/sof_regN2_rk and areas O/C/G/F_regN2), gdxdump of orgsoil_share.gdx, every record as dumped, converted from the gdxdump text by tools/build/convert_sources.py; read by tools/build/build_histosol.py (which leaves out the last record, as its former parser did).",
    "columns": [
     {
      "name": "region",
@@ -33862,7 +34426,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -33871,14 +34435,12 @@
     "builders": [
      "build_histosol"
     ],
-    "checks": [
-     "tools/check/make_provenance.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_pela_own_price": {
-   "file": "capri_data/sources/intermediate/estnlp/pela_own_price.csv",
+   "file": "capri_data/sources/intermediate/estnlp/pela_own_price.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's estimated own-price supply elasticities PELA(region, crop, crop, '2005') from dat/estnlp/results.gdx, per regional unit (rows) and crop (columns); MAIZ renamed CORN (tools/build/ingest_pela_gtap.py).",
@@ -34079,7 +34641,7 @@
    }
   },
   "src_pmp_cnst_techn_2030": {
-   "file": "capri_data/sources/intermediate/baseline_pmp/pmp_cnst_techn_2030.csv",
+   "file": "capri_data/sources/intermediate/baseline_pmp/pmp_cnst_techn_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's linear PMP terms p_pmpCnst(region, activity, tech) of its 2030 baseline calibration (crops T1/T2, others T), from the sim_ini_21730 restart file, which loads them from pmppar_21730<CC> (capmod/create_sim_ini_gdx.gms l. 491-492); CAPRI's 2030 money (tools/build/build_techn_2030.py).",
@@ -34136,7 +34698,7 @@
    }
   },
   "src_pmp_feed_inp_coeff_2030": {
-   "file": "capri_data/sources/intermediate/baseline_pmp/pmp_feed_inp_coeff_2030.csv",
+   "file": "capri_data/sources/intermediate/baseline_pmp/pmp_feed_inp_coeff_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's feed input coefficients of its 2030 baseline calibration per region, animal activity, tech and feed, with coef CNST or SLOP, from pmppar_21730<CC>defaulta.gdx; CAPRI codes, unchanged (tools/build/build_pmp_2030.py).",
@@ -34207,7 +34769,7 @@
    }
   },
   "src_pmp_quad_landtypes_2017": {
-   "file": "capri_data/sources/raw/capri/capreg/pmp_quad_landtypes_2017.csv",
+   "file": "capri_data/sources/raw/capri/capreg/pmp_quad_landtypes_2017.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's 2017 quadratic land-supply terms p_pmpQuadLandTypes(region, landtype1, landtype2), read by tools/build/build_pmp_recipe.py for its 2017 land-nest adjustment; no builder, the file it was taken from is not documented.",
@@ -34266,7 +34828,7 @@
    }
   },
   "src_pmp_quad_landtypes_2030": {
-   "file": "capri_data/sources/intermediate/baseline_pmp/pmp_quad_landtypes_2030.csv",
+   "file": "capri_data/sources/intermediate/baseline_pmp/pmp_quad_landtypes_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's quadratic land-supply terms p_pmpQuadLandTypes(region, landtype1, landtype2) of its 2030 baseline calibration (land market, Trustee_land), from pmppar_21730<CC>defaulta.gdx (tools/build/build_pmp_2030.py).",
@@ -34326,7 +34888,7 @@
    }
   },
   "src_pmp_quad_pact": {
-   "file": "capri_data/sources/intermediate/capreg/pmp_quad_pact.csv",
+   "file": "capri_data/sources/intermediate/capreg/pmp_quad_pact.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's 2017 crop-group PMP terms p_pmpQuadPact(region, group1, group2) per regional unit, from the quadPact_<CC>.txt dumps of pmppar_17*.gdx (tools/build/ingest_pmp_terms.py).",
@@ -34378,16 +34940,12 @@
    "read_by": {
     "model": [],
     "builders": [],
-    "checks": [
-     "tools/check/pmp_recipe_check.py"
-    ],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "checks": [],
+    "tests": []
    }
   },
   "src_pmp_quad_pact_2030": {
-   "file": "capri_data/sources/intermediate/baseline_pmp/pmp_quad_pact_2030.csv",
+   "file": "capri_data/sources/intermediate/baseline_pmp/pmp_quad_pact_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's quadratic PMP terms on crop-group levels p_pmpQuadPact(region, group1, group2) (CERE, CER2, OILS, OARA, FARA; stored for group1 <= group2 in CAPRI's order) of its 2030 baseline calibration, from pmppar_21730<CC>defaulta.gdx (tools/build/build_pmp_2030.py).",
@@ -34441,14 +34999,12 @@
     "builders": [
      "build_pmp_capri_2030"
     ],
-    "checks": [
-     "tools/check/pmp_recipe_check.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_pmp_quad_techn": {
-   "file": "capri_data/sources/intermediate/capreg/pmp_quad_techn.csv",
+   "file": "capri_data/sources/intermediate/capreg/pmp_quad_techn.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's 2017 own-activity PMP diagonal p_pmpQuadTechn(region, activity, T1, T1) (T.T for animals) per regional unit and activity, from the quadTechn_<CC>.txt dumps of pmppar_17*.gdx; MAIZ renamed CORN (tools/build/ingest_pmp_terms.py).",
@@ -34493,7 +35049,7 @@
    "notes": [
     {
      "kind": "origin",
-     "note": "CAPRI's 2017 p_pmpQuadTechn own-activity diagonal (quadTechn_*.txt). The regex accepts both T1.T1 (crops) and T.T (livestock) tags; MAIZ is renamed CORN. 10889 rows, 221 regional units, 56 activities, 19 of them animal activities incl. OANI. Not read by the model: inputs of build_cattle_intensity, build_dairy_intensity and build_grass_intensity, tools/check/pmp_recipe_check.py and one test. The default PMP uses CAPRI's exported 2030 terms (sources/baseline_pmp/pmp_quad_techn_2030.csv).",
+     "note": "CAPRI's 2017 p_pmpQuadTechn own-activity diagonal (quadTechn_*.txt). The regex accepts both T1.T1 (crops) and T.T (livestock) tags; MAIZ is renamed CORN. 10889 rows, 221 regional units, 56 activities, 19 of them animal activities incl. OANI. Not read by the model: inputs of build_cattle_intensity, build_dairy_intensity and build_grass_intensity, tools/check/pmp_recipe_check.py and one test. The default PMP uses CAPRI's exported 2030 terms (sources/baseline_pmp/pmp_quad_techn_2030.parquet).",
      "evidence": "tools/build/ingest_pmp_terms.py:33-34, :52-80; tools/build/build_cattle_intensity.py:40; tools/build/build_dairy_intensity.py:37; tools/build/build_grass_intensity.py:35; tools/check/pmp_recipe_check.py:77; capri_mod/tests/test_capri.py:3705; capri_mod/settings/defaults.toml:102; CSV: 10889 x 3, 221 regions, 56 activities",
      "checked": "2026-10-29"
     }
@@ -34504,16 +35060,12 @@
      "build_cattle_intensity",
      "build_dairy_intensity"
     ],
-    "checks": [
-     "tools/check/pmp_recipe_check.py"
-    ],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "checks": [],
+    "tests": []
    }
   },
   "src_pmp_quad_techn_2030": {
-   "file": "capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.csv",
+   "file": "capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's quadratic PMP terms p_pmpQuadTechn(region, activity, tech1, tech2) of its 2030 baseline calibration (crops T1/T2, animals T), from the project lead's gdxdump of pmppar_21730<CC>defaulta.gdx (tools/build/build_pmp_2030.py).",
@@ -34577,17 +35129,69 @@
      "build_techn_2030",
      "build_techn_mix_2030"
     ],
-    "checks": [
-     "tools/check/pmp_recipe_check.py"
-    ],
-    "tests": [
-     "capri_mod/tests/test_capri.py",
-     "capri_mod/tests/test_techn_mix.py"
-    ]
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_prme_schemes_2030": {
+   "file": "capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/prme_schemes_2030.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's 2030 reference premiums PRME per region, activity and scheme (the technology-factored rural-development schemes and DPTOTAL), extracted from res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/build_techn_mix_2030.py).",
+   "columns": [
+    {
+     "name": "capri_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "scheme",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "capri_region",
+    "activity",
+    "scheme"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "prme_schemes_2030.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_techn_mix_2030",
+    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
    }
   },
   "src_processing_yields_dataout_2030": {
-   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/processing_yields_dataout_2030.csv",
+   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/processing_yields_dataout_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's GROF of olives and paddy (OLIV, PARI) and MAPR of olive oil and milled rice (OLIO, RICE) per member state, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_processing_yields.py).",
@@ -34644,7 +35248,7 @@
    }
   },
   "src_producer_prices_no_builder": {
-   "file": "capri_data/sources/raw/unsourced/producer_prices_no_builder.csv",
+   "file": "capri_data/sources/raw/unsourced/producer_prices_no_builder.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "EU producer price rows no builder computes (activity, price, note): one row, set-aside SETA at 0 by convention; hand-kept, read by tools/build/build_eu_producer_prices.py (KNOWN_ISSUES K72).",
@@ -34697,7 +35301,7 @@
    }
   },
   "src_raw_milk_prices_dataout_2017": {
-   "file": "capri_data/sources/raw/capri/results/market_base_1717/raw_milk_prices_dataout_2017.csv",
+   "file": "capri_data/sources/raw/capri/results/market_base_1717/raw_milk_prices_dataout_2017.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's DATA PMRK MILK of every region of the listing, from market_base_1717 dataOut, 2017 (tools/build/build_bilateral_market.py build_raw_milk_prices).",
@@ -34740,7 +35344,7 @@
    }
   },
   "src_raw_milk_prices_dataout_2030": {
-   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/raw_milk_prices_dataout_2030.csv",
+   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/raw_milk_prices_dataout_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's DATA PMRK MILK of every region of the listing, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_bilateral_market.py build_raw_milk_prices).",
@@ -34783,7 +35387,7 @@
    }
   },
   "src_recipe_2017_quad_pact": {
-   "file": "capri_data/sources/intermediate/baseline_pmp/recipe_2017_quad_pact.csv",
+   "file": "capri_data/sources/intermediate/baseline_pmp/recipe_2017_quad_pact.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "capri-mod's own crop-group PMP terms for 2017 (region, group1, group2, value; the format of p_pmpQuadPact), computed with CAPRI's recipe (supply/define_pmp_terms.gms, supply/pmp_terms/*) per CAPRI region (tools/build/build_pmp_recipe.py --year 2017).",
@@ -34837,16 +35441,12 @@
     "builders": [
      "build_pmp_capri_2030"
     ],
-    "checks": [
-     "tools/check/pmp_recipe_check.py"
-    ],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "checks": [],
+    "tests": []
    }
   },
   "src_recipe_2017_quad_techn": {
-   "file": "capri_data/sources/intermediate/baseline_pmp/recipe_2017_quad_techn.csv",
+   "file": "capri_data/sources/intermediate/baseline_pmp/recipe_2017_quad_techn.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "capri-mod's own activity PMP terms for 2017 (region, activity, tech1, tech2, value; the format of p_pmpQuadTechn), computed with CAPRI's recipe (supply/define_pmp_terms.gms, supply/pmp_terms/*) per CAPRI region (tools/build/build_pmp_recipe.py --year 2017).",
@@ -34907,17 +35507,12 @@
      "build_animal_pmp_capri_2030",
      "build_pmp_capri_2030"
     ],
-    "checks": [
-     "tools/check/pmp_recipe_check.py",
-     "tools/check/reproduce_builders.py"
-    ],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "checks": [],
+    "tests": []
    }
   },
   "src_recipe_2030_quad_pact": {
-   "file": "capri_data/sources/intermediate/baseline_pmp/recipe_2030_quad_pact.csv",
+   "file": "capri_data/sources/intermediate/baseline_pmp/recipe_2030_quad_pact.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "capri-mod's own crop-group PMP terms for 2030 (region, group1, group2, value; the format of p_pmpQuadPact), computed with CAPRI's recipe (supply/define_pmp_terms.gms, supply/pmp_terms/*) per CAPRI region (tools/build/build_pmp_recipe.py --year 2030).",
@@ -34971,14 +35566,12 @@
     "builders": [
      "build_pmp_capri_2030"
     ],
-    "checks": [
-     "tools/check/pmp_recipe_check.py"
-    ],
+    "checks": [],
     "tests": []
    }
   },
   "src_recipe_2030_quad_techn": {
-   "file": "capri_data/sources/intermediate/baseline_pmp/recipe_2030_quad_techn.csv",
+   "file": "capri_data/sources/intermediate/baseline_pmp/recipe_2030_quad_techn.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "capri-mod's own activity PMP terms for 2030 (region, activity, tech1, tech2, value; the format of p_pmpQuadTechn), computed with CAPRI's recipe (supply/define_pmp_terms.gms, supply/pmp_terms/*) per CAPRI region (tools/build/build_pmp_recipe.py --year 2030).",
@@ -35040,17 +35633,12 @@
      "build_intensity_q_2030",
      "build_pmp_capri_2030"
     ],
-    "checks": [
-     "tools/check/pmp_recipe_check.py",
-     "tools/check/reproduce_builders.py"
-    ],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "checks": [],
+    "tests": []
    }
   },
   "src_ref2030_welfare": {
-   "file": "capri_data/sources/raw/capri/results/ref2030_welfare.csv",
+   "file": "capri_data/sources/raw/capri/results/ref2030_welfare.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's welfare items of the 2030 reference (region, col: WELFARE, CSSP, PROFITAGR, TARIFFREV, ...; row: product; value); no builder and no reader; per docs/WELFARE.md taken from scen_ref_2030.txt.",
@@ -35103,13 +35691,11 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": [
-     "capri_mod/tests/test_welfare.py"
-    ]
+    "tests": []
    }
   },
   "src_res17_mann_crpr_expt": {
-   "file": "capri_data/sources/intermediate/envind/res17_mann_crpr_expt.csv",
+   "file": "capri_data/sources/intermediate/envind/res17_mann_crpr_expt.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's LEVL, MANN and CRPR_EXPT per region and animal activity from the 2017 dumps res_17*.txt, column Y, used for the low-N feeding option (tools/build/build_lownfeed_effects.py).",
@@ -35168,10 +35754,10 @@
    }
   },
   "src_smal_pshar_p_smallprodshare": {
-   "file": "capri_data/sources/raw/capri/dat/policy/smal_pshar_p_smallProdShare.csv",
+   "file": "capri_data/sources/raw/capri/dat/policy/smal_pshar_p_smallProdShare.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's TABLE p_smallProdShare(year, region) from dat/policy/smal_pshar.gms l. 27-57 (\"Share of small producers not falling under the compulsory set-aside regime\", 1993-2020), every cell with a number, as written, converted to CSV by tools/build/convert_sources_to_csv.py; read (upper-cased) by tools/build/build_captrd_dat.py.",
+   "comment": "CAPRI's TABLE p_smallProdShare(year, region) from dat/policy/smal_pshar.gms l. 27-57 (\"Share of small producers not falling under the compulsory set-aside regime\", 1993-2020), every cell with a number, as written, converted to CSV by tools/build/convert_sources.py; read (upper-cased) by tools/build/build_captrd_dat.py.",
    "columns": [
     {
      "name": "year",
@@ -35207,7 +35793,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -35221,7 +35807,7 @@
    }
   },
   "src_sugar_processing_dataout_2030": {
-   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/sugar_processing_dataout_2030.csv",
+   "file": "capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/sugar_processing_dataout_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's sugar beet GROF and PRCM and white sugar MAPR and PRCY per member state, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_sugar_processing.py).",
@@ -35278,7 +35864,7 @@
    }
   },
   "src_techn_fact_2030": {
-   "file": "capri_data/sources/intermediate/technology/techn_fact_2030.csv",
+   "file": "capri_data/sources/intermediate/technology/techn_fact_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
    "comment": "CAPRI's technology factors p_technFact(region, activity, row, tech) at its 2030 simulation start (intens/techf.gms, fert/fertned.gms, sugar/techf.gms, policy/rd_logic.gms): row LEVL the technology's share of the activity at the calibration point, the other rows the relative change of the coefficient against the mean; from the sim_ini_21730 restart file (tools/build/build_techn_2030.py).",
@@ -35343,10 +35929,10 @@
    }
   },
   "src_wintercovershare_p_wintercovershare0": {
-   "file": "capri_data/sources/raw/capri/dat/policy/wintercovershare_p_winterCoverShare0.csv",
+   "file": "capri_data/sources/raw/capri/dat/policy/wintercovershare_p_winterCoverShare0.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's p_winterCoverShare0(region, act) from dat/policy/wintercovershare.gms l. 18-221 (\"Share of crop in a region which provides winter cover\"; EU, member-state and some NUTS 2 entries), as written: value is a number or eps (GAMS's explicit zero, kept as text); converted to CSV by tools/build/convert_sources_to_csv.py (capri_gams/wintercovershare.gms was the same file); read by tools/build/build_cover_crops.py (read_wcs: eps -> 0, act upper-cased) and tools/build/build_winter_cover_option.py.",
+   "comment": "CAPRI's p_winterCoverShare0(region, act) from dat/policy/wintercovershare.gms l. 18-221 (\"Share of crop in a region which provides winter cover\"; EU, member-state and some NUTS 2 entries), as written: value is a number or eps (GAMS's explicit zero, kept as text); converted to CSV by tools/build/convert_sources.py (capri_gams/wintercovershare.gms was the same file); read by tools/build/build_cover_crops.py (read_wcs: eps -> 0, act upper-cased) and tools/build/build_winter_cover_option.py.",
    "columns": [
     {
      "name": "region",
@@ -35375,7 +35961,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -35390,10 +35976,10 @@
    }
   },
   "src_yieldiy_p_inputdemandfactor": {
-   "file": "capri_data/sources/raw/capri/gams/inputs/yieldIY_p_inputDemandFactor.csv",
+   "file": "capri_data/sources/raw/capri/gams/inputs/yieldIY_p_inputDemandFactor.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's TABLE p_inputDemandFactor(act, input) from gams/inputs/yieldIY.gms l. 29-96 (\"Estimated yield dependent term of linear input demand function\": the share of the input that depends on yield), each number under its nearest column header, as tools/build/build_plant_protection_cost.py read it (its extraction moved to tools/build/convert_sources_to_csv.py; the blanks are 1 by l. 103, applied by the reader); read by tools/build/build_plant_protection_cost.py.",
+   "comment": "CAPRI's TABLE p_inputDemandFactor(act, input) from gams/inputs/yieldIY.gms l. 29-96 (\"Estimated yield dependent term of linear input demand function\": the share of the input that depends on yield), each number under its nearest column header, as tools/build/build_plant_protection_cost.py read it (its extraction moved to tools/build/convert_sources.py; the blanks are 1 by l. 103, applied by the reader); read by tools/build/build_plant_protection_cost.py.",
    "columns": [
     {
      "name": "activity",
@@ -35429,7 +36015,7 @@
    "provenance": {
     "nature": "source-extract",
     "origins": "CAPRI",
-    "builder": "convert_sources_to_csv",
+    "builder": "convert_sources",
     "sources": null
    },
    "notes": [],
@@ -35442,11 +36028,62 @@
     "tests": []
    }
   },
+  "src_yild_2030_ref": {
+   "file": "capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/yild_2030_ref.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's 2030 reference yields YILD per region and activity, kg per ha, extracted from res_2_1730greendeal_refdefaulta (tools/build/build_plant_protection_cost.py).",
+   "columns": [
+    {
+     "name": "capri_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "yild_kg_ha",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "capri_region",
+    "activity"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "yild_kg_ha",
+     "unit": null,
+     "status": "open",
+     "basis": "yild_2030_ref.yild_kg_ha: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_plant_protection_cost",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "sup_cap_premium_activity": {
    "file": "capri_data/2017/supply/cap_premium_activity.csv",
    "declared_in": "18_supply_more.sql",
    "layout": [],
-   "comment": "CAPRI's CAP premium PRME per regional unit and activity (per ha or per head): the crop columns from crop_premium.csv (every region, model codes), the others from CAPREG's DATA2 extract sources/capreg/capreg_cap_premium.csv (tools/build/build_model_premium_prices.py; the model read the extract and joined them at run time until 31 October 2026)",
+   "comment": "CAPRI's CAP premium PRME per regional unit and activity (per ha or per head): the crop columns from crop_premium.csv (every region, model codes), the others from CAPREG's DATA2 extract sources/capreg/capreg_cap_premium.parquet (tools/build/build_model_premium_prices.py; the model read the extract and joined them at run time until 31 October 2026)",
    "columns": [
     {
      "name": "region",
@@ -39910,7 +40547,7 @@
    "file": "capri_data/2017/supply/producer_prices_regional.csv",
    "declared_in": "18_supply_more.sql",
    "layout": [],
-   "comment": "CAPRI's regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.csv), CAPRI's TWIN column for WINE where it is empty (and OFAR for OFOD until S2, 7 November 2026), and a missing regional price filled with the country's national price (sources/capreg/capreg_national_prices.csv; tools/build/build_model_premium_prices.py; done by the model's loader at run time until 31 October 2026)",
+   "comment": "CAPRI's regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.parquet), CAPRI's TWIN column for WINE where it is empty (and OFAR for OFOD until S2, 7 November 2026), and a missing regional price filled with the country's national price (sources/capreg/capreg_national_prices.parquet; tools/build/build_model_premium_prices.py; done by the model's loader at run time until 31 October 2026)",
    "columns": [
     {
      "name": "model_region",
@@ -45235,7 +45872,7 @@
   },
   {
    "file": "99_rules.sql",
-   "rule": "every CSV file of the catalogue (05_file_catalogue.sql) is a declared file: a renamed or removed file takes its catalogue row along"
+   "rule": "every CSV file and Parquet table of the catalogue (05_file_catalogue.sql) is a declared file: a renamed or removed file takes its catalogue row along"
   },
   {
    "file": "99_rules.sql",

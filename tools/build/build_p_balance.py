@@ -22,9 +22,9 @@ Sources
          their initial shares, the run the N cascade and leaching checks use: tools/build/build_n_leaching.py)
 
 Data written
-  capri_data/sources/intermediate/capri_res/gd2030_ref_pbalance.csv          region, col, row, value: the extract of --ref (the
+  capri_data/sources/intermediate/capri_res/gd2030_ref_pbalance.parquet          region, col, row, value: the extract of --ref (the
       regional items above for PHOF, UAAR LEVL, and per elementary crop LEVL, PRET, PCRD); the input of this builder
-  capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_pbalance.csv  the same for --ini, plus per elementary animal activity
+  capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_pbalance.parquet  the same for --ini, plus per elementary animal activity
       LEVL, MANP, MANN, RUNANI (kg per head, RUNANI/MANN = CAPRI's v_emiLoss(N, RunTot)); validation only
       (capri_mod/tests/test_p_balance.py)
   capri_data/2017/environment/p_balance_crop_coefs_2030.csv  capri_region, model_crop, levl_kha, pret_kg_ha, pcrd_kg_ha:
@@ -44,14 +44,17 @@ import csv
 import re
 from collections import defaultdict
 from pathlib import Path
+
+import pandas as pd
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_DIR = ROOT / "capri_data" / "sources" / "intermediate" / "capri_res"
-SRC_REF = SRC_DIR / "gd2030_ref_pbalance.csv"
-SRC_INI = SRC_DIR / "gd2030_endotech_ini_pbalance.csv"
+SRC_REF = SRC_DIR / "gd2030_ref_pbalance.parquet"
+SRC_INI = SRC_DIR / "gd2030_endotech_ini_pbalance.parquet"
 OUT = ROOT / "capri_data" / "2017" / "environment" / "p_balance_crop_coefs_2030.csv"
 UP = EXPORTS
 
@@ -99,18 +102,14 @@ def extract(dump: Path, out: Path, animals: bool) -> int:
             v = float(m.group(4))
             if v != 0.0:
                 rows.append((m.group(1), m.group(2), m.group(3), m.group(4)))
-    out.parent.mkdir(parents=True, exist_ok=True)
-    with open(out, "w", newline="") as fh:
-        w = csv.writer(fh)
-        w.writerow(["region", "col", "row", "value"])
-        w.writerows(rows)
+    write_source(pd.DataFrame(rows, columns=["region", "col", "row", "value"]), out, index=False)
     return len(rows)
 
 
 def read(src: Path) -> dict:
     """{region: {(col, row): value}}"""
     d = defaultdict(dict)
-    for r in csv.DictReader(open(src)):
+    for r in source_records(src):
         d[r["region"]][(r["col"], r["row"])] = float(r["value"])
     return d
 

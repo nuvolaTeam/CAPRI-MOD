@@ -17,7 +17,7 @@ FFIS, OAQU.
 Source: CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut): FEED per
 member state and product, ARM1P of the member state's market region (A_EU_WEST or A_EU_EAST, CAPRI's RMS_TO_RM;
 EU27yr19's until 3 November 2026); kept as
-capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/feed_bulks_dataout_2030.csv.
+capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/feed_bulks_dataout_2030.parquet.
 
 Model commodity of each product: WHEA -> SWHE, MAIZ -> CORN, RYEM, OATS, OCER as themselves, RICE -> PARI, OLIO -> OLIV,
 BARL, PULS, RAPO, SUNO, SOYO, RAPC, SUNC, SOYC, DDGS, OTHO and the fish products SFIS, FFIS, OAQU by name (markets
@@ -48,9 +48,10 @@ import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "feed_bulks_dataout_2030.csv"
+SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "feed_bulks_dataout_2030.parquet"
 DEST = ROOT / "capri_data" / "2017" / "market"
 GAMS = SOURCES / "gams"
 BULKS = {"FCER": ("WHEA", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "RICE"),
@@ -149,9 +150,9 @@ def main():
         # their use) are kept for them only (Norway only until 4 November 2026)
         rows = [r for r in rows if (r[0] in EU_MS or r[0] in ("A_EU_WEST", "A_EU_EAST") or r[0] in NONEU)
                 and (r[1] in ("FEED", "ARM1P") or r[0] in NONEU)]
-        pd.DataFrame(rows, columns=["region", "item", "product", "value"]).to_csv(SRC, index=False)
+        write_source(pd.DataFrame(rows, columns=["region", "item", "product", "value"]), SRC, index=False)
         print(f"extracted {len(rows)} rows -> {SRC.relative_to(ROOT)}")
-    src = _read_csv(SRC)
+    src = read_source(SRC)
     v = {(r.region, r.item, r.product): float(r.value) for r in src.itertuples()}
     rho = rho_feed()
     out, worst = [], []

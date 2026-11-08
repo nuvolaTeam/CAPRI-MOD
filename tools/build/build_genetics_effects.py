@@ -52,6 +52,7 @@ import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
@@ -71,7 +72,7 @@ GENET_CAP = 0.002
 #: CAPRI's activities of each model animal carrying genet_eff (the max calibration run's records)
 EFF_MEMBERS = {"BULL": ("BULL", "BULH"), "BCOW": ("SCOW",), "CALV": ("CAMF", "CAFF", "CAMR", "CAFR"),
                "HFRS": ("HEIL", "HEIH"), "SHGF": ("SHGF",)}
-#: ghgTechFEff of CAPRI's calibration runs (capri_costsavings_2030.csv; the 2030 reference's setting)
+#: ghgTechFEff of CAPRI's calibration runs (capri_costsavings_2030.parquet; the 2030 reference's setting)
 RUN_FEFF = 0.1
 MEAT = {"BULL": "BEEF", "BCOW": "BEEF", "CALV": "BEEF", "HFRS": "BEEF", "SHGF": "SGMT"}
 CTRY = MS_CODE
@@ -87,9 +88,9 @@ def main():
     # CAPRI's maximum adoption shares of the breeding options (breeding.gms l. 65-77): 0.002 for every TechGenet option
     # unless %fixGenet_eff_to_iniValues% is off (only CAPRI's agora policy files set it); l. 375-379 lower it to the max
     # calibration run's level + 2e-6 where that is smaller (costsavings_max_21730_jul15.gdx ->
-    # capri_data/sources/intermediate/ghgtech/capri_costsavings_2030.csv: genet_eff 0.001999 in every record, so 0.002 stays).
+    # capri_data/sources/intermediate/ghgtech/capri_costsavings_2030.parquet: genet_eff 0.001999 in every record, so 0.002 stays).
     # Written as column max_share; the model applies it with the setting fixGenetToIni (capri_mod/policy/endotech.py)
-    _cs = _read_csv(ROOT / "capri_data" / "sources" / "intermediate" / "ghgtech" / "capri_costsavings_2030.csv")
+    _cs = read_source(ROOT / "capri_data" / "sources" / "intermediate" / "ghgtech" / "capri_costsavings_2030.parquet")
     _cs = _cs[(_cs.technology.str.upper() == "GENET_EFF") & (_cs.run == "max")]
     EFF_MAX = {(r.region, r.activity): float(r.level) for r in _cs.itertuples() if pd.notna(r.level)}
 
@@ -100,7 +101,7 @@ def main():
     L = {(r.region, r.activity): float(r.value) for r in md[md.item == "LEVL"].itertuples()}
     rce = _read_csv(A / "RCEmissions.csv")
     R = {(r.region, r.animal_mitt, r.item): r.value for r in rce.itertuples()}
-    uv = _read_csv(ROOT / "capri_data" / "sources" / "raw" / "capri" / "capri_baseline" / "capri_uvag_store_1730.csv")
+    uv = read_source(ROOT / "capri_data" / "sources" / "raw" / "capri" / "capri_baseline" / "capri_uvag_store_1730.parquet")
     UV = {(r.region, r.product): float(r.uvag_2030) for r in uv.itertuples()}
     # CAPRI's costs of the options are in its money of the simulation year (the 2030 UVAG of COMI, the floors of 20 and 2
     # EUR per place, breeding.gms l. 287-289, 335-341); the model's in 2017 money: over CAPRI's inflation to 2030

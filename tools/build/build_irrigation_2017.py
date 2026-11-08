@@ -2,13 +2,13 @@
 water-demand indicator (capri_mod/water).
 
 Sources (CAPRI's water database inputs, gams/water_database.gms, as uploaded; gdxdumps converted to CSV by
-tools/build/convert_sources_to_csv.py):
-  capri_data/sources/raw/capri/dat/water/irrishare_p_irriShare.csv   p_irriShare(region, IRRI|IRR2, IRSH, year): share of
+tools/build/convert_sources.py):
+  capri_data/sources/raw/capri/dat/water/irrishare_p_irriShare.parquet   p_irriShare(region, IRRI|IRR2, IRSH, year): share of
                                            irrigable (IRRI) and irrigated (IRR2, 'irrigated once a year') area in UAAR,
                                            Eurostat FSS
-  capri_data/sources/raw/capri/dat/water/cropwat_p_cropwatReq.csv   p_cropwatReq(region, crop, CPET|CRAIN|CNIR|YRATIO|YFACT):
+  capri_data/sources/raw/capri/dat/water/cropwat_p_cropwatReq.parquet   p_cropwatReq(region, crop, CPET|CRAIN|CNIR|YRATIO|YFACT):
                                            CROPWAT crop water requirements, mm
-  capri_data/sources/intermediate/capreg/capreg_activity_levels.csv   CAPRI's 2017 levels
+  capri_data/sources/intermediate/capreg/capreg_activity_levels.parquet   CAPRI's 2017 levels
 
 Method. CAPRI's water database (water_database.gms) estimates each EU region's irrigated area per crop with a
 highest-posterior-density fit (lines 513-640) to the FSS irrigated area of the region (IRR2, 'irrigated once a year':
@@ -50,6 +50,7 @@ from capri_mod.csvio import read_csv, to_csv  # noqa: E402
 import sys as _sys_nc  # noqa: E402
 _sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
 from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "water"
 DEST = ROOT / "capri_data" / "2017" / "environment" / "irrigation_2017.csv"
@@ -60,25 +61,25 @@ WAGG = ["SWHE", "DWHE", "BARL", "MAIZ", "RAPE", "SUNF", "SOYA", "MAIF", "ROOF", 
 #: model activity -> CAPRI activities
 MODEL = {**{c: (c,) for c in WAGG if c not in ("MAIZ", "TWIN")},
          "CORN": ("MAIZ",), "WINE": ("TWIN",)}   # ROOF and OFAR the model's own since S2 (7 November 2026)
-#: capreg_activity_levels.csv names CAPRI's MAIZ as the model does
+#: capreg_activity_levels.parquet names CAPRI's MAIZ as the model does
 LEVEL_COL = {"MAIZ": "CORN"}
 IRSH_MIN = 0.001      # water_database.gms line 668: max(0.001, IRR2 share)
 
 
 def records(name):
-    """A gdxdump converted to CSV (tools/build/convert_sources_to_csv.py), every column as text."""
-    return pd.read_csv(SRC / name, dtype=str, keep_default_na=False)
+    """A gdxdump converted to CSV (tools/build/convert_sources.py), every column as text."""
+    return read_source(SRC / name, dtype=str, keep_default_na=False)       # Parquet (_sources_io)
 
 
 def main():
     units = list(read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv").region)
-    sh = records("irrishare_p_irriShare.csv")
+    sh = records("irrishare_p_irriShare.parquet")
     sh = sh[(sh["item"] == "IRR2") & (sh.type == "IRSH")].astype({"year": int, "value": float})
     sh = sh[sh.year <= BASE_YEAR]
     latest = sh.sort_values("year").groupby("region").last()
-    cw = records("cropwat_p_cropwatReq.csv")
+    cw = records("cropwat_p_cropwatReq.parquet")
     cnir = cw[cw["item"] == "CNIR"].astype({"value": float}).pivot_table(index="region", columns="crop", values="value")
-    lev = read_csv(ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_activity_levels.csv", index_col=0)
+    lev = read_source(ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_activity_levels.parquet", index_col=0)
 
     uaa = read_csv(ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0).sum(axis=1)
     rows, none, unplaced = [], [], {}
@@ -97,7 +98,7 @@ def main():
             for c in caps:
                 k = LEVEL_COL.get(c, c)
                 if k not in lev.columns:
-                    raise KeyError(f"{k}: not in capreg_activity_levels.csv")
+                    raise KeyError(f"{k}: not in capreg_activity_levels.parquet")
                 l_[c] = float(lev.at[u, k]) if pd.notna(lev.at[u, k]) else 0.0
             if sum(l_.values()) <= 1e-4:                                  # CAPRI: LEVL gt 1.e-4
                 continue

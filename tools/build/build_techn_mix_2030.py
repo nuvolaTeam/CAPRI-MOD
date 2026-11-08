@@ -9,7 +9,7 @@ SQRT(1 + p_technFact("Yield", T)) x (1 + p_technFact(nutrient, T)), the nutrient
 (fertned.gms l. 206-207: the sum of the output factors over PACT_TO_Y). At the calibration point the crop is split
 50-50 (p_technFact LEVL 0.5).
 
-Columns (one row per model region and crop with a T1/T2 PMP block in pmp_quad_techn_2030.csv; each is checked to
+Columns (one row per model region and crop with a T1/T2 PMP block in pmp_quad_techn_2030.parquet; each is checked to
 have its LEVL T1 and T2 in p_technFact):
   yield_diff         Yield factor T1 - T2 (0.4): outputs, residues and the crop's nutrient removal per unit z
   need_diff          (g_T1 - g_T2) / gbar, g_t = SQRT(1 + y_t) x (1 + y_t), gbar the LEVL-weighted mean: the nutrient
@@ -29,11 +29,11 @@ Not carried: irrigation water (factor 0), the fertiliser cost (through the nutri
 (sugar/techf.gms l. 103, the sugar quota regime's variable cost share, without effect since the quotas ended in 2017;
 to be confirmed, docs/design/S1_MIX_COLUMNS.md section 6).
 
-Sources: capri_data/sources/intermediate/technology/techn_fact_2030.csv (tools/build/build_techn_2030.py),
-capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.csv, CAPREG's 2017 results res_17<MS>.txt (input
+Sources: capri_data/sources/intermediate/technology/techn_fact_2030.parquet (tools/build/build_techn_2030.py),
+capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.parquet, CAPREG's 2017 results res_17<MS>.txt (input
 coefficients, LEVL, UVAG), CAPRI's 2030 reference res_2_1730greendeal_refpol_endotech_all_inidefaulta (PRME by
 scheme; extracted to capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/
-prme_schemes_2030.csv.xz).
+prme_schemes_2030.parquet).
 Output: capri_data/2017/supply/techn_mix_2030.csv
 
     python tools/build/build_techn_mix_2030.py [--dump-dir DIR] [--ref FILE]
@@ -56,14 +56,15 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
 
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
-FACT = ROOT / "capri_data" / "sources" / "intermediate" / "technology" / "techn_fact_2030.csv"
-QUAD = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_quad_techn_2030.csv"
+FACT = ROOT / "capri_data" / "sources" / "intermediate" / "technology" / "techn_fact_2030.parquet"
+QUAD = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_quad_techn_2030.parquet"
 REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 PRME = (ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refpol_endotech_all_inidefaulta"
-        / "prme_schemes_2030.csv.xz")
+        / "prme_schemes_2030.parquet")
 OUT = ROOT / "capri_data" / "2017" / "supply" / "techn_mix_2030.csv"
 #: the inputs with a technology factor (techf.gms l. 92-96, 104-105), the Green Deal's two apart
 REST = ("SEED", "REPM", "REPB", "ELEC", "EGAS", "EFUL", "ELUB")
@@ -91,9 +92,9 @@ def prme_schemes(ref: Path) -> dict:
         rows = [m.groups() for m in map(rx.match, grep(pat, str(ref)).splitlines()) if m]
         df = pd.DataFrame(rows, columns=["capri_region", "activity", "scheme", "value"]).astype({"value": float})
         PRME.parent.mkdir(parents=True, exist_ok=True)
-        df.to_csv(PRME, index=False)
+        write_source(df, PRME, index=False)
         print(f"extracted {len(df)} PRME rows by scheme -> {PRME.relative_to(ROOT)}")
-    df = _read_csv(PRME)
+    df = read_source(PRME)
     out = defaultdict(dict)
     for r in df.itertuples(index=False):
         out[(r.capri_region, r.activity)][r.scheme] = float(r.value)
@@ -106,12 +107,12 @@ def main() -> None:
     ap.add_argument("--ref", type=Path, default=REF)
     a = ap.parse_args()
 
-    fact = _read_csv(FACT)
+    fact = read_source(FACT)
     fact = fact[fact.tech.isin(["T1", "T2"])]
     F = defaultdict(dict)                            # (region, act) -> {(row, tech): value}
     for r in fact.itertuples(index=False):
         F[(r.region, r.activity)][(r.row, r.tech)] = float(r.value)
-    quad = _read_csv(QUAD)
+    quad = read_source(QUAD)
     # a block with both technologies (FALL has T1 alone in most regions, T2 in 24: no mix there, the decision of
     # 7 November 2026)
     _t = quad[quad.tech1.isin(["T1", "T2"])].groupby(["region", "activity"]).tech1.agg(set)

@@ -114,7 +114,11 @@ def main():
     global AD
     AD = _ad_options()
     t = _read_csv(D / "ammonia_technologies.csv")
-    eff = pd.read_parquet(D / "ammonia_technology_effects.parquet")
+    import sys as _sys_sio
+    _sys_sio.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+    from _sources_io import read_source, write_source
+    eff = read_source(Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "intermediate" / "ammonia"
+                      / "ammonia_technology_effects.parquet")
     E = {(r.region, r.activity, r.technology, r.item): r.reduction for r in eff.itertuples()}
     lit = _read_csv(D / "p_litRevAmmoTechsAdd.csv")
     LIT = {(r.region, r.activity): r.value for r in lit.itertuples()

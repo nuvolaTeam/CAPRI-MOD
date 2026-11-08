@@ -8,9 +8,9 @@ minfert_redu_by_crop.gms caps mineral N per hectare of each crop group (NGRP) at
 and relaxes the "limCres" regulation (crop residues to a group at most 1.3 x baseline per ha) by +0.5 or +1 for
 listed pairs, again by simulation year.
 
-The file's statements were converted to CSV by tools/build/convert_sources_to_csv.py (its parse of the file, moved
-there unchanged): capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_p_checkSmallMine.csv and
-minfert_redu_by_crop_limCres.csv. This builder reads both and writes them for the model, which picks the rows that
+The file's statements were converted to CSV by tools/build/convert_sources.py (its parse of the file, moved
+there unchanged): capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_p_checkSmallMine.parquet and
+minfert_redu_by_crop_limCres.parquet. This builder reads both and writes them for the model, which picks the rows that
 apply to its simulation year (CAPRI's conditions are strict: simy > YYYY).
 
 Outputs (capri_data/scenarios/greendeal_group/, the Green Deal group's data)
@@ -25,14 +25,17 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
+import sys as _sys_sio  # noqa: E402
+_sys_sio.path.insert(0, str(ROOT / "tools" / "lib"))
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 DEST = ROOT / "capri_data" / "scenarios" / "greendeal_group"
 SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "policy"
 
 
 def main():
-    exm = pd.read_csv(SRC / "minfert_redu_by_crop_p_checkSmallMine.csv", keep_default_na=False,
+    exm = read_source(SRC / "minfert_redu_by_crop_p_checkSmallMine.parquet", keep_default_na=False,
                       float_precision="round_trip")
-    lim = pd.read_csv(SRC / "minfert_redu_by_crop_limCres.csv", keep_default_na=False, float_precision="round_trip")
+    lim = read_source(SRC / "minfert_redu_by_crop_limCres.parquet", keep_default_na=False)
     exm.to_csv(DEST / "mineral_redu_exemptions.csv", index=False)
     lim.to_csv(DEST / "mineral_redu_limcres.csv", index=False)
     print(f"exemptions: {len(exm)} rows; for 2030 (simy > year, othPol not high): "

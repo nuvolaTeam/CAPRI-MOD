@@ -1,12 +1,12 @@
 """CAPRI's livestock premiums per MODEL head (per region and model animal).
 
-CAPRI's PRME (DATA2, EUR per activity unit; capreg_cap_premium.csv) is attached to its
+CAPRI's PRME (DATA2, EUR per activity unit; capreg_cap_premium.parquet) is attached to its
 own activities (SCOW, BULF, HEIF/HEIR, CAMF/CAFF/CAMR/CAFR, SOWS/PIGF, HENS, POUF,
 SHGM/SHGF). The model looked premiums up by its own names (BCOW, HFRS, CALV, ...), so
 every animal but dairy cows and bulls had NO premium - suckler cows lost EUR 117-121 per
 head in France - and the per-unit values were on CAPRI's activity basis, not the model's
 census heads. As for revenue and costs (build_livestock_output_coef.py), the coefficient
-is CAPRI's regional total (LEVL x PRME, capreg_activity_levels.csv) / the model's heads.
+is CAPRI's regional total (LEVL x PRME, capreg_activity_levels.parquet) / the model's heads.
 
 Output: capri_data/2017/supply/livestock_premium_coef.csv (EUR per model head)
 Usage:  python tools/build/build_livestock_premium_coef.py [<dir with res_17<CC>.txt dumps>]
@@ -20,6 +20,9 @@ import pandas as pd
 import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
+import sys as _sys_sio  # noqa: E402
+_sys_sio.path.insert(0, str(ROOT / "tools" / "lib"))
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _sp = importlib.util.spec_from_file_location("_loc", ROOT / "tools" / "build" / "build_livestock_output_coef.py")
 _loc = importlib.util.module_from_spec(_sp); _sp.loader.exec_module(_loc)
 CAPRI_TO_MODEL = _loc.CAPRI_TO_MODEL
@@ -31,8 +34,8 @@ def main():
     from capri_mod.data.loaders import load_regional_animal_numbers  # the one table needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
     herds = load_regional_animal_numbers(str(ROOT / "capri_data"))
     src = ROOT / "capri_data" / "sources" / "intermediate" / "capreg"
-    lev = _read_csv(src / "capreg_activity_levels.csv", index_col=0)
-    prm = _read_csv(src / "capreg_cap_premium.csv", index_col=0)
+    lev = read_source(src / "capreg_activity_levels.parquet", index_col=0)
+    prm = read_source(src / "capreg_cap_premium.parquet", index_col=0)
     tot = defaultdict(float)
     for reg in prm.index.intersection(lev.index):
         for ca, ma in CAPRI_TO_MODEL.items():

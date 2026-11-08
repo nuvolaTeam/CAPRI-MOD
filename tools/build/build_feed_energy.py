@@ -34,8 +34,8 @@ FEDE at the calibration point (arm/market1.gms l. 402-408): quantity = sum_xx fe
 arm1P_xx / quantity (EUR per kcal, the region's market region's Arm1 prices).
 
 Calorie contents (arm/market_model.gms l. 300-313): p_calContent(XX1) = p_nutrientCont(xx, "Energ_cal") of CAPRI's
-dat/arm/nutrient_cont_usda.gdx (kcal per kg; capri_data/sources/raw/capri/dat/arm/nutrient_cont_usda_p_nutrientCont.csv, the
-GDX's Excel export nutrient_cont_usda_export.xlsx converted by tools/build/convert_sources_to_csv.py); a product
+dat/arm/nutrient_cont_usda.gdx (kcal per kg; capri_data/sources/raw/capri/dat/arm/nutrient_cont_usda_p_nutrientCont.parquet, the
+GDX's Excel export nutrient_cont_usda_export.xlsx converted by tools/build/convert_sources.py); a product
 without one counts no energy (p_noCal).
 
 Data: CAPRI's 2030 market calibration, Data_CAL of data_market_1730defaulta.csv (FEED, PROD, PPRI of each behavioural
@@ -61,6 +61,7 @@ from collections import defaultdict
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
@@ -68,7 +69,7 @@ from build_noneu_market_supply_nq import EU_RM, UNITS, num, read_param  # noqa: 
 
 UP = EXPORTS
 DATA = UP / "data_market_1730defaulta.csv"
-CAL = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "arm" / "nutrient_cont_usda_p_nutrientCont.csv"
+CAL = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "arm" / "nutrient_cont_usda_p_nutrientCont.parquet"
 OUT = ROOT / "capri_data" / "2017" / "market"
 #: arm/arm_sets.gms XX_ANIM_FEED (MEAT_DEF + EGGS + MILK)
 ANIM = ("BEEF", "PORK", "SGMT", "POUM", "EGGS", "MILK")
@@ -83,9 +84,8 @@ SHARE0 = SHARE0_TENTHS / 10.0
 
 def calories(path: Path) -> dict:
     """{product: kcal per kg}: p_nutrientCont(product, "Energ_cal"), the products with a non-zero value."""
-    with open(path, newline="", encoding="utf-8") as fh:
-        return {r["product"]: float(r["value"]) for r in csv.DictReader(fh)
-                if r["item"] == "Energ_cal" and float(r["value"])}
+    return {r["product"]: float(r["value"]) for r in source_records(path)
+            if r["item"] == "Energ_cal" and float(r["value"])}
 
 
 def fit_region(feed_e: float, prod: dict, cal: dict, ppri: dict, ave: float, share: float, m: dict, s: dict):

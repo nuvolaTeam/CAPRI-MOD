@@ -5,7 +5,7 @@ with the Hessian p_hessNQSupp calibrated to p_elasSupp(region, product, product'
 own-price elasticity per product for every non-EU region (CAPRI's EU median, else the Armington eps). This builder
 takes CAPRI's own-price p_elasSupp per CAPRI region (2017/supply/capri_supply_elas_market_1717.csv, from the 2017
 calibration run's elas_2_1717 file) and aggregates it to the model's trade regions with CAPRI's 2017 production
-(sources/raw/capri/results/market_base_1717/bilateral_dataout_2017.csv.xz, item PROD) as weights, through the same region and product maps as the
+(sources/raw/capri/results/market_base_1717/bilateral_dataout_2017.parquet, item PROD) as weights, through the same region and product maps as the
 bilateral market (the market's grouping step, tools/lib/_market_regions.py: codes/model_market_regions.csv;
 tools/build/build_bilateral_market.py MODEL). Products CAPRI's market produces by processing (dairy products, oils and cakes,
 biofuels, DDGS) have no p_elasSupp and keep the market's previous value.
@@ -31,9 +31,10 @@ _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 ELAS = ROOT / "capri_data" / "2017" / "supply" / "capri_supply_elas_market_1717.csv"
-PROD = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "market_base_1717" / "bilateral_dataout_2017.csv.xz"
+PROD = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "market_base_1717" / "bilateral_dataout_2017.parquet"
 OUT = ROOT / "capri_data" / "2017" / "market" / "supply_elas_region.csv"
 
 
@@ -46,7 +47,7 @@ def main():
 
     el = _read_csv(ELAS)
     own = el[el["prod"] == el["wrt"]][["region", "prod", "value"]]
-    src = _read_csv(PROD, keep_default_na=False)
+    src = read_source(PROD, keep_default_na=False)
     prod = src[(src["item"] == "PROD") & (src["r2"] == "")][["r1", "product", "value"]]
     prod = prod.assign(value=pd.to_numeric(prod["value"], errors="coerce").fillna(0.0))
     pw = {(r, p): v for r, p, v in prod.itertuples(index=False)}

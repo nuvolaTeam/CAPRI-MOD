@@ -140,13 +140,13 @@ def norway_mirror(symbols: dict, ammo_gms: Path) -> dict:
         name = by_lower.get(target.lower())
         if name is None or name not in READ:
             continue
-        f = [q for q in MIRROR.rglob("*_p_NO_*.csv") if q.stem.split("_p_NO_")[1].lower() == mirror.lower()]
+        f = [q for q in MIRROR.rglob("*_p_NO_*.parquet") if q.stem.split("_p_NO_")[1].lower() == mirror.lower()]
         if len(f) != 1:
             raise FileNotFoundError(f"the mirror of {name} (p_NO_{mirror}): {f}")
-        with open(f[0], newline="") as fh:
-            rd = csv.reader(fh)
-            next(rd)
-            recs = [(("NO000000", *row[:-1]), float(row[-1])) for row in rd]
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+        from _sources_io import read_source
+        t = read_source(f[0], dtype=str, keep_default_na=False)        # capri_data/sources as Parquet
+        recs = [(("NO000000", *row[:-1]), float(row[-1])) for row in t.itertuples(index=False)]
         out[name] = [r for r in symbols[name] if r[0][0] != "NO000000"] + recs
     return out
 

@@ -75,10 +75,9 @@ def main() -> None:
 
     out = args.data_dir / "sources" / "intermediate" / "capreg"
     out.mkdir(parents=True, exist_ok=True)
-    dt[["model_region", "activity", "value"]].to_csv(
-        out / "pmp_quad_techn.csv", index=False)
-    dp[["model_region", "group1", "group2", "value"]].to_csv(
-        out / "pmp_quad_pact.csv", index=False)
+    from _sources_io import write_source
+    write_source(dt[["model_region", "activity", "value"]], out / "pmp_quad_techn.parquet", index=False)
+    write_source(dp[["model_region", "group1", "group2", "value"]], out / "pmp_quad_pact.parquet", index=False)
 
     print(f"quadTechn: {len(dt):,} records, {dt.model_region.nunique()} model regions, "
           f"{dt.activity.nunique()} activities")

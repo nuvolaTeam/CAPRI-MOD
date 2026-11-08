@@ -33,7 +33,16 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
-_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
+import sys as _sys_sio  # noqa: E402
+_sys_sio.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _sources_io import read_source  # noqa: E402  (capri_data/sources: Parquet)
+
+def _read_csv(path, *a, **k):
+    """read_csv with floats parsed exactly (K82); a table of capri_data/sources (.parquet) through read_source."""
+    if str(path).endswith(".parquet"):
+        return read_source(path, *a, **k)
+    k.setdefault("float_precision", "round_trip")
+    return pd.read_csv(path, *a, **k)
 # model commodity -> CAPRI market commodity
 CODE_MAP = {
     "SWHE": "WHEA", "CORN": "MAIZ", "POUL": "POUM",
@@ -46,7 +55,7 @@ def main() -> None:
     ap.add_argument("--data-dir", type=Path, default=Path("capri_data"))
     args = ap.parse_args()
 
-    ref_path = args.data_dir / "sources/raw/capri/capmod/capmod_world_reference_2017.csv"
+    ref_path = args.data_dir / "sources/raw/capri/capmod/capmod_world_reference_2017.parquet"
     if not ref_path.exists():
         raise SystemExit(f"not found: {ref_path}\n"
                          "Run tools/build/ingest_capmod_market.py first.")

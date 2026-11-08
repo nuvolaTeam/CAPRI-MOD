@@ -4,9 +4,9 @@ Extract the nine remaining model inputs from the capreg DATA2 dumps.
 Everything here is already in dumps held locally; no new GAMS run is required.
 
     LEVL                    activity levels -> base_areas, land_availability,
-                            animal_numbers (capreg_activity_levels.csv); land categories and herd sizes (counted
+                            animal_numbers (capreg_activity_levels.parquet); land categories and herd sizes (counted
                             only: capreg_land.csv, capreg_herds.csv until 30 October 2026, read by nothing)
-    PRME                    CAP premium per activity -> cap_payments (capreg_cap_premium.csv)
+    PRME                    CAP premium per activity -> cap_payments (capreg_cap_premium.parquet)
     NITF PHOF POTF          fertiliser application (counted only)
     FEED FCER FGRA FMAI     feed use by item (counted only: capreg_feed_use.csv until 30 October 2026, read by
     FROO FOFA FPRO FCOM     nothing)
@@ -94,7 +94,10 @@ def main() -> None:
 
     # 1. activity levels -> base areas and animal numbers
     levl = wide(LEVEL)
-    levl.to_csv(out / "capreg_activity_levels.csv")
+    import sys as _sys_sio
+    _sys_sio.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+    from _sources_io import write_source
+    write_source(levl, out / "capreg_activity_levels.parquet")
     summary["activity_levels"] = list(levl.shape)
     print(f"activity levels : {levl.shape[0]} regions x {levl.shape[1]} activities")
 
@@ -107,7 +110,7 @@ def main() -> None:
 
     # 3. CAP premiums per activity
     prme = wide(PREMIUM)
-    prme.to_csv(out / "capreg_cap_premium.csv")
+    write_source(prme, out / "capreg_cap_premium.parquet")
     summary["cap_premium"] = list(prme.shape)
     print(f"CAP premiums    : {prme.shape[0]} regions x {prme.shape[1]} activities")
 

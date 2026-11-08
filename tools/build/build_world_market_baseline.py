@@ -37,11 +37,14 @@ from __future__ import annotations
 import argparse, re, sys
 from collections import defaultdict
 from pathlib import Path
+
+import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC_KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "fao_agg_17_datamarket" / "fao_agg_market_balances_bas.csv"
+SRC_KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "fao_agg_17_datamarket" / "fao_agg_market_balances_bas.parquet"
 MODEL = {
     "SWHE": ("WHEA",), "BARL": ("BARL",), "CORN": ("MAIZ",), "OCER": ("OCER",), "RYEM": ("RYEM",), "OATS": ("OATS",),
     "RAPE": ("RAPE",), "SUNF": ("SUNF",), "SOYA": ("SOYA",), "SUGR": ("SUGA",), "POTA": ("POTA",),
@@ -70,14 +73,12 @@ def main():
         pat = re.compile(r"^'([^']+)'\.'(" + "|".join(ITEMS) + r")'\.'(" + "|".join(CAPRI) + r")'\.'BAS'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, open(a.src, errors="ignore")) if m]
         SRC_KEEP.parent.mkdir(parents=True, exist_ok=True)
-        with open(SRC_KEEP, "w") as f:
-            f.write("region,item,product,tonnes\n")
-            f.writelines(",".join(r) + "\n" for r in rows)
+        write_source(pd.DataFrame(rows, columns=["region", "item", "product", "tonnes"]), SRC_KEEP, index=False)
         print(f"extracted {len(rows)} rows -> {SRC_KEEP.relative_to(ROOT)}")
     out = defaultdict(lambda: defaultdict(float))
     seen = set()
-    for line in open(SRC_KEEP).read().splitlines()[1:]:
-        reg, item, prod, t = line.split(",")
+    for r_ in source_records(SRC_KEEP):
+        reg, item, prod, t = r_["region"], r_["item"], r_["product"], r_["tonnes"]
         if reg in AGGREGATES or reg.startswith(("EU0", "EU_", "A_EU")) or reg == "EU27yr19":
             continue
         tr = model_region(reg)

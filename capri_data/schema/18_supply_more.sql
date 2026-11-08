@@ -647,7 +647,7 @@ CREATE TABLE sup_cap_premium_activity (
     TWIN DOUBLE,
     PRIMARY KEY (region)
 );
-COMMENT ON TABLE sup_cap_premium_activity IS 'CAPRI''s CAP premium PRME per regional unit and activity (per ha or per head): the crop columns from crop_premium.csv (every region, model codes), the others from CAPREG''s DATA2 extract sources/capreg/capreg_cap_premium.csv (tools/build/build_model_premium_prices.py; the model read the extract and joined them at run time until 31 October 2026)';
+COMMENT ON TABLE sup_cap_premium_activity IS 'CAPRI''s CAP premium PRME per regional unit and activity (per ha or per head): the crop columns from crop_premium.csv (every region, model codes), the others from CAPREG''s DATA2 extract sources/capreg/capreg_cap_premium.parquet (tools/build/build_model_premium_prices.py; the model read the extract and joined them at run time until 31 October 2026)';
 INSERT INTO value_units VALUES
   ('sup_cap_premium_activity', 'SWHE', NULL, 'open', 'cap_premium_activity.SWHE: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'DWHE', NULL, 'open', 'cap_premium_activity.DWHE: unit to be established (per ha for crops, per head for animals)'),
@@ -806,7 +806,7 @@ CREATE TABLE sup_producer_prices_regional (
     WINE DOUBLE,
     PRIMARY KEY (model_region)
 );
-COMMENT ON TABLE sup_producer_prices_regional IS 'CAPRI''s regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.csv), CAPRI''s TWIN column for WINE where it is empty (and OFAR for OFOD until S2, 7 November 2026), and a missing regional price filled with the country''s national price (sources/capreg/capreg_national_prices.csv; tools/build/build_model_premium_prices.py; done by the model''s loader at run time until 31 October 2026)';
+COMMENT ON TABLE sup_producer_prices_regional IS 'CAPRI''s regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.parquet), CAPRI''s TWIN column for WINE where it is empty (and OFAR for OFOD until S2, 7 November 2026), and a missing regional price filled with the country''s national price (sources/capreg/capreg_national_prices.parquet; tools/build/build_model_premium_prices.py; done by the model''s loader at run time until 31 October 2026)';
 INSERT INTO value_units VALUES
   ('sup_producer_prices_regional', 'AGGT', NULL, 'open', 'producer_prices_regional.AGGT: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
   ('sup_producer_prices_regional', 'APPL', NULL, 'open', 'producer_prices_regional.APPL: EUR/t as CAPRI''s MPRI, to be confirmed per column'),

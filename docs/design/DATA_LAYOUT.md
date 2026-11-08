@@ -109,6 +109,20 @@ reference to settle, or dropped).
    settings so that a rebuild writes the same bytes: compression, row groups, no index, the library version recorded);
    the schema declarations, validate_data, make_provenance and reproduce_builders extended to Parquet; each file's
    conversion checked value for value against its CSV (floats to the last digit) before the CSV is removed.
+   **Done 8 November 2026** (branch pq): the 124 tables of capri_data/sources (115 CSV, 9 compressed .csv.xz) converted,
+   48.5 MB of CSV to 11.0 MB of Parquet; each checked before its CSV was removed: read back equal to its CSV as
+   read_csv(float_precision="round_trip") read it (values to the last bit, column names and types, row order), and its
+   text as a dtype=str reader sees it equal up to how numbers print (in 32 files "320" against "320.0" or "1E-5"
+   against "1e-05", the same numbers). The two builder intermediates kept as Parquet in 2017/abatement/ammonia
+   (ammonia_cost_curves, ammonia_technology_effects) moved to sources/intermediate/ammonia, so no Parquet file is a
+   model input. One reader and writer for every builder, tools/lib/_sources_io.py (read_source, write_source,
+   write_source_text, source_records), on capri_mod/tableio.py's fixed settings (zstd, no wall-clock metadata): a
+   builder writes the table its CSV text held, so a rebuilt file and a converted one are the same table. The 11
+   compressed extracts and the two intermediates had no declaration (the data check counted only *.csv): declared in
+   30_sources.sql. capri_mod/data/validate_data.py reads Parquet tables (as text, in file order) and flags any Parquet
+   file outside sources; make_provenance and make_manifest_json count them. convert_sources_to_csv.py renamed
+   convert_sources.py (it writes Parquet). The Hugging Face upload of the same files (decision E1) is not part of this
+   step.
    The same Parquet files are also published on Hugging Face with capri_sources' Parquet (decision E1), so the
    download and the repository hold one copy of each file in one format.
 

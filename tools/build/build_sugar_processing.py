@@ -29,10 +29,11 @@ import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DUMP = EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"
-SRC_KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "sugar_processing_dataout_2030.csv"
+SRC_KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "sugar_processing_dataout_2030.parquet"
 KEYS = {("GROF", "SUGB"), ("PRCM", "SUGB"), ("MAPR", "SUGA"), ("PRCY", "SUGA")}
 
 
@@ -40,8 +41,8 @@ def main():
     if DUMP.exists():
         pat = re.compile(r"^'([A-Z]{2}000000)'\.''\.'(GROF|PRCM|MAPR|PRCY)'\.'(SUGB|SUGA)'\.'2030'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, open(DUMP, errors="ignore")) if m and (m.group(2), m.group(3)) in KEYS]
-        pd.DataFrame(rows, columns=["ms", "item", "product", "value"]).to_csv(SRC_KEEP, index=False)
-    src = _read_csv(SRC_KEEP)
+        write_source(pd.DataFrame(rows, columns=["ms", "item", "product", "value"]), SRC_KEEP, index=False)
+    src = read_source(SRC_KEEP)
     v = {(r["ms"], r["item"], r["product"]): float(r["value"]) for _, r in src.iterrows()}
     out = []
     for ms in sorted({r for r, *_ in v}):

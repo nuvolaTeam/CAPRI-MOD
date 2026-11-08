@@ -6,7 +6,7 @@ than the requirement function asks (p_animReq > p_animReqLit). CAPRI's definitio
 
   excess  e_C = p_animReq / p_animReqLit - 1 for crude protein (CRPR), e_E the same for energy (ENNE)
           = CAPRI's requirement correction factors p_animReqCorrFac (capmod/load_feed.gms loads them from the reqrel
-            results as p_animReqCorrFac1; capri_data/sources/intermediate/envind/anim_req_corr_2017.csv)
+            results as p_animReqCorrFac1; capri_data/sources/intermediate/envind/anim_req_corr_2017.parquet)
   cut     p_LowNFeedCut = 0.15 x max(0, e_C) / (1 + 0.5 max(0, e_E)) x ghgTechLowNFeed      (EU regions, e_C > 0)
   effects crude protein (and lysine) requirement x (1 - cut x share); manure N x (1 - cut x (MANN + CRPR_EXPT) /
           MANN x share) (the protein not fed is not excreted; CRPR_EXPT = N leaving in products)
@@ -14,7 +14,7 @@ than the requirement function asks (p_animReq > p_animReqLit). CAPRI's definitio
           p_animExcrProtCorrFact = (1 + e_C) x 0.998^(SIMY - BAS) (capmod/def_requirements.gms)
   shares  MaxShare: monogastrics 1, dairy cows 1 - grazing share, other ruminants 0.5 x (1 - grazing share), capped
           at the level of CAPRI's max calibration run (+2e-6) - taken directly from that run
-          (costsavings_max, capri_costsavings_2030.csv); IniShare 0; relSubs0 0.2, relSubs1 0.8;
+          (costsavings_max, capri_costsavings_2030.parquet); IniShare 0; relSubs0 0.2, relSubs1 0.8;
           pmpParsqr = max(0.05 |c|, c (relSubs1 - relSubs0) - (costsaving0 - costsaving1)) / (MaxShare - IniShare)
           (costsaving0 - costsaving1 from CAPRI's two runs, column dsav per model head: tools/lib/_capri_costsavings.py)
 
@@ -40,12 +40,13 @@ import pandas as pd
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 M = ROOT / "capri_data" / "2017" / "abatement" / "mitigation"
 SRC = ROOT / "capri_data" / "sources" / "intermediate" / "envind"
-CORR = SRC / "anim_req_corr_2017.csv"
-LEV = SRC / "res17_mann_crpr_expt.csv"
+CORR = SRC / "anim_req_corr_2017.parquet"
+LEV = SRC / "res17_mann_crpr_expt.parquet"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
 MAP = {a: _MC.ANIMALS[a] for a in ("DCOW", "BCOW", "BULL", "HFRS", "CALV", "PIGF", "PIGS", "BROI", "LAYS", "SHGM", "SHGF")}
@@ -66,7 +67,7 @@ def extract(zpath: Path, dump_dir: Path):
                     if m and m.group(2) in CAPRI_ACTS:
                         rows.append(dict(region=m.group(1), activity=m.group(2), item=m.group(3), value=float(m.group(4))))
         SRC.mkdir(parents=True, exist_ok=True)
-        pd.DataFrame(rows).to_csv(CORR, index=False)
+        write_source(pd.DataFrame(rows), CORR, index=False)
         print(f"p_animReqCorrFac1: {len(rows)} rows -> {CORR.relative_to(ROOT)}")
     files = glob.glob(str(dump_dir / "res_17*.txt"))
     if files:
@@ -77,7 +78,7 @@ def extract(zpath: Path, dump_dir: Path):
                 m = pat.match(line)
                 if m:
                     rows.append(dict(region=m.group(1), activity=m.group(2), item=m.group(3), value=float(m.group(4))))
-        pd.DataFrame(rows).drop_duplicates(["region", "activity", "item"]).to_csv(LEV, index=False)
+        write_source(pd.DataFrame(rows).drop_duplicates(["region", "activity", "item"]), LEV, index=False)
         print(f"res_17 LEVL, MANN, CRPR_EXPT: {len(rows)} rows -> {LEV.relative_to(ROOT)}")
 
 
@@ -90,11 +91,11 @@ def main():
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
     to_c8 = mr.region_to_capri()
-    cr = _read_csv(CORR)
+    cr = read_source(CORR)
     C = {(r.region, r.activity, r.item): float(r.value) for r in cr.itertuples()}
-    lv = _read_csv(LEV)
+    lv = read_source(LEV)
     D = {(r.region, r.activity, r.item): float(r.value) for r in lv.itertuples()}
-    cs = _read_csv(ROOT / "capri_data" / "sources" / "intermediate" / "ghgtech" / "capri_costsavings_2030.csv")
+    cs = read_source(ROOT / "capri_data" / "sources" / "intermediate" / "ghgtech" / "capri_costsavings_2030.parquet")
     cs = cs[cs.technology.str.lower() == "lownfeed"]
     MX = {(r.region, r.activity): float(r.level) for r in cs[cs.run == "max"].itertuples() if pd.notna(r.level)}
     sys.path.insert(0, str(ROOT))

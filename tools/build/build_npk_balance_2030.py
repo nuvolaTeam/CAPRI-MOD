@@ -27,7 +27,7 @@ Outputs (capri_data/2017/environment/):
                             main output's yield and the straw yield (fert/fertned.gms: need = MIN(cap, MAX(15, O_HP x
                             need per t + STRA x straw content)); 0 for crops at the floor or the cap), with CAPRI's straw
                             content and caps from envind/gascoeff.gms and fert/fertpar.gms (their statements converted
-                            to CSV in capri_data/sources/raw/capri/gams by tools/build/convert_sources_to_csv.py)
+                            to CSV in capri_data/sources/raw/capri/gams by tools/build/convert_sources.py)
   npk_region_2030.csv       capri_region, nutrient, mine_eff (1 + loss / mineral), excr_avail (1 + unavailable /
                             manure), cres_avail (1 + (unavailable + loss) / (pooled + own residues)), uvag_eur_t (CAPRI's
                             2030 unit value of NITF/PHOF/POTF over its inflation to 2030: the model's 2017 money,
@@ -56,10 +56,11 @@ import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ENV = ROOT / "capri_data" / "2017" / "environment"
-SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "npk_dataout_2030.csv.xz"
+SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "npk_dataout_2030.parquet"
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from build_fert_dist_priors import GROUP, PERM_NGRP, NGRPS, ngrp  # noqa: E402
 
@@ -82,28 +83,28 @@ GMS = ROOT / "capri_data" / "sources" / "raw" / "capri" / "gams"
 
 def _gms_csv(name):
     """A statement of CAPRI's GAMS code converted to CSV (capri_data/sources/raw/capri/gams,
-    tools/build/convert_sources_to_csv.py)."""
-    return pd.read_csv(GMS / name, dtype=str, keep_default_na=False)
+    tools/build/convert_sources.py)."""
+    return read_source(GMS / name, dtype=str, keep_default_na=False)
 
 
 def straw_content() -> dict:
     """CAPRI's nutrient content of straw, kg per t (envind/gascoeff.gms, p_nutContCropOutput("STRA", FNUT):
-    gascoeff_p_nutContCropOutput_STRA.csv); CAPREG copies it to DATA(RS, FNUT, "STRA") and fert/fertned.gms prices
+    gascoeff_p_nutContCropOutput_STRA.parquet); CAPREG copies it to DATA(RS, FNUT, "STRA") and fert/fertned.gms prices
     straw at it (no residue relation for STRA)."""
-    t = _gms_csv("envind/gascoeff_p_nutContCropOutput_STRA.csv")
+    t = _gms_csv("envind/gascoeff_p_nutContCropOutput_STRA.parquet")
     return {r.nutrient: float(r.value) for r in t.itertuples(index=False)}
 
 
 def need_bounds() -> tuple:
     """fert/fertned.gms's bounds on a crop's need per ha: MAX(15, ...) and MIN(MAXF x (1 + 1 $ doubleMaxf), ...) with
     MAXF and doubleMaxf from fert/fertpar.gms (the last assignments: 200/160/140 x 2.0; GRAE, GRAI, OFAR, MAIF;
-    fertpar_MAXF.csv, fertpar_doubleMaxf.csv)."""
-    mx = _gms_csv("fert/fertpar_MAXF.csv")
+    fertpar_MAXF.parquet, fertpar_doubleMaxf.parquet)."""
+    mx = _gms_csv("fert/fertpar_MAXF.parquet")
     sc = {float(v) for v in mx["multiplier"]}
     if len(sc) != 1:
-        raise ValueError(f"fertpar_MAXF.csv: one multiplier expected, {sc}")
+        raise ValueError(f"fertpar_MAXF.parquet: one multiplier expected, {sc}")
     sc = sc.pop()
-    dbl = set(_gms_csv("fert/fertpar_doubleMaxf.csv")["activity"])
+    dbl = set(_gms_csv("fert/fertpar_doubleMaxf.parquet")["activity"])
     return 15.0, {r.nutrient: float(r.value) * sc for r in mx.itertuples(index=False)}, dbl
 
 
@@ -156,9 +157,9 @@ def main():
     if a.dump.exists():
         src = extract(a.dump)
         SRC.parent.mkdir(parents=True, exist_ok=True)
-        src.to_csv(SRC, index=False)
+        write_source(src, SRC, index=False)
         print(f"extracted {len(src)} rows -> {SRC.relative_to(ROOT)}")
-    src = _read_csv(SRC, keep_default_na=False)
+    src = read_source(SRC, keep_default_na=False)
     applied_share(src).to_csv(out / "manure_npk_applied_share_2030.csv", index=False)
     v = {(r.region, r.item, r.row, r.col): r.value for r in src.itertuples(index=False)}
     regions = sorted({r for r in src.region if len(r) == 8})

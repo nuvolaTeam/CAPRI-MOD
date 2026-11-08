@@ -11,22 +11,22 @@ l. 5284).
 
 Source: the sim_ini_21730 restart file's p_pmpCnst and p_technFact (capri_sources/reference/simini/simini_21730,
 tools/build/build_simini_reference.py). sim_ini loads p_pmpCnst from the 2030 baseline calibration's
-pmppar_21730<CC> files (capmod/create_sim_ini_gdx.gms l. 491-492), the files pmp_quad_techn_2030.csv was exported from
+pmppar_21730<CC> files (capmod/create_sim_ini_gdx.gms l. 491-492), the files pmp_quad_techn_2030.parquet was exported from
 (tools/build/build_pmp_2030.py); sim_ini's p_pmpQuadTechn equals that export (28,169 records, largest relative
 difference 2e-14; checked 7 November 2026), so both sets of terms are of the same calibration. The pmppar text dumps
 themselves were lost with the workspace on 7 November 2026.
 
 Writes (CAPRI region, activity, row and technology codes; values as CAPRI stores them, nothing mapped or changed):
-  capri_data/sources/intermediate/baseline_pmp/pmp_cnst_techn_2030.csv   region, activity, tech, value
+  capri_data/sources/intermediate/baseline_pmp/pmp_cnst_techn_2030.parquet   region, activity, tech, value
       p_pmpCnst, in CAPRI's 2030 money (the deflation to the model's 2017 money, KNOWN_ISSUES K108, is the model
       input's builder's, as for pmp_capri_2030.csv)
-  capri_data/sources/intermediate/technology/techn_fact_2030.csv         region, activity, row, tech, value
+  capri_data/sources/intermediate/technology/techn_fact_2030.parquet         region, activity, row, tech, value
       p_technFact (LEVL the technology's share at the calibration point; the other rows the relative change of the
       coefficient, +0.2 = 20% above the mean)
 GAMS Eps is written as 0 (as CAPRI reads it).
 
 Checks (the build stops otherwise): the (region, activity) pairs with T1/T2 linear terms are exactly those with T1/T2
-quadratic terms in pmp_quad_techn_2030.csv (11,041 in sim_ini_21730), and each has its T1 and T2 levels in
+quadratic terms in pmp_quad_techn_2030.parquet (11,041 in sim_ini_21730), and each has its T1 and T2 levels in
 p_technFact. For the single technology T the linear and quadratic terms differ as in CAPRI's data: linear terms also
 on LABT, EAAP and LandRent (not activities), and activities with a quadratic term but no linear one (p_pmpCnst absent,
 i.e. 0: NURS, OCRO, FLOW, OANI, OIND, OOIL, NECR).
@@ -41,14 +41,17 @@ import gzip
 import sys
 from pathlib import Path
 
+import pandas as pd
+
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "lib"))  # tools/lib/paths.py
 from paths import REFERENCE  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
-QUAD = SRC / "pmp_quad_techn_2030.csv"
-OUT_CNST = SRC / "pmp_cnst_techn_2030.csv"
-OUT_FACT = ROOT / "capri_data" / "sources" / "intermediate" / "technology" / "techn_fact_2030.csv"
+QUAD = SRC / "pmp_quad_techn_2030.parquet"
+OUT_CNST = SRC / "pmp_cnst_techn_2030.parquet"
+OUT_FACT = ROOT / "capri_data" / "sources" / "intermediate" / "technology" / "techn_fact_2030.parquet"
 TECHS = ("T1", "T2")
 
 
@@ -68,8 +71,7 @@ def main() -> None:
     cnst = sorted(_ref_rows(a.ref / "p_pmpCnst.csv.gz", 3))
     fact = sorted(_ref_rows(a.ref / "p_technFact.csv.gz", 4))
 
-    with open(QUAD, newline="") as fh:
-        quad = {(r["region"], r["activity"], r["tech1"]) for r in csv.DictReader(fh) if r["tech1"] in TECHS}
+    quad = {(r["region"], r["activity"], r["tech1"]) for r in source_records(QUAD) if r["tech1"] in TECHS}
     lin = {k for k, _ in cnst if k[2] in TECHS}
     assert lin == quad, (f"p_pmpCnst and p_pmpQuadTechn cover different T1/T2 pairs: {sorted(lin - quad)[:5]} linear "
                          f"only, {sorted(quad - lin)[:5]} quadratic only")
@@ -77,17 +79,11 @@ def main() -> None:
     assert lin <= levl, f"T1/T2 linear terms without a level share in p_technFact: {sorted(lin - levl)[:5]}"
 
     OUT_CNST.parent.mkdir(parents=True, exist_ok=True)
-    with open(OUT_CNST, "w", newline="") as fh:
-        w = csv.writer(fh)
-        w.writerow(["region", "activity", "tech", "value"])
-        for k, v in cnst:
-            w.writerow([*k, repr(v)])
+    write_source(pd.DataFrame([[*k, repr(v)] for k, v in cnst], columns=["region", "activity", "tech", "value"]),
+                 OUT_CNST, index=False)
     OUT_FACT.parent.mkdir(parents=True, exist_ok=True)
-    with open(OUT_FACT, "w", newline="") as fh:
-        w = csv.writer(fh)
-        w.writerow(["region", "activity", "row", "tech", "value"])
-        for k, v in fact:
-            w.writerow([*k, repr(v)])
+    write_source(pd.DataFrame([[*k, repr(v)] for k, v in fact], columns=["region", "activity", "row", "tech", "value"]),
+                 OUT_FACT, index=False)
     print(f"{OUT_CNST.name}: {len(cnst)} records ({len(lin)} T1/T2); {OUT_FACT.name}: {len(fact)} records")
 
 

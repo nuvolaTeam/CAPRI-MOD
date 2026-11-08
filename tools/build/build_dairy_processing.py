@@ -42,10 +42,11 @@ import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC_M = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "dairy_dataout_2030.csv"
-SRC_E = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1730defaulta" / "dairy_elasticities_2030.csv"
+SRC_M = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "dairy_dataout_2030.parquet"
+SRC_E = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1730defaulta" / "dairy_elasticities_2030.parquet"
 PRODUCTS = ("BUTT", "SMIP", "CHES", "FRMI", "CREM", "COCM", "WMIO", "CASE", "WHEP")
 MLK = PRODUCTS + ("MILK",)
 ITEMS = ("PROD", "PROC", "PRCM", "GROF", "HCOM", "FEDM", "INDM", "LOSM", "PPRI", "FATS", "PROT", "CSEI",
@@ -61,7 +62,7 @@ def extract(dump: Path, elas: Path):
             m = pat.match(line)
             if m and m.group(3) in PRODS:
                 rows.append((m.group(1), m.group(2), m.group(3), float(m.group(4))))
-    pd.DataFrame(rows, columns=["region", "item", "product", "value"]).to_csv(SRC_M, index=False)
+    write_source(pd.DataFrame(rows, columns=["region", "item", "product", "value"]), SRC_M, index=False)
     # elasticity file: three parameters, CAL rows of dairy items
     want = {"p_hessNQDairy", "p_ElasDair", "p_ElasDem"}
     cur, out = None, []
@@ -74,7 +75,7 @@ def extract(dump: Path, elas: Path):
             m = pe.match(line)
             if m and m.group(2) in MLK and m.group(3) in MLK:
                 out.append((cur, m.group(1), m.group(2), m.group(3), float(m.group(4))))
-    pd.DataFrame(out, columns=["param", "ms", "row", "col", "value"]).to_csv(SRC_E, index=False)
+    write_source(pd.DataFrame(out, columns=["param", "ms", "row", "col", "value"]), SRC_E, index=False)
     print(f"extracted {len(rows)} market rows, {len(out)} elasticity rows")
 
 
@@ -86,9 +87,9 @@ def main():
     if a.dump.exists() and a.elas.exists():
         SRC_M.parent.mkdir(parents=True, exist_ok=True)
         extract(a.dump, a.elas)
-    src = _read_csv(SRC_M)
+    src = read_source(SRC_M)
     v = {(r.region, r.item, r.product): r.value for r in src.itertuples()}
-    el = _read_csv(SRC_E)
+    el = read_source(SRC_E)
 
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)

@@ -55,7 +55,7 @@ S = "capri_data/2017/supply"
 #: (builder, arguments, external inputs that must exist). Order: REGIONAL_UNITS_BUILDERS.md section 3, then the rest.
 INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     # the CSV conversion of the sources that were not CSV (reads the originals from git history)
-    ("convert_sources_to_csv", [], []),
+    ("convert_sources", [], []),
     # CAPRI's dat GDX symbols (as Parquet in capri_sources/dat) and the dat files of the project lead's installation
     # (capri_sources/dat_local), to CSV (added to this list 6 November 2026; written by hand into builders.json before)
     ("extract_capri_dat", [], [SOURCES / "dat"]),
@@ -114,9 +114,9 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_pmp_recipe", ["--year", "2017"], [D17, REF]),
     ("build_pmp_recipe", ["--year", "2030"], [D17, REF]),
     ("build_pmp_capri_2030", [], [REF]),
-    ("build_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.csv", "--year", "2017",
+    ("build_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.parquet", "--year", "2017",
                               "--out", f"{S}/pmp_recipe_2017.csv"], [D17]),
-    ("build_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.csv", "--year", "2030",
+    ("build_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.parquet", "--year", "2030",
                               "--out", f"{S}/pmp_recipe_2030.csv"], [REF]),
     ("build_intensity_q_2030", [], []),
     ("build_trajectory_capri_ref", [], [REF, D17]),
@@ -136,13 +136,13 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_cattle_intensity", [], [D17]),
     ("build_animal_pmp_capri_2030", [], [REF]),
     ("build_animal_pmp_capri_2030", ["--splits"], [REF]),
-    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.csv", "--year", "2017",
+    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.parquet", "--year", "2017",
                                      "--out", f"{S}/pmp_recipe_2017_animals.csv"], [D17]),
-    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.csv", "--year", "2017", "--splits",
+    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.parquet", "--year", "2017", "--splits",
                                      "--out", f"{S}/pmp_recipe_2017_animals_members.csv"], [D17]),
-    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.csv", "--year", "2030",
+    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.parquet", "--year", "2030",
                                      "--out", f"{S}/pmp_recipe_2030_animals.csv"], [REF]),
-    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.csv", "--year", "2030", "--splits",
+    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.parquet", "--year", "2030", "--splits",
                                      "--out", f"{S}/pmp_recipe_2030_animals_members.csv"], [REF]),
     ("build_labour_setaside", [], [D17, REF]),
     ("build_livestock_units", [], [D17]),

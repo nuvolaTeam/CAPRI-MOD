@@ -29,9 +29,10 @@ import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refpol_endotech_all_inidefaulta" / "capri_manure_trade_2030.csv"
+KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refpol_endotech_all_inidefaulta" / "capri_manure_trade_2030.parquet"
 DEST = ROOT / "capri_data" / "2017" / "environment" / "manure_trade_2030.csv"
 
 
@@ -45,9 +46,9 @@ def main():
         pat = re.compile(r"^'([A-Z0-9]{8})'\.''\.'(MTRADE|EXCRET)'\.'NITF'\.'2030'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
         KEEP.parent.mkdir(parents=True, exist_ok=True)
-        pd.DataFrame(rows, columns=["capri_region", "item", "kt_n"]).to_csv(KEEP, index=False)
+        write_source(pd.DataFrame(rows, columns=["capri_region", "item", "kt_n"]), KEEP, index=False)
         print(f"extracted {len(rows)} rows -> {KEEP.relative_to(ROOT)}")
-    src = _read_csv(KEEP)
+    src = read_source(KEEP)
     v = {(r.capri_region, r.item): float(r.kt_n) for r in src.itertuples()}
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)

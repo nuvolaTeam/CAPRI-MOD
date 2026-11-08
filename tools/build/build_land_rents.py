@@ -31,14 +31,17 @@ from __future__ import annotations
 import argparse, csv, importlib.util, re, sys
 from collections import defaultdict
 from pathlib import Path
+
+import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 ROOT = Path(__file__).resolve().parents[2]
 REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "land_rents_2030.csv"
-SRC_OUT = ROOT / "capri_data" / "sources" / "intermediate" / "capri_land_rents" / "land_rents_capri_2030.csv"
+SRC_OUT = ROOT / "capri_data" / "sources" / "intermediate" / "capri_land_rents" / "land_rents_capri_2030.parquet"
 TYPES = ("ARAC", "FRUN", "GRAS")
 #: CAPRI's FADN land-rent regression (pol_input/ghg/carbcali_fin_endotech_noc.gms l. 259-261)
 RENT_INTERCEPT, RENT_COEF_TOOU, RENT_COEF_PRME = 0.0, 0.084295555, 0.700023526
@@ -132,13 +135,9 @@ def main() -> None:
     out = OUT if a.year == 2030 else OUT.with_name("land_rents_2017.csv")
     # per CAPRI region as well (read by tools/build/build_pmp_recipe.py, which works on CAPRI's regions)
     SRC_OUT.parent.mkdir(parents=True, exist_ok=True)
-    src_out = SRC_OUT.with_name(f"land_rents_capri_{a.year}.csv")
-    with open(src_out, "w", newline="") as fh:
-        w = csv.writer(fh)
-        w.writerow(["capri_region", "land_type", "rent_eur_ha", "levl_kha"])
-        for c in sorted(data):
-            for t, (r_, l_) in sorted(data[c].items()):
-                w.writerow([c, t, repr(float(r_)), repr(float(l_))])
+    src_out = SRC_OUT.with_name(f"land_rents_capri_{a.year}.parquet")
+    write_source(pd.DataFrame([[c, t, float(r_), float(l_)] for c in sorted(data) for t, (r_, l_) in sorted(data[c].items())],
+                              columns=["capri_region", "land_type", "rent_eur_ha", "levl_kha"]), src_out, index=False)
     print(f"wrote {src_out}")
     sp = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(sp); sp.loader.exec_module(mr)

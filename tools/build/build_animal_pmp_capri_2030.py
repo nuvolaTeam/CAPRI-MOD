@@ -28,7 +28,7 @@ Q = h / (w r^2): the elasticity of CAPRI's territory, with the model's revenue p
 The splits' own curvature (q_low, q_high, q_z in dairy_intensity.csv, cattle_intensity.csv) takes the 2030 terms at the
 2030 market year (q_<x>_capri2030 / _recipe2030, tools/build/build_intensity_q_2030.py).
 
-Sources: capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.csv (tools/build/build_pmp_2030.py); CAPRI 2030 levels LEVL of
+Sources: capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.parquet (tools/build/build_pmp_2030.py); CAPRI 2030 levels LEVL of
 res_2_1730greendeal_refpol_endotech_all_inidefaulta. Output: capri_data/2017/supply/pmp_capri_2030_animals.csv
 (region, animal, g, x_capri, level_ratio, capri_regions)
 
@@ -45,9 +45,10 @@ import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, write_source  # noqa: E402  (capri_data/sources as Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_quad_techn_2030.csv"
+SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_quad_techn_2030.parquet"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030_animals.csv"
 REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 #: model animal -> members; a tuple is an intensity pair whose split the model carries
@@ -125,8 +126,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--ref", type=Path, default=REF)
     ap.add_argument("--techn", type=Path, default=None,
-                    help="CAPRI-format technology terms (default: CAPRI's 2030 export, pmp_quad_techn_2030.csv); e.g. "
-                         "recipe_2017_quad_techn.csv of tools/build/build_pmp_recipe.py")
+                    help="CAPRI-format technology terms (default: CAPRI's 2030 export, pmp_quad_techn_2030.parquet); e.g. "
+                         "recipe_2017_quad_techn.parquet of tools/build/build_pmp_recipe.py")
     ap.add_argument("--year", type=int, choices=(2017, 2030), default=2030,
                     help="levels of the calibration point: 2030 CAPRI's 2030 reference, 2017 CAPRI's 2017 results")
     ap.add_argument("--out", type=Path, default=None)
@@ -138,7 +139,7 @@ def main() -> None:
     import _money
     # CAPRI's terms of the year's calibration are in its money of that year; the model's in 2017 money (K108)
     money = _money.deflator(a.year)
-    t = _read_csv(a.techn or SRC)
+    t = read_source(a.techn or SRC)
     t = t[(t.tech1 == "T") & (t.tech2 == "T") & t.activity.isin(ACTS)]
     Q = defaultdict(dict)
     for r in t.itertuples():

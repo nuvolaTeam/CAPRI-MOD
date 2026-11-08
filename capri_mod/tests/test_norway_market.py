@@ -70,8 +70,9 @@ def test_norway_market_data_are_capris_no000000():
     food demand, processing functions and dairy block are NO000000's; the EU's dairy block holds no Norway; Norway has
     no non-EU feed demand function (CAPRI: FeedBal_ only outside RMSSUP)."""
     import json
-    with lzma.open(DATA_DIR / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "bilateral_dataout_2030.csv.xz", "rt") as fh:
-        src = pd.read_csv(fh, keep_default_na=False)
+    from capri_mod.tests._sources import read_source
+    src = read_source(DATA_DIR / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717"
+                      / "bilateral_dataout_2030.parquet", keep_default_na=False)
     p = src[(src.r1 == "NO000000") & (src.r2 == "") & (src["item"] == "PROD")].set_index("product")["value"].astype(float)
     rg = pd.read_csv(MKT / "bilateral_regions_2030.csv")
     nor = rg[rg.region == "NO000000"].set_index("commodity")["prod_kt"]

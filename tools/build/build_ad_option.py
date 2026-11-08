@@ -49,6 +49,7 @@ import importlib.util as _ilu
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import source_records  # noqa: E402  (capri_data/sources as Parquet)
 _sp_mr = _ilu.spec_from_file_location("_mr", Path(__file__).resolve().parents[2] / "tools" / "lib" / "_model_regions.py")
 _mr = _ilu.module_from_spec(_sp_mr); _sp_mr.loader.exec_module(_mr)
 
@@ -89,6 +90,8 @@ SENS = 1.0                                              # %sensFac% (refpol_endo
 
 
 def _rd(f):
+    if str(f).endswith(".parquet"):
+        return source_records(f)               # a table of capri_data/sources
     with open(f) as h:
         return list(csv.DictReader(h))
 
@@ -105,10 +108,10 @@ def _n1(r):
 
 def load():
     heads = defaultdict(dict)
-    for r in _rd(G / "AD_basedata_p_Heads.csv"):
+    for r in _rd(G / "AD_basedata_p_Heads.parquet"):
         heads[(r["dim1"], r["dim2"])][r["dim3"]] = float(r["level"])
     sf = defaultdict(dict)
-    for r in _rd(G / "AD_basedata_p_sf.csv"):
+    for r in _rd(G / "AD_basedata_p_sf.parquet"):
         sf[r["dim1"]][r["dim2"]] = float(r["level"])
     # the Western Balkans and Turkey's units: CAPRI's estimated farm structure (prep_farm_size_data_for_miti.gms, run
     # before this file: p_Heads in heads from m_heads_per_hold, p_sf from m_fsclass; tools/build/build_farm_size_noneu.py)
@@ -117,7 +120,7 @@ def load():
     for r in _rd(A / "farm_size_noneu_sf.csv"):
         sf[r["region"]][r["size_class"]] = float(r["sf"])
     p2 = lambda f: {(r["dim1"], r["dim2"]): float(r["level"]) for r in _rd(G / f)}
-    gains = {(r["dim1"], r["dim2"], r["dim3"]): float(r["level"]) for r in _rd(G / "gains_ad_p_gainsdata.csv")}
+    gains = {(r["dim1"], r["dim2"], r["dim3"]): float(r["level"]) for r in _rd(G / "gains_ad_p_gainsdata.parquet")}
     clim = defaultdict(dict)
     for r in _rd(CLIM):
         if r["zone"].isdigit():
@@ -125,9 +128,9 @@ def load():
     nem = defaultdict(dict)
     for r in _rd(A / "n_cascade_factors.csv"):
         nem[(r["region"], r["activity"])][r["factor"]] = float(r["value"])
-    tabs = {k: mirror(k, p2(f"AD_basedata_p_{k}.csv")) for k in ("VSER", "HousShar", "SharLiq", "MitiShar0")}
+    tabs = {k: mirror(k, p2(f"AD_basedata_p_{k}.parquet")) for k in ("VSER", "HousShar", "SharLiq", "MitiShar0")}
     vser, housshar, sharliq = (fallback_balkan(tabs[k]) for k in ("VSER", "HousShar", "SharLiq"))
-    return (heads, sf, tabs["MitiShar0"], sharliq, housshar, vser, p2("AD_basedata_p_B0.csv"), gains, clim, nem)
+    return (heads, sf, tabs["MitiShar0"], sharliq, housshar, vser, p2("AD_basedata_p_B0.parquet"), gains, clim, nem)
 
 
 def mirror(name: str, tab: dict) -> dict:

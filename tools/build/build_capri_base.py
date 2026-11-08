@@ -73,7 +73,7 @@ AREA_COLS = ["SWHE", "DWHE", "RYEM", "BARL", "OATS", "CORN", "OCER", "PARI", "PU
              "RAPE", "SUNF", "SOYA", "OOIL", "OCRO", "OIND", "NURS", "FLOW"]
 LAND_COLS = ["ARABLE", "PERMANENT", "GRASSLAND", "FALLOW"]
 HERD_COLS = ["DCOW", "SCOW", "COWS", "BULL", "HEIF", "CALV", "PIGS", "PIGF", "HENS", "POUL", "SHGM", "SHGF"]
-PRICES = _ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_producer_prices.csv"
+PRICES = _ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_producer_prices.parquet"
 
 # ---------------------------------------------------------------- crop map --
 #: model column -> CAPRI activities summed into it. Textile crops are CAPRI's one activity TEXT (cotton in the

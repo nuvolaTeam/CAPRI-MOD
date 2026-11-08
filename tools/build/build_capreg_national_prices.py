@@ -1,7 +1,7 @@
 """CAPRI's national producer prices (MPRI) per member state and activity: the regional prices' fallback where a region
 has no price of its own (capri_mod/data/loaders.py _national_capri_prices; KNOWN_ISSUES K101).
 
-    capri_data/sources/intermediate/capreg/capreg_national_prices.csv   capri_country, <activity>...
+    capri_data/sources/intermediate/capreg/capreg_national_prices.parquet   capri_country, <activity>...
 
 MPRI of the national row '<MS>000000' of each 2017 dump (res_17<MS>.txt, 'Y' column), every activity with a price, under
 CAPRI's code; and under the model's code where it differs (build_capri_base.CROP_MAP, the crop's first CAPRI activity:
@@ -23,12 +23,13 @@ from pathlib import Path
 import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, write_source  # noqa: E402  (capri_data/sources as Parquet)
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 import build_capri_base as B  # noqa: E402
 
-OUT = ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_national_prices.csv"
+OUT = ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_national_prices.parquet"
 #: the national row: '<MS>000000', or Turkey's 'TUR' (sets.gms; its dump res_17TU.txt), keyed by the two letters as the
 #: dumps are (TU: capri_mod.data.definitions.MS_CODE maps Turkey's units TR... to TU)
 REC = re.compile(r"^'(?:([A-Z]{2})000000|(TU)R)'\.'([A-Z0-9]+)'\.'MPRI'\.'Y'\s+([^,\s]+)")
@@ -47,7 +48,7 @@ def main(dump_dir: Path) -> None:
             df[model] = df[acts[0]]
     df = df.sort_index().reindex(sorted(df.columns), axis=1)
     df.index.name = "capri_country"
-    df.to_csv(OUT)
+    write_source(df, OUT)
     print(f"{OUT.name}: {df.shape[0]} countries x {df.shape[1]} activities")
 
 

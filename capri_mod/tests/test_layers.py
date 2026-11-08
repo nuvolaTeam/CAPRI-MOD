@@ -40,7 +40,7 @@ def test_inputs_follow_the_data_directory_and_base_year(tmp_path):
         "n_cascade_region.csv"
     import pytest as _pt
     with _pt.raises(ValueError, match="capri_data/sources"):       # the model reads no file under sources/
-        inp.path("npk_dataout_2030.csv.xz", "sources/environment")
+        inp.path("npk_dataout_2030.parquet", "sources/environment")
     assert inp.csv("crop_cost_shares.csv", "supply", required=False) is None
     import pytest
     with pytest.raises(FileNotFoundError):

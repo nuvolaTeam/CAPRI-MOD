@@ -32,7 +32,7 @@ type's rent (capri_data/2017/supply/land_rents_2030.csv at 2030; D_AREA of res_1
 
 REGISTERED differences from CAPRI's recipe, measured against CAPRI's exported 2030 terms by
 tools/check/pmp_recipe_check.py: (a) the land-nest adjustment's land-type elasticities are recomputed from CAPRI's exported
-land matrix (2030: pmp_quad_landtypes_2030.csv; 2017: capri_data/sources/raw/capri/capreg/pmp_quad_landtypes_2017.csv), levels
+land matrix (2030: pmp_quad_landtypes_2030.parquet; 2017: capri_data/sources/raw/capri/capreg/pmp_quad_landtypes_2017.parquet), levels
 and rents, not read from CAPRI's estimation (v_posterior_elasticity is not exported; the estimation makes it an exact
 function of the same matrix); (b) revenue per technology is the
 activity's TOOU x (1 + CAPRI's technology factor, +-20%; intens/techf.gms) - CAPRI: outputs x (1 + factor) x unit
@@ -57,6 +57,7 @@ import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 import sys as _sys_nc  # noqa: E402
 _sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
 from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
@@ -196,9 +197,9 @@ def rents(year: int, dat: dict, region: str) -> dict:
     (tools/build/build_land_rents.py --year: the reported D_AREA, CAPRI's rule of cal_land_nests.gms l. 204-226 where it is
     not positive; before 23 October 2026 non-positive cells were left out here, and 2017 grassland had none)."""
     if year not in _RENTS:
-        f = ROOT / "capri_data" / "sources" / "intermediate" / "capri_land_rents" / f"land_rents_capri_{year}.csv"
+        f = ROOT / "capri_data" / "sources" / "intermediate" / "capri_land_rents" / f"land_rents_capri_{year}.parquet"
         tab = defaultdict(dict)
-        for r in _read_csv(f).itertuples():
+        for r in read_source(f).itertuples():
             tab[r.capri_region][r.land_type] = float(r.rent_eur_ha)
         _RENTS[year] = tab
     return dict(_RENTS[year].get(region, {}))
@@ -206,10 +207,10 @@ def rents(year: int, dat: dict, region: str) -> dict:
 
 def land_quad(year: int) -> dict:
     """CAPRI's p_pmpQuadLandTypes per CAPRI region at the calibration point."""
-    f = (SRC / "pmp_quad_landtypes_2030.csv" if year == 2030
-         else ROOT / "capri_data" / "sources" / "raw" / "capri" / "capreg" / "pmp_quad_landtypes_2017.csv")
+    f = (SRC / "pmp_quad_landtypes_2030.parquet" if year == 2030
+         else ROOT / "capri_data" / "sources" / "raw" / "capri" / "capreg" / "pmp_quad_landtypes_2017.parquet")
     out = defaultdict(dict)
-    for r in _read_csv(f).itertuples():
+    for r in read_source(f).itertuples():
         out[r.region][(r.landtype1, r.landtype2)] = float(r.value)
     return out
 
@@ -400,9 +401,9 @@ def main() -> None:
     a = ap.parse_args()
     Y = a.year
     vb = defaultdict(dict)
-    for r in _read_csv(SRC / "estnlp_vb.csv").itertuples():
+    for r in _read_csv(SRC / "estnlp_vb.parquet").itertuples():
         vb[r.region][(r.group1, r.group2)] = float(r.level)
-    vd = {(r.region, r.activity): float(r.level) for r in _read_csv(SRC / "estnlp_vd.csv").itertuples()}
+    vd = {(r.region, r.activity): float(r.level) for r in _read_csv(SRC / "estnlp_vd.parquet").itertuples()}
     pela = pela_2004()
     bas = levels_2017()
     ydat = levels_ref(Y) if Y == 2030 else bas

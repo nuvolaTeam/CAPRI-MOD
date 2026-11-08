@@ -18,8 +18,8 @@ CAPRI (envind/cover_crops.gms, supply/supply_model.gms, pol_input/greendeal/*_io
 
 Sources: capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz (CATC LEVL and TOIN, UAAR
 LEVL, crop LEVL; CAPRI's 2030 reference with technologies), capri_data/sources/raw/capri/dat/policy/
-wintercovershare_p_winterCoverShare0.csv (dat/policy/wintercovershare.gms, converted to CSV by
-tools/build/convert_sources_to_csv.py), the GAMS source reports/def_cbalance.gms (p_cInput).
+wintercovershare_p_winterCoverShare0.parquet (dat/policy/wintercovershare.gms, converted to CSV by
+tools/build/convert_sources.py), the GAMS source reports/def_cbalance.gms (p_cInput).
 
 Written (capri_data/2017/supply/):
   cover_crops.csv          region, capri_region, catc_share_2030 (CATC / UAAR), catc_cost_eur_ha (TOIN over CAPRI's
@@ -43,6 +43,7 @@ import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
@@ -50,7 +51,7 @@ _sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "che
 from _model_regions import CTRY as MS_CODE  # noqa: E402  CAPRI member-state codes (capri_member_state_codes.csv)
 CTRY_CAPRI = MS_CODE
 #: CAPRI's p_winterCoverShare0 (dat/policy/wintercovershare.gms as CSV)
-WCS = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "policy" / "wintercovershare_p_winterCoverShare0.csv"
+WCS = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "policy" / "wintercovershare_p_winterCoverShare0.parquet"
 
 
 def _load(path):
@@ -61,10 +62,9 @@ def _load(path):
 
 def read_wcs(path: Path = WCS) -> dict:
     """{(capri_region, capri_act): share} from p_winterCoverShare0 of wintercovershare.gms, converted to CSV by
-    tools/build/convert_sources_to_csv.py (eps -> 0)."""
-    with open(path, newline="", encoding="utf-8") as fh:
-        return {(r["region"], r["act"].upper()): 0.0 if r["value"].lower() == "eps" else float(r["value"])
-                for r in csv.DictReader(fh)}
+    tools/build/convert_sources.py (eps -> 0)."""
+    return {(r["region"], r["act"].upper()): 0.0 if r["value"].lower() == "eps" else float(r["value"])
+            for r in source_records(path)}
 
 
 def read_cinput(path: Path) -> dict:

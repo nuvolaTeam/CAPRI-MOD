@@ -26,10 +26,11 @@ import pandas as pd
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DUMP = EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"
-KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "processing_yields_dataout_2030.csv"
+KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "processing_yields_dataout_2030.parquet"
 PAIRS = (("OLIV", "OLIO"), ("PARI", "RICE"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
@@ -40,8 +41,8 @@ def main():
     if DUMP.exists():
         pat = re.compile(r"^'([A-Z]{2}000000)'\.''\.'(GROF|MAPR)'\.'(OLIV|OLIO|PARI|RICE)'\.'2030'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, open(DUMP, errors="ignore")) if m]
-        pd.DataFrame(rows, columns=["ms", "item", "product", "value"]).to_csv(KEEP, index=False)
-    src = _read_csv(KEEP)
+        write_source(pd.DataFrame(rows, columns=["ms", "item", "product", "value"]), KEEP, index=False)
+    src = read_source(KEEP)
     v = {(r["ms"], r["item"], r["product"]): float(r["value"]) for _, r in src.iterrows()}
     out = []
     for raw, prod in PAIRS:

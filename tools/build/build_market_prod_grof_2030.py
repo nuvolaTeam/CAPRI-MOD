@@ -36,11 +36,12 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
 from paths import REFERENCE  # noqa: E402  (CAPRI's files converted to CSV, outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 SIMINI = REFERENCE / "simini" / "simini_21730" / "DATA.csv.gz"
 SETS = REFERENCE / "sets" / "simini_21730"
 KEEP_DIR = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "sim_ini_21730"
-KEEP = KEEP_DIR / "data_prod_grof_rmssup.csv"
+KEEP = KEEP_DIR / "data_prod_grof_rmssup.parquet"
 OUT = ROOT / "capri_data" / "2017" / "market" / "market_prod_grof_2030.csv"
 #: the market products whose gross rows are not their own (arm/simu_calibration_to_supply.gms l. 230-243)
 SPECIAL = {"RICE": ("PARI",), "OLIO": ("OLIV",), "MILK": ("COMI", "SGMI")}
@@ -87,8 +88,8 @@ def _products() -> dict:
 def main() -> None:
     if SIMINI.exists():
         KEEP_DIR.mkdir(parents=True, exist_ok=True)
-        extract().to_csv(KEEP, index=False)
-    src = pd.read_csv(KEEP, dtype={"capri_ms": str, "item": str, "row": str, "col": str}, float_precision="round_trip")
+        write_source(extract(), KEEP, index=False)
+    src = read_source(KEEP, dtype={"capri_ms": str, "item": str, "row": str, "col": str})
     v = {(r.capri_ms, r.item, r.row): float(r.value) for r in src.itertuples()}
     products = _products()
     rows = []

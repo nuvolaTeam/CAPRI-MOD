@@ -41,7 +41,8 @@ def test_mix_pmp_terms_reproduce_the_collapsed_curvature():
     Schur complement) is the collapsed curvature the model uses without the columns."""
     spec = importlib.util.spec_from_file_location("bpc", ROOT / "tools" / "build" / "build_pmp_capri_2030.py")
     mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
-    techn = pd.read_csv(ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_quad_techn_2030.csv",
+    from capri_mod.tests._sources import read_source
+    techn = read_source(ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_quad_techn_2030.parquet",
                         float_precision="round_trip")
     n = 0
     for region in ("DE110000", "FR240000", "RO040000", "ES610000"):

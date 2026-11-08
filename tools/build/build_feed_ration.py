@@ -26,6 +26,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES, REFERENCE  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 import sys as _sys_nc  # noqa: E402
 _sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
 from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
@@ -310,9 +311,9 @@ def main() -> None:
     import _money
     _m30 = _money.deflator(2030)
     slope_src_2030 = collections.defaultdict(dict)
-    _f30 = _ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_feed_inp_coeff_2030.csv"
+    _f30 = _ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_feed_inp_coeff_2030.parquet"
     if _f30.exists():
-        for row in csv.DictReader(open(_f30)):
+        for row in source_records(_f30):
             if row["coef"] == "SLOP" and row["tech"] == "T":
                 slope_src_2030[(row["region"], row["activity"])][row["feed"]] = -float(row["value"]) / _m30
     if slope_src:

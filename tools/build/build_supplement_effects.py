@@ -52,10 +52,11 @@ import pandas as pd
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 M = ROOT / "capri_data" / "2017" / "abatement" / "mitigation"
-LEV = ROOT / "capri_data" / "sources" / "intermediate" / "envind" / "res17_mann_crpr_expt.csv"
+LEV = ROOT / "capri_data" / "sources" / "intermediate" / "envind" / "res17_mann_crpr_expt.parquet"
 #: CAPRI's 2017 regional results (CAPREG text dumps res_17<MS>.txt): the rations and feed data 3-NOP's effect needs
 DUMPS = SOURCES / "capreg"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
@@ -153,9 +154,9 @@ def main():
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
     to_c8 = mr.region_to_capri()
-    lv = _read_csv(LEV)
+    lv = read_source(LEV)
     L = {(r.region, r.activity): float(r.value) for r in lv[lv["item"] == "LEVL"].itertuples()}
-    cs = _read_csv(ROOT / "capri_data" / "sources" / "intermediate" / "ghgtech" / "capri_costsavings_2030.csv")
+    cs = read_source(ROOT / "capri_data" / "sources" / "intermediate" / "ghgtech" / "capri_costsavings_2030.parquet")
     cs = cs[(cs.run == "max") & cs.technology.isin(list(OPT))]
     MX = {(r.region, r.activity, r.technology): float(r.level) for r in cs.itertuples() if pd.notna(r.level)}
     nut = _read_csv(M / "p_nutCont.csv")

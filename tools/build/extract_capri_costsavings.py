@@ -11,7 +11,7 @@ Input: gdxdump of the project lead's costsavings_ini_21730_jul15.gdx and costsav
 (2030, jul15 mitigation data). Kept: v_Miti records of the options other than NOC with a level or a
 marginal, EU regions (CAPRI 8-character codes).
 
-Output: capri_data/sources/intermediate/ghgtech/capri_costsavings_2030.csv
+Output: capri_data/sources/intermediate/ghgtech/capri_costsavings_2030.parquet
         (region, activity, technology, target, run, level, marginal)
 
     python tools/build/extract_capri_costsavings.py INI.csv MAX.csv
@@ -78,8 +78,11 @@ def main():
         for (reg, act, tech, tgt, r), d in read(path, run).items():
             rows.append((reg, act, tech, tgt, r, d["level"], d["marginal"]))
     out = pd.DataFrame(rows, columns=["region", "activity", "technology", "target", "run", "level", "marginal"])
-    dest = ROOT / "capri_data" / "sources" / "intermediate" / "ghgtech" / "capri_costsavings_2030.csv"
-    out.to_csv(dest, index=False)
+    dest = ROOT / "capri_data" / "sources" / "intermediate" / "ghgtech" / "capri_costsavings_2030.parquet"
+    import sys as _sys_sio
+    _sys_sio.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+    from _sources_io import write_source
+    write_source(out, dest, index=False)
     print(f"wrote {dest.name}: {len(out)} rows")
     print(out.groupby(["technology", "target", "run"]).agg(n=("level", "size"), level_med=("level", "median"),
                                                           marg_med=("marginal", "median")).to_string())

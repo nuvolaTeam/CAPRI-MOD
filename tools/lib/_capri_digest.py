@@ -3,7 +3,7 @@
 CAPRI's envind/digestibility.gms (the standard path, GHGLCA off), per regional unit ru and cattle activity:
 
   1. the feeds' composition: CAPRI's table p_digestPar("EU", "DCOL", product, item) (envind/def_digestibility.gms,
-     capri_data/sources/intermediate/envind/capri_digestpar.csv), missing items filled from the default products DEF_PRD (l. 37);
+     capri_data/sources/intermediate/envind/capri_digestpar.parquet), missing items filled from the default products DEF_PRD (l. 37);
   2. grass: by the activity's grazing share GRAZ (p_NEMIDAT TypeShare, envind/ammo.gms l. 604-613) and the member
      state's grass N-fixation rate (fert/fertpar.gms p_nfixRate_gras, default 0.05, at most 0.75), pasture (GRPS,
      LGPS) or half silage (GRSI, LGSI), half hay (GRHA, LGHA), grass or legumes (l. 43-54); other fodder (OFAR) the
@@ -28,7 +28,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 ENV = ROOT / "capri_data" / "sources" / "intermediate" / "envind"
-#: fert/fertpar.gms's statements, converted to CSV by tools/build/convert_sources_to_csv.py
+#: fert/fertpar.gms's statements, converted to CSV by tools/build/convert_sources.py
 FERTPAR = ROOT / "capri_data" / "sources" / "raw" / "capri" / "gams" / "fert"
 _ROW = re.compile(r"^'([^']*)'\.'([^']*)'\.'([^']*)'\.'Y'\s+(\S+)")
 
@@ -39,6 +39,9 @@ def _num(s):
 
 
 def _csv(path):
+    if str(path).endswith(".parquet"):                 # a table of capri_data/sources
+        from _sources_io import source_records
+        return source_records(path)
     with open(path, newline="", encoding="utf-8") as fh:
         return list(csv.DictReader(fh))
 
@@ -46,10 +49,10 @@ def _csv(path):
 def table():
     """CAPRI's p_digestPar("EU", "DCOL", ...) with the DEF_PRD fill (digestibility.gms l. 37)."""
     t = defaultdict(dict)
-    for r in _csv(ENV / "capri_digestpar.csv"):
+    for r in _csv(ENV / "capri_digestpar.parquet"):
         t[r["feed"]][r["item"]] = float(r["value"])
     base = {k: dict(v) for k, v in t.items()}
-    for r in _csv(ENV / "capri_digest_default_prd.csv"):
+    for r in _csv(ENV / "capri_digest_default_prd.parquet"):
         for item, v in base.get(r["default"], {}).items():
             if not t[r["feed"]].get(item):
                 t[r["feed"]][item] = v
@@ -58,9 +61,9 @@ def table():
 
 def nfix_rates():
     """fert/fertpar.gms p_nfixRate_gras per member state; missing: p_nitrFact RALL GRAE BioFix (fertpar.gms l. 295)
-    (fertpar_p_nfixRate_gras.csv, fertpar_p_nitrFact_RALL_GRAE_BioFix.csv)."""
-    rates = {r["region"]: float(r["value"]) for r in _csv(FERTPAR / "fertpar_p_nfixRate_gras.csv")}
-    g = _csv(FERTPAR / "fertpar_p_nitrFact_RALL_GRAE_BioFix.csv")
+    (fertpar_p_nfixRate_gras.parquet, fertpar_p_nitrFact_RALL_GRAE_BioFix.parquet)."""
+    rates = {r["region"]: float(r["value"]) for r in _csv(FERTPAR / "fertpar_p_nfixRate_gras.parquet")}
+    g = _csv(FERTPAR / "fertpar_p_nitrFact_RALL_GRAE_BioFix.parquet")
     return rates, float(g[0]["value"])
 
 

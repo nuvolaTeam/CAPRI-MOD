@@ -3,7 +3,7 @@
 parameter_list and table read the data statements of CAPRI's include files as tools/build/build_captrd_dat.py read
 them before the sources were converted to CSV (30 October 2026): GAMS labels upper-cased (GAMS is case-insensitive),
 values as floats. parameter_records and table_records are the same readers returning the labels and the numbers as
-the file writes them (tools/build/convert_sources_to_csv.py writes those). gdxdump_symbols reads the text gdxdump
+the file writes them (tools/build/convert_sources.py writes those). gdxdump_symbols reads the text gdxdump
 writes (`Parameter p(*,*) text / 'a'.'b' value, ... /;` and sets).
 """
 from __future__ import annotations

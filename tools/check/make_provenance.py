@@ -7,7 +7,7 @@ For every CSV under capri_data (archive/ left out) one row of the table provenan
             external: from sources other than CAPRI only (Eurostat, FAO)
             mixed: from CAPRI and other sources (origins lists them)
             source-extract: a source file kept in capri_data/sources (its origin in origins; its builder when one
-            writes it: the CSV conversion of a non-CSV original, tools/build/convert_sources_to_csv.py)
+            writes it: the conversion of a non-table original, tools/build/convert_sources.py)
             declared: a table kept by hand with a source per row, read as declared (no builder)
             no-builder: none of the above (to resolve)
   origins   the origins of the leaves its builders read, through every builder in between (CAPRI, JRC121368,
@@ -70,25 +70,25 @@ UNTRACED = {
     "capri_data/codes/capri/COLS.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/ROWS.csv": ("build_code_lists", "CAPRI"),
 }
-#: the CSV conversion of the sources that were not CSV (tools/build/convert_sources_to_csv.py, 30 October 2026),
+#: the conversion of the sources that were not tables (tools/build/convert_sources.py, 30 October 2026),
 #: by file or folder prefix: their origin. The converter reads the originals from the repository's history, so the trace
 #: shows it no external source: its files stay source extracts, with their converter named and this origin (a builder
 #: reading one takes the origin of its folder, SOURCE_ORIGIN, as for any source file).
-CONVERTER = "convert_sources_to_csv"
+CONVERTER = "convert_sources"
 CONVERTED_ORIGIN = {
     "capri_data/sources/raw/capri/dat/water/": "CAPRI",
     "capri_data/sources/raw/capri/gams/": "CAPRI",
     "capri_data/sources/raw/capri/dat/biofuel/": "CAPRI",
     "capri_data/sources/raw/capri/dat/coco/": "CAPRI",
     "capri_data/sources/raw/capri/dat/policy/": "CAPRI",
-    "capri_data/sources/raw/capri/dat/envind/fao_landuse_2000_P.csv": "CAPRI",
-    "capri_data/sources/raw/capri/dat/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.csv": "CAPRI",
-    "capri_data/sources/raw/capri/dat/envind/orgsoil_share_p_orgsoilori.csv": "CAPRI",
-    "capri_data/sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs_all.csv": "CAPRI",
-    "capri_data/sources/raw/capri/dat/scen/ghgtech/miti_data_jul15_p_ghgMiti.csv": "CAPRI",
-    "capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_p_checkSmallMine.csv": "CAPRI",
-    "capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_limCres.csv": "CAPRI",
-    "capri_data/sources/raw/capri/dat/arm/nutrient_cont_usda_p_nutrientCont.csv": "USDA via CAPRI",
+    "capri_data/sources/raw/capri/dat/envind/fao_landuse_2000_P.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/envind/orgsoil_share_p_orgsoilori.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs_all.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/scen/ghgtech/miti_data_jul15_p_ghgMiti.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_p_checkSmallMine.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_limCres.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/arm/nutrient_cont_usda_p_nutrientCont.parquet": "USDA via CAPRI",
     "capri_data/sources/raw/nuts/": "Eurostat",
 }
 #: files without a builder whose origin was established by a check (02_provenance_notes.sql gives the evidence)
@@ -97,9 +97,9 @@ NO_BUILDER_ORIGIN = {
     # CAPRI's NUTS version correspondence (build_general_set_structure.gms) with the pairs added and removed by hand in
     # October 2026 (the table's comment, 26_shared.sql); a JSON file until 31 October 2026
     "capri_data/shared/nuts_version_correspondence.csv": "CAPRI",
-    "capri_data/sources/raw/capri/dat/sugar/p_SQuotas.csv": "CAPRI",
-    "capri_data/sources/raw/capri/dat/sugar/p_PPSQRenounce.csv": "CAPRI",
-    "capri_data/sources/raw/capri/dat/sugar/p_PPSQCBuyBack.csv": "CAPRI",
+    "capri_data/sources/raw/capri/dat/sugar/p_SQuotas.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/sugar/p_PPSQRenounce.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/sugar/p_PPSQCBuyBack.parquet": "CAPRI",
 }
 
 
@@ -165,7 +165,8 @@ def provenance(root: Path = ROOT):
         return memo[f]
 
     rows = []
-    for p in sorted(root.joinpath("capri_data").rglob("*.csv")):
+    for p in sorted(list(root.joinpath("capri_data").rglob("*.csv"))
+                    + list(root.joinpath("capri_data", "sources").rglob("*.parquet"))):   # sources: Parquet (8 Nov 2026)
         rel = str(p.relative_to(root))
         if "archive" in p.parts:
             continue

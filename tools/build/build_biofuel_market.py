@@ -108,6 +108,7 @@ TRADE_BLOCKS = {"EU27yr19", "URUPAR", "WBA", "MER_OTH", "MED"}
 #: world, reported with world-scale biofuel output)
 MORE_AGGREGATES = {"RW"}
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+from _sources_io import read_source, write_source  # noqa: E402  (capri_data/sources as Parquet)
 from _model_regions import EU_MS as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 EU_MS = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
@@ -182,8 +183,8 @@ def main():
     ap.add_argument("--dump", type=Path, required=True)
     ap.add_argument("--elas", type=Path, required=True)
     a = ap.parse_args()
-    SRC = DUMP_DIR[str(a.year)] / f"biofuel_dataout_{a.year}.csv.xz"
-    HESS = ELAS_DIR[str(a.year)] / f"biofuel_proc_hessian_{a.year}.csv"
+    SRC = DUMP_DIR[str(a.year)] / f"biofuel_dataout_{a.year}.parquet"
+    HESS = ELAS_DIR[str(a.year)] / f"biofuel_proc_hessian_{a.year}.parquet"
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import AGGREGATES
     if a.dump.exists():
@@ -191,7 +192,7 @@ def main():
         # the market regions, and the EU aggregate EU27yr19 for the EU's use of the feedstocks (biofuel_use_share)
         src = src[src.region.map(lambda r: is_rms(r, AGGREGATES)) | (src.region == "EU27yr19")]
         SRC.parent.mkdir(parents=True, exist_ok=True)
-        src.to_csv(SRC, index=False)
+        write_source(src, SRC, index=False)
         print(f"extracted {len(src)} rows -> {SRC.relative_to(ROOT)}")
     if a.elas.exists():
         # p_hessNQProc rows of the biofuels (own and cross terms, CAL)
@@ -201,12 +202,12 @@ def main():
         pat = re.compile(r"^'([^']+)'\.'(BIOE|BIOD)'\.'([^']+)'\.'CAL'\s+([-\d.Ee+]+)", re.M)
         hrows = [dict(region=m.group(1), product=m.group(2), price_of=m.group(3), value=float(m.group(4)))
                  for m in pat.finditer(txt[i:j])]
-        pd.DataFrame(hrows).to_csv(HESS, index=False)
+        write_source(pd.DataFrame(hrows), HESS, index=False)
         print(f"extracted {len(hrows)} p_hessNQProc rows -> {HESS.relative_to(ROOT)}")
-    hs = _read_csv(HESS)
+    hs = read_source(HESS)
     assert (hs["product"] == hs["price_of"]).all(), "cross terms in CAPRI's biofuel processing Hessian: extend the model"
     hess = {(r.region, r.product): r.value for r in hs.itertuples()}
-    src = _read_csv(SRC)
+    src = read_source(SRC)
     v = {(r.region, r.item, r.product): r.value for r in src.itertuples()}
     regions = sorted({r for r in src.region if is_rms(r, AGGREGATES)})
 

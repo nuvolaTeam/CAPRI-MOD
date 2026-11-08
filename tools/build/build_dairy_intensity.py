@@ -10,7 +10,7 @@ DCOL = s0 x DCOW + z), with per-head changes relative to the average cow (DCOW):
                      ENNE (net energy need), CRPR (crude protein need), DRMN, DRMX (dry matter
                      intake limits; DRMX is stored negative by CAPRI, magnitudes used)
   q_low, q_high      CAPRI's own PMP diagonal terms of DCOL and DCOH (p_pmpQuadTechn,
-                     capri_data/sources/intermediate/capreg/pmp_quad_techn.csv); regions without them: the
+                     capri_data/sources/intermediate/capreg/pmp_quad_techn.parquet); regions without them: the
                      country's median of q x heads over the region's heads (REGISTERED fallback,
                      column q_source), as for the grassland split (tools/build/build_grass_intensity.py)
 
@@ -32,14 +32,15 @@ import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 #: (column suffix, terms per model region): the base year's (CAPREG), CAPRI's 2030 calibration and capri-mod's
 #: recipe at 2030 (tools/build/build_intensity_q_2030.py); the model takes the suffix of its PMP source at the 2030 market
 #: year (KNOWN_ISSUES K61)
-Q_SOURCES = (("", ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "pmp_quad_techn.csv"),
-             ("_capri2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_capri2030.csv"),
-             ("_recipe2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_recipe2030.csv"))
+Q_SOURCES = (("", ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "pmp_quad_techn.parquet"),
+             ("_capri2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_capri2030.parquet"),
+             ("_recipe2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_recipe2030.parquet"))
 ITEMS = ("LEVL", "COMI", "MANN", "ENNE", "CRPR", "DRMN", "DRMX")
 ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'(DCOL|DCOH|DCOW)'\.'(" + "|".join(ITEMS)
                  + r")'\.'Y'\s+(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
@@ -65,7 +66,7 @@ def main():
     sys.path.insert(0, str(ROOT))
     from capri_mod.data.loaders import load_regional_animal_numbers  # the one table needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
     herds = load_regional_animal_numbers(str(ROOT / "capri_data"))
-    Q = {sfx: _read_csv(f)[lambda d: d["activity"].isin(["DCOL", "DCOH"])].pivot_table(
+    Q = {sfx: read_source(f)[lambda d: d["activity"].isin(["DCOL", "DCOH"])].pivot_table(
              index="model_region", columns="activity", values="value") for sfx, f in Q_SOURCES if f.exists()}
 
     rows = []

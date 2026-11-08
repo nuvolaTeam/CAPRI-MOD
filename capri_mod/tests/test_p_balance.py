@@ -31,19 +31,20 @@ EU27 = ("AT", "BL", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", 
 
 def _read(f):
     d = defaultdict(dict)
-    for r in csv.DictReader(open(f)):
+    from capri_mod.tests._sources import source_records
+    for r in source_records(f):
         d[r["region"]][(r["col"], r["row"])] = float(r["value"])
     return d
 
 
 @pytest.fixture(scope="module")
 def ini():
-    return _read(SRC / "gd2030_endotech_ini_pbalance.csv")
+    return _read(SRC / "gd2030_endotech_ini_pbalance.parquet")
 
 
 @pytest.fixture(scope="module")
 def ref():
-    return _read(SRC / "gd2030_ref_pbalance.csv")
+    return _read(SRC / "gd2030_ref_pbalance.parquet")
 
 
 @pytest.fixture(scope="module")

@@ -37,10 +37,11 @@ import pandas as pd
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC_M = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "dairy_world_dataout_2030.csv"
-SRC_E = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1730defaulta" / "dairy_world_elasticities_2030.csv"
+SRC_M = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "dairy_world_dataout_2030.parquet"
+SRC_E = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1730defaulta" / "dairy_world_elasticities_2030.parquet"
 PRODUCTS = ("BUTT", "SMIP", "CHES", "FRMI", "CREM", "COCM", "WMIO", "CASE", "WHEP")
 MLK = PRODUCTS + ("MILK",)
 ITEMS = ("PROD", "PROC", "FATS", "PROT", "PPRI", "HCON", "FEED", "Imports_noIntra", "Exports_noIntra")
@@ -55,7 +56,7 @@ def extract(dump: Path, elas: Path):
             m = pat.match(line)
             if m and m.group(3) in keep:
                 rows.append(m.groups())
-    pd.DataFrame(rows, columns=["region", "item", "product", "value"]).to_csv(SRC_M, index=False)
+    write_source(pd.DataFrame(rows, columns=["region", "item", "product", "value"]), SRC_M, index=False)
     want = {"p_hessNQDairy", "p_ElasDem", "p_hessNQSupp"}
     cur, out = None, []
     pe = re.compile(r"^'([A-Z_0-9]+)'\.'([A-Z]+)'\.'([A-Z]+)'\.'CAL'\s+([-\d.Ee+]+)")
@@ -67,7 +68,7 @@ def extract(dump: Path, elas: Path):
             m = pe.match(line)
             if m and m.group(2) in MLK and m.group(3) in MLK and (cur != "p_hessNQSupp" or m.group(2) == m.group(3) == "MILK"):
                 out.append((cur,) + m.groups())
-    pd.DataFrame(out, columns=["param", "rms", "row", "col", "value"]).to_csv(SRC_E, index=False)
+    write_source(pd.DataFrame(out, columns=["param", "rms", "row", "col", "value"]), SRC_E, index=False)
     print(f"extracted {len(rows)} market rows, {len(out)} elasticity rows")
 
 
@@ -79,9 +80,9 @@ def main():
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from _market_regions import model_region  # the market's grouping step (tools/lib/_market_regions.py)
     eu_block = set(_read_csv(ROOT / "capri_data" / "2017" / "market" / "dairy_processing.csv")["ms"])
-    src = _read_csv(SRC_M)
+    src = read_source(SRC_M)
     v = {(r.region, r.item, r.product): float(r.value) for r in src.itertuples()}
-    el = _read_csv(SRC_E)
+    el = read_source(SRC_E)
     hrms = set(el.loc[el.param == "p_hessNQDairy", "rms"])
     rms_all = sorted(r for r in hrms if r not in eu_block and v.get((r, "PROD", "MILK"), 0) > 0
                      and v.get((r, "PPRI", "INPE")))
