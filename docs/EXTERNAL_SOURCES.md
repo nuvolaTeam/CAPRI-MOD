@@ -113,6 +113,15 @@ CAPRI's 2030 reference results:
     build_manure_losses, build_nh3_factors, build_npk_balance_2030, build_p_balance, build_plant_protection_cost.
 - **`res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv`**: the 2017 calibration run.
   - Read by: recalibrate_trade_2017, build_tariffs_2017.
+- **`res_2_1730greendeal_refpol_endotech_all_maxdefaulta.gdx`** and **`res_2_1740greendeal_refpol_endotech_all_maxdefaulta.gdx`**
+  (received 9 November 2026; kept as the project lead asked): CAPRI's result files of the endogenous-technology
+  reference's "max" run for 2030 and 2040, as CAPMOD writes them (capmod/set_and_store_dataout.gms l. 477): dataOut
+  (5,223,048 and 5,199,448 records), RALL, META (12,264 records each) and p_INFES. Their META: step "Run scenario without
+  market model", scenario greendeal\refpol_endotech_all_max, base year 2017, run on 5 November 2025 with GAMS 45.7
+  (2030 at 14:13:41, 2040 at 14:13:44), 15 iterations, every GUI setting as run. In the 2030 file every supply solve is
+  feasible, two non-optimal in step 1 (NL120000, UKN00000). Not CAPRI's November 2026 runs with IPOPT forced; the
+  2030 file is the GDX of the run whose dataOut the zip res_2_1730greendeal_refpol_endotech_all_maxdefaulta.zip
+  holds as CSV (not compared value by value). Read by no builder yet.
 
 CAPRI's market exports:
 - **`market_base_1717.txt`**, **`markmarket_greendeal_1730et_base_1717.txt`**: the market model's data for 2017 and 2030.
