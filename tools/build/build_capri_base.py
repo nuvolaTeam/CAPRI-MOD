@@ -69,7 +69,7 @@ COSTS = SUPPLY / "variable_costs.csv"
 NUTRIENTS = SUPPLY / "nutrients_regional.csv"
 #: the layouts of the tables written (columns in the committed files' order)
 AREA_COLS = ["SWHE", "DWHE", "RYEM", "BARL", "OATS", "CORN", "OCER", "PARI", "PULS", "SUGB", "POTA", "TOMA", "OVEG",
-             "APPL", "OFRU", "CITR", "TAGR", "WINE", "OLIV", "TABO", "GRAS", "TOBA", "TEXT", "MAIF", "OFAR", "ROOF", "VSET", "FALL",
+             "APPL", "OFRU", "CITR", "TAGR", "WINE", "OLIV", "TABO", "GRAE", "GRAI", "TOBA", "TEXT", "MAIF", "OFAR", "ROOF", "VSET", "FALL",
              "RAPE", "SUNF", "SOYA", "OOIL", "OCRO", "OIND", "NURS", "FLOW"]
 LAND_COLS = ["ARABLE", "PERMANENT", "GRASSLAND", "FALLOW"]
 HERD_COLS = ["DCOW", "SCOW", "COWS", "BULL", "HEIF", "CALV", "PIGS", "PIGF", "HENS", "POUL", "SHGM", "SHGF"]
@@ -208,7 +208,8 @@ def main(dump_dir: Path):
         # ---- land from the rebuilt areas
         v = areas.loc[reg]
         perm = float(v[[c for c in PERMANENT_CROPS if c in v.index]].sum())
-        grass, fallow = float(v.get("GRAS", 0.0)), float(v.get("VSET", 0.0)) + float(v.get("FALL", 0.0))
+        grass = float(v.get("GRAE", 0.0)) + float(v.get("GRAI", 0.0))   # (GRAS until S2, 7 November 2026)
+        fallow = float(v.get("VSET", 0.0)) + float(v.get("FALL", 0.0))
         land.at[reg, "PERMANENT"], land.at[reg, "GRASSLAND"] = perm, grass
         land.at[reg, "FALLOW"] = fallow
         land.at[reg, "ARABLE"] = float(v.sum()) - perm - grass - fallow

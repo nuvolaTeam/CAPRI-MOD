@@ -47,7 +47,7 @@ _FILE_CATEGORY = {
     "base_areas.csv": "supply", "yields.csv": "supply", "animal_numbers.csv": "supply",
     "cap_premium_activity.csv": "supply", "producer_prices_regional.csv": "supply",
     "livestock_output_coef.csv": "supply", "nutrients_regional.csv": "supply",
-    "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "grass_intensity.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "market_prod_grof_2030.csv": "market", "bilateral_flows_{BY}.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_{BY}.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_{BY}.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.csv": "market", "world_market_baseline_products.csv": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_{BY}.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
+    "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "market_prod_grof_2030.csv": "market", "bilateral_flows_{BY}.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_{BY}.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_{BY}.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.csv": "market", "world_market_baseline_products.csv": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_{BY}.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
     "livestock_feed_coef.csv": "feed",
     "eu_cake_feed_bas.csv": "market",
     "biofuel_feedstock_{BY}.csv": "market", "biofuel_use_share_{BY}.csv": "market", "biofuel_market_{BY}.csv": "market", "biofuel_feedstock_2030.csv": "market", "biofuel_use_share_2030.csv": "market", "biofuel_market_2030.csv": "market", "crushing_parameters_{BY}.csv": "market", "crushing_parameters_2030.csv": "market", "feed_bulks_eu.csv": "market", "feed_bulks_eu_share.csv": "market", "dairy_processing.csv": "market",
@@ -262,17 +262,20 @@ def _reconcile_grass_yield_units(yields: pd.DataFrame, data_dir=None) -> pd.Data
     Converting at the source inverts that default: a new consumer now gets the
     right units without knowing this exists.
     """
-    if "GRAS" not in yields.columns:
+    cols = [g for g in ("GRAE", "GRAI") if g in yields.columns]   # CAPRI's grassland activities (GRAS until S2)
+    if not cols:
         return yields
     out = yields.copy()
     # a fresh-matter figure is ~36,000 kg/ha; a dry-matter tonnage is single
     # digits, so the threshold distinguishes them without ambiguity and makes
     # the conversion idempotent if applied twice
-    mask = out["GRAS"] > 100.0
-    if mask.any():
-        dm = _grass_dm_share(data_dir)
-        out.loc[mask, "GRAS"] = (out.loc[mask, "GRAS"] / 1000.0
-                                 * dm.reindex(out.index[mask]).fillna(float(dm.median())).values)
+    dm = None
+    for g in cols:
+        mask = out[g] > 100.0
+        if mask.any():
+            dm = _grass_dm_share(data_dir) if dm is None else dm
+            out.loc[mask, g] = (out.loc[mask, g] / 1000.0
+                                * dm.reindex(out.index[mask]).fillna(float(dm.median())).values)
     return out
 
 def load_yields(data_dir: Optional[Path] = None) -> pd.DataFrame:
@@ -560,11 +563,6 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # Market revenue per head (CAPRI MREV), by region and animal activity.
         "livestock_output_value_coef": _load_optional_csv(data_dir, "livestock_output_value_coef.csv"),
         "livestock_product_value_coef": _load_optional_csv(data_dir, "livestock_product_value_coef.csv"),
-        # CAPRI's two grassland activities, GRAE and GRAI (Sprint 7a; tools/build/build_grass_intensity.py)
-        # (q_<x>_capri2030 / _recipe2030: the 2030 calibration's curvature, tools/build/build_intensity_q_2030.py; the
-        # q_source columns, text, dropped)
-        "grass_intensity": (lambda df: df.drop(columns=[c for c in df.columns if c == "capri_region" or c.startswith("q_source")])
-                            if df is not None else None)(_load_optional_csv(data_dir, "grass_intensity.csv")),
         # CAPRI's histosols: organic-soil shares, emission factors, fallowing (tools/build/build_histosol.py)
         "histosol": (lambda df: df.drop(columns=[c for c in ("capri_region",) if c in df.columns])
                      if df is not None else None)(_load_optional_csv(data_dir, "histosol.csv")),

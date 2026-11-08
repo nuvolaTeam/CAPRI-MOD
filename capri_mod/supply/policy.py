@@ -32,13 +32,14 @@ class PolicyBlock:
         acts = list(self.acts)
         xb = np.maximum(self._base_levels().reindex(acts).fillna(0.0).values.astype(float), 0.0)
         out = {}
-        if st.get(("active", "permGras")) and "GRAS" in acts:
-            j = acts.index("GRAS")
+        _gj = [acts.index(g) for g in CROPS_ON_LAND["GRAS"] if g in acts]   # GRAE, GRAI (GRAS until S2, 7 Nov 2026)
+        if st.get(("active", "permGras")) and _gj:
             # only where grassland has a level: below the threshold of the activity bounds (an activity without a
             # level, held at zero, _build_constraints) CAPRI has no grassland variable and no rule; with a base of
             # 3.5e-11 kha (EL63, 2030) the rule asked for grass the bounds forbid and the NLP was infeasible (K69)
-            if xb[j] > float(_settings().get("supply.absent_level")):
-                out["permGras"] = {"row": [(j, -1.0)], "rhs": -xb[j] * (1 - 1e-9), "scale": xb[j]}
+            _xg = float(sum(xb[j] for j in _gj))
+            if _xg > float(_settings().get("supply.absent_level")):
+                out["permGras"] = {"row": [(j, -1.0) for j in _gj], "rhs": -_xg * (1 - 1e-9), "scale": _xg}
                 # the rule's dual at the calibration point, CAPRI's assumption (supply/prep_cal.gms l. 118-131):
                 # p_dualGreening = -|rent of arable land - rent of grassland|, charged to GRAE and GRAI in the
                 # calibration's linear terms (EUR/ha; CapriRegionalNLP.calibrate fixes the row's multiplier at it)
@@ -58,7 +59,7 @@ class PolicyBlock:
                  "OFAR": st.get(("weight", "OFAR"), 0.0) * float(fleg.get(ms, 0.0))}
             row = []
             for j, a in enumerate(acts):
-                if a in CROPS and a != "GRAS":
+                if a in CROPS and a not in CROPS_ON_LAND["GRAS"]:
                     row.append((j, r / (1.0 - r) - w.get(a, 0.0)))
             v0 = sum(c_ * xb[j] for j, c_ in row)
             sc_ = max(1.0, sum(abs(c_) * xb[j] for j, c_ in row))
@@ -439,7 +440,7 @@ class PolicyBlock:
             return default
         if activity in self.PERMANENT_LAND_CROPS:
             col = "permanent_pp"
-        elif activity == "GRAS":
+        elif activity in CROPS_ON_LAND["GRAS"]:
             col = "grassland_pp"
         else:
             col = "arable_pp"

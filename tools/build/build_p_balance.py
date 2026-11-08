@@ -29,9 +29,8 @@ Data written
       (capri_mod/tests/test_p_balance.py)
   capri_data/2017/environment/p_balance_crop_coefs_2030.csv  capri_region, model_crop, levl_kha, pret_kg_ha, pcrd_kg_ha:
       CAPRI's P2O5 retention (removal, EXPPRD) and crop residue output (CRESID) per ha of the model's crops (CAPRI crops
-      pooled into model crops by area as tools/build/build_npk_balance_2030.py does: CORN = MAIZ, WINE = TWIN,
-      GRAS = GRAE + GRAI), and GRAE and GRAI on their own
-      (the model's grassland split column)
+      pooled into model crops by area as tools/build/build_npk_balance_2030.py does: CORN = MAIZ, WINE = TWIN; GRAE and
+      GRAI the model's own since S2, 7 November 2026)
 
 The builder checks the identities above on both runs (every region with a UAAR): the sums of the crop and animal
 coefficients against CAPRI's regional items, and the balance identities.
@@ -66,7 +65,7 @@ CROPS = ("SWHE", "DWHE", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "PARI", "RAPE",
 ANIMALS = ("DCOL", "DCOH", "BULL", "BULH", "HEIL", "HEIH", "HEIR", "CAFF", "CAFR", "CAMF", "CAMR", "SCOW", "SHGM", "SHGF",
            "PIGF", "SOWS", "HENS", "POUF")
 #: model crop <- CAPRI crops (tools/build/build_npk_balance_2030.py MODEL)
-MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI")}
+MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",)}   # (GRAS = GRAE + GRAI until S2, 7 November 2026)
 #  (VSET and FALL the model's own since S2, 7 November 2026; before SETA = FALL + VSET + ISET + GSET + TSET; ISET, GSET
 #  and TSET have no area in CAPRI's 2017 and 2030 data)
 
@@ -161,9 +160,7 @@ def build(d: dict) -> int:
             a[0] += L
             a[1] += L * x.get((c, "PRET"), 0.0)
             a[2] += L * x.get((c, "PCRD"), 0.0)
-        for gc in ("GRAE", "GRAI"):
-            if gc in lev:
-                agg["_" + gc] = [lev[gc], lev[gc] * x.get((gc, "PRET"), 0.0), lev[gc] * x.get((gc, "PCRD"), 0.0)]
+        # (GRAE and GRAI on their own rows here too until S2, 7 November 2026: the model's crops since)
         for mc, (L, pr, pc) in sorted(agg.items()):
             rows.append([reg, mc.lstrip("_"), f"{L:.10g}", f"{pr / L:.10g}", f"{pc / L:.10g}"])
     OUT.parent.mkdir(parents=True, exist_ok=True)

@@ -104,17 +104,12 @@ def test_crop_coefs_keep_capris_totals(ref):
     retention and residue output give CAPRI's EXPPRD and CRESID of its 2030 reference."""
     t = pd.read_csv(DATA_DIR / "2017" / "environment" / "p_balance_crop_coefs_2030.csv")
     for reg in REGIONS:
-        d = t[(t.capri_region == reg) & ~t.model_crop.isin(["GRAE", "GRAI"])]
+        d = t[t.capri_region == reg]                 # GRAE and GRAI the model's crops (before, their aggregate GRAS)
         ep = float((d.levl_kha * d.pret_kg_ha).sum()) / 1000.0
         cr = float((d.levl_kha * d.pcrd_kg_ha).sum()) / 1000.0
         assert abs(ep / ref[reg][("EXPPRD", "PHOF")] - 1.0) < 1e-6, reg
         assert abs(cr / ref[reg][("CRESID", "PHOF")] - 1.0) < 1e-6, reg
-        g = t[(t.capri_region == reg) & t.model_crop.isin(["GRAE", "GRAI", "GRAS"])].set_index("model_crop")
-        if "GRAE" in g.index and "GRAI" in g.index:
-            lv = g.at["GRAE", "levl_kha"] + g.at["GRAI", "levl_kha"]
-            assert abs(lv - g.at["GRAS", "levl_kha"]) < 1e-6
-            assert abs((g.at["GRAE", "levl_kha"] * g.at["GRAE", "pret_kg_ha"] + g.at["GRAI", "levl_kha"]
-                        * g.at["GRAI", "pret_kg_ha"]) / lv - g.at["GRAS", "pret_kg_ha"]) < 1e-6
+        assert not (d.model_crop == "GRAS").any()
 
 
 def test_nutned_mineral_closes_at_base():
@@ -124,10 +119,10 @@ def test_nutned_mineral_closes_at_base():
     from capri_mod.fert.npk import NPKData
     D = NPKData.get()
     cr = "DE110000"
-    crops = ("SWHE", "BARL", "RAPE", "GRAS", "APPL")
+    crops = ("SWHE", "BARL", "RAPE", "GRAE", "GRAI", "APPL")
     col = lambda k: {c: D.crop_coef(cr, "P", c, k) for c in crops}
     need, own, pool, mine0 = col("need_kg_ha"), col("own_kg_ha"), col("pool_kg_ha"), col("mine_kg_ha")
-    xb = {"SWHE": 90.0, "BARL": 55.0, "RAPE": 40.0, "GRAS": 137.0, "APPL": 0.7}
+    xb = {"SWHE": 90.0, "BARL": 55.0, "RAPE": 40.0, "GRAE": 68.5, "GRAI": 68.5, "APPL": 0.7}
     sq = {c: 1.0 for c in crops}
     E0 = 5000.0
     m = nutned_mineral(D, cr, need, own, own, pool, mine0, xb, xb, sq, E0, E0)

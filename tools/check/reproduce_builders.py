@@ -133,7 +133,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_price_trajectory_2030", [], [D17]),
     ("build_dairy_intensity", [], [D17]),
     ("build_cattle_intensity", [], [D17]),
-    ("build_grass_intensity", [], [D17]),
     ("build_animal_pmp_capri_2030", [], [REF]),
     ("build_animal_pmp_capri_2030", ["--splits"], [REF]),
     ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.csv", "--year", "2017",

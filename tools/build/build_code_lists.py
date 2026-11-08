@@ -163,6 +163,10 @@ def main():
     for g, ca in pairs("cropDivGrps_mCact"):
         grp_of.setdefault(ca, set()).add(g)
     fodcrp = set(read_set(a.sets, "FODCRP"))
+    # an activity is a fodder crop where CAPRI's FEDACT_TO_FODDI gives it a fodder item (MAIF, ROOF, OFAR, GRAE, GRAI);
+    # FODCRP names the grass product GRAS, not GRAE and GRAI (the model's own activities since S2, 7 November 2026)
+    fedact = {pa for pa, _f in pairs("FEDACT_TO_FODDI")}
+    fod_of = lambda c: ({c} & fodcrp) | ({c} & fedact)
     capri_of = {r["code"]: r["capri_codes"].split(";") for r in acts}
     with open(OUT / "model_activity_classes.csv", newline="", encoding="utf-8") as fh:
         classes = list(csv.DictReader(fh))
@@ -176,8 +180,9 @@ def main():
         if (r["cropdiv_group"] or grps) and {r["cropdiv_group"]} != grps and not declared:
             problems.append(f"model_activity_classes.csv {r['code']}: crop-diversification group {r['cropdiv_group']!r}, "
                             f"CAPRI {sorted(grps)}")
-        if bool(int(r["fodder"])) != bool(set(cc) & fodcrp) and not declared:
-            problems.append(f"model_activity_classes.csv {r['code']}: fodder {r['fodder']}, CAPRI FODCRP {sorted(set(cc) & fodcrp)}")
+        fc = set().union(*(fod_of(c) for c in cc)) if cc else set()
+        if bool(int(r["fodder"])) != bool(fc) and not declared:
+            problems.append(f"model_activity_classes.csv {r['code']}: fodder {r['fodder']}, CAPRI FODCRP {sorted(fc)}")
     # the further classes (N6, second part): a value that differs from CAPRI's set must say "<column>...: the model's"
     # in its source (or name its departure)
     mcact, oyani = set(read_set(a.sets, "MCACT")), set(read_set(a.sets, "OYANI"))

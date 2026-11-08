@@ -27,8 +27,6 @@ class NLPBlock:
         for nut_, pk_ in (getattr(self.ev, "pool_cols_pk", None) or {}).items():
             if len(pk_) == 2:
                 extra[int(pk_[0])] = f"manure_export_{nut_}"; extra[int(pk_[1])] = f"manure_import_{nut_}"
-        if getattr(self.ev, "grass_col", None) is not None:
-            extra[int(self.ev.grass_col)] = "grass_z"
         if getattr(self.ev, "dairy_col", None) is not None:
             extra[int(self.ev.dairy_col)] = "dairy_z"
         for a_, j_ in (getattr(self.ev, "cattle_cols", None) or {}).items():
@@ -157,7 +155,7 @@ class NLPBlock:
         # the first solve (the baseline's base point and prices); the linear terms are kept by column and feed
         cols = self._aug_col_labels(Q.shape[0])
         cal = getattr(self.par, "nlp_cal", None)
-        _late = ("grass_z", "dairy_z", "cattle_z_", "genet_z_", "hist_")
+        _late = ("dairy_z", "cattle_z_", "genet_z_", "hist_")
         if cal is not None and cal.get("cols") is not None and \
                 any(l_.startswith(_late) for l_ in set(cols) - set(cal["cols"])):
             if os.environ.get("CAPRI_TRACE_RECAL"):

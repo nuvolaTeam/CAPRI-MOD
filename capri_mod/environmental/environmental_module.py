@@ -274,8 +274,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
 
         # GHG
         mint = dict(getattr(supply_result, "n_intensity", {}) or {})
-        _gz = float(getattr(supply_result, "grass_ext_shift", 0.0) or 0.0)
-        ghg = self.compute_ghg(acts, region, mint, grass_shift=_gz)
+        ghg = self.compute_ghg(acts, region, mint)
         ghg_total = sum(ghg.values())
 
         # Nitrogen (the straw part of crop need follows the yields before the price response: need_yield_factor)
@@ -297,13 +296,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             nb["n_organic_input"] = float(nb["n_organic_input"]) + _d
             nb["n_mineral_input"] = float(nb["n_mineral_input"]) - _a * _d
             nb["n_surplus"] = float(nb["n_surplus"]) + (1.0 - _a) * _d
-        # CAPRI's grassland split (Sprint 7a): the area moved from GRAI to GRAE changes the
-        # balance by the same per-ha difference the supply model's N row used
-        if _gz:
-            _dl = self.grass_intensity_delta(region) or {}
-            for _k, _v in _dl.items():
-                if _k in nb and isinstance(nb[_k], (int, float)) and _k != "n_use_efficiency":
-                    nb[_k] = float(nb[_k]) + _gz * float(_v)
+        # (CAPRI's grassland split was a column z here until S2, 7 November 2026: GRAE and GRAI are activities since)
         # CAPRI's dairy split (Sprint 7b): z cows at DCOL instead of DCOH excrete
         # (MANN_DCOL - MANN_DCOH) / MANN_DCOW of a cow's manure N more each - the supply model's
         # manure rows use the same factor. Accounted as k = z x that factor manure-equivalent cows:
@@ -339,7 +332,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             for _k in ("n_organic_input", "n_mineral_input", "n_mineral_plain", "n_surplus"):
                 if _k in nb and _k in _nb_k:
                     nb[_k] = float(nb[_k]) + float(_nb_k[_k]) - float(_nb_0[_k])
-            _g_k = self.compute_ghg(_acts_k, region, mint, grass_shift=_gz)
+            _g_k = self.compute_ghg(_acts_k, region, mint)
             if "N2O_MAN" in ghg:
                 ghg["N2O_MAN"] += float(_g_k.get("N2O_MAN", 0.0)) - float(ghg["N2O_MAN"])
         _rel = getattr(supply_result, "animal_n_relief", None) or {}
@@ -443,9 +436,10 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         if _ht is not None and region in _ht.index:
             _h = _ht.loc[region]
             _fa = getattr(supply_result, "histosol_fallow", None) or {}
-            _crop_area = sum(float(acts.get(c, 0.0) or 0.0) for c in CROPS if c != "GRAS")
+            _gr = _CROPS_ON_LAND["GRAS"]     # GRAE, GRAI (GRAS until S2, 7 November 2026)
+            _crop_area = sum(float(acts.get(c, 0.0) or 0.0) for c in CROPS if c not in _gr)
             _n2o_t = (_crop_area * float(_h.get("n2o_t_ha_crop", 0.0) or 0.0)
-                      + float(acts.get("GRAS", 0.0) or 0.0) * float(_h.get("n2o_t_ha_grass", 0.0) or 0.0))
+                      + sum(float(acts.get(g, 0.0) or 0.0) for g in _gr) * float(_h.get("n2o_t_ha_grass", 0.0) or 0.0))
             for _c in ("crop", "grass"):
                 _f = float(_fa.get(_c, 0.0) or 0.0)
                 if _f > 0:
@@ -587,8 +581,8 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
 
         PERM = _CROPS_ON_LAND["FRUN"]      # the crops on permanent-crop land (model_activity_classes.csv, N6)
         perm   = sum(acts.get(c, 0.0) for c in PERM)
-        grass  = acts.get("GRAS", 0.0)
-        arable = sum(acts.get(c, 0.0) for c in CROPS if c not in PERM + ("GRAS",))
+        grass  = sum(acts.get(g, 0.0) for g in _CROPS_ON_LAND["GRAS"])
+        arable = sum(acts.get(c, 0.0) for c in CROPS if c not in PERM + _CROPS_ON_LAND["GRAS"])
 
         return EnvironmentalIndicators(
             region=region,

@@ -128,7 +128,9 @@ def main():
     # FODDER per ha (the fodder balance's usable fodder, u = fed quantity / area): CAPRI's FEDM over LEVL of the
     # fodder crop, 2030 over 2017 (yield, losses and the non-feed use, e.g. silage maize for biogas in Germany: INDM
     # 3.6 of 6.9 Mt in Upper Bavaria's 2030 reference); per group, else member state
-    fcrop = {"GRAS": "GRAS", "MAIF": "MAIF", "OFAR": "OFAR", "ROOF": "ROOF"}   # (OFOD: OFAR alone until S2, 7 Nov 2026)
+    # the model's fodder crop -> CAPRI's: GRAE and GRAI take the use per ha of CAPRI's whole grassland GRAS (CAPRI's FEDM
+    # of grass is not split by activity); (OFOD: OFAR alone until S2, 7 November 2026)
+    fcrop = {"GRAE": "GRAS", "GRAI": "GRAS", "MAIF": "MAIF", "OFAR": "OFAR", "ROOF": "ROOF"}
     fdat = {"2017": {}, "2030": {}}
     pf30 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'(FEDM|LEVL)'\.'(GRAS|MAIF|OFAR|ROOF)'\.'2030'\s+(-?[\d.Ee+\-]+)")
     txt = grep(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(FEDM|LEVL)'\.'(GRAS|MAIF|OFAR|ROOF)'\.'2030'", str(a.ref))
@@ -142,7 +144,7 @@ def main():
         m = pl30.match(line)
         if m:
             fdat["2030"][(m.group(1), m.group(2), "LEVL")] = float(m.group(3))
-    p17 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'(FEDM|GRAS|MAIF|OFAR)'\.'(GRAS|MAIF|OFAR|LEVL)'\.'Y'\s+(-?[\d.Ee+\-]+)")
+    p17 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'(FEDM|GRAS|MAIF|OFAR|ROOF)'\.'(GRAS|MAIF|OFAR|ROOF|LEVL)'\.'Y'\s+(-?[\d.Ee+\-]+)")
     for f in sorted(a.dump_dir.glob("res_17*.txt")):
         for line in open(f, errors="ignore"):
             m = p17.match(line)

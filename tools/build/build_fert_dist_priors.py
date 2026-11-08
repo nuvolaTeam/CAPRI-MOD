@@ -52,7 +52,7 @@ PERM_NGRP = {"GRAS", "PERM"}
 #: aggregates in the extract (not activities)
 AGGREGATES = {"AGGT", "ARAB", "CERE", "FODD", "OAR1", "OILS", "PERM", "SETF", "UAAR", "GRAS"}
 #: model crop -> CAPRI crops (environmental_module._CAPRI_CROP and the model's names)
-MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI")}
+MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",)}   # (GRAS = GRAE + GRAI until S2, 7 November 2026)
 #  (OFAR, ROOF, VSET and FALL the model's own since S2, 7 November 2026; before OFOD = OFAR + ROOF, SETA = SETA + FALL + VSET)
 
 

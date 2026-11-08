@@ -377,7 +377,6 @@ class LandBlock:
         self.ev.land_types_used = list(self.LAND_TYPES)
         start = np.concatenate([x0, L0] + ([np.array([getattr(self.ev, "alloc_m0", 0.0)])] if alloc_k else [])
                                + ([np.zeros(pool_k)] if pool_k else []))
-        Qa, ca, Aa, ba, start = self._grass_intensity_column(Qa, ca, Aa, ba, start, labels, n, alloc_k)
         Qa, ca, Aa, ba, start = self._dairy_intensity_column(Qa, ca, Aa, ba, start, labels, n)
         Qa, ca, Aa, ba, start = self._histosol_columns(Qa, ca, Aa, ba, start, labels, n)
         self.ev.aug_labels = labels              # one label per row of the augmented problem (the NLP form reads them)

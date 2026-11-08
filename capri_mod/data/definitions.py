@@ -45,7 +45,8 @@ CROPS = [
     "TABO",  # Table olives (CAPRI TABO, a market product of its own)
     "TOBA",  # Tobacco
     "TEXT",  # Textile crops (CAPRI TEXT: cotton in EL, ES, BG, flax and hemp elsewhere; a market product of its own)
-    "GRAS",  # Grass / fodder (permanent grassland)
+    "GRAE",  # Grass and grazings, extensive (CAPRI GRAE; with GRAI the model's GRAS until S2, 7 November 2026)
+    "GRAI",  # Grass and grazings, intensive (CAPRI GRAI)
     "MAIF",  # Maize for forage / silage
     "OFAR",  # Fodder other on arable land (CAPRI OFAR; with ROOF the model's OFOD until S2, 7 November 2026)
     "ROOF",  # Fodder root crops (CAPRI ROOF)
@@ -121,7 +122,7 @@ MARKET_COMMODITIES = [
 FEED_ITEMS = [
     "SWHE", "BARL", "CORN", "OCER",        # Grain feeds
     "RAPC", "SOYC", "SUNC",                 # Oilseed cakes (CAPRI's codes)
-    "GRAS", "MAIF", "OFAR", "ROOF",         # Roughages
+    "GRAE", "GRAI", "MAIF", "OFAR", "ROOF", # Roughages
     "MILK",                                  # Milk for calves
 ]
 

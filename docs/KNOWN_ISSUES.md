@@ -26,6 +26,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K120](#k120) | S7 ("capri"): the market supply Hessian measured after the first supply solve had lost most of its response; the baseline calibration's stall rule stopped it uncorrected | fixed: 20 and 37 units, full EU Farm-to-Fork and Green Deal (7 November 2026); open in S7: the baseline calibration's first-round drift (located: set-aside and pulses, the ecological set-aside row) |
 | [K121](#k121) | S2 step 1a: other fodder split into CAPRI's OFAR and ROOF; the fodder roots' feed (FROO) tied to their land for the first time | done on mini-EU (7 November 2026); the full runs and the suite to come |
 | [K122](#k122) | S2 step 1b: set-aside split into CAPRI's VSET and FALL; the winter-cover option's potential counted set-aside CAPRI fills | done on mini-EU (7 November 2026); the full runs and the suite to come |
+| [K123](#k123) | S2 step 1c: grassland split into CAPRI's GRAE and GRAI, the split column z and its late calibration removed; fodder roots' 2030 fodder trajectory was missing since 1a | done on mini-EU (8 November 2026); the full runs and the suite to come |
 
 ## Resolved (107)
 
@@ -2385,4 +2386,39 @@ point (poultry -18.4% against -17.8%, manure N2O -22.3% against -21.9%). Set-asi
 2,418; VSET 1,032 against the reported split's 698, FALL 1,373 against 1,720 (now the models' choice under FALL's bounds);
 labour -7.9% against -7.0% (VSET's and FALL's own labour coefficients). CAPRI's own split under Farm-to-Fork is not at
 hand to compare.
+
+### K123: Grassland split into CAPRI's GRAE and GRAI (S2 step 1c, 8 November 2026)
+
+Until 8 November 2026 the model had one grassland activity, GRAS (CAPRI's GRAE + GRAI), and CAPRI's two activities
+through a split column z (area moved from GRAI to GRAE, Sprint 7a: livestock._grass_intensity_column): z's N balance,
+fodder and mineral-N coefficients the differences of the two activities (nitrogen.grass_intensity_delta, with GRAE's
+and GRAI's mineral N taken as GRAS's in proportion to their need), PMP (q_GRAE + q_GRAI) z^2 / 2 from
+grass_intensity.csv, and a linear term fitted to the duals of the region's first solve (a "late" column: part of the
+mechanism behind K120's first-round drift). S2 step 1c makes GRAE and GRAI the model's own activities, as CAPRI's:
+- codes/model_activities.csv and model_activity_classes.csv (land type GRAS; fodder through CAPRI's FEDACT_TO_FODDI,
+  as FODCRP names their product GRAS; tools/build/build_code_lists.py checks it so), definitions.CROPS;
+- each with CAPREG's own data: grass output (the GRAS item of each activity; DE110000 19.3 and 45.1 t fresh matter per
+  ha, their mean the former GRAS's 32.2), costs, premiums, labour, mineral N (nutrients_regional: DE940000 GRAE below
+  GRAI), N and P coefficients, CAPRI's own 2030 PMP terms and trajectories;
+- the grassland row and the permGras rule over both; the grass fodder balance FGRA shared by their production (u per
+  ha in proportion to each one's grass output, the sum exact at base; fodder_balance_2017.csv one row per producing
+  activity); the histosol and luc accounts over both;
+- removed: the split column, its state, its calibration from the duals, nitrogen.grass_intensity_delta and the
+  grass_override machinery, the GHG tax's and the P accounts' z terms, build_grass_intensity.py and grass_intensity.csv,
+  and intensity_q_2030's rows and file that only the grass and set-aside splits read (GRAE, GRAI, VSET, FALL, ROOF,
+  OFAR; intensity_q_recipe2017.csv).
+The data rebuilt: every changed file identical outside the grassland rows and columns to 1e-9; GRAE + GRAI equals the
+former GRAS to 1e-11 (EU 40,426 thousand ha each, CAPREG's base split being 50:50).
+
+Found with it, from step 1a: build_ration_trajectory_2030.py's 2017 pattern did not list ROOF, so the fodder roots had
+no 2030 fodder trajectory (capri_ref_fodder_2030.csv without ROOF rows; their use per ha stayed at 2017 in the 1a and 1b
+runs); fixed here.
+
+Mini-EU Farm-to-Fork (20 units, against step 1b): converged in 6 iterations, baseline 5; the 24 indicators within 0.3
+point (beef animals -21.0% against -21.3%). Grassland 8,059 thousand ha against 8,057; under Farm-to-Fork GRAE 4,022 to
+5,232 (+30%), GRAI 4,033 to 2,827 (-30%). The baseline calibration's drift (K120) is the same as in 1b (0.02%,
+25.8%, 2.0%, 0.65%, 0 against 0.02%, 25.9%, 2.1%, 0.65%, 0): removing the late grass column did not move it, consistent
+with K120's finding that the drift is in set-aside and pulses. Against dev (0.05%, 12.3%, 3.6%, 2.8%, 0) the second round
+is larger and the third and fourth smaller; 1a's trace equals dev's, so the change comes with 1b, the set-aside split
+(VSET and FALL measured separately, FALL now under the bounds; not analysed further).
 

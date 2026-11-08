@@ -34,17 +34,6 @@ COMMENT ON TABLE src_intensity_q_capri2030 IS 'Per model region (a CAPRI regiona
 INSERT INTO value_units VALUES
   ('src_intensity_q_capri2030', 'value', NULL, 'open', 'intensity_q_capri2030.value: unit to be established');
 
--- file: capri_data/sources/intermediate/baseline_pmp/intensity_q_recipe2017.csv
-CREATE TABLE src_intensity_q_recipe2017 (
-    model_region VARCHAR NOT NULL,
-    activity VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (model_region, activity)
-);
-COMMENT ON TABLE src_intensity_q_recipe2017 IS 'Per model region (a CAPRI regional unit) and activity of the intensity splits: the curvature on the activity level, c = 1/(1'' Q^-1 1), from capri-mod''s own 2017 terms by CAPRI''s recipe (recipe_2017_quad_techn.csv); read for the set-aside split''s base-year weights (tools/build/build_intensity_q_2030.py).';
-INSERT INTO value_units VALUES
-  ('src_intensity_q_recipe2017', 'value', NULL, 'open', 'intensity_q_recipe2017.value: unit to be established');
-
 -- file: capri_data/sources/intermediate/baseline_pmp/intensity_q_recipe2030.csv
 CREATE TABLE src_intensity_q_recipe2030 (
     model_region VARCHAR NOT NULL,

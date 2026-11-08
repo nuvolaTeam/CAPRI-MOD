@@ -48,8 +48,6 @@ class RegionalParameters(_Slots):
         "genet_key",          # the genetics settings key genet_cz belongs to
         "genet_pending",      # the genetics options whose terms wait for the duals
         "genet_rows_memo",    # the genetics options' rows (a memo)
-        "grass_cz",           # the grass split's term
-        "grass_pending_col",  # the grass split's column waiting for the duals
         # fertilisation (S5): memos of the base and CAPRI's priors recalibrated at the first solve
         "ef_lea_cache",       # the leaching emission factor (a memo)
         "ef_min_n2o_cache",   # mineral fertiliser's N2O per kg N, CO2 equivalent (a memo)
@@ -100,7 +98,6 @@ class RegionalEvalState(_Slots):
         "dairy_col",          # the low-yield dairy split's column
         "dairy_req_extra",    # the splits' extra requirement entries by animal
         "genet_cols",         # the genetics options' columns
-        "grass_col",          # the grass split's column
         # fertilisation (S5)
         "n_intensity",        # the mineral N intensity factors of the solve, by crop and the manure credit
         "nlp_mine_small",     # the fertiliser groups too small for the mineral-N row
@@ -204,7 +201,6 @@ class RegionalResults(_Slots):
         # core (S8)
         "land_solution",      # the land types' levels
         "last_aug",           # the augmented problem the land-market solve used (Q, c, A, b, y)
-        "last_grass_z",       # the grass split's level
         "last_hist_fallow",   # the histosol fallowing by class
         "last_manure_trade",  # the manure trade (N)
         "last_manure_trade_pk",  # idem for P and K
@@ -337,13 +333,10 @@ MOVED_REGIONAL: dict = {
     "_genet_key": "par.genet_key",
     "_genet_pending": "par.genet_pending",
     "_genet_rows_memo": "par.genet_rows_memo",
-    "_grass_cz": "par.grass_cz",
-    "_grass_pending_col": "par.grass_pending_col",
     "_cattle_cols": "ev.cattle_cols",
     "_dairy_col": "ev.dairy_col",
     "_dairy_req_extra": "ev.dairy_req_extra",
     "_genet_cols": "ev.genet_cols",
-    "_grass_col": "ev.grass_col",
     "_last_cattle_z": "res.last_cattle_z",
     "_last_dairy_z": "res.last_dairy_z",
     "_last_genet_z": "res.last_genet_z",
@@ -410,7 +403,6 @@ MOVED_REGIONAL: dict = {
     "_yield_price_factor": "ev.yield_price_factor",
     "_land_solution": "res.land_solution",
     "_last_aug": "res.last_aug",
-    "_last_grass_z": "res.last_grass_z",
     "_last_hist_fallow": "res.last_hist_fallow",
     "_last_manure_trade": "res.last_manure_trade",
     "_last_manure_trade_pk": "res.last_manure_trade_pk",

@@ -1,7 +1,8 @@
 """CAPRI's 2030 PMP terms of the intensity variants, per model region, for the model's intensity splits (K61).
 
-The model's intensity splits (dairy DCOL / DCOH, fattening bulls BULL / BULH, heifers HEIL / HEIH, grassland
-GRAE / GRAI; tools/build/build_dairy_intensity.py, build_cattle_intensity.py, build_grass_intensity.py) take their
+The model's intensity splits (dairy DCOL / DCOH, fattening bulls BULL / BULH, heifers HEIL / HEIH; tools/build/
+build_dairy_intensity.py, build_cattle_intensity.py; grassland GRAE / GRAI and the set-aside split until S2, 7
+November 2026, when they became the model's own activities with their own PMP terms) take their
 curvature from CAPRI's own diagonal terms p_pmpQuadTechn of the two variants. Those builders read CAPRI's base-year
 terms (capri_data/sources/intermediate/capreg/pmp_quad_techn.csv: the first technology's diagonal per model region). This tool
 writes the same file format from the terms at the 2030 calibration point, so the builders can add the 2030 curvature
@@ -32,12 +33,10 @@ import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
-ACTS = ("DCOL", "DCOH", "BULL", "BULH", "HEIL", "HEIH", "HEIR", "CAMF", "CAFF", "CAMR", "CAFR", "GRAE", "GRAI",
-        "VSET", "FALL", "ROOF", "OFAR")
-FILES = {"capri2030": SRC / "pmp_quad_techn_2030.csv", "recipe2030": SRC / "recipe_2030_quad_techn.csv",
-         # the base year's terms with both technologies (CAPREG's file keeps one diagonal term per activity): the
-         # recipe's 2017 terms, for the set-aside split's base-year weights (tools/build/build_labour_setaside.py)
-         "recipe2017": SRC / "recipe_2017_quad_techn.csv"}
+ACTS = ("DCOL", "DCOH", "BULL", "BULH", "HEIL", "HEIH", "HEIR", "CAMF", "CAFF", "CAMR", "CAFR")
+FILES = {"capri2030": SRC / "pmp_quad_techn_2030.csv", "recipe2030": SRC / "recipe_2030_quad_techn.csv"}
+# (until S2, 7 November 2026, also GRAE, GRAI, VSET, FALL, ROOF, OFAR, and the recipe's 2017 terms for the set-aside
+# split's base-year weights, intensity_q_recipe2017.csv)
 
 
 def crosswalk() -> dict:

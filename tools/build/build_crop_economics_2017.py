@@ -61,6 +61,8 @@ from capri_mod.data import definitions as D  # noqa: E402
 PRICES_EXTRACT = ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_producer_prices_extract.csv"
 
 ITEMS = ("LEVL", "YILD", "TOIN", "MPRI", "PRME", "MREV", "GRAS")
+#: CAPRI's grassland activities (the GRAS item is their grass output); the model's own since S2 (7 November 2026)
+GRASS = ("GRAE", "GRAI")
 GRASS_DM = ROOT / "capri_data" / "2017" / "supply" / "grass_dm_content.csv"
 PREMIUM = ROOT / "capri_data" / "2017" / "supply" / "crop_premium.csv"
 PAYMENTS = ROOT / "capri_data" / "2017" / "policy" / "cap_payments.csv"
@@ -152,13 +154,13 @@ def main(dump_dir: Path):
                 # CAPRI has the crop nowhere in the member state: no yield and no cost (0, as the file had for rice
                 # outside the rice countries). Until 27 October 2026 such cells kept whatever the file held, in places
                 # values of the synthetic template removed in Sprint 9s (citrus yield 24.2 t/ha in DE11)
-                if col != "GRAS" and col in yields.columns:
+                if col not in GRASS and col in yields.columns:
                     yields.at[reg, col] = 0.0
                 if col in costs.columns:
                     costs.at[reg, col] = 0.0
                 continue
             _, y, p, cst, pr = v
-            if col != "GRAS":
+            if col not in GRASS:
                 if col in yields.columns:
                     yields.at[reg, col] = y
                 if p > 0:
@@ -175,29 +177,31 @@ def main(dump_dir: Path):
     pay.to_csv(PAYMENTS)
     # GRASS: CAPRI's dry-matter content (DRMA of GRAS, 0.22 in every region) for the loader's fresh-to-dry conversion,
     # and the grass price on that basis: CAPRI's revenue per ha (MREV; its grass MPRI is a dummy 1,000) over the
-    # dry-matter yield (build_capri_base used a share of 0.20)
+    # dry-matter yield (build_capri_base used a share of 0.20). Per grassland activity, CAPRI's GRAE and GRAI, the
+    # model's own since S2 (7 November 2026; before, their aggregate GRAS)
     dm = pd.Series(0.0, index=areas.index, name="drma")
     for reg in areas.index:
         src = spec.get(reg) or ((national(reg), 1.0),)
         vals = [capri.get(c, {}).get("GRAS", {}).get("DRMA", 0.0) for c, _ in src]
         vals = [v for v in vals if v > 0] or [capri.get(national(reg), {}).get("GRAS", {}).get("DRMA", 0.0)]
         dm[reg] = vals[0]
-        mrev = sum(w * capri.get(c, {}).get("LEVL", {}).get("GRAS", 0.0) * capri.get(c, {}).get("MREV", {}).get("GRAS", 0.0)
-                   for c, w in src)
-        lv = sum(w * capri.get(c, {}).get("LEVL", {}).get("GRAS", 0.0) for c, w in src)
-        # CAPRI's grass yield is the GRAS output of the GRAS activity (kg fresh matter per ha; its YILD item is the
-        # revenue); 56 regions carried a template value (~5 t/ha) instead
-        fy = (sum(w * capri.get(c, {}).get("LEVL", {}).get("GRAS", 0.0) * capri.get(c, {}).get("GRAS", {}).get("GRAS", 0.0)
-                  for c, w in src) / lv) if lv > 0 else 0.0
-        if fy <= 0:
-            it_ = capri.get(national(reg), {})
-            fy = it_.get("GRAS", {}).get("GRAS", 0.0)
-        if "GRAS" in yields.columns:
-            yields.at[reg, "GRAS"] = fy                  # 0 where CAPRI has no grassland (Malta)
-        raw = float(yields.at[reg, "GRAS"]) if "GRAS" in yields.columns else 0.0
-        dmy = raw / 1000.0 * dm[reg] if raw > 100 else raw
-        if lv > 0 and dmy > 0 and "GRAS" in prices.columns:
-            prices.at[reg, "GRAS"] = mrev / lv / dmy
+        for g in GRASS:
+            mrev = sum(w * capri.get(c, {}).get("LEVL", {}).get(g, 0.0) * capri.get(c, {}).get("MREV", {}).get(g, 0.0)
+                       for c, w in src)
+            lv = sum(w * capri.get(c, {}).get("LEVL", {}).get(g, 0.0) for c, w in src)
+            # CAPRI's grass yield is the GRAS output of the grassland activity (kg fresh matter per ha; its YILD item
+            # is the revenue); 56 regions carried a template value (~5 t/ha) instead
+            fy = (sum(w * capri.get(c, {}).get("LEVL", {}).get(g, 0.0) * capri.get(c, {}).get("GRAS", {}).get(g, 0.0)
+                      for c, w in src) / lv) if lv > 0 else 0.0
+            if fy <= 0:
+                it_ = capri.get(national(reg), {})
+                fy = it_.get("GRAS", {}).get(g, 0.0)
+            if g in yields.columns:
+                yields.at[reg, g] = fy                  # 0 where CAPRI has no such grassland (Malta)
+            raw = float(yields.at[reg, g]) if g in yields.columns else 0.0
+            dmy = raw / 1000.0 * dm[reg] if raw > 100 else raw
+            if lv > 0 and dmy > 0 and g in prices.columns:
+                prices.at[reg, g] = mrev / lv / dmy
     dm.index.name = "region"
     dm.to_csv(GRASS_DM)
     yields.to_csv(B.YIELDS)

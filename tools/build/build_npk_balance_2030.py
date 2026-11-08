@@ -22,9 +22,8 @@ Outputs (capri_data/2017/environment/):
                             pool_kg_ha (contribution to the
                             arable residue pool, fertDistCres_; non-permanent crops), own_kg_ha (permanent crops' own
                             residues, perm_cres), mine_kg_ha (CAPRI's mineral flow), levl_kha; CAPRI crops pooled into
-                            the model's crops by area (CORN = MAIZ, WINE = TWIN, GRAS = GRAE + GRAI,
-                            and GRAE and GRAI on their own (the model's
-                            grassland split column); main_share and straw_share, the parts of the need that follow the
+                            the model's crops by area (CORN = MAIZ, WINE = TWIN; GRAE and GRAI the model's own
+                            since S2, 7 November 2026); main_share and straw_share, the parts of the need that follow the
                             main output's yield and the straw yield (fert/fertned.gms: need = MIN(cap, MAX(15, O_HP x
                             need per t + STRA x straw content)); 0 for crops at the floor or the cap), with CAPRI's straw
                             content and caps from envind/gascoeff.gms and fert/fertpar.gms (their statements converted
@@ -72,7 +71,7 @@ ELEM = ("SWHE", "DWHE", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "PARI", "RAPE", 
         "FLOW", "OCRO", "NECR", "MAIF", "ROOF", "OFAR", "GRAE", "GRAI", "PULS", "POTA", "SUGB", "TEXT", "TOBA", "TOMA",
         "OVEG", "APPL", "OFRU", "CITR", "TAGR", "TABO", "TWIN", "OLIV", "FALL", "ISET", "GSET", "TSET", "VSET", "NONF")
 #: model crop <- CAPRI crops
-MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI")}
+MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",)}   # (GRAS = GRAE + GRAI until S2, 7 November 2026)
 #  (VSET and FALL the model's own since S2, 7 November 2026; before SETA = FALL + VSET + ISET + GSET + TSET; ISET, GSET
 #  and TSET have no area in CAPRI's 2017 and 2030 data)
 FLOWS = ("fertDist_mine", "fertDist_excr", "fertDist_cres", "perm_cres", "nutNed_mine_loss_gasRunTot",
@@ -252,16 +251,7 @@ def main():
                 d["pool"] += pool_raw.get(c, 0.0) * kpool
                 d["own"] += f("perm_cres", c)
                 d["mine"] += f("fertDist_mine", c)
-            # CAPRI's two grassland activities on their own as well (the model's grassland split column moves area
-            # from GRAI to GRAE; NUTNED_ takes each one's need)
-            for gc in ("GRAE", "GRAI"):
-                if gc in lev:
-                    Dg = v.get((r, "", gc, col), 0.0)
-                    bnd = Dg <= floor_ + 1e-6 or Dg >= maxf[col] * (2.0 if gc in dbl else 1.0) - 1e-6
-                    agg["_" + gc] = dict(levl=lev[gc], need=lev[gc] * Dg / 1000.0, pool=0.0,
-                                         own=f("perm_cres", gc),
-                                         mine=f("fertDist_mine", gc),
-                                         main=0.0 if bnd else lev[gc] * Dg / 1000.0, straw=0.0)
+            # (GRAE and GRAI on their own rows here too until S2, 7 November 2026: the model's crops since)
             for mc, d in agg.items():
                 mc = mc.lstrip("_")
                 L = d["levl"]

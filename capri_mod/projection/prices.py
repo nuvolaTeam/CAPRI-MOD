@@ -37,7 +37,7 @@ CROP_PRODUCT = {c: c for c in (
     "NURS", "FLOW", "OCRO", "OIND")}
 CROP_PRODUCT.update({"CORN": "MAIZ", "MAIZ": "MAIZ", "WINE": "TWIN"})
 #: fodder crops of the fodder balance -> CAPRI product (unit value = fodder shadow price)
-FODDER_PRODUCT = {"GRAS": "GRAS", "MAIF": "MAIF", "OFAR": "OFAR", "ROOF": "ROOF"}
+FODDER_PRODUCT = {"GRAE": "GRAS", "GRAI": "GRAS", "MAIF": "MAIF", "OFAR": "OFAR", "ROOF": "ROOF"}   # CAPRI's products
 #: livestock markets -> CAPRI product
 MARKET_PRODUCT = {"MILK": "COMI", "BEEF": "BEEF", "PORK": "PORK", "POUL": "POUM", "EGGS": "EGGS",
                   "SGMT": "SGMT"}
@@ -96,7 +96,7 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
         n_f, fr = 0, []
         for reg, feeds in fb.items():
             for feed, rec in (feeds or {}).items():
-                prod = FODDER_PRODUCT.get(rec.get("crop"))
+                prod = next((FODDER_PRODUCT[c] for c in (rec.get("crops") or {}) if c in FODDER_PRODUCT), None)
                 f = r(reg, prod) if prod else None
                 if f and "value_eur_t" in rec:
                     rec["value_eur_t"] = float(rec["value_eur_t"]) * f
@@ -211,8 +211,9 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
     cp = data.get("cap_premium")
     if isinstance(cp, pd.DataFrame):
         new = cap30.reindex(index=cp.index, columns=cp.columns)
-        crops = [c for c in cp.columns if c in CROP_PRODUCT or c in ("GRAS", "MAIF", "OFAR", "ROOF", "FODD",
-                                                                      "SETF", "VSET", "FRUN", "ARAC", "ANNC")]
+        crops = [c for c in cp.columns if c in CROP_PRODUCT or c in ("GRAS", "GRAE", "GRAI", "MAIF", "OFAR",
+                                                                      "ROOF", "FODD", "SETF", "VSET", "FALL", "FRUN",
+                                                                      "ARAC", "ANNC")]
         for c in crops:
             cp[c] = new[c].combine_first(cp[c])
         summary["crop_premium_cells"] = int(new[crops].notna().sum().sum())

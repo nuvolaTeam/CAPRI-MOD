@@ -1984,7 +1984,8 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
     cap = pd.read_csv(os.path.join(str(DATA_DIR), "validation", "capri_eu27_levels_2030_ref.csv"), index_col=0).iloc[:, 0]
     eu = [r for r in data["areas"].index if not r.startswith("NO")]
     for a in ("SWHE", "BARL", "RAPE", "GRAS"):
-        assert abs(float(data["areas"].loc[eu, a].sum()) / float(cap[a]) - 1.0) < 0.015, a
+        cols = ["GRAE", "GRAI"] if a == "GRAS" else [a]         # CAPRI's GRAS row = GRAE + GRAI (the model's own)
+        assert abs(float(data["areas"].loc[eu, cols].sum().sum()) / float(cap[a]) - 1.0) < 0.015, a
     rb = data["ration_bulk_price"]
     assert rb[("DE000000", "FCER")] < 1.0 < rb[("DE000000", "FPRO")]
     # Sprint 9q: CAPRI's 2030 rations (Upper Bavaria's dairy cows: more other fodder, less silage maize) and usable
@@ -1996,12 +1997,12 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
     assert res["metadata"]["outer_converged"]
     for r in ("FR520000", "IR010000", "DE210000"):
         x = res["supply"][r].activities
-        for a in ("BROI", "LAYS", "PIGF", "DCOW", "SWHE", "OFAR", "ROOF", "MAIF", "GRAS"):
+        for a in ("BROI", "LAYS", "PIGF", "DCOW", "SWHE", "OFAR", "ROOF", "MAIF", "GRAE", "GRAI"):
             tgt = float((data["areas"] if a in data["areas"].columns else data["animal_numbers"]).at[r, a])
             # fodder crops are not calibrated (the fodder balances hold them, see the docstring): their split follows
             # the herds' fodder use and the crops' elasticities (IE04 silage maize -2.9% with CAPRI's fodder
             # elasticities, K32), so they get a looser bound than the calibrated activities
-            tol = 0.05 if a in ("OFAR", "ROOF", "MAIF", "GRAS") else 0.015
+            tol = 0.05 if a in ("OFAR", "ROOF", "MAIF", "GRAE", "GRAI") else 0.015
             if tgt > 1:
                 assert abs(float(x[a]) / tgt - 1.0) < tol, (r, a, float(x[a]), tgt)
 
@@ -2583,7 +2584,7 @@ def test_land_is_fixed_without_the_land_market(data, monkeypatch):
     mo = _cold(sm._models[region])
     base = sm.run(price_signals=None, regions=[region])[region]
     from capri_mod.supply.supply_module import CROPS
-    arable = [a for a in CROPS if a not in ("GRAS",) + mo.PERMANENT_LAND_CROPS]      # the arable_land row
+    arable = [a for a in CROPS if a not in ("GRAE", "GRAI") + mo.PERMANENT_LAND_CROPS]      # the arable_land row
     limit = max(float(mo._land_of("ARABLE")) + float(mo._land_of("FALLOW")),
                 sum(float(mo._base_levels().get(a, 0.0)) for a in arable))
 
@@ -2692,18 +2693,23 @@ def test_fertiliser_substitution_is_exact_at_base(data):
             f"a cow should weigh more where manure is saturated: {cow}"
 
 
-def test_grass_intensity_delta_extensive_lowers_surplus(data):
-    """CAPRI's grassland split (Sprint 7a): a hectare moved from intensive (GRAI) to extensive (GRAE)
-    grassland uses less mineral N, removes less N and lowers the gross surplus, from CAPRI's own
-    per-activity coefficients; the table covers the regions with grassland."""
-    from capri_mod.environmental.environmental_module import EnvironmentalModule
-    env = EnvironmentalModule(data)
-    d = env.grass_intensity_delta("DE940000")
-    assert d is not None
-    assert d["n_mineral_input"] < 0 and d["n_crop_uptake"] < 0 and d["n_surplus"] < 0
-    assert d["mineral_rate"] < 0
-    gi = data["grass_intensity"]
-    assert len(gi) > 200 and (gi["q_ext"] > 0).all() and gi["share_ext"].between(0, 1).all()
+def test_grassland_activities_and_their_fodder_balance(data):
+    """CAPRI's two grassland activities, extensive GRAE and intensive GRAI, the model's own since S2 (7 November 2026;
+    before, GRAS and a split column): each its own grass output, mineral N and costs from CAPREG, and the grass fodder
+    balance FGRA shared by their production (u_GRAE / u_GRAI = yield_GRAE / yield_GRAI, sum u x area = the herds'
+    grass use)."""
+    import pandas as pd
+    reg = "DE940000"
+    y, a = data["yields"], data["areas"]
+    assert 0 < y.at[reg, "GRAE"] < y.at[reg, "GRAI"]
+    n = pd.read_csv(DATA_DIR / "2017" / "supply" / "nutrients_regional.csv", index_col=0)
+    assert n.at[reg, "GRAE"] < n.at[reg, "GRAI"]
+    fb = data["fodder_balance"][reg]["FGRA"]
+    u = fb["crops"]
+    assert set(u) == {"GRAE", "GRAI"} and abs(u["GRAE"] / u["GRAI"] - y.at[reg, "GRAE"] / y.at[reg, "GRAI"]) < 1e-9
+    herds = data["animal_numbers"].rename(columns={"SCOW": "BCOW", "HEIF": "HFRS"})
+    use = sum(float(herds.at[reg, k]) * t for k, t in fb["use_t_head"].items() if k in herds.columns)
+    assert abs(sum(u[c] * a.at[reg, c] for c in u) - use) < 1e-6 * use
 
 
 def test_cover_crop_requirement_and_winter_cover_row(data):
@@ -2766,9 +2772,9 @@ def test_histosol_emissions_and_fallowing_calibrated(data):
     assert (h["ef_n2o_crop"].dropna().between(2.7, 13.0 + 1e-9)).all()    # 13.000000000000002: written to the last digit
     assert h.loc["DE940000", "share_grass"] > 0.3 and h.loc["DE940000", "n2o_t_ha_crop"] > 0
     A = data["areas"]
-    crops = [c for c in A.columns if c != "GRAS"]
+    crops = [c for c in A.columns if c not in ("GRAE", "GRAI")]
     kt = (A[crops].sum(axis=1) * h["n2o_t_ha_crop"].reindex(A.index).fillna(0)
-          + A["GRAS"] * h["n2o_t_ha_grass"].reindex(A.index).fillna(0))
+          + (A["GRAE"] + A["GRAI"]) * h["n2o_t_ha_grass"].reindex(A.index).fillna(0))
     assert 10.0 < float(kt.sum()) * 298.0 / 1000.0 < 20.0          # Mt CO2-eq
     assert (h["pmp_sqr_crop"].dropna() > 0).all()
 
@@ -2892,8 +2898,8 @@ def test_capri_reference_trajectory_reproduces_its_crop_levels(data):
         A = load_all_data(str(DATA_DIR))["areas"]
     assert len(A.index) == 250
     ini = pd.read_csv(DATA_DIR / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz")
-    # CAPRI's SETA row is VSET (K115), its GRAS row GRAE + GRAI
-    ini = ini[(ini["item"] == "LEVL") & ~ini["activity"].isin(["SETA", "GRAE", "GRAI"])]
+    # CAPRI's SETA row is VSET (K115), its GRAS row GRAE + GRAI (the model's own since S2, 7 November 2026)
+    ini = ini[(ini["item"] == "LEVL") & ~ini["activity"].isin(["SETA", "GRAS"])]
     cap = {}
     for r in ini.itertuples():
         a = M.get(r.activity, r.activity)
@@ -3193,8 +3199,11 @@ def test_fixed_activities_land_market_and_grass_as_capri(model):
     a = model.data["areas"]
     assert [r for r in a.index if a.loc[r].sum() > 0 and r not in lm] == []
     y = model.data["yields"]
-    assert abs(y.at["DE110000", "GRAS"] - 32245.664 * 0.22 / 1000.0) < 1e-3
-    assert abs(y.at["DK000000", "GRAS"] - 35718.29 * 0.22 / 1000.0) < 1e-2          # was a template value of ~5 t
+    # CAPRI's grass output of GRAE and GRAI (res_17DE: 19,347.398 and 45,143.930 kg/ha; their mean, 32,245.664, the
+    # model's GRAS until S2, 7 November 2026)
+    assert abs(y.at["DE110000", "GRAE"] - 19347.398 * 0.22 / 1000.0) < 1e-3
+    assert abs(y.at["DE110000", "GRAI"] - 45143.930 * 0.22 / 1000.0) < 1e-3
+    assert abs(0.5 * (y.at["DK000000", "GRAE"] + y.at["DK000000", "GRAI"]) - 35718.29 * 0.22 / 1000.0) < 1e-2   # was ~5 t
     regs = ["ES610000", "FR520000"]
     s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=2)
     for r in regs:
@@ -3563,7 +3572,7 @@ def test_capri_activity_bounds(data):
     A, b, _, _ = m._build_constraints()
     lab = list(m.ev.row_labels)
     x0 = m._base_levels()
-    for a in ("DCOW", "SHGF", "SWHE", "GRAS"):
+    for a in ("DCOW", "SHGF", "SWHE", "GRAE"):
         v = float(x0.get(a, 0.0))
         if v <= 1e-8:
             continue
@@ -3826,7 +3835,7 @@ def test_npk_crop_need_is_the_crops_own():
     d = t[(t.capri_region == "DE210000") & (t.nutrient == "N")].set_index("model_crop").need_kg_ha
     assert d["FALL"] < 10.0 < d["SWHE"]
     assert d["GRAE"] < 0.5 * d["GRAI"]
-    assert abs(d["GRAS"] - 0.5 * (d["GRAE"] + d["GRAI"])) < 1.0          # equal areas at the 2030 reference
+    assert "GRAS" not in d.index                      # GRAE and GRAI the model's own crops since S2 (7 November 2026)
 
 
 def test_n_cascade_reproduces_capri():
@@ -4203,7 +4212,7 @@ def test_capri_2030_animal_terms_and_land_market(data):
         g = pm[reg]
         for a in ("DCOW", "PIGF", "BCOW"):
             assert g.get((a, a), 0.0) > 0, (reg, a)
-            assert not any((a, c) in g for c in ("SWHE", "BARL", "GRAS")), (reg, a)
+            assert not any((a, c) in g for c in ("SWHE", "BARL", "GRAE", "GRAI")), (reg, a)
     # scale (Q = g / x at the model's herd, so g = Q x is the marginal-cost change per head for a 100% herd change): of
     # the order of the per-head output value (DE11 fattening pigs about 420 EUR); the first version (g = h X^2) was 100
     # to 25,000 times steeper
@@ -4407,7 +4416,7 @@ def test_greendeal_input_changes_follow_capri(monkeypatch):
     nr0 = mo.net_revenues.copy()
     o_R, o_a = mo._organic_region_target(0.25), mo._organic_crop_target(crop, 0.25)
     assert 0 < o_R < 0.5 and o_a > 0
-    assert mo._organic_crop_target("GRAS", 0.25) == 0.0, "grassland is not one of CAPRI's organic crops"
+    assert mo._organic_crop_target("GRAE", 0.25) == 0.0, "grassland is not one of CAPRI's organic crops"
 
     mo._apply_greendeal_input_changes(0.25, 0.50)
     topup = 2 * o_a * eful

@@ -29,7 +29,8 @@ OLIV,crop,OLIV,OLIV,CAPRI's own activity (PACT)
 TABO,crop,TABO,TABO,CAPRI's own activity (PACT)
 TOBA,crop,TOBA,TOBA,CAPRI's own activity (PACT)
 TEXT,crop,TEXT,TEXT,CAPRI's own activity (PACT)
-GRAS,crop,GRAS,GRAE;GRAI,"CAPRI's own activity (PACT); in CAPRI's supply model (CAPMOD) the activities with PMP terms: GRAE (Gras and grazings production activity extensive), GRAI (Gras and grazings production activity intensive)"
+GRAE,crop,GRAE,GRAE,"CAPRI's own activity (PACT; Gras and grazings production activity extensive); with GRAI the model's GRAS until S2, 7 November 2026"
+GRAI,crop,GRAI,GRAI,"CAPRI's own activity (PACT; Gras and grazings production activity intensive)"
 MAIF,crop,MAIF,MAIF,CAPRI's own activity (PACT)
 OFAR,crop,OFAR,OFAR,CAPRI's own activity (PACT)
 ROOF,crop,ROOF,ROOF,CAPRI's own activity (PACT)

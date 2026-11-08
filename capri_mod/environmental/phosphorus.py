@@ -99,14 +99,9 @@ class PhosphorusBlock:
             yr[c] = float(y) / b if (b > 0 and y is not None and float(y) >= 0) else 1.0
         x = {c: max(float(acts.get(c, 0.0) or 0.0), 0.0) for c in CROPS}
         h = {a: max(float(acts.get(a, 0.0) or 0.0), 0.0) for a in ANIMALS}
-        z = float(getattr(supply_result, "grass_ext_shift", 0.0) or 0.0) if supply_result is not None else 0.0
         # removal and residues (EXPPRD, CRESID)
         expprd = sum(x[c] * C.coef(cr, c)[0] * yr[c] for c in CROPS)
         cresid = sum(x[c] * C.coef(cr, c)[1] * yr[c] for c in CROPS)
-        if z:
-            ge, gi = C.coef(cr, "GRAE"), C.coef(cr, "GRAI")
-            expprd += z * (ge[0] - gi[0]) * yr.get("GRAS", 1.0)
-            cresid += z * (ge[1] - gi[1]) * yr.get("GRAS", 1.0)
         # excretion (EXCRET)
         manp = {a: D.manure_per_head(region, "P", a) for a in ANIMALS}
         excret = sum(h[a] * manp[a] for a in ANIMALS)
@@ -146,11 +141,7 @@ class PhosphorusBlock:
                 ys_ = b_ * yr[c] / float(_pf[c]) if float(_pf.get(c, 0.0) or 0.0) > 0 else None
                 sq[c] = (need_yield_factor(region, c, b_, b_ * yr[c], None if ys_ is None else float(ys_), "P")
                          if (yr[c] > 0 and b_ > 0) else (1.0 if yr[c] > 0 else 0.0))
-            grass = None
-            if z:
-                grass = (z, D.crop_coef(cr, "P", "GRAE", "need_kg_ha") - D.crop_coef(cr, "P", "GRAI", "need_kg_ha"),
-                         sq.get("GRAS", 1.0))
-            m = _pb.nutned_mineral(D, cr, need, own, own_perm, pool, mine0, xb, x, sq, E0, applied, grass)
+            m = _pb.nutned_mineral(D, cr, need, own, own_perm, pool, mine0, xb, x, sq, E0, applied)
             if m is None:
                 raise RuntimeError(f"no CAPRI P need data for {region} ({cr})")
             minfer = max(0.0, m)

@@ -239,14 +239,12 @@ class FertilisationBlock:
             float(sum(np.asarray(x_start, float)[j] for j in land_cols))
         kap = _st.setdefault(self.par, "npk_kappa", {})
         out = {"capri_region": cr, "nutrients": {}, "land_cols": land_cols, "crop_cols": crop_cols}
-        # the split columns: the grassland split moves area from CAPRI's GRAI to GRAE (z = GRAE - base GRAE, each of the
-        # two half the grassland at base), so the GRAS groups' need changes by z x (need GRAE - need GRAI); the animal
+        # the split columns (GRAE and GRAI are the model's own activities since S2, 7 November 2026; before, the
+        # grassland split column moved area from GRAI to GRAE and changed the GRAS groups' need): the animal
         # split and option columns change their animal's manure in the proportion of their manure per head to the
         # animal's (the tables' dmann_rel / d_mann_rel, the factor their columns carry in the N rows), which reaches
         # ManureNPK_. Until 29 October 2026 the factor was read off the manure-application row or the N row, which
         # exist only with an N target: without one the split columns left the manure in NUTNED_ unchanged (K105).
-        colsl = self._aug_col_labels(n_cols)
-        j_gz = colsl.index("grass_z") if "grass_z" in colsl else None
         man_split = self._split_manure_factors(n_cols, acts)
         for nut in NUTRIENTS:
             sq = sqn[nut]
@@ -312,11 +310,6 @@ class FertilisationBlock:
                 if not modes:
                     continue
                 needl = [(j, sh * k * need[j] * sq.get(acts[j], 1.0)) for j, sh in crops if need[j] > 0]
-                if j_gz is not None and "GRAS" in acts:
-                    sh_g = float(shares.get("GRAS", {}).get(gname, 0.0))
-                    dn = D.crop_coef(cr, nut, "GRAE", "need_kg_ha") - D.crop_coef(cr, nut, "GRAI", "need_kg_ha")
-                    if sh_g > 0 and dn != 0.0:
-                        needl.append((j_gz, sh_g * k * dn * sq.get("GRAS", 1.0)))
                 groups.append({"g": gname, "perm": perm, "acc": acc, "modes": modes, "crops": crops,
                                "need": needl,
                                "own": [(j, sh * k_own * own[j]) for j, sh in crops if perm and own[j] > 0], "Aref": Aref})
@@ -492,10 +485,6 @@ class FertilisationBlock:
                 mp[pc[0]] = sub                 # export: the row has -(1 - sub): -1 organic, +sub mineral
             if pc[1] < A.shape[1]:
                 mp[pc[1]] = -sub
-        gc = getattr(self.ev, "grass_col", None)
-        if gc is not None and gc < A.shape[1]:
-            d = env_.grass_intensity_delta(rid) or {}
-            mp[gc] = float(d.get("n_mineral_input", 0.0))
         cols = self._aug_col_labels(A.shape[1])
         for j, lab in enumerate(cols):
             a = None

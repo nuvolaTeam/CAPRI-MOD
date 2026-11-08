@@ -125,7 +125,8 @@ CREATE TABLE sup_crop_premium (
     TABO DOUBLE NOT NULL,
     TOBA DOUBLE NOT NULL,
     TEXT DOUBLE NOT NULL,
-    GRAS DOUBLE NOT NULL,
+    GRAE DOUBLE NOT NULL,
+    GRAI DOUBLE NOT NULL,
     MAIF DOUBLE NOT NULL,
     OFAR DOUBLE NOT NULL,
     ROOF DOUBLE NOT NULL,
@@ -159,7 +160,8 @@ INSERT INTO value_units VALUES
   ('sup_crop_premium', 'WINE', NULL, 'open', 'crop_premium.WINE: unit to be established'),
   ('sup_crop_premium', 'OLIV', NULL, 'open', 'crop_premium.OLIV: unit to be established'),
   ('sup_crop_premium', 'TABO', NULL, 'open', 'crop_premium.TABO: unit to be established'),
-  ('sup_crop_premium', 'GRAS', NULL, 'open', 'crop_premium.GRAS: unit to be established'),
+  ('sup_crop_premium', 'GRAE', NULL, 'open', 'crop_premium.GRAE: unit to be established'),
+  ('sup_crop_premium', 'GRAI', NULL, 'open', 'crop_premium.GRAI: unit to be established'),
   ('sup_crop_premium', 'TOBA', NULL, 'open', 'crop_premium.TOBA: unit to be established'),
   ('sup_crop_premium', 'MAIF', NULL, 'open', 'crop_premium.MAIF: unit to be established'),
   ('sup_crop_premium', 'RAPE', NULL, 'open', 'crop_premium.RAPE: unit to be established'),
@@ -223,40 +225,6 @@ CREATE TABLE sup_grass_dm_content (
 COMMENT ON TABLE sup_grass_dm_content IS 'Crop yields, producer prices, input costs and CAP premiums for every model region from CAPRI''s 2017 results (tools/build/build_crop_economics_2017.py)';
 INSERT INTO value_units VALUES
   ('sup_grass_dm_content', 'drma', NULL, 'open', 'grass_dm_content.drma: unit to be established');
-
--- file: capri_data/2017/supply/grass_intensity.csv
-CREATE TABLE sup_grass_intensity (
-    region VARCHAR NOT NULL,
-    capri_region VARCHAR NOT NULL,
-    share_ext DOUBLE NOT NULL,
-    yield_ext_rel DOUBLE NOT NULL,
-    yield_int_rel DOUBLE NOT NULL,
-    area_ext DOUBLE NOT NULL,
-    area_int DOUBLE NOT NULL,
-    q_ext DOUBLE NOT NULL,
-    q_int DOUBLE NOT NULL,
-    q_source VARCHAR NOT NULL,
-    q_ext_capri2030 DOUBLE NOT NULL,
-    q_int_capri2030 DOUBLE NOT NULL,
-    q_source_capri2030 VARCHAR NOT NULL,
-    q_ext_recipe2030 DOUBLE NOT NULL,
-    q_int_recipe2030 DOUBLE NOT NULL,
-    q_source_recipe2030 VARCHAR NOT NULL,
-    PRIMARY KEY (region, capri_region, q_source, q_source_capri2030, q_source_recipe2030)
-);
-COMMENT ON TABLE sup_grass_intensity IS 'CAPRI''s two grassland activities, extensive GRAE and intensive GRAI, per model region. (tools/build/build_grass_intensity.py)';
-INSERT INTO value_units VALUES
-  ('sup_grass_intensity', 'share_ext', NULL, 'open', 'grass_intensity.share_ext: unit to be established'),
-  ('sup_grass_intensity', 'yield_ext_rel', NULL, 'open', 'grass_intensity.yield_ext_rel: unit to be established'),
-  ('sup_grass_intensity', 'yield_int_rel', NULL, 'open', 'grass_intensity.yield_int_rel: unit to be established'),
-  ('sup_grass_intensity', 'area_ext', NULL, 'open', 'grass_intensity.area_ext: unit to be established'),
-  ('sup_grass_intensity', 'area_int', NULL, 'open', 'grass_intensity.area_int: unit to be established'),
-  ('sup_grass_intensity', 'q_ext', NULL, 'open', 'grass_intensity.q_ext: unit to be established'),
-  ('sup_grass_intensity', 'q_int', NULL, 'open', 'grass_intensity.q_int: unit to be established'),
-  ('sup_grass_intensity', 'q_ext_capri2030', NULL, 'open', 'grass_intensity.q_ext_capri2030: unit to be established'),
-  ('sup_grass_intensity', 'q_int_capri2030', NULL, 'open', 'grass_intensity.q_int_capri2030: unit to be established'),
-  ('sup_grass_intensity', 'q_ext_recipe2030', NULL, 'open', 'grass_intensity.q_ext_recipe2030: unit to be established'),
-  ('sup_grass_intensity', 'q_int_recipe2030', NULL, 'open', 'grass_intensity.q_int_recipe2030: unit to be established');
 
 -- file: capri_data/2017/supply/labour_coef.csv
 CREATE TABLE sup_labour_coef (
@@ -366,7 +334,8 @@ CREATE TABLE sup_nutrients_regional (
     TABO DOUBLE,
     TOBA DOUBLE,
     TEXT DOUBLE,
-    GRAS DOUBLE,
+    GRAE DOUBLE,
+    GRAI DOUBLE,
     MAIF DOUBLE,
     OFAR DOUBLE NOT NULL,
     ROOF DOUBLE,
@@ -400,7 +369,8 @@ INSERT INTO value_units VALUES
   ('sup_nutrients_regional', 'WINE', NULL, 'open', 'nutrients_regional.WINE: unit to be established'),
   ('sup_nutrients_regional', 'OLIV', NULL, 'open', 'nutrients_regional.OLIV: unit to be established'),
   ('sup_nutrients_regional', 'TABO', NULL, 'open', 'nutrients_regional.TABO: unit to be established'),
-  ('sup_nutrients_regional', 'GRAS', NULL, 'open', 'nutrients_regional.GRAS: unit to be established'),
+  ('sup_nutrients_regional', 'GRAE', NULL, 'open', 'nutrients_regional.GRAE: unit to be established'),
+  ('sup_nutrients_regional', 'GRAI', NULL, 'open', 'nutrients_regional.GRAI: unit to be established'),
   ('sup_nutrients_regional', 'TOBA', NULL, 'open', 'nutrients_regional.TOBA: unit to be established'),
   ('sup_nutrients_regional', 'MAIF', NULL, 'open', 'nutrients_regional.MAIF: unit to be established'),
   ('sup_nutrients_regional', 'RAPE', NULL, 'open', 'nutrients_regional.RAPE: unit to be established'),
@@ -604,7 +574,8 @@ CREATE TABLE sup_cap_premium_activity (
     TABO DOUBLE,
     TOBA DOUBLE,
     TEXT DOUBLE,
-    GRAS DOUBLE,
+    GRAE DOUBLE,
+    GRAI DOUBLE,
     MAIF DOUBLE,
     OFAR DOUBLE,
     ROOF DOUBLE,
@@ -630,6 +601,7 @@ CREATE TABLE sup_cap_premium_activity (
     EAAG DOUBLE,
     FODD DOUBLE,
     FRUN DOUBLE,
+    GRAS DOUBLE,
     HEIF DOUBLE,
     HEIH DOUBLE,
     HEIL DOUBLE,
@@ -685,6 +657,8 @@ INSERT INTO value_units VALUES
   ('sup_cap_premium_activity', 'TABO', NULL, 'open', 'cap_premium_activity.TABO: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'TOBA', NULL, 'open', 'cap_premium_activity.TOBA: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'TEXT', NULL, 'open', 'cap_premium_activity.TEXT: unit to be established (per ha for crops, per head for animals)'),
+  ('sup_cap_premium_activity', 'GRAE', NULL, 'open', 'cap_premium_activity.GRAE: unit to be established (per ha for crops, per head for animals)'),
+  ('sup_cap_premium_activity', 'GRAI', NULL, 'open', 'cap_premium_activity.GRAI: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'GRAS', NULL, 'open', 'cap_premium_activity.GRAS: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'MAIF', NULL, 'open', 'cap_premium_activity.MAIF: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'FALL', NULL, 'open', 'cap_premium_activity.FALL: unit to be established (per ha for crops, per head for animals)'),

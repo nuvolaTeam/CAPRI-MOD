@@ -57,7 +57,6 @@ def main():
     wcs0 = cc.read_wcs(cc.WCS)
     base = _load(ROOT / "tools" / "build" / "build_capri_base.py")
     crop_map = dict(base.CROP_MAP)
-    crop_map["GRAS"] = ("GRAE", "GRAI")
     capri_acts = sorted({x for v in crop_map.values() for x in v})
     cover = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "cover_crops.csv")
 

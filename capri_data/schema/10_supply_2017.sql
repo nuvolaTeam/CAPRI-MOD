@@ -51,9 +51,10 @@ CREATE TABLE yields (
 );
 COMMENT ON TABLE yields IS 'yields 2017: crops CAPRI''s YILD / 1000 level-weighted over the crop''s CAPRI activities (build_crop_economics_2017.py), GRAS CAPRI''s fresh-matter YILD unscaled, animals CAPRI''s YILD / 1000 per model head (build_animal_yields.py)';
 INSERT INTO value_units SELECT 'yields', code, 'U_TonPerHa', 'builder', 'CAPRI''s YILD / 1000 (build_crop_economics_2017.py: t/ha)'
-FROM model_activities WHERE kind = 'crop' AND code NOT IN ('GRAS', 'OCRO', 'OIND', 'NURS', 'FLOW');
+FROM model_activities WHERE kind = 'crop' AND code NOT IN ('GRAE', 'GRAI', 'OCRO', 'OIND', 'NURS', 'FLOW');
 INSERT INTO value_units VALUES
-  ('yields', 'GRAS', 'U_kgperha', 'builder', 'CAPRI''s YILD of GRAS unscaled, fresh matter (loaders: converted to dry matter with CAPRI''s DRMA)'),
+  ('yields', 'GRAE', 'U_kgperha', 'builder', 'CAPRI''s grass output (GRAS) of GRAE, fresh matter (loaders: converted to dry matter with CAPRI''s DRMA)'),
+  ('yields', 'GRAI', 'U_kgperha', 'builder', 'CAPRI''s grass output (GRAS) of GRAI, fresh matter (loaders: converted to dry matter with CAPRI''s DRMA)'),
   ('yields', 'OCRO', 'U_ValueUnitPerHa', 'builder', 'CAPRI''s YILD / 1000: a value-measured crop, CAPRI''s MPRI an index near 1000 and MREV = YILD / 1000 x MPRI as for every crop (checked in res_17NL: NL320000)'),
   ('yields', 'OIND', 'U_ValueUnitPerHa', 'builder', 'CAPRI''s YILD / 1000: a value-measured crop, CAPRI''s MPRI an index near 1000 and MREV = YILD / 1000 x MPRI as for every crop (checked in res_17NL: NL320000)'),
   ('yields', 'NURS', 'U_ValueUnitPerHa', 'builder', 'CAPRI''s YILD / 1000: a value-measured crop, CAPRI''s MPRI an index near 1000 and MREV = YILD / 1000 x MPRI as for every crop (checked in res_17NL: NL320000)'),
@@ -97,9 +98,10 @@ CREATE TABLE producer_prices (
 );
 COMMENT ON TABLE producer_prices IS 'EU producer prices 2017 (build_eu_producer_prices.py): crops from CAPRI''s regional prices; SHGM, SHGF from tools/lib/_sheep_goat.eu_prices; VSET''s and FALL''s 0 (SETA''s until S2, 7 November 2026) from sources/unsourced/producer_prices_no_builder.csv';
 INSERT INTO value_units SELECT 'producer_prices', code, 'U_EuPerTon', 'builder', 'revenue over production of CAPRI''s YILD x MPRI (build_crop_economics_2017.py: EUR/t)'
-FROM model_activities WHERE kind = 'crop' AND code NOT IN ('GRAS', 'VSET', 'FALL', 'OCRO', 'OIND', 'NURS', 'FLOW');
+FROM model_activities WHERE kind = 'crop' AND code NOT IN ('GRAE', 'GRAI', 'VSET', 'FALL', 'OCRO', 'OIND', 'NURS', 'FLOW');
 INSERT INTO value_units VALUES
-  ('producer_prices', 'GRAS', 'U_EuPerTon', 'builder', 'CAPRI''s MREV over the dry-matter yield (build_crop_economics_2017.py): EUR per t of dry matter'),
+  ('producer_prices', 'GRAE', 'U_EuPerTon', 'builder', 'CAPRI''s MREV over the dry-matter yield (build_crop_economics_2017.py): EUR per t of dry matter'),
+  ('producer_prices', 'GRAI', 'U_EuPerTon', 'builder', 'CAPRI''s MREV over the dry-matter yield (build_crop_economics_2017.py): EUR per t of dry matter'),
   ('producer_prices', 'VSET', 'U_EuPerTon', 'builder', '0 by convention (producer_prices_no_builder.csv)'),
   ('producer_prices', 'FALL', 'U_EuPerTon', 'builder', '0 by convention (producer_prices_no_builder.csv)');
 -- (OCRO, OIND, NURS, FLOW have no EU producer price row)

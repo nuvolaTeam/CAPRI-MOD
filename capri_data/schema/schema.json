@@ -3212,7 +3212,13 @@
      "basis": "CAPRI's LEVL of crop activities (CAPRIunits.gdx P_CAPRIunits: U_1000ha)"
     },
     {
-     "item": "GRAS",
+     "item": "GRAE",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "CAPRI's LEVL of crop activities (CAPRIunits.gdx P_CAPRIunits: U_1000ha)"
+    },
+    {
+     "item": "GRAI",
      "unit": "U_1000ha",
      "status": "capri",
      "basis": "CAPRI's LEVL of crop activities (CAPRIunits.gdx P_CAPRIunits: U_1000ha)"
@@ -3410,7 +3416,6 @@
      "build_eu_producer_prices",
      "build_fodder_balance",
      "build_ghg_coefs_2017",
-     "build_grass_intensity",
      "build_irrigation_2017",
      "build_land_market",
      "build_manure_losses",
@@ -3474,7 +3479,6 @@
      "build_fodder_balance",
      "build_genetics_effects",
      "build_ghg_coefs_2017",
-     "build_grass_intensity",
      "build_land_market",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -3667,7 +3671,6 @@
      "build_fodder_balance",
      "build_genetics_effects",
      "build_ghg_coefs_2017",
-     "build_grass_intensity",
      "build_land_market",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -4505,7 +4508,6 @@
      "build_fodder_balance",
      "build_genetics_effects",
      "build_ghg_coefs_2017",
-     "build_grass_intensity",
      "build_land_market",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -4632,7 +4634,6 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_gl_demand",
-     "build_grass_intensity",
      "build_land_market",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -4830,7 +4831,6 @@
      "build_fodder_balance",
      "build_genetics_effects",
      "build_ghg_coefs_2017",
-     "build_grass_intensity",
      "build_land_market",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -12034,7 +12034,7 @@
    "file": "capri_data/2017/feed/fodder_balance_2017.csv",
    "declared_in": "25_feed.sql",
    "layout": [],
-   "comment": "the regional balances of the non-tradable fodder (CAPRI supply_model.gms SUPBAL_): the crop producing it, the usable fresh fodder per ha (base fodder use / base area) and its base value (CAPRI's UVAG); built from feed_ration_2017.csv, base_areas.csv and animal_numbers.csv (tools/build/build_fodder_balance.py; fodder_balance_2017.json until 31 October 2026; capri_mod/data/nested_tables.py)",
+   "comment": "the regional balances of the non-tradable fodder (CAPRI supply_model.gms SUPBAL_): the crops producing it (one row each: grass FGRA from GRAE and GRAI since S2, 7 November 2026), the usable fresh fodder per ha (base fodder use / base area) and its base value (CAPRI's UVAG); built from feed_ration_2017.csv, base_areas.csv and animal_numbers.csv (tools/build/build_fodder_balance.py; fodder_balance_2017.json until 31 October 2026; capri_mod/data/nested_tables.py)",
    "columns": [
     {
      "name": "region",
@@ -12064,7 +12064,8 @@
    ],
    "primary_key": [
     "region",
-    "fodder"
+    "fodder",
+    "crop"
    ],
    "unique": [],
    "foreign_keys": [
@@ -18331,7 +18332,6 @@
      "build_fodder_balance",
      "build_genetics_effects",
      "build_ghg_coefs_2017",
-     "build_grass_intensity",
      "build_labour_setaside",
      "build_land_market",
      "build_livestock_n_export_coef",
@@ -18519,7 +18519,6 @@
      "build_fodder_balance",
      "build_genetics_effects",
      "build_ghg_coefs_2017",
-     "build_grass_intensity",
      "build_land_market",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -18627,7 +18626,6 @@
      "build_fodder_balance",
      "build_genetics_effects",
      "build_ghg_coefs_2017",
-     "build_grass_intensity",
      "build_land_market",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -18723,7 +18721,6 @@
      "build_fodder_balance",
      "build_genetics_effects",
      "build_ghg_coefs_2017",
-     "build_grass_intensity",
      "build_land_market",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -18823,7 +18820,6 @@
      "build_fodder_balance",
      "build_genetics_effects",
      "build_ghg_coefs_2017",
-     "build_grass_intensity",
      "build_land_market",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -19008,7 +19004,6 @@
      "build_fodder_balance",
      "build_genetics_effects",
      "build_ghg_coefs_2017",
-     "build_grass_intensity",
      "build_land_market",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -19098,7 +19093,6 @@
      "build_fodder_balance",
      "build_genetics_effects",
      "build_ghg_coefs_2017",
-     "build_grass_intensity",
      "build_land_market",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -22483,7 +22477,13 @@
      "basis": "0 by convention (producer_prices_no_builder.csv)"
     },
     {
-     "item": "GRAS",
+     "item": "GRAE",
+     "unit": "U_EuPerTon",
+     "status": "builder",
+     "basis": "CAPRI's MREV over the dry-matter yield (build_crop_economics_2017.py): EUR per t of dry matter"
+    },
+    {
+     "item": "GRAI",
      "unit": "U_EuPerTon",
      "status": "builder",
      "basis": "CAPRI's MREV over the dry-matter yield (build_crop_economics_2017.py): EUR per t of dry matter"
@@ -22775,7 +22775,6 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_gl_demand",
-     "build_grass_intensity",
      "build_histosol",
      "build_intensity_q_2030",
      "build_irrigation_2017",
@@ -22981,7 +22980,6 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_gl_demand",
-     "build_grass_intensity",
      "build_land_market",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -23380,7 +23378,6 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_gl_demand",
-     "build_grass_intensity",
      "build_histosol",
      "build_intensity_q_2030",
      "build_irrigation_2017",
@@ -23592,7 +23589,6 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_gl_demand",
-     "build_grass_intensity",
      "build_histosol",
      "build_intensity_q_2030",
      "build_irrigation_2017",
@@ -31672,60 +31668,8 @@
     "model": [],
     "builders": [
      "build_cattle_intensity",
-     "build_dairy_intensity",
-     "build_grass_intensity"
+     "build_dairy_intensity"
     ],
-    "checks": [],
-    "tests": []
-   }
-  },
-  "src_intensity_q_recipe2017": {
-   "file": "capri_data/sources/intermediate/baseline_pmp/intensity_q_recipe2017.csv",
-   "declared_in": "30_sources.sql",
-   "layout": [],
-   "comment": "Per model region (a CAPRI regional unit) and activity of the intensity splits: the curvature on the activity level, c = 1/(1' Q^-1 1), from capri-mod's own 2017 terms by CAPRI's recipe (recipe_2017_quad_techn.csv); read for the set-aside split's base-year weights (tools/build/build_intensity_q_2030.py).",
-   "columns": [
-    {
-     "name": "model_region",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "activity",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "value",
-     "type": "DOUBLE",
-     "not_null": true
-    }
-   ],
-   "primary_key": [
-    "model_region",
-    "activity"
-   ],
-   "unique": [],
-   "foreign_keys": [],
-   "checks": [],
-   "units": [
-    {
-     "item": "value",
-     "unit": null,
-     "status": "open",
-     "basis": "intensity_q_recipe2017.value: unit to be established"
-    }
-   ],
-   "provenance": {
-    "nature": "capri",
-    "origins": "CAPRI",
-    "builder": "build_intensity_q_2030",
-    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/estnlp_results_PELA.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
-   },
-   "notes": [],
-   "read_by": {
-    "model": [],
-    "builders": [],
     "checks": [],
     "tests": []
    }
@@ -31778,8 +31722,7 @@
     "model": [],
     "builders": [
      "build_cattle_intensity",
-     "build_dairy_intensity",
-     "build_grass_intensity"
+     "build_dairy_intensity"
     ],
     "checks": [],
     "tests": []
@@ -34431,8 +34374,7 @@
     "model": [],
     "builders": [
      "build_cattle_intensity",
-     "build_dairy_intensity",
-     "build_grass_intensity"
+     "build_dairy_intensity"
     ],
     "checks": [
      "tools/check/pmp_recipe_check.py"
@@ -34833,7 +34775,6 @@
     "model": [],
     "builders": [
      "build_animal_pmp_capri_2030",
-     "build_intensity_q_2030",
      "build_pmp_capri_2030"
     ],
     "checks": [
@@ -35531,7 +35472,12 @@
      "not_null": false
     },
     {
-     "name": "GRAS",
+     "name": "GRAE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "GRAI",
      "type": "DOUBLE",
      "not_null": false
     },
@@ -35657,6 +35603,11 @@
     },
     {
      "name": "FRUN",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "GRAS",
      "type": "DOUBLE",
      "not_null": false
     },
@@ -35934,6 +35885,18 @@
      "unit": null,
      "status": "open",
      "basis": "cap_premium_activity.FRUN: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "GRAE",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.GRAE: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "GRAI",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.GRAI: unit to be established (per ha for crops, per head for animals)"
     },
     {
      "item": "GRAS",
@@ -37033,7 +36996,12 @@
      "not_null": true
     },
     {
-     "name": "GRAS",
+     "name": "GRAE",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "GRAI",
      "type": "DOUBLE",
      "not_null": true
     },
@@ -37113,10 +37081,16 @@
      "basis": "crop_premium.FLOW: unit to be established"
     },
     {
-     "item": "GRAS",
+     "item": "GRAE",
      "unit": null,
      "status": "open",
-     "basis": "crop_premium.GRAS: unit to be established"
+     "basis": "crop_premium.GRAE: unit to be established"
+    },
+    {
+     "item": "GRAI",
+     "unit": null,
+     "status": "open",
+     "basis": "crop_premium.GRAI: unit to be established"
     },
     {
      "item": "MAIF",
@@ -37566,187 +37540,6 @@
     "origins": "CAPRI",
     "builder": "build_crop_economics_2017",
     "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
-   },
-   "notes": [],
-   "read_by": {
-    "model": [
-     "capri_mod/data/loaders.py"
-    ],
-    "builders": [],
-    "checks": [],
-    "tests": []
-   }
-  },
-  "sup_grass_intensity": {
-   "file": "capri_data/2017/supply/grass_intensity.csv",
-   "declared_in": "18_supply_more.sql",
-   "layout": [],
-   "comment": "CAPRI's two grassland activities, extensive GRAE and intensive GRAI, per model region. (tools/build/build_grass_intensity.py)",
-   "columns": [
-    {
-     "name": "region",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "capri_region",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "share_ext",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "yield_ext_rel",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "yield_int_rel",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "area_ext",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "area_int",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "q_ext",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "q_int",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "q_source",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "q_ext_capri2030",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "q_int_capri2030",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "q_source_capri2030",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "q_ext_recipe2030",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "q_int_recipe2030",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "q_source_recipe2030",
-     "type": "VARCHAR",
-     "not_null": true
-    }
-   ],
-   "primary_key": [
-    "region",
-    "capri_region",
-    "q_source",
-    "q_source_capri2030",
-    "q_source_recipe2030"
-   ],
-   "unique": [],
-   "foreign_keys": [],
-   "checks": [],
-   "units": [
-    {
-     "item": "area_ext",
-     "unit": null,
-     "status": "open",
-     "basis": "grass_intensity.area_ext: unit to be established"
-    },
-    {
-     "item": "area_int",
-     "unit": null,
-     "status": "open",
-     "basis": "grass_intensity.area_int: unit to be established"
-    },
-    {
-     "item": "q_ext",
-     "unit": null,
-     "status": "open",
-     "basis": "grass_intensity.q_ext: unit to be established"
-    },
-    {
-     "item": "q_ext_capri2030",
-     "unit": null,
-     "status": "open",
-     "basis": "grass_intensity.q_ext_capri2030: unit to be established"
-    },
-    {
-     "item": "q_ext_recipe2030",
-     "unit": null,
-     "status": "open",
-     "basis": "grass_intensity.q_ext_recipe2030: unit to be established"
-    },
-    {
-     "item": "q_int",
-     "unit": null,
-     "status": "open",
-     "basis": "grass_intensity.q_int: unit to be established"
-    },
-    {
-     "item": "q_int_capri2030",
-     "unit": null,
-     "status": "open",
-     "basis": "grass_intensity.q_int_capri2030: unit to be established"
-    },
-    {
-     "item": "q_int_recipe2030",
-     "unit": null,
-     "status": "open",
-     "basis": "grass_intensity.q_int_recipe2030: unit to be established"
-    },
-    {
-     "item": "share_ext",
-     "unit": null,
-     "status": "open",
-     "basis": "grass_intensity.share_ext: unit to be established"
-    },
-    {
-     "item": "yield_ext_rel",
-     "unit": null,
-     "status": "open",
-     "basis": "grass_intensity.yield_ext_rel: unit to be established"
-    },
-    {
-     "item": "yield_int_rel",
-     "unit": null,
-     "status": "open",
-     "basis": "grass_intensity.yield_int_rel: unit to be established"
-    }
-   ],
-   "provenance": {
-    "nature": "capri",
-    "origins": "CAPRI",
-    "builder": "build_grass_intensity",
-    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/capri_export/quadPact_<CC>.txt; $SOURCES/capri_export/quadTechn_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/estnlp_results_PELA.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -39533,7 +39326,12 @@
      "not_null": false
     },
     {
-     "name": "GRAS",
+     "name": "GRAE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "GRAI",
      "type": "DOUBLE",
      "not_null": false
     },
@@ -39613,10 +39411,16 @@
      "basis": "nutrients_regional.FLOW: unit to be established"
     },
     {
-     "item": "GRAS",
+     "item": "GRAE",
      "unit": null,
      "status": "open",
-     "basis": "nutrients_regional.GRAS: unit to be established"
+     "basis": "nutrients_regional.GRAE: unit to be established"
+    },
+    {
+     "item": "GRAI",
+     "unit": null,
+     "status": "open",
+     "basis": "nutrients_regional.GRAI: unit to be established"
     },
     {
      "item": "MAIF",
@@ -42060,7 +41864,12 @@
      "not_null": false
     },
     {
-     "name": "GRAS",
+     "name": "GRAE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "GRAI",
      "type": "DOUBLE",
      "not_null": false
     },
@@ -42186,6 +41995,11 @@
     },
     {
      "name": "FRUN",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "GRAS",
      "type": "DOUBLE",
      "not_null": false
     },
@@ -42463,6 +42277,18 @@
      "unit": null,
      "status": "open",
      "basis": "capri_cap_premium_2030.FRUN: unit to be established"
+    },
+    {
+     "item": "GRAE",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_cap_premium_2030.GRAE: unit to be established"
+    },
+    {
+     "item": "GRAI",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_cap_premium_2030.GRAI: unit to be established"
     },
     {
      "item": "GRAS",
@@ -43738,7 +43564,13 @@
      "basis": "CAPRI's TOIN per ha (build_crop_economics_2017.py: EUR/ha)"
     },
     {
-     "item": "GRAS",
+     "item": "GRAE",
+     "unit": "U_EuPerHa",
+     "status": "builder",
+     "basis": "CAPRI's TOIN per ha (build_crop_economics_2017.py: EUR/ha)"
+    },
+    {
+     "item": "GRAI",
      "unit": "U_EuPerHa",
      "status": "builder",
      "basis": "CAPRI's TOIN per ha (build_crop_economics_2017.py: EUR/ha)"
@@ -44397,10 +44229,16 @@
      "basis": "CAPRI's YILD / 1000: a value-measured crop, CAPRI's MPRI an index near 1000 and MREV = YILD / 1000 x MPRI as for every crop (checked in res_17NL: NL320000)"
     },
     {
-     "item": "GRAS",
+     "item": "GRAE",
      "unit": "U_kgperha",
      "status": "builder",
-     "basis": "CAPRI's YILD of GRAS unscaled, fresh matter (loaders: converted to dry matter with CAPRI's DRMA)"
+     "basis": "CAPRI's grass output (GRAS) of GRAE, fresh matter (loaders: converted to dry matter with CAPRI's DRMA)"
+    },
+    {
+     "item": "GRAI",
+     "unit": "U_kgperha",
+     "status": "builder",
+     "basis": "CAPRI's grass output (GRAS) of GRAI, fresh matter (loaders: converted to dry matter with CAPRI's DRMA)"
     },
     {
      "item": "HFRS",

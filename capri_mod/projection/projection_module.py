@@ -243,9 +243,10 @@ class ProjectionModule:
                 uf = {(r_.region, r_.crop): float(r_.factor) for r_ in read_input(f2).itertuples(index=False)}
                 for reg_, feeds_ in fb.items():
                     for feed_, rec_ in (feeds_ or {}).items():
-                        k_ = (reg_, rec_.get("crop"))
-                        if k_ in uf and "u_t_per_ha" in rec_:
-                            rec_["u_t_per_ha"] = float(rec_["u_t_per_ha"]) * uf[k_]
+                        cr_ = rec_.get("crops") or {}
+                        for c_ in list(cr_):
+                            if (reg_, c_) in uf:
+                                cr_[c_] = float(cr_[c_]) * uf[(reg_, c_)]
         report = reconcile_projected_data(data, base_data=self.model.data)
         return data, report
 

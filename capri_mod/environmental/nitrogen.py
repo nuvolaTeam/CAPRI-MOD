@@ -164,24 +164,13 @@ class NitrogenBlock:
                     res = sum(float(x.levl) * res_ha(x) for x in src) / L * kr
                     fix = sum((float(x.biofix_t) if x.biofix_t == x.biofix_t else 0.0) for x in src) * 1000.0 / L
                     out[mc] = (rem, res, fix)
-                # CAPRI's two grassland activities on their own (the model's GRAS pools
-                # them; grass_intensity_delta() needs each)
-                for gc in CAPMOD_MEMBERS["GRAS"]:
-                    if gc in d and float(d[gc].levl) > 0:
-                        x = d[gc]
-                        out[gc] = (_gross(x) * ke, res_ha(x) * kr,
-                                   (float(x.biofix_t) if x.biofix_t == x.biofix_t else 0.0) * 1000.0 / float(x.levl))
                 cls._CROP_N[r8] = out
         to8 = getattr(cls, "_CROP_N_MAP", {})
         r8 = to8.get(region)
         if r8 is None or r8 not in cls._CROP_N:
             nc = capri_ms(region)
             r8 = nc
-        res = cls._CROP_N.get(r8)
-        ov = getattr(self.ev, "grass_override", None)
-        if ov and res and ov in res:
-            res = dict(res); res["GRAS"] = res[ov]
-        return res
+        return cls._CROP_N.get(r8)
 
     def _base_mineral_rate(self, region, crop):
         """Base mineral N per ha of a crop: CAPRI's regional NMIN; none where CAPRI has none (fallow, set-aside: CAPRI's
@@ -194,57 +183,7 @@ class NitrogenBlock:
                 rate = float(v)
         if rate is None:
             rate = 0.0
-        ov = getattr(self.ev, "grass_override", None)
-        if ov and crop == "GRAS":
-            # one of CAPRI's grassland activities: the GRAS rate in proportion to its need
-            # (removal net of fixation) over the pooled GRAS need
-            self.ev.grass_override = None
-            try:
-                cn = self._capri_crop_n(region) or {}
-            finally:
-                self.ev.grass_override = ov
-            if ov in cn and "GRAS" in cn:
-                w_ov = max(cn[ov][0] - cn[ov][2], 0.0)
-                w_g = max(cn["GRAS"][0] - cn["GRAS"][2], 0.0)
-                if w_g > 0:
-                    rate *= w_ov / w_g
         return rate
-
-    def grass_intensity_delta(self, region, n_intensity=None) -> dict:
-        """Balance change (t N per 1000 ha) of moving grassland from CAPRI's intensive activity
-        GRAI to its extensive GRAE: the unit balance of a hectare of GRAE minus one of GRAI, each
-        with its own CAPRI removal, residues and fixation and its share of the GRAS mineral rate by
-        need, at base yield; manure and residue credits keep the base distribution by need.
-        Used for the supply model's extensification column and for the accounts, so the two agree."""
-        cache = _est.setdefault(self.par, "grass_delta_cache", {})
-        key = (region, tuple(sorted((n_intensity or {}).items())))
-        if key in cache:
-            return cache[key]
-        cn = self._capri_crop_n(region) or {}
-        if "GRAE" not in cn or "GRAI" not in cn:
-            cache[key] = None
-            return None
-        self._need_base(region); self._residue_availability(region)      # base caches first
-        y0 = self._cached_row("yields", region) or {}
-        out = {}
-        try:
-            for gc in CAPMOD_MEMBERS["GRAS"]:
-                self.ev.grass_override = gc
-                out[gc] = self.compute_nitrogen_balance({"GRAS": 1.0}, y0, region, n_intensity)
-        finally:
-            self.ev.grass_override = None
-        d = {k: float(out["GRAE"].get(k, 0.0)) - float(out["GRAI"].get(k, 0.0))
-             for k in out["GRAE"] if isinstance(out["GRAE"].get(k), (int, float))}
-        rates = []
-        for gc in CAPMOD_MEMBERS["GRAS"]:
-            self.ev.grass_override = gc
-            try:
-                rates.append(self._base_mineral_rate(region, "GRAS"))
-            finally:
-                self.ev.grass_override = None
-        d["mineral_rate"] = rates[0] - rates[1]
-        cache[key] = d
-        return d
 
     def _need_weight(self, region, crop):
         """A crop's N need per ha at base yield, the key by which CAPRI distributes manure and
