@@ -43,7 +43,8 @@ ROOT = Path(__file__).resolve().parents[2]
 HERDS = {"DCOW": "DCOW", "BCOW": "SCOW", "BULL": "BULF", "HFRS": "HEIF", "SHGM": "SHGM", "SHGF": "SHGF",
          "PIGF": "PIGF", "LAYS": "HENS", "BROI": "POUF"}
 CROPS_ = {"PULS": "PULS", "SOYA": "SOYA", "SUGB": "SUGB", "DWHE": "DWHE", "SWHE": "SWHE", "CORN": "MAIZ",
-          "BARL": "BARL", "RAPE": "RAPE", "SUNF": "SUNF", "TOMA": "TOMA", "GRAS": "GRAS", "MAIF": "MAIF"}
+          "BARL": "BARL", "RAPE": "RAPE", "SUNF": "SUNF", "TOMA": "TOMA", "GRAE": "GRAE", "GRAI": "GRAI",
+          "MAIF": "MAIF"}
 #: the model's young-animal goods (tools/build/build_young_animals.py) -> CAPRI's products
 YANI = {"calves": ("YCAM", "YCAF"), "young": ("YBUL", "YHEI"), "cows": "YCOW", "piglets": "YPIG", "lambs": "YLAM"}
 PRICES = {"BEEF": "BEEF", "MILK": "COMI", "SGMT": "SGMT", "PORK": "PORK", "PULS": "PULS", "SOYA": "SOYA",

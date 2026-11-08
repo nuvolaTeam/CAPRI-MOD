@@ -26,7 +26,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K120](#k120) | S7 ("capri"): the market supply Hessian measured after the first supply solve had lost most of its response; the baseline calibration's stall rule stopped it uncorrected | fixed: 20 and 37 units, full EU Farm-to-Fork and Green Deal (7 November 2026); open in S7: the baseline calibration's first-round drift (located: set-aside and pulses, the ecological set-aside row) |
 | [K121](#k121) | S2 step 1a: other fodder split into CAPRI's OFAR and ROOF; the fodder roots' feed (FROO) tied to their land for the first time | done on mini-EU (7 November 2026); the full runs and the suite to come |
 | [K122](#k122) | S2 step 1b: set-aside split into CAPRI's VSET and FALL; the winter-cover option's potential counted set-aside CAPRI fills | done on mini-EU (7 November 2026); the full runs and the suite to come |
-| [K123](#k123) | S2 step 1c: grassland split into CAPRI's GRAE and GRAI, the split column z and its late calibration removed; fodder roots' 2030 fodder trajectory was missing since 1a | done on mini-EU (8 November 2026); the full runs and the suite to come |
+| [K123](#k123) | S2 step 1c: grassland split into CAPRI's GRAE and GRAI, the split column z and its late calibration removed; fodder roots' 2030 fodder trajectory was missing since 1a | done (8 November 2026): suite, mini-EU, full-EU Farm-to-Fork and Green Deal |
 
 ## Resolved (107)
 
@@ -2421,4 +2421,21 @@ point (beef animals -21.0% against -21.3%). Grassland 8,059 thousand ha against 
 with K120's finding that the drift is in set-aside and pulses. Against dev (0.05%, 12.3%, 3.6%, 2.8%, 0) the second round
 is larger and the third and fourth smaller; 1a's trace equals dev's, so the change comes with 1b, the set-aside split
 (VSET and FALL measured separately, FALL now under the bounds; not analysed further).
+
+Full EU (S2 branch at 22dac48 against dev, 8 November 2026):
+- Farm-to-Fork (run f3e741eaa428 against dev 9b026803124f): converged in 12 iterations, baseline 8, 1814 s; the 24
+  indicators within 0.2 point; mean absolute deviation from JRC121368 4.53 against 4.56.
+- Green Deal 2030, CAPRI's averaged manure pool price (full_gd_s2.pkl against dev f802d7469075): converged in 21
+  iterations against 47, 5401 s against 6568; the indicators within 0.3 point except manure N2O (-11.6% against -10.8%);
+  mean absolute deviation from CAPRI's figures 8.77 against 8.84. Set-aside under the landscape target: VSET 2,505 to
+  6,702 thousand ha against 2,502 to 4,549, FALL 5,403 to 8,967 against 5,403 to 10,765 (the 1b split: VSET outside the
+  bounds, FALL within them). Low nitrogen feed 59.3% of eligible LU against 54.3%. Not analysed further.
+- Baseline levels against CAPRI's 2030 (compare_baseline_capri.py): GRAE +0.2%, GRAI +0.1%, OFAR -0.8%, ROOF +1.0%,
+  FALL +0.6%, VSET -1.9%.
+- Reporting error found with the Green Deal run: run_f2f_2030.py's histosol area (the denominator of "fallowing
+  histosols") still summed a GRAS activity, so from 1c the grassland histosols were left out (1,823 thousand ha against
+  3,665) and the share showed 84.7%; the idled area itself is unchanged (1,545 thousand ha against dev's 1,524), the
+  share 42.1% against 42.8%. Fixed after the run, with the other scripts still on the old codes (run_vcs_2030.py,
+  compare_baseline_capri.py, pmp_cross_term_check.py: GRAS, OFOD, SETA). The stored full_gd_s2.pkl keeps the wrong
+  denominator.
 

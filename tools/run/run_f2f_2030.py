@@ -225,7 +225,7 @@ def main():
     # 0 vs 0 - while shares of eligible units do not: 38 and 33). Fertiliser options: share of
     # crop area (regions weighted by crop area). Ammonia options: share of animal units weighted
     # by excreted N (units x N per head); 'eligible' = the options' maximum shares, same weights.
-    from capri_mod.data.definitions import CROPS
+    from capri_mod.data.definitions import CROPS, CROPS_ON_LAND
     env = m.env_module
 
     def adoption(r):
@@ -299,8 +299,10 @@ def main():
            "histosol": {"fallow": sum(sum(float(x_) for x_ in (getattr(v, "histosol_fallow", None) or {}).values())
                                       for v in s["supply"].values()),
                         "eligible": float(sum(
-                            (float(m.data["histosol"].at[reg, "share_crop"]) * sum(float(v.activities.get(c, 0.0)) for c in CROPS if c != "GRAS")
-                             + float(m.data["histosol"].at[reg, "share_grass"]) * float(v.activities.get("GRAS", 0.0)))
+                            (float(m.data["histosol"].at[reg, "share_crop"]) * sum(float(v.activities.get(c, 0.0)) for c in CROPS
+                                                                       if c not in CROPS_ON_LAND["GRAS"])
+                             + float(m.data["histosol"].at[reg, "share_grass"])
+                             * sum(float(v.activities.get(g, 0.0)) for g in CROPS_ON_LAND["GRAS"]))
                             for reg, v in s["supply"].items() if m.data.get("histosol") is not None and reg in m.data["histosol"].index))},
            # cattle genomics (breeding.gms): heads adopting and all heads of the animals concerned, scenario
            "endotech": dict(_scen.endotech),

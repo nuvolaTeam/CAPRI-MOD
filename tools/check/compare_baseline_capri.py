@@ -43,8 +43,8 @@ ACT = {"SWHE": "SWHE", "DWHE": "DWHE", "RYEM": "RYEM", "BARL": "BARL", "OATS": "
        "OCER": "OCER", "PARI": "PARI", "RAPE": "RAPE", "SUNF": "SUNF", "SOYA": "SOYA", "OOIL": "OOIL",
        "SUGB": "SUGB", "POTA": "POTA", "PULS": "PULS", "TOMA": "TOMA", "OVEG": "OVEG", "APPL": "APPL",
        "OFRU": "OFRU", "CITR": "CITR", "OLIV": "OLIV", "WINE": "TWIN", "TAGR": "TAGR", "TOBA": "TOBA", "TABO": "TABO",
-       "TEXT": "TEXT", "OIND": "OIND", "OCRO": "OCRO", "NURS": "NURS", "FLOW": "FLOW", "GRAS": "GRAS",
-       "MAIF": "MAIF", "OFAR": "OFAR", "FALL": "FALL",
+       "TEXT": "TEXT", "OIND": "OIND", "OCRO": "OCRO", "NURS": "NURS", "FLOW": "FLOW", "GRAE": "GRAE",
+       "GRAI": "GRAI", "MAIF": "MAIF", "OFAR": "OFAR", "ROOF": "ROOF", "FALL": "FALL", "VSET": "VSET",
        "DCOW": "DCOW", "BCOW": "SCOW", "CALV": "CAMF+CAFF+CAMR+CAFR",
        "PIGS": "SOWS", "SHGM": "SHGM", "SHGF": "SHGF", "LAYS": "HENS"}
 UNIT = {"LAYS": 1000.0}
