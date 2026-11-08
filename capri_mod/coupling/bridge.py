@@ -166,9 +166,7 @@ class BridgeBlock:
         # silently overwrote the livestock mapping above. Removed; dairy, which
         # maps correctly, is kept as it was.)
 
-        if str(_settings().get("market.demand_calibration")) == "capri":
-            market_supply = self._marketed_supply(market_supply, supply_agg)
-        return market_supply
+        return self._marketed_supply(market_supply, supply_agg)
 
     def _marketed_supply(self, market_supply, supply_agg):
         """CAPRI's grofNEprod (S7): the market takes each supply product as the supply models' gross production times
@@ -219,10 +217,9 @@ class BridgeBlock:
         areas = d.get("areas")
         run = set(run_regions or [])
         if non_eu:
-            # non_eu (S7, market.demand_calibration = "capri"): the units outside the run of the non-EU countries with
-            # supply models in the market (Norway), whose market base is CAPRI's whole country; their base output is
-            # added to the country's row as it is (no market supply function: the departure of K83, for these
-            # countries in "capri" only; in "supply" their base is aligned to the units in the run)
+            # non_eu (S7): the units outside the run of the non-EU countries with supply models in the market (Norway),
+            # whose market base is CAPRI's whole country; their base output is added to the country's row as it is (no
+            # market supply function: the departure of K83 for these countries)
             from capri_mod.data.definitions import REGION_TO_COUNTRY
             mm = self.market_module
             units = [r for r in areas.index if not _is_eu(r) and r not in run

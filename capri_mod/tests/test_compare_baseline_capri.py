@@ -35,4 +35,4 @@ def test_capri_mode_read_from_the_run_settings():
     t = _tool()
     assert t.capri_mode({"meta": {"settings": {"market": {"demand_calibration": "capri"}}}})
     assert not t.capri_mode({"meta": {"settings": {"market": {"demand_calibration": "supply"}}}})
-    assert not t.capri_mode({})
+    assert t.capri_mode({})                # the setting removed on 8 November 2026 with its "supply" form

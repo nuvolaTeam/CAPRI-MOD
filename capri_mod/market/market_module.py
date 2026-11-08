@@ -277,14 +277,6 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         return ref
 
     # ------------------------------------------------------------------
-    # The EU's base supply and demand
-    # ------------------------------------------------------------------
-    def set_eu_base(self, base_supply: pd.Series, base_demand: pd.Series):
-        """Record the EU's base supply at the model's own levels (base_demand is not kept: nothing read it)."""
-        self.seen.eu_base_supply = base_supply.astype(float)
-
-
-    # ------------------------------------------------------------------
     # Main solver (tatonnement / Newton)
     # ------------------------------------------------------------------
 

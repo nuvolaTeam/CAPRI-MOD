@@ -58,9 +58,8 @@ def supply_data_fingerprint(data_dir=None) -> str:
 
 class HessianBlock:
     def _measure_pending_hessian(self, pend) -> None:
-        """The market supply Hessian of the baseline that has just run (recorded in _hessian_pending), measured from the
-        state the baseline left: called at the start of the scenario run that needs it, before the scenario changes
-        anything (or right after the baseline the scenario ran for itself)."""
+        """The market supply Hessian of the baseline, measured at the baseline's start on calibrated models (the
+        regional models solved once more at the reference prices first; K120, S7)."""
         from capri_mod.supply.supply_module import RegionalSupplyModel as _RSMh
         _RSMh.nlp_tol = float(self.nlp_tol_final)          # the baseline's solves after its loop
         try:

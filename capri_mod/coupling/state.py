@@ -42,7 +42,7 @@ class ModelParameters(_Slots):
         "feed_rations_stable",  # rations by region, built once per ration model (its identity keys the feed cache)
         "feed_rations_for",   # the ration model feed_rations_stable was built for (identity)
         "excluded_units",     # the EU units outside a run on a subset (K83)
-        "excluded_sup_base",  # the base output of the non-EU supply-model units outside a subset run (S7, "capri")
+        "excluded_sup_base",  # the base output of the non-EU supply-model units outside a subset run (S7)
         "base_start",         # per baseline key: the baseline's price signal, block departures and market ratios (S7)
     )
 
@@ -50,7 +50,6 @@ class ModelParameters(_Slots):
 class ModelSolveState(_Slots):
     """State carried from one outer iteration (or run) to the next."""
     __slots__ = (
-        "hessian_pending",    # what the next run needs to measure the baseline's Hessian
         "relax_w",            # the price step's adaptive step per product
         "relax_gprev",        # the previous gaps per product
         "capri_target_hist",  # CAPRI's price forecast: the last targets
@@ -155,7 +154,7 @@ MOVED_MODEL: dict = {
     "_feed_rations_stable": "par.feed_rations_stable",
     "_feed_rations_for": "par.feed_rations_for",
     "_excluded_units": "par.excluded_units",
-    "_hessian_pending": "sv.hessian_pending",
+    "_hessian_pending": "removed (S7, 8 November 2026: the Hessian is measured at the baseline's start)",
     "_relax_w": "sv.relax_w",
     "_relax_gprev": "sv.relax_gprev",
     "_capri_target_hist": "sv.capri_target_hist",

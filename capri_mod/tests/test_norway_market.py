@@ -117,25 +117,25 @@ def _eu_countries(mm):
     return list(out.items())
 
 
-def _exo_with_norway(mm):
-    """Supply by country: one country per EU market region at that region's CAPRI base (_eu_countries), Norway's 5%
-    above CAPRI's (the supply models' output differs from CAPRI's), with raw milk."""
+def _exo_with_norway(mm, f_no=1.0):
+    """Supply by country: one country per EU market region at that region's base (_eu_countries), Norway's at its base
+    x f_no, with raw milk; after _bilateral_calibrate, the base is CAPRI's calibration point (S7)."""
     cols = list(mm.commodities)
     pairs = _eu_countries(mm)
     rows = [mm.par.base_production.loc[r, cols].astype(float) for r, _ in pairs]
-    no = mm.par.base_production.loc["NO000000", cols].astype(float) * 1.05
+    no = mm.par.base_production.loc["NO000000", cols].astype(float) * f_no
     return pd.DataFrame(rows + [no], index=[c for _, c in pairs] + ["NO"])
 
 
 def test_norway_market_supply_is_its_models_and_the_base_is_reproduced(data):
-    """CAPRI's RMSSUP treatment for Norway: at the reference prices the market reproduces the base with Norway's market
-    supply = its supply models' output (the closure's domestic sales absorb the difference to CAPRI's flows), its raw
-    milk all to its own dairies; Norway's supply responds to its own price relative to the price its models saw, and
-    the EU's supply is not touched by Norway's."""
+    """CAPRI's RMSSUP treatment for Norway: the market calibrated at CAPRI's calibration point (S7) reproduces the base
+    at the reference prices when Norway's market supply (its supply models' output) is CAPRI's, its raw milk all to
+    its own dairies; Norway's supply responds to its own price relative to the price its models saw, and the EU's
+    supply is not touched by Norway's."""
     from capri_mod.market.market_module import MarketModule
     mm = MarketModule(data)
+    mm._bilateral_calibrate()
     exo = _exo_with_norway(mm)
-    mm._bilateral_calibrate(exo)
     r = mm._bilateral_ratio_frame()
     S, D, PAr, F, pc = mm._bilateral_eval(r, exo)
     size = {c: np.maximum(sc.S0 + sc.D0, 1.0) for c, sc in mm.par.bilat.items()}
@@ -179,8 +179,8 @@ def test_norway_raw_milk_responds_inside_the_market(data):
     evaluation); with the switch off the milk is its models'."""
     from capri_mod.market.market_module import MarketModule
     mm = MarketModule(data)
-    exo = _exo_with_norway(mm)
-    mm._bilateral_calibrate(exo)
+    mm._bilateral_calibrate()
+    exo = _exo_with_norway(mm, 1.05)                  # Norway's models 5% above CAPRI's calibration point
     r1 = mm._bilateral_ratio_frame().copy()
     r1.at["NO000000", "BARL"] = 1.10
     m_now = float(exo.at["NO", "MILK"])

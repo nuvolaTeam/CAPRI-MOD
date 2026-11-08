@@ -66,7 +66,7 @@ CAPTRD_MOD.md §12.4).
 
 | ID | What | CAPRI | capri-mod | Status | Details |
 |---|---|---|---|---|---|
-| DEP-5 | The baseline run recalibrates market demand to the supply models' supply in every iteration, and scenarios inherit it frozen. The non-EU use factor is bounded to [0.2, 5]. | arm/market1.gms; simu_calibration_to_supply.gms | market/bilateral_solve.py, bilateral.py | in force (04_code_data_status: capri-mod) | DEPARTURES_FROM_CAPRI.md; PROXY_AUDIT S185 |
+| DEP-5 | Raw milk, the one pooled market commodity: the non-EU regions' raw milk base is FAO's base period (not CAPRI's 2030), cleared in a world pool whose non-EU use factor is bounded to [0.2, 5]; CAPRI clears each region's raw milk in its own dairy block. (The baseline's per-iteration recalibration of market demand to the supply models' supply was removed on 8 November 2026: section 5.) | arm/market1.gms; prep_market.gms | market/bilateral_solve.py, bilateral.py | in force for raw milk (04_code_data_status: capri-mod); to close with the non-EU dairy blocks (S7_DEMAND_CALIBRATION.md build step 3) | DEPARTURES_FROM_CAPRI.md; PROXY_AUDIT S185 |
 | DEP-6 | The water indicator's irrigated shares come from the regional irrigated area (IRR2), not from CAPRI's HPD fit to FSS crop data. | water_database.gms l. 325-640 (cited) | tools/build/build_irrigation_2017.py; water module | in force (indicator) | DEPARTURES_FROM_CAPRI.md |
 | DEP-7 | Non-EU supply: ProdNQ_ at CAPRI's 2030 point with no recalibration: the UK, Turkey and the Western Balkans (29 units) have no supply models. (The land rents held until 4 November 2026: since then CAPRI's market land block, stage 7.) | arm/market_model.gms ProdNQ_; simu_calibration_to_supply.gms | market/supply.py, `_noneu_market_supply_nq` | in force | DEPARTURES_FROM_CAPRI.md; README §10.4 |
 | DEP-8 | Mitigation options not built: LegSh, ConsTill, NoTill, UreaSubst, buffer strips, biodiversity, biochar, SupplementPerc_. Their leaching and runoff terms are held at CAPRI's reference. | envind/; ghgMiti.gms; supply_model.gms | supply/n_leaching.py | K93 open (3-NOP built; UreaSubst port started) | KNOWN_ISSUES K93 |
@@ -140,6 +140,14 @@ ones known to be stale.
 
 The settings switched to CAPRI's form are described in DEPARTURES_FROM_CAPRI.md, "Switched to CAPRI's setting". Also
 switched to CAPRI's form:
+- DEP-5's main part, the market's demand recalibrated to the supply models' supply in every baseline iteration and
+  inherited frozen by the scenarios (`market.demand_calibration = "supply"`): the market is calibrated once per run
+  at CAPRI's own 2030 market data, the baseline a market solution, only the supply side following the supply models
+  (S7, CAPRI's form since 6 November 2026 as an option; the only form since 8 November 2026, the setting and the
+  "supply" code removed: the EU's and Norway's base alignment, the baseline's return at the reference prices, the
+  Hessian measured after the baseline). Validated by the full-EU Farm-to-Fork and Green Deal runs of 7 November 2026
+  (KNOWN_ISSUES K120; baseline prices within a median 0.08% of the "supply" run's, none above 5%). The raw milk pool
+  remains (DEP-5).
 - DEP-42, other fodder one crop-diversification group: OFAR and ROOF are the model's own activities and groups, as
   CAPRI's cropDivGrps_mCact (S2 step 1a, 7 November 2026; KNOWN_ISSUES K121).
 - DEP-3, one EU27 trade block: the EU is CAPRI's two market regions A_EU_WEST and A_EU_EAST (`market.eu_blocks = true`,

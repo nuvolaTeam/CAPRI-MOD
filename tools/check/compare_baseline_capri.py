@@ -62,9 +62,11 @@ PROD_CODE = {"SWHE": "WHEA", "CORN": "MAIZ", "PARI": "RICE", "OLIV": "OLIO", "PO
 
 
 def capri_mode(o) -> bool:
-    """The run's market takes the marketed production (market.demand_calibration = "capri", S7)."""
+    """The run's market takes the marketed production (S7): every run since 8 November 2026, when the setting
+    market.demand_calibration was removed with its "supply" form; a run of 6-8 November with "supply" set is not. (A
+    run before 6 November 2026 has no such setting either and was in the "supply" form: not told apart here.)"""
     s = (o.get("meta") or {}).get("settings") or {}
-    return str((s.get("market") or {}).get("demand_calibration", "")) == "capri"
+    return str((s.get("market") or {}).get("demand_calibration", "capri")) == "capri"
 
 
 def capri_marketed_production():

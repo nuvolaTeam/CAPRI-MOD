@@ -96,8 +96,7 @@ class MarketParameters:
     #: their pristine copies, restored at every baseline run
     base_production0: Any = None
     base_consumption0: Any = None
-    #: the EU's base net exports per region, CAPRI's world balance records, the EU's aligned other uses
-    base_net_exports_eu: Any = None
+    #: CAPRI's world balance records, the EU's aligned other uses
     capri_world_balance: Any = None
     eu_aligned_use: Any = None
     #: the dairy block's base raw milk supply: EU total, per member state, per market region
@@ -142,8 +141,6 @@ class MarketSeen:
     #: calves' milk feed relative to base, EU (None: 1) and per non-EU region with supply models
     fmil_index: Any = None
     fmil_index_sup: Any = None
-    #: the EU's base supply at the model's own levels (set_eu_base); None in a baseline run until it is recorded
-    eu_base_supply: Any = None
 
 
 #: the module attributes refactor stage 2b moved (old name: new place) or removed (step 3, write-only): a read or a
@@ -151,7 +148,7 @@ class MarketSeen:
 MOVED = {
     "base_consumption": "par.base_consumption",
     "_base_consumption0": "par.base_consumption0",
-    "_base_net_exports_eu": "par.base_net_exports_eu",
+    "_base_net_exports_eu": "removed (S7, 8 November 2026: read only by the \"supply\" form)",
     "base_production": "par.base_production",
     "_base_production0": "par.base_production0",
     "_bilat": "par.bilat",
@@ -173,7 +170,7 @@ MOVED = {
     "_demand_cal": "par.demand_cal",
     "_demand_cal_frozen": "par.demand_cal_frozen",
     "_eu_aligned_use": "par.eu_aligned_use",
-    "_eu_base_supply": "seen.eu_base_supply",
+    "_eu_base_supply": "removed (S7, 8 November 2026: read only by the \"supply\" form)",
     "_eu_biof_ratio": "ev.eu_biof_ratio",
     "_eu_feed_now_reg": "ev.eu_feed_now_reg",
     "_eu_food_ratio": "ev.eu_food_ratio",

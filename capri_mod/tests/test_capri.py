@@ -3706,7 +3706,7 @@ def test_fish_and_tropical_products_are_markets_and_processing_is_capris(data):
     for r in mm.EU:                                  # each of the EU's market regions (CAPRI's two blocks)
         H = pq["H"][r]
         assert H[("RAPE", "RAPE")] > 0 and H[("RAPE", "SOYA")] < 0 and H[("RAPO", "SUNO")] == H[("SUNO", "RAPO")]
-    mm._bilateral_calibrate(mm.par.base_production.loc[list(mm.EU)].copy())
+    mm._bilateral_calibrate()
     dom0 = mm._dom0()
     d0 = mm.demand_response(dom0, mm.world_prices_base)
     dp = dom0.copy(); dp["SUNO"] *= 1.05

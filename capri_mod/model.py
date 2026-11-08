@@ -351,17 +351,6 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
     def _run_scenario(self, pol_scenario, scenario, world_price_shock, custom_scenario, max_outer_iter,
                       outer_tolerance, market_max_iter, run_environmental, run_biofuel,
                       carbon_price, biofuel_output_scale, regions, endotech, _mt, _bm=True) -> Dict:
-        # the market supply Hessian of the baseline that has just run, if this run is a scenario on it: measured now,
-        # from the state the baseline left, before this run changes anything (_measure_pending_hessian); any other
-        # run drops it (a scenario on another baseline runs that baseline again, below)
-        _pend = _cst.pop(self.sv, "hessian_pending", None)
-        if (_pend is not None and not (custom_scenario is None and str(scenario).upper() == "BASELINE"
-                                       and not world_price_shock)):
-            from capri_mod.policy.endotech import effective as _et_eff0, key as _et_key0
-            _k0 = (tuple(sorted(regions or list(self.data["areas"].index))),
-                   _et_key0(_et_eff0(getattr(pol_scenario, "endotech", None), endotech)), bool(_mt), bool(_bm))
-            if _pend["key"] == _k0:
-                self._measure_pending_hessian(_pend)
         if outer_tolerance is None:
             outer_tolerance = float(_settings().get("outer_loop.outer_tolerance"))
         # the manure pools need more outer iterations than the default allows; an explicitly short run
@@ -406,7 +395,6 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         self.par.eu_base_cache = _cache
         _mm = self.market_module
         if _is_base:
-            _mm.seen.eu_base_supply = None
             # a baseline's market runs without a market supply Hessian (the one of an earlier baseline belonged to
             # another solution, possibly another region set); its own is measured when a scenario needs it
             _mm.par.supply_hessian = None
@@ -441,13 +429,9 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 self.use_manure_market = bool(_mt)
                 self.market_module.biofuel_markets = bool(_bm)
                 self.verbose = _saved
-                _pend = _cst.pop(self.sv, "hessian_pending", None)
-                if _pend is not None:
-                    self._measure_pending_hessian(_pend)
                 self.policy_module.apply_scenario(pol_scenario)
                 for _m in (getattr(self.supply_module, "_models", None) or {}).values():
                     _m.res.nlp_fallback_log = []  # the baseline's fallbacks are in the baseline's own metadata
-            self.market_module.set_eu_base(*_cache[_key][:2])
             # reuse the calibration of the baseline for the same region set
             if len(_cache[_key]) > 2:
                 _cal, _bp, _bc = _cache[_key][2:5]
@@ -472,12 +456,11 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 if len(_cache[_key]) > 6:
                     _mm.par.sup_milk0 = dict(_cache[_key][6])
 
-        # S7 ("capri"): the baseline is a market solution away from the reference prices, so a scenario starts from it
-        # (its price signal, the EU blocks' and Norway's departures, the market's price ratios), as CAPRI's runs start
-        # from its calibration point, which is CAPRI's baseline equilibrium (arm/prep_market.gms: CUR = CAL); in
-        # "supply" the baseline's solution is the reference prices, where every run starts anyway
+        # S7: the baseline is a market solution away from the reference prices, so a scenario starts from it (its price
+        # signal, the EU blocks' and Norway's departures, the market's price ratios), as CAPRI's runs start from its
+        # calibration point, which is CAPRI's baseline equilibrium (arm/prep_market.gms: CUR = CAL)
         _base_start = None
-        if (not _is_base and str(_settings().get("market.demand_calibration")) == "capri"):
+        if not _is_base:
             _base_start = (getattr(self.par, "base_start", None) or {}).get(_key)
             if _base_start is not None and _base_start.get("bilat_last_r") is not None:
                 self.market_module.sv.bilat_last_r = _base_start["bilat_last_r"].copy()
@@ -597,10 +580,9 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 # the member states' CAPRI market supply functions; None with every EU unit in the run
                 self.market_module.seen.eu_excluded_base = self._excluded_base_supply(
                     regions or list(self.data["areas"].index))
-                # S7 ("capri"): the units outside the run of Norway (non-EU, with supply models), at their base output
-                self.par.excluded_sup_base = (
-                    self._excluded_base_supply(regions or list(self.data["areas"].index), non_eu=True)
-                    if str(_settings().get("market.demand_calibration")) == "capri" else None)
+                # S7: the units outside the run of Norway (non-EU, with supply models), at their base output
+                self.par.excluded_sup_base = self._excluded_base_supply(regions or list(self.data["areas"].index),
+                                                                        non_eu=True)
             if self.verbose:
                 print(f"  Outer iteration {outer_iter + 1}/{max_outer_iter}")
             _RSMt.nlp_tol = _tol_tight
@@ -750,8 +732,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             # 626 against 6,004; Dresden recalibrated in 46 of its shock solves; 6 November 2026). So the models are
             # solved once more at the reference prices first, and the Hessian is measured from that state; the loop
             # goes on with this iteration's own supply results
-            if (_is_base and outer_iter == 0 and str(_settings().get("market.demand_calibration")) == "capri"
-                    and bool(getattr(self, "market_supply_nq", True))):
+            if _is_base and outer_iter == 0 and bool(getattr(self, "market_supply_nq", True)):
                 _sr_cal = self.supply_module.run(price_signals=None, policy_scenario=_spol,
                                                  regions=regions or list(self.data["areas"].index), verbose=False)
                 self._measure_pending_hessian({"key": _key, "price_signal": price_signal.copy(),
@@ -1293,19 +1274,13 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                                   RuntimeWarning, stacklevel=2)
         _RSMt.nlp_tol = _tol_tight                # later solves outside the loop at the tight tolerance
 
-        # CAPRI's market supply functions calibrated to the supply models (supply/calibrate_supply.gms:193-508): at the
-        # converged baseline each product's price is raised by 1% in every regional model, and the member states'
-        # responses form the Hessian of the market's normalised-quadratic supply (dQ / d relative price). The scenario
-        # keeps it (CAPRI loads it in simulations, arm/market1.gms:505-674); the market moves the function through the
-        # supply models' latest output every iteration (arm/simu_calibration_to_supply.gms:360-368).
-        # Measured when a scenario needs it (28 October 2026, the project lead's decision), as CAPRI's calibrate_supply
-        # is a task of its own after the baseline: the baseline records what the measurement needs, and the next run, if
-        # it is a scenario on this baseline, measures it (or reads it from the cache) before it changes anything. A
-        # baseline run alone (tests that check a baseline) does not measure it.
-        if (_is_base and supply_results and bool(getattr(self, "market_supply_nq", True)) and market_eq is not None
-                and str(_settings().get("market.demand_calibration")) != "capri"):   # "capri": measured at its start
-            self.sv.hessian_pending = {"key": _key, "price_signal": price_signal.copy(), "supply_results": supply_results,
-                                     "regions": regions}
+        # CAPRI's market supply functions calibrated to the supply models (supply/calibrate_supply.gms:193-508): each
+        # product's price raised by 1% in every regional model, the member states' responses forming the Hessian of the
+        # market's normalised-quadratic supply (dQ / d relative price), measured at the baseline's start on calibrated
+        # models (above, K120); the scenario keeps it (CAPRI loads it in simulations, arm/market1.gms:505-674) and the
+        # market moves the function through the supply models' latest output every iteration
+        # (arm/simu_calibration_to_supply.gms:360-368). (Until 8 November 2026 the "supply" form measured it after the
+        # baseline, when a scenario needed it: the decision of 28 October 2026, superseded by S7.)
 
         if getattr(self.market_module, "_milk_floor_hits", None):
             warnings.warn(f"raw milk price held just above zero in {sorted(self.market_module._milk_floor_hits)} "
@@ -1356,7 +1331,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             self.par.base_supply_cache = getattr(self.par, "base_supply_cache", {}) or {}
             self.par.base_supply_cache[_key] = dict(supply_results)
             (getattr(self.par, "ghg_coef_cache", None) or {}).pop(_key, None)
-        if _is_base and market_eq is not None and str(_settings().get("market.demand_calibration")) == "capri":
+        if _is_base and market_eq is not None:
             # S7: the baseline's solution, where its scenarios start
             import copy as _cpy
             self.par.base_start = getattr(self.par, "base_start", None) or {}
