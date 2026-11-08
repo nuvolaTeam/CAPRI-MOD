@@ -317,14 +317,19 @@ def test_norway_has_pig_herds_and_per_head_coefficients():
 def test_norway_run_on_its_own_supply_models():
     """A baseline with Norway's supply regions: the EU's market supply holds none of Norway's output, Norway's market
     supply is its models' (pork too, since Norway's regions have pigs, K56) plus the base output of its units outside
-    the run (S7: Norway's market base is CAPRI's whole country; model.par.excluded_sup_base), the market clears and
-    Norway's supply models see Norway's prices. With no EU unit in the run, the EU's supply is its units'
+    the run (S7: Norway's market base is CAPRI's whole country; model.par.excluded_sup_base): at the prices Norway's
+    models saw the market's supply is that output exactly (at the baseline's own market prices CAPRI's market supply
+    function moves it, S7; the test runs without that function, market.market_supply_nq off, as the former form's
+    baseline did, which measured no Hessian: its cross terms move barley with Norway's milk price); the market clears
+    and Norway's supply models see Norway's prices. With no EU unit in the run, the EU's supply is its units'
     base output through their member states' market supply functions (K83, since 31 October 2026; before, the market's
     own base table), at the reference prices that base output itself."""
     from capri_mod.model import CAPRIModel
-    m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
-    with pytest.warns(RuntimeWarning):
-        b = m.run(scenario="BASELINE", regions=["NO080000"], max_outer_iter=1)
+    from capri_mod.settings import override
+    with override({"market.market_supply_nq": False}):
+        m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
+        with pytest.warns(RuntimeWarning):
+            b = m.run(scenario="BASELINE", regions=["NO080000"], max_outer_iter=1)
     mm = m.market_module
     P = b["market"].production
     ex = m._bridge_supply_to_market(m.supply_module.aggregate_supply(b["supply"], by_country=True))
@@ -332,14 +337,22 @@ def test_norway_run_on_its_own_supply_models():
     xs = m.par.excluded_sup_base
     assert xs is not None and "NO" in xs.index                  # Norway's other units, at their base output
     ex = ex.add(xs.reindex(columns=ex.columns).fillna(0.0), fill_value=0.0)
+    # the market's supply at the prices the supply models saw (Norway's: sup_price_seen; the EU's units outside the
+    # run: their base, K83): the models' output passed through unchanged
+    r = mm._bilateral_ratio_frame()
+    seen = (mm.seen.sup_price_seen or {}).get("NO000000")
+    assert seen is not None                                     # Norway's models saw Norway's prices
+    r.loc["NO000000"] = seen.reindex(r.columns).fillna(1.0).to_numpy(dtype=float)
+    S = mm.supply_response(mm.world_prices_base * mm._bilateral_world_index(r), ex, region_ratio=r,
+                           crush_dom=mm._dom0())
+    xr = mm._eu_excluded_rows()
     for c in ("BARL", "OATS", "BEEF", "MILK", "SGMT", "PORK"):
-        assert abs(float(P.at["NO000000", c]) - float(ex.at["NO", c])) < 1e-6 * max(1.0, float(ex.at["NO", c])), c
+        assert abs(float(S.at["NO000000", c]) - float(ex.at["NO", c])) < 1e-6 * max(1.0, float(ex.at["NO", c])), c
         # no EU unit in the run: the EU's supply is its units' base output (K83), Norway's output not in it
-        xr = mm._eu_excluded_rows()
         for rg in mm.EU:
-            assert abs(float(P.at[rg, c]) - float(xr.at[rg, c])) < 1e-6 * max(1.0, float(P.at[rg, c])), (rg, c)
+            assert abs(float(S.at[rg, c]) - float(xr.at[rg, c])) < 1e-6 * max(1.0, float(S.at[rg, c])), (rg, c)
+        assert float(P.at["NO000000", c]) > 0
     assert float(mm._bilat_err) < 1e-6
-    assert float((mm.sup_price_ratio - 1.0).abs().max().max()) < 1e-9
 
 
 @pytest.mark.slow

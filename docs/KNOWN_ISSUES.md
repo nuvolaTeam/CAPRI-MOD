@@ -30,6 +30,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K124](#k124) | S1: CAPRI's two crop technologies T1 and T2 as one mix column per crop; five approximations registered | done (8 November 2026): mini-EU, full-EU Farm-to-Fork and Green Deal; CAPRI's setting the default |
 | [K125](#k125) | S7, CAPRI's market calibration, the model's only form: the "supply" form and its setting removed; ten tests written for the old form adapted | done (9 November 2026); the scenario-shifter layer (S7 step 5) still to build |
 | [K126](#k126) | The CasADi trade system left out the quota price offsets of a commodity with global quotas only (casein), in the optional exact-Jacobian and Newton-Krylov solves | fixed (9 November 2026); the default solve unaffected |
+| [K127](#k127) | Under CAPRI's market calibration (S7) an emission tax leaves N manure trade at zero in a four-unit Belgian run where the former form traded 360 t | open (9 November 2026): cause not established |
 
 ## Resolved (107)
 
@@ -2526,3 +2527,23 @@ passed until S7, so the offset was presumably zero at the "supply" form's base (
 solves that use the CasADi system, market.exact_jacobian (off by default) and market.solver = "newton_krylov" (not the
 default); the default solve, which every run with the default settings uses, takes BilateralCommodity's own residual. Fixed: the same condition as
 import_prices.
+
+### K127: No N manure trade under the emission tax in a four-unit Belgian run, under CAPRI's market calibration (found 9 November 2026)
+
+test_manure_p_and_k_have_markets_of_their_own (BL210000-BL240000, manure trade on, baseline 3 iterations, then CAPRI's
+emission tax at 100 EUR/t CO2-eq, 4 iterations) expected N trade to move under the tax. With S7 the only form it does
+not: every unit's N exports and imports stay below 1e-6 t, in the baseline and under the tax, and the N, P and K pools
+clear at every iteration (gaps 0.0000). On dev (the former "supply" form, 608ea0b) the same sequence trades 360 t
+(BL210000 exports 174 t, BL220000 and BL240000 import 109 and 77 t). The regional models' response to the tax is
+nearly the same in both forms (suckler cows -27%, maize, barley and grassland +-16-39%). The N pool's price at the end
+of the tax run: -0.181 against -0.212 (the units of the pool price not checked here); the units' N export column costs -0.020 to -0.111 against
+-0.051 to -0.142.
+
+Possible reading, not established: a pool with trade costs also clears at zero trade when every unit's marginal value
+of manure N lies within the cost band around the pool price, and the product prices differ between the forms
+(CAPRI's baseline is a market solution away from the reference prices), so the tax run can end in the no-trade
+equilibrium. To check: the units' marginal N values against the band, and the pools' price history (CAPRI's averaged
+price, outer_loop.manure_pool_price_update = "capri") in both forms.
+
+The test's tax part is test_manure_n_trade_moves_under_the_emission_tax, an expected failure until this is settled; its
+base part passes (the base a first-order point at the calibration point's prices, P and K trade below 0.1 t).
