@@ -20664,9 +20664,9 @@
    "notes": [
     {
      "kind": "gap",
-     "note": "CAPRI's two technologies per crop (T1 high-yield, T2 low-yield) are collapsed into one model activity with the curvature of the optimal split, so the area response follows CAPRI's terms but the change in average yield that CAPRI gets from shifting between T1 and T2 is not represented.",
-     "evidence": "tools/build/build_pmp_capri_2030.py:10-17; allgms/gams/capmod.gms:246-249 (SET A: T, T1, T2); docs/PMP_CAPRI_2030.md:149-150",
-     "checked": "2026-10-29"
+     "note": "The crop terms are CAPRI's two technologies per crop (T1 high-yield, T2 low-yield) collapsed into one activity with the curvature of the optimal split (the Schur complement of CAPRI's 2x2 block). With supply.crop_technologies on (CAPRI's setting, the default since 8 November 2026) the model adds the mix as one column per crop with both technologies (pmp_capri_2030_mix.csv, techn_mix_2030.csv), and X's curvature with the mix optimised out is this file's (checked on all 5,417 blocks, 1.4e-13 relative); off, the change in average yield that CAPRI gets from shifting between T1 and T2 is not represented.",
+     "evidence": "tools/build/build_pmp_capri_2030.py (mix_terms); capri_mod/supply/techn_mix.py; capri_mod/tests/test_techn_mix.py; allgms/gams/capmod.gms:246-249 (SET A: T, T1, T2); docs/design/S1_MIX_COLUMNS.md",
+     "checked": "2026-11-08"
     },
     {
      "kind": "gap",
@@ -21014,7 +21014,14 @@
     "builder": "build_pmp_capri_2030:",
     "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
-   "notes": [],
+   "notes": [
+    {
+     "kind": "gap",
+     "note": "Read only at the 2030 market year with CAPRI's 2030 PMP terms (pmp_source capri2030, crops in pmp_capri_parts) and supply.crop_technologies on. g = Q x X^2 at CAPRI's 2030 level as pmp_capri_2030.csv. A crop with both technologies whose techn_mix_2030.csv coefficients are all 0 gets no column: with nothing depending on the mix, X's curvature is unchanged.",
+     "evidence": "capri_mod/supply/techn_mix.py (_mix_rows); capri_mod/supply/supply_module.py (_techn_mix_for)",
+     "checked": "2026-11-08"
+    }
+   ],
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py"
@@ -40930,7 +40937,14 @@
     "builder": "build_techn_mix_2030",
     "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
-   "notes": [],
+   "notes": [
+    {
+     "kind": "gap",
+     "note": "Not carried, registered (docs/design/S1_MIX_COLUMNS.md section 6, KNOWN_ISSUES K124): sugar beet's VCOF factor (sugar/techf.gms l. 103; the quota regime's variable cost share, taken as without effect since 2017, to be confirmed); irrigation water (factor 0 in CAPRI). The premium shares per crop are computed from CAPRI's 2030 reference results (PRME by scheme, res_2_1730greendeal_refpol_endotech_all_inidefaulta) and applied to the model's premium of the solve, so a scenario that changes the schemes' mix is not followed. The input costs per ha are CAPREG 2017's (as plant_protection_cost.csv); 0 where CAPREG has no level for the crop.",
+     "evidence": "tools/build/build_techn_mix_2030.py; capri_mod/supply/techn_mix.py (_mix_linear)",
+     "checked": "2026-11-08"
+    }
+   ],
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py"

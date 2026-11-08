@@ -27,6 +27,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K121](#k121) | S2 step 1a: other fodder split into CAPRI's OFAR and ROOF; the fodder roots' feed (FROO) tied to their land for the first time | done on mini-EU (7 November 2026); the full runs and the suite to come |
 | [K122](#k122) | S2 step 1b: set-aside split into CAPRI's VSET and FALL; the winter-cover option's potential counted set-aside CAPRI fills | done on mini-EU (7 November 2026); the full runs and the suite to come |
 | [K123](#k123) | S2 step 1c: grassland split into CAPRI's GRAE and GRAI, the split column z and its late calibration removed; fodder roots' 2030 fodder trajectory was missing since 1a | done (8 November 2026): suite, mini-EU, full-EU Farm-to-Fork and Green Deal |
+| [K124](#k124) | S1: CAPRI's two crop technologies T1 and T2 as one mix column per crop; five approximations registered | done (8 November 2026): mini-EU, full-EU Farm-to-Fork and Green Deal; CAPRI's setting the default |
 
 ## Resolved (107)
 
@@ -2439,3 +2440,48 @@ Full EU (S2 branch at 22dac48 against dev, 8 November 2026):
   compare_baseline_capri.py, pmp_cross_term_check.py: GRAS, OFOD, SETA). The stored full_gd_s2.pkl keeps the wrong
   denominator.
 
+### K124: CAPRI's crop technologies T1 and T2 as mix columns (S1, 8 November 2026)
+
+Until 8 November 2026 the model had CAPRI's two technologies per crop (intens/techf.gms: T1 high yield, T2 low yield,
+50-50 at the calibration point) only through the curvature of the optimal split: pmp_capri_2030.csv's crop term is the
+Schur complement of CAPRI's 2x2 technology block (DEP-9). The area response followed CAPRI's terms; the change in average
+yield, inputs and nutrient need from shifting between the technologies was not represented. S1 (docs/design/
+S1_MIX_COLUMNS.md, capri_mod/supply/techn_mix.py) adds one column z per crop with both technologies, x_T1 = X/2 + z,
+x_T2 = X/2 - z, -X/2 <= z <= X/2:
+- PMP CAPRI's block in (X, z), exact (Q_XX, Q_Xz, Q_zz from p_pmpQuadTechn; X's curvature with z optimised out equals
+  the collapsed term on all 5,417 blocks to 1.4e-13): pmp_capri_2030_mix.csv;
+- per unit z, the differences T1 - T2 of CAPRI's technology factors (techn_mix_2030.csv): output and the fodder rows
+  +0.4 x yield, the factored inputs (SEED, REPM, REPB, ELEC, EGAS, EFUL, ELUB +-0.25; INPO +-0.25 and PLAP +-0.4 on
+  their current cost, with the Green Deal changes), the nutrient need (NUTNED_'s SQRT(1 + y)(1 + y): +0.590 x the
+  crop's), the N balance and mineral N rows (the environmental accounts' unit balance at each technology's yield), the
+  rural-development premiums by scheme (AE -0.5/+0.5, N2K -1/+1, SeExte; zero where the scheme pays nothing);
+- z's linear term calibrated with the activities (not a free column), so the base is a first-order point at z = 0.
+Columns in 4,626 region-crop pairs (FALL only where CAPRI has T2, 24 regions; the decision of 7 November 2026).
+Setting supply.crop_technologies, CAPRI's (on) the default since 8 November 2026; off reproduces the collapsed form.
+
+Checks:
+- Off: the mini-EU run identical to S2 except the histosol reporting fix of K123.
+- Baseline, on: z at EU level 3.1 thousand ha of 102,162 (OFAR 1.5), none at a bound; EU activities within 1e-4 of off.
+- Mini-EU Farm-to-Fork, on: converged in 6 iterations; the indicators within 0.2 point of off.
+- Full EU, on, against S2 (the market supply Hessian measured again: 1,466 s Farm-to-Fork, 1,524 s Green Deal):
+  - Farm-to-Fork (run 7a797932c3b2 against f3e741eaa428): converged in 13 iterations against 12, 3,267 s; the indicators
+    within 0.4 point; mean absolute deviation from JRC121368 4.46 against 4.49. z moves 671 thousand ha to T1 (of 97,463):
+    SWHE 1.39% of its area (average yield +0.55%), BARL 1.33%, MAIF 0.76%, OATS 0.68%; 21 pairs at a bound.
+  - Green Deal 2030 (run b7b38df49dae against full_gd_s2.pkl): converged in 28 iterations against 21, 4,209 s; the
+    indicators within 0.1 point; mean absolute deviation from CAPRI's figures 8.78 against 8.77. z moves 78 thousand ha
+    to T1 (SWHE 0.15%, SUNF 0.27%); 2 pairs at a bound. The histosol share 42.1% against 84.7% is K123's reporting fix
+    (full_gd_s2.pkl keeps the wrong denominator), not S1.
+  Why Farm-to-Fork moves more toward T1 than the Green Deal, and why the Green Deal needs 7 more iterations, is not
+  analysed. The technology shares are not compared with CAPRI's scenario results (not in hand, as K13).
+
+Registered approximations (not closed):
+1. No emission-tax term on z (supply/ghg_tax.py's finite differences have no key per z); matters only in the GHG-tax
+   scenario.
+2. The yield-dependent input costs (_apply_yield_input_costs) are not differentiated by technology; z's input costs
+   are CAPREG 2017's coefficients x the factors.
+3. The fertiliser options (inhibitors, precision farming, timing) do not see z's need; z enters the need and the N rows.
+4. The premium split uses CAPRI's 2030 reference shares by scheme (dataOut PRME) on the solve's premium.
+5. Sugar beet's VCOF factor (sugar/techf.gms l. 103) is not carried (taken as without effect since the quotas ended;
+   to be confirmed).
+Open with it: whether CAPRI's endogenous yields act on the technologies' mean yield as here (S1_MIX_COLUMNS.md
+section 6).

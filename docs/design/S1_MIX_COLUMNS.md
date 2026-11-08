@@ -1,6 +1,9 @@
 # S1: CAPRI's two crop technologies as mix columns (design, 8 November 2026)
 
-Status: design, before implementation. Decision of 1 November 2026 (docs/design/S1_S2_DESIGN.md section 5, option (c));
+Status: implemented and validated (8 November 2026): supply/techn_mix.py, setting supply.crop_technologies (CAPRI's,
+on, the default); checks and registered approximations in KNOWN_ISSUES K124. The text below is the design as written
+before implementation; section 3's data are built (techn_mix_2030.csv, pmp_capri_2030_mix.csv; the premium split from
+CAPRI's 2030 PRME by scheme). Decision of 1 November 2026 (docs/design/S1_S2_DESIGN.md section 5, option (c));
 answers of 7 November 2026 (S2 first; MXSETA_ left out as CAPRI; FALL's column only where CAPRI has its T2). S2 is
 done (KNOWN_ISSUES K121-K123). DEP-9 is the departure this closes.
 
