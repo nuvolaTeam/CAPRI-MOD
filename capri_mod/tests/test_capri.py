@@ -305,11 +305,13 @@ def test_emission_tax_in_supply_follows_capri(model):
 def test_manure_p_and_k_have_markets_of_their_own(model):
     """CAPRI's manure trade by FOUT (supply_model.gms e_netMTrade, e_costMTrade; manuremarket/simu_manure_market.gms,
     one market per nutrient): each EU region has P2O5 and K2O export and import columns besides N, priced at their own
-    pool price, in the block's P and K manure balances only; the base stays a first-order point; under the emission
-    tax, which prices N only, N trade moves while P and K trade do not follow it."""
+    pool price, in the block's P and K manure balances only; the base stays a first-order point at the calibration
+    point's prices (the baseline's first supply solve, at the reference prices; the baseline's later rounds are at its
+    own market's prices, S7); under the emission tax, which prices N only, N trade moves while P and K trade
+    do not follow it."""
     from capri_mod.scenarios.scenarios import carbon_tax_scenario
     regs = [r for r in model.data["areas"].index if r.startswith("BL")][:4]
-    b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=3, manure_trade=True)
+    at_ref = model.run(scenario="BASELINE", regions=regs, max_outer_iter=1, manure_trade=True)["supply"]
     sm = model.supply_module
     for r in regs:
         mo = sm._models[r]
@@ -319,9 +321,10 @@ def test_manure_p_and_k_have_markets_of_their_own(model):
         for nut, (je, ji) in pk.items():
             assert abs(float(c[je]) - mo.seen.manure_pool_price_pk[nut]) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
         x0 = mo._base_levels().reindex(mo.acts).fillna(0.0).values
-        xa = np.array([b["supply"][r].activities.get(a, 0.0) for a in mo.acts])
+        xa = np.array([at_ref[r].activities.get(a, 0.0) for a in mo.acts])
         assert float(np.max(np.abs(xa - x0) / np.maximum(np.abs(x0), 1.0))) < 1e-4
-        assert all(max(map(abs, v)) < 0.1 for v in b["supply"][r].manure_trade_pk.values())      # t, at base
+        assert all(max(map(abs, v)) < 0.1 for v in at_ref[r].manure_trade_pk.values())           # t, at base
+    model.run(scenario="BASELINE", regions=regs, max_outer_iter=3, manure_trade=True)
     s = model.run(custom_scenario=carbon_tax_scenario(100.0), regions=regs, max_outer_iter=4, manure_trade=True)
     n_moved = sum(abs(s["supply"][r].manure_trade[0] - s["supply"][r].manure_trade[1]) for r in regs)
     pk_moved = sum(abs(v[0] - v[1]) for r in regs for v in s["supply"][r].manure_trade_pk.values())
@@ -3368,6 +3371,15 @@ def test_projection_carries_permanent_crops():
     assert areas.at["IT11", "SWHE"] == 10.0
 
 
+
+def _marketed(ms: str, product: str) -> float:
+    """CAPRI's marketed over gross production of a member state's product at the 2030 calibration point (grofNEprod;
+    market_prod_grof_2030.csv), the factor the bridge applies to the supply models' gross output (S7)."""
+    t = pd.read_csv(DATA_DIR / "2017" / "market" / "market_prod_grof_2030.csv", float_precision="round_trip")
+    r = t[(t.capri_ms == ms) & (t["product"] == product)]["ratio"]
+    assert len(r) == 1, (ms, product)
+    return float(r.iloc[0])
+
 def test_rye_and_oats_are_markets(model):
     """Rye (RYEM) and oats (OATS) are market products of their own, as in CAPRI (arm/arm_sets.gms CERE_DEF): each
     activity's output reaches its own market, not OCER's, and the activities earn their own market price."""
@@ -3377,9 +3389,10 @@ def test_rye_and_oats_are_markets(model):
         assert c in MARKET_COMMODITIES
     agg = pd.DataFrame({"RYEM": [3.0], "OATS": [5.0], "OCER": [7.0]}, index=["DE000000"])
     ms = model._bridge_supply_to_market(agg)
-    assert ms.at["DE000000", "RYEM"] == 3.0
-    assert ms.at["DE000000", "OATS"] == 5.0
-    assert ms.at["DE000000", "OCER"] == 7.0
+    # each reaches its own market at CAPRI's marketed share of the gross output (S7, grofNEprod)
+    assert ms.at["DE000000", "RYEM"] == 3.0 * _marketed("DE000000", "RYEM")
+    assert ms.at["DE000000", "OATS"] == 5.0 * _marketed("DE000000", "OATS")
+    assert ms.at["DE000000", "OCER"] == 7.0 * _marketed("DE000000", "OCER")
     assert "RYEM" not in SupplyModule.ACTIVITY_PRICE_SOURCE and "OATS" not in SupplyModule.ACTIVITY_PRICE_SOURCE
     wp = model.data["world_prices"]
     for c in ("RYEM", "OATS"):
@@ -3396,7 +3409,8 @@ def test_table_grapes_and_tobacco_are_markets(model):
         assert c in MARKET_COMMODITIES
     agg = pd.DataFrame({"TAGR": [2.0], "TOBA": [0.5]}, index=["IT000000"])
     ms = model._bridge_supply_to_market(agg)
-    assert ms.at["IT000000", "TAGR"] == 2.0 and ms.at["IT000000", "TOBA"] == 0.5
+    assert ms.at["IT000000", "TAGR"] == 2.0 * _marketed("IT000000", "TAGR")
+    assert ms.at["IT000000", "TOBA"] == 0.5 * _marketed("IT000000", "TOBA")
     arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv", index_col=0)
     assert arm.at["TAGR", "rho1"] == 3.7 and arm.at["TOBA", "rho1"] == 1.8
     h = pd.read_csv(DATA_DIR / "2017" / "market" / "processing_nq_hessian.csv")
@@ -3417,7 +3431,7 @@ def test_table_olives_are_a_market_of_their_own(model, data):
         assert pd.read_csv(DATA_DIR / "2017" / "supply" / f"{k}.csv", index_col=0)["TABO"].notna().all()
     agg = pd.DataFrame({"OLIV": [10.0], "TABO": [2.0]}, index=["IT000000"])
     ms = model._bridge_supply_to_market(agg)
-    assert ms.at["IT000000", "TABO"] == 2.0
+    assert ms.at["IT000000", "TABO"] == 2.0 * _marketed("IT000000", "TABO")
     assert 0.0 < ms.at["IT000000", "OLIV"] < 10.0 * 0.5                              # olive oil, not olives
     arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv", index_col=0)
     assert arm.at["TABO", "rho1"] == 4.1                                            # p_rhoArm1 (market1_ch.gms)
@@ -3434,7 +3448,7 @@ def test_textile_crops_are_one_activity_and_market(model, data):
     assert 520 < ar["TEXT"].sum() < 550                                              # kha, CAPRI 2017: 534.7
     assert ar.loc[[r for r in ar.index if r.startswith("EL")], "TEXT"].sum() > 300  # Greek cotton
     agg = pd.DataFrame({"TEXT": [3.0]}, index=["EL000000"])
-    assert model._bridge_supply_to_market(agg).at["EL000000", "TEXT"] == 3.0
+    assert model._bridge_supply_to_market(agg).at["EL000000", "TEXT"] == 3.0 * _marketed("EL000000", "TEXT")
     arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv", index_col=0)
     assert arm.at["TEXT", "rho1"] == 8.2                                            # p_rhoArm1 (market1_ch.gms)
     h = pd.read_csv(DATA_DIR / "2017" / "market" / "processing_nq_hessian.csv")
@@ -4129,7 +4143,8 @@ def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
 def test_capri_land_rents_at_the_2030_calibration_point(model):
     """docs/LAND_RENT_CALIBRATION_PLAN.md: at the 2030 market year the land market is balanced at CAPRI's land rents
     (D_AREA of its 2030 reference, land_rents_2030.csv) and the NLP calibration fixes the land balances' multipliers at
-    them; the baseline reproduces the 2030 base."""
+    them; the regional models at the calibration point (CAPRI's 2030 prices and rents, the baseline's first round)
+    reproduce the 2030 base. (Later rounds are at the baseline market's own prices, S7: their drift is K120's.)"""
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
     root = _repo_root()
     traj = BaselineTrajectory.from_file(str(root / "capri_data" / "scenarios" / "capri_ref_2030"))
@@ -4142,7 +4157,7 @@ def test_capri_land_rents_at_the_2030_calibration_point(model):
     assert abs(rr["arable_land"] - rents["rent_arac"]) < 1e-6 and abs(rr["grassland"] - rents["rent_gras"]) < 1e-6
     assert (getattr(mo.par, "nlp_cal", None) or {}).get("residual", 1.0) < 1e-6
     drift = res.baseline[2030]["metadata"].get("base_calibration_drift") or [0.0]
-    assert float(drift[-1]) < 0.002, drift
+    assert float(drift[0]) < 0.002, drift
 
 
 def test_ammonia_option_cost_is_per_place_of_the_models_heads(model):

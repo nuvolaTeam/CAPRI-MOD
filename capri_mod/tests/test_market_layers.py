@@ -122,9 +122,11 @@ def test_market_supply_hessian_measured_at_base_and_at_scenario_state():
     with override({"market.hessian_scenario_iter": 2, "market.market_supply_nq": True}):
         m = CAPRIModel(data_dir="capri_data", verbose=False)
         m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
-        # a baseline alone does not measure it (28 October 2026): the scenario on it does, first thing
-        assert not getattr(m.res, "market_supply_hessian_log", None)
-        assert m.market_module.par.supply_hessian is None
+        # the baseline measures it at its start, on calibrated models at the reference prices, since its own market
+        # uses it (S7, K120; until 8 November 2026 a baseline alone did not, the decision of 28 October 2026 for the
+        # "supply" form, whose baseline did not solve the market); the scenario keeps it and measures it again
+        assert len(m.res.market_supply_hessian_log) == 1
+        assert m.market_module.par.supply_hessian is not None
         sc = greendeal_scenario(lndscpTarg=10, orgTarg=25, pestRedu=50, surpRedu=50, mineRedu=20)
         m.run(custom_scenario=sc, regions=regs, max_outer_iter=3)
         base, scen = (dict(d) for d in m.res.market_supply_hessian_log[-2:])
@@ -149,7 +151,7 @@ def test_hessian_skip_of_unreached_regions_is_exact(monkeypatch):
     with override({"market.hessian_skip_unchanged": True, "market.market_supply_nq": True}):
         m = CAPRIModel(data_dir="capri_data", verbose=False)
         # the verification needs a measured Hessian, not the cache: the verify mode's file is removed after the run.
-        # A scenario on the baseline measures it (a world-price shock is a scenario), first thing in its run
+        # The baseline measures it at its start (S7: its market uses it); the world-price shock runs on it
         m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
         m.run(world_price_shock={"SWHE": 0.05}, regions=regs, max_outer_iter=1)
         info = dict(m.res.market_supply_hessian_log[0])
