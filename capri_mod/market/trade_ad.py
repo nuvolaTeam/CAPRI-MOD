@@ -182,7 +182,10 @@ def import_price_matrices(sc, tariff_adds=None, offsets: bool = True) -> Tuple[n
     n = len(sc.regions)
     A = np.array(sc.a, float, copy=True)
     B = np.array(sc.b, float, copy=True)
-    if offsets and getattr(sc, "trq_quotas", None) and sc.trq_offset is not None:
+    # the offsets of the bilateral and the global quotas, as BilateralCommodity.import_prices adds them (until
+    # 9 November 2026 only with a bilateral quota: a commodity with global quotas alone, casein, lost its offset in the
+    # optional exact-Jacobian and Newton-Krylov solves; at CAPRI's calibration point (S7) its largest offset is 278 EUR/t)
+    if offsets and (getattr(sc, "trq_quotas", None) or getattr(sc, "trq_globals", None)) and sc.trq_offset is not None:
         B = B + sc.trq_offset
     for importer, pts in (tariff_adds or ()):
         if not pts:

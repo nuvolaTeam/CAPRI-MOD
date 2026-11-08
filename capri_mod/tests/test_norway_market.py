@@ -119,13 +119,21 @@ def _eu_countries(mm):
 
 
 def _exo_with_norway(mm, f_no=1.0):
-    """Supply by country: one country per EU market region at that region's base (_eu_countries), Norway's at its base
-    x f_no, with raw milk; after _bilateral_calibrate, the base is CAPRI's calibration point (S7)."""
+    """Supply by country, after _bilateral_calibrate (CAPRI's calibration point, S7): one country per EU market region
+    at that region's base (_eu_countries) but raw milk, which each EU member state delivers to its own dairies at
+    CAPRI's marketed milk (the dairy blocks are per member state); Norway's at its base x f_no."""
     cols = list(mm.commodities)
     pairs = _eu_countries(mm)
-    rows = [mm.par.base_production.loc[r, cols].astype(float) for r, _ in pairs]
+    rows = {c: mm.par.base_production.loc[r, cols].astype(float).copy() for r, c in pairs}
+    for c in rows:
+        rows[c]["MILK"] = 0.0
+    for ms, q in (mm.par.dairy_S0_ms or {}).items():
+        c = str(ms)[:2]
+        if c not in rows:
+            rows[c] = pd.Series(0.0, index=cols)
+        rows[c]["MILK"] = float(q)
     no = mm.par.base_production.loc["NO000000", cols].astype(float) * f_no
-    return pd.DataFrame(rows + [no], index=[c for _, c in pairs] + ["NO"])
+    return pd.DataFrame(list(rows.values()) + [no], index=list(rows) + ["NO"])
 
 
 def test_norway_market_supply_is_its_models_and_the_base_is_reproduced(data):
@@ -181,7 +189,7 @@ def test_norway_raw_milk_responds_inside_the_market(data):
     from capri_mod.market.market_module import MarketModule
     mm = MarketModule(data)
     mm._bilateral_calibrate()
-    exo = _exo_with_norway(mm, 1.05)                  # Norway's models 5% above CAPRI's calibration point
+    exo = _exo_with_norway(mm)                        # Norway's models at CAPRI's calibration point
     r1 = mm._bilateral_ratio_frame().copy()
     r1.at["NO000000", "BARL"] = 1.10
     m_now = float(exo.at["NO", "MILK"])
@@ -308,8 +316,9 @@ def test_norway_has_pig_herds_and_per_head_coefficients():
 @pytest.mark.slow
 def test_norway_run_on_its_own_supply_models():
     """A baseline with Norway's supply regions: the EU's market supply holds none of Norway's output, Norway's market
-    supply is its models' (pork too, since Norway's regions have pigs, K56), the base is reproduced at the reference
-    prices and Norway's supply models see Norway's prices. With no EU unit in the run, the EU's supply is its units'
+    supply is its models' (pork too, since Norway's regions have pigs, K56) plus the base output of its units outside
+    the run (S7: Norway's market base is CAPRI's whole country; model.par.excluded_sup_base), the market clears and
+    Norway's supply models see Norway's prices. With no EU unit in the run, the EU's supply is its units'
     base output through their member states' market supply functions (K83, since 31 October 2026; before, the market's
     own base table), at the reference prices that base output itself."""
     from capri_mod.model import CAPRIModel
@@ -320,6 +329,9 @@ def test_norway_run_on_its_own_supply_models():
     P = b["market"].production
     ex = m._bridge_supply_to_market(m.supply_module.aggregate_supply(b["supply"], by_country=True))
     assert float(ex.at["NO", "PORK"]) > 0
+    xs = m.par.excluded_sup_base
+    assert xs is not None and "NO" in xs.index                  # Norway's other units, at their base output
+    ex = ex.add(xs.reindex(columns=ex.columns).fillna(0.0), fill_value=0.0)
     for c in ("BARL", "OATS", "BEEF", "MILK", "SGMT", "PORK"):
         assert abs(float(P.at["NO000000", c]) - float(ex.at["NO", c])) < 1e-6 * max(1.0, float(ex.at["NO", c])), c
         # no EU unit in the run: the EU's supply is its units' base output (K83), Norway's output not in it
@@ -350,6 +362,9 @@ def test_norway_prices_follow_its_own_market_in_a_scenario():
     d = (rs / rb - 1.0)
     assert float((d.loc["NO000000"] - d.loc[mm.eu_region_of_ms("IR000000")]).abs().max()) > 1e-3
     ex = m._bridge_supply_to_market(m.supply_module.aggregate_supply(s["supply"], by_country=True))
+    _xs = m.par.excluded_sup_base                                # Norway's units outside the run, at base (S7)
+    if _xs is not None:
+        ex = ex.add(_xs.reindex(columns=ex.columns).fillna(0.0), fill_value=0.0)
     # Norway's raw milk in the market (market.sup_milk_in_market, step F; simu_calibration_to_supply.gms l. 423-427):
     # its supply models' milk moved by its raw milk supply function, k x (its dairy block's milk price level - the
     # level the models saw) + the MILK row's response to the other prices; equal to the models' milk at convergence

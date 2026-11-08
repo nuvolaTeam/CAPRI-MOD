@@ -28,6 +28,8 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K122](#k122) | S2 step 1b: set-aside split into CAPRI's VSET and FALL; the winter-cover option's potential counted set-aside CAPRI fills | done on mini-EU (7 November 2026); the full runs and the suite to come |
 | [K123](#k123) | S2 step 1c: grassland split into CAPRI's GRAE and GRAI, the split column z and its late calibration removed; fodder roots' 2030 fodder trajectory was missing since 1a | done (8 November 2026): suite, mini-EU, full-EU Farm-to-Fork and Green Deal |
 | [K124](#k124) | S1: CAPRI's two crop technologies T1 and T2 as one mix column per crop; five approximations registered | done (8 November 2026): mini-EU, full-EU Farm-to-Fork and Green Deal; CAPRI's setting the default |
+| [K125](#k125) | S7, CAPRI's market calibration, the model's only form: the "supply" form and its setting removed; ten tests written for the old form adapted | done (9 November 2026); the scenario-shifter layer (S7 step 5) still to build |
+| [K126](#k126) | The CasADi trade system left out the quota price offsets of a commodity with global quotas only (casein), in the optional exact-Jacobian and Newton-Krylov solves | fixed (9 November 2026); the default solve unaffected |
 
 ## Resolved (107)
 
@@ -2485,3 +2487,42 @@ Registered approximations (not closed):
    to be confirmed).
 Open with it: whether CAPRI's endogenous yields act on the technologies' mean yield as here (S1_MIX_COLUMNS.md
 section 6).
+
+### K125: S7, CAPRI's market calibration, the model's only form (9 November 2026)
+
+S7 (docs/design/S7_DEMAND_CALIBRATION.md) built CAPRI's calibration of the market (once per run at CAPRI's own 2030
+market data; the baseline a market solution; only the supply side following the supply models each iteration, at
+CAPRI's marketed over gross production, grofNEprod) as market.demand_calibration = "capri", beside the former form
+"supply" (DEP-5: the demand recalibrated to the supply models' output in every baseline iteration, the baseline at the
+reference prices). The agreed condition for removing "supply" (the full Farm-to-Fork run validating "capri") was met
+on 7 November 2026 (K120: full-EU Farm-to-Fork and Green Deal converged; baseline prices within a median 0.08% of the
+"supply" run's, none above 5%), and every validation run since used "capri", but the switch was not made until
+8 November 2026 (an omission). Removed: the setting, the EU's and Norway's base alignment to the supply models
+(_align_eu_base_balance, _align_sup_base, base_net_exports_eu), the baseline's return at the reference prices, the
+Hessian "pending" after a baseline (sv.hessian_pending) and seen.eu_base_supply; DEP-5's main part to the register's
+history, its raw milk world pool kept (DEP-5, to close with the non-EU dairy blocks).
+
+Consequence: a baseline measures the market supply Hessian at its start (on calibrated models at the reference prices,
+K120), because its own market uses it; the decision of 28 October 2026 (a baseline alone does not measure it, the
+scenario on it does) belonged to the "supply" form, whose baseline did not solve the market. A full-EU baseline alone
+now takes the measurement (about 25 minutes) unless the cache holds it.
+
+The suite with "capri" the default: 10 failures, all tests written for the old form (the bridge's output unchanged by
+the marketed share; the baseline's last round at the base; the base reproduced at the models' own supply; the Hessian
+not measured by a baseline; Norway's market supply its run units' alone on a subset run), adapted to CAPRI's form; one
+real defect found with them (K126). The tests' helper that fed one country per EU block its whole raw milk now gives
+each member state CAPRI's marketed milk (the dairy blocks are per member state).
+
+Open: the scenario-shifter layer (S7 step 5: CAPRI's DATA ChangeFactor / PercentageChange of prep_market.gms and the
+supply side's shifters), which the course scenario ladder needs; not built.
+
+### K126: The CasADi trade system without the global quotas' price offsets (found 9 November 2026)
+
+capri_mod/market/trade_ad.import_price_matrices (p = A r + B, the CasADi trade system's import prices) added the
+quotas' price offsets only for a commodity with bilateral tariff-rate quotas; BilateralCommodity.import_prices adds
+them for bilateral or global quotas. Casein (CASE) has global quotas only, so its offset (up to 278 EUR/t at CAPRI's
+calibration point, where the quota binds) was left out of the system. test_casadi_trade_residual_and_jacobian_match
+passed until S7, so the offset was presumably zero at the "supply" form's base (not checked). Effect: only the optional
+solves that use the CasADi system, market.exact_jacobian (off by default) and market.solver = "newton_krylov" (not the
+default); the default solve, which every run with the default settings uses, takes BilateralCommodity's own residual. Fixed: the same condition as
+import_prices.

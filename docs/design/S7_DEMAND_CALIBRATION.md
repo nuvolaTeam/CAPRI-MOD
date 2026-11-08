@@ -1,6 +1,6 @@
 # S7: the market's demand calibration in CAPRI's form (design)
 
-Status: 5 November 2026, design only; nothing built. Section 1 completed 6 November 2026 (arm/prep_market.gms,
+Status (9 November 2026): built and the model's only form (KNOWN_ISSUES K120, K125): build steps 1-4 done, the "supply" form and its setting removed; step 5, the scenario-shifter layer, not built. Written as a design on 5 November 2026: Section 1 completed 6 November 2026 (arm/prep_market.gms,
 CAPRI's online documentation, checked against the code). Decided by the project lead the same day: the baseline demand
 recalibration (register DEP-5) is removed, soon (MODEL_CONTENT_PLAN §14 item 12, decision log). This note says what
 CAPRI does, what capri-mod does instead, what the change touches, how it is checked, and the questions left.
