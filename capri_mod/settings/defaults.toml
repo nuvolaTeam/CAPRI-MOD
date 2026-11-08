@@ -153,6 +153,10 @@ use_cattle_member_splits = false
 # diversification index took the fixed columns' logs, and the permanent-grassland rule applied to a grassland of
 # 3.5e-11 kha (KNOWN_ISSUES K69)
 absent_activities_fixed = true
+# CAPRI's two technologies per crop, T1 (high yield) and T2 (low yield), as one mix column per crop with both (S1,
+# docs/design/S1_MIX_COLUMNS.md; with CAPRI's 2030 PMP terms only). false: the collapsed form (DEP-9). Off until
+# validated (8 November 2026); CAPRI's setting is on
+crop_technologies = false
 # JRC121368 capped regions given instead of the nine highest baseline surpluses (comma list; "" = the rule)
 jrc_capped_override = ""
 # IPOPT: iteration limits (cold, warm start), acceptable tolerance, CPU guard (s), calibration tolerance (the

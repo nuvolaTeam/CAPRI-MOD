@@ -122,6 +122,9 @@ class RegionalEvalState(_Slots):
         "ghg_applied",        # the emission tax added to the net revenues, by activity (its undo record)
         "ghg_nr_obj",         # the net revenues object the tax was added to (an identity check, never a copy)
         "hist_cols",          # the histosol fallowing's columns
+        "mix_cols",           # {crop: column} of the technology mix columns (S1)
+        "mix_dnr",            # {crop: net revenue T1 - T2 per ha} of this solve (S1)
+        "mix_n_min",          # {crop: mineral N input T1 - T2 per ha} of the N_balance row (S1)
         "manure_ni_nh3",      # NH3 of the manure inhibitors, by activity
         "manure_ni_relief",   # the manure N the inhibitors keep, by activity
         "nlp_nip",            # the manure inhibitors' parameters
@@ -135,6 +138,7 @@ class RegionalEvalState(_Slots):
         "surplus_row",        # the N-surplus row of this solve
         "yields_solve0",      # the yields at the start of the solve (restored at its end)
         "greendeal_inputs",   # the Green Deal's input reductions of this solve
+        "greendeal_crop_delta",   # {crop: (plant protection, other inputs)} cost changes of this solve, EUR/ha
         "organic_conv",       # the organic conversion shares by crop
         "yield_price_factor", # the yields' price factors
     )
@@ -202,6 +206,7 @@ class RegionalResults(_Slots):
         "land_solution",      # the land types' levels
         "last_aug",           # the augmented problem the land-market solve used (Q, c, A, b, y)
         "last_hist_fallow",   # the histosol fallowing by class
+        "last_mix_z",         # {crop: z} of the technology mix columns, 1000 ha moved from T2 to T1 (S1)
         "last_manure_trade",  # the manure trade (N)
         "last_manure_trade_pk",  # idem for P and K
         "last_mineral_n",     # the mineral N bought

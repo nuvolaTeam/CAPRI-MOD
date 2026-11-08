@@ -368,14 +368,23 @@ class PolicyBlock:
             else:
                 plap = self._input_row(a, "plap_eur_ha")
                 inpo = self._input_row(a, "inpo_eur_ha")
+                d_p = d_i = 0.0
                 if plap is not None and pc_plap != 0.0:
-                    d += delta(plap, 0.0, pc_plap)
+                    d_p = delta(plap, 0.0, pc_plap)
                 if inpo is not None:
                     o_a = self._organic_crop_target(a, organic_share) if organic_share else 0.0
                     eful = self._input_row(a, topup_col) or 0.0
                     topup = 2.0 * o_a * eful
                     if topup or pc_inpo:
-                        d += delta(inpo, topup, pc_inpo)
+                        d_i = delta(inpo, topup, pc_inpo)
+                d += d_p
+                d += d_i
+                if d_p or d_i:
+                    # the crop's plant-protection and other-input costs of this solve (the mix columns' technology
+                    # factors act on them, supply/techn_mix.py)
+                    if getattr(self.ev, "greendeal_crop_delta", None) is None:
+                        self.ev.greendeal_crop_delta = {}
+                    self.ev.greendeal_crop_delta[a] = (d_p, d_i)
             if d:
                 nr[a] = float(nr.get(a, 0.0)) - d
         self.net_revenues = nr

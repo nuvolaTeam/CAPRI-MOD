@@ -233,6 +233,9 @@ class RegionData:
     genetics_effects: Optional[dict] = None
     #: CAPRI's histosols: organic-soil shares, emission factors, fallowing cost terms
     histosol: Optional[pd.Series] = None
+    #: CAPRI's crop technologies T1/T2 (S1): per crop with both, the T1 - T2 differences and CAPRI's 2030 technology
+    #: block in the mix columns' variables (techn_mix_2030.csv, pmp_capri_2030_mix.csv); with CAPRI's 2030 PMP terms only
+    techn_mix: Optional[pd.DataFrame] = None
     #: CAPRI's input costs the Green Deal targets change (build_plant_protection_cost.py): plap, inpo, fert, eful
     #: (EUR/ha by crop) and inpo_toin_share (animals)
     input_costs_ha: Optional[pd.DataFrame] = None
@@ -492,10 +495,11 @@ from capri_mod.supply.abatement import AbatementBlock  # noqa: E402
 from capri_mod.supply.policy import PolicyBlock  # noqa: E402
 from capri_mod.supply.land import LandBlock  # noqa: E402
 from capri_mod.supply.nlp import NLPBlock  # noqa: E402
+from capri_mod.supply.techn_mix import TechnMixBlock  # noqa: E402
 
 
 class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock, AbatementBlock, PolicyBlock,
-                          LandBlock, NLPBlock):
+                          LandBlock, NLPBlock, TechnMixBlock):
     """
     Single NUTS-2 regional agricultural programming model.
 
@@ -519,7 +523,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     SOLVE_STATE = ("ev.amm_cost", "sv.amm_last", "res.animal_n_kept", "ev.animal_n_relief", "res.animal_nh3_saved",
                    "res.cover_solved", "res.fd_model", "res.land_solution", "res.last_aug", "res.last_cattle_z",
                    "res.last_dairy_z", "ev.last_duals", "res.last_feed_dm", "res.last_feed_t", "res.last_genet_z",
-                   "res.last_hist_fallow", "res.last_npk", "ev.last_req_duals",
+                   "res.last_hist_fallow", "res.last_mix_z", "res.last_npk", "ev.last_req_duals",
                    "ev.manure_ni_nh3", "ev.manure_ni_relief", "res.manure_tech_shares", "ev.price_shock_now",
                    "sv.wc_solved", "seen.feed_rations", "sv.n_relax_sticky")
     #: the regional NLP's fields (warm starts, calibration, fallbacks and their diagnostics): what the market supply
@@ -1616,6 +1620,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # the organic share. Applied HERE rather than in run(), because
         # _compute_net_revenues() above rebuilds net revenues from scratch under
         # a policy shock and would overwrite an earlier adjustment.
+        self.ev.greendeal_crop_delta = {}
         if isinstance(policy_shock, dict):
             _org = float(policy_shock.get("organic_area_target", 0.0) or 0.0)
             _pest = float(policy_shock.get("pesticide_reduction", 0.0) or 0.0)
@@ -1714,6 +1719,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                                           if len(c_) == 2 and max(c_) < len(y)}
             self.res.last_aug = (Qa, ca, Aa, ba, y)
             self._split_record(y)
+            self._mix_record(y)
             if self._split_pending():
                 self._dairy_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             self.res.last_hist_fallow = {c_: float(y[j_]) for c_, j_ in (getattr(self.ev, "hist_cols", None) or {}).items() if j_ < len(y)}
@@ -1730,6 +1736,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             self.res.last_dairy_z = 0.0
             self.res.last_cattle_z = {}
             self.res.last_genet_z = {}
+            self.res.last_mix_z = {}
             # CAPRI's dairy splits on the plain path too (regions without land-market data: Ireland, Berlin, Hamburg,
             # ...; the grassland split was a column too until S2, 7 November 2026)
             _n0 = len(x0)
@@ -1739,11 +1746,13 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             Qg, cg, Ag, bg, sg = self._dairy_intensity_column(
                 self.Q, c_lin, A_ub, b_ub, np.asarray(x0, float), _lab, _n0)
             Qg, cg, Ag, bg, sg = self._histosol_columns(Qg, cg, Ag, bg, sg, _lab, _n0)
+            Qg, cg, Ag, bg, sg = self._mix_columns(Qg, cg, Ag, bg, sg, _lab, _n0)
             self.ev.aug_labels = _lab
             self.res.last_hist_fallow = {}
             _yc = None
             _cols = (getattr(self.ev, "dairy_col", None) is not None
-                     or getattr(self.ev, "cattle_cols", None) or getattr(self.ev, "hist_cols", None))
+                     or getattr(self.ev, "cattle_cols", None) or getattr(self.ev, "hist_cols", None)
+                     or getattr(self.ev, "mix_cols", None))
             if _cols:
                 _yg = self._nlp_solve(Qg, cg, Ag, bg, sg)
                 if _yg is None:
@@ -1751,6 +1760,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                     self._note_floor_failure()
                     _yg = self._nlp_last_point(Qg, cg, Ag, bg, sg)
                 self._split_record(_yg)
+                self._mix_record(_yg)
                 _yc = _yg[:_n0]
                 if self._split_pending():
                     self._dairy_calibrate_from_duals(getattr(self.ev, "last_duals", None))
@@ -1795,6 +1805,11 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # GRAS is already dry-matter tonnes (converted at load time).
         yields = self.data.yields.reindex(self.acts).fillna(0.0)
         gross_output = activities * yields
+        # CAPRI's technologies (S1): z ha moved from T2 to T1 add yield_diff x yield each (T1 = X/2 + z at
+        # yield (1 + d/2), T2 = X/2 - z at (1 - d/2))
+        _tm = getattr(self.data, "techn_mix", None)
+        for _a, _z in (getattr(self.res, "last_mix_z", None) or {}).items():
+            gross_output[_a] = float(gross_output[_a]) + float(_tm.at[_a, "yield_diff"]) * float(yields[_a]) * _z
 
         # Livestock output comes from CAPRI's FINAL-PRODUCT coefficients, not
         # YILD. For breeding and suckler activities CAPRI's YILD measures
@@ -1851,6 +1866,9 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # is over a hundred times the linear one. That is why farm income used
         # to read as barely moving under policies that visibly changed land use.
         gm = float(self.net_revenues.reindex(self.acts).fillna(0.0).values @ x_opt)
+        # the technologies' net revenue difference on the area moved to T1 (S1; the linear term is minus it)
+        gm += sum(float(getattr(self.ev, "mix_dnr", {}).get(_a, 0.0)) * _z
+                  for _a, _z in (getattr(self.res, "last_mix_z", None) or {}).items())
 
         # Shadow prices: REAL dual variables, from the optimality conditions.
         # The solver minimises 1/2 x'Qx + c'x subject to A x <= b, x >= 0. On the
@@ -2146,6 +2164,15 @@ class SupplyModule(ModuleStateMixin):
             held |= {a for a in prov.columns if prov.at[region, a] == "NO_CAPRI_VALUE" and (a, a) not in pmp}
         return frozenset(held)
 
+    def _techn_mix_for(self, d, region):
+        """The region's crop technologies (S1) where its crops take CAPRI's 2030 PMP terms (pmp_source "capri2030" at the
+        2030 market year, "crops" among pmp_capri_parts): the mix terms are that calibration's; None otherwise."""
+        if str(getattr(self, "pmp_source", "capri2030")) != "capri2030" or _inputs.market_year(d) != 2030:
+            return None
+        if "crops" not in tuple(getattr(self, "pmp_capri_parts", ())):
+            return None
+        return (d.get("techn_mix") or {}).get(region)
+
     def _pmp_capri_parts_of(self, g):
         """The region's CAPRI 2030 terms restricted to pmp_capri_parts (crops' matrix, animals' herd terms)."""
         if not g:
@@ -2269,6 +2296,7 @@ class SupplyModule(ModuleStateMixin):
             land_rents=(((d.get("land_rents") or {}).get(_inputs.market_year(d)) or {}).get(region)),
             # CAPRI's PMP terms of its 2030 baseline calibration (K61): at the 2030 market year, with pmp_source "capri2030"
             pmp_capri=self._pmp_terms_for(d, region),
+            techn_mix=self._techn_mix_for(d, region),
             uncalibrated=self._uncalibrated(d, region),
             livestock_feed_coef=(
                 d["livestock_feed_coef"].loc[region]
@@ -2999,6 +3027,7 @@ class SupplyModule(ModuleStateMixin):
             result.yani_dnet = getattr(model.res, "yani_dnet", None)
             result.genetics_shift = dict(getattr(model.res, "last_genet_z", None) or {})
             result.histosol_fallow = dict(getattr(model.res, "last_hist_fallow", None) or {})
+            result.technology_mix = dict(getattr(model.res, "last_mix_z", None) or {})
             _ls = getattr(model.res, "land_solution", None) or {}
             result.land_types = {t_: float(_ls[t_]) for t_ in getattr(model.ev, "land_types_used", []) if t_ in _ls}
             result.luc = _luc_of(model, result.land_types)
@@ -3051,6 +3080,7 @@ class SupplyModule(ModuleStateMixin):
                 result.yani_dnet = getattr(model.res, "yani_dnet", None)
                 result.genetics_shift = dict(getattr(model.res, "last_genet_z", None) or {})
                 result.histosol_fallow = dict(getattr(model.res, "last_hist_fallow", None) or {})
+                result.technology_mix = dict(getattr(model.res, "last_mix_z", None) or {})
                 _ls = getattr(model.res, "land_solution", None) or {}
                 result.land_types = {t_: float(_ls[t_]) for t_ in getattr(model.ev, "land_types_used", []) if t_ in _ls}
                 result.luc = _luc_of(model, result.land_types)
@@ -3313,4 +3343,4 @@ def fert_side_value(region: str, tech: str, item: str):
 # refactor stage 3a: the mixin modules' methods see this module's names (capri_mod/utils/mixins.py)
 from capri_mod.utils.mixins import inject_names as _inject_names  # noqa: E402
 _inject_names(globals(), ["capri_mod.supply." + _m for _m in ("livestock", "fertilisation", "abatement", "policy",
-                                                              "land", "nlp")])
+                                                              "land", "nlp", "techn_mix")])

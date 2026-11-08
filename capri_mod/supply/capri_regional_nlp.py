@@ -982,6 +982,11 @@ class CapriRegionalNLP:
         hi_l = np.where(at_u[act] & at_l[act], np.inf, np.where(at_u[act], np.inf, 0.0))
         # variable bounds active at base (not the activities': their residual is the calibration)
         free = np.ones(nX, bool); free[:len(self.acts)] = False
+        # the crops' technology mix columns (S1) are calibrated as the activities are: their residual is their linear
+        # term (CAPRI's p_pmpCnst per technology), not a source of row multipliers
+        for k_ in self.spec.get("mix_cols") or ():
+            if k_ < nX:
+                free[k_] = False
         fu, fl_ = np.isfinite(ubx), np.isfinite(lbx)
         vb_u = free & fu & (np.abs(xb - np.where(fu, ubx, 0.0)) <= tol * np.maximum(1.0, np.abs(np.where(fu, ubx, 0.0))))
         vb_l = free & fl_ & (np.abs(xb - np.where(fl_, lbx, 0.0)) <= tol * np.maximum(1.0, np.abs(np.where(fl_, lbx, 0.0)))) & ~vb_u

@@ -379,5 +379,6 @@ class LandBlock:
                                + ([np.zeros(pool_k)] if pool_k else []))
         Qa, ca, Aa, ba, start = self._dairy_intensity_column(Qa, ca, Aa, ba, start, labels, n)
         Qa, ca, Aa, ba, start = self._histosol_columns(Qa, ca, Aa, ba, start, labels, n)
+        Qa, ca, Aa, ba, start = self._mix_columns(Qa, ca, Aa, ba, start, labels, n)   # S1: CAPRI's T1/T2
         self.ev.aug_labels = labels              # one label per row of the augmented problem (the NLP form reads them)
         return Qa, ca, Aa, ba, start, rows

@@ -11,7 +11,7 @@ from __future__ import annotations
 class NLPBlock:
     def _aug_col_labels(self, n_cols):
         """One label per column of the regional problem: activities, land types, the mineral-N allocation column,
-        manure exports and imports, the split and option columns, histosol fallow."""
+        manure exports and imports, the split and option columns, histosol fallow, the crops' technology mix (S1)."""
         lab = list(self.acts)
         n = len(lab)
         extra = {}
@@ -35,6 +35,8 @@ class NLPBlock:
             extra[int(j_)] = f"genet_z_{a_}_{o_}"
         for c_, j_ in (getattr(self.ev, "hist_cols", None) or {}).items():
             extra[int(j_)] = f"hist_{c_}"
+        for a_, j_ in (getattr(self.ev, "mix_cols", None) or {}).items():
+            extra[int(j_)] = f"mix_{a_}"
         out = lab + [extra.get(j, f"col{j}") for j in range(n, n_cols)]
         return out
 
@@ -134,6 +136,11 @@ class NLPBlock:
                     # (on converted land the organic I/O change already took the fertiliser cost out: only the
                     # conventional share's is left in c)
                     c[j] -= float(self._input_cost(a, "fert", self.FERT_COST_SHARE)) * float(oc_.get(a, 1.0))
+            # the technology mix columns (S1): their fertiliser cost difference likewise (need_diff x the crop's)
+            _tm = getattr(self.data, "techn_mix", None)
+            for a_, k_ in (getattr(self.ev, "mix_cols", None) or {}).items():
+                if k_ < len(c):
+                    c[k_] -= self._mix_fert_cost(a_, _tm.loc[a_])
         abat = self._nlp_abatement_spec(labels) if npk is not None else {}
         if npk is not None:
             # capri-mod's manure-application limit and mineral-N allocation row are not CAPRI's
@@ -145,7 +152,8 @@ class NLPBlock:
         spec = dict(Q=Q, c=c, A=A, b=b, labels=labels, acts=list(self.acts), rations=rats, fodder=fod, x_base=xb,
                     prices=getattr(self.seen, "feed_prices", None), req_extra=_rx, feed_ghg=self._ghg_feed_cost(),
                     npk=npk, drop_labels=drop, cap_rules=self._cap_rules_spec(), ghg_min=ghg_min,
-                    land_rent_rows=dict(getattr(self.ev, "land_rent_rows", None) or {}), **abat)
+                    land_rent_rows=dict(getattr(self.ev, "land_rent_rows", None) or {}),
+                    mix_cols=sorted(int(k_) for k_ in (getattr(self.ev, "mix_cols", None) or {}).values()), **abat)
         if npk is not None and getattr(self.ev, "alloc_cols", 0):
             spec["fix_cols"] = {n + len(getattr(self.ev, "land_types_used", [])): 0.0}
         self.res.last_feed_dm = None

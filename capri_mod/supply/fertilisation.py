@@ -246,6 +246,8 @@ class FertilisationBlock:
         # ManureNPK_. Until 29 October 2026 the factor was read off the manure-application row or the N row, which
         # exist only with an N target: without one the split columns left the manure in NUTNED_ unchanged (K105).
         man_split = self._split_manure_factors(n_cols, acts)
+        mixc = dict(getattr(self.ev, "mix_cols", None) or {})
+        tm_ = getattr(self.data, "techn_mix", None)
         for nut in NUTRIENTS:
             sq = sqn[nut]
             R = D.region(cr, nut); P = D.priors(cr, nut)
@@ -310,6 +312,12 @@ class FertilisationBlock:
                 if not modes:
                     continue
                 needl = [(j, sh * k * need[j] * sq.get(acts[j], 1.0)) for j, sh in crops if need[j] > 0]
+                # the technology mix columns (S1): z ha moved from T2 to T1 need need_diff x the crop's need per ha
+                # (NUTNED_: SQRT(1 + y)(1 + y) per technology); in the group's need only, no area
+                for j, sh in crops:
+                    kz = mixc.get(acts[j])
+                    if kz is not None and need[j] > 0 and kz < n_cols:
+                        needl.append((kz, sh * k * need[j] * sq.get(acts[j], 1.0) * float(tm_.at[acts[j], "need_diff"])))
                 groups.append({"g": gname, "perm": perm, "acc": acc, "modes": modes, "crops": crops,
                                "need": needl,
                                "own": [(j, sh * k_own * own[j]) for j, sh in crops if perm and own[j] > 0], "Aref": Aref})
@@ -461,8 +469,8 @@ class FertilisationBlock:
     def _n_row_mineral_parts(self, A, labels):
         """The mineral-N parts of the N_balance row's coefficients (t mineral N per unit of each column), from the
         environmental accounts' own unit balances (n_mineral_input) as the row is built from them: activities their
-        unit balance's, manure exports and imports -/+ the substitution factor, the grassland split its delta, the
-        dairy, cattle and option columns their animal's in proportion to their manure coefficient."""
+        unit balance's, manure exports and imports -/+ the substitution factor, the dairy, cattle and option columns
+        their animal's in proportion to their manure coefficient, the technology mix columns their T1 - T2 (S1)."""
         env_ = getattr(self.seen, "env_for_surplus", None)
         i_nb = labels.index("N_balance")
         mp = np.zeros(A.shape[1])
@@ -494,6 +502,10 @@ class FertilisationBlock:
                 a = lab[len("cattle_z_"):].split(":")[0]
             elif lab.startswith("genet_z_"):
                 a = lab[len("genet_z_"):].split("_")[0]
+            elif lab.startswith("mix_"):
+                # the technology mix (S1): its own mineral part, the unit balances' T1 - T2 (techn_mix._mix_n_terms)
+                mp[j] = float((getattr(self.ev, "mix_n_min", None) or {}).get(lab[len("mix_"):], 0.0))
+                continue
             if a in acts:
                 ja = acts.index(a)
                 if A[i_nb, ja] != 0:
