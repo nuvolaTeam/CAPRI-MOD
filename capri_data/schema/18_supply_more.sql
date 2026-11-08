@@ -383,6 +383,28 @@ INSERT INTO value_units VALUES
   ('sup_nutrients_regional', 'VSET', NULL, 'open', 'nutrients_regional.VSET: unit to be established'),
   ('sup_nutrients_regional', 'FALL', NULL, 'open', 'nutrients_regional.FALL: unit to be established');
 
+-- file: capri_data/2017/supply/techn_mix_2030.csv
+CREATE TABLE sup_techn_mix_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    activity VARCHAR NOT NULL REFERENCES model_activities (code),
+    yield_diff DOUBLE NOT NULL,
+    need_diff DOUBLE NOT NULL,
+    rest_cost_diff_eur_ha DOUBLE NOT NULL,
+    inpo_diff DOUBLE NOT NULL,
+    plap_diff DOUBLE NOT NULL,
+    prem_diff_share DOUBLE NOT NULL,
+    capri_region VARCHAR NOT NULL,
+    PRIMARY KEY (region, activity)
+);
+COMMENT ON TABLE sup_techn_mix_2030 IS 'The T1 - T2 differences per ha of the items CAPRI''s technology factors move (intens/techf.gms, fert/fertned.gms, policy/rd_logic.gms, NUTNED_), per model region and crop with both technologies: the coefficients of the mix columns (S1, docs/design/S1_MIX_COLUMNS.md; tools/build/build_techn_mix_2030.py)';
+INSERT INTO value_units VALUES
+  ('sup_techn_mix_2030', 'yield_diff', 'U_ratio', 'capri', 'p_technFact Yield T1 - T2: outputs and nutrient removal per unit z over the crop''s per ha'),
+  ('sup_techn_mix_2030', 'need_diff', 'U_ratio', 'builder', '(g_T1 - g_T2) / gbar, g = SQRT(1 + y)(1 + y) (NUTNED_): nutrient need per unit z over the crop''s need per ha'),
+  ('sup_techn_mix_2030', 'rest_cost_diff_eur_ha', 'U_EuPerHa', 'builder', 'sum over SEED, REPM, REPB, ELEC, EGAS, EFUL, ELUB of the factor T1 - T2 x CAPREG''s 2017 cost per ha (coefficient x UVAG / 1000)'),
+  ('sup_techn_mix_2030', 'inpo_diff', 'U_ratio', 'capri', 'p_technFact INPO T1 - T2'),
+  ('sup_techn_mix_2030', 'plap_diff', 'U_ratio', 'capri', 'p_technFact PLAP T1 - T2'),
+  ('sup_techn_mix_2030', 'prem_diff_share', 'U_ratio', 'builder', 'sum over the technology-differentiated schemes of PRME(scheme) / PRME(DPTOTAL) x p_technFact T1 - T2, CAPRI''s 2030 reference');
+
 -- file: capri_data/2017/supply/plant_protection_cost.csv
 CREATE TABLE sup_plant_protection_cost (
     region VARCHAR NOT NULL,

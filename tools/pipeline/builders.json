@@ -4441,7 +4441,8 @@
     "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
    ],
    "outputs": [
-    "capri_data/2017/supply/pmp_capri_2030.csv"
+    "capri_data/2017/supply/pmp_capri_2030.csv",
+    "capri_data/2017/supply/pmp_capri_2030_mix.csv"
    ]
   },
   {
@@ -5178,6 +5179,69 @@
    "outputs": [
     "capri_data/sources/intermediate/baseline_pmp/pmp_cnst_techn_2030.csv",
     "capri_data/sources/intermediate/technology/techn_fact_2030.csv"
+   ]
+  },
+  {
+   "task": "build_techn_mix_2030",
+   "builder": "build_techn_mix_2030",
+   "args": [],
+   "inputs": [
+    "capri_data/codes/model_activities.csv",
+    "capri_data/codes/model_activity_classes.csv",
+    "capri_data/shared/capri_member_state_codes.csv",
+    "capri_data/shared/eu_market_blocks.csv",
+    "capri_data/shared/regional_units.csv",
+    "capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.csv",
+    "capri_data/sources/intermediate/technology/techn_fact_2030.csv"
+   ],
+   "code": [
+    "tools/build/build_techn_mix_2030.py",
+    "tools/lib/_grep.py",
+    "tools/lib/_model_codes.py",
+    "tools/lib/_model_regions.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
+    "$SOURCES/capreg/res_17AL.txt",
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BA.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CS.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17KO.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MK.txt",
+    "$SOURCES/capreg/res_17MO.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt",
+    "$SOURCES/capreg/res_17TU.txt",
+    "$SOURCES/capreg/res_17UK.txt"
+   ],
+   "outputs": [
+    "capri_data/2017/supply/techn_mix_2030.csv",
+    "capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/prme_schemes_2030.csv.xz"
    ]
   },
   {

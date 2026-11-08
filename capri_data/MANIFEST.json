@@ -3244,6 +3244,22 @@
    ],
    "catalogue_note": "The animals' herd terms grouped for the cattle member splits (HEIL/HEIH/HEIR, the calves per sex: harmonic of the members' terms); tools/build/build_animal_pmp_capri_2030.py --splits. Read instead of pmp_capri_2030_animals.csv only with the member splits on. KNOWN_ISSUES K65: off by default (RegionalSupplyModel.use_cattle_member_splits), the per-sex young-animal markets did not converge yet (not re-checked)"
   },
+  "capri_data/2017/supply/pmp_capri_2030_mix.csv": {
+   "description": "CAPRI's 2x2 technology block p_pmpQuadTechn(act, T1/T2) of each crop with both technologies in the mix columns' variables (X, z), x_T1 = X/2 + z, x_T2 = X/2 - z (S1, docs/design/S1_MIX_COLUMNS.md): g_xx_extra = (Q_XX - c) X^2 added to the crop's diagonal of pmp_capri_2030 (c its collapsed curvature), g_xz = Q_Xz X^2, g_zz = Q_zz X^2 (tools/build/build_pmp_capri_2030.py, mix_terms)",
+   "kind": "calibrated",
+   "vintage": "2030",
+   "domain": "supply",
+   "status": "live",
+   "vintage_exception": "CAPRI's PMP terms at its 2030 calibration point, used only when the model simulates the 2030 market year",
+   "rows": 5417,
+   "columns": 7,
+   "units": "U_1000ha, U_EuPerHa",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_pmp_capri_2030:"
+   },
+   "catalogue_note": "tools/build/build_pmp_capri_2030.py: the technology block of each crop with T1 and T2 in the mix columns' variables (S1) (not re-checked)"
+  },
   "capri_data/2017/supply/pmp_own_price_elasticities.csv": {
    "description": "CAPRI's estimated own-price elasticities (PELA) per CAPRI region and CAPRI activity, raw (bounded on load, capri_pmp.dampen_elasticity); the elasticity-calibrated PMP's PMP_CAPRI source (docs/PMP_ELASTICITY_WIRING.md), not the default PMP (CAPRI's 2030 terms). Built by tools/build/build_pmp_own_price_elasticities.py from PELA's 2005 own-price slice (an earlier year where 2005 is missing)",
    "kind": "coefficients",
@@ -3432,6 +3448,22 @@
     "Own-price elasticities of 15 arable crops for 198 regional units. CAPRI's PELA (dat/estnlp/results.gdx), 2005 own-price slice, bounded by CAPRI's rule: values above 4.5 become min(8, sqrt(e) + 4.5 - sqrt(4.5)) (impose_upper_bound_on_elasticity.gms:25); no cell sits at 4.5, max 8.0, e.g. DEB20000 OATS raw 111.0 -> 8.0. Read by the model as the highest-precedence crop source in capri_pmp.build_elasticity_table (called in SupplyModule.__init__). With the default pmp_source capri2030, covered crops take CAPRI's exported 2030 terms. (checked 2026-10-29)"
    ],
    "catalogue_note": "Rebuilt from estnlp PELA 2005 with CAPRI's dampening rule. The previous file was keyed by CAPRI region codes (228 rows, only 107 resolving to model regions) and was clipped at 4.5 rather than dampened, understating 270 cells. (not re-checked)"
+  },
+  "capri_data/2017/supply/techn_mix_2030.csv": {
+   "description": "The T1 - T2 differences per ha of the items CAPRI's technology factors move (intens/techf.gms, fert/fertned.gms, policy/rd_logic.gms, NUTNED_), per model region and crop with both technologies: the coefficients of the mix columns (S1, docs/design/S1_MIX_COLUMNS.md; tools/build/build_techn_mix_2030.py)",
+   "kind": "coefficients",
+   "vintage": "2030 reference",
+   "domain": "supply",
+   "status": "live",
+   "vintage_exception": "CAPRI's technology factors at its 2030 simulation start and 2030 premiums by scheme; the input costs are CAPREG's 2017, as plant_protection_cost.csv",
+   "rows": 5417,
+   "columns": 9,
+   "units": "U_EuPerHa, U_ratio",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_techn_mix_2030"
+   },
+   "catalogue_note": "tools/build/build_techn_mix_2030.py: T1 - T2 per ha of each item the technology factors move (S1) (not re-checked)"
   },
   "capri_data/2017/supply/variable_costs.csv": {
    "description": "input costs 2017: crops CAPRI's TOIN level-weighted per ha (build_crop_economics_2017.py); DCOW, BULL, PIGF, OANI CAPRI's TOIN per CAPRI level unit (build_capri_base.intensive_values); SHGM, SHGF tools/lib/_sheep_goat.costs",

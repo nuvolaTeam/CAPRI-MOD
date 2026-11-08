@@ -18353,6 +18353,7 @@
      "build_supplement_effects",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
+     "build_techn_mix_2030",
      "build_trajectory_capri_ref",
      "build_winter_cover_option",
      "build_world_market_baseline",
@@ -18536,6 +18537,7 @@
      "build_supplement_effects",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
+     "build_techn_mix_2030",
      "build_trajectory_capri_ref",
      "build_winter_cover_option",
      "build_world_market_baseline",
@@ -20908,6 +20910,118 @@
     "tests": []
    }
   },
+  "pmp_capri_2030_mix": {
+   "file": "capri_data/2017/supply/pmp_capri_2030_mix.csv",
+   "declared_in": "12_supply_pmp.sql",
+   "layout": [],
+   "comment": "CAPRI's 2x2 technology block p_pmpQuadTechn(act, T1/T2) of each crop with both technologies in the mix columns' variables (X, z), x_T1 = X/2 + z, x_T2 = X/2 - z (S1, docs/design/S1_MIX_COLUMNS.md): g_xx_extra = (Q_XX - c) X^2 added to the crop's diagonal of pmp_capri_2030 (c its collapsed curvature), g_xz = Q_Xz X^2, g_zz = Q_zz X^2 (tools/build/build_pmp_capri_2030.py, mix_terms)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "g_xx_extra",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "g_xz",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "g_zz",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "x",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "capri_region",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(g_xx_extra >= 0)",
+    "(g_zz >= 0)",
+    "(x > 0)"
+   ],
+   "units": [
+    {
+     "item": "g_xx_extra",
+     "unit": "U_EuPerHa",
+     "status": "builder",
+     "basis": "(Q_XX - c) X^2: CAPRI's technology block (1000 EUR per (1000 ha)^2) in (X, z) times the crop's level squared, the convention of pmp_capri_2030.g"
+    },
+    {
+     "item": "g_xz",
+     "unit": "U_EuPerHa",
+     "status": "builder",
+     "basis": "Q_Xz X^2, as g_xx_extra"
+    },
+    {
+     "item": "g_zz",
+     "unit": "U_EuPerHa",
+     "status": "builder",
+     "basis": "Q_zz X^2, as g_xx_extra"
+    },
+    {
+     "item": "x",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "CAPRI's 2030 reference LEVL of the crop in its CAPRI region"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_pmp_capri_2030:",
+    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "pmp_own_price_elasticities": {
    "file": "capri_data/2017/supply/pmp_own_price_elasticities.csv",
    "declared_in": "13_supply_rents_elas.sql",
@@ -22810,6 +22924,7 @@
      "build_supplement_effects",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
+     "build_techn_mix_2030",
      "build_trajectory_capri_ref",
      "build_use_components",
      "build_welfare_base",
@@ -23415,6 +23530,7 @@
      "build_supplement_effects",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
+     "build_techn_mix_2030",
      "build_trajectory_capri_ref",
      "build_use_components",
      "build_welfare_base",
@@ -23625,6 +23741,7 @@
      "build_supplement_effects",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
+     "build_techn_mix_2030",
      "build_trajectory_capri_ref",
      "build_use_components",
      "build_welfare_base",
@@ -34446,7 +34563,8 @@
      "build_animal_pmp_capri_2030",
      "build_intensity_q_2030",
      "build_pmp_capri_2030",
-     "build_techn_2030"
+     "build_techn_2030",
+     "build_techn_mix_2030"
     ],
     "checks": [
      "tools/check/pmp_recipe_check.py"
@@ -35205,7 +35323,9 @@
    "notes": [],
    "read_by": {
     "model": [],
-    "builders": [],
+    "builders": [
+     "build_techn_mix_2030"
+    ],
     "checks": [],
     "tests": []
    }
@@ -40678,6 +40798,136 @@
     "model": [
      "capri_mod/data/loaders.py"
     ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "sup_techn_mix_2030": {
+   "file": "capri_data/2017/supply/techn_mix_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "The T1 - T2 differences per ha of the items CAPRI's technology factors move (intens/techf.gms, fert/fertned.gms, policy/rd_logic.gms, NUTNED_), per model region and crop with both technologies: the coefficients of the mix columns (S1, docs/design/S1_MIX_COLUMNS.md; tools/build/build_techn_mix_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "yield_diff",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "need_diff",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "rest_cost_diff_eur_ha",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "inpo_diff",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "plap_diff",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "prem_diff_share",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "capri_region",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [],
+   "units": [
+    {
+     "item": "inpo_diff",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_technFact INPO T1 - T2"
+    },
+    {
+     "item": "need_diff",
+     "unit": "U_ratio",
+     "status": "builder",
+     "basis": "(g_T1 - g_T2) / gbar, g = SQRT(1 + y)(1 + y) (NUTNED_): nutrient need per unit z over the crop's need per ha"
+    },
+    {
+     "item": "plap_diff",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_technFact PLAP T1 - T2"
+    },
+    {
+     "item": "prem_diff_share",
+     "unit": "U_ratio",
+     "status": "builder",
+     "basis": "sum over the technology-differentiated schemes of PRME(scheme) / PRME(DPTOTAL) x p_technFact T1 - T2, CAPRI's 2030 reference"
+    },
+    {
+     "item": "rest_cost_diff_eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "builder",
+     "basis": "sum over SEED, REPM, REPB, ELEC, EGAS, EFUL, ELUB of the factor T1 - T2 x CAPREG's 2017 cost per ha (coefficient x UVAG / 1000)"
+    },
+    {
+     "item": "yield_diff",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_technFact Yield T1 - T2: outputs and nutrient removal per unit z over the crop's per ha"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_techn_mix_2030",
+    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
     "builders": [],
     "checks": [],
     "tests": []
