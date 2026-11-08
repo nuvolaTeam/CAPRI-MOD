@@ -79,7 +79,7 @@ class TechnMixBlock:
         (0, 0) without the accounts."""
         env_ = getattr(self.seen, "env_for_surplus", None)
         yc = self.data.yields
-        if env_ is None or not hasattr(yc, "copy") or a not in yc.index:
+        if env_ is None or not hasattr(yc, "copy") or a not in yc:
             return 0.0, 0.0
         mint = dict(getattr(self.ev, "n_intensity", {}) or {})
         mi = {k_: v_ for k_, v_ in mint.items() if k_ in (a, "__credit__")}
@@ -90,8 +90,8 @@ class TechnMixBlock:
             y_ = yc.copy(); y_[a] = float(yc[a]) * (1.0 + f)
             ys_ = None
             if ys0 is not None:
-                ys_ = ys0.copy()
-                if a in ys_.index:
+                ys_ = dict(ys0) if isinstance(ys0, dict) else ys0.copy()     # a dict or a Series of yields
+                if a in ys_:
                     ys_[a] = float(ys_[a]) * (1.0 + f)
             u = env_.unit_nitrogen_balance(a, y_, self.data.region_id, mi, yields_scen=ys_)
             out.append((float(u.get("n_surplus", 0.0)), float(u.get("n_mineral_input", 0.0))))
