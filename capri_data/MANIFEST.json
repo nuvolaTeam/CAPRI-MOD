@@ -3254,6 +3254,9 @@
    "rows": 5417,
    "columns": 7,
    "units": "U_1000ha, U_EuPerHa",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
    "origin": {
     "nature": "capri",
     "builder": "build_pmp_capri_2030:"
@@ -3459,6 +3462,9 @@
    "rows": 5417,
    "columns": 9,
    "units": "U_EuPerHa, U_ratio",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
    "origin": {
     "nature": "capri",
     "builder": "build_techn_mix_2030"

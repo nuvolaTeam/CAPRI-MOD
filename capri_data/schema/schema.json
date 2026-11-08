@@ -21016,10 +21016,14 @@
    },
    "notes": [],
    "read_by": {
-    "model": [],
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_techn_mix.py"
+    ]
    }
   },
   "pmp_own_price_elasticities": {
@@ -34570,7 +34574,8 @@
      "tools/check/pmp_recipe_check.py"
     ],
     "tests": [
-     "capri_mod/tests/test_capri.py"
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_techn_mix.py"
     ]
    }
   },
@@ -40927,10 +40932,14 @@
    },
    "notes": [],
    "read_by": {
-    "model": [],
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_techn_mix.py"
+    ]
    }
   },
   "sup_winter_cover_share": {
@@ -45228,13 +45237,13 @@
   }
  ],
  "code_data": {
-  "capri/keep": 88,
+  "capri/keep": 89,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 26,
   "open/keep": 4,
   "physical/keep": 10,
-  "technical/keep": 29
+  "technical/keep": 30
  },
  "other_notes": {}
 }
