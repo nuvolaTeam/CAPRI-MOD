@@ -4342,6 +4342,18 @@ def test_intensity_splits_take_the_2030_curvature_with_capris_2030_terms(data):
         assert sm._intensity_q_at(d30, di, ("q_low", "q_high"), "animals")["q_low"] == pytest.approx(float(di["q_low"]))
 
 
+def test_fert_partial_slack_as_capris_greendeal_group(data):
+    """CAPRI's Green Deal group frees the slack of the fertiliser priors' partial derivative in its listed regions
+    (set_fert_priors.gms l. 664-785, v_fertDistPartialSlack): 28 regions, 30 listed (region, group) pairs; only the
+    Green Deal group's scenarios carry the flag that turns it on (greendeal_scenarios.gms, %scenarioGroup%)."""
+    from capri_mod.policy.greendeal import greendeal_2030_scenario
+    from capri_mod.policy.policy_module import PolicyScenario
+    fps = data["fert_partial_slack"]
+    assert len(fps) == 28 and sum(1 for v in fps.values() for g in v if g) == 30
+    assert fps["HU210000"] == ["GRAS"] and fps["IT310000"] == ["BARL", "PERM"] and fps["ES300000"] == [""]
+    assert greendeal_2030_scenario().greendeal_group and not PolicyScenario(name="x").greendeal_group
+
+
 def test_intensity_splits_at_capris_2030_point_with_manure_npk(data):
     """S6 item 6 (9 November 2026): at the 2030 market year the dairy and cattle splits take CAPRI's own 2030 terms
     (the "_2030" columns, from the 2030 reference the model's base comes from), at 2017 the base year's; the split

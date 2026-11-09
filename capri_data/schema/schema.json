@@ -12646,6 +12646,49 @@
     ]
    }
   },
+  "fert_partial_slack": {
+   "file": "capri_data/scenarios/greendeal_group/fert_partial_slack.csv",
+   "declared_in": "14_policy_targets.sql",
+   "layout": [],
+   "comment": "CAPRI's Green Deal group: the NUTS 2 regions (curNuts2) whose fertiliser priors' partial derivative has a slack (v_fertDistPartialSlack: flows with a prior mode below 5e-3 x 1000 t within +-mode) and the listed (region, group) pairs (extraSlackRegion_to_ngrp: every flow of the group within +-(mode + 0.1 x 1000 t)); ngrp empty: the region's tiny-prior rule only (supply/set_fert_priors.gms l. 664-785, %scenarioGroup%==greendeal); tools/build/build_fert_partial_slack.py",
+   "columns": [
+    {
+     "name": "capri_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "ngrp",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [],
+   "unique": [
+    [
+     "capri_region",
+     "ngrp"
+    ]
+   ],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_fert_partial_slack",
+    "sources": "$SOURCES/gams/supply/set_fert_priors.gms"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "fert_side_effects": {
    "file": "capri_data/2017/abatement/fert_side_effects.csv",
    "declared_in": "15_abatement.sql",
@@ -22607,7 +22650,7 @@
    "file": "capri_data/scenarios/greendeal_group/mineral_redu_limcres.csv",
    "declared_in": "24_policy_more.sql",
    "layout": [],
-   "comment": "CAPRI's exemptions in the crop-specific mineral fertiliser reduction (pol_input/greendeal/minfert_redu_by_crop.gms). (tools/build/build_mineral_redu_rules.py)",
+   "comment": "CAPRI's relaxations of the limCres regulation in the crop-specific mineral fertiliser reduction (pol_input/greendeal/minfert_redu_by_crop.gms): for a group of every nutrient (fnut empty) or for a nutrient's every group (ngrp empty). (tools/build/build_mineral_redu_rules.py)",
    "columns": [
     {
      "name": "capri_region",
@@ -22617,7 +22660,12 @@
     {
      "name": "ngrp",
      "type": "VARCHAR",
-     "not_null": true
+     "not_null": false
+    },
+    {
+     "name": "fnut",
+     "type": "VARCHAR",
+     "not_null": false
     },
     {
      "name": "add",
@@ -22630,11 +22678,14 @@
      "not_null": true
     }
    ],
-   "primary_key": [
-    "capri_region",
-    "ngrp"
+   "primary_key": [],
+   "unique": [
+    [
+     "capri_region",
+     "ngrp",
+     "fnut"
+    ]
    ],
-   "unique": [],
    "foreign_keys": [],
    "checks": [],
    "units": [
@@ -33392,7 +33443,7 @@
    "file": "capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_limCres.parquet",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
-   "comment": "CAPRI's relaxations of the limCres regulation (crop residues to a group at most 1.3 x baseline per ha) by +add for listed (ru, NGRP) in pol_input/greendeal/minfert_redu_by_crop.gms ($ife lines l. 281-356), each with its simulation-year condition ($ifthene %simy%>YYYY: after_year, strict), as tools/build/build_mineral_redu_rules.py parsed them (its parse moved unchanged to tools/build/convert_sources.py; numbers as the parse's floats); read by tools/build/build_mineral_redu_rules.py.",
+   "comment": "CAPRI's relaxations of the limCres regulation (crop residues to a group at most 1.3 x baseline per ha) by +add for listed (ru, NGRP) of every nutrient (fnut empty) or listed (ru, FNUT) of every group (ngrp empty: ES300000 PHOF, extracted since 9 November 2026) in pol_input/greendeal/minfert_redu_by_crop.gms ($ife lines l. 281-356), each with its simulation-year condition ($ifthene %simy%>YYYY: after_year, strict), as tools/build/build_mineral_redu_rules.py parsed them (its parse moved unchanged to tools/build/convert_sources.py; numbers as the parse's floats); read by tools/build/build_mineral_redu_rules.py.",
    "columns": [
     {
      "name": "capri_region",
@@ -33402,7 +33453,12 @@
     {
      "name": "ngrp",
      "type": "VARCHAR",
-     "not_null": true
+     "not_null": false
+    },
+    {
+     "name": "fnut",
+     "type": "VARCHAR",
+     "not_null": false
     },
     {
      "name": "add",
@@ -33415,11 +33471,14 @@
      "not_null": true
     }
    ],
-   "primary_key": [
-    "capri_region",
-    "ngrp"
+   "primary_key": [],
+   "unique": [
+    [
+     "capri_region",
+     "ngrp",
+     "fnut"
+    ]
    ],
-   "unique": [],
    "foreign_keys": [],
    "checks": [],
    "units": [

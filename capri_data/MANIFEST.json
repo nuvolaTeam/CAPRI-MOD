@@ -5007,6 +5007,23 @@
    "units": "- (not re-checked)",
    "catalogue_note": "CAPRI's trend projection as an alternative 2030 scenario (--trajectory captrd): settings; factors in growth.csv and regional.csv (capri_data/trajectories/captrd_2030.json until 31 October 2026). (not re-checked)"
   },
+  "capri_data/scenarios/greendeal_group/fert_partial_slack.csv": {
+   "description": "CAPRI's Green Deal group: the NUTS 2 regions (curNuts2) whose fertiliser priors' partial derivative has a slack (v_fertDistPartialSlack: flows with a prior mode below 5e-3 x 1000 t within +-mode) and the listed (region, group) pairs (extraSlackRegion_to_ngrp: every flow of the group within +-(mode + 0.1 x 1000 t)); ngrp empty: the region's tiny-prior rule only (supply/set_fert_priors.gms l. 664-785, %scenarioGroup%==greendeal); tools/build/build_fert_partial_slack.py",
+   "kind": "structure",
+   "vintage": "star 3.0",
+   "domain": "policy",
+   "status": "live",
+   "rows": 33,
+   "columns": 2,
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_fert_partial_slack"
+   },
+   "catalogue_note": "CAPRI's Green Deal group: the regions and (region, group) pairs with the slack on the fertiliser priors' partial derivative (set_fert_priors.gms); tools/build/build_fert_partial_slack.py. (not re-checked)"
+  },
   "capri_data/scenarios/greendeal_group/landscape_targets_ms.csv": {
    "description": "CAPRI's p_landscapeTargets: share of UAA in non-productive landscape elements to reach (gams/pol_input/greendeal/landscape_targets.gdx; tools/build/build_greendeal_targets.py)",
    "kind": "coefficients",
@@ -5045,13 +5062,13 @@
    "catalogue_note": "CAPRI's listed exemptions from the crop-specific mineral fertiliser reduction: (region, group) capped at factor x baseline from simulation year > after_year, some only with othPol high; tools/build/build_mineral_redu_rules.py. (not re-checked)"
   },
   "capri_data/scenarios/greendeal_group/mineral_redu_limcres.csv": {
-   "description": "CAPRI's exemptions in the crop-specific mineral fertiliser reduction (pol_input/greendeal/minfert_redu_by_crop.gms). (tools/build/build_mineral_redu_rules.py)",
+   "description": "CAPRI's relaxations of the limCres regulation in the crop-specific mineral fertiliser reduction (pol_input/greendeal/minfert_redu_by_crop.gms): for a group of every nutrient (fnut empty) or for a nutrient's every group (ngrp empty). (tools/build/build_mineral_redu_rules.py)",
    "kind": "coefficients",
    "vintage": "star 3.0",
    "domain": "policy",
    "status": "live",
-   "rows": 75,
-   "columns": 4,
+   "rows": 76,
+   "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
     "capri_mod/data/loaders.py",
@@ -5999,10 +6016,10 @@
    }
   },
   "capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_limCres.parquet": {
-   "description": "CAPRI's relaxations of the limCres regulation (crop residues to a group at most 1.3 x baseline per ha) by +add for listed (ru, NGRP) in pol_input/greendeal/minfert_redu_by_crop.gms ($ife lines l. 281-356), each with its simulation-year condition ($ifthene %simy%>YYYY: after_year, strict), as tools/build/build_mineral_redu_rules.py parsed them (its parse moved unchanged to tools/build/convert_sources.py; numbers as the parse's floats); read by tools/build/build_mineral_redu_rules.py.",
+   "description": "CAPRI's relaxations of the limCres regulation (crop residues to a group at most 1.3 x baseline per ha) by +add for listed (ru, NGRP) of every nutrient (fnut empty) or listed (ru, FNUT) of every group (ngrp empty: ES300000 PHOF, extracted since 9 November 2026) in pol_input/greendeal/minfert_redu_by_crop.gms ($ife lines l. 281-356), each with its simulation-year condition ($ifthene %simy%>YYYY: after_year, strict), as tools/build/build_mineral_redu_rules.py parsed them (its parse moved unchanged to tools/build/convert_sources.py; numbers as the parse's floats); read by tools/build/build_mineral_redu_rules.py.",
    "kind": "coefficients",
-   "rows": 75,
-   "columns": 4,
+   "rows": 76,
+   "columns": 5,
    "units": "U_ratio",
    "origin": {
     "nature": "source-extract",

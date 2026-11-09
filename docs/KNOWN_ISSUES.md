@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (12)
+## Open (13)
 
 | # | Issue | Status |
 |---|---|---|
@@ -32,6 +32,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K126](#k126) | The CasADi trade system left out the quota price offsets of a commodity with global quotas only (casein), in the optional exact-Jacobian and Newton-Krylov solves | fixed (9 November 2026); the default solve unaffected |
 | [K127](#k127) | Under CAPRI's market calibration (S7) an emission tax leaves N manure trade at zero in a four-unit Belgian run where the former form traded 360 t | open (9 November 2026): cause not established |
 | [K128](#k128) | Farm-to-Fork's meat prices against JRC121368: beef +29.5% against +24.0%, poultry +20.4% against +18.0%, pork +20.5% against +43.0%, with EU production close to CAPRI's | open (9 November 2026): the market's inputs checked against CAPRI's (base, demand elasticities, Armington, quotas), no departure found; needs CAPRI's own scenario run on the same version |
+| [K129](#k129) | BG020000 under the Green Deal: the regional model ends at very different crop mixes (maize 169 or 16 thousand ha) with the same objective (7e-7 relative), IPOPT at its acceptable level | open (9 November 2026): found in the mini-EU check of the fertiliser priors' slack; cause not established |
 
 ## Resolved (107)
 
@@ -2607,3 +2608,21 @@ Not settled: JRC121368 is another CAPRI version on another baseline, and its mea
 in hand (the report's tables were not readable from its PDF here), so the gap cannot be split between the version and
 the model. Next: CAPRI's own Farm-to-Fork or a market-only shock run on the same version (the course's release or
 Bonn, VALIDATION_PLAN §1.3).
+
+<a id="k129"></a>
+### K129: BG020000 under the Green Deal: two very different solutions with the same objective (found 9 November 2026)
+
+The mini-EU Green Deal 2030 at 65f8c65 (mini_gd_s6c) and with CAPRI's fertiliser priors' slack (s6d, mini_gd_s6d; the
+slack does not act in BG020000, outside CAPRI's list) end BG020000 at very different crop mixes - maize 169 against 16
+thousand ha, barley 14 against 84, other arable crops 80 against 16, pulses 7 against 37, voluntary set-aside 55
+against 97 - with regional objectives within 1.3 EUR of 1.86e6 (7e-7 relative). Every solve of the region ends at
+IPOPT's acceptable level, not optimal, and the jump check (K79) fires in the first iterations (moves of 5.8 and 50).
+The full-EU Green Deal's response there is large as well (soft wheat -54%, maize -73%, sunflower -62%, set-aside and
+fallow 18 -> 193 thousand ha); in the last iteration 13 of 221 EU regions end at the acceptable level.
+
+- **Effect:** the mini-EU Green Deal's cereal production -9.6% against -8.6% between the two runs, most of it this
+  region; any run's BG020000 result
+- **Status:** **open**: the region's problem looks flat in some direction (a crop mix free at equal cost); to check
+  the PMP terms of BG020000's crops at CAPRI's 2030 calibration, IPOPT's tolerance at the acceptable level, and CAPRI's
+  own Green Deal result for the region (the project lead's run, when it completes)
+

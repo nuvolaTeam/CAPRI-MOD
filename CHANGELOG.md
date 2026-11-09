@@ -32,6 +32,23 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 9 November 2026 (late evening): S6, CAPRI's fertiliser priors' slack and a residue relaxation per nutrient
+
+- CAPRI's Green Deal group frees the slack of the fertiliser priors' partial derivative in its listed regions
+  (supply/set_fert_priors.gms l. 664-785, v_fertDistPartialSlack; e_fertDistPartial (partial + beta) (x + slack) =
+  alpha - 1, no cost): in 28 NUTS 2 regions every flow with a prior mode below 5 t within +-mode, and the 30 listed
+  (region, group) pairs' flows within +-(mode + 100 t). Ported: tools/build/build_fert_partial_slack.py,
+  capri_data/scenarios/greendeal_group/fert_partial_slack.csv, the scenario flag PolicyScenario.greendeal_group (set by
+  the Green Deal group's scenarios), the settings fertiliser.partial_slack_tiny_t and partial_slack_listed_add_t.
+  HU210000 under the Green Deal no longer needs its root-crop cap exempted (10 ha, a prior of 0.6 t mineral N).
+- CAPRI's limCres relaxation of every group of one nutrient (ES300000, phosphate, simy > 2025;
+  minfert_redu_by_crop.gms) was dropped by the extraction: extracted (column fnut of mineral_redu_limcres.csv) and
+  applied per nutrient.
+- Checks (the project lead's decision: no full-EU runs for changes of limited reach): mini-EU Farm-to-Fork unchanged at
+  one decimal (NL220000, in CAPRI's list, now needs the inner duals widened); mini-EU Green Deal 18 iterations against
+  23, cereal production -9.6% against -8.6%, almost all of it BG020000 ending at another crop mix with the same
+  objective (K129, outside CAPRI's list); the full-EU effect not yet measured.
+
 ## 9 November 2026 (evening): S6 items 1, 2 and 6 (the regional NLP departures)
 
 - Item 1: the ecological set-aside rule (ecoSetAside_) is held at the base only where the base misses it by round-off
