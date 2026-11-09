@@ -113,8 +113,13 @@ relaxation is kept for the rest of the scenario and recorded in `metadata["nlp_r
 Organic area target (`pol_input/greendeal/organic_area.gms` -> `organic_minfert_redu.gms`, 'region_and_crop'): an "f2f"
 regulation on each group's mineral flow at the base allocation per ha x (1 - the group's organic conversion), groups
 below 10 kg N/ha at base capped at the base; "limCres" at 1.2 x base for every nutrient; with mineRedu the more
-stringent mineral cap of the two holds and mineRedu's limCres. The group's conversion is capri-mod's (its organic
-targets per member state and crop class, weighted by base area; REGISTERED, K50 departure 10).
+stringent mineral cap of the two holds and mineRedu's limCres. The group's conversion is CAPRI's target of the group,
+p_organicAreaTargetCrops(ru, ngrp) (load_organic_targets.gms l. 160-188): the member state's target of the group's
+class (crops_to_ngrp: arable land for the cereal, oilseed, root, pulse and fodder groups MAIF, ROOF, OFAR and OAFC;
+grassland for GRAS; permanent crops for PERM; the UAA target for VEGE; capri_data/scenarios/greendeal_group/
+organic_ngrp_class.csv) scaled to the ambition, 0 where CAPRI's files give the member state none (since 9 November 2026,
+S6 item 2; before, the crops' conversion weighted by base area, which left the fodder and grassland groups without a
+cap). Outside the EU, where CAPRI's files have no targets, the crops' conversion is kept.
 
 ## Conic form (removed 26 October 2026)
 
