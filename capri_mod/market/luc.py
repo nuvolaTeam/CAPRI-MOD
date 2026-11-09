@@ -30,6 +30,8 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas as pd
 
+from capri_mod.settings import current as _settings
+
 #: CAPRI's UNFCCC land classes (luClass), in CAPRI's order
 LU_CLASSES = ("FORE", "ARTIF", "CROP", "WETLND", "GRSLND", "RESLND")
 
@@ -73,9 +75,14 @@ def final_classes(d: dict, land: dict) -> dict:
     return {c: sum(s * float(lv.get(src, 0.0)) for src, s in sh.get(c, {}).items()) for c in LU_CLASSES}
 
 
-def solve_region(d: dict, final: dict, max_iter: int = 200, tol: float = 1e-10):
+def solve_region(d: dict, final: dict, max_iter: int | None = None, tol: float | None = None):
     """CAPRI's transitions at the final land per class (final_classes): (x, info) with info the iterations, the
-    largest balance residual (1000 ha) and the duals (mu per final class, lambda per initial class)."""
+    largest balance residual (1000 ha) and the duals (mu per final class, lambda per initial class). Newton's
+    iterations and its tolerance (relative to the largest initial class) are the settings market.luc_max_iter and
+    market.luc_tol unless given."""
+    st = _settings()
+    max_iter = int(st.get("market.luc_max_iter")) if max_iter is None else max_iter
+    tol = float(st.get("market.luc_tol")) if tol is None else tol
     To, Fr, fac, al, be = d["To"], d["From"], d["fac"], d["alpha"], d["beta"]
     F = np.array([float(final[c]) for c in LU_CLASSES])
     I = d["initial"]
@@ -166,7 +173,7 @@ class LucMixin:
                 continue
             fin = final_classes(d, lv)
             x, info = solve_region(d, fin)
-            if info["residual"] > 1e-6 * max(1.0, float(np.max(d["initial"]))):
+            if info["residual"] > float(_settings().get("market.luc_accept_tol")) * max(1.0, float(np.max(d["initial"]))):
                 raise RuntimeError(f"market: the land-use change of {rms} did not solve (residual {info['residual']:.3g})")
             out[rms] = {"classes": {c: float(v) for c, v in fin.items()},
                         "transitions": dict(zip(d["pos"], (float(v) for v in x)))}

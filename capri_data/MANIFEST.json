@@ -1997,6 +1997,63 @@
    },
    "catalogue_note": "income per head, inhabitants and the reproduction check of each behavioural region (not re-checked)"
   },
+  "capri_data/2017/market/luc_market_classes.csv": {
+   "description": "CAPRI's initial land per UNFCCC land class of the market's land-use-change estimation (p_lucPriorMrk initialLandUse, the 2025 baseline file's land) and the region's inland waters (DATA INLW LEVL CUR), from sim_ini_21730 (tools/build/build_luc_market.py)",
+   "kind": "reference",
+   "vintage": "2030 calibration point",
+   "domain": "market",
+   "status": "live",
+   "rows": 270,
+   "columns": 4,
+   "units": "U_1000ha",
+   "read_by_model": [
+    "capri_mod/market/inputs.py",
+    "capri_mod/market/luc.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_luc_market"
+   },
+   "catalogue_note": "CAPRI's initial land per UNFCCC class (the 2025 land) of the market's land-use-change estimation (not re-checked)"
+  },
+  "capri_data/2017/market/luc_market_priors.csv": {
+   "description": "CAPRI's land-use-change estimation of the market outside the EU (luc_market): per non-EU market region with the land block and transition (lucpos, from one UNFCCC land class to another), the annual factor (2030 minus the initial land-use year 2025 off the diagonal, 1 on it; arm/prep_market.gms l. 178), the gamma prior (p_lucPriorMrk alpha, beta, lower, upper) and CAPRI's transition at its 2030 calibration point (DATA LEVL CAL), from sim_ini_21730 (tools/build/build_luc_market.py)",
+   "kind": "calibrated",
+   "vintage": "2030 calibration point",
+   "domain": "market",
+   "status": "live",
+   "rows": 1620,
+   "columns": 10,
+   "units": "U_1000ha, U_1unit, U_ratio",
+   "read_by_model": [
+    "capri_mod/market/inputs.py",
+    "capri_mod/market/luc.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_luc_market"
+   },
+   "catalogue_note": "CAPRI's land-use-change estimation of the market outside the EU: priors and calibration-point transitions (luc_market) (not re-checked)"
+  },
+  "capri_data/2017/market/luc_market_shares.csv": {
+   "description": "CAPRI's shares linking the market's land types to the UNFCCC land classes (p_shFstInSecMrk, LinkLuWithShares_, arm/define_land_params.gms l. 763-805; GRAS and TGRS as shares of FODFAL), from sim_ini_21730 (tools/build/build_luc_market.py)",
+   "kind": "coefficients",
+   "vintage": "2030 calibration point",
+   "domain": "market",
+   "status": "live",
+   "rows": 629,
+   "columns": 4,
+   "units": "U_ratio",
+   "read_by_model": [
+    "capri_mod/market/inputs.py",
+    "capri_mod/market/luc.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_luc_market"
+   },
+   "catalogue_note": "CAPRI's shares linking the market's land types to the UNFCCC land classes (not re-checked)"
+  },
   "capri_data/2017/market/market_prod_grof_2030.csv": {
    "description": "CAPRI's marketed over gross production at the 2030 calibration point per country with supply models and market product (grofNEprod; arm/simu_calibration_to_supply.gms l. 219-247; tools/build/build_market_prod_grof_2030.py)",
    "kind": "coefficients",

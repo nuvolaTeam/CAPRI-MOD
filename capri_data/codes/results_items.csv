@@ -105,6 +105,8 @@ market,consumption,cols,,,,1000 t,
 market,dairy,cols,,,,,
 market,domestic_prices,cols,PMRK,*,,EUR/t,"reports/sol_market.gms l. 646: DATA(RM,'PMrk',XX) = v_marketPrice.l"
 market,excess_demand,cols,,,,,
+market,luc_classes,cols,,,,1000 ha,"arm/market_model.gms LinkLuWithShares_: v_land of the UNFCCC land classes per non-EU region with the land block (capri_mod/market/luc.py)"
+market,luc_transitions,cols,,,,1000 ha,"arm/market_model.gms luClassInitial_, luClassFinal_, FocLUC_: v_lucpos per non-EU region with the land block, annual off the diagonal (capri_mod/market/luc.py)"
 market,net_exports,cols,,,,1000 t,
 market,production,cols,PROD,*,,1000 t,"reports/sol_market.gms l. 267: DATA(RMS,'Prod',XX1) = v_prodQuant.l"
 market,trade_flows,cols,ImportQ,*,,1000 t,"capmod/set_and_store_dataout.gms l. 151: DATAOUT(RMALL,RMALL1,'ImportQ',XX) = p_tradeFlows (importer first)"

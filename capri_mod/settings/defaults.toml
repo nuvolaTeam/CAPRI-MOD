@@ -329,6 +329,11 @@ noneu_land_market = true
 # market's solution (luc_market_*.csv, tools/build/build_luc_market.py; capri_mod/market/luc.py). No feedback on the
 # market (CAPRI's only one is the LULUCF cost under a carbon price, lulucf_market, not ported). Needs noneu_land_market
 luc_market = true
+# luc_market's Newton on the duals of its balances (capri_mod/market/luc.py solve_region): the iteration limit, the
+# tolerance on the balances (relative to the largest initial class) and the residual above which a market solve stops
+luc_max_iter = 200
+luc_tol = 1e-10
+luc_accept_tol = 1e-6
 # CAPRI's feed bulk demand inside the market (feedBlk_, audit M4): the member states' bulks respond to the prices within a
 # market solve from the supply models' bulks at the prices they saw, with the elasticities measured on the supply models
 # (the market supply Hessian's FEEDBLK rows); false: fixed within a solve (until 29 October 2026). Same fixed point

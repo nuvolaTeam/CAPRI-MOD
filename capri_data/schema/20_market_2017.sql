@@ -127,6 +127,64 @@ COMMENT ON TABLE noneu_land_mnl IS 'CAPRI''s MNL land supply coefficients p_bLu 
 INSERT INTO value_units VALUES
   ('noneu_land_mnl', 'b', 'U_ratio', 'capri', 'CAPRI p_bLu CUR, per EUR/ha of rent (the exponent is dimensionless)');
 
+-- file: capri_data/2017/market/luc_market_priors.csv
+CREATE TABLE luc_market_priors (
+    rms VARCHAR NOT NULL REFERENCES rms_to_rm (rms),
+    lucpos VARCHAR NOT NULL,
+    from_class VARCHAR NOT NULL CHECK (from_class IN ('FORE', 'ARTIF', 'CROP', 'WETLND', 'GRSLND', 'RESLND')),
+    to_class VARCHAR NOT NULL CHECK (to_class IN ('FORE', 'ARTIF', 'CROP', 'WETLND', 'GRSLND', 'RESLND')),
+    annual_factor DOUBLE NOT NULL CHECK (annual_factor >= 1),
+    alpha DOUBLE NOT NULL CHECK (alpha > 1),
+    beta DOUBLE NOT NULL CHECK (beta > 0),
+    lower DOUBLE NOT NULL CHECK (lower >= 0),
+    upper DOUBLE NOT NULL,
+    level_cal DOUBLE NOT NULL CHECK (level_cal >= 0),
+    PRIMARY KEY (rms, lucpos)
+);
+COMMENT ON TABLE luc_market_priors IS 'CAPRI''s land-use-change estimation of the market outside the EU (luc_market): per non-EU market region with the land block and transition (lucpos, from one UNFCCC land class to another), the annual factor (2030 minus the initial land-use year 2025 off the diagonal, 1 on it; arm/prep_market.gms l. 178), the gamma prior (p_lucPriorMrk alpha, beta, lower, upper) and CAPRI''s transition at its 2030 calibration point (DATA LEVL CAL), from sim_ini_21730 (tools/build/build_luc_market.py)';
+INSERT INTO value_units VALUES
+  ('luc_market_priors', 'annual_factor', 'U_1unit', 'capri', 'CAPRI p_lucAnnualFac as arm/prep_market.gms l. 178 sets it: calyea observed minus initialLandUse (years), 1 on the diagonal'),
+  ('luc_market_priors', 'alpha', 'U_ratio', 'capri', 'CAPRI p_lucPriorMrk alpha of the gamma density (dimensionless)'),
+  ('luc_market_priors', 'beta', 'U_ratio', 'capri', 'CAPRI p_lucPriorMrk beta of the gamma density, per 1000 ha'),
+  ('luc_market_priors', 'lower', 'U_1000ha', 'capri', 'CAPRI p_lucPriorMrk lower (the bound of v_lucpos)'),
+  ('luc_market_priors', 'upper', 'U_1000ha', 'capri', 'CAPRI p_lucPriorMrk upper (inf)'),
+  ('luc_market_priors', 'level_cal', 'U_1000ha', 'capri', 'CAPRI DATA LEVL CAL of the transition: annual off the diagonal, total on it');
+
+-- file: capri_data/2017/market/luc_market_classes.csv
+CREATE TABLE luc_market_classes (
+    rms VARCHAR NOT NULL REFERENCES rms_to_rm (rms),
+    luclass VARCHAR NOT NULL CHECK (luclass IN ('FORE', 'ARTIF', 'CROP', 'WETLND', 'GRSLND', 'RESLND')),
+    initial_kha DOUBLE NOT NULL CHECK (initial_kha >= 0),
+    inlw_kha DOUBLE NOT NULL CHECK (inlw_kha >= 0),
+    PRIMARY KEY (rms, luclass)
+);
+COMMENT ON TABLE luc_market_classes IS 'CAPRI''s initial land per UNFCCC land class of the market''s land-use-change estimation (p_lucPriorMrk initialLandUse, the 2025 baseline file''s land) and the region''s inland waters (DATA INLW LEVL CUR), from sim_ini_21730 (tools/build/build_luc_market.py)';
+INSERT INTO value_units VALUES
+  ('luc_market_classes', 'initial_kha', 'U_1000ha', 'capri', 'CAPRI p_lucPriorMrk initialLandUse'),
+  ('luc_market_classes', 'inlw_kha', 'U_1000ha', 'capri', 'CAPRI DATA INLW LEVL CUR (repeated on each class row)');
+
+-- file: capri_data/2017/market/luc_market_shares.csv
+CREATE TABLE luc_market_shares (
+    rms VARCHAR NOT NULL REFERENCES rms_to_rm (rms),
+    target VARCHAR NOT NULL,
+    source VARCHAR NOT NULL,
+    share DOUBLE NOT NULL CHECK (share >= 0 AND share <= 1),
+    PRIMARY KEY (rms, target, source)
+);
+COMMENT ON TABLE luc_market_shares IS 'CAPRI''s shares linking the market''s land types to the UNFCCC land classes (p_shFstInSecMrk, LinkLuWithShares_, arm/define_land_params.gms l. 763-805; GRAS and TGRS as shares of FODFAL), from sim_ini_21730 (tools/build/build_luc_market.py)';
+INSERT INTO value_units VALUES
+  ('luc_market_shares', 'share', 'U_ratio', 'capri', 'CAPRI p_shFstInSecMrk (the share of source in target)');
+
+-- rule: every region of the land-use-change estimation has CAPRI's market land block
+SELECT DISTINCT p.rms FROM luc_market_priors p
+WHERE NOT EXISTS (SELECT 1 FROM noneu_land_market l WHERE l.rms = p.rms);
+
+-- rule: the initial land of the six classes is a region's total land (one balance of the estimation is implied)
+SELECT c.rms, c.ini, l.avail + c.inlw AS arto
+FROM (SELECT rms, sum(initial_kha) AS ini, max(inlw_kha) AS inlw FROM luc_market_classes GROUP BY rms) c
+JOIN (SELECT rms, max(avail_kha) AS avail FROM noneu_land_market GROUP BY rms) l USING (rms)
+WHERE abs(c.ini - l.avail - c.inlw) > 1e-6 * l.avail;
+
 -- rule: each land market region's land types are in its MNL coefficients
 SELECT DISTINCT m.rms, m.lu FROM noneu_land_mnl m
 WHERE NOT EXISTS (SELECT 1 FROM noneu_land_market l WHERE l.rms = m.rms AND l.lu = m.lu)

@@ -3485,6 +3485,7 @@
      "build_livestock_premium_coef",
      "build_livestock_products",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
@@ -3677,6 +3678,7 @@
      "build_livestock_premium_coef",
      "build_livestock_products",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
@@ -4514,6 +4516,7 @@
      "build_livestock_premium_coef",
      "build_livestock_products",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
@@ -4640,6 +4643,7 @@
      "build_livestock_premium_coef",
      "build_livestock_products",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
@@ -4837,6 +4841,7 @@
      "build_livestock_premium_coef",
      "build_livestock_products",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
@@ -13499,6 +13504,300 @@
     "tests": []
    }
   },
+  "luc_market_classes": {
+   "file": "capri_data/2017/market/luc_market_classes.csv",
+   "declared_in": "20_market_2017.sql",
+   "layout": [],
+   "comment": "CAPRI's initial land per UNFCCC land class of the market's land-use-change estimation (p_lucPriorMrk initialLandUse, the 2025 baseline file's land) and the region's inland waters (DATA INLW LEVL CUR), from sim_ini_21730 (tools/build/build_luc_market.py)",
+   "columns": [
+    {
+     "name": "rms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "luclass",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "initial_kha",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "inlw_kha",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "rms",
+    "luclass"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "rms"
+     ],
+     "references": "rms_to_rm",
+     "ref_columns": [
+      "rms"
+     ]
+    }
+   ],
+   "checks": [
+    "(luclass IN ('FORE', 'ARTIF', 'CROP', 'WETLND', 'GRSLND', 'RESLND'))",
+    "(initial_kha >= 0)",
+    "(inlw_kha >= 0)"
+   ],
+   "units": [
+    {
+     "item": "initial_kha",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "CAPRI p_lucPriorMrk initialLandUse"
+    },
+    {
+     "item": "inlw_kha",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "CAPRI DATA INLW LEVL CUR (repeated on each class row)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_luc_market",
+    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/LUCpos.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/sets/simini_21730/luClass.csv; $REFERENCE/sets/simini_21730/luc_from_luClass.csv; $REFERENCE/sets/simini_21730/luc_to_luClass.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_lucPriorMrk.csv.gz; $REFERENCE/simini/simini_21730/p_shFstInSecMrk.csv.gz; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/market/inputs.py",
+     "capri_mod/market/luc.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_luc_market.py"
+    ]
+   }
+  },
+  "luc_market_priors": {
+   "file": "capri_data/2017/market/luc_market_priors.csv",
+   "declared_in": "20_market_2017.sql",
+   "layout": [],
+   "comment": "CAPRI's land-use-change estimation of the market outside the EU (luc_market): per non-EU market region with the land block and transition (lucpos, from one UNFCCC land class to another), the annual factor (2030 minus the initial land-use year 2025 off the diagonal, 1 on it; arm/prep_market.gms l. 178), the gamma prior (p_lucPriorMrk alpha, beta, lower, upper) and CAPRI's transition at its 2030 calibration point (DATA LEVL CAL), from sim_ini_21730 (tools/build/build_luc_market.py)",
+   "columns": [
+    {
+     "name": "rms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "lucpos",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "from_class",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "to_class",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "annual_factor",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "alpha",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "beta",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "lower",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "upper",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "level_cal",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "rms",
+    "lucpos"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "rms"
+     ],
+     "references": "rms_to_rm",
+     "ref_columns": [
+      "rms"
+     ]
+    }
+   ],
+   "checks": [
+    "(from_class IN ('FORE', 'ARTIF', 'CROP', 'WETLND', 'GRSLND', 'RESLND'))",
+    "(to_class IN ('FORE', 'ARTIF', 'CROP', 'WETLND', 'GRSLND', 'RESLND'))",
+    "(annual_factor >= 1)",
+    "(alpha > 1)",
+    "(beta > 0)",
+    "(lower >= 0)",
+    "(level_cal >= 0)"
+   ],
+   "units": [
+    {
+     "item": "alpha",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "CAPRI p_lucPriorMrk alpha of the gamma density (dimensionless)"
+    },
+    {
+     "item": "annual_factor",
+     "unit": "U_1unit",
+     "status": "capri",
+     "basis": "CAPRI p_lucAnnualFac as arm/prep_market.gms l. 178 sets it: calyea observed minus initialLandUse (years), 1 on the diagonal"
+    },
+    {
+     "item": "beta",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "CAPRI p_lucPriorMrk beta of the gamma density, per 1000 ha"
+    },
+    {
+     "item": "level_cal",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "CAPRI DATA LEVL CAL of the transition: annual off the diagonal, total on it"
+    },
+    {
+     "item": "lower",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "CAPRI p_lucPriorMrk lower (the bound of v_lucpos)"
+    },
+    {
+     "item": "upper",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "CAPRI p_lucPriorMrk upper (inf)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_luc_market",
+    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/LUCpos.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/sets/simini_21730/luClass.csv; $REFERENCE/sets/simini_21730/luc_from_luClass.csv; $REFERENCE/sets/simini_21730/luc_to_luClass.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_lucPriorMrk.csv.gz; $REFERENCE/simini/simini_21730/p_shFstInSecMrk.csv.gz; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/market/inputs.py",
+     "capri_mod/market/luc.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_luc_market.py"
+    ]
+   }
+  },
+  "luc_market_shares": {
+   "file": "capri_data/2017/market/luc_market_shares.csv",
+   "declared_in": "20_market_2017.sql",
+   "layout": [],
+   "comment": "CAPRI's shares linking the market's land types to the UNFCCC land classes (p_shFstInSecMrk, LinkLuWithShares_, arm/define_land_params.gms l. 763-805; GRAS and TGRS as shares of FODFAL), from sim_ini_21730 (tools/build/build_luc_market.py)",
+   "columns": [
+    {
+     "name": "rms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "target",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "source",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "share",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "rms",
+    "target",
+    "source"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "rms"
+     ],
+     "references": "rms_to_rm",
+     "ref_columns": [
+      "rms"
+     ]
+    }
+   ],
+   "checks": [
+    "((\"share\" >= 0) AND (\"share\" <= 1))"
+   ],
+   "units": [
+    {
+     "item": "share",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "CAPRI p_shFstInSecMrk (the share of source in target)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_luc_market",
+    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/LUCpos.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/sets/simini_21730/luClass.csv; $REFERENCE/sets/simini_21730/luc_from_luClass.csv; $REFERENCE/sets/simini_21730/luc_to_luClass.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_lucPriorMrk.csv.gz; $REFERENCE/simini/simini_21730/p_shFstInSecMrk.csv.gz; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/market/inputs.py",
+     "capri_mod/market/luc.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_luc_market.py"
+    ]
+   }
+  },
   "market_prod_grof_2030": {
    "file": "capri_data/2017/market/market_prod_grof_2030.csv",
    "declared_in": "21_market_inputs.sql",
@@ -18341,6 +18640,7 @@
      "build_livestock_products",
      "build_livestock_units",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
@@ -18527,6 +18827,7 @@
      "build_livestock_premium_coef",
      "build_livestock_products",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
@@ -18635,6 +18936,7 @@
      "build_livestock_premium_coef",
      "build_livestock_products",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
@@ -18730,6 +19032,7 @@
      "build_livestock_premium_coef",
      "build_livestock_products",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
@@ -18829,6 +19132,7 @@
      "build_livestock_premium_coef",
      "build_livestock_products",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
@@ -19013,6 +19317,7 @@
      "build_livestock_premium_coef",
      "build_livestock_products",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
@@ -19102,6 +19407,7 @@
      "build_livestock_premium_coef",
      "build_livestock_products",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
@@ -19816,7 +20122,8 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_capri.py"
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_luc_market.py"
     ]
    }
   },
@@ -22913,6 +23220,7 @@
      "build_livestock_products",
      "build_livestock_units",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_losses",
      "build_manure_n2o",
      "build_manure_pool_costs",
@@ -23113,6 +23421,7 @@
      "build_livestock_premium_coef",
      "build_livestock_products",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
@@ -23517,6 +23826,7 @@
      "build_livestock_products",
      "build_livestock_units",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_losses",
      "build_manure_n2o",
      "build_manure_pool_costs",
@@ -23729,6 +24039,7 @@
      "build_livestock_products",
      "build_livestock_units",
      "build_lownfeed_effects",
+     "build_luc_market",
      "build_manure_losses",
      "build_manure_n2o",
      "build_manure_pool_costs",
@@ -23838,6 +24149,7 @@
     ],
     "builders": [
      "build_captrd_trajectory",
+     "build_luc_market",
      "build_supply_elasticities_regional",
      "build_trajectory_capri_ref"
     ],
@@ -45774,6 +46086,14 @@
   {
    "file": "20_market_2017.sql",
    "rule": "the market supply functions' model codes are market commodities (raw milk included), mapped from CAPRI's, or"
+  },
+  {
+   "file": "20_market_2017.sql",
+   "rule": "every region of the land-use-change estimation has CAPRI's market land block"
+  },
+  {
+   "file": "20_market_2017.sql",
+   "rule": "the initial land of the six classes is a region's total land (one balance of the estimation is implied)"
   },
   {
    "file": "20_market_2017.sql",

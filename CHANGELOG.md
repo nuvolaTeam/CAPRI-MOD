@@ -32,6 +32,22 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 9 November 2026: the market's land-use change outside the EU (luc_market); result names as CAPRI's; K128
+
+- capri_mod/market/luc.py: CAPRI's land-use-change estimation of the market (arm/market_model.gms LinkLuWithShares_,
+  luClassInitial_, luClassFinal_, FocLUC_, derivativeOfGammaLUC_; on with REPORTS_ENV): per non-EU region with the land
+  block, the final land per UNFCCC class from the land types and the 36 transitions as the mode of CAPRI's gamma
+  priors under the initial and final balances. Data from sim_ini_21730 (tools/build/build_luc_market.py:
+  luc_market_priors.csv, luc_market_classes.csv, luc_market_shares.csv; p_lucPriorMrk, p_shFstInSecMrk and the
+  calibration-point transitions added to the sim_ini extract). At CAPRI's calibration land it reproduces CAPRI's
+  transitions in the 45 regions within 1.2e-8. Reported with every market solution (MarketEquilibrium.luc; the run
+  pickle's luc_market); setting market.luc_market (true). Registered: DEP-44 (solved after the market solve; no
+  feedback without lulucf_market, not ported).
+- Runs named as CAPRI names its result files (res_2_1730<short name>[_<n>u][_<label>]), with a status and a run record,
+  and the store's catalogue results/RUNS.csv (README, "Result names and the run catalogue").
+- K128: Farm-to-Fork's meat prices against JRC121368 checked against CAPRI's own market inputs (base, demand
+  elasticities, Armington, quotas): no departure found.
+
 ## 2 November 2026 (night): refactor stage 4, second half (batches 1-6, first part)
 
 - The environment's and the coupling's state in declared objects (capri_mod/environmental/state.py: par, ev, seen,

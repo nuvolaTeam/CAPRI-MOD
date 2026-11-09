@@ -467,6 +467,12 @@ def to_long(results: dict, point: str) -> pd.DataFrame:
             elif f == "welfare" and x is not None:
                 for (reg, pos), val in _leaves(x):
                     add((point, "welfare", str(reg), "", str(pos), "", val))
+            elif f == "luc" and x is not None:   # CAPRI's land-use change outside the EU, per CAPRI region
+                for rms, d in x.items():
+                    for k, val in d["transitions"].items():
+                        add((point, "market", str(rms), "", "luc_transitions", str(k), val))
+                    for k, val in d["classes"].items():
+                        add((point, "market", str(rms), "", "luc_classes", str(k), val))
             elif x is not None:                # the EU's biofuel and dairy blocks
                 for p, val in _leaves(x):
                     item_in_cols("market", EU, f, p, val)
