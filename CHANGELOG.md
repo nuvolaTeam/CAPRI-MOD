@@ -32,6 +32,26 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 9 November 2026 (evening): S6 items 1, 2 and 6 (the regional NLP departures)
+
+- Item 1: the ecological set-aside rule (ecoSetAside_) is held at the base only where the base misses it by round-off
+  (supply.ecosetaside_hold_tol, 1e-6 thousand ha: 5 EU regions within 1e-7 at the 2030 base, as CAPRI's rows binding
+  there); a larger gap is warned about (DEP-10).
+- Item 2: the organic area target's mineral-N caps per fertiliser crop group take CAPRI's target of the group
+  (p_organicAreaTargetCrops(ru, ngrp): crops_to_ngrp of pol_input/greendeal/load_organic_targets.gms, vegetables at the
+  UAA target as l. 187; capri_data/scenarios/greendeal_group/organic_ngrp_class.csv), not the crops' area-weighted
+  conversion; outside the EU the crops' conversion as before.
+- Item 6: the dairy and cattle split columns move their animal's manure N, P2O5 and K2O by CAPRI's MANN, MANP, MANK of
+  the two activities (until now N only; the phosphate balance follows), and the splits' per-head terms (shares,
+  fattening lengths, milk, feed, young animals, manure) are CAPRI's at its 2030 calibration point (the "_2030" columns
+  of dairy_intensity.csv and cattle_intensity.csv, from res_2_1730greendeal_refpol_endotech_all_ini), used at the 2030
+  market year; the PMP terms keep their 2030 variant. The EU land-use change's priors centred on CAPRI's 2030 solution
+  instead of its observed transitions registered (DEP-10), to be fixed with S13.
+- Checks: full-EU Green Deal at 34ea751 (items 1-2): 32 iterations, indicators unchanged at one decimal against
+  1b97161, RO050000's vegetable cap now exempted; full-EU Farm-to-Fork: 13 iterations, indicators within 0.5 point
+  (beef price +30.0 against +29.5); mini-EU Farm-to-Fork with item 6: indicators unchanged at one decimal, the
+  low-yield dairy shift 13.2 -> 14.1 thousand cows; suite 362 passed, 8 skipped, 1 xfailed.
+
 ## 9 November 2026: the market's land-use change outside the EU (luc_market); result names as CAPRI's; K128
 
 - capri_mod/market/luc.py: CAPRI's land-use-change estimation of the market (arm/market_model.gms LinkLuWithShares_,
