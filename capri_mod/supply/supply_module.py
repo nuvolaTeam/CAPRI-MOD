@@ -273,6 +273,9 @@ class RegionData:
     organic_targets_pp: Optional[pd.Series] = None
     #: {CAPRI crop group (NGRP): its organic target class} (organic_ngrp_class.csv)
     organic_ngrp_class: Optional[dict] = None
+    #: the Green Deal group's slack on the fertiliser priors' partial derivative (fert_partial_slack.csv): the region's
+    #: listed crop groups ("" alone: the tiny-prior rule only); None outside CAPRI's list
+    fert_partial_slack: Optional[list] = None
 
 
 @dataclass
@@ -1624,6 +1627,9 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # _compute_net_revenues() above rebuilds net revenues from scratch under
         # a policy shock and would overwrite an earlier adjustment.
         self.ev.greendeal_crop_delta = {}
+        # CAPRI's Green Deal group (set_fert_priors.gms, %scenarioGroup%==greendeal): the fertiliser priors' partial
+        # derivative has a slack in the listed regions
+        self.ev.fert_partial_slack = bool(isinstance(policy_shock, dict) and policy_shock.get("greendeal_group"))
         if isinstance(policy_shock, dict):
             _org = float(policy_shock.get("organic_area_target", 0.0) or 0.0)
             _pest = float(policy_shock.get("pesticide_reduction", 0.0) or 0.0)
@@ -2244,6 +2250,7 @@ class SupplyModule(ModuleStateMixin):
             landscape_target_pp=_ms_value(d.get("landscape_targets_ms"), region,
                                           "landscape_pp"),
             organic_targets_pp=_ms_row(d.get("organic_targets_ms"), region),
+            fert_partial_slack=(d.get("fert_partial_slack") or {}).get(region),
             organic_ngrp_class=(dict(zip(d["organic_ngrp_class"].index, d["organic_ngrp_class"].target))
                                 if d.get("organic_ngrp_class") is not None else None),
             livestock_revenue_coef=(

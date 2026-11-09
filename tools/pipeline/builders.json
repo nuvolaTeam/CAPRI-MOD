@@ -2325,6 +2325,26 @@
    ]
   },
   {
+   "task": "build_fert_partial_slack",
+   "builder": "build_fert_partial_slack",
+   "args": [
+    "$SOURCES/gams"
+   ],
+   "inputs": [],
+   "code": [
+    "capri_mod/__init__.py",
+    "capri_mod/csvio.py",
+    "tools/build/build_fert_partial_slack.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$SOURCES/gams/supply/set_fert_priors.gms"
+   ],
+   "outputs": [
+    "capri_data/scenarios/greendeal_group/fert_partial_slack.csv"
+   ]
+  },
+  {
    "task": "build_fert_side_effects",
    "builder": "build_fert_side_effects",
    "args": [],

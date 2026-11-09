@@ -188,6 +188,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/scenarios/greendeal_group/mineral_redu_limcres.csv', 'coefficients', 'by file: policy rules and targets, CAPRI''s'),
   ('capri_data/scenarios/greendeal_group/organic_targets_ms.csv', 'coefficients', 'by file: policy rules and targets, CAPRI''s'),
   ('capri_data/scenarios/greendeal_group/organic_ngrp_class.csv', 'structure', 'by file: CAPRI''s mapping of crop groups to the classes of its organic targets'),
+  ('capri_data/scenarios/greendeal_group/fert_partial_slack.csv', 'structure', 'by file: CAPRI''s list of regions and crop groups with the fertiliser priors'' slack'),
   ('capri_data/2017/policy/organic_yield_gap.csv', 'coefficients', 'by file: policy rules and targets, CAPRI''s'),
   ('capri_data/2017/policy/organic_yield_gap_groups.csv', 'coefficients', 'by file: policy rules and targets, CAPRI''s'),
   ('capri_data/2017/policy/organic_yield_gap_regions.csv', 'coefficients', 'by file: policy rules and targets, CAPRI''s'),

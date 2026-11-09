@@ -99,6 +99,7 @@ _SHARED_FILES: dict = {}
 _SCENARIO_FILES = {"landscape_targets_ms.csv": "scenarios/greendeal_group",
                    "organic_targets_ms.csv": "scenarios/greendeal_group",
                    "organic_ngrp_class.csv": "scenarios/greendeal_group",
+                   "fert_partial_slack.csv": "scenarios/greendeal_group",
                    "mineral_redu_exemptions.csv": "scenarios/greendeal_group",
                    "mineral_redu_limcres.csv": "scenarios/greendeal_group",
                    "capri_baseline_surplus_2030.csv": "scenarios/capri_ref_2030"}
@@ -704,6 +705,11 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # crops_to_ngrp; tools/build/build_greendeal_targets.py)
         "organic_ngrp_class": _load_optional_csv(
             data_dir, "organic_ngrp_class.csv"),
+        # CAPRI's Green Deal group: the regions (and listed region x group pairs) with the slack on the fertiliser
+        # priors' partial derivative (set_fert_priors.gms; tools/build/build_fert_partial_slack.py)
+        "fert_partial_slack": (lambda df: None if df is None else {
+            r: sorted({"" if g != g else str(g) for g in grp.ngrp}) for r, grp in df.groupby(level=0)})(
+            _load_optional_csv(data_dir, "fert_partial_slack.csv")),
         # MITERRA housing days (HD) and share of the grazing time spent in the stable (Et, %) of dairy cows per member
         # state (CAPRI p_rcEmissions(RU,"DAICOW_L",...), abatement/ammonia/RCEmissions.csv): the activity term of the
         # dairy cow's energy requirement (envind/breeding.gms l. 188-191)

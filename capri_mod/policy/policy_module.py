@@ -107,6 +107,9 @@ class PolicyScenario:
     #: surplus per hectare cut by surplus_cut (surpRedu/100), no tiers, no caps
     surplus_rule: str = "star3"
     surplus_cut: float = 0.5
+    #: a scenario of CAPRI's Green Deal group (%scenarioGroup%==greendeal): CAPRI frees the slack of the fertiliser
+    #: priors' partial derivative in its listed regions (set_fert_priors.gms, v_fertDistPartialSlack)
+    greendeal_group: bool = False
     #: CAPRI's manure trade (GUI "New Manure Trade Module", manureTradeNew) for this scenario and its baseline;
     #: None = capri-mod's default (CAPRIModel.use_manure_market: on, as star 3.0's GUI)
     manure_trade: Optional[bool] = None

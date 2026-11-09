@@ -323,6 +323,19 @@ class FertilisationBlock:
                                "own": [(j, sh * k_own * own[j]) for j, sh in crops if perm and own[j] > 0], "Aref": Aref})
             if not groups:
                 continue
+            # CAPRI's Green Deal group (set_fert_priors.gms l. 773-781, v_fertDistPartialSlack): in its listed regions
+            # a flow with a prior mode below partial_slack_tiny_t has a slack within +-its mode, a listed (region,
+            # group) pair's flows within +-(mode + partial_slack_listed_add_t) - t, every nutrient and source
+            ps_ = {}
+            _lst = getattr(self.data, "fert_partial_slack", None)
+            if getattr(self.ev, "fert_partial_slack", False) and _lst is not None:
+                _tiny = float(_settings().get("fertiliser.partial_slack_tiny_t"))
+                _add = float(_settings().get("fertiliser.partial_slack_listed_add_t"))
+                for g_ in groups:
+                    for s_, m_ in g_["modes"].items():
+                        lst_ = g_["g"] in _lst
+                        if lst_ or float(m_) < _tiny:
+                            ps_[(g_["g"], s_)] = float(m_) + (_add if lst_ else 0.0)
             Ecols = [(j, float(man[j])) for j in range(n) if man[j] != 0.0]
             # the split columns move their animal's manure of this nutrient (CAPRI's MANN, MANP, MANK per activity;
             # P and K since 9 November 2026, S6 item 6)
@@ -342,7 +355,7 @@ class FertilisationBlock:
                 "eff": eff, "g0": g0, "gc": gc, "slope": endo_slope(g0, m0E, nut), "m0E": m0E,
                 "price": float(R.uvag_eur_t) if R.uvag_eur_t == R.uvag_eur_t else 0.0, "kappa": k,
                 "own_scaled": bool(kap.get((key, "own_scaled"), True)),
-                "M0": base["M0"]}
+                "M0": base["M0"], "partial_slack": ps_}
         out["dual_bound"] = float(getattr(self.par, "npk_dual_bound", 10.0) or 10.0)
         return out if out["nutrients"] else None
 

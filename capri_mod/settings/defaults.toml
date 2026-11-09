@@ -282,6 +282,12 @@ cap_room = 0.998
 # (minfert_redu_by_crop.gms, p_checkSmallMine): its cap at this multiple of its baseline mineral N per ha (CAPRI: 1.0
 # for its small groups, "no backsliding"; 1.1-1.2 for its listed region x group pairs)
 exempt_cap_factor = 1.0
+# CAPRI's slack on the fertiliser priors' partial derivative in the Green Deal group (set_fert_priors.gms l. 773-781,
+# v_fertDistPartialSlack): in the listed regions, a flow whose prior mode is below this (t; CAPRI 5e-3 x 1000 t) has a
+# slack within +-its mode; a listed (region, group) pair's flows within +-(mode + partial_slack_listed_add_t) (CAPRI 0.1
+# x 1000 t)
+partial_slack_tiny_t = 5.0
+partial_slack_listed_add_t = 100.0
 # inner distribution solve: tolerance, iterations
 fd_tol = 1e-9
 fd_max_iter = 100

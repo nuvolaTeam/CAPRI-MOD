@@ -699,6 +699,8 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                         getattr(pol_scenario, "pesticide_reduction", 0.0) or 0.0),
                     "organic_area_target": float(
                         getattr(pol_scenario, "organic_area_target", 0.0) or 0.0),
+                    # CAPRI's Green Deal group: the fertiliser priors' partial-derivative slack in its listed regions
+                    "greendeal_group": bool(getattr(pol_scenario, "greendeal_group", False)),
                 }
             supply_results = self.supply_module.run(
                 price_signals=price_signal if outer_iter > 0 else None,

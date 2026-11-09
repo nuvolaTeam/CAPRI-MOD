@@ -31,6 +31,14 @@ CREATE TABLE organic_ngrp_class (
 );
 COMMENT ON TABLE organic_ngrp_class IS 'The class of CAPRI''s organic targets (a column of organic_targets_ms) each fertiliser crop group takes in the mineral-N caps of the organic area target: CAPRI''s crops_to_ngrp (pol_input/greendeal/load_organic_targets.gms, NMINREST off) and VEGE at the UAA target (l. 186); tools/build/build_greendeal_targets.py';
 
+-- file: capri_data/scenarios/greendeal_group/fert_partial_slack.csv
+CREATE TABLE fert_partial_slack (
+    capri_region VARCHAR NOT NULL,
+    ngrp VARCHAR,
+    UNIQUE (capri_region, ngrp)
+);
+COMMENT ON TABLE fert_partial_slack IS 'CAPRI''s Green Deal group: the NUTS 2 regions (curNuts2) whose fertiliser priors'' partial derivative has a slack (v_fertDistPartialSlack: flows with a prior mode below 5e-3 x 1000 t within +-mode) and the listed (region, group) pairs (extraSlackRegion_to_ngrp: every flow of the group within +-(mode + 0.1 x 1000 t)); ngrp empty: the region''s tiny-prior rule only (supply/set_fert_priors.gms l. 664-785, %scenarioGroup%==greendeal); tools/build/build_fert_partial_slack.py';
+
 -- file: capri_data/2017/policy/organic_yield_gap.csv
 CREATE TABLE organic_yield_gap (
     peseta_region VARCHAR PRIMARY KEY CHECK (peseta_region IN ('CEN', 'CES', 'NE', 'SE', 'UK_IR')),

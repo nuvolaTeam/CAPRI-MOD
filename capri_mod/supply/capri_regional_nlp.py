@@ -679,13 +679,28 @@ class CapriRegionalNLP:
                 Y = self._lin(y, [(j, float(mx) * float(sh)) for j, sh in G[gi_]["crops"]])
                 regs[(gi_, s_)] = (Y, float(b1), float(b2))
                 regs_num[(gi_, s_)] = [(int(j), float(mx) * float(sh)) for j, sh in G[gi_]["crops"]]
+            # CAPRI's slack on the partial derivative of the prior density (v_fertDistPartialSlack, set_fert_priors.gms
+            # l. 668-785; the Green Deal group's listed regions): free within +-bound t, here in units of the flow's
+            # mode; e_fertDistPartial (partial + beta) (x + slack) = alpha - 1
+            sl_ = d.get("partial_slack") or {}
+            sl_i = [(i, float(sl_[(G[gi]["g"], s_)]) / m) for i, (gi, s_, m, acc) in enumerate(flows)
+                    if float(sl_.get((G[gi]["g"], s_), 0.0) or 0.0) > 0]
+            sig = ca.SX.sym(f"s{nut}", len(sl_i))
+            sig_of = {i: sig[k] for k, (i, _) in enumerate(sl_i)}
             # first-order conditions of the inner model
             for i, (gi, s_, m, acc) in enumerate(flows):
                 var_k = 1.0 / acc ** 2
                 bm = (1.0 + np.sqrt(1.0 + 4.0 * var_k)) / (2.0 * var_k)      # beta x mode
                 a1 = bm * bm * var_k - 1.0                                  # alpha - 1
                 dual = lam[gi] * e[s_] - (mu[pools.index(s_)] if s_ in pools else 0)
-                if (gi, s_) in regs:
+                if i in sig_of:
+                    # the prior's part with the slack, the regulation's (e_fertDistPartialRegu) without it
+                    Y_, b1_, b2_ = regs.get((gi, s_), (None, 1.0, 1.0))
+                    term = pv(a1) / (u[i] + sig_of[i]) + pv(b1_ - 1.0) / u[i] - pv(bm) - pv(m / T) * dual
+                    if Y_ is not None:
+                        term = term - pv(m * (b2_ - 1.0)) / (Y_ - x[i])
+                        g_rows.append((x[i] - float(_settings().get("fertiliser.support_margin")) * Y_) * pv(1.0 / m)); lbg.append(-np.inf); ubg.append(0.0)
+                elif (gi, s_) in regs:
                     Y, b1, b2 = regs[(gi, s_)]
                     term = pv(a1 + b1 - 1.0) / u[i] - pv(bm) - pv(m / T) * dual - pv(m * (b2 - 1.0)) / (Y - x[i])
                     g_rows.append((x[i] - float(_settings().get("fertiliser.support_margin")) * Y) * pv(1.0 / m)); lbg.append(-np.inf); ubg.append(0.0)
@@ -735,15 +750,15 @@ class CapriRegionalNLP:
                     g_rows.append(self._lin(y, nzA, scale=rs) + P * pv(1.0 / rs) + _cn)
                     _add = float((npk.get("n_rows_rhs_add") or {}).get(lab_, 0.0))
                     lbg.append(-np.inf); ubg.append((float(self._b[i_]) + _add) / rs)
-            vars_ = ca.vertcat(u, lam, mu, Pv)
+            vars_ = ca.vertcat(u, lam, mu, sig, Pv)
             o = nx0 + sum(int(v.shape[0]) for v in new)
             new.append(vars_)
             db = float(npk.get("dual_bound", 10.0))
-            lbx += [1e-3] * nfl + [-db * T] * (len(G) + len(pools)) + [0.0]
-            ubx += [1e3] * nfl + [db * T] * (len(G) + len(pools)) + [np.inf]
+            lbx += [1e-3] * nfl + [-db * T] * (len(G) + len(pools)) + [-b_ for _, b_ in sl_i] + [0.0]
+            ubx += [1e3] * nfl + [db * T] * (len(G) + len(pools)) + [b_ for _, b_ in sl_i] + [np.inf]
             self.fert[nut] = {"rows": (r_nut0, len(g_rows)), "flows": flows, "groups": [g_["g"] for g_ in G],
-                              "pools": pools, "off": o, "nfl": nfl,
-                              "off_P": o + nfl + len(G) + len(pools), "Pscale": Pscale, "T": T,
+                              "pools": pools, "off": o, "nfl": nfl, "slack": [i for i, _ in sl_i],
+                              "off_P": o + nfl + len(G) + len(pools) + len(sl_i), "Pscale": Pscale, "T": T,
                               "E": E, "C": C, "availE": availE, "price": float(d["price"]),
                               "regs": regs_num}
         self.fert_rows[1] = len(g_rows)
