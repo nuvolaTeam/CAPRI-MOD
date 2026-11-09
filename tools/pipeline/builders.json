@@ -1224,10 +1224,13 @@
     "capri_mod/settings/__init__.py",
     "capri_mod/tableio.py",
     "tools/build/build_cattle_intensity.py",
+    "tools/build/build_dairy_intensity.py",
+    "tools/lib/_grep.py",
     "tools/lib/_model_regions.py",
     "tools/lib/paths.py"
    ],
    "external": [
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
     "$SOURCES/capreg/res_17AL.txt",
     "$SOURCES/capreg/res_17AT.txt",
     "$SOURCES/capreg/res_17BA.txt",
@@ -1642,10 +1645,12 @@
     "capri_mod/settings/__init__.py",
     "capri_mod/tableio.py",
     "tools/build/build_dairy_intensity.py",
+    "tools/lib/_grep.py",
     "tools/lib/_model_regions.py",
     "tools/lib/paths.py"
    ],
    "external": [
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
     "$SOURCES/capreg/res_17AL.txt",
     "$SOURCES/capreg/res_17AT.txt",
     "$SOURCES/capreg/res_17BA.txt",

@@ -242,10 +242,10 @@ class FertilisationBlock:
         # the split columns (GRAE and GRAI are the model's own activities since S2, 7 November 2026; before, the
         # grassland split column moved area from GRAI to GRAE and changed the GRAS groups' need): the animal
         # split and option columns change their animal's manure in the proportion of their manure per head to the
-        # animal's (the tables' dmann_rel / d_mann_rel, the factor their columns carry in the N rows), which reaches
+        # animal's (the tables' dmann_rel / dmanp_rel / dmank_rel, d_mann_rel for N only), which reaches
         # ManureNPK_. Until 29 October 2026 the factor was read off the manure-application row or the N row, which
         # exist only with an N target: without one the split columns left the manure in NUTNED_ unchanged (K105).
-        man_split = self._split_manure_factors(n_cols, acts)
+        man_split = {nut_: self._split_manure_factors(n_cols, acts, nut_) for nut_ in NUTRIENTS}
         mixc = dict(getattr(self.ev, "mix_cols", None) or {})
         tm_ = getattr(self.data, "techn_mix", None)
         for nut in NUTRIENTS:
@@ -324,8 +324,10 @@ class FertilisationBlock:
             if not groups:
                 continue
             Ecols = [(j, float(man[j])) for j in range(n) if man[j] != 0.0]
-            if nut == "N":
-                Ecols += [(j, float(man[acts.index(a_)]) * r_) for j, a_, r_ in man_split if man[acts.index(a_)] * r_ != 0.0]
+            # the split columns move their animal's manure of this nutrient (CAPRI's MANN, MANP, MANK per activity;
+            # P and K since 9 November 2026, S6 item 6)
+            Ecols += [(j, float(man[acts.index(a_)]) * r_) for j, a_, r_ in man_split[nut]
+                      if man[acts.index(a_)] * r_ != 0.0]
             if pool and nut == "N" and len(pool) == 2:
                 Ecols += [(pool[0], -1.0), (pool[1], 1.0)]
             elif nut != "N":

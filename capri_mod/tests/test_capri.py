@@ -4335,6 +4335,40 @@ def test_intensity_splits_take_the_2030_curvature_with_capris_2030_terms(data):
         assert sm._intensity_q_at(d30, di, ("q_low", "q_high"), "animals")["q_low"] == pytest.approx(float(di["q_low"]))
 
 
+def test_intensity_splits_at_capris_2030_point_with_manure_npk(data):
+    """S6 item 6 (9 November 2026): at the 2030 market year the dairy and cattle splits take CAPRI's own 2030 terms
+    (the "_2030" columns, from the 2030 reference the model's base comes from), at 2017 the base year's; the split
+    columns move their animal's manure N, P2O5 and K2O (CAPRI's MANN, MANP, MANK of the two activities), the genetics
+    options manure N only (breeding.gms changes MANN). Anchor: CAPRI's 2030 MANP of DE110000, DCOL 73.853, DCOH 93.268,
+    DCOW 83.559 kg P2O5 per head (res_2_1730greendeal_refpol_endotech_all_inidefaulta)."""
+    from types import SimpleNamespace
+    from capri_mod.projection.projection_module import _split_terms_at_year
+    from capri_mod.supply.livestock import LivestockBlock
+    d30, d17 = dict(data), dict(data)
+    _split_terms_at_year(d30, 2030)
+    _split_terms_at_year(d17, 2017)
+    di0, di = data["dairy_intensity"].loc["DE110000"], d30["dairy_intensity"].loc["DE110000"]
+    assert di["dmanp_rel"] == pytest.approx((73.8525682313429 - 93.2682998797956) / 83.5591639433211, rel=1e-9)
+    assert di["dmann_rel"] == di0["dmann_rel_2030"] and di["share_low"] == di0["share_low_2030"]
+    assert not any(str(c).endswith("_2030") for c in di.index) and "q_low_capri2030" in di.index
+    assert d17["dairy_intensity"].loc["DE110000", "dmann_rel"] == di0["dmann_rel"]
+    c0, c30 = data["cattle_intensity"]["DE110000"]["BULL"], d30["cattle_intensity"]["DE110000"]["BULL"]
+    assert c30["dmank_rel"] == c0["dmank_rel_2030"] and c30["days_low"] == c0["days_low_2030"]
+    assert "dmank_rel_2030" not in c30.index
+    # the split columns' manure factors per nutrient
+    acts = ["DCOW", "BULL"]
+    ct = d30["cattle_intensity"]["DE110000"]
+    obj = SimpleNamespace(ev=SimpleNamespace(dairy_col=2, cattle_cols={"BULL": 3}, genet_cols={("DCOW", "GENET_YLD"): 4}),
+                          data=SimpleNamespace(dairy_intensity=di, cattle_intensity=ct,
+                                               genetics_effects={("DCOW", "GENET_YLD"): {"d_mann_rel": 0.05}}))
+    fN = LivestockBlock._split_manure_factors(obj, 5, acts, "N")
+    fP = LivestockBlock._split_manure_factors(obj, 5, acts, "P")
+    fK = LivestockBlock._split_manure_factors(obj, 5, acts, "K")
+    assert fN == [(2, "DCOW", di["dmann_rel"]), (3, "BULL", ct["BULL"]["dmann_rel"]), (4, "DCOW", 0.05)]
+    assert fP == [(2, "DCOW", di["dmanp_rel"]), (3, "BULL", ct["BULL"]["dmanp_rel"])]
+    assert fK == [(2, "DCOW", di["dmank_rel"]), (3, "BULL", ct["BULL"]["dmank_rel"])]
+
+
 @pytest.mark.slow
 def test_ammonia_options_stay_at_their_base_shares_in_the_2030_baseline():
     """K63 (22 October 2026): without a policy incentive on N the regional NLP holds CAPRI's ammonia options at their

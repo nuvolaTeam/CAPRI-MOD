@@ -67,8 +67,10 @@ class PhosphorusBlock:
         """CAPRI's gross phosphate balance of the region (reports/calc_nbalance.gms, FNUT = PHOF), t P2O5.
 
         EXCRET  sum over animals of herd x manure P2O5 per head (CAPRI's 2017 MANP totals / the model's herds,
-                livestock_manure_p_coef.csv; the split and option columns leave it unchanged, as in the regional model's
-                fertilisation block)
+                livestock_manure_p_coef.csv); the dairy and cattle split columns move it by their manure P2O5 per head
+                relative to their animal's (dairy_intensity / cattle_intensity dmanp_rel, CAPRI's MANP of the two
+                activities), as in the regional model's fertilisation block (S6 item 6, 9 November 2026: before, the
+                split columns left it unchanged)
         MTRADE  EXCRET - manure P2O5 applied in the region (ManureNPK_): with the NLP form's fertilisation block the
                 sum of its manure flows; without it (no supply result: the accounts at the base data) CAPRI's 2030 share applied
                 (1 - MTRADE / EXCRET) plus the region's manure trade carried in the region's P/N proportion, as the
@@ -99,6 +101,10 @@ class PhosphorusBlock:
             yr[c] = float(y) / b if (b > 0 and y is not None and float(y) >= 0) else 1.0
         x = {c: max(float(acts.get(c, 0.0) or 0.0), 0.0) for c in CROPS}
         h = {a: max(float(acts.get(a, 0.0) or 0.0), 0.0) for a in ANIMALS}
+        # the split columns' manure P2O5 as manure-equivalent heads of their animal (z x dmanp_rel)
+        for a_, k_ in self._split_manure_heads(region, supply_result, "dmanp_rel").items():
+            if a_ in h:
+                h[a_] = h[a_] + k_
         # removal and residues (EXPPRD, CRESID)
         expprd = sum(x[c] * C.coef(cr, c)[0] * yr[c] for c in CROPS)
         cresid = sum(x[c] * C.coef(cr, c)[1] * yr[c] for c in CROPS)

@@ -78,6 +78,36 @@ def milk_share_static(tab, cols, region):
     return m / (m + o) if (m + o) > 0 else 1.0
 
 
+def _split_terms_at_year(data: dict, year: int) -> None:
+    """The intensity split tables (data["dairy_intensity"], a DataFrame per region; data["cattle_intensity"],
+    {region: {key: Series}}) at `year`: each column with a "<column>_<year>" twin takes the twin's value where it has
+    one (CAPRI's terms at that year's calibration point; a region without them keeps the base year's); every
+    "_<4 digits>" twin column is dropped."""
+    import re as _re
+    sfx = f"_{year}"
+    twin = _re.compile(r".+_\d{4}$")
+    di = data.get("dairy_intensity")
+    if isinstance(di, pd.DataFrame):
+        di = di.copy()
+        for c in [c for c in di.columns if str(c).endswith(sfx) and c[: -len(sfx)] in di.columns]:
+            di[c[: -len(sfx)]] = di[c].where(di[c].notna(), di[c[: -len(sfx)]])
+        data["dairy_intensity"] = di.drop(columns=[c for c in di.columns if twin.match(str(c))
+                                                   and not str(c).endswith(("_capri2030", "_recipe2030"))])
+    ci = data.get("cattle_intensity")
+    if isinstance(ci, dict):
+        out = {}
+        for r, keys in ci.items():
+            out[r] = {}
+            for k, row in keys.items():
+                row = row.copy()
+                for c in [c for c in row.index if str(c).endswith(sfx) and c[: -len(sfx)] in row.index]:
+                    if row[c] == row[c]:
+                        row[c[: -len(sfx)]] = row[c]
+                out[r][k] = row.drop([c for c in row.index if twin.match(str(c))
+                                      and not str(c).endswith(("_capri2030", "_recipe2030"))])
+        data["cattle_intensity"] = out
+
+
 class ProjectionModule:
     """Run the validated core forward along an external baseline trajectory."""
 
@@ -119,6 +149,10 @@ class ProjectionModule:
         traj = self.trajectory
         # the market's year: CAPRI's bilateral market of that year where it exists (2030 reference)
         data["market_year"] = int(year)
+        # CAPRI's intensity splits (dairy DCOL/DCOH, the cattle pairs) at the year's calibration point: the columns
+        # "<column>_<year>" (CAPRI's own terms of that year, tools/build/build_dairy_intensity.py) replace the base
+        # year's (S6 item 6, 9 November 2026)
+        _split_terms_at_year(data, int(year))
         # CAPRI's baseline calibration applies where the trajectory moves the data (a null trajectory must return the
         # comparative-static result exactly: the projection layer's correctness gate)
         data["calibrate_baseline"] = any(

@@ -156,6 +156,27 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
     EnvironmentalIndicators for each region.
     """
 
+
+    def _split_manure_heads(self, region, supply_result, rel="dmann_rel") -> dict:
+        """{animal: manure-equivalent heads} of the dairy and cattle split columns of the region's solution: z heads
+        (stalls) moved to the low-intensity activity carry `rel` (dmann_rel, dmanp_rel or dmank_rel: CAPRI's MANN,
+        MANP or MANK per head, low - high, over the animal's average; dairy_intensity, cattle_intensity) of a head's
+        manure each, as the regional model's manure rows (RegionalSupplyModel._split_manure_factors)."""
+        out = {}
+        if supply_result is None or not hasattr(self, "data"):
+            return out
+        _dz = float(getattr(supply_result, "dairy_low_shift", 0.0) or 0.0)
+        _dtab = self.data.get("dairy_intensity")
+        if _dz and _dtab is not None and region in _dtab.index and rel in _dtab.columns:
+            out["DCOW"] = _dz * float(_dtab.at[region, rel])
+        # the bull and heifer splits (Sprint 7c) and the calves' the same way, every split of the animal (key "BULL",
+        # "HFRS:rep", "CALV:male", ...)
+        _ctab = (self.data.get("cattle_intensity") or {}).get(region)
+        for _k, _z in (getattr(supply_result, "cattle_shift", None) or {}).items():
+            _a = _k.split(":")[0]
+            if _z and _ctab and _k in _ctab and rel in _ctab[_k].index:
+                out[_a] = float(out.get(_a, 0.0)) + float(_z) * float(_ctab[_k][rel])
+        return {a: v for a, v in out.items() if v}
     def __init__(self, data: dict):
         self.data = data
         # Mineral N per ha: CAPRI's regional NMIN (data["mineral_n_regional"], _base_mineral_rate). A national
@@ -302,20 +323,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         # manure rows use the same factor. Accounted as k = z x that factor manure-equivalent cows:
         # the balance and manure N2O with and without them (enteric CH4 already follows the cows'
         # feed; manure CH4 per head is left unchanged: REGISTERED)
-        _dz = float(getattr(supply_result, "dairy_low_shift", 0.0) or 0.0)
-        _dk = 0.0
-        _dtab = self.data.get("dairy_intensity") if hasattr(self, "data") else None
-        if _dz and _dtab is not None and region in _dtab.index:
-            _dk = _dz * float(_dtab.at[region, "dmann_rel"])
-        # the bull and heifer splits (Sprint 7c) the same way: z stalls at the low-intensity activity
-        # carry (MANN per stall, low - high) / average of the animal's manure N
-        _kk = {"DCOW": _dk} if _dk else {}
-        _ctab = (self.data.get("cattle_intensity") or {}).get(region) if hasattr(self, "data") else None
-        for _k, _z in (getattr(supply_result, "cattle_shift", None) or {}).items():
-            # every split of the animal (key "HFRS", "HFRS:rep", "CALV:male", ...)
-            _a = _k.split(":")[0]
-            if _z and _ctab and _k in _ctab:
-                _kk[_a] = float(_kk.get(_a, 0.0)) + float(_z) * float(_ctab[_k]["dmann_rel"])
+        _kk = self._split_manure_heads(region, supply_result, "dmann_rel")
         # cattle genomics (breeding.gms): g animals adopting excrete d_mann_rel more (genet_yld) or less
         # (genet_eff) manure N each; enteric CH4 follows the animals' feed as for the splits
         _gtab = (self.data.get("genetics_effects") or {}).get(region) if hasattr(self, "data") else None

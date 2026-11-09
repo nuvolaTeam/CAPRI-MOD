@@ -37,6 +37,28 @@ CREATE TABLE sup_cattle_intensity (
     q_z_recipe2030 DOUBLE NOT NULL,
     q_source_recipe2030 VARCHAR NOT NULL,
     q_b_recipe2030 DOUBLE NOT NULL,
+    dmanp_rel DOUBLE NOT NULL,
+    dmank_rel DOUBLE NOT NULL,
+    share_low_2030 DOUBLE,
+    share_high_2030 DOUBLE,
+    days_low_2030 DOUBLE,
+    days_high_2030 DOUBLE,
+    dmann_rel_2030 DOUBLE,
+    dmanp_rel_2030 DOUBLE,
+    dmank_rel_2030 DOUBLE,
+    dbeef_rel_2030 DOUBLE,
+    dyoung_rel_2030 DOUBLE,
+    denne_rel_2030 DOUBLE,
+    dcrpr_rel_2030 DOUBLE,
+    ddrmn_rel_2030 DOUBLE,
+    ddrmx_rel_2030 DOUBLE,
+    dprod_young_m_rel_2030 DOUBLE,
+    dprod_young_f_rel_2030 DOUBLE,
+    dprod_cows_rel_2030 DOUBLE,
+    duse_calves_m_rel_2030 DOUBLE,
+    duse_calves_f_rel_2030 DOUBLE,
+    duse_young_m_rel_2030 DOUBLE,
+    duse_young_f_rel_2030 DOUBLE,
     PRIMARY KEY (region, animal, capri_region, q_source, split, member_low, member_high, q_source_capri2030, q_source_recipe2030)
 );
 COMMENT ON TABLE sup_cattle_intensity IS 'CAPRI''s two-intensity cattle fattening activities, per model region: bulls BULL/BULH and fattening (tools/build/build_cattle_intensity.py)';
@@ -65,7 +87,29 @@ INSERT INTO value_units VALUES
   ('sup_cattle_intensity', 'q_z_capri2030', NULL, 'open', 'cattle_intensity.q_z_capri2030: unit to be established'),
   ('sup_cattle_intensity', 'q_b_capri2030', NULL, 'open', 'cattle_intensity.q_b_capri2030: unit to be established'),
   ('sup_cattle_intensity', 'q_z_recipe2030', NULL, 'open', 'cattle_intensity.q_z_recipe2030: unit to be established'),
-  ('sup_cattle_intensity', 'q_b_recipe2030', NULL, 'open', 'cattle_intensity.q_b_recipe2030: unit to be established');
+  ('sup_cattle_intensity', 'q_b_recipe2030', NULL, 'open', 'cattle_intensity.q_b_recipe2030: unit to be established'),
+  ('sup_cattle_intensity', 'dmanp_rel', NULL, 'open', 'cattle_intensity.dmanp_rel: manure P2O5 / K2O per head, low - high over the animal''s average (CAPRI MANP / MANK)'),
+  ('sup_cattle_intensity', 'dmank_rel', NULL, 'open', 'cattle_intensity.dmank_rel: manure P2O5 / K2O per head, low - high over the animal''s average (CAPRI MANP / MANK)'),
+  ('sup_cattle_intensity', 'share_low_2030', NULL, 'open', 'cattle_intensity.share_low_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'share_high_2030', NULL, 'open', 'cattle_intensity.share_high_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'days_low_2030', NULL, 'open', 'cattle_intensity.days_low_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'days_high_2030', NULL, 'open', 'cattle_intensity.days_high_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'dmann_rel_2030', NULL, 'open', 'cattle_intensity.dmann_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'dmanp_rel_2030', NULL, 'open', 'cattle_intensity.dmanp_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'dmank_rel_2030', NULL, 'open', 'cattle_intensity.dmank_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'dbeef_rel_2030', NULL, 'open', 'cattle_intensity.dbeef_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'dyoung_rel_2030', NULL, 'open', 'cattle_intensity.dyoung_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'denne_rel_2030', NULL, 'open', 'cattle_intensity.denne_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'dcrpr_rel_2030', NULL, 'open', 'cattle_intensity.dcrpr_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'ddrmn_rel_2030', NULL, 'open', 'cattle_intensity.ddrmn_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'ddrmx_rel_2030', NULL, 'open', 'cattle_intensity.ddrmx_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'dprod_young_m_rel_2030', NULL, 'open', 'cattle_intensity.dprod_young_m_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'dprod_young_f_rel_2030', NULL, 'open', 'cattle_intensity.dprod_young_f_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'dprod_cows_rel_2030', NULL, 'open', 'cattle_intensity.dprod_cows_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'duse_calves_m_rel_2030', NULL, 'open', 'cattle_intensity.duse_calves_m_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'duse_calves_f_rel_2030', NULL, 'open', 'cattle_intensity.duse_calves_f_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'duse_young_m_rel_2030', NULL, 'open', 'cattle_intensity.duse_young_m_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_cattle_intensity', 'duse_young_f_rel_2030', NULL, 'open', 'cattle_intensity.duse_young_f_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)');
 
 -- file: capri_data/2017/supply/cover_crops.csv
 CREATE TABLE sup_cover_crops (
@@ -196,6 +240,17 @@ CREATE TABLE sup_dairy_intensity (
     q_low_recipe2030 DOUBLE NOT NULL,
     q_high_recipe2030 DOUBLE NOT NULL,
     q_source_recipe2030 VARCHAR NOT NULL,
+    dmanp_rel DOUBLE NOT NULL,
+    dmank_rel DOUBLE NOT NULL,
+    share_low_2030 DOUBLE NOT NULL,
+    dcomi_rel_2030 DOUBLE NOT NULL,
+    dmann_rel_2030 DOUBLE NOT NULL,
+    dmanp_rel_2030 DOUBLE NOT NULL,
+    dmank_rel_2030 DOUBLE NOT NULL,
+    denne_rel_2030 DOUBLE NOT NULL,
+    dcrpr_rel_2030 DOUBLE NOT NULL,
+    ddrmn_rel_2030 DOUBLE NOT NULL,
+    ddrmx_rel_2030 DOUBLE NOT NULL,
     PRIMARY KEY (region, capri_region, q_source, q_source_capri2030, q_source_recipe2030)
 );
 COMMENT ON TABLE sup_dairy_intensity IS 'CAPRI''s two dairy-cow activities, low-yield DCOL and high-yield DCOH, per model region. (tools/build/build_dairy_intensity.py)';
@@ -214,7 +269,18 @@ INSERT INTO value_units VALUES
   ('sup_dairy_intensity', 'q_low_capri2030', NULL, 'open', 'dairy_intensity.q_low_capri2030: unit to be established'),
   ('sup_dairy_intensity', 'q_high_capri2030', NULL, 'open', 'dairy_intensity.q_high_capri2030: unit to be established'),
   ('sup_dairy_intensity', 'q_low_recipe2030', NULL, 'open', 'dairy_intensity.q_low_recipe2030: unit to be established'),
-  ('sup_dairy_intensity', 'q_high_recipe2030', NULL, 'open', 'dairy_intensity.q_high_recipe2030: unit to be established');
+  ('sup_dairy_intensity', 'q_high_recipe2030', NULL, 'open', 'dairy_intensity.q_high_recipe2030: unit to be established'),
+  ('sup_dairy_intensity', 'dmanp_rel', NULL, 'open', 'dairy_intensity.dmanp_rel: manure P2O5 / K2O per head, low - high over the animal''s average (CAPRI MANP / MANK)'),
+  ('sup_dairy_intensity', 'dmank_rel', NULL, 'open', 'dairy_intensity.dmank_rel: manure P2O5 / K2O per head, low - high over the animal''s average (CAPRI MANP / MANK)'),
+  ('sup_dairy_intensity', 'share_low_2030', NULL, 'open', 'dairy_intensity.share_low_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_dairy_intensity', 'dcomi_rel_2030', NULL, 'open', 'dairy_intensity.dcomi_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_dairy_intensity', 'dmann_rel_2030', NULL, 'open', 'dairy_intensity.dmann_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_dairy_intensity', 'dmanp_rel_2030', NULL, 'open', 'dairy_intensity.dmanp_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_dairy_intensity', 'dmank_rel_2030', NULL, 'open', 'dairy_intensity.dmank_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_dairy_intensity', 'denne_rel_2030', NULL, 'open', 'dairy_intensity.denne_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_dairy_intensity', 'dcrpr_rel_2030', NULL, 'open', 'dairy_intensity.dcrpr_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_dairy_intensity', 'ddrmn_rel_2030', NULL, 'open', 'dairy_intensity.ddrmn_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)'),
+  ('sup_dairy_intensity', 'ddrmx_rel_2030', NULL, 'open', 'dairy_intensity.ddrmx_rel_2030: the column at CAPRI''s 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)');
 
 -- file: capri_data/2017/supply/grass_dm_content.csv
 CREATE TABLE sup_grass_dm_content (

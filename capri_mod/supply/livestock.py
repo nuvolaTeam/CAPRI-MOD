@@ -81,24 +81,28 @@ class LivestockBlock:
                     n = float(rec.get("produce", {}).get(a, 0.0)) - float(rec.get("use", {}).get(a, 0.0))
                     self.net_revenues[a] = float(self.net_revenues[a]) + (r_ - 1.0) * v * n
 
-    def _split_manure_factors(self, n_cols, acts):
-        """[(column, animal, manure per head of the column / the animal's)] of the animal split and option columns:
-        the dairy intensity split (dairy_intensity dmann_rel), the cattle splits (cattle_intensity[key] dmann_rel) and
-        the genetics options (genetics_effects[(animal, option)] d_mann_rel)."""
+    def _split_manure_factors(self, n_cols, acts, nut="N"):
+        """[(column, animal, manure per head of the column / the animal's)] of the animal split and option columns for
+        nutrient `nut` (N, P2O5 or K2O; CAPRI's MANN, MANP, MANK): the dairy intensity split (dairy_intensity
+        dmann_rel / dmanp_rel / dmank_rel), the cattle splits (cattle_intensity[key], the same) and, for N only, the
+        genetics options (genetics_effects[(animal, option)] d_mann_rel: CAPRI's breeding.gms changes MANN only).
+        Until 9 November 2026 (S6 item 6) the split columns moved manure N only."""
+        rc = {"N": "dmann_rel", "P": "dmanp_rel", "K": "dmank_rel"}[nut]
         out = []
         j = getattr(self.ev, "dairy_col", None)
         di = getattr(self.data, "dairy_intensity", None)
-        if j is not None and int(j) < n_cols and di is not None and "DCOW" in acts:
-            out.append((int(j), "DCOW", float(di["dmann_rel"])))
+        if j is not None and int(j) < n_cols and di is not None and "DCOW" in acts and rc in di.index:
+            out.append((int(j), "DCOW", float(di[rc])))
         tab = getattr(self.data, "cattle_intensity", None) or {}
         for key, j in (getattr(self.ev, "cattle_cols", None) or {}).items():
             a = key.split(":")[0]
-            if int(j) < n_cols and a in acts and key in tab:
-                out.append((int(j), a, float(tab[key]["dmann_rel"])))
-        gen = getattr(self.data, "genetics_effects", None) or {}
-        for (a, opt), j in (getattr(self.ev, "genet_cols", None) or {}).items():
-            if int(j) < n_cols and a in acts and (a, opt) in gen:
-                out.append((int(j), a, float(gen[(a, opt)]["d_mann_rel"])))
+            if int(j) < n_cols and a in acts and key in tab and rc in tab[key].index:
+                out.append((int(j), a, float(tab[key][rc])))
+        if nut == "N":
+            gen = getattr(self.data, "genetics_effects", None) or {}
+            for (a, opt), j in (getattr(self.ev, "genet_cols", None) or {}).items():
+                if int(j) < n_cols and a in acts and (a, opt) in gen:
+                    out.append((int(j), a, float(gen[(a, opt)]["d_mann_rel"])))
         return out
 
     @classmethod

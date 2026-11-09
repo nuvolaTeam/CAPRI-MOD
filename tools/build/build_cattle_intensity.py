@@ -9,7 +9,8 @@ HEIR) in census heads, i.e. stalls occupied over the year. The split is represen
 from the high to the low activity, z (1000 model heads), as for the dairy split:
 
   per stall-year, an activity with fattening length D turns over 365 / D animals, so
-    flow items (MANN manure N, BEEF, the young animal IBUL/IHEI) per stall = per animal x 365 / D
+    flow items (MANN, MANP, MANK manure N, P2O5, K2O, BEEF, the young animal IBUL/IHEI) per stall
+                                                                                        = per animal x 365 / D
     daily items (ENNE energy, CRPR protein, DRMN / DRMX dry-matter limits) per stall = per day
   d<item>_rel = (low - high) per stall / the model animal's average per stall (all its CAPRI
                activities: for HFRS including the replacement heifers HEIR)
@@ -18,8 +19,14 @@ from the high to the low activity, z (1000 model heads), as for the dairy split:
              (q_low (365 / (rho D_low))^2 + q_high (365 / (rho D_high))^2), rho = model heads per
              CAPRI stall (the model's census heads over CAPRI's stalls, LEVL x DAYS / 365)
 
-Sources: CAPRI 2017 results res_17<MS>.txt; capri_data/sources/intermediate/capreg/pmp_quad_techn.parquet. Regions take
-their CAPRI region through tools/lib/_model_regions.py (splits and merges), else the national row.
+  <column>_2030  the shares, fattening lengths and d<item>_rel at CAPRI's 2030 calibration point, from CAPRI's 2030
+             reference the model's 2030 base is taken from (res_2_1730greendeal_refpol_endotech_all_ini, dataOut at
+             2030); the model uses them at the 2030 market year (S6 item 6, 9 November 2026: before, the 2017
+             differences were used at the 2030 point). q_z and q_b keep the 2017 stall conversion.
+
+Sources: CAPRI 2017 results res_17<MS>.txt; CAPRI's 2030 reference res_2_1730greendeal_refpol_endotech_all_inidefaulta
+(the _2030 columns); capri_data/sources/intermediate/capreg/pmp_quad_techn.parquet. Regions take their CAPRI region
+through tools/lib/_model_regions.py (splits and merges), else the national row.
 Output: capri_data/2017/supply/cattle_intensity.csv (region, animal, ...)
 
     python tools/build/build_cattle_intensity.py [--dump-dir capri_sources/capreg]
@@ -34,7 +41,7 @@ import pandas as pd
 import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
-from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
@@ -44,7 +51,7 @@ ROOT = Path(__file__).resolve().parents[2]
 Q_SOURCES = (("", ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "pmp_quad_techn.parquet"),
              ("_capri2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_capri2030.parquet"),
              ("_recipe2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_recipe2030.parquet"))
-ITEMS = ("LEVL", "DAYS", "MANN", "BEEF", "IBUL", "IHEI", "ICAM", "ICAF", "YBUL", "YHEI", "YCOW",
+ITEMS = ("LEVL", "DAYS", "MANN", "MANP", "MANK", "BEEF", "IBUL", "IHEI", "ICAM", "ICAF", "YBUL", "YHEI", "YCOW",
          "ENNE", "CRPR", "DRMN", "DRMX")
 ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'(BULL|BULH|HEIL|HEIH|HEIR|CAMF|CAFF|CAMR|CAFR)'\.'(" + "|".join(ITEMS)
                  + r")'\.'Y'\s+(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
@@ -59,7 +66,10 @@ SPLITS = (("BULL", "int", "BULL", "BULH", ("BULL", "BULH"), ("IBUL",)),
           ("CALV", "male", "CAMF", "CAMR", ("CAMF", "CAFF", "CAMR", "CAFR"), ("ICAM", "ICAF")),
           ("CALV", "female", "CAFF", "CAFR", ("CAMF", "CAFF", "CAMR", "CAFR"), ("ICAM", "ICAF")),
           ("CALV", "sex", "CAMR", "CAFR", ("CAMF", "CAFF", "CAMR", "CAFR"), ("ICAM", "ICAF")))
-FLOW = ("MANN", "BEEF", "YOUNG")
+FLOW = ("MANN", "MANP", "MANK", "BEEF", "YOUNG")
+#: CAPRI's 2030 reference the model's 2030 base comes from (capri_data/scenarios/capri_ref_2030)
+REF_2030 = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+ACTS = ("BULL", "BULH", "HEIL", "HEIH", "HEIR", "CAMF", "CAFF", "CAMR", "CAFR")
 DAILY = ("ENNE", "CRPR", "DRMN", "DRMX")
 #: the model's young-animal goods (tools/build/build_young_animals.py): CAPRI items produced / used per animal
 GOODS_PROD = {"young_m": ("YBUL",), "young_f": ("YHEI",), "cows": ("YCOW",)}
@@ -69,7 +79,11 @@ GOODS_USE = {"calves_m": ("ICAM",), "calves_f": ("ICAF",), "young_m": ("IBUL",),
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
+    ap.add_argument("--ref-2030", type=Path, default=REF_2030)
     a = ap.parse_args()
+    spec_ = importlib.util.spec_from_file_location("_bdi", ROOT / "tools" / "build" / "build_dairy_intensity.py")
+    bdi = importlib.util.module_from_spec(spec_); spec_.loader.exec_module(bdi)
+    v30 = bdi.read_2030(a.ref_2030, ACTS, ITEMS)
     v = defaultdict(dict)
     for f in glob.glob(str(a.dump_dir / "res_17*.txt")):
         for line in open(f, errors="ignore"):
@@ -92,7 +106,7 @@ def main():
             return None
         t = 365.0 / D
         rec = {"stalls": L * D / 365.0, "days": D}
-        for it in ("MANN", "BEEF"):
+        for it in ("MANN", "MANP", "MANK", "BEEF"):
             rec[it] = d.get((act, it), 0.0) * t
         rec["YOUNG"] = sum(d.get((act, y), 0.0) for y in young) / 1000.0 * t    # young animals per stall-year
         for g, its in GOODS_PROD.items():
@@ -147,6 +161,26 @@ def main():
                 if sfx == "":
                     rec["heads"] = H
             rec.update({"split": split, "member_low": lo, "member_high": hi})
+            # CAPRI's 2030 point: the same terms from the 2030 reference (the region's own CAPRI unit, else its
+            # member state's)
+            src30 = next((c for c in (to_c8.get(reg), mr.national_code(reg))
+                          if c and c in v30 and stall(v30[c], lo, young) and stall(v30[c], hi, young)), None)
+            if src30 is not None:
+                r30 = {x: stall(v30[src30], x, young) for x in members}
+                r30 = {x: r for x, r in r30.items() if r}
+                S30 = sum(r["stalls"] for r in r30.values())
+                a30 = {it: sum(r[it] * r["stalls"] for r in r30.values()) / S30 for it in FLOW + DAILY + extra}
+                if all(a30[it] > 0 for it in FLOW + DAILY):
+                    rec.update({"share_low_2030": r30[lo]["stalls"] / S30, "share_high_2030": r30[hi]["stalls"] / S30,
+                                "days_low_2030": r30[lo]["days"], "days_high_2030": r30[hi]["days"]})
+                    for it in FLOW + DAILY:
+                        rec[f"d{it.lower()}_rel_2030"] = (r30[lo][it] - r30[hi][it]) / a30[it]
+                    for g in GOODS_PROD:
+                        k = "P_" + g
+                        rec[f"dprod_{g}_rel_2030"] = (r30[lo][k] - r30[hi][k]) / a30[k] if a30[k] > 0 else 0.0
+                    for g in GOODS_USE:
+                        k = "U_" + g
+                        rec[f"duse_{g}_rel_2030"] = (r30[lo][k] - r30[hi][k]) / a30[k] if a30[k] > 0 else 0.0
             for g in GOODS_PROD:
                 k = "P_" + g
                 rec[f"dprod_{g}_rel"] = (recs[lo][k] - recs[hi][k]) / avg[k] if avg[k] > 0 else 0.0
@@ -184,10 +218,13 @@ def main():
     out = out.drop(columns=["ms"])
     # the base year's columns first, as before the 2030 columns were added
     base_cols = ["region", "animal", "capri_region", "share_low", "share_high", "days_low", "days_high"] + \
-        [f"d{it.lower()}_rel" for it in FLOW + DAILY] + ["q_z", "q_source", "heads"]
-    first = base_cols + [c for c in out.columns if c not in base_cols
+        [f"d{it.lower()}_rel" for it in FLOW + DAILY if it not in ("MANP", "MANK")] + ["q_z", "q_source", "heads"]
+    # then the columns added before S6 item 6, then manure P2O5 and K2O, then CAPRI's 2030 point
+    new = ["dmanp_rel", "dmank_rel"] + [c for c in out.columns if c.endswith("_2030") and not c.endswith(("_capri2030",
+                                                                                                         "_recipe2030"))]
+    first = base_cols + [c for c in out.columns if c not in base_cols and c not in new
                          and not (c.endswith("_capri2030") or c.endswith("_recipe2030"))]
-    out = out[first + [c for c in out.columns if c not in first]]
+    out = out[first + [c for c in out.columns if c not in first and c not in new] + new]
     dest = ROOT / "capri_data" / "2017" / "supply" / "cattle_intensity.csv"
     out.to_csv(dest, index=False)
     for animal, split, *_ in SPLITS:
