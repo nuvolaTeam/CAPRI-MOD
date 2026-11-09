@@ -13266,7 +13266,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_greendeal_targets",
-    "sources": "$SOURCES/gams/pol_input/greendeal/landscape_targets.gdx; $SOURCES/gams/pol_input/greendeal/organic_targets.gdx; $SOURCES/gams/pol_input/greendeal/organic_targets_uaa.gdx; $SOURCES/gdxlib/libgdxcclib64.so"
+    "sources": "$SOURCES/gams/pol_input/greendeal/landscape_targets.gdx; $SOURCES/gams/pol_input/greendeal/load_organic_targets.gms; $SOURCES/gams/pol_input/greendeal/organic_targets.gdx; $SOURCES/gams/pol_input/greendeal/organic_targets_uaa.gdx; $SOURCES/gdxlib/libgdxcclib64.so"
    },
    "notes": [],
    "read_by": {
@@ -20457,6 +20457,48 @@
     "tests": []
    }
   },
+  "organic_ngrp_class": {
+   "file": "capri_data/scenarios/greendeal_group/organic_ngrp_class.csv",
+   "declared_in": "14_policy_targets.sql",
+   "layout": [],
+   "comment": "The class of CAPRI's organic targets (a column of organic_targets_ms) each fertiliser crop group takes in the mineral-N caps of the organic area target: CAPRI's crops_to_ngrp (pol_input/greendeal/load_organic_targets.gms, NMINREST off) and VEGE at the UAA target (l. 186); tools/build/build_greendeal_targets.py",
+   "columns": [
+    {
+     "name": "ngrp",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "target",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ngrp"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(\"target\" IN ('arable_pp', 'grassland_pp', 'permanent_pp', 'uaa_pp'))"
+   ],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_greendeal_targets",
+    "sources": "$SOURCES/gams/pol_input/greendeal/landscape_targets.gdx; $SOURCES/gams/pol_input/greendeal/load_organic_targets.gms; $SOURCES/gams/pol_input/greendeal/organic_targets.gdx; $SOURCES/gams/pol_input/greendeal/organic_targets_uaa.gdx; $SOURCES/gdxlib/libgdxcclib64.so"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "organic_targets_ms": {
    "file": "capri_data/scenarios/greendeal_group/organic_targets_ms.csv",
    "declared_in": "14_policy_targets.sql",
@@ -20530,7 +20572,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_greendeal_targets",
-    "sources": "$SOURCES/gams/pol_input/greendeal/landscape_targets.gdx; $SOURCES/gams/pol_input/greendeal/organic_targets.gdx; $SOURCES/gams/pol_input/greendeal/organic_targets_uaa.gdx; $SOURCES/gdxlib/libgdxcclib64.so"
+    "sources": "$SOURCES/gams/pol_input/greendeal/landscape_targets.gdx; $SOURCES/gams/pol_input/greendeal/load_organic_targets.gms; $SOURCES/gams/pol_input/greendeal/organic_targets.gdx; $SOURCES/gams/pol_input/greendeal/organic_targets_uaa.gdx; $SOURCES/gdxlib/libgdxcclib64.so"
    },
    "notes": [],
    "read_by": {

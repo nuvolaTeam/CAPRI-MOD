@@ -2611,12 +2611,14 @@
    ],
    "external": [
     "$SOURCES/gams/pol_input/greendeal/landscape_targets.gdx",
+    "$SOURCES/gams/pol_input/greendeal/load_organic_targets.gms",
     "$SOURCES/gams/pol_input/greendeal/organic_targets.gdx",
     "$SOURCES/gams/pol_input/greendeal/organic_targets_uaa.gdx",
     "$SOURCES/gdxlib/libgdxcclib64.so"
    ],
    "outputs": [
     "capri_data/scenarios/greendeal_group/landscape_targets_ms.csv",
+    "capri_data/scenarios/greendeal_group/organic_ngrp_class.csv",
     "capri_data/scenarios/greendeal_group/organic_targets_ms.csv"
    ]
   },
