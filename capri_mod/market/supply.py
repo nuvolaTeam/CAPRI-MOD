@@ -30,6 +30,9 @@ class SupplyMixin(MarketStateMixin):
     #: arm/market_model.gms l. 1696-1790): the rents of TCRP, FODFAL, FRUN clear each non-EU region's land market
     #: (true, CAPRI's form) or are held at calibration (false, until 4 November 2026)
     noneu_land_market = setting("market.noneu_land_market")
+    #: CAPRI's land-use-change estimation outside the EU (luc_market; capri_mod/market/luc.py), reported with the
+    #: market's solution
+    luc_market = setting("market.luc_market")
     #: CAPRI's agricultural land types of the market (xx1Land / luAgrMrk, arm/arm_sets.gms)
     MARKET_LAND = ("TCRP", "FODFAL", "FRUN")
 

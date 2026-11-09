@@ -323,6 +323,12 @@ noneu_supply_nq = true
 # noneu_land_mnl.csv; tools/build/build_noneu_market_supply_nq.py); false: the rents held at calibration (until
 # 4 November 2026). Needs noneu_supply_nq
 noneu_land_market = true
+# CAPRI's land-use-change estimation of the market outside the EU (luc_market, on with REPORTS_ENV,
+# capmod/set_global_variables.gms l. 395; arm/market_model.gms LinkLuWithShares_, luClassInitial_, luClassFinal_,
+# FocLUC_): the transitions between the UNFCCC land classes of each non-EU region with the land block, reported with the
+# market's solution (luc_market_*.csv, tools/build/build_luc_market.py; capri_mod/market/luc.py). No feedback on the
+# market (CAPRI's only one is the LULUCF cost under a carbon price, lulucf_market, not ported). Needs noneu_land_market
+luc_market = true
 # CAPRI's feed bulk demand inside the market (feedBlk_, audit M4): the member states' bulks respond to the prices within a
 # market solve from the supply models' bulks at the prices they saw, with the elasticities measured on the supply models
 # (the market supply Hessian's FEEDBLK rows); false: fixed within a solve (until 29 October 2026). Same fixed point

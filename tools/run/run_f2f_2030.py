@@ -285,6 +285,9 @@ def main():
            # EU biofuel block (crushing stage 4): feedstock use by commodity and feedstock, baseline and
            # scenario (MarketEquilibrium.biofuel)
            "biofuel": tuple(getattr(x["market"], "biofuel", None) for x in (b, s)),
+           # CAPRI's land-use change outside the EU (MarketEquilibrium.luc, luc_market): per non-EU region with the
+           # land block, final land per UNFCCC class and the 36 transitions (1000 ha), baseline, scenario
+           "luc_market": tuple(getattr(x["market"], "luc", None) for x in (b, s)),
            # CAPRI's inner fertiliser distribution (region x crop group, kg N/ha by source), baseline, scenario
            "fert_dist": tuple((x.get("fert_dist").to_dict("records") if x.get("fert_dist") is not None else None)
                               for x in (b, s)),

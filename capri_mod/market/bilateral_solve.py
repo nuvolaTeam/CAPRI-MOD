@@ -852,6 +852,7 @@ class BilateralSolveMixin(MarketStateMixin):
                         if fuel in reported.columns else 1.0
         return MarketEquilibrium(
             dairy=self.ev.dairy_last if self._dairy_params() else None,
+            luc=(self.noneu_luc(self.ev.land_now) if self.luc_market and self.noneu_land_market else None),
             biofuel=biof, world_prices=world, domestic_prices=reported, wedge_prices=wedge,
             production=S, consumption=D, trade_flows=flows, net_exports=S.subtract(D, fill_value=0),
             welfare=welfare, excess_demand=(D.drop(index="EU27", errors="ignore").sum()
