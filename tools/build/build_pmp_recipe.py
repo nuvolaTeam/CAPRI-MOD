@@ -401,9 +401,9 @@ def main() -> None:
     a = ap.parse_args()
     Y = a.year
     vb = defaultdict(dict)
-    for r in _read_csv(SRC / "estnlp_vb.parquet").itertuples():
+    for r in read_source(SRC / "estnlp_vb.parquet").itertuples():
         vb[r.region][(r.group1, r.group2)] = float(r.level)
-    vd = {(r.region, r.activity): float(r.level) for r in _read_csv(SRC / "estnlp_vd.parquet").itertuples()}
+    vd = {(r.region, r.activity): float(r.level) for r in read_source(SRC / "estnlp_vd.parquet").itertuples()}
     pela = pela_2004()
     bas = levels_2017()
     ydat = levels_ref(Y) if Y == 2030 else bas

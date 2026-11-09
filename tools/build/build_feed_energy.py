@@ -131,8 +131,7 @@ def main() -> None:
     cal = {k: v for k, v in cal_all.items() if k in xx}
     with open(ROOT / "capri_data" / "shared" / "rms_to_rm.csv", newline="") as f:
         rm_of = {r["rms"]: r["rm"] for r in csv.DictReader(f)}
-    with open(UNITS, newline="") as f:
-        ctry = {r["region"][:2] for r in csv.DictReader(f)}
+    ctry = {r["region"][:2] for r in source_records(UNITS)}
     noneu = {r for r, m in rm_of.items() if m not in EU_RM}
     rmssup = {r for r in noneu if (r.endswith("000000") and r[:2] in ctry) or (r == "TUR" and "TR" in ctry)}
     regs = sorted(noneu - rmssup)
