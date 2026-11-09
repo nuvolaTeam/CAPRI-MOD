@@ -37637,6 +37637,116 @@
      "name": "q_b_recipe2030",
      "type": "DOUBLE",
      "not_null": true
+    },
+    {
+     "name": "dmanp_rel",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "dmank_rel",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "share_low_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "share_high_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "days_low_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "days_high_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "dmann_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "dmanp_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "dmank_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "dbeef_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "dyoung_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "denne_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "dcrpr_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "ddrmn_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "ddrmx_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "dprod_young_m_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "dprod_young_f_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "dprod_cows_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "duse_calves_m_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "duse_calves_f_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "duse_young_m_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "duse_young_f_rel_2030",
+     "type": "DOUBLE",
+     "not_null": false
     }
    ],
    "primary_key": [
@@ -37661,10 +37771,22 @@
      "basis": "cattle_intensity.days_high: unit to be established"
     },
     {
+     "item": "days_high_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.days_high_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
      "item": "days_low",
      "unit": null,
      "status": "open",
      "basis": "cattle_intensity.days_low: unit to be established"
+    },
+    {
+     "item": "days_low_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.days_low_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
     },
     {
      "item": "dbeef_rel",
@@ -37673,10 +37795,22 @@
      "basis": "cattle_intensity.dbeef_rel: unit to be established"
     },
     {
+     "item": "dbeef_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.dbeef_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
      "item": "dcrpr_rel",
      "unit": null,
      "status": "open",
      "basis": "cattle_intensity.dcrpr_rel: unit to be established"
+    },
+    {
+     "item": "dcrpr_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.dcrpr_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
     },
     {
      "item": "ddrmn_rel",
@@ -37685,10 +37819,22 @@
      "basis": "cattle_intensity.ddrmn_rel: unit to be established"
     },
     {
+     "item": "ddrmn_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.ddrmn_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
      "item": "ddrmx_rel",
      "unit": null,
      "status": "open",
      "basis": "cattle_intensity.ddrmx_rel: unit to be established"
+    },
+    {
+     "item": "ddrmx_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.ddrmx_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
     },
     {
      "item": "denne_rel",
@@ -37697,10 +37843,46 @@
      "basis": "cattle_intensity.denne_rel: unit to be established"
     },
     {
+     "item": "denne_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.denne_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
+     "item": "dmank_rel",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.dmank_rel: manure P2O5 / K2O per head, low - high over the animal's average (CAPRI MANP / MANK)"
+    },
+    {
+     "item": "dmank_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.dmank_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
      "item": "dmann_rel",
      "unit": null,
      "status": "open",
      "basis": "cattle_intensity.dmann_rel: unit to be established"
+    },
+    {
+     "item": "dmann_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.dmann_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
+     "item": "dmanp_rel",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.dmanp_rel: manure P2O5 / K2O per head, low - high over the animal's average (CAPRI MANP / MANK)"
+    },
+    {
+     "item": "dmanp_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.dmanp_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
     },
     {
      "item": "dprod_cows_rel",
@@ -37709,10 +37891,22 @@
      "basis": "cattle_intensity.dprod_cows_rel: unit to be established"
     },
     {
+     "item": "dprod_cows_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.dprod_cows_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
      "item": "dprod_young_f_rel",
      "unit": null,
      "status": "open",
      "basis": "cattle_intensity.dprod_young_f_rel: unit to be established"
+    },
+    {
+     "item": "dprod_young_f_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.dprod_young_f_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
     },
     {
      "item": "dprod_young_m_rel",
@@ -37721,10 +37915,22 @@
      "basis": "cattle_intensity.dprod_young_m_rel: unit to be established"
     },
     {
+     "item": "dprod_young_m_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.dprod_young_m_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
      "item": "duse_calves_f_rel",
      "unit": null,
      "status": "open",
      "basis": "cattle_intensity.duse_calves_f_rel: unit to be established"
+    },
+    {
+     "item": "duse_calves_f_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.duse_calves_f_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
     },
     {
      "item": "duse_calves_m_rel",
@@ -37733,10 +37939,22 @@
      "basis": "cattle_intensity.duse_calves_m_rel: unit to be established"
     },
     {
+     "item": "duse_calves_m_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.duse_calves_m_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
      "item": "duse_young_f_rel",
      "unit": null,
      "status": "open",
      "basis": "cattle_intensity.duse_young_f_rel: unit to be established"
+    },
+    {
+     "item": "duse_young_f_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.duse_young_f_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
     },
     {
      "item": "duse_young_m_rel",
@@ -37745,10 +37963,22 @@
      "basis": "cattle_intensity.duse_young_m_rel: unit to be established"
     },
     {
+     "item": "duse_young_m_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.duse_young_m_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
      "item": "dyoung_rel",
      "unit": null,
      "status": "open",
      "basis": "cattle_intensity.dyoung_rel: unit to be established"
+    },
+    {
+     "item": "dyoung_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.dyoung_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
     },
     {
      "item": "heads",
@@ -37799,10 +38029,22 @@
      "basis": "cattle_intensity.share_high: unit to be established"
     },
     {
+     "item": "share_high_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.share_high_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
      "item": "share_low",
      "unit": null,
      "status": "open",
      "basis": "cattle_intensity.share_low: unit to be established"
+    },
+    {
+     "item": "share_low_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "cattle_intensity.share_low_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
     }
    ],
    "provenance": {
@@ -38508,6 +38750,61 @@
      "name": "q_source_recipe2030",
      "type": "VARCHAR",
      "not_null": true
+    },
+    {
+     "name": "dmanp_rel",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "dmank_rel",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "share_low_2030",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "dcomi_rel_2030",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "dmann_rel_2030",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "dmanp_rel_2030",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "dmank_rel_2030",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "denne_rel_2030",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "dcrpr_rel_2030",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "ddrmn_rel_2030",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "ddrmx_rel_2030",
+     "type": "DOUBLE",
+     "not_null": true
     }
    ],
    "primary_key": [
@@ -38528,10 +38825,22 @@
      "basis": "dairy_intensity.dcomi_rel: unit to be established"
     },
     {
+     "item": "dcomi_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "dairy_intensity.dcomi_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
      "item": "dcrpr_rel",
      "unit": null,
      "status": "open",
      "basis": "dairy_intensity.dcrpr_rel: unit to be established"
+    },
+    {
+     "item": "dcrpr_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "dairy_intensity.dcrpr_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
     },
     {
      "item": "ddrmn_rel",
@@ -38540,10 +38849,22 @@
      "basis": "dairy_intensity.ddrmn_rel: unit to be established"
     },
     {
+     "item": "ddrmn_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "dairy_intensity.ddrmn_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
      "item": "ddrmx_rel",
      "unit": null,
      "status": "open",
      "basis": "dairy_intensity.ddrmx_rel: unit to be established"
+    },
+    {
+     "item": "ddrmx_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "dairy_intensity.ddrmx_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
     },
     {
      "item": "denne_rel",
@@ -38552,10 +38873,46 @@
      "basis": "dairy_intensity.denne_rel: unit to be established"
     },
     {
+     "item": "denne_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "dairy_intensity.denne_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
+     "item": "dmank_rel",
+     "unit": null,
+     "status": "open",
+     "basis": "dairy_intensity.dmank_rel: manure P2O5 / K2O per head, low - high over the animal's average (CAPRI MANP / MANK)"
+    },
+    {
+     "item": "dmank_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "dairy_intensity.dmank_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
      "item": "dmann_rel",
      "unit": null,
      "status": "open",
      "basis": "dairy_intensity.dmann_rel: unit to be established"
+    },
+    {
+     "item": "dmann_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "dairy_intensity.dmann_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
+    },
+    {
+     "item": "dmanp_rel",
+     "unit": null,
+     "status": "open",
+     "basis": "dairy_intensity.dmanp_rel: manure P2O5 / K2O per head, low - high over the animal's average (CAPRI MANP / MANK)"
+    },
+    {
+     "item": "dmanp_rel_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "dairy_intensity.dmanp_rel_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
     },
     {
      "item": "heads_high",
@@ -38610,6 +38967,12 @@
      "unit": null,
      "status": "open",
      "basis": "dairy_intensity.share_low: unit to be established"
+    },
+    {
+     "item": "share_low_2030",
+     "unit": null,
+     "status": "open",
+     "basis": "dairy_intensity.share_low_2030: the column at CAPRI's 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_ini)"
     }
    ],
    "provenance": {

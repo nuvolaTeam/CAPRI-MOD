@@ -2776,7 +2776,7 @@
    "domain": "supply",
    "status": "live",
    "rows": 1485,
-   "columns": 34,
+   "columns": 56,
    "units": "to be established (value_units: open)",
    "read_by_model": [
     "capri_mod/data/loaders.py"
@@ -2843,7 +2843,7 @@
    "domain": "supply",
    "status": "live",
    "rows": 250,
-   "columns": 20,
+   "columns": 31,
    "units": "to be established (value_units: open)",
    "read_by_model": [
     "capri_mod/data/loaders.py"
