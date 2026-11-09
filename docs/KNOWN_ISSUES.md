@@ -23,7 +23,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
-| [K120](#k120) | S7 ("capri"): the market supply Hessian measured after the first supply solve had lost most of its response; the baseline calibration's stall rule stopped it uncorrected | fixed: 20 and 37 units, full EU Farm-to-Fork and Green Deal (7 November 2026); open in S7: the baseline calibration's first-round drift (located: set-aside and pulses, the ecological set-aside row) |
+| [K120](#k120) | S7 ("capri"): the market supply Hessian measured after the first supply solve had lost most of its response; the baseline calibration's stall rule stopped it uncorrected | fixed: 20 and 37 units, full EU Farm-to-Fork and Green Deal (7 November 2026); open in S7: the baseline calibration's first-round drift (9 November 2026: not the ecological set-aside row; the baseline's prices move up to 1.3% from CAPRI's calibration point; at the baseline's end the crop levels are within a median 0.22% of CAPRI's 2030 levels, 7 region pairs above 5%) |
 | [K121](#k121) | S2 step 1a: other fodder split into CAPRI's OFAR and ROOF; the fodder roots' feed (FROO) tied to their land for the first time | done on mini-EU (7 November 2026); the full runs and the suite to come |
 | [K122](#k122) | S2 step 1b: set-aside split into CAPRI's VSET and FALL; the winter-cover option's potential counted set-aside CAPRI fills | done on mini-EU (7 November 2026); the full runs and the suite to come |
 | [K123](#k123) | S2 step 1c: grassland split into CAPRI's GRAE and GRAI, the split column z and its late calibration removed; fodder roots' 2030 fodder trajectory was missing since 1a | done (8 November 2026): suite, mini-EU, full-EU Farm-to-Fork and Green Deal |
@@ -2330,6 +2330,34 @@ Farm-to-Fork scenario diverged from its second iteration in the 37- and the 20-u
   dual and activity in those regions at round 1. The gaps are small in area (the largest 4.3 thousand ha, ES430000 PULS), so the effect on the
   EU indicators is likely small (not measured). An earlier guess, Luxembourg's set-aside (the largest move in the
   [nlp] trace), was wrong: its level is below the 1-thousand-ha threshold of the drift measure.
+- **Checked on 9 November 2026 (S7 and S2 in place, the full-EU Green Deal at 1b97161, its baseline ref_star3):**
+  - **Not the ecological set-aside row.** I read CAPRI's equation (supply_model.gms l. 1937-1964): it has the same
+    form as the model's row.
+    - In CAPRI's own 2030 Green Deal levels (capri_marginal_terms_ini_2030), the row binds in Mazowieckie
+      (PL220000): slack 0.
+    - The row is slack in Aquitaine (FR610000), 24 thousand ha, and in Extremadura (ES430000), 162 thousand ha.
+    - In the model's base the row is also slack there (base gap -58.6 and -160.8 thousand ha, catch crops
+      included). So the 7 November reading (SETA and PULS substituting along a binding row) does not hold for
+      the two largest cases.
+    - Mazowieckie's base does not meet the rule by 0.59 thousand ha. There the rule is held at the base's value
+      (REGISTERED).
+  - **What moves the regions.** The baseline's market moves the EU prices from CAPRI's calibration point by up to
+    1.3%:
+    - beef -1.3%, sugar -0.9%, other cereals -0.6%, pulses +0.6% at the last iteration;
+    - the EU's beef production is +1.2% and sugar +0.9% against CAPRI's (compare_baseline_capri.py).
+    - A few regions answer that strongly. In Extremadura, a stand-alone probe (the model built outside the 2030
+      projection, so its levels are not the run's) moves pulses 7.7 to 10.9 thousand ha (+41%) for the first
+      iteration's price signal. With the pulses signal alone (+0.49%) the move is +15%. With the signal reversed
+      it is -4%. The response is asymmetric, so some kink is involved; not identified.
+    - CAPRI's own PMP term for Extremadura's pulses is flat: g = 65 EUR/ha per 100% change, CAPRI's H about
+      11 per thousand ha (pmp_capri_2030).
+  - **What is left at the baseline's end** (crop levels per region against CAPRI's 2030 Green Deal levels,
+    activities of at least 1 thousand ha, 3,177 pairs):
+    - median 0.22%; 95% within 1.5%; 7 pairs above 5%, 7 thousand ha in all;
+    - the largest: Extremadura's pulses +25.7% (7.27 against 5.78 thousand ha), CZ040000 other fodder +18.5%
+      (fodder is held by its balance and not shifted), IT910000 voluntary set-aside -12.5%.
+    - The effect on the EU indicators is small. The open question is why the baseline's EU beef and sugar supply
+      sit about 1% above CAPRI's at the calibration point. Not analysed further.
 
 ### K121: Other fodder split into CAPRI's OFAR and ROOF (S2 step 1a, 7 November 2026)
 
