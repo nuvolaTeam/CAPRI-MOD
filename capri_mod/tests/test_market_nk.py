@@ -27,7 +27,6 @@ def test_newton_krylov_reaches_the_default_solves_equilibrium():
                     if c in mm.par.base_production.columns:
                         exo.at[r, c] = mm.par.base_production.at[r, c]
             eq0 = mm.solve(exogenous_supply=exo)
-            mm.set_eu_base(exo.loc[EU].sum(), eq0.consumption.loc[EU].sum())
             exo1 = exo.copy()
             exo1.loc[EU, "BEEF"] *= 0.9
             exo1.loc[EU, "SWHE"] *= 0.95

@@ -99,7 +99,7 @@ def test_market_welfare_at_base_and_after_a_supply_shock():
             if c in mm.par.base_production.columns:
                 exo.at[r, c] = mm.par.base_production.at[r, c]
     eq0 = mm.solve(exogenous_supply=exo)
-    mm.set_eu_base(exo.loc[EU].sum(), eq0.consumption.loc[EU].sum())  # scenarios keep the base calibration
+    # the second solve keeps the run's calibration (S7: calibrated once per run at CAPRI's calibration point)
     weu = lambda w, c: float(w.loc[EU, c].sum())                  # the EU's welfare: its blocks' sum
     w0 = eq0.welfare
     assert list(w0.columns) == list(mm.WELFARE_COMPONENTS) + ["Welfare"]

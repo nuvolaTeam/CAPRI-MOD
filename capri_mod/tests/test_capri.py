@@ -1437,7 +1437,10 @@ def test_schema_declares_every_input_and_all_files_exist():
         if t["read_by"]["model"] and (t["provenance"] or {}).get("nature") in (None, "no-builder"):
             unknown.append(t["file"])
         try:
-            pd.read_csv(f, index_col=0, nrows=5)
+            if f.suffix == ".parquet":                     # a table of capri_data/sources (8 November 2026)
+                pd.read_parquet(f)
+            else:
+                pd.read_csv(f, index_col=0, nrows=5)
         except Exception as exc:            # pragma: no cover
             unreadable.append((name, str(exc)[:80]))
 

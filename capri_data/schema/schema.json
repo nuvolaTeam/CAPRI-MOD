@@ -13600,6 +13600,7 @@
      "tools/check/compare_baseline_capri.py"
     ],
     "tests": [
+     "capri_mod/tests/test_capri.py",
      "capri_mod/tests/test_compare_baseline_capri.py"
     ]
    }
