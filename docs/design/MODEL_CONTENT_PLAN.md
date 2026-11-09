@@ -701,7 +701,7 @@ fine-grained token checked the same day; the token is kept outside the repositor
 4. Ports: written in the current market code (done 4 November 2026, stages 4-7).
 5. Decided 5 November 2026: the market's land-use-change estimation (luc_market) is ported.
 6. Decided 5 November 2026: the default `run.supply_countries_outside_eu` becomes CAPRI's full list, at the end of the
-   work (too costly in run time now).
+   work (too costly in run time now). Moved on 9 November 2026 (the project lead): after G3, before CAPTRD-MOD.
 7. Decided 5 November 2026: G3's bound policy is CAPRI's reproduced; the least-infeasibility formulation an optional
    diagnostic mode (MID §7.2; BEYOND-13).
 8. Decided 5 November 2026: G3's objective is zero, with a squareness and structural-rank check before every solve

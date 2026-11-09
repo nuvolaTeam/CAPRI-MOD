@@ -79,13 +79,14 @@ What the model needs before the completion gate, in the agreed order (MODEL_CONT
 5 November 2026):
 
 1. The market: the quotas inside the price solve; the baseline demand recalibration removed (S7).
-2. The model's content: the activity gap (S1/S2), no-till and legume share (S10), the market's land-use change
-   (luc_market), the regional NLP departures one by one (S6).
+2. The model's content: the activity gap (S1/S2, done), the market's land-use change (luc_market, done 9 November
+   2026), the regional NLP departures one by one (S6), S11 and K65. No-till and legume share (S10) and the LULUCF carbon
+   (S13) with the carbon-tax scenarios (the project lead, 9 November 2026).
 3. Before CAPTRD-MOD: the premium module (P2) with obligatory set-aside (P1); the data layout by role; G3, the whole
    market as one IPOPT system, as decided (MARKET_IPOPT_DESIGN §7.2; before CAPTRD-MOD, the project lead's correction of
-   6 November 2026).
+   6 November 2026); then CAPRI's full list of non-EU supply countries as the default (D2; moved before CAPTRD-MOD by
+   the project lead, 9 November 2026).
 4. CAPTRD-MOD with its parity mode, then the projection layer.
-5. At the end: CAPRI's full list of non-EU supply countries as the default (D2).
 
 ## 3. External phase 1 (University of Bonn)
 
