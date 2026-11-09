@@ -23,6 +23,7 @@ sys.path.insert(0, str(ROOT))
 import pandas as pd  # noqa: E402
 
 from capri_mod import io_results as IO  # noqa: E402
+from capri_mod.csvio import read_csv  # noqa: E402
 
 
 def _root(arg: str) -> Path:
@@ -80,7 +81,7 @@ def main():
         if a.run:
             f = IO.meta_dir(root, rec["run_id"]) / "run_record.csv"
             if f.exists():
-                print(pd.read_csv(f, keep_default_na=False).to_string(index=False))
+                print(read_csv(f, keep_default_na=False).to_string(index=False))
             else:
                 meta = json.loads((IO.meta_dir(root, rec["run_id"]) / "meta.json").read_text())
                 c = IO.catalogue(root)
