@@ -89,29 +89,31 @@ results = model.run(
 
 ## Connecting Your Data
 
-Replace or extend the shipped data by placing CSV files in a directory:
+The model reads its inputs from `capri_data/` (CSV), built by the builders in `tools/build/` from CAPRI's own files
+(capri_data/schema/01_provenance.sql records the builder and the sources of every file). Some of the main ones:
 
-| File | Source | Content |
-|------|--------|---------|
-| `base_areas.csv` | Eurostat `apro_cpsh1` | Crop areas [region × crop], 1000 ha |
-| `animal_numbers.csv` | Eurostat `ef_lsk` | Animal numbers [region × animal], 1000 heads |
-| `yields.csv` | Eurostat `apro_cpsh1` | Yields [region × activity], t/ha or t/head |
-| `producer_prices.csv` | Eurostat `apri_ap_ina` | Prices [activity], EUR/t |
-| `variable_costs.csv` | FADN | Costs [activity], EUR/ha or EUR/head |
-| `land_availability.csv` | Eurostat `ef_oluaa` | UAA [region × land_type], 1000 ha |
-| `world_prices.csv` | FAOSTAT / OECD Outlook | World prices [commodity], EUR/t |
-| `trade_flows.csv` | UN COMTRADE / BACI | Flows [(exporter, importer) × commodity], 1000 t |
-| `cap_payments.csv` | EU DG-AGRI / IACS | CAP payment rates [region × type], EUR/ha |
+| File | Built by | From | Content |
+|------|----------|------|---------|
+| `2017/supply/base_areas.csv` | build_capri_base | CAPRI's 2017 base (CAPREG results) | Crop areas [region × crop], 1000 ha |
+| `2017/supply/animal_numbers.csv` | build_capri_base | CAPRI's 2017 base (CAPREG results) | Animal numbers [region × animal], 1000 heads |
+| `2017/supply/yields.csv` | build_crop_economics_2017 | CAPRI's 2030 reference results and sim_ini_21730 | Yields [region × activity] |
+| `2017/supply/variable_costs.csv` | build_crop_economics_2017 | CAPRI's 2030 reference results and sim_ini_21730 | Costs [region × activity], EUR/ha or EUR/head |
+| `2017/supply/land_availability.csv` | build_capri_base | CAPRI's 2017 base (CAPREG results) | UAA [region × land type], 1000 ha |
+| `2017/market/producer_prices.csv` | build_eu_producer_prices | CAPRI, with unsourced values marked | Producer prices [activity], EUR/t |
+| `2017/market/world_prices.csv` | build_world_prices | CAPRI | World prices [commodity], EUR/t |
+| `2017/policy/cap_payments.csv` | build_crop_economics_2017 | CAPRI | CAP payment rates [region × type], EUR/ha |
 
+CAPRI's own sources behind these (Eurostat, FAOSTAT, FADN and others) enter through CAPRI's database, not directly.
+`capri_data/README.md` and `docs/EXTERNAL_SOURCES.md` describe the layout and CAPRI's material outside git.
 
 ```python
-model = CAPRIModel(data_dir="path/to/your/data/")
+model = CAPRIModel(data_dir="path/to/capri_data/")
 ```
 
 ## Mathematical Reference
 
 - **Supply module**: Positive Mathematical Programming (Howitt 1995), regional NLP
-- **Market module**: Armington (1969) CES spatial equilibrium, tatonnement solver
+- **Market module**: CAPRI's market model (two-level Armington CES, GL food demand, tariff-rate quotas), solved per commodity with Newton steps and Anderson acceleration (DEP-16)
 - **Environmental**: IPCC (2019) Tier 1/2 GHG emission factors, OECD N balance
 - **Policy**: EU Reg. 2021/2115 (CAP Strategic Plans), WTO schedule TRQs
 

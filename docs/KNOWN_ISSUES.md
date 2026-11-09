@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (11)
+## Open (12)
 
 | # | Issue | Status |
 |---|---|---|
@@ -31,6 +31,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K125](#k125) | S7, CAPRI's market calibration, the model's only form: the "supply" form and its setting removed; ten tests written for the old form adapted | done (9 November 2026); the scenario-shifter layer (S7 step 5) still to build |
 | [K126](#k126) | The CasADi trade system left out the quota price offsets of a commodity with global quotas only (casein), in the optional exact-Jacobian and Newton-Krylov solves | fixed (9 November 2026); the default solve unaffected |
 | [K127](#k127) | Under CAPRI's market calibration (S7) an emission tax leaves N manure trade at zero in a four-unit Belgian run where the former form traded 360 t | open (9 November 2026): cause not established |
+| [K128](#k128) | Farm-to-Fork's meat prices against JRC121368: beef +29.5% against +24.0%, poultry +20.4% against +18.0%, pork +20.5% against +43.0%, with EU production close to CAPRI's | open (9 November 2026): the market's inputs checked against CAPRI's (base, demand elasticities, Armington, quotas), no departure found; needs CAPRI's own scenario run on the same version |
 
 ## Resolved (107)
 
@@ -2575,3 +2576,34 @@ price, outer_loop.manure_pool_price_update = "capri") in both forms.
 
 The test's tax part is test_manure_n_trade_moves_under_the_emission_tax, an expected failure until this is settled; its
 base part passes (the base a first-order point at the calibration point's prices, P and K trade below 0.1 t).
+
+<a id="k128"></a>
+### K128: Farm-to-Fork's meat prices against JRC121368 (checked 9 November 2026)
+
+The full-EU Farm-to-Fork at 1b97161 against JRC121368's combined scenario (EU27, % change from the 2030 baseline):
+beef price +29.5 against +24.0, poultry price +20.4 against +18.0, pork price +20.5 against +43.0, with EU beef
+production -13.7 against -14.0, the beef herd -19.2 against -18.0, poultry production -9.9 against -16.5. In the
+model's EU market (both EU blocks): beef production -13.7%, human consumption -5.6%, net exports 667 -> 134 kt; poultry
+-9.6%, -1.5%, 2,822 -> 1,676 kt; pork -13.4%, -1.8%, 3,845 -> 1,302 kt. With production close to CAPRI's the beef gap is
+in the market's price formation, not in the supply. The Green Deal's beef and poultry prices moved from r211 (gate 16,
++11.2 and +7.3) to +13.4 and +8.8 (1b97161) with the market's ports to CAPRI's form of 4 November (quotas, entry prices
+and levies, the non-EU land block) and S7, S1/S2, DEP-22; r211 is not reproducible (its commit 65cd4d8 is not in the
+re-rooted history; the earliest commit, a715747, carries K117's quota failure and was stopped after 4 scenario
+iterations).
+
+Checked against CAPRI's own inputs (no departure found):
+- The market alone at CAPRI's 2030 calibration point (tools/check/check_market_base.py): beef, pork, poultry and sheep
+  meat production within 0.16%, prices within 0.21%, bilateral flows within 1.5% (median 2e-5), so every quota's fill
+  at the base is CAPRI's.
+- The GL food demand: the own-price elasticities at the calibration prices (finite differences on gl_demand_*.csv)
+  against CAPRI's p_ElasDem "CAL" (elas_2_1730defaulta): beef, pork, sheep meat, cheese and poultry meat (POUM) in
+  every behavioural region (80 for poultry) within 7e-5.
+- The Armington substitution elasticities: armington_rho.csv equals CAPRI's p_rhoArm1 and p_rhoArm2 in sim_ini_21730
+  (beef 3.5 and 7.1, pork 6.7 and 13.4, poultry 3.7 and 7.3, sheep meat 3.2 and 6.4).
+- DEP-12 (no commitment terms in the second Armington nest) has no effect with CAPRI's default: p_arm2Commit is set only
+  with modArmington = commitment (arm/modArmington.gms l. 436; default off, capmod/set_global_variables.gms l. 95).
+
+Not settled: JRC121368 is another CAPRI version on another baseline, and its meat consumption and trade changes are not
+in hand (the report's tables were not readable from its PDF here), so the gap cannot be split between the version and
+the model. Next: CAPRI's own Farm-to-Fork or a market-only shock run on the same version (the course's release or
+Bonn, VALIDATION_PLAN §1.3).
