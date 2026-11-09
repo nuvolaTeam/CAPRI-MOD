@@ -203,10 +203,12 @@ def check_overrides(overrides: Dict[str, object]) -> List[str]:
 
 
 def list_runs(results_dir: Optional[Path] = None) -> list:
-    """The stored runs (newest first): scenario, run id, converged, iterations, settings changed."""
+    """The stored runs (newest first): result name, label, status, scenario, run id, converged, iterations, settings
+    changed."""
     import results_data as RD
     r = RD.runs(results_dir or RD.default_store())
-    cols = ["scenario", "run_id", "converged", "iterations", "regions", "settings changed"]
+    cols = ["result name", "label", "status", "scenario", "run_id", "converged", "iterations", "regions",
+            "settings changed"]
     return r[cols].head(20).to_dict("records") if not r.empty else []
 
 

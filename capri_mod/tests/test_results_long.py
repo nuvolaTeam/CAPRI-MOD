@@ -235,3 +235,50 @@ def test_the_pickle_comes_back_from_the_store(tmp_path):
     assert list(got["environmental"][0].index) == list(env[0].index)
     assert list(got["environmental"][0].columns) == list(env[0].columns)
     assert got["outer_history"] == ([{"it": 1, "signal": {"SWHE": 0.0}}], [{"it": 1}, {"it": 2}])
+
+
+def test_runs_are_named_as_capri_names_its_result_files(tmp_path):
+    """CAPRI's result names (set_and_store_dataout.gms l. 477: res_<NTSLVL>_<BAS><SIM><scenario><ResId>): the run
+    script's names, label, series and status go to the runs table; the scenario's metadata folder gets its run record
+    (CAPRI's META: provenance, NUM_RU, NUM_MS, every setting marked changed or [default]) and the store a readable
+    catalogue (RUNS.csv). A store written before 9 November 2026 (no naming columns) takes them on its next run, its
+    earlier records named afterwards from their meta.json."""
+    import pyarrow as pa
+    from deltalake import write_deltalake
+    assert IO.result_name("greendeal2030", "2017", 2030) == "res_2_1730greendeal2030"
+    assert IO.result_name("f2f", 2017, 2030, n_units=20, label="my test/1") == "res_2_1730f2f_20u_my_test_1"
+    assert IO.short_name("farm_to_fork_jrc121368") == "f2f_jrc121368" and IO.short_name("not_a_folder") == "not_a_folder"
+    meta = {"conv": True, "it": 7, "seconds": 600, "market_converged": {"baseline": True, "scenario": True},
+            "nlp_nonoptimal": {"baseline": [], "scenario": ["DE110000"]},
+            "settings": {"run": {"base_year": "2017", "manure_trade": True}, "market": {"x": 1.5}},
+            "settings_changed": {"market.x": 1.5}, "options": {"regions": "DE110000,FR240000", "label": "t"}}
+    assert IO.status_of(meta) == "1 regional solves non-optimal at the end (scenario 1)"
+    assert IO.status_of({**meta, "nlp_nonoptimal": {}}) == "ok"
+    assert IO.status_of({**meta, "conv": False, "nlp_nonoptimal": {}}) == "not converged in 7 iterations"
+    B, S = (IO.with_capri_codes(IO.to_long(_results(s_), p)) for s_, p in ((1.0, "base"), (1.5, "scen")))
+    # an earlier store: its runs table without the naming columns
+    old = tmp_path / "old"
+    r0 = IO.write_run(B, S, scenario="scen_a", reference="ref_x", year=2030, fingerprint_parts={"code": "a"},
+                      meta=meta, root=old)
+    t = IO._runs(old).drop(columns=list(IO.RUNS_NAMING_COLUMNS))
+    import shutil
+    shutil.rmtree(old / "runs")
+    write_deltalake(str(old / "runs"), pa.Table.from_pandas(t, preserve_index=False))
+    assert set(IO.RUNS_NAMING_COLUMNS) <= set(IO._runs(old).columns)
+    c = IO.catalogue(old)
+    assert list(c["result_name"]) == ["res_2_1730scen_a_2u_t", "res_2_1730ref_x_2u_t"]
+    assert c["note"].str.contains("named afterwards").all()
+    names = {"result_name": "res_2_1730scen_b_2u_t", "reference_result_name": "res_2_1730ref_x_2u_t", "label": "t",
+             "series": "review1", "status": IO.status_of(meta)}
+    r1 = IO.write_run(B, S, scenario="scen_b", reference="ref_x", year=2030, fingerprint_parts={"code": "a"},
+                      meta=meta, root=old, names=names, units=["DE110000", "FR240000", "NO080000"])
+    runs = IO._runs(old).sort_values("seq")
+    assert list(runs["result_name"]) == ["", "", "res_2_1730scen_b_2u_t"]        # the reference was reused
+    assert runs.iloc[-1]["series"] == "review1" and runs.iloc[-1]["status"] == names["status"]
+    cat = pd.read_csv(old / "RUNS.csv", keep_default_na=False)
+    assert list(cat["result_name"]) == ["res_2_1730scen_b_2u_t", "res_2_1730scen_a_2u_t", "res_2_1730ref_x_2u_t"]
+    assert cat.iloc[0]["run_id"] == r1["run_id"][:12] and cat.iloc[1]["run_id"] == r0["run_id"][:12]
+    rr = pd.read_csv(IO.meta_dir(old, r1["run_id"]) / "run_record.csv", keep_default_na=False).set_index("item")
+    assert rr.at["NUM_RU", "value"] == "3" and rr.at["NUM_MS", "value"] == "3" and rr.at["MinutesNeeded", "value"] == "10.0"
+    assert rr.at["setting market.x", "note"] == "changed" and rr.at["setting run.manure_trade", "note"] == "[default]"
+    assert rr.at["result_name", "value"] == "res_2_1730scen_b_2u_t"

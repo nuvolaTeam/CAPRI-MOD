@@ -1104,6 +1104,11 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 _hist[-1]["jump_check"] = {r_: dict(m_.res.nlp_jump) for r_, m_ in
                                            (getattr(self.supply_module, "_models", None) or {}).items()
                                            if getattr(m_.res, "nlp_jump", None)}
+                # each region's solve at this iteration (CAPRI's p_INFES per region and step: its model and solver
+                # status): IPOPT's status and whether the solution is optimal (False: IPOPT's last point kept)
+                _hist[-1]["solve_status"] = {
+                    r_: {"status": str(getattr(x_, "solver_message", "") or "").split(": ", 1)[-1],
+                         "optimal": bool(getattr(x_, "converged", True))} for r_, x_ in _sr_.items()}
                 if _settings().get("diagnostics.record_regional_levels"):
                     # every region's activity levels at this iteration, unrounded (K79: the rows CAPRI's stop rule
                     # flags, traced to regions and activities)

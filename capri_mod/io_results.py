@@ -696,7 +696,10 @@ def _stored(rows: pd.DataFrame, year: int) -> pd.DataFrame:
 #: the recipe's version, the first line hashed: a change of the recipe changes every id
 RUN_ID_RECIPE = "capri-mod run id 1"
 RUNS_COLUMNS = ("seq", "scenario", "run_id", "kind", "reference", "reference_run_id", "fingerprint", "commit",
-                "created", "rows", "note")
+                "created", "rows", "note", "result_name", "label", "series", "status")
+#: the columns added on 9 November 2026 (CAPRI-style result names, the user's label and series, the solve status): a
+#: store written before has none of them; _runs reads them as empty text
+RUNS_NAMING_COLUMNS = ("result_name", "label", "series", "status")
 
 
 def rows_digest(rows: pd.DataFrame) -> str:
@@ -737,8 +740,146 @@ def meta_dir(root, run_id: str) -> Path:
 
 def _runs(root: Path) -> pd.DataFrame:
     from deltalake import DeltaTable
-    p = root / "runs"
-    return DeltaTable(str(p)).to_pandas() if p.exists() else pd.DataFrame(columns=list(RUNS_COLUMNS))
+    p = Path(root) / "runs"
+    if not p.exists():
+        return pd.DataFrame(columns=list(RUNS_COLUMNS))
+    r = DeltaTable(str(p)).to_pandas()
+    for c in RUNS_NAMING_COLUMNS:                 # a store written before 9 November 2026, or its earlier records
+        r[c] = r[c].fillna("") if c in r.columns else ""
+    return r
+
+
+# --------------------------------------------------------------------------- #
+# CAPRI's result names (set_and_store_dataout.gms l. 477: res_<NTSLVL>_<BAS><SIM><scenario><ResId>.gdx), the solve
+# status of a run (CAPRI's p_INFES and META in its result file) and a readable catalogue of the store (RUNS.csv)
+# --------------------------------------------------------------------------- #
+def _two_digits(year) -> str:
+    """CAPRI's BAS and SIM in its result names: a year's last two digits (2017 -> "17", 2030 -> "30")."""
+    return str(int(year))[-2:]
+
+
+def _slug(text: str) -> str:
+    """A label as part of a file name: letters, digits, '-' and '.' kept, anything else '_'."""
+    import re
+    return re.sub(r"[^A-Za-z0-9.-]+", "_", str(text)).strip("_")
+
+
+def result_name(short: str, base_year, year, *, n_units: Optional[int] = None, label: str = "") -> str:
+    """A stored run's name as CAPRI names its result files: res_2_<BAS><SIM><scenario> (NTSLVL 2: the supply models
+    are NUTS 2 regions; BAS and SIM the base and simulation years' last two digits; the scenario's short name, its
+    folder's short_name), then _<n>u where the run solved a subset of n regions (CAPRI's ResId names a run's variant;
+    a subset has no CAPRI counterpart) and _<label> for the user's label (--label). Not unique: CAPRI overwrites a
+    result file of the same name, the store keeps every run under its run id."""
+    name = f"res_2_{_two_digits(base_year)}{_two_digits(year)}{_slug(short)}"
+    if n_units:
+        name += f"_{int(n_units)}u"
+    if label:
+        name += f"_{_slug(label)}"
+    return name
+
+
+def short_name(scenario: str) -> str:
+    """A scenario's (or reference's) short name in result names: its folder's short_name
+    (capri_data/scenarios/<name>/settings.toml), else its own name (a scenario built on the command line)."""
+    try:
+        from capri_mod.scenarios import definition as _SD
+        return _SD.load(scenario).short_name or scenario
+    except Exception:
+        return scenario
+
+
+def status_of(meta: dict) -> str:
+    """A run's solve status in a word or a few (CAPRI's p_INFES and its META item for the market model): "ok" where
+    the outer loop converged, both final market solves met their balances and no regional solve's last IPOPT point
+    was kept; else the reasons, separated by "; "."""
+    flags = []
+    conv = meta.get("conv")
+    if conv is None:
+        flags.append("convergence not evaluated")
+    elif not conv:
+        flags.append(f"not converged in {meta.get('it')} iterations")
+    bad = [k for k, v in (meta.get("market_converged") or {}).items() if not v]
+    if bad:
+        flags.append("market not converged: " + ", ".join(bad))
+    no = meta.get("nlp_nonoptimal") or {}
+    n = sum(len(v or []) for v in no.values())
+    if n:
+        flags.append(f"{n} regional solves non-optimal at the end ("
+                     + ", ".join(f"{k} {len(v)}" for k, v in no.items() if v) + ")")
+    return "; ".join(flags) or "ok"
+
+
+def run_record(meta: dict, rec: dict, units: Optional[list] = None) -> pd.DataFrame:
+    """A run's record as CAPRI's META in its result file (set_and_store_dataout.gms: the task's provenance, every GUI
+    setting with "[default]" where it is the default; DATAOUT's META rows NUM_MS, NUM_RU, MinutesNeeded): columns item,
+    value, note. NUM_RU is the number of regions solved, NUM_MS the countries among them (the regions' first two
+    letters; CAPRI counts its member states)."""
+    rows = [(k, rec.get(k, ""), "") for k in ("result_name", "scenario", "kind", "reference", "label", "series",
+                                              "status", "run_id", "reference_run_id", "commit", "created")]
+    if units is not None:
+        rows += [("NUM_RU", len(units), "regions solved"),
+                 ("NUM_MS", len({u[:2] for u in units}), "countries of the regions solved (first two letters)")]
+    rows += [("MinutesNeeded", round(float(meta.get("seconds") or 0) / 60.0, 1), "the run's wall time"),
+             ("iterations", meta.get("it"), "outer iterations of the scenario"),
+             ("base_iterations", meta.get("base_iterations"), "outer iterations of the baseline")]
+    changed = meta.get("settings_changed") or {}
+    for sec, kv in sorted((meta.get("settings") or {}).items()):
+        for k, v in sorted(kv.items()):
+            key = f"{sec}.{k}"
+            rows.append((f"setting {key}", json.dumps(v, default=str) if not isinstance(v, str) else v,
+                         "changed" if key in changed or (sec in changed and isinstance(changed[sec], dict)
+                                                          and k in changed[sec]) else "[default]"))
+    return pd.DataFrame(rows, columns=["item", "value", "note"]).astype({"value": str})
+
+
+CATALOGUE_COLUMNS = ("seq", "created", "result_name", "kind", "scenario", "reference", "label", "series", "status",
+                     "run_id", "reference_run_id", "rows", "commit", "note")
+
+
+def catalogue(root) -> pd.DataFrame:
+    """The store's runs, newest first, as RUNS.csv shows them: the run ids cut to 12 characters (a unique prefix is
+    enough everywhere), the commit to 10. Records written before 9 November 2026 have no result name or status: they
+    are given theirs here from their metadata (meta.json; a reference takes its scenario's), the note says so."""
+    root = Path(root)
+    r = _runs(root).copy()
+    if r.empty:
+        return pd.DataFrame(columns=list(CATALOGUE_COLUMNS))
+    r = r.sort_values("seq", ascending=False).reset_index(drop=True)
+    for i, rec in r[(r["result_name"] == "") & (r["kind"] == "scenario")].iterrows():
+        mf = meta_dir(root, rec["run_id"]) / "meta.json"
+        if not mf.exists():
+            continue
+        meta = json.loads(mf.read_text())
+        regions = [x for x in str((meta.get("options") or {}).get("regions") or "").split(",") if x]
+        by = (meta.get("settings") or {}).get("run", {}).get("base_year")
+        if by is None:
+            continue
+        lab = str((meta.get("options") or {}).get("label") or "")
+        n = len(regions) or None
+        from deltalake import DeltaTable
+        yrs = DeltaTable(str(root / "long")).to_pandas(columns=["year"], filters=[("run_id", "=", rec["run_id"])])
+        if yrs["year"].nunique() != 1:
+            continue
+        yr = int(yrs["year"].iloc[0])
+        r.at[i, "result_name"] = result_name(short_name(rec["scenario"]), by, yr, n_units=n, label=lab)
+        r.at[i, "status"] = status_of(meta)
+        r.at[i, "note"] = "; ".join(x for x in (rec["note"], "named afterwards from meta.json") if x)
+        ref = (r["run_id"] == rec["reference_run_id"]) & (r["result_name"] == "")
+        r.loc[ref, "result_name"] = result_name(short_name(rec["reference"]), by, yr, n_units=n, label=lab)
+        r.loc[ref, "note"] = r.loc[ref, "note"].map(lambda x: "; ".join(y for y in (x, "named afterwards from "
+                                                                                 "its scenario's meta.json") if y))
+    for c in ("run_id", "reference_run_id"):
+        r[c] = r[c].fillna("").astype(str).str[:12]
+    r["commit"] = r["commit"].fillna("").astype(str).str[:10]
+    return r[list(CATALOGUE_COLUMNS)]
+
+
+def write_catalogue(root) -> Path:
+    """root/RUNS.csv: the store's catalogue (catalogue), rewritten after every stored run; a view of root/runs, which
+    stays the record."""
+    f = Path(root) / "RUNS.csv"
+    catalogue(root).to_csv(f, index=False)
+    return f
 
 
 def _rows_of(root, table: str, run_id: str) -> pd.DataFrame:
@@ -783,7 +924,8 @@ def _jsonable(x):
 def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, reference: str, year: int,
               fingerprint_parts: dict, meta: dict, root, summary: Optional[dict] = None,
               iterations: Optional[tuple] = None, scenario_parts: Optional[dict] = None,
-              created: Optional[str] = None, reference_fingerprint: Optional[str] = None) -> dict:
+              created: Optional[str] = None, reference_fingerprint: Optional[str] = None,
+              names: Optional[dict] = None, units: Optional[list] = None) -> dict:
     """Store a run: the reference's rows and the scenario's rows each as its own partition of root/long, named by its
     run id (run_id_of: the SHA-256 of its results and its definition). The reference's definition is
     fingerprint(fingerprint_parts) (its inputs); the scenario's is fingerprint({"reference": that fingerprint,
@@ -795,7 +937,10 @@ def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, referenc
     root/iterations under the partitions' run ids (encode_record's rows); meta (the run's metadata) to
     meta_dir(root, run id)/meta.json. reference_fingerprint, when given, is the reference's fingerprint itself in place
     of fingerprint(fingerprint_parts) (a store converted from an older layout keeps its references' fingerprints:
-    tools/run/migrate_results_store.py). Returns the scenario's record (root/runs)."""
+    tools/run/migrate_results_store.py). names: the records' result names, label, series and status
+    ({"result_name", "reference_result_name", "label", "series", "status"}; empty where not given); units: the regions
+    solved (the run record's NUM_RU and NUM_MS). Besides meta.json the scenario's metadata folder gets run_record.csv
+    (run_record), and root/RUNS.csv is rewritten (write_catalogue). Returns the scenario's record (root/runs)."""
     import pyarrow as pa
     from datetime import datetime as _dt
     from deltalake import write_deltalake
@@ -827,6 +972,7 @@ def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, referenc
         df["scenario"], df["run_id"] = scen_name, rid
         write_deltalake(str(root / table), pa.Table.from_pandas(df, preserve_index=False), mode="append")
 
+    nm = {k: str(v or "") for k, v in (names or {}).items()}
     now = created or _dt.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z")
     seq = int(runs["seq"].max()) + 1 if len(runs) else 0
     recs = []
@@ -836,7 +982,8 @@ def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, referenc
             put(encode_record(iterations[0]), reference, ref_id, "iterations")
         recs.append({"seq": seq, "scenario": reference, "run_id": ref_id, "kind": "reference", "reference": "",
                      "reference_run_id": "", "fingerprint": fp, "commit": commit, "created": now, "rows": len(b),
-                     "note": note})
+                     "note": note, "result_name": nm.get("reference_result_name", ""), "label": nm.get("label", ""),
+                     "series": nm.get("series", ""), "status": ""})
     put(s, scenario, scen_id)
     if summary is not None:
         put(encode_record(summary), scenario, scen_id, "summary")
@@ -844,13 +991,17 @@ def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, referenc
         put(encode_record(iterations[1]), scenario, scen_id, "iterations")
     rec = {"seq": seq + len(recs), "scenario": scenario, "run_id": scen_id, "kind": "scenario", "reference": reference,
            "reference_run_id": ref_id, "fingerprint": fp_s, "commit": commit, "created": now, "rows": len(s),
-           "note": ""}
+           "note": "", "result_name": nm.get("result_name", ""), "label": nm.get("label", ""),
+           "series": nm.get("series", ""), "status": nm.get("status", "")}
     recs.append(rec)
+    # schema_mode "merge": a store written before 9 November 2026 gains the naming columns (RUNS_NAMING_COLUMNS)
     write_deltalake(str(root / "runs"), pa.Table.from_pandas(pd.DataFrame(recs)[list(RUNS_COLUMNS)],
-                                                             preserve_index=False), mode="append")
+                                                             preserve_index=False), mode="append", schema_mode="merge")
     md = meta_dir(root, scen_id)
     md.mkdir(parents=True, exist_ok=True)
     (md / "meta.json").write_text(json.dumps(_jsonable(meta), indent=1, default=str))
+    run_record(meta, rec, units).to_csv(md / "run_record.csv", index=False)
+    write_catalogue(root)
     return {**rec, "reference_reused": not ref_new, "duplicate": False}
 
 

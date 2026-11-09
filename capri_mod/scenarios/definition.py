@@ -128,6 +128,9 @@ class ScenarioDef(_Strict):
     name: str
     kind: Literal["reference", "scenario"]
     description: str = ""
+    #: the short name in its runs' result names (capri_mod/io_results.result_name: res_2_1730<short_name>...), as
+    #: CAPRI's result files carry the scenario's file name; empty: the folder's name
+    short_name: str = ""
     #: the CAPRI files the definition follows (paths under CAPRI's gams folder)
     capri_files: List[str] = Field(default_factory=list)
     #: a reference: the trajectory folder it projects along

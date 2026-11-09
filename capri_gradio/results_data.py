@@ -77,16 +77,22 @@ def runs(root) -> pd.DataFrame:
     """The store's scenario runs, newest first, with their convergence, settings changed and code version."""
     r = IO._runs(Path(root))
     if r.empty:
-        return pd.DataFrame(columns=["seq", "created", "scenario", "run_id", "reference", "reference_run_id",
+        return pd.DataFrame(columns=["seq", "created", "result name", "label", "series", "status", "scenario", "run_id", "reference", "reference_run_id",
                                      "converged", "market converged", "base iterations", "iterations", "seconds",
                                      "regions", "settings changed", "overrides", "commit", "note"])
     rows = []
+    # CAPRI-style result names and the solve status (io_results.catalogue: given afterwards to earlier runs)
+    cat = IO.catalogue(Path(root)).set_index("run_id")
     for rec in r[r["kind"] == "scenario"].sort_values("seq", ascending=False).to_dict("records"):
         m = read_meta(root, rec["scenario"], rec["run_id"])
+        c = cat.loc[str(rec["run_id"])[:12]] if str(rec["run_id"])[:12] in cat.index else {}
         mc = m.get("market_converged") or {}
         reg = str((m.get("options") or {}).get("regions") or "")
         git = ((m.get("run_manifest") or {}).get("git") or {})
-        rows.append({"seq": int(rec["seq"]), "created": rec["created"], "scenario": rec["scenario"],
+        rows.append({"seq": int(rec["seq"]), "created": rec["created"],
+                     "result name": c.get("result_name", "") if len(c) else "", "label": rec.get("label") or "",
+                     "series": rec.get("series") or "", "status": c.get("status", "") if len(c) else "",
+                     "scenario": rec["scenario"],
                      "run_id": rec["run_id"], "reference": rec["reference"],
                      "reference_run_id": rec["reference_run_id"], "converged": m.get("conv"),
                      "market converged": "/".join(str(mc.get(k, "")) for k in ("baseline", "scenario")) if mc else "",

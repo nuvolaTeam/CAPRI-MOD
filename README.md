@@ -851,6 +851,24 @@ from deltalake import DeltaTable
 t = DeltaTable("results/long").to_pandas(filters=[("scenario", "=", "farm_to_fork_jrc121368")])
 ```
 
+**Result names and the run catalogue (since 9 November 2026).** Each stored run is also named as CAPRI names its
+result files (`set_and_store_dataout.gms` l. 477, `res_<NTSLVL>_<BAS><SIM><scenario><ResId>.gdx`):
+`res_2_1730<short name>[_<n>u][_<label>]`, where the short name is the scenario folder's `short_name` (e.g.
+`f2f_jrc121368`, `greendeal2030`, `carbtax50`; else the scenario's name), `_<n>u` marks a run on a subset of n regions
+and `--label` adds your own name. `--series` groups runs (a sensitivity, a review round). `results/RUNS.csv` lists
+every run, newest first: result name, scenario, reference, label, series, status (`ok`, or why not: not converged,
+market not converged, regional solves non-optimal at the end, as CAPRI's p_INFES and its META), the run ids (12
+characters), commit. `results/meta/<run id>/run_record.csv` is the run's record in the manner of CAPRI's META: its
+provenance, NUM_RU and NUM_MS (regions solved and their countries), MinutesNeeded and every setting marked `changed` or
+`[default]`. Runs stored before that date are named afterwards from their meta.json (the catalogue's note says so).
+The name is not unique (CAPRI overwrites a result file of the same name); the run id is.
+
+```bash
+python tools/check/list_runs.py                      # the catalogue (--scenario, --series, --label filter it)
+python tools/check/list_runs.py --run 7a797932       # one run's record
+python tools/check/list_runs.py --solves 7a797932    # its regional solves per iteration (status, non-optimal ones)
+```
+
 **Browsing the results (since 6 November 2026).** `python capri_gradio/results_browser.py [--store DIR ...]` opens a
 local, read-only web page over one or more stores (default `run.results_dir`; `pip install ".[gui]"` for gradio):
 the runs with their convergence, settings changed and code version; a run's scenario against its baseline and two runs

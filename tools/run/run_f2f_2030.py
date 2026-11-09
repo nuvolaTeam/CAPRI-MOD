@@ -87,6 +87,11 @@ def main():
                     help="a TOML settings file (capri_mod/settings/defaults.toml's keys); repeatable, later files win")
     ap.add_argument("--set", action="append", default=[],
                     help="one setting, e.g. --set market.biofuel_markets=false (after the files and the flags)")
+    ap.add_argument("--label", default="",
+                    help="your name for the run, appended to its result name (res_2_1730<scenario>[_<n>u]_<label>) "
+                         "and shown in the store's catalogue (results/RUNS.csv)")
+    ap.add_argument("--series", default="",
+                    help="a series the run belongs to (e.g. a sensitivity or a review round), shown in RUNS.csv")
     ap.add_argument("--base-prices", action="store_true",
                     help="keep 2017 prices in the 2030 baseline (default: CAPRI's 2030 prices in 2017 money)")
     a = ap.parse_args()
@@ -524,6 +529,8 @@ def main():
                "software": out["meta"]["run_manifest"].get("software")}
         # what the scenario adds to its reference's definition: the overrides on the command line and the scenario
         # files read (the reference's fingerprint leaves them out); with the results they make the run id
+        _by = run_settings.get("run.base_year")
+        _nu = len(_subset) if _subset else None
         _sparts = {"overrides": _over,
                    "inputs": {k: v for k, v in (out["meta"]["run_manifest"].get("inputs") or {}).items()
                               if k.startswith("capri_data/scenarios/")}}
@@ -531,7 +538,14 @@ def main():
                              scenario=_scen.name, reference=_ref, year=2030, fingerprint_parts=_fp,
                              scenario_parts=_sparts, meta=out["meta"], root=_rroot, summary=_IO.summary_of(out),
                              iterations=out["outer_history"],
-                             created=(out["meta"]["run_manifest"].get("created") or None))
+                             created=(out["meta"]["run_manifest"].get("created") or None),
+                             # CAPRI's result names (io_results.result_name), the label and series, the solve status
+                             names={"result_name": _IO.result_name(_IO.short_name(_scen.name), _by, 2030,
+                                                                   n_units=_nu, label=a.label),
+                                    "reference_result_name": _IO.result_name(_IO.short_name(_ref), _by, 2030,
+                                                                             n_units=_nu, label=a.label),
+                                    "label": a.label, "series": a.series, "status": _IO.status_of(out["meta"])},
+                             units=sorted(s["supply"]))
         _rid = _rec["run_id"]
         if _rec.get("duplicate"):
             print(f"long table: {_scen.name} {_rid[:12]} already stored (the same results and definition)", flush=True)
@@ -551,7 +565,8 @@ def main():
         for _k in out:
             if _k != "meta":
                 _cmp.walk(out[_k], _st.get(_k), f"$.{_k}", _d, 0.0, set())
-        print(f"long table: {_rroot / 'long'} | {_scen.name} {_rid}: {_rec['rows']} rows; reference {_ref} "
+        print(f"long table: {_rroot / 'long'} | {_rec.get('result_name') or _scen.name} ({_scen.name}) {_rid}: "
+              f"{_rec['rows']} rows, status {_rec.get('status') or '-'}; reference {_ref} "
               f"{_rec['reference_run_id']}" + (" (reused)" if _rec["reference_reused"] else "")
               + (" | the pickle rebuilt from the store: identical" if not _d
                  else f" | {len(_d)} DIFFERENCES between the pickle and the store"), flush=True)
