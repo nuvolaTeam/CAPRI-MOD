@@ -463,7 +463,8 @@ class FertilisationBlock:
                 if nut_ == "N" or d_ is None:
                     continue
                 rg_ = dict(d_.get("regs") or {})
-                for g, (mx, racc, msh) in inner.limcres_caps(self.data.region_id, dict(base, per_ha=per_)).items():
+                for g, (mx, racc, msh) in inner.limcres_caps(self.data.region_id, dict(base, per_ha=per_),
+                                                               nutrient=nut_).items():
                     c1 = float(msh) * float(racc) + 1.0
                     rg_[(g, "CRES")] = (float(mx), c1, float(racc) + 2.0 - c1)
                 d_["regs"] = rg_

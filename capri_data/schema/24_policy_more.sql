@@ -96,12 +96,13 @@ INSERT INTO value_units VALUES
 -- file: capri_data/scenarios/greendeal_group/mineral_redu_limcres.csv
 CREATE TABLE pol_mineral_redu_limcres (
     capri_region VARCHAR NOT NULL,
-    ngrp VARCHAR NOT NULL,
+    ngrp VARCHAR,
+    fnut VARCHAR,
     add DOUBLE NOT NULL,
     after_year BIGINT NOT NULL,
-    PRIMARY KEY (capri_region, ngrp)
+    UNIQUE (capri_region, ngrp, fnut)
 );
-COMMENT ON TABLE pol_mineral_redu_limcres IS 'CAPRI''s exemptions in the crop-specific mineral fertiliser reduction (pol_input/greendeal/minfert_redu_by_crop.gms). (tools/build/build_mineral_redu_rules.py)';
+COMMENT ON TABLE pol_mineral_redu_limcres IS 'CAPRI''s relaxations of the limCres regulation in the crop-specific mineral fertiliser reduction (pol_input/greendeal/minfert_redu_by_crop.gms): for a group of every nutrient (fnut empty) or for a nutrient''s every group (ngrp empty). (tools/build/build_mineral_redu_rules.py)';
 INSERT INTO value_units VALUES
   ('pol_mineral_redu_limcres', 'add', NULL, 'open', 'mineral_redu_limcres.add: unit to be established'),
   ('pol_mineral_redu_limcres', 'after_year', NULL, 'open', 'mineral_redu_limcres.after_year: unit to be established');

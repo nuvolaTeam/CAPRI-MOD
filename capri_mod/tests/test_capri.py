@@ -458,6 +458,13 @@ def test_inner_fert_model_follows_capri():
     assert len(e30) == 9 and set(e30.capri_region) >= {"IT930000", "DE940000", "IT310000"}
     assert parse_mineral_redu("20crp") == ("crp", 0.2) and parse_mineral_redu("20") == ("uaa", 0.2)
     assert parse_mineral_redu("00") == (None, 0.0)
+    # limCres relaxations per group and per nutrient (minfert_redu_by_crop.gms, simy > 2025): ES300000's PULS +0.5 for
+    # every nutrient, and every group +0.5 for phosphate only (sameas(fnut,"PHOF"))
+    b_ = {"capri_region": "ES300000", "per_ha": {("PULS", "CRES"): 10.0, ("WHEA", "CRES"): 10.0}}
+    cN, cP = f.limcres_caps("ES300000", b_, 2030, "N"), f.limcres_caps("ES300000", b_, 2030, "P")
+    assert cN["PULS"][0] == pytest.approx(18.0) and cN["WHEA"][0] == pytest.approx(13.0)
+    assert cP["PULS"][0] == pytest.approx(23.0) and cP["WHEA"][0] == pytest.approx(18.0)
+    assert f.limcres_caps("ES300000", b_, 2025, "P")["WHEA"][0] == pytest.approx(13.0)
 
 
 def test_option_saving_term_as_capri():

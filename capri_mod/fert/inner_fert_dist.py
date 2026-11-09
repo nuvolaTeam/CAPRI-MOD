@@ -332,22 +332,34 @@ class InnerFertDist:
         return {g for (g, s_), v in base["per_ha"].items()
                 if s_ == "MINE" and v > 0 and (g in listed or v < SMALL_MINE_KG_HA)}
 
-    def limcres_caps(self, region: str, base: dict, year: Optional[int] = None) -> Dict[str, Tuple[float, float, float]]:
+    def limcres_caps(self, region: str, base: dict, year: Optional[int] = None,
+                     nutrient: str = "N") -> Dict[str, Tuple[float, float, float]]:
         """CAPRI's "limCres" regulation with the crop-specific reduction: residues to a group at most
         (1.3 + relaxation) x the baseline's per ha, mode at the baseline, accuracy 10 -> {group: (max, 10,
-        1 / (1.3 + relaxation))}."""
+        1 / (1.3 + relaxation))}. A relaxation row names a group (every nutrient) or a nutrient (every group: CAPRI's
+        sameas(fnut,"PHOF") for ES300000; until 9 November 2026 that row was not extracted); `nutrient` is the
+        block's N, P or K."""
         if year is None:                                   # the setting projection.sim_year
             from capri_mod.settings import current as _settings
             year = int(_settings().get("projection.sim_year"))
         _, lim = self._rules()
         r = base.get("capri_region") or self.capri_region(region)
-        add = {}
-        for t in lim[(lim.capri_region == r) & (lim.after_year < year)].itertuples(index=False):
-            add[t.ngrp] = add.get(t.ngrp, 0.0) + float(t.add)
+        fnut = {"N": "NITF", "P": "PHOF", "K": "POTF"}[nutrient]
+        _s = lambda v: "" if v is None or v != v else str(v)
+        rows = lim[(lim.capri_region == r) & (lim.after_year < year)]
+        add_g, add_all = {}, 0.0
+        for t in rows.itertuples(index=False):
+            g_, f_ = _s(t.ngrp), _s(getattr(t, "fnut", ""))
+            if f_ and f_ != fnut:
+                continue
+            if g_:
+                add_g[g_] = add_g.get(g_, 0.0) + float(t.add)
+            else:
+                add_all += float(t.add)
         out = {}
         for (g, s_), v in base["per_ha"].items():
             if s_ == "CRES" and v > 0:
-                f = LIMCRES_FACTOR + add.get(g, 0.0)
+                f = LIMCRES_FACTOR + add_g.get(g, 0.0) + add_all
                 out[g] = (v * f, 10.0, 1.0 / f)
         return out
 

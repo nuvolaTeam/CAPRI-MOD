@@ -226,12 +226,13 @@ INSERT INTO value_units VALUES
 -- file: capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_limCres.parquet
 CREATE TABLE src_minfert_redu_by_crop_limcres (
     capri_region VARCHAR NOT NULL,
-    ngrp VARCHAR NOT NULL,
+    ngrp VARCHAR,
+    fnut VARCHAR,
     add DOUBLE NOT NULL,
     after_year BIGINT NOT NULL,
-    PRIMARY KEY (capri_region, ngrp)
+    UNIQUE (capri_region, ngrp, fnut)
 );
-COMMENT ON TABLE src_minfert_redu_by_crop_limcres IS 'CAPRI''s relaxations of the limCres regulation (crop residues to a group at most 1.3 x baseline per ha) by +add for listed (ru, NGRP) in pol_input/greendeal/minfert_redu_by_crop.gms ($ife lines l. 281-356), each with its simulation-year condition ($ifthene %simy%>YYYY: after_year, strict), as tools/build/build_mineral_redu_rules.py parsed them (its parse moved unchanged to tools/build/convert_sources.py; numbers as the parse''s floats); read by tools/build/build_mineral_redu_rules.py.';
+COMMENT ON TABLE src_minfert_redu_by_crop_limcres IS 'CAPRI''s relaxations of the limCres regulation (crop residues to a group at most 1.3 x baseline per ha) by +add for listed (ru, NGRP) of every nutrient (fnut empty) or listed (ru, FNUT) of every group (ngrp empty: ES300000 PHOF, extracted since 9 November 2026) in pol_input/greendeal/minfert_redu_by_crop.gms ($ife lines l. 281-356), each with its simulation-year condition ($ifthene %simy%>YYYY: after_year, strict), as tools/build/build_mineral_redu_rules.py parsed them (its parse moved unchanged to tools/build/convert_sources.py; numbers as the parse''s floats); read by tools/build/build_mineral_redu_rules.py.';
 INSERT INTO value_units VALUES
   ('src_minfert_redu_by_crop_limcres', 'add', 'U_ratio', 'capri', 'added to the factor 1.3 of the baseline residues per ha'),
   ('src_minfert_redu_by_crop_limcres', 'after_year', NULL, 'open', 'a year (no unit)');

@@ -265,11 +265,19 @@ def parse_minfert(text: str):
         if m:
             (oth if m.group(1).lower().startswith("oth") else year).pop()
             continue
-        # limCres relaxations: $ife %simy%>YYYY  +.5 $ (sameas(ru,"X") $ sameas(ngrp,"Y"))
+        # limCres relaxations, for one group of every nutrient: $ife %simy%>YYYY  +.5 $ (sameas(ru,"X") $ sameas(ngrp,"Y"))
         m = re.match(r'\$ife\s+%simy%>(\d+)\s+\+\s*([0-9.]+)\s*\$\s*\(sameas\(ru,"([A-Z0-9]+)"\)\s*\$\s*sameas\(ngrp,"([A-Z]+)"\)\)',
                      line, re.I)
         if m:
-            lim.append(dict(capri_region=m.group(3), ngrp=m.group(4), add=float(m.group(2)), after_year=int(m.group(1))))
+            lim.append(dict(capri_region=m.group(3), ngrp=m.group(4), fnut="", add=float(m.group(2)),
+                            after_year=int(m.group(1))))
+            continue
+        # ... or for every group of one nutrient: $ife %simy%>YYYY  +.5 $ (sameas(ru,"X") $ sameas(fnut,"PHOF"))
+        m = re.match(r'\$ife\s+%simy%>(\d+)\s+\+\s*([0-9.]+)\s*\$\s*\(sameas\(ru,"([A-Z0-9]+)"\)\s*\$\s*sameas\(fnut,"([A-Z]+)"\)\)',
+                     line, re.I)
+        if m:
+            lim.append(dict(capri_region=m.group(3), ngrp="", fnut=m.group(4).upper(), add=float(m.group(2)),
+                            after_year=int(m.group(1))))
             continue
         if line.startswith("p_checkSmallMine(ru,NGRP)") or stmt:
             stmt += " " + line
