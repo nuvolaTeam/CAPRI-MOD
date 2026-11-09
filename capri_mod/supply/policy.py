@@ -69,8 +69,19 @@ class PolicyBlock:
             cs_ = self._catc_spec() if wc > 0 else None
             if cs_ is not None:
                 v0 -= wc * float(cs_["uaa"]) * float(cs_["m0"])
+            # CAPRI calibrates its catch crops so that the rule holds at the base (supply/prep_cal.gms l. 68-99): in
+            # its 2030 data the row binds to round-off in many regions. Where the model's base misses it by that
+            # round-off the row is held at the base (rhs = the base gap); where it misses it by more than
+            # supply.ecosetaside_hold_tol of the row's scale the base is not CAPRI's (REGISTERED where it acts, DEP-10):
+            # the hold is recorded (spec "held") and reported. None at the 2030 base (9 November 2026: 5 EU regions
+            # within 1e-7 thousand ha)
+            held = v0 > float(_settings().get("supply.ecosetaside_hold_tol")) * sc_
+            if held:
+                import warnings as _w
+                _w.warn(f"{self.data.region_id}: the ecological set-aside rule is held at the base, which misses it by "
+                        f"{v0:.4g} thousand ha (CAPRI's base meets it: supply/prep_cal.gms l. 68-99)")
             out["ecoSetAside"] = {"row": row, "rhs": max(0.0, v0) + 1e-9 * sc_, "scale": sc_, "base_gap": v0,
-                                  "catc_w": wc if cs_ is not None else 0.0}
+                                  "held": bool(held), "catc_w": wc if cs_ is not None else 0.0}
         if st.get(("active", "cropDiv")):
             grp = {}
             for j, a in enumerate(acts):

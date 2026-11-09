@@ -131,6 +131,10 @@ manure_pool_kappa_floor = 1e-3
 manure_pool_arc_ridge = 1e-3
 
 [supply]
+# the ecological set-aside rule where the base misses it: held at the base gap, reported as a departure when the gap
+# exceeds this share of the row's scale (CAPRI's base meets the rule, its catch crops calibrated to it; below it the
+# gap is round-off, as CAPRI's rows binding to 1e-14). capri_mod/supply/policy.py
+ecosetaside_hold_tol = 1e-6
 # PMP terms: "capri2030" (CAPRI's exported 2030 terms at 2030; CAPRI's recipe at its 2017 point at 2017) or "recipe"
 # (capri-mod's own with CAPRI's recipe); activities without a term are held at their level ("elasticity", the legacy
 # calibration from CAPRI's elasticities, removed 28 October 2026, audit S13)
