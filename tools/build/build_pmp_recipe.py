@@ -40,8 +40,8 @@ values (until 23 October 2026 the factor was left out, so CAPRI's elasticity cap
 the 0.84-0.88 ratios in the estimated crops); (c) costs + rent stand in
 for CAPRI's |linear objective contribution|.
 
-Output (CAPRI codes, the format of tools/build/build_pmp_2030.py): capri_data/sources/intermediate/baseline_pmp/recipe_<Y>_quad_techn.csv,
-recipe_<Y>_quad_pact.csv
+Output (CAPRI codes, the format of tools/build/build_pmp_2030.py): capri_data/sources/intermediate/baseline_pmp/recipe_<Y>_quad_techn.parquet,
+recipe_<Y>_quad_pact.parquet
 
     python tools/build/build_pmp_recipe.py --year 2030|2017
 """
@@ -420,10 +420,10 @@ def main() -> None:
                               ydat.get(_national_code(c), {}))
         tech += t_
         pact += p_
-    pd.DataFrame(tech, columns=["region", "activity", "tech1", "tech2", "value"]).to_csv(
-        SRC / f"recipe_{Y}_quad_techn.csv", index=False)
-    pd.DataFrame(pact, columns=["region", "group1", "group2", "value"]).to_csv(
-        SRC / f"recipe_{Y}_quad_pact.csv", index=False)
+    write_source(pd.DataFrame(tech, columns=["region", "activity", "tech1", "tech2", "value"]),
+                 SRC / f"recipe_{Y}_quad_techn.parquet", index=False)
+    write_source(pd.DataFrame(pact, columns=["region", "group1", "group2", "value"]),
+                 SRC / f"recipe_{Y}_quad_pact.parquet", index=False)
     print(f"recipe {Y}: {len(tech)} technology terms, {len(pact)} group terms, {len({r[0] for r in tech})} CAPRI regions")
 
 
