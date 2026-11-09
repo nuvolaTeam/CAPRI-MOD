@@ -140,6 +140,7 @@ class RegionalEvalState(_Slots):
         "greendeal_inputs",   # the Green Deal's input reductions of this solve
         "greendeal_crop_delta",   # {crop: (plant protection, other inputs)} cost changes of this solve, EUR/ha
         "organic_conv",       # the organic conversion shares by crop
+        "organic_group_target",  # CAPRI's organic target per fertiliser crop group (p_organicAreaTargetCrops)
         "yield_price_factor", # the yields' price factors
     )
 

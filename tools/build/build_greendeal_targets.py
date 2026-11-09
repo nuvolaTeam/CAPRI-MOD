@@ -6,6 +6,11 @@
     organic_targets_ms.csv    member_state, arable_pp, grassland_pp, permanent_pp, uaa_pp
         p_organicTargetMS(MS, ARA / J0000 / PECR) of organic_targets.gdx (arable land, grassland, permanent crops) and
         p_organicTargetUAA(MS) of organic_targets_uaa.gdx, percentage points (load_organic_targets.gms)
+    organic_ngrp_class.csv    ngrp, target
+        the class of CAPRI's organic targets each fertiliser crop group (NGRP) takes in the mineral-N caps of the
+        organic area target (organic_minfert_redu.gms 'region_and_crop'): crops_to_ngrp of load_organic_targets.gms
+        (ARA -> arable_pp, J0000 -> grassland_pp with NMINREST off: GRAS, PECR -> permanent_pp) and VEGE at the UAA
+        target (uaa_pp; l. 186: "the org_cropar domain does not have vegetables")
 
 Rows: the member states (NUTS-0 codes, as CAPRI's files key them) of any of the three symbols, sorted; a member state
 a symbol does not carry has an empty cell (CAPRI sets no target there: landscape CY, ES, FI; organic by land type PT).
@@ -17,6 +22,7 @@ GDX's doubles.
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -58,6 +64,22 @@ def main() -> None:
     for m, v in uaa.items():
         ot.at[m, "uaa_pp"] = v
     ot.to_csv(OUT / "organic_targets_ms.csv")
+    # the crop groups' classes: CAPRI's crops_to_ngrp set (NMINREST off: J0000 . GRAS)
+    txt = (gd / "load_organic_targets.gms").read_text(errors="ignore")
+    blk = re.search(r"set crops_to_ngrp\(EUROSTAT_crops, NGRP\)[^/]*/(.*?)/;", txt, re.S | re.I).group(1)
+    blk = "\n".join(l for l in blk.splitlines() if not l.lstrip().startswith("*")
+                    and not re.match(r"\s*\$if\s+%NMINREST%\s*==\s*on", l, re.I))
+    blk = re.sub(r"\$if\s+not\s+%NMINREST%\s*==\s*on", "", blk, flags=re.I)
+    rows = []
+    for cls, body in re.findall(r"(ARA|J0000|PECR)\s*\.\s*(\([^)]*\)|\w+)", blk):
+        for g in re.findall(r"\w+", body):
+            rows.append((g.upper(), ORGANIC_COLS[cls]))
+    rows.append(("VEGE", "uaa_pp"))
+    ng = pd.DataFrame(rows, columns=["ngrp", "target"]).drop_duplicates()
+    if ng.ngrp.duplicated().any():
+        raise SystemExit(f"a crop group in two classes: {sorted(ng.ngrp[ng.ngrp.duplicated()])}")
+    ng.sort_values("ngrp").to_csv(OUT / "organic_ngrp_class.csv", index=False)
+    print(f"organic_ngrp_class.csv: {len(ng)} crop groups")
     print(f"landscape_targets_ms.csv: {lt.landscape_pp.notna().sum()} of {len(ms)} member states; "
           f"organic_targets_ms.csv: {ot.notna().all(axis=1).sum()} complete rows")
 

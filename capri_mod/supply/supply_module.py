@@ -271,6 +271,8 @@ class RegionData:
     #: grassland and permanent-crop area).
     landscape_target_pp: Optional[float] = None
     organic_targets_pp: Optional[pd.Series] = None
+    #: {CAPRI crop group (NGRP): its organic target class} (organic_ngrp_class.csv)
+    organic_ngrp_class: Optional[dict] = None
 
 
 @dataclass
@@ -1428,6 +1430,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         self.ev.nbal_price = float(n_balance_price or 0.0)
         self.ev.n_intensity = {}
         self.ev.organic_conv = {}
+        self.ev.organic_group_target = {}
         self.res.land_solution = None              # set by this solve when the land market is used
         self.res.n_target_relaxed = False
         self.res.last_cattle_z = {}
@@ -2241,6 +2244,8 @@ class SupplyModule(ModuleStateMixin):
             landscape_target_pp=_ms_value(d.get("landscape_targets_ms"), region,
                                           "landscape_pp"),
             organic_targets_pp=_ms_row(d.get("organic_targets_ms"), region),
+            organic_ngrp_class=(dict(zip(d["organic_ngrp_class"].index, d["organic_ngrp_class"].target))
+                                if d.get("organic_ngrp_class") is not None else None),
             livestock_revenue_coef=(
                 d["livestock_revenue_coef"].loc[region]
                 if d.get("livestock_revenue_coef") is not None

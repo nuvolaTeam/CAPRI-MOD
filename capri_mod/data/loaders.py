@@ -98,6 +98,7 @@ _SHARED_FILES: dict = {}
 #: reference's baseline surplus beside its trajectory (capri_data/scenarios/)
 _SCENARIO_FILES = {"landscape_targets_ms.csv": "scenarios/greendeal_group",
                    "organic_targets_ms.csv": "scenarios/greendeal_group",
+                   "organic_ngrp_class.csv": "scenarios/greendeal_group",
                    "mineral_redu_exemptions.csv": "scenarios/greendeal_group",
                    "mineral_redu_limcres.csv": "scenarios/greendeal_group",
                    "capri_baseline_surplus_2030.csv": "scenarios/capri_ref_2030"}
@@ -699,6 +700,10 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
             data_dir, "landscape_targets_ms.csv"),
         "organic_targets_ms": _load_optional_csv(
             data_dir, "organic_targets_ms.csv"),
+        # the class of CAPRI's organic targets each fertiliser crop group takes (load_organic_targets.gms
+        # crops_to_ngrp; tools/build/build_greendeal_targets.py)
+        "organic_ngrp_class": _load_optional_csv(
+            data_dir, "organic_ngrp_class.csv"),
         # MITERRA housing days (HD) and share of the grazing time spent in the stable (Et, %) of dairy cows per member
         # state (CAPRI p_rcEmissions(RU,"DAICOW_L",...), abatement/ammonia/RCEmissions.csv): the activity term of the
         # dairy cow's energy requirement (envind/breeding.gms l. 188-191)

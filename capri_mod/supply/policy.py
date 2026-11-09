@@ -497,6 +497,19 @@ class PolicyBlock:
         nr = self.net_revenues.copy()
         converted_default = max(0.0, float(share) - self._organic_baseline())
         _org = getattr(self.data, "organic_targets_pp", None)
+        # CAPRI's target per fertiliser crop group (p_organicAreaTargetCrops(ru, ngrp), load_organic_targets.gms
+        # l. 160-188), for the mineral-N caps of organic_minfert_redu.gms 'region_and_crop': the class of the group
+        # (crops_to_ngrp: arable land, grassland, permanent crops; VEGE the UAA target) at the member state's target
+        # scaled to the ambition; 0 where CAPRI's files give the member state none. Without CAPRI's targets (outside
+        # the EU) none is set and the cap falls back to the crops' conversion (fertilisation._npk_organic_cap)
+        self.ev.organic_group_target = {}
+        _cls = getattr(self.data, "organic_ngrp_class", None)
+        if _org is not None and hasattr(_org, "get") and _cls:
+            _sc = self._organic_target_scale(share)
+            for g_, col_ in _cls.items():
+                v_ = _org.get(col_)
+                self.ev.organic_group_target[g_] = (0.0 if v_ is None or pd.isna(v_)
+                                                    else max(0.0, min(1.0, float(v_) / 100.0 * _sc)))
         for a in self.acts:
             converted = self._organic_converted(a, share, _org, converted_default)
             if a not in CROPS:

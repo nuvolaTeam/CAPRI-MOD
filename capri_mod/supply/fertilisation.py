@@ -390,9 +390,13 @@ class FertilisationBlock:
                 v = float(base["per_ha"].get((g, "MINE"), 0.0))
                 if v <= 0:
                     continue
-                w = sum(sh * xb[j] for j, sh in g_["crops"])
-                share_conv = 1.0 - (sum(sh * xb[j] * float(conv.get(acts[j], 1.0)) for j, sh in g_["crops"]) / w
-                                    if w > 0 else 1.0)
+                gt = getattr(self.ev, "organic_group_target", None) or {}
+                if g in gt:                       # CAPRI's target of the group (p_organicAreaTargetCrops(ru, ngrp))
+                    share_conv = float(gt[g])
+                else:                             # no CAPRI target for the region: its crops' conversion
+                    w = sum(sh * xb[j] for j, sh in g_["crops"])
+                    share_conv = 1.0 - (sum(sh * xb[j] * float(conv.get(acts[j], 1.0)) for j, sh in g_["crops"]) / w
+                                        if w > 0 else 1.0)
                 mx = v if v < param("ORGANIC_SMALL_MINE_KG_HA") else v * (1.0 - max(share_conv, 0.0))
                 regs[(g, "MINE")] = (mx, b1, b2)
             out["N"] = regs

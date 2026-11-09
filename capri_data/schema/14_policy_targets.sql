@@ -24,6 +24,13 @@ INSERT INTO value_units VALUES
   ('organic_targets_ms', 'permanent_pp', 'U_percent', 'capri', 'p_organicTargetMS(MS, PECR)'),
   ('organic_targets_ms', 'uaa_pp', 'U_percent', 'capri', 'p_organicTargetUAA(MS)');
 
+-- file: capri_data/scenarios/greendeal_group/organic_ngrp_class.csv
+CREATE TABLE organic_ngrp_class (
+    ngrp VARCHAR NOT NULL PRIMARY KEY,
+    target VARCHAR NOT NULL CHECK (target IN ('arable_pp', 'grassland_pp', 'permanent_pp', 'uaa_pp'))
+);
+COMMENT ON TABLE organic_ngrp_class IS 'The class of CAPRI''s organic targets (a column of organic_targets_ms) each fertiliser crop group takes in the mineral-N caps of the organic area target: CAPRI''s crops_to_ngrp (pol_input/greendeal/load_organic_targets.gms, NMINREST off) and VEGE at the UAA target (l. 186); tools/build/build_greendeal_targets.py';
+
 -- file: capri_data/2017/policy/organic_yield_gap.csv
 CREATE TABLE organic_yield_gap (
     peseta_region VARCHAR PRIMARY KEY CHECK (peseta_region IN ('CEN', 'CES', 'NE', 'SE', 'UK_IR')),
