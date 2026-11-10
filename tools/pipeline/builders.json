@@ -6022,6 +6022,23 @@
    ]
   },
   {
+   "task": "extract_capri_gd_pair",
+   "builder": "extract_capri_gd_pair",
+   "args": [],
+   "inputs": [],
+   "code": [
+    "tools/build/extract_capri_gd_pair.py",
+    "tools/build/extract_capri_vcs_pair.py"
+   ],
+   "external": [
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.gdx",
+    "$EXPORTS/res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx"
+   ],
+   "outputs": [
+    "capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz"
+   ]
+  },
+  {
    "task": "extract_gd2030_nbalance",
    "builder": "extract_gd2030_nbalance",
    "args": [],

@@ -66,6 +66,9 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     # before its readers (build_cover_crops, build_histosol, build_price_trajectory_2030, ...): a chain rebuild runs
     # the list in order
     ("extract_capri_marginal_terms", [str(REF), "ref"], [REF]),
+    # CAPRI's Green Deal 2030 step and its reference, as GDX from the project lead's installation (10 November 2026)
+    ("extract_capri_gd_pair", [], [EXPORTS / "res_2_1730greendeal_refdefaulta.gdx",
+                                   EXPORTS / "res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx"]),
     ("build_regional_units", [], []),
     ("build_code_lists", ["--sets", str(SETS)], [SETS]),
     ("build_unit_catalogue", ["--gms", str(GAMS / "CAPRIunits.gms")], [GAMS / "CAPRIunits.gms"]),

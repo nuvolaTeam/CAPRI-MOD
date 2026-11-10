@@ -32,6 +32,17 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 10 November 2026: CAPRI's Green Deal 2030 step as a validation pair
+
+- Data: capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz (tools/build/extract_capri_gd_pair.py): CAPRI's
+  2030 Green Deal step (lnds8 org18 pest20 mine13crp surp30) against the Green Deal reference, levels and % changes as
+  the coupled-support pair keeps them (supply LEVL, PRME by EU27, member state and NUTS 2; PROD, YILD and the market
+  items by EU27 and member state); from the project lead's runs of 10 November 2026 (docs/EXTERNAL_SOURCES.md).
+- Checks: the run pair's reference equals the shipped baseline the model is calibrated to in every record of the
+  member states and EU27 in 2030 (891,502, to the dump's 15 digits). CAPRI's EU27 effect: soft wheat -1.9%, durum
+  -15.3%, maize -10.0%, extensive grassland +51.8%, intensive -54.8%, fallow +90.9%, suckler cows -28.8%, pigs
+  -9.2%; producer prices of cereals +9 to +17%, beef +20.1%, milk +11.2%.
+
 ## 10 November 2026: data layout step (b), the year folders
 
 - Data: `capri_data/shared/` is `capri_data/codes/` (the code lists; the inputs' where-key "shared" is "codes");
