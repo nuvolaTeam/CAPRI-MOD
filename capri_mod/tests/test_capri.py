@@ -4797,3 +4797,39 @@ def test_noneu_land_market_is_capris(data):
                 dem += t.h_ratio * 0.1
         sup = lm.avail_kha.iloc[0] * np.exp(z[u]) / tot
         assert abs(sup - dem) < 1e-8 * lm.at[u, "land_kha"], (u, sup, dem)
+
+
+@pytest.mark.slow
+def test_hessian_shocks_reach_the_rations_feed_prices(model, monkeypatch):
+    """The market supply Hessian's price shocks reach the feeding block inside the regional models: each shock sets the
+    rations' feed prices (seen.feed_prices) from its feed bulk price ratios, as the outer loop does
+    (CAPRIModel._update_rations). Until 10 November 2026 a shock set only the bulk ratios, so the feed was bought at
+    the base prices in every shock: in DE11 a cereal bulk 10% dearer moved no feed and no herd, against -9.9% of
+    cereal feed with the prices set (own response -0.99; CAPRI's EU market Hessian about -0.97)."""
+    from capri_mod.coupling import hessian as H
+    from capri_mod.feed.ration import feed_prices_by_region
+    R, MS = "DE110000", "DE000000"
+    # a key no cached Hessian has: the measurement runs
+    monkeypatch.setattr(H, "supply_code_fingerprint", lambda: "test-feed-prices-in-shocks")
+    sm = model.supply_module
+    seen, run0 = [], sm.run
+
+    class _Enough(Exception):
+        pass
+
+    def run(*a, **k):
+        if getattr(sm.seen, "hess_probe", None) is not None or seen:
+            fb = dict(sm.seen.feed_bulk_ratio or {})
+            seen.append((fb, (sm.seen.feed_prices or {}).get(R)))
+            if len(seen) > 1 and fb.get((MS, "FCER")) != seen[0][0].get((MS, "FCER")):
+                raise _Enough()
+        return run0(*a, **k)
+    monkeypatch.setattr(sm, "run", run)
+    with pytest.warns(RuntimeWarning, match="market supply Hessian not built"):
+        model.run(scenario="BASELINE", regions=[R], max_outer_iter=1)
+    assert len(seen) > 1, "no shock of the cereal bulk was solved"
+    (fb_base, fp_base), (fb, fp) = seen[0], seen[-1]
+    want = feed_prices_by_region(model.par.ration_model, fb)[R]
+    assert set(fp) == set(want)
+    assert all(np.allclose(np.asarray(fp[a], float), np.asarray(want[a], float), rtol=0, atol=0) for a in want)
+    assert any(not np.allclose(np.asarray(fp[a], float), np.asarray(fp_base[a], float)) for a in want)

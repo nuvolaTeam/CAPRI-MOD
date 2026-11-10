@@ -198,6 +198,13 @@ class HessianBlock:
         import copy as _cp
         t0 = _t.time()
         fb0 = getattr(sm.seen, "feed_bulk_ratio", None)
+        # the rations' feed prices inside the regional models (seen.feed_prices, CAPRIModel._update_rations: the member
+        # states' bulk price ratios on the feeds' base prices). Each shock sets them from its bulk ratios as the outer
+        # loop does; until 10 November 2026 only the bulk ratios were set, so the feeding block bought its feed at the
+        # base state's prices in every shock and the feed bulks' own price response (FEEDBLK rows) and the animals'
+        # response to feed prices were missing from the Hessian
+        fp0 = getattr(sm.seen, "feed_prices", None)
+        rm_h = getattr(self.par, "ration_model", None) if fp0 is not None else None
         rows = []
         # every shock starts from the baseline's solution, and the models leave as they came: the regional NLPs' warm
         # starts and path state (_nlp_*) and the N-price loop's state are restored before each shock and after the
@@ -255,6 +262,7 @@ class HessianBlock:
             # does not reach contributes exactly 0 (before, the re-solve's departure from the baseline's own solution,
             # up to 0.04 kt in r161, entered every column)
             sm.seen.feed_bulk_ratio = fb0 if fb0 is not None else self.feed_bulk_price_ratios(sig0)
+            sm.seen.feed_prices = fp0
             _restore(_snap0)
             sm.res.hess_fp, sm.res.hess_verify = {}, {}
             sm.seen.hess_probe = "record"
@@ -304,6 +312,9 @@ class HessianBlock:
                     sm.seen.yani_price_ratio, sm.seen.yani_price_ratio_ms, sm.seen.yani_price_ratio_m = yr0
                     dr_ms = {}
                 sm.seen.feed_bulk_ratio = self.feed_bulk_price_ratios(sig)
+                if rm_h is not None:
+                    from capri_mod.feed.ration import feed_prices_by_region as _fpr
+                    sm.seen.feed_prices = _fpr(rm_h, sm.seen.feed_bulk_ratio)
                 _restore(_snap0)
                 if skip:
                     sm.seen.hess_probe, sm.seen.hess_shock = ("verify" if verify else "compare"), y
@@ -336,6 +347,7 @@ class HessianBlock:
         # back to the base: the regional models' warm starts and states as the baseline left them
         sm.seen.yani_price_ratio, sm.seen.yani_price_ratio_ms, sm.seen.yani_price_ratio_m = yr0
         sm.seen.feed_bulk_ratio = fb0 if fb0 is not None else self.feed_bulk_price_ratios(sig0)
+        sm.seen.feed_prices = fp0
         _restore(_snap0)
         if skip:
             dev = float((q_ref - q0).abs().max().max())          # the base re-solved first

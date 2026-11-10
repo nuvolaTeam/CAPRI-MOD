@@ -32,6 +32,24 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 10 November 2026 (night): the market supply Hessian's shocks reach the rations' feed prices
+
+Found while diagnosing the Green Deal price gap with CAPRI: the market's feed bulks responded to their own price with
++0.15 (the model's market supply Hessian, FEEDBLK rows) against CAPRI's about -0.97 (p_hessNQSupp of CAPRI's Green Deal
+run). Each price shock of the Hessian (coupling/hessian.py) set the member states' feed bulk price ratios but not the
+feed prices of the rations inside the regional models (seen.feed_prices, set by CAPRIModel._update_rations in the outer
+loop), so in every shock the feeding block bought its feed at the base state's prices. DE11, cereal bulk +10%: no feed
+and no herd moved as the Hessian measured; with the prices set, cereal feed -9.9% (own response -0.99) and herds -1 to
+-7%. Each shock now sets the feed prices from its bulk ratios, as the outer loop does; the base re-solve and the end
+restore the base state's. Test: test_capri.py test_hessian_shocks_reach_the_rations_feed_prices (fails before the fix).
+
+Effect, mini-EU Green Deal 2030 (20 units, greendeal2030; before: dev 10eea8e): the Hessian has 48 columns with a
+response (35 before); the scenario converges in 21 iterations as before; EU prices move by at most 0.1 point (cereals
++0.8 -> +0.7), cereal production -9.5% -> -8.5%, oilseeds -11.3% -> -10.6%, herds and emissions by 0.4 point or less.
+So the fix is not the cause of the price gap with CAPRI (prices about 0.6 of CAPRI's): at a converged state the result
+depends little on the Hessian, which shapes the path to it. Tested: this test and the Hessian-related tests; the full
+suite was not rerun.
+
 ## 10 November 2026: CAPRI's Green Deal 2030 step as a validation pair
 
 - Data: capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz (tools/build/extract_capri_gd_pair.py): CAPRI's
