@@ -67,7 +67,8 @@ def scaled(dgagri):  # noqa: F811
     yr = pd.to_numeric(pdata.t, errors="coerce")
     pdata = pdata[~((pdata.col == "INHA") & (pdata.row == "LEVL") & (yr > 2018))]
     resy = [int(y) for y in EXANTE]
-    T = TS.build(1984, 2070, resy, 2017, 2030, uaar_years_any=range(1984, 2019), uaar_years_all=range(1995, 2019),
+    T = TS.build(1984, 2070, resy, 2017, TS.lst_dgagri_for("aglink2023dgAgri"), uaar_years_any=range(1984, 2019),
+                 uaar_years_all=range(1995, 2019),
                  expostt_extra=[2019])
     rto = pd.read_csv(G / "R_T_OAGG.csv", keep_default_na=False, dtype=str)
     return S.scale(pdata, dgagri, ms=s.ms, ragg=["EU014000", "EU013000"], top=["EU27yr19"], west=["EU014000"],

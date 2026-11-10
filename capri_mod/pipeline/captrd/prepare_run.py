@@ -57,12 +57,12 @@ def run(countries: Iterable[str], sets: P.CaptrdSets, base_year: int, first_year
 
     last_year: the last year of the data (CAPREG's and COCO's); resy, lst_dgagri, aglink, milk_quota_expiry: the run's
     simulation years, %lst_dgagri%, %Aglink% and %mlkQutExpiry% (default: the settings captrd.simulation_years,
-    lst_dgagri, aglink, milk_quota_expiry, the reference run results_1770's)."""
+    aglink, milk_quota_expiry, the reference run results_1770's; %lst_dgagri% from %Aglink%, captrd.gms l. 246-249)."""
     from capri_mod.settings import current as _settings
     st = _settings()
     resy = tuple(st.get("captrd.simulation_years")) if resy is None else tuple(resy)
-    lst_dgagri = int(st.get("captrd.lst_dgagri")) if lst_dgagri is None else lst_dgagri
     aglink = str(st.get("captrd.aglink")) if aglink is None else aglink
+    lst_dgagri = TS.lst_dgagri_for(aglink) if lst_dgagri is None else lst_dgagri
     milk_quota_expiry = int(st.get("captrd.milk_quota_expiry")) if milk_quota_expiry is None else milk_quota_expiry
     work.mkdir(parents=True, exist_ok=True)
     dat = P.read_dat() if dat is None else dat

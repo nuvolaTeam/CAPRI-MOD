@@ -4256,6 +4256,71 @@
     "builder": "build_captrd_dat"
    }
   },
+  "capri_data/pipeline/captrd/dat/dairy_ms_agri_to_ms.csv": {
+   "description": "CAPRI's set ms_agri_TO_MS(ms_agri, MS): DG AGRI's country codes to CAPRI's member states, from dat/baseline/dairy_targets_agri.gms; 28 pairs (tools/build/build_captrd_dairy.py).",
+   "kind": "structure",
+   "rows": 28,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_dairy (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/dat/dairy_p_cowmilkprod.csv": {
+   "description": "CAPRI's p_cowMilkProd(ms_agri, year): cow milk production, historical and forecast (DG AGRI's 2015 market outlook), from dat/baseline/dairy_targets_agri.gms (included at expert_support.gms l. 370); 28 countries x 1990-2025, 1,008 rows (tools/build/build_captrd_dairy.py).",
+   "kind": "coefficients",
+   "rows": 1008,
+   "columns": 3,
+   "units": "U_1000t",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_dairy (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/dat/dairy_p_dairycowyield.csv": {
+   "description": "CAPRI's p_dairyCowYield(ms_agri, year): milk yield of dairy cows, historical and forecast, from dat/baseline/dairy_targets_agri.gms (Poland's recomputed from production and cows in expert_support.gms l. 416); 1,008 rows (tools/build/build_captrd_dairy.py).",
+   "kind": "coefficients",
+   "rows": 1008,
+   "columns": 3,
+   "units": "U_kgperhd",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_dairy (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/dat/dairy_p_dcowmilkprod.csv": {
+   "description": "CAPRI's p_DcowMilkProd(ms_agri, year): dairy cow milk production, historical and forecast, from dat/baseline/dairy_targets_agri.gms; not used by expert_support.gms (it uses p_cowMilkProd to avoid a break in the Polish series, l. 396), kept with the file's other tables; 1,008 rows (tools/build/build_captrd_dairy.py).",
+   "kind": "coefficients",
+   "rows": 1008,
+   "columns": 3,
+   "units": "U_1000t",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_dairy (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/dat/dairy_p_milkdeliveries.csv": {
+   "description": "CAPRI's p_milkDeliveries(ms_agri, year): milk delivered to dairies, historical and forecast, from dat/baseline/dairy_targets_agri.gms (its description repeats p_DcowMilkProd's); 1,008 rows (tools/build/build_captrd_dairy.py).",
+   "kind": "coefficients",
+   "rows": 1008,
+   "columns": 3,
+   "units": "U_1000t",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_dairy (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/dat/dairy_p_nrcows.csv": {
+   "description": "CAPRI's p_nrCows(ms_agri, year): number of dairy cows, historical and forecast, from dat/baseline/dairy_targets_agri.gms; 1,008 rows (tools/build/build_captrd_dairy.py).",
+   "kind": "coefficients",
+   "rows": 1008,
+   "columns": 3,
+   "units": "U_1000hd",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_dairy (not in the trace yet)"
+   }
+  },
   "capri_data/pipeline/captrd/dat/p_byproduct.csv": {
    "description": "CAPRI's p_ByProduct(byproduct, stock): by-product (DDGS, GLYC) per ton of feedstock converted to biofuel, from dat/biofuel/biofuel_technology_params.gms (as CSV: capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_ByProduct.parquet, tools/build/convert_sources.py), which captrd.gms l. 340-341 includes; 14 rows (tools/build/build_captrd_dat.py).",
    "kind": "coefficients",
@@ -4354,6 +4419,17 @@
    "origin": {
     "nature": "capri",
     "builder": "build_captrd_dat"
+   }
+  },
+  "capri_data/pipeline/captrd/dat/p_recentmlkyld.csv": {
+   "description": "CAPRI's p_recentMlkYld(region, year): recent milk yields GROF.CMLK/DCOW.SUR4 by year and, under year Y, their annual change 2014/15-2019/20 (the parameter's description), from dat/baseline/recent_mlk_yld.gdx (read at expert_support.gms l. 474; converted to Parquet by tools/build/convert_capri_gdx.py); 352 rows (tools/build/build_captrd_dairy.py).",
+   "kind": "coefficients",
+   "rows": 352,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_dairy (not in the trace yet)"
    }
   },
   "capri_data/pipeline/captrd/dat/p_smallprodshare.csv": {

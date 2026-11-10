@@ -65,6 +65,13 @@ EXTERNAL_ORIGIN = "CAPRI"
 #: builder, origins (from the builder's docstring); a retrace moves them into builders.json
 UNTRACED = {
     "capri_data/pipeline/captrd/sets/": ("build_captrd_sets", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/dairy_ms_agri_to_ms.csv": ("build_captrd_dairy", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/dairy_p_cowmilkprod.csv": ("build_captrd_dairy", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/dairy_p_dairycowyield.csv": ("build_captrd_dairy", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/dairy_p_dcowmilkprod.csv": ("build_captrd_dairy", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/dairy_p_milkdeliveries.csv": ("build_captrd_dairy", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/dairy_p_nrcows.csv": ("build_captrd_dairy", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/p_recentmlkyld.csv": ("build_captrd_dairy", "CAPRI"),
     "capri_data/validation/eu_outlook_2020_2030.csv": ("build_eu_outlook_2030", "EC"),
     "capri_data/validation/n_cascade_capri_gd2030.csv": ("build_n_cascade_validation", "CAPRI"),
     "capri_data/codes/capri/COLS.csv": ("build_code_lists", "CAPRI"),

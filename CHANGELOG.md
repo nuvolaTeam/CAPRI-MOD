@@ -32,6 +32,22 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — CAPTRD-MOD stage 2d: DG AGRI's dairy data
+
+- `capri_mod/pipeline/captrd/dairy_supports.py`: CAPTRD's expert supports from DG AGRI's dairy data
+  (captrd/expert_support.gms l. 365-760: the 2015-2020 values from DG AGRI's tables, the growth rates with the yield
+  shift, the recent yield growth and Aglink's correction, the dampened logistic extrapolation with p_maxmin, the
+  derived milk positions, the trust levels, the share of direct sales) and HCOM.COMI from that share
+  (define_stats_and_supports.gms l. 510-519). Inputs as CSV: `tools/build/build_captrd_dairy.py` (dairy_targets_agri.gms,
+  recent_mlk_yld.gdx), declared in `capri_data/schema/37_captrd_dairy.sql`.
+- Parity (test_captrd_dairy_supports.py): every comparable record equal to CAPTRD's results_1770 (values and trust
+  levels); the records later sources rewrite (2020: agriprod_supports.gms; eight countries: national_supports.gms) are
+  left to those stages.
+- Fixed: the setting `captrd.lst_dgagri` (2030) contradicted CAPTRD, which sets %lst_dgagri% to 2040 for
+  aglink2022/2023/2024dgAgri (captrd.gms l. 246-249); it is now derived from `captrd.aglink`
+  (`timesets.lst_dgagri_for`). The time sets of the reference run are the same either way; the dairy growth rates
+  needed it.
+
 ## 10 November 2026 (night): CAPTRD-MOD stage 2d, expert_support.gms's own rules
 
 - capri_mod/pipeline/captrd/expert_rules.py: fresh milk net trade, sugar and beet prices and balance positions, the
