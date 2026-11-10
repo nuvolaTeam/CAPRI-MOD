@@ -32,6 +32,29 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 10 November 2026 (night): CAPTRD-MOD, the Aglink-COSIMO stage and the requirement functions in the chain
+
+- CAPTRD's Aglink-COSIMO load (baseline/load_aglink2023dgAgri.gms: the DG AGRI outlook mapped to CAPRI's positions for
+  the EU27, its two parts, the UK, Norway, the Western Balkans and Turkey) ported: capri_mod/pipeline/captrd/aglink.py,
+  with CAPTRD's p_data at that point (CAPREG's years and base-year values) as input. Against CAPTRD's own DGAgri
+  (results_1770): every record present in both equal; 123,133 compared once the writes of CAPTRD's later stages are left
+  out, each with its line (aggreg_and_report.gms, scale_DG_AGRI_baseline.gms; one, HCOM.LEVL, attributed but not
+  traced). Not ported: the detailed macro data of l. 899-1058 (an output for CAPMOD and the long-run supports).
+  Test: capri_mod/pipeline/tests/test_captrd_aglink.py.
+- Its sets: tools/lib/gams_sets.py reads GAMS set definitions (data lists, tuples, ranges, set.NAME, aliases,
+  $include, $setglobal, $if) from CAPRI's own files; tools/build/build_captrd_aglink_sets.py reads the Aglink files with
+  it and transcribes the few set assignments with their line numbers (capri_data/pipeline/captrd/sets/aglink2023dgAgri,
+  100 sets). CAPRI's fuel densities and oil equivalents (p_density, p_oilEqu) are sources now
+  (tools/build/convert_sources.py).
+- The animal requirement functions (requirements.py) run in prepare_run after the statistics (captrd.gms l. 944);
+  Denmark's chained energy and protein Const and Slope equal CAPTRD's (test_captrd_prepare.py).
+- CAPREG's base-year file of Spain from the CAPRI GUI's CSV export (build_capreg_base_reference.py reads the
+  export; it equals the text dump in all records of Denmark).
+- Fixed: the results store's digest of a run in batches (io_results.rows_digest_batches, tools/run/verify_ids.py)
+  ran the Unix sort program (since 225d08d's successor d2e6d06), against the rule that no file runs a Unix tool
+  (test_portable_paths); it sorts in chunks and merges in Python now (the same digest: checked equal to the sorted
+  lines' and on the published store's 10 runs).
+
 ## 10 November 2026 (night): the market supply Hessian's shocks reach the rations' feed prices
 
 Found while diagnosing the Green Deal price gap with CAPRI: the market's feed bulks responded to their own price with

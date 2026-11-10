@@ -1,0 +1,45 @@
+file,line,statement,handled
+mainsets_MTO2023.gms,2119,AGLCOSnoEUNC(AGLCOSallC)=YES,transcribed
+mainsets_MTO2023.gms,2120,"AGLCOSnoEUNC(""EUN"")=NO",transcribed
+aglink2023dgAgri_sets.gms,190,"agEUreg(""EUN"") = yes",transcribed
+aglink2023dgAgri_sets.gms,191,"agEUreg(CCC) $ regions_map(""EUN"",CCC) = yes",transcribed
+aglink2023dgAgri_sets.gms,195,"agEUparts(CCC) $ regions_map(""EUN"",CCC) = yes",transcribed
+aglink2023dgAgri_sets.gms,198,agEurop(agEUreg) = yes,transcribed
+aglink2023dgAgri_sets.gms,199,agEurop('TUR') = yes,transcribed
+aglink2023dgAgri_sets.gms,200,agEurop('GBR') = yes,transcribed
+aglink2023dgAgri_sets.gms,201,agEurop('NOR') = yes,transcribed
+aglink2023dgAgri_sets.gms,202,agEurop('EUE') = yes,transcribed
+aglink2023dgAgri_sets.gms,397,"aglinkCols_no_agBalPos(mmm) $ (not sum(sameas(agBalPos,mmm),1))=yes","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+aglink2023dgAgri_sets.gms,398,"if(sum(aglinkCols_no_agBalPos $ measures_map(""MBAL"",aglinkCols_no_agBalPos),1), abort ""set error in %system.fn% %system.incline%""","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+aglink2023dgAgri_sets.gms,400,),"check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+aglink2023dgAgri_sets.gms,402,"chkset1(ag_biovar) $ (not sum(sameas(ag_biovar,aglinkCols),1))=yes","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+aglink2023dgAgri_sets.gms,403,display chkset1,"check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+aglink2023dgAgri_sets.gms,432,agColsSummable('FO..SHR') = no,transcribed
+aglink2023dgAgri_sets.gms,433,agColsSummable(agcolsFrm) = yes,transcribed
+aglink2023dgAgri_sets.gms,434,agColsSummable('YLD') = no,transcribed
+aglink2023dgAgri_sets.gms,435,agColsSummable('POP') = yes,transcribed
+aglink2023dgAgri_sets.gms,436,agColsSummable(agBioVar) = yes,transcribed
+aglink2023dgAgri_sets.gms,437,agColsSummable('BF..BD..CONV') = no,transcribed
+aglink2023dgAgri_sets.gms,439,agColsSummable('BF..ET..CONV') = no,transcribed
+aglink2023dgAgri_sets.gms,447,agColsSummable('MBD') = no,transcribed
+aglink2023dgAgri_sets.gms,449,agColsSummable('BD..ADJ') = no,transcribed
+aglink2023dgAgri_sets.gms,857,"Parameter p_oilEquAGL (aglinkROWS) ""oil equivalents in Aglink definition""/ DIE 1.01 GAS 1.05 BD 0.86 ET 0.64 /","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+fao_codes_new.gms,24,"$GDXIN ""%RESULTS_IN%/fao/faodata.gdx"" $LOAD FAORows = FAO_ROWS $LOAD FAOCols = FAO_COLS $LOAD FAORegionsIni = FAO_REG $LOAD FAOYears = FAO_Years $GDXIN SET FAORegionsNotUpto2021ini ""Regions removed in","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+fao_codes_new.gms,168,"FAORegionsDel(FAORegions) $ (NOT SUM(RMAll $ SAMEAS(RMAll,FAORegions),1)) = YES","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+fao_codes_new.gms,534,parameter p_checkRegionMap,"check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+fao_codes_new.gms,536,"p_checkRegionMap(""sum>1"",FAORegions,""b"") $ (SUM(FAOregions_map(RMAll,FAORegions) $ (not SUM(SAMEAS(EU27AGGS,RMALL),1)),1) gt 1)=1","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+fao_codes_new.gms,537,"p_checkRegionMap(""not mapped"",FAORegions,""b"") $ (not SUM(FAOregions_map(RMAll,FAORegions) ,1))=1","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+fao_codes_new.gms,543,"FAORegions_map(RM,FAORegions) $ SUM(RMS_TO_RM(RMS,RM) $ FAORegions_map(RMS,FAORegions),1) =YES","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+fao_codes_new.gms,550,"$iftheni.regmap off==on SET FAORegionsMapped(FAORegions) ""FAO regions mapped to any CAPRI region""","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+fao_codes_new.gms,552,"FAORegionsMapped(FAORegions) $ SUM( FAORegions_map(RMAll,FAORegions), 1) = YES","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+fao_codes_new.gms,553,"$endif.regmap FAORegions_map(RW,FAORegions) $ SUM(RW_TO_RM(RW,RM) , SUM(RMS_TO_RM(RMS,RM) $ FAORegions_map(RMS,FAORegions),1)) =YES","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+aglink2023dgAgri_mappings.gms,36,rmAggSup('EU013000') = yes,transcribed
+aglink2023dgAgri_mappings.gms,37,rmAggSup('EU014000') = yes,transcribed
+aglink2023dgAgri_mappings.gms,218,"AglinkRegionsMapped(AglinkRegions) $ sum(AglinkRegions_map(RMall,AglinkRegions), 1) = yes",transcribed
+aglink2023dgAgri_mappings.gms,221,AglinkRegionsNotMapped(AglinkRegions) $ (not AglinkRegionsMapped(AglinkRegions) ) = yes,transcribed
+aglink2023dgAgri_mappings.gms,223,"display AglinkRegionsNotMapped, AglinkRegionsMapped","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+aglink2023dgAgri_mappings.gms,267,"ColsMappedAglink(cols) = yes$(sum(aglinkCols_map(cols,aglinkCols),1))",transcribed
+aglink2023dgAgri_mappings.gms,269,"aglinkColsMapped(aglinkCols) = yes$(sum(cols$aglinkCols_map(cols,aglinkCols),1)=1)",transcribed
+aglink2023dgAgri_mappings.gms,359,"RowsMappedAglink(rows) = yes$(sum(aglinkRows_map(rows,aglinkRows),1))",transcribed
+aglink2023dgAgri_mappings.gms,360,"aglinkRowsMapped(aglinkRows) = yes$(sum(rows $ aglinkRows_map(rows,aglinkRows),1)=1)",transcribed
+aglink2023dgAgri_mappings.gms,361,"aglinkRowsMapped(""FH"") = YES",transcribed

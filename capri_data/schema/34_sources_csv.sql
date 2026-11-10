@@ -22,6 +22,26 @@ COMMENT ON TABLE src_biofuel_technology_params_p_extrrates IS 'CAPRI''s p_ExtrRa
 INSERT INTO value_units VALUES
   ('src_biofuel_technology_params_p_extrrates', 'value', 'U_ratio', 'capri', 't of biofuel per t of feedstock (the file: Conversion coefficients ... (t/t))');
 
+-- file: capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_density.parquet
+CREATE TABLE src_biofuel_technology_params_p_density (
+    fuel VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (fuel)
+);
+COMMENT ON TABLE src_biofuel_technology_params_p_density IS 'CAPRI''s p_density(rows) from dat/biofuel/biofuel_technology_params.gms l. 92-102 (density of liquids, kg per l (RED 2009)), every record as the file writes it, converted by tools/build/convert_sources.py; read by capri_mod/pipeline/captrd/aglink.py (load_aglink2023dgAgri.gms l. 484-492, 796-818).';
+INSERT INTO value_units VALUES
+  ('src_biofuel_technology_params_p_density', 'value', NULL, 'open', 'the file: density of liquids, kg per l (RED 2009)');
+
+-- file: capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_oilEqu.parquet
+CREATE TABLE src_biofuel_technology_params_p_oilequ (
+    fuel VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (fuel)
+);
+COMMENT ON TABLE src_biofuel_technology_params_p_oilequ IS 'CAPRI''s p_oilEqu(rows) from dat/biofuel/biofuel_technology_params.gms l. 80-90 (oil equivalents, toe per t (RED 2009)), every record as the file writes it, converted by tools/build/convert_sources.py; read by capri_mod/pipeline/captrd/aglink.py (load_aglink2023dgAgri.gms l. 484-492, 796-818).';
+INSERT INTO value_units VALUES
+  ('src_biofuel_technology_params_p_oilequ', 'value', NULL, 'open', 'the file: oil equivalents, toe per t (RED 2009)');
+
 -- file: capri_data/sources/raw/capri/dat/coco/milk_quota_dat_p_MQuotaDat.parquet
 CREATE TABLE src_milk_quota_dat_p_mquotadat (
     region VARCHAR NOT NULL,

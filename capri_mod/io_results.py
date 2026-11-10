@@ -1063,34 +1063,60 @@ def _row_lines(rows: pd.DataFrame) -> list:
                        ensure_ascii=False, separators=(",", ":")) for i in range(len(rows))]
 
 
-def rows_digest_batches(batches, tmpdir=None) -> tuple:
-    """rows_digest of a partition given in batches (an iterable of stored-row DataFrames), in bounded memory: the
-    lines written to a file and sorted by sort(1) in byte order (LC_ALL=C), which for UTF-8 text is the code-point
-    order of Python's sorted; the SHA-256 of the sorted lines joined by newlines. Returns (digest, number of rows)."""
+#: lines sorted in memory per chunk by rows_digest_batches before the chunks are merged (bounded memory)
+DIGEST_CHUNK_LINES = 250_000
+
+
+def sorted_lines_digest(lines, tmpdir=None, chunk: int = DIGEST_CHUNK_LINES) -> str:
+    """The SHA-256 of text lines (no newline in a line) sorted in Python's string order (code points, which for UTF-8
+    is byte order) and joined by newlines, in bounded memory: chunks of `chunk` lines sorted and written to temporary
+    files, then merged (heapq.merge). Equal to sha256("\\n".join(sorted(lines)))."""
     import hashlib
-    import os
-    import subprocess
+    import heapq
     import tempfile
+    h = hashlib.sha256()
     with tempfile.TemporaryDirectory(dir=tmpdir) as td:
-        src, dst = Path(td) / "lines", Path(td) / "sorted"
-        n = 0
-        with open(src, "w", encoding="utf-8", newline="\n") as fh:
-            for b in batches:
-                for ln in _row_lines(b):
-                    fh.write(ln + "\n")
-                n += len(b)
-        subprocess.run(["sort", "-S", "256M", "-T", td, "-o", str(dst), str(src)], check=True,
-                       env={**os.environ, "LC_ALL": "C"})
-        h = hashlib.sha256()
-        with open(dst, "rb") as fh:
-            prev = None
-            for chunk in iter(lambda: fh.read(1 << 20), b""):
-                if prev is not None:
-                    h.update(prev)
-                prev = chunk
-            if prev:
-                h.update(prev[:-1] if prev.endswith(b"\n") else prev)    # the lines joined, no newline at the end
-        return h.hexdigest(), n
+        files, buf = [], []
+
+        def flush():
+            if buf:
+                buf.sort()
+                f = Path(td) / f"chunk{len(files)}"
+                with open(f, "w", encoding="utf-8", newline="\n") as fh:
+                    fh.writelines(ln + "\n" for ln in buf)
+                files.append(f)
+                buf.clear()
+        for ln in lines:
+            buf.append(ln)
+            if len(buf) >= chunk:
+                flush()
+        flush()
+        handles = [open(f, encoding="utf-8", newline="\n") for f in files]
+        try:
+            first = True
+            for ln in heapq.merge(*((x[:-1] for x in fh) for fh in handles)):
+                if not first:
+                    h.update(b"\n")
+                h.update(ln.encode("utf-8"))
+                first = False
+        finally:
+            for fh in handles:
+                fh.close()
+    return h.hexdigest()
+
+
+def rows_digest_batches(batches, tmpdir=None) -> tuple:
+    """rows_digest of a partition given in batches (an iterable of stored-row DataFrames), in bounded memory
+    (sorted_lines_digest; until 10 November 2026 the lines were sorted by the Unix sort program, which not every system
+    has). Returns (digest, number of rows)."""
+    n = [0]
+
+    def lines():
+        for b in batches:
+            yield from _row_lines(b)
+            n[0] += len(b)
+    d = sorted_lines_digest(lines(), tmpdir)
+    return d, n[0]
 
 
 def write_capri_run(ref_rows, scen_rows, *, scenario: str, reference: str, ref_source: dict, scen_source: dict,

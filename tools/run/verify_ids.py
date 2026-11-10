@@ -1,18 +1,17 @@
 """Recompute every run id of a capri-mod results store from the tables alone (no capri-mod code): the recipe
 'capri-mod run id 1' as documented in capri_mod/io_results.py (rows_digest, run_id_of). Published beside the store
 (Hugging Face dataset nuvolaTeam/capri-mod-results). Each run's rows are read alone (a filter on run_id) and in
-batches, and their lines sorted on disk by sort(1) in byte order (LC_ALL=C: for UTF-8 text the code-point order of
-Python's sorted), so a run of millions of rows is checked in bounded memory. Needs the deltalake and pyarrow packages
-and the sort command.
+batches, and their lines sorted in chunks on disk and merged (Python's string order, as sorted), so a run of millions of
+rows is checked in bounded memory. Needs the deltalake and pyarrow packages.
 
     python verify_ids.py STORE_DIR        (the folder holding runs/ and long/)
 Exit status 1 if an id does not recompute.
 """
 import hashlib
+import heapq
 import json
 import math
 import os
-import subprocess
 import sys
 import tempfile
 
@@ -30,27 +29,44 @@ def n_(v):
     return "nan" if v is None or math.isnan(float(v)) else float(v).hex()
 
 
-def digest(scanner):
-    """The SHA-256 of a run's rows as JSON lines, sorted and joined by newlines (no newline at the end)."""
+def digest(scanner, chunk=250_000):
+    """The SHA-256 of a run's rows as JSON lines, sorted (Python's string order: code points, for UTF-8 byte order)
+    and joined by newlines (no newline at the end): chunks sorted in memory and written to temporary files, then
+    merged, so memory stays bounded."""
+    h = hashlib.sha256()
+    n = 0
     with tempfile.TemporaryDirectory() as td:
-        src, dst = os.path.join(td, "lines"), os.path.join(td, "sorted")
-        n = 0
-        with open(src, "w", encoding="utf-8", newline="\n") as fh:
-            for b in scanner.to_batches():
-                cols = {c: b.column(c).to_pylist() for c in TEXT + ["year", "value"]}
-                for i in range(b.num_rows):
-                    fh.write(json.dumps([t(cols[c][i]) for c in TEXT] + [int(cols["year"][i]), n_(cols["value"][i])],
-                                        ensure_ascii=False, separators=(",", ":")) + "\n")
-                n += b.num_rows
-        subprocess.run(["sort", "-S", "256M", "-T", td, "-o", dst, src], check=True, env={**os.environ, "LC_ALL": "C"})
-        h = hashlib.sha256()
-        with open(dst, "rb") as fh:
-            data = fh.read(1 << 20)
-            while data:
-                nxt = fh.read(1 << 20)
-                h.update(data if nxt else data[:-1] if data.endswith(b"\n") else data)
-                data = nxt
-        return h.hexdigest(), n
+        files, buf = [], []
+
+        def flush():
+            if buf:
+                buf.sort()
+                f = os.path.join(td, f"chunk{len(files)}")
+                with open(f, "w", encoding="utf-8", newline="\n") as fh:
+                    fh.writelines(x + "\n" for x in buf)
+                files.append(f)
+                buf.clear()
+        for b in scanner.to_batches():
+            cols = {c: b.column(c).to_pylist() for c in TEXT + ["year", "value"]}
+            for i in range(b.num_rows):
+                buf.append(json.dumps([t(cols[c][i]) for c in TEXT] + [int(cols["year"][i]), n_(cols["value"][i])],
+                                      ensure_ascii=False, separators=(",", ":")))
+                if len(buf) >= chunk:
+                    flush()
+            n += b.num_rows
+        flush()
+        handles = [open(f, encoding="utf-8", newline="\n") for f in files]
+        try:
+            first = True
+            for ln in heapq.merge(*((x[:-1] for x in fh) for fh in handles)):
+                if not first:
+                    h.update(b"\n")
+                h.update(ln.encode("utf-8"))
+                first = False
+        finally:
+            for fh in handles:
+                fh.close()
+    return h.hexdigest(), n
 
 
 def main(root):

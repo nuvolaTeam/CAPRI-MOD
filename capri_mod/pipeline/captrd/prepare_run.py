@@ -6,9 +6,10 @@ Per country file, in passes where a step needs every country:
   3  COCO applied, checks, deletions                          load_coco1_data.gms l. 250-561 (biofuel flags from every
                                                               country); captrd.gms l. 830-850
   4  UVAD averaged over the market aggregates                 l. 852-860 (every country's UVAD)
-  5  regions' cleaning, LABH, labour bounds, policy data, prep_data_for_estimation, statistics and base-year values
-                                                              l. 862-906; labour_ageline.gms; captrd_policy.gms;
-                                                              prep_data_for_estimation.gms l. 15-320
+  5  regions' cleaning, LABH, labour bounds, policy data, prep_data_for_estimation, statistics and base-year values,
+     the animal requirement functions                         l. 862-944; labour_ageline.gms; captrd_policy.gms;
+                                                              prep_data_for_estimation.gms l. 15-320;
+                                                              prep_requirement_estimation.gms (over ExPost)
 The time sets are timesets.build's (captrd.gms l. 203-812): ExPost from CAPREG's UAAR, ExPostT adds ExAnteD (COCO),
 BASYRS5 and BASYRSM around the base year within ExPost, the ex-ante years from the simulation years.
 
@@ -29,6 +30,7 @@ from capri_mod.pipeline.captrd import coco as C
 from capri_mod.pipeline.captrd import labour as Lab
 from capri_mod.pipeline.captrd import policy as Pol
 from capri_mod.pipeline.captrd import prepare as P
+from capri_mod.pipeline.captrd import requirements as RQ
 from capri_mod.pipeline.captrd import statistics as St
 from capri_mod.pipeline.captrd import timesets as TS
 
@@ -128,6 +130,7 @@ def run(countries: Iterable[str], sets: P.CaptrdSets, base_year: int, first_year
                       aglink, expiry=milk_quota_expiry)
         p = P.prep_for_estimation(p, sets, expostt, basyrs5, basyrsm, T.years, dat["luunits"])
         p = St.statistics(p, sets, expostt, basyrs5, T.eightlst)        # prep_data_for_estimation.gms l. 205-320
+        p = RQ.estimate(p, sets, expost)                                # prep_requirement_estimation.gms (l. 944)
         out[m] = work / f"{_cc(m)}.parquet"
         p.to_parquet(out[m], index=False)
     return out

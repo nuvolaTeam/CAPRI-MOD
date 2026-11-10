@@ -22,8 +22,8 @@ unchanged); the CSV declarations (capri_data/schema/34_sources_csv.sql) cite the
     water/cropwat.gms                                  -> water/cropwat_p_cropwatReq.parquet
     water/irrishare.gms                                -> water/irrishare_p_irriShare.parquet
   CAPRI's data include files (gams_text.parameter_records, table_records)
-    capri_dat/biofuel/biofuel_technology_params.gms    -> ..._{p_ExtrRates, p_ByProduct}.csv (p_secgConv, p_oilEqu,
-                                                          p_density: read by no code, not written)
+    capri_dat/biofuel/biofuel_technology_params.gms    -> ..._{p_ExtrRates, p_ByProduct, p_oilEqu, p_density}.parquet
+                                                          (p_secgConv: read by no code, not written)
     capri_dat/coco/milk_quota_dat.gms                  -> milk_quota_dat_p_MQuotaDat.parquet
     capri_dat/policy/livestock_units.gms               -> livestock_units_p_LUUnits.parquet
     capri_dat/policy/smal_pshar.gms                    -> smal_pshar_p_smallProdShare.parquet
@@ -154,6 +154,10 @@ GAMS_DATA = {
          ["fuel", "stock", "value"]),
         ("p_ByProduct", "parameter", 2, "raw/capri/dat/biofuel/biofuel_technology_params_p_ByProduct.parquet",
          ["byproduct", "stock", "value"]),
+        ("p_oilEqu", "parameter", 1, "raw/capri/dat/biofuel/biofuel_technology_params_p_oilEqu.parquet",
+         ["fuel", "value"]),
+        ("p_density", "parameter", 1, "raw/capri/dat/biofuel/biofuel_technology_params_p_density.parquet",
+         ["fuel", "value"]),
         ],
     "capri_dat/coco/milk_quota_dat.gms": [
         ("p_MQuotaDat", "table", 2, "raw/capri/dat/coco/milk_quota_dat_p_MQuotaDat.parquet",

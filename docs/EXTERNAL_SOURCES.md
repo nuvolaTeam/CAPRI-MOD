@@ -94,6 +94,12 @@ copies of the area table are identical in levels: one kept).
 **`gams_extra/`**: `fortrd.gms`, CAPTRD's settings include as delivered (empty: the GUI sets CAPTRD's settings; the
 reference run's are its META, docs/design/CAPTRD_MOD.md).
 
+**`dat_parquet/`**: GDX files of `dat_local/` converted to Parquet by tools/build/convert_capri_gdx.py (every record,
+NA and UNDF named in the column `special`), one folder per file and one file per symbol:
+`baseline/aglink2023dgAgri_oriEUdata/` (all 29 symbols) and `baseline/AGLINK2019dgagri_oridata/p_aglinkOri.parquet`.
+- Read by: capri_mod/pipeline/captrd/aglink.py (CAPTRD's Aglink stage; c, m, p, m_eq, p_dbvar and the 2019 fish data)
+  and tools/build/build_captrd_aglink_sets.py (c, m, p, m_eq).
+
 **`dat_local/`**: files of CAPRI's `dat` folder the mirror above does not hold, under their paths in `dat`:
 `envind/lulucf_emissions_original_source.gms` (p_PEATSH_def), `policy/livestock_units.gms` (p_LUUnits) and
 `scen/ghgtech/holdingsLSU.gdx` (p_holdLSU).
@@ -224,7 +230,7 @@ named below.
 | Folder | Original | Content | Tool |
 |---|---|---|---|
 | `capreg_tseries/17/<CC>.csv.gz` | `Capreg_tseries/<CC>_17.gdx` (35 files) | CAPREG's time series `DATA(region, col, row, t)`, 1984–2018 plus BAS, BASM, CUR, MEAN, TRD, Y: the input CAPTRD reads as DATA1 (captrd.gms l. 486-505) | `tools/build_capreg_tseries_reference.py --src Capreg_tseries.zip` |
-| `capreg_base/17/<CC>.csv.gz` | CAPREG's base-year results `res_17<CC>.gdx`: 27 as text dumps `res_17<CC>.txt` (upload res_17zip.zip and single files), 8 as GDX files (UK, TU, AL, MK, CS, MO, BA, KO; uploaded 29 October 2026). <CC> is CAPTRD's file code, the first two characters of the country (TU for TUR) | CAPREG's base-year data `DATA2(region, col, row, "Y")`, the input CAPTRD reads as BASM (captrd.gms l. 528-580); 15 significant digits from the dumps, 17 from the GDX files | `tools/build/build_capreg_base_reference.py --src DIR_OR_ZIP [--src DIR]` |
+| `capreg_base/17/<CC>.csv.gz` | CAPREG's base-year results `res_17<CC>.gdx`: as text dumps `res_17<CC>.txt` (upload res_17zip.zip and single files), 8 as GDX files (UK, TU, AL, MK, CS, MO, BA, KO; uploaded 29 October 2026), Spain from the CAPRI GUI's CSV export `DATA2_res_17ES.csv` (upload capri_export_zip.zip; the export equals the dump in all 10,991 records of Denmark, 10 November 2026). <CC> is CAPTRD's file code, the first two characters of the country (TU for TUR) | CAPREG's base-year data `DATA2(region, col, row, "Y")`, the input CAPTRD reads as BASM (captrd.gms l. 528-580); 15 significant digits from the dumps, 17 from the GDX files | `tools/build/build_capreg_base_reference.py --src DIR_OR_ZIP [--src DIR]` |
 | `coco2/17/coco2_output.csv.gz` | text listing `coco2.csv` of COCO's `coco2_output.gdx` (upload coco2.zip) | COCO's `DATA2(region, item, col, row, t)`, items INI, COCO1, COCO2, 1984–2019: what CAPTRD loads as dataMS (load_coco1_data.gms l. 24); 15 significant digits | `tools/build/build_coco2_reference.py --src coco2.zip` |
 | `fao_agg/17/<symbol>.csv.gz` | text listing `FAO_agg_17_defaulta.csv` of the global database `fao_agg_17_defaulta.gdx` (upload FAO_agg_17_defaulta.zip) | `p_biofuelData`, `p_aglinkGrowthFactor` (load_coco1_data.gms l. 360); columns d0…dn, value, eps | `tools/build/build_fao_agg_reference.py --src FAO_agg_17_defaulta.zip` |
 | `captrd_results/1770/<respos>.csv.gz` | `results_1770.gdx` (base 2017, simulation years 2018–2070) | CAPTRD's `p_result(region, col, row, t, respos)`, one file per result position (Step1, support, support1, wVarErr, step2, step3, series, P_Data, data statistics, …); `respos_counts.csv` lists all positions and `settings.csv` the run settings | `tools/build_captrd_results_reference.py --src results_1770.gdx --tag 1770` |

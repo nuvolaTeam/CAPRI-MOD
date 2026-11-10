@@ -4388,6 +4388,1033 @@
     "builder": "build_captrd_sets (not in the trace yet)"
    }
   },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/AGLC.csv": {
+   "description": "CAPTRD's Aglink set AGLC, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 15,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/AGLCOSC.csv": {
+   "description": "CAPTRD's Aglink set AGLCOSC, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 47,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/AGLCOSallC.csv": {
+   "description": "CAPTRD's Aglink set AGLCOSallC, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 49,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/AGLCOSnoEUNC.csv": {
+   "description": "CAPTRD's Aglink set AGLCOSnoEUNC, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 48,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/AGLINKBioCols.csv": {
+   "description": "CAPTRD's Aglink set AGLINKBioCols, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 0,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/AGLINKBioColsQ.csv": {
+   "description": "CAPTRD's Aglink set AGLINKBioColsQ, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 31,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/AGLINKBioColsV.csv": {
+   "description": "CAPTRD's Aglink set AGLINKBioColsV, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 5,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/AGLINKBioRows.csv": {
+   "description": "CAPTRD's Aglink set AGLINKBioRows, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 4,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/AGLINKFuelMatch.csv": {
+   "description": "CAPTRD's Aglink set AGLINKFuelMatch, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/AglinkRegionsMapped.csv": {
+   "description": "CAPTRD's Aglink set AglinkRegionsMapped, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 50,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/AglinkRegionsNotMapped.csv": {
+   "description": "CAPTRD's Aglink set AglinkRegionsNotMapped, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 4,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/BIOFUELS.csv": {
+   "description": "CAPTRD's Aglink set BIOFUELS, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 43,
+   "columns": 1,
+   "read_by_model": [
+    "capri_mod/pipeline/captrd/aglink.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/CCC.csv": {
+   "description": "CAPTRD's Aglink set CCC, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 54,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/COLS.csv": {
+   "description": "CAPRI's global set cols (capri_sources/reference/sets/simini_21730) with the elements baseline/aglink2023dgAgri_mappings.gms l. 63-64 adds",
+   "kind": "structure",
+   "rows": 932,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/COSC.csv": {
+   "description": "CAPTRD's Aglink set COSC, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 32,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ColsMappedAglink.csv": {
+   "description": "CAPTRD's Aglink set ColsMappedAglink, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 20,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/EUNAGGP_M.csv": {
+   "description": "CAPTRD's Aglink set EUNAGGP_M, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 311,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/EUNC.csv": {
+   "description": "CAPTRD's Aglink set EUNC, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/EUparts.csv": {
+   "description": "CAPTRD's Aglink set EUparts, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/EUreg.csv": {
+   "description": "CAPTRD's Aglink set EUreg, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/EuropReg.csv": {
+   "description": "CAPTRD's Aglink set EuropReg, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 7,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/FAODataType.csv": {
+   "description": "CAPTRD's Aglink set FAODataType, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 0,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/FAORegionsNotUpto2013.csv": {
+   "description": "CAPTRD's Aglink set FAORegionsNotUpto2013, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 56,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/FAORegionsNotUpto2013ini.csv": {
+   "description": "CAPTRD's Aglink set FAORegionsNotUpto2013ini, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 56,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ModAggs.csv": {
+   "description": "CAPTRD's Aglink set ModAggs, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/PPP.csv": {
+   "description": "CAPTRD's Aglink set PPP, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 155,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/RM.csv": {
+   "description": "CAPTRD's Aglink set RM, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 47,
+   "columns": 1,
+   "read_by_model": [
+    "capri_mod/data/definitions.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ROWS.csv": {
+   "description": "CAPRI's global set rows (capri_sources/reference/sets/simini_21730) with the elements baseline/aglink2023dgAgri_mappings.gms l. 63-64 adds",
+   "kind": "structure",
+   "rows": 930,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/RmAggSup.csv": {
+   "description": "CAPTRD's Aglink set RmAggSup, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 44,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/RowsMappedAglink.csv": {
+   "description": "CAPTRD's Aglink set RowsMappedAglink, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 51,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/_aliases.csv": {
+   "description": "GAMS aliases of these sets (upper case): alias, the set it names",
+   "kind": "structure",
+   "rows": 31,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/_unparsed.csv": {
+   "description": "the statements of the Aglink set files the reader leaves to the builder: transcribed there, or not needed (checks, displays, parameters, FAO sets)",
+   "kind": "structure",
+   "rows": 44,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agBalPos.csv": {
+   "description": "CAPTRD's Aglink set agBalPos, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 27,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agBioF.csv": {
+   "description": "CAPTRD's Aglink set agBioF, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agBioVar.csv": {
+   "description": "CAPTRD's Aglink set agBioVar, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 30,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agByprod.csv": {
+   "description": "CAPTRD's Aglink set agByprod, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agCols.csv": {
+   "description": "CAPTRD's Aglink set agCols, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 83,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agColsBio_hierarhy.csv": {
+   "description": "CAPTRD's Aglink set agColsBio_hierarhy, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 13,
+   "columns": 3,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agColsBio_map.csv": {
+   "description": "CAPTRD's Aglink set agColsBio_map, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 31,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agColsFrm.csv": {
+   "description": "CAPTRD's Aglink set agColsFrm, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agColsSummable.csv": {
+   "description": "CAPTRD's Aglink set agColsSummable, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 55,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agColsV.csv": {
+   "description": "CAPTRD's Aglink set agColsV, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 17,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agEUparts.csv": {
+   "description": "CAPTRD's Aglink set agEUparts, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agEUreg.csv": {
+   "description": "CAPTRD's Aglink set agEUreg, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agEurop.csv": {
+   "description": "CAPTRD's Aglink set agEurop, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 7,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agFosF.csv": {
+   "description": "CAPTRD's Aglink set agFosF, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agFuels.csv": {
+   "description": "CAPTRD's Aglink set agFuels, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 4,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agFuels_o.csv": {
+   "description": "CAPTRD's Aglink set agFuels_o, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 5,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agMacroVar.csv": {
+   "description": "CAPTRD's Aglink set agMacroVar, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 7,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agOther.csv": {
+   "description": "CAPTRD's Aglink set agOther, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 10,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agPrim.csv": {
+   "description": "CAPTRD's Aglink set agPrim, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 29,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agRegs.csv": {
+   "description": "CAPTRD's Aglink set agRegs, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 43,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agRows.csv": {
+   "description": "CAPTRD's Aglink set agRows, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 80,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agRowsAggregate_map.csv": {
+   "description": "CAPTRD's Aglink set agRowsAggregate_map, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 35,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agSeco.csv": {
+   "description": "CAPTRD's Aglink set agSeco, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 41,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/agYears.csv": {
+   "description": "CAPTRD's Aglink set agYears, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 41,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_BioVar.csv": {
+   "description": "CAPTRD's Aglink set ag_BioVar, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 30,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_EUreg.csv": {
+   "description": "CAPTRD's Aglink set ag_EUreg, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_Other.csv": {
+   "description": "CAPTRD's Aglink set ag_Other, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 10,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_Prim.csv": {
+   "description": "CAPTRD's Aglink set ag_Prim, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 29,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_Regs.csv": {
+   "description": "CAPTRD's Aglink set ag_Regs, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 43,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_Rows.csv": {
+   "description": "CAPTRD's Aglink set ag_Rows, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 80,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_Seco.csv": {
+   "description": "CAPTRD's Aglink set ag_Seco, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 41,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_balPos.csv": {
+   "description": "CAPTRD's Aglink set ag_balPos, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 19,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_colsFrm.csv": {
+   "description": "CAPTRD's Aglink set ag_colsFrm, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_colsV.csv": {
+   "description": "CAPTRD's Aglink set ag_colsV, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 17,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_macroVar.csv": {
+   "description": "CAPTRD's Aglink set ag_macroVar, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 7,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_macroVarNoFoe.csv": {
+   "description": "CAPTRD's Aglink set ag_macroVarNoFoe, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 6,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_market.csv": {
+   "description": "CAPTRD's Aglink set ag_market, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_marketMap.csv": {
+   "description": "CAPTRD's Aglink set ag_marketMap, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 12,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_var.csv": {
+   "description": "CAPTRD's Aglink set ag_var, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 83,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/aglink.csv": {
+   "description": "CAPTRD's Aglink set aglink, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 0,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/aglinkAct_map.csv": {
+   "description": "CAPTRD's Aglink set aglinkAct_map, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 20,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/aglinkCols.csv": {
+   "description": "CAPTRD's Aglink set aglinkCols, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 668,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/aglinkColsMapped.csv": {
+   "description": "CAPTRD's Aglink set aglinkColsMapped, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 20,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/aglinkCols_bioMap.csv": {
+   "description": "CAPTRD's Aglink set aglinkCols_bioMap, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 30,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/aglinkCols_map.csv": {
+   "description": "CAPTRD's Aglink set aglinkCols_map, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 22,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/aglinkCols_no_agBalPos.csv": {
+   "description": "CAPTRD's Aglink set aglinkCols_no_agBalPos, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 0,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/aglinkRegions_map.csv": {
+   "description": "CAPTRD's Aglink set aglinkRegions_map, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 95,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/aglinkRowsMapped.csv": {
+   "description": "CAPTRD's Aglink set aglinkRowsMapped, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 50,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/aglinkRows_map.csv": {
+   "description": "CAPTRD's Aglink set aglinkRows_map, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 52,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/aglinkYears.csv": {
+   "description": "CAPTRD's Aglink set aglinkYears, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 71,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/bioSource.csv": {
+   "description": "CAPTRD's Aglink set bioSource, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 16,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/bioSource_map.csv": {
+   "description": "CAPTRD's Aglink set bioSource_map, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 13,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/biofC.csv": {
+   "description": "CAPTRD's Aglink set biofC, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 23,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/chkset1.csv": {
+   "description": "CAPTRD's Aglink set chkset1, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 0,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/colums.csv": {
+   "description": "CAPTRD's Aglink set colums, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 0,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/for.csv": {
+   "description": "CAPTRD's Aglink set for, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 0,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/m_eq.csv": {
+   "description": "CAPTRD's Aglink set m_eq, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 665,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/majorAglinkProd_map.csv": {
+   "description": "CAPTRD's Aglink set majorAglinkProd_map, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 31,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/map_CROP_FERTCP.csv": {
+   "description": "CAPTRD's Aglink set map_CROP_FERTCP, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 21,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/map_CROP_FERTQC.csv": {
+   "description": "CAPTRD's Aglink set map_CROP_FERTQC, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 21,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/map_CROP_FERTQCHA.csv": {
+   "description": "CAPTRD's Aglink set map_CROP_FERTQCHA, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 21,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/map_FERTQC_FERTQCHA.csv": {
+   "description": "CAPTRD's Aglink set map_FERTQC_FERTQCHA, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 21,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/map_FERT_QCCP.csv": {
+   "description": "CAPTRD's Aglink set map_FERT_QCCP, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 21,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/measures_map.csv": {
+   "description": "CAPTRD's Aglink set measures_map, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 154,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/not_m_eq.csv": {
+   "description": "CAPTRD's Aglink set not_m_eq, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 19,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/products_map.csv": {
+   "description": "CAPTRD's Aglink set products_map, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 464,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/regions_map.csv": {
+   "description": "CAPTRD's Aglink set regions_map, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 124,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/used.csv": {
+   "description": "CAPTRD's Aglink set used, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 0,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/wldAgg.csv": {
+   "description": "CAPTRD's Aglink set wldAgg, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 47,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/aglink2023dgAgri/wldAgg1.csv": {
+   "description": "CAPTRD's Aglink set wldAgg1, as GAMS compiles baseline/aglink2023dgAgri_sets.gms (with mainsets_MTO2023.gms), global/fao_codes_new.gms and baseline/aglink2023dgAgri_mappings.gms",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
   "capri_data/pipeline/captrd/sets/bio_cols.csv": {
    "description": "CAPRI's global set Bio_Cols (biofuel columns: non-agricultural, first and second generation, exogenous, energy share; gams/sets.gms l. 1731): one member per row in d0, 5 members (e.g. NAGR, FSTG, HCOS); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py.",
    "kind": "structure",
@@ -5892,6 +6919,26 @@
    "origin": {
     "nature": "source-extract",
     "builder": "convert_sources"
+   }
+  },
+  "capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_density.parquet": {
+   "description": "CAPRI's p_density(rows) from dat/biofuel/biofuel_technology_params.gms l. 92-102 (density of liquids, kg per l (RED 2009)), every record as the file writes it, converted by tools/build/convert_sources.py; read by capri_mod/pipeline/captrd/aglink.py (load_aglink2023dgAgri.gms l. 484-492, 796-818).",
+   "kind": "coefficients",
+   "rows": 5,
+   "columns": 2,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "source-extract"
+   }
+  },
+  "capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_oilEqu.parquet": {
+   "description": "CAPRI's p_oilEqu(rows) from dat/biofuel/biofuel_technology_params.gms l. 80-90 (oil equivalents, toe per t (RED 2009)), every record as the file writes it, converted by tools/build/convert_sources.py; read by capri_mod/pipeline/captrd/aglink.py (load_aglink2023dgAgri.gms l. 484-492, 796-818).",
+   "kind": "coefficients",
+   "rows": 4,
+   "columns": 2,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "source-extract"
    }
   },
   "capri_data/sources/raw/capri/dat/coco/milk_quota_dat_p_MQuotaDat.parquet": {
