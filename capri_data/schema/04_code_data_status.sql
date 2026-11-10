@@ -100,6 +100,8 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/pipeline/captrd/prepare_run.py', 'run', 2000000.0, 'numerical', 'keep', NULL, 'CSV read chunk size'),
   ('capri_mod/pipeline/captrd/step1.py', '_CHUNK', 4000.0, 'numerical', 'keep', NULL, 'series per vectorised block of the trend fit'),
   ('capri_mod/pipeline/captrd/step1.py', 'error_variance', 0.25, 'capri', 'keep', 'gams/captrd/define_stats_and_supports.gms l. 127-132', 'fall-back error variance SQR(wAve) x 0.25 for 1-2 observations'),
+  ('capri_mod/pipeline/captrd/requirements.py', 'EFFICIENCY', 0.998, 'capri', 'keep', 'gams/captrd/define_stats_and_supports.gms l. 86-93', '0.2% less animal requirement per unit of output a year (WB''s assumption)'),
+  ('capri_mod/pipeline/captrd/requirements.py', 'EFFICIENCY_FROM', 2000.0, 'capri', 'keep', 'gams/captrd/define_stats_and_supports.gms l. 86-93', 'the year the requirement efficiency gain is counted from'),
   ('capri_mod/pipeline/captrd/supports.py', 'supports', 0.05, 'capri', 'keep', 'gams/captrd/define_stats_and_supports.gms l. 327-329', 'error-variance floor 0.05 x |wAve| (squared under captrd.variance_floor_squared, registered CAPRI-ERROR-FIX)'),
   ('capri_mod/pipeline/captrd/supports.py', 'supports', 0.9, 'capri', 'keep', 'gams/captrd/define_stats_and_supports.gms l. 285', 'grassland support at least 0.9 x BASM'),
   ('capri_mod/pipeline/captrd/supports.py', 'supports', 0.975, 'capri', 'keep', 'gams/captrd/define_stats_and_supports.gms l. 236', 'yield support at least 0.975^dt x base'),

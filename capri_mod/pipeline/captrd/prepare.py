@@ -131,6 +131,8 @@ class CaptrdSets:
     pact_to_y: Set[Tuple[str, str]] = field(default_factory=set)
     cropc_to_g: Set[Tuple[str, str]] = field(default_factory=set)
     rows_to_g: Set[Tuple[str, str]] = field(default_factory=set)
+    # read by requirements.py (prep_requirement_estimation.gms)
+    reqst: Set[str] = field(default_factory=set)
 
     @property
     def nt2ext(self) -> Set[str]:
@@ -159,7 +161,7 @@ def read_sets(path: Path = SETS_DIR) -> CaptrdSets:
               "rmaggsup", "ncnc", "fout", "oyani_rows", "mcact", "cact", "seco", "o", "feed", "mrkbale", "mrkbalee",
               "dompos", "breedact", "meat", "grpr", "grpc", "aact", "oyani", "corfeedlosf", "cropo", "domm_set",
               "splitacts", "dact", "dmpact", "msnoeu28", "fuel_rows", "biofuels", "fosfuels", "fuels", "biostock",
-              "grcu", "rset", "msall", "nosugquotaaglinkversion", "srnuts1"]
+              "grcu", "rset", "msall", "nosugquotaaglinkversion", "srnuts1", "reqst"]
     names2 = ["map_rr", "pact_to_io", "pact_to_i", "rms_to_rm", "pact_to_o", "pact_to_y", "cropc_to_g", "rows_to_g",
               "prcd", "feed_to_o", "dact_to_pact", "p_t_actagg", "stock_to_fuel", "stock_to_by"]
     m3 = read_csv(path / "map_rrt.csv", keep_default_na=False, dtype=str)

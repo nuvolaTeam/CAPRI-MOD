@@ -81,8 +81,18 @@ copies of the area table are identical in levels: one kept).
   build_active_technologies, build_greendeal_targets.
 
 **`dat/`**: CAPRI's `dat` folder as parquet, the project's mirror of it.
-- From: the project lead.
+- From: the project lead; and, on 10 November 2026, from the public mirror of CAPRI's dat folder on Hugging Face
+  (dataset jrc-ai/capri, an older dat vintage): `arm/allpop/worldPop.parquet`, `arm/nutrient_cont_usda/
+  p_nutrientCont.parquet`, `biofuel/fossilFuel/p_fossilFuel.parquet` (equal to the installation's fossilFuel.gdx).
 - Read by: build_captrd_dat (`dat/baseline/ageline/ageline.parquet`).
+
+**`results/global/`**: CAPRI's global results that CAPTRD reads (captrd/longrun_supports.gms):
+`longrun_info_fac_defaulta.gdx` (p_longRunInfoAll) and `GLOBIOM_GL_longrun_defaulta.gdx` (p_globiomInfo).
+- From: the project lead's installation (9-10 November 2026).
+- Read by: not yet (CAPTRD-MOD Steps 2-3).
+
+**`gams_extra/`**: `fortrd.gms`, CAPTRD's settings include as delivered (empty: the GUI sets CAPTRD's settings; the
+reference run's are its META, docs/design/CAPTRD_MOD.md).
 
 **`dat_local/`**: files of CAPRI's `dat` folder the mirror above does not hold, under their paths in `dat`:
 `envind/lulucf_emissions_original_source.gms` (p_PEATSH_def), `policy/livestock_units.gms` (p_LUUnits) and
@@ -91,6 +101,20 @@ copies of the area table are identical in levels: one kept).
 - Read by: extract_capri_dat_local (p_PEATSH_def); convert_sources_to_csv (p_LUUnits). holdingsLSU.gdx confirms
   capri_data/2017/abatement/ammonia/p_holdLSU.csv (identical records), built from a dump before.
 - Goes to the Hugging Face set with the rest of capri_sources (MODEL_CONTENT_PLAN §12b).
+- Added on 10 November 2026 (the project lead's installation; CAPTRD's inputs for Steps 2-3, docs/design/CAPTRD_MOD.md
+  section 12.1), under their paths in `dat`:
+  - `baseline/`: `aglink2023dgAgri_oriEUdata.gdx` (c, m, m_eq, p, p_dbvar), `AGLINK2019dgagri_oridata.gdx`
+    (p_aglinkOri; delivered as aglink2019dgAgri_oriData.gdx, renamed to the name load_aglink2023dgAgri.gms l. 205
+    reads), `aglink2023macro.xlsx` (CAPTRD makes ctrCode.gdx and aglink2023macro.gdx from it with gdxxrw, l. 913-927),
+    `data_SSPV3_update.gdx` (SSP_data), `recent_mlk_yld.gdx` (p_recentMlkYld), `dairy_targets_agri.gms`,
+    `necp_expert.gms`; not read by CAPTRD: `aglink2019OECD_oriData.gdx`,
+    `Comtrade_UKR_2023_Export_Cereals-Oilseeds-Oils-Meals_Jan-Sep.xlsx` (arm/data_prep.gms);
+  - `arm/`: `allpop.gdx` (worldPop), `allpop.gms`, `nutrient_cont_usda.gdx` (p_nutrientCont);
+  - `coco/Agri_Prod.gdx` (p_AgriProd); `capreg/regional_mlk_prod.gms`;
+  - `biofuel/`: `primes_ref_060722.gdx` (p_PrimesWithUnits; the run's %primesBiofuelFile%), `fossilFuel.gdx`
+    (p_fossilFuel; equal to the mirror's record for record), `biofuel_data.gms`,
+    `POTENCIA_processing/POTENCIA_transport_energy_outlook.gdx`;
+  - `global/reg_mappings.xlsx` (GlobiomCountry, GlobiomCountry_FAOreg, FAOreg_AGLINKregions, l. 931-951).
 
 **`results/permits/`**, **`results/arm/`**: CAPRI's GHG and technology result files, received 10 November 2026, as
 capmod.gms l. 1641-1645 writes them (results\permits\res_<scenario>_21730.gdx: v_Miti, p_ghgMiti, EMISCALC,
