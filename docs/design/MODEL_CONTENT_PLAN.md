@@ -573,6 +573,16 @@ needs one obligatory set-aside activity (no output; CAPRI's costs and premium; f
 carry their coefficients, their levels being zero since 2008), the constraint and the PMP terms. Then
 scen/set_aside/set_aside_10.gms (10% on GRCU) becomes a scenario folder again. SET_ASIDE_10PCT, which put a 10% floor
 on all arable land counted on SETA, was removed (commit 3120071). Estimate: half a day to a day.
+**Done 10 November 2026.** CAPRI's 2017 and 2030 data carry no coefficient of ISET, GSET, TSET or NONF other than HSTY
+(sim_ini_21730 DATA; no TOIN, no premium, no level), so CAPRI's ISET, opened by prep_sim.gms l. 253 where a rate is
+set, has nothing in the objective: the model substitutes it into the arable land balance (CAPRI's LandBalNoSlak_(ARAC)),
+each rated activity's coefficient there + r / (1 - r) x (1 - NONS), the balance's base use unchanged, and reports
+ISET (set_aside table, SupplyResult.iset). Same optimum as CAPRI's column (Claude's choice: no extra column without
+terms). NONS is 0 (no NONS in CAPRI's 2030 data; the scenario sets it 0). Scenario folder set_aside_10:
+set_aside_rates.csv (tools/build/build_set_aside_scenario.py from set_aside_10.gms and sets.gms: 10% on SWHE, DWHE,
+RYEM, BARL, OATS, CORN, OCER, RAPE, SUNF, SOYA, PULS, MAIF in the 215 EU units). Mini-EU check: ISET = 0.1111 x the
+rated crops' area in every unit (1,073 thousand ha), those crops -8.6%, voluntary set-aside and fallow -74, cereal
+production -8.4%; no CAPRI run of the scenario to compare with.
 
 **P2. Coupled support and the Pillar I envelope.** CAPRI's scenario without voluntary coupled support
 (cap_after_2014 with voluntaryCoupledSupportFile = void.gms) sets the coupled premium types (PSDPAY_vcs*) to zero and
@@ -689,7 +699,7 @@ fine-grained token checked the same day; the token is kept outside the repositor
 | S9 | K65 | deferred (no CAPRI per-sex results) | whether to resume | KI K65 |
 | S10 | [I] S1 for no-till's yield | 3-NOP built; UreaSubst parked; NoTill, LegSh not built | whether to build NoTill and LegSh | KI K93 |
 | S11 | S1 for T1/T2 averages | not started; per item | which items and exports | SGP S11 |
-| P1 obligatory set-aside | — | not started | when | §12a; supply_model.gms SETA_ |
+| P1 obligatory set-aside | done 10 November 2026 | CAPRI's SETA_ (supply/land.py _obligatory_set_aside), scenario set_aside_10 | — | §12a; supply_model.gms SETA_ |
 | P2 coupled support, Pillar I envelope | — | not started | when; with the premium module's port | §12a |
 | CAPRI's sources as Parquet, for download (beyond CAPRI) | — | decided 3 Nov: outside git, gated Hugging Face dataset, after market stages 2-3; sizes measured; not started | none | §12b |
 

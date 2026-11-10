@@ -290,6 +290,8 @@ class SupplyResult:
     ghg_emissions: pd.Series = None
     converged: bool = True
     solver_message: str = ""
+    #: CAPRI's obligatory set-aside ISET (1000 ha; SETA_, supply/land.py _obligatory_set_aside): 0 without rates
+    iset: float = 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -1630,6 +1632,13 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # CAPRI's Green Deal group (set_fert_priors.gms, %scenarioGroup%==greendeal): the fertiliser priors' partial
         # derivative has a slack in the listed regions
         self.ev.fert_partial_slack = bool(isinstance(policy_shock, dict) and policy_shock.get("greendeal_group"))
+        # CAPRI's obligatory set-aside rates of this region's arable activities (percent; SETA_, land.py)
+        self.ev.set_aside_rates = dict(((policy_shock.get("set_aside_rates") or {}) if isinstance(policy_shock, dict)
+                                        else {}).get(self.data.region_id) or {})
+        if self.ev.set_aside_rates and (getattr(self.data, "land_market", None) or {}).get("quad") is None:
+            import warnings as _w
+            _w.warn(f"{self.data.region_id}: obligatory set-aside rates given, but the region has no land market "
+                    f"(CAPRI's arable land balance): not applied")
         if isinstance(policy_shock, dict):
             _org = float(policy_shock.get("organic_area_target", 0.0) or 0.0)
             _pest = float(policy_shock.get("pesticide_reduction", 0.0) or 0.0)
@@ -1919,6 +1928,9 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             coefs = self.data.nutrient_coefs.reindex(self.acts)[nut].fillna(0.0)
             nutr[nut] = float((coefs * activities).sum())
         nutrient_balance = pd.Series(nutr)
+        _sv = getattr(self.ev, "seta_obl_vec", None)
+        _iset = (float(np.asarray(_sv, float) @ activities.reindex(self.acts[:len(_sv)]).fillna(0.0).values)
+                 if _sv is not None else 0.0)
 
         return SupplyResult(
             region_id=self.rid,
@@ -1929,6 +1941,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             nutrient_balance=nutrient_balance,
             converged=solver_converged,
             solver_message=solver_message,
+            iset=_iset,
         )
 
 

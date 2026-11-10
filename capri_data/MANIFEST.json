@@ -4031,7 +4031,7 @@
   "capri_data/codes/results_items.csv": {
    "description": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
    "kind": "structure",
-   "rows": 179,
+   "rows": 181,
    "columns": 8,
    "read_by_model": [
     "capri_mod/io_results.py"
@@ -5121,6 +5121,24 @@
    "status": "live",
    "units": "- (not re-checked)",
    "catalogue_note": "The identity scenario (no factors): projecting with it must reproduce the comparative-static result exactly (capri_data/trajectories/null.json until 31 October 2026). (not re-checked)"
+  },
+  "capri_data/scenarios/set_aside_10/set_aside_rates.csv": {
+   "description": "CAPRI's obligatory set-aside scenario (scen/set_aside/set_aside_10.gms): the set-aside rate in percent (DATA(ru, act, \"SETR\")) of each EU regional unit's Grandes Cultures (sets.gms GRCU less RSET and VSET, set to eps there; CAPRI's codes mapped to the model's), the obligation CAPRI's SETA_ (supply/land.py); tools/build/build_set_aside_scenario.py",
+   "kind": "structure",
+   "vintage": "star 3.0",
+   "domain": "policy",
+   "status": "live",
+   "rows": 2580,
+   "columns": 3,
+   "units": "U_percent",
+   "read_by_model": [
+    "capri_mod/scenarios/definition.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_set_aside_scenario"
+   },
+   "catalogue_note": "CAPRI's 10% obligatory set-aside scenario: the rate of each EU unit's Grandes Cultures (scen/set_aside/set_aside_10.gms, sets.gms); tools/build/build_set_aside_scenario.py. (not re-checked)"
   },
   "capri_data/shared/capri_member_state_codes.csv": {
    "description": "capri_member_state_codes (no builder: a declared table)",

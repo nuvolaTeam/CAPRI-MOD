@@ -32,6 +32,18 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 10 November 2026: P1, CAPRI's obligatory set-aside (SETA_)
+
+- CAPRI's SETA_ (supply_model.gms l. 2219-2241): an arable activity with a set-aside rate r needs r / (1 - r) ha of
+  obligatory set-aside ISET per ha on arable land. CAPRI's ISET has no output, input cost, premium or PMP term in its
+  2030 data, so the model substitutes it into the arable land balance (supply/land.py _obligatory_set_aside; the base
+  use unchanged) and reports it (set_aside table ISET, SupplyResult.iset; results_items). The rates are a scenario
+  table, set_aside_rates.csv (region, activity, setr_pct; PolicyScenario.set_aside_rates).
+- Scenario folder set_aside_10: CAPRI's scen/set_aside/set_aside_10.gms, 10% on its Grandes Cultures in the EU
+  (tools/build/build_set_aside_scenario.py; schema set_aside_rates).
+- Checks: test_obligatory_set_aside_as_capris_seta; the mini-EU set_aside_10 run converged in 5 iterations, ISET =
+  0.1111 x the rated area in every unit; runs without rates unchanged but for the new ISET column (0).
+
 ## 10 November 2026: S6 items 3-5 closed in the registers
 
 - Item 4 (the fertiliser calibration where CAPRI's 2030 posterior admits no allocation at the model's base): with the

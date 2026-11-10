@@ -1,0 +1,11 @@
+# CAPRI's flat-rate 10% obligatory set-aside on the Grandes Cultures (scen/set_aside/set_aside_10.gms), on capri-mod's
+# Green Deal reference: the rates (set_aside_rates.csv) from tools/build/build_set_aside_scenario.py; the obligation is
+# CAPRI's SETA_ (supply/land.py _obligatory_set_aside)
+[scenario]
+name = "set_aside_10"
+short_name = "set_aside_10"
+kind = "scenario"
+description = "CAPRI's 10% obligatory set-aside on cereals, oilseeds, pulses and fodder maize in the EU (SETA_)."
+capri_files = ["scen/set_aside/set_aside_10.gms"]
+reference = "ref_star3"
+reference_note = "CAPRI's file is a scenario shifter without its own reference; it runs on the Green Deal reference here"

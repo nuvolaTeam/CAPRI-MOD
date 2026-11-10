@@ -4355,6 +4355,32 @@ def test_fert_partial_slack_as_capris_greendeal_group(data):
     assert greendeal_2030_scenario().greendeal_group and not PolicyScenario(name="x").greendeal_group
 
 
+def test_obligatory_set_aside_as_capris_seta():
+    """P1 (10 November 2026): CAPRI's obligatory set-aside (supply_model.gms SETA_): an arable activity with a rate r
+    needs r / (1 - r) ha of set-aside (ISET) per ha on arable land; ISET has nothing in CAPRI's objective, so it is
+    substituted into the arable land balance (both rows of the equality), whose base use stays the base's. The
+    scenario set_aside_10 (scen/set_aside/set_aside_10.gms): 10% on CAPRI's Grandes Cultures (GRCU less RSET and VSET)
+    in the 215 EU regional units."""
+    from types import SimpleNamespace
+    import numpy as np
+    from capri_mod.supply.land import LandBlock
+    from capri_mod.scenarios import definition as SD
+    labels = ["arable_land", "grassland", "arable_land_lo"]
+    Aa = np.array([[1.0, 1.0, 0.0, -1.0], [0.0, 0.0, 1.0, 0.0], [-1.0, -1.0, 0.0, 1.0]])
+    obj = SimpleNamespace(ev=SimpleNamespace(set_aside_rates={"SWHE": 10.0}, seta_obl_vec=None),
+                          acts=["SWHE", "VSET", "GRAE"], data=SimpleNamespace(region_id="X"))
+    A1 = LandBlock._obligatory_set_aside(obj, Aa.copy(), labels, 3)
+    assert A1[0, 0] == pytest.approx(1.0 + 0.1 / 0.9) and A1[2, 0] == pytest.approx(-1.0 - 0.1 / 0.9)
+    assert (A1[1] == Aa[1]).all() and (A1[:, 1:] == Aa[:, 1:]).all()
+    assert obj.ev.seta_obl_vec[0] == pytest.approx(0.1 / 0.9) and obj.ev.seta_obl_vec[1:].tolist() == [0.0, 0.0]
+    obj.ev.set_aside_rates = {}
+    assert (LandBlock._obligatory_set_aside(obj, Aa.copy(), labels, 3) == Aa).all() and obj.ev.seta_obl_vec is None
+    sc = SD.to_policy_scenario(SD.load("set_aside_10"))
+    assert len(sc.set_aside_rates) == 215
+    assert sc.set_aside_rates["AT110000"] == {a: 10.0 for a in ("BARL", "CORN", "DWHE", "MAIF", "OATS", "OCER", "PULS",
+                                                                "RAPE", "RYEM", "SOYA", "SUNF", "SWHE")}
+
+
 def test_intensity_splits_at_capris_2030_point_with_manure_npk(data):
     """S6 item 6 (9 November 2026): at the 2030 market year the dairy and cattle splits take CAPRI's own 2030 terms
     (the "_2030" columns, from the 2030 reference the model's base comes from), at 2017 the base year's; the split

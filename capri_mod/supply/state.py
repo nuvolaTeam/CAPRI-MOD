@@ -142,6 +142,8 @@ class RegionalEvalState(_Slots):
         "organic_conv",       # the organic conversion shares by crop
         "organic_group_target",  # CAPRI's organic target per fertiliser crop group (p_organicAreaTargetCrops)
         "fert_partial_slack",    # the Green Deal group's slack on the fertiliser priors' partial derivative
+        "set_aside_rates",       # CAPRI's obligatory set-aside rates of the region's arable activities (SETA_)
+        "seta_obl_vec",          # the obligatory set-aside per unit of each activity, r / (1 - r) (SETA_; land.py)
         "yield_price_factor", # the yields' price factors
     )
 

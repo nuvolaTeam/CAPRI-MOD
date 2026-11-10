@@ -2347,6 +2347,31 @@
    ]
   },
   {
+   "task": "build_set_aside_scenario",
+   "builder": "build_set_aside_scenario",
+   "args": [
+    "$SOURCES/gams"
+   ],
+   "inputs": [
+    "capri_data/shared/regional_units.csv",
+    "capri_data/shared/eu_market_blocks.csv"
+   ],
+   "code": [
+    "capri_mod/__init__.py",
+    "capri_mod/csvio.py",
+    "capri_mod/data/definitions.py",
+    "tools/build/build_set_aside_scenario.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$SOURCES/gams/scen/set_aside/set_aside_10.gms",
+    "$SOURCES/gams/sets.gms"
+   ],
+   "outputs": [
+    "capri_data/scenarios/set_aside_10/set_aside_rates.csv"
+   ]
+  },
+  {
    "task": "build_fert_side_effects",
    "builder": "build_fert_side_effects",
    "args": [],

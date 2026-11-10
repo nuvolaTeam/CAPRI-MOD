@@ -701,6 +701,8 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                         getattr(pol_scenario, "organic_area_target", 0.0) or 0.0),
                     # CAPRI's Green Deal group: the fertiliser priors' partial-derivative slack in its listed regions
                     "greendeal_group": bool(getattr(pol_scenario, "greendeal_group", False)),
+                    # CAPRI's obligatory set-aside rates, {region: {activity: pct}} (SETA_)
+                    "set_aside_rates": dict(getattr(pol_scenario, "set_aside_rates", None) or {}),
                 }
             supply_results = self.supply_module.run(
                 price_signals=price_signal if outer_iter > 0 else None,
@@ -1554,7 +1556,8 @@ def _npk_table(supply_results):
 
 
 def _set_aside_table(supply_results, data):
-    """CAPRI's two set-aside activities, VSET and FALL, per region (1000 ha; premiums million EUR), the model's own
+    """CAPRI's two set-aside activities, VSET and FALL, and its obligatory set-aside ISET (SETA_, scenarios with
+    set-aside rates only), per region (1000 ha; premiums million EUR), VSET and FALL the model's own
     activities since S2 (7 November 2026; before, the model's SETA split by CAPRI's VSET share and PMP terms, K111):
     their levels and premiums per ha (tools/build/build_labour_setaside.py, set_aside_split.csv prem_vset, prem_fall,
     the 2030 values at the 2030 market year). None without the data."""
@@ -1572,7 +1575,9 @@ def _set_aside_table(supply_results, data):
         row = sa.loc[r]
         v, f_ = (float(x.get(a, 0.0)) for a in ("VSET", "FALL"))
         pv, pf = (float(row.get(k + vt, row.get(k, 0.0)) or 0.0) for k in ("prem_vset", "prem_fall"))
-        rows[r] = {"SETA": v + f_, "VSET": v, "FALL": f_, "prem_VSET": v * pv / 1000.0, "prem_FALL": f_ * pf / 1000.0}
+        rows[r] = {"SETA": v + f_, "VSET": v, "FALL": f_, "prem_VSET": v * pv / 1000.0, "prem_FALL": f_ * pf / 1000.0,
+                   # CAPRI's obligatory set-aside (SETA_, 0 without a scenario's rates; not in SETA = VSET + FALL)
+                   "ISET": float(getattr(res, "iset", 0.0) or 0.0)}
     return pd.DataFrame.from_dict(rows, orient="index") if rows else None
 
 

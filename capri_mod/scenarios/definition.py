@@ -30,6 +30,9 @@ TABLES = {
     "premium_factors.csv": (("region", "activity", "factor"), "premium_factor_regional"),
     "tariff_changes.csv": (("region", "commodity", "change_pct"), "tariff_changes"),
     "trq_volume_changes.csv": (("commodity", "change_kt"), "trq_volume_changes"),
+    # CAPRI's obligatory set-aside rate in percent by regional unit and arable activity (DATA(ru, act, "SETR"),
+    # supply_model.gms SETA_)
+    "set_aside_rates.csv": (("region", "activity", "setr_pct"), "set_aside_rates"),
 }
 
 
@@ -225,7 +228,7 @@ def tables(name: str, root: Optional[Path] = None) -> Dict[str, dict]:
             raise ValueError(f"{f}: columns {list(head)}, expected {list(cols)}")
         for i, r in enumerate(rows, start=2):
             for c in cols[:-1]:
-                ok = (r[c] in units) if (c == "region" and fname == "premium_factors.csv") else \
+                ok = (r[c] in units) if (c == "region" and fname in ("premium_factors.csv", "set_aside_rates.csv")) else \
                      (r[c] in set(ALL_TRADE_REGIONS)) if c == "region" else (r[c] in known[c])
                 if not ok:
                     raise ValueError(f"{f} line {i}: {c} {r[c]!r} is not one of the model's")

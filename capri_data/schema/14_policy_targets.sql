@@ -39,6 +39,17 @@ CREATE TABLE fert_partial_slack (
 );
 COMMENT ON TABLE fert_partial_slack IS 'CAPRI''s Green Deal group: the NUTS 2 regions (curNuts2) whose fertiliser priors'' partial derivative has a slack (v_fertDistPartialSlack: flows with a prior mode below 5e-3 x 1000 t within +-mode) and the listed (region, group) pairs (extraSlackRegion_to_ngrp: every flow of the group within +-(mode + 0.1 x 1000 t)); ngrp empty: the region''s tiny-prior rule only (supply/set_fert_priors.gms l. 664-785, %scenarioGroup%==greendeal); tools/build/build_fert_partial_slack.py';
 
+-- file: capri_data/scenarios/set_aside_10/set_aside_rates.csv
+CREATE TABLE set_aside_rates (
+    region VARCHAR NOT NULL,
+    activity VARCHAR NOT NULL,
+    setr_pct DOUBLE NOT NULL CHECK (setr_pct > 0 AND setr_pct < 100),
+    PRIMARY KEY (region, activity)
+);
+COMMENT ON TABLE set_aside_rates IS 'CAPRI''s obligatory set-aside scenario (scen/set_aside/set_aside_10.gms): the set-aside rate in percent (DATA(ru, act, "SETR")) of each EU regional unit''s Grandes Cultures (sets.gms GRCU less RSET and VSET, set to eps there; CAPRI''s codes mapped to the model''s), the obligation CAPRI''s SETA_ (supply/land.py); tools/build/build_set_aside_scenario.py';
+INSERT INTO value_units VALUES
+  ('set_aside_rates', 'setr_pct', 'U_percent', 'capri', 'DATA(RU, act, "SETR") (scen/set_aside/set_aside_10.gms)');
+
 -- file: capri_data/2017/policy/organic_yield_gap.csv
 CREATE TABLE organic_yield_gap (
     peseta_region VARCHAR PRIMARY KEY CHECK (peseta_region IN ('CEN', 'CES', 'NE', 'SE', 'UK_IR')),

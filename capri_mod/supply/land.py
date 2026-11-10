@@ -22,6 +22,37 @@ class LandBlock:
             raise ValueError(f"{self.data.region_id}: no {kind} land in land_availability.csv")
         return v
 
+    def _obligatory_set_aside(self, Aa, labels, n):
+        """CAPRI's obligatory set-aside (supply/supply_model.gms SETA_, l. 2219-2241): the arable activities with a
+        set-aside rate r (DATA(ru, act, "SETR"), percent) require r / (1 - r) ha of obligatory set-aside per ha, x
+        (1 - NONS), on arable land: sum(act, level x (1 - NONS) x r / (1 - r)) = ISET (+GSET, TSET, NONF). CAPRI's
+        ISET has no output, no input cost (no TOIN in its 2030 data), no premium and no PMP term (no level at the
+        calibration point); prep_sim.gms l. 253 opens it where a rate is set. With nothing of its own in the objective,
+        the ISET column equals that sum, so it is substituted: each activity's coefficient in the arable land balance
+        (CAPRI's LandBalNoSlak_(ARAC), which carries ISET) rises by r / (1 - r), and the ISET area is that term of the
+        solution (reported as ISET). The balance's base use (its right-hand side) stays the base's, without the
+        obligation: the land it needs comes from the crops or from more arable land, at the land market's cost, as in
+        CAPRI. NONS (CAPRI's non-food share on set-aside) is 0 in CAPRI's 2030 data and in its set-aside scenario.
+        Applies where the scenario gives rates (the policy shock's set_aside_rates); returns Aa unchanged otherwise."""
+        rates = getattr(self.ev, "set_aside_rates", None) or {}
+        self.ev.seta_obl_vec = None
+        if not rates:
+            return Aa
+        inc = np.zeros(n)
+        for j, a in enumerate(self.acts[:n]):
+            r = 0.01 * float(rates.get(a, 0.0) or 0.0)
+            if r > 0:
+                if not r < 1.0:
+                    raise ValueError(f"{self.data.region_id}: set-aside rate of {a} {100 * r}% (below 100% needed)")
+                inc[j] = r / (1.0 - r)
+        if not inc.any():
+            return Aa
+        for lab, sign in (("arable_land", 1.0), ("arable_land_lo", -1.0)):
+            if lab in labels:
+                Aa[labels.index(lab), :n] += sign * inc
+        self.ev.seta_obl_vec = inc
+        return Aa
+
     def _land_augment(self, A_ub, b_ub, c_lin, x0):
         """Augment the regional QP with CAPRI's land market (LandMarket_,
         trustee-land variant): land-type areas L as variables, cost 1/2 L'Q L
@@ -374,6 +405,7 @@ class LandBlock:
         if extra_r:
             Aa = np.vstack([Aa] + extra_r); ba = np.concatenate([ba, extra_b])
             labels.extend([labels[i] + "_lo" for i, _c, _k in rows])
+        Aa = self._obligatory_set_aside(Aa, labels, n)
         self.ev.land_types_used = list(self.LAND_TYPES)
         start = np.concatenate([x0, L0] + ([np.array([getattr(self.ev, "alloc_m0", 0.0)])] if alloc_k else [])
                                + ([np.zeros(pool_k)] if pool_k else []))

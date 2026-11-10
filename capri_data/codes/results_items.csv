@@ -117,6 +117,7 @@ policy,pillar1_EUR_billion,cols,,,,,
 policy,pillar2_EUR_billion,cols,,,,,
 policy,premium_EUR_ha_UAA,cols,,,,,
 policy,total_EU_budget_EUR_billion,cols,,,,,
+set_aside,ISET,rows,ISET,LEVL,,1000 ha,"CAPRI's obligatory set-aside DATA(RU,'ISET','LEVL') (SETA_, supply_model.gms l. 2219-2241); 0 without a scenario's set-aside rates"
 set_aside,FALL,rows,FALL,LEVL,,1000 ha,"CAPRI's set-aside activities' levels DATA(RU,act,'LEVL'): simini_21730 DATA DE110000.VSET.LEVL, DE110000.FALL.LEVL"
 set_aside,SETA,rows,,,,,
 set_aside,VSET,rows,VSET,LEVL,,1000 ha,"CAPRI's set-aside activities' levels DATA(RU,act,'LEVL'): simini_21730 DATA DE110000.VSET.LEVL, DE110000.FALL.LEVL"
@@ -145,6 +146,7 @@ supply,ghg_emissions,rows,,,,,
 supply,gross_margin,rows,,,,EUR 1000,
 supply,gross_output,rows,GROF,act,SWHE;DWHE;RYEM;BARL;OATS;CORN;OCER;PARI;OCRO;OIND;NURS;FLOW;POTA;SUGB;SUNF;RAPE;SOYA;OOIL;PULS;TOMA;OVEG;APPL;OFRU;CITR;TAGR;WINE;OLIV;TABO;TOBA;TEXT;MAIF,1000 t,"DATA(RU,'GROF',product): the region's gross production (simini_21730 DATA DE110000.GROF.SWHE); the model's gross output of a crop activity is its product's (CAPRI's 2030 GD reference, DE110000: SWHE 545.4 vs the model's 544.9). Not GRAS (another measure: 4356 vs 970) nor the animals (their products are other codes)"
 supply,histosol_fallow,rows,,,,,
+supply,iset,rows,,,,,
 supply,land_types,rows,,,,,
 supply,luc,rows,,,,,
 supply,manure_availability,rows,,,,,

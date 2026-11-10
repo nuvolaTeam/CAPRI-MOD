@@ -23334,6 +23334,7 @@
      "build_processing_seeds",
      "build_processing_yields",
      "build_ration_trajectory_2030",
+     "build_set_aside_scenario",
      "build_supplement_effects",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
@@ -23830,6 +23831,61 @@
     ]
    }
   },
+  "set_aside_rates": {
+   "file": "capri_data/scenarios/set_aside_10/set_aside_rates.csv",
+   "declared_in": "14_policy_targets.sql",
+   "layout": [],
+   "comment": "CAPRI's obligatory set-aside scenario (scen/set_aside/set_aside_10.gms): the set-aside rate in percent (DATA(ru, act, \"SETR\")) of each EU regional unit's Grandes Cultures (sets.gms GRCU less RSET and VSET, set to eps there; CAPRI's codes mapped to the model's), the obligation CAPRI's SETA_ (supply/land.py); tools/build/build_set_aside_scenario.py",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "setr_pct",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "((setr_pct > 0) AND (setr_pct < 100))"
+   ],
+   "units": [
+    {
+     "item": "setr_pct",
+     "unit": "U_percent",
+     "status": "capri",
+     "basis": "DATA(RU, act, \"SETR\") (scen/set_aside/set_aside_10.gms)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_set_aside_scenario",
+    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/scen/set_aside/set_aside_10.gms; $SOURCES/gams/sets.gms"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/scenarios/definition.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "shr_capri_member_state_codes": {
    "file": "capri_data/shared/capri_member_state_codes.csv",
    "declared_in": "26_shared.sql",
@@ -24154,6 +24210,7 @@
      "build_processing_yields",
      "build_ration_trajectory_2030",
      "build_regional_units",
+     "build_set_aside_scenario",
      "build_supplement_effects",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
