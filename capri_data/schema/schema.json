@@ -8769,7 +8769,9 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_expert_rules.py"
+    ]
    }
   },
   "ctrd_cact": {
@@ -50373,7 +50375,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 106,
+  "capri/keep": 128,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 26,

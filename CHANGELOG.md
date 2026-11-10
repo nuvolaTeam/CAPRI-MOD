@@ -32,6 +32,15 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 10 November 2026 (night): CAPTRD-MOD stage 2d, expert_support.gms's own rules
+
+- capri_mod/pipeline/captrd/expert_rules.py: fresh milk net trade, sugar and beet prices and balance positions, the
+  nutrient intake trends, isoglucose, UAAR, the breeding animals' slaughter weights and sheep milk yield (expert_support.gms
+  l. 51-322; the sources it includes are separate pieces). Against CAPTRD's Expert and TrustLevl of 2020-2070: 12 rules
+  equal in every record and trust level; sheep milk's values equal, 9 trust levels set by a later source; the beet trade
+  positions set by a later source (not yet ported). Isoglucose gives nothing, as in CAPTRD: the HFCS share it needs
+  (HCOS) is not a CAPRI column and CAPTRD's DGAgri holds none (test_captrd_expert_rules.py).
+
 ## 10 November 2026 (late night): CAPTRD-MOD stage 2d begun, the COCO nowcast supports
 
 - define_stats_and_supports.gms l. 377-455 and 522-534 ported (capri_mod/pipeline/captrd/coco_supports.py): the data of
