@@ -32,7 +32,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K126](#k126) | The CasADi trade system left out the quota price offsets of a commodity with global quotas only (casein), in the optional exact-Jacobian and Newton-Krylov solves | fixed (9 November 2026); the default solve unaffected |
 | [K127](#k127) | Under CAPRI's market calibration (S7) an emission tax leaves N manure trade at zero in a four-unit Belgian run where the former form traded 360 t | open (9 November 2026): cause not established |
 | [K128](#k128) | Farm-to-Fork's meat prices against JRC121368: beef +29.5% against +24.0%, poultry +20.4% against +18.0%, pork +20.5% against +43.0%, with EU production close to CAPRI's | open (9 November 2026): the market's inputs checked against CAPRI's (base, demand elasticities, Armington, quotas), no departure found; needs CAPRI's own scenario run on the same version |
-| [K129](#k129) | BG020000 under the Green Deal: the regional model keeps a worse local optimum (objective 2.4% from the best one found) for many iterations, so its crop mix depends on the restart path (maize 169 or 16 thousand ha between two runs) | open (9 November 2026): non-convex regional problem, K79 family; a stronger multi-start planned (S6 item 5) |
+| [K129](#k129) | BG020000 under the Green Deal: the coupled iteration settles on one of two branches of the region's response (maize 169 or 16 thousand ha between two runs); each iteration's problem mostly has one solution the starts agree on | open (10 November 2026): the branch follows the market iteration's path; more starts per solve did not change it (tried and dropped) |
 | [K130](#k130) | Catch crops' cost per ha is CAPRI's reported TOIN of CATC, not its cost coefficients; where CAPRI's Green Deal baseline has no catch crops (160 of 250 units), the calibration run's TOIN | open (9 November 2026): to read CAPRI's own cost data of the winter-cover technology |
 
 ## Resolved (107)
@@ -2624,34 +2624,36 @@ the model. Next: CAPRI's own Farm-to-Fork or a market-only shock run on the same
 Bonn, VALIDATION_PLAN §1.3).
 
 <a id="k129"></a>
-### K129: BG020000 under the Green Deal: a worse local optimum kept, a crop mix that depends on the restart path (found 9 November 2026)
+### K129: BG020000 under the Green Deal: the run settles on one of two branches of the region's response (found 9 November 2026)
 
 The mini-EU Green Deal 2030 at 65f8c65 (mini_gd_s6c) and with CAPRI's fertiliser priors' slack (s6d, mini_gd_s6d; the
 slack does not act in BG020000, outside CAPRI's list) end BG020000 at very different crop mixes - maize 169 against 16
 thousand ha, barley 14 against 84, other arable crops 80 against 16, pulses 7 against 37, voluntary set-aside 55
-against 97. Every solve of the region ends at IPOPT's acceptable level, not optimal, and the jump check (K79) fires in
-the first iterations (moves of 5.8 and 50). The full-EU Green Deal's response there is large as well (soft wheat -54%,
-maize -73%, sunflower -62%, set-aside and fallow 18 -> 193 thousand ha); in the last iteration 13 of 221 EU regions end
-at the acceptable level.
+against 97. The full-EU Green Deal's response there is large as well (soft wheat -54%, maize -73%, sunflower -62%,
+set-aside and fallow 18 -> 193 thousand ha); in the last iteration 13 of 221 EU regions end at IPOPT's acceptable
+level, not optimal.
 
-Investigation (9 November 2026, the regions' problems dumped with CAPRI_NLP_DUMP and re-solved alone):
-- the first reading, one objective for two crop mixes (a flat direction), was wrong: the two runs' final problems are
-  not the same (other prices), and their objectives are not comparable;
-- the problem is non-convex and has several local optima. Re-solved from four starts at a tight tolerance, s6d's last
-  problem of the region reaches one solution, with an objective 2.4% better than the one the run kept (-1,906,667
-  against -1,862,413); in both runs the region stayed in the worse basin for about ten iterations;
-- the jump check's restart from the previous iterate (K79, 'jump:prev') moved the dev run's region to the better basin
-  (-1,906,423), while the same restart returned Infeasible in s6d, which kept the worse one: which basin a run ends in
-  depends on the restart path, not on the change under test.
-CAPRI solves the same kind of problem with CONOPT, a local solver whose result also depends on its start; whether
-CAPRI's own Green Deal solution for the region is in the better basin is not known (CAPRI's Green Deal run of the
-project lead, when it completes).
+Investigation (9-10 November 2026, the region's solves traced with CAPRI_NLP_DUMP / CAPRI_NLP_TRACE and re-solved alone):
+- the region's problem can have two local optima at some prices: in mini_gd_s6c's 19th scenario iteration the warm
+  start ended at -1,861,922 and the restart from the previous point (the jump check, K79) at -1,906,423 on the same
+  problem, and the run continued on that branch;
+- but at most iterations the starts agree: in the mini-EU Green Deal at 1fc8088 with an extra check (10 November
+  2026; every solve kept at the acceptable level also solved from the previous point, the standard start and the
+  region's last optimal solution), the three starts reached the same objective in each of the last 16 scenario
+  iterations (or failed), and the last problem re-solved from the last six iterates at a tight tolerance gives one
+  solution, -1,859,343 (maize 15, barley 87, set-aside 99 thousand ha); the run's indicators were identical to one
+  decimal without the check, which cost about 30% more time. The check was dropped;
+- so the branch a run ends on follows the coupled iteration's path (the prices the market feeds back), not a solve
+  that misses a better optimum of its own problem; the objectives of two runs' problems are not comparable (the
+  first reading of 9 November, "a worse optimum kept, 2.4% from the best", compared two different problems).
+CAPRI solves the same kind of problem with CONOPT, a local solver whose result also depends on its start; which
+branch CAPRI's own Green Deal solution takes for the region is to be read from the project lead's CAPRI Green Deal
+run, when its results are stored.
 
 - **Effect:** the mini-EU Green Deal's cereal production -9.6% against -8.6% between the two runs, most of it this
-  region; any run's BG020000 result, and comparisons between runs where a region changes basin
-- **Status:** **open**: a stronger search for the region's best local optimum (more starts when a solve ends at the
-  acceptable level or the jump check fires, the best objective kept) planned under S6 item 5; until then a run-to-run
-  difference concentrated in such a region is not attributed to the change under test
+  region; any run's BG020000 result, and comparisons between runs where the region changes branch
+- **Status:** **open**: to compare with CAPRI's Green Deal result for the region; until then a run-to-run difference
+  concentrated in such a region is not attributed to the change under test
 
 ### K130: Catch crops' cost per ha from CAPRI's reported TOIN (found 9 November 2026)
 

@@ -32,6 +32,22 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 10 November 2026: S6 items 3-5 closed in the registers
+
+- Item 4 (the fertiliser calibration where CAPRI's 2030 posterior admits no allocation at the model's base): with the
+  base at CAPRI's Green Deal baseline, of the Romanian, Hungarian HU10-HU12 and ES620000 units only RO020000 (N) needs
+  it: its other arable fodder crops' need at the base is 4.4% above the group's prior supply (81% with the calibration
+  run's base); the model's need per ha is CAPRI's NITF within 1% and CAPRI's own reported flows fall short by about as
+  much, so a term of CAPRI's NUTNED_ the model does not carry is the likely cause, not yet identified (DEP-10).
+- Item 3 (Green Deal mineral caps exempted by solving): the remaining cases registered by pattern, tiny-prior groups
+  outside CAPRI's slack list and large groups with almost no manure prior under the 13% cut (DEP-10); to recheck on the
+  next full-EU Green Deal.
+- Item 5 (the numerical safeguards): registered (DEP-10, DEP-18). A further check for K129, re-solving every solution
+  kept at IPOPT's acceptable level from the other starts and the region's last optimal solution, was tried on the
+  mini-EU Green Deal and dropped: the starts agreed in every iteration, indicators unchanged, about 30% more time.
+  K129 corrected: the region's branch follows the coupled iteration's path; at most iterations its problem has one
+  solution the starts agree on.
+
 ## 10 November 2026 (night): the 2030 baseline at CAPRI's Green Deal baseline
 
 - The project lead's decision: the model's 2030 baseline reproduces CAPRI's 2030 Green Deal baseline
@@ -79,8 +95,8 @@ and `docs/KNOWN_ISSUES.md`.
   applied per nutrient.
 - Checks (the project lead's decision: no full-EU runs for changes of limited reach): mini-EU Farm-to-Fork unchanged at
   one decimal (NL220000, in CAPRI's list, now needs the inner duals widened); mini-EU Green Deal 18 iterations against
-  23, cereal production -9.6% against -8.6%, almost all of it BG020000 ending at another crop mix: a worse local
-  optimum kept, the basin depending on the restart path (K129, outside CAPRI's list); the full-EU effect not yet measured.
+  23, cereal production -9.6% against -8.6%, almost all of it BG020000 ending at another crop mix: the run
+  settling on another branch of the region's response (K129, outside CAPRI's list); the full-EU effect not yet measured.
 
 ## 9 November 2026 (evening): S6 items 1, 2 and 6 (the regional NLP departures)
 

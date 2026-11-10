@@ -160,6 +160,14 @@ goes gate by gate.
 - **Expected effect:** small each, documented per builder.
 - **Effort:** per item; some close with more exports from the project lead's CAPRI.
 - **How to check:** the rebuilt quantity against a CAPRI export, where one can be made.
+- **Status (10 November 2026): closed, one check left.** The 2030 feed slopes: CAPRI's 2030 SLOP with CAPRI's 2030
+  weights (DEP-22 fixed). The 2030 rations per activity: CAPRI's own (DATA at the 2030 point, since 10 November 2026
+  its Green Deal baseline; not rebuilt). The digestibility table: CAPRI's code (envind/def_digestibility.gms,
+  tools/build/build_digestibility_table.py; not rebuilt). The MITERRA fractions: the shares of liquid and solid
+  manure, grazing and housing (p_Nemidat TypeShare) checked against sim_ini_21730 and found equal; the storage and
+  application loss factors cannot be checked against an export of CAPRI (they are computed inside ammo_tech.gms from
+  the LitRev inputs, docs: claude/n_cascade_spec.md) and stay as built, unverified against a CAPRI number. K65 (S9)
+  needs CAPRI's per-sex young-animal results, not available now.
 
 ### S12. The solver
 
