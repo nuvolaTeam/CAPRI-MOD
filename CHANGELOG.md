@@ -32,6 +32,16 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 10 November 2026 (late night): CAPTRD-MOD stage 2d begun, the COCO nowcast supports
+
+- define_stats_and_supports.gms l. 377-455 and 522-534 ported (capri_mod/pipeline/captrd/coco_supports.py): the data of
+  the years COCO nowcasts (2018 in the reference run) as expert supports, with their trust levels, overwriting the other
+  experts' for those years. Against CAPTRD's Expert of 2018: 91,794 of 91,880 common records equal; the others and the
+  197 only here are biofuel (216) and sugar (65) positions that expert_support.gms and adjust_to_biof_supports.gms
+  rework (not yet ported), and 2 not traced (test_captrd_coco_supports.py).
+- Found in CAPRI's code: the flag "closeToBas" (l. 392-394) is assigned to itself, so it is never set and the exception it
+  guards (the columns colsNoCoco in the last ex-post year) never applies. Kept as coded.
+
 ## 10 November 2026 (late night): CAPTRD-MOD stage 2c, the DG AGRI baseline scaled to CAPRI's base period
 
 - captrd/scale_DG_AGRI_baseline.gms ported (capri_mod/pipeline/captrd/scale_dgagri.py): DGAgri to DGAgri1, the
