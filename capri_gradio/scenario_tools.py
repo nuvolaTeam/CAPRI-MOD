@@ -12,7 +12,6 @@ run_summary. The GUI also uses start_run, run_status and the job registry.
 from __future__ import annotations
 
 import json
-import os
 import re
 import subprocess
 import sys
@@ -334,10 +333,10 @@ def start_run(scenario: str, scenarios_dir: Optional[Path] = None, regions: str 
     rdir.mkdir(parents=True, exist_ok=True)
     stamp = time.strftime("%Y%m%dT%H%M%S")
     out, log = rdir / f"{scenario}_{stamp}.pkl", rdir / f"{scenario}_{stamp}.log"
-    cmd = run_command(scenario, out, scenarios_dir, regions, overrides)
-    env = {**os.environ, "CAPRI_WORKERS": str(workers), "PYTHONHASHSEED": "0"}
+    # the worker count as a setting (run.n_workers); the runner fixes the hash seed itself
+    cmd = run_command(scenario, out, scenarios_dir, regions, {**(overrides or {}), "run.n_workers": int(workers)})
     fh = open(log, "w")
-    proc = subprocess.Popen(cmd, cwd=str(ROOT), stdout=fh, stderr=subprocess.STDOUT, env=env)
+    proc = subprocess.Popen(cmd, cwd=str(ROOT), stdout=fh, stderr=subprocess.STDOUT)
     jid = f"{scenario}_{stamp}"
     JOBS[jid] = Job(scenario=scenario, cmd=cmd, log=log, out=out, proc=proc, owner=owner)
     return {"ok": True, "job": jid, "log": str(log)}

@@ -50,8 +50,9 @@ Compact form: several keys per line separated by `;`. The real file has one key 
 as one-key-per-line TOML (comments and [v] marks removed): it parses, 153 keys.
 ```
 [run]          base_year="2017" (only 2017 exists); manure_trade=true (use_manure_market; manureTradeNew, star3 GUI on)
-               n_workers="auto" (env CAPRI_WORKERS); run_environmental=true; report_biofuel=false; output_root="outputs"
-               nlp_cache_size=64 (env CAPRI_NLP_CACHE); hash_seed=0 (PYTHONHASHSEED, launcher sets it)
+               n_workers=0 (the cores; not read from the environment since 11 November 2026); run_environmental=true;
+               report_biofuel=false; output_root="outputs"; nlp_cache_size=64 (likewise); hash_seed=0 (PYTHONHASHSEED,
+               the launcher sets it); verbosity="capri", log_file, step_report (the run log, 11 November 2026)
 [outer_loop]   max_outer_iter=25 (CAPRI %STEPS%); outer_tolerance=0.005 (CAPRI p_minIterChg 0.05 %, other metric [v])
                supply_gap_tol=0.005; nbal_update_tol=0.001 (was land_update_tol); base_cal_tol=0.002; manure_pool_tol=0.03
                manure_max_outer_iter=60; manure_extend_min_iter=25; price_relaxation=0.5

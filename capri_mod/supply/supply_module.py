@@ -3164,16 +3164,12 @@ class SupplyModule(ModuleStateMixin):
 
     def workers(self, n_regions: int) -> int:
         """Number of worker processes for n_regions regional solves."""
-        n = self.n_workers
+        n = self.n_workers                         # the setting run.n_workers (0: the machine's cores)
         if n is None:
-            env = os.environ.get("CAPRI_WORKERS", "").strip()
-            if env:
-                n = int(env)
-            else:
-                try:
-                    n = len(os.sched_getaffinity(0))
-                except AttributeError:
-                    n = os.cpu_count() or 1
+            try:
+                n = len(os.sched_getaffinity(0))
+            except AttributeError:
+                n = os.cpu_count() or 1
         n = max(1, min(int(n), n_regions - 1))     # the first region is always solved here (below)
         if n > 1 and "fork" not in multiprocessing.get_all_start_methods():
             n = 1                                  # the workers inherit the module's state by fork

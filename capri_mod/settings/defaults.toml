@@ -7,19 +7,30 @@
 # Sourced economic parameters are not here: capri_data/codes/model_parameters.csv.
 
 [run]
+# The run's log (capri_mod/runlog.py): quiet (warnings and the last line), capri (CAPRI's section titles and run-log
+# lines, util/title.gms and capmod.gms's caplog, with one line of step report per iteration), detailed (also the model's
+# own timed lines: each stage, the inner balances, the regions not solved to optimality), debug (also the model's
+# verbose prints)
+verbosity = "capri"
+# the same lines written to this file ("" = none; the run scripts put it beside their output: <output>.log)
+log_file = ""
+# the step report as CSV, by path stem: <stem>_steps.csv (one row per iteration: times, stop tests, solve status) and
+# <stem>_iterchg.csv (every item's change between iterations, CAPRI's p_iterChg with its sign); "" = none (the run
+# scripts write it beside their output). Not CAPRI's: CAPRI keeps its step report in cur_step.gdx
+step_report = ""
 # CAPRI's manure trade between regions (GUI "New Manure Trade Module", manureTradeNew; star 3.0 GUI default on).
 # A scenario may set its own (PolicyScenario.manure_trade); it then holds for the scenario and its baseline.
 manure_trade = true
 # base year of the data (only capri_data/2017 exists; 2030 runs go through the projection layer)
 base_year = "2017"
-# worker processes for the regional solves: 0 = the machine's cores (the environment variable CAPRI_WORKERS, if set,
-# decides then: it is a property of the machine), 1 = in the main process, n = n workers. Results do not depend on it.
+# worker processes for the regional solves: 0 = the machine's cores, 1 = in the main process, n = n workers (e.g.
+# --set run.n_workers=2). Results do not depend on it.
 n_workers = 0
 # compute the environmental accounts after the solve
 run_environmental = true
 # report the EU biofuel block (feedstock demand is always in the market)
 report_biofuel = false
-# IPOPT solver objects kept per region graph (environment variable CAPRI_NLP_CACHE wins if set)
+# IPOPT solver objects kept per region graph (about 6 MB each)
 nlp_cache_size = 64
 # the regional NLP's derivative functions kept (sensitivity and KKT factorisations, each; refactor stage 3, N5)
 nlp_derivative_cache_size = 16

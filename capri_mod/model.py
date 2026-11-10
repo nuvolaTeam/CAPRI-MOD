@@ -56,6 +56,7 @@ from capri_mod.settings import setting, tri_state, current as _settings
 from capri_mod.data.definitions import MS_CODE, capri_ms, REGION_TO_COUNTRY, EU_MS_BLOCK, sup_noneu, is_eu as _is_eu
 from capri_mod.data.definitions import PRICE_FOLLOWS_EU, PRICE_FOLLOWS_ALL, CAPRI_FEED_TRD   # refactor stage 4
 from capri_mod.tableio import read_input
+from capri_mod import runlog as _runlog
 
 
 #: Nitrates Directive ceiling on organic N application (kg N per ha of UAA)
@@ -569,9 +570,12 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         self.res.nlp_tol_trace = []
         _lab = "baseline" if _is_base else str(getattr(pol_scenario, "name", scenario))
         self._progress(f"{_lab}: start (at most {max_outer_iter} iterations)")
+        _rl = _runlog.current()
+        _yr = self.data.get("market_year") if isinstance(self.data, dict) else None
         for outer_iter in range(max_outer_iter):
             self.ev.outer_iter_now = outer_iter
             _t_it0 = time.time()
+            _rl.loop_start(outer_iter + 1, max_outer_iter, _lab, _yr)
             if outer_iter == 0:
                 # CAPRI's price forecast and stop rule start afresh every run (outer_loop.price_update, stop_rule)
                 self.sv.capri_yani_hist = {}
@@ -713,6 +717,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             self.seen.last_spol = _spol
             self.seen.last_supply_results = supply_results   # fodder shadow prices for the rations
             _t_sup = time.time()
+            _rl_extra = _rl.supply_solved(outer_iter + 1, supply_results)
             # CAPRI's baseline calibration (CAPMOD calibrates its supply models so that the simulation year's baseline
             # reproduces the projected levels): in the baseline of a projected year, the regional models' linear terms
             # are corrected until their solution is the projection's levels (Sprint 9p); the scenario then starts
@@ -813,6 +818,8 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 verbose=self.verbose,
             )
             _t_mk1 = time.time()
+            _rl_extra.update(_rl.market_solved(outer_iter + 1, market_eq, self.market_module,
+                                               float(_settings().get("market.tol"))))
             if _yani_mkt:
                 self._young_animal_prices_from_market(_yani_ref)
 
@@ -1240,6 +1247,16 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                    + (f" ({_cv['top'][0][0]} {_cv['top'][0][1]})" if _cv.get('top') else "") if _cv else "")
                 + f" | N-balance price {_nbal:.2e}, pools {_pool:.2e}, young animals {_yani:.2e}, calibration {_cal:.2e}"
                 + (" -> stop" if _own_ok else ""))
+            _rl_extra.update(nbal_price_update=_nbal, manure_pools=_pool, young_animals=_yani, base_calibration=_cal,
+                             stop=bool(_own_ok))
+            _rs = getattr(self.sv, "capri_stop", None)
+            _rl.step_report(outer_iter + 1, _lab, _cv,
+                            {"t_supply_s": _t_sup - _t_it0, "t_between_s": _t_mk0 - _t_sup,
+                             "t_market_s": _t_mk1 - _t_mk0, "t_stop_tests_s": _t_it1 - _t_mk1,
+                             "t_iteration_s": _t_it1 - _t_it0},
+                            _rl_extra, getattr(_rs, "min_iter_chg", None),
+                            (_rs.steps[-1].get("signed") if _rs is not None and _rs.steps and _cv is not None
+                             else None))
             if _own_ok:
                 outer_converged = True
                 if self.verbose:
@@ -1255,6 +1272,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             # verbose=False comparison failed silently. It now always warns and
             # is recorded in metadata as outer_converged.
             outer_converged = False
+            _rl.log(f"WARNING: {_lab}: the stop rule was not met in {max_outer_iter} simulation loops")
             warnings.warn(
                 f"Outer supply-market loop did NOT converge in {max_outer_iter} "
                 "iterations. Price feedback is incomplete, so scenario results "
@@ -1291,6 +1309,10 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         # (arm/simu_calibration_to_supply.gms:360-368). (Until 8 November 2026 the "supply" form measured it after the
         # baseline, when a scenario needed it: the decision of 28 October 2026, superseded by S7.)
 
+        # CAPRI's warning when the market of the last step is not solved (arm/simu_market.gms l. 288-301)
+        if not bool(getattr(market_eq, "converged", True)):
+            _rl.log("WARNING: Market model not solved to its tolerance in the last iteration! The solution cannot be "
+                    "considered as an equilibrium")
         if getattr(self.market_module, "_milk_floor_hits", None):
             warnings.warn(f"raw milk price held just above zero in {sorted(self.market_module._milk_floor_hits)} "
                           "(negative milk prices not allowed in this scenario, CAPRI's negProdPriceAllowed): their milk "
@@ -1453,12 +1475,10 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
     progress_t0: Optional[float] = None
 
     def _progress(self, msg: str) -> None:
+        """The model's own timed line: the run log's level "detailed" (capri_mod/runlog.py)."""
         if not self.progress:
             return
-        now = time.time()
-        t0 = self.progress_t0 if self.progress_t0 is not None else now
-        el = int(now - t0)
-        print(f"[{time.strftime('%H:%M:%S')} +{el // 3600}:{el % 3600 // 60:02d}:{el % 60:02d}] {msg}", flush=True)
+        _runlog.current().detail(msg)
 
 
     # ------------------------------------------------------------------

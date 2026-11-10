@@ -173,12 +173,9 @@ def linear_solver_options() -> dict:
 
 
 def _cache_max():
-    """Solver objects kept: CAPRI_NLP_CACHE if set (a property of the machine's memory), else run.nlp_cache_size."""
+    """Solver objects kept: the setting run.nlp_cache_size."""
     from capri_mod.settings import current as _settings
-    try:
-        return int(os.environ.get("CAPRI_NLP_CACHE", "") or _settings().get("run.nlp_cache_size"))
-    except ValueError:
-        return int(_settings().get("run.nlp_cache_size"))
+    return int(_settings().get("run.nlp_cache_size"))
 
 
 def _cascade_loss(sub, sh):

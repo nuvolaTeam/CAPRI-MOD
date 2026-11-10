@@ -189,7 +189,7 @@ files record how they map to this model's names.
 | Test suite | 252 tests (gate of 30 October 2026, batch 9: 250 passed, 1 skipped; test_denmark_with_the_coco_data, skipped at the earlier gates, corrected after the full run and rerun on its own) |
 | On by default, as in CAPRI | land market and land rules, endogenous feed rations, fodder equality, ammonia technologies |
 | Optional | manure market (`use_manure_market`) |
-| 2030 Farm-to-Fork run | about 36 minutes on 2 cores (r161), plus about an hour once per new baseline for the market supply Hessian (67 min for r161's); regions solved in parallel (`CAPRI_WORKERS`), same results |
+| 2030 Farm-to-Fork run | about 36 minutes on 2 cores (r161), plus about an hour once per new baseline for the market supply Hessian (67 min for r161's); regions solved in parallel (setting `run.n_workers`), same results |
 | Solvers | IPOPT via CasADi (supply), Clarabel (manure pools), Newton (markets), HiGHS (LP checks) |
 
 ### Where things stand (29 October 2026)
@@ -388,10 +388,19 @@ Change a value there for a sensitivity run; scenario settings stay in the scenar
 tolerances in the code. A test keeps file and code in step.
 
 Runs repeat exactly only with a fixed string-hash seed (the model iterates sets of names in a few places): the
-runners and the container set `PYTHONHASHSEED=0`; when calling `CAPRIModel` from your own script, start Python with
-`PYTHONHASHSEED=0` too (otherwise two runs of one scenario can differ by ~0.2%, more in a few degenerate regions).
-The number of worker processes for the regional solves does not change results (`CAPRI_WORKERS=1` solves them in
-one process).
+runners (`tools/run/`) restart Python with it themselves, so there is nothing to export; a script of your own that
+calls `CAPRIModel` should do the same (the first lines of `tools/run/run_f2f_2030.py`), otherwise two runs of one
+scenario can differ by ~0.2%, more in a few degenerate regions. Everything else is a setting, none is read from the
+environment: the number of worker processes for the regional solves (`--set run.n_workers=2`; 0 = every core, 1 =
+one process) does not change results. A run from the repository's folder, its output under `runs/` (created if
+missing):
+
+```shell
+python tools/run/run_f2f_2030.py runs/f2f.pkl --set run.n_workers=2
+```
+
+It prints CAPRI's run log (`run.verbosity`: quiet, capri, detailed, debug) and writes it beside the output
+(`runs/f2f.log`), with the step report per iteration as CSV (`runs/f2f_steps.csv`, `runs/f2f_iterchg.csv`).
 
 Then, in Python — validate the data layer and run a minimal base scenario:
 
@@ -1350,8 +1359,8 @@ and review), and statistical or machine-learning methods that learn from its inp
 ### 9.2 Reproducibility
 
 - **Same inputs, settings and code, same results.** Inputs are CSV files with their provenance (§12); downloads are
-  kept as versions; every run writes its effective settings next to its result; runs use a fixed hash seed
-  (`PYTHONHASHSEED=0`, §3), without which two runs of one scenario can differ by about 0.2%.
+  kept as versions; every run writes its effective settings next to its result; the runners fix Python's hash seed
+  themselves (§3), without which two runs of one scenario can differ by about 0.2%.
 - **Changes are checked against reference runs.** Every refactor must reproduce them, and the regression anchors and
   tests fail when a result moves (§12).
 - **Caches are keyed by what they depend on.** The market supply Hessian, the slowest step, is cached under a key of

@@ -32,6 +32,24 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — the run log in CAPRI's style; no environment variables
+
+- `capri_mod/runlog.py`, setting `run.verbosity` (quiet, capri, detailed, debug; default capri): CAPRI's section titles
+  (util/title.gms: the section, the previous one, the seconds since it and the minutes since the start; here with the
+  wall clock) and its run-log lines (capmod.gms's caplog: run started, data preparation, "enters simulation loop Nr.",
+  supply side solved, global market model solved, finished), with one line of step report per iteration (CAPRI's
+  stop-rule rows above 0.05% and the largest changes, the time split). "detailed" adds the model's own timed lines.
+- Not CAPRI's (the project lead's choice): the same lines written beside the output (`<out>.log`, `run.log_file`) and
+  the step report as CSV per iteration (`<out>_steps.csv`: times, stop tests, solve status; `<out>_iterchg.csv`: every
+  item's change between iterations, CAPRI's p_iterChg with its sign; `run.step_report`).
+- Where CAPRI reports its market solver's number and sum of infeasibilities, the log reports the market's balance
+  residuals: the products whose largest relative residual is above `market.tol`, and the largest. A supply model not
+  solved to optimality is named (CAPRI aborts there; this model keeps IPOPT's last point, as before).
+- No environment variables: the worker count and the solver cache are the settings `run.n_workers` and
+  `run.nlp_cache_size` only (`CAPRI_WORKERS`, `CAPRI_NLP_CACHE` no longer read); the runners already fix Python's hash
+  seed themselves; `run_f2f_2030.py` creates its output folder (e.g. `runs/`). The app and the check tools pass
+  `run.n_workers` as a setting; the solver build notes (tools/solvers/README.md) no longer export variables.
+
 ## 11 November 2026 — CAPTRD-MOD stage 2d: DG AGRI's dairy data
 
 - `capri_mod/pipeline/captrd/dairy_supports.py`: CAPTRD's expert supports from DG AGRI's dairy data

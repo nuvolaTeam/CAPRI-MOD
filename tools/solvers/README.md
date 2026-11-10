@@ -60,8 +60,10 @@ result is a wheel you install with pip in place of PyPI's CasADi.
 4. Check that SPRAL runs with OpenMP:
 
    ```
-   OMP_CANCELLATION=TRUE OMP_NUM_THREADS=2 python3 - <<'EOF'
-   import casadi as ca, os
+   python3 - <<'EOF'
+   import os
+   os.environ.update(OMP_CANCELLATION="TRUE", OMP_NUM_THREADS="2")   # read by OpenMP when CasADi loads IPOPT
+   import casadi as ca
    x = ca.MX.sym("x", 2000)
    S = ca.nlpsol("S", "ipopt", {"x": x, "f": ca.sumsqr(x - 1) + ca.sumsqr(x[1:] - x[:-1]), "g": ca.sum1(x)},
                  {"ipopt.linear_solver": "spral", "ipopt.print_level": 0, "print_time": 0})
@@ -73,7 +75,8 @@ result is a wheel you install with pip in place of PyPI's CasADi.
 
    It should print `Solve_Succeeded 3.8.1+spral.omp` and a libgomp inside CasADi's folder.
 
-5. In capri-mod (the support is on the local branch `spral-omp`, and reaches `dev` with the next gate's push):
+5. In capri-mod's settings (a file passed with `--settings`, or `--set supply.nlp_linear_solver=spral` and so on); the
+   model sets the OpenMP environment itself (capri_mod/utils/ipopt_library.py), nothing to export:
 
    ```
    [supply]

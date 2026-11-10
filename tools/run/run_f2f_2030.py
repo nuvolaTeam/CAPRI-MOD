@@ -95,6 +95,7 @@ def main():
     ap.add_argument("--base-prices", action="store_true",
                     help="keep 2017 prices in the 2030 baseline (default: CAPRI's 2030 prices in 2017 money)")
     a = ap.parse_args()
+    Path(a.out).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)   # e.g. runs/ in the repository
     warnings.filterwarnings("ignore")
     # a regional solve whose last IPOPT point is kept (non-optimal, as CAPRI) is always shown
     warnings.filterwarnings("always", message=".*IPOPT's last point kept")
@@ -130,15 +131,23 @@ def main():
             ov[k.strip()] = v.strip()
     run_settings = _S.load(a.settings, overrides=ov)
     _S.activate(run_settings)
-    # a timed line per stage and outer iteration (CAPRIModel._progress): wall clock and time since the start
+    # the run's log (capri_mod/runlog.py, setting run.verbosity): CAPRI's titles and run-log lines, the model's own
+    # timed lines at "detailed"; written also beside the output (<out>.log) with the step report as CSV
+    # (<out>_steps.csv, <out>_iterchg.csv), unless run.log_file / run.step_report name other places
+    from capri_mod import runlog as _RL
+    _stem = str(a.out).rsplit(".", 1)[0]
+    _rl = _RL.configure(file=str(run_settings.get("run.log_file") or "") or _stem + ".log",
+                        step_report=str(run_settings.get("run.step_report") or "") or _stem, t0=_T_START)
+    _rl.log(f"{_RL.PROGRAM} run started: {' '.join(sys.argv[1:])}")
+    _rl.log("Data preparation")
     CAPRIModel.progress, CAPRIModel.progress_t0 = True, _T_START
     # a subset of regions (--regions) is solved on the whole data set: the EU's units outside it stay in the data and
     # supply the market through their member states' CAPRI market supply functions (KNOWN_ISSUES K83); until 31 October
     # 2026 the model was built on the subset's data alone, so the EU market had the whole EU's demand and the subset's
     # supply only
     _subset = [x for x in a.regions.split(",") if x] or None
-    m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False)
-    m._progress("model built (data loaded)")
+    m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=_rl.at("debug"))
+    _rl.log("Data preparation done")
     t0 = time.time()
     # CAPRI simulates from its calibrated 2030 reference (CAPMOD's reference run); the trend projection (CAPTRD) is
     # that calibration's input and stays available (--trajectory captrd)
@@ -203,9 +212,9 @@ def main():
             _over[field] = value
             setattr(_scen, field, value)
     _scen.endotech = effective(_scen.endotech)
-    m._progress(f"projection to 2030: baseline, then {_scen.name}")
+    _rl.title(f"Projection to 2030: baseline, then {_scen.name}")
     res = pmod.run(policy_scenario=_scen, years=[2030], **({"regions": _subset} if _subset else {}))
-    m._progress("runs done; writing the results")
+    _rl.title("Generate tables and write the results")
     b, s = res.baseline[2030], res.scenario[2030]
     _pmm = (getattr(pmod, "_last_projected_model", None) or m).market_module
     db, ds = b["market"].domestic_prices.loc["EU27"], s["market"].domestic_prices.loc["EU27"]
@@ -577,13 +586,15 @@ def main():
             print("\n".join(map(str, _d[:20])), flush=True)
             sys.exit(1)
     _no = out["meta"]["nlp_nonoptimal"]
-    print(f"saved {a.out} | converged {out['meta']['conv']} in {out['meta']['it']} iterations, {out['meta']['seconds']} s"
-          f" | non-optimal regional solves kept: baseline {len(_no['baseline'])}, scenario {len(_no['scenario'])}"
-          + (f" ({', '.join(_no['baseline'] + _no['scenario'])})" if _no['baseline'] or _no['scenario'] else "")
-          + f" | PMP {out['meta'].get('pmp_source')}"
-          + (f", mineral caps relaxed: {out['meta']['nlp_relaxed']}" if out['meta'].get('nlp_relaxed') else "")
-          + ("" if all(out["meta"]["market_converged"].values()) else
-             f" | MARKET NOT CONVERGED: {[k_ for k_, v_ in out['meta']['market_converged'].items() if not v_]}"))
+    _rl.log(f"{_RL.PROGRAM} went through all steps and is now finished")
+    _rl.always(f"saved {a.out} | converged {out['meta']['conv']} in {out['meta']['it']} iterations, "
+               f"{out['meta']['seconds']} s"
+               f" | non-optimal regional solves kept: baseline {len(_no['baseline'])}, scenario {len(_no['scenario'])}"
+               + (f" ({', '.join(_no['baseline'] + _no['scenario'])})" if _no['baseline'] or _no['scenario'] else "")
+               + f" | PMP {out['meta'].get('pmp_source')}"
+               + (f", mineral caps relaxed: {out['meta']['nlp_relaxed']}" if out['meta'].get('nlp_relaxed') else "")
+               + ("" if all(out["meta"]["market_converged"].values()) else
+                  f" | MARKET NOT CONVERGED: {[k_ for k_, v_ in out['meta']['market_converged'].items() if not v_]}"))
 
 
 if __name__ == "__main__":

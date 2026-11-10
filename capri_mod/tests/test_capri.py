@@ -3062,25 +3062,20 @@ def test_bull_heifer_split_calibrated_at_base():
 
 @pytest.mark.slow
 def test_parallel_regional_solves_match_sequential():
-    """Sprint 9r: the regional supply models are solved across worker processes (one per core, CAPRI_WORKERS or
-    SupplyModule.n_workers to change it). At given market prices the regions are independent, as in CAPRI, so the
+    """Sprint 9r: the regional supply models are solved across worker processes (one per core; the setting
+    run.n_workers or SupplyModule.n_workers to change it).
+    At given market prices the regions are independent, as in CAPRI, so the
     results are the same, to the last digit, with one worker or several. Two models built in one process agree too:
     the market's prices are CAPRI's data (no tariff or price drawn at random on a load)."""
     from capri_mod.model import CAPRIModel
     from capri_mod.supply.supply_module import SupplyModule
     from capri_mod.policy.greendeal import farm_to_fork_scenario
-    import os
+    from capri_mod.settings import override
     sm = SupplyModule.__new__(SupplyModule)
-    old = os.environ.get("CAPRI_WORKERS")
-    os.environ["CAPRI_WORKERS"] = "3"
-    try:
+    with override({"run.n_workers": 3}):
         assert sm.workers(10) == 3 and sm.workers(2) == 1
         sm.n_workers = 1                                  # run state over the setting run.n_workers
         assert sm.workers(10) == 1
-    finally:
-        os.environ.pop("CAPRI_WORKERS")
-        if old is not None:
-            os.environ["CAPRI_WORKERS"] = old
     # three regions, a livestock, a crop and a small mixed region: the first region is always solved in this process
     # (SupplyModule.workers: at most n_regions - 1 workers), so with two regions the second run had one worker and
     # never forked (found 2 November 2026, docs/design/STAGE3B_PLAN.md); with three it forks two workers
@@ -4604,11 +4599,11 @@ def test_dead_worker_does_not_hang_the_regional_solves(monkeypatch):
     monkeypatch.setitem(smod.__dict__, "_par_solve_region_orig", smod._par_solve_region)
     with override({"market.market_supply_nq": False}):
         m1 = CAPRIModel(data_dir="capri_data", verbose=False)
-        monkeypatch.setenv("CAPRI_WORKERS", "1")
+        m1.supply_module.n_workers = 1
         r1 = m1.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
         monkeypatch.setattr(smod, "_par_solve_region", _dying_in_fr10)
-        monkeypatch.setenv("CAPRI_WORKERS", "2")
         m2 = CAPRIModel(data_dir="capri_data", verbose=False)
+        m2.supply_module.n_workers = 2
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             r2 = m2.run(scenario="BASELINE", regions=regs, max_outer_iter=1)

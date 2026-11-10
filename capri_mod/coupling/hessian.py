@@ -6,6 +6,8 @@ module once model is loaded (capri_mod.coupling.inject); the annotations are not
 """
 from __future__ import annotations
 
+from capri_mod import runlog as _runlog
+
 import functools as _functools
 import hashlib as _hashlib
 from pathlib import Path as _Path
@@ -63,12 +65,12 @@ class HessianBlock:
         from capri_mod.supply.supply_module import RegionalSupplyModel as _RSMh
         _RSMh.nlp_tol = float(self.nlp_tol_final)          # the baseline's solves after its loop
         try:
-            self._progress("market supply Hessian of the baseline ...")
+            _runlog.current().title("Market supply Hessian of the baseline (calibrate_supply.gms)")
             _t_h = time.time()
             self.market_module.par.supply_hessian = self._market_supply_hessian(pend["price_signal"], pend["supply_results"],
                                                                             pend["regions"])
             self.par.hessian_key = pend["key"]
-            self._progress(f"market supply Hessian of the baseline: {time.time() - _t_h:.0f} s")
+            _runlog.current().log(f"Market supply Hessian of the baseline measured: {time.time() - _t_h:.0f} s")
         except Exception as _exc:
             warnings.warn(f"market supply Hessian not built ({_exc!r}); the market keeps its own-price "
                           "anticipation", RuntimeWarning, stacklevel=2)
