@@ -4461,7 +4461,9 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_scale_dgagri.py"
+    ]
    }
   },
   "capri_perm_ngrp": {
@@ -50371,7 +50373,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 97,
+  "capri/keep": 102,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 26,

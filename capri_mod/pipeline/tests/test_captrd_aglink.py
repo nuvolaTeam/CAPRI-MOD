@@ -9,8 +9,8 @@ comparison, each with the line that writes it:
   - the BAST, BAST2 and growth-rate entries (t not a year): scale_DG_AGRI_baseline.gms l. 69-72 and later
   - the EU aggregates' UVAG where Aglink has none, taken from EU_WEST (EU014000): scale_DG_AGRI_baseline.gms l. 86-88
     (checked: all 122 such records equal EU014000's)
-  - HCOM.LEVL of the European regions (19 years each, the CAPREG years): not written by load_aglink2023dgAgri.gms;
-    presumably the regional aggregation of aggreg_and_report.gms l. 89-91 (MrkBalee x S_RowsEst), not traced
+  - HCOM.LEVL of the European regions (19 years each, the CAPREG years): human consumption from the per-head data and
+    the population, scale_DG_AGRI_baseline.gms l. 170-174 (reproduced in test_captrd_scale_dgagri.py)
 
 Results on 10 November 2026: 123,133 compared records; every record present in both equal (relative 1e-6, in fact to
 round-off); 217 records only in CAPTRD's (the UVAG and HCOM.LEVL above, before they were excluded); 1 only here (EU014000

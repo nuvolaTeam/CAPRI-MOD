@@ -32,6 +32,20 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 10 November 2026 (late night): CAPTRD-MOD stage 2c, the DG AGRI baseline scaled to CAPRI's base period
+
+- captrd/scale_DG_AGRI_baseline.gms ported (capri_mod/pipeline/captrd/scale_dgagri.py): DGAgri to DGAgri1, the
+  outlook's relative changes applied to CAPRI's base-period values (BAST, BAST2), prices and yields from the member
+  state's, its EU part's or the EU27's outlook, market balances and activity levels, the biofuels' guarded factor. The
+  reference run's "Scaling to DG Agri baseline: off" acts only in scale_biofuel_to_dgagri.gms; this file always runs.
+- Checked on CAPTRD's own results, chained to the Aglink stage (test_captrd_scale_dgagri.py): DGAgri as the stage leaves
+  it equal in all but 2 of 123,918 compared records; DGAgri1 of the years define_EU_supports.gms does not rewrite
+  equal for the member states, Norway, Turkey and the UK but 57 records, and for EU014000 but groups with a constant
+  ratio to CAPTRD's (the factor's base differs). The residuals point to p_data values CAPTRD's stored P_Data no
+  longer holds (removed or changed by a later stage, not traced). The input's population after 2018 is left out: CAPTRD
+  writes it after this stage (its HCOM.LEVL of DGAgri, which this stage computes, covers 2000-2018 only).
+- The Aglink test's last unexplained exclusion, HCOM.LEVL of DGAgri, is this stage's (l. 170-174).
+
 ## 10 November 2026 (night): CAPTRD-MOD, the Aglink-COSIMO stage and the requirement functions in the chain
 
 - CAPTRD's Aglink-COSIMO load (baseline/load_aglink2023dgAgri.gms: the DG AGRI outlook mapped to CAPRI's positions for
