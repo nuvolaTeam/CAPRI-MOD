@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (13)
+## Open (14)
 
 | # | Issue | Status |
 |---|---|---|
@@ -23,7 +23,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
-| [K120](#k120) | S7 ("capri"): the market supply Hessian measured after the first supply solve had lost most of its response; the baseline calibration's stall rule stopped it uncorrected | fixed: 20 and 37 units, full EU Farm-to-Fork and Green Deal (7 November 2026); open in S7: the baseline calibration's first-round drift (9 November 2026: not the ecological set-aside row; the baseline's prices move up to 1.3% from CAPRI's calibration point; at the baseline's end the crop levels are within a median 0.22% of CAPRI's 2030 levels, 7 region pairs above 5%) |
+| [K120](#k120) | S7 ("capri"): the market supply Hessian measured after the first supply solve had lost most of its response; the baseline calibration's stall rule stopped it uncorrected | fixed: 20 and 37 units, full EU Farm-to-Fork and Green Deal (7 November 2026); open in S7: the baseline calibration's first-round drift (9 November 2026: not the ecological set-aside row; the baseline's prices move up to 1.3% from CAPRI's calibration point; at the baseline's end the crop levels are within a median 0.22% of CAPRI's 2030 levels, 7 region pairs above 5%; 9 November 2026, night: most of the remaining gap was the projection rescaling CAPRI's own 2030 levels to the 2017 crop-to-land ratio, fixed) |
 | [K121](#k121) | S2 step 1a: other fodder split into CAPRI's OFAR and ROOF; the fodder roots' feed (FROO) tied to their land for the first time | done on mini-EU (7 November 2026); the full runs and the suite to come |
 | [K122](#k122) | S2 step 1b: set-aside split into CAPRI's VSET and FALL; the winter-cover option's potential counted set-aside CAPRI fills | done on mini-EU (7 November 2026); the full runs and the suite to come |
 | [K123](#k123) | S2 step 1c: grassland split into CAPRI's GRAE and GRAI, the split column z and its late calibration removed; fodder roots' 2030 fodder trajectory was missing since 1a | done (8 November 2026): suite, mini-EU, full-EU Farm-to-Fork and Green Deal |
@@ -32,7 +32,8 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K126](#k126) | The CasADi trade system left out the quota price offsets of a commodity with global quotas only (casein), in the optional exact-Jacobian and Newton-Krylov solves | fixed (9 November 2026); the default solve unaffected |
 | [K127](#k127) | Under CAPRI's market calibration (S7) an emission tax leaves N manure trade at zero in a four-unit Belgian run where the former form traded 360 t | open (9 November 2026): cause not established |
 | [K128](#k128) | Farm-to-Fork's meat prices against JRC121368: beef +29.5% against +24.0%, poultry +20.4% against +18.0%, pork +20.5% against +43.0%, with EU production close to CAPRI's | open (9 November 2026): the market's inputs checked against CAPRI's (base, demand elasticities, Armington, quotas), no departure found; needs CAPRI's own scenario run on the same version |
-| [K129](#k129) | BG020000 under the Green Deal: the regional model ends at very different crop mixes (maize 169 or 16 thousand ha) with the same objective (7e-7 relative), IPOPT at its acceptable level | open (9 November 2026): found in the mini-EU check of the fertiliser priors' slack; cause not established |
+| [K129](#k129) | BG020000 under the Green Deal: the regional model keeps a worse local optimum (objective 2.4% from the best one found) for many iterations, so its crop mix depends on the restart path (maize 169 or 16 thousand ha between two runs) | open (9 November 2026): non-convex regional problem, K79 family; a stronger multi-start planned (S6 item 5) |
+| [K130](#k130) | Catch crops' cost per ha is CAPRI's reported TOIN of CATC, not its cost coefficients; where CAPRI's Green Deal baseline has no catch crops (160 of 250 units), the calibration run's TOIN | open (9 November 2026): to read CAPRI's own cost data of the winter-cover technology |
 
 ## Resolved (107)
 
@@ -2361,6 +2362,19 @@ Farm-to-Fork scenario diverged from its second iteration in the 37- and the 20-u
     - The effect on the EU indicators is small. The open question is why the baseline's EU beef and sugar supply
       sit about 1% above CAPRI's at the calibration point. Not analysed further.
 
+- **The baseline against CAPRI's Green Deal baseline (9 November 2026, night):** with the base point moved to CAPRI's
+  Green Deal baseline res_2_1730greendeal_refdefaulta (the project lead's decision; docs/BASELINE_REPRODUCTION.md), the
+  mini-EU baseline's crop levels were 228 thousand ha (of 25,505) from CAPRI's, almost all in a few regions and the
+  same factor for every crop of a region: Denmark +4.1%, Croatia +2.3%, Portugal's PT18 +1.2%, Spain's ES61 +0.7%,
+  Poland's PL12 +0.5%. Not a calibration drift: the projected data themselves were off by those factors. The
+  projection's land reconciliation (capri_mod/projection/reconcile.py) rescaled each region's crop areas to its 2017
+  ratio of cropped area to land, carried to the projected land; with CAPRI's own 2030 levels, which are one consistent
+  solution, that moved them by the change of the ratio between 2017 and 2030, and the baseline calibration then
+  reproduced the rescaled levels. Fixed: a trajectory of CAPRI's own results (capri_ref_*) is not rescaled (CAPRI
+  simulates from CAPMOD's results as they are); a trend projection (CAPTRD) still is. The projected 2030 crop areas of
+  the 20 units are then CAPRI's to round-off (before: 214 thousand ha off, 0.24% mean adjustment over 221 regions,
+  4.4% the largest).
+
 ### K121: Other fodder split into CAPRI's OFAR and ROOF (S2 step 1a, 7 November 2026)
 
 Until 7 November 2026 the model had one other-fodder activity, OFOD = CAPRI's OFAR (other fodder on arable land) +
@@ -2610,19 +2624,47 @@ the model. Next: CAPRI's own Farm-to-Fork or a market-only shock run on the same
 Bonn, VALIDATION_PLAN §1.3).
 
 <a id="k129"></a>
-### K129: BG020000 under the Green Deal: two very different solutions with the same objective (found 9 November 2026)
+### K129: BG020000 under the Green Deal: a worse local optimum kept, a crop mix that depends on the restart path (found 9 November 2026)
 
 The mini-EU Green Deal 2030 at 65f8c65 (mini_gd_s6c) and with CAPRI's fertiliser priors' slack (s6d, mini_gd_s6d; the
 slack does not act in BG020000, outside CAPRI's list) end BG020000 at very different crop mixes - maize 169 against 16
 thousand ha, barley 14 against 84, other arable crops 80 against 16, pulses 7 against 37, voluntary set-aside 55
-against 97 - with regional objectives within 1.3 EUR of 1.86e6 (7e-7 relative). Every solve of the region ends at
-IPOPT's acceptable level, not optimal, and the jump check (K79) fires in the first iterations (moves of 5.8 and 50).
-The full-EU Green Deal's response there is large as well (soft wheat -54%, maize -73%, sunflower -62%, set-aside and
-fallow 18 -> 193 thousand ha); in the last iteration 13 of 221 EU regions end at the acceptable level.
+against 97. Every solve of the region ends at IPOPT's acceptable level, not optimal, and the jump check (K79) fires in
+the first iterations (moves of 5.8 and 50). The full-EU Green Deal's response there is large as well (soft wheat -54%,
+maize -73%, sunflower -62%, set-aside and fallow 18 -> 193 thousand ha); in the last iteration 13 of 221 EU regions end
+at the acceptable level.
+
+Investigation (9 November 2026, the regions' problems dumped with CAPRI_NLP_DUMP and re-solved alone):
+- the first reading, one objective for two crop mixes (a flat direction), was wrong: the two runs' final problems are
+  not the same (other prices), and their objectives are not comparable;
+- the problem is non-convex and has several local optima. Re-solved from four starts at a tight tolerance, s6d's last
+  problem of the region reaches one solution, with an objective 2.4% better than the one the run kept (-1,906,667
+  against -1,862,413); in both runs the region stayed in the worse basin for about ten iterations;
+- the jump check's restart from the previous iterate (K79, 'jump:prev') moved the dev run's region to the better basin
+  (-1,906,423), while the same restart returned Infeasible in s6d, which kept the worse one: which basin a run ends in
+  depends on the restart path, not on the change under test.
+CAPRI solves the same kind of problem with CONOPT, a local solver whose result also depends on its start; whether
+CAPRI's own Green Deal solution for the region is in the better basin is not known (CAPRI's Green Deal run of the
+project lead, when it completes).
 
 - **Effect:** the mini-EU Green Deal's cereal production -9.6% against -8.6% between the two runs, most of it this
-  region; any run's BG020000 result
-- **Status:** **open**: the region's problem looks flat in some direction (a crop mix free at equal cost); to check
-  the PMP terms of BG020000's crops at CAPRI's 2030 calibration, IPOPT's tolerance at the acceptable level, and CAPRI's
-  own Green Deal result for the region (the project lead's run, when it completes)
+  region; any run's BG020000 result, and comparisons between runs where a region changes basin
+- **Status:** **open**: a stronger search for the region's best local optimum (more starts when a solve ends at the
+  acceptable level or the jump check fires, the best objective kept) planned under S6 item 5; until then a run-to-run
+  difference concentrated in such a region is not attributed to the change under test
 
+### K130: Catch crops' cost per ha from CAPRI's reported TOIN (found 9 November 2026)
+
+The winter-cover (catch crop) option's linear cost (tools/build/build_cover_crops.py, catc_cost_eur_ha; the cost curve
+of tools/build/build_winter_cover_option.py scales with it) is CATC's input cost TOIN per ha as CAPRI reports it in its
+2030 results, not CAPRI's cost coefficients of the winter-cover technology. CAPRI reports TOIN only where CATC has a
+level. With the base point at CAPRI's Green Deal baseline (res_2_1730greendeal_refdefaulta), whose catch crops are far
+fewer than its calibration run's (EU national rows 2.35 against 9.2 million ha), 160 of the 250 units have no catch
+crop and so no TOIN in the baseline: they take the region's own TOIN in the calibration run
+(res_2_1730greendeal_refpol_endotech_all_inidefaulta; column cost_source = calibration). Where both runs report it,
+the two TOIN per ha differ by up to 25% (input mix at another adoption level).
+
+- **Effect:** the Green Deal's and Farm-to-Fork's catch-crop requirement (e_minCoverCrops) in those units costs the
+  calibration run's input bill per ha; mini-EU indicators within 0.4 point of the runs with the calibration run's base
+- **Status:** **open**: to read CAPRI's own cost data of the winter-cover technology (the ghg technology tables of
+  envind/cover_crops.gms) instead of the reported TOIN, for every unit

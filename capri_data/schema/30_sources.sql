@@ -1267,7 +1267,7 @@ CREATE TABLE src_land_rents_capri_2030 (
     levl_kha DOUBLE NOT NULL,
     PRIMARY KEY (capri_region, land_type)
 );
-COMMENT ON TABLE src_land_rents_capri_2030 IS 'Land rent (EUR/ha) and level (1000 ha) per CAPRI region and land type ARAC, FRUN, GRAS from CAPRI''s 2030 reference res_2_1730greendeal_refpol_endotech_all_inidefaulta (D_AREA), non-positive rents replaced by CAPRI''s calibration rent (cal_land_nests.gms l. 204-226) (tools/build/build_land_rents.py).';
+COMMENT ON TABLE src_land_rents_capri_2030 IS 'Land rent (EUR/ha) and level (1000 ha) per CAPRI region and land type ARAC, FRUN, GRAS from CAPRI''s 2030 reference res_2_1730greendeal_refdefaulta (CAPRI''s 2030 Green Deal baseline; its calibration run res_2_1730greendeal_refpol_endotech_all_inidefaulta until 9 November 2026) (D_AREA), non-positive rents replaced by CAPRI''s calibration rent (cal_land_nests.gms l. 204-226) (tools/build/build_land_rents.py).';
 INSERT INTO value_units VALUES
   ('src_land_rents_capri_2030', 'rent_eur_ha', NULL, 'open', 'land_rents_capri_2030.rent_eur_ha: unit to be established'),
   ('src_land_rents_capri_2030', 'levl_kha', NULL, 'open', 'land_rents_capri_2030.levl_kha: unit to be established');
@@ -1362,14 +1362,14 @@ COMMENT ON TABLE src_res17_mann_crpr_expt IS 'CAPRI''s LEVL, MANN and CRPR_EXPT 
 INSERT INTO value_units VALUES
   ('src_res17_mann_crpr_expt', 'value', NULL, 'open', 'res17_mann_crpr_expt.value: unit to be established');
 
--- file: capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/capri_manure_trade_2030.parquet
+-- file: capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/capri_manure_trade_2030.parquet
 CREATE TABLE src_capri_manure_trade_2030 (
     capri_region VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
     kt_n DOUBLE NOT NULL,
     PRIMARY KEY (capri_region, "item")
 );
-COMMENT ON TABLE src_capri_manure_trade_2030 IS 'CAPRI''s manure N excretion EXCRET and net manure trade MTRADE (kt N, positive = net export) per CAPRI region, item NITF, from res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/build_manure_trade_base.py).';
+COMMENT ON TABLE src_capri_manure_trade_2030 IS 'CAPRI''s manure N excretion EXCRET and net manure trade MTRADE (kt N, positive = net export) per CAPRI region, item NITF, from res_2_1730greendeal_refdefaulta (CAPRI''s 2030 Green Deal baseline; its calibration run res_2_1730greendeal_refpol_endotech_all_inidefaulta until 9 November 2026) (tools/build/build_manure_trade_base.py).';
 INSERT INTO value_units VALUES
   ('src_capri_manure_trade_2030', 'kt_n', NULL, 'open', 'capri_manure_trade_2030.kt_n: unit to be established');
 
@@ -1875,7 +1875,7 @@ COMMENT ON TABLE src_yild_2030_ref IS 'CAPRI''s 2030 reference yields YILD per r
 INSERT INTO value_units VALUES
   ('src_yild_2030_ref', 'yild_kg_ha', NULL, 'open', 'yild_2030_ref.yild_kg_ha: unit to be established');
 
--- file: capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/capri_ref_levl_yild_2030_2017.parquet
+-- file: capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/capri_ref_levl_yild_2030_2017.parquet
 CREATE TABLE src_capri_ref_levl_yild_2030_2017 (
     capri_region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -1884,11 +1884,11 @@ CREATE TABLE src_capri_ref_levl_yild_2030_2017 (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (capri_region, activity, "item", "year")
 );
-COMMENT ON TABLE src_capri_ref_levl_yild_2030_2017 IS 'CAPRI''s levels and yields (LEVL, YILD) per region and activity in 2017 and 2030 of the 2030 reference, extracted from res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/build_trajectory_capri_ref.py).';
+COMMENT ON TABLE src_capri_ref_levl_yild_2030_2017 IS 'CAPRI''s levels and yields (LEVL, YILD) per region and activity in 2017 and 2030 of the 2030 reference, extracted from res_2_1730greendeal_refdefaulta (CAPRI''s 2030 Green Deal baseline; its calibration run res_2_1730greendeal_refpol_endotech_all_inidefaulta until 9 November 2026) (tools/build/build_trajectory_capri_ref.py).';
 INSERT INTO value_units VALUES
   ('src_capri_ref_levl_yild_2030_2017', 'value', NULL, 'open', 'capri_ref_levl_yild_2030_2017.value: unit to be established');
 
--- file: capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/prme_schemes_2030.parquet
+-- file: capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/prme_schemes_2030.parquet
 CREATE TABLE src_prme_schemes_2030 (
     capri_region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -1896,6 +1896,6 @@ CREATE TABLE src_prme_schemes_2030 (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (capri_region, activity, scheme)
 );
-COMMENT ON TABLE src_prme_schemes_2030 IS 'CAPRI''s 2030 reference premiums PRME per region, activity and scheme (the technology-factored rural-development schemes and DPTOTAL), extracted from res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/build_techn_mix_2030.py).';
+COMMENT ON TABLE src_prme_schemes_2030 IS 'CAPRI''s 2030 reference premiums PRME per region, activity and scheme (the technology-factored rural-development schemes and DPTOTAL), extracted from res_2_1730greendeal_refdefaulta (CAPRI''s 2030 Green Deal baseline; its calibration run res_2_1730greendeal_refpol_endotech_all_inidefaulta until 9 November 2026) (tools/build/build_techn_mix_2030.py).';
 INSERT INTO value_units VALUES
   ('src_prme_schemes_2030', 'value', NULL, 'open', 'prme_schemes_2030.value: unit to be established');

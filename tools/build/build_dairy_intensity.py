@@ -11,8 +11,8 @@ DCOL = s0 x DCOW + z), with per-head changes relative to the average cow (DCOW):
                      protein need), DRMN, DRMX (dry matter intake limits; DRMX is stored negative by CAPRI,
                      magnitudes used)
   <column>_2030      the same at CAPRI's 2030 calibration point (share_low and the d<item>_rel), from CAPRI's
-                     2030 reference the model's 2030 base is taken from (res_2_1730greendeal_refpol_endotech_all_ini,
-                     dataOut LEVL at 2030); the model uses them at the 2030 market year (S6 item 6, 9 November 2026:
+                     2030 Green Deal baseline the model's 2030 base is taken from (res_2_1730greendeal_refdefaulta,
+                     dataOut LEVL at 2030; tools/lib/paths.BASELINE_REF); the model uses them at the 2030 market year (S6 item 6, 9 November 2026:
                      before, the 2017 differences were used at the 2030 point)
   q_low, q_high      CAPRI's own PMP diagonal terms of DCOL and DCOH (p_pmpQuadTechn,
                      capri_data/sources/intermediate/capreg/pmp_quad_techn.parquet); regions without them: the
@@ -21,8 +21,8 @@ DCOL = s0 x DCOW + z), with per-head changes relative to the average cow (DCOW):
 
 Calves, cull-cow beef and replacement (YCAM, YCAF, BEEF, ICOW) are the same for both activities.
 
-Sources: CAPRI 2017 results res_17<MS>.txt (DCOL, DCOH, DCOW); CAPRI's 2030 reference
-res_2_1730greendeal_refpol_endotech_all_inidefaulta (the _2030 columns). Output:
+Sources: CAPRI 2017 results res_17<MS>.txt (DCOL, DCOH, DCOW); CAPRI's 2030 Green Deal baseline
+res_2_1730greendeal_refdefaulta (the _2030 columns). Output:
 capri_data/2017/supply/dairy_intensity.csv
 
     python tools/build/build_dairy_intensity.py [--dump-dir capri_sources/capreg]
@@ -37,7 +37,7 @@ import pandas as pd
 import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
-from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import SOURCES, BASELINE_REF  # noqa: E402  (CAPRI's material outside the repository)
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
@@ -54,7 +54,7 @@ REL_ITEMS = ("COMI", "MANN", "MANP", "MANK", "ENNE", "CRPR", "DRMN", "DRMX")
 ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'(DCOL|DCOH|DCOW)'\.'(" + "|".join(ITEMS)
                  + r")'\.'Y'\s+(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
 #: CAPRI's 2030 reference the model's 2030 base comes from (capri_data/scenarios/capri_ref_2030)
-REF_2030 = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+REF_2030 = BASELINE_REF
 
 
 def read_2030(ref: Path, acts, items) -> dict:

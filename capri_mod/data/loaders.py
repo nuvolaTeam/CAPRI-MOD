@@ -600,7 +600,7 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "dairy_intensity": (lambda df: df.drop(columns=[c for c in df.columns if c == "capri_region" or c.startswith("q_source")])
                             if df is not None else None)(_load_optional_csv(data_dir, "dairy_intensity.csv")),
         # CAPRI's winter cover (catch) crops and winter cover shares (tools/build/build_cover_crops.py)
-        "cover_crops": (lambda df: df.drop(columns=[c for c in ("capri_region",) if c in df.columns])
+        "cover_crops": (lambda df: df.drop(columns=[c for c in ("capri_region", "cost_source") if c in df.columns])
                         if df is not None else None)(_load_optional_csv(data_dir, "cover_crops.csv")),
         "winter_cover_share": (lambda df: {r: g.set_index("crop")[["share", "share0"]]
                                            for r, g in df.reset_index().groupby("region")} if df is not None else None)(

@@ -1992,7 +1992,7 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
     from capri_mod.projection import scenario_io
     tp = os.path.join(str(DATA_DIR), "scenarios", "capri_ref_2030")
-    src = os.path.join(str(DATA_DIR), "sources", "raw", "capri", "results", "res_2_1730greendeal_refpol_endotech_all_inidefaulta", "capri_ref_levl_yild_2030_2017.parquet")
+    src = os.path.join(str(DATA_DIR), "sources", "raw", "capri", "results", "res_2_1730greendeal_refdefaulta", "capri_ref_levl_yild_2030_2017.parquet")
     t = scenario_io.read(tp)
     raw = read_source(src)
     v = {(r.capri_region, r.activity, r.item, str(r.year)): r.value for r in raw.itertuples()}
@@ -2892,20 +2892,21 @@ def test_norway_miterra_mirror_and_ad_option_as_capri():
 
 def test_set_aside_trajectories_are_fallow_and_voluntary_set_aside():
     """KNOWN_ISSUES K115, K122: VSET and FALL are the model's own activities since S2 (7 November 2026; before, SETA =
-    FALL + VSET), each with its own 2030 factor from CAPRI's 2030 reference over 2017 (IT400000: VSET 5.72 / 10.70 =
-    0.534, FALL 14.21 / 7.22 = 1.968; PL120000: FALL 103.90 / 57.24 = 1.8152), and no SETA left."""
+    FALL + VSET), each with its own 2030 factor from CAPRI's 2030 Green Deal baseline over 2017 (IT400000: VSET 6.087 /
+    10.70 = 0.569, FALL 14.229 / 7.22 = 1.971; PL120000: FALL 104.327 / 57.24 = 1.8226; in the calibration run, the base
+    until 9 November 2026: 5.72, 14.21, 103.90), and no SETA left."""
     import pandas as pd
     t = pd.read_csv(DATA_DIR / "scenarios" / "capri_ref_2030" / "regional.csv")
     h = t[t.block == "herds"]
     f = h.set_index(["item", "region"])["factor"]
-    assert abs(f[("VSET", "IT400000")] - 5.72 / 10.70) < 5e-3 and abs(f[("FALL", "IT400000")] - 14.21 / 7.22) < 5e-3
-    assert abs(f[("FALL", "PL120000")] - 1.8152) < 5e-4
+    assert abs(f[("VSET", "IT400000")] - 6.087 / 10.70) < 5e-3 and abs(f[("FALL", "IT400000")] - 14.229 / 7.22) < 5e-3
+    assert abs(f[("FALL", "PL120000")] - 1.8226) < 5e-4
     assert not (h["item"] == "SETA").any()
 
 def test_capri_reference_trajectory_reproduces_its_crop_levels(data):
     """The capri_ref_2030 trajectory's level factors are CAPRI's own 2030 over 2017 (no [0.2, 5] band, no 1.0 threshold),
     a level the reference does not list is 0 (GAMS stores no zero: UK grain maize), OFAR and ROOF grow as their own: the
-    model's 2017 crop levels times its regional factors give CAPRI's 2030 reference levels (the validation file's ini
+    model's 2017 crop levels times its regional factors give CAPRI's 2030 reference levels (the validation file's ref
     levels) in every region, the 29 units outside the EU and Norway's included, to 1e-6 relative
     (4 November 2026; until then 96 EU cells were off by more than 1%, France's pulses 0.2 against CAPRI's 0.112, and 247
     outside the EU)."""
@@ -2918,18 +2919,18 @@ def test_capri_reference_trajectory_reproduces_its_crop_levels(data):
                                                                 "CS000000", "KO000000", "MK000000", "MO000000"]}):
         A = load_all_data(str(DATA_DIR))["areas"]
     assert len(A.index) == 250
-    ini = pd.read_csv(DATA_DIR / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz")
+    ref = pd.read_csv(DATA_DIR / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv.xz")
     # CAPRI's SETA row is VSET (K115), its GRAS row GRAE + GRAI (the model's own since S2, 7 November 2026)
-    ini = ini[(ini["item"] == "LEVL") & ~ini["activity"].isin(["SETA", "GRAS"])]
+    ref = ref[(ref["item"] == "LEVL") & ~ref["activity"].isin(["SETA", "GRAS"])]
     cap = {}
-    for r in ini.itertuples():
+    for r in ref.itertuples():
         a = M.get(r.activity, r.activity)
         if a in CROPS:
             cap[(r.region, a)] = cap.get((r.region, a), 0.0) + float(r.value)
     t = pd.read_csv(DATA_DIR / "scenarios" / "capri_ref_2030" / "regional.csv")
     t = t[(t.block == "herds") & (t.region.str.len() == 8)]
     F = {(r.region, r.item): float(r.factor) for r in t.itertuples()}
-    assert F[("UKJ00000", "CORN")] == 0.0 and abs(F[("FR240000", "PULS")] - 0.815 / 48.62) < 1e-3
+    assert F[("UKJ00000", "CORN")] == 0.0 and abs(F[("FR240000", "PULS")] - 8.147 / 48.62) < 1e-3
     n = 0
     for reg in A.index:
         for a in CROPS:
@@ -4359,7 +4360,7 @@ def test_intensity_splits_at_capris_2030_point_with_manure_npk(data):
     (the "_2030" columns, from the 2030 reference the model's base comes from), at 2017 the base year's; the split
     columns move their animal's manure N, P2O5 and K2O (CAPRI's MANN, MANP, MANK of the two activities), the genetics
     options manure N only (breeding.gms changes MANN). Anchor: CAPRI's 2030 MANP of DE110000, DCOL 73.853, DCOH 93.268,
-    DCOW 83.559 kg P2O5 per head (res_2_1730greendeal_refpol_endotech_all_inidefaulta)."""
+    DCOW 83.560 kg P2O5 per head (res_2_1730greendeal_refdefaulta; 83.559 in the calibration run)."""
     from types import SimpleNamespace
     from capri_mod.projection.projection_module import _split_terms_at_year
     from capri_mod.supply.livestock import LivestockBlock
@@ -4367,7 +4368,7 @@ def test_intensity_splits_at_capris_2030_point_with_manure_npk(data):
     _split_terms_at_year(d30, 2030)
     _split_terms_at_year(d17, 2017)
     di0, di = data["dairy_intensity"].loc["DE110000"], d30["dairy_intensity"].loc["DE110000"]
-    assert di["dmanp_rel"] == pytest.approx((73.8525682313429 - 93.2682998797956) / 83.5591639433211, rel=1e-9)
+    assert di["dmanp_rel"] == pytest.approx((73.8525682313429 - 93.2682998797956) / 83.5604340599232, rel=1e-9)
     assert di["dmann_rel"] == di0["dmann_rel_2030"] and di["share_low"] == di0["share_low_2030"]
     assert not any(str(c).endswith("_2030") for c in di.index) and "q_low_capri2030" in di.index
     assert d17["dairy_intensity"].loc["DE110000", "dmann_rel"] == di0["dmann_rel"]

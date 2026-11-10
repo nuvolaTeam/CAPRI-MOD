@@ -2,9 +2,11 @@
 capri_data/scenarios/capri_ref_2030 (settings.toml, growth.csv, regional.csv; capri_mod/projection/scenario_io.py;
 capri_data/trajectories/capri_ref_2030.json until 31 October 2026).
 
-CAPRI simulates every scenario from its calibrated baseline: CAPMOD's reference run for the simulation year (star 3.0:
-`res_2_1730greendeal_refpol_endotech_all_ini`, the 2030 Green Deal reference with endogenous technologies at their
-calibrated shares). The model projected its 2030 baseline with CAPRI's trend projection (CAPTRD `series`,
+CAPRI compares its Green Deal scenarios with its 2030 Green Deal baseline (star 3.0: `res_2_1730greendeal_refdefaulta`,
+CAPMOD's simulation of the reference policy refpol_endotech_all_sup from its calibration run
+`res_2_1730greendeal_refpol_endotech_all_ini`); the model's 2030 baseline reproduces that run's levels and yields
+(tools/lib/paths.BASELINE_REF; the project lead's decision of 9 November 2026: until then the calibration run's, whose
+levels differ in places, Ireland's other fodder +38 kha in the baseline, Romania's fallow land 3.4 against 13.6 kha). The model projected its 2030 baseline with CAPRI's trend projection (CAPTRD `series`,
 capri_data/scenarios/captrd_2030), which is the INPUT to that calibration, not its result: against the reference the projected data
 had cereals 3-4% high, other fruit +21%, pulses +9% (tools/check/compare_baseline_capri.py), before the model solved anything.
 
@@ -25,7 +27,7 @@ from collections import defaultdict
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
-from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import SOURCES, BASELINE_REF  # noqa: E402  (CAPRI's material outside the repository)
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 
@@ -37,8 +39,8 @@ def _read_csv(*a, **k):
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_data" / "scenarios" / "capri_ref_2030"
-REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
-KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refpol_endotech_all_inidefaulta" / "capri_ref_levl_yild_2030_2017.parquet"
+REF = BASELINE_REF
+KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "capri_ref_levl_yild_2030_2017.parquet"
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
 from _model_regions import FALLBACK_UNITS, UNITS  # noqa: E402  (capri_data/shared/regional_units.csv)
 #: the first two letters of the model's regional units (CAPRI's codes: BL, IR, EL, NO ...): the countries whose 2030
@@ -177,8 +179,8 @@ def main():
         cells["land"][col] = list(cells["herds"].get(ca, []))
     growth = {b: {act: {"2030": statistics.median(fs)} for act, fs in c.items() if len(fs) >= 3}
               for b, c in cells.items()}
-    out = {"name": "capri_ref_2030", "source": "CAPRI star 3.0 2030 Green Deal reference with endogenous technologies "
-           "(res_2_1730greendeal_refpol_endotech_all_ini, LEVL and YILD) over CAPRI's 2017 results (res_17<MS>)",
+    out = {"name": "capri_ref_2030", "source": "CAPRI star 3.0 2030 Green Deal baseline "
+           "(res_2_1730greendeal_refdefaulta, LEVL and YILD) over CAPRI's 2017 results (res_17<MS>)",
            "vintage": "from user CAPRI installation", "base_year": 2017, "target_years": [2030], "growth": growth,
            "regional": {b: dict(r) for b, r in regional.items()},
            "_provenance": {"extracted_from": str(KEEP.relative_to(ROOT)),

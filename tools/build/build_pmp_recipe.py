@@ -27,7 +27,8 @@ the calibration point's data. Steps ported here, per CAPRI region, with p_infl =
     (Q(A,A) + own)) > 4.5, Q(A,A) = revenue / (L x tf x share term x min(8, sqrt(e) + 4.5 - sqrt(4.5))).
 
 Data of the calibration point: L_BAS = CAPRI's 2017 levels (res_17 LEVL), L_Y the year's levels (2030: CAPRI's 2030
-reference, the model's trajectory; 2017: L_BAS); revenue = TOOU, costs = TOIN of the same sources; rent = the land
+Green Deal baseline res_2_1730greendeal_refdefaulta, tools/lib/paths.BASELINE_REF, the model's trajectory; its calibration
+run refpol_endotech_all_ini, the point of CAPRI's own 2030 terms, until 9 November 2026; 2017: L_BAS); revenue = TOOU, costs = TOIN of the same sources; rent = the land
 type's rent (capri_data/2017/supply/land_rents_2030.csv at 2030; D_AREA of res_17 at 2017).
 
 REGISTERED differences from CAPRI's recipe, measured against CAPRI's exported 2030 terms by
@@ -56,7 +57,7 @@ import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
-from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import BASELINE_REF, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 import sys as _sys_nc  # noqa: E402
 _sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
@@ -64,7 +65,7 @@ from _model_regions import national_code as _national_code  # noqa: E402  (TUR f
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
-REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+REF = BASELINE_REF
 DUMPS = SOURCES / "capreg"
 PELA = SOURCES / "pmp2030/estnlp_results_PELA.txt"
 P_INFL, EST_YEAR = 1.019, 2004

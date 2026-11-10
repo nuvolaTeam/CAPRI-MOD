@@ -24,7 +24,7 @@ North Macedonia 70,000, Turkey 2,560,000 split equally over its 12 units), p_LUu
 p_sizeControl and p_farm_multiplier are written in CAPRI's code; they are read from it here, not copied.
 
 The animals: CAPRI uses data(region, activity, "LEVL"/"DAYS", "y"), the simulation year's base: here CAPRI's Green
-Deal 2030 ini levels (capri_marginal_terms_ini_2030) and 2030 days (capri_mann_days_2030), the run the model
+Deal 2030 ini levels (capri_marginal_terms_ref_2030) and 2030 days (capri_mann_days_2030), the run the model
 calibrates on. Solved with IPOPT (CasADi), from CAPRI's starting point (l. 464-511; CAPRI keeps a variable's level from
 the previous region of the loop where it sets none: here the holdings of dairy cattle start at heads / heads per
 holding as the other groups') and from a second one; the lowest objective is kept (estimate_best, REGISTERED).
@@ -58,7 +58,7 @@ from _sources_io import read_source, source_records, write_source  # noqa: E402 
 
 SRC = ROOT / "capri_data" / "sources"
 AMM = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
-LEVELS = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz"
+LEVELS = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv.xz"
 
 
 def _rd(path):

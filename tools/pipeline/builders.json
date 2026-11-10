@@ -287,7 +287,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_capri_2030_animals.csv"
@@ -316,7 +316,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_capri_2030_animals_members.csv"
@@ -485,7 +485,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_recipe_2030_animals.csv"
@@ -520,7 +520,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_recipe_2030_animals_members.csv"
@@ -674,7 +674,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/policy/cap_ceilings_2030.csv",
@@ -861,7 +861,7 @@
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz",
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz",
     "capri_mod/settings/defaults.toml"
    ],
    "code": [
@@ -1230,7 +1230,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
     "$SOURCES/capreg/res_17AL.txt",
     "$SOURCES/capreg/res_17AT.txt",
     "$SOURCES/capreg/res_17BA.txt",
@@ -1369,18 +1369,20 @@
     "capri_data/shared/regional_units.csv",
     "capri_data/sources/raw/capri/dat/policy/wintercovershare_p_winterCoverShare0.parquet",
     "capri_data/trajectories/capri_price_ratios_2030.csv",
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz",
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz",
     "capri_mod/settings/defaults.toml"
    ],
    "code": [
     "tools/build/build_capri_base.py",
     "tools/build/build_cover_crops.py",
+    "tools/lib/_grep.py",
     "tools/lib/_model_codes.py",
     "tools/lib/_model_regions.py",
     "tools/lib/_money.py",
     "tools/lib/paths.py"
    ],
    "external": [
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
     "$SOURCES/gams/reports/def_cbalance.gms"
    ],
    "outputs": [
@@ -1650,7 +1652,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
     "$SOURCES/capreg/res_17AL.txt",
     "$SOURCES/capreg/res_17AT.txt",
     "$SOURCES/capreg/res_17BA.txt",
@@ -2019,7 +2021,7 @@
     "capri_data/sources/raw/capri/dat/policy/livestock_units_p_LUUnits.parquet",
     "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_Heads.parquet",
     "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_sf.parquet",
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz",
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz",
     "capri_mod/settings/defaults.toml"
    ],
    "code": [
@@ -2662,7 +2664,7 @@
     "capri_data/sources/raw/capri/dat/envind/orgsoil_share_p_orgsoilori.parquet",
     "capri_data/sources/raw/capri/dat_local/envind/lulucf_emissions_original_source_p_PEATSH_def.parquet",
     "capri_data/trajectories/capri_price_ratios_2030.csv",
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz",
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz",
     "capri_mod/settings/defaults.toml"
    ],
    "code": [
@@ -2749,7 +2751,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
     "$SOURCES/capreg/res_17AL.txt",
     "$SOURCES/capreg/res_17AT.txt",
     "$SOURCES/capreg/res_17BA.txt",
@@ -2953,7 +2955,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/supply/land_market_2030.csv",
@@ -3044,7 +3046,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/supply/land_rents_2030.csv",
@@ -3791,11 +3793,11 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/environment/manure_trade_2030.csv",
-    "capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/capri_manure_trade_2030.parquet"
+    "capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/capri_manure_trade_2030.parquet"
    ]
   },
   {
@@ -4537,7 +4539,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_capri_2030.csv",
@@ -4643,7 +4645,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_recipe_2030.csv"
@@ -4758,7 +4760,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
     "$SOURCES/capreg/res_17AL.txt",
     "$SOURCES/capreg/res_17AT.txt",
     "$SOURCES/capreg/res_17BA.txt",
@@ -4825,8 +4827,8 @@
     "capri_data/shared/regional_units.csv",
     "capri_data/shared/rms_to_rm.csv",
     "capri_data/sources/raw/capri/capri_baseline/capri_market_prices_1730.parquet",
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz",
-    "capri_data/validation/greendeal_2030/capri_unit_values_ini_2030.csv",
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz",
+    "capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv",
     "capri_mod/settings/defaults.toml"
    ],
    "code": [
@@ -4988,7 +4990,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
     "$SOURCES/capreg/res_17AL.txt",
     "$SOURCES/capreg/res_17AT.txt",
     "$SOURCES/capreg/res_17BA.txt",
@@ -5301,7 +5303,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
     "$SOURCES/capreg/res_17AL.txt",
     "$SOURCES/capreg/res_17AT.txt",
     "$SOURCES/capreg/res_17BA.txt",
@@ -5340,7 +5342,7 @@
    ],
    "outputs": [
     "capri_data/2017/supply/techn_mix_2030.csv",
-    "capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/prme_schemes_2030.parquet"
+    "capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/prme_schemes_2030.parquet"
    ]
   },
   {
@@ -5391,7 +5393,7 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
     "$SOURCES/capreg/res_17AL.txt",
     "$SOURCES/capreg/res_17AT.txt",
     "$SOURCES/capreg/res_17BA.txt",
@@ -5432,7 +5434,7 @@
     "capri_data/scenarios/capri_ref_2030/growth.csv",
     "capri_data/scenarios/capri_ref_2030/regional.csv",
     "capri_data/scenarios/capri_ref_2030/settings.toml",
-    "capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/capri_ref_levl_yild_2030_2017.parquet"
+    "capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/capri_ref_levl_yild_2030_2017.parquet"
    ]
   },
   {
@@ -5525,7 +5527,7 @@
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
     "capri_data/sources/raw/capri/dat/policy/wintercovershare_p_winterCoverShare0.parquet",
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz",
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz",
     "capri_mod/settings/defaults.toml"
    ],
    "code": [
@@ -5979,19 +5981,19 @@
    "task": "extract_capri_marginal_terms",
    "builder": "extract_capri_marginal_terms",
    "args": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
-    "ini"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
+    "ref"
    ],
    "inputs": [],
    "code": [
     "tools/build/extract_capri_marginal_terms.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz",
-    "capri_data/validation/greendeal_2030/capri_unit_values_ini_2030.csv"
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz",
+    "capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv"
    ]
   },
   {

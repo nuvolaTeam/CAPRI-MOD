@@ -281,7 +281,14 @@ class ProjectionModule:
                         for c_ in list(cr_):
                             if (reg_, c_) in uf:
                                 cr_[c_] = float(cr_[c_]) * uf[(reg_, c_)]
-        report = reconcile_projected_data(data, base_data=self.model.data)
+        # The land reconciliation (the region's 2017 ratio of cropped area to land carried to the projected land) is for
+        # a trend projection, whose activity levels and land types are projected apart (CAPTRD). CAPRI's own 2030
+        # results (capri_ref_*: CAPMOD's Green Deal baseline) are one consistent solution: CAPRI simulates from them as
+        # they are, so they are not rescaled (9 November 2026: until then the rescaling moved them by the change of
+        # the ratio, Denmark's crops +4.1% and Croatia's +2.3% above CAPRI's levels, the baseline calibration reproducing
+        # the rescaled levels; KNOWN_ISSUES K120). The plausibility checks still run.
+        capri_levels = str(getattr(traj, "name", "")).startswith("capri_ref")
+        report = reconcile_projected_data(data, base_data=None if capri_levels else self.model.data)
         return data, report
 
     #: animals whose output per head follows their projected yield

@@ -31,9 +31,9 @@ to be confirmed, docs/design/S1_MIX_COLUMNS.md section 6).
 
 Sources: capri_data/sources/intermediate/technology/techn_fact_2030.parquet (tools/build/build_techn_2030.py),
 capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.parquet, CAPREG's 2017 results res_17<MS>.txt (input
-coefficients, LEVL, UVAG), CAPRI's 2030 reference res_2_1730greendeal_refpol_endotech_all_inidefaulta (PRME by
-scheme; extracted to capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/
-prme_schemes_2030.parquet).
+coefficients, LEVL, UVAG), CAPRI's 2030 Green Deal baseline res_2_1730greendeal_refdefaulta (PRME by
+scheme; tools/lib/paths.BASELINE_REF, its calibration run refpol_endotech_all_ini until 9 November 2026; extracted to
+capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/prme_schemes_2030.parquet).
 Output: capri_data/2017/supply/techn_mix_2030.csv
 
     python tools/build/build_techn_mix_2030.py [--dump-dir DIR] [--ref FILE]
@@ -55,15 +55,15 @@ import functools as _ft
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
-from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import SOURCES, BASELINE_REF  # noqa: E402  (CAPRI's material outside the repository)
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
 
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 FACT = ROOT / "capri_data" / "sources" / "intermediate" / "technology" / "techn_fact_2030.parquet"
 QUAD = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_quad_techn_2030.parquet"
-REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
-PRME = (ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refpol_endotech_all_inidefaulta"
+REF = BASELINE_REF
+PRME = (ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta"
         / "prme_schemes_2030.parquet")
 OUT = ROOT / "capri_data" / "2017" / "supply" / "techn_mix_2030.csv"
 #: the inputs with a technology factor (techf.gms l. 92-96, 104-105), the Green Deal's two apart

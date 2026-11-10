@@ -43,11 +43,12 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
-from paths import EXPORTS, REFERENCE, SOURCES  # noqa: E402  (CAPRI's material: docs/EXTERNAL_SOURCES.md)
+from paths import BASELINE_REF, EXPORTS, REFERENCE, SOURCES  # noqa: E402  (CAPRI's material: docs/EXTERNAL_SOURCES.md)
 
 D17 = SOURCES / "capreg"                    # res_17<CC>.txt dumps of CAPREG's 2017 base (DATA2)
 GAMS = SOURCES / "gams"                     # CAPRI's GAMS code
-REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+REF = BASELINE_REF                          # CAPRI's 2030 Green Deal baseline (the model's 2030 base)
+INI = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"   # its calibration run (the N cascade checks)
 SETS = REFERENCE / "sets" / "simini_21730"  # CAPRI's sets (docs/EXTERNAL_SOURCES.md), not in git
 BP = "capri_data/sources/intermediate/baseline_pmp"
 S = "capri_data/2017/supply"
@@ -60,7 +61,10 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     # (capri_sources/dat_local), to CSV (added to this list 6 November 2026; written by hand into builders.json before)
     ("extract_capri_dat", [], [SOURCES / "dat"]),
     ("extract_capri_dat_local", [], [SOURCES / "dat_local"]),
-    ("extract_gd2030_nbalance", [], [REF]),
+    ("extract_gd2030_nbalance", [], [INI]),
+    # before its readers (build_cover_crops, build_histosol, build_price_trajectory_2030, ...): a chain rebuild runs
+    # the list in order
+    ("extract_capri_marginal_terms", [str(REF), "ref"], [REF]),
     ("build_regional_units", [], []),
     ("build_code_lists", ["--sets", str(SETS)], [SETS]),
     ("build_unit_catalogue", ["--gms", str(GAMS / "CAPRIunits.gms")], [GAMS / "CAPRIunits.gms"]),
@@ -238,7 +242,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
      + ["unzip:" + str(EXPORTS / "supply_elas_2_1720REMAINI_NGdefaulta.zip")], [EXPORTS / "supply_elas_2_1720DEdefaulta.txt"]),
     ("extract_capri_costsavings", [str(SOURCES / "costsavings/costsavings_ini_21730_jul15.csv"),
                                    str(SOURCES / "costsavings/costsavings_max_21730_jul15.csv")], [SOURCES / "costsavings"]),
-    ("extract_capri_marginal_terms", [str(REF), "ini"], [REF]),
     ("ingest_capmod_market", ["--dump", str(EXPORTS / "_symbols_base1717.txt")], [EXPORTS / "_symbols_base1717.txt"]),
 ]
 

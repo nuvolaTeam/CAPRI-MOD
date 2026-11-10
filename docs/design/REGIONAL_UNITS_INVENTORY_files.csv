@@ -265,4 +265,4 @@ trajectories/capri_livestock_premium_ratio_2030.csv,<index>:model:248; Unnamed: 
 trajectories/capri_ref_fodder_2030.csv,<index>:model:248; region:model:248,True,build_ration_trajectory_2030.py,projection/projection_module.py,True,
 trajectories/capri_ref_ration_2030.csv,<index>:model:248; region:model:248,True,build_ration_trajectory_2030.py,feed/ration.py;projection/projection_module.py,True,
 validation/greendeal_2030/capri_greendeal_effect.csv,<index>:capri8:270; region:capri8:270,False,,,False,
-validation/greendeal_2030/capri_unit_values_ini_2030.csv,<index>:capri8:34; region:capri8:34,False,build_price_trajectory_2030.py,,False,
+validation/greendeal_2030/capri_unit_values_ref_2030.csv,<index>:capri8:34; region:capri8:34,False,build_price_trajectory_2030.py,,False,

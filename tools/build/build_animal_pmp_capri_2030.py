@@ -29,7 +29,8 @@ The splits' own curvature (q_low, q_high, q_z in dairy_intensity.csv, cattle_int
 2030 market year (q_<x>_capri2030 / _recipe2030, tools/build/build_intensity_q_2030.py).
 
 Sources: capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.parquet (tools/build/build_pmp_2030.py); CAPRI 2030 levels LEVL of
-res_2_1730greendeal_refpol_endotech_all_inidefaulta. Output: capri_data/2017/supply/pmp_capri_2030_animals.csv
+its 2030 Green Deal baseline res_2_1730greendeal_refdefaulta (tools/lib/paths.BASELINE_REF, the model's 2030 base;
+its calibration run refpol_endotech_all_ini until 9 November 2026). Output: capri_data/2017/supply/pmp_capri_2030_animals.csv
 (region, animal, g, x_capri, level_ratio, capri_regions)
 
     python tools/build/build_animal_pmp_capri_2030.py [--ref FILE]
@@ -44,13 +45,13 @@ import pandas as pd
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
-from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import SOURCES, BASELINE_REF  # noqa: E402  (CAPRI's material outside the repository)
 from _sources_io import read_source, write_source  # noqa: E402  (capri_data/sources as Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_quad_techn_2030.parquet"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030_animals.csv"
-REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+REF = BASELINE_REF
 #: model animal -> members; a tuple is an intensity pair whose split the model carries
 #: tuples: activities the model gives their own levels inside the animal (split columns), whose herd curvature is the
 #: harmonic 1 / sum(1 / q_j) of their terms (the Schur complement for a pair).

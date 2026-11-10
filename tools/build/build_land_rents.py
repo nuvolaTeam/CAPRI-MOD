@@ -6,8 +6,8 @@ supply/pmp_terms/define_const_pmp_param.gms adds it back). At the calibration po
 the land balances' duals, which its results report as D_AREA: the land types ARAC and FRUN carry the rent (positive),
 the activities minus the rent of their land type (grassland GRAS: -rent of grassland).
 
-Read from CAPRI's 2030 reference (res_2_1730greendeal_refpol_endotech_all_inidefaulta, the file the model's 2030
-trajectory is built from):
+Read from CAPRI's 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta, tools/lib/paths.BASELINE_REF, the run
+the model's 2030 trajectory is built from; its calibration run refpol_endotech_all_ini until 9 November 2026):
   rent_ARAC = D_AREA(ARAC), rent_FRUN = D_AREA(FRUN), rent_GRAS = -D_AREA(GRAS), EUR/ha; LEVL of the same rows (1000 ha)
 Non-positive rents (grassland in ten regions, every land type of PT20) are not calibration rents: CAPRI's calibration
 gives every land type a positive one (supply/cal_land_nests.gms l. 204-226), and so does this file since 23 October 2026
@@ -35,11 +35,11 @@ from pathlib import Path
 import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
-from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import SOURCES, BASELINE_REF  # noqa: E402  (CAPRI's material outside the repository)
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 ROOT = Path(__file__).resolve().parents[2]
-REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+REF = BASELINE_REF
 OUT = ROOT / "capri_data" / "2017" / "supply" / "land_rents_2030.csv"
 SRC_OUT = ROOT / "capri_data" / "sources" / "intermediate" / "capri_land_rents" / "land_rents_capri_2030.parquet"
 TYPES = ("ARAC", "FRUN", "GRAS")

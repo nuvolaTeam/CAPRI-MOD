@@ -2795,7 +2795,7 @@
    "status": "live",
    "vintage_exception": "CAPRI's 2030 catch-crop share of UAAR: the Farm-to-Fork requirement adds to the 2030 baseline",
    "rows": 250,
-   "columns": 5,
+   "columns": 6,
    "units": "to be established (value_units: open)",
    "read_by_model": [
     "capri_mod/data/loaders.py"
@@ -4922,7 +4922,7 @@
    "catalogue_note": "CAPRI's own baseline gross N surplus per ha (2030 reference), input to the tiered nitrogen target; built by tools/build/build_capri_baseline_surplus.py from capri_gnb_components_2030.csv (SURTOT): 221 regions from their CAPRI NUTS-2 region(s) incl. old NUTS codes and NUTS splits/merges, 17 from member states CAPRI holds as one region, 10 city or non-modelled regions from the national value (REGISTERED). Replaces the 2026-10 file, where 82 regions carried their own surplus pattern scaled to the national value. (not re-checked)"
   },
   "capri_data/scenarios/capri_ref_2030/growth.csv": {
-   "description": "CAPRI's 2030 reference as growth factors per block and activity: the per-activity median of the per-region ratios LEVL or YILD in res_2_1730greendeal_refpol_endotech_all_ini / CAPRI's 2017 results, with the model's activity aliases (tools/build/build_trajectory_capri_ref.py, build_trajectory_model_keys.py)",
+   "description": "CAPRI's 2030 reference as growth factors per block and activity: the per-activity median of the per-region ratios LEVL or YILD in res_2_1730greendeal_refdefaulta (CAPRI's 2030 Green Deal baseline) / CAPRI's 2017 results, with the model's activity aliases (tools/build/build_trajectory_capri_ref.py, build_trajectory_model_keys.py)",
    "kind": "reference",
    "vintage": "2030 reference",
    "domain": "projection",
@@ -5576,9 +5576,9 @@
    }
   },
   "capri_data/sources/intermediate/capri_land_rents/land_rents_capri_2030.parquet": {
-   "description": "Land rent (EUR/ha) and level (1000 ha) per CAPRI region and land type ARAC, FRUN, GRAS from CAPRI's 2030 reference res_2_1730greendeal_refpol_endotech_all_inidefaulta (D_AREA), non-positive rents replaced by CAPRI's calibration rent (cal_land_nests.gms l. 204-226) (tools/build/build_land_rents.py).",
+   "description": "Land rent (EUR/ha) and level (1000 ha) per CAPRI region and land type ARAC, FRUN, GRAS from CAPRI's 2030 reference res_2_1730greendeal_refdefaulta (CAPRI's 2030 Green Deal baseline; its calibration run res_2_1730greendeal_refpol_endotech_all_inidefaulta until 9 November 2026) (D_AREA), non-positive rents replaced by CAPRI's calibration rent (cal_land_nests.gms l. 204-226) (tools/build/build_land_rents.py).",
    "kind": "reference",
-   "rows": 805,
+   "rows": 806,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -6630,6 +6630,36 @@
     "nature": "source-extract"
    }
   },
+  "capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/capri_manure_trade_2030.parquet": {
+   "description": "CAPRI's manure N excretion EXCRET and net manure trade MTRADE (kt N, positive = net export) per CAPRI region, item NITF, from res_2_1730greendeal_refdefaulta (CAPRI's 2030 Green Deal baseline; its calibration run res_2_1730greendeal_refpol_endotech_all_inidefaulta until 9 November 2026) (tools/build/build_manure_trade_base.py).",
+   "kind": "reference",
+   "vintage": "2030",
+   "domain": "environment",
+   "status": "source",
+   "rows": 520,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_manure_trade_base"
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_manure_trade_base.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
+  },
+  "capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/capri_ref_levl_yild_2030_2017.parquet": {
+   "description": "CAPRI's levels and yields (LEVL, YILD) per region and activity in 2017 and 2030 of the 2030 reference, extracted from res_2_1730greendeal_refdefaulta (CAPRI's 2030 Green Deal baseline; its calibration run res_2_1730greendeal_refpol_endotech_all_inidefaulta until 9 November 2026) (tools/build/build_trajectory_capri_ref.py).",
+   "kind": "reference",
+   "vintage": "2030",
+   "domain": "sources",
+   "status": "source",
+   "rows": 61176,
+   "columns": 5,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_trajectory_capri_ref"
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by its builder (not re-checked)"
+  },
   "capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/fert_dist_dataout_2030.parquet": {
    "description": "CAPRI's 2030 reference fertiliser distribution items per region, extracted from res_2_1730greendeal_refdefaulta (tools/build/build_fert_dist_priors.py).",
    "kind": "reference",
@@ -6660,6 +6690,21 @@
    },
    "catalogue_note": "extract of CAPRI's raw file written and read back by its builder (not re-checked)"
   },
+  "capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/prme_schemes_2030.parquet": {
+   "description": "CAPRI's 2030 reference premiums PRME per region, activity and scheme (the technology-factored rural-development schemes and DPTOTAL), extracted from res_2_1730greendeal_refdefaulta (CAPRI's 2030 Green Deal baseline; its calibration run res_2_1730greendeal_refpol_endotech_all_inidefaulta until 9 November 2026) (tools/build/build_techn_mix_2030.py).",
+   "kind": "reference",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "source",
+   "rows": 52875,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_techn_mix_2030"
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by its builder (not re-checked)"
+  },
   "capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/yild_2030_ref.parquet": {
    "description": "CAPRI's 2030 reference yields YILD per region and activity, kg per ha, extracted from res_2_1730greendeal_refdefaulta (tools/build/build_plant_protection_cost.py).",
    "kind": "reference",
@@ -6672,51 +6717,6 @@
    "origin": {
     "nature": "capri",
     "builder": "build_plant_protection_cost"
-   },
-   "catalogue_note": "extract of CAPRI's raw file written and read back by its builder (not re-checked)"
-  },
-  "capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/capri_manure_trade_2030.parquet": {
-   "description": "CAPRI's manure N excretion EXCRET and net manure trade MTRADE (kt N, positive = net export) per CAPRI region, item NITF, from res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/build_manure_trade_base.py).",
-   "kind": "reference",
-   "vintage": "2030",
-   "domain": "environment",
-   "status": "source",
-   "rows": 521,
-   "columns": 3,
-   "units": "to be established (value_units: open)",
-   "origin": {
-    "nature": "capri",
-    "builder": "build_manure_trade_base"
-   },
-   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_manure_trade_base.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
-  },
-  "capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/capri_ref_levl_yild_2030_2017.parquet": {
-   "description": "CAPRI's levels and yields (LEVL, YILD) per region and activity in 2017 and 2030 of the 2030 reference, extracted from res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/build_trajectory_capri_ref.py).",
-   "kind": "reference",
-   "vintage": "2030",
-   "domain": "sources",
-   "status": "source",
-   "rows": 61176,
-   "columns": 5,
-   "units": "to be established (value_units: open)",
-   "origin": {
-    "nature": "capri",
-    "builder": "build_trajectory_capri_ref"
-   },
-   "catalogue_note": "extract of CAPRI's raw file written and read back by its builder (not re-checked)"
-  },
-  "capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/prme_schemes_2030.parquet": {
-   "description": "CAPRI's 2030 reference premiums PRME per region, activity and scheme (the technology-factored rural-development schemes and DPTOTAL), extracted from res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/build_techn_mix_2030.py).",
-   "kind": "reference",
-   "vintage": "2030",
-   "domain": "policy",
-   "status": "source",
-   "rows": 53466,
-   "columns": 4,
-   "units": "to be established (value_units: open)",
-   "origin": {
-    "nature": "capri",
-    "builder": "build_techn_mix_2030"
    },
    "catalogue_note": "extract of CAPRI's raw file written and read back by its builder (not re-checked)"
   },
@@ -6916,8 +6916,8 @@
     "builder": "build_eu_outlook_2030 (not in the trace yet)"
    }
   },
-  "capri_data/validation/greendeal_2030/capri_unit_values_ini_2030.csv": {
-   "description": "CAPRI's 2030 unit values UVAG per region and product from the dataOut of res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/extract_capri_marginal_terms.py, tag ini).",
+  "capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv": {
+   "description": "CAPRI's 2030 unit values UVAG per region and product from the dataOut of res_2_1730greendeal_refdefaulta (CAPRI's 2030 Green Deal baseline) (tools/build/extract_capri_marginal_terms.py, tag ini).",
    "kind": "validation",
    "rows": 2131,
    "columns": 3,

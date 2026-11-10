@@ -44,9 +44,18 @@ The table stored in `capri_data/validation/baseline_reproduction_2030.csv` is ol
 
 Each step is what CAPRI does; the code is in `capri_mod/projection/` and `capri_mod/supply/supply_module.py`.
 
-1. **CAPRI's 2030 reference as the trajectory** (`capri_data/scenarios/capri_ref_2030`,
-   `tools/build/build_trajectory_capri_ref.py`). CAPRI simulates from CAPMOD's calibrated reference run, not from its trend
-   projection (CAPTRD), which is that calibration's input. The trajectory carries the reference's levels and yields
+1. **CAPRI's 2030 Green Deal baseline as the trajectory** (`capri_data/scenarios/capri_ref_2030`,
+   `tools/build/build_trajectory_capri_ref.py`). CAPRI simulates from CAPMOD's calibrated reference, not from its trend
+   projection (CAPTRD), which is that calibration's input. Since 9 November 2026 (the project lead's decision) the
+   point is CAPRI's Green Deal baseline `res_2_1730greendeal_refdefaulta` (`tools/lib/paths.BASELINE_REF`): CAPMOD's
+   simulation of the reference policy (`refpol_endotech_all_sup`) from its calibration run
+   `res_2_1730greendeal_refpol_endotech_all_ini`, and the run CAPRI's Green Deal scenarios are compared with. Until then
+   the levels and yields were the calibration run's; the two runs' prices agree within 0.01%, but levels moved in places
+   (Ireland's other fodder +38 thousand ha in the baseline, Romania's RO02 fallow 3.4 against 13.6, France's voluntary
+   set-aside +25 in FR61), and the fertiliser priors were already the baseline's. Every builder of the base point reads
+   the same run: levels and yields, land types, rations and fodder, dairy and cattle intensity splits, land rents,
+   labour, premiums by scheme, manure trade and the levels that scale CAPRI's PMP terms (so that the Hessian at the
+   model's base is CAPRI's own; the linear terms are the model's, calibrated in step 7). The trajectory carries the reference's levels and yields
    over CAPRI's 2017 results, per region and activity (sheep and goats, calves as CAPRI's totals), and the land types
    (ARAC, FRUN, GRAS, FALL; CAPRI's 2030 UAA is 2.1% below 2017). The trend projection stays available
    (`scenarios/captrd_2030`, `run_f2f_2030.py --trajectory captrd`); it is keyed by CAPRI codes and regions, and
@@ -54,8 +63,10 @@ Each step is what CAPRI does; the code is in `capri_mod/projection/` and `capri_
 2. **Livestock output per head follows the projected yield** (`ProjectionModule._project_livestock`), and so do the
    requirements (dairy cows: energy, protein and dry matter from `breeding.gms`'s functions, manure N per kg milk;
    `RationModel(scale=...)`).
-3. **Crop areas follow their trajectory factor**; the reconciliation restores each region's cropped-area-to-land
-   ratio.
+3. **Crop areas follow their trajectory factor.** With a trend projection (CAPTRD) the reconciliation then restores
+   each region's 2017 cropped-area-to-land ratio; with CAPRI's own results (`capri_ref_*`) it does not (9 November
+   2026): they are one consistent solution, and CAPRI simulates from them as they are (until then the rescaling put
+   Denmark's crops 4.1% and Croatia's 2.3% above CAPRI's levels; KNOWN_ISSUES K120).
 4. **CAPRI's 2030 market**: bilateral market with CAPRI's 2030 flows and the non-EU world of CAPRI's 2030 reference
    (docs/ARMINGTON_MARKET.md); CAPRI's 2030 prices and premiums in 2017 money (`capri_mod/projection/prices.py`).
 5. **Purchased feed at CAPRI's 2030 bulk prices** (`projection/prices.py`): the rations' FCER, FPRO and FOTH prices

@@ -12,7 +12,7 @@ CREATE TABLE scn_capri_ref_2030_growth (
     factor DOUBLE NOT NULL CHECK (factor >= 0),
     PRIMARY KEY (block, "item", "year")
 );
-COMMENT ON TABLE scn_capri_ref_2030_growth IS 'CAPRI''s 2030 reference as growth factors per block and activity: the per-activity median of the per-region ratios LEVL or YILD in res_2_1730greendeal_refpol_endotech_all_ini / CAPRI''s 2017 results, with the model''s activity aliases (tools/build/build_trajectory_capri_ref.py, build_trajectory_model_keys.py)';
+COMMENT ON TABLE scn_capri_ref_2030_growth IS 'CAPRI''s 2030 reference as growth factors per block and activity: the per-activity median of the per-region ratios LEVL or YILD in res_2_1730greendeal_refdefaulta (CAPRI''s 2030 Green Deal baseline) / CAPRI''s 2017 results, with the model''s activity aliases (tools/build/build_trajectory_capri_ref.py, build_trajectory_model_keys.py)';
 INSERT INTO value_units VALUES
   ('scn_capri_ref_2030_growth', 'year', NULL, 'open', 'the target year (a calendar year, not a quantity)'),
   ('scn_capri_ref_2030_growth', 'factor', NULL, 'open', 'growth.factor: a ratio to the base year (the builder)');

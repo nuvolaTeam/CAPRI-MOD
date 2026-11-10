@@ -32,6 +32,39 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 10 November 2026 (night): the 2030 baseline at CAPRI's Green Deal baseline
+
+- The project lead's decision: the model's 2030 baseline reproduces CAPRI's 2030 Green Deal baseline
+  `res_2_1730greendeal_refdefaulta` (CAPMOD's simulation of the reference policy refpol_endotech_all_sup, the run CAPRI's
+  Green Deal scenarios are compared with), not its calibration run `res_2_1730greendeal_refpol_endotech_all_ini`. The
+  two runs' prices agree within 0.01%, but levels and yields moved in places (crops: Ireland's other fodder +38
+  thousand ha, Romania's RO02 fallow 3.4 against 13.6, France's voluntary set-aside +25 in FR61; fattened pigs; 66
+  yields by more than 1%), and CAPRI's catch crops are far fewer in the baseline (EU national rows 2.35 against 9.2
+  million ha). The fertiliser priors and the other 2030 coefficients were already the baseline's.
+- One location for the run, tools/lib/paths.BASELINE_REF, read by every builder of the base point: the trajectory
+  (levels, yields), CAPRI's land types, rations and fodder, the dairy and cattle splits' 2030 terms, land rents, labour
+  and set-aside premiums, premiums by scheme, manure trade, CAP ceilings' weights, CAPRI's marginal terms and unit
+  values (capri_marginal_terms_ref_2030, renamed from _ini_), and the levels that scale CAPRI's PMP terms
+  (pmp_capri_2030*, so the Hessian at the model's base is CAPRI's own; the linear terms are the model's, calibrated at
+  the base as before) and the PMP recipe's calibration point. The N cascade checks (extract_gd2030_nbalance,
+  build_n_cascade_validation, build_p_balance --ini) still read the calibration run.
+- Catch crops (tools/build/build_cover_crops.py): a region CAPRI reports without CATC has 0 (GAMS stores no zero;
+  until now the member state's share was taken there); the cost per ha is CATC's TOIN in the baseline, else the
+  region's TOIN in the calibration run (column cost_source; KNOWN_ISSUES K130).
+- reproduce_builders: the marginal-terms extraction runs before its readers.
+- The projection's land reconciliation (capri_mod/projection/reconcile.py: each region's crop areas rescaled to its
+  2017 ratio of cropped area to land) is skipped for a trajectory of CAPRI's own results (capri_ref_*), which are one
+  consistent solution: it had moved them by the change of the ratio between 2017 and 2030 (Denmark +4.1%, Croatia +2.3%,
+  PT18 +1.2%), which the baseline calibration then reproduced (KNOWN_ISSUES K120). Trend projections (CAPTRD) keep it.
+- Tests anchored on the calibration run's values (IT400000 and PL120000 set-aside factors, FR240000's pulses, DE110000's
+  dairy MANP) take the Green Deal baseline's.
+- Checks (mini-EU, 20 units): the 2030 baseline's crop levels against CAPRI's Green Deal baseline 7.4 thousand ha off
+  (of 25,505; median 0.004%, largest 0.75%, Norway's grassland), against 418 before (median 0.50%, 29 cells beyond 5%);
+  228 with the base switch alone, the rest the reconciliation. Green Deal and Farm-to-Fork indicators within 0.4 point
+  of the previous mini runs (manure N2O -13.5% against -13.0% in the Green Deal); relaxed mineral caps: Green Deal
+  IR010000 (inner duals), HU220000 no longer; Farm-to-Fork NL220000 no longer, HR000000 inner duals in place of the
+  root-crop exemption. The full-EU effect not yet measured.
+
 ## 9 November 2026 (late evening): S6, CAPRI's fertiliser priors' slack and a residue relaxation per nutrient
 
 - CAPRI's Green Deal group frees the slack of the fertiliser priors' partial derivative in its listed regions
@@ -46,8 +79,8 @@ and `docs/KNOWN_ISSUES.md`.
   applied per nutrient.
 - Checks (the project lead's decision: no full-EU runs for changes of limited reach): mini-EU Farm-to-Fork unchanged at
   one decimal (NL220000, in CAPRI's list, now needs the inner duals widened); mini-EU Green Deal 18 iterations against
-  23, cereal production -9.6% against -8.6%, almost all of it BG020000 ending at another crop mix with the same
-  objective (K129, outside CAPRI's list); the full-EU effect not yet measured.
+  23, cereal production -9.6% against -8.6%, almost all of it BG020000 ending at another crop mix: a worse local
+  optimum kept, the basin depending on the restart path (K129, outside CAPRI's list); the full-EU effect not yet measured.
 
 ## 9 November 2026 (evening): S6 items 1, 2 and 6 (the regional NLP departures)
 

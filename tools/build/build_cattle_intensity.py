@@ -20,11 +20,11 @@ from the high to the low activity, z (1000 model heads), as for the dairy split:
              CAPRI stall (the model's census heads over CAPRI's stalls, LEVL x DAYS / 365)
 
   <column>_2030  the shares, fattening lengths and d<item>_rel at CAPRI's 2030 calibration point, from CAPRI's 2030
-             reference the model's 2030 base is taken from (res_2_1730greendeal_refpol_endotech_all_ini, dataOut at
-             2030); the model uses them at the 2030 market year (S6 item 6, 9 November 2026: before, the 2017
+             Green Deal baseline the model's 2030 base is taken from (res_2_1730greendeal_refdefaulta, dataOut at
+             2030; tools/lib/paths.BASELINE_REF); the model uses them at the 2030 market year (S6 item 6, 9 November 2026: before, the 2017
              differences were used at the 2030 point). q_z and q_b keep the 2017 stall conversion.
 
-Sources: CAPRI 2017 results res_17<MS>.txt; CAPRI's 2030 reference res_2_1730greendeal_refpol_endotech_all_inidefaulta
+Sources: CAPRI 2017 results res_17<MS>.txt; CAPRI's 2030 Green Deal baseline res_2_1730greendeal_refdefaulta
 (the _2030 columns); capri_data/sources/intermediate/capreg/pmp_quad_techn.parquet. Regions take their CAPRI region
 through tools/lib/_model_regions.py (splits and merges), else the national row.
 Output: capri_data/2017/supply/cattle_intensity.csv (region, animal, ...)
@@ -41,7 +41,7 @@ import pandas as pd
 import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
-from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import SOURCES, BASELINE_REF  # noqa: E402  (CAPRI's material outside the repository)
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
@@ -68,7 +68,7 @@ SPLITS = (("BULL", "int", "BULL", "BULH", ("BULL", "BULH"), ("IBUL",)),
           ("CALV", "sex", "CAMR", "CAFR", ("CAMF", "CAFF", "CAMR", "CAFR"), ("ICAM", "ICAF")))
 FLOW = ("MANN", "MANP", "MANK", "BEEF", "YOUNG")
 #: CAPRI's 2030 reference the model's 2030 base comes from (capri_data/scenarios/capri_ref_2030)
-REF_2030 = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+REF_2030 = BASELINE_REF
 ACTS = ("BULL", "BULH", "HEIL", "HEIH", "HEIR", "CAMF", "CAFF", "CAMR", "CAFR")
 DAILY = ("ENNE", "CRPR", "DRMN", "DRMX")
 #: the model's young-animal goods (tools/build/build_young_animals.py): CAPRI items produced / used per animal

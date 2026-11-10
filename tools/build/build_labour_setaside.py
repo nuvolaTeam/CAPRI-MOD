@@ -19,8 +19,9 @@ request).
    of a SETA level (CAPRI's VSET share and the share of a change CAPRI's PMP terms give VSET) and their labour, now
    in labour_coef.csv under VSET and FALL.
 
-Sources: CAPRI 2017 results capri_sources/capreg/res_17*.txt; CAPRI's 2030 reference
-capri_sources/exports/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; PMP terms
+Sources: CAPRI 2017 results capri_sources/capreg/res_17*.txt; CAPRI's 2030 Green Deal baseline
+capri_sources/exports/res_2_1730greendeal_refdefaulta.zip (tools/lib/paths.BASELINE_REF; its calibration run
+refpol_endotech_all_ini until 9 November 2026); PMP terms
 (the PMP terms, capri_data/sources/intermediate/baseline_pmp/intensity_q_*.csv, were read for the split until S2).
 
     python tools/build/build_labour_setaside.py
@@ -39,11 +40,11 @@ import pandas as pd
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
-from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import SOURCES, BASELINE_REF  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DUMPS = SOURCES / "capreg"
-REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+REF = BASELINE_REF
 ITEMS = ("LEVL", "LABT", "LABF", "LABP", "PRME")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)

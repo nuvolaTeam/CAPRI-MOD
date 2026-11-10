@@ -17,8 +17,8 @@ and 2030 calibration points, capri_data/sources/raw/capri/capri_baseline/capri_m
 The reference run's 2030 output prices equal CAPRI's own calibrated 2030 baseline (p_uvagStore,
 results/baseline/data_uvag1730defaulta; capri_uvag_store_1730.parquet): ratio 1.000 for every traded product.
 
-Sources: capri_data/validation/greendeal_2030/capri_unit_values_ini_2030.csv and
-capri_marginal_terms_ini_2030.csv.xz (tools/build/extract_capri_marginal_terms.py); CAPRI 2017 results
+Sources: capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv and
+capri_marginal_terms_ref_2030.csv.xz (tools/build/extract_capri_marginal_terms.py); CAPRI 2017 results
 res_17<MS>.txt (national UVAG, regional PRME and LEVL).
 
 Written (capri_data/trajectories/):
@@ -63,8 +63,8 @@ def main() -> None:
     args = ap.parse_args()
     val = ROOT / "capri_data" / "validation" / "greendeal_2030"
     out = ROOT / "capri_data" / "trajectories"
-    uv30 = _read_csv(val / "capri_unit_values_ini_2030.csv")
-    terms = _read_csv(val / "capri_marginal_terms_ini_2030.csv.xz")
+    uv30 = _read_csv(val / "capri_unit_values_ref_2030.csv")
+    terms = _read_csv(val / "capri_marginal_terms_ref_2030.csv.xz")
     products = set(uv30["product"])
 
     # --- CAPRI 2017: national UVAG, regional PRME and LEVL

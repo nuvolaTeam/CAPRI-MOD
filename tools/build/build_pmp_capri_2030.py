@@ -25,8 +25,10 @@ Animals keep the model's elasticity-calibrated terms (CAPRI's animal terms inclu
 BULL/BULH and CAPRI's feed PMP terms, a separate step).
 
 Sources: capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.parquet, pmp_quad_pact_2030.parquet (tools/build/build_pmp_2030.py,
-exported from the project lead's CAPRI 2030 baseline calibration); CAPRI 2030 levels LEVL from the 2030 reference
-the model's trajectory is built from (res_2_1730greendeal_refpol_endotech_all_inidefaulta).
+exported from the project lead's CAPRI 2030 baseline calibration); CAPRI 2030 levels LEVL from the 2030 Green Deal
+baseline the model's trajectory is built from (res_2_1730greendeal_refdefaulta, tools/lib/paths.BASELINE_REF): with
+the model's base at those levels, Q = H there, CAPRI's own curvature (its calibration run refpol_endotech_all_ini until
+9 November 2026, when the base moved to the Green Deal baseline).
 Outputs: capri_data/2017/supply/pmp_capri_2030_mix.csv (S1's mix columns, mix_terms; the default run only) and
 capri_data/2017/supply/pmp_capri_2030.csv (region, act_i, act_j, g, x_i, x_j, capri_regions); g in the
 model's 2017 money: CAPRI's 2030 terms over CAPRI's inflation to 2030 (tools/lib/_money.deflator, the deflator the
@@ -46,13 +48,13 @@ import pandas as pd
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
-from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import SOURCES, BASELINE_REF  # noqa: E402  (CAPRI's material outside the repository)
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030.csv"
-REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+REF = BASELINE_REF
 #: the mix columns' PMP terms (S1): g_xx_extra (Q_XX - c) X^2 to add to the crop's diagonal, g_xz and g_zz, per model
 #: region and crop with both technologies, in the convention of OUT (g = Q x X^2 at CAPRI's 2030 level x, the model's
 #: 2017 money)

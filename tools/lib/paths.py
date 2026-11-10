@@ -30,6 +30,16 @@ SOURCES = Path(os.environ["CAPRI_SOURCES"]).expanduser().resolve() if os.environ
     else ROOT / "capri_sources"
 #: CAPRI's exports as delivered (result listings, market and elasticity exports, GAMS-dumped inputs)
 EXPORTS = SOURCES / "exports"
+#: CAPRI's 2030 Green Deal baseline (CAPMOD's simulation of the reference policy, refpol_endotech_all_sup, from its
+#: calibration run refpol_endotech_all_ini): the point the model's 2030 baseline reproduces and the run CAPRI's Green Deal scenarios are
+#: compared with. Every builder of the baseline's levels, yields and coefficients reads it (the project lead's decision of
+#: 9 November 2026, docs/BASELINE_REPRODUCTION.md; until then the levels came from CAPRI's calibration run
+#: res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv, which the N cascade checks still read)
+BASELINE_REF = EXPORTS / "res_2_1730greendeal_refdefaulta.zip"
+#: CAPRI's 2030 calibration run (refpol_endotech_all_ini, from which the baseline above is simulated): read where the
+#: baseline reports nothing for a coefficient CAPRI has (catch crops' input cost in regions without catch crops at the
+#: baseline, tools/build/build_cover_crops.py)
+CALIBRATION_REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 #: CAPRI's files converted for the parity tests (tools/build/build_*_reference.py; not committed): capri_sources/
 #: reference, or $CAPRI_REFERENCE (capri_reference/ at the repository root until 4 November 2026)
 REFERENCE = Path(os.environ["CAPRI_REFERENCE"]).expanduser().resolve() if os.environ.get("CAPRI_REFERENCE") \

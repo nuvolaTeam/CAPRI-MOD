@@ -21,7 +21,7 @@ CAPRI's Green Deal settings (refpol_endotech_all_sup.gms l. 76), so no RDP premi
 
 Sources: capri_data/2017/supply/cover_crops.csv (catc_share_2030, catc_cost_eur_ha = CATC TOIN; tools/
 build_cover_crops.py), capri_data/2017/supply/winter_cover_share.csv (filled shares by model crop), CAPRI's 2030 crop
-levels (capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz, LEVL, as build_cover_crops.py).
+levels (capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz, LEVL, as build_cover_crops.py).
 
 Output: capri_data/2017/abatement/mitigation/winter_cover_option.csv
     region, capri_region, uaar_kha, ini_share, max_share, cost_lin_eur_ha, subs0, subs1, pmp_sqr, pmp_lin, case
@@ -50,7 +50,7 @@ def _load(path):
 
 def main():
     cc = _load(ROOT / "tools" / "build" / "build_cover_crops.py")
-    terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz",
+    terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv.xz",
                         header=None, names=["region", "act", "item", "value"], dtype=str)
     terms["value"] = pd.to_numeric(terms["value"], errors="coerce")
     lev = terms[terms["item"] == "LEVL"].pivot_table(index="region", columns="act", values="value")

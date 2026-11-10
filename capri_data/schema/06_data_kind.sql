@@ -456,7 +456,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/sources/raw/capri/dat/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.parquet', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/sources/raw/capri/dat/envind/orgsoil_share_p_orgsoilori.parquet', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/sources/intermediate/envind/res17_mann_crpr_expt.parquet', 'base', 'by file: CAPRI''s data series (quotas, small producers, 2017 results, land use)'),
-  ('capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/capri_manure_trade_2030.parquet', 'reference', 'by rule: extract of CAPRI''s 2030 reference'),
+  ('capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/capri_manure_trade_2030.parquet', 'reference', 'by rule: extract of CAPRI''s 2030 reference'),
   ('capri_data/sources/intermediate/estnlp/pela_own_price.parquet', 'coefficients', 'by rule: CAPRI''s estimates'),
   ('capri_data/sources/raw/eurostat/aei_pr_gnb_nitrogen.parquet', 'base', 'by rule: 2017 extract'),
   ('capri_data/sources/raw/eurostat/ef_lus_main_uaa_nuts2024.parquet', 'base', 'by rule: 2017 extract'),
@@ -500,7 +500,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/validation/capri_eu27_levels_2017_capreg.csv', 'validation', 'by rule: kept for comparison'),
   ('capri_data/validation/capri_eu27_levels_2030_ref.csv', 'validation', 'by rule: kept for comparison'),
   ('capri_data/validation/eu_outlook_2020_2030.csv', 'validation', 'by rule: kept for comparison'),
-  ('capri_data/validation/greendeal_2030/capri_unit_values_ini_2030.csv', 'validation', 'by rule: kept for comparison'),
+  ('capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv', 'validation', 'by rule: kept for comparison'),
   ('capri_data/validation/n_cascade_capri_gd2030.csv', 'validation', 'by rule: kept for comparison'),
   ('capri_data/sources/intermediate/ammonia/ammonia_cost_curves.parquet', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/sources/intermediate/ammonia/ammonia_technology_effects.parquet', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
@@ -511,5 +511,5 @@ INSERT INTO data_kind VALUES
   ('capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/fert_dist_dataout_2030.parquet', 'reference', 'by rule: extract of CAPRI''s 2030 reference'),
   ('capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/npk_dataout_2030.parquet', 'reference', 'by rule: extract of CAPRI''s 2030 reference'),
   ('capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/yild_2030_ref.parquet', 'reference', 'by rule: extract of CAPRI''s 2030 reference'),
-  ('capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/capri_ref_levl_yild_2030_2017.parquet', 'reference', 'by rule: extract of CAPRI''s 2030 reference'),
-  ('capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/prme_schemes_2030.parquet', 'reference', 'by rule: extract of CAPRI''s 2030 reference');
+  ('capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/capri_ref_levl_yild_2030_2017.parquet', 'reference', 'by rule: extract of CAPRI''s 2030 reference'),
+  ('capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/prme_schemes_2030.parquet', 'reference', 'by rule: extract of CAPRI''s 2030 reference');

@@ -1,11 +1,11 @@
 name = "capri_ref_2030"
-source = "CAPRI star 3.0 2030 Green Deal reference with endogenous technologies (res_2_1730greendeal_refpol_endotech_all_ini, LEVL and YILD) over CAPRI's 2017 results (res_17<MS>)"
+source = "CAPRI star 3.0 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta, LEVL and YILD) over CAPRI's 2017 results (res_17<MS>)"
 vintage = "from user CAPRI installation"
 base_year = 2017
 target_years = [2030]
 
 [provenance]
-extracted_from = "capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/capri_ref_levl_yild_2030_2017.parquet"
+extracted_from = "capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/capri_ref_levl_yild_2030_2017.parquet"
 datatype_read = "CAPMOD reference results 2030 against CAPRI 2017 results"
 aggregation = "per-activity median of per-region ratios (EU fallback)"
 factor_band = "none"

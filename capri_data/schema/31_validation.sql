@@ -46,16 +46,16 @@ COMMENT ON TABLE val_eu_outlook_2020_2030 IS 'DG AGRI''s EU agricultural outlook
 INSERT INTO value_units VALUES
   ('val_eu_outlook_2020_2030', 'table', NULL, 'open', 'eu_outlook_2020_2030.table: unit to be established');
 
--- file: capri_data/validation/greendeal_2030/capri_unit_values_ini_2030.csv
-CREATE TABLE val_capri_unit_values_ini_2030 (
+-- file: capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv
+CREATE TABLE val_capri_unit_values_ref_2030 (
     region VARCHAR NOT NULL,
     product VARCHAR NOT NULL,
     uvag DOUBLE NOT NULL,
     PRIMARY KEY (region, product)
 );
-COMMENT ON TABLE val_capri_unit_values_ini_2030 IS 'CAPRI''s 2030 unit values UVAG per region and product from the dataOut of res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/extract_capri_marginal_terms.py, tag ini).';
+COMMENT ON TABLE val_capri_unit_values_ref_2030 IS 'CAPRI''s 2030 unit values UVAG per region and product from the dataOut of res_2_1730greendeal_refdefaulta (CAPRI''s 2030 Green Deal baseline) (tools/build/extract_capri_marginal_terms.py, tag ini).';
 INSERT INTO value_units VALUES
-  ('val_capri_unit_values_ini_2030', 'uvag', NULL, 'open', 'capri_unit_values_ini_2030.uvag: unit to be established');
+  ('val_capri_unit_values_ref_2030', 'uvag', NULL, 'open', 'capri_unit_values_ref_2030.uvag: unit to be established');
 
 -- file: capri_data/validation/n_cascade_capri_gd2030.csv
 CREATE TABLE val_n_cascade_capri_gd2030 (
