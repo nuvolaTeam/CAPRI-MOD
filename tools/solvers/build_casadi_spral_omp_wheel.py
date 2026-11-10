@@ -7,7 +7,9 @@ so IPOPT's SPRAL runs on one thread there. This script repeats CasADi's own rele
 API) with one change, tools/solvers/casadi_3.8.1_spral_openmp.patch:
 
   - SPRAL configured without --disable-openmp, and -lgomp added to IPOPT's SPRAL link flags;
-  - SWIG_IMPORT on (binaries.yml's swig job does the same with sed before packing the source).
+  - SWIG_IMPORT on by default (binaries.yml's swig job does the same with sed before packing the source, after it has
+    generated the wrappers: the generation step here passes -DSWIG_IMPORT=OFF, else CMake looks for the wrappers it is
+    to generate and stops with "No SOURCES given to target: _casadi", found on Red Hat 9 on 11 November 2026).
 
 Everything else is CasADi's: the same images (ghcr.io/casadi/ci-swig for the SWIG sources, ghcr.io/jgillis/
 manylinux_2_28-x64:production for the build), the same build_flags (read from binaries.yml at the tag, so every plugin
@@ -125,11 +127,15 @@ def main() -> None:
         (work / "build_flags.txt").write_text(flags + "\n")
         done(work, "sources")
 
-    if not stamp(work, "swig"):
-        # binaries.yml's swig job (Python 3, GIL release on, as the build's flags)
-        docker(work, SWIG_IMAGE, "cd casadi && mkdir -p build_swig && cd build_swig && cmake -DWITH_SELFCONTAINED=ON "
-               "-DWITH_PYTHON=ON -DSWIG_EXPORT=ON -DWITH_COMMON=OFF -DWITH_PYTHON_GIL_RELEASE=ON .. "
-               "&& make python_source && cd .. && rm -rf build_swig", log)
+    wrapper = work / "casadi" / "swig" / "python" / "target3" / "source" / "casadiPYTHON_wrap_gil_release.cxx"
+    if not stamp(work, "swig") or not wrapper.exists():
+        # binaries.yml's swig job (Python 3, GIL release on, as the build's flags), with SWIG_IMPORT off: the patch
+        # has switched its default on already (binaries.yml switches it after this step)
+        docker(work, SWIG_IMAGE, "cd casadi && rm -rf build_swig && mkdir build_swig && cd build_swig && cmake "
+               "-DWITH_SELFCONTAINED=ON -DWITH_PYTHON=ON -DSWIG_EXPORT=ON -DSWIG_IMPORT=OFF -DWITH_COMMON=OFF "
+               "-DWITH_PYTHON_GIL_RELEASE=ON .. && make python_source && cd .. && rm -rf build_swig", log)
+        if not wrapper.exists():
+            sys.exit(f"the SWIG step did not write {wrapper}: see {log}")
         done(work, "swig")
 
     if not stamp(work, "mockups"):

@@ -9,6 +9,10 @@ result is a wheel you install with pip in place of PyPI's CasADi.
 - Status: these steps have run here only up to the start of the core build (sources, SWIG, mockups, the first external
   projects). The Python, graft and wheel steps follow CasADi's release workflow but have not been run end to end.
   If a step fails, the log says which one, and running the script again resumes there.
+- Fixed on 11 November 2026: the SWIG step stopped at its configure on Red Hat 9 with "No SOURCES given to target:
+  _casadi" (the patch switches SWIG_IMPORT on before the wrappers exist; the step now passes `-DSWIG_IMPORT=OFF`, as
+  CasADi's own workflow generates them before switching it). Rerun the same command: the step is repeated whenever its
+  wrapper file is missing.
 
 ## What you need
 
