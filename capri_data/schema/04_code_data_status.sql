@@ -33,6 +33,8 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/pipeline/captrd/policy.py', 'sugar_quotas', 2006.0, 'capri', 'keep', 'gams/policy/reformsugarquotas.gms l. 82-83', 'A and B quotas merged from the 2006 reform'),
   ('capri_mod/pipeline/captrd/policy.py', 'sugar_quotas', 2017.0, 'capri', 'keep', 'gams/policy/reformsugarquotas.gms l. 136-139', 'sugar quotas zero from 2017 where the Aglink version assumes none'),
   ('capri_mod/data/find_symbol.py', '<module>', 15.0, 'technical', 'keep', NULL, 'number of search hits shown by the symbol finder'),
+  ('capri_mod/io_results.py', 'rows_digest_batches', 20.0, 'technical', 'keep', NULL, 'read size of the sorted lines file, 1 MiB (1 << 20 bytes)'),
+  ('capri_mod/io_results.py', 'verify_run', 200000.0, 'technical', 'keep', NULL, 'rows per batch read when a run id is recomputed (bounded memory)'),
   ('capri_mod/data/loaders.py', 'load_all_data', 2030.0, 'technical', 'keep', NULL, 'year in the land-rent and PMP-recipe file names'),
   ('capri_mod/data/loaders.py', 'load_variable_costs', 50.0, 'technical', 'keep', NULL, 'row count telling a region-level cost file from an EU-level one'),
   ('capri_mod/data/loaders.py', 'load_variable_costs_regional', 50.0, 'technical', 'keep', NULL, 'row count telling a region-level cost file from an EU-level one'),

@@ -1,0 +1,1528 @@
+{
+ "repo": "nuvolaTeam/capri-mod-raw",
+ "repo_type": "dataset",
+ "versions": [
+  {
+   "tag": "v2026.11.10",
+   "note": "the six GDX files received 10 November 2026: CAPRI's shipped Green Deal 2030 reference (5 November 2025), the project lead's Green Deal step from it (10 November 2026), the permits results (step; endotech ini/max, undated), the step's market debug dump",
+   "files_added": 303
+  }
+ ],
+ "files": {
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/ArmBal1_.parquet": {
+   "sha256": "6f9220d25cd1d85bc5ae99feed813ef02a9bd3f5dca4aac882583e5a81b460fa",
+   "size": 8975,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/CPri_.parquet": {
+   "sha256": "cea80660af45e970de904be50fb0f53bf550d0ef70eaeed9a274de76db4002eb",
+   "size": 96592,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/DairyNQ_.parquet": {
+   "sha256": "b68dc0db567d0f8fdbf70ad46214cdbd6654abb2481cd1af79e349e7c800e578",
+   "size": 20739,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/EXPs_.parquet": {
+   "sha256": "5d814814a9cf484c7becc328175e9a3aba5e11485dbe119240370266330e17dd",
+   "size": 1598,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/FLIPFLOP_.parquet": {
+   "sha256": "6c72f40a1fe5c2773684090cebde8aa6ff0322d88c45ed4ef57e85f490725260",
+   "size": 2596,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/FatsProtBal_.parquet": {
+   "sha256": "0a5b1eecbe80366e189a8cdfa6f9c1fa103acc4bb7e311a88a27fab12d489914",
+   "size": 4846,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/FeedFudge_.parquet": {
+   "sha256": "3e79e0b4855c62fee927a15e5df8a0e0f893ecd3626457a499e19c7d0512628b",
+   "size": 1583,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/FeedNQ_.parquet": {
+   "sha256": "ddcd615f36f50928c41994a5c6203dbdf1d6b212bd5b3d17775af24d8d8d9719",
+   "size": 28142,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/FlexLevyNotCut_.parquet": {
+   "sha256": "c354c4d9ae1450175770355bcdd01f73934524f1a50b00a961c4097847b0bd3a",
+   "size": 4030,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/FlexLevy_.parquet": {
+   "sha256": "863af212fc786dcb50c2ece2bf61e95c4d7fab086e0791b926bc6768e346dc47",
+   "size": 4015,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/GLDemandGS_.parquet": {
+   "sha256": "54f297d21f1f820c0cd02502b284f9c10fc5d5b4ede3f58fb68fd70e7d1cc627",
+   "size": 5502,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/GLDemandGiS_.parquet": {
+   "sha256": "985e0431222f9a2045ce1d2c4d8896fa079a36e53243b64be00d38fcf6c99eb7",
+   "size": 4745,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/GlDemandFS_.parquet": {
+   "sha256": "ec27d62feec3e8e71486ac3986d026b8a3c9a4a6e2135352b8607d3a059222ed",
+   "size": 5502,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/ImpQuant_.parquet": {
+   "sha256": "cca895934fdf280d85a83a84a906b4fb711d383bf7bb6a91c1e7e959d51b2a76",
+   "size": 1582,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/META.parquet": {
+   "sha256": "5cea403d8351c7596a32370b1467457ea6b47b51c4d5e00d0935f0298b4f5975",
+   "size": 19742,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/MarketPriceAgg_.parquet": {
+   "sha256": "8ad6483a665ddca86bd07e9a19545a8982e98ef865976611a3a65b2e24b62aa9",
+   "size": 3632,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/PMrk_.parquet": {
+   "sha256": "4c51ff9c2ddb6321e13a6c70bc9ed4c3186c2d8348c8995cd3c54ce3f7e33ab0",
+   "size": 7759,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/PPri_.parquet": {
+   "sha256": "2fa36769579a1456183a457313e27d110a41becc01e6ca33f4b537433116a371",
+   "size": 5889,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/ProcFudge_.parquet": {
+   "sha256": "cdc27251dde58230818d0b193b9f6f7f4c41ca8f5031e107b5086015ca15de6e",
+   "size": 1581,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/ProcMargM_.parquet": {
+   "sha256": "e814014fc0918dc44a4d37ea3dff672b3182dcfc81cc3b28b9acbb5084f5aefd",
+   "size": 4149,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/ProcMargO_.parquet": {
+   "sha256": "48d8eb4da6d8116e2f7ceb740ec686d298e0c61d884c1c08935e502e4a692704",
+   "size": 3843,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/ProcNQ_.parquet": {
+   "sha256": "636f2b88248301faecaacc5e66d8f11df41fe325a2ecffe0d94286dfecbb0a33",
+   "size": 52426,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/ProcO_.parquet": {
+   "sha256": "51b2e6044564fd4132b721e2476c60ef6cc7eacff3aae5878f73ff64ec73a960",
+   "size": 4010,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/ProdFudge_.parquet": {
+   "sha256": "46d9652183d8b4dcaea11fac871600f7d96f3d02b461b934d3d750d1d4a2b62e",
+   "size": 1582,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/ProdNQ_.parquet": {
+   "sha256": "de38f35f6f20cb9d7a6b5bf0f26e5060bff50d0df513162630d83ecc70ae081a",
+   "size": 70038,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/Proda_.parquet": {
+   "sha256": "8ea69618e4c65fe703db66b815b74c2392101b6d96e1e3471263b8a7d72b9ea9",
+   "size": 4959,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/RM.parquet": {
+   "sha256": "c9196a5ce48269770862416c2688d973575fbf12b4b3ec0ee385a2a5c373c7ef",
+   "size": 2485,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/RMS.parquet": {
+   "sha256": "e89954561936002a273503b01ec5bed1f74180fb2b6ecbb4948bfb0e490ec60c",
+   "size": 2845,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/RMSSUP.parquet": {
+   "sha256": "1fc74bfc2601c1d9d988a1f31ce9506e4b3bba42e9e5152139e4412ce65b7660",
+   "size": 2088,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/RM_TO_RMS.parquet": {
+   "sha256": "380dd37099168e176e64923c99b31a30b5adf954e5064aee382b27e1142e16cb",
+   "size": 2489,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/RW.parquet": {
+   "sha256": "be7d6f8da43f3051c3c4900eaea950f304f02f5c8e53f44c03ddd029d12382b4",
+   "size": 1982,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/RW_TO_RM.parquet": {
+   "sha256": "169e18679e493a3945e4df4985fd8601388438f324f6fc8cfe012e638b137efa",
+   "size": 2353,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/SupBalM_.parquet": {
+   "sha256": "07c115863356d75283389c8dc022ab12814e922f1008e260b957f3703ac7ee73",
+   "size": 6033,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/TRQImports_.parquet": {
+   "sha256": "10d721810114a5394157c0fab9a0e9c00790b8a4052b0f999192d8856334ddf8",
+   "size": 3543,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/TradeFlowsAgg_.parquet": {
+   "sha256": "32837f6ec7bdf1fa7b350e7eeca134f4689c8902e84ac95eb135871bfc1b8817",
+   "size": 7024,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/XiS_.parquet": {
+   "sha256": "a42654211521ccf9f33667c364545d27078feddb96f6036e1cd696b81f4f32ec",
+   "size": 101884,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/_symbols.csv": {
+   "sha256": "1fc9a46ad9644ea0627cb4a1a76c674b4faa620e4a516ef222806cc6516c0476",
+   "size": 14647,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/arm1Val_.parquet": {
+   "sha256": "399e8ef77eb5306e79d6656c6be394f45f715e562fca707d96d9b61388a146ca",
+   "size": 1600,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/arm2QuantShares_.parquet": {
+   "sha256": "1ce9d8649c5688dc0ba42b5750944f1ac8591c2c5333b9322e433eae41b83c7d",
+   "size": 4396,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/arm2Val_.parquet": {
+   "sha256": "b502b3312d885f6c07c9ef80ec3358428ea182ab0548b05fa0123b9fdf2106d7",
+   "size": 1548,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/buyingRMNum_.parquet": {
+   "sha256": "847cc3db2529f5197a2dc2c09f4cd157c5fde70e6b7caebd8eb0c3d2325fc053",
+   "size": 1751,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/buyingRM_.parquet": {
+   "sha256": "4016a0343741ed1c04ca80d38dd365aef4922a65a1837e307b9cb9dd16ed5fba",
+   "size": 1692,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/buyingShares_.parquet": {
+   "sha256": "8845a2a8ad58ec6d46cd9186918caafc524c874f7e5c35fdd29809ac20f1d92c",
+   "size": 1624,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/buyingToIntervStock_.parquet": {
+   "sha256": "6b5ac4fe3314092a901e7cc0b4b1205f7a0b5f3d3fea5f457bab2fe514cc35f3",
+   "size": 1619,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/domSalesShares_.parquet": {
+   "sha256": "32e030b673c5b2b7e806178f7529e8d6b5372b307e98ca83fa089c8496722e5c",
+   "size": 4696,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/expQuant_.parquet": {
+   "sha256": "07314ab7396341e391fbe1c668b35f235dcc6115b392013cef2870fdb68c3284",
+   "size": 4641,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/impPrice_.parquet": {
+   "sha256": "03b332981b52c42e636de4d5c6dfc9314225a60fea2d365821df010cd5b38118",
+   "size": 561896,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/importShares_.parquet": {
+   "sha256": "9f0564cf65a2a2d6ef1208ff9d3290cfaf8da11b1211af2e9d83560d2b44f635",
+   "size": 22198,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/intervStockChange_.parquet": {
+   "sha256": "39d0fede3d7b9d4aa7fb4da25e8ed39dafe1ca1354b104e2cc4cf32205cbf28b",
+   "size": 1634,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/intervStockLevel_.parquet": {
+   "sha256": "b11ca2a872d464537d6ca0f7c0d062cab60ea825144a4bd6a685933aa4218a29",
+   "size": 1603,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_arm2Commit.parquet": {
+   "sha256": "762b8fd1c4fdb038a5986932f0e3a2d70eb235fd9f84746a6e06af48bb5c4a47",
+   "size": 1488,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_cnstNQDairy.parquet": {
+   "sha256": "7ab6615090fa2309b4cc00bd7cd032c797332077738e4b7779e969686c75470e",
+   "size": 8723,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_cnstNQFeed.parquet": {
+   "sha256": "fe2c3ecd185c0f96eaa8b14b5eda8d4b335d6380f94bfbb9b1ad0a094f456318",
+   "size": 11662,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_cnstNQProc.parquet": {
+   "sha256": "c02861d92e665c61d20a1bebd9ebb209f97987e8d21e128d7a28069dabcb989d",
+   "size": 20247,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_cnstNQSupp.parquet": {
+   "sha256": "42e9435543183b98b316de348c6e0e68f68b84005fae5d9ddf1fb021eb8c1bca",
+   "size": 29646,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_dataCopy.parquet": {
+   "sha256": "f2735779e556bfa229dc8720c0dc9d5d954a44520e937f4a6e242ea67d09e785",
+   "size": 1572495,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_deltaCES.parquet": {
+   "sha256": "956a8bba1b321bdbd1f4edad179577e3eba9ee542e499c6fd95d47f2cb346257",
+   "size": 10685,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_doubleZero.parquet": {
+   "sha256": "bec14a0bc8de12fa98371e0465df49702d3d60f164c52586397cc50988789e1c",
+   "size": 4848,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_dpCESBiof.parquet": {
+   "sha256": "86f43a3974a110235f35418467ac2456a47d86956234722daf85d248d0217eca",
+   "size": 5825,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_dpCESFeed.parquet": {
+   "sha256": "4ddc171577951854cf1c69b78609de691463ac0fc1d275e51e9239b98335a10e",
+   "size": 10827,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_dpCESTrade.parquet": {
+   "sha256": "397e5a922041a3f442b66e1b6113e150a3a5cdbff58b6b115275442b17facb59",
+   "size": 256942,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_elasBuying.parquet": {
+   "sha256": "8af58578023098e21d61b9487fdf832dc3561c0a4ebadb3cef11fda6f265ad78",
+   "size": 2538,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_elasRelease.parquet": {
+   "sha256": "a9f5cb04f0e6f692aa4b4c865b135929ef5b49fb066164a34cb865917e9e5372",
+   "size": 2539,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_expectedTrade.parquet": {
+   "sha256": "f068392759a4f873633efab3302ed687990ed4c153a891e7e69333fe11cacb50",
+   "size": 1505,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_hessNQDairy.parquet": {
+   "sha256": "85af5fffcb5548b271bd5b6cf5206a61b19cdef34b66db5ece94a697e3aa6cea",
+   "size": 36331,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_hessNQFeed.parquet": {
+   "sha256": "0c66c5d2b5b4ae133d977d5ddf8e7990bedd3a7121f95597802a4cf3b1fad36f",
+   "size": 152398,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_hessNQProc.parquet": {
+   "sha256": "4550e6df04621faa5e3ac515a814a2f996bb8bf894396c4badd7aeead323c7d8",
+   "size": 28003,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_hessNQSupp.parquet": {
+   "sha256": "cac9debcefec7ad84521582a76b32794c2dfbad6d964e8843cd2173525ace900",
+   "size": 695757,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_impPrice.parquet": {
+   "sha256": "38465aceb77a5db87f02fa36b5bb26d7e261861c3e41c9ca3caea16b1a5d0f2a",
+   "size": 252778,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp1.parquet": {
+   "sha256": "fed69f02fc19a3e6773e6d3422f8ebc6b8c3431883258f506070ae9034472be0",
+   "size": 37250,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp10.parquet": {
+   "sha256": "53dd5d0bcef81e5856b2acdcd7e5ef9694104c81af7083fe1ab9aec27b970590",
+   "size": 9524,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp11.parquet": {
+   "sha256": "4c054d94c26cee7ef8b7ad907281815161cc620d5bf64551cca5f698fa89340a",
+   "size": 3893,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp12.parquet": {
+   "sha256": "70aef302380e6a999bf92f635e8eab93bbf9dfb3dc659ba54b7fed36b37dad27",
+   "size": 10795,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp13.parquet": {
+   "sha256": "47db9d45a64573117cf8a67a11333dc093923d0151adda9178f9b427e564cb6b",
+   "size": 2368,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp14.parquet": {
+   "sha256": "0f74cb41dc6504d68aba04645cd3bce25879e44f65cb39160cfa488d2318e17e",
+   "size": 6826,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp15.parquet": {
+   "sha256": "9c2c713a3ed93534ac8f794fa912c88bcf59dd05620a0f3df6e5321c297e47b2",
+   "size": 11158,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp16.parquet": {
+   "sha256": "8aa788a730d5f8774d88e101baa78a458e4dd2238ceed2a6ed7f74168d2b9943",
+   "size": 139615,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp17.parquet": {
+   "sha256": "50f9449faae15674c6f4c171cc59d91c3c71dec377ad356a60b011475e413ace",
+   "size": 25600,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp18.parquet": {
+   "sha256": "483f8cb1233e733bf34478884521736d6cac28d2efffb472762ed78b0f1e1642",
+   "size": 1267,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp19.parquet": {
+   "sha256": "06204c6f30da265fb0cb31d8f462f33eaff877d59ef2b836c4fa0355cbc8128e",
+   "size": 4847,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp2.parquet": {
+   "sha256": "1fe3198a5d95d25fbd5825a18a8be050a538064cd008e029175283318b321b44",
+   "size": 870862,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp20.parquet": {
+   "sha256": "aec647db1290884bb4fde3306113041299f96e026bb4b4016910ce9b3b5a77b4",
+   "size": 19077,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp21.parquet": {
+   "sha256": "5bc215e046ab7c827a1812fcb5e67cabc65fed7aae0d65f1f69363802369ab00",
+   "size": 8634,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp22.parquet": {
+   "sha256": "455b6fb0022ecd83ced8a863bb4937c0417d5f59dd759d33adec57fe849b6755",
+   "size": 35999,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp23.parquet": {
+   "sha256": "01fa66348290f0a90b95fbea80a3472b4eee5ca733feecce0ca2491b2d97de3e",
+   "size": 3055,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp24.parquet": {
+   "sha256": "55e174049190272d27e09caddfc69454d1936f9ece73ff4a3b98e6d67234fc81",
+   "size": 8247,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp25.parquet": {
+   "sha256": "1d59cf00c3f67d2f701c12f42173f48265c988fa2f245e9c5e0380c8114cb18e",
+   "size": 9242,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp26.parquet": {
+   "sha256": "ebd53bd5bc469181e651fc6a8391a3344c98c4956d9ee7c24f65f0d5f13c110a",
+   "size": 8943,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp27.parquet": {
+   "sha256": "c1ac992bb9c4662f946b458d08475506add805869e7e677a2f955e1bcffe3725",
+   "size": 3866,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp28.parquet": {
+   "sha256": "7f4ea90a6aa607cb502414246cb22dd75f6baf9a2a85f423b30a14343d95bf14",
+   "size": 3866,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp29.parquet": {
+   "sha256": "a50d841856a5159834078809f0ed81b7da9a89236af08a61a3bb778e89bdac75",
+   "size": 3877,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp3.parquet": {
+   "sha256": "65335218bfad04da5482179853a1ffff8699e3207743a6f7b15f9d55fe4ac7f7",
+   "size": 2833,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp30.parquet": {
+   "sha256": "b65cd3b74673c6e98c03811122be30da7ff489f9f811d7739e433f914130298e",
+   "size": 4559,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp31.parquet": {
+   "sha256": "8480537b07dfee0092d55ca650eb6dd2b68472050a1f234843c5c04bd251430b",
+   "size": 4538,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp32.parquet": {
+   "sha256": "ed6436ef9c71406168459ee1c429b9b52d371bbe8a6f17046448b7499f962147",
+   "size": 4183,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp33.parquet": {
+   "sha256": "bb6f7069d5742426d2eea57de655986d4a1217e2c2f633820f274e27373a6991",
+   "size": 4239,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp34.parquet": {
+   "sha256": "1dd3ba7af334531dd0cedfd7c34c0fe1cdd442a513c6d438a8fc1acf928e0c27",
+   "size": 19970,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp35.parquet": {
+   "sha256": "ef127a1390f09c5c793bcbfd19a7bb372eb77ef972e369c5739f2250e4c8e11a",
+   "size": 18247,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp36.parquet": {
+   "sha256": "40e617aa05d5ef93678c06f9b33ce0c2075c394ad78558851d0741d9a6183d5a",
+   "size": 20155,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp37.parquet": {
+   "sha256": "c0d5be3687d09d44357868bc3bebf019c4548f4d3672cdb374504c65441251fb",
+   "size": 27668,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp38.parquet": {
+   "sha256": "05eec22adb960f773e57fed6312d12b304e7b545c9711343fb087a5967fb14e6",
+   "size": 1283,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp39.parquet": {
+   "sha256": "0d8b15c0aef641bab27e7cfe9650a48bb243c2d261a7e23b42eae855f2c28527",
+   "size": 2128,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp4.parquet": {
+   "sha256": "ef7c4aee2f8a4f6785782ff6bf4ff0d74487fe4de225d2b50221c91f2efe97ed",
+   "size": 2833,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp40.parquet": {
+   "sha256": "e3ef4d317420520b3004415633ae3b56cae3c66910d8a49141a877f79cd1a38f",
+   "size": 3213,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp41.parquet": {
+   "sha256": "703210fe1a7d2e390b697f5894c7b4d7fad0b2a198de9f70728969f415cbded3",
+   "size": 5869,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp42.parquet": {
+   "sha256": "50bc797b2371d2336516c13afa23c8f5442e451c63ec1628a6fed5a80b53d0d6",
+   "size": 5519,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp43.parquet": {
+   "sha256": "b16028f3ef05343718583cfc70d2871a88b097c6bab5f327521c786a41203011",
+   "size": 3197,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp44.parquet": {
+   "sha256": "232dbc4711b0f5b82b31419b71e3a713c85f4373c7bd6120ea010e83c9288ce0",
+   "size": 3197,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp45.parquet": {
+   "sha256": "152144d65946d015371387c725212fa8ed8817f7ffd814309186f7a66a0ba1cd",
+   "size": 1484,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp46.parquet": {
+   "sha256": "ee04d155a7cf3f7522376aa553b9fbfaa23e67eb978236ecfa53ab708b7951c0",
+   "size": 1484,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp47.parquet": {
+   "sha256": "9eb40ac9fcb431138ae0a85d7a5497924d38dd8d704de9dcce2d3aed871108a9",
+   "size": 2390,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp48.parquet": {
+   "sha256": "ea40e003ea8e213868751d9bb96e8d9b5deaa139fbd1dba1aa312aedfc4b61ba",
+   "size": 3199,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp49.parquet": {
+   "sha256": "25bbb91ed083b7baf24d88340ac887aeaa863725335259fc47aa938ea40106df",
+   "size": 2472,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp5.parquet": {
+   "sha256": "c1e9e7fbf7ce08fbac66eef6c50cdd73e7249d2393455ecde12901ab87991b98",
+   "size": 4187,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp50.parquet": {
+   "sha256": "34aa19be6502c824153ceab7894303603ecd828689bb583c5e1e932942e321ef",
+   "size": 3199,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp51.parquet": {
+   "sha256": "7044e63101be5c778c4636eb5a5ec8a1603d150b523211e9310e25401171de76",
+   "size": 3199,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp52.parquet": {
+   "sha256": "ab731941685a478dc26c22d9a5bdc2940a2e6aed6bf002163b0cd15d7c54c2f0",
+   "size": 2440,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp53.parquet": {
+   "sha256": "b22018a416b8c394bd2a6477eb13a01c58173515443eb83656cbbae2090681cb",
+   "size": 2480,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp54.parquet": {
+   "sha256": "a15076b41501915f526185b17d0883a4de96b8929ff39cd79d08bac2ab2cb247",
+   "size": 2604,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp55.parquet": {
+   "sha256": "087a5d15178078c88e4f6789eade91fb7fe25b8f213302688daf5f918647e296",
+   "size": 1458,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp56.parquet": {
+   "sha256": "bfff5d69862f1d460c41ea33258ab1bdeccbbe911f584e0a9ec52096c0811ca2",
+   "size": 1163,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp57.parquet": {
+   "sha256": "f944495262995285d9cc6ab668b53867090f0b499a28973855f91afe3309dc77",
+   "size": 232990,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp58.parquet": {
+   "sha256": "09decc6be11624a93580efe8f46abe7005aa98f2c3863ff9f3a792a35fb38e52",
+   "size": 1359,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp59.parquet": {
+   "sha256": "869d2470d7c876c3b9addfe122810f19751445ac552e2562de669af690eebc5f",
+   "size": 2190,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp6.parquet": {
+   "sha256": "ec88dc79b01f024decc3dcde4fe0d17e23c11c2b3dd39982bb5cf5424ffc3fc5",
+   "size": 2199,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp60.parquet": {
+   "sha256": "a57f8668858943618e69f192ffdc63b3f3726009fd081fa95040983f7efda84c",
+   "size": 1286,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp61.parquet": {
+   "sha256": "fa43b5233753837ca41723f23d2b0668727034d81719da6245aaa838a713c9d4",
+   "size": 2104,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp62.parquet": {
+   "sha256": "095cb2c933cda05d88d2a7ea496de4b595d0bbf201287b54b4d66a9f48c97087",
+   "size": 3085,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp63.parquet": {
+   "sha256": "c80d619bc37f7b8340137b43109e89e05a2e90d5cefa553373b5ebdea2f36020",
+   "size": 2697,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp64.parquet": {
+   "sha256": "16304b0154ada5e303b3e068cc113eec487f9ee294181339e7c4824e22838539",
+   "size": 2293,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp7.parquet": {
+   "sha256": "f7176dd3bfdc0a6c1e3e47eb766f61885d06fb2f3e4a203033945d3f312fede7",
+   "size": 10408,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp8.parquet": {
+   "sha256": "5489aaa1f19011f3614417eeee2fecce49b638b8221c7d01e52aae81b07c1d93",
+   "size": 10792,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mp9.parquet": {
+   "sha256": "8400a4d5c61850c24b83f2ba82ab4224c09751adbd3b3945beede3b0a89f36bf",
+   "size": 2367,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv1.parquet": {
+   "sha256": "7a504dc3dba124c212f07a5306eef71894aa98342cd1388bba69c8432a2971fc",
+   "size": 40754,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv10.parquet": {
+   "sha256": "c6a135a57f304f9173edec2422772c77f7b7403576824bd67b0efb9e7deda5a6",
+   "size": 3705,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv11.parquet": {
+   "sha256": "ece630fb23e2723e6b15941ff430e8fca3326cc522ee40533881727e620bdce5",
+   "size": 25570,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv12.parquet": {
+   "sha256": "59f273b50224bfb4dd7287d94b05529c0bb5be3f0525664e988c441ea28e8734",
+   "size": 3864,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv13.parquet": {
+   "sha256": "9b8d564b27c440c0cd02dba761f905fb065191877a0273e2b1742430b2786aef",
+   "size": 1253,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv14.parquet": {
+   "sha256": "902e110045621b95c61dcbbc6cb55cc04fbdf892c124028eab00d8c89c30c6d3",
+   "size": 1254,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv15.parquet": {
+   "sha256": "8012db049698ba1a5c2e2d08ef9e7a0efc97571cabded22910a4941ca5d6f38f",
+   "size": 10653,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv16.parquet": {
+   "sha256": "5b8f2d918dd5ba80f66559c75b9d8478ebe928a323564c30e8588e3dd564c78b",
+   "size": 2818,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv17.parquet": {
+   "sha256": "a6fd36aa1a6041894a7756ee85f0cd95b7a3fa98f441395a25d1e769cef61539",
+   "size": 2818,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv18.parquet": {
+   "sha256": "40dfbc98960e14fd50637f16caf15d427e571e1fe88b3928ec1fbdbb402cacbd",
+   "size": 45811,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv19.parquet": {
+   "sha256": "5412d7a1bcb9081cdd6ddd6cec689d11a09b597d42207ae68273c8936df2f06e",
+   "size": 2814,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv2.parquet": {
+   "sha256": "0bce165eed89e6e25ef4f3265516cfcb1b1f19f5811344db6284eb0f48f97765",
+   "size": 2797,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv20.parquet": {
+   "sha256": "126aef2d167b2ace102c3ad1367106fa7534dda3db2a41f3e3cae5838248fa05",
+   "size": 4093,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv21.parquet": {
+   "sha256": "d9fcfe6367f00ff134a175ed6afa469819f939ee2e1b8a51cc96f72b82073091",
+   "size": 4369,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv22.parquet": {
+   "sha256": "26cb4dc576fc41dc933f19a4fa69993e4bd4fd7e2f741734a7cab92747215b45",
+   "size": 4188,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv23.parquet": {
+   "sha256": "badb9b12626ed19dea3742cf4818ec43636249135e6e7f5d86d392f8839c6813",
+   "size": 1254,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv24.parquet": {
+   "sha256": "c0e7c12e3051e940cc2be05ea9a517d940e02902dcddaff8a455734e6f2b8ba1",
+   "size": 3180,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv25.parquet": {
+   "sha256": "cbd354d315e90a3bb49974e68be145684eaeb52a6824a8468eeafd30d77de38c",
+   "size": 3180,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv26.parquet": {
+   "sha256": "b815a00d503f020f458d0d2e0910edf22695d2fbf3bc05b505bd1b150803acf0",
+   "size": 7133,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv27.parquet": {
+   "sha256": "974be87734acb31e35ae76145f45230e2e21c7129d12cfc87f6cb5df89135603",
+   "size": 2505,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv3.parquet": {
+   "sha256": "0ea4a8494254e9920f9c5c2355dd5b1fb3a582a7d6c511674cc79c90173b2e08",
+   "size": 2493,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv4.parquet": {
+   "sha256": "79d6e08353b555d80237214fbaa51558476c6e0e1535557c95d549265063c4ea",
+   "size": 36469,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv5.parquet": {
+   "sha256": "5fc2d2d42ee79fad2c49380a45a877d1e5563a526de8cd02eea46c3385fd9ec7",
+   "size": 36194,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv6.parquet": {
+   "sha256": "68ed0de7107a4a617485604a009c7a85ca8424eef0baff8565398996b989d86c",
+   "size": 1253,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv7.parquet": {
+   "sha256": "eaf7ab5e45b4d879c66de00efde6dffa3c87eb714bfdf1bbb1c4ec25c4501514",
+   "size": 1878,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv8.parquet": {
+   "sha256": "349dcfc054ac6e611988eb4f5ebe75a2513d284e442ee57ca205354134636390",
+   "size": 19117,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_mv9.parquet": {
+   "sha256": "cc4688e2e133bbe54b95dc343793524b95a0cf418493f19f8a67cf5babe07af7",
+   "size": 10399,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_numeraireBuying.parquet": {
+   "sha256": "277c6c3f001b36259f9a4d31734f6c83278379bef7d90a4b34d1f303cdea74bd",
+   "size": 2310,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_numeraireRelease.parquet": {
+   "sha256": "ff9ef84f53a95f707e88c7ef3ce494436393ed385ff8649135cf5c62941036d7",
+   "size": 2311,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_pbGL.parquet": {
+   "sha256": "d4dfc50aba15cc78a8296c457b7b83b5ab0d56ff76fdcfe48ee8b733a4e9bc12",
+   "size": 871632,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_pdGL.parquet": {
+   "sha256": "614c19303e16ec63402235fe315b28bbe19857960e68071afee7a75397c1b7d3",
+   "size": 37594,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_realRhoArm2.parquet": {
+   "sha256": "a71edc06f48a148e9082b9980ff2add92c13e0886cea91c21b76fea2caf9d9c2",
+   "size": 3666,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_rhoArm1.parquet": {
+   "sha256": "7eab9b6e170c6722b9a66ea4dacc7c2979e58d3cb6bf5a39f257cc3ad661a313",
+   "size": 3461,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_rhoArm2.parquet": {
+   "sha256": "e9ee49804864613b4dd9f0a95767e0e22d7d1456e86fe20d462572c2aaf054aa",
+   "size": 3472,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_tradeFlows.parquet": {
+   "sha256": "ff88a0fc5f625ab61ea5ef7f5f828abb824dc01bfec61a3451b2d57006e1300d",
+   "size": 280568,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_transitA.parquet": {
+   "sha256": "ff55ce0632f4a4251d5459f474d78a089d568fb8295b754b24b61b358395da05",
+   "size": 1431,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_transitB.parquet": {
+   "sha256": "57cb5ba843f3d1132efe6fe00132ed4d9fb8e6d59ea102ddf23204712e837957",
+   "size": 10656,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_transpCost.parquet": {
+   "sha256": "805c12b52d1b0b744c47a55ce148f360bbb74854d6449674530e92b05b80e4be",
+   "size": 313250,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_trqBilat.parquet": {
+   "sha256": "b9025b01e84a8a50ed56f393b04ff954e3396258c5531f821bb65e0ebd2f29d5",
+   "size": 19773,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/p_trqGlobl.parquet": {
+   "sha256": "c6af830dff0600ef5d45d1f13ee6b6e6d334795c501a4f99dd9c7922df8d6c42",
+   "size": 7109,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/probMarketPriceUnderSafetyNet_.parquet": {
+   "sha256": "a303a8f873b423e5ed9f7d1be3a2664c7f0361da329f9dc2ec952d4e492f9f50",
+   "size": 1697,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/pv_bevFuncIntAddFac.parquet": {
+   "sha256": "8048eb68c36ffd447397e2f109715730fb1801e4e270edbbb29e54d11f1a7229",
+   "size": 68044,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/pv_bevFuncIntCorrFac.parquet": {
+   "sha256": "a60e1e27f89ed6c3f702dcf0d1e0f8f1f023aac3b10fc03f70314db99eb82829",
+   "size": 4730,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/pv_constShareBuying.parquet": {
+   "sha256": "aa54386dcc07988261eb14ec141d74e6937519d52113df8ac2358d3fe7e0dd4a",
+   "size": 4240,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/pv_constShareRelease.parquet": {
+   "sha256": "0081254ada783316bee3615339fc8485456927e1ca74b9ee5e40ad51dc83c4c5",
+   "size": 4253,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/pv_prodPriceMarg.parquet": {
+   "sha256": "459a6914ba16793d02383195dcf8ae40625b3c7b87684324d45034537c8f29ac",
+   "size": 66143,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/releaseFromIntervStock1_.parquet": {
+   "sha256": "34d908d3bc1c8bae58fcdadcad799f1654878df9a8b361aa808e5dd11735c132",
+   "size": 1634,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/releaseFromIntervStock_.parquet": {
+   "sha256": "f3cc591669085b562cedec5c964dab864eb3bdec85554c00beeaa1d2bbecf531",
+   "size": 1625,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/releaseRMNum_.parquet": {
+   "sha256": "4009034df6cec8f111f09c388a2e27d9877d056a8b1156aa64e4628c25103466",
+   "size": 1766,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/releaseRM_.parquet": {
+   "sha256": "31333b0511f07754576a68daf31bbdb35ec618f66711a90387e1c457373e273b",
+   "size": 1695,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/releaseShares_.parquet": {
+   "sha256": "0499e11bb73850e3f7f990c9b80f61446cbf7e02f8c4caa47418c1cbebdebe0f",
+   "size": 1634,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/rm_modArm.parquet": {
+   "sha256": "88e303d89b476be6f4dc5375d4fa4fadbe3e9fa1e8df360560dc667077cec6f5",
+   "size": 1212,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/stockChangeRM_.parquet": {
+   "sha256": "d8c12ab689edf5e55be2d481ea68d05e3d1bb162dfe6656183c08d6bbb556ff6",
+   "size": 1716,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/tarAdValW_.parquet": {
+   "sha256": "4cf7090519e1efea7395bf837ebe46b0f9b1032c6db536c72f4d89e466702fba",
+   "size": 4843,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/tarAdval_.parquet": {
+   "sha256": "990797e492435de54fe9829a55156e6dccdce730fab0f682bb480d77e6340d31",
+   "size": 5476,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/tarSpecW_.parquet": {
+   "sha256": "8db221d38a33ed0d5cdac0cb7d203fe918dc59fcf8ebf3dc2b618b7cff43f4d8",
+   "size": 3787,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/tarSpec_.parquet": {
+   "sha256": "a7bcd1421c21088ce93be705633ee2b7c13b059f9bc4c201cf132d0a935a486e",
+   "size": 4380,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/unitValueExports_.parquet": {
+   "sha256": "bb58fe9e1365865e175df445b123b5f4c359e3f77afe6eaeaf09025b47a154a9",
+   "size": 1582,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_GLDemandFS.parquet": {
+   "sha256": "fde55a8c46ca001a50ec28049378cde26120e8e4e08126c6efadd3c6dd0b9345",
+   "size": 5383,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_GLDemandGS.parquet": {
+   "sha256": "9438d6b47923ca843de03a9795a955ecb80199d54917dcd504f24f3e61286c4e",
+   "size": 3777,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_GLDemandGiS.parquet": {
+   "sha256": "a49f1501a04d493466055568b5a730067df4dd3bc396fb69d19609c4a9c22e11",
+   "size": 104298,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_TRQImports.parquet": {
+   "sha256": "3c9c81412c4b89ace230cf95c2fe57182eb064d68dbc0a5685b7b7f7610d6203",
+   "size": 25325,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_arm1Price.parquet": {
+   "sha256": "2cb05623447c50fdef797be747da34f706569edc55da51d0fa8ff8c83d10c43a",
+   "size": 63312,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_arm1Quant.parquet": {
+   "sha256": "213d63b505cbfff3c909d1ee6b1cbd3602ac36c9984160cbbb9170b8f471eb03",
+   "size": 49523,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_arm2Price.parquet": {
+   "sha256": "eb956ad95d2878990c7e8c28a9affc4e4bf46d4977f04ccd88ea3c9637ee862a",
+   "size": 73524,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_arm2Quant.parquet": {
+   "sha256": "cbbf2e8c47c4d405ec1fb1db746fc1490dc9f6265860bff00b6bba5e0c7bb3a7",
+   "size": 48477,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_biofProcQuant.parquet": {
+   "sha256": "701f81ea653fd3b28defc55726f0e2580a56a4c04e765b47f0b6e9f24f2dff47",
+   "size": 44378,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_cifPrice.parquet": {
+   "sha256": "a49e344b71c27d7a1301de4e9b22d05fa7bdf02bba05263184df70fbb8e046f4",
+   "size": 1727,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_consPrice.parquet": {
+   "sha256": "7d571b3a69946fd1b529bab36de352c3676520e1b3813cb099d2fd90df856a8e",
+   "size": 111243,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_consQuant.parquet": {
+   "sha256": "6d45d1b28e87ed1520743d3b9697cbfd43a36c3ed8993a42de38f473aa542b30",
+   "size": 109297,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_domSales.parquet": {
+   "sha256": "19afda8e57591d0e827f07d609ee86936d65ad0bade6ecb3f15940c09c138be2",
+   "size": 48728,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_expQuant.parquet": {
+   "sha256": "73558890e73090b341b9521266bb9b9f2d3195e533224f5dc719fabd86db7764",
+   "size": 42123,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_feedQuant.parquet": {
+   "sha256": "ff1f34823eb51bc1ad49a3e0efe910928bd84ed8a71c6a032dc4f7e1ca614d0e",
+   "size": 45554,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_flexLevy.parquet": {
+   "sha256": "17829566ffe2186ff86889b228e0f70773d79264181625a25fa3d91433167b06",
+   "size": 13174,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_flexLevyNotCut.parquet": {
+   "sha256": "d4bac743013ac99259903c9091c3df07d0e3e5aa845393e76e04b0ee05635d44",
+   "size": 13136,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_impPrice.parquet": {
+   "sha256": "ce309643c2ef216f047de10c41626c0b06597c36ed37c2eeb5bff503218ad145",
+   "size": 705845,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_impQuant.parquet": {
+   "sha256": "0df77e8644cdd96612a0df96ba6241ad877bf74dfa1610ef0ae0048dfff95588",
+   "size": 47881,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_impShadowPrice.parquet": {
+   "sha256": "17e5a5dad68c76db3f13c5e41751e244b1864b96050cfb44fdd73936e7d8a025",
+   "size": 1750,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_marketPrice.parquet": {
+   "sha256": "398905225292612459d2b5d8fca0617d51ab9a6789c4fbe5856b7e86db068b3e",
+   "size": 82037,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_procMarg.parquet": {
+   "sha256": "9f176ce2bec8a89e64f51a243760eda9c0b3f2971db426dd993c80a719c49e54",
+   "size": 28089,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_procQuant.parquet": {
+   "sha256": "0b9216e1fc8f6b8a3065f71020654f0df7408c330d361bb56eea4c505198bf28",
+   "size": 57964,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_prodPrice.parquet": {
+   "sha256": "aed3a594a0254dfb935e5a26eba61d8b98c3215b1900b0a822997142929deab6",
+   "size": 132076,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_prodQuant.parquet": {
+   "sha256": "29629bff34a6808efc77a9a3c0de6091778f0c1b95ccea0a245be015b9f36fea",
+   "size": 89518,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_tarAdval.parquet": {
+   "sha256": "b8b3b54cfe78b1871ddc16f02a5a56783d581d6cad18f47f81cf574baeba8523",
+   "size": 163138,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_tarSpec.parquet": {
+   "sha256": "c15e06e3168a2c1ce66c218844c9053010c2d568e592010b13884bd6f37a878c",
+   "size": 21265,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_tradeFlows.parquet": {
+   "sha256": "6c6356800719016eb93401f34b7f80201798247c0e32f5cff6cb7c4cbe8c8b43",
+   "size": 462196,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/v_transpCost.parquet": {
+   "sha256": "1a186a0c21752cc84d3dcb95cfdf68a3c59c67f910e524678fd0b3a7bc0363eb",
+   "size": 394570,
+   "version": "v2026.11.10"
+  },
+  "capri/results/chk_market_data_greendeal_greendeal_scenarios/valSubsExports_.parquet": {
+   "sha256": "314a72bd9dbdd3ee45ba7f7de422138d3c2ff78ab13d32624d5e3310f0c77e35",
+   "size": 1619,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA/META.parquet": {
+   "sha256": "a634922e31bdfa3957773d4b76b9e975a88dd2504f970ca2f8f0e75369035ad5",
+   "size": 19813,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA/RALL.parquet": {
+   "sha256": "8ed01b895f388cb330c16bace3f450f2697a43d0e57a1bf8296078d36d7565e6",
+   "size": 7604,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA/_symbols.csv": {
+   "sha256": "946d35632f80da28147b54a9aa53ad86d45befd8e79b3107c0b49fabe8815c0d",
+   "size": 278,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA/dataOut.parquet": {
+   "sha256": "c4eda6ce3c07b5734e08b95180a029d5baf56d35866f188094252fae517b6eec",
+   "size": 57620837,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA/p_INFES.parquet": {
+   "sha256": "334cddf392433f478ca028ee87d504b0cbacd34993f153e35bf4872317faf2d6",
+   "size": 7942,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_2_1730greendeal_refdefaulta/META.parquet": {
+   "sha256": "3d0c23e568fef38fc84e80c4e7fba0ab11dceb9fc57cdf8d7839f6a502811c7e",
+   "size": 19768,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_2_1730greendeal_refdefaulta/RALL.parquet": {
+   "sha256": "0197674840881a9074bd52a8eecb7dd9a70560038b706d5e65f9ca32350b995d",
+   "size": 7519,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_2_1730greendeal_refdefaulta/_symbols.csv": {
+   "sha256": "1d66cd28438f6a54fa2b16c03abf8366661a38456583efacd0be94adcf7947ef",
+   "size": 277,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_2_1730greendeal_refdefaulta/dataOut.parquet": {
+   "sha256": "b06742a421ed0d41d26ce907bd92a0d9f983a3ed7c435009d904f566e36fd4ff",
+   "size": 40378974,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_2_1730greendeal_refdefaulta/p_INFES.parquet": {
+   "sha256": "97355273235eb42cf4a0a5981dd16c9ee51733fc7b9fddf9dc0d9e989d140981",
+   "size": 3312,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/EMISCALC.parquet": {
+   "sha256": "8ddb78846f14ada37205076dda0a61e08e2420fd2a90051355f3e221c1159538",
+   "size": 2799913,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/R_RAGG.parquet": {
+   "sha256": "9b50371e6ec4dd4a8040bd3209af8645e95f1c5245f1eb54d5ef4fe7d1f5cc72",
+   "size": 4466,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/_symbols.csv": {
+   "sha256": "fc6d23334b2044da12ee60ebc1d51321e39f656cca6e019c629d3b9f31064d18",
+   "size": 1734,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/mitiTech_map.parquet": {
+   "sha256": "50a235489310742a0e262c8abaa8e39c85ed0f0f62bf90a8841781f95e8a5ce0",
+   "size": 15566,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/p_CO2EquEmisInIters.parquet": {
+   "sha256": "b53e7f785a13d888eea1e690eadb96ee37f75550d6b1f2728d8901d315fcb909",
+   "size": 687391,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/p_NemiDAT.parquet": {
+   "sha256": "8fd81bc4039e254bac739305a32f2057ef38cd6b23d3a86d3db39ba3def20f5e",
+   "size": 56438,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/p_animReq.parquet": {
+   "sha256": "48a3678df511ebfea4d0a9cbc2b8f141275dbac2797092b650373511c5616c92",
+   "size": 280973,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/p_dualsCO2EquEmisInIters.parquet": {
+   "sha256": "bf7565e33d8a506d7247f96083f2c8b2456bc80a4fb831b7fdd7b8909cb4f1a2",
+   "size": 1597,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/p_emiLoss.parquet": {
+   "sha256": "e4575906777cb86281b84a669ade20fb5c216db89bba61e995edc043b131c694",
+   "size": 236826,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/p_emisFeed.parquet": {
+   "sha256": "c6dd38f90ebca594dfb3d003db50cf102a82c1c9476afa8414a33f87dfa41614",
+   "size": 40593,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/p_ghgMiti.parquet": {
+   "sha256": "b310dfc6e545581ba39230aa609b2078575abd2f4f21766f07fd5e81d3584f29",
+   "size": 5217255,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/p_metaGHGScen.parquet": {
+   "sha256": "fdf3ac5af9963c6e122370afe5dfd33aa554cf8fe54ff4264277853fdbfe2a94",
+   "size": 1978,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/p_pmpFeedInpCoeff.parquet": {
+   "sha256": "4b08224705d933ee9702b144dcc9a74c482709f120084c6e52a9a212199c138a",
+   "size": 1632,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/p_winterCoverShare.parquet": {
+   "sha256": "d343b8a4853d9898394047e3e45e174a347228fd788b209c56a8e30dbc4e3648",
+   "size": 3016,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/v_CO2EquEmis.parquet": {
+   "sha256": "7c03447a3d80fefeb590c61133062ee410616c00175233cddc4e17c03ae2c188",
+   "size": 60489,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/v_Miti.parquet": {
+   "sha256": "a440a37a664daa3df19f235eb697d36de69996e25072941dbe9e1240d92794f3",
+   "size": 1133113,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/v_SupplementPerc.parquet": {
+   "sha256": "d3173552443621e8e631424d75b28ef66f1081a83d1bfa4d293c769bd80d8407",
+   "size": 23040,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/v_actLevl.parquet": {
+   "sha256": "69703a60df80f27fd5ba8dd0c6b4da5fb81caadee816edc2aab384b4cf5780d9",
+   "size": 640042,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/v_emiLoss.parquet": {
+   "sha256": "7b019624cc7f5a15929b9d8a6ecbc04f702b172c1aadf9c88406085207b6839f",
+   "size": 396529,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/v_feedInpCoeff.parquet": {
+   "sha256": "ca704aae34d394e6479ae58c667b0b1f316e29d629f0e6ed3a302854a98af11b",
+   "size": 1835,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/v_netPutQuant.parquet": {
+   "sha256": "6176a98165fe40d46ecdb51167b838df7a743e2e685342d4f2724a80d5dd74dd",
+   "size": 1676,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730/v_supplementSlack.parquet": {
+   "sha256": "5222071d8620d84b97f7dacac2d60e5f4d01682b77e7e7941378224c7102ead7",
+   "size": 24749,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/EMISCALC.parquet": {
+   "sha256": "c721f3840620c8159b7851e7e15f5a529a940cafad7fe6817e3627efc45c0141",
+   "size": 2756648,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/R_RAGG.parquet": {
+   "sha256": "76a2480205ffeb20324ca1acec94c50fa44a53ba9a1ebf5c8100ea7f816ffddd",
+   "size": 4462,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/_symbols.csv": {
+   "sha256": "bce028f5ee597d77a569d96b68e9584683ce0f87af95bfd100118f14a4a33a0a",
+   "size": 1734,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/mitiTech_map.parquet": {
+   "sha256": "a66ee9902de84366eac165ca67081a66c25c57cef0b3d08537eea520d5a08345",
+   "size": 15642,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/p_CO2EquEmisInIters.parquet": {
+   "sha256": "aea98f0b5d0afa25b3dafbba2441641a7d14342edaf328f72f463378aef3f4b6",
+   "size": 119592,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/p_NemiDAT.parquet": {
+   "sha256": "89d785b15648f7e9e88d83231b31d09bb1055ae87a74b90d9c40cb565cbb0d50",
+   "size": 56643,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/p_animReq.parquet": {
+   "sha256": "ffa1bde52c175993ca83d01a1218ff9ec511bb656894db46e9a02363c6b345e6",
+   "size": 281043,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/p_dualsCO2EquEmisInIters.parquet": {
+   "sha256": "7976b417b817845ab299de6949f4b5cb5e04d58bc60eba12962d51c541784ae5",
+   "size": 1540,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/p_emiLoss.parquet": {
+   "sha256": "593aeb7bb2efeef2025dfecc839bc0b15619a3b40aa0f86362455687f9343a51",
+   "size": 237296,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/p_emisFeed.parquet": {
+   "sha256": "34e9aa0ab5096789eb83459f9852680a646b687800630978d00e4dffd8884029",
+   "size": 40566,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/p_ghgMiti.parquet": {
+   "sha256": "e45dd7acd379cf4b6dbff13163e97833d69abad297e5ad7d3ef0d6c00e8cd4b3",
+   "size": 2781971,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/p_metaGHGScen.parquet": {
+   "sha256": "55fcb70c5b3713ccde1ba845e748f51eda5ba92589e45c154716138a68cd11fc",
+   "size": 1921,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/p_pmpFeedInpCoeff.parquet": {
+   "sha256": "7ad3dde1e06b0578ffa470b05f85f4f7833891c17015e15be9fe5128e2c89958",
+   "size": 1575,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/p_winterCoverShare.parquet": {
+   "sha256": "40aa06b30a7793e9ddb3adc6343319f1a861eb12ab5bbcc483a4389338a44a76",
+   "size": 2960,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/v_CO2EquEmis.parquet": {
+   "sha256": "0ec91aadac0985ea926a1db672b3aabc7777ebccfd48066f20fd50cdc06318a5",
+   "size": 63553,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/v_Miti.parquet": {
+   "sha256": "9efd8512ab1cecc399486ca57a80b811831c618e04d471e2bb56408edb851b58",
+   "size": 1460677,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/v_SupplementPerc.parquet": {
+   "sha256": "9498c9cc99e0b79f99e75636cb65cce53089da6c690c75ac1852c246862c3930",
+   "size": 27709,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/v_actLevl.parquet": {
+   "sha256": "4496bbd9421aa874d14ad1fb44f9fc1790008e7fac7b92bfda29447a3ce900df",
+   "size": 664954,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/v_emiLoss.parquet": {
+   "sha256": "8a011fd2f7451c0148bf8c1215545ce7b162142aa31392e42b7a044848f0a7e9",
+   "size": 213379,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/v_feedInpCoeff.parquet": {
+   "sha256": "a238b6d550b4ccfa0400215b5c8d796c05d76f8ec9cb94edd6753a315ee4239d",
+   "size": 1778,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/v_netPutQuant.parquet": {
+   "sha256": "5b3346eb8978e61462e0f6653e7652e9841c67867c2d5bb31a729208b76e36a9",
+   "size": 1619,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_ini_21730/v_supplementSlack.parquet": {
+   "sha256": "f394d4ee409e97d951456b8de40b3584c585b22c98a44cfa8ac07c3e933f4cd3",
+   "size": 28294,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/EMISCALC.parquet": {
+   "sha256": "53deb907dc5185e80c5605481c6dffad1801b570a302b9dcff39e6bb5670ecbf",
+   "size": 2759844,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/R_RAGG.parquet": {
+   "sha256": "57fe1216bc8980ca059ce2115d788d900a6c817ba06582f5656807cd1fedfb9f",
+   "size": 4462,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/_symbols.csv": {
+   "sha256": "1460585052090c09be210c61f33ab735f9a8ebf866a54a1ec2d96e110fac3c0d",
+   "size": 1734,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/mitiTech_map.parquet": {
+   "sha256": "961bdb06ada26cd05bcc12e910fb35bea0e4016323e4c4be992763c8c2bdc859",
+   "size": 15642,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/p_CO2EquEmisInIters.parquet": {
+   "sha256": "8187900ff9eaeab92286fde788746d507db7d6849678e290a383fbd594991fbf",
+   "size": 128183,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/p_NemiDAT.parquet": {
+   "sha256": "ff6db0f6f8f8669b35cf551a9d0aee59b06af38466be3565344a1c6526ba215e",
+   "size": 56643,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/p_animReq.parquet": {
+   "sha256": "7a7923ec4b2743ea444bedc376a46a634bd1062e9e22617f4111ea07b00dd3b7",
+   "size": 281043,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/p_dualsCO2EquEmisInIters.parquet": {
+   "sha256": "9970b0f866c5c7fe7fec406d5f5ab5cbb7a18228ad226bc6f3e3f1d2e30b706b",
+   "size": 1540,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/p_emiLoss.parquet": {
+   "sha256": "ec6559b9685fc86ac87329ccfec427bea7acb84d6ca34ef9f4ce0f944af7b958",
+   "size": 237296,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/p_emisFeed.parquet": {
+   "sha256": "dfaa5527a99dc7f0bd5f74cb0d267a47f1c995b1d8e125e19d94bbfeb1b0ea37",
+   "size": 40566,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/p_ghgMiti.parquet": {
+   "sha256": "047910313ce928eca57fd35be3f2d14e993b1b32250ddcd31891eb556d46083c",
+   "size": 2539278,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/p_metaGHGScen.parquet": {
+   "sha256": "5cf700f6e92ac726f55230b85c6cc3ad09ec1d1309f1d7538b7653c6313e4ad3",
+   "size": 1921,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/p_pmpFeedInpCoeff.parquet": {
+   "sha256": "327fe01f9c9b66880bb9332906fc953584918d8e01a08544756976eacea1386d",
+   "size": 1575,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/p_winterCoverShare.parquet": {
+   "sha256": "daea166469071cbc5ac0a049f101737b62dad1c50387a41340ead731058d4b8c",
+   "size": 2960,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/v_CO2EquEmis.parquet": {
+   "sha256": "2373c8f4a71dc396a8c8a36999a7e524a02665db622db9b84443a6a86700a066",
+   "size": 62516,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/v_Miti.parquet": {
+   "sha256": "71270732e9d06f998b4cef0cca5f0341811155cb1ce4c8a8f62607cfd2c2d88c",
+   "size": 1522609,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/v_SupplementPerc.parquet": {
+   "sha256": "a9e0632f5c8fa8a657b05a37e3069e3cfca587fd2716d03bb92a17b649936280",
+   "size": 27559,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/v_actLevl.parquet": {
+   "sha256": "3d3a93ce6ce77cddd1d882ff627235fd714578a563148256d98ac48bb1575fce",
+   "size": 650958,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/v_emiLoss.parquet": {
+   "sha256": "adf9c7c1b23b486abbc3c8c01f70d470b084b1c804716821908ed50a3ebcec11",
+   "size": 247289,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/v_feedInpCoeff.parquet": {
+   "sha256": "d8691ec8af99becae0d821155449eea7db0e7f0e4a0210a644f055d1a1a94e7b",
+   "size": 1778,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/v_netPutQuant.parquet": {
+   "sha256": "cd560038bf484cfdcd185363810e0df7dcde30d530f06c7c3483874b8e917457",
+   "size": 1619,
+   "version": "v2026.11.10"
+  },
+  "capri/results/res_greendeal_refpol_endotech_all_max_21730/v_supplementSlack.parquet": {
+   "sha256": "1592152b5c5e5a154bb56629336eb700d2e84f553b6f58f343b5fbf43ee1f089",
+   "size": 28308,
+   "version": "v2026.11.10"
+  },
+  "originals/exports/res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx": {
+   "sha256": "b9d0a24df5af1e036d68ab993cbb11781f6b69db3eb47a584481dc17a18d0522",
+   "size": 62971190,
+   "version": "v2026.11.10"
+  },
+  "originals/exports/res_2_1730greendeal_refdefaulta.gdx": {
+   "sha256": "4820aba1145e3ec853fe4937d43a33880006018f745ef4b47850ee8ed88b4043",
+   "size": 44689701,
+   "version": "v2026.11.10"
+  },
+  "originals/results/arm/chk_market_data_greendeal_greendeal_scenarios.gdx": {
+   "sha256": "592bb4c91080854a4bfa3cd549fb82e035d6aca73929f5b58e95dac60b5fd1b0",
+   "size": 9606856,
+   "version": "v2026.11.10"
+  },
+  "originals/results/permits/res_greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00_21730.gdx": {
+   "sha256": "4a62ebf78858060846131e0db2a3f28f59972780b1882e80f229c2f92684f0c2",
+   "size": 11401049,
+   "version": "v2026.11.10"
+  },
+  "originals/results/permits/res_greendeal_refpol_endotech_all_ini_21730.gdx": {
+   "sha256": "cffa6df6cf4bd8cd452234ae1aafcdb5bf4e2a376b0ade7b71243e422153a755",
+   "size": 9191858,
+   "version": "v2026.11.10"
+  },
+  "originals/results/permits/res_greendeal_refpol_endotech_all_max_21730.gdx": {
+   "sha256": "4e3217134da1b8a8d601c2604ef6da81e215f6b3d87a29b4eddec84f06650468",
+   "size": 9008400,
+   "version": "v2026.11.10"
+  }
+ }
+}

@@ -253,6 +253,8 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
 #: not audited: utilities and writers of capri_sources/reference/ (not committed) or of inputs held elsewhere
 NOT_AUDITED = {
     "gdx_dump_symbol": "utility (dumps one GDX symbol)",
+    "convert_capri_gdx": "converter of the published source set (writes outside capri_data; MODEL_CONTENT_PLAN 12b)",
+    "make_raw_manifest": "writes tools/pipeline/capri_raw_manifest.json from a staged upload (MODEL_CONTENT_PLAN 12b)",
     "build_capreg_tseries_reference": "writes capri_sources/reference/ (not committed)",
     "build_capri_sets_reference": "writes capri_sources/reference/ (not committed)",
     "build_captrd_results_reference": "writes capri_sources/reference/ (not committed)",

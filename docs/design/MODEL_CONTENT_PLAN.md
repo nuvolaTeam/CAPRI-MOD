@@ -614,6 +614,16 @@ pinned set (step 5); the converter written here (step 1).
 | costsavings_ini_21730_jul15.csv | 7.48 M | 359 MB | 6.3 MB | 3.5 MB |
 | res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv | 5.33 M | 330 MB | 34.7 MB | 31.9 MB |
 
+**Started (10 November 2026; the project lead approved the uploads).** First version of the set, tag `v2026.11.10`
+of nuvolaTeam/capri-mod-raw: the six GDX files received on 10 November 2026 (CAPRI's shipped Green Deal 2030
+reference, the project lead's Green Deal step from it, the permits results of the step and of the endotech ini/max
+runs, the market model's debug dump of the step), as delivered
+under originals/ and as Parquet per symbol under capri/results/ (tools/build/convert_capri_gdx.py, GDX only so far;
+47.4 million records, each file checked record by record against its GDX: tools/check/check_capri_gdx_parquet.py);
+the manifest tools/pipeline/capri_raw_manifest.json (303 files, 285 MB; every SHA-256 and size checked against the
+uploaded files). Not yet: the rest of capri_sources, the listings (gdxdump text, CSV), the download step and the
+builders' switch (steps 2, 4-8).
+
 **Steps** [I]:
 1. One converter: a CAPRI listing (gdxdump text, CSV) or GDX to Parquet, one file per GAMS symbol, every record, Eps
    kept as a flag (as capri_reference's CSVs: value 0, eps 1), checked lossless against the original.

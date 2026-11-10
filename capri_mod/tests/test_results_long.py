@@ -282,3 +282,41 @@ def test_runs_are_named_as_capri_names_its_result_files(tmp_path):
     assert rr.at["NUM_RU", "value"] == "3" and rr.at["NUM_MS", "value"] == "3" and rr.at["MinutesNeeded", "value"] == "10.0"
     assert rr.at["setting market.x", "note"] == "changed" and rr.at["setting run.manure_trade", "note"] == "[default]"
     assert rr.at["result_name", "value"] == "res_2_1730scen_b_2u_t"
+
+
+def test_capris_own_runs_are_stored_beside_the_models_with_verifiable_ids(tmp_path):
+    """tools/run/store_capri_run.py: a pair of CAPRI's runs (DATAOUT records d1..d5, value) stored as kinds
+    capri_reference and capri_scenario; the ids recompute (verify_run); the reference is stored once; the year label
+    BAS is the base year; read_run (the model's runs) does not return CAPRI's; the catalogue lists them."""
+    def dataout(v):
+        return pd.DataFrame({"d1": ["EU27yr19", "EU27yr19", "DE000000"], "d2": ["", "", ""],
+                             "d3": ["SWHE", "SWHE", "UVAP"], "d4": ["LEVL", "LEVL", "BEEF"],
+                             "d5": ["2030", "BAS", "2030"], "value": [v, 21000.0, float("inf")]})
+    ref, s1, s2 = IO.capri_rows(dataout(21476.08), 2017), IO.capri_rows(dataout(21060.71), 2017), \
+        IO.capri_rows(dataout(20000.0), 2017)
+    assert sorted(ref["year"]) == [2017, 2030, 2030] and set(ref["block"]) == {"capri"}
+    assert (ref["capri_cols"] == ref["cols"]).all() and (ref["unit"] == "").all()
+    src = {"file": "res_ref.gdx", "sha256": "0" * 64, "meta": {"Date and time": "2026-11-10"}}
+    a = IO.write_capri_run(ref, s1, scenario="gd", reference="greendeal_ref", ref_source=src,
+                           scen_source={**src, "file": "res_gd.gdx"}, root=tmp_path, names={"result_name": "res_gd"})
+    b = IO.write_capri_run(ref, s2, scenario="gd2", reference="greendeal_ref", ref_source=src,
+                           scen_source={**src, "file": "res_gd2.gdx"}, root=tmp_path, names={})
+    again = IO.write_capri_run(ref, s1, scenario="gd", reference="greendeal_ref", ref_source=src,
+                               scen_source={**src, "file": "res_gd.gdx"}, root=tmp_path, names={})
+    assert again["duplicate"] and a["reference_run_id"] == b["reference_run_id"]
+    runs = IO._runs(tmp_path)
+    assert sorted(runs["kind"]) == ["capri_reference", "capri_scenario", "capri_scenario"]
+    assert all(IO.verify_run(tmp_path, r) for r in runs["run_id"])
+    with pytest.raises(KeyError):
+        IO.read_run(tmp_path, "gd")
+    cat = IO.catalogue(tmp_path)
+    assert set(cat["kind"]) == set(IO.CAPRI_KINDS) and "res_gd" in set(cat["result_name"])
+    back = IO.read_partition(tmp_path, "gd", a["run_id"])
+    assert np.isinf(back["value"]).sum() == 1 and len(back) == 3
+    # batches: the same ids as one frame, and the on-disk sort gives rows_digest's digest (text outside ASCII too)
+    many = pd.concat([ref.assign(region=f"R{i:03d}é") for i in range(30)], ignore_index=True).sample(frac=1, random_state=0)
+    assert IO.rows_digest_batches([many.iloc[:40], many.iloc[40:]])[0] == IO.rows_digest(many)
+    c = IO.write_capri_run(lambda: iter([ref.iloc[:1], ref.iloc[1:]]), lambda: iter([s1]), scenario="gd",
+                           reference="greendeal_ref", ref_source=src, scen_source={**src, "file": "res_gd.gdx"},
+                           root=tmp_path, names={})
+    assert c["duplicate"] and c["run_id"] == a["run_id"]

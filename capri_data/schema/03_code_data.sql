@@ -35,6 +35,8 @@ INSERT INTO code_data VALUES
   ('capri_mod/fert/inner_fert_dist.py', '<module>', 0.75, 1, '53', 'def beta_regulation(accuracy: float = 0.25, mode_share: float = 0.75) -> Tuple[float, float]:'),
   ('capri_mod/fert/inner_fert_dist.py', 'InnerFertDist.solve', 0.25, 1, '423', 'mx, racc, msh = (float(cv), 0.25, 0.75) if not isinstance(cv, tuple) else map(float, cv)'),
   ('capri_mod/fert/inner_fert_dist.py', 'InnerFertDist.solve', 0.75, 1, '423', 'mx, racc, msh = (float(cv), 0.25, 0.75) if not isinstance(cv, tuple) else map(float, cv)'),
+  ('capri_mod/io_results.py', 'rows_digest_batches', 20.0, 1, '1087', 'for chunk in iter(lambda: fh.read(1 << 20), b""):'),
+  ('capri_mod/io_results.py', 'verify_run', 200000.0, 1, '921', 'batch_size=200_000, batch_readahead=1, fragment_readahead=1)'),
   ('capri_mod/market/bilateral.py', 'BilateralCommodity.TRQ_ARG_CLIP', 60.0, 1, '111', 'TRQ_ARG_CLIP = 60.0'),
   ('capri_mod/market/bilateral.py', 'BilateralCommodity.TRQ_FILL_MID', 0.97, 1, '109', 'TRQ_FILL_MID = 0.97'),
   ('capri_mod/market/bilateral.py', 'BilateralCommodity.border_spec', 0.95, 1, '435', 'd = (E * 0.95 - cif) / np.where(b["price"] > 0, b["price"], 1.0) * b["fac"]'),

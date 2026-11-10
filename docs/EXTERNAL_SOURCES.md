@@ -92,12 +92,19 @@ copies of the area table are identical in levels: one kept).
   capri_data/2017/abatement/ammonia/p_holdLSU.csv (identical records), built from a dump before.
 - Goes to the Hugging Face set with the rest of capri_sources (MODEL_CONTENT_PLAN §12b).
 
-**`results/permits/`**, **`results/arm/`**: CAPRI's GHG and technology results of the project lead's runs of 10
-November 2026, as capmod.gms l. 1641-1645 writes them (results\permits\res_<scenario>_21730.gdx: v_Miti, p_ghgMiti,
-EMISCALC, v_actLevl, p_animReq, ...): the Green Deal step and the endogenous-technology reference's ini and max runs;
-and the market model's debug dump at its preparatory solve (arm/prep_market.gms l. 1211,
-chk_market_data_greendeal_greendeal_scenarios.gdx).
+**`results/permits/`**, **`results/arm/`**: CAPRI's GHG and technology result files, received 10 November 2026, as
+capmod.gms l. 1641-1645 writes them (results\permits\res_<scenario>_21730.gdx: v_Miti, p_ghgMiti, EMISCALC,
+v_actLevl, p_animReq, ...): the Green Deal step's (the project lead's run of 10 November 2026) and the
+endogenous-technology reference's ini and max runs' (the files carry no META: their date and origin are not
+recorded); and the market model's debug dump at the Green Deal step's preparatory solve (arm/prep_market.gms
+l. 1211, chk_market_data_greendeal_greendeal_scenarios.gdx; META: 10 November 2026, GAMS 53.3).
 - Read by: not yet (technology uptake and market-calibration checks).
+
+**The published set** (Hugging Face, gated: nuvolaTeam/capri-mod-raw; docs/design/MODEL_CONTENT_PLAN.md §12b): the
+files above under `originals/<path under capri_sources>` byte for byte, and their symbols as Parquet under
+`capri/results/<file stem>/` (tools/build/convert_capri_gdx.py). Every file with its SHA-256, size and version (tag) in
+tools/pipeline/capri_raw_manifest.json. First version `v2026.11.10` (10 November 2026): the six GDX files received that day
+(exports/ and results/ above).
 
 **`gdxlib/`**: GAMS's GDX library, `libgdxcclib64.so`. This is software, not data.
 - From: built from the open-source GDX library (MIT; README section 3). No GAMS installation or licence is needed.
@@ -132,9 +139,12 @@ CAPRI's 2030 reference results:
 - **`res_2_1730greendeal_refdefaulta.gdx`** and
   **`res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx`** (received 10 November 2026):
   CAPRI's Green Deal 2030 reference and its 2030 Green Deal step (pol_input/greendeal/greendeal_scenarios.gms: landscape
-  elements 8%, organic 18%, pesticides -20%, mineral fertiliser 13crp, N surplus -30%), run by the project lead on 10
-  November 2026 with GAMS 53.3 (META). The reference's dataOut equals the zip above in every record of the member
-  states and EU27yr19 in 2030 (891,502; largest relative difference 5e-15, the dump's 15 digits).
+  elements 8%, organic 18%, pesticides -20%, mineral fertiliser 13crp, N surplus -30%). The reference is CAPRI's shipped
+  run (META: 5 November 2025, GAMS 45.7), the GDX of the zip above (the two agree in all 891,502 records of the member
+  states and EU27yr19 in 2030, to the dump's 15 digits); the step is the project lead's run from it (META: 10 November
+  2026, GAMS 53.3). Its META lists "Sensitivity experiments with features in supply model: true [default]", but its
+  dataOut holds no experiment's records (set_and_store_dataout.gms l. 258-269 would store them under the experiments'
+  names in the second dimension): the experiments did not run or did not write results.
   - Read by: extract_capri_gd_pair (capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz).
 
 The zip above, **`gd_full.zip`** (gd_full.txt) and **`markmarket_greendeal_1730et_base_1717.txt`** are one file: the

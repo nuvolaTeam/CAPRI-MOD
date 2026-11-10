@@ -1,14 +1,16 @@
 """CAPRI's Green Deal 2030 step against its reference: the scenario's effect, for comparison with capri-mod's
 greendeal2030 run (capri_data/validation/HOW_TO_RUN_A_VALIDATION_SCENARIO.md).
 
-Two CAPRI capmod runs from the project lead's installation (10 November 2026, GAMS 53.3):
+Two CAPRI capmod result files from the project lead's installation (received 10 November 2026):
 
-  res_2_1730greendeal_refdefaulta.gdx      the reference. Its dataOut equals the shipped baseline the model is
-                                           calibrated to (res_2_1730greendeal_refdefaulta.zip, tools/lib/paths.py
-                                           BASELINE_REF) in all 891,502 records of the member states and EU27yr19
-                                           in 2030, to the 15 digits of the dump (largest relative difference 5e-15)
+  res_2_1730greendeal_refdefaulta.gdx      the reference: CAPRI's shipped run (META: 5 November 2025, GAMS 45.7, not
+                                           a run of the project lead's), the GDX of the dump the model is calibrated
+                                           to (res_2_1730greendeal_refdefaulta.zip, tools/lib/paths.py BASELINE_REF):
+                                           the two agree in all 891,502 records of the member states and EU27yr19 in
+                                           2030, to the dump's 15 digits (the same run in two formats)
   res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx
-                                           pol_input/greendeal/greendeal_scenarios.gms with landscape elements 8%,
+                                           the project lead's run from that reference (META: 10 November 2026, GAMS
+                                           53.3): pol_input/greendeal/greendeal_scenarios.gms with landscape elements 8%,
                                            organic 18%, pesticides -20%, mineral fertiliser 13crp, N surplus -30%
                                            (META of the run; the model's scenario folder
                                            capri_data/scenarios/greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00)

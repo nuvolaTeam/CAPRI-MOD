@@ -906,15 +906,28 @@ def read_partition(root, scenario: str, run_id: str) -> pd.DataFrame:
 
 
 def verify_run(root, run_id: str) -> bool:
-    """Recompute a stored partition's run id from its rows and its record in the runs table."""
+    """Recompute a stored partition's run id from its rows and its record in the runs table. The rows are read in
+    batches and their digest computed on disk (rows_digest_batches), so a partition of millions of rows (CAPRI's DATAOUT)
+    is checked in bounded memory."""
+    import pyarrow.dataset as ds
+    from deltalake import DeltaTable
     runs = _runs(Path(root))
     r = runs[runs["run_id"] == run_id]
     if len(r) != 1:
         raise KeyError(f"{root}: {len(r)} records of run {run_id}")
     rec = r.iloc[0]
-    rows = read_partition(root, rec["scenario"], run_id)
-    return run_id_of(rec["kind"], rec["scenario"], rec["fingerprint"], rows_digest(rows),
-                     rec["reference_run_id"] or "") == run_id
+    dset = DeltaTable(str(Path(root) / "long")).to_pyarrow_dataset()
+    sc = dset.scanner(columns=list(STORED_COLUMNS) + ["scenario"], filter=ds.field("run_id") == run_id,
+                      batch_size=200_000, batch_readahead=1, fragment_readahead=1)
+
+    def batches():
+        for b in sc.to_batches():
+            df = b.to_pandas()
+            if len(df) and set(df["scenario"]) != {rec["scenario"]}:
+                raise KeyError(f"{root}: run {run_id} is {sorted(set(df['scenario']))}, not {rec['scenario']}")
+            yield df[list(STORED_COLUMNS)]
+    dig, _ = rows_digest_batches(batches())
+    return run_id_of(rec["kind"], rec["scenario"], rec["fingerprint"], dig, rec["reference_run_id"] or "") == run_id
 
 
 def _jsonable(x):
@@ -1009,6 +1022,140 @@ def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, referenc
     run_record(meta, rec, units).to_csv(md / "run_record.csv", index=False)
     write_catalogue(root)
     return {**rec, "reference_reused": not ref_new, "duplicate": False}
+
+
+#: the kinds of CAPRI's own runs in the store (write_capri_run): read_run and the catalogue's naming select "scenario"
+#: and "reference", so CAPRI's runs are listed but never taken for the model's
+CAPRI_KINDS = ("capri_reference", "capri_scenario")
+
+
+def capri_rows(dataout: pd.DataFrame, base_year: int) -> pd.DataFrame:
+    """CAPRI's DATAOUT(rall, dim5, cols, rows, year) records (columns d1..d5, value: tools/build/convert_capri_gdx.py)
+    as stored rows (STORED_COLUMNS): CAPRI's coordinates in the capri_* columns and, as the model's code columns
+    cannot be filled from CAPRI's without an assignment of CAPRI's items to the model's (DCOL and DCOH are both the
+    model's DCOW), also in region, dim5, cols and rows, under the block "capri"; unit empty (DATAOUT carries none).
+    The year as an integer: DATAOUT's year label "BAS" (CAPRI's base year, %BAS%) as base_year; a file that has both
+    "BAS" and the base year's own label is refused (two records could take one key)."""
+    labels = set(dataout["d5"].unique())
+    if "BAS" in labels and str(int(base_year)) in labels:
+        raise ValueError(f"DATAOUT has the year labels BAS and {base_year}: BAS cannot be stored as {base_year}")
+    yr = dataout["d5"].map(lambda y: int(base_year) if y == "BAS" else int(y))
+    out = pd.DataFrame({"block": "capri", "region": dataout["d1"], "dim5": dataout["d2"], "cols": dataout["d3"],
+                        "rows": dataout["d4"], "capri_region": dataout["d1"], "capri_dim5": dataout["d2"],
+                        "capri_cols": dataout["d3"], "capri_rows": dataout["d4"], "unit": "", "year": yr,
+                        "value": dataout["value"].astype(float)})
+    return out[list(STORED_COLUMNS)]
+
+
+def _row_lines(rows: pd.DataFrame) -> list:
+    """rows_digest's lines of a batch of stored rows (the same text, unsorted)."""
+    import math
+    text_cols = [c for c in STORED_COLUMNS if c not in ("year", "value")]
+    cols = {c: rows[c].tolist() for c in STORED_COLUMNS}
+
+    def txt(v):
+        return "" if v is None or (isinstance(v, float) and math.isnan(v)) or v is pd.NA else str(v)
+
+    def num(v):
+        v = float(v)
+        return "nan" if math.isnan(v) else v.hex()
+    return [json.dumps([txt(cols[c][i]) for c in text_cols] + [int(cols["year"][i]), num(cols["value"][i])],
+                       ensure_ascii=False, separators=(",", ":")) for i in range(len(rows))]
+
+
+def rows_digest_batches(batches, tmpdir=None) -> tuple:
+    """rows_digest of a partition given in batches (an iterable of stored-row DataFrames), in bounded memory: the
+    lines written to a file and sorted by sort(1) in byte order (LC_ALL=C), which for UTF-8 text is the code-point
+    order of Python's sorted; the SHA-256 of the sorted lines joined by newlines. Returns (digest, number of rows)."""
+    import hashlib
+    import os
+    import subprocess
+    import tempfile
+    with tempfile.TemporaryDirectory(dir=tmpdir) as td:
+        src, dst = Path(td) / "lines", Path(td) / "sorted"
+        n = 0
+        with open(src, "w", encoding="utf-8", newline="\n") as fh:
+            for b in batches:
+                for ln in _row_lines(b):
+                    fh.write(ln + "\n")
+                n += len(b)
+        subprocess.run(["sort", "-S", "256M", "-T", td, "-o", str(dst), str(src)], check=True,
+                       env={**os.environ, "LC_ALL": "C"})
+        h = hashlib.sha256()
+        with open(dst, "rb") as fh:
+            prev = None
+            for chunk in iter(lambda: fh.read(1 << 20), b""):
+                if prev is not None:
+                    h.update(prev)
+                prev = chunk
+            if prev:
+                h.update(prev[:-1] if prev.endswith(b"\n") else prev)    # the lines joined, no newline at the end
+        return h.hexdigest(), n
+
+
+def write_capri_run(ref_rows, scen_rows, *, scenario: str, reference: str, ref_source: dict, scen_source: dict,
+                    root, names: dict, note: str = "", created: Optional[str] = None, tmpdir=None) -> dict:
+    """Store a pair of CAPRI's own runs (a reference and a scenario run from it) as two partitions of root/long, of
+    the kinds CAPRI_KINDS, with the store's run ids (run_id_of: the recipe of the model's runs, so verify_ids.py
+    recomputes them). Each run's rows (capri_rows) as a DataFrame, or as a function returning an iterable of
+    DataFrames (batches: a run of millions of rows in bounded memory, read twice: for its digest, then to write it).
+    Each partition's definition is the fingerprint of its source (ref_source, scen_source: the result file, its
+    SHA-256 and the run's META items); the scenario's includes the reference's. A pair already stored is not stored
+    again; the reference is stored once. names: {"result_name", "reference_result_name"} (CAPRI's file stems).
+    Returns the scenario's record."""
+    import pyarrow as pa
+    from datetime import datetime as _dt
+    from deltalake import DeltaTable, write_deltalake
+    root = Path(root)
+    root.mkdir(parents=True, exist_ok=True)
+
+    def batches(p):
+        return (lambda: iter([p])) if isinstance(p, pd.DataFrame) else p
+    ref_b, scen_b = batches(ref_rows), batches(scen_rows)
+    runs = _runs(root)
+    fp_r = fingerprint({"source": "CAPRI", **ref_source})
+    fp_s = fingerprint({"source": "CAPRI", "reference": fp_r, **scen_source})
+    d_r, n_r = rows_digest_batches(ref_b(), tmpdir)
+    d_s, n_s = rows_digest_batches(scen_b(), tmpdir)
+    ref_id = run_id_of(CAPRI_KINDS[0], reference, fp_r, d_r)
+    scen_id = run_id_of(CAPRI_KINDS[1], scenario, fp_s, d_s, ref_id)
+    have = runs[runs["run_id"] == scen_id]
+    if len(have):
+        return {**have.iloc[0].to_dict(), "duplicate": True}
+    now = created or _dt.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z")
+    seq = int(runs["seq"].max()) + 1 if len(runs) else 0
+    recs = []
+    for bf, n, kind, name, rid, fp, ref, ref_rid, rn in (
+            (ref_b, n_r, CAPRI_KINDS[0], reference, ref_id, fp_r, "", "", names.get("reference_result_name", "")),
+            (scen_b, n_s, CAPRI_KINDS[1], scenario, scen_id, fp_s, reference, ref_id, names.get("result_name", ""))):
+        if kind == CAPRI_KINDS[0] and (runs["run_id"] == rid).any():
+            continue                                   # the reference stored once
+        lp = root / "long"
+        schema = DeltaTable(str(lp)).schema().to_arrow() if (lp / "_delta_log").exists() else None
+        if schema is not None and not isinstance(schema, pa.Schema):
+            schema = pa.schema(schema)
+
+        def gen():
+            for b in bf():
+                df = b.copy()
+                df["scenario"], df["run_id"] = name, rid
+                t = pa.Table.from_pandas(df, preserve_index=False)
+                yield from (t.cast(schema) if schema is not None else t).to_batches()
+        first = next(iter(gen()), None)
+        sch = schema if schema is not None else first.schema
+        write_deltalake(str(lp), pa.RecordBatchReader.from_batches(sch, gen()), mode="append")
+        recs.append({"seq": seq + len(recs), "scenario": name, "run_id": rid, "kind": kind, "reference": ref,
+                     "reference_run_id": ref_rid, "fingerprint": fp, "commit": "", "created": now, "rows": n,
+                     "note": note, "result_name": rn, "label": "", "series": "", "status": "ok"})
+    write_deltalake(str(root / "runs"), pa.Table.from_pandas(pd.DataFrame(recs)[list(RUNS_COLUMNS)],
+                                                             preserve_index=False), mode="append", schema_mode="merge")
+    for rec in recs:
+        src = ref_source if rec["kind"] == CAPRI_KINDS[0] else scen_source
+        md = meta_dir(root, rec["run_id"])
+        md.mkdir(parents=True, exist_ok=True)
+        (md / "meta.json").write_text(json.dumps(_jsonable({"source": "CAPRI", **src}), indent=1, default=str))
+    write_catalogue(root)
+    return {**recs[-1], "duplicate": False}
 
 
 def read_run(root, scenario: str, run_id: Optional[str] = None) -> tuple:

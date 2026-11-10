@@ -37,9 +37,11 @@ and `docs/KNOWN_ISSUES.md`.
 - Data: capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz (tools/build/extract_capri_gd_pair.py): CAPRI's
   2030 Green Deal step (lnds8 org18 pest20 mine13crp surp30) against the Green Deal reference, levels and % changes as
   the coupled-support pair keeps them (supply LEVL, PRME by EU27, member state and NUTS 2; PROD, YILD and the market
-  items by EU27 and member state); from the project lead's runs of 10 November 2026 (docs/EXTERNAL_SOURCES.md).
-- Checks: the run pair's reference equals the shipped baseline the model is calibrated to in every record of the
-  member states and EU27 in 2030 (891,502, to the dump's 15 digits). CAPRI's EU27 effect: soft wheat -1.9%, durum
+  items by EU27 and member state); the reference is CAPRI's shipped run (5 November 2025, GAMS 45.7), the step the
+  project lead's run from it (10 November 2026, GAMS 53.3) (docs/EXTERNAL_SOURCES.md).
+- Checks: the reference's GDX and the baseline dump the model is calibrated to agree in every record of the member
+  states and EU27 in 2030 (891,502, to the dump's 15 digits): the same run in two formats (corrected on 10 November
+  2026: first described as the project lead's own run, which its META does not support). CAPRI's EU27 effect: soft wheat -1.9%, durum
   -15.3%, maize -10.0%, extensive grassland +51.8%, intensive -54.8%, fallow +90.9%, suckler cows -28.8%, pigs
   -9.2%; producer prices of cereals +9 to +17%, beef +20.1%, milk +11.2%.
 
