@@ -1,7 +1,7 @@
 # Rebuilding the data on CAPRI's regional units: log (27 October 2026)
 
 The model's regions are now CAPRI's 221 regional units of the EU27 and Norway under CAPRI's 8-character codes
-(`capri_data/shared/regional_units.csv`, `tools/build/build_regional_units.py`; inventory: `REGIONAL_UNITS_INVENTORY.md`;
+(`capri_data/codes/regional_units.csv`, `tools/build/build_regional_units.py`; inventory: `REGIONAL_UNITS_INVENTORY.md`;
 builders and their order: `REGIONAL_UNITS_BUILDERS.md`). Every region-keyed file was rebuilt by its builder on the units
 and compared with the file on the old NUTS-2016 regions (`tools/check/compare_rekeyed.py`,
 `tools/check/compare_rekeyed_json.py`, against branch `next`): for the 196 regions whose CAPRI unit was theirs alone

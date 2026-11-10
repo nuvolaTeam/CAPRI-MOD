@@ -259,7 +259,7 @@ def add_results(stores: list, app):
         # ------------------------------------------------------------------ CAPRI
         with gr.Tab("Map"):
             gr.Markdown("A result of every regional unit on the NUTS-2024 regions it covers "
-                        "(capri_data/shared/capri_units_nuts2024.csv). Where a unit covers several regions, each shows "
+                        "(capri_data/codes/capri_units_nuts2024.csv). Where a unit covers several regions, each shows "
                         "the unit's rate; a level of an additive item is split by the regions' farmland (UAA) shares. "
                         "Below: the same item by member state (additive items only).")
             with gr.Row():

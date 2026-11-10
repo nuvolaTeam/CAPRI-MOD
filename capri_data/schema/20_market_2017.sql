@@ -20,7 +20,7 @@ COMMENT ON TABLE model_market_regions IS 'the market''s grouping step: each of C
 -- rule: every one of CAPRI's market regions has its model region
 SELECT code FROM capri_rm WHERE code NOT IN (SELECT rm FROM model_market_regions);
 
--- file: capri_data/shared/rms_to_rm.csv
+-- file: capri_data/codes/rms_to_rm.csv
 CREATE TABLE rms_to_rm (
     rms VARCHAR PRIMARY KEY REFERENCES capri_rall (code),
     rm VARCHAR NOT NULL REFERENCES capri_rall (code)

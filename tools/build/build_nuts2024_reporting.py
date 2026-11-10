@@ -23,7 +23,7 @@ regions (NO02, NO06, NO07, NO08, NO09, NO0A), which are taken as its 2024 region
 CAPRI has no unit for Brussels (BE10), Berlin (DE30), Bremen (DE50), Hamburg (DE60), Ceuta and Melilla (ES63, ES64) and
 the French outermost regions (FRY1-5): build_general_set_structure.gms leaves them out; nor for Svalbard (NO0B). They receive no values.
 
-Output: capri_data/shared/capri_units_nuts2024.csv (capri_unit, nuts2024, group, uaa_ha, weight)
+Output: capri_data/codes/capri_units_nuts2024.csv (capri_unit, nuts2024, group, uaa_ha, weight)
     python tools/build/build_nuts2024_reporting.py [--download]
 """
 from __future__ import annotations
@@ -44,7 +44,7 @@ _sys_sio.path.insert(0, str(ROOT / "tools" / "lib"))
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 NUTS = ROOT / "capri_data" / "sources" / "raw" / "nuts"
 UAA = ROOT / "capri_data" / "sources" / "raw" / "eurostat" / "ef_lus_main_uaa_nuts2024.parquet"
-DEST = ROOT / "capri_data" / "shared" / "capri_units_nuts2024.csv"
+DEST = ROOT / "capri_data" / "codes" / "capri_units_nuts2024.csv"
 API = ("https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/ef_lus_main?format=JSON&lang=EN"
        "&crops=UAA&unit=HA&statinfo=TOTAL&farmtype=TOTAL&so_eur=TOTAL&uaarea=TOTAL&time=")
 #: Eurostat's NUTS-2 change notes 2021 -> 2024 (sheet 'Changes NUTS-2'): the regions whose boundaries changed
@@ -106,7 +106,7 @@ def main():
     # the EU's units and Norway's (FALLBACK_UNITS): the units of the UK, Turkey and the Western Balkans, listed since 4
     # November 2026, are not in the NUTS-2024 reporting
     units = [u for u in mr.UNITS if u in mr.FALLBACK_UNITS]
-    _ru = pd.read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv", dtype=str)
+    _ru = pd.read_csv(ROOT / "capri_data" / "codes" / "regional_units.csv", dtype=str)
     ctry = {u: c for u, c in zip(_ru.region, _ru.country) if u in set(units)}
 
     t13 = read_source(NUTS / "nuts2013_2016.parquet").astype(object).fillna("").astype(str)

@@ -33,7 +33,7 @@ DUMP = EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"
 KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "processing_yields_dataout_2030.parquet"
 PAIRS = (("OLIV", "OLIO"), ("PARI", "RICE"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/codes/eu_market_blocks.csv)
 EU27 = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 
 

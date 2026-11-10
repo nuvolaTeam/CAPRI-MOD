@@ -4,7 +4,7 @@
 # tools/run/run_f2f_2030.py --settings FILE and its flags); the effective settings are saved with each run.
 # Every key names what it does and CAPRI's equivalent. DEPARTURE marks a default that differs from CAPRI's,
 # with the reason; CAPRI-ERROR-FIX marks a correction of CAPRI's code (described in docs/DEPARTURES_FROM_CAPRI.md).
-# Sourced economic parameters are not here: capri_data/shared/model_parameters.csv.
+# Sourced economic parameters are not here: capri_data/codes/model_parameters.csv.
 
 [run]
 # CAPRI's manure trade between regions (GUI "New Manure Trade Module", manureTradeNew; star 3.0 GUI default on).
@@ -25,7 +25,7 @@ nlp_cache_size = 64
 nlp_derivative_cache_size = 16
 # the countries outside the EU whose supply models are in the run, by CAPRI member-state code (CAPRI's per-country
 # switches, %CountriesNO000000% ... %CountriesTUR%, capmod/define_regional_sets.gms l. 40-77). Each must have regional
-# units (capri_data/shared/regional_units.csv). Their market region takes its supply from their models; a country
+# units (capri_data/codes/regional_units.csv). Their market region takes its supply from their models; a country
 # left out keeps its market region's supply functions. The EU's member states are always in.
 supply_countries_outside_eu = ["NO000000"]
 # a folder of the user's own scenarios (refactor stage 5), looked in before capri_data/scenarios; "" = none. A scenario

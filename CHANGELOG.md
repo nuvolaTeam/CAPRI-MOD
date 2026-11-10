@@ -32,6 +32,21 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 10 November 2026: data layout step (b), the year folders
+
+- Data: `capri_data/shared/` is `capri_data/codes/` (the code lists; the inputs' where-key "shared" is "codes");
+  `capri_data/trajectories/` and the 43 files of `capri_data/2017/` named for 2030 are in `capri_data/2030/`, under
+  the same area subfolders (56 moves, docs/design/DATA_LAYOUT.md). The rule is
+  `capri_mod.data.inputs.year_of_file`: a file whose name carries a year other than the base year lives in that year's
+  folder; a year range (`cap_greening_2013_2020.csv`) names the period of a base-year file and stays. The readers
+  (RunInputs.path, market inputs, loaders.resolve_data_file) and the builders follow it;
+  `build_npk_balance_2030.py` writes its two 2017 manure P/K coefficient files to the base-year folder.
+- Not yet: the column splits of five files that carry 2017 and 2030 columns (DATA_LAYOUT.md).
+- Checks: the loaded data dict is identical before and after the move (all 62 keys); the mini-EU F2F run is
+  identical to the run before the move (compare_pickles_exact, rtol 0); the 102 builders that read or write moved
+  files reproduce their committed outputs (reproduce_builders); the suite (365 tests; four tests now follow the layout);
+  test_a_file_carrying_another_year_lives_in_that_years_folder_a_period_does_not.
+
 ## 10 November 2026: P1, CAPRI's obligatory set-aside (SETA_)
 
 - CAPRI's SETA_ (supply_model.gms l. 2219-2241): an arable activity with a set-aside rate r needs r / (1 - r) ha of

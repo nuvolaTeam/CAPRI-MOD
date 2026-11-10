@@ -145,7 +145,7 @@ def main():
     _tf = {"capri_ref": "capri_ref_2030", "captrd": "captrd_2030"}.get(a.trajectory, a.trajectory)
     traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "scenarios" / _tf))
     kw = {k: (v if k == "mineRedu" else int(v)) for k, v in (x.split("=") for x in a.targets.split(",") if x)}
-    _pdir = None if a.base_prices else str(ROOT / "capri_data" / "trajectories")
+    _pdir = None if a.base_prices else str(ROOT / "capri_data" / "2030")
     pmod = ProjectionModule(m, traj, capri_prices_dir=_pdir)
     from capri_mod.policy.endotech import JRC121368_ENDOTECH, effective
     _et = (dict(JRC121368_ENDOTECH) if a.endotech.lower() == "jrc121368"

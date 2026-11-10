@@ -103,7 +103,7 @@ def test_p_items_follow_capri(ini):
 def test_crop_coefs_keep_capris_totals(ref):
     """p_balance_crop_coefs_2030.csv pools CAPRI's crops into the model's crops by area: at CAPRI's own areas the pooled
     retention and residue output give CAPRI's EXPPRD and CRESID of its 2030 reference."""
-    t = pd.read_csv(DATA_DIR / "2017" / "environment" / "p_balance_crop_coefs_2030.csv")
+    t = pd.read_csv(DATA_DIR / "2030" / "environment" / "p_balance_crop_coefs_2030.csv")
     for reg in REGIONS:
         d = t[t.capri_region == reg]                 # GRAE and GRAI the model's crops (before, their aggregate GRAS)
         ep = float((d.levl_kha * d.pret_kg_ha).sum()) / 1000.0

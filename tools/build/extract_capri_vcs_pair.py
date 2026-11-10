@@ -33,7 +33,7 @@ SUP_ITEMS = {"LEVL", "PRME", "PROD", "YILD"}
 MKT_ITEMS = {"UVAP", "UVAG", "MAPR", "HCON", "IMPT", "EXPT"}
 REG = re.compile(r"^(EU27yr19|[A-Z]{2}[0-9A-Z]{6})$")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/codes/eu_market_blocks.csv)
 EU_MS = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 
 

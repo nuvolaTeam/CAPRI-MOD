@@ -8,7 +8,7 @@ below comes from reading the code (and listing the existing files), so behaviour
 marked as uncertain. Companion: `REGIONAL_UNITS_INVENTORY_files.csv` (the 79 target files: `model_codes == True` and
 `live == True`).
 
-Snapshot note: `tools/build/build_regional_units.py` (writes `shared/regional_units.csv`) and a change to
+Snapshot note: `tools/build/build_regional_units.py` (writes `codes/regional_units.csv`) and a change to
 `capri_mod/data/definitions.py` appeared at 05:09 while this survey was being made. That script is not one of the 114
 analysed, but it is listed in section 1.1 because it is the first builder of a region list.
 
@@ -57,7 +57,7 @@ Abbreviations used in the tables:
 |---|---|
 | `S/` `E/` `F/` `P/` `M/` | `capri_data/2017/supply/`, `/environment/`, `/feed/`, `/policy/`, `/market/` |
 | `AM/` `MI/` `AB/` | `capri_data/2017/abatement/ammonia/`, `/abatement/mitigation/`, `/abatement/` |
-| `T/` `SH/` | `capri_data/trajectories/`, `capri_data/shared/` |
+| `T/` `SH/` | `capri_data/2030/`, `capri_data/codes/` |
 | `SC/` `BP/` `GH/` `SMK/` `SEN/` | `capri_data/sources/capreg/`, `/sources/baseline_pmp/`, `/sources/ghgtech/`, `/sources/market/`, `/sources/environment/` (the paths of the inventory's date; since 6 November 2026 under sources/raw and sources/intermediate, docs/design/DATA_LAYOUT_files.csv) |
 | `GD/` | `capri_data/validation/greendeal_2030/` |
 | D17 | CAPRI's 2017 CAPREG results `capri_sources/capreg/res_17<MS>.txt` (27 files present, ES included) |
@@ -238,7 +238,7 @@ member-state set from MR.list) and `build_eu_producer_prices` (section 1.2).
 | build_dairy_world_markets | `M/dairy_world_baseline.csv`; `sources/raw/capri/results/fao_agg_17_datamarket/fao_agg_dairy_products_bas.csv` | – | `--src` `UP/fao_agg_17_datamarket.txt` | – |
 | build_world_market_baseline | `M/world_market_baseline.csv`; `sources/raw/capri/results/fao_agg_17_datamarket/fao_agg_market_balances_bas.csv` | – | `--src` `UP/fao_agg_17_datamarket.txt` | – |
 | build_feed_bulks | `M/feed_bulks_eu.csv`, `feed_bulks_no.csv`, `feed_bulks_eu_share.csv`, `F/feed_cereal_mix_2030.csv`; `SMK/feed_bulks_dataout_2030.csv` | `validation/capri_eu27_market_balance_2030_ref.json` | `--dump` MKTD, `capri_sources/gams/arm/market1.gms` | – |
-| build_world_prices | `M/world_prices.csv`, `sources/world_price_provenance.csv` (from scratch, 29 October 2026; JSON until 30 October 2026) | `codes/model_commodities.csv`, `shared/regional_units.csv`, `M/bilateral_flows_2017.csv`, `M/bilateral_regions_2017.csv` | `UP/fao_agg_17_datamarket.txt`, `WORK/capreg` res_17 | – |
+| build_world_prices | `M/world_prices.csv`, `sources/world_price_provenance.csv` (from scratch, 29 October 2026; JSON until 30 October 2026) | `codes/model_commodities.csv`, `codes/regional_units.csv`, `M/bilateral_flows_2017.csv`, `M/bilateral_regions_2017.csv` | `UP/fao_agg_17_datamarket.txt`, `WORK/capreg` res_17 | – |
 | build_feed_byproducts | `M/feed_byproducts.csv` (until 29 October 2026 also in place `M/world_prices.csv`, `M/armington_params.csv`, `sources/world_price_provenance.json`) | `SMK/bilateral_dataout_2030.csv.xz`, `M/bilateral_regions_2030.csv`, `M/bilateral_flows_2017.csv`, `M/bilateral_regions_2017.csv`, `M/armington_rho.csv`, `2017/supply/capri_supply_elas_market_1717.csv`, the EU27 balance JSON | `UP/fao_agg_17_datamarket.txt` | – |
 | build_feed_demand_nonEU | `M/feed_demand_nonEU.csv`; `SMK/feed_demand_nonEU_{elas,use}_2030.csv` | `M/processing_nq_base.csv` | `--elas`, `--data` uploads | – |
 | build_gl_demand | `M/gl_demand_goods.csv`, `gl_demand_b.csv`, `gl_demand_regions.csv`; `SH/rms_to_rm.csv`, `SH/rms.csv` (copied from `capri_reference/sets/simini_21730/` when present) | – | `UP/elas_2_1730defaulta.csv`, `UP/data_market_1730defaulta.csv` | – |
@@ -278,8 +278,8 @@ see section 3). The last column compares with the inventory's `builders` column.
 | 6 | `2017/abatement/mitigation/winter_cover_option.csv` | build_winter_cover_option |  |  |
 | 7 | `2017/environment/capri_regional_n_balance_2030.csv` | **none** | NO BUILDER; read by no code (orphan per the inventory) |  |
 | 8 | `2017/environment/crop_co2_coef.csv` | build_ghg_coefs_2017 |  |  |
-| 9 | `2017/environment/crop_nut_need_mult_fact_2030.csv` | build_overfert_factors |  |  |
-| 10 | `2017/environment/fertiliser_substitution_2030.csv` | **none** | NO BUILDER; CAPRI items fertDist_*/nutNed_* (AGGT, per ha) are in capri_gnb_components_2030.csv (build_capri_gnb_components.py), CAPRI codes |  |
+| 9 | `2030/environment/crop_nut_need_mult_fact_2030.csv` | build_overfert_factors |  |  |
+| 10 | `2030/environment/fertiliser_substitution_2030.csv` | **none** | NO BUILDER; CAPRI items fertDist_*/nutNed_* (AGGT, per ha) are in capri_gnb_components_2030.csv (build_capri_gnb_components.py), CAPRI codes |  |
 | 11 | `2017/environment/histosol.csv` | build_histosol |  |  |
 | 12 | `2017/environment/livestock_ch4ent_coef.csv` | build_ghg_coefs_2017 |  |  |
 | 13 | `2017/environment/livestock_ch4man_coef.csv` | build_ghg_coefs_2017 |  |  |
@@ -287,15 +287,15 @@ see section 3). The last column compares with the inventory's `builders` column.
 | 15 | `2017/environment/livestock_manure_n_coef.csv` | build_shg_split[coef] | only build_shg_split.coefficient_tables writes it (build(dump,'MANN')); no standalone script | not writers (read only, or docstring mention): build_genetics_effects, build_livestock_n_export_coef, build_npk_balance_2030 |
 | 16 | `2017/environment/livestock_manure_p_coef.csv` | build_npk_balance_2030 | only when --capreg-dir exists |  |
 | 17 | `2017/environment/livestock_n_export_coef.csv` | build_livestock_n_export_coef |  |  |
-| 18 | `2017/environment/manure_housing_losses_2030.csv` | build_manure_losses |  |  |
+| 18 | `2030/environment/manure_housing_losses_2030.csv` | build_manure_losses |  |  |
 | 19 | `2017/environment/manure_n2o_factors.csv` | build_manure_n2o |  |  |
 | 20 | `2017/environment/manure_n2o_tech.csv` | build_manure_n2o | region set inherited from ammonia_tech_model.csv | indirect only (orchestrator running the writer): build_norway_pigs |
-| 21 | `2017/environment/manure_trade_2030.csv` | build_manure_trade_base |  |  |
+| 21 | `2030/environment/manure_trade_2030.csv` | build_manure_trade_base |  |  |
 | 22 | `2017/environment/n_deposition_regional.csv` | **none** | NO BUILDER; CAPRI's perHa ATMOSD is in capri_gnb_components_2030.csv, CAPRI codes |  |
 | 23 | `2017/feed/livestock_feed_coef.csv` | build_shg_split[coef] | only build_shg_split.coefficient_tables (FCER, FPRO, FENE / 1000) |  |
 | 24 | `2017/policy/cap_payments.csv` | build_crop_economics_2017 | BPS = CAPRI UAAR PRME; ANC, AES, ORGANIC, COUPLED written as 0 | not writers (read only, or docstring mention): extract_remaining_nine |
 | 25 | `2017/policy/capri_baseline_surplus_2030.csv` | build_capri_baseline_surplus |  |  |
-| 26 | `2017/policy/premium_scheme_shares_2030.csv` | build_cap_ceilings_2030 |  |  |
+| 26 | `2030/policy/premium_scheme_shares_2030.csv` | build_cap_ceilings_2030 |  |  |
 | 27 | `2017/supply/animal_numbers.csv` | build_capri_base → build_shg_split[herds] → build_norway_pigs | capri_base writes HERD_MAP columns (incl. SHGO only if the column exists; PIGS = CAPRI's census 'PIGS'); shg_split splits SHGO → SHGM/SHGF (no-op without SHGO); norway_pigs sets PIGS/PIGF of NO rows. The EU pig split (PIGS := SOWS HERD, PIGF := PIGS - SOWS) was tools/build_pig_split.py, a one-off script no longer in the repository: NO BUILDER for the EU PIGS/PIGF columns | not writers (read only, or docstring mention): build_capri_level_ratio, build_fodder_balance; missing: build_shg_split |
 | 28 | `2017/supply/base_areas.csv` | build_capri_base |  | not writers (read only, or docstring mention): build_eu_producer_prices, build_fodder_balance, build_land_market |
 | 29 | `2017/supply/capri_level_ratio.csv` | build_capri_level_ratio |  | not writers (read only, or docstring mention): _capri_costsavings, build_animal_pmp_capri_2030, build_animal_yields |
@@ -309,11 +309,11 @@ see section 3). The last column compares with the inventory's `builders` column.
 | 37 | `2017/supply/land_availability.csv` | build_capri_base |  |  |
 | 38 | `2017/supply/land_market_2017.csv` | build_land_market | --year 2017 (capri_mod/data/land_market_io.write); --repair-splits rewrites it in place (one-off repair) |  |
 | 39 | `2017/supply/land_market_2017_regions.csv` | build_land_market | written with land_market_2017.csv by land_market_io.write | missing: build_land_market |
-| 40 | `2017/supply/land_market_2030.csv` | build_land_market | --year 2030 |  |
-| 41 | `2017/supply/land_market_2030_regions.csv` | build_land_market | written with land_market_2030.csv | missing: build_land_market |
+| 40 | `2030/supply/land_market_2030.csv` | build_land_market | --year 2030 |  |
+| 41 | `2030/supply/land_market_2030_regions.csv` | build_land_market | written with land_market_2030.csv | missing: build_land_market |
 | 42 | `2017/supply/land_rent_regional.csv` | **none** | NO BUILDER; Eurostat apri_lrnt (capri_sources/exports/estat_apri_lrnt_en.csv exists) |  |
 | 43 | `2017/supply/land_rents_2017.csv` | build_land_rents | --year 2017 (res_17 dumps, hard-coded path); build_pmp_recipe reads the CAPRI-coded sibling only | not writers (read only, or docstring mention): build_pmp_recipe |
-| 44 | `2017/supply/land_rents_2030.csv` | build_land_rents | --year 2030 (default) | not writers (read only, or docstring mention): build_pmp_recipe |
+| 44 | `2030/supply/land_rents_2030.csv` | build_land_rents | --year 2030 (default) | not writers (read only, or docstring mention): build_pmp_recipe |
 | 45 | `2017/supply/livestock_cost_coef.csv` | build_livestock_output_coef → build_shg_split[coef] | as livestock_output_coef.csv | not writers (read only, or docstring mention): build_plant_protection_cost |
 | 46 | `2017/supply/livestock_intensity_bounds.csv` | **none** | NO BUILDER; capreg DATA2 DCOL/DCOH YILD |  |
 | 47 | `2017/supply/livestock_output_by_product_coef.csv` | build_livestock_products |  | not writers (read only, or docstring mention): build_genetics_effects |
@@ -326,15 +326,15 @@ see section 3). The last column compares with the inventory's `builders` column.
 | 54 | `2017/supply/livestock_units.csv` | build_livestock_units |  |  |
 | 55 | `2017/supply/nutrients_regional.csv` | build_capri_base |  |  |
 | 56 | `2017/supply/plant_protection_cost.csv` | build_plant_protection_cost |  | not writers (read only, or docstring mention): build_crop_cost_shares |
-| 57 | `2017/supply/pmp_capri_2030.csv` | build_pmp_capri_2030 | default run | not writers (read only, or docstring mention): build_animal_pmp_capri_2030 |
-| 58 | `2017/supply/pmp_capri_2030_animals.csv` | build_animal_pmp_capri_2030 | default run |  |
-| 59 | `2017/supply/pmp_capri_2030_animals_members.csv` | build_animal_pmp_capri_2030 | --splits (default name <stem>_members.csv) | missing: build_animal_pmp_capri_2030 |
+| 57 | `2030/supply/pmp_capri_2030.csv` | build_pmp_capri_2030 | default run | not writers (read only, or docstring mention): build_animal_pmp_capri_2030 |
+| 58 | `2030/supply/pmp_capri_2030_animals.csv` | build_animal_pmp_capri_2030 | default run |  |
+| 59 | `2030/supply/pmp_capri_2030_animals_members.csv` | build_animal_pmp_capri_2030 | --splits (default name <stem>_members.csv) | missing: build_animal_pmp_capri_2030 |
 | 60 | `2017/supply/pmp_recipe_2017.csv` | build_pmp_capri_2030 | INFERRED (no recorded command): build_pmp_capri_2030.py --techn capri_data/sources/intermediate/baseline_pmp/recipe_2017_quad_techn.csv --year 2017 --out capri_data/2017/supply/pmp_recipe_2017.csv; needs build_pmp_recipe.py --year 2017 first | not writers (read only, or docstring mention): build_animal_pmp_capri_2030, build_intensity_q_2030, build_land_rents |
 | 61 | `2017/supply/pmp_recipe_2017_animals.csv` | build_animal_pmp_capri_2030 | INFERRED: build_animal_pmp_capri_2030.py --techn .../recipe_2017_quad_techn.csv --year 2017 --out .../pmp_recipe_2017_animals.csv | missing: build_animal_pmp_capri_2030 |
 | 62 | `2017/supply/pmp_recipe_2017_animals_members.csv` | build_animal_pmp_capri_2030 | INFERRED: as above with --splits --out .../pmp_recipe_2017_animals_members.csv | missing: build_animal_pmp_capri_2030 |
-| 63 | `2017/supply/pmp_recipe_2030.csv` | build_pmp_capri_2030 | INFERRED: build_pmp_capri_2030.py --techn .../recipe_2030_quad_techn.csv --year 2030 --out .../pmp_recipe_2030.csv; needs build_pmp_recipe.py --year 2030 first | not writers (read only, or docstring mention): build_animal_pmp_capri_2030, build_intensity_q_2030, build_land_rents |
-| 64 | `2017/supply/pmp_recipe_2030_animals.csv` | build_animal_pmp_capri_2030 | INFERRED: build_animal_pmp_capri_2030.py --techn .../recipe_2030_quad_techn.csv --year 2030 --out .../pmp_recipe_2030_animals.csv | missing: build_animal_pmp_capri_2030 |
-| 65 | `2017/supply/pmp_recipe_2030_animals_members.csv` | build_animal_pmp_capri_2030 | INFERRED: as above with --splits --out .../pmp_recipe_2030_animals_members.csv | missing: build_animal_pmp_capri_2030 |
+| 63 | `2030/supply/pmp_recipe_2030.csv` | build_pmp_capri_2030 | INFERRED: build_pmp_capri_2030.py --techn .../recipe_2030_quad_techn.csv --year 2030 --out .../pmp_recipe_2030.csv; needs build_pmp_recipe.py --year 2030 first | not writers (read only, or docstring mention): build_animal_pmp_capri_2030, build_intensity_q_2030, build_land_rents |
+| 64 | `2030/supply/pmp_recipe_2030_animals.csv` | build_animal_pmp_capri_2030 | INFERRED: build_animal_pmp_capri_2030.py --techn .../recipe_2030_quad_techn.csv --year 2030 --out .../pmp_recipe_2030_animals.csv | missing: build_animal_pmp_capri_2030 |
+| 65 | `2030/supply/pmp_recipe_2030_animals_members.csv` | build_animal_pmp_capri_2030 | INFERRED: as above with --splits --out .../pmp_recipe_2030_animals_members.csv | missing: build_animal_pmp_capri_2030 |
 | 66 | `2017/supply/set_aside_split.csv` | build_labour_setaside |  |  |
 | 67 | `2017/supply/supply_elasticities_regional.csv` | build_supply_elasticities_regional | rows = regions of sources/intermediate/estnlp/pela_own_price.csv (ingest_pela_gtap.py via nuts_crosswalk). derive_elasticities_from_pmp.py --write would add non-PELA activities: the current file has PELA's 15 crops only | not writers (read only, or docstring mention): derive_elasticities_from_pmp, ingest_pela_gtap |
 | 68 | `2017/supply/variable_costs.csv` | build_capri_base → build_crop_economics_2017 → build_shg_split[herds] | capri_base: crops + DCOW, BULL, PIGF, OANI (TOIN); crop_economics: crop columns; shg_split: SHGM, SHGF. Other animal columns (BCOW, HFRS, CALV, PIGS, LAYS, BROI): no writer found |  |
@@ -345,10 +345,10 @@ see section 3). The last column compares with the inventory's `builders` column.
 | 73 | `sources/capreg/capreg_nutrient_coefs.csv` | extract_all_from_data2 → extract_remaining_nine | both scripts write the same format from DATA2 dumps via nuts_crosswalk.json; whichever runs last wins |  |
 | 74 | `sources/intermediate/capreg/capreg_producer_prices.csv` | extract_all_from_data2 → build_capri_base → build_crop_economics_2017 | extract_all_from_data2 rewrites the whole file on the crosswalk regions (legacy; running it after build_capri_base would drop rows); capri_base and crop_economics fill MPRI per region in place; SHGM/SHGF columns come only from the DATA2 extraction | not writers (read only, or docstring mention): build_eu_producer_prices; indirect only (orchestrator running the writer): build_patched_inputs; missing: extract_all_from_data2 |
 | 75 | `sources/intermediate/capreg/pmp_quad_pact.csv` | ingest_pmp_terms | via nuts_crosswalk.json (one model region per CAPRI code) | not writers (read only, or docstring mention): derive_elasticities_from_pmp |
-| 76 | `trajectories/capri_cap_premium_2030.csv` | build_price_trajectory_2030 | index = load_all_data cap_premium (capreg_cap_premium.csv + crop_premium.csv) |  |
-| 77 | `trajectories/capri_livestock_premium_ratio_2030.csv` | build_price_trajectory_2030 |  |  |
-| 78 | `trajectories/capri_ref_fodder_2030.csv` | build_ration_trajectory_2030 |  |  |
-| 79 | `trajectories/capri_ref_ration_2030.csv` | build_ration_trajectory_2030 |  |  |
+| 76 | `2030/capri_cap_premium_2030.csv` | build_price_trajectory_2030 | index = load_all_data cap_premium (capreg_cap_premium.csv + crop_premium.csv) |  |
+| 77 | `2030/capri_livestock_premium_ratio_2030.csv` | build_price_trajectory_2030 |  |  |
+| 78 | `2030/capri_ref_fodder_2030.csv` | build_ration_trajectory_2030 |  |  |
+| 79 | `2030/capri_ref_ration_2030.csv` | build_ration_trajectory_2030 |  |  |
 
 ## 3. Proposed global run order (rebuild on a new set of regions)
 
@@ -549,7 +549,7 @@ builder reads `file`, last written by `A`. `build_shg_split[herds]` = its `split
 | 8 | build_animal_pmp_capri_2030 | build_capri_base: 2017/supply/base_areas.csv; build_capri_level_ratio: 2017/supply/capri_level_ratio.csv |
 | 8 | build_animal_yields | build_capri_base: 2017/supply/base_areas.csv; build_capri_level_ratio: 2017/supply/capri_level_ratio.csv; build_shg_split[herds]: 2017/supply/yields.csv (same file, written before) |
 | 8 | build_fodder_balance | build_capri_base: 2017/supply/base_areas.csv; build_feed_ration: 2017/feed/feed_ration_2017.csv; build_norway_pigs: 2017/supply/animal_numbers.csv |
-| 8 | build_histosol | build_capri_base: 2017/supply/base_areas.csv; build_price_trajectory_2030: trajectories/capri_price_ratios_2030.csv |
+| 8 | build_histosol | build_capri_base: 2017/supply/base_areas.csv; build_price_trajectory_2030: 2030/capri_price_ratios_2030.csv |
 | 8 | build_labour_setaside | build_capri_base: 2017/supply/base_areas.csv; build_capri_level_ratio: 2017/supply/capri_level_ratio.csv; build_intensity_q_2030: sources/intermediate/baseline_pmp/intensity_q_capri2030.csv, sources/intermediate/baseline_pmp/intensity_q_recipe2017.csv, sources/intermediate/baseline_pmp/intensity_q_recipe2030.csv |
 | 8 | build_livestock_units | build_capri_base: 2017/supply/base_areas.csv; build_capri_level_ratio: 2017/supply/capri_level_ratio.csv |
 | 8 | build_lownfeed_effects | build_capri_base: 2017/supply/base_areas.csv; build_capri_level_ratio: 2017/supply/capri_level_ratio.csv; build_feed_ration: 2017/feed/feed_ration_2017.csv |

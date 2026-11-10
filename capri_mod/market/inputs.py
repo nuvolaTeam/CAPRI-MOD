@@ -3,7 +3,7 @@ layer "data adapters").
 
 Every input of the market blocks is named here with its location in the data directory:
     <data_dir>/<base_year>/market/<file>   the market's inputs of the base year
-    <data_dir>/shared/<file>                cross-vintage mappings (CAPRI's sets)
+    <data_dir>/codes/<file>                 cross-vintage mappings (CAPRI's sets; capri_data/shared until 10 November 2026)
     <data_dir>/sources/<sub>/<file>         CAPRI exports used as inputs (to be moved to market/, see below)
 The data directory and base year are the model's (CAPRIModel(data_dir, base_year)); before 24 October 2026 the blocks
 read a fixed capri_data/2017 path next to the package, so another data directory or base year was ignored.
@@ -78,12 +78,14 @@ class MarketInputs:
 
     # -- locations -----------------------------------------------------------------------------------------------
     def path(self, name: str, where: str = "market") -> Path:
-        """where: "market" (the base year's market folder) or "shared". Not "sources/<sub>": the model reads no file
-        under capri_data/sources (refused since 3 November 2026)."""
+        """where: "market" (the base year's market folder; a file whose name carries another year in that year's,
+        capri_mod.data.inputs.year_of_file) or "codes". Not "sources/<sub>": the model reads no file under
+        capri_data/sources (refused since 3 November 2026)."""
+        from capri_mod.data.inputs import year_of_file
         if where == "market":
-            return self.root / self.base_year / "market" / name
-        if where == "shared":
-            return self.root / "shared" / name
+            return self.root / (year_of_file(name, self.base_year) or self.base_year) / "market" / name
+        if where == "codes":
+            return self.root / "codes" / name
         if where.startswith("sources/") or where == "sources":
             raise ValueError(f"{where!r}: the model reads no file under capri_data/sources (the builders' extracts of CAPRI's material, capri_data/sources/README.md); a builder writes what the model needs as an input (3 November 2026)")
         raise ValueError(f"unknown input location {where!r}")

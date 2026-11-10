@@ -52,7 +52,7 @@ def _source_folder(rel):
 #: CAPRI's folders under sources (every other folder): CAPRI's code, data (dat), CAPREG, COCO, CAPMOD results
 SOURCE_DEFAULT = "CAPRI"
 #: tables kept by hand, with a source per row, read as declared (KNOWN_ISSUES K101)
-DECLARED = {"capri_data/shared/capri_member_state_codes.csv", "capri_data/shared/model_parameters.csv",
+DECLARED = {"capri_data/codes/capri_member_state_codes.csv", "capri_data/codes/model_parameters.csv",
             "capri_data/codes/model_units.csv", "capri_data/codes/model_trade_regions.csv",
             "capri_data/codes/model_market_regions.csv",
             "capri_data/codes/model_activity_classes.csv", "capri_data/codes/model_land_types.csv",
@@ -96,7 +96,7 @@ NO_BUILDER_ORIGIN = {
     "capri_data/2017/environment/climate_zones.csv": "CAPRI",
     # CAPRI's NUTS version correspondence (build_general_set_structure.gms) with the pairs added and removed by hand in
     # October 2026 (the table's comment, 26_shared.sql); a JSON file until 31 October 2026
-    "capri_data/shared/nuts_version_correspondence.csv": "CAPRI",
+    "capri_data/codes/nuts_version_correspondence.csv": "CAPRI",
     "capri_data/sources/raw/capri/dat/sugar/p_SQuotas.parquet": "CAPRI",
     "capri_data/sources/raw/capri/dat/sugar/p_PPSQRenounce.parquet": "CAPRI",
     "capri_data/sources/raw/capri/dat/sugar/p_PPSQCBuyBack.parquet": "CAPRI",

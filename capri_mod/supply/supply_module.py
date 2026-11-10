@@ -61,12 +61,12 @@ FIXED_ACTIVITIES = tuple(a for a, r in ACTIVITY_CLASSES.items() if r["fixed"] ==
 # (the level: the setting supply.absent_level)
 
 # CAPRI's p_OverFertMarkUp and p_fertEffCor (envind/ghgMiti.gms) and the supply's other parameters are read where they
-# are used, through the run's inputs (param(): <data_dir>/shared/model_parameters.csv; refactor stage 3, N1)
+# are used, through the run's inputs (param(): <data_dir>/codes/model_parameters.csv; refactor stage 3, N1)
 
 
 def overfert_factor(region: str):
     """CAPRI's over-fertilisation factor x = v_cropNutNeedMultFact(ru, NITF, "T") for a model
-    region (capri_data/2017/environment/crop_nut_need_mult_fact_2030.csv, built by
+    region (capri_data/2030/environment/crop_nut_need_mult_fact_2030.csv, built by
     tools/build/build_overfert_factors.py from CAPRI's priFertDist results). Every unit of the model has one
     (CAPRI's limits on the fertiliser technologies, Tot_MitFert_ and the regional maximum shares, need it): a missing
     file or region is an error (K74, 29 October 2026; before, the limits were dropped with a warning, a fallback no

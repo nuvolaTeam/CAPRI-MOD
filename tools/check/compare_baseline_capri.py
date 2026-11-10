@@ -16,7 +16,7 @@ Compared, EU27, model baseline of a run saved by tools/run/run_f2f_2030.py again
                                             calibration point), so the block compares it with CAPRI's own marketed
                                             production instead: the sum over the EU's member states of
                                             DATA(ms, "Prod", product, "CAL") of sim_ini_21730
-                                            (capri_data/2017/market/market_prod_grof_2030.csv, prod_kt)
+                                            (capri_data/2030/market/market_prod_grof_2030.csv, prod_kt)
   market domestic use (1000 t)              GROF + IMPT - EXPT: the model's market works with gross production, so
                                             its use holds CAPRI's on-farm seed and losses (SEDF, LOSF) besides
                                             CAPRI's market use DOMM (HCOM + FEDM + SEDM + INDM + PRCM + BIOF + LOSM;
@@ -71,11 +71,11 @@ def capri_mode(o) -> bool:
 
 def capri_marketed_production():
     """CAPRI's marketed production at the 2030 calibration point, EU27 (the member states of
-    capri_data/shared/eu_market_blocks.csv), per CAPRI market product, kt."""
+    capri_data/codes/eu_market_blocks.csv), per CAPRI market product, kt."""
     import csv
     from capri_mod.data.definitions import EU_MS_BLOCK
     out = {}
-    with open(ROOT / "capri_data" / "2017" / "market" / "market_prod_grof_2030.csv", newline="") as fh:
+    with open(ROOT / "capri_data" / "2030" / "market" / "market_prod_grof_2030.csv", newline="") as fh:
         for r in csv.DictReader(fh):
             if r["capri_ms"] in EU_MS_BLOCK:
                 out[r["product"]] = out.get(r["product"], 0.0) + float(r["prod_kt"])

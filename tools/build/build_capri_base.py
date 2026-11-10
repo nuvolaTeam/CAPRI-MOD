@@ -26,7 +26,7 @@ version ran alongside a new one.
 How regions map
 ---------------
 Since 27 October 2026 the model's regions are CAPRI's regional units under CAPRI's own codes
-(capri_data/shared/regional_units.csv, tools/build/build_regional_units.py): every region takes its own
+(capri_data/codes/regional_units.csv, tools/build/build_regional_units.py): every region takes its own
 CAPRI row. Until then the model had 248 NUTS-2016 regions, matched to CAPRI's codes by renames, merges,
 splits by Eurostat cattle numbers (Denmark, Lithuania, Slovenia, Croatia, Saxony, ...), Ireland's 2016
 boundary shares, Norway's pooled regions and crop-specific splits from CAPREG's p_REGIO; all of that is gone
@@ -131,8 +131,8 @@ def build_spec(capri: dict, regions) -> dict:
 
 
 def units() -> list:
-    """The model's regions: CAPRI's regional units (shared/regional_units.csv)."""
-    with open(_ROOT / "capri_data" / "shared" / "regional_units.csv", newline="") as f:
+    """The model's regions: CAPRI's regional units (codes/regional_units.csv)."""
+    with open(_ROOT / "capri_data" / "codes" / "regional_units.csv", newline="") as f:
         return [r["region"] for r in csv.DictReader(f)]
 
 

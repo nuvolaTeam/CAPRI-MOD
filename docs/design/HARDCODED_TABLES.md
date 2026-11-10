@@ -90,7 +90,7 @@ On 30 October 2026 (branch region-decl):
    - build_code_lists then checks the tables instead of writing them from the literals.
 3. **H3, CAPRI's sets.** The tables that mirror a CAPRI set are read from that set. The run cannot read
    capri_reference (it is not committed), so a builder extracts the sets the model uses from CAPRI's instantiation
-   into capri_data/shared/sets/, as tools/build/build_captrd_sets.py does for CAPTRD.
+   into capri_data/codes/sets/, as tools/build/build_captrd_sets.py does for CAPTRD.
 4. **H4, classifiers in logic.** A single code used as a classifier becomes a set read from data. A code named in an
    equation about that code stays.
 

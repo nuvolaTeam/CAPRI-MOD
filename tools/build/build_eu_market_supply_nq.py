@@ -28,7 +28,7 @@ WHEA, SUGA, OLIO, POUM, RICE and TWIN (0.8% of their absolute sum).
 Sources: CAPRI's NQ supply Hessian at the calibration point (elas_2_1730defaulta.csv: p_hessNQSupp at CAL), the
 member states' producer prices and production there (data_market_1730defaulta.csv: Data_CAL PPRI, PROD at CAL) and
 the 2030 price of the non-agricultural good (markmarket_greendeal_1730et_base_1717.txt: PPRI INPE 2030); the member
-states: CAPRI's EU trade blocks (shared/eu_market_blocks.csv); the codes: codes/model_commodities.csv.
+states: CAPRI's EU trade blocks (codes/eu_market_blocks.csv); the codes: codes/model_commodities.csv.
 
 Output:
   capri_data/2017/market/eu_market_supply_nq.csv    ms, x, y, capri_x, capri_y, h, ppri_y, inpe, h_ratio
@@ -50,7 +50,7 @@ sys.path.insert(0, str(ROOT))
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build")]
 from capri_mod.csvio import read_csv, to_csv  # noqa: E402
 from _capri_nq import read_supply_hessian  # noqa: E402
-from _model_regions import EU_MS  # noqa: E402  (shared/eu_market_blocks.csv)
+from _model_regions import EU_MS  # noqa: E402  (codes/eu_market_blocks.csv)
 from build_noneu_market_supply_nq import ELAS, DATA, DUMP, num, read_param  # noqa: E402
 
 OUT = ROOT / "capri_data" / "2017" / "market" / "eu_market_supply_nq.csv"

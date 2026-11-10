@@ -1,6 +1,6 @@
 """CAPRI's own 2030 reference as the projection's trajectory (Sprint 9p): the scenario folder
 capri_data/scenarios/capri_ref_2030 (settings.toml, growth.csv, regional.csv; capri_mod/projection/scenario_io.py;
-capri_data/trajectories/capri_ref_2030.json until 31 October 2026).
+capri_data/2030/capri_ref_2030.json until 31 October 2026).
 
 CAPRI compares its Green Deal scenarios with its 2030 Green Deal baseline (star 3.0: `res_2_1730greendeal_refdefaulta`,
 CAPMOD's simulation of the reference policy refpol_endotech_all_sup from its calibration run
@@ -42,7 +42,7 @@ OUT = ROOT / "capri_data" / "scenarios" / "capri_ref_2030"
 REF = BASELINE_REF
 KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "capri_ref_levl_yild_2030_2017.parquet"
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
-from _model_regions import FALLBACK_UNITS, UNITS  # noqa: E402  (capri_data/shared/regional_units.csv)
+from _model_regions import FALLBACK_UNITS, UNITS  # noqa: E402  (capri_data/codes/regional_units.csv)
 #: the first two letters of the model's regional units (CAPRI's codes: BL, IR, EL, NO ...): the countries whose 2030
 #: reference rows are kept. A set named EU27 until 30 October 2026, which held Norway (HARDCODED_TABLES.md)
 SUPPLY_PREFIXES = frozenset(u[:2] for u in UNITS)

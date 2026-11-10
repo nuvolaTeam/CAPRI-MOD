@@ -62,7 +62,7 @@ branch manifest-sql at HEAD dae44fa (the checkout). Line numbers are those of th
 Sources read: capri_mod/supply/state.py, capri_mod/market/state.py, docs/design/STAGE3B_PLAN.md,
 docs/design/SUPPLY_STATE_INVENTORY.md, docs/design/ARCHITECTURE_REFACTOR.md §3, docs/design/N6_CODE_TABLES.md,
 docs/design/HARDCODED_TABLES.md, capri_mod/environmental/*.py, capri_mod/model.py, capri_mod/coupling/*.py,
-capri_mod/units.py, capri_mod/settings/__init__.py (the `setting` descriptor), capri_data/shared/model_parameters.csv,
+capri_mod/units.py, capri_mod/settings/__init__.py (the `setting` descriptor), capri_data/codes/model_parameters.csv,
 capri_mod/settings/defaults.toml, capri_data/schema/03_code_data.sql and 04_code_data_status.sql, and the readers in
 capri_mod/supply, capri_mod/projection, capri_mod/tests and tools.
 

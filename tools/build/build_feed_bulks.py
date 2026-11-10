@@ -31,7 +31,7 @@ Outputs (capri_data/2017/market/)
   feed_bulks_eu_share.csv   commodity, feed_kt, use_kt, share  (EU27 2030 reference: FEDM / (HCOM + FEDM + INDM
                             + BIOF + LOSM + PRCM) of the product group, the part of EU use that is feed;
                             the dairy products' feed is the dairy block's FMIL, not listed)
-  capri_data/2017/feed/feed_cereal_mix_2030.csv  cereal, fedm_kt  (EU27 FCER feed per cereal with a model producer
+  capri_data/2030/feed/feed_cereal_mix_2030.csv  cereal, fedm_kt  (EU27 FCER feed per cereal with a model producer
                             price; replaces a hand-entered table that had rye and oats inside OCER)
 
     python tools/build/build_feed_bulks.py [--dump capri_sources/exports/markmarket_greendeal_1730et_base_1717.txt]
@@ -89,7 +89,7 @@ GROUPS = {"SWHE": ("SWHE", "DWHE"), "CORN": ("MAIZ",), "OCER": ("OCER",), "RYEM"
           "PORK": ("PORK",), "BEEF": ("BEEF",), "TAGR": ("TAGR",), "TABO": ("TABO",), "TEXT": ("TEXT",),
           "OTHO": ("OTHO",), "SFIS": ("SFIS",), "FFIS": ("FFIS",), "OAQU": ("OAQU",)}
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from _model_regions import EU_MS as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+from _model_regions import EU_MS as _EU_FROM_DATA  # noqa: E402  (capri_data/codes/eu_market_blocks.csv)
 EU_MS = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 from _model_regions import UNITS as _UNITS, national_code as _nat_code  # noqa: E402
 #: the supply-model countries outside the EU (CAPRI's RMSSUP outside it), Norway first as before
@@ -211,7 +211,7 @@ def main():
     # the model has no producer price for it (0.2% of FCER).
     mix = (df[(df.bulk == "FCER") & df.commodity.isin(FEED_CEREAL_MIX)].groupby("commodity")["feed_kt"].sum()
            .reindex(FEED_CEREAL_MIX))
-    mix.rename("fedm_kt").rename_axis("cereal").to_csv(ROOT / "capri_data" / "2017" / "feed" / "feed_cereal_mix_2030.csv")
+    mix.rename("fedm_kt").rename_axis("cereal").to_csv(ROOT / "capri_data" / "2030" / "feed" / "feed_cereal_mix_2030.csv")
     print("feed_cereal_mix_2030.csv:", mix.to_dict())
     worst.sort(reverse=True)
     print(f"feed_bulks_eu.csv: {len(df)} rows, {df.ms.nunique()} member states; rho {rho}")

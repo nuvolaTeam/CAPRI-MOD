@@ -9,14 +9,14 @@ from capri_mod.csvio import read_csv
 
 def test_the_manifest_records_the_inputs_read_with_their_hash(tmp_path):
     root = run_manifest.ROOT
-    f = root / "capri_data" / "shared" / "rms_to_rm.csv"
+    f = root / "capri_data" / "codes" / "rms_to_rm.csv"
     run_manifest.start()
     read_csv(f)
     (root / "capri_data" / "2017" / "feed" / "fodder_balance_2017.csv").read_text()   # Path.read_text: Python's open too
     out = tmp_path / "x.csv"
     pd.DataFrame({"a": [1]}).to_csv(out)                                   # a write is not an input
     m = run_manifest.finish()
-    rel = "capri_data/shared/rms_to_rm.csv"
+    rel = "capri_data/codes/rms_to_rm.csv"
     assert rel in m["inputs"]
     assert m["inputs"][rel]["sha256"] == hashlib.sha256(f.read_bytes()).hexdigest()
     assert "capri_data/2017/feed/fodder_balance_2017.csv" in m["inputs"]

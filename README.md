@@ -383,7 +383,7 @@ docker run --rm -v "$PWD/runs:/runs" capri-mod \
 
 **Parameters.** Every constant the model's economics and accounting rest on - CAPRI's parameters, IPCC factors as
 CAPRI uses them, JRC121368's assumptions and the few model settings that are not CAPRI data - is a row of
-`capri_data/shared/model_parameters.csv` (value, unit, kind, source, module), read through `capri_mod/params.py`.
+`capri_data/codes/model_parameters.csv` (value, unit, kind, source, module), read through `capri_mod/params.py`.
 Change a value there for a sensitivity run; scenario settings stay in the scenario definitions, numerical
 tolerances in the code. A test keeps file and code in step.
 
@@ -909,7 +909,7 @@ Arguments left at None take the run's settings (§7.6).
 Every run setting (switches, tolerances, iteration limits, algorithm choices) is in one file,
 `capri_mod/settings/defaults.toml`, in the sections run, outer_loop, supply, fertiliser, market, young_animals,
 environment, projection, endotech, diagnostics, captrd and pipeline. Each is commented with what it does and CAPRI's
-equivalent. Sourced economic parameters are not settings: they are in `capri_data/shared/model_parameters.csv`.
+equivalent. Sourced economic parameters are not settings: they are in `capri_data/codes/model_parameters.csv`.
 
 ```python
 from capri_mod import settings
@@ -1486,7 +1486,7 @@ step rather than being entangled in a single 2030 number.
 
 Three trajectories ship, each a scenario folder under `capri_data/scenarios/` (`settings.toml` with the name, source,
 vintage, years and provenance; `growth.csv` and `regional.csv` with the factors; `capri_mod/projection/scenario_io.py`;
-JSON files in `capri_data/trajectories/` until 31 October 2026): `capri_ref_2030` (default in
+JSON files in `capri_data/2030/` until 31 October 2026): `capri_ref_2030` (default in
 `tools/run/run_f2f_2030.py`) — CAPRI star 3.0's own 2030 reference (CAPMOD's reference run over CAPRI's 2017 results:
 levels, yields and land types per region; `tools/build/build_trajectory_capri_ref.py`), the point CAPRI's own
 scenarios start from; `captrd_2030` — CAPRI's captrd trend results, the input of CAPRI's baseline calibration; and
@@ -1582,7 +1582,7 @@ with an Armington premium on the world price.
 
 Since 27 October 2026 the model's regions are CAPRI's regional units, the units CAPRI solves one supply model for
 (RU(SRNUTS2) $ MAP_RR, capmod/define_regional_sets.gms l. 230): 221 for EU27 + Norway (215 + 6), under CAPRI's
-8-character codes (DE110000, FR240000, BL400000, DK000000; capri_data/shared/regional_units.csv,
+8-character codes (DE110000, FR240000, BL400000, DK000000; capri_data/codes/regional_units.csv,
 tools/build/build_regional_units.py). Every CAPRI file is read without a translation, and every region carries its own
 CAPRI data. The units follow CAPRI's own NUTS vintages (France's 22 regions, Italy's numeric codes, Poland's 16, Ireland's
 two); Denmark, Estonia, Lithuania, Latvia, Slovenia, Cyprus, Malta and Croatia are one unit each, as in CAPRI. The UK,
@@ -1592,13 +1592,13 @@ Until then the model had 248 NUTS-2016 regions, 13 of them empty, mapped to CAPR
 NUTS splits made on proxies (cattle shares, Ireland's 2016 boundary shares, Norway's pooled regions); the rebuild and
 every difference it made are in docs/design/REGIONAL_UNITS_REBUILD_LOG.md. Results on current NUTS regions are a
 reporting step, not regional detail of their own: `capri_mod/nuts_reporting.to_nuts2024` maps the units to NUTS 2024
-(capri_data/shared/capri_units_nuts2024.csv: the units through CAPRI's NUTS 2016 groups and Eurostat's 2016 -> 2021 ->
+(capri_data/codes/capri_units_nuts2024.csv: the units through CAPRI's NUTS 2016 groups and Eurostat's 2016 -> 2021 ->
 2024 changes; extensive values split by Eurostat UAA within each connected group, intensive values weighted by a
 basis).
 
 ### 10.5 Inputs traced to a CAPRI source
 
-The parameters of `capri_data/shared/model_parameters.csv` each carry their source (CAPRI, IPCC, JRC121368, literature
+The parameters of `capri_data/codes/model_parameters.csv` each carry their source (CAPRI, IPCC, JRC121368, literature
 or legal), the feed requirements are CAPRI's (DATA2) and the world prices CAPRI's market data (p_dataMarket, World,
 PMRK). Every builder-written input is reproduced by its builder from CAPRI's files (the data pipeline's rebuild from
 blank, 29 October 2026); the last inputs without a builder, the ten livestock rows of `producer_prices.csv` of

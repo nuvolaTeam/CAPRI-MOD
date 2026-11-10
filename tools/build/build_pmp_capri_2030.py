@@ -29,8 +29,8 @@ exported from the project lead's CAPRI 2030 baseline calibration); CAPRI 2030 le
 baseline the model's trajectory is built from (res_2_1730greendeal_refdefaulta, tools/lib/paths.BASELINE_REF): with
 the model's base at those levels, Q = H there, CAPRI's own curvature (its calibration run refpol_endotech_all_ini until
 9 November 2026, when the base moved to the Green Deal baseline).
-Outputs: capri_data/2017/supply/pmp_capri_2030_mix.csv (S1's mix columns, mix_terms; the default run only) and
-capri_data/2017/supply/pmp_capri_2030.csv (region, act_i, act_j, g, x_i, x_j, capri_regions); g in the
+Outputs: capri_data/2030/supply/pmp_capri_2030_mix.csv (S1's mix columns, mix_terms; the default run only) and
+capri_data/2030/supply/pmp_capri_2030.csv (region, act_i, act_j, g, x_i, x_j, capri_regions); g in the
 model's 2017 money: CAPRI's 2030 terms over CAPRI's inflation to 2030 (tools/lib/_money.deflator, the deflator the
 2030 prices take; KNOWN_ISSUES K108, 31 October 2026: before, in CAPRI's 2030 money)
 
@@ -53,12 +53,12 @@ from _sources_io import read_source, source_records, write_source  # noqa: E402 
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
-OUT = ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030.csv"
+OUT = ROOT / "capri_data" / "2030" / "supply" / "pmp_capri_2030.csv"
 REF = BASELINE_REF
 #: the mix columns' PMP terms (S1): g_xx_extra (Q_XX - c) X^2 to add to the crop's diagonal, g_xz and g_zz, per model
 #: region and crop with both technologies, in the convention of OUT (g = Q x X^2 at CAPRI's 2030 level x, the model's
 #: 2017 money)
-OUT_MIX = ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030_mix.csv"
+OUT_MIX = ROOT / "capri_data" / "2030" / "supply" / "pmp_capri_2030_mix.csv"
 
 #: CAPRI's EPRD_TO_GRP (gams/sets.gms l. 2918) and group order (storage of p_pmpQuadPact)
 CAPRI_GRP = {"SWHE": "CERE", "DWHE": "CERE", "RYEM": "CERE", "BARL": "CERE", "OATS": "CERE",
@@ -171,7 +171,7 @@ def main() -> None:
     techn = read_source(ap_t)
     pact = read_source(Path(str(ap_t).replace("_quad_techn", "_quad_pact")))
     lev = ref_levels(a.ref) if a.year == 2030 else levels_2017_dumps(set(CAPRI_TO_MODEL))
-    OUT = a.out or (ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030.csv")
+    OUT = a.out or (ROOT / "capri_data" / "2030" / "supply" / "pmp_capri_2030.csv")
     regions = mr.model_regions()
     code_to_group, groups = mr.capri_groups(regions)
     covered = {r for _, (_, rs) in groups.items() for r in rs}

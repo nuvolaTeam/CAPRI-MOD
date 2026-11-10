@@ -4,9 +4,14 @@ Status: proposed 5 November 2026 and decided by the project lead 5-6 November 20
 done 6 November 2026 for capri_data/sources: its 121 files (and the sugar folder's README) under sources/raw and
 sources/intermediate, every content unchanged
 (reproduce_builders: 380 of 381 files rebuilt identical, the one difference K119, also on dev before the move; the
-mini-EU Farm-to-Fork bit-identical outside the metadata). Still to do: the table's 13 moves of model
-inputs (shared/ to codes/, trajectories/ to 2030/; they change the model's input paths, so they go with step (b)),
-step (b), the splits that change a file's content, and step (c), Parquet for capri_data/sources. The plan's step before CAPTRD-MOD ("the data layout by role",
+mini-EU Farm-to-Fork bit-identical outside the metadata). Step (c), Parquet for capri_data/sources, done 8 November
+2026. Step (b), 10 November 2026: the table's 13 moves of model inputs (shared/ to codes/, trajectories/ to 2030/) and
+the 43 files of 2017/ whose name carries 2030 (CAPRI's 2030 calibration point: PMP terms, land market and rents,
+fertiliser priors, the 2030 market, CAP ceilings ...) to 2030/<module>/, contents unchanged; the model finds a file whose
+name carries another year than the base year in that year's folder (capri_mod.data.inputs.year_of_file, used by the
+data adapters and loaders.resolve_data_file), the builders write there. Left of step (b): the 2030 columns inside five
+2017 files (cattle_intensity, dairy_intensity, cover_crops, labour_coef, set_aside_split: their "_2030" columns,
+taken at the 2030 market year) to 2030/ files of their own, with the readers that pick the columns. The plan's step before CAPTRD-MOD ("the data layout by role",
 VALIDATION_PLAN stage 2 item 3). Sections 1-2 describe the state before the move.
 
 ## 1. What is there today

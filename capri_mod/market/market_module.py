@@ -71,7 +71,7 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
 
     #: CAPRI's EU market structure: its two market regions A_EU_WEST and A_EU_EAST (gams/aggregation/defaultA.agg), the
     #: model's EU_WEST (EU-14) and EU_EAST (EU-13), each with its own market and Armington prices and bilateral trade
-    #: between them, the member states inside (capri_data/shared/eu_market_blocks.csv; definitions.EU_BLOCKS). The one
+    #: between them, the member states inside (capri_data/codes/eu_market_blocks.csv; definitions.EU_BLOCKS). The one
     #: EU27 region of before (market.eu_blocks = false) was removed on 3 November 2026 (the market's move onto CAPRI's
     #: regions, stage 2); "EU27" stays a reporting row, the sum of the two (bilateral_solve._with_eu_aggregate).
     EU_BLOCK_REGIONS = _defs.EU_BLOCKS
@@ -140,7 +140,7 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
     def _ms_block_map(self) -> Dict[str, str]:
         m = getattr(self, "_ms_block_cache", None)
         if m is None:
-            m = self._inp().csv("eu_market_blocks.csv", "shared").set_index("ms")["block"].astype(str).to_dict()
+            m = self._inp().csv("eu_market_blocks.csv", "codes").set_index("ms")["block"].astype(str).to_dict()
             self._ms_block_cache = m
         return m
 

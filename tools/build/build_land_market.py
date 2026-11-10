@@ -194,7 +194,7 @@ def main() -> None:
         v_["min_eigenvalue"] = float(v_["min_eigenvalue"]) / money
     sys.path.insert(0, str(_ROOT))
     from capri_mod.data import land_market_io as io
-    dest = _ROOT / "capri_data" / "2017" / "supply" / f"land_market_{args.year}"
+    dest = _ROOT / "capri_data" / str(args.year) / "supply" / f"land_market_{args.year}"
     src_txt = ("CAPRI res_17 LEVL of land types; pmppar_17XX p_pmpQuadLandTypes" if args.year == 2017 else
                "CAPRI 2030 reference LEVL of land types (res_2_1730greendeal_refdefaulta, the 2030 Green Deal baseline); "
                "pmppar_21730XX p_pmpQuadLandTypes of the 2030 baseline calibration (tools/build/build_pmp_2030.py)")

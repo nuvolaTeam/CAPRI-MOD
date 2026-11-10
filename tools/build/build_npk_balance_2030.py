@@ -17,7 +17,7 @@ with need = mineral - loss + manure - unavailable + residues (pooled or own) - u
 (nutNed_rest ~ 1e-15). This builder checks that identity, and the pools: sum of manure flows = EXCRET - GASANI -
 RUNANI - MTRADE (ManureNPK_, manExportOrAppl_), sum of mineral flows = NETF (fertDistMine_).
 
-Outputs (capri_data/2017/environment/):
+Outputs (capri_data/2030/environment/; the two livestock_manure_*_coef.csv, 2017 values, in capri_data/2017/environment/):
   npk_crop_coefs_2030.csv   capri_region, model_crop, nutrient (N, P, K), need_kg_ha (the crop's own NITF/PHOF/POTF),
                             pool_kg_ha (contribution to the
                             arable residue pool, fertDistCres_; non-permanent crops), own_kg_ha (permanent crops' own
@@ -59,7 +59,8 @@ from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the 
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-ENV = ROOT / "capri_data" / "2017" / "environment"
+ENV = ROOT / "capri_data" / "2030" / "environment"
+ENV_BASE = ROOT / "capri_data" / "2017" / "environment"   # the files without a year in their name (DATA_LAYOUT (b))
 SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "npk_dataout_2030.parquet"
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from build_fert_dist_priors import GROUP, PERM_NGRP, NGRPS, ngrp  # noqa: E402
@@ -304,9 +305,10 @@ def main():
     # manure P and K per model head (CAPRI 2017 regional totals / the model's herds)
     if a.capreg_dir.exists():
         import build_livestock_output_coef as B
+        out_base = ENV_BASE if a.out_dir == ENV else out
         for item, name in (("MANP", "livestock_manure_p_coef.csv"), ("MANK", "livestock_manure_k_coef.csv")):
             t = B.build(a.capreg_dir, item)
-            t.to_csv(out / name)
+            t.to_csv(out_base / name)
             print(f"{name}: {t.shape[0]} regions x {t.shape[1]} animals")
     else:
         print(f"CAPREG dumps not at {a.capreg_dir}: manure P/K per head not rebuilt")

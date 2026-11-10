@@ -101,7 +101,7 @@ def build(fao: Path = FAO, dumps: Path = DUMPS):
     world, olio = fao_market(fao)
     with open(CODES, newline="", encoding="utf-8") as fh:
         capri_code = {r["code"]: r["capri_code"] for r in csv.DictReader(fh)}
-    # the EU's member states (shared/eu_market_blocks.csv through tools/lib/_model_regions.EU_MS; SUPPLY_NONEU_DESIGN
+    # the EU's member states (codes/eu_market_blocks.csv through tools/lib/_model_regions.EU_MS; SUPPLY_NONEU_DESIGN
     # section 2, issue 4: until 31 October 2026 the member states of regional_units.csv but Norway, which would take in
     # the UK's, Turkey's and the Western Balkans' units)
     sys.path.insert(0, str(ROOT / "tools" / "lib"))

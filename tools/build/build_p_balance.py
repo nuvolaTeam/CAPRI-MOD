@@ -27,7 +27,7 @@ Data written
   capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_pbalance.parquet  the same for --ini, plus per elementary animal activity
       LEVL, MANP, MANN, RUNANI (kg per head, RUNANI/MANN = CAPRI's v_emiLoss(N, RunTot)); validation only
       (capri_mod/tests/test_p_balance.py)
-  capri_data/2017/environment/p_balance_crop_coefs_2030.csv  capri_region, model_crop, levl_kha, pret_kg_ha, pcrd_kg_ha:
+  capri_data/2030/environment/p_balance_crop_coefs_2030.csv  capri_region, model_crop, levl_kha, pret_kg_ha, pcrd_kg_ha:
       CAPRI's P2O5 retention (removal, EXPPRD) and crop residue output (CRESID) per ha of the model's crops (CAPRI crops
       pooled into model crops by area as tools/build/build_npk_balance_2030.py does: CORN = MAIZ, WINE = TWIN; GRAE and
       GRAI the model's own since S2, 7 November 2026)
@@ -55,7 +55,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC_DIR = ROOT / "capri_data" / "sources" / "intermediate" / "capri_res"
 SRC_REF = SRC_DIR / "gd2030_ref_pbalance.parquet"
 SRC_INI = SRC_DIR / "gd2030_endotech_ini_pbalance.parquet"
-OUT = ROOT / "capri_data" / "2017" / "environment" / "p_balance_crop_coefs_2030.csv"
+OUT = ROOT / "capri_data" / "2030" / "environment" / "p_balance_crop_coefs_2030.csv"
 UP = EXPORTS
 
 ITEMS = ("EXCRET", "MTRADE", "MINFER", "NETF", "CRESID", "EXPPRD", "RUNANI", "IMPORT", "SURTOT", "SURSOI")

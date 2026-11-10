@@ -8,7 +8,7 @@ food and feed use) are split between the blocks with this table: per member stat
 PROD, human consumption HCON, feed FEED, processing PROC, biofuel processing BIOF at CAPRI's 2030 calibration point.
 Data with member-state detail (feed bulks, dairy blocks, biofuel feedstocks, GL demand, supply models) need no split.
 
-Output: capri_data/2017/market/eu_ms_balance_2030.csv  ms, block, product, commodity, prod_kt, hcon_kt, feed_kt,
+Output: capri_data/2030/market/eu_ms_balance_2030.csv  ms, block, product, commodity, prod_kt, hcon_kt, feed_kt,
         proc_kt, biof_kt   (commodity: the model's market commodity, empty where it has none)
 
     python tools/build/build_eu_ms_balance.py
@@ -26,7 +26,7 @@ from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repositor
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DATA = EXPORTS / "data_market_1730defaulta.csv"
-OUT = ROOT / "capri_data" / "2017" / "market" / "eu_ms_balance_2030.csv"
+OUT = ROOT / "capri_data" / "2030" / "market" / "eu_ms_balance_2030.csv"
 ITEMS = ("PROD", "HCON", "FEED", "PROC", "BIOF")
 
 
@@ -34,7 +34,7 @@ def main() -> None:
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import build_bilateral_market as BM
     g2m = {g: m for m, gs in BM.MODEL.items() for g in gs}
-    bm = _read_csv(ROOT / "capri_data" / "shared" / "eu_market_blocks.csv")
+    bm = _read_csv(ROOT / "capri_data" / "codes" / "eu_market_blocks.csv")
     blocks = bm.set_index("ms")["block"].to_dict()                      # CAPRI's member states of the two blocks
     pat = re.compile(r"^'([A-Z]{2}000000)'\.'(" + "|".join(ITEMS) + r")'\.'([A-Za-z]+)'\.'CAL'\s+([-\d.Ee+]+)")
     v = defaultdict(lambda: defaultdict(float))

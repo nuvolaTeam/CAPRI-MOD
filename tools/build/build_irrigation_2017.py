@@ -72,7 +72,7 @@ def records(name):
 
 
 def main():
-    units = list(read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv").region)
+    units = list(read_csv(ROOT / "capri_data" / "codes" / "regional_units.csv").region)
     sh = records("irrishare_p_irriShare.parquet")
     sh = sh[(sh["item"] == "IRR2") & (sh.type == "IRSH")].astype({"year": int, "value": float})
     sh = sh[sh.year <= BASE_YEAR]

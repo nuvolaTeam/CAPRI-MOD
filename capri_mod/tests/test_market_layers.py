@@ -29,7 +29,7 @@ def test_missing_input_names_its_builder(tmp_path):
     with pytest.raises(FileNotFoundError, match="build_gl_demand.py"):
         inp.csv("gl_demand_goods.csv")
     assert inp.csv("gl_demand_goods.csv", required=False) is None
-    assert inp.path("rms_to_rm.csv", "shared") == tmp_path / "shared" / "rms_to_rm.csv"
+    assert inp.path("rms_to_rm.csv", "codes") == tmp_path / "codes" / "rms_to_rm.csv"
 
 
 def test_model_does_not_read_delta_tables():

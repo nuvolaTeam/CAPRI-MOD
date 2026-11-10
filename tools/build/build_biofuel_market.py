@@ -83,7 +83,7 @@ ROOT = Path(__file__).resolve().parents[2]
 # the kept extracts, in the folders of the CAPRI dump and elasticity files they come from (DATA_LAYOUT.md)
 DUMP_DIR = {"2017": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "market_base_1717", "2030": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717"}
 ELAS_DIR = {"2017": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1717defaulta", "2030": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1730defaulta"}
-DEST = ROOT / "capri_data" / "2017" / "market"
+DEST = {y: ROOT / "capri_data" / y / "market" for y in ("2017", "2030")}   # by market year (DATA_LAYOUT step (b))
 FUEL = {"BIOE": ("WHEA", "BARL", "MAIZ", "RYEM", "OATS", "OCER", "SUGA", "TWIN"),
         "BIOD": ("RAPO", "SUNO", "SOYO", "PLMO", "OTHO")}
 FOSSIL = {"BIOE": "GASL", "BIOD": "DISL"}                                    # arm_sets.gms fuelMatch
@@ -109,7 +109,7 @@ TRADE_BLOCKS = {"EU27yr19", "URUPAR", "WBA", "MER_OTH", "MED"}
 MORE_AGGREGATES = {"RW"}
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from _sources_io import read_source, write_source  # noqa: E402  (capri_data/sources as Parquet)
-from _model_regions import EU_MS as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+from _model_regions import EU_MS as _EU_FROM_DATA  # noqa: E402  (capri_data/codes/eu_market_blocks.csv)
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 EU_MS = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 
@@ -246,7 +246,7 @@ def main():
             x0[(ms, fuel)] = (X, mub)
             checks.append((ms, fuel, X, mub, v.get((ms, "BiofFeedCost", fuel))))
     fs = pd.DataFrame(frows)
-    fs.to_csv(DEST / f"biofuel_feedstock_{a.year}.csv", index=False)
+    fs.to_csv(DEST[a.year] / f"biofuel_feedstock_{a.year}.csv", index=False)
 
     eu = fs[fs.region == "EU27"]
     us = []
@@ -255,7 +255,7 @@ def main():
         use = sum(v.get(("EU27yr19", k, x), 0.0) for x in grp for k in ("HCOM", "FEDM", "INDM", "BIOF", "LOSM"))
         q = float(eu.loc[eu["commodity"] == c, "biof_kt"].sum())
         us.append({"commodity": c, "biof_kt": q, "use_kt": use, "share": q / use if use > 0 else 0.0})
-    pd.DataFrame(us).to_csv(DEST / f"biofuel_use_share_{a.year}.csv", index=False)
+    pd.DataFrame(us).to_csv(DEST[a.year] / f"biofuel_use_share_{a.year}.csv", index=False)
 
     # ---- biofuel supply and demand functions
     mrows = []
@@ -293,7 +293,7 @@ def main():
                        inpe=v.get((ms, "PPRI", "INPE"), 0.0))
             mrows.append(row)
     mk = pd.DataFrame(mrows)
-    mk.to_csv(DEST / f"biofuel_market_{a.year}.csv", index=False)
+    mk.to_csv(DEST[a.year] / f"biofuel_market_{a.year}.csv", index=False)
 
     print(f"biofuel_feedstock_{a.year}.csv: {len(fs)} rows, {fs.ms.nunique()} CAPRI regions")
     print(f"biofuel_market_{a.year}.csv: {len(mk)} rows; supply functions {int((mk.pr0 > 0).sum())}, "

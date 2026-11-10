@@ -129,7 +129,7 @@ def main() -> None:
     with open(ROOT / "capri_data" / "codes" / "capri" / "XX.csv", newline="") as f:
         xx = {r["code"] for r in csv.DictReader(f)}
     cal = {k: v for k, v in cal_all.items() if k in xx}
-    with open(ROOT / "capri_data" / "shared" / "rms_to_rm.csv", newline="") as f:
+    with open(ROOT / "capri_data" / "codes" / "rms_to_rm.csv", newline="") as f:
         rm_of = {r["rms"]: r["rm"] for r in csv.DictReader(f)}
     ctry = {r["region"][:2] for r in source_records(UNITS)}
     noneu = {r for r, m in rm_of.items() if m not in EU_RM}

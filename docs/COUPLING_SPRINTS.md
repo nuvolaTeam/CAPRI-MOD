@@ -247,7 +247,7 @@ indicators within 0.4 / 0.8 points. IPOPT not needed (docs/archive/PROTOTYPE_NI_
 
 ## Sprint 9t — one parameter file; land supply of combined CAPRI regions (October 2026: done, default)
 
-All constants of the economics and accounts in `capri_data/shared/model_parameters.csv` (55 rows with unit, kind,
+All constants of the economics and accounts in `capri_data/codes/model_parameters.csv` (55 rows with unit, kind,
 source; results identical). Combined CAPRI regions' land supply as the sum of their land owners' responses
 ((sum Q^-1)^-1) instead of an area-weighted matrix; Ireland's regions from their own shares of the NUTS-2013
 regions. IE05's nitrogen price then showed two branches and the run did not settle in 8 inner solves; 16 close it.
@@ -1093,7 +1093,7 @@ Brittany €288 → €226 per ha, grass €381 → €232).
 
 **Before.** The 2030 trajectory scaled yields and herds only: the baseline ran at 2017 prices and premiums.
 
-**Now** (`tools/build/build_price_trajectory_2030.py` → `capri_data/trajectories/capri_price_ratios_2030.csv`,
+**Now** (`tools/build/build_price_trajectory_2030.py` → `capri_data/2030/capri_price_ratios_2030.csv`,
 `capri_cap_premium_2030.csv`, `capri_livestock_premium_ratio_2030.csv`; applied by
 `capri_mod/projection/prices.py`, on in `tools/run/run_f2f_2030.py`, `--base-prices` to switch off). The model stays in
 2017 money: each product's CAPRI 2030/2017 unit-value ratio over the input index (median member state: pork 1.19,

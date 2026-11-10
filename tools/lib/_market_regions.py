@@ -5,7 +5,7 @@ market's data groups CAPRI's regions through this one step, read from data:
 
   capri_data/codes/capri/RM.csv          CAPRI's 45 market regions (set RM; tools/build/build_code_lists.py)
   capri_data/codes/capri/RMEU_to_RM.csv  CAPRI's two EU market blocks (RMEU_to_RM: EU_WEST A_EU_WEST, EU_EAST A_EU_EAST)
-  capri_data/shared/rms_to_rm.csv        each behavioural region's market region (RMS_TO_RM; build_code_lists.py)
+  capri_data/codes/rms_to_rm.csv        each behavioural region's market region (RMS_TO_RM; build_code_lists.py)
   capri_data/codes/model_market_regions.csv
                                          each market region's model region (declared): today 26 market regions are
                                          their own, the two EU blocks are the model's EU27, 17 are its ROW
@@ -52,7 +52,7 @@ def eu_blocks() -> dict:
 @lru_cache(maxsize=1)
 def rms_to_rm() -> dict:
     """CAPRI's behavioural regions and their market region (RMS_TO_RM)."""
-    return {r["rms"]: r["rm"] for r in _rows(ROOT / "capri_data" / "shared" / "rms_to_rm.csv")}
+    return {r["rms"]: r["rm"] for r in _rows(ROOT / "capri_data" / "codes" / "rms_to_rm.csv")}
 
 
 @lru_cache(maxsize=1)

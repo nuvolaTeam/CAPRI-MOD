@@ -78,7 +78,7 @@ def main():
     rate, acts, eps_ = parse(scen, sets)
     from capri_mod.data.definitions import CAPRI_TO_MODEL_ACTIVITY, CROPS, EU_MS_BLOCK
     model_acts = sorted({CAPRI_TO_MODEL_ACTIVITY.get(a, a) for a in acts} & set(CROPS))
-    units = read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv")
+    units = read_csv(ROOT / "capri_data" / "codes" / "regional_units.csv")
     eu = sorted(units.loc[units.capri_ms.isin(set(EU_MS_BLOCK)), "region"])
     df = pd.DataFrame([(r, a, rate) for r in eu for a in model_acts], columns=["region", "activity", "setr_pct"])
     OUT.parent.mkdir(parents=True, exist_ok=True)

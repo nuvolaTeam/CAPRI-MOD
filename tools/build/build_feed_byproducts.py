@@ -43,7 +43,7 @@ PARENTS = {"FPRI": {"SWHE": ("WHEA", "SWHE", "DWHE"), "BARL": ("BARL",), "CORN":
 def main():
     bal = json.load(open(ROOT / "capri_data" / "validation" / "capri_eu27_market_balance_2030_ref.json"))["products"]
     # the EU's production: the model's two EU market regions, EU_WEST and EU_EAST (tools/build/build_bilateral_market.py)
-    breg = _read_csv(MKT / "bilateral_regions_2030.csv")
+    breg = _read_csv(MKT.parents[1] / "2030" / "market" / "bilateral_regions_2030.csv")
     rows = []
     for rp, par in PARENTS.items():
         p0 = math.fsum(breg.loc[(breg.commodity == rp) & (breg.region.isin(["EU_WEST", "EU_EAST"])), "prod_kt"])

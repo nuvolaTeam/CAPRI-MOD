@@ -93,7 +93,7 @@ Done (18 October 2026), as an option (`MarketModule.eu_blocks`, run_f2f_2030.py 
 the Green Deal runs and the remaining items below are settled):
 - Data: tools/build_bilateral_market.py --eu-blocks keeps CAPRI's A_EU_WEST and A_EU_EAST (bilateral_*_<year>_eu2.csv;
   the extra-EU flows equal the one-region data; 2030 West-East flows, e.g. 15.0 Mt of maize from East to West);
-  capri_data/shared/eu_market_blocks.csv (member state -> block, defaultA.agg); tools/build_eu_ms_balance.py (CAPRI's
+  capri_data/codes/eu_market_blocks.csv (member state -> block, defaultA.agg); tools/build_eu_ms_balance.py (CAPRI's
   2030 member-state balance, used only to split the EU-level data that have no member-state detail: feed and
   biofuel shares of use, residual feed output, crushing share of seed use, dairy food and feed use).
 - Market: each block a region of the bilateral market with its own market and Armington prices; the EU's quotas

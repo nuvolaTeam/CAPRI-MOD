@@ -32,7 +32,7 @@ term, was removed on 27 October 2026.)
 2. Share term. CAPRI scales crop curvature by 1 - 0.2 sqrt(LEVL / arable total), so a crop with a large share of the
    region's arable land responds less. `share_term` (floor 0.1); CAPRI's
    elas = revenue / (LEVL x shareTerm x (pmpQuadTechn + pmpQuadPact)) rearranged gives the diagonal below. Constants
-   ELAS_HIGH, ELAS_CAP, SHARE_COEF in `capri_data/shared/model_parameters.csv`.
+   ELAS_HIGH, ELAS_CAP, SHARE_COEF in `capri_data/codes/model_parameters.csv`.
 3. Crop groups (`EPRD_TO_GRP`, `gams/sets.gms:2918`, the ESTNLP mapping): (SWHE, DWHE, RYEM, BARL, OATS) CERE;
    (MAIZ, OCER, PARI) CER2; (RAPE, SUNF, SOYA) OILS; (PULS, POTA, SUGB) OARA; (MAIF, ROOF, OFAR) FARA. The variant in
    `gams/capdis/sets.gms` uses another group set and is not used.

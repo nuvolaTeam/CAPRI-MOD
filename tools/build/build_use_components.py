@@ -31,7 +31,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA = EXPORTS / "data_market_1730defaulta.csv"
 OUT = ROOT / "capri_data" / "2017" / "market" / "use_components.csv"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/codes/eu_market_blocks.csv)
 EU = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 ITEMS = ("HCON", "FEED", "PROC", "BIOF", "ARM1")
 
@@ -46,7 +46,7 @@ def main() -> None:
     import build_bilateral_market as BM
     from _market_regions import model_region  # the market's grouping step (tools/lib/_market_regions.py)
     g2m = {g: m for m, gs in BM.MODEL.items() for g in gs}
-    rms_set = set(_read_csv(ROOT / "capri_data" / "shared" / "rms.csv")["rms"])
+    rms_set = set(_read_csv(ROOT / "capri_data" / "codes" / "rms.csv")["rms"])
     pat = re.compile(r"^'([^']*)'\.'(" + "|".join(ITEMS) + r")'\.'([A-Za-z]+)'\.'CAL'\s+(\S+)")
     v = defaultdict(float)
     for line in open(DATA, encoding="latin-1"):

@@ -4,7 +4,7 @@
     capri_data/2017/supply/mineral_n_price.csv   country, capri_code, eur_per_t_n
 
 eur_per_t_n = UVAG of NITF of the member state's national row (res_17<MS>.txt: '<MS>000000'.'UVAG'.'NITF'.'Y', EUR per
-t of N). Rows: the NUTS country prefixes of shared/capri_member_state_codes.csv whose CAPRI member state has a dump,
+t of N). Rows: the NUTS country prefixes of codes/capri_member_state_codes.csv whose CAPRI member state has a dump,
 ordered by CAPRI code; where a prefix equals its CAPRI code (EL) the alias (GR) is left out, otherwise every prefix of
 the code is a row (BE and LU for BL, IE for IR). Until 29 October 2026 the file had no builder (the same values
 rounded to 2 decimals).
@@ -25,7 +25,7 @@ OUT = ROOT / "capri_data" / "2017" / "supply" / "mineral_n_price.csv"
 
 
 def main(dump_dir: Path) -> None:
-    with open(ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv", newline="") as f:
+    with open(ROOT / "capri_data" / "codes" / "capri_member_state_codes.csv", newline="") as f:
         codes = [(r["nuts_prefix"], r["capri_ms"]) for r in csv.DictReader(f)]
     rows = []
     for ms in sorted({c for _, c in codes}):

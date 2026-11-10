@@ -60,7 +60,7 @@ l. 3275 [own check]; import prices per pair: impPrice_ l. 2849 (G3I, Armington t
 **What exists.**
 - The inventory: region-keyed files (MRI §2), code that depends on the region set (§3), result effects (§4), a staged
   plan (§5), decisions (§7).
-- CAPRI's sets as CSV in capri_reference/sets/simini_21730/; capri_data/shared/rms_to_rm.csv equals sim_ini's
+- CAPRI's sets as CSV in capri_reference/sets/simini_21730/; capri_data/codes/rms_to_rm.csv equals sim_ini's
   RMS_TO_RM (MRI header).
 - Extracts with the two EU regions for both years: capri_data/sources/market/bilateral_dataout_2017_eu2.csv.xz and
   _2030_eu2.csv.xz [own check]. The 2030 `_eu2` extract equals p_tradeFlows "CAL" over all 20,705 RM pairs (MRI §2.1).
@@ -675,7 +675,7 @@ fine-grained token checked the same day; the token is kept outside the repositor
 - The model's inputs are organised by role, not by a year in the folder name (with the renaming above, so paths change
   once): capri_data/<base_year>/ holds the base year's data only; capri_data/baselines/capri_ref_2030/ everything taken
   from CAPRI's 2030 reference run (on 4 November 2026 spread over 40 of the 216 files of capri_data/2017/, e.g. the
-  2030 PMP terms, market state, rents, N coefficients and CAP ceilings, over capri_data/trajectories/ and over
+  2030 PMP terms, market state, rents, N coefficients and CAP ceilings, over capri_data/2030/ and over
   capri_data/scenarios/capri_ref_2030/), a CAPTRD-MOD baseline as another package (baselines/captrd_2030/), the run
   choosing its baseline package; capri_data/scenarios/ the policy scenarios, and under scenarios/groups/ the data a
   scenario group shares, as CAPRI's pol_input files (the project lead, 4 November 2026: greendeal_group moves to

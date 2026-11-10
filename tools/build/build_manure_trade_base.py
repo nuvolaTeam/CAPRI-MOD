@@ -12,7 +12,7 @@ splits, merges, Ireland's several-to-several):
 so a split region gets its parent's share and rate, and trade between CAPRI regions of one group (Ireland: IR01 to
 IR02) stays in the group as gross flows.
 
-Replaces capri_data/2017/environment/manure_trade_2030.csv, which had been written without a builder from
+Replaces capri_data/2030/environment/manure_trade_2030.csv, which had been written without a builder from
 `res_2_1730greendeal_refdefaulta` by CAPRI code: its Romanian and Irish regions (CAPRI's older codes) were missing,
 so 155 kt of CAPRI's net trade (Romania 125, Ireland 30) was not in the model's balances.
 
@@ -33,7 +33,7 @@ from _sources_io import read_source, source_records, write_source  # noqa: E402 
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "capri_manure_trade_2030.parquet"
-DEST = ROOT / "capri_data" / "2017" / "environment" / "manure_trade_2030.csv"
+DEST = ROOT / "capri_data" / "2030" / "environment" / "manure_trade_2030.csv"
 
 
 def main():

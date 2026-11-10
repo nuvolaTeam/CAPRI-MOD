@@ -36,7 +36,7 @@ function stays at CAPRI's calibration point, as for the regions without supply m
 Sources: CAPRI's NQ supply Hessian at the calibration point (elas_2_1730defaulta.csv: p_hessNQSupp at CAL), the
 regions' producer prices and production there (data_market_1730defaulta.csv: Data_CAL PPRI, PROD at CAL), the 2030
 price of the non-agricultural good (markmarket_greendeal_1730et_base_1717.txt: PPRI INPE 2030), CAPRI's market
-regions (capri_data/shared/rms_to_rm.csv) and the model's trade regions (the market's grouping step,
+regions (capri_data/codes/rms_to_rm.csv) and the model's trade regions (the market's grouping step,
 tools/lib/_market_regions.py).
 
 Output: capri_data/2017/market/noneu_market_supply_nq.csv
@@ -68,7 +68,7 @@ UP = EXPORTS
 ELAS = UP / "elas_2_1730defaulta.csv"
 DATA = UP / "data_market_1730defaulta.csv"
 DUMP = UP / "markmarket_greendeal_1730et_base_1717.txt"
-RMS_TO_RM = ROOT / "capri_data" / "shared" / "rms_to_rm.csv"
+RMS_TO_RM = ROOT / "capri_data" / "codes" / "rms_to_rm.csv"
 UNITS = ROOT / "capri_data" / "sources" / "intermediate" / "capri_res" / "gd2030_endotech_ini_nbalance.parquet"
 OUT = ROOT / "capri_data" / "2017" / "market" / "noneu_market_supply_nq.csv"
 FEED_ENERGY = ROOT / "capri_data" / "2017" / "market" / "noneu_feed_energy.csv"

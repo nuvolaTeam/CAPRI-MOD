@@ -30,7 +30,7 @@ The splits' own curvature (q_low, q_high, q_z in dairy_intensity.csv, cattle_int
 
 Sources: capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.parquet (tools/build/build_pmp_2030.py); CAPRI 2030 levels LEVL of
 its 2030 Green Deal baseline res_2_1730greendeal_refdefaulta (tools/lib/paths.BASELINE_REF, the model's 2030 base;
-its calibration run refpol_endotech_all_ini until 9 November 2026). Output: capri_data/2017/supply/pmp_capri_2030_animals.csv
+its calibration run refpol_endotech_all_ini until 9 November 2026). Output: capri_data/2030/supply/pmp_capri_2030_animals.csv
 (region, animal, g, x_capri, level_ratio, capri_regions)
 
     python tools/build/build_animal_pmp_capri_2030.py [--ref FILE]
@@ -50,7 +50,7 @@ from _sources_io import read_source, write_source  # noqa: E402  (capri_data/sou
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_quad_techn_2030.parquet"
-OUT = ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030_animals.csv"
+OUT = ROOT / "capri_data" / "2030" / "supply" / "pmp_capri_2030_animals.csv"
 REF = BASELINE_REF
 #: model animal -> members; a tuple is an intensity pair whose split the model carries
 #: tuples: activities the model gives their own levels inside the animal (split columns), whose herd curvature is the
@@ -146,7 +146,7 @@ def main() -> None:
     for r in t.itertuples():
         Q[r.region][r.activity] = float(r.value)
     lev = ref_levels(a.ref) if a.year == 2030 else levels_2017_dumps(set(ACTS))
-    OUT = a.out or (ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030_animals.csv")
+    OUT = a.out or (ROOT / "capri_data" / "2030" / "supply" / "pmp_capri_2030_animals.csv")
     if a.splits and a.out is None:
         OUT = OUT.with_name(OUT.stem + "_members.csv")
     members_of = MEMBERS_SPLITS if a.splits else MEMBERS

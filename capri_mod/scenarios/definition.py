@@ -213,7 +213,7 @@ def tables(name: str, root: Optional[Path] = None) -> Dict[str, dict]:
     import csv
     from capri_mod.data.definitions import ALL_ACTIVITIES, MARKET_COMMODITIES, ALL_TRADE_REGIONS
     from capri_mod.data.inputs import current as _inputs
-    with open(_inputs().path("regional_units.csv", "shared"), newline="") as fh:
+    with open(_inputs().path("regional_units.csv", "codes"), newline="") as fh:
         units = {r["region"] for r in csv.DictReader(fh)}
     known = {"activity": set(ALL_ACTIVITIES), "commodity": set(MARKET_COMMODITIES)}
     folder, out = find(name, root), {}

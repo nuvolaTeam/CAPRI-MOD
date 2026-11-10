@@ -132,14 +132,14 @@ ALL_ACTIVITIES = CROPS + ANIMALS
 # ---------------------------------------------------------------------------
 # REGIONS: CAPRI's regional units of the EU27 and Norway, under CAPRI's 8-character codes (DE110000, FR240000, BL400000,
 # DK000000), as CAPRI solves them (RU(SRNUTS2) $ MAP_RR, capmod/define_regional_sets.gms l. 230). Data:
-# capri_data/shared/regional_units.csv (tools/build/build_regional_units.py). Until 27 October 2026 the model had 248
+# capri_data/codes/regional_units.csv (tools/build/build_regional_units.py). Until 27 October 2026 the model had 248
 # NUTS-2016 regions listed here, mapped to CAPRI's units through crosswalks and split where they did not match
 # (docs/design/REGIONAL_UNITS_INVENTORY.md).
 # ---------------------------------------------------------------------------
 def _load_units():
     import csv
     from pathlib import Path
-    p = Path(__file__).resolve().parents[2] / "capri_data" / "shared" / "regional_units.csv"
+    p = Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "regional_units.csv"
     with open(p, newline="") as f:
         return [(r["region"], r["capri_ms"], r["country"]) for r in csv.DictReader(f)]
 
@@ -185,11 +185,11 @@ def country_of(region: str) -> str:
 def _shared_rows(name: str) -> list:
     import csv
     from pathlib import Path
-    with open(Path(__file__).resolve().parents[2] / "capri_data" / "shared" / name, newline="") as f:
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / name, newline="") as f:
         return list(csv.DictReader(f))
 
 
-#: CAPRI's EU trade blocks (capri_data/shared/eu_market_blocks.csv, from gams/aggregation/defaultA.agg): member state
+#: CAPRI's EU trade blocks (capri_data/codes/eu_market_blocks.csv, from gams/aggregation/defaultA.agg): member state
 #: (CAPRI code) -> block, and the blocks in the file's order (EU_WEST, EU_EAST)
 EU_MS_BLOCK = {r["ms"]: r["block"] for r in _shared_rows("eu_market_blocks.csv")}
 EU_BLOCKS = tuple(dict.fromkeys(EU_MS_BLOCK.values()))
@@ -221,8 +221,8 @@ ALL_TRADE_REGIONS, TRADE_REGION_OF_CAPRI = _load_trade_regions()
 
 def _supply_model_regions_outside_eu() -> dict:
     """The countries outside the EU with supply models (CAPRI's RMSSUP outside the EU): the CAPRI member states of the
-    regional units (capri_data/shared/regional_units.csv) that are not in an EU trade block. Returns CAPRI member
-    state -> (country code of its units, its trade region: its CAPRI market region, capri_data/shared/rms_to_rm.csv,
+    regional units (capri_data/codes/regional_units.csv) that are not in an EU trade block. Returns CAPRI member
+    state -> (country code of its units, its trade region: its CAPRI market region, capri_data/codes/rms_to_rm.csv,
     in TRADE_REGION_OF_CAPRI). Like the EU's, their market supply is their supply models' output (KNOWN_ISSUES K56)."""
     rm_of = {r["rms"]: r["rm"] for r in _shared_rows("rms_to_rm.csv")}
     out = {}
@@ -233,7 +233,7 @@ def _supply_model_regions_outside_eu() -> dict:
         tr = TRADE_REGION_OF_CAPRI.get(rm) if rm is not None else None
         if tr is None:
             raise ValueError(f"supply-model country {m}: no trade region for its market region {rm} "
-                             "(capri_data/shared/rms_to_rm.csv, codes/model_trade_regions.csv)")
+                             "(capri_data/codes/rms_to_rm.csv, codes/model_trade_regions.csv)")
         out[m] = (c, tr)
     return out
 
@@ -253,7 +253,7 @@ def sup_noneu(countries=None) -> dict:
     miss = [m for m in countries if m not in SUP_NONEU_ALL]
     if miss:
         raise ValueError(f"run.supply_countries_outside_eu: {miss} have no regional units outside the EU "
-                         f"(capri_data/shared/regional_units.csv has {sorted(SUP_NONEU_ALL)})")
+                         f"(capri_data/codes/regional_units.csv has {sorted(SUP_NONEU_ALL)})")
     return {m: SUP_NONEU_ALL[m] for m in dict.fromkeys(countries)}
 
 
@@ -392,13 +392,13 @@ GHG_TYPES = [
 # ---------------------------------------------------------------------------
 # CAPRI member-state codes (sets.gms NUTS0): Belgium and Luxembourg are one member state in CAPRI (BL000000), Ireland is
 # IR000000, Greece EL000000, the United Kingdom UK000000; every other country keeps its NUTS prefix. Data:
-# capri_data/shared/capri_member_state_codes.csv. MS_CODE maps a two-letter prefix to CAPRI's (identity where they
+# capri_data/codes/capri_member_state_codes.csv. MS_CODE maps a two-letter prefix to CAPRI's (identity where they
 # agree, so MS_CODE.get(p, p) works for any prefix); capri_ms(region) gives the 8-character CAPRI member state.
 # ---------------------------------------------------------------------------
 def _load_ms_codes():
     import csv
     from pathlib import Path
-    p = Path(__file__).resolve().parents[2] / "capri_data" / "shared" / "capri_member_state_codes.csv"
+    p = Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "capri_member_state_codes.csv"
     with open(p, newline="") as f:
         return {r["nuts_prefix"]: r["capri_ms"] for r in csv.DictReader(f)}
 
@@ -444,6 +444,6 @@ def capri_ms(region: str) -> str:
 
 def is_eu(region: str) -> bool:
     """Whether a model region, a CAPRI member state or a country prefix belongs to the EU: its CAPRI member state is in
-    one of CAPRI's EU trade blocks (EU_MS_BLOCK, capri_data/shared/eu_market_blocks.csv). Norway's supply regions are
+    one of CAPRI's EU trade blocks (EU_MS_BLOCK, capri_data/codes/eu_market_blocks.csv). Norway's supply regions are
     not (they are SUP_NONEU_ALL). A market region's code raises (capri_ms)."""
     return capri_ms(region) in EU_MS_BLOCK

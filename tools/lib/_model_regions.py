@@ -1,7 +1,7 @@
 """Shared helpers for builders: the model's regions and the CAPRI national-code fallback.
 
 Since 27 October 2026 the model's regions are CAPRI's regional units under CAPRI's own codes
-(capri_data/shared/regional_units.csv): each region is its own CAPRI region, including the units of the member states
+(capri_data/codes/regional_units.csv): each region is its own CAPRI region, including the units of the member states
 without regional detail, whose code is the member state's (DK000000, EE000000, ...). capri_groups and region_to_capri
 are then the identity. The NUTS correspondence below is kept only for regions that are not CAPRI units (none in the
 model's data; the functions refuse a mixed list).
@@ -12,18 +12,18 @@ import csv
 ROOT = Path(__file__).resolve().parents[2]
 # CAPRI member-state codes (sets.gms NUTS0: BL = Belgium and Luxembourg, IR, EL, UK), the table the model uses
 # (capri_mod.data.definitions.MS_CODE)
-with open(ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv", newline="") as _f:
+with open(ROOT / "capri_data" / "codes" / "capri_member_state_codes.csv", newline="") as _f:
     MS_OF_PREFIX = {r["nuts_prefix"]: r["capri_ms"] for r in csv.DictReader(_f)}
 #: country prefix -> the two letters of CAPRI's member state (BE -> BL; TR -> TU, as in CAPREG's dump res_17TU)
 CTRY = {p: m[:2] for p, m in MS_OF_PREFIX.items()}
 _MS_SET = frozenset(MS_OF_PREFIX.values())
 
 
-with open(ROOT / "capri_data" / "shared" / "regional_units.csv", newline="") as _f:
+with open(ROOT / "capri_data" / "codes" / "regional_units.csv", newline="") as _f:
     UNITS = [r["region"] for r in csv.DictReader(_f)]
-# CAPRI's EU member states: those of its EU trade blocks (capri_data/shared/eu_market_blocks.csv, from
+# CAPRI's EU member states: those of its EU trade blocks (capri_data/codes/eu_market_blocks.csv, from
 # gams/aggregation/defaultA.agg), as eight-character codes (BL000000) and as their two-letter prefixes (BL)
-with open(ROOT / "capri_data" / "shared" / "eu_market_blocks.csv", newline="") as _f:
+with open(ROOT / "capri_data" / "codes" / "eu_market_blocks.csv", newline="") as _f:
     EU_MS = frozenset(r["ms"] for r in csv.DictReader(_f))
 EU_MS2 = frozenset(m[:2] for m in EU_MS)
 UNIT_SET = frozenset(UNITS)
@@ -60,11 +60,11 @@ def _all_units(regs) -> bool:
 
 
 def model_regions():
-    """The model's regional units in their order: capri_data/shared/regional_units.csv (the model's areas are indexed
+    """The model's regional units in their order: capri_data/codes/regional_units.csv (the model's areas are indexed
     the same, checked by tests). Until 29 October 2026 the model's whole data were loaded for this list, so every
     builder calling it opened about 80 model inputs, its own outputs among them (docs/design/DATA_PIPELINE_DOIT.md)."""
     import csv
-    with open(ROOT / "capri_data" / "shared" / "regional_units.csv", newline="") as fh:
+    with open(ROOT / "capri_data" / "codes" / "regional_units.csv", newline="") as fh:
         return [r["region"] for r in csv.DictReader(fh)]
 
 
@@ -103,13 +103,13 @@ CORR_FIXES = {"FI190000": ["FI19"], "FI180000": ["FI18"]}
 
 
 def _nuts_correspondence():
-    """CAPRI's NUTS version correspondence {capri code: [NUTS codes]} (capri_data/shared/nuts_version_correspondence.csv,
+    """CAPRI's NUTS version correspondence {capri code: [NUTS codes]} (capri_data/codes/nuts_version_correspondence.csv,
     read by capri_mod/data/nested_tables.py, loaded from its file: this module runs without the package on the path)."""
     import importlib.util
     sp = importlib.util.spec_from_file_location("_nested_tables", ROOT / "capri_mod" / "data" / "nested_tables.py")
     nt = importlib.util.module_from_spec(sp)
     sp.loader.exec_module(nt)
-    return nt.read_nuts_correspondence(ROOT / "capri_data" / "shared" / "nuts_version_correspondence.csv")
+    return nt.read_nuts_correspondence(ROOT / "capri_data" / "codes" / "nuts_version_correspondence.csv")
 
 
 def capri_groups(model_regions=None):

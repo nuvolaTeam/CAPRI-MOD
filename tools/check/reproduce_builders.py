@@ -52,6 +52,7 @@ INI = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"   # it
 SETS = REFERENCE / "sets" / "simini_21730"  # CAPRI's sets (docs/EXTERNAL_SOURCES.md), not in git
 BP = "capri_data/sources/intermediate/baseline_pmp"
 S = "capri_data/2017/supply"
+S30 = "capri_data/2030/supply"   # the 2030 inputs (DATA_LAYOUT step (b), 10 November 2026)
 
 #: (builder, arguments, external inputs that must exist). Order: REGIONAL_UNITS_BUILDERS.md section 3, then the rest.
 INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
@@ -121,7 +122,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.parquet", "--year", "2017",
                               "--out", f"{S}/pmp_recipe_2017.csv"], [D17]),
     ("build_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.parquet", "--year", "2030",
-                              "--out", f"{S}/pmp_recipe_2030.csv"], [REF]),
+                              "--out", f"{S30}/pmp_recipe_2030.csv"], [REF]),
     ("build_intensity_q_2030", [], []),
     ("build_trajectory_capri_ref", [], [REF, D17]),
     ("build_winter_cover_option", [], []),
@@ -145,9 +146,9 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.parquet", "--year", "2017", "--splits",
                                      "--out", f"{S}/pmp_recipe_2017_animals_members.csv"], [D17]),
     ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.parquet", "--year", "2030",
-                                     "--out", f"{S}/pmp_recipe_2030_animals.csv"], [REF]),
+                                     "--out", f"{S30}/pmp_recipe_2030_animals.csv"], [REF]),
     ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.parquet", "--year", "2030", "--splits",
-                                     "--out", f"{S}/pmp_recipe_2030_animals_members.csv"], [REF]),
+                                     "--out", f"{S30}/pmp_recipe_2030_animals_members.csv"], [REF]),
     ("build_labour_setaside", [], [D17, REF]),
     ("build_livestock_units", [], [D17]),
     ("build_fodder_balance", [], []),

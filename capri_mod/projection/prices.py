@@ -4,7 +4,7 @@ CAPRI's 2030 reference (the one JRC121368's Farm-to-Fork scenarios start from) i
 prices: every non-agricultural input moves by one index (2030/2017 = 1.277, every member
 state), agricultural outputs by their own projected prices, and CAP payments are nominal. The
 model works in 2017 money, so its 2030 baseline takes each product's CAPRI price ratio over
-that index (tools/build/build_price_trajectory_2030.py -> capri_data/trajectories/):
+that index (tools/build/build_price_trajectory_2030.py -> capri_data/2030/):
 
 - crop producer prices (regional and EU), by member state and product;
 - fodder (grass, silage maize, other fodder, fodder roots) is not marketed: its value is the shadow

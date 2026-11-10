@@ -27,6 +27,12 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCES = Path(os.environ.get("CAPRI_SOURCES") or ROOT / "capri_sources")
 DATA_DIR = ROOT / "capri_data"
 MKT = DATA_DIR / "2017" / "market"
+
+
+def _mkt(name: str):
+    """A market input's path under the data layout (a file named for another year in that year's folder)."""
+    from capri_mod.data.inputs import RunInputs
+    return RunInputs(DATA_DIR, "2017").path(name, "market")
 NO_REGIONS = ["NO020000", "NO060000", "NO070000", "NO080000", "NO090000", "NO0A0000"]
 
 
@@ -74,14 +80,14 @@ def test_norway_market_data_are_capris_no000000():
     src = read_source(DATA_DIR / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717"
                       / "bilateral_dataout_2030.parquet", keep_default_na=False)
     p = src[(src.r1 == "NO000000") & (src.r2 == "") & (src["item"] == "PROD")].set_index("product")["value"].astype(float)
-    rg = pd.read_csv(MKT / "bilateral_regions_2030.csv")
+    rg = pd.read_csv(_mkt("bilateral_regions_2030.csv"))
     nor = rg[rg.region == "NO000000"].set_index("commodity")["prod_kt"]
     for model_c, capri_c in (("BARL", "BARL"), ("SFIS", "SFIS"), ("POUL", "POUM"), ("PORK", "PORK")):
         assert abs(float(nor[model_c]) - float(p[capri_c])) < 1e-4 * max(1.0, float(p[capri_c])), model_c
     for f in ("bilateral_flows_2017.csv", "bilateral_flows_2030.csv"):
-        fl = pd.read_csv(MKT / f)
+        fl = pd.read_csv(_mkt(f))
         assert ((fl.importer == "NO000000") & (fl.exporter == "NO000000")).any(), f
-    tq = pd.read_csv(MKT / "bilateral_trq_2030.csv")              # Norway's own quotas (CAPRI's p_trqBilat)
+    tq = pd.read_csv(_mkt("bilateral_trq_2030.csv"))              # Norway's own quotas (CAPRI's p_trqBilat)
     assert (tq.importer == "NO000000").sum() == 5
     gl = pd.read_csv(MKT / "gl_demand_regions.csv")
     assert gl.loc[gl.rms == "NO000000", "model_region"].tolist() == ["NO000000"]

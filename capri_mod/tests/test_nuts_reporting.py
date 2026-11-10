@@ -1,4 +1,4 @@
-"""Reporting on NUTS 2024 (capri_mod/nuts_reporting.py, capri_data/shared/capri_units_nuts2024.csv)."""
+"""Reporting on NUTS 2024 (capri_mod/nuts_reporting.py, capri_data/codes/capri_units_nuts2024.csv)."""
 from pathlib import Path
 
 import numpy as np
@@ -28,7 +28,7 @@ def areas():
 
 def test_mapping_covers_units_and_current_nuts(m):
     from capri_mod.data.definitions import is_eu
-    ru = read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv")
+    ru = read_csv(ROOT / "capri_data" / "codes" / "regional_units.csv")
     # the reporting covers the EU's units and Norway's (build_nuts2024_reporting); the units of the UK, Turkey and the
     # Western Balkans (listed since 4 November 2026, SUPPLY_NONEU_DESIGN) are not in it
     ru = ru[[is_eu(x) or x == "NO000000" for x in ru.capri_ms]]

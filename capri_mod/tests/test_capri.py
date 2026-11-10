@@ -32,7 +32,7 @@ def _german_units(n):
     """The first n German regional units (DE110000, DE120000, ...): the regions the tests took as the first n rows of
     the region index when the model's regions were NUTS-2016 codes listed from Germany on (27 October 2026)."""
     import pandas as _pd
-    units = _pd.read_csv(DATA_DIR / "shared" / "regional_units.csv").region
+    units = _pd.read_csv(DATA_DIR / "codes" / "regional_units.csv").region
     return [r for r in units if r.startswith("DE")][:n]
 
 
@@ -201,7 +201,7 @@ def test_dairy_block_follows_capri_per_member_state(model):
     mm = model.market_module
     for c in ("FRMI", "CREM", "COCM", "WMIO", "CASE"):
         assert c in MARKET_COMMODITIES and mm.DAIRY_TRADED[c] == c
-    fl = pd.read_csv(DATA_DIR / "2017" / "market" / "bilateral_flows_2030.csv")
+    fl = pd.read_csv(DATA_DIR / "2030" / "market" / "bilateral_flows_2030.csv")
     assert set(fl.commodity) >= {"FRMI", "CREM", "COCM", "WMIO", "CASE"}
     try:
         mm._dairy_cache = None
@@ -762,7 +762,7 @@ def test_bilateral_market_reproduces_capri_flows_at_base():
     import pandas as pd
     from capri_mod.market.bilateral import BilateralCommodity
     from pathlib import Path
-    base = Path(DATA_DIR) / "2017" / "market"
+    base = Path(DATA_DIR) / "2030" / "market"
     fl = pd.read_csv(base / "bilateral_flows_2030.csv")
     g = fl[fl.commodity == "BEEF"]
     R = sorted(set(g.importer) | set(g.exporter))
@@ -1130,7 +1130,7 @@ def test_option_costsaving_drop_follows_capri(model):
     from pathlib import Path
     root = Path(__file__).resolve().parents[2]
     cs = read_source(root / "capri_data" / "sources" / "intermediate" / "ghgtech" / "capri_costsavings_2030.parquet")
-    md = pd.read_csv(root / "capri_data" / "2017" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
+    md = pd.read_csv(root / "capri_data" / "2030" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
     ratio = model.data["capri_level_ratio"]
     lev = {(r.region, r.activity): float(r.value) for r in md[md["item"] == "LEVL"].itertuples()}
 
@@ -2000,7 +2000,7 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
     assert abs(t["regional"]["herds"]["DE110000"]["SWHE"]["2030"] - f) < 1e-12          # written to the last digit
     assert t["regional"]["land"]["DE110000"]["ARABLE"]["2030"] < 1.0
     traj = BaselineTrajectory.from_file(tp)
-    pm = ProjectionModule(model, traj, capri_prices_dir=os.path.join(str(DATA_DIR), "trajectories"))
+    pm = ProjectionModule(model, traj, capri_prices_dir=os.path.join(str(DATA_DIR), "2030"))
     data, _ = pm.project_data(2030)
     cap = pd.read_csv(os.path.join(str(DATA_DIR), "validation", "capri_eu27_levels_2030_ref.csv"), index_col=0).iloc[:, 0]
     eu = [r for r in data["areas"].index if not r.startswith("NO")]
@@ -2999,7 +2999,7 @@ def test_baseline_surplus_is_capri_regional(data):
     splits included), never from the model's own pattern scaled to a national total."""
     cs = data["capri_baseline_surplus"]
     assert not cs["source"].str.contains("scaled|own balance").any()
-    g = pd.read_csv(DATA_DIR / "2017" / "environment" / "capri_gnb_components_2030.csv")
+    g = pd.read_csv(DATA_DIR / "2030" / "environment" / "capri_gnb_components_2030.csv")
     sur = g[g["item"] == "SURTOT"].set_index("capri_region")["kg_n_per_ha"]
     for reg, c8 in (("IT120000", "IT120000"), ("BL400000", "BL400000"), ("SE070000", "SE070000"), ("PT300000", "PT300000")):
         assert abs(float(cs.at[reg, "surplus_kg_n_per_ha"]) - float(sur[c8])) < 0.01
@@ -3008,12 +3008,12 @@ def test_baseline_surplus_is_capri_regional(data):
 
 def test_model_regions_are_capris_regional_units(data):
     """The model's regions are CAPRI's regional units (27 October 2026): every region is a unit of
-    shared/regional_units.csv, each carries its own CAPRI row (no NUTS splits, merges or proxy shares), and the units of
+    codes/regional_units.csv, each carries its own CAPRI row (no NUTS splits, merges or proxy shares), and the units of
     the member states without regional detail are their member state's code. Per-head values are CAPRI's regional ones
     (Finland's FI18 once carried all of Etelae-Suomi's manure on one part of a split: 990 kg N per dairy cow)."""
     from capri_mod import settings as S
     from capri_mod.data.definitions import is_eu
-    units = pd.read_csv(DATA_DIR / "shared" / "regional_units.csv")
+    units = pd.read_csv(DATA_DIR / "codes" / "regional_units.csv")
     # all of CAPRI's 250 supply-model units are listed (SUPPLY_NONEU_DESIGN, 4 November 2026); the data are built for
     # the EU's and the default countries outside it (Norway) until the design's step 4 builds the other 29
     noneu = set(S.defaults().get("run.supply_countries_outside_eu"))
@@ -3234,7 +3234,7 @@ def test_fixed_activities_land_market_and_grass_as_capri(model):
 
 
 def test_parameter_file_and_code_agree():
-    """Sprint 9t: the model's parameters live in one file, capri_data/shared/model_parameters.csv (value, unit,
+    """Sprint 9t: the model's parameters live in one file, capri_data/codes/model_parameters.csv (value, unit,
     kind, source). Every row is read by the code and every param() call names a row - the file cannot drift. Kinds
     are limited to the declared ones, every row has a source."""
     import csv, re, pathlib
@@ -3253,7 +3253,7 @@ def test_parameter_file_and_code_agree():
 
 def test_the_supplys_parameters_follow_the_runs_data_directory(tmp_path):
     """Refactor stage 3, N1 (the project lead's decision Q6, 2 November 2026): param() reads
-    <data_dir>/shared/model_parameters.csv through the run's inputs (capri_mod.data.inputs), and the supply reads its
+    <data_dir>/codes/model_parameters.csv through the run's inputs (capri_mod.data.inputs), and the supply reads its
     parameters where it uses them, so a run on another data directory takes that directory's values."""
     import csv
     from capri_mod import params
@@ -3263,8 +3263,8 @@ def test_the_supplys_parameters_follow_the_runs_data_directory(tmp_path):
     for r in rows:
         if r["name"] == "ELAS_CAP":
             r["value"] = "5.0"
-    (tmp_path / "shared").mkdir()
-    with open(tmp_path / "shared" / "model_parameters.csv", "w", newline="") as f:
+    (tmp_path / "codes").mkdir()
+    with open(tmp_path / "codes" / "model_parameters.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
         w.writeheader()
         w.writerows(rows)
@@ -3393,7 +3393,7 @@ def test_projection_carries_permanent_crops():
 def _marketed(ms: str, product: str) -> float:
     """CAPRI's marketed over gross production of a member state's product at the 2030 calibration point (grofNEprod;
     market_prod_grof_2030.csv), the factor the bridge applies to the supply models' gross output (S7)."""
-    t = pd.read_csv(DATA_DIR / "2017" / "market" / "market_prod_grof_2030.csv", float_precision="round_trip")
+    t = pd.read_csv(DATA_DIR / "2030" / "market" / "market_prod_grof_2030.csv", float_precision="round_trip")
     r = t[(t.capri_ms == ms) & (t["product"] == product)]["ratio"]
     assert len(r) == 1, (ms, product)
     return float(r.iloc[0])
@@ -3483,7 +3483,7 @@ def test_palm_and_other_vegetable_oils_are_markets(model):
     from capri_mod.market.market_module import MarketModule
     assert {"PLMO", "OTHO"} <= set(MARKET_COMMODITIES)
     assert MarketModule.EU_MARKET_SUPPLY == frozenset({"OTHO", "FFIS", "SFIS", "OAQU"})
-    fs = pd.read_csv(DATA_DIR / "2017" / "market" / "biofuel_feedstock_2030.csv")
+    fs = pd.read_csv(DATA_DIR / "2030" / "market" / "biofuel_feedstock_2030.csv")
     assert (fs.loc[fs.feedstock == "PLMO", "commodity"] == "PLMO").all()
     mm = model.market_module
     cols = list(mm.commodities)
@@ -3683,7 +3683,7 @@ def test_eu_trade_blocks_data_and_split(data):
     from capri_mod.market.market_module import MarketModule
     mm = MarketModule(data)
     assert mm.EU == ("EU_WEST", "EU_EAST") and "EU27" not in mm.regions
-    mkt = DATA_DIR / "2017" / "market"
+    mkt = DATA_DIR / "2030" / "market"
     fb = pd.read_csv(mkt / "bilateral_flows_2030.csv")
     we = fb[(fb.commodity == "CORN") & (fb.importer == "EU_WEST") & (fb.exporter == "EU_EAST")].q_kt.sum()
     assert abs(we - 15041.0) < 1.0
@@ -3816,7 +3816,7 @@ def test_luc_model_reproduces_capris_2030_transitions():
     luc.py): at the base land types the posterior mode of the gamma priors is CAPRI's own 2030 solution."""
     import pandas as _pd
     from capri_mod.environmental.luc import LUCModel
-    t = _pd.read_csv(DATA_DIR / "2017" / "environment" / "luc_2030.csv")
+    t = _pd.read_csv(DATA_DIR / "2030" / "environment" / "luc_2030.csv")
     for r in ("DE110000", "FR520000", "RO020000"):
         v = dict(t[t.capri_region == r][["item", "value"]].values)
         out = LUCModel.get().solve(r, {})
@@ -3863,7 +3863,7 @@ def test_npk_crop_need_is_the_crops_own():
     group's need spread by area, so the crop coefficients take NITF (tools/build/build_npk_balance_2030.py): fallow and
     set-aside need a few kg N/ha, CAPRI's extensive grassland far less than its intensive one."""
     import pandas as _pd
-    t = _pd.read_csv(DATA_DIR / "2017" / "environment" / "npk_crop_coefs_2030.csv")
+    t = _pd.read_csv(DATA_DIR / "2030" / "environment" / "npk_crop_coefs_2030.csv")
     d = t[(t.capri_region == "DE210000") & (t.nutrient == "N")].set_index("model_crop").need_kg_ha
     assert d["FALL"] < 10.0 < d["SWHE"]
     assert d["GRAE"] < 0.5 * d["GRAI"]
@@ -3991,7 +3991,7 @@ def test_n_leaching_follows_capri():
     for r in csv.DictReader(open(root / "validation" / "n_cascade_capri_gd2030.csv")):
         R[(r["region"], r["key"])][(r["col"], r["row"])] = float(r["value"])
     LM = defaultdict(dict)
-    for r in csv.DictReader(open(root / "2017" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")):
+    for r in csv.DictReader(open(root / "2030" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")):
         LM[(r["region"], r["activity"])][r["item"]] = float(r["value"])
     F, G, _ = nc.load()
     reg_tab = nl.load()
@@ -4166,11 +4166,11 @@ def test_capri_land_rents_at_the_2030_calibration_point(model):
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
     root = _repo_root()
     traj = BaselineTrajectory.from_file(str(root / "capri_data" / "scenarios" / "capri_ref_2030"))
-    pmod = ProjectionModule(model, traj, capri_prices_dir=str(root / "capri_data" / "trajectories"))
+    pmod = ProjectionModule(model, traj, capri_prices_dir=str(root / "capri_data" / "2030"))
     res = pmod.run(years=[2030], regions=["IR010000"], max_outer_iter=2)
     pm = getattr(pmod, "_last_projected_model", None) or model
     mo = pm.supply_module._models["IR010000"]
-    rents = pd.read_csv(root / "capri_data" / "2017" / "supply" / "land_rents_2030.csv", index_col=0).loc["IR010000"]
+    rents = pd.read_csv(root / "capri_data" / "2030" / "supply" / "land_rents_2030.csv", index_col=0).loc["IR010000"]
     rr = mo.ev.land_rent_rows
     assert abs(rr["arable_land"] - rents["rent_arac"]) < 1e-6 and abs(rr["grassland"] - rents["rent_gras"]) < 1e-6
     assert (getattr(mo.par, "nlp_cal", None) or {}).get("residual", 1.0) < 1e-6
@@ -4425,7 +4425,7 @@ def test_ammonia_options_stay_at_their_base_shares_in_the_2030_baseline():
     from capri_mod.supply import ammonia_techs as _at
     m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
     traj = BaselineTrajectory.from_file(str(DATA_DIR / "scenarios" / "capri_ref_2030"))
-    pmod = ProjectionModule(m, traj, capri_prices_dir=str(DATA_DIR / "trajectories"))
+    pmod = ProjectionModule(m, traj, capri_prices_dir=str(DATA_DIR / "2030"))
     d30, _ = pmod.project_data(2030)
     pm = pmod._model_for(d30)
     b = pm.run(scenario="BASELINE", regions=["IT200000"], max_outer_iter=1)

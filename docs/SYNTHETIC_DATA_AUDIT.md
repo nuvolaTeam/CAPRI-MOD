@@ -13,7 +13,7 @@ effect of the fixes on results is in CHANGELOG.md.
   warning being a stale row count in MANIFEST.json for `fert_side_effects.csv`). Tests:
   `test_no_synthetic_inputs_reach_the_model`, `test_ghg_accounts_take_capris_methane_and_co2`,
   `test_fixed_activities_land_market_and_grass_as_capri`, `test_parameter_file_and_code_agree`.
-- **Constants** the economics and accounts rest on are rows of `capri_data/shared/model_parameters.csv` (value, unit,
+- **Constants** the economics and accounts rest on are rows of `capri_data/codes/model_parameters.csv` (value, unit,
   kind, source), read through `capri_mod/params.py` (Sprint 9t).
 
 What is still not CAPRI's data, and where it acts:

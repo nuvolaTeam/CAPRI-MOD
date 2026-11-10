@@ -5,7 +5,7 @@ Source: Eurostat GISCO, NUTS 2024, regions, 1:20 million, EPSG:4326, level 2
   (c) EuroGeographics for the administrative boundaries (GISCO's copyright notice; shown on every map).
 Kept as CSV (the project's rule for data files): one row per region, the GeoJSON geometry as text.
 The model does not read it: the results are on CAPRI's regional units, linked to NUTS 2024 by
-capri_data/shared/capri_units_nuts2024.csv (capri_mod/nuts_reporting.py).
+capri_data/codes/capri_units_nuts2024.csv (capri_mod/nuts_reporting.py).
 
 Usage: python capri_gradio/geo/build_nuts_geometry.py [GEOJSON]   (downloads the file when none is given)
 """

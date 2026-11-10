@@ -13,7 +13,7 @@ Items (CAPRI's names; calc_nbalance.gms line numbers):
 CAPRI reports them in 1000 t P2O5 and per ha of UAAR; the environmental accounts keep t P2O5 (1000 ha x kg/ha, as the
 N items). P2O5 is CAPRI's unit for phosphate throughout (PHOF, MANP, PRET, PCRD); P = P2O5 x 0.4364.
 
-Data: capri_data/2017/environment/p_balance_crop_coefs_2030.csv (retention and residue output per ha of the model's
+Data: capri_data/2030/environment/p_balance_crop_coefs_2030.csv (retention and residue output per ha of the model's
 crops, tools/build/build_p_balance.py); manure P2O5 per head and CAPRI's crop nutrient balance for P (NPKData,
 capri_mod/fert/npk.py, the data of the regional model's fertilisation block).
 """

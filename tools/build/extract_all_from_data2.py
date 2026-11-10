@@ -88,7 +88,7 @@ def main() -> None:
     df = pd.concat([parse(f, WANTED) for f in files], ignore_index=True)
     df = df.drop_duplicates(["region", "activity", "item"], keep="last")
 
-    # the model's regions are CAPRI's regional units (shared/regional_units.csv): each CAPRI row is its own region's
+    # the model's regions are CAPRI's regional units (codes/regional_units.csv): each CAPRI row is its own region's
     # (until 27 October 2026 mapped to NUTS-2016 regions through shared/nuts_crosswalk.json, 21 regions unmatched)
     import sys as _sys
     _sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))

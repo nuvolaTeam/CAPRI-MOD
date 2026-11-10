@@ -1,4 +1,4 @@
-"""The model's parameters, from one file: <data_dir>/shared/model_parameters.csv (capri_data's for the repository).
+"""The model's parameters, from one file: <data_dir>/codes/model_parameters.csv (capri_data's for the repository).
 
 Every constant the model's economics or accounting rests on - CAPRI's parameters, the IPCC factors as CAPRI uses
 them, JRC121368's assumptions, the few model settings that are not CAPRI data - is a row there, with its unit, kind
@@ -15,8 +15,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict
 
-#: the repository's file (the run's is <data_dir>/shared/model_parameters.csv, through capri_mod.data.inputs)
-FILE = Path(__file__).resolve().parents[1] / "capri_data" / "shared" / "model_parameters.csv"
+#: the repository's file (the run's is <data_dir>/codes/model_parameters.csv, through capri_mod.data.inputs)
+FILE = Path(__file__).resolve().parents[1] / "capri_data" / "codes" / "model_parameters.csv"
 
 
 def _load() -> Dict[tuple, float]:

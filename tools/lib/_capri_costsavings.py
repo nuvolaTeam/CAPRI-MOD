@@ -65,7 +65,7 @@ def costsaving_drop(members: dict, technology: str) -> dict:
     rec = {k: (float(r[("level", "max")]), float(r[("marginal", "ini")]), float(r[("marginal", "max")]))
            for k, r in p.iterrows()
            if pd.notna(r.get(("level", "max"))) and pd.notna(r.get(("marginal", "ini"))) and pd.notna(r.get(("marginal", "max")))}
-    md = _read_csv(ROOT / "capri_data" / "2017" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
+    md = _read_csv(ROOT / "capri_data" / "2030" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
     lev = {(r.region, r.activity): float(r.value) for r in md[md["item"] == "LEVL"].itertuples()}
     ratio = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
     mr = _model_regions()

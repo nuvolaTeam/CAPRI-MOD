@@ -29,7 +29,7 @@ the calibration point's data. Steps ported here, per CAPRI region, with p_infl =
 Data of the calibration point: L_BAS = CAPRI's 2017 levels (res_17 LEVL), L_Y the year's levels (2030: CAPRI's 2030
 Green Deal baseline res_2_1730greendeal_refdefaulta, tools/lib/paths.BASELINE_REF, the model's trajectory; its calibration
 run refpol_endotech_all_ini, the point of CAPRI's own 2030 terms, until 9 November 2026; 2017: L_BAS); revenue = TOOU, costs = TOIN of the same sources; rent = the land
-type's rent (capri_data/2017/supply/land_rents_2030.csv at 2030; D_AREA of res_17 at 2017).
+type's rent (capri_data/2030/supply/land_rents_2030.csv at 2030; D_AREA of res_17 at 2017).
 
 REGISTERED differences from CAPRI's recipe, measured against CAPRI's exported 2030 terms by
 tools/check/pmp_recipe_check.py: (a) the land-nest adjustment's land-type elasticities are recomputed from CAPRI's exported

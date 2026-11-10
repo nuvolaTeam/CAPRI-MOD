@@ -80,3 +80,16 @@ def test_the_market_and_supply_tables_follow_the_base_year(tmp_path):
         assert young_animal_table()
     finally:
         I.use(old)
+
+
+def test_a_file_carrying_another_year_lives_in_that_years_folder_a_period_does_not():
+    """DATA_LAYOUT step (b): "<name>_<year>" files of a year other than the base year sit in <data_dir>/<year>/; a year
+    range names the period a base-year file covers (cap_greening_2013_2020.csv stays in the base year's folder)."""
+    from capri_mod.data.inputs import RunInputs, year_of_file
+    assert year_of_file("land_rents_2030.csv", "2017") == "2030"
+    assert year_of_file("pmp_capri_2030_animals.csv", "2017") == "2030"
+    assert year_of_file("land_rents_2017.csv", "2017") is None
+    assert year_of_file("cap_greening_2013_2020.csv", "2017") is None
+    ri = RunInputs(base_year="2017")
+    assert ri.path("cap_greening_2013_2020.csv", "policy").exists()
+    assert ri.path("land_market_2030.csv", "supply").parent.parent.name == "2030"

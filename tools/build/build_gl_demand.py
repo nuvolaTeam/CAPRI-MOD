@@ -38,7 +38,7 @@ ELAS = EXPORTS / "elas_2_1730defaulta.csv"
 DATA = EXPORTS / "data_market_1730defaulta.csv"
 OUT = ROOT / "capri_data" / "2017" / "market"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/codes/eu_market_blocks.csv)
 EU = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 USES = ("HCON", "FEED", "PROC", "BIOF", "INDM", "LOSM")
 
@@ -93,7 +93,7 @@ def model_maps():
 
 #: CAPRI's mapping of behavioural regions to market regions (set RMS_TO_RM of CAPRI's own instantiation), written by
 #: tools/build/build_code_lists.py with CAPRI's other code lists (by this builder until 3 November 2026)
-RMS_TO_RM = ROOT / "capri_data" / "shared" / "rms_to_rm.csv"
+RMS_TO_RM = ROOT / "capri_data" / "codes" / "rms_to_rm.csv"
 
 
 def rms_to_rm() -> dict:

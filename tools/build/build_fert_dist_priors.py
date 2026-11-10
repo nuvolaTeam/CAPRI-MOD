@@ -44,6 +44,7 @@ from _sources_io import read_source, source_records, write_source  # noqa: E402 
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ENV = ROOT / "capri_data" / "2017" / "environment"
+ENV30 = ROOT / "capri_data" / "2030" / "environment"   # the 2030 outputs (DATA_LAYOUT step (b))
 GROUP = {"SWHE": "WHEA", "DWHE": "WHEA", "BARL": "BARL", "MAIZ": "MAIZ", "RYEM": "CERE", "OATS": "CERE",
          "OCER": "CERE", "RAPE": "RAPN", "NONF": "RAPN", "SUNF": "SUNF", "SOYA": "SOYA", "PULS": "PULS",
          "POTA": "POTA", "SUGB": "SUGB", "MAIF": "MAIF", "ROOF": "ROOF", "OFAR": "OFAR", "GRAE": "GRAS",
@@ -170,10 +171,10 @@ def main():
         for c, x in area.items():
             mrows.append(dict(capri_region=r, model_crop=rev.get(c, c), ngrp=ngrp(c), area=x))
     pri = pd.DataFrame(rows).sort_values(["capri_region", "ngrp"])
-    pri.to_csv(ENV / "fert_dist_priors_2030.csv", index=False)
+    pri.to_csv(ENV30 / "fert_dist_priors_2030.csv", index=False)
     mg = pd.DataFrame(mrows).groupby(["capri_region", "model_crop", "ngrp"], as_index=False).area.sum()
     mg["share"] = mg.area / mg.groupby(["capri_region", "model_crop"]).area.transform("sum")
-    mg.drop(columns="area").to_csv(ENV / "fert_dist_crop_groups_2030.csv", index=False)
+    mg.drop(columns="area").to_csv(ENV30 / "fert_dist_crop_groups_2030.csv", index=False)
     print(f"fert_dist_priors_2030.csv: {len(pri)} rows, {pri[pri.level == 'ru'].capri_region.nunique()} CAPRI regions in "
           f"{pri.capri_region.str[:2].nunique()} countries")
     print(f"mineral efficiency: median {pri.mine_eff.median():.3f}; manure availability median {pri.excr_avail.median():.3f}")

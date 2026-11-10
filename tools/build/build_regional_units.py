@@ -10,12 +10,12 @@ AT130000) carry no results and are not units of a run.
 
 Source: the units of CAPRI's Green Deal 2030 run (sources/intermediate/capri_res/gd2030_endotech_ini_nbalance.parquet, CAPRI's own
 results): a code ending in 000000 is a member state total, kept as a unit only where the member state has no other
-code. Member states: capri_data/shared/capri_member_state_codes.csv, a unit's member state as
+code. Member states: capri_data/codes/capri_member_state_codes.csv, a unit's member state as
 tools/lib/_model_regions.national_code gives it (TR100000 -> TUR, Turkey's code in sets.gms, MAP_RR TUR.SET.R_TUR).
 With --dump-dir (one or more folders), each unit is checked to have CAPRI 2017 activity levels in the res_17<MS>.txt
 dumps.
 
-Output: capri_data/shared/regional_units.csv (region, capri_ms, country): country is the unit's NUTS-0 country, the
+Output: capri_data/codes/regional_units.csv (region, capri_ms, country): country is the unit's NUTS-0 country, the
 key the model aggregates regions by (aggregate_supply(by_country=True), mapped to CAPRI's member state by MS_CODE):
 CAPRI's member state read back through capri_member_state_codes.csv, except BL400000, Luxembourg (sets.gms l. 6126),
 in CAPRI's member state BL with Belgium. (CAPRI's own prefixes are not used as country keys: IR, Ireland in CAPRI, is
@@ -35,11 +35,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
-from _model_regions import EU_MS, national_code  # noqa: E402  (shared/eu_market_blocks.csv, capri_member_state_codes.csv)
+from _model_regions import EU_MS, national_code  # noqa: E402  (codes/eu_market_blocks.csv, capri_member_state_codes.csv)
 
 SRC = ROOT / "capri_data" / "sources" / "intermediate" / "capri_res" / "gd2030_endotech_ini_nbalance.parquet"
-MS_FILE = ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv"
-DEST = ROOT / "capri_data" / "shared" / "regional_units.csv"
+MS_FILE = ROOT / "capri_data" / "codes" / "capri_member_state_codes.csv"
+DEST = ROOT / "capri_data" / "codes" / "regional_units.csv"
 CODE = re.compile(r"^[A-Z]{2}[A-Z0-9]{6}$")
 
 

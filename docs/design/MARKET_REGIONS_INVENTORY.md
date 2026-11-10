@@ -16,7 +16,7 @@ Sources of CAPRI's sets and data: `sim_ini_21730_1.gdx` (uploaded by the project
 calibrated 2030 market state) (read with gams.core.gdx through
 tools/lib/_gdx.py). The sets RM, RMTP, RMS, RMS_TO_RM, RM_TO_RMTP, RMS_TO_RMTP, RMSSUP in that file are identical to the
 CSV export already in capri_reference/sets/simini_21730/ (made from sim_ini_21730.gdx; the two GDX files differ in
-size by one byte, the sets are the same) [V], and capri_data/shared/rms_to_rm.csv equals sim_ini's RMS_TO_RM [V].
+size by one byte, the sets are the same) [V], and capri_data/codes/rms_to_rm.csv equals sim_ini's RMS_TO_RM [V].
 
 ---
 
@@ -179,7 +179,7 @@ ROW**: ROW exists only in the data (builders' default `"ROW"`), the code list an
 
 ### 3.1 Region list and maps
 
-- definitions.py:189-192 (`EU_MS_BLOCK`, `EU_BLOCKS` from shared/eu_market_blocks.csv), 195-215 (`ALL_TRADE_REGIONS`,
+- definitions.py:189-192 (`EU_MS_BLOCK`, `EU_BLOCKS` from codes/eu_market_blocks.csv), 195-215 (`ALL_TRADE_REGIONS`,
   `TRADE_REGION_OF_CAPRI` from codes/model_trade_regions.csv), 218-253 (`SUP_NONEU_ALL`, `sup_noneu`: non-EU
   supply-model country → trade region through rms_to_rm.csv and TRADE_REGION_OF_CAPRI).
 - market_module.py:30, 77, 85-92 (the region list: EU27 or the blocks), 99-106 (`SUP_NONEU_REGIONS`,
@@ -432,14 +432,14 @@ as G3's equations); the Farm-to-Fork and Green Deal gates after stages 1-4 and a
 Preparation done 2 November 2026 (branch market-rm, not yet merged): CAPRI's region lists are written by
 build_code_lists from sim_ini's sets as capri_data/codes/capri/RM.csv (45), RMTP.csv (42), RM_TO_RMTP.csv and
 RMEU_to_RM.csv, in CAPRI's set order, next to CAPRI's other sets, instead of the names shared/market_regions.csv,
-policy_blocks.csv and rm_to_rmtp.csv of §5 stage 1; the builder checks them against RALL and shared/rms_to_rm.csv
+policy_blocks.csv and rm_to_rmtp.csv of §5 stage 1; the builder checks them against RALL and codes/rms_to_rm.csv
 against CAPRI's RMS_TO_RM. No model code reads them yet. The 37 sim_ini symbols the move and the ports need are
 extracted to capri_reference/simini/simini_21730 (tools/build/build_simini_reference.py).
 
 ### Stage 1, done (3 November 2026, branch market-rm)
 
 - CAPRI's region lists as code lists from sim_ini's sets (tools/build/build_code_lists.py): codes/capri/RM.csv, RMTP.csv,
-  RM_TO_RMTP.csv, RMEU_to_RM.csv, and CAPRI's RMS and RMS_TO_RM in shared/rms.csv and shared/rms_to_rm.csv (written by
+  RM_TO_RMTP.csv, RMEU_to_RM.csv, and CAPRI's RMS and RMS_TO_RM in codes/rms.csv and codes/rms_to_rm.csv (written by
   build_gl_demand.py before; same bytes). The names differ from the plan's (shared/market_regions.csv, policy_blocks.csv,
   rm_to_rmtp.csv): CAPRI's own set names, as the other code lists under codes/capri.
 - One grouping step, tools/lib/_market_regions.py, read from the declared table codes/model_market_regions.csv (each of

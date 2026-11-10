@@ -49,7 +49,7 @@ KEEP_U = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "data_m
 DEST = ROOT / "capri_data" / "2017" / "market" / "feed_demand_nonEU.csv"
 USES = ("HCON", "FEED", "PROC", "BIOF")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/codes/eu_market_blocks.csv)
 EU = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 
 

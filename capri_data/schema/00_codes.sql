@@ -112,7 +112,7 @@ CREATE TABLE model_commodities (
 );
 COMMENT ON TABLE model_commodities IS 'the model''s market commodities (capri_mod/data/definitions.py MARKET_COMMODITIES) and CAPRI''s products';
 
--- file: capri_data/shared/regional_units.csv
+-- file: capri_data/codes/regional_units.csv
 CREATE TABLE regional_units (
     region VARCHAR PRIMARY KEY REFERENCES capri_rall (code),
     capri_ms VARCHAR NOT NULL REFERENCES capri_rall (code),

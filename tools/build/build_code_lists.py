@@ -148,7 +148,7 @@ def main():
         comms.append((c, cc, src))
 
     # regional units
-    with open(ROOT / "capri_data" / "shared" / "regional_units.csv", newline="") as fh:
+    with open(ROOT / "capri_data" / "codes" / "regional_units.csv", newline="") as fh:
         units = [r["region"] for r in csv.DictReader(fh)]
     miss = [u for u in units if u not in capri["RALL"]]
     if miss:
@@ -243,7 +243,7 @@ def main():
 
     # CAPRI's market regions (the market's move onto CAPRI's regions, stage 1: MARKET_REGIONS_INVENTORY.md section 5):
     # RM (45 market regions), RMTP (42 trade-policy blocks), RM_TO_RMTP, RMEU_to_RM (the EU's two market blocks), in
-    # CAPRI's set order; checked against RALL and against the behavioural regions' map shared/rms_to_rm.csv
+    # CAPRI's set order; checked against RALL and against the behavioural regions' map codes/rms_to_rm.csv
     rm, rmtp = read_set(a.sets, "RM"), read_set(a.sets, "RMTP")
     rm_to_rmtp, rmeu_to_rm = pairs("RM_TO_RMTP"), pairs("RMEU_to_RM")
     for name, codes in (("RM", rm), ("RMTP", rmtp)):
@@ -257,7 +257,7 @@ def main():
                  for r in rm if len(blocks_of.get(r, [])) != 1]
     problems += [f"CAPRI's RMEU_to_RM: {r} is not in RM" for _, r in rmeu_to_rm if r not in rm]
     # CAPRI's behavioural regions RMS and their market region RMS_TO_RM, every RMS in one RM: written below to
-    # shared/rms.csv and shared/rms_to_rm.csv (until 3 November 2026 written by build_gl_demand.py, which reads them,
+    # codes/rms.csv and codes/rms_to_rm.csv (until 3 November 2026 written by build_gl_demand.py, which reads them,
     # and checked here; the market's grouping step, tools/lib/_market_regions.py, reads them)
     rms, rms_to_rm = read_set(a.sets, "RMS"), pairs("RMS_TO_RM")
     rm_of_rms = {}
@@ -291,8 +291,8 @@ def main():
     write(OUT / "capri" / "RMTP.csv", ("code", "text"), list(rmtp.items()))
     write(OUT / "capri" / "RM_TO_RMTP.csv", ("rm", "rmtp"), rm_to_rmtp)
     write(OUT / "capri" / "RMEU_to_RM.csv", ("rmeu", "rm"), rmeu_to_rm)
-    write(ROOT / "capri_data" / "shared" / "rms.csv", ("rms",), [(r,) for r in rms])
-    write(ROOT / "capri_data" / "shared" / "rms_to_rm.csv", ("rms", "rm"), rms_to_rm)
+    write(ROOT / "capri_data" / "codes" / "rms.csv", ("rms",), [(r,) for r in rms])
+    write(ROOT / "capri_data" / "codes" / "rms_to_rm.csv", ("rms", "rm"), rms_to_rm)
     write(OUT / "model_commodities.csv", ("code", "capri_code", "mapping_source"), comms)
     differ = [(c, cc) for c, cc, _ in comms if c != cc]
     print(f"wrote {OUT.relative_to(ROOT)}: CAPRI's sets {', '.join(f'{s} {len(d)}' for s, d in capri.items())}; "
