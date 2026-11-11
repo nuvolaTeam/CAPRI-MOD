@@ -9,11 +9,10 @@
     l. 841-848   no position may have both an Absolute and a PercentChange support (check_duplicates)
   captrd/define_stats_and_supports.gms
     l. 485-500   Expert: the Absolute, else (1 + PercentChange/100) x BASM, on S_ColsEst x S_RowsEst (expert)
-    l. 589-596   (adjust_to_biof_supports.gms with "support", per ex-ante year outside ExAnteD) only its l. 175 here:
-                 BIOF.SUGA's Expert deleted where MAPR.SUGA has no nObs (biof_suga); its support adjustments are not
-                 ported yet
-    l. 627-630   the member states' trade of sugar beet (IMPT, EXPT, NTRD .SUGB): Expert (and support) = BAST, else
-                 BASM, in every ex-ante year (expert, sugb_trade)
+    l. 589-598   (adjust_to_biof_supports.gms, with BIOF.SUGA's Expert deleted without MAPR.SUGA observations:
+                 final_supports.biof_adjust)
+    l. 631-633   the member states' trade of sugar beet (IMPT, EXPT, NTRD .SUGB): Expert (and support) = BAST, else
+                 BASM, in every ex-ante year (sugb_trade)
     l. 637-645   TrustLevl where Expert: the COCO support's, else the expert support's, else 10 (trust)
 """
 from __future__ import annotations
@@ -120,21 +119,9 @@ def expert(S, *, basm: Dict[K3, float], s_colsest: Iterable[str], s_rowsest: Ite
     return out
 
 
-def biof_suga(expert_: Dict[K4, float], *, rest: Iterable[str], exante: Sequence[int], exanted: Iterable[int],
-              nobs: Set[K3]) -> None:
-    """adjust_to_biof_supports.gms l. 175 (called by define_stats_and_supports.gms l. 589-596 for the ex-ante years
-    outside ExAnteD), in place: BIOF.SUGA's Expert deleted where MAPR.SUGA has no nObs."""
-    skip = set(exanted)
-    for r in rest:
-        if (r, "MAPR", "SUGA") not in nobs:
-            for y in exante:
-                if y not in skip:
-                    expert_.pop((r, "BIOF", "SUGA", y), None)
-
-
 def sugb_trade(expert_: Dict[K4, float], support: Dict[K4, float], *, ms: Iterable[str], exante: Sequence[int],
                bast: Dict[K3, float], basm: Dict[K3, float]) -> None:
-    """define_stats_and_supports.gms l. 627-630, in place: P_Result(MS, tradeEst, "SUGB", ExAnte, support/expert)
+    """define_stats_and_supports.gms l. 631-633, in place: P_Result(MS, tradeEst, "SUGB", ExAnte, support/expert)
     = BAST, else BASM (tradeEst: IMPT, EXPT, NTRD; sets_captrd.gms l. 314-316)."""
     for r in ms:
         for c in ("IMPT", "EXPT", "NTRD"):

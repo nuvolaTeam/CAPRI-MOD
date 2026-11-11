@@ -32,6 +32,30 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — CAPTRD-MOD stage 2d: the supports as the first stage leaves them (support1)
+
+- `capri_mod/pipeline/captrd/final_supports.py` ports the rest of define_stats_and_supports.gms up to support1
+  (l. 589-675): adjust_to_biof_supports.gms per ex-ante year (with %use_KWS_supports% off), the overwrite of the
+  supports by the Expert, the crop areas scaled to UAAR, adjust_trade_supports.gms (its oils block is off as coded),
+  and the wVarErr formulas of the expert positions (not compared yet: stage 2f changes wVarErr).
+- BIOF.SUGA's Expert is now deleted only for the member states with a biofuel expert support above 2e-13 (MSest, as
+  in GAMS): this fixes the 6 tiny BIOF.SUGA positions that were wrongly put down to stage 2f.
+- supports.py: DG AGRI's scaled prices as the member states' UVAG support (l. 355-356, `uvag_from_dgagri1`), and the
+  DAYS/DAILY supports of activities with LEVL observations but none of their own (l. 290-293).
+- Found in the stored results: CAPTRD's stored Step1 of DOMM is the reporting's sum of the domestic use positions
+  (aggreg_and_report.gms l. 293-294); the estimation's DOMM is in DEMD. The tests now rebuild the trend supports from it
+  (tests/captrd_pre_expert.py), and no longer let stored ex-ante supports fill positions the trend supports leave
+  empty. This fixes CS000000's DOMM.COMI (4 positions before put down as "not stored").
+- New sets: Oseeds, tradeEst, ShiftSugbPos, SED_TO_OIL, OIL_TO_CAK, BIO_PRCD (43_captrd_final.sql).
+- Parity (test_captrd_expert_support.py):
+  - Expert and TrustLevl: 39,495 of 39,567 member-state positions after 2018 equal; the other 72 are stage 2f's
+    trust levels of NO000000 and TUR.
+  - support1: 441,600 of 474,390 equal. 32,750 are rewritten after this stage (YILD, requirement rows, HFCS) or cannot
+    be rebuilt from the stored Step1 (the product groups' prices and consumption). Open: 40 fossil fuel prices (UVAG of
+    DISL and GASL of NO, EL, IR, UK, 2020-2040) that our DGAgri1 holds and CAPTRD's support1 does not.
+
+---
+
 ## 11 November 2026 — CAPTRD-MOD stage 2d: the expert supports assembled
 
 - `capri_mod/pipeline/captrd/expert_support.py` ports the end of captrd/expert_support.gms (l. 787-860) and the
@@ -49,9 +73,7 @@ and `docs/KNOWN_ISSUES.md`.
   (tests/captrd_pre_expert.py); CAPTRD's stored support is the one the experts overwrote. This changes TUR's share
   of direct milk sales (HCOM/GROF), which is taken from the trend supports.
 - Parity (test_captrd_expert_support.py, all ported sources chained in expert_support.gms's order): of the 39,567
-  member-state positions after 2018, 39,485 equal CAPTRD's Expert and TrustLevl. The other 82 are define_EU_supports
-  (stage 2f: NO and TUR trust levels, 72; tiny BIOF.SUGA defaults, 6) or not in the stored results (CS DOMM.COMI,
-  4). The national supports: 7,282 of 7,410 changed positions equal (was 6,701 of 6,829).
+  member-state positions after 2018, 39,485 equal CAPTRD's Expert and TrustLevl (39,495 after the next entry). The national supports: 7,282 of 7,410 changed positions equal (was 6,701 of 6,829).
 
 ---
 

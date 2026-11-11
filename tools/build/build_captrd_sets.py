@@ -79,6 +79,11 @@ MRKBALEE = MRKBALE + ["EAAG", "EXPD", "DOMM", "NTRD", "NAGR", "SECG"]
 DOMPOS = ["FEDM", "SEDM", "SEDF", "INDM", "PRCM", "BIOF", "HCOM", "LOSM", "LOSF"]
 BREEDACT = ["DCOL", "DCOH", "SCOW", "SHGM", "SOWS", "HENS"]
 MEAT = ["BEEF", "POUM", "PORK", "SGMT"]
+# the oilseeds as outputs (Oseeds, l. 262-266), the trade positions estimated (tradeEst, l. 314-316) and the sugar beet
+# positions shifted with GROF (ShiftSugbPos, l. 323-325), for adjust_to_biof_supports.gms and adjust_trade_supports.gms
+OSEEDS = ["RAPE", "SUNF", "SOYA"]
+TRADEEST = ["IMPT", "EXPT", "NTRD"]
+SHIFTSUGBPOS = ["FEDM", "SEDM", "INDM", "HCOM", "LOSM", "EAAG"]
 # CAPRI's global sets the preparation reads, as instantiated (copied from the reference export): MS is sets.rmssup
 # (sets_captrd.gms l. 54-56), NT2 the alias of SRNUTS2 (l. 69)
 GLOBAL_1D = {"ms": "RMSSUP", "srnuts1": "SRNUTS1", "srnuts2": "SRNUTS2", "urbannuts": "urbanNUTS", "secom": "SECOM",
@@ -98,7 +103,9 @@ GLOBAL_2D = {"map_rr": "Map_RR", "pact_to_io": "PACT_TO_IO", "pact_to_i": "PACT_
              "pact_to_o": "PACT_TO_O", "pact_to_y": "PACT_TO_Y",
              # load_coco1_data.gms
              "prcd": "PRCD", "feed_to_o": "FEED_TO_O", "dact_to_pact": "DACT_TO_PACT", "p_t_actagg": "P_T_ActAgg",
-             "stock_to_fuel": "STOCK_TO_FUEL", "stock_to_by": "STOCK_TO_BY"}
+             "stock_to_fuel": "STOCK_TO_FUEL", "stock_to_by": "STOCK_TO_BY",
+             # adjust_to_biof_supports.gms
+             "sed_to_oil": "SED_TO_OIL", "bio_prcd": "BIO_PRCD", "oil_to_cak": "OIL_TO_CAK"}
 GLOBAL_3D = {"map_rrt": "MAP_RRT"}                     # captrd_policy.gms (sugar quotas of the EU members by year)
 
 
@@ -169,6 +176,9 @@ def main() -> None:
     _write("dompos", DOMPOS)
     _write("breedact", BREEDACT)
     _write("meat", MEAT)
+    _write("oseeds", OSEEDS)
+    _write("tradeest", TRADEEST)
+    _write("shiftsugbpos", SHIFTSUGBPOS)
     for out, s in GLOBAL_1D.items():
         _write(out, _members(ref, s))
     for out, s in GLOBAL_2D.items():

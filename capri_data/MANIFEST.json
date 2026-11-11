@@ -5866,6 +5866,16 @@
     "builder": "build_captrd_sets (not in the trace yet)"
    }
   },
+  "capri_data/pipeline/captrd/sets/bio_prcd.csv": {
+   "description": "CAPRI's global mapping BIO_PRCD (biofuels to their feedstocks; gams/sets.gms l. 4981): one pair per row (d0, d1), 12 pairs (e.g. BIOE.MAIZ, BIOD.RAPO); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py.",
+   "kind": "structure",
+   "rows": 12,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
   "capri_data/pipeline/captrd/sets/biofuel/agfuels.csv": {
    "description": "The set agFuels of biofuel/biofuel_trends.gms (Aglink's fuel codes; l. 211-212), as written: one member per row, 4 (e.g. GAS, DIE, ET); read by tools/build/build_captrd_biofuel.py (tools/lib/gams_sets.py).",
    "kind": "structure",
@@ -6559,10 +6569,30 @@
     "builder": "build_captrd_sets (not in the trace yet)"
    }
   },
+  "capri_data/pipeline/captrd/sets/oil_to_cak.csv": {
+   "description": "The mapping OIL_TO_CAK (oils to their cakes; gams/captrd/sets_captrd.gms l. 289): one pair per row (d0, d1), 3 pairs (e.g. RAPO.RAPC); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730), whose members are the same, by tools/build/build_captrd_sets.py.",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
   "capri_data/pipeline/captrd/sets/oseco.csv": {
    "description": "CAPRI's global set OSECO (outputs and secondary products; gams/sets.gms l. 5080-5081): one member per row in d0, 92 members (e.g. SWHE, DWHE, RYEM); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the biofuel trends.",
    "kind": "structure",
    "rows": 92,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/oseeds.csv": {
+   "description": "CAPTRD's own set Oseeds (oilseeds as outputs; gams/captrd/sets_captrd.gms l. 262-266): one member per row in d0, 3 members (RAPE, SUNF, SOYA); transcribed in tools/build/build_captrd_sets.py.",
+   "kind": "structure",
+   "rows": 3,
    "columns": 1,
    "origin": {
     "nature": "capri",
@@ -6783,6 +6813,26 @@
     "builder": "build_captrd_sets (not in the trace yet)"
    }
   },
+  "capri_data/pipeline/captrd/sets/sed_to_oil.csv": {
+   "description": "The mapping SED_TO_OIL (oilseeds to their oils; gams/captrd/sets_captrd.gms l. 287): one pair per row (d0, d1), 3 pairs (e.g. RAPE.RAPO); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730), whose members are the same, by tools/build/build_captrd_sets.py.",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/shiftsugbpos.csv": {
+   "description": "CAPTRD's own set ShiftSugbPos (the sugar beet positions shifted along with GROF; gams/captrd/sets_captrd.gms l. 323-325): one member per row in d0, 6 members (e.g. FEDM, INDM, EAAG); transcribed in tools/build/build_captrd_sets.py.",
+   "kind": "structure",
+   "rows": 6,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
   "capri_data/pipeline/captrd/sets/splitacts.csv": {
    "description": "CAPRI's global set SplitActs (disaggregated activities in the model; gams/sets.gms l. 2310): one member per row in d0, 8 members (e.g. GRAE, DCOL); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py.",
    "kind": "structure",
@@ -6828,6 +6878,16 @@
    "kind": "structure",
    "rows": 14,
    "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/tradeest.csv": {
+   "description": "CAPTRD's own set tradeEst (the trade positions estimated; gams/captrd/sets_captrd.gms l. 314-316): one member per row in d0, 3 members (IMPT, EXPT, NTRD); transcribed in tools/build/build_captrd_sets.py.",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 1,
    "origin": {
     "nature": "capri",
     "builder": "build_captrd_sets (not in the trace yet)"

@@ -138,6 +138,22 @@ def supports(st: pd.DataFrame, step1: pd.DataFrame, years: Sequence[int], bas_ye
         S[rq] = 1.0
         out[t] = S
     sup = pd.DataFrame(out, index=idx)
+    # l. 290-293 also give a support to the DAYS / DAILY series without observations of their own where the activity's
+    # LEVL has them: max(0, 0.99 x lo), then at most 1.01 x up
+    lev_n = st["nobs"].xs("LEVL", level=2, drop_level=False) if "LEVL" in set(rows) else st["nobs"].iloc[:0]
+    known = set(idx)
+    extra = {}
+    for (c, r), (lo, up) in sets.reqfcnlim.items():
+        if not lo:
+            continue
+        v = 0.99 * lo if up is None else min(0.99 * lo, 1.01 * up)
+        for (reg, cc, _), nn in lev_n.items():
+            if cc == c and nn != 0.0 and (reg, c, r) not in known:
+                extra[(reg, c, r)] = v
+    if extra:
+        add = pd.DataFrame({t: list(extra.values()) for t in years},
+                           index=pd.MultiIndex.from_tuples(list(extra), names=idx.names))
+        sup = pd.concat([sup, add])
     # l. 327-329: the stored error variance with its floor, except for requirements and feed: CAPRI's 0.05 x |wAve|
     # (a level against a variance; CAPTRD_MOD.md section 12.4), or its square (floor_squared)
     no_floor = np.isin(rows, list(sets.reqst)) | np.isin(rows, list(sets.feed))
@@ -146,3 +162,13 @@ def supports(st: pd.DataFrame, step1: pd.DataFrame, years: Sequence[int], bas_ye
         fl = fl * fl
     wv = np.where(no_floor, st["wvarerr"].to_numpy(float), np.maximum(fl, st["wvarerr"].to_numpy(float)))
     return sup, pd.Series(np.where(has, wv, np.nan), index=idx)
+
+
+def uvag_from_dgagri1(support: Dict[Tuple[str, str, str, int], float], dgagri1: Dict[Tuple[str, str, str, int], float],
+                      *, ms: Iterable[str], s_rowsest: Iterable[str], exante: Sequence[int]) -> None:
+    """define_stats_and_supports.gms l. 355-356, in place: the member states' price supports (UVAG) = DG AGRI's scaled
+    prices (DGAgri1) where those are given (the wVarErr of l. 358-365 is the estimation's, not ported here)."""
+    msset, rows, yrs = set(ms), set(s_rowsest), set(exante)
+    for (r, c, w, y), v in dgagri1.items():
+        if c == "UVAG" and r in msset and w in rows and y in yrs and v:
+            support[(r, c, w, y)] = v

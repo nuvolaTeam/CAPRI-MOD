@@ -27,6 +27,7 @@ from capri_mod.pipeline.captrd import agriprod_supports as A
 from capri_mod.pipeline.captrd import expert_rules as XR
 from capri_mod.pipeline.captrd import national_supports as N
 from capri_mod.pipeline.captrd import prepare as P
+from capri_mod.pipeline.captrd import supports as SU
 from capri_mod.pipeline.tests.test_captrd_aglink import dgagri, need, aglink_p  # noqa: F401
 from capri_mod.pipeline.tests.test_captrd_scale_dgagri import scaled, EXANTE  # noqa: F401
 from capri_mod.pipeline.tests import test_captrd_biofuel_trends as TB
@@ -109,6 +110,11 @@ def state(dgagri, scaled, aglink_p, result):  # noqa: F811
         S.put(S.lo, k, a or 0.0)
         S.put(S.up, k, b or 0.0)
     prior = N.Expert(dict(S.ab), dict(S.pc), dict(S.tr), dict(S.lo), dict(S.up))
+    dg1 = {(r, c, w, int(y)): v for (r, c, w, y), v in dict(scaled[0]).items()}
+    # the stored supports of the other years, the ex-ante years' from before the expert supports (no stored value kept)
+    support = {**_kv(sup[sup.t.str.isdigit() & ~sup.t.isin([str(y) for y in T.exante])]),
+               **_pre_expert_supports(tuple(T.exante))}
+    SU.uvag_from_dgagri1(support, dg1, ms=s.ms, s_rowsest=s.s_rowsest, exante=T.exante)   # l. 355-356
     X = N.Context(
         ms=list(s.ms), runr=runr, nuts0=_g("NUTS0"), nuts0_and_2=_g("NUTS0_and_2"),
         nt2est=sorted({b for a, b in s.map_rr if a in set(s.ms) and b in set(s.nt2ext)}), nt2=s.srnuts2,
@@ -117,7 +123,7 @@ def state(dgagri, scaled, aglink_p, result):  # noqa: F811
         pact_to_y=pty, p_t_actagg=s.p_t_actagg, exante=T.exante, exantet=T.exantet, expostt=T.expostt,
         basyrsm=T.basyrsm, base_year=2017, bast_year=T.lst_expostt - 1, lst_expost=T.lst_expost,
         lst_expostt=T.lst_expostt, lst_exante=max(T.exante), lst_dgagri=T.lst_dgagri,
-        support={**_kv(sup[sup.t.str.isdigit()]), **_pre_expert_supports(tuple(T.exante))}, basm=bm70, bast=_kv(d[d.t == "BAST"], False),
+        support=support, basm=bm70, bast=_kv(d[d.t == "BAST"], False),
         bas=_kv(d[d.t == "BAS"], False), pdata=pd_all, dgagri1={(r, c, w, int(y)): v for (r, c, w, y), v in
                                                               dict(scaled[0]).items()},
         years=list(range(1984, 2071)))

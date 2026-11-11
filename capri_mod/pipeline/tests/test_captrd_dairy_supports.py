@@ -22,6 +22,7 @@ import pytest
 from capri_mod.external_paths import REFERENCE
 from capri_mod.pipeline.captrd import dairy_supports as D
 from capri_mod.pipeline.captrd import prepare as P
+from capri_mod.pipeline.captrd import supports as SU
 from capri_mod.pipeline.captrd import timesets as TS
 from capri_mod.pipeline.tests.test_captrd_aglink import dgagri, need  # noqa: F401
 from capri_mod.pipeline.tests.test_captrd_scale_dgagri import scaled, EXANTE  # noqa: F401
@@ -62,7 +63,11 @@ def result(scaled):  # noqa: F811
     runr = list(s.ms) + (["BL400000"] if "BL000000" in s.ms else [])
     tr = {}
     # the supports when expert_support.gms runs: the trend supports, not the stored ones the expert supports overwrote
-    support = {**_kv(sup), **{(r, c, w, str(y)): v for (r, c, w, y), v in pre_expert_supports(tuple(T.exante)).items()}}
+    pre = dict(pre_expert_supports(tuple(T.exante)))
+    SU.uvag_from_dgagri1(pre, {(r, c, w, int(y)): v for (r, c, w, y), v in dict(scaled[0]).items()}, ms=s.ms,
+                         s_rowsest=s.s_rowsest, exante=T.exante)               # l. 355-356
+    support = {**_kv(sup[~sup.t.isin([str(y) for y in T.exante])]),
+               **{(r, c, w, str(y)): v for (r, c, w, y), v in pre.items()}}
     dg = {k: v for k, v in scaled[1].items()} if isinstance(scaled[1], dict) else _kv(scaled[1])
     E, share = D.dairy(runr=runr, ms=s.ms, ms_no_eu28=s.msnoeu28, dcow=["DCOL", "DCOH"], base_year=2017,
                        exante_t=T.exantet, expost=T.expost, expostt=T.expostt, years_cur=T.years_cur, sim_years=resy,

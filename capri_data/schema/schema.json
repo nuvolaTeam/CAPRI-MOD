@@ -8732,7 +8732,9 @@
     "checks": [
      "tools/check/make_provenance.py"
     ],
-    "tests": []
+    "tests": [
+     "capri_mod/pipeline/tests/captrd_pre_expert.py"
+    ]
    }
   },
   "ctrd_ap_agriprod": {
@@ -9833,6 +9835,45 @@
     "tests": []
    }
   },
+  "ctrd_bio_prcd": {
+   "file": "capri_data/pipeline/captrd/sets/bio_prcd.csv",
+   "declared_in": "43_captrd_final.sql",
+   "layout": [],
+   "comment": "CAPRI's global mapping BIO_PRCD (biofuels to their feedstocks; gams/sets.gms l. 4981): one pair per row (d0, d1), 12 pairs (e.g. BIOE.MAIZ, BIOD.RAPO); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "d1",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0",
+    "d1"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_bio_primesms_extra": {
    "file": "capri_data/pipeline/captrd/sets/biofuel/primesms_extra.csv",
    "declared_in": "38_captrd_biofuel.sql",
@@ -10273,7 +10314,9 @@
     "checks": [
      "tools/check/make_provenance.py"
     ],
-    "tests": []
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_expert_support.py"
+    ]
    }
   },
   "ctrd_biofuels": {
@@ -12775,11 +12818,83 @@
     "tests": []
    }
   },
+  "ctrd_oil_to_cak": {
+   "file": "capri_data/pipeline/captrd/sets/oil_to_cak.csv",
+   "declared_in": "43_captrd_final.sql",
+   "layout": [],
+   "comment": "The mapping OIL_TO_CAK (oils to their cakes; gams/captrd/sets_captrd.gms l. 289): one pair per row (d0, d1), 3 pairs (e.g. RAPO.RAPC); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730), whose members are the same, by tools/build/build_captrd_sets.py.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "d1",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0",
+    "d1"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_oseco": {
    "file": "capri_data/pipeline/captrd/sets/oseco.csv",
    "declared_in": "38_captrd_biofuel.sql",
    "layout": [],
    "comment": "CAPRI's global set OSECO (outputs and secondary products; gams/sets.gms l. 5080-5081): one member per row in d0, 92 members (e.g. SWHE, DWHE, RYEM); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the biofuel trends.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_oseeds": {
+   "file": "capri_data/pipeline/captrd/sets/oseeds.csv",
+   "declared_in": "43_captrd_final.sql",
+   "layout": [],
+   "comment": "CAPTRD's own set Oseeds (oilseeds as outputs; gams/captrd/sets_captrd.gms l. 262-266): one member per row in d0, 3 members (RAPE, SUNF, SOYA); transcribed in tools/build/build_captrd_sets.py.",
    "columns": [
     {
      "name": "d0",
@@ -14152,6 +14267,78 @@
     "tests": []
    }
   },
+  "ctrd_sed_to_oil": {
+   "file": "capri_data/pipeline/captrd/sets/sed_to_oil.csv",
+   "declared_in": "43_captrd_final.sql",
+   "layout": [],
+   "comment": "The mapping SED_TO_OIL (oilseeds to their oils; gams/captrd/sets_captrd.gms l. 287): one pair per row (d0, d1), 3 pairs (e.g. RAPE.RAPO); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730), whose members are the same, by tools/build/build_captrd_sets.py.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "d1",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0",
+    "d1"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_shiftsugbpos": {
+   "file": "capri_data/pipeline/captrd/sets/shiftsugbpos.csv",
+   "declared_in": "43_captrd_final.sql",
+   "layout": [],
+   "comment": "CAPTRD's own set ShiftSugbPos (the sugar beet positions shifted along with GROF; gams/captrd/sets_captrd.gms l. 323-325): one member per row in d0, 6 members (e.g. FEDM, INDM, EAAG); transcribed in tools/build/build_captrd_sets.py.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_splitacts": {
    "file": "capri_data/pipeline/captrd/sets/splitacts.csv",
    "declared_in": "29_captrd_more.sql",
@@ -14331,6 +14518,39 @@
     "tests": [
      "capri_mod/pipeline/tests/test_captrd_biofuel_trends.py"
     ]
+   }
+  },
+  "ctrd_tradeest": {
+   "file": "capri_data/pipeline/captrd/sets/tradeest.csv",
+   "declared_in": "43_captrd_final.sql",
+   "layout": [],
+   "comment": "CAPTRD's own set tradeEst (the trade positions estimated; gams/captrd/sets_captrd.gms l. 314-316): one member per row in d0, 3 members (IMPT, EXPT, NTRD); transcribed in tools/build/build_captrd_sets.py.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
    }
   },
   "ctrd_urbannuts": {
@@ -53184,7 +53404,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 268,
+  "capri/keep": 292,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 26,
