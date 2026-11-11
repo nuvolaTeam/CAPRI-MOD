@@ -4419,6 +4419,20 @@
     "builder": "build_captrd_dairy (not in the trace yet)"
    }
   },
+  "capri_data/pipeline/captrd/dat/longrun_p_longruninfoall.csv": {
+   "description": "The long-run change factors, data and shares p_longRunInfoAll(region, col, row, info, scenario, year or B2000) of results/global/longrun_info_fac_defaulta.gdx for the scenario of the setting captrd.longrun_scenario (CAPTRD's %SelecScen%), the member states CAPTRD projects and World; 0 rows: the reference run's selection globiom_eu_bright_s0_2023+REFERENCE+REFERENCE has no records in that file (tools/build/build_captrd_longrun.py).",
+   "kind": "coefficients",
+   "rows": 0,
+   "columns": 7,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/pipeline/captrd/longrun_supports.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_longrun (not in the trace yet)"
+   }
+  },
   "capri_data/pipeline/captrd/dat/macro_p_aglinkmacroeu.csv": {
    "description": "The EU countries' Aglink macro data p_aglinkMacroEU(ctrCode, var, year) of dat/baseline/aglink2023macro.xlsx (sheet for_gams, A2:D5600; load_aglink2023dgAgri.gms l. 924), the rows of POP and GDPR; 2214 rows (tools/build/build_captrd_macro.py).",
    "kind": "coefficients",

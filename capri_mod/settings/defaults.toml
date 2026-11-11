@@ -545,6 +545,12 @@ milk_quota_expiry = 2009
 # globiom_eu_bright_s0_2023; the reference run results_1770 did not apply it (the member states' biofuel positions after
 # 2020 move in its results, Germany's ethanol use among them): off, as that run. The project lead decides (11 November 2026)
 const_bioenergy = false
+# %SelecScen% (captrd.gms; the reference run's "Long run baseline selection"): the long-run scenario whose change
+# factors longrun_supports.gms reads from results/global/longrun_info_fac_%reg_agg%.gdx (tools/build/
+# build_captrd_longrun.py keeps its records). The reference run's selection is not in that file (only
+# GLOBIOM_EU_EUCLIMIT6_S2_50CV and SSP2+ref_REF+scenRCPref are), so it ran without GLOBIOM long-run supports, as this
+# setting does with the file in hand (11 November 2026)
+longrun_scenario = "globiom_eu_bright_s0_2023+REFERENCE+REFERENCE"
 
 [pipeline]
 # The data download layer (capri_mod/pipeline; docs/DATA_PIPELINE.md). Where the store (raw downloads, manifest, Delta

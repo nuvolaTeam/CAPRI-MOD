@@ -298,6 +298,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/pipeline/captrd/dat/dairy_p_dcowmilkprod.csv', 'coefficients', 'by file: CAPRI''s dat inputs to CAPTRD'),
   ('capri_data/pipeline/captrd/dat/dairy_p_milkdeliveries.csv', 'coefficients', 'by file: CAPRI''s dat inputs to CAPTRD'),
   ('capri_data/pipeline/captrd/dat/dairy_p_nrcows.csv', 'coefficients', 'by file: CAPRI''s dat inputs to CAPTRD'),
+  ('capri_data/pipeline/captrd/dat/longrun_p_longruninfoall.csv', 'coefficients', 'by file: CAPRI''s dat inputs to CAPTRD'),
   ('capri_data/pipeline/captrd/dat/macro_p_aglinkmacroeu.csv', 'coefficients', 'by file: CAPRI''s dat inputs to CAPTRD'),
   ('capri_data/pipeline/captrd/dat/macro_ssp_data.csv', 'coefficients', 'by file: CAPRI''s dat inputs to CAPTRD'),
   ('capri_data/pipeline/captrd/dat/macro_worldpop.csv', 'coefficients', 'by file: CAPRI''s dat inputs to CAPTRD'),

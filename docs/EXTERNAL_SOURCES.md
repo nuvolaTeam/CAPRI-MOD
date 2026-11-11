@@ -88,15 +88,23 @@ copies of the area table are identical in levels: one kept).
 
 **`results/global/`**: CAPRI's global results that CAPTRD reads (captrd/longrun_supports.gms):
 `longrun_info_fac_defaulta.gdx` (p_longRunInfoAll) and `GLOBIOM_GL_longrun_defaulta.gdx` (p_globiomInfo).
-- From: the project lead's installation (9-10 November 2026).
-- Read by: not yet (CAPTRD-MOD Steps 2-3).
+- From: the project lead's installation (9-10 November 2026). Re-sent on 11 November 2026, identical (SHA-256);
+  `GLOBIOM_EU_longrun_defaulta.gdx` received the same day (p_globiomInfo, scenario GLOBIOM_EU_EUCLIMIT6_S2_50CV
+  only), in this folder.
+- The files hold the scenarios GLOBIOM_EU_EUCLIMIT6_S2_50CV and SSP2+ref_REF+scenRCPref, not the reference run's
+  selection globiom_eu_bright_s0_2023+REFERENCE+REFERENCE (CAPTRD's results_1770 hold no Longrun records: the run had
+  no GLOBIOM long-run information).
+- Read by: tools/build/build_captrd_longrun.py (through dat_parquet/global/longrun_info_fac_defaulta).
 
 **`gams_extra/`**: `fortrd.gms`, CAPTRD's settings include as delivered (empty: the GUI sets CAPTRD's settings; the
 reference run's are its META, docs/design/CAPTRD_MOD.md).
 
 **`dat_parquet/`**: GDX files of `dat_local/` converted to Parquet by tools/build/convert_capri_gdx.py (every record,
 NA and UNDF named in the column `special`), one folder per file and one file per symbol:
-`baseline/aglink2023dgAgri_oriEUdata/` (all 29 symbols) and `baseline/AGLINK2019dgagri_oridata/p_aglinkOri.parquet`.
+`baseline/aglink2023dgAgri_oriEUdata/` (all 29 symbols) and `baseline/AGLINK2019dgagri_oridata/p_aglinkOri.parquet`;
+added on 11 November 2026: `baseline/data_SSPV3_update/` (SSP_DATA), `arm/allpop/` (worldPop),
+`global/longrun_info_fac_defaulta/` (of results/global) and `global/globiom_eu_bright_s0_2023+REFERENCE+REFERENCE/`
+(the 36 symbols of the GLOBIOM file below).
 - Read by: capri_mod/pipeline/captrd/aglink.py (CAPTRD's Aglink stage; c, m, p, m_eq, p_dbvar and the 2019 fish data)
   and tools/build/build_captrd_aglink_sets.py (c, m, p, m_eq).
 
@@ -121,6 +129,9 @@ NA and UNDF named in the column `special`), one folder per file and one file per
     (p_fossilFuel; equal to the mirror's record for record), `biofuel_data.gms`,
     `POTENCIA_processing/POTENCIA_transport_energy_outlook.gdx`;
   - `global/reg_mappings.xlsx` (GlobiomCountry, GlobiomCountry_FAOreg, FAOreg_AGLINKregions, l. 931-951).
+- Added on 11 November 2026: `global/globiom_eu_bright_s0_2023+REFERENCE+REFERENCE.gdx`, GLOBIOM-EU's Brightspace
+  2023 baseline (A. Deppermann to P. Witzke, 23 October 2023, per global/convert_globiom.gms l. 282-287), the raw input
+  of the long-run selection of the reference run; read by CAPRI's global/convert_globiom.gms (not ported yet).
 
 **`results/permits/`**, **`results/arm/`**: CAPRI's GHG and technology result files, received 10 November 2026, as
 capmod.gms l. 1641-1645 writes them (results\permits\res_<scenario>_21730.gdx: v_Miti, p_ghgMiti, EMISCALC,

@@ -71,6 +71,7 @@ UNTRACED = {
     "capri_data/pipeline/captrd/dat/macro_p_aglinkmacroeu.csv": ("build_captrd_macro", "CAPRI"),
     "capri_data/pipeline/captrd/dat/macro_ssp_data.csv": ("build_captrd_macro", "CAPRI"),
     "capri_data/pipeline/captrd/dat/macro_worldpop.csv": ("build_captrd_macro", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/longrun_p_longruninfoall.csv": ("build_captrd_longrun", "CAPRI"),
     "capri_data/pipeline/captrd/dat/national_p_fromnecp.csv": ("build_captrd_national", "CAPRI"),
     "capri_data/pipeline/captrd/dat/agriprod_p_agriprod.csv": ("build_captrd_agriprod", "CAPRI"),
     "capri_data/pipeline/captrd/dat/agriprod_p_reqfcnlim.csv": ("build_captrd_agriprod", "CAPRI"),

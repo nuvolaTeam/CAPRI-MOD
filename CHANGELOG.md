@@ -32,6 +32,31 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — CAPTRD-MOD stage 2d: the long-run supports
+
+- `capri_mod/pipeline/captrd/longrun_supports.py` ports captrd/longrun_supports.gms with GlobiomAact and
+  FixExogenFactGlobiom off:
+  - the B2000 means;
+  - the scenario's change factors, with the bright and cv50 corrections;
+  - Longrun of the long-run years, interpolated, cleaned and scaled to BAST;
+  - HCOM.SUGA per head;
+  - the merge of the national PercentChange with Longrun from %phaseInYr% (Longrun1), and Longrun1 as Absolute where
+    nothing else is given.
+
+  The long-run selection is the new setting `captrd.longrun_scenario` (the reference run's
+  globiom_eu_bright_s0_2023+REFERENCE+REFERENCE). Its records come from longrun_info_fac_defaulta.gdx as CSV
+  (`tools/build/build_captrd_longrun.py`, 42_captrd_longrun.sql); none in the file in hand, as in the reference run.
+- Parity (test_captrd_longrun_supports.py, after the national supports):
+  - no Longrun or Longrun1 records, as in CAPTRD's results;
+  - all 158,370 B2000 values equal CAPTRD's (now exported from results_1770.gdx with expertLo and expertUp);
+  - the file changes only HCOM.SUGA, 315 Absolute supports, all equal to CAPTRD's Expert.
+
+  The GLOBIOM merge itself is ported but not checked against CAPRI: the reference run had no long-run data.
+- test_captrd_national_supports.py: the expert bounds of the national and agriprod supports equal CAPTRD's stored
+  expertLo and expertUp (1,181 and 1,022 after 2018).
+- Received: GLOBIOM-EU's raw Brightspace 2023 file (dat/global/globiom_eu_bright_s0_2023+REFERENCE+REFERENCE.gdx),
+  the input of CAPRI's global/convert_globiom.gms for that scenario (not ported yet).
+
 ## 11 November 2026 — CAPTRD-MOD stage 2d: the population path; the reference run had no GLOBIOM long-run data
 
 - `capri_mod/pipeline/captrd/macro.py` ports two pieces:

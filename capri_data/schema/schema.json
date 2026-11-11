@@ -11562,6 +11562,85 @@
     "tests": []
    }
   },
+  "ctrd_longrun_p_longruninfoall": {
+   "file": "capri_data/pipeline/captrd/dat/longrun_p_longruninfoall.csv",
+   "declared_in": "42_captrd_longrun.sql",
+   "layout": [],
+   "comment": "The long-run change factors, data and shares p_longRunInfoAll(region, col, row, info, scenario, year or B2000) of results/global/longrun_info_fac_defaulta.gdx for the scenario of the setting captrd.longrun_scenario (CAPTRD's %SelecScen%), the member states CAPTRD projects and World; 0 rows: the reference run's selection globiom_eu_bright_s0_2023+REFERENCE+REFERENCE has no records in that file (tools/build/build_captrd_longrun.py).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "col",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "row",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "info",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "scenario",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "col",
+    "row",
+    "info",
+    "scenario",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "longrun_p_longruninfoall.value: by info (factorB2000: change factor over 2000; data: GLOBIOM''s level; share: demand share)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_longrun (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/pipeline/captrd/longrun_supports.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "ctrd_maact": {
    "file": "capri_data/pipeline/captrd/sets/maact.csv",
    "declared_in": "29_captrd_more.sql",
@@ -12185,7 +12264,9 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_longrun_supports.py"
+    ]
    }
   },
   "ctrd_ms": {
@@ -13714,6 +13795,7 @@
     "builders": [],
     "checks": [],
     "tests": [
+     "capri_mod/pipeline/tests/test_captrd_longrun_supports.py",
      "capri_mod/pipeline/tests/test_captrd_prepare.py"
     ]
    }
@@ -53100,7 +53182,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 235,
+  "capri/keep": 263,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 26,

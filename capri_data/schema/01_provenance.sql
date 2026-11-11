@@ -292,6 +292,7 @@ INSERT INTO provenance (file, nature, origins, builder, sources) VALUES
   ('capri_data/pipeline/captrd/dat/dairy_p_dcowmilkprod.csv', 'capri', 'CAPRI', 'build_captrd_dairy (not in the trace yet)', NULL),
   ('capri_data/pipeline/captrd/dat/dairy_p_milkdeliveries.csv', 'capri', 'CAPRI', 'build_captrd_dairy (not in the trace yet)', NULL),
   ('capri_data/pipeline/captrd/dat/dairy_p_nrcows.csv', 'capri', 'CAPRI', 'build_captrd_dairy (not in the trace yet)', NULL),
+  ('capri_data/pipeline/captrd/dat/longrun_p_longruninfoall.csv', 'capri', 'CAPRI', 'build_captrd_longrun (not in the trace yet)', NULL),
   ('capri_data/pipeline/captrd/dat/macro_p_aglinkmacroeu.csv', 'capri', 'CAPRI', 'build_captrd_macro (not in the trace yet)', NULL),
   ('capri_data/pipeline/captrd/dat/macro_ssp_data.csv', 'capri', 'CAPRI', 'build_captrd_macro (not in the trace yet)', NULL),
   ('capri_data/pipeline/captrd/dat/macro_worldpop.csv', 'capri', 'CAPRI', 'build_captrd_macro (not in the trace yet)', NULL),
