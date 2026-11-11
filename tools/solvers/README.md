@@ -6,24 +6,25 @@ result is a wheel you install with pip in place of PyPI's CasADi.
 
 - Script: `build_casadi_spral_omp_wheel.py`.
 - Patch: `casadi_3.8.1_spral_openmp.patch`.
-- Status: these steps have run here only up to the start of the core build (sources, SWIG, mockups, the first external
-  projects). The Python, graft and wheel steps follow CasADi's release workflow but have not been run end to end.
+- Status: on Red Hat 9 the steps have run through the sources, SWIG and most of the core build (to 84%, in parallel
+  runs that stopped at the problems fixed below; not yet rerun with the fixes). The Python, graft and wheel steps follow
+  CasADi's release workflow but have not been run end to end.
   If a step fails, the log says which one, and running the script again resumes there.
-- Fixed on 11 November 2026: the SWIG step stopped at its configure on Red Hat 9 with "No SOURCES given to target:
-  _casadi" (the patch switches SWIG_IMPORT on before the wrappers exist; the step now passes `-DSWIG_IMPORT=OFF`, as
-  CasADi's own workflow generates them before switching it). Rerun the same command: the step is repeated whenever its
-  wrapper file is missing.
-- Fixed on 11 November 2026: the core build stopped at the WORHP plugin (`Params` has no `ScaledKKT`): the script took
-  CasADi's solver mockups at v116, whose WORHP headers no longer match CasADi 3.8.1; it now takes v111, the release
-  CasADi's workflow used when 3.8.1 was built, and rebuilds an earlier run's mockups by itself.
-- Fixed on 11 November 2026: the core build stopped in SPRAL ("Cannot open module file 'spral_matrix_util.mod'", then
-  'spral_ssids_contrib.mod'): SPRAL's Makefile (the version CasADi 3.8.1 builds) misses module dependencies, so a
-  parallel make can compile a file before the module it uses (CasADi's own workflow calls it a known race). The patch
-  now builds SPRAL with `make -j1` (the rest stays parallel). The script applies a changed patch again by itself and
-  repeats the core build; rerun the same command.
-- Fixed on 11 November 2026 (the v111 pin above was not enough): the core build also clones and builds the mockups
-  itself, from their master branch, and compiles the WORHP plugin against that copy. The script now passes
-  `-DBUILD_MOCKUPS_VERSION=v111` to the core build and removes an earlier run's copy of another release.
+- Fixed on 11 November 2026, from your Red Hat logs:
+  - SWIG step: "No SOURCES given to target: _casadi" (the patch switches SWIG_IMPORT on before the wrappers exist; the
+    step now passes `-DSWIG_IMPORT=OFF`, as CasADi's workflow generates them before switching it).
+  - WORHP plugin: `Params` has no `ScaledKKT`. The solver mockups' master branch (v114 on) dropped it. With the build
+    flags' `WITH_MOCKUP_*`, the core build clones the mockups itself, and the script now passes
+    `-DBUILD_MOCKUPS_VERSION=v111` (the release CasADi 3.8.1 was built against) and removes an earlier run's copy.
+    The separate mockups step is gone: with `WITH_MOCKUP_*` the core skips the search for these solvers and
+    does not use it, and its folder, most likely only partly removed (files the container wrote are root's), made
+    the last run stop ("/work/mockups does not appear to contain CMakeLists.txt").
+  - SPRAL: "Cannot open module file 'spral_matrix_util.mod'", then 'spral_ssids_contrib.mod'. SPRAL's Makefile misses
+    module dependencies (CasADi's workflow calls it a known parallel-build race). The patch builds SPRAL with
+    `make -j1`, and the whole build is now serial by default, as CasADi's.
+  - The script applies a changed patch again by itself and repeats the core build. Rerun the same command on the
+    same work folder; the leftover `mockups` and `mockups_install` folders there are no longer used and can be
+    deleted (with `sudo` if the container wrote them as root).
 
 ## What you need
 
@@ -37,7 +38,7 @@ result is a wheel you install with pip in place of PyPI's CasADi.
   - `coin-or-tools.github.io` (MUMPS and METIS sources);
   - `gitlab.com` (Eigen);
   - `pypi.org` and `files.pythonhosted.org` (two small tools inside the container).
-- Time: several hours on 2 cores, much less on more.
+- Time: several hours (the build is serial by default, as CasADi's own workflow runs it).
 
 ## Steps
 
@@ -48,17 +49,21 @@ result is a wheel you install with pip in place of PyPI's CasADi.
    # copy build_casadi_spral_omp_wheel.py and casadi_3.8.1_spral_openmp.patch here
    ```
 
-2. Run the build, with as many parallel jobs as your cores:
+2. Run the build:
 
    ```
-   python3 build_casadi_spral_omp_wheel.py ~/casadi-omp/work --jobs $(nproc)
+   python3 build_casadi_spral_omp_wheel.py ~/casadi-omp/work
    ```
+
+   It builds serially, as CasADi's own release workflow does (`cmake --build` without `-j`). `--jobs N` runs N jobs
+   in parallel and is faster, but leaves the path CasADi tests: some external projects' Makefiles miss dependencies
+   (SPRAL's did, and the patch now builds SPRAL serially in any case).
 
    The script:
-   - clones CasADi 3.8.1, CasADi's solver mockups (v111) and its library grafter, and applies the patch;
+   - clones CasADi 3.8.1 and its library grafter, and applies the patch;
    - pulls `ghcr.io/casadi/ci-swig` and `ghcr.io/jgillis/manylinux_2_28-x64:production`, CasADi's own build images;
-   - generates the Python wrappers, builds the mockups, the core with every plugin of PyPI's wheel, and the Python 3.11
-     limited-API module;
+   - generates the Python wrappers, builds the core with every plugin of PyPI's wheel (the core clones and builds the
+     solver mockups itself, pinned to v111), and the Python 3.11 limited-API module;
    - grafts the runtime libraries (libgomp, libgfortran, ...) into the package under renamed names, as PyPI's wheel
      has them, and packs the wheel.
 

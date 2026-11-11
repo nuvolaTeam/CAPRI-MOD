@@ -19,20 +19,23 @@ API) with one change, tools/solvers/casadi_3.8.1_spral_openmp.patch:
 
 Everything else is CasADi's: the same images (ghcr.io/casadi/ci-swig for the SWIG sources, ghcr.io/jgillis/
 manylinux_2_28-x64:production for the build), the same build_flags (read from binaries.yml at the tag, so every plugin
-of PyPI's wheel), the solver mockups (github.com/casadi/mockups at v111, built from source here: their release zip is a
-github.com download, not reachable from the build machine), the grafting of the runtime libraries into the package
+of PyPI's wheel), the solver mockups (github.com/casadi/mockups at v111, which the core build clones and builds itself
+for the build_flags' WITH_MOCKUP_* solvers: binaries.yml's own note, "no mockups/cmake prefix needed"), the core and
+python builds run serially as binaries.yml runs them (cmake --build without -j; --jobs N is faster and leaves
+CasADi's tested path), the grafting of the runtime libraries into the package
 (github.com/jgillis/universal_grafter: jgillis's auditwheel fork renames libgomp, libgfortran and the others with hashed
 names, as in PyPI's wheel) and the wheel packer (misc/create_wheel_local.py). The wheel's version is 3.8.1+spral.omp, so
 pip and the run manifest tell it from PyPI's.
 
-    python tools/solvers/build_casadi_spral_omp_wheel.py WORKDIR [--jobs N]
+    python tools/solvers/build_casadi_spral_omp_wheel.py WORKDIR [--jobs N]   (N: parallel jobs, default 1)
 
 Needs a container engine (Docker, or podman: Red Hat's, used as docker; SELinux's relabelling of the bind mounts is
 added when it is enforcing), git, Python 3, and network access to github.com (git), ghcr.io, coin-or-tools.github.io (CasADi's MUMPS
 and METIS 4 sources) and gitlab.com (Eigen). The steps leave stamp files in WORKDIR/stamps and are skipped when there;
-the build takes hours on two cores and about 8 GB of disk (the images 7 GB more). Tested on 1 November 2026 up to the
-core build's first external projects (sources, SWIG, mockups, the start of the core); the python, graft and wheel
-steps follow binaries.yml and universal_grafter but have not run yet. The wheel is written to WORKDIR/dist. Not committed; the
+the build takes hours (serially) and about 8 GB of disk (the images 7 GB more). Run on Red Hat 9 on 11 November 2026
+through the sources, SWIG and most of the core build (to 84%, in parallel runs that stopped at the WORHP mockup and
+SPRAL's module order, both fixed since, not yet rerun); the python, graft and wheel steps follow binaries.yml and
+universal_grafter but have not run yet. The wheel is written to WORKDIR/dist. Not committed; the
 library inside it is loaded by CasADi itself, so supply.nlp_ipopt_library stays "" with it and
 supply.nlp_linear_solver = "spral" selects SPRAL (capri_mod/utils/ipopt_library.py's OpenMP rules apply: the threads
 of a process that forks its workers).
@@ -43,7 +46,6 @@ import argparse
 import hashlib
 import os
 import re
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -53,8 +55,8 @@ CASADI_TAG = "3.8.1"
 #: the mockups release CasADi 3.8.1 (16 September 2026) was built against: binaries.yml uses casadi/mockups@master, whose
 #: action downloaded v111 then; v114 on (15 October 2026) regenerated the WORHP mockup without Params.ScaledKKT, which
 #: 3.8.1's worhp_interface.cpp l. 409 reads (the build stopped there on Red Hat 9, 11 November 2026). The build_flags'
-#: WITH_MOCKUP_* make the core build clone and build the mockups itself too (CMakeLists.txt l. 1231-1324, its
-#: BUILD_MOCKUPS_VERSION defaulting to master), and its WORHP plugin compiles against that copy: the tag is passed there
+#: WITH_MOCKUP_* make the core build clone and build the mockups itself (CMakeLists.txt l. 1231-1324, its
+#: BUILD_MOCKUPS_VERSION defaulting to master) and compile the plugins against that copy: the tag is passed there
 MOCKUPS_TAG = "v111"
 BUILD_IMAGE = "ghcr.io/jgillis/manylinux_2_28-x64:production"
 SWIG_IMAGE = "ghcr.io/casadi/ci-swig:latest"
@@ -117,7 +119,9 @@ def done(work: Path, name: str):
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("work", type=Path)
-    ap.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
+    ap.add_argument("--jobs", type=int, default=1,
+                    help="parallel build jobs (default 1, serial as binaries.yml: some external projects' Makefiles "
+                         "miss dependencies)")
     a = ap.parse_args()
     work = a.work.expanduser().resolve()
     work.mkdir(parents=True, exist_ok=True)
@@ -128,9 +132,6 @@ def main() -> None:
         if not (work / "casadi").exists():
             sh(["git", "clone", "--depth", "1", "-b", CASADI_TAG, "--recurse-submodules", "--shallow-submodules",
                 "https://github.com/casadi/casadi", "casadi"], cwd=work, log=log)
-        if not (work / "mockups").exists():
-            sh(["git", "clone", "--depth", "1", "-b", MOCKUPS_TAG, "https://github.com/casadi/mockups", "mockups"],
-               cwd=work, log=log)
         if not (work / "universal_grafter").exists():
             sh(["git", "clone", "--depth", "1", "https://github.com/jgillis/universal_grafter", "universal_grafter"],
                cwd=work, log=log)
@@ -162,23 +163,6 @@ def main() -> None:
             sys.exit(f"the SWIG step did not write {wrapper}: see {log}")
         done(work, "swig")
 
-    tagfile = work / "stamps" / "mockups_tag"
-    stale = tagfile.read_text().strip() != MOCKUPS_TAG if tagfile.exists() else stamp(work, "mockups")
-    if (work / "mockups").exists() and stale:
-        # an earlier run's mockups of another release: cloned and built again
-        for d in (work / "mockups", work / "mockups_install"):
-            shutil.rmtree(d, ignore_errors=True)
-        (work / "stamps" / "mockups").unlink(missing_ok=True)
-    if not (work / "mockups").exists():
-        sh(["git", "clone", "--depth", "1", "-b", MOCKUPS_TAG, "https://github.com/casadi/mockups", "mockups"],
-           cwd=work, log=log)
-    if not stamp(work, "mockups"):
-        docker(work, BUILD_IMAGE, "cd mockups && cmake -B build_mock -DCMAKE_BUILD_TYPE=Release "
-               "-DCMAKE_INSTALL_PREFIX=/work/mockups_install . && cmake --build build_mock -j2 "
-               "&& cmake --install build_mock", log)
-        done(work, "mockups")
-        tagfile.write_text(MOCKUPS_TAG + "\n")
-
     if not stamp(work, "core"):
         # binaries.yml's core-dockcross job, the core's own mockups at MOCKUPS_TAG (an earlier run's copy of another
         # release removed, so that it is cloned again)
@@ -188,7 +172,7 @@ def main() -> None:
             "build/external_projects/src/mockups-external-stamp build/external_projects/mockups && ")
         docker(work, BUILD_IMAGE, f"cd casadi && {clean}rm -f build/CMakeCache.txt && cmake -Bbuild "
                "-DCMAKE_BUILD_TYPE=Release -DWITH_SELFCONTAINED=ON $(cat /work/build_flags.txt) "
-               f"-DBUILD_MOCKUPS_VERSION={MOCKUPS_TAG} -DCMAKE_PREFIX_PATH=/work/mockups_install/cmake "
+               f"-DBUILD_MOCKUPS_VERSION={MOCKUPS_TAG} "
                f"-H. && cmake --build build -j{a.jobs}", log)
         core_tag.write_text(MOCKUPS_TAG + "\n")
         done(work, "core")
