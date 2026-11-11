@@ -12,8 +12,10 @@ trust level; the other 128 are accounted for by a later stage or by the stored r
     (l. 719-833) sets again;
   - CS000000's DOMM.COMI, whose support CAPTRD's results hold only as the reporting re-aggregate;
   - BL400000's dairy herds (HERD), whose BASM is not among CAPTRD's stored results.
-longrun_supports.gms runs after this file and is not ported yet; the PercentChange positions this file leaves are
-equal to CAPTRD's nonetheless (that file merges long-run information only where it has some).
+The expert bounds of this file and of agriprod_supports.gms equal CAPTRD's stored expertLo and expertUp
+(test_expert_bounds_equal_captrds). longrun_supports.gms runs after this file; in the reference run it had no
+long-run information (the selected GLOBIOM scenario is missing from its data), so the PercentChange positions this
+file leaves are CAPTRD's.
 """
 from __future__ import annotations
 
@@ -195,3 +197,24 @@ def test_national_supports_equal_captrds(state):
     assert len(m) > 6000 and len(rest) > 6500
     assert rest.ok.all() and rest.tok.all()
     assert int(known.sum()) < 150
+
+
+@pytest.mark.slow
+@need
+def test_expert_bounds_equal_captrds(state):
+    """The expert bounds this file and agriprod_supports.gms set (p_result expertLo, expertUp) equal CAPTRD's stored
+    ones in the years after 2018 (11 November 2026: 1,181 lower and 1,022 upper bounds; CAPTRD's others are the
+    nutrient intake bounds of a source not ported yet, N_CAL and N_PRO .INCE, and DOMM's under DEMD, the
+    reporting's copy)."""
+    S, prior, nat, X, s = state
+    for name, mine in (("expertLo", S.lo), ("expertUp", S.up)):
+        ref = _ref(name)
+        ref = ref[ref.t.str.isdigit()]
+        R = {(r, c, w, int(t)): v for r, c, w, t, v in zip(ref.region, ref.col, ref.row, ref.t, ref.value)}
+        keys = [k for k in mine if k[3] in set(X.exantet)]
+        bad = [k for k in keys if abs(mine[k] - R.get(k, 0.0)) > 1e-6 * max(abs(R.get(k, 0.0)), 1e-6)]
+        assert len(keys) > 1000 and not bad, bad[:10]
+        # CAPTRD's reporting keeps the estimated DOMM under DEMD (aggreg_and_report.gms l. 293-294)
+        rest = {k[2] for k in R if k[3] in set(X.exantet) and k not in mine
+                and not (k[1] == "DEMD" and (k[0], "DOMM", k[2], k[3]) in mine)}
+        assert rest <= {"INCE"}, rest
