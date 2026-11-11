@@ -1,7 +1,7 @@
 -- The supply models' land rents, own-price supply elasticities, fertiliser coefficients and the mineral N price.
 -- Long files: the unit of each numeric column is in value_units, the column's name as the item.
 
--- file: capri_data/baselines/capri_greendeal_ref/2017_2030/supply/land_rents_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/land_rents_2030.csv
 CREATE TABLE land_rents_2030 (
     region VARCHAR PRIMARY KEY REFERENCES regional_units (region),
     capri_source VARCHAR NOT NULL,                     -- the CAPRI region(s) the rents are from (free text)

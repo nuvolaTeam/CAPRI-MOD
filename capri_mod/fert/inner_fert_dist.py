@@ -18,7 +18,7 @@ e_s: mineral efficiency (1 - losses), manure availability, residue availability.
 with the gamma parameters from the prior mode m_gs and accuracy a (supply/set_fert_priors.gms):
   var = (m / a)^2,  beta = (m + sqrt(m^2 + 4 var)) / (2 var),  alpha = beta^2 var.
 In a simulation the prior mode is the baseline's posterior mode per hectare times the group's current area
-(sourceStat postMode; capri_data/baselines/capri_greendeal_ref/2017_2030/environment/fert_dist_priors_2030.csv, accuracy 1).
+(sourceStat postMode; capri_data/baselines/capri_greendeal_ref/1730/environment/fert_dist_priors_2030.csv, accuracy 1).
 
 Optional "regulations" (fertDistRegulation; beta densities on per-group flows, e_fertDistPartialRegu): a maximum
 per hectare y_max on a flow adds (beta1 - 1) / x - (beta2 - 1) / (Y - x) with Y = y_max x area, mode 0.75 y_max,

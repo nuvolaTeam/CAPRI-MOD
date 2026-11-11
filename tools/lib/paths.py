@@ -28,7 +28,7 @@ FOLDERS = ("lib", "build", "run", "check", "gams", "solvers")
 #: the model's data: the base years' folders and the baselines' (docs/design/DATA_LAYOUT.md step (d), 11 November 2026)
 DATA = ROOT / "capri_data"
 #: the builders' baseline: CAPRI's 2030 Green Deal baseline projected from 2017 (run.baseline = "capri_greendeal_ref")
-BASELINE_DATA = DATA / "baselines" / "capri_greendeal_ref" / "2017_2030"
+BASELINE_DATA = DATA / "baselines" / "capri_greendeal_ref" / "1730"
 #: the base year whose folder the builders write (the 2017 data of CAPREG and COCO)
 BASE_YEAR = "2017"
 

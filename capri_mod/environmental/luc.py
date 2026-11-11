@@ -11,7 +11,7 @@ its regional solution.
 The first-order conditions with the adding-up constraints are those of the posterior mode - the maximum of
 sum (alpha - 1) log T - beta T under the adding-up constraints - which is solved here (concave, unique).
 
-Data: capri_data/baselines/capri_greendeal_ref/2017_2030/environment/luc_2030.csv (tools/build/build_luc_2030.py, CAPRI's 2030 reference). Initial classes
+Data: capri_data/baselines/capri_greendeal_ref/1730/environment/luc_2030.csv (tools/build/build_luc_2030.py, CAPRI's 2030 reference). Initial classes
 and prior modes are CAPRI's 2030 solution for the region (its posterior, as the inner fertiliser model's priors);
 final classes are CAPRI's 2030 classes moved by the change in the model's land types from its base.
 

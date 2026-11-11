@@ -21,7 +21,7 @@ Sources: capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv and
 capri_marginal_terms_ref_2030.csv.xz (tools/build/extract_capri_marginal_terms.py); CAPRI 2017 results
 res_17<MS>.txt (national UVAG, regional PRME and LEVL).
 
-Written (capri_data/baselines/capri_greendeal_ref/2017_2030/trajectories/):
+Written (capri_data/baselines/capri_greendeal_ref/1730/trajectories/):
   capri_price_ratios_2030.csv          ms, product, uvag_2017, uvag_2030, deflator, real_ratio
   capri_cap_premium_2030.csv           model region x CAPRI activity: PRME 2030 in 2017 money (per unit)
   capri_livestock_premium_ratio_2030.csv  model region x model animal: 2030/2017 premium ratio (real,
@@ -62,7 +62,7 @@ def main() -> None:
     ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     args = ap.parse_args()
     val = ROOT / "capri_data" / "validation" / "greendeal_2030"
-    out = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "trajectories"
+    out = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "trajectories"
     uv30 = _read_csv(val / "capri_unit_values_ref_2030.csv")
     terms = _read_csv(val / "capri_marginal_terms_ref_2030.csv.xz")
     products = set(uv30["product"])

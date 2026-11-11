@@ -16,7 +16,7 @@ enteric methane per head, CH4MAN and CH4ENT (items ghg_CH4MAN, ghg_CH4ENT: the 2
 methane of tools/build/build_ghg_coefs_2017.py). Groups without regional rows take
 their member state's factor (national rows). Inputs: CAPRI's 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta,
 tools/lib/paths.BASELINE_REF; its calibration run refpol_endotech_all_ini until 9 November 2026)
-and CAPRI's 2017 results (res_17<MS>.txt). Output: capri_data/baselines/capri_greendeal_ref/2017_2030/trajectories/capri_ref_ration_2030.csv
+and CAPRI's 2017 results (res_17<MS>.txt). Output: capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_ref_ration_2030.csv
 (region, animal, item, factor); factors in [0, 5] (feeds) and [0.2, 5] (requirements).
 
     python tools/build/build_ration_trajectory_2030.py [--ref CSV] [--dump-dir DIR]
@@ -36,8 +36,8 @@ ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
 _sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from _model_regions import CTRY as MS_CODE  # noqa: E402  CAPRI member-state codes (capri_member_state_codes.csv)
-OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "trajectories" / "capri_ref_ration_2030.csv"
-OUT_FODDER = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "trajectories" / "capri_ref_fodder_2030.csv"
+OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "trajectories" / "capri_ref_ration_2030.csv"
+OUT_FODDER = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "trajectories" / "capri_ref_fodder_2030.csv"
 REF = BASELINE_REF
 ITEMS = ("LEVL", "DAYS", "ENNE", "CRPR", "DRMN", "DRMX", "CH4MAN", "CH4ENT")
 

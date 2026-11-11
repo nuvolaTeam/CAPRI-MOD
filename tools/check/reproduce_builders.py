@@ -52,7 +52,7 @@ INI = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"   # it
 SETS = REFERENCE / "sets" / "simini_21730"  # CAPRI's sets (docs/EXTERNAL_SOURCES.md), not in git
 BP = "capri_data/sources/intermediate/baseline_pmp"
 S = "capri_data/2017/supply"
-S30 = "capri_data/baselines/capri_greendeal_ref/2017_2030/supply"   # the 2030 inputs (DATA_LAYOUT step (b), 10 November 2026)
+S30 = "capri_data/baselines/capri_greendeal_ref/1730/supply"   # the 2030 inputs (DATA_LAYOUT step (b), 10 November 2026)
 
 #: (builder, arguments, external inputs that must exist). Order: REGIONAL_UNITS_BUILDERS.md section 3, then the rest.
 INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [

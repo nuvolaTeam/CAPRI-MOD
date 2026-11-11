@@ -16,7 +16,7 @@ $REFERENCE/simini/simini_21730 (docs/EXTERNAL_SOURCES.md).
 The records used are kept in capri_data/sources/raw/capri/results/sim_ini_21730/ (rows filtered, values unchanged), so
 the table rebuilds without CAPRI's file.
 
-Output: capri_data/baselines/capri_greendeal_ref/2017_2030/market/market_prod_grof_2030.csv
+Output: capri_data/baselines/capri_greendeal_ref/1730/market/market_prod_grof_2030.csv
   capri_ms   CAPRI's country with supply models (RMSSUP)
   product    CAPRI's market product (XX)
   prod_kt    DATA(capri_ms, "Prod", product, "CAL")
@@ -42,7 +42,7 @@ SIMINI = REFERENCE / "simini" / "simini_21730" / "DATA.csv.gz"
 SETS = REFERENCE / "sets" / "simini_21730"
 KEEP_DIR = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "sim_ini_21730"
 KEEP = KEEP_DIR / "data_prod_grof_rmssup.parquet"
-OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "market" / "market_prod_grof_2030.csv"
+OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "market" / "market_prod_grof_2030.csv"
 #: the market products whose gross rows are not their own (arm/simu_calibration_to_supply.gms l. 230-243)
 SPECIAL = {"RICE": ("PARI",), "OLIO": ("OLIV",), "MILK": ("COMI", "SGMI")}
 

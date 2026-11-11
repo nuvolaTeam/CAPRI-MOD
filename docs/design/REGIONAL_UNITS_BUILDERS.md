@@ -57,7 +57,7 @@ Abbreviations used in the tables:
 |---|---|
 | `S/` `E/` `F/` `P/` `M/` | `capri_data/2017/supply/`, `/environment/`, `/feed/`, `/policy/`, `/market/` |
 | `AM/` `MI/` `AB/` | `capri_data/2017/abatement/ammonia/`, `/abatement/mitigation/`, `/abatement/` |
-| `T/` `SH/` | `capri_data/baselines/capri_greendeal_ref/2017_2030/`, `capri_data/codes/` |
+| `T/` `SH/` | `capri_data/baselines/capri_greendeal_ref/1730/`, `capri_data/codes/` |
 | `SC/` `BP/` `GH/` `SMK/` `SEN/` | `capri_data/sources/capreg/`, `/sources/baseline_pmp/`, `/sources/ghgtech/`, `/sources/market/`, `/sources/environment/` (the paths of the inventory's date; since 6 November 2026 under sources/raw and sources/intermediate, docs/design/DATA_LAYOUT_files.csv) |
 | `GD/` | `capri_data/validation/greendeal_2030/` |
 | D17 | CAPRI's 2017 CAPREG results `capri_sources/capreg/res_17<MS>.txt` (27 files present, ES included) |

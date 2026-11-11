@@ -20,7 +20,7 @@ Sources: CAPRI's 2030 market calibration (data_market_1730defaulta.csv: Data_CAL
 CPRI at CAL), its NQ Hessians (elas_2_1730defaulta.csv: p_hessNQProc, p_hessNQDairy, p_hessNQSupp at CAL) and the
 2030 processing margins of its market solution (markmarket_greendeal_1730et_base_1717.txt: PROCMARG at 2030).
 
-Output: capri_data/baselines/capri_greendeal_ref/2017_2030/market/welfare_base_2030.csv  rms, model_region, component, value
+Output: capri_data/baselines/capri_greendeal_ref/1730/market/welfare_base_2030.csv  rms, model_region, component, value
 
     python tools/build/build_welfare_base.py
 """
@@ -43,7 +43,7 @@ UP = EXPORTS
 ELAS = UP / "elas_2_1730defaulta.csv"
 DATA = UP / "data_market_1730defaulta.csv"
 DUMP = UP / "markmarket_greendeal_1730et_base_1717.txt"
-OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "market" / "welfare_base_2030.csv"
+OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "market" / "welfare_base_2030.csv"
 #: CAPRI's oilseeds (SED: their processing is priced at the crushing margin)
 SED = {"RAPE", "SUNF", "SOYA", "OLIV"}
 ITEMS = ("PROD", "PPRI", "PROC", "FEED", "ARM1P", "HCON", "CPRI")

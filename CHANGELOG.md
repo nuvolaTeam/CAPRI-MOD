@@ -54,7 +54,8 @@ and `docs/KNOWN_ISSUES.md`.
 
 ## 11 November 2026 — the data folder keeps the base years only: CAPRI's 2030 baseline in baselines/
 
-- capri_data/2030 moved to capri_data/baselines/capri_greendeal_ref/2017_2030 (the project lead: the data folder keeps
+- capri_data/2030 moved to capri_data/baselines/capri_greendeal_ref/1730 (first as 2017_2030, renamed the same day to
+  CAPRI's %BAS%%SIM% naming, the project lead's choice) (the project lead: the data folder keeps
   only the base years; a baseline has its own place, named by its origin and its years, so that another, a Green Deal
   reference to 2040 for instance, goes beside it). Its module folders are unchanged; its five projection tables (CAPRI's
   2030 price ratios, premiums, livestock premium ratios, rations and fodder) are in trajectories/. Contents unchanged.

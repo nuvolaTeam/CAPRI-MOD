@@ -17,9 +17,9 @@ capri_data/
 │   ├── feed/                requirements, rations, fodder balances
 │   └── abatement/           mitigation options: ammonia/ (N cascade, AD, leaching, Nitrates Directive, costs/),
 │                            mitigation/ (feed, genetics, soil options), fertiliser options
-├── baselines/               one folder per baseline, then one per projection <base year>_<year> (run.baseline)
+├── baselines/               one folder per baseline, then one per projection <BAS><SIM> (run.baseline)
 │   └── capri_greendeal_ref/ CAPRI's Green Deal baseline (res_2_1730greendeal_refdefaulta)
-│       └── 2017_2030/       its 2030 point, from the 2017 base: the same module folders as 2017/ (the files whose
+│       └── 1730/            its 2030 point, from the 2017 base: the same module folders as 2017/ (the files whose
 │                            name carries 2030: PMP terms, land market and rents, fertiliser priors, the 2030 market,
 │                            CAP ceilings ...) and trajectories/ (CAPRI's 2030 prices, premiums, rations and fodder,
 │                            read by the projection layer)
@@ -54,8 +54,9 @@ Guides in this folder:
 A CAPRI base year is self-contained: its prices, quantities and PMP parameters are calibrated together and must not
 be mixed across years, so each base year has its own folder. A baseline is a projection from a base year (CAPRI's:
 CAPTRD's trends and the CAPMOD run calibrated to them); it is not a base year, so it has its own folder under
-`baselines/`, named by its origin and its years. Another baseline (a Green Deal reference to 2040, CAPTRD-MOD's own
-projection) goes beside it, `baselines/<name>/<base year>_<year>/`, and a run picks it with the setting
+`baselines/`, named by its origin, then by its years as CAPRI names its results, %BAS%%SIM% (the last two digits of
+the base year and of the projection year: 1730, from 2017 to 2030). Another baseline (a Green Deal reference to 2040,
+CAPTRD-MOD's own projection) goes beside it, `baselines/<name>/<BAS><SIM>/`, and a run picks it with the setting
 `run.baseline` (default `capri_greendeal_ref`).
 
 ## File resolution
@@ -63,7 +64,7 @@ projection) goes beside it, `baselines/<name>/<base year>_<year>/`, and a run pi
 The model locates a file by its name (capri_mod/data/inputs.py, capri_mod/market/inputs.py and
 capri_mod/data/loaders.py::resolve_data_file): a file whose name carries a year other than the base year
 (`land_rents_2030.csv`) is in that year's folder of the run's baseline, `capri_mod.data.inputs.year_dir`
-(`baselines/<run.baseline>/<base year>_<year>/<module>/`); any other in the base year's (`<base year>/<module>/`);
+(`baselines/<run.baseline>/<BAS><SIM>/<module>/`); any other in the base year's (`<base year>/<module>/`);
 the codes in `codes/`. The projection layer's tables are in the baseline's `trajectories/`
 (`capri_mod.data.inputs.trajectories_dir`). The builders write to the same folders (tools/lib/paths.py: `data_year`).
 

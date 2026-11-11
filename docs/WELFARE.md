@@ -45,7 +45,7 @@ models' ProfitAgr, ProfitLandUse and PSEs.
    price or crushing margin (ProfitProc), dairy products x processing margin (ProfitDairy), the revenue of the regions
    without supply models less their land and feed-energy netputs (ProfitAgr), minus 20% of their feed cost
    (ProfitFeed). The base values per CAPRI region come from CAPRI's 2030 data with welfare.gms's formulas
-   (tools/build/build_welfare_base.py, capri_data/baselines/capri_greendeal_ref/2017_2030/market/welfare_base_2030.csv); against CAPRI's 2030 reference
+   (tools/build/build_welfare_base.py, capri_data/baselines/capri_greendeal_ref/1730/market/welfare_base_2030.csv); against CAPRI's 2030 reference
    levels, CSSP and ProfitDairy are equal in all 80 regions, ProfitAgr and ProfitProc within a median 4-5%, ProfitFeed
    not comparable (CHANGELOG 28 October 2026). Comparisons of two runs take the difference of the levels.
 2. **Non-EU farms and feed users**: the integrals of the model's constant-elasticity functions, not CAPRI's NQ

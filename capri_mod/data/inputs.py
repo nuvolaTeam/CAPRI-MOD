@@ -3,10 +3,10 @@ docs/design/ARCHITECTURE_REFACTOR.md, layer "data adapters"; the market has its 
 
 Every input is located in the data directory and base year of the run:
     <data_dir>/<base_year>/<area>/<file>   area: supply, abatement, environment, feed, policy, market
-    <data_dir>/baselines/<baseline>/<base_year>_<year>/<area>/<file>
+    <data_dir>/baselines/<baseline>/<BAS><SIM>/<area>/<file>
                                            a file of another year (its name carries it, "_2030"): the run's baseline
                                            (run.baseline) projected to that year, CAPRI's Green Deal reference
-                                           capri_data/baselines/capri_greendeal_ref/2017_2030 (year_dir;
+                                           capri_data/baselines/capri_greendeal_ref/1730 (year_dir;
                                            docs/design/DATA_LAYOUT.md steps (b) and (d): capri_data/2030 from 10
                                            November 2026, under the base year's folder before)
     <data_dir>/codes/<file>                the codes and cross-vintage mappings (capri_data/shared until 10 November 2026)
@@ -50,13 +50,14 @@ def default_baseline() -> str:
 
 def year_dir(root, year, base_year=None, baseline=None) -> Path:
     """The folder of a year's inputs: the base year's own, <root>/<base_year>; another year's, the baseline's projection
-    from the base year to it, <root>/baselines/<baseline>/<base_year>_<year> (baseline: run.baseline). The data
+    from the base year to it, <root>/baselines/<baseline>/<BAS><SIM> (baseline: run.baseline; <BAS><SIM>: the last
+    two digits of the base year and of the year, as CAPRI names its results, %BAS%%SIM%: 1730). The data
     directory keeps only the base years; a baseline, CAPRI's or another, has its own folder (docs/design/DATA_LAYOUT.md
     step (d), the project lead, 11 November 2026; capri_data/2030 until then)."""
     by = str(base_year) if base_year is not None else default_base_year()
     if str(year) == by:
         return Path(root) / by
-    return Path(root) / "baselines" / (baseline or default_baseline()) / f"{by}_{year}"
+    return Path(root) / "baselines" / (baseline or default_baseline()) / f"{by[-2:]}{str(year)[-2:]}"
 
 
 def trajectories_dir(root, year, base_year=None, baseline=None) -> Path:

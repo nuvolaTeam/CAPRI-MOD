@@ -123,7 +123,7 @@ def main():
     lit = _read_csv(D / "p_litRevAmmoTechsAdd.csv")
     LIT = {(r.region, r.activity): r.value for r in lit.itertuples()
            if r.technology == "ManAcid" and r.item == "NH3STO" and r.manure_system.upper() == "LIQUID"}
-    md = _read_csv(D.parents[2] / "baselines" / "capri_greendeal_ref" / "2017_2030" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
+    md = _read_csv(D.parents[2] / "baselines" / "capri_greendeal_ref" / "1730" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
     M = {(r.region, r.activity, r.item): r.value for r in md.itertuples()}
     fr = {}
     for f, k, scale in (("FracEmHouse", "H", 100.0), ("FracEmStorage", "S", 1.0), ("FracEmAppl", "A", 1.0)):

@@ -80,7 +80,7 @@ def no3_weighted():
     fac = _read_csv(A / "n_cascade_factors.csv")
     tsl = {(r.region[:2], r.activity): float(r.value) for r in fac[fac.factor == "tsl"].itertuples()
            if r.region.endswith("000000")}
-    md = _read_csv(A.parents[2] / "baselines" / "capri_greendeal_ref" / "2017_2030" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
+    md = _read_csv(A.parents[2] / "baselines" / "capri_greendeal_ref" / "1730" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
     md = md[md["item"].isin(["LEVL", "MANN"])].pivot_table(index=["region", "activity"], columns="item",
                                                            values="value", aggfunc="first").fillna(0.0)
     w = (md["LEVL"] * md["MANN"]).to_dict()

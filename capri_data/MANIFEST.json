@@ -2923,7 +2923,7 @@
    "units": "n/a (not re-checked)",
    "catalogue_note": "How far each model OUTPUT can be trusted; queried by capri_mod/fitness.py. (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/abatement/ammonia/capri_mann_days_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/abatement/ammonia/capri_mann_days_2030.csv": {
    "description": "CAPRI's 2030 levels, manure N and stable days per CAPRI region and activity (build_ammonia_herd_inputs.py) (tools/build/build_ammonia_herd_inputs.py)",
    "kind": "coefficients",
    "rows": 16365,
@@ -2934,7 +2934,7 @@
     "builder": "build_ammonia_herd_inputs"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/environment/capri_crop_n_coefs_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_n_coefs_2030.csv": {
    "description": "CAPRI's per-crop nitrogen coefficients per region, 2030 reference (for the gross N balance). (tools/build/build_capri_crop_n_coefs.py)",
    "kind": "coefficients",
    "rows": 8568,
@@ -2948,7 +2948,7 @@
     "builder": "build_capri_crop_n_coefs"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/environment/capri_gnb_components_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/capri_gnb_components_2030.csv": {
    "description": "CAPRI's regional gross nitrogen balance components, 2030 reference (kg N per ha). (tools/build/build_capri_gnb_components.py)",
    "kind": "coefficients",
    "rows": 4336,
@@ -2962,7 +2962,7 @@
     "builder": "build_capri_gnb_components"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/environment/crop_nut_need_mult_fact_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/crop_nut_need_mult_fact_2030.csv": {
    "description": "CAPRI's over-fertilisation factor per region (v_cropNutNeedMultFact, NITF, \"T\"). (tools/build/build_overfert_factors.py)",
    "kind": "calibrated",
    "rows": 250,
@@ -2976,7 +2976,7 @@
     "builder": "build_overfert_factors"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/environment/fert_dist_crop_groups_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/fert_dist_crop_groups_2030.csv": {
    "description": "CAPRI's priors for the inner fertiliser distribution model (supply/set_fert_priors.gms, simulation mode). (tools/build/build_fert_dist_priors.py)",
    "kind": "coefficients",
    "vintage": "2030 reference",
@@ -2996,7 +2996,7 @@
    },
    "catalogue_note": "Model crop -> CAPRI crop group (NGRP) with area shares per CAPRI region (OFOD = OFAR + ROOF, OLIV = OLIV + TABO, GRAS = GRAE + GRAI); tools/build/build_fert_dist_priors.py. (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/environment/fert_dist_priors_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/fert_dist_priors_2030.csv": {
    "description": "CAPRI's priors for the inner fertiliser distribution model (supply/set_fert_priors.gms, simulation mode). (tools/build/build_fert_dist_priors.py)",
    "kind": "calibrated",
    "vintage": "2030 reference",
@@ -3015,7 +3015,7 @@
    },
    "catalogue_note": "Priors of CAPRI's inner fertiliser distribution model (supply/set_fert_priors.gms, simulation: baseline posterior mode per ha, accuracy 1): per CAPRI region and crop group the mineral, manure and residue N per ha, area, mineral efficiency and manure availability; tools/build/build_fert_dist_priors.py, docs/FERTILISER_ALLOCATION.md. (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/environment/fert_dist_priors_npk_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/fert_dist_priors_npk_2030.csv": {
    "description": "CAPRI's crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_, (tools/build/build_npk_balance_2030.py)",
    "kind": "calibrated",
    "rows": 12282,
@@ -3029,7 +3029,7 @@
     "builder": "build_npk_balance_2030"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/environment/fertiliser_substitution_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/fertiliser_substitution_2030.csv": {
    "description": "Atmospheric N deposition and the fertiliser substitution terms per model region, from CAPRI's 2030 reference. (tools/build/build_n_deposition_substitution.py)",
    "kind": "coefficients",
    "vintage": "2030",
@@ -3048,7 +3048,7 @@
    },
    "catalogue_note": "Manure-N availability and mineral-N efficiency per region (CAPRI fertiliser allocation): manure displaces mineral fertiliser at availability/efficiency; need_at_floor_share: share of crop need at CAPRI's minimum-mineral floor (fert/fertpar.gms p_minShareMinFert: 0.4 arable, 0.5 vegetables/permanent, 0.3 maize, 0.2 silage maize, 0.05 grass, 0 pulses), EU median where unmatched (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/environment/luc_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/luc_2030.csv": {
    "description": "CAPRI's land-use change (LUC) transition model data (supply/supply_model.gms e_landTypes_to_LUclass, (tools/build/build_luc_2030.py)",
    "kind": "coefficients",
    "rows": 16200,
@@ -3062,7 +3062,7 @@
     "builder": "build_luc_2030"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/environment/manure_housing_losses_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/manure_housing_losses_2030.csv": {
    "description": "CAPRI's manure N lost in housing and storage, per model region and animal (fertDistExcr_ input). (tools/build/build_manure_losses.py)",
    "kind": "coefficients",
    "rows": 2746,
@@ -3076,7 +3076,7 @@
     "builder": "build_manure_losses"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/environment/manure_npk_applied_share_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/manure_npk_applied_share_2030.csv": {
    "description": "CAPRI's 2030 manure applied in the region per unit excreted, 1 - MTRADE / EXCRET (supply_model.gms ManureNPK_, manExportOrAppl_), N P K, from its 2030 reference results (tools/build/build_npk_balance_2030.py); read by the fertilisation block and the P balance (capri_mod/fert/npk.manure_applied_share)",
    "kind": "coefficients",
    "rows": 819,
@@ -3090,7 +3090,7 @@
     "builder": "build_npk_balance_2030"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/environment/manure_trade_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/manure_trade_2030.csv": {
    "description": "CAPRI's 2030 manure trade per model region (manureTradeNew; Sprint 9j). (tools/build/build_manure_trade_base.py)",
    "kind": "coefficients",
    "vintage": "2030",
@@ -3108,7 +3108,7 @@
    },
    "catalogue_note": "CAPRI's 2030 manure N trade between regions: export share of excretion, import per ha of cropland; counts only where the run trades manure (manureTradeNew). (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/environment/npk_crop_coefs_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/npk_crop_coefs_2030.csv": {
    "description": "CAPRI's crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_, (tools/build/build_npk_balance_2030.py)",
    "kind": "coefficients",
    "rows": 23511,
@@ -3122,7 +3122,7 @@
     "builder": "build_npk_balance_2030"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/environment/npk_region_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/npk_region_2030.csv": {
    "description": "CAPRI's crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_, (tools/build/build_npk_balance_2030.py)",
    "kind": "coefficients",
    "rows": 810,
@@ -3136,7 +3136,7 @@
     "builder": "build_npk_balance_2030"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/environment/p_balance_crop_coefs_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/p_balance_crop_coefs_2030.csv": {
    "description": "CAPRI's gross phosphate (P2O5) balance (reports/calc_nbalance.gms, FNUT = PHOF), the coefficients the environmental (tools/build/build_p_balance.py)",
    "kind": "coefficients",
    "vintage": "2030 reference",
@@ -3157,7 +3157,7 @@
    ],
    "catalogue_note": "CAPRI's P2O5 removal (retention) and crop residue output per ha of the model's crops, per CAPRI region (GRAE and GRAI also on their own), for the gross phosphate balance of the environmental accounts (EnvironmentalModule.compute_phosphorus_balance); tools/build/build_p_balance.py, docs/P_BALANCE.md. At CAPRI's own areas the coefficients give its EXPPRD and CRESID (PHOF) exactly. (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/feed/feed_cereal_mix_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/feed/feed_cereal_mix_2030.csv": {
    "description": "CAPRI's feed bulks in the market for the member states (arm/market_model.gms feedBlkPrice_, feedShareEqu_). (tools/build/build_feed_bulks.py)",
    "kind": "coefficients",
    "rows": 6,
@@ -3171,7 +3171,7 @@
     "builder": "build_feed_bulks"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/market/bilateral_flows_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_flows_2030.csv": {
    "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
    "kind": "reference",
    "vintage": "2030 reference",
@@ -3191,7 +3191,7 @@
    },
    "catalogue_note": "as bilateral_flows_2017.csv for the 2030 market year Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded). (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/market/bilateral_regions_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_regions_2030.csv": {
    "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
    "kind": "reference",
    "vintage": "2030 reference",
@@ -3211,7 +3211,7 @@
    },
    "catalogue_note": "market price and production per model trade region, 2030 Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded). (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/market/bilateral_trq_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_trq_2030.csv": {
    "description": "CAPRI's bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks' market regions and the regime of the pair (bilateral sigmoid; with the importer's global quota: the smaller rate; entry price system), 2030 (tools/build/build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md).",
    "kind": "coefficients",
    "vintage": "2030 reference",
@@ -3230,7 +3230,7 @@
    },
    "catalogue_note": "CAPRI's bilateral tariff-rate quotas of every importer per pair of policy blocks, with their regime (docs/design/PORTS_STAGE4.md) (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/market/bilateral_trq_global_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_trq_global_2030.csv": {
    "description": "CAPRI's global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer's rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2030 (tools/build/build_bilateral_market.py build_trq_global; docs/design/PORTS_STAGE4.md).",
    "kind": "coefficients",
    "vintage": "2030 reference",
@@ -3248,7 +3248,7 @@
    },
    "catalogue_note": "CAPRI's global tariff-rate quotas per importer block, with the free-trade exporters (docs/design/PORTS_STAGE4.md) (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/market/biofuel_feedstock_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/market/biofuel_feedstock_2030.csv": {
    "description": "Market year 2030: CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
    "kind": "reference",
    "vintage": "2030 market year",
@@ -3267,7 +3267,7 @@
    },
    "catalogue_note": "First-generation biofuel feedstocks per CAPRI market region and biofuel (all regions; column region = model trade region): 2030-reference quantity, biofuel and by-product yields, feedstock and by-product prices, numeraire, CES elasticity (tools/build/build_biofuel_market.py). Reproduces CAPRI's BiofFeedCost exactly in every region. (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/market/biofuel_market_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/market/biofuel_market_2030.csv": {
    "description": "Market year 2030: CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
    "kind": "reference",
    "vintage": "2030 market year",
@@ -3286,7 +3286,7 @@
    },
    "catalogue_note": "CAPRI's biofuel supply (SupplyBiof_), demand (biofDemShare_, biofDem_) and non-fuel processing (ProcNQ_: proc_kt, proc_hess from p_hessNQProc, INPE price) functions per CAPRI market region, calibrated as biofuel/def_biofuel_params.gms to the 2030 reference; tools/build/build_biofuel_market.py, docs/BIOFUEL_MARKET.md. (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/market/biofuel_use_share_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/market/biofuel_use_share_2030.csv": {
    "description": "Market year 2030: CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
    "kind": "coefficients",
    "vintage": "2030 market year",
@@ -3305,7 +3305,7 @@
    },
    "catalogue_note": "Share of the EU use of each model market commodity that goes to biofuels (tools/build/build_biofuel_market.py). (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/market/border_measures_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/market/border_measures_2030.csv": {
    "description": "CAPRI's entry prices (DATA TriggerP) and flexible levies (DATA MinBordP) per importer policy block and model commodity, with the bound specific rate DATA TARS and the free-trade exporters (p_doubleZero), from sim_ini_21730 CUR (tools/build/build_bilateral_market.py build_border_measures; docs/design/PORTS_STAGE4.md, stage 6).",
    "kind": "coefficients",
    "vintage": "2030 reference",
@@ -3323,7 +3323,7 @@
    },
    "catalogue_note": "CAPRI's entry prices and flexible levies (docs/design/PORTS_STAGE4.md, stage 6) (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/market/border_pairs_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/market/border_pairs_2030.csv": {
    "description": "CAPRI's entry price pairs: p_entryPriceFac and the preferential trigger price PrefTrigPrice per pair of policy blocks and model commodity (sim_ini_21730 CUR; the market listing) (tools/build/build_bilateral_market.py build_border_measures).",
    "kind": "coefficients",
    "vintage": "2030 reference",
@@ -3341,7 +3341,7 @@
    },
    "catalogue_note": "CAPRI's entry price pairs (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/market/crushing_parameters_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/market/crushing_parameters_2030.csv": {
    "description": "CAPRI's oilseed crushing per model trade region at the 2030 market year: crush = PROC of the seed, oil and cake yields = CAPRI's PRCY, from CAPRI's market data of 2030 (tools/build/build_crushing_parameters.py)",
    "kind": "coefficients",
    "rows": 107,
@@ -3356,7 +3356,7 @@
     "builder": "build_crushing_parameters:year_2030_market_markmarket_greendeal_1730et_base_1717.txt_elas_elas_2_1730defau"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/market/eu_ms_balance_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/market/eu_ms_balance_2030.csv": {
    "description": "CAPRI's 2030 market balance per EU member state (Data_CAL of data_market_1730defaulta), for the market with the EU (tools/build/build_eu_ms_balance.py)",
    "kind": "reference",
    "vintage": "2030 calibration point",
@@ -3375,7 +3375,7 @@
    },
    "catalogue_note": "splits EU-level market data without member-state detail between the EU trade blocks (tools/build/build_eu_ms_balance.py); EU totals stay those of their own sources (2030 Green Deal reference) (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/market/market_prod_grof_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/market/market_prod_grof_2030.csv": {
    "description": "CAPRI's marketed over gross production at the 2030 calibration point per country with supply models and market product (grofNEprod; arm/simu_calibration_to_supply.gms l. 219-247; tools/build/build_market_prod_grof_2030.py)",
    "kind": "coefficients",
    "vintage": "2030 reference",
@@ -3395,7 +3395,7 @@
    },
    "catalogue_note": "CAPRI's marketed over gross production per country with supply models and market product, grofNEprod (tools/build/build_market_prod_grof_2030.py) (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/market/raw_milk_prices_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/market/raw_milk_prices_2030.csv": {
    "description": "CAPRI's raw milk market price (DATA PMRK MILK) per market region, 2030: with the bilateral regions' PMRK the market's reference price levels (tools/build/build_bilateral_market.py build_raw_milk_prices).",
    "kind": "reference",
    "vintage": "2030 reference",
@@ -3413,7 +3413,7 @@
    },
    "catalogue_note": "CAPRI's raw milk market price per market region (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/market/welfare_base_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/market/welfare_base_2030.csv": {
    "description": "CAPRI's welfare report levels at the calibration point (reports/welfare.gms): the base terms CAPRI adds to each (tools/build/build_welfare_base.py)",
    "kind": "reference",
    "vintage": "2030 calibration point",
@@ -3432,7 +3432,7 @@
    },
    "catalogue_note": "CAPRI's welfare report base values per behavioural region (reports/welfare.gms conventions; tools/build/build_welfare_base.py): the welfare levels are these plus the change from the calibration point (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/policy/cap_ceilings_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/policy/cap_ceilings_2030.csv": {
    "description": "CAPRI's 2030 CAP budgets and the per-activity premium split by scheme (Pillar I, LFA, Natura 2000, agri-environment). (tools/build/build_cap_ceilings_2030.py)",
    "kind": "coefficients",
    "vintage": "2030",
@@ -3450,7 +3450,7 @@
    },
    "catalogue_note": "tools/build/build_cap_ceilings_2030.py; national envelopes of the payments report (CAPRI member states; Norway has none) (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/policy/premium_scheme_shares_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/policy/premium_scheme_shares_2030.csv": {
    "description": "CAPRI's 2030 CAP budgets and the per-activity premium split by scheme (Pillar I, LFA, Natura 2000, agri-environment). (tools/build/build_cap_ceilings_2030.py)",
    "kind": "coefficients",
    "vintage": "2030",
@@ -3468,7 +3468,7 @@
    },
    "catalogue_note": "tools/build/build_cap_ceilings_2030.py; Pillar II budget changes (PolicyScenario.lfa_/ae_/n2k_budget_change) and the payments report's split by scheme (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/supply/land_market_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/land_market_2030.csv": {
    "description": "Build CAPRI's land-market data per model region (docs/LAND_USE_FLEXIBILITY.md). (tools/build/build_land_market.py)",
    "kind": "calibrated",
    "vintage": "2030",
@@ -3487,7 +3487,7 @@
    },
    "catalogue_note": "235 regions, the 2017 file's territory rules (merges as the inverse of summed inverses, splits by area share, Ireland's NUTS shares); Norway's NO01/03/04/05 from NO08 + NO09 + NO0A (NO000000's 2030 matrix has no diagonal). Used at the 2030 market year with SupplyModule.pmp_source = 'capri2030' (KNOWN_ISSUES K61); CSV since 23 October 2026 (long format region,row,col,value; per-region source in land_market_<year>_regions.csv; capri_mod/data/land_market_io.py) (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/supply/land_market_2030_regions.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/land_market_2030_regions.csv": {
    "description": "Build CAPRI's land-market data per model region (docs/LAND_USE_FLEXIBILITY.md). (tools/build/build_land_market.py)",
    "kind": "calibrated",
    "rows": 250,
@@ -3501,7 +3501,7 @@
     "builder": "build_land_market:year_2030"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/supply/land_rents_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/land_rents_2030.csv": {
    "description": "CAPRI's land rents at the 2030 reference: D_AREA of ARAC and FRUN, -D_AREA of GRAS; CAPRI's calibration rule (supply/cal_land_nests.gms l. 204-226) where D_AREA is not positive; territory groups area-weighted, else the member state's (tools/build/build_land_rents.py)",
    "kind": "reference",
    "vintage": "2030",
@@ -3520,7 +3520,7 @@
    },
    "catalogue_note": "tools/build/build_land_rents.py; used at the 2030 market year only (docs/LAND_RENT_CALIBRATION_PLAN.md) (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/supply/pmp_capri_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_capri_2030.csv": {
    "description": "CAPRI's 2030 PMP terms of the crops (p_pmpQuadTechn, p_pmpQuadPact of the project lead's 2030 baseline calibration) as the Hessian on the model's activities per territory group, g_ij = H_ij sqrt(X_i X_j) (tools/build/build_pmp_capri_2030.py, K61)",
    "kind": "calibrated",
    "vintage": "2030",
@@ -3544,7 +3544,7 @@
    ],
    "catalogue_note": "tools/build/build_pmp_capri_2030.py: technology terms collapsed per crop, group terms on the groups' levels (QUADRA_, GRPLEVL_), aggregated to model activities and territories; used at the 2030 market year with SupplyModule.pmp_source = 'capri2030' (KNOWN_ISSUES K61) (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/supply/pmp_capri_2030_animals.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_capri_2030_animals.csv": {
    "description": "CAPRI's 2030 PMP terms of the animal activities (p_pmpQuadTechn(act, T, T)) as herd curvature per model animal, intensity pairs DCOL/DCOH, BULL/BULH, HEIL/HEIH by their Schur complement, g = h X / r (tools/build/build_animal_pmp_capri_2030.py, K61)",
    "kind": "calibrated",
    "vintage": "2030",
@@ -3566,7 +3566,7 @@
    ],
    "catalogue_note": "tools/build/build_pmp_capri_2030.py: technology terms collapsed per crop, group terms on the groups' levels (QUADRA_, GRPLEVL_), aggregated to model activities and territories; used at the 2030 market year with SupplyModule.pmp_source = 'capri2030' (KNOWN_ISSUES K61) (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/supply/pmp_capri_2030_animals_members.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_capri_2030_animals_members.csv": {
    "description": "as pmp_capri_2030_animals with the heifers' three activities and the calves per sex as split members (--splits; read only with RegionalSupplyModel.use_cattle_member_splits, off by default, K65)",
    "kind": "calibrated",
    "vintage": "2030",
@@ -3588,7 +3588,7 @@
    ],
    "catalogue_note": "The animals' herd terms grouped for the cattle member splits (HEIL/HEIH/HEIR, the calves per sex: harmonic of the members' terms); tools/build/build_animal_pmp_capri_2030.py --splits. Read instead of pmp_capri_2030_animals.csv only with the member splits on. KNOWN_ISSUES K65: off by default (RegionalSupplyModel.use_cattle_member_splits), the per-sex young-animal markets did not converge yet (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/supply/pmp_capri_2030_mix.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_capri_2030_mix.csv": {
    "description": "CAPRI's 2x2 technology block p_pmpQuadTechn(act, T1/T2) of each crop with both technologies in the mix columns' variables (X, z), x_T1 = X/2 + z, x_T2 = X/2 - z (S1, docs/design/S1_MIX_COLUMNS.md): g_xx_extra = (Q_XX - c) X^2 added to the crop's diagonal of pmp_capri_2030 (c its collapsed curvature), g_xz = Q_Xz X^2, g_zz = Q_zz X^2 (tools/build/build_pmp_capri_2030.py, mix_terms)",
    "kind": "calibrated",
    "vintage": "2030",
@@ -3610,7 +3610,7 @@
    ],
    "catalogue_note": "tools/build/build_pmp_capri_2030.py: the technology block of each crop with T1 and T2 in the mix columns' variables (S1) (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/supply/pmp_recipe_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_recipe_2030.csv": {
    "description": "capri-mod's own crop PMP terms with CAPRI's recipe (supply/define_pmp_terms.gms) at the 2030 calibration point, as the Hessian on the model's activities per territory group (tools/build/build_pmp_recipe.py, K61)",
    "kind": "calibrated",
    "vintage": "2030",
@@ -3632,7 +3632,7 @@
    ],
    "catalogue_note": "SupplyModule.pmp_source = 'recipe' (KNOWN_ISSUES K61, docs/PMP_CAPRI_2030.md) (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/supply/pmp_recipe_2030_animals.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_recipe_2030_animals.csv": {
    "description": "capri-mod's own animal PMP terms with CAPRI's recipe at the 2030 calibration point, as herd curvature per model animal (tools/build/build_pmp_recipe.py, build_animal_pmp_capri_2030.py)",
    "kind": "calibrated",
    "vintage": "2030",
@@ -3651,7 +3651,7 @@
    },
    "catalogue_note": "SupplyModule.pmp_source = 'recipe' (KNOWN_ISSUES K61, docs/PMP_CAPRI_2030.md) (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/supply/pmp_recipe_2030_animals_members.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_recipe_2030_animals_members.csv": {
    "description": "as pmp_recipe_2030_animals with the heifers' and calves' split members (--splits; read only with use_cattle_member_splits, K65)",
    "kind": "calibrated",
    "vintage": "2030",
@@ -3670,7 +3670,7 @@
    },
    "catalogue_note": "The animals' herd terms grouped for the cattle member splits (HEIL/HEIH/HEIR, the calves per sex: harmonic of the members' terms); tools/build/build_animal_pmp_capri_2030.py --splits. Read instead of pmp_recipe_2030_animals.csv only with the member splits on. KNOWN_ISSUES K65: off by default (RegionalSupplyModel.use_cattle_member_splits), the per-sex young-animal markets did not converge yet (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/supply/techn_mix_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/techn_mix_2030.csv": {
    "description": "The T1 - T2 differences per ha of the items CAPRI's technology factors move (intens/techf.gms, fert/fertned.gms, policy/rd_logic.gms, NUTNED_), per model region and crop with both technologies: the coefficients of the mix columns (S1, docs/design/S1_MIX_COLUMNS.md; tools/build/build_techn_mix_2030.py)",
    "kind": "coefficients",
    "vintage": "2030 reference",
@@ -3692,7 +3692,7 @@
    ],
    "catalogue_note": "tools/build/build_techn_mix_2030.py: T1 - T2 per ha of each item the technology factors move (S1) (not re-checked)"
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/trajectories/capri_cap_premium_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_cap_premium_2030.csv": {
    "description": "CAPRI's 2030 prices and premiums for the model's 2030 baseline, in 2017 money. (tools/build/build_price_trajectory_2030.py)",
    "kind": "coefficients",
    "rows": 250,
@@ -3706,7 +3706,7 @@
     "builder": "build_price_trajectory_2030"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/trajectories/capri_livestock_premium_ratio_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_livestock_premium_ratio_2030.csv": {
    "description": "CAPRI's 2030 / 2017 premium ratio per model animal, real, 2017 activity levels as weights (tools/build/build_price_trajectory_2030.py)",
    "kind": "coefficients",
    "rows": 250,
@@ -3720,7 +3720,7 @@
     "builder": "build_price_trajectory_2030"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/trajectories/capri_price_ratios_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_price_ratios_2030.csv": {
    "description": "CAPRI's 2030 prices and premiums for the model's 2030 baseline, in 2017 money. (tools/build/build_price_trajectory_2030.py)",
    "kind": "reference",
    "rows": 1983,
@@ -3734,7 +3734,7 @@
     "builder": "build_price_trajectory_2030"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/trajectories/capri_ref_fodder_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_ref_fodder_2030.csv": {
    "description": "CAPRI's 2030 rations and requirements as factors on the model's 2017 rations (Sprint 9q). (tools/build/build_ration_trajectory_2030.py)",
    "kind": "reference",
    "rows": 1120,
@@ -3748,7 +3748,7 @@
     "builder": "build_ration_trajectory_2030"
    }
   },
-  "capri_data/baselines/capri_greendeal_ref/2017_2030/trajectories/capri_ref_ration_2030.csv": {
+  "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_ref_ration_2030.csv": {
    "description": "CAPRI's 2030 rations and requirements as factors on the model's 2017 rations (Sprint 9q). (tools/build/build_ration_trajectory_2030.py)",
    "kind": "reference",
    "rows": 31476,
@@ -7299,7 +7299,7 @@
    "domain": "projection",
    "status": "live",
    "units": "- (not re-checked)",
-   "catalogue_note": "The default 2030 scenario's settings (name, source, vintage, years, provenance); its factors in growth.csv and regional.csv (capri_mod/projection/scenario_io.py; capri_data/baselines/capri_greendeal_ref/2017_2030/capri_ref_2030.json until 31 October 2026). (not re-checked)"
+   "catalogue_note": "The default 2030 scenario's settings (name, source, vintage, years, provenance); its factors in growth.csv and regional.csv (capri_mod/projection/scenario_io.py; capri_data/baselines/capri_greendeal_ref/1730/capri_ref_2030.json until 31 October 2026). (not re-checked)"
   },
   "capri_data/scenarios/captrd_2030/growth.csv": {
    "description": "CAPRI's trend projection (CAPTRD results_1770, p_result series) as growth factors per block and activity: per-activity medians of the per-region cumulative ratios 2030 / 2017 of YILD and LEVL, with the model's activity aliases (tools/build/build_captrd_trajectory.py)",
@@ -7342,7 +7342,7 @@
    "domain": "projection",
    "status": "live",
    "units": "- (not re-checked)",
-   "catalogue_note": "CAPRI's trend projection as an alternative 2030 scenario (--trajectory captrd): settings; factors in growth.csv and regional.csv (capri_data/baselines/capri_greendeal_ref/2017_2030/captrd_2030.json until 31 October 2026). (not re-checked)"
+   "catalogue_note": "CAPRI's trend projection as an alternative 2030 scenario (--trajectory captrd): settings; factors in growth.csv and regional.csv (capri_data/baselines/capri_greendeal_ref/1730/captrd_2030.json until 31 October 2026). (not re-checked)"
   },
   "capri_data/scenarios/greendeal_group/fert_partial_slack.csv": {
    "description": "CAPRI's Green Deal group: the NUTS 2 regions (curNuts2) whose fertiliser priors' partial derivative has a slack (v_fertDistPartialSlack: flows with a prior mode below 5e-3 x 1000 t within +-mode) and the listed (region, group) pairs (extraSlackRegion_to_ngrp: every flow of the group within +-(mode + 0.1 x 1000 t)); ngrp empty: the region's tiny-prior rule only (supply/set_fert_priors.gms l. 664-785, %scenarioGroup%==greendeal); tools/build/build_fert_partial_slack.py",
@@ -7457,7 +7457,7 @@
    "domain": "projection",
    "status": "live",
    "units": "- (not re-checked)",
-   "catalogue_note": "The identity scenario (no factors): projecting with it must reproduce the comparative-static result exactly (capri_data/baselines/capri_greendeal_ref/2017_2030/null.json until 31 October 2026). (not re-checked)"
+   "catalogue_note": "The identity scenario (no factors): projecting with it must reproduce the comparative-static result exactly (capri_data/baselines/capri_greendeal_ref/1730/null.json until 31 October 2026). (not re-checked)"
   },
   "capri_data/scenarios/set_aside_10/set_aside_rates.csv": {
    "description": "CAPRI's obligatory set-aside scenario (scen/set_aside/set_aside_10.gms): the set-aside rate in percent (DATA(ru, act, \"SETR\")) of each EU regional unit's Grandes Cultures (sets.gms GRCU less RSET and VSET, set to eps there; CAPRI's codes mapped to the model's), the obligation CAPRI's SETA_ (supply/land.py); tools/build/build_set_aside_scenario.py",

@@ -50,7 +50,7 @@ def build():
         if r["factor"] == "leach":
             base[r["region"]] = float(r["value"])
     gnb = {}
-    for r in csv.DictReader(open(ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "environment" / "capri_gnb_components_2030.csv")):
+    for r in csv.DictReader(open(ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "capri_gnb_components_2030.csv")):
         gnb.setdefault(r["capri_region"], {})[r["item"]] = float(r["kg_n_per_ha"])
     rows = []
     for reg in sorted(set(base) | set(d)):

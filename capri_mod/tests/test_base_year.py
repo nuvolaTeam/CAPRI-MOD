@@ -22,12 +22,12 @@ def test_a_base_year_without_data_stops_naming_the_years_with_data():
 def _mirror(tmp: Path, year: str) -> Path:
     """A data directory whose <year> folder holds the 2017 files, the base year in their names written as <year>
     (links, not copies); shared, codes and sources linked as they are; each baseline's projections from 2017
-    (baselines/<baseline>/2017_<year>) as projections from <year> (<year>_<year of the projection>)."""
+    (baselines/<baseline>/17<SIM>) as projections from <year> (<year's last two digits><SIM>)."""
     for d in DATA.iterdir():
         if d.is_dir() and d.name not in ("2017", "baselines"):
             os.symlink(d, tmp / d.name)
-    for d in (DATA / "baselines").glob("*/2017_*"):
-        q = tmp / "baselines" / d.parent.name / d.name.replace("2017_", f"{year}_", 1)
+    for d in (DATA / "baselines").glob("*/17??"):
+        q = tmp / "baselines" / d.parent.name / (year[-2:] + d.name[2:])
         q.parent.mkdir(parents=True, exist_ok=True)
         os.symlink(d, q)
     for p in (DATA / "2017").rglob("*"):
@@ -89,7 +89,7 @@ def test_the_market_and_supply_tables_follow_the_base_year(tmp_path):
 
 def test_a_file_carrying_another_year_lives_in_that_years_folder_a_period_does_not():
     """DATA_LAYOUT steps (b) and (d): "<name>_<year>" files of a year other than the base year sit in the baseline's
-    folder, <data_dir>/baselines/<run.baseline>/<base year>_<year>/; a year range names the period a base-year file
+    folder, <data_dir>/baselines/<run.baseline>/<BAS><SIM>/; a year range names the period a base-year file
     covers (cap_greening_2013_2020.csv stays in the base year's folder)."""
     from capri_mod.data.inputs import RunInputs, year_of_file
     assert year_of_file("land_rents_2030.csv", "2017") == "2030"
@@ -99,6 +99,6 @@ def test_a_file_carrying_another_year_lives_in_that_years_folder_a_period_does_n
     ri = RunInputs(base_year="2017")
     assert ri.path("cap_greening_2013_2020.csv", "policy").exists()
     p = ri.path("land_market_2030.csv", "supply")
-    assert p.parent.parent.name == "2017_2030" and p.parent.parent.parent.name == "capri_greendeal_ref"
+    assert p.parent.parent.name == "1730" and p.parent.parent.parent.name == "capri_greendeal_ref"
     assert p.parent.parent.parent.parent.name == "baselines"
     assert ri.path("land_market_2017.csv", "supply").parent.parent.name == "2017"

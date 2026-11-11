@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
-SUP = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "supply"      # the 2030 files (DATA_LAYOUT step (b))
+SUP = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "supply"      # the 2030 files (DATA_LAYOUT step (b))
 
 
 def _read(name):

@@ -1,6 +1,6 @@
 """CAPRI's own 2030 reference as the projection's trajectory (Sprint 9p): the scenario folder
 capri_data/scenarios/capri_ref_2030 (settings.toml, growth.csv, regional.csv; capri_mod/projection/scenario_io.py;
-capri_data/baselines/capri_greendeal_ref/2017_2030/capri_ref_2030.json until 31 October 2026).
+capri_data/baselines/capri_greendeal_ref/1730/capri_ref_2030.json until 31 October 2026).
 
 CAPRI compares its Green Deal scenarios with its 2030 Green Deal baseline (star 3.0: `res_2_1730greendeal_refdefaulta`,
 CAPMOD's simulation of the reference policy refpol_endotech_all_sup from its calibration run

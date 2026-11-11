@@ -22,7 +22,7 @@ is its CAPRI regions' rents weighted by their area of that land type; model regi
 member state's (national) rent (REGISTERED, as elsewhere in the model).
 
     python tools/build/build_land_rents.py [--year 2030|2017] [--ref FILE]
-Writes capri_data/baselines/capri_greendeal_ref/2017_2030/supply/land_rents_2030.csv (or land_rents_2017.csv from CAPRI's 2017 results, res_17<MS> dumps:
+Writes capri_data/baselines/capri_greendeal_ref/1730/supply/land_rents_2030.csv (or land_rents_2017.csv from CAPRI's 2017 results, res_17<MS> dumps:
 D_AREA 'Y'; 23 October 2026) with region, capri_source, rent_arac, rent_frun, rent_gras (EUR/ha, in the model's 2017
 money: the 2030 rents over CAPRI's inflation to 2030, KNOWN_ISSUES K108), and per CAPRI region
 sources/intermediate/capri_land_rents/land_rents_capri_<year>.csv in CAPRI's money of the year (the recipe's input).
@@ -40,7 +40,7 @@ from _sources_io import read_source, source_records, write_source  # noqa: E402 
 
 ROOT = Path(__file__).resolve().parents[2]
 REF = BASELINE_REF
-OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "supply" / "land_rents_2030.csv"
+OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "supply" / "land_rents_2030.csv"
 SRC_OUT = ROOT / "capri_data" / "sources" / "intermediate" / "capri_land_rents" / "land_rents_capri_2030.parquet"
 TYPES = ("ARAC", "FRUN", "GRAS")
 #: CAPRI's FADN land-rent regression (pol_input/ghg/carbcali_fin_endotech_noc.gms l. 259-261)

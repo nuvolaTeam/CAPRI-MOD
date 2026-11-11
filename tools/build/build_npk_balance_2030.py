@@ -17,7 +17,7 @@ with need = mineral - loss + manure - unavailable + residues (pooled or own) - u
 (nutNed_rest ~ 1e-15). This builder checks that identity, and the pools: sum of manure flows = EXCRET - GASANI -
 RUNANI - MTRADE (ManureNPK_, manExportOrAppl_), sum of mineral flows = NETF (fertDistMine_).
 
-Outputs (capri_data/baselines/capri_greendeal_ref/2017_2030/environment/; the two livestock_manure_*_coef.csv, 2017 values, in capri_data/2017/environment/):
+Outputs (capri_data/baselines/capri_greendeal_ref/1730/environment/; the two livestock_manure_*_coef.csv, 2017 values, in capri_data/2017/environment/):
   npk_crop_coefs_2030.csv   capri_region, model_crop, nutrient (N, P, K), need_kg_ha (the crop's own NITF/PHOF/POTF),
                             pool_kg_ha (contribution to the
                             arable residue pool, fertDistCres_; non-permanent crops), own_kg_ha (permanent crops' own
@@ -59,7 +59,7 @@ from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the 
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-ENV = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "environment"
+ENV = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment"
 ENV_BASE = ROOT / "capri_data" / "2017" / "environment"   # the files without a year in their name (DATA_LAYOUT (b))
 SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "npk_dataout_2030.parquet"
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]

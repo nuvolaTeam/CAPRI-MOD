@@ -175,7 +175,7 @@ def build():
     for it in ("LFsurface", "LFsoil", "LFNmin"):
         if it not in rlf.get("ES120000", {}) and it in rlf.get("ES110000", {}) and it in rlf.get("ES130000", {}):
             rlf["ES120000"][it] = 0.5 * (rlf["ES110000"][it] + rlf["ES130000"][it])
-    md = _read_csv(D.parents[2] / "baselines" / "capri_greendeal_ref" / "2017_2030" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
+    md = _read_csv(D.parents[2] / "baselines" / "capri_greendeal_ref" / "1730" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
     pairs = sorted({(r.region, r.activity) for r in md.itertuples() if r.item == "LEVL" and r.activity in MITT})
 
     rows_a, rows_r = [], []

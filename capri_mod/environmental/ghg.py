@@ -13,7 +13,7 @@ from capri_mod.units import M_N2O, M_N2O_N, M_CO2, M_UREA_N, MJ_PER_MCAL   # the
 class GHGBlock:
     def _manure_loss_shares(self, region: str) -> dict:
         """CAPRI's manure N lost in housing and storage per kg excreted, by animal ((GASANI + RUNANI) / MANN, 2030
-        reference; capri_data/baselines/capri_greendeal_ref/2017_2030/environment/manure_housing_losses_2030.csv). Raises where the data is missing."""
+        reference; capri_data/baselines/capri_greendeal_ref/1730/environment/manure_housing_losses_2030.csv). Raises where the data is missing."""
         c = _est.setdefault(self.par, "mloss_cache", {})
         if region not in c:
             t = self.data.get("manure_housing_losses") if hasattr(self, "data") else None

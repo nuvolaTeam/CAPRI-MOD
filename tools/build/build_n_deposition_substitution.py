@@ -1,7 +1,7 @@
 """Atmospheric N deposition and the fertiliser substitution terms per model region, from CAPRI's 2030 reference.
 
 Both files were supplied without a builder until 27 October 2026 (docs/design/REGIONAL_UNITS_INVENTORY.md); on CAPRI's
-regional units each region takes its own CAPRI row of capri_data/baselines/capri_greendeal_ref/2017_2030/environment/capri_gnb_components_2030.csv
+regional units each region takes its own CAPRI row of capri_data/baselines/capri_greendeal_ref/1730/environment/capri_gnb_components_2030.csv
 (tools/build/build_capri_gnb_components.py: res_2_1730greendeal_refdefaulta dataOut, kg N per ha), else its member
 state's row.
 
@@ -29,7 +29,7 @@ ENV = ROOT / "capri_data" / "2017" / "environment"
 def main():
     sp = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(sp); sp.loader.exec_module(mr)
-    g = pd.read_csv(ENV.parents[1] / "baselines" / "capri_greendeal_ref" / "2017_2030" / "environment" / "capri_gnb_components_2030.csv", float_precision="round_trip").pivot_table(
+    g = pd.read_csv(ENV.parents[1] / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "capri_gnb_components_2030.csv", float_precision="round_trip").pivot_table(
         index="capri_region", columns="item", values="kg_n_per_ha")
     dep, sub = [], []
     for reg in mr.model_regions():
@@ -47,7 +47,7 @@ def main():
                         "mineral_efficiency": 1.0 + float(x.get("nutNed_mine_loss_gasRunTot_perha", 0.0)) / float(me),
                         "source": how})
     pd.DataFrame(dep).to_csv(ENV / "n_deposition_regional.csv", index=False)
-    pd.DataFrame(sub).to_csv(ENV.parents[1] / "baselines" / "capri_greendeal_ref" / "2017_2030" / "environment" / "fertiliser_substitution_2030.csv", index=False)
+    pd.DataFrame(sub).to_csv(ENV.parents[1] / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "fertiliser_substitution_2030.csv", index=False)
     print(f"n_deposition_regional.csv: {len(dep)} regions; fertiliser_substitution_2030.csv: {len(sub)} regions "
           f"(of {len(mr.model_regions())})")
 

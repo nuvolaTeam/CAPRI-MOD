@@ -26,7 +26,7 @@ model assumes that all manure generated in a region has to be used within that r
 
 The 2030 baseline's flows between regions are CAPRI's (2030 Green Deal reference with endogenous technologies,
 `res_2_1730greendeal_refpol_endotech_all_ini`: MTRADE.NITF and EXCRET.NITF per CAPRI region;
-`tools/build/build_manure_trade_base.py` -> `capri_data/baselines/capri_greendeal_ref/2017_2030/environment/manure_trade_2030.csv`): exporting regions keep
+`tools/build/build_manure_trade_base.py` -> `capri_data/baselines/capri_greendeal_ref/1730/environment/manure_trade_2030.csv`): exporting regions keep
 (1 - export share) of their manure N, importing regions receive manure N per ha of cropland; 1.2 Mt N moves between EU
 regions (113 exporters, 111 importers when built). The base trade counts only where the run trades manure: without
 trade (Farm-to-Fork as JRC121368) the scenario and its baseline keep all manure in its region.
