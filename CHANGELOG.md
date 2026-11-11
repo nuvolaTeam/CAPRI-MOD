@@ -32,6 +32,26 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — CAPTRD-MOD stage 2f: DG AGRI's supports after the first estimation
+
+- capri_mod/pipeline/captrd/eu_supports.py: define_eu_supports.gms for one ex-ante year (between Solve1 and Solve2):
+  DGAgri1 extrapolated beyond %lst_dgagri% by CAPRI's logistic from Step3, the EU parts' DGAgri1 spread over their
+  members by Step2, the long-run merge, UAAR's bounds, adjust_to_biof_supports.gms on DGAgri1, the supports from DGAgri1
+  where there is no expert support, the implied NTRD, DDGS, IMPT and EXPT, the areas scaled to UAAR, the young animals,
+  DG AGRI's trust levels, the deletions, wVarErr. CAPRI's constants with their 04_code_data_status rows.
+- test_captrd_eu_supports.py on CAPTRD's stored Solve1 results (step2) and the earlier years' Solve2 results (step3):
+  of the member states' positions in 2020-2070, support 434,701 of 455,713 equal, TrustLevl 107,619 of 107,958,
+  wVarErr 105,922 of 107,647 (where a trust level is set), DGAgri1 26,017 of 28,151; the rest rewritten after this
+  stage, inherited from stage 2c's EU parts (DGAgri1 of the cereals' and rape oil's INDM, FEDM, PRCM, DOMM differ there
+  already, from p_data that CAPTRD's stored P_Data no longer holds), the fossil fuel prices open since support1, and 406
+  support positions open (listed in the test). The 72 trust levels of NO000000 and TUR that stage 2d left open are
+  equal.
+- Found: CAPTRD's stored Step2 and Step3 hold the reporting's DOMM (the sum of the domestic use positions; the
+  estimation's is DEMD, aggreg_and_report.gms l. 293-294) and the reporting's product groups where the estimation had
+  none; S_RowsEst1 and S_ColsEst1 have no LABT and no QUTS, QUTA, QUTB (captrd.gms l. 559, 946-948): eu_supports.est_sets.
+  An explicit zero (EPS) Expert of NECR.LEVL carries a trust level in CAPTRD that the port, which keeps no zero records,
+  does not (69 positions).
+
 ## 11 November 2026 — the data folder keeps the base years only: CAPRI's 2030 baseline in baselines/
 
 - capri_data/2030 moved to capri_data/baselines/capri_greendeal_ref/2017_2030 (the project lead: the data folder keeps

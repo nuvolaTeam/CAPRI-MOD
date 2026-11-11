@@ -11503,7 +11503,9 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_eu_supports.py"
+    ]
    }
   },
   "ctrd_globiom_faoregions": {
@@ -54578,7 +54580,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 301,
+  "capri/keep": 332,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 26,

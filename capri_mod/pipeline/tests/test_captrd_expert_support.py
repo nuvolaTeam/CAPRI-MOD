@@ -7,7 +7,7 @@ production, the sugar beet trade, TrustLevl); compared with CAPTRD's Expert and 
 Results on 11 November 2026: of the 39,567 positions of the member states in the years after 2018 (DEMD, the
 reporting's copy of DOMM, and the positions the reporting adds without a trust level left out), 39,495 equal in value
 and trust level. The other 72 are define_EU_supports.gms's (stage 2f): the trust levels of NO000000's and TUR's market
-positions with DG AGRI targets, which it sets again (l. 719-760).
+positions with DG AGRI targets, which it sets again (l. 719-760). With stage 2f chained, they equal CAPTRD's (test_captrd_eu_supports.py).
 
 test_support1_equal_captrds: the supports as define_stats_and_supports.gms leaves them (support1) against CAPTRD's; see
 its docstring.
@@ -35,7 +35,9 @@ REQST = {"ENNE", "CRPR", "FILG", "FICT", "FISM", "FISF"}            # sets_captr
 @pytest.fixture(scope="module")
 def assembled(state, population, result):  # noqa: F811
     """Every ported source of the expert supports chained, then define_stats_and_supports.gms l. 485-633: (E: Expert,
-    TL: TrustLevl, sup: the supports as support1, X, s, nobs)."""
+    TL: TrustLevl, sup: the supports as support1, X, s, nobs, ex: what stage 2f takes over - the sets of
+    adjust_to_biof_supports.gms (FS), its parameters as GAMS keeps them between calls (prd_adj, low_lim, upp_lim) and the
+    long-run positions (longrun, longrun1))."""
     S0, prior, nat, X, s = state
     S = copy.deepcopy(S0)
     g = lambda n: pd.read_csv(G / f"{n}.csv", keep_default_na=False).d0.str.upper().tolist()   # noqa: E731
@@ -92,13 +94,14 @@ def assembled(state, population, result):  # noqa: F811
     F.adjust_trade(sup, E, ms=X.ms, s_rowsest=s.s_rowsest, exante=X.exante, basm=X.basm, dompos=FS.dompos)
     XS.sugb_trade(E, sup, ms=X.ms, exante=X.exante, bast=X.bast, basm=X.basm)
     TL = XS.trust(E, coco_trust={}, expert_trust=S.tr, s_colsest=s.s_colsest, s_rowsest=s.s_rowsest, rest=rest)
-    return E, TL, sup, X, s, nobs
+    ex = dict(FS=FS, prd_adj=pa, low_lim=ll, upp_lim=ul, longrun=lr.longrun, longrun1=lr.longrun1)
+    return E, TL, sup, X, s, nobs, ex
 
 
 @pytest.mark.slow
 @need
 def test_expert_supports_equal_captrds(assembled):
-    E, TL, sup, X, s, nobs = assembled
+    E, TL, sup, X, s, nobs, _ = assembled
     yrs, msset = set(X.exantet), set(X.ms)
     ex, tl = _ref("Expert"), _ref("TrustLevl")
     RE = {(r, c, w, int(t)): v for r, c, w, t, v in zip(ex.region, ex.col, ex.row, ex.t, ex.value)
@@ -136,7 +139,7 @@ def test_support1_equal_captrds(assembled):
     prices of the fossil fuels (UVAG of DISL, GASL) of NO000000, EL000000, IR000000 and UK000000 in 2020-2040, which
     our DGAgri1 holds and CAPTRD's support1 does not (its stored DGAgri1 of these years is rewritten by stage 2f, so
     it cannot tell which is right)."""
-    E, TL, sup, X, s, nobs = assembled
+    E, TL, sup, X, s, nobs, _ = assembled
     yrs, msset = set(X.exantet), set(X.ms)
     cols, rows = set(s.s_colsest), set(s.s_rowsest)
     s1 = _ref("support1")
