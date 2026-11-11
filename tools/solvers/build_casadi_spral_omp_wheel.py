@@ -7,9 +7,12 @@ so IPOPT's SPRAL runs on one thread there. This script repeats CasADi's own rele
 API) with one change, tools/solvers/casadi_3.8.1_spral_openmp.patch:
 
   - SPRAL configured without --disable-openmp, and -lgomp added to IPOPT's SPRAL link flags;
-  - SPRAL built with make -j1: its Makefile.am (ralna/spral d385d2c, CasADi's BUILD_SPRAL_VERSION) does not say that
-    interfaces/C/matrix_util.o needs src/matrix_util.o's module, so a parallel make may compile the first before the
-    second ("Cannot open module file 'spral_matrix_util.mod'", on Red Hat 9, 11 November 2026);
+  - SPRAL built with make -j1: its Makefile.am (ralna/spral d385d2c, CasADi's BUILD_SPRAL_VERSION) misses module
+    dependencies (interfaces/C/matrix_util.o on src/matrix_util.o, src/ssids/contrib_free.o on src/ssids/contrib.o), so
+    a parallel make may compile a file before the module it uses ("Cannot open module file 'spral_matrix_util.mod'",
+    then 'spral_ssids_contrib.mod', on Red Hat 9, 11 November 2026; binaries.yml's own comment calls it SPRAL's
+    "Fortran-module parallel-build race" and leaves SPRAL out of its native and macOS builds); in the file order a
+    serial make follows (Makefile.am's libspral_a_SOURCES), both modules come before their users;
   - SWIG_IMPORT on by default (binaries.yml's swig job does the same with sed before packing the source, after it has
     generated the wrappers: the generation step here passes -DSWIG_IMPORT=OFF, else CMake looks for the wrappers it is
     to generate and stops with "No SOURCES given to target: _casadi", found on Red Hat 9 on 11 November 2026).
@@ -49,7 +52,9 @@ HERE = Path(__file__).resolve().parent
 CASADI_TAG = "3.8.1"
 #: the mockups release CasADi 3.8.1 (16 September 2026) was built against: binaries.yml uses casadi/mockups@master, whose
 #: action downloaded v111 then; v114 on (15 October 2026) regenerated the WORHP mockup without Params.ScaledKKT, which
-#: 3.8.1's worhp_interface.cpp l. 409 reads (the build stopped there on Red Hat 9, 11 November 2026)
+#: 3.8.1's worhp_interface.cpp l. 409 reads (the build stopped there on Red Hat 9, 11 November 2026). The build_flags'
+#: WITH_MOCKUP_* make the core build clone and build the mockups itself too (CMakeLists.txt l. 1231-1324, its
+#: BUILD_MOCKUPS_VERSION defaulting to master), and its WORHP plugin compiles against that copy: the tag is passed there
 MOCKUPS_TAG = "v111"
 BUILD_IMAGE = "ghcr.io/jgillis/manylinux_2_28-x64:production"
 SWIG_IMAGE = "ghcr.io/casadi/ci-swig:latest"
@@ -175,10 +180,17 @@ def main() -> None:
         tagfile.write_text(MOCKUPS_TAG + "\n")
 
     if not stamp(work, "core"):
-        # binaries.yml's core-dockcross job
-        docker(work, BUILD_IMAGE, "cd casadi && rm -f build/CMakeCache.txt && cmake -Bbuild -DCMAKE_BUILD_TYPE=Release "
-               "-DWITH_SELFCONTAINED=ON $(cat /work/build_flags.txt) -DCMAKE_PREFIX_PATH=/work/mockups_install/cmake "
+        # binaries.yml's core-dockcross job, the core's own mockups at MOCKUPS_TAG (an earlier run's copy of another
+        # release removed, so that it is cloned again)
+        core_tag = work / "stamps" / "core_mockups_tag"
+        clean = "" if core_tag.exists() and core_tag.read_text().strip() == MOCKUPS_TAG else (
+            "rm -rf build/external_projects/src/mockups-external build/external_projects/src/mockups-external-build "
+            "build/external_projects/src/mockups-external-stamp build/external_projects/mockups && ")
+        docker(work, BUILD_IMAGE, f"cd casadi && {clean}rm -f build/CMakeCache.txt && cmake -Bbuild "
+               "-DCMAKE_BUILD_TYPE=Release -DWITH_SELFCONTAINED=ON $(cat /work/build_flags.txt) "
+               f"-DBUILD_MOCKUPS_VERSION={MOCKUPS_TAG} -DCMAKE_PREFIX_PATH=/work/mockups_install/cmake "
                f"-H. && cmake --build build -j{a.jobs}", log)
+        core_tag.write_text(MOCKUPS_TAG + "\n")
         done(work, "core")
 
     if not stamp(work, "python"):

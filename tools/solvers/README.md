@@ -16,10 +16,14 @@ result is a wheel you install with pip in place of PyPI's CasADi.
 - Fixed on 11 November 2026: the core build stopped at the WORHP plugin (`Params` has no `ScaledKKT`): the script took
   CasADi's solver mockups at v116, whose WORHP headers no longer match CasADi 3.8.1; it now takes v111, the release
   CasADi's workflow used when 3.8.1 was built, and rebuilds an earlier run's mockups by itself.
-- Fixed on 11 November 2026: the core build stopped in SPRAL ("Cannot open module file 'spral_matrix_util.mod'"):
-  SPRAL's Makefile (the version CasADi 3.8.1 builds) misses one dependency, so a parallel make can compile its C
-  interface before the module it uses. The patch now builds SPRAL with `make -j1` (the rest stays parallel). The
-  script applies a changed patch again by itself and repeats the core build; rerun the same command.
+- Fixed on 11 November 2026: the core build stopped in SPRAL ("Cannot open module file 'spral_matrix_util.mod'", then
+  'spral_ssids_contrib.mod'): SPRAL's Makefile (the version CasADi 3.8.1 builds) misses module dependencies, so a
+  parallel make can compile a file before the module it uses (CasADi's own workflow calls it a known race). The patch
+  now builds SPRAL with `make -j1` (the rest stays parallel). The script applies a changed patch again by itself and
+  repeats the core build; rerun the same command.
+- Fixed on 11 November 2026 (the v111 pin above was not enough): the core build also clones and builds the mockups
+  itself, from their master branch, and compiles the WORHP plugin against that copy. The script now passes
+  `-DBUILD_MOCKUPS_VERSION=v111` to the core build and removes an earlier run's copy of another release.
 
 ## What you need
 
