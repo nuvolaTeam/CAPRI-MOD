@@ -624,6 +624,17 @@ the manifest tools/pipeline/capri_raw_manifest.json (303 files, 285 MB; every SH
 uploaded files). Not yet: the rest of capri_sources, the listings (gdxdump text, CSV), the download step and the
 builders' switch (steps 2, 4-8).
 
+**Second version (11 November 2026).** Tag `v2026.11.11`: 148 GDX files (capri_sources outside the course mirror,
+the uploads and the chat's attachments, the six of v2026.11.10 among them), published one at a time
+(tools/build/publish_raw_batch.py), each checked record by record. The project lead's decisions of the same day: the
+set holds only the Parquet (the originals removed: the Parquet holds every record and names its source file and
+SHA-256), laid out as CAPRI's installation, `capri/dat/<subfolder>/<file>/`, `capri/results/<module>/<file>/` and
+`capri/temp/<file>/` (CAPRI's debug dumps, not trusted), each file's folder from where CAPRI's code reads or writes it,
+or marked inferred (tools/build/relayout_raw_dataset.py; 38 inferred: CAPREG's Capreg_tseries/<CC>_17 files,
+chk_market_data, PACT_201020_IFS). The manifest: 10,637 files and, per CAPRI file, its source's name, SHA-256, size,
+the origin of its folder and whether it is trusted. Not yet: the course mirror's 877 GDX files, the listings, CSV and
+spreadsheets, the download step and the builders' switch.
+
 **Steps** [I]:
 1. One converter: a CAPRI listing (gdxdump text, CSV) or GDX to Parquet, one file per GAMS symbol, every record, Eps
    kept as a flag (as capri_reference's CSVs: value 0, eps 1), checked lossless against the original.
