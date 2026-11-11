@@ -34,9 +34,8 @@ Needs a container engine (Docker, or podman: Red Hat's, used as docker; SELinux'
 added when it is enforcing), git, Python 3, and network access to github.com (git), ghcr.io, coin-or-tools.github.io (CasADi's MUMPS
 and METIS 4 sources) and gitlab.com (Eigen). The steps leave stamp files in WORKDIR/stamps and are skipped when there;
 the build takes hours (serially) and about 8 GB of disk (the images 7 GB more). Run on Red Hat 9 on 11 November 2026
-through the sources, SWIG and most of the core build (to 84%, in parallel runs that stopped at the WORHP mockup and
-SPRAL's module order, both fixed since, not yet rerun); the python, graft and wheel steps follow binaries.yml and
-universal_grafter but have not run yet. The wheel is written to WORKDIR/dist. Not committed; the
+through the sources, SWIG, the mockups, the core and the python steps; the graft step stopped at the unpacking of the
+repaired wheel (fixed since, as universal_grafter's action does it; not yet rerun); the wheel step has not run yet. The wheel is written to WORKDIR/dist. Not committed; the
 library inside it is loaded by CasADi itself, so supply.nlp_ipopt_library stays "" with it and
 supply.nlp_linear_solver = "spral" selects SPRAL (capri_mod/utils/ipopt_library.py's OpenMP rules apply: the threads
 of a process that forks its workers).
@@ -203,19 +202,22 @@ def main() -> None:
     if not stamp(work, "graft"):
         # universal_grafter's Linux steps: RPATH $ORIGIN, a dummy wheel of the package, jgillis's auditwheel repair
         # (the runtime libraries copied in under hashed names), the result unpacked over the package
-        # (the action runs chrpath -r '$ORIGIN' on its host; the image has patchelf: the same RPATH where one is set)
-        docker(work, BUILD_IMAGE, "cd install/casadi && for f in *; do [ -f \"$f\" ] && r=$(patchelf --print-rpath "
+        # (the action runs chrpath -r '$ORIGIN' on its host; the image has patchelf: the same RPATH where one is set);
+        # the unpacking as the action's "Extract repaired wheel" step (unzip; cp -r dummy/*; rm -rf dummy
+        # dummy-1.0.dist-info), with Python's zipfile where the image has no unzip; an earlier attempt's unpacked dummy removed first
+        docker(work, BUILD_IMAGE, "rm -rf install/casadi/dummy install/casadi/dummy-1.0.dist-info dummy-1.0-*.whl && "
+               "cd install/casadi && for f in *; do [ -f \"$f\" ] && r=$(patchelf --print-rpath "
                "\"$f\" 2>/dev/null) && [ -n \"$r\" ] && patchelf --force-rpath --set-rpath '$ORIGIN' \"$f\" || true; "
                "done && rm -f spral_ssids && /opt/python/cp39-cp39/bin/pip install -q pyelftools wheel==0.31.1 && "
                "cd /work && W=$(/opt/python/cp39-cp39/bin/python universal_grafter/create_wheel_local.py 64 "
                "manylinux_2_28-x64 install/casadi) && cp universal_grafter/graft_manylinux.sh . && "
                "./graft_manylinux.sh $W 'libknitro:libhsl:libworhp:libsnopt7:libut:libmex:libmx:libeng:"
                "libmadnlp_c:libMad:libmosek64:libxprs:libonnxruntime:libipmc:libconopt:libconopt.so.4:"
-               "libonnxruntime.so.1' && rm graft_manylinux.sh && /opt/python/cp39-cp39/bin/python -c "
-               "\"import zipfile,shutil,glob,os; z=zipfile.ZipFile('$W'); z.extractall('install/casadi'); "
-               "[shutil.copytree(p, os.path.join('install/casadi', os.path.basename(p)), dirs_exist_ok=True) "
-               "for p in glob.glob('install/casadi/dummy/*')]; shutil.rmtree('install/casadi/dummy'); "
-               "[shutil.rmtree(p) for p in glob.glob('install/casadi/dummy-*.dist-info')]\"", log)
+               "libonnxruntime.so.1' && rm graft_manylinux.sh && { if command -v unzip >/dev/null; then unzip -oq "
+               "$W -d install/casadi; else /opt/python/cp39-cp39/bin/python -c "
+               "\"import zipfile; zipfile.ZipFile('$W').extractall('install/casadi')\"; fi; } && "
+               "cp -r install/casadi/dummy/* install/casadi && "
+               "rm -rf install/casadi/dummy install/casadi/dummy-1.0.dist-info", log)
         done(work, "graft")
 
     if not stamp(work, "wheel"):

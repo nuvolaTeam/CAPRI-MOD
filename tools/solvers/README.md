@@ -6,10 +6,9 @@ result is a wheel you install with pip in place of PyPI's CasADi.
 
 - Script: `build_casadi_spral_omp_wheel.py`.
 - Patch: `casadi_3.8.1_spral_openmp.patch`.
-- Status: on Red Hat 9 the steps have run through the sources, SWIG and most of the core build (to 84%, in parallel
-  runs that stopped at the problems fixed below; not yet rerun with the fixes). The Python, graft and wheel steps follow
-  CasADi's release workflow but have not been run end to end.
-  If a step fails, the log says which one, and running the script again resumes there.
+- Status: on Red Hat 9 the sources, SWIG, mockups, core and Python steps have run (11 November 2026). The graft step
+  stopped while unpacking the repaired wheel (fixed below, not yet rerun); the wheel step has not run yet. If a step
+  fails, the log says which one, and running the script again resumes there.
 - Fixed on 11 November 2026, from your Red Hat logs:
   - SWIG step: "No SOURCES given to target: _casadi" (the patch switches SWIG_IMPORT on before the wrappers exist; the
     step now passes `-DSWIG_IMPORT=OFF`, as CasADi's workflow generates them before switching it).
@@ -24,6 +23,9 @@ result is a wheel you install with pip in place of PyPI's CasADi.
   - SPRAL: "Cannot open module file 'spral_matrix_util.mod'", then 'spral_ssids_contrib.mod'. SPRAL's Makefile misses
     module dependencies (CasADi's workflow calls it a known parallel-build race). The patch builds SPRAL with
     `make -j1`, and the whole build is now serial by default, as CasADi's.
+  - Graft step: "NotADirectoryError: ... 'install/casadi/dummy/__init__.py'". The unpacking of the repaired wheel
+    now does what universal_grafter's action does (unzip; `cp -r dummy/*`; remove `dummy` and its dist-info), and
+    clears an earlier attempt's unpacked files first.
   - The script applies a changed patch again by itself and repeats the core build. Rerun the same command on the
     same work folder; the old `mockups` and `mockups_install` folders there (without the `_v111`) are no longer
     used and can be deleted (with `sudo` if the container wrote them as root).
