@@ -7,6 +7,9 @@ so IPOPT's SPRAL runs on one thread there. This script repeats CasADi's own rele
 API) with one change, tools/solvers/casadi_3.8.1_spral_openmp.patch:
 
   - SPRAL configured without --disable-openmp, and -lgomp added to IPOPT's SPRAL link flags;
+  - SPRAL built with make -j1: its Makefile.am (ralna/spral d385d2c, CasADi's BUILD_SPRAL_VERSION) does not say that
+    interfaces/C/matrix_util.o needs src/matrix_util.o's module, so a parallel make may compile the first before the
+    second ("Cannot open module file 'spral_matrix_util.mod'", on Red Hat 9, 11 November 2026);
   - SWIG_IMPORT on by default (binaries.yml's swig job does the same with sed before packing the source, after it has
     generated the wrappers: the generation step here passes -DSWIG_IMPORT=OFF, else CMake looks for the wrappers it is
     to generate and stops with "No SOURCES given to target: _casadi", found on Red Hat 9 on 11 November 2026).
@@ -34,6 +37,7 @@ of a process that forks its workers).
 from __future__ import annotations
 
 import argparse
+import hashlib
 import os
 import re
 import shutil
@@ -125,11 +129,22 @@ def main() -> None:
         if not (work / "universal_grafter").exists():
             sh(["git", "clone", "--depth", "1", "https://github.com/jgillis/universal_grafter", "universal_grafter"],
                cwd=work, log=log)
-        sh(["git", "apply", HERE / "casadi_3.8.1_spral_openmp.patch"], cwd=work / "casadi", log=log)
         y = (work / "casadi" / ".github" / "workflows" / "binaries.yml").read_text()
         flags = re.search(r'^  build_flags: "([^"]+)"', y, re.M).group(1)
         (work / "build_flags.txt").write_text(flags + "\n")
         done(work, "sources")
+
+    # the patch, applied over CasADi's own CMakeLists.txt (again when it has changed since an earlier run, whose patch
+    # git checkout takes away); the core build and the steps after it are then repeated
+    patch = HERE / "casadi_3.8.1_spral_openmp.patch"
+    digest = hashlib.sha256(patch.read_bytes()).hexdigest()
+    patchfile = work / "stamps" / "patch_sha256"
+    if not patchfile.exists() or patchfile.read_text().strip() != digest:
+        sh(["git", "checkout", "--", "CMakeLists.txt"], cwd=work / "casadi", log=log)
+        sh(["git", "apply", patch], cwd=work / "casadi", log=log)
+        patchfile.write_text(digest + "\n")
+        for st in ("core", "python", "graft", "wheel"):
+            (work / "stamps" / st).unlink(missing_ok=True)
 
     wrapper = work / "casadi" / "swig" / "python" / "target3" / "source" / "casadiPYTHON_wrap_gil_release.cxx"
     if not stamp(work, "swig") or not wrapper.exists():
