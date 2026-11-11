@@ -4419,6 +4419,45 @@
     "builder": "build_captrd_dairy (not in the trace yet)"
    }
   },
+  "capri_data/pipeline/captrd/dat/macro_p_aglinkmacroeu.csv": {
+   "description": "The EU countries' Aglink macro data p_aglinkMacroEU(ctrCode, var, year) of dat/baseline/aglink2023macro.xlsx (sheet for_gams, A2:D5600; load_aglink2023dgAgri.gms l. 924), the rows of POP and GDPR; 2214 rows (tools/build/build_captrd_macro.py).",
+   "kind": "coefficients",
+   "rows": 2214,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/pipeline/captrd/macro.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_macro (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/dat/macro_ssp_data.csv": {
+   "description": "SSP2's population (IIASA) and GDP (OECD) per GLOBIOM country, SSP_data of dat/baseline/data_SSPV3_update.gdx (load_aglink2023dgAgri.gms l. 959); 14072 rows (tools/build/build_captrd_macro.py).",
+   "kind": "coefficients",
+   "rows": 14072,
+   "columns": 6,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/pipeline/captrd/macro.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_macro (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/dat/macro_worldpop.csv": {
+   "description": "The UN population WorldPop(year, region) of dat/arm/allpop.gdx (captrd.gms l. 614), the nonzero records; 28179 rows (tools/build/build_captrd_macro.py).",
+   "kind": "coefficients",
+   "rows": 28179,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_macro (not in the trace yet)"
+   }
+  },
   "capri_data/pipeline/captrd/dat/national_p_fromnecp.csv": {
    "description": "The member states' herds and mineral nitrogen from their NECPs, p_fromNECP(rAll, xpCols, simyy) of dat/baseline/necp_expert.gms (M Kesting, P Witzke, 8 April 2025; read by captrd/national_supports.gms l. 149), the nonzero records; 869 rows (tools/build/build_captrd_national.py).",
    "kind": "coefficients",
@@ -6261,6 +6300,46 @@
    "origin": {
     "nature": "capri",
     "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/macro/faoreg_aglinkregions.csv": {
+   "description": "The set FAOreg_AGLINKregions (the FAO regions to the Aglink regions; Sheet1!R2:S250, l. 948): one member per row, 231 (e.g. 1.ASC, 2.ASL, 3.EUE); written by tools/build/build_captrd_macro.py.",
+   "kind": "structure",
+   "rows": 231,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_macro (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/macro/globiomcountry.csv": {
+   "description": "The set GlobiomCountry (the GLOBIOM countries; dat/global/reg_mappings.xlsx Sheet1!Y2:Y250, l. 931): one member per row, 180 (e.g. Armenia, Afghanistan, Albania); written by tools/build/build_captrd_macro.py.",
+   "kind": "structure",
+   "rows": 180,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_macro (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/macro/globiomcountry_faoreg.csv": {
+   "description": "The set GlobiomCountry_FAOreg (the GLOBIOM countries to the FAO regions (with Taiwan.214, l. 943); Sheet1!Y2:Z250, l. 939): one member per row, 183 (e.g. Armenia.1, Afghanistan.2, Albania.3); written by tools/build/build_captrd_macro.py.",
+   "kind": "structure",
+   "rows": 183,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_macro (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/macro/iso_faoreg.csv": {
+   "description": "The set ISO_FAOreg (the ISO countries to the FAO regions (with PSE.299, global/iso_to_fao_regions.gms l. 23); Sheet1!U2:V250, the range of iso_to_fao_regions.gms's $CALL): one member per row, 214 (e.g. AFG.2, ALB.3, DZA.4); written by tools/build/build_captrd_macro.py.",
+   "kind": "structure",
+   "rows": 214,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_macro (not in the trace yet)"
    }
   },
   "capri_data/pipeline/captrd/sets/map_rr.csv": {

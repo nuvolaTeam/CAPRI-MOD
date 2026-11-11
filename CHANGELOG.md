@@ -32,6 +32,28 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — CAPTRD-MOD stage 2d: the population path; the reference run had no GLOBIOM long-run data
+
+- `capri_mod/pipeline/captrd/macro.py` ports two pieces:
+  - the population of the Aglink load's macro data p_aglinkMacro (baseline/load_aglink2023dgAgri.gms l. 905-1068):
+    SSP2's 2000 population × Aglink's population growth (the EU countries' own, else the Aglink region's), SSP2's
+    growth after %lst_dgagri%, linear between the SSP years, summed to the CAPRI regions, the base-year mean;
+  - CAPTRD's INHA.LEVL p_data after BAST (captrd/longrun_supports.gms l. 368-389), with the UN-population fallback.
+
+  Inputs as CSV (`tools/build/build_captrd_macro.py`, 41_captrd_macro.sql): aglink2023macro.xlsx,
+  data_SSPV3_update.gdx, reg_mappings.xlsx, allpop.gdx. GDP and the Venezuela and Taiwan base values are not ported
+  (CAPTRD does not read them).
+- Parity (test_captrd_macro.py): all 350 values (35 regions; 2019 and the ex-ante years) equal CAPTRD's stored P_Data.
+- Found: the reference run's long-run selection, globiom_eu_bright_s0_2023+REFERENCE+REFERENCE, is in none of the
+  long-run files the project lead holds:
+  - longrun_info_fac_defaulta.gdx;
+  - GLOBIOM_EU_longrun_defaulta.gdx (EUCLIMIT6 50CV);
+  - GLOBIOM_GL_longrun_defaulta.gdx (SSP2).
+
+  CAPTRD's results_1770 hold no Longrun or Longrun1 records, while B2000, which the same file always writes, holds
+  183,610. So the GLOBIOM long-run supports did not enter that baseline. Building the scenario needs
+  dat/global/globiom_eu_bright_s0_2023+REFERENCE+REFERENCE.gdx (global/convert_globiom.gms l. 284, 471).
+
 ## 11 November 2026 — CAPTRD-MOD stage 2d: the national expert supports
 
 - `capri_mod/pipeline/captrd/national_supports.py`: CAPTRD's national expert supports (captrd/national_supports.gms,

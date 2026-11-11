@@ -67,6 +67,10 @@ UNTRACED = {
     "capri_data/pipeline/captrd/sets/biofuel/": ("build_captrd_biofuel", "CAPRI"),     # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/agriprod/": ("build_captrd_agriprod", "CAPRI"),   # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/national/": ("build_captrd_national", "CAPRI"),   # before sets/ (first match)
+    "capri_data/pipeline/captrd/sets/macro/": ("build_captrd_macro", "CAPRI"),   # before sets/ (first match)
+    "capri_data/pipeline/captrd/dat/macro_p_aglinkmacroeu.csv": ("build_captrd_macro", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/macro_ssp_data.csv": ("build_captrd_macro", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/macro_worldpop.csv": ("build_captrd_macro", "CAPRI"),
     "capri_data/pipeline/captrd/dat/national_p_fromnecp.csv": ("build_captrd_national", "CAPRI"),
     "capri_data/pipeline/captrd/dat/agriprod_p_agriprod.csv": ("build_captrd_agriprod", "CAPRI"),
     "capri_data/pipeline/captrd/dat/agriprod_p_reqfcnlim.csv": ("build_captrd_agriprod", "CAPRI"),
