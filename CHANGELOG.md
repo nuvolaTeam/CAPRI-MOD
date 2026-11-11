@@ -32,6 +32,16 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — correction: CAPRI's calibration point is the reference run's
+
+- The notes that called res_2_1730greendeal_refpol_endotech_all_ini CAPRI's 2030 calibration run, from which the Green
+  Deal baseline is simulated, were wrong. CAPMOD's calibration point (sim_ini_21730, DATA "Y" and "TRD") equals the
+  reference run's levels (res_2_1730greendeal_refdefaulta) in all 74 member-state positions checked, while the ini run
+  differs (e.g. Ireland's potatoes 3.5 against 8.3 thousand ha, France's voluntary set-aside 358.5 against 431.7):
+  refpol_endotech_all_ini is a scenario run from that point. The model's 2030 base point since 10 November is
+  therefore CAPRI's calibration point, with CAPRI's PMP terms of the same calibration (no departure). Corrected:
+  tools/lib/paths.py, docs/BASELINE_REPRODUCTION.md.
+
 ## 11 November 2026 — CAPTRD-MOD stage 2f: DG AGRI's supports after the first estimation
 
 - capri_mod/pipeline/captrd/eu_supports.py: define_eu_supports.gms for one ex-ante year (between Solve1 and Solve2):

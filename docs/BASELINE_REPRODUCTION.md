@@ -48,9 +48,12 @@ Each step is what CAPRI does; the code is in `capri_mod/projection/` and `capri_
    `tools/build/build_trajectory_capri_ref.py`). CAPRI simulates from CAPMOD's calibrated reference, not from its trend
    projection (CAPTRD), which is that calibration's input. Since 9 November 2026 (the project lead's decision) the
    point is CAPRI's Green Deal baseline `res_2_1730greendeal_refdefaulta` (`tools/lib/paths.BASELINE_REF`): CAPMOD's
-   simulation of the reference policy (`refpol_endotech_all_sup`) from its calibration run
-   `res_2_1730greendeal_refpol_endotech_all_ini`, and the run CAPRI's Green Deal scenarios are compared with. Until then
-   the levels and yields were the calibration run's; the two runs' prices agree within 0.01%, but levels moved in places
+   reference run, which lands on CAPMOD's calibration point (`sim_ini_21730`, DATA "Y" and "TRD": equal to the
+   reference run's levels in all 74 member-state positions checked on 11 November 2026, while the ini run differs), and
+   the run CAPRI's Green Deal scenarios are compared with; CAPRI's PMP terms (`pmppar_21730`) belong to the same
+   calibration. Until then the levels and yields were those of `res_2_1730greendeal_refpol_endotech_all_ini`, a
+   scenario run from that point (the reference policy with the endogenous mitigation technologies at their initial
+   shares), taken until then for the calibration run, which it is not (corrected 11 November 2026); the two runs' prices agree within 0.01%, but levels moved in places
    (Ireland's other fodder +38 thousand ha in the baseline, Romania's RO02 fallow 3.4 against 13.6, France's voluntary
    set-aside +25 in FR61), and the fertiliser priors were already the baseline's. Every builder of the base point reads
    the same run: levels and yields, land types, rations and fodder, dairy and cattle intensity splits, land rents,
