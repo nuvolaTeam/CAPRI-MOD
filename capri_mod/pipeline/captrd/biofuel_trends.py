@@ -21,7 +21,8 @@ In GAMS's order (line numbers of biofuel_trends.gms):
               p_potentialStocks), DDGS; small feedstocks removed or fixed close to zero
   l. 1276-1291 ethanol production recomputed from its feedstocks
   l. 1297-1318 %constBionergy% (the 2023 Brightspace baseline): the EU28 member states' biofuel positions after 2020 at
-              their 2020 values (setting captrd.const_bioenergy: off, as the reference run, which did not apply it)
+              their 2020 values (setting captrd.const_bioenergy: on, CAPRI's default, acting only with that long-run
+              selection; the reference run did not apply it, so its parity test sets it off)
   l. 1323-1413 fossil fuel demand, per inhabitant; excise taxes (Biofuel_data.gms's p_taxData), prices from PRIMES's
               change, consumer prices, per ton; EXPD
   l. 1415-1478 trust levels; p_data's nObs of the new series
@@ -40,6 +41,8 @@ from typing import Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 #: l. 79, 428: PRIMES's reference year (%BASprimes%)
 BAS_PRIMES = 2015
+#: captrd.gms l. 97, biofuel_trends.gms l. 1299: the long-run selection with which %constBionergy% acts
+BRIGHT_SCENARIO = "globiom_eu_bright_s0_2023+REFERENCE+REFERENCE"
 #: l. 355-362: heating values (GJ/t) of rape seed and rape oil, GJ per toe
 LHV_RAPE = 26.5
 LHV_RAPO = 37.2
@@ -200,11 +203,13 @@ def trends(I: Inputs, *, ms: Sequence[str], msincl: Sequence[str], msall: Iterab
     """The biofuel trends. pdata: p_data of the years (region, col, row, year); nobs: the (region, col, row) with
     p_data's nObs; basm: BASM per (region, col, row); step1: Step 1's results; aglink: Aglink's p_aglink
     (region, col, row, year as text); bfyld: p_BFyld (feedstock, fuel, year as text); extr_rates, byproduct:
-    p_ExtrRates(fuel, stock), p_ByProduct(by-product, stock); const_bio: %constBionergy% (default: the setting
-    captrd.const_bioenergy)."""
+    p_ExtrRates(fuel, stock), p_ByProduct(by-product, stock); const_bio: whether l. 1297-1318 apply (default: the
+    setting captrd.const_bioenergy, with the long-run selection captrd.longrun_scenario the Brightspace baseline, as
+    the $iftheni of l. 1299 requires both)."""
     if const_bio is None:
         from capri_mod.settings import current as _settings
-        const_bio = bool(_settings().get("captrd.const_bioenergy"))
+        const_bio = (bool(_settings().get("captrd.const_bioenergy"))
+                     and str(_settings().get("captrd.longrun_scenario")) == BRIGHT_SCENARIO)
     ms = list(ms)
     msincl = list(msincl)
     ms_set = set(ms)

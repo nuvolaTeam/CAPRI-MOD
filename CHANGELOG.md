@@ -32,6 +32,17 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — CAPTRD-MOD: %constBionergy% at CAPRI's default
+
+- The setting `captrd.const_bioenergy` is now on, CAPRI's default (captrd.gms l. 94-97), by the project lead's
+  decision. As in GAMS (biofuel_trends.gms l. 1299), biofuel_trends.py applies it only when the long-run selection
+  (`captrd.longrun_scenario`) is globiom_eu_bright_s0_2023+REFERENCE+REFERENCE, the default selection: the EU28 member
+  states' biofuel positions are then held at their 2020 values after 2020.
+- The reference run results_1770 did not apply it, so a run with the defaults no longer reproduces its biofuel
+  positions after 2020; the parity tests set it off explicitly, as before.
+
+---
+
 ## 11 November 2026 — CAPTRD-MOD stage 2d: the supports as the first stage leaves them (support1)
 
 - `capri_mod/pipeline/captrd/final_supports.py` ports the rest of define_stats_and_supports.gms up to support1

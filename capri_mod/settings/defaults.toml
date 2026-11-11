@@ -540,11 +540,13 @@ last_data_year = 2019
 simulation_years = [2018, 2020, 2025, 2030, 2035, 2040, 2045, 2050, 2060, 2070]
 aglink = "aglink2023dgAgri"
 milk_quota_expiry = 2009
-# %constBionergy% (captrd.gms l. 95-97, biofuel/biofuel_trends.gms l. 1297-1318): the EU28 member states' biofuel
-# positions held at their 2020 values after 2020. CAPRI's code switches it on for the long-run selection
-# globiom_eu_bright_s0_2023; the reference run results_1770 did not apply it (the member states' biofuel positions after
-# 2020 move in its results, Germany's ethanol use among them): off, as that run. The project lead decides (11 November 2026)
-const_bioenergy = false
+# %constBionergy% (captrd.gms l. 94-97, biofuel/biofuel_trends.gms l. 1297-1318): the EU28 member states' biofuel
+# positions held at their 2020 values after 2020. CAPRI's default: on ("Default is ==on", captrd.gms l. 95), and it
+# acts only with the long-run selection globiom_eu_bright_s0_2023+REFERENCE+REFERENCE (l. 97, biofuel_trends.gms
+# l. 1299; biofuel_trends.py checks captrd.longrun_scenario). The reference run results_1770 did not apply it (its member
+# states' biofuel positions after 2020 move, Germany's ethanol use among them), so the parity tests set it off. CAPRI's
+# default kept: the project lead's decision of 11 November 2026
+const_bioenergy = true
 # %SelecScen% (captrd.gms; the reference run's "Long run baseline selection"): the long-run scenario whose change
 # factors longrun_supports.gms reads from results/global/longrun_info_fac_%reg_agg%.gdx (tools/build/
 # build_captrd_longrun.py keeps its records). The reference run's selection is not in that file (only
