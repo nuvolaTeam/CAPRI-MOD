@@ -18290,6 +18290,103 @@
     "tests": []
    }
   },
+  "env_manure_pool_market_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv",
+   "declared_in": "17_environment.sql",
+   "layout": [],
+   "comment": "CAPRI's manure pool market terms per CAPRI region and manure nutrient (MANN, MANP, MANK): the manure distributed to crops, the calibration dual, CAPRI's excess-supply slope p_mPoolSupSlope and its value in the model's units (manuremarket/declare_manure_market.gms l. 466-505; outer_loop.manure_pool_form \"capri\"). (tools/build/build_manure_pool_market.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fout",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "supply_t",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "dual_cal_eur_t",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "slope_capri",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "es_slope",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "dual_cal",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "fout"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "dual_cal",
+     "unit": "U_1000EuPerTon",
+     "status": "builder",
+     "basis": "dual_cal_eur_t / 1000 / deflator(2030)"
+    },
+    {
+     "item": "dual_cal_eur_t",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "p_dualValueManureCal (CAPRI's 2030 money): ManureNPK_.M, the supply model objective in 1000 EUR over the balance in 1000 t"
+    },
+    {
+     "item": "es_slope",
+     "unit": "U_TonPer1000EuPerTon",
+     "status": "builder",
+     "basis": "slope_capri x 1000 x 1000 x deflator(2030)"
+    },
+    {
+     "item": "slope_capri",
+     "unit": "U_1000tPerEuPerTon",
+     "status": "capri",
+     "basis": "p_mPoolSupSlope = 0.01 supply_t / dual_cal_eur_t, used with the excess supply in kt"
+    },
+    {
+     "item": "supply_t",
+     "unit": "U_Ton",
+     "status": "capri",
+     "basis": "sum of p_priFertDist postMode EXCR over the fertiliser groups (v_fertDist, t)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_manure_pool_market",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/coupling/manure.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "env_manure_trade_2030": {
    "file": "capri_data/baselines/capri_greendeal_ref/1730/environment/manure_trade_2030.csv",
    "declared_in": "17_environment.sql",
@@ -31064,6 +31161,7 @@
      "build_manure_losses",
      "build_manure_n2o",
      "build_manure_pool_costs",
+     "build_manure_pool_market",
      "build_manure_trade_base",
      "build_model_premium_prices",
      "build_n_cascade",
@@ -31726,6 +31824,7 @@
      "build_manure_losses",
      "build_manure_n2o",
      "build_manure_pool_costs",
+     "build_manure_pool_market",
      "build_manure_trade_base",
      "build_mineral_n_price",
      "build_model_premium_prices",
@@ -31939,6 +32038,7 @@
      "build_manure_losses",
      "build_manure_n2o",
      "build_manure_pool_costs",
+     "build_manure_pool_market",
      "build_manure_trade_base",
      "build_model_premium_prices",
      "build_n_cascade",
@@ -41269,6 +41369,65 @@
     "model": [],
     "builders": [
      "build_histosol"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_manure_pool_inputs_2030": {
+   "file": "capri_data/sources/raw/capri/results/fert/manure_pool_inputs_2030.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's records of its 2030 Green Deal baseline fertiliser distribution (priFertDist_<MS>1730defaulta.gdx, results/fert; the raw dataset nuvolaTeam/capri-mod-raw v2026.11.11.2) per CAPRI region and manure nutrient: supply_t (p_priFertDist postMode EXCR summed over the groups, t) and dual_cal_eur_t (p_dualValueManureCal, EUR per t) (tools/build/build_manure_pool_market.py).",
+   "columns": [
+    {
+     "name": "capri_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fout",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "capri_region",
+    "fout",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "manure_pool_inputs_2030.value: by item, t (supply_t) or EUR per t (dual_cal_eur_t)"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": null,
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_manure_pool_market"
     ],
     "checks": [],
     "tests": []
@@ -52434,6 +52593,7 @@
      "build_land_market",
      "build_land_rents",
      "build_lownfeed_effects",
+     "build_manure_pool_market",
      "build_npk_balance_2030",
      "build_pmp_capri_2030",
      "build_supplement_effects"
@@ -54585,7 +54745,7 @@
   "literature/keep": 11,
   "numerical/keep": 26,
   "open/keep": 4,
-  "physical/keep": 10,
+  "physical/keep": 11,
   "technical/keep": 33
  },
  "other_notes": {}

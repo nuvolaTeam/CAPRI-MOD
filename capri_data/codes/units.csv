@@ -47,3 +47,7 @@ U_Elasticity,"An elasticity: percent change of a quantity (or of a quantity rati
 U_kcalPerKg,Kilocalories per kg (CAPRI's p_calContent; a feed conversion factor's energy fed per kg of animal product),no
 U_MioKcal,"Million kilocalories (1000 t x kcal per kg: CAPRI's FEDE quantity, sum of feed x calories)",no
 U_EuPer1000Kcal,"EUR per 1000 kilocalories (EUR per t over kcal per kg: CAPRI's FEDE price, feed value per calorie)",no
+U_Ton,Metric ton,no
+U_1000EuPerTon,"1000 Euro per metric ton (the model's money, EUR 1000 of 2017 per t)",no
+U_1000tPerEuPerTon,1000 t per Euro per metric ton (CAPRI's p_mPoolSupSlope as its pool market uses it),no
+U_TonPer1000EuPerTon,"Metric ton per 1000 Euro (2017) per metric ton: a quantity's response to a price, in the model's units",no

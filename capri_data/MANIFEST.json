@@ -3090,6 +3090,24 @@
     "builder": "build_npk_balance_2030"
    }
   },
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv": {
+   "description": "CAPRI's manure pool market terms per CAPRI region and manure nutrient (MANN, MANP, MANK): the manure distributed to crops, the calibration dual, CAPRI's excess-supply slope p_mPoolSupSlope and its value in the model's units (manuremarket/declare_manure_market.gms l. 466-505; outer_loop.manure_pool_form \"capri\"). (tools/build/build_manure_pool_market.py)",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "environment",
+   "status": "live",
+   "rows": 750,
+   "columns": 7,
+   "units": "U_1000EuPerTon, U_1000tPerEuPerTon, U_EuPerTon, U_Ton, U_TonPer1000EuPerTon",
+   "read_by_model": [
+    "capri_mod/coupling/manure.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_manure_pool_market"
+   },
+   "catalogue_note": "CAPRI's manure pool market terms per CAPRI region and nutrient (m_mPoolMarket): manure supply, calibration dual, the excess-supply slope; read by the pools' \"capri\" form (outer_loop.manure_pool_form). (not re-checked)"
+  },
   "capri_data/baselines/capri_greendeal_ref/1730/environment/manure_trade_2030.csv": {
    "description": "CAPRI's 2030 manure trade per model region (manureTradeNew; Sprint 9j). (tools/build/build_manure_trade_base.py)",
    "kind": "coefficients",
@@ -4160,7 +4178,7 @@
   "capri_data/codes/model_units.csv": {
    "description": "The model's own units that CAPRI's unit catalogue (CAPRIunits.gms) lacks: code, description and the tables using it; hand-kept, no builder; tools/build/build_unit_catalogue.py adds them to units.csv with capri = no.",
    "kind": "structure",
-   "rows": 9,
+   "rows": 13,
    "columns": 3,
    "origin": {
     "nature": "declared"
@@ -4235,7 +4253,7 @@
   "capri_data/codes/units.csv": {
    "description": "the unit catalogue: CAPRI's set capri_u (gams/CAPRIunits.gms) and the model's own units (tools/build/build_unit_catalogue.py)",
    "kind": "structure",
-   "rows": 48,
+   "rows": 52,
    "columns": 3,
    "origin": {
     "nature": "capri",
@@ -8693,6 +8711,20 @@
     "builder": "build_world_market_baseline"
    },
    "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_world_market_baseline.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
+  },
+  "capri_data/sources/raw/capri/results/fert/manure_pool_inputs_2030.parquet": {
+   "description": "CAPRI's records of its 2030 Green Deal baseline fertiliser distribution (priFertDist_<MS>1730defaulta.gdx, results/fert; the raw dataset nuvolaTeam/capri-mod-raw v2026.11.11.2) per CAPRI region and manure nutrient: supply_t (p_priFertDist postMode EXCR summed over the groups, t) and dual_cal_eur_t (p_dualValueManureCal, EUR per t) (tools/build/build_manure_pool_market.py).",
+   "kind": "reference",
+   "vintage": "2030",
+   "domain": "environment",
+   "status": "source",
+   "rows": 1500,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "source-extract"
+   },
+   "catalogue_note": "extract of CAPRI's priFertDist_<MS>1730defaulta.gdx (the raw dataset) written and read back by tools/build/build_manure_pool_market.py, kept so its output can be rebuilt without the raw files (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/raw/capri/results/market_base_1717/bilateral_dataout_2017.parquet": {
    "description": "CAPRI's 2017 market data per pair of market regions (r2 empty for a region's own items) and product, the items the bilateral market is built from, extracted from market_base_1717 (tools/build/build_bilateral_market.py).",

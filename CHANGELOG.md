@@ -32,6 +32,38 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 12 November 2026 — manure pools: CAPRI's pool market (m_mPoolMarket) ported and the default (DEP-17)
+
+- outer_loop.manure_pool_form = "capri" (new, the default): CAPRI's manure pool market (manuremarket/
+  declare_manure_market.gms l. 99-204, simu_manure_market.gms l. 34-89) per nutrient, capri_mod/coupling/manure.py
+  `_clear_pool_capri`: each region's linear excess supply refitted at its manure value and net trade of the last solve,
+  CAPRI's slope p_mPoolSupSlope, the regional NLP's trade costs, the pools' trade costs; a convex QP (Clarabel). The
+  former form stays as "schedules". outer_loop.manure_pool_price_update = "capri" again (CAPRI's averaging; "damped"
+  11-12 November 2026).
+- The region's manure value (CAPRI's PSHW, ManureNPK_.M) is recorded with each regional NLP solve
+  (capri_regional_nlp.py `manure_values`, res.manure_value: the multiplier of the fertilisation block's EXCR pool row).
+  At the start of the Green Deal run it is CAPRI's calibration dual in the model's 2017 money: P and K 0.783 of CAPRI's
+  (the deflator 1.2772), N 0.78-0.94.
+- New input capri_data/baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv (250 CAPRI regions x
+  MANN, MANP, MANK) from CAPRI's priFertDist_<MS>1730defaulta.gdx (the raw dataset v2026.11.11.2), tools/build/
+  build_manure_pool_market.py, with its kept extract capri_data/sources/raw/capri/results/fert/manure_pool_inputs_2030.parquet;
+  four units added to the model's catalogue (codes/model_units.csv).
+- Units, from CAPRI's code and its listing: the supply model's manure trade is in kt (as the model's, in t, with the
+  same cost slope); CAPRI's pool model takes its slope from the supply in t with the trade in kt, so its regional excess
+  supply responds 1000 times more than the elasticity 0.01 written. outer_loop.manure_pool_es_slope = "capri_code"
+  (CAPRI's numbers, the project lead's choice) or "capri_doc". One region-nutrient has a negative slope (NL410000 MANN,
+  dual -824 EUR per t); the problem stays convex there (its trade cost slopes outweigh it), checked at every solve.
+- Checks, Green Deal 2030 (greendeal_lnds8_org18_pest20_mine13crp_surp30), CAPRI's averaging: Austria, Ireland, Spain,
+  Slovakia 14 iterations (the pool gap falling at every step; "schedules" with CAPRI's averaging 19, oscillating;
+  "schedules" damped 8), the indicators within 0.1 point of the damped run's; full EU 19 iterations ("schedules"
+  damped 16; "schedules" with CAPRI's averaging not converged after 36), prices within 0.1 point of the damped run's
+  (beef +13.3% against +13.4, milk +7.9 against +8.0), GHG total -13.6% against -13.8, fertiliser N2O -32.6 against
+  -33.0.
+- Remaining differences (DEP-17, narrowed): the trade cleared as deviations from CAPRI's base trade (no calibration
+  wedges, no fixed third-country exports in the balance), the cost constants from the regions' reduced costs, exports
+  at most the manure produced, CAPRI's autarky buffers (p_mTradeAddCost) not ported.
+- MODEL_CONTENT_PLAN §13 brought up to date (it was of 4 November).
+
 ## 11 November 2026 — manure pools: the damped price step again; the Green Deal against CAPRI's own run
 
 - outer_loop.manure_pool_price_update = "damped" again (the project lead's choice of 11 November 2026, until CAPRI's

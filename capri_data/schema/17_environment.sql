@@ -294,6 +294,25 @@ INSERT INTO value_units VALUES
   ('env_manure_trade_2030', 'export_share', NULL, 'open', 'manure_trade_2030.export_share: unit to be established'),
   ('env_manure_trade_2030', 'import_kg_n_per_ha', NULL, 'open', 'manure_trade_2030.import_kg_n_per_ha: unit to be established');
 
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv
+CREATE TABLE env_manure_pool_market_2030 (
+    region VARCHAR NOT NULL,
+    fout VARCHAR NOT NULL,
+    supply_t DOUBLE NOT NULL,
+    dual_cal_eur_t DOUBLE NOT NULL,
+    slope_capri DOUBLE NOT NULL,
+    es_slope DOUBLE NOT NULL,
+    dual_cal DOUBLE NOT NULL,
+    PRIMARY KEY (region, fout)
+);
+COMMENT ON TABLE env_manure_pool_market_2030 IS 'CAPRI''s manure pool market terms per CAPRI region and manure nutrient (MANN, MANP, MANK): the manure distributed to crops, the calibration dual, CAPRI''s excess-supply slope p_mPoolSupSlope and its value in the model''s units (manuremarket/declare_manure_market.gms l. 466-505; outer_loop.manure_pool_form "capri"). (tools/build/build_manure_pool_market.py)';
+INSERT INTO value_units VALUES
+  ('env_manure_pool_market_2030', 'supply_t', 'U_Ton', 'capri', 'sum of p_priFertDist postMode EXCR over the fertiliser groups (v_fertDist, t)'),
+  ('env_manure_pool_market_2030', 'dual_cal_eur_t', 'U_EuPerTon', 'capri', 'p_dualValueManureCal (CAPRI''s 2030 money): ManureNPK_.M, the supply model objective in 1000 EUR over the balance in 1000 t'),
+  ('env_manure_pool_market_2030', 'slope_capri', 'U_1000tPerEuPerTon', 'capri', 'p_mPoolSupSlope = 0.01 supply_t / dual_cal_eur_t, used with the excess supply in kt'),
+  ('env_manure_pool_market_2030', 'es_slope', 'U_TonPer1000EuPerTon', 'builder', 'slope_capri x 1000 x 1000 x deflator(2030)'),
+  ('env_manure_pool_market_2030', 'dual_cal', 'U_1000EuPerTon', 'builder', 'dual_cal_eur_t / 1000 / deflator(2030)');
+
 -- file: capri_data/2017/environment/n_deposition_regional.csv
 CREATE TABLE env_n_deposition_regional (
     region VARCHAR NOT NULL,

@@ -133,13 +133,25 @@ manure_pool_omega_min = 0.25
 manure_pool_qp_tol = 1e-8
 # the price the manure pools send back to the regional models: "capri" (CAPRI's, manuremarket/simu_manure_market.gms
 # l. 214-226: the weighted average of the pools' clearing prices of the last steps with CAPRI's price-forecast weights,
-# capri_step_weights; the default from 7 to 11 November 2026) or "damped" (capri-mod's own: a step towards the new
-# clearing prices, the omega bounds above; the default again since 11 November 2026, the project lead's choice, until
-# CAPRI's pool market m_mPoolMarket is ported, DEP-17). CAPRI's averaging was written for CAPRI's pool market; on
-# capri-mod's (cleared on the regions' exact trade schedules) it kept regional crop and feed mixes swinging: full-EU
-# Green Deal 2030 not converged after 36 iterations ("capri") against 16 iterations, 52 minutes ("damped"); Austria,
-# Ireland, Spain and Slovakia 19 against 8 iterations (6 without manure trade). DEPARTURE until the port
-manure_pool_price_update = "damped"
+# capri_step_weights; the default since 12 November 2026, with CAPRI's pool market below) or "damped" (capri-mod's own:
+# a step towards the new clearing prices, the omega bounds above; the default 11-12 November 2026). CAPRI's averaging on
+# capri-mod's former pool market ("schedules") kept regional crop and feed mixes swinging (full-EU Green Deal 2030 not
+# converged after 36 iterations); with CAPRI's pool market ("capri") it converges: full-EU Green Deal 2030 in
+# 19 iterations, the equilibrium within 0.1-0.4 points of the damped run's (docs/design/MANURE_POOL_PORT.md)
+manure_pool_price_update = "capri"
+# the pools' clearing model: "capri" (CAPRI's m_mPoolMarket, manuremarket/declare_manure_market.gms l. 99-204: each
+# region's linear excess supply, refitted at its manure value and net trade of the last solve, its trade costs, the
+# pools' trade costs; the default since 12 November 2026) or "schedules" (capri-mod's own: the regions' exact trade
+# schedules from their reduced costs, a Broyden-type response factor; the default before; DEP-17)
+manure_pool_form = "capri"
+# the "capri" form's slope of the regional excess supply (capri_data/baselines/capri_greendeal_ref/1730/environment/
+# manure_pool_market_2030.csv): "capri_code" (CAPRI's number as its code uses it: supply in t over the dual, with the
+# trade in kt, i.e. 1000 times the elasticity 0.01 written) or "capri_doc" (the elasticity 0.01 as written, supply and
+# trade in one unit)
+manure_pool_es_slope = "capri_code"
+# the "capri" form: a region's manure value at or below this level is replaced by the step-weighted average of its
+# values of the steps before (simu_manure_market.gms l. 74-77: CAPRI's 1e-6 EUR per t, here EUR 1000 per t)
+manure_pool_pshw_floor = 1e-9
 # numerical (refactor stage 4): the multiplier recovery of a region's stored problem (NNLS on its active rows): a row
 # is active within this relative tolerance, a column at its bound below this level, at most this many iterations per
 # column; the pools' trade cost slopes are divided by kappa, at least this floor; the arcs' ridge as a share of the

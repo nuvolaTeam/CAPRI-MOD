@@ -38,6 +38,7 @@ class ModelParameters(_Slots):
         "prod_grof_cache",    # CAPRI's marketed over gross production per member state and product (S7, grofNEprod)
         "sugar_rate_cache",   # sugar per t beet by member state
         "pool_cost_cache",    # the manure pools' trade costs
+        "pool_es_cache",      # the "capri" pool market's excess-supply slopes and calibration duals by region and FOUT
         "ration_model",       # CAPRI's ration model
         "feed_rations_stable",  # rations by region, built once per ration model (its identity keys the feed cache)
         "feed_rations_for",   # the ration model feed_rations_stable was built for (identity)

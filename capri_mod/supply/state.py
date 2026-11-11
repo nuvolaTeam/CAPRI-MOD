@@ -200,6 +200,7 @@ class RegionalResults(_Slots):
         # land (S6): the manure pools, read by the manure market (coupling/manure.py)
         "manure_supply0",     # the region's manure N supply at the start
         "manure_supply0_pk",  # idem for P and K
+        "manure_value",       # the manure nutrients' value at the solution (PSHW, CAPRI's ManureNPK_.M), by nutrient
         "pool_manure_vec",    # the manure N by column
         "pool_manure_vec_pk", # idem for P and K
         # abatement (S7)

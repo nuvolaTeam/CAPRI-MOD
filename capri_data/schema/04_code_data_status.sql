@@ -12,6 +12,7 @@ CREATE TABLE code_data_status (
     PRIMARY KEY (file, scope, value)
 );
 INSERT INTO code_data_status VALUES
+  ('capri_mod/coupling/manure.py', '_T_PER_KT', 1000.0, 'physical', 'keep', 'gams/supply/def_supply_model_par.gms l. 501; gams/manuremarket/declare_manure_market.gms l. 496-500', 't per kt: CAPRI''s pool trade in kt, the supply in its excess-supply slope in t (outer_loop.manure_pool_es_slope "capri_doc")'),
   ('capri_mod/market/market_nk.py', 'NewtonKrylovMixin._nk_solve', 32.0, 'numerical', 'keep', NULL, 'smallest backtracking step of the Newton-Krylov line search (1/32), a non-default solver option'),
   ('capri_mod/pipeline/captrd/labour.py', 'PERIODS', 1993.0, 'capri', 'keep', 'gams/baseline/labour_ageline.gms l. 42-58', 'farm structure survey years between which the annual change of holders is computed'),
   ('capri_mod/pipeline/captrd/labour.py', 'PERIODS', 1995.0, 'capri', 'keep', 'gams/baseline/labour_ageline.gms l. 42-58', 'farm structure survey years between which the annual change of holders is computed'),

@@ -610,6 +610,7 @@ class CapriRegionalNLP:
         lc = [int(j) for j in (npk.get("land_cols") or npk.get("crop_cols") or [])]
         land = ca.sum1(y[lc]) if len(lc) > 1 else (y[lc[0]] if lc else 0)
         self.fert_rows = [len(g_rows), None]
+        self.excr_rows = {}                     # nutrient -> (row of fertDistExcr_, its scale): ManureNPK_'s value
         for nut, d in npk["nutrients"].items():
             G = d["groups"]
             flows = []                                              # (group index, source, mode t, accuracy)
@@ -663,6 +664,8 @@ class CapriRegionalNLP:
                 tot = pool_sum(s_)
                 rhs = E if s_ == "EXCR" else C
                 sc_ = max(sum(f[2] for f in flows if f[1] == s_), 1.0)
+                if s_ == "EXCR":
+                    self.excr_rows[nut] = (len(g_rows), sc_)
                 g_rows.append((tot - rhs) * pv(1.0 / sc_)); lbg.append(0.0); ubg.append(0.0)
             # the regulations (e_fertDistPartialRegu, e_fertDistReguMax): a beta density on a group's flow with its
             # support (0, max per ha x the group's area) - the Green Deal's mineral caps by crop group ("f2f") and the
@@ -1493,6 +1496,15 @@ class CapriRegionalNLP:
                 "warm": False}
 
     # ---------------- results in the regional QP's terms ----------------
+    def manure_values(self, res) -> dict:
+        """The value of one more t of manure nutrient applied in the region, per nutrient (EUR 1000 per t): the dual of
+        the fertilisation block's EXCR pool row (fertDistExcr_), which carries the value of CAPRI's ManureNPK_ - CAPRI's
+        PSHW (capmod/report_supply_model.gms l. 261: ManureNPK_.M), the point of the manure pool market's excess supply
+        function (manuremarket/simu_manure_market.gms l. 60-89). The objective is a cost to minimise, the row
+        (applied - manure) / scale = 0: the value is lambda / scale."""
+        lam = res["lam_g"]
+        return {nut: float(lam[gi]) / sc for nut, (gi, sc) in (getattr(self, "excr_rows", None) or {}).items()}
+
     def outputs(self, res):
         """(y, F {(act, feed): t}, zA (dual of each row of A, >= 0 for A y <= b), info) - the fields the supply module
         reads from the regional model."""

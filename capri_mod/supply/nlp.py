@@ -501,6 +501,8 @@ class NLPBlock:
             with open(_fn, "ab") as _fh:
                 _pk.dump(_rec, _fh)
         y, F, zA, info = nlp.outputs(res)
+        # the region's value of manure applied, per nutrient (CAPRI's PSHW, the manure pool market's point)
+        self.res.manure_value = nlp.manure_values(res)
         self.sv.nlp_y = np.asarray(y, float).ravel().copy()
         self.sv.nlp_cols = list(cols)
         # the young-animal markets' price update: this solution's response to the young-animal prices (K65)

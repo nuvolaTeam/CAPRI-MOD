@@ -1373,6 +1373,18 @@ COMMENT ON TABLE src_capri_manure_trade_2030 IS 'CAPRI''s manure N excretion EXC
 INSERT INTO value_units VALUES
   ('src_capri_manure_trade_2030', 'kt_n', NULL, 'open', 'capri_manure_trade_2030.kt_n: unit to be established');
 
+-- file: capri_data/sources/raw/capri/results/fert/manure_pool_inputs_2030.parquet
+CREATE TABLE src_manure_pool_inputs_2030 (
+    capri_region VARCHAR NOT NULL,
+    fout VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (capri_region, fout, "item")
+);
+COMMENT ON TABLE src_manure_pool_inputs_2030 IS 'CAPRI''s records of its 2030 Green Deal baseline fertiliser distribution (priFertDist_<MS>1730defaulta.gdx, results/fert; the raw dataset nuvolaTeam/capri-mod-raw v2026.11.11.2) per CAPRI region and manure nutrient: supply_t (p_priFertDist postMode EXCR summed over the groups, t) and dual_cal_eur_t (p_dualValueManureCal, EUR per t) (tools/build/build_manure_pool_market.py).';
+INSERT INTO value_units VALUES
+  ('src_manure_pool_inputs_2030', 'value', NULL, 'open', 'manure_pool_inputs_2030.value: by item, t (supply_t) or EUR per t (dual_cal_eur_t)');
+
 -- file: capri_data/sources/intermediate/estnlp/pela_own_price.parquet
 CREATE TABLE src_pela_own_price (
     model_region VARCHAR NOT NULL,

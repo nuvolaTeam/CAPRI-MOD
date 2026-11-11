@@ -93,6 +93,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_land_rents", ["--year", "2017"], [D17]),
     ("build_land_rents", ["--year", "2030"], [REF]),
     ("build_manure_losses", [], [EXPORTS / "res_2_1730greendeal_refdefaulta.zip"]),
+    ("build_manure_pool_market", [], []),         # from its kept extract (--parquet DIR / --download: the raw)
     ("build_manure_trade_base", [], [REF]),
     ("build_nh3_factors", [], [EXPORTS / "res_2_1730greendeal_refdefaulta.zip"]),
     ("build_overfert_factors", [str(SOURCES / "fert/multfact_1730.txt")], [SOURCES / "fert/multfact_1730.txt"]),

@@ -3672,6 +3672,34 @@
    ]
   },
   {
+   "task": "build_manure_pool_market",
+   "builder": "build_manure_pool_market",
+   "args": [],
+   "inputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_price_ratios_2030.csv",
+    "capri_data/codes/capri_member_state_codes.csv",
+    "capri_data/codes/eu_market_blocks.csv",
+    "capri_data/codes/regional_units.csv",
+    "capri_data/sources/raw/capri/results/fert/manure_pool_inputs_2030.parquet",
+    "capri_mod/settings/defaults.toml"
+   ],
+   "code": [
+    "capri_mod/__init__.py",
+    "capri_mod/csvio.py",
+    "capri_mod/run_manifest.py",
+    "capri_mod/tableio.py",
+    "tools/build/build_manure_pool_market.py",
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py",
+    "tools/lib/_sources_io.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [],
+   "outputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv"
+   ]
+  },
+  {
    "task": "build_manure_n2o",
    "builder": "build_manure_n2o",
    "args": [],

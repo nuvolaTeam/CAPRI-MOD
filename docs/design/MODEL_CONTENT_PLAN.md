@@ -706,23 +706,32 @@ fine-grained token checked the same day; the token is kept outside the repositor
 
 ## 13. Summary
 
+Updated 12 November 2026 (the table of 4 November was stale). Status from the commit history of dev and the notes.
+
 | Item | Depends on | Status | Open decisions | Main source |
 |---|---|---|---|---|
-| Market on 45 RM (stages 1-3, 2017 year, TARV, young-animal timing) | refactor finished; full scenario runs | inventory and decisions done; WBA fix done; **stage 1 done 3 November 2026** (MRI "Stage 1, done"); stages 2-3 built 3-4 November 2026 (stage 2: the two EU blocks, feed bulks per block; stage 3: ROW as CAPRI's 17 market regions, FPRI over the 45; tariffs.csv kept in stage 2, TARV with the ports) | stage of the TARV switch and 2017 rebuild; link of stage 2's young-animal fix with G2g; gate batching | MRI |
-| Ports (stages 4-7: bilateral and global TRQs, DEP-41, levies, entry prices, land and yield block) | market move stages 1-3 | built 4 November 2026 in the current market code (stages 4-5 TRQs, stage 6 entry prices and flexible levies, CAPRI's market prices as the reference price levels, stage 7 the land market outside the EU); the full F2F with them converged on 5 November after K117 (13 iterations; mean deviation from CAPRI 4.59 against 4.18 at gate 16, the beef and poultry prices higher, not yet attributed); the GD gate not run; market time per solve 145-480 s against 15-38 s at gate 16 (open) | ports before G3 or as G3 equations; luc_market not in scope | MRI §5; G3I |
-| 29 non-EU units | market move (MRI §7) | SND steps 1-9 done 4 November 2026 (step 9: the 2030 baseline per country within 0.7-5.1% of CAPRI's, weighted; the 9-country F2F did not converge, Serbia's feed energy price oscillating, to diagnose); step 10, the full F2F and GD runs, started 4 November | default country list after the build [I] | SND |
-| S1/S2 (and DEP-42) | refactor stages 3-5; N6 | decided 1 Nov (S1 option c; S2 explicit); data and code not started; DEP-42 on n6 branches; **the project lead, 4 Nov: close the activity gap with CAPRI** (S2's splits; NECR held fixed as CAPRI's FACT, 251 kha in the EU's 2030; calves and heifers by sex with S9) | none stated | S12 |
-| Step G (G2b, G2d, G2f, G2g; G3) | G2b on refactor stage 4; G3 after market move | G1, G2a, G2c, G2e built; G2b, G2d, G2f, G2g built 4 November 2026 on branch step-g2b (each equal to the former code at random points; merge after a mini-EU check and the suite); G3 on standby | G3: bound policy, objective with squareness check, validation on sim_ini; fudge activation; scaling | MID; GR; G3I |
-| S3 | — | decided and implemented (narrowed form); base checked; in gate 14's code | none stated | SGP S3 |
-| S5 | — | closed: hold kept (DEP-15) | none | SGP S5 |
-| S6 | — | not started; per item | which DEP-10 items | SGP S6; REG DEP-10 |
-| S7 | [I] market move; 29 units | not started | whether and when | SGP S7; DFC |
-| S9 | K65 | deferred (no CAPRI per-sex results) | whether to resume | KI K65 |
-| S10 | [I] S1 for no-till's yield | 3-NOP built; UreaSubst parked; NoTill, LegSh not built | whether to build NoTill and LegSh | KI K93 |
-| S11 | S1 for T1/T2 averages | not started; per item | which items and exports | SGP S11 |
-| P1 obligatory set-aside | done 10 November 2026 | CAPRI's SETA_ (supply/land.py _obligatory_set_aside), scenario set_aside_10 | — | §12a; supply_model.gms SETA_ |
-| P2 coupled support, Pillar I envelope | — | not started | when; with the premium module's port | §12a |
-| CAPRI's sources as Parquet, for download (beyond CAPRI) | — | decided 3 Nov: outside git, gated Hugging Face dataset, after market stages 2-3; sizes measured; not started | none | §12b |
+| Market on 45 RM (stages 1-3, 2017 year, TARV, young-animal timing) | — | **done** 3-4 November 2026 | — | MRI |
+| Ports (stages 4-7: TRQs, levies, entry prices, land and yield block) | market stages 1-3 | **done** 4 November 2026 in the current market code; market time per solve higher than before (open) | — | MRI §5; G3I |
+| 29 non-EU units | market move | **built** 4 November 2026 (SND steps 1-9); off by default (run.supply_countries_outside_eu = Norway only): D2 below | — | SND |
+| D2: CAPRI's full list of non-EU supply countries the default | 29 units; G3 | not started (after G3, before the end of CAPTRD-MOD; the project lead, 9 November 2026) | — | VALIDATION_PLAN §2 |
+| S1/S2 (and DEP-42) | — | **done** 7-8 November 2026 (OFAR/ROOF, VSET/FALL, GRAE/GRAI, CAPRI's technologies at 2030; DEP-42 closed) | — | S12 |
+| Step G (G2b, G2d, G2f, G2g) | — | **done** 4 November 2026 | — | MID; GR |
+| G3: the whole market as one IPOPT system | market move | not started (before the end of CAPTRD-MOD; decisions 7-10 of section 14) | the CAPRI market dump for the external check (GR Q5.2) | MID §7.2; G3I |
+| S3 | — | done (narrowed form) | — | SGP S3 |
+| S5 | — | closed: hold kept (DEP-15) | — | SGP S5 |
+| S6 | — | **done**, items 1-6 (9-10 November 2026; DEP-10) | — | SGP S6; REG DEP-10 |
+| S7 | — | **done** 8-9 November 2026 (CAPRI's demand calibration the only form; DEP-5 removed) | — | SGP S7 |
+| S9 / K65 | CAPRI data | deferred | whether to resume after S1/S2 | KI K65 |
+| S10 | carbon-tax scenarios | 3-NOP built; UreaSubst parked; NoTill and LegSh to port (decided 5 November 2026) | — | KI K93 |
+| S11 | — | closed 10 November 2026, one check left (the 2030 feed slopes) | — | SGP S11 |
+| S13: LULUCF carbon, the carbon price on land-use change | carbon-tax scenarios | planned 9 November 2026 | — | SGP S13 |
+| luc_market | — | **done** 9 November 2026 (DEP-44) | — | G3I |
+| P1 obligatory set-aside | — | **done** 10 November 2026 | — | §12a |
+| P2 coupled support, Pillar I envelope | — | not started (with the port of CAPRI's premium module, before the end of CAPTRD-MOD) | — | §12a |
+| Data layout by role | — | **done** 11 November 2026 (capri_data/<base year>/, capri_data/baselines/<baseline>/<BAS><SIM>/) | — | DATA_LAYOUT.md |
+| CAPRI's sources as Parquet, for download (beyond CAPRI) | — | **done**: the gated dataset nuvolaTeam/capri-mod-raw (v2026.11.11.2, 170 sources) | — | §12b |
+| Manure pools: CAPRI's pool market (DEP-17) | — | ported 11 November 2026 (outer_loop.manure_pool_form "capri"); default after the full-EU check | the excess-supply slope (CAPRI's code or its documented elasticity) | MANURE_POOL_PORT.md |
+| CAPTRD-MOD | — | stages 1, 2a-2d, 2f done; 2e (m_trendMS), 3 (NUTS2), 4 (reporting) to do | — | CAPTRD_MOD.md |
 
 ## 14. Open decisions across all items
 
