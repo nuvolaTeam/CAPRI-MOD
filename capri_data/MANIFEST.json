@@ -4419,6 +4419,20 @@
     "builder": "build_captrd_dairy (not in the trace yet)"
    }
   },
+  "capri_data/pipeline/captrd/dat/national_p_fromnecp.csv": {
+   "description": "The member states' herds and mineral nitrogen from their NECPs, p_fromNECP(rAll, xpCols, simyy) of dat/baseline/necp_expert.gms (M Kesting, P Witzke, 8 April 2025; read by captrd/national_supports.gms l. 149), the nonzero records; 869 rows (tools/build/build_captrd_national.py).",
+   "kind": "coefficients",
+   "rows": 869,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/pipeline/captrd/national_supports.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_national (not in the trace yet)"
+   }
+  },
   "capri_data/pipeline/captrd/dat/p_byproduct.csv": {
    "description": "CAPRI's p_ByProduct(byproduct, stock): by-product (DDGS, GLYC) per ton of feedstock converted to biofuel, from dat/biofuel/biofuel_technology_params.gms (as CSV: capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_ByProduct.parquet, tools/build/convert_sources.py), which captrd.gms l. 340-341 includes; 14 rows (tools/build/build_captrd_dat.py).",
    "kind": "coefficients",
@@ -6350,6 +6364,66 @@
    "origin": {
     "nature": "capri",
     "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/national/absdairyrunr.csv": {
+   "description": "The set absDairyRunr of captrd/national_supports.gms (the regions whose dairy supports stay in absolute form; l. 1516-1535), as written (labels with blanks kept): one member per row, 18 (e.g. BL000000, DK000000, DE000000); read by tools/build/build_captrd_national.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 18,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_national (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/national/expert_to_cols.csv": {
+   "description": "The set Expert_to_cols of captrd/national_supports.gms (the national sources' columns to CAPRI's columns; l. 112-123), as written (labels with blanks kept): one member per row, 43 (e.g. CATT.DCOL, CATT.DCOH, DCOW.DCOL); read by tools/build/build_captrd_national.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 43,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_national (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/national/expert_to_rows.csv": {
+   "description": "The set Expert_to_rows of captrd/national_supports.gms (the national sources' rows to CAPRI's rows; l. 125-137), as written (labels with blanks kept): one member per row, 13 (e.g. COMI.COMI, SWHE.SWHE, BARL.BARL); read by tools/build/build_captrd_national.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 13,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_national (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/national/xpcols.csv": {
+   "description": "The set xpCOLS of captrd/national_supports.gms (the columns or column groups of the national sources; l. 52-75), as written (labels with blanks kept): one member per row, 22 (e.g. BROIL, Castrated horses , CATO); read by tools/build/build_captrd_national.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 22,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_national (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/national/xpdisagg.csv": {
+   "description": "The set xpDisAgg of captrd/national_supports.gms (the disaggregate animal categories, given a higher trust level; l. 77-91), as written (labels with blanks kept): one member per row, 13 (e.g. BROIL, DCOW, DUCKS); read by tools/build/build_captrd_national.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 13,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_national (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/national/xprows.csv": {
+   "description": "The set xpROWS of captrd/national_supports.gms (the rows or row groups of the national sources; l. 95-108), as written (labels with blanks kept): one member per row, 12 (e.g. COMI, NITF, LEV1); read by tools/build/build_captrd_national.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 12,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_national (not in the trace yet)"
    }
   },
   "capri_data/pipeline/captrd/sets/ncnc.csv": {

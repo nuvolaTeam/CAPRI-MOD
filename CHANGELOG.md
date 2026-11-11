@@ -32,6 +32,32 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — CAPTRD-MOD stage 2d: the national expert supports
+
+- `capri_mod/pipeline/captrd/national_supports.py`: CAPTRD's national expert supports (captrd/national_supports.gms,
+  with the reference run's switches: aglinkTightLink off, useAgriInfo on). It works on p_ExpertSupprt as the earlier
+  sources leave it (Absolute, PercentChange, TrustLevl, expert bounds):
+  - the dairy absolutes also as PercentChange;
+  - the member states' NECP herds (dat/baseline/necp_expert.gms), interpolated as coco/time_avg.gms, the base mean;
+  - the default national supports (trust 7.01, 6.01 for herds without disaggregate data);
+  - the 31 country blocks with their bounds, CS000000's dairy-herd support floored;
+  - the dairy supports of absDairyRunr back to Absolute after 2020.
+
+  Inputs as CSV (`tools/build/build_captrd_national.py`, 40_captrd_national.sql). `tools/lib/gams_text.table_records`
+  reads quoted labels with blanks ('Mature sheep').
+- Parity (test_captrd_national_supports.py): the earlier ports are chained in expert_support.gms's order, on the
+  supports before the expert supports (supports.py on CAPTRD's Step1: CAPTRD stores the support only after the expert
+  supports overwrite it). Of the 6,829 positions the file changes after 2018, 6,701 are equal to CAPTRD's Expert and
+  TrustLevl. The other 128:
+  - NO's and TUR's trust levels, which define_EU_supports.gms sets again;
+  - CS's DOMM.COMI, stored only as the reporting re-aggregate;
+  - Luxembourg's dairy HERD, whose BASM is not stored.
+- Found:
+  - the block headed "HU" (l. 1097-1122) assigns Croatia's positions, kept as coded;
+  - TUR's market supports get no trust level, because their condition needs expertdairy_map, which holds no POUM or
+    SGMT (l. 1481-1484); kept as coded;
+  - the PercentChange the file leaves are equal to CAPTRD's although longrun_supports.gms is not ported yet.
+
 ## 11 November 2026 — CAPTRD-MOD stage 2d: Eurostat's recent production; the CasADi wheel's SPRAL build
 
 - `capri_mod/pipeline/captrd/agriprod_supports.py`: CAPTRD's short-run supports from Eurostat's recent production
