@@ -16,15 +16,17 @@ result is a wheel you install with pip in place of PyPI's CasADi.
   - WORHP plugin: `Params` has no `ScaledKKT`. The solver mockups' master branch (v114 on) dropped it. With the build
     flags' `WITH_MOCKUP_*`, the core build clones the mockups itself, and the script now passes
     `-DBUILD_MOCKUPS_VERSION=v111` (the release CasADi 3.8.1 was built against) and removes an earlier run's copy.
-    The separate mockups step is gone: with `WITH_MOCKUP_*` the core skips the search for these solvers and
-    does not use it, and its folder, most likely only partly removed (files the container wrote are root's), made
-    the last run stop ("/work/mockups does not appear to contain CMakeLists.txt").
+    The separate mockups build is still needed: the MATLAB IPC plugin finds its MATLAB mockup there (the run without
+    it stopped at "MATLAB not found"). It is now cloned, built and installed inside the container, into
+    `mockups_v111` and `mockups_v111_install`: an earlier run's `mockups` folder, most likely only partly removed by
+    the host (files the container wrote are root's), had stopped a run with "/work/mockups does not appear to
+    contain CMakeLists.txt".
   - SPRAL: "Cannot open module file 'spral_matrix_util.mod'", then 'spral_ssids_contrib.mod'. SPRAL's Makefile misses
     module dependencies (CasADi's workflow calls it a known parallel-build race). The patch builds SPRAL with
     `make -j1`, and the whole build is now serial by default, as CasADi's.
   - The script applies a changed patch again by itself and repeats the core build. Rerun the same command on the
-    same work folder; the leftover `mockups` and `mockups_install` folders there are no longer used and can be
-    deleted (with `sudo` if the container wrote them as root).
+    same work folder; the old `mockups` and `mockups_install` folders there (without the `_v111`) are no longer
+    used and can be deleted (with `sudo` if the container wrote them as root).
 
 ## What you need
 
@@ -61,6 +63,7 @@ result is a wheel you install with pip in place of PyPI's CasADi.
 
    The script:
    - clones CasADi 3.8.1 and its library grafter, and applies the patch;
+   - builds CasADi's solver mockups (v111) for the MATLAB IPC plugin;
    - pulls `ghcr.io/casadi/ci-swig` and `ghcr.io/jgillis/manylinux_2_28-x64:production`, CasADi's own build images;
    - generates the Python wrappers, builds the core with every plugin of PyPI's wheel (the core clones and builds the
      solver mockups itself, pinned to v111), and the Python 3.11 limited-API module;

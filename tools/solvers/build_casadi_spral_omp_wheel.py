@@ -19,8 +19,9 @@ API) with one change, tools/solvers/casadi_3.8.1_spral_openmp.patch:
 
 Everything else is CasADi's: the same images (ghcr.io/casadi/ci-swig for the SWIG sources, ghcr.io/jgillis/
 manylinux_2_28-x64:production for the build), the same build_flags (read from binaries.yml at the tag, so every plugin
-of PyPI's wheel), the solver mockups (github.com/casadi/mockups at v111, which the core build clones and builds itself
-for the build_flags' WITH_MOCKUP_* solvers: binaries.yml's own note, "no mockups/cmake prefix needed"), the core and
+of PyPI's wheel), the solver mockups (github.com/casadi/mockups at v111: built here as binaries.yml's casadi/mockups action
+provides them, on CMAKE_PREFIX_PATH, where the MATLAB IPC plugin finds its MATLAB mockup; and cloned by the core build
+itself for the WITH_MOCKUP_* solvers), the core and
 python builds run serially as binaries.yml runs them (cmake --build without -j; --jobs N is faster and leaves
 CasADi's tested path), the grafting of the runtime libraries into the package
 (github.com/jgillis/universal_grafter: jgillis's auditwheel fork renames libgomp, libgfortran and the others with hashed
@@ -163,6 +164,19 @@ def main() -> None:
             sys.exit(f"the SWIG step did not write {wrapper}: see {log}")
         done(work, "swig")
 
+    mock, mock_inst = f"mockups_{MOCKUPS_TAG}", f"mockups_{MOCKUPS_TAG}_install"
+    if not stamp(work, mock):
+        # binaries.yml's casadi/mockups action: the mockups for CMAKE_PREFIX_PATH (the MATLAB IPC plugin's MATLAB is
+        # found there: cmake/FindMATLAB.cmake, matlab-config.cmake); cloned, built and installed inside the container
+        # into folders named by the release, an unfinished earlier attempt removed there (its files are root's)
+        docker(work, BUILD_IMAGE, f"rm -rf {mock} {mock_inst} && git clone --depth 1 -b {MOCKUPS_TAG} "
+               f"https://github.com/casadi/mockups {mock} && cd {mock} && cmake -B build_mock "
+               f"-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/work/{mock_inst} . && cmake --build build_mock "
+               "&& cmake --install build_mock", log)
+        if not (work / mock_inst / "cmake").is_dir():
+            sys.exit(f"the mockups step did not install {work / mock_inst / 'cmake'}: see {log}")
+        done(work, mock)
+
     if not stamp(work, "core"):
         # binaries.yml's core-dockcross job, the core's own mockups at MOCKUPS_TAG (an earlier run's copy of another
         # release removed, so that it is cloned again)
@@ -172,7 +186,7 @@ def main() -> None:
             "build/external_projects/src/mockups-external-stamp build/external_projects/mockups && ")
         docker(work, BUILD_IMAGE, f"cd casadi && {clean}rm -f build/CMakeCache.txt && cmake -Bbuild "
                "-DCMAKE_BUILD_TYPE=Release -DWITH_SELFCONTAINED=ON $(cat /work/build_flags.txt) "
-               f"-DBUILD_MOCKUPS_VERSION={MOCKUPS_TAG} "
+               f"-DBUILD_MOCKUPS_VERSION={MOCKUPS_TAG} -DCMAKE_PREFIX_PATH=/work/{mock_inst}/cmake "
                f"-H. && cmake --build build -j{a.jobs}", log)
         core_tag.write_text(MOCKUPS_TAG + "\n")
         done(work, "core")
