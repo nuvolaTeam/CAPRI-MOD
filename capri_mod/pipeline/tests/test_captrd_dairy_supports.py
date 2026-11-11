@@ -25,6 +25,7 @@ from capri_mod.pipeline.captrd import prepare as P
 from capri_mod.pipeline.captrd import timesets as TS
 from capri_mod.pipeline.tests.test_captrd_aglink import dgagri, need  # noqa: F401
 from capri_mod.pipeline.tests.test_captrd_scale_dgagri import scaled, EXANTE  # noqa: F401
+from capri_mod.pipeline.tests.captrd_pre_expert import pre_expert_supports
 
 R = REFERENCE / "captrd_results" / "1770"
 DAT = P.SETS_DIR.parent / "dat"
@@ -60,12 +61,14 @@ def result(scaled):  # noqa: F811
     rc = rc[rc.year.str.upper() == "Y"]
     runr = list(s.ms) + (["BL400000"] if "BL000000" in s.ms else [])
     tr = {}
+    # the supports when expert_support.gms runs: the trend supports, not the stored ones the expert supports overwrote
+    support = {**_kv(sup), **{(r, c, w, str(y)): v for (r, c, w, y), v in pre_expert_supports(tuple(T.exante)).items()}}
     dg = {k: v for k, v in scaled[1].items()} if isinstance(scaled[1], dict) else _kv(scaled[1])
     E, share = D.dairy(runr=runr, ms=s.ms, ms_no_eu28=s.msnoeu28, dcow=["DCOL", "DCOH"], base_year=2017,
                        exante_t=T.exantet, expost=T.expost, expostt=T.expostt, years_cur=T.years_cur, sim_years=resy,
                        fst_exante=T.fst_exante, lst_exante=max(T.exante), lst_dgagri=T.lst_dgagri, tables=_tables(),
                        ms_agri_to_ms=list(zip(m2.ms_agri, m2.region)), recent=dict(zip(rc.region, rc.value)),
-                       basm=_kv(bm[bm.t == "2070"], False), support=_kv(sup), pdata=_kv(pdata), dgagri=dg,
+                       basm=_kv(bm[bm.t == "2070"], False), support=support, pdata=_kv(pdata), dgagri=dg,
                        map_rr=s.map_rr, europ_aggs=["EU014000", "EU013000", "EU27yr19"],
                        sub_aggs=["EU014000", "EU013000"], eu13="EU013000", eu14="EU014000", west="A_EU_WEST",
                        east="A_EU_EAST", trace=tr)

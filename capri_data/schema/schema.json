@@ -12265,6 +12265,7 @@
     "builders": [],
     "checks": [],
     "tests": [
+     "capri_mod/pipeline/tests/test_captrd_expert_support.py",
      "capri_mod/pipeline/tests/test_captrd_longrun_supports.py"
     ]
    }
@@ -12736,7 +12737,7 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/pipeline/tests/test_captrd_national_supports.py",
+     "capri_mod/pipeline/tests/captrd_pre_expert.py",
      "capri_mod/pipeline/tests/test_captrd_supports.py"
     ]
    }
@@ -13795,6 +13796,7 @@
     "builders": [],
     "checks": [],
     "tests": [
+     "capri_mod/pipeline/tests/test_captrd_expert_support.py",
      "capri_mod/pipeline/tests/test_captrd_longrun_supports.py",
      "capri_mod/pipeline/tests/test_captrd_prepare.py"
     ]
@@ -53182,7 +53184,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 263,
+  "capri/keep": 268,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 26,

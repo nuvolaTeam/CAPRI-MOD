@@ -32,6 +32,29 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — CAPTRD-MOD stage 2d: the expert supports assembled
+
+- `capri_mod/pipeline/captrd/expert_support.py` ports the end of captrd/expert_support.gms (l. 787-860) and the
+  storage of the expert supports in define_stats_and_supports.gms (l. 485-500, 589-596 in part, 627-645):
+  - the herd and level floor of the member states' animal activities (90% a year, or a linear decline to 20% by
+    Lst_exAnte);
+  - TOOU as an expert support with a low trust level where the output's price has expert information;
+  - the stop where a position has both an Absolute and a PercentChange support;
+  - Expert (Absolute, else (1 + PercentChange/100) x BASM), BIOF.SUGA deleted without MAPR.SUGA observations (only
+    l. 175 of adjust_to_biof_supports.gms; its support adjustments are not ported yet), the member states' sugar
+    beet trade = BAST, else BASM, and TrustLevl (COCO's, else the expert's, else 10).
+- national_supports.py: MAPR.MILK added to the dairy positions it may rewrite (expertdairy_map, expert_support.gms
+  l. 686).
+- The tests of the dairy and national supports now read the supports from before the expert supports
+  (tests/captrd_pre_expert.py); CAPTRD's stored support is the one the experts overwrote. This changes TUR's share
+  of direct milk sales (HCOM/GROF), which is taken from the trend supports.
+- Parity (test_captrd_expert_support.py, all ported sources chained in expert_support.gms's order): of the 39,567
+  member-state positions after 2018, 39,485 equal CAPTRD's Expert and TrustLevl. The other 82 are define_EU_supports
+  (stage 2f: NO and TUR trust levels, 72; tiny BIOF.SUGA defaults, 6) or not in the stored results (CS DOMM.COMI,
+  4). The national supports: 7,282 of 7,410 changed positions equal (was 6,701 of 6,829).
+
+---
+
 ## 11 November 2026 — CAPTRD-MOD stage 2d: the long-run supports
 
 - `capri_mod/pipeline/captrd/longrun_supports.py` ports captrd/longrun_supports.gms with GlobiomAact and

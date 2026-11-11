@@ -6,7 +6,7 @@ after the expert supports have overwritten it, define_stats_and_supports.gms l. 
 (Absolute, else (1 + PercentChange/100) x BASM) and TrustLevl (10 where no source sets one, l. 637-645) of the
 positions this file changes.
 
-Results on 11 November 2026: of 6,829 positions changed in the years after 2018, 6,701 equal to CAPTRD's in value and
+Results on 11 November 2026: of 7,410 positions changed in the years after 2018, 7,282 equal to CAPTRD's in value and
 trust level; the other 128 are accounted for by a later stage or by the stored results:
   - the trust levels of NO000000's and TUR's market positions with DG AGRI targets, which define_EU_supports.gms
     (l. 719-833) sets again;
@@ -27,11 +27,11 @@ from capri_mod.pipeline.captrd import agriprod_supports as A
 from capri_mod.pipeline.captrd import expert_rules as XR
 from capri_mod.pipeline.captrd import national_supports as N
 from capri_mod.pipeline.captrd import prepare as P
-from capri_mod.pipeline.captrd import supports as SU
 from capri_mod.pipeline.tests.test_captrd_aglink import dgagri, need, aglink_p  # noqa: F401
 from capri_mod.pipeline.tests.test_captrd_scale_dgagri import scaled, EXANTE  # noqa: F401
 from capri_mod.pipeline.tests import test_captrd_biofuel_trends as TB
 from capri_mod.pipeline.tests.test_captrd_dairy_supports import result  # noqa: F401  (the dairy supports)
+from capri_mod.pipeline.tests.captrd_pre_expert import pre_expert_supports as _pre_expert_supports
 
 R = REFERENCE / "captrd_results" / "1770"
 G = REFERENCE / "sets" / "simini_21730"
@@ -47,40 +47,6 @@ def _kv(df, with_t=True):
     if with_t:
         return {(r, c, w, int(y)): v for r, c, w, y, v in zip(df.region, df.col, df.row, df.t, df.value)}
     return {(r, c, w): v for r, c, w, v in zip(df.region, df.col, df.row, df.value)}
-
-
-def _pre_expert_supports(years):
-    """define_stats_and_supports.gms l. 186-330 on CAPTRD's Step1 and statistics (test_captrd_supports.py)."""
-    st = _ref("data").pivot_table(index=["region", "col", "row"], columns="t", values="value",
-                                  aggfunc="first").fillna(0.0)
-    st = st[st.nObs > 0]
-    s1 = _ref("step1")
-    S1 = s1[s1.t.isin([str(y) for y in years])].pivot_table(index=["region", "col", "row"], columns="t",
-                                                             values="value", aggfunc="first")
-    S1.columns = [int(c) for c in S1.columns]
-    p = _ref("P_Data")
-    p = p[p.t.str.fullmatch(r"\d{4}")]
-    yl = p[p.t.astype(int).between(2011, 2018)].pivot_table(index=["region", "col", "row"], columns="t",
-                                                             values="value", aggfunc="first").fillna(0.0)
-    pty = set(map(tuple, pd.read_csv(G / "PACT_TO_Y.csv")[["d0", "d1"]].values))
-    yidx = [i for i in yl.index if (i[1], i[2]) in pty]
-    levbas = pd.Series({i: st.at[(i[0], i[1], "LEVL"), "BAS"] if (i[0], i[1], "LEVL") in st.index else 0.0
-                        for i in yidx})
-    bsy = SU.best_three_yields(levbas, yl.loc[yidx], range(2011, 2019), st["BAS"])
-    bm, bt = _ref("BASM"), _ref("BAST")
-    bm = bm[bm.t == "2030"].set_index(["region", "col", "row"]).value
-    bt = bt[bt.t == "2030"].set_index(["region", "col", "row"]).value
-    inp = pd.DataFrame({"nobs": st.nObs, "wr2": st.wR2, "wave": st.WAve, "wvar": st.wVar, "wvarerr": 0.0,
-                        "basm": bm.reindex(st.index).fillna(0.0), "bast": bt.reindex(st.index).fillna(0.0),
-                        "bas": st.BAS})
-    inp["bsy"] = bsy.reindex(inp.index).fillna(0.0)
-    sets = SU.SupportSets(pact_to_y=pty, mcact=set(_g("MCACT")), no_yield_drop=set(
-        pd.read_csv(P.SETS_DIR / "noyielddrop.csv").d0), breed_act={"DCOL", "DCOH", "SCOW", "SHGM", "SOWS", "HENS"},
-        grs_act=set(_g("GRSACT")), reqst={"ENNE", "CRPR", "FILG", "FICT", "FISM", "FISF"}, feed=set(_g("FEED")),
-        mpact=set(_g("MPACT")))
-    sup, _ = SU.supports(inp, S1, years, 2017, 2018, sets)
-    st = sup.stack()
-    return {(r, c, w, int(y)): float(v) for (r, c, w, y), v in st.items() if v and v == v}
 
 
 def _g(name):
@@ -151,7 +117,7 @@ def state(dgagri, scaled, aglink_p, result):  # noqa: F811
         pact_to_y=pty, p_t_actagg=s.p_t_actagg, exante=T.exante, exantet=T.exantet, expostt=T.expostt,
         basyrsm=T.basyrsm, base_year=2017, bast_year=T.lst_expostt - 1, lst_expost=T.lst_expost,
         lst_expostt=T.lst_expostt, lst_exante=max(T.exante), lst_dgagri=T.lst_dgagri,
-        support={**_kv(sup[sup.t.str.isdigit()]), **_pre_expert_supports(list(T.exante))}, basm=bm70, bast=_kv(d[d.t == "BAST"], False),
+        support={**_kv(sup[sup.t.str.isdigit()]), **_pre_expert_supports(tuple(T.exante))}, basm=bm70, bast=_kv(d[d.t == "BAST"], False),
         bas=_kv(d[d.t == "BAS"], False), pdata=pd_all, dgagri1={(r, c, w, int(y)): v for (r, c, w, y), v in
                                                               dict(scaled[0]).items()},
         years=list(range(1984, 2071)))

@@ -179,7 +179,8 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
     def is_(col, g):
         return col in agg.get(g, set())
     emap = {(c, w) for c in dcow for w in ("LEVL", "HERD", "COMI")} | {
-        (c, "COMI") for c in ("GROF", "DOMM", "EAAG", "PRCM", "EXPE")}       # expert_support.gms l. 433-436
+        (c, "COMI") for c in ("GROF", "DOMM", "EAAG", "PRCM", "EXPE")} | {
+        ("MAPR", "MILK")}                                  # expert_support.gms l. 433-435, 686
     pty = set(X.pact_to_y)
     sup, basm, bast, bas = X.support, X.basm, X.bast, X.bas
     ab, pc, tr, lo, up = S.ab, S.pc, S.tr, S.lo, S.up
