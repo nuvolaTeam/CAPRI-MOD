@@ -10,10 +10,10 @@ the run the model's 2030 base reproduces; its calibration run refpol_endotech_al
   - dataOut(R, '', activity, 'LEVL', '2030'): activity levels, to weight CAPRI activities into model activities.
 
 Outputs
-  capri_data/2030/policy/cap_ceilings_2030.csv     CAPRI region x scheme budget (Mio EUR of 2017, K108): DPPIL1, DPPIL2, DPRD_LFA,
+  capri_data/baselines/capri_greendeal_ref/2017_2030/policy/cap_ceilings_2030.csv     CAPRI region x scheme budget (Mio EUR of 2017, K108): DPPIL1, DPPIL2, DPRD_LFA,
                                                     DPRD_N2K, DPAE, DPNAT (national payments: complementary
                                                     national direct payments, Norway's schemes), DPTOTAL (Eps -> 0)
-  capri_data/2030/policy/premium_scheme_shares_2030.csv
+  capri_data/baselines/capri_greendeal_ref/2017_2030/policy/premium_scheme_shares_2030.csv
                                                     model region x activity: the share of the activity's premium per
                                                     unit paid under DPPIL1, DPRD_LFA, DPRD_N2K, DPAE and DPNAT
                                                     (each over DPTOTAL), level-weighted over the activity's CAPRI members; region
@@ -40,8 +40,8 @@ from _grep import lines  # noqa: E402  (a listing's lines, plain or zipped)
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = BASELINE_REF
-OUT_CEIL = ROOT / "capri_data" / "2030" / "policy" / "cap_ceilings_2030.csv"
-OUT_SHARE = ROOT / "capri_data" / "2030" / "policy" / "premium_scheme_shares_2030.csv"
+OUT_CEIL = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "policy" / "cap_ceilings_2030.csv"
+OUT_SHARE = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "policy" / "premium_scheme_shares_2030.csv"
 SCHEMES = ("DPPIL1", "DPPIL2", "DPRD_LFA", "DPRD_N2K", "DPAE", "DPNAT", "DPTOTAL")
 SHARES = ("DPPIL1", "DPRD_LFA", "DPRD_N2K", "DPAE", "DPNAT")
 # model activity -> CAPRI activities (crops: tools/build/build_capri_base.CROP_MAP; animals: tools/build/build_livestock_units.ANIMALS)

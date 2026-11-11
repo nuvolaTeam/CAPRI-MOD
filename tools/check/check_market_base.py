@@ -4,7 +4,7 @@ stages 2-3: "base reproduces")
 The market module is built from the model's data, the supply of the EU's and the other supply-model countries'
 market regions held at their base production, and solved at base world prices with no scenario. Its production,
 trade flows and market prices per region are compared with CAPRI's 2030 market data the market is calibrated on
-(capri_data/2030/market/bilateral_regions_2030.csv: PMRK and PROD per market region; bilateral_flows_2030.csv:
+(capri_data/baselines/capri_greendeal_ref/2017_2030/market/bilateral_regions_2030.csv: PMRK and PROD per market region; bilateral_flows_2030.csv:
 ImportQ per pair; CAPRI's markmarket_greendeal_1730et_base_1717 dataOut, tools/build/build_bilateral_market.py).
 
 Prints, per region: the largest relative gaps of production and prices, and the flows' total absolute gap; then the
@@ -46,8 +46,8 @@ def main():
             if c in bp.columns and r in bp.index:
                 exo.at[r, c] = float(bp.at[r, c])
     eq = mm.solve(exogenous_supply=exo)
-    rg = pd.read_csv(MKT.parents[1] / "2030" / "market" / "bilateral_regions_2030.csv", float_precision="round_trip")
-    fl = pd.read_csv(MKT.parents[1] / "2030" / "market" / "bilateral_flows_2030.csv", float_precision="round_trip")
+    rg = pd.read_csv(MKT.parents[1] / "baselines" / "capri_greendeal_ref" / "2017_2030" / "market" / "bilateral_regions_2030.csv", float_precision="round_trip")
+    fl = pd.read_csv(MKT.parents[1] / "baselines" / "capri_greendeal_ref" / "2017_2030" / "market" / "bilateral_flows_2030.csv", float_precision="round_trip")
     rows = []
     for t in rg.itertuples(index=False):
         if t.region not in eq.production.index or t.commodity not in eq.production.columns:

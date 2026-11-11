@@ -17,7 +17,7 @@ from pathlib import Path
 import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
-from paths import SOURCES, BASELINE_REF  # noqa: E402  (CAPRI's material outside the repository)
+from paths import SOURCES, BASELINE_REF, data_year  # noqa: E402  (CAPRI's material outside the repository)
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 import sys as _sys_nc  # noqa: E402
 _sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
@@ -194,7 +194,7 @@ def main() -> None:
         v_["min_eigenvalue"] = float(v_["min_eigenvalue"]) / money
     sys.path.insert(0, str(_ROOT))
     from capri_mod.data import land_market_io as io
-    dest = _ROOT / "capri_data" / str(args.year) / "supply" / f"land_market_{args.year}"
+    dest = data_year(args.year) / "supply" / f"land_market_{args.year}"
     src_txt = ("CAPRI res_17 LEVL of land types; pmppar_17XX p_pmpQuadLandTypes" if args.year == 2017 else
                "CAPRI 2030 reference LEVL of land types (res_2_1730greendeal_refdefaulta, the 2030 Green Deal baseline); "
                "pmppar_21730XX p_pmpQuadLandTypes of the 2030 baseline calibration (tools/build/build_pmp_2030.py)")

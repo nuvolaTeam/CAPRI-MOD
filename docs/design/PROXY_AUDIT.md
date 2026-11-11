@@ -73,7 +73,7 @@ Done in the code and data (the rows below keep the audit as it was written):
   parts), trajectory capri_ref, scenario `farm_to_fork_scenario()`. The F2F scenario has manure trade off, the JRC121368
   tiered surplus rule and `eu_blocks` off.
 - **Input data:** each fallback condition was evaluated on the input files, loaded the way the code loads them:
-  `capri_data/2017/...`, `capri_data/codes/...` and `capri_data/2030/...`. Counts use the 2017 base levels. The
+  `capri_data/2017/...`, `capri_data/codes/...` and `capri_data/baselines/capri_greendeal_ref/2017_2030/...`. Counts use the 2017 base levels. The
   2030 levels are the 2017 data times CAPRI's 2030 factors, so presence and absence of rows are the same.
 - **Run outputs:** where the outcome depends on the solve, the latest default run was used:
   the run r99_f2f_capri.pkl (a local run output, not delivered; 23 Oct 13:45, nlp, capri2030, converged in 15 iterations). Its metadata

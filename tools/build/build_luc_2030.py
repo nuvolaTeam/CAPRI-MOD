@@ -10,7 +10,7 @@ year for changes, xxxxxx remaining) of CAPRI's solution. This builder checks CAP
   e_luClassFinal          sum_from T x f = class
 and records the step length f each region's solution implies (p_lucAnnualFac_sup).
 
-Output: capri_data/2030/environment/luc_2030.csv  (capri_region, item, value): land types, classes, initial classes,
+Output: capri_data/baselines/capri_greendeal_ref/2017_2030/environment/luc_2030.csv  (capri_region, item, value): land types, classes, initial classes,
 transitions, the OLND shares shG/shW/shR and the step length f.
 
     python tools/build/build_luc_2030.py [--dump res_2_1730greendeal_refdefaulta.zip]
@@ -29,7 +29,7 @@ from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_data" / "2030" / "environment" / "luc_2030.csv"
+OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "environment" / "luc_2030.csv"
 CLS = {"CRP": "CROP", "FOR": "FORE", "ART": "ARTIF", "GRS": "GRSLND", "WET": "WETLND", "RES": "RESLND"}
 LT = ("ARAC", "FRUN", "GRAS", "FORE", "OLND", "ARTIF", "INLW", "ARTO")
 

@@ -25,6 +25,20 @@ ROOT = next(p for p in Path(__file__).resolve().parents if (p / "pyproject.toml"
 TOOLS = ROOT / "tools"
 FOLDERS = ("lib", "build", "run", "check", "gams", "solvers")
 
+#: the model's data: the base years' folders and the baselines' (docs/design/DATA_LAYOUT.md step (d), 11 November 2026)
+DATA = ROOT / "capri_data"
+#: the builders' baseline: CAPRI's 2030 Green Deal baseline projected from 2017 (run.baseline = "capri_greendeal_ref")
+BASELINE_DATA = DATA / "baselines" / "capri_greendeal_ref" / "2017_2030"
+#: the base year whose folder the builders write (the 2017 data of CAPREG and COCO)
+BASE_YEAR = "2017"
+
+
+def data_year(year) -> Path:
+    """The folder of a year's data the builders write: the base year's own (DATA/<year>), the 2030 baseline's
+    (BASELINE_DATA) for the other year a builder takes (its --year 2030)."""
+    return DATA / BASE_YEAR if str(year) == BASE_YEAR else BASELINE_DATA
+
+
 #: CAPRI's material outside the repository (docs/EXTERNAL_SOURCES.md): capri_sources/ or $CAPRI_SOURCES
 SOURCES = Path(os.environ["CAPRI_SOURCES"]).expanduser().resolve() if os.environ.get("CAPRI_SOURCES") \
     else ROOT / "capri_sources"

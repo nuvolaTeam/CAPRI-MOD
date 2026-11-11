@@ -49,3 +49,5 @@ capri_sources
 # the GUI's user scenarios and runs (capri_gradio/capri_gui.py), local to the user
 /user_scenarios/
 /user_runs/
+# the tools' run outputs written to the relative runs/ (pickles, logs, step reports): not data
+/runs/

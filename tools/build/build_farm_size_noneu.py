@@ -287,7 +287,7 @@ def main():
     t = pd.read_csv(LEVELS, dtype=str)
     t = t[t["item"] == "LEVL"]
     lev = {(r.region, r.activity): float(r.value) for r in t.itertuples()}
-    days = {(r["region"], r["activity"]): float(r["value"]) for r in _rd(AMM.parents[2] / "2030" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
+    days = {(r["region"], r["activity"]): float(r["value"]) for r in _rd(AMM.parents[2] / "baselines" / "capri_greendeal_ref" / "2017_2030" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
             if r["item"] == "DAYS"}
     regions = loop_regions(c)
     n_tur = sum(1 for r in regions if mr.national_code(r) == "TUR")

@@ -26,6 +26,7 @@ from capri_mod.data.definitions import (
 from capri_mod.data import land_market_io as _land_market_io
 from capri_mod.data import nested_tables as _nested_tables
 from capri_mod.tableio import read_input
+from capri_mod.data.inputs import year_dir as _year_dir
 
 
 
@@ -140,16 +141,16 @@ def resolve_data_file(data_dir, filename, base_year=None):
         return flat if flat.exists() else shared
 
     cat = _category(filename, base_year)
-    from capri_mod.data.inputs import year_of_file
-    yf = year_of_file(filename, base_year) or base_year
+    from capri_mod.data.inputs import year_dir, year_of_file
+    yd = year_dir(data_dir, year_of_file(filename, base_year) or base_year, base_year)
     if cat:
-        categorised = data_dir / yf / cat / filename
+        categorised = yd / cat / filename
         if categorised.exists():
             return categorised
     flat = data_dir / filename
     if flat.exists():
         return flat
-    return (data_dir / yf / cat / filename) if cat else flat
+    return (yd / cat / filename) if cat else flat
 
 
 # ---------------------------------------------------------------------------
@@ -646,19 +647,19 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "land_market": _land_market_io.read(Path(data_dir) / by / "supply" / f"land_market_{by}"),
         # CAPRI's land market at its 2030 baseline calibration (tools/build/build_land_market.py --year 2030: 2030 land-type levels
         # and p_pmpQuadLandTypes of pmppar_21730); used with SupplyModule.pmp_source "capri2030" at the 2030 market year
-        "land_market_2030": _land_market_io.read(Path(data_dir) / "2030" / "supply" / "land_market_2030"),
+        "land_market_2030": _land_market_io.read(_year_dir(data_dir, 2030, by) / "supply" / "land_market_2030"),
         # CAPRI's land rents at its calibration points, 2030 and 2017 (tools/build/build_land_rents.py --year;
         # docs/LAND_RENT_CALIBRATION_PLAN.md): {year: {region: {land type: EUR/ha}}}
         "land_rents": {y: (lambda p: {r: {t: float(v) for t, v in (("ARAC", row["rent_arac"]), ("FRUN", row["rent_frun"]),
                                                                    ("GRAS", row["rent_gras"])) if v == v}
                                       for r, row in read_input(p, index_col=0).iterrows()} if p.exists() else None)(
-            Path(data_dir) / str(y) / "supply" / f"land_rents_{y}.csv") for y in (int(by), 2030)},
+            _year_dir(data_dir, y, by) / "supply" / f"land_rents_{y}.csv") for y in (int(by), 2030)},
         # CAPRI's PMP matrix of the crops at its 2030 baseline calibration, per model region (tools/build/build_pmp_capri_2030.py,
         # KNOWN_ISSUES K61): {region: {(act_i, act_j): g}}, g in EUR/ha per 100% change of the levels
         # and of the animals' herds (tools/build/build_animal_pmp_capri_2030.py, pmp_capri_2030_animals.csv: diagonal only)
-        "pmp_capri_2030": _load_pmp_capri_2030(Path(data_dir) / "2030" / "supply"),
+        "pmp_capri_2030": _load_pmp_capri_2030(_year_dir(data_dir, 2030, by) / "supply"),
         # capri-mod's own terms with CAPRI's recipe (tools/build/build_pmp_recipe.py; SupplyModule.pmp_source "recipe")
-        "pmp_recipe": {y: _load_pmp_capri_2030(Path(data_dir) / str(y) / "supply", f"pmp_recipe_{y}") for y in (int(by), 2030)},
+        "pmp_recipe": {y: _load_pmp_capri_2030(_year_dir(data_dir, y, by) / "supply", f"pmp_recipe_{y}") for y in (int(by), 2030)},
         # Regional fodder balances (docs/FODDER_BALANCE.md)
         "fodder_balance": _nested_tables.read_fodder_balances(Path(data_dir) / by / "feed" / f"fodder_balance_{by}.csv"),
         # Feed per head (t): CAPRI 2017 regional FCER/FPRO/FENE totals / herds; required: the animals without a

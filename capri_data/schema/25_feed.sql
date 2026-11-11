@@ -1,7 +1,7 @@
 -- Inputs under capri_data/2017/feed. Generated structure (types, NOT NULL, keys) from the files on 29 October 2026; units open where no
 -- builder or CAPRI file states them (value_units).
 
--- file: capri_data/2030/feed/feed_cereal_mix_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/2017_2030/feed/feed_cereal_mix_2030.csv
 CREATE TABLE feed_feed_cereal_mix_2030 (
     cereal VARCHAR NOT NULL,
     fedm_kt DOUBLE NOT NULL,

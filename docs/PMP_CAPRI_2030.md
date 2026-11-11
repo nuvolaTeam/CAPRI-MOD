@@ -37,7 +37,7 @@ elasticities (supply_elas_2_1720ATdefaulta, 2020: a guide to magnitudes, not a 2
   the CAPRI installation (35 countries) and `dat\estnlp\results.gdx` (VB, VD, PELA).
 - `tools/build/build_pmp_2030.py` writes the symbols unchanged as CSV, CAPRI codes: `capri_data/sources/intermediate/baseline_pmp/`
   (p_pmpQuadTechn, p_pmpQuadPact, p_pmpCnst, p_pmpQuadLandTypes, p_pmpCnstLandTypes, VB and VD levels).
-- `tools/build/build_pmp_capri_2030.py` derives the model's matrix: `capri_data/2030/supply/pmp_capri_2030.csv`.
+- `tools/build/build_pmp_capri_2030.py` derives the model's matrix: `capri_data/baselines/capri_greendeal_ref/2017_2030/supply/pmp_capri_2030.csv`.
 
 ## From CAPRI's terms to the model's matrix
 

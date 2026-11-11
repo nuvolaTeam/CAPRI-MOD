@@ -696,7 +696,7 @@ fine-grained token checked the same day; the token is kept outside the repositor
 - The model's inputs are organised by role, not by a year in the folder name (with the renaming above, so paths change
   once): capri_data/<base_year>/ holds the base year's data only; capri_data/baselines/capri_ref_2030/ everything taken
   from CAPRI's 2030 reference run (on 4 November 2026 spread over 40 of the 216 files of capri_data/2017/, e.g. the
-  2030 PMP terms, market state, rents, N coefficients and CAP ceilings, over capri_data/2030/ and over
+  2030 PMP terms, market state, rents, N coefficients and CAP ceilings, over capri_data/baselines/capri_greendeal_ref/2017_2030/ and over
   capri_data/scenarios/capri_ref_2030/), a CAPTRD-MOD baseline as another package (baselines/captrd_2030/), the run
   choosing its baseline package; capri_data/scenarios/ the policy scenarios, and under scenarios/groups/ the data a
   scenario group shares, as CAPRI's pol_input files (the project lead, 4 November 2026: greendeal_group moves to

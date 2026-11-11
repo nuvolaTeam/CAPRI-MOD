@@ -12,7 +12,7 @@ p_OverFertMarkUp = 0.1; supply/supply_model.gms Tot_MitFert_):
     1 + sum_t share_t x NMIN_t <= max(x + 0.1, 1)
 and lowers each option's maximum share where crop need lies above precision farming's level.
 
-Output: capri_data/2030/environment/crop_nut_need_mult_fact_2030.csv
+Output: capri_data/baselines/capri_greendeal_ref/2017_2030/environment/crop_nut_need_mult_fact_2030.csv
         (region = the model's region, CAPRI's regional unit; capri_region, x); model regions without a regional CAPRI
         entry take their country's value (the model's registered national fallback).
 Usage:  python tools/build/build_overfert_factors.py <dump file> [<dump file> ...] [--year 2030]
@@ -25,7 +25,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_data" / "2030" / "environment" / "crop_nut_need_mult_fact_2030.csv"
+OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "environment" / "crop_nut_need_mult_fact_2030.csv"
 LINE = re.compile(r"^\s*'([^']+)'\.'([^']+)'\.'([^']+)'\.'([^']+)'\s+([-+0-9.eE]+)")
 
 

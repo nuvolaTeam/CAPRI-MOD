@@ -11,7 +11,7 @@ cut where CAPRI uses old codes (Italy, Belgium-Luxembourg, Sweden, Finland): Val
 kg N/ha (CAPRI 48.5) and a 70% cut instead of 26%, Luxembourg 235 (CAPRI 157), Swedish regions ~100
 (CAPRI 70-79), and the nine capped regions were chosen from the proxied ranking.
 
-Sources: capri_data/2030/environment/capri_gnb_components_2030.csv (SURTOT, from CAPRI's
+Sources: capri_data/baselines/capri_greendeal_ref/2017_2030/environment/capri_gnb_components_2030.csv (SURTOT, from CAPRI's
 res_2_1730greendeal_refdefaulta), capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz
 (UAAR LEVL, weights).
 Output: capri_data/scenarios/capri_ref_2030/capri_baseline_surplus_2030.csv (a result of CAPRI's 2030 reference run, beside its trajectory) (region, surplus_kg_n_per_ha, source)
@@ -33,7 +33,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def main():
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
-    g = _read_csv(ROOT / "capri_data" / "2030" / "environment" / "capri_gnb_components_2030.csv")
+    g = _read_csv(ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "environment" / "capri_gnb_components_2030.csv")
     sur = g[g["item"] == "SURTOT"].set_index("capri_region")["kg_n_per_ha"].astype(float)
     t = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv.xz",
                     header=None, names=["region", "act", "item", "value"], dtype=str)

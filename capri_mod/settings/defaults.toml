@@ -23,6 +23,12 @@ step_report = ""
 manure_trade = true
 # base year of the data (only capri_data/2017 exists; 2030 runs go through the projection layer)
 base_year = "2017"
+# the baseline whose projection from the base year the run uses: its folder capri_data/baselines/<baseline>/
+# <base_year>_<year> (capri_mod.data.inputs.year_dir; docs/design/DATA_LAYOUT.md step (d)). capri_greendeal_ref:
+# CAPRI's 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta), the only one for now. CAPRI's equivalent: the
+# baseline a CAPMOD scenario starts from (CAPTRD's %results_in%/baseline/trends_<BAS><SIM>.gdx, e.g.
+# envind/bfp_sets_parameters.gms l. 54-59, and the baseline run calibrated to it)
+baseline = "capri_greendeal_ref"
 # worker processes for the regional solves: 0 = the machine's cores, 1 = in the main process, n = n workers (e.g.
 # --set run.n_workers=2). Results do not depend on it.
 n_workers = 0

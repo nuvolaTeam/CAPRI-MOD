@@ -3,9 +3,12 @@ docs/design/ARCHITECTURE_REFACTOR.md, layer "data adapters"; the market has its 
 
 Every input is located in the data directory and base year of the run:
     <data_dir>/<base_year>/<area>/<file>   area: supply, abatement, environment, feed, policy, market
-    <data_dir>/<year>/<area>/<file>        a file of another year (its name carries it, "_2030"): CAPRI's 2030
-                                           calibration point, capri_data/2030 (docs/design/DATA_LAYOUT.md step (b),
-                                           10 November 2026; until then under the base year's folder)
+    <data_dir>/baselines/<baseline>/<base_year>_<year>/<area>/<file>
+                                           a file of another year (its name carries it, "_2030"): the run's baseline
+                                           (run.baseline) projected to that year, CAPRI's Green Deal reference
+                                           capri_data/baselines/capri_greendeal_ref/2017_2030 (year_dir;
+                                           docs/design/DATA_LAYOUT.md steps (b) and (d): capri_data/2030 from 10
+                                           November 2026, under the base year's folder before)
     <data_dir>/codes/<file>                the codes and cross-vintage mappings (capri_data/shared until 10 November 2026)
     <data_dir>/sources/<sub>/<file>         CAPRI exports read as inputs
 Before 30 October 2026 the supply, environment, fertiliser and water code read a fixed capri_data/2017 path next to
@@ -39,6 +42,29 @@ def year_of_file(name: str, base_year: str) -> Optional[str]:
 AREAS = ("supply", "abatement", "environment", "feed", "policy", "market")
 
 
+def default_baseline() -> str:
+    """The settings' baseline (run.baseline): the folder under <data_dir>/baselines whose projection the run uses."""
+    from capri_mod.settings import current as _settings
+    return str(_settings().get("run.baseline"))
+
+
+def year_dir(root, year, base_year=None, baseline=None) -> Path:
+    """The folder of a year's inputs: the base year's own, <root>/<base_year>; another year's, the baseline's projection
+    from the base year to it, <root>/baselines/<baseline>/<base_year>_<year> (baseline: run.baseline). The data
+    directory keeps only the base years; a baseline, CAPRI's or another, has its own folder (docs/design/DATA_LAYOUT.md
+    step (d), the project lead, 11 November 2026; capri_data/2030 until then)."""
+    by = str(base_year) if base_year is not None else default_base_year()
+    if str(year) == by:
+        return Path(root) / by
+    return Path(root) / "baselines" / (baseline or default_baseline()) / f"{by}_{year}"
+
+
+def trajectories_dir(root, year, base_year=None, baseline=None) -> Path:
+    """The baseline's projection tables from the base year to year (prices, premiums, rations, fodder: the projection
+    layer's, capri_mod/projection), <year_dir>/trajectories."""
+    return year_dir(root, year, base_year, baseline) / "trajectories"
+
+
 class RunInputs:
     """Paths and readers of the model's inputs for one data directory and base year."""
 
@@ -61,7 +87,7 @@ class RunInputs:
         if where == "codes" or where.startswith("scenarios/"):
             return self.root / where / name
         if where.split("/")[0] in AREAS:
-            return self.root / (year_of_file(name, self.base_year) or self.base_year) / where / name
+            return year_dir(self.root, year_of_file(name, self.base_year) or self.base_year, self.base_year) / where / name
         raise ValueError(f"unknown input location {where!r}")
 
     def exists(self, name: str, where: str) -> bool:

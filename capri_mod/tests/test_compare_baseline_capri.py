@@ -21,7 +21,7 @@ def test_marketed_production_sums_the_eu_member_states_only():
     from capri_mod.data.definitions import EU_MS_BLOCK
     t = _tool()
     got = t.capri_marketed_production()
-    with open(ROOT / "capri_data" / "2030" / "market" / "market_prod_grof_2030.csv", newline="") as fh:
+    with open(ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "market" / "market_prod_grof_2030.csv", newline="") as fh:
         rows = list(csv.DictReader(fh))
     eu = sum(float(r["prod_kt"]) for r in rows if r["product"] == "WHEA" and r["capri_ms"] in EU_MS_BLOCK)
     allc = sum(float(r["prod_kt"]) for r in rows if r["product"] == "WHEA")

@@ -97,7 +97,7 @@ def main():
     t = _read_csv(M / "trends_milk_yield_1730.csv")
     Y = {(r.region, r.activity): float(r.milk_yield_kg) for r in t.itertuples()}
     top = {x: sum(Y.get((c, x), 0.0) for c in ("DK000000", "PT000000", "SE000000", "FI000000")) / 4 for x in ("DCOL", "DCOH")}
-    md = _read_csv(A.parents[2] / "2030" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
+    md = _read_csv(A.parents[2] / "baselines" / "capri_greendeal_ref" / "2017_2030" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
     L = {(r.region, r.activity): float(r.value) for r in md[md.item == "LEVL"].itertuples()}
     rce = _read_csv(A / "RCEmissions.csv")
     R = {(r.region, r.animal_mitt, r.item): r.value for r in rce.itertuples()}

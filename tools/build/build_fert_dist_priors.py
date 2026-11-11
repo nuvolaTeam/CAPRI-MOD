@@ -44,7 +44,7 @@ from _sources_io import read_source, source_records, write_source  # noqa: E402 
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ENV = ROOT / "capri_data" / "2017" / "environment"
-ENV30 = ROOT / "capri_data" / "2030" / "environment"   # the 2030 outputs (DATA_LAYOUT step (b))
+ENV30 = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "environment"   # the 2030 outputs (DATA_LAYOUT step (b))
 GROUP = {"SWHE": "WHEA", "DWHE": "WHEA", "BARL": "BARL", "MAIZ": "MAIZ", "RYEM": "CERE", "OATS": "CERE",
          "OCER": "CERE", "RAPE": "RAPN", "NONF": "RAPN", "SUNF": "SUNF", "SOYA": "SOYA", "PULS": "PULS",
          "POTA": "POTA", "SUGB": "SUGB", "MAIF": "MAIF", "ROOF": "ROOF", "OFAR": "OFAR", "GRAE": "GRAS",

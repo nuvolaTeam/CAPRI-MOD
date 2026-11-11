@@ -34,7 +34,7 @@ capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.parquet, CAPREG
 coefficients, LEVL, UVAG), CAPRI's 2030 Green Deal baseline res_2_1730greendeal_refdefaulta (PRME by
 scheme; tools/lib/paths.BASELINE_REF, its calibration run refpol_endotech_all_ini until 9 November 2026; extracted to
 capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/prme_schemes_2030.parquet).
-Output: capri_data/2030/supply/techn_mix_2030.csv
+Output: capri_data/baselines/capri_greendeal_ref/2017_2030/supply/techn_mix_2030.csv
 
     python tools/build/build_techn_mix_2030.py [--dump-dir DIR] [--ref FILE]
 """
@@ -65,7 +65,7 @@ QUAD = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_
 REF = BASELINE_REF
 PRME = (ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta"
         / "prme_schemes_2030.parquet")
-OUT = ROOT / "capri_data" / "2030" / "supply" / "techn_mix_2030.csv"
+OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "supply" / "techn_mix_2030.csv"
 #: the inputs with a technology factor (techf.gms l. 92-96, 104-105), the Green Deal's two apart
 REST = ("SEED", "REPM", "REPB", "ELEC", "EGAS", "EFUL", "ELUB")
 INPUTS = REST + ("INPO", "PLAP")

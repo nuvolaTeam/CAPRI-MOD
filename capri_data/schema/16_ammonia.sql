@@ -218,7 +218,7 @@ COMMENT ON TABLE amm_bnumanirains IS 'animal numbers of the RAINS categories by 
 INSERT INTO value_units VALUES
   ('amm_bnumanirains', 'value', NULL, 'open', 'bNumAniRAINS value');
 
--- file: capri_data/2030/abatement/ammonia/capri_mann_days_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/2017_2030/abatement/ammonia/capri_mann_days_2030.csv
 CREATE TABLE amm_capri_mann_days_2030 (
     region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,

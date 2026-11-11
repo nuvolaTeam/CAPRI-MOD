@@ -32,6 +32,26 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — the data folder keeps the base years only: CAPRI's 2030 baseline in baselines/
+
+- capri_data/2030 moved to capri_data/baselines/capri_greendeal_ref/2017_2030 (the project lead: the data folder keeps
+  only the base years; a baseline has its own place, named by its origin and its years, so that another, a Green Deal
+  reference to 2040 for instance, goes beside it). Its module folders are unchanged; its five projection tables (CAPRI's
+  2030 price ratios, premiums, livestock premium ratios, rations and fodder) are in trajectories/. Contents unchanged.
+- The setting run.baseline (default capri_greendeal_ref) picks the baseline; capri_mod.data.inputs.year_dir locates a
+  file of another year than the base year in it (the data adapters, the market's inputs and loaders.resolve_data_file),
+  trajectories_dir the projection layer's tables; the builders write there (tools/lib/paths.py: data_year,
+  BASELINE_DATA). capri_data/README.md rewritten (it still described shared/ and trajectories/); docs/design/
+  DATA_LAYOUT.md step (d).
+- The raw dataset's manifest (tools/pipeline/capri_raw_manifest.json) without the five untrusted debug dumps removed
+  from nuvolaTeam/capri-mod-raw (version v2026.11.11.1: 143 sources, 10,459 files, equal to the dataset's listing);
+  runs/ ignored by git.
+- Checks: validate_data 0 violations; the data the model loads (load_all_data, 62 tables) equal to before the move; the
+  mini-EU Farm-to-Fork run equal to the run before the move (0 regional activity levels differing); the 52 builder runs
+  that write the moved files reproduce all 121 of their files identically (reproduce_builders); the fast suite, 327 passed (with test_layers and
+  test_base_year's mirror on the new layout, and tools/check/compare_capri_gd.py reading its table with exact floats,
+  failing test_exact_io on dev since 10 November).
+
 ## 11 November 2026 — CAPTRD-MOD: CAPRI's GLOBIOM long-run conversion, switchable
 
 - `capri_mod/pipeline/captrd/globiom.py` ports global/convert_globiom.gms (the GLOBIOM-EU branch) and

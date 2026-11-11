@@ -34,7 +34,7 @@ Western Balkans and Turkey; the WBA6 set from sets.gms),
 fao_landuse_2000_P.parquet (the project lead's gdxdumps, converted by tools/build/convert_sources.py); FAO
 country codes from the GAMS source (global/fao_codes_new.gms FAORegions_map); sources/intermediate/ghgtech/capri_costsavings_2030.parquet; CROP and GRAS 2030 levels
 from validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz; deflator from
-2030/capri_price_ratios_2030.csv.
+baselines/capri_greendeal_ref/2017_2030/trajectories/capri_price_ratios_2030.csv.
 
     python tools/build/build_histosol.py [--gams-dir capri_sources/gams]
 """
@@ -176,7 +176,7 @@ def main():
                         header=None, names=["region", "act", "item", "value"], dtype=str)
     terms = terms[(terms["item"] == "LEVL") & terms["act"].isin(["CROP", "GRAS"])]
     lev = {(r.region, r.act): float(r.value) for r in terms.itertuples()}
-    pr = _read_csv(ROOT / "capri_data" / "2030" / "capri_price_ratios_2030.csv")
+    pr = _read_csv(ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "trajectories" / "capri_price_ratios_2030.csv")
     defl = float(pr["deflator"].median())
 
     mr = _load(ROOT / "tools" / "lib" / "_model_regions.py")

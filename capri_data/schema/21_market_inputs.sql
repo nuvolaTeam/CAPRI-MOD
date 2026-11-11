@@ -108,7 +108,7 @@ INSERT INTO value_units VALUES
   ('processing_yields', 'product_kt', 'U_1000t', 'capri', 'CAPRI''s quantity of the processed product (1000 t)'),
   ('processing_yields', 'yield', 'U_ratio', 'builder', 't of product per t of raw product');
 
--- file: capri_data/2030/market/market_prod_grof_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/2017_2030/market/market_prod_grof_2030.csv
 CREATE TABLE market_prod_grof_2030 (
     capri_ms VARCHAR NOT NULL REFERENCES capri_rall (code),  -- CAPRI's country with supply models (RMSSUP)
     product VARCHAR NOT NULL REFERENCES capri_xx (code),      -- CAPRI's market product (XX)

@@ -31,7 +31,7 @@ Outputs (capri_data/2017/market/)
   feed_bulks_eu_share.csv   commodity, feed_kt, use_kt, share  (EU27 2030 reference: FEDM / (HCOM + FEDM + INDM
                             + BIOF + LOSM + PRCM) of the product group, the part of EU use that is feed;
                             the dairy products' feed is the dairy block's FMIL, not listed)
-  capri_data/2030/feed/feed_cereal_mix_2030.csv  cereal, fedm_kt  (EU27 FCER feed per cereal with a model producer
+  capri_data/baselines/capri_greendeal_ref/2017_2030/feed/feed_cereal_mix_2030.csv  cereal, fedm_kt  (EU27 FCER feed per cereal with a model producer
                             price; replaces a hand-entered table that had rye and oats inside OCER)
 
     python tools/build/build_feed_bulks.py [--dump capri_sources/exports/markmarket_greendeal_1730et_base_1717.txt]
@@ -211,7 +211,7 @@ def main():
     # the model has no producer price for it (0.2% of FCER).
     mix = (df[(df.bulk == "FCER") & df.commodity.isin(FEED_CEREAL_MIX)].groupby("commodity")["feed_kt"].sum()
            .reindex(FEED_CEREAL_MIX))
-    mix.rename("fedm_kt").rename_axis("cereal").to_csv(ROOT / "capri_data" / "2030" / "feed" / "feed_cereal_mix_2030.csv")
+    mix.rename("fedm_kt").rename_axis("cereal").to_csv(ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "2017_2030" / "feed" / "feed_cereal_mix_2030.csv")
     print("feed_cereal_mix_2030.csv:", mix.to_dict())
     worst.sort(reverse=True)
     print(f"feed_bulks_eu.csv: {len(df)} rows, {df.ms.nunique()} member states; rho {rho}")

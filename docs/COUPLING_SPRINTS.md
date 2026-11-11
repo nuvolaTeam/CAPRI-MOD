@@ -1093,7 +1093,7 @@ Brittany €288 → €226 per ha, grass €381 → €232).
 
 **Before.** The 2030 trajectory scaled yields and herds only: the baseline ran at 2017 prices and premiums.
 
-**Now** (`tools/build/build_price_trajectory_2030.py` → `capri_data/2030/capri_price_ratios_2030.csv`,
+**Now** (`tools/build/build_price_trajectory_2030.py` → `capri_data/baselines/capri_greendeal_ref/2017_2030/trajectories/capri_price_ratios_2030.csv`,
 `capri_cap_premium_2030.csv`, `capri_livestock_premium_ratio_2030.csv`; applied by
 `capri_mod/projection/prices.py`, on in `tools/run/run_f2f_2030.py`, `--base-prices` to switch off). The model stays in
 2017 money: each product's CAPRI 2030/2017 unit-value ratio over the input index (median member state: pork 1.19,

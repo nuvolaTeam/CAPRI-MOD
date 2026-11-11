@@ -39,6 +39,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from _model_regions import EU_MS  # noqa: E402  CAPRI's EU member states (codes/eu_market_blocks.csv)
+from paths import data_year  # noqa: E402  (the year folders of capri_data)
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "capri_data" / "2017" / "market"
@@ -158,7 +159,7 @@ def main():
     a = ap.parse_args()
     rows = build(a.market, a.year, a.elas)
     out = eu_build(a.market, a.year, a.elas) + rows
-    OUT = OUT_DIR.parents[1] / str(a.year) / "market" / f"crushing_parameters_{a.year}.csv"
+    OUT = data_year(a.year) / "market" / f"crushing_parameters_{a.year}.csv"
     with open(OUT, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=COLS)
         w.writeheader()

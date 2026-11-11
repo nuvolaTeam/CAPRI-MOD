@@ -1495,7 +1495,7 @@ step rather than being entangled in a single 2030 number.
 
 Three trajectories ship, each a scenario folder under `capri_data/scenarios/` (`settings.toml` with the name, source,
 vintage, years and provenance; `growth.csv` and `regional.csv` with the factors; `capri_mod/projection/scenario_io.py`;
-JSON files in `capri_data/2030/` until 31 October 2026): `capri_ref_2030` (default in
+JSON files in `capri_data/baselines/capri_greendeal_ref/2017_2030/` until 31 October 2026): `capri_ref_2030` (default in
 `tools/run/run_f2f_2030.py`) — CAPRI star 3.0's own 2030 reference (CAPMOD's reference run over CAPRI's 2017 results:
 levels, yields and land types per region; `tools/build/build_trajectory_capri_ref.py`), the point CAPRI's own
 scenarios start from; `captrd_2030` — CAPRI's captrd trend results, the input of CAPRI's baseline calibration; and

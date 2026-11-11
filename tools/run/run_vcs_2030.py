@@ -123,7 +123,8 @@ def main():
     scen = PolicyScenario(name="WITHOUT_VCS", description="CAPRI cap_after_2014 without voluntary coupled support",
                           premium_factor_regional=fac)
     traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "scenarios" / "captrd_2030"))
-    pmod = ProjectionModule(m, traj, capri_prices_dir=str(ROOT / "capri_data" / "2030"))
+    from capri_mod.data.inputs import trajectories_dir
+    pmod = ProjectionModule(m, traj, capri_prices_dir=str(trajectories_dir(ROOT / "capri_data", 2030)))
     res = pmod.run(policy_scenario=scen, years=[2030])
     b, s = res.baseline[2030], res.scenario[2030]
 

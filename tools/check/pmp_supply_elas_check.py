@@ -51,7 +51,8 @@ def model_elas(pmp: str, ms: str, products, shock: float) -> pd.Series:
     _S.activate(_S.current().replace({"supply.pmp_source": pmp}))
     m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False)
     traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "scenarios" / "capri_ref_2030"))
-    pmod = ProjectionModule(m, traj, capri_prices_dir=str(ROOT / "capri_data" / "2030"))
+    from capri_mod.data.inputs import trajectories_dir
+    pmod = ProjectionModule(m, traj, capri_prices_dir=str(trajectories_dir(ROOT / "capri_data", 2030)))
     data, _ = pmod.project_data(2030)
     pm = pmod._model_for(data)
     regions = [r for r in pm.data["areas"].index if r.startswith(ms)]

@@ -1,7 +1,7 @@
 -- Inputs under capri_data/trajectories. Generated structure (types, NOT NULL, keys) from the files on 29 October 2026; units open where no
 -- builder or CAPRI file states them (value_units).
 
--- file: capri_data/2030/capri_cap_premium_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/2017_2030/trajectories/capri_cap_premium_2030.csv
 -- AGGT, BEFM, CACR, CATA, EAAG, HEIR, RUMI, SCOW: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
 -- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE traj_capri_cap_premium_2030 (
@@ -169,7 +169,7 @@ INSERT INTO value_units VALUES
   ('traj_capri_cap_premium_2030', 'TWIN', NULL, 'open', 'capri_cap_premium_2030.TWIN: unit to be established'),
   ('traj_capri_cap_premium_2030', 'VSET', NULL, 'open', 'capri_cap_premium_2030.VSET: unit to be established');
 
--- file: capri_data/2030/capri_price_ratios_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/2017_2030/trajectories/capri_price_ratios_2030.csv
 CREATE TABLE traj_capri_price_ratios_2030 (
     ms VARCHAR NOT NULL,
     product VARCHAR NOT NULL,
@@ -186,7 +186,7 @@ INSERT INTO value_units VALUES
   ('traj_capri_price_ratios_2030', 'deflator', NULL, 'open', 'capri_price_ratios_2030.deflator: unit to be established'),
   ('traj_capri_price_ratios_2030', 'real_ratio', NULL, 'open', 'capri_price_ratios_2030.real_ratio: unit to be established');
 
--- file: capri_data/2030/capri_ref_fodder_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/2017_2030/trajectories/capri_ref_fodder_2030.csv
 CREATE TABLE traj_capri_ref_fodder_2030 (
     region VARCHAR NOT NULL,
     crop VARCHAR NOT NULL,
@@ -198,7 +198,7 @@ COMMENT ON TABLE traj_capri_ref_fodder_2030 IS 'CAPRI''s 2030 rations and requir
 INSERT INTO value_units VALUES
   ('traj_capri_ref_fodder_2030', 'factor', NULL, 'open', 'capri_ref_fodder_2030.factor: unit to be established');
 
--- file: capri_data/2030/capri_ref_ration_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/2017_2030/trajectories/capri_ref_ration_2030.csv
 CREATE TABLE traj_capri_ref_ration_2030 (
     region VARCHAR NOT NULL,
     animal VARCHAR NOT NULL,
@@ -211,7 +211,7 @@ COMMENT ON TABLE traj_capri_ref_ration_2030 IS 'CAPRI''s 2030 rations and requir
 INSERT INTO value_units VALUES
   ('traj_capri_ref_ration_2030', 'factor', NULL, 'open', 'capri_ref_ration_2030.factor: unit to be established');
 
--- file: capri_data/2030/capri_livestock_premium_ratio_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/2017_2030/trajectories/capri_livestock_premium_ratio_2030.csv
 -- layout: wide, unnamed
 CREATE TABLE traj_capri_livestock_premium_ratio_2030 (
     region VARCHAR NOT NULL REFERENCES regional_units (region),

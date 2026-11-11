@@ -31,7 +31,7 @@ A_EU_WEST, A_EU_EAST; the rest one to one).
 
 1. Builder tools/build/build_bilateral_trq.py (replaces build_bilateral_market's EU-only build_trq): every quota of
    p_trqBilat "CUR" with its rates and slope, keyed by importer and exporter policy block and model commodity:
-   capri_data/2030/market/bilateral_trq_2030.csv.
+   capri_data/baselines/capri_greendeal_ref/2017_2030/market/bilateral_trq_2030.csv.
 2. BilateralCommodity: per flow its ad valorem and specific parts at the base (TaAppl, ImportP - (Fob + TC)(1 + ta));
    per quota the flows it covers (importer rows in RMTP_i, exporter columns in RMTP_j). The import price of a flow
    under a quota: (Pd0_j r_j + TC_ij)(1 + tav(sigma)/100) + ts(sigma), sigma from the quota's fill at the current

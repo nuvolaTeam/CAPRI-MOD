@@ -341,7 +341,7 @@ INSERT INTO value_units VALUES
   ('sup_land_market_2017_regions', 'share_of_source', NULL, 'open', 'land_market_2017_regions.share_of_source: unit to be established'),
   ('sup_land_market_2017_regions', 'min_eigenvalue', NULL, 'open', 'land_market_2017_regions.min_eigenvalue: unit to be established');
 
--- file: capri_data/2030/supply/land_market_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/2017_2030/supply/land_market_2030.csv
 CREATE TABLE sup_land_market_2030 (
     region VARCHAR NOT NULL,
     row VARCHAR NOT NULL,
@@ -353,7 +353,7 @@ COMMENT ON TABLE sup_land_market_2030 IS 'Build CAPRI''s land-market data per mo
 INSERT INTO value_units VALUES
   ('sup_land_market_2030', 'value', NULL, 'open', 'land_market_2030.value: unit to be established');
 
--- file: capri_data/2030/supply/land_market_2030_regions.csv
+-- file: capri_data/baselines/capri_greendeal_ref/2017_2030/supply/land_market_2030_regions.csv
 CREATE TABLE sup_land_market_2030_regions (
     region VARCHAR NOT NULL,
     quad_source VARCHAR NOT NULL,
@@ -450,7 +450,7 @@ INSERT INTO value_units VALUES
   ('sup_nutrients_regional', 'VSET', NULL, 'open', 'nutrients_regional.VSET: unit to be established'),
   ('sup_nutrients_regional', 'FALL', NULL, 'open', 'nutrients_regional.FALL: unit to be established');
 
--- file: capri_data/2030/supply/techn_mix_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/2017_2030/supply/techn_mix_2030.csv
 CREATE TABLE sup_techn_mix_2030 (
     region VARCHAR NOT NULL REFERENCES regional_units (region),
     activity VARCHAR NOT NULL REFERENCES model_activities (code),

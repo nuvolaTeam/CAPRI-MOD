@@ -2,7 +2,7 @@
 
 For a crop a with both technologies in the region, the model's activity X and one column z, x_T1 = X/2 + z,
 x_T2 = X/2 - z (z = 0 at CAPRI's 50-50 calibration point); -X/2 <= z <= X/2 as two rows. Per unit of z, the
-differences T1 - T2 of what CAPRI's technology factors move (capri_data/2030/supply/techn_mix_2030.csv,
+differences T1 - T2 of what CAPRI's technology factors move (capri_data/baselines/capri_greendeal_ref/2017_2030/supply/techn_mix_2030.csv,
 tools/build/build_techn_mix_2030.py): output +yield_diff x yield, the factored inputs' costs, plant protection, other
 inputs, the fertiliser need (need_diff, NUTNED_'s SQRT(1 + y)(1 + y)) and the rural-development premiums; PMP CAPRI's
 2x2 technology block in (X, z) (pmp_capri_2030_mix.csv: X's diagonal + g_xx_extra / x^2, the X-z and z-z terms).

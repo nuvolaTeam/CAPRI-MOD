@@ -80,10 +80,12 @@ import pandas as pd
 import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "tools" / "lib"))
+from paths import data_year  # noqa: E402  (the year folders of capri_data)
 # the kept extracts, in the folders of the CAPRI dump and elasticity files they come from (DATA_LAYOUT.md)
 DUMP_DIR = {"2017": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "market_base_1717", "2030": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717"}
 ELAS_DIR = {"2017": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1717defaulta", "2030": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1730defaulta"}
-DEST = {y: ROOT / "capri_data" / y / "market" for y in ("2017", "2030")}   # by market year (DATA_LAYOUT step (b))
+DEST = {y: data_year(y) / "market" for y in ("2017", "2030")}   # by market year (DATA_LAYOUT steps (b), (d))
 FUEL = {"BIOE": ("WHEA", "BARL", "MAIZ", "RYEM", "OATS", "OCER", "SUGA", "TWIN"),
         "BIOD": ("RAPO", "SUNO", "SOYO", "PLMO", "OTHO")}
 FOSSIL = {"BIOE": "GASL", "BIOD": "DISL"}                                    # arm_sets.gms fuelMatch

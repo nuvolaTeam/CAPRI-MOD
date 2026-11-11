@@ -13,10 +13,10 @@ CREATE TABLE code_data (
 COMMENT ON TABLE code_data IS 'the numbers in the model code that may be data (tools/check/make_code_data.py)';
 INSERT INTO code_data VALUES
   ('capri_mod/data/find_symbol.py', '<module>', 15.0, 1, '31', 'def search(keyword, limit=15):'),
-  ('capri_mod/data/inputs.py', 'REPO_DATA', 2.0, 1, '29', 'REPO_DATA = Path(__file__).resolve().parents[2] / "capri_data"'),
-  ('capri_mod/data/loaders.py', 'load_all_data', 2030.0, 2, '655,661', 'Path(data_dir) / str(y) / "supply" / f"land_rents_{y}.csv") for y in (int(by), 2030)},'),
-  ('capri_mod/data/loaders.py', 'load_variable_costs', 50.0, 1, '385', 'if df.shape[0] > 50:'),
-  ('capri_mod/data/loaders.py', 'load_variable_costs_regional', 50.0, 1, '368', 'if df.shape[0] > 50:          # region-level file'),
+  ('capri_mod/data/inputs.py', 'REPO_DATA', 2.0, 1, '32', 'REPO_DATA = Path(__file__).resolve().parents[2] / "capri_data"'),
+  ('capri_mod/data/loaders.py', 'load_all_data', 2030.0, 4, '650,656,660,662', '"land_market_2030": _land_market_io.read(_year_dir(data_dir, 2030, by) / "supply" / "land_market_2030"),'),
+  ('capri_mod/data/loaders.py', 'load_variable_costs', 50.0, 1, '386', 'if df.shape[0] > 50:'),
+  ('capri_mod/data/loaders.py', 'load_variable_costs_regional', 50.0, 1, '369', 'if df.shape[0] > 50:          # region-level file'),
   ('capri_mod/data/validate_data.py', '<module>', -8000.0, 1, '257', 'ARTIFACT_LOSS, ARTIFACT_LOSS_SPECIALTY = -1000.0, -8000.0'),
   ('capri_mod/data/validate_data.py', '<module>', -1000.0, 1, '257', 'ARTIFACT_LOSS, ARTIFACT_LOSS_SPECIALTY = -1000.0, -8000.0'),
   ('capri_mod/data/validate_data.py', 'ROOT', 2.0, 1, '41', 'ROOT = Path(__file__).resolve().parents[2]'),

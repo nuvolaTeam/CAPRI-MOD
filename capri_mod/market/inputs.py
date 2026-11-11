@@ -81,9 +81,9 @@ class MarketInputs:
         """where: "market" (the base year's market folder; a file whose name carries another year in that year's,
         capri_mod.data.inputs.year_of_file) or "codes". Not "sources/<sub>": the model reads no file under
         capri_data/sources (refused since 3 November 2026)."""
-        from capri_mod.data.inputs import year_of_file
+        from capri_mod.data.inputs import year_dir, year_of_file
         if where == "market":
-            return self.root / (year_of_file(name, self.base_year) or self.base_year) / "market" / name
+            return year_dir(self.root, year_of_file(name, self.base_year) or self.base_year, self.base_year) / "market" / name
         if where == "codes":
             return self.root / "codes" / name
         if where.startswith("sources/") or where == "sources":

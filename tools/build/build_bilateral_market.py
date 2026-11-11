@@ -49,7 +49,7 @@ import pandas as pd
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
-from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import EXPORTS, SOURCES, data_year  # noqa: E402  (CAPRI's material outside the repository)
 from _sources_io import read_source, write_source  # noqa: E402  (capri_data/sources as Parquet)
 from _market_regions import model_region, market_regions  # noqa: E402  (the market's grouping step: CAPRI region -> model region)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
@@ -173,7 +173,7 @@ def build(year, AGGREGATES):
     rrows = [dict(commodity=c, region=r, pmrk=(v["pv"] / v["prod"] if v["prod"] > 0 else v["pm_any"]), prod_kt=v["prod"])
              for (c, r), v in ra.items()]
     rg = pd.DataFrame(rrows).sort_values(["commodity", "region"])
-    dest = ROOT / "capri_data" / str(year) / "market"
+    dest = data_year(year) / "market"
     fl.to_csv(dest / f"bilateral_flows_{year}{sfx}.csv", index=False)
     rg.to_csv(dest / f"bilateral_regions_{year}{sfx}.csv", index=False)
     # checks: exports + domestic sales = production (CAPRI SupBalM_, stock changes aside)
@@ -257,7 +257,7 @@ def build_trq(year, AGGREGATES):
                  importer_regions="|".join(members[i]), exporter_regions="|".join(members[j]), regime=v["regime"])
             for (i, j, c), v in agg.items()]
     out = pd.DataFrame(rows).sort_values(["importer", "commodity", "exporter"])
-    out.to_csv(ROOT / "capri_data" / str(year) / "market" / f"bilateral_trq_{year}.csv", index=False)
+    out.to_csv(data_year(year) / "market" / f"bilateral_trq_{year}.csv", index=False)
     print(f"{year} bilateral TRQs: {len(out)} quotas; per importer: " + ", ".join(
         f"{i} {n}" for i, n in out.importer.value_counts().items()) + "; per regime: " + ", ".join(
         f"{r} {n}" for r, n in out.regime.value_counts().items()))
@@ -303,7 +303,7 @@ def build_trq_global(year):
                  ts_mfn=v["TSMFN"] / v["q"], ts_pref=v["TSPREF"] / v["q"], importer_regions="|".join(members[i]),
                  free_regions=v["free"]) for (i, c), v in agg.items()]
     out = pd.DataFrame(rows).sort_values(["importer", "commodity"])
-    out.to_csv(ROOT / "capri_data" / str(year) / "market" / f"bilateral_trq_global_{year}.csv", index=False)
+    out.to_csv(data_year(year) / "market" / f"bilateral_trq_global_{year}.csv", index=False)
     print(f"{year} global TRQs: {len(out)}; per importer: " + ", ".join(
         f"{i} {n}" for i, n in out.importer.value_counts().items()))
     return out
@@ -326,7 +326,7 @@ def build_raw_milk_prices(year):
     out = pd.DataFrame([dict(region=model_region(r.region, eu_as_blocks=True), pmrk=float(r.value))
                         for r in df.itertuples(index=False) if r.region in rm and float(r.value) > 0])
     out = out.sort_values("region")
-    out.to_csv(ROOT / "capri_data" / str(year) / "market" / f"raw_milk_prices_{year}.csv", index=False)
+    out.to_csv(data_year(year) / "market" / f"raw_milk_prices_{year}.csv", index=False)
     print(f"{year} raw milk prices: {len(out)} market regions")
     return out
 
@@ -373,7 +373,7 @@ def build_border_measures(year=2030):
     bm = pd.DataFrame(rows).sort_values(["importer", "commodity"])
     if bm.duplicated(["importer", "commodity"]).any():
         raise ValueError("CAPRI products of one model commodity with two border measures")
-    bm.to_csv(ROOT / "capri_data" / str(year) / "market" / f"border_measures_{year}.csv", index=False)
+    bm.to_csv(data_year(year) / "market" / f"border_measures_{year}.csv", index=False)
     fac = _read_csv(sim / "p_entryPriceFac.csv.gz", keep_default_na=False)
     fac = fac[(fac.d3 == "CUR") & fac.d0.isin(rmtp) & fac.d1.isin(rmtp)]
     tq = read_source(KEEP_DIR[year] / f"bilateral_trq_dataout_{year}.parquet", keep_default_na=False)
@@ -382,7 +382,7 @@ def build_border_measures(year=2030):
                 pref_trig=trig.get((r.d0, r.d1, r.d2), 0.0), exporter_regions="|".join(members[r.d1]))
            for r in fac.itertuples(index=False) if r.d2 in CAPRI]
     bp = pd.DataFrame(prs).sort_values(["importer", "commodity", "exporter"])
-    bp.to_csv(ROOT / "capri_data" / str(year) / "market" / f"border_pairs_{year}.csv", index=False)
+    bp.to_csv(data_year(year) / "market" / f"border_pairs_{year}.csv", index=False)
     # every model market region's policy block (RM_TO_RMTP): CAPRI defines the measures per pair of blocks, at the
     # block pair's CIF price (TransportCostsAgg_: transport costs weighted by the base flows)
     pd.DataFrame([dict(region=x, block=b_) for b_ in sorted(members) for x in members[b_]]).to_csv(

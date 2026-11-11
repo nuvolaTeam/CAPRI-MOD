@@ -112,7 +112,7 @@ def load():
     for r in _read_csv(D / "farm_size_noneu.csv").itertuples():
         HEADS[(r.region, r.ad_activity)][r.size_class] = r.heads
         HOLD[(r.region, r.ad_activity)][r.size_class] = r.holdings
-    md = _read_csv(D.parents[2] / "2030" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
+    md = _read_csv(D.parents[2] / "baselines" / "capri_greendeal_ref" / "2017_2030" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
     MD = {(r.region, r.activity, r.item): r.value for r in md.itertuples()}
     return INV, ADD, FOP, PRICE, STOR, MIN, KGN, nvz, HEADS, HOLD, MD
 

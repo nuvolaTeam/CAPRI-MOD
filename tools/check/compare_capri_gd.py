@@ -42,7 +42,8 @@ PRICES = {"SWHE": "SWHE", "BARL": "BARL", "CORN": "MAIZ", "RYEM": "RYEM", "OATS"
 
 
 def capri_effect() -> pd.DataFrame:
-    return pd.read_csv(TABLE, keep_default_na=False, na_values=[""])
+    from capri_mod.csvio import read_csv
+    return read_csv(TABLE, keep_default_na=False, na_values=[""])
 
 
 def activity_table(run: dict, capri: pd.DataFrame, by_ms: bool = False) -> pd.DataFrame:
