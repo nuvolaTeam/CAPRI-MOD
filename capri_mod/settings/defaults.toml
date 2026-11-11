@@ -540,6 +540,11 @@ last_data_year = 2019
 simulation_years = [2018, 2020, 2025, 2030, 2035, 2040, 2045, 2050, 2060, 2070]
 aglink = "aglink2023dgAgri"
 milk_quota_expiry = 2009
+# %constBionergy% (captrd.gms l. 95-97, biofuel/biofuel_trends.gms l. 1297-1318): the EU28 member states' biofuel
+# positions held at their 2020 values after 2020. CAPRI's code switches it on for the long-run selection
+# globiom_eu_bright_s0_2023; the reference run results_1770 did not apply it (the member states' biofuel positions after
+# 2020 move in its results, Germany's ethanol use among them): off, as that run. The project lead decides (11 November 2026)
+const_bioenergy = false
 
 [pipeline]
 # The data download layer (capri_mod/pipeline; docs/DATA_PIPELINE.md). Where the store (raw downloads, manifest, Delta

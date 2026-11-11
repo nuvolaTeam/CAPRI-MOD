@@ -13,6 +13,9 @@ result is a wheel you install with pip in place of PyPI's CasADi.
   _casadi" (the patch switches SWIG_IMPORT on before the wrappers exist; the step now passes `-DSWIG_IMPORT=OFF`, as
   CasADi's own workflow generates them before switching it). Rerun the same command: the step is repeated whenever its
   wrapper file is missing.
+- Fixed on 11 November 2026: the core build stopped at the WORHP plugin (`Params` has no `ScaledKKT`): the script took
+  CasADi's solver mockups at v116, whose WORHP headers no longer match CasADi 3.8.1; it now takes v111, the release
+  CasADi's workflow used when 3.8.1 was built, and rebuilds an earlier run's mockups by itself.
 
 ## What you need
 
@@ -44,7 +47,7 @@ result is a wheel you install with pip in place of PyPI's CasADi.
    ```
 
    The script:
-   - clones CasADi 3.8.1, CasADi's solver mockups (v116) and its library grafter, and applies the patch;
+   - clones CasADi 3.8.1, CasADi's solver mockups (v111) and its library grafter, and applies the patch;
    - pulls `ghcr.io/casadi/ci-swig` and `ghcr.io/jgillis/manylinux_2_28-x64:production`, CasADi's own build images;
    - generates the Python wrappers, builds the mockups, the core with every plugin of PyPI's wheel, and the Python 3.11
      limited-API module;

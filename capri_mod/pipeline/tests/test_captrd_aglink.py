@@ -48,9 +48,20 @@ def dgagri():
     src = A.ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "biofuel" / "biofuel_technology_params_"
     dens = pd.read_parquet(f"{src}p_density.parquet").set_index("fuel").value.astype(float).to_dict()
     oil = pd.read_parquet(f"{src}p_oilEqu.parquet").set_index("fuel").value.astype(float).to_dict()
-    dg, _, _ = A.run(SP / "aglink2023dgAgri_oriEUdata", SP / "AGLINK2019dgagri_oridata",
+    dg, p, _ = A.run(SP / "aglink2023dgAgri_oriEUdata", SP / "AGLINK2019dgagri_oridata",
                      REFERENCE / "sets" / "simini_21730", pdata, dens, oil)
+    _STAGE["p_aglink"] = p                       # p_aglink with p_BFyld (fixture aglink_p)
     return dg
+
+
+#: the stage's other results of the module's run, for the fixtures below
+_STAGE: dict = {}
+
+
+@pytest.fixture(scope="module")
+def aglink_p(dgagri):
+    """The Aglink stage's p_aglink (with p_BFyld as .bfyld), from dgagri's run."""
+    return _STAGE["p_aglink"]
 
 
 @pytest.mark.slow

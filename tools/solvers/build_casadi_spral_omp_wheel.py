@@ -13,7 +13,7 @@ API) with one change, tools/solvers/casadi_3.8.1_spral_openmp.patch:
 
 Everything else is CasADi's: the same images (ghcr.io/casadi/ci-swig for the SWIG sources, ghcr.io/jgillis/
 manylinux_2_28-x64:production for the build), the same build_flags (read from binaries.yml at the tag, so every plugin
-of PyPI's wheel), the solver mockups (github.com/casadi/mockups at v116, built from source here: their release zip is a
+of PyPI's wheel), the solver mockups (github.com/casadi/mockups at v111, built from source here: their release zip is a
 github.com download, not reachable from the build machine), the grafting of the runtime libraries into the package
 (github.com/jgillis/universal_grafter: jgillis's auditwheel fork renames libgomp, libgfortran and the others with hashed
 names, as in PyPI's wheel) and the wheel packer (misc/create_wheel_local.py). The wheel's version is 3.8.1+spral.omp, so
@@ -36,13 +36,17 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 CASADI_TAG = "3.8.1"
-MOCKUPS_TAG = "v116"
+#: the mockups release CasADi 3.8.1 (16 September 2026) was built against: binaries.yml uses casadi/mockups@master, whose
+#: action downloaded v111 then; v114 on (15 October 2026) regenerated the WORHP mockup without Params.ScaledKKT, which
+#: 3.8.1's worhp_interface.cpp l. 409 reads (the build stopped there on Red Hat 9, 11 November 2026)
+MOCKUPS_TAG = "v111"
 BUILD_IMAGE = "ghcr.io/jgillis/manylinux_2_28-x64:production"
 SWIG_IMAGE = "ghcr.io/casadi/ci-swig:latest"
 PY = "311"                      # CasADi's wheel: Python 3.11 limited API (abi3), for Python 3.11 and later
@@ -138,11 +142,22 @@ def main() -> None:
             sys.exit(f"the SWIG step did not write {wrapper}: see {log}")
         done(work, "swig")
 
+    tagfile = work / "stamps" / "mockups_tag"
+    stale = tagfile.read_text().strip() != MOCKUPS_TAG if tagfile.exists() else stamp(work, "mockups")
+    if (work / "mockups").exists() and stale:
+        # an earlier run's mockups of another release: cloned and built again
+        for d in (work / "mockups", work / "mockups_install"):
+            shutil.rmtree(d, ignore_errors=True)
+        (work / "stamps" / "mockups").unlink(missing_ok=True)
+    if not (work / "mockups").exists():
+        sh(["git", "clone", "--depth", "1", "-b", MOCKUPS_TAG, "https://github.com/casadi/mockups", "mockups"],
+           cwd=work, log=log)
     if not stamp(work, "mockups"):
         docker(work, BUILD_IMAGE, "cd mockups && cmake -B build_mock -DCMAKE_BUILD_TYPE=Release "
                "-DCMAKE_INSTALL_PREFIX=/work/mockups_install . && cmake --build build_mock -j2 "
                "&& cmake --install build_mock", log)
         done(work, "mockups")
+        tagfile.write_text(MOCKUPS_TAG + "\n")
 
     if not stamp(work, "core"):
         # binaries.yml's core-dockcross job

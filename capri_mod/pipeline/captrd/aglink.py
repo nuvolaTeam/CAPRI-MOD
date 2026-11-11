@@ -423,6 +423,7 @@ def eu_data(ori: P4, sets: Sets, pdata: pd.DataFrame, density: Dict[str, float],
             if v is not None:
                 yld[(src, fuel, y)] = v
         yld[("WTS", "ET", y)] = yld.get(("WT", "ET", y), 0.0)
+    p.bfyld = yld                         # p_BFyld (feedstock, fuel, year): read by the biofuel trends (biofuel_trends.py)
     for r in S.agEurop:                                                       # l. 540-550
         for y in S.agYears:
             if r != "EUN":

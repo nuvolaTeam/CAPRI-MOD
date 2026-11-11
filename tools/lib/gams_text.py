@@ -53,11 +53,11 @@ def parameter_list(path: Path, name: str, dim: int):
 
 
 def table_records(text: str, name: str, row_dims: int, where: str = ""):
-    """The records of `Table name(...) "text"` (GAMS table: a header line of column labels, then rows of a label of
+    """The records of `Table name(...) "text"` or `Table name "text"` (GAMS table: a header line of column labels, then rows of a label of
     row_dims parts joined by dots and numbers in the columns they overlap), as written: (row keys..., column, value
     text)."""
     lines = text.splitlines()
-    k = next(i for i, ln in enumerate(lines) if re.match(rf"\s*table\s+{name}\s*\(", ln, flags=re.I))
+    k = next(i for i, ln in enumerate(lines) if re.match(rf"\s*table\s+{name}(\s|\(|$)", ln, flags=re.I))
     i = k + 1
     while not lines[i].strip() or lines[i].lstrip().startswith("*"):
         i += 1

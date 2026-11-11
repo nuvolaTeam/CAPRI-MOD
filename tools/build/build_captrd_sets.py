@@ -91,7 +91,9 @@ GLOBAL_1D = {"ms": "RMSSUP", "srnuts1": "SRNUTS1", "srnuts2": "SRNUTS2", "urbann
              "dact": "DACT", "dmpact": "DMPACT", "msnoeu28": "MSnoEU28", "fuel_rows": "FUEL_ROWS",
              "biofuels": "BIOFUELS", "fosfuels": "FOSFUELS", "fuels": "FUELS", "biostock": "bioStock",
              # captrd_policy.gms
-             "grcu": "GRCU", "rset": "RSET", "msall": "MSALL", "nosugquotaaglinkversion": "noSugQuotaAglinkVersion"}
+             "grcu": "GRCU", "rset": "RSET", "msall": "MSALL", "nosugquotaaglinkversion": "noSugQuotaAglinkVersion",
+             # biofuel/biofuel_trends.gms
+             "cere": "CERE", "biostockoilp": "bioStockOilP", "bio_by": "BIO_BY", "oseco": "OSECO", "balpos": "BALPOS"}
 GLOBAL_2D = {"map_rr": "Map_RR", "pact_to_io": "PACT_TO_IO", "pact_to_i": "PACT_TO_I", "rms_to_rm": "RMS_TO_RM",
              "pact_to_o": "PACT_TO_O", "pact_to_y": "PACT_TO_Y",
              # load_coco1_data.gms

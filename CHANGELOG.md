@@ -32,6 +32,22 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — CAPTRD-MOD stage 2d: the biofuel trends; the CasADi wheel's mockups
+
+- `capri_mod/pipeline/captrd/biofuel_trends.py`: CAPTRD's expert supports for the biofuel sector from PRIMES
+  (biofuel/biofuel_trends.gms with the reference run's switches): PRIMES's results aggregated, gap-filled and
+  interpolated; demand, production, trade, second generation and non-agricultural fuels as PRIMES's change on the 2015
+  data; new energy crops (member states and NUTS 2, EPS kept as CAPTRD does); processing coefficients from Aglink's
+  yields (the Aglink stage now keeps p_BFyld); feedstock use from base shares and p_potentialStocks; DDGS; fossil fuels,
+  excise taxes, prices; trust levels. Inputs as CSV (`tools/build/build_captrd_biofuel.py`, 38_captrd_biofuel.sql).
+- Parity (test_captrd_biofuel_trends.py): all 28,798 comparable values equal to CAPTRD's results_1770, trust levels
+  as CAPTRD stores them, but for two documented later-stage changes.
+- Found: GAMS evaluates an assignment's right side on the values from before the statement (the cereal and sugar
+  shares; the gap filling); the reference run did not apply %constBionergy%, which CAPRI's code switches on for its
+  long-run selection: setting `captrd.const_bioenergy`, off as that run (for the project lead to decide).
+- CasADi SPRAL/OpenMP wheel: the solver mockups pinned to v111, the release CasADi 3.8.1 was built against (v114 on
+  lack WORHP's `ScaledKKT`, where the Red Hat build stopped).
+
 ## 11 November 2026 — the run log in CAPRI's style; no environment variables
 
 - `capri_mod/runlog.py`, setting `run.verbosity` (quiet, capri, detailed, debug; default capri): CAPRI's section titles
