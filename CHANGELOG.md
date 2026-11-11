@@ -32,6 +32,24 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — manure pools: the damped price step again; the Green Deal against CAPRI's own run
+
+- outer_loop.manure_pool_price_update = "damped" again (the project lead's choice of 11 November 2026, until CAPRI's
+  pool market m_mPoolMarket is ported; DEP-17). CAPRI's averaging of the pools' last clearing prices, written for
+  CAPRI's pool market, kept the regional crop and feed mixes swinging on capri-mod's pool market (cleared on the
+  regions' exact trade schedules): the full-EU Green Deal 2030 had not converged after 36 iterations (2 hours; largest
+  change between iterations 0.3-3.9%, Austria's and Ireland's cereals and feed, Spain's maize); with the damped step it
+  converges in 16 iterations, 52 minutes. Austria, Ireland, Spain and Slovakia alone: 19 iterations ("capri"), 8
+  ("damped"), 6 without manure trade; the same four countries on the code before the switch of the 2030 base point
+  (7e15416) follow the same path as today's, so that switch is not the cause.
+- Full-EU Green Deal 2030 (greendeal_lnds8_org18_pest20_mine13crp_surp30) against CAPRI star 3.0's own run of the same
+  scenario (capri_gd_effect.csv.xz): activity changes' mean gap 7.0 points, same sign 83%; producer prices' mean gap 3.8
+  points, the model's changes 0.63 of CAPRI's (median): milk +8.0% against +11.2%, beef +13.4 against +20.1, pork +7.9
+  against +12.9, soft wheat +5.5 against +8.9; fattening pigs -6.1% against -9.2, broilers -5.9 against -8.1;
+  voluntary set-aside +164% against +80, fallow +66 against +91; histosols idled 1,647 against 1,819 thousand ha.
+  The supply cuts are smaller than CAPRI's and the prices rise less: the regional supply models, not the market.
+- Mini-EU Farm-to-Fork (no manure trade) unchanged.
+
 ## 11 November 2026 — correction: CAPRI's calibration point is the reference run's
 
 - The notes that called res_2_1730greendeal_refpol_endotech_all_ini CAPRI's 2030 calibration run, from which the Green
