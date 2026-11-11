@@ -4256,6 +4256,34 @@
     "builder": "build_captrd_dat"
    }
   },
+  "capri_data/pipeline/captrd/dat/agriprod_p_agriprod.csv": {
+   "description": "Eurostat's recent production statistics p_AgriProd(msAgriprod, agriprod, itemAgriProd, year) of dat/coco/Agri_Prod.gdx (read by captrd/agriprod_supports.gms l. 229), the records of the file's domains and of the years from 2010; 10104 rows (tools/build/build_captrd_agriprod.py).",
+   "kind": "base",
+   "rows": 10104,
+   "columns": 5,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/pipeline/captrd/agriprod_supports.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/dat/agriprod_p_reqfcnlim.csv": {
+   "description": "The table p_reqfcnlim(COLS, ROWS, lo/up) of gams/feed/feed_decl.gms l. 284: the absolute limits of days and daily growth in the feed requirement functions; 45 rows (tools/build/build_captrd_agriprod.py).",
+   "kind": "coefficients",
+   "rows": 45,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/pipeline/captrd/agriprod_supports.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
   "capri_data/pipeline/captrd/dat/biofuel_p_fossilfuel.csv": {
    "description": "PRIMES's fossil fuel demand (DOMM) and prices (UVAP) p_fossilFuel(region, item, fuel, year) of dat/biofuel/fossilFuel.gdx, used where p_PrimesWithUnits lacks them; 1232 rows (tools/build/build_captrd_biofuel.py).",
    "kind": "coefficients",
@@ -5559,6 +5587,186 @@
    "origin": {
     "nature": "capri",
     "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/agriprod.csv": {
+   "description": "The set agriprod of captrd/agriprod_supports.gms (every survey series plus the activity levels to target; l. 57-62), as written: one member per row, 42 (e.g. CATA, SCOW, DCOW); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 42,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/agriprod1.csv": {
+   "description": "The set agriprod1 of captrd/agriprod_supports.gms (the first-choice series of an activity without its own; l. 64-70), as written: one member per row, 5 (e.g. DCOW, CALV, AdNonDai); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 5,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/agriprod2.csv": {
+   "description": "The set agriprod2 of captrd/agriprod_supports.gms (the second-choice series; l. 72-75), as written: one member per row, 2 (e.g. CATA, SHEPS); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/agriprod_to_item.csv": {
+   "description": "The set agriprod_to_item of captrd/agriprod_supports.gms (the series to their nowcast items; l. 201-207), as written: one member per row, 35 (e.g. DCOW.SUR4, CALV.SUR4, AdNonDai.SUR4); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 35,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/agriprodaact.csv": {
+   "description": "The set agriProdAact of captrd/agriprod_supports.gms (the target animal activities; l. 81-86), as written: one member per row, 16 (e.g. DCOL, DCOH, SCOW); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 16,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/agriprodcact.csv": {
+   "description": "The set agriProdCact of captrd/agriprod_supports.gms (the target crop activities; l. 88-90), as written: one member per row, 10 (e.g. SWHE, SUGB, DWHE); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 10,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/agriprodcalc.csv": {
+   "description": "The set agriprodCalc of captrd/agriprod_supports.gms (the series derived from them; l. 49-55), as written: one member per row, 5 (e.g. PIGF, AdNonDai, SHGT); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 5,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/agriprodmlk.csv": {
+   "description": "The set agriProdMlk of captrd/agriprod_supports.gms (the target milk variables; l. 92-94), as written: one member per row, 2 (e.g. GROF, YILD); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/agriprodori.csv": {
+   "description": "The set agriprodOri of captrd/agriprod_supports.gms (the December survey's series that guide the short-run projections; l. 31-47), as written: one member per row, 25 (e.g. CATA, SCOW, DCOW); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 25,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/cols_to_agriprod.csv": {
+   "description": "The set cols_TO_agriprod of captrd/agriprod_supports.gms (CAPRI's animal activities to the series groups; l. 98-106), as written: one member per row, 30 (e.g. CAMR.CALV, CAFR.CALV, CAMF.CALV); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 30,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/fac.csv": {
+   "description": "The set fac of captrd/agriprod_supports.gms (the change factors to the nowcast years; l. 189), as written: one member per row, 3 (e.g. fac2018, fac2019, fac2020); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/facyr.csv": {
+   "description": "The set facyr of captrd/agriprod_supports.gms (the base years of the change factors, %BaseYear% (2017 as the reference run) and 2018; l. 214), as written: one member per row, 2 (e.g. 2017, 2018); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/itemagriprod.csv": {
+   "description": "The set itemAgriProd of captrd/agriprod_supports.gms (the items of the agriprod data used; l. 191-195), as written: one member per row, 9 (e.g. SUR4, LEVL, RMLK); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 9,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/mlkagriprod.csv": {
+   "description": "The set mlkAgriProd of captrd/agriprod_supports.gms (the milk types loaded; l. 197-199), as written: one member per row, 4 (e.g. RMLK, CMLK, EMLK); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 4,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/msagriprod.csv": {
+   "description": "The set MSagriprod of captrd/agriprod_supports.gms (the member states in COCO's notation; l. 108-145), as written: one member per row, 36 (e.g. BE000, LU000, DK000); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 36,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/msagriprod_map.csv": {
+   "description": "The set MSagriprod_map of captrd/agriprod_supports.gms (COCO's member states to CAPRI's regions; l. 146-183), as written: one member per row, 36 (e.g. BE000.BL000000, LU000.BL400000, DK000.DK000000); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 36,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/shepgoat.csv": {
+   "description": "The set shepGoat of captrd/agriprod_supports.gms (the sheep and goat original series; l. 77-79), as written: one member per row, 4 (e.g. SHEP, GOAT, SHEPS); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 4,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/agriprod/shepgoatori.csv": {
+   "description": "The set shepGoatOri of captrd/agriprod_supports.gms (the December survey's sheep and goat series; l. 25-30), as written: one member per row, 4 (e.g. SHEP, GOAT, SHEPS); read by tools/build/build_captrd_agriprod.py (tools/lib/gams_sets.py).",
+   "kind": "structure",
+   "rows": 4,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_agriprod (not in the trace yet)"
    }
   },
   "capri_data/pipeline/captrd/sets/balpos.csv": {

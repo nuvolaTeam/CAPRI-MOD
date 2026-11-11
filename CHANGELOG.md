@@ -32,6 +32,27 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — CAPTRD-MOD stage 2d: Eurostat's recent production; the CasADi wheel's SPRAL build
+
+- `capri_mod/pipeline/captrd/agriprod_supports.py`: CAPTRD's short-run supports from Eurostat's recent production
+  statistics (captrd/agriprod_supports.gms, dat/coco/Agri_Prod.gdx): the December survey series completed and derived
+  (other cattle, fattening pigs, sheep and goats, Malta's 2017 milk, cow milk, milk yields), three-year means around
+  2017 and 2018, change factors to 2018-2020, and for 2020 the target animal activities' herds and levels, the dairy
+  yields and cow milk with trust 9.02 (3.02 up to 1), the fattening activities' bounds of days, daily growth and meat
+  yields, the dairy herds' and cow milk's 1% bounds, and 2017/2016 set to BASM and p_data where a 2020 support exists.
+  The PercentChange supports it deletes are returned as positions. Inputs as CSV
+  (`tools/build/build_captrd_agriprod.py`, 39_captrd_agriprod.sql). Not ported: the blocks for 2019 and 2018, which
+  run only when those years are ex-ante simulation years (not in the reference run); the module stops if they are.
+- Parity (test_captrd_agriprod_supports.py): of 1,224 values of 2020, 1,150 equal to CAPTRD's results_1770 with
+  their trust levels; the other 74 are later sources' (65 national_supports.gms's, its trust levels ending in .01 and
+  its rules for Greece; 39 positions this file deletes for want of recent data that a later source fills, the two
+  groups overlapping). The bounds are not in CAPTRD's stored results and are not compared.
+- CasADi SPRAL/OpenMP wheel (from the project lead's Red Hat logs): SPRAL built with `make -j1` (its Makefile misses
+  module dependencies: the parallel build stopped at 'spral_matrix_util.mod', then 'spral_ssids_contrib.mod'); the core
+  build's own mockups pinned to v111 too (`-DBUILD_MOCKUPS_VERSION`: with WITH_MOCKUP_* the core clones them from
+  master and compiles the WORHP plugin against that copy, so the earlier pin did not reach it); a changed patch is
+  applied again by the script.
+
 ## 11 November 2026 — CAPTRD-MOD stage 2d: the biofuel trends; the CasADi wheel's mockups
 
 - `capri_mod/pipeline/captrd/biofuel_trends.py`: CAPTRD's expert supports for the biofuel sector from PRIMES

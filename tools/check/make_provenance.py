@@ -65,6 +65,9 @@ EXTERNAL_ORIGIN = "CAPRI"
 #: builder, origins (from the builder's docstring); a retrace moves them into builders.json
 UNTRACED = {
     "capri_data/pipeline/captrd/sets/biofuel/": ("build_captrd_biofuel", "CAPRI"),     # before sets/ (first match)
+    "capri_data/pipeline/captrd/sets/agriprod/": ("build_captrd_agriprod", "CAPRI"),   # before sets/ (first match)
+    "capri_data/pipeline/captrd/dat/agriprod_p_agriprod.csv": ("build_captrd_agriprod", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/agriprod_p_reqfcnlim.csv": ("build_captrd_agriprod", "CAPRI"),
     "capri_data/pipeline/captrd/dat/biofuel_p_potentialstocks.csv": ("build_captrd_biofuel", "CAPRI"),
     "capri_data/pipeline/captrd/dat/biofuel_proc_yields.csv": ("build_captrd_biofuel", "CAPRI"),
     "capri_data/pipeline/captrd/dat/biofuel_p_primeswithunits.csv": ("build_captrd_biofuel", "CAPRI"),
