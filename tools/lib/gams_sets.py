@@ -80,7 +80,7 @@ class _Text:
                 continue
             s = re.sub(r"%(\w+(?:\.\w+)?)%", lambda m: self.g.get(m.group(1).lower(), m.group(0)), s)
             st = s.strip()
-            if st.startswith("$"):
+            if s.startswith("$"):                 # compile-time commands start in column 1; an indented $ is a condition
                 yield from self._control(path, no, st)
                 continue
             out.append((path, no, s))

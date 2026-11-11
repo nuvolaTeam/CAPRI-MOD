@@ -553,6 +553,12 @@ const_bioenergy = true
 # GLOBIOM_EU_EUCLIMIT6_S2_50CV and SSP2+ref_REF+scenRCPref are), so it ran without GLOBIOM long-run supports, as this
 # setting does with the file in hand (11 November 2026)
 longrun_scenario = "globiom_eu_bright_s0_2023+REFERENCE+REFERENCE"
+# Where longrun_supports.gms's p_longRunInfoAll comes from: false = the long-run file as CAPRI's run had it
+# (results/global/longrun_info_fac_%reg_agg%.gdx, tools/build/build_captrd_longrun.py), true = CAPRI's conversion of
+# the selection's GLOBIOM-EU file run here (global/create_longrun_info.gms with convert_globiom.gms,
+# capri_mod/pipeline/captrd/globiom.py; parity with CAPRI's conversion of the EUCLIMIT6 file in
+# test_captrd_globiom.py). Off: the reference run results_1770 had no GLOBIOM long-run supports (11 November 2026)
+longrun_from_globiom = false
 
 [pipeline]
 # The data download layer (capri_mod/pipeline; docs/DATA_PIPELINE.md). Where the store (raw downloads, manifest, Delta

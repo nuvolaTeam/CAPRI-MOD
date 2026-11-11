@@ -119,6 +119,25 @@ def read_info(dat_dir) -> Dict[Tuple[str, str, str, str, str, object], float]:
     return out
 
 
+def info_source(dat_dir, scenario: str = "") -> Dict[Tuple[str, str, str, str, str, object], float]:
+    """p_longRunInfoAll as the setting captrd.longrun_from_globiom chooses: the long-run file's records (read_info) or
+    CAPRI's conversion of the selection's GLOBIOM-EU file (globiom.longrun_info_all, on the external sources'
+    Parquet: capri_sources/dat_parquet)."""
+    from pathlib import Path
+    from capri_mod.settings import current as _settings
+    if not bool(_settings().get("captrd.longrun_from_globiom")):
+        return read_info(dat_dir)
+    from capri_mod.external_paths import SOURCES
+    from capri_mod.pipeline.captrd import globiom as GL
+    from capri_mod.pipeline.captrd import prepare as P
+    pq = SOURCES / "dat_parquet"
+    return GL.longrun_info_all(
+        scenario or str(_settings().get("captrd.longrun_scenario")), sets_dir=P.SETS_DIR / "globiom",
+        capri_sets_dir=P.SETS_DIR / "globiom", dat_dir=Path(dat_dir), globiom_root=pq / "global",
+        capreg_root=pq / "capreg", datamarket=pq / "global" / "fao_agg_17_defaulta" / "p_dataMarket.parquet",
+        worldpop=pq / "arm" / "allpop" / "worldPop.parquet")
+
+
 def _ofrom_one_pact(pact: Iterable[str], pact_to_o: Iterable[Tuple[str, str]]) -> Set[str]:
     """sets_captrd.gms l. 278-283: outputs of one production activity, COMI and GRAS."""
     pa = set(pact)

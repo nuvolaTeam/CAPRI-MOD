@@ -68,6 +68,8 @@ UNTRACED = {
     "capri_data/pipeline/captrd/sets/agriprod/": ("build_captrd_agriprod", "CAPRI"),   # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/national/": ("build_captrd_national", "CAPRI"),   # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/macro/": ("build_captrd_macro", "CAPRI"),   # before sets/ (first match)
+    "capri_data/pipeline/captrd/sets/globiom/": ("build_captrd_globiom_sets", "CAPRI"),   # before sets/ (first match)
+    "capri_data/pipeline/captrd/dat/globiom_scenarios.csv": ("build_captrd_globiom_sets", "CAPRI"),
     "capri_data/pipeline/captrd/dat/macro_p_aglinkmacroeu.csv": ("build_captrd_macro", "CAPRI"),
     "capri_data/pipeline/captrd/dat/macro_ssp_data.csv": ("build_captrd_macro", "CAPRI"),
     "capri_data/pipeline/captrd/dat/macro_worldpop.csv": ("build_captrd_macro", "CAPRI"),

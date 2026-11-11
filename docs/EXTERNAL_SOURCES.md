@@ -131,7 +131,22 @@ added on 11 November 2026: `baseline/data_SSPV3_update/` (SSP_DATA), `arm/allpop
   - `global/reg_mappings.xlsx` (GlobiomCountry, GlobiomCountry_FAOreg, FAOreg_AGLINKregions, l. 931-951).
 - Added on 11 November 2026: `global/globiom_eu_bright_s0_2023+REFERENCE+REFERENCE.gdx`, GLOBIOM-EU's Brightspace
   2023 baseline (A. Deppermann to P. Witzke, 23 October 2023, per global/convert_globiom.gms l. 282-287), the raw input
-  of the long-run selection of the reference run; read by CAPRI's global/convert_globiom.gms (not ported yet).
+  of the long-run selection of the reference run; read by CAPRI's global/convert_globiom.gms (capri_mod/pipeline/captrd/
+  globiom.py, through dat_parquet).
+- Added on 11 November 2026: `global/GLOBIOM-EU_EUCLIMIT6_S2_50CV.gdx` (GLOBIOM-EU's EUCLIMIT6 file, equal to the
+  course mirror's dat/global copy), the input of CAPRI's conversion in GLOBIOM_EU_longrun_defaulta.gdx;
+  `capreg_tseries/Capreg_tseries/<CC>_17.gdx` (35, upload Capreg_tseries.zip).
+
+**`results_local/capreg/`**: CAPREG's time series `res_time_series_17<CC>.gdx` (35; DATA1, RALL, DB_COLS, DB_ROWS,
+META; upload res_time_series_17ES.zip), read by create_longrun_info.gms l. 66-70 (through dat_parquet/capreg).
+
+**`reference/globiom/`**: CAPRI's conversion of the EUCLIMIT6 file, `GLOBIOM_EU_longrun_defaulta.gdx` (p_globiomInfo,
+SelecScen) and its Parquet, compared with in test_captrd_globiom.py.
+
+Parquet added on 11 November 2026 (tools/build/convert_capri_gdx.py): `dat_parquet/global/GLOBIOM-EU_EUCLIMIT6_S2_50CV/`,
+`dat_parquet/capreg/res_time_series_17<CC>/`, `dat_parquet/capreg_tseries/<CC>_17/`; and from the fao_agg listing
+(tools/build/build_fao_agg_reference.py --parquet) `dat_parquet/global/fao_agg_17_defaulta/` (p_dataMarket,
+p_biofuelData, p_aglinkGrowthFactor).
 
 **`results/permits/`**, **`results/arm/`**: CAPRI's GHG and technology result files, received 10 November 2026, as
 capmod.gms l. 1641-1645 writes them (results\permits\res_<scenario>_21730.gdx: v_Miti, p_ghgMiti, EMISCALC,

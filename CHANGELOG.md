@@ -32,6 +32,29 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 11 November 2026 — CAPTRD-MOD: CAPRI's GLOBIOM long-run conversion, switchable
+
+- `capri_mod/pipeline/captrd/globiom.py` ports global/convert_globiom.gms (the GLOBIOM-EU branch) and
+  global/create_longrun_info.gms: GLOBIOM-EU's projections mapped to CAPRI's regions (through FAO codes) and codes,
+  sugar, DOMM, the world price, the change factors from B2000, the demand and trade shares, the base year's factors
+  from CAPREG's time series, the global database (p_dataMarket) and the UN population; p_longRunInfoAll with
+  Taiwan = China.
+- Parity on GLOBIOM-EU's EUCLIMIT6 file (test_captrd_globiom.py): the same 452,241 records as CAPRI's
+  p_longRunInfoAll (and as p_globiomInfo without Taiwan); all equal but 128 of the 2017 factors (population and
+  Switzerland's DOMM), which come from the global database and population files, whose versions differ from that run's.
+  The EUCLIMIT6 and Brightspace branches of convert_globiom.gms differ only in the input file and the scenario lines,
+  so the Brightspace conversion (the reference run's selection, no CAPRI conversion of it in hand) runs the same code.
+- Found: the prices (UVAP) come only from the GLOBIOM regions that produce (l. 1744 excludes the plain price sum); the
+  EU aggregates take their FAO codes from fao_codes_new.gms l. 559, which CAPMOD's run skips.
+- Setting `captrd.longrun_from_globiom` (default false: the long-run file as the reference run had it, without GLOBIOM
+  long-run supports); `longrun_supports.info_source` picks the source.
+- `tools/lib/gams_preproc.py` selects the GAMS branch of a set of control variables; `tools/lib/gams_sets.py` and
+  the preprocessor take only column-1 dollar lines as compile-time commands (an indented $ is a condition; the
+  builders that use gams_sets reproduce their files unchanged). `tools/build/build_captrd_globiom_sets.py` writes the
+  conversion's sets (sets/globiom, 44_captrd_globiom.sql); `build_fao_agg_reference.py --parquet` also writes Parquet.
+
+---
+
 ## 11 November 2026 — CAPTRD-MOD: %constBionergy% at CAPRI's default
 
 - The setting `captrd.const_bioenergy` is now on, CAPRI's default (captrd.gms l. 94-97), by the project lead's
