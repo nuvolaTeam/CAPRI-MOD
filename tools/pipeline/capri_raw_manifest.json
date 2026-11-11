@@ -17,6 +17,11 @@
    "note": "the five untrusted debug dumps of an earlier market run (capri/temp: data_cur, cur_step, market_model, iy, supply_model; not read by any builder) removed, the project lead, 11 November 2026; the card rewritten",
    "files_added": 0,
    "files_removed": 178
+  },
+  {
+   "tag": "v2026.11.11.2",
+   "note": "priFertDist_<MS>1730defaulta: CAPRI's fertiliser distribution results per country (results/fert), the project lead's upload of 11 November 2026 (26 EU files, NO000000; the non-EU 8 again)",
+   "files_added": 621
   }
  ],
  "files": {
@@ -11615,6 +11620,121 @@
    "size": 1895,
    "version": "v2026.11.11"
   },
+  "capri/results/fert/priFertDist_AT1730defaulta/META.parquet": {
+   "sha256": "43e0ebe069ab24953898043efd82ef3b2f661842355f4cb4cb37298c9542f31f",
+   "size": 6252,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/_symbols.csv": {
+   "sha256": "285b66325be213dd09bc989f517a1b53c2128d62d0f2be4d3560f6d0cb257515",
+   "size": 2213,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "f9efb13f125e33046fa09d7d6545952a2e8438d9e8e184cfe82af6b554053547",
+   "size": 14216,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "0ea0a061a2f25ad54890d26768ed8d0e66335872ecda22446e2a4494b56822c5",
+   "size": 14918,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "a0f6b13d4045cd040b946112de723da28a87bcd0df84396b9e607450338dcabf",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "cb34827867e0fda7f580aead08bb372e99c607004d703f8f9920be4964965482",
+   "size": 2316,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_endoManAv.parquet": {
+   "sha256": "74c38819354754131dd40de28704c091428fe57e59dc5bb586d5c3400a233c47",
+   "size": 2569,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "ddf069f9a51a34ec1ac79a9745f0c3e2bc31357ce1e4c7c22fb8572e52a89425",
+   "size": 2338,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "39b2d9264a478ee7e6d65cc5b660dbf6c0319b1ead12ab087ee01060977e23ba",
+   "size": 2474,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_manureExports.parquet": {
+   "sha256": "f1ad49ba6314f35e5ff99b9ee6b69dc0332c4af93e612b0139df5545beb0a431",
+   "size": 6205,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "430157527f56890ec2402880ab2f564a6ebeace4622211bf5f624b6f7cb2645a",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_manureImports.parquet": {
+   "sha256": "96f6510a6598090b9f0b07c9548094cbfc5ce8f8f253bb5de101d7ab71c2f4d2",
+   "size": 7780,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "94335a3ba211f27223c2cafabacf964aa154dcbd4d114fbd12140930fd861647",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "531bf75ba642bc19fd575d1dcefe257caf5a08829706a108174a0d8ef4fcd893",
+   "size": 2230,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "8f2a5389d316e02597d9b116184fe0c877faa69d010b16c60ff6dfa1fa602e22",
+   "size": 2475,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "01ffcde221094023db29398c262fc6fa6230de773ffe2e79b21e7a5da75e186d",
+   "size": 15628,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "201c225c44cfac9bd1a9ec3509c4f68513c6d7ac6f16fc37c09d0f25287da1e1",
+   "size": 12947,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_priFertDist.parquet": {
+   "sha256": "2f8102d73ae785201f9d7585ecd0d147164672d52ab0b5c1d84d2ef8178becc8",
+   "size": 2513895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_priManNShare.parquet": {
+   "sha256": "dfffa7d0e1879a8ef2c37e5b3f332a1011bd15a5d86392037f66608c662e27f8",
+   "size": 129622,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_priMinRate.parquet": {
+   "sha256": "3902ad3102f6bc5c1daaa1f314d22ba3102c08f7686f72515b89da565464a27c",
+   "size": 594239,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "352f08b8cc7524c69e159a8dc8c270641cac684551fe9046b9cfd6f33dbbfbf0",
+   "size": 39610,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "1a402e14f940dd1f64824fc741a0088c35254f68d338422d224b8ee2cb907311",
+   "size": 35941,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_AT1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "71a27507369505d063006d426162e1702ca2768d186e26e963d79fc02eec9a4f",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
   "capri/results/fert/priFertDist_BA1730defaulta/META.parquet": {
    "sha256": "5bef7c3e0427735e59dcab5b5346efe5fa8580d98a2eb6b3b6310a8130533acf",
    "size": 5888,
@@ -11729,6 +11849,236 @@
    "sha256": "e19c63c203e16ab6982dc9b18c08e160a84e75c860bd88c1bf03920d58ea6672",
    "size": 1895,
    "version": "v2026.11.11"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/META.parquet": {
+   "sha256": "a8272c9210fca25b1726de5a3611707c8604b59af8c37270e1ab5843db8e6587",
+   "size": 6116,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/_symbols.csv": {
+   "sha256": "cbc76f577f4fba5d7e3d218d0e6fa174d41526d79fdfaa781238995ca06745fd",
+   "size": 2210,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "17d67ee96dc7c30a0b2bc7e72195341e9b513842f7c6cf88a3607d057db6d18b",
+   "size": 8313,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "238e5cafef0921932b834564b937f18b13e0b7b7a667272d12add62fd7d49a26",
+   "size": 7101,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "3b960e0ef39421a984d27e4e9470d7b5b478dba6eee667427f7773a52d550fca",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "849a1b80d0feffe2152aa5ef4a415091444e69a31e63f597f13c10d3fab528c2",
+   "size": 2197,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_endoManAv.parquet": {
+   "sha256": "9ad8b1fc4dc9ec99bdf7dde478da3f96911d003fb25e72e1666f6b8324b4cbd0",
+   "size": 2543,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "9bbffa4d6d32acf2fd2d12eaf85804dd551ce18997bca1d9f2db2a44a7aa36e8",
+   "size": 2246,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "2fba94cb12710b3c68a5d3f7575a3bf10427f97984cb09347549e865a8846d94",
+   "size": 2305,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_manureExports.parquet": {
+   "sha256": "1b6051daf1ef2bdacc025a3ec317b750915623fca1c90f216c7873ad6790adef",
+   "size": 5050,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "7c3e69d06f91e7e7382626dc0a96867b076313adb69322fd22b5110154de077d",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_manureImports.parquet": {
+   "sha256": "bb178e9afab82e394cc97783db451ae7f258b44c3b3e44f23674077be01de968",
+   "size": 5462,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "9f15e6524a03ff026097f964a9f23db67f53fb418f055cb5727d072e365518db",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "5b2340ee812a9f7526c198d849b9bbd320a3b1ff68b4a916a45f0e3954cfe944",
+   "size": 2207,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "51c1a60d0fac8af38c87d4e10669397a3115db84b82336fbfe278bc10d010aaa",
+   "size": 2306,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "6681f2aaa4e2572c353f5d19f779ea5613d55ac9690f6bd85dba3eadbbf140f0",
+   "size": 9178,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "4c21d217d307a2eb6a1f3806454b0dec4f6b0c9ea58af2ac19bd29554088fa41",
+   "size": 7642,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_priFertDist.parquet": {
+   "sha256": "a18c9d2a8271978f0546149ec99edc38740704325dfefeb05333f07b1ad4753b",
+   "size": 1317744,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_priManNShare.parquet": {
+   "sha256": "2a333cf6029932303e0988fcd5c7871bd0f84114c8ee5144c4a2c8380745f6db",
+   "size": 72013,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_priMinRate.parquet": {
+   "sha256": "739d5a209b045963a8c905172a9bb334482ad171b00cd6213ac6cc46d53d2dc6",
+   "size": 195643,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "d80e9505c7b5e4cc813377a88e600393f50dcadd4706b2d8e1139d5247c439fb",
+   "size": 21898,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "7dc1311f92f920ea7f8486f484b3fa24d00461da1051d6984c6c581f5a8a4c1e",
+   "size": 20188,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "ab6713c7adbe374aed70c6d0b1c5c05b0cd3ac233935aff0e1a947da4271abff",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/META.parquet": {
+   "sha256": "e2c0beb7b5bb8ab92015bb4d67d72f73b3f0cb1634ab2ba6244d458b01b9fc4f",
+   "size": 6254,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/_symbols.csv": {
+   "sha256": "c54dd394d3f9d6da8d7b3bb06f953907aff54adf83b227fa5a16f4dbfb2592d5",
+   "size": 2214,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "acd195fa229fd73ea2a5456bc30272a2a3045f2a730765d7110d43d03d58c823",
+   "size": 16010,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "d2eb548970c1f5c954e232bef8c57049e0c7010bb6ee8e9ca3d42f4a1a3cbecd",
+   "size": 20822,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "b320606a874ea20b7d97f18b5ad703d287de5de7540f4fa9ec954d6be25d5fba",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "676e3bd36b245e71f9625f9f304b27e77a0bba4aefb5056cac98da09fd7a1a4e",
+   "size": 2451,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_endoManAv.parquet": {
+   "sha256": "a26884cfe1f5621d6ef8899e91eaabc1ab12ee889ffb723a6865599cca98fec0",
+   "size": 2647,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "61161e10f8b524b26f3b0f1d375a490a552afb1ac56bbd064f3ee241f70c6b98",
+   "size": 2449,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "0b21b6bb0f9ca4de4e0a7c9dc407de1dcb3d72ba5a77844e3ddb0bc916ceb499",
+   "size": 2539,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_manureExports.parquet": {
+   "sha256": "2017fe8a4ad2ff5cc1217389ad5cf6a72e61adc3da46dbe99f74cff717eef37b",
+   "size": 8472,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "b13d03b38db37f8956ee508d98f4298cf5f05a79df277a3adb57adf2ac08eab5",
+   "size": 2519,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_manureImports.parquet": {
+   "sha256": "7533548f7159473ac928640556a005c9866fc297e95df1449df630fc57f1ef55",
+   "size": 8486,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "32586ff8a6fb13bd532945ea03583ef0942ba12a15babefef1301fb5e9bfbe8a",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "62d1bd5fa0557244f088f4f997dc63f40c4ef285049085379b398cd3be493c21",
+   "size": 2332,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "96d10673d89ef74875caa0a555e1563ba40c2f39022c1870de55173dcca23db0",
+   "size": 2540,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "dee5164b1d897b7a0f1d70132a13c652631bf3c9f0d630c157c12f49819a44c8",
+   "size": 17540,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "4f8e92c7f80615d36b550c628d1245d7b1b3deebac54484a56ec8dd46c1ec964",
+   "size": 17873,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_priFertDist.parquet": {
+   "sha256": "938fca9ba2a85a593df9810691b65e7dc5802983692385f2f4b9cf0dfe80fa63",
+   "size": 2630304,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_priManNShare.parquet": {
+   "sha256": "016db1d8d5fa461a97169ead682cbb11a44fa35590ba843e6535f5fcbb0599dc",
+   "size": 158921,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_priMinRate.parquet": {
+   "sha256": "c85be349d2967353239323320956c5018b028c074b21fed237363954dfa4cfbe",
+   "size": 625865,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "c7b69a9acd33672155264a9f1cba1839e8db6c46fefcd882cb1ce3288bd9e47c",
+   "size": 47127,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "e255105efc6f0a768c5725495e17240b9e730c02b276063dc4b581a8e5cddab4",
+   "size": 43821,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "6cf6472b9445de787e56a908386dcd3a85b82ee52cf9c455723e0bc2db321411",
+   "size": 1895,
+   "version": "v2026.11.11.2"
   },
   "capri/results/fert/priFertDist_CS1730defaulta/META.parquet": {
    "sha256": "0f8df1cf2c5cac75554577e09cbac10f496dfce00d49e1a9dde440a40ea9cd32",
@@ -11845,6 +12195,1501 @@
    "size": 1895,
    "version": "v2026.11.11"
   },
+  "capri/results/fert/priFertDist_CY1730defaulta/META.parquet": {
+   "sha256": "527d88a8f25e9f2be3236bf13bbbd26eed6e64eff4415b7a7e79334d7b300262",
+   "size": 6113,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/_symbols.csv": {
+   "sha256": "2f088503c6133f41b5b63cb9267ee92b9c28a9267a252f0fb0a643d4dfd385ad",
+   "size": 2191,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "6b2fd8048769ee6210b81b17ffc55245ac713f8639a46e58019160e9d2b91926",
+   "size": 3255,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "a6aad1ce1a92fd3f9f36f5dc2bee8c39316f535d0e34e638abd15831cada5b4e",
+   "size": 3483,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "c3526f9e41854d5866f37ec446d7411b37f60e5a8bb133ec61d72481fe13e421",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "b1ba136336c86b2fc86c96338dc36ac849a2cb5d7808b8bb1447764c54573ada",
+   "size": 2110,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_endoManAv.parquet": {
+   "sha256": "9c60e78d73e4867ad46e9502f0763251d95b15bc762db704ca63cde914f86044",
+   "size": 2420,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "4de95557da95172542656f4f3831a64f33ee4a4bf7a48604bbf07087f8f09fb2",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "09b82eb5f395e74a5624959087355ea931f9fbf879fdc222b55ac9f2097f7f09",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_manureExports.parquet": {
+   "sha256": "a17147e82c726d7620e539c1b81301baf8bc048b80978641ed4bbf39bccc1d38",
+   "size": 1400,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "065ef55591794ba376224ce4d044a19875d95df61c5505c773806b68078ec87d",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_manureImports.parquet": {
+   "sha256": "b42b6cb5069a8d15b3ee4716b0a212dea259e794ddef52afc72f37c5ec99c625",
+   "size": 1410,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "a8b9f7803e42585def6c817f6599cd88c945da39314c42b3809773ead29e5f77",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "28b805c12a00872d7e0c87b3217d76d18d85e0cf133848b90e86088114652ffb",
+   "size": 2092,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "088d9769e433284cdd25380215d98f3b03c906c165956ead7188689f870a2cfb",
+   "size": 2109,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "af40bd1f733ad4bb8064250349dce6b9add9f2587bf830ca3967c0d3d8a87e59",
+   "size": 3832,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "b3ed2eab6dd7999be2834dff06944e6eb8623c5ac67f37e4c389f1478fcff51d",
+   "size": 3911,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_priFertDist.parquet": {
+   "sha256": "1111c8d0f014cef3bb56946622791908546de31960cb497e38353618b240d284",
+   "size": 133452,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_priManNShare.parquet": {
+   "sha256": "7b8f29ee95c1b7c4b0c6e2fe8fc58695d43446101140725b5df80516b98280ea",
+   "size": 6723,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_priMinRate.parquet": {
+   "sha256": "bf8863cd2351f78988ee8a4f8365bde60b2ac9060dbde668e93f0a27de764a5f",
+   "size": 39188,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "f462bdda55e0ee8add19483264b80888d535a51c16a82c5b13e43251b7ccc552",
+   "size": 4522,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "05df72d79af6effc6ab6fc6faff8252fa5391ccdaf6e9a651fb348d65735d7dc",
+   "size": 4465,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CY1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "8ff9eef082885aa7a256bfb5245ba3c5be7e392873e6e77cbc81029f477847bf",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/META.parquet": {
+   "sha256": "58d9828d06798f7268c344a4791834eca49c42b78d569256fd223cc327ff5b41",
+   "size": 6121,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/_symbols.csv": {
+   "sha256": "089fbeed28a74237799ab5921d67e4ec54856ffee93e853b920744d966f4d1d3",
+   "size": 2210,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "a8c421efcaddb554dae1ef80d576282fd6d3bb881cb30fc1d2581ee61578e1da",
+   "size": 8989,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "043fb6050f609b0c9d5c3daf5f852ce8f7aa2ffefd63304d5c0eccc951c41acc",
+   "size": 9216,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "69e5e06253686307a0361e8a8c2e32515aa8100d806052d2d6cb93778ecb14f5",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "b0a2c108d0143e73a00a749f9e2b8d575338e853eb0df317a95015f2a8941248",
+   "size": 2239,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_endoManAv.parquet": {
+   "sha256": "0b7c7e13bd5b8bab9d2c46dcd8bb8ba2d4192368981f14e78c69d366de805f55",
+   "size": 2582,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "0e19287cd733e14c5729ffa7dd8ed06242e476f02a2b4934de5cb965059c0639",
+   "size": 2296,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "811eb260458cbfd8aa58c465eab94f29b70709ccc5da985139d948abde89f924",
+   "size": 2373,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_manureExports.parquet": {
+   "sha256": "0ccdba87b90c239d1b642fe0abbe3c979f7abba6c1354b44313fb721c54c8750",
+   "size": 5375,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "be1375afa18d28eb6422a8aef9be87fadeeca8f96a10cebbe6cd29b9d471d8dc",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_manureImports.parquet": {
+   "sha256": "7805ba1ee2f4f881e47eb4a280539fe2c414714ce610728dfa910e4d6a0f34f2",
+   "size": 5930,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "58e65a82631c6ee4ce03c951456c115db1a38585d939aeea38d5ee7700ff4eba",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "3052a4394a7b57ee5a9124a2a743ae536ac4f144daa8b6d479f8048a38e89d71",
+   "size": 2238,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "788956081b50ad499ff7ea1d0f1bcc49ae1b6ed1fc584e7275a53129f4bda8c8",
+   "size": 2374,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "36feaa2beaca3ef9b4e126cca8946aa98ef136aa00f9e71fe8102252a5452296",
+   "size": 9907,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "02682c4771c628fd5535c6b9d7dd313e2df124f4e2b5e0d56fa2d9f9487cd4ba",
+   "size": 10068,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_priFertDist.parquet": {
+   "sha256": "4ce785169205fc2d5df5d38e8a0b027630efbf39101265d8dd78575eb3a3a4ca",
+   "size": 1518722,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_priManNShare.parquet": {
+   "sha256": "12906f20171f6729cef6572e5f6fafeab86d5c78b9c84ac031bee2063869c7dc",
+   "size": 86051,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_priMinRate.parquet": {
+   "sha256": "d0bfe8bf9bd407f21fd15a491f5ddc1ba9706900adbb1a07cdfd6dcfb046e80d",
+   "size": 342192,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "e9bc61b4354f4f491c388635d51e912202f6476e78222b51a5b3040620a59e7e",
+   "size": 24662,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "5a9fbb365ead26543f7ad8b68da5b1d35bfca35ca167fd0e89cf8d32deb7d754",
+   "size": 22860,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "edb7b8fca9a834058d4c79c792bcbb62dc42c2f47d21fffb94eedded419dcbcd",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/META.parquet": {
+   "sha256": "a7d8c12cb5a68226232536bc510c07e8224337ba370cbd5d3a3b102d8302404b",
+   "size": 6253,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/_symbols.csv": {
+   "sha256": "76e426e3c5f9b5caebf50b7a07d9a35e023f5761038991ee69e5ec7f46b25472",
+   "size": 2222,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "eaa49c303aeebe40adc75509f39ef4cef58c5a268e37dd38dfb146a7df50e7f1",
+   "size": 36206,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "9287f19a70e0654257cf9315a55e8d43f275c085226133ffe8b73cc71ebc23ca",
+   "size": 34233,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "ca7607d3aee01c763963f441dc02632264c0475f7a801a7e2f52ab2c957ed5d6",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "1fa6ef175e4e35cea428c6874d5039b0597054657020fd8b48a6c3ec7d5d7349",
+   "size": 2951,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_endoManAv.parquet": {
+   "sha256": "056bf431c18bdf0df49c85bf5120b621964e16aa0bac89a5443450bbd7f4e369",
+   "size": 3142,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "5517e0fb64091c63e6dd75a19290699ca6109f630b1853138aad563a86613042",
+   "size": 3181,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "35040e900844136657f895d0ed7584832c3898ce076c1b369780801f91e52549",
+   "size": 3378,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_manureExports.parquet": {
+   "sha256": "a2195d659679d9fc48f56973085e2deba02e9d01953f36d6300b7680195718e9",
+   "size": 11440,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "f2006067e6fffeecb4aecd00fbbbcccb0ded32f15b598e3afbfecf7e824aec3d",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_manureImports.parquet": {
+   "sha256": "bd0ffc9b3d25fa61cec3410cfc69dff00681180e1a6958040572a06b755b79be",
+   "size": 24712,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "cfeaf798f04bfe70a4014c33c570d2c464cfb21296c45e3195f346b884977e09",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "8378487edca69a7f58769ebc1effbe9e8143cf844e06123d7e00c62d81ee73e7",
+   "size": 2574,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "22ae8082c63d168d668466c6c0ae334236cf956b35a2245e366dd81103cbf7de",
+   "size": 3379,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "42c4f7150799418672ffd72099f7c53fde0f091508a3e94f44977ba9fcb1e79f",
+   "size": 39754,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "5312208f789c1424ff19fba6f1c95b0f2ad43e52e035bd287fa74124b3deb299",
+   "size": 37157,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_priFertDist.parquet": {
+   "sha256": "49f303645b734c4d6c886888667b36542ef4d97035ac58242b7d45e233433166",
+   "size": 7188272,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_priManNShare.parquet": {
+   "sha256": "2e15715af94ffbb26550ceb5742537dd7f4af2074fa439fe06b5ad7e5dcbbcfa",
+   "size": 386842,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_priMinRate.parquet": {
+   "sha256": "8a33a69ddb8bba8df1744a44a6f967ebf79007ae215faef3536f2fd74586ba0d",
+   "size": 1666058,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "eec5e79521dd279cb45d44ceadb18f7a6d896580aba3578a288d68f5ef35560e",
+   "size": 118545,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "f51df2bdbf867b05a2ce44e4dfcab9a2db8685ff4ee33da94f5b7f54c55abfbd",
+   "size": 106206,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "20e392e670929a04ff8c898dfaa2c327c85ddf48b0cde1157be4a8d38def1b8c",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/META.parquet": {
+   "sha256": "534642873b4caa26a55f2b3cf1b18e6f14bb386d90009fec2a133a391dfaadce",
+   "size": 6246,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/_symbols.csv": {
+   "sha256": "00a4f72c1bf582b4002a832146ef0f72e486b82ae6e7c60972664cb771fbd776",
+   "size": 2193,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "02605d1fa119ac547b7d1517b39157f747db503854415840568f2a196c9f8b1e",
+   "size": 3431,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "26968e58b02b9ff3dcbf3f239c95ae782917174e05439ab5dd51348e2280a241",
+   "size": 3983,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "4fddeba9e61c431308f707a2460256826eba73e03ce9dcfe02abee3cb18a0f44",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "6faf9ea1b8a5ca5d45ca064748bcf626304fa6ea120e17137bcaa2f17272b774",
+   "size": 2110,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_endoManAv.parquet": {
+   "sha256": "759544477b04ba3a6c8b552aafbaaa6c1c980f8873e26cf661781d1f7c9a32bc",
+   "size": 2420,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "5e8f79c9ba9c682b0e028805066a05cb522306c95564a3c2bd649e877b1e2966",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "ee5caa66056098770136646ec85b7c8eec4171afe80ae3e315100f96d12914d2",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_manureExports.parquet": {
+   "sha256": "f26ee43314284f61a35551f16e8c4ee2e37229c7a2ba20867a34c0536d816304",
+   "size": 1400,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "57aa0f54b73d00bc048dba21eecd98f890b9c36ebeceff8b1fdc78961c293aa8",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_manureImports.parquet": {
+   "sha256": "3bff4c7bad1becb7be0e016b328d0dac8d617732842654cc85c149852362876f",
+   "size": 1410,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "1b098885632e251e072a5f330e48fa6af64876fdca795288b69df23f2dd0da41",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "39982eeeb9a75a1f4b083452e55d6b025323e8a208c5cb62c9c4e1f892c1129b",
+   "size": 2092,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "80420ad8811af754f933a7638ccead100e800594256bd4656fe0637abccc4b06",
+   "size": 2109,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "11c53cd2ef8a5c57a3d12216d0306ae464be6a87474009c32c7029c9b3285b53",
+   "size": 4038,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "be144aee3c97941d20717d6043efc76f6c83cb1a80df58c3b479306dfb61c4f8",
+   "size": 4114,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_priFertDist.parquet": {
+   "sha256": "227b0fb53106e55424633d2849dc6a5f250e59240ec24bb7b6ffbe94455bc7f4",
+   "size": 177232,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_priManNShare.parquet": {
+   "sha256": "fe69d1c942749f48f3271102777b4f12174ed9241132f581de14231d2e3efdb7",
+   "size": 8217,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_priMinRate.parquet": {
+   "sha256": "b78c4f9bdb77764f7a987e2f29cb9cefc6fcf8535f6c357f37b3ba537a63d0de",
+   "size": 60279,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "f81e72d241a0ddf2515cdbd1e28e4632ce7e764e3ea629f51cb94af0ad0d5a2e",
+   "size": 5429,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "886b0672e5a2ee87149f0ba95be0c51e26d1be73a238eb905b507fa609b9ed29",
+   "size": 4755,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "34e7f197c3981651b2b0e006f2d1757461340bd90760a78c1f4b9af4a7be5ed8",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/META.parquet": {
+   "sha256": "911046b5c619de2a3402ec6554748d1c8c1312c220c9be7a4d14b23f54bd311f",
+   "size": 6120,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/_symbols.csv": {
+   "sha256": "7969bbeeb19a5d98c56ff73090fa2461b0302d222f97476f0d6817c7df4944aa",
+   "size": 2191,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "9aa807c9f81e84d104625eb69e612be85c41671077e526fd8b03c83de6cf7d33",
+   "size": 3255,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "8d29645570cf943358e4bf0a6f71197be171365eae3e3bbca042d8d638edbae8",
+   "size": 3363,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "6aa11030b0231afb2d422e87a0a3aa5c9c682c2169328e5548a5e9243106396b",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "fb1e7f52d9574cdbcf21690143fbe0e7d9190547dd19e4b81774793b2adb0e66",
+   "size": 2110,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_endoManAv.parquet": {
+   "sha256": "1a65b52bbb41ccf7f91e5766ffb8d1ab318505b485e2798dd8ecd300803a5e88",
+   "size": 2446,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "8799f8d53011b071ca83891622be743e10559933e9febab1ee74f75c7747c728",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "f8da3c94d8c5f5665d28a2f8bb9b7ea9f85524bc8a8b28c3147d779827739056",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_manureExports.parquet": {
+   "sha256": "740bf5ce4a8a9bd1141346dbc92a03192ceb2dfa326259d6093610c56155f532",
+   "size": 1400,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "45752b46eafd9fd16a683cbbc11df62a9a8844091465f411011d145d5d07e743",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_manureImports.parquet": {
+   "sha256": "8edfa0c10e556726567f67a5231f698a5287b14ea4dd461cb4f722a5828363ed",
+   "size": 1410,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "ea378c17498d7a212c9c08c16bec93b06b64ed2b27b9f56df4ef30d3cedc05f8",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "4b0aae207e9aa361928595b8a1f17187265a62b129461ddbc2fc7b1a7dcb38a5",
+   "size": 2092,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "d4b473dac3f04e3d955c0f52006a934c1092aba2558f3e841655f25ec2169219",
+   "size": 2109,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "e5fa934a1d421f8ba8c9f96646e7586860c0dbe728a71cc9db3b6ecf1dca5ec3",
+   "size": 3809,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "e8cc8d09d37aa27d886c3d80d4f40587c7d60291ad222a0934bce08f7594bde5",
+   "size": 3744,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_priFertDist.parquet": {
+   "sha256": "6327e94d3c15b9449309cfabfd5bf0ceffc079ae3ba09c9e0133b3385ac79dc5",
+   "size": 150562,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_priManNShare.parquet": {
+   "sha256": "c6534c699ab0910a66c849ff0db10d0f9e168cea16b4b13a1537eb8e884893b4",
+   "size": 7032,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_priMinRate.parquet": {
+   "sha256": "2f2762510900344ddd4d52aaa538335a4644d552b2536e82ae2750ff27df6e8a",
+   "size": 47284,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "434d6183fb0ec7c9fdff65d6032068919b66763b67bc43661fe000ba80151bec",
+   "size": 5170,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "a14148eb42e7fb027bf50f65654c0cf5176e1022176aa8756b01d66eedb5ecc8",
+   "size": 4474,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "b532ca415d2f92483aa3f2c31a700e14513abf8a3f392b536d4bf2bda7e85c60",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/META.parquet": {
+   "sha256": "8a1a7742ba5d6ab900f70d5c7ca01d2ea524887f8bf074ae73e99ac4175e5d88",
+   "size": 6248,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/_symbols.csv": {
+   "sha256": "0006407a465ea2a6587ec25caa1651d2fbbdee8a02f73581e045765ee669816f",
+   "size": 2214,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "0e8c3a8175e958bf850ab87224da04a6ed28c088294317c1cd8910dcd7deee7f",
+   "size": 19201,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "1b47a7a39dabd4e5d5e5b49626a4d5f79722a897aa5dd301cc5197f0a0f898b0",
+   "size": 24773,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "d0df7674936459fcd81bd9c478c36b661adcfd7342d43585cb354cef63a0b5c2",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "e0244a13c2e3ea0603923d722115316226879bdf51ebcc5340acd91a76877772",
+   "size": 2446,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_endoManAv.parquet": {
+   "sha256": "c8a281bf2d6af8d5602eae759801f1c1509a5120e1650b3eae413c47f12edb12",
+   "size": 2663,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "033324507f05954380b99a1fb60b3452fa23158e6ebe3d529f1e04a3c716c9a2",
+   "size": 2489,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "ff45370c5b918f9df43dc1c33f5347b7c0af2a61d178175937fa2eda54a8465f",
+   "size": 2640,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_manureExports.parquet": {
+   "sha256": "9b83b0923809753d403dd5403b04c1a9de2cf3fec069d7fdb6d3657fe413acd5",
+   "size": 9760,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "419f6ebb0cffd46c47c6ac373a6442f26c2db29fe06971c4abb6a23547c16c41",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_manureImports.parquet": {
+   "sha256": "0f8d65a017a025a3734d436b3f90c2594d898d0cfd78c3cd4971dbbc5fbc634a",
+   "size": 9300,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "30905ecd51526ac74a4651bdb98853f8ce2464918e60364a6226d589ea6657d0",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "cd06b3ccedcce7b5ab80ef9a4a96a32d88d779a83254e7ad31bc8f64fbb5019f",
+   "size": 2348,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "172796b2e2e09dcce14658385ec57d23953f80251a4647c9c20c435ca4f9e426",
+   "size": 2641,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "40ba0961316d2ee76d4e7d91cf417ad61c7378f636b929b0c17b857f4e54fbc5",
+   "size": 20993,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "8883b8420db93e2f2c9a52d9fe9bb7a386a33dcff0364273e2c1dc42bc03f03c",
+   "size": 20804,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_priFertDist.parquet": {
+   "sha256": "ba4f82c7da2efb1b9541350e799b2d09607e9c1cc6c1be86ba283d4cf087f334",
+   "size": 3173133,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_priManNShare.parquet": {
+   "sha256": "714d26252b3113219c4b8034546b9fccaf06e99b9378c8337edd28f1a4ce29dd",
+   "size": 195089,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_priMinRate.parquet": {
+   "sha256": "eb062d92df641e0ffd2925f293ccf97aeb52fc6c999189f0875f7105745b3453",
+   "size": 716710,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "78818110a980cb850f6d8f8b5ccca1accd5d0946510597b02a92c73c1c49d622",
+   "size": 56980,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "c70cb87d3e7f873650ae76c69f2a72bb0e6d46a86a81010832179659d0b28ac1",
+   "size": 51691,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "e329627fcfd0f8f21dccd4410447ce02c51b0b8a456a6c588f79619e35847ccb",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/META.parquet": {
+   "sha256": "972f339ff0551150ef1078f85a64fcc9429b62674eb117f22ec553d4d93bbf83",
+   "size": 6248,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/_symbols.csv": {
+   "sha256": "a7c9f25949299e5fe61971aad69978c8df007c7ac30156ef3efc4f781bc9a083",
+   "size": 2216,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "b961e34f12943d92dc32cf521cedd2140f0ff2b7f8e2511653e3c07a64e9c094",
+   "size": 25128,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "2a6e87071551ffad00e74f62a5b019e4d6bdc26c96a66d75fed9143d2cda75ac",
+   "size": 29444,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "a409854dfa16c7003454f8f06fafe7bcb32516782c1db91724a0a477bbc5e05a",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "3a1491906534bc2fa03daf0b337b2b00f7a70bd4076fdbb341ea7aa45a198ef9",
+   "size": 2584,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_endoManAv.parquet": {
+   "sha256": "47aa6ae7678990b3b8e43395b7cfd221b1475701674e77c130b44b4290e5d209",
+   "size": 2750,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "cc3e63a54987cb884f0159182db9fd37f03b157a9aa3948da49a64cceb7bfb78",
+   "size": 2582,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "aad3bf78c0157a0dc66e90c87593115bd2f9186cf61bf089d8b6d37c8d53b02d",
+   "size": 2854,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_manureExports.parquet": {
+   "sha256": "deb22262c68710d7e02b6796c4f10c6f865fc9f66539112aecb5efe437058fb2",
+   "size": 13860,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "dddf21acf678aff7582d8421ca697191b47ab51e57b964dd808d29ccbf0435d6",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_manureImports.parquet": {
+   "sha256": "71dc42e3aefe52992b010595d2469a0266ff3d68032c27be7729f202d42af7ad",
+   "size": 9739,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "7b6789395d6f4ca8eb359d4b8a37a7d2e2dcfd6370516eee1401f3cf9db1e251",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "4052ed985c24b969b1285b7de3c6f402807660b0050e811e6dee6f80b4196476",
+   "size": 2551,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "409bf6b510541bba10b1590b3bd7ffa3f922da7c41a7d9673905a5f24c8e66bf",
+   "size": 2855,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "b27d6f7ed1d5536b37d0bcf666db7f93a52db2f3df6b9beb6e16e879800f97b6",
+   "size": 27282,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "4edbe760b465d3cde5f2d62f1f10b3fb161748075513a8c751a0927e3ed00708",
+   "size": 27728,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_priFertDist.parquet": {
+   "sha256": "9f0317be05085144de74fa0104d5068e1a60272f1ef8ae9e92590b8083c1b25f",
+   "size": 4743473,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_priManNShare.parquet": {
+   "sha256": "be7da60ddd2d6e6b99934ed1e0f455d959f92cb75dbe009ba1e6caf2998fd073",
+   "size": 268837,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_priMinRate.parquet": {
+   "sha256": "488c12c48b59c8c22c762722191ad649bcc99b2384921006f0c51d45ce49451a",
+   "size": 1091100,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "3513a896d0e332c46676526e5d62e17a5afba4d1c3b25802dc4f088ba9821a64",
+   "size": 77213,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "d152c86834785eb96c9ecc3101ca6c466e8d226c45b4a3311bcbaac61eacc142",
+   "size": 68518,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "bacf875af8d6c40ec7cd758035ee301034896955a7b09aeaf68a5ef1004ea867",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/META.parquet": {
+   "sha256": "7f3cac5e1e2c2564ed6468ef00ca52e5747a47aaad98a6526a3d71c045bfd98d",
+   "size": 6252,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/_symbols.csv": {
+   "sha256": "f729c2e773aa49ba9e5c84e3883216f22081ec95c6264f0d4c48c3bca32c6de5",
+   "size": 2209,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "79c3f8b5d26702619bd9279f8d898348f90864d5eca1e78816a6d8b78c0a0b83",
+   "size": 9271,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "6ce82cff6f6d246c44f331dc8196d5723a51c18a4cefc4fd60d37ed2f7a67c13",
+   "size": 11547,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "342f3391bafb902f225b6f98cbc179fcdae1964df018d034d21d1aa41bb0ea32",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "5183fc97da12b4ae21301dba8f7cf093243646874a38f5b0d0a5855a28d10790",
+   "size": 2244,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_endoManAv.parquet": {
+   "sha256": "301a556aa3c5a5e78c049509a984afc28c2fe9456139d09adcc826fe23893671",
+   "size": 2523,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "934731e8257c4ac681d322f876cb081333afe1026fa03e9d245cb29bdbfea00b",
+   "size": 2242,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "8be720052d47fcd7450d182d609e660b4d859e870ca187daa93d5bdc6644d271",
+   "size": 2305,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_manureExports.parquet": {
+   "sha256": "59d058f92eaf7630da3846877d421d8a27c6e5f6407abb7f5a37076f47a42f2e",
+   "size": 5415,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "0dc609d6dc642e1020837eb2bbe23c5eb0dd78523cbd1112c033750dd2d8a261",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_manureImports.parquet": {
+   "sha256": "9610f6fc33cad2d2e4f428baec85ff2d0f187ad285b7f54365e069f8d8695bd8",
+   "size": 5098,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "714a7830f60c7a525dcf5fcdcf33f0bfdb5766bc012344796ef1443217a30e26",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "61a0745b11175a8dad7b9fc093d599b13b3b923ca8158022bf953aa0e7998d7e",
+   "size": 2185,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "e0ddd8ceeb2773f4a4dcedd754cfd1298335780a70a95969c660097b956816a4",
+   "size": 2306,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "735bfc871126fd7359ef5ff9dfa81250729c96088850fac690be118e7df2d19f",
+   "size": 10321,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "3d0ddd70abe1a6b52007790ebe78273db9f12b7254a44702efd157874c9dd3b4",
+   "size": 10349,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_priFertDist.parquet": {
+   "sha256": "8c7fc9aa3c5f1125e7ea44efc92c8e4a12d3e6416a724080ddd272306b4fba45",
+   "size": 1210591,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_priManNShare.parquet": {
+   "sha256": "4308a40a653b0ec791a1a4ecae1ea83d6f6d94a7e2a069b29f7653459909c820",
+   "size": 75634,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_priMinRate.parquet": {
+   "sha256": "892a697c9f894e23defde5650b00c174167b0d648465efe6ccdce20952ccb78b",
+   "size": 300709,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "d66c6d6c3d5dc1933665d975fa8836b0a4c476c750ce8e991af00dd8e4bd8abd",
+   "size": 24099,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "42a610b8f645dc23b4279bed0265b1ed5a0205a7702d610866bb9e9540b5c96f",
+   "size": 22428,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "cb220c75e2fd31618c03045374e31a6f97abbda7754de17eff9b7e08f503201d",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/META.parquet": {
+   "sha256": "56e7771c7cd38f7b9d1dfc661d6f5e30a519a9f236f36f66999514b02e56dc6b",
+   "size": 6245,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/_symbols.csv": {
+   "sha256": "40f7025052bf055254da980f00c20f7841327d8dd9af157aa7e118d1b8901872",
+   "size": 2219,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "9d544afc58ceee658991136799908b4eb608256ca55009ab87448452718a5f45",
+   "size": 30884,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "284459f4ead40a40db02f31bfb7c78923ba9fe7ca675d94c674ef896b7c3d248",
+   "size": 35140,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "800c4c340a2733a3bed5114f93bc81015a85895ae94d5e239ef8538ad3ab3218",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "5a14bc727f4c484bfaa8ff7ce9c0d76c4215223337aa0bd8d918e4df4cab093c",
+   "size": 2696,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_endoManAv.parquet": {
+   "sha256": "43dfffe63e0021041f921904263b868005a6ea49f51605b30a9d27242669ee40",
+   "size": 2849,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "0ab995dd87723703184ce34a9d2a01940e852c0c074b093c4d90aff221bb904d",
+   "size": 2833,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "0608ccd36f7569106f60e5ce887ecab7e14d200a02eb38585f5e9f32495bfdb5",
+   "size": 3041,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_manureExports.parquet": {
+   "sha256": "f951ee8ab28fd0a07e4b02400252e0551ce0c63803bca0f9f515062646abeab8",
+   "size": 10568,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "e33039ec25627f43ea5df42aaa96cbd83ff8f02a6fa28df975214f2de7c1a71b",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_manureImports.parquet": {
+   "sha256": "621ad95bf6c9f02c4dbb61bc1a71dddf4624598c9416c9fadb07ea39a7a509e7",
+   "size": 18576,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "f80bb8e130e2adcc97568f2749bfe726727aefec58ce9399cf7f563bd7f6a7e9",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "4879c44f1b556595110364d02d9e7ded5522fc899735dad8915b919cb9c14f35",
+   "size": 2461,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "2eea402ef110807794074477d1d84dea9be4d3e70e77cf697ee53dc5d59d8fc7",
+   "size": 3042,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "bd925265fc43c12423731cc3c8b3fe6ce807cae333d16842c3d5cc1ac8503a81",
+   "size": 33423,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "e8752571123d7c5553b94d55fa73fc467a7e03756cc09e299f53038808f7a7c0",
+   "size": 32602,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_priFertDist.parquet": {
+   "sha256": "375c4d23312a7df2726dcd548a14472b91d07b2c05590b81352b715f8ca9fb04",
+   "size": 6352932,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_priManNShare.parquet": {
+   "sha256": "96d9804a67987107839fa0501f12e651c044caf90caa6b68d0cf896148459662",
+   "size": 354447,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_priMinRate.parquet": {
+   "sha256": "1fa44a25f690e02b8e8b450e19448bcb6568b2c8a5080767c722a029c515735e",
+   "size": 1424401,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "b8ac7fdce396d529503f361eb5c95bbb9114656d7cf94d716f9bebe9d75f4d91",
+   "size": 95717,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "54ae1fd98cf09c9b5287c0f36bbd29babb143cb29ed5dc3b472bb59b9bbcea6e",
+   "size": 87783,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "03d63a5ba584325629ff95996af676a0b1c7f7e0ccfe54af68246bb15db43d85",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/META.parquet": {
+   "sha256": "de4109afdef9d6d11c4b97c01da2a83c775467eab335226b2ef96cc7e1221efa",
+   "size": 6114,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/_symbols.csv": {
+   "sha256": "3be52612f7a7fa9a20b835b3d5e795f343203917f40fd4f8cdaff3f0e99f5e0e",
+   "size": 2191,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "de3421cad35bcad1e15409eb103a266367aee90cfef48f1449e4720968bbd68e",
+   "size": 3111,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "4b146d136175753ddb4ce35f073878ed5a317cb694bf231f40a7ccfcdfeed0c2",
+   "size": 3567,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "452db3d8302965de061762da07a54a40caa873c966588051b57a9c4cb10cffcf",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "07c4234caf0ea82d50b03b7c5aecd54f3339259e6aca54b97a0f05fd3c8e1038",
+   "size": 2110,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_endoManAv.parquet": {
+   "sha256": "2e4bec71e3d708e97388f0c9bd77873b9550fe5ac9cbe7b5a1430954d93cd719",
+   "size": 2420,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "380792b890b6cb98fac90b08794543b1cc71e68c9263645401a7644d052e6c05",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "1606d4316432c588b7a646b34441eead0a9ca4d41f17e7dda16151a4be4651fb",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_manureExports.parquet": {
+   "sha256": "53ec2ab6a3f48c3c3a0a09a8846b1c40b5257eed0de327bd3da0aa9776e9a454",
+   "size": 1400,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "7c863b486ccfd6a0ff93187b57e46bbad5b7f7a9ffc6fe1109f402c8d2c9b95b",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_manureImports.parquet": {
+   "sha256": "d6a74502901840b603f61367049a49ba1624c0ccf546fc84fdd6133bc4eb4d97",
+   "size": 1410,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "cdfde2495b170dca903a5f0e6f5a2778a71cd3f8a6eb3dbc05a1a90b4d7d7af0",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "cb0de5ca306c8affdb5a0db9ec70033fb6ebd3cc8ed52c4bca75b9d33ef64a64",
+   "size": 2092,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "95187795b1dda5a90014191d92d704617231e505b912673c3140ad45fe4f2e63",
+   "size": 2109,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "cd0e4b727848dda691eea037d693ed24b4aa9b9bf53f3bc7f9aeddd27ebb0c92",
+   "size": 3711,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "dc998aa1b8a7b6e6f4bda48b7842179f26f4fb9cbc9fa3f402ba8a09c4d03a08",
+   "size": 3824,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_priFertDist.parquet": {
+   "sha256": "b750d67e412a5c24349c3fdbd2da4aa83b569d0a1cfd77b172e4e4667f4e0bcf",
+   "size": 148211,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_priManNShare.parquet": {
+   "sha256": "7a32c515db1fcffd1138bd2d083a064184f5da1db2f282a9bf35c86eb28d983d",
+   "size": 7714,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_priMinRate.parquet": {
+   "sha256": "6fc3a0788103083330fce6ea3b06a0cc02f27ddb2288c53f0e5593e92d1631b4",
+   "size": 49880,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "0532715354c4cbf7fea407131531c97edacae143cb12783e04d086bf033a91f3",
+   "size": 4862,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "01f3d2e90c9c37a00541cdd894631a9de1e86c4ceabcccc62f8f0e3f64e914fa",
+   "size": 4186,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "e842bbf3eda8562856251d53ab99ffe31052b56d51aba888bf906035e78ad7a0",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/META.parquet": {
+   "sha256": "fbd1b8a44b1c857a7e465369e44b8185eb8e85e96a4a5540d4adfc3589d237f0",
+   "size": 5617,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/_symbols.csv": {
+   "sha256": "b7ba1546fd6f30ed28690d7589e5ea2b132575d5080a331a57a9e7df3544fa0c",
+   "size": 2211,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "64a7f2b69e7ea90c7266f5370cc594328e27f518e4fea004ef7a57191a046a9f",
+   "size": 10851,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "49503089cf702486181d222385f4870927120c94b987d864ab34b1f151288b31",
+   "size": 8671,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "3716ef2a6b40d0254d997342556c057a8c666500c69bda5a2cac80182e97733a",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "1bd4159d5cfa7b2155487110ac7b5685a2bcdab478e20d2aebc5158974b7008f",
+   "size": 2246,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_endoManAv.parquet": {
+   "sha256": "0773ab2d6b877df5f4c1c3ff0764b998561193a451f0e8072efcd2ea55deefb9",
+   "size": 2557,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "929532142039d93b257485d5796c319b3923d31740fa3ad5474cfdcdc24ca00f",
+   "size": 2303,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "f952e6876b2bd21d51fb04857329d34987f014975fff1313a74bef15f70977bb",
+   "size": 2402,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_manureExports.parquet": {
+   "sha256": "28adafe10fd56bb3b10a5f1d871d15d006a13f1928da900e38f7d10e196d3c7e",
+   "size": 5142,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "2616631d4224f54528bf57c5fc3b27b515b9aad7f64484177ba320a1f422c0f0",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_manureImports.parquet": {
+   "sha256": "7f7cfb30544995bff3094e559afa03522debbae9c989771314ddb01f8c1ff028",
+   "size": 6515,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "f424d3bd51a64df051aad677d448a49222680a00dcd8608c1511a0f85608e113",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "70a9605517a43a390d612b61eb4b07b8de3212d3acacad8f6e1f1d81e9144b9c",
+   "size": 2221,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "371eb5c039cfdcdcd83b2d1d77f06b97f875ad834e3bfbe5ba64c14e6fb6c42d",
+   "size": 2403,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "450ab604bfb146ca5ec0511deb678d538005c8c3e17782954af60e483e8cecc2",
+   "size": 11857,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "91ed28642072faf0ff3f69df4d2694a0b9c14b895c83bd32cd8c7a4c644f4f18",
+   "size": 9214,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_priFertDist.parquet": {
+   "sha256": "f92aaa598b44317c3a156c22c9def9b138c457cb35d0b16ac1a81a7968cc60d7",
+   "size": 1949338,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_priManNShare.parquet": {
+   "sha256": "b715311fabca5f25f041337f671041833053032750987935bd98e299854f7543",
+   "size": 96715,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_priMinRate.parquet": {
+   "sha256": "0d7264a2bce4e38b55d5c237a0fe71c1ae769d7aa5dfb533e45a7feed6058b10",
+   "size": 433460,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "3ec2defa37a6508b9c2321916c145c38ca59b0cb9205ad0fe5db29ab0fbcc30f",
+   "size": 30436,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "052f24a2f137396be033cb69c52655851c2c77a248ec87b981beafb0782c4e2f",
+   "size": 26896,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "a0a2635f503f94af9e48973b8df8fba338a837b13024886182685c3f2e58be5d",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/META.parquet": {
+   "sha256": "dd1b28c4e14c4aca1f49484da22bcbff2b64babf62adf9b2fe012edc04d15dcc",
+   "size": 6247,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/_symbols.csv": {
+   "sha256": "c63a1b0f92ba01debfff64876aa5a07b15e45c6b6a337d9e4b21932b83608df0",
+   "size": 2202,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "daa2acf9e5bef0ef1de3cde4d04abff5f41ebad841ad51b73451064e0f5d7b13",
+   "size": 5337,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "e970a001f27c2cc30d640afffe3be9a1336e71e57979b08deeb0c22b06446d11",
+   "size": 5981,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "3501e443e97f598f71e57048c214c43dc8951238fed43a8d55be8ab9217b9ae2",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "0979a0296058ec312fa69c83c3f071b85e308801c13192cd324126ef52b41159",
+   "size": 2147,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_endoManAv.parquet": {
+   "sha256": "46aa8c0b98a365aa8d91b2495b97381c8e81edffcd1e891ba6495671398f43db",
+   "size": 2467,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "cf230cb5494a7cf1d5c5b7fc5697a4fc61ac38224a9e9576ae0cdfa90f8f73d7",
+   "size": 2133,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "f79cbeaab84b98ab735f879bc10c7f9f60b01efe54d3886bab60296488d27b81",
+   "size": 2169,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_manureExports.parquet": {
+   "sha256": "379734a268184a8659f06b82643f27cc231a2a7234a4c7788110d7231e4b34e5",
+   "size": 3517,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "8095b72d4ee416945980c19779c994989e6c8e24a92e2f1efcbf2195e6b31670",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_manureImports.parquet": {
+   "sha256": "268309e019f2bbd33db1ff0cd15131e9ddc574c60a860dfcc299d880d0dbbb19",
+   "size": 3520,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "8fc1e445d278056d1bf5cf3c99df304f83bde74d08f3164d4139d69c34973f49",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "aa23ecc1ce8e66469971f8cff31394adf17651bfcbcffa2fec00c61b86736dd5",
+   "size": 2129,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "c5296613db0b8e70d8177de5549996ecf70873b0ae3348e6081b37046d28fae5",
+   "size": 2182,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "c3478b793672b127528f0816fe48b7f915c47a6c54972b3dff0a11e7ea2d370a",
+   "size": 6075,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "b2ff319efc5ead2f0ad7ff630833b0789abc78526a3bec914a528fb462f6d570",
+   "size": 5831,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_priFertDist.parquet": {
+   "sha256": "05e5fd04f7ddc303061abf7abeb6fe4f657f51510a53f2b3812f79cf41fe811d",
+   "size": 510133,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_priManNShare.parquet": {
+   "sha256": "cd3eedf1b165f49adfe5e80ddcfe623f0aa3851a387b9e23c6a0f09c802b00dd",
+   "size": 28913,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_priMinRate.parquet": {
+   "sha256": "51a8942852f9688a6579d93da0d3e2fef748e5fb07dc045f5062621b0d2c8785",
+   "size": 137019,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "2c80e228cbb0d1ba8410f7b345f051d8cb8f29168a00f3fd62a83dff3b393c5a",
+   "size": 11492,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "2481caeeb95a011e623c3f99ac585f64cbe01399cf63de230ba7af4a61d8ee04",
+   "size": 10618,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "1a65224aea7a2d03c5df8b220a3e56992e5c561a288be872b5ead831dd7645b5",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/META.parquet": {
+   "sha256": "61b292e64f529fa8972c14914e12ca3c3ba6686151fc8b328a6aa60a618a7e03",
+   "size": 6249,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/_symbols.csv": {
+   "sha256": "d28e35199ddc9078533827ca1fcb38aa67647b76a068be13977f72aad683b120",
+   "size": 2218,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "385904ac6f1a5774fdb3cba306ec196a55ef51b3fbb24053345666fc4ebfd307",
+   "size": 28125,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "7dcabeb4cdf8fe6c1160f9441fa6fa20ebc78888119e50ad5b9cc819bbc42579",
+   "size": 31987,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "b0be348074f56b4eee4ade76a3d087683d903247ca7545a83780edc357b8dfd1",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "06d3fff4eadf4ea3984aca83ab1d5600ba0bde539f35bee6767ae4daf9034bb9",
+   "size": 2673,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_endoManAv.parquet": {
+   "sha256": "923dd0457785abd60830308e1a01f66d6173e70b30c64d5c2699fdbb1e7d71e2",
+   "size": 2837,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "138c89b16805ab4799709a9ab69125dadfd0fa64e18ce10bb541eb5c86c3a8bb",
+   "size": 2695,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "0ff05a3f356e902e7b86dfb0274cb981e0cff23804cde663489881ab3fbdd7f3",
+   "size": 2947,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_manureExports.parquet": {
+   "sha256": "b7fa67c67bf2672d584cb175f208ed58af72b249e44312df724014f2945323db",
+   "size": 13102,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "f355801a1c4e80bbdaee238ea8e8428b4b8e33311819b24a32cd2a299d563c3f",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_manureImports.parquet": {
+   "sha256": "5130b9def341ed67484c96fce80fd6c80b93a55f870d178913c578502d163272",
+   "size": 14117,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "a7a50d88c1090f71633c63b06f3d1097c9042aad94100803a482dc223f000879",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "80d68f0abe7b2e34f029ab1ec7ccaed52389d2ffc2e27592de27caeac5ff2952",
+   "size": 2503,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "60652d237f19c44c2d260034cd84ee5646bc2d0f3960373bc88a4c2a8ddb0efa",
+   "size": 2948,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "b402490f019a7062cb275371cc99df34c2deaf0e7b393be9852e6ec03429471e",
+   "size": 30511,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "4ab1d3b0b8e530a00b03317a03243251be6f4b783019e2d81ebdeed02588a065",
+   "size": 30260,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_priFertDist.parquet": {
+   "sha256": "4225fa7b01cd067ff69b0cf5b93402535da00acd3a8e57957ddbb4b8d4b86fa3",
+   "size": 5486707,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_priManNShare.parquet": {
+   "sha256": "f8c01993fbcda5e315e1cba193fb11095a30e2709ead13f0ff130ded2177a014",
+   "size": 314513,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_priMinRate.parquet": {
+   "sha256": "4b60d0af8589cc34857e01c93317626980ccac0624c84a66f51ff8d1452a41f9",
+   "size": 1241350,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "8fe7e349f8365217b7d035d21c26d42977bbeb6a80a45de5ad0c4a002605e496",
+   "size": 86423,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "08d6b792d2082135a49e11955db7b63dc52e660913a5494ee13533a95091e95f",
+   "size": 77961,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "f9846dc5ee0eb44d97722dca9cb88a862b44d09aaa7234c7b928843bf3679041",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
   "capri/results/fert/priFertDist_KO1730defaulta/META.parquet": {
    "sha256": "331530a2036a83923126ce13d241e6aebca8f39236ba0d8f8b05c8ae81795357",
    "size": 5876,
@@ -11959,6 +13804,236 @@
    "sha256": "f3c9719836fbb7839293282f2223330a55cfcd36fd9a8c70122ad7de80cbef8f",
    "size": 1895,
    "version": "v2026.11.11"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/META.parquet": {
+   "sha256": "68249f3eb6df1c4c47b01df00df0c51a02c8c083bd1c72785b4ec673048296dd",
+   "size": 6116,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/_symbols.csv": {
+   "sha256": "c2447217214acadfde558c9a0c693e8de15d30d89e3aa7bb6cff466a9871e8ef",
+   "size": 2192,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "b2c9fcb3cf7eef6941b9e21e03c8604c269c81a906d827aea6ffc6162980cb73",
+   "size": 3255,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "ed766dec4131069aea80e284fb6e20e57195e318d2b34b78e6be905add681921",
+   "size": 3515,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "fc6ca9a058b5abe825b02a56d55cd9718c258487df381c14901524c26aa29807",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "3e9eb4f1ba7c2eb3a417e54f10a2dea9afe80975d95c867032ae88f2755bd523",
+   "size": 2110,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_endoManAv.parquet": {
+   "sha256": "ec985473603289f500df3c334618f8526224dc0938740e83ca74793e46b8b001",
+   "size": 2420,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "240174b76da369dc9a340fb03faf371c5daf06c33d3fafe1c9608e9aeb8911f2",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "ff7430aac752c12277182e7d563e15e6d658a5b0dec8d2bf7f1560382f669185",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_manureExports.parquet": {
+   "sha256": "76c79b00ae7dcb103bd906fb70265a7f89e694c4d7b9345cfbc34c114acf78b3",
+   "size": 1400,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "c0cfb7bfde377ef283f1607d1ebf062a50252a460294a22288e115e3d9202b7f",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_manureImports.parquet": {
+   "sha256": "0c9d406da984c5b9d46679dc9a39c96c7fde592d20a67d7a9d281d53a94a0640",
+   "size": 1410,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "0a770e22c2ba465ab0ebfbd81b126e48bd1d6f8e0e9d8c1ff36030f5dd68f6a1",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "5aa88c687d627ba70a94c6791095eed628cfc72d8cbe40d707ee18d85035094a",
+   "size": 2092,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "1e1607cceb6ec2747a0abc00643bdd11cdc178dcaf8ef4d2524f4f331889f149",
+   "size": 2109,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "d9b3a1f2c39ac73a7e0785a726d831ddb8c49601e3676f1edb95895bc459e780",
+   "size": 3791,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "fde4d7045c9f5ef15c248fe6c639a2df9d84bbef5ea2178fa37514cdbb48c660",
+   "size": 3935,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_priFertDist.parquet": {
+   "sha256": "ac90d81b20dfa39bc54a02d767da221fe735a33909d2423368f6b60d09c43277",
+   "size": 168886,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_priManNShare.parquet": {
+   "sha256": "6620521158b042b1bf512ce316eafd4e92ee6f2c97657993b54f63ebba343fc7",
+   "size": 7751,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_priMinRate.parquet": {
+   "sha256": "3e9b773006158a736bda923c537cd98aeee0b127d51b5a6363f09782ac371a63",
+   "size": 57080,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "bcbb87e600c116aae8cbe6842a8cf03ff28d113e1f3b8047f4920f3035029dc9",
+   "size": 5192,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "d84c35b7736c336536369137da2d34b66fadc85ebcd724e3e2976829bc90e2b9",
+   "size": 4470,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "bc9cb95183abfd5ee69b8e5778cfe974142f81f23f8d8476d4c390c120aaff55",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/META.parquet": {
+   "sha256": "213e39c347629570a2eebef820ff4fa307caf7b8811f32cb4e5bfd61d93b9cb2",
+   "size": 6113,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/_symbols.csv": {
+   "sha256": "bc85ee8a5431a54ca33e2c831d88925e125e493bba65a5b13c4d04fe0628a318",
+   "size": 2191,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "1616cdd2961cab5f29a7855a1725a8290e7924ef190b90e04406757e09db9c0f",
+   "size": 3255,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "54402b845d7e97db56b2c8ff93dbef1f7148deaabf11a03c876fbf59ceb6ecb1",
+   "size": 3329,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "dc0add5bd70f10e19c8f8d525f681da6b5e9a09051818153bbb799ce7d17e1e6",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "589bb2df48e88704c091a3ac3a771c6af4ebbe3e0dc4ed5bd9f740f406a4ba63",
+   "size": 2110,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_endoManAv.parquet": {
+   "sha256": "eb4d79ab9030e30621c8abdd500e6e9270a240eea889dd98bcdf3651af1b7d34",
+   "size": 2446,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "bdbacfa55b713a9ae9ac2569b2b58bc41c8ce65f4b46f668459c5f193cb6d6c1",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "96fbe4e2d9b0662f1f2467735bc4b51773bf518603c5c30f7970ca22c1d1d67f",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_manureExports.parquet": {
+   "sha256": "71c97ce8ef21d567df78b12eb1ddbf337ae037e7601fd663a00f394e227ea059",
+   "size": 1400,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "a3f03e4bd18da45d941aa1327234514b45ef433063463a8e84bf37e35a76d9ef",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_manureImports.parquet": {
+   "sha256": "1454333aedb4d9a3961c2f8c4ff703e4e42a353ea3480b5b5a4b86f139fbc195",
+   "size": 1410,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "b77d33bfb56314f4f6a3f0d032252bd8dfecc9ca9826c9d78dace20f970eab76",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "41b5f399a55a53dd156dfadfe40536dc7ec280747cf4cae80d02a40170ef1a88",
+   "size": 2092,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "864c0eab588eca3ee2f92cd04eb452e6ede14b09ae66be4dba1a33877e1bef16",
+   "size": 2109,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "3a40aa43d14f402440da187ddd38cf2b805cc5711a0afa8b0d69cc26cd72b1dd",
+   "size": 3793,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "26a973d77f527f6add479346f2957e2357e0e9f324245ae9056c0b7a6673ef5a",
+   "size": 3704,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_priFertDist.parquet": {
+   "sha256": "2abfc2f349c794fe7bda2ce599473e86eaba01ff716b1e9fb13fccad309b852b",
+   "size": 155574,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_priManNShare.parquet": {
+   "sha256": "4127f2a01e54bf845715a782ae80ec8c7ce8fa0cf6e9e5f6362ddcea8834ecbc",
+   "size": 7105,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_priMinRate.parquet": {
+   "sha256": "feabdf8220ccbfc231a5aefdcd3f24b3f7465323742a3a76073c3a6adde292c9",
+   "size": 45126,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "40782758fdf925ba179491acc5ed6038093b2dc11d3e8c80dd2a9ef259ea5aba",
+   "size": 5184,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "8336e0e45a497cb708e6a041c65e658436e5ffa697e85ac4f4a0a02613f7b252",
+   "size": 4506,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "5e3abfabde589134eb18958984bb0f26ea9017c7e07e94051eda7b478448b92d",
+   "size": 1895,
+   "version": "v2026.11.11.2"
   },
   "capri/results/fert/priFertDist_MK1730defaulta/META.parquet": {
    "sha256": "f3edbaa0d6f77d7d453fb9e985b691ef5189589443d39d78b6ebd7933160d4d1",
@@ -12189,6 +14264,1041 @@
    "sha256": "0cb7c935c3f9d5712c6c0ee29abb77e3ad6d59e8acc301df31033965f8ca41b6",
    "size": 1895,
    "version": "v2026.11.11"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/META.parquet": {
+   "sha256": "3f62787937cec2a40b6751834e699bdc0ee19896864b50176ec556980f55c645",
+   "size": 6114,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/_symbols.csv": {
+   "sha256": "96ded9710f1a43ecc3bb3e955cfcb05414001fbc160ee9d94cbeb7f0453373b4",
+   "size": 2191,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "e94b8240e2d0c5929933241995a673cc4156f808e4bc3fd12fe0909f67e2194a",
+   "size": 3255,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "3adffdd6d1a2e3eefd987d267e0bd3fec2176ce9c888afb7eeee6976aff2b573",
+   "size": 3555,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "239ab543106d3785a667365923de040e06b4bd1b70a28d3cee2eacb304b2cd53",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "946244bab8f479ca25f6f86ee38026f82c9c8cc570cbbe5b84deb7fa6495d8a8",
+   "size": 2110,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_endoManAv.parquet": {
+   "sha256": "8cc355a827ade109907d75db66be95a9f01b4fd83dd97b8f35810ef23890eaef",
+   "size": 2420,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "5955a1e1e618a519d2344f56e0bfc3dcd624d17776e40624f0b8231b957b2a84",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "c016e0530e951dc60f0fb40291ae0929f8969daab88c4e16276be5cfed59f29d",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_manureExports.parquet": {
+   "sha256": "50cc81d4941df5f9d9cabd757a7bc1ad9d583572c383799fb9418c92239436a0",
+   "size": 1400,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "8a5e38367a57d651b2606db8818ebce82701c4c62abf5203c706f6564e13ab6d",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_manureImports.parquet": {
+   "sha256": "bca64cb7494a2bb37a076b1f700bc6ff3e3fabf63a10b1b9e1243b6686a59266",
+   "size": 1410,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "2d45cbc46ce8888426070a8f47d4c6e2491649f39ff9e610bb34f0ffbbd4541e",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "329f1f4e368b7f5197874213e7b94786827940efccda6083e373ea16eeaaf7a5",
+   "size": 2092,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "7010cbd705224cc1b24ee50a8752e96f8ee7b929de1bd1b6acaa2bd7387bc726",
+   "size": 2109,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "119fc58eb920c175a9bb5fe9eb103751d271d29da59bd4eb46ff4187a4f6bba5",
+   "size": 3852,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "d1c1327a6c957d90c47258caeff0bb222e8b2b2981eac8067b0344ce8878d029",
+   "size": 3974,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_priFertDist.parquet": {
+   "sha256": "c8071acf28cd790a7883d19a916ad0cfa79a5fbf8abb788e215d0f20b192ee61",
+   "size": 84399,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_priManNShare.parquet": {
+   "sha256": "be5e9819c6b4349be22a8e0f5b7b8db253dd28bdfb40902268e98aab4859ed57",
+   "size": 5595,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_priMinRate.parquet": {
+   "sha256": "b5f91992da1dda58a914259da285645094b679d3278dd1033fd1ef987a4d61b1",
+   "size": 20117,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "afb9aaa4a6ba54773f868b5cec8ffb7dce60349ca801577e92f79002a7e5ee2d",
+   "size": 4832,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "a009f206fa36cfebf1ec0a279c3554def29c7db59ba632510ee9a7ec3337f588",
+   "size": 4462,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "11593333844d3ea00cfea48a8ecd395c56817b504768d650907449ebee3e04ef",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/META.parquet": {
+   "sha256": "34d681d95eda21a76390462041c70de6986c61a940b54cfa17abe280f9dbfdac",
+   "size": 6258,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/_symbols.csv": {
+   "sha256": "11d394927df3a74c86606dc09c2ee57841977a133a665a5431cf66182838d4d6",
+   "size": 2215,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "93304fd2e3b1662bf322b89533869bb19ce8630755339596ca609c33d4bf8282",
+   "size": 18783,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "dc932839ae5a0932eee89bdf281ac056f7ade55108c1d71dab9631e0bbd1b8f0",
+   "size": 24719,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "34d7f2791b29af24635651f198a321bf62f3be396c41b0c8b7f561ee4070762b",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "9ad55761999f9073f0266d9bb8b80a89acb92add747298133abdbdd46e73e0f9",
+   "size": 2463,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_endoManAv.parquet": {
+   "sha256": "5e440dcd3dc02bda53aa5d531ba5e95723e32142846e290fa586c3a1c07dd3bd",
+   "size": 2659,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "96d61f3ef32569b1cde844b0aa40072db73c23cc4638a168f41dc744f361338f",
+   "size": 2469,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "4ceed0690c4a7276b11dbf09f6f7fc899ef61c10022d4c0634cd5e992bbbad83",
+   "size": 2641,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_manureExports.parquet": {
+   "sha256": "0cf295eb2845c23bc38fc7d04c1421f52edb78915dddb9545cbd652c4df4549d",
+   "size": 7266,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "008e4a7a648d48614f266a641e29459aab72352edade0b96c827ba5fbfbbf977",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_manureImports.parquet": {
+   "sha256": "018bdf81236749348e7b6d047ea9ce35a0df580ac567d1e90b2303bc7598bf00",
+   "size": 10677,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "2f265013097950ef0840f4b01f4d067fd8d19813b40615e31b280d09d153026d",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "626e9893f11e6b643315a3e1c59571708de3c48e84ace3c2e6af5220976c0626",
+   "size": 2299,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "9511a56b3eee153423f6fec89dbf9483a7633744aab2375b757fc11b121108f5",
+   "size": 2642,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "2b7eb2f6a6b9827e19661bd075fbd6894dc4fcc4ad8e8d0749622a376dc5bc15",
+   "size": 20439,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "b695c31a5013d50ec54d1a219360339cebfd2c1343327f4982cb9e5a8f5d2392",
+   "size": 21020,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_priFertDist.parquet": {
+   "sha256": "a92e985bc2281bdbb8f3d403b354d83f9833c3bf0bf1120fc625e1ad97d937ac",
+   "size": 3321737,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_priManNShare.parquet": {
+   "sha256": "5c626f80534cdab12933ea8e855f1266334c9d2e8bc9e57f535e3c1359dda3a3",
+   "size": 194040,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_priMinRate.parquet": {
+   "sha256": "495d6b38a82ec408865062f2d26607f44f7274157fd702fa66ae85a3b221c18d",
+   "size": 736515,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "94f392bf618891dbfaa24d612360a54c56c61e55ea9d43d4bc00f32d8244df46",
+   "size": 57016,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "ba42114b959a73c79ce4b9951898059c0dd42c6538765407dd031d600fb84e74",
+   "size": 51755,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "31df52eadc9f8eddf20e15ea2816211438f0d8ec3f9fc20e00779c4ce4d679e4",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/META.parquet": {
+   "sha256": "f946e9a49a486dc5bbec9e07e63c68fa88e8c13bcbf44b0199f6d260a66b5293",
+   "size": 5890,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/_symbols.csv": {
+   "sha256": "0b19dfadd9c5d7937f38e743f6151dd4ca8ca19d084d42345f104a6735f59f40",
+   "size": 2208,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "0953045a8c0277873bdb9523bd130735cb393b49d6e4eadb443b3fbbc1263bd0",
+   "size": 7119,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "54f55f89b425a0127f66ea2da4a068aa80a86d3c18adcff4e135728257b4a181",
+   "size": 8151,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "815328dc038875782b307248b36ca5a615f90fc96e695ba2f36c5d0ea6b7b16b",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "51437e7c032de2bd92c24b3fbdfe1f558865f5264e06c61b2fcd299c2b303b0c",
+   "size": 2275,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_endoManAv.parquet": {
+   "sha256": "06ce4e6f6836cdc17717755781530d3c24a7be4891c0397d742111c22d704d73",
+   "size": 2525,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "d35dd207bde5db7bf11dfc4277b43e4e8c4b7d490e383b85dced2f2d923e4642",
+   "size": 2273,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "fa2dc7824c714143b3812aacd3102ac7b5b637d7824e13465b9b75d3e23e5149",
+   "size": 2305,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_manureExports.parquet": {
+   "sha256": "f67cbe191e71248da263d7dfdbc8457c07b2ac4765ea9e0d4e6c59e3f181ebf9",
+   "size": 4826,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "2fa0e53fa48aff2812a23e05c326e2d5cb7ffea910bd5a5a04164a16e3f93cb7",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_manureImports.parquet": {
+   "sha256": "e8bda88f7b606ed9a16bc3b024183b857a6d8e1f25a1b660a2b2639621a68686",
+   "size": 4476,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "c0b7fcea6bfcc56930dc90769612334f8b2357727f39697c0f7e906a334e7186",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "eba0dee9d261afa4f121ffe3134f89cbffc3fd9adf26ea6239d17f1f1ce8093b",
+   "size": 2223,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "52b301e0704efee4bd5558af89c77b33ea5e870631fb0be6cf289e8688a756cd",
+   "size": 2306,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "7d5d0f35775f1a27d78a4bf13de0febc3e4a7d38e68d5b266c245f333b5cfef4",
+   "size": 8129,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "97ef803698d103b9e41830e812769de1a902a08066048a4ea470cb791b7d1878",
+   "size": 8369,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_priFertDist.parquet": {
+   "sha256": "8f431eb58ecd690ecb76062d7c336bed9579962ae488544d10f241609128e81a",
+   "size": 626442,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_priManNShare.parquet": {
+   "sha256": "51487a7cb6aeebb1e4a70e8f6a28f54c2db51c3223cd100868a91d50d1dca88c",
+   "size": 49183,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_priMinRate.parquet": {
+   "sha256": "c27534476fdb426cd48f51f1c6fa8c2c1381eba1747af994c2b025acab1f7818",
+   "size": 157488,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "fb9905374d5d73999e60545e09abe65960bbd8d1705d8f7e32eddf5678d57318",
+   "size": 18166,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "51e7b27dbdff98ae5783a0d749aff6a30c66e9face6724fa29caf8b585a1766a",
+   "size": 16945,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "daa5b7ce9168f09228812b78c8aec9d5d9cfd941759579e9a0130eee3e7a3713",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/META.parquet": {
+   "sha256": "24fa3bd3b3d7ea71aca67f99a3f04866c7a3043b56830d3c935e31247d2cac98",
+   "size": 6117,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/_symbols.csv": {
+   "sha256": "66954056704e708dc4f0d348041d9103ea8dd33bbe18d33a8ef6b09568070441",
+   "size": 2214,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "f9af393eb6e1668f5703a843986957b17f753bc14ad1d7a5f45c81e8dba051bd",
+   "size": 21942,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "84f6f6d0eb6e8454f0352871283c3c22f1ac4c0db7e37af10316d0f09b45ea55",
+   "size": 20235,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "7faab7089ac1edf675b8747d5948f3795085873332210f6f56cd2bf08798547c",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "e6b5bcca918757f2c12f382ddcc35cb3a39fb1e00e03f0443bf842a01e53a85c",
+   "size": 2469,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_endoManAv.parquet": {
+   "sha256": "b1b079d03be054b7a67b656f923774ccef7ee9139cc36a76c3db91d84ed5fe7c",
+   "size": 2733,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "50fa30902599be1f58d9d9e8a981b3200a5d30e8af9429d8fc24e26a19eba24d",
+   "size": 2513,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "cc2494e8fdd157496e5c922d2e4efef9517a9ddd48698a02f436adbe97364849",
+   "size": 2855,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_manureExports.parquet": {
+   "sha256": "8cdac04c74dcfa5b0be0ac18c552e064538a5ecc500a54a73e44596b7785e263",
+   "size": 9970,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "2c23c90db507ec8138451ecb02e9d68da0c2633a2f5536c31d8444ca526b7f1b",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_manureImports.parquet": {
+   "sha256": "d6c428a6f582d4a67da80f195a79e2d455aeca31fd3721ab7637fa1769f967eb",
+   "size": 10522,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "daaa0e8a1aa9a22c09a610c5f7273145bd6e127c5e15e0c98c59b36d83e33bcd",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "ab28ce07b0fa38c7300c4fb218bac9e1386a40d1eee6a273807cd0af468ad612",
+   "size": 2435,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "c7918d7370009f3e3b7a242001401d7edecd7a3c990fe708b099567ad5c83e67",
+   "size": 2856,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "95a7e886685606deb6d7552fede30339cee3ff1c79df390d09046016221df661",
+   "size": 23541,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "46104cf414ce8acf11c25cdcb3f01ebdda67a71dbfc601754e5d8d3d20424c38",
+   "size": 22403,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_priFertDist.parquet": {
+   "sha256": "6ac94fe7e6817e2f88e048f95b03f78c21b2cfe37ec86317e54601848eec44cb",
+   "size": 4307072,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_priManNShare.parquet": {
+   "sha256": "c9845c7af3d5b58194a9dfb09262a65e6e3f83928fa579b99e962e4295713e5f",
+   "size": 202867,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_priMinRate.parquet": {
+   "sha256": "7598bbce804e18cff926ab71126180c33d3aef6af4894d5a002db31903a52e66",
+   "size": 979651,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "5b3c6b4e48d9ece20a632b10c20ff72741a1114c10db270d8a42dca533c646a7",
+   "size": 67796,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "9975dcc4c320a3c20a859ee5d027a2754d9f378ae5435c5ff03e98dda5309891",
+   "size": 58669,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "50c10ae553dc654a6db563b774cb653807692d7a06e52ce4f1164000461b8d38",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/META.parquet": {
+   "sha256": "dca17341e2844f54ec9e9fdc5b37303bb1a8cf9bd11d90450f7ed4e53a683d73",
+   "size": 6254,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/_symbols.csv": {
+   "sha256": "14eea2f25f4f6e65748a3719d0c0fac50e01f50149744bbddae9a2adee12fc63",
+   "size": 2210,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "39557d6e2422a596654c70349f1cdcf3b7283dce9e0b626d3513d4e830df2357",
+   "size": 11211,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "71db34199e5e6ca26fdcb4addc6daf84d7184ae79e2d497daa11de6970541d33",
+   "size": 13562,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "32de9c475a837ab7739b896f32e33b1e5839f080c40d1cd53b48ad4c656d42bf",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "4df0acf1a888e8b1f3b608cbc059388a975059d05f0d9cd1fe2beea3bbc61d6e",
+   "size": 2288,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_endoManAv.parquet": {
+   "sha256": "8d994adbbafe312736bfd00c07cfd932423652917bc96eccad445069c42f0b0e",
+   "size": 2564,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "55e75517b19cd6b36c5852cedea3f5c77475e3af5368f3fcf9d00f8bdb7a8227",
+   "size": 2310,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "490edaf4024105fec75239fb65e3d99d10d4ab5b1c7a094ae57c62d572380dd4",
+   "size": 2373,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_manureExports.parquet": {
+   "sha256": "0de25032116844b5b82e80d20041efdb5bbb3226e3e1638f00532c3c18c9d9f6",
+   "size": 7234,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "36d3838930f115b2840afca277b9225837d58a42d731919269afb1431e6772bd",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_manureImports.parquet": {
+   "sha256": "5182938b2c22b0d505a73dfa98e6f1d4edad29d4422fc1d84112b18347a6d80a",
+   "size": 5328,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "abf5e6de36765a99265f1b873142d9839e305fd1e18ef4eeb0a22f9bc452b604",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "5e96be7baa7c8c107fb7a229dd315188f5d81e64d921ced5b0cefb5ef1c7e170",
+   "size": 2236,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "a16f315a39d7d3c2a356bf3b610f0a8cadc5bcac56fb3e8daafb24e64710f888",
+   "size": 2374,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "65c50865a181c2eeee5234c7878cd755e5eb5569e2f0f803c88fff0084393314",
+   "size": 12581,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "3368ae7461684578f3a9d164b060163ad94a806ff5726e02b0a3c1cab2ff62db",
+   "size": 12110,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_priFertDist.parquet": {
+   "sha256": "6f8b387c6760a39b49c46aa9420721f3c8f4bb47d670ad217c6deeda92f0c684",
+   "size": 1616120,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_priManNShare.parquet": {
+   "sha256": "8ef7436308a72aa305289887b7829be021fb51a4456e54cdfc3e991ca24ed900",
+   "size": 103352,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_priMinRate.parquet": {
+   "sha256": "638f0892c6b40552ee6e15aac1b41dcbf93d259bae637d9d8c5d9fec3d6e8018",
+   "size": 363963,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "cce04847fa75197853c7bb547a9dd4b7b780ff380afe927c76da5b2413178c7c",
+   "size": 30188,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "5c0715e72ff14504dbf792a88dcb3ba28dea9e6f627cbaefa4d02889930263b3",
+   "size": 28512,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "22ad29e1aa94e4ee8467f0c525d550e36a16e874fa5b7cd34a3337c1d58aa832",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/META.parquet": {
+   "sha256": "74e4331603c0383909f943abb8addb522271dbba77e447fc5b466e94fbfe9cd1",
+   "size": 6115,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/_symbols.csv": {
+   "sha256": "1f70ee796abfd10a1f8b78e0dcad0cf00aa81b2981838bd4f0485ee864ed56d3",
+   "size": 2210,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "9db32f0dfe6b212c5212f2946017244afa806f8ef1ccfff8ecc3d4a7591f6dcf",
+   "size": 9976,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "8a72b08841523dc4eebc59af7dbb618b16de875dd2e4336c857b3c386ee4c233",
+   "size": 8667,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "f5128421d073c09df57a6fc30b4c07c5799c5b00fc44663108a047c1ce6127e3",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "796de34d46063035d51535a4ff26a1c8f258958a41e726bd39422de93ffe532f",
+   "size": 2290,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_endoManAv.parquet": {
+   "sha256": "7d06d6d2dc6e42f5ca721ad6f100ee1ecfdb462f603918bb2d8b1d4246bdda22",
+   "size": 2558,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "20b8876df6755dafd9b2141a4e9843ecca994794691df6074af1fec991baf183",
+   "size": 2312,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "79e12b539727dd553f6371fee2fc4ae349a7173679111d46169f565bf0e53c29",
+   "size": 2373,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_manureExports.parquet": {
+   "sha256": "49d22f9386c926468b4dfb5751b4c6dc8c0c0ac9b32fe0a4e0e4eeccff218d7b",
+   "size": 5884,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "da52ccfe00bc839f97cf57b50ce3825a7bf7612a5bb938e527c2e9ebf7fdaa69",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_manureImports.parquet": {
+   "sha256": "a40041f4ecdda17117f35d7bec76390ee7cc85a7833f4e4c3f86f748ea4242eb",
+   "size": 6337,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "8adb6cd8c9ad1ec4cbec1fd05a59108179e0448d3decb367742145b4169997bc",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "eb9b9dcc5607928d9f35c82262b200901412106f47ad101653e4f1d060187b87",
+   "size": 2262,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "2b7ac77945670a77b951bad0fe8e0e72f97537a344cb14a032a9e2f692d487e5",
+   "size": 2374,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "453192351a1c1357ccb7b25b75b38eb24b27eba5e189abfcf9d5123f287e9bcb",
+   "size": 11005,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "25e56fb6591757c0cf7f9f2343dd9fb8c3d518f14baf627dd43f2b85f8bd02fa",
+   "size": 9274,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_priFertDist.parquet": {
+   "sha256": "956cbd31be2c7e0f10a398874507f27852681710de13d549f86703d9860bb889",
+   "size": 1830259,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_priManNShare.parquet": {
+   "sha256": "7fa383296441fa430ac3df8dc3ffb75b3cb3bbd7dc0dae9faca962e1f712f7c9",
+   "size": 96482,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_priMinRate.parquet": {
+   "sha256": "da0b01d06b6b7b32a09fe9f3209c747a808200cf3e514798ee5631bd7480a2f4",
+   "size": 347876,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "2ade74eb29f10cc69c7c0e4d53de970aed1f1364150e73b14072e2aabc0bdef3",
+   "size": 27362,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "25d94173f3bef6fa86100b46e25d2ce3454c5d85241de0eea9b75e35e4a7cf58",
+   "size": 25754,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "3b69d9f7fecece707131540fca1250dec9e79f5d36de63b0dc3c2faed78c9d05",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/META.parquet": {
+   "sha256": "c25cac25081c6fd63c8d677f076671932c0178afc23778549017950cf18f4cdd",
+   "size": 6244,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/_symbols.csv": {
+   "sha256": "9bd4442c8d7da1bf33a6febcb58603ac9a4ac4b4ebab266eabfcce5c024e0a7b",
+   "size": 2210,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "e1fa3867e231e4511cbff943706cfac1951cdc1034d08b8c1891be1d29e4bde3",
+   "size": 11113,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "ec2bf11130b5769d2634f45d3000a08bf848189f496596cc645514841f937861",
+   "size": 13340,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "a2922caf55a536c3cdec2d290b8c2c17b3f3a93e19986a70682cf5ae8dddb307",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "94244070abcd2364adb26c0690aa9fd2167b08facb9a7cc9d8df1219b5ecafd7",
+   "size": 2338,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_endoManAv.parquet": {
+   "sha256": "d351c3edcd16d0e947f005946ea66dfb110c263260a5eacaf9acb446f6781f82",
+   "size": 2574,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "9895a05473ce405e94ba9fe1769c5dbcdef9d6e72feb398777fef4a97ba701f6",
+   "size": 2336,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "ba89eb5f59f61f33fcad4c16450010a209c6854aed75d0aaf4973ee2acfa3e75",
+   "size": 2373,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_manureExports.parquet": {
+   "sha256": "5e2f2f66a9b17de9fef5d4faa53782082fffaef36dc2b0344d6b4c372173cbfe",
+   "size": 6292,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "1f3081b69e20b324d9106b28c2774c8b2200bfdfcccb8978fd5ad21eb7ff0276",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_manureImports.parquet": {
+   "sha256": "412c3bcb1820d102b9951a11bdabdacd6a2ac0daff885f04be506cb0db40b094",
+   "size": 7023,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "6080ae7bf004545a59ce3c19084e8fc7c440aa1c60a31f2d40489661ace7aa7a",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "d8f3753b01ec0de2db597f3f8d0776ee5eb514ad9804f89c2e157378d7a14298",
+   "size": 2213,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "8b80514de2804b507fdf63e8b2509c5053df4b6d86584dee96a4b79f44b64382",
+   "size": 2374,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "80c1664ce16a7bae30a8fe115366b743c6dda7660cf31ecbf88757b278e7b03f",
+   "size": 12448,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "59baa97450950a198d7294b0c64e7b714b5b246c694a16e5d5da57d30463c0d2",
+   "size": 11926,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_priFertDist.parquet": {
+   "sha256": "419e430b41d582633fa11d00589e71f6c3e0d46a81562178fca5fdf21d25f4b5",
+   "size": 1537252,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_priManNShare.parquet": {
+   "sha256": "ffd345e82b8e85c56acd0f52abe1bf1e8ca268788ccc05b87494b996aebae074",
+   "size": 97922,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_priMinRate.parquet": {
+   "sha256": "e3e712390ec6b58f7001ee7c5468ad871fe500a87b3c4859c0f0d9452eb1fc7c",
+   "size": 353852,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "2b3ba87e030e01811cb09579ffc95d80ae9d2d9fa5304a75bf65baea0a9b561c",
+   "size": 30144,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "f968b786ee491c3bdf63740815626e46a3aeb61b0839012249cd17327cdeb582",
+   "size": 29272,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "3eeb8118d4c52dde9efe22adc07740041ae5ef0799385773fa46e88bd7e73633",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/META.parquet": {
+   "sha256": "fc70d0d2c2a3cb98b689990dd7dc9b137c7e621df49b8698f3fe24ec6fc13927",
+   "size": 6117,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/_symbols.csv": {
+   "sha256": "2ad469674ea5919aa074c13fe44e29d20be7734a2927c1df1b136e3fd8e9c853",
+   "size": 2191,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "bf53468427d34a061bf3bfc1884db573a2e62eb8f89a30874bbe261884f8e901",
+   "size": 3166,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "fb5edfc694e500de6d9cf376e17a2a55e5a698a2ae86aa7d0e4658fe1979847b",
+   "size": 3539,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "31e0a6ee4f9853093c5d1308421ea9da4f9bf471f12f27d9e76763cdf4754aae",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "b541fccd3e4a06ca9e517954bc64b69ece515f53cbda0e1ee949dce67ab81b20",
+   "size": 2110,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_endoManAv.parquet": {
+   "sha256": "5fcec4971d44e77794de9ba5a8e50eaddb007d22239d1bef855030bc716b6a9d",
+   "size": 2420,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "3dd97a6df7294cc2fb095477ea9106e735627c1e844edc6ad7a4b8dd4255d152",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "3253cae0663aad41c71685a0d1115481aa1e6a2a71e876ab304793cda0365850",
+   "size": 2096,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_manureExports.parquet": {
+   "sha256": "c6fd28f84273657d49864755233db0f228a0cf982e213f3d4a8b78d9d01d419f",
+   "size": 1400,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "162f13925bc34cc05bffd9cbef169cd4df683acc7389239ac8f5a3c7bb0dcbcf",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_manureImports.parquet": {
+   "sha256": "4a9a8d25133efb9d4cb454f3ccbd0996937a02e59daa64df6bd74bbd935f50c1",
+   "size": 1410,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "69b5ccaccacda7e4cd9536fed2a0149cc59e4d849d8c38904805c5d452c25783",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "ae93a95f5893588d29cfea7653d731515fdcde6d443e2d54d3baca0c5bb7afc9",
+   "size": 2092,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "1e1df133a458ee0cdf94eccc45cfaa7e14a999be22b402048bfdc398035e2bfb",
+   "size": 2109,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "7ee5255ecaf3b5b42df65f6a437b547ccf8900ac4498462cf7199e8933e68299",
+   "size": 3739,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "b2077767d9a0131871db841c5861e7e2bf7b76e6b79dc83bd980b6b1338a5b68",
+   "size": 3903,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_priFertDist.parquet": {
+   "sha256": "5f311094e128c1bfbdb0c54d4394f1271b427a7ece84500d810e35abbe665222",
+   "size": 154310,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_priManNShare.parquet": {
+   "sha256": "92fb4e0e09273312b080653ff2a3d4383ad8aa24fab4aa265739e102a1545833",
+   "size": 7656,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_priMinRate.parquet": {
+   "sha256": "ef185ce6efbc67b1c801053acbd96a8260316c5aa562dcf56e2c5b06b028c23c",
+   "size": 48339,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "64054d5b39f3290541389619de4c5621ff5d45cc2c2d7b78eb76038480f87aa9",
+   "size": 4955,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "cf711a2cb30b58807a1d824a8275319afdce3299a9ba2cc3ea10ddc1f7e315d9",
+   "size": 4280,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "fb4c38c731fd76fe6da5e9851dc2c15efe29646d90bccf6a431e110f3ea7b7eb",
+   "size": 1895,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/META.parquet": {
+   "sha256": "ec7861bca28dfa68d11e10dc38158ae6ad5f14722427554fc766cface668dc77",
+   "size": 6122,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/_symbols.csv": {
+   "sha256": "e9d34a33c7f51547ed9d00fb5e221176700fa5bb5c91603b072c7e76dfe15d87",
+   "size": 2208,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_CropNutNeedAddFact.parquet": {
+   "sha256": "8369d025bbf218b1be57d4d72899fcd86ae60934eefc70263f561c956fbad893",
+   "size": 6069,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_CropNutNeedMultFact.parquet": {
+   "sha256": "9753c1e05215b55cd2b7286e907465c2cdf9524d63946c6e47785a0f78526bfd",
+   "size": 6244,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_ManureNPKintraTrade.parquet": {
+   "sha256": "e6bd42fcc347adf6916ed00a449595213c6bbc49e55eb7c463f044a60b078459",
+   "size": 1394,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_dualValueManureCal.parquet": {
+   "sha256": "57b216e7f73795a85bf38dedcb839b37dc98dbf25cb84d8af845a9f5790dcdd0",
+   "size": 2180,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_endoManAv.parquet": {
+   "sha256": "2a3402425b2164a48e1fcda9b2d7942edf04abca0c1f452202aa69404e9c19ab",
+   "size": 2507,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_manureBuyCostConst.parquet": {
+   "sha256": "e570a57d140b5773b46c7bd4f167acd8022cabd5b6addd2f79cadbcfc4d50acf",
+   "size": 2196,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_manureBuyCostSlope.parquet": {
+   "sha256": "3c9124e38e1722ad11c812cfceb906e642a4f129f06d7400878a82b8e382335b",
+   "size": 2237,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_manureExports.parquet": {
+   "sha256": "26a5aef4961d44e1b5648a9dcacd8341aaf686c931160ed1fa58a6e3b9951700",
+   "size": 3747,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_manureExportsToThirdCountries.parquet": {
+   "sha256": "e14cf59af91359cbd1af7c62016efac8097fc42345d35aebf6a3dc3cf299ed48",
+   "size": 2386,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_manureImports.parquet": {
+   "sha256": "9ee3414c56b592d3d63fdbdcf8cf13d8e8f667318c120cff54a798addc3c1e1a",
+   "size": 4378,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_manurePoolPrice.parquet": {
+   "sha256": "58948ea73d0866bdd240ef29b0e980a650f87a08be9ff79b39632e2d05d86b63",
+   "size": 2263,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_manureSellCostConst.parquet": {
+   "sha256": "8df21c894d235548f28ad9f0529d4ceeefc08ef86a3dceeecce21e651b57c44b",
+   "size": 2179,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_manureSellCostSlope.parquet": {
+   "sha256": "4ed0e9ca87188ded98d0178c2481de48013d370569642020367cab7caac106dc",
+   "size": 2238,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_priCropNutNeedAddFact.parquet": {
+   "sha256": "f69ef651e6ace59dca7862ca27af78ba972a22b3af657dbcfbe26544669626ae",
+   "size": 6893,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_priCropNutNeedMultFact.parquet": {
+   "sha256": "fe35bae6ce57c2871da7b9a725441aa371582596890a3b3d31bed9ae06afdf45",
+   "size": 6452,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_priFertDist.parquet": {
+   "sha256": "9f1275350f52b34f25067bdec5fb2dd71b6e4c5705fd80b7eff6c5daadb268b8",
+   "size": 833779,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_priManNShare.parquet": {
+   "sha256": "ce036333de220badf090bc760a7cab49fbded68f76d1fd9e1df7dc4f5c18b467",
+   "size": 46510,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_priMinRate.parquet": {
+   "sha256": "7daf1e01681d282cace347476cef9a0cf9e63084e71f88fa6e399e35b18165e6",
+   "size": 200062,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_priNutAvailFact.parquet": {
+   "sha256": "00c4f75fd0da711f581e0de6de85e37cd6239cbd1f6e6ab06fbd24b282f046a5",
+   "size": 14765,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_priorMTrade.parquet": {
+   "sha256": "11f35da3ba059314e9def552c6166a8b652f3bdb3dea8ce639a9888e4b72b764",
+   "size": 13510,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta/p_storedFertModuleSettings.parquet": {
+   "sha256": "81ba8dd24d365e31ecd9ce6ff26a50d73ae001480aba75f23120cfedb28c8068",
+   "size": 1895,
+   "version": "v2026.11.11.2"
   },
   "capri/results/fert/priFertDist_TU1730defaulta/META.parquet": {
    "sha256": "9b4705e088ff416b0e2a1834d8fd083591a09fb953917283c1dceb7c2606ea36",
@@ -53341,6 +56451,14 @@
    "trusted": true,
    "version": "v2026.11.11"
   },
+  "capri/results/fert/priFertDist_AT1730defaulta": {
+   "file": "priFertDist_AT1730defaulta.gdx",
+   "sha256": "6a66438e977d479b4eb38c7057f4730fb8c7d34509d697d2fdcee1d9bce710e7",
+   "size": 4097810,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
   "capri/results/fert/priFertDist_BA1730defaulta": {
    "file": "priFertDist_BA1730defaulta.gdx",
    "sha256": "6eacd8844251daf5f923a84f1ca2e86c6d675a50bf613c0fe946b01942924c0d",
@@ -53348,6 +56466,22 @@
    "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx",
    "trusted": true,
    "version": "v2026.11.11"
+  },
+  "capri/results/fert/priFertDist_BG1730defaulta": {
+   "file": "priFertDist_BG1730defaulta.gdx",
+   "sha256": "1931938c67ec3180df31ee27405363c96fb984f243e7b59358fbc8f43c11e3c8",
+   "size": 1922949,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_BL1730defaulta": {
+   "file": "priFertDist_BL1730defaulta.gdx",
+   "sha256": "2dd388c44f991c047492110761e895abf783164fad7e11de05cbc38eaf0fc55c",
+   "size": 4291654,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
   },
   "capri/results/fert/priFertDist_CS1730defaulta": {
    "file": "priFertDist_CS1730defaulta.gdx",
@@ -53357,6 +56491,110 @@
    "trusted": true,
    "version": "v2026.11.11"
   },
+  "capri/results/fert/priFertDist_CY1730defaulta": {
+   "file": "priFertDist_CY1730defaulta.gdx",
+   "sha256": "f01e7c420f8c3e08f11a93a7dbe56b66eabba2a481601132f3e5a54669a6112a",
+   "size": 189378,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_CZ1730defaulta": {
+   "file": "priFertDist_CZ1730defaulta.gdx",
+   "sha256": "8eb8dbaeedd57f389bdccb0fd093398c32b32c97cc188e91163576fd59b2faf0",
+   "size": 2392757,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DE1730defaulta": {
+   "file": "priFertDist_DE1730defaulta.gdx",
+   "sha256": "40fbcbc280b4ed11ef6ba1d2a3890cdac2d22cb72c2c42666233fb4a9d49e5a2",
+   "size": 11700673,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_DK1730defaulta": {
+   "file": "priFertDist_DK1730defaulta.gdx",
+   "sha256": "210ed239ead1ba1e1241ebd1ad3eb597df5b71974f7f33ab6df2dc782b919a9d",
+   "size": 296523,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EE1730defaulta": {
+   "file": "priFertDist_EE1730defaulta.gdx",
+   "sha256": "14f514641a6f56da9577ff47a91b2999cb821ea5277bd626ee536e8dba261bd2",
+   "size": 234916,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_EL1730defaulta": {
+   "file": "priFertDist_EL1730defaulta.gdx",
+   "sha256": "a263df1ec8eac37df267409a8d1ba61ee101d53ff1bad7d4c2174e46a0db3aab",
+   "size": 5321233,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_ES1730defaulta": {
+   "file": "priFertDist_ES1730defaulta.gdx",
+   "sha256": "ef1f930bbdfc4e549edbd7c22a03febf292b3ed5ec0a9fdd33e5a8e532c1e5cf",
+   "size": 7830211,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FI1730defaulta": {
+   "file": "priFertDist_FI1730defaulta.gdx",
+   "sha256": "5bfed34efb73ffbdc5a903d3639ff5364db28c6649f340b825994faa728849d4",
+   "size": 1956308,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_FR1730defaulta": {
+   "file": "priFertDist_FR1730defaulta.gdx",
+   "sha256": "a0b3548250ccbeeadf47ea00d75e2907957b3beaf469e43af6a8fa3b79880421",
+   "size": 10292816,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HR1730defaulta": {
+   "file": "priFertDist_HR1730defaulta.gdx",
+   "sha256": "a76f4f530165ec2707f94ea13a9c23ca937ef07162a10ea744925d8d3b946a1b",
+   "size": 237544,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_HU1730defaulta": {
+   "file": "priFertDist_HU1730defaulta.gdx",
+   "sha256": "f761a16880aa9c9aa85d16187f721fa819279cb58348b4fa7a1495fc784358fc",
+   "size": 3045905,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IR1730defaulta": {
+   "file": "priFertDist_IR1730defaulta.gdx",
+   "sha256": "28f49a6133ab0aef6fd5fbaac3ced6332725209ddcb10d1fc84289ca92df2973",
+   "size": 833855,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_IT1730defaulta": {
+   "file": "priFertDist_IT1730defaulta.gdx",
+   "sha256": "27738a2a5209ee24267305aea46bda5515efdc089c9c66f23535833bd2bd5588",
+   "size": 8961065,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
   "capri/results/fert/priFertDist_KO1730defaulta": {
    "file": "priFertDist_KO1730defaulta.gdx",
    "sha256": "d977fe888c389997a9538d9d1000438680f83d8f49ee633bd063222e1679adb0",
@@ -53364,6 +56602,22 @@
    "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx",
    "trusted": true,
    "version": "v2026.11.11"
+  },
+  "capri/results/fert/priFertDist_LT1730defaulta": {
+   "file": "priFertDist_LT1730defaulta.gdx",
+   "sha256": "6a69c109ab71aa466b98edb84012dd284c6306407fad588b4511b40b60933502",
+   "size": 284693,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_LV1730defaulta": {
+   "file": "priFertDist_LV1730defaulta.gdx",
+   "sha256": "5863e11b90a12705416bba6e03b017e58312b4d849f7c8e3a97cfbd58e7dcf2f",
+   "size": 229635,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
   },
   "capri/results/fert/priFertDist_MK1730defaulta": {
    "file": "priFertDist_MK1730defaulta.gdx",
@@ -53380,6 +56634,78 @@
    "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx",
    "trusted": true,
    "version": "v2026.11.11"
+  },
+  "capri/results/fert/priFertDist_MT1730defaulta": {
+   "file": "priFertDist_MT1730defaulta.gdx",
+   "sha256": "cfe67632379e4b742d7576d0d349fb9eb10982b1d412c36bb2b2a8e344c22ff2",
+   "size": 127683,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NL1730defaulta": {
+   "file": "priFertDist_NL1730defaulta.gdx",
+   "sha256": "97738a6351e3487944c0599b87aa6fab709b08fb1b8487acfc235da3defe471f",
+   "size": 5438962,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_NO1730defaulta": {
+   "file": "priFertDist_NO1730defaulta.gdx",
+   "sha256": "8731b4e5f80d503a96c8316115d4294d5b23513133fbab6e52cd078431a36e81",
+   "size": 1016613,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PL1730defaulta": {
+   "file": "priFertDist_PL1730defaulta.gdx",
+   "sha256": "3558c170b768481ff03a610659f1b1f4cafb58a03e944479470cd0cea81e9f13",
+   "size": 6881234,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_PT1730defaulta": {
+   "file": "priFertDist_PT1730defaulta.gdx",
+   "sha256": "6f2430bc77ecf27eae4fbd4d4b4469977c03f8ca55cee7f2a3c5c1604aec9323",
+   "size": 2596068,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_RO1730defaulta": {
+   "file": "priFertDist_RO1730defaulta.gdx",
+   "sha256": "777dfae7302d108dddc91ee7675a905526ba99cf94a4bc34b025e326a9a28fe4",
+   "size": 2683244,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SE1730defaulta": {
+   "file": "priFertDist_SE1730defaulta.gdx",
+   "sha256": "cc2f327c11a9e4233b16256e6af5dd6ebf6f90421fc7177d40301185095ff10e",
+   "size": 2454634,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SI1730defaulta": {
+   "file": "priFertDist_SI1730defaulta.gdx",
+   "sha256": "b7b6f88f183ca3ea7b022cf957380cbe7fec6c35ef065e737d17ef7d8199e8d2",
+   "size": 250155,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
+  },
+  "capri/results/fert/priFertDist_SK1730defaulta": {
+   "file": "priFertDist_SK1730defaulta.gdx",
+   "sha256": "af50247e6fc2c6b6045031f8d7bdf04bb9071bbb720349822f2ad9fac94efe4a",
+   "size": 1325782,
+   "location": "code: %RESULTS_IN%/fert/priFertDist_<MS><BAS>.gdx (capmod/load_fert_baseline.gms l. 63; written by capmod/def_fert_and_requirements.gms l. 942)",
+   "trusted": true,
+   "version": "v2026.11.11.2"
   },
   "capri/results/fert/priFertDist_TU1730defaulta": {
    "file": "priFertDist_TU1730defaulta.gdx",
