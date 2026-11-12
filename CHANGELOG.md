@@ -106,6 +106,13 @@ hold within 1e-3 (`test_captrd_estimate_ms.py`: Denmark in the fast suite, six m
   Spain 2030, whose objective is dominated by the milk losses LOSF.COMI (a support near 1 with a small variance,
   comi_bounds.gms holding it near 700), whose bounds open by 0.995^n with the try count n, and Denmark 2020
   (HCOM.BARL), not yet rerun with "phase1".
+- The phase-1 solve keeps close to the infeasible solve's point (setting `captrd.nlp_phase1_proximity`, 1e-6 x the
+  squared scaled distance): without anything in its objective on the positions, the interior-point solve drifted the
+  free ones to the middle of their bounds (Spain 2030's Solve1 up to 6e7, its final SSQ 1.9e7 against CAPTRD's 821),
+  where CONOPT's phase 1 moves from the given point. Solve1 with it: Spain 2030 542.8 against CAPTRD's 821.4, Austria
+  2030 1,086.7 against 1,092.9; Denmark 2020 (phase 1 before the proximity term) 1.4647 against 1.4635. Denmark
+  2030's Solve2: 7 lower and 4 upper bounds of 1,625 differ from CAPTRD's (17 tries). Poland 2030 open (2.85e6
+  against 2.21e6, phase 1 before the proximity term; the milk losses' bounds).
 - Found: FIX-7 (ARTIF's upper bound, fix_est.gms l. 810) cannot act as decided: the statement takes the max with the
   previous upper bound, CAPTRD's standard 1e9 (estimate_ms.gms l. 56), so with the parenthesis fixed the bound stays
   1e9. Left as coded; its form is for the project lead to decide again.

@@ -78,7 +78,8 @@ def _settings():
     from capri_mod.settings import current
     st = current()
     keys = ("captrd.nlp_tol", "captrd.nlp_max_iter", "captrd.nlp_tolinfeas", "captrd.nlp_max_tries",
-            "captrd.nlp_at_bound_tol", "captrd.nlp_marginal_tol", "captrd.nlp_infeasible_marginals")
+            "captrd.nlp_at_bound_tol", "captrd.nlp_marginal_tol", "captrd.nlp_infeasible_marginals",
+            "captrd.nlp_phase1_proximity")
     return {k.split(".", 1)[1]: st.get(k) for k in keys}
 
 
@@ -124,10 +125,15 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
     if phase1:
         # CONOPT reports an infeasible solve at its phase 1's point, the least sum of infeasibilities within the bounds,
         # with that objective's marginals: the bounds blocking feasibility, not those the objective pulls at
+        # with nothing in the objective on X an interior-point solve drifts the free directions to the middle of their
+        # boxes (up to the standard 1e9); CONOPT's phase 1 moves from the given point: a small proximity term to the
+        # infeasible solve's point (xhat, scaled by max(1, |xhat|)), weight captrd.nlp_phase1_proximity
         m = int(G.shape[0])
         sp, sn = ca.SX.sym("sp", m), ca.SX.sym("sn", m)
+        xh, xs_ = ca.SX.sym("xhat", X.shape[0]), ca.SX.sym("xscale", X.shape[0])
+        f1 = ca.sum1(sp) + ca.sum1(sn) + float(o["nlp_phase1_proximity"]) * ca.sumsqr((X - xh) / xs_)
         ph1 = ca.nlpsol("m_trendMS_phase1", "ipopt",
-                        {"x": ca.vertcat(X, sp, sn), "f": ca.sum1(sp) + ca.sum1(sn), "g": G - sp + sn},
+                        {"x": ca.vertcat(X, sp, sn), "p": ca.vertcat(xh, xs_), "f": f1, "g": G - sp + sn},
                         {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": float(o["nlp_tol"]),
                          "ipopt.max_iter": int(o["nlp_max_iter"]),
                          "ipopt.fixed_variable_treatment": "make_constraint"})
@@ -159,8 +165,9 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
         if phase1:
             nk = len(keys)
             viol_v = np.maximum(lbg - gv, 0.0), np.maximum(gv - ubg, 0.0)
-            p1 = ph1(x0=np.concatenate([xs, viol_v[1], viol_v[0]]), lbx=np.concatenate([lb, np.zeros(2 * m)]),
-                     ubx=np.concatenate([ub, np.full(2 * m, INF)]), lbg=lbg, ubg=ubg)
+            p1 = ph1(x0=np.concatenate([x, viol_v[1], viol_v[0]]), lbx=np.concatenate([lb, np.zeros(2 * m)]),
+                     ubx=np.concatenate([ub, np.full(2 * m, INF)]), lbg=lbg, ubg=ubg,
+                     p=np.concatenate([x, np.maximum(1.0, np.abs(x))]))
             if ph1.stats()["return_status"] in SOLVER_ERRORS:
                 raise RuntimeError(f"m_trendMS {d.ms} {d.year}: phase 1 solver error {ph1.stats()['return_status']}")
             z = np.array(p1["x"]).ravel()

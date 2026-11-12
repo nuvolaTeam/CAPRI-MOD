@@ -608,6 +608,10 @@ nlp_marginal_tol = 1e-8
 # "phase1", 54 with "ipopt"; Austria 2030's Solve1 reaches CAPTRD's objective with "phase1" (1,085 against 1,093),
 # 788 with "ipopt" from bounds CAPTRD did not open
 nlp_infeasible_marginals = "phase1"
+# the phase 1's proximity weight: the least-infeasibility solve also minimises this times the squared scaled distance
+# from the infeasible solve's point (CONOPT's phase 1 starts there and moves as needed; an interior-point solve without
+# it drifts the free positions to the middle of their bounds, Spain 2030's Solve1 up to 6e7); the port's choice
+nlp_phase1_proximity = 1e-6
 
 [pipeline]
 # The data download layer (capri_mod/pipeline; docs/DATA_PIPELINE.md). Where the store (raw downloads, manifest, Delta

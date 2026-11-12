@@ -11,7 +11,8 @@ infeasible stop also carries the objective's pull). The widening turns on near-t
 tolerance), so its path moves with small differences: two of four runs of this test on the same code gave 25 lower
 bounds instead of 7 (not yet traced: the run-to-run variation has not been found in the code's set orders; the
 linear algebra's floating-point order is a candidate), and an earlier preparation of Denmark's data, a few CSSP and
-UVAD series one observation apart, gives 7 and 5 too. Hence 2%.
+UVAD series one observation apart, gives 7 and 5 too. Hence 2%. With the phase 1's proximity term
+(captrd.nlp_phase1_proximity) 17 tries, 7 and 4.
 
 test_solve1_objective_equals_captrds: Solve1 (CAPTRD's stored support1, the port's bounds on it, the start
 at the support) against CAPTRD's step2, Solve1's result. CAPTRD stores the wVarErr of Solve2 only; Solve1's is rebuilt:
