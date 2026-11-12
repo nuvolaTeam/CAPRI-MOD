@@ -45,6 +45,8 @@ PRCY_FLOOR = 0.01
 PRCY_RANGE = 1.1
 #: l. 280-287: the calories' bounds by (1 -/+ 1e-5 n)^n
 INCE_STEP = 1.0e-5
+#: l. 330: the OIND / OCRO rule after 25 tries
+OIND_OCRO_TRIES = 25
 #: biofuel_bounds.gms is applied again below 30 tries (l. 381-384)
 BIOFUEL_TRIES = 30
 #: release_comi_yields.gms: the milk yields' step, LOSF.COMI's factors
@@ -110,7 +112,12 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
                        {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": float(o["nlp_tol"]),
                         "ipopt.max_iter": int(o["nlp_max_iter"]), "ipopt.fixed_variable_treatment": "make_constraint"})
     gfun = ca.Function("g", [X], [G])
-    x0 = np.array([start.get(k, p.support.get(k, 0.0)) for k in keys])
+    # l. 83-100: the positions with data start at estP (the previous solve's result) if there is one, else at the
+    # support; the others at their levels (in Solve2: Solve1's result, estP)
+    has_start = any(v for v in start.values())
+    nobs_i = np.array([k in p.nobs for k in keys], dtype=bool)
+    x_est = np.array([start.get(k, 0.0) if has_start else p.support.get(k, 0.0) for k in keys])
+    x0 = np.array([start.get(k, 0.0) if has_start else p.support.get(k, 0.0) for k in keys])
     log = log if log is not None else []
     tol_at, tol_m = float(o["nlp_at_bound_tol"]), float(o["nlp_marginal_tol"])
     sol = None
@@ -130,7 +137,10 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
         lam = np.array(sol["lam_x"]).ravel()
         at_lo, at_up = _binding(keys, x, lam, lb, ub, tol_at, tol_m)
         _widen(ntry, keys, x, at_lo, at_up, lo_, up_, B, p, expertlo, expertup, basm)
+        _oind_ocro(ntry, keys, x, at_lo, lo_)
         _again(ntry, d, B, lo_, up_, expertup, at_lo, at_up)
+        # l. 349-353: the levels stay at the last solve's, but those with data go back to estP
+        x0 = np.where(nobs_i & has_start, x_est, x)
     x = np.array(sol["x"]).ravel()
     return Result({k: float(x[i]) for i, k in enumerate(keys)}, float(sol["f"]), False, ntry + 1, status, lo_, up_)
 
@@ -159,6 +169,7 @@ def _widen(ntry, keys, x, at_lo, at_up, lo_, up_, B, p, expertlo, expertup, basm
             if k[0] in B.mpact and k[1] == "LEVL" and lo_.get(k) != expertlo.get(k):
                 lo_[k] = v * LEVL_LO_FAC
         return
+    cols = B.cols_est | {"STCM"}                    # l. 276, 321: STCM is opened with the rest
     moved = set()
     for k in sorted(at_lo):
         if k[1] == "INCE" and k[0] in _ncnc(p) and expertlo.get(k):
@@ -170,21 +181,34 @@ def _widen(ntry, keys, x, at_lo, at_up, lo_, up_, B, p, expertlo, expertup, basm
             moved.add(("up", k))
     for k in sorted(at_lo):
         c, w = k
-        if ("lo", k) not in moved and c in B.cols_est and w in B.rows_est:
+        if ("lo", k) not in moved and c in cols and w in B.rows_est:
             sh = WIDEN_SHARE_PRCY if (c == "PRCY" and w in B.seco) else WIDEN_SHARE
             lo_[k] = lo_[k] - max(WIDEN_MIN, sh * abs(lo_[k]))
     for k in sorted(at_up):
         c, w = k
-        if ("up", k) not in moved and c in B.cols_est and w in B.rows_est:
+        if ("up", k) not in moved and c in cols and w in B.rows_est:
             sh = WIDEN_SHARE_PRCY if (c == "PRCY" and w in B.seco) else WIDEN_SHARE
             up_[k] = up_[k] + max(WIDEN_MIN, sh * abs(up_[k]))
     if ntry > LEVL_TRIES:
         for k in keys:
             c, w = k
-            if c in B.cols_est and w in B.rows_est and basm(c, w) > 0 and c not in ("NTRD", "INTP") and k in lo_:
-                lo_[k] = max(0.0, lo_[k], PRCY_FLOOR * p.support.get(k, 0.0) if c == "PRCY" else 0.0)
+            # a free position's lower bound is -inf in GAMS: MAX(0, -inf, ..) gives it the floor too
+            if c in cols and w in B.rows_est and basm(c, w) > 0 and c not in ("NTRD", "INTP"):
+                lo_[k] = max(0.0, lo_.get(k, -INF), PRCY_FLOOR * p.support.get(k, 0.0) if c == "PRCY" else 0.0)
             if c == "PRCY" and k in lo_ and lo_.get(k, -INF) != up_.get(k, INF):
                 up_[k] = max(up_.get(k, INF), PRCY_RANGE * lo_[k])
+
+
+def _oind_ocro(ntry, keys, x, at_lo, lo_):
+    """estimate_ms.gms l. 330-346: after 25 tries the lower bounds of OIND and OCRO's levels at a binding bound go to
+    zero where the solution has no production (GROF) of them."""
+    if ntry <= OIND_OCRO_TRIES:                     # nRepeatedSolves > 25 (nRepeatedSolves = ntry here)
+        return
+    lev = dict(zip(keys, x))
+    for c in ("OIND", "OCRO"):
+        k = (c, "LEVL")
+        if k in at_lo and lev.get(("GROF", c), 0.0) == 0.0:
+            lo_[k] = 0.0
 
 
 def _ncnc(p):
@@ -217,7 +241,7 @@ def _again(ntry, d, B, lo_, up_, expertup, at_lo, at_up):
     sup = lambda c, w: R("Support", c, w)                                  # noqa: E731
     EB._comi(d, B, lo_, up_, LO, UP, n, pd, R, sup, fx, t)
     _release_comi(ntry, B, lo_, up_, n, at_lo, at_up)
-    if ntry + 1 < BIOFUEL_TRIES:
+    if ntry < BIOFUEL_TRIES:                        # nRepeatedSolves < 30 (the tries so far, l. 381)
         EB._biofuel(d, B, lo_, up_, UP, n, R, fx)
     for (c, w), s_ in sorted(res.get("Support", {}).items()):
         cc = R("coco", c, w)

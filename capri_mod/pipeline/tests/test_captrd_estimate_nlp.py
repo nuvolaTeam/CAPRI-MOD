@@ -4,8 +4,9 @@ bounds (fix_est.gms) with CAPTRD's widening of infeasible solves (estimate_ms.gm
 Checked against CAPTRD's second solve (Solve2) of Denmark 2030: its supports and wVarErr as CAPTRD stores them,
 the port's bounds, CAPTRD's step2 (Solve1's result, estP) as the start. CAPTRD's own Solve2 was infeasible on its
 first bounds and stores the bounds it widened them to: the port's widening must reach them. Checked 12 November 2026:
-feasible after about 16 tries (CAPTRD at least 7), 1,610 of 1,625 lower bounds and 1,582 upper ones equal CAPTRD's
-(the port widens more foodSh upper bounds).
+feasible after about 15 tries (CAPTRD at least 7), all but about 15 of 1,625 lower bounds and about 43 upper ones equal
+CAPTRD's (the port widens the foodSh upper bounds with INHA's lower ones: IPOPT's multipliers at an infeasible point
+spread over both bounds of the degenerate pair HCOM_ couples, CONOPT's marginal sits on one).
 
 Open: the solution itself against CAPTRD's step3 (about 36% of the positions within 0.5%): step3 is the result of a
 further cleaning solve (clean_tiny.gms, rem_tiny.gms) on supports and bounds of its own, IPOPT's widening passes over

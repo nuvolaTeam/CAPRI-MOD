@@ -73,6 +73,17 @@ hold within 1e-3 (`test_captrd_estimate_ms.py`: Denmark in the fast suite, six m
   CAPTRD's Step3 (about 36% of the positions within 0.5%; Step3 is a further cleaning solve's result).
 - Set iteration in the estimation's code no longer depends on Python's string hashing (sorted sets), so two runs give
   the same widening path.
+- The widening closer to estimate_ms.gms l. 252-353: STCM is opened with the other positions (l. 276, 321); the zero
+  floor of the positions with a positive base year also reaches positions without a lower bound (GAMS's MAX(0, -inf));
+  after 25 tries the binding lower bounds of OIND's and OCRO's levels go to zero where they have no production
+  (l. 330-346); between tries the levels stay at the last solve's, those with data go back to estP (l. 349-353); the
+  try counts of biofuel_bounds.gms (below 30) and of the OIND/OCRO rule are nRepeatedSolves before its increment.
+  On Denmark 2030 the widened bounds change by one position (a scratch run with the same inputs: 13 lower and
+  41 upper bounds differ from CAPTRD's, against 12 and 41). The remaining gap is the solver's: at the first general
+  widening (try 7) IPOPT's infeasible point lies at 57 lower and 52 upper bounds with multipliers, the food intake's
+  (INHA) lower bounds and the food shares' (foodSh) upper bounds together, coupled by HCOM_ (INHA x population =
+  (HCOM + LOSF) x foodSh); CAPTRD opened INHA's lower bounds only, as an active-set solver puts the marginal of such a
+  degenerate pair on one of the two.
 
 ## 12 November 2026 — manure pools: CAPRI's autarky buffers (p_mTradeAddCost)
 
