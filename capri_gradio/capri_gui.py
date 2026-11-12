@@ -152,13 +152,17 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False):
             r_custom = gr.Textbox(label="custom regions (comma-separated regional units)", visible=False)
             r_over = gr.Code(language="json", value="{}", label="setting overrides (JSON, e.g. "
                              "{\"outer_loop.max_outer_iter\": 30})")
+            # the log's level (run.verbosity): CAPRI's run log, the model's timed lines, each solve's own log (as
+            # CAPRI's GUI shows GAMS's output with the solvers' iteration logs)
+            r_verb = gr.Radio(T.LOG_LEVELS, value="capri", label="log (run.verbosity)")
             with gr.Row():
                 r_start = gr.Button("Start run", variant="primary")
                 r_stop = gr.Button("Stop run", variant="stop")
             r_msg = gr.Markdown()
             r_job = gr.State("")
-            r_iters = gr.Textbox(label="iterations", lines=10, interactive=False)
-            r_tail = gr.Textbox(label="log (last lines)", lines=8, interactive=False)
+            r_title = gr.Markdown()
+            r_iters = gr.Textbox(label="iterations (step report)", lines=8, interactive=False)
+            r_tail = gr.Textbox(label="log", lines=24, max_lines=24, interactive=False, autoscroll=True)
             timer = gr.Timer(5.0)
 
         # ------------------------------------------------------------------ results
@@ -227,7 +231,7 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False):
         app.load(on_refresh, None, r_scen)
         r_regions.change(lambda v: gr.update(visible=v == "custom"), r_regions, r_custom)
 
-        def on_start(scen, regions, custom, over_text, request: gr.Request):
+        def on_start(scen, regions, custom, over_text, verb, request: gr.Request):
             if shared and regions != MINI_EU:
                 return "**Not started:** only mini-EU runs on a shared page", ""
             try:
@@ -235,12 +239,14 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False):
             except json.JSONDecodeError as e:
                 return f"**Overrides are not valid JSON:** {e}", ""
             regs = _mini_units() if regions == MINI_EU else (custom.strip() if regions == "custom" else "")
+            if verb in T.LOG_LEVELS:
+                over = {**over, "run.verbosity": verb}
             r = T.start_run(scen, scenarios_dir=_sd(request), regions=regs, overrides=over, owner=_who(request))
             if not r.get("ok"):
                 return "**Not started:**\n" + "\n".join(f"- {e}" for e in r["errors"]), ""
             return f"**Started** `{r['job']}`; log `{r['log']}`", r["job"]
 
-        r_start.click(on_start, [r_scen, r_regions, r_custom, r_over], [r_msg, r_job])
+        r_start.click(on_start, [r_scen, r_regions, r_custom, r_over, r_verb], [r_msg, r_job])
         def on_stop(job, request: gr.Request):
             r = T.stop_run(job, owner=_who(request) if shared else None)
             return "**Stopped**" if r.get("ok") else "**Not stopped:** " + "; ".join(r.get("errors", []))
@@ -249,14 +255,15 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False):
 
         def on_tick(job):
             if not job or job not in T.JOBS:
-                return gr.update(), gr.update()
+                return gr.update(), gr.update(), gr.update()
             st = T.JOBS[job].status()
             head = ("running" if st["running"] else f"finished (exit {st['returncode']})") + f", {st['seconds']} s"
             if st["saved"]:
                 head += "\n" + st["saved"]
-            return head + "\n\n" + "\n".join(st["iterations"]), st["tail"]
+            return (f"**{st['title']}**" if st["title"] else "", head + "\n\n" + "\n".join(st["iterations"]),
+                    st["tail"])
 
-        timer.tick(on_tick, r_job, [r_iters, r_tail])
+        timer.tick(on_tick, r_job, [r_title, r_iters, r_tail])
     return app
 
 

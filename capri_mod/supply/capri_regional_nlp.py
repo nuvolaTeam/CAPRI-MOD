@@ -1320,7 +1320,22 @@ class CapriRegionalNLP:
                          "ipopt.warm_start_bound_push": float(_st.get("supply.nlp_warm_start_bound_push")),
                          "ipopt.warm_start_mult_bound_push": float(_st.get("supply.nlp_warm_start_mult_bound_push")),
                          "ipopt.warm_start_slack_bound_push": float(_st.get("supply.nlp_warm_start_slack_bound_push"))})
+        from capri_mod import runlog as _runlog
+        _log_file, _log_at = None, 0
+        if _runlog.current().at("solver"):
+            # run.verbosity "solver": IPOPT's own log of this solve (as GAMS's log shows the solver's). IPOPT opens its
+            # output file once per solver object and appends each solve's log, so each cached solver of this process
+            # (the regions solve in parallel processes) has its own file, read from where this solve starts
+            import hashlib as _hl
+            import os as _os
+            import tempfile as _tf
+            _h = _hl.sha1(repr(self.structure_key(opts)).encode()).hexdigest()[:16]
+            _log_file = _os.path.join(_tf.gettempdir(), f"capri_mod_ipopt_{_os.getpid()}_{_h}.log")
+            opts = dict(opts, **{"ipopt.output_file": _log_file,
+                                 "ipopt.file_print_level": int(_st.get("run.solver_log_print_level"))})
         S = self._get_solver(opts)
+        if _log_file is not None:
+            _log_at = _runlog.solver_log_size(_log_file)
         self._solver = S
         self.build_s = _t.time() - t0
         t0 = _t.time()
@@ -1333,9 +1348,16 @@ class CapriRegionalNLP:
         st = S.stats()
         self.solve_s = _t.time() - t0
         x = np.asarray(r["x"]).ravel()
-        return {"x": x, "f": float(r["f"]), "lam_g": np.asarray(r["lam_g"]).ravel(),
-                "lam_x": np.asarray(r["lam_x"]).ravel(), "status": st["return_status"],
-                "iterations": st.get("iter_count"), "success": bool(st.get("success")), "warm": warm}
+        out = {"x": x, "f": float(r["f"]), "lam_g": np.asarray(r["lam_g"]).ravel(),
+               "lam_x": np.asarray(r["lam_x"]).ravel(), "status": st["return_status"],
+               "iterations": st.get("iter_count"), "success": bool(st.get("success")), "warm": warm}
+        if _log_file is not None:
+            out["log"] = {"log": _runlog.read_solver_log(_log_file, _log_at), "n_x": int(len(self.lbx)), "n_g": int(len(self.lbg)), "seconds": self.solve_s,
+                          "status": st["return_status"], "iterations": int(st.get("iter_count") or 0),
+                          "start": "warm" if warm else "cold",
+                          "linear_solver": str(opts["ipopt.linear_solver"] if "ipopt.linear_solver" in opts
+                                               else "mumps")}
+        return out
 
     # ---------------- sensitivity of the solution ----------------
     def response(self, res, D, tol=1e-9):

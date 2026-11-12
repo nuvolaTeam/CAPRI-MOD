@@ -17,6 +17,11 @@ Here, with the setting run.verbosity:
   capri     CAPRI's titles and run-log lines, with one line of step report per iteration (the default)
   detailed  also the model's own timed lines (each stage, the inner balances, the regions not solved to optimality,
             the Hessian's progress)
+  solver    also each solve, as CAPRI's GUI shows GAMS's output while a task runs (gui2014.pdf, "Interaction with
+            GAMS": GAMS's log piped into the GUI's window, its title lines into the title bar): per regional supply
+            model its size, IPOPT's own iteration log (run.solver_log_print_level) and status, in region order after the
+            supply side (the regions solve in parallel); per market solve each iteration's largest residual; per manure
+            pool market its QP's size and status
   debug     also the model's verbose prints (CAPRIModel.verbose)
 Beyond CAPRI (the project lead's choice of 11 November 2026): the same lines written to a file (run.log_file), and the
 step report as CSV per iteration (run.step_report: <stem>_steps.csv, one row per iteration with its times and stop
@@ -34,7 +39,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
 #: run.verbosity's levels, in order
-LEVELS = ["quiet", "capri", "detailed", "debug"]
+LEVELS = ["quiet", "capri", "detailed", "solver", "debug"]
 #: the program name in the title lines (CAPRI's %PGMNAME%)
 PROGRAM = "CAPRI-MOD"
 
@@ -113,6 +118,30 @@ class RunLog:
             el = int(time.time() - self.t0)
             self._emit(f"[{time.strftime('%H:%M:%S')} +{el // 3600}:{el % 3600 // 60:02d}:{el % 60:02d}] {text}")
 
+    def solver(self, text: str) -> None:
+        """A solver's line (level solver), as GAMS writes it to its log."""
+        if self.at("solver"):
+            self._emit(text)
+
+    def supply_solves(self, supply_results: Dict) -> None:
+        """Each regional model's solves (level solver), as GAMS's log shows a solve: generation, the solver's own log,
+        its status. The regions solve in parallel; their logs are written in region order once all have solved."""
+        for r in sorted(supply_results or {}):
+            logs = getattr(supply_results[r], "solver_log", None) or []
+            if logs:
+                # written here, not kept with the results
+                supply_results[r].solver_log = []
+            if not self.at("solver"):
+                continue
+            for s in logs:
+                self._emit(f"--- Generating NLP model supply {r} ({s.get('start', '')} start): {s.get('n_x', 0):,} "
+                           f"variables, {s.get('n_g', 0):,} constraints")
+                self._emit(f"--- Executing IPOPT ({s.get('linear_solver', '')})")
+                for ln in str(s.get("log", "")).rstrip().splitlines():
+                    self._emit(ln)
+                self._emit(f"--- {r}: {s.get('status', '')}, {s.get('iterations', 0)} iterations, "
+                           f"{float(s.get('seconds', 0.0)):.2f} s")
+
     def always(self, text: str) -> None:
         """A line written at every level, quiet included (the run's last line)."""
         self._emit(text)
@@ -131,6 +160,7 @@ class RunLog:
         """The supply side's line (capmod/report_supply_model.gms l. 126-128, 302). CAPRI aborts when a supply model
         is not solved; this model keeps IPOPT's last point (supply_module, a departure) and names the regions."""
         res = supply_results or {}
+        self.supply_solves(res)
         bad = sorted(r for r, x in res.items() if not bool(getattr(x, "converged", True)))
         if not bad:
             self.sub(f"Supply side of simulation loop Nr. {n} properly solved ({len(res)} regional models)")
@@ -229,6 +259,22 @@ def configure(level: Optional[str] = None, file: Optional[str] = None, step_repo
                       step_report=(str(st.get("run.step_report") or "") or None) if step_report is None
                       else step_report, t0=t0)
     return _current
+
+
+def solver_log_size(path: str) -> int:
+    """The size of a solver's log file (run.verbosity "solver"): where the next solve's log starts."""
+    p = Path(path)
+    return p.stat().st_size if p.exists() else 0
+
+
+def read_solver_log(path: str, start: int) -> str:
+    """A solver's log from byte start on (one solve's: IPOPT appends each solve of a solver object to its file)."""
+    try:
+        with open(path, "rb") as fh:
+            fh.seek(start)
+            return fh.read().decode("utf-8", errors="replace")
+    except OSError as exc:
+        return f"(the solver's log not read: {exc!r})"
 
 
 def current() -> RunLog:

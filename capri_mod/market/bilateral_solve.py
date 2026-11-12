@@ -670,6 +670,8 @@ class BilateralSolveMixin(MarketStateMixin):
         prev = np.inf
         damp = 1.0
         converged = False
+        from capri_mod import runlog as _runlog
+        _rl_s = _runlog.current()
         aa = getattr(self, "market_acceleration", None) == "anderson"
         trq_joint = bool(_st.get("market.trq_joint"))
         aa_z, aa_g = [], []                                  # history: log r and log new (the map's value)
@@ -703,6 +705,12 @@ class BilateralSolveMixin(MarketStateMixin):
                 trq_moved = max(trq_moved, sc.trq_sigma_change(old_s))
             if verbose:
                 print(f"  bilateral market iter {it}: max rel residual {err:.2e}, quota rates moved {trq_moved:.2e}")
+            if _rl_s.at("solver"):
+                # run.verbosity "solver": the market solve's iteration log, as the solver's in GAMS's log
+                if it == 0:
+                    _rl_s.solver(f"--- Executing the market solve (fixed point, tolerance {tol:g})")
+                    _rl_s.solver("   Iter  Max rel residual  Product  Region            Quota moved  Damping")
+                _rl_s.solver(f"  {it:5d}  {err:16.6e}  {_wc:<7}  {str(_wr):<16}  {trq_moved:11.3e}  {damp:7.3f}")
             if err < tol and trq_moved < tol:
                 converged = True
                 break

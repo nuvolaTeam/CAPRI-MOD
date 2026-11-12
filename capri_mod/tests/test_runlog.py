@@ -53,3 +53,22 @@ def test_quiet_and_detailed(tmp_path, capsys):
     assert capsys.readouterr().out.rstrip().endswith("] timed")
     with pytest.raises(ValueError):
         RL.RunLog(level="loud")
+
+
+def test_solver_level_writes_each_solve_and_drops_the_logs(capsys):
+    """run.verbosity "solver": each regional solve as GAMS's log shows it (size, IPOPT's own log, status), in region
+    order; the logs are not kept with the results; below the level nothing is written and the logs are dropped too."""
+    log = {"log": "iter    objective\n   0  1.0e+00\nEXIT: Optimal Solution Found.\n", "n_x": 505, "n_g": 366,
+           "seconds": 0.25, "status": "Solve_Succeeded", "iterations": 38, "start": "cold", "linear_solver": "mumps"}
+    res = {"R2": SimpleNamespace(converged=True, solver_log=[dict(log)]),
+           "R1": SimpleNamespace(converged=True, solver_log=[dict(log, start="warm")])}
+    RL.RunLog(level="solver", t0=0.0).supply_solved(1, res)
+    out = capsys.readouterr().out.splitlines()
+    gen = [x for x in out if x.startswith("--- Generating NLP model supply")]
+    assert gen == ["--- Generating NLP model supply R1 (warm start): 505 variables, 366 constraints",
+                   "--- Generating NLP model supply R2 (cold start): 505 variables, 366 constraints"]
+    assert "EXIT: Optimal Solution Found." in out and "--- R1: Solve_Succeeded, 38 iterations, 0.25 s" in out
+    assert all(v.solver_log == [] for v in res.values())
+    res = {"R1": SimpleNamespace(converged=True, solver_log=[dict(log)])}
+    RL.RunLog(level="capri", t0=0.0).supply_solved(1, res)
+    assert not any(x.startswith("--- ") for x in capsys.readouterr().out.splitlines()) and res["R1"].solver_log == []

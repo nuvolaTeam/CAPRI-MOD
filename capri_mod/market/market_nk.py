@@ -144,6 +144,8 @@ class NewtonKrylovMixin:
 
         z = pack(r)
         g, ev, post = resid(r)
+        from capri_mod import runlog as _runlog
+        _rl_s = _runlog.current()
         converged = False
         it = 0
         n_evals = 1
@@ -164,6 +166,14 @@ class NewtonKrylovMixin:
             if verbose:
                 print(f"  market Newton-Krylov step {it}: max rel residual {err:.2e}, quota rates moved {trq_moved:.2e}, "
                       f"evaluations {n_evals}")
+            if _rl_s.at("solver"):
+                # run.verbosity "solver": the market solve's iteration log, as the solver's in GAMS's log
+                if it == 0:
+                    _rl_s.solver(f"--- Executing the market solve (Newton-Krylov, tolerance {tol:g})")
+                    _rl_s.solver("   Iter  Max rel residual  Product  Quota moved  Evaluations")
+                _wc = max(errs, key=errs.get) if errs else ""
+                _rl_s.solver(f"  {it:5d}  {max(errs.values()) if errs else 0.0:16.6e}  {_wc:<7}  {trq_moved:11.3e}  "
+                             f"{n_evals:11d}")
             if max(errs.values()) < tol and trq_moved < tol:
                 converged = True
                 break

@@ -353,8 +353,9 @@ LONG_COLUMNS = ("point", "block", "region", "dim5", "cols", "rows", "value")
 #: the run's results not in the table: run metadata and diagnostics (meta.json beside the table), the outer
 #: iterations' record (its own table), the scenario's name, the policy summary's text
 LONG_EXCLUDED = ("scenario", "metadata", "convergence", "outer_history")
-#: SupplyResult fields that are text (the solver's message, the region's own id)
-_SUPPLY_TEXT = ("region_id", "solver_message")
+#: SupplyResult fields not in the table: text (the solver's message, the region's own id) and the solves' logs
+#: (run.verbosity "solver", written to the run's log, not kept)
+_SUPPLY_TEXT = ("region_id", "solver_message", "solver_log")
 #: the market tables of MarketEquilibrium (trade region x commodity)
 _MARKET_TABLES = ("production", "consumption", "net_exports", "domestic_prices", "wedge_prices")
 #: the environmental accounts summed over the EU's regions (additive ones: flatten_outputs' list)

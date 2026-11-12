@@ -399,8 +399,11 @@ missing):
 python tools/run/run_f2f_2030.py runs/f2f.pkl --set run.n_workers=2
 ```
 
-It prints CAPRI's run log (`run.verbosity`: quiet, capri, detailed, debug) and writes it beside the output
-(`runs/f2f.log`), with the step report per iteration as CSV (`runs/f2f_steps.csv`, `runs/f2f_iterchg.csv`).
+It prints CAPRI's run log (`run.verbosity`: quiet, capri, detailed, solver, debug) and writes it beside the output
+(`runs/f2f.log`), with the step report per iteration as CSV (`runs/f2f_steps.csv`, `runs/f2f_iterchg.csv`). The
+`solver` level adds each solve as CAPRI's GUI shows GAMS's output: per regional supply model its size, IPOPT's
+iteration log and status; per market solve its iterations; per manure pool market its solve
+(`--set run.verbosity=solver`; the Gradio app's Run tab has the same choice).
 
 Then, in Python — validate the data layer and run a minimal base scenario:
 

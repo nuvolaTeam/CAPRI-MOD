@@ -291,14 +291,22 @@ class Job:
     def status(self) -> dict:
         rc = self.proc.poll() if self.proc else None
         text = self.log.read_text(errors="replace") if self.log.exists() else ""
-        its = re.findall(r"^\[[^\]]+\] (.*iteration \d+:.*)$", text, flags=re.M)
+        # as CAPRI's GUI (gui2014.pdf, "Interaction with GAMS"): the run's log in a window, its title lines (the
+        # section and its timing, capri_mod/runlog.py) as the title, and the step report's line per iteration
+        titles = re.findall(r"^\[[^\]]+\] title (.*)$", text, flags=re.M)
+        its = re.findall(r"^\*\*\* --- (Step report Nr\. .*)$", text, flags=re.M)
         saved = re.search(r"^saved .*$", text, flags=re.M)
         return {"running": self.proc is not None and rc is None, "returncode": rc,
                 "seconds": round(time.time() - self.started), "iterations": its[-30:],
-                "saved": saved.group(0) if saved else "", "tail": "\n".join(text.splitlines()[-15:])}
+                "title": titles[-1] if titles else "", "saved": saved.group(0) if saved else "",
+                "tail": "\n".join(text.splitlines()[-TAIL_LINES:])}
 
 
 JOBS: Dict[str, Job] = {}
+#: the log window's lines (the last ones of the run's log)
+TAIL_LINES = 400
+#: the log levels a run can be started with (run.verbosity, capri_mod/runlog.py)
+LOG_LEVELS = ["capri", "detailed", "solver"]
 
 
 def run_command(scenario: str, out: Path, scenarios_dir: Optional[Path] = None, regions: str = "",

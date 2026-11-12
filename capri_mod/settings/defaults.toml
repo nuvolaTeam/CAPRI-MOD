@@ -9,9 +9,14 @@
 [run]
 # The run's log (capri_mod/runlog.py): quiet (warnings and the last line), capri (CAPRI's section titles and run-log
 # lines, util/title.gms and capmod.gms's caplog, with one line of step report per iteration), detailed (also the model's
-# own timed lines: each stage, the inner balances, the regions not solved to optimality), debug (also the model's
-# verbose prints)
+# own timed lines: each stage, the inner balances, the regions not solved to optimality), solver (also each solve as
+# CAPRI's GUI shows GAMS's output, gui2014.pdf "Interaction with GAMS": per regional supply model its size, IPOPT's own
+# iteration log and its status; per market solve its iterations; per manure pool market its solve), debug (also the
+# model's verbose prints)
 verbosity = "capri"
+# the "solver" level: IPOPT's print level in the regional models' logs (IPOPT's file_print_level; 5: its iteration
+# table and the final statistics)
+solver_log_print_level = 5
 # the same lines written to this file ("" = none; the run scripts put it beside their output: <output>.log)
 log_file = ""
 # the step report as CSV, by path stem: <stem>_steps.csv (one row per iteration: times, stop tests, solve status) and

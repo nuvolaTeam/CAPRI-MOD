@@ -292,6 +292,8 @@ class SupplyResult:
     solver_message: str = ""
     #: CAPRI's obligatory set-aside ISET (1000 ha; SETA_, supply/land.py _obligatory_set_aside): 0 without rates
     iset: float = 0.0
+    #: run.verbosity "solver": each IPOPT solve of the region's model, its log, size and status (runlog.supply_solves)
+    solver_log: list = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -1942,6 +1944,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             converged=solver_converged,
             solver_message=solver_message,
             iset=_iset,
+            solver_log=list(getattr(self.res, "solver_log", None) or []),
         )
 
 

@@ -409,6 +409,9 @@ class ManureBlock:
         status = str(info.get("status", "?"))
         if not ok and "AlmostSolved" in status:
             ok = True
+        from capri_mod import runlog as _runlog
+        _runlog.current().solver(f"--- Manure pool market {fout}: {nv:,} variables ({nr} regions, {na} links), "
+                                 f"{len(keys)} pools; Clarabel {status}, {info.get('iterations')} iterations")
         pnew, ship = {}, {k: 0.0 for k in keys}
         if ok:
             # Clarabel: Q x + c + Aeq' y = 0; an exporter's condition gives y_k = -(its marginal value + sell cost) =

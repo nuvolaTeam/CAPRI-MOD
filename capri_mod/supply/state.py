@@ -189,6 +189,7 @@ class RegionalResults(_Slots):
         "nlp_rc",             # the activities' reduced costs
         "nlp_relaxed",        # the mineral-cap exemption applied
         "nlp_status",         # IPOPT's status
+        "solver_log",         # run.verbosity "solver": each IPOPT solve's log, size and status (runlog.supply_solves)
         "yani_dnet",          # the solution's response to the young-animal prices (K65)
         # livestock (S4): the split columns' levels in the last solution
         "last_cattle_z",

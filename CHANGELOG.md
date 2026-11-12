@@ -32,6 +32,21 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 12 November 2026 — the run log's solver level, as CAPRI's GUI shows a run
+
+- run.verbosity = "solver" (new level, between detailed and debug): each solve as CAPRI's GUI shows GAMS's output while
+  a task runs (gui2014.pdf, "Interaction with GAMS": GAMS's log piped into the GUI's window, its title lines into the
+  title bar). Per regional supply model and solve: "Generating NLP model supply <region> (<warm/cold> start): <n>
+  variables, <m> constraints", IPOPT's own iteration log (run.solver_log_print_level, IPOPT's file print level, 5) and
+  its status, iterations and time, written in region order once the supply side has solved (the regions solve in
+  parallel processes; each process's solvers write to their own temporary file, read back with the result); per
+  market solve each iteration's largest relative residual, product, region, quota move and damping (fixed point) or
+  evaluations (Newton-Krylov); per manure pool market its QP's size and Clarabel's status. The logs are not kept with
+  the results. Output only: the results do not depend on the level.
+- The Gradio app's Run tab: the same choice of log level (capri, detailed, solver), the run's log in a window (its last
+  400 lines), the last title line above it, and the step report's line per iteration (the app's former iteration pane
+  matched a title format no longer written).
+
 ## 12 November 2026 — the raw dataset without version tags
 
 - tools/pipeline/capri_raw_manifest.json no longer names a tag per file (the project lead's choice, 12 November 2026):

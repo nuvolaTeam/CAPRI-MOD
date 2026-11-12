@@ -332,6 +332,8 @@ class NLPBlock:
         _km = _crn.KKT_MODE
         _kb = _st.setdefault(self.sv, "kkt_base", {}) if _km else None
 
+        self.res.solver_log = []                     # run.verbosity "solver": each IPOPT solve's log (runlog.supply_solves)
+
         def _nsolve(nlp_, xs_, lam=None, tol=None):
             # the market supply Hessian from the KKT conditions (market.hessian_method = "kkt"): a shock's solve of a
             # graph the base solved is the first-order step from the base's solution (CapriRegionalNLP.kkt_step);
@@ -341,7 +343,10 @@ class NLPBlock:
                 if b_ is not None and len(b_["pval"]) == len(nlp_.pval) and len(b_["x"]) == len(nlp_.lbx):
                     return nlp_.kkt_step(b_)
                 self.res.kkt_ipopt = int(getattr(self.res, "kkt_ipopt", 0) or 0) + 1
-            return nlp_.solve(xs_, lam=lam, tol=tol) if tol is not None else nlp_.solve(xs_, lam=lam)
+            r_ = nlp_.solve(xs_, lam=lam, tol=tol) if tol is not None else nlp_.solve(xs_, lam=lam)
+            if r_.get("log") is not None:
+                self.res.solver_log.append(r_["log"])
+            return r_
         for kind, xs, lam_ in starts:
             res = _nsolve(nlp, xs, lam=lam_, tol=_tol)
             if res["status"] == "KKT_Step":
