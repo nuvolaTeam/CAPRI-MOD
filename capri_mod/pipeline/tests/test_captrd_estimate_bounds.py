@@ -94,7 +94,7 @@ def _case(ms, year, prepared):
                      bur=ms in {"BG000000", "RO000000"}, prev=prev, prev_exante_d=prev is not None and prev <= 2019,
                      estp_prev=st3, step3_prev=st3, const_slope={k: v for k, v in cs.items() if v},
                      nuts2_with_data=nuts2, **ORD)
-    lo, up = EB.bounds(D, B, E.REQS_EFF ** (year - E.REQS_YEAR0))
+    lo, up = EB.bounds(D, B, E.REQS_EFF ** (year - E.REQS_YEAR0), artif_as_coded=True)   # CAPTRD as coded (FIX-7)
     L0, U0 = _by_year("Lo", ms, [year]).get(year, {}), _by_year("up", ms, [year]).get(year, {})
     Lr = E.requirements_relative(E.Point(V=L0, support={}, **kw), S, L0)
     Ur = E.requirements_relative(E.Point(V=U0, support={}, **kw), S, U0)
@@ -150,3 +150,19 @@ def test_share_rule_of_areas():
     assert up[("SWHE", "LEVL")] == pytest.approx(max(500.0 + 0.1, 500.0 + dev))
     assert lo[("SWHE", "LEVL")] == pytest.approx(500.0 - dev)
     assert lo[("NTRD", "SWHE")] == -float("inf") and up[("NTRD", "SWHE")] == float("inf")
+
+
+def test_artif_upper_bound():
+    """fix_est.gms l. 810 (FIX-7): as coded 1.02**(OrdT(ExAnte)) - OrdT("BAS"), the year in the exponent; fixed
+    1.02**(OrdT(ExAnte) - OrdT("BAS")); in both the max with the previous bound, the standard 1e9 with data
+    (estimate_ms.gms l. 56), so fixed the bound is 1e9 here."""
+    B = EB.read_bound_sets()
+    vals = {("ARTIF", "LEVL", "BASM"): 100.0, ("ARTIF", "LEVL", "nObs"): 10.0}
+    d = EB.BoundData(ms="XX000000", year=2030, pd=lambda c, w, s: vals.get((c, w, s), 0.0), res={}, exante_d=False,
+                     west=False, east=False, **ORD)
+    _, up_fixed = EB.bounds(d, B, 1.0, artif_as_coded=False)
+    _, up_coded = EB.bounds(d, B, 1.0, artif_as_coded=True)
+    std = 1.0e9
+    assert up_fixed[("ARTIF", "LEVL")] == pytest.approx(max(100.0 * 1.02 ** (2030 - 2017), std))
+    assert up_coded[("ARTIF", "LEVL")] == pytest.approx(100.0 * 1.02 ** 2030 - 2017)
+

@@ -8,11 +8,11 @@ with the phase-1 marginals (captrd.nlp_infeasible_marginals, the default) feasib
 7), all but 7 of the 1,625 lower bounds and 5 upper ones equal CAPTRD's; with IPOPT's own marginals of the infeasible
 solves 15 tries and 13 and 41 (the foodSh upper bounds opened with INHA's lower ones, coupled by HCOM_, as IPOPT's
 infeasible stop also carries the objective's pull). The widening turns on near-ties (a bound counts or not within a
-tolerance), so its path moves with small differences: two of four runs of this test on the same code gave 25 lower
-bounds instead of 7 (not yet traced: the run-to-run variation has not been found in the code's set orders; the
-linear algebra's floating-point order is a candidate), and an earlier preparation of Denmark's data, a few CSSP and
-UVAD series one observation apart, gives 7 and 5 too. Hence 2%. With the phase 1's proximity term
-(captrd.nlp_phase1_proximity) 17 tries, 7 and 4.
+tolerance), so its path moves with small differences of the inputs: until 12 November 2026 the data preparation
+summed over Python sets in hash order, and runs of this test on the same code gave 7 or 25 differing lower bounds;
+with the sums in sorted order the preparation is bit-identical between runs. With the phase 1's proximity term
+(captrd.nlp_phase1_proximity) and the deterministic preparation: 16 tries, 8 lower and 10 upper bounds differ.
+Hence 2%.
 
 test_solve1_objective_equals_captrds: Solve1 (CAPTRD's stored support1, the port's bounds on it, the start
 at the support) against CAPTRD's step2, Solve1's result. CAPTRD stores the wVarErr of Solve2 only; Solve1's is rebuilt:

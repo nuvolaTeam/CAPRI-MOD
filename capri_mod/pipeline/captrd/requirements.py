@@ -58,7 +58,8 @@ def coefficients(p: pd.DataFrame, sets: CaptrdSets, expost: Iterable[int],
                  zeros_as_missing: Optional[bool] = None) -> pd.DataFrame:
     """Const, Slope and the requirement's BASM per (region, animal, requirement) after steps 1-3 (module docstring),
     indexed by KEYS, with the scaling factor ("scale"), the country regression's nObs ("nObs_reg") and Const and Slope
-    before the scaling ("Const0", "Slope0")."""
+    before the scaling ("Const0", "Slope0"). Sums run over sorted members, so the results do not depend on Python's
+    hash order."""
     zm = zeros_missing(zeros_as_missing)
     ex = [str(int(y)) for y in expost]
     reqst = set(sets.reqst)
@@ -84,7 +85,7 @@ def coefficients(p: pd.DataFrame, sets: CaptrdSets, expost: Iterable[int],
     reg: Dict[Tuple[str, str, str], Tuple[float, float, float]] = {}
     for m in [r for r in regions if r in ms_set]:
         for a, outs in ys.items():
-            xk = [(m, a, o) for o in outs if (m, a, o) in wide.index]
+            xk = [(m, a, o) for o in sorted(outs) if (m, a, o) in wide.index]
             X = sum((wide.loc[k, ex].to_numpy(float) for k in xk), np.zeros(len(ex)))
             X = np.nan_to_num(X)
             for q in reqst:
@@ -108,7 +109,7 @@ def coefficients(p: pd.DataFrame, sets: CaptrdSets, expost: Iterable[int],
         for a, outs in ys.items():
             lv_basm = val(r, a, "LEVL", "BASM")
             lv_nobs = val(r, a, "LEVL", "nObs")
-            y_basm = sum(val(r, a, o, "BASM") for o in outs)
+            y_basm = sum(val(r, a, o, "BASM") for o in sorted(outs))
             for q in reqst:
                 c0, s0, n0 = reg.get((r, a, q), (0.0, 0.0, 0.0)) if r in ms_set else (0.0, 0.0, 0.0)
                 cm, sm, _ = reg.get((m, a, q), (0.0, 0.0, 0.0))
@@ -118,7 +119,7 @@ def coefficients(p: pd.DataFrame, sets: CaptrdSets, expost: Iterable[int],
                 scale = 0.0
                 if lv_nobs and basm:
                     num = 0.0
-                    for f in sets.feed:
+                    for f in sorted(sets.feed):
                         fb = val(r, a, f, "BASM")
                         if fb:
                             num += fb * val(m, q, f, "BASM")
@@ -159,7 +160,7 @@ def step1(co: pd.DataFrame, nobs: pd.Series, yield_step1: pd.DataFrame, sets: Ca
         if not nobs.get((r, a, q), 0.0):
             continue
         x = np.zeros(len(years))
-        for o in ys.get(a, ()):
+        for o in sorted(ys.get(a, ())):
             if (r, a, o) in yield_step1.index:
                 x = x + np.nan_to_num(yield_step1.loc[(r, a, o)].to_numpy(float))
         out[(r, a, q)] = (c["Const"] + c["Slope"] * x) * eff

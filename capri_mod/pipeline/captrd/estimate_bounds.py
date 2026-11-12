@@ -150,9 +150,14 @@ class BoundData:
     nuts2_with_data: Dict[str, int] = field(default_factory=dict)  # activity -> its NUTS2 regions with LEVL data
 
 
-def bounds(d: BoundData, B: BoundSets, eff: float):
+def bounds(d: BoundData, B: BoundSets, eff: float, artif_as_coded: Optional[bool] = None):
     """lo, up: {(col, row): bound} of every position a statement bounds (others free). eff: the requirement
-    functions' feeding efficiency factor of the year (0.998^(year - 2000))."""
+    functions' feeding efficiency factor of the year (0.998^(year - 2000)). artif_as_coded (setting
+    captrd.artif_upper_bound_as_coded; FIX-7): ARTIF's upper bound with fix_est.gms l. 810's parenthesis as coded
+    (the year as the exponent) or, the default, as its comment states it (the years since the base)."""
+    if artif_as_coded is None:
+        from capri_mod.settings import current as _settings
+        artif_as_coded = bool(_settings().get("captrd.artif_upper_bound_as_coded"))
     lo: Dict[K2, float] = {}
     up: Dict[K2, float] = {}
     LO = lambda k: lo.get(k, -INF)                                         # noqa: E731
@@ -571,9 +576,12 @@ def bounds(d: BoundData, B: BoundSets, eff: float):
         lo[("UAAR", "LEVL")] = pd("UAAR", "LEVL", "BASM") * 0.998 ** (t - d.ord_bas)
     # l. 805-816: artificial land, total area, inland waters, kitchen gardens
     lo[("ARTIF", "LEVL")] = pd("ARTIF", "LEVL", "BASM") if n("ARTIF", "LEVL") else 0.0
-    # l. 810 reads 1.02**(OrdT(ExAnte)) - OrdT("BAS"): the year as the exponent, in effect no upper bound; kept as
-    # coded
-    up[("ARTIF", "LEVL")] = max(LO(("ARTIF", "LEVL")) * 1.02 ** t - d.ord_bas, UP(("ARTIF", "LEVL")))
+    # l. 810 reads 1.02**(OrdT(ExAnte)) - OrdT("BAS"): the year as the exponent (CAPRI-ERROR, a misplaced parenthesis;
+    # FIX-7). Fixed (the default), 1.02**(OrdT(ExAnte) - OrdT("BAS")) as the comment's "max. 2% increase per year"; the
+    # max with the previous bound kept, as coded, so where that is the standard 1e9 the bound stays 1e9
+    la = LO(("ARTIF", "LEVL"))
+    cap = la * 1.02 ** t - d.ord_bas if artif_as_coded else la * 1.02 ** (t - d.ord_bas)
+    up[("ARTIF", "LEVL")] = max(cap, UP(("ARTIF", "LEVL")))
     for c in ("ARTO", "INLW", "KITC"):
         fx((c, "LEVL"), pd(c, "LEVL", "BASM"))
     # l. 822: set-aside

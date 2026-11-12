@@ -548,15 +548,15 @@ def prep_for_estimation(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int
         w.drop("PRCY", s_, t_yrs & (w("MAPR", s_) == 0))
 
     # l. 81: UAAR from the crop activities; l. 83-86: the crop groups' areas
-    w.put("UAAR", "LEVL", sum((w(c, "LEVL") for c in sets.mcact), w.zero), where=t_exp)
+    w.put("UAAR", "LEVL", sum((w(c, "LEVL") for c in sorted(sets.mcact)), w.zero), where=t_exp)
     for g in sets.grpc:
-        mem = [c for c, g2 in sets.cropc_to_g if g2 == g and c in sets.cact]
+        mem = sorted(c for c, g2 in sets.cropc_to_g if g2 == g and c in sets.cact)
         tot = sum((w(c, "LEVL") for c in mem), w.zero)
         w.put(g, "LEVL", tot, where=t_exp | (w.t == "BASM"))
     # l. 88-96: slaughter weight of the female breeding animals
     for b in sorted(sets.breedact):
-        yani = sum((w(b, i) for a, i in sets.pact_to_i if a == b and i in sets.iyani), w.zero)
-        meat = sum((w(b, m) for a, m in sets.pact_to_o if a == b and m in sets.meat), w.zero)
+        yani = sum((w(b, i) for a, i in sorted(sets.pact_to_i) if a == b and i in sets.iyani), w.zero)
+        meat = sum((w(b, m) for a, m in sorted(sets.pact_to_o) if a == b and m in sets.meat), w.zero)
         cond = t_exp & (yani != 0) & (w(b, "LEVL") != 0)
         w.put(b, "SLGW", (meat / yani.where(yani != 0, 1.0)) * 1000.0, where=cond)
         if (w.t == "BASM").any():
@@ -585,12 +585,12 @@ def prep_for_estimation(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int
     # l. 147-148: market balances of the product groups (countries)
     for c in sets.mrkbalee:
         for g in sets.grpr:
-            mem = [r for r, g2 in sets.rows_to_g if g2 == g]
+            mem = sorted(r for r, g2 in sets.rows_to_g if g2 == g)
             w.put(c, g, sum((w(c, r) for r in mem), w.zero), where=is_ms & t_yb)
     # l. 150-156: DOMM as the sum of the domestic uses of at least 1e-12
     rows_all = {k[1] for k in w.s}
     for r in sorted(rows_all):
-        dsum = sum((w(c, r).where(w(c, r) >= 1e-12, 0.0) for c in sets.dompos), w.zero)
+        dsum = sum((w(c, r).where(w(c, r) >= 1e-12, 0.0) for c in sorted(sets.dompos)), w.zero)
         dm = w("DOMM", r)
         cond = is_ms & t_yb & (((dsum != 0) & (dm != 0)) | ((dm < 0) & (r not in sets.oyani_rows)))
         if cond.any():
@@ -603,14 +603,15 @@ def prep_for_estimation(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int
         w.put("UVAD", g, w("EXPE", g) / hc.where(hc != 0, 1.0) * 1000.0, where=is_ms & t_yb & (hc != 0))
     # l. 161-162: the activities' output value
     for a in sets.mpact:
-        tot = sum((w(a, r) * w("UVAG", r) for a2, r in sets.pact_to_o if a2 == a and r in sets.s_rowsest), w.zero)
+        tot = sum((w(a, r) * w("UVAG", r) for a2, r in sorted(sets.pact_to_o) if a2 == a and r in sets.s_rowsest),
+                  w.zero)
         w.put(a, "TOOU", tot * 0.001, where=is_ms & t_yb)
     # l. 163-165: net trade
     for r in sets.s_rowsest:
         w.put("NTRD", r, w("EXPT", r) - w("IMPT", r), where=is_ms & t_yb)
     # l. 169-172: per capita consumption of cereals and meat, food shares
     for g in ("CERE", "MEAS"):
-        mem = [r for r, g2 in sets.rows_to_g if g2 == g]
+        mem = sorted(r for r, g2 in sets.rows_to_g if g2 == g)
         w.put("INHA", g, sum((w("INHA", r) for r in mem), w.zero), where=is_ms & t_yb)
     w.put("foodSh", "CERE", w("foodSh", "SWHE"), where=is_ms & t_yb)
     w.put("foodSh", "MEAS", w("foodSh", "BEEF"), where=is_ms & t_yb)
@@ -625,7 +626,8 @@ def prep_for_estimation(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int
         cond = is_ms & t_yb & (hc != 0) & (inha != 0)
         if cond.any():
             w.put("EXPE", r, w("UVAD", r) * hc / inha.where(inha != 0, 1.0), where=cond)
-    tot = sum((w("EXPE", r) for r in {k[1] for k in w.keys(cols={"EXPE"})} if r != "LEVL" and r not in sets.grpr),
+    expe_rows = sorted({k[1] for k in w.keys(cols={"EXPE"})})
+    tot = sum((w("EXPE", r) for r in expe_rows if r != "LEVL" and r not in sets.grpr),
               w.zero)
     w.put("EXPE", "LEVL", tot, where=is_ms & t_yb)
     # l. 160-162: stocking density, livestock units per hectare of UAAR

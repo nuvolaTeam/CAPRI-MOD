@@ -612,6 +612,12 @@ nlp_infeasible_marginals = "phase1"
 # from the infeasible solve's point (CONOPT's phase 1 starts there and moves as needed; an interior-point solve without
 # it drifts the free positions to the middle of their bounds, Spain 2030's Solve1 up to 6e7); the port's choice
 nlp_phase1_proximity = 1e-6
+# FIX-7 (decided 22 October 2026, implemented 12 November 2026): ARTIF's upper bound in the member states' estimation,
+# fix_est.gms l. 810, has a misplaced parenthesis, 1.02**(OrdT(ExAnte)) - OrdT("BAS") (the year as the exponent):
+# false = the parenthesis fixed, 1.02**(OrdT(ExAnte) - OrdT("BAS")) as the statement's comment states it ("max. 2%
+# increase per year"), the max with the previous bound kept as coded (with data the standard 1e9, so the bound stays
+# 1e9); true = CAPRI as coded (the parity tests against CAPTRD's stored bounds)
+artif_upper_bound_as_coded = false
 
 [pipeline]
 # The data download layer (capri_mod/pipeline; docs/DATA_PIPELINE.md). Where the store (raw downloads, manifest, Delta

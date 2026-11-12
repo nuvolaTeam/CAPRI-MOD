@@ -113,9 +113,23 @@ hold within 1e-3 (`test_captrd_estimate_ms.py`: Denmark in the fast suite, six m
   2030 1,086.7 against 1,092.9; Denmark 2020 (phase 1 before the proximity term) 1.4647 against 1.4635. Denmark
   2030's Solve2: 7 lower and 4 upper bounds of 1,625 differ from CAPTRD's (17 tries). Poland 2030 open (2.85e6
   against 2.21e6, phase 1 before the proximity term; the milk losses' bounds).
-- Found: FIX-7 (ARTIF's upper bound, fix_est.gms l. 810) cannot act as decided: the statement takes the max with the
-  previous upper bound, CAPTRD's standard 1e9 (estimate_ms.gms l. 56), so with the parenthesis fixed the bound stays
-  1e9. Left as coded; its form is for the project lead to decide again.
+- The run-to-run variation traced: CAPTRD's data preparation (prepare.py, requirements.py) summed over Python sets,
+  in hash order, so each process's prepared data differed in the last bits (1,025 of Denmark's 80,030 values, at most
+  6e-15 relative: the product groups, DOMM, UAAR, LU and the requirement functions), and the estimation's widening,
+  which turns on near-ties, took different paths from them. The sums now run over sorted members: two preparations of
+  Denmark in separate processes are bit-identical. Denmark 2030's Solve2 on it: 16 tries, 8 lower and 10 upper of the
+  1,625 bounds differ from CAPTRD's stored ones (the test allows 2%).
+- Poland 2030's Solve1: comi_bounds.gms sets LOSF.COMI's bounds again at every try and release_comi_yields.gms opens
+  them by 0.995^n at try n, so the final bound records the try: CAPTRD's (749.07 x 0.995^25) says its Solve1 of Poland
+  2030 took at least 26 tries, where the port's (x 0.995^15, IPOPT's marginals) last opened it at try 15. The
+  objective, dominated by LOSF.COMI (a support of 1.2 with a small variance against a bound near 700), follows the try
+  count; a footprint of CONOPT's path the port does not reproduce.
+- FIX-7 implemented (the project lead, 12 November 2026): ARTIF's upper bound (fix_est.gms l. 810) has a misplaced
+  parenthesis, 1.02**(OrdT(ExAnte)) - OrdT("BAS") for 1.02**(OrdT(ExAnte) - OrdT("BAS")); capri-mod fixes the parenthesis
+  (setting `captrd.artif_upper_bound_as_coded`, false; the parity tests against CAPTRD's stored bounds set true). The
+  statement's max with the previous upper bound, CAPTRD's standard 1e9 (estimate_ms.gms l. 56), is kept as coded, so
+  where that is 1e9 the bound stays 1e9 (about 1e20 as coded): the fix changes the bound's value, not whether it binds;
+  in CAPTRD's stored results ARTIF never grows faster than 2% a year.
 - An IPOPT solver error (insufficient memory, an internal error or exception) now stops the estimation instead of being
   taken for an infeasible model and widened (CAPTRD aborts on a solver error, estimate_ms.gms l. 230, 243).
 
