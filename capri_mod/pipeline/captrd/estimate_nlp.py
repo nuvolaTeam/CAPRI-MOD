@@ -86,10 +86,11 @@ def _settings():
 def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, float], up: Dict[K2, float],
           wvar: Dict[K2, float], start: Dict[K2, float], expertlo: Dict[K2, float] = None,
           expertup: Dict[K2, float] = None, basm: Optional[callable] = None, log: Optional[List[str]] = None,
-          opts: Optional[dict] = None) -> Result:
+          opts: Optional[dict] = None, widen: bool = True) -> Result:
     """m_trendMS for one member state and year. p: the point's data (support relative, as the bounds); lo, up: the
     bounds (estimate_bounds.bounds); wvar: wVarErr; start: the starting levels (CAPTRD: estP of the previous solve, else
-    the support, estimate_ms.gms l. 79-90); basm(c, w): p_data's BASM (the widening's floor at zero)."""
+    the support, estimate_ms.gms l. 79-90); basm(c, w): p_data's BASM (the widening's floor at zero). widen=False: one
+    solve, no widening (clean_tiny.gms's solve, which aborts on an infeasible model instead)."""
     import casadi as ca
     o = dict(_settings())
     o.update(opts or {})
@@ -158,8 +159,9 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
         log.append(f"try {ntry}: {status}, max. infeasibility {viol:.2e}, SSQ {float(sol['f']):.6g}")
         if status in SOLVER_ERRORS:
             raise RuntimeError(f"m_trendMS {d.ms} {d.year}: solver error {status} at try {ntry}")
-        if viol <= float(o["nlp_tolinfeas"]) and status in ("Solve_Succeeded", "Solved_To_Acceptable_Level"):
-            return Result({k: float(x[i]) for i, k in enumerate(keys)}, float(sol["f"]), True, ntry + 1, status,
+        ok = viol <= float(o["nlp_tolinfeas"]) and status in ("Solve_Succeeded", "Solved_To_Acceptable_Level")
+        if ok or not widen:
+            return Result({k: float(x[i]) for i, k in enumerate(keys)}, float(sol["f"]), ok, ntry + 1, status,
                           lo_, up_)
         lam = np.array(sol["lam_x"]).ravel()
         if phase1:

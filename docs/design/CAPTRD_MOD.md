@@ -752,3 +752,30 @@ Order of work (proposed): 2a, 2c, 2d one by one, each against its position; then
 the Step 1 test country) against step2, then all; then 2f and 3. 2e is the largest piece: the equations of
 equations.gms ported block by block, each block checked by evaluating it at CAPTRD's own step2 solution (its residual
 must be zero) before the NLP is solved.
+
+### 12.6 Stage 2e: Solve2 against Step3; clean_tiny and the step3 copies (12 November 2026)
+
+**Solve2 against Step3** (Denmark, Austria, France 2030; CAPTRD's stored support and wVarErr, the objective SSQS_ over
+the positions Step3 holds). On CAPTRD's own final bounds (a bound it does not store read as 0, NTRD free) the port's
+equations are feasible at the first solve and reach the same optimum as on its own widened bounds; a start at Step3
+returns to it. Apart from the fossil fuels the port's objective is at or below Step3's (DK 0.1390 against 0.1412, AT
+589.7 against 602.0, FR 0.01527 against 0.01531). The fossil fuels: MBAL_ is active for DISL and GASL (HCOM has
+observations) with no supply term, so the estimation sets their HCOM to zero, in the port and in CAPTRD's Solve1
+(step2); copy_labour_biofuel_on_presult.gms l. 56-59 then overwrites Step3's fossil fuel rows with the Expert supports
+(Step3 equals Expert on every fuel position of the three countries). CAPTRD's final fuel rows therefore do not satisfy
+its MBAL_; that is CAPTRD as coded. The stored results are those after captrdfrm.gms, which includes that file
+(l. 778).
+
+**clean_tiny.gms** (`clean_tiny.py`, sets ColsTiny, RowsTiny, ColsTinyFodd, FODF, FEDACT_TO_FODDI from
+build_captrd_sets.py, p_tiny 0.1 of sets_captrd.gms l. 471): the support at Solve2's levels, the bounds within 0.5%,
+the tiny values flagged and passed on, the re-solve (a second solve if not optimal, an infeasible one stops as CAPTRD
+aborts), the support, variances and bounds restored. The solve is estimate_nlp.solve without the widening
+(`widen=False`). **copy_labour_biofuel_on_presult.gms** (`step3_copies.py`): the labour positions from the activity
+levels and GROF.LABO / LABN's trends, the fossil fuels from Expert, INHA.LEVL from p_data. Against Step3 on the
+positions it holds, after Solve2, clean_tiny and the copies: within 2% DK 94.3% (Solve2 alone 84.0%), AT 97.9%
+(89.6%), FR 87.3% (77.2%); within 0.5% DK 83.9%, AT 92.7%, FR 73.5% (the full preparation of all countries; the test's
+DK-and-AT preparation gives DK 92.0% against 81.9%, the widening's path differing with the inputs' last digits). The
+rest are the solves' points where the objective is nearly flat (trade IMPT, EXPT, NTRD: Denmark's olive oil imports and
+exports 8.6e7 against 1.1, both free of the objective; the young cattle's feed mix CAMF, CAFR, BULL, BULH; INHA,
+foodSh), not yet resolved: IPOPT, an interior-point method, ends such free directions inside their boxes (up to the
+standard 1e9), CONOPT near its start.

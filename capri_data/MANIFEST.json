@@ -6206,6 +6206,26 @@
     "builder": "build_captrd_sets (not in the trace yet)"
    }
   },
+  "capri_data/pipeline/captrd/sets/colstiny.csv": {
+   "description": "CAPTRD's set ColsTiny (columns that are zero or at least p_tiny; sets_captrd.gms l. 474-476: MrkBalE and DOMM): one member per row in d0, 15 members (e.g. GROF, IMPT); transcribed by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).",
+   "kind": "structure",
+   "rows": 15,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/colstinyfodd.csv": {
+   "description": "CAPTRD's set ColsTinyFodd (columns with zero fodder entries where a fodder LEVL becomes zero; sets_captrd.gms l. 481-484: GROF, FEDM, DOMM, EAAG and CAPRI's MAACT): one member per row in d0, 22 members (e.g. GROF, FEDM); transcribed (MAACT from CAPRI's instantiation in sim_ini_21730) by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).",
+   "kind": "structure",
+   "rows": 22,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
   "capri_data/pipeline/captrd/sets/corfeedlosf.csv": {
    "description": "CAPRI's global set corFeedLosf (feed items whose losses coco2 may adjust; gams/sets.gms l. 5590): one member per row in d0, 5 members (e.g. FGRA, FMAI); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py.",
    "kind": "structure",
@@ -6306,6 +6326,16 @@
     "builder": "build_captrd_sets (not in the trace yet)"
    }
   },
+  "capri_data/pipeline/captrd/sets/fedact_to_foddi.csv": {
+   "description": "CAPRI's global set FEDACT_TO_FODDI (fodder producing activities to non-tradeable fodder inputs; gams/sets.gms l. 5810-5812): one pair per row (d0, d1), 5 pairs (e.g. MAIF.FMAI, ROOF.FROO); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).",
+   "kind": "structure",
+   "rows": 5,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
   "capri_data/pipeline/captrd/sets/feed.csv": {
    "description": "CAPRI's global set FEED (feedingstuff as inputs; gams/sets.gms l. 4732): one member per row in d0, 12 members (e.g. FGRA, FMAI); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py.",
    "kind": "structure",
@@ -6360,6 +6390,16 @@
    "description": "CAPRI's global set FODDI (non-tradeable feedingstuffs as inputs; gams/sets.gms l. 4829): one member per row in d0, 7 members (e.g. FGRA, FMAI); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the bounds of captrd/fix_est.gms.",
    "kind": "structure",
    "rows": 7,
+   "columns": 1,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/fodf.csv": {
+   "description": "CAPRI's global set FODF (fodder outputs; gams/sets.gms l. 5763): one member per row in d0, 4 members (e.g. MAIF, ROOF); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).",
+   "kind": "structure",
+   "rows": 4,
    "columns": 1,
    "origin": {
     "nature": "capri",
@@ -7315,6 +7355,16 @@
    "kind": "structure",
    "rows": 28,
    "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_sets (not in the trace yet)"
+   }
+  },
+  "capri_data/pipeline/captrd/sets/rowstiny.csv": {
+   "description": "CAPTRD's set RowsTiny (rows that are zero or at least p_tinyR; sets_captrd.gms l. 478-479): one member per row in d0, 1 members (e.g. LEVL); transcribed by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).",
+   "kind": "structure",
+   "rows": 1,
+   "columns": 1,
    "origin": {
     "nature": "capri",
     "builder": "build_captrd_sets (not in the trace yet)"

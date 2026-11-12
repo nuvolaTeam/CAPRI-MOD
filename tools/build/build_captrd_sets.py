@@ -59,6 +59,12 @@ S_ROWS_LITERAL = ["FENI", "FPRI", "HFCS", "LEVL", "TOOU", "YDAYS", "DAYS", "HERD
 NO_YIELD_DROP_LITERAL = ["PARI", "MAIF", "ROOF", "POTA", "SUGB", "PULS", "TOBA", "TAGR", "TEXT", "DCOL", "DCOH",
                          "SOWS", "HENS", "OOIL", "GRAE", "GRAI"]                              # l. 465-467 (+ CERE, OILS)
 FIX_YIELD = ["OCRO", "OOIL", "OANI"]                                                         # l. 472
+# clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py): the columns that are zero or at least p_tiny (ColsTiny,
+# l. 474-476), the rows that are zero or at least p_tinyR (RowsTiny, l. 478-479), the columns with zero fodder entries
+# where a fodder LEVL becomes zero (ColsTinyFodd, l. 481-484: these four and MAACT)
+COLS_TINY = MRKBALE + ["DOMM"]
+ROWS_TINY = ["LEVL"]
+COLS_TINY_FODD_LITERAL = ["GROF", "FEDM", "DOMM", "EAAG"]
 
 # --- the data preparation (capri_mod/pipeline/captrd/prepare.py) ----------------------------------------------------
 # captrd.gms l. 418-478: the columns and rows loaded from CAPREG's time series, every DB_COLS / DB_ROWS member but these
@@ -116,7 +122,9 @@ GLOBAL_1D = {"ms": "RMSSUP", "srnuts1": "SRNUTS1", "srnuts2": "SRNUTS2", "urbann
              # equations.gms (capri_mod/pipeline/captrd/estimate_ms.py)
              "arbact": "arbAct", "secod": "SECOD", "resimp": "RESIMP", "mlkseco": "MLKSECO", "mlko": "MLKO",
              # fix_est.gms (capri_mod/pipeline/captrd/estimate_bounds.py)
-             "fix_yao": "FIX_YAO", "grsact": "GRSACT", "foddi": "FODDI"}
+             "fix_yao": "FIX_YAO", "grsact": "GRSACT", "foddi": "FODDI",
+             # clean_tiny.gms
+             "fodf": "FODF"}
 GLOBAL_2D = {"map_rr": "Map_RR", "pact_to_io": "PACT_TO_IO", "pact_to_i": "PACT_TO_I", "rms_to_rm": "RMS_TO_RM",
              "pact_to_o": "PACT_TO_O", "pact_to_y": "PACT_TO_Y",
              # load_coco1_data.gms
@@ -125,7 +133,9 @@ GLOBAL_2D = {"map_rr": "Map_RR", "pact_to_io": "PACT_TO_IO", "pact_to_i": "PACT_
              # adjust_to_biof_supports.gms
              "sed_to_oil": "SED_TO_OIL", "bio_prcd": "BIO_PRCD", "oil_to_cak": "OIL_TO_CAK",
              # equations.gms
-             "resimp_t_o": "RESIMP_T_O", "o_to_yani": "O_TO_YANI"}
+             "resimp_t_o": "RESIMP_T_O", "o_to_yani": "O_TO_YANI",
+             # clean_tiny.gms
+             "fedact_to_foddi": "FEDACT_TO_FODDI"}
 GLOBAL_3D = {"map_rrt": "MAP_RRT"}                     # captrd_policy.gms (sugar quotas of the EU members by year)
 
 
@@ -208,6 +218,9 @@ def main() -> None:
     _write("reqste", REQSTE)
     _write("cropswithmaximumyields", sorted(set(CROPS_MAX_YIELDS_LITERAL) | set(_members(ref, "CERE"))))
     _write("aactwith365days", AACT365)
+    _write("colstiny", COLS_TINY)
+    _write("rowstiny", ROWS_TINY)
+    _write("colstinyfodd", COLS_TINY_FODD_LITERAL + [a for a in _members(ref, "MAACT") if a not in COLS_TINY_FODD_LITERAL])
     for out, s in GLOBAL_1D.items():
         _write(out, _members(ref, s))
     for out, s in GLOBAL_2D.items():

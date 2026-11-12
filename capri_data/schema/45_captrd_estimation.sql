@@ -180,3 +180,39 @@ CREATE TABLE ctrd_aactwith365days (
     PRIMARY KEY (d0)
 );
 COMMENT ON TABLE ctrd_aactwith365days IS 'CAPTRD''s set AACTwith365days (animal activities lasting the whole year; sets_captrd.gms l. 466): one member per row in d0, 7 members (e.g. DCOW, DCOL); transcribed by tools/build/build_captrd_sets.py (CropsWithMaximumYields with CAPRI''s CERE), for the bounds of captrd/fix_est.gms.';
+
+-- file: capri_data/pipeline/captrd/sets/colstiny.csv
+CREATE TABLE ctrd_colstiny (
+    d0 VARCHAR NOT NULL,
+    PRIMARY KEY (d0)
+);
+COMMENT ON TABLE ctrd_colstiny IS 'CAPTRD''s set ColsTiny (columns that are zero or at least p_tiny; sets_captrd.gms l. 474-476: MrkBalE and DOMM): one member per row in d0, 15 members (e.g. GROF, IMPT); transcribed by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).';
+
+-- file: capri_data/pipeline/captrd/sets/rowstiny.csv
+CREATE TABLE ctrd_rowstiny (
+    d0 VARCHAR NOT NULL,
+    PRIMARY KEY (d0)
+);
+COMMENT ON TABLE ctrd_rowstiny IS 'CAPTRD''s set RowsTiny (rows that are zero or at least p_tinyR; sets_captrd.gms l. 478-479): one member per row in d0, 1 members (e.g. LEVL); transcribed by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).';
+
+-- file: capri_data/pipeline/captrd/sets/colstinyfodd.csv
+CREATE TABLE ctrd_colstinyfodd (
+    d0 VARCHAR NOT NULL,
+    PRIMARY KEY (d0)
+);
+COMMENT ON TABLE ctrd_colstinyfodd IS 'CAPTRD''s set ColsTinyFodd (columns with zero fodder entries where a fodder LEVL becomes zero; sets_captrd.gms l. 481-484: GROF, FEDM, DOMM, EAAG and CAPRI''s MAACT): one member per row in d0, 22 members (e.g. GROF, FEDM); transcribed (MAACT from CAPRI''s instantiation in sim_ini_21730) by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).';
+
+-- file: capri_data/pipeline/captrd/sets/fodf.csv
+CREATE TABLE ctrd_fodf (
+    d0 VARCHAR NOT NULL,
+    PRIMARY KEY (d0)
+);
+COMMENT ON TABLE ctrd_fodf IS 'CAPRI''s global set FODF (fodder outputs; gams/sets.gms l. 5763): one member per row in d0, 4 members (e.g. MAIF, ROOF); copied from CAPRI''s instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).';
+
+-- file: capri_data/pipeline/captrd/sets/fedact_to_foddi.csv
+CREATE TABLE ctrd_fedact_to_foddi (
+    d0 VARCHAR NOT NULL,
+    d1 VARCHAR NOT NULL,
+    PRIMARY KEY (d0, d1)
+);
+COMMENT ON TABLE ctrd_fedact_to_foddi IS 'CAPRI''s global set FEDACT_TO_FODDI (fodder producing activities to non-tradeable fodder inputs; gams/sets.gms l. 5810-5812): one pair per row (d0, d1), 5 pairs (e.g. MAIF.FMAI, ROOF.FROO); copied from CAPRI''s instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).';

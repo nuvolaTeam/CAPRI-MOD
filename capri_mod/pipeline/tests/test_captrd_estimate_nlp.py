@@ -40,6 +40,7 @@ import pytest
 from capri_mod.pipeline.captrd import estimate_bounds as EB
 from capri_mod.pipeline.captrd import estimate_ms as E
 from capri_mod.pipeline.captrd import estimate_nlp as N
+from capri_mod.csvio import read_csv
 from capri_mod.pipeline.tests import test_captrd_estimate_bounds as TB
 from capri_mod.pipeline.tests import test_captrd_estimate_ms as TM
 from capri_mod.pipeline.tests.test_captrd_estimate_bounds import needs_reference, prepared  # noqa: F401
@@ -47,6 +48,11 @@ from capri_mod.pipeline.tests.test_captrd_expert_support import assembled  # noq
 from capri_mod.pipeline.tests.test_captrd_national_supports import (  # noqa: F401
     state, dgagri, aglink_p, scaled, result, need)
 from capri_mod.pipeline.tests.test_captrd_macro import population  # noqa: F401
+
+
+def EB_SETS():
+    from capri_mod.pipeline.captrd import prepare as _P
+    return _P.SETS_DIR
 
 
 @pytest.mark.slow
@@ -81,6 +87,24 @@ def test_denmark_2030_solve2_widens_to_captrds_bounds(prepared):  # noqa: F811
     # every equation holds at the solution
     res = E.residuals(E.Point(**{**p.__dict__, "V": r.x, "lo": r.lo, "up": r.up}), S, level=start)
     assert not E.violations(res, 1e-4)
+    # stage 2f: clean_tiny.gms, then copy_labour_biofuel_on_presult.gms: CAPTRD's step3 on the positions it holds (the
+    # rest: the solves' points in the objective's flat directions, trade and the feed mix). 12 November 2026, the
+    # test's preparation (DK and AT): 92.0% within 2% (Solve2 alone: 81.9%); the full preparation of all countries
+    # 94.3% (84.0%): the widening's path differs with the inputs' last digits
+    from capri_mod.pipeline.captrd import clean_tiny as CT, step3_copies as SC
+    rc = CT.clean(p, S, B, D, r, tab["wVarErr"])
+    st3 = TB._by_year("step3", ms, [y]).get(y, {})
+    ex = TB._by_year("Expert", ms, [y]).get(y, {})
+    ref3 = E.from_stored(E.Point(V=st3, support=sup_abs, **{**kw, "lo": {}, "up": {}}), S, st3)
+    ex_r = E.from_stored(E.Point(V=ex, support=sup_abs, **{**kw, "lo": {}, "up": {}}), S, ex)
+    fos = set(read_csv(EB_SETS() / "fosfuels.csv", keep_default_na=False, dtype=str).d0)
+    x3 = SC.copy(rc.x, lambda c, w: pb.get((c, w), 0.0), S.mpact, set(S.mpact) | {a for a, _o in S.pact_to_io}, fos,
+                 ex_r, D.res.get("p_data", {}).get(("INHA", "LEVL"), 0.0))
+    held = [k for k in sorted(st3) if k in ref3 and k[0] in S.cols_est and k[1] in S.rows_est]
+    share = lambda V: sum(abs(V.get(k, 0.0) - ref3[k]) <= 0.02 * max(abs(ref3[k]), 1.0) for k in held) / len(held)  # noqa: E731
+    s2, s3 = share(r.x), share(x3)
+    print(f"step3 DK 2030: share within 2%: Solve2 {s2:.3f}, after clean_tiny and the copies {s3:.3f} of {len(held)}")
+    assert s3 >= 0.90 and s3 > s2 + 0.05
 
 
 def test_widening_rules():

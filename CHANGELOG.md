@@ -32,6 +32,19 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 12 November 2026 — CAPTRD-MOD stage 2e: Solve2 against Step3; clean_tiny and the step3 copies
+
+- Solve2 against CAPTRD's Step3 (DK, AT, FR 2030): on CAPTRD's own final bounds the port is feasible at the first solve
+  and reaches the same optimum; apart from the fossil fuels its objective is at or below Step3's. The gap reported
+  earlier (1.2-1.9 times Step3's) is the fossil fuels' HCOM, which the estimation sets to zero (MBAL_ with no supply
+  term, in CAPTRD's Solve1 too) and copy_labour_biofuel_on_presult.gms then overwrites with the Expert supports.
+- New: clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py) and copy_labour_biofuel_on_presult.gms
+  (step3_copies.py); estimate_nlp.solve(widen=False) for clean_tiny's single solve; the sets ColsTiny, RowsTiny,
+  ColsTinyFodd, FODF, FEDACT_TO_FODDI (build_captrd_sets.py). Against Step3 on the positions it holds, within 2%: DK
+  94.3% (Solve2 alone 84.0%), AT 97.9% (89.6%), FR 87.3% (77.2%); the rest the solves' points in the objective's flat
+  directions (trade, the young cattle's feed mix). Tests: test_captrd_estimate_nlp.py (DK, extended),
+  test_captrd_step3_copies.py.
+
 ## 12 November 2026 — the market alone against CAPRI's Green Deal market
 
 - New check tools/check/check_market_gd.py with its data capri_data/validation/greendeal_2030/capri_gd_market_2030.csv.xz

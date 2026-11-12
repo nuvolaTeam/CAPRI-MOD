@@ -10729,6 +10729,72 @@
     "tests": []
    }
   },
+  "ctrd_colstiny": {
+   "file": "capri_data/pipeline/captrd/sets/colstiny.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPTRD's set ColsTiny (columns that are zero or at least p_tiny; sets_captrd.gms l. 474-476: MrkBalE and DOMM): one member per row in d0, 15 members (e.g. GROF, IMPT); transcribed by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_colstinyfodd": {
+   "file": "capri_data/pipeline/captrd/sets/colstinyfodd.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPTRD's set ColsTinyFodd (columns with zero fodder entries where a fodder LEVL becomes zero; sets_captrd.gms l. 481-484: GROF, FEDM, DOMM, EAAG and CAPRI's MAACT): one member per row in d0, 22 members (e.g. GROF, FEDM); transcribed (MAACT from CAPRI's instantiation in sim_ini_21730) by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_corfeedlosf": {
    "file": "capri_data/pipeline/captrd/sets/corfeedlosf.csv",
    "declared_in": "29_captrd_more.sql",
@@ -11383,6 +11449,45 @@
     ]
    }
   },
+  "ctrd_fedact_to_foddi": {
+   "file": "capri_data/pipeline/captrd/sets/fedact_to_foddi.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's global set FEDACT_TO_FODDI (fodder producing activities to non-tradeable fodder inputs; gams/sets.gms l. 5810-5812): one pair per row (d0, d1), 5 pairs (e.g. MAIF.FMAI, ROOF.FROO); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "d1",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0",
+    "d1"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_feed": {
    "file": "capri_data/pipeline/captrd/sets/feed.csv",
    "declared_in": "29_captrd_more.sql",
@@ -11587,6 +11692,39 @@
     "tests": []
    }
   },
+  "ctrd_fodf": {
+   "file": "capri_data/pipeline/captrd/sets/fodf.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's global set FODF (fodder outputs; gams/sets.gms l. 5763): one member per row in d0, 4 members (e.g. MAIF, ROOF); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_fosfuels": {
    "file": "capri_data/pipeline/captrd/sets/fosfuels.csv",
    "declared_in": "29_captrd_more.sql",
@@ -11617,7 +11755,9 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_estimate_nlp.py"
+    ]
    }
   },
   "ctrd_fout": {
@@ -15926,6 +16066,39 @@
     "tests": [
      "capri_mod/pipeline/tests/test_captrd_sets.py"
     ]
+   }
+  },
+  "ctrd_rowstiny": {
+   "file": "capri_data/pipeline/captrd/sets/rowstiny.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPTRD's set RowsTiny (rows that are zero or at least p_tinyR; sets_captrd.gms l. 478-479): one member per row in d0, 1 members (e.g. LEVL); transcribed by tools/build/build_captrd_sets.py, for captrd/clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py).",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
    }
   },
   "ctrd_rset": {
@@ -55632,12 +55805,12 @@
   }
  ],
  "code_data": {
-  "capri/keep": 448,
+  "capri/keep": 455,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 27,
   "open/keep": 4,
-  "physical/keep": 12,
+  "physical/keep": 13,
   "technical/keep": 33
  },
  "other_notes": {}
