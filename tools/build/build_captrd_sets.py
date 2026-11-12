@@ -92,6 +92,12 @@ MLKCNT = ["FATS", "PROT"]
 LO_TO_HI = [("GRAE", "GRAI"), ("BULL", "BULH"), ("HEIL", "HEIH"), ("DCOL", "DCOH")]
 SPLITACTSLO = ["DCOL", "BULL", "HEIL", "GRAE"]
 BULF = ["BULL", "BULH"]                                                                      # l. 341 (Dailyup_)
+# the bounds of the estimation (fix_est.gms; capri_mod/pipeline/captrd/estimate_bounds.py)
+COWSACT = ["DCOL", "DCOH", "SCOW"]                                                            # l. 332
+REQSTE = ["ENNE", "CRPR"]                                                                     # l. 451
+CROPS_MAX_YIELDS_LITERAL = ["MAIF", "POTA", "SUGB", "ROOF", "GRAE", "GRAI", "OFAR", "TOBA", "CITR", "TAGR", "APPL",
+                            "TWIN", "OLIV", "OVEG", "OFRU", "TEXT", "TABO"]                   # l. 461-463 (+ CERE)
+AACT365 = ["DCOW", "DCOL", "DCOH", "SCOW", "SOWS", "SHGM", "HENS"]                            # l. 466
 # CAPRI's global sets the preparation reads, as instantiated (copied from the reference export): MS is sets.rmssup
 # (sets_captrd.gms l. 54-56), NT2 the alias of SRNUTS2 (l. 69)
 GLOBAL_1D = {"ms": "RMSSUP", "srnuts1": "SRNUTS1", "srnuts2": "SRNUTS2", "urbannuts": "urbanNUTS", "secom": "SECOM",
@@ -108,7 +114,9 @@ GLOBAL_1D = {"ms": "RMSSUP", "srnuts1": "SRNUTS1", "srnuts2": "SRNUTS2", "urbann
              # biofuel/biofuel_trends.gms
              "cere": "CERE", "biostockoilp": "bioStockOilP", "bio_by": "BIO_BY", "oseco": "OSECO", "balpos": "BALPOS",
              # equations.gms (capri_mod/pipeline/captrd/estimate_ms.py)
-             "arbact": "arbAct", "secod": "SECOD", "resimp": "RESIMP", "mlkseco": "MLKSECO", "mlko": "MLKO"}
+             "arbact": "arbAct", "secod": "SECOD", "resimp": "RESIMP", "mlkseco": "MLKSECO", "mlko": "MLKO",
+             # fix_est.gms (capri_mod/pipeline/captrd/estimate_bounds.py)
+             "fix_yao": "FIX_YAO", "grsact": "GRSACT", "foddi": "FODDI"}
 GLOBAL_2D = {"map_rr": "Map_RR", "pact_to_io": "PACT_TO_IO", "pact_to_i": "PACT_TO_I", "rms_to_rm": "RMS_TO_RM",
              "pact_to_o": "PACT_TO_O", "pact_to_y": "PACT_TO_Y",
              # load_coco1_data.gms
@@ -196,6 +204,10 @@ def main() -> None:
     _write("lo_to_hi", LO_TO_HI, 2)
     _write("splitactslo", SPLITACTSLO)
     _write("bulf", BULF)
+    _write("cowsact", COWSACT)
+    _write("reqste", REQSTE)
+    _write("cropswithmaximumyields", sorted(set(CROPS_MAX_YIELDS_LITERAL) | set(_members(ref, "CERE"))))
+    _write("aactwith365days", AACT365)
     for out, s in GLOBAL_1D.items():
         _write(out, _members(ref, s))
     for out, s in GLOBAL_2D.items():

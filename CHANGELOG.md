@@ -51,8 +51,16 @@ hold within 1e-3 (`test_captrd_estimate_ms.py`: Denmark in the fast suite, six m
   feed/feed_decl.gms) and p_NCNC_CONT as in sim_ini_21730 (`tools/build/build_captrd_estimation_params.py`, from a
   kept extract). The fill and fibre feed contents and the empty days, which CAPTRD's stored results do not hold, come
   from the port's own data preparation.
-- Found: CAPTRD's stored supports and bounds are those of its last solve (Solve2), not of Solve1, so step2 cannot be
-  reproduced from them; the bounds of fix_est.gms are the next step.
+- The bounds (fix_est.gms with comi_bounds.gms and biofuel_bounds.gms, and estimate_ms.gms's own;
+  `capri_mod/pipeline/captrd/estimate_bounds.py`): with Solve2's supports, CAPTRD's results of the year and the
+  port's prepared data, 43,874 of 47,172 bounds of Denmark, Austria, France, Poland and Spain in 2020, 2030 and 2050
+  equal the ones CAPTRD stores (`test_captrd_estimate_bounds.py`, slow suite). The rest: CAPTRD stores the bounds after
+  widening them for infeasible solves (estimate_ms.gms l. 222-420), not yet ported (foodSh, processing yields,
+  calories, a few trade rows), and the food intake INHA with HCOM, open.
+- Found: CAPTRD's stored supports, wVarErr and bounds are those of its last solve (Solve2), and Step3 is the result of
+  a further cleaning solve (clean_tiny.gms), so neither step2 nor step3 can be reproduced from the stored inputs
+  alone; fix_est.gms l. 810 raises 1.02 to the year, in effect no upper bound on artificial land (kept as coded).
+
 ## 12 November 2026 — manure pools: CAPRI's autarky buffers (p_mTradeAddCost)
 
 The pool market now adds CAPRI's autarky buffer to the trade cost of every link unused at the calibration point

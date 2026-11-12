@@ -5015,6 +5015,39 @@
     "tests": []
    }
   },
+  "ctrd_aactwith365days": {
+   "file": "capri_data/pipeline/captrd/sets/aactwith365days.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPTRD's set AACTwith365days (animal activities lasting the whole year; sets_captrd.gms l. 466): one member per row in d0, 7 members (e.g. DCOW, DCOL); transcribed by tools/build/build_captrd_sets.py (CropsWithMaximumYields with CAPRI's CERE), for the bounds of captrd/fix_est.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_ag_ag_balpos": {
    "file": "capri_data/pipeline/captrd/sets/aglink2023dgAgri/ag_balPos.csv",
    "declared_in": "36_captrd_aglink_sets.sql",
@@ -8726,7 +8759,8 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/pipeline/captrd/agriprod_supports.py"
+     "capri_mod/pipeline/captrd/agriprod_supports.py",
+     "capri_mod/pipeline/captrd/estimate_bounds.py"
     ],
     "builders": [],
     "checks": [
@@ -10728,6 +10762,39 @@
     "tests": []
    }
   },
+  "ctrd_cowsact": {
+   "file": "capri_data/pipeline/captrd/sets/cowsact.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPTRD's set CowsAct (the cow activities; sets_captrd.gms l. 332): one member per row in d0, 3 members (e.g. DCOL, DCOH); transcribed by tools/build/build_captrd_sets.py (CropsWithMaximumYields with CAPRI's CERE), for the bounds of captrd/fix_est.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_cropc_to_g": {
    "file": "capri_data/pipeline/captrd/sets/cropc_to_g.csv",
    "declared_in": "28_captrd_sets.sql",
@@ -10774,6 +10841,39 @@
    "declared_in": "29_captrd_more.sql",
    "layout": [],
    "comment": "CAPRI's global set CROPO (crop outputs; gams/sets.gms l. 4565): one member per row in d0, 37 members (e.g. SWHE, DWHE); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_cropswithmaximumyields": {
+   "file": "capri_data/pipeline/captrd/sets/cropswithmaximumyields.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPTRD's set CropsWithMaximumYields (crops with plausible maximum yields; sets_captrd.gms l. 461-463): one member per row in d0, 24 members (e.g. APPL, BARL); transcribed by tools/build/build_captrd_sets.py (CropsWithMaximumYields with CAPRI's CERE), for the bounds of captrd/fix_est.gms.",
    "columns": [
     {
      "name": "d0",
@@ -11386,11 +11486,77 @@
     "tests": []
    }
   },
+  "ctrd_fix_yao": {
+   "file": "capri_data/pipeline/captrd/sets/fix_yao.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's global set FIX_YAO (animals with a fixed output coefficient of young animals; gams/sets.gms l. 5213): one member per row in d0, 3 members (e.g. HEIR, CAMR); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the bounds of captrd/fix_est.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_fixyield": {
    "file": "capri_data/pipeline/captrd/sets/fixyield.csv",
    "declared_in": "28_captrd_sets.sql",
    "layout": [],
    "comment": "CAPTRD's own set FixYield(PACT) \"Activities with fixed yield\" (gams/captrd/sets_captrd.gms l. 464: OCRO, OOIL, OANI), transcribed in tools/build/build_captrd_sets.py; read by no code yet: CAPTRD fixes these activities' ex-ante yields at their base value in the estimation (captrd/fix_est.gms l. 541), so it is kept for when CAPTRD's Steps 2-3 are ported (the project lead's decision, 30 October 2026).",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_foddi": {
+   "file": "capri_data/pipeline/captrd/sets/foddi.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's global set FODDI (non-tradeable feedingstuffs as inputs; gams/sets.gms l. 4829): one member per row in d0, 7 members (e.g. FGRA, FMAI); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the bounds of captrd/fix_est.gms.",
    "columns": [
     {
      "name": "d0",
@@ -12824,6 +12990,39 @@
     "tests": []
    }
   },
+  "ctrd_grsact": {
+   "file": "capri_data/pipeline/captrd/sets/grsact.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's global set GRSACT (grass and grazing activities; gams/sets.gms l. 2958): one member per row in d0, 4 members (e.g. FallGr, GRAE); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the bounds of captrd/fix_est.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_iyani": {
    "file": "capri_data/pipeline/captrd/sets/iyani.csv",
    "declared_in": "29_captrd_more.sql",
@@ -13416,7 +13615,9 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_estimate_bounds.py"
+    ]
    }
   },
   "ctrd_map_rrt": {
@@ -15433,6 +15634,39 @@
      "capri_mod/pipeline/tests/test_captrd_longrun_supports.py",
      "capri_mod/pipeline/tests/test_captrd_prepare.py"
     ]
+   }
+  },
+  "ctrd_reqste": {
+   "file": "capri_data/pipeline/captrd/sets/reqste.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPTRD's set REQSTE (the energy and protein requirements; sets_captrd.gms l. 451): one member per row in d0, 2 members (e.g. ENNE, CRPR); transcribed by tools/build/build_captrd_sets.py (CropsWithMaximumYields with CAPRI's CERE), for the bounds of captrd/fix_est.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
    }
   },
   "ctrd_resimp": {
@@ -55394,7 +55628,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 346,
+  "capri/keep": 431,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 26,

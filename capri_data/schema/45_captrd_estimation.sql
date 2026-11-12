@@ -129,3 +129,54 @@ CREATE TABLE src_captrd_estimation_params (
 COMMENT ON TABLE src_captrd_estimation_params IS 'CAPRI''s p_carcassShare, p_startWgt and p_NCNC_CONT as in sim_ini_21730 (the raw dataset nuvolaTeam/capri-mod-raw, capri/results/simini/sim_ini_21730/), the records tools/build/build_captrd_estimation_params.py uses, kept so it rebuilds without the raw files; d1 only for p_NCNC_CONT.';
 INSERT INTO value_units VALUES
   ('src_captrd_estimation_params', 'value', NULL, 'open', 'by symbol: see ctrd_carcass_share, ctrd_start_wgt, ctrd_ncnc_cont');
+
+-- the bounds of the estimation (captrd/fix_est.gms; capri_mod/pipeline/captrd/estimate_bounds.py)
+
+-- file: capri_data/pipeline/captrd/sets/fix_yao.csv
+CREATE TABLE ctrd_fix_yao (
+    d0 VARCHAR NOT NULL,
+    PRIMARY KEY (d0)
+);
+COMMENT ON TABLE ctrd_fix_yao IS 'CAPRI''s global set FIX_YAO (animals with a fixed output coefficient of young animals; gams/sets.gms l. 5213): one member per row in d0, 3 members (e.g. HEIR, CAMR); copied from CAPRI''s instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the bounds of captrd/fix_est.gms.';
+
+-- file: capri_data/pipeline/captrd/sets/grsact.csv
+CREATE TABLE ctrd_grsact (
+    d0 VARCHAR NOT NULL,
+    PRIMARY KEY (d0)
+);
+COMMENT ON TABLE ctrd_grsact IS 'CAPRI''s global set GRSACT (grass and grazing activities; gams/sets.gms l. 2958): one member per row in d0, 4 members (e.g. FallGr, GRAE); copied from CAPRI''s instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the bounds of captrd/fix_est.gms.';
+
+-- file: capri_data/pipeline/captrd/sets/foddi.csv
+CREATE TABLE ctrd_foddi (
+    d0 VARCHAR NOT NULL,
+    PRIMARY KEY (d0)
+);
+COMMENT ON TABLE ctrd_foddi IS 'CAPRI''s global set FODDI (non-tradeable feedingstuffs as inputs; gams/sets.gms l. 4829): one member per row in d0, 7 members (e.g. FGRA, FMAI); copied from CAPRI''s instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the bounds of captrd/fix_est.gms.';
+
+-- file: capri_data/pipeline/captrd/sets/cowsact.csv
+CREATE TABLE ctrd_cowsact (
+    d0 VARCHAR NOT NULL,
+    PRIMARY KEY (d0)
+);
+COMMENT ON TABLE ctrd_cowsact IS 'CAPTRD''s set CowsAct (the cow activities; sets_captrd.gms l. 332): one member per row in d0, 3 members (e.g. DCOL, DCOH); transcribed by tools/build/build_captrd_sets.py (CropsWithMaximumYields with CAPRI''s CERE), for the bounds of captrd/fix_est.gms.';
+
+-- file: capri_data/pipeline/captrd/sets/reqste.csv
+CREATE TABLE ctrd_reqste (
+    d0 VARCHAR NOT NULL,
+    PRIMARY KEY (d0)
+);
+COMMENT ON TABLE ctrd_reqste IS 'CAPTRD''s set REQSTE (the energy and protein requirements; sets_captrd.gms l. 451): one member per row in d0, 2 members (e.g. ENNE, CRPR); transcribed by tools/build/build_captrd_sets.py (CropsWithMaximumYields with CAPRI''s CERE), for the bounds of captrd/fix_est.gms.';
+
+-- file: capri_data/pipeline/captrd/sets/cropswithmaximumyields.csv
+CREATE TABLE ctrd_cropswithmaximumyields (
+    d0 VARCHAR NOT NULL,
+    PRIMARY KEY (d0)
+);
+COMMENT ON TABLE ctrd_cropswithmaximumyields IS 'CAPTRD''s set CropsWithMaximumYields (crops with plausible maximum yields; sets_captrd.gms l. 461-463): one member per row in d0, 24 members (e.g. APPL, BARL); transcribed by tools/build/build_captrd_sets.py (CropsWithMaximumYields with CAPRI''s CERE), for the bounds of captrd/fix_est.gms.';
+
+-- file: capri_data/pipeline/captrd/sets/aactwith365days.csv
+CREATE TABLE ctrd_aactwith365days (
+    d0 VARCHAR NOT NULL,
+    PRIMARY KEY (d0)
+);
+COMMENT ON TABLE ctrd_aactwith365days IS 'CAPTRD''s set AACTwith365days (animal activities lasting the whole year; sets_captrd.gms l. 466): one member per row in d0, 7 members (e.g. DCOW, DCOL); transcribed by tools/build/build_captrd_sets.py (CropsWithMaximumYields with CAPRI''s CERE), for the bounds of captrd/fix_est.gms.';
