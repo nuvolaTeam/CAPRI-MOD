@@ -32,6 +32,14 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 12 November 2026 — the raw dataset without version tags
+
+- tools/pipeline/capri_raw_manifest.json no longer names a tag per file (the project lead's choice, 12 November 2026):
+  the tags v2026.11.10, v2026.11.11 and v2026.11.11.1 no longer resolved on Hugging Face (the repository's history is
+  intact). Each file stays pinned by its SHA-256; the manifest names the dataset commit the files are at ("revision")
+  and keeps the uploads' notes as a dated history. make_raw_manifest.py and publish_raw_batch.py take --date (and record
+  the commit) instead of --version; the dataset card says the same. The tag v2026.11.11.2 still exists on the dataset.
+
 ## 12 November 2026 — manure pools: CAPRI's pool market (m_mPoolMarket) ported and the default (DEP-17)
 
 - outer_loop.manure_pool_form = "capri" (new, the default): CAPRI's manure pool market (manuremarket/

@@ -158,8 +158,10 @@ l. 1211, chk_market_data_greendeal_greendeal_scenarios.gdx; META: 10 November 20
 
 **The published set** (Hugging Face, gated: nuvolaTeam/capri-mod-raw; docs/design/MODEL_CONTENT_PLAN.md §12b): the
 files above under `originals/<path under capri_sources>` byte for byte, and their symbols as Parquet under
-`capri/results/<file stem>/` (tools/build/convert_capri_gdx.py). Every file with its SHA-256, size and version (tag) in
-tools/pipeline/capri_raw_manifest.json. First version `v2026.11.10` (10 November 2026): the six GDX files received that day
+`capri/results/<file stem>/` (tools/build/convert_capri_gdx.py). Every file with its SHA-256 and size in
+tools/pipeline/capri_raw_manifest.json, which also names the dataset commit the files are at ("revision") and the history
+of the uploads; uploads are no longer tagged, each file is pinned by its SHA-256 (the project lead, 12 November 2026; tags
+v2026.11.10 to v2026.11.11.2 were used until then, of which v2026.11.11.2 remains). First upload 10 November 2026: the six GDX files received that day
 (exports/ and results/ above).
 
 **`gdxlib/`**: GAMS's GDX library, `libgdxcclib64.so`. This is software, not data.

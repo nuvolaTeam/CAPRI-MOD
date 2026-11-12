@@ -1,8 +1,8 @@
 # CAPRI's manure pool market (m_mPoolMarket): the port (DEP-17)
 
 Status: ported 11 November 2026 as `outer_loop.manure_pool_form = "capri"` (the project lead: "proceed with the fix");
-inputs received the same day (priFertDist_<MS>1730defaulta.gdx, 26 EU files, NO000000 and the 8 non-EU; the raw dataset
-v2026.11.11.2). The default since 12 November 2026, with CAPRI's price averaging (manure_pool_price_update "capri"),
+inputs received the same day (priFertDist_<MS>1730defaulta.gdx, 26 EU files, NO000000 and the 8 non-EU; in the raw dataset
+since 11 November 2026). The default since 12 November 2026, with CAPRI's price averaging (manure_pool_price_update "capri"),
 after the checks of step 4.
 
 ## Why

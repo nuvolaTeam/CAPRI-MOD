@@ -11,9 +11,11 @@ installation, Parquet only (the originals are not published: the Parquet holds e
 The manifest's "sources" give per CAPRI file its name, SHA-256, size, where its folder comes from and whether it is
 trusted (tools/build/relayout_raw_dataset.py, tools/build/publish_raw_batch.py).
 
-    python tools/build/make_raw_manifest.py STAGE_DIR --version TAG [--note TEXT]
+    python tools/build/make_raw_manifest.py STAGE_DIR --date YYYY-MM-DD [--note TEXT] [--revision COMMIT]
 Merges the stage's files into the manifest (a file already listed with another hash is an error: a new version of a
-file gets a new path or the set a new major version).
+file gets a new path) and records the upload in the manifest's history; --revision, the dataset commit the files are
+at once uploaded. The dataset has no tags: each file is pinned by its SHA-256 and the manifest by the commit (the
+project lead, 12 November 2026).
 """
 from __future__ import annotations
 
@@ -39,26 +41,28 @@ def sha256(p: Path) -> str:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("stage", type=Path)
-    ap.add_argument("--version", required=True)
+    ap.add_argument("--date", required=True)
     ap.add_argument("--note", default="")
+    ap.add_argument("--revision", default="")
     a = ap.parse_args()
-    man = json.loads(OUT.read_text()) if OUT.exists() else {"repo": REPO, "repo_type": "dataset", "versions": [],
+    man = json.loads(OUT.read_text()) if OUT.exists() else {"repo": REPO, "repo_type": "dataset", "history": [],
                                                               "files": {}}
     added = 0
     for p in sorted(x for x in a.stage.rglob("*") if x.is_file()):
         rel = p.relative_to(a.stage).as_posix()
-        e = {"sha256": sha256(p), "size": p.stat().st_size, "version": a.version}
+        e = {"sha256": sha256(p), "size": p.stat().st_size}
         old = man["files"].get(rel)
         if old and old["sha256"] != e["sha256"]:
-            sys.exit(f"{rel}: listed with another SHA-256 ({old['sha256'][:12]}, version {old['version']})")
+            sys.exit(f"{rel}: listed with another SHA-256 ({old['sha256'][:12]})")
         if not old:
             man["files"][rel] = e
             added += 1
-    if a.version not in [v["tag"] for v in man["versions"]]:
-        man["versions"].append({"tag": a.version, "note": a.note, "files_added": added})
+    man.setdefault("history", []).append({"date": a.date, "note": a.note, "files_added": added})
+    if a.revision:
+        man["revision"] = a.revision
     man["files"] = dict(sorted(man["files"].items()))
     OUT.write_text(json.dumps(man, indent=1) + "\n")
-    print(f"{OUT.relative_to(ROOT)}: {added} files added in {a.version}, {len(man['files'])} in all")
+    print(f"{OUT.relative_to(ROOT)}: {added} files added ({a.date}), {len(man['files'])} in all")
 
 
 if __name__ == "__main__":

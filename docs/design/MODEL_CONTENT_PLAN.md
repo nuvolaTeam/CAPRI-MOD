@@ -729,7 +729,7 @@ Updated 12 November 2026 (the table of 4 November was stale). Status from the co
 | P1 obligatory set-aside | — | **done** 10 November 2026 | — | §12a |
 | P2 coupled support, Pillar I envelope | — | not started (with the port of CAPRI's premium module, before the end of CAPTRD-MOD) | — | §12a |
 | Data layout by role | — | **done** 11 November 2026 (capri_data/<base year>/, capri_data/baselines/<baseline>/<BAS><SIM>/) | — | DATA_LAYOUT.md |
-| CAPRI's sources as Parquet, for download (beyond CAPRI) | — | **done**: the gated dataset nuvolaTeam/capri-mod-raw (v2026.11.11.2, 170 sources) | — | §12b |
+| CAPRI's sources as Parquet, for download (beyond CAPRI) | — | **done**: the gated dataset nuvolaTeam/capri-mod-raw (170 sources, 11 November 2026; no tags since 12 November: the manifest pins each file by its SHA-256 and the dataset commit) | — | §12b |
 | Manure pools: CAPRI's pool market (DEP-17) | — | ported 11 November 2026 (outer_loop.manure_pool_form "capri"); default after the full-EU check | the excess-supply slope (CAPRI's code or its documented elasticity) | MANURE_POOL_PORT.md |
 | CAPTRD-MOD | — | stages 1, 2a-2d, 2f done; 2e (m_trendMS), 3 (NUTS2), 4 (reporting) to do | — | CAPTRD_MOD.md |
 

@@ -10,7 +10,7 @@ dat/<subfolder>, results/<module>, temp), location (where that folder comes from
 "inferred: <reason>") and trusted (yes/no); the Parquet goes to capri/<folder>/<file name without extension>/. A file
 whose SHA-256 the manifest's sources already list is skipped; a folder listed with another source is an error.
 
-    python tools/build/publish_raw_batch.py BATCH.csv STAGE_DIR --version TAG [--note TEXT] [--lib-dir DIR]
+    python tools/build/publish_raw_batch.py BATCH.csv STAGE_DIR --date YYYY-MM-DD [--note TEXT] [--lib-dir DIR]
 The Hugging Face token is the one huggingface_hub finds (its token file); it is never printed.
 """
 from __future__ import annotations
@@ -32,7 +32,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("batch", type=Path)
     ap.add_argument("stage", type=Path)
-    ap.add_argument("--version", required=True)
+    ap.add_argument("--date", required=True)
     ap.add_argument("--note", default="")
     ap.add_argument("--lib-dir", default="")
     a = ap.parse_args()
@@ -41,10 +41,8 @@ def main() -> None:
     man = json.loads(OUT.read_text())
     man.setdefault("sources", {})
     known = {e["sha256"] for e in man["sources"].values()}
-    ver = next((v for v in man["versions"] if v["tag"] == a.version), None)
-    if ver is None:
-        ver = {"tag": a.version, "note": a.note, "files_added": 0}
-        man["versions"].append(ver)
+    ver = {"date": a.date, "note": a.note, "files_added": 0}
+    man.setdefault("history", []).append(ver)
     lib = ["--lib-dir", a.lib_dir] if a.lib_dir else []
     with open(a.batch, newline="") as fh:
         rows = list(csv.DictReader(fh))
@@ -68,17 +66,18 @@ def main() -> None:
             if p.returncode:
                 sys.exit(f"{dest}: {cmd[0]} failed:\n{p.stdout[-2000:]}\n{p.stderr[-2000:]}")
         files = sorted(x for x in up.rglob("*") if x.is_file())
-        entries = {x.relative_to(up).as_posix(): {"sha256": sha256(x), "size": x.stat().st_size,
-                                                   "version": a.version} for x in files}
+        entries = {x.relative_to(up).as_posix(): {"sha256": sha256(x), "size": x.stat().st_size} for x in files}
         for k, e in entries.items():
             if k in man["files"] and man["files"][k]["sha256"] != e["sha256"]:
                 sys.exit(f"{k}: listed with another SHA-256")
-        api.upload_folder(repo_id=REPO, repo_type="dataset", folder_path=str(up),
-                          commit_message=f"{a.version}: {dest}")
+        ci = api.upload_folder(repo_id=REPO, repo_type="dataset", folder_path=str(up),
+                               commit_message=f"{a.date}: {dest}")
+        # the dataset commit the manifest's files are at (no tags: the files are pinned by their SHA-256)
+        man["revision"] = ci.oid
         new = [k for k in entries if k not in man["files"]]
         man["files"].update(entries)
         man["sources"][dest] = {"file": src.name, "sha256": h, "size": src.stat().st_size, "location": r["location"],
-                                "trusted": r["trusted"].strip().lower() in ("yes", "true", "1"), "version": a.version}
+                                "trusted": r["trusted"].strip().lower() in ("yes", "true", "1")}
         ver["files_added"] += len(new)
         known.add(h)
         man["files"] = dict(sorted(man["files"].items()))
@@ -87,7 +86,7 @@ def main() -> None:
         size = sum(e["size"] for e in entries.values())
         print(f"[{i}/{len(rows)}] {dest}: {len(entries)} files, {size / 1e6:.1f} MB uploaded", flush=True)
         shutil.rmtree(a.stage)
-    print(f"{OUT.relative_to(ROOT)}: {ver['files_added']} files in {a.version}, {len(man['files'])} in all")
+    print(f"{OUT.relative_to(ROOT)}: {ver['files_added']} files added ({a.date}), {len(man['files'])} in all")
 
 
 if __name__ == "__main__":

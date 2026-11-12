@@ -89,7 +89,7 @@ def plan(man):
         folder, why = location(stem)
         new = f"capri/{folder}/{re.sub(r'^[0-9]{13}_', '', stem)}"      # the upload's time stamp prefix dropped
         out[old] = (new, {"file": rel.name, "sha256": e["sha256"], "size": e["size"], "location": why,
-                          "trusted": not UNTRUSTED.search(stem), "version": e["version"]})
+                          "trusted": not UNTRUSTED.search(stem)})
     news = [v[0] for v in out.values()]
     if len(set(news)) != len(news):
         raise SystemExit("two files would share a folder")
