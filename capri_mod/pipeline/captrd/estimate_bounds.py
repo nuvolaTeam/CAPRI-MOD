@@ -7,7 +7,8 @@ V_EstV is a free variable (equations.gms l. 28-32): a position no statement boun
 rows (ReqsT) are in the estimation's relative form (estimate_ms.requirements_relative), as their supports.
 
 Inputs (CAPTRD's symbols, for the member state):
-  pd(col, row, stat)  p_data's statistics: nObs, BAS, BASM, BAST, BSY, Const, Slope (and BASM of DRMN, DRMX, N_EXPT, EDAYS)
+  pd(col, row, stat)  p_data's statistics: nObs, BAS, BASM, BAST, BSY, Const, Slope (and BASM of DRMN, DRMX,
+                      N_EXPT, EDAYS)
   res[respos]         P_Result of the year: Support, coco, Expert, expertlo, expertup, p_data (the exogenous series)
   prev                the ex-ante year before (BeFore), its estP and Step3, and whether it is an ExAnteD year
   the time ordinals   OrdT of the year, BAS, BAST (Lst_exPostT - 1), Lst_exAnte, Fst_exAnte, Lst_exPostT, %lst_dgagri%
@@ -101,11 +102,11 @@ def read_bound_sets(sets_dir: Path = None, dat_dir: Path = None) -> BoundSets:
     S = _E.read_sets(sets_dir)
 
     def one(n):
-        return set(read_csv(sets_dir / f"{n}.csv", keep_default_na=False, dtype=str).d0)
+        return _E.OSet(read_csv(sets_dir / f"{n}.csv", keep_default_na=False, dtype=str).d0)
 
     def two(n):
         d = read_csv(sets_dir / f"{n}.csv", keep_default_na=False, dtype=str)
-        return set(zip(d.d0, d.d1))
+        return _E.OSet(zip(d.d0, d.d1))
     agg = two("p_t_actagg")
     rl = read_csv(dat_dir / "agriprod_p_reqfcnlim.csv", keep_default_na=False)
     return BoundSets(mpact=S.mpact, maact=S.maact, mcact=S.mcact, cact=one("cact"), grpc=S.grpc, grpr=S.grpr,
@@ -117,7 +118,8 @@ def read_bound_sets(sets_dir: Path = None, dat_dir: Path = None) -> BoundSets:
                      fix_yai=one("fix_yai"), fix_yao=one("fix_yao"), aact365=one("aactwith365days"),
                      grsact=one("grsact"), meat=S.meat, mlkcnt=S.mlkcnt, mlkseco=S.mlkseco, seco=one("seco"),
                      seco_biof=S.seco_biof, bio_stock=S.bio_stock, mrkbalee=S.mrkbalee, rset=S.rset,
-                     dact_to_pact=two("dact_to_pact"), o=one("o"), uaar_acts={a for a, g in agg if g == "UAAR"},
+                     dact_to_pact=two("dact_to_pact"), o=one("o"),
+                     uaar_acts=_E.OSet(a for a, g in agg if g == "UAAR"),
                      reqfcnlim={(a, w, b): float(v) for a, w, b, v in zip(rl.act, rl.row, rl.bound, rl.value)})
 
 
@@ -319,13 +321,19 @@ def bounds(d: BoundData, B: BoundSets, eff: float):
             continue
         up[("UVAG", w)] = max(pd("UVAG", w, "BASM"), pd("UVAG", w, "BAS")) * hi ** (t - d.ord_bas)
         lo[("UVAG", w)] = min(pd("UVAG", w, "BASM"), pd("UVAG", w, "BAS")) * lw ** (t - d.ord_bas)
-    # l. 261-264: GLOBIOM food intake: none; l. 269-279: food intake, 2% a year
+    # l. 261-264: GLOBIOM food intake: none; l. 269-279: food intake, 2% a year. As GAMS reads the statement,
+    #   p_data(BAST) * 0.98**(t - BAST) $ (BAST) + p_data(BASM) * 0.98**(t - BAS) $ (not BAST),
+    # the second $ conditions the exponent only (it binds to the operand before it), so where BAST exists the
+    # second term is BASM x 0.98^0 = BASM: the bounds are BAST x 0.98^n + BASM and BAST x 1.02^n + BASM, about
+    # twice the intended ones. Kept as coded: CAPTRD's stored bounds show it in every country and year (CAPRI-ERROR,
+    # not fixed: the bounds CAPTRD then widens are these)
     if exante_t:
         for w in sorted(rows):
             if n("INHA", w) and w not in B.grpr and not R("coco", "INHA", w):
-                base, ref = bast_or_basm("INHA", w)
-                lo[("INHA", w)] = base * 0.98 ** (t - ref)
-                up[("INHA", w)] = base * 1.02 ** (t - ref)
+                bt, bm = pd("INHA", w, "BAST"), pd("INHA", w, "BASM")
+                e2 = 0 if bt else (t - d.ord_bas)
+                lo[("INHA", w)] = (bt * 0.98 ** (t - d.ord_bast) if bt else 0.0) + bm * 0.98 ** e2
+                up[("INHA", w)] = (bt * 1.02 ** (t - d.ord_bast) if bt else 0.0) + bm * 1.02 ** e2
         # l. 284-292: foodSh
         for w in sorted(rows):
             if n("foodSh", w) and not R("coco", "foodSh", w):

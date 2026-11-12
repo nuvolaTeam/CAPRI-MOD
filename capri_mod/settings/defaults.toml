@@ -588,6 +588,19 @@ longrun_scenario = "globiom_eu_bright_s0_2023+REFERENCE+REFERENCE"
 # capri_mod/pipeline/captrd/globiom.py; parity with CAPRI's conversion of the EUCLIMIT6 file in
 # test_captrd_globiom.py). Off: the reference run results_1770 had no GLOBIOM long-run supports (11 November 2026)
 longrun_from_globiom = false
+# The member states' estimation m_trendMS (capri_mod/pipeline/captrd/estimate_nlp.py), solved by IPOPT in place of
+# CAPTRD's CONOPT: IPOPT's tolerance and iteration limit per solve (CAPTRD's CONOPT iterlim is 100000,
+# equations.gms l. 900; an interior-point iteration is not comparable, the port's choice); the largest
+# equation residual of a feasible solve (CAPTRD's tolinfeas 1e-5, l. 901); the tries with widened bounds before the
+# estimation stops (estimate_ms.gms l. 222: more than 50); a bound counts as reached within nlp_at_bound_tol (relative)
+# with a multiplier beyond nlp_marginal_tol (CONOPT: exactly at the bound with a marginal; the port's choice for an
+# interior-point solver)
+nlp_tol = 1e-8
+nlp_max_iter = 3000
+nlp_tolinfeas = 1e-5
+nlp_max_tries = 50
+nlp_at_bound_tol = 1e-4
+nlp_marginal_tol = 1e-8
 
 [pipeline]
 # The data download layer (capri_mod/pipeline; docs/DATA_PIPELINE.md). Where the store (raw downloads, manifest, Delta

@@ -132,6 +132,23 @@ class Point:
 
 INF = float("inf")
 
+class OSet(dict):
+    """A set iterated in sorted order (a dict of its members), so the equations' sums and the NLP built from them do
+    not depend on Python's hash order (PYTHONHASHSEED)."""
+
+    def __init__(self, items=()):
+        super().__init__((k, None) for k in sorted(set(items)))
+
+    def __and__(self, other):
+        return OSet(k for k in self if k in other)
+
+    def __or__(self, other):
+        return OSet(list(self) + list(other))
+
+    def __sub__(self, other):
+        return OSet(k for k in self if k not in other)
+
+
 #: Sets fields read from capri_data/pipeline/captrd/sets/<file>.csv (tools/build/build_captrd_sets.py)
 _SET_FILES = {"cols_est": "s_colsest", "rows_est": "s_rowsest", "landuse_arto": "landusearto",
               "breed_act": "breedact", "split_acts_lo": "splitactslo", "bio_stock": "biostock"}
@@ -150,9 +167,9 @@ def read_sets(sets_dir: Path = None, params_dir: Path = None, dat_dir: Path = No
             continue
         d = read_csv(sets_dir / f"{_SET_FILES.get(f.name, f.name)}.csv", keep_default_na=False,
                      dtype=str)
-        kw[f.name] = set(zip(d.d0, d.d1)) if "d1" in d.columns else set(d.d0)
+        kw[f.name] = OSet(zip(d.d0, d.d1)) if "d1" in d.columns else OSet(d.d0)
     agg = read_csv(sets_dir / "p_t_actagg.csv", keep_default_na=False, dtype=str)
-    kw["poul"] = {a for a, g in zip(agg.d0, agg.d1) if g == "POUL"}
+    kw["poul"] = OSet(a for a, g in zip(agg.d0, agg.d1) if g == "POUL")
     lu = read_csv(dat_dir / "p_luunits.csv", keep_default_na=False)
     kw["lu_units"] = dict(zip(lu.act, lu.value.astype(float)))
     for name, fn in (("carcass_share", "carcass_share"), ("start_wgt", "start_wgt")):

@@ -60,6 +60,19 @@ hold within 1e-3 (`test_captrd_estimate_ms.py`: Denmark in the fast suite, six m
 - Found: CAPTRD's stored supports, wVarErr and bounds are those of its last solve (Solve2), and Step3 is the result of
   a further cleaning solve (clean_tiny.gms), so neither step2 nor step3 can be reproduced from the stored inputs
   alone; fix_est.gms l. 810 raises 1.02 to the year, in effect no upper bound on artificial land (kept as coded).
+- The food intake's bounds (INHA, fix_est.gms l. 269-279) as GAMS reads them: the second term's `$` conditions only
+  its exponent, so where BAST exists the bounds are BAST x 0.98^n + BASM and BAST x 1.02^n + BASM, not a choice
+  between BAST and BASM as the code's layout suggests (CAPRI-ERROR, kept as coded). With it 45,983 of the 47,172
+  bounds equal CAPTRD's; the rest are mostly bounds CAPTRD widened in its infeasible solves.
+- In progress: the solve with CAPTRD's widening of infeasible solves (estimate_ms.gms l. 222-436;
+  `capri_mod/pipeline/captrd/estimate_nlp.py`, IPOPT in place of CONOPT, settings `captrd.nlp_*`). Denmark 2030's
+  Solve2 on the port's bounds is infeasible at first, as CAPTRD's evidently was, and feasible after about 16 tries;
+  the widened bounds equal CAPTRD's stored ones on 1,610 of 1,625 lower and 1,582 of 1,625 upper bounds
+  (`test_captrd_estimate_nlp.py`, slow suite). Departure: CONOPT's active set has no IPOPT counterpart, so a bound
+  counts as binding within a tolerance (`captrd.nlp_at_bound_tol`, `nlp_marginal_tol`). Open: the solution against
+  CAPTRD's Step3 (about 36% of the positions within 0.5%; Step3 is a further cleaning solve's result).
+- Set iteration in the estimation's code no longer depends on Python's string hashing (sorted sets), so two runs give
+  the same widening path.
 
 ## 12 November 2026 — manure pools: CAPRI's autarky buffers (p_mTradeAddCost)
 

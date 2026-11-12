@@ -5,16 +5,17 @@ requirements, captrd.gms l. 1205-1218); with Solve2's supports, CAPTRD's P_Resul
 prepared p_data (prepare_run.py, tested in test_captrd_prepare.py) the port gives them. A bound GAMS does not store
 (zero, or infinite) is zero but for NTRD, free (fix_est.gms l. 727-728).
 
-Checked 12 November 2026 on DK, AT, FR, PL, ES in 2020, 2030, 2050: of 47,172 bounds 43,874 equal CAPTRD's; of the
-3,298 others, 3,265 in the open columns OPEN_COLS and 33 elsewhere: a few yields bounded below by the previous year's
-estimate (NoYieldDrop, fix_est.gms l. 183-185: CAPTRD's estP there is its Solve2 result, here its Step3, cleaned of
-tiny values) and, in 2020, one animal's bounds at 0.1 and 1.9 times the port's.
+Checked 12 November 2026 on DK, AT, FR, PL, ES in 2020, 2030, 2050: of 47,172 bounds 45,983 equal CAPTRD's. The
+food intake's (INHA, fix_est.gms l. 269-279) as GAMS reads them: the second term's $ conditions only its exponent, so
+where BAST exists the bounds are BAST x 0.98^n + BASM and BAST x 1.02^n + BASM (CAPRI-ERROR, kept as coded).
 
 Open: CAPTRD's stored bounds are those after its bound-widening of infeasible solves (estimate_ms.gms l. 222-420: the
 lower bounds of the positions at a binding bound times 0.1, the upper ones times 1.9, the processing yields' upper
-bounds at least 1.1 times the lower, the calories by small steps), which the port has not run; in every country and
-year this shows in foodSh, PRCY, INCE and a few rows of EXPE, CSSP, DOMM, MAPR, LOSF, UVAD, UVAG and the trade
-positions; and the food intake INHA with HCOM, whose fix_est bounds (l. 269-339) give CAPTRD's in no country (OPEN_COLS).
+bounds at least 1.1 times the lower, the calories by small steps; estimate_nlp.py): this is most of the 1,189 others,
+in INHA's lower bounds (widened, in every country and year), foodSh, PRCY, INCE and a few rows of EXPE, CSSP, HCOM,
+DOMM, MAPR, LOSF, UVAD, UVAG and the trade positions (OPEN_COLS); the rest, a few yields bounded by the previous
+year's estimate (NoYieldDrop, l. 183-185: CAPTRD's estP there is its Solve2 result, here its Step3, cleaned of tiny
+values) and, in 2020, one animal's bounds at 0.1 and 1.9 times the port's (widened).
 """
 from __future__ import annotations
 
@@ -51,7 +52,8 @@ def _by_year(name, ms, years):
 
 
 def _case(ms, year, prepared):
-    """(ours lo, up), (CAPTRD's lo, up) on the positions with data or a support, the requirements relative."""
+    """(ours lo, up), (CAPTRD's lo, up) on the positions with data or a support, the requirements relative; and the
+    BoundData (D) and the point's keywords (kw) for the solve."""
     S = E.read_sets()
     B = EB.read_bound_sets()
     d = read_csv(RES / "data.csv.gz", dtype={"t": str}, keep_default_na=False)
@@ -78,6 +80,7 @@ def _case(ms, year, prepared):
     nobs = {k for k, v in data.get("nObs", {}).items() if v}
     kw = dict(nobs=nobs, bas=data.get("BAS", {}), basm={}, const=data.get("Const", {}), slope=data.get("Slope", {}),
               pdata=res["p_data"], coco=set(res["coco"]), lo={}, up={}, year=year, exante_d=year <= ORD["lst_expostt"])
+    kw["basm"].update(data.get("BASM", {}))              # the feed contents (ReqsT x FEED)
     for a in S.maact:
         for r_ in S.reqst:
             kw["basm"][(a, r_)] = pd_(a, r_, "BASM")
@@ -96,7 +99,7 @@ def _case(ms, year, prepared):
     Lr = E.requirements_relative(E.Point(V=L0, support={}, **kw), S, L0)
     Ur = E.requirements_relative(E.Point(V=U0, support={}, **kw), S, U0)
     pos = sorted(k for k in set(sup_abs) | nobs if k[0] in S.cols_est and k[1] in S.rows_est)
-    return pos, (lo, up), (Lr, Ur)
+    return pos, (lo, up), (Lr, Ur), (D, kw, sup_abs)
 
 
 def _diff(pos, ours, ref, free):
@@ -122,16 +125,16 @@ def prepared(tmp_path_factory):
 @needs_reference
 @pytest.mark.parametrize("ms,year", [("DK000000", 2030), ("AT000000", 2030), ("DK000000", 2050)])
 def test_solve2_bounds_equal_captrds(prepared, ms, year):
-    pos, (lo, up), (Lr, Ur) = _case(ms, year, prepared)
+    pos, (lo, up), (Lr, Ur), _ = _case(ms, year, prepared)
     inf = float("inf")
     for name, ours, ref, free in (("lo", lo, Lr, -inf), ("up", up, Ur, inf)):
         bad = _diff(pos, ours, ref, free)
         settled = [b for b in bad if b[0][0] not in OPEN_COLS]
-        # outside the open columns: a handful of yields bounded by the previous year's estimate (NoYieldDrop, l. 183-185:
-        # estP of the year before, CAPTRD's Solve2 result there, Step3 here, cleaned of tiny values) and of
-        # slaughter weights
+        # outside the open columns: a handful of yields bounded by the previous year's estimate (NoYieldDrop,
+        # l. 183-185: estP of the year before, CAPTRD's Solve2 result there, Step3 here, cleaned of tiny values)
         assert len(settled) <= 8, (name, settled[:10])
-        assert len(bad) <= 0.09 * len(pos), (name, len(bad), collections.Counter(b[0][0] for b in bad))
+        n_bad = collections.Counter(b[0][0] for b in bad)
+        assert len(bad) <= 0.045 * len(pos), (name, len(bad), n_bad)
         assert not [b for b in bad if b[0][1] == "LEVL" and b[0][0] in E.read_sets().mpact], name
 
 
