@@ -73,6 +73,9 @@ net export and its buffers (`manure_pool_market_2030.csv`); setting `outer_loop.
 - Full-EU Green Deal 2030: converged in 21 iterations (19 without the buffers), the worst pool's gap falling at every
   step; the equilibrium within 0.4 points of the run without them (beef price +13.4% against +13.3, GHG total -13.7%
   against -13.6, fertiliser N2O -33.0% against -32.6). Malta's N exports, 96 t without the buffers, are zero.
+- CAPRI's slope as coded against its documented elasticity (four countries, Green Deal 2030): as coded
+  (`manure_pool_es_slope = "capri_code"`, the default) 14 iterations; as documented ("capri_doc", a slope 1000 times
+  smaller) not converged in 60 iterations, the pools' gap swinging between 23% and 300%.
 
 ## 12 November 2026 — the run log's solver level, as CAPRI's GUI shows a run
 

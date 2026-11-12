@@ -102,7 +102,13 @@ CAPRI's step weights (capmod/define_stepWeights.gms) = outer_loop.manure_pool_pr
 ## Open
 
 - outer_loop.manure_pool_es_slope: CAPRI's code ("capri_code", the project lead's choice of 12 November 2026: "start
-  with capri code and see what happens") against its documented elasticity ("capri_doc"), not yet compared.
+  with capri code and see what happens") against its documented elasticity ("capri_doc"). Compared 12 November 2026
+  on the four-country Green Deal 2030 (AT, ES, IR, SK, 31 units, with the autarky buffers): "capri_code" converges in
+  14 iterations (the worst pool's gap 18.1, 11.0, 7.9, 5.6, 3.9, 2.9, 2.2, 1.6, 1.2, 0.9, 0.7, 0.5, 0.4, 0.3%), its
+  equilibrium as without the buffers; "capri_doc" (a slope 1000 times smaller) does not converge in 60 iterations,
+  the worst gap swinging between 23% and 300% to the end, with Ireland's regional solutions jumping between steps.
+  With the elasticity as documented the regions' excess supply is nearly inelastic, so a small shift of a region's
+  net trade moves its pool price a lot; how CAPRI's own run would behave with it is not known.
 - A per-step check against CAPRI's own chk_manure_trade_<BAS><SIM>*.gdx (p_mTradeReport) once a CAPRI scenario run
   completes (the project lead's Farm-to-Fork run of 11 November 2026 stopped in EL210000's supply model before the
   first manure market step: widen_bounds.gms l. 265-269 raised a zero lower bound of the idle histosol group's mineral
