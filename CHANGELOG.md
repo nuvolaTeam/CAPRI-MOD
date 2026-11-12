@@ -32,6 +32,14 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 12 November 2026 — CAPTRD-MOD stage 3: the NUTS 2 estimation's equations
+
+- New capri_mod/pipeline/captrd/estimate_nuts2.py: m_trendNT2's equations for the regions of one member state under its
+  fixed result (the nine blocks shared with m_trendMS, REQS_ with the member state's feed contents; MSGROF_, MSLEVL_,
+  MSLANDUSE_, MSFEEDI_, MSlosfFoddo_, MSindmMaif_, EFED_) and SSQS_ with the regional weights. At CAPTRD's stored step3
+  of Ireland's two regions in 2030 all 448 equations hold within 1e-3 (test_captrd_estimate_nuts2.py). Next: the
+  bounds of estimate_nuts2.gms, the solve, rem_tiny.
+
 ## 12 November 2026 — CAPTRD-MOD stage 2e: positions outside the model held; the widening's path
 
 - Fixed: a position referenced only in a term whose condition is off is in no equation and not in the objective (GAMS

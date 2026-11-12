@@ -800,3 +800,19 @@ only): Denmark's share within 2% 80.2% against 84.2% and objective 0.2931 agains
 it is (CAPTRD's objective unchanged) and deal with the trade positions free of the objective in stage 4**, where the
 EU's gross trade is built from the members' (estimate_eu_trade.gms); the rule there to be proposed then (any rule is
 one CAPRI does not have).
+
+### 12.7 Stage 3: the NUTS 2 estimation m_trendNT2, the equations (12 November 2026)
+
+`estimate_nuts2.py`: m_trendNT2's equations for the regions of one member state (equations.gms l. 909-912), the member
+state's own result fixed (estimate_nuts2.gms l. 72): the nine blocks it shares with m_trendMS from
+estimate_ms.residuals per region (AREAB_, LANDUSEB_, OSET_, GROF_, REQS_, GRPLVL_, STRA_, LU_, SplitFix_), REQS_ with
+the member state's feed contents (`regional_basm`: equations.gms l. 535 takes p_data(MSEst, ReqsT, Feed, "BASM")
+through MAP_RR); the adding-up blocks MSGROF_, MSLEVL_, MSLANDUSE_, MSFEEDI_ (l. 182-240); MSlosfFoddo_ (the member
+state's loss rate, l. 474-485), MSindmMaif_ (l. 490-495), EFED_ (l. 500-507); SSQS_ with the regional weights of
+CARD(Rest) > 1 (l. 803-878: each term weighted by its region's share of the activities' LEVL BASM, at least 0.001; a row
+no activity produces or uses 1 / CARD(Rest)). Check (test_captrd_estimate_nuts2.py): at CAPTRD's stored step3 of
+Ireland's two regions in 2030 under Ireland's, all 448 equations of 14 blocks (OSET_ without a set-aside rate, MSindmMaif_
+Germany's only) hold within 1e-3. Found: with each region's own feed contents 50 REQS_ rows were off; CAPTRD stores no
+zero, so a coefficient with neither bound nor level stored is read as fixed at zero (the regions' BULH.IBUL, with data,
+1000 in Ireland's own result), as MSGROF_'s condition needs. Not yet: the objective at CAPTRD's solution (its weights
+need the regions' LEVL BASM), estimate_nuts2.gms's bounds, the solve, rem_tiny (docs: the project's stage 3 plan).
