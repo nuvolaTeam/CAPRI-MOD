@@ -32,6 +32,27 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 12 November 2026 — CAPTRD-MOD stage 2e: the equations of the member states' estimation
+
+`capri_mod/pipeline/captrd/estimate_ms.py` holds the equations of CAPTRD's NLP m_trendMS (captrd/equations.gms, the 39
+blocks of its model statement) and its objective SSQS_, with GAMS's domain conditions, for one member state and
+ex-ante year; the same code gives the residuals at a point or, with symbolic variables, the NLP's constraints.
+Evaluated at CAPTRD's own step2 (Solve1's result) of all 35 countries in 2018-2050, the 229,231 checkable equations
+hold within 1e-3 (`test_captrd_estimate_ms.py`: Denmark in the fast suite, six more countries in the slow one).
+
+- The stored step2 is the estimation's after CAPTRD's reporting: the animal requirements are stored as absolute
+  amounts (captrd.gms l. 1205-1218; in the estimation they are relative to the requirement function), DOMM is
+  re-summed over all domestic uses (the estimation's is DEMD, aggreg_and_report.gms l. 293-294). Both are undone
+  before the check (`from_stored`). Left out: equations whose terms the reporting overwrites (INHA of the product
+  groups, HFCS) or that hold free variables CAPTRD does not store (STCM of the young animals, LOSF of the milks, the
+  weights of activities without data).
+- New inputs: CAPRI's sets arbAct, SECOD, RESIMP, RESIMP_T_O, MLKSECO, MLKO, O_TO_YANI and CAPTRD's ROWS_LAB, MLKCNT,
+  LO_TO_HI, SplitActsLo, BULF (`build_captrd_sets.py`); p_carcassShare, p_startWgt (CAPRI's constants of
+  feed/feed_decl.gms) and p_NCNC_CONT as in sim_ini_21730 (`tools/build/build_captrd_estimation_params.py`, from a
+  kept extract). The fill and fibre feed contents and the empty days, which CAPTRD's stored results do not hold, come
+  from the port's own data preparation.
+- Found: CAPTRD's stored supports and bounds are those of its last solve (Solve2), not of Solve1, so step2 cannot be
+  reproduced from them; the bounds of fix_est.gms are the next step.
 ## 12 November 2026 — manure pools: CAPRI's autarky buffers (p_mTradeAddCost)
 
 The pool market now adds CAPRI's autarky buffer to the trade cost of every link unused at the calibration point

@@ -1128,6 +1128,24 @@
    ]
   },
   {
+   "task": "build_captrd_estimation_params",
+   "builder": "build_captrd_estimation_params",
+   "args": [],
+   "inputs": [
+    "capri_data/sources/raw/capri/results/simini/sim_ini_21730/captrd_estimation_params.parquet"
+   ],
+   "code": [
+    "tools/build/build_captrd_estimation_params.py",
+    "tools/lib/_sources_io.py"
+   ],
+   "external": [],
+   "outputs": [
+    "capri_data/pipeline/captrd/params/carcass_share.csv",
+    "capri_data/pipeline/captrd/params/ncnc_cont.csv",
+    "capri_data/pipeline/captrd/params/start_wgt.csv"
+   ]
+  },
+  {
    "task": "build_captrd_trajectory",
    "builder": "build_captrd_trajectory",
    "args": [

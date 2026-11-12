@@ -83,6 +83,7 @@ UNTRACED = {
     "capri_data/pipeline/captrd/dat/biofuel_p_fossilfuel.csv": ("build_captrd_biofuel", "CAPRI"),
     "capri_data/pipeline/captrd/dat/biofuel_p_taxdata.csv": ("build_captrd_biofuel", "CAPRI"),
     "capri_data/pipeline/captrd/sets/": ("build_captrd_sets", "CAPRI"),
+    "capri_data/pipeline/captrd/params/": ("build_captrd_estimation_params", "CAPRI"),
     "capri_data/pipeline/captrd/dat/dairy_ms_agri_to_ms.csv": ("build_captrd_dairy", "CAPRI"),
     "capri_data/pipeline/captrd/dat/dairy_p_cowmilkprod.csv": ("build_captrd_dairy", "CAPRI"),
     "capri_data/pipeline/captrd/dat/dairy_p_dairycowyield.csv": ("build_captrd_dairy", "CAPRI"),

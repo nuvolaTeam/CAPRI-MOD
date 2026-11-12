@@ -84,6 +84,14 @@ MEAT = ["BEEF", "POUM", "PORK", "SGMT"]
 OSEEDS = ["RAPE", "SUNF", "SOYA"]
 TRADEEST = ["IMPT", "EXPT", "NTRD"]
 SHIFTSUGBPOS = ["FEDM", "SEDM", "INDM", "HCOM", "LOSM", "EAAG"]
+# the estimation's equations (equations.gms): the labour rows (ROWS_LAB, l. 252-259), the milk components (MLKCNT,
+# l. 330), the low- to high-yield activities (LO_TO_HI, SplitActsLo, l. 376-377); ex_endofodderUse (l. 382-383) is
+# emptied, so not written
+ROWS_LAB = ["LABO", "LABN", "LABH", "LABT", "LABF", "LABP"]
+MLKCNT = ["FATS", "PROT"]
+LO_TO_HI = [("GRAE", "GRAI"), ("BULL", "BULH"), ("HEIL", "HEIH"), ("DCOL", "DCOH")]
+SPLITACTSLO = ["DCOL", "BULL", "HEIL", "GRAE"]
+BULF = ["BULL", "BULH"]                                                                      # l. 341 (Dailyup_)
 # CAPRI's global sets the preparation reads, as instantiated (copied from the reference export): MS is sets.rmssup
 # (sets_captrd.gms l. 54-56), NT2 the alias of SRNUTS2 (l. 69)
 GLOBAL_1D = {"ms": "RMSSUP", "srnuts1": "SRNUTS1", "srnuts2": "SRNUTS2", "urbannuts": "urbanNUTS", "secom": "SECOM",
@@ -98,14 +106,18 @@ GLOBAL_1D = {"ms": "RMSSUP", "srnuts1": "SRNUTS1", "srnuts2": "SRNUTS2", "urbann
              # captrd_policy.gms
              "grcu": "GRCU", "rset": "RSET", "msall": "MSALL", "nosugquotaaglinkversion": "noSugQuotaAglinkVersion",
              # biofuel/biofuel_trends.gms
-             "cere": "CERE", "biostockoilp": "bioStockOilP", "bio_by": "BIO_BY", "oseco": "OSECO", "balpos": "BALPOS"}
+             "cere": "CERE", "biostockoilp": "bioStockOilP", "bio_by": "BIO_BY", "oseco": "OSECO", "balpos": "BALPOS",
+             # equations.gms (capri_mod/pipeline/captrd/estimate_ms.py)
+             "arbact": "arbAct", "secod": "SECOD", "resimp": "RESIMP", "mlkseco": "MLKSECO", "mlko": "MLKO"}
 GLOBAL_2D = {"map_rr": "Map_RR", "pact_to_io": "PACT_TO_IO", "pact_to_i": "PACT_TO_I", "rms_to_rm": "RMS_TO_RM",
              "pact_to_o": "PACT_TO_O", "pact_to_y": "PACT_TO_Y",
              # load_coco1_data.gms
              "prcd": "PRCD", "feed_to_o": "FEED_TO_O", "dact_to_pact": "DACT_TO_PACT", "p_t_actagg": "P_T_ActAgg",
              "stock_to_fuel": "STOCK_TO_FUEL", "stock_to_by": "STOCK_TO_BY",
              # adjust_to_biof_supports.gms
-             "sed_to_oil": "SED_TO_OIL", "bio_prcd": "BIO_PRCD", "oil_to_cak": "OIL_TO_CAK"}
+             "sed_to_oil": "SED_TO_OIL", "bio_prcd": "BIO_PRCD", "oil_to_cak": "OIL_TO_CAK",
+             # equations.gms
+             "resimp_t_o": "RESIMP_T_O", "o_to_yani": "O_TO_YANI"}
 GLOBAL_3D = {"map_rrt": "MAP_RRT"}                     # captrd_policy.gms (sugar quotas of the EU members by year)
 
 
@@ -179,6 +191,11 @@ def main() -> None:
     _write("oseeds", OSEEDS)
     _write("tradeest", TRADEEST)
     _write("shiftsugbpos", SHIFTSUGBPOS)
+    _write("rows_lab", ROWS_LAB)
+    _write("mlkcnt", MLKCNT)
+    _write("lo_to_hi", LO_TO_HI, 2)
+    _write("splitactslo", SPLITACTSLO)
+    _write("bulf", BULF)
     for out, s in GLOBAL_1D.items():
         _write(out, _members(ref, s))
     for out, s in GLOBAL_2D.items():

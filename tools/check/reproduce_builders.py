@@ -211,6 +211,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_captrd_trajectory", ["--series", str(REFERENCE / "captrd_results/1770/series.csv.gz")],
      [REFERENCE / "captrd_results/1770/series.csv.gz"]),
     ("build_captrd_dat", [], [SOURCES / "dat/baseline/ageline/ageline.parquet"]),
+    ("build_captrd_estimation_params", [], []),   # from its kept extract (--parquet DIR / --download: the raw)
     ("build_feed_demand_nonEU", [], [EXPORTS / "elas_2_1730defaulta.csv", EXPORTS / "data_market_1730defaulta.csv"]),
     ("build_fert_dist_priors", [], []),
     ("build_fert_options_jul15", [], []),

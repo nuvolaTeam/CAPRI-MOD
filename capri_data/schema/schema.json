@@ -9349,6 +9349,39 @@
     "tests": []
    }
   },
+  "ctrd_arbact": {
+   "file": "capri_data/pipeline/captrd/sets/arbact.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's global set arbAct (crops on arable land; gams/sets.gms l. 2962): one member per row in d0, 40 members (e.g. SWHE, DWHE); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the equations of captrd/equations.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_balpos": {
    "file": "capri_data/pipeline/captrd/sets/balpos.csv",
    "declared_in": "38_captrd_biofuel.sql",
@@ -10487,6 +10520,39 @@
     ]
    }
   },
+  "ctrd_bulf": {
+   "file": "capri_data/pipeline/captrd/sets/bulf.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPTRD's set BULF (the male fattening activities of Dailyup_; sets_captrd.gms l. 341): one member per row in d0, 2 members (e.g. BULL, BULH); transcribed by tools/build/build_captrd_sets.py, for the equations of captrd/equations.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_cact": {
    "file": "capri_data/pipeline/captrd/sets/cact.csv",
    "declared_in": "29_captrd_more.sql",
@@ -10510,6 +10576,51 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_carcass_share": {
+   "file": "capri_data/pipeline/captrd/params/carcass_share.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's p_carcassShare(COLS): carcass weight over live weight of the fattening and breeding activities, CAPRI's constants of feed/feed_decl.gms l. 211-226 (included by captrd.gms l. 370), as in sim_ini_21730 (the raw dataset, capri/results/simini/sim_ini_21730/p_carcassShare.parquet); used by FinalWgt_ and Dailyup_ (equations.gms l. 573-593); 13 rows (tools/build/build_captrd_estimation_params.py).",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "carcass over live weight, a ratio; no unit code for it"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_estimation_params",
     "sources": null
    },
    "notes": [],
@@ -12779,6 +12890,45 @@
     "tests": []
    }
   },
+  "ctrd_lo_to_hi": {
+   "file": "capri_data/pipeline/captrd/sets/lo_to_hi.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPTRD's set LO_TO_HI (low-yield to high-yield variant of an activity; sets_captrd.gms l. 376): one pair per row (d0, d1), 4 pairs (e.g. GRAE.GRAI, BULL.BULH); transcribed by tools/build/build_captrd_sets.py, for the equations of captrd/equations.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "d1",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0",
+    "d1"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_longrun_p_longruninfoall": {
    "file": "capri_data/pipeline/captrd/dat/longrun_p_longruninfoall.csv",
    "declared_in": "42_captrd_longrun.sql",
@@ -13385,6 +13535,105 @@
     ]
    }
   },
+  "ctrd_mlkcnt": {
+   "file": "capri_data/pipeline/captrd/sets/mlkcnt.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPTRD's set MLKCNT (the milk components; sets_captrd.gms l. 330): one member per row in d0, 2 members (e.g. FATS, PROT); transcribed by tools/build/build_captrd_sets.py, for the equations of captrd/equations.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_mlko": {
+   "file": "capri_data/pipeline/captrd/sets/mlko.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's global set MLKO (raw milks as tradeable products (COMI, SGMI); gams/sets.gms l. 5072): one member per row in d0, 2 members (e.g. COMI, SGMI); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the equations of captrd/equations.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_mlkseco": {
+   "file": "capri_data/pipeline/captrd/sets/mlkseco.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's global set MLKSECO (dairy products; gams/sets.gms l. 5078): one member per row in d0, 9 members (e.g. WHEP, CASE); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the equations of captrd/equations.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_mpact": {
    "file": "capri_data/pipeline/captrd/sets/mpact.csv",
    "declared_in": "29_captrd_more.sql",
@@ -13890,6 +14139,59 @@
     "tests": []
    }
   },
+  "ctrd_ncnc_cont": {
+   "file": "capri_data/pipeline/captrd/params/ncnc_cont.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's p_NCNC_CONT(ROWS, NCNC): nutrient content per kg of a food product, the USDA contents mapped to CAPRI's codes (captrd.gms l. 622-633, coco2.gms l. 255-262), as in sim_ini_21730 (p_NCNC_CONT.parquet); used by NUTBAL_ (equations.gms l. 740-746); 1118 rows (tools/build/build_captrd_estimation_params.py).",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "d1",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0",
+    "d1"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "per kg of product, by nutrient (kcal, g, mg); no unit code for it"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_estimation_params",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/pipeline/captrd/estimate_ms.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_nosugquotaaglinkversion": {
    "file": "capri_data/pipeline/captrd/sets/nosugquotaaglinkversion.csv",
    "declared_in": "33_captrd_labour_policy.sql",
@@ -13973,6 +14275,45 @@
    ],
    "primary_key": [
     "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_o_to_yani": {
+   "file": "capri_data/pipeline/captrd/sets/o_to_yani.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's global mapping O_TO_YANI (young animals produced to young animals used as inputs; gams/sets.gms l. 5331): one pair per row (d0, d1), 8 pairs (e.g. YCOW.ICOW, YBUL.IBUL); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the equations of captrd/equations.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "d1",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0",
+    "d1"
    ],
    "unique": [],
    "foreign_keys": [],
@@ -14313,6 +14654,7 @@
    "notes": [],
    "read_by": {
     "model": [
+     "capri_mod/pipeline/captrd/estimate_ms.py",
      "capri_mod/pipeline/captrd/prepare.py"
     ],
     "builders": [],
@@ -14785,7 +15127,9 @@
    },
    "notes": [],
    "read_by": {
-    "model": [],
+    "model": [
+     "capri_mod/pipeline/captrd/estimate_ms.py"
+    ],
     "builders": [],
     "checks": [],
     "tests": []
@@ -15091,6 +15435,78 @@
     ]
    }
   },
+  "ctrd_resimp": {
+   "file": "capri_data/pipeline/captrd/sets/resimp.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's global set RESIMP (by-products of milling and processing (FPRI, FENI); gams/sets.gms l. 5323): one member per row in d0, 2 members (e.g. FPRI, FENI); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the equations of captrd/equations.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_resimp_t_o": {
+   "file": "capri_data/pipeline/captrd/sets/resimp_t_o.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's global mapping RESIMP_T_O (by-product of milling or processing to the product it comes from; gams/sets.gms l. 5325): one pair per row (d0, d1), 10 pairs (e.g. FPRI.SWHE, FPRI.DWHE); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the equations of captrd/equations.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "d1",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0",
+    "d1"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_rmaggsup": {
    "file": "capri_data/pipeline/captrd/sets/rmaggsup.csv",
    "declared_in": "29_captrd_more.sql",
@@ -15167,6 +15583,39 @@
      "capri_mod/tests/test_market_layers.py",
      "capri_mod/tests/test_run_manifest.py"
     ]
+   }
+  },
+  "ctrd_rows_lab": {
+   "file": "capri_data/pipeline/captrd/sets/rows_lab.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPTRD's set ROWS_LAB (the labour rows; sets_captrd.gms l. 252-259): one member per row in d0, 6 members (e.g. LABO, LABN); transcribed by tools/build/build_captrd_sets.py, for the equations of captrd/equations.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
    }
   },
   "ctrd_rows_load": {
@@ -15408,6 +15857,39 @@
     "tests": []
    }
   },
+  "ctrd_secod": {
+   "file": "capri_data/pipeline/captrd/sets/secod.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's global set SECOD (processed outputs linked to PRCM; gams/sets.gms l. 5135): one member per row in d0, 13 members (e.g. RICE, MOLA); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py, for the equations of captrd/equations.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_secom": {
    "file": "capri_data/pipeline/captrd/sets/secom.csv",
    "declared_in": "29_captrd_more.sql",
@@ -15546,6 +16028,39 @@
     "tests": []
    }
   },
+  "ctrd_splitactslo": {
+   "file": "capri_data/pipeline/captrd/sets/splitactslo.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPTRD's set SplitActsLo (the low-yield variants of the split activities; sets_captrd.gms l. 377): one member per row in d0, 4 members (e.g. DCOL, BULL); transcribed by tools/build/build_captrd_sets.py, for the equations of captrd/equations.gms.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_srnuts1": {
    "file": "capri_data/pipeline/captrd/sets/srnuts1.csv",
    "declared_in": "33_captrd_labour_policy.sql",
@@ -15602,6 +16117,51 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_start_wgt": {
+   "file": "capri_data/pipeline/captrd/params/start_wgt.csv",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's p_startWgt(COLS): live weight at the start of the fattening or raising process, feed/feed_decl.gms l. 231-245, as in sim_ini_21730 (p_startWgt.parquet); used by FinalWgt_ (equations.gms l. 573-583); 12 rows (tools/build/build_captrd_estimation_params.py).",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "kg live weight per head (feed_decl.gms: live weight at start)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_estimation_params",
     "sources": null
    },
    "notes": [],
@@ -39216,6 +39776,67 @@
     "tests": []
    }
   },
+  "src_captrd_estimation_params": {
+   "file": "capri_data/sources/raw/capri/results/simini/sim_ini_21730/captrd_estimation_params.parquet",
+   "declared_in": "45_captrd_estimation.sql",
+   "layout": [],
+   "comment": "CAPRI's p_carcassShare, p_startWgt and p_NCNC_CONT as in sim_ini_21730 (the raw dataset nuvolaTeam/capri-mod-raw, capri/results/simini/sim_ini_21730/), the records tools/build/build_captrd_estimation_params.py uses, kept so it rebuilds without the raw files; d1 only for p_NCNC_CONT.",
+   "columns": [
+    {
+     "name": "symbol",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "d1",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [],
+   "unique": [
+    [
+     "symbol",
+     "d0",
+     "d1"
+    ]
+   ],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "by symbol: see ctrd_carcass_share, ctrd_start_wgt, ctrd_ncnc_cont"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": null,
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_captrd_estimation_params"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
   "src_cropwat_p_cropwatreq": {
    "file": "capri_data/sources/raw/capri/dat/water/cropwat_p_cropwatReq.parquet",
    "declared_in": "34_sources_csv.sql",
@@ -54773,7 +55394,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 332,
+  "capri/keep": 346,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 26,
