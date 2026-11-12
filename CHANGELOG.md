@@ -32,6 +32,19 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 12 November 2026 — manure pools: CAPRI's autarky buffers (p_mTradeAddCost)
+
+The pool market now adds CAPRI's autarky buffer to the trade cost of every link unused at the calibration point
+(manuremarket/declare_manure_market.gms l. 396-436): (buffer_k + buffer_l) / 2, CAPRI's 10 EUR per t, and in the
+Green Deal group 50,000 EUR per t for its isolated pools (UK, MT, NO, the Western Balkans, TUR, CY), which closes
+them. The links CAPRI's calibration uses are taken from p_priorMTrade, from the pools that export to those that import
+(at the 2030 calibration point BL, DE and NL to FR). The builder `build_manure_pool_market.py` adds each region's base
+net export and its buffers (`manure_pool_market_2030.csv`); setting `outer_loop.manure_pool_autarky_tol`.
+
+- Full-EU Green Deal 2030: converged in 21 iterations (19 without the buffers), the worst pool's gap falling at every
+  step; the equilibrium within 0.4 points of the run without them (beef price +13.4% against +13.3, GHG total -13.7%
+  against -13.6, fertiliser N2O -33.0% against -32.6). Malta's N exports, 96 t without the buffers, are zero.
+
 ## 12 November 2026 — the run log's solver level, as CAPRI's GUI shows a run
 
 - run.verbosity = "solver" (new level, between detailed and debug): each solve as CAPRI's GUI shows GAMS's output while

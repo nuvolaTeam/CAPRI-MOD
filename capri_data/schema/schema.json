@@ -18330,6 +18330,21 @@
      "name": "dual_cal",
      "type": "DOUBLE",
      "not_null": true
+    },
+    {
+     "name": "base_net_export_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "buffer",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "buffer_greendeal",
+     "type": "DOUBLE",
+     "not_null": true
     }
    ],
    "primary_key": [
@@ -18340,6 +18355,24 @@
    "foreign_keys": [],
    "checks": [],
    "units": [
+    {
+     "item": "base_net_export_kt",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "p_priorMTrade(r, \"postMode\", FOUT, 2030): net manure export at the calibration point, 1000 t of nutrient (v_manureExports, v_manureImports: 1000 t)"
+    },
+    {
+     "item": "buffer",
+     "unit": "U_1000EuPerTon",
+     "status": "builder",
+     "basis": "p_mTradeAutarkyBuffer 10 EUR per t / 1000 / deflator(2030)"
+    },
+    {
+     "item": "buffer_greendeal",
+     "unit": "U_1000EuPerTon",
+     "status": "builder",
+     "basis": "p_mTradeAutarkyBuffer in the Green Deal group (50,000 EUR per t for the isolated pools) / 1000 / deflator(2030)"
+    },
     {
      "item": "dual_cal",
      "unit": "U_1000EuPerTon",
@@ -41378,7 +41411,7 @@
    "file": "capri_data/sources/raw/capri/results/fert/manure_pool_inputs_2030.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
-   "comment": "CAPRI's records of its 2030 Green Deal baseline fertiliser distribution (priFertDist_<MS>1730defaulta.gdx, results/fert; the raw dataset nuvolaTeam/capri-mod-raw, uploaded 11 November 2026) per CAPRI region and manure nutrient: supply_t (p_priFertDist postMode EXCR summed over the groups, t) and dual_cal_eur_t (p_dualValueManureCal, EUR per t) (tools/build/build_manure_pool_market.py).",
+   "comment": "CAPRI's records of its 2030 Green Deal baseline fertiliser distribution (priFertDist_<MS>1730defaulta.gdx, results/fert; the raw dataset nuvolaTeam/capri-mod-raw, uploaded 11 November 2026) per CAPRI region and manure nutrient: supply_t (p_priFertDist postMode EXCR summed over the groups, t), dual_cal_eur_t (p_dualValueManureCal, EUR per t) and base_net_export_kt (p_priorMTrade postMode, kt) (tools/build/build_manure_pool_market.py).",
    "columns": [
     {
      "name": "capri_region",
@@ -41414,7 +41447,7 @@
      "item": "value",
      "unit": null,
      "status": "open",
-     "basis": "manure_pool_inputs_2030.value: by item, t (supply_t) or EUR per t (dual_cal_eur_t)"
+     "basis": "manure_pool_inputs_2030.value: by item, t (supply_t), EUR per t (dual_cal_eur_t) or kt (base_net_export_kt)"
     }
    ],
    "provenance": {

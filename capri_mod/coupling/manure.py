@@ -345,6 +345,15 @@ class ManureBlock:
             from capri_mod.data import inputs as _inputs
             t = _inputs.current().csv("manure_pool_market_2030.csv", "environment", float_precision="round_trip")
             bc = {(r, f): (float(b), float(d)) for r, f, b, d in zip(t.region, t.fout, t.es_slope, t.dual_cal)}
+            # CAPRI's autarky buffers (declare_manure_market.gms l. 396-436): the pools' base net exports (kt, any
+            # nutrient) and buffers (EUR 1000 per t; the Green Deal group's for its isolated pools)
+            pool_ = lambda r: self.POOL_OF_PREFIX.get(r[:2], r[:2])     # noqa: E731
+            net, buf, buf_gd = {}, {}, {}
+            for r, f, x, b0, b1 in zip(t.region, t.fout, t.base_net_export_kt, t.buffer, t.buffer_greendeal):
+                k = pool_(r)
+                net[(k, f)] = net.get((k, f), 0.0) + float(x)
+                buf[k], buf_gd[k] = max(buf.get(k, 0.0), float(b0)), max(buf_gd.get(k, 0.0), float(b1))
+            bc = {"es": bc, "net": net, "buffer": buf, "buffer_greendeal": buf_gd}
             self.par.pool_es_cache = bc
         mode = str(st.get("outer_loop.manure_pool_es_slope"))
         if mode not in ("capri_code", "capri_doc"):
@@ -362,9 +371,9 @@ class ManureBlock:
         Qp = np.zeros((nv, nv)); cp_ = np.zeros(nv)
         for q, r_ in enumerate(crec):
             key = (r_["reg"], fout)
-            if key not in bc:
+            if key not in bc["es"]:
                 raise KeyError(f"manure_pool_market_2030.csv: no slope for {key}")
-            b, dual = bc[key][0] / b_div, bc[key][1]
+            b, dual = bc["es"][key][0] / b_div, bc["es"][key][1]
             v = r_["v"]
             if v is None:
                 # CAPRI's fall-back (simu_manure_market.gms l. 50-66): last step's price sent (the value, - the fee),
@@ -389,8 +398,19 @@ class ManureBlock:
             Qp[ie, ie] += be + cs1; Qp[ii, ii] += be + cb1; Qp[ie, ii] -= be; Qp[ii, ie] -= be
             cp_[ie] = -a * be + cs0
             cp_[ii] = a * be + cb0
+        # CAPRI's autarky buffers (p_mTradeAddCost, declare_manure_market.gms l. 396-436): a link unused at the
+        # calibration point costs (buffer_k + buffer_l) / 2 more, so that new flows need a price gap beyond the trade
+        # cost; CAPRI's calibrated links are those from its exporting pools to its importing ones (at the 2030
+        # calibration point BL, DE, NL to FR, for N and P), exempt in both directions. Its term max(0, P_l - P_k - c)
+        # is zero here (the model's pool prices are equal, zero, at the base)
+        tol_ = float(st.get("outer_loop.manure_pool_autarky_tol"))
+        exp_ = {k for (k, f), x in bc["net"].items() if x > tol_}
+        imp_ = {k for (k, f), x in bc["net"].items() if x < -tol_}
+        used_ = {(a_, b_) for a_ in exp_ for b_ in imp_} | {(b_, a_) for a_ in exp_ for b_ in imp_}
+        bf_ = bc["buffer_greendeal"] if bool(getattr(self.ev, "greendeal_group", False)) else bc["buffer"]
         for t, (a_, b_, cc) in enumerate(arcs):
-            cp_[2 * nr + t] = cc
+            add_ = 0.0 if (a_, b_) in used_ else 0.5 * (bf_.get(a_, 0.0) + bf_.get(b_, 0.0))
+            cp_[2 * nr + t] = cc + add_
         Ap = np.zeros((nr, nv)); bp = np.zeros(nr)
         for q, r_ in enumerate(crec):
             Ap[q, q] = 1.0; bp[q] = r_["emax"]                # exports at most the manure produced

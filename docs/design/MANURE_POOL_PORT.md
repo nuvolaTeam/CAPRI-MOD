@@ -73,8 +73,12 @@ CAPRI's step weights (capmod/define_stepWeights.gms) = outer_loop.manure_pool_pr
      equivalent terms in the rows its trade columns enter), so the market model's first-order conditions hold at each
      region's last solution as in CAPRI's refit; the slopes are the regional NLP's;
    - the exports are bounded by the manure produced (the regional NLP's own row);
-   - p_mTradeAddCost (the autarky buffers on links unused at base) is not ported: in the deviation form every link
-     starts unused; its isolated pools are outside the EU's runs except Malta and Cyprus (open);
+   - p_mTradeAddCost (the autarky buffers, l. 396-436) ported 12 November 2026: a link unused at the calibration point
+     costs (buffer_k + buffer_l) / 2 more, CAPRI's 10 EUR per t, and in the Green Deal group 50,000 for its isolated
+     pools (UK, MT, NO, CS, AL, MO, BA, MK, KO, TUR, CY), so these are closed there; the links CAPRI's calibration uses
+     are taken as those from its exporting pools to its importing ones by p_priorMTrade (exempt in both directions; at
+     the 2030 calibration point BL, DE and NL to FR for N and P, the flows the listing shows: BL 16.6, DE 10.8, NL 1.1 kt
+     N), exact while one pool imports; CAPRI's term max(0, P_l - P_k - c) is zero at the model's equal base prices;
    - a negative b (one region-nutrient: NL410000 MANN, calibration dual -824 EUR per t) is kept as CAPRI's: the problem
      stays convex when the region's trade cost slopes outweigh it ((1/b + cs1)(1/b + cb1) >= 1/b^2; NL410000:
      |b| cs1 = 42 against 2); otherwise the run stops with the region named (none on the 2030 data).
@@ -89,12 +93,16 @@ CAPRI's step weights (capmod/define_stepWeights.gms) = outer_loop.manure_pool_pr
      converged after 36. Equilibrium against the damped run: prices within 0.1 points (beef +13.3% against +13.4,
      milk +7.9 against +8.0, pork +7.7 against +7.9), herds and production within 0.1, GHG total -13.6% against -13.8,
      fertiliser N2O -32.6 against -33.0, ammonia -29.6 against -29.7.
+   - with the autarky buffers (12 November 2026, same scenario): converged in 21 iterations, the worst pool's gap
+     falling at every step (24.3, 15.7, 12.5, 10.1, 7.8, 6.0, 4.6, 3.6, 2.7, 2.0, 1.5, 1.2, 1.0, 0.8, 0.7, 0.5, 0.4,
+     0.4, 0.3, 0.2, 0.2%); the equilibrium within 0.4 points of the run without them (beef +13.4% against +13.3, milk
+     +8.0 against +7.9, GHG total -13.7 against -13.6, fertiliser N2O -33.0 against -32.6); Malta's N exports, 96 t
+     without the buffers, are zero (its pool closed as in CAPRI's Green Deal group), Cyprus' stay zero.
 
 ## Open
 
 - outer_loop.manure_pool_es_slope: CAPRI's code ("capri_code", the project lead's choice of 12 November 2026: "start
   with capri code and see what happens") against its documented elasticity ("capri_doc"), not yet compared.
-- The autarky buffers (p_mTradeAddCost) and the isolated pools.
 - A per-step check against CAPRI's own chk_manure_trade_<BAS><SIM>*.gdx (p_mTradeReport) once a CAPRI scenario run
   completes (the project lead's Farm-to-Fork run of 11 November 2026 stopped in EL210000's supply model before the
   first manure market step: widen_bounds.gms l. 265-269 raised a zero lower bound of the idle histosol group's mineral

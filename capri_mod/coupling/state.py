@@ -87,6 +87,7 @@ class ModelEvalState(_Slots):
     """One outer iteration's working values."""
     __slots__ = (
         "outer_iter_now",     # the outer iteration
+        "greendeal_group",    # the run's scenario is of CAPRI's Green Deal group (%scenarioGroup%==greendeal)
         "ls_by_country",      # livestock products by country (the bridge's input; the Hessian overwrites it)
         "unmarketed_supply",  # gross output the market does not take (no marketed production in CAPRI; S7, grofNEprod)
         "blockdev_target_now", # the trade blocks' target departures of the iteration

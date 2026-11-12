@@ -1381,9 +1381,9 @@ CREATE TABLE src_manure_pool_inputs_2030 (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (capri_region, fout, "item")
 );
-COMMENT ON TABLE src_manure_pool_inputs_2030 IS 'CAPRI''s records of its 2030 Green Deal baseline fertiliser distribution (priFertDist_<MS>1730defaulta.gdx, results/fert; the raw dataset nuvolaTeam/capri-mod-raw, uploaded 11 November 2026) per CAPRI region and manure nutrient: supply_t (p_priFertDist postMode EXCR summed over the groups, t) and dual_cal_eur_t (p_dualValueManureCal, EUR per t) (tools/build/build_manure_pool_market.py).';
+COMMENT ON TABLE src_manure_pool_inputs_2030 IS 'CAPRI''s records of its 2030 Green Deal baseline fertiliser distribution (priFertDist_<MS>1730defaulta.gdx, results/fert; the raw dataset nuvolaTeam/capri-mod-raw, uploaded 11 November 2026) per CAPRI region and manure nutrient: supply_t (p_priFertDist postMode EXCR summed over the groups, t), dual_cal_eur_t (p_dualValueManureCal, EUR per t) and base_net_export_kt (p_priorMTrade postMode, kt) (tools/build/build_manure_pool_market.py).';
 INSERT INTO value_units VALUES
-  ('src_manure_pool_inputs_2030', 'value', NULL, 'open', 'manure_pool_inputs_2030.value: by item, t (supply_t) or EUR per t (dual_cal_eur_t)');
+  ('src_manure_pool_inputs_2030', 'value', NULL, 'open', 'manure_pool_inputs_2030.value: by item, t (supply_t), EUR per t (dual_cal_eur_t) or kt (base_net_export_kt)');
 
 -- file: capri_data/sources/intermediate/estnlp/pela_own_price.parquet
 CREATE TABLE src_pela_own_price (

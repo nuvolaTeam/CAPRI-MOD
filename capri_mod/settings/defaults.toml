@@ -157,6 +157,9 @@ manure_pool_es_slope = "capri_code"
 # the "capri" form: a region's manure value at or below this level is replaced by the step-weighted average of its
 # values of the steps before (simu_manure_market.gms l. 74-77: CAPRI's 1e-6 EUR per t, here EUR 1000 per t)
 manure_pool_pshw_floor = 1e-9
+# the "capri" form: a pool's base net export (kt) beyond this counts as trade at CAPRI's calibration point (CAPRI's
+# p_mTradeAutarkyTol, declare_manure_market.gms l. 422-423), for the links exempt from the autarky buffer
+manure_pool_autarky_tol = 0.001
 # numerical (refactor stage 4): the multiplier recovery of a region's stored problem (NNLS on its active rows): a row
 # is active within this relative tolerance, a column at its bound below this level, at most this many iterations per
 # column; the pools' trade cost slopes are divided by kappa, at least this floor; the arcs' ridge as a share of the

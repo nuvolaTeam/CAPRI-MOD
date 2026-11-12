@@ -574,6 +574,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         _yr = self.data.get("market_year") if isinstance(self.data, dict) else None
         for outer_iter in range(max_outer_iter):
             self.ev.outer_iter_now = outer_iter
+            self.ev.greendeal_group = bool(getattr(pol_scenario, "greendeal_group", False))
             _t_it0 = time.time()
             _rl.loop_start(outer_iter + 1, max_outer_iter, _lab, _yr)
             if outer_iter == 0:
