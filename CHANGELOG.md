@@ -84,6 +84,15 @@ hold within 1e-3 (`test_captrd_estimate_ms.py`: Denmark in the fast suite, six m
   (INHA) lower bounds and the food shares' (foodSh) upper bounds together, coupled by HCOM_ (INHA x population =
   (HCOM + LOSF) x foodSh); CAPTRD opened INHA's lower bounds only, as an active-set solver puts the marginal of such a
   degenerate pair on one of the two.
+- Solve1 checked against CAPTRD's step2 (`test_denmark_2030_solve1_objective_equals_captrds`, slow suite): with CAPTRD's
+  support1, the port's bounds on it and Solve1's wVarErr, the port's optimum for Denmark 2030 is 0.5127 against 0.5138
+  for CAPTRD's step2 under the same objective (feasible after 17 tries); 65% of the positions lie within 0.5% of
+  step2, 84% within 2%, the rest mostly trade positions and other directions the objective leaves nearly free. CAPTRD
+  stores Solve2's wVarErr only: Solve1's is rebuilt from the 2d chain's expert positions (define_stats_and_supports.gms
+  l. 646-663) and, where stage 2f adds a trust level, from the trend's error variance (l. 327-329, inverted from the
+  stored wVar and wR2, l. 177-179). With the stored wVarErr step2 would score 2.27 against 0.23: stage 2f puts
+  FEDM.OCER, FEDM.MOLA and INDM.OCER at DG AGRI's values, about a hundredth of support1, with standard errors near
+  0.2 where Solve1's are near 156.
 
 ## 12 November 2026 — manure pools: CAPRI's autarky buffers (p_mTradeAddCost)
 

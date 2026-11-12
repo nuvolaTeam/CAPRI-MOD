@@ -11378,7 +11378,9 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_estimate_nlp.py"
+    ]
    }
   },
   "ctrd_feed": {

@@ -8,6 +8,18 @@ feasible after about 15 tries (CAPTRD at least 7), all but about 15 of 1,625 low
 CAPTRD's (the port widens the foodSh upper bounds with INHA's lower ones: IPOPT's multipliers at an infeasible point
 spread over both bounds of the degenerate pair HCOM_ couples, CONOPT's marginal sits on one).
 
+test_denmark_2030_solve1_objective_equals_captrds: Solve1 (CAPTRD's stored support1, the port's bounds on it, the start
+at the support) against CAPTRD's step2, Solve1's result. CAPTRD stores the wVarErr of Solve2 only; Solve1's is rebuilt:
+on the 2d chain's expert positions as define_stats_and_supports.gms l. 646-663 sets it (test_captrd_eu_supports.py's
+chain), on the positions whose trust level stage 2f adds the trend's, MAX(0.05 |wAve|, wVarErr) (l. 327-329, as coded,
+not for requirement and feed rows), wVarErr from CAPTRD's stored statistics as wVar x (1 - wR2) (l. 177-179 inverted;
+wVar where wR2 is 0, its lower bound) or wAve^2 / 4 with one or two observations (l. 130); elsewhere the stored one.
+Checked 12 November 2026: the port's optimum 0.5127, CAPTRD's step2 0.5138 under the same objective; 65% of the
+positions within 0.5% of step2, 84% within 2%, the rest mostly trade positions (EXPT, IMPT, NTRD) and other directions
+the objective leaves nearly free. With the stored (Solve2) wVarErr instead, step2 scores 2.27 against the port's 0.23:
+stage 2f gives FEDM.OCER, FEDM.MOLA and INDM.OCER trust levels at DG AGRI's values (about a hundredth of support1),
+and with them standard errors of about 0.2 where Solve1's, the trend's, are near 156 (FEDM.OCER).
+
 Open: the solution itself against CAPTRD's step3 (about 36% of the positions within 0.5%): step3 is the result of a
 further cleaning solve (clean_tiny.gms, rem_tiny.gms) on supports and bounds of its own, IPOPT's widening passes over
 other blocking bounds than CONOPT's, and the trade positions without a term in the objective are free.
@@ -23,6 +35,10 @@ from capri_mod.pipeline.captrd import estimate_nlp as N
 from capri_mod.pipeline.tests import test_captrd_estimate_bounds as TB
 from capri_mod.pipeline.tests import test_captrd_estimate_ms as TM
 from capri_mod.pipeline.tests.test_captrd_estimate_bounds import needs_reference, prepared  # noqa: F401
+from capri_mod.pipeline.tests.test_captrd_expert_support import assembled  # noqa: F401
+from capri_mod.pipeline.tests.test_captrd_national_supports import (  # noqa: F401
+    state, dgagri, aglink_p, scaled, result, need)
+from capri_mod.pipeline.tests.test_captrd_macro import population  # noqa: F401
 
 
 @pytest.mark.slow
@@ -75,3 +91,70 @@ def test_widening_rules():
     assert lo2[("FEDM", "SWHE")] == pytest.approx(5.0)
     assert lo2[("PRCY", "RAPO")] == pytest.approx(0.39 - max(0.001, 0.01 * 0.39))
     assert up2[("PRCY", "RAPO")] == pytest.approx(max(0.41, 1.1 * lo2[("PRCY", "RAPO")]))
+
+
+def _solve1_wvar(ms, y, assembled):  # noqa: F811
+    """Solve1's wVarErr of one member state and year (see the module docstring)."""
+    import numpy as np
+    from capri_mod.csvio import read_csv
+    from capri_mod.pipeline.captrd import final_supports as F
+    from capri_mod.pipeline.captrd import prepare as P
+    E0, TL0, sup0, X, s, nobs, ex = assembled
+    dompos = pd.read_csv(P.SETS_DIR / "dompos.csv", keep_default_na=False).d0.tolist()
+    W = F.wvarerr(E0, TL0)
+    F.domm_wvarerr(W, sup0, [X.dgagri1, E0, ex["longrun1"]], ms=X.ms, s_colsest=s.s_colsest, s_rowsest=s.s_rowsest,
+                   exante=X.exante, dompos=dompos)
+    S = E.read_sets()
+    out = dict(TB._by_year("wVarErr", ms, [y]).get(y, {}))
+    trust = TB._by_year("TrustLevl", ms, [y]).get(y, {})
+    d = read_csv(TB.RES / "data.csv.gz", dtype={"t": str}, keep_default_na=False)
+    d = d[d.region == ms]
+    st = {t: dict(zip(zip(g.col, g.row), g.value.astype(float))) for t, g in d.groupby("t")}
+    tl0 = {(c, w) for (r, c, w, t) in TL0 if r == ms and t == y}
+    for k in trust:
+        n = st.get("nObs", {}).get(k, 0.0)
+        if k in tl0 or not n or k[1] in S.reqst or k[1] in S.feed:
+            continue
+        wave, wvar, wr2 = (st.get(n_, {}).get(k, 0.0) for n_ in ("WAve", "wVar", "wR2"))
+        werr = wave * wave * 0.25 if n <= 2 else wvar * (1.0 - wr2)
+        out[k] = max(abs(wave) * 0.05, werr)
+    out.update({(c, w): v for (r, c, w, t), v in W.items() if r == ms and t == y})
+    return out
+
+
+@pytest.mark.slow
+@needs_reference
+@need
+def test_denmark_2030_solve1_objective_equals_captrds(prepared, assembled):  # noqa: F811
+    pytest.importorskip("casadi")
+    import numpy as np
+    ms, y = "DK000000", 2030
+    orig = TB._by_year
+    TB._by_year = lambda n, m, ys: orig("support1" if n == "support" else n, m, ys)
+    try:
+        pos, (lo, up), _, (D, kw, sup_abs) = TB._case(ms, y, prepared)
+    finally:
+        TB._by_year = orig
+    S = E.read_sets()
+    B = EB.read_bound_sets()
+    tab = {n: TB._by_year(n, ms, [y]).get(y, {}) for n in ("BASM", "step2")}
+    basm = dict(TM._prepared_basm(ms))
+    basm.update(kw["basm"])
+    basm.update(tab["BASM"])
+    kw = {**kw, "basm": basm}
+    wvar = _solve1_wvar(ms, y, assembled)
+    sup = D.res["Support"]
+    p = E.Point(V=sup, support=sup, **{k: v for k, v in kw.items() if k not in ("lo", "up")}, lo=lo, up=up)
+    ref = E.from_stored(E.Point(V=tab["step2"], support=sup_abs, **{**kw, "lo": {}, "up": {}}), S, tab["step2"])
+    pp = prepared[(prepared.region == ms) & (prepared.t == "BASM")]
+    pb = {(c, w): float(v) for c, w, v in zip(pp.col, pp.row, pp.value)}
+    log = []
+    r = N.solve(p, S, B, D, lo, up, wvar, {}, expertlo=D.res["expertlo"], expertup=D.res["expertup"],
+                basm=lambda c, w: pb.get((c, w), 0.0), log=log)
+    assert r.feasible, log[-3:]
+    f_ref = float(E.objective(p, S, lambda c, w: ref.get((c, w), 0.0), wvar, r.lo, r.up, exante_t=not p.exante_d))
+    assert abs(r.objective - f_ref) <= 0.01 * f_ref, (r.objective, f_ref)
+    keys = [k for k in pos if k in ref or k in r.x]
+    rel = np.array([abs(r.x.get(k, 0.0) - ref.get(k, 0.0)) / max(abs(ref.get(k, 0.0)), 1e-3) for k in keys])
+    assert np.mean(rel <= 0.02) >= 0.8, np.mean(rel <= 0.02)
+
