@@ -93,6 +93,24 @@ hold within 1e-3 (`test_captrd_estimate_ms.py`: Denmark in the fast suite, six m
   stored wVar and wR2, l. 177-179). With the stored wVarErr step2 would score 2.27 against 0.23: stage 2f puts
   FEDM.OCER, FEDM.MOLA and INDM.OCER at DG AGRI's values, about a hundredth of support1, with standard errors near
   0.2 where Solve1's are near 156.
+- The widening's marginals as CONOPT reports an infeasible model (setting `captrd.nlp_infeasible_marginals`, "phase1",
+  the new default): after an infeasible IPOPT solve, the least sum of the equations' violations within the bounds is
+  solved, and its point and marginals mark the bounds to open; IPOPT's own infeasible stop ("ipopt", the behaviour
+  before) also carries the objective's pull on the bounds. Denmark 2030's Solve2: 12 of the 3,250 widened bounds differ
+  from CAPTRD's (54 before), feasible after 26 tries (15 before); Austria 2030's Solve1 reaches CAPTRD's objective,
+  1,084.8 against 1,092.9 (787.6 before, from INHA, foodSh and HCOM bounds CAPTRD did not open: with "phase1" its
+  INHA.BARL lower and foodSh.BARL upper bounds are CAPTRD's); Denmark 2030's Solve1 0.51391 against 0.51385. The
+  widening path turns on near-ties: two of four runs of the Solve2 test on the same code gave 25 differing lower
+  bounds instead of 7 (run-to-run variation not yet traced), so the test allows 2%. Solve1
+  of Denmark 2050 and France 2030 (with "ipopt"): 0.1398 against 0.1406 and 0.01187 against 0.01190. Open: Poland and
+  Spain 2030, whose objective is dominated by the milk losses LOSF.COMI (a support near 1 with a small variance,
+  comi_bounds.gms holding it near 700), whose bounds open by 0.995^n with the try count n, and Denmark 2020
+  (HCOM.BARL), not yet rerun with "phase1".
+- Found: FIX-7 (ARTIF's upper bound, fix_est.gms l. 810) cannot act as decided: the statement takes the max with the
+  previous upper bound, CAPTRD's standard 1e9 (estimate_ms.gms l. 56), so with the parenthesis fixed the bound stays
+  1e9. Left as coded; its form is for the project lead to decide again.
+- An IPOPT solver error (insufficient memory, an internal error or exception) now stops the estimation instead of being
+  taken for an infeasible model and widened (CAPTRD aborts on a solver error, estimate_ms.gms l. 230, 243).
 
 ## 12 November 2026 — manure pools: CAPRI's autarky buffers (p_mTradeAddCost)
 

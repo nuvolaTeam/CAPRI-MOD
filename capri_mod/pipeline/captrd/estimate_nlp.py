@@ -14,7 +14,11 @@ comi_bounds.gms, biofuel_bounds.gms below 30 tries, UAAR, the fixed land, ARTIF,
 
 Departure from CAPRI (the solver): CONOPT's active-set solution lies exactly at its bounds and its marginals of an
 infeasible solve mark the blocking bounds; IPOPT's interior-point solution approaches them, so a bound counts as
-reached within captrd.nlp_at_bound_tol (relative) with a multiplier beyond captrd.nlp_marginal_tol. Where the objective
+reached within captrd.nlp_at_bound_tol (relative) with a multiplier beyond captrd.nlp_marginal_tol. CONOPT reports an
+infeasible model at the point of its phase 1, the least sum of infeasibilities, with that objective's marginals; IPOPT's
+own infeasible stop also carries the objective's pull on the bounds. With captrd.nlp_infeasible_marginals = "phase1"
+(the default) an infeasible solve is followed by that least-infeasibility problem (the equations' violations as
+nonnegative slacks, their sum minimised within the bounds), and its point and marginals drive the widening. Where the objective
 leaves directions free (a trade position without a support and its counterpart, both free of the objective), the
 two solvers can end at different points of equal objective.
 """
@@ -45,6 +49,10 @@ PRCY_FLOOR = 0.01
 PRCY_RANGE = 1.1
 #: l. 280-287: the calories' bounds by (1 -/+ 1e-5 n)^n
 INCE_STEP = 1.0e-5
+#: IPOPT's returns that are solver errors, not an infeasible model: CAPTRD aborts on a solver error (EXECERROR,
+#: estimate_ms.gms l. 230, 243), so the estimation stops rather than widen bounds after one
+SOLVER_ERRORS = ("Insufficient_Memory", "Internal_Error", "Invalid_Option", "Invalid_Problem_Definition",
+                 "Unrecoverable_Exception", "NonIpopt_Exception_Thrown", "Not_Enough_Degrees_Of_Freedom")
 #: l. 330: the OIND / OCRO rule after 25 tries
 OIND_OCRO_TRIES = 25
 #: biofuel_bounds.gms is applied again below 30 tries (l. 381-384)
@@ -70,7 +78,7 @@ def _settings():
     from capri_mod.settings import current
     st = current()
     keys = ("captrd.nlp_tol", "captrd.nlp_max_iter", "captrd.nlp_tolinfeas", "captrd.nlp_max_tries",
-            "captrd.nlp_at_bound_tol", "captrd.nlp_marginal_tol")
+            "captrd.nlp_at_bound_tol", "captrd.nlp_marginal_tol", "captrd.nlp_infeasible_marginals")
     return {k.split(".", 1)[1]: st.get(k) for k in keys}
 
 
@@ -112,6 +120,17 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
                        {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": float(o["nlp_tol"]),
                         "ipopt.max_iter": int(o["nlp_max_iter"]), "ipopt.fixed_variable_treatment": "make_constraint"})
     gfun = ca.Function("g", [X], [G])
+    phase1 = str(o["nlp_infeasible_marginals"]) == "phase1"
+    if phase1:
+        # CONOPT reports an infeasible solve at its phase 1's point, the least sum of infeasibilities within the bounds,
+        # with that objective's marginals: the bounds blocking feasibility, not those the objective pulls at
+        m = int(G.shape[0])
+        sp, sn = ca.SX.sym("sp", m), ca.SX.sym("sn", m)
+        ph1 = ca.nlpsol("m_trendMS_phase1", "ipopt",
+                        {"x": ca.vertcat(X, sp, sn), "f": ca.sum1(sp) + ca.sum1(sn), "g": G - sp + sn},
+                        {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": float(o["nlp_tol"]),
+                         "ipopt.max_iter": int(o["nlp_max_iter"]),
+                         "ipopt.fixed_variable_treatment": "make_constraint"})
     # l. 83-100: the positions with data start at estP (the previous solve's result) if there is one, else at the
     # support; the others at their levels (in Solve2: Solve1's result, estP)
     has_start = any(v for v in start.values())
@@ -131,10 +150,22 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
         viol = float(np.maximum(np.maximum(lbg - gv, gv - ubg), 0.0).max()) if len(gv) else 0.0
         status = solver.stats()["return_status"]
         log.append(f"try {ntry}: {status}, max. infeasibility {viol:.2e}, SSQ {float(sol['f']):.6g}")
+        if status in SOLVER_ERRORS:
+            raise RuntimeError(f"m_trendMS {d.ms} {d.year}: solver error {status} at try {ntry}")
         if viol <= float(o["nlp_tolinfeas"]) and status in ("Solve_Succeeded", "Solved_To_Acceptable_Level"):
             return Result({k: float(x[i]) for i, k in enumerate(keys)}, float(sol["f"]), True, ntry + 1, status,
                           lo_, up_)
         lam = np.array(sol["lam_x"]).ravel()
+        if phase1:
+            nk = len(keys)
+            viol_v = np.maximum(lbg - gv, 0.0), np.maximum(gv - ubg, 0.0)
+            p1 = ph1(x0=np.concatenate([xs, viol_v[1], viol_v[0]]), lbx=np.concatenate([lb, np.zeros(2 * m)]),
+                     ubx=np.concatenate([ub, np.full(2 * m, INF)]), lbg=lbg, ubg=ubg)
+            if ph1.stats()["return_status"] in SOLVER_ERRORS:
+                raise RuntimeError(f"m_trendMS {d.ms} {d.year}: phase 1 solver error {ph1.stats()['return_status']}")
+            z = np.array(p1["x"]).ravel()
+            x, lam = z[:nk], np.array(p1["lam_x"]).ravel()[:nk]
+            log.append(f"    phase 1: {ph1.stats()['return_status']}, sum of infeasibilities {float(p1['f']):.3e}")
         at_lo, at_up = _binding(keys, x, lam, lb, ub, tol_at, tol_m)
         _widen(ntry, keys, x, at_lo, at_up, lo_, up_, B, p, expertlo, expertup, basm)
         _oind_ocro(ntry, keys, x, at_lo, lo_)

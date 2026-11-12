@@ -601,6 +601,13 @@ nlp_tolinfeas = 1e-5
 nlp_max_tries = 50
 nlp_at_bound_tol = 1e-4
 nlp_marginal_tol = 1e-8
+# which marginals of an infeasible solve mark the bounds to widen: "phase1" (the default since 12 November 2026: a
+# least-infeasibility solve within the bounds, the sum of the equations' violations, as CONOPT reports an infeasible
+# model, at its phase 1's point with that objective's marginals) or "ipopt" (those of IPOPT's own infeasible stop,
+# which also carry the objective's pull). Denmark 2030's Solve2: 12 of 3,250 widened bounds differ from CAPTRD's with
+# "phase1", 54 with "ipopt"; Austria 2030's Solve1 reaches CAPTRD's objective with "phase1" (1,085 against 1,093),
+# 788 with "ipopt" from bounds CAPTRD did not open
+nlp_infeasible_marginals = "phase1"
 
 [pipeline]
 # The data download layer (capri_mod/pipeline; docs/DATA_PIPELINE.md). Where the store (raw downloads, manifest, Delta
