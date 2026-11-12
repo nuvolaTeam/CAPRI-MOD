@@ -87,12 +87,22 @@ def test_denmark_2030_solve2_widens_to_captrds_bounds(prepared):  # noqa: F811
     # every equation holds at the solution
     res = E.residuals(E.Point(**{**p.__dict__, "V": r.x, "lo": r.lo, "up": r.up}), S, level=start)
     assert not E.violations(res, 1e-4)
-    # stage 2f: clean_tiny.gms, then copy_labour_biofuel_on_presult.gms: CAPTRD's step3 on the positions it holds (the
-    # rest: the solves' points in the objective's flat directions, trade and the feed mix). 12 November 2026, the
-    # test's preparation (DK and AT): 92.0% within 2% (Solve2 alone: 81.9%); the full preparation of all countries
-    # 94.3% (84.0%): the widening's path differs with the inputs' last digits
+    # stage 2f: clean_tiny.gms, then copy_labour_biofuel_on_presult.gms, against CAPTRD's step3 on the positions it
+    # holds. The widening's path moves the result by several points (the share within 2% after Solve2 on the port's
+    # bounds was 84-94% between runs whose inputs differed in their last digits), so the check starts from Solve2 on
+    # CAPTRD's own final bounds (a bound CAPTRD does not store is 0, NTRD free): feasible at the first solve. 12 November
+    # 2026: 95.4% within 2% (Solve2 alone 85.4%), with the full preparation of all countries; the rest the solves' points
+    # in the objective's flat directions (trade, the young cattle's feed mix)
     from capri_mod.pipeline.captrd import clean_tiny as CT, step3_copies as SC
-    rc = CT.clean(p, S, B, D, r, tab["wVarErr"])
+    Lc, Uc = dict(lo), dict(up)
+    for k in pos:
+        Lc[k] = Lr.get(k, -float("inf") if k[0] == "NTRD" else 0.0)
+        Uc[k] = Ur.get(k, float("inf") if k[0] == "NTRD" else 0.0)
+    pL = E.Point(**{**p.__dict__, "lo": Lc, "up": Uc})
+    rL = N.solve(pL, S, B, D, Lc, Uc, tab["wVarErr"], start, expertlo=D.res["expertlo"], expertup=D.res["expertup"],
+                 basm=lambda c, w: pb.get((c, w), 0.0))
+    assert rL.feasible and rL.tries == 1
+    rc = CT.clean(pL, S, B, D, rL, tab["wVarErr"])
     st3 = TB._by_year("step3", ms, [y]).get(y, {})
     ex = TB._by_year("Expert", ms, [y]).get(y, {})
     ref3 = E.from_stored(E.Point(V=st3, support=sup_abs, **{**kw, "lo": {}, "up": {}}), S, st3)
@@ -102,9 +112,10 @@ def test_denmark_2030_solve2_widens_to_captrds_bounds(prepared):  # noqa: F811
                  ex_r, D.res.get("p_data", {}).get(("INHA", "LEVL"), 0.0))
     held = [k for k in sorted(st3) if k in ref3 and k[0] in S.cols_est and k[1] in S.rows_est]
     share = lambda V: sum(abs(V.get(k, 0.0) - ref3[k]) <= 0.02 * max(abs(ref3[k]), 1.0) for k in held) / len(held)  # noqa: E731
-    s2, s3 = share(r.x), share(x3)
-    print(f"step3 DK 2030: share within 2%: Solve2 {s2:.3f}, after clean_tiny and the copies {s3:.3f} of {len(held)}")
-    assert s3 >= 0.90 and s3 > s2 + 0.05
+    s2, s3 = share(rL.x), share(x3)
+    print(f"step3 DK 2030 (Solve2 on CAPTRD's bounds): share within 2%: Solve2 {s2:.3f}, after clean_tiny and the "
+          f"copies {s3:.3f} of {len(held)}")
+    assert s3 >= 0.93 and s3 > s2 + 0.05
 
 
 def test_widening_rules():

@@ -773,9 +773,23 @@ aborts), the support, variances and bounds restored. The solve is estimate_nlp.s
 (`widen=False`). **copy_labour_biofuel_on_presult.gms** (`step3_copies.py`): the labour positions from the activity
 levels and GROF.LABO / LABN's trends, the fossil fuels from Expert, INHA.LEVL from p_data. Against Step3 on the
 positions it holds, after Solve2, clean_tiny and the copies: within 2% DK 94.3% (Solve2 alone 84.0%), AT 97.9%
-(89.6%), FR 87.3% (77.2%); within 0.5% DK 83.9%, AT 92.7%, FR 73.5% (the full preparation of all countries; the test's
-DK-and-AT preparation gives DK 92.0% against 81.9%, the widening's path differing with the inputs' last digits). The
-rest are the solves' points where the objective is nearly flat (trade IMPT, EXPT, NTRD: Denmark's olive oil imports and
-exports 8.6e7 against 1.1, both free of the objective; the young cattle's feed mix CAMF, CAFR, BULL, BULH; INHA,
-foodSh), not yet resolved: IPOPT, an interior-point method, ends such free directions inside their boxes (up to the
-standard 1e9), CONOPT near its start.
+(89.6%), FR 87.3% (77.2%) on the port's bounds, before the fix below.
+
+**Fixed (12 November 2026, evening): positions outside the model.** A position referenced only in a term whose
+condition is off (V(c, w) x n(c, w) with n false) is in no equation and not in the objective; GAMS does not generate it,
+but the port created it as an NLP variable, and IPOPT pushed it into its open box: about 40 positions per member state
+at 1e5 (GROF of the dairy products, MAPR of the crops). Such a variable is now held at its start (estimate_nlp.solve,
+from CasADi's dependency of the constraints and the objective), and clean_tiny returns the levels CAPTRD stores (estP,
+estimate_ms.gms l. 452-456: the positions with observations or a support; `estimate_nlp.estp`).
+
+**The widening's path.** The fix moved Denmark's widening path (17 tries instead of 16-18; 11 lower and 18 upper bounds
+differ from CAPTRD's, against 8 and 10), and the share within 2% of step3 after Solve2 on the port's bounds from 94.3% to
+84.2%: the result depends on the path by several points. On CAPTRD's own final bounds (one solve, no widening) the share
+is 95.4% within 2% and 88.1% within 0.5% (Solve2 alone 85.4% and 77.6%); the test (test_captrd_estimate_nlp.py) checks
+that case. The rest are the solves' points where the objective is nearly flat: the young cattle's feed mix (CAMF, CAFR,
+BULL, BULH), PRCBY, some trade. **Open:** trade positions free of the objective go to the middle of their box with IPOPT,
+an interior-point method: Denmark's olive oil imports and exports 5e8 (the middle of [1e-8, 1e9]) against CAPTRD's 1.1
+(CONOPT stays near its start); Austria's 2.7e6 against 0.33. Harmless for the objective (IMPT = EXPT, NTRD 0), not for
+the EU's gross trade built from the members' (estimate_eu_trade.gms). A small proximity term to the start (as the phase-1
+solve has) keeps them near the start in a test (Denmark), but changes the widening's path (32 lower and 38 upper
+bounds differing); not adopted, for the project lead to decide.

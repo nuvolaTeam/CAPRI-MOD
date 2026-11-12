@@ -228,5 +228,6 @@ def clean(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, r2: N.Result,
         r = N.solve(pc, S, B, d, lo, up, wv, r.x, log=log, opts=o, widen=False)
     if not r.feasible:
         raise RuntimeError(f"clean_tiny {d.ms} {d.year}: the cleaning solve is infeasible ({r.status}); CAPTRD aborts")
-    # l. 296-327: the support, variances and bounds restored (Lo, up stored are Solve2's)
-    return N.Result(r.x, r.objective, True, r.tries, r.status, dict(lo2), dict(up2))
+    # l. 296-327: the support, variances and bounds restored (Lo, up stored are Solve2's); estimate_ms.gms l. 452-456:
+    # the levels stored (estP) of the positions with observations or a support (Solve2's)
+    return N.Result(N.estp(r.x, p, S), r.objective, True, r.tries, r.status, dict(lo2), dict(up2))

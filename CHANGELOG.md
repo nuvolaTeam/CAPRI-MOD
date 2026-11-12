@@ -32,6 +32,17 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 12 November 2026 — CAPTRD-MOD stage 2e: positions outside the model held; the widening's path
+
+- Fixed: a position referenced only in a term whose condition is off is in no equation and not in the objective (GAMS
+  does not generate it); the port made it an NLP variable and IPOPT pushed it into its open box (about 40 per member
+  state at 1e5: GROF of the dairy products, MAPR of the crops). It is now held at its start; clean_tiny returns the
+  levels CAPTRD stores (estP: observations or a support).
+- Found: the widening's path moves the result by several points (Denmark's share within 2% of step3: 94.3% before the
+  fix, 84.2% after, on the port's bounds); on CAPTRD's own final bounds 95.4% (0.5%: 88.1%), which the test now checks.
+- Open, for the project lead: trade positions free of the objective at the middle of their box (Denmark's olive oil
+  imports and exports 5e8 against CAPTRD's 1.1), harmful for the EU's gross trade built from the members'.
+
 ## 12 November 2026 — CAPTRD-MOD stage 2e: Solve2 against Step3; clean_tiny and the step3 copies
 
 - Solve2 against CAPTRD's Step3 (DK, AT, FR 2030): on CAPTRD's own final bounds the port is feasible at the first solve

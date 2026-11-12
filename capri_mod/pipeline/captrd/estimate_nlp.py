@@ -122,6 +122,12 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
                        {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": float(o["nlp_tol"]),
                         "ipopt.max_iter": int(o["nlp_max_iter"]), "ipopt.fixed_variable_treatment": "make_constraint"})
     gfun = ca.Function("g", [X], [G])
+    # a position referenced only in a term whose condition is off (V(c, w) * n(c, w) with n false) is in no equation and
+    # not in the objective: GAMS does not generate it, so it is not in the model and keeps its level (V_EstV.L); here it
+    # is held at its start, so the interior point does not push it into its open box (found 12 November 2026: about
+    # 40 positions per member state at 1e5, e.g. GROF of the dairy products, MAPR of the crops)
+    absent = ~(np.array(ca.which_depends(G, X, 1, False), dtype=bool) | np.array(ca.which_depends(f, X, 1, False), dtype=bool)) \
+        if G.shape[0] else np.zeros(X.shape[0], dtype=bool)
     phase1 = str(o["nlp_infeasible_marginals"]) == "phase1"
     if phase1:
         # CONOPT reports an infeasible solve at its phase 1's point, the least sum of infeasibilities within the bounds,
@@ -151,6 +157,7 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
         lb = np.array([lo_.get(k, -INF) for k in keys])
         ub = np.array([up_.get(k, INF) for k in keys])
         xs = np.clip(x0, np.where(np.isfinite(lb), lb, -1e30), np.where(np.isfinite(ub), ub, 1e30))
+        lb, ub = np.where(absent, xs, lb), np.where(absent, xs, ub)
         sol = solver(x0=xs, lbx=lb, ubx=ub, lbg=lbg, ubg=ubg)
         x = np.array(sol["x"]).ravel()
         gv = np.array(gfun(x)).ravel()
@@ -183,6 +190,12 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
         x0 = np.where(nobs_i & has_start, x_est, x)
     x = np.array(sol["x"]).ravel()
     return Result({k: float(x[i]) for i, k in enumerate(keys)}, float(sol["f"]), False, ntry + 1, status, lo_, up_)
+
+
+def estp(x: Dict[K2, float], p: E.Point, S: E.Sets) -> Dict[K2, float]:
+    """estimate_ms.gms l. 452-456: the levels stored (estP) are those of the positions with observations or a support,
+    of the estimated columns (and STCM)."""
+    return {k: v for k, v in x.items() if (k in p.nobs or p.support.get(k)) and (k[0] in S.cols_est or k[0] == "STCM")}
 
 
 def _binding(keys, x, lam, lb, ub, tol_at, tol_m):
