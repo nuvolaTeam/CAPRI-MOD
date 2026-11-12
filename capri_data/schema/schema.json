@@ -22602,7 +22602,8 @@
     "model": [
      "capri_mod/coupling/bridge.py",
      "capri_mod/data/loaders.py",
-     "capri_mod/market/calibration.py"
+     "capri_mod/market/calibration.py",
+     "capri_mod/market/market_module.py"
     ],
     "builders": [],
     "checks": [
@@ -23152,7 +23153,8 @@
      "capri_mod/market/calibration.py"
     ],
     "builders": [
-     "build_feed_byproducts"
+     "build_feed_byproducts",
+     "extract_capri_gd_market"
     ],
     "checks": [
      "tools/check/check_market_base.py"

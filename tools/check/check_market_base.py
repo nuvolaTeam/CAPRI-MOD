@@ -2,7 +2,13 @@
 stages 2-3: "base reproduces")
 
 The market module is built from the model's data, the supply of the EU's and the other supply-model countries'
-market regions held at their base production, and solved at base world prices with no scenario. Its production,
+market regions held at their base production, and solved at base world prices with no scenario. The EU's supply is
+passed as a run passes it, one row per member state (MarketModule.capri_base_supply_rows): CAPRI's 2030 member-state production
+(eu_ms_balance_2030.csv) with raw milk delivered (market_prod_grof_2030.csv), which the dairy block reads per member
+state. (Until 12 November 2026 the check passed the two EU market regions' totals as rows: the dairy block then found
+no member state's milk, and Norway's raw milk came from the base table as read (the FAO base-period milk, which the
+market's calibration replaces by the milk delivered, calibration._capri_milk_point): Norway's dairy prices were up
+to 17% low, flows up to twice CAPRI's. K109's production gaps of the EU's processed products remain.) Its production,
 trade flows and market prices per region are compared with CAPRI's 2030 market data the market is calibrated on
 (capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_regions_2030.csv: PMRK and PROD per market region; bilateral_flows_2030.csv:
 ImportQ per pair; CAPRI's markmarket_greendeal_1730et_base_1717 dataOut, tools/build/build_bilateral_market.py).
@@ -38,13 +44,7 @@ def main():
     data = load_all_data(ROOT / "capri_data")
     data["market_year"] = 2030                         # CAPRI's 2030 market (the projection layer sets it in a run)
     mm = MarketModule(data)
-    held = list(mm.EU) + list(getattr(mm, "SUP", ()))
-    bp = mm.par.base_production
-    exo = pd.DataFrame(0.0, index=held, columns=list(mm.commodities))
-    for r in held:
-        for c in mm.commodities:
-            if c in bp.columns and r in bp.index:
-                exo.at[r, c] = float(bp.at[r, c])
+    exo = mm.capri_base_supply_rows()
     eq = mm.solve(exogenous_supply=exo)
     rg = pd.read_csv(MKT.parents[1] / "baselines" / "capri_greendeal_ref" / "1730" / "market" / "bilateral_regions_2030.csv", float_precision="round_trip")
     fl = pd.read_csv(MKT.parents[1] / "baselines" / "capri_greendeal_ref" / "1730" / "market" / "bilateral_flows_2030.csv", float_precision="round_trip")

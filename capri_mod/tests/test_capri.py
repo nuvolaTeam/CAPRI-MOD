@@ -104,15 +104,11 @@ def test_market_module_reproduces_its_own_prices(data):
     and neither is demonstrably right.
     """
     from capri_mod.market.market_module import MarketModule
-    from capri_mod.data.definitions import MARKET_COMMODITIES
 
     mm = MarketModule(data)
-    # the EU's market regions (CAPRI's two blocks since 3 November 2026) at their base production
-    exo = pd.DataFrame(0.0, index=list(mm.EU), columns=MARKET_COMMODITIES)
-    for r in mm.EU:
-        for c in MARKET_COMMODITIES:
-            if c in mm.par.base_production.columns:
-                exo.at[r, c] = mm.par.base_production.at[r, c]
+    # CAPRI's base supply as a run passes it: one row per member state (the dairy block reads raw milk per member state;
+    # until 12 November 2026 the EU's two market regions' totals, whose milk no dairy received)
+    exo = mm.capri_base_supply_rows()
 
     eq = mm.solve(exogenous_supply=exo)
     assert eq.converged

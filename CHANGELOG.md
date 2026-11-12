@@ -32,6 +32,24 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 12 November 2026 — the market alone against CAPRI's Green Deal market
+
+- New check tools/check/check_market_gd.py with its data capri_data/validation/greendeal_2030/capri_gd_market_2030.csv.xz
+  (tools/build/extract_capri_gd_market.py, from the two Green Deal result files): CAPRI's last market solve of a
+  converged run, with CAPRI's own supply-model results as the supply side (member states' production and raw milk
+  delivered, feed bulk indices, the prices the supply models saw). Control (every input at the reference): all 2,610
+  prices back to CAPRI's within 5.4e-6. Green Deal: EU price changes within 0.31 points on average (90th percentile
+  1.05, correlation 0.990); cereals, oilseeds, meats and eggs within about 0.4, beef -0.6; the other producing regions
+  0.17 on average. Open: the dairy products (KNOWN_ISSUES K131). The market's equations and parameters reproduce
+  CAPRI's response to the Green Deal supply shock; the gaps of the model's own Green Deal run are then mainly on the
+  supply side and in the coupling. The solve method (G3) is not tested by it.
+- MarketModule.supply_rows_by_member_state and capri_base_supply_rows: the EU's supply one row per member state, as a
+  run passes it. tools/check/check_market_base.py and three tests (test_market_nk, test_welfare,
+  test_market_module_reproduces_its_own_prices) passed the two EU blocks' totals as rows, which gave the dairy block
+  no member state's milk; with member-state rows the base check's prices (9.4e-8) and flows (5.3e-7) are CAPRI's in
+  every region, Norway's dairy included (before up to 17% and 2x); K109's production gaps remain. The dairy block now
+  stops on a supply row named after an EU block.
+
 ## 12 November 2026 — CAPTRD-MOD stage 2e: the equations of the member states' estimation
 
 `capri_mod/pipeline/captrd/estimate_ms.py` holds the equations of CAPTRD's NLP m_trendMS (captrd/equations.gms, the 39

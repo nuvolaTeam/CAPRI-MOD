@@ -89,15 +89,13 @@ def test_market_welfare_at_base_and_after_a_supply_shock():
     2030 reference level (household expenditure at the calibration prices); with 10% less EU beef the EU beef price
     rises, the EU's consumers lose and Brazil's farms gain."""
     from capri_mod.data.loaders import load_all_data
-    from capri_mod.data.definitions import MARKET_COMMODITIES
     from capri_mod.market.market_module import MarketModule
     mm = MarketModule(load_all_data(str(Path(__file__).resolve().parents[2] / "capri_data")))
+    # CAPRI's base supply as a run passes it: one row per member state (the dairy block reads raw milk per member state;
+    # until 12 November 2026 the two EU blocks' totals, whose milk no dairy received)
+    exo = mm.capri_base_supply_rows()
+    EU_ROWS = [r for r in exo.index if mm.eu_region_of_country(r) is not None]
     EU = list(mm.EU)                                           # CAPRI's two EU blocks (since 3 November 2026)
-    exo = pd.DataFrame(0.0, index=EU, columns=MARKET_COMMODITIES)
-    for r in EU:
-        for c in MARKET_COMMODITIES:
-            if c in mm.par.base_production.columns:
-                exo.at[r, c] = mm.par.base_production.at[r, c]
     eq0 = mm.solve(exogenous_supply=exo)
     # the second solve keeps the run's calibration (S7: calibrated once per run at CAPRI's calibration point)
     weu = lambda w, c: float(w.loc[EU, c].sum())                  # the EU's welfare: its blocks' sum
@@ -117,7 +115,7 @@ def test_market_welfare_at_base_and_after_a_supply_shock():
     eu_rms = sorted(set(gl.loc[gl.model_region == "EU27", "rms"]))
     assert abs(weu(w0, "CSSP") - float(ref.reindex(eu_rms).sum())) < 1e-6 * weu(w0, "CSSP")
     exo1 = exo.copy()
-    exo1.loc[EU, "BEEF"] *= 0.9
+    exo1.loc[EU_ROWS, "BEEF"] *= 0.9
     eq1 = mm.solve(exogenous_supply=exo1)
     w1 = eq1.welfare
     assert eq1.domestic_prices.at["EU27", "BEEF"] > eq0.domestic_prices.at["EU27", "BEEF"]

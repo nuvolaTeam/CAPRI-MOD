@@ -6085,6 +6085,29 @@
    ]
   },
   {
+   "task": "extract_capri_gd_market",
+   "builder": "extract_capri_gd_market",
+   "args": [],
+   "inputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_regions_2030.csv"
+   ],
+   "code": [
+    "tools/build/build_bilateral_market.py",
+    "tools/build/extract_capri_gd_market.py",
+    "tools/lib/_grep.py",
+    "tools/lib/_market_regions.py",
+    "tools/lib/_sources_io.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.gdx",
+    "$EXPORTS/res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx"
+   ],
+   "outputs": [
+    "capri_data/validation/greendeal_2030/capri_gd_market_2030.csv.xz"
+   ]
+  },
+  {
    "task": "extract_gd2030_nbalance",
    "builder": "extract_gd2030_nbalance",
    "args": [],

@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (14)
+## Open (15)
 
 | # | Issue | Status |
 |---|---|---|
@@ -34,6 +34,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K128](#k128) | Farm-to-Fork's meat prices against JRC121368: beef +29.5% against +24.0%, poultry +20.4% against +18.0%, pork +20.5% against +43.0%, with EU production close to CAPRI's | open (9 November 2026): the market's inputs checked against CAPRI's (base, demand elasticities, Armington, quotas), no departure found; needs CAPRI's own scenario run on the same version |
 | [K129](#k129) | BG020000 under the Green Deal: the coupled iteration settles on one of two branches of the region's response (maize 169 or 16 thousand ha between two runs); each iteration's problem mostly has one solution the starts agree on | open (10 November 2026): the branch follows the market iteration's path; more starts per solve did not change it (tried and dropped) |
 | [K130](#k130) | Catch crops' cost per ha is CAPRI's reported TOIN of CATC, not its cost coefficients; where CAPRI's Green Deal baseline has no catch crops (160 of 250 units), the calibration run's TOIN | open (9 November 2026): to read CAPRI's own cost data of the winter-cover technology |
+| [K131](#k131) | Given CAPRI's own Green Deal supply, the market's EU prices follow CAPRI's within 0.3 points on average, but the dairy protein products rise 2-5 points more and butter 1 point less | open (12 November 2026): not yet traced |
 
 ## Resolved (107)
 
@@ -1972,6 +1973,12 @@ the EU's two market regions only (A_EU_WEST, A_EU_EAST):
 Not yet traced to the member-state data. Next: compare the member states' crush and dairy output of the base with
 CAPRI's DATA per member state (sim_ini_21730), region by region.
 
+- **12 November 2026:** the check now passes the EU's supply per member state, as a run does
+  (MarketModule.capri_base_supply_rows); until then its two block rows gave the dairy block no member state's milk and
+  Norway the base table's FAO milk. Prices (largest relative gap 9.4e-8) and flows (5.3e-7) are now CAPRI's in every
+  region, Norway's dairy included (before: up to 17% and 2x). The production gaps above are unchanged (cheese -407 kt
+  in EU_WEST, rape cake +-122.8 kt, casein -31% in EU_EAST): they do not come from the check's rows.
+
 ### K110: The market's Newton-Krylov solve did not converge on a real shock; its test had passed without one (found 4 November 2026, the ports block's full test suite)
 
 test_market_nk.py (a 10% cut of EU beef and 5% of EU soft wheat, the Newton-Krylov solve against the default one)
@@ -2675,3 +2682,26 @@ the two TOIN per ha differ by up to 25% (input mix at another adoption level).
   calibration run's input bill per ha; mini-EU indicators within 0.4 point of the runs with the calibration run's base
 - **Status:** **open**: to read CAPRI's own cost data of the winter-cover technology (the ghg technology tables of
   envind/cover_crops.gms) instead of the reported TOIN, for every unit
+
+<a id="k131"></a>
+### K131: Given CAPRI's Green Deal supply, the market's dairy protein products rise more than CAPRI's (found 12 November 2026)
+
+tools/check/check_market_gd.py solves the market alone with CAPRI's own Green Deal 2030 supply-model results as its
+supply side (member states' production and raw milk, feed bulks, the prices the supply models saw;
+capri_data/validation/greendeal_2030/capri_gd_market_2030.csv.xz). The EU's prices follow CAPRI's within 0.3 points of
+price change on average (correlation 0.99; cereals, oilseeds, meats, eggs within about 0.4, beef -0.6); the other
+producing regions within 0.17 on average. The dairy products do not: raw milk +12.4 / +11.4% in EU_WEST / EU_EAST
+against CAPRI's producer price +11.3 / +10.6; skimmed milk powder +5.0 / +4.9 against +2.5 / +2.6, whey +6.1 / +5.2
+against +1.5 / +2.6, casein, concentrated milk and whole milk powder 1-2 points above; butter 1 point below
+(+7.3 / +9.7 against +8.3 / +10.8). Protein products above, fat products below: the dairy block's valuation of milk
+protein against fat, or the feed use of whey and SMP (CAPRI's FEDM of whey -111 kt, SMP -30 kt in A_EU_WEST), not yet
+traced.
+
+Also seen in that check, not an issue of results: in the 534 cells of non-EU regions without production of a product
+the market reports the region's base price (none moves), CAPRI's PMRK moves in 364 of them (Pakistan's rye +14.7%).
+Whether those regions' consumer prices differ was not checked.
+
+- **Effect:** EU dairy product prices in scenario runs
+- **In 9t:** –
+- **Status:** open
+

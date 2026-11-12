@@ -203,6 +203,62 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         out = df.groupby(pd.Index(reg, name=None), sort=False).sum()
         return out.reindex(list(self.EU)).fillna(0.0)
 
+    def supply_rows_by_member_state(self, ms_prod: pd.DataFrame, block_totals: Dict[str, pd.Series]) -> pd.DataFrame:
+        """The EU's supply as a run passes it to the market (one row per supply-model country, the model's country code;
+        the dairy block reads raw milk per member state): ms_prod is production per CAPRI member state (ms x
+        commodity, MILK the raw milk delivered), block_totals {EU market region: Series} the totals the rows add up
+        to, raw milk excepted. Each commodity's member-state rows are scaled to their region's total (CAPRI's
+        member-state and market-region data differ by rounding, up to 2.5e-4 of a total); a commodity without
+        member-state rows goes on the region's first member state."""
+        cty_of: Dict[str, str] = {}
+        for cty, m2 in sorted(self._COUNTRY_MS.items()):
+            cty_of.setdefault(m2 + "000000", cty)
+        cm = list(self.commodities)
+        rows = {}
+        for ms in ms_prod.index:
+            cty = cty_of.get(str(ms))
+            if cty is None or self.eu_region_of_country(cty) is None:
+                continue
+            rows[cty] = ms_prod.loc[ms].reindex(cm).fillna(0.0).astype(float)
+        exo = pd.DataFrame(rows).T.reindex(columns=cm).fillna(0.0)
+        reg = pd.Series({c: self.eu_region_of_country(c) for c in exo.index}, dtype=object)
+        for rg in self.EU:
+            idx = list(reg.index[reg == rg])
+            tot = block_totals.get(rg)
+            if not idx or tot is None:
+                continue
+            for c in cm:
+                if c == "MILK":
+                    continue
+                b = float(tot.get(c, 0.0)) if pd.notna(tot.get(c, 0.0)) else 0.0
+                sm = float(exo.loc[idx, c].sum())
+                if sm > 0:
+                    exo.loc[idx, c] *= b / sm
+                elif b > 0:
+                    exo.at[idx[0], c] = b
+        return exo
+
+    def capri_base_supply_rows(self) -> pd.DataFrame:
+        """CAPRI's 2030 supply of the regions with supply models as a run passes it (supply_rows_by_member_state):
+        the EU's member states from CAPRI's member-state production (eu_ms_balance_2030.csv) scaled to the market
+        regions' base production, raw milk delivered DATA(RMSSUP, "Prod", "MILK", "CAL") (market_prod_grof_2030.csv);
+        the non-EU market regions with supply models (Norway) at their base production with their raw milk delivered."""
+        b = self._inp().csv("eu_ms_balance_2030.csv", keep_default_na=False)
+        b = b[b["commodity"].astype(str) != ""]
+        t = b.pivot_table(index="ms", columns="commodity", values="prod_kt", aggfunc="sum")
+        g = self._inp().csv("market_prod_grof_2030.csv")
+        milk = {str(r.capri_ms): float(r.prod_kt) for r in g[g["product"] == "MILK"].itertuples(index=False)}
+        t["MILK"] = [milk.get(str(ms), 0.0) for ms in t.index]
+        bp = self.par.base_production
+        exo = self.supply_rows_by_member_state(t, {rg: bp.loc[rg] for rg in self.EU if rg in bp.index})
+        for r in getattr(self, "SUP", ()):
+            if r not in bp.index:
+                continue
+            exo.loc[r] = [float(bp.at[r, c]) if c in bp.columns else 0.0 for c in exo.columns]
+            if "MILK" in exo.columns:
+                exo.at[r, "MILK"] = float(sum(milk.get(ms, 0.0) for ms in self.SUP_NONEU_MS.get(r, ())))
+        return exo
+
     def _eu_ms_balance(self) -> pd.DataFrame:
         """CAPRI's 2030 member-state balance (tools/build/build_eu_ms_balance.py), summed per EU market region and model
         commodity: prod, hcon, feed, proc, biof (1000 t)."""

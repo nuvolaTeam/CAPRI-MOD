@@ -203,7 +203,8 @@ CAPRI's 2030 reference results:
   2026, GAMS 53.3). Its META lists "Sensitivity experiments with features in supply model: true [default]", but its
   dataOut holds no experiment's records (set_and_store_dataout.gms l. 258-269 would store them under the experiments'
   names in the second dimension): the experiments did not run or did not write results.
-  - Read by: extract_capri_gd_pair (capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz).
+  - Read by: extract_capri_gd_pair (capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz) and
+    extract_capri_gd_market (capri_data/validation/greendeal_2030/capri_gd_market_2030.csv.xz).
 
 The zip above, **`gd_full.zip`** (gd_full.txt) and **`markmarket_greendeal_1730et_base_1717.txt`** are one file: the
 same dataOut dump of the 2030 reference (387,918,153 bytes, CRC 5c5903b6; checked 10 November 2026), under three names.
