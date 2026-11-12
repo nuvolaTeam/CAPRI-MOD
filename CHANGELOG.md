@@ -40,8 +40,10 @@ and `docs/KNOWN_ISSUES.md`.
   levels CAPTRD stores (estP: observations or a support).
 - Found: the widening's path moves the result by several points (Denmark's share within 2% of step3: 94.3% before the
   fix, 84.2% after, on the port's bounds); on CAPTRD's own final bounds 95.4% (0.5%: 88.1%), which the test now checks.
-- Open, for the project lead: trade positions free of the objective at the middle of their box (Denmark's olive oil
-  imports and exports 5e8 against CAPTRD's 1.1), harmful for the EU's gross trade built from the members'.
+- Trade positions free of the objective at the middle of their box (Denmark's olive oil imports and exports 5e8
+  against CAPTRD's 1.1), harmful for the EU's gross trade built from the members': IPOPT's warm start (tested: France's
+  share within 2% of step3 31.6% against 84.5%) and a proximity term not adopted; decided by the project lead: the solve
+  kept as it is, the free trade positions dealt with in stage 4 (estimate_eu_trade.gms).
 
 ## 12 November 2026 — CAPTRD-MOD stage 2e: Solve2 against Step3; clean_tiny and the step3 copies
 

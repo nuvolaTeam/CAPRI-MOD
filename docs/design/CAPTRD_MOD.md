@@ -792,4 +792,11 @@ an interior-point method: Denmark's olive oil imports and exports 5e8 (the middl
 (CONOPT stays near its start); Austria's 2.7e6 against 0.33. Harmless for the objective (IMPT = EXPT, NTRD 0), not for
 the EU's gross trade built from the members' (estimate_eu_trade.gms). A small proximity term to the start (as the phase-1
 solve has) keeps them near the start in a test (Denmark), but changes the widening's path (32 lower and 38 upper
-bounds differing); not adopted, for the project lead to decide.
+bounds differing). Also tested and not adopted: IPOPT's warm start (warm_start_init_point, mu_init 1e-9; solver options
+only): Denmark's share within 2% 80.2% against 84.2% and objective 0.2931 against 0.2827, France's 31.6% against 84.5%
+(objective 0.0379 against 0.0181); the proximity term on the positions outside the objective only: Denmark 92.8%
+(objective 0.2285, olive oil 1.12), Austria 97.7% (1,234.8, unchanged), France 84.0% (0.0194, 7% higher), 24 lower and
+35 upper bounds of Denmark differing from CAPTRD's. **Decided (the project lead, 12 November 2026): keep the solve as
+it is (CAPTRD's objective unchanged) and deal with the trade positions free of the objective in stage 4**, where the
+EU's gross trade is built from the members' (estimate_eu_trade.gms); the rule there to be proposed then (any rule is
+one CAPRI does not have).
