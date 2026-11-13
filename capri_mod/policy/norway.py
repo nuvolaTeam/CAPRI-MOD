@@ -11,7 +11,7 @@ for the simulation year.
   effective premium is the rate. DPNOR6 and DPNOR7 (noPriceSup, l. 347-348) are paid per t of the activity's output,
   with the yields of p_dataCopy(rsNorw, pppact, o, %1), which l. 97 copies from DATA at the year's own column
   ("2030"), empty in CAPMOD (DATA holds "Y", "BAS", "TRD"): in the simulation they pay nothing, as here (CAPRI's 2030
-  reference has no output payment in Norway's premiums; KNOWN_ISSUES K144).
+  reference has no output payment in Norway's premiums; KNOWN_ISSUES K144: a CAPRI bug, kept as CAPRI computes it).
 
 At sim_ini_21730's chain the 2030 premiums are CAPRI's reference PRME at every Norwegian unit and production activity
 (capri_mod/tests/test_norway.py).

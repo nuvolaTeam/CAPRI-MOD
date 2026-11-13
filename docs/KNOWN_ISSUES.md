@@ -40,7 +40,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K140](#k140) | P2c, the rural development port: 286 of 20,098 effective RD premiums differ from CAPRI's 2030 reference (Praha's rates, Ile-de-France's inherited LFA cut, Sweden's technology-differentiated extensification measure) | open (13 November 2026); the port not yet used by the model |
 | [K142](#k142) | P2c, the BPS key (the MTR port): Croatia's key not found in CAPRI's chain (a uniform IUV used); sim_ini's NA sheep rates of 2002 taken as absent; France's Corsica 5% below CAPRI's 2030 BPS rate | open (13 November 2026) |
 | [K143](#k143) | A regional premium factor on animals compounded at every solve (livestock_premium_coef not restored) | fixed (13 November 2026) |
-| [K144](#k144) | CAPRI bug (probable): Norway's output payments (DPNOR6, DPNOR7) pay nothing in the simulation year (policy.gms l. 97 reads the yields at the year's column) | open (13 November 2026), kept as CAPRI |
+| [K144](#k144) | CAPRI bug: Norway's output payments (DPNOR6, DPNOR7) pay nothing in the simulation year (policy.gms l. 97 reads the yields at the year's column) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it |
 
 ## Resolved (115)
 
@@ -2970,7 +2970,7 @@ without the fix)
 - **Status:** fixed
 
 <a id="k144"></a>
-### K144: CAPRI bug (probable): Norway's output payments pay nothing in the simulation year (found 13 November 2026)
+### K144: CAPRI bug: Norway's output payments pay nothing in the simulation year (found 13 November 2026)
 
 policy/norw_pol.gms declares Norway's price support per t of output (DPNOR6, amber box, and DPNOR7, blue box; APPTYPE
 noPriceSup). policy.gms pays it per activity unit as the yield x 0.001 x the rate, with the yields of
@@ -2983,4 +2983,6 @@ cells exact). With the yields at "Y" Norway's dairy cows would get about 40% mor
 
 - **Effect:** Norway's premiums per activity in the simulation year, as in CAPRI
 - **In 9t:** -
-- **Status:** open, kept as CAPRI computes it (as K141): the project lead to decide whether to sign it as a CAPRI bug
+- **Status:** closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it by the project lead's decision ("for
+  the moment keep capri and sign the fact, like you did with k141"); reading the yields at "Y" would be a departure,
+  not offered as a setting
