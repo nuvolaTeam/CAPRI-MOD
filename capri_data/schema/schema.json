@@ -4005,6 +4005,49 @@
     "tests": []
    }
   },
+  "capri_map_rr": {
+   "file": "capri_data/codes/capri/MAP_RR.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI MAP_RR: the members of each region (aggregates, member states, NUTS 1 and NUTS 2; policy.gms re-aggregates the declared premiums along it)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "member",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "member"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/declared.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_mcact": {
    "file": "capri_data/codes/capri/MCACT.csv",
    "declared_in": "00_codes.sql",
@@ -4162,6 +4205,86 @@
      "build_supplement_effects"
     ],
     "checks": [],
+    "tests": []
+   }
+  },
+  "capri_msagg": {
+   "file": "capri_data/codes/capri/MSAGG.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI MSAGG: the member states (policy.gms)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_nuts1a": {
+   "file": "capri_data/codes/capri/NUTS1A.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI NUTS1A: the NUTS 1 regions, a member state or unit without one standing for it (policy.gms)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": []
    }
   },
@@ -4580,6 +4703,49 @@
     "tests": []
    }
   },
+  "capri_r_ragg": {
+   "file": "capri_data/codes/capri/R_RAGG.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI R_RAGG: the regions each region belongs to, itself included (policy.gms breaks the premium declarations down along it)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "aggregate",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "aggregate"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/declared.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_rall": {
    "file": "capri_data/codes/capri/RALL.csv",
    "declared_in": "00_codes.sql",
@@ -4615,6 +4781,86 @@
     "model": [],
     "builders": [],
     "checks": [],
+    "tests": []
+   }
+  },
+  "capri_regaggp": {
+   "file": "capri_data/codes/capri/REGAGGP.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI REGAGGP: the EU aggregates with premium declarations (policy.gms)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_regeu1015": {
+   "file": "capri_data/codes/capri/REGEU1015.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI REGEU1015: the EU-10 and EU-15 aggregates (policy.gms takes a member state's premium declarations from them first)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": []
    }
   },
@@ -4945,6 +5191,46 @@
     "tests": [
      "capri_mod/tests/test_results_long.py"
     ]
+   }
+  },
+  "capri_srnuts1": {
+   "file": "capri_data/codes/capri/SRNUTS1.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI SRNUTS1: the NUTS 1 regions a member state's declared premiums are re-aggregated from (policy.gms)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
    }
   },
   "capri_xx": {
@@ -31404,6 +31690,7 @@
      "tools/check/make_provenance.py"
     ],
     "tests": [
+     "capri_mod/tests/test_declared.py",
      "capri_mod/tests/test_premium_cut.py"
     ]
    }
@@ -32135,6 +32422,80 @@
     "tests": []
    }
   },
+  "pol_premium_entitlement_weights": {
+   "file": "capri_data/2017/policy/premium_entitlement_weights.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The share of an activity's level holding entitlements of a scheme (p_EntlWght1 of sim_ini_21730; eps 1: written EPS, no entitlements; policy/policy.gms) (tools/build/build_premium_policy_inputs.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "scheme",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "weight",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "eps",
+     "type": "INTEGER",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "scheme"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(eps IN (0, 1))"
+   ],
+   "units": [
+    {
+     "item": "eps",
+     "unit": null,
+     "status": "open",
+     "basis": "premium_entitlement_weights.eps: 1 where CAPRI writes EPS"
+    },
+    {
+     "item": "weight",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "premium_entitlement_weights.weight: share of the level"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_premium_policy_inputs (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/cap14_premiums.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "pol_premium_scheme_shares_2030": {
    "file": "capri_data/baselines/capri_greendeal_ref/1730/policy/premium_scheme_shares_2030.csv",
    "declared_in": "24_policy_more.sql",
@@ -32235,6 +32596,58 @@
     ],
     "builders": [],
     "checks": [],
+    "tests": []
+   }
+  },
+  "pol_premium_settings": {
+   "file": "capri_data/2017/policy/premium_settings.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The flags of policy/policy.gms: ntslvl (re-aggregate the declared premiums to NUTS 1 and the member states) and p_AggregNUTS2 (farm types) of sim_ini_21730 (tools/build/build_premium_policy_inputs.py)",
+   "columns": [
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "source",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "premium_settings.value: a flag"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_premium_policy_inputs (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": []
    }
   },
@@ -32772,6 +33185,7 @@
     "tests": [
      "capri_mod/tests/test_capri.py",
      "capri_mod/tests/test_data_schema.py",
+     "capri_mod/tests/test_declared.py",
      "capri_mod/tests/test_nuts_reporting.py"
     ]
    }
@@ -56439,7 +56853,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 486,
+  "capri/keep": 490,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 31,

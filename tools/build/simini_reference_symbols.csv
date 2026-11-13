@@ -56,3 +56,8 @@ p_lucAnnualFac,par,"the transitions' annual factor (calyea CUR minus the initial
 v_lucpos,var,"the market's land-use transitions at CAPRI's 2030 calibration point (the check of the luc_market port)"
 v_dualOfLUCtoCurClassMrkt,var,"duals of luClassFinal_ at the calibration point (the luc_market port's check)"
 v_dualOfLUCfromIniClassMrkt,var,"duals of luClassInitial_ at the calibration point (the luc_market port's check)"
+p_EntlWght1,par,"the entitlement weights per region, activity and payment scheme (policy/policy.gms p_entlWght1: the premium module, P2b)"
+p_premModifFact,par,"the premium modification factors per region, year, activity and scheme (policy/policy.gms, prmcut.gms; P2b)"
+p_LUUnits,par,"the livestock units per animal activity (policy/policy.gms, the application type per livestock unit; P2b)"
+ntslvl,par,"the flag of the NUTS level runs (policy/policy.gms re-aggregates the declared premiums to NUTS 1 and the member states where set; P2b)"
+p_AggregNUTS2,par,"the flag of the farm-type runs (policy/policy.gms; 0 in CAPMOD's NUTS 2 runs; P2b)"

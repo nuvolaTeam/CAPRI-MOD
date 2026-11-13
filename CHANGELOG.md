@@ -52,8 +52,27 @@ and `docs/KNOWN_ISSUES.md`.
   implement_bps.gms's convergence: P2c.
 - The SAPS scheme written DPBPS_SAPS, as CAPRI's set PSDPAY and results write it (dpbps_SAPS in the gms file; a GAMS
   label keeps the case of its first declaration): the builder takes the area schemes' spelling from PSDPAY.
-- The model still takes its premiums from cap_premium_activity.csv; P2b and P2c (claude/p2_premium_module_scoping.md)
-  come before the switch.
+- P2b, policy.gms (capri_mod/policy/declared.py): the declared premium per activity and the entitlement weight from
+  a year's declarations (rates per premium group and application type by region): the activities of each scheme, the
+  rates broken down from the EU aggregates (REGEU1015, then REGAGGP) to the member states, NUTS 1 and NUTS 2 where a
+  region has none (EPS stops it), the application factors (per level, per slaughtered head, per yield, per historical
+  yield, per livestock unit), the entitlement weights (p_EntlWght1, EPS = none), the re-aggregation by level to NUTS 1,
+  the member states and the EU aggregates. cap14_premiums now writes the coupled and area schemes' declarations (the
+  application type per level where the region has a ceiling) and takes PRMD from declared.py.
+- Check (CAPRI's 2030 reference PRMD, as a check; trend levels of sim_ini): all 22564 unit x activity x scheme records
+  of the coupled and area schemes (crops and animals) and the 1893 member states' within 1e-6, none missing or extra
+  at the units; the EU_WEST and EU_EAST rows differ by up to 2.9e-4 (169 records, unexplained; EU027000 matches; no
+  2030 scheme has a ceiling at those aggregates, so no premium depends on them). The effective premiums of the area
+  schemes are unchanged (17928 records within 1e-7).
+- Data: CAPRI's region hierarchy and main outputs in codes/capri (MAP_RR, R_RAGG, REGAGGP, REGEU1015, MSAGG, NUTS1A,
+  SRNUTS1; build_code_lists.py); the entitlement weights and policy.gms's flags (2017/policy/
+  premium_entitlement_weights.csv, premium_settings.csv; tools/build/build_premium_policy_inputs.py, from sim_ini's
+  p_EntlWght1, ntslvl, p_AggregNUTS2, added to the sim_ini extract). The livestock units are CAPRI's
+  dat/policy/livestock_units.gms already in capri_data/pipeline/captrd/dat/p_luunits.csv (equal to sim_ini's
+  p_LUUnits); the premium modification factors come with P2c (in 2030 only the decoupled Agenda 2000 animal schemes
+  have them).
+- The model still takes its premiums from cap_premium_activity.csv; P2c (claude/p2_premium_module_scoping.md) comes
+  before the switch.
 - Tests: capri_mod/tests/test_premium_cut.py.
 
 ## 13 November 2026 — CAPRI's endogenous entitlement limit (K136)

@@ -2218,6 +2218,39 @@
     "builder": "build_organic_yield_gap"
    }
   },
+  "capri_data/2017/policy/premium_entitlement_weights.csv": {
+   "description": "The share of an activity's level holding entitlements of a scheme (p_EntlWght1 of sim_ini_21730; eps 1: written EPS, no entitlements; policy/policy.gms) (tools/build/build_premium_policy_inputs.py)",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 16705,
+   "columns": 5,
+   "units": "U_ratio",
+   "read_by_model": [
+    "capri_mod/policy/cap14_premiums.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_premium_policy_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "CAPRI's entitlement weights per region, activity and payment scheme (p_EntlWght1, sim_ini_21730): the share of the level holding entitlements. (not re-checked)"
+  },
+  "capri_data/2017/policy/premium_settings.csv": {
+   "description": "The flags of policy/policy.gms: ntslvl (re-aggregate the declared premiums to NUTS 1 and the member states) and p_AggregNUTS2 (farm types) of sim_ini_21730 (tools/build/build_premium_policy_inputs.py)",
+   "kind": "parameters",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 2,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_premium_policy_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The flags of CAPRI's policy.gms (ntslvl, p_AggregNUTS2 of sim_ini_21730). (not re-checked)"
+  },
   "capri_data/2017/supply/animal_numbers.csv": {
    "description": "herd sizes 2017: CAPRI's HERD item (build_capri_base.py HERD_MAP; COWS = DCOW + SCOW; PIGS = CAPRI's SOWS herd, PIGF = the PIGS census less the sows); the loader renames SCOW, HEIF, HENS, POUL (loaders.HERD_ALIASES)",
    "kind": "base",
@@ -3971,6 +4004,19 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/MAP_RR.csv": {
+   "description": "CAPRI MAP_RR: the members of each region (aggregates, member states, NUTS 1 and NUTS 2; policy.gms re-aggregates the declared premiums along it)",
+   "kind": "structure",
+   "rows": 823,
+   "columns": 2,
+   "read_by_model": [
+    "capri_mod/policy/declared.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/MCACT.csv": {
    "description": "CAPRI MCACT(PACT), crop activities in the supply model",
    "kind": "structure",
@@ -3991,6 +4037,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/MSAGG.csv": {
+   "description": "CAPRI MSAGG: the member states (policy.gms)",
+   "kind": "structure",
+   "rows": 35,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/MS_RU.csv": {
    "description": "CAPRI's member states and their regional units (MAP_RR restricted to MS x RU)",
    "kind": "structure",
@@ -3999,6 +4055,16 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/NUTS1A.csv": {
+   "description": "CAPRI NUTS1A: the NUTS 1 regions, a member state or unit without one standing for it (policy.gms)",
+   "kind": "structure",
+   "rows": 101,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/PACT.csv": {
@@ -4042,6 +4108,26 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/REGAGGP.csv": {
+   "description": "CAPRI REGAGGP: the EU aggregates with premium declarations (policy.gms)",
+   "kind": "structure",
+   "rows": 7,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/REGEU1015.csv": {
+   "description": "CAPRI REGEU1015: the EU-10 and EU-15 aggregates (policy.gms takes a member state's premium declarations from them first)",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/RM.csv": {
@@ -4098,6 +4184,29 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/R_RAGG.csv": {
+   "description": "CAPRI R_RAGG: the regions each region belongs to, itself included (policy.gms breaks the premium declarations down along it)",
+   "kind": "structure",
+   "rows": 823,
+   "columns": 2,
+   "read_by_model": [
+    "capri_mod/policy/declared.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/SRNUTS1.csv": {
+   "description": "CAPRI SRNUTS1: the NUTS 1 regions a member state's declared premiums are re-aggregated from (policy.gms)",
+   "kind": "structure",
+   "rows": 101,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/XX.csv": {

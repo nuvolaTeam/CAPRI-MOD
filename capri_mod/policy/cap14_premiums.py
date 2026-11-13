@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from capri_mod.data.definitions import capri_ms
+from capri_mod.policy.premium_cut import EPS
 from capri_mod.supply import entitlements as _entl
 from capri_mod.supply import inputs as _inputs
 
@@ -55,53 +55,73 @@ def coupled_premium_data(year: int, d=None) -> dict:
     return dict(out)
 
 
-def coupled_premiums(units, levels: dict, year: int, d=None):
-    """The coupled schemes' declared premiums (PRMD per unit of the activity) at the given units, their weights (1)
-    and ceilings, for premium_cut.premiums: (prmd {(unit, activity, scheme): EUR}, weight, ceilings {(region,
-    scheme): {"CEILVAL": million EUR}}). An activity gets a rate where the unit has a level of it (policy.gms's
-    p_dataCopy LEVL condition); the sum over its groups where it is in several."""
+def entitlement_weights(inp=None) -> dict:
+    """{(region, activity, scheme): p_EntlWght1, EPS where CAPRI writes EPS} (policy/premium_entitlement_weights.csv)."""
+    inp = inp or _inputs.current()
+
+    def _load(i):
+        w = i.csv("premium_entitlement_weights.csv", "policy", keep_default_na=False)
+        return {(r, a, s): (EPS if int(e) else float(v))
+                for r, a, s, v, e in zip(w.region, w.activity, w.scheme, w.weight, w.eps)}
+    return inp.cached("premium_entitlement_weights", _load)
+
+
+def coupled_declarations(year: int, d=None):
+    """The coupled schemes' declarations of the year for declared.declared_premiums: {(region, scheme): {"rates":
+    {group: EUR per unit}, "APPTYPE": "perLevl" where the region has a ceiling (CAP_2013_2020_vcs.gms l. 49,
+    _cscs.gms l. 47)}} and their ceilings {(region, scheme): {"CEILVAL": million EUR}}."""
     d = data() if d is None else d
-    units = list(units)
-    prmd, ceilings = {}, {}
+    decl, ceilings = {}, {}
     for (r, s), item in coupled_premium_data(year, d).items():
-        below = [u for u in units if u == r] or [u for u in units if capri_ms(u) == r and r != u]
-        if not below:
-            continue
+        decl[(r, s)] = {"rates": dict(item["rates"])}
         if "CEILVAL" in item:
             ceilings[(r, s)] = {"CEILVAL": item["CEILVAL"]}
-        for g, rate in item["rates"].items():
-            for a in d["groups"].get(g, []):
-                for u in below:
-                    if levels.get((u, a), 0.0) > 0.0:
-                        prmd[(u, a, s)] = prmd.get((u, a, s), 0.0) + rate
-    return prmd, {k: 1.0 for k in prmd}, ceilings
+            if item["CEILVAL"]:
+                decl[(r, s)]["APPTYPE"] = "perLevl"
+    return decl, ceilings
+
+
+def area_declarations(year: int):
+    """The CAP 2014-2020 area schemes' declarations of the year: the greening, young-farmer, redistributive,
+    natural-constraint payments and the SAPS (CAP_2014_2020.gms l. 309-357): the rate per premium group (PGSAPS, 1000
+    EUR per ha) in each member state, per level where the member state has a ceiling of the scheme (the year's, from
+    capri_mod/supply/entitlements.py, K136), and those ceilings. The BPS of the member states with the basic payment
+    scheme (dp_bps) has a rate per region from implement_bps.gms's convergence: P2c."""
+    ent = _entl.data()
+    rates = {item[len("area_rate_"):]: v for item, v in ent["settings"].items() if item.startswith("area_rate_")}
+    decl, ceilings = {}, {}
+    for ms, c in _entl.ms_ceilings(year, ent).items():
+        for g, by_scheme in rates.items():
+            for s, rate in by_scheme.items():
+                decl.setdefault((ms, s), {"rates": {}})["rates"][g] = rate
+                v = c.get(s, 0.0)
+                if v > 0.0:
+                    decl[(ms, s)]["APPTYPE"] = "perLevl"
+                    ceilings[(ms, s)] = {"CEILVAL": v}
+    return decl, ceilings
+
+
+def _declared(units, levels, decl):
+    from capri_mod.policy.declared import PolicyRegions, declared_premiums
+    regions = PolicyRegions.from_codes(units)
+    out = declared_premiums(decl, data()["groups"], regions, levels, entl_weight=entitlement_weights())
+    units = set(units)
+    prmd = {k: v for k, v in out["prmd"].items() if k[0] in units and v}
+    return prmd, {k: out["weight"][k] for k in prmd}
+
+
+def coupled_premiums(units, levels: dict, year: int, d=None):
+    """The coupled schemes' declared premiums (PRMD per unit of the activity) at the given units, their entitlement
+    weights and ceilings, for premium_cut.premiums: (prmd {(unit, activity, scheme): EUR}, weight, ceilings {(region,
+    scheme): {"CEILVAL": million EUR}}), through policy.gms (declared.py)."""
+    decl, ceilings = coupled_declarations(year, d)
+    prmd, weight = _declared(units, levels, decl)
+    return prmd, weight, ceilings
 
 
 def area_premiums(units, levels: dict, year: int):
-    """The CAP 2014-2020 area schemes' declared premiums at the given units, their weights (1) and their member
-    states' ceilings, for premium_cut.premiums: the greening, young-farmer, redistributive and natural-constraint
-    payments and the SAPS (CAP_2014_2020.gms l. 309-357): the rate per premium group (PGSAPS, 1000 EUR per ha of every
-    activity of the group) where the member state has a ceiling of the scheme (the application type is set only
-    there), the ceiling of the simulation year (capri_mod/supply/entitlements.py, K136). The BPS of the member states
-    with the basic payment scheme (dp_bps) has a rate per region from its convergence (implement_bps.gms): P2c."""
-    ent = _entl.data()
-    rates = {item[len("area_rate_"):]: v for item, v in ent["settings"].items() if item.startswith("area_rate_")}
-    ceil_ms = _entl.ms_ceilings(year, ent)
-    groups = data()["groups"]
-    units = list(units)
-    prmd, ceilings = {}, {}
-    for g, by_scheme in rates.items():
-        for s, rate in by_scheme.items():
-            for ms, c in ceil_ms.items():
-                v = c.get(s, 0.0)
-                if v <= 0.0:
-                    continue
-                below = [u for u in units if capri_ms(u) == ms]
-                if not below:
-                    continue
-                ceilings[(ms, s)] = {"CEILVAL": v}
-                for a in groups.get(g, []):
-                    for u in below:
-                        if levels.get((u, a), 0.0) > 0.0:
-                            prmd[(u, a, s)] = prmd.get((u, a, s), 0.0) + rate
-    return prmd, {k: 1.0 for k in prmd}, ceilings
+    """The CAP 2014-2020 area schemes' declared premiums at the given units (area_declarations through policy.gms),
+    their entitlement weights and the member states' ceilings, for premium_cut.premiums."""
+    decl, ceilings = area_declarations(year)
+    prmd, weight = _declared(units, levels, decl)
+    return prmd, weight, ceilings

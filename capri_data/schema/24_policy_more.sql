@@ -217,3 +217,27 @@ COMMENT ON TABLE pol_cap14_coupled_rates IS 'The rates of the voluntary coupled 
 INSERT INTO value_units VALUES
   ('pol_cap14_coupled_rates', 'year', NULL, 'open', 'cap14_coupled_rates.year: a calendar year'),
   ('pol_cap14_coupled_rates', 'rate', NULL, 'open', 'cap14_coupled_rates.rate: EUR per unit of the group''s activities (per ha or per head)');
+
+-- file: capri_data/2017/policy/premium_entitlement_weights.csv
+CREATE TABLE pol_premium_entitlement_weights (
+    region VARCHAR NOT NULL,
+    activity VARCHAR NOT NULL,
+    scheme VARCHAR NOT NULL,
+    weight DOUBLE NOT NULL,
+    eps INTEGER NOT NULL CHECK (eps IN (0, 1)),
+    PRIMARY KEY (region, activity, scheme)
+);
+COMMENT ON TABLE pol_premium_entitlement_weights IS 'The share of an activity''s level holding entitlements of a scheme (p_EntlWght1 of sim_ini_21730; eps 1: written EPS, no entitlements; policy/policy.gms) (tools/build/build_premium_policy_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_premium_entitlement_weights', 'weight', 'U_ratio', 'capri', 'premium_entitlement_weights.weight: share of the level'),
+  ('pol_premium_entitlement_weights', 'eps', NULL, 'open', 'premium_entitlement_weights.eps: 1 where CAPRI writes EPS');
+
+-- file: capri_data/2017/policy/premium_settings.csv
+CREATE TABLE pol_premium_settings (
+    "item" VARCHAR PRIMARY KEY,
+    "value" DOUBLE NOT NULL,
+    source VARCHAR NOT NULL
+);
+COMMENT ON TABLE pol_premium_settings IS 'The flags of policy/policy.gms: ntslvl (re-aggregate the declared premiums to NUTS 1 and the member states) and p_AggregNUTS2 (farm types) of sim_ini_21730 (tools/build/build_premium_policy_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_premium_settings', 'value', NULL, 'open', 'premium_settings.value: a flag');
