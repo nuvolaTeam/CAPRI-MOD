@@ -32152,6 +32152,7 @@
      "capri_mod/tests/test_mtr.py",
      "capri_mod/tests/test_nordic_aid.py",
      "capri_mod/tests/test_premium_cut.py",
+     "capri_mod/tests/test_premiums.py",
      "capri_mod/tests/test_rd.py"
     ]
    }
@@ -32935,7 +32936,7 @@
    "file": "capri_data/2017/policy/mtr_base_data.csv",
    "declared_in": "24_policy_more.sql",
    "layout": [],
-   "comment": "sim_ini_21730's DATA the MTR port evaluates the premiums at: levels (BAS, TRD), the main yields (YILD) and young animals' inputs (SLGT) at BAS, the historical yields (HSTY) and the milk quota (QUTS COMI) by column (tools/build/build_mtr_inputs.py)",
+   "comment": "sim_ini_21730's DATA the MTR port evaluates the premiums at: levels (BAS, TRD), the main yields (YILD) and young animals' inputs (SLGT) at BAS and Y (the simulation year's trend), the historical yields (HSTY) and the milk quota (QUTS COMI) by column (tools/build/build_mtr_inputs.py)",
    "columns": [
     {
      "name": "region",
@@ -35510,6 +35511,7 @@
      "capri_mod/tests/test_mtr.py",
      "capri_mod/tests/test_nordic_aid.py",
      "capri_mod/tests/test_nuts_reporting.py",
+     "capri_mod/tests/test_premiums.py",
      "capri_mod/tests/test_rd.py"
     ]
    }

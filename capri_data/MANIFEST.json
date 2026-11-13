@@ -2222,12 +2222,12 @@
    "catalogue_note": "The decoupled complementary national payments' premium groups (CAP_2013_2020_CNDP.gms). (not re-checked)"
   },
   "capri_data/2017/policy/mtr_base_data.csv": {
-   "description": "sim_ini_21730's DATA the MTR port evaluates the premiums at: levels (BAS, TRD), the main yields (YILD) and young animals' inputs (SLGT) at BAS, the historical yields (HSTY) and the milk quota (QUTS COMI) by column (tools/build/build_mtr_inputs.py)",
+   "description": "sim_ini_21730's DATA the MTR port evaluates the premiums at: levels (BAS, TRD), the main yields (YILD) and young animals' inputs (SLGT) at BAS and Y (the simulation year's trend), the historical yields (HSTY) and the milk quota (QUTS COMI) by column (tools/build/build_mtr_inputs.py)",
    "kind": "coefficients",
    "vintage": "2017",
    "domain": "policy",
    "status": "live",
-   "rows": 50642,
+   "rows": 67933,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2335,7 +2335,7 @@
    "vintage": "1993-2030",
    "domain": "policy",
    "status": "live",
-   "rows": 2779,
+   "rows": 2806,
    "columns": 7,
    "units": "to be established (value_units: open)",
    "read_by_model": [

@@ -578,7 +578,7 @@ CREATE TABLE pol_mtr_base_data (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (region, activity, item, "column")
 );
-COMMENT ON TABLE pol_mtr_base_data IS 'sim_ini_21730''s DATA the MTR port evaluates the premiums at: levels (BAS, TRD), the main yields (YILD) and young animals'' inputs (SLGT) at BAS, the historical yields (HSTY) and the milk quota (QUTS COMI) by column (tools/build/build_mtr_inputs.py)';
+COMMENT ON TABLE pol_mtr_base_data IS 'sim_ini_21730''s DATA the MTR port evaluates the premiums at: levels (BAS, TRD), the main yields (YILD) and young animals'' inputs (SLGT) at BAS and Y (the simulation year''s trend), the historical yields (HSTY) and the milk quota (QUTS COMI) by column (tools/build/build_mtr_inputs.py)';
 INSERT INTO value_units VALUES
   ('pol_mtr_base_data', 'value', NULL, 'open', 'mtr_base_data.value: by item (1000 ha or heads, kg or t per unit, 1000 t)');
 

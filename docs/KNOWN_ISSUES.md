@@ -2830,7 +2830,10 @@ trend level.
 - **Status:** fixed (13 November 2026). The full EU Green Deal run (runs/full_gd_k136.pkl, 19 iterations, every
   regional solve optimal): EU UAA +1.90% (K135 +3.36%, CAPRI +1.3%); the 35 activities' mean absolute gap to CAPRI's
   Green Deal step 3.6 points (K135 4.3), the producer prices' 2.7 (3.8). PL340000 (K139) unchanged. Since 13
-  November (P2) only CAPRI's VCS and cotton schemes are taken out of the BPS ceiling (the CNDP are national money)
+  November (P2) only CAPRI's VCS and cotton schemes are taken out of the BPS ceiling (the CNDP are national money).
+  The full EU Farm-to-Fork run with it (dev f5da6c7, 13 November 2026): converged in 14 iterations, 4,051 s, every
+  regional solve optimal; the mean absolute deviation from JRC121368's 20 indicators 4.77 points (UAA +3.2%,
+  JRC121368 +3%). Both runs are in the results store (ebc377a04811, 3c1dee09f16b)
 
 <a id="k137"></a>
 ### K137: The reported UAA left out the idled histosols (found 13 November 2026)

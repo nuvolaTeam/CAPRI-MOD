@@ -8,9 +8,10 @@ tables merge into the data, $ONMULTI in util/global_settings.gms; its assignment
 
   capri_data/<base year>/policy/mtr_declarations.csv   line, region, year, scheme, item, value, special
         line 0: sim_ini_21730's p_premDataE of the schemes the key needs (PSDPAY_MTR_EL with mtr_until2013.gms's
-        additions, DPMTR, DPSAPS); line n: mtr_until2013.gms's assignment of one value at line n (p_premDataE("R",
-        "Y","S","I") = number, EPS or an application type). special: EPS, NA (sim_ini's NA, policy.gms's "missing")
-        or the application type's name in value. The file's other assignments (sets, conditions, loops) are
+        additions, DPMTR, DPSAPS) and of DPIRSCOW (Ireland's suckler cow welfare payment, coupled); line n:
+        mtr_until2013.gms's assignment of one value at line n (p_premDataE("R","Y","S","I") = number, EPS or an
+        application type). special: EPS, NA (sim_ini's NA; mtr.py takes them as absent, K142) or the application
+        type's name in value. The file's other assignments (sets, conditions, loops) are
         capri_mod/policy/mtr.py's rules, each at its line; this builder stops when mtr_until2013.gms has one more
   capri_data/<base year>/policy/mtr_ceiling_tables.csv table, region, year, value
         P_1782_2003_ANNEX_VIII, P_1782_2003_ANNEX_VIIIa, p_73_2009_ANNEX_IV (million EUR) and P_SAPS_AREAS (1000 ha,
@@ -29,7 +30,8 @@ tables merge into the data, $ONMULTI in util/global_settings.gms; its assignment
         (group|scheme), TRDWHE_REG, PSDPAY_MTR (the key's schemes), PSGROUP (the premium groups), DDTarget
   capri_data/<base year>/policy/mtr_base_data.csv      region, activity, item, column, value
         DATA of sim_ini_21730 for the units and member states: LEVL at BAS and TRD, UAAR at BAS, the main outputs'
-        yields (PACT_TO_Y, item YILD summed) and the young animals' inputs (PACT_TO_I, item SLGT summed) at BAS, HSTY
+        yields (PACT_TO_Y, item YILD summed) and the young animals' inputs (PACT_TO_I, item SLGT summed) at BAS and Y
+        (the simulation year's trend, for the year's policy.gms), HSTY
         (the activities' and CERE's) and the milk quota (QUTS COMI) in every column
   capri_data/<base year>/policy/mtr_rules.csv          line, rule, labels, rhs, numbers, statement
         each rule line of mtr_until2013.gms with the rule of mtr.py that executes it and the statement's quoted
@@ -160,7 +162,8 @@ def main() -> None:
     if m is None:
         raise SystemExit(f"{TOP}: DPAgEu10 not found")
     ageu10 = [scheme(s.strip()) for s in m.group(1).split(",") if s.strip()]
-    keyset = set(mtr_el) | {scheme("DPMTR"), scheme("DPSAPS")}
+    # the key's schemes, and Ireland's suckler cow welfare payment (l. 351-352), coupled and carried to the year
+    keyset = set(mtr_el) | {scheme("DPMTR"), scheme("DPSAPS"), scheme("DPIRSCOW")}
     sets = ([("PSDPAY_MTR_EL", s, "sim_ini" if s not in added else f"star 3.0 {MTR.as_posix()}") for s in mtr_el]
             + [("DPAgEu10", s, f"star 3.0 {TOP.as_posix()}") for s in ageu10]
             + [("PSGG_TO_P", f"{g}|{p}", "sim_ini") for g, p in pairs("PSGG_TO_P")]
@@ -334,8 +337,8 @@ def main() -> None:
     ua = D[(D.d1 == "UAAR") & (D.d2 == "LEVL") & (D.d3 == "BAS")]
     parts.append(pd.DataFrame({"region": ua.d0, "activity": "UAAR", "item": "LEVL", "column": "BAS",
                                "value": ua.value}))
-    for pp, name, col in ((p2y.rename(columns={"o": "x"}), "YILD", "BAS"), (p2i.rename(columns={"i": "x"}), "SLGT",
-                                                                            "BAS")):
+    for pp, name, col in ((p2y.rename(columns={"o": "x"}), "YILD", "BAS"), (p2i.rename(columns={"i": "x"}), "SLGT", "BAS"),
+                          (p2y.rename(columns={"o": "x"}), "YILD", "Y"), (p2i.rename(columns={"i": "x"}), "SLGT", "Y")):
         x = D[D.d3 == col].merge(pp, left_on=["d1", "d2"], right_on=["a", "x"])
         x = x.groupby(["d0", "d1"], as_index=False).value.sum()
         parts.append(pd.DataFrame({"region": x.d0, "activity": x.d1, "item": name, "column": col, "value": x.value}))

@@ -124,9 +124,16 @@ and `docs/KNOWN_ISSUES.md`.
   but Corsica 5% low; Croatia by a uniform IUV; sim_ini's NA sheep rates taken as absent (K142).
 - The tables of mtr_until2013.gms parsed (coupling, decoupling targets, modulation) equal sim_ini's compiled copies
   cell by cell; gams_table keeps EPS apart from a written zero on request; sim_ini's extract writes its acronyms.
-- The model still takes its premiums from cap_premium_activity.csv; DPNONCAP and the outer-loop integration come
-  before the switch.
-- Tests: capri_mod/tests/test_mtr.py.
+- All ported schemes together (capri_mod/policy/premiums.py): coupled (VCS, cotton, CNDP), area schemes, the BPS
+  (rates and the units' ceilings, implement_bps.gms l. 147-160, 315), RD, Nordic aid and Ireland's suckler cow
+  welfare payment (DPIRSCOW, mtr_until2013.gms l. 351-352), declared at the year's trend data (sim_ini's DATA "Y",
+  now in mtr_base_data.csv) and cut by prmcut. Check at CAPRI's trend levels: the EU's 2030 premiums 47,262 against
+  CAPRI's reference 47,260 million EUR; 92% of the unit x activity totals within 1e-4 (p90 1.7e-5); the differences
+  France's BPS (K142) and the RD port's (K140). Not ported: Norway's payments (norw_pol.gms) and DPNONCAP, which in
+  2030 pays outside the EU only.
+- The model still takes its premiums from cap_premium_activity.csv; the outer-loop integration comes before the
+  switch.
+- Tests: capri_mod/tests/test_mtr.py, test_premiums.py.
 - Tests: capri_mod/tests/test_premium_cut.py.
 
 ## 13 November 2026 — CAPRI's endogenous entitlement limit (K136)

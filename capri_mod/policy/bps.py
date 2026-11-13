@@ -129,10 +129,12 @@ def converge(ceil: dict, entl: dict, years, opts: dict) -> dict:
     return out
 
 
-def bps_rates(units, levels: dict, key: dict, year: int, d: dict = None) -> dict:
+def bps_rates(units, levels: dict, key: dict, year: int, d: dict = None, detail: bool = False):
     """{unit: dp_bps rate per level (EUR / ha)} of the simulation year for the member states with the BPS among the
     units' (implement_bps.gms, the year's rate the last reform year's, def_policy.gms). levels {(unit, activity):
-    trend level}, key {unit: the unit's MTR payments, million EUR}."""
+    trend level}, key {unit: the unit's MTR payments, million EUR}. detail: also the units' ceilings of the year
+    {(unit, "dp_bps"): {"CEILLEV": entitlements, "CEILVAL": the unit's share of the ceiling before the convergence,
+    million EUR}} (implement_bps.gms l. 147-160)."""
     d = d or data()
     ent = _entl.data()
     saps = set(ent["settings"].get("saps", {}))
@@ -141,7 +143,7 @@ def bps_rates(units, levels: dict, key: dict, year: int, d: dict = None) -> dict
     from capri_mod.data.definitions import capri_ms
     for u in units:
         by_ms[capri_ms(u)].append(u)
-    out = {}
+    out, ceilings = {}, {}
     for ms, us in by_ms.items():
         if ms in saps or ms not in set(d["regions"].ms):
             continue
@@ -166,4 +168,8 @@ def bps_rates(units, levels: dict, key: dict, year: int, d: dict = None) -> dict
             conv = converge({y: {u: ceil[y].get(u, 0.0) for u in bu} for y in years}, {u: entl[u] for u in bu}, years,
                             _options(ms, b, d))
             out.update(conv[min(max(years), year)])
-    return out
+        y = min(max(years), year)
+        for u in us:
+            if u in out:
+                ceilings[(u, "dp_bps")] = {"CEILLEV": entl[u], "CEILVAL": ceil[y].get(u, 0.0)}
+    return (out, ceilings) if detail else out
