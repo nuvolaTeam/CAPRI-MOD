@@ -139,7 +139,12 @@ and `docs/KNOWN_ISSUES.md`.
   model's own baseline (DEP-48), so every factor is 1 at that baseline and the levels' units cancel; not run in the
   calibrated baseline. A first version had put CAPRI's activities at the model's levels in the model's units
   (stalls, poultry in thousands): factors up to 2.3 at the first step. The model's own splits (dairy z, the bulls'
-  and heifers' intensity pairs) give each CAPRI activity its own change.
+  and heifers' intensity pairs) give each CAPRI activity its own change. Full EU, the response on (the default):
+  Farm-to-Fork (full_f2f_prem) converged in 14 iterations as without it (full_f2f_k136, the same inputs otherwise),
+  every indicator within 0.5 point (sheep and goats -10.6 -> -10.1, CAPRI -9.4; beef animals -20.6 -> -20.4; beef
+  price +32.0 -> +31.8); Green Deal 2030 (full_gd_prem) in 19 iterations as full_gd_k136, within 0.3 point (sheep
+  and goats -7.4 -> -7.1, beef animals -13.6 -> -13.4); full_gd_k136 predates the entitlement-limit inputs' last
+  rebuild (cap14_coupled_ceilings, cap14_entitlement_levels, cap14_settings), so that difference is in the comparison too.
 - Norway's payments (capri_mod/policy/norway.py; norw_pol.gms, def_no_policy.gms, policy.gms): the national rates
   times the units' factors, carried to the year as def_policy.gms carries them, a data base activity's rate on its
   variants (codes/capri/DACT_TO_PACT.csv, new). At 2030: CAPRI's reference PRME at all 108 Norwegian unit x
@@ -149,9 +154,11 @@ and `docs/KNOWN_ISSUES.md`.
 - Fixed K143: a regional premium factor on animals compounded at every solve of a regional model (the solve did not
   restore livestock_premium_coef). With the premium response the mini-EU Farm-to-Fork run diverged on it; earlier,
   tools/run/run_vcs_2030.py's coupled-support experiment overstated the animals' response (to be redone).
-- The model's baseline premiums are still CAPRI's 2030 reference PRME (capri_cap_premium_2030.csv); replacing them
-  by the port at the trend levels needs CAPRI's reporting aggregates of the animal activities (DCOW, BULF, HEIF) first.
-- Tests: capri_mod/tests/test_mtr.py, test_premiums.py, test_premium_response.py.
+- The model's baseline premiums are still CAPRI's 2030 reference PRME (capri_cap_premium_2030.csv). Replacing them
+  by the ports at the trend levels (step 2): CAPRI's aggregates DCOW, BULF, HEIF carry their members' total premium
+  over a level that moves with the herd, so a per-stall premium from the ports is possible without CAPRI's results;
+  open, because the ports do not cover the UK, the Western Balkans and Turkey (claude/p2_integration_design.md).
+- Tests: capri_mod/tests/test_mtr.py, test_premiums.py, test_premium_response.py, test_norway.py.
 - Tests: capri_mod/tests/test_premium_cut.py.
 
 ## 13 November 2026 — CAPRI's endogenous entitlement limit (K136)
