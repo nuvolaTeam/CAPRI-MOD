@@ -131,9 +131,15 @@ and `docs/KNOWN_ISSUES.md`.
   CAPRI's reference 47,260 million EUR; 92% of the unit x activity totals within 1e-4 (p90 1.7e-5); the differences
   France's BPS (K142) and the RD port's (K140). Not ported: Norway's payments (norw_pol.gms) and DPNONCAP, which in
   2030 pays outside the EU only.
-- The model still takes its premiums from cap_premium_activity.csv; the outer-loop integration comes before the
-  switch.
-- Tests: capri_mod/tests/test_mtr.py, test_premiums.py.
+- The premiums respond to a scenario (capri_mod/policy/premium_response.py, supply.premium_response = "capri",
+  CAPRI's calculate_premiums.gms): at each step up to the tenth (supply.premium_response_max_step) prmcut on the
+  weighted levels of the last steps (outer_loop.capri_step_weights), the ported premiums' change over their value at
+  the trend levels applied as a factor on the model's premium per activity (the supply model's
+  premium_factor_regional); a model activity of several CAPRI activities split by their trend shares (DEP-48). Not
+  run in the calibrated baseline, where every factor is 1.
+- The model's baseline premiums are still CAPRI's 2030 reference PRME (capri_cap_premium_2030.csv); replacing them
+  by the port at the trend levels needs CAPRI's reporting aggregates of the animal activities (DCOW, BULF, HEIF) first.
+- Tests: capri_mod/tests/test_mtr.py, test_premiums.py, test_premium_response.py.
 - Tests: capri_mod/tests/test_premium_cut.py.
 
 ## 13 November 2026 — CAPRI's endogenous entitlement limit (K136)

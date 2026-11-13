@@ -2092,6 +2092,7 @@
    "columns": 3,
    "units": "to be established (value_units: open)",
    "read_by_model": [
+    "capri_mod/policy/premiums.py",
     "capri_mod/supply/entitlements.py"
    ],
    "origin": {
@@ -4971,7 +4972,8 @@
    "columns": 5,
    "read_by_model": [
     "capri_mod/data/definitions.py",
-    "capri_mod/io_results.py"
+    "capri_mod/io_results.py",
+    "capri_mod/policy/premium_response.py"
    ],
    "origin": {
     "nature": "declared"
@@ -5108,6 +5110,7 @@
    "columns": 3,
    "read_by_model": [
     "capri_mod/data/definitions.py",
+    "capri_mod/policy/premiums.py",
     "capri_mod/scenarios/definition.py"
    ],
    "origin": {

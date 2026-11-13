@@ -56,6 +56,7 @@ from capri_mod.settings import setting, tri_state, current as _settings
 from capri_mod.data.definitions import MS_CODE, capri_ms, REGION_TO_COUNTRY, EU_MS_BLOCK, sup_noneu, is_eu as _is_eu
 from capri_mod.data.definitions import PRICE_FOLLOWS_EU, PRICE_FOLLOWS_ALL, CAPRI_FEED_TRD   # refactor stage 4
 from capri_mod.tableio import read_input
+from capri_mod.policy.premium_response import merge as _merge_premium_factors   # P2: the iterations' premium cut
 from capri_mod import runlog as _runlog
 
 
@@ -572,6 +573,16 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         self._progress(f"{_lab}: start (at most {max_outer_iter} iterations)")
         _rl = _runlog.current()
         _yr = self.data.get("market_year") if isinstance(self.data, dict) else None
+        # CAPRI's premium cut during the scenario's steps (capmod/calculate_premiums.gms, P2): the ported premiums on
+        # the weighted levels of the last steps, up to supply.premium_response_max_step, as factors on the model's
+        # premiums per activity. In the calibrated baseline the levels are the trend's and every factor 1: not run there
+        _prem_resp, _prem_fac = None, None
+        if (not _is_base and str(_settings().get("supply.premium_response")) == "capri" and _yr is not None
+                and int(_yr) == int(_settings().get("projection.sim_year"))):
+            from capri_mod.policy.premium_response import PremiumResponse
+            _prem_resp = PremiumResponse(int(_yr), int(_settings().get("run.base_year")),
+                                         _settings().get("outer_loop.capri_step_weights"),
+                                         int(_settings().get("supply.premium_response_max_step")))
         for outer_iter in range(max_outer_iter):
             self.ev.outer_iter_now = outer_iter
             self.ev.greendeal_group = bool(getattr(pol_scenario, "greendeal_group", False))
@@ -664,7 +675,8 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             _spol = {
                     "adders": policy_adders.to_dict(),
                     # premium factors by region and activity (a CAPRI premium experiment)
-                    "premium_factor_regional": self.policy_module.get_premium_factors_regional(),
+                    "premium_factor_regional": _merge_premium_factors(
+                        self.policy_module.get_premium_factors_regional(), _prem_fac),
                     # mandatory non-productive share (CAP GAEC 8 / F2F landscape
                     # elements); binds the arable land constraint in the solve
                     "set_aside_requirement": float(
@@ -717,6 +729,15 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             )
             self.seen.last_spol = _spol
             self.seen.last_supply_results = supply_results   # fodder shadow prices for the rations
+            if _prem_resp is not None:
+                _prem_resp.record(outer_iter + 1, {r: res.activities.to_dict() for r, res in supply_results.items()
+                                                   if getattr(res, "activities", None) is not None})
+                _pf = _prem_resp.factors(outer_iter + 1)
+                if _pf is not None:
+                    _prem_fac = _pf
+                    _fv = [f for d_ in _pf.values() for f in d_.values()]
+                    self._progress(f"{_lab}: premiums recomputed at step {outer_iter + 1} ({len(_pf)} units, factors "
+                                   f"{min(_fv):.4f}-{max(_fv):.4f})" if _fv else f"{_lab}: premiums recomputed")
             _t_sup = time.time()
             _rl_extra = _rl.supply_solved(outer_iter + 1, supply_results)
             # CAPRI's baseline calibration (CAPMOD calibrates its supply models so that the simulation year's baseline
