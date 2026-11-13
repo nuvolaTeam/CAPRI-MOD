@@ -2825,7 +2825,10 @@ trend level.
 - **Effect:** land expansion and the land market under shocks that raise land's value (the Green Deal); the base
   regions where the limit binds
 - **In 9t:** –
-- **Status:** fixed (13 November 2026): the full EU Green Deal run to confirm the UAA effect
+- **Status:** fixed (13 November 2026). The full EU Green Deal run (runs/full_gd_k136.pkl, 19 iterations, every
+  regional solve optimal): EU UAA +1.90% (K135 +3.36%, CAPRI +1.3%); the 35 activities' mean absolute gap to CAPRI's
+  Green Deal step 3.6 points (K135 4.3), the producer prices' 2.7 (3.8). PL340000 (K139) unchanged. Since 13
+  November (P2) only CAPRI's VCS and cotton schemes are taken out of the BPS ceiling (the CNDP are national money)
 
 <a id="k137"></a>
 ### K137: The reported UAA left out the idled histosols (found 13 November 2026)
