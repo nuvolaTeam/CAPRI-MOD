@@ -601,17 +601,32 @@ nlp_tolinfeas = 1e-5
 nlp_max_tries = 50
 nlp_at_bound_tol = 1e-4
 nlp_marginal_tol = 1e-8
-# which marginals of an infeasible solve mark the bounds to widen: "phase1" (the default since 12 November 2026: a
+# which marginals of an infeasible solve mark the bounds to widen: "slp" (the default since 12 November 2026, late:
+# CONOPT's phase 1 as a sequential LP, below; 2030, 19 member states: within 2% of CAPTRD's step3 94.6% against 92.5%,
+# none worse), "phase1" (the default before: a
 # least-infeasibility solve within the bounds, the sum of the equations' violations, as CONOPT reports an infeasible
 # model, at its phase 1's point with that objective's marginals) or "ipopt" (those of IPOPT's own infeasible stop,
 # which also carry the objective's pull). Denmark 2030's Solve2: 12 of 3,250 widened bounds differ from CAPTRD's with
 # "phase1", 54 with "ipopt"; Austria 2030's Solve1 reaches CAPTRD's objective with "phase1" (1,085 against 1,093),
 # 788 with "ipopt" from bounds CAPTRD did not open
-nlp_infeasible_marginals = "phase1"
+nlp_infeasible_marginals = "slp"
 # the phase 1's proximity weight: the least-infeasibility solve also minimises this times the squared scaled distance
 # from the infeasible solve's point (CONOPT's phase 1 starts there and moves as needed; an interior-point solve without
 # it drifts the free positions to the middle of their bounds, Spain 2030's Solve1 up to 6e7); the port's choice
 nlp_phase1_proximity = 1e-6
+# nlp_infeasible_marginals = "slp" (added 12 November 2026): CONOPT's phase 1 as a sequential LP from the solve's start
+# (estimate_nlp.phase1_slp: the least-infeasibility LP on the linearised equations, HiGHS's dual simplex, a trust region
+# relative to max(1, |x|)); its iterations' limit and the initial radius. The port's choice (CONOPT's own algorithm is
+# not available)
+nlp_phase1_slp_max_iter = 200
+nlp_phase1_slp_radius = 0.1
+# after a feasible member-state solve, the positions outside the objective moved to the optimum nearest the solve's
+# start (estimate_nlp._tie_break; the project lead's decision of 12 November 2026, option C): CONOPT leaves them at
+# their start, IPOPT drifts them to the middle of their bounds (Denmark 2030's olive oil trade 5e8 against CAPTRD's
+# 1.1). The objective and the widening's path are unchanged; the port's choice (a solver departure)
+nlp_tie_break = true
+# the NUTS 2 estimation's tries with opened bounds before it stops (est_nuts2_grid.gms l. 37: nRepeatedSolves < 75)
+nuts2_max_tries = 75
 # FIX-7 (decided 22 October 2026, implemented 12 November 2026): ARTIF's upper bound in the member states' estimation,
 # fix_est.gms l. 810, has a misplaced parenthesis, 1.02**(OrdT(ExAnte)) - OrdT("BAS") (the year as the exponent):
 # false = the parenthesis fixed, 1.02**(OrdT(ExAnte) - OrdT("BAS")) as the statement's comment states it ("max. 2%

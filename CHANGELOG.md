@@ -32,6 +32,24 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 13 November 2026 — CAPTRD-MOD: the NUTS 2 bounds, solve and rem_tiny; CONOPT's phase 1; the tie-break
+
+- **Stage 3 completed for one year.** `estimate_nuts2.py` gains the bounds (fix_est.gms per region, then
+  estimate_nuts2.gms l. 92-402), the solve with est_nuts2_grid.gms's retries (`captrd.nuts2_max_tries`, 75) and
+  rem_tiny.
+  - Ireland and Austria 2030: the bounds equal CAPTRD's stored ones, and 100% of positions are within 2% of its step3.
+  - SK and FR 2030: 98.8-100% (test_captrd_estimate_nuts2.py).
+- **Fixed:** comi_bounds.gms l. 278's yearly 0.25% growth of the previous milk yield is the member state's only
+  (`$ sameas(Rest, MS)`); the port applied it to the regions too.
+- **The infeasible point as CONOPT finds it** (`captrd.nlp_infeasible_marginals = "slp"`, now the default): a
+  sequential LP from the solve's start, with the marginals at a simplex vertex. 2030 member states: 94.6% of positions
+  within 2% of CAPTRD's step3, against 92.5%, and none worse (DE 87.9% to 98.3%, ES 86.4% to 95.4%, FR 84.5% to
+  91.3%).
+- **The tie-break** (`captrd.nlp_tie_break`): after a feasible member-state solve, the positions outside the objective
+  are moved to the optimum nearest the start, as CONOPT leaves them. Denmark's olive oil trade goes from 5e8 to 1.11
+  (CAPTRD 1.11), with the objective unchanged.
+- Registered in DEPARTURES_FROM_CAPRI.md (the solver section) and CAPTRD_MOD.md §12.8-12.9.
+
 ## 12 November 2026 — CAPTRD-MOD stage 3: the NUTS 2 estimation's equations
 
 - New capri_mod/pipeline/captrd/estimate_nuts2.py: m_trendNT2's equations for the regions of one member state under its

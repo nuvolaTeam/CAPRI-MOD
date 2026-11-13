@@ -142,9 +142,11 @@ It is not CAPTRD:
      production = yield × level, land, feed and so on.
    - National expert supports enter here.
 4. **Second solve of the same model**, adding the EU-level Outlook/Aglink targets (define_EU_supports.gms runs between
-   the two solves).
-   - The NUTS-2 breakdown happens inside this second solve.
+   the two solves), then clean_tiny.gms's cleaning solve.
+5. **The NUTS 2 regions** (model m_trendNT2; estimate_nuts2.gms, captrd.gms l. 1101): a separate model after the
+   member states, the regions of each member state estimated together under its fixed result, then rem_tiny.gms.
    - The breakdown by farm type is a separate CAPRI program (captrdfrm.gms), left out at first.
+6. **Reporting aggregates and the EU's extra-EU trade** (aggreg_and_report.gms, estimate_eu_trade.gms).
 
 **Parity test.** Give CAPTRD-MOD the inputs CAPRI used, and compare its result with `scenarios/captrd_2030`, CAPRI's own
 CAPTRD output. The exact list of files needed from the CAPRI installation comes with the detailed design (from
@@ -816,3 +818,89 @@ Germany's only) hold within 1e-3. Found: with each region's own feed contents 50
 zero, so a coefficient with neither bound nor level stored is read as fixed at zero (the regions' BULH.IBUL, with data,
 1000 in Ireland's own result), as MSGROF_'s condition needs. Not yet: the objective at CAPTRD's solution (its weights
 need the regions' LEVL BASM), estimate_nuts2.gms's bounds, the solve, rem_tiny (docs: the project's stage 3 plan).
+
+### 12.8 Stage 3: the NUTS 2 bounds, the solve with its retries, rem_tiny (12 November 2026)
+
+`estimate_nuts2.py` continued:
+
+- `nuts2_bound_sets`: S_ColsEst and S_RowsEst as estimate_nuts2.gms l. 31-48 redefines them (INDM for Germany, l. 55).
+- `bounds`: fix_est.gms for each region (`estimate_bounds.bounds` with `BoundData.region_of` set: estimate_ms.gms
+  l. 53-67, ARTIF's fix_est bounds and the step after l. 71 are the member state's only; comi_bounds.gms reads the member
+  state's p_data and P_Result as MS), then estimate_nuts2.gms l. 92-402. The sugar beet rule of l. 336-345 (an expert
+  yield with p_ExpertSupprt "Absolute") is not in the stored results: the port raises if it would apply.
+- `solve`: m_trendNT2 with est_nuts2_grid.gms's retries (est_Nuts2_grid_openbound.gms, comi_bounds.gms,
+  release_comi_yields.gms, the sugar beet and milk production rules), up to `captrd.nuts2_max_tries` (75, CAPRI's).
+  The binding bounds and the multipliers of REQS_ and MSFEEDI_ come from the least-infeasibility problem, as in
+  estimate_nlp. CONOPT's `iterusd eq 0` conditions and its "feasible but not optimal" retries have no IPOPT counterpart
+  and are not ported.
+- `rem_tiny`: rem_tiny.gms for one region.
+
+Checks (test_captrd_estimate_nuts2.py, slow; CAPTRD's reference run):
+
+- Ireland 2030 (solved at CAPTRD's first try). The bounds equal CAPTRD's stored ones on every position with data. A bound
+  CAPTRD does not store is read as zero or infinite, because the GDX keeps neither. Our solve reaches CAPTRD's step3 on
+  every position within 2%, and on 99.7% and 100% of positions within 0.5% (one region each). rem_tiny leaves this
+  unchanged. Austria 2030 (nine regions) is the same: all bounds match, and 99.7-100% of positions are within 0.5%.
+- Ireland 2050. Our first solve is infeasible, as CAPTRD's was: CAPTRD's stored bounds are the ones after its retries,
+  for example the young animals fixed at 1000 by openbound l. 255-258. One retry makes it feasible. Afterwards 3 and 2
+  bounds per region differ from CAPTRD's (a feed coefficient, GROF of FENE and OCRO); which bounds open depends on the
+  infeasible point. The result is within 2% of CAPTRD's step3 on 98.9% of positions (42.7% before the retry).
+
+Found:
+
+- comi_bounds.gms l. 278 keeps the milk yield from falling below the previous year's. The yearly 0.25% growth applies to
+  the member state only (`1 + .0025 $ sameas(Rest, MS)`); a region keeps its previous yield. The port applied the growth
+  to the regions too. Seen on Ireland's regions in 2050, where the lower bound was 10,178.6 against CAPTRD's 10,052.3,
+  which is the regions' 2045 step3. Fixed in `estimate_bounds._comi`.
+- At Ireland 2030, LOSF.RYEM's lower and upper bounds are both zero, and CAPTRD stores neither (they are zero). Yet
+  CAPTRD's step3 is the support, 0.007, where the port gives 0. One possible cause is a GAMS level kept outside its
+  bounds by HoldFixed. This is unconfirmed and too small to matter; it is left open.
+
+### 12.9 The infeasible point as CONOPT finds it; the tie-break (12-13 November 2026)
+
+CAPTRD's retry rules (estimate_ms.gms l. 252-321, est_Nuts2_grid_openbound.gms) read the bounds an infeasible solve
+blocks from CONOPT's marginals. CONOPT is an active-set method. When a model is infeasible, it reports the end of its
+phase 1, the least sum of infeasibilities reached from the solve's start, where only the truly blocking bounds carry
+marginals.
+
+The port's earlier phase 1 (`"phase1"`) solved the same least-infeasibility problem with IPOPT, from the infeasible
+solve's point. An interior-point solution spreads the adjustment over many variables, so more bounds counted as
+binding. The member states' widening therefore opened bounds CAPTRD did not open (France 2030: 89 widened bounds
+differing from CAPTRD's).
+
+`captrd.nlp_infeasible_marginals = "slp"` is the default since 13 November 2026, by the project lead's decision
+(option 2). It works in four steps:
+- `estimate_nlp.phase1_slp`: CONOPT's phase 1 as a sequential LP from the solve's start. The least-infeasibility LP
+  is set up on the linearised equations and solved with HiGHS's dual simplex (scipy), under a trust region.
+- The point is polished with the least-infeasibility NLP, and the polished point is kept only if it is less
+  infeasible.
+- `phase1_marginals`: the marginals are the simplex reduced costs at a vertex. They come from the LP solved within a
+  box of `nlp_at_bound_tol` around the point.
+- If the phase-1 point is feasible, the model is solved again from it, without widening, as CONOPT goes on to optimise.
+
+Both the member-state solve and the regional solve use it. CONOPT's pivoting at degenerate vertices is not reproduced.
+
+Check: Solve2 of 2030 on the port's bounds with its widening, shares within 2% of CAPTRD's step3 (in brackets: within
+0.5%; widened bounds differing from CAPTRD's).
+
+| | Old phase 1 | SLP | One solve on CAPTRD's final bounds |
+|---|---|---|---|
+| DE | 87.9% (74.7%; 46) | 98.3% (96.4%; 11) | 97.7% |
+| ES | 86.4% (74.0%; 54) | 95.4% (89.4%; 11) | 94.8% |
+| DK | 84.2% (68.5%; 33) | 94.7% (86.8%; 10) | 95.3% |
+| FR | 84.5% (71.3%; 89) | 91.3% (81.6%; 11) | 90.9% |
+| IR | 89.9% (73.9%; 23) | 92.6% (82.4%; 9) | 92.7% |
+
+On the 19 member states with both runs, the mean share within 2% rises from 92.5% to 94.6% (within 0.5%: 83.8% to
+87.7%), and none is worse. Across all 34 member states with SLP the mean is 94.4%, and the lowest is Kosovo's 81.0%,
+which was 80.9% with the old phase 1.
+
+**The tie-break** (`captrd.nlp_tie_break`, the project lead's decision, option C) runs after a feasible member-state
+solve. Among the optima, it picks the one whose positions outside the objective lie nearest the solve's start: a
+subproblem over those positions, with the equations they appear in as a narrow band.
+- CONOPT leaves such a position at its start. IPOPT drifts it to the middle of its bounds. In the ex-ante years, IMPT
+  and EXPT enter only through their difference.
+- Denmark 2030's olive oil imports and exports are now 1.1113, against CAPTRD's 1.1113 (they were 5e8). The objective
+  is unchanged, and 2 of the 27 positions outside it moved.
+- Stage 4 (estimate_eu_trade.gms) builds the EU's gross trade from the members' step3, so this matters downstream.
+- Malta 2030's clean_tiny solve, infeasible without the tie-break, now solves: 90.9% within 2%.

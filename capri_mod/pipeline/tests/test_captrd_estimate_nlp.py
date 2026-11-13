@@ -12,7 +12,9 @@ tolerance), so its path moves with small differences of the inputs: until 12 Nov
 summed over Python sets in hash order, and runs of this test on the same code gave 7 or 25 differing lower bounds;
 with the sums in sorted order the preparation is bit-identical between runs. With the phase 1's proximity term
 (captrd.nlp_phase1_proximity) and the deterministic preparation: 16 tries, 8 lower and 10 upper bounds differ.
-Hence 2%.
+Hence 2%. These counts are the "phase1" marginals'; since 13 November 2026 the default is "slp" (CONOPT's phase 1 as a
+sequential LP, estimate_nlp.phase1_slp, with the IPOPT phase 1 for a try whose phase-1 point is feasible but not
+solvable from) and the tie-break; the tests' thresholds hold with it.
 
 test_solve1_objective_equals_captrds: Solve1 (CAPTRD's stored support1, the port's bounds on it, the start
 at the support) against CAPTRD's step2, Solve1's result. CAPTRD stores the wVarErr of Solve2 only; Solve1's is rebuilt:
@@ -90,14 +92,15 @@ def test_denmark_2030_solve2_widens_to_captrds_bounds(prepared):  # noqa: F811
     # stage 2f: clean_tiny.gms, then copy_labour_biofuel_on_presult.gms, against CAPTRD's step3 on the positions it
     # holds. The widening's path moves the result by several points (the share within 2% after Solve2 on the port's
     # bounds was 84-94% between runs whose inputs differed in their last digits), so the check starts from Solve2 on
-    # CAPTRD's own final bounds (a bound CAPTRD does not store is 0, NTRD free): feasible at the first solve. 12 November
+    # CAPTRD's own final bounds (a bound CAPTRD does not store is 0, or infinite where the port's is: an infinite bound
+    # is not exported either; NTRD free): feasible at the first solve. 12 November
     # 2026: 95.4% within 2% (Solve2 alone 85.4%), with the full preparation of all countries; the rest the solves' points
     # in the objective's flat directions (trade, the young cattle's feed mix)
     from capri_mod.pipeline.captrd import clean_tiny as CT, step3_copies as SC
     Lc, Uc = dict(lo), dict(up)
     for k in pos:
-        Lc[k] = Lr.get(k, -float("inf") if k[0] == "NTRD" else 0.0)
-        Uc[k] = Ur.get(k, float("inf") if k[0] == "NTRD" else 0.0)
+        Lc[k] = Lr.get(k, -float("inf") if (k[0] == "NTRD" or lo.get(k, -float("inf")) == -float("inf")) else 0.0)
+        Uc[k] = Ur.get(k, float("inf") if (k[0] == "NTRD" or up.get(k, float("inf")) == float("inf")) else 0.0)
     pL = E.Point(**{**p.__dict__, "lo": Lc, "up": Uc})
     rL = N.solve(pL, S, B, D, Lc, Uc, tab["wVarErr"], start, expertlo=D.res["expertlo"], expertup=D.res["expertup"],
                  basm=lambda c, w: pb.get((c, w), 0.0))

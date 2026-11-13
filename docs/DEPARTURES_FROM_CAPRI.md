@@ -308,6 +308,26 @@ CAPRI's scenario files set a few market-loop switches of their own. Two were fou
   lower bound in any scenario; never active (lowest member-state raw milk price at the end of r163 Farm-to-Fork 1.10 of
   base, r166 Green Deal 1.05).
 
+## CAPTRD-MOD: the solver (IPOPT in place of CONOPT; 12-13 November 2026)
+
+CAPTRD solves m_trendMS and m_trendNT2 with CONOPT, an active-set method. The port solves them with IPOPT, an
+interior-point method. Where the optimum is unique, both reach it: Denmark 2030's Solve1 gives 0.51391 against CAPTRD's
+0.51385, France 2030's regions 188.02 against 188.34. The departures below are where the two solvers' behaviour
+differs, and each is meant to reproduce CONOPT's (CAPTRD_MOD.md §12.6, §12.9):
+
+- **Binding bounds** (`captrd.nlp_at_bound_tol`, `captrd.nlp_marginal_tol`). A bound counts as reached within a
+  tolerance, and its multiplier must exceed a threshold. CONOPT's active set is exact.
+- **The infeasible point** (`captrd.nlp_infeasible_marginals = "slp"`, the project lead's decision). CAPTRD's retry
+  rules read CONOPT's phase-1 marginals. The port repeats CONOPT's phase 1 as a sequential LP from the solve's start,
+  with HiGHS's dual simplex, and reads the marginals at a simplex vertex. When that point is feasible but IPOPT cannot
+  optimise from it, the try uses IPOPT's least-infeasibility point instead. On the 2030 member states, 94.6% of
+  positions are within 2% of CAPTRD's step3, against 92.5% with the IPOPT phase 1.
+- **The positions outside the objective** (`captrd.nlp_tie_break = true`, the project lead's decision, option C).
+  After a feasible member-state solve, they are moved to the optimum nearest the start. CONOPT leaves them there, while
+  IPOPT drives them to the middle of their bounds (Denmark 2030's olive oil trade: 5e8 before, 1.11 after, CAPTRD
+  1.11). The objective is unchanged.
+- **Positions in no equation and not in the objective** are held at their start. GAMS does not generate them.
+
 ## Beyond CAPRI: reports only (results unchanged)
 
 ### The run manifest (29 October 2026; the project lead's decision)

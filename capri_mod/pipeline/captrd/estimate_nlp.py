@@ -21,13 +21,23 @@ own infeasible stop also carries the objective's pull on the bounds. With captrd
 nonnegative slacks, their sum minimised within the bounds), and its point and marginals drive the widening. Where the objective
 leaves directions free (a trade position without a support and its counterpart, both free of the objective), the
 two solvers can end at different points of equal objective.
+
+With captrd.nlp_infeasible_marginals = "slp" (added 12 November 2026) the infeasible point is found as CONOPT finds it:
+its phase 1 minimises the sum of infeasibilities from the solve's start with an active-set method. phase1_slp does
+this as a sequential LP (the least-infeasibility LP on the linearised equations, HiGHS's dual simplex, a trust region)
+from the start; the point is then polished by the least-infeasibility NLP (kept only if less infeasible), and the
+marginals are read at a simplex vertex there (phase1_marginals: the LP within a box of nlp_at_bound_tol). CONOPT's
+pivoting at degenerate vertices is not reproduced.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
+import casadi as ca
 import numpy as np
+import scipy.optimize as sopt
+import scipy.sparse as sps
 
 from capri_mod.pipeline.captrd import estimate_bounds as EB
 from capri_mod.pipeline.captrd import estimate_ms as E
@@ -79,8 +89,105 @@ def _settings():
     st = current()
     keys = ("captrd.nlp_tol", "captrd.nlp_max_iter", "captrd.nlp_tolinfeas", "captrd.nlp_max_tries",
             "captrd.nlp_at_bound_tol", "captrd.nlp_marginal_tol", "captrd.nlp_infeasible_marginals",
-            "captrd.nlp_phase1_proximity")
+            "captrd.nlp_phase1_proximity", "captrd.nlp_phase1_slp_max_iter", "captrd.nlp_phase1_slp_radius",
+            "captrd.nlp_tie_break")
     return {k.split(".", 1)[1]: st.get(k) for k in keys}
+
+
+#: phase1_slp's trust region: a step is taken if it achieves this share of the predicted reduction; the radius doubles
+#: above the second share, shrinks to a quarter on a rejected step; it stops when the predicted reduction falls below
+#: SLP_STOP relative to the infeasibility (or the radius below SLP_MIN_RADIUS)
+SLP_ACCEPT, SLP_EXPAND, SLP_GROW, SLP_SHRINK, SLP_STOP, SLP_MIN_RADIUS = 0.1, 0.75, 2.0, 0.25, 1.0e-10, 1.0e-12
+
+
+def _max_violation(gv, lbg, ubg):
+    return float(np.maximum(np.maximum(lbg - gv, gv - ubg), 0.0).max()) if len(gv) else 0.0
+
+
+def _infeasibility(gv, lbg, ubg):
+    return float(np.maximum(lbg - gv, 0.0).sum() + np.maximum(gv - ubg, 0.0).sum())
+
+
+def _phase1_lp(gv, J, lbg, ubg, dlo, dup):
+    """The least-infeasibility LP at a point: min sum(sp + sn) over the step d within [dlo, dup], with
+    lbg <= g + J d - sp + sn <= ubg (sp, sn >= 0). HiGHS's dual simplex (a vertex, reduced costs as marginals)."""
+    n, m = J.shape[1], J.shape[0]
+    eq = np.isfinite(lbg) & np.isfinite(ubg) & (lbg == ubg)
+    le = np.isfinite(ubg) & ~eq
+    ge = np.isfinite(lbg) & ~eq
+    I = sps.identity(m, format="csr")
+    A = sps.hstack([J, -I, I], format="csr")
+    c = np.concatenate([np.zeros(n), np.ones(m), np.ones(m)])
+    A_ub = sps.vstack([A[le], -A[ge]], format="csr")
+    b_ub = np.concatenate([ubg[le] - gv[le], gv[ge] - lbg[ge]])
+    bounds = np.vstack([np.column_stack([dlo, dup]), np.column_stack([np.zeros(2 * m), np.full(2 * m, np.inf)])])
+    bounds = [(None if not np.isfinite(a) else a, None if not np.isfinite(b) else b) for a, b in bounds]
+    r = sopt.linprog(c, A_ub=A_ub if A_ub.shape[0] else None, b_ub=b_ub if A_ub.shape[0] else None,
+                     A_eq=A[eq] if eq.any() else None, b_eq=(lbg[eq] - gv[eq]) if eq.any() else None,
+                     bounds=bounds, method="highs-ds")
+    if r.status != 0:
+        raise RuntimeError(f"phase 1 LP: {r.message}")
+    lam_g = np.zeros(m)
+    if eq.any():
+        lam_g[eq] = r.eqlin.marginals
+    if A_ub.shape[0]:
+        k = int(le.sum())
+        lam_g[le] = r.ineqlin.marginals[:k]
+        lam_g[ge] = -r.ineqlin.marginals[k:]
+    return r.x[:n], float(r.fun), r.lower.marginals[:n], r.upper.marginals[:n], lam_g
+
+
+def phase1_slp(gfun, jfun, xs, lb, ub, lbg, ubg, max_iter: int, radius: float, trace: Optional[list] = None):
+    """CONOPT's phase 1 (the least sum of infeasibilities from the given point, with an active-set method) as a
+    sequential LP with a trust region: from xs, the least-infeasibility LP on the linearised equations (HiGHS's dual
+    simplex) gives the step; a step is kept if the true infeasibility falls. Returns the point, the sum of
+    infeasibilities and the iterations. The SLP converges slowly where the least infeasibility is not at a vertex
+    (CONOPT continues with second-order steps there): the caller polishes the point (the least-infeasibility NLP from
+    it) and takes the marginals at the polished point (phase1_marginals).
+    Departure from CAPRI (the solver): CONOPT's own phase 1 is replaced; its pivoting at degenerate vertices is not
+    reproduced. Settings captrd.nlp_phase1_slp_max_iter, captrd.nlp_phase1_slp_radius (relative to max(1, |x|))."""
+    x = np.clip(xs, lb, ub)
+    gv = np.array(gfun(x)).ravel()
+    f0 = _infeasibility(gv, lbg, ubg)
+    delta = radius * np.maximum(1.0, np.abs(x))
+    it = 0
+    for it in range(1, max_iter + 1):
+        Jd = jfun(x)
+        r_, c_ = Jd.sparsity().get_triplet()
+        J = sps.csr_matrix((np.array(Jd.nonzeros()), (r_, c_)), shape=Jd.shape)
+        d, fl, _l, _u, _g = _phase1_lp(gv, J, lbg, ubg, np.maximum(lb - x, -delta), np.minimum(ub - x, delta))
+        pred = f0 - fl
+        if pred <= SLP_STOP * (1.0 + f0) or delta.max() < SLP_MIN_RADIUS:
+            break
+        xn = np.clip(x + d, lb, ub)
+        gn = np.array(gfun(xn)).ravel()
+        fn = _infeasibility(gn, lbg, ubg)
+        if trace is not None:
+            trace.append((it, f0, fl, fn, float(np.median(delta))))
+        if f0 - fn >= SLP_ACCEPT * pred:
+            if f0 - fn >= SLP_EXPAND * pred:
+                delta = delta * SLP_GROW
+            x, gv, f0 = xn, gn, fn
+        else:
+            delta = delta * SLP_SHRINK
+    return x, f0, it
+
+
+def phase1_marginals(gfun, jfun, x, lb, ub, lbg, ubg, tol_at: float):
+    """The marginals of a least-infeasibility point as an active-set solver reports them: the least-infeasibility LP on
+    the linearised equations within a box of tol_at x max(1, |x|) around x (HiGHS's dual simplex, a vertex): the
+    reduced costs of the variables' own bounds within the box (IPOPT's sign: negative at a lower bound, positive at an
+    upper one) and the equations' multipliers."""
+    gv = np.array(gfun(x)).ravel()
+    Jd = jfun(x)
+    r_, c_ = Jd.sparsity().get_triplet()
+    J = sps.csr_matrix((np.array(Jd.nonzeros()), (r_, c_)), shape=Jd.shape)
+    delta = tol_at * np.maximum(1.0, np.abs(x))
+    dlo, dup = np.maximum(lb - x, -delta), np.minimum(ub - x, delta)
+    _d, _fl, ml, mu, lam_g = _phase1_lp(gv, J, lbg, ubg, dlo, dup)
+    own_lo, own_up = (lb - x) >= -delta, (ub - x) <= delta
+    lam = np.where(own_lo, -np.asarray(ml), 0.0) + np.where(own_up, -np.asarray(mu), 0.0)
+    return lam, lam_g
 
 
 def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, float], up: Dict[K2, float],
@@ -91,7 +198,6 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
     bounds (estimate_bounds.bounds); wvar: wVarErr; start: the starting levels (CAPTRD: estP of the previous solve, else
     the support, estimate_ms.gms l. 79-90); basm(c, w): p_data's BASM (the widening's floor at zero). widen=False: one
     solve, no widening (clean_tiny.gms's solve, which aborts on an infeasible model instead)."""
-    import casadi as ca
     o = dict(_settings())
     o.update(opts or {})
     expertlo, expertup = expertlo or {}, expertup or {}
@@ -122,13 +228,16 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
                        {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": float(o["nlp_tol"]),
                         "ipopt.max_iter": int(o["nlp_max_iter"]), "ipopt.fixed_variable_treatment": "make_constraint"})
     gfun = ca.Function("g", [X], [G])
+    in_obj = np.array(ca.which_depends(f, X, 1, False), dtype=bool)
     # a position referenced only in a term whose condition is off (V(c, w) * n(c, w) with n false) is in no equation and
     # not in the objective: GAMS does not generate it, so it is not in the model and keeps its level (V_EstV.L); here it
     # is held at its start, so the interior point does not push it into its open box (found 12 November 2026: about
     # 40 positions per member state at 1e5, e.g. GROF of the dairy products, MAPR of the crops)
     absent = ~(np.array(ca.which_depends(G, X, 1, False), dtype=bool) | np.array(ca.which_depends(f, X, 1, False), dtype=bool)) \
         if G.shape[0] else np.zeros(X.shape[0], dtype=bool)
-    phase1 = str(o["nlp_infeasible_marginals"]) == "phase1"
+    slp = str(o["nlp_infeasible_marginals"]) == "slp"
+    jfun = ca.Function("J", [X], [ca.jacobian(G, X)]) if slp else None
+    phase1 = str(o["nlp_infeasible_marginals"]) in ("phase1", "slp")
     if phase1:
         # CONOPT reports an infeasible solve at its phase 1's point, the least sum of infeasibilities within the bounds,
         # with that objective's marginals: the bounds blocking feasibility, not those the objective pulls at
@@ -167,10 +276,39 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
         if status in SOLVER_ERRORS:
             raise RuntimeError(f"m_trendMS {d.ms} {d.year}: solver error {status} at try {ntry}")
         ok = viol <= float(o["nlp_tolinfeas"]) and status in ("Solve_Succeeded", "Solved_To_Acceptable_Level")
+        if ok and o.get("nlp_tie_break"):
+            x = _tie_break(X, f, G, x, xs, lb, ub, lbg, ubg, in_obj, o, log)
         if ok or not widen:
             return Result({k: float(x[i]) for i, k in enumerate(keys)}, float(sol["f"]), ok, ntry + 1, status,
                           lo_, up_)
         lam = np.array(sol["lam_x"]).ravel()
+        x_ip, use_slp = x, slp
+        if slp:
+            # CONOPT's phase 1 from the solve's start (the sequential LP), then polished below
+            x, f1, its = phase1_slp(gfun, jfun, xs, lb, ub, lbg, ubg, int(o["nlp_phase1_slp_max_iter"]),
+                                    float(o["nlp_phase1_slp_radius"]))
+            gv = np.array(gfun(x)).ravel()
+            x_slp = x
+            log.append(f"    phase 1 (SLP): {its} iterations, sum of infeasibilities {f1:.3e}")
+            # CONOPT goes on to optimise from a feasible phase-1 point: the bounds are not widened then, the model is
+            # solved again from it
+            if _max_violation(gv, lbg, ubg) <= float(o["nlp_tolinfeas"]):
+                sol = solver(x0=x, lbx=lb, ubx=ub, lbg=lbg, ubg=ubg)
+                x2 = np.array(sol["x"]).ravel()
+                viol2 = _max_violation(np.array(gfun(x2)).ravel(), lbg, ubg)
+                status = solver.stats()["return_status"]
+                log.append(f"    from the feasible phase-1 point: {status}, max. infeasibility {viol2:.2e}, "
+                           f"SSQ {float(sol['f']):.6g}")
+                if viol2 <= float(o["nlp_tolinfeas"]) and status in ("Solve_Succeeded", "Solved_To_Acceptable_Level"):
+                    if o.get("nlp_tie_break"):
+                        x2 = _tie_break(X, f, G, x2, xs, lb, ub, lbg, ubg, in_obj, o, log)
+                    return Result({k: float(x2[i]) for i, k in enumerate(keys)}, float(sol["f"]), True, ntry + 1,
+                                  status, lo_, up_)
+                # departure: CONOPT would optimise on from the feasible point; IPOPT cannot (its interior-point start
+                # leaves a feasible set without interior: Denmark and Austria 2030's Solve1). The widening then takes
+                # the least-infeasibility point from IPOPT's infeasible solve, as with "phase1"
+                x, gv, use_slp = x_ip, np.array(gfun(x_ip)).ravel(), False
+                log.append("    phase 1: feasible but not solvable from it: the IPOPT phase 1 for this try")
         if phase1:
             nk = len(keys)
             viol_v = np.maximum(lbg - gv, 0.0), np.maximum(gv - ubg, 0.0)
@@ -182,6 +320,12 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
             z = np.array(p1["x"]).ravel()
             x, lam = z[:nk], np.array(p1["lam_x"]).ravel()[:nk]
             log.append(f"    phase 1: {ph1.stats()['return_status']}, sum of infeasibilities {float(p1['f']):.3e}")
+        if use_slp:
+            # the polished point only if it is less infeasible than the SLP's
+            if _infeasibility(np.array(gfun(x)).ravel(), lbg, ubg) > f1:
+                x = x_slp
+                log.append("    phase 1: the SLP point kept")
+            lam, _lam_g = phase1_marginals(gfun, jfun, x, lb, ub, lbg, ubg, tol_at)
         at_lo, at_up = _binding(keys, x, lam, lb, ub, tol_at, tol_m)
         _widen(ntry, keys, x, at_lo, at_up, lo_, up_, B, p, expertlo, expertup, basm)
         _oind_ocro(ntry, keys, x, at_lo, lo_)
@@ -190,6 +334,53 @@ def solve(p: E.Point, S: E.Sets, B: EB.BoundSets, d: EB.BoundData, lo: Dict[K2, 
         x0 = np.where(nobs_i & has_start, x_est, x)
     x = np.array(sol["x"]).ravel()
     return Result({k: float(x[i]) for i, k in enumerate(keys)}, float(sol["f"]), False, ntry + 1, status, lo_, up_)
+
+
+#: _tie_break: the equations' band, a share of captrd.nlp_tolinfeas
+TIE_BREAK_BAND = 0.1
+
+
+def _tie_break(X, f, G, x, xs, lb, ub, lbg, ubg, in_obj, o, log):
+    """Departure from CAPRI (the solver; decided by the project lead, 12 November 2026): among the optima of a feasible
+    solve, the one whose positions outside the objective lie nearest the solve's start. CONOPT leaves a variable at its
+    start unless an equation moves it; IPOPT, an interior-point method, drives the directions the objective leaves free
+    to the middle of their bounds (Denmark 2030's olive oil imports and exports 5e8 against CAPTRD's 1.1: in the ex-ante
+    years IMPT and EXPT enter only through their difference). The objective's variables are fixed at the solution; the
+    others minimise their squared distance from the start (scaled by max(1, |start|)) within the equations and bounds.
+    The objective is unchanged; applied after the solve only, so the widening's path is not affected. Kept only if
+    feasible (captrd.nlp_tolinfeas)."""
+    free = ~in_obj & (lb != ub)
+    if not free.any():
+        return x
+    # the subproblem: the free positions as variables, the others constants, the equations that hold a free position
+    fi = np.flatnonzero(free)
+    Xf = ca.SX.sym("xf", len(fi))
+    full = ca.SX(ca.DM(x))
+    for j, i in enumerate(fi):
+        full[int(i)] = Xf[j]
+    Gfull = ca.Function("g", [X], [G])(full)
+    rows = np.flatnonzero(np.array(ca.which_depends(Gfull, Xf, 1, True), dtype=bool))
+    Gs = Gfull[rows.tolist()] if len(rows) else ca.SX(0, 1)
+    xs_f = xs[fi]
+    f2 = ca.sumsqr((Xf - ca.DM(xs_f)) / ca.DM(np.maximum(1.0, np.abs(xs_f))))
+    tb = ca.nlpsol("tie_break", "ipopt", {"x": Xf, "f": f2, "g": Gs},
+                   {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": float(o["nlp_tol"]),
+                    "ipopt.max_iter": int(o["nlp_max_iter"])})
+    # the equations as a band of a tenth of the feasibility tolerance: the subproblem has more equations than free
+    # positions (each free position's equations are consistent at the solution), which IPOPT rejects as equalities
+    band = TIE_BREAK_BAND * float(o["nlp_tolinfeas"])
+    sol = tb(x0=x[fi], lbx=lb[fi], ubx=ub[fi], lbg=lbg[rows] - band, ubg=ubg[rows] + band)
+    xn = x.copy()
+    xn[fi] = np.array(sol["x"]).ravel()
+    gv = np.array(ca.Function("g", [X], [G])(xn)).ravel()
+    viol = float(np.maximum(np.maximum(lbg - gv, gv - ubg), 0.0).max()) if len(gv) else 0.0
+    status = tb.stats()["return_status"]
+    if viol > float(o["nlp_tolinfeas"]) or status not in ("Solve_Succeeded", "Solved_To_Acceptable_Level"):
+        log.append(f"    tie-break: {status}, max. infeasibility {viol:.2e}: the solve's point kept")
+        return x
+    moved = int((np.abs(xn - x) > 1e-6 * np.maximum(1.0, np.abs(x)))[free].sum())
+    log.append(f"    tie-break: {status}, {int(free.sum())} positions outside the objective, {moved} moved")
+    return xn
 
 
 def estp(x: Dict[K2, float], p: E.Point, S: E.Sets) -> Dict[K2, float]:

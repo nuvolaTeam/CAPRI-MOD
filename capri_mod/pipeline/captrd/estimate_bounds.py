@@ -148,6 +148,11 @@ class BoundData:
     step3_prev: Dict[K2, float] = field(default_factory=dict)
     const_slope: Dict[K2, float] = field(default_factory=dict)   # Const + Slope of the requirements (nonzero)
     nuts2_with_data: Dict[str, int] = field(default_factory=dict)  # activity -> its NUTS2 regions with LEVL data
+    # a NUTS 2 region of the member state region_of (estimate_nuts2.gms includes fix_est.gms for Rest = the regions):
+    # its member state's p_data and P_Result of the year, which comi_bounds.gms reads as MS; None for a member state
+    region_of: Optional[str] = None
+    ms_pd: Optional[Callable[[str, str, str], float]] = None
+    ms_res: Optional[Dict[str, Dict[K2, float]]] = None
 
 
 def bounds(d: BoundData, B: BoundSets, eff: float, artif_as_coded: Optional[bool] = None):
@@ -185,8 +190,8 @@ def bounds(d: BoundData, B: BoundSets, eff: float, artif_as_coded: Optional[bool
 
     cols, rows = B.cols_est, B.rows_est
     posn = [(c, w) for c in sorted(cols) for w in sorted(rows)]
-    # --- estimate_ms.gms l. 53-67
-    for c, w in posn:
+    # --- estimate_ms.gms l. 53-67 (the member state's estimation only)
+    for c, w in (posn if d.region_of is None else ()):
         if n(c, w):
             up[(c, w)] = STD_UP
         s_ = sup(c, w)
@@ -575,13 +580,15 @@ def bounds(d: BoundData, B: BoundSets, eff: float, artif_as_coded: Optional[bool
         up[("UAAR", "LEVL")] = pd("UAAR", "LEVL", "BASM")
         lo[("UAAR", "LEVL")] = pd("UAAR", "LEVL", "BASM") * 0.998 ** (t - d.ord_bas)
     # l. 805-816: artificial land, total area, inland waters, kitchen gardens
-    lo[("ARTIF", "LEVL")] = pd("ARTIF", "LEVL", "BASM") if n("ARTIF", "LEVL") else 0.0
+    if d.region_of is None:
+        lo[("ARTIF", "LEVL")] = pd("ARTIF", "LEVL", "BASM") if n("ARTIF", "LEVL") else 0.0
     # l. 810 reads 1.02**(OrdT(ExAnte)) - OrdT("BAS"): the year as the exponent (CAPRI-ERROR, a misplaced parenthesis;
     # FIX-7). Fixed (the default), 1.02**(OrdT(ExAnte) - OrdT("BAS")) as the comment's "max. 2% increase per year"; the
     # max with the previous bound kept, as coded, so where that is the standard 1e9 the bound stays 1e9
-    la = LO(("ARTIF", "LEVL"))
-    cap = la * 1.02 ** t - d.ord_bas if artif_as_coded else la * 1.02 ** (t - d.ord_bas)
-    up[("ARTIF", "LEVL")] = max(cap, UP(("ARTIF", "LEVL")))
+    if d.region_of is None:                          # l. 805-811: v_estV(MSEst, "ARTIF") $ Rest(MSEst)
+        la = LO(("ARTIF", "LEVL"))
+        cap = la * 1.02 ** t - d.ord_bas if artif_as_coded else la * 1.02 ** (t - d.ord_bas)
+        up[("ARTIF", "LEVL")] = max(cap, UP(("ARTIF", "LEVL")))
     for c in ("ARTO", "INLW", "KITC"):
         fx((c, "LEVL"), pd(c, "LEVL", "BASM"))
     # l. 822: set-aside
@@ -603,6 +610,8 @@ def bounds(d: BoundData, B: BoundSets, eff: float, artif_as_coded: Optional[bool
         lo[("EAAG", "SUGB")] = 0.0
     if UP(("GROF", "SUGB")) == 0:
         lo[("SUGB", "TOOU")] = 0.0
+    if d.region_of is not None:
+        return lo, up                                # the rest is estimate_ms.gms's (estimate_nuts2.gms has its own)
     # --- estimate_ms.gms l. 71-76: activity levels at least 1e-5 x the number of the member state's NUTS2 regions
     # with data, the upper at least 1.1 x the lower
     for a in sorted(B.mpact):
@@ -667,19 +676,27 @@ def _comi(d, B, lo, up, LO, UP, n, pd, R, sup, fx, t):
         b, ref = bb("HCOM", "COMI")
         lo[("HCOM", "COMI")] = max(2.0e-8, b) * (1 - 0.01) ** (t - ref)
         up[("HCOM", "COMI")] = max(2.0e-8, b) * (1 + 0.01) ** (t - ref)
-    # DCOW's milk yield (p_data BASM, BAST): the weighted mean of DCOL and DCOH
+    # the member state's p_data and P_Result (MS in l. 124-186; the region's own where Rest is the member state)
+    MPD = d.ms_pd or pd
+    MR = (lambda rp, c, w: (d.ms_res or {}).get(rp, {}).get((c, w), 0.0)) if d.ms_res is not None else R  # noqa: E731
+
+    def mbb(c, w):
+        b = MPD(c, w, "BAST")
+        return (b, d.ord_bast) if b else (MPD(c, w, "BASM"), d.ord_bas)
+    # DCOW's milk yield (the member state's p_data BASM, BAST): the weighted mean of DCOL and DCOH
     dcow = {}
     for st in ("BASM", "BAST"):
-        lv = pd("DCOL", "LEVL", st) + pd("DCOH", "LEVL", st)
-        dcow[st] = ((pd("DCOL", "COMI", st) * pd("DCOL", "LEVL", st) + pd("DCOH", "COMI", st) * pd("DCOH", "LEVL", st))
-                    / lv) if lv else pd("DCOW", "COMI", st)
+        lv = MPD("DCOL", "LEVL", st) + MPD("DCOH", "LEVL", st)
+        dcow[st] = ((MPD("DCOL", "COMI", st) * MPD("DCOL", "LEVL", st) + MPD("DCOH", "COMI", st)
+                     * MPD("DCOH", "LEVL", st)) / lv) if lv else MPD("DCOW", "COMI", st)
     dy, dref = (dcow["BAST"], d.ord_bast) if dcow["BAST"] else (dcow["BASM"], d.ord_bas)
     late = max(0, 2050 - d.lst_exante) / (2050 - d.lst_dgagri)
     for c in sorted(B.cols_est):
-        if (c, "COMI") not in B.pact_to_y or not n(c, "COMI") or R("p_data", c, "COMI") or not pd(c, "COMI", "BASM"):
+        if (c, "COMI") not in B.pact_to_y or not n(c, "COMI") or MR("p_data", c, "COMI") or not MPD(c, "COMI", "BASM"):
             continue
-        b, _ = bb(c, "COMI")
-        base = pd(c, "COMI", "BASM") * b / pd(c, "COMI", "BASM")
+        b, _ = mbb(c, "COMI")
+        # the region's base corrected for the member state's jump from BASM to BAST (l. 141-145)
+        base = pd(c, "COMI", "BASM") * b / MPD(c, "COMI", "BASM")
         gap = (REF_MILK_YIELD - dy) / REF_MILK_YIELD
         if R("expertup", c, "COMI"):
             up[(c, "COMI")] = R("expertup", c, "COMI")
@@ -690,18 +707,24 @@ def _comi(d, B, lo, up, LO, UP, n, pd, R, sup, fx, t):
         else:
             lo[(c, "COMI")] = base * (1 + (0.0025 + 0.0075 * gap - 0.0025 * late)) ** (t - dref)
         # the member state's own (SUM(MAP_RR(MS, Rest), 1) GT 1) only with NUTS2 regions in Rest: not at MS level
+    # l. 249-267: the member state's Expert equal to its Support: the corridor +-5% of the support (member state),
+    # +-10% (a region)
+    wid = 0.05 if d.region_of is None else 0.10
     for c in sorted(B.cols_est):
         if (c, "COMI") not in B.pact_to_y or not n(c, "COMI"):
             continue
-        e, s_ = R("Expert", c, "COMI"), sup(c, "COMI")
-        if e == s_ and LO((c, "COMI")) != UP((c, "COMI")) and s_:
-            lo[(c, "COMI")] = min(LO((c, "COMI")), 0.95 * s_)
-            up[(c, "COMI")] = max(UP((c, "COMI")), 1.05 * s_)
+        s_ = sup(c, "COMI")
+        if MR("Expert", c, "COMI") == MR("Support", c, "COMI") and LO((c, "COMI")) != UP((c, "COMI")) and s_:
+            lo[(c, "COMI")] = min(LO((c, "COMI")), (1.0 - wid) * s_)
+            up[(c, "COMI")] = max(UP((c, "COMI")), (1.0 + wid) * s_)
     for c in sorted(B.cols_est):
         if (c, "COMI") not in B.pact_to_y or not n(c, "COMI"):
             continue
         if t > d.fst_exante + 2 and LO((c, "COMI")) > 0:
-            prev = (d.step3_prev.get((c, "COMI"), 0.0) * 1.0025 ** (t - d.prev)
+            # l. 278: the previous year's yield grows by 0.25% a year for the member state only (1 + .0025 $
+            # sameas(Rest, MS)); a region keeps it (found 12 November 2026: Ireland's regions in 2050)
+            growth = 1.0025 if d.region_of is None else 1.0
+            prev = (d.step3_prev.get((c, "COMI"), 0.0) * growth ** (t - d.prev)
                     if d.prev is not None and d.prev > d.lst_expostt else 0.0)
             lo[(c, "COMI")] = max(prev, LO((c, "COMI")))
             if LO((c, "COMI")) != UP((c, "COMI")):
