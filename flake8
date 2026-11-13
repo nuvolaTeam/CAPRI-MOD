@@ -1,0 +1,9 @@
+[flake8]
+# capri_mod/utils/mixins.inject_names (supply, environmental) and capri_mod/coupling/__init__.py give the block
+# modules their parent module's names at import (docs/design/ARCHITECTURE_REFACTOR.md, refactor stage 4a), so flake8
+# sees those names as undefined (F821); the tests exercise them at run time
+per-file-ignores =
+    capri_mod/supply/*.py: F821
+    capri_mod/environmental/*.py: F821
+    capri_mod/coupling/*.py: F821
+exclude = .git,__pycache__,capri_sources,runs,results,.cache
