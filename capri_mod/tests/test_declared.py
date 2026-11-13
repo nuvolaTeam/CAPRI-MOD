@@ -81,12 +81,12 @@ def test_the_application_factors_and_the_entitlement_weights():
 
 
 def test_the_cap14_declared_premiums_follow_capris_2030_reference():
-    """P2b: the coupled and area schemes' 2030 declarations (cap14_premiums) through policy.gms with the crops' trend
-    levels (cap14_entitlement_levels.csv): the declared premium equals CAPRI's 2030 reference PRMD (dataOut, used as a
-    check) at all 19554 unit x crop x scheme records and the 1666 member states' (re-aggregated) within 1e-6, none
-    missing or extra at the units (with the animals' trend levels of sim_ini too, 22564 and 1893: 13 November 2026,
-    CHANGELOG). Four written here: CAPRI's unit BL400000, its own NUTS 1 region, with Luxembourg's scheme; Latvia; a
-    Finnish NUTS 1 region and Belgium's member-state row, re-aggregated by level."""
+    """P2b: the coupled and area schemes' 2030 declarations (cap14_premiums) through policy.gms with the trend levels
+    (cap14_entitlement_levels.csv, all production activities): the declared premium equals CAPRI's 2030 reference
+    PRMD (dataOut, used as a check) at all 22564 unit x activity x scheme records and the 1893 member states'
+    (re-aggregated) within 1e-6, none missing or extra at the units. Four written here: CAPRI's unit BL400000, its
+    own NUTS 1 region, with Luxembourg's scheme; Latvia; a Finnish NUTS 1 region and Belgium's member-state row,
+    re-aggregated by level."""
     root = Path(__file__).resolve().parents[2]
     lev = pd.read_csv(root / "capri_data" / "2017" / "policy" / "cap14_entitlement_levels.csv")
     ru = set(pd.read_csv(root / "capri_data" / "codes" / "regional_units.csv").region)

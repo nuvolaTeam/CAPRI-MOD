@@ -1,0 +1,39 @@
+code,text
+DPRD_AE1,Agri-environmental payments for field crops
+DPRD_AE2,Agri-environmental payments for horticulture
+DPRD_AE3,Agri-environmental payments for wine
+DPRD_AE4,Agri-environmental payments for permanent crops
+DPRD_AE5,Agri-environmental payments for dairy farms
+DPRD_AE6,Agri-environmental payments for grassland farms
+DPRD_AE7,Agri-environmental payments for pig farms
+DPRD_AE8,Agri-environmental payments for mixed farms
+DPRD_SeBete,Agri-env. support to grassland in Sweden
+DPRD_SeVall,Agri-env. support to grass fodder on arable land Sweden (ley)
+DPRD_SeExte,All other agri-environmental support (extensive production) Sweden
+DPRD_WinterCov,Prototype payment scheme for mitigation technology winter cover
+DPRD_noTill,payment scheme for mitigation technology no tillage
+DPRD_consTill,payment scheme for mitigation technology conservation tillage
+DPRD_ammAppLE,payment scheme for mitigation technology low ammonia application low efficiency
+DPRD_ammAppHE,payment scheme for mitigation technology low ammonia application high efficiency
+DPRD_precFarm,payment scheme for mitigation technology precision farming
+DPRD_vrt,payment scheme for mitigation technology variable rate technology
+DPRD_nitrInhMin,payment scheme for mitigation technology nitrification inhibitors mineral fertilizers
+DPRD_nitrInhMan,payment scheme for mitigation technology nitrification inhibitors manure
+DPRD_ferttimeMin,payment scheme for mitigation technology better timing of mineral fertilizer application
+DPRD_ferttimeMan,payment scheme for mitigation technology better timing of manure application
+DPRD_NtotLimit,payment scheme for mitigation technology limit to total N fertilizer input
+DPRD_NminLimit,payment scheme for mitigation technology limit to N from mineral fertilizer input
+DPRD_NmanLimit,payment scheme for mitigation technology limit to N from manure input
+DPRD_LUperHALimit,payment scheme for mitigation technology limit to livestock units per ha
+DPRD_bufferBel1Min,payment scheme for mitigation technology buffer strips up to 1 meter mineral fertilizers
+DPRD_buffer1to5Min,payment scheme for mitigation technology buffer strips 1 to 5 meters mineral fertilizers
+DPRD_buffer5to10Min,payment scheme for mitigation technology buffer strips 5 to 10 meters mineral fertilizers
+DPRD_buffer10to30Min,payment scheme for mitigation technology buffer strips 10 to 30 meters mineral fertilizers
+DPRD_bufferBel1Man,payment scheme for mitigation technology buffer strips up to 1 meter manure
+DPRD_buffer1to5Man,payment scheme for mitigation technology buffer strips 1 to 5 meters manure
+DPRD_buffer5to10Man,payment scheme for mitigation technology buffer strips 5 to 10 meters manure
+DPRD_buffer10to30Man,payment scheme for mitigation technology buffer strips 10 to 30 meters manure
+DPRD_fallowCr,payment scheme for mitigation technology fallowing of histosols on cropland
+DPRD_fallowGr,payment scheme for mitigation technology fallowing of histosols on cropland
+DPRD_LFA,Less favoured area payment
+DPRD_N2K,Support in Natura 2000 area

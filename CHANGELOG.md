@@ -32,7 +32,7 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
-## 13 November 2026 — P2 started: CAPRI's premium cut and the coupled support's 2030 premiums (not yet used by the model)
+## 13 November 2026 — P2: CAPRI's premium cut, policy.gms, the CAP 2014-2020 coupled and area schemes and the rural development payments (not yet used by the model)
 
 - capri_mod/policy/premium_cut.py: policy/prmcut.gms, the premiums a region is paid when a scheme's paid quantity or
   value exceeds its ceiling (the cut 1 / max(1, used / ceiling) by ceiling region, EPS ceilings, the cut passed down
@@ -71,8 +71,29 @@ and `docs/KNOWN_ISSUES.md`.
   dat/policy/livestock_units.gms already in capri_data/pipeline/captrd/dat/p_luunits.csv (equal to sim_ini's
   p_LUUnits); the premium modification factors come with P2c (in 2030 only the decoupled Agenda 2000 animal schemes
   have them).
-- The model still takes its premiums from cap_premium_activity.csv; P2c (claude/p2_premium_module_scoping.md) comes
-  before the switch.
+- P2c, the rural development payments (capri_mod/policy/rd.py): extend_rd_baseline.gms (the plan carried forward,
+  the NUTS 2 weights of the 2007-2013 money by CAPRI's rules 1, 3 and 4, the unspent plan spread, every year after
+  2013 the 2007-2013 average) and rd_logic.gms (the regions with RD money, the ceilings from the measures' spend or
+  plan, the agri-environment money split by FADN farm types, the LFA, Natura 2000 and agri-environment rates from the
+  CLUE land partition and FADN, the rates scaled to 1.5 times the ceiling, Sweden's expert data), then def_policy's
+  fill to 2030. GAMS's EPS kept throughout (4,998 public-spend cells of rd_budget.gdx are EPS: a region with EPS spend
+  takes no share of the unspent plan and its plan does not reach the ceiling; tools/lib/_gdx.read_symbol takes an
+  eps marker).
+- Checks (as checks): at the trend levels the 2030 RD declarations equal sim_ini's (2,607 ceilings, 3,658 rates), the
+  declared premiums CAPRI's 2030 reference PRMD at 21,673 of 21,733 records (the 60 others Praha's), the effective
+  premiums PRME at 19,812 of 20,098 records within 1e-4 (K140).
+- Found on the way: CAP_2014_2020.gms l. 77 kills p_entlWght1 after the base-year pass, and no later file sets one,
+  so the year's policy.gms has every entitlement weight at 1 (CAPRI's 2030 reference confirms it: an animal's RD
+  premium is PRMD x cut); cap14_premiums no longer passes sim_ini's weights to it (the coupled and area results are
+  unchanged: sim_ini has none for them). The restart file's weights and rd_logic's livestock-unit weights still scale
+  rd_logic's rates (Natura 2000's over the member states and units only, RS). mtr_until2013.gms redefines the premium
+  groups PGFRM and PGREF at run time (arable + grass crops): premium_group_edits.csv, applied by cap14_premiums.data().
+- Data: 2017/policy/rd_*.csv (tools/build/build_rd_inputs.py from rd_budget.gdx, CAPRI's dat files and the RD gms
+  files' set literals), premium_group_edits.csv (build_cap14_entitlements.py); cap14_entitlement_levels.csv now holds
+  all production activities' trend levels (the entitlement limit reads the crops'); codes/capri NUTS0, SRNUTS2,
+  SRNUTS2_EXT, PSDPAY_RD, PSDPAY_AE.
+- The model still takes its premiums from cap_premium_activity.csv; the BPS (dp_bps, the decision asked of the project
+  lead), the Nordic aid, CNDP and DPNONCAP, and the outer-loop integration come before the switch.
 - Tests: capri_mod/tests/test_premium_cut.py.
 
 ## 13 November 2026 — CAPRI's endogenous entitlement limit (K136)

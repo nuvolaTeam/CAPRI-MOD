@@ -1,0 +1,251 @@
+code,text
+DK000000,Denmark
+SI000000,Slovenia
+EE000000,ESTONIA
+LT000000,LITHUANIA
+LV000000,LATVIA
+CY000000,CYPRUS
+MT000000,MALTA
+AL000000,Albania
+MK000000,Macedonia
+CS000000,Serbia
+MO000000,Montenegro
+HR000000,Croatia
+BA000000,Bosnia and Herzegovina
+KO000000,Kosovo
+BL400000,Luxembourg (Grand-Duche)
+BL210000,Antwerpen (Arrondissement)
+BL220000,Limburg (B)
+BL230000,Oost-Vlaanderen
+BL240000,Vlaams Brabant
+BL250000,West-Vlaanderen
+BL310000,Brabant Wallon
+BL320000,Hainaut
+BL330000,Verviers
+BL340000,Luxembourg (B)
+BL350000,Namur
+DE400000,Brandenburg
+DE800000,Mecklenburg-Vorpommern
+DEC00000,Saarland
+DED00000,Sachsen
+DEE00000,Sachsen-Anhalt
+DEF00000,Schleswig-Holstein
+DEG00000,Thueringen
+DE110000,Stuttgart
+DE120000,Karlsruhe
+DE130000,Freiburg
+DE140000,Tuebingen
+DE210000,Oberbayern
+DE220000,Niederbayern
+DE230000,Oberpfalz
+DE240000,Oberfranken
+DE250000,Mittelfranken
+DE260000,Unterfranken
+DE270000,Schwaben
+DE710000,Darmstadt
+DE720000,Giessen
+DE730000,Kassel
+DE910000,Braunschweig
+DE920000,Hannover
+DE930000,Lueneburg
+DE940000,Weser-Ems
+DEA10000,Duesseldorf
+DEA20000,Koeln
+DEA30000,Muenster
+DEA40000,Detmold
+DEA50000,Arnsberg
+DEB10000,Koblenz
+DEB20000,Trier
+DEB30000,Rheinhessen-Pfalz
+EL300000,Attiki
+EL110000,"Anatoliki Makedonia, Thraki"
+EL120000,Kentriki Makedonia
+EL130000,Dytiki Makedonia
+EL140000,Thessalia
+EL210000,Ipeiros
+EL220000,Ionia Nisia
+EL230000,Dytiki Ellada
+EL240000,Sterea Ellada
+EL250000,Peloponnisos
+EL410000,Voreio Aigaio
+EL420000,Notio Aigaio
+EL430000,Kriti
+ES300000,Madrid
+ES700000,Canarias
+ES110000,Galicia
+ES120000,Asturias
+ES130000,Cantabria
+ES210000,Pais Vasco
+ES220000,Navarra
+ES230000,Rioja
+ES240000,Aragon
+ES410000,Castilla-Leon
+ES420000,Castilla-La Mancha
+ES430000,Extremadura
+ES510000,Cataluna
+ES520000,Comunidad Valenciana
+ES530000,Baleares
+ES610000,Andalucia
+ES620000,Murcia
+FR100000,Ile de France
+FR300000,Nord-Pas-de-Calais
+FR210000,Champagne-Ardenne
+FR220000,Picardie
+FR230000,Haute-Normandie
+FR240000,Centre
+FR250000,Basse-Normandie
+FR260000,Bourgogne
+FR410000,Lorraine
+FR420000,Alsace
+FR430000,Franche-Comte
+FR510000,Pays de la Loire
+FR520000,Bretagne
+FR530000,Poitou-Charentes
+FR610000,Aquitaine
+FR620000,Midi-Pyrenees
+FR630000,Limousin
+FR710000,Rhone-Alpes
+FR720000,Auvergne
+FR810000,Languedoc-Roussillon
+FR820000,Provence-Alpes-Cote d'Azur
+FR830000,Corse
+IR010000,"Border, Midlands and Western"
+IR020000,Southern and Eastern
+IT200000,Lombardia
+IT400000,Emilia-romagna
+IT600000,Lazio
+IT800000,Campania
+ITA00000,Sicilia
+ITB00000,Sardegna
+IT110000,Piemonte
+IT120000,Valle d'Aosta
+IT130000,Liguria
+IT310000,Trentino-Alto Adige
+IT320000,Veneto
+IT330000,Friuli-Venezia Giulia
+IT510000,Toscana
+IT520000,Umbria
+IT530000,Marche
+IT710000,Abruzzo
+IT720000,Molise
+IT910000,Puglia
+IT920000,Basilicata
+IT930000,Calabria
+NL110000,Groningen
+NL120000,Friesland
+NL130000,Drenthe
+NL210000,Overijssel
+NL220000,Gelderland
+NL230000,Flevoland
+NL310000,Utrecht
+NL320000,Noord-Holland
+NL330000,Zuid-Holland
+NL340000,Zeeland
+NL410000,Noord-Brabant
+NL420000,Limburg (NL)
+AT110000,Burgenland
+AT120000,Niederoesterreich
+AT210000,Kaernten
+AT220000,Steiermark
+AT310000,Oberoesterreich
+AT320000,Salzburg
+AT330000,Tirol
+AT340000,Vorarlberg
+PT200000,Acores
+PT300000,Madeira
+PT110000,Norte
+PT150000,Algarve
+PT160000,Centro (PT)
+PT170000,Lisboa
+PT180000,Alentejo
+SE010000,Stockholm
+SE020000,Oestra Mellansverige
+SE040000,Sydsverige
+SE060000,Norra Mellansverige
+SE070000,Mellersta Norrland
+SE080000,Oevre Norrland
+SE090000,Smaaland med Oearna
+SE0A0000,Vaestsverige
+FI200000,Ahvenanmaa/Aaland
+FI130000,Itae-Suomi
+FI180000,Etelae-Suomi
+FI190000,Laensi-Suomi
+FI1A0000,Pohjois-Suomi
+UKC00000,North East
+UKD00000,North West (including Merseyside)
+UKE00000,Yorkshire and The Humber
+UKF00000,East Midlands
+UKG00000,West Midlands
+UKH00000,Eastern
+UKJ00000,South East
+UKK00000,South West
+UKL00000,Wales
+UKM00000,Scotland
+UKN00000,Northern Ireland
+NO080000,Oslo og Viken
+NO020000,Innlandet
+NO090000,Agder og Sør-Østlandet
+NO0A0000,Vestlandet
+NO060000,Trøndelag
+NO070000,NordNorge
+CZ010000,Praha
+CZ020000,Strední Cechy
+CZ030000,Jihozápad
+CZ040000,Severozápad
+CZ050000,Severovýchod
+CZ060000,Jihovýchod
+CZ070000,Strední Morava
+CZ080000,Moravskoslezko
+HU100000,Közép-Magyarország
+HU210000,Közép-Dunántúl
+HU220000,Nyugat-Dunántúl
+HU230000,Dél-Dunántúl
+HU310000,Észak-Magyarország
+HU320000,Észak-Alföld
+HU330000,Dél-Alföld
+PL110000,Lódzkie
+PL120000,Mazowieckie
+PL210000,Malopolskie
+PL220000,Slaskie
+PL310000,Lubelskie
+PL320000,Podkarpackie
+PL330000,Swietokrzyskie
+PL340000,Podlaskie
+PL410000,Wielkopolskie
+PL420000,Zachodniopomorskie
+PL430000,Lubuskie
+PL510000,Dolnoslaskie
+PL520000,Opolskie
+PL610000,Kujawsko-Pomorskie
+PL620000,Warminsko-Mazurskie
+PL630000,Pomorskie
+SK010000,Bratislavsky
+SK020000,Západné Slovensko
+SK030000,Stredné Slovensko
+SK040000,Východné Slovensko
+BG010000,Severozapaden
+BG020000,Severen tsentralen
+BG030000,Severoiztochen
+BG040000,Yugozazapaden
+BG050000,Yuzhen tsentralen
+BG060000,Yugoiztochen
+RO010000,Nord-Est
+RO020000,Sud-Est
+RO030000,Sud
+RO040000,Sud-Vest
+RO050000,Vest
+RO060000,Nord-Vest
+RO070000,Centru
+RO080000,Bucuresti
+TR100000,Istanbul
+TR900000,Dogu Karadeniz
+TR200000,Bati Marmara
+TR300000,Ege
+TR400000,Dogu Marmara
+TR500000,Bati Anadolu
+TR600000,Akdeniz
+TR700000,Orta Anadolu
+TR800000,Bati Karadeniz
+TRA00000,Kuzeydogu Anadolu
+TRB00000,Ortadogu Anadolu
+TRC00000,Güneydogu Anadolu

@@ -4039,13 +4039,16 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/policy/declared.py"
+     "capri_mod/policy/declared.py",
+     "capri_mod/policy/rd.py"
     ],
     "builders": [],
     "checks": [
      "tools/check/make_provenance.py"
     ],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_rd.py"
+    ]
    }
   },
   "capri_mcact": {
@@ -4090,7 +4093,9 @@
    },
    "notes": [],
    "read_by": {
-    "model": [],
+    "model": [
+     "capri_mod/supply/entitlements.py"
+    ],
     "builders": [],
     "checks": [],
     "tests": [
@@ -4213,6 +4218,46 @@
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI MSAGG: the member states (policy.gms)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_nuts0": {
+   "file": "capri_data/codes/capri/NUTS0.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI NUTS0: the countries (extend_rd_baseline.gms runs the RD money by them)",
    "columns": [
     {
      "name": "code",
@@ -4657,6 +4702,86 @@
      "build_young_animals"
     ],
     "checks": [],
+    "tests": []
+   }
+  },
+  "capri_psdpay_ae": {
+   "file": "capri_data/codes/capri/PSDPAY_AE.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI PSDPAY_AE: the agri-environment payment schemes (rd_logic.gms)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_psdpay_rd": {
+   "file": "capri_data/codes/capri/PSDPAY_RD.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI PSDPAY_RD: the rural development payment schemes (rd_logic.gms)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": []
    }
   },
@@ -5198,6 +5323,86 @@
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI SRNUTS1: the NUTS 1 regions a member state's declared premiums are re-aggregated from (policy.gms)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_srnuts2": {
+   "file": "capri_data/codes/capri/SRNUTS2.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI SRNUTS2: the NUTS 2 regions of the supply side (rd_logic.gms)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_srnuts2_ext": {
+   "file": "capri_data/codes/capri/SRNUTS2_EXT.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI SRNUTS2_EXT: the NUTS 2 regions with RD money, the urban ones without agriculture included (extend_rd_baseline.gms)",
    "columns": [
     {
      "name": "code",
@@ -15327,7 +15532,8 @@
    "read_by": {
     "model": [
      "capri_mod/pipeline/captrd/estimate_ms.py",
-     "capri_mod/pipeline/captrd/prepare.py"
+     "capri_mod/pipeline/captrd/prepare.py",
+     "capri_mod/policy/rd.py"
     ],
     "builders": [],
     "checks": [],
@@ -31641,7 +31847,7 @@
    "file": "capri_data/2017/policy/cap14_entitlement_levels.csv",
    "declared_in": "24_policy_more.sql",
    "layout": [],
-   "comment": "CAPRI's trend levels of its crop activities (DATA(ru, mcact, LEVL, TRD) of sim_ini_21730), whose sum is a region's entitlement limit (policy/def_endCut.gms) (tools/build/build_cap14_entitlements.py)",
+   "comment": "CAPRI's trend levels of its production activities (DATA(ru, mpact, LEVL, TRD) of sim_ini_21730): the crops' sum is a region's entitlement limit (policy/def_endCut.gms), all of them scale the rural development rates (policy/rd_logic.gms) (tools/build/build_cap14_entitlements.py)",
    "columns": [
     {
      "name": "region",
@@ -31669,9 +31875,9 @@
    "units": [
     {
      "item": "trd_kha",
-     "unit": "U_1000ha",
-     "status": "capri",
-     "basis": "cap14_entitlement_levels.trd_kha: 1000 ha"
+     "unit": null,
+     "status": "open",
+     "basis": "cap14_entitlement_levels.trd_kha: 1000 ha (crops) or 1000 heads (animals)"
     }
    ],
    "provenance": {
@@ -31691,7 +31897,8 @@
     ],
     "tests": [
      "capri_mod/tests/test_declared.py",
-     "capri_mod/tests/test_premium_cut.py"
+     "capri_mod/tests/test_premium_cut.py",
+     "capri_mod/tests/test_rd.py"
     ]
    }
   },
@@ -32496,6 +32703,59 @@
     "tests": []
    }
   },
+  "pol_premium_group_edits": {
+   "file": "capri_data/2017/policy/premium_group_edits.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The premium groups CAPRI's chain redefines at run time: the group's activities of the domain become those of the groups on the right (pol_input/mtr_until2013.gms) (tools/build/build_cap14_entitlements.py)",
+   "columns": [
+    {
+     "name": "group",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "from_group",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "domain",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "source",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "group",
+    "from_group"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_cap14_entitlements (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/cap14_premiums.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "pol_premium_scheme_shares_2030": {
    "file": "capri_data/baselines/capri_greendeal_ref/1730/policy/premium_scheme_shares_2030.csv",
    "declared_in": "24_policy_more.sql",
@@ -32644,6 +32904,606 @@
    "notes": [],
    "read_by": {
     "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_rd_budget": {
+   "file": "capri_data/2017/policy/rd_budget.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "CAPRI's rural development public money (rdSpendPublic of rd_budget.gdx) per region, year and RDP measure; eps 1: written EPS (tools/build/build_rd_inputs.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "measure",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "plan_spend",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "meur",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "eps",
+     "type": "INTEGER",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "year",
+    "measure",
+    "plan_spend"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(plan_spend IN ('plan', 'spend'))",
+    "(eps IN (0, 1))"
+   ],
+   "units": [
+    {
+     "item": "eps",
+     "unit": null,
+     "status": "open",
+     "basis": "rd_budget.eps: 1 where CAPRI writes EPS"
+    },
+    {
+     "item": "meur",
+     "unit": "U_MioEur",
+     "status": "capri",
+     "basis": "rd_budget.meur: million EUR"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "rd_budget.year: a calendar year"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_rd_inputs (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/rd.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_rd_fadn_ae": {
+   "file": "capri_data/2017/policy/rd_fadn_ae.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "FADN 2005 hectares and agri-environment euros by farm type, in or out of LFA, with or without AE (p_fes) (tools/build/build_rd_inputs.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "farm_type",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "lfa",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "ae",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "unit",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "farm_type",
+    "lfa",
+    "ae",
+    "unit"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "rd_fadn_ae.value: by unit: ha or EUR"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_rd_inputs (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/rd.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_rd_land_partition": {
+   "file": "capri_data/2017/policy/rd_land_partition.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The agricultural land covers' areas, total and in LFA, Natura 2000, HNV and NVZ (p_clueLandPart, CLUE) (tools/build/build_rd_inputs.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "land_cover",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "area_type",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "kha",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "land_cover",
+    "area_type"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "kha",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "rd_land_partition.kha: 1000 ha"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_rd_inputs (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/rd.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_rd_new_measure_keys": {
+   "file": "capri_data/2017/policy/rd_new_measure_keys.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "CAPRI's regional distribution key of RD money on a measure not funded before (p_rdNewMeasuresRegDist) (tools/build/build_rd_inputs.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "shock",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "share",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "shock"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "share",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "rd_new_measure_keys.share: share of the country"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_rd_inputs (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/rd.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_rd_programme_years": {
+   "file": "capri_data/2017/policy/rd_programme_years.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The years of each rural development programme (rdp_simyy of rd_budget.gdx) (tools/build/build_rd_inputs.py)",
+   "columns": [
+    {
+     "name": "rdp",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "rdp",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "rd_programme_years.year: a calendar year"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_rd_inputs (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/rd.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_rd_scheme_measures": {
+   "file": "capri_data/2017/policy/rd_scheme_measures.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The RDP measures of each CAPRI RD payment scheme by programme (psDpay_RDP_rdMeasure, define_second_pillar_baseline.gms) (tools/build/build_rd_inputs.py)",
+   "columns": [
+    {
+     "name": "scheme",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "rdp",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "measure",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "scheme",
+    "rdp",
+    "measure"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_rd_inputs (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/rd.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_rd_sets": {
+   "file": "capri_data/2017/policy/rd_sets.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The RD chain's two-dimensional sets psgroup_tf8, dpae_tf8, tf8_lc (rd_static.gms) (tools/build/build_rd_inputs.py)",
+   "columns": [
+    {
+     "name": "set",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "a",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "b",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "set",
+    "a",
+    "b"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_rd_inputs (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/rd.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_rd_settings": {
+   "file": "capri_data/2017/policy/rd_settings.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The RD chain's maximum LFA and Natura 2000 amounts (p_rdMax, define_second_pillar_baseline.gms) (tools/build/build_rd_inputs.py)",
+   "columns": [
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "key",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "source",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "item",
+    "key"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "rd_settings.value: EUR per ha"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_rd_inputs (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/rd.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_rd_shock_measures": {
+   "file": "capri_data/2017/policy/rd_shock_measures.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The RDP measures of the policy shocks of CAPRI's RD schemes' measures (rdShocks_RDP_rdMeasure, load_rdp_spend_and_budget.gms) (tools/build/build_rd_inputs.py)",
+   "columns": [
+    {
+     "name": "shock",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "rdp",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "measure",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "shock",
+    "rdp",
+    "measure"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_rd_inputs (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/rd.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_rd_sweden_expert": {
+   "file": "capri_data/2017/policy/rd_sweden_expert.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "Sweden's RD expert data per NUTS 2 region, year and scheme (p_seLbuData) (tools/build/build_rd_inputs.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "scheme",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "ceiling_meur",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "year",
+    "scheme"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "ceiling_meur",
+     "unit": "U_MioEur",
+     "status": "capri",
+     "basis": "rd_sweden_expert.ceiling_meur: million EUR"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "rd_sweden_expert.year: a calendar year"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_rd_inputs (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/rd.py"
+    ],
     "builders": [],
     "checks": [
      "tools/check/make_provenance.py"
@@ -33186,7 +34046,8 @@
      "capri_mod/tests/test_capri.py",
      "capri_mod/tests/test_data_schema.py",
      "capri_mod/tests/test_declared.py",
-     "capri_mod/tests/test_nuts_reporting.py"
+     "capri_mod/tests/test_nuts_reporting.py",
+     "capri_mod/tests/test_rd.py"
     ]
    }
   },
@@ -56853,7 +57714,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 490,
+  "capri/keep": 497,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 31,

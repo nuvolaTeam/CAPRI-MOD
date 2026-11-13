@@ -25,12 +25,20 @@ def _load(inp):
     groups = defaultdict(list)
     for g, a in zip(psg["psgroup"], psg["pact"]):
         groups[str(g).upper()].append(str(a))
+    # the groups the chain redefines at run time (mtr_until2013.gms): their crops become the union of other groups'
+    edits = inp.csv("premium_group_edits.csv", "policy", keep_default_na=False)
+    domain = {d: set(inp.csv(f"capri/{d}.csv", "codes", keep_default_na=False).code) for d in set(edits["domain"])}
+    for g, part in edits.groupby("group"):
+        dom = set().union(*(domain[d] for d in part["domain"]))
+        crops = {a for f in part["from_group"] for a in groups.get(f, []) if a in dom}
+        groups[g] = sorted({a for a in groups.get(g, []) if a not in dom} | crops)
     return {"rates": rates, "ceilings": ceil, "groups": dict(groups)}
 
 
 def data():
     """The coupled schemes' rates and ceilings (capri_data/<base year>/policy/cap14_coupled_*.csv) and CAPRI's premium
-    groups (codes/capri/PSG_TO_A.csv), read once per run."""
+    groups (codes/capri/PSG_TO_A.csv, with the chain's run-time redefinitions, policy/premium_group_edits.csv), read
+    once per run."""
     return _inputs.current().cached("cap14_premiums", _load)
 
 
@@ -56,7 +64,9 @@ def coupled_premium_data(year: int, d=None) -> dict:
 
 
 def entitlement_weights(inp=None) -> dict:
-    """{(region, activity, scheme): p_EntlWght1, EPS where CAPRI writes EPS} (policy/premium_entitlement_weights.csv)."""
+    """{(region, activity, scheme): p_EntlWght1, EPS where CAPRI writes EPS} (policy/premium_entitlement_weights.csv):
+    the restart file's weights, live in the chain until CAP_2014_2020.gms l. 77 kills them (rd_logic.gms's rate
+    scaling, the base-year pass of calc_mtr_top.gms), not in the year's policy.gms."""
     inp = inp or _inputs.current()
 
     def _load(i):
@@ -102,9 +112,11 @@ def area_declarations(year: int):
 
 
 def _declared(units, levels, decl):
+    """policy.gms for the year: no entitlement weights (CAP_2014_2020.gms l. 77 kills p_entlWght1 after the
+    base-year pass that writes policyIUV.gdx, and no later file of the chain sets one), so each is 1."""
     from capri_mod.policy.declared import PolicyRegions, declared_premiums
     regions = PolicyRegions.from_codes(units)
-    out = declared_premiums(decl, data()["groups"], regions, levels, entl_weight=entitlement_weights())
+    out = declared_premiums(decl, data()["groups"], regions, levels)
     units = set(units)
     prmd = {k: v for k, v in out["prmd"].items() if k[0] in units and v}
     return prmd, {k: out["weight"][k] for k in prmd}

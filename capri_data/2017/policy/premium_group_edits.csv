@@ -1,0 +1,5 @@
+group,from_group,domain,source
+PGFRM,PGARAB,MCACT,star 3.0 pol_input/mtr_until2013.gms
+PGFRM,PGGRAS,MCACT,star 3.0 pol_input/mtr_until2013.gms
+PGREF,PGARAB,MCACT,star 3.0 pol_input/mtr_until2013.gms
+PGREF,PGGRAS,MCACT,star 3.0 pol_input/mtr_until2013.gms

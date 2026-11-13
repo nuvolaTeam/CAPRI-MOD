@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (24)
+## Open (25)
 
 | # | Issue | Status |
 |---|---|---|
@@ -37,6 +37,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K131](#k131) | Given CAPRI's own Green Deal supply, the market's EU prices follow CAPRI's within 0.3 points on average, but the dairy protein products rise 2-5 points more and butter 1 point less | open (12 November 2026): not yet traced |
 | [K138](#k138) | CAPRI's new energy crops (NECR, 251 kha of the EU's 2030 crop area) are not a model activity | open (13 November 2026) |
 | [K139](#k139) | PL340000 converts all its forest to farmland in the Green Deal 2030 run (crop area +45% against CAPRI's -2%) | open (13 November 2026) |
+| [K140](#k140) | P2c, the rural development port: 286 of 20,098 effective RD premiums differ from CAPRI's 2030 reference (Praha's rates, Ile-de-France's inherited LFA cut, Sweden's technology-differentiated extensification measure) | open (13 November 2026); the port not yet used by the model |
 
 ## Resolved (114)
 
@@ -2871,3 +2872,25 @@ market's quadratic is not unusual there: smallest eigenvalue 1.5e-4, the median 
 - **Effect:** PL340000's land use and supply in the Green Deal; part of the EU's UAA gap (K136)
 - **In 9t:** –
 - **Status:** open: to be traced (the land market's transformation costs at the solution against CAPRI's 2030 LUC)
+
+### K140: the rural development port's open differences from CAPRI's 2030 reference (found 13 November 2026)
+
+capri_mod/policy/rd.py ports extend_rd_baseline.gms and rd_logic.gms (P2c). At the trend levels its 2030 RD
+declarations equal sim_ini's (all 2,607 ceilings and 3,658 rates), its declared premiums CAPRI's 2030 reference PRMD at
+21,673 of 21,733 unit x activity x scheme records, and, with the cut and the entitlement weights killed as
+CAP_2014_2020.gms l. 77 does, the effective premiums PRME at 19,812 of 20,098 records within 1e-4. The 286 others:
+
+- **Praha (CZ010000), 60 records:** in CAPRI's simulation Praha takes the Czech rates of the agri-environment schemes
+  (PRMD 49.889 for AE1, the member state's), while rd_logic at the trend levels gives it its own (398.7, as sim_ini
+  has them): consistent with Praha's levels being zero in DATA "Y" when the simulation's chain runs; not established.
+- **Ile-de-France (FR100000), 26 records:** its LFA ceiling is negative in the data (-0.00015 million EUR), so it has no
+  cut of its own; CAPRI pays it the member state's reported cut, 0.634, not France's own 0.984 (the cut factors
+  persist across prmcut's calls: not ported yet).
+- **Sweden's DPRD_SeExte, 184 records (1.6%):** its technology factors (T2 +1/3, T1 -1/3) enter the cut through the
+  technology shares (prmcut's p_technFactMod), which the check leaves at 50/50.
+- 16 records just above 1e-4 (BG030000's AE6: 4.2292 against 4.2296).
+
+- **Effect:** none on the model yet (its premiums are still cap_premium_activity.csv); in the integration, these regions'
+  RD premiums
+- **In 9t:** –
+- **Status:** open (the technology shares come with the integration, step <= 10 on the solved levels)

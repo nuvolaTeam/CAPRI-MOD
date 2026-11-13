@@ -48,9 +48,12 @@ def _load(inp):
     settings = defaultdict(dict)
     for r in st.itertuples(index=False):
         settings[r.item][r.key] = float(r.value)
+    # the crops' trend levels (CAPRI's MCACT; the file holds all production activities' for the RD chain)
+    mcact = set(inp.csv("capri/MCACT.csv", "codes", keep_default_na=False).code)
     levels = defaultdict(dict)
     for r in lev.itertuples(index=False):
-        levels[r.region][r.activity] = float(r.trd_kha)
+        if r.activity in mcact:
+            levels[r.region][r.activity] = float(r.trd_kha)
     return {"nat": nat, "shares": shares, "transfers": transfers, "coupled": coupled, "settings": dict(settings),
             "levels": dict(levels)}
 

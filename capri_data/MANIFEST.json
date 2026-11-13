@@ -2050,14 +2050,14 @@
    "catalogue_note": "The rates of the voluntary coupled support and the cotton payment per premium group (vcs_2015_2020.gms, CropSpecificPremium_2015_2020.gms). (not re-checked)"
   },
   "capri_data/2017/policy/cap14_entitlement_levels.csv": {
-   "description": "CAPRI's trend levels of its crop activities (DATA(ru, mcact, LEVL, TRD) of sim_ini_21730), whose sum is a region's entitlement limit (policy/def_endCut.gms) (tools/build/build_cap14_entitlements.py)",
+   "description": "CAPRI's trend levels of its production activities (DATA(ru, mpact, LEVL, TRD) of sim_ini_21730): the crops' sum is a region's entitlement limit (policy/def_endCut.gms), all of them scale the rural development rates (policy/rd_logic.gms) (tools/build/build_cap14_entitlements.py)",
    "kind": "coefficients",
    "vintage": "2030",
    "domain": "policy",
    "status": "live",
-   "rows": 7245,
+   "rows": 11918,
    "columns": 3,
-   "units": "U_1000ha",
+   "units": "to be established (value_units: open)",
    "read_by_model": [
     "capri_mod/supply/entitlements.py"
    ],
@@ -2236,6 +2236,23 @@
    },
    "catalogue_note": "CAPRI's entitlement weights per region, activity and payment scheme (p_EntlWght1, sim_ini_21730): the share of the level holding entitlements. (not re-checked)"
   },
+  "capri_data/2017/policy/premium_group_edits.csv": {
+   "description": "The premium groups CAPRI's chain redefines at run time: the group's activities of the domain become those of the groups on the right (pol_input/mtr_until2013.gms) (tools/build/build_cap14_entitlements.py)",
+   "kind": "structure",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 4,
+   "columns": 4,
+   "read_by_model": [
+    "capri_mod/policy/cap14_premiums.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_cap14_entitlements (not in the trace yet)"
+   },
+   "catalogue_note": "The premium groups CAPRI's chain redefines at run time (pol_input/mtr_until2013.gms: PGFRM, PGREF). (not re-checked)"
+  },
   "capri_data/2017/policy/premium_settings.csv": {
    "description": "The flags of policy/policy.gms: ntslvl (re-aggregate the declared premiums to NUTS 1 and the member states) and p_AggregNUTS2 (farm types) of sim_ini_21730 (tools/build/build_premium_policy_inputs.py)",
    "kind": "parameters",
@@ -2250,6 +2267,183 @@
     "builder": "build_premium_policy_inputs (not in the trace yet)"
    },
    "catalogue_note": "The flags of CAPRI's policy.gms (ntslvl, p_AggregNUTS2 of sim_ini_21730). (not re-checked)"
+  },
+  "capri_data/2017/policy/rd_budget.csv": {
+   "description": "CAPRI's rural development public money (rdSpendPublic of rd_budget.gdx) per region, year and RDP measure; eps 1: written EPS (tools/build/build_rd_inputs.py)",
+   "kind": "base",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 9408,
+   "columns": 6,
+   "units": "U_MioEur",
+   "read_by_model": [
+    "capri_mod/policy/rd.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_rd_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "CAPRI's rural development public money per region, year and RDP measure, planned and spent (rd_budget.gdx). (not re-checked)"
+  },
+  "capri_data/2017/policy/rd_fadn_ae.csv": {
+   "description": "FADN 2005 hectares and agri-environment euros by farm type, in or out of LFA, with or without AE (p_fes) (tools/build/build_rd_inputs.py)",
+   "kind": "base",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 771,
+   "columns": 6,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/policy/rd.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_rd_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "FADN 2005 hectares and agri-environment payments by farm type, in and out of LFA (ae_lfa_fes.gdx). (not re-checked)"
+  },
+  "capri_data/2017/policy/rd_land_partition.csv": {
+   "description": "The agricultural land covers' areas, total and in LFA, Natura 2000, HNV and NVZ (p_clueLandPart, CLUE) (tools/build/build_rd_inputs.py)",
+   "kind": "base",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 2592,
+   "columns": 4,
+   "units": "U_1000ha",
+   "read_by_model": [
+    "capri_mod/policy/rd.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_rd_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The agricultural land covers' areas, total and in LFA, Natura 2000, HNV and NVZ (CLUE, clueLandPartition.gdx). (not re-checked)"
+  },
+  "capri_data/2017/policy/rd_new_measure_keys.csv": {
+   "description": "CAPRI's regional distribution key of RD money on a measure not funded before (p_rdNewMeasuresRegDist) (tools/build/build_rd_inputs.py)",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 498,
+   "columns": 3,
+   "units": "U_ratio",
+   "read_by_model": [
+    "capri_mod/policy/rd.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_rd_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "CAPRI's regional key for RD money on measures not funded before (rdNewMeasuresRegDist.gdx). (not re-checked)"
+  },
+  "capri_data/2017/policy/rd_programme_years.csv": {
+   "description": "The years of each rural development programme (rdp_simyy of rd_budget.gdx) (tools/build/build_rd_inputs.py)",
+   "kind": "structure",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 21,
+   "columns": 2,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/policy/rd.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_rd_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The years of each rural development programme (rdp_simyy of rd_budget.gdx). (not re-checked)"
+  },
+  "capri_data/2017/policy/rd_scheme_measures.csv": {
+   "description": "The RDP measures of each CAPRI RD payment scheme by programme (psDpay_RDP_rdMeasure, define_second_pillar_baseline.gms) (tools/build/build_rd_inputs.py)",
+   "kind": "structure",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 90,
+   "columns": 3,
+   "read_by_model": [
+    "capri_mod/policy/rd.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_rd_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The RDP measures of CAPRI's RD payment schemes by programme (define_second_pillar_baseline.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/rd_sets.csv": {
+   "description": "The RD chain's two-dimensional sets psgroup_tf8, dpae_tf8, tf8_lc (rd_static.gms) (tools/build/build_rd_inputs.py)",
+   "kind": "structure",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 25,
+   "columns": 3,
+   "read_by_model": [
+    "capri_mod/policy/rd.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_rd_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The RD chain's mappings: premium group and AE scheme to FADN farm type, farm type to land cover (rd_static.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/rd_settings.csv": {
+   "description": "The RD chain's maximum LFA and Natura 2000 amounts (p_rdMax, define_second_pillar_baseline.gms) (tools/build/build_rd_inputs.py)",
+   "kind": "parameters",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 2,
+   "columns": 4,
+   "units": "U_EuPerHa",
+   "read_by_model": [
+    "capri_mod/policy/rd.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_rd_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The RD chain's maximum LFA and Natura 2000 amounts per ha (p_rdMax, define_second_pillar_baseline.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/rd_shock_measures.csv": {
+   "description": "The RDP measures of the policy shocks of CAPRI's RD schemes' measures (rdShocks_RDP_rdMeasure, load_rdp_spend_and_budget.gms) (tools/build/build_rd_inputs.py)",
+   "kind": "structure",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 12,
+   "columns": 3,
+   "read_by_model": [
+    "capri_mod/policy/rd.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_rd_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The RDP measures of the policy shocks the RD money is distributed by (load_rdp_spend_and_budget.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/rd_sweden_expert.csv": {
+   "description": "Sweden's RD expert data per NUTS 2 region, year and scheme (p_seLbuData) (tools/build/build_rd_inputs.py)",
+   "kind": "base",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 278,
+   "columns": 4,
+   "units": "U_MioEur",
+   "read_by_model": [
+    "capri_mod/policy/rd.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_rd_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "Sweden's RD expert data, the measures' money by NUTS 2 region and year (rd_spend_2007_2013_se.gdx). (not re-checked)"
   },
   "capri_data/2017/supply/animal_numbers.csv": {
    "description": "herd sizes 2017: CAPRI's HERD item (build_capri_base.py HERD_MAP; COWS = DCOW + SCOW; PIGS = CAPRI's SOWS herd, PIGF = the PIGS census less the sows); the loader renames SCOW, HEIF, HENS, POUL (loaders.HERD_ALIASES)",
@@ -4010,7 +4204,8 @@
    "rows": 823,
    "columns": 2,
    "read_by_model": [
-    "capri_mod/policy/declared.py"
+    "capri_mod/policy/declared.py",
+    "capri_mod/policy/rd.py"
    ],
    "origin": {
     "nature": "capri",
@@ -4022,6 +4217,9 @@
    "kind": "structure",
    "rows": 44,
    "columns": 2,
+   "read_by_model": [
+    "capri_mod/supply/entitlements.py"
+   ],
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
@@ -4057,6 +4255,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/NUTS0.csv": {
+   "description": "CAPRI NUTS0: the countries (extend_rd_baseline.gms runs the RD money by them)",
+   "kind": "structure",
+   "rows": 35,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/NUTS1A.csv": {
    "description": "CAPRI NUTS1A: the NUTS 1 regions, a member state or unit without one standing for it (policy.gms)",
    "kind": "structure",
@@ -4085,6 +4293,26 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/PSDPAY_AE.csv": {
+   "description": "CAPRI PSDPAY_AE: the agri-environment payment schemes (rd_logic.gms)",
+   "kind": "structure",
+   "rows": 11,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/PSDPAY_RD.csv": {
+   "description": "CAPRI PSDPAY_RD: the rural development payment schemes (rd_logic.gms)",
+   "kind": "structure",
+   "rows": 38,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/PSG_TO_A.csv": {
@@ -4203,6 +4431,26 @@
    "description": "CAPRI SRNUTS1: the NUTS 1 regions a member state's declared premiums are re-aggregated from (policy.gms)",
    "kind": "structure",
    "rows": 101,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/SRNUTS2.csv": {
+   "description": "CAPRI SRNUTS2: the NUTS 2 regions of the supply side (rd_logic.gms)",
+   "kind": "structure",
+   "rows": 250,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/SRNUTS2_EXT.csv": {
+   "description": "CAPRI SRNUTS2_EXT: the NUTS 2 regions with RD money, the urban ones without agriculture included (extend_rd_baseline.gms)",
+   "kind": "structure",
+   "rows": 258,
    "columns": 2,
    "origin": {
     "nature": "capri",
@@ -4804,7 +5052,8 @@
    "units": "to be established (value_units: open)",
    "read_by_model": [
     "capri_mod/pipeline/captrd/estimate_ms.py",
-    "capri_mod/pipeline/captrd/prepare.py"
+    "capri_mod/pipeline/captrd/prepare.py",
+    "capri_mod/policy/rd.py"
    ],
    "origin": {
     "nature": "capri",

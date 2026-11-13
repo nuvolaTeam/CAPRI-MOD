@@ -2,6 +2,7 @@
 
     from _gdx import read_symbol
     rows = read_symbol(path, "p_landscapeTargets", gdxlib)      # [(key1, ..., value), ...], EPS as 0.0
+    rows = read_symbol(path, "p_rdBudget", eps="EPS")            # EPS as the marker given
 
 The library's folder: the argument, else the environment variable CAPRI_GDXLIB, else capri_sources/gdxlib
 (tools/lib/paths.py, docs/EXTERNAL_SOURCES.md).
@@ -16,8 +17,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from paths import SOURCES  # noqa: E402
 
 
-def read_symbol(path, name: str, gdxlib: str | None = None) -> list[tuple]:
-    """The records of symbol name in the GDX file path: (keys..., level value), EPS as 0.0; UNDF and NA raise."""
+def read_symbol(path, name: str, gdxlib: str | None = None, eps=0.0) -> list[tuple]:
+    """The records of symbol name in the GDX file path: (keys..., level value), EPS as the value given (0.0 by
+    default; a record written EPS is nonzero in a GAMS condition, so a caller that needs the difference passes a
+    marker); UNDF and NA raise."""
     import gams.core.gdx as g
     lib = gdxlib or os.environ.get("CAPRI_GDXLIB") or str(SOURCES / "gdxlib")
     h = g.new_gdxHandle_tp()
@@ -32,14 +35,15 @@ def read_symbol(path, name: str, gdxlib: str | None = None) -> list[tuple]:
             raise KeyError(f"{path}: no symbol {name}")
         sv = g.doubleArray(g.GMS_SVIDX_MAX)
         g.gdxGetSpecialValues(h, sv)
-        eps, undf, na = sv[g.GMS_SVIDX_EPS], sv[g.GMS_SVIDX_UNDEF], sv[g.GMS_SVIDX_NA]
+        eps_value, undf, na = sv[g.GMS_SVIDX_EPS], sv[g.GMS_SVIDX_UNDEF], sv[g.GMS_SVIDX_NA]
         _, n = g.gdxDataReadStrStart(h, idx)
         out = []
         for _ in range(n):
             _, keys, vals, _ = g.gdxDataReadStr(h)
             v = vals[g.GMS_VAL_LEVEL]
-            if v == eps:
-                v = 0.0
+            if v == eps_value:
+                out.append((*keys, eps))
+                continue
             elif v in (undf, na):
                 raise ValueError(f"{path}: special value {v} at {keys}")
             out.append((*keys, float(v)))

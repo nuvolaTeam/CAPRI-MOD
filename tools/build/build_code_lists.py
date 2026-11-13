@@ -11,6 +11,8 @@ throughout may follow later). This builder writes:
   capri_data/codes/capri/MS_RU.csv     CAPRI's member states and their regional units (MAP_RR x MS x RU)
   capri_data/codes/capri/MAP_RR.csv, R_RAGG.csv, REGAGGP.csv, REGEU1015.csv, MSAGG.csv, NUTS1A.csv, SRNUTS1.csv
                                        the region hierarchy of policy/policy.gms (P2b)
+  capri_data/codes/capri/NUTS0.csv, SRNUTS2.csv, SRNUTS2_EXT.csv, PSDPAY_RD.csv, PSDPAY_AE.csv
+                                       the regions and schemes of the rural development chain (P2c)
   capri_data/codes/capri/RM.csv, RMTP.csv, RM_TO_RMTP.csv, RMEU_to_RM.csv
                                        CAPRI's market regions, trade-policy blocks, the block of each market region
                                               and the EU's two market blocks, in CAPRI's set order (the market's move
@@ -321,7 +323,10 @@ def main():
     # (MSAGG), the NUTS 1 regions (NUTS1A, SRNUTS1)
     write(OUT / "capri" / "MAP_RR.csv", ("region", "member"), sorted(pairs("Map_RR")))
     write(OUT / "capri" / "R_RAGG.csv", ("region", "aggregate"), sorted(pairs("R_RAGG")))
-    for s in ("REGAGGP", "REGEU1015", "MSAGG", "NUTS1A", "SRNUTS1"):
+    # and the regions and schemes of the rural development chain (extend_rd_baseline.gms, rd_logic.gms: NUTS0, the NUTS 2
+    # regions with RD money, SRNUTS2_EXT, the RD and agri-environment schemes)
+    for s in ("REGAGGP", "REGEU1015", "MSAGG", "NUTS1A", "SRNUTS1", "NUTS0", "SRNUTS2", "SRNUTS2_EXT", "PSDPAY_RD",
+              "PSDPAY_AE"):
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
     write(OUT / "capri" / "RM.csv", ("code", "text"), list(rm.items()))
     write(OUT / "capri" / "RMTP.csv", ("code", "text"), list(rmtp.items()))

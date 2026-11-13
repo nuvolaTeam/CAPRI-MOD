@@ -32,9 +32,15 @@ Outputs (capri_data/2017/policy/):
       (BPSYEARS, policy/policy_sets.gms), the member states under the single area payment scheme (DPCAP14_SAPS) and
       the payment schemes cut endogenously (dpEndCut, def_endCut.gms) and the simulation year whose trend levels
       the levels file holds (SIMY), the last three from sim_ini_21730's sets
+  premium_group_edits.csv      group, from_group, domain, source
+      the premium groups CAPRI's chain redefines at run time (pol_input/mtr_until2013.gms, included by
+      CAP_2014_2020.gms: PSG_TO_A("PGFRM", MCACT) = PSG_TO_A("PGARAB", MCACT) + PSG_TO_A("PGGRAS", MCACT)): the group's
+      crops become those of the groups on the right (sim_ini's PSG_TO_A is policy_sets.gms's, before the edit)
   cap14_entitlement_levels.csv region, activity, trd_kha
-      DATA(ru, mcact, "LEVL", "TRD") of sim_ini_21730 for CAPRI's regional units (RU) and crop activities (MCACT):
-      the trend levels whose sum is each region's entitlement limit (def_endCut.gms, p_entlLimit "Limit")
+      DATA(ru, mpact, "LEVL", "TRD") of sim_ini_21730 for CAPRI's regional units (RU) and production activities
+      (MPACT; 1000 ha or heads): the crops' (MCACT) sum is each region's entitlement limit (def_endCut.gms,
+      p_entlLimit "Limit"), all the levels scale the rural development rates (rd_logic.gms, DATA "Y" at the chain's
+      call)
 
     python tools/build/build_cap14_entitlements.py [--gams DIR] [--sets DIR] [--simini DIR]
 """
@@ -58,6 +64,7 @@ TRANSFERS = Path("scen") / "Premiums" / "cap_2013_2020_transfers.gms"
 COUPLED = (Path("scen") / "Premiums" / "Coupling" / "vcs_2015_2020.gms",
            Path("scen") / "Premiums" / "Coupling" / "CropSpecificPremium_2015_2020.gms")
 POLICY_SETS = Path("policy") / "policy_sets.gms"
+MTR_UNTIL2013 = Path("pol_input") / "mtr_until2013.gms"
 #: the share tables of CAP_2014_2020.gms and the payment each one takes out of the national ceiling
 SHARE_TABLES = {"p_BPSYF": "DPYOUNG", "p_BPSRED": "DPFIRHA", "p_BPSNATCO": "DPNATCO"}
 
@@ -176,11 +183,22 @@ def main() -> None:
     settings = pd.DataFrame(settings, columns=["item", "key", "value", "source"])
 
     ru = set(read_csv(a.sets / "RU.csv", keep_default_na=False).d0)
-    mcact = set(read_csv(a.sets / "MCACT.csv", keep_default_na=False).d0)
+    mpact = set(read_csv(a.sets / "MPACT.csv", keep_default_na=False).d0)
     D = read_csv(a.simini / "DATA.csv.gz", keep_default_na=False, usecols=["d0", "d1", "d2", "d3", "value"])
-    D = D[(D.d2 == "LEVL") & (D.d3 == "TRD") & D.d0.isin(ru) & D.d1.isin(mcact)]
+    D = D[(D.d2 == "LEVL") & (D.d3 == "TRD") & D.d0.isin(ru) & D.d1.isin(mpact)]
     levels = (D.rename(columns={"d0": "region", "d1": "activity", "value": "trd_kha"})
               [["region", "activity", "trd_kha"]].sort_values(["region", "activity"]))
+
+    mtr = (a.gams / MTR_UNTIL2013).read_text(errors="ignore")
+    edits = []
+    for g, rhs in re.findall(r'^\s*PSG_TO_A\("(\w+)",\s*MCACT\)\s*=\s*([^;]+);', mtr, re.I | re.M):
+        parts = re.findall(r'PSG_TO_A\("(\w+)",\s*MCACT\)', rhs, re.I)
+        if not parts or re.sub(r'PSG_TO_A\("\w+",\s*MCACT\)|[+\s]', "", rhs, flags=re.I):
+            raise SystemExit(f"mtr_until2013.gms: PSG_TO_A({g}) = {rhs}: only a union of groups is read")
+        edits += [(g.upper(), f.upper(), "MCACT", f"star 3.0 {MTR_UNTIL2013.as_posix()}") for f in parts]
+    if not edits:
+        raise SystemExit("mtr_until2013.gms: no redefinition of a premium group found")
+    edits = pd.DataFrame(edits, columns=["group", "from_group", "domain", "source"])
 
     OUT.mkdir(parents=True, exist_ok=True)
     for frame, name, keys in ((nat, "cap14_national_ceilings.csv", ["ms", "year"]),
@@ -189,7 +207,8 @@ def main() -> None:
                               (coupled, "cap14_coupled_ceilings.csv", ["region", "year", "scheme"]),
                               (rates, "cap14_coupled_rates.csv", ["region", "year", "scheme", "group"]),
                               (settings, "cap14_settings.csv", ["item", "key"]),
-                              (levels, "cap14_entitlement_levels.csv", ["region", "activity"])):
+                              (levels, "cap14_entitlement_levels.csv", ["region", "activity"]),
+                              (edits, "premium_group_edits.csv", ["group", "from_group"])):
         to_csv(frame.sort_values(keys).reset_index(drop=True), OUT / name, index=False)
     print(f"cap14: {nat.ms.nunique()} national ceilings, {len(shares)} share cells, {len(transfers)} transfer cells, "
           f"{coupled.scheme.nunique()} coupled schemes, {levels.region.nunique()} regions' trend levels")

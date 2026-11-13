@@ -1,0 +1,3 @@
+item,key,value,source
+rd_max,LFA,250.0,star 3.0 scen/Premiums/rd/define_second_pillar_baseline.gms
+rd_max,N2K,500.0,star 3.0 scen/Premiums/rd/define_second_pillar_baseline.gms
