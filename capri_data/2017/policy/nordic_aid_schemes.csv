@@ -1,0 +1,12 @@
+scheme,apptype,year,source
+dpNoaBovi,perLivestockUnit,1995,star 3.0 policy/nordicaid.gms
+dpNoaCere,perLevl,1995,star 3.0 policy/nordicaid.gms
+dpNoaFlat,perLevl,1995,star 3.0 policy/nordicaid.gms
+dpNoaHens,perLivestockUnit,1995,star 3.0 policy/nordicaid.gms
+dpNoaMilk,perYield,1995,star 3.0 policy/nordicaid.gms
+dpNoaPiPo,perLivestockUnit,1995,star 3.0 policy/nordicaid.gms
+dpNoaPigs,perLivestockUnit,1995,star 3.0 policy/nordicaid.gms
+dpNoaPota,perLevl,1995,star 3.0 policy/nordicaid.gms
+dpNoaSHGM,perLivestockUnit,1995,star 3.0 policy/nordicaid.gms
+dpNoaSugb,perLevl,1995,star 3.0 policy/nordicaid.gms
+dpNoaYouf,perLevl,1995,star 3.0 policy/nordicaid.gms

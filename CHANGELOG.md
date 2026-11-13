@@ -92,8 +92,19 @@ and `docs/KNOWN_ISSUES.md`.
   files' set literals), premium_group_edits.csv (build_cap14_entitlements.py); cap14_entitlement_levels.csv now holds
   all production activities' trend levels (the entitlement limit reads the crops'); codes/capri NUTS0, SRNUTS2,
   SRNUTS2_EXT, PSDPAY_RD, PSDPAY_AE.
-- The model still takes its premiums from cap_premium_activity.csv; the BPS (dp_bps, the decision asked of the project
-  lead), the Nordic aid, CNDP and DPNONCAP, and the outer-loop integration come before the switch.
+- The Nordic aid (policy/nordicaid.gms; capri_mod/policy/nordic_aid.py, tools/build/build_nordic_aid.py): the 1995
+  declarations carried to 2030, per livestock unit, per ton of milk (per yield) and per ha; its declared premiums
+  equal the reference PRMD at all 198 records (with sim_ini's 2030 milk yields). The GAMS table parser reads "+"
+  continuation blocks; policy.gms's application types are read without case (perLivestockUnit).
+- The complementary national direct payments (CAP_2013_2020_CNDP.gms, CNDP_2015_2020.gms) in the coupled files: the
+  coupled rates as written, the decoupled ones the ceiling over the member state's level of the group
+  (cndp_decoupled_groups.csv); all 2377 reference PRMD records within 1e-6. The coupled files are read through their
+  wrappers (each one's $include and ceiling divisor: VCS and cotton EUR / 1e6, CNDP thousand EUR / 1000), an item
+  assigned twice keeps the later value (24 in the CNDP file). VCS and cotton unchanged.
+- K136: only the schemes of CAPRI's sets psdpay_vcs and psdpay_cscs are taken out of the BPS ceiling (codes/capri
+  PSDPAY_vcs.csv, PSDPAY_cscs.csv); the CNDP are national money (CAP_2014_2020.gms l. 178).
+- The model still takes its premiums from cap_premium_activity.csv; the BPS (dp_bps: option A', calc_mtr and
+  implement_bps from sim_ini's pre-2014 declarations), DPNONCAP and the outer-loop integration come before the switch.
 - Tests: capri_mod/tests/test_premium_cut.py.
 
 ## 13 November 2026 — CAPRI's endogenous entitlement limit (K136)

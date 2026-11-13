@@ -93,6 +93,14 @@ COMMENT ON TABLE capri_psdpay_rd IS 'CAPRI PSDPAY_RD: the rural development paym
 CREATE TABLE capri_psdpay_ae (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_psdpay_ae IS 'CAPRI PSDPAY_AE: the agri-environment payment schemes (rd_logic.gms)';
 
+-- file: capri_data/codes/capri/PSDPAY_vcs.csv
+CREATE TABLE capri_psdpay_vcs (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_psdpay_vcs IS 'CAPRI PSDPAY_vcs: the voluntary coupled support''s schemes (taken out of the BPS ceiling, CAP_2014_2020.gms)';
+
+-- file: capri_data/codes/capri/PSDPAY_cscs.csv
+CREATE TABLE capri_psdpay_cscs (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_psdpay_cscs IS 'CAPRI PSDPAY_cscs: the crop-specific cotton payment''s schemes (taken out of the BPS ceiling, CAP_2014_2020.gms)';
+
 -- file: capri_data/codes/capri/REGAGGP.csv
 CREATE TABLE capri_regaggp (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_regaggp IS 'CAPRI REGAGGP: the EU aggregates with premium declarations (policy.gms)';

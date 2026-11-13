@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from capri_mod.data.definitions import capri_ms
 from capri_mod.policy.premium_cut import EPS
 from capri_mod.supply import entitlements as _entl
 from capri_mod.supply import inputs as _inputs
@@ -32,7 +33,9 @@ def _load(inp):
         dom = set().union(*(domain[d] for d in part["domain"]))
         crops = {a for f in part["from_group"] for a in groups.get(f, []) if a in dom}
         groups[g] = sorted({a for a in groups.get(g, []) if a not in dom} | crops)
-    return {"rates": rates, "ceilings": ceil, "groups": dict(groups)}
+    dg = inp.csv("cndp_decoupled_groups.csv", "policy", keep_default_na=False)
+    return {"rates": rates, "ceilings": ceil, "groups": dict(groups),
+            "dcndp_groups": [(str(s), str(g).upper()) for s, g in zip(dg.scheme, dg.group)]}
 
 
 def data():
@@ -76,13 +79,28 @@ def entitlement_weights(inp=None) -> dict:
     return inp.cached("premium_entitlement_weights", _load)
 
 
-def coupled_declarations(year: int, d=None):
+def coupled_declarations(year: int, d=None, levels: dict = None):
     """The coupled schemes' declarations of the year for declared.declared_premiums: {(region, scheme): {"rates":
     {group: EUR per unit}, "APPTYPE": "perLevl" where the region has a ceiling (CAP_2013_2020_vcs.gms l. 49,
-    _cscs.gms l. 47)}} and their ceilings {(region, scheme): {"CEILVAL": million EUR}}."""
+    _cscs.gms l. 47, _CNDP.gms l. 86-94)}} and their ceilings {(region, scheme): {"CEILVAL": million EUR}}. With the
+    levels {(unit, activity): level}, the decoupled complementary national payments' rates too: the scheme's ceiling
+    over the member state's level of its group's activities (CAP_2013_2020_CNDP.gms l. 63-66, computed with each data
+    year's ceiling before the years are filled, so the last one's)."""
     d = data() if d is None else d
     decl, ceilings = {}, {}
-    for (r, s), item in coupled_premium_data(year, d).items():
+    item_data = coupled_premium_data(year, d)
+    if levels is not None:
+        ms_level = defaultdict(float)
+        for (u, a), v in levels.items():
+            ms_level[(capri_ms(u), a)] += v
+        for s, g in d["dcndp_groups"]:
+            for (r, s2), item in item_data.items():
+                if s2 != s or not item.get("CEILVAL"):
+                    continue
+                tot = sum(ms_level.get((r, a), 0.0) for a in d["groups"].get(g, []))
+                if tot:
+                    item["rates"][g] = item["CEILVAL"] * 1000.0 / tot
+    for (r, s), item in item_data.items():
         decl[(r, s)] = {"rates": dict(item["rates"])}
         if "CEILVAL" in item:
             ceilings[(r, s)] = {"CEILVAL": item["CEILVAL"]}
@@ -126,7 +144,7 @@ def coupled_premiums(units, levels: dict, year: int, d=None):
     """The coupled schemes' declared premiums (PRMD per unit of the activity) at the given units, their entitlement
     weights and ceilings, for premium_cut.premiums: (prmd {(unit, activity, scheme): EUR}, weight, ceilings {(region,
     scheme): {"CEILVAL": million EUR}}), through policy.gms (declared.py)."""
-    decl, ceilings = coupled_declarations(year, d)
+    decl, ceilings = coupled_declarations(year, d, levels)
     prmd, weight = _declared(units, levels, decl)
     return prmd, weight, ceilings
 

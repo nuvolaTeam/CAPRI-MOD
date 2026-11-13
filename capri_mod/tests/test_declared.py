@@ -8,6 +8,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+from capri_mod.data.definitions import capri_ms
 from capri_mod.policy import cap14_premiums as C
 from capri_mod.policy.declared import PolicyRegions, declared_premiums, gams_sum
 from capri_mod.policy.premium_cut import EPS
@@ -100,5 +101,23 @@ def test_the_cap14_declared_premiums_follow_capris_2030_reference():
            ("LV000000", "SWHE", "vcs-216-Latvia-Seeds"): 104.0,
            ("FI100000", "RYEM", "vcs-60-Finland-Cereals"): 56.0,
            ("BL000000", "PULS", "vcs-196-Luxembourg-Protein crops"): 26.883289}
+    for k, v in ref.items():
+        assert out["prmd"][k] == pytest.approx(v, rel=1e-6), k
+
+
+def test_the_complementary_national_payments_follow_capris_2030_reference():
+    """The complementary national direct payments (CAP_2013_2020_CNDP.gms): the coupled ones' rates as written, the
+    decoupled ones' the ceiling over the member state's trend level of the group's activities. Their declared premium
+    equals CAPRI's 2030 reference PRMD at all 2377 unit x activity x scheme records within 1e-6 (13 November 2026);
+    written here: Poland's decoupled tobacco and area payments, Bulgaria's coupled sheep and goat payment."""
+    root = Path(__file__).resolve().parents[2]
+    lev = pd.read_csv(root / "capri_data" / "2017" / "policy" / "cap14_entitlement_levels.csv")
+    ms = ("PL000000", "BG000000")
+    units = sorted({r for r in lev.region if capri_ms(r) in ms and r not in ms})
+    levels = {(r.region, r.activity): r.trd_kha for r in lev.itertuples() if r.region in units}
+    decl, _ = C.coupled_declarations(2030, levels=levels)
+    out = declared_premiums(decl, C.data()["groups"], PolicyRegions.from_codes(units), levels)
+    ref = {("PL000000", "TOBA", "DCNDP_TOBA"): 620.384375, ("PL000000", "SWHE", "DCNDP_Area"): 14.55036,
+           ("BG000000", "SHGM", "CNDP_SHG"): 21.0}
     for k, v in ref.items():
         assert out["prmd"][k] == pytest.approx(v, rel=1e-6), k

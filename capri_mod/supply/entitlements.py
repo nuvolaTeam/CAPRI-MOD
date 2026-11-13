@@ -54,7 +54,10 @@ def _load(inp):
     for r in lev.itertuples(index=False):
         if r.activity in mcact:
             levels[r.region][r.activity] = float(r.trd_kha)
-    return {"nat": nat, "shares": shares, "transfers": transfers, "coupled": coupled, "settings": dict(settings),
+    deducted = {str(c).strip().lower() for f in ("PSDPAY_vcs", "PSDPAY_cscs")
+                for c in inp.csv(f"capri/{f}.csv", "codes", keep_default_na=False).code}
+    return {"nat": nat, "shares": shares, "transfers": transfers, "coupled": coupled, "deducted": deducted,
+            "settings": dict(settings),
             "levels": dict(levels)}
 
 
@@ -103,8 +106,12 @@ def ms_ceilings(year: int, d=None) -> dict:
 
     # 3. the coupled support of the member state's regions (map_rr: Luxembourg's in Belgium's), each scheme's
     #    ceiling from the base year on taking the year before's where it has none
+    #    (the schemes of psdpay_vcs and psdpay_cscs: the complementary national payments in the same file are national
+    #    money, not taken out, CAP_2014_2020.gms l. 178)
     cp = defaultdict(lambda: defaultdict(float))
     for (reg, _scheme), g in d["coupled"].groupby(["region", "scheme"]):
+        if str(_scheme).strip().lower() not in d["deducted"]:
+            continue
         v = dict(zip(g.year.astype(int), g.ceiling_meur.astype(float)))
         for y, x in _filled(v, range(base, year + 1), keep=[y for y in v if y < base]).items():
             cp[capri_ms(reg)][y] += x

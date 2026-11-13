@@ -13,6 +13,9 @@ throughout may follow later). This builder writes:
                                        the region hierarchy of policy/policy.gms (P2b)
   capri_data/codes/capri/NUTS0.csv, SRNUTS2.csv, SRNUTS2_EXT.csv, PSDPAY_RD.csv, PSDPAY_AE.csv
                                        the regions and schemes of the rural development chain (P2c)
+  capri_data/codes/capri/PSDPAY_vcs.csv, PSDPAY_cscs.csv
+                                       the voluntary coupled support's and cotton's schemes (taken out of the BPS
+                                       ceiling, CAP_2014_2020.gms; K136)
   capri_data/codes/capri/RM.csv, RMTP.csv, RM_TO_RMTP.csv, RMEU_to_RM.csv
                                        CAPRI's market regions, trade-policy blocks, the block of each market region
                                               and the EU's two market blocks, in CAPRI's set order (the market's move
@@ -326,7 +329,7 @@ def main():
     # and the regions and schemes of the rural development chain (extend_rd_baseline.gms, rd_logic.gms: NUTS0, the NUTS 2
     # regions with RD money, SRNUTS2_EXT, the RD and agri-environment schemes)
     for s in ("REGAGGP", "REGEU1015", "MSAGG", "NUTS1A", "SRNUTS1", "NUTS0", "SRNUTS2", "SRNUTS2_EXT", "PSDPAY_RD",
-              "PSDPAY_AE"):
+              "PSDPAY_AE", "PSDPAY_vcs", "PSDPAY_cscs"):
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
     write(OUT / "capri" / "RM.csv", ("code", "text"), list(rm.items()))
     write(OUT / "capri" / "RMTP.csv", ("code", "text"), list(rmtp.items()))

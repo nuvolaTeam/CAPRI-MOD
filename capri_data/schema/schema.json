@@ -4745,11 +4745,91 @@
     "tests": []
    }
   },
+  "capri_psdpay_cscs": {
+   "file": "capri_data/codes/capri/PSDPAY_cscs.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI PSDPAY_cscs: the crop-specific cotton payment's schemes (taken out of the BPS ceiling, CAP_2014_2020.gms)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_psdpay_rd": {
    "file": "capri_data/codes/capri/PSDPAY_RD.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI PSDPAY_RD: the rural development payment schemes (rd_logic.gms)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_psdpay_vcs": {
+   "file": "capri_data/codes/capri/PSDPAY_vcs.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI PSDPAY_vcs: the voluntary coupled support's schemes (taken out of the BPS ceiling, CAP_2014_2020.gms)",
    "columns": [
     {
      "name": "code",
@@ -15537,7 +15617,9 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_nordic_aid.py"
+    ]
    }
   },
   "ctrd_p_minlabourperact": {
@@ -31897,6 +31979,7 @@
     ],
     "tests": [
      "capri_mod/tests/test_declared.py",
+     "capri_mod/tests/test_nordic_aid.py",
      "capri_mod/tests/test_premium_cut.py",
      "capri_mod/tests/test_rd.py"
     ]
@@ -32479,6 +32562,54 @@
     "tests": []
    }
   },
+  "pol_cndp_decoupled_groups": {
+   "file": "capri_data/2017/policy/cndp_decoupled_groups.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The decoupled complementary national payments' premium groups (psdpay_to_psgroup of CAP_2013_2020_CNDP.gms): the rate the ceiling over the member state's level of the group (tools/build/build_cap14_entitlements.py)",
+   "columns": [
+    {
+     "name": "scheme",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "group",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "source",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "scheme",
+    "group"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_cap14_entitlements (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/cap14_premiums.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "pol_mineral_redu_exemptions": {
    "file": "capri_data/scenarios/greendeal_group/mineral_redu_exemptions.csv",
    "declared_in": "24_policy_more.sql",
@@ -32626,6 +32757,243 @@
     ],
     "builders": [],
     "checks": [],
+    "tests": []
+   }
+  },
+  "pol_nordic_aid_ceilings": {
+   "file": "capri_data/2017/policy/nordic_aid_ceilings.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "CAPRI's Nordic aid ceilings per scheme and member state (tables 2.6 and 2.10 of nordicaid.gms) (tools/build/build_nordic_aid.py)",
+   "columns": [
+    {
+     "name": "scheme",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "ceiling_meur",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "scheme",
+    "ms"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "ceiling_meur",
+     "unit": "U_MioEur",
+     "status": "capri",
+     "basis": "nordic_aid_ceilings.ceiling_meur: million EUR"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_nordic_aid (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/nordic_aid.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_nordic_aid_rates": {
+   "file": "capri_data/2017/policy/nordic_aid_rates.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "CAPRI's Nordic aid amounts by scheme, premium group and Nordic aid region: per livestock unit or ton of milk (p_nordicAid_2_5_perLU) or per ha (p_nordicAid_2_9_PerHa) (tools/build/build_nordic_aid.py)",
+   "columns": [
+    {
+     "name": "scheme",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "group",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "nordic_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "basis",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "rate",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "scheme",
+    "group",
+    "nordic_region"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(basis IN ('per_lu', 'per_ha'))"
+   ],
+   "units": [
+    {
+     "item": "rate",
+     "unit": null,
+     "status": "open",
+     "basis": "nordic_aid_rates.rate: EUR per livestock unit, ton of milk or ha (basis)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_nordic_aid (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/nordic_aid.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_nordic_aid_region_shares": {
+   "file": "capri_data/2017/policy/nordic_aid_region_shares.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The share of a CAPRI region in each Nordic aid region (p_nordicAidRegionShare, nordicaid.gms) (tools/build/build_nordic_aid.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "nordic_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "share",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "nordic_region"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "share",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "nordic_aid_region_shares.share: share of the region"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_nordic_aid (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/nordic_aid.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_nordic_aid_schemes": {
+   "file": "capri_data/2017/policy/nordic_aid_schemes.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The Nordic aid schemes' application types and the year nordicaid.gms declares them (tools/build/build_nordic_aid.py)",
+   "columns": [
+    {
+     "name": "scheme",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "apptype",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "source",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "scheme"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "nordic_aid_schemes.year: a calendar year"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_nordic_aid (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/nordic_aid.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": []
    }
   },
@@ -34046,6 +34414,7 @@
      "capri_mod/tests/test_capri.py",
      "capri_mod/tests/test_data_schema.py",
      "capri_mod/tests/test_declared.py",
+     "capri_mod/tests/test_nordic_aid.py",
      "capri_mod/tests/test_nuts_reporting.py",
      "capri_mod/tests/test_rd.py"
     ]

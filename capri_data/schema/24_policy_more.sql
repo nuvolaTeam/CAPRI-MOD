@@ -366,3 +366,58 @@ CREATE TABLE pol_rd_settings (
 COMMENT ON TABLE pol_rd_settings IS 'The RD chain''s maximum LFA and Natura 2000 amounts (p_rdMax, define_second_pillar_baseline.gms) (tools/build/build_rd_inputs.py)';
 INSERT INTO value_units VALUES
   ('pol_rd_settings', 'value', 'U_EuPerHa', 'capri', 'rd_settings.value: EUR per ha');
+
+-- file: capri_data/2017/policy/nordic_aid_rates.csv
+CREATE TABLE pol_nordic_aid_rates (
+    scheme VARCHAR NOT NULL,
+    "group" VARCHAR NOT NULL,
+    nordic_region VARCHAR NOT NULL,
+    basis VARCHAR NOT NULL CHECK (basis IN ('per_lu', 'per_ha')),
+    rate DOUBLE NOT NULL,
+    PRIMARY KEY (scheme, "group", nordic_region)
+);
+COMMENT ON TABLE pol_nordic_aid_rates IS 'CAPRI''s Nordic aid amounts by scheme, premium group and Nordic aid region: per livestock unit or ton of milk (p_nordicAid_2_5_perLU) or per ha (p_nordicAid_2_9_PerHa) (tools/build/build_nordic_aid.py)';
+INSERT INTO value_units VALUES
+  ('pol_nordic_aid_rates', 'rate', NULL, 'open', 'nordic_aid_rates.rate: EUR per livestock unit, ton of milk or ha (basis)');
+
+-- file: capri_data/2017/policy/nordic_aid_ceilings.csv
+CREATE TABLE pol_nordic_aid_ceilings (
+    scheme VARCHAR NOT NULL,
+    ms VARCHAR NOT NULL,
+    ceiling_meur DOUBLE NOT NULL,
+    PRIMARY KEY (scheme, ms)
+);
+COMMENT ON TABLE pol_nordic_aid_ceilings IS 'CAPRI''s Nordic aid ceilings per scheme and member state (tables 2.6 and 2.10 of nordicaid.gms) (tools/build/build_nordic_aid.py)';
+INSERT INTO value_units VALUES
+  ('pol_nordic_aid_ceilings', 'ceiling_meur', 'U_MioEur', 'capri', 'nordic_aid_ceilings.ceiling_meur: million EUR');
+
+-- file: capri_data/2017/policy/nordic_aid_region_shares.csv
+CREATE TABLE pol_nordic_aid_region_shares (
+    region VARCHAR NOT NULL,
+    nordic_region VARCHAR NOT NULL,
+    share DOUBLE NOT NULL,
+    PRIMARY KEY (region, nordic_region)
+);
+COMMENT ON TABLE pol_nordic_aid_region_shares IS 'The share of a CAPRI region in each Nordic aid region (p_nordicAidRegionShare, nordicaid.gms) (tools/build/build_nordic_aid.py)';
+INSERT INTO value_units VALUES
+  ('pol_nordic_aid_region_shares', 'share', 'U_ratio', 'capri', 'nordic_aid_region_shares.share: share of the region');
+
+-- file: capri_data/2017/policy/nordic_aid_schemes.csv
+CREATE TABLE pol_nordic_aid_schemes (
+    scheme VARCHAR PRIMARY KEY,
+    apptype VARCHAR NOT NULL,
+    "year" BIGINT NOT NULL,
+    source VARCHAR NOT NULL
+);
+COMMENT ON TABLE pol_nordic_aid_schemes IS 'The Nordic aid schemes'' application types and the year nordicaid.gms declares them (tools/build/build_nordic_aid.py)';
+INSERT INTO value_units VALUES
+  ('pol_nordic_aid_schemes', 'year', NULL, 'open', 'nordic_aid_schemes.year: a calendar year');
+
+-- file: capri_data/2017/policy/cndp_decoupled_groups.csv
+CREATE TABLE pol_cndp_decoupled_groups (
+    scheme VARCHAR NOT NULL,
+    "group" VARCHAR NOT NULL,
+    source VARCHAR NOT NULL,
+    PRIMARY KEY (scheme, "group")
+);
+COMMENT ON TABLE pol_cndp_decoupled_groups IS 'The decoupled complementary national payments'' premium groups (psdpay_to_psgroup of CAP_2013_2020_CNDP.gms): the rate the ceiling over the member state''s level of the group (tools/build/build_cap14_entitlements.py)';

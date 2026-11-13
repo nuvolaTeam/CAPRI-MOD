@@ -35,6 +35,7 @@ from capri_mod.policy.premium_cut import EPS
 
 #: CAPRI's application types and the numbers policy.gms gives them to sum them over the levels above (l. 166-173)
 APPTYPES = {"perLevl": 1, "perSlgthd": 2, "perYield": 3, "perHistY": 4, "perLiveStockUnit": 5}
+_APPTYPE_CI = {k.lower(): v for k, v in APPTYPES.items()}    # GAMS's identifiers ignore case (perLivestockUnit)
 
 
 def nonzero(x) -> bool:
@@ -177,7 +178,7 @@ def declared_premiums(declarations: dict, groups: dict, regions: PolicyRegions, 
                 prmr[(r, a, s)] = v
                 t = d.get("APPTYPE")
                 if above_eps(v) and t:
-                    app[(r, a, s)] = APPTYPES[t] if isinstance(t, str) else int(t)
+                    app[(r, a, s)] = _APPTYPE_CI[t.lower()] if isinstance(t, str) else int(t)
     for (r, a, s), v in entl_weight.items():
         w1[(r, a, s)] = v
 

@@ -2018,7 +2018,7 @@
    "vintage": "2015-2020",
    "domain": "policy",
    "status": "live",
-   "rows": 1585,
+   "rows": 1945,
    "columns": 4,
    "units": "U_MioEur",
    "read_by_model": [
@@ -2037,7 +2037,7 @@
    "vintage": "2015-2020",
    "domain": "policy",
    "status": "live",
-   "rows": 1573,
+   "rows": 1681,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2170,6 +2170,95 @@
     "One row per regional unit (221). BPS = CAPRI's PRME per ha of UAAR (e.g. AT110000 533.12 = res_17 UAAR PRME), and ANC, AES, ORGANIC and COUPLED are 0 because CAPRI's results carry no split by instrument. It feeds the DirectPaymentsEngine's regional totals (policy report); crop premiums in the margin come from crop_premium.csv and livestock_premium_coef.csv, with no fallback to BPS. (checked 2026-10-29)"
    ],
    "catalogue_note": "BPS = CAPRI's premiums per ha of UAA over all schemes; ANC, AES, ORGANIC, COUPLED are 0 and unused (the split by scheme comes from premium_scheme_shares_2030.csv) (not re-checked)"
+  },
+  "capri_data/2017/policy/cndp_decoupled_groups.csv": {
+   "description": "The decoupled complementary national payments' premium groups (psdpay_to_psgroup of CAP_2013_2020_CNDP.gms): the rate the ceiling over the member state's level of the group (tools/build/build_cap14_entitlements.py)",
+   "kind": "structure",
+   "vintage": "2015-2020",
+   "domain": "policy",
+   "status": "live",
+   "rows": 19,
+   "columns": 3,
+   "read_by_model": [
+    "capri_mod/policy/cap14_premiums.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_cap14_entitlements (not in the trace yet)"
+   },
+   "catalogue_note": "The decoupled complementary national payments' premium groups (CAP_2013_2020_CNDP.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/nordic_aid_ceilings.csv": {
+   "description": "CAPRI's Nordic aid ceilings per scheme and member state (tables 2.6 and 2.10 of nordicaid.gms) (tools/build/build_nordic_aid.py)",
+   "kind": "coefficients",
+   "vintage": "1995",
+   "domain": "policy",
+   "status": "live",
+   "rows": 13,
+   "columns": 3,
+   "units": "U_MioEur",
+   "read_by_model": [
+    "capri_mod/policy/nordic_aid.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_nordic_aid (not in the trace yet)"
+   },
+   "catalogue_note": "CAPRI's Nordic aid ceilings per scheme, Finland and Sweden, million EUR a year (nordicaid.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/nordic_aid_rates.csv": {
+   "description": "CAPRI's Nordic aid amounts by scheme, premium group and Nordic aid region: per livestock unit or ton of milk (p_nordicAid_2_5_perLU) or per ha (p_nordicAid_2_9_PerHa) (tools/build/build_nordic_aid.py)",
+   "kind": "coefficients",
+   "vintage": "1995",
+   "domain": "policy",
+   "status": "live",
+   "rows": 77,
+   "columns": 5,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/policy/nordic_aid.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_nordic_aid (not in the trace yet)"
+   },
+   "catalogue_note": "CAPRI's Nordic aid amounts per livestock unit, ton of milk or ha by premium group and Nordic aid region (nordicaid.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/nordic_aid_region_shares.csv": {
+   "description": "The share of a CAPRI region in each Nordic aid region (p_nordicAidRegionShare, nordicaid.gms) (tools/build/build_nordic_aid.py)",
+   "kind": "coefficients",
+   "vintage": "1995",
+   "domain": "policy",
+   "status": "live",
+   "rows": 17,
+   "columns": 3,
+   "units": "U_ratio",
+   "read_by_model": [
+    "capri_mod/policy/nordic_aid.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_nordic_aid (not in the trace yet)"
+   },
+   "catalogue_note": "The shares of CAPRI's regions in the Nordic aid regions (p_nordicAidRegionShare, nordicaid.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/nordic_aid_schemes.csv": {
+   "description": "The Nordic aid schemes' application types and the year nordicaid.gms declares them (tools/build/build_nordic_aid.py)",
+   "kind": "structure",
+   "vintage": "1995",
+   "domain": "policy",
+   "status": "live",
+   "rows": 11,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/policy/nordic_aid.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_nordic_aid (not in the trace yet)"
+   },
+   "catalogue_note": "The Nordic aid schemes' application types and declared year (nordicaid.gms). (not re-checked)"
   },
   "capri_data/2017/policy/organic_yield_gap.csv": {
    "description": "organic-to-conventional yield gaps per PESETA macro-region and product group, FADN estimates by the JRC (SUPREMA), CAPRI's dat/pesticides/yield_effects_ppp.xlsx sheet yld_gap (tools/build/build_organic_yield_gap.py)",
@@ -4309,6 +4398,26 @@
    "description": "CAPRI PSDPAY_RD: the rural development payment schemes (rd_logic.gms)",
    "kind": "structure",
    "rows": 38,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/PSDPAY_cscs.csv": {
+   "description": "CAPRI PSDPAY_cscs: the crop-specific cotton payment's schemes (taken out of the BPS ceiling, CAP_2014_2020.gms)",
+   "kind": "structure",
+   "rows": 4,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/PSDPAY_vcs.csv": {
+   "description": "CAPRI PSDPAY_vcs: the voluntary coupled support's schemes (taken out of the BPS ceiling, CAP_2014_2020.gms)",
+   "kind": "structure",
+   "rows": 280,
    "columns": 2,
    "origin": {
     "nature": "capri",

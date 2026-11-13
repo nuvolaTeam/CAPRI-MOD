@@ -20,9 +20,11 @@ Outputs (capri_data/2017/policy/):
       runs (CAP_2014_2020.gms l. 52, before l. 147), so CAPRI's transfer is zero (checked: the 2030 BPS ceilings of
       HR, HU, MT, PL and SK in CAPRI's reference dataOut have none)
   cap14_coupled_ceilings.csv   region, year, scheme, ceiling_meur
-      the voluntary coupled support (scen/Premiums/Coupling/vcs_2015_2020.gms, through CAP_2013_2020_vcs.gms) and
-      the crop-specific cotton payment (CropSpecificPremium_2015_2020.gms, through CAP_2013_2020_cscs.gms), each
-      scheme's ceiling per year in million EUR (the files' EUR / 1e6, as CAPRI divides them)
+      the voluntary coupled support (scen/Premiums/Coupling/vcs_2015_2020.gms, through CAP_2013_2020_vcs.gms), the
+      crop-specific cotton payment (CropSpecificPremium_2015_2020.gms, through CAP_2013_2020_cscs.gms) and the
+      complementary national direct payments (CNDP_2015_2020.gms, through CAP_2013_2020_CNDP.gms), each scheme's
+      ceiling per year in million EUR (the files' values divided as each wrapper divides them: EUR / 1e6, thousand
+      EUR / 1000)
   cap14_coupled_rates.csv      region, year, scheme, group, rate
       the same files' premium rates per premium group (pgvcsDCOW, pgvcsPULS, ... ; EUR per unit of the group's
       activities, policy.gms's PRMR), as written
@@ -32,6 +34,9 @@ Outputs (capri_data/2017/policy/):
       (BPSYEARS, policy/policy_sets.gms), the member states under the single area payment scheme (DPCAP14_SAPS) and
       the payment schemes cut endogenously (dpEndCut, def_endCut.gms) and the simulation year whose trend levels
       the levels file holds (SIMY), the last three from sim_ini_21730's sets
+  cndp_decoupled_groups.csv    scheme, group, source
+      the decoupled complementary national payments' premium groups (psdpay_to_psgroup of CAP_2013_2020_CNDP.gms):
+      their rate per unit is the scheme's ceiling over the member state's levels of the group's activities, at run time
   premium_group_edits.csv      group, from_group, domain, source
       the premium groups CAPRI's chain redefines at run time (pol_input/mtr_until2013.gms, included by
       CAP_2014_2020.gms: PSG_TO_A("PGFRM", MCACT) = PSG_TO_A("PGARAB", MCACT) + PSG_TO_A("PGGRAS", MCACT)): the group's
@@ -61,8 +66,11 @@ from capri_mod.csvio import read_csv, to_csv  # noqa: E402
 OUT = ROOT / "capri_data" / "2017" / "policy"
 CAP14 = Path("scen") / "base_scenarios" / "CAP_2014_2020.gms"
 TRANSFERS = Path("scen") / "Premiums" / "cap_2013_2020_transfers.gms"
-COUPLED = (Path("scen") / "Premiums" / "Coupling" / "vcs_2015_2020.gms",
-           Path("scen") / "Premiums" / "Coupling" / "CropSpecificPremium_2015_2020.gms")
+#: the coupled-support files of CAP_2014_2020.gms: each wrapper includes its data file and divides its ceilings
+#: (VCS and cotton from EUR, the complementary national payments from thousand EUR, to million EUR)
+COUPLED = (Path("scen") / "Premiums" / "Coupling" / "CAP_2013_2020_vcs.gms",
+           Path("scen") / "Premiums" / "Coupling" / "CAP_2013_2020_cscs.gms",
+           Path("scen") / "Premiums" / "Coupling" / "CAP_2013_2020_CNDP.gms")
 POLICY_SETS = Path("policy") / "policy_sets.gms"
 MTR_UNTIL2013 = Path("pol_input") / "mtr_until2013.gms"
 #: the share tables of CAP_2014_2020.gms and the payment each one takes out of the national ceiling
@@ -72,8 +80,8 @@ SHARE_TABLES = {"p_BPSYF": "DPYOUNG", "p_BPSRED": "DPFIRHA", "p_BPSNATCO": "DPNA
 def gams_table(text: str, name: str) -> dict:
     """{(row, column): value} of the GAMS table `name` in text: each cell is assigned to the column header it
     overlaps, or, written just beside one (CAP_2014_2020.gms's left-aligned zeros), to the header whose start or end
-    is nearest; two cells of a row under one column stop the build. EPS is kept as 0.0 (a present cell), comment
-    lines skipped."""
+    is nearest; two cells of a row under one column stop the build. A line starting with "+" opens a block with its
+    own headers. EPS is kept as 0.0 (a present cell), comment lines skipped."""
     m = re.search(rf"^\s*table\s+{name}\s*\([^)]*\)[^\n]*\n(.*?)^\s*;", text, re.S | re.I | re.M)
     if m is None:
         raise SystemExit(f"table {name} not found")
@@ -81,6 +89,10 @@ def gams_table(text: str, name: str) -> dict:
     head = [(t.start(), t.end(), t.group()) for t in re.finditer(r"\S+", lines[0])]
     out = {}
     for l in lines[1:]:
+        if l.lstrip().startswith("+"):
+            # a continuation block: its own column headers (the "+" itself is not one)
+            head = [(t.start(), t.end(), t.group()) for t in re.finditer(r"\S+", l) if t.group() != "+"]
+            continue
         toks = list(re.finditer(r"\S+", l))
         row = toks[0].group()
         taken = set()
@@ -105,18 +117,43 @@ def scalar_assignment(text: str, name: str) -> float:
     return float(hits[0])
 
 
-def coupled_items(text: str) -> tuple:
+def _case_path(root: Path, rel: Path) -> Path:
+    """rel under root, each part matched without case (CAPRI's include paths are written for Windows)."""
+    p = root
+    for part in rel.parts:
+        hit = [c for c in p.iterdir() if c.name.lower() == part.lower()] if p.is_dir() else []
+        if not hit:
+            raise SystemExit(f"{root / rel}: not found")
+        p = hit[0]
+    return p
+
+
+def coupled_wrapper(gams: Path, wrapper: Path) -> tuple:
+    """A coupled-support wrapper's data file (its $include) and the number it divides the ceilings by (its
+    p_premDataE(..., "ceilval") = p_premDataE(..., "ceilval") / N lines, one N)."""
+    text = (gams / wrapper).read_text(errors="ignore")
+    inc = re.findall(r"^\s*\$include\s+'([^']+)'", text, re.I | re.M)
+    div = {float(v) for v in re.findall(r'"ceilval"\)\s*=\s*p_premDataE\([^)]*"ceilval"\)\s*/\s*([\d.Ee+]+)\s*;',
+                                         text, re.I)}
+    if len(inc) != 1 or len(div) != 1:
+        raise SystemExit(f"{wrapper}: includes {inc}, ceiling divisors {div}: one of each expected")
+    return Path(*inc[0].replace("\\", "/").split("/")), div.pop(), text
+
+
+def coupled_items(text: str, divisor: float) -> tuple:
     """The lines p_premDataE("R","Y","scheme","item")=value; of a coupled-support file: (ceilings (region, year,
-    scheme, million EUR), rates (region, year, scheme, premium group, EUR per unit)). A scheme's label as GAMS reads
-    it, trailing blanks dropped ("vcs-203-Italy-Protein crops " is CAPRI's vcs-203-Italy-Protein crops)."""
+    scheme, million EUR: the file's value / divisor), rates (region, year, scheme, premium group, EUR per unit)). A
+    scheme's label as GAMS reads it, trailing blanks dropped ("vcs-203-Italy-Protein crops " is CAPRI's
+    vcs-203-Italy-Protein crops). An item the file assigns twice keeps the later value."""
     rx = re.compile(r'^\s*p_premDataE\("(\w+)","(\d{4})","([^"]+)","(\w+)"\)\s*=\s*([-\d.Ee+]+)\s*;', re.I | re.M)
-    ceil, rates = [], []
+    ceil, rates = {}, {}
     for r, y, s, item, v in rx.findall(text):
+        # an item assigned twice keeps the later value, as GAMS executes the file (24 in CNDP_2015_2020.gms)
         if item.lower() == "ceilval":
-            ceil.append((r, int(y), s.rstrip(), float(v) / 1e6))
+            ceil[(r, int(y), s.rstrip())] = float(v) / divisor
         else:
-            rates.append((r, int(y), s.rstrip(), item.upper(), float(v)))
-    return ceil, rates
+            rates[(r, int(y), s.rstrip(), item.upper())] = float(v)
+    return [(*k, v) for k, v in ceil.items()], [(*k, v) for k, v in rates.items()]
 
 
 def main() -> None:
@@ -140,11 +177,15 @@ def main() -> None:
         raise SystemExit("p_cap_2013_2020_transfers_dp_rd: a row that is not 'rel.MS'")
     transfers = pd.DataFrame([(r[4:], int(y), v) for (r, y), v in tr.items()], columns=["ms", "year", "pct"])
 
-    cp, cr = [], []
-    for f in COUPLED:
-        c_, r_ = coupled_items((a.gams / f).read_text(errors="ignore"))
+    cp, cr, dgroups = [], [], []
+    for w in COUPLED:
+        f, div, wtext = coupled_wrapper(a.gams, w)
+        c_, r_ = coupled_items(_case_path(a.gams, f).read_text(errors="ignore"), div)
         cp += c_
         cr += r_
+        # the decoupled complementary payments' groups (their rate the ceiling over the member state's levels)
+        dgroups += [(sch, g.upper(), f"star 3.0 {w.as_posix()}")
+                    for sch, g in re.findall(r'psdpay_to_psgroup\("(\w+)","(\w+)"\)\s*=\s*yes\s*;', wtext, re.I)]
     coupled = pd.DataFrame(cp, columns=["region", "year", "scheme", "ceiling_meur"])
     rates = pd.DataFrame(cr, columns=["region", "year", "scheme", "group", "rate"])
     if rates.duplicated(["region", "year", "scheme", "group"]).any():
@@ -208,7 +249,9 @@ def main() -> None:
                               (rates, "cap14_coupled_rates.csv", ["region", "year", "scheme", "group"]),
                               (settings, "cap14_settings.csv", ["item", "key"]),
                               (levels, "cap14_entitlement_levels.csv", ["region", "activity"]),
-                              (edits, "premium_group_edits.csv", ["group", "from_group"])):
+                              (edits, "premium_group_edits.csv", ["group", "from_group"]),
+                              (pd.DataFrame(dgroups, columns=["scheme", "group", "source"]),
+                               "cndp_decoupled_groups.csv", ["scheme", "group"])):
         to_csv(frame.sort_values(keys).reset_index(drop=True), OUT / name, index=False)
     print(f"cap14: {nat.ms.nunique()} national ceilings, {len(shares)} share cells, {len(transfers)} transfer cells, "
           f"{coupled.scheme.nunique()} coupled schemes, {levels.region.nunique()} regions' trend levels")
