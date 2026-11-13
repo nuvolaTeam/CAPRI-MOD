@@ -56,7 +56,7 @@ def main() -> None:
             rows.append((kind, r, int(y), s, col, v))
     df = pd.DataFrame(rows, columns=["kind", "region", "year", "scheme", "code", "value"])
     df = df.sort_values(["kind", "scheme", "region", "year", "code"]).reset_index(drop=True)
-    df.to_csv(OUT, index=False, float_format="%.10g")
+    df.to_csv(OUT, index=False)
     print(f"{OUT.relative_to(ROOT)}: {len(df)} cells, schemes {sorted(df.scheme.unique())}, years "
           f"{df.year.min()}-{df.year.max()}, regions {sorted(df.region.unique())}")
 
