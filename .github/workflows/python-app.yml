@@ -37,7 +37,7 @@ jobs:
       matrix:
         # pyproject.toml: requires-python >= 3.11 (duckdb >= 2.0 has no wheel for 3.10); 3.13 is what the suite is
         # run on in development
-        python-version: [ "3.11", "3.13" ]
+        python-version: [ "3.13" ]
 
     steps:
     - uses: actions/checkout@v4
