@@ -2545,6 +2545,24 @@
    },
    "catalogue_note": "The Nordic aid schemes' application types and declared year (nordicaid.gms). (not re-checked)"
   },
+  "capri_data/2017/policy/norway_premiums.csv": {
+   "description": "CAPRI's Norwegian payment rates (policy/norw_pol.gms): national rates (NO000000, EUR per activity unit or per t of output) and the NUTS 2 units' factors, by payment group (DPNOR1-DPNOR7) and year, every cell as written, 0 included (tools/build/build_norway_premiums.py)",
+   "kind": "coefficients",
+   "vintage": "1995-2019",
+   "domain": "policy",
+   "status": "live",
+   "rows": 7850,
+   "columns": 6,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/policy/norway.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_norway_premiums (not in the trace yet)"
+   },
+   "catalogue_note": "CAPRI's Norwegian payment rates and regional factors by payment group and year (norw_pol.gms). (not re-checked)"
+  },
   "capri_data/2017/policy/organic_yield_gap.csv": {
    "description": "organic-to-conventional yield gaps per PESETA macro-region and product group, FADN estimates by the JRC (SUPREMA), CAPRI's dat/pesticides/yield_effects_ppp.xlsx sheet yld_gap (tools/build/build_organic_yield_gap.py)",
    "kind": "coefficients",
@@ -4532,6 +4550,19 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/DACT_TO_PACT.csv": {
+   "description": "CAPRI DACT_TO_PACT: the data base activities and their high / low variants (sets.gms: DCOW = DCOL + DCOH, BULF, HEIF, GRAS, the set-aside codes)",
+   "kind": "structure",
+   "rows": 17,
+   "columns": 2,
+   "read_by_model": [
+    "capri_mod/policy/norway.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/FEED_TO_O.csv": {
    "description": "CAPRI's FEED_TO_O: the feed bulks and their products (sets.gms)",
    "kind": "structure",
@@ -4581,6 +4612,7 @@
     "capri_mod/policy/bps.py",
     "capri_mod/policy/declared.py",
     "capri_mod/policy/mtr.py",
+    "capri_mod/policy/norway.py",
     "capri_mod/policy/rd.py"
    ],
    "origin": {

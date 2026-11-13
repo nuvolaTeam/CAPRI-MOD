@@ -11,8 +11,8 @@ The schemes, each from its port:
   Nordic aid Finland's and Sweden's national aid (nordic_aid.py)
   DPIRSCOW   Ireland's suckler cow welfare payment (mtr_until2013.gms l. 351-352, carried to the year)
 CAP_2014_2020.gms l. 77 kills the entitlement weights before the year's policy.gms: every weight is 1 there except
-the slaughtered share of the schemes per slaughtered head (policy.gms). Not ported: Norway's payments (norw_pol.gms)
-and the non-CAP payments (DPNONCAP, paid outside the EU in 2030).
+the slaughtered share of the schemes per slaughtered head (policy.gms). Norway's payments are their own port
+(norway.py: no ceiling, so no cut); not ported: the non-CAP payments (DPNONCAP, paid outside the EU in 2030).
 
 The year's data (yields, young animals, historical yields) are sim_ini_21730's DATA "Y" (mtr_base_data.csv).
 """

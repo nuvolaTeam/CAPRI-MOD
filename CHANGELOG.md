@@ -140,6 +140,12 @@ and `docs/KNOWN_ISSUES.md`.
   calibrated baseline. A first version had put CAPRI's activities at the model's levels in the model's units
   (stalls, poultry in thousands): factors up to 2.3 at the first step. The model's own splits (dairy z, the bulls'
   and heifers' intensity pairs) give each CAPRI activity its own change.
+- Norway's payments (capri_mod/policy/norway.py; norw_pol.gms, def_no_policy.gms, policy.gms): the national rates
+  times the units' factors, carried to the year as def_policy.gms carries them, a data base activity's rate on its
+  variants (codes/capri/DACT_TO_PACT.csv, new). At 2030: CAPRI's reference PRME at all 108 Norwegian unit x
+  production activity cells (test_norway.py). The output payments (DPNOR6, DPNOR7) pay nothing in CAPRI's simulation
+  year (policy.gms l. 97 reads the yields at the year's column, empty in CAPMOD): kept as CAPRI, K144. Not yet used
+  by the model (step 2 of P2: the baseline premiums from the ports).
 - Fixed K143: a regional premium factor on animals compounded at every solve of a regional model (the solve did not
   restore livestock_premium_coef). With the premium response the mini-EU Farm-to-Fork run diverged on it; earlier,
   tools/run/run_vcs_2030.py's coupled-support experiment overstated the animals' response (to be redone).

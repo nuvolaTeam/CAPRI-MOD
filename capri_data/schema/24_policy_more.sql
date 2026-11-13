@@ -625,3 +625,18 @@ CREATE TABLE pol_mtr_settings (
 COMMENT ON TABLE pol_mtr_settings IS 'The MTR port''s years: CAPRI''s year set, %endofMTR%, the coupling''s and decoupling targets'' first years, the years EU025000''s and EU027000''s declarations reach the member states (tools/build/build_mtr_inputs.py)';
 INSERT INTO value_units VALUES
   ('pol_mtr_settings', 'value', NULL, 'open', 'mtr_settings.value: a calendar year');
+
+-- file: capri_data/2017/policy/norway_premiums.csv
+CREATE TABLE pol_norway_premiums (
+    kind VARCHAR NOT NULL CHECK (kind IN ('pact', 'output')),
+    region VARCHAR NOT NULL,
+    "year" BIGINT NOT NULL,
+    scheme VARCHAR NOT NULL,
+    code VARCHAR NOT NULL,
+    value DOUBLE NOT NULL,
+    PRIMARY KEY (kind, region, "year", scheme, code)
+);
+COMMENT ON TABLE pol_norway_premiums IS 'CAPRI''s Norwegian payment rates (policy/norw_pol.gms): national rates (NO000000, EUR per activity unit or per t of output) and the NUTS 2 units'' factors, by payment group (DPNOR1-DPNOR7) and year, every cell as written, 0 included (tools/build/build_norway_premiums.py)';
+INSERT INTO value_units VALUES
+  ('pol_norway_premiums', 'year', NULL, 'open', 'norway_premiums.year: a calendar year'),
+  ('pol_norway_premiums', 'value', NULL, 'open', 'norway_premiums.value: EUR per activity unit or per t (NO000000), a factor (the units)');

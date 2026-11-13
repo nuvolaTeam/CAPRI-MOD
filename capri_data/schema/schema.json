@@ -3585,6 +3585,49 @@
     "tests": []
    }
   },
+  "capri_dact_to_pact": {
+   "file": "capri_data/codes/capri/DACT_TO_PACT.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI DACT_TO_PACT: the data base activities and their high / low variants (sets.gms: DCOW = DCOL + DCOH, BULF, HEIF, GRAS, the set-aside codes)",
+   "columns": [
+    {
+     "name": "dact",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "pact",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "dact",
+    "pact"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/norway.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_feed_to_o": {
    "file": "capri_data/codes/capri/FEED_TO_O.csv",
    "declared_in": "00_codes.sql",
@@ -4042,6 +4085,7 @@
      "capri_mod/policy/bps.py",
      "capri_mod/policy/declared.py",
      "capri_mod/policy/mtr.py",
+     "capri_mod/policy/norway.py",
      "capri_mod/policy/rd.py"
     ],
     "builders": [],
@@ -4152,7 +4196,8 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/pipeline/tests/test_captrd_supports.py"
+     "capri_mod/pipeline/tests/test_captrd_supports.py",
+     "capri_mod/tests/test_norway.py"
     ]
    }
   },
@@ -34084,6 +34129,87 @@
    "read_by": {
     "model": [
      "capri_mod/policy/nordic_aid.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_norway_premiums": {
+   "file": "capri_data/2017/policy/norway_premiums.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "CAPRI's Norwegian payment rates (policy/norw_pol.gms): national rates (NO000000, EUR per activity unit or per t of output) and the NUTS 2 units' factors, by payment group (DPNOR1-DPNOR7) and year, every cell as written, 0 included (tools/build/build_norway_premiums.py)",
+   "columns": [
+    {
+     "name": "kind",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "scheme",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "kind",
+    "region",
+    "year",
+    "scheme",
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(kind IN ('pact', 'output'))"
+   ],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "norway_premiums.value: EUR per activity unit or per t (NO000000), a factor (the units)"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "norway_premiums.year: a calendar year"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_norway_premiums (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/norway.py"
     ],
     "builders": [],
     "checks": [

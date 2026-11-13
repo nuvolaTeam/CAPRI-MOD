@@ -40,6 +40,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K140](#k140) | P2c, the rural development port: 286 of 20,098 effective RD premiums differ from CAPRI's 2030 reference (Praha's rates, Ile-de-France's inherited LFA cut, Sweden's technology-differentiated extensification measure) | open (13 November 2026); the port not yet used by the model |
 | [K142](#k142) | P2c, the BPS key (the MTR port): Croatia's key not found in CAPRI's chain (a uniform IUV used); sim_ini's NA sheep rates of 2002 taken as absent; France's Corsica 5% below CAPRI's 2030 BPS rate | open (13 November 2026) |
 | [K143](#k143) | A regional premium factor on animals compounded at every solve (livestock_premium_coef not restored) | fixed (13 November 2026) |
+| [K144](#k144) | CAPRI bug (probable): Norway's output payments (DPNOR6, DPNOR7) pay nothing in the simulation year (policy.gms l. 97 reads the yields at the year's column) | open (13 November 2026), kept as CAPRI |
 
 ## Resolved (115)
 
@@ -2967,3 +2968,19 @@ without the fix)
   had no factor and are not affected
 - **In 9t:** -
 - **Status:** fixed
+
+<a id="k144"></a>
+### K144: CAPRI bug (probable): Norway's output payments pay nothing in the simulation year (found 13 November 2026)
+
+policy/norw_pol.gms declares Norway's price support per t of output (DPNOR6, amber box, and DPNOR7, blue box; APPTYPE
+noPriceSup). policy.gms pays it per activity unit as the yield x 0.001 x the rate, with the yields of
+p_dataCopy(rsNorw, pppact, o, %1), which l. 97 copies from DATA(rsNorw, pppact, o, %1): the year's own column
+("2030"), while CAPMOD's DATA holds the simulation year at "Y" (l. 92-94 copy the EU's yields from "Y"). So the
+weight is 0 and the output payments are not in the premiums: CAPRI's 2030 reference PRME of every Norwegian unit and
+production activity equals the direct payments (DPNOR1-DPNOR5) alone (capri_mod/policy/norway.py, test_norway.py: 108
+cells exact). With the yields at "Y" Norway's dairy cows would get about 40% more (NO020000: 1,798-2,032 against
+1,277 EUR per head), bulls 2.5-3.3 times as much, fattening pigs 3.8 times.
+
+- **Effect:** Norway's premiums per activity in the simulation year, as in CAPRI
+- **In 9t:** -
+- **Status:** open, kept as CAPRI computes it (as K141): the project lead to decide whether to sign it as a CAPRI bug
