@@ -80,7 +80,9 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # a pull request's token cannot write GitHub's Actions cache ("cache write denied: token has no writable
+          # scopes", 13 November 2026): the cache is written by the pushes and the schedule only, read by everyone
+          cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
