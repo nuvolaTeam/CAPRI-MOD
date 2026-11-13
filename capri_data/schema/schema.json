@@ -54274,6 +54274,68 @@
     "tests": []
    }
   },
+  "val_jrc121368_eu27": {
+   "file": "capri_data/validation/farm_to_fork_2030/jrc121368_eu27.csv",
+   "declared_in": "31_validation.sql",
+   "layout": [],
+   "comment": "JRC121368 (Barreiro-Hurle et al. 2021, EUR 30317 EN), the F2F and BDS targets and CAP 2014-2020 scenario: EU27 % changes from the 2030 baseline of the indicators tools/check/compare_runs.py computes, each with its table, page or text; \"figure\" marks a reading measured on the report's chart (kept by hand, 13 November 2026)",
+   "columns": [
+    {
+     "name": "indicator",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value_pct",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "kind",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "source",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "indicator"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(kind IN ('table', 'text', 'figure'))"
+   ],
+   "units": [
+    {
+     "item": "value_pct",
+     "unit": "U_percent",
+     "status": "capri",
+     "basis": "JRC121368: % change from the baseline in 2030"
+    }
+   ],
+   "provenance": {
+    "nature": "declared",
+    "origins": "per row",
+    "builder": null,
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/compare_runs.py",
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_results_browser.py"
+    ]
+   }
+  },
   "val_n_cascade_capri_gd2030": {
    "file": "capri_data/validation/n_cascade_capri_gd2030.csv",
    "declared_in": "31_validation.sql",

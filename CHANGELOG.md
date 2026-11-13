@@ -32,6 +32,23 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 13 November 2026 — the results browser: Farm-to-Fork against JRC121368 in the same tab
+
+- The "Green Deal vs CAPRI" tab is now "Scenarios vs CAPRI", with a choice of comparison: the Green Deal 2030 run
+  against CAPRI's own step (as before), or a Farm-to-Fork 2030 run against the figures JRC121368 published from CAPRI
+  (the F2F and BDS targets and CAP 2014-2020 scenario): EU27 bars of herds and production, prices and the environment,
+  the gaps, a table with each figure's source and a CSV. JRC121368 has no member-state figures, so that comparison is
+  EU27 only.
+- **JRC121368's figures are data now**: capri_data/validation/farm_to_fork_2030/jrc121368_eu27.csv, each with its
+  table, page or text, kept by hand. tools/check/compare_runs.py read them from its own code until now, rounded to
+  half points and without sources. Checked against the report (the uploaded EUR 30317 EN): the table and text figures
+  as written (cereal price 8.2 instead of 8, beef price 24.1 instead of 24); the others measured on Figures 5 and 7
+  (the same charts' table-backed bars measure within 0.1-0.2 points of their tables). Changed by 0.3 points or more:
+  milk price 1.5 -> 1.1, beef animals -18 -> -17.7, poultry heads -16.5 -> -16.2. The Farm-to-Fork mean gap reported
+  from earlier runs was computed with the old figures.
+- compare_runs.indicators: NaN for an indicator whose block the run does not hold, instead of an error.
+- Test: test_the_farm_to_fork_comparison_reads_jrc121368_with_its_sources.
+
 ## 13 November 2026 — the results browser: a Green Deal vs CAPRI tab
 
 - capri_gradio: a "Green Deal vs CAPRI" tab sets a stored Green Deal 2030 run beside CAPRI's own 2030 Green Deal step

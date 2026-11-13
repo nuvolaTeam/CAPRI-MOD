@@ -445,6 +445,35 @@ GD_N_ITEMS = {"mineral fertiliser (MINFER)": ("n_mineral_input", "MINFER"),
 GD_N_UNIT_FACTOR = 1.0e-3
 
 
+#: the groups of JRC121368's Farm-to-Fork indicators in the comparison (tools/check/compare_runs.py's names)
+F2F_GROUPS = {"prices": ("cereal price", "oilseed price", "veg+perm price", "beef price", "pork price",
+                         "poultry price", "milk price"),
+              "herds and production": ("dairy cows", "beef animals", "pigs", "poultry", "sheep+goats", "cereals prod",
+                                       "oilseeds prod", "veg+perm prod", "beef production", "UAA"),
+              "environment": ("N surplus", "ammonia", "fertiliser N2O", "manure N2O", "enteric CH4", "manure CH4",
+                              "GHG total")}
+
+
+def f2f_jrc(root, scenario: str, run_id: str) -> pd.DataFrame:
+    """A Farm-to-Fork 2030 run's indicators (% change from its baseline, EU27; tools/check/compare_runs.py) beside the
+    figures JRC121368 published from CAPRI (capri_data/validation/farm_to_fork_2030/jrc121368_eu27.csv): group,
+    indicator, model_pct, jrc_pct, gap_pts, kind (table, text or a reading of the report's chart) and source."""
+    cr = _tool("compare_runs")
+    mod = cr.indicators(_loaded(root, scenario, run_id))
+    ref = pd.read_csv(cr.JRC121368_FILE).set_index("indicator")
+    rows = []
+    for grp, names in F2F_GROUPS.items():
+        for k in names:
+            if k in ref.index:
+                m = mod.get(k)
+                rows.append(dict(group=grp, indicator=k, model_pct=(float(m) if m is not None else float("nan")),
+                                 jrc_pct=float(ref.at[k, "value_pct"]), kind=ref.at[k, "kind"],
+                                 source=ref.at[k, "source"]))
+    df = pd.DataFrame(rows)
+    df["gap_pts"] = df["model_pct"] - df["jrc_pct"]
+    return df
+
+
 def _gd_tool():
     return _tool("compare_capri_gd")
 

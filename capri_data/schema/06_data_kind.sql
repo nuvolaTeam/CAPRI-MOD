@@ -638,6 +638,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/validation/capri_eu27_levels_2017_capreg.csv', 'validation', 'by rule: kept for comparison'),
   ('capri_data/validation/capri_eu27_levels_2030_ref.csv', 'validation', 'by rule: kept for comparison'),
   ('capri_data/validation/eu_outlook_2020_2030.csv', 'validation', 'by rule: kept for comparison'),
+  ('capri_data/validation/farm_to_fork_2030/jrc121368_eu27.csv', 'validation', 'by rule: kept for comparison'),
   ('capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv', 'validation', 'by rule: kept for comparison'),
   ('capri_data/validation/n_cascade_capri_gd2030.csv', 'validation', 'by rule: kept for comparison'),
   ('capri_data/sources/intermediate/ammonia/ammonia_cost_curves.parquet', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),

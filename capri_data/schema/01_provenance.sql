@@ -742,5 +742,6 @@ INSERT INTO provenance (file, nature, origins, builder, sources) VALUES
   ('capri_data/validation/capri_eu27_levels_2017_capreg.csv', 'capri', 'CAPRI', 'build_capri_eu27_levels', '$EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg'),
   ('capri_data/validation/capri_eu27_levels_2030_ref.csv', 'capri', 'CAPRI', 'build_capri_eu27_levels', '$EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg'),
   ('capri_data/validation/eu_outlook_2020_2030.csv', 'external', 'EC', 'build_eu_outlook_2030 (not in the trace yet)', NULL),
+  ('capri_data/validation/farm_to_fork_2030/jrc121368_eu27.csv', 'declared', 'per row', NULL, NULL),
   ('capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv', 'capri', 'CAPRI', 'extract_capri_marginal_terms', '$EXPORTS/res_2_1730greendeal_refdefaulta.zip'),
   ('capri_data/validation/n_cascade_capri_gd2030.csv', 'capri', 'CAPRI', 'build_n_cascade_validation (not in the trace yet)', NULL);

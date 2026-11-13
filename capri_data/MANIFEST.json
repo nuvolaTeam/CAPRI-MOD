@@ -9440,6 +9440,20 @@
     "builder": "build_eu_outlook_2030 (not in the trace yet)"
    }
   },
+  "capri_data/validation/farm_to_fork_2030/jrc121368_eu27.csv": {
+   "description": "JRC121368 (Barreiro-Hurle et al. 2021, EUR 30317 EN), the F2F and BDS targets and CAP 2014-2020 scenario: EU27 % changes from the 2030 baseline of the indicators tools/check/compare_runs.py computes, each with its table, page or text; \"figure\" marks a reading measured on the report's chart (kept by hand, 13 November 2026)",
+   "kind": "validation",
+   "vintage": "2030",
+   "domain": "validation",
+   "status": "validation",
+   "rows": 24,
+   "columns": 4,
+   "units": "U_percent",
+   "origin": {
+    "nature": "declared"
+   },
+   "catalogue_note": "JRC121368's published Farm-to-Fork figures (EU27, % change from the baseline), each with its table, page or text; kept by hand. (not re-checked)"
+  },
   "capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz": {
    "vintage": "2030",
    "domain": "validation",

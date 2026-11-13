@@ -7,26 +7,23 @@ deviation of each run from them.
 Usage: python tools/check/compare_runs.py RUN_A.pkl [RUN_B.pkl] [--capri]
 """
 import argparse
+import csv
 import pickle
+from pathlib import Path
 
 import numpy as np
 __import__("sys").path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2]))
 from capri_mod.io_results import load_run  # a run pickle or a stored run, "store:ROOT:SCENARIO[:RUN_ID]"
 
-# JRC121368 (EUR 30317 EN) Farm-to-Fork combined scenario, EU27, % change from baseline
-CAPRI = {"cereal price": 8, "oilseed price": 11, "veg+perm price": 15, "beef price": 24, "pork price": 43,
-         "poultry price": 18, "milk price": 1.5, "dairy cows": -10, "beef animals": -18, "pigs": -14.5,
-         "poultry": -16.5, "sheep+goats": -9.5, "cereals prod": -15, "oilseeds prod": -15.5, "veg+perm prod": -12,
-         "N surplus": -33.5, "fertiliser N2O": -40.4, "enteric CH4": -14.6, "manure CH4": -12.2, "GHG total": -14.8,
-         "ammonia": -33.0, "beef production": -14.0, "manure N2O": -3.2,
-         # total UAA: "+3% in this scenario" (JRC121368 section 5.1.1; set-aside 1.5, nutrients 0.8); reported, not in
-         # the 20-indicator mean (kept comparable with earlier runs)
-         "UAA": 3.0}
+#: JRC121368 (EUR 30317 EN), the F2F and BDS targets and CAP 2014-2020 scenario, EU27, % change from the baseline in
+#: 2030: capri_data/validation/farm_to_fork_2030/jrc121368_eu27.csv, each figure with its table, page or text (and the
+#: chart readings marked as such). Until 13 November 2026 written here, rounded to half points, without sources. UAA
+#: ("+3% in this scenario", section 5.1.1) is reported, not in the 20-indicator mean (kept comparable with earlier runs)
+JRC121368_FILE = Path(__file__).resolve().parents[2] / "capri_data" / "validation" / "farm_to_fork_2030" / "jrc121368_eu27.csv"
+CAPRI = {r["indicator"]: float(r["value_pct"]) for r in csv.DictReader(open(JRC121368_FILE, newline="", encoding="utf-8"))}
 
 
 def _producer_prices():
-    import csv
-    from pathlib import Path
     f = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "producer_prices.csv"
     try:
         return {r[""]: float(r["price"]) for r in csv.DictReader(open(f))}
@@ -37,9 +34,14 @@ def _producer_prices():
 _PP = _producer_prices()
 
 
+def _pct(new, old) -> float:
+    """% change; NaN where the run has no base level (a run without the activities or products)."""
+    return (new / old - 1) * 100 if old else float("nan")
+
+
 def indicators(o):
-    p = o["prices"]
-    g = lambda cs: np.mean([p[c] for c in cs if c in p]) * 100
+    p = o.get("prices") or {}                  # a run without the block: its indicators are NaN
+    g = lambda cs: np.mean([p[c] for c in cs if c in p]) * 100 if any(c in p for c in cs) else float("nan")
     ob0 = o["out"][0]
 
     def gv(cs):
@@ -54,11 +56,11 @@ def indicators(o):
     ab, as_ = o["act"]
     for lab, acts in [("dairy cows", ["DCOW"]), ("beef animals", ["BULL", "BCOW", "HFRS", "CALV"]),
                       ("pigs", ["PIGS", "PIGF"]), ("poultry", ["BROI", "LAYS"]), ("sheep+goats", ["SHGP", "SHGM", "SHGF"])]:
-        out[lab] = (sum(as_.get(x, 0) for x in acts) / sum(ab.get(x, 0) for x in acts) - 1) * 100
+        out[lab] = _pct(sum(as_.get(x, 0) for x in acts), sum(ab.get(x, 0) for x in acts))
     ob, os_ = o["out"]
     for lab, cs in [("cereals", ["SWHE", "DWHE", "BARL", "CORN", "RYEM", "OATS", "OCER", "PARI"]), ("oilseeds", ["RAPE", "SUNF", "SOYA"]),
                     ("veg+perm", ["TOMA", "OVEG", "APPL", "OFRU", "CITR", "OLIV", "TABO", "WINE", "TAGR"])]:
-        out[lab + " prod"] = (sum(os_.get(x, 0) for x in cs) / sum(ob.get(x, 0) for x in cs) - 1) * 100
+        out[lab + " prod"] = _pct(sum(os_.get(x, 0) for x in cs), sum(ob.get(x, 0) for x in cs))
     if o.get("prod"):
         pb, ps = o["prod"]
         if pb.get("BEEF"):
@@ -73,7 +75,7 @@ def indicators(o):
         if lab == "GHG total" and "ghg_non_co2" in eb and "ghg_non_co2" in es:
             c = "ghg_non_co2"            # JRC121368's figure is non-CO2 GHG (Sprint 9s; older runs: all items)
         if c in eb:
-            out[lab] = (es[c].sum() / eb[c].sum() - 1) * 100
+            out[lab] = _pct(es[c].sum(), eb[c].sum())
     return out
 
 

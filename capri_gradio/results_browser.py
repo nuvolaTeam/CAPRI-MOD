@@ -120,16 +120,16 @@ def indicator_figure(ind: pd.DataFrame, run_cols: list):
     return _layout(fig, "Farm-to-Fork indicators: capri-mod against JRC121368", 820)
 
 
-def pair_figure(labels, model, capri, title: str, axis: str):
-    """The model's % changes beside CAPRI's, grouped horizontal bars in the order given (capri-mod blue, CAPRI orange,
-    a legend)."""
+def pair_figure(labels, model, capri, title: str, axis: str, ref_name: str = "CAPRI"):
+    """The model's % changes beside CAPRI's (or another reference's, ref_name), grouped horizontal bars in the order
+    given (capri-mod blue, the reference orange, a legend)."""
     import plotly.graph_objects as go
     d = pd.DataFrame({"l": list(labels), "m": list(model), "c": list(capri)}).iloc[::-1]
     fig = go.Figure()
     fig.add_trace(go.Bar(y=d["l"], x=d["m"], orientation="h", name="capri-mod", marker_color=SERIES[0],
                          hovertemplate="%{y}: <b>%{x:+.1f}</b><extra>capri-mod</extra>"))
-    fig.add_trace(go.Bar(y=d["l"], x=d["c"], orientation="h", name="CAPRI", marker_color=SERIES[1],
-                         hovertemplate="%{y}: <b>%{x:+.1f}</b><extra>CAPRI</extra>"))
+    fig.add_trace(go.Bar(y=d["l"], x=d["c"], orientation="h", name=ref_name, marker_color=SERIES[1],
+                         hovertemplate="%{y}: <b>%{x:+.1f}</b><extra>" + ref_name + "</extra>"))
     fig.add_vline(x=0, line_width=1, line_color="#8a8984")
     fig.update_layout(barmode="group", bargap=0.25, bargroupgap=0.08,
                       legend=dict(orientation="h", yanchor="bottom", y=1.0, x=0))
@@ -349,15 +349,22 @@ def add_results(stores: list, app):
             cp_stats = gr.Dataframe(interactive=False, label="per block: median |dev| %, share within 10%")
             cp_ind = gr.Dataframe(interactive=False, label="Farm-to-Fork indicators, % change from the baseline")
 
-        with gr.Tab("Green Deal vs CAPRI"):
+        with gr.Tab("Scenarios vs CAPRI"):
             gr.Markdown(
-                "A Green Deal 2030 run (lnds8_org18_pest20_mine13crp_surp30) against the project lead's CAPRI run of "
-                "the same scenario from the same 2030 reference (`capri_data/validation/greendeal_2030`, "
-                "`tools/check/compare_capri_gd.py`). Only % changes from each model's own reference are compared: "
-                "some herds are counted in other units than CAPRI's activity levels (KNOWN_ISSUES K63). EU27 = "
-                "CAPRI's EU27yr19 and the model's regions outside Norway. A run on a subset of regions is not "
-                "comparable (KNOWN_ISSUES K83).")
+                "**Green Deal 2030**: a run (lnds8_org18_pest20_mine13crp_surp30) against the project lead's CAPRI "
+                "run of the same scenario from the same 2030 reference (`capri_data/validation/greendeal_2030`, "
+                "`tools/check/compare_capri_gd.py`), EU27, member states and regional units.  \n"
+                "**Farm-to-Fork 2030**: a run against the figures JRC121368 published from CAPRI (Barreiro-Hurle et "
+                "al. 2021, the F2F and BDS targets and CAP 2014-2020 scenario; "
+                "`capri_data/validation/farm_to_fork_2030/jrc121368_eu27.csv`, each figure with its table, page or "
+                "text; \"figure\" marks a reading measured on the report's chart), EU27 only: the report publishes no "
+                "member-state figures.  \n"
+                "Only % changes from each model's own reference are compared: some herds are counted in other units "
+                "than CAPRI's activity levels (KNOWN_ISSUES K63). EU27 = the model's regions outside Norway. A run on "
+                "a subset of regions is not comparable (KNOWN_ISSUES K83).")
             with gr.Row():
+                gd_kind = gr.Radio(["Green Deal 2030 · CAPRI's run", "Farm-to-Fork 2030 · JRC121368"],
+                                   value="Green Deal 2030 · CAPRI's run", label="comparison", scale=3)
                 gd_run = gr.Dropdown(labs0, value=first0, label="run", scale=4)
                 gd_go = gr.Button("Compare", variant="primary", scale=1)
             gd_msg = gr.Markdown()
@@ -514,16 +521,33 @@ def add_results(stores: list, app):
 
         cp_go.click(cp_show, [store, cp_run, cp_more], [cp_msg, cp_base, cp_stats, cp_ind])
 
-        # ------------------------------------------------------------------ Green Deal vs CAPRI
+        # ------------------------------------------------------------------ Scenarios vs CAPRI (Green Deal, Farm-to-Fork)
         def _subset_note(root, s_, r_):
             regs = str((RD.read_meta(root, s_, r_).get("options") or {}).get("regions") or "")
             return (f"The run solved {len(regs.split(','))} regional units only (--regions): not comparable with "
                     "CAPRI's EU27 (KNOWN_ISSUES K83). " if regs else "")
 
-        def gd_show(root, label):
+        def f2f_show(root, s_, r_):
+            d = RD.f2f_jrc(root, s_, r_)
+            ok = d.dropna(subset=["model_pct"])
+            same = np.mean(np.sign(ok["jrc_pct"].round(1)) == np.sign(ok["model_pct"].round(1))) if len(ok) else 0
+            msg = (_subset_note(root, s_, r_) + f"EU27, {len(ok)} indicators: mean absolute gap "
+                   f"{ok['gap_pts'].abs().mean():.1f} points, same sign {same:.0%}. JRC121368 publishes EU27 figures "
+                   "only: the member-state and regional charts below are for the Green Deal comparison.")
+            figs = []
+            for grp in ("herds and production", "prices", "environment"):
+                g = d[d["group"] == grp]
+                figs.append(pair_figure(g["indicator"], g["model_pct"], g["jrc_pct"], f"Farm-to-Fork, EU27: {grp}",
+                                        "% change from the baseline", ref_name="JRC121368 (CAPRI)"))
+            return (msg, *figs, None, _shown(d), _csv(d, "farm_to_fork_vs_jrc121368"),
+                    gr.update(choices=[], value=None))
+
+        def gd_show(root, label, kind=None):
             if not label:
                 return ("Pick a run.",) + (None,) * 6 + (gr.update(choices=[], value=None),)
             s_, r_ = RD.parse_label(label)
+            if kind and kind.startswith("Farm-to-Fork"):
+                return f2f_show(root, s_, r_)
             act = RD.gd_activities(root, s_, r_)
             pri = RD.gd_prices(root, s_, r_)
             yld = RD.gd_yields(root, s_, r_)
@@ -576,7 +600,8 @@ def add_results(stores: list, app):
             sc = scatter_figure(reg, f"{item}: {len(ok)} regional units, {corr}")
             return f_ms, mm, mc, sc
 
-        gd_go.click(gd_show, [store, gd_run], [gd_msg, gd_act, gd_pri, gd_yld, gd_nbal, gd_table, gd_file, gd_item])
+        gd_go.click(gd_show, [store, gd_run, gd_kind], [gd_msg, gd_act, gd_pri, gd_yld, gd_nbal, gd_table, gd_file,
+                                                         gd_item])
         gd_go2.click(gd_draw, [store, gd_run, gd_item], [gd_ms, gd_map_m, gd_map_c, gd_sc])
 
         # ------------------------------------------------------------------ map and charts

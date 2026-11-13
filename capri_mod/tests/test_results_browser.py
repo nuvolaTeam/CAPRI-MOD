@@ -121,3 +121,18 @@ def test_the_green_deal_tab_compares_the_run_with_capris_step(store):
     m = RD.map_frame(RD.gd_unit_values(reg.reset_index(), "capri"), "% change").set_index("nuts2024")
     assert np.isclose(m.at["DE11", "value"], lev.at["DE110000", "pct_change"])
     assert RD.gd_n_balance(store, "scen_a", IDS["r1"]).empty
+
+
+def test_the_farm_to_fork_comparison_reads_jrc121368_with_its_sources(store):
+    """The tab's Farm-to-Fork comparison: the run's indicators (compare_runs.indicators, % change from its baseline)
+    beside JRC121368's published figures, each with its source (capri_data/validation/farm_to_fork_2030); the
+    fixture's wheat-led cereals output rises 50% where the run holds it."""
+    import pandas as pd
+
+    ref = pd.read_csv(ROOT / "capri_data" / "validation" / "farm_to_fork_2030" / "jrc121368_eu27.csv")
+    assert ref["source"].str.startswith("JRC121368").all() and set(ref["kind"]) <= {"table", "text", "figure"}
+    d = RD.f2f_jrc(store, "scen_a", IDS["r1"]).set_index("indicator")
+    assert set(d.index) == set(ref["indicator"])
+    assert d.at["pork price", "jrc_pct"] == 43.0 and d.at["pork price", "kind"] == "table"
+    assert np.isclose(d.at["N surplus", "jrc_pct"], -33.5)
+    assert set(d["group"]) == {"prices", "herds and production", "environment"}
