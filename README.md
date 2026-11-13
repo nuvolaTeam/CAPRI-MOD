@@ -1,4 +1,5 @@
 [![Docker](https://github.com/nuvolaTeam/CAPRI-MOD/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/nuvolaTeam/CAPRI-MOD/actions/workflows/docker-publish.yml)
+[![Python application](https://github.com/nuvolaTeam/CAPRI-MOD/actions/workflows/python-app.yml/badge.svg)](https://github.com/nuvolaTeam/CAPRI-MOD/actions/workflows/python-app.yml)
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/capri-mod-logo-white.png">
