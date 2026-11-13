@@ -1,0 +1,33 @@
+ms,bps_region,members_of,source
+AT000000,rbps1,AT000000,star 3.0 scen/Premiums/bps_convergence.gms l. 162-169
+BL000000,rbps1,BL200000,star 3.0 scen/Premiums/bps_convergence.gms l. 305-318
+BL000000,rbps2,BL300000,star 3.0 scen/Premiums/bps_convergence.gms l. 305-318
+BL000000,rbps3,BL400000,star 3.0 scen/Premiums/bps_convergence.gms l. 305-318
+DE000000,rbps1,DE000000,star 3.0 scen/Premiums/bps_convergence.gms l. 104-111
+DK000000,rbps1,DK000000,star 3.0 scen/Premiums/bps_convergence.gms l. 323-345
+EL000000,rbps1,EL250000,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+EL000000,rbps1,EL300000,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+EL000000,rbps1,EL410000,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+EL000000,rbps1,EL420000,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+EL000000,rbps1,EL430000,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+EL000000,rbps2,EL110000,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+EL000000,rbps2,EL120000,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+EL000000,rbps2,EL210000,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+EL000000,rbps2,EL220000,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+EL000000,rbps2,EL240000,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+EL000000,rbps3,EL130000,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+EL000000,rbps3,EL140000,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+EL000000,rbps3,EL230000,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+FI000000,rbps1,FI000000,star 3.0 scen/Premiums/bps_convergence.gms l. 200-210 (the loop does not advance currbps: one region)
+FR000000,rbps1,FR830000,star 3.0 scen/Premiums/bps_convergence.gms l. 258-273
+FR000000,rbps2,REST,star 3.0 scen/Premiums/bps_convergence.gms l. 258-273 (France's other units)
+HR000000,rbps1,HR000000,star 3.0 scen/Premiums/bps_convergence.gms l. 323-345
+IR000000,rbps1,IR000000,star 3.0 scen/Premiums/bps_convergence.gms l. 323-345
+IT000000,rbps1,IT000000,star 3.0 scen/Premiums/bps_convergence.gms l. 323-345
+MT000000,rbps1,MT000000,star 3.0 scen/Premiums/bps_convergence.gms l. 119-126
+NL000000,rbps1,NL000000,star 3.0 scen/Premiums/bps_convergence.gms l. 148-155
+PT000000,rbps1,PT000000,star 3.0 scen/Premiums/bps_convergence.gms l. 323-345
+SE000000,rbps1,SE000000,star 3.0 scen/Premiums/bps_convergence.gms l. 134-141
+SI000000,rbps1,SI000000,star 3.0 scen/Premiums/bps_convergence.gms l. 323-345
+UK000000,rbps1,UK000000,star 3.0 scen/Premiums/bps_convergence.gms l. 179-191 (the loop does not advance currbps: one region)
+ES000000,EACH,ES000000,star 3.0 scen/Premiums/bps_convergence.gms l. 283-295 (each NUTS 2 region its own BPS region)

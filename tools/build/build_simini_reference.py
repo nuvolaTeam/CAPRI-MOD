@@ -10,6 +10,8 @@ Output (CAPRI's own data, read-only; capri_sources/reference/README.md):
   capri_sources/reference/simini/<tag>/<symbol>.csv.gz   parameters: d0, ..., dn, value, eps
                                                  variables:  d0, ..., dn, level, eps, lower, upper, marginal
   capri_sources/reference/simini/<tag>/_index.csv        symbol, kind, dim, domains, records, description
+  capri_sources/reference/simini/<tag>/_acronyms.csv     number, name, description: the file's acronyms (a value
+                                                 written as an acronym, e.g. an application type, is number x 1e301)
 
 Values: written with repr (full precision). GAMS Eps is written as 0 with eps = 1 (for a variable, eps flags the level;
 Eps in a bound or a marginal is written as 0). +INF and -INF are written as inf and -inf, NA as nan. A record CAPRI did
@@ -100,6 +102,14 @@ class _Gdx:
                 yield tuple(keys), (lv, e) + rest
         g.gdxDataReadDone(self.h)
 
+    def acronyms(self) -> list[tuple]:
+        """The file's acronyms: (number, name, text); a value written as an acronym is stored as number x 1e301."""
+        out = []
+        for i in range(1, self.g.gdxAcronymCount(self.h) + 1):
+            _, name, text, number = self.g.gdxAcronymGetInfo(self.h, i)
+            out.append((number, name, text))
+        return out
+
     def close(self):
         self.g.gdxClose(self.h)
 
@@ -140,6 +150,10 @@ def write(src: Path, tag: str, gdxlib: str, symbols: Path) -> None:
             raise RuntimeError(f"{name}: {n} records written, the file declares {cnt}")
         index.append((name, kind, dim, " ".join(doms), n, txt))
         print(f"{name}: {n} records")
+    with open(out / "_acronyms.csv", "w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh, lineterminator="\n")
+        w.writerow(["number", "name", "description"])
+        w.writerows(sorted(gdx.acronyms()))
     gdx.close()
     with open(out / "_index.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh, lineterminator="\n")

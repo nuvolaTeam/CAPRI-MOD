@@ -1,0 +1,9 @@
+item,value,source
+coupled_until,2005.0,star 3.0 pol_input/mtr_until2013.gms
+coupling_from,2006.0,star 3.0 pol_input/mtr_until2013.gms
+end_of_mtr,2020.0,star 3.0 scen/base_scenarios/CAP_2014_2020.gms
+eu25_from,2004.0,star 3.0 policy/calc_mtr_top.gms
+eu27_from,2007.0,star 3.0 policy/calc_mtr_top.gms
+first_year,1940.0,sim_ini SIMYY
+last_year,2100.0,sim_ini SIMYY
+targets_from,2006.0,star 3.0 pol_input/mtr_until2013.gms

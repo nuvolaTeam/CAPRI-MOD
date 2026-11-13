@@ -69,3 +69,15 @@ COMMENT ON TABLE val_n_cascade_capri_gd2030 IS 'CAPRI''s per-head N losses (MANN
 INSERT INTO value_units VALUES
   ('val_n_cascade_capri_gd2030', 'value', NULL, 'open', 'n_cascade_capri_gd2030.value: unit to be established');
 
+
+-- file: capri_data/validation/farm_to_fork_2030/jrc121368_eu27.csv
+CREATE TABLE val_jrc121368_eu27 (
+    indicator VARCHAR NOT NULL,
+    value_pct DOUBLE NOT NULL,
+    kind VARCHAR NOT NULL CHECK (kind IN ('table', 'text', 'figure')),
+    source VARCHAR NOT NULL,
+    PRIMARY KEY (indicator)
+);
+COMMENT ON TABLE val_jrc121368_eu27 IS 'JRC121368 (Barreiro-Hurle et al. 2021, EUR 30317 EN), the F2F and BDS targets and CAP 2014-2020 scenario: EU27 % changes from the 2030 baseline of the indicators tools/check/compare_runs.py computes, each with its table, page or text; "figure" marks a reading measured on the report''s chart (kept by hand, 13 November 2026)';
+INSERT INTO value_units VALUES
+  ('val_jrc121368_eu27', 'value_pct', 'U_percent', 'capri', 'JRC121368: % change from the baseline in 2030');

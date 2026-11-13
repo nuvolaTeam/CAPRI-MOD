@@ -4932,3 +4932,55 @@ def test_green_deal_targets_follow_capris_geo_to_ms_maps(data):
     assert pd.isna(org.at["IE", "permanent_pp"]) and organic("IR020000")["permanent_pp"] == 0.0
     assert organic("IR020000")["uaa_pp"] == org.at["IE", "uaa_pp"]
     assert _landscape_pp(data, "NO020000") == 0.0 and (organic("NO020000") == 0.0).all()
+
+
+def test_cap14_ceilings_follow_capris_chain():
+    """K136: the 2030 ceilings of CAPRI's CAP 2014-2020 chain (scen/base_scenarios/CAP_2014_2020.gms, the transfers,
+    the coupled support, def_policy.gms's carry to the simulation year) as capri_mod/supply/entitlements.py computes
+    them from CAPRI's tables; the figures are CAPRI's 2030 reference dataOut CEILVAL (million EUR), used as a check.
+      FR: the BPS ceiling of 2029 (no young-farmer or redistributive deduction after 2020) with 2020's DPFIRHA
+      HR: Annex II to 2022 for BPS (373 x 0.7 - coupled), 2020's share for DPFIRHA (10% of 298.4)
+      PL: no transfer from pillar 2 (its ceilings deleted by del_policy.gms); flax's VCS of 2015 not carried
+      RO: the transfer written EPS in 2019-2020 holds it at zero"""
+    from capri_mod.supply import entitlements as E
+
+    c = E.ms_ceilings(2030)
+    ref = {("FR000000", "dp_bps"): 3918.661, ("FR000000", "DPFIRHA"): 1438.354, ("HR000000", "dp_bps"): 215.428,
+           ("HR000000", "DPFIRHA"): 29.840, ("PL000000", "DPBPS_SAPS"): 1684.352, ("RO000000", "DPBPS_SAPS"): 1047.142,
+           ("DK000000", "DPNATCO"): 2.657, ("NL000000", "DPGREEN"): 210.263}
+    for (ms, s), v in ref.items():
+        assert abs(c[ms][s] - v) < 1e-3, (ms, s, c[ms].get(s), v)
+
+    # the cut per ha: the ceilings of the cut schemes over the member state's trend area (EUR/ha; CAPRI's Green Deal
+    # step has D_sumEntl = -Cut where the area overshoots: NL -272.64, FR -193.47, PL -139.77)
+    cuts = E.ms_cuts(2030)
+    for ms, v in (("NL000000", 272.64), ("FR000000", 193.47), ("PL000000", 139.77)):
+        assert abs(cuts[ms] - v) < 0.01, (ms, cuts[ms])
+    assert "NO000000" not in cuts
+
+
+def test_entitlement_limit_in_the_2030_regional_model(model):
+    """K136: the regional model in CAPRI's 2030 calibration point carries sumEntl_ and overShotEntl_ (one overshoot
+    column at the member state's cut, one row: the crop columns - overshoot <= the trend area); the crops are at their
+    trend levels there, so the overshoot is zero and the base is reproduced. Ireland's regions take the plain path
+    (no land-market data)."""
+    from capri_mod.projection import ProjectionModule, BaselineTrajectory
+    from capri_mod.supply import entitlements as E
+
+    root = _repo_root()
+    traj = BaselineTrajectory.from_file(str(root / "capri_data" / "scenarios" / "capri_ref_2030"))
+    pmod = ProjectionModule(model, traj, capri_prices_dir=str(trajectories_dir(root / "capri_data", 2030)))
+    res = pmod.run(years=[2030], regions=["IR020000"], max_outer_iter=2)
+    pm = getattr(pmod, "_last_projected_model", None) or model
+    mo = pm.supply_module._models["IR020000"]
+
+    e = mo.res.entl
+    assert e is not None and mo.ev.entl_col is not None
+    assert abs(e["cut"] - E.ms_cuts(2030)["IR000000"]) < 1e-9 and abs(e["cut"] - 186.55) < 0.01
+    lev = E.data()["levels"]["IR020000"]
+    assert abs(e["limit"] - sum(lev.values())) < 1e-6           # every crop of CAPRI's in IR020000 is a model column
+    assert e["overshoot"] < 1e-3 * e["limit"], e
+    labels = list(mo.ev.aug_labels)
+    assert "entitlements" in labels
+    drift = res.baseline[2030]["metadata"].get("base_calibration_drift") or [0.0]
+    assert float(drift[0]) < 0.002, drift

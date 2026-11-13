@@ -32,6 +32,144 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 13 November 2026 — P2: CAPRI's premium cut, policy.gms, the CAP 2014-2020 coupled and area schemes and the rural development payments (not yet used by the model)
+
+- capri_mod/policy/premium_cut.py: policy/prmcut.gms, the premiums a region is paid when a scheme's paid quantity or
+  value exceeds its ceiling (the cut 1 / max(1, used / ceiling) by ceiling region, EPS ceilings, the cut passed down
+  to the units, PRME = PRMD x cut x weight).
+- capri_mod/policy/cap14_premiums.py: the coupled schemes' 2030 rates and ceilings (VCS and cotton: each item of its
+  last year, def_policy.gms) and their declared premiums per activity through CAPRI's premium groups.
+- Data: cap14_coupled_rates.csv (the files' rates per premium group, build_cap14_entitlements.py), codes/capri/
+  PSG_TO_A.csv (build_code_lists.py); the coupled schemes' labels without trailing blanks, as GAMS reads them.
+- Checks (CAPRI's 2030 reference, as checks): the area schemes' cuts (BPS, SAPS, greening, young farmers,
+  redistributive, ANC) equal CUTT in all 701 unit x scheme pairs of the EU (with CAPRI's PRMD and weights, the trend
+  levels); the crop coupled schemes' cuts in FR, EL, ES and IT in 799 pairs within 4e-6.
+- The area schemes' declared premiums (cap14_premiums.area_premiums): 1000 EUR/ha per PGSAPS activity (the rates of
+  CAP_2014_2020.gms, cap14_settings.csv area_rate_PGSAPS) where the member state has a 2030 ceiling of the scheme
+  (entitlements.ms_ceilings, K136), the application type being set only there. Cut to the ceilings with the trend
+  levels they give CAPRI's 2030 reference PRME at all 17928 unit x model activity x scheme records (greening and young
+  farmers 6682 each, redistributive 2958, SAPS 1581, ANC 25) within 1e-7. The BPS (dp_bps) per region needs
+  implement_bps.gms's convergence: P2c.
+- The SAPS scheme written DPBPS_SAPS, as CAPRI's set PSDPAY and results write it (dpbps_SAPS in the gms file; a GAMS
+  label keeps the case of its first declaration): the builder takes the area schemes' spelling from PSDPAY.
+- P2b, policy.gms (capri_mod/policy/declared.py): the declared premium per activity and the entitlement weight from
+  a year's declarations (rates per premium group and application type by region): the activities of each scheme, the
+  rates broken down from the EU aggregates (REGEU1015, then REGAGGP) to the member states, NUTS 1 and NUTS 2 where a
+  region has none (EPS stops it), the application factors (per level, per slaughtered head, per yield, per historical
+  yield, per livestock unit), the entitlement weights (p_EntlWght1, EPS = none), the re-aggregation by level to NUTS 1,
+  the member states and the EU aggregates. cap14_premiums now writes the coupled and area schemes' declarations (the
+  application type per level where the region has a ceiling) and takes PRMD from declared.py.
+- Check (CAPRI's 2030 reference PRMD, as a check; trend levels of sim_ini): all 22564 unit x activity x scheme records
+  of the coupled and area schemes (crops and animals) and the 1893 member states' within 1e-6, none missing or extra
+  at the units; the EU_WEST and EU_EAST rows differ by up to 2.9e-4 (169 records, unexplained; EU027000 matches; no
+  2030 scheme has a ceiling at those aggregates, so no premium depends on them). The effective premiums of the area
+  schemes are unchanged (17928 records within 1e-7).
+- Data: CAPRI's region hierarchy and main outputs in codes/capri (MAP_RR, R_RAGG, REGAGGP, REGEU1015, MSAGG, NUTS1A,
+  SRNUTS1; build_code_lists.py); the entitlement weights and policy.gms's flags (2017/policy/
+  premium_entitlement_weights.csv, premium_settings.csv; tools/build/build_premium_policy_inputs.py, from sim_ini's
+  p_EntlWght1, ntslvl, p_AggregNUTS2, added to the sim_ini extract). The livestock units are CAPRI's
+  dat/policy/livestock_units.gms already in capri_data/pipeline/captrd/dat/p_luunits.csv (equal to sim_ini's
+  p_LUUnits); the premium modification factors come with P2c (in 2030 only the decoupled Agenda 2000 animal schemes
+  have them).
+- P2c, the rural development payments (capri_mod/policy/rd.py): extend_rd_baseline.gms (the plan carried forward,
+  the NUTS 2 weights of the 2007-2013 money by CAPRI's rules 1, 3 and 4, the unspent plan spread, every year after
+  2013 the 2007-2013 average) and rd_logic.gms (the regions with RD money, the ceilings from the measures' spend or
+  plan, the agri-environment money split by FADN farm types, the LFA, Natura 2000 and agri-environment rates from the
+  CLUE land partition and FADN, the rates scaled to 1.5 times the ceiling, Sweden's expert data), then def_policy's
+  fill to 2030. GAMS's EPS kept throughout (4,998 public-spend cells of rd_budget.gdx are EPS: a region with EPS spend
+  takes no share of the unspent plan and its plan does not reach the ceiling; tools/lib/_gdx.read_symbol takes an
+  eps marker).
+- Checks (as checks): at the trend levels the 2030 RD declarations equal sim_ini's (2,607 ceilings, 3,658 rates), the
+  declared premiums CAPRI's 2030 reference PRMD at 21,673 of 21,733 records (the 60 others Praha's), the effective
+  premiums PRME at 19,812 of 20,098 records within 1e-4 (K140).
+- Found on the way: CAP_2014_2020.gms l. 77 kills p_entlWght1 after the base-year pass, and no later file sets one,
+  so the year's policy.gms has every entitlement weight at 1 (CAPRI's 2030 reference confirms it: an animal's RD
+  premium is PRMD x cut); cap14_premiums no longer passes sim_ini's weights to it (the coupled and area results are
+  unchanged: sim_ini has none for them). The restart file's weights and rd_logic's livestock-unit weights still scale
+  rd_logic's rates (Natura 2000's over the member states and units only, RS). mtr_until2013.gms redefines the premium
+  groups PGFRM and PGREF at run time (arable + grass crops): premium_group_edits.csv, applied by cap14_premiums.data().
+- Data: 2017/policy/rd_*.csv (tools/build/build_rd_inputs.py from rd_budget.gdx, CAPRI's dat files and the RD gms
+  files' set literals), premium_group_edits.csv (build_cap14_entitlements.py); cap14_entitlement_levels.csv now holds
+  all production activities' trend levels (the entitlement limit reads the crops'); codes/capri NUTS0, SRNUTS2,
+  SRNUTS2_EXT, PSDPAY_RD, PSDPAY_AE.
+- The Nordic aid (policy/nordicaid.gms; capri_mod/policy/nordic_aid.py, tools/build/build_nordic_aid.py): the 1995
+  declarations carried to 2030, per livestock unit, per ton of milk (per yield) and per ha; its declared premiums
+  equal the reference PRMD at all 198 records (with sim_ini's 2030 milk yields). The GAMS table parser reads "+"
+  continuation blocks; policy.gms's application types are read without case (perLivestockUnit).
+- The complementary national direct payments (CAP_2013_2020_CNDP.gms, CNDP_2015_2020.gms) in the coupled files: the
+  coupled rates as written, the decoupled ones the ceiling over the member state's level of the group
+  (cndp_decoupled_groups.csv); all 2377 reference PRMD records within 1e-6. The coupled files are read through their
+  wrappers (each one's $include and ceiling divisor: VCS and cotton EUR / 1e6, CNDP thousand EUR / 1000), an item
+  assigned twice keeps the later value (24 in the CNDP file). VCS and cotton unchanged.
+- K136: only the schemes of CAPRI's sets psdpay_vcs and psdpay_cscs are taken out of the BPS ceiling (codes/capri
+  PSDPAY_vcs.csv, PSDPAY_cscs.csv); the CNDP are national money (CAP_2014_2020.gms l. 178).
+- The BPS internal convergence (implement_bps.gms; capri_mod/policy/bps.py): the member state's BPS ceiling of each
+  reform year distributed by the units' MTR payments (the key, an input until calc_mtr is ported), the average unit
+  value per BPS region, the tunnel (target share, gap closure in equal steps to the final year), the linear model and
+  the 30% rule, the year's rate the last reform year's. The member states' BPS regions and options transcribed from
+  bps_convergence.gms (2017/policy/bps_convergence_regions.csv, bps_convergence_options.csv, declared). Check: the six
+  member states whose model ends at a flat rate (DE, AT, NL, SE, MT, FI) give CAPRI's 2030 reference rate at all 67
+  units whatever the key (within 2e-8), confirming the entitlements (the crops' trend levels), the 2020 rate carried
+  to 2030 and K136's ceilings by year. K141: CAPRI's last convergence step takes the overshoot left after the 30% rule
+  off in million EUR per thousand ha (no factor 1000, implement_bps.gms l. 309): a CAPRI bug, kept as CAPRI computes it
+  by the project lead's decision.
+- The BPS key (capri_mod/policy/mtr.py, tools/build/build_mtr_inputs.py, port A): sim_ini_21730 is written at the
+  simulation start and holds the time series without mtr_until2013.gms's declarations, which CAPRI's 2030 run executes
+  on it (CAP_2014_2020.gms -> mtr_RD.gms); the port executes them in their order (116 literal assignments as data, 39
+  rule statements whose labels and numbers come from the statement, mtr_rules.csv), then def_policy.gms's fill,
+  calc_mtr_top.gms's aggregates and EU-10 scaling, policy.gms and prmcut.gms at the base year's data, the modulation
+  and national ceiling correction, the decoupled budgets (no scheme is coupled in 2030: the coupling loop stops at
+  %endofMTR%), DPFRMS / DPFRMF / DPREG and the policyIUV pass at the 2030 levels. Check: the 2030 BPS rates are
+  CAPRI's reference at every unit of BL, EL, ES, IT, PT, IR (3e-5) and the flat-rate member states; France within 0.6%
+  but Corsica 5% low; Croatia by a uniform IUV; sim_ini's NA sheep rates taken as absent (K142).
+- The tables of mtr_until2013.gms parsed (coupling, decoupling targets, modulation) equal sim_ini's compiled copies
+  cell by cell; gams_table keeps EPS apart from a written zero on request; sim_ini's extract writes its acronyms.
+- All ported schemes together (capri_mod/policy/premiums.py): coupled (VCS, cotton, CNDP), area schemes, the BPS
+  (rates and the units' ceilings, implement_bps.gms l. 147-160, 315), RD, Nordic aid and Ireland's suckler cow
+  welfare payment (DPIRSCOW, mtr_until2013.gms l. 351-352), declared at the year's trend data (sim_ini's DATA "Y",
+  now in mtr_base_data.csv) and cut by prmcut. Check at CAPRI's trend levels: the EU's 2030 premiums 47,262 against
+  CAPRI's reference 47,260 million EUR; 92% of the unit x activity totals within 1e-4 (p90 1.7e-5); the differences
+  France's BPS (K142) and the RD port's (K140). Not ported: Norway's payments (norw_pol.gms) and DPNONCAP, which in
+  2030 pays outside the EU only.
+- The model still takes its premiums from cap_premium_activity.csv; the outer-loop integration comes before the
+  switch.
+- Tests: capri_mod/tests/test_mtr.py, test_premiums.py.
+- Tests: capri_mod/tests/test_premium_cut.py.
+
+## 13 November 2026 — CAPRI's endogenous entitlement limit (K136)
+
+- **Ported** policy/def_endCut.gms with supply_model.gms's sumEntl_ and overShotEntl_: in each region whose member
+  state has a ceiling of a cut scheme, a hectare of crops beyond the trend area loses the area payments per ha (one
+  overshoot column at the member state's cut, one row; setting `supply.entitlement_limit`, CAPRI's default on). Left
+  out of the calibration, as in CAPRI's PMP terms.
+- **The 2030 ceilings** are computed by capri_mod/supply/entitlements.py from CAPRI's CAP 2014-2020 tables
+  (tools/build/build_cap14_entitlements.py: Annex II, the shares, the transfers, the coupled ceilings, the trend
+  levels; capri_data/2017/policy/cap14_*.csv), as CAPRI's chain does at run time. They equal the 2030 reference's
+  CEILVAL for all 27 member states and 6 schemes.
+- **Four-region Green Deal check:** the row binds with the dual at CAPRI's cut in IR020000 (186.55 EUR/ha), NL120000
+  (272.64) and PL340000 (139.77).
+- The region's result has `entitlements` (cut, limit, eligible area, overshoot, premium lost, dual); the run's pickle
+  too.
+- New known issues: K138 (NECR is not a model activity), K139 (PL340000 converts all its forest to farmland in the Green
+  Deal). KNOWN_ISSUES' index counts corrected (24 open, 114 resolved).
+- Tests: test_cap14_ceilings_follow_capris_chain, test_entitlement_limit_in_the_2030_regional_model.
+## 13 November 2026 — the results browser: Farm-to-Fork against JRC121368 in the same tab
+
+- The "Green Deal vs CAPRI" tab is now "Scenarios vs CAPRI", with a choice of comparison: the Green Deal 2030 run
+  against CAPRI's own step (as before), or a Farm-to-Fork 2030 run against the figures JRC121368 published from CAPRI
+  (the F2F and BDS targets and CAP 2014-2020 scenario): EU27 bars of herds and production, prices and the environment,
+  the gaps, a table with each figure's source and a CSV. JRC121368 has no member-state figures, so that comparison is
+  EU27 only.
+- **JRC121368's figures are data now**: capri_data/validation/farm_to_fork_2030/jrc121368_eu27.csv, each with its
+  table, page or text, kept by hand. tools/check/compare_runs.py read them from its own code until now, rounded to
+  half points and without sources. Checked against the report (the uploaded EUR 30317 EN): the table and text figures
+  as written (cereal price 8.2 instead of 8, beef price 24.1 instead of 24); the others measured on Figures 5 and 7
+  (the same charts' table-backed bars measure within 0.1-0.2 points of their tables). Changed by 0.3 points or more:
+  milk price 1.5 -> 1.1, beef animals -18 -> -17.7, poultry heads -16.5 -> -16.2. The Farm-to-Fork mean gap reported
+  from earlier runs was computed with the old figures.
+- compare_runs.indicators: NaN for an indicator whose block the run does not hold, instead of an error.
+- Test: test_the_farm_to_fork_comparison_reads_jrc121368_with_its_sources.
+
 ## 13 November 2026 — the results browser: a Green Deal vs CAPRI tab
 
 - capri_gradio: a "Green Deal vs CAPRI" tab sets a stored Green Deal 2030 run beside CAPRI's own 2030 Green Deal step
@@ -41,6 +179,7 @@ and `docs/KNOWN_ISSUES.md`.
 - tools/build/extract_capri_gd_pair.py also keeps the crop yields at every level and CAPRI's N balance items (NITF:
   MINFER, EXCRET, BIOFIX, ATMOSD, EXPPRD, SURTOT and the loss items); capri_gd_effect.csv.xz rebuilt (79,802 rows).
 - Test: test_the_green_deal_tab_compares_the_run_with_capris_step.
+
 ## 13 November 2026 — the idled histosols in the reported land (K137)
 
 - The environmental table's arable land, grassland and UAA include the histosols the regional model idles, as CAPRI's

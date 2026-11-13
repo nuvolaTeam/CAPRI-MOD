@@ -1,0 +1,20 @@
+scheme,group,source
+DCNDP_Anim,PGDCNDPANIMAL,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_Arab,PGDCNDPARABLE,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_Area,PGDCNDPAREA,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_BULL,PGDCNDPBULL,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_Beef,PGDCNDPBEEF,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_Cattle,PGDCNDPCATTLE,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_DCOW,PGDCNDPDCOW,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_EWE,PGDCNDPEWE,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_FLAX,PGDCNDPFLAX,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_OCRO,PGDCNDPOCRO,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_PARI,PGDCNDPPARI,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_POTA,PGDCNDPPOTA,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_PULS,PGDCNDPULS,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_Rum,PGDCNDPRUMINANT,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_SCOW,PGDCNDPSCOW,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_SHG,PGDCNDPSHG,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_SUGB,PGDCNDPSUGB,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_Slaught,PGDCNDPSLAUGHTERANIM,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms
+DCNDP_TOBA,PGDCNDPTOBA,star 3.0 scen/Premiums/Coupling/CAP_2013_2020_CNDP.gms

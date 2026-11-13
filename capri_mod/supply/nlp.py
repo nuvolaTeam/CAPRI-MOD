@@ -37,6 +37,8 @@ class NLPBlock:
             extra[int(j_)] = f"hist_{c_}"
         for a_, j_ in (getattr(self.ev, "mix_cols", None) or {}).items():
             extra[int(j_)] = f"mix_{a_}"
+        if getattr(self.ev, "entl_col", None) is not None:
+            extra[int(self.ev.entl_col)] = "entl_overshoot"
         out = lab + [extra.get(j, f"col{j}") for j in range(n, n_cols)]
         return out
 
@@ -175,7 +177,10 @@ class NLPBlock:
         try:
             # the scenario's policy rows are not part of the base the model is calibrated at (CAPRI calibrates in its
             # baseline)
-            pol_rows = [l_ for l_ in ("N_balance", "mineral_N", "landscape_floor", "winter_cover") if l_ in labels]
+            # (and the entitlement limit: at the base the crops are at their trend levels, the overshoot zero and the
+            # row's multiplier zero, as in CAPRI's PMP terms, prep_sim_pmp_terms.gms l. 166)
+            pol_rows = [l_ for l_ in ("N_balance", "mineral_N", "landscape_floor", "winter_cover", "entitlements")
+                        if l_ in labels]
             spec_sim = spec
             spec = dict(spec_sim, drop_labels=list(drop) + pol_rows)
             _fp = None

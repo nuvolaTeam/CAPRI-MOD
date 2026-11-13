@@ -322,6 +322,10 @@ def main():
                              + float(m.data["histosol"].at[reg, "share_grass"])
                              * sum(float(v.activities.get(g, 0.0)) for g in CROPS_ON_LAND["GRAS"]))
                             for reg, v in s["supply"].items() if m.data.get("histosol") is not None and reg in m.data["histosol"].index))},
+           # CAPRI's entitlement limit (def_endCut.gms, K136) per region: cut, limit, eligible area, overshoot, the
+           # premium lost and the row's dual; baseline, scenario
+           "entitlements": tuple({reg: dict(getattr(v, "entitlements", None) or {}) for reg, v in x["supply"].items()
+                                  if getattr(v, "entitlements", None)} for x in (b, s)),
            # cattle genomics (breeding.gms): heads adopting and all heads of the animals concerned, scenario
            "endotech": dict(_scen.endotech),
            "scenario_settings": {"name": _scen.name, "surplus_rule": _scen.surplus_rule,

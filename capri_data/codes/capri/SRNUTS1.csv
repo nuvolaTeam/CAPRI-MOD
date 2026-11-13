@@ -1,0 +1,102 @@
+code,text
+DK000000,Denmark
+SE000000,
+CZ000000,
+SI000000,
+SK000000,
+EE000000,
+LT000000,
+LV000000,
+CY000000,
+MT000000,
+BG000000,
+RO000000,
+NO000000,Norway
+TUR,
+AL000000,
+MK000000,
+CS000000,
+MO000000,Montenegro
+HR000000,Croatia
+BA000000,
+KO000000,
+BL200000,Vlaams Gewest
+BL300000,Region wallonne
+BL400000,Luxembourg (Grand-Duche)
+DE400000,Brandenburg
+DE800000,Mecklenburg-Vorpommern
+DEC00000,Saarland
+DED00000,Sachsen
+DEE00000,Sachsen-Anhalt
+DEF00000,Schleswig-Holstein
+DEG00000,Thueringen
+DE100000,Baden-Wuerttemberg
+DE200000,Bayern
+DE700000,Hessen
+DE900000,Niedersachsen
+DEA00000,Nordrhein-Westfalen
+DEB00000,Rheinland-Pfalz
+EL100000,Voreia Ellada
+EL200000,Kentriki Ellada
+EL400000,"Nisia aigaiou, Kriti"
+EL300000,Attiki
+ES100000,Noroeste
+ES200000,Noreste
+ES400000,Centro (E)
+ES500000,Este
+ES600000,Sur
+ES300000,Madrid
+ES700000,Canarias
+FR100000,Ile de France
+FR300000,Nord-Pas-de-Calais
+FR200000,Bassin Parisien
+FR400000,Est
+FR500000,Ouest
+FR600000,Sud-Ouest
+FR700000,Centre-Est
+FR800000,Mediterranee
+IR010000,"Border, Midlands and Western"
+IR020000,Southern and Eastern
+IT200000,Lombardia
+IT400000,Emilia-romagna
+IT600000,Lazio
+IT800000,Campania
+ITA00000,Sicilia
+ITB00000,Sardegna
+IT100000,Nord Ovest
+IT300000,Nord Est
+IT500000,Centro (I)
+IT700000,Abruzzo-Molise
+IT900000,Sud
+NL100000,Noord-Nederland
+NL200000,Oost-Nederland
+NL300000,West-Nederland
+NL400000,Zuid-Nederland
+AT100000,Ostoesterreich
+AT200000,Suedoesterreich
+AT300000,Westoesterreich
+PT200000,Acores
+PT300000,Madeira
+PT100000,Continente
+FI200000,Ahvenanmaa/Aaland
+FI100000,Manner-Suomi
+UKC00000,North East
+UKD00000,North West (including Merseyside)
+UKE00000,Yorkshire and The Humber
+UKF00000,East Midlands
+UKG00000,West Midlands
+UKH00000,Eastern
+UKJ00000,South East
+UKK00000,South West
+UKL00000,Wales
+UKM00000,Scotland
+UKN00000,Northern Ireland
+HU100000,Közép-Magyarország
+HU200000,Dunántúl
+HU300000,Alföld és Észak
+PL100000,Centralny
+PL200000,Poludniowy
+PL300000,Wschodni
+PL400000,Pólnocno-Zachodni
+PL500000,Poludniowo-Zachodni
+PL600000,Pólnocny

@@ -61,6 +61,67 @@ COMMENT ON TABLE capri_landtypes_to_pact IS 'CAPRI landTypes_to_pact: the land t
 CREATE TABLE capri_cropdivgrps_mcact ("group" VARCHAR NOT NULL, mcact VARCHAR NOT NULL, PRIMARY KEY ("group", mcact));
 COMMENT ON TABLE capri_cropdivgrps_mcact IS 'CAPRI cropDivGrps_mCact: the crop-diversification group of each annual crop (sets.gms)';
 
+-- file: capri_data/codes/capri/PSG_TO_A.csv
+CREATE TABLE capri_psg_to_a (psgroup VARCHAR NOT NULL, pact VARCHAR NOT NULL, PRIMARY KEY (psgroup, pact));
+COMMENT ON TABLE capri_psg_to_a IS 'CAPRI psg_to_a: the activities of each premium group (policy/policy_sets.gms; a scheme''s rate per group reaches them, policy.gms)';
+
+-- file: capri_data/codes/capri/MAP_RR.csv
+CREATE TABLE capri_map_rr (region VARCHAR NOT NULL, member VARCHAR NOT NULL, PRIMARY KEY (region, member));
+COMMENT ON TABLE capri_map_rr IS 'CAPRI MAP_RR: the members of each region (aggregates, member states, NUTS 1 and NUTS 2; policy.gms re-aggregates the declared premiums along it)';
+
+-- file: capri_data/codes/capri/R_RAGG.csv
+CREATE TABLE capri_r_ragg (region VARCHAR NOT NULL, "aggregate" VARCHAR NOT NULL, PRIMARY KEY (region, "aggregate"));
+COMMENT ON TABLE capri_r_ragg IS 'CAPRI R_RAGG: the regions each region belongs to, itself included (policy.gms breaks the premium declarations down along it)';
+
+-- file: capri_data/codes/capri/NUTS0.csv
+CREATE TABLE capri_nuts0 (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_nuts0 IS 'CAPRI NUTS0: the countries (extend_rd_baseline.gms runs the RD money by them)';
+
+-- file: capri_data/codes/capri/SRNUTS2.csv
+CREATE TABLE capri_srnuts2 (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_srnuts2 IS 'CAPRI SRNUTS2: the NUTS 2 regions of the supply side (rd_logic.gms)';
+
+-- file: capri_data/codes/capri/SRNUTS2_EXT.csv
+CREATE TABLE capri_srnuts2_ext (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_srnuts2_ext IS 'CAPRI SRNUTS2_EXT: the NUTS 2 regions with RD money, the urban ones without agriculture included (extend_rd_baseline.gms)';
+
+-- file: capri_data/codes/capri/PSDPAY_RD.csv
+CREATE TABLE capri_psdpay_rd (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_psdpay_rd IS 'CAPRI PSDPAY_RD: the rural development payment schemes (rd_logic.gms)';
+
+-- file: capri_data/codes/capri/PSDPAY_AE.csv
+CREATE TABLE capri_psdpay_ae (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_psdpay_ae IS 'CAPRI PSDPAY_AE: the agri-environment payment schemes (rd_logic.gms)';
+
+-- file: capri_data/codes/capri/PSDPAY_vcs.csv
+CREATE TABLE capri_psdpay_vcs (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_psdpay_vcs IS 'CAPRI PSDPAY_vcs: the voluntary coupled support''s schemes (taken out of the BPS ceiling, CAP_2014_2020.gms)';
+
+-- file: capri_data/codes/capri/PSDPAY_cscs.csv
+CREATE TABLE capri_psdpay_cscs (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_psdpay_cscs IS 'CAPRI PSDPAY_cscs: the crop-specific cotton payment''s schemes (taken out of the BPS ceiling, CAP_2014_2020.gms)';
+
+-- file: capri_data/codes/capri/REGAGGP.csv
+CREATE TABLE capri_regaggp (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_regaggp IS 'CAPRI REGAGGP: the EU aggregates with premium declarations (policy.gms)';
+
+-- file: capri_data/codes/capri/REGEU1015.csv
+CREATE TABLE capri_regeu1015 (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_regeu1015 IS 'CAPRI REGEU1015: the EU-10 and EU-15 aggregates (policy.gms takes a member state''s premium declarations from them first)';
+
+-- file: capri_data/codes/capri/MSAGG.csv
+CREATE TABLE capri_msagg (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_msagg IS 'CAPRI MSAGG: the member states (policy.gms)';
+
+-- file: capri_data/codes/capri/NUTS1A.csv
+CREATE TABLE capri_nuts1a (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_nuts1a IS 'CAPRI NUTS1A: the NUTS 1 regions, a member state or unit without one standing for it (policy.gms)';
+
+-- file: capri_data/codes/capri/SRNUTS1.csv
+CREATE TABLE capri_srnuts1 (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_srnuts1 IS 'CAPRI SRNUTS1: the NUTS 1 regions a member state''s declared premiums are re-aggregated from (policy.gms)';
+
+
 -- file: capri_data/codes/model_activity_classes.csv
 CREATE TABLE model_activity_classes (
     code VARCHAR PRIMARY KEY REFERENCES model_activities (code),

@@ -9,6 +9,13 @@ throughout may follow later). This builder writes:
                                               land and feed energy, RALL all regional units)
   capri_data/codes/capri/FEED_TO_O.csv  CAPRI's feed bulks and their products: feed, row
   capri_data/codes/capri/MS_RU.csv     CAPRI's member states and their regional units (MAP_RR x MS x RU)
+  capri_data/codes/capri/MAP_RR.csv, R_RAGG.csv, REGAGGP.csv, REGEU1015.csv, MSAGG.csv, NUTS1A.csv, SRNUTS1.csv
+                                       the region hierarchy of policy/policy.gms (P2b)
+  capri_data/codes/capri/NUTS0.csv, SRNUTS2.csv, SRNUTS2_EXT.csv, PSDPAY_RD.csv, PSDPAY_AE.csv
+                                       the regions and schemes of the rural development chain (P2c)
+  capri_data/codes/capri/PSDPAY_vcs.csv, PSDPAY_cscs.csv
+                                       the voluntary coupled support's and cotton's schemes (taken out of the BPS
+                                       ceiling, CAP_2014_2020.gms; K136)
   capri_data/codes/capri/RM.csv, RMTP.csv, RM_TO_RMTP.csv, RMEU_to_RM.csv
                                        CAPRI's market regions, trade-policy blocks, the block of each market region
                                               and the EU's two market blocks, in CAPRI's set order (the market's move
@@ -309,7 +316,21 @@ def main():
     write(OUT / "capri" / "FEED_TRD.csv", ("code", "text"), list(read_set(a.sets, "FEED_TRD").items()))
     write(OUT / "capri" / "landTypes_to_pact.csv", ("land_type", "pact"), sorted(pairs("landTypes_to_pact")))
     write(OUT / "capri" / "cropDivGrps_mCact.csv", ("group", "mcact"), sorted(pairs("cropDivGrps_mCact")))
+    # CAPRI's premium groups and their activities (policy/policy.gms psg_to_a: a scheme's rate per group reaches the
+    # group's activities; the premium module, P2)
+    write(OUT / "capri" / "PSG_TO_A.csv", ("psgroup", "pact"), sorted((g.upper(), a) for g, a in pairs("PSG_TO_A")))
     write(OUT / "capri" / "MS_RU.csv", ("ms", "ru"), sorted((m, r) for m, r in pairs("Map_RR") if m in ms_ and r in ru_))
+    # the region hierarchy policy/policy.gms breaks the premium declarations down and re-aggregates the declared
+    # premiums along (the premium module, P2b): MAP_RR (a region and its members), R_RAGG (a region and the regions it
+    # belongs to, itself included), the EU aggregates with premium declarations (REGAGGP, REGEU1015), the member states
+    # (MSAGG), the NUTS 1 regions (NUTS1A, SRNUTS1)
+    write(OUT / "capri" / "MAP_RR.csv", ("region", "member"), sorted(pairs("Map_RR")))
+    write(OUT / "capri" / "R_RAGG.csv", ("region", "aggregate"), sorted(pairs("R_RAGG")))
+    # and the regions and schemes of the rural development chain (extend_rd_baseline.gms, rd_logic.gms: NUTS0, the NUTS 2
+    # regions with RD money, SRNUTS2_EXT, the RD and agri-environment schemes)
+    for s in ("REGAGGP", "REGEU1015", "MSAGG", "NUTS1A", "SRNUTS1", "NUTS0", "SRNUTS2", "SRNUTS2_EXT", "PSDPAY_RD",
+              "PSDPAY_AE", "PSDPAY_vcs", "PSDPAY_cscs"):
+        write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
     write(OUT / "capri" / "RM.csv", ("code", "text"), list(rm.items()))
     write(OUT / "capri" / "RMTP.csv", ("code", "text"), list(rmtp.items()))
     write(OUT / "capri" / "RM_TO_RMTP.csv", ("rm", "rmtp"), rm_to_rmtp)

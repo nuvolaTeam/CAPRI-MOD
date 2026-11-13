@@ -122,6 +122,7 @@ class RegionalEvalState(_Slots):
         "ghg_applied",        # the emission tax added to the net revenues, by activity (its undo record)
         "ghg_nr_obj",         # the net revenues object the tax was added to (an identity check, never a copy)
         "hist_cols",          # the histosol fallowing's columns
+        "entl_col",           # the entitlement overshoot's column (K136)
         "mix_cols",           # {crop: column} of the technology mix columns (S1)
         "mix_dnr",            # {crop: net revenue T1 - T2 per ha} of this solve (S1)
         "mix_n_min",          # {crop: mineral N input T1 - T2 per ha} of the N_balance row (S1)
@@ -212,6 +213,7 @@ class RegionalResults(_Slots):
         "land_solution",      # the land types' levels
         "last_aug",           # the augmented problem the land-market solve used (Q, c, A, b, y)
         "last_hist_fallow",   # the histosol fallowing by class
+        "entl",               # the entitlement limit of the solve: cut, limit, overshoot, dual (K136)
         "last_mix_z",         # {crop: z} of the technology mix columns, 1000 ha moved from T2 to T1 (S1)
         "last_manure_trade",  # the manure trade (N)
         "last_manure_trade_pk",  # idem for P and K
