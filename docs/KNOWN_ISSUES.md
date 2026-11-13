@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (25)
+## Open (26)
 
 | # | Issue | Status |
 |---|---|---|
@@ -38,6 +38,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K138](#k138) | CAPRI's new energy crops (NECR, 251 kha of the EU's 2030 crop area) are not a model activity | open (13 November 2026) |
 | [K139](#k139) | PL340000 converts all its forest to farmland in the Green Deal 2030 run (crop area +45% against CAPRI's -2%) | open (13 November 2026) |
 | [K140](#k140) | P2c, the rural development port: 286 of 20,098 effective RD premiums differ from CAPRI's 2030 reference (Praha's rates, Ile-de-France's inherited LFA cut, Sweden's technology-differentiated extensification measure) | open (13 November 2026); the port not yet used by the model |
+| [K141](#k141) | CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | open (13 November 2026): CAPRI's arithmetic kept; the project lead to decide |
 
 ## Resolved (114)
 
@@ -2897,3 +2898,17 @@ CAP_2014_2020.gms l. 77 does, the effective premiums PRME at 19,812 of 20,098 re
   RD premiums
 - **In 9t:** –
 - **Status:** open (the technology shares come with the integration, step <= 10 on the solved levels)
+
+### K141: CAPRI's BPS convergence takes the leftover overshoot off in the wrong unit (found 13 November 2026)
+
+implement_bps.gms l. 309 recomputes the BPS region's overshoot after the 30% rule (million EUR: entitlements in 1000
+ha x EUR/ha / 1000) and takes it off the units below target as p_bps_envelopeOvershoot / sum of their entitlements,
+1000 ha: an EUR/ha change 1000 times too small. Where the 30% rule binds (BL, EL, France's rbps2, IT, PT, SI) the
+envelope stays overshot by what the rule kept; the year's prmcut then cuts every unit's BPS to the member state's
+ceiling by the same factor, so the total is right but the low units keep a larger share than the rule intends.
+capri_mod/policy/bps.py keeps CAPRI's arithmetic (CAPRI's 2030 reference is computed with it); a test
+(test_bps.py) fixes it.
+
+- **Effect:** the BPS distribution within those member states' BPS regions, as in CAPRI
+- **In 9t:** -
+- **Status:** open: CAPRI's arithmetic kept; correcting it (x 1000) would be a departure, for the project lead to decide

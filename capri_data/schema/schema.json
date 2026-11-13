@@ -4039,6 +4039,7 @@
    "notes": [],
    "read_by": {
     "model": [
+     "capri_mod/policy/bps.py",
      "capri_mod/policy/declared.py",
      "capri_mod/policy/rd.py"
     ],
@@ -4094,6 +4095,7 @@
    "notes": [],
    "read_by": {
     "model": [
+     "capri_mod/policy/bps.py",
      "capri_mod/supply/entitlements.py"
     ],
     "builders": [],
@@ -5470,7 +5472,9 @@
    },
    "notes": [],
    "read_by": {
-    "model": [],
+    "model": [
+     "capri_mod/policy/bps.py"
+    ],
     "builders": [],
     "checks": [
      "tools/check/make_provenance.py"
@@ -31717,6 +31721,167 @@
     "tests": []
    }
   },
+  "pol_bps_convergence_options": {
+   "file": "capri_data/2017/policy/bps_convergence_options.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The member states' BPS internal convergence options per BPS region (bps_convergence.gms, transcribed): linear model, 30% rule, final year, the tunnel's target share of the average unit value and the share of the gap closed (declared)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "bps_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "linear",
+     "type": "INTEGER",
+     "not_null": true
+    },
+    {
+     "name": "rule_30_percent",
+     "type": "INTEGER",
+     "not_null": true
+    },
+    {
+     "name": "final_year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "target_share",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "gap_closure",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "source",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "bps_region"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(linear IN (0, 1))",
+    "(rule_30_percent IN (0, 1))"
+   ],
+   "units": [
+    {
+     "item": "final_year",
+     "unit": null,
+     "status": "open",
+     "basis": "bps_convergence_options.final_year: a calendar year"
+    },
+    {
+     "item": "gap_closure",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "bps_convergence_options.gap_closure: share of the gap"
+    },
+    {
+     "item": "linear",
+     "unit": null,
+     "status": "open",
+     "basis": "bps_convergence_options.linear: 1 for the linear model"
+    },
+    {
+     "item": "rule_30_percent",
+     "unit": null,
+     "status": "open",
+     "basis": "bps_convergence_options.rule_30_percent: 1 where the 30% rule applies"
+    },
+    {
+     "item": "target_share",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "bps_convergence_options.target_share: share of the average IUV"
+    }
+   ],
+   "provenance": {
+    "nature": "declared",
+    "origins": "per row",
+    "builder": null,
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/bps.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_bps_convergence_regions": {
+   "file": "capri_data/2017/policy/bps_convergence_regions.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The member states' BPS regions (bps_region_to_ru of scen/Premiums/bps_convergence.gms, transcribed): a region's units are those of the CAPRI region named (MAP_RR, itself included), REST the member state's other units, EACH every NUTS 2 region its own (declared)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "bps_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "members_of",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "source",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "bps_region",
+    "members_of"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "declared",
+    "origins": "per row",
+    "builder": null,
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/bps.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "pol_cap14_ceiling_shares": {
    "file": "capri_data/2017/policy/cap14_ceiling_shares.csv",
    "declared_in": "24_policy_more.sql",
@@ -31978,6 +32143,7 @@
      "tools/check/make_provenance.py"
     ],
     "tests": [
+     "capri_mod/tests/test_bps.py",
      "capri_mod/tests/test_declared.py",
      "capri_mod/tests/test_nordic_aid.py",
      "capri_mod/tests/test_premium_cut.py",
@@ -34411,6 +34577,7 @@
     ],
     "checks": [],
     "tests": [
+     "capri_mod/tests/test_bps.py",
      "capri_mod/tests/test_capri.py",
      "capri_mod/tests/test_data_schema.py",
      "capri_mod/tests/test_declared.py",
@@ -58083,7 +58250,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 497,
+  "capri/keep": 498,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 31,

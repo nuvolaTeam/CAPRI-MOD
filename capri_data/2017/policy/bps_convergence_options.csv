@@ -1,0 +1,23 @@
+ms,bps_region,linear,rule_30_percent,final_year,target_share,gap_closure,source
+AT000000,rbps1,1,0,2019,1.0,1.0,star 3.0 scen/Premiums/bps_convergence.gms l. 162-169
+BL000000,rbps1,1,1,2019,0.9,0.3333333333333333,star 3.0 scen/Premiums/bps_convergence.gms l. 305-318
+BL000000,rbps2,1,1,2019,0.9,0.3333333333333333,star 3.0 scen/Premiums/bps_convergence.gms l. 305-318
+BL000000,rbps3,1,0,2019,0.9,0.3333333333333333,star 3.0 scen/Premiums/bps_convergence.gms l. 305-318 (no 30% rule for rbps3)
+DE000000,rbps1,1,0,2019,1.0,1.0,star 3.0 scen/Premiums/bps_convergence.gms l. 104-111
+DK000000,rbps1,1,0,2019,0.9,0.3333333333333333,star 3.0 scen/Premiums/bps_convergence.gms l. 323-345
+EL000000,rbps1,1,1,2019,0.9,0.3333333333333333,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+EL000000,rbps2,1,1,2019,0.9,0.3333333333333333,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+EL000000,rbps3,1,1,2019,0.9,0.3333333333333333,star 3.0 scen/Premiums/bps_convergence.gms l. 222-247
+FI000000,rbps1,1,0,2019,1.0,1.0,star 3.0 scen/Premiums/bps_convergence.gms l. 200-210
+FR000000,rbps1,1,0,2015,1.0,1.0,star 3.0 scen/Premiums/bps_convergence.gms l. 258-273
+FR000000,rbps2,1,1,2019,1.0,0.7,star 3.0 scen/Premiums/bps_convergence.gms l. 258-273
+HR000000,rbps1,1,0,2019,1.0,0.3333333333333333,star 3.0 scen/Premiums/bps_convergence.gms l. 323-345
+IR000000,rbps1,1,0,2019,0.9,0.3333333333333333,star 3.0 scen/Premiums/bps_convergence.gms l. 323-345
+IT000000,rbps1,1,1,2019,0.9,0.3333333333333333,star 3.0 scen/Premiums/bps_convergence.gms l. 323-345
+MT000000,rbps1,1,0,2015,1.0,1.0,star 3.0 scen/Premiums/bps_convergence.gms l. 119-126
+NL000000,rbps1,1,0,2019,1.0,1.0,star 3.0 scen/Premiums/bps_convergence.gms l. 148-155
+PT000000,rbps1,1,1,2019,0.9,0.3333333333333333,star 3.0 scen/Premiums/bps_convergence.gms l. 323-345
+SE000000,rbps1,1,0,2020,1.0,1.0,star 3.0 scen/Premiums/bps_convergence.gms l. 134-141
+SI000000,rbps1,1,1,2019,0.9,0.3333333333333333,star 3.0 scen/Premiums/bps_convergence.gms l. 323-345
+UK000000,rbps1,1,0,2019,1.0,0.714,star 3.0 scen/Premiums/bps_convergence.gms l. 179-191 (the loop's last unit UKN00000 sets them)
+ES000000,EACH,1,0,2019,0.9,0.3333333333333333,star 3.0 scen/Premiums/bps_convergence.gms l. 283-295

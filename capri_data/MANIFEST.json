@@ -1994,6 +1994,39 @@
    ],
    "catalogue_note": "Replaced 2026-10: the previous values ('CAPRI SUA') differed from CAPRI's base world prices for most commodities, and the oilseed rows held CAKE prices. OOIL, OLIV, FATS, OFOD_M, WMLK kept (no unambiguous CAPRI counterpart). Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded). 29 October 2026: one builder (tools/build/build_world_prices.py), every row from its source at full precision (at most 0.02% from the 2- and 1-decimal values held before); the placeholder rows FATS and OFOD_M removed; the provenance's previous values are in the file's git history. (not re-checked)"
   },
+  "capri_data/2017/policy/bps_convergence_options.csv": {
+   "description": "The member states' BPS internal convergence options per BPS region (bps_convergence.gms, transcribed): linear model, 30% rule, final year, the tunnel's target share of the average unit value and the share of the gap closed (declared)",
+   "kind": "parameters",
+   "vintage": "2015-2020",
+   "domain": "policy",
+   "status": "live",
+   "rows": 22,
+   "columns": 8,
+   "units": "U_ratio",
+   "read_by_model": [
+    "capri_mod/policy/bps.py"
+   ],
+   "origin": {
+    "nature": "declared"
+   },
+   "catalogue_note": "The member states' BPS internal convergence options (bps_convergence.gms, transcribed). (not re-checked)"
+  },
+  "capri_data/2017/policy/bps_convergence_regions.csv": {
+   "description": "The member states' BPS regions (bps_region_to_ru of scen/Premiums/bps_convergence.gms, transcribed): a region's units are those of the CAPRI region named (MAP_RR, itself included), REST the member state's other units, EACH every NUTS 2 region its own (declared)",
+   "kind": "structure",
+   "vintage": "2015-2020",
+   "domain": "policy",
+   "status": "live",
+   "rows": 32,
+   "columns": 4,
+   "read_by_model": [
+    "capri_mod/policy/bps.py"
+   ],
+   "origin": {
+    "nature": "declared"
+   },
+   "catalogue_note": "The member states' BPS regions for the internal convergence (bps_convergence.gms, transcribed). (not re-checked)"
+  },
   "capri_data/2017/policy/cap14_ceiling_shares.csv": {
    "description": "The young-farmer, redistributive and natural-constraint payments in percent of the national ceiling (p_BPSYF, p_BPSRED, p_BPSNATCO of CAP_2014_2020.gms) (tools/build/build_cap14_entitlements.py)",
    "kind": "coefficients",
@@ -4293,6 +4326,7 @@
    "rows": 823,
    "columns": 2,
    "read_by_model": [
+    "capri_mod/policy/bps.py",
     "capri_mod/policy/declared.py",
     "capri_mod/policy/rd.py"
    ],
@@ -4307,6 +4341,7 @@
    "rows": 44,
    "columns": 2,
    "read_by_model": [
+    "capri_mod/policy/bps.py",
     "capri_mod/supply/entitlements.py"
    ],
    "origin": {
@@ -4551,6 +4586,9 @@
    "kind": "structure",
    "rows": 250,
    "columns": 2,
+   "read_by_model": [
+    "capri_mod/policy/bps.py"
+   ],
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists (not in the trace yet)"

@@ -58,7 +58,8 @@ DECLARED = {"capri_data/codes/capri_member_state_codes.csv", "capri_data/codes/m
             "capri_data/codes/model_activity_classes.csv", "capri_data/codes/model_land_types.csv",
             "capri_data/codes/model_cattle_splits.csv", "capri_data/codes/model_price_follows.csv",
             "capri_data/codes/model_activities.csv", "capri_data/codes/results_items.csv",
-            "capri_data/validation/farm_to_fork_2030/jrc121368_eu27.csv"}
+            "capri_data/validation/farm_to_fork_2030/jrc121368_eu27.csv",
+            "capri_data/2017/policy/bps_convergence_regions.csv", "capri_data/2017/policy/bps_convergence_options.csv"}
 #: the origin of the external files the builders read: every one is CAPRI's (its exports, dumps, dat files and
 #: code), checked 29 October 2026 against the builders' docstrings
 EXTERNAL_ORIGIN = "CAPRI"

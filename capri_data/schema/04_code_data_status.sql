@@ -536,6 +536,8 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/policy/rd.py', 'SE_EXPERT_RATE', 300.0, 'capri', 'keep', 'gams/policy/rd_logic.gms l. 368-389', 'EUR per ha of Sweden''s expert RD measures'),
   ('capri_mod/policy/rd.py', 'rd_declarations', 2007.0, 'capri', 'keep', 'gams/policy/rd_logic.gms l. 356', 'the first year of Sweden''s expert RD data (expertYears)'),
   ('capri_mod/policy/rd.py', 'rd_declarations', 2014.0, 'capri', 'keep', 'gams/policy/rd_logic.gms l. 359', 'Sweden''s expert RD data from 2014 not trusted (set to zero)'),
+  ('capri_mod/policy/bps.py', 'converge', 2014.0, 'capri', 'keep', 'gams/policy/implement_bps.gms l. 113-115', 'the year before the reform''s first: the convergence steps count from it (CAPRI hard-codes it)'),
+  ('capri_mod/policy/bps.py', 'RULE_30_FLOOR', 0.7, 'capri', 'keep', 'gams/policy/implement_bps.gms l. 299-300', 'the 30% rule: an IUV above the average falls by at most 30%'),
   ('capri_mod/policy/endotech.py', 'JRC121368_ENDOTECH', 0.1, 'capri', 'keep', 'gams/pol_input/ecampa/refpol_endotech_set14_ini.gms l. 109', 'ghgTechFEff of the JRC121368-era endotech reference'),
   ('capri_mod/policy/endotech.py', 'JRC121368_ENDOTECH', 0.2, 'capri', 'keep', 'gams/pol_input/ecampa/refpol_endotech_set14_ini.gms l. 115', 'ghgTechMYld of the JRC121368-era endotech reference'),
   ('capri_mod/policy/endotech.py', 'STAR3_DEFAULTS', 0.1, 'capri', 'keep', 'gams/pol_input/greendeal/refpol_endotech_all_sup.gms l. 130', 'ghgTechFEff star 3.0 default; duplicates settings [endotech] and serves only to validate keys'),

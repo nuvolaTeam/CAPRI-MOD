@@ -114,6 +114,8 @@ INSERT INTO file_catalogue VALUES
   ('capri_data/2017/policy/cap14_settings.csv', '2014-2020', 'policy', 'live', '-', NULL, 'Settings of CAPRI''s CAP 2014-2020 chain (greening share, BPS years, SAPS member states, cut schemes, trend year).'),
   ('capri_data/2017/policy/premium_entitlement_weights.csv', '2030', 'policy', 'live', '-', NULL, 'CAPRI''s entitlement weights per region, activity and payment scheme (p_EntlWght1, sim_ini_21730): the share of the level holding entitlements.'),
   ('capri_data/2017/policy/premium_settings.csv', '2030', 'policy', 'live', '-', NULL, 'The flags of CAPRI''s policy.gms (ntslvl, p_AggregNUTS2 of sim_ini_21730).'),
+  ('capri_data/2017/policy/bps_convergence_regions.csv', '2015-2020', 'policy', 'live', '-', NULL, 'The member states'' BPS regions for the internal convergence (bps_convergence.gms, transcribed).'),
+  ('capri_data/2017/policy/bps_convergence_options.csv', '2015-2020', 'policy', 'live', '-', NULL, 'The member states'' BPS internal convergence options (bps_convergence.gms, transcribed).'),
   ('capri_data/2017/policy/nordic_aid_rates.csv', '1995', 'policy', 'live', '-', NULL, 'CAPRI''s Nordic aid amounts per livestock unit, ton of milk or ha by premium group and Nordic aid region (nordicaid.gms).'),
   ('capri_data/2017/policy/nordic_aid_ceilings.csv', '1995', 'policy', 'live', '-', NULL, 'CAPRI''s Nordic aid ceilings per scheme, Finland and Sweden, million EUR a year (nordicaid.gms).'),
   ('capri_data/2017/policy/nordic_aid_region_shares.csv', '1995', 'policy', 'live', '-', NULL, 'The shares of CAPRI''s regions in the Nordic aid regions (p_nordicAidRegionShare, nordicaid.gms).'),

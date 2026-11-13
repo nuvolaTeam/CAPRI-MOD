@@ -103,8 +103,17 @@ and `docs/KNOWN_ISSUES.md`.
   assigned twice keeps the later value (24 in the CNDP file). VCS and cotton unchanged.
 - K136: only the schemes of CAPRI's sets psdpay_vcs and psdpay_cscs are taken out of the BPS ceiling (codes/capri
   PSDPAY_vcs.csv, PSDPAY_cscs.csv); the CNDP are national money (CAP_2014_2020.gms l. 178).
-- The model still takes its premiums from cap_premium_activity.csv; the BPS (dp_bps: option A', calc_mtr and
-  implement_bps from sim_ini's pre-2014 declarations), DPNONCAP and the outer-loop integration come before the switch.
+- The BPS internal convergence (implement_bps.gms; capri_mod/policy/bps.py): the member state's BPS ceiling of each
+  reform year distributed by the units' MTR payments (the key, an input until calc_mtr is ported), the average unit
+  value per BPS region, the tunnel (target share, gap closure in equal steps to the final year), the linear model and
+  the 30% rule, the year's rate the last reform year's. The member states' BPS regions and options transcribed from
+  bps_convergence.gms (2017/policy/bps_convergence_regions.csv, bps_convergence_options.csv, declared). Check: the six
+  member states whose model ends at a flat rate (DE, AT, NL, SE, MT, FI) give CAPRI's 2030 reference rate at all 67
+  units whatever the key (within 2e-8), confirming the entitlements (the crops' trend levels), the 2020 rate carried
+  to 2030 and K136's ceilings by year. K141: CAPRI's last convergence step takes the overshoot left after the 30% rule
+  off in million EUR per thousand ha (no factor 1000, implement_bps.gms l. 309); its arithmetic kept.
+- The model still takes its premiums from cap_premium_activity.csv; the BPS key (calc_mtr_top.gms, calc_mtr.gms from
+  sim_ini's pre-2014 declarations, option A'), DPNONCAP and the outer-loop integration come before the switch.
 - Tests: capri_mod/tests/test_premium_cut.py.
 
 ## 13 November 2026 — CAPRI's endogenous entitlement limit (K136)

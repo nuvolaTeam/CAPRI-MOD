@@ -188,6 +188,8 @@ INSERT INTO data_kind VALUES
   ('capri_data/2017/policy/cap14_settings.csv', 'coefficients', 'by file: policy instruments (payments, tariffs, ceilings, scheme shares)'),
   ('capri_data/2017/policy/premium_entitlement_weights.csv', 'coefficients', 'by file: policy instruments (payments, tariffs, ceilings, scheme shares)'),
   ('capri_data/2017/policy/premium_settings.csv', 'parameters', 'by file: flags of a CAPRI policy file'),
+  ('capri_data/2017/policy/bps_convergence_regions.csv', 'structure', 'by file: a CAPRI policy file''s regions'),
+  ('capri_data/2017/policy/bps_convergence_options.csv', 'parameters', 'by file: a CAPRI policy file''s options'),
   ('capri_data/2017/policy/nordic_aid_rates.csv', 'coefficients', 'by file: policy instruments (payments, tariffs, ceilings, scheme shares)'),
   ('capri_data/2017/policy/nordic_aid_ceilings.csv', 'coefficients', 'by file: policy instruments (payments, tariffs, ceilings, scheme shares)'),
   ('capri_data/2017/policy/nordic_aid_region_shares.csv', 'coefficients', 'by file: policy instruments (payments, tariffs, ceilings, scheme shares)'),

@@ -421,3 +421,33 @@ CREATE TABLE pol_cndp_decoupled_groups (
     PRIMARY KEY (scheme, "group")
 );
 COMMENT ON TABLE pol_cndp_decoupled_groups IS 'The decoupled complementary national payments'' premium groups (psdpay_to_psgroup of CAP_2013_2020_CNDP.gms): the rate the ceiling over the member state''s level of the group (tools/build/build_cap14_entitlements.py)';
+
+-- file: capri_data/2017/policy/bps_convergence_regions.csv
+CREATE TABLE pol_bps_convergence_regions (
+    ms VARCHAR NOT NULL,
+    bps_region VARCHAR NOT NULL,
+    members_of VARCHAR NOT NULL,
+    source VARCHAR NOT NULL,
+    PRIMARY KEY (ms, bps_region, members_of)
+);
+COMMENT ON TABLE pol_bps_convergence_regions IS 'The member states'' BPS regions (bps_region_to_ru of scen/Premiums/bps_convergence.gms, transcribed): a region''s units are those of the CAPRI region named (MAP_RR, itself included), REST the member state''s other units, EACH every NUTS 2 region its own (declared)';
+
+-- file: capri_data/2017/policy/bps_convergence_options.csv
+CREATE TABLE pol_bps_convergence_options (
+    ms VARCHAR NOT NULL,
+    bps_region VARCHAR NOT NULL,
+    linear INTEGER NOT NULL CHECK (linear IN (0, 1)),
+    rule_30_percent INTEGER NOT NULL CHECK (rule_30_percent IN (0, 1)),
+    final_year BIGINT NOT NULL,
+    target_share DOUBLE NOT NULL,
+    gap_closure DOUBLE NOT NULL,
+    source VARCHAR NOT NULL,
+    PRIMARY KEY (ms, bps_region)
+);
+COMMENT ON TABLE pol_bps_convergence_options IS 'The member states'' BPS internal convergence options per BPS region (bps_convergence.gms, transcribed): linear model, 30% rule, final year, the tunnel''s target share of the average unit value and the share of the gap closed (declared)';
+INSERT INTO value_units VALUES
+  ('pol_bps_convergence_options', 'final_year', NULL, 'open', 'bps_convergence_options.final_year: a calendar year'),
+  ('pol_bps_convergence_options', 'linear', NULL, 'open', 'bps_convergence_options.linear: 1 for the linear model'),
+  ('pol_bps_convergence_options', 'rule_30_percent', NULL, 'open', 'bps_convergence_options.rule_30_percent: 1 where the 30% rule applies'),
+  ('pol_bps_convergence_options', 'target_share', 'U_ratio', 'capri', 'bps_convergence_options.target_share: share of the average IUV'),
+  ('pol_bps_convergence_options', 'gap_closure', 'U_ratio', 'capri', 'bps_convergence_options.gap_closure: share of the gap');
