@@ -77,11 +77,13 @@ MTR_UNTIL2013 = Path("pol_input") / "mtr_until2013.gms"
 SHARE_TABLES = {"p_BPSYF": "DPYOUNG", "p_BPSRED": "DPFIRHA", "p_BPSNATCO": "DPNATCO"}
 
 
-def gams_table(text: str, name: str) -> dict:
+def gams_table(text: str, name: str, eps=0.0) -> dict:
     """{(row, column): value} of the GAMS table `name` in text: each cell is assigned to the column header it
     overlaps, or, written just beside one (CAP_2014_2020.gms's left-aligned zeros), to the header whose start or end
     is nearest; two cells of a row under one column stop the build. A line starting with "+" opens a block with its
-    own headers. EPS is kept as 0.0 (a present cell), comment lines skipped."""
+    own headers; a row label written in parts ("DPGRCU     .2006") is joined. EPS is kept as the value eps (0.0 by
+    default: a present cell; GAMS stores no cell written 0, so a caller that needs the difference passes a marker),
+    comment lines skipped."""
     m = re.search(rf"^\s*table\s+{name}\s*\([^)]*\)[^\n]*\n(.*?)^\s*;", text, re.S | re.I | re.M)
     if m is None:
         raise SystemExit(f"table {name} not found")
@@ -94,9 +96,14 @@ def gams_table(text: str, name: str) -> dict:
             head = [(t.start(), t.end(), t.group()) for t in re.finditer(r"\S+", l) if t.group() != "+"]
             continue
         toks = list(re.finditer(r"\S+", l))
-        row = toks[0].group()
+        # a row label written in parts ("DPGRCU     .2006"): the parts starting with "." left of the first header
+        first = min(s_ for s_, _, _ in head)
+        n_lab = 1
+        while n_lab < len(toks) and toks[n_lab].group().startswith(".") and toks[n_lab].start() < first:
+            n_lab += 1
+        row = "".join(t.group() for t in toks[:n_lab])
         taken = set()
-        for t in toks[1:]:
+        for t in toks[n_lab:]:
             cols = [c for s, e, c in head if t.start() < e and s < t.end()]
             if not cols:
                 gap = min(min(abs(t.start() - s), abs(t.end() - e)) for s, e, _ in head)
@@ -105,7 +112,7 @@ def gams_table(text: str, name: str) -> dict:
                 raise SystemExit(f"table {name} row {row}: cell {t.group()!r} at {t.start()} under {cols} columns")
             taken.add(cols[0])
             v = t.group()
-            out[(row, cols[0])] = 0.0 if v.lower() == "eps" else float(v)
+            out[(row, cols[0])] = eps if v.lower() == "eps" else float(v)
     return out
 
 

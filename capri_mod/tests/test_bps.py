@@ -32,7 +32,7 @@ def test_the_30_percent_rule_and_capris_overshoot_step():
     full closure: the low units reach 190, the high unit would fall to 190 but the 30% rule holds it at 700. The
     overshoot left, 51 million EUR, comes off the low units as implement_bps.gms l. 309 writes it: divided by their
     entitlements in thousand ha without the factor 1000 (0.057 EUR/ha each, not 56.7), so the envelope stays overshot
-    (prmcut cuts the year's BPS to its ceiling). CAPRI's arithmetic kept (KNOWN_ISSUES K141)."""
+    (prmcut cuts the year's BPS to its ceiling). CAPRI's arithmetic kept: a CAPRI bug (KNOWN_ISSUES K141)."""
     ceil = {2019: {"H": 100.0, **{f"L{i}": 10.0 for i in range(9)}}}
     entl = {u: 100.0 for u in ceil[2019]}
     opts = {"linear": True, "rule30": True, "final": 2019, "target_share": 1.0, "gap": 1.0}

@@ -61,3 +61,7 @@ p_premModifFact,par,"the premium modification factors per region, year, activity
 p_LUUnits,par,"the livestock units per animal activity (policy/policy.gms, the application type per livestock unit; P2b)"
 ntslvl,par,"the flag of the NUTS level runs (policy/policy.gms re-aggregates the declared premiums to NUTS 1 and the member states where set; P2b)"
 p_AggregNUTS2,par,"the flag of the farm-type runs (policy/policy.gms; 0 in CAPMOD's NUTS 2 runs; P2b)"
+p_premDataE,par,"the premium declarations per region, year, scheme and item as the restart file holds them (1995-2020: the 2000-2013 regime and the RD measures, after mtr_RD.gms): the input of calc_mtr_top.gms and calc_mtr.gms, the BPS's historical key (P2c, option A')"
+p_premToDDTarget_E,par,"the decoupled payments' targets per region, year, scheme (DDFRMS, DDRARA, ...; calc_mtr.gms; P2c)"
+p_premToDDTargetNuts,par,"the regional level of the regional flat rates (calc_mtr.gms; P2c)"
+p_percAffByModulation,par,"the share of farms affected by the modulation per payment group and member state (calc_mtr_top.gms; P2c)"

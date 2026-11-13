@@ -38,12 +38,13 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K138](#k138) | CAPRI's new energy crops (NECR, 251 kha of the EU's 2030 crop area) are not a model activity | open (13 November 2026) |
 | [K139](#k139) | PL340000 converts all its forest to farmland in the Green Deal 2030 run (crop area +45% against CAPRI's -2%) | open (13 November 2026) |
 | [K140](#k140) | P2c, the rural development port: 286 of 20,098 effective RD premiums differ from CAPRI's 2030 reference (Praha's rates, Ile-de-France's inherited LFA cut, Sweden's technology-differentiated extensification measure) | open (13 November 2026); the port not yet used by the model |
-| [K141](#k141) | CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | open (13 November 2026): CAPRI's arithmetic kept; the project lead to decide |
+| [K142](#k142) | P2c, the BPS key (the MTR port): Croatia's key not found in CAPRI's chain (a uniform IUV used); sim_ini's NA sheep rates of 2002 taken as absent; France's Corsica 5% below CAPRI's 2030 BPS rate | open (13 November 2026) |
 
-## Resolved (114)
+## Resolved (115)
 
 | # | Issue | Status |
 |---|---|---|
+| [K141](#k141) | CAPRI bug: CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it (the project lead's decision) |
 | [K136](#k136) | CAPRI's endogenous entitlement limit (def_endCut.gms: no area payment beyond the trend area) was not in the model; ported with CAPRI's 2030 ceilings computed from its CAP 2014-2020 tables | fixed (13 November 2026) |
 | [K137](#k137) | The reported UAA left out the idled histosols (CAPRI's IHISGR, IHISCR stay in GRAS, ARAC and UAAR): the Green Deal's surplus per ha looked short of its target where the row met it | fixed (13 November 2026) |
 | [K135](#k135) | The Green Deal targets reached the regions by their country, not through CAPRI's geo_to_ms maps: Portugal, which CAPRI maps to no target, took its GDX values; Luxembourg its own instead of Belgium's | fixed (13 November 2026) |
@@ -2899,7 +2900,35 @@ CAP_2014_2020.gms l. 77 does, the effective premiums PRME at 19,812 of 20,098 re
 - **In 9t:** –
 - **Status:** open (the technology shares come with the integration, step <= 10 on the solved levels)
 
-### K141: CAPRI's BPS convergence takes the leftover overshoot off in the wrong unit (found 13 November 2026)
+### K142: P2c, the BPS key: three points left in the MTR port (found 13 November 2026)
+
+capri_mod/policy/mtr.py ports CAPRI's 2004-2013 regime as CAP_2014_2020.gms evaluates it for the BPS key
+(mtr_until2013.gms executed on sim_ini_21730's time series, calc_mtr_top.gms, calc_mtr.gms, the policyIUV pass). With
+it the BPS rates of 2030 (bps.py) are CAPRI's reference at every unit of Belgium, Greece, Spain, Italy, Portugal and
+Ireland (within 3e-5), and of the flat-rate member states (2e-8). Three points are open:
+
+1. Croatia: no unit has MTR payments in the port (no declaration of an MTR scheme; DPMTR's 40 million EUR of 2013 has
+   no payments to scale), so implement_bps.gms would give it no BPS ceiling; CAPRI's reference has one. Where CAPRI's
+   key for Croatia comes from was not found. bps.py takes the entitlements as the key of a member state none of whose
+   units has one (a uniform IUV): for Croatia, one unit, CAPRI's rate whatever the key (exact). A departure where it
+   acts, flagged.
+2. NA: agenda.gms l. 1225 writes the sheep premium of 2002 as NA in every EU region ("treated as a missing value",
+   policy.gms l. 25), and sim_ini_21730 holds those records. Reading them as GAMS records (def_policy.gms carries NA
+   to 2030; policy.gms drops it; the member states take EU015000's 16.8 EUR) puts Spain, Italy, Portugal and Greece
+   1-5% off CAPRI's reference, correlated with the units' sheep payments; taking them as absent (each member state's
+   last rate before them: 26.98 EUR in Spain, 26 in France and Italy, 23 in Portugal, 20 in Greece) gives the
+   reference exactly. The port takes them as absent; how CAPRI's run loses them is not traced. CAPRI's results used
+   to choose between two readings of its data, not to fit a value.
+3. France: the mainland units within 0.6% of the reference, Corsica (FR830000, its own BPS region, so its rate is its
+   key share of the French ceiling) 5% low: its key short by about 1 million EUR of 19.6. Not found: the coupling
+   degree of 2030 is nil in CAPRI's chain (the loop stops at %endofMTR%; with 2020's degrees all member states move
+   further off), the modification factors do not change a unit's total, the 2030 cut of DPFRMS improves the match.
+
+- **Effect:** the BPS rates of Croatia (CAPRI's), of France's units (Corsica 5% low, the others within 0.6%)
+- **In 9t:** -
+- **Status:** open
+
+### K141: CAPRI bug: CAPRI's BPS convergence takes the leftover overshoot off in the wrong unit (found 13 November 2026)
 
 implement_bps.gms l. 309 recomputes the BPS region's overshoot after the 30% rule (million EUR: entitlements in 1000
 ha x EUR/ha / 1000) and takes it off the units below target as p_bps_envelopeOvershoot / sum of their entitlements,
@@ -2911,4 +2940,5 @@ capri_mod/policy/bps.py keeps CAPRI's arithmetic (CAPRI's 2030 reference is comp
 
 - **Effect:** the BPS distribution within those member states' BPS regions, as in CAPRI
 - **In 9t:** -
-- **Status:** open: CAPRI's arithmetic kept; correcting it (x 1000) would be a departure, for the project lead to decide
+- **Status:** closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it by the project lead's decision ("keep
+  capri but sign it as capri bug"); correcting it (x 1000) would be a departure, not offered as a setting

@@ -6,7 +6,8 @@ For a member state with the BPS and each year of the reform (2015-2020; a year w
 before's):
   ceiling(r)    = key(r) / sum of the member state's keys x the member state's dp_bps ceiling (key: the unit's MTR
                   payments, sum PRME x Entl / 1000 of DPFRMS, DPFRMF, DPREG, DPSAPS at the simulation year's levels,
-                  CAPRI's policyIUV.gdx; equal shares are not assumed: without a key a unit has no ceiling)
+                  CAPRI's policyIUV.gdx, capri_mod/policy/mtr.py; without a key a unit has no ceiling; a member
+                  state none of whose units has a key takes their entitlements as the key, K142)
   entl(r)       = the unit's trend level of CAPRI's crops (MCACT): its payment entitlements
   aiuv          = the BPS region's envelope (sum of its units' ceilings) x 1000 / its entitlements
   iuv0(r)       = ceiling(r) x 1000 / entl(r)                     (before convergence)
@@ -19,7 +20,7 @@ then, with F the final year and the years before it in equal steps (min(1, (year
   30% rule:                 iuv >= 0.7 x iuv0 for them
   the overshoot left:       taken from the units below target, divided by their entitlements as implement_bps.gms
                             l. 309 writes it (million EUR over thousand ha, without the factor 1000: the envelope
-                            stays overshot where the 30% rule binds; CAPRI's arithmetic kept, KNOWN_ISSUES K141)
+                            stays overshot where the 30% rule binds: a CAPRI bug, kept as CAPRI computes it, KNOWN_ISSUES K141)
 The year's rate (pgsaps of dp_bps, per level) is the simulation year's by def_policy.gms: the last year's, 2020.
 The proportional model (bps_proportional) no member state uses; it is not ported.
 """
@@ -119,7 +120,7 @@ def converge(ceil: dict, entl: dict, years, opts: dict) -> dict:
             for u in up:
                 r[u] = max(r[u], iuv0[y][u] * RULE_30_FLOOR)
         if lo:
-            # implement_bps.gms l. 309: million EUR over thousand ha (CAPRI's units, K141)
+            # implement_bps.gms l. 309: million EUR over thousand ha (a CAPRI bug kept as CAPRI computes it, K141)
             e_lo = sum(entl[u] for u in lo)
             o = overshoot()
             for u in lo:
@@ -148,14 +149,19 @@ def bps_rates(units, levels: dict, key: dict, year: int, d: dict = None) -> dict
         for (u, a), v in levels.items():
             if u in us and a in d["mcact"]:
                 entl[u] += v
-        ksum = sum(key.get(u, 0.0) for u in us)
+        kms = {u: key.get(u, 0.0) for u in us}
+        if not any(kms.values()):
+            # no unit has MTR payments (Croatia: CAPRI's key for it is not found in the chain, KNOWN_ISSUES K142):
+            # the entitlements as the key, a uniform IUV; for a member state of one unit CAPRI's result whatever its key
+            kms = {u: entl[u] for u in us}
+        ksum = sum(kms.values())
         ceil = {}
         last = None
         for y in years:
             c = _entl.ms_ceilings(y, ent).get(ms, {}).get("dp_bps")
             c = c if c else last
             last = c
-            ceil[y] = {u: key[u] * c / ksum for u in us if key.get(u) and ksum and c}
+            ceil[y] = {u: kms[u] * c / ksum for u in us if kms.get(u) and ksum and c}
         for b, bu in bps_regions(ms, us, d).items():
             conv = converge({y: {u: ceil[y].get(u, 0.0) for u in bu} for y in years}, {u: entl[u] for u in bu}, years,
                             _options(ms, b, d))

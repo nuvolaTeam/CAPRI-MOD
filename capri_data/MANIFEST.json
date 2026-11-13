@@ -2221,6 +2221,257 @@
    },
    "catalogue_note": "The decoupled complementary national payments' premium groups (CAP_2013_2020_CNDP.gms). (not re-checked)"
   },
+  "capri_data/2017/policy/mtr_base_data.csv": {
+   "description": "sim_ini_21730's DATA the MTR port evaluates the premiums at: levels (BAS, TRD), the main yields (YILD) and young animals' inputs (SLGT) at BAS, the historical yields (HSTY) and the milk quota (QUTS COMI) by column (tools/build/build_mtr_inputs.py)",
+   "kind": "coefficients",
+   "vintage": "2017",
+   "domain": "policy",
+   "status": "live",
+   "rows": 50642,
+   "columns": 5,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mtr_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "sim_ini_21730's DATA for the MTR port: base-year levels, yields, young animals, historical yields, milk quota. (not re-checked)"
+  },
+  "capri_data/2017/policy/mtr_ceiling_tables.csv": {
+   "description": "The national ceilings of Reg. 1782/2003 Annex VIII and VIIIa and Reg. 73/2009 Annex IV (million EUR) and the SAPS areas (1000 ha, year 0) of mtr_until2013.gms (tools/build/build_mtr_inputs.py)",
+   "kind": "coefficients",
+   "vintage": "2005-2016",
+   "domain": "policy",
+   "status": "live",
+   "rows": 350,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mtr_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The MTR national ceilings (Reg. 1782/2003 Annex VIII, VIIIa; Reg. 73/2009 Annex IV) and SAPS areas of mtr_until2013.gms. (not re-checked)"
+  },
+  "capri_data/2017/policy/mtr_coupling.csv": {
+   "description": "TABLE p_couplPercent_E of mtr_until2013.gms: the coupling degree of each scheme and member state from the year written; eps 1 where written EPS (tools/build/build_mtr_inputs.py)",
+   "kind": "coefficients",
+   "vintage": "2006",
+   "domain": "policy",
+   "status": "live",
+   "rows": 677,
+   "columns": 5,
+   "units": "U_percent",
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mtr_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The MTR coupling degrees (TABLE p_couplPercent_E of mtr_until2013.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/mtr_dd_nuts.csv": {
+   "description": "p_premToDDTargetNuts of mtr_until2013.gms: the regional flat rate's NUTS level (0 the member state, 1 NUTS 1), the declaration's data and the assignments, by line (tools/build/build_mtr_inputs.py)",
+   "kind": "parameters",
+   "vintage": "2006",
+   "domain": "policy",
+   "status": "live",
+   "rows": 4,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mtr_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The regional flat rates' NUTS level (p_premToDDTargetNuts of mtr_until2013.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/mtr_dd_target_rules.csv": {
+   "description": "The decoupling target assignments of mtr_until2013.gms l. 1566-1581 in their order (scheme or target ALL: all of PSDPAY_MTR_EL or DDTarget) (tools/build/build_mtr_inputs.py)",
+   "kind": "coefficients",
+   "vintage": "2006",
+   "domain": "policy",
+   "status": "live",
+   "rows": 13,
+   "columns": 6,
+   "units": "U_percent",
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mtr_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The MTR decoupling target assignments of mtr_until2013.gms l. 1566-1581. (not re-checked)"
+  },
+  "capri_data/2017/policy/mtr_dd_targets.csv": {
+   "description": "TABLE p_premToDDTarget_E of mtr_until2013.gms: the share of a decoupled scheme going to each decoupling target (the hybrid models) (tools/build/build_mtr_inputs.py)",
+   "kind": "coefficients",
+   "vintage": "2006-2013",
+   "domain": "policy",
+   "status": "live",
+   "rows": 936,
+   "columns": 6,
+   "units": "U_percent",
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mtr_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The MTR decoupling targets of the hybrid models (TABLE p_premToDDTarget_E of mtr_until2013.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/mtr_declarations.csv": {
+   "description": "The premium declarations of the BPS key's schemes: line 0 sim_ini_21730's p_premDataE time series, line n the literal assignment of pol_input/mtr_until2013.gms at line n; value a number or, with special APPTYPE, an application type (tools/build/build_mtr_inputs.py)",
+   "kind": "coefficients",
+   "vintage": "1993-2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 2779,
+   "columns": 7,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mtr_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The BPS key's premium declarations: sim_ini_21730's time series and mtr_until2013.gms's literal assignments (by line). (not re-checked)"
+  },
+  "capri_data/2017/policy/mtr_lu_units.csv": {
+   "description": "p_LUUnits of sim_ini_21730: livestock units per head, for the premiums per livestock unit (tools/build/build_mtr_inputs.py)",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 18,
+   "columns": 2,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mtr_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "Livestock units per head (p_LUUnits of sim_ini_21730). (not re-checked)"
+  },
+  "capri_data/2017/policy/mtr_modif.csv": {
+   "description": "p_premModifFact of 2030 in sim_ini_21730 above EPS: the Agenda 2000 premiums' modification factors per activity (tools/build/build_mtr_inputs.py)",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 9473,
+   "columns": 4,
+   "units": "U_ratio",
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mtr_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The Agenda 2000 premium modification factors of 2030 (p_premModifFact of sim_ini_21730). (not re-checked)"
+  },
+  "capri_data/2017/policy/mtr_modulation.csv": {
+   "description": "TABLE p_percAffByModulation of mtr_until2013.gms: the percentage of farms by producer group and size class of the modulation cut (tools/build/build_mtr_inputs.py)",
+   "kind": "coefficients",
+   "vintage": "2005",
+   "domain": "policy",
+   "status": "live",
+   "rows": 169,
+   "columns": 4,
+   "units": "U_percent",
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mtr_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The farms by producer group and modulation size class (p_percAffByModulation of mtr_until2013.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/mtr_modulation_classes.csv": {
+   "description": "Prem_Mod of mtr_until2013.gms: the modulation of each size class (tools/build/build_mtr_inputs.py)",
+   "kind": "coefficients",
+   "vintage": "2005",
+   "domain": "policy",
+   "status": "live",
+   "rows": 3,
+   "columns": 2,
+   "units": "U_ratio",
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mtr_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The modulation of each size class (Prem_Mod of mtr_until2013.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/mtr_rules.csv": {
+   "description": "The assignments of mtr_until2013.gms that capri_mod/policy/mtr.py executes as rules: the rule and the statement's quoted labels, right-hand side and numbers (tools/build/build_mtr_inputs.py)",
+   "kind": "structure",
+   "vintage": "2004-2013",
+   "domain": "policy",
+   "status": "live",
+   "rows": 39,
+   "columns": 6,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mtr_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The rule statements of mtr_until2013.gms the MTR port executes, with their labels and numbers. (not re-checked)"
+  },
+  "capri_data/2017/policy/mtr_sets.csv": {
+   "description": "The sets the MTR port needs: PSDPAY_MTR_EL with mtr_until2013.gms's additions, DPAgEu10, PSGG_TO_P (group|scheme), TRDWHE_REG, PSDPAY_MTR, PSGROUP, DDTarget (tools/build/build_mtr_inputs.py)",
+   "kind": "structure",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 658,
+   "columns": 3,
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mtr_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The sets of the MTR port (sim_ini_21730, mtr_until2013.gms, calc_mtr_top.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/mtr_settings.csv": {
+   "description": "The MTR port's years: CAPRI's year set, %endofMTR%, the coupling's and decoupling targets' first years, the years EU025000's and EU027000's declarations reach the member states (tools/build/build_mtr_inputs.py)",
+   "kind": "parameters",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 8,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mtr_inputs (not in the trace yet)"
+   },
+   "catalogue_note": "The MTR port's years (SIMYY, %endofMTR%, the coupling's and targets' first years). (not re-checked)"
+  },
   "capri_data/2017/policy/nordic_aid_ceilings.csv": {
    "description": "CAPRI's Nordic aid ceilings per scheme and member state (tables 2.6 and 2.10 of nordicaid.gms) (tools/build/build_nordic_aid.py)",
    "kind": "coefficients",
@@ -4328,6 +4579,7 @@
    "read_by_model": [
     "capri_mod/policy/bps.py",
     "capri_mod/policy/declared.py",
+    "capri_mod/policy/mtr.py",
     "capri_mod/policy/rd.py"
    ],
    "origin": {
@@ -4465,7 +4717,8 @@
    "rows": 6415,
    "columns": 2,
    "read_by_model": [
-    "capri_mod/policy/cap14_premiums.py"
+    "capri_mod/policy/cap14_premiums.py",
+    "capri_mod/policy/mtr.py"
    ],
    "origin": {
     "nature": "capri",
@@ -4576,6 +4829,9 @@
    "kind": "structure",
    "rows": 101,
    "columns": 2,
+   "read_by_model": [
+    "capri_mod/policy/mtr.py"
+   ],
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists (not in the trace yet)"

@@ -451,3 +451,177 @@ INSERT INTO value_units VALUES
   ('pol_bps_convergence_options', 'rule_30_percent', NULL, 'open', 'bps_convergence_options.rule_30_percent: 1 where the 30% rule applies'),
   ('pol_bps_convergence_options', 'target_share', 'U_ratio', 'capri', 'bps_convergence_options.target_share: share of the average IUV'),
   ('pol_bps_convergence_options', 'gap_closure', 'U_ratio', 'capri', 'bps_convergence_options.gap_closure: share of the gap');
+
+-- file: capri_data/2017/policy/mtr_declarations.csv
+CREATE TABLE pol_mtr_declarations (
+    line BIGINT NOT NULL,
+    region VARCHAR NOT NULL,
+    "year" BIGINT NOT NULL,
+    scheme VARCHAR NOT NULL,
+    item VARCHAR NOT NULL,
+    "value" VARCHAR,
+    special VARCHAR CHECK (special IN ('EPS', 'NA', 'APPTYPE')),
+    PRIMARY KEY (line, region, "year", scheme, item)
+);
+COMMENT ON TABLE pol_mtr_declarations IS 'The premium declarations of the BPS key''s schemes: line 0 sim_ini_21730''s p_premDataE time series, line n the literal assignment of pol_input/mtr_until2013.gms at line n; value a number or, with special APPTYPE, an application type (tools/build/build_mtr_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_mtr_declarations', 'line', NULL, 'open', 'mtr_declarations.line: a line number of the GAMS file'),
+  ('pol_mtr_declarations', 'year', NULL, 'open', 'mtr_declarations.year: a calendar year');
+
+-- file: capri_data/2017/policy/mtr_ceiling_tables.csv
+CREATE TABLE pol_mtr_ceiling_tables (
+    "table" VARCHAR NOT NULL CHECK ("table" IN ('ANNEX_VIII', 'ANNEX_VIIIa', 'ANNEX_IV', 'SAPS_AREAS')),
+    region VARCHAR NOT NULL,
+    "year" BIGINT NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY ("table", region, "year")
+);
+COMMENT ON TABLE pol_mtr_ceiling_tables IS 'The national ceilings of Reg. 1782/2003 Annex VIII and VIIIa and Reg. 73/2009 Annex IV (million EUR) and the SAPS areas (1000 ha, year 0) of mtr_until2013.gms (tools/build/build_mtr_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_mtr_ceiling_tables', 'value', NULL, 'open', 'mtr_ceiling_tables.value: million EUR (the annexes) or 1000 ha (SAPS_AREAS)'),
+  ('pol_mtr_ceiling_tables', 'year', NULL, 'open', 'mtr_ceiling_tables.year: a calendar year (0 for the SAPS areas)');
+
+-- file: capri_data/2017/policy/mtr_coupling.csv
+CREATE TABLE pol_mtr_coupling (
+    scheme VARCHAR NOT NULL,
+    "year" BIGINT NOT NULL,
+    ms VARCHAR NOT NULL,
+    pct DOUBLE NOT NULL,
+    eps INTEGER NOT NULL CHECK (eps IN (0, 1)),
+    PRIMARY KEY (scheme, "year", ms)
+);
+COMMENT ON TABLE pol_mtr_coupling IS 'TABLE p_couplPercent_E of mtr_until2013.gms: the coupling degree of each scheme and member state from the year written; eps 1 where written EPS (tools/build/build_mtr_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_mtr_coupling', 'eps', NULL, 'open', 'mtr_coupling.eps: 1 where CAPRI writes EPS'),
+  ('pol_mtr_coupling', 'pct', 'U_percent', 'capri', 'mtr_coupling.pct: percent coupled'),
+  ('pol_mtr_coupling', 'year', NULL, 'open', 'mtr_coupling.year: a calendar year');
+
+-- file: capri_data/2017/policy/mtr_dd_targets.csv
+CREATE TABLE pol_mtr_dd_targets (
+    region VARCHAR NOT NULL,
+    "year" BIGINT NOT NULL,
+    scheme VARCHAR NOT NULL,
+    target VARCHAR NOT NULL,
+    pct DOUBLE NOT NULL,
+    eps INTEGER NOT NULL CHECK (eps IN (0, 1)),
+    PRIMARY KEY (region, "year", scheme, target)
+);
+COMMENT ON TABLE pol_mtr_dd_targets IS 'TABLE p_premToDDTarget_E of mtr_until2013.gms: the share of a decoupled scheme going to each decoupling target (the hybrid models) (tools/build/build_mtr_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_mtr_dd_targets', 'eps', NULL, 'open', 'mtr_dd_targets.eps: 1 where CAPRI writes EPS'),
+  ('pol_mtr_dd_targets', 'pct', 'U_percent', 'capri', 'mtr_dd_targets.pct: percent of the scheme'),
+  ('pol_mtr_dd_targets', 'year', NULL, 'open', 'mtr_dd_targets.year: a calendar year');
+
+-- file: capri_data/2017/policy/mtr_dd_target_rules.csv
+CREATE TABLE pol_mtr_dd_target_rules (
+    line BIGINT PRIMARY KEY,
+    region VARCHAR NOT NULL,
+    scheme VARCHAR NOT NULL,
+    target VARCHAR NOT NULL,
+    pct DOUBLE NOT NULL,
+    from_year BIGINT NOT NULL
+);
+COMMENT ON TABLE pol_mtr_dd_target_rules IS 'The decoupling target assignments of mtr_until2013.gms l. 1566-1581 in their order (scheme or target ALL: all of PSDPAY_MTR_EL or DDTarget) (tools/build/build_mtr_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_mtr_dd_target_rules', 'line', NULL, 'open', 'mtr_dd_target_rules.line: a line number of the GAMS file'),
+  ('pol_mtr_dd_target_rules', 'pct', 'U_percent', 'capri', 'mtr_dd_target_rules.pct: percent of the scheme'),
+  ('pol_mtr_dd_target_rules', 'from_year', NULL, 'open', 'mtr_dd_target_rules.from_year: a calendar year');
+
+-- file: capri_data/2017/policy/mtr_dd_nuts.csv
+CREATE TABLE pol_mtr_dd_nuts (
+    line BIGINT NOT NULL,
+    region VARCHAR NOT NULL,
+    "level" DOUBLE NOT NULL,
+    PRIMARY KEY (line, region)
+);
+COMMENT ON TABLE pol_mtr_dd_nuts IS 'p_premToDDTargetNuts of mtr_until2013.gms: the regional flat rate''s NUTS level (0 the member state, 1 NUTS 1), the declaration''s data and the assignments, by line (tools/build/build_mtr_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_mtr_dd_nuts', 'line', NULL, 'open', 'mtr_dd_nuts.line: a line number of the GAMS file'),
+  ('pol_mtr_dd_nuts', 'level', NULL, 'open', 'mtr_dd_nuts.level: a NUTS level');
+
+-- file: capri_data/2017/policy/mtr_modulation.csv
+CREATE TABLE pol_mtr_modulation (
+    "group" VARCHAR NOT NULL,
+    class VARCHAR NOT NULL,
+    region VARCHAR NOT NULL,
+    pct DOUBLE NOT NULL,
+    PRIMARY KEY ("group", class, region)
+);
+COMMENT ON TABLE pol_mtr_modulation IS 'TABLE p_percAffByModulation of mtr_until2013.gms: the percentage of farms by producer group and size class of the modulation cut (tools/build/build_mtr_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_mtr_modulation', 'pct', 'U_percent', 'capri', 'mtr_modulation.pct: percent of the farms');
+
+-- file: capri_data/2017/policy/mtr_modulation_classes.csv
+CREATE TABLE pol_mtr_modulation_classes (
+    class VARCHAR PRIMARY KEY,
+    share DOUBLE NOT NULL
+);
+COMMENT ON TABLE pol_mtr_modulation_classes IS 'Prem_Mod of mtr_until2013.gms: the modulation of each size class (tools/build/build_mtr_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_mtr_modulation_classes', 'share', 'U_ratio', 'capri', 'mtr_modulation_classes.share: share of the payments');
+
+-- file: capri_data/2017/policy/mtr_sets.csv
+CREATE TABLE pol_mtr_sets (
+    "set" VARCHAR NOT NULL,
+    member VARCHAR NOT NULL,
+    source VARCHAR NOT NULL,
+    PRIMARY KEY ("set", member)
+);
+COMMENT ON TABLE pol_mtr_sets IS 'The sets the MTR port needs: PSDPAY_MTR_EL with mtr_until2013.gms''s additions, DPAgEu10, PSGG_TO_P (group|scheme), TRDWHE_REG, PSDPAY_MTR, PSGROUP, DDTarget (tools/build/build_mtr_inputs.py)';
+
+-- file: capri_data/2017/policy/mtr_base_data.csv
+CREATE TABLE pol_mtr_base_data (
+    region VARCHAR NOT NULL,
+    activity VARCHAR NOT NULL,
+    item VARCHAR NOT NULL,
+    "column" VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, activity, item, "column")
+);
+COMMENT ON TABLE pol_mtr_base_data IS 'sim_ini_21730''s DATA the MTR port evaluates the premiums at: levels (BAS, TRD), the main yields (YILD) and young animals'' inputs (SLGT) at BAS, the historical yields (HSTY) and the milk quota (QUTS COMI) by column (tools/build/build_mtr_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_mtr_base_data', 'value', NULL, 'open', 'mtr_base_data.value: by item (1000 ha or heads, kg or t per unit, 1000 t)');
+
+-- file: capri_data/2017/policy/mtr_modif.csv
+CREATE TABLE pol_mtr_modif (
+    region VARCHAR NOT NULL,
+    activity VARCHAR NOT NULL,
+    scheme VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, activity, scheme)
+);
+COMMENT ON TABLE pol_mtr_modif IS 'p_premModifFact of 2030 in sim_ini_21730 above EPS: the Agenda 2000 premiums'' modification factors per activity (tools/build/build_mtr_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_mtr_modif', 'value', 'U_ratio', 'capri', 'mtr_modif.value: factor on the premium');
+
+-- file: capri_data/2017/policy/mtr_lu_units.csv
+CREATE TABLE pol_mtr_lu_units (
+    activity VARCHAR PRIMARY KEY,
+    "value" DOUBLE NOT NULL
+);
+COMMENT ON TABLE pol_mtr_lu_units IS 'p_LUUnits of sim_ini_21730: livestock units per head, for the premiums per livestock unit (tools/build/build_mtr_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_mtr_lu_units', 'value', NULL, 'open', 'mtr_lu_units.value: livestock units per head');
+
+-- file: capri_data/2017/policy/mtr_rules.csv
+CREATE TABLE pol_mtr_rules (
+    line BIGINT PRIMARY KEY,
+    rule VARCHAR NOT NULL,
+    labels VARCHAR,
+    rhs VARCHAR NOT NULL,
+    numbers VARCHAR,
+    statement VARCHAR NOT NULL
+);
+COMMENT ON TABLE pol_mtr_rules IS 'The assignments of mtr_until2013.gms that capri_mod/policy/mtr.py executes as rules: the rule and the statement''s quoted labels, right-hand side and numbers (tools/build/build_mtr_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_mtr_rules', 'line', NULL, 'open', 'mtr_rules.line: a line number of the GAMS file');
+
+-- file: capri_data/2017/policy/mtr_settings.csv
+CREATE TABLE pol_mtr_settings (
+    item VARCHAR PRIMARY KEY,
+    "value" DOUBLE NOT NULL,
+    source VARCHAR NOT NULL
+);
+COMMENT ON TABLE pol_mtr_settings IS 'The MTR port''s years: CAPRI''s year set, %endofMTR%, the coupling''s and decoupling targets'' first years, the years EU025000''s and EU027000''s declarations reach the member states (tools/build/build_mtr_inputs.py)';
+INSERT INTO value_units VALUES
+  ('pol_mtr_settings', 'value', NULL, 'open', 'mtr_settings.value: a calendar year');

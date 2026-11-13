@@ -111,9 +111,22 @@ and `docs/KNOWN_ISSUES.md`.
   member states whose model ends at a flat rate (DE, AT, NL, SE, MT, FI) give CAPRI's 2030 reference rate at all 67
   units whatever the key (within 2e-8), confirming the entitlements (the crops' trend levels), the 2020 rate carried
   to 2030 and K136's ceilings by year. K141: CAPRI's last convergence step takes the overshoot left after the 30% rule
-  off in million EUR per thousand ha (no factor 1000, implement_bps.gms l. 309); its arithmetic kept.
-- The model still takes its premiums from cap_premium_activity.csv; the BPS key (calc_mtr_top.gms, calc_mtr.gms from
-  sim_ini's pre-2014 declarations, option A'), DPNONCAP and the outer-loop integration come before the switch.
+  off in million EUR per thousand ha (no factor 1000, implement_bps.gms l. 309): a CAPRI bug, kept as CAPRI computes it
+  by the project lead's decision.
+- The BPS key (capri_mod/policy/mtr.py, tools/build/build_mtr_inputs.py, port A): sim_ini_21730 is written at the
+  simulation start and holds the time series without mtr_until2013.gms's declarations, which CAPRI's 2030 run executes
+  on it (CAP_2014_2020.gms -> mtr_RD.gms); the port executes them in their order (116 literal assignments as data, 39
+  rule statements whose labels and numbers come from the statement, mtr_rules.csv), then def_policy.gms's fill,
+  calc_mtr_top.gms's aggregates and EU-10 scaling, policy.gms and prmcut.gms at the base year's data, the modulation
+  and national ceiling correction, the decoupled budgets (no scheme is coupled in 2030: the coupling loop stops at
+  %endofMTR%), DPFRMS / DPFRMF / DPREG and the policyIUV pass at the 2030 levels. Check: the 2030 BPS rates are
+  CAPRI's reference at every unit of BL, EL, ES, IT, PT, IR (3e-5) and the flat-rate member states; France within 0.6%
+  but Corsica 5% low; Croatia by a uniform IUV; sim_ini's NA sheep rates taken as absent (K142).
+- The tables of mtr_until2013.gms parsed (coupling, decoupling targets, modulation) equal sim_ini's compiled copies
+  cell by cell; gams_table keeps EPS apart from a written zero on request; sim_ini's extract writes its acronyms.
+- The model still takes its premiums from cap_premium_activity.csv; DPNONCAP and the outer-loop integration come
+  before the switch.
+- Tests: capri_mod/tests/test_mtr.py.
 - Tests: capri_mod/tests/test_premium_cut.py.
 
 ## 13 November 2026 — CAPRI's endogenous entitlement limit (K136)
