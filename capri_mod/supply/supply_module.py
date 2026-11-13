@@ -602,6 +602,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: CAPRI's CAP 2014-2020 greening in the NLP form (permGrasGreening_, ecoSetAside_, cropDivGreening_), as in
     #: CAPRI's 2030 reference (pol_input/cap_after_2014/ref.gms)
     cap_greening = setting("supply.cap_greening")
+    # CAPRI's endogenous entitlement limit (policy/def_endCut.gms, K136)
+    entitlement_limit = setting("supply.entitlement_limit")
     #: annual crops (sets.gms annualCrops) of the model and their crop-diversification groups (cropDivGrps: each
     #: annual crop alone, MAIS = grain and silage maize, OSET = set-aside and fallow)
     CROPDIV_GROUPS = {a: r["cropdiv_group"] for a, r in ACTIVITY_CLASSES.items() if r["cropdiv_group"]}   # N6
@@ -1783,6 +1785,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             if self._split_pending():
                 self._dairy_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             self.res.last_hist_fallow = {c_: float(y[j_]) for c_, j_ in (getattr(self.ev, "hist_cols", None) or {}).items() if j_ < len(y)}
+            self._entl_record(y)
             if getattr(self.par, "hist_pending", None):
                 self._histosol_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             # land rows' limits at the solved land areas, so the shadow
@@ -1807,12 +1810,13 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 self.Q, c_lin, A_ub, b_ub, np.asarray(x0, float), _lab, _n0)
             Qg, cg, Ag, bg, sg = self._histosol_columns(Qg, cg, Ag, bg, sg, _lab, _n0)
             Qg, cg, Ag, bg, sg = self._mix_columns(Qg, cg, Ag, bg, sg, _lab, _n0)
+            Qg, cg, Ag, bg, sg = self._entitlement_columns(Qg, cg, Ag, bg, sg, _lab, _n0)
             self.ev.aug_labels = _lab
             self.res.last_hist_fallow = {}
             _yc = None
             _cols = (getattr(self.ev, "dairy_col", None) is not None
                      or getattr(self.ev, "cattle_cols", None) or getattr(self.ev, "hist_cols", None)
-                     or getattr(self.ev, "mix_cols", None))
+                     or getattr(self.ev, "mix_cols", None) or getattr(self.ev, "entl_col", None) is not None)
             if _cols:
                 _yg = self._nlp_solve(Qg, cg, Ag, bg, sg)
                 if _yg is None:
@@ -1825,6 +1829,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 if self._split_pending():
                     self._dairy_calibrate_from_duals(getattr(self.ev, "last_duals", None))
                 self.res.last_hist_fallow = {c_: float(_yg[j_]) for c_, j_ in (getattr(self.ev, "hist_cols", None) or {}).items()}
+                self._entl_record(_yg)
                 if getattr(self.par, "hist_pending", None):
                     self._histosol_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             else:
@@ -3091,6 +3096,7 @@ class SupplyModule(ModuleStateMixin):
             result.yani_dnet = getattr(model.res, "yani_dnet", None)
             result.genetics_shift = dict(getattr(model.res, "last_genet_z", None) or {})
             result.histosol_fallow = dict(getattr(model.res, "last_hist_fallow", None) or {})
+            result.entitlements = dict(getattr(model.res, "entl", None) or {})
             result.technology_mix = dict(getattr(model.res, "last_mix_z", None) or {})
             _ls = getattr(model.res, "land_solution", None) or {}
             result.land_types = {t_: float(_ls[t_]) for t_ in getattr(model.ev, "land_types_used", []) if t_ in _ls}
@@ -3144,6 +3150,7 @@ class SupplyModule(ModuleStateMixin):
                 result.yani_dnet = getattr(model.res, "yani_dnet", None)
                 result.genetics_shift = dict(getattr(model.res, "last_genet_z", None) or {})
                 result.histosol_fallow = dict(getattr(model.res, "last_hist_fallow", None) or {})
+                result.entitlements = dict(getattr(model.res, "entl", None) or {})
                 result.technology_mix = dict(getattr(model.res, "last_mix_z", None) or {})
                 _ls = getattr(model.res, "land_solution", None) or {}
                 result.land_types = {t_: float(_ls[t_]) for t_ in getattr(model.ev, "land_types_used", []) if t_ in _ls}

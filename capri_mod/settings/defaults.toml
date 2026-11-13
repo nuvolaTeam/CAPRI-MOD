@@ -189,6 +189,9 @@ use_land_market = true
 grassland_allowance = 0.0
 # CAPRI's greening rules (permGrasGreening_)
 cap_greening = true
+# CAPRI's endogenous entitlement limit (policy/def_endCut.gms; supply_model.gms sumEntl_, overShotEntl_): a hectare of
+# crops beyond the region's trend area loses the member state's area payments per ha (K136)
+entitlement_limit = true
 # DEPARTURE: CAPRI optimises replacement heifers and the four calf activities on their own and clears young animals
 # per sex; off because the Farm-to-Fork run does not converge with them (K65); to be switched to CAPRI's setting
 use_cattle_member_splits = false

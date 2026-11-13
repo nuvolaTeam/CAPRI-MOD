@@ -1994,6 +1994,114 @@
    ],
    "catalogue_note": "Replaced 2026-10: the previous values ('CAPRI SUA') differed from CAPRI's base world prices for most commodities, and the oilseed rows held CAKE prices. OOIL, OLIV, FATS, OFOD_M, WMLK kept (no unambiguous CAPRI counterpart). Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded). 29 October 2026: one builder (tools/build/build_world_prices.py), every row from its source at full precision (at most 0.02% from the 2- and 1-decimal values held before); the placeholder rows FATS and OFOD_M removed; the provenance's previous values are in the file's git history. (not re-checked)"
   },
+  "capri_data/2017/policy/cap14_ceiling_shares.csv": {
+   "description": "The young-farmer, redistributive and natural-constraint payments in percent of the national ceiling (p_BPSYF, p_BPSRED, p_BPSNATCO of CAP_2014_2020.gms) (tools/build/build_cap14_entitlements.py)",
+   "kind": "coefficients",
+   "vintage": "2015-2020",
+   "domain": "policy",
+   "status": "live",
+   "rows": 216,
+   "columns": 4,
+   "units": "U_percent",
+   "read_by_model": [
+    "capri_mod/supply/entitlements.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_cap14_entitlements (not in the trace yet)"
+   },
+   "catalogue_note": "Young-farmer, redistributive and natural-constraint shares of the national ceiling (CAP_2014_2020.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/cap14_coupled_ceilings.csv": {
+   "description": "The ceilings of the voluntary coupled support and the crop-specific cotton payment per scheme (scen/Premiums/Coupling/vcs_2015_2020.gms, CropSpecificPremium_2015_2020.gms) (tools/build/build_cap14_entitlements.py)",
+   "kind": "coefficients",
+   "vintage": "2015-2020",
+   "domain": "policy",
+   "status": "live",
+   "rows": 1585,
+   "columns": 4,
+   "units": "U_MioEur",
+   "read_by_model": [
+    "capri_mod/supply/entitlements.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_cap14_entitlements (not in the trace yet)"
+   },
+   "catalogue_note": "Ceilings of the voluntary coupled support and the cotton payment (vcs_2015_2020.gms, CropSpecificPremium_2015_2020.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/cap14_entitlement_levels.csv": {
+   "description": "CAPRI's trend levels of its crop activities (DATA(ru, mcact, LEVL, TRD) of sim_ini_21730), whose sum is a region's entitlement limit (policy/def_endCut.gms) (tools/build/build_cap14_entitlements.py)",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 7245,
+   "columns": 3,
+   "units": "U_1000ha",
+   "read_by_model": [
+    "capri_mod/supply/entitlements.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_cap14_entitlements (not in the trace yet)"
+   },
+   "catalogue_note": "CAPRI's 2030 trend levels of its crop activities (sim_ini_21730 DATA TRD): the entitlement limit of each region. (not re-checked)"
+  },
+  "capri_data/2017/policy/cap14_national_ceilings.csv": {
+   "description": "CAPRI's CAP 2014-2020 national ceilings (Regulation 1307/2013 Annex II, p_2013_1307_AnnexII of scen/base_scenarios/CAP_2014_2020.gms) (tools/build/build_cap14_entitlements.py)",
+   "kind": "coefficients",
+   "vintage": "2015-2022",
+   "domain": "policy",
+   "status": "live",
+   "rows": 138,
+   "columns": 3,
+   "units": "U_MioEur",
+   "read_by_model": [
+    "capri_mod/supply/entitlements.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_cap14_entitlements (not in the trace yet)"
+   },
+   "catalogue_note": "CAPRI's CAP 2014-2020 national ceilings (Annex II of Regulation 1307/2013), the inputs of the entitlement limit (K136). (not re-checked)"
+  },
+  "capri_data/2017/policy/cap14_pillar_transfers.csv": {
+   "description": "The transfer from pillar 1 to pillar 2 in percent of the national ceiling (p_cap_2013_2020_transfers_dp_rd rel of scen/Premiums/cap_2013_2020_transfers.gms; a row with 0 is a cell written EPS) (tools/build/build_cap14_entitlements.py)",
+   "kind": "coefficients",
+   "vintage": "2015-2020",
+   "domain": "policy",
+   "status": "live",
+   "rows": 58,
+   "columns": 3,
+   "units": "U_percent",
+   "read_by_model": [
+    "capri_mod/supply/entitlements.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_cap14_entitlements (not in the trace yet)"
+   },
+   "catalogue_note": "Transfers from pillar 1 to pillar 2 (cap_2013_2020_transfers.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/cap14_settings.csv": {
+   "description": "The CAP 2014-2020 chain's settings: greening share, BPS years, SAPS member states, the endogenously cut schemes (dpEndCut) and the year of the trend levels (tools/build/build_cap14_entitlements.py)",
+   "kind": "coefficients",
+   "vintage": "2014-2020",
+   "domain": "policy",
+   "status": "live",
+   "rows": 19,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/supply/entitlements.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_cap14_entitlements (not in the trace yet)"
+   },
+   "catalogue_note": "Settings of CAPRI's CAP 2014-2020 chain (greening share, BPS years, SAPS member states, cut schemes, trend year). (not re-checked)"
+  },
   "capri_data/2017/policy/cap_greening_2013_2020.csv": {
    "description": "CAPRI's CAP 2014-2020 greening (the policy of CAPRI's 2030 reference, pol_input/cap_after_2014/ref.gms -> (tools/build/build_cap_greening.py)",
    "kind": "coefficients",
@@ -4218,7 +4326,7 @@
   "capri_data/codes/results_items.csv": {
    "description": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
    "kind": "structure",
-   "rows": 181,
+   "rows": 182,
    "columns": 8,
    "read_by_model": [
     "capri_mod/io_results.py"

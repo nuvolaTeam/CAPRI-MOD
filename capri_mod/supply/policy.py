@@ -7,8 +7,72 @@ this module once supply_module is loaded (capri_mod.utils.mixins.inject_names); 
 """
 from __future__ import annotations
 
+from capri_mod.supply import entitlements as _entl
+
 
 class PolicyBlock:
+    def _entitlement_columns(self, Qa, ca, Aa, ba, start, labels, n):
+        """CAPRI's endogenous entitlement limit (policy/def_endCut.gms; supply_model.gms sumEntl_, overShotEntl_,
+        l. 1885-1892, and the objective's - overshoot x Cut, l. 4768; capri_mod/supply/entitlements.py): one column,
+        the overshoot o >= 0 (1000 ha) at Cut EUR per ha in the objective, and one row
+
+            sum of the crop columns (CAPRI's MCACT) + the idled histosols - o <= the region's trend area
+
+        so a hectare beyond the trend area earns no area payment. In the simulation year of CAPRI's trend levels
+        (cap14_settings.csv trend_year), where the member state has a ceiling of a cut scheme (setting
+        supply.entitlement_limit). CAPRI has one overshoot per cut scheme with the same limit: their sum is this one
+        column at the sum of the cuts. At the calibration point the crops are at their trend levels (CAPRI's TRD is
+        its 2030 calibration level) and the row is left out of the calibration, as the scenario's policy rows: the
+        overshoot is zero there and the row's multiplier too, as in CAPRI's PMP terms (prep_sim_pmp_terms.gms l. 166)."""
+        self.ev.entl_col = None
+        self.res.entl = None
+        if not getattr(type(self), "entitlement_limit", False):
+            return Qa, ca, Aa, ba, start
+        sim = getattr(self.data, "sim_year", None)
+        d = _entl.data()
+        if sim is None or int(sim) != int(d["settings"]["trend_year"]["TRD"]):
+            return Qa, ca, Aa, ba, start
+        lim = _entl.region_limit(self.data.region_id, list(self.acts), int(sim))
+        if lim is None:
+            return Qa, ca, Aa, ba, start
+        cut, limit, cols = lim
+
+        lev = d["levels"].get(self.data.region_id) or {}
+        row = np.zeros(Aa.shape[1] + 1)
+        row[cols] = 1.0
+        for cls, j in (getattr(self.ev, "hist_cols", None) or {}).items():
+            # iHisCr and iHisGr are CAPRI crop activities (MCACT): the idled histosols keep their entitlements
+            row[int(j)] = 1.0
+            limit += float(lev.get(_entl.HISTOSOL_CODES[cls], 0.0))
+        row[-1] = -1.0
+
+        Aa = np.hstack([Aa, np.zeros((Aa.shape[0], 1))])
+        Aa = np.vstack([Aa, row])
+        ba = np.concatenate([ba, [limit]])
+        labels.append("entitlements")
+        Qa = np.pad(Qa, ((0, 1), (0, 1)))
+        ca = np.concatenate([ca, [cut]])
+        used = float(row[:-1] @ np.asarray(start, float)[:len(row) - 1])
+        start = np.concatenate([start, [max(0.0, used - limit)]])
+        self.ev.entl_col = Aa.shape[1] - 1
+        self.res.entl = {"cut": cut, "limit": limit}
+        return Qa, ca, Aa, ba, start
+
+    def _entl_record(self, y) -> None:
+        """The solve's entitlements (res.entl, the region's result .entitlements): the eligible area (sumEntl), the
+        overshoot and the premium it loses (overshoot x Cut, 1000 EUR), and the row's dual (EUR/ha; CAPRI's
+        D_sumEntl with the opposite sign, reports/margcr.gms l. 309-310)."""
+        j = getattr(self.ev, "entl_col", None)
+        e = getattr(self.res, "entl", None)
+        if j is None or e is None or j >= len(y):
+            return
+        over = float(y[j])
+        e.update(overshoot=over, eligible=e["limit"] + over, premium_lost=over * e["cut"])
+        labels = list(getattr(self.ev, "aug_labels", None) or [])
+        zA = getattr(self.ev, "last_duals", None)
+        if "entitlements" in labels and zA is not None and labels.index("entitlements") < len(zA):
+            e["dual"] = float(zA[labels.index("entitlements")])
+
     def _cap_rules_spec(self):
         """CAPRI's greening rules of this region (policy/define_greening_limits.gms with
         scen/Premiums/Greening/cap_2013_2020_greening.gms; data tools/build/build_cap_greening.py):

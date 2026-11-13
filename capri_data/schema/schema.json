@@ -31100,6 +31100,377 @@
     "tests": []
    }
   },
+  "pol_cap14_ceiling_shares": {
+   "file": "capri_data/2017/policy/cap14_ceiling_shares.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The young-farmer, redistributive and natural-constraint payments in percent of the national ceiling (p_BPSYF, p_BPSRED, p_BPSNATCO of CAP_2014_2020.gms) (tools/build/build_cap14_entitlements.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "scheme",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "pct",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "year",
+    "scheme"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "pct",
+     "unit": "U_percent",
+     "status": "capri",
+     "basis": "cap14_ceiling_shares.pct: % of the national ceiling"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "cap14_ceiling_shares.year: a calendar year"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_cap14_entitlements (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/supply/entitlements.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_cap14_coupled_ceilings": {
+   "file": "capri_data/2017/policy/cap14_coupled_ceilings.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The ceilings of the voluntary coupled support and the crop-specific cotton payment per scheme (scen/Premiums/Coupling/vcs_2015_2020.gms, CropSpecificPremium_2015_2020.gms) (tools/build/build_cap14_entitlements.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "scheme",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "ceiling_meur",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "year",
+    "scheme"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "ceiling_meur",
+     "unit": "U_MioEur",
+     "status": "capri",
+     "basis": "cap14_coupled_ceilings.ceiling_meur: million EUR"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "cap14_coupled_ceilings.year: a calendar year"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_cap14_entitlements (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/supply/entitlements.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_cap14_entitlement_levels": {
+   "file": "capri_data/2017/policy/cap14_entitlement_levels.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "CAPRI's trend levels of its crop activities (DATA(ru, mcact, LEVL, TRD) of sim_ini_21730), whose sum is a region's entitlement limit (policy/def_endCut.gms) (tools/build/build_cap14_entitlements.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "trd_kha",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "trd_kha",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "cap14_entitlement_levels.trd_kha: 1000 ha"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_cap14_entitlements (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/supply/entitlements.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_cap14_national_ceilings": {
+   "file": "capri_data/2017/policy/cap14_national_ceilings.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "CAPRI's CAP 2014-2020 national ceilings (Regulation 1307/2013 Annex II, p_2013_1307_AnnexII of scen/base_scenarios/CAP_2014_2020.gms) (tools/build/build_cap14_entitlements.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "ceiling_meur",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "ceiling_meur",
+     "unit": "U_MioEur",
+     "status": "capri",
+     "basis": "cap14_national_ceilings.ceiling_meur: million EUR"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "cap14_national_ceilings.year: a calendar year"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_cap14_entitlements (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/supply/entitlements.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_cap14_pillar_transfers": {
+   "file": "capri_data/2017/policy/cap14_pillar_transfers.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The transfer from pillar 1 to pillar 2 in percent of the national ceiling (p_cap_2013_2020_transfers_dp_rd rel of scen/Premiums/cap_2013_2020_transfers.gms; a row with 0 is a cell written EPS) (tools/build/build_cap14_entitlements.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "pct",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "pct",
+     "unit": "U_percent",
+     "status": "capri",
+     "basis": "cap14_pillar_transfers.pct: % of the national ceiling"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "cap14_pillar_transfers.year: a calendar year"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_cap14_entitlements (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/supply/entitlements.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_cap14_settings": {
+   "file": "capri_data/2017/policy/cap14_settings.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The CAP 2014-2020 chain's settings: greening share, BPS years, SAPS member states, the endogenously cut schemes (dpEndCut) and the year of the trend levels (tools/build/build_cap14_entitlements.py)",
+   "columns": [
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "key",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "source",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "item",
+    "key"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "cap14_settings.value: by item (a share, a year or 1 for a member)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_cap14_entitlements (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/supply/entitlements.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "pol_cap_ceilings_2030": {
    "file": "capri_data/baselines/capri_greendeal_ref/1730/policy/cap_ceilings_2030.csv",
    "declared_in": "24_policy_more.sql",

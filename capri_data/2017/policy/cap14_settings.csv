@@ -1,0 +1,20 @@
+item,key,value,source
+bps_years,first,2000.0,star 3.0 policy/policy_sets.gms
+bps_years,last,2029.0,star 3.0 policy/policy_sets.gms
+cut_scheme,DPBPS_SAPS,1.0,sim_ini_21730 set dpEndCut (policy/def_endCut.gms)
+cut_scheme,DPFIRHA,1.0,sim_ini_21730 set dpEndCut (policy/def_endCut.gms)
+cut_scheme,DPNATCO,1.0,sim_ini_21730 set dpEndCut (policy/def_endCut.gms)
+cut_scheme,DPYOUNG,1.0,sim_ini_21730 set dpEndCut (policy/def_endCut.gms)
+cut_scheme,dp_bps,1.0,sim_ini_21730 set dpEndCut (policy/def_endCut.gms)
+greening_share,MS,0.3,star 3.0 scen/base_scenarios/CAP_2014_2020.gms
+saps,BG000000,1.0,sim_ini_21730 set DPCAP14_SAPS
+saps,CY000000,1.0,sim_ini_21730 set DPCAP14_SAPS
+saps,CZ000000,1.0,sim_ini_21730 set DPCAP14_SAPS
+saps,EE000000,1.0,sim_ini_21730 set DPCAP14_SAPS
+saps,HU000000,1.0,sim_ini_21730 set DPCAP14_SAPS
+saps,LT000000,1.0,sim_ini_21730 set DPCAP14_SAPS
+saps,LV000000,1.0,sim_ini_21730 set DPCAP14_SAPS
+saps,PL000000,1.0,sim_ini_21730 set DPCAP14_SAPS
+saps,RO000000,1.0,sim_ini_21730 set DPCAP14_SAPS
+saps,SK000000,1.0,sim_ini_21730 set DPCAP14_SAPS
+trend_year,TRD,2030.0,sim_ini_21730 set SIMY (the year of DATA's TRD levels)

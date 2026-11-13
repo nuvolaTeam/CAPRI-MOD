@@ -134,6 +134,7 @@ supply,cattle_shift,rows,,,,,
 supply,converged,rows,,,,,
 supply,cover_crops,rows,,,,,
 supply,dairy_low_shift,rows,,,,,
+supply,entitlements,rows,,,,,"K136: CAPRI's entitlement limit (def_endCut.gms): cut (EUR/ha), limit and eligible area (1000 ha), overshoot (1000 ha), premium_lost (1000 EUR), dual (EUR/ha; CAPRI's D_sumEntl with the opposite sign)"
 supply,feed_dm,rows,,,,,
 supply,feed_t,rows,,,,,
 supply,fert_dist_mode_crops,rows,,,,,

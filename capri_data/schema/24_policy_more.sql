@@ -128,3 +128,78 @@ INSERT INTO value_units VALUES
   ('pol_premium_scheme_shares_2030', 'DPNAT', NULL, 'open', 'premium_scheme_shares_2030.DPNAT: unit to be established');
 
 INSERT INTO value_units VALUES ('pol_mineral_redu_exemptions', 'after_year', NULL, 'open', 'a calendar year (part of the key), no unit');
+
+-- CAPRI's CAP 2014-2020 ceilings and the endogenous entitlement limit (K136, 13 November 2026)
+
+-- file: capri_data/2017/policy/cap14_national_ceilings.csv
+CREATE TABLE pol_cap14_national_ceilings (
+    ms VARCHAR NOT NULL,
+    "year" BIGINT NOT NULL,
+    ceiling_meur DOUBLE NOT NULL,
+    PRIMARY KEY (ms, "year")
+);
+COMMENT ON TABLE pol_cap14_national_ceilings IS 'CAPRI''s CAP 2014-2020 national ceilings (Regulation 1307/2013 Annex II, p_2013_1307_AnnexII of scen/base_scenarios/CAP_2014_2020.gms) (tools/build/build_cap14_entitlements.py)';
+INSERT INTO value_units VALUES
+  ('pol_cap14_national_ceilings', 'year', NULL, 'open', 'cap14_national_ceilings.year: a calendar year'),
+  ('pol_cap14_national_ceilings', 'ceiling_meur', 'U_MioEur', 'capri', 'cap14_national_ceilings.ceiling_meur: million EUR');
+
+-- file: capri_data/2017/policy/cap14_ceiling_shares.csv
+CREATE TABLE pol_cap14_ceiling_shares (
+    ms VARCHAR NOT NULL,
+    "year" BIGINT NOT NULL,
+    scheme VARCHAR NOT NULL,
+    pct DOUBLE NOT NULL,
+    PRIMARY KEY (ms, "year", scheme)
+);
+COMMENT ON TABLE pol_cap14_ceiling_shares IS 'The young-farmer, redistributive and natural-constraint payments in percent of the national ceiling (p_BPSYF, p_BPSRED, p_BPSNATCO of CAP_2014_2020.gms) (tools/build/build_cap14_entitlements.py)';
+INSERT INTO value_units VALUES
+  ('pol_cap14_ceiling_shares', 'year', NULL, 'open', 'cap14_ceiling_shares.year: a calendar year'),
+  ('pol_cap14_ceiling_shares', 'pct', 'U_percent', 'capri', 'cap14_ceiling_shares.pct: % of the national ceiling');
+
+-- file: capri_data/2017/policy/cap14_pillar_transfers.csv
+CREATE TABLE pol_cap14_pillar_transfers (
+    ms VARCHAR NOT NULL,
+    "year" BIGINT NOT NULL,
+    pct DOUBLE NOT NULL,
+    PRIMARY KEY (ms, "year")
+);
+COMMENT ON TABLE pol_cap14_pillar_transfers IS 'The transfer from pillar 1 to pillar 2 in percent of the national ceiling (p_cap_2013_2020_transfers_dp_rd rel of scen/Premiums/cap_2013_2020_transfers.gms; a row with 0 is a cell written EPS) (tools/build/build_cap14_entitlements.py)';
+INSERT INTO value_units VALUES
+  ('pol_cap14_pillar_transfers', 'year', NULL, 'open', 'cap14_pillar_transfers.year: a calendar year'),
+  ('pol_cap14_pillar_transfers', 'pct', 'U_percent', 'capri', 'cap14_pillar_transfers.pct: % of the national ceiling');
+
+-- file: capri_data/2017/policy/cap14_coupled_ceilings.csv
+CREATE TABLE pol_cap14_coupled_ceilings (
+    region VARCHAR NOT NULL,
+    "year" BIGINT NOT NULL,
+    scheme VARCHAR NOT NULL,
+    ceiling_meur DOUBLE NOT NULL,
+    PRIMARY KEY (region, "year", scheme)
+);
+COMMENT ON TABLE pol_cap14_coupled_ceilings IS 'The ceilings of the voluntary coupled support and the crop-specific cotton payment per scheme (scen/Premiums/Coupling/vcs_2015_2020.gms, CropSpecificPremium_2015_2020.gms) (tools/build/build_cap14_entitlements.py)';
+INSERT INTO value_units VALUES
+  ('pol_cap14_coupled_ceilings', 'year', NULL, 'open', 'cap14_coupled_ceilings.year: a calendar year'),
+  ('pol_cap14_coupled_ceilings', 'ceiling_meur', 'U_MioEur', 'capri', 'cap14_coupled_ceilings.ceiling_meur: million EUR');
+
+-- file: capri_data/2017/policy/cap14_settings.csv
+CREATE TABLE pol_cap14_settings (
+    "item" VARCHAR NOT NULL,
+    "key" VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    source VARCHAR NOT NULL,
+    PRIMARY KEY ("item", "key")
+);
+COMMENT ON TABLE pol_cap14_settings IS 'The CAP 2014-2020 chain''s settings: greening share, BPS years, SAPS member states, the endogenously cut schemes (dpEndCut) and the year of the trend levels (tools/build/build_cap14_entitlements.py)';
+INSERT INTO value_units VALUES
+  ('pol_cap14_settings', 'value', NULL, 'open', 'cap14_settings.value: by item (a share, a year or 1 for a member)');
+
+-- file: capri_data/2017/policy/cap14_entitlement_levels.csv
+CREATE TABLE pol_cap14_entitlement_levels (
+    region VARCHAR NOT NULL,
+    activity VARCHAR NOT NULL,
+    trd_kha DOUBLE NOT NULL,
+    PRIMARY KEY (region, activity)
+);
+COMMENT ON TABLE pol_cap14_entitlement_levels IS 'CAPRI''s trend levels of its crop activities (DATA(ru, mcact, LEVL, TRD) of sim_ini_21730), whose sum is a region''s entitlement limit (policy/def_endCut.gms) (tools/build/build_cap14_entitlements.py)';
+INSERT INTO value_units VALUES
+  ('pol_cap14_entitlement_levels', 'trd_kha', 'U_1000ha', 'capri', 'cap14_entitlement_levels.trd_kha: 1000 ha');

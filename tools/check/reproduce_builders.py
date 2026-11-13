@@ -201,6 +201,8 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_feed_energy", [], [EXPORTS / "data_market_1730defaulta.csv"]),
     ("build_noneu_feed_nq", [], [EXPORTS / "data_market_1730defaulta.csv", EXPORTS / "elas_2_1730defaulta.csv"]),
     ("build_greendeal_targets", ["--gams", str(GAMS), "--gdxlib", str(SOURCES / "gdxlib")], [GAMS / "pol_input" / "greendeal"]),
+    ("build_cap14_entitlements", ["--gams", str(GAMS)], [GAMS / "scen", GAMS / "policy" / "policy_sets.gms", SETS,
+                                                          REFERENCE / "simini" / "simini_21730" / "DATA.csv.gz"]),
     ("build_eu_market_blocks", ["--agg", str(GAMS / "aggregation" / "defaultA.agg")], [GAMS / "aggregation" / "defaultA.agg"]),
     ("build_organic_yield_gap", ["--xlsx", str(EXPORTS / "yield_effects_ppp.xlsx")], [EXPORTS / "yield_effects_ppp.xlsx"]),
     ("build_yield_price_elasticity", ["--gams", str(GAMS)], [GAMS / "supply" / "yield_elas.gms", GAMS / "global" / "fromimpact" / "sets.gms"]),

@@ -1,0 +1,1586 @@
+region,year,scheme,ceiling_meur
+AT000000,2015,vcs-220-Austria-Sheepmeat and goatmeat,0.806
+AT000000,2015,vcs-221-Austria-Sheepmeat and goatmeat,0.0992
+AT000000,2015,vcs-6-Austria-Beef and veal,7.781
+AT000000,2015,vcs-7-Austria-Beef and veal,4.6562
+AT000000,2016,vcs-220-Austria-Sheepmeat and goatmeat,0.806
+AT000000,2016,vcs-221-Austria-Sheepmeat and goatmeat,0.0992
+AT000000,2016,vcs-6-Austria-Beef and veal,7.781
+AT000000,2016,vcs-7-Austria-Beef and veal,4.6562
+AT000000,2017,vcs-220-Austria-Sheepmeat and goatmeat,0.806
+AT000000,2017,vcs-221-Austria-Sheepmeat and goatmeat,0.0992
+AT000000,2017,vcs-6-Austria-Beef and veal,7.781
+AT000000,2017,vcs-7-Austria-Beef and veal,4.6562
+AT000000,2018,vcs-220-Austria-Sheepmeat and goatmeat,0.806
+AT000000,2018,vcs-221-Austria-Sheepmeat and goatmeat,0.0992
+AT000000,2018,vcs-6-Austria-Beef and veal,7.781
+AT000000,2018,vcs-7-Austria-Beef and veal,4.6562
+AT000000,2019,vcs-220-Austria-Sheepmeat and goatmeat,0.806
+AT000000,2019,vcs-221-Austria-Sheepmeat and goatmeat,0.0992
+AT000000,2019,vcs-6-Austria-Beef and veal,7.781
+AT000000,2019,vcs-7-Austria-Beef and veal,4.6562
+AT000000,2020,vcs-220-Austria-Sheepmeat and goatmeat,0.806
+AT000000,2020,vcs-221-Austria-Sheepmeat and goatmeat,0.0992
+AT000000,2020,vcs-6-Austria-Beef and veal,7.781
+AT000000,2020,vcs-7-Austria-Beef and veal,4.6562
+BG000000,2015,cscs-Bulgaria-cotton,2.345603
+BG000000,2015,vcs-12-Bulgaria-Beef and veal,12.714163
+BG000000,2015,vcs-13-Bulgaria-Beef and veal,11.707851
+BG000000,2015,vcs-139-Bulgaria-Milk and milk products,23.919001
+BG000000,2015,vcs-14-Bulgaria-Beef and veal,2.767713
+BG000000,2015,vcs-181-Bulgaria-Protein crops,15.81818
+BG000000,2015,vcs-223-Bulgaria-Sheepmeat and goatmeat,4.61104
+BG000000,2015,vcs-224-Bulgaria-Sheepmeat and goatmeat,6.562358
+BG000000,2015,vcs-68-Bulgaria-Fruit and vegetables,20.024464
+BG000000,2015,vcs-69-Bulgaria-Fruit and vegetables,17.86158
+BG000000,2015,vcs-70-Bulgaria-Fruit and vegetables,2.65
+BG000000,2016,cscs-Bulgaria-cotton,2.604554
+BG000000,2016,vcs-12-Bulgaria-Beef and veal,12.714163
+BG000000,2016,vcs-13-Bulgaria-Beef and veal,11.707851
+BG000000,2016,vcs-139-Bulgaria-Milk and milk products,23.919001
+BG000000,2016,vcs-14-Bulgaria-Beef and veal,2.767713
+BG000000,2016,vcs-181-Bulgaria-Protein crops,15.84898
+BG000000,2016,vcs-223-Bulgaria-Sheepmeat and goatmeat,4.61104
+BG000000,2016,vcs-224-Bulgaria-Sheepmeat and goatmeat,6.562358
+BG000000,2016,vcs-68-Bulgaria-Fruit and vegetables,20.024464
+BG000000,2016,vcs-69-Bulgaria-Fruit and vegetables,18.06178
+BG000000,2016,vcs-70-Bulgaria-Fruit and vegetables,2.65
+BG000000,2017,cscs-Bulgaria-cotton,2.604554
+BG000000,2017,vcs-12-Bulgaria-Beef and veal,12.714163
+BG000000,2017,vcs-13-Bulgaria-Beef and veal,11.707851
+BG000000,2017,vcs-139-Bulgaria-Milk and milk products,23.919001
+BG000000,2017,vcs-14-Bulgaria-Beef and veal,2.767713
+BG000000,2017,vcs-181-Bulgaria-Protein crops,15.86452
+BG000000,2017,vcs-223-Bulgaria-Sheepmeat and goatmeat,4.61104
+BG000000,2017,vcs-224-Bulgaria-Sheepmeat and goatmeat,6.562358
+BG000000,2017,vcs-68-Bulgaria-Fruit and vegetables,20.024464
+BG000000,2017,vcs-69-Bulgaria-Fruit and vegetables,18.16279
+BG000000,2017,vcs-70-Bulgaria-Fruit and vegetables,2.65
+BG000000,2018,cscs-Bulgaria-cotton,2.604554
+BG000000,2018,vcs-12-Bulgaria-Beef and veal,12.714163
+BG000000,2018,vcs-13-Bulgaria-Beef and veal,11.707851
+BG000000,2018,vcs-139-Bulgaria-Milk and milk products,23.919001
+BG000000,2018,vcs-14-Bulgaria-Beef and veal,2.767713
+BG000000,2018,vcs-181-Bulgaria-Protein crops,15.89518
+BG000000,2018,vcs-223-Bulgaria-Sheepmeat and goatmeat,4.61104
+BG000000,2018,vcs-224-Bulgaria-Sheepmeat and goatmeat,6.562358
+BG000000,2018,vcs-68-Bulgaria-Fruit and vegetables,20.024464
+BG000000,2018,vcs-69-Bulgaria-Fruit and vegetables,18.36208
+BG000000,2018,vcs-70-Bulgaria-Fruit and vegetables,2.65
+BG000000,2019,cscs-Bulgaria-cotton,2.604554
+BG000000,2019,vcs-12-Bulgaria-Beef and veal,12.714163
+BG000000,2019,vcs-13-Bulgaria-Beef and veal,11.707851
+BG000000,2019,vcs-139-Bulgaria-Milk and milk products,23.919001
+BG000000,2019,vcs-14-Bulgaria-Beef and veal,2.767713
+BG000000,2019,vcs-181-Bulgaria-Protein crops,15.92584
+BG000000,2019,vcs-223-Bulgaria-Sheepmeat and goatmeat,4.61104
+BG000000,2019,vcs-224-Bulgaria-Sheepmeat and goatmeat,6.562358
+BG000000,2019,vcs-68-Bulgaria-Fruit and vegetables,20.024464
+BG000000,2019,vcs-69-Bulgaria-Fruit and vegetables,18.56137
+BG000000,2019,vcs-70-Bulgaria-Fruit and vegetables,2.65
+BG000000,2020,cscs-Bulgaria-cotton,2.604554
+BG000000,2020,vcs-12-Bulgaria-Beef and veal,12.714163
+BG000000,2020,vcs-13-Bulgaria-Beef and veal,11.707851
+BG000000,2020,vcs-139-Bulgaria-Milk and milk products,23.919001
+BG000000,2020,vcs-14-Bulgaria-Beef and veal,2.767713
+BG000000,2020,vcs-181-Bulgaria-Protein crops,15.92584
+BG000000,2020,vcs-223-Bulgaria-Sheepmeat and goatmeat,4.61104
+BG000000,2020,vcs-224-Bulgaria-Sheepmeat and goatmeat,6.562358
+BG000000,2020,vcs-68-Bulgaria-Fruit and vegetables,20.024464
+BG000000,2020,vcs-69-Bulgaria-Fruit and vegetables,18.56137
+BG000000,2020,vcs-70-Bulgaria-Fruit and vegetables,2.65
+BL000000,2015,vcs-10-Belgium Wallonia-Beef and veal,54.089854
+BL000000,2015,vcs-11-Belgium Wallonia-Beef and veal,3.164832
+BL000000,2015,vcs-138-Belgium Wallonia-Milk and milk products,3.371248
+BL000000,2015,vcs-222-Belgium Wallonia-Sheepmeat and goatmeat,0.65672
+BL000000,2015,vcs-8-Belgium Flanders-Beef and veal,23.594581
+BL000000,2015,vcs-9-Belgium Flanders-Beef and veal,2.359458
+BL000000,2016,vcs-10-Belgium Wallonia-Beef and veal,53.2875
+BL000000,2016,vcs-11-Belgium Wallonia-Beef and veal,3.117886
+BL000000,2016,vcs-138-Belgium Wallonia-Milk and milk products,3.32124
+BL000000,2016,vcs-222-Belgium Wallonia-Sheepmeat and goatmeat,0.646979
+BL000000,2016,vcs-8-Belgium Flanders-Beef and veal,22.632886
+BL000000,2016,vcs-9-Belgium Flanders-Beef and veal,2.263289
+BL000000,2017,vcs-10-Belgium Wallonia-Beef and veal,52.484945
+BL000000,2017,vcs-11-Belgium Wallonia-Beef and veal,3.070928
+BL000000,2017,vcs-138-Belgium Wallonia-Milk and milk products,3.271219
+BL000000,2017,vcs-222-Belgium Wallonia-Sheepmeat and goatmeat,0.637234
+BL000000,2017,vcs-8-Belgium Flanders-Beef and veal,22.292015
+BL000000,2017,vcs-9-Belgium Flanders-Beef and veal,2.229202
+BL000000,2018,vcs-10-Belgium Wallonia-Beef and veal,51.733041
+BL000000,2018,vcs-11-Belgium Wallonia-Beef and veal,3.026933
+BL000000,2018,vcs-138-Belgium Wallonia-Milk and milk products,3.224355
+BL000000,2018,vcs-222-Belgium Wallonia-Sheepmeat and goatmeat,0.628105
+BL000000,2018,vcs-8-Belgium Flanders-Beef and veal,21.378802
+BL000000,2018,vcs-9-Belgium Flanders-Beef and veal,2.13788
+BL000000,2019,vcs-10-Belgium Wallonia-Beef and veal,50.981137
+BL000000,2019,vcs-11-Belgium Wallonia-Beef and veal,2.982939
+BL000000,2019,vcs-138-Belgium Wallonia-Milk and milk products,3.177491
+BL000000,2019,vcs-222-Belgium Wallonia-Sheepmeat and goatmeat,0.618976
+BL000000,2019,vcs-8-Belgium Flanders-Beef and veal,21.068076
+BL000000,2019,vcs-9-Belgium Flanders-Beef and veal,2.106808
+BL000000,2020,vcs-10-Belgium Wallonia-Beef and veal,50.981137
+BL000000,2020,vcs-11-Belgium Wallonia-Beef and veal,2.982939
+BL000000,2020,vcs-138-Belgium Wallonia-Milk and milk products,3.177491
+BL000000,2020,vcs-222-Belgium Wallonia-Sheepmeat and goatmeat,0.618976
+BL000000,2020,vcs-8-Belgium Flanders-Beef and veal,23.408974
+BL000000,2020,vcs-9-Belgium Flanders-Beef and veal,2.340897
+BL400000,2015,vcs-196-Luxembourg-Protein crops,0.16
+BL400000,2016,vcs-196-Luxembourg-Protein crops,0.16
+BL400000,2017,vcs-196-Luxembourg-Protein crops,0.16
+BL400000,2018,vcs-196-Luxembourg-Protein crops,0.16
+BL400000,2019,vcs-196-Luxembourg-Protein crops,0.16
+BL400000,2020,vcs-196-Luxembourg-Protein crops,0.16
+CY000000,2015,vcs-141-Cyprus-Milk and milk products,3.0
+CY000000,2015,vcs-226-Cyprus-Sheepmeat and goatmeat,0.725
+CY000000,2015,vcs-73-Cyprus-Fruit and vegetables,0.275
+CY000000,2016,vcs-141-Cyprus-Milk and milk products,3.0
+CY000000,2016,vcs-226-Cyprus-Sheepmeat and goatmeat,0.725
+CY000000,2016,vcs-73-Cyprus-Fruit and vegetables,0.275
+CY000000,2017,vcs-141-Cyprus-Milk and milk products,2.97328
+CY000000,2017,vcs-226-Cyprus-Sheepmeat and goatmeat,0.725
+CY000000,2017,vcs-73-Cyprus-Fruit and vegetables,0.275
+CY000000,2018,vcs-141-Cyprus-Milk and milk products,2.9324
+CY000000,2018,vcs-226-Cyprus-Sheepmeat and goatmeat,0.725
+CY000000,2018,vcs-73-Cyprus-Fruit and vegetables,0.275
+CY000000,2019,vcs-141-Cyprus-Milk and milk products,2.89144
+CY000000,2019,vcs-226-Cyprus-Sheepmeat and goatmeat,0.725
+CY000000,2019,vcs-73-Cyprus-Fruit and vegetables,0.275
+CY000000,2020,vcs-141-Cyprus-Milk and milk products,2.89144
+CY000000,2020,vcs-226-Cyprus-Sheepmeat and goatmeat,0.725
+CY000000,2020,vcs-73-Cyprus-Fruit and vegetables,0.275
+CZ000000,2015,vcs-132-Czech Republic-Hops,3.148148
+CZ000000,2015,vcs-142-Czech Republic-Milk and milk products,50.418194
+CZ000000,2015,vcs-17-Czech Republic-Beef and veal,24.346428
+CZ000000,2015,vcs-183-Czech Republic-Protein crops,16.897087
+CZ000000,2015,vcs-227-Czech Republic-Sheepmeat and goatmeat,2.844225
+CZ000000,2015,vcs-266-Czech Republic-Starch potato,3.148148
+CZ000000,2015,vcs-273-Czech Republic-Sugar beet,16.666667
+CZ000000,2015,vcs-74-Czech Republic-Fruit and vegetables,2.647556
+CZ000000,2015,vcs-75-Czech Republic-Fruit and vegetables,1.056148
+CZ000000,2015,vcs-76-Czech Republic-Fruit and vegetables,1.851852
+CZ000000,2015,vcs-77-Czech Republic-Fruit and vegetables,3.194815
+CZ000000,2015,vcs-78-Czech Republic-Fruit and vegetables,0.508889
+CZ000000,2016,vcs-132-Czech Republic-Hops,3.148148
+CZ000000,2016,vcs-142-Czech Republic-Milk and milk products,50.349533
+CZ000000,2016,vcs-17-Czech Republic-Beef and veal,24.313272
+CZ000000,2016,vcs-183-Czech Republic-Protein crops,16.880827
+CZ000000,2016,vcs-227-Czech Republic-Sheepmeat and goatmeat,2.840351
+CZ000000,2016,vcs-266-Czech Republic-Starch potato,3.148148
+CZ000000,2016,vcs-273-Czech Republic-Sugar beet,16.666667
+CZ000000,2016,vcs-74-Czech Republic-Fruit and vegetables,2.647556
+CZ000000,2016,vcs-75-Czech Republic-Fruit and vegetables,1.056148
+CZ000000,2016,vcs-76-Czech Republic-Fruit and vegetables,1.851852
+CZ000000,2016,vcs-77-Czech Republic-Fruit and vegetables,3.194815
+CZ000000,2016,vcs-78-Czech Republic-Fruit and vegetables,0.508889
+CZ000000,2017,vcs-132-Czech Republic-Hops,3.148148
+CZ000000,2017,vcs-142-Czech Republic-Milk and milk products,50.278507
+CZ000000,2017,vcs-17-Czech Republic-Beef and veal,24.278974
+CZ000000,2017,vcs-183-Czech Republic-Protein crops,16.864007
+CZ000000,2017,vcs-227-Czech Republic-Sheepmeat and goatmeat,2.836345
+CZ000000,2017,vcs-266-Czech Republic-Starch potato,3.148148
+CZ000000,2017,vcs-273-Czech Republic-Sugar beet,16.666667
+CZ000000,2017,vcs-74-Czech Republic-Fruit and vegetables,2.647556
+CZ000000,2017,vcs-75-Czech Republic-Fruit and vegetables,1.056148
+CZ000000,2017,vcs-76-Czech Republic-Fruit and vegetables,1.851852
+CZ000000,2017,vcs-77-Czech Republic-Fruit and vegetables,3.194815
+CZ000000,2017,vcs-78-Czech Republic-Fruit and vegetables,0.508889
+CZ000000,2018,vcs-132-Czech Republic-Hops,3.148148
+CZ000000,2018,vcs-142-Czech Republic-Milk and milk products,51.841538
+CZ000000,2018,vcs-17-Czech Republic-Beef and veal,25.033746
+CZ000000,2018,vcs-183-Czech Republic-Protein crops,17.234158
+CZ000000,2018,vcs-227-Czech Republic-Sheepmeat and goatmeat,2.924519
+CZ000000,2018,vcs-266-Czech Republic-Starch potato,3.148148
+CZ000000,2018,vcs-273-Czech Republic-Sugar beet,16.666667
+CZ000000,2018,vcs-74-Czech Republic-Fruit and vegetables,2.647556
+CZ000000,2018,vcs-75-Czech Republic-Fruit and vegetables,1.056148
+CZ000000,2018,vcs-76-Czech Republic-Fruit and vegetables,1.851852
+CZ000000,2018,vcs-77-Czech Republic-Fruit and vegetables,3.194815
+CZ000000,2018,vcs-78-Czech Republic-Fruit and vegetables,0.508889
+CZ000000,2019,vcs-132-Czech Republic-Hops,3.148148
+CZ000000,2019,vcs-142-Czech Republic-Milk and milk products,51.840694
+CZ000000,2019,vcs-17-Czech Republic-Beef and veal,25.033338
+CZ000000,2019,vcs-183-Czech Republic-Protein crops,17.233958
+CZ000000,2019,vcs-227-Czech Republic-Sheepmeat and goatmeat,2.924472
+CZ000000,2019,vcs-266-Czech Republic-Starch potato,3.148148
+CZ000000,2019,vcs-273-Czech Republic-Sugar beet,16.666667
+CZ000000,2019,vcs-74-Czech Republic-Fruit and vegetables,2.647556
+CZ000000,2019,vcs-75-Czech Republic-Fruit and vegetables,1.056148
+CZ000000,2019,vcs-76-Czech Republic-Fruit and vegetables,1.851852
+CZ000000,2019,vcs-77-Czech Republic-Fruit and vegetables,3.194815
+CZ000000,2019,vcs-78-Czech Republic-Fruit and vegetables,0.508889
+CZ000000,2020,vcs-132-Czech Republic-Hops,3.148148
+CZ000000,2020,vcs-142-Czech Republic-Milk and milk products,52.77907
+CZ000000,2020,vcs-17-Czech Republic-Beef and veal,25.48647
+CZ000000,2020,vcs-183-Czech Republic-Protein crops,17.45618
+CZ000000,2020,vcs-227-Czech Republic-Sheepmeat and goatmeat,2.977408
+CZ000000,2020,vcs-266-Czech Republic-Starch potato,3.148148
+CZ000000,2020,vcs-273-Czech Republic-Sugar beet,16.666667
+CZ000000,2020,vcs-74-Czech Republic-Fruit and vegetables,2.647556
+CZ000000,2020,vcs-75-Czech Republic-Fruit and vegetables,1.056148
+CZ000000,2020,vcs-76-Czech Republic-Fruit and vegetables,1.851852
+CZ000000,2020,vcs-77-Czech Republic-Fruit and vegetables,3.194815
+CZ000000,2020,vcs-78-Czech Republic-Fruit and vegetables,0.508889
+DK000000,2015,vcs-18-Denmark-Beef and veal,24.135
+DK000000,2016,vcs-18-Denmark-Beef and veal,24.135
+DK000000,2017,vcs-18-Denmark-Beef and veal,24.135
+DK000000,2018,vcs-18-Denmark-Beef and veal,24.135
+DK000000,2019,vcs-18-Denmark-Beef and veal,24.135
+DK000000,2020,vcs-18-Denmark-Beef and veal,24.135
+EE000000,2015,vcs-143-Estonia-Milk and milk products,2.024
+EE000000,2015,vcs-19-Estonia-Beef and veal,1.01
+EE000000,2015,vcs-228-Estonia-Sheepmeat and goatmeat,0.396
+EE000000,2015,vcs-79-Estonia-Fruit and vegetables,0.807
+EE000000,2016,vcs-143-Estonia-Milk and milk products,2.024
+EE000000,2016,vcs-19-Estonia-Beef and veal,1.01
+EE000000,2016,vcs-228-Estonia-Sheepmeat and goatmeat,0.396
+EE000000,2016,vcs-79-Estonia-Fruit and vegetables,0.807
+EE000000,2017,vcs-143-Estonia-Milk and milk products,2.024
+EE000000,2017,vcs-19-Estonia-Beef and veal,1.01
+EE000000,2017,vcs-228-Estonia-Sheepmeat and goatmeat,0.396
+EE000000,2017,vcs-79-Estonia-Fruit and vegetables,0.807
+EE000000,2018,vcs-143-Estonia-Milk and milk products,2.024
+EE000000,2018,vcs-19-Estonia-Beef and veal,1.01
+EE000000,2018,vcs-228-Estonia-Sheepmeat and goatmeat,0.396
+EE000000,2018,vcs-79-Estonia-Fruit and vegetables,0.807
+EE000000,2019,vcs-143-Estonia-Milk and milk products,2.024
+EE000000,2019,vcs-19-Estonia-Beef and veal,1.01
+EE000000,2019,vcs-228-Estonia-Sheepmeat and goatmeat,0.396
+EE000000,2019,vcs-79-Estonia-Fruit and vegetables,0.807
+EE000000,2020,vcs-143-Estonia-Milk and milk products,2.024
+EE000000,2020,vcs-19-Estonia-Beef and veal,1.01
+EE000000,2020,vcs-228-Estonia-Sheepmeat and goatmeat,0.396
+EE000000,2020,vcs-79-Estonia-Fruit and vegetables,0.807
+EL000000,2015,cscs-Greece-cotton,187.344
+EL000000,2015,vcs-122-Greece-Grain legumes,5.0
+EL000000,2015,vcs-190-Greece-Protein crops,7.0
+EL000000,2015,vcs-205-Greece-Rice,8.0
+EL000000,2015,vcs-213-Greece-Seeds,3.0
+EL000000,2015,vcs-239-Greece-Sheepmeat and goatmeat,21.7
+EL000000,2015,vcs-240-Greece-Sheepmeat and goatmeat,25.5
+EL000000,2015,vcs-241-Greece-Sheepmeat and goatmeat,11.5
+EL000000,2015,vcs-261-Greece-Silkworms,0.8
+EL000000,2015,vcs-264-Greece-Special entitlements,30.0
+EL000000,2015,vcs-275-Greece-Sugar beet,5.0
+EL000000,2015,vcs-34-Greece-Beef and veal,4.5
+EL000000,2015,vcs-35-Greece-Beef and veal,24.5
+EL000000,2015,vcs-62-Greece-Cereals,9.0
+EL000000,2015,vcs-86-Greece-Fruit and vegetables,2.6
+EL000000,2015,vcs-87-Greece-Fruit and vegetables,9.0
+EL000000,2015,vcs-88-Greece-Fruit and vegetables,1.5
+EL000000,2015,vcs-89-Greece-Fruit and vegetables,3.0
+EL000000,2016,cscs-Greece-cotton,187.344
+EL000000,2016,vcs-122-Greece-Grain legumes,4.941136
+EL000000,2016,vcs-190-Greece-Protein crops,6.917591
+EL000000,2016,vcs-205-Greece-Rice,7.905818
+EL000000,2016,vcs-213-Greece-Seeds,2.964682
+EL000000,2016,vcs-239-Greece-Sheepmeat and goatmeat,21.444532
+EL000000,2016,vcs-240-Greece-Sheepmeat and goatmeat,25.199796149999997
+EL000000,2016,vcs-241-Greece-Sheepmeat and goatmeat,11.364614
+EL000000,2016,vcs-261-Greece-Silkworms,0.790582
+EL000000,2016,vcs-264-Greece-Special entitlements,29.646819
+EL000000,2016,vcs-275-Greece-Sugar beet,6.917591
+EL000000,2016,vcs-34-Greece-Beef and veal,4.44702285
+EL000000,2016,vcs-35-Greece-Beef and veal,24.211569
+EL000000,2016,vcs-62-Greece-Cereals,11.858727
+EL000000,2016,vcs-86-Greece-Fruit and vegetables,3.162327
+EL000000,2016,vcs-87-Greece-Fruit and vegetables,11.858727
+EL000000,2016,vcs-88-Greece-Fruit and vegetables,1.482341
+EL000000,2016,vcs-89-Greece-Fruit and vegetables,2.964682
+EL000000,2017,cscs-Greece-cotton,187.344
+EL000000,2017,vcs-122-Greece-Grain legumes,4.882207
+EL000000,2017,vcs-190-Greece-Protein crops,6.835089
+EL000000,2017,vcs-205-Greece-Rice,7.811531
+EL000000,2017,vcs-213-Greece-Seeds,2.929324
+EL000000,2017,vcs-239-Greece-Sheepmeat and goatmeat,21.188777
+EL000000,2017,vcs-240-Greece-Sheepmeat and goatmeat,24.899254
+EL000000,2017,vcs-241-Greece-Sheepmeat and goatmeat,11.229075
+EL000000,2017,vcs-261-Greece-Silkworms,0.781153
+EL000000,2017,vcs-264-Greece-Special entitlements,29.29324
+EL000000,2017,vcs-275-Greece-Sugar beet,6.835089
+EL000000,2017,vcs-34-Greece-Beef and veal,4.393986
+EL000000,2017,vcs-35-Greece-Beef and veal,23.922813
+EL000000,2017,vcs-62-Greece-Cereals,14.158399
+EL000000,2017,vcs-86-Greece-Fruit and vegetables,3.905765
+EL000000,2017,vcs-87-Greece-Fruit and vegetables,11.717296
+EL000000,2017,vcs-88-Greece-Fruit and vegetables,1.464662
+EL000000,2017,vcs-89-Greece-Fruit and vegetables,2.929324
+EL000000,2018,cscs-Greece-cotton,187.344
+EL000000,2018,vcs-122-Greece-Grain legumes,4.828375
+EL000000,2018,vcs-190-Greece-Protein crops,6.759725
+EL000000,2018,vcs-205-Greece-Rice,7.725399
+EL000000,2018,vcs-213-Greece-Seeds,2.897025
+EL000000,2018,vcs-239-Greece-Sheepmeat and goatmeat,20.955146
+EL000000,2018,vcs-240-Greece-Sheepmeat and goatmeat,24.6247108
+EL000000,2018,vcs-241-Greece-Sheepmeat and goatmeat,11.105262
+EL000000,2018,vcs-261-Greece-Silkworms,0.77254
+EL000000,2018,vcs-264-Greece-Special entitlements,28.970248
+EL000000,2018,vcs-275-Greece-Sugar beet,6.759725
+EL000000,2018,vcs-34-Greece-Beef and veal,4.3455372
+EL000000,2018,vcs-35-Greece-Beef and veal,23.659036
+EL000000,2018,vcs-62-Greece-Cereals,14.002287
+EL000000,2018,vcs-86-Greece-Fruit and vegetables,3.8627
+EL000000,2018,vcs-87-Greece-Fruit and vegetables,11.588099
+EL000000,2018,vcs-88-Greece-Fruit and vegetables,1.448512
+EL000000,2018,vcs-89-Greece-Fruit and vegetables,2.897025
+EL000000,2019,cscs-Greece-cotton,187.344
+EL000000,2019,vcs-122-Greece-Grain legumes,4.774548
+EL000000,2019,vcs-190-Greece-Protein crops,6.684367
+EL000000,2019,vcs-205-Greece-Rice,7.639276
+EL000000,2019,vcs-213-Greece-Seeds,2.864729
+EL000000,2019,vcs-239-Greece-Sheepmeat and goatmeat,20.721536
+EL000000,2019,vcs-240-Greece-Sheepmeat and goatmeat,24.35019225
+EL000000,2019,vcs-241-Greece-Sheepmeat and goatmeat,10.981459
+EL000000,2019,vcs-261-Greece-Silkworms,0.763928
+EL000000,2019,vcs-264-Greece-Special entitlements,28.647285
+EL000000,2019,vcs-275-Greece-Sugar beet,6.684367
+EL000000,2019,vcs-34-Greece-Beef and veal,4.29709275
+EL000000,2019,vcs-35-Greece-Beef and veal,23.395283
+EL000000,2019,vcs-62-Greece-Cereals,13.846188
+EL000000,2019,vcs-86-Greece-Fruit and vegetables,3.819638
+EL000000,2019,vcs-87-Greece-Fruit and vegetables,11.458914
+EL000000,2019,vcs-88-Greece-Fruit and vegetables,1.432364
+EL000000,2019,vcs-89-Greece-Fruit and vegetables,2.864729
+EL000000,2020,cscs-Greece-cotton,187.344
+EL000000,2020,vcs-122-Greece-Grain legumes,4.774548
+EL000000,2020,vcs-190-Greece-Protein crops,6.684367
+EL000000,2020,vcs-205-Greece-Rice,7.639276
+EL000000,2020,vcs-213-Greece-Seeds,2.864729
+EL000000,2020,vcs-239-Greece-Sheepmeat and goatmeat,20.721536
+EL000000,2020,vcs-240-Greece-Sheepmeat and goatmeat,24.35019225
+EL000000,2020,vcs-241-Greece-Sheepmeat and goatmeat,10.981459
+EL000000,2020,vcs-261-Greece-Silkworms,0.763928
+EL000000,2020,vcs-264-Greece-Special entitlements,28.647285
+EL000000,2020,vcs-275-Greece-Sugar beet,6.684367
+EL000000,2020,vcs-34-Greece-Beef and veal,4.29709275
+EL000000,2020,vcs-35-Greece-Beef and veal,23.395283
+EL000000,2020,vcs-62-Greece-Cereals,13.846188
+EL000000,2020,vcs-86-Greece-Fruit and vegetables,3.819638
+EL000000,2020,vcs-87-Greece-Fruit and vegetables,11.458914
+EL000000,2020,vcs-88-Greece-Fruit and vegetables,1.432364
+EL000000,2020,vcs-89-Greece-Fruit and vegetables,2.864729
+ES000000,2015,cscs-Spain-cotton,60.8412
+ES000000,2015,vcs-119-Spain-Fruit and vegetables,6.352
+ES000000,2015,vcs-125-Spain-Grain legumes,1.0
+ES000000,2015,vcs-165-Spain-Milk and milk products,51.861
+ES000000,2015,vcs-166-Spain-Milk and milk products,26.986
+ES000000,2015,vcs-167-Spain-Milk and milk products,9.853
+ES000000,2015,vcs-168-Spain-Milk and milk products,2.652
+ES000000,2015,vcs-169-Spain-Milk and milk products,2.227
+ES000000,2015,vcs-171-Spain-Nuts,12.956
+ES000000,2015,vcs-172-Spain-Nuts,1.044
+ES000000,2015,vcs-201-Spain-Protein crops,21.64554
+ES000000,2015,vcs-202-Spain-Protein crops,22.891489
+ES000000,2015,vcs-210-Spain-Rice,12.206
+ES000000,2015,vcs-255-Spain-Sheepmeat and goatmeat,124.475
+ES000000,2015,vcs-256-Spain-Sheepmeat and goatmeat,3.428
+ES000000,2015,vcs-257-Spain-Sheepmeat and goatmeat,5.386
+ES000000,2015,vcs-258-Spain-Sheepmeat and goatmeat,5.093
+ES000000,2015,vcs-259-Spain-Sheepmeat and goatmeat,30.155
+ES000000,2015,vcs-281-Spain-Sugar beet,14.46961
+ES000000,2015,vcs-282-Spain-Sugar beet,2.36639
+ES000000,2015,vcs-50-Spain-Beef and veal,187.294
+ES000000,2015,vcs-51-Spain-Beef and veal,0.451
+ES000000,2015,vcs-52-Spain-Beef and veal,12.488
+ES000000,2015,vcs-53-Spain-Beef and veal,0.093
+ES000000,2015,vcs-54-Spain-Beef and veal,25.913
+ES000000,2015,vcs-55-Spain-Beef and veal,0.193
+ES000000,2015,vcs-56-Spain-Beef and veal,1.44
+ES000000,2016,cscs-Spain-cotton,60.8412
+ES000000,2016,vcs-119-Spain-Fruit and vegetables,6.352
+ES000000,2016,vcs-125-Spain-Grain legumes,1.0
+ES000000,2016,vcs-165-Spain-Milk and milk products,51.861
+ES000000,2016,vcs-166-Spain-Milk and milk products,26.986
+ES000000,2016,vcs-167-Spain-Milk and milk products,9.853
+ES000000,2016,vcs-168-Spain-Milk and milk products,2.652
+ES000000,2016,vcs-169-Spain-Milk and milk products,2.227
+ES000000,2016,vcs-171-Spain-Nuts,12.956
+ES000000,2016,vcs-172-Spain-Nuts,1.044
+ES000000,2016,vcs-201-Spain-Protein crops,21.64554
+ES000000,2016,vcs-202-Spain-Protein crops,22.891489
+ES000000,2016,vcs-210-Spain-Rice,12.206
+ES000000,2016,vcs-255-Spain-Sheepmeat and goatmeat,124.475
+ES000000,2016,vcs-256-Spain-Sheepmeat and goatmeat,3.428
+ES000000,2016,vcs-257-Spain-Sheepmeat and goatmeat,5.386
+ES000000,2016,vcs-258-Spain-Sheepmeat and goatmeat,5.093
+ES000000,2016,vcs-259-Spain-Sheepmeat and goatmeat,30.155
+ES000000,2016,vcs-281-Spain-Sugar beet,14.46961
+ES000000,2016,vcs-282-Spain-Sugar beet,2.36639
+ES000000,2016,vcs-50-Spain-Beef and veal,187.294
+ES000000,2016,vcs-51-Spain-Beef and veal,0.451
+ES000000,2016,vcs-52-Spain-Beef and veal,12.488
+ES000000,2016,vcs-53-Spain-Beef and veal,0.093
+ES000000,2016,vcs-54-Spain-Beef and veal,25.913
+ES000000,2016,vcs-55-Spain-Beef and veal,0.193
+ES000000,2016,vcs-56-Spain-Beef and veal,1.44
+ES000000,2017,cscs-Spain-cotton,60.8412
+ES000000,2017,vcs-119-Spain-Fruit and vegetables,6.352
+ES000000,2017,vcs-125-Spain-Grain legumes,1.0
+ES000000,2017,vcs-165-Spain-Milk and milk products,51.861
+ES000000,2017,vcs-166-Spain-Milk and milk products,26.986
+ES000000,2017,vcs-167-Spain-Milk and milk products,9.853
+ES000000,2017,vcs-168-Spain-Milk and milk products,2.652
+ES000000,2017,vcs-169-Spain-Milk and milk products,2.227
+ES000000,2017,vcs-171-Spain-Nuts,12.956
+ES000000,2017,vcs-172-Spain-Nuts,1.044
+ES000000,2017,vcs-201-Spain-Protein crops,21.64554
+ES000000,2017,vcs-202-Spain-Protein crops,22.891489
+ES000000,2017,vcs-210-Spain-Rice,12.206
+ES000000,2017,vcs-255-Spain-Sheepmeat and goatmeat,124.475
+ES000000,2017,vcs-256-Spain-Sheepmeat and goatmeat,3.428
+ES000000,2017,vcs-257-Spain-Sheepmeat and goatmeat,5.386
+ES000000,2017,vcs-258-Spain-Sheepmeat and goatmeat,5.093
+ES000000,2017,vcs-259-Spain-Sheepmeat and goatmeat,30.155
+ES000000,2017,vcs-281-Spain-Sugar beet,14.46961
+ES000000,2017,vcs-282-Spain-Sugar beet,2.36639
+ES000000,2017,vcs-50-Spain-Beef and veal,187.294
+ES000000,2017,vcs-51-Spain-Beef and veal,0.451
+ES000000,2017,vcs-52-Spain-Beef and veal,12.488
+ES000000,2017,vcs-53-Spain-Beef and veal,0.093
+ES000000,2017,vcs-54-Spain-Beef and veal,25.913
+ES000000,2017,vcs-55-Spain-Beef and veal,0.193
+ES000000,2017,vcs-56-Spain-Beef and veal,1.44
+ES000000,2018,cscs-Spain-cotton,60.8412
+ES000000,2018,vcs-119-Spain-Fruit and vegetables,6.352
+ES000000,2018,vcs-125-Spain-Grain legumes,1.0
+ES000000,2018,vcs-165-Spain-Milk and milk products,51.861
+ES000000,2018,vcs-166-Spain-Milk and milk products,26.986
+ES000000,2018,vcs-167-Spain-Milk and milk products,9.853
+ES000000,2018,vcs-168-Spain-Milk and milk products,2.652
+ES000000,2018,vcs-169-Spain-Milk and milk products,2.227
+ES000000,2018,vcs-171-Spain-Nuts,12.956
+ES000000,2018,vcs-172-Spain-Nuts,1.044
+ES000000,2018,vcs-201-Spain-Protein crops,21.64554
+ES000000,2018,vcs-202-Spain-Protein crops,22.891489
+ES000000,2018,vcs-210-Spain-Rice,12.206
+ES000000,2018,vcs-255-Spain-Sheepmeat and goatmeat,124.475
+ES000000,2018,vcs-256-Spain-Sheepmeat and goatmeat,3.428
+ES000000,2018,vcs-257-Spain-Sheepmeat and goatmeat,5.386
+ES000000,2018,vcs-258-Spain-Sheepmeat and goatmeat,5.093
+ES000000,2018,vcs-259-Spain-Sheepmeat and goatmeat,30.155
+ES000000,2018,vcs-281-Spain-Sugar beet,14.46961
+ES000000,2018,vcs-282-Spain-Sugar beet,2.36639
+ES000000,2018,vcs-50-Spain-Beef and veal,187.294
+ES000000,2018,vcs-51-Spain-Beef and veal,0.451
+ES000000,2018,vcs-52-Spain-Beef and veal,12.488
+ES000000,2018,vcs-53-Spain-Beef and veal,0.093
+ES000000,2018,vcs-54-Spain-Beef and veal,25.913
+ES000000,2018,vcs-55-Spain-Beef and veal,0.193
+ES000000,2018,vcs-56-Spain-Beef and veal,1.44
+ES000000,2019,cscs-Spain-cotton,60.8412
+ES000000,2019,vcs-119-Spain-Fruit and vegetables,6.352
+ES000000,2019,vcs-125-Spain-Grain legumes,1.0
+ES000000,2019,vcs-165-Spain-Milk and milk products,51.861
+ES000000,2019,vcs-166-Spain-Milk and milk products,26.986
+ES000000,2019,vcs-167-Spain-Milk and milk products,9.853
+ES000000,2019,vcs-168-Spain-Milk and milk products,2.652
+ES000000,2019,vcs-169-Spain-Milk and milk products,2.227
+ES000000,2019,vcs-171-Spain-Nuts,12.956
+ES000000,2019,vcs-172-Spain-Nuts,1.044
+ES000000,2019,vcs-201-Spain-Protein crops,21.64554
+ES000000,2019,vcs-202-Spain-Protein crops,22.891489
+ES000000,2019,vcs-210-Spain-Rice,12.206
+ES000000,2019,vcs-255-Spain-Sheepmeat and goatmeat,124.475
+ES000000,2019,vcs-256-Spain-Sheepmeat and goatmeat,3.428
+ES000000,2019,vcs-257-Spain-Sheepmeat and goatmeat,5.386
+ES000000,2019,vcs-258-Spain-Sheepmeat and goatmeat,5.093
+ES000000,2019,vcs-259-Spain-Sheepmeat and goatmeat,30.155
+ES000000,2019,vcs-281-Spain-Sugar beet,14.46961
+ES000000,2019,vcs-282-Spain-Sugar beet,2.36639
+ES000000,2019,vcs-50-Spain-Beef and veal,187.294
+ES000000,2019,vcs-51-Spain-Beef and veal,0.451
+ES000000,2019,vcs-52-Spain-Beef and veal,12.488
+ES000000,2019,vcs-53-Spain-Beef and veal,0.093
+ES000000,2019,vcs-54-Spain-Beef and veal,25.913
+ES000000,2019,vcs-55-Spain-Beef and veal,0.193
+ES000000,2019,vcs-56-Spain-Beef and veal,1.44
+ES000000,2020,cscs-Spain-cotton,60.8412
+ES000000,2020,vcs-119-Spain-Fruit and vegetables,6.352
+ES000000,2020,vcs-125-Spain-Grain legumes,1.0
+ES000000,2020,vcs-165-Spain-Milk and milk products,51.861
+ES000000,2020,vcs-166-Spain-Milk and milk products,26.986
+ES000000,2020,vcs-167-Spain-Milk and milk products,9.853
+ES000000,2020,vcs-168-Spain-Milk and milk products,2.652
+ES000000,2020,vcs-169-Spain-Milk and milk products,2.227
+ES000000,2020,vcs-171-Spain-Nuts,12.956
+ES000000,2020,vcs-172-Spain-Nuts,1.044
+ES000000,2020,vcs-201-Spain-Protein crops,21.64554
+ES000000,2020,vcs-202-Spain-Protein crops,22.891489
+ES000000,2020,vcs-210-Spain-Rice,12.206
+ES000000,2020,vcs-255-Spain-Sheepmeat and goatmeat,124.475
+ES000000,2020,vcs-256-Spain-Sheepmeat and goatmeat,3.428
+ES000000,2020,vcs-257-Spain-Sheepmeat and goatmeat,5.386
+ES000000,2020,vcs-258-Spain-Sheepmeat and goatmeat,5.093
+ES000000,2020,vcs-259-Spain-Sheepmeat and goatmeat,30.155
+ES000000,2020,vcs-281-Spain-Sugar beet,14.46961
+ES000000,2020,vcs-282-Spain-Sugar beet,2.36639
+ES000000,2020,vcs-50-Spain-Beef and veal,187.294
+ES000000,2020,vcs-51-Spain-Beef and veal,0.451
+ES000000,2020,vcs-52-Spain-Beef and veal,12.488
+ES000000,2020,vcs-53-Spain-Beef and veal,0.093
+ES000000,2020,vcs-54-Spain-Beef and veal,25.913
+ES000000,2020,vcs-55-Spain-Beef and veal,0.193
+ES000000,2020,vcs-56-Spain-Beef and veal,1.44
+FI000000,2015,vcs-144-Finland-Milk and milk products,30.5
+FI000000,2015,vcs-145-Finland-Milk and milk products,1.14
+FI000000,2015,vcs-146-Finland-Milk and milk products,0.36
+FI000000,2015,vcs-147-Finland-Milk and milk products,0.2
+FI000000,2015,vcs-184-Finland-Protein crops,6.3
+FI000000,2015,vcs-20-Finland-Beef and veal,8.4
+FI000000,2015,vcs-21-Finland-Beef and veal,0.85
+FI000000,2015,vcs-22-Finland-Beef and veal,9.35
+FI000000,2015,vcs-229-Finland-Sheepmeat and goatmeat,1.0
+FI000000,2015,vcs-23-Finland-Beef and veal,13.7
+FI000000,2015,vcs-230-Finland-Sheepmeat and goatmeat,0.3
+FI000000,2015,vcs-231-Finland-Sheepmeat and goatmeat,0.2
+FI000000,2015,vcs-232-Finland-Sheepmeat and goatmeat,1.1
+FI000000,2015,vcs-24-Finland-Beef and veal,0.6
+FI000000,2015,vcs-25-Finland-Beef and veal,21.6166
+FI000000,2015,vcs-26-Finland-Beef and veal,1.0
+FI000000,2015,vcs-267-Finland-Starch potato,3.7
+FI000000,2015,vcs-27-Finland-Beef and veal,0.15
+FI000000,2015,vcs-274-Finland-Sugar beet,1.0
+FI000000,2015,vcs-28-Finland-Beef and veal,0.5
+FI000000,2015,vcs-60-Finland-Cereals,1.5
+FI000000,2015,vcs-80-Finland-Fruit and vegetables,1.2
+FI000000,2016,vcs-144-Finland-Milk and milk products,30.5
+FI000000,2016,vcs-145-Finland-Milk and milk products,1.14
+FI000000,2016,vcs-146-Finland-Milk and milk products,0.36
+FI000000,2016,vcs-147-Finland-Milk and milk products,0.2
+FI000000,2016,vcs-184-Finland-Protein crops,6.3
+FI000000,2016,vcs-20-Finland-Beef and veal,8.4
+FI000000,2016,vcs-21-Finland-Beef and veal,0.85
+FI000000,2016,vcs-22-Finland-Beef and veal,8.85
+FI000000,2016,vcs-229-Finland-Sheepmeat and goatmeat,1.0
+FI000000,2016,vcs-23-Finland-Beef and veal,13.7
+FI000000,2016,vcs-230-Finland-Sheepmeat and goatmeat,0.3
+FI000000,2016,vcs-231-Finland-Sheepmeat and goatmeat,0.2
+FI000000,2016,vcs-232-Finland-Sheepmeat and goatmeat,1.1
+FI000000,2016,vcs-24-Finland-Beef and veal,0.6
+FI000000,2016,vcs-25-Finland-Beef and veal,20.040712
+FI000000,2016,vcs-26-Finland-Beef and veal,1.0
+FI000000,2016,vcs-267-Finland-Starch potato,3.7
+FI000000,2016,vcs-27-Finland-Beef and veal,0.15
+FI000000,2016,vcs-274-Finland-Sugar beet,1.0
+FI000000,2016,vcs-28-Finland-Beef and veal,0.5
+FI000000,2016,vcs-60-Finland-Cereals,1.5
+FI000000,2016,vcs-80-Finland-Fruit and vegetables,1.2
+FI000000,2017,vcs-144-Finland-Milk and milk products,30.5
+FI000000,2017,vcs-145-Finland-Milk and milk products,1.14
+FI000000,2017,vcs-146-Finland-Milk and milk products,0.36
+FI000000,2017,vcs-147-Finland-Milk and milk products,0.2
+FI000000,2017,vcs-184-Finland-Protein crops,6.3
+FI000000,2017,vcs-20-Finland-Beef and veal,8.4
+FI000000,2017,vcs-21-Finland-Beef and veal,0.85
+FI000000,2017,vcs-22-Finland-Beef and veal,8.35
+FI000000,2017,vcs-229-Finland-Sheepmeat and goatmeat,1.0
+FI000000,2017,vcs-23-Finland-Beef and veal,13.7
+FI000000,2017,vcs-230-Finland-Sheepmeat and goatmeat,0.3
+FI000000,2017,vcs-231-Finland-Sheepmeat and goatmeat,0.2
+FI000000,2017,vcs-232-Finland-Sheepmeat and goatmeat,1.1
+FI000000,2017,vcs-24-Finland-Beef and veal,0.6
+FI000000,2017,vcs-25-Finland-Beef and veal,18.460656
+FI000000,2017,vcs-26-Finland-Beef and veal,1.0
+FI000000,2017,vcs-267-Finland-Starch potato,3.7
+FI000000,2017,vcs-27-Finland-Beef and veal,0.15
+FI000000,2017,vcs-274-Finland-Sugar beet,1.0
+FI000000,2017,vcs-28-Finland-Beef and veal,0.5
+FI000000,2017,vcs-60-Finland-Cereals,1.5
+FI000000,2017,vcs-80-Finland-Fruit and vegetables,1.2
+FI000000,2018,vcs-144-Finland-Milk and milk products,30.5
+FI000000,2018,vcs-145-Finland-Milk and milk products,1.14
+FI000000,2018,vcs-146-Finland-Milk and milk products,0.36
+FI000000,2018,vcs-147-Finland-Milk and milk products,0.2
+FI000000,2018,vcs-184-Finland-Protein crops,6.0
+FI000000,2018,vcs-20-Finland-Beef and veal,8.4
+FI000000,2018,vcs-21-Finland-Beef and veal,0.85
+FI000000,2018,vcs-22-Finland-Beef and veal,7.85
+FI000000,2018,vcs-229-Finland-Sheepmeat and goatmeat,1.0
+FI000000,2018,vcs-23-Finland-Beef and veal,13.7
+FI000000,2018,vcs-230-Finland-Sheepmeat and goatmeat,0.3
+FI000000,2018,vcs-231-Finland-Sheepmeat and goatmeat,0.2
+FI000000,2018,vcs-232-Finland-Sheepmeat and goatmeat,1.1
+FI000000,2018,vcs-24-Finland-Beef and veal,0.6
+FI000000,2018,vcs-25-Finland-Beef and veal,17.273656
+FI000000,2018,vcs-26-Finland-Beef and veal,1.0
+FI000000,2018,vcs-267-Finland-Starch potato,3.7
+FI000000,2018,vcs-27-Finland-Beef and veal,0.15
+FI000000,2018,vcs-274-Finland-Sugar beet,1.0
+FI000000,2018,vcs-28-Finland-Beef and veal,0.5
+FI000000,2018,vcs-60-Finland-Cereals,1.5
+FI000000,2018,vcs-80-Finland-Fruit and vegetables,1.2
+FI000000,2019,vcs-144-Finland-Milk and milk products,30.5
+FI000000,2019,vcs-145-Finland-Milk and milk products,1.14
+FI000000,2019,vcs-146-Finland-Milk and milk products,0.36
+FI000000,2019,vcs-147-Finland-Milk and milk products,0.2
+FI000000,2019,vcs-184-Finland-Protein crops,5.7
+FI000000,2019,vcs-20-Finland-Beef and veal,8.4
+FI000000,2019,vcs-21-Finland-Beef and veal,0.85
+FI000000,2019,vcs-22-Finland-Beef and veal,7.35
+FI000000,2019,vcs-229-Finland-Sheepmeat and goatmeat,1.0
+FI000000,2019,vcs-23-Finland-Beef and veal,13.7
+FI000000,2019,vcs-230-Finland-Sheepmeat and goatmeat,0.3
+FI000000,2019,vcs-231-Finland-Sheepmeat and goatmeat,0.2
+FI000000,2019,vcs-232-Finland-Sheepmeat and goatmeat,1.1
+FI000000,2019,vcs-24-Finland-Beef and veal,0.6
+FI000000,2019,vcs-25-Finland-Beef and veal,16.182104
+FI000000,2019,vcs-26-Finland-Beef and veal,1.0
+FI000000,2019,vcs-267-Finland-Starch potato,3.7
+FI000000,2019,vcs-27-Finland-Beef and veal,0.15
+FI000000,2019,vcs-274-Finland-Sugar beet,1.0
+FI000000,2019,vcs-28-Finland-Beef and veal,0.5
+FI000000,2019,vcs-60-Finland-Cereals,1.5
+FI000000,2019,vcs-80-Finland-Fruit and vegetables,1.1
+FI000000,2020,vcs-144-Finland-Milk and milk products,30.5
+FI000000,2020,vcs-145-Finland-Milk and milk products,1.14
+FI000000,2020,vcs-146-Finland-Milk and milk products,0.36
+FI000000,2020,vcs-147-Finland-Milk and milk products,0.2
+FI000000,2020,vcs-184-Finland-Protein crops,5.5
+FI000000,2020,vcs-20-Finland-Beef and veal,8.4
+FI000000,2020,vcs-21-Finland-Beef and veal,0.85
+FI000000,2020,vcs-22-Finland-Beef and veal,6.85
+FI000000,2020,vcs-229-Finland-Sheepmeat and goatmeat,1.0
+FI000000,2020,vcs-23-Finland-Beef and veal,13.7
+FI000000,2020,vcs-230-Finland-Sheepmeat and goatmeat,0.3
+FI000000,2020,vcs-231-Finland-Sheepmeat and goatmeat,0.2
+FI000000,2020,vcs-232-Finland-Sheepmeat and goatmeat,1.1
+FI000000,2020,vcs-24-Finland-Beef and veal,0.6
+FI000000,2020,vcs-25-Finland-Beef and veal,14.78358
+FI000000,2020,vcs-26-Finland-Beef and veal,1.0
+FI000000,2020,vcs-267-Finland-Starch potato,3.7
+FI000000,2020,vcs-27-Finland-Beef and veal,0.15
+FI000000,2020,vcs-274-Finland-Sugar beet,1.0
+FI000000,2020,vcs-28-Finland-Beef and veal,0.5
+FI000000,2020,vcs-60-Finland-Cereals,1.5
+FI000000,2020,vcs-80-Finland-Fruit and vegetables,1.1
+FR000000,2015,vcs-127-France-Hemp,1.69
+FR000000,2015,vcs-133-France-Hops,0.338
+FR000000,2015,vcs-148-France-Milk and milk products,86.27
+FR000000,2015,vcs-149-France-Milk and milk products,43.47
+FR000000,2015,vcs-150-France-Milk and milk products,3.69
+FR000000,2015,vcs-151-France-Milk and milk products,1.81
+FR000000,2015,vcs-185-France-Protein crops,94.805
+FR000000,2015,vcs-186-France-Protein crops,5.8
+FR000000,2015,vcs-187-France-Protein crops,33.85
+FR000000,2015,vcs-188-France-Protein crops,7.74
+FR000000,2015,vcs-189-France-Protein crops,3.86
+FR000000,2015,vcs-212-France-Seeds,0.483
+FR000000,2015,vcs-233-France-Sheepmeat and goatmeat,81.77
+FR000000,2015,vcs-234-France-Sheepmeat and goatmeat,9.7
+FR000000,2015,vcs-235-France-Sheepmeat and goatmeat,13.2
+FR000000,2015,vcs-236-France-Sheepmeat and goatmeat,16.09
+FR000000,2015,vcs-237-France-Sheepmeat and goatmeat,12.2
+FR000000,2015,vcs-238-France-Sheepmeat and goatmeat,2.29
+FR000000,2015,vcs-268-France-Starch potato,1.93
+FR000000,2015,vcs-29-France-Beef and veal,273.27
+FR000000,2015,vcs-30-France-Beef and veal,232.79
+FR000000,2015,vcs-31-France-Beef and veal,141.24
+FR000000,2015,vcs-32-France-Beef and veal,2.9711
+FR000000,2015,vcs-33-France-Beef and veal,1.8589
+FR000000,2015,vcs-61-France-Cereals,6.76
+FR000000,2015,vcs-81-France-Fruit and vegetables,11.59
+FR000000,2015,vcs-82-France-Fruit and vegetables,0.502
+FR000000,2015,vcs-83-France-Fruit and vegetables,0.067
+FR000000,2015,vcs-84-France-Fruit and vegetables,0.396
+FR000000,2015,vcs-85-France-Fruit and vegetables,2.89
+FR000000,2016,vcs-127-France-Hemp,1.682716
+FR000000,2016,vcs-133-France-Hops,0.336543
+FR000000,2016,vcs-148-France-Milk and milk products,85.898203
+FR000000,2016,vcs-149-France-Milk and milk products,43.282657
+FR000000,2016,vcs-150-France-Milk and milk products,3.674097
+FR000000,2016,vcs-151-France-Milk and milk products,1.802199
+FR000000,2016,vcs-185-France-Protein crops,94.396429
+FR000000,2016,vcs-186-France-Protein crops,5.775003
+FR000000,2016,vcs-187-France-Protein crops,33.704116
+FR000000,2016,vcs-188-France-Protein crops,7.706642
+FR000000,2016,vcs-189-France-Protein crops,3.843364
+FR000000,2016,vcs-212-France-Seeds,0.480918
+FR000000,2016,vcs-233-France-Sheepmeat and goatmeat,81.417598
+FR000000,2016,vcs-234-France-Sheepmeat and goatmeat,9.658195
+FR000000,2016,vcs-235-France-Sheepmeat and goatmeat,13.143112
+FR000000,2016,vcs-236-France-Sheepmeat and goatmeat,16.020656
+FR000000,2016,vcs-237-France-Sheepmeat and goatmeat,12.147422
+FR000000,2016,vcs-238-France-Sheepmeat and goatmeat,2.28013
+FR000000,2016,vcs-268-France-Starch potato,1.921682
+FR000000,2016,vcs-29-France-Beef and veal,272.09229
+FR000000,2016,vcs-30-France-Beef and veal,231.786745
+FR000000,2016,vcs-31-France-Beef and veal,140.631299
+FR000000,2016,vcs-32-France-Beef and veal,2.958295
+FR000000,2016,vcs-33-France-Beef and veal,1.850889
+FR000000,2016,vcs-61-France-Cereals,6.730866
+FR000000,2016,vcs-81-France-Fruit and vegetables,11.54005
+FR000000,2016,vcs-82-France-Fruit and vegetables,0.499836
+FR000000,2016,vcs-83-France-Fruit and vegetables,0.066711
+FR000000,2016,vcs-84-France-Fruit and vegetables,0.394293
+FR000000,2016,vcs-85-France-Fruit and vegetables,2.877544
+FR000000,2017,vcs-127-France-Hemp,1.67539
+FR000000,2017,vcs-133-France-Hops,0.335078
+FR000000,2017,vcs-148-France-Milk and milk products,85.524243
+FR000000,2017,vcs-149-France-Milk and milk products,43.094225
+FR000000,2017,vcs-150-France-Milk and milk products,3.658102
+FR000000,2017,vcs-151-France-Milk and milk products,1.794353
+FR000000,2017,vcs-185-France-Protein crops,93.985473
+FR000000,2017,vcs-186-France-Protein crops,5.749862
+FR000000,2017,vcs-187-France-Protein crops,33.557385
+FR000000,2017,vcs-188-France-Protein crops,7.673091
+FR000000,2017,vcs-189-France-Protein crops,3.826632
+FR000000,2017,vcs-212-France-Seeds,0.478825
+FR000000,2017,vcs-233-France-Sheepmeat and goatmeat,81.063144
+FR000000,2017,vcs-234-France-Sheepmeat and goatmeat,9.616148
+FR000000,2017,vcs-235-France-Sheepmeat and goatmeat,13.085893
+FR000000,2017,vcs-236-France-Sheepmeat and goatmeat,15.95091
+FR000000,2017,vcs-237-France-Sheepmeat and goatmeat,12.094537
+FR000000,2017,vcs-238-France-Sheepmeat and goatmeat,2.270204
+FR000000,2017,vcs-268-France-Starch potato,1.913316
+FR000000,2017,vcs-29-France-Beef and veal,270.907732
+FR000000,2017,vcs-30-France-Beef and veal,230.777657
+FR000000,2017,vcs-31-France-Beef and veal,140.019057
+FR000000,2017,vcs-32-France-Beef and veal,2.945416
+FR000000,2017,vcs-33-France-Beef and veal,1.842831
+FR000000,2017,vcs-61-France-Cereals,6.701563
+FR000000,2017,vcs-81-France-Fruit and vegetables,11.48981
+FR000000,2017,vcs-82-France-Fruit and vegetables,0.49766
+FR000000,2017,vcs-83-France-Fruit and vegetables,0.06642
+FR000000,2017,vcs-84-France-Fruit and vegetables,0.392576
+FR000000,2017,vcs-85-France-Fruit and vegetables,2.865017
+FR000000,2018,vcs-127-France-Hemp,1.669665
+FR000000,2018,vcs-133-France-Hops,0.333933
+FR000000,2018,vcs-148-France-Milk and milk products,85.23198
+FR000000,2018,vcs-149-France-Milk and milk products,42.946959
+FR000000,2018,vcs-150-France-Milk and milk products,3.645601
+FR000000,2018,vcs-151-France-Milk and milk products,1.788221
+FR000000,2018,vcs-185-France-Protein crops,93.664293
+FR000000,2018,vcs-186-France-Protein crops,5.730213
+FR000000,2018,vcs-187-France-Protein crops,33.442709
+FR000000,2018,vcs-188-France-Protein crops,7.64687
+FR000000,2018,vcs-189-France-Protein crops,3.813555
+FR000000,2018,vcs-212-France-Seeds,0.477188
+FR000000,2018,vcs-233-France-Sheepmeat and goatmeat,80.786126
+FR000000,2018,vcs-234-France-Sheepmeat and goatmeat,9.583287
+FR000000,2018,vcs-235-France-Sheepmeat and goatmeat,13.041174
+FR000000,2018,vcs-236-France-Sheepmeat and goatmeat,15.896401
+FR000000,2018,vcs-237-France-Sheepmeat and goatmeat,12.053207
+FR000000,2018,vcs-238-France-Sheepmeat and goatmeat,2.262446
+FR000000,2018,vcs-268-France-Starch potato,1.906777
+FR000000,2018,vcs-29-France-Beef and veal,269.981954
+FR000000,2018,vcs-30-France-Beef and veal,229.989018
+FR000000,2018,vcs-31-France-Beef and veal,139.540568
+FR000000,2018,vcs-32-France-Beef and veal,2.935351
+FR000000,2018,vcs-33-France-Beef and veal,1.836533
+FR000000,2018,vcs-61-France-Cereals,6.678662
+FR000000,2018,vcs-81-France-Fruit and vegetables,11.450546
+FR000000,2018,vcs-82-France-Fruit and vegetables,0.495959
+FR000000,2018,vcs-83-France-Fruit and vegetables,0.066193
+FR000000,2018,vcs-84-France-Fruit and vegetables,0.391235
+FR000000,2018,vcs-85-France-Fruit and vegetables,2.855226
+FR000000,2019,vcs-127-France-Hemp,1.66394
+FR000000,2019,vcs-133-France-Hops,0.332788
+FR000000,2019,vcs-148-France-Milk and milk products,84.939717
+FR000000,2019,vcs-149-France-Milk and milk products,42.799692
+FR000000,2019,vcs-150-France-Milk and milk products,3.6331
+FR000000,2019,vcs-151-France-Milk and milk products,1.782089
+FR000000,2019,vcs-185-France-Protein crops,93.343117
+FR000000,2019,vcs-186-France-Protein crops,5.710563
+FR000000,2019,vcs-187-France-Protein crops,33.328032
+FR000000,2019,vcs-188-France-Protein crops,7.620649
+FR000000,2019,vcs-189-France-Protein crops,3.800478
+FR000000,2019,vcs-212-France-Seeds,0.475552
+FR000000,2019,vcs-233-France-Sheepmeat and goatmeat,80.509108
+FR000000,2019,vcs-234-France-Sheepmeat and goatmeat,9.550425
+FR000000,2019,vcs-235-France-Sheepmeat and goatmeat,12.996455
+FR000000,2019,vcs-236-France-Sheepmeat and goatmeat,15.841892
+FR000000,2019,vcs-237-France-Sheepmeat and goatmeat,12.011876
+FR000000,2019,vcs-238-France-Sheepmeat and goatmeat,2.254688
+FR000000,2019,vcs-268-France-Starch potato,1.900239
+FR000000,2019,vcs-29-France-Beef and veal,269.056176
+FR000000,2019,vcs-30-France-Beef and veal,229.200378
+FR000000,2019,vcs-31-France-Beef and veal,139.062079
+FR000000,2019,vcs-32-France-Beef and veal,2.925285
+FR000000,2019,vcs-33-France-Beef and veal,1.830236
+FR000000,2019,vcs-61-France-Cereals,6.65576
+FR000000,2019,vcs-81-France-Fruit and vegetables,11.411282
+FR000000,2019,vcs-82-France-Fruit and vegetables,0.494259
+FR000000,2019,vcs-83-France-Fruit and vegetables,0.065966
+FR000000,2019,vcs-84-France-Fruit and vegetables,0.389893
+FR000000,2019,vcs-85-France-Fruit and vegetables,2.845436
+FR000000,2020,vcs-127-France-Hemp,1.721258
+FR000000,2020,vcs-133-France-Hops,0.344251
+FR000000,2020,vcs-148-France-Milk and milk products,87.865646
+FR000000,2020,vcs-149-France-Milk and milk products,44.274018
+FR000000,2020,vcs-150-France-Milk and milk products,3.75825
+FR000000,2020,vcs-151-France-Milk and milk products,1.843477
+FR000000,2020,vcs-185-France-Protein crops,96.558518
+FR000000,2020,vcs-186-France-Protein crops,5.907276
+FR000000,2020,vcs-187-France-Protein crops,34.476087
+FR000000,2020,vcs-188-France-Protein crops,7.883158
+FR000000,2020,vcs-189-France-Protein crops,3.931394
+FR000000,2020,vcs-212-France-Seeds,0.491933
+FR000000,2020,vcs-233-France-Sheepmeat and goatmeat,83.282415
+FR000000,2020,vcs-234-France-Sheepmeat and goatmeat,9.87941
+FR000000,2020,vcs-235-France-Sheepmeat and goatmeat,13.444146
+FR000000,2020,vcs-236-France-Sheepmeat and goatmeat,16.387599
+FR000000,2020,vcs-237-France-Sheepmeat and goatmeat,12.425651
+FR000000,2020,vcs-238-France-Sheepmeat and goatmeat,2.332355
+FR000000,2020,vcs-268-France-Starch potato,1.965697
+FR000000,2020,vcs-29-France-Beef and veal,278.324388
+FR000000,2020,vcs-30-France-Beef and veal,237.095671
+FR000000,2020,vcs-31-France-Beef and veal,143.852367
+FR000000,2020,vcs-32-France-Beef and veal,3.026053
+FR000000,2020,vcs-33-France-Beef and veal,1.893282
+FR000000,2020,vcs-61-France-Cereals,6.885032
+FR000000,2020,vcs-81-France-Fruit and vegetables,11.804368
+FR000000,2020,vcs-82-France-Fruit and vegetables,0.511284
+FR000000,2020,vcs-83-France-Fruit and vegetables,0.068239
+FR000000,2020,vcs-84-France-Fruit and vegetables,0.403324
+FR000000,2020,vcs-85-France-Fruit and vegetables,2.943453
+HR000000,2015,vcs-140-Croatia-Milk and milk products,8.617534
+HR000000,2015,vcs-15-Croatia-Beef and veal,5.547817
+HR000000,2015,vcs-16-Croatia-Beef and veal,2.921839
+HR000000,2015,vcs-182-Croatia-Protein crops,3.660698
+HR000000,2015,vcs-225-Croatia-Sheepmeat and goatmeat,2.163633
+HR000000,2015,vcs-272-Croatia-Sugar beet,2.770028
+HR000000,2015,vcs-71-Croatia-Fruit and vegetables,0.865368
+HR000000,2015,vcs-72-Croatia-Fruit and vegetables,0.908317
+HR000000,2016,vcs-140-Croatia-Milk and milk products,9.513491
+HR000000,2016,vcs-15-Croatia-Beef and veal,6.124618
+HR000000,2016,vcs-16-Croatia-Beef and veal,3.22562
+HR000000,2016,vcs-182-Croatia-Protein crops,4.041297
+HR000000,2016,vcs-225-Croatia-Sheepmeat and goatmeat,2.388583
+HR000000,2016,vcs-272-Croatia-Sugar beet,3.058025
+HR000000,2016,vcs-71-Croatia-Fruit and vegetables,0.955339
+HR000000,2016,vcs-72-Croatia-Fruit and vegetables,1.002754
+HR000000,2017,vcs-140-Croatia-Milk and milk products,11.305405
+HR000000,2017,vcs-15-Croatia-Beef and veal,7.278221
+HR000000,2017,vcs-16-Croatia-Beef and veal,3.833182
+HR000000,2017,vcs-182-Croatia-Protein crops,4.802496
+HR000000,2017,vcs-225-Croatia-Sheepmeat and goatmeat,2.838485
+HR000000,2017,vcs-272-Croatia-Sugar beet,3.63402
+HR000000,2017,vcs-71-Croatia-Fruit and vegetables,1.135282
+HR000000,2017,vcs-72-Croatia-Fruit and vegetables,1.191628
+HR000000,2018,vcs-140-Croatia-Milk and milk products,13.097319
+HR000000,2018,vcs-15-Croatia-Beef and veal,8.431823
+HR000000,2018,vcs-16-Croatia-Beef and veal,4.440744
+HR000000,2018,vcs-182-Croatia-Protein crops,5.563695
+HR000000,2018,vcs-225-Croatia-Sheepmeat and goatmeat,3.288387
+HR000000,2018,vcs-272-Croatia-Sugar beet,4.210014
+HR000000,2018,vcs-71-Croatia-Fruit and vegetables,1.315225
+HR000000,2018,vcs-72-Croatia-Fruit and vegetables,1.380502
+HR000000,2019,vcs-140-Croatia-Milk and milk products,14.889233
+HR000000,2019,vcs-15-Croatia-Beef and veal,9.585426
+HR000000,2019,vcs-16-Croatia-Beef and veal,5.048306
+HR000000,2019,vcs-182-Croatia-Protein crops,6.324893
+HR000000,2019,vcs-225-Croatia-Sheepmeat and goatmeat,3.738289
+HR000000,2019,vcs-272-Croatia-Sugar beet,4.786009
+HR000000,2019,vcs-71-Croatia-Fruit and vegetables,1.495168
+HR000000,2019,vcs-72-Croatia-Fruit and vegetables,1.569376
+HR000000,2020,vcs-140-Croatia-Milk and milk products,14.335312
+HR000000,2020,vcs-15-Croatia-Beef and veal,9.228821
+HR000000,2020,vcs-16-Croatia-Beef and veal,4.860495
+HR000000,2020,vcs-182-Croatia-Protein crops,6.089589
+HR000000,2020,vcs-225-Croatia-Sheepmeat and goatmeat,3.599214
+HR000000,2020,vcs-272-Croatia-Sugar beet,4.607956
+HR000000,2020,vcs-71-Croatia-Fruit and vegetables,1.439544
+HR000000,2020,vcs-72-Croatia-Fruit and vegetables,1.510991
+HU000000,2015,vcs-152-Hungary-Milk and milk products,69.0
+HU000000,2015,vcs-191-Hungary-Protein crops,13.45746
+HU000000,2015,vcs-192-Hungary-Protein crops,13.45746
+HU000000,2015,vcs-206-Hungary-Rice,2.0
+HU000000,2015,vcs-242-Hungary-Sheepmeat and goatmeat,22.0
+HU000000,2015,vcs-276-Hungary-Sugar beet,8.0
+HU000000,2015,vcs-36-Hungary-Beef and veal,35.0
+HU000000,2015,vcs-37-Hungary-Beef and veal,4.5
+HU000000,2015,vcs-90-Hungary-Fruit and vegetables,9.94698
+HU000000,2015,vcs-91-Hungary-Fruit and vegetables,8.0
+HU000000,2015,vcs-92-Hungary-Fruit and vegetables,16.5
+HU000000,2016,vcs-152-Hungary-Milk and milk products,68.934115
+HU000000,2016,vcs-191-Hungary-Protein crops,13.44461
+HU000000,2016,vcs-192-Hungary-Protein crops,13.44461
+HU000000,2016,vcs-206-Hungary-Rice,1.99809
+HU000000,2016,vcs-242-Hungary-Sheepmeat and goatmeat,21.978993
+HU000000,2016,vcs-276-Hungary-Sugar beet,7.992361
+HU000000,2016,vcs-36-Hungary-Beef and veal,34.96658
+HU000000,2016,vcs-37-Hungary-Beef and veal,4.495703
+HU000000,2016,vcs-90-Hungary-Fruit and vegetables,9.937482
+HU000000,2016,vcs-91-Hungary-Fruit and vegetables,7.992361
+HU000000,2016,vcs-92-Hungary-Fruit and vegetables,16.484245
+HU000000,2017,vcs-152-Hungary-Milk and milk products,68.866076
+HU000000,2017,vcs-191-Hungary-Protein crops,13.43134
+HU000000,2017,vcs-192-Hungary-Protein crops,13.43134
+HU000000,2017,vcs-206-Hungary-Rice,1.996118
+HU000000,2017,vcs-242-Hungary-Sheepmeat and goatmeat,21.9573
+HU000000,2017,vcs-276-Hungary-Sugar beet,7.984473
+HU000000,2017,vcs-36-Hungary-Beef and veal,34.932067
+HU000000,2017,vcs-37-Hungary-Beef and veal,4.491266
+HU000000,2017,vcs-90-Hungary-Fruit and vegetables,9.927674
+HU000000,2017,vcs-91-Hungary-Fruit and vegetables,7.984743
+HU000000,2017,vcs-92-Hungary-Fruit and vegetables,16.467975
+HU000000,2018,vcs-152-Hungary-Milk and milk products,68.859718
+HU000000,2018,vcs-191-Hungary-Protein crops,13.4301
+HU000000,2018,vcs-192-Hungary-Protein crops,13.4301
+HU000000,2018,vcs-206-Hungary-Rice,1.995934
+HU000000,2018,vcs-242-Hungary-Sheepmeat and goatmeat,21.955272
+HU000000,2018,vcs-276-Hungary-Sugar beet,7.983735
+HU000000,2018,vcs-36-Hungary-Beef and veal,34.928842
+HU000000,2018,vcs-37-Hungary-Beef and veal,4.490851
+HU000000,2018,vcs-90-Hungary-Fruit and vegetables,9.926757
+HU000000,2018,vcs-91-Hungary-Fruit and vegetables,7.983735
+HU000000,2018,vcs-92-Hungary-Fruit and vegetables,16.466454
+HU000000,2019,vcs-152-Hungary-Milk and milk products,68.852386
+HU000000,2019,vcs-191-Hungary-Protein crops,13.42867
+HU000000,2019,vcs-192-Hungary-Protein crops,13.42867
+HU000000,2019,vcs-206-Hungary-Rice,1.995721
+HU000000,2019,vcs-242-Hungary-Sheepmeat and goatmeat,21.952935
+HU000000,2019,vcs-276-Hungary-Sugar beet,7.982885
+HU000000,2019,vcs-36-Hungary-Beef and veal,34.925123
+HU000000,2019,vcs-37-Hungary-Beef and veal,4.490373
+HU000000,2019,vcs-90-Hungary-Fruit and vegetables,9.9257
+HU000000,2019,vcs-91-Hungary-Fruit and vegetables,7.982885
+HU000000,2019,vcs-92-Hungary-Fruit and vegetables,16.464701
+HU000000,2020,vcs-152-Hungary-Milk and milk products,64.073128
+HU000000,2020,vcs-191-Hungary-Protein crops,12.69158
+HU000000,2020,vcs-192-Hungary-Protein crops,12.69158
+HU000000,2020,vcs-206-Hungary-Rice,1.886178
+HU000000,2020,vcs-242-Hungary-Sheepmeat and goatmeat,20.747954
+HU000000,2020,vcs-276-Hungary-Sugar beet,7.544711
+HU000000,2020,vcs-36-Hungary-Beef and veal,33.008109
+HU000000,2020,vcs-37-Hungary-Beef and veal,4.2439
+HU000000,2020,vcs-90-Hungary-Fruit and vegetables,9.380886
+HU000000,2020,vcs-91-Hungary-Fruit and vegetables,7.544711
+HU000000,2020,vcs-92-Hungary-Fruit and vegetables,15.560965
+IR000000,2015,vcs-193-Ireland-Protein crops,3.0
+IR000000,2016,vcs-193-Ireland-Protein crops,3.0
+IR000000,2017,vcs-193-Ireland-Protein crops,3.0
+IR000000,2018,vcs-193-Ireland-Protein crops,3.0
+IR000000,2019,vcs-193-Ireland-Protein crops,3.0
+IR000000,2020,vcs-193-Ireland-Protein crops,3.0
+IT000000,2015,vcs-121-Italy-Grain legumes,11.803668
+IT000000,2015,vcs-153-Italy-Milk and milk products,75.114251
+IT000000,2015,vcs-154-Italy-Milk and milk products,9.872159
+IT000000,2015,vcs-155-Italy-Milk and milk products,4.120553
+IT000000,2015,vcs-174-Italy-Oilseeds,9.872159
+IT000000,2015,vcs-177-Italy-Olive oil,13.305953
+IT000000,2015,vcs-178-Italy-Olive oil,44.210102
+IT000000,2015,vcs-179-Italy-Olive oil,12.876729
+IT000000,2015,vcs-203-Italy-Protein crops ,14.164402
+IT000000,2015,vcs-207-Italy-Rice,22.748887
+IT000000,2015,vcs-243-Italy-Sheepmeat and goatmeat,9.485857
+IT000000,2015,vcs-244-Italy-Sheepmeat and goatmeat,5.536993
+IT000000,2015,vcs-277-Italy-Sugar beet,17.211894
+IT000000,2015,vcs-38-Italy-Beef and veal,40.776308
+IT000000,2015,vcs-39-Italy-Beef and veal,66.958989
+IT000000,2015,vcs-59-Italy-Cereals,59.876788
+IT000000,2015,vcs-93-Italy-Fruit and vegetables,11.288599
+IT000000,2016,vcs-121-Italy-Grain legumes,11.648685
+IT000000,2016,vcs-153-Italy-Milk and milk products,74.127996
+IT000000,2016,vcs-154-Italy-Milk and milk products,9.742537
+IT000000,2016,vcs-155-Italy-Milk and milk products,4.06645
+IT000000,2016,vcs-174-Italy-Oilseeds,9.742537
+IT000000,2016,vcs-177-Italy-Olive oil,13.131245
+IT000000,2016,vcs-178-Italy-Olive oil,43.629621
+IT000000,2016,vcs-179-Italy-Olive oil,12.707659
+IT000000,2016,vcs-203-Italy-Protein crops ,13.978422
+IT000000,2016,vcs-207-Italy-Rice,22.450193
+IT000000,2016,vcs-243-Italy-Sheepmeat and goatmeat,9.361307
+IT000000,2016,vcs-244-Italy-Sheepmeat and goatmeat,5.464292
+IT000000,2016,vcs-277-Italy-Sugar beet,16.985901
+IT000000,2016,vcs-38-Italy-Beef and veal,40.240912
+IT000000,2016,vcs-39-Italy-Beef and veal,66.079814
+IT000000,2016,vcs-59-Italy-Cereals,59.090603
+IT000000,2016,vcs-93-Italy-Fruit and vegetables,11.140379
+IT000000,2017,vcs-121-Italy-Grain legumes,11.493609
+IT000000,2017,vcs-153-Italy-Milk and milk products,73.141145
+IT000000,2017,vcs-154-Italy-Milk and milk products,9.612836
+IT000000,2017,vcs-155-Italy-Milk and milk products,4.012314
+IT000000,2017,vcs-174-Italy-Oilseeds,9.612836
+IT000000,2017,vcs-177-Italy-Olive oil,12.956431
+IT000000,2017,vcs-178-Italy-Olive oil,43.048788
+IT000000,2017,vcs-179-Italy-Olive oil,12.538482
+IT000000,2017,vcs-203-Italy-Protein crops ,13.79233
+IT000000,2017,vcs-207-Italy-Rice,22.151318
+IT000000,2017,vcs-243-Italy-Sheepmeat and goatmeat,9.236682
+IT000000,2017,vcs-244-Italy-Sheepmeat and goatmeat,5.391547
+IT000000,2017,vcs-277-Italy-Sugar beet,16.759771
+IT000000,2017,vcs-38-Italy-Beef and veal,39.705193
+IT000000,2017,vcs-39-Italy-Beef and veal,65.200106
+IT000000,2017,vcs-59-Italy-Cereals,58.303941
+IT000000,2017,vcs-93-Italy-Fruit and vegetables,10.992069
+IT000000,2018,vcs-121-Italy-Grain legumes,11.349609
+IT000000,2018,vcs-153-Italy-Milk and milk products,72.224787
+IT000000,2018,vcs-154-Italy-Milk and milk products,9.492401
+IT000000,2018,vcs-155-Italy-Milk and milk products,3.962045
+IT000000,2018,vcs-174-Italy-Oilseeds,9.492401
+IT000000,2018,vcs-177-Italy-Olive oil,12.794105
+IT000000,2018,vcs-178-Italy-Olive oil,42.509446
+IT000000,2018,vcs-179-Italy-Olive oil,12.381392
+IT000000,2018,vcs-203-Italy-Protein crops ,13.619531
+IT000000,2018,vcs-207-Italy-Rice,21.873793
+IT000000,2018,vcs-243-Italy-Sheepmeat and goatmeat,9.120959
+IT000000,2018,vcs-244-Italy-Sheepmeat and goatmeat,5.323999
+IT000000,2018,vcs-277-Italy-Sugar beet,16.549794
+IT000000,2018,vcs-38-Italy-Beef and veal,39.207742
+IT000000,2018,vcs-39-Italy-Beef and veal,64.383239
+IT000000,2018,vcs-59-Italy-Cereals,57.573473
+IT000000,2018,vcs-93-Italy-Fruit and vegetables,10.854354
+IT000000,2019,vcs-121-Italy-Grain legumes,11.205619
+IT000000,2019,vcs-153-Italy-Milk and milk products,71.308487
+IT000000,2019,vcs-154-Italy-Milk and milk products,9.371973
+IT000000,2019,vcs-155-Italy-Milk and milk products,3.91178
+IT000000,2019,vcs-174-Italy-Oilseeds,9.371973
+IT000000,2019,vcs-177-Italy-Olive oil,12.631789
+IT000000,2019,vcs-178-Italy-Olive oil,41.970138
+IT000000,2019,vcs-179-Italy-Olive oil,12.224312
+IT000000,2019,vcs-203-Italy-Protein crops ,13.446743
+IT000000,2019,vcs-207-Italy-Rice,21.596285
+IT000000,2019,vcs-243-Italy-Sheepmeat and goatmeat,9.005243
+IT000000,2019,vcs-244-Italy-Sheepmeat and goatmeat,5.256454
+IT000000,2019,vcs-277-Italy-Sugar beet,16.339831
+IT000000,2019,vcs-38-Italy-Beef and veal,38.710322
+IT000000,2019,vcs-39-Italy-Beef and veal,63.566423
+IT000000,2019,vcs-59-Italy-Cereals,56.843051
+IT000000,2019,vcs-93-Italy-Fruit and vegetables,10.716647
+IT000000,2020,vcs-121-Italy-Grain legumes,11.205619
+IT000000,2020,vcs-153-Italy-Milk and milk products,71.308487
+IT000000,2020,vcs-154-Italy-Milk and milk products,9.371973
+IT000000,2020,vcs-155-Italy-Milk and milk products,3.91178
+IT000000,2020,vcs-174-Italy-Oilseeds,9.371973
+IT000000,2020,vcs-177-Italy-Olive oil,12.631789
+IT000000,2020,vcs-178-Italy-Olive oil,41.970138
+IT000000,2020,vcs-179-Italy-Olive oil,12.224312
+IT000000,2020,vcs-203-Italy-Protein crops ,13.446743
+IT000000,2020,vcs-207-Italy-Rice,21.596285
+IT000000,2020,vcs-243-Italy-Sheepmeat and goatmeat,9.005243
+IT000000,2020,vcs-244-Italy-Sheepmeat and goatmeat,5.256454
+IT000000,2020,vcs-277-Italy-Sugar beet,16.339831
+IT000000,2020,vcs-38-Italy-Beef and veal,38.710322
+IT000000,2020,vcs-39-Italy-Beef and veal,63.566423
+IT000000,2020,vcs-59-Italy-Cereals,56.843051
+IT000000,2020,vcs-93-Italy-Fruit and vegetables,10.716647
+LT000000,2015,vcs-158-Lithuania-Milk and milk products,23.903308
+LT000000,2015,vcs-195-Lithuania-Protein crops,14.442278
+LT000000,2015,vcs-246-Lithuania-Sheepmeat and goatmeat,1.955725
+LT000000,2015,vcs-247-Lithuania-Sheepmeat and goatmeat,0.217303
+LT000000,2015,vcs-41-Lithuania-Beef and veal,13.038168
+LT000000,2015,vcs-42-Lithuania-Beef and veal,4.346056
+LT000000,2015,vcs-96-Lithuania-Fruit and vegetables,1.086514
+LT000000,2015,vcs-97-Lithuania-Fruit and vegetables,1.303817
+LT000000,2015,vcs-98-Lithuania-Fruit and vegetables,2.390331
+LT000000,2016,vcs-158-Lithuania-Milk and milk products,25.311572
+LT000000,2016,vcs-195-Lithuania-Protein crops,15.293146
+LT000000,2016,vcs-246-Lithuania-Sheepmeat and goatmeat,2.070947
+LT000000,2016,vcs-247-Lithuania-Sheepmeat and goatmeat,0.230105
+LT000000,2016,vcs-41-Lithuania-Beef and veal,13.806312
+LT000000,2016,vcs-42-Lithuania-Beef and veal,4.602104
+LT000000,2016,vcs-96-Lithuania-Fruit and vegetables,1.150526
+LT000000,2016,vcs-97-Lithuania-Fruit and vegetables,1.380631
+LT000000,2016,vcs-98-Lithuania-Fruit and vegetables,2.531157
+LT000000,2017,vcs-158-Lithuania-Milk and milk products,26.716404
+LT000000,2017,vcs-195-Lithuania-Protein crops,16.141939
+LT000000,2017,vcs-246-Lithuania-Sheepmeat and goatmeat,2.185888
+LT000000,2017,vcs-247-Lithuania-Sheepmeat and goatmeat,0.242876
+LT000000,2017,vcs-41-Lithuania-Beef and veal,14.572584
+LT000000,2017,vcs-42-Lithuania-Beef and veal,4.857528
+LT000000,2017,vcs-96-Lithuania-Fruit and vegetables,1.214382
+LT000000,2017,vcs-97-Lithuania-Fruit and vegetables,1.457258
+LT000000,2017,vcs-98-Lithuania-Fruit and vegetables,2.67164
+LT000000,2018,vcs-158-Lithuania-Milk and milk products,28.145203
+LT000000,2018,vcs-195-Lithuania-Protein crops,17.005213
+LT000000,2018,vcs-246-Lithuania-Sheepmeat and goatmeat,2.302789
+LT000000,2018,vcs-247-Lithuania-Sheepmeat and goatmeat,0.255865
+LT000000,2018,vcs-41-Lithuania-Beef and veal,15.351929
+LT000000,2018,vcs-42-Lithuania-Beef and veal,5.11731
+LT000000,2018,vcs-96-Lithuania-Fruit and vegetables,1.279327
+LT000000,2018,vcs-97-Lithuania-Fruit and vegetables,1.535193
+LT000000,2018,vcs-98-Lithuania-Fruit and vegetables,2.81452
+LT000000,2019,vcs-158-Lithuania-Milk and milk products,29.574002
+LT000000,2019,vcs-195-Lithuania-Protein crops,17.868488
+LT000000,2019,vcs-246-Lithuania-Sheepmeat and goatmeat,2.419691
+LT000000,2019,vcs-247-Lithuania-Sheepmeat and goatmeat,0.268855
+LT000000,2019,vcs-41-Lithuania-Beef and veal,16.131274
+LT000000,2019,vcs-42-Lithuania-Beef and veal,5.377091
+LT000000,2019,vcs-96-Lithuania-Fruit and vegetables,1.344273
+LT000000,2019,vcs-97-Lithuania-Fruit and vegetables,1.613127
+LT000000,2019,vcs-98-Lithuania-Fruit and vegetables,2.9574
+LT000000,2020,vcs-158-Lithuania-Milk and milk products,29.574002
+LT000000,2020,vcs-195-Lithuania-Protein crops,17.868488
+LT000000,2020,vcs-246-Lithuania-Sheepmeat and goatmeat,2.419691
+LT000000,2020,vcs-247-Lithuania-Sheepmeat and goatmeat,0.268855
+LT000000,2020,vcs-41-Lithuania-Beef and veal,16.131274
+LT000000,2020,vcs-42-Lithuania-Beef and veal,5.377091
+LT000000,2020,vcs-96-Lithuania-Fruit and vegetables,1.344273
+LT000000,2020,vcs-97-Lithuania-Fruit and vegetables,1.613127
+LT000000,2020,vcs-98-Lithuania-Fruit and vegetables,2.9574
+LV000000,2015,vcs-156-Latvia-Milk and milk products,12.382996
+LV000000,2015,vcs-157-Latvia-Milk and milk products,0.094886
+LV000000,2015,vcs-175-Latvia-Oilseeds,1.431801
+LV000000,2015,vcs-194-Latvia-Protein crops,2.1804
+LV000000,2015,vcs-214-Latvia-Seeds,0.291392
+LV000000,2015,vcs-215-Latvia-Seeds,0.160218
+LV000000,2015,vcs-216-Latvia-Seeds,0.730833
+LV000000,2015,vcs-245-Latvia-Sheepmeat and goatmeat,0.249239
+LV000000,2015,vcs-269-Latvia-Starch potato,0.207146
+LV000000,2015,vcs-40-Latvia-Beef and veal,3.31435
+LV000000,2015,vcs-63-Latvia-Cereals,2.865167
+LV000000,2015,vcs-94-Latvia-Fruit and vegetables,1.124867
+LV000000,2015,vcs-95-Latvia-Fruit and vegetables,0.682825
+LV000000,2016,vcs-156-Latvia-Milk and milk products,14.095178
+LV000000,2016,vcs-157-Latvia-Milk and milk products,0.108006
+LV000000,2016,vcs-175-Latvia-Oilseeds,1.894275
+LV000000,2016,vcs-194-Latvia-Protein crops,2.1804
+LV000000,2016,vcs-214-Latvia-Seeds,0.291392
+LV000000,2016,vcs-215-Latvia-Seeds,0.160218
+LV000000,2016,vcs-216-Latvia-Seeds,0.730833
+LV000000,2016,vcs-245-Latvia-Sheepmeat and goatmeat,0.402437
+LV000000,2016,vcs-269-Latvia-Starch potato,0.207146
+LV000000,2016,vcs-40-Latvia-Beef and veal,3.728228
+LV000000,2016,vcs-63-Latvia-Cereals,3.073967
+LV000000,2016,vcs-94-Latvia-Fruit and vegetables,1.280401
+LV000000,2016,vcs-95-Latvia-Fruit and vegetables,0.777239
+LV000000,2017,vcs-156-Latvia-Milk and milk products,15.784908
+LV000000,2017,vcs-157-Latvia-Milk and milk products,0.120954
+LV000000,2017,vcs-175-Latvia-Oilseeds,2.382313
+LV000000,2017,vcs-194-Latvia-Protein crops,2.1804
+LV000000,2017,vcs-214-Latvia-Seeds,0.291392
+LV000000,2017,vcs-215-Latvia-Seeds,0.160218
+LV000000,2017,vcs-216-Latvia-Seeds,0.730833
+LV000000,2017,vcs-245-Latvia-Sheepmeat and goatmeat,0.55451
+LV000000,2017,vcs-269-Latvia-Starch potato,0.207146
+LV000000,2017,vcs-40-Latvia-Beef and veal,4.136679
+LV000000,2017,vcs-63-Latvia-Cereals,3.282767
+LV000000,2017,vcs-94-Latvia-Fruit and vegetables,1.433896
+LV000000,2017,vcs-95-Latvia-Fruit and vegetables,0.870414
+LV000000,2018,vcs-156-Latvia-Milk and milk products,16.291837
+LV000000,2018,vcs-157-Latvia-Milk and milk products,0.121697
+LV000000,2018,vcs-175-Latvia-Oilseeds,2.844786
+LV000000,2018,vcs-194-Latvia-Protein crops,2.1804
+LV000000,2018,vcs-214-Latvia-Seeds,0.291392
+LV000000,2018,vcs-215-Latvia-Seeds,0.160218
+LV000000,2018,vcs-216-Latvia-Seeds,0.730833
+LV000000,2018,vcs-245-Latvia-Sheepmeat and goatmeat,0.634794
+LV000000,2018,vcs-269-Latvia-Starch potato,0.207146
+LV000000,2018,vcs-40-Latvia-Beef and veal,5.86077
+LV000000,2018,vcs-63-Latvia-Cereals,3.491567
+LV000000,2018,vcs-94-Latvia-Fruit and vegetables,1.588598
+LV000000,2018,vcs-95-Latvia-Fruit and vegetables,0.964322
+LV000000,2019,vcs-156-Latvia-Milk and milk products,17.819603
+LV000000,2019,vcs-157-Latvia-Milk and milk products,0.121697
+LV000000,2019,vcs-175-Latvia-Oilseeds,3.30726
+LV000000,2019,vcs-194-Latvia-Protein crops,2.1804
+LV000000,2019,vcs-214-Latvia-Seeds,0.291392
+LV000000,2019,vcs-215-Latvia-Seeds,0.160218
+LV000000,2019,vcs-216-Latvia-Seeds,0.730833
+LV000000,2019,vcs-245-Latvia-Sheepmeat and goatmeat,0.634794
+LV000000,2019,vcs-269-Latvia-Starch potato,0.207146
+LV000000,2019,vcs-40-Latvia-Beef and veal,6.64517
+LV000000,2019,vcs-63-Latvia-Cereals,3.700367
+LV000000,2019,vcs-94-Latvia-Fruit and vegetables,1.743306
+LV000000,2019,vcs-95-Latvia-Fruit and vegetables,1.058234
+LV000000,2020,vcs-156-Latvia-Milk and milk products,19.54705
+LV000000,2020,vcs-157-Latvia-Milk and milk products,0.121697
+LV000000,2020,vcs-175-Latvia-Oilseeds,3.718605
+LV000000,2020,vcs-194-Latvia-Protein crops,2.1804
+LV000000,2020,vcs-214-Latvia-Seeds,0.291392
+LV000000,2020,vcs-215-Latvia-Seeds,0.160218
+LV000000,2020,vcs-216-Latvia-Seeds,0.730833
+LV000000,2020,vcs-245-Latvia-Sheepmeat and goatmeat,0.634794
+LV000000,2020,vcs-269-Latvia-Starch potato,0.207146
+LV000000,2020,vcs-40-Latvia-Beef and veal,7.009578
+LV000000,2020,vcs-63-Latvia-Cereals,3.909167
+LV000000,2020,vcs-94-Latvia-Fruit and vegetables,1.883938
+LV000000,2020,vcs-95-Latvia-Fruit and vegetables,1.143602
+MT000000,2015,vcs-159-Malta-Milk and milk products,1.55885
+MT000000,2015,vcs-248-Malta-Sheepmeat and goatmeat,0.076016
+MT000000,2015,vcs-43-Malta-Beef and veal,0.461094
+MT000000,2015,vcs-99-Malta-Fruit and vegetables,0.90404
+MT000000,2016,vcs-159-Malta-Milk and milk products,1.55885
+MT000000,2016,vcs-248-Malta-Sheepmeat and goatmeat,0.076016
+MT000000,2016,vcs-43-Malta-Beef and veal,0.461094
+MT000000,2016,vcs-99-Malta-Fruit and vegetables,0.90404
+MT000000,2017,vcs-159-Malta-Milk and milk products,1.55885
+MT000000,2017,vcs-248-Malta-Sheepmeat and goatmeat,0.076016
+MT000000,2017,vcs-43-Malta-Beef and veal,0.461094
+MT000000,2017,vcs-99-Malta-Fruit and vegetables,0.90404
+MT000000,2018,vcs-159-Malta-Milk and milk products,1.55885
+MT000000,2018,vcs-248-Malta-Sheepmeat and goatmeat,0.076016
+MT000000,2018,vcs-43-Malta-Beef and veal,0.461094
+MT000000,2018,vcs-99-Malta-Fruit and vegetables,0.90404
+MT000000,2019,vcs-159-Malta-Milk and milk products,1.55885
+MT000000,2019,vcs-248-Malta-Sheepmeat and goatmeat,0.076016
+MT000000,2019,vcs-43-Malta-Beef and veal,0.461094
+MT000000,2019,vcs-99-Malta-Fruit and vegetables,0.90404
+MT000000,2020,vcs-159-Malta-Milk and milk products,1.55885
+MT000000,2020,vcs-248-Malta-Sheepmeat and goatmeat,0.076016
+MT000000,2020,vcs-43-Malta-Beef and veal,0.461094
+MT000000,2020,vcs-99-Malta-Fruit and vegetables,0.90404
+NL000000,2015,vcs-249-Netherlands-Sheepmeat and goatmeat,1.1
+NL000000,2015,vcs-44-Netherlands-Beef and veal,2.4
+NL000000,2016,vcs-249-Netherlands-Sheepmeat and goatmeat,1.1
+NL000000,2016,vcs-44-Netherlands-Beef and veal,2.4
+NL000000,2017,vcs-249-Netherlands-Sheepmeat and goatmeat,1.1
+NL000000,2017,vcs-44-Netherlands-Beef and veal,2.4
+NL000000,2018,vcs-249-Netherlands-Sheepmeat and goatmeat,1.1
+NL000000,2018,vcs-44-Netherlands-Beef and veal,2.4
+NL000000,2019,vcs-249-Netherlands-Sheepmeat and goatmeat,1.1
+NL000000,2019,vcs-44-Netherlands-Beef and veal,2.4
+NL000000,2020,vcs-249-Netherlands-Sheepmeat and goatmeat,1.1
+NL000000,2020,vcs-44-Netherlands-Beef and veal,2.4
+PL000000,2015,vcs-100-Poland-Fruit and vegetables,4.212
+PL000000,2015,vcs-101-Poland-Fruit and vegetables,15.0
+PL000000,2015,vcs-128-Poland-Hemp,0.093
+PL000000,2015,vcs-131-Poland-Hops,0.83712
+PL000000,2015,vcs-160-Poland-Milk and milk products,151.924361
+PL000000,2015,vcs-197-Poland-Protein crops,67.57208
+PL000000,2015,vcs-250-Poland-Sheepmeat and goatmeat,4.65585
+PL000000,2015,vcs-251-Poland-Sheepmeat and goatmeat,0.266445
+PL000000,2015,vcs-270-Poland-Starch potato,8.664
+PL000000,2015,vcs-278-Poland-Sugar beet,81.2
+PL000000,2015,vcs-45-Poland-Beef and veal,171.794544
+PL000000,2015,vcs-66-Poland-Flax,0.5712
+PL000000,2016,vcs-100-Poland-Fruit and vegetables,4.232814
+PL000000,2016,vcs-101-Poland-Fruit and vegetables,15.074125
+PL000000,2016,vcs-128-Poland-Hemp,0.09346
+PL000000,2016,vcs-131-Poland-Hops,0.841257
+PL000000,2016,vcs-160-Poland-Milk and milk products,152.675123
+PL000000,2016,vcs-197-Poland-Protein crops,67.906
+PL000000,2016,vcs-250-Poland-Sheepmeat and goatmeat,4.678858
+PL000000,2016,vcs-251-Poland-Sheepmeat and goatmeat,0.267762
+PL000000,2016,vcs-270-Poland-Starch potato,8.706815
+PL000000,2016,vcs-278-Poland-Sugar beet,81.601265
+PL000000,2016,vcs-45-Poland-Beef and veal,172.643499
+PL000000,2017,vcs-100-Poland-Fruit and vegetables,4.253452
+PL000000,2017,vcs-101-Poland-Fruit and vegetables,15.14762
+PL000000,2017,vcs-128-Poland-Hemp,0.093915
+PL000000,2017,vcs-131-Poland-Hops,0.845358
+PL000000,2017,vcs-160-Poland-Milk and milk products,153.419501
+PL000000,2017,vcs-197-Poland-Protein crops,68.23708
+PL000000,2017,vcs-250-Poland-Sheepmeat and goatmeat,4.70167
+PL000000,2017,vcs-251-Poland-Sheepmeat and goatmeat,0.269067
+PL000000,2017,vcs-270-Poland-Starch potato,8.749265
+PL000000,2017,vcs-278-Poland-Sugar beet,81.999117
+PL000000,2017,vcs-45-Poland-Beef and veal,173.485233
+PL000000,2018,vcs-100-Poland-Fruit and vegetables,4.277615
+PL000000,2018,vcs-101-Poland-Fruit and vegetables,15.23367
+PL000000,2018,vcs-128-Poland-Hemp,0.094449
+PL000000,2018,vcs-131-Poland-Hops,0.850161
+PL000000,2018,vcs-160-Poland-Milk and milk products,154.291044
+PL000000,2018,vcs-197-Poland-Protein crops,68.62472
+PL000000,2018,vcs-250-Poland-Sheepmeat and goatmeat,4.728379
+PL000000,2018,vcs-251-Poland-Sheepmeat and goatmeat,0.270596
+PL000000,2018,vcs-270-Poland-Starch potato,8.798968
+PL000000,2018,vcs-278-Poland-Sugar beet,82.464936
+PL000000,2018,vcs-45-Poland-Beef and veal,174.470765
+PL000000,2019,vcs-100-Poland-Fruit and vegetables,4.301645
+PL000000,2019,vcs-101-Poland-Fruit and vegetables,15.31925
+PL000000,2019,vcs-128-Poland-Hemp,0.094979
+PL000000,2019,vcs-131-Poland-Hops,0.854937
+PL000000,2019,vcs-160-Poland-Milk and milk products,155.15782
+PL000000,2019,vcs-197-Poland-Protein crops,69.01024
+PL000000,2019,vcs-250-Poland-Sheepmeat and goatmeat,4.754942
+PL000000,2019,vcs-251-Poland-Sheepmeat and goatmeat,0.272116
+PL000000,2019,vcs-270-Poland-Starch potato,8.848399
+PL000000,2019,vcs-278-Poland-Sugar beet,82.928208
+PL000000,2019,vcs-45-Poland-Beef and veal,175.450907
+PL000000,2020,vcs-100-Poland-Fruit and vegetables,3.816699
+PL000000,2020,vcs-101-Poland-Fruit and vegetables,13.592232
+PL000000,2020,vcs-128-Poland-Hemp,0.084272
+PL000000,2020,vcs-131-Poland-Hops,0.758555
+PL000000,2020,vcs-160-Poland-Milk and milk products,137.666079
+PL000000,2020,vcs-197-Poland-Protein crops,61.23036
+PL000000,2020,vcs-250-Poland-Sheepmeat and goatmeat,4.218893
+PL000000,2020,vcs-251-Poland-Sheepmeat and goatmeat,0.241439
+PL000000,2020,vcs-270-Poland-Starch potato,7.850873
+PL000000,2020,vcs-278-Poland-Sugar beet,73.579284
+PL000000,2020,vcs-45-Poland-Beef and veal,155.671422
+PT000000,2015,cscs-Portugal-cotton,0.180576
+PT000000,2015,vcs-102-Portugal-Fruit and vegetables,3.335
+PT000000,2015,vcs-161-Portugal-Milk and milk products,12.5
+PT000000,2015,vcs-208-Portugal-Rice,6.0
+PT000000,2015,vcs-252-Portugal-Sheepmeat and goatmeat,35.9
+PT000000,2015,vcs-46-Portugal-Beef and veal,59.8
+PT000000,2016,cscs-Portugal-cotton,0.180576
+PT000000,2016,vcs-102-Portugal-Fruit and vegetables,3.335
+PT000000,2016,vcs-161-Portugal-Milk and milk products,12.5
+PT000000,2016,vcs-208-Portugal-Rice,6.0
+PT000000,2016,vcs-252-Portugal-Sheepmeat and goatmeat,35.9
+PT000000,2016,vcs-46-Portugal-Beef and veal,59.8
+PT000000,2017,cscs-Portugal-cotton,0.180576
+PT000000,2017,vcs-102-Portugal-Fruit and vegetables,3.335
+PT000000,2017,vcs-161-Portugal-Milk and milk products,12.5
+PT000000,2017,vcs-208-Portugal-Rice,6.0
+PT000000,2017,vcs-252-Portugal-Sheepmeat and goatmeat,35.9
+PT000000,2017,vcs-46-Portugal-Beef and veal,59.8
+PT000000,2018,cscs-Portugal-cotton,0.180576
+PT000000,2018,vcs-102-Portugal-Fruit and vegetables,3.335
+PT000000,2018,vcs-161-Portugal-Milk and milk products,12.5
+PT000000,2018,vcs-208-Portugal-Rice,6.0
+PT000000,2018,vcs-252-Portugal-Sheepmeat and goatmeat,35.9
+PT000000,2018,vcs-46-Portugal-Beef and veal,59.8
+PT000000,2019,cscs-Portugal-cotton,0.180576
+PT000000,2019,vcs-102-Portugal-Fruit and vegetables,3.335
+PT000000,2019,vcs-161-Portugal-Milk and milk products,12.5
+PT000000,2019,vcs-208-Portugal-Rice,6.0
+PT000000,2019,vcs-252-Portugal-Sheepmeat and goatmeat,35.9
+PT000000,2019,vcs-46-Portugal-Beef and veal,59.8
+PT000000,2020,cscs-Portugal-cotton,0.180576
+PT000000,2020,vcs-102-Portugal-Fruit and vegetables,3.335
+PT000000,2020,vcs-161-Portugal-Milk and milk products,12.5
+PT000000,2020,vcs-208-Portugal-Rice,6.0
+PT000000,2020,vcs-252-Portugal-Sheepmeat and goatmeat,35.9
+PT000000,2020,vcs-46-Portugal-Beef and veal,59.8
+RO000000,2015,vcs-103-Romania-Fruit and vegetables,2.8
+RO000000,2015,vcs-104-Romania-Fruit and vegetables,0.1
+RO000000,2015,vcs-105-Romania-Fruit and vegetables,2.3921
+RO000000,2015,vcs-106-Romania-Fruit and vegetables,10.7625
+RO000000,2015,vcs-107-Romania-Fruit and vegetables,0.18
+RO000000,2015,vcs-108-Romania-Fruit and vegetables,0.15
+RO000000,2015,vcs-109-Romania-Fruit and vegetables,0.06
+RO000000,2015,vcs-110-Romania-Fruit and vegetables,0.06
+RO000000,2015,vcs-111-Romania-Fruit and vegetables,2.0
+RO000000,2015,vcs-112-Romania-Fruit and vegetables,15.75
+RO000000,2015,vcs-123-Romania-Grain legumes,0.18
+RO000000,2015,vcs-124-Romania-Grain legumes,0.18
+RO000000,2015,vcs-129-Romania-Hemp,0.16296
+RO000000,2015,vcs-134-Romania-Hops,0.122
+RO000000,2015,vcs-162-Romania-Milk and milk products,75.0
+RO000000,2015,vcs-163-Romania-Milk and milk products,1.33
+RO000000,2015,vcs-198-Romania-Protein crops,29.77
+RO000000,2015,vcs-199-Romania-Protein crops,18.9365
+RO000000,2015,vcs-209-Romania-Rice,5.715
+RO000000,2015,vcs-217-Romania-Seeds,0.8064
+RO000000,2015,vcs-253-Romania-Sheepmeat and goatmeat,24.5
+RO000000,2015,vcs-262-Romania-Silkworms,0.027
+RO000000,2015,vcs-279-Romania-Sugar beet,17.58
+RO000000,2015,vcs-47-Romania-Beef and veal,10.5
+RO000000,2016,vcs-103-Romania-Fruit and vegetables,2.82
+RO000000,2016,vcs-104-Romania-Fruit and vegetables,0.102
+RO000000,2016,vcs-105-Romania-Fruit and vegetables,2.3959
+RO000000,2016,vcs-106-Romania-Fruit and vegetables,10.7975
+RO000000,2016,vcs-107-Romania-Fruit and vegetables,0.186
+RO000000,2016,vcs-108-Romania-Fruit and vegetables,0.155
+RO000000,2016,vcs-109-Romania-Fruit and vegetables,0.062
+RO000000,2016,vcs-110-Romania-Fruit and vegetables,0.062
+RO000000,2016,vcs-111-Romania-Fruit and vegetables,2.0
+RO000000,2016,vcs-112-Romania-Fruit and vegetables,15.975
+RO000000,2016,vcs-123-Romania-Grain legumes,0.19
+RO000000,2016,vcs-124-Romania-Grain legumes,0.19
+RO000000,2016,vcs-129-Romania-Hemp,0.17136
+RO000000,2016,vcs-134-Romania-Hops,0.12444
+RO000000,2016,vcs-162-Romania-Milk and milk products,79.5
+RO000000,2016,vcs-163-Romania-Milk and milk products,1.4
+RO000000,2016,vcs-198-Romania-Protein crops,30.686
+RO000000,2016,vcs-199-Romania-Protein crops,22.3795
+RO000000,2016,vcs-209-Romania-Rice,5.842
+RO000000,2016,vcs-217-Romania-Seeds,0.8148
+RO000000,2016,vcs-253-Romania-Sheepmeat and goatmeat,28.0
+RO000000,2016,vcs-262-Romania-Silkworms,0.027
+RO000000,2016,vcs-279-Romania-Sugar beet,17.873
+RO000000,2016,vcs-47-Romania-Beef and veal,11.025
+RO000000,2017,vcs-103-Romania-Fruit and vegetables,2.84
+RO000000,2017,vcs-104-Romania-Fruit and vegetables,0.104
+RO000000,2017,vcs-105-Romania-Fruit and vegetables,2.3997
+RO000000,2017,vcs-106-Romania-Fruit and vegetables,10.8325
+RO000000,2017,vcs-107-Romania-Fruit and vegetables,0.192
+RO000000,2017,vcs-108-Romania-Fruit and vegetables,0.16
+RO000000,2017,vcs-109-Romania-Fruit and vegetables,0.064
+RO000000,2017,vcs-110-Romania-Fruit and vegetables,0.064
+RO000000,2017,vcs-111-Romania-Fruit and vegetables,2.0
+RO000000,2017,vcs-112-Romania-Fruit and vegetables,16.2
+RO000000,2017,vcs-123-Romania-Grain legumes,0.2
+RO000000,2017,vcs-124-Romania-Grain legumes,0.2
+RO000000,2017,vcs-129-Romania-Hemp,0.17976
+RO000000,2017,vcs-134-Romania-Hops,0.12688
+RO000000,2017,vcs-162-Romania-Milk and milk products,84.0
+RO000000,2017,vcs-163-Romania-Milk and milk products,1.47
+RO000000,2017,vcs-198-Romania-Protein crops,31.602
+RO000000,2017,vcs-199-Romania-Protein crops,25.8225
+RO000000,2017,vcs-209-Romania-Rice,5.969
+RO000000,2017,vcs-217-Romania-Seeds,0.8232
+RO000000,2017,vcs-253-Romania-Sheepmeat and goatmeat,31.5
+RO000000,2017,vcs-262-Romania-Silkworms,0.027
+RO000000,2017,vcs-279-Romania-Sugar beet,18.166
+RO000000,2017,vcs-47-Romania-Beef and veal,11.55
+RO000000,2018,vcs-103-Romania-Fruit and vegetables,2.86
+RO000000,2018,vcs-104-Romania-Fruit and vegetables,0.106
+RO000000,2018,vcs-105-Romania-Fruit and vegetables,2.4035
+RO000000,2018,vcs-106-Romania-Fruit and vegetables,10.8675
+RO000000,2018,vcs-107-Romania-Fruit and vegetables,0.198
+RO000000,2018,vcs-108-Romania-Fruit and vegetables,0.165
+RO000000,2018,vcs-109-Romania-Fruit and vegetables,0.066
+RO000000,2018,vcs-110-Romania-Fruit and vegetables,0.066
+RO000000,2018,vcs-111-Romania-Fruit and vegetables,2.0
+RO000000,2018,vcs-112-Romania-Fruit and vegetables,16.425
+RO000000,2018,vcs-123-Romania-Grain legumes,0.21
+RO000000,2018,vcs-124-Romania-Grain legumes,0.21
+RO000000,2018,vcs-129-Romania-Hemp,0.18816
+RO000000,2018,vcs-134-Romania-Hops,0.12932
+RO000000,2018,vcs-162-Romania-Milk and milk products,88.5
+RO000000,2018,vcs-163-Romania-Milk and milk products,1.54
+RO000000,2018,vcs-198-Romania-Protein crops,32.518
+RO000000,2018,vcs-199-Romania-Protein crops,29.2655
+RO000000,2018,vcs-209-Romania-Rice,6.096
+RO000000,2018,vcs-217-Romania-Seeds,0.8316
+RO000000,2018,vcs-253-Romania-Sheepmeat and goatmeat,35.0
+RO000000,2018,vcs-262-Romania-Silkworms,0.027
+RO000000,2018,vcs-279-Romania-Sugar beet,18.459
+RO000000,2018,vcs-47-Romania-Beef and veal,12.075
+RO000000,2019,vcs-103-Romania-Fruit and vegetables,2.88
+RO000000,2019,vcs-104-Romania-Fruit and vegetables,0.108
+RO000000,2019,vcs-105-Romania-Fruit and vegetables,2.4073
+RO000000,2019,vcs-106-Romania-Fruit and vegetables,10.9025
+RO000000,2019,vcs-107-Romania-Fruit and vegetables,0.204
+RO000000,2019,vcs-108-Romania-Fruit and vegetables,0.17
+RO000000,2019,vcs-109-Romania-Fruit and vegetables,0.068
+RO000000,2019,vcs-110-Romania-Fruit and vegetables,0.068
+RO000000,2019,vcs-111-Romania-Fruit and vegetables,2.0
+RO000000,2019,vcs-112-Romania-Fruit and vegetables,16.65
+RO000000,2019,vcs-123-Romania-Grain legumes,0.22
+RO000000,2019,vcs-124-Romania-Grain legumes,0.22
+RO000000,2019,vcs-129-Romania-Hemp,0.19656
+RO000000,2019,vcs-134-Romania-Hops,0.13176
+RO000000,2019,vcs-162-Romania-Milk and milk products,93.0
+RO000000,2019,vcs-163-Romania-Milk and milk products,1.61
+RO000000,2019,vcs-198-Romania-Protein crops,33.434
+RO000000,2019,vcs-199-Romania-Protein crops,32.7085
+RO000000,2019,vcs-209-Romania-Rice,6.223
+RO000000,2019,vcs-217-Romania-Seeds,0.84
+RO000000,2019,vcs-253-Romania-Sheepmeat and goatmeat,38.5
+RO000000,2019,vcs-262-Romania-Silkworms,0.027
+RO000000,2019,vcs-279-Romania-Sugar beet,18.752
+RO000000,2019,vcs-47-Romania-Beef and veal,12.6
+RO000000,2020,vcs-103-Romania-Fruit and vegetables,2.89
+RO000000,2020,vcs-104-Romania-Fruit and vegetables,0.109
+RO000000,2020,vcs-105-Romania-Fruit and vegetables,2.4111
+RO000000,2020,vcs-106-Romania-Fruit and vegetables,10.9375
+RO000000,2020,vcs-107-Romania-Fruit and vegetables,0.207
+RO000000,2020,vcs-108-Romania-Fruit and vegetables,0.1725
+RO000000,2020,vcs-109-Romania-Fruit and vegetables,0.069
+RO000000,2020,vcs-110-Romania-Fruit and vegetables,0.069
+RO000000,2020,vcs-111-Romania-Fruit and vegetables,2.0
+RO000000,2020,vcs-112-Romania-Fruit and vegetables,16.762
+RO000000,2020,vcs-123-Romania-Grain legumes,0.225
+RO000000,2020,vcs-124-Romania-Grain legumes,0.225
+RO000000,2020,vcs-129-Romania-Hemp,0.20076
+RO000000,2020,vcs-134-Romania-Hops,0.13298
+RO000000,2020,vcs-162-Romania-Milk and milk products,97.5
+RO000000,2020,vcs-163-Romania-Milk and milk products,1.68
+RO000000,2020,vcs-198-Romania-Protein crops,33.892
+RO000000,2020,vcs-199-Romania-Protein crops,34.43
+RO000000,2020,vcs-209-Romania-Rice,6.2865
+RO000000,2020,vcs-217-Romania-Seeds,0.8442
+RO000000,2020,vcs-253-Romania-Sheepmeat and goatmeat,42.0
+RO000000,2020,vcs-262-Romania-Silkworms,0.027
+RO000000,2020,vcs-279-Romania-Sugar beet,18.8985
+RO000000,2020,vcs-47-Romania-Beef and veal,13.125
+SE000000,2015,vcs-57-Sweden-Beef and veal,90.5957
+SE000000,2016,vcs-57-Sweden-Beef and veal,90.64835
+SE000000,2017,vcs-57-Sweden-Beef and veal,90.69814
+SE000000,2018,vcs-57-Sweden-Beef and veal,90.83399
+SE000000,2019,vcs-57-Sweden-Beef and veal,90.96984
+SE000000,2020,vcs-57-Sweden-Beef and veal,90.96984
+SI000000,2015,vcs-118-Slovenia-Fruit and vegetables,2.069805
+SI000000,2015,vcs-137-Slovenia-Milk and milk products,4.829545
+SI000000,2015,vcs-200-Slovenia-Protein crops,2.75974
+SI000000,2015,vcs-49-Slovenia-Beef and veal,4.13961
+SI000000,2015,vcs-64-Slovenia-Cereals,6.89935
+SI000000,2016,vcs-118-Slovenia-Fruit and vegetables,2.054955
+SI000000,2016,vcs-137-Slovenia-Milk and milk products,4.794895
+SI000000,2016,vcs-200-Slovenia-Protein crops,2.73994
+SI000000,2016,vcs-49-Slovenia-Beef and veal,4.10991
+SI000000,2016,vcs-64-Slovenia-Cereals,6.84985
+SI000000,2017,vcs-118-Slovenia-Fruit and vegetables,2.040045
+SI000000,2017,vcs-137-Slovenia-Milk and milk products,4.760105
+SI000000,2017,vcs-200-Slovenia-Protein crops,2.72006
+SI000000,2017,vcs-49-Slovenia-Beef and veal,4.08009
+SI000000,2017,vcs-64-Slovenia-Cereals,6.80015
+SI000000,2018,vcs-118-Slovenia-Fruit and vegetables,2.027115
+SI000000,2018,vcs-137-Slovenia-Milk and milk products,4.729935
+SI000000,2018,vcs-200-Slovenia-Protein crops,2.70282
+SI000000,2018,vcs-49-Slovenia-Beef and veal,4.05423
+SI000000,2018,vcs-64-Slovenia-Cereals,6.75705
+SI000000,2019,vcs-118-Slovenia-Fruit and vegetables,2.01417
+SI000000,2019,vcs-137-Slovenia-Milk and milk products,4.69973
+SI000000,2019,vcs-200-Slovenia-Protein crops,2.68556
+SI000000,2019,vcs-49-Slovenia-Beef and veal,4.02834
+SI000000,2019,vcs-64-Slovenia-Cereals,6.7139
+SI000000,2020,vcs-118-Slovenia-Fruit and vegetables,2.01417
+SI000000,2020,vcs-137-Slovenia-Milk and milk products,4.69973
+SI000000,2020,vcs-200-Slovenia-Protein crops,2.68556
+SI000000,2020,vcs-49-Slovenia-Beef and veal,4.02834
+SI000000,2020,vcs-64-Slovenia-Cereals,6.7139
+SK000000,2015,vcs-113-Slovakia-Fruit and vegetables,0.34182
+SK000000,2015,vcs-114-Slovakia-Fruit and vegetables,0.79758
+SK000000,2015,vcs-115-Slovakia-Fruit and vegetables,0.074061
+SK000000,2015,vcs-116-Slovakia-Fruit and vegetables,0.495639
+SK000000,2015,vcs-117-Slovakia-Fruit and vegetables,0.28485
+SK000000,2015,vcs-135-Slovakia-Hops,0.085455
+SK000000,2015,vcs-164-Slovakia-Milk and milk products,33.185025
+SK000000,2015,vcs-254-Slovakia-Sheepmeat and goatmeat,5.697
+SK000000,2015,vcs-280-Slovakia-Sugar beet,7.9758
+SK000000,2015,vcs-48-Slovakia-Beef and veal,8.03277
+SK000000,2016,vcs-113-Slovakia-Fruit and vegetables,0.34434
+SK000000,2016,vcs-114-Slovakia-Fruit and vegetables,0.80346
+SK000000,2016,vcs-115-Slovakia-Fruit and vegetables,0.074607
+SK000000,2016,vcs-116-Slovakia-Fruit and vegetables,0.499293
+SK000000,2016,vcs-117-Slovakia-Fruit and vegetables,0.28695
+SK000000,2016,vcs-135-Slovakia-Hops,0.086085
+SK000000,2016,vcs-164-Slovakia-Milk and milk products,33.429675
+SK000000,2016,vcs-254-Slovakia-Sheepmeat and goatmeat,5.739
+SK000000,2016,vcs-280-Slovakia-Sugar beet,8.0346
+SK000000,2016,vcs-48-Slovakia-Beef and veal,8.09199
+SK000000,2017,vcs-113-Slovakia-Fruit and vegetables,0.3468
+SK000000,2017,vcs-114-Slovakia-Fruit and vegetables,0.8092
+SK000000,2017,vcs-115-Slovakia-Fruit and vegetables,0.07514
+SK000000,2017,vcs-116-Slovakia-Fruit and vegetables,0.50286
+SK000000,2017,vcs-117-Slovakia-Fruit and vegetables,0.289
+SK000000,2017,vcs-135-Slovakia-Hops,0.0867
+SK000000,2017,vcs-164-Slovakia-Milk and milk products,33.6685
+SK000000,2017,vcs-254-Slovakia-Sheepmeat and goatmeat,5.78
+SK000000,2017,vcs-280-Slovakia-Sugar beet,8.092
+SK000000,2017,vcs-48-Slovakia-Beef and veal,8.1498
+SK000000,2018,vcs-113-Slovakia-Fruit and vegetables,0.34956
+SK000000,2018,vcs-114-Slovakia-Fruit and vegetables,0.81564
+SK000000,2018,vcs-115-Slovakia-Fruit and vegetables,0.075738
+SK000000,2018,vcs-116-Slovakia-Fruit and vegetables,0.506862
+SK000000,2018,vcs-117-Slovakia-Fruit and vegetables,0.2913
+SK000000,2018,vcs-135-Slovakia-Hops,0.08739
+SK000000,2018,vcs-164-Slovakia-Milk and milk products,33.93645
+SK000000,2018,vcs-254-Slovakia-Sheepmeat and goatmeat,5.826
+SK000000,2018,vcs-280-Slovakia-Sugar beet,8.1564
+SK000000,2018,vcs-48-Slovakia-Beef and veal,8.21466
+SK000000,2019,vcs-113-Slovakia-Fruit and vegetables,0.35226
+SK000000,2019,vcs-114-Slovakia-Fruit and vegetables,0.82194
+SK000000,2019,vcs-115-Slovakia-Fruit and vegetables,0.076323
+SK000000,2019,vcs-116-Slovakia-Fruit and vegetables,0.510777
+SK000000,2019,vcs-117-Slovakia-Fruit and vegetables,0.29355
+SK000000,2019,vcs-135-Slovakia-Hops,0.088065
+SK000000,2019,vcs-164-Slovakia-Milk and milk products,34.198575
+SK000000,2019,vcs-254-Slovakia-Sheepmeat and goatmeat,5.871
+SK000000,2019,vcs-280-Slovakia-Sugar beet,8.2194
+SK000000,2019,vcs-48-Slovakia-Beef and veal,8.27811
+SK000000,2020,vcs-113-Slovakia-Fruit and vegetables,0.30762
+SK000000,2020,vcs-114-Slovakia-Fruit and vegetables,0.71778
+SK000000,2020,vcs-115-Slovakia-Fruit and vegetables,0.066651
+SK000000,2020,vcs-116-Slovakia-Fruit and vegetables,0.446049
+SK000000,2020,vcs-117-Slovakia-Fruit and vegetables,0.25635
+SK000000,2020,vcs-135-Slovakia-Hops,0.076905
+SK000000,2020,vcs-164-Slovakia-Milk and milk products,29.864775
+SK000000,2020,vcs-254-Slovakia-Sheepmeat and goatmeat,5.127
+SK000000,2020,vcs-280-Slovakia-Sugar beet,7.1778
+SK000000,2020,vcs-48-Slovakia-Beef and veal,7.22907
+UK000000,2015,vcs-219-United Kingdom Scotland-Sheepmeat and goatmeat,7.889985
+UK000000,2015,vcs-4-United Kingdom Scotland-Beef and veal,38.134928
+UK000000,2015,vcs-5-United Kingdom Scotland-Beef and veal,6.574988
+UK000000,2016,vcs-219-United Kingdom Scotland-Sheepmeat and goatmeat,7.906286
+UK000000,2016,vcs-4-United Kingdom Scotland-Beef and veal,38.213714
+UK000000,2016,vcs-5-United Kingdom Scotland-Beef and veal,6.588571
+UK000000,2017,vcs-219-United Kingdom Scotland-Sheepmeat and goatmeat,7.922295
+UK000000,2017,vcs-4-United Kingdom Scotland-Beef and veal,38.291094
+UK000000,2017,vcs-5-United Kingdom Scotland-Beef and veal,6.601913
+UK000000,2018,vcs-219-United Kingdom Scotland-Sheepmeat and goatmeat,7.945821
+UK000000,2018,vcs-4-United Kingdom Scotland-Beef and veal,38.404803
+UK000000,2018,vcs-5-United Kingdom Scotland-Beef and veal,6.621517
+UK000000,2019,vcs-219-United Kingdom Scotland-Sheepmeat and goatmeat,7.969347
+UK000000,2019,vcs-4-United Kingdom Scotland-Beef and veal,38.51851
+UK000000,2019,vcs-5-United Kingdom Scotland-Beef and veal,6.641122
+UK000000,2020,vcs-219-United Kingdom Scotland-Sheepmeat and goatmeat,7.969347
+UK000000,2020,vcs-4-United Kingdom Scotland-Beef and veal,38.51851
+UK000000,2020,vcs-5-United Kingdom Scotland-Beef and veal,6.641122

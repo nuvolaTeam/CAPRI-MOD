@@ -32,6 +32,23 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 13 November 2026 — CAPRI's endogenous entitlement limit (K136)
+
+- **Ported** policy/def_endCut.gms with supply_model.gms's sumEntl_ and overShotEntl_: in each region whose member
+  state has a ceiling of a cut scheme, a hectare of crops beyond the trend area loses the area payments per ha (one
+  overshoot column at the member state's cut, one row; setting `supply.entitlement_limit`, CAPRI's default on). Left
+  out of the calibration, as in CAPRI's PMP terms.
+- **The 2030 ceilings** are computed by capri_mod/supply/entitlements.py from CAPRI's CAP 2014-2020 tables
+  (tools/build/build_cap14_entitlements.py: Annex II, the shares, the transfers, the coupled ceilings, the trend
+  levels; capri_data/2017/policy/cap14_*.csv), as CAPRI's chain does at run time. They equal the 2030 reference's
+  CEILVAL for all 27 member states and 6 schemes.
+- **Four-region Green Deal check:** the row binds with the dual at CAPRI's cut in IR020000 (186.55 EUR/ha), NL120000
+  (272.64) and PL340000 (139.77).
+- The region's result has `entitlements` (cut, limit, eligible area, overshoot, premium lost, dual); the run's pickle
+  too.
+- New known issues: K138 (NECR is not a model activity), K139 (PL340000 converts all its forest to farmland in the Green
+  Deal). KNOWN_ISSUES' index counts corrected (24 open, 114 resolved).
+- Tests: test_cap14_ceilings_follow_capris_chain, test_entitlement_limit_in_the_2030_regional_model.
 ## 13 November 2026 — the results browser: Farm-to-Fork against JRC121368 in the same tab
 
 - The "Green Deal vs CAPRI" tab is now "Scenarios vs CAPRI", with a choice of comparison: the Green Deal 2030 run
@@ -58,6 +75,7 @@ and `docs/KNOWN_ISSUES.md`.
 - tools/build/extract_capri_gd_pair.py also keeps the crop yields at every level and CAPRI's N balance items (NITF:
   MINFER, EXCRET, BIOFIX, ATMOSD, EXPPRD, SURTOT and the loss items); capri_gd_effect.csv.xz rebuilt (79,802 rows).
 - Test: test_the_green_deal_tab_compares_the_run_with_capris_step.
+
 ## 13 November 2026 — the idled histosols in the reported land (K137)
 
 - The environmental table's arable land, grassland and UAA include the histosols the regional model idles, as CAPRI's

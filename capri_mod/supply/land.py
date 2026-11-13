@@ -412,5 +412,6 @@ class LandBlock:
         Qa, ca, Aa, ba, start = self._dairy_intensity_column(Qa, ca, Aa, ba, start, labels, n)
         Qa, ca, Aa, ba, start = self._histosol_columns(Qa, ca, Aa, ba, start, labels, n)
         Qa, ca, Aa, ba, start = self._mix_columns(Qa, ca, Aa, ba, start, labels, n)   # S1: CAPRI's T1/T2
+        Qa, ca, Aa, ba, start = self._entitlement_columns(Qa, ca, Aa, ba, start, labels, n)   # K136: def_endCut
         self.ev.aug_labels = labels              # one label per row of the augmented problem (the NLP form reads them)
         return Qa, ca, Aa, ba, start, rows
