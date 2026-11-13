@@ -184,6 +184,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/2017/policy/cap_greening_fleg_ms.csv', 'coefficients', 'by file: policy rules and targets, CAPRI''s'),
   ('capri_data/2017/policy/cap_payments.csv', 'coefficients', 'by file: policy instruments (payments, tariffs, ceilings, scheme shares)'),
   ('capri_data/scenarios/capri_ref_2030/capri_baseline_surplus_2030.csv', 'reference', 'by file: CAPRI''s 2030 reference policy'),
+  ('capri_data/scenarios/greendeal_group/greendeal_geo_to_ms.csv', 'coefficients', 'by file: policy rules and targets, CAPRI''s'),
   ('capri_data/scenarios/greendeal_group/landscape_targets_ms.csv', 'coefficients', 'by file: policy rules and targets, CAPRI''s'),
   ('capri_data/scenarios/greendeal_group/mineral_redu_exemptions.csv', 'coefficients', 'by file: policy rules and targets, CAPRI''s'),
   ('capri_data/scenarios/greendeal_group/mineral_redu_limcres.csv', 'coefficients', 'by file: policy rules and targets, CAPRI''s'),

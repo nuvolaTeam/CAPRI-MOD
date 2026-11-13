@@ -4078,10 +4078,10 @@
    }
   },
   "capri_data/codes/model_activity_classes.csv": {
-   "description": "the model's activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags, the organic target group and yield gap, the pesticide yield loss, the price source, the PMP share term's arable set and the young-animal outputs; a declared table, checked against CAPRI's sets by build_code_lists (a row that differs names its departure)",
+   "description": "the model's activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags, the organic target group and yield gap, the pesticide yield loss, the price source, the PMP share term's arable set, the young-animal outputs and the number of CAPRI technologies; a declared table, checked against CAPRI's sets by build_code_lists (a row that differs names its departure)",
    "kind": "structure",
    "rows": 49,
-   "columns": 12,
+   "columns": 13,
    "units": "to be established (value_units: open)",
    "read_by_model": [
     "capri_mod/data/definitions.py"
@@ -7660,6 +7660,23 @@
     "builder": "build_fert_partial_slack"
    },
    "catalogue_note": "CAPRI's Green Deal group: the regions and (region, group) pairs with the slack on the fertiliser priors' partial derivative (set_fert_priors.gms); tools/build/build_fert_partial_slack.py. (not re-checked)"
+  },
+  "capri_data/scenarios/greendeal_group/greendeal_geo_to_ms.csv": {
+   "description": "CAPRI's maps from the Green Deal target files' Eurostat codes to its member states: geo_to_ms_landscape (pol_input/greendeal/load_landscape_targets.gms) and geo_to_ms (load_organic_targets.gms). A region takes the sum of the targets of the codes mapped to its member state; LU and PT are mapped by neither (tools/build/build_greendeal_targets.py)",
+   "kind": "coefficients",
+   "vintage": "2021",
+   "domain": "policy",
+   "status": "live",
+   "rows": 25,
+   "columns": 3,
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_greendeal_targets (not in the trace yet)"
+   },
+   "catalogue_note": "CAPRI's maps from the Green Deal targets' Eurostat codes to its member states (geo_to_ms_landscape, geo_to_ms). (not re-checked)"
   },
   "capri_data/scenarios/greendeal_group/landscape_targets_ms.csv": {
    "description": "CAPRI's p_landscapeTargets: share of UAA in non-productive landscape elements to reach (gams/pol_input/greendeal/landscape_targets.gdx; tools/build/build_greendeal_targets.py)",

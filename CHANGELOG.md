@@ -32,6 +32,37 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 13 November 2026 — the idled histosols in the reported land (K137)
+
+- The environmental table's arable land, grassland and UAA include the histosols the regional model idles, as CAPRI's
+  land types and UAAR do (dataOut's GRAS includes IHISGR, ARAC IHISCR). Before, the Green Deal's surplus per ha computed
+  from the table looked short of its -30% in 28 manure-heavy regions while the N-surplus row met it exactly; the EU UAA
+  of the Green Deal 2030 run grows +3.4% with the idled histosols against +2.3% as reported before (CAPRI +1.3%).
+- Test: test_emission_tax_in_supply_follows_capri checks the reported grassland of IR010000's idled histosols.
+
+## 13 November 2026 — the Green Deal targets through CAPRI's geo_to_ms maps (K135)
+
+- The landscape and organic targets reach a region as in CAPRI: the sum over the Eurostat codes that geo_to_ms_landscape
+  and geo_to_ms map to its member state (new capri_data/scenarios/greendeal_group/greendeal_geo_to_ms.csv, built by
+  build_greendeal_targets.py from CAPRI's GMS files). Neither set maps LU or PT: Luxembourg takes Belgium's targets,
+  Portugal and the regions outside the EU have none, and a code's empty cell gives 0. Before, the targets were looked up
+  by the region's country (Portugal 3.08 landscape and 19.2 organic points; Luxembourg its own values; Ireland's permanent
+  crops and Malta's grassland the UAA target).
+- Test: test_green_deal_targets_follow_capris_geo_to_ms_maps.
+
+## 13 November 2026 — the activity bounds as CAPRI's: set-aside, fallow, per technology (K132-K134)
+
+- The voluntary set-aside takes CAPRI's 1e-6 .. 1e5 (1000 ha) bounds only where the data have a VSET level above 1e-6
+  (set_supply_bounds.gms l. 42-43, `RegionalSupplyModel.VSET_DATA_MIN`); without one it takes the absent rule. Before,
+  VSET was exempt everywhere and grew from zero in the regions whose CAPRI 2030 data have fallow only (PL, CZ, RO, SK,
+  CY, MT): 1.2 Mha in the Green Deal 2030 run.
+- With a landscape floor the fallow may take half the UAA per technology (set_supply_bounds.gms l. 159-160): without
+  it RO010000 was infeasible under the Green Deal's 8% target once VSET followed CAPRI's rule.
+- The activity bounds are the sums of CAPRI's per-technology bounds (K134): crops with T1 and T2 (half the level each)
+  may reach max(10 x level, level + 200); the number of technologies is a new column of
+  capri_data/codes/model_activity_classes.csv, checked by build_code_lists against sim_ini_21730's p_technFact.
+- Tests: test_vset_bounds_only_where_capri_data_have_set_aside, test_fallow_takes_half_the_uaa_per_technology_under_the_landscape_floor,
+  test_activity_bounds_sum_capris_per_technology_bounds.
 ## 13 November 2026 — CAPTRD-MOD: the NUTS 2 bounds, solve and rem_tiny; CONOPT's phase 1; the tie-break
 
 - **Stage 3 completed for one year.** `estimate_nuts2.py` gains the bounds (fix_est.gms per region, then

@@ -291,9 +291,9 @@ class PolicyBlock:
         return max(0.0, (100.0 * float(share) - o) / (t - o))
 
     def _organic_region_target(self, share: float) -> float:
-        """p_organicAreaTarget(ru): the member state's UAA target (organic_targets_uaa.gdx) scaled to the ambition.
-        A region without CAPRI's targets (outside the EU) takes the EU distance-to-target fallback, as
-        _organic_converted does."""
+        """p_organicAreaTarget(ru): the member state's UAA target (organic_targets_uaa.gdx) scaled to the ambition; 0
+        where CAPRI maps no code to the member state (Portugal, the regions outside the EU: _capri_ms_targets).
+        Without CAPRI's target files the EU distance-to-target fallback, as _organic_converted does."""
         t = getattr(self.data, "organic_targets_pp", None)
         v = t.get("uaa_pp") if (t is not None and hasattr(t, "get")) else None
         if v is None or pd.isna(v):
@@ -303,8 +303,8 @@ class PolicyBlock:
     def _organic_crop_target(self, activity: str, share: float) -> float:
         """p_organicAreaTargetCrops(ru, crop) of CAPRI's organic crops (0 for the other crops): the target of the
         crop's NGRP group (ORGANIC_CROP_TARGET). A member state with no value for the group in CAPRI's
-        organic_targets.gdx gets 0, as in CAPRI (Portugal: no arable or permanent-crop entry; Ireland: no permanent,
-        Malta: no grassland)."""
+        organic_targets.gdx gets 0, as in CAPRI (Ireland: no permanent, Malta: no grassland), and so does one CAPRI
+        maps no code to (Portugal, the regions outside the EU: _capri_ms_targets)."""
         col = self.ORGANIC_CROP_TARGET.get(activity)
         if col is None:
             return 0.0
@@ -452,9 +452,10 @@ class PolicyBlock:
         past 25%, still converts 7.5 points of UAA where a distance-to-25% rule
         gave it nothing.
 
-        The requested share scales the ambition (0.25 = CAPRI's full target).
-        Falls back to the member state's UAA-wide figure, then to the
-        distance-to-target rule, where a crop group has no entry.
+        The requested share scales the ambition (0.25 = CAPRI's full target). A
+        land type with no record in CAPRI's file, or a member state CAPRI maps no
+        code to, gives 0 (_capri_ms_targets), as CAPRI's sum does; the
+        distance-to-target rule only without CAPRI's target files.
         """
         if targets is None:
             return default
@@ -464,11 +465,7 @@ class PolicyBlock:
             col = "grassland_pp"
         else:
             col = "arable_pp"
-        val = targets.get(col) if hasattr(targets, "get") else None
-        if val is None or pd.isna(val):
-            val = targets.get("uaa_pp") if hasattr(targets, "get") else None
-        if val is None or pd.isna(val):
-            return default
+        val = targets[col]
         # CAPRI scales its targets to the requested ambition as (orgTarg - 12) / (25 - 12)
         # (load_organic_targets.gms; orgTarg in %), exactly 1 at the 25% target
         scale = self._organic_target_scale(share)

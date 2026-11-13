@@ -578,6 +578,8 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/supply/fertilisation.py', 'FertilisationBlock.tiered_surplus_target', 0.75, 'literature', 'keep', 'JRC121368 tiered surplus rule (sect. 4.3.4 as cited in policy_module.py)', '75% cut on 100-150 kg N/ha'),
   ('capri_mod/supply/fertilisation.py', 'FertilisationBlock.tiered_surplus_target', 50.0, 'literature', 'keep', 'JRC121368 tiered surplus rule (sect. 4.3.4 as cited in policy_module.py)', 'tier bounds 50 and 100 kg N/ha'),
   ('capri_mod/supply/fertilisation.py', 'FertilisationBlock.tiered_surplus_target', 150.0, 'literature', 'keep', 'JRC121368 tiered surplus rule (sect. 4.3.4 as cited in policy_module.py)', 'tier bound 150 kg N/ha'),
+  ('capri_mod/supply/supply_module.py', 'RegionalSupplyModel.FALL_FLOOR_UP_SHARE', 0.5, 'capri', 'keep', 'gams/supply/set_supply_bounds.gms l. 159-160', 'with a landscape floor the fallow''s upper bound is half the UAA per technology'),
+  ('capri_mod/supply/supply_module.py', 'RegionalSupplyModel.VSET_DATA_MIN', 1e-06, 'capri', 'keep', 'gams/supply/set_supply_bounds.gms l. 42-43', 'the voluntary set-aside has CAPRI''s bounds 1e-6 .. 1e5 (1000 ha) only where its data level exceeds 1e-6; otherwise the absent rule'),
   ('capri_mod/supply/supply_module.py', 'SupplyModule._build_region_data', 2030.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 data variant'),
   ('capri_mod/supply/supply_module.py', 'SupplyModule._intensity_q_at', 2030.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 data variant'),
   ('capri_mod/supply/supply_module.py', 'SupplyModule._pmp_terms_for', 2030.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 data variant'),

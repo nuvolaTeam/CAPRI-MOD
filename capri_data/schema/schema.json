@@ -21838,6 +21838,72 @@
     "tests": []
    }
   },
+  "greendeal_geo_to_ms": {
+   "file": "capri_data/scenarios/greendeal_group/greendeal_geo_to_ms.csv",
+   "declared_in": "14_policy_targets.sql",
+   "layout": [],
+   "comment": "CAPRI's maps from the Green Deal target files' Eurostat codes to its member states: geo_to_ms_landscape (pol_input/greendeal/load_landscape_targets.gms) and geo_to_ms (load_organic_targets.gms). A region takes the sum of the targets of the codes mapped to its member state; LU and PT are mapped by neither (tools/build/build_greendeal_targets.py)",
+   "columns": [
+    {
+     "name": "geo",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "landscape_ms",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "organic_ms",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "geo"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "landscape_ms"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "organic_ms"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_greendeal_targets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "land_availability": {
    "file": "capri_data/2017/supply/land_availability.csv",
    "declared_in": "10_supply_2017.sql",
@@ -27561,7 +27627,7 @@
    "file": "capri_data/codes/model_activity_classes.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
-   "comment": "the model's activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags, the organic target group and yield gap, the pesticide yield loss, the price source, the PMP share term's arable set and the young-animal outputs; a declared table, checked against CAPRI's sets by build_code_lists (a row that differs names its departure)",
+   "comment": "the model's activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags, the organic target group and yield gap, the pesticide yield loss, the price source, the PMP share term's arable set, the young-animal outputs and the number of CAPRI technologies; a declared table, checked against CAPRI's sets by build_code_lists (a row that differs names its departure)",
    "columns": [
     {
      "name": "code",
@@ -27619,6 +27685,11 @@
      "not_null": false
     },
     {
+     "name": "technologies",
+     "type": "INTEGER",
+     "not_null": true
+    },
+    {
      "name": "source",
      "type": "VARCHAR",
      "not_null": true
@@ -27645,7 +27716,8 @@
     "(organic_target IN ('arable_pp', 'permanent_pp', 'uaa_pp'))",
     "(organic_yield_gap IN (0, 1))",
     "(pesticide IN (0, 1))",
-    "(share_term_arable IN (0, 1))"
+    "(share_term_arable IN (0, 1))",
+    "(technologies IN (1, 2))"
    ],
    "units": [
     {
@@ -27677,6 +27749,12 @@
      "unit": null,
      "status": "open",
      "basis": "a flag (1: in the PMP share term's arable denominator)"
+    },
+    {
+     "item": "technologies",
+     "unit": null,
+     "status": "open",
+     "basis": "a count: CAPRI's LEVL technologies of the activity (1: T; 2: T1 and T2)"
     }
    ],
    "provenance": {
@@ -55665,6 +55743,10 @@
   },
   {
    "file": "14_policy_targets.sql",
+   "rule": "the geo codes CAPRI maps are codes of the target files"
+  },
+  {
+   "file": "14_policy_targets.sql",
    "rule": "the targets' member states are the EU's (NUTS-0 prefixes of CAPRI's member states)"
   },
   {
@@ -55805,7 +55887,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 484,
+  "capri/keep": 486,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 31,

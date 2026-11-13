@@ -41,8 +41,12 @@ import csv
 import sys
 from pathlib import Path
 
+import numpy as np
+
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools" / "lib"))
+from _sources_io import read_source  # noqa: E402  (capri_data/sources: Parquet)
 OUT = ROOT / "capri_data" / "codes"
 CAPRI_SETS = ("PACT", "MPACT", "MCACT", "MAACT", "XX", "XX1", "RALL", "COLS", "ROWS")
 
@@ -213,6 +217,25 @@ def main():
                                 f"AACT_TO_XX {sorted(capri_x)}")
         problems += [f"model_activity_classes.csv {r['code']}: young output {y} is not in CAPRI's OYANI"
                      for y in filter(None, r["young_outputs"].split(";")) if y not in oyani]
+    # the activities' technologies (the activity bounds sum CAPRI's per-technology bounds, set_supply_bounds.gms l. 26-27,
+    # 42-43, 159-160): CAPRI's LEVL technologies at the 2030 simulation start, the same in every region, equal shares
+    fact = read_source(ROOT / "capri_data" / "sources" / "intermediate" / "technology" / "techn_fact_2030.parquet")
+    lv = fact[fact.row == "LEVL"]
+    t_of = lv.groupby(["region", "activity"]).tech.agg(lambda s: tuple(sorted(s))).groupby(level="activity").agg(set)
+    sh = lv.groupby(["activity", "tech"]).value.agg(lambda s: (s.min(), s.max()))
+    for r in classes:
+        ts = [t_of.get(c) for c in capri_of.get(r["code"], []) if c in t_of.index]
+        if any(len(t) != 1 for t in ts):
+            problems.append(f"model_activity_classes.csv {r['code']}: CAPRI's technologies differ by region {ts}")
+            continue
+        n = {len(next(iter(t))) for t in ts} or {1}
+        if n != {int(r["technologies"])}:
+            problems.append(f"model_activity_classes.csv {r['code']}: technologies {r['technologies']}, CAPRI {sorted(n)}")
+        for c in capri_of.get(r["code"], []):
+            k = len(next(iter(t_of[c]))) if c in t_of.index else 1
+            if c in t_of.index and any(not np.isclose(v, 1.0 / k, rtol=0, atol=1e-12) for t in next(iter(t_of[c]))
+                                       for v in sh[(c, t)]):
+                problems.append(f"model_activity_classes.csv {r['code']}: CAPRI's {c} technologies without equal shares")
     # the ammonia technologies the N cascade's equations name (HOUSN_, STORN_, RUNHOUSN_, APPLN_: CAPRI writes the
     # lists in the equations, supply_model.gms l. 3200 ff., and so does the model): each one of CAPRI's MitiTechAmm
     amm = set(read_set(a.sets, "MitiTechAmm"))

@@ -24,6 +24,14 @@ INSERT INTO value_units VALUES
   ('organic_targets_ms', 'permanent_pp', 'U_percent', 'capri', 'p_organicTargetMS(MS, PECR)'),
   ('organic_targets_ms', 'uaa_pp', 'U_percent', 'capri', 'p_organicTargetUAA(MS)');
 
+-- file: capri_data/scenarios/greendeal_group/greendeal_geo_to_ms.csv
+CREATE TABLE greendeal_geo_to_ms (
+    geo VARCHAR PRIMARY KEY,                                 -- the Eurostat code of the target files
+    landscape_ms VARCHAR REFERENCES capri_rall (code),       -- empty: geo_to_ms_landscape does not map the code
+    organic_ms VARCHAR REFERENCES capri_rall (code)          -- empty: geo_to_ms does not map the code
+);
+COMMENT ON TABLE greendeal_geo_to_ms IS 'CAPRI''s maps from the Green Deal target files'' Eurostat codes to its member states: geo_to_ms_landscape (pol_input/greendeal/load_landscape_targets.gms) and geo_to_ms (load_organic_targets.gms). A region takes the sum of the targets of the codes mapped to its member state; LU and PT are mapped by neither (tools/build/build_greendeal_targets.py)';
+
 -- file: capri_data/scenarios/greendeal_group/organic_ngrp_class.csv
 CREATE TABLE organic_ngrp_class (
     ngrp VARCHAR NOT NULL PRIMARY KEY,
@@ -90,6 +98,10 @@ CREATE TABLE yield_price_elasticity (
 );
 COMMENT ON TABLE yield_price_elasticity IS 'CAPRI''s p_yieldElas (supply/yield_elas.gms: cereals 0.3, oilseeds 0.2, potatoes 0.2) on the model''s crops (tools/build/build_yield_price_elasticity.py)';
 INSERT INTO value_units VALUES ('yield_price_elasticity', 'elasticity', 'U_Elasticity', 'capri', 'p_yieldElas, yield on own price');
+
+-- rule: the geo codes CAPRI maps are codes of the target files
+SELECT 'geo_to_ms' AS tbl, geo AS member_state FROM greendeal_geo_to_ms
+WHERE geo NOT IN (SELECT member_state FROM landscape_targets_ms UNION SELECT member_state FROM organic_targets_ms);
 
 -- rule: the targets' member states are the EU's (NUTS-0 prefixes of CAPRI's member states)
 SELECT 'landscape' AS tbl, member_state FROM landscape_targets_ms

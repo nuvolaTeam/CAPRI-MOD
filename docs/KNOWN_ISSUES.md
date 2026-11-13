@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (15)
+## Open (16)
 
 | # | Issue | Status |
 |---|---|---|
@@ -35,11 +35,17 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K129](#k129) | BG020000 under the Green Deal: the coupled iteration settles on one of two branches of the region's response (maize 169 or 16 thousand ha between two runs); each iteration's problem mostly has one solution the starts agree on | open (10 November 2026): the branch follows the market iteration's path; more starts per solve did not change it (tried and dropped) |
 | [K130](#k130) | Catch crops' cost per ha is CAPRI's reported TOIN of CATC, not its cost coefficients; where CAPRI's Green Deal baseline has no catch crops (160 of 250 units), the calibration run's TOIN | open (9 November 2026): to read CAPRI's own cost data of the winter-cover technology |
 | [K131](#k131) | Given CAPRI's own Green Deal supply, the market's EU prices follow CAPRI's within 0.3 points on average, but the dairy protein products rise 2-5 points more and butter 1 point less | open (12 November 2026): not yet traced |
+| [K136](#k136) | CAPRI's endogenous entitlement limit (def_endCut.gms: no area payment beyond the trend area) is not in the model; it binds in every EU region of CAPRI's Green Deal 2030 step | open (13 November 2026): the 2030 ceilings' data route is the project lead's decision, with P2 |
 
-## Resolved (107)
+## Resolved (112)
 
 | # | Issue | Status |
 |---|---|---|
+| [K137](#k137) | The reported UAA left out the idled histosols (CAPRI's IHISGR, IHISCR stay in GRAS, ARAC and UAAR): the Green Deal's surplus per ha looked short of its target where the row met it | fixed (13 November 2026) |
+| [K135](#k135) | The Green Deal targets reached the regions by their country, not through CAPRI's geo_to_ms maps: Portugal, which CAPRI maps to no target, took its GDX values; Luxembourg its own instead of Belgium's | fixed (13 November 2026) |
+| [K134](#k134) | The activity bounds of one technology for crops with CAPRI's two (T1, T2) | fixed (13 November 2026) |
+| [K133](#k133) | Fallow held under 10 x its level when the landscape floor needs more (CAPRI: 0.5 x UAAR per technology) | fixed (13 November 2026) |
+| [K132](#k132) | The voluntary set-aside exempt from the absent-activity rule everywhere; it grew from zero where CAPRI's data have none | fixed (13 November 2026) |
 | [K108](#k108) | Inputs from CAPRI's 2030 results in 2030 money in a model working in 2017 money | fixed (gate 11, 31 October 2026) |
 | [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | decided (31 October 2026): the model's calibration kept, a deliberate departure (DEP-30) |
 | [K107](#k107) | The regional model's tax on mineral N took IPCC's factors, the accounts CAPRI's MITERRA fractions | fixed (31 October 2026) |
@@ -2705,3 +2711,115 @@ Whether those regions' consumer prices differ was not checked.
 - **In 9t:** –
 - **Status:** open
 
+
+<a id="k132"></a>
+### K132: The voluntary set-aside exempt from the absent-activity rule everywhere (found 13 November 2026)
+
+CAPRI bounds VSET at 1e-6 .. 1e5 (1000 ha) only `$ (p_technFact x DATA VSET LEVL > 1e-6)` (set_supply_bounds.gms
+l. 42-43); without a data level the activity has no variable. The model skipped VSET in the bounds loop in every
+region, so where CAPRI's 2030 data have fallow only (PL, CZ, RO, SK, CY, MT) VSET could grow from zero: 0.013 kha in
+the baseline, 363 kha in PL, 484 in RO, 255 in CZ and 112 in SK in the Green Deal 2030 run (runs/full_gd_buf.pkl),
+where EU VSET rose +163% against CAPRI's +80% and FALL +65% against +91%. Fixed: CAPRI's condition
+(`RegionalSupplyModel.VSET_DATA_MIN`); with a data level CAPRI's bounds, without one the absent rule.
+
+- **Effect:** set-aside and fallow under area targets (Green Deal landscape features), the per-ha N constraints
+- **In 9t:** –
+- **Status:** fixed (13 November 2026); the Green Deal run with the fix to be compared again
+
+<a id="k133"></a>
+### K133: Fallow held under 10 x its level when a landscape floor needs more (found 13 November 2026)
+
+With a landscape floor CAPRI lifts the fallow's upper bound to half the UAA per technology
+(set_supply_bounds.gms l. 159-160, after the general 0.1x .. 10x rule; FALL has T1 and T2 at a LEVL factor of 0.5 in
+all 236 regions of sim_ini_21730 that have fallow). The model kept the general rule, which K132's free VSET had
+hidden. Once VSET followed CAPRI's rule, RO010000 (12 kha of fallow and no set-aside in CAPRI's 2030 data, a floor of
+about 122 kha under the Green Deal's 8% target, more than 10 x its fallow) became infeasible in every scenario solve;
+IPOPT's last point was kept, and Romania's market went on moving by up to 197% between steps until the run was
+stopped. Fixed: `RegionalSupplyModel.FALL_FLOOR_UP_SHARE` x FALL's technologies (K134) x the UAA the floor is sized on.
+
+- **Effect:** feasibility under the Green Deal landscape target where the data have little fallow and no set-aside
+- **In 9t:** –
+- **Status:** fixed (13 November 2026); the Green Deal 2030 run with K132 and K133 (runs/full_gd_fall.pkl) converged
+  in 19 iterations with every regional solve optimal (RO010000 included); EU VSET +79.1% against CAPRI's +79.5% (before
+  +162.8%), FALL +101% against +91%; the prices' and herds' gaps to CAPRI are unchanged
+
+<a id="k134"></a>
+### K134: The activity bounds of one technology for crops with two (found 13 November 2026)
+
+CAPRI bounds each technology's level (set_supply_bounds.gms l. 26-27, 42-43, 159-160): every crop but grassland, OOIL,
+OIND, NURS, FLOW and OCRO has T1 and T2 at half its level (p_technFact LEVL, the same in all regions of sim_ini_21730;
+intens/techf.gms l. 64-75), so its level may reach max(10 x level, level + 200), not level + 100. The model applied
+one technology's bounds to the crop: a crop below 22 kha could grow by 100 kha (BARL in PL340000 ended at that bound,
+15 -> 155 kha, in the Green Deal 2030 run runs/full_gd_buf.pkl). Fixed: model_activity_classes.csv carries CAPRI's
+number of technologies (checked by build_code_lists against p_technFact); the bounds are their sums. The mix columns'
+per-technology bounds (T1 and T2 each within its own range) are not rows of the model (S1_MIX_COLUMNS.md).
+
+- **Effect:** small crops' upper bound under large shocks
+- **In 9t:** –
+- **Status:** fixed (13 November 2026); in the run with K132 and K133 only (runs/full_gd_fall.pkl) BARL in PL340000 still
+  ended at 10 x its level (155 kha), whose bound is now 215.5 kha
+
+<a id="k135"></a>
+### K135: The Green Deal targets of Portugal and Luxembourg not CAPRI's (found 13 November 2026)
+
+CAPRI maps the target files' Eurostat codes to its member states with two sets, geo_to_ms_landscape
+(pol_input/greendeal/load_landscape_targets.gms) and geo_to_ms (load_organic_targets.gms), and a region takes the sum
+over the codes mapped to its member state (p_setAsideTarget(ms), p_organicAreaTarget(ms), p_organicAreaTargetCrops(ms,
+ngrp)), then the member state's value by map_rr. Neither set maps LU or PT, although landscape_targets.gdx,
+organic_targets.gdx and organic_targets_uaa.gdx hold values for both. So in CAPRI Luxembourg (BL400000) takes
+Belgium's targets (BE -> BL000000), Portugal has neither a landscape nor an organic target, and neither do the regions
+outside the EU. The model looked the targets up by the region's NUTS-0 country: Portugal took 3.08 landscape points
+(PT200000's fallow 0.01 -> 2.94 kha, CAPRI 0.01 -> 0.01; CAPRI's Portuguese fallow and set-aside fall 22% and 21%) and
+19.2 organic points of UAA, and Luxembourg its own values (the regions outside the EU take none of the Green Deal's
+instruments in the model, SupplyModule.EU_POLICY_KEYS, so their lookup had no effect). An empty cell of a mapped code (Ireland's permanent crops, Malta's grassland) fell back
+to the member state's UAA target, where CAPRI's sum gives 0. Fixed: CAPRI's two sets are data
+(capri_data/scenarios/greendeal_group/greendeal_geo_to_ms.csv, parsed by build_greendeal_targets.py from the GMS
+files) and `_capri_ms_targets` sums the codes mapped to the region's member state. That CAPRI leaves out Portugal and
+Luxembourg looks like an omission in its sets rather than a choice (the GDX files carry their targets); the model
+follows CAPRI's code.
+
+- **Effect:** the Green Deal in Portugal and Luxembourg; Ireland's permanent crops and Malta's grassland under the
+  organic target
+- **In 9t:** –
+- **Status:** fixed (13 November 2026)
+
+<a id="k136"></a>
+### K136: CAPRI's endogenous entitlement limit not in the model (found 13 November 2026)
+
+CAPRI's policy/def_endCut.gms (through scen/base_scenarios/CAP_2014_2020.gms, in the Green Deal reference and in the
+scenario's base refpol_endotech_all_sup.gms alike) gives each region entitlements for the area payments (dp_bps,
+Dpbps_SAPS, DpYOUNG, DpFIRHA, DpNATCO where the member state has a 2030 ceiling): Limit = the crops' trend levels
+(DATA "trd"), Cut = the member state's ceiling CEILVAL x 1000 / its regions' Limit (EUR/ha). The supply model's
+sumEntl_ and overShotEntl_ (supply_model.gms l. 1885-1892) and the objective's - overshoot x Cut (l. 4768) take the
+payment away from every eligible hectare beyond the limit; entitlement trade (prem_entl_trade.gms) is off
+(%entl_trade%, capmod/set_global_variables.gms l. 194). The dual's contribution D_sumEntl in CAPRI's dataOut is nonzero
+in 85 regions and aggregates of the 2030 reference and in all 248 EU regions and aggregates of the Green Deal 2030
+step, at about the payment per ha (NL -273, BL -231, DE -223, IR020000 -186.5 EUR/ha). The model pays every hectare
+(fixed PRME per activity): its UAA grows +3.4% in the Green Deal (with the idled histosols, K137) against CAPRI's
++1.3%, which also eases the per-ha N-surplus target.
+
+- **Effect:** land expansion and the land market under shocks that raise land's value (the Green Deal); the base
+  regions where the limit binds
+- **In 9t:** –
+- **Status:** open: the 2030 ceilings are set at run time by CAPRI's policy chain (sim_ini_21730 has the trend levels
+  but no 2030 BPS ceilings); the data route is the project lead's decision, with P2
+  (claude/p2_premium_module_scoping.md)
+
+<a id="k137"></a>
+### K137: The reported UAA left out the idled histosols (found 13 November 2026)
+
+The environmental table's arable land, grassland and uaa_total summed the crop activities only. The histosols the
+regional model idles (CAPRI's IHISGR, IHISCR; capri-mod's histosol fallow columns) stay in their land type: in the
+model's land rows (crops + idled area = the land type, CAPRI's LandBalNoSlak_) and in CAPRI's reporting (dataOut's
+GRAS includes IHISGR, ARAC IHISCR, UAAR both; e_SURTOTHa divides by the land types). So the surplus per ha computed
+from the table looked short of the Green Deal's -30% in 28 manure-heavy regions (IR020000 -26.8%, NL120000 -16.2%)
+while the N-surplus row met it exactly: in IR020000 the row is surplus <= 0.7 x 176.36 kg N/ha x the land columns
+(2674.8 kha), 330.2 kt N, the reported surplus, with 115 kha of idled histosol grassland in the land and not in the
+table (checked by recording the row at the solution). The EU UAA of the Green Deal 2030 run grows +3.36% with the idled
+histosols (1,721 kha; CAPRI 1,819 kha) against +2.30% without; CAPRI +1.3% (K136). Fixed: the idled area is counted in
+the land type it belongs to (EnvironmentalModule, from the supply result's histosol_fallow).
+
+- **Effect:** reporting: arable land, grassland and UAA, and every per-ha figure taken from them, wherever histosols
+  are idled (the Green Deal, an emission tax)
+- **In 9t:** –
+- **Status:** fixed (13 November 2026)

@@ -291,7 +291,13 @@ def test_emission_tax_in_supply_follows_capri(model):
         # holds crude protein as an equality (CAPRI's simulation model), and nitrate's lower protein requirement then
         # pushes grass out of a grass-based dairy ration (its dual: +200 EUR per unit against the tax's gain)
         assert any(v > 0 for (a_, o_), v in gs.items() if o_ == "Nitr_Tot")
-        assert sum(s["supply"]["IR010000"].histosol_fallow.values()) > 0
+        hf = s["supply"]["IR010000"].histosol_fallow
+        assert sum(hf.values()) > 0
+        # the idled histosols stay in CAPRI's land types (GRAS includes IHISGR, UAAR both): in the reported UAA
+        from capri_mod.data.definitions import CROPS_ON_LAND
+        env = s["environmental"].loc["IR010000"]
+        grass = sum(float(a1.get(g, 0.0)) for g in CROPS_ON_LAND["GRAS"])
+        assert abs(float(env["grassland"]) - grass - float(hf.get("grass", 0.0))) < 1e-6
         assert s["abatement"]["carbon_tax"] == 100.0
     finally:
         model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
@@ -3587,9 +3593,10 @@ def test_supply_elasticities_reach_every_region_from_capri(data):
 
 def test_capri_activity_bounds(data):
     """K27: CAPRI's bounds on endogenous activity levels (supply/set_supply_bounds.gms): 0.1 x to max(10 x, + 100) the
-    simulation's data level, the 100 in CAPRI's units (LEVL; animals converted with capri_level_ratio.csv), set-aside
-    and fixed activities exempt; the base solution lies inside them."""
-    from capri_mod.supply.supply_module import SupplyModule, FIXED_ACTIVITIES
+    simulation's data level, the 100 in CAPRI's units (LEVL; animals converted with capri_level_ratio.csv), per
+    technology (K132: the model's bound sums CAPRI's T1 and T2 bounds, each at half the level), voluntary set-aside
+    (its own 1e-6 .. 1e5 per technology, where the data have it) and fixed activities exempt."""
+    from capri_mod.supply.supply_module import SupplyModule, FIXED_ACTIVITIES, _n_techn
     from capri_mod.utils.utils import calibrate_supply_elasticities
     sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
     sm.run(price_signals=None, regions=["NL120000"])
@@ -3603,9 +3610,14 @@ def test_capri_activity_bounds(data):
             continue
         up, lo = b[lab.index(f"bound_{a}_up")], -b[lab.index(f"bound_{a}_lo")]
         k = float(data["capri_level_ratio"].at["NL120000", a]) if a in data["capri_level_ratio"].columns else 1.0
-        assert abs(up - max(10 * v, v + 100 * k)) < 1e-9 and abs(lo - 0.1 * v) < 1e-9, (a, up, lo, v, k)
-    # CAPRI exempts VSET (set_supply_bounds.gms l. 42-43); FALL takes the rule since S2 (7 November 2026)
-    assert not any(l in lab for l in ("bound_VSET_up",) + tuple(f"bound_{f}_up" for f in FIXED_ACTIVITIES))
+        nt = _n_techn(a)
+        assert abs(up - max(10 * v, v + 100 * k * nt)) < 1e-9 and abs(lo - max(0.1 * v, nt * 1e-8)) < 1e-9, \
+            (a, up, lo, v, k, nt)
+
+    # CAPRI exempts VSET (set_supply_bounds.gms l. 42-43) where the data have it; FALL takes the rule since S2
+    if "bound_VSET_up" in lab:
+        assert abs(b[lab.index("bound_VSET_up")] - _n_techn("VSET") * m.VSET_UP) < 1e-9
+    assert not any(f"bound_{f}_up" in lab for f in FIXED_ACTIVITIES)
 
 
 def test_lamb_balance_links_sheep_activities():
@@ -4825,3 +4837,98 @@ def test_hessian_shocks_reach_the_rations_feed_prices(model, monkeypatch):
     assert set(fp) == set(want)
     assert all(np.allclose(np.asarray(fp[a], float), np.asarray(want[a], float), rtol=0, atol=0) for a in want)
     assert any(not np.allclose(np.asarray(fp[a], float), np.asarray(fp_base[a], float)) for a in want)
+
+
+def test_vset_bounds_only_where_capri_data_have_set_aside(data):
+    """CAPRI's set-aside bounds (set_supply_bounds.gms l. 42-43): VSET in 1e-6 .. 1e5 (1000 ha) per technology only
+    where the data have a VSET level above 1e-6; without one VSET has no variable and takes the absent rule (KNOWN_ISSUES K132:
+    Polish regions, whose CAPRI 2030 data have fallow only, had grown VSET from zero)."""
+    from capri_mod.supply.supply_module import SupplyModule, RegionalSupplyModel
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
+    sm.run(price_signals=None, regions=["PL210000", "FR520000"])
+
+    without = sm._models["PL210000"]
+    without._build_constraints()
+    assert "bound_VSET_absent" in without.ev.row_labels
+    assert "bound_VSET_up" not in without.ev.row_labels
+
+    with_ = sm._models["FR520000"]
+    A, b, _, _ = with_._build_constraints()
+    lab = list(with_.ev.row_labels)
+    assert "bound_VSET_absent" not in lab
+    # per technology in CAPRI: VSET has T1 and T2
+    assert abs(b[lab.index("bound_VSET_up")] - 2 * RegionalSupplyModel.VSET_UP) < 1e-9
+    assert abs(b[lab.index("bound_VSET_lo")] + 2 * RegionalSupplyModel.VSET_LO) < 1e-12
+
+
+def test_fallow_takes_half_the_uaa_per_technology_under_the_landscape_floor(data):
+    """CAPRI's fallow bound with a landscape floor (set_supply_bounds.gms l. 159-160): FALL up to 0.5 x UAAR per
+    technology (T1, T2) instead of 10 x its level; without a floor the general rule. In CAPRI's 2030 data RO010000
+    (12 kha of fallow, no set-aside) needs more under the Green Deal's 8% target than 10 x its fallow (KNOWN_ISSUES
+    K133); the fixture's levels are the base year's."""
+    from capri_mod.supply.supply_module import SupplyModule, RegionalSupplyModel as R, _n_techn
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
+    sm.run(price_signals=None, regions=["RO010000"])
+    m = sm._models["RO010000"]
+
+    _, b, _, _ = m._build_constraints()
+    lab = list(m.ev.row_labels)
+    fall0 = float(m._base_levels()["FALL"])
+    assert _n_techn("FALL") == 2
+    assert abs(b[lab.index("bound_FALL_up")] - max(10.0 * fall0, fall0 + 200.0)) < 1e-9
+
+    _, b, _, _ = m._build_constraints(set_aside_requirement=0.08)
+    lab = list(m.ev.row_labels)
+    floor = -b[lab.index("landscape_floor")]
+    up = b[lab.index("bound_FALL_up")]
+    assert abs(up - R.FALL_FLOOR_UP_SHARE * 2 * floor_uaa(m)) < 1e-6 and up > floor
+
+
+def test_activity_bounds_sum_capris_per_technology_bounds(data):
+    """CAPRI's activity bounds are per technology (set_supply_bounds.gms l. 26-27): a crop with T1 and T2 at half its
+    level each may reach max(10 x level, level + 2 x 100); grassland and the animals have one technology, T."""
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
+    sm.run(price_signals=None, regions=["PL340000"])
+    m = sm._models["PL340000"]
+    _, b, _, _ = m._build_constraints()
+    lab = list(m.ev.row_labels)
+    base = m._base_levels()
+    for a, k in (("BARL", 2), ("GRAI", 1)):
+        v = float(base[a])
+        assert abs(b[lab.index(f"bound_{a}_up")] - max(10.0 * v, v + k * 100.0)) < 1e-9
+        assert abs(b[lab.index(f"bound_{a}_lo")] + max(0.1 * v, k * 1e-8)) < 1e-12
+
+
+def floor_uaa(m):
+    """The UAA the landscape floor is sized on (the region's four land types)."""
+    return sum(m._land_of(t) for t in ("ARABLE", "PERMANENT", "GRASSLAND", "FALLOW"))
+
+
+def test_green_deal_targets_follow_capris_geo_to_ms_maps(data):
+    """CAPRI's landscape and organic targets reach a region through its member state's Eurostat codes
+    (load_landscape_targets.gms geo_to_ms_landscape, load_organic_targets.gms geo_to_ms) and a sum: Luxembourg
+    (BL400000) takes Belgium's targets (BE -> BL000000), Portugal has none although the GDX files hold values for it,
+    a code without a record gives 0 (Ireland's permanent crops), and so do the regions outside the EU (KNOWN_ISSUES
+    K135)."""
+    from capri_mod.supply.supply_module import _capri_ms_targets, _landscape_pp
+
+    land, org = data["landscape_targets_ms"], data["organic_targets_ms"]
+    assert land.at["PT", "landscape_pp"] > 0 and org.at["PT", "uaa_pp"] > 0       # in the GDX, not mapped by CAPRI
+
+    def organic(region):
+        return _capri_ms_targets(org, data["greendeal_geo_to_ms"], "organic", region)
+
+    assert _landscape_pp(data, "PT200000") == 0.0
+    assert (organic("PT200000") == 0.0).all()
+    assert _landscape_pp(data, "BL400000") == land.at["BE", "landscape_pp"] != land.at["LU", "landscape_pp"]
+    assert np.allclose(organic("BL400000"), org.loc["BE"]) and np.allclose(organic("BL210000"), org.loc["BE"])
+    assert pd.isna(org.at["IE", "permanent_pp"]) and organic("IR020000")["permanent_pp"] == 0.0
+    assert organic("IR020000")["uaa_pp"] == org.at["IE", "uaa_pp"]
+    assert _landscape_pp(data, "NO020000") == 0.0 and (organic("NO020000") == 0.0).all()

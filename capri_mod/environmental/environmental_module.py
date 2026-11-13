@@ -591,6 +591,11 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         perm   = sum(acts.get(c, 0.0) for c in PERM)
         grass  = sum(acts.get(g, 0.0) for g in _CROPS_ON_LAND["GRAS"])
         arable = sum(acts.get(c, 0.0) for c in CROPS if c not in PERM + _CROPS_ON_LAND["GRAS"])
+        # the idled histosols stay in their land type, as in CAPRI's land balance (LandBalNoSlak_: the crops and the
+        # idled area together are the land type; dataOut's GRAS includes IHISGR, ARAC IHISCR, UAAR both)
+        _hf = getattr(supply_result, "histosol_fallow", None) or {}
+        arable += float(_hf.get("crop", 0.0) or 0.0)
+        grass += float(_hf.get("grass", 0.0) or 0.0)
 
         return EnvironmentalIndicators(
             region=region,

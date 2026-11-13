@@ -11,6 +11,12 @@
         organic area target (organic_minfert_redu.gms 'region_and_crop'): crops_to_ngrp of load_organic_targets.gms
         (ARA -> arable_pp, J0000 -> grassland_pp with NMINREST off: GRAS, PECR -> permanent_pp) and VEGE at the UAA
         target (uaa_pp; l. 186: "the org_cropar domain does not have vegetables")
+    greendeal_geo_to_ms.csv   geo, landscape_ms, organic_ms
+        CAPRI's maps from the GDX files' Eurostat codes to its member states: geo_to_ms_landscape
+        (load_landscape_targets.gms) and geo_to_ms (load_organic_targets.gms). A region takes the sum of the targets
+        of the codes mapped to its member state (p_setAsideTarget(ms), p_organicAreaTarget(ms) = sum(geo_to_ms(geo,
+        ms), ...), then to NUTS 2 by map_rr): BE -> BL000000 for the whole of Belgium and Luxembourg; LU and PT are
+        mapped by neither set, so Luxembourg takes Belgium's targets and Portugal has none
 
 Rows: the member states (NUTS-0 codes, as CAPRI's files key them) of any of the three symbols, sorted; a member state
 a symbol does not carry has an empty cell (CAPRI sets no target there: landscape CY, ES, FI; organic by land type PT).
@@ -38,6 +44,25 @@ GAMS = SOURCES / "gams"
 OUT = ROOT / "capri_data" / "scenarios" / "greendeal_group"   # the Green Deal group's data (refactor stage 5)
 #: CAPRI's land types of p_organicTargetMS and the file's columns
 ORGANIC_COLS = {"ARA": "arable_pp", "J0000": "grassland_pp", "PECR": "permanent_pp"}
+
+
+def _geo_to_ms(source, name: str) -> dict:
+    """{geo: CAPRI member state} of the GAMS set name(geo..., rall) in source (a .gms path or its text): the
+    'GEO . MS000000' lines between the set's slashes, comment lines skipped."""
+    txt = source if isinstance(source, str) else Path(source).read_text(errors="ignore")
+    blk = re.search(rf"set\s+{name}\s*\([^)]*\)[^/]*/(.*?)/;", txt, re.S | re.I)
+    if blk is None:
+        raise SystemExit(f"set {name} not found")
+    lines = [l for l in blk.group(1).splitlines() if l.strip() and not l.lstrip().startswith("*")]
+    out = {}
+    for l in lines:
+        m = re.fullmatch(r"\s*(\w+)\s*\.\s*(\w+)\s*", l)
+        if m is None:
+            raise SystemExit(f"set {name}: a line not of the form 'GEO . MS': {l!r}")
+        if m.group(1) in out:
+            raise SystemExit(f"set {name}: {m.group(1)} mapped twice")
+        out[m.group(1)] = m.group(2)
+    return out
 
 
 def main() -> None:
@@ -80,6 +105,15 @@ def main() -> None:
         raise SystemExit(f"a crop group in two classes: {sorted(ng.ngrp[ng.ngrp.duplicated()])}")
     ng.sort_values("ngrp").to_csv(OUT / "organic_ngrp_class.csv", index=False)
     print(f"organic_ngrp_class.csv: {len(ng)} crop groups")
+
+    # CAPRI's maps from the files' Eurostat codes to its member states: only these geo codes reach a region
+    land_map = _geo_to_ms(gd / "load_landscape_targets.gms", "geo_to_ms_landscape")
+    org_map = _geo_to_ms(txt, "geo_to_ms")
+    geo = pd.DataFrame({"landscape_ms": pd.Series(land_map, dtype=object), "organic_ms": pd.Series(org_map, dtype=object)})
+    geo.index.name = "geo"
+    geo.sort_index().to_csv(OUT / "greendeal_geo_to_ms.csv")
+    unmapped = sorted(set(ms) - set(land_map) - set(org_map))
+    print(f"greendeal_geo_to_ms.csv: {len(geo)} geo codes; the targets' codes no map reaches: {unmapped}")
     print(f"landscape_targets_ms.csv: {lt.landscape_pp.notna().sum()} of {len(ms)} member states; "
           f"organic_targets_ms.csv: {ot.notna().all(axis=1).sum()} complete rows")
 

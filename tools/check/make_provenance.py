@@ -93,6 +93,7 @@ UNTRACED = {
     "capri_data/pipeline/captrd/dat/p_recentmlkyld.csv": ("build_captrd_dairy", "CAPRI"),
     "capri_data/validation/eu_outlook_2020_2030.csv": ("build_eu_outlook_2030", "EC"),
     "capri_data/validation/n_cascade_capri_gd2030.csv": ("build_n_cascade_validation", "CAPRI"),
+    "capri_data/scenarios/greendeal_group/greendeal_geo_to_ms.csv": ("build_greendeal_targets", "CAPRI"),
     "capri_data/codes/capri/COLS.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/ROWS.csv": ("build_code_lists", "CAPRI"),
 }

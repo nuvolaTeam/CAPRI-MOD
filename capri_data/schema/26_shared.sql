@@ -75,4 +75,5 @@ INSERT INTO value_units VALUES
   ('model_price_follows', 'eu_market', NULL, 'open', 'a flag (1: in the EU markets'' price step)'),
   ('model_activity_classes', 'pesticide', NULL, 'open', 'a flag (1: the pesticide yield loss reaches the crop)'),
   ('model_activity_classes', 'share_term_arable', NULL, 'open', 'a flag (1: in the PMP share term''s arable denominator)'),
+  ('model_activity_classes', 'technologies', NULL, 'open', 'a count: CAPRI''s LEVL technologies of the activity (1: T; 2: T1 and T2)'),
   ('model_land_types', 'in_land_market', NULL, 'open', 'a flag (1: a column of the land market)');

@@ -100,6 +100,7 @@ _SHARED_FILES: dict = {}
 _SCENARIO_FILES = {"landscape_targets_ms.csv": "scenarios/greendeal_group",
                    "organic_targets_ms.csv": "scenarios/greendeal_group",
                    "organic_ngrp_class.csv": "scenarios/greendeal_group",
+                   "greendeal_geo_to_ms.csv": "scenarios/greendeal_group",
                    "fert_partial_slack.csv": "scenarios/greendeal_group",
                    "mineral_redu_exemptions.csv": "scenarios/greendeal_group",
                    "mineral_redu_limcres.csv": "scenarios/greendeal_group",
@@ -705,6 +706,10 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
             data_dir, "landscape_targets_ms.csv"),
         "organic_targets_ms": _load_optional_csv(
             data_dir, "organic_targets_ms.csv"),
+        # CAPRI's maps from the targets' Eurostat codes to its member states (geo_to_ms_landscape, geo_to_ms;
+        # tools/build/build_greendeal_targets.py)
+        "greendeal_geo_to_ms": _load_optional_csv(
+            data_dir, "greendeal_geo_to_ms.csv"),
         # the class of CAPRI's organic targets each fertiliser crop group takes (load_organic_targets.gms
         # crops_to_ngrp; tools/build/build_greendeal_targets.py)
         "organic_ngrp_class": _load_optional_csv(
