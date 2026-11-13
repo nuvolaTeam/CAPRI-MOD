@@ -4,14 +4,16 @@ Status: revised 20 October 2026 against the code. The CAPRI-side steps were writ
 and folder conventions and have not been re-checked in a CAPRI installation since.
 
 A comparison of response magnitudes needs a CAPRI run pair (reference and scenario) with a clear policy contrast,
-from the same CAPRI version capri-mod is built from (star 3.0, base 2017, 2030). One such pair is in hand: CAPRI's
+from the same CAPRI version capri-mod is built from (star 3.0, base 2017, 2030). Two such pairs are in hand: CAPRI's
 2030 run without voluntary coupled support against its reference (`coupled_support_2030/capri_vcs_effect.csv.xz`,
-`tools/build/extract_capri_vcs_pair.py`, compared by `tools/run/run_vcs_2030.py`). Wanted next (README 11.4, 13; KNOWN_ISSUES
+`tools/build/extract_capri_vcs_pair.py`, compared by `tools/run/run_vcs_2030.py`), and, since 10 November 2026, CAPRI's
+Green Deal 2030 step against the Green Deal reference (`greendeal_2030/capri_gd_effect.csv.xz`,
+`tools/build/extract_capri_gd_pair.py`). Wanted next (README 11.4, 13; KNOWN_ISSUES
 K13):
 
-- **CAPRI's Green Deal 2030 step** (lnds 8, org 18, pest 20, mine 13crp, surp 30; result name
-  `res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA`), against which capri-mod's
-  `greendeal_2030_scenario()` run is to be checked;
+- ~~CAPRI's Green Deal 2030 step~~ (lnds 8, org 18, pest 20, mine 13crp, surp 30; result name
+  `res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA`): in hand since 10 November 2026
+  (above), against which capri-mod's greendeal2030 run is checked;
 - **CAPRI's Farm-to-Fork dairy market results** (raw milk and dairy product prices and quantities), for the milk
   price gap (K13).
 

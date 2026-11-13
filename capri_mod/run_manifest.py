@@ -130,7 +130,7 @@ def finish() -> dict:
                 "data_tree": _git("rev-parse", "HEAD:capri_data"), "changed_files": status},
         "software": _versions(),
         "environment": {"platform": platform.platform(), "cpus": os.cpu_count(),
-                        **{k: os.environ.get(k) for k in ("CAPRI_WORKERS", "PYTHONHASHSEED", "OMP_CANCELLATION",
+                        **{k: os.environ.get(k) for k in ("PYTHONHASHSEED", "OMP_CANCELLATION",
                                                            "OMP_PROC_BIND", "OMP_NUM_THREADS") if k in os.environ}},
         "command": list(sys.argv),
         "inputs": inputs,

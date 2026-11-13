@@ -46,7 +46,7 @@ NAGR, SECG, EXOG, QUTS (%), BiofFeedCost, HCOM of gasoline and diesel, CPRI of g
 The dump's HCOM of the fossil fuels is the FOSSIL part; CAPRI's HCON in the calibration is total fuel use
 (fossil + biofuel in fossil equivalents): HCON = HCOM + BIOF oilEqu_b / oilEqu_f, which reproduces CAPRI's
 data_market_1730defaulta HCON (CAL) and its HCOS share. The rows used are kept as
-capri_data/sources/market/biofuel_dataout_<YEAR>.csv.xz.
+capri_data/sources/raw/capri/results/<CAPRI file>/biofuel_dataout_<YEAR>.csv.xz.
 
 Feedstock -> model market commodity: WHEA -> SWHE, BARL -> BARL, MAIZ -> CORN, RYEM, OATS, OCER as themselves,
 SUGA -> SUGR, TWIN -> WINE, RAPO/SUNO/SOYO -> themselves; palm oil PLMO and other vegetable oils OTHO -> themselves
@@ -80,8 +80,12 @@ import pandas as pd
 import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC_DIR = ROOT / "capri_data" / "sources" / "market"
-DEST = ROOT / "capri_data" / "2017" / "market"
+sys.path.insert(0, str(ROOT / "tools" / "lib"))
+from paths import data_year  # noqa: E402  (the year folders of capri_data)
+# the kept extracts, in the folders of the CAPRI dump and elasticity files they come from (DATA_LAYOUT.md)
+DUMP_DIR = {"2017": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "market_base_1717", "2030": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717"}
+ELAS_DIR = {"2017": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1717defaulta", "2030": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1730defaulta"}
+DEST = {y: data_year(y) / "market" for y in ("2017", "2030")}   # by market year (DATA_LAYOUT steps (b), (d))
 FUEL = {"BIOE": ("WHEA", "BARL", "MAIZ", "RYEM", "OATS", "OCER", "SUGA", "TWIN"),
         "BIOD": ("RAPO", "SUNO", "SOYO", "PLMO", "OTHO")}
 FOSSIL = {"BIOE": "GASL", "BIOD": "DISL"}                                    # arm_sets.gms fuelMatch
@@ -106,7 +110,8 @@ TRADE_BLOCKS = {"EU27yr19", "URUPAR", "WBA", "MER_OTH", "MED"}
 #: world, reported with world-scale biofuel output)
 MORE_AGGREGATES = {"RW"}
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from _model_regions import EU_MS as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+from _sources_io import read_source, write_source  # noqa: E402  (capri_data/sources as Parquet)
+from _model_regions import EU_MS as _EU_FROM_DATA  # noqa: E402  (capri_data/codes/eu_market_blocks.csv)
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 EU_MS = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 
@@ -180,8 +185,8 @@ def main():
     ap.add_argument("--dump", type=Path, required=True)
     ap.add_argument("--elas", type=Path, required=True)
     a = ap.parse_args()
-    SRC = SRC_DIR / f"biofuel_dataout_{a.year}.csv.xz"
-    HESS = SRC_DIR / f"biofuel_proc_hessian_{a.year}.csv"
+    SRC = DUMP_DIR[str(a.year)] / f"biofuel_dataout_{a.year}.parquet"
+    HESS = ELAS_DIR[str(a.year)] / f"biofuel_proc_hessian_{a.year}.parquet"
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import AGGREGATES
     if a.dump.exists():
@@ -189,7 +194,7 @@ def main():
         # the market regions, and the EU aggregate EU27yr19 for the EU's use of the feedstocks (biofuel_use_share)
         src = src[src.region.map(lambda r: is_rms(r, AGGREGATES)) | (src.region == "EU27yr19")]
         SRC.parent.mkdir(parents=True, exist_ok=True)
-        src.to_csv(SRC, index=False)
+        write_source(src, SRC, index=False)
         print(f"extracted {len(src)} rows -> {SRC.relative_to(ROOT)}")
     if a.elas.exists():
         # p_hessNQProc rows of the biofuels (own and cross terms, CAL)
@@ -199,12 +204,12 @@ def main():
         pat = re.compile(r"^'([^']+)'\.'(BIOE|BIOD)'\.'([^']+)'\.'CAL'\s+([-\d.Ee+]+)", re.M)
         hrows = [dict(region=m.group(1), product=m.group(2), price_of=m.group(3), value=float(m.group(4)))
                  for m in pat.finditer(txt[i:j])]
-        pd.DataFrame(hrows).to_csv(HESS, index=False)
+        write_source(pd.DataFrame(hrows), HESS, index=False)
         print(f"extracted {len(hrows)} p_hessNQProc rows -> {HESS.relative_to(ROOT)}")
-    hs = _read_csv(HESS)
+    hs = read_source(HESS)
     assert (hs["product"] == hs["price_of"]).all(), "cross terms in CAPRI's biofuel processing Hessian: extend the model"
     hess = {(r.region, r.product): r.value for r in hs.itertuples()}
-    src = _read_csv(SRC)
+    src = read_source(SRC)
     v = {(r.region, r.item, r.product): r.value for r in src.itertuples()}
     regions = sorted({r for r in src.region if is_rms(r, AGGREGATES)})
 
@@ -243,7 +248,7 @@ def main():
             x0[(ms, fuel)] = (X, mub)
             checks.append((ms, fuel, X, mub, v.get((ms, "BiofFeedCost", fuel))))
     fs = pd.DataFrame(frows)
-    fs.to_csv(DEST / f"biofuel_feedstock_{a.year}.csv", index=False)
+    fs.to_csv(DEST[a.year] / f"biofuel_feedstock_{a.year}.csv", index=False)
 
     eu = fs[fs.region == "EU27"]
     us = []
@@ -252,7 +257,7 @@ def main():
         use = sum(v.get(("EU27yr19", k, x), 0.0) for x in grp for k in ("HCOM", "FEDM", "INDM", "BIOF", "LOSM"))
         q = float(eu.loc[eu["commodity"] == c, "biof_kt"].sum())
         us.append({"commodity": c, "biof_kt": q, "use_kt": use, "share": q / use if use > 0 else 0.0})
-    pd.DataFrame(us).to_csv(DEST / f"biofuel_use_share_{a.year}.csv", index=False)
+    pd.DataFrame(us).to_csv(DEST[a.year] / f"biofuel_use_share_{a.year}.csv", index=False)
 
     # ---- biofuel supply and demand functions
     mrows = []
@@ -290,7 +295,7 @@ def main():
                        inpe=v.get((ms, "PPRI", "INPE"), 0.0))
             mrows.append(row)
     mk = pd.DataFrame(mrows)
-    mk.to_csv(DEST / f"biofuel_market_{a.year}.csv", index=False)
+    mk.to_csv(DEST[a.year] / f"biofuel_market_{a.year}.csv", index=False)
 
     print(f"biofuel_feedstock_{a.year}.csv: {len(fs)} rows, {fs.ms.nunique()} CAPRI regions")
     print(f"biofuel_market_{a.year}.csv: {len(mk)} rows; supply functions {int((mk.pr0 > 0).sum())}, "

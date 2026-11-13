@@ -35,7 +35,7 @@ CAPRI does not fit land duals; it sets them from data.
 
 1. **Data.** Extract CAPRI's land rents, `d_area` by region and land type (ARAC, FRUN, GRAS types, UAAR, ARAB, ARTIF,
    FORE), from CAPRI's 2030 reference results (the res_2_1730 files already used for the 2030 baseline).
-   - Write them to `capri_data/2017/supply/land_rents_2030.csv` with a builder, `tools/build/build_land_rents.py`.
+   - Write them to `capri_data/baselines/capri_greendeal_ref/1730/supply/land_rents_2030.csv` with a builder, `tools/build/build_land_rents.py`.
    - Register the file in MANIFEST, INPUT_MANIFEST, INPUT_SCHEMA and DATA_SOURCING_REGISTRY.
    - If `d_area` is missing for some regions, apply CAPRI's own rent function from cal_land_nests.gms, with its
      parameters read from the GAMS source. Proxies such as Eurostat `apri_lrnt` stay for validation only.
@@ -60,7 +60,7 @@ CAPRI does not fit land duals; it sets them from data.
 
 ## Done (21 October 2026)
 
-- `tools/build/build_land_rents.py` -> `capri_data/2017/supply/land_rents_2030.csv`: D_AREA of ARAC, FRUN and of the grassland
+- `tools/build/build_land_rents.py` -> `capri_data/baselines/capri_greendeal_ref/1730/supply/land_rents_2030.csv`: D_AREA of ARAC, FRUN and of the grassland
   activity GRAS (sign turned) at CAPRI's 2030 reference, by CAPRI region group (area-weighted), else the member state.
   CAPRI's calibration rents are positive (cal_land_nests.gms: arable at least 1.25 x premiums, grassland at least
   min(1, 0.2 x revenue)); where the reported D_AREA is not positive (grassland in 10 regions, all of PT20's land types,

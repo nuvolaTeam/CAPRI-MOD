@@ -1,5 +1,5 @@
 """A projection trajectory as a scenario folder, capri_data/scenarios/<name>/ (converted from
-capri_data/trajectories/<name>.json on 31 October 2026; the project lead's rule: a scenario's settings and its
+capri_data/2030/<name>.json on 31 October 2026; the project lead's rule: a scenario's settings and its
 reference data in separate files, in a scenario folder).
 
     settings.toml   name, source, vintage, base_year, target_years, notes (optional) and [provenance] (optional)

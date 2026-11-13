@@ -383,7 +383,12 @@ class DairyMixin(MarketStateMixin):
         if exogenous_supply is None or "MILK" not in exogenous_supply.columns:
             return out
         for c, v in exogenous_supply["MILK"].items():
-            ms = self._DAIRY_MS.get(str(c)[:2], str(c)[:2]) + "000000"
+            if str(c) in self.EU:
+                # an EU market region's total has no member state: its milk would go to "EU000000" and no dairy
+                # (tools/check/check_market_base.py passed such rows until 12 November 2026)
+                raise ValueError(f"supply row {c!r}: the dairy block needs the raw milk per member state, not per EU "
+                                 f"market region")
+            ms =self._DAIRY_MS.get(str(c)[:2], str(c)[:2]) + "000000"
             out[ms] = out.get(ms, 0.0) + float(v)
         return out
 

@@ -22,16 +22,15 @@ Sources
          their initial shares, the run the N cascade and leaching checks use: tools/build/build_n_leaching.py)
 
 Data written
-  capri_data/sources/capri_res/gd2030_ref_pbalance.csv          region, col, row, value: the extract of --ref (the
+  capri_data/sources/intermediate/capri_res/gd2030_ref_pbalance.parquet          region, col, row, value: the extract of --ref (the
       regional items above for PHOF, UAAR LEVL, and per elementary crop LEVL, PRET, PCRD); the input of this builder
-  capri_data/sources/capri_res/gd2030_endotech_ini_pbalance.csv  the same for --ini, plus per elementary animal activity
+  capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_pbalance.parquet  the same for --ini, plus per elementary animal activity
       LEVL, MANP, MANN, RUNANI (kg per head, RUNANI/MANN = CAPRI's v_emiLoss(N, RunTot)); validation only
       (capri_mod/tests/test_p_balance.py)
-  capri_data/2017/environment/p_balance_crop_coefs_2030.csv  capri_region, model_crop, levl_kha, pret_kg_ha, pcrd_kg_ha:
+  capri_data/baselines/capri_greendeal_ref/1730/environment/p_balance_crop_coefs_2030.csv  capri_region, model_crop, levl_kha, pret_kg_ha, pcrd_kg_ha:
       CAPRI's P2O5 retention (removal, EXPPRD) and crop residue output (CRESID) per ha of the model's crops (CAPRI crops
-      pooled into model crops by area as tools/build/build_npk_balance_2030.py does: CORN = MAIZ, WINE = TWIN,
-      GRAS = GRAE + GRAI, OFOD = OFAR + ROOF, SETA = FALL + VSET + ISET + GSET + TSET), and GRAE and GRAI on their own
-      (the model's grassland split column)
+      pooled into model crops by area as tools/build/build_npk_balance_2030.py does: CORN = MAIZ, WINE = TWIN; GRAE and
+      GRAI the model's own since S2, 7 November 2026)
 
 The builder checks the identities above on both runs (every region with a UAAR): the sums of the crop and animal
 coefficients against CAPRI's regional items, and the balance identities.
@@ -45,15 +44,18 @@ import csv
 import re
 from collections import defaultdict
 from pathlib import Path
+
+import pandas as pd
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC_DIR = ROOT / "capri_data" / "sources" / "capri_res"
-SRC_REF = SRC_DIR / "gd2030_ref_pbalance.csv"
-SRC_INI = SRC_DIR / "gd2030_endotech_ini_pbalance.csv"
-OUT = ROOT / "capri_data" / "2017" / "environment" / "p_balance_crop_coefs_2030.csv"
+SRC_DIR = ROOT / "capri_data" / "sources" / "intermediate" / "capri_res"
+SRC_REF = SRC_DIR / "gd2030_ref_pbalance.parquet"
+SRC_INI = SRC_DIR / "gd2030_endotech_ini_pbalance.parquet"
+OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "p_balance_crop_coefs_2030.csv"
 UP = EXPORTS
 
 ITEMS = ("EXCRET", "MTRADE", "MINFER", "NETF", "CRESID", "EXPPRD", "RUNANI", "IMPORT", "SURTOT", "SURSOI")
@@ -66,8 +68,9 @@ CROPS = ("SWHE", "DWHE", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "PARI", "RAPE",
 ANIMALS = ("DCOL", "DCOH", "BULL", "BULH", "HEIL", "HEIH", "HEIR", "CAFF", "CAFR", "CAMF", "CAMR", "SCOW", "SHGM", "SHGF",
            "PIGF", "SOWS", "HENS", "POUF")
 #: model crop <- CAPRI crops (tools/build/build_npk_balance_2030.py MODEL)
-MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI"), "OFOD": ("OFAR", "ROOF"),
-         "SETA": ("FALL", "VSET", "ISET", "GSET", "TSET")}
+MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",)}   # (GRAS = GRAE + GRAI until S2, 7 November 2026)
+#  (VSET and FALL the model's own since S2, 7 November 2026; before SETA = FALL + VSET + ISET + GSET + TSET; ISET, GSET
+#  and TSET have no area in CAPRI's 2017 and 2030 data)
 
 RX = re.compile(r"^'([A-Z0-9]{8})'\.''\.'([A-Za-z0-9_]+)'\.'([A-Za-z0-9_]+)'\.'2030'\s+([-\d.Ee+]+)")
 
@@ -99,18 +102,14 @@ def extract(dump: Path, out: Path, animals: bool) -> int:
             v = float(m.group(4))
             if v != 0.0:
                 rows.append((m.group(1), m.group(2), m.group(3), m.group(4)))
-    out.parent.mkdir(parents=True, exist_ok=True)
-    with open(out, "w", newline="") as fh:
-        w = csv.writer(fh)
-        w.writerow(["region", "col", "row", "value"])
-        w.writerows(rows)
+    write_source(pd.DataFrame(rows, columns=["region", "col", "row", "value"]), out, index=False)
     return len(rows)
 
 
 def read(src: Path) -> dict:
     """{region: {(col, row): value}}"""
     d = defaultdict(dict)
-    for r in csv.DictReader(open(src)):
+    for r in source_records(src):
         d[r["region"]][(r["col"], r["row"])] = float(r["value"])
     return d
 
@@ -160,9 +159,7 @@ def build(d: dict) -> int:
             a[0] += L
             a[1] += L * x.get((c, "PRET"), 0.0)
             a[2] += L * x.get((c, "PCRD"), 0.0)
-        for gc in ("GRAE", "GRAI"):
-            if gc in lev:
-                agg["_" + gc] = [lev[gc], lev[gc] * x.get((gc, "PRET"), 0.0), lev[gc] * x.get((gc, "PCRD"), 0.0)]
+        # (GRAE and GRAI on their own rows here too until S2, 7 November 2026: the model's crops since)
         for mc, (L, pr, pc) in sorted(agg.items()):
             rows.append([reg, mc.lstrip("_"), f"{L:.10g}", f"{pr / L:.10g}", f"{pc / L:.10g}"])
     OUT.parent.mkdir(parents=True, exist_ok=True)

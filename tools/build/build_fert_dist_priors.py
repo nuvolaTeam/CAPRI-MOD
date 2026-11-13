@@ -10,7 +10,7 @@ Source: CAPRI's 2030 Green Deal reference results (res_2_1730greendeal_refdefaul
 flows to each crop, fertDist_mine / fertDist_excr / fertDist_cres (1000 t N; summed to the groups - the dump's rows
 named CERE, PERM, GRAS are reporting aggregates over a different crop set, not the NGRP groups), the crop areas
 (LEVL) and the region's mineral losses and manure N not available (AGGT, kg/ha) - the baseline's posterior; kept
-as capri_data/sources/environment/fert_dist_dataout_2030.csv.xz. Per hectare these ARE CAPRI's posterior modes:
+as capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/fert_dist_dataout_2030.parquet. Per hectare these ARE CAPRI's posterior modes:
 the priFertDist results at hand (DE, FR, NL, BL, DK, IT; priFertDist_<MS>1730defaulta) carry the same values
 (postModePerHa, 2030) and accuracy 1 for every region, group and source; this builder checks both.
 
@@ -24,7 +24,7 @@ Outputs (capri_data/2017/environment/)
                                   model regions without a CAPRI region), ngrp, perm, area_kha, mine_kg_ha, excr_kg_ha,
                                   cres_kg_ha, accuracy, mine_eff, excr_avail
   fert_dist_crop_groups_2030.csv  capri_region, model_crop, ngrp, share   (model crop -> CAPRI group, area shares;
-                                  OFOD = OFAR + ROOF)
+                                  OFAR and ROOF their own since S2, 7 November 2026)
 
     python tools/build/build_fert_dist_priors.py [--dump capri_sources/exports/res_2_1730greendeal_refdefaulta.zip]
                                            [--prifertdist capri_sources/exports/priFertDist_1730defaulta.zip]
@@ -40,9 +40,11 @@ import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ENV = ROOT / "capri_data" / "2017" / "environment"
+ENV30 = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment"   # the 2030 outputs (DATA_LAYOUT step (b))
 GROUP = {"SWHE": "WHEA", "DWHE": "WHEA", "BARL": "BARL", "MAIZ": "MAIZ", "RYEM": "CERE", "OATS": "CERE",
          "OCER": "CERE", "RAPE": "RAPN", "NONF": "RAPN", "SUNF": "SUNF", "SOYA": "SOYA", "PULS": "PULS",
          "POTA": "POTA", "SUGB": "SUGB", "MAIF": "MAIF", "ROOF": "ROOF", "OFAR": "OFAR", "GRAE": "GRAS",
@@ -52,8 +54,8 @@ PERM_NGRP = {"GRAS", "PERM"}
 #: aggregates in the extract (not activities)
 AGGREGATES = {"AGGT", "ARAB", "CERE", "FODD", "OAR1", "OILS", "PERM", "SETF", "UAAR", "GRAS"}
 #: model crop -> CAPRI crops (environmental_module._CAPRI_CROP and the model's names)
-MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI"),
-         "OFOD": ("OFAR", "ROOF"), "SETA": ("SETA", "FALL", "VSET")}
+MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",)}   # (GRAS = GRAE + GRAI until S2, 7 November 2026)
+#  (OFAR, ROOF, VSET and FALL the model's own since S2, 7 November 2026; before OFOD = OFAR + ROOF, SETA = SETA + FALL + VSET)
 
 
 def ngrp(c: str) -> str:
@@ -92,7 +94,7 @@ def check_dumps(zpath: Path, pri: pd.DataFrame):
     print(f"postModePerHa against the extract: {n} values, worst relative difference {worst:.2e}")
 
 
-SRC = ROOT / "capri_data" / "sources" / "environment" / "fert_dist_dataout_2030.csv.xz"
+SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "fert_dist_dataout_2030.parquet"
 NGRPS = ("WHEA", "BARL", "MAIZ", "CERE", "RAPN", "SUNF", "SOYA", "PULS", "POTA", "SUGB", "MAIF", "ROOF", "OFAR",
          "GRAS", "OAFC", "VEGE", "PERM")
 #: CAPRI crops (MCACT) whose LEVL make up the group areas; GRAS = GRAE + GRAI
@@ -124,9 +126,9 @@ def main():
     if a.dump.exists():
         src = extract(a.dump)
         SRC.parent.mkdir(parents=True, exist_ok=True)
-        src.to_csv(SRC, index=False)
+        write_source(src, SRC, index=False)
         print(f"extracted {len(src)} rows -> {SRC.relative_to(ROOT)}")
-    src = _read_csv(SRC)
+    src = read_source(SRC)
     v = {(r.region, r.item, r.product): r.value for r in src.itertuples(index=False)}
     # CAPRI's regions (RU: NUTS2, or the country where it has one region) and, for the model regions without a
     # CAPRI region of their own (Berlin, Hamburg, Bremen, ...), the country (NUTS0 code; level "nuts0")
@@ -169,10 +171,10 @@ def main():
         for c, x in area.items():
             mrows.append(dict(capri_region=r, model_crop=rev.get(c, c), ngrp=ngrp(c), area=x))
     pri = pd.DataFrame(rows).sort_values(["capri_region", "ngrp"])
-    pri.to_csv(ENV / "fert_dist_priors_2030.csv", index=False)
+    pri.to_csv(ENV30 / "fert_dist_priors_2030.csv", index=False)
     mg = pd.DataFrame(mrows).groupby(["capri_region", "model_crop", "ngrp"], as_index=False).area.sum()
     mg["share"] = mg.area / mg.groupby(["capri_region", "model_crop"]).area.transform("sum")
-    mg.drop(columns="area").to_csv(ENV / "fert_dist_crop_groups_2030.csv", index=False)
+    mg.drop(columns="area").to_csv(ENV30 / "fert_dist_crop_groups_2030.csv", index=False)
     print(f"fert_dist_priors_2030.csv: {len(pri)} rows, {pri[pri.level == 'ru'].capri_region.nunique()} CAPRI regions in "
           f"{pri.capri_region.str[:2].nunique()} countries")
     print(f"mineral efficiency: median {pri.mine_eff.median():.3f}; manure availability median {pri.excr_avail.median():.3f}")

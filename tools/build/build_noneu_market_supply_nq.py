@@ -36,7 +36,7 @@ function stays at CAPRI's calibration point, as for the regions without supply m
 Sources: CAPRI's NQ supply Hessian at the calibration point (elas_2_1730defaulta.csv: p_hessNQSupp at CAL), the
 regions' producer prices and production there (data_market_1730defaulta.csv: Data_CAL PPRI, PROD at CAL), the 2030
 price of the non-agricultural good (markmarket_greendeal_1730et_base_1717.txt: PPRI INPE 2030), CAPRI's market
-regions (capri_data/shared/rms_to_rm.csv) and the model's trade regions (the market's grouping step,
+regions (capri_data/codes/rms_to_rm.csv) and the model's trade regions (the market's grouping step,
 tools/lib/_market_regions.py).
 
 Output: capri_data/2017/market/noneu_market_supply_nq.csv
@@ -55,6 +55,7 @@ from pathlib import Path
 import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -67,8 +68,8 @@ UP = EXPORTS
 ELAS = UP / "elas_2_1730defaulta.csv"
 DATA = UP / "data_market_1730defaulta.csv"
 DUMP = UP / "markmarket_greendeal_1730et_base_1717.txt"
-RMS_TO_RM = ROOT / "capri_data" / "shared" / "rms_to_rm.csv"
-UNITS = ROOT / "capri_data" / "sources" / "capri_res" / "gd2030_endotech_ini_nbalance.csv"
+RMS_TO_RM = ROOT / "capri_data" / "codes" / "rms_to_rm.csv"
+UNITS = ROOT / "capri_data" / "sources" / "intermediate" / "capri_res" / "gd2030_endotech_ini_nbalance.parquet"
 OUT = ROOT / "capri_data" / "2017" / "market" / "noneu_market_supply_nq.csv"
 FEED_ENERGY = ROOT / "capri_data" / "2017" / "market" / "noneu_feed_energy.csv"
 LAND_OUT = ROOT / "capri_data" / "2017" / "market" / "noneu_land_market.csv"
@@ -113,7 +114,7 @@ def main():
 
     # CAPRI's regions with supply models (RMSSUP) outside the EU: the countries of its supply-model units in the Green
     # Deal 2030 run (Norway, the UK, Turkey, the Western Balkans; Turkey's units TR..., its market region TUR)
-    ctry = {str(u)[:2] for u in read_csv(UNITS)["region"].unique()}
+    ctry = {str(u)[:2] for u in read_source(UNITS)["region"].unique()}
     rmssup = {r for r in noneu if (r.endswith("000000") and r[:2] in ctry) or (r == "TUR" and "TR" in ctry)}
     hess = read_supply_hessian(ELAS, lambda r: r in noneu, rmssup)
     terms = sorted((r, x, y, h) for (r, x, y), h in hess.items() if x in to_model and y != "INPE")

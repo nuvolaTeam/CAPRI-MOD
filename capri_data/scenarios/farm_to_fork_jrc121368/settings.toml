@@ -2,6 +2,7 @@
 # surplus rule with the nine-region 36% cap, sect. 4.3.4; the 10% yield loss at a 50% pesticide cut)
 [scenario]
 name = "farm_to_fork_jrc121368"
+short_name = "f2f_jrc121368"
 kind = "scenario"
 description = "Farm-to-Fork as JRC121368: landscape 10%, organic 25%, pesticides -50%, nutrient surplus -50% (tiered, 36% cap), no manure trade, milk-yield genomics 0.2"
 capri_files = ["pol_input/greendeal/greendeal_scenarios.gms"]

@@ -3,6 +3,7 @@
 # trade on, as that batch
 [scenario]
 name = "greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00"
+short_name = "greendeal2030"
 kind = "scenario"
 capri_files = ["pol_input/greendeal/greendeal_scenarios.gms"]
 group = "greendeal_group"

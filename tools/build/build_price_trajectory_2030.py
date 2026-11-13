@@ -13,15 +13,15 @@ Premiums the same way: CAPRI's 2030 PRME per activity unit over the deflator (CA
 nominal and fall in 2030 in CAPRI's reference: soft wheat in Brittany EUR 288 -> 226 per ha).
 
 Oilcakes (no UVAG in CAPRI's 2017 results): producer prices PPRI at the market baseline's base (2017)
-and 2030 calibration points, capri_data/sources/capri_baseline/capri_market_prices_1730.csv.
+and 2030 calibration points, capri_data/sources/raw/capri/capri_baseline/capri_market_prices_1730.parquet.
 The reference run's 2030 output prices equal CAPRI's own calibrated 2030 baseline (p_uvagStore,
-results/baseline/data_uvag1730defaulta; capri_uvag_store_1730.csv): ratio 1.000 for every traded product.
+results/baseline/data_uvag1730defaulta; capri_uvag_store_1730.parquet): ratio 1.000 for every traded product.
 
-Sources: capri_data/validation/greendeal_2030/capri_unit_values_ini_2030.csv and
-capri_marginal_terms_ini_2030.csv.xz (tools/build/extract_capri_marginal_terms.py); CAPRI 2017 results
+Sources: capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv and
+capri_marginal_terms_ref_2030.csv.xz (tools/build/extract_capri_marginal_terms.py); CAPRI 2017 results
 res_17<MS>.txt (national UVAG, regional PRME and LEVL).
 
-Written (capri_data/trajectories/):
+Written (capri_data/baselines/capri_greendeal_ref/1730/trajectories/):
   capri_price_ratios_2030.csv          ms, product, uvag_2017, uvag_2030, deflator, real_ratio
   capri_cap_premium_2030.csv           model region x CAPRI activity: PRME 2030 in 2017 money (per unit)
   capri_livestock_premium_ratio_2030.csv  model region x model animal: 2030/2017 premium ratio (real,
@@ -40,6 +40,7 @@ import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 import sys as _sys_nc  # noqa: E402
 _sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
 from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
@@ -61,9 +62,9 @@ def main() -> None:
     ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     args = ap.parse_args()
     val = ROOT / "capri_data" / "validation" / "greendeal_2030"
-    out = ROOT / "capri_data" / "trajectories"
-    uv30 = _read_csv(val / "capri_unit_values_ini_2030.csv")
-    terms = _read_csv(val / "capri_marginal_terms_ini_2030.csv.xz")
+    out = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "trajectories"
+    uv30 = _read_csv(val / "capri_unit_values_ref_2030.csv")
+    terms = _read_csv(val / "capri_marginal_terms_ref_2030.csv.xz")
     products = set(uv30["product"])
 
     # --- CAPRI 2017: national UVAG, regional PRME and LEVL
@@ -98,7 +99,7 @@ def main() -> None:
     # oilcakes: CAPRI's 2017 results carry no oilcake UVAG; the market baseline
     # (results/baseline/data_market_1730defaulta: PPRI at the base point BAS = 2017 and at the 2030
     # calibration point CAL) gives the same producer-price concept at both points
-    mk = _read_csv(ROOT / "capri_data" / "sources" / "capri_baseline" / "capri_market_prices_1730.csv")
+    mk = read_source(ROOT / "capri_data" / "sources" / "raw" / "capri" / "capri_baseline" / "capri_market_prices_1730.parquet")
     mk = mk[(mk["item"] == "PPRI") & mk["product"].isin(CAKES)].pivot_table(
         index=["region", "product"], columns="point", values="value")
     for (reg, prod), v in mk.iterrows():

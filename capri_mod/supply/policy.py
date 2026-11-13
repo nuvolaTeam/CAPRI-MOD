@@ -16,7 +16,7 @@ class PolicyBlock:
           ecoSetAside  sum(crops but grassland) x r / (1 - r) <= sum(EFA activities x weight)  (r = 5%, efabasis
                        UAAR; weights FALL/VSET (SETA) 1, PULS 0.7, OFAR 0.7 x legume share, catch crops 0.3 where the
                        winter cover option is in the NLP; ISET 0, GSET/TSET none: CAPRI's 2017 and 2030 data have no
-                       area under them, so SETA = FALL + VSET at weight 1)
+                       area under them; VSET and FALL each at its own weight, 1, since S2, 7 November 2026: before, SETA = FALL + VSET)
           cropDiv      Shannon index of the annual crop groups >= its base value
         Where the base does not meet the ecological set-aside rule (the model's base data, not CAPRI's calibrated
         base), the rule is held at the base's own value (REGISTERED)."""
@@ -32,13 +32,14 @@ class PolicyBlock:
         acts = list(self.acts)
         xb = np.maximum(self._base_levels().reindex(acts).fillna(0.0).values.astype(float), 0.0)
         out = {}
-        if st.get(("active", "permGras")) and "GRAS" in acts:
-            j = acts.index("GRAS")
+        _gj = [acts.index(g) for g in CROPS_ON_LAND["GRAS"] if g in acts]   # GRAE, GRAI (GRAS until S2, 7 Nov 2026)
+        if st.get(("active", "permGras")) and _gj:
             # only where grassland has a level: below the threshold of the activity bounds (an activity without a
             # level, held at zero, _build_constraints) CAPRI has no grassland variable and no rule; with a base of
             # 3.5e-11 kha (EL63, 2030) the rule asked for grass the bounds forbid and the NLP was infeasible (K69)
-            if xb[j] > float(_settings().get("supply.absent_level")):
-                out["permGras"] = {"row": [(j, -1.0)], "rhs": -xb[j] * (1 - 1e-9), "scale": xb[j]}
+            _xg = float(sum(xb[j] for j in _gj))
+            if _xg > float(_settings().get("supply.absent_level")):
+                out["permGras"] = {"row": [(j, -1.0) for j in _gj], "rhs": -_xg * (1 - 1e-9), "scale": _xg}
                 # the rule's dual at the calibration point, CAPRI's assumption (supply/prep_cal.gms l. 118-131):
                 # p_dualGreening = -|rent of arable land - rent of grassland|, charged to GRAE and GRAI in the
                 # calibration's linear terms (EUR/ha; CapriRegionalNLP.calibrate fixes the row's multiplier at it)
@@ -51,21 +52,14 @@ class PolicyBlock:
             r = st.get(("setaside_rate_pct", "ARAB"), 0.0) / 100.0
             ms = self.data.region_id[:2]
             ms = MS_CODE.get(ms, ms)
-            ofar = 1.0
-            env_ = getattr(self.seen, "env_for_surplus", None)
-            try:
-                from capri_mod.fert.npk import NPKData
-                cr = env_.par.inner_fert.capri_region(self.data.region_id) if env_ is not None and \
-                    getattr(env_.par, "inner_fert", None) is not None else None
-                if cr is not None:
-                    ofar = float(NPKData.get().crop_shares(cr).get("OFOD", {}).get("OFAR", 1.0))
-            except Exception:
-                pass
-            w = {"SETA": st.get(("weight", "FALL"), 0.0), "PULS": st.get(("weight", "PULS"), 0.0),
-                 "OFOD": st.get(("weight", "OFAR"), 0.0) * float(fleg.get(ms, 0.0)) * ofar}
+            # OFAR at CAPRI's weight times the member state's legume share (ROOF does not count); until S2 (7 November
+            # 2026) the model's OFOD = OFAR + ROOF carried it scaled by OFAR's share of the two
+            w = {"VSET": st.get(("weight", "VSET"), 0.0), "FALL": st.get(("weight", "FALL"), 0.0),
+                 "PULS": st.get(("weight", "PULS"), 0.0),
+                 "OFAR": st.get(("weight", "OFAR"), 0.0) * float(fleg.get(ms, 0.0))}
             row = []
             for j, a in enumerate(acts):
-                if a in CROPS and a != "GRAS":
+                if a in CROPS and a not in CROPS_ON_LAND["GRAS"]:
                     row.append((j, r / (1.0 - r) - w.get(a, 0.0)))
             v0 = sum(c_ * xb[j] for j, c_ in row)
             sc_ = max(1.0, sum(abs(c_) * xb[j] for j, c_ in row))
@@ -75,8 +69,19 @@ class PolicyBlock:
             cs_ = self._catc_spec() if wc > 0 else None
             if cs_ is not None:
                 v0 -= wc * float(cs_["uaa"]) * float(cs_["m0"])
+            # CAPRI calibrates its catch crops so that the rule holds at the base (supply/prep_cal.gms l. 68-99): in
+            # its 2030 data the row binds to round-off in many regions. Where the model's base misses it by that
+            # round-off the row is held at the base (rhs = the base gap); where it misses it by more than
+            # supply.ecosetaside_hold_tol of the row's scale the base is not CAPRI's (REGISTERED where it acts, DEP-10):
+            # the hold is recorded (spec "held") and reported. None at the 2030 base (9 November 2026: 5 EU regions
+            # within 1e-7 thousand ha)
+            held = v0 > float(_settings().get("supply.ecosetaside_hold_tol")) * sc_
+            if held:
+                import warnings as _w
+                _w.warn(f"{self.data.region_id}: the ecological set-aside rule is held at the base, which misses it by "
+                        f"{v0:.4g} thousand ha (CAPRI's base meets it: supply/prep_cal.gms l. 68-99)")
             out["ecoSetAside"] = {"row": row, "rhs": max(0.0, v0) + 1e-9 * sc_, "scale": sc_, "base_gap": v0,
-                                  "catc_w": wc if cs_ is not None else 0.0}
+                                  "held": bool(held), "catc_w": wc if cs_ is not None else 0.0}
         if st.get(("active", "cropDiv")):
             grp = {}
             for j, a in enumerate(acts):
@@ -286,9 +291,9 @@ class PolicyBlock:
         return max(0.0, (100.0 * float(share) - o) / (t - o))
 
     def _organic_region_target(self, share: float) -> float:
-        """p_organicAreaTarget(ru): the member state's UAA target (organic_targets_uaa.gdx) scaled to the ambition.
-        A region without CAPRI's targets (outside the EU) takes the EU distance-to-target fallback, as
-        _organic_converted does."""
+        """p_organicAreaTarget(ru): the member state's UAA target (organic_targets_uaa.gdx) scaled to the ambition; 0
+        where CAPRI maps no code to the member state (Portugal, the regions outside the EU: _capri_ms_targets).
+        Without CAPRI's target files the EU distance-to-target fallback, as _organic_converted does."""
         t = getattr(self.data, "organic_targets_pp", None)
         v = t.get("uaa_pp") if (t is not None and hasattr(t, "get")) else None
         if v is None or pd.isna(v):
@@ -298,8 +303,8 @@ class PolicyBlock:
     def _organic_crop_target(self, activity: str, share: float) -> float:
         """p_organicAreaTargetCrops(ru, crop) of CAPRI's organic crops (0 for the other crops): the target of the
         crop's NGRP group (ORGANIC_CROP_TARGET). A member state with no value for the group in CAPRI's
-        organic_targets.gdx gets 0, as in CAPRI (Portugal: no arable or permanent-crop entry; Ireland: no permanent,
-        Malta: no grassland)."""
+        organic_targets.gdx gets 0, as in CAPRI (Ireland: no permanent, Malta: no grassland), and so does one CAPRI
+        maps no code to (Portugal, the regions outside the EU: _capri_ms_targets)."""
         col = self.ORGANIC_CROP_TARGET.get(activity)
         if col is None:
             return 0.0
@@ -374,14 +379,23 @@ class PolicyBlock:
             else:
                 plap = self._input_row(a, "plap_eur_ha")
                 inpo = self._input_row(a, "inpo_eur_ha")
+                d_p = d_i = 0.0
                 if plap is not None and pc_plap != 0.0:
-                    d += delta(plap, 0.0, pc_plap)
+                    d_p = delta(plap, 0.0, pc_plap)
                 if inpo is not None:
                     o_a = self._organic_crop_target(a, organic_share) if organic_share else 0.0
                     eful = self._input_row(a, topup_col) or 0.0
                     topup = 2.0 * o_a * eful
                     if topup or pc_inpo:
-                        d += delta(inpo, topup, pc_inpo)
+                        d_i = delta(inpo, topup, pc_inpo)
+                d += d_p
+                d += d_i
+                if d_p or d_i:
+                    # the crop's plant-protection and other-input costs of this solve (the mix columns' technology
+                    # factors act on them, supply/techn_mix.py)
+                    if getattr(self.ev, "greendeal_crop_delta", None) is None:
+                        self.ev.greendeal_crop_delta = {}
+                    self.ev.greendeal_crop_delta[a] = (d_p, d_i)
             if d:
                 nr[a] = float(nr.get(a, 0.0)) - d
         self.net_revenues = nr
@@ -438,23 +452,20 @@ class PolicyBlock:
         past 25%, still converts 7.5 points of UAA where a distance-to-25% rule
         gave it nothing.
 
-        The requested share scales the ambition (0.25 = CAPRI's full target).
-        Falls back to the member state's UAA-wide figure, then to the
-        distance-to-target rule, where a crop group has no entry.
+        The requested share scales the ambition (0.25 = CAPRI's full target). A
+        land type with no record in CAPRI's file, or a member state CAPRI maps no
+        code to, gives 0 (_capri_ms_targets), as CAPRI's sum does; the
+        distance-to-target rule only without CAPRI's target files.
         """
         if targets is None:
             return default
         if activity in self.PERMANENT_LAND_CROPS:
             col = "permanent_pp"
-        elif activity == "GRAS":
+        elif activity in CROPS_ON_LAND["GRAS"]:
             col = "grassland_pp"
         else:
             col = "arable_pp"
-        val = targets.get(col) if hasattr(targets, "get") else None
-        if val is None or pd.isna(val):
-            val = targets.get("uaa_pp") if hasattr(targets, "get") else None
-        if val is None or pd.isna(val):
-            return default
+        val = targets[col]
         # CAPRI scales its targets to the requested ambition as (orgTarg - 12) / (25 - 12)
         # (load_organic_targets.gms; orgTarg in %), exactly 1 at the 25% target
         scale = self._organic_target_scale(share)
@@ -483,6 +494,19 @@ class PolicyBlock:
         nr = self.net_revenues.copy()
         converted_default = max(0.0, float(share) - self._organic_baseline())
         _org = getattr(self.data, "organic_targets_pp", None)
+        # CAPRI's target per fertiliser crop group (p_organicAreaTargetCrops(ru, ngrp), load_organic_targets.gms
+        # l. 160-188), for the mineral-N caps of organic_minfert_redu.gms 'region_and_crop': the class of the group
+        # (crops_to_ngrp: arable land, grassland, permanent crops; VEGE the UAA target) at the member state's target
+        # scaled to the ambition; 0 where CAPRI's files give the member state none. Without CAPRI's targets (outside
+        # the EU) none is set and the cap falls back to the crops' conversion (fertilisation._npk_organic_cap)
+        self.ev.organic_group_target = {}
+        _cls = getattr(self.data, "organic_ngrp_class", None)
+        if _org is not None and hasattr(_org, "get") and _cls:
+            _sc = self._organic_target_scale(share)
+            for g_, col_ in _cls.items():
+                v_ = _org.get(col_)
+                self.ev.organic_group_target[g_] = (0.0 if v_ is None or pd.isna(v_)
+                                                    else max(0.0, min(1.0, float(v_) / 100.0 * _sc)))
         for a in self.acts:
             converted = self._organic_converted(a, share, _org, converted_default)
             if a not in CROPS:

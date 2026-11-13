@@ -17,18 +17,17 @@ with need = mineral - loss + manure - unavailable + residues (pooled or own) - u
 (nutNed_rest ~ 1e-15). This builder checks that identity, and the pools: sum of manure flows = EXCRET - GASANI -
 RUNANI - MTRADE (ManureNPK_, manExportOrAppl_), sum of mineral flows = NETF (fertDistMine_).
 
-Outputs (capri_data/2017/environment/):
+Outputs (capri_data/baselines/capri_greendeal_ref/1730/environment/; the two livestock_manure_*_coef.csv, 2017 values, in capri_data/2017/environment/):
   npk_crop_coefs_2030.csv   capri_region, model_crop, nutrient (N, P, K), need_kg_ha (the crop's own NITF/PHOF/POTF),
                             pool_kg_ha (contribution to the
                             arable residue pool, fertDistCres_; non-permanent crops), own_kg_ha (permanent crops' own
                             residues, perm_cres), mine_kg_ha (CAPRI's mineral flow), levl_kha; CAPRI crops pooled into
-                            the model's crops by area (CORN = MAIZ, WINE = TWIN, GRAS = GRAE + GRAI, OFOD = OFAR + ROOF,
-                            SETA = FALL + VSET + ISET + GSET + TSET), and GRAE and GRAI on their own (the model's
-                            grassland split column); main_share and straw_share, the parts of the need that follow the
+                            the model's crops by area (CORN = MAIZ, WINE = TWIN; GRAE and GRAI the model's own
+                            since S2, 7 November 2026); main_share and straw_share, the parts of the need that follow the
                             main output's yield and the straw yield (fert/fertned.gms: need = MIN(cap, MAX(15, O_HP x
                             need per t + STRA x straw content)); 0 for crops at the floor or the cap), with CAPRI's straw
                             content and caps from envind/gascoeff.gms and fert/fertpar.gms (their statements converted
-                            to CSV in capri_data/sources/capri_gams by tools/build/convert_sources_to_csv.py)
+                            to CSV in capri_data/sources/raw/capri/gams by tools/build/convert_sources.py)
   npk_region_2030.csv       capri_region, nutrient, mine_eff (1 + loss / mineral), excr_avail (1 + unavailable /
                             manure), cres_avail (1 + (unavailable + loss) / (pooled + own residues)), uvag_eur_t (CAPRI's
                             2030 unit value of NITF/PHOF/POTF over its inflation to 2030: the model's 2017 money,
@@ -57,10 +56,12 @@ import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-ENV = ROOT / "capri_data" / "2017" / "environment"
-SRC = ROOT / "capri_data" / "sources" / "environment" / "npk_dataout_2030.csv.xz"
+ENV = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment"
+ENV_BASE = ROOT / "capri_data" / "2017" / "environment"   # the files without a year in their name (DATA_LAYOUT (b))
+SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "npk_dataout_2030.parquet"
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from build_fert_dist_priors import GROUP, PERM_NGRP, NGRPS, ngrp  # noqa: E402
 
@@ -72,38 +73,39 @@ ELEM = ("SWHE", "DWHE", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "PARI", "RAPE", 
         "FLOW", "OCRO", "NECR", "MAIF", "ROOF", "OFAR", "GRAE", "GRAI", "PULS", "POTA", "SUGB", "TEXT", "TOBA", "TOMA",
         "OVEG", "APPL", "OFRU", "CITR", "TAGR", "TABO", "TWIN", "OLIV", "FALL", "ISET", "GSET", "TSET", "VSET", "NONF")
 #: model crop <- CAPRI crops
-MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI"), "OFOD": ("OFAR", "ROOF"),
-         "SETA": ("FALL", "VSET", "ISET", "GSET", "TSET")}
+MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",)}   # (GRAS = GRAE + GRAI until S2, 7 November 2026)
+#  (VSET and FALL the model's own since S2, 7 November 2026; before SETA = FALL + VSET + ISET + GSET + TSET; ISET, GSET
+#  and TSET have no area in CAPRI's 2017 and 2030 data)
 FLOWS = ("fertDist_mine", "fertDist_excr", "fertDist_cres", "perm_cres", "nutNed_mine_loss_gasRunTot",
          "nutNed_cres_loss_gasRunTot", "nutNed_excr_unavailable", "nutNed_cres_unavailable", "nutNed_lhs")
 BAL = ("EXCRET", "MTRADE", "GASANI", "RUNANI", "NETF", "UVAG")
-GMS = ROOT / "capri_data" / "sources" / "capri_gams"
+GMS = ROOT / "capri_data" / "sources" / "raw" / "capri" / "gams"
 
 
 def _gms_csv(name):
-    """A statement of CAPRI's GAMS code converted to CSV (capri_data/sources/capri_gams,
-    tools/build/convert_sources_to_csv.py)."""
-    return pd.read_csv(GMS / name, dtype=str, keep_default_na=False)
+    """A statement of CAPRI's GAMS code converted to CSV (capri_data/sources/raw/capri/gams,
+    tools/build/convert_sources.py)."""
+    return read_source(GMS / name, dtype=str, keep_default_na=False)
 
 
 def straw_content() -> dict:
     """CAPRI's nutrient content of straw, kg per t (envind/gascoeff.gms, p_nutContCropOutput("STRA", FNUT):
-    gascoeff_p_nutContCropOutput_STRA.csv); CAPREG copies it to DATA(RS, FNUT, "STRA") and fert/fertned.gms prices
+    gascoeff_p_nutContCropOutput_STRA.parquet); CAPREG copies it to DATA(RS, FNUT, "STRA") and fert/fertned.gms prices
     straw at it (no residue relation for STRA)."""
-    t = _gms_csv("envind/gascoeff_p_nutContCropOutput_STRA.csv")
+    t = _gms_csv("envind/gascoeff_p_nutContCropOutput_STRA.parquet")
     return {r.nutrient: float(r.value) for r in t.itertuples(index=False)}
 
 
 def need_bounds() -> tuple:
     """fert/fertned.gms's bounds on a crop's need per ha: MAX(15, ...) and MIN(MAXF x (1 + 1 $ doubleMaxf), ...) with
     MAXF and doubleMaxf from fert/fertpar.gms (the last assignments: 200/160/140 x 2.0; GRAE, GRAI, OFAR, MAIF;
-    fertpar_MAXF.csv, fertpar_doubleMaxf.csv)."""
-    mx = _gms_csv("fert/fertpar_MAXF.csv")
+    fertpar_MAXF.parquet, fertpar_doubleMaxf.parquet)."""
+    mx = _gms_csv("fert/fertpar_MAXF.parquet")
     sc = {float(v) for v in mx["multiplier"]}
     if len(sc) != 1:
-        raise ValueError(f"fertpar_MAXF.csv: one multiplier expected, {sc}")
+        raise ValueError(f"fertpar_MAXF.parquet: one multiplier expected, {sc}")
     sc = sc.pop()
-    dbl = set(_gms_csv("fert/fertpar_doubleMaxf.csv")["activity"])
+    dbl = set(_gms_csv("fert/fertpar_doubleMaxf.parquet")["activity"])
     return 15.0, {r.nutrient: float(r.value) * sc for r in mx.itertuples(index=False)}, dbl
 
 
@@ -156,9 +158,9 @@ def main():
     if a.dump.exists():
         src = extract(a.dump)
         SRC.parent.mkdir(parents=True, exist_ok=True)
-        src.to_csv(SRC, index=False)
+        write_source(src, SRC, index=False)
         print(f"extracted {len(src)} rows -> {SRC.relative_to(ROOT)}")
-    src = _read_csv(SRC, keep_default_na=False)
+    src = read_source(SRC, keep_default_na=False)
     applied_share(src).to_csv(out / "manure_npk_applied_share_2030.csv", index=False)
     v = {(r.region, r.item, r.row, r.col): r.value for r in src.itertuples(index=False)}
     regions = sorted({r for r in src.region if len(r) == 8})
@@ -251,16 +253,7 @@ def main():
                 d["pool"] += pool_raw.get(c, 0.0) * kpool
                 d["own"] += f("perm_cres", c)
                 d["mine"] += f("fertDist_mine", c)
-            # CAPRI's two grassland activities on their own as well (the model's grassland split column moves area
-            # from GRAI to GRAE; NUTNED_ takes each one's need)
-            for gc in ("GRAE", "GRAI"):
-                if gc in lev:
-                    Dg = v.get((r, "", gc, col), 0.0)
-                    bnd = Dg <= floor_ + 1e-6 or Dg >= maxf[col] * (2.0 if gc in dbl else 1.0) - 1e-6
-                    agg["_" + gc] = dict(levl=lev[gc], need=lev[gc] * Dg / 1000.0, pool=0.0,
-                                         own=f("perm_cres", gc),
-                                         mine=f("fertDist_mine", gc),
-                                         main=0.0 if bnd else lev[gc] * Dg / 1000.0, straw=0.0)
+            # (GRAE and GRAI on their own rows here too until S2, 7 November 2026: the model's crops since)
             for mc, d in agg.items():
                 mc = mc.lstrip("_")
                 L = d["levl"]
@@ -312,9 +305,10 @@ def main():
     # manure P and K per model head (CAPRI 2017 regional totals / the model's herds)
     if a.capreg_dir.exists():
         import build_livestock_output_coef as B
+        out_base = ENV_BASE if a.out_dir == ENV else out
         for item, name in (("MANP", "livestock_manure_p_coef.csv"), ("MANK", "livestock_manure_k_coef.csv")):
             t = B.build(a.capreg_dir, item)
-            t.to_csv(out / name)
+            t.to_csv(out_base / name)
             print(f"{name}: {t.shape[0]} regions x {t.shape[1]} animals")
     else:
         print(f"CAPREG dumps not at {a.capreg_dir}: manure P/K per head not rebuilt")

@@ -7,7 +7,7 @@ name = "capri-mod"
 version = "0.1.0"
 description = "A Python reimplementation of the CAPRI star 3.0 agricultural economic model"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { text = "GPL-3.0-only" }
 dependencies = [
     "pandas>=2.0",
@@ -29,6 +29,8 @@ dev = ["pytest>=7.0", "pytest-xdist>=3.5", "coverage>=7.0", "duckdb>=2.0", "doit
 pipeline = ["requests>=2.28"]
 # the reference-building tools (tools/build/*): GDX bindings of the GAMS Python API; the GDX library is built separately
 tools = ["gamsapi>=54"]
+# the GUI (capri_gradio/: results browser, scenario editor, runs, optional assistant): gradio, plotly for the maps and charts
+gui = ["gradio>=5.0", "plotly>=5.0"]
 
 [tool.setuptools.packages.find]
 include = ["capri_mod*"]

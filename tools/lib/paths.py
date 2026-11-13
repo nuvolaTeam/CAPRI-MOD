@@ -25,11 +25,38 @@ ROOT = next(p for p in Path(__file__).resolve().parents if (p / "pyproject.toml"
 TOOLS = ROOT / "tools"
 FOLDERS = ("lib", "build", "run", "check", "gams", "solvers")
 
+#: the model's data: the base years' folders and the baselines' (docs/design/DATA_LAYOUT.md step (d), 11 November 2026)
+DATA = ROOT / "capri_data"
+#: the builders' baseline: CAPRI's 2030 Green Deal baseline projected from 2017 (run.baseline = "capri_greendeal_ref")
+BASELINE_DATA = DATA / "baselines" / "capri_greendeal_ref" / "1730"
+#: the base year whose folder the builders write (the 2017 data of CAPREG and COCO)
+BASE_YEAR = "2017"
+
+
+def data_year(year) -> Path:
+    """The folder of a year's data the builders write: the base year's own (DATA/<year>), the 2030 baseline's
+    (BASELINE_DATA) for the other year a builder takes (its --year 2030)."""
+    return DATA / BASE_YEAR if str(year) == BASE_YEAR else BASELINE_DATA
+
+
 #: CAPRI's material outside the repository (docs/EXTERNAL_SOURCES.md): capri_sources/ or $CAPRI_SOURCES
 SOURCES = Path(os.environ["CAPRI_SOURCES"]).expanduser().resolve() if os.environ.get("CAPRI_SOURCES") \
     else ROOT / "capri_sources"
 #: CAPRI's exports as delivered (result listings, market and elasticity exports, GAMS-dumped inputs)
 EXPORTS = SOURCES / "exports"
+#: CAPRI's 2030 Green Deal baseline (CAPMOD's reference run, greendeal\ref, which lands on CAPMOD's calibration point
+#: sim_ini_21730): the point the model's 2030 baseline reproduces and the run CAPRI's Green Deal scenarios are
+#: compared with. Every builder of the baseline's levels, yields and coefficients reads it (the project lead's decision of
+#: 9 November 2026, docs/BASELINE_REPRODUCTION.md; until then the levels came from the scenario run
+#: res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv, CALIBRATION_REF below, which the N cascade checks still read)
+BASELINE_REF = EXPORTS / "res_2_1730greendeal_refdefaulta.zip"
+#: CAPRI's 2030 Green Deal scenario run refpol_endotech_all_ini (the reference policy with the endogenous mitigation
+#: technologies at their initial shares; CAPRI writes its GHG abatement report to results/permits): a scenario from the
+#: same calibrated point, not CAPRI's calibration (that is sim_ini_21730, whose 2030 levels the baseline above
+#: reproduces; checked 11 November 2026 on 74 member-state levels). Read where the baseline reports nothing for a
+#: coefficient CAPRI has (catch crops' input cost in regions without catch crops at the baseline,
+#: tools/build/build_cover_crops.py). The name CALIBRATION_REF is historical
+CALIBRATION_REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 #: CAPRI's files converted for the parity tests (tools/build/build_*_reference.py; not committed): capri_sources/
 #: reference, or $CAPRI_REFERENCE (capri_reference/ at the repository root until 4 November 2026)
 REFERENCE = Path(os.environ["CAPRI_REFERENCE"]).expanduser().resolve() if os.environ.get("CAPRI_REFERENCE") \
@@ -54,6 +81,8 @@ LAYOUT = {
     "dat": "CAPRI's dat folder as parquet (the project's mirror)",
     "reference": "CAPRI's files converted for the parity tests and two builders (tools/build/build_*_reference.py; "
                  "docs/EXTERNAL_SOURCES.md, \"The reference folder\")",
+    "datam_mirror_2040": "the project lead's extracts of CAPRI's 2040 results from the JRC DataM dashboard MRL_TO_LOQ_2 "
+                         "(tools/build/build_datam_mirror_2040_reference.py)",
     "gdxlib": "the GDX library libgdxcclib64.so (open source, README section 3), for the builders that read .gdx files",
 }
 

@@ -11,7 +11,7 @@ aggregated to the model animals weighted by excreted N (LEVL x MANN), as tools/b
 regions without regional rows take the national (CC000000) shares.
 
 Source: CAPRI's 2030 Green Deal reference results, res_2_1730greendeal_refdefaulta (dataOut).
-Output: capri_data/2017/environment/manure_housing_losses_2030.csv
+Output: capri_data/baselines/capri_greendeal_ref/1730/environment/manure_housing_losses_2030.csv
         region, animal, loss_share (kg N lost per kg N excreted), source (regional / national)
 
     python tools/build/build_manure_losses.py [--zip capri_sources/exports/res_2_1730greendeal_refdefaulta.zip]
@@ -118,7 +118,7 @@ def main() -> None:
             kind = "regional" if a in own else "national"
             rows.append(dict(region=reg, animal=a, loss_share=s, source=kind))
             src[kind] += 1
-    dest = _ROOT / "capri_data" / "2017" / "environment" / "manure_housing_losses_2030.csv"
+    dest = _ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "manure_housing_losses_2030.csv"
     pd.DataFrame(rows).to_csv(dest, index=False)
     print(f"wrote {dest}: {len(rows)} rows, {len({r['region'] for r in rows})} regions ({dict(src)})")
 

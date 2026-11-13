@@ -85,7 +85,7 @@ def ghg_coefficients(env, region: str, res, rations: Optional[dict]) -> dict:
             r1.activities = acts.copy()
             r1.activities[a] = float(acts[a]) + h_
         out["act"][a] = diff(m, h)
-    for fld, key in (("grass_ext_shift", "grass"), ("dairy_low_shift", "dairy")):
+    for fld, key in (("dairy_low_shift", "dairy"),):   # (and the grassland split until S2, 7 November 2026)
         def m(r1, h_, fld=fld):
             setattr(r1, fld, float(getattr(res, fld, 0.0) or 0.0) + h_)
         out[key] = diff(m, 0.01)

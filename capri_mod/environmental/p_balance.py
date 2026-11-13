@@ -13,7 +13,7 @@ Items (CAPRI's names; calc_nbalance.gms line numbers):
 CAPRI reports them in 1000 t P2O5 and per ha of UAAR; the environmental accounts keep t P2O5 (1000 ha x kg/ha, as the
 N items). P2O5 is CAPRI's unit for phosphate throughout (PHOF, MANP, PRET, PCRD); P = P2O5 x 0.4364.
 
-Data: capri_data/2017/environment/p_balance_crop_coefs_2030.csv (retention and residue output per ha of the model's
+Data: capri_data/baselines/capri_greendeal_ref/1730/environment/p_balance_crop_coefs_2030.csv (retention and residue output per ha of the model's
 crops, tools/build/build_p_balance.py); manure P2O5 per head and CAPRI's crop nutrient balance for P (NPKData,
 capri_mod/fert/npk.py, the data of the regional model's fertilisation block).
 """
@@ -62,8 +62,8 @@ class PCropCoefs:
         return 0.0, 0.0
 
 
-def nutned_mineral(D, capri_region: str, need, own, own_perm, pool, mine0, xb, x, sq, E0: float, E: float,
-                   grass=None) -> Optional[float]:
+def nutned_mineral(D, capri_region: str, need, own, own_perm, pool, mine0, xb, x, sq, E0: float,
+                   E: float) -> Optional[float]:
     """Mineral P2O5 bought (t) from CAPRI's NUTNED_ for P summed over the crop groups, the equation of the regional
     model's fertilisation block (capri_regional_nlp._fert_block, data SupplyModel._npk_spec):
 
@@ -75,8 +75,8 @@ def nutned_mineral(D, capri_region: str, need, own, own_perm, pool, mine0, xb, x
     kappa x need0 - gc x own0 = eff x M0 + g0 x E0 + gc x C0 (CAPRI's v_cropNutNeedMultFact, calibrated at the
     base and fixed in simulation), or, where that leaves a permanent group no need of its own, the need net of the own
     residues scaled together (capri_mod.fert.npk.need_multiplier).
-    Arguments are dicts by model crop (kg/ha, 1000 ha) and t; grass = (z, dn, sq) adds the grassland split column
-    (z x need difference GRAE - GRAI). Used where there is no regional solution (the accounts at the base data); at the
+    Arguments are dicts by model crop (kg/ha, 1000 ha) and t (GRAE and GRAI among the crops since S2, 7 November 2026;
+    before, a grass argument added the grassland split column). Used where there is no regional solution (the accounts at the base data); at the
     NLP form's solution the sum of its NUTNED_ rows is this equation exactly. None without CAPRI's data."""
     R = D.region(capri_region, "P")
     if R is None:
@@ -96,8 +96,6 @@ def nutned_mineral(D, capri_region: str, need, own, own_perm, pool, mine0, xb, x
     kappa, own_scaled = need_multiplier(eff * dot(mine0, xb) + g0 * E0 + gc * dot(pool, xb), need0, dot(own, xb), gc,
                                         perm_g)
     N = sum(float(need.get(k, 0.0)) * float(sq.get(k, 1.0)) * float(v) for k, v in x.items())
-    if grass is not None:
-        N += float(grass[0]) * float(grass[1]) * float(grass[2])
     own_x = gc * dot(own_perm, x)
     M = ((kappa * (N - own_x) if own_scaled else kappa * N - own_x) - g0 * E - gc * dot(pool, x)) / eff
     return M                          # kg/ha x 1000 ha = t, as E

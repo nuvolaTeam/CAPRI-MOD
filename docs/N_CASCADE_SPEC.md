@@ -56,7 +56,7 @@
   p_nitrBalance(Leach) is p_Nemidat itself), leach_ini (CAPRI's realised share LEACHI / SURSOI in its Green Deal
   reference with endogenous technologies: calc_nbalance.gms l. 290 reports LEACHI = SURSOI x v_nitrBalance.l), exp_imp
   (EXPPRD / IMPORT of CAPRI's 2030 reference). The run's regional N balance items are kept in
-  `capri_data/sources/capri_res/gd2030_endotech_ini_nbalance.csv`.
+  `capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_nbalance.csv`.
 * `capri_mod/supply/n_leaching.py`: LEACHN_ as L = leach_base x B1 x B2, B1 with the options capri-mod has (winter
   cover 0.35, nitrification inhibitors on mineral N and on manure through NO3SLEA / NO3MLEA x (1 - (1 - lit)(1 +
   NMIN)), the application options' v_ammoAppLeaAgg), B2 with those it has not (tillage, buffer strips, biodiversity,

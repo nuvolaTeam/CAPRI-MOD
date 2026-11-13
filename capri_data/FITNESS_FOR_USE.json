@@ -121,7 +121,7 @@
   "regions.nuts2024": {
    "status": "use_with_care",
    "note": "Results are per CAPRI regional unit. On NUTS 2024 (capri_mod/nuts_reporting) 202 of 217 groups are one unit to one region; in the others (member states without regional detail such as DK, SI, HR; units NUTS later split such as DED00000, PL120000, IT310000; NL31/NL33 and Portugal's 2024 changes; Ireland) each region gets a UAA share of the group's result, not a result of its own. No unit for BE10, DE30, DE50, DE60, ES63, ES64, FRY1-5, NO0B.",
-   "scope": "capri_data/shared/capri_units_nuts2024.csv"
+   "scope": "capri_data/codes/capri_units_nuts2024.csv"
   },
   "scenario.milk_price": {
    "status": "overstated",

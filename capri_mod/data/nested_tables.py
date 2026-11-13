@@ -13,7 +13,7 @@ last digit: written with repr, read with float). A missing file raises FileNotFo
     feed rations      feed_ration_2017.csv (region, animal, block, feed, nutrient, value): a block keyed by feed
                       (ration, price, capri_slope, capri_slope_2030: nutrient empty), by nutrient (req: feed empty) or
                       by both (content) -> {region: {animal: {block: {feed: v} | {nutrient: v} | {feed: {nutrient: v}}}}}
-    fodder balances   fodder_balance_2017.csv (region, fodder, crop, u_t_per_ha, value_eur_t);
+    fodder balances   fodder_balance_2017.csv (region, fodder, crop, u_t_per_ha, value_eur_t; a row per activity);
                       fodder_balance_2017_use.csv (region, fodder, animal, use_t_head)
                       -> {region: {fodder: {"crop", "u_t_per_ha", "value_eur_t", "use_t_head": {animal: v}}}}
     market balances   dairy_world_baseline.csv, world_market_baseline.csv (region, commodity, item, value);
@@ -164,8 +164,8 @@ FODDER_USE = ["region", "fodder", "animal", "use_t_head"]
 
 def write_fodder_balances(path: Path, regions: dict) -> None:
     """path: .../fodder_balance_2017.csv; the fodder per head goes to fodder_balance_2017_use.csv."""
-    _write(path, FODDER, ([r, f, b["crop"], _num(b["u_t_per_ha"]), _num(b["value_eur_t"])]
-                          for r, fs in regions.items() for f, b in fs.items()))
+    _write(path, FODDER, ([r, f, c, _num(u), _num(b["value_eur_t"])]
+                          for r, fs in regions.items() for f, b in fs.items() for c, u in b["crops"].items()))
     _write(_sibling(path, "_use"), FODDER_USE, ([r, f, a, _num(t)] for r, fs in regions.items() for f, b in fs.items()
                                                 for a, t in b["use_t_head"].items()))
 
@@ -176,8 +176,14 @@ def read_fodder_balances(path: Path) -> dict:
         use.setdefault((r, f), {})[a] = float(t)
     out: dict = {}
     for r, f, crop, u, val in _rows(path, FODDER):
-        out.setdefault(r, {})[f] = {"crop": crop, "u_t_per_ha": float(u), "value_eur_t": float(val),
-                                    "use_t_head": use.pop((r, f), {})}
+        # {"crops": {producing activity: u_t_per_ha}, value_eur_t, use_t_head}: one row per producing activity (grass:
+        # GRAE and GRAI, since S2, 7 November 2026)
+        rec = out.setdefault(r, {}).get(f)
+        if rec is None:
+            rec = out[r][f] = {"crops": {}, "value_eur_t": float(val), "use_t_head": use.pop((r, f), {})}
+        elif float(val) != rec["value_eur_t"]:
+            raise ValueError(f"{Path(path).name}: {r} {f}: two values ({rec['value_eur_t']}, {val})")
+        rec["crops"][crop] = float(u)
     if use:
         raise ValueError(f"{_sibling(path, '_use')}: balances without their row in {Path(path).name}: {list(use)[:5]}")
     return out

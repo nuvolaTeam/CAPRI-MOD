@@ -23,7 +23,7 @@ def test_irrigation_table_adds_up_to_fss_irrigated_area(data):
     assert set(t.region) == set(data["areas"].index) - {"IR010000", "IR020000"}   # no Irish share in CAPRI's data
     assert (t[t.activity == "PARI"].irrigated_share == 1.0).all()
     assert t.irrigated_share.between(0.001, 1.0).all()
-    assert not t.activity.isin(["GRAS", "RYEM", "OATS", "OCER", "TOBA"]).any()      # not irrigable in CAPRI
+    assert not t.activity.isin(["GRAE", "GRAI", "RYEM", "OATS", "OCER", "TOBA"]).any()      # not irrigable in CAPRI
     # the irrigable crops' irrigated area = the unit's IRR2 share x its UAA, within [rice + 0.001 x the rest, all of them]
     areas = data["areas"]
     for r, g in t.groupby("region"):

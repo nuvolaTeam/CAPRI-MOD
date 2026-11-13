@@ -106,7 +106,7 @@ Other entries of the same period (registry names in brackets; details in the reg
   revenue, manure and feed per head. Pairs were added only when CAPRI's agricultural area matched the model's (exact
   to 0.2%, or within 1% and unambiguous) and dairy herds (or wheat + barley area) matched within 3%; the second test
   rejected three coincidental matches. Bulgaria uses CAPRI's own region order. The runtime map is now
-  `capri_data/shared/region_capri_map.csv` (`tools/build/build_region_map.py`).
+  `capri_data/codes/region_capri_map.csv` (`tools/build/build_region_map.py`).
 - **Demand price reference**: demand measured price changes against the base world price instead of the base
   domestic price, cutting every tariff-protected region's base demand by (1 + tariff)^elasticity (EU beef 17% too
   low). Fixed; base results unchanged. Food demand is now CAPRI's Generalised Leontief system.
@@ -121,6 +121,6 @@ Other entries of the same period (registry names in brackets; details in the reg
 
 ## Open from this record
 
-- **Trade-flow vintage**: `capri_data/shared/trade_flows_2017.csv` (read as `trade_flows.csv`) is, per the files' catalogue (from MANIFEST.json),
+- **Trade-flow vintage**: `capri_data/codes/trade_flows_2017.csv` (read as `trade_flows.csv`) is, per the files' catalogue (from MANIFEST.json),
   recalibrated from CAPRI's 2017 market results, while the registry entry `trade_flows.csv` still says FAO 2021. The
   bilateral market itself reads CAPRI's `bilateral_flows_<year>.csv`. The registry entry should be brought in line.

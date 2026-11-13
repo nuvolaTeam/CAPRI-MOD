@@ -22,14 +22,14 @@ class PriceStepBlock:
           animals as the market's price ratios (no price level at hand, so CAPRI's EUR 0.05 filter is not applied to
           them; they are out of the step's maximum as in CAPRI). Departures: one price per market region for every
           member state in it, where CAPRI has each member state's price; the aggregates are CAPRI's trade blocks EU_West and EU_East
-          (capri_data/shared/eu_market_blocks.csv) - EU015000 and WBA, also in CAPRI's REGAGGU, are not used.
+          (capri_data/codes/eu_market_blocks.csv) - EU015000 and WBA, also in CAPRI's REGAGGU, are not used.
         Returns the step's verdict, or None when the items cannot be formed."""
         from capri_mod.data.definitions import capri_ms
         from capri_mod.utils.capri_stop import CapriStopRule
         if not supply_results:
             return None
         if getattr(self.sv, "capri_stop", None) is None:
-            blocks = read_input(Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[2] / "capri_data") / "shared" / "eu_market_blocks.csv")
+            blocks = read_input(Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[2] / "capri_data") / "codes" / "eu_market_blocks.csv")
             aggs = {b: list(g["ms"]) for b, g in blocks.groupby("block")}
             self.sv.capri_stop = CapriStopRule(aggs, yani_rows=(), no_abs_price_rows=())
         rule = self.sv.capri_stop

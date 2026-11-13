@@ -88,7 +88,7 @@ def main() -> None:
     df = pd.concat([parse(f, WANTED) for f in files], ignore_index=True)
     df = df.drop_duplicates(["region", "activity", "item"], keep="last")
 
-    # the model's regions are CAPRI's regional units (shared/regional_units.csv): each CAPRI row is its own region's
+    # the model's regions are CAPRI's regional units (codes/regional_units.csv): each CAPRI row is its own region's
     # (until 27 October 2026 mapped to NUTS-2016 regions through shared/nuts_crosswalk.json, 21 regions unmatched)
     import sys as _sys
     _sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
@@ -97,7 +97,7 @@ def main() -> None:
     df = df.dropna(subset=["model_region"])
     df["activity"] = df.activity.replace({"MAIZ": "CORN"})
 
-    out = args.data_dir / "sources" / "capreg"
+    out = args.data_dir / "sources" / "intermediate" / "capreg"
     out.mkdir(parents=True, exist_ok=True)
     summary = {}
 
@@ -105,9 +105,12 @@ def main() -> None:
     pr = df[df.item == PRICE_ITEM].pivot_table(
         index="model_region", columns="activity", values="value", aggfunc="last")
     pr = pr.where(pr > 0)
-    # CAPRI's regional producer prices as extracted (CAPRI's codes); the model's table capreg_producer_prices.csv is
+    # CAPRI's regional producer prices as extracted (CAPRI's codes); the model's table capreg_producer_prices.parquet is
     # assembled from it by tools/build/build_crop_economics_2017.py (one writer per file, 29 October 2026)
-    pr.to_csv(out / "capreg_producer_prices_extract.csv")
+    import sys as _sys_sio
+    _sys_sio.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+    from _sources_io import write_source
+    write_source(pr, out / "capreg_producer_prices_extract.parquet")
     summary["producer_prices"] = {
         "regions": int(pr.shape[0]), "activities": int(pr.shape[1]),
         "values": int(pr.notna().sum().sum())}

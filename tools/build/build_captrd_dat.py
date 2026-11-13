@@ -1,19 +1,19 @@
 """CAPRI's data include files that CAPTRD reads, as CSV for CAPTRD-MOD.
 
 Sources (CAPRI star 3.0 dat folder, from the project lead's installation, converted to CSV by
-tools/build/convert_sources_to_csv.py, capri_data/sources/capri_dat/):
-  policy/livestock_units_p_LUUnits.csv   p_LUUnits(act)              livestock units per head (prep_data_for_estimation
+tools/build/convert_sources.py, capri_data/sources/raw/capri/dat/):
+  policy/livestock_units_p_LUUnits.parquet   p_LUUnits(act)              livestock units per head (prep_data_for_estimation
                                                                      .gms l. 160-162, the stocking density LU)
-  biofuel/biofuel_technology_params_p_ExtrRates.csv  p_ExtrRates(fuel, stock)  biofuel per ton of feedstock
+  biofuel/biofuel_technology_params_p_ExtrRates.parquet  p_ExtrRates(fuel, stock)  biofuel per ton of feedstock
                                          (load_coco1_data.gms l. 524-537, the default biostocks)
-  biofuel/biofuel_technology_params_p_ByProduct.csv  p_ByProduct(byprod, stock)  by-product per ton of feedstock
+  biofuel/biofuel_technology_params_p_ByProduct.parquet  p_ByProduct(byprod, stock)  by-product per ton of feedstock
                                          (l. 545-548, DDGS)
-  coco/milk_quota_dat_p_MQuotaDat.csv    p_MQuotaDat(MS, info, year) milk quotas, deliveries and direct sales (DG AGRI)
-  policy/smal_pshar_p_smallProdShare.csv p_smallProdShare(year, MS)  small producers' share outside compulsory set-aside
-and from CAPRI's code (capri_data/sources/capri_gams, the same converter):
-  pol_input/mquota_update_PMQuotaReg.csv PMQuotaReg(MS, QUTtot, year) total milk quotas 2004-2014 (1000 t)
-  baseline/labour_ageline_p_minLabourPerAct.csv  p_minLabourPerAct(act)  minimum labour per activity unit (h, 2008)
-and CAPRI's sugar quota GDX input_load_sugar_quotas.gdx (capri_data/sources/capri_dat/sugar, README there):
+  coco/milk_quota_dat_p_MQuotaDat.parquet    p_MQuotaDat(MS, info, year) milk quotas, deliveries and direct sales (DG AGRI)
+  policy/smal_pshar_p_smallProdShare.parquet p_smallProdShare(year, MS)  small producers' share outside compulsory set-aside
+and from CAPRI's code (capri_data/sources/raw/capri/gams, the same converter):
+  pol_input/mquota_update_PMQuotaReg.parquet PMQuotaReg(MS, QUTtot, year) total milk quotas 2004-2014 (1000 t)
+  baseline/labour_ageline_p_minLabourPerAct.parquet  p_minLabourPerAct(act)  minimum labour per activity unit (h, 2008)
+and CAPRI's sugar quota GDX input_load_sugar_quotas.gdx (capri_data/sources/raw/capri/dat/sugar, README there):
   p_SQuotas, p_PPSQRenounce, p_PPSQCBuyBack (p_PPSQWithdraw: no records)
 and CAPRI's farm holders' age lines dat/baseline/ageline.gdx AGELINE(region, age, year) from the parquet mirror of
 CAPRI's dat folder (ageline.parquet: uni_0 region, uni_1 age, uni_2 year; the year label "ageline" kept as it is,
@@ -36,18 +36,19 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "capri_dat"
+SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat"
 OUT = ROOT / "capri_data" / "pipeline" / "captrd" / "dat"
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 AGELINE = SOURCES / "dat" / "baseline" / "ageline" / "ageline.parquet"
 
 
 def _records(rel: str, cols, upper: int):
-    """The records of a converted source (capri_data/sources/<rel>, tools/build/convert_sources_to_csv.py): the
+    """The records of a converted source (capri_data/sources/<rel>, tools/build/convert_sources.py): the
     first `upper` columns upper-cased (GAMS labels are case-insensitive), the value as float."""
-    with open(ROOT / "capri_data" / "sources" / rel, newline="", encoding="utf-8") as fh:
-        rd = list(csv.reader(fh))
+    t = read_source(ROOT / "capri_data" / "sources" / rel, dtype=str, keep_default_na=False)   # Parquet (_sources_io)
+    rd = [list(t.columns)] + t.values.tolist()
     if rd[0] != cols:
         raise ValueError(f"{rel}: columns {rd[0]}, expected {cols}")
     return [(*(k.upper() for k in r[:upper]), *r[upper:-1], float(r[-1])) for r in rd[1:]]
@@ -68,26 +69,26 @@ def main() -> None:
     ap.add_argument("--ageline", type=Path, default=AGELINE)
     a = ap.parse_args()
     _write("p_luunits", ["act", "value"],
-           _records("capri_dat/policy/livestock_units_p_LUUnits.csv", ["act", "value"], 1))
-    bio = "capri_dat/biofuel/biofuel_technology_params_"
-    _write("p_extrrates", ["fuel", "stock", "value"], _records(bio + "p_ExtrRates.csv", ["fuel", "stock", "value"], 2))
+           _records("raw/capri/dat/policy/livestock_units_p_LUUnits.parquet", ["act", "value"], 1))
+    bio = "raw/capri/dat/biofuel/biofuel_technology_params_"
+    _write("p_extrrates", ["fuel", "stock", "value"], _records(bio + "p_ExtrRates.parquet", ["fuel", "stock", "value"], 2))
     _write("p_byproduct", ["byproduct", "stock", "value"],
-           _records(bio + "p_ByProduct.csv", ["byproduct", "stock", "value"], 2))
+           _records(bio + "p_ByProduct.parquet", ["byproduct", "stock", "value"], 2))
     _write("p_mquotadat", ["region", "info", "year", "value"],
-           _records("capri_dat/coco/milk_quota_dat_p_MQuotaDat.csv", ["region", "info", "year", "value"], 3))
+           _records("raw/capri/dat/coco/milk_quota_dat_p_MQuotaDat.parquet", ["region", "info", "year", "value"], 3))
     _write("p_mquotareg", ["region", "info", "year", "value"],
-           _records("capri_gams/pol_input/mquota_update_PMQuotaReg.csv", ["region", "info", "year", "value"], 3))
+           _records("raw/capri/gams/pol_input/mquota_update_PMQuotaReg.parquet", ["region", "info", "year", "value"], 3))
     _write("p_smallprodshare", ["year", "region", "value"],
-           _records("capri_dat/policy/smal_pshar_p_smallProdShare.csv", ["year", "region", "value"], 2))
+           _records("raw/capri/dat/policy/smal_pshar_p_smallProdShare.parquet", ["year", "region", "value"], 2))
     for f, hdr in (("p_SQuotas", ["region", "quota", "year", "value"]), ("p_PPSQRenounce", ["region", "year", "value"]),
                    ("p_PPSQCBuyBack", ["region", "year", "value"])):
-        with open(SRC / "sugar" / f"{f}.csv") as fh:
-            rd = list(csv.reader(fh))
+        t = read_source(SRC / "sugar" / f"{f}.parquet", dtype=str, keep_default_na=False)
+        rd = [list(t.columns)] + t.values.tolist()
         if rd[0] != hdr:
-            raise ValueError(f"{f}.csv: columns {rd[0]}, expected {hdr}")
+            raise ValueError(f"{f}.parquet: columns {rd[0]}, expected {hdr}")
         _write(f.lower(), hdr, [(*r[:-1], float(r[-1])) for r in rd[1:]])
     _write("p_minlabourperact", ["act", "value"],
-           _records("capri_gams/baseline/labour_ageline_p_minLabourPerAct.csv", ["act", "value"], 1))
+           _records("raw/capri/gams/baseline/labour_ageline_p_minLabourPerAct.parquet", ["act", "value"], 1))
     import pandas as pd
     ag = pd.read_parquet(a.ageline)
     _write("ageline", ["region", "age", "year", "value"],

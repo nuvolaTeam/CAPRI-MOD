@@ -17,7 +17,8 @@ from pathlib import Path
 import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
-from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import SOURCES, BASELINE_REF, data_year  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 import sys as _sys_nc  # noqa: E402
 _sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
 from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
@@ -42,9 +43,9 @@ def main() -> None:
     ap.add_argument("--year", type=int, choices=(2017, 2030), default=2017,
                     help="2017: CAPRI's base-year calibration (res_17 LEVL, pmppar_17 exports); 2030: its 2030 baseline "
                          "calibration (LEVL of the 2030 reference, pmppar_21730 p_pmpQuadLandTypes, "
-                         "capri_data/sources/baseline_pmp/pmp_quad_landtypes_2030.csv)")
+                         "capri_data/sources/intermediate/baseline_pmp/pmp_quad_landtypes_2030.parquet)")
     ap.add_argument("--ref", type=Path,
-                    default=EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
+                    default=BASELINE_REF)
     args = ap.parse_args()
     import pandas as pd
     areas = _read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)
@@ -80,7 +81,7 @@ def main() -> None:
                 r8of.setdefault(reg, set()).add(c8)
     Q = defaultdict(dict)
     if args.year == 2030:
-        for r in csv.DictReader(open(_ROOT / "capri_data" / "sources" / "baseline_pmp" / "pmp_quad_landtypes_2030.csv")):
+        for r in source_records(_ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_quad_landtypes_2030.parquet"):
             if r["landtype1"] in LT and r["landtype2"] in LT:
                 Q[r["region"]][(r["landtype1"], r["landtype2"])] = float(r["value"])
     else:
@@ -193,9 +194,9 @@ def main() -> None:
         v_["min_eigenvalue"] = float(v_["min_eigenvalue"]) / money
     sys.path.insert(0, str(_ROOT))
     from capri_mod.data import land_market_io as io
-    dest = _ROOT / "capri_data" / "2017" / "supply" / f"land_market_{args.year}"
+    dest = data_year(args.year) / "supply" / f"land_market_{args.year}"
     src_txt = ("CAPRI res_17 LEVL of land types; pmppar_17XX p_pmpQuadLandTypes" if args.year == 2017 else
-               "CAPRI 2030 reference LEVL of land types (res_2_1730greendeal_refpol_endotech_all_inidefaulta); "
+               "CAPRI 2030 reference LEVL of land types (res_2_1730greendeal_refdefaulta, the 2030 Green Deal baseline); "
                "pmppar_21730XX p_pmpQuadLandTypes of the 2030 baseline calibration (tools/build/build_pmp_2030.py)")
     io.write(dest, out, LT)        # CSV (capri_mod/data/land_market_io.py); its source printed below (src_txt)
     print(f"wrote {dest}.csv ({src_txt}): {len(out)} regions | without CAPRI quad: {len(nodata)} | not positive definite: {len(notpd)} {notpd[:5]}")

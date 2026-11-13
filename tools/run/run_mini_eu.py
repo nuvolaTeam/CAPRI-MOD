@@ -13,7 +13,6 @@ regional activity differences.
 from __future__ import annotations
 
 import argparse
-import os
 import pickle
 import subprocess
 import sys
@@ -54,7 +53,7 @@ def main():
     ap.add_argument("--scenario", default="f2f")
     ap.add_argument("--reference", default="")
     a = ap.parse_args()
-    env = {**os.environ, "PYTHONHASHSEED": "0"}
+    env = None                 # run_f2f_2030.py fixes the hash seed itself: no environment to pass
     cmd = [sys.executable, str(ROOT / "tools" / "run" / "run_f2f_2030.py"), a.out, "--scenario", a.scenario,
            "--regions", ",".join(UNITS)]
     r = subprocess.run(cmd, cwd=ROOT, env=env)

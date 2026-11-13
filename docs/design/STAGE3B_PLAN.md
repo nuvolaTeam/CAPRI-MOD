@@ -7,7 +7,7 @@ Naming: ARCHITECTURE_REFACTOR's table has stages 3a and 3b done (the mixins, the
 Sources read: docs/design/ARCHITECTURE_REFACTOR.md (sections 1-3), docs/design/MARKET_STATE_INVENTORY.md,
 capri_mod/market/state.py and capri_mod/tests/test_market_layers.py (stage 2b), capri_mod/supply/*.py,
 capri_mod/coupling/hessian.py, the coupling's and model.py's uses of the supply objects, capri_data/schema/03_code_data.sql
-and 04_code_data_status.sql, docs/design/HARDCODED_TABLES.md, capri_data/shared/model_parameters.csv,
+and 04_code_data_status.sql, docs/design/HARDCODED_TABLES.md, capri_data/codes/model_parameters.csv,
 capri_mod/params.py, capri_mod/settings/defaults.toml.
 
 Method. The inventory comes from an AST scan of the class bodies of RegionalSupplyModel (supply_module.py) and its six
@@ -276,16 +276,16 @@ classified by hand in 04 (Q7). The 116 CAPRI constants of 31 October are a lower
 
 ### 2.3 The declared parameters file and the adapter
 
-The declared parameters file exists: capri_data/shared/model_parameters.csv (38 rows: name, key, value, unit, kind,
+The declared parameters file exists: capri_data/codes/model_parameters.csv (38 rows: name, key, value, unit, kind,
 source, used_in), read by capri_mod/params.py. The supply code reads 11 of its parameters with `param()`, at import, into
 module or class constants (capri_pmp.py:47-61 ELAS_HIGH, ELAS_CAP, SHARE_COEF; ghg_tax.py:43 MJ_PER_KG_CH4;
 supply_module.py:64, 88, 903, 915, 933, 2039, 2040). params.py reads a fixed path next to the package
-(`FILE = .../capri_data/shared/model_parameters.csv`, params.py:19), not the run's data directory: it is outside the
+(`FILE = .../capri_data/codes/model_parameters.csv`, params.py:19), not the run's data directory: it is outside the
 data adapter (capri_mod/data/inputs.py, RunInputs), which follows `data_dir` and the base year. [verified]
 
 Proposal (consistent with ARCHITECTURE_REFACTOR section 3, "read through the data adapters into the parameter
 objects"): extend model_parameters.csv rather than add a second file; RunInputs gets a `parameters()` reader of
-`<data_dir>/shared/model_parameters.csv`; the supply's values are read when SupplyModule builds its parameters (or the
+`<data_dir>/codes/model_parameters.csv`; the supply's values are read when SupplyModule builds its parameters (or the
 regional model's `par`), not at import. For a run on capri_data the values are the same, so the move is checked by an
 identical run; for a run on another data directory it is a behaviour change (it would read that directory's file), to
 be confirmed (Q6). The test that the file and the code agree (test_capri.py:2763) is adapted.
@@ -313,7 +313,7 @@ fertilisation sub-solve's 3000 iterations (capri_regional_nlp.py:1138) are "the 
 | _MS_ALIAS | supply_module.py:1983 | member-state code aliases |
 
 EU_POLICY_KEYS (2659) is a set of keys of the scenario dict, not codes of data: it stays in the code. H3 (CAPRI's own
-sets) needs a builder that extracts them into capri_data/shared/sets/ (HARDCODED_TABLES plan step 3); builders are run
+sets) needs a builder that extracts them into capri_data/codes/sets/ (HARDCODED_TABLES plan step 3); builders are run
 by the maintainers only.
 
 ## 3. Proposed objects
@@ -473,7 +473,7 @@ Numbers and code tables (each also a pure move, checked identical; after the sta
 
 | # | commit | content | batch |
 |---|---|---|---|
-| N1 | parameters through the adapter | RunInputs reads `<data_dir>/shared/model_parameters.csv`; params.py delegates to the current inputs; the supply's 11 `param()` constants read when SupplyModule builds its parameters (Q6) | B5 |
+| N1 | parameters through the adapter | RunInputs reads `<data_dir>/codes/model_parameters.csv`; params.py delegates to the current inputs; the supply's 11 `param()` constants read when SupplyModule builds its parameters (Q6) | B5 |
 | N2 | supply's CAPRI constants | the 22 census rows and those of 2.2 confirmed in the GAMS, merged by concept (2.1), as rows of model_parameters.csv with the citation from 04; the code reads them from `par` | B5 |
 | N3 | literature and scenario rule numbers | JRC121368's tiered rule (0.25, 0.50, 0.75, 50, 100, 150), the default surplus cut 0.5 (kind jrc121368), unless Q10 sends them to stage 5 | B5 |
 | N4 | physical constants | 44/28 and 4.1868 (Q5) | B5 |
@@ -522,7 +522,7 @@ found 13 after its rebase).
 - **Q5** The physical constants (44/28, 4.1868) into model_parameters.csv as agreed on 31 October, or kept as named
   code constants? In the project's terminology a parameter is a value one can change to make a different run; these
   cannot be changed meaningfully. The agreement stands unless you change it.
-- **Q6** Parameters read from the run's data directory (`<data_dir>/shared/model_parameters.csv`): the same values for
+- **Q6** Parameters read from the run's data directory (`<data_dir>/codes/model_parameters.csv`): the same values for
   capri_data, a behaviour change for another data directory (today the package's copy is read whatever the data
   directory). Agree?
 - **Q7** A one-off census of the supply files without the small-number filter (2.2), classified by hand, before N2?

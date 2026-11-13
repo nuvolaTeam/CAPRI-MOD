@@ -166,9 +166,45 @@ class BridgeBlock:
         # silently overwrote the livestock mapping above. Removed; dairy, which
         # maps correctly, is kept as it was.)
 
-        return market_supply
+        return self._marketed_supply(market_supply, supply_agg)
 
-    def _excluded_base_supply(self, run_regions):
+    def _marketed_supply(self, market_supply, supply_agg):
+        """CAPRI's grofNEprod (S7): the market takes each supply product as the supply models' gross production times
+        CAPRI's marketed over gross production at the calibration point, per country (arm/simu_calibration_to_supply.gms
+        l. 219-247; market_prod_grof_2030.csv, tools/build/build_market_prod_grof_2030.py): seed use and losses follow
+        production and never reach the market. Olive oil and milled rice from the olive and paddy harvest at CAPRI's
+        ratio (instead of processing_yields.csv's), raw milk in proportion to cow and sheep and goat milk. A product a
+        country produces where CAPRI has no marketed production at the calibration point is not marketed, as in
+        CAPRI (its prod(XX, step) is defined only where prod and grof at "trd" are); the quantities so left out are
+        kept in ev.unmarketed_supply."""
+        from capri_mod.data.definitions import MS_OF_PREFIX
+        tab = getattr(self.par, "prod_grof_cache", None)
+        if tab is None:
+            from pathlib import Path
+            from capri_mod.data.loaders import resolve_data_file
+            base = Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[2] / "capri_data")
+            t = read_input(resolve_data_file(base, "market_prod_grof_2030.csv"))
+            tab = {(r["capri_ms"], r["product"]): float(r["ratio"]) for _, r in t.iterrows()}
+            self.par.prod_grof_cache = tab
+        out = market_supply.copy()
+        raw = {"OLIV": "OLIV", "PARI": "PARI"}           # the harvest the bridge converted with processing_yields.csv
+        left = {}
+        for mc in out.columns:
+            x = COMMODITY_CAPRI_CODE.get(mc, mc)
+            if not any(k[1] == x for k in tab):
+                continue                                 # not a product the supply models hand over (CAPRI's XX_SUPPLY)
+            for ctry in out.index:
+                ms = MS_OF_PREFIX.get(str(ctry)[:2])
+                f = tab.get((ms, x), 0.0)
+                gross = (float(supply_agg.at[ctry, raw[mc]]) if mc in raw and raw[mc] in supply_agg.columns
+                         else float(out.at[ctry, mc]))
+                if f == 0.0 and gross > 0.0:
+                    left[(ctry, mc)] = gross
+                out.at[ctry, mc] = gross * f
+        self.ev.unmarketed_supply = left
+        return out
+
+    def _excluded_base_supply(self, run_regions, non_eu: bool = False):
         """KNOWN_ISSUES K83: the base output of the EU's regional units not in a run on a subset of them, per country
         and market commodity (kt), through the same bridge as the supply models' output; None when the run has every
         EU unit. A unit's base gross output from the run's data as the regional model computes it at its base levels
@@ -180,10 +216,23 @@ class BridgeBlock:
         d = self.data
         areas = d.get("areas")
         run = set(run_regions or [])
-        units = [r for r in areas.index if _is_eu(r) and r not in run] if areas is not None else []
-        self.par.excluded_units = list(units)          # the feed bulks' base (coupling/feed.py) reads them too
-        if not units:
-            return None
+        if non_eu:
+            # non_eu (S7): the units outside the run of the non-EU countries with supply models in the market (Norway),
+            # whose market base is CAPRI's whole country; their base output is added to the country's row as it is (no
+            # market supply function: the departure of K83 for these countries)
+            from capri_mod.data.definitions import REGION_TO_COUNTRY
+            mm = self.market_module
+            units = [r for r in areas.index if not _is_eu(r) and r not in run
+                     and mm.sup_region_of_country(REGION_TO_COUNTRY.get(r, "")) is not None
+                     and any(REGION_TO_COUNTRY.get(x) == REGION_TO_COUNTRY.get(r) for x in run)] \
+                if areas is not None else []
+            if not units:
+                return None
+        else:
+            units = [r for r in areas.index if _is_eu(r) and r not in run] if areas is not None else []
+            self.par.excluded_units = list(units)          # the feed bulks' base (coupling/feed.py) reads them too
+            if not units:
+                return None
         yld, an, oc = d.get("yields"), d.get("animal_numbers"), d.get("livestock_output_coef")
         res = {}
         for r in units:

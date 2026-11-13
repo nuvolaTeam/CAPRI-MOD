@@ -11,7 +11,7 @@ from __future__ import annotations
 class NLPBlock:
     def _aug_col_labels(self, n_cols):
         """One label per column of the regional problem: activities, land types, the mineral-N allocation column,
-        manure exports and imports, the split and option columns, histosol fallow."""
+        manure exports and imports, the split and option columns, histosol fallow, the crops' technology mix (S1)."""
         lab = list(self.acts)
         n = len(lab)
         extra = {}
@@ -27,8 +27,6 @@ class NLPBlock:
         for nut_, pk_ in (getattr(self.ev, "pool_cols_pk", None) or {}).items():
             if len(pk_) == 2:
                 extra[int(pk_[0])] = f"manure_export_{nut_}"; extra[int(pk_[1])] = f"manure_import_{nut_}"
-        if getattr(self.ev, "grass_col", None) is not None:
-            extra[int(self.ev.grass_col)] = "grass_z"
         if getattr(self.ev, "dairy_col", None) is not None:
             extra[int(self.ev.dairy_col)] = "dairy_z"
         for a_, j_ in (getattr(self.ev, "cattle_cols", None) or {}).items():
@@ -37,6 +35,8 @@ class NLPBlock:
             extra[int(j_)] = f"genet_z_{a_}_{o_}"
         for c_, j_ in (getattr(self.ev, "hist_cols", None) or {}).items():
             extra[int(j_)] = f"hist_{c_}"
+        for a_, j_ in (getattr(self.ev, "mix_cols", None) or {}).items():
+            extra[int(j_)] = f"mix_{a_}"
         out = lab + [extra.get(j, f"col{j}") for j in range(n, n_cols)]
         return out
 
@@ -136,6 +136,11 @@ class NLPBlock:
                     # (on converted land the organic I/O change already took the fertiliser cost out: only the
                     # conventional share's is left in c)
                     c[j] -= float(self._input_cost(a, "fert", self.FERT_COST_SHARE)) * float(oc_.get(a, 1.0))
+            # the technology mix columns (S1): their fertiliser cost difference likewise (need_diff x the crop's)
+            _tm = getattr(self.data, "techn_mix", None)
+            for a_, k_ in (getattr(self.ev, "mix_cols", None) or {}).items():
+                if k_ < len(c):
+                    c[k_] -= self._mix_fert_cost(a_, _tm.loc[a_])
         abat = self._nlp_abatement_spec(labels) if npk is not None else {}
         if npk is not None:
             # capri-mod's manure-application limit and mineral-N allocation row are not CAPRI's
@@ -147,7 +152,8 @@ class NLPBlock:
         spec = dict(Q=Q, c=c, A=A, b=b, labels=labels, acts=list(self.acts), rations=rats, fodder=fod, x_base=xb,
                     prices=getattr(self.seen, "feed_prices", None), req_extra=_rx, feed_ghg=self._ghg_feed_cost(),
                     npk=npk, drop_labels=drop, cap_rules=self._cap_rules_spec(), ghg_min=ghg_min,
-                    land_rent_rows=dict(getattr(self.ev, "land_rent_rows", None) or {}), **abat)
+                    land_rent_rows=dict(getattr(self.ev, "land_rent_rows", None) or {}),
+                    mix_cols=sorted(int(k_) for k_ in (getattr(self.ev, "mix_cols", None) or {}).values()), **abat)
         if npk is not None and getattr(self.ev, "alloc_cols", 0):
             spec["fix_cols"] = {n + len(getattr(self.ev, "land_types_used", [])): 0.0}
         self.res.last_feed_dm = None
@@ -157,7 +163,7 @@ class NLPBlock:
         # the first solve (the baseline's base point and prices); the linear terms are kept by column and feed
         cols = self._aug_col_labels(Q.shape[0])
         cal = getattr(self.par, "nlp_cal", None)
-        _late = ("grass_z", "dairy_z", "cattle_z_", "genet_z_", "hist_")
+        _late = ("dairy_z", "cattle_z_", "genet_z_", "hist_")
         if cal is not None and cal.get("cols") is not None and \
                 any(l_.startswith(_late) for l_ in set(cols) - set(cal["cols"])):
             if os.environ.get("CAPRI_TRACE_RECAL"):
@@ -284,7 +290,7 @@ class NLPBlock:
                 _crn.SOLVE_PROBE(_crn.problem_fingerprint(
                     spec, {"x_start": np.asarray(x_start, float), "prev": getattr(self.sv, "nlp_prev", None),
                            "f_prev": getattr(self.sv, "nlp_prev_f", None), "keep": _keep},
-                    {"tol": float(getattr(type(self), "nlp_tol", 1e-8)),
+                    {"tol": float(type(self).nlp_tol),
                      "warm_check": float(getattr(type(self), "nlp_warm_check", 0.01)),
                      "jump_check": float(getattr(type(self), "nlp_jump_check", 0.0) or 0.0),
                      "jump_gain": float(getattr(type(self), "nlp_jump_gain", 0.0) or 0.0)}))
@@ -321,10 +327,12 @@ class NLPBlock:
         starts.append(("start", nlp.start(np.asarray(x_start, float)), None))
         res = None
         kinds = []
-        _tol = float(getattr(type(self), "nlp_tol", 1e-8))
+        _tol = float(type(self).nlp_tol)
         _tried = []
         _km = _crn.KKT_MODE
         _kb = _st.setdefault(self.sv, "kkt_base", {}) if _km else None
+
+        self.res.solver_log = []                     # run.verbosity "solver": each IPOPT solve's log (runlog.supply_solves)
 
         def _nsolve(nlp_, xs_, lam=None, tol=None):
             # the market supply Hessian from the KKT conditions (market.hessian_method = "kkt"): a shock's solve of a
@@ -335,7 +343,10 @@ class NLPBlock:
                 if b_ is not None and len(b_["pval"]) == len(nlp_.pval) and len(b_["x"]) == len(nlp_.lbx):
                     return nlp_.kkt_step(b_)
                 self.res.kkt_ipopt = int(getattr(self.res, "kkt_ipopt", 0) or 0) + 1
-            return nlp_.solve(xs_, lam=lam, tol=tol) if tol is not None else nlp_.solve(xs_, lam=lam)
+            r_ = nlp_.solve(xs_, lam=lam, tol=tol) if tol is not None else nlp_.solve(xs_, lam=lam)
+            if r_.get("log") is not None:
+                self.res.solver_log.append(r_["log"])
+            return r_
         for kind, xs, lam_ in starts:
             res = _nsolve(nlp, xs, lam=lam_, tol=_tol)
             if res["status"] == "KKT_Step":
@@ -400,7 +411,8 @@ class NLPBlock:
         def _try(sp_):
             try:
                 nlp_ = CapriRegionalNLP(sp_)
-                return nlp_, _nsolve(nlp_, nlp_.start(np.asarray(x_start, float)))
+                return nlp_, _nsolve(nlp_, nlp_.start(np.asarray(x_start, float)),
+                                     tol=float(_settings().get("supply.nlp_relax_try_tol")))
             except Exception:
                 return None, None
         if (not _ok(res) and _fp is not None and _todo and getattr(self.ev, "nlp_try_n_relax", False)
@@ -494,6 +506,8 @@ class NLPBlock:
             with open(_fn, "ab") as _fh:
                 _pk.dump(_rec, _fh)
         y, F, zA, info = nlp.outputs(res)
+        # the region's value of manure applied, per nutrient (CAPRI's PSHW, the manure pool market's point)
+        self.res.manure_value = nlp.manure_values(res)
         self.sv.nlp_y = np.asarray(y, float).ravel().copy()
         self.sv.nlp_cols = list(cols)
         # the young-animal markets' price update: this solution's response to the young-animal prices (K65)

@@ -6,7 +6,7 @@
 -- crop's g is in EUR/ha and an animal's in EUR per model head (h X / r: 1000 EUR per CAPRI level unit, over the
 -- model's 1000 head per CAPRI level unit).
 
--- file: capri_data/2017/supply/pmp_capri_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_capri_2030.csv
 CREATE TABLE pmp_capri_2030 (
     region VARCHAR NOT NULL REFERENCES regional_units (region),
     act_i VARCHAR NOT NULL REFERENCES model_activities (code),
@@ -23,6 +23,24 @@ INSERT INTO value_units VALUES
   ('pmp_capri_2030', 'g', 'U_EuPerHa', 'builder', 'H x sqrt(X_i X_j): CAPRI''s PMP Hessian (1000 EUR per (1000 ha)^2) times the levels (1000 ha); the marginal cost''s change in EUR/ha for a 100% change of the levels'),
   ('pmp_capri_2030', 'x_i', 'U_1000ha', 'capri', 'CAPRI''s 2030 reference LEVL of the territory group, summed over the model activity''s CAPRI activities'),
   ('pmp_capri_2030', 'x_j', 'U_1000ha', 'capri', 'CAPRI''s 2030 reference LEVL of the territory group, summed over the model activity''s CAPRI activities');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_capri_2030_mix.csv
+CREATE TABLE pmp_capri_2030_mix (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    activity VARCHAR NOT NULL REFERENCES model_activities (code),
+    g_xx_extra DOUBLE NOT NULL CHECK (g_xx_extra >= 0),
+    g_xz DOUBLE NOT NULL,
+    g_zz DOUBLE NOT NULL CHECK (g_zz >= 0),
+    x DOUBLE NOT NULL CHECK (x > 0),
+    capri_region VARCHAR NOT NULL,
+    PRIMARY KEY (region, activity)
+);
+COMMENT ON TABLE pmp_capri_2030_mix IS 'CAPRI''s 2x2 technology block p_pmpQuadTechn(act, T1/T2) of each crop with both technologies in the mix columns'' variables (X, z), x_T1 = X/2 + z, x_T2 = X/2 - z (S1, docs/design/S1_MIX_COLUMNS.md): g_xx_extra = (Q_XX - c) X^2 added to the crop''s diagonal of pmp_capri_2030 (c its collapsed curvature), g_xz = Q_Xz X^2, g_zz = Q_zz X^2 (tools/build/build_pmp_capri_2030.py, mix_terms)';
+INSERT INTO value_units VALUES
+  ('pmp_capri_2030_mix', 'g_xx_extra', 'U_EuPerHa', 'builder', '(Q_XX - c) X^2: CAPRI''s technology block (1000 EUR per (1000 ha)^2) in (X, z) times the crop''s level squared, the convention of pmp_capri_2030.g'),
+  ('pmp_capri_2030_mix', 'g_xz', 'U_EuPerHa', 'builder', 'Q_Xz X^2, as g_xx_extra'),
+  ('pmp_capri_2030_mix', 'g_zz', 'U_EuPerHa', 'builder', 'Q_zz X^2, as g_xx_extra'),
+  ('pmp_capri_2030_mix', 'x', 'U_1000ha', 'capri', 'CAPRI''s 2030 reference LEVL of the crop in its CAPRI region');
 
 -- file: capri_data/2017/supply/pmp_recipe_2017.csv
 CREATE TABLE pmp_recipe_2017 (
@@ -42,7 +60,7 @@ INSERT INTO value_units VALUES
   ('pmp_recipe_2017', 'x_i', 'U_1000ha', 'capri', 'CAPRI''s 2017 LEVL (res_17) of the territory group, summed over the model activity''s CAPRI activities'),
   ('pmp_recipe_2017', 'x_j', 'U_1000ha', 'capri', 'CAPRI''s 2017 LEVL (res_17) of the territory group, summed over the model activity''s CAPRI activities');
 
--- file: capri_data/2017/supply/pmp_recipe_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_recipe_2030.csv
 CREATE TABLE pmp_recipe_2030 (
     region VARCHAR NOT NULL REFERENCES regional_units (region),
     act_i VARCHAR NOT NULL REFERENCES model_activities (code),
@@ -60,7 +78,7 @@ INSERT INTO value_units VALUES
   ('pmp_recipe_2030', 'x_i', 'U_1000ha', 'capri', 'CAPRI''s 2030 reference LEVL of the territory group, summed over the model activity''s CAPRI activities'),
   ('pmp_recipe_2030', 'x_j', 'U_1000ha', 'capri', 'CAPRI''s 2030 reference LEVL of the territory group, summed over the model activity''s CAPRI activities');
 
--- file: capri_data/2017/supply/pmp_capri_2030_animals.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_capri_2030_animals.csv
 CREATE TABLE pmp_capri_2030_animals (
     region VARCHAR NOT NULL REFERENCES regional_units (region),
     animal VARCHAR NOT NULL REFERENCES model_activities (code),
@@ -76,7 +94,7 @@ INSERT INTO value_units VALUES
   ('pmp_capri_2030_animals', 'x_capri', NULL, 'open', 'CAPRI''s 2030 reference LEVL of the animal''s CAPRI activities in CAPRI''s unit of each: 1000 head (U_1000hd), poultry (LAYS, BROI) million head (U_Miohd); two units in one column'),
   ('pmp_capri_2030_animals', 'level_ratio', 'U_ratio', 'builder', 'the model''s herd (1000 head) per unit of CAPRI''s LEVL (capri_level_ratio.csv, tools/build/build_capri_level_ratio.py)');
 
--- file: capri_data/2017/supply/pmp_capri_2030_animals_members.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_capri_2030_animals_members.csv
 CREATE TABLE pmp_capri_2030_animals_members (
     region VARCHAR NOT NULL REFERENCES regional_units (region),
     animal VARCHAR NOT NULL REFERENCES model_activities (code),
@@ -124,7 +142,7 @@ INSERT INTO value_units VALUES
   ('pmp_recipe_2017_animals_members', 'x_capri', NULL, 'open', 'CAPRI''s 2017 LEVL (res_17) of the animal''s CAPRI activities in CAPRI''s unit of each: 1000 head (U_1000hd), poultry (LAYS, BROI) million head (U_Miohd); two units in one column'),
   ('pmp_recipe_2017_animals_members', 'level_ratio', 'U_ratio', 'builder', 'the model''s herd (1000 head) per unit of CAPRI''s LEVL (capri_level_ratio.csv, tools/build/build_capri_level_ratio.py)');
 
--- file: capri_data/2017/supply/pmp_recipe_2030_animals.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_recipe_2030_animals.csv
 CREATE TABLE pmp_recipe_2030_animals (
     region VARCHAR NOT NULL REFERENCES regional_units (region),
     animal VARCHAR NOT NULL REFERENCES model_activities (code),
@@ -140,7 +158,7 @@ INSERT INTO value_units VALUES
   ('pmp_recipe_2030_animals', 'x_capri', NULL, 'open', 'CAPRI''s 2030 reference LEVL of the animal''s CAPRI activities in CAPRI''s unit of each: 1000 head (U_1000hd), poultry (LAYS, BROI) million head (U_Miohd); two units in one column'),
   ('pmp_recipe_2030_animals', 'level_ratio', 'U_ratio', 'builder', 'the model''s herd (1000 head) per unit of CAPRI''s LEVL (capri_level_ratio.csv, tools/build/build_capri_level_ratio.py)');
 
--- file: capri_data/2017/supply/pmp_recipe_2030_animals_members.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_recipe_2030_animals_members.csv
 CREATE TABLE pmp_recipe_2030_animals_members (
     region VARCHAR NOT NULL REFERENCES regional_units (region),
     animal VARCHAR NOT NULL REFERENCES model_activities (code),

@@ -32,7 +32,6 @@ class EnvParameters(_Slots):
         "nh3_fac_cache",      # NH3 factors, by region
         "sub_cache",          # manure substitution terms, by region (dropped when the manure-trade switch changes)
         "row_cache",          # one region's row of a data table, by (table, region)
-        "grass_delta_cache",  # grassland GRAI to GRAE balance change, by (region, intensity)
         "need_base_cache",    # the base crop need weights, by region
         "res_av_cache",       # residue availability, by region
         "unit_nb_memo",       # unit N balances, by (region, activity, yields, intensity, trade)
@@ -45,7 +44,6 @@ class EnvParameters(_Slots):
 class EnvEvalState(_Slots):
     """One region's evaluation, passed between the blocks."""
     __slots__ = (
-        "grass_override",     # which CAPRI grassland activity (GRAE, GRAI) stands for GRAS during a call
         "nitrate_share_now",  # the nitrate shares of the region's rations
         "supp_ch4",           # the feed supplements' enteric CH4 factor, by region (kept for every region seen)
         "feed_dm_now",        # feed dry matter per animal of the region
@@ -85,14 +83,12 @@ MOVED_ENV: dict = {
     "_nh3_fac_cache": "par.nh3_fac_cache",
     "_sub_cache": "par.sub_cache",
     "_row_cache": "par.row_cache",
-    "_grass_delta_cache": "par.grass_delta_cache",
     "_need_base_cache": "par.need_base_cache",
     "_res_av_cache": "par.res_av_cache",
     "_unit_nb_memo": "par.unit_nb_memo",
     "_inner_fert": "par.inner_fert",
     "_min_n2o_cache": "par.min_n2o_cache",
     "_p_ratio_base": "par.p_ratio_base",
-    "_grass_override": "ev.grass_override",
     "_nitrate_share_now": "ev.nitrate_share_now",
     "_supp_ch4": "ev.supp_ch4",
     "_feed_dm_now": "ev.feed_dm_now",

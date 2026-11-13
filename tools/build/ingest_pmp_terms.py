@@ -42,7 +42,7 @@ def main() -> None:
     ap.add_argument("--data-dir", type=Path, default=Path("capri_data"))
     args = ap.parse_args()
 
-    # the model's regions are CAPRI's regional units (shared/regional_units.csv): each CAPRI code is its own region
+    # the model's regions are CAPRI's regional units (codes/regional_units.csv): each CAPRI code is its own region
     # (until 27 October 2026 mapped through shared/nuts_crosswalk.json, which left 21 regions unmatched)
     import sys as _sys
     _sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib'))
@@ -73,12 +73,11 @@ def main() -> None:
     # CAPRI names grain maize MAIZ; the model calls it CORN.
     dt["activity"] = dt.activity.replace({"MAIZ": "CORN"})
 
-    out = args.data_dir / "sources" / "capreg"
+    out = args.data_dir / "sources" / "intermediate" / "capreg"
     out.mkdir(parents=True, exist_ok=True)
-    dt[["model_region", "activity", "value"]].to_csv(
-        out / "pmp_quad_techn.csv", index=False)
-    dp[["model_region", "group1", "group2", "value"]].to_csv(
-        out / "pmp_quad_pact.csv", index=False)
+    from _sources_io import write_source
+    write_source(dt[["model_region", "activity", "value"]], out / "pmp_quad_techn.parquet", index=False)
+    write_source(dp[["model_region", "group1", "group2", "value"]], out / "pmp_quad_pact.parquet", index=False)
 
     print(f"quadTechn: {len(dt):,} records, {dt.model_region.nunique()} model regions, "
           f"{dt.activity.nunique()} activities")

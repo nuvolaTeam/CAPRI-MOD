@@ -29,7 +29,7 @@ read by no code). All of them are to be checked when their content moves into th
 
 Matched to the files by name (so approximate): 167 of the 401 CSVs are described in at least one store, 234 in none.
 
-Code lists: the regional units are data (`capri_data/shared/regional_units.csv`, 221 units with member state); the
+Code lists: the regional units are data (`capri_data/codes/regional_units.csv`, 221 units with member state); the
 crop and animal activities and the market commodities are lists in code (`capri_mod/data/definitions.py`: `CROPS`,
 `ANIMALS`, `MARKET_COMMODITIES`), with aliases elsewhere (`capri_pmp.py` `ACTIVITY_ALIASES`).
 
@@ -113,7 +113,7 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    classification, to be reviewed); two rules keep it complete; `MANIFEST.json` shows it per file. The project lead's
    rules: a parameter is one value, with its concept and meaning; a file of more than one value is a dataset; a
    coefficient belongs to the scenario. On that day: 41 base, 28 reference, 200 coefficients,
-   39 calibrated, 1 parameters (shared/model_parameters.csv), 95 structure, 5 validation.
+   39 calibrated, 1 parameters (codes/model_parameters.csv), 95 structure, 5 validation.
    With the 22 CSV files of the JSON conversion (31 October 2026: capri_mod/data/nested_tables.py, the scenario
    folders): 45 base, 32 reference, 210 coefficients, 39 calibrated, 1 parameters, 99 structure, 5 validation.
 3. `DATA_SOURCING_REGISTRY.json` (276 entries): the 37 that name a file give their provenance to the table comments.
@@ -163,7 +163,7 @@ file has its provenance and no provenance row is left without a declared file; e
 ; a file without a builder has a checked note
 on its origin; every number in the code has its classification and no classification is left without its number.
 
-Two source files in GAMS text form, `sources/water/cropwat.csv` and `irrishare.csv`, were CSV only by name; they were
+Two source files in GAMS text form, `sources/raw/capri/dat/water/cropwat.csv` and `irrishare.csv`, were CSV only by name; they were
 renamed `.gms` (the builder's output unchanged, byte for byte), and on 30 October 2026 converted to CSV with every
 other non-CSV source: `water/cropwat_p_cropwatReq.csv`, `water/irrishare_p_irriShare.csv` (`tools/build/convert_sources_to_csv.py`, declared
 in `34_sources_csv.sql`).

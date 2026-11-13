@@ -25,10 +25,10 @@ by system and is written as the plain mean (the model keeps no manure-applicatio
 it is recorded, not used - REGISTERED). Fertiliser timing on manure (FERTTIME) is not carried: the
 model has no such option.
 
-Source: capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs.csv (the records used, from the
-gdxdump of the installation's LitRevFertTech.gdx; the full dump is LitRevFertTech_p_litRevFertTechs_all.csv beside
-it, converted from the gdxdump text by tools/build/convert_sources_to_csv.py; the NO3 records are read from the full
-dump into LitRevFertTech_p_litRevFertTechs_no3.csv). Model regions take their CAPRI region, else the national entry,
+Source: capri_data/sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs.parquet (the records used, from the
+gdxdump of the installation's LitRevFertTech.gdx; the full dump is LitRevFertTech_p_litRevFertTechs_all.parquet beside
+it, converted from the gdxdump text by tools/build/convert_sources.py; the NO3 records are read from the full
+dump into LitRevFertTech_p_litRevFertTechs_no3.parquet). Model regions take their CAPRI region, else the national entry,
 else (multi-region countries whose model region has no CAPRI counterpart: city states, recent NUTS
 splits, Norway) the median over the country's CAPRI regions (REGISTERED; the values vary little
 within a country).
@@ -46,24 +46,26 @@ import functools as _ft
 import sys as _sys_nc  # noqa: E402
 _sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
 from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ITEMS = ("N2OSYN", "NH3SYN")
 MAN_ITEMS = ("NH3APP", "N2OAPP")
 NO3_MIN = ("NO3SLEA", "NO3SRUN")
 NO3_MAN = ("NO3MLEA", "NO3MRUN")
-SRC = ROOT / "capri_data" / "sources" / "ghgtech"
+RAW = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "scen" / "ghgtech"
+INTER = ROOT / "capri_data" / "sources" / "intermediate" / "ghgtech"
 
 
 def no3_records():
-    """The NO3 records of NITR_INH from the full dump (LitRevFertTech_p_litRevFertTechs_all.csv, the gdxdump converted
-    by tools/build/convert_sources_to_csv.py) -> LitRevFertTech_p_litRevFertTechs_no3.csv (region, technology,
+    """The NO3 records of NITR_INH from the full dump (LitRevFertTech_p_litRevFertTechs_all.parquet, the gdxdump converted
+    by tools/build/convert_sources.py) -> LitRevFertTech_p_litRevFertTechs_no3.parquet (region, technology,
     activity, system, item, value)."""
-    out = SRC / "LitRevFertTech_p_litRevFertTechs_no3.csv"
-    full = pd.read_csv(SRC / "LitRevFertTech_p_litRevFertTechs_all.csv", dtype=str, keep_default_na=False)
+    out = INTER / "LitRevFertTech_p_litRevFertTechs_no3.parquet"
+    full = read_source(RAW / "LitRevFertTech_p_litRevFertTechs_all.parquet", dtype=str, keep_default_na=False)
     full = full[(full["technology"] == "NITR_INH") & full["item"].str.fullmatch(r"NO3[A-Z]+")]
-    full.astype({"value": float}).to_csv(out, index=False)
-    return _read_csv(out)
+    write_source(full.astype({"value": float}), out, index=False)
+    return read_source(out)
 
 
 def no3_weighted():
@@ -78,7 +80,7 @@ def no3_weighted():
     fac = _read_csv(A / "n_cascade_factors.csv")
     tsl = {(r.region[:2], r.activity): float(r.value) for r in fac[fac.factor == "tsl"].itertuples()
            if r.region.endswith("000000")}
-    md = _read_csv(A / "capri_mann_days_2030.csv")
+    md = _read_csv(A.parents[2] / "baselines" / "capri_greendeal_ref" / "1730" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
     md = md[md["item"].isin(["LEVL", "MANN"])].pivot_table(index=["region", "activity"], columns="item",
                                                            values="value", aggfunc="first").fillna(0.0)
     w = (md["LEVL"] * md["MANN"]).to_dict()
@@ -104,7 +106,7 @@ def no3_weighted():
 def main():
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
-    raw = _read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "LitRevFertTech_p_litRevFertTechs.csv")
+    raw = read_source(ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "scen" / "ghgtech" / "LitRevFertTech_p_litRevFertTechs.parquet")
     m = raw[(raw["system"] == "Mineral") & raw["item"].isin(ITEMS)][["region", "technology", "item", "value"]]
     mm = raw[(raw["technology"] == "NITR_INH") & raw["system"].isin(["LIQUID", "SOLID"]) & raw["item"].isin(MAN_ITEMS)]
     mm = mm.groupby(["region", "item"], as_index=False)["value"].mean().assign(technology="NITR_INH_MAN")

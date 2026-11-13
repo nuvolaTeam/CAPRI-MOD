@@ -81,24 +81,28 @@ class LivestockBlock:
                     n = float(rec.get("produce", {}).get(a, 0.0)) - float(rec.get("use", {}).get(a, 0.0))
                     self.net_revenues[a] = float(self.net_revenues[a]) + (r_ - 1.0) * v * n
 
-    def _split_manure_factors(self, n_cols, acts):
-        """[(column, animal, manure per head of the column / the animal's)] of the animal split and option columns:
-        the dairy intensity split (dairy_intensity dmann_rel), the cattle splits (cattle_intensity[key] dmann_rel) and
-        the genetics options (genetics_effects[(animal, option)] d_mann_rel)."""
+    def _split_manure_factors(self, n_cols, acts, nut="N"):
+        """[(column, animal, manure per head of the column / the animal's)] of the animal split and option columns for
+        nutrient `nut` (N, P2O5 or K2O; CAPRI's MANN, MANP, MANK): the dairy intensity split (dairy_intensity
+        dmann_rel / dmanp_rel / dmank_rel), the cattle splits (cattle_intensity[key], the same) and, for N only, the
+        genetics options (genetics_effects[(animal, option)] d_mann_rel: CAPRI's breeding.gms changes MANN only).
+        Until 9 November 2026 (S6 item 6) the split columns moved manure N only."""
+        rc = {"N": "dmann_rel", "P": "dmanp_rel", "K": "dmank_rel"}[nut]
         out = []
         j = getattr(self.ev, "dairy_col", None)
         di = getattr(self.data, "dairy_intensity", None)
-        if j is not None and int(j) < n_cols and di is not None and "DCOW" in acts:
-            out.append((int(j), "DCOW", float(di["dmann_rel"])))
+        if j is not None and int(j) < n_cols and di is not None and "DCOW" in acts and rc in di.index:
+            out.append((int(j), "DCOW", float(di[rc])))
         tab = getattr(self.data, "cattle_intensity", None) or {}
         for key, j in (getattr(self.ev, "cattle_cols", None) or {}).items():
             a = key.split(":")[0]
-            if int(j) < n_cols and a in acts and key in tab:
-                out.append((int(j), a, float(tab[key]["dmann_rel"])))
-        gen = getattr(self.data, "genetics_effects", None) or {}
-        for (a, opt), j in (getattr(self.ev, "genet_cols", None) or {}).items():
-            if int(j) < n_cols and a in acts and (a, opt) in gen:
-                out.append((int(j), a, float(gen[(a, opt)]["d_mann_rel"])))
+            if int(j) < n_cols and a in acts and key in tab and rc in tab[key].index:
+                out.append((int(j), a, float(tab[key][rc])))
+        if nut == "N":
+            gen = getattr(self.data, "genetics_effects", None) or {}
+            for (a, opt), j in (getattr(self.ev, "genet_cols", None) or {}).items():
+                if int(j) < n_cols and a in acts and (a, opt) in gen:
+                    out.append((int(j), a, float(gen[(a, opt)]["d_mann_rel"])))
         return out
 
     @classmethod
@@ -133,66 +137,6 @@ class LivestockBlock:
             return float(_cc[act])
         v = float(self.data.variable_costs.get(act, 0.0))
         return v if np.isfinite(v) else 0.0          # an activity the region does not have (level fixed at 0)
-
-    def _grass_intensity_column(self, Qa, ca, Aa, ba, start, labels, n, alloc_k):
-        """Append CAPRI's grassland-intensity choice as one column z (1000 ha moved from GRAI to
-        GRAE; GRAE = s0 x GRAS + z, GRAI = (1 - s0) x GRAS - z, so z = 0 is the base split):
-          - N balance row: the balance change of a hectare of GRAE over one of GRAI
-            (EnvironmentalModule.grass_intensity_delta, the accounts' own function);
-          - grass fodder rows: production changes by u x (yield_ext - yield_int) / mean yield;
-          - crop-need limit (manure within need): the change in the unit balance's mineral N (K19) and in CAPRI's
-            minimum mineral share x need (K9);
-          - 0 <= GRAE, GRAI: -z - s0 GRAS <= 0, z - (1 - s0) GRAS <= 0;
-          - PMP: (q_ext + q_int) z^2 / 2 (CAPRI's p_pmpQuadTechn of GRAE and GRAI), linear term
-            from the base duals of the rows z enters, so z = 0 is optimal at base (as CAPRI's
-            PMP calibration makes the base split optimal)."""
-        self.ev.grass_col = None
-        if "GRAS" not in self.acts or alloc_k:
-            return Qa, ca, Aa, ba, start
-        gi = getattr(self.data, "grass_intensity", None)
-        env_ = getattr(self.seen, "env_for_surplus", None)
-        if gi is None or env_ is None or not hasattr(gi, "get") or not (gi.get("q_ext", 0) > 0):
-            return Qa, ca, Aa, ba, start
-        dl = env_.grass_intensity_delta(self.data.region_id)
-        if not dl:
-            return Qa, ca, Aa, ba, start
-        jg = list(self.acts).index("GRAS")
-        s0 = float(gi["share_ext"]); dy = float(gi["yield_ext_rel"]) - float(gi["yield_int_rel"])
-        col = np.zeros(Aa.shape[0])
-        if "N_balance" in labels:
-            col[labels.index("N_balance")] = float(dl.get("n_surplus", 0.0))
-        for i, lab in enumerate(labels):
-            if lab.startswith("fodder_") and i < Aa.shape[0] and Aa[i, jg] != 0.0:
-                # GRAS's own coefficient is -u (row) or +u (band); production change u x dy per ha
-                col[i] = Aa[i, jg] * dy
-        nr = getattr(self.ev, "need_row", None)
-        if nr is not None and nr < Aa.shape[0]:
-            # the change in the unit balance's mineral N, the quantity every crop carries on this row and the accounts
-            # apply (K19: it was the plain fertiliser rate, -3.65 against -39.9 t per 1000 ha in AT32; the model then
-            # saw mineral N at its floor while the accounts went to -461 t); and CAPRI's NUTMIN_ floor moves with the
-            # need of a hectare of GRAE over one of GRAI (K9)
-            col[nr] = -float(dl.get("n_mineral_input", dl.get("mineral_rate", 0.0)))
-        # LINEAR TERM: calibrated so that z = 0 is optimal in the base problem (CAPRI's PMP
-        # calibration makes the base split of GRAE and GRAI optimal): c_z = - sum_i mu_i A_iz with
-        # mu the duals of the rows z enters, from the region's first (baseline) solve, which is
-        # made WITHOUT the column. Later solves carry the column with the stored term.
-        cz = getattr(self.par, "grass_cz", None)
-        if cz is None:
-            self.par.grass_pending_col = col
-            self.ev.grass_col = None
-            return Qa, ca, Aa, ba, start
-        self.par.grass_pending_col = None
-        Aa = np.hstack([Aa, col[:, None]])
-        lo = np.zeros(Aa.shape[1]); lo[-1] = -1.0; lo[jg] = -s0
-        hi = np.zeros(Aa.shape[1]); hi[-1] = 1.0; hi[jg] = -(1.0 - s0)
-        Aa = np.vstack([Aa, lo, hi]); ba = np.concatenate([ba, [1e-9, 1e-9]])
-        labels.extend(["grass_z_lo", "grass_z_hi"])
-        qz = float(gi["q_ext"]) + float(gi["q_int"])
-        Qa = np.pad(Qa, ((0, 1), (0, 1))); Qa[-1, -1] = qz
-        ca = np.concatenate([ca, [cz + self._ghg_cost('grass')]])
-        start = np.concatenate([start, [0.0]])
-        self.ev.grass_col = Aa.shape[1] - 1
-        return Qa, ca, Aa, ba, start
 
     def _dairy_intensity_column(self, Qa, ca, Aa, ba, start, labels, n):
         """CAPRI's two-intensity cattle activities: dairy cows (DCOL/DCOH, Sprint 7b), then fattening
@@ -542,26 +486,17 @@ class LivestockBlock:
                                + sum(float(rd.get(("DCOW", lab), 0.0)) * sgn.get(lab, 1.0) * v for lab, v in req.items()))
         self.par.dairy_pending = None
 
-    def _grass_calibrate_from_duals(self, duals):
-        """After the first (baseline) solve without the column: c_z = - sum_i mu_i A_iz."""
-        col = getattr(self.par, "grass_pending_col", None)
-        if col is None:
-            return
-        if duals is not None and len(duals) >= len(col):
-            self.par.grass_cz = -float(np.asarray(duals[:len(col)], float) @ col)
-        self.par.grass_pending_col = None
-
     def _fodder_rows(self):
         """CAPRI-consistent fodder balance rows (non-tradable fodder, SUPBAL_):
-        sum_animals use_t_head x heads - u x area_crop <= 0, exact at base.
+        sum_animals use_t_head x heads - sum_crops u_crop x area_crop <= 0, exact at base (grass: GRAE and GRAI).
         Returns [(row, base value EUR/t, rhs, label)]."""
         fb = getattr(self.data, "fodder_balance", None) or {}
         acts_idx = {a: i for i, a in enumerate(self.acts)}
         x0 = self._base_levels().reindex(self.acts).fillna(0.0).values
         out = []
         for feed, rec in fb.items():
-            crop = rec.get("crop")
-            if crop not in acts_idx:
+            crops = {c: u for c, u in (rec.get("crops") or {}).items() if c in acts_idx}
+            if not crops:
                 continue
             row = np.zeros(len(self.acts))
             row_b = np.zeros(len(self.acts))
@@ -579,8 +514,9 @@ class LivestockBlock:
                         row_b[acts_idx[a]] = row[acts_idx[a]]
             if not row.any():
                 continue
-            row[acts_idx[crop]] = -float(rec["u_t_per_ha"])
-            row_b[acts_idx[crop]] = row[acts_idx[crop]]
+            for c, u in crops.items():
+                row[acts_idx[c]] = -float(u)
+                row_b[acts_idx[c]] = row[acts_idx[c]]
             scale = float(np.abs(row) @ np.abs(x0)) or 1.0
             # exact at base in both directions (K36): where the projected herds' fodder use and the projected fodder
             # output differ (use below output in FI1D, ITF5, ITG1...), the gap at base is carried as a constant, as

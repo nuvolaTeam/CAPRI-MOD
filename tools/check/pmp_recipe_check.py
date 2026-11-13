@@ -6,8 +6,8 @@ each crop group's terms. Reported: the ratio recipe / CAPRI by activity (median 
 regions, share of regions within 5%) and for the group terms.
 
 With --year 2017 the recipe's 2017 terms are compared with CAPRI's base-year (CAPREG) terms of the model's regions
-(capri_data/sources/capreg/pmp_quad_techn.csv: the first technology's diagonal term, Q(T1, T1) or Q(T, T); the group
-terms pmp_quad_pact.csv).
+(capri_data/sources/intermediate/capreg/pmp_quad_techn.parquet: the first technology's diagonal term, Q(T1, T1) or Q(T, T); the group
+terms pmp_quad_pact.parquet).
 
     python tools/check/pmp_recipe_check.py [--year 2030|2017] [--out FILE]
 """
@@ -19,9 +19,18 @@ import numpy as np
 import pandas as pd
 
 import functools as _ft
-_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
+import sys as _sys_sio  # noqa: E402
+_sys_sio.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _sources_io import read_source  # noqa: E402  (capri_data/sources: Parquet)
+
+def _read_csv(path, *a, **k):
+    """read_csv with floats parsed exactly (K82); a table of capri_data/sources (.parquet) through read_source."""
+    if str(path).endswith(".parquet"):
+        return read_source(path, *a, **k)
+    k.setdefault("float_precision", "round_trip")
+    return pd.read_csv(path, *a, **k)
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "baseline_pmp"
+SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
 
 
 def collapsed(t: pd.DataFrame) -> pd.Series:
@@ -49,7 +58,7 @@ def main() -> None:
     if a.year == 2017:
         check_2017(a)
         return
-    ex = collapsed(_read_csv(SRC / "pmp_quad_techn_2030.csv"))
+    ex = collapsed(_read_csv(SRC / "pmp_quad_techn_2030.parquet"))
     rc = collapsed(_read_csv(SRC / f"recipe_{a.year}_quad_techn.csv"))
     j = pd.concat({"capri": ex, "recipe": rc}, axis=1).dropna()
     j["ratio"] = j.recipe / j.capri
@@ -61,7 +70,7 @@ def main() -> None:
     print(tab.round(3).to_string())
     print(f"all activities: {len(j)} region x activity pairs, within 5%: {((j.ratio - 1).abs() < 0.05).mean():.1%}, "
           f"within 20%: {((j.ratio - 1).abs() < 0.2).mean():.1%}")
-    pe = _read_csv(SRC / "pmp_quad_pact_2030.csv").set_index(["region", "group1", "group2"])["value"]
+    pe = _read_csv(SRC / "pmp_quad_pact_2030.parquet").set_index(["region", "group1", "group2"])["value"]
     pr = _read_csv(SRC / f"recipe_{a.year}_quad_pact.csv").set_index(["region", "group1", "group2"])["value"]
     k = pd.concat({"capri": pe, "recipe": pr}, axis=1).dropna()
     d = k[k.index.get_level_values(1) == k.index.get_level_values(2)]
@@ -74,8 +83,8 @@ def main() -> None:
 
 
 def check_2017(a) -> None:
-    cap = _read_csv(ROOT / "capri_data" / "sources" / "capreg" / "pmp_quad_techn.csv")
-    rec = _read_csv(SRC / "recipe_2017_quad_techn.csv")
+    cap = _read_csv(ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "pmp_quad_techn.parquet")
+    rec = _read_csv(SRC / "recipe_2017_quad_techn.parquet")
     rec = rec[(rec.tech1 == rec.tech2) & rec.tech1.isin(["T1", "T"])].drop_duplicates(["region", "activity"]).copy()
     rec["model_region"] = rec.region            # the model's regions are CAPRI's units since 27 October 2026
     j = cap.merge(rec, on=["model_region", "activity"], suffixes=("_capri", "_recipe"))
@@ -87,8 +96,8 @@ def check_2017(a) -> None:
     print(tab.round(3).to_string())
     print(f"all: {len(j)} pairs, within 5%: {((j.ratio - 1).abs() < 0.05).mean():.1%}, "
           f"within 20%: {((j.ratio - 1).abs() < 0.2).mean():.1%}")
-    cp = _read_csv(ROOT / "capri_data" / "sources" / "capreg" / "pmp_quad_pact.csv")
-    rp = _read_csv(SRC / "recipe_2017_quad_pact.csv")
+    cp = _read_csv(ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "pmp_quad_pact.parquet")
+    rp = _read_csv(SRC / "recipe_2017_quad_pact.parquet")
     rp["model_region"] = rp.region
     k = cp.merge(rp, on=["model_region", "group1", "group2"])
     rr = k.value_y / k.value_x

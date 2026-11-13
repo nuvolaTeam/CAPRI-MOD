@@ -27,7 +27,7 @@ elasticities of ROW's other regions; Turkey, a trade region of its own, keeps th
 
 Output: capri_data/2017/market/feed_demand_nonEU.csv (region, commodity, feed_share),
 feed_demand_nonEU_elasticities.csv (region, commodity, price_of, elasticity) and feed_demand_nonEU_capri_regions.csv
-(region, commodity, capri_region) (capri_mod/data/nested_tables.py; a JSON file until 31 October 2026); source extracts capri_data/sources/market/feed_demand_nonEU_{elas,use}_2030.csv.
+(region, commodity, capri_region) (capri_mod/data/nested_tables.py; a JSON file until 31 October 2026); source extracts capri_data/sources/raw/capri/results/{elas_2_1730defaulta,data_market_1730defaulta}/feed_demand_nonEU_{elas,use}_2030.csv.
 
     python tools/build/build_feed_demand_nonEU.py
 """
@@ -41,14 +41,15 @@ import pandas as pd
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-KEEP_E = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_elas_2030.csv"
-KEEP_U = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_use_2030.csv"
+KEEP_E = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1730defaulta" / "feed_demand_nonEU_elas_2030.parquet"
+KEEP_U = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "data_market_1730defaulta" / "feed_demand_nonEU_use_2030.parquet"
 DEST = ROOT / "capri_data" / "2017" / "market" / "feed_demand_nonEU.csv"
 USES = ("HCON", "FEED", "PROC", "BIOF")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/codes/eu_market_blocks.csv)
 EU = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 
 
@@ -78,7 +79,7 @@ def main():
             m = pat.match(line)
             if m and m.group(2) in caps and m.group(3) in caps:
                 rows.append(dict(rms=m.group(1), feed=m.group(2), price_of=m.group(3), value=float(m.group(4))))
-        pd.DataFrame(rows).to_csv(KEEP_E, index=False)
+        write_source(pd.DataFrame(rows), KEEP_E, index=False)
         print(f"extracted {len(rows)} p_ElasFeed rows -> {KEEP_E.relative_to(ROOT)}")
     if a.data.exists():
         rows = []
@@ -87,10 +88,10 @@ def main():
             m = pat.match(line)
             if m and m.group(3) in caps:
                 rows.append(dict(rms=m.group(1), item=m.group(2), product=m.group(3), value=float(m.group(4))))
-        pd.DataFrame(rows).to_csv(KEEP_U, index=False)
+        write_source(pd.DataFrame(rows), KEEP_U, index=False)
         print(f"extracted {len(rows)} use rows -> {KEEP_U.relative_to(ROOT)}")
-    el = _read_csv(KEEP_E)
-    us = _read_csv(KEEP_U)
+    el = read_source(KEEP_E)
+    us = read_source(KEEP_U)
     # CAPRI's behavioural regions (RMS: the 80 regions of its processing functions, the same elasticity export);
     # the data also hold trade blocks and reporting sums of them (A_EU_*, EU, MED, MER, MER_OTH, URUPAR, WBA)
     beh = set(_read_csv(ROOT / "capri_data" / "2017" / "market" / "processing_nq_base.csv").rms)

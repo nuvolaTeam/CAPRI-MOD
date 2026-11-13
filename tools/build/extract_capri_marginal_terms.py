@@ -12,7 +12,9 @@ cost terms (shadow values) that sum to zero at an interior optimum (D_PROV = the
   D_AREA   land shadow price                                D_CRPR/D_ENNE requirement duals (not in D_PROV)
 Written: capri_data/validation/greendeal_2030/capri_marginal_terms_<tag>_2030.csv.xz (region, activity, item, value)
          capri_data/validation/greendeal_2030/capri_unit_values_<tag>_2030.csv (member state, product, UVAG 2030)
-The pipeline runs it with the tag ini (res_2_1730greendeal_refpol_endotech_all_inidefaulta). Until 30 October 2026 it
+The pipeline runs it with the tag ref on CAPRI's 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta.zip,
+tools/lib/paths.BASELINE_REF; until 9 November 2026 with the tag ini on its calibration run
+res_2_1730greendeal_refpol_endotech_all_inidefaulta). Until 30 October 2026 it
 also ran on the endotech max run (tag max, its terms kept to a few items); nothing read those two files and they were
 removed with that invocation, the project lead's decision (KNOWN_ISSUES K103).
 
@@ -21,6 +23,8 @@ removed with that invocation, the project lead's decision (KNOWN_ISSUES K103).
 from __future__ import annotations
 import csv, re, sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _grep import lines  # noqa: E402  (a listing's lines, plain or zipped)
 
 ROOT = Path(__file__).resolve().parents[2]
 ITEMS = {"LEVL", "MREV", "TOOU", "TOIN", "MANN", "PRME"}
@@ -39,7 +43,7 @@ RX = re.compile(r"^'([^']*)'\.(?:'([^']*)'\.)?'([^']*)'\.'([^']*)'\.'2030'\s+(\S
 def main(src: str, tag: str) -> None:
     out = ROOT / "capri_data" / "validation" / "greendeal_2030"
     terms, uv = [], []
-    for line in open(src, errors="ignore"):
+    for line in lines(src):
         m = RX.match(line)
         if not m:
             continue

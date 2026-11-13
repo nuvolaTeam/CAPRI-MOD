@@ -118,6 +118,7 @@ def greendeal_scenario(lndscpTarg: int = 10, orgTarg: int = 25, pestRedu: int = 
         endotech=dict(endotech or {}),
         # greendeal_scenarios.gms l. 66-67 (with the market model): negative raw milk prices allowed
         negative_milk_price=True,
+        greendeal_group=True,
     )
 
 

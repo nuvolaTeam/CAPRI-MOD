@@ -30,6 +30,9 @@ TABLES = {
     "premium_factors.csv": (("region", "activity", "factor"), "premium_factor_regional"),
     "tariff_changes.csv": (("region", "commodity", "change_pct"), "tariff_changes"),
     "trq_volume_changes.csv": (("commodity", "change_kt"), "trq_volume_changes"),
+    # CAPRI's obligatory set-aside rate in percent by regional unit and arable activity (DATA(ru, act, "SETR"),
+    # supply_model.gms SETA_)
+    "set_aside_rates.csv": (("region", "activity", "setr_pct"), "set_aside_rates"),
 }
 
 
@@ -128,6 +131,9 @@ class ScenarioDef(_Strict):
     name: str
     kind: Literal["reference", "scenario"]
     description: str = ""
+    #: the short name in its runs' result names (capri_mod/io_results.result_name: res_2_1730<short_name>...), as
+    #: CAPRI's result files carry the scenario's file name; empty: the folder's name
+    short_name: str = ""
     #: the CAPRI files the definition follows (paths under CAPRI's gams folder)
     capri_files: List[str] = Field(default_factory=list)
     #: a reference: the trajectory folder it projects along
@@ -207,7 +213,7 @@ def tables(name: str, root: Optional[Path] = None) -> Dict[str, dict]:
     import csv
     from capri_mod.data.definitions import ALL_ACTIVITIES, MARKET_COMMODITIES, ALL_TRADE_REGIONS
     from capri_mod.data.inputs import current as _inputs
-    with open(_inputs().path("regional_units.csv", "shared"), newline="") as fh:
+    with open(_inputs().path("regional_units.csv", "codes"), newline="") as fh:
         units = {r["region"] for r in csv.DictReader(fh)}
     known = {"activity": set(ALL_ACTIVITIES), "commodity": set(MARKET_COMMODITIES)}
     folder, out = find(name, root), {}
@@ -222,7 +228,7 @@ def tables(name: str, root: Optional[Path] = None) -> Dict[str, dict]:
             raise ValueError(f"{f}: columns {list(head)}, expected {list(cols)}")
         for i, r in enumerate(rows, start=2):
             for c in cols[:-1]:
-                ok = (r[c] in units) if (c == "region" and fname == "premium_factors.csv") else \
+                ok = (r[c] in units) if (c == "region" and fname in ("premium_factors.csv", "set_aside_rates.csv")) else \
                      (r[c] in set(ALL_TRADE_REGIONS)) if c == "region" else (r[c] in known[c])
                 if not ok:
                     raise ValueError(f"{f} line {i}: {c} {r[c]!r} is not one of the model's")

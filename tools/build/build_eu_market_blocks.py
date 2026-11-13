@@ -1,7 +1,7 @@
 """The EU's trade blocks of CAPRI's market (market step E, eu_blocks): member state -> block, from CAPRI's region
 aggregation file (KNOWN_ISSUES K101).
 
-    capri_data/shared/eu_market_blocks.csv   ms, block, source
+    capri_data/codes/eu_market_blocks.csv   ms, block, source
 
 Rows: section 4 of gams/aggregation/defaultA.agg (one line per old region: code, name & new region & flag), the
 member states mapped to EU_WEST or EU_EAST, in the file's order: CAPRI's rows only. Until 30 October 2026 Norway was
@@ -23,7 +23,7 @@ from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repositor
 
 ROOT = Path(__file__).resolve().parents[2]
 AGG = SOURCES / "gams/aggregation/defaultA.agg"
-OUT = ROOT / "capri_data" / "shared" / "eu_market_blocks.csv"
+OUT = ROOT / "capri_data" / "codes" / "eu_market_blocks.csv"
 BLOCKS = ("EU_WEST", "EU_EAST")
 SOURCE = "gams/aggregation/defaultA.agg"
 

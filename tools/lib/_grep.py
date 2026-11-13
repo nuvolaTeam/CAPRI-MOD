@@ -39,6 +39,14 @@ def _members(path: Path):
             yield from _lines(fh)
 
 
+def lines(path):
+    """Every line of the file, or of every member of a zip archive (as `unzip -p`), as text without its line end, one at
+    a time (for the builders that read a whole listing; open(path, errors="ignore") on a plain file until 9 November
+    2026, when the 2030 baseline's listing became the zip res_2_1730greendeal_refdefaulta.zip)."""
+    for raw in _members(Path(path)):
+        yield raw.decode("utf-8", errors="ignore").rstrip("\r")
+
+
 def grep(pattern: str, paths) -> str:
     """The lines of the file(s) that match the extended regular expression, as grep -E (-h) prints them."""
     rx = re.compile(pattern.encode("latin-1"))

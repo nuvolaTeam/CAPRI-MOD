@@ -1,7 +1,7 @@
 -- Inputs under capri_data/2017/feed. Generated structure (types, NOT NULL, keys) from the files on 29 October 2026; units open where no
 -- builder or CAPRI file states them (value_units).
 
--- file: capri_data/2017/feed/feed_cereal_mix_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/feed/feed_cereal_mix_2030.csv
 CREATE TABLE feed_feed_cereal_mix_2030 (
     cereal VARCHAR NOT NULL,
     fedm_kt DOUBLE NOT NULL,
@@ -46,13 +46,13 @@ INSERT INTO value_units VALUES
 -- file: capri_data/2017/feed/fodder_balance_2017.csv
 CREATE TABLE feed_fodder_balance_2017 (
     region VARCHAR NOT NULL REFERENCES regional_units (region),
-    fodder VARCHAR NOT NULL CHECK (fodder IN ('FGRA', 'FMAI', 'FOFA')),
+    fodder VARCHAR NOT NULL CHECK (fodder IN ('FGRA', 'FMAI', 'FOFA', 'FROO')),
     crop VARCHAR NOT NULL REFERENCES model_activities (code),
     u_t_per_ha DOUBLE NOT NULL,
     value_eur_t DOUBLE NOT NULL,
-    PRIMARY KEY (region, fodder)
+    PRIMARY KEY (region, fodder, crop)
 );
-COMMENT ON TABLE feed_fodder_balance_2017 IS 'the regional balances of the non-tradable fodder (CAPRI supply_model.gms SUPBAL_): the crop producing it, the usable fresh fodder per ha (base fodder use / base area) and its base value (CAPRI''s UVAG); built from feed_ration_2017.csv, base_areas.csv and animal_numbers.csv (tools/build/build_fodder_balance.py; fodder_balance_2017.json until 31 October 2026; capri_mod/data/nested_tables.py)';
+COMMENT ON TABLE feed_fodder_balance_2017 IS 'the regional balances of the non-tradable fodder (CAPRI supply_model.gms SUPBAL_): the crops producing it (one row each: grass FGRA from GRAE and GRAI since S2, 7 November 2026), the usable fresh fodder per ha (base fodder use / base area) and its base value (CAPRI''s UVAG); built from feed_ration_2017.csv, base_areas.csv and animal_numbers.csv (tools/build/build_fodder_balance.py; fodder_balance_2017.json until 31 October 2026; capri_mod/data/nested_tables.py)';
 INSERT INTO value_units VALUES
   ('feed_fodder_balance_2017', 'u_t_per_ha', 'U_TonPerHa', 'builder', 'fodder_balance_2017.u_t_per_ha: t fresh fodder per ha (the builder)'),
   ('feed_fodder_balance_2017', 'value_eur_t', NULL, 'open', 'fodder_balance_2017.value_eur_t: EUR per t (the builder; no unit code in the catalogue)');
@@ -60,7 +60,7 @@ INSERT INTO value_units VALUES
 -- file: capri_data/2017/feed/fodder_balance_2017_use.csv
 CREATE TABLE feed_fodder_balance_2017_use (
     region VARCHAR NOT NULL REFERENCES regional_units (region),
-    fodder VARCHAR NOT NULL CHECK (fodder IN ('FGRA', 'FMAI', 'FOFA')),
+    fodder VARCHAR NOT NULL CHECK (fodder IN ('FGRA', 'FMAI', 'FOFA', 'FROO')),
     animal VARCHAR NOT NULL REFERENCES model_activities (code),
     use_t_head DOUBLE NOT NULL,
     PRIMARY KEY (region, fodder, animal)

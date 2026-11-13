@@ -29,10 +29,13 @@ OLIV,crop,OLIV,OLIV,CAPRI's own activity (PACT)
 TABO,crop,TABO,TABO,CAPRI's own activity (PACT)
 TOBA,crop,TOBA,TOBA,CAPRI's own activity (PACT)
 TEXT,crop,TEXT,TEXT,CAPRI's own activity (PACT)
-GRAS,crop,GRAS,GRAE;GRAI,"CAPRI's own activity (PACT); in CAPRI's supply model (CAPMOD) the activities with PMP terms: GRAE (Gras and grazings production activity extensive), GRAI (Gras and grazings production activity intensive)"
+GRAE,crop,GRAE,GRAE,"CAPRI's own activity (PACT; Gras and grazings production activity extensive); with GRAI the model's GRAS until S2, 7 November 2026"
+GRAI,crop,GRAI,GRAI,"CAPRI's own activity (PACT; Gras and grazings production activity intensive)"
 MAIF,crop,MAIF,MAIF,CAPRI's own activity (PACT)
-OFOD,crop,OFAR;ROOF,OFAR;ROOF,"CAPRI's PACT activities summed: OFAR (Fodder other on arable land production activity), ROOF (Fodder root crops production activity)"
-SETA,crop,SETA;FALL,VSET;FALL,"CAPRI's PACT activities summed: SETA (Set aside total), FALL (Fallow land); in CAPRI's supply model (CAPMOD) the activities with PMP terms: VSET (Set aside voluntary), FALL (Fallow land)"
+OFAR,crop,OFAR,OFAR,CAPRI's own activity (PACT)
+ROOF,crop,ROOF,ROOF,CAPRI's own activity (PACT)
+VSET,crop,VSET,VSET,"CAPRI's own activity (PACT; CAPRI's SETA row, Set aside total, holds VSET: KNOWN_ISSUES K115)"
+FALL,crop,FALL,FALL,CAPRI's own activity (PACT)
 DCOW,animal,DCOL;DCOH,DCOL;DCOH,"CAPRI's PACT activities summed: DCOL (Dairy cows production activity low yield), DCOH (Dairy cows  production activityhigh yield)"
 BCOW,animal,SCOW,SCOW,CAPRI's activity SCOW (Suckler cows production activity) under the model's own code
 BULL,animal,BULL;BULH,BULL;BULH,"CAPRI's PACT activities summed: BULL (Male adult fattening activity low final weight), BULH (Male adult fattening activity high final weight)"

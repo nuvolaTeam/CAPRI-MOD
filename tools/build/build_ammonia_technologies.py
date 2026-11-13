@@ -84,7 +84,11 @@ def graz_share(ctry, act, RCE=None):
 
 def build():
     INV, ADD, FOP, PRICE, STOR, MIN, KGN, nvz, HEADS, HOLD, MD = cc.load()
-    curves = pd.read_parquet(D / "ammonia_cost_curves.parquet")
+    import sys as _sys_sio
+    _sys_sio.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+    from _sources_io import read_source, write_source
+    AMI = Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "intermediate" / "ammonia"
+    curves = read_source(AMI / "ammonia_cost_curves.parquet")
     CUR = {(r.region, r.activity, r.manure_system.lower(), r.technology): (r.alpha, r.beta) for r in curves.itertuples()}
     rains = _read_csv(D / "bNumAniRAINS.csv", dtype={"year": str})
     RN = {(r.region, r.animal_mitt): r.value for r in rains[rains.year == RAINS_YEAR].itertuples()}
@@ -225,9 +229,14 @@ def build():
         w.writerow(["region", "activity", "technology", "target", "CostParLin", "CostParSqr", "IniShare",
                     "MaxShare", "qemitt", "applicability", "liquid_share", "grazing_share"])
         w.writerows(out)
-    # a builder intermediate (read by build_n_cascade, build_ammonia_tech_model, build_manure_n2o): Parquet
-    pd.DataFrame(effects, columns=["region", "activity", "technology", "item", "reduction"]).to_parquet(
-        D / "ammonia_technology_effects.parquet", index=False)
+    # a builder intermediate (read by build_n_cascade, build_ammonia_tech_model, build_manure_n2o), under
+    # capri_data/sources (8 November 2026)
+    import sys as _sys_sio
+    _sys_sio.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+    from _sources_io import read_source, write_source
+    write_source(pd.DataFrame(effects, columns=["region", "activity", "technology", "item", "reduction"]),
+                 Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "intermediate" / "ammonia"
+                 / "ammonia_technology_effects.parquet", index=False)
     return out
 
 

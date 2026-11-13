@@ -1,7 +1,7 @@
 """CAPRI's 2030 CAP budgets and the per-activity premium split by scheme (Pillar I, LFA, Natura 2000, agri-environment).
 
-Source: CAPRI's 2030 reference results, dataOut of res_2_1730greendeal_refpol_endotech_all_inidefaulta (the run the
-model's 2030 calibration uses):
+Source: CAPRI's 2030 Green Deal baseline, dataOut of res_2_1730greendeal_refdefaulta (tools/lib/paths.BASELINE_REF,
+the run the model's 2030 base reproduces; its calibration run refpol_endotech_all_ini until 9 November 2026):
   - dataOut(R, '', 'CEILVAL', scheme, '2030'): the budget of each premium scheme, Mio EUR (p_premDataE(...,'ceilval'),
     policy/rd_logic.gms l. 160-170 for the RD schemes, policy/calc_mtr_top.gms for Pillar I), per member state and
     CAPRI NUTS2 region;
@@ -10,10 +10,10 @@ model's 2030 calibration uses):
   - dataOut(R, '', activity, 'LEVL', '2030'): activity levels, to weight CAPRI activities into model activities.
 
 Outputs
-  capri_data/2017/policy/cap_ceilings_2030.csv     CAPRI region x scheme budget (Mio EUR of 2017, K108): DPPIL1, DPPIL2, DPRD_LFA,
+  capri_data/baselines/capri_greendeal_ref/1730/policy/cap_ceilings_2030.csv     CAPRI region x scheme budget (Mio EUR of 2017, K108): DPPIL1, DPPIL2, DPRD_LFA,
                                                     DPRD_N2K, DPAE, DPNAT (national payments: complementary
                                                     national direct payments, Norway's schemes), DPTOTAL (Eps -> 0)
-  capri_data/2017/policy/premium_scheme_shares_2030.csv
+  capri_data/baselines/capri_greendeal_ref/1730/policy/premium_scheme_shares_2030.csv
                                                     model region x activity: the share of the activity's premium per
                                                     unit paid under DPPIL1, DPRD_LFA, DPRD_N2K, DPAE and DPNAT
                                                     (each over DPTOTAL), level-weighted over the activity's CAPRI members; region
@@ -35,12 +35,13 @@ from pathlib import Path
 
 import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
-from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from paths import BASELINE_REF  # noqa: E402  (CAPRI's material outside the repository)
+from _grep import lines  # noqa: E402  (a listing's lines, plain or zipped)
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
-OUT_CEIL = ROOT / "capri_data" / "2017" / "policy" / "cap_ceilings_2030.csv"
-OUT_SHARE = ROOT / "capri_data" / "2017" / "policy" / "premium_scheme_shares_2030.csv"
+SRC = BASELINE_REF
+OUT_CEIL = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "policy" / "cap_ceilings_2030.csv"
+OUT_SHARE = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "policy" / "premium_scheme_shares_2030.csv"
 SCHEMES = ("DPPIL1", "DPPIL2", "DPRD_LFA", "DPRD_N2K", "DPAE", "DPNAT", "DPTOTAL")
 SHARES = ("DPPIL1", "DPRD_LFA", "DPRD_N2K", "DPAE", "DPNAT")
 # model activity -> CAPRI activities (crops: tools/build/build_capri_base.CROP_MAP; animals: tools/build/build_livestock_units.ANIMALS)
@@ -64,19 +65,18 @@ def read(src: Path):
     rx_c = re.compile(r"^'([A-Z0-9_]{8})'\.''\.'CEILVAL'\.'([^']+)'\.'2030'\s+(\S+)")
     rx_p = re.compile(r"^'([A-Z0-9_]{8})'\.'PRME'\.'([A-Z0-9]+)'\.'([^']+)'\.'2030'\s+(\S+)")
     rx_l = re.compile(r"^'([A-Z0-9_]{8})'\.''\.'([A-Z0-9]+)'\.'LEVL'\.'2030'\s+(\S+)")
-    with open(src, errors="ignore") as f:
-        for line in f:
-            if "'2030'" not in line:
-                continue
-            m = rx_c.match(line)
-            if m and m.group(2) in SCHEMES:
-                ceil[m.group(1)][m.group(2)] = num(m.group(3)); continue
-            m = rx_p.match(line)
-            if m and m.group(2) in CAPRI_ACTS and m.group(3) in SHARES + ("DPTOTAL",):
-                prme[m.group(1)][(m.group(2), m.group(3))] = num(m.group(4)); continue
-            m = rx_l.match(line)
-            if m and m.group(2) in CAPRI_ACTS:
-                levl[m.group(1)][m.group(2)] = num(m.group(3))
+    for line in lines(src):
+        if "'2030'" not in line:
+            continue
+        m = rx_c.match(line)
+        if m and m.group(2) in SCHEMES:
+            ceil[m.group(1)][m.group(2)] = num(m.group(3)); continue
+        m = rx_p.match(line)
+        if m and m.group(2) in CAPRI_ACTS and m.group(3) in SHARES + ("DPTOTAL",):
+            prme[m.group(1)][(m.group(2), m.group(3))] = num(m.group(4)); continue
+        m = rx_l.match(line)
+        if m and m.group(2) in CAPRI_ACTS:
+            levl[m.group(1)][m.group(2)] = num(m.group(3))
     return ceil, prme, levl
 
 

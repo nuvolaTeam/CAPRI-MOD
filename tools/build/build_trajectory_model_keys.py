@@ -2,7 +2,7 @@
 
 The trajectory carries CAPRI's codes: activities as CAPRI names them (MAIZ, TWIN, SCOW, BULF, SOWS, HENS, POUF,
 SHGT, OFAR ...) and regions as the first four characters of CAPRI's region code (DE11, FR24, BL00 ...). The
-projection looks factors up by the MODEL's names (CORN, WINE, BCOW, BULL, PIGS, LAYS, BROI, SHGP, OFOD) and
+projection looks factors up by the MODEL's names (CORN, WINE, BCOW, BULL, PIGS, LAYS, BROI, SHGP) and
 model regions (NUTS 2021: FRB0, IE04 ...), so every name that differs fell back to the activity default
 (maize yield +3.6% instead of CAPRI's +1.8%, bulls' herd 1.0 instead of 0.93) and every recoded region to the
 EU median. This adds model-keyed entries next to CAPRI's (which are kept): activity aliases below, regions
@@ -22,14 +22,23 @@ ROOT = Path(__file__).resolve().parents[2]
 #: model name -> CAPRI key, per block
 ALIASES = {
     "yields": {"CORN": "MAIZ", "WINE": "TWIN", "BCOW": "SCOW", "HFRS": "HEIF", "CALV": "CACR",
-               "PIGS": "SOWS", "LAYS": "HENS", "BROI": "POUF", "OFOD": "OFAR", "BULL": "BULF"},
+               "PIGS": "SOWS", "LAYS": "HENS", "BROI": "POUF", "BULL": "BULF"},
     # the herds block carries CAPRI's activity levels (LEVL), crops included: model crop names too
     "herds": {"BULL": "BULF", "PIGS": "SOWS", "POUL": "POUF", "SCOW": "SCOW", "HEIF": "HEIF",
-              "CORN": "MAIZ", "WINE": "TWIN", "OFOD": "OFAR",
+              "CORN": "MAIZ", "WINE": "TWIN",   # (OFOD = OFAR until S2, 7 November 2026: OFAR and ROOF their own)
               # the model's own animal names (animal_numbers columns) had no herd factor: suckler cows, heifers,
               # laying hens, broilers, calves, sheep and goats stayed at 2017 in the projected data (K12)
               "BCOW": "SCOW", "HFRS": "HEIF", "LAYS": "HENS", "BROI": "POUF", "CALV": "CACR"},
 }
+
+
+#: model names that are CAPRI's names for another item: the alias replaces them, and where the alias has no factor the
+#: model name gets none either (the region falls back to the EU factor, itself the alias's), never the other item's.
+#: BULL: CAPRI's bulls' raising, the model's bull fattening is BULF. PIGS (KNOWN_ISSUES K119, the project lead's
+#: decision of 6 November 2026): CAPRI's "Pigs total" aggregate (PIGF + SOWS + piglets; reports/aggreg_sets.gms l. 101,
+#: 132; CAPTRD's aggreg_and_report.gms l. 262-283, a yield mixing tonnes of pork and heads of piglets), the model's
+#: PIGS is CAPRI's SOWS (codes/model_activities.csv)
+CAPRI_OTHER = ("BULL", "PIGS")
 
 
 def add_model_keys(t: dict) -> dict:
@@ -51,8 +60,10 @@ def add_model_keys(t: dict) -> dict:
     for block, al in ALIASES.items():
         g = t["growth"].get(block, {})
         for m, c in al.items():
-            if c in g and (m not in g or m in ("BULL",)):
+            if c in g and (m not in g or m in CAPRI_OTHER):
                 g[m] = dict(g[c]); added["growth"] += 1
+            elif m in CAPRI_OTHER and m in g and c not in g:
+                del g[m]
     for block in list(t.get("regional", {})):
         reg = t["regional"][block]
         al = ALIASES.get(block, {})
@@ -63,8 +74,12 @@ def add_model_keys(t: dict) -> dict:
                 continue
             entry = dict(src)
             for m, c in al.items():
-                if c in src:
+                # a factor under the model's own name (e.g. SHGT = SHGM + SHGF, build_trajectory_capri_ref.py) is kept;
+                # a model name that is CAPRI's name for another item (CAPRI_OTHER) takes the alias or nothing
+                if c in src and (m not in src or m in CAPRI_OTHER):
                     entry[m] = dict(src[c])
+                elif m in CAPRI_OTHER and m in entry and c not in src:
+                    del entry[m]
             if r not in reg:
                 added["regions"] += 1
             reg[r] = entry

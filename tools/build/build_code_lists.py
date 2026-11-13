@@ -41,8 +41,12 @@ import csv
 import sys
 from pathlib import Path
 
+import numpy as np
+
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools" / "lib"))
+from _sources_io import read_source  # noqa: E402  (capri_data/sources: Parquet)
 OUT = ROOT / "capri_data" / "codes"
 CAPRI_SETS = ("PACT", "MPACT", "MCACT", "MAACT", "XX", "XX1", "RALL", "COLS", "ROWS")
 
@@ -148,7 +152,7 @@ def main():
         comms.append((c, cc, src))
 
     # regional units
-    with open(ROOT / "capri_data" / "shared" / "regional_units.csv", newline="") as fh:
+    with open(ROOT / "capri_data" / "codes" / "regional_units.csv", newline="") as fh:
         units = [r["region"] for r in csv.DictReader(fh)]
     miss = [u for u in units if u not in capri["RALL"]]
     if miss:
@@ -163,6 +167,10 @@ def main():
     for g, ca in pairs("cropDivGrps_mCact"):
         grp_of.setdefault(ca, set()).add(g)
     fodcrp = set(read_set(a.sets, "FODCRP"))
+    # an activity is a fodder crop where CAPRI's FEDACT_TO_FODDI gives it a fodder item (MAIF, ROOF, OFAR, GRAE, GRAI);
+    # FODCRP names the grass product GRAS, not GRAE and GRAI (the model's own activities since S2, 7 November 2026)
+    fedact = {pa for pa, _f in pairs("FEDACT_TO_FODDI")}
+    fod_of = lambda c: ({c} & fodcrp) | ({c} & fedact)
     capri_of = {r["code"]: r["capri_codes"].split(";") for r in acts}
     with open(OUT / "model_activity_classes.csv", newline="", encoding="utf-8") as fh:
         classes = list(csv.DictReader(fh))
@@ -176,8 +184,9 @@ def main():
         if (r["cropdiv_group"] or grps) and {r["cropdiv_group"]} != grps and not declared:
             problems.append(f"model_activity_classes.csv {r['code']}: crop-diversification group {r['cropdiv_group']!r}, "
                             f"CAPRI {sorted(grps)}")
-        if bool(int(r["fodder"])) != bool(set(cc) & fodcrp) and not declared:
-            problems.append(f"model_activity_classes.csv {r['code']}: fodder {r['fodder']}, CAPRI FODCRP {sorted(set(cc) & fodcrp)}")
+        fc = set().union(*(fod_of(c) for c in cc)) if cc else set()
+        if bool(int(r["fodder"])) != bool(fc) and not declared:
+            problems.append(f"model_activity_classes.csv {r['code']}: fodder {r['fodder']}, CAPRI FODCRP {sorted(fc)}")
     # the further classes (N6, second part): a value that differs from CAPRI's set must say "<column>...: the model's"
     # in its source (or name its departure)
     mcact, oyani = set(read_set(a.sets, "MCACT")), set(read_set(a.sets, "OYANI"))
@@ -208,6 +217,25 @@ def main():
                                 f"AACT_TO_XX {sorted(capri_x)}")
         problems += [f"model_activity_classes.csv {r['code']}: young output {y} is not in CAPRI's OYANI"
                      for y in filter(None, r["young_outputs"].split(";")) if y not in oyani]
+    # the activities' technologies (the activity bounds sum CAPRI's per-technology bounds, set_supply_bounds.gms l. 26-27,
+    # 42-43, 159-160): CAPRI's LEVL technologies at the 2030 simulation start, the same in every region, equal shares
+    fact = read_source(ROOT / "capri_data" / "sources" / "intermediate" / "technology" / "techn_fact_2030.parquet")
+    lv = fact[fact.row == "LEVL"]
+    t_of = lv.groupby(["region", "activity"]).tech.agg(lambda s: tuple(sorted(s))).groupby(level="activity").agg(set)
+    sh = lv.groupby(["activity", "tech"]).value.agg(lambda s: (s.min(), s.max()))
+    for r in classes:
+        ts = [t_of.get(c) for c in capri_of.get(r["code"], []) if c in t_of.index]
+        if any(len(t) != 1 for t in ts):
+            problems.append(f"model_activity_classes.csv {r['code']}: CAPRI's technologies differ by region {ts}")
+            continue
+        n = {len(next(iter(t))) for t in ts} or {1}
+        if n != {int(r["technologies"])}:
+            problems.append(f"model_activity_classes.csv {r['code']}: technologies {r['technologies']}, CAPRI {sorted(n)}")
+        for c in capri_of.get(r["code"], []):
+            k = len(next(iter(t_of[c]))) if c in t_of.index else 1
+            if c in t_of.index and any(not np.isclose(v, 1.0 / k, rtol=0, atol=1e-12) for t in next(iter(t_of[c]))
+                                       for v in sh[(c, t)]):
+                problems.append(f"model_activity_classes.csv {r['code']}: CAPRI's {c} technologies without equal shares")
     # the ammonia technologies the N cascade's equations name (HOUSN_, STORN_, RUNHOUSN_, APPLN_: CAPRI writes the
     # lists in the equations, supply_model.gms l. 3200 ff., and so does the model): each one of CAPRI's MitiTechAmm
     amm = set(read_set(a.sets, "MitiTechAmm"))
@@ -238,7 +266,7 @@ def main():
 
     # CAPRI's market regions (the market's move onto CAPRI's regions, stage 1: MARKET_REGIONS_INVENTORY.md section 5):
     # RM (45 market regions), RMTP (42 trade-policy blocks), RM_TO_RMTP, RMEU_to_RM (the EU's two market blocks), in
-    # CAPRI's set order; checked against RALL and against the behavioural regions' map shared/rms_to_rm.csv
+    # CAPRI's set order; checked against RALL and against the behavioural regions' map codes/rms_to_rm.csv
     rm, rmtp = read_set(a.sets, "RM"), read_set(a.sets, "RMTP")
     rm_to_rmtp, rmeu_to_rm = pairs("RM_TO_RMTP"), pairs("RMEU_to_RM")
     for name, codes in (("RM", rm), ("RMTP", rmtp)):
@@ -252,7 +280,7 @@ def main():
                  for r in rm if len(blocks_of.get(r, [])) != 1]
     problems += [f"CAPRI's RMEU_to_RM: {r} is not in RM" for _, r in rmeu_to_rm if r not in rm]
     # CAPRI's behavioural regions RMS and their market region RMS_TO_RM, every RMS in one RM: written below to
-    # shared/rms.csv and shared/rms_to_rm.csv (until 3 November 2026 written by build_gl_demand.py, which reads them,
+    # codes/rms.csv and codes/rms_to_rm.csv (until 3 November 2026 written by build_gl_demand.py, which reads them,
     # and checked here; the market's grouping step, tools/lib/_market_regions.py, reads them)
     rms, rms_to_rm = read_set(a.sets, "RMS"), pairs("RMS_TO_RM")
     rm_of_rms = {}
@@ -286,8 +314,8 @@ def main():
     write(OUT / "capri" / "RMTP.csv", ("code", "text"), list(rmtp.items()))
     write(OUT / "capri" / "RM_TO_RMTP.csv", ("rm", "rmtp"), rm_to_rmtp)
     write(OUT / "capri" / "RMEU_to_RM.csv", ("rmeu", "rm"), rmeu_to_rm)
-    write(ROOT / "capri_data" / "shared" / "rms.csv", ("rms",), [(r,) for r in rms])
-    write(ROOT / "capri_data" / "shared" / "rms_to_rm.csv", ("rms", "rm"), rms_to_rm)
+    write(ROOT / "capri_data" / "codes" / "rms.csv", ("rms",), [(r,) for r in rms])
+    write(ROOT / "capri_data" / "codes" / "rms_to_rm.csv", ("rms", "rm"), rms_to_rm)
     write(OUT / "model_commodities.csv", ("code", "capri_code", "mapping_source"), comms)
     differ = [(c, cc) for c, cc, _ in comms if c != cc]
     print(f"wrote {OUT.relative_to(ROOT)}: CAPRI's sets {', '.join(f'{s} {len(d)}' for s, d in capri.items())}; "

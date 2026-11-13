@@ -97,7 +97,11 @@ def _effects(pairs, _unused, rows_a, frs):
     for r in rows_a:
         F[(r[0], r[1])][r[2]] = r[3]
     E = defaultdict(dict)
-    for r in pd.read_parquet(D / "ammonia_technology_effects.parquet").itertuples():
+    import sys as _sys_sio
+    _sys_sio.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+    from _sources_io import read_source, write_source
+    for r in read_source(Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "intermediate" / "ammonia"
+                         / "ammonia_technology_effects.parquet").itertuples():
         E[(r.region, r.activity)][(r.technology, r.item)] = float(r.reduction)
     LIT = defaultdict(dict)
     for r in _read_csv(D / "p_litRevAmmoTechsAdd.csv").itertuples():
@@ -171,7 +175,7 @@ def build():
     for it in ("LFsurface", "LFsoil", "LFNmin"):
         if it not in rlf.get("ES120000", {}) and it in rlf.get("ES110000", {}) and it in rlf.get("ES130000", {}):
             rlf["ES120000"][it] = 0.5 * (rlf["ES110000"][it] + rlf["ES130000"][it])
-    md = _read_csv(D / "capri_mann_days_2030.csv")
+    md = _read_csv(D.parents[2] / "baselines" / "capri_greendeal_ref" / "1730" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
     pairs = sorted({(r.region, r.activity) for r in md.itertuples() if r.item == "LEVL" and r.activity in MITT})
 
     rows_a, rows_r = [], []

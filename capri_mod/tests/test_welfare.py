@@ -89,17 +89,15 @@ def test_market_welfare_at_base_and_after_a_supply_shock():
     2030 reference level (household expenditure at the calibration prices); with 10% less EU beef the EU beef price
     rises, the EU's consumers lose and Brazil's farms gain."""
     from capri_mod.data.loaders import load_all_data
-    from capri_mod.data.definitions import MARKET_COMMODITIES
     from capri_mod.market.market_module import MarketModule
     mm = MarketModule(load_all_data(str(Path(__file__).resolve().parents[2] / "capri_data")))
+    # CAPRI's base supply as a run passes it: one row per member state (the dairy block reads raw milk per member state;
+    # until 12 November 2026 the two EU blocks' totals, whose milk no dairy received)
+    exo = mm.capri_base_supply_rows()
+    EU_ROWS = [r for r in exo.index if mm.eu_region_of_country(r) is not None]
     EU = list(mm.EU)                                           # CAPRI's two EU blocks (since 3 November 2026)
-    exo = pd.DataFrame(0.0, index=EU, columns=MARKET_COMMODITIES)
-    for r in EU:
-        for c in MARKET_COMMODITIES:
-            if c in mm.par.base_production.columns:
-                exo.at[r, c] = mm.par.base_production.at[r, c]
     eq0 = mm.solve(exogenous_supply=exo)
-    mm.set_eu_base(exo.loc[EU].sum(), eq0.consumption.loc[EU].sum())  # scenarios keep the base calibration
+    # the second solve keeps the run's calibration (S7: calibrated once per run at CAPRI's calibration point)
     weu = lambda w, c: float(w.loc[EU, c].sum())                  # the EU's welfare: its blocks' sum
     w0 = eq0.welfare
     assert list(w0.columns) == list(mm.WELFARE_COMPONENTS) + ["Welfare"]
@@ -110,13 +108,14 @@ def test_market_welfare_at_base_and_after_a_supply_shock():
         for c in mm.WELFARE_COMPONENTS:
             if c not in ("TariffRev", "TRQRents"):
                 assert abs(w0.at[reg, c] - base.get(reg, {}).get(c, 0.0)) < 1e-6 * max(1.0, abs(w0.at[reg, c])), (reg, c)
-    ref = pd.read_csv(Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "capri_res" / "ref2030_welfare.csv")
+    from capri_mod.tests._sources import read_source
+    ref = read_source(Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "raw" / "capri" / "results" / "ref2030_welfare.parquet")
     ref = ref[(ref["col"].str.upper() == "CSSP") & (ref["row"].str.upper() == "INCE")].set_index("region")["value"]
     gl = pd.read_csv(Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "gl_demand_goods.csv")
     eu_rms = sorted(set(gl.loc[gl.model_region == "EU27", "rms"]))
     assert abs(weu(w0, "CSSP") - float(ref.reindex(eu_rms).sum())) < 1e-6 * weu(w0, "CSSP")
     exo1 = exo.copy()
-    exo1.loc[EU, "BEEF"] *= 0.9
+    exo1.loc[EU_ROWS, "BEEF"] *= 0.9
     eq1 = mm.solve(exogenous_supply=exo1)
     w1 = eq1.welfare
     assert eq1.domestic_prices.at["EU27", "BEEF"] > eq0.domestic_prices.at["EU27", "BEEF"]

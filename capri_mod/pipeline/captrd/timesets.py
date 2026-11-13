@@ -40,6 +40,17 @@ class TimeSets:
     p_trend: Dict[int, float] = field(default_factory=dict)
 
 
+#: captrd.gms l. 246-249: %lst_dgagri%, the last year of DG AGRI's Aglink baseline, follows the %Aglink% version
+LST_DGAGRI = 2030
+LST_DGAGRI_LONG = 2040
+AGLINK_LONG = ["aglink2022dgagri", "aglink2023dgagri", "aglink2024dgagri"]
+
+
+def lst_dgagri_for(aglink: str) -> int:
+    """%lst_dgagri% of an %Aglink% version (captrd.gms l. 246-249, compared case-insensitively as $ifi does)."""
+    return LST_DGAGRI_LONG if str(aglink).lower() in AGLINK_LONG else LST_DGAGRI
+
+
 def build(first_year: int, last_year: int, resy: Iterable[int], base_year: int, lst_dgagri: int,
           uaar_years_any: Iterable[int], uaar_years_all: Iterable[int], expostt_extra: Iterable[int] = (),
           basyrs5_halfwidth: Optional[int] = None) -> TimeSets:

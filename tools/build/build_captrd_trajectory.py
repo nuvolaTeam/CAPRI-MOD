@@ -1,5 +1,5 @@
 """CAPRI's trend projection as the model's alternative 2030 trajectory: the scenario folder capri_data/scenarios/captrd_2030
-(settings.toml, growth.csv, regional.csv; capri_mod/projection/scenario_io.py; capri_data/trajectories/captrd_2030.json
+(settings.toml, growth.csv, regional.csv; capri_mod/projection/scenario_io.py; capri_data/baselines/capri_greendeal_ref/1730/captrd_2030.json
 until 31 October 2026) (`--trajectory captrd`; the default is CAPRI's 2030 reference, capri_data/scenarios/capri_ref_2030).
 The folder's one writer, from blank.
 

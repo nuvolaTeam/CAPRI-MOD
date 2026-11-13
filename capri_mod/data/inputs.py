@@ -3,7 +3,13 @@ docs/design/ARCHITECTURE_REFACTOR.md, layer "data adapters"; the market has its 
 
 Every input is located in the data directory and base year of the run:
     <data_dir>/<base_year>/<area>/<file>   area: supply, abatement, environment, feed, policy, market
-    <data_dir>/shared/<file>                cross-vintage mappings
+    <data_dir>/baselines/<baseline>/<BAS><SIM>/<area>/<file>
+                                           a file of another year (its name carries it, "_2030"): the run's baseline
+                                           (run.baseline) projected to that year, CAPRI's Green Deal reference
+                                           capri_data/baselines/capri_greendeal_ref/1730 (year_dir;
+                                           docs/design/DATA_LAYOUT.md steps (b) and (d): capri_data/2030 from 10
+                                           November 2026, under the base year's folder before)
+    <data_dir>/codes/<file>                the codes and cross-vintage mappings (capri_data/shared until 10 November 2026)
     <data_dir>/sources/<sub>/<file>         CAPRI exports read as inputs
 Before 30 October 2026 the supply, environment, fertiliser and water code read a fixed capri_data/2017 path next to
 the package (and the PMP elasticity table a path relative to the working directory), so another data directory or
@@ -24,7 +30,40 @@ import pandas as pd
 from capri_mod.tableio import read_input
 
 REPO_DATA = Path(__file__).resolve().parents[2] / "capri_data"
+
+
+def year_of_file(name: str, base_year: str) -> Optional[str]:
+    """The year a file's name carries ("land_rents_2030.csv", "pmp_capri_2030_animals.csv": "2030") where it is not
+    the base year; None otherwise. Such a file lives in <data_dir>/<year>/ (DATA_LAYOUT step (b)). A year range
+    ("cap_greening_2013_2020.csv") names the period a base-year file covers, not a year folder: it is skipped."""
+    import re
+    m = re.search(r"_((?:19|20)\d\d)(?=[_.])", re.sub(r"(?:19|20)\d\d_(?:19|20)\d\d", "", name))
+    return m.group(1) if m and m.group(1) != str(base_year) else None
 AREAS = ("supply", "abatement", "environment", "feed", "policy", "market")
+
+
+def default_baseline() -> str:
+    """The settings' baseline (run.baseline): the folder under <data_dir>/baselines whose projection the run uses."""
+    from capri_mod.settings import current as _settings
+    return str(_settings().get("run.baseline"))
+
+
+def year_dir(root, year, base_year=None, baseline=None) -> Path:
+    """The folder of a year's inputs: the base year's own, <root>/<base_year>; another year's, the baseline's projection
+    from the base year to it, <root>/baselines/<baseline>/<BAS><SIM> (baseline: run.baseline; <BAS><SIM>: the last
+    two digits of the base year and of the year, as CAPRI names its results, %BAS%%SIM%: 1730). The data
+    directory keeps only the base years; a baseline, CAPRI's or another, has its own folder (docs/design/DATA_LAYOUT.md
+    step (d), the project lead, 11 November 2026; capri_data/2030 until then)."""
+    by = str(base_year) if base_year is not None else default_base_year()
+    if str(year) == by:
+        return Path(root) / by
+    return Path(root) / "baselines" / (baseline or default_baseline()) / f"{by[-2:]}{str(year)[-2:]}"
+
+
+def trajectories_dir(root, year, base_year=None, baseline=None) -> Path:
+    """The baseline's projection tables from the base year to year (prices, premiums, rations, fodder: the projection
+    layer's, capri_mod/projection), <year_dir>/trajectories."""
+    return year_dir(root, year, base_year, baseline) / "trajectories"
 
 
 class RunInputs:
@@ -37,7 +76,8 @@ class RunInputs:
 
     # -- locations -----------------------------------------------------------------------------------------------
     def path(self, name: str, where: str) -> Path:
-        """where: an area of the base year (AREAS, with a subfolder: "abatement/ammonia"), "shared",
+        """where: an area of the base year (AREAS, with a subfolder: "abatement/ammonia"; a file whose name carries another
+        year in that year's folder, year_of_file), "codes",
         "scenarios/<folder>" (a scenario group's or reference's data, refactor stage 5) or "root" (the data
         directory itself). Not "sources/<sub>": the model reads no file under capri_data/sources (refused since
         3 November 2026; the builders read it)."""
@@ -45,10 +85,10 @@ class RunInputs:
             return self.root / name
         if where.startswith("sources/") or where == "sources":
             raise ValueError(f"{where!r}: the model reads no file under capri_data/sources (the builders' extracts of CAPRI's material, capri_data/sources/README.md); a builder writes what the model needs as an input (3 November 2026)")
-        if where == "shared" or where.startswith("scenarios/"):
+        if where == "codes" or where.startswith("scenarios/"):
             return self.root / where / name
         if where.split("/")[0] in AREAS:
-            return self.root / self.base_year / where / name
+            return year_dir(self.root, year_of_file(name, self.base_year) or self.base_year, self.base_year) / where / name
         raise ValueError(f"unknown input location {where!r}")
 
     def exists(self, name: str, where: str) -> bool:
@@ -105,12 +145,12 @@ class RunInputs:
         return read_input(path, **read_kw)
 
     def parameters(self) -> dict:
-        """The model's parameters, {(name, key): value}, from <data_dir>/shared/model_parameters.csv (capri_mod.params;
+        """The model's parameters, {(name, key): value}, from <data_dir>/codes/model_parameters.csv (capri_mod.params;
         refactor stage 3, N1: read through the run's inputs, not from a path next to the package)."""
         def _load(s):
             import csv
             tab = {}
-            with open(s.need(s.path("model_parameters.csv", "shared")), newline="") as f:
+            with open(s.need(s.path("model_parameters.csv", "codes")), newline="") as f:
                 for r in csv.DictReader(f):
                     k = (r["name"], r.get("key") or "")
                     if k in tab:

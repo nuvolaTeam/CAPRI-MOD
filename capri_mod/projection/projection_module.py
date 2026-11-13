@@ -78,6 +78,36 @@ def milk_share_static(tab, cols, region):
     return m / (m + o) if (m + o) > 0 else 1.0
 
 
+def _split_terms_at_year(data: dict, year: int) -> None:
+    """The intensity split tables (data["dairy_intensity"], a DataFrame per region; data["cattle_intensity"],
+    {region: {key: Series}}) at `year`: each column with a "<column>_<year>" twin takes the twin's value where it has
+    one (CAPRI's terms at that year's calibration point; a region without them keeps the base year's); every
+    "_<4 digits>" twin column is dropped."""
+    import re as _re
+    sfx = f"_{year}"
+    twin = _re.compile(r".+_\d{4}$")
+    di = data.get("dairy_intensity")
+    if isinstance(di, pd.DataFrame):
+        di = di.copy()
+        for c in [c for c in di.columns if str(c).endswith(sfx) and c[: -len(sfx)] in di.columns]:
+            di[c[: -len(sfx)]] = di[c].where(di[c].notna(), di[c[: -len(sfx)]])
+        data["dairy_intensity"] = di.drop(columns=[c for c in di.columns if twin.match(str(c))
+                                                   and not str(c).endswith(("_capri2030", "_recipe2030"))])
+    ci = data.get("cattle_intensity")
+    if isinstance(ci, dict):
+        out = {}
+        for r, keys in ci.items():
+            out[r] = {}
+            for k, row in keys.items():
+                row = row.copy()
+                for c in [c for c in row.index if str(c).endswith(sfx) and c[: -len(sfx)] in row.index]:
+                    if row[c] == row[c]:
+                        row[c[: -len(sfx)]] = row[c]
+                out[r][k] = row.drop([c for c in row.index if twin.match(str(c))
+                                      and not str(c).endswith(("_capri2030", "_recipe2030"))])
+        data["cattle_intensity"] = out
+
+
 class ProjectionModule:
     """Run the validated core forward along an external baseline trajectory."""
 
@@ -119,6 +149,10 @@ class ProjectionModule:
         traj = self.trajectory
         # the market's year: CAPRI's bilateral market of that year where it exists (2030 reference)
         data["market_year"] = int(year)
+        # CAPRI's intensity splits (dairy DCOL/DCOH, the cattle pairs) at the year's calibration point: the columns
+        # "<column>_<year>" (CAPRI's own terms of that year, tools/build/build_dairy_intensity.py) replace the base
+        # year's (S6 item 6, 9 November 2026)
+        _split_terms_at_year(data, int(year))
         # CAPRI's baseline calibration applies where the trajectory moves the data (a null trajectory must return the
         # comparative-static result exactly: the projection layer's correctness gate)
         data["calibrate_baseline"] = any(
@@ -243,10 +277,18 @@ class ProjectionModule:
                 uf = {(r_.region, r_.crop): float(r_.factor) for r_ in read_input(f2).itertuples(index=False)}
                 for reg_, feeds_ in fb.items():
                     for feed_, rec_ in (feeds_ or {}).items():
-                        k_ = (reg_, rec_.get("crop"))
-                        if k_ in uf and "u_t_per_ha" in rec_:
-                            rec_["u_t_per_ha"] = float(rec_["u_t_per_ha"]) * uf[k_]
-        report = reconcile_projected_data(data, base_data=self.model.data)
+                        cr_ = rec_.get("crops") or {}
+                        for c_ in list(cr_):
+                            if (reg_, c_) in uf:
+                                cr_[c_] = float(cr_[c_]) * uf[(reg_, c_)]
+        # The land reconciliation (the region's 2017 ratio of cropped area to land carried to the projected land) is for
+        # a trend projection, whose activity levels and land types are projected apart (CAPTRD). CAPRI's own 2030
+        # results (capri_ref_*: CAPMOD's Green Deal baseline) are one consistent solution: CAPRI simulates from them as
+        # they are, so they are not rescaled (9 November 2026: until then the rescaling moved them by the change of
+        # the ratio, Denmark's crops +4.1% and Croatia's +2.3% above CAPRI's levels, the baseline calibration reproducing
+        # the rescaled levels; KNOWN_ISSUES K120). The plausibility checks still run.
+        capri_levels = str(getattr(traj, "name", "")).startswith("capri_ref")
+        report = reconcile_projected_data(data, base_data=None if capri_levels else self.model.data)
         return data, report
 
     #: animals whose output per head follows their projected yield

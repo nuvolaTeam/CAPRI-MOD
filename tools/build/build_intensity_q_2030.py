@@ -1,21 +1,22 @@
 """CAPRI's 2030 PMP terms of the intensity variants, per model region, for the model's intensity splits (K61).
 
-The model's intensity splits (dairy DCOL / DCOH, fattening bulls BULL / BULH, heifers HEIL / HEIH, grassland
-GRAE / GRAI; tools/build/build_dairy_intensity.py, build_cattle_intensity.py, build_grass_intensity.py) take their
+The model's intensity splits (dairy DCOL / DCOH, fattening bulls BULL / BULH, heifers HEIL / HEIH; tools/build/
+build_dairy_intensity.py, build_cattle_intensity.py; grassland GRAE / GRAI and the set-aside split until S2, 7
+November 2026, when they became the model's own activities with their own PMP terms) take their
 curvature from CAPRI's own diagonal terms p_pmpQuadTechn of the two variants. Those builders read CAPRI's base-year
-terms (capri_data/sources/capreg/pmp_quad_techn.csv: the first technology's diagonal per model region). This tool
+terms (capri_data/sources/intermediate/capreg/pmp_quad_techn.parquet: the first technology's diagonal per model region). This tool
 writes the same file format from the terms at the 2030 calibration point, so the builders can add the 2030 curvature
 beside the base year's:
 
-  capri2030   CAPRI's exported 2030 terms (capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv, the project
+  capri2030   CAPRI's exported 2030 terms (capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.parquet, the project
               lead's export of pmppar_21730<CC>defaulta.gdx)
-  recipe2030  capri-mod's own 2030 terms by CAPRI's recipe (recipe_2030_quad_techn.csv, tools/build/build_pmp_recipe.py)
+  recipe2030  capri-mod's own 2030 terms by CAPRI's recipe (recipe_2030_quad_techn.parquet, tools/build/build_pmp_recipe.py)
 
 Term: the activity's curvature on its level, its technology block collapsed (c = 1 / (1' Qt^-1 1): Q(T, T) of a
 single-technology activity, as the animals and grassland; the set-aside and fodder crops have two).
 Model regions: CAPRI's regional units, each its own CAPRI region's terms.
 
-Output: capri_data/sources/baseline_pmp/intensity_q_<tag>.csv (model_region, activity, value); value in the model's
+Output: capri_data/sources/intermediate/baseline_pmp/intensity_q_<tag>.csv (model_region, activity, value); value in the model's
 2017 money: the terms of a 2030 calibration over CAPRI's inflation to 2030 (tools/lib/_money.deflator; KNOWN_ISSUES
 K108, 31 October 2026: before, CAPRI's 2030 money)
 
@@ -31,13 +32,14 @@ import pandas as pd
 import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "baseline_pmp"
-ACTS = ("DCOL", "DCOH", "BULL", "BULH", "HEIL", "HEIH", "HEIR", "CAMF", "CAFF", "CAMR", "CAFR", "GRAE", "GRAI",
-        "VSET", "FALL", "ROOF", "OFAR")
-FILES = {"capri2030": SRC / "pmp_quad_techn_2030.csv", "recipe2030": SRC / "recipe_2030_quad_techn.csv",
-         # the base year's terms with both technologies (CAPREG's file keeps one diagonal term per activity): the
-         # recipe's 2017 terms, for the set-aside split's base-year weights (tools/build/build_labour_setaside.py)
-         "recipe2017": SRC / "recipe_2017_quad_techn.csv"}
+import sys as _sys_sio  # noqa: E402
+_sys_sio.path.insert(0, str(ROOT / "tools" / "lib"))
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
+SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
+ACTS = ("DCOL", "DCOH", "BULL", "BULH", "HEIL", "HEIH", "HEIR", "CAMF", "CAFF", "CAMR", "CAFR")
+FILES = {"capri2030": SRC / "pmp_quad_techn_2030.parquet", "recipe2030": SRC / "recipe_2030_quad_techn.parquet"}
+# (until S2, 7 November 2026, also GRAE, GRAI, VSET, FALL, ROOF, OFAR, and the recipe's 2017 terms for the set-aside
+# split's base-year weights, intensity_q_recipe2017.csv)
 
 
 def crosswalk() -> dict:
@@ -52,7 +54,7 @@ def crosswalk() -> dict:
 def build(path: Path, rev: dict, money: float = 1.0) -> pd.DataFrame:
     """money: CAPRI's money of the terms' calibration year per unit of the model's (2017) money."""
     import numpy as np
-    t = _read_csv(path)
+    t = read_source(path)
     t = t[t.activity.isin(ACTS)]
     # one term per CAPRI region and activity on its level: the technology block collapsed, c = 1 / (1' Qt^-1 1)
     # (Q(T, T) for one technology; for fallow, whose T2 carries no term, Q(T1, T1)); the animals and grassland
@@ -89,8 +91,8 @@ def main() -> None:
         _sys.path.insert(0, str(ROOT / "tools" / "lib"))
         import _money
         d = build(path, rev, _money.deflator(int(tag[-4:])))
-        out = SRC / f"intensity_q_{tag}.csv"
-        d.to_csv(out, index=False)
+        out = SRC / f"intensity_q_{tag}.parquet"
+        write_source(d, out, index=False)
         print(f"wrote {out.name}: {len(d)} rows, {d.model_region.nunique()} model regions, "
               f"activities {sorted(d.activity.unique())}")
 

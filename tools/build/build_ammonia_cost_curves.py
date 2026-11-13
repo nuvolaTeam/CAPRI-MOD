@@ -23,7 +23,7 @@ SIMPLIFICATION (registered): where a region has no heads data, CAPRI falls back 
 parent; this builder falls back to the national figures. The Western Balkans and Turkey's units take CAPRI's estimated
 farm structure (farm_size_noneu.csv, tools/build/build_farm_size_noneu.py).
 
-Output: capri_data/2017/abatement/ammonia/ammonia_cost_curves.parquet (an intermediate)
+Output: capri_data/sources/intermediate/ammonia/ammonia_cost_curves.parquet (an intermediate)
 """
 from __future__ import annotations
 
@@ -112,7 +112,7 @@ def load():
     for r in _read_csv(D / "farm_size_noneu.csv").itertuples():
         HEADS[(r.region, r.ad_activity)][r.size_class] = r.heads
         HOLD[(r.region, r.ad_activity)][r.size_class] = r.holdings
-    md = _read_csv(D / "capri_mann_days_2030.csv")
+    md = _read_csv(D.parents[2] / "baselines" / "capri_greendeal_ref" / "1730" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
     MD = {(r.region, r.activity, r.item): r.value for r in md.itertuples()}
     return INV, ADD, FOP, PRICE, STOR, MIN, KGN, nvz, HEADS, HOLD, MD
 
@@ -226,9 +226,14 @@ def build():
                         continue
                     a, b = res
                     out.append([rs, act, sysm.capitalize(), tech, a, b, lb, len(acc), tot])
-    # a builder intermediate (read only by build_ammonia_technologies.py): Parquet, as decided 27 October 2026
-    pd.DataFrame(out, columns=["region", "activity", "manure_system", "technology", "alpha", "beta", "lower_bound",
-                               "n_classes", "heads"]).to_parquet(D / "ammonia_cost_curves.parquet", index=False)
+    # a builder intermediate (read only by build_ammonia_technologies.py), under capri_data/sources (8 November 2026)
+    import sys as _sys_sio
+    _sys_sio.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+    from _sources_io import read_source, write_source
+    write_source(pd.DataFrame(out, columns=["region", "activity", "manure_system", "technology", "alpha", "beta",
+                                            "lower_bound", "n_classes", "heads"]),
+                 Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "intermediate" / "ammonia"
+                 / "ammonia_cost_curves.parquet", index=False)
     return out
 
 

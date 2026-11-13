@@ -20,7 +20,7 @@ Sources: CAPRI's 2030 market calibration (data_market_1730defaulta.csv: Data_CAL
 CPRI at CAL), its NQ Hessians (elas_2_1730defaulta.csv: p_hessNQProc, p_hessNQDairy, p_hessNQSupp at CAL) and the
 2030 processing margins of its market solution (markmarket_greendeal_1730et_base_1717.txt: PROCMARG at 2030).
 
-Output: capri_data/2017/market/welfare_base_2030.csv  rms, model_region, component, value
+Output: capri_data/baselines/capri_greendeal_ref/1730/market/welfare_base_2030.csv  rms, model_region, component, value
 
     python tools/build/build_welfare_base.py
 """
@@ -43,7 +43,7 @@ UP = EXPORTS
 ELAS = UP / "elas_2_1730defaulta.csv"
 DATA = UP / "data_market_1730defaulta.csv"
 DUMP = UP / "markmarket_greendeal_1730et_base_1717.txt"
-OUT = ROOT / "capri_data" / "2017" / "market" / "welfare_base_2030.csv"
+OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "market" / "welfare_base_2030.csv"
 #: CAPRI's oilseeds (SED: their processing is priced at the crushing margin)
 SED = {"RAPE", "SUNF", "SOYA", "OLIV"}
 ITEMS = ("PROD", "PPRI", "PROC", "FEED", "ARM1P", "HCON", "CPRI")
@@ -97,7 +97,7 @@ def main():
                     marg[(m.group(1), m.group(2))] = num(m.group(3))
     g = read_csv(ROOT / "capri_data" / "2017" / "market" / "gl_demand_goods.csv")
     mreg = dict(zip(g.rms, g.model_region))
-    r2m = read_csv(ROOT / "capri_data" / "shared" / "rms_to_rm.csv")
+    r2m = read_csv(ROOT / "capri_data" / "codes" / "rms_to_rm.csv")
     r2m = dict(zip(r2m.rms, r2m.rm))
     # the regions with supply models by default: the EU's member states and the default countries outside it (Norway),
     # the member states of FALLBACK_UNITS (tools/lib/_model_regions.py). Until 4 November 2026 every member state of

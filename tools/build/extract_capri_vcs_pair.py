@@ -33,7 +33,7 @@ SUP_ITEMS = {"LEVL", "PRME", "PROD", "YILD"}
 MKT_ITEMS = {"UVAP", "UVAG", "MAPR", "HCON", "IMPT", "EXPT"}
 REG = re.compile(r"^(EU27yr19|[A-Z]{2}[0-9A-Z]{6})$")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/codes/eu_market_blocks.csv)
 EU_MS = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 
 
@@ -50,7 +50,9 @@ def _keep(r, q, a, i):
     return None
 
 
-def read_gdx(path, lib):
+def read_gdx(path, lib, keep=None):
+    """dataOut's 2030 rows of a CAPRI result file that keep (default _keep) selects: {key: level}."""
+    keep = keep or _keep
     from gams.core import gdx
     h = gdx.new_gdxHandle_tp()
     ok, msg = gdx.gdxCreateD(h, lib, gdx.GMS_SSSIZE)
@@ -66,7 +68,7 @@ def read_gdx(path, lib):
             break
         if k[4] != "2030":
             continue
-        key = _keep(k[0], k[1], k[2], k[3])
+        key = keep(k[0], k[1], k[2], k[3])
         if key:
             out[key] = float(v[gdx.GMS_VAL_LEVEL])
     gdx.gdxDataReadDone(h); gdx.gdxClose(h)

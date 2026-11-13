@@ -18,7 +18,7 @@ they replaced on 31 October 2026 reported on 20 October 2026: 12 pass, 1 warning
 | Market | 2017 base and CAPRI's 2030 reference | CAPRI's bilateral market (`bilateral_flows_<year>.csv`), FAO_agg balances and prices, CAPRI's demand, processing, dairy, biofuel and feed parameters |
 | Projection | 2030 | CAPRI star 3.0's 2030 Green Deal reference (`scenarios/capri_ref_2030`), CAPRI's 2030 prices, premiums, rations and fodder |
 | Mitigation options, N cascade, leaching | CAPRI's Green Deal reference and its option data | CAPRI's mitigation data (`miti_data_jul15`), MITERRA tables, CAPRI's literature review |
-| Constants | – | `shared/model_parameters.csv`, each with its source |
+| Constants | – | `codes/model_parameters.csv`, each with its source |
 
 What is still not CAPRI's data, and where it acts: docs/SYNTHETIC_DATA_AUDIT.md, "Current state".
 

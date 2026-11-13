@@ -108,6 +108,22 @@ INSERT INTO value_units VALUES
   ('processing_yields', 'product_kt', 'U_1000t', 'capri', 'CAPRI''s quantity of the processed product (1000 t)'),
   ('processing_yields', 'yield', 'U_ratio', 'builder', 't of product per t of raw product');
 
+-- file: capri_data/baselines/capri_greendeal_ref/1730/market/market_prod_grof_2030.csv
+CREATE TABLE market_prod_grof_2030 (
+    capri_ms VARCHAR NOT NULL REFERENCES capri_rall (code),  -- CAPRI's country with supply models (RMSSUP)
+    product VARCHAR NOT NULL REFERENCES capri_xx (code),      -- CAPRI's market product (XX)
+    prod_kt DOUBLE NOT NULL CHECK (prod_kt > 0),
+    grof_kt DOUBLE NOT NULL CHECK (grof_kt > 0),
+    ratio DOUBLE NOT NULL CHECK (ratio > 0),
+    PRIMARY KEY (capri_ms, product),
+    CHECK (abs(ratio - prod_kt / grof_kt) <= 1e-9 * ratio)
+);
+COMMENT ON TABLE market_prod_grof_2030 IS 'CAPRI''s marketed over gross production at the 2030 calibration point per country with supply models and market product (grofNEprod; arm/simu_calibration_to_supply.gms l. 219-247; tools/build/build_market_prod_grof_2030.py)';
+INSERT INTO value_units VALUES
+  ('market_prod_grof_2030', 'prod_kt', 'U_1000t', 'capri', 'DATA(RMSSUP, "Prod", XX, "CAL") of sim_ini_21730 (1000 t)'),
+  ('market_prod_grof_2030', 'grof_kt', 'U_1000t', 'capri', 'the sum of DATA(RMSSUP, "GROF", row, "TRD") over the rows CAPRI maps to the product (1000 t)'),
+  ('market_prod_grof_2030', 'ratio', 'U_ratio', 'builder', 'prod_kt / grof_kt');
+
 -- rule: the world prices' rows are market commodities, or DWHE and SUGB (kept for the outer loop's price index)
 SELECT commodity FROM world_prices
 WHERE commodity NOT IN (SELECT code FROM model_commodities) AND commodity NOT IN ('DWHE', 'SUGB');

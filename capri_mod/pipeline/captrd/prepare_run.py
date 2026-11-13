@@ -6,9 +6,10 @@ Per country file, in passes where a step needs every country:
   3  COCO applied, checks, deletions                          load_coco1_data.gms l. 250-561 (biofuel flags from every
                                                               country); captrd.gms l. 830-850
   4  UVAD averaged over the market aggregates                 l. 852-860 (every country's UVAD)
-  5  regions' cleaning, LABH, labour bounds, policy data, prep_data_for_estimation, statistics and base-year values
-                                                              l. 862-906; labour_ageline.gms; captrd_policy.gms;
-                                                              prep_data_for_estimation.gms l. 15-320
+  5  regions' cleaning, LABH, labour bounds, policy data, prep_data_for_estimation, statistics and base-year values,
+     the animal requirement functions                         l. 862-944; labour_ageline.gms; captrd_policy.gms;
+                                                              prep_data_for_estimation.gms l. 15-320;
+                                                              prep_requirement_estimation.gms (over ExPost)
 The time sets are timesets.build's (captrd.gms l. 203-812): ExPost from CAPREG's UAAR, ExPostT adds ExAnteD (COCO),
 BASYRS5 and BASYRSM around the base year within ExPost, the ex-ante years from the simulation years.
 
@@ -29,6 +30,7 @@ from capri_mod.pipeline.captrd import coco as C
 from capri_mod.pipeline.captrd import labour as Lab
 from capri_mod.pipeline.captrd import policy as Pol
 from capri_mod.pipeline.captrd import prepare as P
+from capri_mod.pipeline.captrd import requirements as RQ
 from capri_mod.pipeline.captrd import statistics as St
 from capri_mod.pipeline.captrd import timesets as TS
 
@@ -55,12 +57,12 @@ def run(countries: Iterable[str], sets: P.CaptrdSets, base_year: int, first_year
 
     last_year: the last year of the data (CAPREG's and COCO's); resy, lst_dgagri, aglink, milk_quota_expiry: the run's
     simulation years, %lst_dgagri%, %Aglink% and %mlkQutExpiry% (default: the settings captrd.simulation_years,
-    lst_dgagri, aglink, milk_quota_expiry, the reference run results_1770's)."""
+    aglink, milk_quota_expiry, the reference run results_1770's; %lst_dgagri% from %Aglink%, captrd.gms l. 246-249)."""
     from capri_mod.settings import current as _settings
     st = _settings()
     resy = tuple(st.get("captrd.simulation_years")) if resy is None else tuple(resy)
-    lst_dgagri = int(st.get("captrd.lst_dgagri")) if lst_dgagri is None else lst_dgagri
     aglink = str(st.get("captrd.aglink")) if aglink is None else aglink
+    lst_dgagri = TS.lst_dgagri_for(aglink) if lst_dgagri is None else lst_dgagri
     milk_quota_expiry = int(st.get("captrd.milk_quota_expiry")) if milk_quota_expiry is None else milk_quota_expiry
     work.mkdir(parents=True, exist_ok=True)
     dat = P.read_dat() if dat is None else dat
@@ -128,6 +130,7 @@ def run(countries: Iterable[str], sets: P.CaptrdSets, base_year: int, first_year
                       aglink, expiry=milk_quota_expiry)
         p = P.prep_for_estimation(p, sets, expostt, basyrs5, basyrsm, T.years, dat["luunits"])
         p = St.statistics(p, sets, expostt, basyrs5, T.eightlst)        # prep_data_for_estimation.gms l. 205-320
+        p = RQ.estimate(p, sets, expost)                                # prep_requirement_estimation.gms (l. 944)
         out[m] = work / f"{_cc(m)}.parquet"
         p.to_parquet(out[m], index=False)
     return out

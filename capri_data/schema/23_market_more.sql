@@ -23,7 +23,7 @@ INSERT INTO value_units VALUES
   ('mkt_bilateral_flows_2017', 'ta_pct', NULL, 'open', 'bilateral_flows_2017.ta_pct: unit to be established'),
   ('mkt_bilateral_flows_2017', 'tc', NULL, 'open', 'bilateral_flows_2017.tc: unit to be established');
 
--- file: capri_data/2017/market/bilateral_flows_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_flows_2030.csv
 CREATE TABLE mkt_bilateral_flows_2030 (
     commodity VARCHAR NOT NULL,
     importer VARCHAR NOT NULL,
@@ -58,7 +58,7 @@ INSERT INTO value_units VALUES
   ('mkt_bilateral_regions_2017', 'pmrk', NULL, 'open', 'bilateral_regions_2017.pmrk: unit to be established'),
   ('mkt_bilateral_regions_2017', 'prod_kt', NULL, 'open', 'bilateral_regions_2017.prod_kt: unit to be established');
 
--- file: capri_data/2017/market/bilateral_regions_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_regions_2030.csv
 CREATE TABLE mkt_bilateral_regions_2030 (
     commodity VARCHAR NOT NULL,
     region VARCHAR NOT NULL,
@@ -115,7 +115,7 @@ INSERT INTO value_units VALUES
   ('mkt_bilateral_trq_global_2017', 'ts_mfn', 'U_EuPerTon', 'builder', 'CAPRI p_trqGlobl TsMFN'),
   ('mkt_bilateral_trq_global_2017', 'ts_pref', 'U_EuPerTon', 'builder', 'CAPRI p_trqGlobl TsPref');
 
--- file: capri_data/2017/market/bilateral_trq_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_trq_2030.csv
 CREATE TABLE mkt_bilateral_trq_2030 (
     importer VARCHAR NOT NULL,
     exporter VARCHAR NOT NULL,
@@ -138,7 +138,7 @@ INSERT INTO value_units VALUES
   ('mkt_bilateral_trq_2030', 'ts_mfn', 'U_EuPerTon', 'builder', 'CAPRI p_trqBilat TsMFN'),
   ('mkt_bilateral_trq_2030', 'ts_pref', 'U_EuPerTon', 'builder', 'CAPRI p_trqBilat TsPref');
 
--- file: capri_data/2017/market/bilateral_trq_global_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_trq_global_2030.csv
 CREATE TABLE mkt_bilateral_trq_global_2030 (
     importer VARCHAR NOT NULL,
     commodity VARCHAR NOT NULL,
@@ -185,7 +185,7 @@ INSERT INTO value_units VALUES
   ('mkt_biofuel_feedstock_2017', 'rho', NULL, 'open', 'biofuel_feedstock_2017.rho: unit to be established'),
   ('mkt_biofuel_feedstock_2017', 'numeraire', NULL, 'open', 'biofuel_feedstock_2017.numeraire: unit to be established');
 
--- file: capri_data/2017/market/biofuel_feedstock_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/market/biofuel_feedstock_2030.csv
 CREATE TABLE mkt_biofuel_feedstock_2030 (
     ms VARCHAR NOT NULL,
     region VARCHAR NOT NULL,
@@ -277,7 +277,7 @@ INSERT INTO value_units VALUES
   ('mkt_biofuel_market_2017', 'proc_hess', NULL, 'open', 'biofuel_market_2017.proc_hess: unit to be established'),
   ('mkt_biofuel_market_2017', 'inpe', NULL, 'open', 'biofuel_market_2017.inpe: unit to be established');
 
--- file: capri_data/2017/market/biofuel_market_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/market/biofuel_market_2030.csv
 CREATE TABLE mkt_biofuel_market_2030 (
     ms VARCHAR NOT NULL,
     region VARCHAR NOT NULL,
@@ -357,7 +357,7 @@ INSERT INTO value_units VALUES
   ('mkt_biofuel_use_share_2017', 'use_kt', NULL, 'open', 'biofuel_use_share_2017.use_kt: unit to be established'),
   ('mkt_biofuel_use_share_2017', 'share', NULL, 'open', 'biofuel_use_share_2017.share: unit to be established');
 
--- file: capri_data/2017/market/biofuel_use_share_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/market/biofuel_use_share_2030.csv
 CREATE TABLE mkt_biofuel_use_share_2030 (
     commodity VARCHAR NOT NULL,
     biof_kt DOUBLE NOT NULL,
@@ -392,7 +392,7 @@ INSERT INTO value_units VALUES
   ('mkt_crushing_parameters_2017', 'elasticity', NULL, 'open', 'crushing_parameters_2017.elasticity: unit to be established'),
   ('mkt_crushing_parameters_2017', 'crush_share_of_use', NULL, 'open', 'crushing_parameters_2017.crush_share_of_use: unit to be established');
 
--- file: capri_data/2017/market/crushing_parameters_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/market/crushing_parameters_2030.csv
 CREATE TABLE mkt_crushing_parameters_2030 (
     region VARCHAR NOT NULL,
     seed VARCHAR NOT NULL,
@@ -533,7 +533,7 @@ INSERT INTO value_units VALUES
   ('mkt_dairy_world_processing', 'feed_kt', NULL, 'open', 'dairy_world_processing.feed_kt: unit to be established'),
   ('mkt_dairy_world_processing', 'net_imports_kt', NULL, 'open', 'dairy_world_processing.net_imports_kt: unit to be established');
 
--- file: capri_data/2017/market/eu_ms_balance_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/market/eu_ms_balance_2030.csv
 CREATE TABLE mkt_eu_ms_balance_2030 (
     ms VARCHAR NOT NULL,
     block VARCHAR NOT NULL,
@@ -717,7 +717,7 @@ INSERT INTO value_units VALUES
   ('mkt_use_components', 'biof_kt', NULL, 'open', 'use_components.biof_kt: unit to be established'),
   ('mkt_use_components', 'arm1_kt', NULL, 'open', 'use_components.arm1_kt: unit to be established');
 
--- file: capri_data/2017/market/welfare_base_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/market/welfare_base_2030.csv
 CREATE TABLE mkt_welfare_base_2030 (
     rms VARCHAR NOT NULL,
     model_region VARCHAR NOT NULL,
@@ -793,7 +793,7 @@ CREATE TABLE mkt_feed_demand_noneu_capri_regions (
 );
 COMMENT ON TABLE mkt_feed_demand_noneu_capri_regions IS 'the CAPRI regions whose feed functions make a trade region''s feed demand of a product (tools/build/build_feed_demand_nonEU.py)';
 
--- file: capri_data/2017/market/border_measures_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/market/border_measures_2030.csv
 CREATE TABLE mkt_border_measures_2030 (
     importer VARCHAR NOT NULL,
     commodity VARCHAR NOT NULL,
@@ -809,7 +809,7 @@ INSERT INTO value_units VALUES
   ('mkt_border_measures_2030', 'price', 'U_EuPerTon', 'builder', 'CAPRI DATA TriggerP or MinBordP'),
   ('mkt_border_measures_2030', 'tars', 'U_EuPerTon', 'builder', 'CAPRI DATA TARS');
 
--- file: capri_data/2017/market/border_pairs_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/market/border_pairs_2030.csv
 CREATE TABLE mkt_border_pairs_2030 (
     importer VARCHAR NOT NULL,
     exporter VARCHAR NOT NULL,
@@ -842,7 +842,7 @@ COMMENT ON TABLE mkt_raw_milk_prices_2017 IS 'CAPRI''s raw milk market price (DA
 INSERT INTO value_units VALUES
   ('mkt_raw_milk_prices_2017', 'pmrk', 'U_EuPerTon', 'builder', 'CAPRI DATA PMRK MILK');
 
--- file: capri_data/2017/market/raw_milk_prices_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/market/raw_milk_prices_2030.csv
 CREATE TABLE mkt_raw_milk_prices_2030 (
     region VARCHAR NOT NULL,
     pmrk DOUBLE NOT NULL,

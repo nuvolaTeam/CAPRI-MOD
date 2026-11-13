@@ -49,13 +49,16 @@ import pandas as pd
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
-from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import EXPORTS, SOURCES, data_year  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, write_source  # noqa: E402  (capri_data/sources as Parquet)
 from _market_regions import model_region, market_regions  # noqa: E402  (the market's grouping step: CAPRI region -> model region)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = {2017: EXPORTS / "market_base_1717.txt",
        2030: EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"}
-KEEP = ROOT / "capri_data" / "sources" / "market"
+# the kept extracts, in the folder of the CAPRI dump they come from (sources/raw, DATA_LAYOUT.md)
+KEEP_DIR = {2017: ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "market_base_1717",
+            2030: ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717"}
 GAMS = SOURCES / "gams"
 MODEL = {
     "SWHE": ("WHEA",), "BARL": ("BARL",), "CORN": ("MAIZ",), "OCER": ("OCER",), "RYEM": ("RYEM",), "OATS": ("OATS",), "PARI": ("RICE",),
@@ -101,7 +104,7 @@ def extract(year):
     """CAPRI's market regions with the EU as its two A_EU_WEST and A_EU_EAST (defaultA.agg), not the EU27yr19
     reporting block (the one-EU extract and its files were removed on 3 November 2026, market move stage 3)."""
     src = SRC[year]
-    keep = KEEP / f"bilateral_dataout_{year}.csv.xz"
+    keep = KEEP_DIR[year] / f"bilateral_dataout_{year}.parquet"
     if src.exists():
         prods = "|".join(CAPRI)
         pat = re.compile(r"^'([^']*)'\.'([^']*)'\.'(" + "|".join(PAIR_ITEMS + REG_ITEMS) + r")'\.'(" + prods
@@ -115,9 +118,9 @@ def extract(year):
         flow = {(a, b, p) for a, b, it, p, v in rows if it == "ImportQ" and float(v) > 1e-6}
         rows = [r for r in rows if r[0] not in _AG and r[1] not in _AG
                 and (r[1] == "" or (r[0], r[1], r[3]) in flow)]
-        pd.DataFrame(rows, columns=["r1", "r2", "item", "product", "value"]).to_csv(keep, index=False)
+        write_source(pd.DataFrame(rows, columns=["r1", "r2", "item", "product", "value"]), keep, index=False)
         print(f"{year}: extracted {len(rows)} rows -> {keep.relative_to(ROOT)}")
-    return _read_csv(keep, keep_default_na=False)
+    return read_source(keep, keep_default_na=False)
 
 
 def build(year, AGGREGATES):
@@ -170,7 +173,7 @@ def build(year, AGGREGATES):
     rrows = [dict(commodity=c, region=r, pmrk=(v["pv"] / v["prod"] if v["prod"] > 0 else v["pm_any"]), prod_kt=v["prod"])
              for (c, r), v in ra.items()]
     rg = pd.DataFrame(rrows).sort_values(["commodity", "region"])
-    dest = ROOT / "capri_data" / "2017" / "market"
+    dest = data_year(year) / "market"
     fl.to_csv(dest / f"bilateral_flows_{year}{sfx}.csv", index=False)
     rg.to_csv(dest / f"bilateral_regions_{year}{sfx}.csv", index=False)
     # checks: exports + domestic sales = production (CAPRI SupBalM_, stock changes aside)
@@ -206,7 +209,7 @@ def build_trq(year, AGGREGATES):
     the importer also has a global quota on the product, entry_price: a preferential trigger price is set). Until 4 November 2026 the EU's quotas only, summed per model exporter with a price gap frozen at the base
     (DEP-34, DEP-35, DEP-36)."""
     src = SRC[year]
-    keep = KEEP / f"bilateral_trq_dataout_{year}.csv"
+    keep = KEEP_DIR[year] / f"bilateral_trq_dataout_{year}.parquet"
     items = ("TRQNT", "TAMFN", "TAPREF", "TSMFN", "TSPREF", "PREFTRIGPRICE")
     if src.exists():
         prods = "|".join(CAPRI)
@@ -216,8 +219,8 @@ def build_trq(year, AGGREGATES):
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
         rows = [(a, b, it.upper(), pr, v) for a, b, it, pr, v in rows if it.upper() in items
                 and (b != "World" or it.upper() != "PREFTRIGPRICE")]
-        pd.DataFrame(rows, columns=["importer", "exporter", "item", "product", "value"]).to_csv(keep, index=False)
-    df = _read_csv(keep, keep_default_na=False)
+        write_source(pd.DataFrame(rows, columns=["importer", "exporter", "item", "product", "value"]), keep, index=False)
+    df = read_source(keep, keep_default_na=False)
     d = defaultdict(dict)
     for r in df.itertuples(index=False):
         d[(r.importer, r.exporter, r.product)][r.item] = float(r.value)
@@ -254,7 +257,7 @@ def build_trq(year, AGGREGATES):
                  importer_regions="|".join(members[i]), exporter_regions="|".join(members[j]), regime=v["regime"])
             for (i, j, c), v in agg.items()]
     out = pd.DataFrame(rows).sort_values(["importer", "commodity", "exporter"])
-    out.to_csv(ROOT / "capri_data" / "2017" / "market" / f"bilateral_trq_{year}.csv", index=False)
+    out.to_csv(data_year(year) / "market" / f"bilateral_trq_{year}.csv", index=False)
     print(f"{year} bilateral TRQs: {len(out)} quotas; per importer: " + ", ".join(
         f"{i} {n}" for i, n in out.importer.value_counts().items()) + "; per regime: " + ", ".join(
         f"{r} {n}" for r, n in out.regime.value_counts().items()))
@@ -269,7 +272,7 @@ def build_trq_global(year):
     2017 market year too (the 2030 agreements; REGISTERED in PORTS_STAGE4.md).
     Output bilateral_trq_global_<year>.csv: importer (policy block), commodity, quota_kt, ta_mfn, ta_pref, ts_mfn,
     ts_pref, importer_regions, free_regions (the market regions of the exporter blocks with free trade, "|"-joined)."""
-    df = _read_csv(KEEP / f"bilateral_trq_dataout_{year}.csv", keep_default_na=False)
+    df = read_source(KEEP_DIR[year] / f"bilateral_trq_dataout_{year}.parquet", keep_default_na=False)
     df = df[df.exporter == "World"]
     d = defaultdict(dict)
     for r in df.itertuples(index=False):
@@ -300,7 +303,7 @@ def build_trq_global(year):
                  ts_mfn=v["TSMFN"] / v["q"], ts_pref=v["TSPREF"] / v["q"], importer_regions="|".join(members[i]),
                  free_regions=v["free"]) for (i, c), v in agg.items()]
     out = pd.DataFrame(rows).sort_values(["importer", "commodity"])
-    out.to_csv(ROOT / "capri_data" / "2017" / "market" / f"bilateral_trq_global_{year}.csv", index=False)
+    out.to_csv(data_year(year) / "market" / f"bilateral_trq_global_{year}.csv", index=False)
     print(f"{year} global TRQs: {len(out)}; per importer: " + ", ".join(
         f"{i} {n}" for i, n in out.importer.value_counts().items()))
     return out
@@ -312,18 +315,18 @@ def build_raw_milk_prices(year):
     own prices, the project lead's decision of 3 November 2026, docs/design/TARV_COMPARISON.md).
     Output raw_milk_prices_<year>.csv: region, pmrk (EUR/t)."""
     src = SRC[year]
-    keep = KEEP / f"raw_milk_prices_dataout_{year}.csv"
+    keep = KEEP_DIR[year] / f"raw_milk_prices_dataout_{year}.parquet"
     if src.exists():
         txt = grep(r"^'[^']*'\.''\.'PMRK'\.'MILK'\.'" + str(year) + "'", str(src))
         pat = re.compile(r"^'([^']*)'\.''\.'PMRK'\.'MILK'\.'\d+'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
-        pd.DataFrame(rows, columns=["region", "value"]).to_csv(keep, index=False)
-    df = _read_csv(keep, keep_default_na=False)
+        write_source(pd.DataFrame(rows, columns=["region", "value"]), keep, index=False)
+    df = read_source(keep, keep_default_na=False)
     rm = set(market_regions())
     out = pd.DataFrame([dict(region=model_region(r.region, eu_as_blocks=True), pmrk=float(r.value))
                         for r in df.itertuples(index=False) if r.region in rm and float(r.value) > 0])
     out = out.sort_values("region")
-    out.to_csv(ROOT / "capri_data" / "2017" / "market" / f"raw_milk_prices_{year}.csv", index=False)
+    out.to_csv(data_year(year) / "market" / f"raw_milk_prices_{year}.csv", index=False)
     print(f"{year} raw milk prices: {len(out)} market regions")
     return out
 
@@ -370,16 +373,16 @@ def build_border_measures(year=2030):
     bm = pd.DataFrame(rows).sort_values(["importer", "commodity"])
     if bm.duplicated(["importer", "commodity"]).any():
         raise ValueError("CAPRI products of one model commodity with two border measures")
-    bm.to_csv(ROOT / "capri_data" / "2017" / "market" / f"border_measures_{year}.csv", index=False)
+    bm.to_csv(data_year(year) / "market" / f"border_measures_{year}.csv", index=False)
     fac = _read_csv(sim / "p_entryPriceFac.csv.gz", keep_default_na=False)
     fac = fac[(fac.d3 == "CUR") & fac.d0.isin(rmtp) & fac.d1.isin(rmtp)]
-    tq = _read_csv(KEEP / f"bilateral_trq_dataout_{year}.csv", keep_default_na=False)
+    tq = read_source(KEEP_DIR[year] / f"bilateral_trq_dataout_{year}.parquet", keep_default_na=False)
     trig = {(r.importer, r.exporter, r.product): float(r.value) for r in tq[tq["item"] == "PREFTRIGPRICE"].itertuples()}
     prs = [dict(importer=r.d0, exporter=r.d1, commodity=CAPRI[r.d2], entry_fac=float(r.value),
                 pref_trig=trig.get((r.d0, r.d1, r.d2), 0.0), exporter_regions="|".join(members[r.d1]))
            for r in fac.itertuples(index=False) if r.d2 in CAPRI]
     bp = pd.DataFrame(prs).sort_values(["importer", "commodity", "exporter"])
-    bp.to_csv(ROOT / "capri_data" / "2017" / "market" / f"border_pairs_{year}.csv", index=False)
+    bp.to_csv(data_year(year) / "market" / f"border_pairs_{year}.csv", index=False)
     # every model market region's policy block (RM_TO_RMTP): CAPRI defines the measures per pair of blocks, at the
     # block pair's CIF price (TransportCostsAgg_: transport costs weighted by the base flows)
     pd.DataFrame([dict(region=x, block=b_) for b_ in sorted(members) for x in members[b_]]).to_csv(
@@ -392,7 +395,8 @@ def build_border_measures(year=2030):
 def main():
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import AGGREGATES
-    KEEP.mkdir(parents=True, exist_ok=True)
+    for _d in KEEP_DIR.values():
+        _d.mkdir(parents=True, exist_ok=True)
     for y in (2017, 2030):
         build(y, AGGREGATES)
         build_trq(y, AGGREGATES)        # CAPRI's bilateral quotas of every importer

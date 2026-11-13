@@ -60,7 +60,7 @@ l. 3275 [own check]; import prices per pair: impPrice_ l. 2849 (G3I, Armington t
 **What exists.**
 - The inventory: region-keyed files (MRI §2), code that depends on the region set (§3), result effects (§4), a staged
   plan (§5), decisions (§7).
-- CAPRI's sets as CSV in capri_reference/sets/simini_21730/; capri_data/shared/rms_to_rm.csv equals sim_ini's
+- CAPRI's sets as CSV in capri_reference/sets/simini_21730/; capri_data/codes/rms_to_rm.csv equals sim_ini's
   RMS_TO_RM (MRI header).
 - Extracts with the two EU regions for both years: capri_data/sources/market/bilateral_dataout_2017_eu2.csv.xz and
   _2030_eu2.csv.xz [own check]. The 2030 `_eu2` extract equals p_tradeFlows "CAL" over all 20,705 RM pairs (MRI §2.1).
@@ -274,7 +274,7 @@ commented out [own check].
 - The design and the decision (S12 §5, 1 November 2026): S1 option (c), one mix column z per crop (T1 = X/2 + z,
   T2 = X/2 - z, |z| <= X/2), CAPRI's quadratic blocks and linear terms carried over by the change of variables; S2 the
   three pairs as activities of their own. Nothing implemented (S12 status line).
-- Data in hand: CAPRI's 2030 quadratic technology blocks (capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv;
+- Data in hand: CAPRI's 2030 quadratic technology blocks (capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.csv;
   S12 §3). Not yet extracted: the linear terms per technology (capri_sources/pmp2030/pmppar_21730<CC>defaulta.txt).
   Not in any export: the factors p_technFact (fixed rules in CAPRI's code). The split activities' levels are in
   CAPREG's 2017 results and the 2030 reference (S12 §3).
@@ -543,7 +543,8 @@ of S1) (SGP S11).
 
 **CAPRI's form.** CAPRI's internal parameters (SGP S11); no GAMS lines given.
 
-**What exists.** DEP-22 registered (REG; PMP_CAPRI_2030.md). No design note.
+**What exists.** DEP-22 removed 6 November 2026: the 2030 feed slopes take CAPRI's 2030 weights from sim_ini_21730's DATA
+at TRD (REG history; PMP_CAPRI_2030.md), so that export is not needed. No design note for the rest.
 
 **Steps still to do.** Per item; "some close with more exports from the project lead's CAPRI" (SGP S11).
 
@@ -572,6 +573,16 @@ needs one obligatory set-aside activity (no output; CAPRI's costs and premium; f
 carry their coefficients, their levels being zero since 2008), the constraint and the PMP terms. Then
 scen/set_aside/set_aside_10.gms (10% on GRCU) becomes a scenario folder again. SET_ASIDE_10PCT, which put a 10% floor
 on all arable land counted on SETA, was removed (commit 3120071). Estimate: half a day to a day.
+**Done 10 November 2026.** CAPRI's 2017 and 2030 data carry no coefficient of ISET, GSET, TSET or NONF other than HSTY
+(sim_ini_21730 DATA; no TOIN, no premium, no level), so CAPRI's ISET, opened by prep_sim.gms l. 253 where a rate is
+set, has nothing in the objective: the model substitutes it into the arable land balance (CAPRI's LandBalNoSlak_(ARAC)),
+each rated activity's coefficient there + r / (1 - r) x (1 - NONS), the balance's base use unchanged, and reports
+ISET (set_aside table, SupplyResult.iset). Same optimum as CAPRI's column (Claude's choice: no extra column without
+terms). NONS is 0 (no NONS in CAPRI's 2030 data; the scenario sets it 0). Scenario folder set_aside_10:
+set_aside_rates.csv (tools/build/build_set_aside_scenario.py from set_aside_10.gms and sets.gms: 10% on SWHE, DWHE,
+RYEM, BARL, OATS, CORN, OCER, RAPE, SUNF, SOYA, PULS, MAIF in the 215 EU units). Mini-EU check: ISET = 0.1111 x the
+rated crops' area in every unit (1,073 thousand ha), those crops -8.6%, voluntary set-aside and fallow -74, cereal
+production -8.4%; no CAPRI run of the scenario to compare with.
 
 **P2. Coupled support and the Pillar I envelope.** CAPRI's scenario without voluntary coupled support
 (cap_after_2014 with voluntaryCoupledSupportFile = void.gms) sets the coupled premium types (PSDPAY_vcs*) to zero and
@@ -602,6 +613,27 @@ pinned set (step 5); the converter written here (step 1).
 | markmarket_greendeal_1730et_base_1717.txt | 6.40 M | 388 MB | 42.0 MB | 38.4 MB |
 | costsavings_ini_21730_jul15.csv | 7.48 M | 359 MB | 6.3 MB | 3.5 MB |
 | res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv | 5.33 M | 330 MB | 34.7 MB | 31.9 MB |
+
+**Started (10 November 2026; the project lead approved the uploads).** First version of the set, tag `v2026.11.10`
+of nuvolaTeam/capri-mod-raw: the six GDX files received on 10 November 2026 (CAPRI's shipped Green Deal 2030
+reference, the project lead's Green Deal step from it, the permits results of the step and of the endotech ini/max
+runs, the market model's debug dump of the step), as delivered
+under originals/ and as Parquet per symbol under capri/results/ (tools/build/convert_capri_gdx.py, GDX only so far;
+47.4 million records, each file checked record by record against its GDX: tools/check/check_capri_gdx_parquet.py);
+the manifest tools/pipeline/capri_raw_manifest.json (303 files, 285 MB; every SHA-256 and size checked against the
+uploaded files). Not yet: the rest of capri_sources, the listings (gdxdump text, CSV), the download step and the
+builders' switch (steps 2, 4-8).
+
+**Second version (11 November 2026).** Tag `v2026.11.11`: 148 GDX files (capri_sources outside the course mirror,
+the uploads and the chat's attachments, the six of v2026.11.10 among them), published one at a time
+(tools/build/publish_raw_batch.py), each checked record by record. The project lead's decisions of the same day: the
+set holds only the Parquet (the originals removed: the Parquet holds every record and names its source file and
+SHA-256), laid out as CAPRI's installation, `capri/dat/<subfolder>/<file>/`, `capri/results/<module>/<file>/` and
+`capri/temp/<file>/` (CAPRI's debug dumps, not trusted), each file's folder from where CAPRI's code reads or writes it,
+or marked inferred (tools/build/relayout_raw_dataset.py; 38 inferred: CAPREG's Capreg_tseries/<CC>_17 files,
+chk_market_data, PACT_201020_IFS). The manifest: 10,637 files and, per CAPRI file, its source's name, SHA-256, size,
+the origin of its folder and whether it is trusted. Not yet: the course mirror's 877 GDX files, the listings, CSV and
+spreadsheets, the download step and the builders' switch.
 
 **Steps** [I]:
 1. One converter: a CAPRI listing (gdxdump text, CSV) or GDX to Parquet, one file per GAMS symbol, every record, Eps
@@ -664,7 +696,7 @@ fine-grained token checked the same day; the token is kept outside the repositor
 - The model's inputs are organised by role, not by a year in the folder name (with the renaming above, so paths change
   once): capri_data/<base_year>/ holds the base year's data only; capri_data/baselines/capri_ref_2030/ everything taken
   from CAPRI's 2030 reference run (on 4 November 2026 spread over 40 of the 216 files of capri_data/2017/, e.g. the
-  2030 PMP terms, market state, rents, N coefficients and CAP ceilings, over capri_data/trajectories/ and over
+  2030 PMP terms, market state, rents, N coefficients and CAP ceilings, over capri_data/baselines/capri_greendeal_ref/1730/ and over
   capri_data/scenarios/capri_ref_2030/), a CAPTRD-MOD baseline as another package (baselines/captrd_2030/), the run
   choosing its baseline package; capri_data/scenarios/ the policy scenarios, and under scenarios/groups/ the data a
   scenario group shares, as CAPRI's pol_input files (the project lead, 4 November 2026: greendeal_group moves to
@@ -674,49 +706,65 @@ fine-grained token checked the same day; the token is kept outside the repositor
 
 ## 13. Summary
 
+Updated 12 November 2026 (the table of 4 November was stale). Status from the commit history of dev and the notes.
+
 | Item | Depends on | Status | Open decisions | Main source |
 |---|---|---|---|---|
-| Market on 45 RM (stages 1-3, 2017 year, TARV, young-animal timing) | refactor finished; full scenario runs | inventory and decisions done; WBA fix done; **stage 1 done 3 November 2026** (MRI "Stage 1, done"); stages 2-3 built 3-4 November 2026 (stage 2: the two EU blocks, feed bulks per block; stage 3: ROW as CAPRI's 17 market regions, FPRI over the 45; tariffs.csv kept in stage 2, TARV with the ports) | stage of the TARV switch and 2017 rebuild; link of stage 2's young-animal fix with G2g; gate batching | MRI |
-| Ports (stages 4-7: bilateral and global TRQs, DEP-41, levies, entry prices, land and yield block) | market move stages 1-3 | built 4 November 2026 in the current market code (stages 4-5 TRQs, stage 6 entry prices and flexible levies, CAPRI's market prices as the reference price levels, stage 7 the land market outside the EU); the full F2F with them converged on 5 November after K117 (13 iterations; mean deviation from CAPRI 4.59 against 4.18 at gate 16, the beef and poultry prices higher, not yet attributed); the GD gate not run; market time per solve 145-480 s against 15-38 s at gate 16 (open) | ports before G3 or as G3 equations; luc_market not in scope | MRI §5; G3I |
-| 29 non-EU units | market move (MRI §7) | SND steps 1-9 done 4 November 2026 (step 9: the 2030 baseline per country within 0.7-5.1% of CAPRI's, weighted; the 9-country F2F did not converge, Serbia's feed energy price oscillating, to diagnose); step 10, the full F2F and GD runs, started 4 November | default country list after the build [I] | SND |
-| S1/S2 (and DEP-42) | refactor stages 3-5; N6 | decided 1 Nov (S1 option c; S2 explicit); data and code not started; DEP-42 on n6 branches; **the project lead, 4 Nov: close the activity gap with CAPRI** (S2's splits; NECR held fixed as CAPRI's FACT, 251 kha in the EU's 2030; calves and heifers by sex with S9) | none stated | S12 |
-| Step G (G2b, G2d, G2f, G2g; G3) | G2b on refactor stage 4; G3 after market move | G1, G2a, G2c, G2e built; G2b, G2d, G2f, G2g built 4 November 2026 on branch step-g2b (each equal to the former code at random points; merge after a mini-EU check and the suite); G3 on standby | G3: bound policy, objective with squareness check, validation on sim_ini; fudge activation; scaling | MID; GR; G3I |
-| S3 | — | decided and implemented (narrowed form); base checked; in gate 14's code | none stated | SGP S3 |
-| S5 | — | closed: hold kept (DEP-15) | none | SGP S5 |
-| S6 | — | not started; per item | which DEP-10 items | SGP S6; REG DEP-10 |
-| S7 | [I] market move; 29 units | not started | whether and when | SGP S7; DFC |
-| S9 | K65 | deferred (no CAPRI per-sex results) | whether to resume | KI K65 |
-| S10 | [I] S1 for no-till's yield | 3-NOP built; UreaSubst parked; NoTill, LegSh not built | whether to build NoTill and LegSh | KI K93 |
-| S11 | S1 for T1/T2 averages | not started; per item | which items and exports | SGP S11 |
-| P1 obligatory set-aside | — | not started | when | §12a; supply_model.gms SETA_ |
-| P2 coupled support, Pillar I envelope | — | not started | when; with the premium module's port | §12a |
-| CAPRI's sources as Parquet, for download (beyond CAPRI) | — | decided 3 Nov: outside git, gated Hugging Face dataset, after market stages 2-3; sizes measured; not started | none | §12b |
+| Market on 45 RM (stages 1-3, 2017 year, TARV, young-animal timing) | — | **done** 3-4 November 2026 | — | MRI |
+| Ports (stages 4-7: TRQs, levies, entry prices, land and yield block) | market stages 1-3 | **done** 4 November 2026 in the current market code; market time per solve higher than before (open) | — | MRI §5; G3I |
+| 29 non-EU units | market move | **built** 4 November 2026 (SND steps 1-9); off by default (run.supply_countries_outside_eu = Norway only): D2 below | — | SND |
+| D2: CAPRI's full list of non-EU supply countries the default | 29 units; G3 | not started (after G3, before the end of CAPTRD-MOD; the project lead, 9 November 2026) | — | VALIDATION_PLAN §2 |
+| S1/S2 (and DEP-42) | — | **done** 7-8 November 2026 (OFAR/ROOF, VSET/FALL, GRAE/GRAI, CAPRI's technologies at 2030; DEP-42 closed) | — | S12 |
+| Step G (G2b, G2d, G2f, G2g) | — | **done** 4 November 2026 | — | MID; GR |
+| G3: the whole market as one IPOPT system | market move | not started (before the end of CAPTRD-MOD; decisions 7-10 of section 14) | the CAPRI market dump for the external check (GR Q5.2) | MID §7.2; G3I |
+| S3 | — | done (narrowed form) | — | SGP S3 |
+| S5 | — | closed: hold kept (DEP-15) | — | SGP S5 |
+| S6 | — | **done**, items 1-6 (9-10 November 2026; DEP-10) | — | SGP S6; REG DEP-10 |
+| S7 | — | **done** 8-9 November 2026 (CAPRI's demand calibration the only form; DEP-5 removed) | — | SGP S7 |
+| S9 / K65 | CAPRI data | deferred | whether to resume after S1/S2 | KI K65 |
+| S10 | carbon-tax scenarios | 3-NOP built; UreaSubst parked; NoTill and LegSh to port (decided 5 November 2026) | — | KI K93 |
+| S11 | — | closed 10 November 2026, one check left (the 2030 feed slopes) | — | SGP S11 |
+| S13: LULUCF carbon, the carbon price on land-use change | carbon-tax scenarios | planned 9 November 2026 | — | SGP S13 |
+| luc_market | — | **done** 9 November 2026 (DEP-44) | — | G3I |
+| P1 obligatory set-aside | — | **done** 10 November 2026 | — | §12a |
+| P2 coupled support, Pillar I envelope | — | not started (with the port of CAPRI's premium module, before the end of CAPTRD-MOD) | — | §12a |
+| Data layout by role | — | **done** 11 November 2026 (capri_data/<base year>/, capri_data/baselines/<baseline>/<BAS><SIM>/) | — | DATA_LAYOUT.md |
+| CAPRI's sources as Parquet, for download (beyond CAPRI) | — | **done**: the gated dataset nuvolaTeam/capri-mod-raw (170 sources, 11 November 2026; no tags since 12 November: the manifest pins each file by its SHA-256 and the dataset commit) | — | §12b |
+| Manure pools: CAPRI's pool market (DEP-17) | — | ported 11 November 2026 (outer_loop.manure_pool_form "capri"); default after the full-EU check | the excess-supply slope (CAPRI's code or its documented elasticity) | MANURE_POOL_PORT.md |
+| CAPTRD-MOD | — | stages 1, 2a-2d, 2f done; 2e (m_trendMS), 3 (NUTS2), 4 (reporting) to do | — | CAPTRD_MOD.md |
 
 ## 14. Open decisions across all items
 
 1. Decided 2 November 2026: the TARV switch in stage 2, the 2017 rebuild in stage 1.
 2. Decided 2 November 2026: stage 2's young-animal fix in the current solve; G2g later.
 3. Decided 2 November 2026: the F2F/GD gates after stages 1-4 and after stages 5-7.
-4. Ports: written in the current market code, or directly as G3's defining equations (not stated).
-5. Ports: the market's land-use-change estimation (luc_market), on in CAPRI with REPORTS_ENV (G3I findings), is not in
-   this list; whether it is to be ported (not stated).
-6. 29 units: [I] whether the default `run.supply_countries_outside_eu` becomes CAPRI's full list once built.
-7. G3: the bound policy, CAPRI's reproduced or an elastic least-infeasibility formulation (GR Q2.4).
-8. G3: the objective, the decided ½‖z − z₀‖² (MID §7) or zero with a squareness and structural-rank check (GR Q2.4).
-9. G3: validation by reproducing CAPRI's market state from sim_ini (GR Q5.2), and replacing MID §6's acceptance test by
-   G3-R plus G3-C (GR Q5.1).
-10. G3: fudge equations as CAPRI activates them or always on (GR Q1.2); variable scaling (GR Q6.4); the set structure
-    in production and validation (GR Q6.5); beyond CAPRI, a least-infeasibility mode and a Dulmage–Mendelsohn check
-    (GR "Beyond CAPRI").
-11. S6: which DEP-10 items to take on.
-12. S7: whether and when to remove the baseline demand recalibration (DEP-5).
-13. S9: whether to resume K65 without CAPRI's per-sex results.
-14. S10: whether to build NoTill and LegSh.
-15. S11: which items, and which CAPRI exports to request.
+4. Ports: written in the current market code (done 4 November 2026, stages 4-7).
+5. Decided 5 November 2026: the market's land-use-change estimation (luc_market) is ported.
+6. Decided 5 November 2026: the default `run.supply_countries_outside_eu` becomes CAPRI's full list, at the end of the
+   work (too costly in run time now). Moved on 9 November 2026 (the project lead): after G3, before CAPTRD-MOD.
+7. Decided 5 November 2026: G3's bound policy is CAPRI's reproduced; the least-infeasibility formulation an optional
+   diagnostic mode (MID §7.2; BEYOND-13).
+8. Decided 5 November 2026: G3's objective is zero, with a squareness and structural-rank check before every solve
+   (MID §7.2).
+9. Decided 5 November 2026: G3-R plus G3-C replace MID §6's acceptance test. Open: the CAPRI market dump for the
+   external validation (GR Q5.2), to be agreed with the project lead.
+10. Decided 5 November 2026: the fudge equations as CAPRI activates them; variables scaled as ratios to base (a
+    registered departure); a Dulmage–Mendelsohn check (BEYOND-12). Open: the set structure in production and
+    validation (GR Q6.5), with G3's design.
+11. Decided 5 November 2026: S6 stays close to CAPRI; each DEP-10 item triaged, with questions to the project lead
+    where CAPRI's form cannot be kept.
+12. Decided 5 November 2026: S7, the baseline demand recalibration (DEP-5) is removed, soon.
+13. Open (5 November 2026): K65 stays deferred unless CAPRI data help; to revisit after S1/S2 (heifers by sex).
+14. Decided 5 November 2026: S10, NoTill and LegSh are ported.
+15. Open (5 November 2026): S11's CAPRI exports, specified to the project lead (2030 feed per head per activity for
+    DEP-22, p_Nemidat, p_digestPar after digestibility.gms; T1/T2 with S1).
 16. Not raised in the notes [I]: the position of S1/S2, the G2 stages and S6-S11 relative to the market move and the
     29 units.
-17. P1 and P2 (§12a): when to schedule them.
-18. Decided 3 November 2026: §12b's Parquet download on Hugging Face, gated, after the market move's stages 2-3.
+17. Decided 5 November 2026: P1 (obligatory set-aside) just before CAPTRD; P2 by porting CAPRI's premium module, scheduled
+    with P1 before CAPTRD.
+18. Decided 3 November 2026: §12b's Parquet download on Hugging Face, gated, after the market move's stages 2-3. Go-ahead confirmed 5 November 2026.
+19. Decided 5 November 2026: the CAPRI 2040 mirror-standard (pesticide) extracts are kept as a future 2040 check for
+    CAPTRD-MOD (capri_reference/), not as a benchmark until the shock inputs and CAPRI's scenario code are available.
 
 ## 15. Notes found out of date while drafting
 

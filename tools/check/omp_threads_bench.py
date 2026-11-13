@@ -9,17 +9,16 @@ in CasADi's function evaluations, iterations, status and objective. The run's pa
 every pair is the same problem. The comparison with MUMPS is tools/check/linear_solver_bench.py's (CasADi's IPOPT:
 MUMPS and SPRAL on one thread), which cannot run in this process (this library has no MUMPS).
 
-    CAPRI_WORKERS=1 python tools/check/omp_threads_bench.py OUT.jsonl --library PATH/libipopt.so.3 --threads 2
+    python tools/check/omp_threads_bench.py OUT.jsonl --library PATH/libipopt.so.3 --threads 2
     python tools/check/omp_threads_bench.py OUT.jsonl --summary
 
-One process (CAPRI_WORKERS=1): forked workers would take their records with them. A speed-up needs cores free for the
-threads: on a machine with as many cores as workers there are none.
+One process (run.n_workers = 1, passed to the runner): forked workers would take their records with them. A speed-up
+needs cores free for the threads: on a machine with as many cores as workers there are none.
 """
 from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 import time
 from pathlib import Path
@@ -76,7 +75,7 @@ def run(out, library, threads):
     C.CapriRegionalNLP.solve = probe
     sys.argv = ["run_f2f_2030.py", str(Path(out).with_suffix(".pkl")), "--scenario", "f2f",
                 "--regions", ",".join(UNITS), "--set", f"supply.nlp_ipopt_library={json.dumps(str(library))}",
-                "--set", 'supply.nlp_linear_solver="spral"']
+                "--set", 'supply.nlp_linear_solver="spral"', "--set", "run.n_workers=1"]   # one process
     try:
         run_f2f_2030.main()
     finally:
@@ -119,8 +118,6 @@ def main():
     if a.summary:
         summary(a.out)
         return
-    if os.environ.get("CAPRI_WORKERS", "") != "1":
-        raise SystemExit("run with CAPRI_WORKERS=1 (one process)")
     if not a.library:
         raise SystemExit("--library: the IPOPT library with SPRAL in OpenMP")
     run(a.out, a.library, [int(t) for t in a.threads.split(",") if t.strip()])

@@ -29,7 +29,7 @@ def heads(scen_zip):
 
 def mann_days(gd_zip, year=b"2030"):
     z = zipfile.ZipFile(gd_zip); n = 0
-    with z.open("gd_full.txt") as f, open(OUT / "capri_mann_days_2030.csv", "w", newline="") as g:
+    with z.open("gd_full.txt") as f, open(OUT.parents[2] / "baselines" / "capri_greendeal_ref" / "1730" / "abatement" / "ammonia" / "capri_mann_days_2030.csv", "w", newline="") as g:
         w = csv.writer(g); w.writerow(["region", "activity", "item", "value"])
         for raw in f:
             if b"'MANN'" not in raw and b"'DAYS'" not in raw and b"'LEVL'" not in raw:
@@ -44,5 +44,6 @@ def mann_days(gd_zip, year=b"2030"):
 
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
+    (OUT.parents[2] / "baselines" / "capri_greendeal_ref" / "1730" / "abatement" / "ammonia").mkdir(parents=True, exist_ok=True)
     print("p_Heads rows:", heads(sys.argv[1]))
     print("MANN/DAYS rows:", mann_days(sys.argv[2]))

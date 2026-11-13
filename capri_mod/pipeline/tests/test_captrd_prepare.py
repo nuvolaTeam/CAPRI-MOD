@@ -243,6 +243,15 @@ def test_denmark_with_the_coco_data(tmp_path):
     ref = ref[ref.t.str.isdigit() & (ref.eps == 0) & (ref.col.isin(s.quotas) | (ref.row == "SETR") | lab(ref))]
     q = a.merge(ref[P.KEYS + ["value"]], on=P.KEYS, how="outer", suffixes=("", "_ref"), indicator=True)
     _assert_equal(q, 170)
+    # the animal requirement functions (prep_requirement_estimation.gms, after the statistics): Denmark's energy and
+    # protein Const and Slope, from the chained stages, equal CAPTRD's
+    a = pd.read_parquet(out["DK000000"])
+    a = a[a.t.isin(["Const", "Slope"]) & a.row.isin(["ENNE", "CRPR"])]
+    d = pd.read_csv(RES / "data.csv.gz")
+    d = d[d.t.isin(["Const", "Slope"]) & d.row.isin(["ENNE", "CRPR"]) & d.region.str.startswith("DK")]
+    r = a.merge(d[P.KEYS + ["value"]], on=P.KEYS, how="outer", suffixes=("", "_ref"), indicator=True)
+    assert len(r) > 60 and (r._merge == "both").all()            # 63 series on 10 November 2026
+    assert ((r.value - r.value_ref).abs() <= 1e-9 * r.value_ref.abs().clip(lower=1.0)).all()
 
 
 @pytest.mark.skipif(not (TS / "IR.csv.gz").exists(), reason="CAPRI reference files not built")

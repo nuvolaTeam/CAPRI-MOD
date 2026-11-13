@@ -142,9 +142,11 @@ It is not CAPTRD:
      production = yield × level, land, feed and so on.
    - National expert supports enter here.
 4. **Second solve of the same model**, adding the EU-level Outlook/Aglink targets (define_EU_supports.gms runs between
-   the two solves).
-   - The NUTS-2 breakdown happens inside this second solve.
+   the two solves), then clean_tiny.gms's cleaning solve.
+5. **The NUTS 2 regions** (model m_trendNT2; estimate_nuts2.gms, captrd.gms l. 1101): a separate model after the
+   member states, the regions of each member state estimated together under its fixed result, then rem_tiny.gms.
    - The breakdown by farm type is a separate CAPRI program (captrdfrm.gms), left out at first.
+6. **Reporting aggregates and the EU's extra-EU trade** (aggreg_and_report.gms, estimate_eu_trade.gms).
 
 **Parity test.** Give CAPTRD-MOD the inputs CAPRI used, and compare its result with `scenarios/captrd_2030`, CAPRI's own
 CAPTRD output. The exact list of files needed from the CAPRI installation comes with the detailed design (from
@@ -403,8 +405,9 @@ Each defect gets a fix, and a parity switch reproduces CAPRI's behaviour.
 - **Reporting:** the effect of each fix is reported separately, against the parity run.
 
 The defects (details in CAPTRD_MAP.md):
-- the upper bound on artificial land, non-binding through a misplaced parenthesis (fix_est.gms:810): decided, not built
-  yet (Steps 2-3 are not ported; register FIX-7);
+- the upper bound on artificial land, non-binding through a misplaced parenthesis (fix_est.gms:810): the parenthesis
+  fixed 12 November 2026, setting `captrd.artif_upper_bound_as_coded` (register FIX-7); the statement's max with the
+  previous bound, the standard 1e9, is kept as coded, so the bound still does not bind where that is 1e9;
 - the error-variance floor comparing a level with a variance: fixed 24 October 2026 as (0.05 × |wAve|)², setting
   `captrd.variance_floor_squared` (section 12.4; docs/DEPARTURES_FROM_CAPRI.md);
 - the base-year window labelled "5 years" spanning 7: on inspection (23 October 2026) not a defect where ExPost ends
@@ -578,10 +581,10 @@ CAPTRD's inputs are listed in CAPTRD_MAP.md section 2. Their state on 23 October
 | # | Input | In hand | Where / next |
 |---|---|---|---|
 | 1 | CAPREG time series `res_time_series_17<MS>.gdx` | yes. The 35 files of the project lead's `Capreg_tseries` folder: symbol `DATA` (1984–2018 plus BAS, BASM, CUR, MEAN, TRD, Y), country, NUTS2 and some EU aggregates | `capri_reference/capreg_tseries/17/<CC>.csv.gz` (35.3 million records), `tools/build/build_capreg_tseries_reference.py` |
-| 2 | CAPREG base year `res_17<MS>.gdx` (DATA2 → BASM) | all 35 countries: text dumps for 27 (`res_17zip.zip` and single files), GDX files for UK, TUR, AL, MK, CS, MO, BA, KO (29 October 2026) | `capri_reference/capreg_base/17/<CC>.csv.gz` (2,628,522 records), `tools/build/build_capreg_base_reference.py` |
+| 2 | CAPREG base year `res_17<MS>.gdx` (DATA2 → BASM) | all 35 countries: text dumps for 26 (`res_17zip.zip` and res_17IT.txt), GDX files for UK, TUR, AL, MK, CS, MO, BA, KO (29 October 2026), Spain from the GUI's CSV export DATA2_res_17ES.csv (capri_export_zip.zip; the export equals the text dump in all 10,991 records of Denmark; 10 November 2026) | `capri_reference/capreg_base/17/<CC>.csv.gz` (2,628,522 records), `tools/build/build_capreg_base_reference.py` |
 | 3 | COCO `coco2_output.gdx` (COCO1 nowcasts, ExAnteD years) | `coco2.csv` (upload coco2.zip, a listing of DATA2) | `capri_reference/coco2/17/coco2_output.csv.gz` (7,892,151 records), `tools/build/build_coco2_reference.py`; with fao_agg's `p_biofuelData` (`capri_reference/fao_agg/17`, `tools/build/build_fao_agg_reference.py`) |
-| 4 | Aglink (DG AGRI outlook) of the run | no. `baseline.zip` holds older vintages (up to aglink2017OECD) | needed for Steps 2–3, not Step 1; vintage to be read from the results file META |
-| 5–11 | population, nutrient contents, long-run info, age line, Agri_Prod, recent milk yields | only the age line (`baseline.zip`, parquet) | needed for the Step-2 expert supports |
+| 4 | Aglink (DG AGRI outlook) of the run | yes (10 November 2026): aglink2023dgAgri_oriEUdata.gdx, AGLINK2019dgagri_oridata.gdx (fish), aglink2023macro.xlsx, data_SSPV3_update.gdx, the region mappings reg_mappings.xlsx | `capri_sources/dat_local/baseline`, `dat_local/global` (docs/EXTERNAL_SOURCES.md); needed for Steps 2–3 |
+| 5–11 | population, nutrient contents, long-run info, age line, Agri_Prod, recent milk yields | yes (9-10 November 2026): allpop.gdx, nutrient_cont_usda.gdx, longrun_info_fac_defaulta.gdx and GLOBIOM_GL_longrun_defaulta.gdx, the age line, Agri_Prod.gdx, recent_mlk_yld.gdx; with dairy_targets_agri.gms, necp_expert.gms, regional_mlk_prod.gms and the biofuel inputs (primes_ref_060722.gdx, fossilFuel.gdx, biofuel_data.gms, POTENCIA_transport_energy_outlook.gdx) | `capri_sources/dat_local`, `results/global`; every data file CAPTRD reads at the reference run's settings (NewBiofuelModule on, aglinkTightLink, agmip and the Globiom tight link off, no farm types) is now in hand |
 | — | CAPTRD's own results `results_1770.gdx` (p_result, all positions) | yes (upload of 23 October 2026: base 2017, simulation years 2018–2070) | `capri_reference/captrd_results/1770/<respos>.csv.gz`, `tools/build/build_captrd_results_reference.py` |
 
 The results file carries CAPTRD's estimation data `p_result(..., years, "p_data")` (stored after the data
@@ -595,18 +598,18 @@ data preparation is ported.
 | Part | GAMS | Status |
 |---|---|---|
 | Trend variable, grid on c | captrd.gms l. 203, 271; estimate_trends.gms l. 28, 80-82 | done (`capri_mod/pipeline/captrd/step1.py`) |
-| Time sets ExPost, ExPostT, BASYRS5, BASYRSM, EIGHTLST, BAST, YearsEst | captrd.gms l. 665-812 | next (ExPostT: 1984–2019 in the reference run, 2019 from COCO) |
+| Time sets ExPost, ExPostT, BASYRS5, BASYRSM, EIGHTLST, BAST, YearsEst | captrd.gms l. 665-812 | done (`timesets.py`; section 12.4) |
 | Data load and cleaning (copy of years, area rescaling, deletion of series not estimated, early years, UVAD fill, regions, LABH) | captrd.gms l. 418-517, 830-898; check_and_cor_capreg.gms | done (`capri_mod/pipeline/captrd/prepare.py`, 29 October 2026), with BASM from DATA2 (l. 528-580) and the ARTIF correction of check_and_cor_capreg.gms. The sets it reads, CAPRI's global ones copied from the reference export and CAPTRD's own transcribed, are written by `tools/build/build_captrd_sets.py` (COLS_LOAD, ROWS_LOAD, MS, NT2, urbanNUTS, rmAggSup with EU013000, MrkBaleE, DOMPOS, breedAct, MEAT, ...). GAMS assignments are parallel (the right-hand side is read before the statement; GAMS user's guide), which the area rescaling and the UVAD average follow |
 | Data preparation (sugar prices, aggregates, SLGW, UVAG, DOMM, TOOU, NTRD, LU density) | prep_data_for_estimation.gms l. 15-162 | done (`prep_for_estimation`); LU.LEVL with CAPRI's livestock units p_LUUnits (dat/policy/livestock_units.gms, uploaded 29 October 2026; `capri_data/pipeline/captrd/dat`, `tools/build/build_captrd_dat.py`). Check (`test_captrd_prepare.py`): Denmark's prepared years equal CAPTRD's p_data on all 40,000+ compared records (relative 1e-9), leaving out what the stages not yet ported write: the reporting overwrites of the same position (aggreg_and_report.gms l. 203-220), the COCO nowcasts and biofuel data (load_coco1_data.gms, from coco2_output.gdx) ; not traced: Denmark's VSET.LEVL of 1991-2005, which CAPTRD's p_data has at one-decimal values (8.2 for 1994 against CAPREG's 8.3599), with UAAR as its sum and LU per UAAR (LU equals CAPTRD's in every other year). The UVAD that Denmark lacks (other cereals, 1990) is the average over the 11 countries of its market aggregate A_EU_WEST with data (Germany's 1990 deleted first), as in CAPTRD (slow test). Denmark's BASM equals CAPTRD's BASM position on all 1,200+ compared records, leaving out further the animal requirements (prep_requirement_estimation.gms), the activities' LABF and LABP (labour stage) and DOMM of the products with biofuel use |
 | COCO data: the years after CAPREG's series (ExAnteD), biofuels, near-zero flags | load_coco1_data.gms (captrd.gms l. 715) | done (`capri_mod/pipeline/captrd/coco.py`; all stages in CAPTRD's order: `prepare_run.py`), 29 October 2026, with CAPRI's P_ExtrRates and p_ByProduct for the default biostocks and DDGS (dat/biofuel/biofuel_technology_params.gms, uploaded 29 October 2026). Not ported: the Aglink expert supports of the non-EU countries (p_result_MSnoEU, l. 422-497) belong to the expert supports. Check (slow test): Denmark's years 1984-2019 equal CAPTRD's p_data on 42,000+ records, leaving out the stages not ported, the near-zero flags another country's COCO data sets and the UVAD averages; not traced: the fossil fuels' UVAG of 2019, which CAPTRD's p_data has and COCO does not |
 | Policy data: milk and sugar quotas, set-aside rates | captrd_policy.gms with pol_input/mquota_update.gms, sugar/load_quotas.gms, policy/reformsugarquotas.gms (captrd.gms l. 906) | done (`capri_mod/pipeline/captrd/policy.py`, 29 October 2026). Data: CAPRI's milk_quota_dat.gms and smal_pshar.gms (uploaded 29 October 2026), the PMQuotaReg table of mquota_update.gms, the sugar quotas of input_load_sugar_quotas.gdx from the parquet mirror of CAPRI's dat folder (p_PPSQWithdraw has no records there, taken as empty); `tools/build/build_captrd_dat.py`. Check (slow test): Denmark's quotas equal CAPTRD's p_data in every year, the ex-ante years included (the milk quotas end with %mlkQutExpiry% 2009 and the sugar quotas from 2017 under aglink2023dgAgri). |
-| Labour bounds: the farm holders' age lines and the activities' minimum labour | baseline/labour_ageline.gms (captrd.gms l. 902, between LABH and the policy data) | done (`capri_mod/pipeline/captrd/labour.py`, 30 October 2026): MINS/MAXS LABO per ex-ante year, the age-line bounds across CAPTRD's MS set (every country, whatever a run prepares). Data: AGELINE of dat/baseline/ageline.gdx from the parquet mirror of CAPRI's dat folder, p_minLabourPerAct transcribed from labour_ageline.gms (capri_data/sources/capri_gams/baseline), the set SRNUTS1 (`tools/build/build_captrd_dat.py`, `build_captrd_sets.py`). Check: Denmark (slow test; the activities' minimum labour binds), Austria and Belgium (the age lines bind in some years) equal CAPTRD's p_data to 1e-15 in every ex-ante year |
+| Labour bounds: the farm holders' age lines and the activities' minimum labour | baseline/labour_ageline.gms (captrd.gms l. 902, between LABH and the policy data) | done (`capri_mod/pipeline/captrd/labour.py`, 30 October 2026): MINS/MAXS LABO per ex-ante year, the age-line bounds across CAPTRD's MS set (every country, whatever a run prepares). Data: AGELINE of dat/baseline/ageline.gdx from the parquet mirror of CAPRI's dat folder, p_minLabourPerAct transcribed from labour_ageline.gms (capri_data/sources/raw/capri/gams/baseline), the set SRNUTS1 (`tools/build/build_captrd_dat.py`, `build_captrd_sets.py`). Check: Denmark (slow test; the activities' minimum labour binds), Austria and Belgium (the age lines bind in some years) equal CAPTRD's p_data to 1e-15 in every ex-ante year |
 | nObs, nW, wAve, wVar | prep_data_for_estimation.gms l. 205-247 | done |
-| BAS, BSY, feed coefficients (nObs forced to 1) | prep_data_for_estimation.gms l. 250-320 | next |
+| BAS, BSY, feed coefficients (nObs forced to 1) | prep_data_for_estimation.gms l. 250-320 | done (`statistics.py`; section 12.4) |
 | WLS grid search | estimate_trends.gms | done |
 | Step1, wVarErr, wR2 | define_stats_and_supports.gms l. 44-49, 113-132, 177-179 | done |
-| Requirement functions (Step1 of ENNE, CRPR, ...) | define_stats_and_supports.gms l. 86-93; prep_requirement_estimation.gms | next |
-| Supports from Step 1 | define_stats_and_supports.gms l. 186-330; BSY prep_data_for_estimation.gms l. 300-317 | done (`supports.py`): on CAPTRD's own inputs, 99.77% of 48,788 comparable series equal CAPTRD's support1 in 2030 (`test_captrd_supports.py`); the rest are trade positions adjust_trade_supports.gms changes later. Not yet: the feed coefficients' error variance and member-state fallback, the requirement functions |
+| Requirement functions (Step1 of ENNE, CRPR, ...) | define_stats_and_supports.gms l. 86-93; prep_requirement_estimation.gms | done (`requirements.py`, 10 November 2026): the country regressions of each requirement on the yield, copied to the NUTS 2 regions and scaled to the base-year ration's contents, and their Step1 with CAPRI's 0.2% efficiency gain a year. Check (`test_captrd_requirements.py`, on CAPTRD's own stored inputs): the fitted base-year energy and protein requirement equals CAPTRD's in all 9,672 series, Const and Slope in 9,429 (the other 243 regress on a constant yield, the young animals' 1000 heads per head, where only the fit is determined); fibre and dry matter checked up to the feed scaling (CAPTRD's results do not store those feed contents); Step1 equal in all 1,726 series CAPTRD stores (relative 3e-13). Not yet wired into `prepare_run` (it follows statistics there, captrd.gms l. 937-943) |
+| Supports from Step 1 | define_stats_and_supports.gms l. 186-330; BSY prep_data_for_estimation.gms l. 300-317 | done (`supports.py`): on CAPTRD's own inputs, 99.77% of 48,788 comparable series equal CAPTRD's support1 in 2030 (`test_captrd_supports.py`); the rest are trade positions adjust_trade_supports.gms changes later. Not yet: the feed coefficients' error variance and member-state fallback. The requirement rows' supports (l. 318-321) take Const and Slope, from `requirements.py` since 10 November 2026 |
 
 ### 12.3 Tests
 
@@ -725,3 +728,179 @@ data preparation is ported.
   must leave these records out.
 - **DOMM and NTRD in CAPTRD's output** are reporting re-aggregates in every position, Step1 included. A parity test
   must use DEMD for DOMM, and cannot test NTRD's estimated Step1.
+
+### 12.5 Steps 2-3: order of the GAMS code and the plan (10 November 2026)
+
+What follows Step 1, in CAPTRD's order (captrd.gms, CAPRI star 3.0; lines of GAMS code, comments included), with the
+position of CAPTRD's results file results_1770 each stage can be checked against. As for Step 1, each stage is to be
+ported and tested on CAPTRD's own inputs to that stage, read from results_1770, before the stages are chained.
+
+| # | Stage | GAMS | Lines | Check against (results_1770 respos, records) |
+|---|---|---|---|---|
+| 2a | Aglink-COSIMO data mapped to CAPRI's products and to the member states and EU aggregates; macro data (aglink2023macro.xlsx), SSP data, the region mappings (reg_mappings.xlsx), FAO medium-term data | baseline/load_aglink2023dgAgri.gms, aglink2023dgAgri_sets/_mappings.gms (captrd.gms l. 593) | 1,502 + sets | DGAgri (142,827)  **done 10 November 2026** (`aglink.py`; sets by `tools/build/build_captrd_aglink_sets.py`): every record present in both equal to CAPTRD's DGAgri, 123,133 compared once the later stages' writes are left out (test_captrd_aglink.py); not ported: the detailed macro data p_aglinkMacro (l. 899-1058, an output for CAPMOD and the long-run supports) |
+| 2b | Population (allpop.gdx), nutrient contents (nutrient_cont_usda.gdx) | captrd.gms l. 597-620 | short | (inputs of 2d) |
+| 2c | DG AGRI baseline scaled to CAPRI's base year (DGAgri to DGAgri1) | captrd/scale_DG_AGRI_baseline.gms (captrd.gms l. 953) | 466 | DGAgri1 (91,192); the reference run's META: "Scaling to DG Agri baseline: Off", what Off leaves of the file to be read  **done 10 November 2026** (`scale_dgagri.py`, chained to 2a): the switch "Scaling to DG Agri baseline" acts only in scale_biofuel_to_dgagri.gms, this file always runs; DGAgri as it leaves it equal to CAPTRD's in all but 2 of 123,918 compared records, DGAgri1 of the years define_EU_supports.gms does not rewrite equal for the countries but 57 records, the residuals traced to p_data values CAPTRD's stored P_Data no longer holds (test_captrd_scale_dgagri.py) |
+| 2d | Expert supports with trust levels: CAPRI's own rules (expert_support.gms), biofuel trends from PRIMES (biofuel/biofuel_trends.gms, primes_ref_060722.gdx, fossilFuel.gdx, biofuel_data.gms, POTENCIA), dairy targets (dairy_targets_agri.gms), Eurostat's recent production (agriprod_supports.gms, Agri_Prod.gdx, recent_mlk_yld.gdx), national experts (national_supports.gms, necp_expert.gms), the long-run projections (longrun_supports.gms, longrun_info_fac and GLOBIOM_GL_longrun) | define_stats_and_supports.gms l. 460 includes them | 860 + 1,498 + 711 + 1,574 + 546 | Expert (156,764), TrustLevl (222,386), COCO (94,539), support (1,817,853)  **in progress**: the COCO nowcast supports (define_stats_and_supports.gms l. 377-455, 522-534; `coco_supports.py`) done 10 November 2026, CAPTRD's Expert of 2018 equal in 91,794 of 91,880 common records, the rest biofuel and sugar positions the later parts rework (test_captrd_coco_supports.py); found: the 'closeToBas' flag assigns itself (l. 392-394) and is never set, kept as coded; expert_support.gms's own rules (`expert_rules.py`) done 10 November 2026: 12 of its rules equal to CAPTRD's in every record and trust level, the beet trade positions and 9 trust levels set by a later source (test_captrd_expert_rules.py); DG AGRI's dairy data (expert_support.gms l. 365-760, with define_stats_and_supports.gms l. 510-519's HCOM.COMI; `dairy_supports.py`, inputs by tools/build/build_captrd_dairy.py) done 11 November 2026: the EU parts' and A_EU_WEST/EAST's positions equal in every ex-ante year, the regions' positions after 2020 that no later source rewrites equal in all 1,090 records and trust levels, HCOM.COMI equal in its 233 comparable records (2020 is agriprod_supports.gms's, eight countries' values national_supports.gms's: test_captrd_dairy_supports.py); found: %lst_dgagri% is 2040 for aglink2023dgAgri (captrd.gms l. 248), the setting captrd.lst_dgagri (2030) was wrong and is now derived from %Aglink%; the biofuel trends (biofuel/biofuel_trends.gms, PRIMES primes_ref_060722; `biofuel_trends.py`, inputs by tools/build/build_captrd_biofuel.py) done 11 November 2026: all 28,798 comparable values of 2020-2070 equal, trust levels as CAPTRD stores them but for two later stages' changes (test_captrd_biofuel_trends.py); found: GAMS evaluates an assignment's right side on the values from before the statement, the reference run did not apply %constBionergy% (setting captrd.const_bioenergy: CAPRI's default, on, kept by the project lead's decision of 11 November 2026; it acts only with the Brightspace long-run selection; the parity tests set it off as that run); Eurostat's recent production (captrd/agriprod_supports.gms, Agri_Prod.gdx; `agriprod_supports.py`, inputs by tools/build/build_captrd_agriprod.py) done 11 November 2026: of the 1,224 values of 2020, 1,150 equal with their trust levels, the other 74 later sources' (national_supports.gms's trust levels ending in .01 and its Greek rules; positions this file deletes that a later source fills); the 2019 and 2018 blocks not ported (no ex-ante simulation years in the reference run; the module stops if they are); the PercentChange supports it deletes returned as positions (test_captrd_agriprod_supports.py); the national experts (captrd/national_supports.gms, necp_expert.gms; `national_supports.py`, inputs by tools/build/build_captrd_national.py) done 11 November 2026: on the earlier ports chained in expert_support.gms's order and the supports before the expert supports, 7,282 of the 7,410 positions it changes after 2018 equal CAPTRD's Expert and TrustLevl, the other 128 a later stage's (define_EU_supports.gms's trust levels of NO and TUR) or not in the stored results (CS DOMM.COMI's support, Luxembourg's HERD BASM) (test_captrd_national_supports.py); found: the block headed HU assigns HR000000, TUR's market supports get no trust level (expertdairy_map holds no POUM, SGMT), kept as coded; the population path (p_aglinkMacro of baseline/load_aglink2023dgAgri.gms l. 905-1068 and longrun_supports.gms l. 368-389; `macro.py`, inputs by tools/build/build_captrd_macro.py) done 11 November 2026: all 350 INHA values of 2019 and the ex-ante years equal CAPTRD's P_Data (test_captrd_macro.py); found: the reference run's long-run selection (globiom_eu_bright_s0_2023) is in none of the long-run files in hand and CAPTRD's results hold no Longrun records, so the GLOBIOM supports did not enter the reference baseline; the long-run supports (`longrun_supports.py`, setting captrd.longrun_scenario, inputs by tools/build/build_captrd_longrun.py) done 11 November 2026: no Longrun records (none in the data, as in CAPTRD), all 158,370 B2000 values and the 315 HCOM.SUGA supports equal CAPTRD's; the GLOBIOM merge ported, not checkable against the reference run (test_captrd_longrun_supports.py); the expert bounds of the national and agriprod supports equal CAPTRD's expertLo and expertUp; the end of expert_support.gms (l. 787-860) and the storage as Expert and TrustLevl (define_stats_and_supports.gms l. 485-500, 627-645; `expert_support.py`) done 11 November 2026: with every ported source chained, 39,495 of the 39,567 member-state positions after 2018 equal CAPTRD's Expert and TrustLevl, the other 72 stage 2f's (NO and TUR trust levels) (test_captrd_expert_support.py); the supports up to support1 (define_stats_and_supports.gms l. 589-675, adjust_to_biof_supports.gms, adjust_trade_supports.gms; `final_supports.py`) done 11 November 2026: 441,600 of 474,390 support1 positions equal, 32,750 rewritten after this stage or not rebuildable from the stored Step1, 40 open (fossil fuel prices of NO, EL, IR, UK in 2020-2040); found: the stored Step1's DOMM is the reporting's re-aggregate, the estimation's is in DEMD; the GLOBIOM conversion (convert_globiom.gms GLOBIOM-EU branch, create_longrun_info.gms; `globiom.py`) done 11 November 2026, switchable (setting captrd.longrun_from_globiom, off as the reference run): on the EUCLIMIT6 file all of CAPRI's 452,241 p_longRunInfoAll records but 128 base-year factors from other-vintage global data equal (test_captrd_globiom.py); the Aglink supports of NO, TUR and the Western Balkans (load_coco1_data.gms l. 423-487, expert_support.gms l. 115-145) wait for stage 2f, which rewrites all of their positions |
+| 2e | The member states' constrained estimation, per ex-ante year, Solve1 then Solve2: the NLP m_trendMS (minimum weighted squared deviation from the supports, SSQ, subject to about 40 equation blocks: areas and land use, herds and young animals, feed and requirements, market balances, sugar quotas, biofuels, nutrient balance ...) | estimate_MS.gms with equations.gms, fix_est.gms, comi_bounds.gms, biofuel_bounds.gms, clean_tiny.gms (captrd.gms l. 1058-1060) | 570 + 926 + ... | step2 (769,369), Lo / up (bounds)  **in progress**: the equations of m_trendMS (equations.gms l. 107-878, the 39 blocks of the model statement l. 885-890, and the objective SSQS_; `estimate_ms.py`, numeric or symbolic for the NLP) done 12 November 2026: evaluated at CAPTRD's step2 (Solve1's result, define_EU_supports.gms l. 43) of the 35 countries in 2018-2050, all 229,231 checkable equations hold within 1e-3 (test_captrd_estimate_ms.py); the stored step2 is the estimation's after CAPTRD's reporting, so the requirements are turned back into the estimation's relative form (captrd.gms l. 1205-1218) and DOMM read from DEMD (aggreg_and_report.gms l. 293-294); left out: the equations whose terms the reporting overwrites (INHA of the groups, HFCS) or that hold free variables CAPTRD does not store (STCM of the young animals, LOSF of the milks, the weights of activities without data; V_EstV is a free variable); the fibre and fill contents and the empty days (BASM of FILG, FICT, FISM, FISF, EDAYS), not in the reference, from the port's own data preparation; found: the stored support, wVarErr and Lo / up are those of the last solve (Solve2; clean_tiny.gms l. 303-317 puts them back after its own solve), and Step3 is that cleaning solve's result, so neither step2 nor step3 can be reproduced from them alone (Denmark 2030: with support1 and the stored bounds IPOPT reaches an objective of 0.30, stopped at its iteration limit, where CAPTRD's step2 scores 2.27); the bounds (fix_est.gms with comi_bounds.gms and biofuel_bounds.gms, estimate_ms.gms l. 53-121; `estimate_bounds.py`) done 12 November 2026: with Solve2's supports, CAPTRD's P_Result of the year and the port's prepared p_data, 45,983 of 47,172 bounds of DK, AT, FR, PL, ES in 2020, 2030, 2050 equal CAPTRD's stored ones (test_captrd_estimate_bounds.py); the rest are mostly bounds CAPTRD widened in its infeasible solves (INHA's lower bounds, foodSh, PRCY, INCE and a few rows of EXPE, CSSP, HCOM, DOMM, MAPR, LOSF, UVAD, UVAG and trade), a few yields bounded by the previous year's estimate (NoYieldDrop; CAPTRD's estP there is its Solve2 result, the reference only has Step3) and one animal's 2020 bounds; found: the food intake's bounds (INHA, fix_est.gms l. 269-279) as GAMS reads them, the second term's $ conditioning only its exponent, so where BAST exists the bounds are BAST x 0.98^n + BASM and BAST x 1.02^n + BASM, not a choice between BAST and BASM as the code's layout suggests (CAPRI-ERROR, kept as coded; with it INHA's unwidened bounds equal CAPTRD's); found: fix_est.gms l. 810 raises 1.02 to the year (1.02**(OrdT(ExAnte)) - OrdT("BAS")), in effect no upper bound on ARTIF (FIX-7, since 12 November 2026: the parenthesis fixed, captrd.artif_upper_bound_as_coded; the max with the previous bound, the standard 1e9 of estimate_ms.gms l. 56, kept as coded, so the bound stays 1e9 there); the solve with CAPTRD's widening of infeasible solves (estimate_ms.gms l. 222-436: the first six tries widen only the binding activity levels, x 0.5 and x 2, then every binding bound by 90% of itself, at least 0.001, 1% for the processing yields of secondary products, with the again statements, comi_bounds, the release of the COMI yields and the biofuel bounds; `estimate_nlp.py`, IPOPT in place of CONOPT, settings captrd.nlp_*) **in progress** since 12 November 2026: Denmark 2030's Solve2 on the port's bounds is infeasible at first, as CAPTRD's evidently was, and feasible after about 16 tries; its widened bounds reach CAPTRD's stored ones on 1,610 of 1,625 lower and 1,582 of 1,625 upper bounds (the port widens more foodSh upper bounds; test_captrd_estimate_nlp.py); departure: CONOPT's active set (a variable exactly at a bound with a marginal) has no IPOPT counterpart, so a bound counts as binding within captrd.nlp_at_bound_tol with a multiplier beyond captrd.nlp_marginal_tol, and the widening path, path-dependent, can differ from CAPTRD's; open: the solution against CAPTRD's Step3 (about 36% of the positions within 0.5%): Step3 is a further cleaning solve's result (clean_tiny.gms, rem_tiny.gms) and the trade positions without an objective term are free; Solve1 against step2 (12 November 2026, test_captrd_estimate_nlp.py): with CAPTRD's support1, the port's bounds on it and Solve1's wVarErr (CAPTRD stores Solve2's only; rebuilt from the 2d chain's expert positions and, where stage 2f adds a trust level, from the trend's error variance, define_stats_and_supports.gms l. 327-329 with l. 177-179 inverted on the stored wVar and wR2), Denmark 2030's optimum is 0.5127 against 0.5138 for CAPTRD's step2 under the same objective, 84% of the positions within 2% of step2; with the widening's marginals from a least-infeasibility solve, as CONOPT reports an infeasible model (captrd.nlp_infeasible_marginals = "phase1", the default since 12 November 2026), Denmark 2030's Solve2 widens to CAPTRD's stored bounds but 12 of 3,250 and Austria 2030's Solve1 reaches CAPTRD's objective (1,084.8 against 1,092.9); open: Poland and Spain 2030 (the milk losses' bounds, opened by 0.995^n with the try count) and Denmark 2020; next: Solve1 for more countries and years, then stage 2f, clean_tiny and rem_tiny against Step3 |
+| 2f | After Solve1: the member states' results aggregated where the supports are at EU level, the members' supports changed to meet DG AGRI's | define_EU_supports.gms, adjust_to_biof_supports.gms (l. 1070) | 906 | support1 (1,822,752), CoefVarErr, wVarErr  **done 11 November 2026** (`eu_supports.py`, per ex-ante year; tested on CAPTRD's stored Solve1 results, step2, and the earlier years' Solve2 results, step3): of the member states' positions in 2020-2070, support 434,701 of 455,713 equal, TrustLevl 107,619 of 107,958, wVarErr 105,922 of 107,647 (where a trust level is set), DGAgri1 26,017 of 28,151; the rest rewritten later (YILD, requirement rows, HFCS, the groups' prices), inherited from stage 2c (the EU parts' DGAgri1 of the cereals' and rape oil's INDM, FEDM, PRCM, DOMM, from p_data CAPTRD's stored P_Data no longer holds), the fossil fuel prices, and 406 support positions open (EU013000's members: DOMM of BEEF, SGMT, MOLA, PLMO; NECR.LEVL's trust level where CAPTRD's Expert is an explicit zero, EPS) (test_captrd_eu_supports.py); found: the stored Step2 and Step3 hold the reporting's DOMM (the estimation's is DEMD) and its product groups; S_RowsEst1 has no LABT, S_ColsEst1 no QUTS, QUTA, QUTB (captrd.gms l. 559, 946-948) |
+| 3 | NUTS 2 regions under the member states' results: the NLP m_trendNT2 | estimate_NUTS2.gms, est_nuts2_grid.gms (l. 1093) | 543 + ... | step3 (2,546,982; the members' Step3 is Solve2's result) |
+| 4 | Reporting aggregates and the EU's trade | aggreg_and_report.gms, estimate_eu_trade.gms (l. 1250-1256) | 162 + ... | series (7,061,476) |
+
+Inputs: all in hand since 10 November 2026 (section 12.1, docs/EXTERNAL_SOURCES.md). The two NLPs are least-squares
+problems with linear and bilinear constraints; IPOPT (as in the supply models) is the solver, with CAPTRD's own
+settings (optfile 1, tolinfeas 1e-5) to be read from its option file.
+
+Order of work (proposed): 2a, 2c, 2d one by one, each against its position; then 2e for one member state (Denmark,
+the Step 1 test country) against step2, then all; then 2f and 3. 2e is the largest piece: the equations of
+equations.gms ported block by block, each block checked by evaluating it at CAPTRD's own step2 solution (its residual
+must be zero) before the NLP is solved.
+
+### 12.6 Stage 2e: Solve2 against Step3; clean_tiny and the step3 copies (12 November 2026)
+
+**Solve2 against Step3** (Denmark, Austria, France 2030; CAPTRD's stored support and wVarErr, the objective SSQS_ over
+the positions Step3 holds). On CAPTRD's own final bounds (a bound it does not store read as 0, NTRD free) the port's
+equations are feasible at the first solve and reach the same optimum as on its own widened bounds; a start at Step3
+returns to it. Apart from the fossil fuels the port's objective is at or below Step3's (DK 0.1390 against 0.1412, AT
+589.7 against 602.0, FR 0.01527 against 0.01531). The fossil fuels: MBAL_ is active for DISL and GASL (HCOM has
+observations) with no supply term, so the estimation sets their HCOM to zero, in the port and in CAPTRD's Solve1
+(step2); copy_labour_biofuel_on_presult.gms l. 56-59 then overwrites Step3's fossil fuel rows with the Expert supports
+(Step3 equals Expert on every fuel position of the three countries). CAPTRD's final fuel rows therefore do not satisfy
+its MBAL_; that is CAPTRD as coded. The stored results are those after captrdfrm.gms, which includes that file
+(l. 778).
+
+**clean_tiny.gms** (`clean_tiny.py`, sets ColsTiny, RowsTiny, ColsTinyFodd, FODF, FEDACT_TO_FODDI from
+build_captrd_sets.py, p_tiny 0.1 of sets_captrd.gms l. 471): the support at Solve2's levels, the bounds within 0.5%,
+the tiny values flagged and passed on, the re-solve (a second solve if not optimal, an infeasible one stops as CAPTRD
+aborts), the support, variances and bounds restored. The solve is estimate_nlp.solve without the widening
+(`widen=False`). **copy_labour_biofuel_on_presult.gms** (`step3_copies.py`): the labour positions from the activity
+levels and GROF.LABO / LABN's trends, the fossil fuels from Expert, INHA.LEVL from p_data. Against Step3 on the
+positions it holds, after Solve2, clean_tiny and the copies: within 2% DK 94.3% (Solve2 alone 84.0%), AT 97.9%
+(89.6%), FR 87.3% (77.2%) on the port's bounds, before the fix below.
+
+**Fixed (12 November 2026, evening): positions outside the model.** A position referenced only in a term whose
+condition is off (V(c, w) x n(c, w) with n false) is in no equation and not in the objective; GAMS does not generate it,
+but the port created it as an NLP variable, and IPOPT pushed it into its open box: about 40 positions per member state
+at 1e5 (GROF of the dairy products, MAPR of the crops). Such a variable is now held at its start (estimate_nlp.solve,
+from CasADi's dependency of the constraints and the objective), and clean_tiny returns the levels CAPTRD stores (estP,
+estimate_ms.gms l. 452-456: the positions with observations or a support; `estimate_nlp.estp`).
+
+**The widening's path.** The fix moved Denmark's widening path (17 tries instead of 16-18; 11 lower and 18 upper bounds
+differ from CAPTRD's, against 8 and 10), and the share within 2% of step3 after Solve2 on the port's bounds from 94.3% to
+84.2%: the result depends on the path by several points. On CAPTRD's own final bounds (one solve, no widening) the share
+is 95.4% within 2% and 88.1% within 0.5% (Solve2 alone 85.4% and 77.6%); the test (test_captrd_estimate_nlp.py) checks
+that case. The rest are the solves' points where the objective is nearly flat: the young cattle's feed mix (CAMF, CAFR,
+BULL, BULH), PRCBY, some trade. **Open:** trade positions free of the objective go to the middle of their box with IPOPT,
+an interior-point method: Denmark's olive oil imports and exports 5e8 (the middle of [1e-8, 1e9]) against CAPTRD's 1.1
+(CONOPT stays near its start); Austria's 2.7e6 against 0.33. Harmless for the objective (IMPT = EXPT, NTRD 0), not for
+the EU's gross trade built from the members' (estimate_eu_trade.gms). A small proximity term to the start (as the phase-1
+solve has) keeps them near the start in a test (Denmark), but changes the widening's path (32 lower and 38 upper
+bounds differing). Also tested and not adopted: IPOPT's warm start (warm_start_init_point, mu_init 1e-9; solver options
+only): Denmark's share within 2% 80.2% against 84.2% and objective 0.2931 against 0.2827, France's 31.6% against 84.5%
+(objective 0.0379 against 0.0181); the proximity term on the positions outside the objective only: Denmark 92.8%
+(objective 0.2285, olive oil 1.12), Austria 97.7% (1,234.8, unchanged), France 84.0% (0.0194, 7% higher), 24 lower and
+35 upper bounds of Denmark differing from CAPTRD's. **Decided (the project lead, 12 November 2026): keep the solve as
+it is (CAPTRD's objective unchanged) and deal with the trade positions free of the objective in stage 4**, where the
+EU's gross trade is built from the members' (estimate_eu_trade.gms); the rule there to be proposed then (any rule is
+one CAPRI does not have).
+
+### 12.7 Stage 3: the NUTS 2 estimation m_trendNT2, the equations (12 November 2026)
+
+`estimate_nuts2.py`: m_trendNT2's equations for the regions of one member state (equations.gms l. 909-912), the member
+state's own result fixed (estimate_nuts2.gms l. 72): the nine blocks it shares with m_trendMS from
+estimate_ms.residuals per region (AREAB_, LANDUSEB_, OSET_, GROF_, REQS_, GRPLVL_, STRA_, LU_, SplitFix_), REQS_ with
+the member state's feed contents (`regional_basm`: equations.gms l. 535 takes p_data(MSEst, ReqsT, Feed, "BASM")
+through MAP_RR); the adding-up blocks MSGROF_, MSLEVL_, MSLANDUSE_, MSFEEDI_ (l. 182-240); MSlosfFoddo_ (the member
+state's loss rate, l. 474-485), MSindmMaif_ (l. 490-495), EFED_ (l. 500-507); SSQS_ with the regional weights of
+CARD(Rest) > 1 (l. 803-878: each term weighted by its region's share of the activities' LEVL BASM, at least 0.001; a row
+no activity produces or uses 1 / CARD(Rest)). Check (test_captrd_estimate_nuts2.py): at CAPTRD's stored step3 of
+Ireland's two regions in 2030 under Ireland's, all 448 equations of 14 blocks (OSET_ without a set-aside rate, MSindmMaif_
+Germany's only) hold within 1e-3. Found: with each region's own feed contents 50 REQS_ rows were off; CAPTRD stores no
+zero, so a coefficient with neither bound nor level stored is read as fixed at zero (the regions' BULH.IBUL, with data,
+1000 in Ireland's own result), as MSGROF_'s condition needs. Not yet: the objective at CAPTRD's solution (its weights
+need the regions' LEVL BASM), estimate_nuts2.gms's bounds, the solve, rem_tiny (docs: the project's stage 3 plan).
+
+### 12.8 Stage 3: the NUTS 2 bounds, the solve with its retries, rem_tiny (12 November 2026)
+
+`estimate_nuts2.py` continued:
+
+- `nuts2_bound_sets`: S_ColsEst and S_RowsEst as estimate_nuts2.gms l. 31-48 redefines them (INDM for Germany, l. 55).
+- `bounds`: fix_est.gms for each region (`estimate_bounds.bounds` with `BoundData.region_of` set: estimate_ms.gms
+  l. 53-67, ARTIF's fix_est bounds and the step after l. 71 are the member state's only; comi_bounds.gms reads the member
+  state's p_data and P_Result as MS), then estimate_nuts2.gms l. 92-402. The sugar beet rule of l. 336-345 (an expert
+  yield with p_ExpertSupprt "Absolute") is not in the stored results: the port raises if it would apply.
+- `solve`: m_trendNT2 with est_nuts2_grid.gms's retries (est_Nuts2_grid_openbound.gms, comi_bounds.gms,
+  release_comi_yields.gms, the sugar beet and milk production rules), up to `captrd.nuts2_max_tries` (75, CAPRI's).
+  The binding bounds and the multipliers of REQS_ and MSFEEDI_ come from the least-infeasibility problem, as in
+  estimate_nlp. CONOPT's `iterusd eq 0` conditions and its "feasible but not optimal" retries have no IPOPT counterpart
+  and are not ported.
+- `rem_tiny`: rem_tiny.gms for one region.
+
+Checks (test_captrd_estimate_nuts2.py, slow; CAPTRD's reference run):
+
+- Ireland 2030 (solved at CAPTRD's first try). The bounds equal CAPTRD's stored ones on every position with data. A bound
+  CAPTRD does not store is read as zero or infinite, because the GDX keeps neither. Our solve reaches CAPTRD's step3 on
+  every position within 2%, and on 99.7% and 100% of positions within 0.5% (one region each). rem_tiny leaves this
+  unchanged. Austria 2030 (nine regions) is the same: all bounds match, and 99.7-100% of positions are within 0.5%.
+- Ireland 2050. Our first solve is infeasible, as CAPTRD's was: CAPTRD's stored bounds are the ones after its retries,
+  for example the young animals fixed at 1000 by openbound l. 255-258. One retry makes it feasible. Afterwards 3 and 2
+  bounds per region differ from CAPTRD's (a feed coefficient, GROF of FENE and OCRO); which bounds open depends on the
+  infeasible point. The result is within 2% of CAPTRD's step3 on 98.9% of positions (42.7% before the retry).
+
+Found:
+
+- comi_bounds.gms l. 278 keeps the milk yield from falling below the previous year's. The yearly 0.25% growth applies to
+  the member state only (`1 + .0025 $ sameas(Rest, MS)`); a region keeps its previous yield. The port applied the growth
+  to the regions too. Seen on Ireland's regions in 2050, where the lower bound was 10,178.6 against CAPTRD's 10,052.3,
+  which is the regions' 2045 step3. Fixed in `estimate_bounds._comi`.
+- At Ireland 2030, LOSF.RYEM's lower and upper bounds are both zero, and CAPTRD stores neither (they are zero). Yet
+  CAPTRD's step3 is the support, 0.007, where the port gives 0. One possible cause is a GAMS level kept outside its
+  bounds by HoldFixed. This is unconfirmed and too small to matter; it is left open.
+
+### 12.9 The infeasible point as CONOPT finds it; the tie-break (12-13 November 2026)
+
+CAPTRD's retry rules (estimate_ms.gms l. 252-321, est_Nuts2_grid_openbound.gms) read the bounds an infeasible solve
+blocks from CONOPT's marginals. CONOPT is an active-set method. When a model is infeasible, it reports the end of its
+phase 1, the least sum of infeasibilities reached from the solve's start, where only the truly blocking bounds carry
+marginals.
+
+The port's earlier phase 1 (`"phase1"`) solved the same least-infeasibility problem with IPOPT, from the infeasible
+solve's point. An interior-point solution spreads the adjustment over many variables, so more bounds counted as
+binding. The member states' widening therefore opened bounds CAPTRD did not open (France 2030: 89 widened bounds
+differing from CAPTRD's).
+
+`captrd.nlp_infeasible_marginals = "slp"` is the default since 13 November 2026, by the project lead's decision
+(option 2). It works in four steps:
+- `estimate_nlp.phase1_slp`: CONOPT's phase 1 as a sequential LP from the solve's start. The least-infeasibility LP
+  is set up on the linearised equations and solved with HiGHS's dual simplex (scipy), under a trust region.
+- The point is polished with the least-infeasibility NLP, and the polished point is kept only if it is less
+  infeasible.
+- `phase1_marginals`: the marginals are the simplex reduced costs at a vertex. They come from the LP solved within a
+  box of `nlp_at_bound_tol` around the point.
+- If the phase-1 point is feasible, the model is solved again from it, without widening, as CONOPT goes on to optimise.
+
+Both the member-state solve and the regional solve use it. CONOPT's pivoting at degenerate vertices is not reproduced.
+
+Check: Solve2 of 2030 on the port's bounds with its widening, shares within 2% of CAPTRD's step3 (in brackets: within
+0.5%; widened bounds differing from CAPTRD's).
+
+| | Old phase 1 | SLP | One solve on CAPTRD's final bounds |
+|---|---|---|---|
+| DE | 87.9% (74.7%; 46) | 98.3% (96.4%; 11) | 97.7% |
+| ES | 86.4% (74.0%; 54) | 95.4% (89.4%; 11) | 94.8% |
+| DK | 84.2% (68.5%; 33) | 94.7% (86.8%; 10) | 95.3% |
+| FR | 84.5% (71.3%; 89) | 91.3% (81.6%; 11) | 90.9% |
+| IR | 89.9% (73.9%; 23) | 92.6% (82.4%; 9) | 92.7% |
+
+On the 19 member states with both runs, the mean share within 2% rises from 92.5% to 94.6% (within 0.5%: 83.8% to
+87.7%), and none is worse. Across all 34 member states with SLP the mean is 94.4%, and the lowest is Kosovo's 81.0%,
+which was 80.9% with the old phase 1.
+
+**The tie-break** (`captrd.nlp_tie_break`, the project lead's decision, option C) runs after a feasible member-state
+solve. Among the optima, it picks the one whose positions outside the objective lie nearest the solve's start: a
+subproblem over those positions, with the equations they appear in as a narrow band.
+- CONOPT leaves such a position at its start. IPOPT drifts it to the middle of its bounds. In the ex-ante years, IMPT
+  and EXPT enter only through their difference.
+- Denmark 2030's olive oil imports and exports are now 1.1113, against CAPTRD's 1.1113 (they were 5e8). The objective
+  is unchanged, and 2 of the 27 positions outside it moved.
+- Stage 4 (estimate_eu_trade.gms) builds the EU's gross trade from the members' step3, so this matters downstream.
+- Malta 2030's clean_tiny solve, infeasible without the tie-break, now solves: 90.9% within 2%.

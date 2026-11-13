@@ -45,7 +45,7 @@ models' ProfitAgr, ProfitLandUse and PSEs.
    price or crushing margin (ProfitProc), dairy products x processing margin (ProfitDairy), the revenue of the regions
    without supply models less their land and feed-energy netputs (ProfitAgr), minus 20% of their feed cost
    (ProfitFeed). The base values per CAPRI region come from CAPRI's 2030 data with welfare.gms's formulas
-   (tools/build/build_welfare_base.py, capri_data/2017/market/welfare_base_2030.csv); against CAPRI's 2030 reference
+   (tools/build/build_welfare_base.py, capri_data/baselines/capri_greendeal_ref/1730/market/welfare_base_2030.csv); against CAPRI's 2030 reference
    levels, CSSP and ProfitDairy are equal in all 80 regions, ProfitAgr and ProfitProc within a median 4-5%, ProfitFeed
    not comparable (CHANGELOG 28 October 2026). Comparisons of two runs take the difference of the levels.
 2. **Non-EU farms and feed users**: the integrals of the model's constant-elasticity functions, not CAPRI's NQ
@@ -57,7 +57,7 @@ models' ProfitAgr, ProfitLandUse and PSEs.
 4. **Not represented**: market PSE/CSE/FSE wedges, processing aids, export subsidies and intervention costs (the model
    has none); the land owners of the regions without supply models (no land market); CAPRI's emission tax revenues
    (not in CAPRI's total either, welfare.gms l. 790-795).
-5. **CAPRI's welfare at hand: the 2030 reference's levels only** (capri_data/sources/capri_res/ref2030_welfare.csv,
+5. **CAPRI's welfare at hand: the 2030 reference's levels only** (capri_data/sources/raw/capri/results/ref2030_welfare.csv,
    from scen_ref_2030.txt). The Green Deal file of the same pair and the res_2_1730greendeal... files carry no welfare
    rows, so no scenario change can be compared with CAPRI's. The levels the model also reports as levels can be
    compared with the model's baseline: TariffRev (EU27 4,228), TRQRents (EU27 407), the supply models' MGVA (EU27

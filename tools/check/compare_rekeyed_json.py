@@ -52,7 +52,7 @@ def main():
     o, n = old, new
     for k in (a.key.split("/") if a.key else []):      # a path of keys: regional/herds
         o, n = o[k], n[k]
-    rmap = list(csv.DictReader(io.StringIO(show(a.old_ref, "capri_data/shared/region_capri_map.csv"))))
+    rmap = list(csv.DictReader(io.StringIO(show(a.old_ref, "capri_data/codes/region_capri_map.csv"))))
     one = {r["region"]: r["capri_region"] for r in rmap if r["relation"] == "one-to-one"}
     out, cmp_ = [], 0
     for r, c in one.items():

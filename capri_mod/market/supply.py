@@ -30,6 +30,9 @@ class SupplyMixin(MarketStateMixin):
     #: arm/market_model.gms l. 1696-1790): the rents of TCRP, FODFAL, FRUN clear each non-EU region's land market
     #: (true, CAPRI's form) or are held at calibration (false, until 4 November 2026)
     noneu_land_market = setting("market.noneu_land_market")
+    #: CAPRI's land-use-change estimation outside the EU (luc_market; capri_mod/market/luc.py), reported with the
+    #: market's solution
+    luc_market = setting("market.luc_market")
     #: CAPRI's agricultural land types of the market (xx1Land / luAgrMrk, arm/arm_sets.gms)
     MARKET_LAND = ("TCRP", "FODFAL", "FRUN")
 
@@ -925,6 +928,7 @@ class SupplyMixin(MarketStateMixin):
                 Fv, J = lf[1](dr_, base)
                 return np.asarray(Fv).ravel(), np.asarray(J).reshape(len(fr), len(fr))
             Fv, J = F(dr)
+            _stall_tol = float(_settings().get("market.land_stall_tol"))
             for _ in range(100):
                 if np.max(np.abs(Fv) / scale) < 1e-13:
                     break
@@ -938,7 +942,10 @@ class SupplyMixin(MarketStateMixin):
                     t *= 0.5
                 dr, Fv, J = dr + t * step, F1, J1
             else:
-                raise RuntimeError(f"market: the land market of {rms} did not clear (residual {np.max(np.abs(Fv)):.3g})")
+                # the 1e-13 target not met in 100 steps: accepted where the residual is within market.land_stall_tol
+                # (round-off: the line search no longer reduces it), else the run stops
+                if not np.max(np.abs(Fv) / scale) < _stall_tol:
+                    raise RuntimeError(f"market: the land market of {rms} did not clear (residual {np.max(np.abs(Fv)):.3g})")
             out[rms] = dr
         return out
 

@@ -13,7 +13,8 @@ ROOT = Path(__file__).resolve().parents[2]
 def test_the_input_is_capris_share_exactly():
     from capri_mod.csvio import read_csv
     from capri_mod.fert.npk import manure_applied_share
-    s = read_csv(ROOT / "capri_data" / "sources" / "environment" / "npk_dataout_2030.csv.xz", keep_default_na=False)
+    from capri_mod.tests._sources import read_source
+    s = read_source(ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "npk_dataout_2030.parquet", keep_default_na=False)
     s = s[(s.item == "") & (s.row.isin(["EXCRET", "MTRADE"]))]
     v = {(t.region, t.row, t.col): float(t.value) for t in s.itertuples(index=False)}
     want = {(r, {"PHOF": "P", "POTF": "K", "NITF": "N"}[col]): max(0.0, 1.0 - v.get((r, "MTRADE", col), 0.0) / x)
@@ -27,4 +28,4 @@ def test_the_model_reads_no_file_under_sources(tmp_path):
     from capri_mod.market.inputs import MarketInputs
     for inp in (RunInputs(tmp_path, "2017"), MarketInputs(tmp_path, "2017")):
         with pytest.raises(ValueError, match="capri_data/sources"):
-            inp.path("npk_dataout_2030.csv.xz", "sources/environment")
+            inp.path("npk_dataout_2030.parquet", "sources/environment")

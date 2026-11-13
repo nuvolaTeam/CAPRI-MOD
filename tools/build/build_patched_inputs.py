@@ -7,7 +7,7 @@ Two files are written by more than one builder, each owning some cells:
       3 build_animal_yields.py         animal columns (CAPRI YILD per model head)
   capri_data/2017/market/producer_prices.csv
       2 build_eu_producer_prices.py    crop rows (CAPRI's production-weighted EU price; reads yields.csv, and the
-                                       regional prices that step 1 writes to sources/capreg/capreg_producer_prices.csv)
+                                       regional prices that step 1 writes to sources/intermediate/capreg/capreg_producer_prices.parquet)
       livestock rows: no builder (the SHGM/SHGF rows came from build_shg_split.py's one-time split)
   (armington_params.csv, written by build_dairy_trade_params.py and build_feed_byproducts.py until 29 October
   2026: removed with its last column, eps, which acted on no result; KNOWN_ISSUES K72)

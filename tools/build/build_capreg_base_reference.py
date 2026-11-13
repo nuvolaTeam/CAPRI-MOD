@@ -3,7 +3,8 @@
 Source: CAPREG's base-year results res_17<CC>.gdx, symbol DATA2(rall, cols, rows, "Y"), from the project lead's CAPRI
 installation, either as the GDX files (read with the GDX library, --gdxlib or CAPRI_GDXLIB) or as text dumps
 res_17<CC>.txt (a GAMS parameter listing "'region'.'col'.'row'.'Y' value,"; uploaded as res_17zip.zip and single
-files). CAPTRD reads this symbol from %results_in%\\capreg\\res_%BAS%<MS.tl:2>.gdx (the first two characters of the
+files), or as the CAPRI GUI's CSV exports DATA2_res_17<CC>.csv (uploaded as capri_export_zip.zip; used for a country
+with neither: Spain). CAPTRD reads this symbol from %results_in%\\capreg\\res_%BAS%<MS.tl:2>.gdx (the first two characters of the
 country code: TU for TUR) and copies it to p_data(..., "BASM") (captrd.gms l. 528-580). <CC> is that file code.
 
 The dumps carry 15 significant digits (the GDX files 17): parity with CAPTRD is to about 1e-14 relative for countries
@@ -100,9 +101,24 @@ def _gdx_records(path: Path, gdxlib: str):
     g.gdxClose(h)
 
 
+def _csv_records(path: Path):
+    """The CAPRI GUI's CSV export of DATA2 (DATA2_res_17<CC>.csv: "RALL","Dim2","Dim3","Dim4","Val"; Eps as the text
+    Eps; 15 significant digits, as the text dumps). Checked on Denmark, 10 November 2026: equal to the text dump in all
+    10,991 records."""
+    with open(path, newline="", encoding="latin-1") as fh:
+        rd = csv.reader(fh)
+        if next(rd) != ["RALL", "Dim2", "Dim3", "Dim4", "Val"]:
+            raise ValueError(f"{path}: not a DATA2 export")
+        for r, c, w, t, v in rd:
+            if v.strip().upper() == "EPS":
+                yield (r, c, w, t, 0.0, 1)
+            else:
+                yield (r, c, w, t, float(v), 0)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--src", required=True, action="append", help="folder or zip with res_17<CC>.gdx or .txt")
+    ap.add_argument("--src", required=True, action="append", help="folder or zip with res_17<CC>.gdx or .txt, or the GUI's DATA2_res_17<CC>.csv")
     ap.add_argument("--gdxlib", default=os.environ.get("CAPRI_GDXLIB", ""))
     args = ap.parse_args()
     tmps, found = [], {}
@@ -112,14 +128,20 @@ def main() -> None:
             tmps.append(tmp)
             with zipfile.ZipFile(src) as z:
                 z.extractall(tmp.name)
-            files = sorted(Path(tmp.name).rglob("res_17*.*"))
+            files = sorted(Path(tmp.name).rglob("*res_17*.*"))
         else:
-            files = sorted(src.glob("res_17*.*"))
+            files = sorted(src.glob("*res_17*.*"))
         for f in files:
-            if f.suffix.lower() not in (".txt", ".gdx"):
+            if f.suffix.lower() not in (".txt", ".gdx", ".csv"):
                 continue
-            cc = f.stem[len("res_17"):]
-            if cc not in found or f.suffix.lower() == ".gdx":
+            if f.suffix.lower() == ".csv" and not f.stem.startswith("DATA2_res_17"):
+                continue
+            if f.suffix.lower() != ".csv" and not f.stem.startswith("res_17"):
+                continue
+            cc = f.stem.split("res_17", 1)[1]
+            # preference: the GDX file, then the text dump, then the GUI's CSV export
+            rank = {".gdx": 0, ".txt": 1, ".csv": 2}
+            if cc not in found or rank[f.suffix.lower()] < rank[found[cc].suffix.lower()]:
                 found[cc] = f
     if not found:
         raise SystemExit(f"no res_17*.gdx or .txt in {args.src}")
@@ -127,7 +149,8 @@ def main() -> None:
     total = 0
     for cc, f in sorted(found.items()):
         out = OUT / f"{cc}.csv.gz"
-        recs = _gdx_records(f, args.gdxlib) if f.suffix.lower() == ".gdx" else _records(f)
+        recs = (_gdx_records(f, args.gdxlib) if f.suffix.lower() == ".gdx"
+                else _csv_records(f) if f.suffix.lower() == ".csv" else _records(f))
         n = 0
         with gzip.open(out, "wt", newline="", compresslevel=6) as fh:
             w = csv.writer(fh, lineterminator="\n")

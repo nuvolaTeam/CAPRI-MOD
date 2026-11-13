@@ -1,7 +1,7 @@
 -- Inputs under capri_data/shared. Generated structure (types, NOT NULL, keys) from the files on 29 October 2026; units open where no
 -- builder or CAPRI file states them (value_units).
 
--- file: capri_data/shared/capri_member_state_codes.csv
+-- file: capri_data/codes/capri_member_state_codes.csv
 CREATE TABLE shr_capri_member_state_codes (
     nuts_prefix VARCHAR NOT NULL,
     capri_ms VARCHAR NOT NULL,
@@ -14,7 +14,7 @@ COMMENT ON TABLE shr_capri_member_state_codes IS 'capri_member_state_codes (no b
 -- or TUR for Turkey's units, sets.gms MAP_RR TUR.SET.R_TUR)
 SELECT region, capri_ms FROM regional_units WHERE capri_ms NOT IN (SELECT capri_ms FROM shr_capri_member_state_codes);
 
--- file: capri_data/shared/capri_units_nuts2024.csv
+-- file: capri_data/codes/capri_units_nuts2024.csv
 CREATE TABLE shr_capri_units_nuts2024 (
     capri_unit VARCHAR NOT NULL,
     nuts2024 VARCHAR NOT NULL,
@@ -29,7 +29,7 @@ INSERT INTO value_units VALUES
   ('shr_capri_units_nuts2024', 'uaa_ha', NULL, 'open', 'capri_units_nuts2024.uaa_ha: unit to be established'),
   ('shr_capri_units_nuts2024', 'weight', NULL, 'open', 'capri_units_nuts2024.weight: unit to be established');
 
--- file: capri_data/shared/eu_market_blocks.csv
+-- file: capri_data/codes/eu_market_blocks.csv
 CREATE TABLE shr_eu_market_blocks (
     ms VARCHAR NOT NULL,
     block VARCHAR NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE shr_eu_market_blocks (
 );
 COMMENT ON TABLE shr_eu_market_blocks IS 'The EU''s trade blocks of CAPRI''s market (market step E, eu_blocks): member state -> block, from CAPRI''s region (tools/build/build_eu_market_blocks.py)';
 
--- file: capri_data/shared/model_parameters.csv
+-- file: capri_data/codes/model_parameters.csv
 CREATE TABLE shr_model_parameters (
     name VARCHAR NOT NULL,
     "key" VARCHAR,
@@ -52,14 +52,14 @@ COMMENT ON TABLE shr_model_parameters IS 'model_parameters (no builder: a declar
 INSERT INTO value_units VALUES
   ('shr_model_parameters', 'value', NULL, 'open', 'model_parameters.value: unit to be established');
 
--- file: capri_data/shared/rms.csv
+-- file: capri_data/codes/rms.csv
 CREATE TABLE shr_rms (
     rms VARCHAR NOT NULL,
     PRIMARY KEY (rms)
 );
 COMMENT ON TABLE shr_rms IS 'rms (no builder: a declared table)';
 
--- file: capri_data/shared/nuts_version_correspondence.csv
+-- file: capri_data/codes/nuts_version_correspondence.csv
 CREATE TABLE shr_nuts_version_correspondence (
     capri_code VARCHAR NOT NULL,
     nuts_code VARCHAR,
@@ -75,4 +75,5 @@ INSERT INTO value_units VALUES
   ('model_price_follows', 'eu_market', NULL, 'open', 'a flag (1: in the EU markets'' price step)'),
   ('model_activity_classes', 'pesticide', NULL, 'open', 'a flag (1: the pesticide yield loss reaches the crop)'),
   ('model_activity_classes', 'share_term_arable', NULL, 'open', 'a flag (1: in the PMP share term''s arable denominator)'),
+  ('model_activity_classes', 'technologies', NULL, 'open', 'a count: CAPRI''s LEVL technologies of the activity (1: T; 2: T1 and T2)'),
   ('model_land_types', 'in_land_market', NULL, 'open', 'a flag (1: a column of the land market)');

@@ -3,7 +3,7 @@
 parameter_list and table read the data statements of CAPRI's include files as tools/build/build_captrd_dat.py read
 them before the sources were converted to CSV (30 October 2026): GAMS labels upper-cased (GAMS is case-insensitive),
 values as floats. parameter_records and table_records are the same readers returning the labels and the numbers as
-the file writes them (tools/build/convert_sources_to_csv.py writes those). gdxdump_symbols reads the text gdxdump
+the file writes them (tools/build/convert_sources.py writes those). gdxdump_symbols reads the text gdxdump
 writes (`Parameter p(*,*) text / 'a'.'b' value, ... /;` and sets).
 """
 from __future__ import annotations
@@ -52,12 +52,12 @@ def parameter_list(path: Path, name: str, dim: int):
             for r in parameter_records(read_text(path), name, dim, str(path))]
 
 
-def table_records(text: str, name: str, row_dims: int, where: str = ""):
-    """The records of `Table name(...) "text"` (GAMS table: a header line of column labels, then rows of a label of
+def table_records(text: str, name: str, row_dims: int, where: str = "", unquote: bool = False):
+    """The records of `Table name(...) "text"` or `Table name "text"` (GAMS table: a header line of column labels, then rows of a label of
     row_dims parts joined by dots and numbers in the columns they overlap), as written: (row keys..., column, value
-    text)."""
+    text). A quoted label may hold blanks ('Mature sheep'); unquote: its quotes removed from the row keys."""
     lines = text.splitlines()
-    k = next(i for i, ln in enumerate(lines) if re.match(rf"\s*table\s+{name}\s*\(", ln, flags=re.I))
+    k = next(i for i, ln in enumerate(lines) if re.match(rf"\s*table\s+{name}(\s|\(|$)", ln, flags=re.I))
     i = k + 1
     while not lines[i].strip() or lines[i].lstrip().startswith("*"):
         i += 1
@@ -70,7 +70,7 @@ def table_records(text: str, name: str, row_dims: int, where: str = ""):
             break
         if not s.strip() or s.lstrip().startswith("*"):
             continue
-        toks = [(m.start(), m.end(), m.group(0)) for m in re.finditer(r"\S+", s)]
+        toks = [(m.start(), m.end(), m.group(0)) for m in re.finditer(r"(?:[^\s'\"]|'[^']*'|\"[^\"]*\")+", s)]
         label, j = "", 0
         while j < len(toks):
             label += toks[j][2]
@@ -79,6 +79,8 @@ def table_records(text: str, name: str, row_dims: int, where: str = ""):
                     j < len(toks) and toks[j][2].startswith(".")):
                 break
         keys = [x.strip() for x in label.split(".")]
+        if unquote:
+            keys = [x[1:-1] if len(x) > 1 and x[0] == x[-1] and x[0] in "'\"" else x for x in keys]
         if len(keys) != row_dims:
             raise ValueError(f"{where}: {name}: unreadable row label in {ln!r}")
         for a, b, v in toks[j:]:

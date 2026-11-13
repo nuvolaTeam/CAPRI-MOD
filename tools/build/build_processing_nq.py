@@ -41,7 +41,7 @@ DATA = EXPORTS / "data_market_1730defaulta.csv"
 DUMP = EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"
 OUT = ROOT / "capri_data" / "2017" / "market"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/codes/eu_market_blocks.csv)
 EU = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 USES = ("HCON", "FEED", "PROC", "BIOF")
 
@@ -70,7 +70,7 @@ def main() -> None:
             h.append((m.group(1), m.group(2), m.group(3), num(m.group(4))))
     regs = {r for r, _, _, _ in h}
     v = defaultdict(float)
-    r2m = _read_csv(ROOT / "capri_data" / "shared" / "rms_to_rm.csv")   # CAPRI's RMS_TO_RM (build_gl_demand.py)
+    r2m = _read_csv(ROOT / "capri_data" / "codes" / "rms_to_rm.csv")   # CAPRI's RMS_TO_RM (build_gl_demand.py)
     r2m = dict(zip(r2m.rms, r2m.rm))
     pat2 = re.compile(r"^'([^']*)'\.'(PROC|HCON|FEED|BIOF|PPRI|ARM1P)'\.'([A-Za-z]+)'\.'CAL'\s+(\S+)")
     for line in open(DATA, encoding="latin-1"):

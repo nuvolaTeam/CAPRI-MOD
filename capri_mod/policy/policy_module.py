@@ -107,6 +107,13 @@ class PolicyScenario:
     #: surplus per hectare cut by surplus_cut (surpRedu/100), no tiers, no caps
     surplus_rule: str = "star3"
     surplus_cut: float = 0.5
+    #: a scenario of CAPRI's Green Deal group (%scenarioGroup%==greendeal): CAPRI frees the slack of the fertiliser
+    #: priors' partial derivative in its listed regions (set_fert_priors.gms, v_fertDistPartialSlack)
+    greendeal_group: bool = False
+    #: CAPRI's obligatory set-aside (supply_model.gms SETA_): the set-aside rate in percent (DATA(ru, act, "SETR"))
+    #: by regional unit and arable activity, {region: {activity: pct}}; the scenario folder's set_aside_rates.csv
+    #: (e.g. scen/set_aside/set_aside_10.gms). Empty: no obligation, as CAPRI's 2030 data (SETR 0 since 2008)
+    set_aside_rates: dict = field(default_factory=dict)
     #: CAPRI's manure trade (GUI "New Manure Trade Module", manureTradeNew) for this scenario and its baseline;
     #: None = capri-mod's default (CAPRIModel.use_manure_market: on, as star 3.0's GUI)
     manure_trade: Optional[bool] = None
@@ -325,7 +332,7 @@ class PolicyModule:
         d = float(self.scenario.biss_rate_change or 0.0)
         if d:
             for crop in CROPS:
-                if crop != "SETA":
+                if crop not in ("VSET", "FALL"):        # set-aside (the model's SETA until S2, 7 November 2026)
                     adders[crop] += d
         for comm, rate in self.scenario.coupled_support.items():
             if comm in adders.index:

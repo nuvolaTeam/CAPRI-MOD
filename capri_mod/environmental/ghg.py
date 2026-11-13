@@ -13,7 +13,7 @@ from capri_mod.units import M_N2O, M_N2O_N, M_CO2, M_UREA_N, MJ_PER_MCAL   # the
 class GHGBlock:
     def _manure_loss_shares(self, region: str) -> dict:
         """CAPRI's manure N lost in housing and storage per kg excreted, by animal ((GASANI + RUNANI) / MANN, 2030
-        reference; capri_data/2017/environment/manure_housing_losses_2030.csv). Raises where the data is missing."""
+        reference; capri_data/baselines/capri_greendeal_ref/1730/environment/manure_housing_losses_2030.csv). Raises where the data is missing."""
         c = _est.setdefault(self.par, "mloss_cache", {})
         if region not in c:
             t = self.data.get("manure_housing_losses") if hasattr(self, "data") else None
@@ -92,12 +92,10 @@ class GHGBlock:
         activities: pd.Series,   # activity levels (1000 ha / 1000 heads)
         region: str,
         n_intensity: Optional[Dict[str, float]] = None,
-        grass_shift: float = 0.0,
     ) -> Dict[str, float]:
         """
-        Compute GHG emissions (kt CO2-eq) for a region. ``grass_shift``: grassland moved from
-        intensive to extensive (1000 ha, Sprint 7a), whose fertiliser rate is GRAS's in proportion
-        to CAPRI's need of each activity.
+        Compute GHG emissions (kt CO2-eq) for a region (the grassland activities GRAE and GRAI each with its own
+        fertiliser rate since S2, 7 November 2026; before, the grassland split's shift as an argument).
 
         Uses IPCC Tier 1 emission factors with EU-specific adjustments.
         """
@@ -154,12 +152,6 @@ class GHGBlock:
             # (was /1e6: soil N2O, liming and urea CO2 came out in Mt while every other gas is in kt,
             # so the GHG total left them out - 83 kt of soil N2O in the EU instead of 83 Mt)
 
-        if grass_shift:
-            dl = self.grass_intensity_delta(region) or {}
-            r_g = self._base_mineral_rate(region, "GRAS")
-            if r_g > 0:
-                # the grassland intensity shift's change of mineral N per ha (kg) on the shifted area (1000 ha)
-                total_n_applied += grass_shift * float(dl.get("mineral_rate", 0.0)) / 1e3
         # Direct N2O from soils
         n2o_soil_n = total_n_applied * EF_SOIL_N2O_DIRECT
         ghg["N2O_SOIL"] += (n2o_soil_n * M_N2O / M_N2O_N) * GWP_N2O

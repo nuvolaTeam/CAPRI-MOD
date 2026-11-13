@@ -32,7 +32,7 @@ ACTS_2017 = ["BULF", "HEIF", "HEIR", "PIGF", "POUF", "SOWS", "HENS"]
 #: the policy accounts dataOut holds under LEVL for the EU aggregate: not activity levels
 POLICY_ACCOUNT = re.compile(r"^(bud.*|PSE_.*|BlueBox|GreenBox|DeMinimis)$")
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
-from _model_regions import EU_MS2  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+from _model_regions import EU_MS2  # noqa: E402  (capri_data/codes/eu_market_blocks.csv)
 #: CAPRI's EU member states as CAPREG's dump codes (res_17<CC>.txt): 26 files, BL = Belgium-Luxembourg
 EU27 = sorted(EU_MS2)
 

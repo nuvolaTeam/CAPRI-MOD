@@ -27,7 +27,7 @@ is defensible, but it should be stated.
 GTAP
 ----
 Until 30 October 2026 it also wrote the GTAP Armington elasticities (esubd, esubm of dat/arm/GTP57_134.gdx) per model
-commodity through a GTAP-sector concordance to sources/estnlp/gtap_armington.csv. Nothing read that file (the
+commodity through a GTAP-sector concordance to sources/intermediate/estnlp/gtap_armington.csv. Nothing read that file (the
 model's Armington terms come from tools/build/build_bilateral_market.py, armington_rho.csv) and it was removed with
 that part of this tool, the project lead's decision (KNOWN_ISSUES K103).
 
@@ -66,10 +66,10 @@ def main() -> None:
     ap.add_argument("--data-dir", type=Path, default=Path("capri_data"))
     args = ap.parse_args()
 
-    out = args.data_dir / "sources" / "estnlp"
+    out = args.data_dir / "sources" / "intermediate" / "estnlp"
     out.mkdir(parents=True, exist_ok=True)
 
-    # the model's regions are CAPRI's regional units (shared/regional_units.csv): each CAPRI code is its own region
+    # the model's regions are CAPRI's regional units (codes/regional_units.csv): each CAPRI code is its own region
     # (until 27 October 2026 mapped through shared/nuts_crosswalk.json, which left 21 regions unmatched)
     import sys as _sys
     _sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib'))
@@ -88,7 +88,8 @@ def main() -> None:
     cross = pela[pela.crop != pela.wrt][
         ["model_region", "crop", "wrt", "value"]]
 
-    own.to_csv(out / "pela_own_price.csv")
+    from _sources_io import write_source
+    write_source(own, out / "pela_own_price.parquet")
     # (the cross-price records were also written to pela_cross_by_region.json for the supply module's legacy cross
     # terms; that path and the file were removed on 29 October 2026: KNOWN_ISSUES K105)
     print(f"PELA {PELA_YEAR}: {len(pela):,} records reaching "

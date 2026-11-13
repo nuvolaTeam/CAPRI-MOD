@@ -31,7 +31,7 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "tools" / "pipeline" / "builders.json"
 sys.path.insert(0, str(ROOT / "tools" / "check"))
 from reproduce_builders import placeholder  # noqa: E402  ($EXPORTS, $SOURCES, $REFERENCE)
-#: the repository's git store: a builder reading the repository's history (convert_sources_to_csv, git show) reads it;
+#: the repository's git store: a builder reading the repository's history (convert_sources, git show) reads it;
 #: those objects are the repository, not an external source
 GIT_DIR = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=ROOT,
                          capture_output=True, text=True).stdout.strip()
@@ -43,8 +43,10 @@ def build(trace: dict) -> tuple[list, list]:
     for key, d in trace.items():
         parts = key.split()
         builder, args = parts[0], parts[1:]
+        # a builder invoked more than once: named by its arguments, a path by its file name (6 November 2026: the full
+        # paths made names longer than the cut and two collided; file names also keep the names when a folder moves)
         name = builder if names[builder] == 1 else builder + ":" + "_".join(
-            a.replace("$EXPORTS/", "").replace("$SOURCES/", "").replace("$REFERENCE/", "").replace("/", ".").lstrip("-") for a in args)[:80]
+            a.rsplit("/", 1)[-1].lstrip("-") for a in args)[:80]
         outs = sorted(set(d["writes"]) | set(d["rewrites"]))
         ins = sorted(set(d["reads"]) - set(outs))
         # a builder's own temporary files (tempfile) are not sources
@@ -61,6 +63,9 @@ def build(trace: dict) -> tuple[list, list]:
     for f, w in sorted(writers.items()):
         if len(w) > 1:
             problems.append(f"two writers of {f}: {w}")
+    for n, k in sorted(collections.Counter(t["task"] for t in tasks).items()):
+        if k > 1:
+            problems.append(f"task name {n} given {k} times")
     # cycles: Tarjan over task -> task edges (writer of an input -> reader)
     by = {t["task"]: t for t in tasks}
     G = collections.defaultdict(set)

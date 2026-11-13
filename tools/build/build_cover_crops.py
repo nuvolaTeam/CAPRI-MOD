@@ -16,19 +16,21 @@ CAPRI (envind/cover_crops.gms, supply/supply_model.gms, pol_input/greendeal/*_io
     for Austria and a few German regions only); the potential-area row uses p_winterCoverShare, filled
     NUTS2 <- member state <- EU (policy/define_greening_limits.gms). Both are written.
 
-Sources: capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz (CATC LEVL and TOIN, UAAR
-LEVL, crop LEVL; CAPRI's 2030 reference with technologies), capri_data/sources/capri_dat/policy/
-wintercovershare_p_winterCoverShare0.csv (dat/policy/wintercovershare.gms, converted to CSV by
-tools/build/convert_sources_to_csv.py), the GAMS source reports/def_cbalance.gms (p_cInput).
+Sources: capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz (CATC LEVL and TOIN, UAAR
+LEVL, crop LEVL; CAPRI's 2030 Green Deal baseline, the model's 2030 base), CAPRI's calibration run
+res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv (CATC TOIN where the baseline has no catch crop in a region), capri_data/sources/raw/capri/dat/policy/
+wintercovershare_p_winterCoverShare0.parquet (dat/policy/wintercovershare.gms, converted to CSV by
+tools/build/convert_sources.py), the GAMS source reports/def_cbalance.gms (p_cInput).
 
 Written (capri_data/2017/supply/):
   cover_crops.csv          region, capri_region, catc_share_2030 (CATC / UAAR), catc_cost_eur_ha (TOIN over CAPRI's
-                           inflation to 2030: the model's 2017 money, K108),
-                           biofix_t_n_ha
+                           inflation to 2030: the model's 2017 money, K108), cost_source (baseline: the
+                           baseline's TOIN; calibration: CAPRI's calibration run's, where the baseline has no catch
+                           crop in the region; none), biofix_t_n_ha
   winter_cover_share.csv   region, crop, share (filled), share0 (as given; 0 where not given)
 
 Model crops that sum several CAPRI activities take their shares weighted by CAPRI's 2030 levels in the
-region (OFOD: OFAR, ROOF; SETA: SETA, FALL; GRAS: GRAE, GRAI; olives OLIV and table olives TABO separate).
+region (GRAS: GRAE, GRAI; olives OLIV and table olives TABO separate).
 
     python tools/build/build_cover_crops.py [--gams-dir capri_sources/gams]
 """
@@ -42,7 +44,9 @@ import pandas as pd
 import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
-from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import CALIBRATION_REF, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
@@ -50,7 +54,7 @@ _sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "che
 from _model_regions import CTRY as MS_CODE  # noqa: E402  CAPRI member-state codes (capri_member_state_codes.csv)
 CTRY_CAPRI = MS_CODE
 #: CAPRI's p_winterCoverShare0 (dat/policy/wintercovershare.gms as CSV)
-WCS = ROOT / "capri_data" / "sources" / "capri_dat" / "policy" / "wintercovershare_p_winterCoverShare0.csv"
+WCS = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "policy" / "wintercovershare_p_winterCoverShare0.parquet"
 
 
 def _load(path):
@@ -61,10 +65,9 @@ def _load(path):
 
 def read_wcs(path: Path = WCS) -> dict:
     """{(capri_region, capri_act): share} from p_winterCoverShare0 of wintercovershare.gms, converted to CSV by
-    tools/build/convert_sources_to_csv.py (eps -> 0)."""
-    with open(path, newline="", encoding="utf-8") as fh:
-        return {(r["region"], r["act"].upper()): 0.0 if r["value"].lower() == "eps" else float(r["value"])
-                for r in csv.DictReader(fh)}
+    tools/build/convert_sources.py (eps -> 0)."""
+    return {(r["region"], r["act"].upper()): 0.0 if r["value"].lower() == "eps" else float(r["value"])
+            for r in source_records(path)}
 
 
 def read_cinput(path: Path) -> dict:
@@ -86,8 +89,9 @@ def read_cinput(path: Path) -> dict:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--gams-dir", type=Path, default=SOURCES / "gams")
+    ap.add_argument("--calibration", type=Path, default=CALIBRATION_REF)
     a = ap.parse_args()
-    terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz",
+    terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv.xz",
                         header=None, names=["region", "act", "item", "value"], dtype=str)
     terms["value"] = pd.to_numeric(terms["value"], errors="coerce")
     lev = terms[terms["item"] == "LEVL"].pivot_table(index="region", columns="act", values="value")
@@ -99,6 +103,11 @@ def main():
     import _money
     toin = terms[(terms["act"] == "CATC") & (terms["item"] == "TOIN")].set_index("region")["value"] \
         / _money.deflator(2030)
+    # CAPRI's catch crops in its calibration run, for the cost where the baseline has none (see below)
+    rx_ = re.compile(r"^'([A-Z0-9]{8})'\.''\.'CATC'\.'TOIN'\.'2030'\s+([-\d.Ee+]+)")
+    toin_cal = {m.group(1): float(m.group(2)) / _money.deflator(2030)
+                for m in map(rx_.match, grep(r"^'[A-Z0-9]{8}'\.''\.'CATC'\.'TOIN'\.'2030'", str(a.calibration)).splitlines())
+                if m}
     wcs0 = read_wcs(WCS)
     cin = read_cinput(a.gams_dir / "reports" / "def_cbalance.gms")
 
@@ -124,13 +133,25 @@ def main():
     for reg in mr.model_regions():
         c8 = to_c8.get(reg)
         ms = mr.national_code(reg)
-        src = c8 if (c8 in lev.index and pd.notna(lev.at[c8, "CATC"]) if "CATC" in lev.columns else False) else ms
+        # the region's own entry where CAPRI reports the region (its UAAR): a CATC level it does not list is 0 (GAMS
+        # stores no zero; until 9 November 2026 the member state's share was taken there); else the member state's
+        reported = c8 in lev.index and "UAAR" in lev.columns and lev.at[c8, "UAAR"] > 0
+        src = c8 if reported else ms
         if src not in lev.index or "UAAR" not in lev.columns or not (lev.at[src, "UAAR"] > 0):
             continue
-        catc = float(lev.at[src, "CATC"]) if pd.notna(lev.at[src, "CATC"]) else 0.0
+        catc = float(lev.at[src, "CATC"]) if "CATC" in lev.columns and pd.notna(lev.at[src, "CATC"]) else 0.0
+        # the cost per ha: CATC's TOIN in the baseline; where the baseline has no catch crop in the region, the
+        # region's own TOIN in CAPRI's calibration run (the activity's input cost there, CAPRI's number for the same
+        # region; the baseline's and the calibration's TOIN per ha differ by up to 25% where both exist)
+        if src in toin.index and pd.notna(toin.get(src)):
+            cost, csrc = float(toin[src]), "baseline"
+        elif src in toin_cal:
+            cost, csrc = toin_cal[src], "calibration"
+        else:
+            cost, csrc = float("nan"), "none"
         bf = cin.get(c8 or "", cin.get(ms))
         rows.append({"region": reg, "capri_region": src, "catc_share_2030": catc / float(lev.at[src, "UAAR"]),
-                     "catc_cost_eur_ha": float(toin.get(src, float("nan"))),
+                     "catc_cost_eur_ha": cost, "cost_source": csrc,
                      "biofix_t_n_ha": (bf / 24.0 * 0.75 * 0.5) if bf is not None else float("nan")})
         wr = c8 if c8 in lev.index else ms
         for crop, acts in crop_map.items():

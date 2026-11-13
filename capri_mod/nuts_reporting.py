@@ -1,7 +1,7 @@
 """Results on CAPRI's regional units reported on the current NUTS-2 regions (NUTS 2024).
 
-The model runs on CAPRI's 221 regional units (capri_data/shared/regional_units.csv). For reporting on current NUTS,
-capri_data/shared/capri_units_nuts2024.csv (tools/build/build_nuts2024_reporting.py) links each unit to the NUTS-2024
+The model runs on CAPRI's 221 regional units (capri_data/codes/regional_units.csv). For reporting on current NUTS,
+capri_data/codes/capri_units_nuts2024.csv (tools/build/build_nuts2024_reporting.py) links each unit to the NUTS-2024
 regions covering its territory; linked units and regions form groups, and each region of a group carries a weight, its
 share of the group's utilised agricultural area (Eurostat ef_lus_main). 202 of the 217 groups are one unit to one region,
 where the report is the unit's own value.
@@ -22,7 +22,7 @@ import pandas as pd
 
 from capri_mod.tableio import read_input
 
-_MAP = Path(__file__).resolve().parents[1] / "capri_data" / "shared" / "capri_units_nuts2024.csv"
+_MAP = Path(__file__).resolve().parents[1] / "capri_data" / "codes" / "capri_units_nuts2024.csv"
 
 
 def load_mapping(path: str | Path | None = None) -> pd.DataFrame:

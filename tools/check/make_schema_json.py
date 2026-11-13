@@ -62,7 +62,7 @@ def _names_in_code(root: Path):
                 lits.add(n.value)
             elif isinstance(n, ast.JoinedStr):
                 # a placeholder stands for one name part without "_" (a year, a country, a variant): f"land_rents_{y}.csv"
-                # names land_rents_2017.csv, not land_rents_capri_2017.csv (until 31 October 2026 any text, which
+                # names land_rents_2017.csv, not land_rents_capri_2017.parquet (until 31 October 2026 any text, which
                 # attributed CAPRI's land rents and TRQ extracts to the model); several placeholders in a row may
                 # stand for parts joined by "_" (f"bilateral_flows_{year}{suffix}.csv": bilateral_flows_2017_eu2.csv)
                 parts, fixed, run = [], "", 0

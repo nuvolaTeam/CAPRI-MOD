@@ -136,7 +136,7 @@ def build(dest_name: str) -> None:
     old_es = {}
     _old = Path(args.old) if args.old else None
     if _old and _old.exists():
-        md = _read_csv(_ROOT / "capri_data" / "2017" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
+        md = _read_csv(_ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
         L30 = defaultdict(float)
         SUB = {"DCOL": "DCOW", "DCOH": "DCOW", "BULL": "BULL", "BULH": "BULL", "HEIL": "HFRS", "HEIH": "HFRS", "HEIR": "HFRS",
                "SCOW": "BCOW", "CAMR": "CALV", "CAFR": "CALV", "CAMF": "CALV", "CAFF": "CALV"}

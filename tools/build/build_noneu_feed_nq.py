@@ -63,7 +63,7 @@ def main() -> None:
     hess = read_feed_hessian(ELAS, lambda r: r in regs)
     # every non-EU behavioural region's feed at CAL, for the trade regions' totals (the members with supply models in
     # CAPRI, outside FeedBal_'s domain, included: their feed is held)
-    with open(ROOT / "capri_data" / "shared" / "rms_to_rm.csv", newline="") as f:
+    with open(ROOT / "capri_data" / "codes" / "rms_to_rm.csv", newline="") as f:
         rm_all = {r["rms"]: r["rm"] for r in csv.DictReader(f)}
     from build_noneu_market_supply_nq import EU_RM
     noneu_all = {r for r, m in rm_all.items() if m not in EU_RM}

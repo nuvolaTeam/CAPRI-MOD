@@ -1,6 +1,7 @@
 # CAPRI's emission tax at EUR 50 per t CO2-eq (pol_input/ecampa/carbtax50_endotech_set12.gms l. 70, 214-226)
 [scenario]
 name = "CARBON_TAX_50"
+short_name = "carbtax50"
 kind = "scenario"
 description = "CAPRI emission tax at EUR 50.0/t CO2-eq on EU agricultural emissions (ghgTax)."
 capri_files = ["pol_input/ecampa/carbtax50_endotech_set12.gms"]

@@ -114,12 +114,16 @@ def main():
     global AD
     AD = _ad_options()
     t = _read_csv(D / "ammonia_technologies.csv")
-    eff = pd.read_parquet(D / "ammonia_technology_effects.parquet")
+    import sys as _sys_sio
+    _sys_sio.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+    from _sources_io import read_source, write_source
+    eff = read_source(Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "intermediate" / "ammonia"
+                      / "ammonia_technology_effects.parquet")
     E = {(r.region, r.activity, r.technology, r.item): r.reduction for r in eff.itertuples()}
     lit = _read_csv(D / "p_litRevAmmoTechsAdd.csv")
     LIT = {(r.region, r.activity): r.value for r in lit.itertuples()
            if r.technology == "ManAcid" and r.item == "NH3STO" and r.manure_system.upper() == "LIQUID"}
-    md = _read_csv(D / "capri_mann_days_2030.csv")
+    md = _read_csv(D.parents[2] / "baselines" / "capri_greendeal_ref" / "1730" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
     M = {(r.region, r.activity, r.item): r.value for r in md.itertuples()}
     fr = {}
     for f, k, scale in (("FracEmHouse", "H", 100.0), ("FracEmStorage", "S", 1.0), ("FracEmAppl", "A", 1.0)):

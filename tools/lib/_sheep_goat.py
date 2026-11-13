@@ -5,7 +5,7 @@ tables' owners: build_crop_economics_2017.py (variable_costs.csv) and build_eu_p
 
   costs   CAPRI's TOIN level-weighted over the region's CAPRI group (tools/lib/_model_regions.capri_groups; the member
           state's row where the group has no regional rows), 2017 results (res_17*.txt dumps, item 'Y')
-  prices  CAPREG's regional producer prices (sources/capreg/capreg_producer_prices.csv) herd-weighted over the units
+  prices  CAPREG's regional producer prices (sources/intermediate/capreg/capreg_producer_prices.parquet) herd-weighted over the units
           (animal_numbers.csv)
 """
 from __future__ import annotations

@@ -173,12 +173,9 @@ def linear_solver_options() -> dict:
 
 
 def _cache_max():
-    """Solver objects kept: CAPRI_NLP_CACHE if set (a property of the machine's memory), else run.nlp_cache_size."""
+    """Solver objects kept: the setting run.nlp_cache_size."""
     from capri_mod.settings import current as _settings
-    try:
-        return int(os.environ.get("CAPRI_NLP_CACHE", "") or _settings().get("run.nlp_cache_size"))
-    except ValueError:
-        return int(_settings().get("run.nlp_cache_size"))
+    return int(_settings().get("run.nlp_cache_size"))
 
 
 def _cascade_loss(sub, sh):
@@ -613,6 +610,7 @@ class CapriRegionalNLP:
         lc = [int(j) for j in (npk.get("land_cols") or npk.get("crop_cols") or [])]
         land = ca.sum1(y[lc]) if len(lc) > 1 else (y[lc[0]] if lc else 0)
         self.fert_rows = [len(g_rows), None]
+        self.excr_rows = {}                     # nutrient -> (row of fertDistExcr_, its scale): ManureNPK_'s value
         for nut, d in npk["nutrients"].items():
             G = d["groups"]
             flows = []                                              # (group index, source, mode t, accuracy)
@@ -666,6 +664,8 @@ class CapriRegionalNLP:
                 tot = pool_sum(s_)
                 rhs = E if s_ == "EXCR" else C
                 sc_ = max(sum(f[2] for f in flows if f[1] == s_), 1.0)
+                if s_ == "EXCR":
+                    self.excr_rows[nut] = (len(g_rows), sc_)
                 g_rows.append((tot - rhs) * pv(1.0 / sc_)); lbg.append(0.0); ubg.append(0.0)
             # the regulations (e_fertDistPartialRegu, e_fertDistReguMax): a beta density on a group's flow with its
             # support (0, max per ha x the group's area) - the Green Deal's mineral caps by crop group ("f2f") and the
@@ -679,13 +679,28 @@ class CapriRegionalNLP:
                 Y = self._lin(y, [(j, float(mx) * float(sh)) for j, sh in G[gi_]["crops"]])
                 regs[(gi_, s_)] = (Y, float(b1), float(b2))
                 regs_num[(gi_, s_)] = [(int(j), float(mx) * float(sh)) for j, sh in G[gi_]["crops"]]
+            # CAPRI's slack on the partial derivative of the prior density (v_fertDistPartialSlack, set_fert_priors.gms
+            # l. 668-785; the Green Deal group's listed regions): free within +-bound t, here in units of the flow's
+            # mode; e_fertDistPartial (partial + beta) (x + slack) = alpha - 1
+            sl_ = d.get("partial_slack") or {}
+            sl_i = [(i, float(sl_[(G[gi]["g"], s_)]) / m) for i, (gi, s_, m, acc) in enumerate(flows)
+                    if float(sl_.get((G[gi]["g"], s_), 0.0) or 0.0) > 0]
+            sig = ca.SX.sym(f"s{nut}", len(sl_i))
+            sig_of = {i: sig[k] for k, (i, _) in enumerate(sl_i)}
             # first-order conditions of the inner model
             for i, (gi, s_, m, acc) in enumerate(flows):
                 var_k = 1.0 / acc ** 2
                 bm = (1.0 + np.sqrt(1.0 + 4.0 * var_k)) / (2.0 * var_k)      # beta x mode
                 a1 = bm * bm * var_k - 1.0                                  # alpha - 1
                 dual = lam[gi] * e[s_] - (mu[pools.index(s_)] if s_ in pools else 0)
-                if (gi, s_) in regs:
+                if i in sig_of:
+                    # the prior's part with the slack, the regulation's (e_fertDistPartialRegu) without it
+                    Y_, b1_, b2_ = regs.get((gi, s_), (None, 1.0, 1.0))
+                    term = pv(a1) / (u[i] + sig_of[i]) + pv(b1_ - 1.0) / u[i] - pv(bm) - pv(m / T) * dual
+                    if Y_ is not None:
+                        term = term - pv(m * (b2_ - 1.0)) / (Y_ - x[i])
+                        g_rows.append((x[i] - float(_settings().get("fertiliser.support_margin")) * Y_) * pv(1.0 / m)); lbg.append(-np.inf); ubg.append(0.0)
+                elif (gi, s_) in regs:
                     Y, b1, b2 = regs[(gi, s_)]
                     term = pv(a1 + b1 - 1.0) / u[i] - pv(bm) - pv(m / T) * dual - pv(m * (b2 - 1.0)) / (Y - x[i])
                     g_rows.append((x[i] - float(_settings().get("fertiliser.support_margin")) * Y) * pv(1.0 / m)); lbg.append(-np.inf); ubg.append(0.0)
@@ -735,15 +750,15 @@ class CapriRegionalNLP:
                     g_rows.append(self._lin(y, nzA, scale=rs) + P * pv(1.0 / rs) + _cn)
                     _add = float((npk.get("n_rows_rhs_add") or {}).get(lab_, 0.0))
                     lbg.append(-np.inf); ubg.append((float(self._b[i_]) + _add) / rs)
-            vars_ = ca.vertcat(u, lam, mu, Pv)
+            vars_ = ca.vertcat(u, lam, mu, sig, Pv)
             o = nx0 + sum(int(v.shape[0]) for v in new)
             new.append(vars_)
             db = float(npk.get("dual_bound", 10.0))
-            lbx += [1e-3] * nfl + [-db * T] * (len(G) + len(pools)) + [0.0]
-            ubx += [1e3] * nfl + [db * T] * (len(G) + len(pools)) + [np.inf]
+            lbx += [1e-3] * nfl + [-db * T] * (len(G) + len(pools)) + [-b_ for _, b_ in sl_i] + [0.0]
+            ubx += [1e3] * nfl + [db * T] * (len(G) + len(pools)) + [b_ for _, b_ in sl_i] + [np.inf]
             self.fert[nut] = {"rows": (r_nut0, len(g_rows)), "flows": flows, "groups": [g_["g"] for g_ in G],
-                              "pools": pools, "off": o, "nfl": nfl,
-                              "off_P": o + nfl + len(G) + len(pools), "Pscale": Pscale, "T": T,
+                              "pools": pools, "off": o, "nfl": nfl, "slack": [i for i, _ in sl_i],
+                              "off_P": o + nfl + len(G) + len(pools) + len(sl_i), "Pscale": Pscale, "T": T,
                               "E": E, "C": C, "availE": availE, "price": float(d["price"]),
                               "regs": regs_num}
         self.fert_rows[1] = len(g_rows)
@@ -982,6 +997,11 @@ class CapriRegionalNLP:
         hi_l = np.where(at_u[act] & at_l[act], np.inf, np.where(at_u[act], np.inf, 0.0))
         # variable bounds active at base (not the activities': their residual is the calibration)
         free = np.ones(nX, bool); free[:len(self.acts)] = False
+        # the crops' technology mix columns (S1) are calibrated as the activities are: their residual is their linear
+        # term (CAPRI's p_pmpCnst per technology), not a source of row multipliers
+        for k_ in self.spec.get("mix_cols") or ():
+            if k_ < nX:
+                free[k_] = False
         fu, fl_ = np.isfinite(ubx), np.isfinite(lbx)
         vb_u = free & fu & (np.abs(xb - np.where(fu, ubx, 0.0)) <= tol * np.maximum(1.0, np.abs(np.where(fu, ubx, 0.0))))
         vb_l = free & fl_ & (np.abs(xb - np.where(fl_, lbx, 0.0)) <= tol * np.maximum(1.0, np.abs(np.where(fl_, lbx, 0.0)))) & ~vb_u
@@ -1056,7 +1076,7 @@ class CapriRegionalNLP:
             nk = Mk.shape[1]
             Ma = np.vstack([Mk / csc, np.sqrt(float(_settings().get("supply.nlp_cal_ridge"))) * np.eye(nk)])
             ra = np.concatenate([rhs, np.zeros(nk)])
-            sol = lsq_linear(Ma, ra, bounds=(lo[keep] * csc, hi[keep] * csc), lsmr_tol="auto",
+            sol = lsq_linear(Ma, ra, bounds=(lo[keep] * csc, hi[keep] * csc),
                              max_iter=int(_settings().get("supply.nlp_cal_lsq_max_iter")))
             mult[keep] = sol.x / csc
         else:
@@ -1142,7 +1162,8 @@ class CapriRegionalNLP:
             Xs = ca.vertcat(ca.DM(x[:o]), xf, ca.DM(x[o1:]))
             gf = ca.Function("gf", [self.X, self.p], [self.g[r0:r1]])(Xs, ca.DM(self.pval))
             S = ca.nlpsol("C", "ipopt", {"x": xf, "f": 0, "g": gf},
-                          {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": 1e-10,
+                          {"ipopt.print_level": int(_settings().get("diagnostics.ipopt_print_level")), "print_time": 0,
+                           "ipopt.tol": float(_settings().get("supply.nlp_fert_check_tol")),
                            "ipopt.max_iter": int(_settings().get("supply.nlp_max_iter")),
                            **linear_solver_options()})
             r = S(x0=x[o:o1], lbx=self.lbx[o:o1], ubx=self.ubx[o:o1], lbg=self.lbg[r0:r1], ubg=self.ubg[r0:r1])
@@ -1260,17 +1281,30 @@ class CapriRegionalNLP:
             _SOLVERS.move_to_end(key)
         return S
 
-    def solve(self, x0, max_iter=None, tol=1e-8, print_level=0, lam=None):
+    def solve(self, x0, max_iter=None, tol=None, print_level=None, lam=None):
         """IPOPT from x0; with lam = (lam_x, lam_g) of a previous solve of the same structure, IPOPT's warm start from
-        that primal-dual point (CAPRI's CONOPT also restarts from the last solution, its basis included)."""
+        that primal-dual point (CAPRI's CONOPT also restarts from the last solution, its basis included). tol is
+        required: until 5 November 2026 a default of 1e-8 served the retries with relaxed fertiliser caps, now the
+        setting supply.nlp_relax_try_tol."""
         import time as _t
         from capri_mod.settings import current as _settings
         _st = _settings()
         if max_iter is None:
             max_iter = int(_st.get("supply.nlp_max_iter"))
+        if tol is None:
+            raise ValueError("CapriRegionalNLP.solve needs its tolerance (outer_loop.nlp_tol_final or "
+                             "supply.nlp_relax_try_tol): no default")
+        if print_level is None:
+            print_level = int(_st.get("diagnostics.ipopt_print_level"))
         t0 = _t.time()
         opts = {"ipopt.print_level": print_level, "print_time": 0, "ipopt.max_iter": max_iter, "ipopt.tol": tol,
-                "ipopt.acceptable_tol": float(_st.get("supply.nlp_acceptable_tol")), "ipopt.mu_strategy": "adaptive",
+                "ipopt.acceptable_tol": float(_st.get("supply.nlp_acceptable_tol")), "ipopt.mu_strategy": str(_st.get("supply.nlp_mu_strategy")),
+                "ipopt.honor_original_bounds": str(_st.get("supply.nlp_honor_original_bounds")),
+                "ipopt.constr_viol_tol": float(_st.get("supply.nlp_constr_viol_tol")),
+                "ipopt.acceptable_iter": int(_st.get("supply.nlp_acceptable_iter")),
+                "ipopt.bound_relax_factor": float(_st.get("supply.nlp_bound_relax_factor")),
+                "ipopt.nlp_scaling_method": str(_st.get("supply.nlp_scaling_method")),
+                "ipopt.nlp_scaling_max_gradient": float(_st.get("supply.nlp_scaling_max_gradient")),
                 "ipopt.fixed_variable_treatment": str(_st.get("supply.nlp_fixed_variable_treatment")),
                 # a guard: a regional solve normally takes well under a second; one that stalls is cut and the caller's
                 # next start (or fallback) follows
@@ -1281,10 +1315,27 @@ class CapriRegionalNLP:
             # active set no longer fits can take over a thousand (DEB2 1,252 in the Green Deal baseline), where the
             # cold start from the same point (the caller's next start) takes a few hundred at most
             opts["ipopt.max_iter"] = min(int(max_iter), int(_st.get("supply.nlp_warm_max_iter")))
-            opts.update({"ipopt.warm_start_init_point": "yes", "ipopt.mu_init": 1e-6,
-                         "ipopt.warm_start_bound_push": 1e-9, "ipopt.warm_start_mult_bound_push": 1e-9,
-                         "ipopt.warm_start_slack_bound_push": 1e-9})
+            opts.update({"ipopt.warm_start_init_point": "yes",
+                         "ipopt.mu_init": float(_st.get("supply.nlp_warm_start_mu_init")),
+                         "ipopt.warm_start_bound_push": float(_st.get("supply.nlp_warm_start_bound_push")),
+                         "ipopt.warm_start_mult_bound_push": float(_st.get("supply.nlp_warm_start_mult_bound_push")),
+                         "ipopt.warm_start_slack_bound_push": float(_st.get("supply.nlp_warm_start_slack_bound_push"))})
+        from capri_mod import runlog as _runlog
+        _log_file, _log_at = None, 0
+        if _runlog.current().at("solver"):
+            # run.verbosity "solver": IPOPT's own log of this solve (as GAMS's log shows the solver's). IPOPT opens its
+            # output file once per solver object and appends each solve's log, so each cached solver of this process
+            # (the regions solve in parallel processes) has its own file, read from where this solve starts
+            import hashlib as _hl
+            import os as _os
+            import tempfile as _tf
+            _h = _hl.sha1(repr(self.structure_key(opts)).encode()).hexdigest()[:16]
+            _log_file = _os.path.join(_tf.gettempdir(), f"capri_mod_ipopt_{_os.getpid()}_{_h}.log")
+            opts = dict(opts, **{"ipopt.output_file": _log_file,
+                                 "ipopt.file_print_level": int(_st.get("run.solver_log_print_level"))})
         S = self._get_solver(opts)
+        if _log_file is not None:
+            _log_at = _runlog.solver_log_size(_log_file)
         self._solver = S
         self.build_s = _t.time() - t0
         t0 = _t.time()
@@ -1297,9 +1348,16 @@ class CapriRegionalNLP:
         st = S.stats()
         self.solve_s = _t.time() - t0
         x = np.asarray(r["x"]).ravel()
-        return {"x": x, "f": float(r["f"]), "lam_g": np.asarray(r["lam_g"]).ravel(),
-                "lam_x": np.asarray(r["lam_x"]).ravel(), "status": st["return_status"],
-                "iterations": st.get("iter_count"), "success": bool(st.get("success")), "warm": warm}
+        out = {"x": x, "f": float(r["f"]), "lam_g": np.asarray(r["lam_g"]).ravel(),
+               "lam_x": np.asarray(r["lam_x"]).ravel(), "status": st["return_status"],
+               "iterations": st.get("iter_count"), "success": bool(st.get("success")), "warm": warm}
+        if _log_file is not None:
+            out["log"] = {"log": _runlog.read_solver_log(_log_file, _log_at), "n_x": int(len(self.lbx)), "n_g": int(len(self.lbg)), "seconds": self.solve_s,
+                          "status": st["return_status"], "iterations": int(st.get("iter_count") or 0),
+                          "start": "warm" if warm else "cold",
+                          "linear_solver": str(opts["ipopt.linear_solver"] if "ipopt.linear_solver" in opts
+                                               else "mumps")}
+        return out
 
     # ---------------- sensitivity of the solution ----------------
     def response(self, res, D, tol=1e-9):
@@ -1460,6 +1518,15 @@ class CapriRegionalNLP:
                 "warm": False}
 
     # ---------------- results in the regional QP's terms ----------------
+    def manure_values(self, res) -> dict:
+        """The value of one more t of manure nutrient applied in the region, per nutrient (EUR 1000 per t): the dual of
+        the fertilisation block's EXCR pool row (fertDistExcr_), which carries the value of CAPRI's ManureNPK_ - CAPRI's
+        PSHW (capmod/report_supply_model.gms l. 261: ManureNPK_.M), the point of the manure pool market's excess supply
+        function (manuremarket/simu_manure_market.gms l. 60-89). The objective is a cost to minimise, the row
+        (applied - manure) / scale = 0: the value is lambda / scale."""
+        lam = res["lam_g"]
+        return {nut: float(lam[gi]) / sc for nut, (gi, sc) in (getattr(self, "excr_rows", None) or {}).items()}
+
     def outputs(self, res):
         """(y, F {(act, feed): t}, zA (dual of each row of A, >= 0 for A y <= b), info) - the fields the supply module
         reads from the regional model."""

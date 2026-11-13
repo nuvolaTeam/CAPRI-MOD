@@ -221,13 +221,13 @@ CAPRI's 2030 market and are to be ported (DEP-33, DEP-34 are active departures).
 
 | Equation | Domain | Line | Status | capri-mod | Note |
 |---|---|---|---|---|---|
-| LinkLuWithShares_ | (RMS,luMrkMod) | 1923 | not ported | environmental/luc.py (supply side) | on with REPORTS_ENV (set_global_variables.gms l. 395): the market's LUC estimation |
-| luClassInitial_ | (rms,LUclass) | 1950 | not ported | environmental/luc.py (supply side) | on with REPORTS_ENV (set_global_variables.gms l. 395): the market's LUC estimation |
-| luClassFinal_ | (rms,LUclass1) | 1938 | not ported | environmental/luc.py (supply side) | on with REPORTS_ENV (set_global_variables.gms l. 395): the market's LUC estimation |
-| FocLUC_ | (rms,LUCpos) | 1960 | not ported | environmental/luc.py (supply side) | on with REPORTS_ENV (set_global_variables.gms l. 395): the market's LUC estimation |
-| derivativeOfNormalLUC_ | (rms,LUCpos) | 1970 | not ported | environmental/luc.py (supply side) | on with REPORTS_ENV (set_global_variables.gms l. 395): the market's LUC estimation |
-| derivativeOfGammaLUC_ | (rms,LUCpos) | 1980 | not ported | environmental/luc.py (supply side) | on with REPORTS_ENV (set_global_variables.gms l. 395): the market's LUC estimation |
-| derivativeOfSpikeLUC_ | (rms,LUCpos) | 1987 | not ported | environmental/luc.py (supply side) | on with REPORTS_ENV (set_global_variables.gms l. 395): the market's LUC estimation |
+| LinkLuWithShares_ | (RMS,luMrkMod) | 1923 | ported 9 November 2026 | capri_mod/market/luc.py | luc_market (setting market.luc_market): solved after each market solve (no feedback without lulucf_market, DEP-44); reproduces CAPRI's CAL transitions in the 45 regions within 1.2e-8 |
+| luClassInitial_ | (rms,LUclass) | 1950 | ported 9 November 2026 | capri_mod/market/luc.py | luc_market (setting market.luc_market): solved after each market solve (no feedback without lulucf_market, DEP-44); reproduces CAPRI's CAL transitions in the 45 regions within 1.2e-8 |
+| luClassFinal_ | (rms,LUclass1) | 1938 | ported 9 November 2026 | capri_mod/market/luc.py | luc_market (setting market.luc_market): solved after each market solve (no feedback without lulucf_market, DEP-44); reproduces CAPRI's CAL transitions in the 45 regions within 1.2e-8 |
+| FocLUC_ | (rms,LUCpos) | 1960 | ported 9 November 2026 | capri_mod/market/luc.py | luc_market (setting market.luc_market): solved after each market solve (no feedback without lulucf_market, DEP-44); reproduces CAPRI's CAL transitions in the 45 regions within 1.2e-8 |
+| derivativeOfNormalLUC_ | (rms,LUCpos) | 1970 | not needed | capri_mod/market/luc.py | no transition of sim_ini_21730 has a normal or spike prior (all gamma); the build stops otherwise (tools/build/build_luc_market.py) |
+| derivativeOfGammaLUC_ | (rms,LUCpos) | 1980 | ported 9 November 2026 | capri_mod/market/luc.py | luc_market (setting market.luc_market): solved after each market solve (no feedback without lulucf_market, DEP-44); reproduces CAPRI's CAL transitions in the 45 regions within 1.2e-8 |
+| derivativeOfSpikeLUC_ | (rms,LUCpos) | 1987 | not needed | capri_mod/market/luc.py | no transition of sim_ini_21730 has a normal or spike prior (all gamma); the build stops otherwise (tools/build/build_luc_market.py) |
 
 ## LULUCF emissions (lulucf_market)
 

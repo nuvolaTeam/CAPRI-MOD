@@ -7,7 +7,7 @@ For every CSV under capri_data (archive/ left out) one row of the table provenan
             external: from sources other than CAPRI only (Eurostat, FAO)
             mixed: from CAPRI and other sources (origins lists them)
             source-extract: a source file kept in capri_data/sources (its origin in origins; its builder when one
-            writes it: the CSV conversion of a non-CSV original, tools/build/convert_sources_to_csv.py)
+            writes it: the conversion of a non-table original, tools/build/convert_sources.py)
             declared: a table kept by hand with a source per row, read as declared (no builder)
             no-builder: none of the above (to resolve)
   origins   the origins of the leaves its builders read, through every builder in between (CAPRI, JRC121368,
@@ -42,10 +42,17 @@ OUT = ROOT / "capri_data" / "schema" / "01_provenance.sql"
 SOURCE_ORIGIN = {
     "jrc121368": "JRC121368", "eurostat": "Eurostat", "nuts": "Eurostat", "fao_2021": "FAO", "unsourced": "unsourced",
 }
+
+
+def _source_folder(rel):
+    """The publisher folder of a file under capri_data/sources: raw/<publisher>/... (since 6 November 2026,
+    docs/design/DATA_LAYOUT.md), else the folder under sources (intermediate/, fao_2021/)."""
+    parts = rel.split("/")
+    return parts[3] if parts[2] == "raw" and len(parts) > 4 else parts[2]
 #: CAPRI's folders under sources (every other folder): CAPRI's code, data (dat), CAPREG, COCO, CAPMOD results
 SOURCE_DEFAULT = "CAPRI"
 #: tables kept by hand, with a source per row, read as declared (KNOWN_ISSUES K101)
-DECLARED = {"capri_data/shared/capri_member_state_codes.csv", "capri_data/shared/model_parameters.csv",
+DECLARED = {"capri_data/codes/capri_member_state_codes.csv", "capri_data/codes/model_parameters.csv",
             "capri_data/codes/model_units.csv", "capri_data/codes/model_trade_regions.csv",
             "capri_data/codes/model_market_regions.csv",
             "capri_data/codes/model_activity_classes.csv", "capri_data/codes/model_land_types.csv",
@@ -57,42 +64,69 @@ EXTERNAL_ORIGIN = "CAPRI"
 #: files written by builders that the trace has not run yet (added after the last retrace), by file or folder prefix:
 #: builder, origins (from the builder's docstring); a retrace moves them into builders.json
 UNTRACED = {
+    "capri_data/pipeline/captrd/sets/biofuel/": ("build_captrd_biofuel", "CAPRI"),     # before sets/ (first match)
+    "capri_data/pipeline/captrd/sets/agriprod/": ("build_captrd_agriprod", "CAPRI"),   # before sets/ (first match)
+    "capri_data/pipeline/captrd/sets/national/": ("build_captrd_national", "CAPRI"),   # before sets/ (first match)
+    "capri_data/pipeline/captrd/sets/macro/": ("build_captrd_macro", "CAPRI"),   # before sets/ (first match)
+    "capri_data/pipeline/captrd/sets/globiom/": ("build_captrd_globiom_sets", "CAPRI"),   # before sets/ (first match)
+    "capri_data/pipeline/captrd/dat/globiom_scenarios.csv": ("build_captrd_globiom_sets", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/macro_p_aglinkmacroeu.csv": ("build_captrd_macro", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/macro_ssp_data.csv": ("build_captrd_macro", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/macro_worldpop.csv": ("build_captrd_macro", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/longrun_p_longruninfoall.csv": ("build_captrd_longrun", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/national_p_fromnecp.csv": ("build_captrd_national", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/agriprod_p_agriprod.csv": ("build_captrd_agriprod", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/agriprod_p_reqfcnlim.csv": ("build_captrd_agriprod", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/biofuel_p_potentialstocks.csv": ("build_captrd_biofuel", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/biofuel_proc_yields.csv": ("build_captrd_biofuel", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/biofuel_p_primeswithunits.csv": ("build_captrd_biofuel", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/biofuel_p_fossilfuel.csv": ("build_captrd_biofuel", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/biofuel_p_taxdata.csv": ("build_captrd_biofuel", "CAPRI"),
     "capri_data/pipeline/captrd/sets/": ("build_captrd_sets", "CAPRI"),
+    "capri_data/pipeline/captrd/params/": ("build_captrd_estimation_params", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/dairy_ms_agri_to_ms.csv": ("build_captrd_dairy", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/dairy_p_cowmilkprod.csv": ("build_captrd_dairy", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/dairy_p_dairycowyield.csv": ("build_captrd_dairy", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/dairy_p_dcowmilkprod.csv": ("build_captrd_dairy", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/dairy_p_milkdeliveries.csv": ("build_captrd_dairy", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/dairy_p_nrcows.csv": ("build_captrd_dairy", "CAPRI"),
+    "capri_data/pipeline/captrd/dat/p_recentmlkyld.csv": ("build_captrd_dairy", "CAPRI"),
     "capri_data/validation/eu_outlook_2020_2030.csv": ("build_eu_outlook_2030", "EC"),
     "capri_data/validation/n_cascade_capri_gd2030.csv": ("build_n_cascade_validation", "CAPRI"),
+    "capri_data/scenarios/greendeal_group/greendeal_geo_to_ms.csv": ("build_greendeal_targets", "CAPRI"),
     "capri_data/codes/capri/COLS.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/ROWS.csv": ("build_code_lists", "CAPRI"),
 }
-#: the CSV conversion of the sources that were not CSV (tools/build/convert_sources_to_csv.py, 30 October 2026),
+#: the conversion of the sources that were not tables (tools/build/convert_sources.py, 30 October 2026),
 #: by file or folder prefix: their origin. The converter reads the originals from the repository's history, so the trace
 #: shows it no external source: its files stay source extracts, with their converter named and this origin (a builder
 #: reading one takes the origin of its folder, SOURCE_ORIGIN, as for any source file).
-CONVERTER = "convert_sources_to_csv"
+CONVERTER = "convert_sources"
 CONVERTED_ORIGIN = {
-    "capri_data/sources/water/": "CAPRI",
-    "capri_data/sources/capri_gams/": "CAPRI",
-    "capri_data/sources/capri_dat/biofuel/": "CAPRI",
-    "capri_data/sources/capri_dat/coco/": "CAPRI",
-    "capri_data/sources/capri_dat/policy/": "CAPRI",
-    "capri_data/sources/envind/fao_landuse_2000_P.csv": "CAPRI",
-    "capri_data/sources/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.csv": "CAPRI",
-    "capri_data/sources/envind/orgsoil_share_p_orgsoilori.csv": "CAPRI",
-    "capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs_all.csv": "CAPRI",
-    "capri_data/sources/ghgtech/miti_data_jul15_p_ghgMiti.csv": "CAPRI",
-    "capri_data/sources/policy/minfert_redu_by_crop_p_checkSmallMine.csv": "CAPRI",
-    "capri_data/sources/policy/minfert_redu_by_crop_limCres.csv": "CAPRI",
-    "capri_data/sources/capri_star/nutrient_cont_usda_p_nutrientCont.csv": "USDA via CAPRI",
-    "capri_data/sources/nuts/": "Eurostat",
+    "capri_data/sources/raw/capri/dat/water/": "CAPRI",
+    "capri_data/sources/raw/capri/gams/": "CAPRI",
+    "capri_data/sources/raw/capri/dat/biofuel/": "CAPRI",
+    "capri_data/sources/raw/capri/dat/coco/": "CAPRI",
+    "capri_data/sources/raw/capri/dat/policy/": "CAPRI",
+    "capri_data/sources/raw/capri/dat/envind/fao_landuse_2000_P.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/envind/orgsoil_share_p_orgsoilori.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs_all.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/scen/ghgtech/miti_data_jul15_p_ghgMiti.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_p_checkSmallMine.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_limCres.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/arm/nutrient_cont_usda_p_nutrientCont.parquet": "USDA via CAPRI",
+    "capri_data/sources/raw/nuts/": "Eurostat",
 }
 #: files without a builder whose origin was established by a check (02_provenance_notes.sql gives the evidence)
 NO_BUILDER_ORIGIN = {
     "capri_data/2017/environment/climate_zones.csv": "CAPRI",
     # CAPRI's NUTS version correspondence (build_general_set_structure.gms) with the pairs added and removed by hand in
     # October 2026 (the table's comment, 26_shared.sql); a JSON file until 31 October 2026
-    "capri_data/shared/nuts_version_correspondence.csv": "CAPRI",
-    "capri_data/sources/capri_dat/sugar/p_SQuotas.csv": "CAPRI",
-    "capri_data/sources/capri_dat/sugar/p_PPSQRenounce.csv": "CAPRI",
-    "capri_data/sources/capri_dat/sugar/p_PPSQCBuyBack.csv": "CAPRI",
+    "capri_data/codes/nuts_version_correspondence.csv": "CAPRI",
+    "capri_data/sources/raw/capri/dat/sugar/p_SQuotas.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/sugar/p_PPSQRenounce.parquet": "CAPRI",
+    "capri_data/sources/raw/capri/dat/sugar/p_PPSQCBuyBack.parquet": "CAPRI",
 }
 
 
@@ -133,11 +167,11 @@ def provenance(root: Path = ROOT):
         t = writer.get(f)
         if t is not None and t["builder"] == CONVERTER:
             # a source file, as if it had no writer: its folder's origin
-            memo[f] = ({SOURCE_ORIGIN.get(f.split("/")[2], SOURCE_DEFAULT)}, set())
+            memo[f] = ({SOURCE_ORIGIN.get(_source_folder(f), SOURCE_DEFAULT)}, set())
             return memo[f]
         if t is None:
             if f.startswith("capri_data/sources/"):
-                folder = f.split("/")[2]
+                folder = _source_folder(f)
                 res = ({SOURCE_ORIGIN.get(folder, SOURCE_DEFAULT)}, set())
             elif f in DECLARED:
                 res = ({"declared"}, set())
@@ -158,7 +192,8 @@ def provenance(root: Path = ROOT):
         return memo[f]
 
     rows = []
-    for p in sorted(root.joinpath("capri_data").rglob("*.csv")):
+    for p in sorted(list(root.joinpath("capri_data").rglob("*.csv"))
+                    + list(root.joinpath("capri_data", "sources").rglob("*.parquet"))):   # sources: Parquet (8 Nov 2026)
         rel = str(p.relative_to(root))
         if "archive" in p.parts:
             continue
@@ -167,7 +202,7 @@ def provenance(root: Path = ROOT):
             rows.append((rel, "source-extract", _converted(rel) or SOURCE_DEFAULT, CONVERTER, None))
             continue
         if rel.startswith("capri_data/sources/") and t is None:
-            folder = rel.split("/")[2]
+            folder = _source_folder(rel)
             hit = _untraced(rel)
             rows.append((rel, "source-extract", hit[1], hit[0] + " (not in the trace yet)", None) if hit else
                         (rel, "source-extract", SOURCE_ORIGIN.get(folder, SOURCE_DEFAULT), None, None))

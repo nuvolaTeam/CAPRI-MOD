@@ -22,6 +22,8 @@ TEMPLATE = '''# A scenario of capri-mod (python -m capri_mod.scenarios check {na
 name = "{name}"
 kind = "scenario"
 description = ""
+# its name in the result names (res_2_1730<short_name>...; default: the folder's name)
+# short_name = ""
 # the CAPRI files this scenario follows (paths under CAPRI's gams folder), for the record
 capri_files = []
 # the reference it is compared with (its folder); it gives the trajectory and the reference-level settings

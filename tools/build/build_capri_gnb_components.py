@@ -11,7 +11,7 @@ NUTNED_: manure availability, mineral efficiency and manure applied per ha for C
 availability factor, fert/endoManAvail.gms)
 (= MINFER + EXCRET + BIOFIX + ATMOSD + CRESID - EXPPRD - MTRADE; supply_model.gms e_SURTOTHa).
 
-Output: capri_data/2017/environment/capri_gnb_components_2030.csv (capri_region, item, kg_n_per_ha)
+Output: capri_data/baselines/capri_greendeal_ref/1730/environment/capri_gnb_components_2030.csv (capri_region, item, kg_n_per_ha)
 Usage: python tools/build/build_capri_gnb_components.py <zip of res_2_1730greendeal_refdefaulta>
 """
 import csv
@@ -21,7 +21,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_data" / "2017" / "environment" / "capri_gnb_components_2030.csv"
+OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "capri_gnb_components_2030.csv"
 ITEMS = {"MINFER", "EXCRET", "BIOFIX", "ATMOSD", "CRESID", "EXPPRD", "MTRADE", "IMPORT", "GASTOT", "SURTOT"}
 PAT = re.compile(r"'([^']+)'\.'perHa'\.'([^']+)'\.'NITF'\.'2030'\s+([-0-9.eE+]+)")
 # residue (and deposition) N not available to crops, NUTNED_ (kg/ha of UAA)

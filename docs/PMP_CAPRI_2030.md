@@ -35,9 +35,9 @@ elasticities (supply_elas_2_1720ATdefaulta, 2020: a guide to magnitudes, not a 2
 
 - Export: `tools/gams/export_pmp_2030.gms` (GAMS, plain gdxdump) dumps every `output\results\baseline\pmppar_21730*.gdx` of
   the CAPRI installation (35 countries) and `dat\estnlp\results.gdx` (VB, VD, PELA).
-- `tools/build/build_pmp_2030.py` writes the symbols unchanged as CSV, CAPRI codes: `capri_data/sources/baseline_pmp/`
+- `tools/build/build_pmp_2030.py` writes the symbols unchanged as CSV, CAPRI codes: `capri_data/sources/intermediate/baseline_pmp/`
   (p_pmpQuadTechn, p_pmpQuadPact, p_pmpCnst, p_pmpQuadLandTypes, p_pmpCnstLandTypes, VB and VD levels).
-- `tools/build/build_pmp_capri_2030.py` derives the model's matrix: `capri_data/2017/supply/pmp_capri_2030.csv`.
+- `tools/build/build_pmp_capri_2030.py` derives the model's matrix: `capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_capri_2030.csv`.
 
 ## From CAPRI's terms to the model's matrix
 
@@ -68,14 +68,15 @@ Under the same switch, at the 2030 market year:
   proportions (sum q_j s_j^2); territories by the inverse of the summed inverses; Q = g / x^2 at the model's herd.
   Diagonal only, as QUADRA_ (no cross terms between animals or with crops). The intensity splits' own curvature
   (22 October 2026): CAPRI's 2030 p_pmpQuadTechn of the two variants (tools/build/build_intensity_q_2030.py ->
-  sources/baseline_pmp/intensity_q_capri2030.csv and _recipe2030.csv; the builders of the dairy, cattle and grassland
+  sources/intermediate/baseline_pmp/intensity_q_capri2030.csv and _recipe2030.csv; the builders of the dairy, cattle and grassland
   splits add q_<x>_capri2030 and q_<x>_recipe2030 beside the base year's columns, same fallback rule), taken at the
   2030 market year with pmp_source capri2030 / recipe (animals: DCOL/DCOH, BULL/BULH, HEIL/HEIH with "animals" in
   pmp_capri_parts; grassland GRAE/GRAI with "crops"). Medians 2030 over 2017: dairy 1.8, bulls 1.4, heifers 1.3,
   intensive grassland 1.2, extensive 0.9.
 - **Feed PMP slopes** (`tools/build/build_feed_ration.py`: `capri_slope_2030` beside `capri_slope` in feed_ration_2017.csv):
-  CAPRI's 2030 p_pmpFeedInpCoeff SLOP, aggregated as the 2017 ones (2017 weights, registered); the ration model takes
-  them (`RationModel(slope_key="capri_slope_2030")`).
+  CAPRI's 2030 p_pmpFeedInpCoeff SLOP, aggregated as the 2017 ones but with CAPRI's 2030 herd shares and rations per
+  head (sim_ini_21730's DATA at TRD; DEP-22 removed 6 November 2026; a feed without a 2030 ration keeps the 2017
+  weights, unused); the ration model takes them (`RationModel(slope_key="capri_slope_2030")`).
 - **Land market** (`tools/build/build_land_market.py --year 2030` -> `land_market_2030.csv`): CAPRI's 2030 land-type
   levels and p_pmpQuadLandTypes, with the 2017 file's territory rules (Norway's split regions from NO08 + NO09 + NO0A:
   NO000000's 2030 matrix has no diagonal). The 2017 mode of the builder reproduces land_market_2017.csv exactly.
@@ -115,7 +116,7 @@ CAPRI's land-nest adjustment (forecast_activity_slopes.gms l. 103-141, crops oth
 trustee land market: the activity's level over the summed levels of the agricultural land types it belongs to -
 ARAB, ANNC, ARAC for annual crops, ARAB and FRUN for permanent ones - times those land types' posterior own-rent
 elasticities, which exist for ARAC and FRUN). The posterior elasticities are recomputed from CAPRI's exported land
-matrix (2030: pmp_quad_landtypes_2030.csv; 2017: sources/capreg/pmp_quad_landtypes_2017.csv), levels and rents with
+matrix (2030: pmp_quad_landtypes_2030.csv; 2017: sources/raw/capri/capreg/pmp_quad_landtypes_2017.csv), levels and rents with
 the land owner's bordered Hessian of declare_calibration_models_for_land_supply.gms (p_landMarketScale 1000): CAPRI's
 estimation makes v_posterior_elasticity an exact function of the same matrix, but does not export it. The literal
 denominator (the sum over ARAB, ANNC and ARAC, about three times the arable area) was kept because it reproduces

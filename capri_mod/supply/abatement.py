@@ -522,8 +522,9 @@ class AbatementBlock:
     def _histosol_base_area(self, cls):
         base = self._base_levels()
         if cls == "crop":
-            return float(sum(float(base.get(c, 0.0) or 0.0) for c in CROPS if c != "GRAS" and c in base.index))
-        return float(base.get("GRAS", 0.0) or 0.0)
+            return float(sum(float(base.get(c, 0.0) or 0.0) for c in CROPS if c not in CROPS_ON_LAND["GRAS"]
+                             and c in base.index))
+        return float(sum(float(base.get(g, 0.0) or 0.0) for g in CROPS_ON_LAND["GRAS"]))
 
     def _histosol_columns(self, Qa, ca, Aa, ba, start, labels, n):
         """CAPRI's histosol fallowing (no_histosols.gms, idleHisto_), one column per class: F = 1000 ha of

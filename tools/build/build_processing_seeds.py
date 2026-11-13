@@ -36,7 +36,7 @@ OUT = ROOT / "capri_data" / "2017" / "market" / "processing_seeds.csv"
 CHAINS = {"RAPE": ("RAPO", "RAPC"), "SUNF": ("SUNO", "SUNC"), "SOYA": ("SOYO", "SOYC")}
 RHO_PROC = 0.01                       # arm/market1.gms l. 185: p_rhoProc(RMS,SED) = 0.01
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/codes/eu_market_blocks.csv)
 EU = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 
 
@@ -57,10 +57,10 @@ def main() -> None:
         m = pat.match(line)
         if m and m.group(3) in goods:
             v[(m.group(1), m.group(2), m.group(3))] = num(m.group(4))
-    r2m = _read_csv(ROOT / "capri_data" / "shared" / "rms_to_rm.csv")      # CAPRI's RMS_TO_RM
+    r2m = _read_csv(ROOT / "capri_data" / "codes" / "rms_to_rm.csv")      # CAPRI's RMS_TO_RM
     r2m = dict(zip(r2m.rms, r2m.rm))
     # CAPRI's behavioural regions (set RMS; aggregates such as EU, MER or the trade blocks also carry data rows)
-    rms_set = set(_read_csv(ROOT / "capri_data" / "shared" / "rms.csv")["rms"])
+    rms_set = set(_read_csv(ROOT / "capri_data" / "codes" / "rms.csv")["rms"])
     rms_all = sorted({r for (r, it, g) in v if it == "PROC" and r in rms_set})
     mreg = model_region
     rows = []

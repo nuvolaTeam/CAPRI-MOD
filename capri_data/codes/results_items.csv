@@ -105,6 +105,8 @@ market,consumption,cols,,,,1000 t,
 market,dairy,cols,,,,,
 market,domestic_prices,cols,PMRK,*,,EUR/t,"reports/sol_market.gms l. 646: DATA(RM,'PMrk',XX) = v_marketPrice.l"
 market,excess_demand,cols,,,,,
+market,luc_classes,cols,,,,1000 ha,"arm/market_model.gms LinkLuWithShares_: v_land of the UNFCCC land classes per non-EU region with the land block (capri_mod/market/luc.py)"
+market,luc_transitions,cols,,,,1000 ha,"arm/market_model.gms luClassInitial_, luClassFinal_, FocLUC_: v_lucpos per non-EU region with the land block, annual off the diagonal (capri_mod/market/luc.py)"
 market,net_exports,cols,,,,1000 t,
 market,production,cols,PROD,*,,1000 t,"reports/sol_market.gms l. 267: DATA(RMS,'Prod',XX1) = v_prodQuant.l"
 market,trade_flows,cols,ImportQ,*,,1000 t,"capmod/set_and_store_dataout.gms l. 151: DATAOUT(RMALL,RMALL1,'ImportQ',XX) = p_tradeFlows (importer first)"
@@ -115,6 +117,7 @@ policy,pillar1_EUR_billion,cols,,,,,
 policy,pillar2_EUR_billion,cols,,,,,
 policy,premium_EUR_ha_UAA,cols,,,,,
 policy,total_EU_budget_EUR_billion,cols,,,,,
+set_aside,ISET,rows,ISET,LEVL,,1000 ha,"CAPRI's obligatory set-aside DATA(RU,'ISET','LEVL') (SETA_, supply_model.gms l. 2219-2241); 0 without a scenario's set-aside rates"
 set_aside,FALL,rows,FALL,LEVL,,1000 ha,"CAPRI's set-aside activities' levels DATA(RU,act,'LEVL'): simini_21730 DATA DE110000.VSET.LEVL, DE110000.FALL.LEVL"
 set_aside,SETA,rows,,,,,
 set_aside,VSET,rows,VSET,LEVL,,1000 ha,"CAPRI's set-aside activities' levels DATA(RU,act,'LEVL'): simini_21730 DATA DE110000.VSET.LEVL, DE110000.FALL.LEVL"
@@ -140,10 +143,10 @@ supply,fert_npk,rows,,,,,
 supply,fert_tech_shares,rows,,,,,
 supply,genetics_shift,rows,,,,,
 supply,ghg_emissions,rows,,,,,
-supply,grass_ext_shift,rows,,,,,
 supply,gross_margin,rows,,,,EUR 1000,
 supply,gross_output,rows,GROF,act,SWHE;DWHE;RYEM;BARL;OATS;CORN;OCER;PARI;OCRO;OIND;NURS;FLOW;POTA;SUGB;SUNF;RAPE;SOYA;OOIL;PULS;TOMA;OVEG;APPL;OFRU;CITR;TAGR;WINE;OLIV;TABO;TOBA;TEXT;MAIF,1000 t,"DATA(RU,'GROF',product): the region's gross production (simini_21730 DATA DE110000.GROF.SWHE); the model's gross output of a crop activity is its product's (CAPRI's 2030 GD reference, DE110000: SWHE 545.4 vs the model's 544.9). Not GRAS (another measure: 4356 vs 970) nor the animals (their products are other codes)"
 supply,histosol_fallow,rows,,,,,
+supply,iset,rows,,,,,
 supply,land_types,rows,,,,,
 supply,luc,rows,,,,,
 supply,manure_availability,rows,,,,,
@@ -161,6 +164,7 @@ supply,nitrate_share,rows,,,,,
 supply,nutrient_balance,rows,,,,,
 supply,organic_conv,rows,,,,,
 supply,shadow_prices,rows,,,,,
+supply,technology_mix,rows,,,,1000 ha,"S1: z per crop with CAPRI's T1 and T2, area moved from T2 to T1 (x_T1 = X/2 + z)"
 supply,yani_dnet,rows,,,,,
 supply,yield_price_factor,rows,,,,,
 welfare,CSSP,cols,EAAG,CSSP,,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"

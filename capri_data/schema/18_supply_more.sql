@@ -37,6 +37,28 @@ CREATE TABLE sup_cattle_intensity (
     q_z_recipe2030 DOUBLE NOT NULL,
     q_source_recipe2030 VARCHAR NOT NULL,
     q_b_recipe2030 DOUBLE NOT NULL,
+    dmanp_rel DOUBLE NOT NULL,
+    dmank_rel DOUBLE NOT NULL,
+    share_low_2030 DOUBLE,
+    share_high_2030 DOUBLE,
+    days_low_2030 DOUBLE,
+    days_high_2030 DOUBLE,
+    dmann_rel_2030 DOUBLE,
+    dmanp_rel_2030 DOUBLE,
+    dmank_rel_2030 DOUBLE,
+    dbeef_rel_2030 DOUBLE,
+    dyoung_rel_2030 DOUBLE,
+    denne_rel_2030 DOUBLE,
+    dcrpr_rel_2030 DOUBLE,
+    ddrmn_rel_2030 DOUBLE,
+    ddrmx_rel_2030 DOUBLE,
+    dprod_young_m_rel_2030 DOUBLE,
+    dprod_young_f_rel_2030 DOUBLE,
+    dprod_cows_rel_2030 DOUBLE,
+    duse_calves_m_rel_2030 DOUBLE,
+    duse_calves_f_rel_2030 DOUBLE,
+    duse_young_m_rel_2030 DOUBLE,
+    duse_young_f_rel_2030 DOUBLE,
     PRIMARY KEY (region, animal, capri_region, q_source, split, member_low, member_high, q_source_capri2030, q_source_recipe2030)
 );
 COMMENT ON TABLE sup_cattle_intensity IS 'CAPRI''s two-intensity cattle fattening activities, per model region: bulls BULL/BULH and fattening (tools/build/build_cattle_intensity.py)';
@@ -65,7 +87,29 @@ INSERT INTO value_units VALUES
   ('sup_cattle_intensity', 'q_z_capri2030', NULL, 'open', 'cattle_intensity.q_z_capri2030: unit to be established'),
   ('sup_cattle_intensity', 'q_b_capri2030', NULL, 'open', 'cattle_intensity.q_b_capri2030: unit to be established'),
   ('sup_cattle_intensity', 'q_z_recipe2030', NULL, 'open', 'cattle_intensity.q_z_recipe2030: unit to be established'),
-  ('sup_cattle_intensity', 'q_b_recipe2030', NULL, 'open', 'cattle_intensity.q_b_recipe2030: unit to be established');
+  ('sup_cattle_intensity', 'q_b_recipe2030', NULL, 'open', 'cattle_intensity.q_b_recipe2030: unit to be established'),
+  ('sup_cattle_intensity', 'dmanp_rel', NULL, 'open', 'cattle_intensity.dmanp_rel: manure P2O5 / K2O per head, low - high over the animal''s average (CAPRI MANP / MANK)'),
+  ('sup_cattle_intensity', 'dmank_rel', NULL, 'open', 'cattle_intensity.dmank_rel: manure P2O5 / K2O per head, low - high over the animal''s average (CAPRI MANP / MANK)'),
+  ('sup_cattle_intensity', 'share_low_2030', NULL, 'open', 'cattle_intensity.share_low_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'share_high_2030', NULL, 'open', 'cattle_intensity.share_high_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'days_low_2030', NULL, 'open', 'cattle_intensity.days_low_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'days_high_2030', NULL, 'open', 'cattle_intensity.days_high_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'dmann_rel_2030', NULL, 'open', 'cattle_intensity.dmann_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'dmanp_rel_2030', NULL, 'open', 'cattle_intensity.dmanp_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'dmank_rel_2030', NULL, 'open', 'cattle_intensity.dmank_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'dbeef_rel_2030', NULL, 'open', 'cattle_intensity.dbeef_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'dyoung_rel_2030', NULL, 'open', 'cattle_intensity.dyoung_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'denne_rel_2030', NULL, 'open', 'cattle_intensity.denne_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'dcrpr_rel_2030', NULL, 'open', 'cattle_intensity.dcrpr_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'ddrmn_rel_2030', NULL, 'open', 'cattle_intensity.ddrmn_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'ddrmx_rel_2030', NULL, 'open', 'cattle_intensity.ddrmx_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'dprod_young_m_rel_2030', NULL, 'open', 'cattle_intensity.dprod_young_m_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'dprod_young_f_rel_2030', NULL, 'open', 'cattle_intensity.dprod_young_f_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'dprod_cows_rel_2030', NULL, 'open', 'cattle_intensity.dprod_cows_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'duse_calves_m_rel_2030', NULL, 'open', 'cattle_intensity.duse_calves_m_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'duse_calves_f_rel_2030', NULL, 'open', 'cattle_intensity.duse_calves_f_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'duse_young_m_rel_2030', NULL, 'open', 'cattle_intensity.duse_young_m_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'duse_young_f_rel_2030', NULL, 'open', 'cattle_intensity.duse_young_f_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)');
 
 -- file: capri_data/2017/supply/cover_crops.csv
 CREATE TABLE sup_cover_crops (
@@ -73,6 +117,7 @@ CREATE TABLE sup_cover_crops (
     capri_region VARCHAR NOT NULL,
     catc_share_2030 DOUBLE NOT NULL,
     catc_cost_eur_ha DOUBLE NOT NULL,
+    cost_source VARCHAR NOT NULL CHECK (cost_source IN ('baseline', 'calibration')),
     biofix_t_n_ha DOUBLE,
     PRIMARY KEY (region, capri_region)
 );
@@ -125,10 +170,13 @@ CREATE TABLE sup_crop_premium (
     TABO DOUBLE NOT NULL,
     TOBA DOUBLE NOT NULL,
     TEXT DOUBLE NOT NULL,
-    GRAS DOUBLE NOT NULL,
+    GRAE DOUBLE NOT NULL,
+    GRAI DOUBLE NOT NULL,
     MAIF DOUBLE NOT NULL,
-    OFOD DOUBLE NOT NULL,
-    SETA DOUBLE NOT NULL,
+    OFAR DOUBLE NOT NULL,
+    ROOF DOUBLE NOT NULL,
+    VSET DOUBLE NOT NULL,
+    FALL DOUBLE NOT NULL,
     PRIMARY KEY (region)
 );
 COMMENT ON TABLE sup_crop_premium IS 'Crop yields, producer prices, input costs and CAP premiums for every model region from CAPRI''s 2017 results (tools/build/build_crop_economics_2017.py)';
@@ -157,7 +205,8 @@ INSERT INTO value_units VALUES
   ('sup_crop_premium', 'WINE', NULL, 'open', 'crop_premium.WINE: unit to be established'),
   ('sup_crop_premium', 'OLIV', NULL, 'open', 'crop_premium.OLIV: unit to be established'),
   ('sup_crop_premium', 'TABO', NULL, 'open', 'crop_premium.TABO: unit to be established'),
-  ('sup_crop_premium', 'GRAS', NULL, 'open', 'crop_premium.GRAS: unit to be established'),
+  ('sup_crop_premium', 'GRAE', NULL, 'open', 'crop_premium.GRAE: unit to be established'),
+  ('sup_crop_premium', 'GRAI', NULL, 'open', 'crop_premium.GRAI: unit to be established'),
   ('sup_crop_premium', 'TOBA', NULL, 'open', 'crop_premium.TOBA: unit to be established'),
   ('sup_crop_premium', 'MAIF', NULL, 'open', 'crop_premium.MAIF: unit to be established'),
   ('sup_crop_premium', 'RAPE', NULL, 'open', 'crop_premium.RAPE: unit to be established'),
@@ -165,8 +214,10 @@ INSERT INTO value_units VALUES
   ('sup_crop_premium', 'SOYA', NULL, 'open', 'crop_premium.SOYA: unit to be established'),
   ('sup_crop_premium', 'OOIL', NULL, 'open', 'crop_premium.OOIL: unit to be established'),
   ('sup_crop_premium', 'TEXT', NULL, 'open', 'crop_premium.TEXT: unit to be established'),
-  ('sup_crop_premium', 'OFOD', NULL, 'open', 'crop_premium.OFOD: unit to be established'),
-  ('sup_crop_premium', 'SETA', NULL, 'open', 'crop_premium.SETA: unit to be established');
+  ('sup_crop_premium', 'OFAR', NULL, 'open', 'crop_premium.OFAR: unit to be established'),
+  ('sup_crop_premium', 'ROOF', NULL, 'open', 'crop_premium.ROOF: unit to be established'),
+  ('sup_crop_premium', 'VSET', NULL, 'open', 'crop_premium.VSET: unit to be established'),
+  ('sup_crop_premium', 'FALL', NULL, 'open', 'crop_premium.FALL: unit to be established');
 
 -- file: capri_data/2017/supply/dairy_intensity.csv
 CREATE TABLE sup_dairy_intensity (
@@ -190,6 +241,17 @@ CREATE TABLE sup_dairy_intensity (
     q_low_recipe2030 DOUBLE NOT NULL,
     q_high_recipe2030 DOUBLE NOT NULL,
     q_source_recipe2030 VARCHAR NOT NULL,
+    dmanp_rel DOUBLE NOT NULL,
+    dmank_rel DOUBLE NOT NULL,
+    share_low_2030 DOUBLE NOT NULL,
+    dcomi_rel_2030 DOUBLE NOT NULL,
+    dmann_rel_2030 DOUBLE NOT NULL,
+    dmanp_rel_2030 DOUBLE NOT NULL,
+    dmank_rel_2030 DOUBLE NOT NULL,
+    denne_rel_2030 DOUBLE NOT NULL,
+    dcrpr_rel_2030 DOUBLE NOT NULL,
+    ddrmn_rel_2030 DOUBLE NOT NULL,
+    ddrmx_rel_2030 DOUBLE NOT NULL,
     PRIMARY KEY (region, capri_region, q_source, q_source_capri2030, q_source_recipe2030)
 );
 COMMENT ON TABLE sup_dairy_intensity IS 'CAPRI''s two dairy-cow activities, low-yield DCOL and high-yield DCOH, per model region. (tools/build/build_dairy_intensity.py)';
@@ -208,7 +270,18 @@ INSERT INTO value_units VALUES
   ('sup_dairy_intensity', 'q_low_capri2030', NULL, 'open', 'dairy_intensity.q_low_capri2030: unit to be established'),
   ('sup_dairy_intensity', 'q_high_capri2030', NULL, 'open', 'dairy_intensity.q_high_capri2030: unit to be established'),
   ('sup_dairy_intensity', 'q_low_recipe2030', NULL, 'open', 'dairy_intensity.q_low_recipe2030: unit to be established'),
-  ('sup_dairy_intensity', 'q_high_recipe2030', NULL, 'open', 'dairy_intensity.q_high_recipe2030: unit to be established');
+  ('sup_dairy_intensity', 'q_high_recipe2030', NULL, 'open', 'dairy_intensity.q_high_recipe2030: unit to be established'),
+  ('sup_dairy_intensity', 'dmanp_rel', NULL, 'open', 'dairy_intensity.dmanp_rel: manure P2O5 / K2O per head, low - high over the animal''s average (CAPRI MANP / MANK)'),
+  ('sup_dairy_intensity', 'dmank_rel', NULL, 'open', 'dairy_intensity.dmank_rel: manure P2O5 / K2O per head, low - high over the animal''s average (CAPRI MANP / MANK)'),
+  ('sup_dairy_intensity', 'share_low_2030', NULL, 'open', 'dairy_intensity.share_low_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_dairy_intensity', 'dcomi_rel_2030', NULL, 'open', 'dairy_intensity.dcomi_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_dairy_intensity', 'dmann_rel_2030', NULL, 'open', 'dairy_intensity.dmann_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_dairy_intensity', 'dmanp_rel_2030', NULL, 'open', 'dairy_intensity.dmanp_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_dairy_intensity', 'dmank_rel_2030', NULL, 'open', 'dairy_intensity.dmank_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_dairy_intensity', 'denne_rel_2030', NULL, 'open', 'dairy_intensity.denne_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_dairy_intensity', 'dcrpr_rel_2030', NULL, 'open', 'dairy_intensity.dcrpr_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_dairy_intensity', 'ddrmn_rel_2030', NULL, 'open', 'dairy_intensity.ddrmn_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_dairy_intensity', 'ddrmx_rel_2030', NULL, 'open', 'dairy_intensity.ddrmx_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)');
 
 -- file: capri_data/2017/supply/grass_dm_content.csv
 CREATE TABLE sup_grass_dm_content (
@@ -219,40 +292,6 @@ CREATE TABLE sup_grass_dm_content (
 COMMENT ON TABLE sup_grass_dm_content IS 'Crop yields, producer prices, input costs and CAP premiums for every model region from CAPRI''s 2017 results (tools/build/build_crop_economics_2017.py)';
 INSERT INTO value_units VALUES
   ('sup_grass_dm_content', 'drma', NULL, 'open', 'grass_dm_content.drma: unit to be established');
-
--- file: capri_data/2017/supply/grass_intensity.csv
-CREATE TABLE sup_grass_intensity (
-    region VARCHAR NOT NULL,
-    capri_region VARCHAR NOT NULL,
-    share_ext DOUBLE NOT NULL,
-    yield_ext_rel DOUBLE NOT NULL,
-    yield_int_rel DOUBLE NOT NULL,
-    area_ext DOUBLE NOT NULL,
-    area_int DOUBLE NOT NULL,
-    q_ext DOUBLE NOT NULL,
-    q_int DOUBLE NOT NULL,
-    q_source VARCHAR NOT NULL,
-    q_ext_capri2030 DOUBLE NOT NULL,
-    q_int_capri2030 DOUBLE NOT NULL,
-    q_source_capri2030 VARCHAR NOT NULL,
-    q_ext_recipe2030 DOUBLE NOT NULL,
-    q_int_recipe2030 DOUBLE NOT NULL,
-    q_source_recipe2030 VARCHAR NOT NULL,
-    PRIMARY KEY (region, capri_region, q_source, q_source_capri2030, q_source_recipe2030)
-);
-COMMENT ON TABLE sup_grass_intensity IS 'CAPRI''s two grassland activities, extensive GRAE and intensive GRAI, per model region. (tools/build/build_grass_intensity.py)';
-INSERT INTO value_units VALUES
-  ('sup_grass_intensity', 'share_ext', NULL, 'open', 'grass_intensity.share_ext: unit to be established'),
-  ('sup_grass_intensity', 'yield_ext_rel', NULL, 'open', 'grass_intensity.yield_ext_rel: unit to be established'),
-  ('sup_grass_intensity', 'yield_int_rel', NULL, 'open', 'grass_intensity.yield_int_rel: unit to be established'),
-  ('sup_grass_intensity', 'area_ext', NULL, 'open', 'grass_intensity.area_ext: unit to be established'),
-  ('sup_grass_intensity', 'area_int', NULL, 'open', 'grass_intensity.area_int: unit to be established'),
-  ('sup_grass_intensity', 'q_ext', NULL, 'open', 'grass_intensity.q_ext: unit to be established'),
-  ('sup_grass_intensity', 'q_int', NULL, 'open', 'grass_intensity.q_int: unit to be established'),
-  ('sup_grass_intensity', 'q_ext_capri2030', NULL, 'open', 'grass_intensity.q_ext_capri2030: unit to be established'),
-  ('sup_grass_intensity', 'q_int_capri2030', NULL, 'open', 'grass_intensity.q_int_capri2030: unit to be established'),
-  ('sup_grass_intensity', 'q_ext_recipe2030', NULL, 'open', 'grass_intensity.q_ext_recipe2030: unit to be established'),
-  ('sup_grass_intensity', 'q_int_recipe2030', NULL, 'open', 'grass_intensity.q_int_recipe2030: unit to be established');
 
 -- file: capri_data/2017/supply/labour_coef.csv
 CREATE TABLE sup_labour_coef (
@@ -302,7 +341,7 @@ INSERT INTO value_units VALUES
   ('sup_land_market_2017_regions', 'share_of_source', NULL, 'open', 'land_market_2017_regions.share_of_source: unit to be established'),
   ('sup_land_market_2017_regions', 'min_eigenvalue', NULL, 'open', 'land_market_2017_regions.min_eigenvalue: unit to be established');
 
--- file: capri_data/2017/supply/land_market_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/land_market_2030.csv
 CREATE TABLE sup_land_market_2030 (
     region VARCHAR NOT NULL,
     row VARCHAR NOT NULL,
@@ -314,7 +353,7 @@ COMMENT ON TABLE sup_land_market_2030 IS 'Build CAPRI''s land-market data per mo
 INSERT INTO value_units VALUES
   ('sup_land_market_2030', 'value', NULL, 'open', 'land_market_2030.value: unit to be established');
 
--- file: capri_data/2017/supply/land_market_2030_regions.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/land_market_2030_regions.csv
 CREATE TABLE sup_land_market_2030_regions (
     region VARCHAR NOT NULL,
     quad_source VARCHAR NOT NULL,
@@ -362,10 +401,13 @@ CREATE TABLE sup_nutrients_regional (
     TABO DOUBLE,
     TOBA DOUBLE,
     TEXT DOUBLE,
-    GRAS DOUBLE,
+    GRAE DOUBLE,
+    GRAI DOUBLE,
     MAIF DOUBLE,
-    OFOD DOUBLE NOT NULL,
-    SETA DOUBLE,
+    OFAR DOUBLE NOT NULL,
+    ROOF DOUBLE,
+    VSET DOUBLE,
+    FALL DOUBLE,
     PRIMARY KEY (region)
 );
 COMMENT ON TABLE sup_nutrients_regional IS 'Rebuild every region''s base data from CAPRI. (tools/build/build_capri_base.py)';
@@ -394,7 +436,8 @@ INSERT INTO value_units VALUES
   ('sup_nutrients_regional', 'WINE', NULL, 'open', 'nutrients_regional.WINE: unit to be established'),
   ('sup_nutrients_regional', 'OLIV', NULL, 'open', 'nutrients_regional.OLIV: unit to be established'),
   ('sup_nutrients_regional', 'TABO', NULL, 'open', 'nutrients_regional.TABO: unit to be established'),
-  ('sup_nutrients_regional', 'GRAS', NULL, 'open', 'nutrients_regional.GRAS: unit to be established'),
+  ('sup_nutrients_regional', 'GRAE', NULL, 'open', 'nutrients_regional.GRAE: unit to be established'),
+  ('sup_nutrients_regional', 'GRAI', NULL, 'open', 'nutrients_regional.GRAI: unit to be established'),
   ('sup_nutrients_regional', 'TOBA', NULL, 'open', 'nutrients_regional.TOBA: unit to be established'),
   ('sup_nutrients_regional', 'MAIF', NULL, 'open', 'nutrients_regional.MAIF: unit to be established'),
   ('sup_nutrients_regional', 'RAPE', NULL, 'open', 'nutrients_regional.RAPE: unit to be established'),
@@ -402,8 +445,32 @@ INSERT INTO value_units VALUES
   ('sup_nutrients_regional', 'SOYA', NULL, 'open', 'nutrients_regional.SOYA: unit to be established'),
   ('sup_nutrients_regional', 'OOIL', NULL, 'open', 'nutrients_regional.OOIL: unit to be established'),
   ('sup_nutrients_regional', 'TEXT', NULL, 'open', 'nutrients_regional.TEXT: unit to be established'),
-  ('sup_nutrients_regional', 'OFOD', NULL, 'open', 'nutrients_regional.OFOD: unit to be established'),
-  ('sup_nutrients_regional', 'SETA', NULL, 'open', 'nutrients_regional.SETA: unit to be established');
+  ('sup_nutrients_regional', 'OFAR', NULL, 'open', 'nutrients_regional.OFAR: unit to be established'),
+  ('sup_nutrients_regional', 'ROOF', NULL, 'open', 'nutrients_regional.ROOF: unit to be established'),
+  ('sup_nutrients_regional', 'VSET', NULL, 'open', 'nutrients_regional.VSET: unit to be established'),
+  ('sup_nutrients_regional', 'FALL', NULL, 'open', 'nutrients_regional.FALL: unit to be established');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/techn_mix_2030.csv
+CREATE TABLE sup_techn_mix_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    activity VARCHAR NOT NULL REFERENCES model_activities (code),
+    yield_diff DOUBLE NOT NULL,
+    need_diff DOUBLE NOT NULL,
+    rest_cost_diff_eur_ha DOUBLE NOT NULL,
+    inpo_diff DOUBLE NOT NULL,
+    plap_diff DOUBLE NOT NULL,
+    prem_diff_share DOUBLE NOT NULL,
+    capri_region VARCHAR NOT NULL,
+    PRIMARY KEY (region, activity)
+);
+COMMENT ON TABLE sup_techn_mix_2030 IS 'The T1 - T2 differences per ha of the items CAPRI''s technology factors move (intens/techf.gms, fert/fertned.gms, policy/rd_logic.gms, NUTNED_), per model region and crop with both technologies: the coefficients of the mix columns (S1, docs/design/S1_MIX_COLUMNS.md; tools/build/build_techn_mix_2030.py)';
+INSERT INTO value_units VALUES
+  ('sup_techn_mix_2030', 'yield_diff', 'U_ratio', 'capri', 'p_technFact Yield T1 - T2: outputs and nutrient removal per unit z over the crop''s per ha'),
+  ('sup_techn_mix_2030', 'need_diff', 'U_ratio', 'builder', '(g_T1 - g_T2) / gbar, g = SQRT(1 + y)(1 + y) (NUTNED_): nutrient need per unit z over the crop''s need per ha'),
+  ('sup_techn_mix_2030', 'rest_cost_diff_eur_ha', 'U_EuPerHa', 'builder', 'sum over SEED, REPM, REPB, ELEC, EGAS, EFUL, ELUB of the factor T1 - T2 x CAPREG''s 2017 cost per ha (coefficient x UVAG / 1000)'),
+  ('sup_techn_mix_2030', 'inpo_diff', 'U_ratio', 'capri', 'p_technFact INPO T1 - T2'),
+  ('sup_techn_mix_2030', 'plap_diff', 'U_ratio', 'capri', 'p_technFact PLAP T1 - T2'),
+  ('sup_techn_mix_2030', 'prem_diff_share', 'U_ratio', 'builder', 'sum over the technology-differentiated schemes of PRME(scheme) / PRME(DPTOTAL) x p_technFact T1 - T2, CAPRI''s 2030 reference');
 
 -- file: capri_data/2017/supply/plant_protection_cost.csv
 CREATE TABLE sup_plant_protection_cost (
@@ -438,36 +505,18 @@ INSERT INTO value_units VALUES
 -- file: capri_data/2017/supply/set_aside_split.csv
 CREATE TABLE sup_set_aside_split (
     region VARCHAR NOT NULL,
-    share_vset DOUBLE NOT NULL,
     prem_vset DOUBLE NOT NULL,
-    labt_vset DOUBLE NOT NULL,
     prem_fall DOUBLE NOT NULL,
-    labt_fall DOUBLE NOT NULL,
-    share_vset_2030 DOUBLE NOT NULL,
     prem_vset_2030 DOUBLE NOT NULL,
-    labt_vset_2030 DOUBLE NOT NULL,
     prem_fall_2030 DOUBLE NOT NULL,
-    labt_fall_2030 DOUBLE NOT NULL,
-    w_vset DOUBLE NOT NULL,
-    w_vset_capri2030 DOUBLE NOT NULL,
-    w_vset_recipe2030 DOUBLE NOT NULL,
     PRIMARY KEY (region)
 );
-COMMENT ON TABLE sup_set_aside_split IS 'CAPRI''s labour accounts and its two set-aside activities, per model region (22 October 2026, the project lead''s (tools/build/build_labour_setaside.py)';
+COMMENT ON TABLE sup_set_aside_split IS 'CAPRI''s premiums PRME (EUR/ha) of its two set-aside activities VSET and FALL per model region, 2017 and 2030 (the 2030 values in the model''s 2017 money), for the set-aside report (tools/build/build_labour_setaside.py; until S2, 7 November 2026, also the split of the model''s SETA and its labour)';
 INSERT INTO value_units VALUES
-  ('sup_set_aside_split', 'share_vset', NULL, 'open', 'set_aside_split.share_vset: unit to be established'),
-  ('sup_set_aside_split', 'prem_vset', NULL, 'open', 'set_aside_split.prem_vset: unit to be established'),
-  ('sup_set_aside_split', 'labt_vset', NULL, 'open', 'set_aside_split.labt_vset: unit to be established'),
-  ('sup_set_aside_split', 'prem_fall', NULL, 'open', 'set_aside_split.prem_fall: unit to be established'),
-  ('sup_set_aside_split', 'labt_fall', NULL, 'open', 'set_aside_split.labt_fall: unit to be established'),
-  ('sup_set_aside_split', 'share_vset_2030', NULL, 'open', 'set_aside_split.share_vset_2030: unit to be established'),
-  ('sup_set_aside_split', 'prem_vset_2030', NULL, 'open', 'set_aside_split.prem_vset_2030: unit to be established'),
-  ('sup_set_aside_split', 'labt_vset_2030', NULL, 'open', 'set_aside_split.labt_vset_2030: unit to be established'),
-  ('sup_set_aside_split', 'prem_fall_2030', NULL, 'open', 'set_aside_split.prem_fall_2030: unit to be established'),
-  ('sup_set_aside_split', 'labt_fall_2030', NULL, 'open', 'set_aside_split.labt_fall_2030: unit to be established'),
-  ('sup_set_aside_split', 'w_vset', NULL, 'open', 'set_aside_split.w_vset: unit to be established'),
-  ('sup_set_aside_split', 'w_vset_capri2030', NULL, 'open', 'set_aside_split.w_vset_capri2030: unit to be established'),
-  ('sup_set_aside_split', 'w_vset_recipe2030', NULL, 'open', 'set_aside_split.w_vset_recipe2030: unit to be established');
+  ('sup_set_aside_split', 'prem_vset', 'U_EuPerHa', 'capri', 'CAPRI''s PRME of VSET'),
+  ('sup_set_aside_split', 'prem_fall', 'U_EuPerHa', 'capri', 'CAPRI''s PRME of FALL'),
+  ('sup_set_aside_split', 'prem_vset_2030', 'U_EuPerHa', 'capri', 'CAPRI''s 2030 PRME of VSET over CAPRI''s inflation to 2030'),
+  ('sup_set_aside_split', 'prem_fall_2030', 'U_EuPerHa', 'capri', 'CAPRI''s 2030 PRME of FALL over CAPRI''s inflation to 2030');
 
 -- file: capri_data/2017/supply/winter_cover_share.csv
 CREATE TABLE sup_winter_cover_share (
@@ -614,10 +663,13 @@ CREATE TABLE sup_cap_premium_activity (
     TABO DOUBLE,
     TOBA DOUBLE,
     TEXT DOUBLE,
-    GRAS DOUBLE,
+    GRAE DOUBLE,
+    GRAI DOUBLE,
     MAIF DOUBLE,
-    OFOD DOUBLE,
-    SETA DOUBLE,
+    OFAR DOUBLE,
+    ROOF DOUBLE,
+    VSET DOUBLE,
+    FALL DOUBLE,
     AGGT DOUBLE,
     ANNC DOUBLE,
     ARAC DOUBLE,
@@ -638,6 +690,7 @@ CREATE TABLE sup_cap_premium_activity (
     EAAG DOUBLE,
     FODD DOUBLE,
     FRUN DOUBLE,
+    GRAS DOUBLE,
     HEIF DOUBLE,
     HEIH DOUBLE,
     HEIL DOUBLE,
@@ -647,13 +700,11 @@ CREATE TABLE sup_cap_premium_activity (
     MODU DOUBLE,
     OANI DOUBLE,
     OAR1 DOUBLE,
-    OFAR DOUBLE,
     OILS DOUBLE,
     PERM DOUBLE,
     PIGF DOUBLE,
     PKPL DOUBLE,
     POUF DOUBLE,
-    ROOF DOUBLE,
     RUMI DOUBLE,
     SCOW DOUBLE,
     SETF DOUBLE,
@@ -661,10 +712,9 @@ CREATE TABLE sup_cap_premium_activity (
     SHGM DOUBLE,
     SOWS DOUBLE,
     TWIN DOUBLE,
-    VSET DOUBLE,
     PRIMARY KEY (region)
 );
-COMMENT ON TABLE sup_cap_premium_activity IS 'CAPRI''s CAP premium PRME per regional unit and activity (per ha or per head): the crop columns from crop_premium.csv (every region, model codes), the others from CAPREG''s DATA2 extract sources/capreg/capreg_cap_premium.csv (tools/build/build_model_premium_prices.py; the model read the extract and joined them at run time until 31 October 2026)';
+COMMENT ON TABLE sup_cap_premium_activity IS 'CAPRI''s CAP premium PRME per regional unit and activity (per ha or per head): the crop columns from crop_premium.csv (every region, model codes), the others from CAPREG''s DATA2 extract sources/capreg/capreg_cap_premium.parquet (tools/build/build_model_premium_prices.py; the model read the extract and joined them at run time until 31 October 2026)';
 INSERT INTO value_units VALUES
   ('sup_cap_premium_activity', 'SWHE', NULL, 'open', 'cap_premium_activity.SWHE: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'DWHE', NULL, 'open', 'cap_premium_activity.DWHE: unit to be established (per ha for crops, per head for animals)'),
@@ -696,10 +746,11 @@ INSERT INTO value_units VALUES
   ('sup_cap_premium_activity', 'TABO', NULL, 'open', 'cap_premium_activity.TABO: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'TOBA', NULL, 'open', 'cap_premium_activity.TOBA: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'TEXT', NULL, 'open', 'cap_premium_activity.TEXT: unit to be established (per ha for crops, per head for animals)'),
+  ('sup_cap_premium_activity', 'GRAE', NULL, 'open', 'cap_premium_activity.GRAE: unit to be established (per ha for crops, per head for animals)'),
+  ('sup_cap_premium_activity', 'GRAI', NULL, 'open', 'cap_premium_activity.GRAI: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'GRAS', NULL, 'open', 'cap_premium_activity.GRAS: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'MAIF', NULL, 'open', 'cap_premium_activity.MAIF: unit to be established (per ha for crops, per head for animals)'),
-  ('sup_cap_premium_activity', 'OFOD', NULL, 'open', 'cap_premium_activity.OFOD: unit to be established (per ha for crops, per head for animals)'),
-  ('sup_cap_premium_activity', 'SETA', NULL, 'open', 'cap_premium_activity.SETA: unit to be established (per ha for crops, per head for animals)'),
+  ('sup_cap_premium_activity', 'FALL', NULL, 'open', 'cap_premium_activity.FALL: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'AGGT', NULL, 'open', 'cap_premium_activity.AGGT: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'ANNC', NULL, 'open', 'cap_premium_activity.ANNC: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'ARAC', NULL, 'open', 'cap_premium_activity.ARAC: unit to be established (per ha for crops, per head for animals)'),
@@ -820,10 +871,9 @@ CREATE TABLE sup_producer_prices_regional (
     TWIN DOUBLE,
     UAAR DOUBLE,
     WINE DOUBLE,
-    OFOD DOUBLE,
     PRIMARY KEY (model_region)
 );
-COMMENT ON TABLE sup_producer_prices_regional IS 'CAPRI''s regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.csv), CAPRI''s TWIN and OFAR columns for WINE and OFOD where those are empty, and a missing regional price filled with the country''s national price (sources/capreg/capreg_national_prices.csv; tools/build/build_model_premium_prices.py; done by the model''s loader at run time until 31 October 2026)';
+COMMENT ON TABLE sup_producer_prices_regional IS 'CAPRI''s regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.parquet), CAPRI''s TWIN column for WINE where it is empty (and OFAR for OFOD until S2, 7 November 2026), and a missing regional price filled with the country''s national price (sources/capreg/capreg_national_prices.parquet; tools/build/build_model_premium_prices.py; done by the model''s loader at run time until 31 October 2026)';
 INSERT INTO value_units VALUES
   ('sup_producer_prices_regional', 'AGGT', NULL, 'open', 'producer_prices_regional.AGGT: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
   ('sup_producer_prices_regional', 'APPL', NULL, 'open', 'producer_prices_regional.APPL: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
@@ -896,8 +946,7 @@ INSERT INTO value_units VALUES
   ('sup_producer_prices_regional', 'TOMA', NULL, 'open', 'producer_prices_regional.TOMA: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
   ('sup_producer_prices_regional', 'TWIN', NULL, 'open', 'producer_prices_regional.TWIN: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
   ('sup_producer_prices_regional', 'UAAR', NULL, 'open', 'producer_prices_regional.UAAR: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
-  ('sup_producer_prices_regional', 'WINE', NULL, 'open', 'producer_prices_regional.WINE: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
-  ('sup_producer_prices_regional', 'OFOD', NULL, 'open', 'producer_prices_regional.OFOD: EUR/t as CAPRI''s MPRI, to be confirmed per column');
+  ('sup_producer_prices_regional', 'WINE', NULL, 'open', 'producer_prices_regional.WINE: EUR/t as CAPRI''s MPRI, to be confirmed per column');
 
 -- file: capri_data/2017/supply/young_animals_2017.csv
 CREATE TABLE sup_young_animals_2017 (

@@ -26,7 +26,7 @@ version ran alongside a new one.
 How regions map
 ---------------
 Since 27 October 2026 the model's regions are CAPRI's regional units under CAPRI's own codes
-(capri_data/shared/regional_units.csv, tools/build/build_regional_units.py): every region takes its own
+(capri_data/codes/regional_units.csv, tools/build/build_regional_units.py): every region takes its own
 CAPRI row. Until then the model had 248 NUTS-2016 regions, matched to CAPRI's codes by renames, merges,
 splits by Eurostat cattle numbers (Denmark, Lithuania, Slovenia, Croatia, Saxony, ...), Ireland's 2016
 boundary shares, Norway's pooled regions and crop-specific splits from CAPREG's p_REGIO; all of that is gone
@@ -69,11 +69,11 @@ COSTS = SUPPLY / "variable_costs.csv"
 NUTRIENTS = SUPPLY / "nutrients_regional.csv"
 #: the layouts of the tables written (columns in the committed files' order)
 AREA_COLS = ["SWHE", "DWHE", "RYEM", "BARL", "OATS", "CORN", "OCER", "PARI", "PULS", "SUGB", "POTA", "TOMA", "OVEG",
-             "APPL", "OFRU", "CITR", "TAGR", "WINE", "OLIV", "TABO", "GRAS", "TOBA", "TEXT", "MAIF", "OFOD", "SETA",
+             "APPL", "OFRU", "CITR", "TAGR", "WINE", "OLIV", "TABO", "GRAE", "GRAI", "TOBA", "TEXT", "MAIF", "OFAR", "ROOF", "VSET", "FALL",
              "RAPE", "SUNF", "SOYA", "OOIL", "OCRO", "OIND", "NURS", "FLOW"]
 LAND_COLS = ["ARABLE", "PERMANENT", "GRASSLAND", "FALLOW"]
 HERD_COLS = ["DCOW", "SCOW", "COWS", "BULL", "HEIF", "CALV", "PIGS", "PIGF", "HENS", "POUL", "SHGM", "SHGF"]
-PRICES = _ROOT / "capri_data" / "sources" / "capreg" / "capreg_producer_prices.csv"
+PRICES = _ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_producer_prices.parquet"
 
 # ---------------------------------------------------------------- crop map --
 #: model column -> CAPRI activities summed into it. Textile crops are CAPRI's one activity TEXT (cotton in the
@@ -92,7 +92,7 @@ HERD_MAP = {"DCOW": "DCOW", "SCOW": "SCOW", "BULL": "BULL", "HEIF": "HEIF",
 
 #: cost columns verified equal to CAPRI TOIN on DE11, FR10 and ES61
 COST_ANIMALS = ("DCOW", "BULL", "PIGF", "OANI")
-COST_EXCLUDE = ("SETA", "WINE")
+COST_EXCLUDE = ("VSET", "FALL", "WINE")   # (SETA until S2, 7 November 2026)
 # the crops on permanent-crop land: the model's classes (capri_data/codes/model_activity_classes.csv, N6), one list
 # with the supply model (DEP-43 fixed, 2 November 2026: nurseries on FRUN as CAPRI)
 PERMANENT_CROPS = _MC.permanent_crops()
@@ -131,8 +131,8 @@ def build_spec(capri: dict, regions) -> dict:
 
 
 def units() -> list:
-    """The model's regions: CAPRI's regional units (shared/regional_units.csv)."""
-    with open(_ROOT / "capri_data" / "shared" / "regional_units.csv", newline="") as f:
+    """The model's regions: CAPRI's regional units (codes/regional_units.csv)."""
+    with open(_ROOT / "capri_data" / "codes" / "regional_units.csv", newline="") as f:
         return [r["region"] for r in csv.DictReader(f)]
 
 
@@ -208,7 +208,8 @@ def main(dump_dir: Path):
         # ---- land from the rebuilt areas
         v = areas.loc[reg]
         perm = float(v[[c for c in PERMANENT_CROPS if c in v.index]].sum())
-        grass, fallow = float(v.get("GRAS", 0.0)), float(v.get("SETA", 0.0))
+        grass = float(v.get("GRAE", 0.0)) + float(v.get("GRAI", 0.0))   # (GRAS until S2, 7 November 2026)
+        fallow = float(v.get("VSET", 0.0)) + float(v.get("FALL", 0.0))
         land.at[reg, "PERMANENT"], land.at[reg, "GRASSLAND"] = perm, grass
         land.at[reg, "FALLOW"] = fallow
         land.at[reg, "ARABLE"] = float(v.sum()) - perm - grass - fallow

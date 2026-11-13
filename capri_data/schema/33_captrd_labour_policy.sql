@@ -20,7 +20,7 @@ CREATE TABLE ctrd_p_minlabourperact (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (act)
 );
-COMMENT ON TABLE ctrd_p_minlabourperact IS 'CAPRI''s p_minLabourPerAct(act): minimum labour per activity unit (h, 2008), from baseline/labour_ageline.gms l. 92-153 (as CSV: capri_data/sources/capri_gams/baseline/labour_ageline_p_minLabourPerAct.csv, tools/build/convert_sources_to_csv.py) by tools/build/build_captrd_dat.py';
+COMMENT ON TABLE ctrd_p_minlabourperact IS 'CAPRI''s p_minLabourPerAct(act): minimum labour per activity unit (h, 2008), from baseline/labour_ageline.gms l. 92-153 (as CSV: capri_data/sources/raw/capri/gams/baseline/labour_ageline_p_minLabourPerAct.parquet, tools/build/convert_sources.py) by tools/build/build_captrd_dat.py';
 INSERT INTO value_units VALUES
   ('ctrd_p_minlabourperact', 'value', NULL, 'open', 'p_minlabourperact.value: unit to be established');
 
@@ -32,7 +32,7 @@ CREATE TABLE ctrd_p_mquotadat (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (region, info, "year")
 );
-COMMENT ON TABLE ctrd_p_mquotadat IS 'CAPRI''s p_MQuotaDat(MS, info, year): milk quotas, deliveries and direct sales (DG AGRI), from dat/coco/milk_quota_dat.gms (as CSV: capri_data/sources/capri_dat/coco/milk_quota_dat_p_MQuotaDat.csv, tools/build/convert_sources_to_csv.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
+COMMENT ON TABLE ctrd_p_mquotadat IS 'CAPRI''s p_MQuotaDat(MS, info, year): milk quotas, deliveries and direct sales (DG AGRI), from dat/coco/milk_quota_dat.gms (as CSV: capri_data/sources/raw/capri/dat/coco/milk_quota_dat_p_MQuotaDat.parquet, tools/build/convert_sources.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
 INSERT INTO value_units VALUES
   ('ctrd_p_mquotadat', 'value', NULL, 'open', 'p_mquotadat.value: unit to be established');
 
@@ -44,7 +44,7 @@ CREATE TABLE ctrd_p_mquotareg (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (region, info, "year")
 );
-COMMENT ON TABLE ctrd_p_mquotareg IS 'CAPRI''s PMQuotaReg(MS, QUTtot, year): total milk quotas 2004-2014 (1000 t), from pol_input/mquota_update.gms (as CSV: capri_data/sources/capri_gams/pol_input/mquota_update_PMQuotaReg.csv, tools/build/convert_sources_to_csv.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
+COMMENT ON TABLE ctrd_p_mquotareg IS 'CAPRI''s PMQuotaReg(MS, QUTtot, year): total milk quotas 2004-2014 (1000 t), from pol_input/mquota_update.gms (as CSV: capri_data/sources/raw/capri/gams/pol_input/mquota_update_PMQuotaReg.parquet, tools/build/convert_sources.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
 INSERT INTO value_units VALUES
   ('ctrd_p_mquotareg', 'value', 'U_1000t', 'capri', 'CAPRI''s quantity in 1000 t (builder docstring; sugar README)');
 
@@ -55,7 +55,7 @@ CREATE TABLE ctrd_p_ppsqcbuyback (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (region, "year")
 );
-COMMENT ON TABLE ctrd_p_ppsqcbuyback IS 'CAPRI''s p_PPSQCBuyBack(MSALL, year): sugar quota buy-back, from CAPRI''s input_load_sugar_quotas.gdx (capri_data/sources/capri_dat/sugar/p_PPSQCBuyBack.csv), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
+COMMENT ON TABLE ctrd_p_ppsqcbuyback IS 'CAPRI''s p_PPSQCBuyBack(MSALL, year): sugar quota buy-back, from CAPRI''s input_load_sugar_quotas.gdx (capri_data/sources/raw/capri/dat/sugar/p_PPSQCBuyBack.parquet), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
 INSERT INTO value_units VALUES
   ('ctrd_p_ppsqcbuyback', 'year', NULL, 'open', 'p_ppsqcbuyback.year: unit to be established'),
   ('ctrd_p_ppsqcbuyback', 'value', NULL, 'open', 'p_ppsqcbuyback.value: unit to be established');
@@ -67,7 +67,7 @@ CREATE TABLE ctrd_p_ppsqrenounce (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (region, "year")
 );
-COMMENT ON TABLE ctrd_p_ppsqrenounce IS 'CAPRI''s p_PPSQRenounce(MSALL, year): renounced sugar quota, from CAPRI''s input_load_sugar_quotas.gdx (capri_data/sources/capri_dat/sugar/p_PPSQRenounce.csv), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
+COMMENT ON TABLE ctrd_p_ppsqrenounce IS 'CAPRI''s p_PPSQRenounce(MSALL, year): renounced sugar quota, from CAPRI''s input_load_sugar_quotas.gdx (capri_data/sources/raw/capri/dat/sugar/p_PPSQRenounce.parquet), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
 INSERT INTO value_units VALUES
   ('ctrd_p_ppsqrenounce', 'value', NULL, 'open', 'p_ppsqrenounce.value: unit to be established');
 
@@ -78,7 +78,7 @@ CREATE TABLE ctrd_p_smallprodshare (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (region, "year")
 );
-COMMENT ON TABLE ctrd_p_smallprodshare IS 'CAPRI''s p_smallProdShare(year, MS): small producers'' share outside compulsory set-aside, from dat/policy/smal_pshar.gms (as CSV: capri_data/sources/capri_dat/policy/smal_pshar_p_smallProdShare.csv, tools/build/convert_sources_to_csv.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
+COMMENT ON TABLE ctrd_p_smallprodshare IS 'CAPRI''s p_smallProdShare(year, MS): small producers'' share outside compulsory set-aside, from dat/policy/smal_pshar.gms (as CSV: capri_data/sources/raw/capri/dat/policy/smal_pshar_p_smallProdShare.parquet, tools/build/convert_sources.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
 INSERT INTO value_units VALUES
   ('ctrd_p_smallprodshare', 'value', NULL, 'open', 'p_smallprodshare.value: unit to be established');
 
@@ -90,7 +90,7 @@ CREATE TABLE ctrd_p_squotas (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (region, quota, "year")
 );
-COMMENT ON TABLE ctrd_p_squotas IS 'CAPRI''s p_SQuotas(MSALL, QUOTAS, year): sugar quotas (1000 t white sugar), from CAPRI''s input_load_sugar_quotas.gdx (capri_data/sources/capri_dat/sugar/p_SQuotas.csv), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
+COMMENT ON TABLE ctrd_p_squotas IS 'CAPRI''s p_SQuotas(MSALL, QUOTAS, year): sugar quotas (1000 t white sugar), from CAPRI''s input_load_sugar_quotas.gdx (capri_data/sources/raw/capri/dat/sugar/p_SQuotas.parquet), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
 INSERT INTO value_units VALUES
   ('ctrd_p_squotas', 'value', 'U_1000t', 'capri', 'CAPRI''s quantity in 1000 t (builder docstring; sugar README)');
 
@@ -138,7 +138,7 @@ CREATE TABLE ctrd_srnuts1 (
 );
 COMMENT ON TABLE ctrd_srnuts1 IS 'CAPRI''s global set SRNUTS1 (gams/sets.gms) as instantiated in sim_ini_21730 (capri_reference/sets/simini_21730), copied by tools/build/build_captrd_sets.py';
 
--- file: capri_data/sources/capri_dat/sugar/p_PPSQCBuyBack.csv
+-- file: capri_data/sources/raw/capri/dat/sugar/p_PPSQCBuyBack.parquet
 CREATE TABLE src_capri_dat_sugar_p_ppsqcbuyback (
     region VARCHAR NOT NULL,
     "year" BIGINT NOT NULL,
@@ -150,7 +150,7 @@ INSERT INTO value_units VALUES
   ('src_capri_dat_sugar_p_ppsqcbuyback', 'year', NULL, 'open', 'p_PPSQCBuyBack.year: unit to be established'),
   ('src_capri_dat_sugar_p_ppsqcbuyback', 'value', NULL, 'open', 'p_PPSQCBuyBack.value: unit to be established');
 
--- file: capri_data/sources/capri_dat/sugar/p_PPSQRenounce.csv
+-- file: capri_data/sources/raw/capri/dat/sugar/p_PPSQRenounce.parquet
 CREATE TABLE src_capri_dat_sugar_p_ppsqrenounce (
     region VARCHAR NOT NULL,
     "year" BIGINT NOT NULL,
@@ -161,7 +161,7 @@ COMMENT ON TABLE src_capri_dat_sugar_p_ppsqrenounce IS 'CAPRI''s p_PPSQRenounce(
 INSERT INTO value_units VALUES
   ('src_capri_dat_sugar_p_ppsqrenounce', 'value', NULL, 'open', 'p_PPSQRenounce.value: unit to be established');
 
--- file: capri_data/sources/capri_dat/sugar/p_SQuotas.csv
+-- file: capri_data/sources/raw/capri/dat/sugar/p_SQuotas.parquet
 CREATE TABLE src_capri_dat_sugar_p_squotas (
     region VARCHAR NOT NULL,
     quota VARCHAR NOT NULL,

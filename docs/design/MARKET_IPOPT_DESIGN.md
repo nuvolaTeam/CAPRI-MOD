@@ -275,12 +275,39 @@ After the market Newton-Krylov solve's review (KNOWN_ISSUES K110):
 2. Then the quotas' sigmas and the dairy blocks' raw milk price inside each market evaluation, solved with the prices
    (CAPRI: trqSigmoidFunc_ and the dairy equations in the same system). This shortens the default solve's end, which
    on K110's shock is mostly the quotas settling (40 iterations), and G3 needs these pieces as equations anyway.
+   Done for the quotas on 5 November 2026 (market.trq_joint, the default; KNOWN_ISSUES K117). The non-EU dairy blocks'
+   raw milk price (used by the feed energy balances and the land markets one evaluation behind) was tried inside each
+   evaluation on 6 November 2026 (inner rounds until the price settled, 1e-10): the same equilibrium (mini-EU
+   Farm-to-Fork deviation from JRC121368 7.82 in both, values within 4e-5 relative) at twice the run time (928 s
+   against 466 s; the market up to 5 times slower, each round re-evaluating the whole supply side). Dropped by the
+   project lead's decision: left to G3, where the raw milk balance is one of the market's equations.
 3. Then G3, the whole market as one system in CAPRI's form (section 3.1), solved by IPOPT, so that the comparison with
    CAPRI is between the same simultaneous form, not only the same equations.
 
 Solver roles: the default market solve stays the successive linearisation until G3 is measured against it; the
 Newton-Krylov solve (market.solver = "newton_krylov") stays optional with no further work, as a cross-check of the
 equilibrium; MUMPS stays available as an option for IPOPT's linear solver (section 9).
+
+### 7.2 G3's open points decided (the project lead, 5 November 2026; G_REVIEW_2026-11-01.md)
+
+- **Bound policy (GR Q2.4 (3)):** CAPRI's reproduced as the default: CAPRI's bounds are checks, not IPOPT bounds; where
+  a variable leaves them or IPOPT reports infeasibility, widen_bounds' rules (widen, activate the fudge by lo < 0, fix
+  consumption at about 0), then re-solve, at most twice; numinfes and suminfes reported on CAPRI's scaled equations
+  with CAPRI's thresholds. The elastic least-infeasibility formulation only as an optional diagnostic mode (BEYOND-13).
+- **Objective (GR Q2.4 (1)-(2)):** zero, IPOPT as a pure feasibility solver as CONOPT in CAPRI, with the squareness
+  and structural-rank check before every solve (abort with the unpaired variables listed). This replaces the
+  ½‖z − z₀‖² of section 7 (30 October).
+- **Fudge equations (GR Q1.2):** as CAPRI activates them, only after a bound widening; the processing fudge applied
+  always (processing.py) goes.
+- **Acceptance (GR Q5.1):** G3-R, IPOPT reproduces the current solver's equilibrium with the equations unchanged; G3-C,
+  each change to CAPRI's form validated against CAPRI one at a time, its effect on the Farm-to-Fork and Green Deal
+  runs reported. Section 6 item 8's test is replaced by the two.
+- **External validation (GR Q5.2):** open; the CAPRI market dump to be agreed with the project lead (the calibration
+  point with CAPRI's debug_store_market_data, or a solved simulation step).
+- **Variable scaling (GR Q6.4):** ratios to base (logs for prices), an absolute scale where the base is 0; a numerical
+  choice, registered as a departure when G3 is built.
+- **Structural diagnostics (GR "Beyond CAPRI"):** a Dulmage–Mendelsohn decomposition of the Jacobian before each solve
+  (BEYOND-12).
 
 ## 8. Found while making the inventory
 

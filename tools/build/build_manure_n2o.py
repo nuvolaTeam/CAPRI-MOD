@@ -7,7 +7,7 @@ CAPRI (envind/gases.gms) computes manure N2O per activity from its manure N (MAN
   N2OLEA  leaching              (indirect)
   N2OAMM  volatilisation        (NH3 + NOx)-N x EF4 x 44/28 (indirect)
 The loss shares move with the ammonia technologies (v_emiLoss): CAPRI's technology effects on N2O
-(ammo_tech.gms; capri_data/2017/abatement/ammonia/ammonia_technology_effects.parquet, N2OHOU and N2OAPP; manure
+(ammo_tech.gms; capri_data/sources/intermediate/ammonia/ammonia_technology_effects.parquet, N2OHOU and N2OAPP; manure
 acidification from p_litRevAmmoTechsAdd) - covered storage cuts housing/storage N2O, low-emission
 application raises application N2O (slurry injected, less NH3, more N2O).
 
@@ -99,7 +99,11 @@ def main():
 
     # technology effects on N2O
     amm = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
-    eff = pd.read_parquet(amm / "ammonia_technology_effects.parquet")
+    import sys as _sys_sio
+    _sys_sio.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+    from _sources_io import read_source, write_source
+    eff = read_source(Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "intermediate" / "ammonia"
+                      / "ammonia_technology_effects.parquet")
     eff = eff[eff["item"].isin(["N2OHOU", "N2OAPP"])]
     lit = _read_csv(amm / "p_litRevAmmoTechsAdd.csv")
     lit = lit[lit["item"].isin(["N2OHOU", "N2OAPP"]) & (lit["technology"] == "ManAcid")]

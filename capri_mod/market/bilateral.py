@@ -234,6 +234,33 @@ class BilateralCommodity:
         """trq_offset from the quotas' current sigmas at the exporters' price ratios r."""
         self.trq_offset = self._trq_off(r, self.trq_sigma, self.trq_sigmaW)
 
+    def trq_active(self) -> tuple:
+        """The quotas with a volume, (bilateral indices, global indices): the unknowns of the joint solve."""
+        return ([k for k, q in enumerate(self.trq_quotas or ()) if q["Q"] > 0],
+                [m for m, g in enumerate(self.trq_globals or ()) if g["Q"] > 0])
+
+    def trq_arguments(self, X: np.ndarray, act: Optional[tuple] = None) -> np.ndarray:
+        """The sigmoid's argument of each active quota at the flows X (importer x exporter), CAPRI's trqSigmoidFunc_:
+        clip(slope (fill / Q - 0.97)), fill the quota's imports (TradeFlowsAgg_ for a bilateral quota, TRQImports_ for
+        a global one), bilateral first."""
+        bil, glo = self.trq_active() if act is None else act
+        f = [self.trq_fill(X, self.trq_quotas[k]) / self.trq_quotas[k]["Q"] for k in bil]
+        f += [self.trq_global_imports(X, self.trq_globals[m]) / self.trq_globals[m]["Q"] for m in glo]
+        return np.clip(self.TRQ_SLOPE * (np.asarray(f, float) - self.TRQ_FILL_MID), -self.TRQ_ARG_CLIP,
+                       self.TRQ_ARG_CLIP)
+
+    def trq_equation_gap(self, X: np.ndarray) -> float:
+        """CAPRI's trqSigmoidFunc_ residual at the flows X and the current sigmas: max |sigma - Sigmoid(argument)| over
+        the active quotas (0 without quotas)."""
+        if not (self.trq_quotas or self.trq_globals) or self.trq_sigma is None:
+            return 0.0
+        bil, glo = self.trq_active()
+        if not (bil or glo):
+            return 0.0
+        sW = np.asarray(self.trq_sigmaW if self.trq_sigmaW is not None else np.zeros(0), float)
+        s = np.concatenate([np.asarray(self.trq_sigma, float)[bil], sW[glo]])
+        return float(np.max(np.abs(s - 1.0 / (1.0 + np.exp(-self.trq_arguments(X, (bil, glo)))))))
+
     def trq_solve(self, X: np.ndarray, p: np.ndarray, r: Optional[np.ndarray] = None,
                   D: Optional[np.ndarray] = None) -> None:
         """Every quota's sigma consistent with its flows (Gauss-Seidel over the quotas, the bilateral ones first, then
@@ -375,8 +402,9 @@ class BilateralCommodity:
     #: the base, set by border_base()
     border: Optional[dict] = None
 
-    def border_spec(self, r: np.ndarray) -> np.ndarray:
-        """The specific tariff of the flows under a border measure (EUR/t; 0 elsewhere) at the exporters' ratios r:
+    def border_spec(self, r: np.ndarray, sig: Optional[tuple] = None) -> np.ndarray:
+        """The specific tariff of the flows under a border measure (EUR/t; 0 elsewhere) at the exporters' ratios r (and the
+        quotas' sigmas sig = (bilateral, global), default the current ones):
         entry price (EntryPriceDriver_, tarSpecIfEntryPrice_, prefTriggerPrice_): driver d = (E 0.95 - (Pmrk + TC)) /
         TriggerP x fac, tariff = exp(min(0, d)) / (1 + 20 exp(-|d|)) x (TARS or TsPref), E = TriggerP, or PrefTrigPrice
         for an unlimited preference, or PrefTrigPrice + (TriggerP - PrefTrigPrice) sigma under the quota; flexible levy
@@ -385,6 +413,7 @@ class BilateralCommodity:
         out = np.zeros((len(self.regions), len(self.regions)))
         if not b:
             return out
+        sB, sW = (self.trq_sigma, self.trq_sigmaW) if sig is None else sig
         tc = self.tc if self.tc is not None else np.zeros_like(self.a0)
         cif = self.a0 * r[None, :] + tc
         # CAPRI defines the measures per pair of policy blocks (v_marketPrice(RMTP1) + v_transpCost(RMTP, RMTP1),
@@ -400,7 +429,7 @@ class BilateralCommodity:
             E = np.where(b["pref"] > 0, b["pref"], b["price"])
             for qi in np.unique(b["quota"][en & (b["quota"] >= 0)]):
                 m = en & (b["quota"] == qi)
-                s_ = float(self.trq_sigma[int(qi)]) if self.trq_sigma is not None else 0.0
+                s_ = float(sB[int(qi)]) if sB is not None else 0.0
                 E = np.where(m, b["pref"] + (b["price"] - b["pref"]) * s_, E)
             with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
                 d = (E * 0.95 - cif) / np.where(b["price"] > 0, b["price"], 1.0) * b["fac"]
@@ -410,8 +439,8 @@ class BilateralCommodity:
         if lv.any():
             # the levy is cut at the flow's specific tariff: the bound rate, or the quota's current rate (v_tarSpec)
             tars = b["tars"]
-            if self.trq_sigma is not None and (self.trq_quotas or self.trq_globals):
-                _, ts = self._trq_rates(self.trq_sigma, self.trq_sigmaW)
+            if sB is not None and (self.trq_quotas or self.trq_globals):
+                _, ts = self._trq_rates(sB, sW)
                 tars = np.where(np.isnan(ts), tars, ts)
             z = 1e-3 * np.where(b["price"] > 0, b["price"], 1.0)
             notcut = -self.ncpcm(-(b["price"] - cif), 0.0, z)
@@ -423,16 +452,19 @@ class BilateralCommodity:
         if self.border:
             self.border["S0"] = self.border_spec(np.ones(len(self.regions)))
 
-    def import_prices(self, r: np.ndarray, tariff_adds=None) -> np.ndarray:
+    def import_prices(self, r: np.ndarray, tariff_adds=None, sig: Optional[tuple] = None) -> np.ndarray:
         """Import prices p_ij at the exporters' price ratios r. tariff_adds: [(importer rows, points of ad valorem
         tariff added)], CAPRI impPrice_ (arm/market_model.gms l. 2849-2882): the ad valorem tariff applies to the
         exporter's market price plus the transport cost; flows between the rows of one importer (the EU's trade
-        blocks) carry none."""
+        blocks) carry none. sig = (bilateral, global sigmas): the quotas' rates at these sigmas and at r (the joint
+        solve's trial point, _bilateral_inner_trq); without it the stored offsets and the current sigmas."""
         p = self.a * r[None, :] + self.b
-        if (self.trq_quotas or self.trq_globals) and self.trq_offset is not None:
+        if sig is not None and (self.trq_quotas or self.trq_globals):
+            p = p + self._trq_off(np.asarray(r, dtype=float), sig[0], sig[1])
+        elif (self.trq_quotas or self.trq_globals) and self.trq_offset is not None:
             p = p + self.trq_offset
         if self.border and "S0" in self.border:
-            p = p + (self.border_spec(np.asarray(r, dtype=float)) - self.border["S0"])
+            p = p + (self.border_spec(np.asarray(r, dtype=float), sig) - self.border["S0"])
         for importer, pts in (tariff_adds or ()):
             if not pts:
                 continue

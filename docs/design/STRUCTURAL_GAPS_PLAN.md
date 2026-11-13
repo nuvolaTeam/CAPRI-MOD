@@ -160,6 +160,14 @@ goes gate by gate.
 - **Expected effect:** small each, documented per builder.
 - **Effort:** per item; some close with more exports from the project lead's CAPRI.
 - **How to check:** the rebuilt quantity against a CAPRI export, where one can be made.
+- **Status (10 November 2026): closed, one check left.** The 2030 feed slopes: CAPRI's 2030 SLOP with CAPRI's 2030
+  weights (DEP-22 fixed). The 2030 rations per activity: CAPRI's own (DATA at the 2030 point, since 10 November 2026
+  its Green Deal baseline; not rebuilt). The digestibility table: CAPRI's code (envind/def_digestibility.gms,
+  tools/build/build_digestibility_table.py; not rebuilt). The MITERRA fractions: the shares of liquid and solid
+  manure, grazing and housing (p_Nemidat TypeShare) checked against sim_ini_21730 and found equal; the storage and
+  application loss factors cannot be checked against an export of CAPRI (they are computed inside ammo_tech.gms from
+  the LitRev inputs, docs: claude/n_cascade_spec.md) and stay as built, unverified against a CAPRI number. K65 (S9)
+  needs CAPRI's per-sex young-animal results, not available now.
 
 ### S12. The solver
 
@@ -169,13 +177,42 @@ goes gate by gate.
 - **Effort:** in development (Step G, linear solvers); K79's diagnostic first.
 - **How to check:** the K79 diagnostic (tools/check/k79_multistart, draft): the objectives of the two states.
 
+### S13. LULUCF carbon: accounting and the carbon price on land-use change (added 9 November 2026)
+
+- **CAPRI:** the land-use-change transitions carry carbon effects (biomass, soil carbon, burning, histosols; the GWP of
+  each transition per climate zone) and, under a carbon price on LULUCF (p_carbonTax(..., "GLUC")), their cost per
+  hectare enters the land rents and the objectives:
+  - market, non-EU regions: lulucf_market (arm/market_model.gms from l. 1995: landshareMrk_, the GWP*MrkLu_
+    equations, glucCostPerHa_; v_glucCostPerHa in the rents, l. 1717), on with REPORTS_ENV, its equations active only
+    where p_carbonTax(RMS, "GLUC") > 0 (capmod/set_global_variables.gms l. 399-410);
+  - supply, EU regions: lulucf_supply with ghgabatement (the supply model's LULUCF equations; post-model reporting in
+    reports/sol_simy.gms otherwise);
+  - without a price, LULUCF emissions are reported after the solves (sol_market, sol_simy).
+- **capri-mod now:** the transitions are ported on both sides (supply: capri_mod/environmental/luc.py; market:
+  capri_mod/market/luc.py, luc_market, 9 November 2026); no carbon accounting of the transitions, no LULUCF price
+  (DEP-44 for the market's recursive solve).
+- **Where CAPRI uses the price:** not in the scenarios run now. ecampa/carbtax50_endotech_set14.gms taxes GGWP in the
+  EU supply regions only; greendeal/oth_pol.gms has GWPA and GLUC taxes on the supply regions (0 in the Green Deal
+  2030 run, oth00); the market regions' GLUC price is set in the global mitigation scenarios (agmip/agclim50_*,
+  afolu_ets).
+- **Expected effect:** none on Farm-to-Fork, the Green Deal and the carbon tax at 50; the LULUCF emissions and, with
+  a GLUC price, land use and prices in the mitigation scenarios.
+- **Effort:** large: CAPRI's carbon-stock data (p_biomassJrc, p_soilCarbon, p_SOCfactorJRC, the burning and histosol
+  factors per climate zone) extracted and built, the accounting per transition, then the cost in the rents (market)
+  and in the regional models (supply). Two steps: (a) post-model reporting as sol_market and sol_simy; (b) the price.
+- **How to check:** (a) CAPRI's LULUCF emissions at its 2030 calibration point (DATA GLUC and the gas items per
+  region in sim_ini_21730 and the reference results); (b) a CAPRI run with a GLUC price (to request: none in hand).
+- **When:** with the carbon-tax scenarios, together with S10 (the project lead's decision of 9 November 2026 for S10;
+  S13's timing to be confirmed).
+
 ## 2. Order (agreed with the project lead, 31 October 2026)
 
 1. **S3 diagnosis and S12's K79 check.** Both are cheap and tell where the larger items matter: S3 may point at S1/S2;
    the K79 check tells whether the regions that switch state have one better optimum.
 2. **S4 and S5.** Contained ports, each with its own gate.
 3. **S1/S2 design document.** The largest item: the design first, then a decision on whether and how.
-4. **S6 item by item, S7, S8, S10, S11** as the project lead marks them.
+4. **S6 item by item, S7, S8, S10, S11** as the project lead marks them; S10 and S13 together with the carbon-tax
+   scenarios (9 November 2026).
 5. **S9** with K65.
 
 Each step: CAPRI's code read and cited, the base reproduced exactly, tests, and the F2F/GD gate compared with the

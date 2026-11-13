@@ -6,6 +6,8 @@ module once model is loaded (capri_mod.coupling.inject); the annotations are not
 """
 from __future__ import annotations
 
+from capri_mod import runlog as _runlog
+
 import functools as _functools
 import hashlib as _hashlib
 from pathlib import Path as _Path
@@ -33,20 +35,42 @@ def supply_code_fingerprint() -> str:
     return h.hexdigest()[:16]
 
 
+#: the data folders that cannot change the supply models' price response (the market's own data, the checks' references,
+#: the schema and the documents)
+_NOT_SUPPLY_DATA = ("market", "validation", "schema")
+
+
+@_functools.lru_cache(maxsize=4)
+def supply_data_fingerprint(data_dir=None) -> str:
+    """A hash of the data that can change the supply models' price response: every CSV file under the run's data folder
+    (capri_data when none is given) but the market's, the validation references' and the schema's (path and content).
+    Part of the cached Hessian's key since 5 November 2026 (DEP-22): the 2030 feed PMP slopes changed the price
+    response without moving the base totals the key already holds, so a Hessian measured on the old file would have
+    been reused. Any change of those files means one new measurement."""
+    root = _Path(data_dir) if data_dir else _Path(__file__).resolve().parents[2] / "capri_data"
+    h = _hashlib.sha1()
+    for f in sorted(root.rglob("*.csv")):
+        rel = f.relative_to(root)
+        if any(part in _NOT_SUPPLY_DATA for part in rel.parts):
+            continue
+        h.update(str(rel).encode())
+        h.update(f.read_bytes())
+    return h.hexdigest()[:16]
+
+
 class HessianBlock:
     def _measure_pending_hessian(self, pend) -> None:
-        """The market supply Hessian of the baseline that has just run (recorded in _hessian_pending), measured from the
-        state the baseline left: called at the start of the scenario run that needs it, before the scenario changes
-        anything (or right after the baseline the scenario ran for itself)."""
+        """The market supply Hessian of the baseline, measured at the baseline's start on calibrated models (the
+        regional models solved once more at the reference prices first; K120, S7)."""
         from capri_mod.supply.supply_module import RegionalSupplyModel as _RSMh
         _RSMh.nlp_tol = float(self.nlp_tol_final)          # the baseline's solves after its loop
         try:
-            self._progress("market supply Hessian of the baseline ...")
+            _runlog.current().title("Market supply Hessian of the baseline (calibrate_supply.gms)")
             _t_h = time.time()
             self.market_module.par.supply_hessian = self._market_supply_hessian(pend["price_signal"], pend["supply_results"],
                                                                             pend["regions"])
             self.par.hessian_key = pend["key"]
-            self._progress(f"market supply Hessian of the baseline: {time.time() - _t_h:.0f} s")
+            _runlog.current().log(f"Market supply Hessian of the baseline measured: {time.time() - _t_h:.0f} s")
         except Exception as _exc:
             warnings.warn(f"market supply Hessian not built ({_exc!r}); the market keeps its own-price "
                           "anticipation", RuntimeWarning, stacklevel=2)
@@ -154,6 +178,7 @@ class HessianBlock:
                             sorted((getattr(sm.seen, "milk_price_dev_ms", None) or {}).items())))
                       if getattr(self.ev, "hessian_at_scenario", False) else ""))
         key_src += repr(("supply-code", supply_code_fingerprint()))
+        key_src += repr(("supply-data", supply_data_fingerprint(getattr(self, "data_dir", None))))
         key = hashlib.sha1(key_src.encode()).hexdigest()[:16]
         cdir = _P(__file__).resolve().parents[2] / ".cache" / "market_supply_hessian"
         # Parquet (binary doubles, exact by construction). The Hessians cached as CSV before 27 October 2026 were
@@ -175,6 +200,13 @@ class HessianBlock:
         import copy as _cp
         t0 = _t.time()
         fb0 = getattr(sm.seen, "feed_bulk_ratio", None)
+        # the rations' feed prices inside the regional models (seen.feed_prices, CAPRIModel._update_rations: the member
+        # states' bulk price ratios on the feeds' base prices). Each shock sets them from its bulk ratios as the outer
+        # loop does; until 10 November 2026 only the bulk ratios were set, so the feeding block bought its feed at the
+        # base state's prices in every shock and the feed bulks' own price response (FEEDBLK rows) and the animals'
+        # response to feed prices were missing from the Hessian
+        fp0 = getattr(sm.seen, "feed_prices", None)
+        rm_h = getattr(self.par, "ration_model", None) if fp0 is not None else None
         rows = []
         # every shock starts from the baseline's solution, and the models leave as they came: the regional NLPs' warm
         # starts and path state (_nlp_*) and the N-price loop's state are restored before each shock and after the
@@ -232,6 +264,7 @@ class HessianBlock:
             # does not reach contributes exactly 0 (before, the re-solve's departure from the baseline's own solution,
             # up to 0.04 kt in r161, entered every column)
             sm.seen.feed_bulk_ratio = fb0 if fb0 is not None else self.feed_bulk_price_ratios(sig0)
+            sm.seen.feed_prices = fp0
             _restore(_snap0)
             sm.res.hess_fp, sm.res.hess_verify = {}, {}
             sm.seen.hess_probe = "record"
@@ -281,6 +314,9 @@ class HessianBlock:
                     sm.seen.yani_price_ratio, sm.seen.yani_price_ratio_ms, sm.seen.yani_price_ratio_m = yr0
                     dr_ms = {}
                 sm.seen.feed_bulk_ratio = self.feed_bulk_price_ratios(sig)
+                if rm_h is not None:
+                    from capri_mod.feed.ration import feed_prices_by_region as _fpr
+                    sm.seen.feed_prices = _fpr(rm_h, sm.seen.feed_bulk_ratio)
                 _restore(_snap0)
                 if skip:
                     sm.seen.hess_probe, sm.seen.hess_shock = ("verify" if verify else "compare"), y
@@ -313,6 +349,7 @@ class HessianBlock:
         # back to the base: the regional models' warm starts and states as the baseline left them
         sm.seen.yani_price_ratio, sm.seen.yani_price_ratio_ms, sm.seen.yani_price_ratio_m = yr0
         sm.seen.feed_bulk_ratio = fb0 if fb0 is not None else self.feed_bulk_price_ratios(sig0)
+        sm.seen.feed_prices = fp0
         _restore(_snap0)
         if skip:
             dev = float((q_ref - q0).abs().max().max())          # the base re-solved first

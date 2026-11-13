@@ -30,8 +30,8 @@ SELECT file FROM provenance WHERE file NOT IN (SELECT file FROM _declared);
 -- rule: every data file has a known origin: a traced builder, a source folder, a declared table or a checked note
 SELECT file, nature FROM provenance WHERE nature = 'no-builder';
 
--- rule: every CSV file of the catalogue (05_file_catalogue.sql) is a declared file: a renamed or removed file takes its catalogue row along
-SELECT file FROM file_catalogue WHERE file LIKE '%.csv' AND file NOT IN (SELECT file FROM _declared);
+-- rule: every CSV file and Parquet table of the catalogue (05_file_catalogue.sql) is a declared file: a renamed or removed file takes its catalogue row along
+SELECT file FROM file_catalogue WHERE (file LIKE '%.csv' OR file LIKE '%.parquet') AND file NOT IN (SELECT file FROM _declared);
 
 -- rule: the base-year group shares one vintage: the supply and price files of the catalogue (but 'static' and '2006'), unless a file's row records why it carries another (MANIFEST.json's vintage check, kept since 2 October 2026)
 SELECT list(DISTINCT vintage ORDER BY vintage) AS vintages

@@ -6,10 +6,10 @@ iteration), the chain of supply-module functions and lines that asked for it (wh
 start (warm or cold), IPOPT's status, iterations and seconds, and the objective. Diagnostic only: the run is the usual
 one, nothing is changed.
 
-    CAPRI_WORKERS=1 python tools/check/k89_trace.py OUT.jsonl [--scenario f2f|greendeal2030]
+    python tools/check/k89_trace.py OUT.jsonl [--scenario f2f|greendeal2030]
     python tools/check/k89_trace.py OUT.jsonl --summary
 
-One process (CAPRI_WORKERS=1): forked workers would take their records with them.
+One process (run.n_workers = 1, passed to the runner): forked workers would take their records with them.
 """
 from __future__ import annotations
 
@@ -62,7 +62,7 @@ def run(out, scenario):
 
     C.CapriRegionalNLP.solve = probe
     sys.argv = ["run_f2f_2030.py", str(Path(out).with_suffix(".pkl")), "--scenario", scenario,
-                "--regions", ",".join(UNITS)]
+                "--regions", ",".join(UNITS), "--set", "run.n_workers=1"]    # one process
     try:
         run_f2f_2030.main()
     finally:
@@ -94,8 +94,6 @@ def main():
     ap.add_argument("--summary", action="store_true")
     a = ap.parse_args()
     if not a.summary:
-        if os.environ.get("CAPRI_WORKERS", "") != "1":
-            raise SystemExit("run with CAPRI_WORKERS=1 (one process)")
         run(a.out, a.scenario)
     summary(a.out)
 

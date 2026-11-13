@@ -29,6 +29,11 @@ Each folder is listed with what it holds, where it comes from, and the builders 
 
 **`exports/`**: CAPRI's exports as delivered, one file each, not unpacked (list below).
 
+**`datam_mirror_2040/`**: the project lead's extracts of CAPRI's 2040 results from the JRC DataM dashboard MRL_TO_LOQ_2
+(import production standards, pesticides), four `.xlsx` files as uploaded on 5 November 2026 (the dashboard's four
+copies of the area table are identical in levels: one kept).
+- Read by: build_datam_mirror_2040_reference (to the reference folder only; not a model input).
+
 **`capreg/`**: CAPREG's 2017 results, `res_17<MS>.txt`.
 - From: the gdxdump listings of `output/results/capreg/res_17<MS>.gdx`, in `res_17zip.zip` (27 member states) plus single
   files. `tools/gams/dump_capreg_explicit.gms` makes them.
@@ -76,8 +81,32 @@ Each folder is listed with what it holds, where it comes from, and the builders 
   build_active_technologies, build_greendeal_targets.
 
 **`dat/`**: CAPRI's `dat` folder as parquet, the project's mirror of it.
-- From: the project lead.
+- From: the project lead; and, on 10 November 2026, from the public mirror of CAPRI's dat folder on Hugging Face
+  (dataset jrc-ai/capri, an older dat vintage): `arm/allpop/worldPop.parquet`, `arm/nutrient_cont_usda/
+  p_nutrientCont.parquet`, `biofuel/fossilFuel/p_fossilFuel.parquet` (equal to the installation's fossilFuel.gdx).
 - Read by: build_captrd_dat (`dat/baseline/ageline/ageline.parquet`).
+
+**`results/global/`**: CAPRI's global results that CAPTRD reads (captrd/longrun_supports.gms):
+`longrun_info_fac_defaulta.gdx` (p_longRunInfoAll) and `GLOBIOM_GL_longrun_defaulta.gdx` (p_globiomInfo).
+- From: the project lead's installation (9-10 November 2026). Re-sent on 11 November 2026, identical (SHA-256);
+  `GLOBIOM_EU_longrun_defaulta.gdx` received the same day (p_globiomInfo, scenario GLOBIOM_EU_EUCLIMIT6_S2_50CV
+  only), in this folder.
+- The files hold the scenarios GLOBIOM_EU_EUCLIMIT6_S2_50CV and SSP2+ref_REF+scenRCPref, not the reference run's
+  selection globiom_eu_bright_s0_2023+REFERENCE+REFERENCE (CAPTRD's results_1770 hold no Longrun records: the run had
+  no GLOBIOM long-run information).
+- Read by: tools/build/build_captrd_longrun.py (through dat_parquet/global/longrun_info_fac_defaulta).
+
+**`gams_extra/`**: `fortrd.gms`, CAPTRD's settings include as delivered (empty: the GUI sets CAPTRD's settings; the
+reference run's are its META, docs/design/CAPTRD_MOD.md).
+
+**`dat_parquet/`**: GDX files of `dat_local/` converted to Parquet by tools/build/convert_capri_gdx.py (every record,
+NA and UNDF named in the column `special`), one folder per file and one file per symbol:
+`baseline/aglink2023dgAgri_oriEUdata/` (all 29 symbols) and `baseline/AGLINK2019dgagri_oridata/p_aglinkOri.parquet`;
+added on 11 November 2026: `baseline/data_SSPV3_update/` (SSP_DATA), `arm/allpop/` (worldPop),
+`global/longrun_info_fac_defaulta/` (of results/global) and `global/globiom_eu_bright_s0_2023+REFERENCE+REFERENCE/`
+(the 36 symbols of the GLOBIOM file below).
+- Read by: capri_mod/pipeline/captrd/aglink.py (CAPTRD's Aglink stage; c, m, p, m_eq, p_dbvar and the 2019 fish data)
+  and tools/build/build_captrd_aglink_sets.py (c, m, p, m_eq).
 
 **`dat_local/`**: files of CAPRI's `dat` folder the mirror above does not hold, under their paths in `dat`:
 `envind/lulucf_emissions_original_source.gms` (p_PEATSH_def), `policy/livestock_units.gms` (p_LUUnits) and
@@ -86,6 +115,54 @@ Each folder is listed with what it holds, where it comes from, and the builders 
 - Read by: extract_capri_dat_local (p_PEATSH_def); convert_sources_to_csv (p_LUUnits). holdingsLSU.gdx confirms
   capri_data/2017/abatement/ammonia/p_holdLSU.csv (identical records), built from a dump before.
 - Goes to the Hugging Face set with the rest of capri_sources (MODEL_CONTENT_PLAN §12b).
+- Added on 10 November 2026 (the project lead's installation; CAPTRD's inputs for Steps 2-3, docs/design/CAPTRD_MOD.md
+  section 12.1), under their paths in `dat`:
+  - `baseline/`: `aglink2023dgAgri_oriEUdata.gdx` (c, m, m_eq, p, p_dbvar), `AGLINK2019dgagri_oridata.gdx`
+    (p_aglinkOri; delivered as aglink2019dgAgri_oriData.gdx, renamed to the name load_aglink2023dgAgri.gms l. 205
+    reads), `aglink2023macro.xlsx` (CAPTRD makes ctrCode.gdx and aglink2023macro.gdx from it with gdxxrw, l. 913-927),
+    `data_SSPV3_update.gdx` (SSP_data), `recent_mlk_yld.gdx` (p_recentMlkYld), `dairy_targets_agri.gms`,
+    `necp_expert.gms`; not read by CAPTRD: `aglink2019OECD_oriData.gdx`,
+    `Comtrade_UKR_2023_Export_Cereals-Oilseeds-Oils-Meals_Jan-Sep.xlsx` (arm/data_prep.gms);
+  - `arm/`: `allpop.gdx` (worldPop), `allpop.gms`, `nutrient_cont_usda.gdx` (p_nutrientCont);
+  - `coco/Agri_Prod.gdx` (p_AgriProd); `capreg/regional_mlk_prod.gms`;
+  - `biofuel/`: `primes_ref_060722.gdx` (p_PrimesWithUnits; the run's %primesBiofuelFile%), `fossilFuel.gdx`
+    (p_fossilFuel; equal to the mirror's record for record), `biofuel_data.gms`,
+    `POTENCIA_processing/POTENCIA_transport_energy_outlook.gdx`;
+  - `global/reg_mappings.xlsx` (GlobiomCountry, GlobiomCountry_FAOreg, FAOreg_AGLINKregions, l. 931-951).
+- Added on 11 November 2026: `global/globiom_eu_bright_s0_2023+REFERENCE+REFERENCE.gdx`, GLOBIOM-EU's Brightspace
+  2023 baseline (A. Deppermann to P. Witzke, 23 October 2023, per global/convert_globiom.gms l. 282-287), the raw input
+  of the long-run selection of the reference run; read by CAPRI's global/convert_globiom.gms (capri_mod/pipeline/captrd/
+  globiom.py, through dat_parquet).
+- Added on 11 November 2026: `global/GLOBIOM-EU_EUCLIMIT6_S2_50CV.gdx` (GLOBIOM-EU's EUCLIMIT6 file, equal to the
+  course mirror's dat/global copy), the input of CAPRI's conversion in GLOBIOM_EU_longrun_defaulta.gdx;
+  `capreg_tseries/Capreg_tseries/<CC>_17.gdx` (35, upload Capreg_tseries.zip).
+
+**`results_local/capreg/`**: CAPREG's time series `res_time_series_17<CC>.gdx` (35; DATA1, RALL, DB_COLS, DB_ROWS,
+META; upload res_time_series_17ES.zip), read by create_longrun_info.gms l. 66-70 (through dat_parquet/capreg).
+
+**`reference/globiom/`**: CAPRI's conversion of the EUCLIMIT6 file, `GLOBIOM_EU_longrun_defaulta.gdx` (p_globiomInfo,
+SelecScen) and its Parquet, compared with in test_captrd_globiom.py.
+
+Parquet added on 11 November 2026 (tools/build/convert_capri_gdx.py): `dat_parquet/global/GLOBIOM-EU_EUCLIMIT6_S2_50CV/`,
+`dat_parquet/capreg/res_time_series_17<CC>/`, `dat_parquet/capreg_tseries/<CC>_17/`; and from the fao_agg listing
+(tools/build/build_fao_agg_reference.py --parquet) `dat_parquet/global/fao_agg_17_defaulta/` (p_dataMarket,
+p_biofuelData, p_aglinkGrowthFactor).
+
+**`results/permits/`**, **`results/arm/`**: CAPRI's GHG and technology result files, received 10 November 2026, as
+capmod.gms l. 1641-1645 writes them (results\permits\res_<scenario>_21730.gdx: v_Miti, p_ghgMiti, EMISCALC,
+v_actLevl, p_animReq, ...): the Green Deal step's (the project lead's run of 10 November 2026) and the
+endogenous-technology reference's ini and max runs' (the files carry no META: their date and origin are not
+recorded); and the market model's debug dump at the Green Deal step's preparatory solve (arm/prep_market.gms
+l. 1211, chk_market_data_greendeal_greendeal_scenarios.gdx; META: 10 November 2026, GAMS 53.3).
+- Read by: not yet (technology uptake and market-calibration checks).
+
+**The published set** (Hugging Face, gated: nuvolaTeam/capri-mod-raw; docs/design/MODEL_CONTENT_PLAN.md §12b): the
+files above under `originals/<path under capri_sources>` byte for byte, and their symbols as Parquet under
+`capri/results/<file stem>/` (tools/build/convert_capri_gdx.py). Every file with its SHA-256 and size in
+tools/pipeline/capri_raw_manifest.json, which also names the dataset commit the files are at ("revision") and the history
+of the uploads; uploads are no longer tagged, each file is pinned by its SHA-256 (the project lead, 12 November 2026; tags
+v2026.11.10 to v2026.11.11.2 were used until then, of which v2026.11.11.2 remains). First upload 10 November 2026: the six GDX files received that day
+(exports/ and results/ above).
 
 **`gdxlib/`**: GAMS's GDX library, `libgdxcclib64.so`. This is software, not data.
 - From: built from the open-source GDX library (MIT; README section 3). No GAMS installation or licence is needed.
@@ -108,6 +185,29 @@ CAPRI's 2030 reference results:
     build_manure_losses, build_nh3_factors, build_npk_balance_2030, build_p_balance, build_plant_protection_cost.
 - **`res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv`**: the 2017 calibration run.
   - Read by: recalibrate_trade_2017, build_tariffs_2017.
+- **`res_2_1730greendeal_refpol_endotech_all_maxdefaulta.gdx`** and **`res_2_1740greendeal_refpol_endotech_all_maxdefaulta.gdx`**
+  (received 9 November 2026; kept as the project lead asked): CAPRI's result files of the endogenous-technology
+  reference's "max" run for 2030 and 2040, as CAPMOD writes them (capmod/set_and_store_dataout.gms l. 477): dataOut
+  (5,223,048 and 5,199,448 records), RALL, META (12,264 records each) and p_INFES. Their META: step "Run scenario without
+  market model", scenario greendeal\refpol_endotech_all_max, base year 2017, run on 5 November 2025 with GAMS 45.7
+  (2030 at 14:13:41, 2040 at 14:13:44), 15 iterations, every GUI setting as run. In the 2030 file every supply solve is
+  feasible, two non-optimal in step 1 (NL120000, UKN00000). Not CAPRI's November 2026 runs with IPOPT forced; the
+  2030 file is the GDX of the run whose dataOut the zip res_2_1730greendeal_refpol_endotech_all_maxdefaulta.zip
+  holds as CSV (not compared value by value). Read by no builder yet.
+- **`res_2_1730greendeal_refdefaulta.gdx`** and
+  **`res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx`** (received 10 November 2026):
+  CAPRI's Green Deal 2030 reference and its 2030 Green Deal step (pol_input/greendeal/greendeal_scenarios.gms: landscape
+  elements 8%, organic 18%, pesticides -20%, mineral fertiliser 13crp, N surplus -30%). The reference is CAPRI's shipped
+  run (META: 5 November 2025, GAMS 45.7), the GDX of the zip above (the two agree in all 891,502 records of the member
+  states and EU27yr19 in 2030, to the dump's 15 digits); the step is the project lead's run from it (META: 10 November
+  2026, GAMS 53.3). Its META lists "Sensitivity experiments with features in supply model: true [default]", but its
+  dataOut holds no experiment's records (set_and_store_dataout.gms l. 258-269 would store them under the experiments'
+  names in the second dimension): the experiments did not run or did not write results.
+  - Read by: extract_capri_gd_pair (capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz) and
+    extract_capri_gd_market (capri_data/validation/greendeal_2030/capri_gd_market_2030.csv.xz).
+
+The zip above, **`gd_full.zip`** (gd_full.txt) and **`markmarket_greendeal_1730et_base_1717.txt`** are one file: the
+same dataOut dump of the 2030 reference (387,918,153 bytes, CRC 5c5903b6; checked 10 November 2026), under three names.
 
 CAPRI's market exports:
 - **`market_base_1717.txt`**, **`markmarket_greendeal_1730et_base_1717.txt`**: the market model's data for 2017 and 2030.
@@ -159,12 +259,13 @@ named below.
 | Folder | Original | Content | Tool |
 |---|---|---|---|
 | `capreg_tseries/17/<CC>.csv.gz` | `Capreg_tseries/<CC>_17.gdx` (35 files) | CAPREG's time series `DATA(region, col, row, t)`, 1984–2018 plus BAS, BASM, CUR, MEAN, TRD, Y: the input CAPTRD reads as DATA1 (captrd.gms l. 486-505) | `tools/build_capreg_tseries_reference.py --src Capreg_tseries.zip` |
-| `capreg_base/17/<CC>.csv.gz` | CAPREG's base-year results `res_17<CC>.gdx`: 27 as text dumps `res_17<CC>.txt` (upload res_17zip.zip and single files), 8 as GDX files (UK, TU, AL, MK, CS, MO, BA, KO; uploaded 29 October 2026). <CC> is CAPTRD's file code, the first two characters of the country (TU for TUR) | CAPREG's base-year data `DATA2(region, col, row, "Y")`, the input CAPTRD reads as BASM (captrd.gms l. 528-580); 15 significant digits from the dumps, 17 from the GDX files | `tools/build/build_capreg_base_reference.py --src DIR_OR_ZIP [--src DIR]` |
+| `capreg_base/17/<CC>.csv.gz` | CAPREG's base-year results `res_17<CC>.gdx`: as text dumps `res_17<CC>.txt` (upload res_17zip.zip and single files), 8 as GDX files (UK, TU, AL, MK, CS, MO, BA, KO; uploaded 29 October 2026), Spain from the CAPRI GUI's CSV export `DATA2_res_17ES.csv` (upload capri_export_zip.zip; the export equals the dump in all 10,991 records of Denmark, 10 November 2026). <CC> is CAPTRD's file code, the first two characters of the country (TU for TUR) | CAPREG's base-year data `DATA2(region, col, row, "Y")`, the input CAPTRD reads as BASM (captrd.gms l. 528-580); 15 significant digits from the dumps, 17 from the GDX files | `tools/build/build_capreg_base_reference.py --src DIR_OR_ZIP [--src DIR]` |
 | `coco2/17/coco2_output.csv.gz` | text listing `coco2.csv` of COCO's `coco2_output.gdx` (upload coco2.zip) | COCO's `DATA2(region, item, col, row, t)`, items INI, COCO1, COCO2, 1984–2019: what CAPTRD loads as dataMS (load_coco1_data.gms l. 24); 15 significant digits | `tools/build/build_coco2_reference.py --src coco2.zip` |
 | `fao_agg/17/<symbol>.csv.gz` | text listing `FAO_agg_17_defaulta.csv` of the global database `fao_agg_17_defaulta.gdx` (upload FAO_agg_17_defaulta.zip) | `p_biofuelData`, `p_aglinkGrowthFactor` (load_coco1_data.gms l. 360); columns d0…dn, value, eps | `tools/build/build_fao_agg_reference.py --src FAO_agg_17_defaulta.zip` |
 | `captrd_results/1770/<respos>.csv.gz` | `results_1770.gdx` (base 2017, simulation years 2018–2070) | CAPTRD's `p_result(region, col, row, t, respos)`, one file per result position (Step1, support, support1, wVarErr, step2, step3, series, P_Data, data statistics, …); `respos_counts.csv` lists all positions and `settings.csv` the run settings | `tools/build_captrd_results_reference.py --src results_1770.gdx --tag 1770` |
 | `sets/simini_21730/<SET>.csv` | `sim_ini_21730.gdx` (CAPMOD restart file of the endotech Green Deal 2030 run) | the 1,972 CAPRI sets of that run (global sets.gms and loaded modules, with the run's switches applied), one file per set with `_index.csv`; sets defined only in CAPTRD (sets_captrd.gms) are not among them | `tools/build_capri_sets_reference.py --src sim_ini_21730.gdx --tag simini_21730` |
-| `simini/simini_21730/<symbol>.csv.gz` | `sim_ini_21730.gdx` (the same restart file as `sets/simini_21730`) | CAPRI's calibrated 2030 market state for the move onto CAPRI's market regions and the ports' checks: the 37 symbols listed with their use in `tools/build/simini_reference_symbols.csv` (DATA, the trade flows and prices, TRQs, levies, entry prices, Armington and CES parameters, the GL demand and NQ Hessians, the market variables' levels and bounds), with `_index.csv`; parameters `d0…dn, value, eps`, variables `d0…dn, level, eps, lower, upper, marginal`; +INF/-INF as inf/-inf, NA as nan. `--check sim_ini_21730_1.gdx` found the 37 symbols identical in the second upload (2 November 2026) | `tools/build/build_simini_reference.py --src sim_ini_21730.gdx --tag simini_21730` |
+| `simini/simini_21730/<symbol>.csv.gz` | `sim_ini_21730.gdx` (the same restart file as `sets/simini_21730`) | CAPRI's calibrated 2030 market state for the move onto CAPRI's market regions and the ports' checks, and the per-technology terms of S1 (p_pmpCnst, p_technFact, since 7 November 2026): the symbols listed with their use in `tools/build/simini_reference_symbols.csv` (DATA, the trade flows and prices, TRQs, levies, entry prices, Armington and CES parameters, the GL demand and NQ Hessians, the market variables' levels and bounds), with `_index.csv`; parameters `d0…dn, value, eps`, variables `d0…dn, level, eps, lower, upper, marginal`; +INF/-INF as inf/-inf, NA as nan. `--check sim_ini_21730_1.gdx` found the 37 symbols identical in the second upload (2 November 2026), and all 51 on 7 November 2026 | `tools/build/build_simini_reference.py --src sim_ini_21730.gdx --tag simini_21730` |
+| `datam_mirror_2040/<table>.csv` | the project lead's extracts of the JRC DataM dashboard MRL_TO_LOQ_2 (`capri_sources/datam_mirror_2040/*.xlsx`, uploaded 5 November 2026; data valid as of February 2026 per the dashboard) | CAPRI's 2040 results of the JRC study on aligning import production standards (pesticide active substances not approved in the EU), four scenarios (Baseline, switchX-scaleEFSA_5, switchX-scaleEFSA+min20, noadapt-noscale): utilised area per member state, EU production change per product (scenario not stated in the extract), producer prices per trade region and product, bilateral trade per reporter, product and partner (variable and unit not stated). Not read by the model or the pipeline: a future 2040 check for CAPTRD-MOD (MODEL_CONTENT_PLAN §14 item 19); the shock inputs and CAPRI's scenario code are not in the extracts | `tools/build/build_datam_mirror_2040_reference.py` |
 
 Columns of the data files: `region, col, row, t, value, eps`.
 - A record CAPRI stored as Eps (an explicit zero) has value 0 and eps = 1.

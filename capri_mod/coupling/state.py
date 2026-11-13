@@ -35,19 +35,22 @@ class ModelParameters(_Slots):
         "endotech_key",       # the key of the applied endotech settings (in the Hessian's cache key)
         "dairy_yield_cache",  # dairy products per t raw milk by member state
         "proc_yield_cache",   # olive oil and milled rice yields
+        "prod_grof_cache",    # CAPRI's marketed over gross production per member state and product (S7, grofNEprod)
         "sugar_rate_cache",   # sugar per t beet by member state
         "pool_cost_cache",    # the manure pools' trade costs
+        "pool_es_cache",      # the "capri" pool market's excess-supply slopes and calibration duals by region and FOUT
         "ration_model",       # CAPRI's ration model
         "feed_rations_stable",  # rations by region, built once per ration model (its identity keys the feed cache)
         "feed_rations_for",   # the ration model feed_rations_stable was built for (identity)
         "excluded_units",     # the EU units outside a run on a subset (K83)
+        "excluded_sup_base",  # the base output of the non-EU supply-model units outside a subset run (S7)
+        "base_start",         # per baseline key: the baseline's price signal, block departures and market ratios (S7)
     )
 
 
 class ModelSolveState(_Slots):
     """State carried from one outer iteration (or run) to the next."""
     __slots__ = (
-        "hessian_pending",    # what the next run needs to measure the baseline's Hessian
         "relax_w",            # the price step's adaptive step per product
         "relax_gprev",        # the previous gaps per product
         "capri_target_hist",  # CAPRI's price forecast: the last targets
@@ -84,7 +87,9 @@ class ModelEvalState(_Slots):
     """One outer iteration's working values."""
     __slots__ = (
         "outer_iter_now",     # the outer iteration
+        "greendeal_group",    # the run's scenario is of CAPRI's Green Deal group (%scenarioGroup%==greendeal)
         "ls_by_country",      # livestock products by country (the bridge's input; the Hessian overwrites it)
+        "unmarketed_supply",  # gross output the market does not take (no marketed production in CAPRI; S7, grofNEprod)
         "blockdev_target_now", # the trade blocks' target departures of the iteration
         "hessian_at_scenario", # set around a scenario's Hessian measurement (in its cache key)
         "yani_np",            # the young animals' (net, production) of the iteration
@@ -151,7 +156,7 @@ MOVED_MODEL: dict = {
     "_feed_rations_stable": "par.feed_rations_stable",
     "_feed_rations_for": "par.feed_rations_for",
     "_excluded_units": "par.excluded_units",
-    "_hessian_pending": "sv.hessian_pending",
+    "_hessian_pending": "removed (S7, 8 November 2026: the Hessian is measured at the baseline's start)",
     "_relax_w": "sv.relax_w",
     "_relax_gprev": "sv.relax_gprev",
     "_capri_target_hist": "sv.capri_target_hist",

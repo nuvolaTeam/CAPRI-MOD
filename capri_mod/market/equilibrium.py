@@ -28,3 +28,6 @@ class MarketEquilibrium:
     #: EU dairy block at the equilibrium (MarketModule.dairy_block): price ratios of the products,
     #: raw milk, fat and protein; production of the nine products and raw milk delivered (kt)
     dairy: Optional[dict] = None
+    #: CAPRI's land-use change outside the EU at the equilibrium (MarketModule.noneu_luc, luc_market): per non-EU
+    #: region with the land block, the final land per UNFCCC class and the 36 transitions (1000 ha)
+    luc: Optional[dict] = None

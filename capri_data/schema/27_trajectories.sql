@@ -1,7 +1,7 @@
 -- Inputs under capri_data/trajectories. Generated structure (types, NOT NULL, keys) from the files on 29 October 2026; units open where no
 -- builder or CAPRI file states them (value_units).
 
--- file: capri_data/trajectories/capri_cap_premium_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_cap_premium_2030.csv
 -- AGGT, BEFM, CACR, CATA, EAAG, HEIR, RUMI, SCOW: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
 -- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE traj_capri_cap_premium_2030 (
@@ -36,10 +36,13 @@ CREATE TABLE traj_capri_cap_premium_2030 (
     TABO DOUBLE,
     TOBA DOUBLE,
     TEXT DOUBLE,
-    GRAS DOUBLE,
+    GRAE DOUBLE,
+    GRAI DOUBLE,
     MAIF DOUBLE,
-    OFOD DOUBLE,
-    SETA DOUBLE,
+    OFAR DOUBLE,
+    ROOF DOUBLE,
+    VSET DOUBLE,
+    FALL DOUBLE,
     AGGT DOUBLE,
     ANNC DOUBLE,
     ARAC DOUBLE,
@@ -60,6 +63,7 @@ CREATE TABLE traj_capri_cap_premium_2030 (
     EAAG DOUBLE,
     FODD DOUBLE,
     FRUN DOUBLE,
+    GRAS DOUBLE,
     HEIF DOUBLE,
     HEIH DOUBLE,
     HEIL DOUBLE,
@@ -69,13 +73,11 @@ CREATE TABLE traj_capri_cap_premium_2030 (
     MODU DOUBLE,
     OANI DOUBLE,
     OAR1 DOUBLE,
-    OFAR DOUBLE,
     OILS DOUBLE,
     PERM DOUBLE,
     PIGF DOUBLE,
     PKPL DOUBLE,
     POUF DOUBLE,
-    ROOF DOUBLE,
     RUMI DOUBLE,
     SCOW DOUBLE,
     SETF DOUBLE,
@@ -83,7 +85,6 @@ CREATE TABLE traj_capri_cap_premium_2030 (
     SHGM DOUBLE,
     SOWS DOUBLE,
     TWIN DOUBLE,
-    VSET DOUBLE,
     PRIMARY KEY (region)
 );
 COMMENT ON TABLE traj_capri_cap_premium_2030 IS 'CAPRI''s 2030 prices and premiums for the model''s 2030 baseline, in 2017 money. (tools/build/build_price_trajectory_2030.py)';
@@ -112,6 +113,8 @@ INSERT INTO value_units VALUES
   ('traj_capri_cap_premium_2030', 'WINE', NULL, 'open', 'capri_cap_premium_2030.WINE: unit to be established'),
   ('traj_capri_cap_premium_2030', 'OLIV', NULL, 'open', 'capri_cap_premium_2030.OLIV: unit to be established'),
   ('traj_capri_cap_premium_2030', 'TABO', NULL, 'open', 'capri_cap_premium_2030.TABO: unit to be established'),
+  ('traj_capri_cap_premium_2030', 'GRAE', NULL, 'open', 'capri_cap_premium_2030.GRAE: unit to be established'),
+  ('traj_capri_cap_premium_2030', 'GRAI', NULL, 'open', 'capri_cap_premium_2030.GRAI: unit to be established'),
   ('traj_capri_cap_premium_2030', 'GRAS', NULL, 'open', 'capri_cap_premium_2030.GRAS: unit to be established'),
   ('traj_capri_cap_premium_2030', 'TOBA', NULL, 'open', 'capri_cap_premium_2030.TOBA: unit to be established'),
   ('traj_capri_cap_premium_2030', 'MAIF', NULL, 'open', 'capri_cap_premium_2030.MAIF: unit to be established'),
@@ -120,8 +123,7 @@ INSERT INTO value_units VALUES
   ('traj_capri_cap_premium_2030', 'SOYA', NULL, 'open', 'capri_cap_premium_2030.SOYA: unit to be established'),
   ('traj_capri_cap_premium_2030', 'OOIL', NULL, 'open', 'capri_cap_premium_2030.OOIL: unit to be established'),
   ('traj_capri_cap_premium_2030', 'TEXT', NULL, 'open', 'capri_cap_premium_2030.TEXT: unit to be established'),
-  ('traj_capri_cap_premium_2030', 'OFOD', NULL, 'open', 'capri_cap_premium_2030.OFOD: unit to be established'),
-  ('traj_capri_cap_premium_2030', 'SETA', NULL, 'open', 'capri_cap_premium_2030.SETA: unit to be established'),
+  ('traj_capri_cap_premium_2030', 'FALL', NULL, 'open', 'capri_cap_premium_2030.FALL: unit to be established'),
   ('traj_capri_cap_premium_2030', 'AGGT', NULL, 'open', 'capri_cap_premium_2030.AGGT: unit to be established'),
   ('traj_capri_cap_premium_2030', 'ANNC', NULL, 'open', 'capri_cap_premium_2030.ANNC: unit to be established'),
   ('traj_capri_cap_premium_2030', 'ARAC', NULL, 'open', 'capri_cap_premium_2030.ARAC: unit to be established'),
@@ -167,7 +169,7 @@ INSERT INTO value_units VALUES
   ('traj_capri_cap_premium_2030', 'TWIN', NULL, 'open', 'capri_cap_premium_2030.TWIN: unit to be established'),
   ('traj_capri_cap_premium_2030', 'VSET', NULL, 'open', 'capri_cap_premium_2030.VSET: unit to be established');
 
--- file: capri_data/trajectories/capri_price_ratios_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_price_ratios_2030.csv
 CREATE TABLE traj_capri_price_ratios_2030 (
     ms VARCHAR NOT NULL,
     product VARCHAR NOT NULL,
@@ -184,7 +186,7 @@ INSERT INTO value_units VALUES
   ('traj_capri_price_ratios_2030', 'deflator', NULL, 'open', 'capri_price_ratios_2030.deflator: unit to be established'),
   ('traj_capri_price_ratios_2030', 'real_ratio', NULL, 'open', 'capri_price_ratios_2030.real_ratio: unit to be established');
 
--- file: capri_data/trajectories/capri_ref_fodder_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_ref_fodder_2030.csv
 CREATE TABLE traj_capri_ref_fodder_2030 (
     region VARCHAR NOT NULL,
     crop VARCHAR NOT NULL,
@@ -196,7 +198,7 @@ COMMENT ON TABLE traj_capri_ref_fodder_2030 IS 'CAPRI''s 2030 rations and requir
 INSERT INTO value_units VALUES
   ('traj_capri_ref_fodder_2030', 'factor', NULL, 'open', 'capri_ref_fodder_2030.factor: unit to be established');
 
--- file: capri_data/trajectories/capri_ref_ration_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_ref_ration_2030.csv
 CREATE TABLE traj_capri_ref_ration_2030 (
     region VARCHAR NOT NULL,
     animal VARCHAR NOT NULL,
@@ -209,7 +211,7 @@ COMMENT ON TABLE traj_capri_ref_ration_2030 IS 'CAPRI''s 2030 rations and requir
 INSERT INTO value_units VALUES
   ('traj_capri_ref_ration_2030', 'factor', NULL, 'open', 'capri_ref_ration_2030.factor: unit to be established');
 
--- file: capri_data/trajectories/capri_livestock_premium_ratio_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_livestock_premium_ratio_2030.csv
 -- layout: wide, unnamed
 CREATE TABLE traj_capri_livestock_premium_ratio_2030 (
     region VARCHAR NOT NULL REFERENCES regional_units (region),

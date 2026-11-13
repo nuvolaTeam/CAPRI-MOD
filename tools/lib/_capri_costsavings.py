@@ -20,7 +20,7 @@ tables aggregate them), divided by capri_level_ratio (model heads per CAPRI leve
 
     dsav = sum_m MaxShare_m (M0_m - M1_m) / (capri_level_ratio x sum_m MaxShare_m LEVL_m)
 
-M0, M1: v_Miti.m of CAPRI's ini and max runs (capri_data/sources/ghgtech/capri_costsavings_2030.csv, from the project
+M0, M1: v_Miti.m of CAPRI's ini and max runs (capri_data/sources/intermediate/ghgtech/capri_costsavings_2030.parquet, from the project
 lead's costsavings_ini/max_21730_jul15.gdx); MaxShare_m: the max run's level (+2e-6, as CAPRI's adjustment);
 LEVL_m: CAPRI's 2030 levels (abatement/ammonia/capri_mann_days_2030.csv). The member records are the region's row,
 else its member state's. dsav in the model's 2017 money: CAPRI's 2030 marginals over its inflation to 2030
@@ -35,7 +35,16 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
-_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
+import sys as _sys_sio  # noqa: E402
+_sys_sio.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _sources_io import read_source  # noqa: E402  (capri_data/sources: Parquet)
+
+def _read_csv(path, *a, **k):
+    """read_csv with floats parsed exactly (K82); a table of capri_data/sources (.parquet) through read_source."""
+    if str(path).endswith(".parquet"):
+        return read_source(path, *a, **k)
+    k.setdefault("float_precision", "round_trip")
+    return pd.read_csv(path, *a, **k)
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -50,13 +59,13 @@ def costsaving_drop(members: dict, technology: str) -> dict:
     """{(model region, model animal): dsav, EUR per model head adopting} for CAPRI's option `technology`
     (GENET_EFF, lowNFeed, LINE_Tot, Nitr_Tot as in the source file) over the model animals' CAPRI members
     {model animal: (CAPRI activity, ...)}. Missing where no member has both runs' records or no level ratio."""
-    cs = _read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "capri_costsavings_2030.csv")
+    cs = _read_csv(ROOT / "capri_data" / "sources" / "intermediate" / "ghgtech" / "capri_costsavings_2030.parquet")
     cs = cs[cs.technology == technology]
     p = cs.pivot_table(index=["region", "activity"], columns="run", values=["level", "marginal"])
     rec = {k: (float(r[("level", "max")]), float(r[("marginal", "ini")]), float(r[("marginal", "max")]))
            for k, r in p.iterrows()
            if pd.notna(r.get(("level", "max"))) and pd.notna(r.get(("marginal", "ini"))) and pd.notna(r.get(("marginal", "max")))}
-    md = _read_csv(ROOT / "capri_data" / "2017" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
+    md = _read_csv(ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
     lev = {(r.region, r.activity): float(r.value) for r in md[md["item"] == "LEVL"].itertuples()}
     ratio = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
     mr = _model_regions()

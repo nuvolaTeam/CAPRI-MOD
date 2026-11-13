@@ -16,7 +16,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "capri_data"
-SRC = DATA_DIR / "sources" / "capri_res"
+SRC = DATA_DIR / "sources" / "intermediate" / "capri_res"
 REGIONS = ("DE110000", "NL220000", "PL220000", "DK000000")
 #: CAPRI's elementary activities (tools/build/build_p_balance.py)
 CAPRI_CROPS = ("SWHE", "DWHE", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "PARI", "RAPE", "SUNF", "SOYA", "OOIL", "OIND",
@@ -31,19 +31,20 @@ EU27 = ("AT", "BL", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", 
 
 def _read(f):
     d = defaultdict(dict)
-    for r in csv.DictReader(open(f)):
+    from capri_mod.tests._sources import source_records
+    for r in source_records(f):
         d[r["region"]][(r["col"], r["row"])] = float(r["value"])
     return d
 
 
 @pytest.fixture(scope="module")
 def ini():
-    return _read(SRC / "gd2030_endotech_ini_pbalance.csv")
+    return _read(SRC / "gd2030_endotech_ini_pbalance.parquet")
 
 
 @pytest.fixture(scope="module")
 def ref():
-    return _read(SRC / "gd2030_ref_pbalance.csv")
+    return _read(SRC / "gd2030_ref_pbalance.parquet")
 
 
 @pytest.fixture(scope="module")
@@ -102,19 +103,14 @@ def test_p_items_follow_capri(ini):
 def test_crop_coefs_keep_capris_totals(ref):
     """p_balance_crop_coefs_2030.csv pools CAPRI's crops into the model's crops by area: at CAPRI's own areas the pooled
     retention and residue output give CAPRI's EXPPRD and CRESID of its 2030 reference."""
-    t = pd.read_csv(DATA_DIR / "2017" / "environment" / "p_balance_crop_coefs_2030.csv")
+    t = pd.read_csv(DATA_DIR / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "p_balance_crop_coefs_2030.csv")
     for reg in REGIONS:
-        d = t[(t.capri_region == reg) & ~t.model_crop.isin(["GRAE", "GRAI"])]
+        d = t[t.capri_region == reg]                 # GRAE and GRAI the model's crops (before, their aggregate GRAS)
         ep = float((d.levl_kha * d.pret_kg_ha).sum()) / 1000.0
         cr = float((d.levl_kha * d.pcrd_kg_ha).sum()) / 1000.0
         assert abs(ep / ref[reg][("EXPPRD", "PHOF")] - 1.0) < 1e-6, reg
         assert abs(cr / ref[reg][("CRESID", "PHOF")] - 1.0) < 1e-6, reg
-        g = t[(t.capri_region == reg) & t.model_crop.isin(["GRAE", "GRAI", "GRAS"])].set_index("model_crop")
-        if "GRAE" in g.index and "GRAI" in g.index:
-            lv = g.at["GRAE", "levl_kha"] + g.at["GRAI", "levl_kha"]
-            assert abs(lv - g.at["GRAS", "levl_kha"]) < 1e-6
-            assert abs((g.at["GRAE", "levl_kha"] * g.at["GRAE", "pret_kg_ha"] + g.at["GRAI", "levl_kha"]
-                        * g.at["GRAI", "pret_kg_ha"]) / lv - g.at["GRAS", "pret_kg_ha"]) < 1e-6
+        assert not (d.model_crop == "GRAS").any()
 
 
 def test_nutned_mineral_closes_at_base():
@@ -124,10 +120,10 @@ def test_nutned_mineral_closes_at_base():
     from capri_mod.fert.npk import NPKData
     D = NPKData.get()
     cr = "DE110000"
-    crops = ("SWHE", "BARL", "RAPE", "GRAS", "APPL")
+    crops = ("SWHE", "BARL", "RAPE", "GRAE", "GRAI", "APPL")
     col = lambda k: {c: D.crop_coef(cr, "P", c, k) for c in crops}
     need, own, pool, mine0 = col("need_kg_ha"), col("own_kg_ha"), col("pool_kg_ha"), col("mine_kg_ha")
-    xb = {"SWHE": 90.0, "BARL": 55.0, "RAPE": 40.0, "GRAS": 137.0, "APPL": 0.7}
+    xb = {"SWHE": 90.0, "BARL": 55.0, "RAPE": 40.0, "GRAE": 68.5, "GRAI": 68.5, "APPL": 0.7}
     sq = {c: 1.0 for c in crops}
     E0 = 5000.0
     m = nutned_mineral(D, cr, need, own, own, pool, mine0, xb, xb, sq, E0, E0)

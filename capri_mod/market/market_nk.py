@@ -59,6 +59,7 @@ class NewtonKrylovMixin:
         sclip = tuple(st.get("market.step_clip"))
         h = float(st.get("market.nk_fd_step"))
         kmax = int(st.get("market.nk_max_krylov"))
+        eta_lo, eta_hi = float(st.get("market.nk_forcing_min")), float(st.get("market.nk_forcing_max"))
         sysd = self.par.bilat
         tadd = self._tariff_adds(trade_scenario)
         lay = self._nk_layout(r, sysd)
@@ -143,6 +144,8 @@ class NewtonKrylovMixin:
 
         z = pack(r)
         g, ev, post = resid(r)
+        from capri_mod import runlog as _runlog
+        _rl_s = _runlog.current()
         converged = False
         it = 0
         n_evals = 1
@@ -163,6 +166,14 @@ class NewtonKrylovMixin:
             if verbose:
                 print(f"  market Newton-Krylov step {it}: max rel residual {err:.2e}, quota rates moved {trq_moved:.2e}, "
                       f"evaluations {n_evals}")
+            if _rl_s.at("solver"):
+                # run.verbosity "solver": the market solve's iteration log, as the solver's in GAMS's log
+                if it == 0:
+                    _rl_s.solver(f"--- Executing the market solve (Newton-Krylov, tolerance {tol:g})")
+                    _rl_s.solver("   Iter  Max rel residual  Product  Quota moved  Evaluations")
+                _wc = max(errs, key=errs.get) if errs else ""
+                _rl_s.solver(f"  {it:5d}  {max(errs.values()) if errs else 0.0:16.6e}  {_wc:<7}  {trq_moved:11.3e}  "
+                             f"{n_evals:11d}")
             if max(errs.values()) < tol and trq_moved < tol:
                 converged = True
                 break
@@ -198,7 +209,7 @@ class NewtonKrylovMixin:
             J = LinearOperator((n, n), matvec=jv, dtype=float)
             M = LinearOperator((n, n), matvec=lambda v: apply_prec(blocks, v), dtype=float)
             rhs = np.where(frozen, 0.0, -g0)
-            eta = min(0.1, max(float(np.linalg.norm(rhs)), 1e-3))
+            eta = min(eta_hi, max(float(np.linalg.norm(rhs)), eta_lo))
             try:
                 dz, info = gmres(J, rhs, M=M, rtol=eta, restart=kmax, maxiter=1)
             except TypeError:                                      # SciPy before 1.12 names the tolerance tol

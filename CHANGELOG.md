@@ -32,6 +32,796 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 13 November 2026 — the results browser: a Green Deal vs CAPRI tab
+
+- capri_gradio: a "Green Deal vs CAPRI" tab sets a stored Green Deal 2030 run beside CAPRI's own 2030 Green Deal step
+  (the project lead's run against its reference): % changes of the activity levels and the N balance items (EU27
+  and per member state), of the EU producer prices and the EU crop yields; one activity's regional changes as two maps on a shared colour scale
+  and a scatter of the model's against CAPRI's, with the correlation; tables and a CSV.
+- tools/build/extract_capri_gd_pair.py also keeps the crop yields at every level and CAPRI's N balance items (NITF:
+  MINFER, EXCRET, BIOFIX, ATMOSD, EXPPRD, SURTOT and the loss items); capri_gd_effect.csv.xz rebuilt (79,802 rows).
+- Test: test_the_green_deal_tab_compares_the_run_with_capris_step.
+## 13 November 2026 — the idled histosols in the reported land (K137)
+
+- The environmental table's arable land, grassland and UAA include the histosols the regional model idles, as CAPRI's
+  land types and UAAR do (dataOut's GRAS includes IHISGR, ARAC IHISCR). Before, the Green Deal's surplus per ha computed
+  from the table looked short of its -30% in 28 manure-heavy regions while the N-surplus row met it exactly; the EU UAA
+  of the Green Deal 2030 run grows +3.4% with the idled histosols against +2.3% as reported before (CAPRI +1.3%).
+- Test: test_emission_tax_in_supply_follows_capri checks the reported grassland of IR010000's idled histosols.
+
+## 13 November 2026 — the Green Deal targets through CAPRI's geo_to_ms maps (K135)
+
+- The landscape and organic targets reach a region as in CAPRI: the sum over the Eurostat codes that geo_to_ms_landscape
+  and geo_to_ms map to its member state (new capri_data/scenarios/greendeal_group/greendeal_geo_to_ms.csv, built by
+  build_greendeal_targets.py from CAPRI's GMS files). Neither set maps LU or PT: Luxembourg takes Belgium's targets,
+  Portugal and the regions outside the EU have none, and a code's empty cell gives 0. Before, the targets were looked up
+  by the region's country (Portugal 3.08 landscape and 19.2 organic points; Luxembourg its own values; Ireland's permanent
+  crops and Malta's grassland the UAA target).
+- Test: test_green_deal_targets_follow_capris_geo_to_ms_maps.
+
+## 13 November 2026 — the activity bounds as CAPRI's: set-aside, fallow, per technology (K132-K134)
+
+- The voluntary set-aside takes CAPRI's 1e-6 .. 1e5 (1000 ha) bounds only where the data have a VSET level above 1e-6
+  (set_supply_bounds.gms l. 42-43, `RegionalSupplyModel.VSET_DATA_MIN`); without one it takes the absent rule. Before,
+  VSET was exempt everywhere and grew from zero in the regions whose CAPRI 2030 data have fallow only (PL, CZ, RO, SK,
+  CY, MT): 1.2 Mha in the Green Deal 2030 run.
+- With a landscape floor the fallow may take half the UAA per technology (set_supply_bounds.gms l. 159-160): without
+  it RO010000 was infeasible under the Green Deal's 8% target once VSET followed CAPRI's rule.
+- The activity bounds are the sums of CAPRI's per-technology bounds (K134): crops with T1 and T2 (half the level each)
+  may reach max(10 x level, level + 200); the number of technologies is a new column of
+  capri_data/codes/model_activity_classes.csv, checked by build_code_lists against sim_ini_21730's p_technFact.
+- Tests: test_vset_bounds_only_where_capri_data_have_set_aside, test_fallow_takes_half_the_uaa_per_technology_under_the_landscape_floor,
+  test_activity_bounds_sum_capris_per_technology_bounds.
+## 13 November 2026 — CAPTRD-MOD: the NUTS 2 bounds, solve and rem_tiny; CONOPT's phase 1; the tie-break
+
+- **Stage 3 completed for one year.** `estimate_nuts2.py` gains the bounds (fix_est.gms per region, then
+  estimate_nuts2.gms l. 92-402), the solve with est_nuts2_grid.gms's retries (`captrd.nuts2_max_tries`, 75) and
+  rem_tiny.
+  - Ireland and Austria 2030: the bounds equal CAPTRD's stored ones, and 100% of positions are within 2% of its step3.
+  - SK and FR 2030: 98.8-100% (test_captrd_estimate_nuts2.py).
+- **Fixed:** comi_bounds.gms l. 278's yearly 0.25% growth of the previous milk yield is the member state's only
+  (`$ sameas(Rest, MS)`); the port applied it to the regions too.
+- **The infeasible point as CONOPT finds it** (`captrd.nlp_infeasible_marginals = "slp"`, now the default): a
+  sequential LP from the solve's start, with the marginals at a simplex vertex. 2030 member states: 94.6% of positions
+  within 2% of CAPTRD's step3, against 92.5%, and none worse (DE 87.9% to 98.3%, ES 86.4% to 95.4%, FR 84.5% to
+  91.3%).
+- **The tie-break** (`captrd.nlp_tie_break`): after a feasible member-state solve, the positions outside the objective
+  are moved to the optimum nearest the start, as CONOPT leaves them. Denmark's olive oil trade goes from 5e8 to 1.11
+  (CAPTRD 1.11), with the objective unchanged.
+- Registered in DEPARTURES_FROM_CAPRI.md (the solver section) and CAPTRD_MOD.md §12.8-12.9.
+
+## 12 November 2026 — CAPTRD-MOD stage 3: the NUTS 2 estimation's equations
+
+- New capri_mod/pipeline/captrd/estimate_nuts2.py: m_trendNT2's equations for the regions of one member state under its
+  fixed result (the nine blocks shared with m_trendMS, REQS_ with the member state's feed contents; MSGROF_, MSLEVL_,
+  MSLANDUSE_, MSFEEDI_, MSlosfFoddo_, MSindmMaif_, EFED_) and SSQS_ with the regional weights. At CAPTRD's stored step3
+  of Ireland's two regions in 2030 all 448 equations hold within 1e-3 (test_captrd_estimate_nuts2.py). Next: the
+  bounds of estimate_nuts2.gms, the solve, rem_tiny.
+
+## 12 November 2026 — CAPTRD-MOD stage 2e: positions outside the model held; the widening's path
+
+- Fixed: a position referenced only in a term whose condition is off is in no equation and not in the objective (GAMS
+  does not generate it); the port made it an NLP variable and IPOPT pushed it into its open box (about 40 per member
+  state at 1e5: GROF of the dairy products, MAPR of the crops). It is now held at its start; clean_tiny returns the
+  levels CAPTRD stores (estP: observations or a support).
+- Found: the widening's path moves the result by several points (Denmark's share within 2% of step3: 94.3% before the
+  fix, 84.2% after, on the port's bounds); on CAPTRD's own final bounds 95.4% (0.5%: 88.1%), which the test now checks.
+- Trade positions free of the objective at the middle of their box (Denmark's olive oil imports and exports 5e8
+  against CAPTRD's 1.1), harmful for the EU's gross trade built from the members': IPOPT's warm start (tested: France's
+  share within 2% of step3 31.6% against 84.5%) and a proximity term not adopted; decided by the project lead: the solve
+  kept as it is, the free trade positions dealt with in stage 4 (estimate_eu_trade.gms).
+
+## 12 November 2026 — CAPTRD-MOD stage 2e: Solve2 against Step3; clean_tiny and the step3 copies
+
+- Solve2 against CAPTRD's Step3 (DK, AT, FR 2030): on CAPTRD's own final bounds the port is feasible at the first solve
+  and reaches the same optimum; apart from the fossil fuels its objective is at or below Step3's. The gap reported
+  earlier (1.2-1.9 times Step3's) is the fossil fuels' HCOM, which the estimation sets to zero (MBAL_ with no supply
+  term, in CAPTRD's Solve1 too) and copy_labour_biofuel_on_presult.gms then overwrites with the Expert supports.
+- New: clean_tiny.gms (capri_mod/pipeline/captrd/clean_tiny.py) and copy_labour_biofuel_on_presult.gms
+  (step3_copies.py); estimate_nlp.solve(widen=False) for clean_tiny's single solve; the sets ColsTiny, RowsTiny,
+  ColsTinyFodd, FODF, FEDACT_TO_FODDI (build_captrd_sets.py). Against Step3 on the positions it holds, within 2%: DK
+  94.3% (Solve2 alone 84.0%), AT 97.9% (89.6%), FR 87.3% (77.2%); the rest the solves' points in the objective's flat
+  directions (trade, the young cattle's feed mix). Tests: test_captrd_estimate_nlp.py (DK, extended),
+  test_captrd_step3_copies.py.
+
+## 12 November 2026 — the market alone against CAPRI's Green Deal market
+
+- New check tools/check/check_market_gd.py with its data capri_data/validation/greendeal_2030/capri_gd_market_2030.csv.xz
+  (tools/build/extract_capri_gd_market.py, from the two Green Deal result files): CAPRI's last market solve of a
+  converged run, with CAPRI's own supply-model results as the supply side (member states' production and raw milk
+  delivered, feed bulk indices, the prices the supply models saw). Control (every input at the reference): all 2,610
+  prices back to CAPRI's within 5.4e-6. Green Deal: EU price changes within 0.31 points on average (90th percentile
+  1.05, correlation 0.990); cereals, oilseeds, meats and eggs within about 0.4, beef -0.6; the other producing regions
+  0.17 on average. Open: the dairy products (KNOWN_ISSUES K131). The market's equations and parameters reproduce
+  CAPRI's response to the Green Deal supply shock; the gaps of the model's own Green Deal run are then mainly on the
+  supply side and in the coupling. The solve method (G3) is not tested by it.
+- MarketModule.supply_rows_by_member_state and capri_base_supply_rows: the EU's supply one row per member state, as a
+  run passes it. tools/check/check_market_base.py and three tests (test_market_nk, test_welfare,
+  test_market_module_reproduces_its_own_prices) passed the two EU blocks' totals as rows, which gave the dairy block
+  no member state's milk; with member-state rows the base check's prices (9.4e-8) and flows (5.3e-7) are CAPRI's in
+  every region, Norway's dairy included (before up to 17% and 2x); K109's production gaps remain. The dairy block now
+  stops on a supply row named after an EU block.
+
+## 12 November 2026 — CAPTRD-MOD stage 2e: the equations of the member states' estimation
+
+`capri_mod/pipeline/captrd/estimate_ms.py` holds the equations of CAPTRD's NLP m_trendMS (captrd/equations.gms, the 39
+blocks of its model statement) and its objective SSQS_, with GAMS's domain conditions, for one member state and
+ex-ante year; the same code gives the residuals at a point or, with symbolic variables, the NLP's constraints.
+Evaluated at CAPTRD's own step2 (Solve1's result) of all 35 countries in 2018-2050, the 229,231 checkable equations
+hold within 1e-3 (`test_captrd_estimate_ms.py`: Denmark in the fast suite, six more countries in the slow one).
+
+- The stored step2 is the estimation's after CAPTRD's reporting: the animal requirements are stored as absolute
+  amounts (captrd.gms l. 1205-1218; in the estimation they are relative to the requirement function), DOMM is
+  re-summed over all domestic uses (the estimation's is DEMD, aggreg_and_report.gms l. 293-294). Both are undone
+  before the check (`from_stored`). Left out: equations whose terms the reporting overwrites (INHA of the product
+  groups, HFCS) or that hold free variables CAPTRD does not store (STCM of the young animals, LOSF of the milks, the
+  weights of activities without data).
+- New inputs: CAPRI's sets arbAct, SECOD, RESIMP, RESIMP_T_O, MLKSECO, MLKO, O_TO_YANI and CAPTRD's ROWS_LAB, MLKCNT,
+  LO_TO_HI, SplitActsLo, BULF (`build_captrd_sets.py`); p_carcassShare, p_startWgt (CAPRI's constants of
+  feed/feed_decl.gms) and p_NCNC_CONT as in sim_ini_21730 (`tools/build/build_captrd_estimation_params.py`, from a
+  kept extract). The fill and fibre feed contents and the empty days, which CAPTRD's stored results do not hold, come
+  from the port's own data preparation.
+- The bounds (fix_est.gms with comi_bounds.gms and biofuel_bounds.gms, and estimate_ms.gms's own;
+  `capri_mod/pipeline/captrd/estimate_bounds.py`): with Solve2's supports, CAPTRD's results of the year and the
+  port's prepared data, 43,874 of 47,172 bounds of Denmark, Austria, France, Poland and Spain in 2020, 2030 and 2050
+  equal the ones CAPTRD stores (`test_captrd_estimate_bounds.py`, slow suite). The rest: CAPTRD stores the bounds after
+  widening them for infeasible solves (estimate_ms.gms l. 222-420), not yet ported (foodSh, processing yields,
+  calories, a few trade rows), and the food intake INHA with HCOM, open.
+- Found: CAPTRD's stored supports, wVarErr and bounds are those of its last solve (Solve2), and Step3 is the result of
+  a further cleaning solve (clean_tiny.gms), so neither step2 nor step3 can be reproduced from the stored inputs
+  alone; fix_est.gms l. 810 raises 1.02 to the year, in effect no upper bound on artificial land (kept as coded).
+- The food intake's bounds (INHA, fix_est.gms l. 269-279) as GAMS reads them: the second term's `$` conditions only
+  its exponent, so where BAST exists the bounds are BAST x 0.98^n + BASM and BAST x 1.02^n + BASM, not a choice
+  between BAST and BASM as the code's layout suggests (CAPRI-ERROR, kept as coded). With it 45,983 of the 47,172
+  bounds equal CAPTRD's; the rest are mostly bounds CAPTRD widened in its infeasible solves.
+- In progress: the solve with CAPTRD's widening of infeasible solves (estimate_ms.gms l. 222-436;
+  `capri_mod/pipeline/captrd/estimate_nlp.py`, IPOPT in place of CONOPT, settings `captrd.nlp_*`). Denmark 2030's
+  Solve2 on the port's bounds is infeasible at first, as CAPTRD's evidently was, and feasible after about 16 tries;
+  the widened bounds equal CAPTRD's stored ones on 1,610 of 1,625 lower and 1,582 of 1,625 upper bounds
+  (`test_captrd_estimate_nlp.py`, slow suite). Departure: CONOPT's active set has no IPOPT counterpart, so a bound
+  counts as binding within a tolerance (`captrd.nlp_at_bound_tol`, `nlp_marginal_tol`). Open: the solution against
+  CAPTRD's Step3 (about 36% of the positions within 0.5%; Step3 is a further cleaning solve's result).
+- Set iteration in the estimation's code no longer depends on Python's string hashing (sorted sets), so two runs give
+  the same widening path.
+- The widening closer to estimate_ms.gms l. 252-353: STCM is opened with the other positions (l. 276, 321); the zero
+  floor of the positions with a positive base year also reaches positions without a lower bound (GAMS's MAX(0, -inf));
+  after 25 tries the binding lower bounds of OIND's and OCRO's levels go to zero where they have no production
+  (l. 330-346); between tries the levels stay at the last solve's, those with data go back to estP (l. 349-353); the
+  try counts of biofuel_bounds.gms (below 30) and of the OIND/OCRO rule are nRepeatedSolves before its increment.
+  On Denmark 2030 the widened bounds change by one position (a scratch run with the same inputs: 13 lower and
+  41 upper bounds differ from CAPTRD's, against 12 and 41). The remaining gap is the solver's: at the first general
+  widening (try 7) IPOPT's infeasible point lies at 57 lower and 52 upper bounds with multipliers, the food intake's
+  (INHA) lower bounds and the food shares' (foodSh) upper bounds together, coupled by HCOM_ (INHA x population =
+  (HCOM + LOSF) x foodSh); CAPTRD opened INHA's lower bounds only, as an active-set solver puts the marginal of such a
+  degenerate pair on one of the two.
+- Solve1 checked against CAPTRD's step2 (`test_denmark_2030_solve1_objective_equals_captrds`, slow suite): with CAPTRD's
+  support1, the port's bounds on it and Solve1's wVarErr, the port's optimum for Denmark 2030 is 0.5127 against 0.5138
+  for CAPTRD's step2 under the same objective (feasible after 17 tries); 65% of the positions lie within 0.5% of
+  step2, 84% within 2%, the rest mostly trade positions and other directions the objective leaves nearly free. CAPTRD
+  stores Solve2's wVarErr only: Solve1's is rebuilt from the 2d chain's expert positions (define_stats_and_supports.gms
+  l. 646-663) and, where stage 2f adds a trust level, from the trend's error variance (l. 327-329, inverted from the
+  stored wVar and wR2, l. 177-179). With the stored wVarErr step2 would score 2.27 against 0.23: stage 2f puts
+  FEDM.OCER, FEDM.MOLA and INDM.OCER at DG AGRI's values, about a hundredth of support1, with standard errors near
+  0.2 where Solve1's are near 156.
+- The widening's marginals as CONOPT reports an infeasible model (setting `captrd.nlp_infeasible_marginals`, "phase1",
+  the new default): after an infeasible IPOPT solve, the least sum of the equations' violations within the bounds is
+  solved, and its point and marginals mark the bounds to open; IPOPT's own infeasible stop ("ipopt", the behaviour
+  before) also carries the objective's pull on the bounds. Denmark 2030's Solve2: 12 of the 3,250 widened bounds differ
+  from CAPTRD's (54 before), feasible after 26 tries (15 before); Austria 2030's Solve1 reaches CAPTRD's objective,
+  1,084.8 against 1,092.9 (787.6 before, from INHA, foodSh and HCOM bounds CAPTRD did not open: with "phase1" its
+  INHA.BARL lower and foodSh.BARL upper bounds are CAPTRD's); Denmark 2030's Solve1 0.51391 against 0.51385. The
+  widening path turns on near-ties: two of four runs of the Solve2 test on the same code gave 25 differing lower
+  bounds instead of 7 (run-to-run variation not yet traced), so the test allows 2%. Solve1
+  of Denmark 2050 and France 2030 (with "ipopt"): 0.1398 against 0.1406 and 0.01187 against 0.01190. Open: Poland and
+  Spain 2030, whose objective is dominated by the milk losses LOSF.COMI (a support near 1 with a small variance,
+  comi_bounds.gms holding it near 700), whose bounds open by 0.995^n with the try count n, and Denmark 2020
+  (HCOM.BARL), not yet rerun with "phase1".
+- The phase-1 solve keeps close to the infeasible solve's point (setting `captrd.nlp_phase1_proximity`, 1e-6 x the
+  squared scaled distance): without anything in its objective on the positions, the interior-point solve drifted the
+  free ones to the middle of their bounds (Spain 2030's Solve1 up to 6e7, its final SSQ 1.9e7 against CAPTRD's 821),
+  where CONOPT's phase 1 moves from the given point. Solve1 with it: Spain 2030 542.8 against CAPTRD's 821.4, Austria
+  2030 1,086.7 against 1,092.9; Denmark 2020 (phase 1 before the proximity term) 1.4647 against 1.4635. Denmark
+  2030's Solve2: 7 lower and 4 upper bounds of 1,625 differ from CAPTRD's (17 tries). Poland 2030 open (2.85e6
+  against 2.21e6, phase 1 before the proximity term; the milk losses' bounds).
+- The run-to-run variation traced: CAPTRD's data preparation (prepare.py, requirements.py) summed over Python sets,
+  in hash order, so each process's prepared data differed in the last bits (1,025 of Denmark's 80,030 values, at most
+  6e-15 relative: the product groups, DOMM, UAAR, LU and the requirement functions), and the estimation's widening,
+  which turns on near-ties, took different paths from them. The sums now run over sorted members: two preparations of
+  Denmark in separate processes are bit-identical. Denmark 2030's Solve2 on it: 16 tries, 8 lower and 10 upper of the
+  1,625 bounds differ from CAPTRD's stored ones (the test allows 2%).
+- Poland 2030's Solve1: comi_bounds.gms sets LOSF.COMI's bounds again at every try and release_comi_yields.gms opens
+  them by 0.995^n at try n, so the final bound records the try: CAPTRD's (749.07 x 0.995^25) says its Solve1 of Poland
+  2030 took at least 26 tries, where the port's (x 0.995^15, IPOPT's marginals) last opened it at try 15. The
+  objective, dominated by LOSF.COMI (a support of 1.2 with a small variance against a bound near 700), follows the try
+  count; a footprint of CONOPT's path the port does not reproduce.
+- FIX-7 implemented (the project lead, 12 November 2026): ARTIF's upper bound (fix_est.gms l. 810) has a misplaced
+  parenthesis, 1.02**(OrdT(ExAnte)) - OrdT("BAS") for 1.02**(OrdT(ExAnte) - OrdT("BAS")); capri-mod fixes the parenthesis
+  (setting `captrd.artif_upper_bound_as_coded`, false; the parity tests against CAPTRD's stored bounds set true). The
+  statement's max with the previous upper bound, CAPTRD's standard 1e9 (estimate_ms.gms l. 56), is kept as coded, so
+  where that is 1e9 the bound stays 1e9 (about 1e20 as coded): the fix changes the bound's value, not whether it binds;
+  in CAPTRD's stored results ARTIF never grows faster than 2% a year.
+- An IPOPT solver error (insufficient memory, an internal error or exception) now stops the estimation instead of being
+  taken for an infeasible model and widened (CAPTRD aborts on a solver error, estimate_ms.gms l. 230, 243).
+
+## 12 November 2026 — manure pools: CAPRI's autarky buffers (p_mTradeAddCost)
+
+The pool market now adds CAPRI's autarky buffer to the trade cost of every link unused at the calibration point
+(manuremarket/declare_manure_market.gms l. 396-436): (buffer_k + buffer_l) / 2, CAPRI's 10 EUR per t, and in the
+Green Deal group 50,000 EUR per t for its isolated pools (UK, MT, NO, the Western Balkans, TUR, CY), which closes
+them. The links CAPRI's calibration uses are taken from p_priorMTrade, from the pools that export to those that import
+(at the 2030 calibration point BL, DE and NL to FR). The builder `build_manure_pool_market.py` adds each region's base
+net export and its buffers (`manure_pool_market_2030.csv`); setting `outer_loop.manure_pool_autarky_tol`.
+
+- Full-EU Green Deal 2030: converged in 21 iterations (19 without the buffers), the worst pool's gap falling at every
+  step; the equilibrium within 0.4 points of the run without them (beef price +13.4% against +13.3, GHG total -13.7%
+  against -13.6, fertiliser N2O -33.0% against -32.6). Malta's N exports, 96 t without the buffers, are zero.
+- CAPRI's slope as coded against its documented elasticity (four countries, Green Deal 2030): as coded
+  (`manure_pool_es_slope = "capri_code"`, the default) 14 iterations; as documented ("capri_doc", a slope 1000 times
+  smaller) not converged in 60 iterations, the pools' gap swinging between 23% and 300%.
+
+## 12 November 2026 — the run log's solver level, as CAPRI's GUI shows a run
+
+- run.verbosity = "solver" (new level, between detailed and debug): each solve as CAPRI's GUI shows GAMS's output while
+  a task runs (gui2014.pdf, "Interaction with GAMS": GAMS's log piped into the GUI's window, its title lines into the
+  title bar). Per regional supply model and solve: "Generating NLP model supply <region> (<warm/cold> start): <n>
+  variables, <m> constraints", IPOPT's own iteration log (run.solver_log_print_level, IPOPT's file print level, 5) and
+  its status, iterations and time, written in region order once the supply side has solved (the regions solve in
+  parallel processes; each process's solvers write to their own temporary file, read back with the result); per
+  market solve each iteration's largest relative residual, product, region, quota move and damping (fixed point) or
+  evaluations (Newton-Krylov); per manure pool market its QP's size and Clarabel's status. The logs are not kept with
+  the results. Output only: the results do not depend on the level.
+- The Gradio app's Run tab: the same choice of log level (capri, detailed, solver), the run's log in a window (its last
+  400 lines), the last title line above it, and the step report's line per iteration (the app's former iteration pane
+  matched a title format no longer written).
+
+## 12 November 2026 — the raw dataset without version tags
+
+- tools/pipeline/capri_raw_manifest.json no longer names a tag per file (the project lead's choice, 12 November 2026):
+  the tags v2026.11.10, v2026.11.11 and v2026.11.11.1 no longer resolved on Hugging Face (the repository's history is
+  intact). Each file stays pinned by its SHA-256; the manifest names the dataset commit the files are at ("revision")
+  and keeps the uploads' notes as a dated history. make_raw_manifest.py and publish_raw_batch.py take --date (and record
+  the commit) instead of --version; the dataset card says the same. The tag v2026.11.11.2 still exists on the dataset.
+
+## 12 November 2026 — manure pools: CAPRI's pool market (m_mPoolMarket) ported and the default (DEP-17)
+
+- outer_loop.manure_pool_form = "capri" (new, the default): CAPRI's manure pool market (manuremarket/
+  declare_manure_market.gms l. 99-204, simu_manure_market.gms l. 34-89) per nutrient, capri_mod/coupling/manure.py
+  `_clear_pool_capri`: each region's linear excess supply refitted at its manure value and net trade of the last solve,
+  CAPRI's slope p_mPoolSupSlope, the regional NLP's trade costs, the pools' trade costs; a convex QP (Clarabel). The
+  former form stays as "schedules". outer_loop.manure_pool_price_update = "capri" again (CAPRI's averaging; "damped"
+  11-12 November 2026).
+- The region's manure value (CAPRI's PSHW, ManureNPK_.M) is recorded with each regional NLP solve
+  (capri_regional_nlp.py `manure_values`, res.manure_value: the multiplier of the fertilisation block's EXCR pool row).
+  At the start of the Green Deal run it is CAPRI's calibration dual in the model's 2017 money: P and K 0.783 of CAPRI's
+  (the deflator 1.2772), N 0.78-0.94.
+- New input capri_data/baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv (250 CAPRI regions x
+  MANN, MANP, MANK) from CAPRI's priFertDist_<MS>1730defaulta.gdx (the raw dataset v2026.11.11.2), tools/build/
+  build_manure_pool_market.py, with its kept extract capri_data/sources/raw/capri/results/fert/manure_pool_inputs_2030.parquet;
+  four units added to the model's catalogue (codes/model_units.csv).
+- Units, from CAPRI's code and its listing: the supply model's manure trade is in kt (as the model's, in t, with the
+  same cost slope); CAPRI's pool model takes its slope from the supply in t with the trade in kt, so its regional excess
+  supply responds 1000 times more than the elasticity 0.01 written. outer_loop.manure_pool_es_slope = "capri_code"
+  (CAPRI's numbers, the project lead's choice) or "capri_doc". One region-nutrient has a negative slope (NL410000 MANN,
+  dual -824 EUR per t); the problem stays convex there (its trade cost slopes outweigh it), checked at every solve.
+- Checks, Green Deal 2030 (greendeal_lnds8_org18_pest20_mine13crp_surp30), CAPRI's averaging: Austria, Ireland, Spain,
+  Slovakia 14 iterations (the pool gap falling at every step; "schedules" with CAPRI's averaging 19, oscillating;
+  "schedules" damped 8), the indicators within 0.1 point of the damped run's; full EU 19 iterations ("schedules"
+  damped 16; "schedules" with CAPRI's averaging not converged after 36), prices within 0.1 point of the damped run's
+  (beef +13.3% against +13.4, milk +7.9 against +8.0), GHG total -13.6% against -13.8, fertiliser N2O -32.6 against
+  -33.0.
+- Remaining differences (DEP-17, narrowed): the trade cleared as deviations from CAPRI's base trade (no calibration
+  wedges, no fixed third-country exports in the balance), the cost constants from the regions' reduced costs, exports
+  at most the manure produced, CAPRI's autarky buffers (p_mTradeAddCost) not ported.
+- MODEL_CONTENT_PLAN §13 brought up to date (it was of 4 November).
+
+## 11 November 2026 — manure pools: the damped price step again; the Green Deal against CAPRI's own run
+
+- outer_loop.manure_pool_price_update = "damped" again (the project lead's choice of 11 November 2026, until CAPRI's
+  pool market m_mPoolMarket is ported; DEP-17). CAPRI's averaging of the pools' last clearing prices, written for
+  CAPRI's pool market, kept the regional crop and feed mixes swinging on capri-mod's pool market (cleared on the
+  regions' exact trade schedules): the full-EU Green Deal 2030 had not converged after 36 iterations (2 hours; largest
+  change between iterations 0.3-3.9%, Austria's and Ireland's cereals and feed, Spain's maize); with the damped step it
+  converges in 16 iterations, 52 minutes. Austria, Ireland, Spain and Slovakia alone: 19 iterations ("capri"), 8
+  ("damped"), 6 without manure trade; the same four countries on the code before the switch of the 2030 base point
+  (7e15416) follow the same path as today's, so that switch is not the cause.
+- Full-EU Green Deal 2030 (greendeal_lnds8_org18_pest20_mine13crp_surp30) against CAPRI star 3.0's own run of the same
+  scenario (capri_gd_effect.csv.xz): activity changes' mean gap 7.0 points, same sign 83%; producer prices' mean gap 3.8
+  points, the model's changes 0.63 of CAPRI's (median): milk +8.0% against +11.2%, beef +13.4 against +20.1, pork +7.9
+  against +12.9, soft wheat +5.5 against +8.9; fattening pigs -6.1% against -9.2, broilers -5.9 against -8.1;
+  voluntary set-aside +164% against +80, fallow +66 against +91; histosols idled 1,647 against 1,819 thousand ha.
+  The supply cuts are smaller than CAPRI's and the prices rise less: the regional supply models, not the market.
+- Mini-EU Farm-to-Fork (no manure trade) unchanged.
+
+## 11 November 2026 — correction: CAPRI's calibration point is the reference run's
+
+- The notes that called res_2_1730greendeal_refpol_endotech_all_ini CAPRI's 2030 calibration run, from which the Green
+  Deal baseline is simulated, were wrong. CAPMOD's calibration point (sim_ini_21730, DATA "Y" and "TRD") equals the
+  reference run's levels (res_2_1730greendeal_refdefaulta) in all 74 member-state positions checked, while the ini run
+  differs (e.g. Ireland's potatoes 3.5 against 8.3 thousand ha, France's voluntary set-aside 358.5 against 431.7):
+  refpol_endotech_all_ini is a scenario run from that point. The model's 2030 base point since 10 November is
+  therefore CAPRI's calibration point, with CAPRI's PMP terms of the same calibration (no departure). Corrected:
+  tools/lib/paths.py, docs/BASELINE_REPRODUCTION.md.
+
+## 11 November 2026 — CAPTRD-MOD stage 2f: DG AGRI's supports after the first estimation
+
+- capri_mod/pipeline/captrd/eu_supports.py: define_eu_supports.gms for one ex-ante year (between Solve1 and Solve2):
+  DGAgri1 extrapolated beyond %lst_dgagri% by CAPRI's logistic from Step3, the EU parts' DGAgri1 spread over their
+  members by Step2, the long-run merge, UAAR's bounds, adjust_to_biof_supports.gms on DGAgri1, the supports from DGAgri1
+  where there is no expert support, the implied NTRD, DDGS, IMPT and EXPT, the areas scaled to UAAR, the young animals,
+  DG AGRI's trust levels, the deletions, wVarErr. CAPRI's constants with their 04_code_data_status rows.
+- test_captrd_eu_supports.py on CAPTRD's stored Solve1 results (step2) and the earlier years' Solve2 results (step3):
+  of the member states' positions in 2020-2070, support 434,701 of 455,713 equal, TrustLevl 107,619 of 107,958,
+  wVarErr 105,922 of 107,647 (where a trust level is set), DGAgri1 26,017 of 28,151; the rest rewritten after this
+  stage, inherited from stage 2c's EU parts (DGAgri1 of the cereals' and rape oil's INDM, FEDM, PRCM, DOMM differ there
+  already, from p_data that CAPTRD's stored P_Data no longer holds), the fossil fuel prices open since support1, and 406
+  support positions open (listed in the test). The 72 trust levels of NO000000 and TUR that stage 2d left open are
+  equal.
+- Found: CAPTRD's stored Step2 and Step3 hold the reporting's DOMM (the sum of the domestic use positions; the
+  estimation's is DEMD, aggreg_and_report.gms l. 293-294) and the reporting's product groups where the estimation had
+  none; S_RowsEst1 and S_ColsEst1 have no LABT and no QUTS, QUTA, QUTB (captrd.gms l. 559, 946-948): eu_supports.est_sets.
+  An explicit zero (EPS) Expert of NECR.LEVL carries a trust level in CAPTRD that the port, which keeps no zero records,
+  does not (69 positions).
+
+## 11 November 2026 — the data folder keeps the base years only: CAPRI's 2030 baseline in baselines/
+
+- capri_data/2030 moved to capri_data/baselines/capri_greendeal_ref/1730 (first as 2017_2030, renamed the same day to
+  CAPRI's %BAS%%SIM% naming, the project lead's choice) (the project lead: the data folder keeps
+  only the base years; a baseline has its own place, named by its origin and its years, so that another, a Green Deal
+  reference to 2040 for instance, goes beside it). Its module folders are unchanged; its five projection tables (CAPRI's
+  2030 price ratios, premiums, livestock premium ratios, rations and fodder) are in trajectories/. Contents unchanged.
+- The setting run.baseline (default capri_greendeal_ref) picks the baseline; capri_mod.data.inputs.year_dir locates a
+  file of another year than the base year in it (the data adapters, the market's inputs and loaders.resolve_data_file),
+  trajectories_dir the projection layer's tables; the builders write there (tools/lib/paths.py: data_year,
+  BASELINE_DATA). capri_data/README.md rewritten (it still described shared/ and trajectories/); docs/design/
+  DATA_LAYOUT.md step (d).
+- The raw dataset's manifest (tools/pipeline/capri_raw_manifest.json) without the five untrusted debug dumps removed
+  from nuvolaTeam/capri-mod-raw (version v2026.11.11.1: 143 sources, 10,459 files, equal to the dataset's listing);
+  runs/ ignored by git.
+- Checks: validate_data 0 violations; the data the model loads (load_all_data, 62 tables) equal to before the move; the
+  mini-EU Farm-to-Fork run equal to the run before the move (0 regional activity levels differing); the 52 builder runs
+  that write the moved files reproduce all 121 of their files identically (reproduce_builders); the fast suite, 327 passed (with test_layers and
+  test_base_year's mirror on the new layout, and tools/check/compare_capri_gd.py reading its table with exact floats,
+  failing test_exact_io on dev since 10 November).
+
+## 11 November 2026 — CAPTRD-MOD: CAPRI's GLOBIOM long-run conversion, switchable
+
+- `capri_mod/pipeline/captrd/globiom.py` ports global/convert_globiom.gms (the GLOBIOM-EU branch) and
+  global/create_longrun_info.gms: GLOBIOM-EU's projections mapped to CAPRI's regions (through FAO codes) and codes,
+  sugar, DOMM, the world price, the change factors from B2000, the demand and trade shares, the base year's factors
+  from CAPREG's time series, the global database (p_dataMarket) and the UN population; p_longRunInfoAll with
+  Taiwan = China.
+- Parity on GLOBIOM-EU's EUCLIMIT6 file (test_captrd_globiom.py): the same 452,241 records as CAPRI's
+  p_longRunInfoAll (and as p_globiomInfo without Taiwan); all equal but 128 of the 2017 factors (population and
+  Switzerland's DOMM), which come from the global database and population files, whose versions differ from that run's.
+  The EUCLIMIT6 and Brightspace branches of convert_globiom.gms differ only in the input file and the scenario lines,
+  so the Brightspace conversion (the reference run's selection, no CAPRI conversion of it in hand) runs the same code.
+- Found: the prices (UVAP) come only from the GLOBIOM regions that produce (l. 1744 excludes the plain price sum); the
+  EU aggregates take their FAO codes from fao_codes_new.gms l. 559, which CAPMOD's run skips.
+- Setting `captrd.longrun_from_globiom` (default false: the long-run file as the reference run had it, without GLOBIOM
+  long-run supports); `longrun_supports.info_source` picks the source.
+- `tools/lib/gams_preproc.py` selects the GAMS branch of a set of control variables; `tools/lib/gams_sets.py` and
+  the preprocessor take only column-1 dollar lines as compile-time commands (an indented $ is a condition; the
+  builders that use gams_sets reproduce their files unchanged). `tools/build/build_captrd_globiom_sets.py` writes the
+  conversion's sets (sets/globiom, 44_captrd_globiom.sql); `build_fao_agg_reference.py --parquet` also writes Parquet.
+
+---
+
+## 11 November 2026 — CAPTRD-MOD: %constBionergy% at CAPRI's default
+
+- The setting `captrd.const_bioenergy` is now on, CAPRI's default (captrd.gms l. 94-97), by the project lead's
+  decision. As in GAMS (biofuel_trends.gms l. 1299), biofuel_trends.py applies it only when the long-run selection
+  (`captrd.longrun_scenario`) is globiom_eu_bright_s0_2023+REFERENCE+REFERENCE, the default selection: the EU28 member
+  states' biofuel positions are then held at their 2020 values after 2020.
+- The reference run results_1770 did not apply it, so a run with the defaults no longer reproduces its biofuel
+  positions after 2020; the parity tests set it off explicitly, as before.
+
+---
+
+## 11 November 2026 — CAPTRD-MOD stage 2d: the supports as the first stage leaves them (support1)
+
+- `capri_mod/pipeline/captrd/final_supports.py` ports the rest of define_stats_and_supports.gms up to support1
+  (l. 589-675): adjust_to_biof_supports.gms per ex-ante year (with %use_KWS_supports% off), the overwrite of the
+  supports by the Expert, the crop areas scaled to UAAR, adjust_trade_supports.gms (its oils block is off as coded),
+  and the wVarErr formulas of the expert positions (not compared yet: stage 2f changes wVarErr).
+- BIOF.SUGA's Expert is now deleted only for the member states with a biofuel expert support above 2e-13 (MSest, as
+  in GAMS): this fixes the 6 tiny BIOF.SUGA positions that were wrongly put down to stage 2f.
+- supports.py: DG AGRI's scaled prices as the member states' UVAG support (l. 355-356, `uvag_from_dgagri1`), and the
+  DAYS/DAILY supports of activities with LEVL observations but none of their own (l. 290-293).
+- Found in the stored results: CAPTRD's stored Step1 of DOMM is the reporting's sum of the domestic use positions
+  (aggreg_and_report.gms l. 293-294); the estimation's DOMM is in DEMD. The tests now rebuild the trend supports from it
+  (tests/captrd_pre_expert.py), and no longer let stored ex-ante supports fill positions the trend supports leave
+  empty. This fixes CS000000's DOMM.COMI (4 positions before put down as "not stored").
+- New sets: Oseeds, tradeEst, ShiftSugbPos, SED_TO_OIL, OIL_TO_CAK, BIO_PRCD (43_captrd_final.sql).
+- Parity (test_captrd_expert_support.py):
+  - Expert and TrustLevl: 39,495 of 39,567 member-state positions after 2018 equal; the other 72 are stage 2f's
+    trust levels of NO000000 and TUR.
+  - support1: 441,600 of 474,390 equal. 32,750 are rewritten after this stage (YILD, requirement rows, HFCS) or cannot
+    be rebuilt from the stored Step1 (the product groups' prices and consumption). Open: 40 fossil fuel prices (UVAG of
+    DISL and GASL of NO, EL, IR, UK, 2020-2040) that our DGAgri1 holds and CAPTRD's support1 does not.
+
+---
+
+## 11 November 2026 — CAPTRD-MOD stage 2d: the expert supports assembled
+
+- `capri_mod/pipeline/captrd/expert_support.py` ports the end of captrd/expert_support.gms (l. 787-860) and the
+  storage of the expert supports in define_stats_and_supports.gms (l. 485-500, 589-596 in part, 627-645):
+  - the herd and level floor of the member states' animal activities (90% a year, or a linear decline to 20% by
+    Lst_exAnte);
+  - TOOU as an expert support with a low trust level where the output's price has expert information;
+  - the stop where a position has both an Absolute and a PercentChange support;
+  - Expert (Absolute, else (1 + PercentChange/100) x BASM), BIOF.SUGA deleted without MAPR.SUGA observations (only
+    l. 175 of adjust_to_biof_supports.gms; its support adjustments are not ported yet), the member states' sugar
+    beet trade = BAST, else BASM, and TrustLevl (COCO's, else the expert's, else 10).
+- national_supports.py: MAPR.MILK added to the dairy positions it may rewrite (expertdairy_map, expert_support.gms
+  l. 686).
+- The tests of the dairy and national supports now read the supports from before the expert supports
+  (tests/captrd_pre_expert.py); CAPTRD's stored support is the one the experts overwrote. This changes TUR's share
+  of direct milk sales (HCOM/GROF), which is taken from the trend supports.
+- Parity (test_captrd_expert_support.py, all ported sources chained in expert_support.gms's order): of the 39,567
+  member-state positions after 2018, 39,485 equal CAPTRD's Expert and TrustLevl (39,495 after the next entry). The national supports: 7,282 of 7,410 changed positions equal (was 6,701 of 6,829).
+
+---
+
+## 11 November 2026 — CAPTRD-MOD stage 2d: the long-run supports
+
+- `capri_mod/pipeline/captrd/longrun_supports.py` ports captrd/longrun_supports.gms with GlobiomAact and
+  FixExogenFactGlobiom off:
+  - the B2000 means;
+  - the scenario's change factors, with the bright and cv50 corrections;
+  - Longrun of the long-run years, interpolated, cleaned and scaled to BAST;
+  - HCOM.SUGA per head;
+  - the merge of the national PercentChange with Longrun from %phaseInYr% (Longrun1), and Longrun1 as Absolute where
+    nothing else is given.
+
+  The long-run selection is the new setting `captrd.longrun_scenario` (the reference run's
+  globiom_eu_bright_s0_2023+REFERENCE+REFERENCE). Its records come from longrun_info_fac_defaulta.gdx as CSV
+  (`tools/build/build_captrd_longrun.py`, 42_captrd_longrun.sql); none in the file in hand, as in the reference run.
+- Parity (test_captrd_longrun_supports.py, after the national supports):
+  - no Longrun or Longrun1 records, as in CAPTRD's results;
+  - all 158,370 B2000 values equal CAPTRD's (now exported from results_1770.gdx with expertLo and expertUp);
+  - the file changes only HCOM.SUGA, 315 Absolute supports, all equal to CAPTRD's Expert.
+
+  The GLOBIOM merge itself is ported but not checked against CAPRI: the reference run had no long-run data.
+- test_captrd_national_supports.py: the expert bounds of the national and agriprod supports equal CAPTRD's stored
+  expertLo and expertUp (1,181 and 1,022 after 2018).
+- Received: GLOBIOM-EU's raw Brightspace 2023 file (dat/global/globiom_eu_bright_s0_2023+REFERENCE+REFERENCE.gdx),
+  the input of CAPRI's global/convert_globiom.gms for that scenario (not ported yet).
+
+## 11 November 2026 — CAPTRD-MOD stage 2d: the population path; the reference run had no GLOBIOM long-run data
+
+- `capri_mod/pipeline/captrd/macro.py` ports two pieces:
+  - the population of the Aglink load's macro data p_aglinkMacro (baseline/load_aglink2023dgAgri.gms l. 905-1068):
+    SSP2's 2000 population × Aglink's population growth (the EU countries' own, else the Aglink region's), SSP2's
+    growth after %lst_dgagri%, linear between the SSP years, summed to the CAPRI regions, the base-year mean;
+  - CAPTRD's INHA.LEVL p_data after BAST (captrd/longrun_supports.gms l. 368-389), with the UN-population fallback.
+
+  Inputs as CSV (`tools/build/build_captrd_macro.py`, 41_captrd_macro.sql): aglink2023macro.xlsx,
+  data_SSPV3_update.gdx, reg_mappings.xlsx, allpop.gdx. GDP and the Venezuela and Taiwan base values are not ported
+  (CAPTRD does not read them).
+- Parity (test_captrd_macro.py): all 350 values (35 regions; 2019 and the ex-ante years) equal CAPTRD's stored P_Data.
+- Found: the reference run's long-run selection, globiom_eu_bright_s0_2023+REFERENCE+REFERENCE, is in none of the
+  long-run files the project lead holds:
+  - longrun_info_fac_defaulta.gdx;
+  - GLOBIOM_EU_longrun_defaulta.gdx (EUCLIMIT6 50CV);
+  - GLOBIOM_GL_longrun_defaulta.gdx (SSP2).
+
+  CAPTRD's results_1770 hold no Longrun or Longrun1 records, while B2000, which the same file always writes, holds
+  183,610. So the GLOBIOM long-run supports did not enter that baseline. Building the scenario needs
+  dat/global/globiom_eu_bright_s0_2023+REFERENCE+REFERENCE.gdx (global/convert_globiom.gms l. 284, 471).
+
+## 11 November 2026 — CAPTRD-MOD stage 2d: the national expert supports
+
+- `capri_mod/pipeline/captrd/national_supports.py`: CAPTRD's national expert supports (captrd/national_supports.gms,
+  with the reference run's switches: aglinkTightLink off, useAgriInfo on). It works on p_ExpertSupprt as the earlier
+  sources leave it (Absolute, PercentChange, TrustLevl, expert bounds):
+  - the dairy absolutes also as PercentChange;
+  - the member states' NECP herds (dat/baseline/necp_expert.gms), interpolated as coco/time_avg.gms, the base mean;
+  - the default national supports (trust 7.01, 6.01 for herds without disaggregate data);
+  - the 31 country blocks with their bounds, CS000000's dairy-herd support floored;
+  - the dairy supports of absDairyRunr back to Absolute after 2020.
+
+  Inputs as CSV (`tools/build/build_captrd_national.py`, 40_captrd_national.sql). `tools/lib/gams_text.table_records`
+  reads quoted labels with blanks ('Mature sheep').
+- Parity (test_captrd_national_supports.py): the earlier ports are chained in expert_support.gms's order, on the
+  supports before the expert supports (supports.py on CAPTRD's Step1: CAPTRD stores the support only after the expert
+  supports overwrite it). Of the 6,829 positions the file changes after 2018, 6,701 are equal to CAPTRD's Expert and
+  TrustLevl. The other 128:
+  - NO's and TUR's trust levels, which define_EU_supports.gms sets again;
+  - CS's DOMM.COMI, stored only as the reporting re-aggregate;
+  - Luxembourg's dairy HERD, whose BASM is not stored.
+- Found:
+  - the block headed "HU" (l. 1097-1122) assigns Croatia's positions, kept as coded;
+  - TUR's market supports get no trust level, because their condition needs expertdairy_map, which holds no POUM or
+    SGMT (l. 1481-1484); kept as coded;
+  - the PercentChange the file leaves are equal to CAPTRD's although longrun_supports.gms is not ported yet.
+
+## 11 November 2026 — CAPTRD-MOD stage 2d: Eurostat's recent production; the CasADi wheel's SPRAL build
+
+- `capri_mod/pipeline/captrd/agriprod_supports.py`: CAPTRD's short-run supports from Eurostat's recent production
+  statistics (captrd/agriprod_supports.gms, dat/coco/Agri_Prod.gdx): the December survey series completed and derived
+  (other cattle, fattening pigs, sheep and goats, Malta's 2017 milk, cow milk, milk yields), three-year means around
+  2017 and 2018, change factors to 2018-2020, and for 2020 the target animal activities' herds and levels, the dairy
+  yields and cow milk with trust 9.02 (3.02 up to 1), the fattening activities' bounds of days, daily growth and meat
+  yields, the dairy herds' and cow milk's 1% bounds, and 2017/2016 set to BASM and p_data where a 2020 support exists.
+  The PercentChange supports it deletes are returned as positions. Inputs as CSV
+  (`tools/build/build_captrd_agriprod.py`, 39_captrd_agriprod.sql). Not ported: the blocks for 2019 and 2018, which
+  run only when those years are ex-ante simulation years (not in the reference run); the module stops if they are.
+- Parity (test_captrd_agriprod_supports.py): of 1,224 values of 2020, 1,150 equal to CAPTRD's results_1770 with
+  their trust levels; the other 74 are later sources' (65 national_supports.gms's, its trust levels ending in .01 and
+  its rules for Greece; 39 positions this file deletes for want of recent data that a later source fills, the two
+  groups overlapping). The bounds are not in CAPTRD's stored results and are not compared.
+- CasADi SPRAL/OpenMP wheel (from the project lead's Red Hat logs): SPRAL built with `make -j1` (its Makefile misses
+  module dependencies: the parallel build stopped at 'spral_matrix_util.mod', then 'spral_ssids_contrib.mod'); the core
+  build's own mockups pinned to v111 too (`-DBUILD_MOCKUPS_VERSION`: with WITH_MOCKUP_* the core clones them from
+  master and compiles the WORHP plugin against that copy, so the earlier pin did not reach it); a changed patch is
+  applied again by the script.
+
+## 11 November 2026 — CAPTRD-MOD stage 2d: the biofuel trends; the CasADi wheel's mockups
+
+- `capri_mod/pipeline/captrd/biofuel_trends.py`: CAPTRD's expert supports for the biofuel sector from PRIMES
+  (biofuel/biofuel_trends.gms with the reference run's switches): PRIMES's results aggregated, gap-filled and
+  interpolated; demand, production, trade, second generation and non-agricultural fuels as PRIMES's change on the 2015
+  data; new energy crops (member states and NUTS 2, EPS kept as CAPTRD does); processing coefficients from Aglink's
+  yields (the Aglink stage now keeps p_BFyld); feedstock use from base shares and p_potentialStocks; DDGS; fossil fuels,
+  excise taxes, prices; trust levels. Inputs as CSV (`tools/build/build_captrd_biofuel.py`, 38_captrd_biofuel.sql).
+- Parity (test_captrd_biofuel_trends.py): all 28,798 comparable values equal to CAPTRD's results_1770, trust levels
+  as CAPTRD stores them, but for two documented later-stage changes.
+- Found: GAMS evaluates an assignment's right side on the values from before the statement (the cereal and sugar
+  shares; the gap filling); the reference run did not apply %constBionergy%, which CAPRI's code switches on for its
+  long-run selection: setting `captrd.const_bioenergy`, off as that run (for the project lead to decide).
+- CasADi SPRAL/OpenMP wheel: the solver mockups pinned to v111, the release CasADi 3.8.1 was built against (v114 on
+  lack WORHP's `ScaledKKT`, where the Red Hat build stopped).
+
+## 11 November 2026 — the run log in CAPRI's style; no environment variables
+
+- `capri_mod/runlog.py`, setting `run.verbosity` (quiet, capri, detailed, debug; default capri): CAPRI's section titles
+  (util/title.gms: the section, the previous one, the seconds since it and the minutes since the start; here with the
+  wall clock) and its run-log lines (capmod.gms's caplog: run started, data preparation, "enters simulation loop Nr.",
+  supply side solved, global market model solved, finished), with one line of step report per iteration (CAPRI's
+  stop-rule rows above 0.05% and the largest changes, the time split). "detailed" adds the model's own timed lines.
+- Not CAPRI's (the project lead's choice): the same lines written beside the output (`<out>.log`, `run.log_file`) and
+  the step report as CSV per iteration (`<out>_steps.csv`: times, stop tests, solve status; `<out>_iterchg.csv`: every
+  item's change between iterations, CAPRI's p_iterChg with its sign; `run.step_report`).
+- Where CAPRI reports its market solver's number and sum of infeasibilities, the log reports the market's balance
+  residuals: the products whose largest relative residual is above `market.tol`, and the largest. A supply model not
+  solved to optimality is named (CAPRI aborts there; this model keeps IPOPT's last point, as before).
+- No environment variables: the worker count and the solver cache are the settings `run.n_workers` and
+  `run.nlp_cache_size` only (`CAPRI_WORKERS`, `CAPRI_NLP_CACHE` no longer read); the runners already fix Python's hash
+  seed themselves; `run_f2f_2030.py` creates its output folder (e.g. `runs/`). The app and the check tools pass
+  `run.n_workers` as a setting; the solver build notes (tools/solvers/README.md) no longer export variables.
+
+## 11 November 2026 — CAPTRD-MOD stage 2d: DG AGRI's dairy data
+
+- `capri_mod/pipeline/captrd/dairy_supports.py`: CAPTRD's expert supports from DG AGRI's dairy data
+  (captrd/expert_support.gms l. 365-760: the 2015-2020 values from DG AGRI's tables, the growth rates with the yield
+  shift, the recent yield growth and Aglink's correction, the dampened logistic extrapolation with p_maxmin, the
+  derived milk positions, the trust levels, the share of direct sales) and HCOM.COMI from that share
+  (define_stats_and_supports.gms l. 510-519). Inputs as CSV: `tools/build/build_captrd_dairy.py` (dairy_targets_agri.gms,
+  recent_mlk_yld.gdx), declared in `capri_data/schema/37_captrd_dairy.sql`.
+- Parity (test_captrd_dairy_supports.py): every comparable record equal to CAPTRD's results_1770 (values and trust
+  levels); the records later sources rewrite (2020: agriprod_supports.gms; eight countries: national_supports.gms) are
+  left to those stages.
+- Fixed: the setting `captrd.lst_dgagri` (2030) contradicted CAPTRD, which sets %lst_dgagri% to 2040 for
+  aglink2022/2023/2024dgAgri (captrd.gms l. 246-249); it is now derived from `captrd.aglink`
+  (`timesets.lst_dgagri_for`). The time sets of the reference run are the same either way; the dairy growth rates
+  needed it.
+
+## 10 November 2026 (night): CAPTRD-MOD stage 2d, expert_support.gms's own rules
+
+- capri_mod/pipeline/captrd/expert_rules.py: fresh milk net trade, sugar and beet prices and balance positions, the
+  nutrient intake trends, isoglucose, UAAR, the breeding animals' slaughter weights and sheep milk yield (expert_support.gms
+  l. 51-322; the sources it includes are separate pieces). Against CAPTRD's Expert and TrustLevl of 2020-2070: 12 rules
+  equal in every record and trust level; sheep milk's values equal, 9 trust levels set by a later source; the beet trade
+  positions set by a later source (not yet ported). Isoglucose gives nothing, as in CAPTRD: the HFCS share it needs
+  (HCOS) is not a CAPRI column and CAPTRD's DGAgri holds none (test_captrd_expert_rules.py).
+
+## 10 November 2026 (late night): CAPTRD-MOD stage 2d begun, the COCO nowcast supports
+
+- define_stats_and_supports.gms l. 377-455 and 522-534 ported (capri_mod/pipeline/captrd/coco_supports.py): the data of
+  the years COCO nowcasts (2018 in the reference run) as expert supports, with their trust levels, overwriting the other
+  experts' for those years. Against CAPTRD's Expert of 2018: 91,794 of 91,880 common records equal; the others and the
+  197 only here are biofuel (216) and sugar (65) positions that expert_support.gms and adjust_to_biof_supports.gms
+  rework (not yet ported), and 2 not traced (test_captrd_coco_supports.py).
+- Found in CAPRI's code: the flag "closeToBas" (l. 392-394) is assigned to itself, so it is never set and the exception it
+  guards (the columns colsNoCoco in the last ex-post year) never applies. Kept as coded.
+
+## 10 November 2026 (late night): CAPTRD-MOD stage 2c, the DG AGRI baseline scaled to CAPRI's base period
+
+- captrd/scale_DG_AGRI_baseline.gms ported (capri_mod/pipeline/captrd/scale_dgagri.py): DGAgri to DGAgri1, the
+  outlook's relative changes applied to CAPRI's base-period values (BAST, BAST2), prices and yields from the member
+  state's, its EU part's or the EU27's outlook, market balances and activity levels, the biofuels' guarded factor. The
+  reference run's "Scaling to DG Agri baseline: off" acts only in scale_biofuel_to_dgagri.gms; this file always runs.
+- Checked on CAPTRD's own results, chained to the Aglink stage (test_captrd_scale_dgagri.py): DGAgri as the stage leaves
+  it equal in all but 2 of 123,918 compared records; DGAgri1 of the years define_EU_supports.gms does not rewrite
+  equal for the member states, Norway, Turkey and the UK but 57 records, and for EU014000 but groups with a constant
+  ratio to CAPTRD's (the factor's base differs). The residuals point to p_data values CAPTRD's stored P_Data no
+  longer holds (removed or changed by a later stage, not traced). The input's population after 2018 is left out: CAPTRD
+  writes it after this stage (its HCOM.LEVL of DGAgri, which this stage computes, covers 2000-2018 only).
+- The Aglink test's last unexplained exclusion, HCOM.LEVL of DGAgri, is this stage's (l. 170-174).
+
+## 10 November 2026 (night): CAPTRD-MOD, the Aglink-COSIMO stage and the requirement functions in the chain
+
+- CAPTRD's Aglink-COSIMO load (baseline/load_aglink2023dgAgri.gms: the DG AGRI outlook mapped to CAPRI's positions for
+  the EU27, its two parts, the UK, Norway, the Western Balkans and Turkey) ported: capri_mod/pipeline/captrd/aglink.py,
+  with CAPTRD's p_data at that point (CAPREG's years and base-year values) as input. Against CAPTRD's own DGAgri
+  (results_1770): every record present in both equal; 123,133 compared once the writes of CAPTRD's later stages are left
+  out, each with its line (aggreg_and_report.gms, scale_DG_AGRI_baseline.gms; one, HCOM.LEVL, attributed but not
+  traced). Not ported: the detailed macro data of l. 899-1058 (an output for CAPMOD and the long-run supports).
+  Test: capri_mod/pipeline/tests/test_captrd_aglink.py.
+- Its sets: tools/lib/gams_sets.py reads GAMS set definitions (data lists, tuples, ranges, set.NAME, aliases,
+  $include, $setglobal, $if) from CAPRI's own files; tools/build/build_captrd_aglink_sets.py reads the Aglink files with
+  it and transcribes the few set assignments with their line numbers (capri_data/pipeline/captrd/sets/aglink2023dgAgri,
+  100 sets). CAPRI's fuel densities and oil equivalents (p_density, p_oilEqu) are sources now
+  (tools/build/convert_sources.py).
+- The animal requirement functions (requirements.py) run in prepare_run after the statistics (captrd.gms l. 944);
+  Denmark's chained energy and protein Const and Slope equal CAPTRD's (test_captrd_prepare.py).
+- CAPREG's base-year file of Spain from the CAPRI GUI's CSV export (build_capreg_base_reference.py reads the
+  export; it equals the text dump in all records of Denmark).
+- Fixed: the results store's digest of a run in batches (io_results.rows_digest_batches, tools/run/verify_ids.py)
+  ran the Unix sort program (since 225d08d's successor d2e6d06), against the rule that no file runs a Unix tool
+  (test_portable_paths); it sorts in chunks and merges in Python now (the same digest: checked equal to the sorted
+  lines' and on the published store's 10 runs).
+
+## 10 November 2026 (night): the market supply Hessian's shocks reach the rations' feed prices
+
+Found while diagnosing the Green Deal price gap with CAPRI: the market's feed bulks responded to their own price with
++0.15 (the model's market supply Hessian, FEEDBLK rows) against CAPRI's about -0.97 (p_hessNQSupp of CAPRI's Green Deal
+run). Each price shock of the Hessian (coupling/hessian.py) set the member states' feed bulk price ratios but not the
+feed prices of the rations inside the regional models (seen.feed_prices, set by CAPRIModel._update_rations in the outer
+loop), so in every shock the feeding block bought its feed at the base state's prices. DE11, cereal bulk +10%: no feed
+and no herd moved as the Hessian measured; with the prices set, cereal feed -9.9% (own response -0.99) and herds -1 to
+-7%. Each shock now sets the feed prices from its bulk ratios, as the outer loop does; the base re-solve and the end
+restore the base state's. Test: test_capri.py test_hessian_shocks_reach_the_rations_feed_prices (fails before the fix).
+
+Effect, mini-EU Green Deal 2030 (20 units, greendeal2030; before: dev 10eea8e): the Hessian has 48 columns with a
+response (35 before); the scenario converges in 21 iterations as before; EU prices move by at most 0.1 point (cereals
++0.8 -> +0.7), cereal production -9.5% -> -8.5%, oilseeds -11.3% -> -10.6%, herds and emissions by 0.4 point or less.
+So the fix is not the cause of the price gap with CAPRI (prices about 0.6 of CAPRI's): at a converged state the result
+depends little on the Hessian, which shapes the path to it. Tested: this test and the Hessian-related tests; the full
+suite was not rerun.
+
+## 10 November 2026: CAPRI's Green Deal 2030 step as a validation pair
+
+- Data: capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz (tools/build/extract_capri_gd_pair.py): CAPRI's
+  2030 Green Deal step (lnds8 org18 pest20 mine13crp surp30) against the Green Deal reference, levels and % changes as
+  the coupled-support pair keeps them (supply LEVL, PRME by EU27, member state and NUTS 2; PROD, YILD and the market
+  items by EU27 and member state); the reference is CAPRI's shipped run (5 November 2025, GAMS 45.7), the step the
+  project lead's run from it (10 November 2026, GAMS 53.3) (docs/EXTERNAL_SOURCES.md).
+- Checks: the reference's GDX and the baseline dump the model is calibrated to agree in every record of the member
+  states and EU27 in 2030 (891,502, to the dump's 15 digits): the same run in two formats (corrected on 10 November
+  2026: first described as the project lead's own run, which its META does not support). CAPRI's EU27 effect: soft wheat -1.9%, durum
+  -15.3%, maize -10.0%, extensive grassland +51.8%, intensive -54.8%, fallow +90.9%, suckler cows -28.8%, pigs
+  -9.2%; producer prices of cereals +9 to +17%, beef +20.1%, milk +11.2%.
+
+## 10 November 2026: data layout step (b), the year folders
+
+- Data: `capri_data/shared/` is `capri_data/codes/` (the code lists; the inputs' where-key "shared" is "codes");
+  `capri_data/trajectories/` and the 43 files of `capri_data/2017/` named for 2030 are in `capri_data/2030/`, under
+  the same area subfolders (56 moves, docs/design/DATA_LAYOUT.md). The rule is
+  `capri_mod.data.inputs.year_of_file`: a file whose name carries a year other than the base year lives in that year's
+  folder; a year range (`cap_greening_2013_2020.csv`) names the period of a base-year file and stays. The readers
+  (RunInputs.path, market inputs, loaders.resolve_data_file) and the builders follow it;
+  `build_npk_balance_2030.py` writes its two 2017 manure P/K coefficient files to the base-year folder.
+- Not yet: the column splits of five files that carry 2017 and 2030 columns (DATA_LAYOUT.md).
+- Checks: the loaded data dict is identical before and after the move (all 62 keys); the mini-EU F2F run is
+  identical to the run before the move (compare_pickles_exact, rtol 0); the 102 builders that read or write moved
+  files reproduce their committed outputs (reproduce_builders); the suite (365 tests; four tests now follow the layout);
+  test_a_file_carrying_another_year_lives_in_that_years_folder_a_period_does_not.
+
+## 10 November 2026: P1, CAPRI's obligatory set-aside (SETA_)
+
+- CAPRI's SETA_ (supply_model.gms l. 2219-2241): an arable activity with a set-aside rate r needs r / (1 - r) ha of
+  obligatory set-aside ISET per ha on arable land. CAPRI's ISET has no output, input cost, premium or PMP term in its
+  2030 data, so the model substitutes it into the arable land balance (supply/land.py _obligatory_set_aside; the base
+  use unchanged) and reports it (set_aside table ISET, SupplyResult.iset; results_items). The rates are a scenario
+  table, set_aside_rates.csv (region, activity, setr_pct; PolicyScenario.set_aside_rates).
+- Scenario folder set_aside_10: CAPRI's scen/set_aside/set_aside_10.gms, 10% on its Grandes Cultures in the EU
+  (tools/build/build_set_aside_scenario.py; schema set_aside_rates).
+- Checks: test_obligatory_set_aside_as_capris_seta; the mini-EU set_aside_10 run converged in 5 iterations, ISET =
+  0.1111 x the rated area in every unit; runs without rates unchanged but for the new ISET column (0).
+
+## 10 November 2026: S6 items 3-5 closed in the registers
+
+- Item 4 (the fertiliser calibration where CAPRI's 2030 posterior admits no allocation at the model's base): with the
+  base at CAPRI's Green Deal baseline, of the Romanian, Hungarian HU10-HU12 and ES620000 units only RO020000 (N) needs
+  it: its other arable fodder crops' need at the base is 4.4% above the group's prior supply (81% with the calibration
+  run's base); the model's need per ha is CAPRI's NITF within 1% and CAPRI's own reported flows fall short by about as
+  much, so a term of CAPRI's NUTNED_ the model does not carry is the likely cause, not yet identified (DEP-10).
+- Item 3 (Green Deal mineral caps exempted by solving): the remaining cases registered by pattern, tiny-prior groups
+  outside CAPRI's slack list and large groups with almost no manure prior under the 13% cut (DEP-10); to recheck on the
+  next full-EU Green Deal.
+- Item 5 (the numerical safeguards): registered (DEP-10, DEP-18). A further check for K129, re-solving every solution
+  kept at IPOPT's acceptable level from the other starts and the region's last optimal solution, was tried on the
+  mini-EU Green Deal and dropped: the starts agreed in every iteration, indicators unchanged, about 30% more time.
+  K129 corrected: the region's branch follows the coupled iteration's path; at most iterations its problem has one
+  solution the starts agree on.
+
+## 10 November 2026 (night): the 2030 baseline at CAPRI's Green Deal baseline
+
+- The project lead's decision: the model's 2030 baseline reproduces CAPRI's 2030 Green Deal baseline
+  `res_2_1730greendeal_refdefaulta` (CAPMOD's simulation of the reference policy refpol_endotech_all_sup, the run CAPRI's
+  Green Deal scenarios are compared with), not its calibration run `res_2_1730greendeal_refpol_endotech_all_ini`. The
+  two runs' prices agree within 0.01%, but levels and yields moved in places (crops: Ireland's other fodder +38
+  thousand ha, Romania's RO02 fallow 3.4 against 13.6, France's voluntary set-aside +25 in FR61; fattened pigs; 66
+  yields by more than 1%), and CAPRI's catch crops are far fewer in the baseline (EU national rows 2.35 against 9.2
+  million ha). The fertiliser priors and the other 2030 coefficients were already the baseline's.
+- One location for the run, tools/lib/paths.BASELINE_REF, read by every builder of the base point: the trajectory
+  (levels, yields), CAPRI's land types, rations and fodder, the dairy and cattle splits' 2030 terms, land rents, labour
+  and set-aside premiums, premiums by scheme, manure trade, CAP ceilings' weights, CAPRI's marginal terms and unit
+  values (capri_marginal_terms_ref_2030, renamed from _ini_), and the levels that scale CAPRI's PMP terms
+  (pmp_capri_2030*, so the Hessian at the model's base is CAPRI's own; the linear terms are the model's, calibrated at
+  the base as before) and the PMP recipe's calibration point. The N cascade checks (extract_gd2030_nbalance,
+  build_n_cascade_validation, build_p_balance --ini) still read the calibration run.
+- Catch crops (tools/build/build_cover_crops.py): a region CAPRI reports without CATC has 0 (GAMS stores no zero;
+  until now the member state's share was taken there); the cost per ha is CATC's TOIN in the baseline, else the
+  region's TOIN in the calibration run (column cost_source; KNOWN_ISSUES K130).
+- reproduce_builders: the marginal-terms extraction runs before its readers.
+- The projection's land reconciliation (capri_mod/projection/reconcile.py: each region's crop areas rescaled to its
+  2017 ratio of cropped area to land) is skipped for a trajectory of CAPRI's own results (capri_ref_*), which are one
+  consistent solution: it had moved them by the change of the ratio between 2017 and 2030 (Denmark +4.1%, Croatia +2.3%,
+  PT18 +1.2%), which the baseline calibration then reproduced (KNOWN_ISSUES K120). Trend projections (CAPTRD) keep it.
+- Tests anchored on the calibration run's values (IT400000 and PL120000 set-aside factors, FR240000's pulses, DE110000's
+  dairy MANP) take the Green Deal baseline's.
+- Checks (mini-EU, 20 units): the 2030 baseline's crop levels against CAPRI's Green Deal baseline 7.4 thousand ha off
+  (of 25,505; median 0.004%, largest 0.75%, Norway's grassland), against 418 before (median 0.50%, 29 cells beyond 5%);
+  228 with the base switch alone, the rest the reconciliation. Green Deal and Farm-to-Fork indicators within 0.4 point
+  of the previous mini runs (manure N2O -13.5% against -13.0% in the Green Deal); relaxed mineral caps: Green Deal
+  IR010000 (inner duals), HU220000 no longer; Farm-to-Fork NL220000 no longer, HR000000 inner duals in place of the
+  root-crop exemption. The full-EU effect not yet measured.
+
+## 9 November 2026 (late evening): S6, CAPRI's fertiliser priors' slack and a residue relaxation per nutrient
+
+- CAPRI's Green Deal group frees the slack of the fertiliser priors' partial derivative in its listed regions
+  (supply/set_fert_priors.gms l. 664-785, v_fertDistPartialSlack; e_fertDistPartial (partial + beta) (x + slack) =
+  alpha - 1, no cost): in 28 NUTS 2 regions every flow with a prior mode below 5 t within +-mode, and the 30 listed
+  (region, group) pairs' flows within +-(mode + 100 t). Ported: tools/build/build_fert_partial_slack.py,
+  capri_data/scenarios/greendeal_group/fert_partial_slack.csv, the scenario flag PolicyScenario.greendeal_group (set by
+  the Green Deal group's scenarios), the settings fertiliser.partial_slack_tiny_t and partial_slack_listed_add_t.
+  HU210000 under the Green Deal no longer needs its root-crop cap exempted (10 ha, a prior of 0.6 t mineral N).
+- CAPRI's limCres relaxation of every group of one nutrient (ES300000, phosphate, simy > 2025;
+  minfert_redu_by_crop.gms) was dropped by the extraction: extracted (column fnut of mineral_redu_limcres.csv) and
+  applied per nutrient.
+- Checks (the project lead's decision: no full-EU runs for changes of limited reach): mini-EU Farm-to-Fork unchanged at
+  one decimal (NL220000, in CAPRI's list, now needs the inner duals widened); mini-EU Green Deal 18 iterations against
+  23, cereal production -9.6% against -8.6%, almost all of it BG020000 ending at another crop mix: the run
+  settling on another branch of the region's response (K129, outside CAPRI's list); the full-EU effect not yet measured.
+
+## 9 November 2026 (evening): S6 items 1, 2 and 6 (the regional NLP departures)
+
+- Item 1: the ecological set-aside rule (ecoSetAside_) is held at the base only where the base misses it by round-off
+  (supply.ecosetaside_hold_tol, 1e-6 thousand ha: 5 EU regions within 1e-7 at the 2030 base, as CAPRI's rows binding
+  there); a larger gap is warned about (DEP-10).
+- Item 2: the organic area target's mineral-N caps per fertiliser crop group take CAPRI's target of the group
+  (p_organicAreaTargetCrops(ru, ngrp): crops_to_ngrp of pol_input/greendeal/load_organic_targets.gms, vegetables at the
+  UAA target as l. 187; capri_data/scenarios/greendeal_group/organic_ngrp_class.csv), not the crops' area-weighted
+  conversion; outside the EU the crops' conversion as before.
+- Item 6: the dairy and cattle split columns move their animal's manure N, P2O5 and K2O by CAPRI's MANN, MANP, MANK of
+  the two activities (until now N only; the phosphate balance follows), and the splits' per-head terms (shares,
+  fattening lengths, milk, feed, young animals, manure) are CAPRI's at its 2030 calibration point (the "_2030" columns
+  of dairy_intensity.csv and cattle_intensity.csv, from res_2_1730greendeal_refpol_endotech_all_ini), used at the 2030
+  market year; the PMP terms keep their 2030 variant. The EU land-use change's priors centred on CAPRI's 2030 solution
+  instead of its observed transitions registered (DEP-10), to be fixed with S13.
+- Checks: full-EU Green Deal at 34ea751 (items 1-2): 32 iterations, indicators unchanged at one decimal against
+  1b97161, RO050000's vegetable cap now exempted; full-EU Farm-to-Fork: 13 iterations, indicators within 0.5 point
+  (beef price +30.0 against +29.5); mini-EU Farm-to-Fork with item 6: indicators unchanged at one decimal, the
+  low-yield dairy shift 13.2 -> 14.1 thousand cows; suite 362 passed, 8 skipped, 1 xfailed.
+
+## 9 November 2026: the market's land-use change outside the EU (luc_market); result names as CAPRI's; K128
+
+- capri_mod/market/luc.py: CAPRI's land-use-change estimation of the market (arm/market_model.gms LinkLuWithShares_,
+  luClassInitial_, luClassFinal_, FocLUC_, derivativeOfGammaLUC_; on with REPORTS_ENV): per non-EU region with the land
+  block, the final land per UNFCCC class from the land types and the 36 transitions as the mode of CAPRI's gamma
+  priors under the initial and final balances. Data from sim_ini_21730 (tools/build/build_luc_market.py:
+  luc_market_priors.csv, luc_market_classes.csv, luc_market_shares.csv; p_lucPriorMrk, p_shFstInSecMrk and the
+  calibration-point transitions added to the sim_ini extract). At CAPRI's calibration land it reproduces CAPRI's
+  transitions in the 45 regions within 1.2e-8. Reported with every market solution (MarketEquilibrium.luc; the run
+  pickle's luc_market); setting market.luc_market (true). Registered: DEP-44 (solved after the market solve; no
+  feedback without lulucf_market, not ported).
+- Runs named as CAPRI names its result files (res_2_1730<short name>[_<n>u][_<label>]), with a status and a run record,
+  and the store's catalogue results/RUNS.csv (README, "Result names and the run catalogue").
+- K128: Farm-to-Fork's meat prices against JRC121368 checked against CAPRI's own market inputs (base, demand
+  elasticities, Armington, quotas): no departure found.
+
 ## 2 November 2026 (night): refactor stage 4, second half (batches 1-6, first part)
 
 - The environment's and the coupling's state in declared objects (capri_mod/environmental/state.py: par, ev, seen,

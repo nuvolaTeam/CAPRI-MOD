@@ -6,7 +6,7 @@ crush = the seed's processing PROC, oil and cake yields = CAPRI's PRCY (summed o
 PROC), and the crushing elasticity p_ElasProc(r, seed, seed, 'CAL') (elas_2_17<YEAR>defaulta). In CAPRI's data the
 processing identity ProcO_ holds (PROD(oil, cake) = PROC(seed) x PRCY; arm/calibrate_market_data.gms l. 72-82 and
 1123-1130), so the market's crushing reproduces CAPRI's oil and cake production of the market year. CAPRI regions that
-the model does not trade separately are summed into ROW (CAPRI's behavioural regions, shared/rms.csv without the EU, by
+the model does not trade separately are summed into ROW (CAPRI's behavioural regions, codes/rms.csv without the EU, by
 their market region: tools/build/recalibrate_trade_2017.trade_region), their elasticity the crush-weighted mean of the
 members'.
 
@@ -38,7 +38,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from _model_regions import EU_MS  # noqa: E402  CAPRI's EU member states (shared/eu_market_blocks.csv)
+from _model_regions import EU_MS  # noqa: E402  CAPRI's EU member states (codes/eu_market_blocks.csv)
+from paths import data_year  # noqa: E402  (the year folders of capri_data)
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "capri_data" / "2017" / "market"
@@ -53,7 +54,7 @@ def region_map():
     30 October 2026 the blocks' crushing was missed, ROW's oils and cakes falling short of CAPRI's production)."""
     from _market_regions import model_region      # the market's grouping step (tools/lib/_market_regions.py)
     eu = set(EU_MS)
-    with open(ROOT / "capri_data" / "shared" / "rms.csv", newline="") as f:
+    with open(ROOT / "capri_data" / "codes" / "rms.csv", newline="") as f:
         rms = [r["rms"] for r in csv.DictReader(f)]
     return {r: model_region(r) for r in rms if r not in eu}
 
@@ -128,7 +129,7 @@ def build(market: Path, year: str, elas: Path):
 
 
 def eu_build(market: Path, year: str, elas: Path):
-    """EU27 rows from CAPRI's member states (those of its EU trade blocks, shared/eu_market_blocks.csv): crush = sum
+    """EU27 rows from CAPRI's member states (those of its EU trade blocks, codes/eu_market_blocks.csv): crush = sum
     of PROC, yields = sum of PROC x PRCY / crush, crush share of use = crush / sum of (PROD + IMPORTS - EXPORTS) of
     the seed, elasticity = median of the member states' p_ElasProc (the market's EU base crush = this share x its aligned EU
     seed use)."""
@@ -158,7 +159,7 @@ def main():
     a = ap.parse_args()
     rows = build(a.market, a.year, a.elas)
     out = eu_build(a.market, a.year, a.elas) + rows
-    OUT = OUT_DIR / f"crushing_parameters_{a.year}.csv"
+    OUT = data_year(a.year) / "market" / f"crushing_parameters_{a.year}.csv"
     with open(OUT, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=COLS)
         w.writeheader()

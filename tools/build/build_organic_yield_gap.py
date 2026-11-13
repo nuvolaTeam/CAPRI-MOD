@@ -6,8 +6,8 @@ maps of CAPRI's member states and activities to them.
     capri_data/2017/policy/organic_yield_gap_regions.csv  ms, peseta_region: CAPRI's ms2peseta, every member state of
                                                            its supply models (EU, NO, UK, TUR, the Western Balkans)
     capri_data/2017/policy/organic_yield_gap_groups.csv   activity, group: CAPRI's pact2yieldGap for the model's crops
-                                                           (codes/model_activities.csv, CAPRI's supply-model codes: GRAS
-                                                           from GRAE and GRAI, CORN from MAIZ, WINE from TWIN); the
+                                                           (codes/model_activities.csv, CAPRI's supply-model codes: CORN
+                                                           from MAIZ, WINE from TWIN); the
                                                            animals' rows (DCOL, DCOH: milk) are left out, as CAPRI
                                                            leaves animal products out of organicCrops (its comment)
 

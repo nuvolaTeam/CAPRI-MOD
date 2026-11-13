@@ -14,6 +14,10 @@ docs/design/CAPTRD_MOD.md section 6):
 Zeros: a record listed as Eps is written with value 0 and eps = 1; a record not listed is absent.
 
     python tools/build/build_fao_agg_reference.py --src FAO_agg_17_defaulta.zip [--symbols p_biofuelData ...]
+                                                  [--parquet DIR]
+With --parquet, each symbol is also written as DIR/<symbol>.parquet in the layout of tools/build/convert_capri_gdx.py
+(d1..dn as text, value, special = "value:EPS" for an Eps record), for the model's inputs under capri_sources/dat_parquet
+(capri_sources/dat_parquet/global/fao_agg_17_defaulta: p_dataMarket, read by capri_mod/pipeline/captrd/globiom.py).
 """
 from __future__ import annotations
 
@@ -43,6 +47,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--src", required=True)
     ap.add_argument("--symbols", nargs="+", default=["p_biofuelData", "p_aglinkGrowthFactor"])
+    ap.add_argument("--parquet", default="")
     args = ap.parse_args()
     src = Path(args.src)
     want = {s.lower(): s for s in args.symbols}
@@ -90,6 +95,18 @@ def main() -> None:
     missing = set(want) - done
     if missing:
         raise SystemExit(f"symbols not found or not closed: {sorted(want[m] for m in missing)}")
+    if args.parquet:
+        import pandas as pd
+        pq = Path(args.parquet)
+        pq.mkdir(parents=True, exist_ok=True)
+        for sym in want.values():
+            d = pd.read_csv(OUT / f"{sym}.csv.gz", dtype=str, keep_default_na=False)
+            dims = [c for c in d.columns if c.startswith("d")]
+            out = d[dims].rename(columns={c: f"d{int(c[1:]) + 1}" for c in dims})
+            out["value"] = d.value.astype(float)
+            out["special"] = ["value:EPS" if e == "1" else "" for e in d.eps]
+            out.to_parquet(pq / f"{sym}.parquet", index=False)
+            print(f"{sym}: {len(out)} records -> {pq / (sym + '.parquet')}")
 
 
 if __name__ == "__main__":

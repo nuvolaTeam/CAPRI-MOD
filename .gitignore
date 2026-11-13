@@ -45,3 +45,9 @@ capri_sources
 
 # the runs' long results tables (capri_mod/io_results.py write_run; setting run.results_dir): run outputs, not data
 /results/
+
+# the GUI's user scenarios and runs (capri_gradio/capri_gui.py), local to the user
+/user_scenarios/
+/user_runs/
+# the tools' run outputs written to the relative runs/ (pickles, logs, step reports): not data
+/runs/

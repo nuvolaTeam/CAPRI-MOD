@@ -90,10 +90,17 @@ def check_table(con, table, csv_path, lay=frozenset()):
     cols = con.execute("SELECT column_name, data_type, is_nullable FROM duckdb_columns() WHERE table_name = ? "
                        "ORDER BY column_index", [table]).fetchall()
     names = [c[0] for c in cols]
-    con.execute("CREATE OR REPLACE TEMP TABLE _stage AS SELECT row_number() OVER () + 1 AS _line, * "
-                "FROM read_csv(?, header = false, all_varchar = true, auto_detect = false, "
-                f"columns = {{{', '.join(repr(f'c{i}') + ': ' + repr('VARCHAR') for i in range(_ncols(csv_path)))}}}, "
-                "skip = 1)", [str(csv_path)])
+    if str(csv_path).endswith(".parquet"):
+        # a table of capri_data/sources (Parquet since 8 November 2026, data layout step (c)): its values as text, in
+        # the file's row order, line numbers as its former CSV's (header line 1); a null is an empty cell
+        sel = ", ".join(f'CAST("{n}" AS VARCHAR) AS c{i}' for i, n in enumerate(_parquet_names(csv_path)))
+        con.execute(f"CREATE OR REPLACE TEMP TABLE _stage AS SELECT file_row_number + 2 AS _line, {sel} "
+                    "FROM read_parquet(?, file_row_number = true) ORDER BY file_row_number", [str(csv_path)])
+    else:
+        con.execute("CREATE OR REPLACE TEMP TABLE _stage AS SELECT row_number() OVER () + 1 AS _line, * "
+                    "FROM read_csv(?, header = false, all_varchar = true, auto_detect = false, "
+                    f"columns = {{{', '.join(repr(f'c{i}') + ': ' + repr('VARCHAR') for i in range(_ncols(csv_path)))}}}, "
+                    "skip = 1)", [str(csv_path)])
     header = _header(csv_path)
     if "unnamed" in lay and header and header[0] == "":
         header = [names[0]] + header[1:]
@@ -156,7 +163,15 @@ def check_table(con, table, csv_path, lay=frozenset()):
     return v
 
 
+def _parquet_names(path):
+    import pyarrow.parquet as pq
+    return list(pq.read_schema(path).names)
+
+
 def _header(path):
+    """The column names as the file's CSV header writes them (a Parquet table's unnamed index column: "")."""
+    if str(path).endswith(".parquet"):
+        return ["" if n.startswith("Unnamed: ") else n for n in _parquet_names(path)]
     import csv
     with open(path, newline="", encoding="utf-8") as fh:
         return next(csv.reader(fh))
@@ -204,15 +219,18 @@ def validate(root=ROOT, verbose=True, con=None, declarations_only=False):
                 con.execute(stmt)
     if declarations_only:
         return found
-    all_csv = sorted(str(p.relative_to(root)) for p in (root / "capri_data").rglob("*.csv") if "archive" not in p.parts)
-    found += [(f, "undeclared", "a CSV file under capri_data without a declaration") for f in all_csv
+    all_csv = sorted([str(p.relative_to(root)) for p in (root / "capri_data").rglob("*.csv") if "archive" not in p.parts]
+                     + [str(p.relative_to(root)) for p in (root / "capri_data" / "sources").rglob("*.parquet")])
+    found += [(f, "undeclared", "a data file under capri_data without a declaration") for f in all_csv
               if f not in set(declared)]
+    found += [(str(p.relative_to(root)), "format", "a Parquet file outside capri_data/sources: the model's inputs are CSV")
+              for p in (root / "capri_data").rglob("*.parquet") if "sources" not in p.relative_to(root / "capri_data").parts]
     found += catalogue_files(con, root)
     margin_found, margin_note = margins(root)
     found += margin_found
     if verbose:
         print(f"input margins: {margin_note}")
-        print(f"{len(declared)} files declared of {len(all_csv)} CSV files under capri_data; "
+        print(f"{len(declared)} files declared of {len(all_csv)} data files under capri_data (CSV; Parquet under sources); "
               f"{len(found)} violations")
         for where, k, msg in found:
             print(f"  {where} [{k}] {msg}")
@@ -220,8 +238,8 @@ def validate(root=ROOT, verbose=True, con=None, declarations_only=False):
 
 
 def catalogue_files(con, root):
-    """The catalogue's files that are not CSV (JSON files, compressed CSVs, folders; 05_file_catalogue.sql): each must
-    exist (the CSV files are checked as declarations, rule in 99_rules.sql)."""
+    """The catalogue's files that are not CSV (JSON files, Parquet tables, folders; 05_file_catalogue.sql): each must
+    exist (the CSV and Parquet tables are checked as declarations, rule in 99_rules.sql)."""
     try:
         rows = con.execute("SELECT file FROM file_catalogue WHERE file NOT LIKE '%.csv' ORDER BY file").fetchall()
     except Exception:                                    # no catalogue declared (a partial copy)
@@ -233,7 +251,7 @@ def catalogue_files(con, root):
 #: fodder and other non-marketed activities are left out; a staple crop whose gross margin with its CAP payments falls
 #: below ARTIFACT_LOSS EUR/ha is a violation (a data error, as the sugar-price bug once was); specialty crops are
 #: reported below their looser threshold, not counted as violations
-NON_MARKET = {"GRAS", "MAIF", "OFOD", "SETA"}
+NON_MARKET = {"GRAE", "GRAI", "MAIF", "OFAR", "ROOF", "VSET", "FALL"}
 STAPLES = {"SWHE", "DWHE", "BARL", "CORN", "RYEM", "OATS", "RAPE", "SUNF", "SOYA", "POTA", "SUGB", "PULS"}
 SPECIALTY = {"OVEG", "TOMA", "APPL", "OFRU", "CITR", "OLIV", "PULS", "TAGR", "TWIN", "TABO", "WINE"}
 ARTIFACT_LOSS, ARTIFACT_LOSS_SPECIALTY = -1000.0, -8000.0

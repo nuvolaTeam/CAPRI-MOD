@@ -56,6 +56,7 @@ from capri_mod.settings import setting, tri_state, current as _settings
 from capri_mod.data.definitions import MS_CODE, capri_ms, REGION_TO_COUNTRY, EU_MS_BLOCK, sup_noneu, is_eu as _is_eu
 from capri_mod.data.definitions import PRICE_FOLLOWS_EU, PRICE_FOLLOWS_ALL, CAPRI_FEED_TRD   # refactor stage 4
 from capri_mod.tableio import read_input
+from capri_mod import runlog as _runlog
 
 
 #: Nitrates Directive ceiling on organic N application (kg N per ha of UAA)
@@ -351,17 +352,6 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
     def _run_scenario(self, pol_scenario, scenario, world_price_shock, custom_scenario, max_outer_iter,
                       outer_tolerance, market_max_iter, run_environmental, run_biofuel,
                       carbon_price, biofuel_output_scale, regions, endotech, _mt, _bm=True) -> Dict:
-        # the market supply Hessian of the baseline that has just run, if this run is a scenario on it: measured now,
-        # from the state the baseline left, before this run changes anything (_measure_pending_hessian); any other
-        # run drops it (a scenario on another baseline runs that baseline again, below)
-        _pend = _cst.pop(self.sv, "hessian_pending", None)
-        if (_pend is not None and not (custom_scenario is None and str(scenario).upper() == "BASELINE"
-                                       and not world_price_shock)):
-            from capri_mod.policy.endotech import effective as _et_eff0, key as _et_key0
-            _k0 = (tuple(sorted(regions or list(self.data["areas"].index))),
-                   _et_key0(_et_eff0(getattr(pol_scenario, "endotech", None), endotech)), bool(_mt), bool(_bm))
-            if _pend["key"] == _k0:
-                self._measure_pending_hessian(_pend)
         if outer_tolerance is None:
             outer_tolerance = float(_settings().get("outer_loop.outer_tolerance"))
         # the manure pools need more outer iterations than the default allows; an explicitly short run
@@ -406,7 +396,6 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         self.par.eu_base_cache = _cache
         _mm = self.market_module
         if _is_base:
-            _mm.seen.eu_base_supply = None
             # a baseline's market runs without a market supply Hessian (the one of an earlier baseline belonged to
             # another solution, possibly another region set); its own is measured when a scenario needs it
             _mm.par.supply_hessian = None
@@ -441,13 +430,9 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 self.use_manure_market = bool(_mt)
                 self.market_module.biofuel_markets = bool(_bm)
                 self.verbose = _saved
-                _pend = _cst.pop(self.sv, "hessian_pending", None)
-                if _pend is not None:
-                    self._measure_pending_hessian(_pend)
                 self.policy_module.apply_scenario(pol_scenario)
                 for _m in (getattr(self.supply_module, "_models", None) or {}).values():
                     _m.res.nlp_fallback_log = []  # the baseline's fallbacks are in the baseline's own metadata
-            self.market_module.set_eu_base(*_cache[_key][:2])
             # reuse the calibration of the baseline for the same region set
             if len(_cache[_key]) > 2:
                 _cal, _bp, _bc = _cache[_key][2:5]
@@ -471,6 +456,15 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                     _mm.sv.bilat_last_r = None
                 if len(_cache[_key]) > 6:
                     _mm.par.sup_milk0 = dict(_cache[_key][6])
+
+        # S7: the baseline is a market solution away from the reference prices, so a scenario starts from it (its price
+        # signal, the EU blocks' and Norway's departures, the market's price ratios), as CAPRI's runs start from its
+        # calibration point, which is CAPRI's baseline equilibrium (arm/prep_market.gms: CUR = CAL)
+        _base_start = None
+        if not _is_base:
+            _base_start = (getattr(self.par, "base_start", None) or {}).get(_key)
+            if _base_start is not None and _base_start.get("bilat_last_r") is not None:
+                self.market_module.sv.bilat_last_r = _base_start["bilat_last_r"].copy()
 
         # CAPRI's emission tax (ghgTax; pol_input/ecampa/carbtax50_endotech_*.gms, supply_model.gms objective): a
         # policy shock of the scenario, EUR per t CO2-eq on the EU regions' emissions; each column's emission per
@@ -564,6 +558,8 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
 
         # Initial price signal = world prices
         price_signal = pd.Series(0.0, index=self.data["world_prices"].index)
+        if _base_start is not None:
+            price_signal = _base_start["price_signal"].reindex(price_signal.index).fillna(0.0)
         supply_results = None
         market_eq = None
 
@@ -574,9 +570,13 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         self.res.nlp_tol_trace = []
         _lab = "baseline" if _is_base else str(getattr(pol_scenario, "name", scenario))
         self._progress(f"{_lab}: start (at most {max_outer_iter} iterations)")
+        _rl = _runlog.current()
+        _yr = self.data.get("market_year") if isinstance(self.data, dict) else None
         for outer_iter in range(max_outer_iter):
             self.ev.outer_iter_now = outer_iter
+            self.ev.greendeal_group = bool(getattr(pol_scenario, "greendeal_group", False))
             _t_it0 = time.time()
+            _rl.loop_start(outer_iter + 1, max_outer_iter, _lab, _yr)
             if outer_iter == 0:
                 # CAPRI's price forecast and stop rule start afresh every run (outer_loop.price_update, stop_rule)
                 self.sv.capri_yani_hist = {}
@@ -585,6 +585,9 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 # the member states' CAPRI market supply functions; None with every EU unit in the run
                 self.market_module.seen.eu_excluded_base = self._excluded_base_supply(
                     regions or list(self.data["areas"].index))
+                # S7: the units outside the run of Norway (non-EU, with supply models), at their base output
+                self.par.excluded_sup_base = self._excluded_base_supply(regions or list(self.data["areas"].index),
+                                                                        non_eu=True)
             if self.verbose:
                 print(f"  Outer iteration {outer_iter + 1}/{max_outer_iter}")
             _RSMt.nlp_tol = _tol_tight
@@ -631,6 +634,10 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             if outer_iter == 0:
                 self.sv.eu_dev = None
                 self.sv.sup_dev = None
+                if _base_start is not None:
+                    import copy as _cpy
+                    self.sv.eu_dev = _cpy.deepcopy(_base_start.get("eu_dev"))
+                    self.sv.sup_dev = _cpy.deepcopy(_base_start.get("sup_dev"))
             _dev = getattr(self.sv, "eu_dev", None) or {}
             _bmap = self.market_module._ms_block_map()
             self.supply_module.seen.price_dev_ms = ({ms: _dev[rg] for ms, rg in _bmap.items() if rg in _dev}
@@ -697,6 +704,10 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                         getattr(pol_scenario, "pesticide_reduction", 0.0) or 0.0),
                     "organic_area_target": float(
                         getattr(pol_scenario, "organic_area_target", 0.0) or 0.0),
+                    # CAPRI's Green Deal group: the fertiliser priors' partial-derivative slack in its listed regions
+                    "greendeal_group": bool(getattr(pol_scenario, "greendeal_group", False)),
+                    # CAPRI's obligatory set-aside rates, {region: {activity: pct}} (SETA_)
+                    "set_aside_rates": dict(getattr(pol_scenario, "set_aside_rates", None) or {}),
                 }
             supply_results = self.supply_module.run(
                 price_signals=price_signal if outer_iter > 0 else None,
@@ -707,6 +718,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             self.seen.last_spol = _spol
             self.seen.last_supply_results = supply_results   # fodder shadow prices for the rations
             _t_sup = time.time()
+            _rl_extra = _rl.supply_solved(outer_iter + 1, supply_results)
             # CAPRI's baseline calibration (CAPMOD calibrates its supply models so that the simulation year's baseline
             # reproduces the projected levels): in the baseline of a projected year, the regional models' linear terms
             # are corrected until their solution is the projection's levels (Sprint 9p); the scenario then starts
@@ -717,6 +729,24 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 self.res.calib_drift = self.supply_module.calibrate_to_base(supply_results, reset=(outer_iter == 0))
                 self.res.calib_trace = getattr(self.res, "calib_trace", []) if outer_iter else []
                 self.res.calib_trace.append(round(float(self.res.calib_drift), 5))
+            # S7 ("capri"): CAPRI's market supply functions come from the supply models' calibration, before any
+            # simulation (supply/calibrate_supply.gms, loaded by arm/market1.gms l. 505-674), so the baseline's market
+            # already anticipates the supply response: the Hessian is measured here, at the calibration point (the
+            # reference prices), and kept for the scenarios on this baseline. In "supply" the baseline's prices are the
+            # reference by construction and it is measured after the baseline.
+            # CAPRI measures on calibrated models. A regional model's calibration is complete only at its second solve:
+            # the dairy, cattle and genetics split columns enter after the first (supply/nlp.py, the "_late" columns),
+            # and a solve that finds them recalibrates the region at the prices it is given. Measured right after the
+            # first solve, every price shock recalibrated its regions at the shocked price, which cancelled the response
+            # (20 units: 19 of 35 prices with a response, none for milk, meat, fruit or young animals; Germany's wheat
+            # 626 against 6,004; Dresden recalibrated in 46 of its shock solves; 6 November 2026). So the models are
+            # solved once more at the reference prices first, and the Hessian is measured from that state; the loop
+            # goes on with this iteration's own supply results
+            if _is_base and outer_iter == 0 and bool(getattr(self, "market_supply_nq", True)):
+                _sr_cal = self.supply_module.run(price_signals=None, policy_scenario=_spol,
+                                                 regions=regions or list(self.data["areas"].index), verbose=False)
+                self._measure_pending_hessian({"key": _key, "price_signal": price_signal.copy(),
+                                               "supply_results": _sr_cal, "regions": regions})
             # the market supply Hessian measured again at the scenario's state (market.hessian_scenario_iter; the
             # user's choice 2(b), 25 October 2026, K75): the baseline's responses can differ from the scenario's (the
             # calf market of the Farm-to-Fork runs responded with 0-10% of the baseline's own response). CAPRI
@@ -755,6 +785,10 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             # Map to market commodities (simplified bridge); livestock by CAPRI final product
             self.ev.ls_by_country = self._livestock_products_by_country(supply_results)
             eu_supply_market = self._bridge_supply_to_market(eu_supply_agg)
+            _xs = getattr(self.par, "excluded_sup_base", None)
+            if _xs is not None:
+                eu_supply_market = eu_supply_market.add(_xs.reindex(columns=eu_supply_market.columns).fillna(0.0),
+                                                        fill_value=0.0)
 
             # --- Step 2: Market module ---
             if self.verbose:
@@ -785,6 +819,8 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 verbose=self.verbose,
             )
             _t_mk1 = time.time()
+            _rl_extra.update(_rl.market_solved(outer_iter + 1, market_eq, self.market_module,
+                                               float(_settings().get("market.tol"))))
             if _yani_mkt:
                 self._young_animal_prices_from_market(_yani_ref)
 
@@ -1073,13 +1109,18 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                               "milk_ms": {k_: {kk: float(vv) for kk, vv in v_.items()} for k_, v_ in (_dlh.get("ms_price_ratio") or {}).items()},
                               "herd": _herd,
                               "herd_regional": {r_: {a_: round(float(getattr(x_, "activities", pd.Series(dtype=float)).get(a_, 0.0)), 4)
-                                                     for a_ in ("BCOW", "DCOW", "CALV", "BULL", "HFRS", "GRAS", "MAIF", "OFOD")}
+                                                     for a_ in ("BCOW", "DCOW", "CALV", "BULL", "HFRS", "GRAE", "GRAI", "MAIF", "OFAR", "ROOF")}
                                                 for r_, x_ in _sr_.items()}})
                 # the regions whose jump check acted at this iteration (supply.nlp_jump_check, K79): the largest move, the
                 # starts solved, the one kept and the objectives
                 _hist[-1]["jump_check"] = {r_: dict(m_.res.nlp_jump) for r_, m_ in
                                            (getattr(self.supply_module, "_models", None) or {}).items()
                                            if getattr(m_.res, "nlp_jump", None)}
+                # each region's solve at this iteration (CAPRI's p_INFES per region and step: its model and solver
+                # status): IPOPT's status and whether the solution is optimal (False: IPOPT's last point kept)
+                _hist[-1]["solve_status"] = {
+                    r_: {"status": str(getattr(x_, "solver_message", "") or "").split(": ", 1)[-1],
+                         "optimal": bool(getattr(x_, "converged", True))} for r_, x_ in _sr_.items()}
                 if _settings().get("diagnostics.record_regional_levels"):
                     # every region's activity levels at this iteration, unrounded (K79: the rows CAPRI's stop rule
                     # flags, traced to regions and activities)
@@ -1134,13 +1175,17 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                     _sr = getattr(self.seen, "last_supply_results", None) or {}
                     _go = {r_: float(getattr(x_, "gross_output", pd.Series(dtype=float)).get(_gc, 0.0)) for r_, x_ in _sr.items()}
                     _lv = {r_: float(x_.activities.get(_gc, 0.0)) for r_, x_ in _sr.items()}
-                    _gprev = getattr(self.sv, "trace_go_prev", None) or {}
+                    # the previous iteration's gross output of the same product (each region's whole gross output is
+                    # kept: the gap's product changes between iterations)
+                    _gprev_all = getattr(self.sv, "trace_go_prev", None) or {}
+                    _gprev = {r_: float(s_.get(_gc, 0.0)) for r_, s_ in _gprev_all.items()}
                     if _gprev:
                         _dd = sorted(((abs(_go[r_] - _gprev.get(r_, 0.0)), r_) for r_ in _go), reverse=True)[:5]
                         print(f'    [gap {_gc} output] EU {sum(_go.values()):.1f} (prev {sum(_gprev.values()):.1f}) | '
                               + ', '.join(f'{r_} {_gprev.get(r_, 0.0):.1f}->{_go[r_]:.1f} (lvl {_lv.get(r_, float("nan")):.2f})'
                                           for _, r_ in _dd), flush=True)
-                    self.sv.trace_go_prev = _go
+                    self.sv.trace_go_prev = {r_: getattr(x_, "gross_output", pd.Series(dtype=float)).copy()
+                                             for r_, x_ in _sr.items()}
                     print(f'    [gap {_gc}->{_mc}] EU supply {float(agg_qty.get(_mc, float("nan"))):.1f}'
                           f' (beet {float(agg_qty.get("SUGB", float("nan"))):.1f}) | world ratio {float((_dv + 1.0).get(_mc, float("nan"))):.4f}'
                           f' | premium {float(_pr.get(_mc, float("nan"))) if _pr is not None else float("nan"):.4f}'
@@ -1203,6 +1248,16 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                    + (f" ({_cv['top'][0][0]} {_cv['top'][0][1]})" if _cv.get('top') else "") if _cv else "")
                 + f" | N-balance price {_nbal:.2e}, pools {_pool:.2e}, young animals {_yani:.2e}, calibration {_cal:.2e}"
                 + (" -> stop" if _own_ok else ""))
+            _rl_extra.update(nbal_price_update=_nbal, manure_pools=_pool, young_animals=_yani, base_calibration=_cal,
+                             stop=bool(_own_ok))
+            _rs = getattr(self.sv, "capri_stop", None)
+            _rl.step_report(outer_iter + 1, _lab, _cv,
+                            {"t_supply_s": _t_sup - _t_it0, "t_between_s": _t_mk0 - _t_sup,
+                             "t_market_s": _t_mk1 - _t_mk0, "t_stop_tests_s": _t_it1 - _t_mk1,
+                             "t_iteration_s": _t_it1 - _t_it0},
+                            _rl_extra, getattr(_rs, "min_iter_chg", None),
+                            (_rs.steps[-1].get("signed") if _rs is not None and _rs.steps and _cv is not None
+                             else None))
             if _own_ok:
                 outer_converged = True
                 if self.verbose:
@@ -1218,6 +1273,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             # verbose=False comparison failed silently. It now always warns and
             # is recorded in metadata as outer_converged.
             outer_converged = False
+            _rl.log(f"WARNING: {_lab}: the stop rule was not met in {max_outer_iter} simulation loops")
             warnings.warn(
                 f"Outer supply-market loop did NOT converge in {max_outer_iter} "
                 "iterations. Price feedback is incomplete, so scenario results "
@@ -1246,19 +1302,18 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                                   RuntimeWarning, stacklevel=2)
         _RSMt.nlp_tol = _tol_tight                # later solves outside the loop at the tight tolerance
 
-        # CAPRI's market supply functions calibrated to the supply models (supply/calibrate_supply.gms:193-508): at the
-        # converged baseline each product's price is raised by 1% in every regional model, and the member states'
-        # responses form the Hessian of the market's normalised-quadratic supply (dQ / d relative price). The scenario
-        # keeps it (CAPRI loads it in simulations, arm/market1.gms:505-674); the market moves the function through the
-        # supply models' latest output every iteration (arm/simu_calibration_to_supply.gms:360-368).
-        # Measured when a scenario needs it (28 October 2026, the project lead's decision), as CAPRI's calibrate_supply
-        # is a task of its own after the baseline: the baseline records what the measurement needs, and the next run, if
-        # it is a scenario on this baseline, measures it (or reads it from the cache) before it changes anything. A
-        # baseline run alone (tests that check a baseline) does not measure it.
-        if _is_base and supply_results and bool(getattr(self, "market_supply_nq", True)) and market_eq is not None:
-            self.sv.hessian_pending = {"key": _key, "price_signal": price_signal.copy(), "supply_results": supply_results,
-                                     "regions": regions}
+        # CAPRI's market supply functions calibrated to the supply models (supply/calibrate_supply.gms:193-508): each
+        # product's price raised by 1% in every regional model, the member states' responses forming the Hessian of the
+        # market's normalised-quadratic supply (dQ / d relative price), measured at the baseline's start on calibrated
+        # models (above, K120); the scenario keeps it (CAPRI loads it in simulations, arm/market1.gms:505-674) and the
+        # market moves the function through the supply models' latest output every iteration
+        # (arm/simu_calibration_to_supply.gms:360-368). (Until 8 November 2026 the "supply" form measured it after the
+        # baseline, when a scenario needed it: the decision of 28 October 2026, superseded by S7.)
 
+        # CAPRI's warning when the market of the last step is not solved (arm/simu_market.gms l. 288-301)
+        if not bool(getattr(market_eq, "converged", True)):
+            _rl.log("WARNING: Market model not solved to its tolerance in the last iteration! The solution cannot be "
+                    "considered as an equilibrium")
         if getattr(self.market_module, "_milk_floor_hits", None):
             warnings.warn(f"raw milk price held just above zero in {sorted(self.market_module._milk_floor_hits)} "
                           "(negative milk prices not allowed in this scenario, CAPRI's negProdPriceAllowed): their milk "
@@ -1309,6 +1364,15 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             self.par.base_supply_cache[_key] = dict(supply_results)
             (getattr(self.par, "ghg_coef_cache", None) or {}).pop(_key, None)
         if _is_base and market_eq is not None:
+            # S7: the baseline's solution, where its scenarios start
+            import copy as _cpy
+            self.par.base_start = getattr(self.par, "base_start", None) or {}
+            _lr = self.market_module.sv.bilat_last_r
+            self.par.base_start[_key] = {"price_signal": price_signal.copy(),
+                                         "eu_dev": _cpy.deepcopy(getattr(self.sv, "eu_dev", None)),
+                                         "sup_dev": _cpy.deepcopy(getattr(self.sv, "sup_dev", None)),
+                                         "bilat_last_r": None if _lr is None else _lr.copy()}
+        if _is_base and market_eq is not None:
             try:
                 self.par.eu_base_cache[_key] = (
                     market_eq.production.loc["EU27"].copy(),
@@ -1340,7 +1404,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             "luc": _luc_table(supply_results),
             # CAPRI's labour accounts (million hours; GROF LABT = sum LABT x LEVL / 1000) and its set-aside split
             # VSET / FALL with their premiums (tools/build/build_labour_setaside.py)
-            "set_aside": _set_aside_table(supply_results, self.data, self._pmp_suffix()),
+            "set_aside": _set_aside_table(supply_results, self.data),
             "labour": None,
             # the NLP form's mineral N, P2O5, K2O purchases and flows per region and crop group (t)
             "fert_npk": _npk_table(supply_results),
@@ -1399,7 +1463,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             reporter.print_summary()
             print(f"  Run completed in {t_elapsed:.1f}s")
 
-        results["labour"] = _labour_table(supply_results, self.data, results.get("set_aside"))
+        results["labour"] = _labour_table(supply_results, self.data)
         results["welfare_supply"] = self._welfare_supply(supply_results)
         return results
 
@@ -1412,12 +1476,10 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
     progress_t0: Optional[float] = None
 
     def _progress(self, msg: str) -> None:
+        """The model's own timed line: the run log's level "detailed" (capri_mod/runlog.py)."""
         if not self.progress:
             return
-        now = time.time()
-        t0 = self.progress_t0 if self.progress_t0 is not None else now
-        el = int(now - t0)
-        print(f"[{time.strftime('%H:%M:%S')} +{el // 3600}:{el % 3600 // 60:02d}:{el % 60:02d}] {msg}", flush=True)
+        _runlog.current().detail(msg)
 
 
     # ------------------------------------------------------------------
@@ -1492,15 +1554,6 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         """List all available built-in scenarios."""
         return list_scenarios()
 
-    def _pmp_suffix(self) -> str:
-        """The PMP terms' column suffix of the set-aside split's weights: the 2030 terms at the 2030 market year
-        (CAPRI's or the recipe's, as SupplyModule.pmp_source; CAPRI's for the elasticity calibration), else the base
-        year's."""
-        from capri_mod.supply.supply_module import SupplyModule
-        if _mkt_year(self.data) != 2030:
-            return ""
-        return "_recipe2030" if str(getattr(SupplyModule, "pmp_source", "")) == "recipe" else "_capri2030"
-
 
 def _luc_table(supply_results):
     """Region x transition (1000 ha per year for changes, remaining in full) from the regional results, or None."""
@@ -1523,48 +1576,36 @@ def _npk_table(supply_results):
     return pd.DataFrame(rows) if rows else None
 
 
-def _set_aside_table(supply_results, data, wsfx=""):
-    """CAPRI's two set-aside activities in the model's SETA, per region (1000 ha; premiums million EUR): VSET = s X0 +
-    w (X - X0), FALL = X - VSET (tools/build/build_labour_setaside.py: s CAPRI's VSET share at the calibration year, w the
-    share of a common change CAPRI's PMP terms give VSET; X0 the region's base SETA). None without the data."""
+def _set_aside_table(supply_results, data):
+    """CAPRI's two set-aside activities, VSET and FALL, and its obligatory set-aside ISET (SETA_, scenarios with
+    set-aside rates only), per region (1000 ha; premiums million EUR), VSET and FALL the model's own
+    activities since S2 (7 November 2026; before, the model's SETA split by CAPRI's VSET share and PMP terms, K111):
+    their levels and premiums per ha (tools/build/build_labour_setaside.py, set_aside_split.csv prem_vset, prem_fall,
+    the 2030 values at the 2030 market year). None without the data."""
     import pandas as pd
-    sa, ar = data.get("set_aside_split"), data.get("areas")
-    if sa is None or ar is None or "SETA" not in getattr(ar, "columns", []):
+    sa = data.get("set_aside_split")
+    if sa is None:
         return None
     yr = _mkt_year(data)
     vt = "_2030" if yr == 2030 else ""
     rows = {}
     for r, res in (supply_results or {}).items():
-        if r not in sa.index or r not in ar.index:
-            continue
         x = getattr(res, "activities", None)
-        if x is None or "SETA" not in x.index:
+        if x is None or r not in sa.index or not ("VSET" in x.index or "FALL" in x.index):
             continue
-        X, X0 = float(x["SETA"]), float(ar.at[r, "SETA"])
         row = sa.loc[r]
-        s_ = row.get("share_vset" + vt)
-        s_ = float(row.get("share_vset")) if s_ is None or s_ != s_ else float(s_)
-        w = row.get("w_vset" + wsfx)
-        w = float(row.get("w_vset", 0.5)) if w is None or w != w else float(w)
-        if not s_ > 0:
-            # no VSET at the calibration point: CAPRI takes the activity out of the region's model
-            # (supply/prep_cal.gms l. 103: p_technFact LEVL 0 where the level is 0; set_supply_bounds.gms l. 42-43:
-            # VSET's bounds only where its base level exceeds 1e-6), so it stays 0 and the change is FALL's (K111)
-            w = 0.0
-        v = min(max(s_ * X0 + w * (X - X0), 0.0), X) if X > 0 else 0.0
-        f_ = X - v
+        v, f_ = (float(x.get(a, 0.0)) for a in ("VSET", "FALL"))
         pv, pf = (float(row.get(k + vt, row.get(k, 0.0)) or 0.0) for k in ("prem_vset", "prem_fall"))
-        lv, lf = (float(row.get(k + vt, row.get(k, 0.0)) or 0.0) for k in ("labt_vset", "labt_fall"))
-        rows[r] = {"SETA": X, "VSET": v, "FALL": f_, "prem_VSET": v * pv / 1000.0, "prem_FALL": f_ * pf / 1000.0,
-                   "labt_VSET": v * lv / 1000.0, "labt_FALL": f_ * lf / 1000.0}
+        rows[r] = {"SETA": v + f_, "VSET": v, "FALL": f_, "prem_VSET": v * pv / 1000.0, "prem_FALL": f_ * pf / 1000.0,
+                   # CAPRI's obligatory set-aside (SETA_, 0 without a scenario's rates; not in SETA = VSET + FALL)
+                   "ISET": float(getattr(res, "iset", 0.0) or 0.0)}
     return pd.DataFrame.from_dict(rows, orient="index") if rows else None
 
 
-def _labour_table(supply_results, data, set_aside=None):
+def _labour_table(supply_results, data):
     """CAPRI's labour accounts per region (million hours): total LABT, family LABF, paid LABP, as CAPRI's GROF =
     sum over activities of the level x labour per unit / 1000 (tools/build/build_labour_setaside.py; the 2030 coefficients
-    at the 2030 market year). The set-aside's total labour from its VSET / FALL split where available. None without
-    the data."""
+    at the 2030 market year; VSET and FALL their own activities since S2, 7 November 2026). None without the data."""
     import pandas as pd
     lc = data.get("labour_coef")
     if lc is None:
@@ -1588,13 +1629,6 @@ def _labour_table(supply_results, data, set_aside=None):
                 c = row.get(it.lower()) if c is None or c != c else c
                 if c is not None and c == c:
                     tot[it] += float(lev) * float(c) / 1000.0
-        if set_aside is not None and r in set_aside.index and (r, "SETA") in lc.index:
-            row = lc.loc[(r, "SETA")]
-            c = row.get("labt" + vt)
-            c = row.get("labt") if c is None or c != c else c
-            if c is not None and c == c:
-                tot["LABT"] += (float(set_aside.at[r, "labt_VSET"]) + float(set_aside.at[r, "labt_FALL"])
-                                - float(x["SETA"]) * float(c) / 1000.0)
         rows[r] = tot
     return pd.DataFrame.from_dict(rows, orient="index") if rows else None
 

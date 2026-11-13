@@ -1,7 +1,7 @@
 """CAPRI's 2030 manure trade per model region (manureTradeNew; Sprint 9j).
 
-CAPRI's Green Deal reference (star 3.0, `res_2_1730greendeal_refpol_endotech_all_ini`: the 2030 reference with the
-endogenous technologies at their calibrated shares, as the model's 2030 baseline) trades manure between regions
+CAPRI's 2030 Green Deal baseline (star 3.0, `res_2_1730greendeal_refdefaulta`, tools/lib/paths.BASELINE_REF: the
+run the model's 2030 baseline reproduces; its calibration run `refpol_endotech_all_ini` until 9 November 2026) trades manure between regions
 through its national pools (supply_model.gms e_netMTrade, e_costMTrade; manuremarket/). Its results carry per
 CAPRI region the net manure N trade, MTRADE.NITF (kt N, positive = net export), and the excretion, EXCRET.NITF.
 
@@ -12,11 +12,11 @@ splits, merges, Ireland's several-to-several):
 so a split region gets its parent's share and rate, and trade between CAPRI regions of one group (Ireland: IR01 to
 IR02) stays in the group as gross flows.
 
-Replaces capri_data/2017/environment/manure_trade_2030.csv, which had been written without a builder from
+Replaces capri_data/baselines/capri_greendeal_ref/1730/environment/manure_trade_2030.csv, which had been written without a builder from
 `res_2_1730greendeal_refdefaulta` by CAPRI code: its Romanian and Irish regions (CAPRI's older codes) were missing,
 so 155 kt of CAPRI's net trade (Romania 125, Ireland 30) was not in the model's balances.
 
-    python tools/build/build_manure_trade_base.py [--src capri_sources/exports/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv]
+    python tools/build/build_manure_trade_base.py [--src capri_sources/exports/res_2_1730greendeal_refdefaulta.zip]
 """
 from __future__ import annotations
 import argparse, importlib.util, re, sys
@@ -28,26 +28,27 @@ import pandas as pd
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
-from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from paths import BASELINE_REF  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-KEEP = ROOT / "capri_data" / "sources" / "environment" / "capri_manure_trade_2030.csv"
-DEST = ROOT / "capri_data" / "2017" / "environment" / "manure_trade_2030.csv"
+KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "capri_manure_trade_2030.parquet"
+DEST = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "manure_trade_2030.csv"
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", type=Path,
-                    default=EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
+                    default=BASELINE_REF)
     a = ap.parse_args()
     if a.src.exists():
         txt = grep(r"^'[A-Z0-9]{8}'\.''\.'(MTRADE|EXCRET)'\.'NITF'\.'2030'", str(a.src))
         pat = re.compile(r"^'([A-Z0-9]{8})'\.''\.'(MTRADE|EXCRET)'\.'NITF'\.'2030'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
         KEEP.parent.mkdir(parents=True, exist_ok=True)
-        pd.DataFrame(rows, columns=["capri_region", "item", "kt_n"]).to_csv(KEEP, index=False)
+        write_source(pd.DataFrame(rows, columns=["capri_region", "item", "kt_n"]), KEEP, index=False)
         print(f"extracted {len(rows)} rows -> {KEEP.relative_to(ROOT)}")
-    src = _read_csv(KEEP)
+    src = read_source(KEEP)
     v = {(r.capri_region, r.item): float(r.kt_n) for r in src.itertuples()}
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
@@ -69,7 +70,7 @@ def main():
             out[r] = (sh, kg, "+".join(sorted(codes)))
     rows = [dict(region=r, export_share=out.get(r, (0.0, 0.0, ""))[0],
                  import_kg_n_per_ha=out.get(r, (0.0, 0.0, ""))[1],
-                 source="CAPRI 2030 reference endotech_all_ini MTRADE/EXCRET " + out.get(r, (0, 0, "none"))[2])
+                 source="CAPRI 2030 Green Deal baseline MTRADE/EXCRET " + out.get(r, (0, 0, "none"))[2])
             for r in regs]
     new = pd.DataFrame(rows)
     new.to_csv(DEST, index=False)

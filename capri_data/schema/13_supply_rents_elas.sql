@@ -1,7 +1,7 @@
 -- The supply models' land rents, own-price supply elasticities, fertiliser coefficients and the mineral N price.
 -- Long files: the unit of each numeric column is in value_units, the column's name as the item.
 
--- file: capri_data/2017/supply/land_rents_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/land_rents_2030.csv
 CREATE TABLE land_rents_2030 (
     region VARCHAR PRIMARY KEY REFERENCES regional_units (region),
     capri_source VARCHAR NOT NULL,                     -- the CAPRI region(s) the rents are from (free text)
@@ -35,7 +35,7 @@ CREATE TABLE supply_elasticities_regional (
     model_region VARCHAR NOT NULL REFERENCES regional_units (region),
     crop VARCHAR NOT NULL CHECK (crop IN ('BARL', 'CORN', 'DWHE', 'MAIF', 'OATS', 'OCER', 'OFAR', 'POTA', 'PULS', 'RAPE',
                                           'RYEM', 'SOYA', 'SUGB', 'SUNF', 'SWHE')),
-                                          -- model codes, except CAPRI's OFAR (read as the model's OFOD, loaders l. 339)
+                                          -- model codes (OFAR the model's own since S2, 7 November 2026)
     value DOUBLE CHECK (value > 0 AND value <= 8),     -- empty: PELA has none; <= 8: CAPRI's bound min(8, ...)
     PRIMARY KEY (model_region, crop)
 );

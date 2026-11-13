@@ -5,7 +5,7 @@
 
 feed_kt = sum over CAPRI's EU member states of p_dataMarket(MS, 'FEDM', cake, 'BAS') / 1000 (tonnes to 1000 t), cakes
 RAPC, SUNC, SOYC, from CAPRI's FAO_agg market data (fao_agg_17_datamarket.txt, the export the market builders read).
-The member states: those of CAPRI's EU trade blocks, shared/eu_market_blocks.csv (26, BL =
+The member states: those of CAPRI's EU trade blocks, codes/eu_market_blocks.csv (26, BL =
 Belgium and Luxembourg). Until 29 October 2026 the weights were read from capri_oilseed_products_baseline.json, a file
 without builder whose other contents no code read (removed).
 
@@ -21,7 +21,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from _model_regions import EU_MS  # noqa: E402  CAPRI's EU member states (shared/eu_market_blocks.csv)
+from _model_regions import EU_MS  # noqa: E402  CAPRI's EU member states (codes/eu_market_blocks.csv)
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
@@ -32,7 +32,7 @@ CAKES = ("RAPC", "SUNC", "SOYC")
 
 
 def eu_member_states() -> list[str]:
-    """CAPRI's EU member states: those of its EU trade blocks (shared/eu_market_blocks.csv)."""
+    """CAPRI's EU member states: those of its EU trade blocks (codes/eu_market_blocks.csv)."""
     return sorted(EU_MS)
 
 

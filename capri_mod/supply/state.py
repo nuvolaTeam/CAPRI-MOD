@@ -48,8 +48,6 @@ class RegionalParameters(_Slots):
         "genet_key",          # the genetics settings key genet_cz belongs to
         "genet_pending",      # the genetics options whose terms wait for the duals
         "genet_rows_memo",    # the genetics options' rows (a memo)
-        "grass_cz",           # the grass split's term
-        "grass_pending_col",  # the grass split's column waiting for the duals
         # fertilisation (S5): memos of the base and CAPRI's priors recalibrated at the first solve
         "ef_lea_cache",       # the leaching emission factor (a memo)
         "ef_min_n2o_cache",   # mineral fertiliser's N2O per kg N, CO2 equivalent (a memo)
@@ -100,7 +98,6 @@ class RegionalEvalState(_Slots):
         "dairy_col",          # the low-yield dairy split's column
         "dairy_req_extra",    # the splits' extra requirement entries by animal
         "genet_cols",         # the genetics options' columns
-        "grass_col",          # the grass split's column
         # fertilisation (S5)
         "n_intensity",        # the mineral N intensity factors of the solve, by crop and the manure credit
         "nlp_mine_small",     # the fertiliser groups too small for the mineral-N row
@@ -125,6 +122,9 @@ class RegionalEvalState(_Slots):
         "ghg_applied",        # the emission tax added to the net revenues, by activity (its undo record)
         "ghg_nr_obj",         # the net revenues object the tax was added to (an identity check, never a copy)
         "hist_cols",          # the histosol fallowing's columns
+        "mix_cols",           # {crop: column} of the technology mix columns (S1)
+        "mix_dnr",            # {crop: net revenue T1 - T2 per ha} of this solve (S1)
+        "mix_n_min",          # {crop: mineral N input T1 - T2 per ha} of the N_balance row (S1)
         "manure_ni_nh3",      # NH3 of the manure inhibitors, by activity
         "manure_ni_relief",   # the manure N the inhibitors keep, by activity
         "nlp_nip",            # the manure inhibitors' parameters
@@ -138,7 +138,12 @@ class RegionalEvalState(_Slots):
         "surplus_row",        # the N-surplus row of this solve
         "yields_solve0",      # the yields at the start of the solve (restored at its end)
         "greendeal_inputs",   # the Green Deal's input reductions of this solve
+        "greendeal_crop_delta",   # {crop: (plant protection, other inputs)} cost changes of this solve, EUR/ha
         "organic_conv",       # the organic conversion shares by crop
+        "organic_group_target",  # CAPRI's organic target per fertiliser crop group (p_organicAreaTargetCrops)
+        "fert_partial_slack",    # the Green Deal group's slack on the fertiliser priors' partial derivative
+        "set_aside_rates",       # CAPRI's obligatory set-aside rates of the region's arable activities (SETA_)
+        "seta_obl_vec",          # the obligatory set-aside per unit of each activity, r / (1 - r) (SETA_; land.py)
         "yield_price_factor", # the yields' price factors
     )
 
@@ -184,6 +189,7 @@ class RegionalResults(_Slots):
         "nlp_rc",             # the activities' reduced costs
         "nlp_relaxed",        # the mineral-cap exemption applied
         "nlp_status",         # IPOPT's status
+        "solver_log",         # run.verbosity "solver": each IPOPT solve's log, size and status (runlog.supply_solves)
         "yani_dnet",          # the solution's response to the young-animal prices (K65)
         # livestock (S4): the split columns' levels in the last solution
         "last_cattle_z",
@@ -195,6 +201,7 @@ class RegionalResults(_Slots):
         # land (S6): the manure pools, read by the manure market (coupling/manure.py)
         "manure_supply0",     # the region's manure N supply at the start
         "manure_supply0_pk",  # idem for P and K
+        "manure_value",       # the manure nutrients' value at the solution (PSHW, CAPRI's ManureNPK_.M), by nutrient
         "pool_manure_vec",    # the manure N by column
         "pool_manure_vec_pk", # idem for P and K
         # abatement (S7)
@@ -204,8 +211,8 @@ class RegionalResults(_Slots):
         # core (S8)
         "land_solution",      # the land types' levels
         "last_aug",           # the augmented problem the land-market solve used (Q, c, A, b, y)
-        "last_grass_z",       # the grass split's level
         "last_hist_fallow",   # the histosol fallowing by class
+        "last_mix_z",         # {crop: z} of the technology mix columns, 1000 ha moved from T2 to T1 (S1)
         "last_manure_trade",  # the manure trade (N)
         "last_manure_trade_pk",  # idem for P and K
         "last_mineral_n",     # the mineral N bought
@@ -337,13 +344,10 @@ MOVED_REGIONAL: dict = {
     "_genet_key": "par.genet_key",
     "_genet_pending": "par.genet_pending",
     "_genet_rows_memo": "par.genet_rows_memo",
-    "_grass_cz": "par.grass_cz",
-    "_grass_pending_col": "par.grass_pending_col",
     "_cattle_cols": "ev.cattle_cols",
     "_dairy_col": "ev.dairy_col",
     "_dairy_req_extra": "ev.dairy_req_extra",
     "_genet_cols": "ev.genet_cols",
-    "_grass_col": "ev.grass_col",
     "_last_cattle_z": "res.last_cattle_z",
     "_last_dairy_z": "res.last_dairy_z",
     "_last_genet_z": "res.last_genet_z",
@@ -410,7 +414,6 @@ MOVED_REGIONAL: dict = {
     "_yield_price_factor": "ev.yield_price_factor",
     "_land_solution": "res.land_solution",
     "_last_aug": "res.last_aug",
-    "_last_grass_z": "res.last_grass_z",
     "_last_hist_fallow": "res.last_hist_fallow",
     "_last_manure_trade": "res.last_manure_trade",
     "_last_manure_trade_pk": "res.last_manure_trade_pk",

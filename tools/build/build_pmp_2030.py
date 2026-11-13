@@ -16,11 +16,11 @@ Symbols (supply/supply_model.gms QUADRA_ l. 5284, GRPLEVL_ l. 4892, LandMarket_ 
                                  (supply/define_pmp_terms.gms); kept for the record and for checks
 
 Writes (CAPRI region codes, CAPRI activity codes; nothing mapped or changed here):
-  capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv      region, activity, tech1, tech2, value
-  capri_data/sources/baseline_pmp/pmp_quad_pact_2030.csv       region, group1, group2, value
-  capri_data/sources/baseline_pmp/pmp_quad_landtypes_2030.csv  region, landtype1, landtype2, value
-  capri_data/sources/baseline_pmp/pmp_feed_inp_coeff_2030.csv region, activity, tech, feed, coef (CNST / SLOP), value
-  capri_data/sources/baseline_pmp/estnlp_vb.csv, estnlp_vd.csv region, ..., level (VB.L, VD.L)
+  capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.parquet      region, activity, tech1, tech2, value
+  capri_data/sources/intermediate/baseline_pmp/pmp_quad_pact_2030.parquet       region, group1, group2, value
+  capri_data/sources/intermediate/baseline_pmp/pmp_quad_landtypes_2030.parquet  region, landtype1, landtype2, value
+  capri_data/sources/intermediate/baseline_pmp/pmp_feed_inp_coeff_2030.parquet region, activity, tech, feed, coef (CNST / SLOP), value
+  capri_data/sources/intermediate/baseline_pmp/estnlp_vb.parquet, estnlp_vd.parquet region, ..., level (VB.L, VD.L)
 The linear terms p_pmpCnst and p_pmpCnstLandTypes were written to pmp_cnst_2030.csv and pmp_cnst_landtypes_2030.csv
 until 30 October 2026; nothing read them (the model derives its linear terms from its own calibration, docs/
 PMP_CAPRI_2030.md) and they were removed, the project lead's decision (KNOWN_ISSUES K103).
@@ -30,16 +30,19 @@ PMP_CAPRI_2030.md) and they were removed, the project lead's decision (KNOWN_ISS
 from __future__ import annotations
 import argparse, csv, re
 from pathlib import Path
+
+import pandas as pd
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_data" / "sources" / "baseline_pmp"
-SYMBOLS = {"p_pmpQuadTechn": ("pmp_quad_techn_2030.csv", ["region", "activity", "tech1", "tech2", "value"]),
-           "p_pmpQuadPact": ("pmp_quad_pact_2030.csv", ["region", "group1", "group2", "value"]),
-           "p_pmpQuadLandTypes": ("pmp_quad_landtypes_2030.csv", ["region", "landtype1", "landtype2", "value"]),
-           "p_pmpFeedInpCoeff": ("pmp_feed_inp_coeff_2030.csv", ["region", "activity", "tech", "feed", "coef", "value"])}
+OUT = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
+SYMBOLS = {"p_pmpQuadTechn": ("pmp_quad_techn_2030.parquet", ["region", "activity", "tech1", "tech2", "value"]),
+           "p_pmpQuadPact": ("pmp_quad_pact_2030.parquet", ["region", "group1", "group2", "value"]),
+           "p_pmpQuadLandTypes": ("pmp_quad_landtypes_2030.parquet", ["region", "landtype1", "landtype2", "value"]),
+           "p_pmpFeedInpCoeff": ("pmp_feed_inp_coeff_2030.parquet", ["region", "activity", "tech", "feed", "coef", "value"])}
 _REC = re.compile(r"^((?:'[^']*'\.)*'[^']*')(?:\.(L|M|LO|UP|SCALE))?\s+(\S+?),?\s*$")
 
 
@@ -90,31 +93,21 @@ def main() -> None:
     files = sorted(a.dir.glob("pmppar_21730*.txt"))
     assert files, f"no pmppar_21730*.txt in {a.dir}"
     for sym, (name, header) in SYMBOLS.items():
-        n = 0
-        with open(OUT / name, "w", newline="") as fh:
-            w = csv.writer(fh)
-            w.writerow(header)
-            for f in files:
-                for keys, v in records(f, sym):
-                    if len(keys) != len(header) - 1:
-                        continue
-                    w.writerow(keys + [repr(v) if isinstance(v, float) else v])
-                    n += 1
+        rows = [keys + [repr(v) if isinstance(v, float) else v] for f in files for keys, v in records(f, sym)
+                if len(keys) == len(header) - 1]
+        write_source(pd.DataFrame(rows, columns=header), OUT / name, index=False)
+        n = len(rows)
         print(f"{name}: {n} records from {len(files)} files")
-    for sym, name, header in (("VB", "estnlp_vb.csv", ["region", "group1", "group2", "level"]),
-                              ("VD", "estnlp_vd.csv", ["region", "activity", "level"])):
+    for sym, name, header in (("VB", "estnlp_vb.parquet", ["region", "group1", "group2", "level"]),
+                              ("VD", "estnlp_vd.parquet", ["region", "activity", "level"])):
         src = a.dir / f"estnlp_results_{sym}.txt"
         if not src.exists():
             print(f"{src.name}: not found")
             continue
-        n = 0
-        with open(OUT / name, "w", newline="") as fh:
-            w = csv.writer(fh)
-            w.writerow(header)
-            for keys, v in records(src, sym, field="L"):
-                if len(keys) == len(header) - 1:
-                    w.writerow(keys + [repr(v) if isinstance(v, float) else v])
-                    n += 1
+        rows = [keys + [repr(v) if isinstance(v, float) else v] for keys, v in records(src, sym, field="L")
+                if len(keys) == len(header) - 1]
+        write_source(pd.DataFrame(rows, columns=header), OUT / name, index=False)
+        n = len(rows)
         print(f"{name}: {n} records")
 
 

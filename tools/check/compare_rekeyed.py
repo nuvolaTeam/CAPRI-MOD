@@ -40,7 +40,7 @@ def main():
     ic = ic[0] if len(ic) == 1 else ic
     old = old_frame(a.path, a.old_ref, index_col=ic)
     new = pd.read_csv(ROOT / a.path, index_col=ic, float_precision="round_trip")
-    rmap = old_frame("capri_data/shared/region_capri_map.csv", a.old_ref, dtype=str).fillna("")
+    rmap = old_frame("capri_data/codes/region_capri_map.csv", a.old_ref, dtype=str).fillna("")
     one = {r.region: r.capri_region for r in rmap.itertuples() if r.relation == "one-to-one"}
     lvl = 0 if not isinstance(old.index, pd.MultiIndex) else 0
 

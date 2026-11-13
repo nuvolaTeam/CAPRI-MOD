@@ -43,20 +43,32 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
-from paths import EXPORTS, REFERENCE, SOURCES  # noqa: E402  (CAPRI's material: docs/EXTERNAL_SOURCES.md)
+from paths import BASELINE_REF, EXPORTS, REFERENCE, SOURCES  # noqa: E402  (CAPRI's material: docs/EXTERNAL_SOURCES.md)
 
 D17 = SOURCES / "capreg"                    # res_17<CC>.txt dumps of CAPREG's 2017 base (DATA2)
 GAMS = SOURCES / "gams"                     # CAPRI's GAMS code
-REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+REF = BASELINE_REF                          # CAPRI's 2030 Green Deal baseline (the model's 2030 base)
+INI = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"   # its calibration run (the N cascade checks)
 SETS = REFERENCE / "sets" / "simini_21730"  # CAPRI's sets (docs/EXTERNAL_SOURCES.md), not in git
-BP = "capri_data/sources/baseline_pmp"
+BP = "capri_data/sources/intermediate/baseline_pmp"
 S = "capri_data/2017/supply"
+S30 = "capri_data/baselines/capri_greendeal_ref/1730/supply"   # the 2030 inputs (DATA_LAYOUT step (b), 10 November 2026)
 
 #: (builder, arguments, external inputs that must exist). Order: REGIONAL_UNITS_BUILDERS.md section 3, then the rest.
 INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     # the CSV conversion of the sources that were not CSV (reads the originals from git history)
-    ("convert_sources_to_csv", [], []),
-    ("extract_gd2030_nbalance", [], [REF]),
+    ("convert_sources", [], []),
+    # CAPRI's dat GDX symbols (as Parquet in capri_sources/dat) and the dat files of the project lead's installation
+    # (capri_sources/dat_local), to CSV (added to this list 6 November 2026; written by hand into builders.json before)
+    ("extract_capri_dat", [], [SOURCES / "dat"]),
+    ("extract_capri_dat_local", [], [SOURCES / "dat_local"]),
+    ("extract_gd2030_nbalance", [], [INI]),
+    # before its readers (build_cover_crops, build_histosol, build_price_trajectory_2030, ...): a chain rebuild runs
+    # the list in order
+    ("extract_capri_marginal_terms", [str(REF), "ref"], [REF]),
+    # CAPRI's Green Deal 2030 step and its reference, as GDX from the project lead's installation (10 November 2026)
+    ("extract_capri_gd_pair", [], [EXPORTS / "res_2_1730greendeal_refdefaulta.gdx",
+                                   EXPORTS / "res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx"]),
     ("build_regional_units", [], []),
     ("build_code_lists", ["--sets", str(SETS)], [SETS]),
     ("build_unit_catalogue", ["--gms", str(GAMS / "CAPRIunits.gms")], [GAMS / "CAPRIunits.gms"]),
@@ -81,6 +93,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_land_rents", ["--year", "2017"], [D17]),
     ("build_land_rents", ["--year", "2030"], [REF]),
     ("build_manure_losses", [], [EXPORTS / "res_2_1730greendeal_refdefaulta.zip"]),
+    ("build_manure_pool_market", [], []),         # from its kept extract (--parquet DIR / --download: the raw)
     ("build_manure_trade_base", [], [REF]),
     ("build_nh3_factors", [], [EXPORTS / "res_2_1730greendeal_refdefaulta.zip"]),
     ("build_overfert_factors", [str(SOURCES / "fert/multfact_1730.txt")], [SOURCES / "fert/multfact_1730.txt"]),
@@ -94,6 +107,9 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
                                                          "LitRev_input_manStor.csv", "LitRevAmmoTech.csv",
                                                          "holdingsLSU.csv", "nvzShare_LU.csv")],
      [EXPORTS / "LitRev_inputs.csv"]),
+    # the non-EU farm structure (envind/prep_farm_size_data_for_miti.gms), from the herd and holding inputs above; read
+    # by the cost curves, the technologies and the AD option (added to this list 6 November 2026)
+    ("build_farm_size_noneu", [], [GAMS / "envind/prep_farm_size_data_for_miti.gms"]),
     ("build_ammonia_cost_curves", [], []),
     ("build_ammonia_technologies", [], []),
     ("build_n_cascade", [], []),
@@ -101,13 +117,16 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_ad_option", [], []),
     ("build_ammonia_tech_model", [], []),
     ("build_pmp_2030", [], [SOURCES / "pmp2030"]),
+    ("build_techn_2030", [], [REFERENCE / "simini" / "simini_21730" / "p_pmpCnst.csv.gz",
+                              REFERENCE / "simini" / "simini_21730" / "p_technFact.csv.gz"]),
+    ("build_techn_mix_2030", [], [REF]),
     ("build_pmp_recipe", ["--year", "2017"], [D17, REF]),
     ("build_pmp_recipe", ["--year", "2030"], [D17, REF]),
     ("build_pmp_capri_2030", [], [REF]),
-    ("build_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.csv", "--year", "2017",
+    ("build_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.parquet", "--year", "2017",
                               "--out", f"{S}/pmp_recipe_2017.csv"], [D17]),
-    ("build_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.csv", "--year", "2030",
-                              "--out", f"{S}/pmp_recipe_2030.csv"], [REF]),
+    ("build_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.parquet", "--year", "2030",
+                              "--out", f"{S30}/pmp_recipe_2030.csv"], [REF]),
     ("build_intensity_q_2030", [], []),
     ("build_trajectory_capri_ref", [], [REF, D17]),
     ("build_winter_cover_option", [], []),
@@ -124,17 +143,16 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_price_trajectory_2030", [], [D17]),
     ("build_dairy_intensity", [], [D17]),
     ("build_cattle_intensity", [], [D17]),
-    ("build_grass_intensity", [], [D17]),
     ("build_animal_pmp_capri_2030", [], [REF]),
     ("build_animal_pmp_capri_2030", ["--splits"], [REF]),
-    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.csv", "--year", "2017",
+    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.parquet", "--year", "2017",
                                      "--out", f"{S}/pmp_recipe_2017_animals.csv"], [D17]),
-    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.csv", "--year", "2017", "--splits",
+    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.parquet", "--year", "2017", "--splits",
                                      "--out", f"{S}/pmp_recipe_2017_animals_members.csv"], [D17]),
-    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.csv", "--year", "2030",
-                                     "--out", f"{S}/pmp_recipe_2030_animals.csv"], [REF]),
-    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.csv", "--year", "2030", "--splits",
-                                     "--out", f"{S}/pmp_recipe_2030_animals_members.csv"], [REF]),
+    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.parquet", "--year", "2030",
+                                     "--out", f"{S30}/pmp_recipe_2030_animals.csv"], [REF]),
+    ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2030_quad_techn.parquet", "--year", "2030", "--splits",
+                                     "--out", f"{S30}/pmp_recipe_2030_animals_members.csv"], [REF]),
     ("build_labour_setaside", [], [D17, REF]),
     ("build_livestock_units", [], [D17]),
     ("build_fodder_balance", [], []),
@@ -143,6 +161,8 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_livestock_products", [], [D17]),
     ("build_eu_producer_prices", [], []),
     ("build_digestibility_table", [str(GAMS)], [GAMS / "envind" / "def_digestibility.gms"]),
+    ("build_fert_partial_slack", [str(GAMS)], [GAMS / "supply" / "set_fert_priors.gms"]),
+    ("build_set_aside_scenario", [str(GAMS)], [GAMS / "scen" / "set_aside" / "set_aside_10.gms", GAMS / "sets.gms"]),
     ("build_supplement_effects", [], [SOURCES / "capreg"]),
     ("build_genetics_effects", [], [D17]),
     # not region-keyed, or member-state / market / CAPRI-coded
@@ -191,6 +211,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_captrd_trajectory", ["--series", str(REFERENCE / "captrd_results/1770/series.csv.gz")],
      [REFERENCE / "captrd_results/1770/series.csv.gz"]),
     ("build_captrd_dat", [], [SOURCES / "dat/baseline/ageline/ageline.parquet"]),
+    ("build_captrd_estimation_params", [], []),   # from its kept extract (--parquet DIR / --download: the raw)
     ("build_feed_demand_nonEU", [], [EXPORTS / "elas_2_1730defaulta.csv", EXPORTS / "data_market_1730defaulta.csv"]),
     ("build_fert_dist_priors", [], []),
     ("build_fert_options_jul15", [], []),
@@ -213,6 +234,12 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
                                           EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"]),
     ("build_processing_seeds", [], []),
     ("build_processing_yields", [], [EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"]),
+    # CAPRI's marketed over gross production at the 2030 calibration point (S7, grofNEprod), from sim_ini_21730's DATA
+    ("build_market_prod_grof_2030", [], [REFERENCE / "simini" / "simini_21730" / "DATA.csv.gz"]),
+    # CAPRI's land-use-change estimation of the market outside the EU (luc_market), from sim_ini_21730
+    ("build_luc_market", [], [REFERENCE / "simini" / "simini_21730" / "p_lucPriorMrk.csv.gz",
+                              REFERENCE / "simini" / "simini_21730" / "p_shFstInSecMrk.csv.gz",
+                              REFERENCE / "simini" / "simini_21730" / "DATA.csv.gz"]),
     ("build_sugar_processing", [], []),
     ("build_supply_elas_nonEU", [], []),
     ("build_use_components", [], []),
@@ -222,16 +249,18 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
      + ["unzip:" + str(EXPORTS / "supply_elas_2_1720REMAINI_NGdefaulta.zip")], [EXPORTS / "supply_elas_2_1720DEdefaulta.txt"]),
     ("extract_capri_costsavings", [str(SOURCES / "costsavings/costsavings_ini_21730_jul15.csv"),
                                    str(SOURCES / "costsavings/costsavings_max_21730_jul15.csv")], [SOURCES / "costsavings"]),
-    ("extract_capri_marginal_terms", [str(REF), "ini"], [REF]),
     ("ingest_capmod_market", ["--dump", str(EXPORTS / "_symbols_base1717.txt")], [EXPORTS / "_symbols_base1717.txt"]),
 ]
 
 #: not audited: utilities and writers of capri_sources/reference/ (not committed) or of inputs held elsewhere
 NOT_AUDITED = {
     "gdx_dump_symbol": "utility (dumps one GDX symbol)",
+    "convert_capri_gdx": "converter of the published source set (writes outside capri_data; MODEL_CONTENT_PLAN 12b)",
+    "make_raw_manifest": "writes tools/pipeline/capri_raw_manifest.json from a staged upload (MODEL_CONTENT_PLAN 12b)",
     "build_capreg_tseries_reference": "writes capri_sources/reference/ (not committed)",
     "build_capri_sets_reference": "writes capri_sources/reference/ (not committed)",
     "build_captrd_results_reference": "writes capri_sources/reference/ (not committed)",
+    "build_datam_mirror_2040_reference": "writes capri_sources/reference/ (not committed)",
     "build_eu_outlook_2030": "input (DG AGRI outlook PDF) not held in the workspace",
     "build_n_cascade_validation": "a check, writes a validation table",
     "build_patched_inputs": "superseded one-off (see REGIONAL_UNITS_BUILDERS.md 4.4)",

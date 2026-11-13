@@ -87,9 +87,15 @@ def main():
                     help="a TOML settings file (capri_mod/settings/defaults.toml's keys); repeatable, later files win")
     ap.add_argument("--set", action="append", default=[],
                     help="one setting, e.g. --set market.biofuel_markets=false (after the files and the flags)")
+    ap.add_argument("--label", default="",
+                    help="your name for the run, appended to its result name (res_2_1730<scenario>[_<n>u]_<label>) "
+                         "and shown in the store's catalogue (results/RUNS.csv)")
+    ap.add_argument("--series", default="",
+                    help="a series the run belongs to (e.g. a sensitivity or a review round), shown in RUNS.csv")
     ap.add_argument("--base-prices", action="store_true",
                     help="keep 2017 prices in the 2030 baseline (default: CAPRI's 2030 prices in 2017 money)")
     a = ap.parse_args()
+    Path(a.out).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)   # e.g. runs/ in the repository
     warnings.filterwarnings("ignore")
     # a regional solve whose last IPOPT point is kept (non-optimal, as CAPRI) is always shown
     warnings.filterwarnings("always", message=".*IPOPT's last point kept")
@@ -125,22 +131,31 @@ def main():
             ov[k.strip()] = v.strip()
     run_settings = _S.load(a.settings, overrides=ov)
     _S.activate(run_settings)
-    # a timed line per stage and outer iteration (CAPRIModel._progress): wall clock and time since the start
+    # the run's log (capri_mod/runlog.py, setting run.verbosity): CAPRI's titles and run-log lines, the model's own
+    # timed lines at "detailed"; written also beside the output (<out>.log) with the step report as CSV
+    # (<out>_steps.csv, <out>_iterchg.csv), unless run.log_file / run.step_report name other places
+    from capri_mod import runlog as _RL
+    _stem = str(a.out).rsplit(".", 1)[0]
+    _rl = _RL.configure(file=str(run_settings.get("run.log_file") or "") or _stem + ".log",
+                        step_report=str(run_settings.get("run.step_report") or "") or _stem, t0=_T_START)
+    _rl.log(f"{_RL.PROGRAM} run started: {' '.join(sys.argv[1:])}")
+    _rl.log("Data preparation")
     CAPRIModel.progress, CAPRIModel.progress_t0 = True, _T_START
     # a subset of regions (--regions) is solved on the whole data set: the EU's units outside it stay in the data and
     # supply the market through their member states' CAPRI market supply functions (KNOWN_ISSUES K83); until 31 October
     # 2026 the model was built on the subset's data alone, so the EU market had the whole EU's demand and the subset's
     # supply only
     _subset = [x for x in a.regions.split(",") if x] or None
-    m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False)
-    m._progress("model built (data loaded)")
+    m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=_rl.at("debug"))
+    _rl.log("Data preparation done")
     t0 = time.time()
     # CAPRI simulates from its calibrated 2030 reference (CAPMOD's reference run); the trend projection (CAPTRD) is
     # that calibration's input and stays available (--trajectory captrd)
     _tf = {"capri_ref": "capri_ref_2030", "captrd": "captrd_2030"}.get(a.trajectory, a.trajectory)
     traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "scenarios" / _tf))
     kw = {k: (v if k == "mineRedu" else int(v)) for k, v in (x.split("=") for x in a.targets.split(",") if x)}
-    _pdir = None if a.base_prices else str(ROOT / "capri_data" / "trajectories")
+    from capri_mod.data.inputs import trajectories_dir
+    _pdir = None if a.base_prices else str(trajectories_dir(ROOT / "capri_data", 2030))
     pmod = ProjectionModule(m, traj, capri_prices_dir=_pdir)
     from capri_mod.policy.endotech import JRC121368_ENDOTECH, effective
     _et = (dict(JRC121368_ENDOTECH) if a.endotech.lower() == "jrc121368"
@@ -198,9 +213,9 @@ def main():
             _over[field] = value
             setattr(_scen, field, value)
     _scen.endotech = effective(_scen.endotech)
-    m._progress(f"projection to 2030: baseline, then {_scen.name}")
+    _rl.title(f"Projection to 2030: baseline, then {_scen.name}")
     res = pmod.run(policy_scenario=_scen, years=[2030], **({"regions": _subset} if _subset else {}))
-    m._progress("runs done; writing the results")
+    _rl.title("Generate tables and write the results")
     b, s = res.baseline[2030], res.scenario[2030]
     _pmm = (getattr(pmod, "_last_projected_model", None) or m).market_module
     db, ds = b["market"].domestic_prices.loc["EU27"], s["market"].domestic_prices.loc["EU27"]
@@ -225,7 +240,7 @@ def main():
     # 0 vs 0 - while shares of eligible units do not: 38 and 33). Fertiliser options: share of
     # crop area (regions weighted by crop area). Ammonia options: share of animal units weighted
     # by excreted N (units x N per head); 'eligible' = the options' maximum shares, same weights.
-    from capri_mod.data.definitions import CROPS
+    from capri_mod.data.definitions import CROPS, CROPS_ON_LAND
     env = m.env_module
 
     def adoption(r):
@@ -280,6 +295,9 @@ def main():
            # EU biofuel block (crushing stage 4): feedstock use by commodity and feedstock, baseline and
            # scenario (MarketEquilibrium.biofuel)
            "biofuel": tuple(getattr(x["market"], "biofuel", None) for x in (b, s)),
+           # CAPRI's land-use change outside the EU (MarketEquilibrium.luc, luc_market): per non-EU region with the
+           # land block, final land per UNFCCC class and the 36 transitions (1000 ha), baseline, scenario
+           "luc_market": tuple(getattr(x["market"], "luc", None) for x in (b, s)),
            # CAPRI's inner fertiliser distribution (region x crop group, kg N/ha by source), baseline, scenario
            "fert_dist": tuple((x.get("fert_dist").to_dict("records") if x.get("fert_dist") is not None else None)
                               for x in (b, s)),
@@ -299,8 +317,10 @@ def main():
            "histosol": {"fallow": sum(sum(float(x_) for x_ in (getattr(v, "histosol_fallow", None) or {}).values())
                                       for v in s["supply"].values()),
                         "eligible": float(sum(
-                            (float(m.data["histosol"].at[reg, "share_crop"]) * sum(float(v.activities.get(c, 0.0)) for c in CROPS if c != "GRAS")
-                             + float(m.data["histosol"].at[reg, "share_grass"]) * float(v.activities.get("GRAS", 0.0)))
+                            (float(m.data["histosol"].at[reg, "share_crop"]) * sum(float(v.activities.get(c, 0.0)) for c in CROPS
+                                                                       if c not in CROPS_ON_LAND["GRAS"])
+                             + float(m.data["histosol"].at[reg, "share_grass"])
+                             * sum(float(v.activities.get(g, 0.0)) for g in CROPS_ON_LAND["GRAS"]))
                             for reg, v in s["supply"].items() if m.data.get("histosol") is not None and reg in m.data["histosol"].index))},
            # cattle genomics (breeding.gms): heads adopting and all heads of the animals concerned, scenario
            "endotech": dict(_scen.endotech),
@@ -520,17 +540,33 @@ def main():
                           if not k.startswith(".cache/")
                           and (not k.startswith("capri_data/scenarios/") or k.startswith(_own))},
                "software": out["meta"]["run_manifest"].get("software")}
-        _rid = time.strftime("%Y%m%dT%H%M%S") + "-" + str(_git.get("commit") or "nocommit")[:7]
-        if _over:                                   # a scenario changed on the command line: its run id says so
-            _rid += "-ov" + _IO.fingerprint({"overrides": _over})[:8]
+        # what the scenario adds to its reference's definition: the overrides on the command line and the scenario
+        # files read (the reference's fingerprint leaves them out); with the results they make the run id
+        _by = run_settings.get("run.base_year")
+        _nu = len(_subset) if _subset else None
+        _sparts = {"overrides": _over,
+                   "inputs": {k: v for k, v in (out["meta"]["run_manifest"].get("inputs") or {}).items()
+                              if k.startswith("capri_data/scenarios/")}}
         _rec = _IO.write_run(_IO.with_capri_codes(_IO.to_long(b, "base")), _IO.with_capri_codes(_IO.to_long(s, "scen")),
-                             scenario=_scen.name, reference=_ref, year=2030, run_id=_rid, fingerprint_parts=_fp,
-                             meta=out["meta"], root=_rroot, summary=_IO.summary_of(out),
-                             iterations=out["outer_history"])
-        _md = _rroot / "meta" / _scen.name / _rid
-        run_settings.save(str(_md / "settings.toml"))
-        with open(_md / "manifest.json", "w") as fh_:
-            json.dump(out["meta"]["run_manifest"], fh_, indent=1)
+                             scenario=_scen.name, reference=_ref, year=2030, fingerprint_parts=_fp,
+                             scenario_parts=_sparts, meta=out["meta"], root=_rroot, summary=_IO.summary_of(out),
+                             iterations=out["outer_history"],
+                             created=(out["meta"]["run_manifest"].get("created") or None),
+                             # CAPRI's result names (io_results.result_name), the label and series, the solve status
+                             names={"result_name": _IO.result_name(_IO.short_name(_scen.name), _by, 2030,
+                                                                   n_units=_nu, label=a.label),
+                                    "reference_result_name": _IO.result_name(_IO.short_name(_ref), _by, 2030,
+                                                                             n_units=_nu, label=a.label),
+                                    "label": a.label, "series": a.series, "status": _IO.status_of(out["meta"])},
+                             units=sorted(s["supply"]))
+        _rid = _rec["run_id"]
+        if _rec.get("duplicate"):
+            print(f"long table: {_scen.name} {_rid[:12]} already stored (the same results and definition)", flush=True)
+        _md = _IO.meta_dir(_rroot, _rid)
+        if not _rec.get("duplicate"):               # an identical run keeps the first one's metadata
+            run_settings.save(str(_md / "settings.toml"))
+            with open(_md / "manifest.json", "w") as fh_:
+                json.dump(out["meta"]["run_manifest"], fh_, indent=1)
         # the whole pickle (its metadata apart) rebuilt from the store must equal it exactly: the gate's comparison
         # (tools/check/compare_pickles_exact.py walk) at tolerance zero
         import importlib.util as _ilu
@@ -542,7 +578,8 @@ def main():
         for _k in out:
             if _k != "meta":
                 _cmp.walk(out[_k], _st.get(_k), f"$.{_k}", _d, 0.0, set())
-        print(f"long table: {_rroot / 'long'} | {_scen.name} {_rid}: {_rec['rows']} rows; reference {_ref} "
+        print(f"long table: {_rroot / 'long'} | {_rec.get('result_name') or _scen.name} ({_scen.name}) {_rid}: "
+              f"{_rec['rows']} rows, status {_rec.get('status') or '-'}; reference {_ref} "
               f"{_rec['reference_run_id']}" + (" (reused)" if _rec["reference_reused"] else "")
               + (" | the pickle rebuilt from the store: identical" if not _d
                  else f" | {len(_d)} DIFFERENCES between the pickle and the store"), flush=True)
@@ -550,13 +587,15 @@ def main():
             print("\n".join(map(str, _d[:20])), flush=True)
             sys.exit(1)
     _no = out["meta"]["nlp_nonoptimal"]
-    print(f"saved {a.out} | converged {out['meta']['conv']} in {out['meta']['it']} iterations, {out['meta']['seconds']} s"
-          f" | non-optimal regional solves kept: baseline {len(_no['baseline'])}, scenario {len(_no['scenario'])}"
-          + (f" ({', '.join(_no['baseline'] + _no['scenario'])})" if _no['baseline'] or _no['scenario'] else "")
-          + f" | PMP {out['meta'].get('pmp_source')}"
-          + (f", mineral caps relaxed: {out['meta']['nlp_relaxed']}" if out['meta'].get('nlp_relaxed') else "")
-          + ("" if all(out["meta"]["market_converged"].values()) else
-             f" | MARKET NOT CONVERGED: {[k_ for k_, v_ in out['meta']['market_converged'].items() if not v_]}"))
+    _rl.log(f"{_RL.PROGRAM} went through all steps and is now finished")
+    _rl.always(f"saved {a.out} | converged {out['meta']['conv']} in {out['meta']['it']} iterations, "
+               f"{out['meta']['seconds']} s"
+               f" | non-optimal regional solves kept: baseline {len(_no['baseline'])}, scenario {len(_no['scenario'])}"
+               + (f" ({', '.join(_no['baseline'] + _no['scenario'])})" if _no['baseline'] or _no['scenario'] else "")
+               + f" | PMP {out['meta'].get('pmp_source')}"
+               + (f", mineral caps relaxed: {out['meta']['nlp_relaxed']}" if out['meta'].get('nlp_relaxed') else "")
+               + ("" if all(out["meta"]["market_converged"].values()) else
+                  f" | MARKET NOT CONVERGED: {[k_ for k_, v_ in out['meta']['market_converged'].items() if not v_]}"))
 
 
 if __name__ == "__main__":

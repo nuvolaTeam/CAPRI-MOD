@@ -189,7 +189,7 @@ files record how they map to this model's names.
 | Test suite | 252 tests (gate of 30 October 2026, batch 9: 250 passed, 1 skipped; test_denmark_with_the_coco_data, skipped at the earlier gates, corrected after the full run and rerun on its own) |
 | On by default, as in CAPRI | land market and land rules, endogenous feed rations, fodder equality, ammonia technologies |
 | Optional | manure market (`use_manure_market`) |
-| 2030 Farm-to-Fork run | about 36 minutes on 2 cores (r161), plus about an hour once per new baseline for the market supply Hessian (67 min for r161's); regions solved in parallel (`CAPRI_WORKERS`), same results |
+| 2030 Farm-to-Fork run | about 36 minutes on 2 cores (r161), plus about an hour once per new baseline for the market supply Hessian (67 min for r161's); regions solved in parallel (setting `run.n_workers`), same results |
 | Solvers | IPOPT via CasADi (supply), Clarabel (manure pools), Newton (markets), HiGHS (LP checks) |
 
 ### Where things stand (29 October 2026)
@@ -348,7 +348,7 @@ solver, and every intermediate quantity inspectable.
 
 ## 3. Installation & quick start
 
-Install the dependencies (Python 3.10 or later) and run the test suite from the command line:
+Install the dependencies (Python 3.11 or later: the settings are read with tomllib; the code parses under 3.11, the tests are run on 3.13) and run the test suite from the command line:
 
 ```shell
 pip install -r requirements.txt        # the model, tests, data pipeline and reference tools
@@ -383,15 +383,27 @@ docker run --rm -v "$PWD/runs:/runs" capri-mod \
 
 **Parameters.** Every constant the model's economics and accounting rest on - CAPRI's parameters, IPCC factors as
 CAPRI uses them, JRC121368's assumptions and the few model settings that are not CAPRI data - is a row of
-`capri_data/shared/model_parameters.csv` (value, unit, kind, source, module), read through `capri_mod/params.py`.
+`capri_data/codes/model_parameters.csv` (value, unit, kind, source, module), read through `capri_mod/params.py`.
 Change a value there for a sensitivity run; scenario settings stay in the scenario definitions, numerical
 tolerances in the code. A test keeps file and code in step.
 
 Runs repeat exactly only with a fixed string-hash seed (the model iterates sets of names in a few places): the
-runners and the container set `PYTHONHASHSEED=0`; when calling `CAPRIModel` from your own script, start Python with
-`PYTHONHASHSEED=0` too (otherwise two runs of one scenario can differ by ~0.2%, more in a few degenerate regions).
-The number of worker processes for the regional solves does not change results (`CAPRI_WORKERS=1` solves them in
-one process).
+runners (`tools/run/`) restart Python with it themselves, so there is nothing to export; a script of your own that
+calls `CAPRIModel` should do the same (the first lines of `tools/run/run_f2f_2030.py`), otherwise two runs of one
+scenario can differ by ~0.2%, more in a few degenerate regions. Everything else is a setting, none is read from the
+environment: the number of worker processes for the regional solves (`--set run.n_workers=2`; 0 = every core, 1 =
+one process) does not change results. A run from the repository's folder, its output under `runs/` (created if
+missing):
+
+```shell
+python tools/run/run_f2f_2030.py runs/f2f.pkl --set run.n_workers=2
+```
+
+It prints CAPRI's run log (`run.verbosity`: quiet, capri, detailed, solver, debug) and writes it beside the output
+(`runs/f2f.log`), with the step report per iteration as CSV (`runs/f2f_steps.csv`, `runs/f2f_iterchg.csv`). The
+`solver` level adds each solve as CAPRI's GUI shows GAMS's output: per regional supply model its size, IPOPT's
+iteration log and status; per market solve its iterations; per manure pool market its solve
+(`--set run.verbosity=solver`; the Gradio app's Run tab has the same choice).
 
 Then, in Python — validate the data layer and run a minimal base scenario:
 
@@ -838,8 +850,11 @@ delta = model.compare(base, scen)              # activity & price changes
 
 **The results table (since 3 November 2026).** `tools/run/run_f2f_2030.py` also writes each run to `results/` (setting
 `run.results_dir`): a Delta Lake table in CAPRI's DATAOUT layout (region, dim5, cols, rows, year, value; the model's
-codes and CAPRI's where checked, `capri_data/codes/results_items.csv`), partitioned by scenario and run, the
-reference stored once. Read it with `deltalake`, polars or DuckDB, or rebuild a run's pickle with
+codes and CAPRI's where checked, `capri_data/codes/results_items.csv`), the reference stored once. Each reference
+and scenario is stored under its run id, the SHA-256 of its results and its definition (since 7 November 2026:
+`capri_mod.io_results.run_id_of`, recomputed by `verify_run`); `scenario` and `run_id` are columns (the tables are not
+partitioned), the run's metadata, settings and manifest are in `results/meta/<run id>/`, and a unique prefix of an id
+(12 characters, as for git commits) names a run. Read it with `deltalake`, polars or DuckDB, or rebuild a run's pickle with
 `capri_mod.io_results.load_run("store:results:SCENARIO")`; the check tools take `store:ROOT:SCENARIO[:RUN_ID]` in place
 of a pickle.
 
@@ -847,6 +862,44 @@ of a pickle.
 from deltalake import DeltaTable
 t = DeltaTable("results/long").to_pandas(filters=[("scenario", "=", "farm_to_fork_jrc121368")])
 ```
+
+**Result names and the run catalogue (since 9 November 2026).** Each stored run is also named as CAPRI names its
+result files (`set_and_store_dataout.gms` l. 477, `res_<NTSLVL>_<BAS><SIM><scenario><ResId>.gdx`):
+`res_2_1730<short name>[_<n>u][_<label>]`, where the short name is the scenario folder's `short_name` (e.g.
+`f2f_jrc121368`, `greendeal2030`, `carbtax50`; else the scenario's name), `_<n>u` marks a run on a subset of n regions
+and `--label` adds your own name. `--series` groups runs (a sensitivity, a review round). `results/RUNS.csv` lists
+every run, newest first: result name, scenario, reference, label, series, status (`ok`, or why not: not converged,
+market not converged, regional solves non-optimal at the end, as CAPRI's p_INFES and its META), the run ids (12
+characters), commit. `results/meta/<run id>/run_record.csv` is the run's record in the manner of CAPRI's META: its
+provenance, NUM_RU and NUM_MS (regions solved and their countries), MinutesNeeded and every setting marked `changed` or
+`[default]`. Runs stored before that date are named afterwards from their meta.json (the catalogue's note says so).
+The name is not unique (CAPRI overwrites a result file of the same name); the run id is.
+
+```bash
+python tools/check/list_runs.py                      # the catalogue (--scenario, --series, --label filter it)
+python tools/check/list_runs.py --run 7a797932       # one run's record
+python tools/check/list_runs.py --solves 7a797932    # its regional solves per iteration (status, non-optimal ones)
+```
+
+**Browsing the results (since 6 November 2026).** `python capri_gradio/results_browser.py [--store DIR ...]` opens a
+local, read-only web page over one or more stores (default `run.results_dir`; `pip install ".[gui]"` for gradio):
+the runs with their convergence, settings changed and code version; a run's scenario against its baseline and two runs
+against each other as pivot tables (one dimension down, one across, single stored rows, no sums) and bar charts, with a
+CSV download; the baseline against CAPRI's 2030 reference and the Farm-to-Fork indicators against JRC121368, computed
+by `tools/check/compare_baseline_capri.py` and `tools/check/compare_runs.py`; a Green Deal 2030 run against the
+project lead's CAPRI run of the same scenario (since 13 November 2026; `tools/check/compare_capri_gd.py`): EU27
+activity levels, producer prices, crop yields and N balance items as % changes beside CAPRI's, each activity and N item
+by member state, and an activity's change in every regional unit on two maps with one colour scale and as a scatter
+with its correlation.
+
+**The GUI (draft, since 7 November 2026).** `python capri_gradio/capri_gui.py [--llm none|openai|anthropic]
+[--llm-model NAME] [--llm-base-url URL] [--llm-key-env VAR]` opens a local page in the spirit of CAPRI's GUI: an
+assistant that writes scenarios through checked tool calls (the language model is not chosen yet: any server with the
+OpenAI chat-completions API, the Anthropic API, or none), the same scenario as a form (a reference, then the Green Deal
+group's switches or policy shocks), a Run tab (full EU or the 20 mini-EU units, one run at a time) and the results
+browser. Every scenario is checked against `capri_mod/scenarios/definition.py` and read back as a run reads it; it is
+written to the user's folder (`run.scenarios_dir`, else `user_scenarios/`), never to `capri_data/scenarios`. The model
+cannot start a run: the user does.
 
 ### 7.5 Key `run()` parameters
 
@@ -872,7 +925,7 @@ Arguments left at None take the run's settings (§7.6).
 Every run setting (switches, tolerances, iteration limits, algorithm choices) is in one file,
 `capri_mod/settings/defaults.toml`, in the sections run, outer_loop, supply, fertiliser, market, young_animals,
 environment, projection, endotech, diagnostics, captrd and pipeline. Each is commented with what it does and CAPRI's
-equivalent. Sourced economic parameters are not settings: they are in `capri_data/shared/model_parameters.csv`.
+equivalent. Sourced economic parameters are not settings: they are in `capri_data/codes/model_parameters.csv`.
 
 ```python
 from capri_mod import settings
@@ -1313,8 +1366,8 @@ and review), and statistical or machine-learning methods that learn from its inp
 ### 9.2 Reproducibility
 
 - **Same inputs, settings and code, same results.** Inputs are CSV files with their provenance (§12); downloads are
-  kept as versions; every run writes its effective settings next to its result; runs use a fixed hash seed
-  (`PYTHONHASHSEED=0`, §3), without which two runs of one scenario can differ by about 0.2%.
+  kept as versions; every run writes its effective settings next to its result; the runners fix Python's hash seed
+  themselves (§3), without which two runs of one scenario can differ by about 0.2%.
 - **Changes are checked against reference runs.** Every refactor must reproduce them, and the regression anchors and
   tests fail when a result moves (§12).
 - **Caches are keyed by what they depend on.** The market supply Hessian, the slowest step, is cached under a key of
@@ -1449,7 +1502,7 @@ step rather than being entangled in a single 2030 number.
 
 Three trajectories ship, each a scenario folder under `capri_data/scenarios/` (`settings.toml` with the name, source,
 vintage, years and provenance; `growth.csv` and `regional.csv` with the factors; `capri_mod/projection/scenario_io.py`;
-JSON files in `capri_data/trajectories/` until 31 October 2026): `capri_ref_2030` (default in
+JSON files in `capri_data/baselines/capri_greendeal_ref/1730/` until 31 October 2026): `capri_ref_2030` (default in
 `tools/run/run_f2f_2030.py`) — CAPRI star 3.0's own 2030 reference (CAPMOD's reference run over CAPRI's 2017 results:
 levels, yields and land types per region; `tools/build/build_trajectory_capri_ref.py`), the point CAPRI's own
 scenarios start from; `captrd_2030` — CAPRI's captrd trend results, the input of CAPRI's baseline calibration; and
@@ -1545,7 +1598,7 @@ with an Armington premium on the world price.
 
 Since 27 October 2026 the model's regions are CAPRI's regional units, the units CAPRI solves one supply model for
 (RU(SRNUTS2) $ MAP_RR, capmod/define_regional_sets.gms l. 230): 221 for EU27 + Norway (215 + 6), under CAPRI's
-8-character codes (DE110000, FR240000, BL400000, DK000000; capri_data/shared/regional_units.csv,
+8-character codes (DE110000, FR240000, BL400000, DK000000; capri_data/codes/regional_units.csv,
 tools/build/build_regional_units.py). Every CAPRI file is read without a translation, and every region carries its own
 CAPRI data. The units follow CAPRI's own NUTS vintages (France's 22 regions, Italy's numeric codes, Poland's 16, Ireland's
 two); Denmark, Estonia, Lithuania, Latvia, Slovenia, Cyprus, Malta and Croatia are one unit each, as in CAPRI. The UK,
@@ -1555,13 +1608,13 @@ Until then the model had 248 NUTS-2016 regions, 13 of them empty, mapped to CAPR
 NUTS splits made on proxies (cattle shares, Ireland's 2016 boundary shares, Norway's pooled regions); the rebuild and
 every difference it made are in docs/design/REGIONAL_UNITS_REBUILD_LOG.md. Results on current NUTS regions are a
 reporting step, not regional detail of their own: `capri_mod/nuts_reporting.to_nuts2024` maps the units to NUTS 2024
-(capri_data/shared/capri_units_nuts2024.csv: the units through CAPRI's NUTS 2016 groups and Eurostat's 2016 -> 2021 ->
+(capri_data/codes/capri_units_nuts2024.csv: the units through CAPRI's NUTS 2016 groups and Eurostat's 2016 -> 2021 ->
 2024 changes; extensive values split by Eurostat UAA within each connected group, intensive values weighted by a
 basis).
 
 ### 10.5 Inputs traced to a CAPRI source
 
-The parameters of `capri_data/shared/model_parameters.csv` each carry their source (CAPRI, IPCC, JRC121368, literature
+The parameters of `capri_data/codes/model_parameters.csv` each carry their source (CAPRI, IPCC, JRC121368, literature
 or legal), the feed requirements are CAPRI's (DATA2) and the world prices CAPRI's market data (p_dataMarket, World,
 PMRK). Every builder-written input is reproduced by its builder from CAPRI's files (the data pipeline's rebuild from
 blank, 29 October 2026); the last inputs without a builder, the ten livestock rows of `producer_prices.csv` of

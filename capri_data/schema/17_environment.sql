@@ -2,7 +2,7 @@
 -- the regional environmental data. Generated structure (types, NOT NULL, keys) from the files on 29 October 2026;
 -- units open where no builder or CAPRI file states them (value_units).
 
--- file: capri_data/2017/environment/capri_crop_n_coefs_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_n_coefs_2030.csv
 CREATE TABLE env_capri_crop_n_coefs_2030 (
     capri_region VARCHAR NOT NULL,
     crop VARCHAR NOT NULL,
@@ -21,7 +21,7 @@ INSERT INTO value_units VALUES
   ('env_capri_crop_n_coefs_2030', 'ncrd', NULL, 'open', 'capri_crop_n_coefs_2030.ncrd: unit to be established'),
   ('env_capri_crop_n_coefs_2030', 'biofix_t', NULL, 'open', 'capri_crop_n_coefs_2030.biofix_t: unit to be established');
 
--- file: capri_data/2017/environment/capri_gnb_components_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/capri_gnb_components_2030.csv
 CREATE TABLE env_capri_gnb_components_2030 (
     capri_region VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -55,7 +55,7 @@ INSERT INTO value_units VALUES
   ('env_crop_co2_coef', 'co2lim_kg_ha', NULL, 'open', 'crop_co2_coef.co2lim_kg_ha: unit to be established'),
   ('env_crop_co2_coef', 'urea_share', NULL, 'open', 'crop_co2_coef.urea_share: unit to be established');
 
--- file: capri_data/2017/environment/crop_nut_need_mult_fact_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/crop_nut_need_mult_fact_2030.csv
 CREATE TABLE env_crop_nut_need_mult_fact_2030 (
     region VARCHAR NOT NULL,
     capri_region VARCHAR NOT NULL,
@@ -82,7 +82,7 @@ INSERT INTO value_units VALUES
   ('env_enteric_feed_factors', 'ym', NULL, 'open', 'enteric_feed_factors.ym: unit to be established'),
   ('env_enteric_feed_factors', 'grazing_share', NULL, 'open', 'enteric_feed_factors.grazing_share: unit to be established');
 
--- file: capri_data/2017/environment/fert_dist_crop_groups_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/fert_dist_crop_groups_2030.csv
 CREATE TABLE env_fert_dist_crop_groups_2030 (
     capri_region VARCHAR NOT NULL,
     model_crop VARCHAR NOT NULL,
@@ -94,7 +94,7 @@ COMMENT ON TABLE env_fert_dist_crop_groups_2030 IS 'CAPRI''s priors for the inne
 INSERT INTO value_units VALUES
   ('env_fert_dist_crop_groups_2030', 'share', NULL, 'open', 'fert_dist_crop_groups_2030.share: unit to be established');
 
--- file: capri_data/2017/environment/fert_dist_priors_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/fert_dist_priors_2030.csv
 CREATE TABLE env_fert_dist_priors_2030 (
     capri_region VARCHAR NOT NULL,
     "level" VARCHAR NOT NULL,
@@ -120,7 +120,7 @@ INSERT INTO value_units VALUES
   ('env_fert_dist_priors_2030', 'mine_eff', NULL, 'open', 'fert_dist_priors_2030.mine_eff: unit to be established'),
   ('env_fert_dist_priors_2030', 'excr_avail', NULL, 'open', 'fert_dist_priors_2030.excr_avail: unit to be established');
 
--- file: capri_data/2017/environment/fert_dist_priors_npk_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/fert_dist_priors_npk_2030.csv
 CREATE TABLE env_fert_dist_priors_npk_2030 (
     capri_region VARCHAR NOT NULL,
     "level" VARCHAR NOT NULL,
@@ -143,7 +143,7 @@ INSERT INTO value_units VALUES
   ('env_fert_dist_priors_npk_2030', 'cres_kg_ha', NULL, 'open', 'fert_dist_priors_npk_2030.cres_kg_ha: unit to be established'),
   ('env_fert_dist_priors_npk_2030', 'accuracy', NULL, 'open', 'fert_dist_priors_npk_2030.accuracy: unit to be established');
 
--- file: capri_data/2017/environment/fertiliser_substitution_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/fertiliser_substitution_2030.csv
 CREATE TABLE env_fertiliser_substitution_2030 (
     region VARCHAR NOT NULL,
     manure_availability DOUBLE NOT NULL,
@@ -227,7 +227,7 @@ INSERT INTO value_units VALUES
   ('env_irrigation_2017', 'irr2_share', NULL, 'open', 'irrigation_2017.irr2_share: unit to be established'),
   ('env_irrigation_2017', 'irr2_year', NULL, 'open', 'irrigation_2017.irr2_year: unit to be established');
 
--- file: capri_data/2017/environment/luc_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/luc_2030.csv
 CREATE TABLE env_luc_2030 (
     capri_region VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -237,7 +237,7 @@ COMMENT ON TABLE env_luc_2030 IS 'CAPRI''s land-use change (LUC) transition mode
 INSERT INTO value_units VALUES
   ('env_luc_2030', 'value', NULL, 'open', 'luc_2030.value: unit to be established');
 
--- file: capri_data/2017/environment/manure_housing_losses_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/manure_housing_losses_2030.csv
 CREATE TABLE env_manure_housing_losses_2030 (
     region VARCHAR NOT NULL,
     animal VARCHAR NOT NULL,
@@ -281,7 +281,7 @@ INSERT INTO value_units VALUES
   ('env_manure_n2o_tech', 'r_hou', NULL, 'open', 'manure_n2o_tech.r_hou: unit to be established'),
   ('env_manure_n2o_tech', 'r_app', NULL, 'open', 'manure_n2o_tech.r_app: unit to be established');
 
--- file: capri_data/2017/environment/manure_trade_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/manure_trade_2030.csv
 CREATE TABLE env_manure_trade_2030 (
     region VARCHAR NOT NULL,
     export_share DOUBLE NOT NULL,
@@ -294,6 +294,31 @@ INSERT INTO value_units VALUES
   ('env_manure_trade_2030', 'export_share', NULL, 'open', 'manure_trade_2030.export_share: unit to be established'),
   ('env_manure_trade_2030', 'import_kg_n_per_ha', NULL, 'open', 'manure_trade_2030.import_kg_n_per_ha: unit to be established');
 
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv
+CREATE TABLE env_manure_pool_market_2030 (
+    region VARCHAR NOT NULL,
+    fout VARCHAR NOT NULL,
+    supply_t DOUBLE NOT NULL,
+    dual_cal_eur_t DOUBLE NOT NULL,
+    slope_capri DOUBLE NOT NULL,
+    es_slope DOUBLE NOT NULL,
+    dual_cal DOUBLE NOT NULL,
+    base_net_export_kt DOUBLE NOT NULL,
+    buffer DOUBLE NOT NULL,
+    buffer_greendeal DOUBLE NOT NULL,
+    PRIMARY KEY (region, fout)
+);
+COMMENT ON TABLE env_manure_pool_market_2030 IS 'CAPRI''s manure pool market terms per CAPRI region and manure nutrient (MANN, MANP, MANK): the manure distributed to crops, the calibration dual, CAPRI''s excess-supply slope p_mPoolSupSlope and its value in the model''s units (manuremarket/declare_manure_market.gms l. 466-505; outer_loop.manure_pool_form "capri"). (tools/build/build_manure_pool_market.py)';
+INSERT INTO value_units VALUES
+  ('env_manure_pool_market_2030', 'supply_t', 'U_Ton', 'capri', 'sum of p_priFertDist postMode EXCR over the fertiliser groups (v_fertDist, t)'),
+  ('env_manure_pool_market_2030', 'dual_cal_eur_t', 'U_EuPerTon', 'capri', 'p_dualValueManureCal (CAPRI''s 2030 money): ManureNPK_.M, the supply model objective in 1000 EUR over the balance in 1000 t'),
+  ('env_manure_pool_market_2030', 'slope_capri', 'U_1000tPerEuPerTon', 'capri', 'p_mPoolSupSlope = 0.01 supply_t / dual_cal_eur_t, used with the excess supply in kt'),
+  ('env_manure_pool_market_2030', 'es_slope', 'U_TonPer1000EuPerTon', 'builder', 'slope_capri x 1000 x 1000 x deflator(2030)'),
+  ('env_manure_pool_market_2030', 'dual_cal', 'U_1000EuPerTon', 'builder', 'dual_cal_eur_t / 1000 / deflator(2030)'),
+  ('env_manure_pool_market_2030', 'base_net_export_kt', 'U_1000t', 'capri', 'p_priorMTrade(r, "postMode", FOUT, 2030): net manure export at the calibration point, 1000 t of nutrient (v_manureExports, v_manureImports: 1000 t)'),
+  ('env_manure_pool_market_2030', 'buffer', 'U_1000EuPerTon', 'builder', 'p_mTradeAutarkyBuffer 10 EUR per t / 1000 / deflator(2030)'),
+  ('env_manure_pool_market_2030', 'buffer_greendeal', 'U_1000EuPerTon', 'builder', 'p_mTradeAutarkyBuffer in the Green Deal group (50,000 EUR per t for the isolated pools) / 1000 / deflator(2030)');
+
 -- file: capri_data/2017/environment/n_deposition_regional.csv
 CREATE TABLE env_n_deposition_regional (
     region VARCHAR NOT NULL,
@@ -305,7 +330,7 @@ COMMENT ON TABLE env_n_deposition_regional IS 'Atmospheric N deposition and the 
 INSERT INTO value_units VALUES
   ('env_n_deposition_regional', 'deposition_kg_n_per_ha', NULL, 'open', 'n_deposition_regional.deposition_kg_n_per_ha: unit to be established');
 
--- file: capri_data/2017/environment/npk_crop_coefs_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/npk_crop_coefs_2030.csv
 CREATE TABLE env_npk_crop_coefs_2030 (
     capri_region VARCHAR NOT NULL,
     model_crop VARCHAR NOT NULL,
@@ -329,7 +354,7 @@ INSERT INTO value_units VALUES
   ('env_npk_crop_coefs_2030', 'main_share', NULL, 'open', 'npk_crop_coefs_2030.main_share: unit to be established'),
   ('env_npk_crop_coefs_2030', 'straw_share', NULL, 'open', 'npk_crop_coefs_2030.straw_share: unit to be established');
 
--- file: capri_data/2017/environment/npk_region_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/npk_region_2030.csv
 CREATE TABLE env_npk_region_2030 (
     capri_region VARCHAR NOT NULL,
     "level" VARCHAR NOT NULL,
@@ -361,7 +386,7 @@ INSERT INTO value_units VALUES
   ('env_npk_region_2030', 'land_kha', NULL, 'open', 'npk_region_2030.land_kha: unit to be established'),
   ('env_npk_region_2030', 'pool_scale', NULL, 'open', 'npk_region_2030.pool_scale: unit to be established');
 
--- file: capri_data/2017/environment/manure_npk_applied_share_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/manure_npk_applied_share_2030.csv
 CREATE TABLE env_manure_npk_applied_share_2030 (
     capri_region VARCHAR NOT NULL,
     nutrient VARCHAR NOT NULL CHECK (nutrient IN ('N', 'P', 'K')),
@@ -376,7 +401,7 @@ INSERT INTO value_units VALUES
   ('env_manure_npk_applied_share_2030', 'mtrade_kt', 'U_1000t', 'capri', 'CAPRI DATA(R, "MTRADE", NITF/PHOF/POTF), 2030 reference: 1000 t of N, P2O5 or K2O'),
   ('env_manure_npk_applied_share_2030', 'applied_share', 'U_ratio', 'builder', '1 - mtrade_kt / excret_kt, at least 0 (t applied per t excreted)');
 
--- file: capri_data/2017/environment/p_balance_crop_coefs_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/p_balance_crop_coefs_2030.csv
 CREATE TABLE env_p_balance_crop_coefs_2030 (
     capri_region VARCHAR NOT NULL,
     model_crop VARCHAR NOT NULL,

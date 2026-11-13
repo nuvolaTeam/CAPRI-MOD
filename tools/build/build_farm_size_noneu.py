@@ -24,7 +24,7 @@ North Macedonia 70,000, Turkey 2,560,000 split equally over its 12 units), p_LUu
 p_sizeControl and p_farm_multiplier are written in CAPRI's code; they are read from it here, not copied.
 
 The animals: CAPRI uses data(region, activity, "LEVL"/"DAYS", "y"), the simulation year's base: here CAPRI's Green
-Deal 2030 ini levels (capri_marginal_terms_ini_2030) and 2030 days (capri_mann_days_2030), the run the model
+Deal 2030 ini levels (capri_marginal_terms_ref_2030) and 2030 days (capri_mann_days_2030), the run the model
 calibrates on. Solved with IPOPT (CasADi), from CAPRI's starting point (l. 464-511; CAPRI keeps a variable's level from
 the previous region of the loop where it sets none: here the holdings of dairy cattle start at heads / heads per
 holding as the other groups') and from a second one; the lowest objective is kept (estimate_best, REGISTERED).
@@ -54,13 +54,16 @@ sys.path.insert(0, str(ROOT / "tools" / "lib"))
 import gams_text as G  # noqa: E402
 import _model_regions as mr  # noqa: E402
 from paths import SOURCES  # noqa: E402
+from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 SRC = ROOT / "capri_data" / "sources"
 AMM = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
-LEVELS = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz"
+LEVELS = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv.xz"
 
 
 def _rd(path):
+    if str(path).endswith(".parquet"):
+        return source_records(path)            # a table of capri_data/sources
     with open(path, newline="") as fh:
         return list(csv.DictReader(fh))
 
@@ -121,10 +124,10 @@ def targets(c: dict):
     """CAPRI's l. 200-266 for the fallback regions: {name: {cell: value}} shared by every loop region (none has data
     of its own)."""
     heads = defaultdict(dict)
-    for r in _rd(SRC / "capri_dat" / "ghgtech" / "AD_basedata_p_Heads.csv"):
+    for r in _rd(SRC / "raw" / "capri" / "dat" / "scen" / "ghgtech" / "AD_basedata_p_Heads.parquet"):
         heads[r["dim1"]][(r["dim2"].upper(), r["dim3"])] = float(r["level"])
     sf = defaultdict(dict)
-    for r in _rd(SRC / "capri_dat" / "ghgtech" / "AD_basedata_p_sf.csv"):
+    for r in _rd(SRC / "raw" / "capri" / "dat" / "scen" / "ghgtech" / "AD_basedata_p_sf.parquet"):
         sf[r["dim1"]][r["dim2"]] = float(r["level"])
     hold = defaultdict(lambda: defaultdict(float))
     for r in _rd(AMM / "p_holdLSU.csv"):
@@ -280,11 +283,11 @@ def main():
     a = ap.parse_args()
     c = capri_constants(a.gams_dir)
     tg, A, F = targets(c)
-    lu = {r["act"].upper(): float(r["value"]) for r in _rd(SRC / "capri_dat" / "policy" / "livestock_units_p_LUUnits.csv")}
+    lu = {r["act"].upper(): float(r["value"]) for r in _rd(SRC / "raw" / "capri" / "dat" / "policy" / "livestock_units_p_LUUnits.parquet")}
     t = pd.read_csv(LEVELS, dtype=str)
     t = t[t["item"] == "LEVL"]
     lev = {(r.region, r.activity): float(r.value) for r in t.itertuples()}
-    days = {(r["region"], r["activity"]): float(r["value"]) for r in _rd(AMM / "capri_mann_days_2030.csv")
+    days = {(r["region"], r["activity"]): float(r["value"]) for r in _rd(AMM.parents[2] / "baselines" / "capri_greendeal_ref" / "1730" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
             if r["item"] == "DAYS"}
     regions = loop_regions(c)
     n_tur = sum(1 for r in regions if mr.national_code(r) == "TUR")

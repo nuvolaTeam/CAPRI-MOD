@@ -10,7 +10,7 @@ the data are the projected ones (ProjectionModule.project_data scales data["yiel
 1 at the 2030 baseline and CAPRI's 2030 coefficients enter once (checked 4 November 2026 on gate 16's baseline:
 removal per region / CAPRI's EXPPRD median 0.999, EU 0.999; BIOFIX EU 0.987).
 
-Output: capri_data/2017/environment/capri_crop_n_coefs_2030.csv
+Output: capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_n_coefs_2030.csv
   capri_region, crop, levl, yild, nitf, ncrd, biofix_t
 Usage: python tools/build/build_capri_crop_n_coefs.py <zip>
 """
@@ -22,7 +22,7 @@ from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_data" / "2017" / "environment" / "capri_crop_n_coefs_2030.csv"
+OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "capri_crop_n_coefs_2030.csv"
 P1 = re.compile(r"'([^']+)'\.''\.'([^']+)'\.'(LEVL|YILD|NITF|NCRD)'\.'2030'\s+([-0-9.eE+]+)")
 P2 = re.compile(r"'([^']+)'\.'nutNed_biofix'\.'([^']+)'\.'NITF'\.'2030'\s+([-0-9.eE+]+)")
 AGG = {"ARAB", "CERE", "PERM", "FODD", "SETF", "OILS", "OAR1", "AGGT", "UAAR", "GROF", "INTF", "NETF"}

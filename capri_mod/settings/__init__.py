@@ -3,7 +3,7 @@
 Every switch, tolerance, iteration limit and algorithm choice of a run lives in ``defaults.toml`` (next to this file),
 grouped by section (run, outer_loop, supply, fertiliser, market, young_animals, environment, projection, endotech,
 diagnostics), each key commented with what it does and CAPRI's equivalent; where capri-mod departs from CAPRI the
-comment says so (DEPARTURE). Sourced economic parameters stay in capri_data/shared/model_parameters.csv
+comment says so (DEPARTURE). Sourced economic parameters stay in capri_data/codes/model_parameters.csv
 (capri_mod.params), CAPRI's structure in mapping CSVs, scenarios in scenario definitions.
 
 Use:

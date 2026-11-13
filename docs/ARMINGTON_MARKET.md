@@ -22,7 +22,7 @@ Code: `capri_mod/market/bilateral.py` (`BilateralCommodity`: one product's trade
 - The EU is one market region by default. With `MarketModule.eu_blocks = True` (`run_f2f_2030.py --eu-blocks`) it is
   CAPRI's two trade blocks of `gams/aggregation/defaultA.agg`, EU_WEST (EU-14, with Belgium and Luxembourg as CAPRI's
   BL) and EU_EAST (EU-13), each with its own market prices and bilateral trade between them
-  (`capri_data/shared/eu_market_blocks.csv`, data files `*_eu2.csv`). The EU's common external tariff and the EU's
+  (`capri_data/codes/eu_market_blocks.csv`, data files `*_eu2.csv`). The EU's common external tariff and the EU's
   tariff-rate quotas apply to both blocks; an `EU27` row (quantities summed, prices production-weighted) is added to
   the results for reporting (`_with_eu_aggregate`). Norway is its own market region NO000000 in both settings, as in
   CAPRI.

@@ -5,7 +5,7 @@ biological fixation, deposition and the surplus per ha. Eurostat's balance diffe
 definition (crop residues left on the field are neither input nor output in Eurostat; CAPRI counts them
 on both sides; manure coefficients are national), so components are compared, not only the surplus.
 
-Data: capri_data/sources/eurostat/aei_pr_gnb_nitrogen.csv (Eurostat AEI_PR_GNB, N, tonnes and kg/ha;
+Data: capri_data/sources/raw/eurostat/aei_pr_gnb_nitrogen.parquet (Eurostat AEI_PR_GNB, N, tonnes and kg/ha;
 supplied by the project lead). Usage: python tools/check/validate_gnb_eurostat.py [year]
 """
 import sys
@@ -15,7 +15,16 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
-_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
+import sys as _sys_sio  # noqa: E402
+_sys_sio.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _sources_io import read_source  # noqa: E402  (capri_data/sources: Parquet)
+
+def _read_csv(path, *a, **k):
+    """read_csv with floats parsed exactly (K82); a table of capri_data/sources (.parquet) through read_source."""
+    if str(path).endswith(".parquet"):
+        return read_source(path, *a, **k)
+    k.setdefault("float_precision", "round_trip")
+    return pd.read_csv(path, *a, **k)
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 warnings.filterwarnings("ignore")
@@ -27,7 +36,7 @@ def main(year=2017):
     from capri_mod.data.definitions import ANIMALS
     d = load_all_data(str(ROOT / "capri_data"))
     e = EnvironmentalModule(d)
-    es = _read_csv(ROOT / "capri_data" / "sources" / "eurostat" / "aei_pr_gnb_nitrogen.csv")
+    es = _read_csv(ROOT / "capri_data" / "sources" / "raw" / "eurostat" / "aei_pr_gnb_nitrogen.parquet")
     es = es[es.year == year].pivot_table(index="geo", columns="indic_ag", values="value")
     H = d["animal_numbers"]
     rows = {}

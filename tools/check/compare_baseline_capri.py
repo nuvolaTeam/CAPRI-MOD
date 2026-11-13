@@ -10,8 +10,19 @@ Compared, EU27, model baseline of a run saved by tools/run/run_f2f_2030.py again
                                             markmarket_greendeal_1730et_base_1717); laying hens: CAPRI counts
                                             1000s of the model's unit; fattened pigs and broilers are left out
                                             (CAPRI counts animals produced a year, the model places)
-  market production (1000 t)                capri_eu27_market_balance_2030_ref.json MAPR (GROF where no MAPR)
-  market domestic use (1000 t)              HCOM + FEDM + INDM + BIOF + LOSM + PRCM
+  market production (1000 t)                capri_eu27_market_balance_2030_ref.json MAPR (GROF where no MAPR);
+                                            in a run with market.demand_calibration = "capri" (S7) the market takes
+                                            the marketed production (CAPRI's grofNEprod: gross x PROD/GROF at the
+                                            calibration point), so the block compares it with CAPRI's own marketed
+                                            production instead: the sum over the EU's member states of
+                                            DATA(ms, "Prod", product, "CAL") of sim_ini_21730
+                                            (capri_data/baselines/capri_greendeal_ref/1730/market/market_prod_grof_2030.csv, prod_kt)
+  market domestic use (1000 t)              GROF + IMPT - EXPT: the model's market works with gross production, so
+                                            its use holds CAPRI's on-farm seed and losses (SEDF, LOSF) besides
+                                            CAPRI's market use DOMM (HCOM + FEDM + SEDM + INDM + PRCM + BIOF + LOSM;
+                                            DOMM + SEDF + LOSF = GROF + IMPT - EXPT, checked on barley). Until
+                                            5 November 2026 the sum HCOM + FEDM + INDM + BIOF + LOSM + PRCM, which
+                                            leaves out seed and on-farm use (cereals 8-10% short of the balance)
   producer prices (EUR/t)                   UVAP; the model's prices are CAPRI's 2030 prices in 2017 money, so
                                             the price block reports each ratio against the median ratio
                                             (the deflator), i.e. the RELATIVE price structure
@@ -32,8 +43,8 @@ ACT = {"SWHE": "SWHE", "DWHE": "DWHE", "RYEM": "RYEM", "BARL": "BARL", "OATS": "
        "OCER": "OCER", "PARI": "PARI", "RAPE": "RAPE", "SUNF": "SUNF", "SOYA": "SOYA", "OOIL": "OOIL",
        "SUGB": "SUGB", "POTA": "POTA", "PULS": "PULS", "TOMA": "TOMA", "OVEG": "OVEG", "APPL": "APPL",
        "OFRU": "OFRU", "CITR": "CITR", "OLIV": "OLIV", "WINE": "TWIN", "TAGR": "TAGR", "TOBA": "TOBA", "TABO": "TABO",
-       "TEXT": "TEXT", "OIND": "OIND", "OCRO": "OCRO", "NURS": "NURS", "FLOW": "FLOW", "GRAS": "GRAS",
-       "MAIF": "MAIF", "OFAR": "OFAR", "FALL": "FALL",
+       "TEXT": "TEXT", "OIND": "OIND", "OCRO": "OCRO", "NURS": "NURS", "FLOW": "FLOW", "GRAE": "GRAE",
+       "GRAI": "GRAI", "MAIF": "MAIF", "OFAR": "OFAR", "ROOF": "ROOF", "FALL": "FALL", "VSET": "VSET",
        "DCOW": "DCOW", "BCOW": "SCOW", "CALV": "CAMF+CAFF+CAMR+CAFR",
        "PIGS": "SOWS", "SHGM": "SHGM", "SHGF": "SHGF", "LAYS": "HENS"}
 UNIT = {"LAYS": 1000.0}
@@ -46,6 +57,29 @@ MKT = {"SWHE": "SWHE+DWHE", "BARL": "BARL", "CORN": "MAIZ", "RYEM": "RYEM", "OAT
        "BIOE": "BIOE", "BIOD": "BIOD", "DDGS": "DDGS", "FRMI": "FRMI", "CREM": "CREM", "COCM": "COCM", "WMIO": "WMIO",
        "CASE": "CASE", "FENI": "FENI", "FPRI": "FPRI"}
 USE = ("HCOM", "FEDM", "INDM", "BIOF", "LOSM", "PRCM")
+# the model's market products as CAPRI's in market_prod_grof_2030.csv (its products are CAPRI's XX; the others the same)
+PROD_CODE = {"SWHE": "WHEA", "CORN": "MAIZ", "PARI": "RICE", "OLIV": "OLIO", "POUL": "POUM", "WINE": "TWIN"}
+
+
+def capri_mode(o) -> bool:
+    """The run's market takes the marketed production (S7): every run since 8 November 2026, when the setting
+    market.demand_calibration was removed with its "supply" form; a run of 6-8 November with "supply" set is not. (A
+    run before 6 November 2026 has no such setting either and was in the "supply" form: not told apart here.)"""
+    s = (o.get("meta") or {}).get("settings") or {}
+    return str((s.get("market") or {}).get("demand_calibration", "capri")) == "capri"
+
+
+def capri_marketed_production():
+    """CAPRI's marketed production at the 2030 calibration point, EU27 (the member states of
+    capri_data/codes/eu_market_blocks.csv), per CAPRI market product, kt."""
+    import csv
+    from capri_mod.data.definitions import EU_MS_BLOCK
+    out = {}
+    with open(ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "market" / "market_prod_grof_2030.csv", newline="") as fh:
+        for r in csv.DictReader(fh):
+            if r["capri_ms"] in EU_MS_BLOCK:
+                out[r["product"]] = out.get(r["product"], 0.0) + float(r["prod_kt"])
+    return out
 
 
 def _sum(d, expr, f):
@@ -89,11 +123,29 @@ def rows(o):
         pass
     bm = o.get("base_market") or {}
     prod, cons, price = bm.get("prod", {}), bm.get("cons", {}), bm.get("price", {})
+    mkt_prod = capri_marketed_production() if capri_mode(o) else None
     for m, c in MKT.items():
-        rp = _sum(bal, c, lambda d, k: (d.get(k) or {}).get("MAPR", (d.get(k) or {}).get("GROF")))
-        if rp and m in prod:
-            out.append(("production", m, c, float(prod[m]), rp))
-        ru = _sum(bal, c, lambda d, k: sum(float((d.get(k) or {}).get(i, 0.0)) for i in USE) or None)
+        if mkt_prod is not None and mkt_prod.get(PROD_CODE.get(m, m)):
+            # a product the supply models hand over (CAPRI's XX_SUPPLY): its marketed production; the processed
+            # products (oils, cakes, dairy products, biofuels) do not pass grofNEprod and keep the block below
+            c_ = PROD_CODE.get(m, m)
+            if m in prod:
+                out.append(("production (PROD)", m, c_, float(prod[m]), mkt_prod[c_]))
+        else:
+            rp = _sum(bal, c, lambda d, k: (d.get(k) or {}).get("MAPR", (d.get(k) or {}).get("GROF")))
+            if rp and m in prod:
+                out.append(("production", m, c, float(prod[m]), rp))
+        ru = _sum(bal, c, lambda d, k: (float(d[k]["GROF"]) + float(d[k].get("IMPT", 0.0)) - float(d[k].get("EXPT", 0.0)))
+                  if (d.get(k) or {}).get("GROF") is not None else
+                  (sum(float((d.get(k) or {}).get(i, 0.0)) for i in USE) or None))
+        if mkt_prod is not None and mkt_prod.get(PROD_CODE.get(m, m)):
+            # the marketed production's use: CAPRI's PROD + IMPT - EXPT (its market use, without the seed and losses
+            # its supply models keep), the same products and trade as above
+            nt = _sum(bal, c, lambda d, k: (float(d[k].get("IMPT", 0.0)) - float(d[k].get("EXPT", 0.0))) if d.get(k) else None)
+            ru = mkt_prod[PROD_CODE.get(m, m)] + (nt or 0.0)
+            if ru and m in cons:
+                out.append(("domestic use (PROD)", m, c, float(cons[m]), ru))
+            continue
         if ru and m in cons:
             out.append(("domestic use", m, c, float(cons[m]), ru))
     pr = []

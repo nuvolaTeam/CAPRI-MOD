@@ -1,5 +1,6 @@
 """The long results table (refactor stage 5; capri_mod/io_results.py): CAPRI's DATAOUT layout, CAPRI's codes declared
-in capri_data/codes/results_items.csv, the reference stored once in the Delta store, the pickle's blocks rebuilt.
+in capri_data/codes/results_items.csv, the reference stored once in the Delta store, each run under the SHA-256 of
+its results and definition, the pickle's blocks rebuilt.
 
 The run script checks every run's table against its pickle (tools/run/run_f2f_2030.py: "identical to the pickle's
 blocks"); these tests check the mechanics on a small set of results in the shape of the model's."""
@@ -118,23 +119,24 @@ def test_every_capri_code_of_the_items_is_capris():
 
 
 def test_the_reference_is_stored_once_and_the_pickles_blocks_come_back(tmp_path):
+    import json
     base, scen = _results(), _results(scale=1.5)
     B, S = (IO.with_capri_codes(IO.to_long(x, p)) for x, p in ((base, "base"), (scen, "scen")))
     # the run's metadata has tuple keys (the young animals' markets, the Hessian's records): written as text
     kw = dict(reference="ref_x", year=2030, fingerprint_parts={"code": "a"},
               meta={"conv": True, "markets": {("EU27", "CALV"): 1.0}}, root=tmp_path)
-    r1 = IO.write_run(B, S, scenario="scen_a", run_id="r1", **kw)
-    r2 = IO.write_run(B, S, scenario="scen_b", run_id="r2", **kw)
-    assert not r1["reference_reused"] and r2["reference_reused"] and r2["reference_run_id"] == "r1"
-    # another fingerprint (other code or data) stores the reference again
-    r3 = IO.write_run(B, S, scenario="scen_a", run_id="r3", **{**kw, "fingerprint_parts": {"code": "b"}})
-    assert not r3["reference_reused"]
+    r1 = IO.write_run(B, S, scenario="scen_a", **kw)
+    r2 = IO.write_run(B, S, scenario="scen_b", **kw)
+    assert not r1["reference_reused"] and r2["reference_reused"]
+    assert r2["reference_run_id"] == r1["reference_run_id"] != r1["run_id"]
+    # another fingerprint (other code or data) stores the reference again, under another id
+    r3 = IO.write_run(B, S, scenario="scen_a", **{**kw, "fingerprint_parts": {"code": "b"}})
+    assert not r3["reference_reused"] and r3["reference_run_id"] != r1["reference_run_id"]
     runs = IO._runs(tmp_path)
-    assert sorted(runs[runs.kind == "reference"].run_id) == ["r1", "r3"]
+    assert sorted(runs[runs.kind == "reference"].run_id) == sorted([r1["reference_run_id"], r3["reference_run_id"]])
     rb, rs, rec = IO.read_run(tmp_path, "scen_a")
-    assert rec["run_id"] == "r3" and (tmp_path / "meta" / "scen_a" / "r3" / "meta.json").is_file()
-    import json
-    assert json.loads((tmp_path / "meta" / "scen_a" / "r3" / "meta.json").read_text())["markets"] == {"EU27|CALV": 1.0}
+    assert rec["run_id"] == r3["run_id"] and (IO.meta_dir(tmp_path, r3["run_id"]) / "meta.json").is_file()
+    assert json.loads((IO.meta_dir(tmp_path, r3["run_id"]) / "meta.json").read_text())["markets"] == {"EU27|CALV": 1.0}
     blocks = IO.pickle_blocks(*IO.as_points(rb, rs))
     assert blocks["act"] == ({"SWHE": 30.0, "DCOW": 9.0}, {"SWHE": 45.0, "DCOW": 9.0})
     assert blocks["base_market"]["prod"] == {"SWHE": 1.0, "MILK": 2.0}
@@ -147,17 +149,47 @@ def test_the_reference_is_stored_once_and_the_pickles_blocks_come_back(tmp_path)
     assert IO.check_pickle(blocks, out) and not IO.check_pickle(blocks, blocks)
 
 
-def test_the_table_is_read_by_partition(tmp_path):
-    """The store is a Delta table partitioned by scenario and run id: a reader takes one partition without the rest."""
+def test_run_ids_are_the_sha256_of_results_and_definition(tmp_path):
+    """Each partition's run id is run_id_of its kind, name, reference, definition and rows (64 hex characters),
+    recomputed by verify_run from the store; a changed number, another definition or another scenario name gives
+    another id; the same run stored twice is stored once."""
+    B, S = (IO.with_capri_codes(IO.to_long(_results(s_), p)) for s_, p in ((1.0, "base"), (1.5, "scen")))
+    kw = dict(scenario="scen_a", reference="ref_x", year=2030, fingerprint_parts={"code": "a"}, meta={},
+              root=tmp_path)
+    r = IO.write_run(B, S, **kw)
+    assert len(r["run_id"]) == 64 and int(r["run_id"], 16) >= 0 and not r["duplicate"]
+    assert IO.verify_run(tmp_path, r["run_id"]) and IO.verify_run(tmp_path, r["reference_run_id"])
+    # the id is the recipe's: recomputed here from the rows and the record
+    rows = IO.read_partition(tmp_path, "scen_a", r["run_id"])
+    assert IO.run_id_of("scenario", "scen_a", r["fingerprint"], IO.rows_digest(rows), r["reference_run_id"]) == r["run_id"]
+    # the rows' digest does not depend on their order
+    assert IO.rows_digest(rows) == IO.rows_digest(rows.iloc[::-1])
+    again = IO.write_run(B, S, **kw)
+    assert again["duplicate"] and again["run_id"] == r["run_id"] and len(IO._runs(tmp_path)) == 2
+    S2 = S.copy()
+    S2.loc[S2.index[0], "value"] = S2["value"].iloc[0] + 1e-12
+    assert IO.write_run(B, S2, **kw)["run_id"] != r["run_id"]
+    assert IO.write_run(B, S, **{**kw, "scenario_parts": {"overrides": {"x": 1}}})["run_id"] != r["run_id"]
+    assert IO.write_run(B, S, **{**kw, "scenario": "scen_b"})["run_id"] != r["run_id"]
+    # a run is named by a unique prefix of its id
+    assert IO.read_run(tmp_path, "scen_a", r["run_id"][:12])[2]["run_id"] == r["run_id"]
+
+
+def test_the_tables_are_not_partitioned_and_a_run_is_read_alone(tmp_path):
+    """No scenario=/run_id= folders: the tables are unpartitioned Delta tables with scenario and run_id as columns; a
+    reader takes one run by its id without the rest; the metadata folder is meta/<run id>/."""
     from deltalake import DeltaTable
     B, S = (IO.with_capri_codes(IO.to_long(_results(), p)) for p in ("base", "scen"))
-    IO.write_run(B, S, scenario="scen_a", reference="ref_x", year=2030, run_id="r1", fingerprint_parts={},
-                 meta={}, root=tmp_path)
-    dt = DeltaTable(str(tmp_path / "long"))
-    assert dt.metadata().partition_columns == ["scenario", "run_id"]
-    part = dt.to_pandas(filters=[("scenario", "=", "ref_x")])
+    r = IO.write_run(B, S, scenario="scen_a", reference="ref_x", year=2030, fingerprint_parts={}, meta={},
+                     root=tmp_path, summary={"a": 1.0}, iterations=([{"it": 1}], [{"it": 1}, {"it": 2}]))
+    for t in ("long", "summary", "iterations", "runs"):
+        dt = DeltaTable(str(tmp_path / t))
+        assert dt.metadata().partition_columns == []
+        assert not [p for p in (tmp_path / t).iterdir() if "=" in p.name]
+    part = DeltaTable(str(tmp_path / "long")).to_pandas(filters=[("run_id", "=", r["reference_run_id"])])
     assert set(part.scenario) == {"ref_x"} and len(part) == len(B)
     assert np.array_equal(np.sort(part.value.to_numpy()), np.sort(B.value.to_numpy()))
+    assert sorted(p.name for p in (tmp_path / "meta").iterdir()) == [r["run_id"]]
 
 
 def test_the_run_metadata_is_declared():
@@ -195,7 +227,7 @@ def test_the_pickle_comes_back_from_the_store(tmp_path):
     B, S = (IO.with_capri_codes(IO.to_long(x, p)) for x, p in ((base, "base"), (scen, "scen")))
     env = (base["environmental"], scen["environmental"])
     out = {"environmental": env, "adoption": ({"PRECFARM": 0.1}, {"PRECFARM": 0.2}), "histosol": {"fallow": 1.0}}
-    IO.write_run(B, S, scenario="s", reference="r", year=2030, run_id="a", fingerprint_parts={}, meta={},
+    IO.write_run(B, S, scenario="s", reference="r", year=2030, fingerprint_parts={}, meta={},
                  root=tmp_path, summary=IO.summary_of({**out, "act": None}),
                  iterations=([{"it": 1, "signal": {"SWHE": 0.0}}], [{"it": 1}, {"it": 2}]))
     got = IO.load_run(f"store:{tmp_path}:s")
@@ -203,3 +235,88 @@ def test_the_pickle_comes_back_from_the_store(tmp_path):
     assert list(got["environmental"][0].index) == list(env[0].index)
     assert list(got["environmental"][0].columns) == list(env[0].columns)
     assert got["outer_history"] == ([{"it": 1, "signal": {"SWHE": 0.0}}], [{"it": 1}, {"it": 2}])
+
+
+def test_runs_are_named_as_capri_names_its_result_files(tmp_path):
+    """CAPRI's result names (set_and_store_dataout.gms l. 477: res_<NTSLVL>_<BAS><SIM><scenario><ResId>): the run
+    script's names, label, series and status go to the runs table; the scenario's metadata folder gets its run record
+    (CAPRI's META: provenance, NUM_RU, NUM_MS, every setting marked changed or [default]) and the store a readable
+    catalogue (RUNS.csv). A store written before 9 November 2026 (no naming columns) takes them on its next run, its
+    earlier records named afterwards from their meta.json."""
+    import pyarrow as pa
+    from deltalake import write_deltalake
+    assert IO.result_name("greendeal2030", "2017", 2030) == "res_2_1730greendeal2030"
+    assert IO.result_name("f2f", 2017, 2030, n_units=20, label="my test/1") == "res_2_1730f2f_20u_my_test_1"
+    assert IO.short_name("farm_to_fork_jrc121368") == "f2f_jrc121368" and IO.short_name("not_a_folder") == "not_a_folder"
+    meta = {"conv": True, "it": 7, "seconds": 600, "market_converged": {"baseline": True, "scenario": True},
+            "nlp_nonoptimal": {"baseline": [], "scenario": ["DE110000"]},
+            "settings": {"run": {"base_year": "2017", "manure_trade": True}, "market": {"x": 1.5}},
+            "settings_changed": {"market.x": 1.5}, "options": {"regions": "DE110000,FR240000", "label": "t"}}
+    assert IO.status_of(meta) == "1 regional solves non-optimal at the end (scenario 1)"
+    assert IO.status_of({**meta, "nlp_nonoptimal": {}}) == "ok"
+    assert IO.status_of({**meta, "conv": False, "nlp_nonoptimal": {}}) == "not converged in 7 iterations"
+    B, S = (IO.with_capri_codes(IO.to_long(_results(s_), p)) for s_, p in ((1.0, "base"), (1.5, "scen")))
+    # an earlier store: its runs table without the naming columns
+    old = tmp_path / "old"
+    r0 = IO.write_run(B, S, scenario="scen_a", reference="ref_x", year=2030, fingerprint_parts={"code": "a"},
+                      meta=meta, root=old)
+    t = IO._runs(old).drop(columns=list(IO.RUNS_NAMING_COLUMNS))
+    import shutil
+    shutil.rmtree(old / "runs")
+    write_deltalake(str(old / "runs"), pa.Table.from_pandas(t, preserve_index=False))
+    assert set(IO.RUNS_NAMING_COLUMNS) <= set(IO._runs(old).columns)
+    c = IO.catalogue(old)
+    assert list(c["result_name"]) == ["res_2_1730scen_a_2u_t", "res_2_1730ref_x_2u_t"]
+    assert c["note"].str.contains("named afterwards").all()
+    names = {"result_name": "res_2_1730scen_b_2u_t", "reference_result_name": "res_2_1730ref_x_2u_t", "label": "t",
+             "series": "review1", "status": IO.status_of(meta)}
+    r1 = IO.write_run(B, S, scenario="scen_b", reference="ref_x", year=2030, fingerprint_parts={"code": "a"},
+                      meta=meta, root=old, names=names, units=["DE110000", "FR240000", "NO080000"])
+    runs = IO._runs(old).sort_values("seq")
+    assert list(runs["result_name"]) == ["", "", "res_2_1730scen_b_2u_t"]        # the reference was reused
+    assert runs.iloc[-1]["series"] == "review1" and runs.iloc[-1]["status"] == names["status"]
+    cat = pd.read_csv(old / "RUNS.csv", keep_default_na=False)
+    assert list(cat["result_name"]) == ["res_2_1730scen_b_2u_t", "res_2_1730scen_a_2u_t", "res_2_1730ref_x_2u_t"]
+    assert cat.iloc[0]["run_id"] == r1["run_id"][:12] and cat.iloc[1]["run_id"] == r0["run_id"][:12]
+    rr = pd.read_csv(IO.meta_dir(old, r1["run_id"]) / "run_record.csv", keep_default_na=False).set_index("item")
+    assert rr.at["NUM_RU", "value"] == "3" and rr.at["NUM_MS", "value"] == "3" and rr.at["MinutesNeeded", "value"] == "10.0"
+    assert rr.at["setting market.x", "note"] == "changed" and rr.at["setting run.manure_trade", "note"] == "[default]"
+    assert rr.at["result_name", "value"] == "res_2_1730scen_b_2u_t"
+
+
+def test_capris_own_runs_are_stored_beside_the_models_with_verifiable_ids(tmp_path):
+    """tools/run/store_capri_run.py: a pair of CAPRI's runs (DATAOUT records d1..d5, value) stored as kinds
+    capri_reference and capri_scenario; the ids recompute (verify_run); the reference is stored once; the year label
+    BAS is the base year; read_run (the model's runs) does not return CAPRI's; the catalogue lists them."""
+    def dataout(v):
+        return pd.DataFrame({"d1": ["EU27yr19", "EU27yr19", "DE000000"], "d2": ["", "", ""],
+                             "d3": ["SWHE", "SWHE", "UVAP"], "d4": ["LEVL", "LEVL", "BEEF"],
+                             "d5": ["2030", "BAS", "2030"], "value": [v, 21000.0, float("inf")]})
+    ref, s1, s2 = IO.capri_rows(dataout(21476.08), 2017), IO.capri_rows(dataout(21060.71), 2017), \
+        IO.capri_rows(dataout(20000.0), 2017)
+    assert sorted(ref["year"]) == [2017, 2030, 2030] and set(ref["block"]) == {"capri"}
+    assert (ref["capri_cols"] == ref["cols"]).all() and (ref["unit"] == "").all()
+    src = {"file": "res_ref.gdx", "sha256": "0" * 64, "meta": {"Date and time": "2026-11-10"}}
+    a = IO.write_capri_run(ref, s1, scenario="gd", reference="greendeal_ref", ref_source=src,
+                           scen_source={**src, "file": "res_gd.gdx"}, root=tmp_path, names={"result_name": "res_gd"})
+    b = IO.write_capri_run(ref, s2, scenario="gd2", reference="greendeal_ref", ref_source=src,
+                           scen_source={**src, "file": "res_gd2.gdx"}, root=tmp_path, names={})
+    again = IO.write_capri_run(ref, s1, scenario="gd", reference="greendeal_ref", ref_source=src,
+                               scen_source={**src, "file": "res_gd.gdx"}, root=tmp_path, names={})
+    assert again["duplicate"] and a["reference_run_id"] == b["reference_run_id"]
+    runs = IO._runs(tmp_path)
+    assert sorted(runs["kind"]) == ["capri_reference", "capri_scenario", "capri_scenario"]
+    assert all(IO.verify_run(tmp_path, r) for r in runs["run_id"])
+    with pytest.raises(KeyError):
+        IO.read_run(tmp_path, "gd")
+    cat = IO.catalogue(tmp_path)
+    assert set(cat["kind"]) == set(IO.CAPRI_KINDS) and "res_gd" in set(cat["result_name"])
+    back = IO.read_partition(tmp_path, "gd", a["run_id"])
+    assert np.isinf(back["value"]).sum() == 1 and len(back) == 3
+    # batches: the same ids as one frame, and the on-disk sort gives rows_digest's digest (text outside ASCII too)
+    many = pd.concat([ref.assign(region=f"R{i:03d}é") for i in range(30)], ignore_index=True).sample(frac=1, random_state=0)
+    assert IO.rows_digest_batches([many.iloc[:40], many.iloc[40:]])[0] == IO.rows_digest(many)
+    c = IO.write_capri_run(lambda: iter([ref.iloc[:1], ref.iloc[1:]]), lambda: iter([s1]), scenario="gd",
+                           reference="greendeal_ref", ref_source=src, scen_source={**src, "file": "res_gd.gdx"},
+                           root=tmp_path, names={})
+    assert c["duplicate"] and c["run_id"] == a["run_id"]

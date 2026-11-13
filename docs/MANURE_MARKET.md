@@ -26,7 +26,7 @@ model assumes that all manure generated in a region has to be used within that r
 
 The 2030 baseline's flows between regions are CAPRI's (2030 Green Deal reference with endogenous technologies,
 `res_2_1730greendeal_refpol_endotech_all_ini`: MTRADE.NITF and EXCRET.NITF per CAPRI region;
-`tools/build/build_manure_trade_base.py` -> `capri_data/2017/environment/manure_trade_2030.csv`): exporting regions keep
+`tools/build/build_manure_trade_base.py` -> `capri_data/baselines/capri_greendeal_ref/1730/environment/manure_trade_2030.csv`): exporting regions keep
 (1 - export share) of their manure N, importing regions receive manure N per ha of cropland; 1.2 Mt N moves between EU
 regions (113 exporters, 111 importers when built). The base trade counts only where the run trades manure: without
 trade (Farm-to-Fork as JRC121368) the scenario and its baseline keep all manure in its region.
@@ -59,17 +59,26 @@ at the base, and deviations from the base trade follow the change in manure's va
   N bought or saved is priced on the columns.
 
 Pools (`CAPRIModel._update_manure_pools`): CAPRI's 34 country pools and 930 links
-(`capri_data/2017/environment/manure_pool_costs.csv`, `tools/build/build_manure_pool_costs.py`). Each outer iteration:
+(`capri_data/2017/environment/manure_pool_costs.csv`, `tools/build/build_manure_pool_costs.py`), one market per
+nutrient. Each outer iteration the pools clear in the form `outer_loop.manure_pool_form`:
 
-1. each region's exact piecewise-linear schedule from the reduced costs of its trade columns at its solution (NLP form:
-   IPOPT's bound multipliers, because the fertilisation block is not in the stored rows; conic form: the conic solve's
-   duals);
-2. the primal spatial equilibrium on those schedules, a convex QP solved with Clarabel (`capri_mod/supply/convex_qp.py`;
-   a built-in primal-dual method where Clarabel is missing), pool balances as equalities; pool prices = the balances'
-   duals;
-3. a Broyden-type correction of each pool's response (regions respond less than the schedule says, because their own
-   N shadow price moves as they trade) and adaptive damping of the price move (full steps while the gap falls, halved,
-   to at least 0.25, when it rises).
+- "capri" (the default since 12 November 2026; docs/design/MANURE_POOL_PORT.md): CAPRI's m_mPoolMarket
+  (manuremarket/declare_manure_market.gms l. 99-204). Each region's linear excess supply ES = a + b p is refitted at
+  its manure value (the fertilisation block's manure balance multiplier, CAPRI's PSHW = ManureNPK_.M) and its net trade
+  of the last solve, with CAPRI's slope b = 0.01 supply / calibration dual
+  (`baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv`, `tools/build/build_manure_pool_market.py`);
+  its trade costs are the regional NLP's (the constants from its trade columns' reduced costs); the pools' surplus less
+  the trade costs between them is maximised as a convex QP (Clarabel), the pool balances' duals the prices.
+- "schedules" (capri-mod's own, the default before): each region's exact piecewise-linear schedule from the reduced
+  costs of its trade columns at its solution, the primal spatial equilibrium on those schedules (Clarabel), a
+  Broyden-type correction of each pool's response.
+
+The price sent back to the regional models (`outer_loop.manure_pool_price_update`): "capri" (the default), CAPRI's
+weighted average of the pool's clearing prices of the last steps with the price forecast's weights
+(manuremarket/simu_manure_market.gms l. 214-226; 0.55 / 0.30 / 0.15, then 0.4 / 0.3 / 0.2 / 0.1 from step 20);
+"damped", capri-mod's own: a step towards the new clearing prices, full while the gap falls, halved, to at least 0.25,
+when it rises. Full-EU Green Deal 2030 (12 November 2026): "capri" with "capri" 19 iterations; "schedules" with
+"damped" 16; "schedules" with "capri" not converged after 36; the equilibria within 0.1-0.4 points.
 
 Convergence: every pool within `manure_pool_tolerance` (0.03) of its manure supply and EU-wide conservation within the
 same tolerance; with trade on, the outer-iteration cap is raised to `manure_max_outer_iter` (60) when it is 25 or more.

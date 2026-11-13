@@ -24,6 +24,40 @@ INSERT INTO value_units VALUES
   ('organic_targets_ms', 'permanent_pp', 'U_percent', 'capri', 'p_organicTargetMS(MS, PECR)'),
   ('organic_targets_ms', 'uaa_pp', 'U_percent', 'capri', 'p_organicTargetUAA(MS)');
 
+-- file: capri_data/scenarios/greendeal_group/greendeal_geo_to_ms.csv
+CREATE TABLE greendeal_geo_to_ms (
+    geo VARCHAR PRIMARY KEY,                                 -- the Eurostat code of the target files
+    landscape_ms VARCHAR REFERENCES capri_rall (code),       -- empty: geo_to_ms_landscape does not map the code
+    organic_ms VARCHAR REFERENCES capri_rall (code)          -- empty: geo_to_ms does not map the code
+);
+COMMENT ON TABLE greendeal_geo_to_ms IS 'CAPRI''s maps from the Green Deal target files'' Eurostat codes to its member states: geo_to_ms_landscape (pol_input/greendeal/load_landscape_targets.gms) and geo_to_ms (load_organic_targets.gms). A region takes the sum of the targets of the codes mapped to its member state; LU and PT are mapped by neither (tools/build/build_greendeal_targets.py)';
+
+-- file: capri_data/scenarios/greendeal_group/organic_ngrp_class.csv
+CREATE TABLE organic_ngrp_class (
+    ngrp VARCHAR NOT NULL PRIMARY KEY,
+    target VARCHAR NOT NULL CHECK (target IN ('arable_pp', 'grassland_pp', 'permanent_pp', 'uaa_pp'))
+);
+COMMENT ON TABLE organic_ngrp_class IS 'The class of CAPRI''s organic targets (a column of organic_targets_ms) each fertiliser crop group takes in the mineral-N caps of the organic area target: CAPRI''s crops_to_ngrp (pol_input/greendeal/load_organic_targets.gms, NMINREST off) and VEGE at the UAA target (l. 186); tools/build/build_greendeal_targets.py';
+
+-- file: capri_data/scenarios/greendeal_group/fert_partial_slack.csv
+CREATE TABLE fert_partial_slack (
+    capri_region VARCHAR NOT NULL,
+    ngrp VARCHAR,
+    UNIQUE (capri_region, ngrp)
+);
+COMMENT ON TABLE fert_partial_slack IS 'CAPRI''s Green Deal group: the NUTS 2 regions (curNuts2) whose fertiliser priors'' partial derivative has a slack (v_fertDistPartialSlack: flows with a prior mode below 5e-3 x 1000 t within +-mode) and the listed (region, group) pairs (extraSlackRegion_to_ngrp: every flow of the group within +-(mode + 0.1 x 1000 t)); ngrp empty: the region''s tiny-prior rule only (supply/set_fert_priors.gms l. 664-785, %scenarioGroup%==greendeal); tools/build/build_fert_partial_slack.py';
+
+-- file: capri_data/scenarios/set_aside_10/set_aside_rates.csv
+CREATE TABLE set_aside_rates (
+    region VARCHAR NOT NULL,
+    activity VARCHAR NOT NULL,
+    setr_pct DOUBLE NOT NULL CHECK (setr_pct > 0 AND setr_pct < 100),
+    PRIMARY KEY (region, activity)
+);
+COMMENT ON TABLE set_aside_rates IS 'CAPRI''s obligatory set-aside scenario (scen/set_aside/set_aside_10.gms): the set-aside rate in percent (DATA(ru, act, "SETR")) of each EU regional unit''s Grandes Cultures (sets.gms GRCU less RSET and VSET, set to eps there; CAPRI''s codes mapped to the model''s), the obligation CAPRI''s SETA_ (supply/land.py); tools/build/build_set_aside_scenario.py';
+INSERT INTO value_units VALUES
+  ('set_aside_rates', 'setr_pct', 'U_percent', 'capri', 'DATA(RU, act, "SETR") (scen/set_aside/set_aside_10.gms)');
+
 -- file: capri_data/2017/policy/organic_yield_gap.csv
 CREATE TABLE organic_yield_gap (
     peseta_region VARCHAR PRIMARY KEY CHECK (peseta_region IN ('CEN', 'CES', 'NE', 'SE', 'UK_IR')),
@@ -64,6 +98,10 @@ CREATE TABLE yield_price_elasticity (
 );
 COMMENT ON TABLE yield_price_elasticity IS 'CAPRI''s p_yieldElas (supply/yield_elas.gms: cereals 0.3, oilseeds 0.2, potatoes 0.2) on the model''s crops (tools/build/build_yield_price_elasticity.py)';
 INSERT INTO value_units VALUES ('yield_price_elasticity', 'elasticity', 'U_Elasticity', 'capri', 'p_yieldElas, yield on own price');
+
+-- rule: the geo codes CAPRI maps are codes of the target files
+SELECT 'geo_to_ms' AS tbl, geo AS member_state FROM greendeal_geo_to_ms
+WHERE geo NOT IN (SELECT member_state FROM landscape_targets_ms UNION SELECT member_state FROM organic_targets_ms);
 
 -- rule: the targets' member states are the EU's (NUTS-0 prefixes of CAPRI's member states)
 SELECT 'landscape' AS tbl, member_state FROM landscape_targets_ms

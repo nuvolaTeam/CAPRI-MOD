@@ -3,7 +3,8 @@
 
 Input: a census of the files the builders write (tools/check/reproduce_builders.py REPORT.csv: one row per builder and
 file, every file a builder writes). Converted: the files under capri_data that are model inputs, i.e. not sources
-(capri_data/sources: CAPRI, Eurostat, FAO extracts, which stay CSV) and not validation tables (capri_data/validation).
+(capri_data/sources: Parquet since 8 November 2026 by their own conversion, tools/lib/_sources_io.py) and not validation
+tables (capri_data/validation). The model-input conversion itself was deferred (the inputs stay CSV).
 
 Each CSV is read exactly (capri_mod/csvio.read_csv, no index: every column a column, the types pandas infers) and
 written next to it as Parquet (tableio.write_table, same name with .parquet for .csv, .csv.xz, .csv.gz). The conversion

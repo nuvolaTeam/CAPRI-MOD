@@ -1,7 +1,7 @@
 """CAPRI's regional N balance of its Green Deal 2030 run with endogenous technologies ('ini'), from the run's results.
 
 Data written
-  capri_data/sources/capri_res/gd2030_endotech_ini_nbalance.csv  region, item, value: CAPRI's regional N balance
+  capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_nbalance.parquet  region, item, value: CAPRI's regional N balance
       items of the run (dataOut '' . item . NITF . 2030, 1000 t N): MINFER GASMIN RUNMIN NH3MIN EXPPRD IMPORT ATMOSD
       CRESID BIOFIX EXCRET GASANI RUNANI MTRADE SURSOI LEACHI; UAAR LEVL (1000 ha) and UAAR N2OLEA (kg N2O per ha)
 
@@ -17,11 +17,14 @@ import csv
 import re
 import sys
 from pathlib import Path
+
+import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
+from _sources_io import write_source  # noqa: E402  (capri_data/sources: Parquet)
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_data" / "sources" / "capri_res" / "gd2030_endotech_ini_nbalance.csv"
+OUT = ROOT / "capri_data" / "sources" / "intermediate" / "capri_res" / "gd2030_endotech_ini_nbalance.parquet"
 ITEMS = ("MINFER", "GASMIN", "RUNMIN", "NH3MIN", "EXPPRD", "IMPORT", "ATMOSD", "CRESID", "BIOFIX", "EXCRET", "GASANI",
          "RUNANI", "MTRADE", "SURSOI", "LEACHI")
 DUMP = str(EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
@@ -40,11 +43,7 @@ def extract(dump):
             if (row == "NITF" and col in ITEMS) or (col == "UAAR" and row in ("LEVL", "N2OLEA")):
                 item = col if row == "NITF" else f"UAAR_{row}"
                 rows.append([reg, item, float(v)])
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    with open(OUT, "w", newline="") as fh:
-        w = csv.writer(fh)
-        w.writerow(["region", "item", "value"])
-        w.writerows(rows)
+    write_source(pd.DataFrame(rows, columns=["region", "item", "value"]), OUT, index=False)
     return rows
 
 

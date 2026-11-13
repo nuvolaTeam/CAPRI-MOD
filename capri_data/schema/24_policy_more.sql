@@ -1,7 +1,7 @@
 -- Inputs under capri_data/2017/policy. Generated structure (types, NOT NULL, keys) from the files on 29 October 2026; units open where no
 -- builder or CAPRI file states them (value_units).
 
--- file: capri_data/2017/policy/cap_ceilings_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/policy/cap_ceilings_2030.csv
 CREATE TABLE pol_cap_ceilings_2030 (
     capri_region VARCHAR NOT NULL,
     DPPIL1 DOUBLE NOT NULL,
@@ -96,17 +96,18 @@ INSERT INTO value_units VALUES
 -- file: capri_data/scenarios/greendeal_group/mineral_redu_limcres.csv
 CREATE TABLE pol_mineral_redu_limcres (
     capri_region VARCHAR NOT NULL,
-    ngrp VARCHAR NOT NULL,
+    ngrp VARCHAR,
+    fnut VARCHAR,
     add DOUBLE NOT NULL,
     after_year BIGINT NOT NULL,
-    PRIMARY KEY (capri_region, ngrp)
+    UNIQUE (capri_region, ngrp, fnut)
 );
-COMMENT ON TABLE pol_mineral_redu_limcres IS 'CAPRI''s exemptions in the crop-specific mineral fertiliser reduction (pol_input/greendeal/minfert_redu_by_crop.gms). (tools/build/build_mineral_redu_rules.py)';
+COMMENT ON TABLE pol_mineral_redu_limcres IS 'CAPRI''s relaxations of the limCres regulation in the crop-specific mineral fertiliser reduction (pol_input/greendeal/minfert_redu_by_crop.gms): for a group of every nutrient (fnut empty) or for a nutrient''s every group (ngrp empty). (tools/build/build_mineral_redu_rules.py)';
 INSERT INTO value_units VALUES
   ('pol_mineral_redu_limcres', 'add', NULL, 'open', 'mineral_redu_limcres.add: unit to be established'),
   ('pol_mineral_redu_limcres', 'after_year', NULL, 'open', 'mineral_redu_limcres.after_year: unit to be established');
 
--- file: capri_data/2017/policy/premium_scheme_shares_2030.csv
+-- file: capri_data/baselines/capri_greendeal_ref/1730/policy/premium_scheme_shares_2030.csv
 CREATE TABLE pol_premium_scheme_shares_2030 (
     region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,

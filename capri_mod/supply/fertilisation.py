@@ -239,15 +239,15 @@ class FertilisationBlock:
             float(sum(np.asarray(x_start, float)[j] for j in land_cols))
         kap = _st.setdefault(self.par, "npk_kappa", {})
         out = {"capri_region": cr, "nutrients": {}, "land_cols": land_cols, "crop_cols": crop_cols}
-        # the split columns: the grassland split moves area from CAPRI's GRAI to GRAE (z = GRAE - base GRAE, each of the
-        # two half the grassland at base), so the GRAS groups' need changes by z x (need GRAE - need GRAI); the animal
+        # the split columns (GRAE and GRAI are the model's own activities since S2, 7 November 2026; before, the
+        # grassland split column moved area from GRAI to GRAE and changed the GRAS groups' need): the animal
         # split and option columns change their animal's manure in the proportion of their manure per head to the
-        # animal's (the tables' dmann_rel / d_mann_rel, the factor their columns carry in the N rows), which reaches
+        # animal's (the tables' dmann_rel / dmanp_rel / dmank_rel, d_mann_rel for N only), which reaches
         # ManureNPK_. Until 29 October 2026 the factor was read off the manure-application row or the N row, which
         # exist only with an N target: without one the split columns left the manure in NUTNED_ unchanged (K105).
-        colsl = self._aug_col_labels(n_cols)
-        j_gz = colsl.index("grass_z") if "grass_z" in colsl else None
-        man_split = self._split_manure_factors(n_cols, acts)
+        man_split = {nut_: self._split_manure_factors(n_cols, acts, nut_) for nut_ in NUTRIENTS}
+        mixc = dict(getattr(self.ev, "mix_cols", None) or {})
+        tm_ = getattr(self.data, "techn_mix", None)
         for nut in NUTRIENTS:
             sq = sqn[nut]
             R = D.region(cr, nut); P = D.priors(cr, nut)
@@ -312,19 +312,35 @@ class FertilisationBlock:
                 if not modes:
                     continue
                 needl = [(j, sh * k * need[j] * sq.get(acts[j], 1.0)) for j, sh in crops if need[j] > 0]
-                if j_gz is not None and "GRAS" in acts:
-                    sh_g = float(shares.get("GRAS", {}).get(gname, 0.0))
-                    dn = D.crop_coef(cr, nut, "GRAE", "need_kg_ha") - D.crop_coef(cr, nut, "GRAI", "need_kg_ha")
-                    if sh_g > 0 and dn != 0.0:
-                        needl.append((j_gz, sh_g * k * dn * sq.get("GRAS", 1.0)))
+                # the technology mix columns (S1): z ha moved from T2 to T1 need need_diff x the crop's need per ha
+                # (NUTNED_: SQRT(1 + y)(1 + y) per technology); in the group's need only, no area
+                for j, sh in crops:
+                    kz = mixc.get(acts[j])
+                    if kz is not None and need[j] > 0 and kz < n_cols:
+                        needl.append((kz, sh * k * need[j] * sq.get(acts[j], 1.0) * float(tm_.at[acts[j], "need_diff"])))
                 groups.append({"g": gname, "perm": perm, "acc": acc, "modes": modes, "crops": crops,
                                "need": needl,
                                "own": [(j, sh * k_own * own[j]) for j, sh in crops if perm and own[j] > 0], "Aref": Aref})
             if not groups:
                 continue
+            # CAPRI's Green Deal group (set_fert_priors.gms l. 773-781, v_fertDistPartialSlack): in its listed regions
+            # a flow with a prior mode below partial_slack_tiny_t has a slack within +-its mode, a listed (region,
+            # group) pair's flows within +-(mode + partial_slack_listed_add_t) - t, every nutrient and source
+            ps_ = {}
+            _lst = getattr(self.data, "fert_partial_slack", None)
+            if getattr(self.ev, "fert_partial_slack", False) and _lst is not None:
+                _tiny = float(_settings().get("fertiliser.partial_slack_tiny_t"))
+                _add = float(_settings().get("fertiliser.partial_slack_listed_add_t"))
+                for g_ in groups:
+                    for s_, m_ in g_["modes"].items():
+                        lst_ = g_["g"] in _lst
+                        if lst_ or float(m_) < _tiny:
+                            ps_[(g_["g"], s_)] = float(m_) + (_add if lst_ else 0.0)
             Ecols = [(j, float(man[j])) for j in range(n) if man[j] != 0.0]
-            if nut == "N":
-                Ecols += [(j, float(man[acts.index(a_)]) * r_) for j, a_, r_ in man_split if man[acts.index(a_)] * r_ != 0.0]
+            # the split columns move their animal's manure of this nutrient (CAPRI's MANN, MANP, MANK per activity;
+            # P and K since 9 November 2026, S6 item 6)
+            Ecols += [(j, float(man[acts.index(a_)]) * r_) for j, a_, r_ in man_split[nut]
+                      if man[acts.index(a_)] * r_ != 0.0]
             if pool and nut == "N" and len(pool) == 2:
                 Ecols += [(pool[0], -1.0), (pool[1], 1.0)]
             elif nut != "N":
@@ -339,7 +355,7 @@ class FertilisationBlock:
                 "eff": eff, "g0": g0, "gc": gc, "slope": endo_slope(g0, m0E, nut), "m0E": m0E,
                 "price": float(R.uvag_eur_t) if R.uvag_eur_t == R.uvag_eur_t else 0.0, "kappa": k,
                 "own_scaled": bool(kap.get((key, "own_scaled"), True)),
-                "M0": base["M0"]}
+                "M0": base["M0"], "partial_slack": ps_}
         out["dual_bound"] = float(getattr(self.par, "npk_dual_bound", 10.0) or 10.0)
         return out if out["nutrients"] else None
 
@@ -389,9 +405,13 @@ class FertilisationBlock:
                 v = float(base["per_ha"].get((g, "MINE"), 0.0))
                 if v <= 0:
                     continue
-                w = sum(sh * xb[j] for j, sh in g_["crops"])
-                share_conv = 1.0 - (sum(sh * xb[j] * float(conv.get(acts[j], 1.0)) for j, sh in g_["crops"]) / w
-                                    if w > 0 else 1.0)
+                gt = getattr(self.ev, "organic_group_target", None) or {}
+                if g in gt:                       # CAPRI's target of the group (p_organicAreaTargetCrops(ru, ngrp))
+                    share_conv = float(gt[g])
+                else:                             # no CAPRI target for the region: its crops' conversion
+                    w = sum(sh * xb[j] for j, sh in g_["crops"])
+                    share_conv = 1.0 - (sum(sh * xb[j] * float(conv.get(acts[j], 1.0)) for j, sh in g_["crops"]) / w
+                                        if w > 0 else 1.0)
                 mx = v if v < param("ORGANIC_SMALL_MINE_KG_HA") else v * (1.0 - max(share_conv, 0.0))
                 regs[(g, "MINE")] = (mx, b1, b2)
             out["N"] = regs
@@ -456,7 +476,8 @@ class FertilisationBlock:
                 if nut_ == "N" or d_ is None:
                     continue
                 rg_ = dict(d_.get("regs") or {})
-                for g, (mx, racc, msh) in inner.limcres_caps(self.data.region_id, dict(base, per_ha=per_)).items():
+                for g, (mx, racc, msh) in inner.limcres_caps(self.data.region_id, dict(base, per_ha=per_),
+                                                               nutrient=nut_).items():
                     c1 = float(msh) * float(racc) + 1.0
                     rg_[(g, "CRES")] = (float(mx), c1, float(racc) + 2.0 - c1)
                 d_["regs"] = rg_
@@ -468,8 +489,8 @@ class FertilisationBlock:
     def _n_row_mineral_parts(self, A, labels):
         """The mineral-N parts of the N_balance row's coefficients (t mineral N per unit of each column), from the
         environmental accounts' own unit balances (n_mineral_input) as the row is built from them: activities their
-        unit balance's, manure exports and imports -/+ the substitution factor, the grassland split its delta, the
-        dairy, cattle and option columns their animal's in proportion to their manure coefficient."""
+        unit balance's, manure exports and imports -/+ the substitution factor, the dairy, cattle and option columns
+        their animal's in proportion to their manure coefficient, the technology mix columns their T1 - T2 (S1)."""
         env_ = getattr(self.seen, "env_for_surplus", None)
         i_nb = labels.index("N_balance")
         mp = np.zeros(A.shape[1])
@@ -492,10 +513,6 @@ class FertilisationBlock:
                 mp[pc[0]] = sub                 # export: the row has -(1 - sub): -1 organic, +sub mineral
             if pc[1] < A.shape[1]:
                 mp[pc[1]] = -sub
-        gc = getattr(self.ev, "grass_col", None)
-        if gc is not None and gc < A.shape[1]:
-            d = env_.grass_intensity_delta(rid) or {}
-            mp[gc] = float(d.get("n_mineral_input", 0.0))
         cols = self._aug_col_labels(A.shape[1])
         for j, lab in enumerate(cols):
             a = None
@@ -505,6 +522,10 @@ class FertilisationBlock:
                 a = lab[len("cattle_z_"):].split(":")[0]
             elif lab.startswith("genet_z_"):
                 a = lab[len("genet_z_"):].split("_")[0]
+            elif lab.startswith("mix_"):
+                # the technology mix (S1): its own mineral part, the unit balances' T1 - T2 (techn_mix._mix_n_terms)
+                mp[j] = float((getattr(self.ev, "mix_n_min", None) or {}).get(lab[len("mix_"):], 0.0))
+                continue
             if a in acts:
                 ja = acts.index(a)
                 if A[i_nb, ja] != 0:

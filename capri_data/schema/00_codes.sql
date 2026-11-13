@@ -74,9 +74,10 @@ CREATE TABLE model_activity_classes (
     price_source VARCHAR,                  -- the market whose price an animal earns (a model_commodities code)
     share_term_arable INTEGER NOT NULL CHECK (share_term_arable IN (0, 1)),
     young_outputs VARCHAR,                 -- the young animals in the activity's outputs (CAPRI OYANI), ';'-separated
+    technologies INTEGER NOT NULL CHECK (technologies IN (1, 2)),   -- CAPRI's LEVL technologies (T; T1 and T2 at 0.5 each)
     source VARCHAR NOT NULL
 );
-COMMENT ON TABLE model_activity_classes IS 'the model''s activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags, the organic target group and yield gap, the pesticide yield loss, the price source, the PMP share term''s arable set and the young-animal outputs; a declared table, checked against CAPRI''s sets by build_code_lists (a row that differs names its departure)';
+COMMENT ON TABLE model_activity_classes IS 'the model''s activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags, the organic target group and yield gap, the pesticide yield loss, the price source, the PMP share term''s arable set, the young-animal outputs and the number of CAPRI technologies; a declared table, checked against CAPRI''s sets by build_code_lists (a row that differs names its departure)';
 
 -- file: capri_data/codes/model_cattle_splits.csv
 CREATE TABLE model_cattle_splits (
@@ -112,7 +113,7 @@ CREATE TABLE model_commodities (
 );
 COMMENT ON TABLE model_commodities IS 'the model''s market commodities (capri_mod/data/definitions.py MARKET_COMMODITIES) and CAPRI''s products';
 
--- file: capri_data/shared/regional_units.csv
+-- file: capri_data/codes/regional_units.csv
 CREATE TABLE regional_units (
     region VARCHAR PRIMARY KEY REFERENCES capri_rall (code),
     capri_ms VARCHAR NOT NULL REFERENCES capri_rall (code),

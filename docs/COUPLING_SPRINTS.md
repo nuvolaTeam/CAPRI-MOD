@@ -247,7 +247,7 @@ indicators within 0.4 / 0.8 points. IPOPT not needed (docs/archive/PROTOTYPE_NI_
 
 ## Sprint 9t — one parameter file; land supply of combined CAPRI regions (October 2026: done, default)
 
-All constants of the economics and accounts in `capri_data/shared/model_parameters.csv` (55 rows with unit, kind,
+All constants of the economics and accounts in `capri_data/codes/model_parameters.csv` (55 rows with unit, kind,
 source; results identical). Combined CAPRI regions' land supply as the sum of their land owners' responses
 ((sum Q^-1)^-1) instead of an area-weighted matrix; Ireland's regions from their own shares of the NUTS-2013
 regions. IE05's nitrogen price then showed two branches and the run did not settle in 8 inner solves; 16 close it.
@@ -1093,7 +1093,7 @@ Brittany €288 → €226 per ha, grass €381 → €232).
 
 **Before.** The 2030 trajectory scaled yields and herds only: the baseline ran at 2017 prices and premiums.
 
-**Now** (`tools/build/build_price_trajectory_2030.py` → `capri_data/trajectories/capri_price_ratios_2030.csv`,
+**Now** (`tools/build/build_price_trajectory_2030.py` → `capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_price_ratios_2030.csv`,
 `capri_cap_premium_2030.csv`, `capri_livestock_premium_ratio_2030.csv`; applied by
 `capri_mod/projection/prices.py`, on in `tools/run/run_f2f_2030.py`, `--base-prices` to switch off). The model stays in
 2017 money: each product's CAPRI 2030/2017 unit-value ratio over the input index (median member state: pork 1.19,
@@ -1122,7 +1122,7 @@ in the supply models. So the prices are CAPRI's baseline, whichever file they ar
 trend projection (`trends_1730`, DATA2); CAPRI sets them in its policy module, so the reference run is their source.
 Oilcake prices now follow the market baseline's producer prices at its 2017 and 2030 points (`data_market_1730defaulta`,
 PPRI BAS/CAL; median real ratio soya cake 1.15, rape cake 1.20, sunflower cake 0.91): gap 6.66 → 6.68, no visible effect.
-Extracts: `capri_data/sources/capri_baseline/capri_uvag_store_1730.csv`, `capri_market_prices_1730.csv`.
+Extracts: `capri_data/sources/raw/capri/capri_baseline/capri_uvag_store_1730.csv`, `capri_market_prices_1730.csv`.
 
 **Technologies in CAPRI cut the surplus little.** With every technology at its maximum (`_max` against `_ini`), CAPRI's
 gross N surplus falls 4.1% in the EU (Brittany 14%, Weser-Ems 18%, Denmark 5%, Dutch regions 1–2%): mineral N −15%,
@@ -1223,7 +1223,7 @@ vs −20.7%, pork price +55.6 vs +60.3%, beef price +24.4% vs +26.9%; CAPRI −9
 
 ## External check: the base balance against Eurostat (aei_pr_gnb, 2017)
 
-`tools/check/validate_gnb_eurostat.py` (data: `capri_data/sources/eurostat/aei_pr_gnb_nitrogen.csv`, supplied by the
+`tools/check/validate_gnb_eurostat.py` (data: `capri_data/sources/raw/eurostat/aei_pr_gnb_nitrogen.csv`, supplied by the
 project lead) compares the model's base-year balance with Eurostat's by member state, 20 countries:
 
 | Component | Model | Eurostat | Ratio |

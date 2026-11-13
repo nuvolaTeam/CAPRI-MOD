@@ -214,10 +214,12 @@ def test_parity_with_captrd_step1():
 
 
 def test_time_sets_of_the_reference_configuration():
-    """Base 2017, CAPREG to 2018, COCO 2019, simulation years 2018-2070, %lst_dgagri% 2030 (results_1770.gdx)."""
+    """Base 2017, CAPREG to 2018, COCO 2019, simulation years 2018-2070, %lst_dgagri% 2040 (aglink2023dgAgri;
+    results_1770.gdx)."""
     from capri_mod.pipeline.captrd import timesets as ts
     resy = [2018, 2020, 2025, 2030, 2035, 2040, 2045, 2050, 2060, 2070]
-    T = ts.build(1984, 2070, resy, 2017, 2030, uaar_years_any=range(1984, 2019), uaar_years_all=range(1995, 2019),
+    T = ts.build(1984, 2070, resy, 2017, ts.lst_dgagri_for("aglink2023dgAgri"), uaar_years_any=range(1984, 2019),
+                 uaar_years_all=range(1995, 2019),
                  expostt_extra=[2019], basyrs5_halfwidth=3)
     assert T.years_est == [1985, 1990, 1995, 2000] + resy           # CAPTRD's Step1 years in results_1770.gdx
     assert (T.expostt[0], T.expostt[-1], T.lst_expost) == (1984, 2019, 2018)
