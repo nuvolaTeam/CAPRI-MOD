@@ -1,6 +1,4 @@
-# The test suite and a syntax lint. Pushes and pull requests to main run the fast part (the tests not marked slow,
-# pyproject.toml's marker: full-EU or multi-solve tests over 30 s); the whole suite runs every week and by hand from
-# the Actions tab (suite: full).
+
 name: Python application
 
 on:
@@ -8,6 +6,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+
   schedule:
     - cron: "17 2 * * 0"          # Sundays 02:17 UTC: the whole suite
   workflow_dispatch:
@@ -29,8 +28,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 240
+
     env:
       SUITE: ${{ github.event_name == 'schedule' && 'full' || inputs.suite || 'fast' }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -71,15 +72,19 @@ jobs:
         restore-keys: |
           hessians-${{ runner.os }}-py${{ matrix.python-version }}-
 
+
     - name: Test with pytest (${{ env.SUITE }})
       run: |
         # two test processes as on an 8 GB machine (the runner has 16 GB); the longest tests start first (conftest.py)
         if [ "$SUITE" = "fast" ]; then MARK=(-m "not slow"); else MARK=(); fi
         python -m pytest -n 2 "${MARK[@]}" -ra --durations=25 --junitxml=pytest-${{ matrix.python-version }}.xml
 
+
     - name: Upload the test report
       if: always()
       uses: actions/upload-artifact@v4
       with:
+
         name: pytest-report-${{ matrix.python-version }}-${{ env.SUITE }}
+
         path: pytest-${{ matrix.python-version }}.xml
