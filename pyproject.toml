@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,7 +8,8 @@ version = "0.1.0"
 description = "A Python reimplementation of the CAPRI star 3.0 agricultural economic model"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "GPL-3.0-only" }
+license = "GPL-3.0-only"
+license-files = ["LICENSE", "NOTICE"]
 dependencies = [
     "pandas>=2.0",
     "numpy>=1.24",
@@ -34,6 +35,8 @@ gui = ["gradio>=5.0", "plotly>=5.0"]
 
 [tool.setuptools.packages.find]
 include = ["capri_mod*"]
+# the tests read the repository's capri_data and tools: they stay in the source tree, not in the wheel
+exclude = ["capri_mod.tests*", "capri_mod.pipeline.tests*"]
 
 [tool.setuptools.package-data]
 capri_mod = ["*.json", "*.md", "settings/*.toml"]
