@@ -11,9 +11,16 @@ duckdb = pytest.importorskip("duckdb")
 from capri_mod.data import validate_data as V  # noqa: E402
 
 
+@pytest.fixture(scope="module")
+def repo_violations():
+    """The repository's own violations, validated once for the module (a full validation takes about a minute on the
+    CI runner; the damaged copies below are compared with it)."""
+    return V.validate(ROOT, verbose=False)
+
+
 @pytest.mark.slow
-def test_the_data_meet_their_declarations():
-    assert V.validate(ROOT, verbose=False) == []
+def test_the_data_meet_their_declarations(repo_violations):
+    assert repo_violations == []
 
 
 def _copy(tmp_path):
@@ -46,9 +53,9 @@ def _edit(root, rel, fn):
 
 
 @pytest.mark.slow
-def test_each_kind_of_violation_is_found_with_its_line(tmp_path):
+def test_each_kind_of_violation_is_found_with_its_line(tmp_path, repo_violations):
     root = _copy(tmp_path)
-    assert set(V.validate(root, verbose=False)) == set(V.validate(ROOT, verbose=False))   # the copy is the repository
+    assert set(V.validate(root, verbose=False)) == set(repo_violations)   # the copy is the repository
     acts, comms = "capri_data/codes/model_activities.csv", "capri_data/codes/model_commodities.csv"
     units = "capri_data/codes/regional_units.csv"
     # a duplicate key: line 2 repeated at the end
@@ -65,9 +72,9 @@ def test_each_kind_of_violation_is_found_with_its_line(tmp_path):
 
 
 @pytest.mark.slow
-def test_a_wrong_header_and_a_wrong_type_are_found(tmp_path):
+def test_a_wrong_header_and_a_wrong_type_are_found(tmp_path, repo_violations):
     root = _copy(tmp_path)
-    base = V.validate(root, verbose=False)                 # the repository's own violations, if any, left aside
+    base = repo_violations                                 # the repository's own violations, if any, left aside
     sql = root / "capri_data" / "schema" / "99_test.sql"
     (root / "t.csv").write_text("key,value\nA,1.5\nB,x\nC,\n")
     sql.write_text("-- file: t.csv\nCREATE TABLE t (key VARCHAR PRIMARY KEY, value DOUBLE NOT NULL CHECK (value >= 0));\n")

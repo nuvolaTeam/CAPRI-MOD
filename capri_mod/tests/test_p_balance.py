@@ -190,6 +190,7 @@ def _realised_yields(m, reg, sr):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_p_accounts_from_the_nlp_solution():
     """NLP form, baseline and Farm-to-Fork (one market iteration, DE11 and NL22): mineral P2O5 is the fertilisation
     block's purchase, manure P2O5 applied the sum of its manure flows (MTRADE = EXCRET - applied); CAPRI's NUTNED_ for

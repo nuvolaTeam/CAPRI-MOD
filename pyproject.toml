@@ -43,7 +43,8 @@ capri_mod = ["*.json", "*.md", "settings/*.toml"]
 
 [tool.pytest.ini_options]
 markers = ["slow: full-EU or multi-solve tests over 30 s (deselect per step with -m 'not slow'; the batch-end run takes all)",
-           "online: live provider API tests of the data pipeline (run on request: -m online)"]
+           "online: live provider API tests of the data pipeline (run on request: -m online)",
+           "no_market_hessian: a test of a regional-model mechanism run with market.market_supply_nq off, so no market supply Hessian is measured (capri_mod/tests/conftest.py)"]
 testpaths = ["capri_mod/tests", "capri_mod/pipeline/tests"]
 # tests that check a mechanism (adoption, accounts, reporting) run the market loop for 1-2 iterations on purpose; the
 # model warns loudly about any unconverged run, so this one expected warning is filtered here and every other warning

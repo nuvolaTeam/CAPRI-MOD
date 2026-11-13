@@ -70,11 +70,9 @@ def _state_ref(mm, prod_ratio, arm_ratio, mand):
 
 
 @pytest.fixture(scope="module")
-def market():
-    from pathlib import Path
-    from capri_mod.data.loaders import load_all_data
-    from capri_mod.market.market_module import MarketModule
-    return MarketModule(load_all_data(Path(__file__).resolve().parents[2] / "capri_data"))
+def market(base_market):
+    """The market module built from the model's data (conftest.py)."""
+    return base_market
 
 
 def _rel(a, b):

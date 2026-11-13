@@ -67,6 +67,30 @@ def model(_fresh_model):
     return copy.deepcopy(_fresh_model)
 
 
+#: four German units of one baseline iteration shared by the tests of the Green Deal instruments and the base accounts
+#: (13 November 2026: each ran its own baseline on 4, 6, 8 or 10 units, each measuring its own market supply Hessian)
+DE4 = _german_units(4)
+
+
+@pytest.fixture(scope="module")
+def _de4_baseline_once():
+    from capri_mod.model import CAPRIModel
+    from capri_mod.settings import override
+    with override({"market.market_supply_nq": False}):
+        m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
+        res = m.run(scenario="BASELINE", regions=DE4, max_outer_iter=1)
+    return m, res
+
+
+@pytest.fixture
+def de4_baseline(_de4_baseline_once):
+    """(a copy of the model after the baseline, the baseline's results) on DE4, without the market supply Hessian: for
+    tests marked no_market_hessian, whose scenarios start from that baseline."""
+    import copy
+    m, res = _de4_baseline_once
+    return copy.deepcopy(m), res
+
+
 def test_data_loads(data):
     assert "areas" in data
     assert "world_prices" in data
@@ -195,12 +219,19 @@ def test_supply_no_blowup(model):
 
 
 def test_full_run_all_modules(model):
-    regions = _german_units(5)
+    """One baseline iteration on the default path (the market supply Hessian included): every module returns, and the
+    environmental indicators cover every region (folded in from test_environmental_results_are_populated, 13 November
+    2026: two bugs, an undefined name in compute_ammonia and a missing @dataclass, had made every region fail inside
+    run_all_regions, which returned an empty table unnoticed)."""
+    regions = [r for r in ("FR240000", "DE400000") if r in model.data["areas"].index]
     r = model.run(scenario="BASELINE", max_outer_iter=1, market_max_iter=50,
                   regions=regions, run_environmental=True,
                   run_biofuel=True)
     for k in ["supply", "market", "environmental", "feed", "biofuel"]:
         assert r[k] is not None
+    env = r["environmental"]
+    assert len(env) == len(regions), f"environmental table has {len(env)} rows for {len(regions)} regions"
+    assert (env["n_surplus"] != 0).all() and (env["ghg_total"] > 0).all()
 
 
 def test_dairy_block_follows_capri_per_member_state(model):
@@ -271,6 +302,7 @@ def test_base_manure_trade_follows_capri_and_the_trade_setting(data):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_emission_tax_in_supply_follows_capri(model):
     """CAPRI's emission tax (ghgTax: p_carbonTax(ru, "GGWP") in the supply model's objective, EU regions only):
     each column's emission per unit at the baseline solution (the accounts' finite differences; cattle enteric CH4
@@ -321,6 +353,7 @@ def test_emission_tax_in_supply_follows_capri(model):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_manure_p_and_k_have_markets_of_their_own(model):
     """CAPRI's manure trade by FOUT (supply_model.gms e_netMTrade, e_costMTrade; manuremarket/simu_manure_market.gms,
     one market per nutrient): each EU region has P2O5 and K2O export and import columns besides N, priced at their own
@@ -345,6 +378,8 @@ def test_manure_p_and_k_have_markets_of_their_own(model):
 
 @pytest.mark.xfail(reason="KNOWN_ISSUES K127: under CAPRI's market calibration (S7) the tax leaves N trade at zero in "
                           "these four Belgian units, where the former form traded 360 t; cause open", strict=False)
+@pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_manure_n_trade_moves_under_the_emission_tax(model):
     """Under the emission tax, which prices N only, N manure trade moves while P and K trade do not follow it, and the
     three pools clear."""
@@ -359,6 +394,7 @@ def test_manure_n_trade_moves_under_the_emission_tax(model):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_manure_market_and_ammonia_options_in_every_eu_solve(model):
     """Sprint 9k: CAPRI's crop nutrient balance (NUTNED_) and manure market (e_netMTrade, e_costMTrade) are in every
     run, not only under the N target: each EU solve carries the crop-need row and, with manure trade on, the pool
@@ -513,6 +549,7 @@ def test_organic_and_mineral_caps_merge_as_capri():
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_mineral_fertiliser_cap_binds(model):
     """CAPRI's mineral fertiliser reduction (Green Deal mineRedu "20", minfert_redu_uaa.gms e_synNMax): the
     region's mineral N per ha of land falls to 80% of the baseline's, the cap's shadow price is positive, and the
@@ -754,6 +791,7 @@ def test_genetics_effects_follow_capri_breeding(model):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_endotech_settings_hold_for_baseline_and_scenario(model):
     """CAPRI's technology settings are scenario configuration loaded with the reference: a scenario with
     ghgTechMYld 0.2 is compared with a baseline at 0.2 (its own cache entry and genomics calibration)."""
@@ -1178,6 +1216,7 @@ def test_option_costsaving_drop_follows_capri(model):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_genetics_not_adopted_at_base(model):
     """breeding.gms calibration: IniShare 0, so a baseline run adopts (almost) nothing."""
     regions = ["DE110000", "FR520000", "IR010000"]
@@ -1549,6 +1588,7 @@ def test_market_mapping_consistency():
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_projection_null_trajectory_reproduces_base(model):
     """The projection layer's correctness gate.
 
@@ -1680,7 +1720,8 @@ def test_captrd_trajectory_is_usable_and_plausible():
 
 
 @pytest.mark.slow
-def test_set_aside_requirement_actually_binds(model):
+@pytest.mark.no_market_hessian
+def test_set_aside_requirement_actually_binds(de4_baseline):
     """A mandatory non-productive share must change the solve.
 
     Regression test for a silent-failure bug: `set_aside_requirement` was
@@ -1689,15 +1730,15 @@ def test_set_aside_requirement_actually_binds(model):
     never enforced in the supply constraints, so the scenario returned results
     bit-identical to the baseline while reporting success.
     """
-    regions = _german_units(10)
-    # two outer iterations: the requirement acts in the first regional solve (the test checks that it binds, not the
-    # converged equilibrium; 77 s with the full outer loop, 23 October 2026)
-    base = model.run(scenario="BASELINE", regions=regions, max_outer_iter=2)
+    # one outer iteration: the requirement acts in the first regional solve (the test checks that it binds, not the
+    # converged equilibrium; 77 s with the full outer loop, 23 October 2026; 10 units and 2 iterations until 13 November)
+    model, base = de4_baseline
+    regions = DE4
     from capri_mod.policy.policy_module import PolicyScenario
     # the requirement on its own (the Green Deal's landscape-elements floor; SET_ASIDE_10PCT, which set it, was
     # removed 3 November 2026)
     sa = model.run(custom_scenario=PolicyScenario(name="SET_ASIDE_FLOOR_10", set_aside_requirement=0.10),
-                   regions=regions, max_outer_iter=2)
+                   regions=regions, max_outer_iter=1)
 
     changes, acts_seen = [], []
     for reg, res in base.get("supply", {}).items():
@@ -1850,7 +1891,8 @@ def test_no_negative_own_price_elasticities(data):
                 "supply must rise when a crop's own price rises")
 
 
-def test_cap_support_not_double_counted(model):
+@pytest.mark.no_market_hessian
+def test_cap_support_not_double_counted(de4_baseline):
     """A BASELINE model run must not inflate supply above the calibrated base.
 
     The calibrated net revenue already contains cap_premium. The policy module's
@@ -1864,10 +1906,10 @@ def test_cap_support_not_double_counted(model):
     # Reference: the calibrated base levels. Until 23 October 2026 the reference was a bare SupplyModule.run without
     # the model's run state (feed rations and prices, manure pools); since the proxy removals of that day such a bare
     # solve no longer reproduces the base (DE11 wheat 71 against 91 kha; KNOWN_ISSUES K68), so it is no reference.
-    regions = _german_units(8)
+    model, res = de4_baseline
+    regions = DE4
     base_wheat = float(model.data["areas"].loc[regions, "SWHE"].sum())
 
-    res = model.run(scenario="BASELINE", regions=regions, max_outer_iter=1)
     run_wheat = sum(float(getattr(v, "activities", {}).get("SWHE", 0.0))
                     for v in res.get("supply", {}).values())
 
@@ -1907,7 +1949,8 @@ def test_elasticity_paths_are_base_year_aware():
 
 
 @pytest.mark.slow
-def test_organic_area_target_binds_and_is_a_noop_at_zero(model):
+@pytest.mark.no_market_hessian
+def test_organic_area_target_binds_and_is_a_noop_at_zero(de4_baseline):
     """The Farm-to-Fork organic AREA target must act on I/O coefficients.
 
     Previously only `organic_rate_change` existed (removed 23 October 2026) — a payment RATE, which is a
@@ -1918,7 +1961,8 @@ def test_organic_area_target_binds_and_is_a_noop_at_zero(model):
     """
     from capri_mod.policy.policy_module import PolicyScenario
 
-    regions = _german_units(8)
+    model, base_res = de4_baseline
+    regions = DE4
 
     def totals(res):
         out = {}
@@ -1930,8 +1974,7 @@ def test_organic_area_target_binds_and_is_a_noop_at_zero(model):
                 out[a] = out.get(a, 0.0) + float(val)
         return out
 
-    base = totals(model.run(scenario="BASELINE", regions=regions,
-                            max_outer_iter=1))
+    base = totals(base_res)
     zero = totals(model.run(custom_scenario=PolicyScenario(
         name="t", organic_area_target=0.0), regions=regions, max_outer_iter=1))
     tgt = totals(model.run(custom_scenario=PolicyScenario(
@@ -2000,6 +2043,7 @@ def test_projection_matches_capri_2030_reference(model):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_projection_starts_from_capri_reference_and_calibrates(model):
     """Sprint 9p: the 2030 baseline is projected with CAPRI's own 2030 reference (CAPMOD's reference run over CAPRI's
     2017 results, levels, yields and land types per region: capri_data/scenarios/capri_ref_2030), not its trend projection, and the
@@ -2177,7 +2221,8 @@ def test_permanent_crop_elasticities_match_capri(data):
 
 
 @pytest.mark.slow
-def test_pesticide_reduction_binds_and_is_a_noop_at_zero(model):
+@pytest.mark.no_market_hessian
+def test_pesticide_reduction_binds_and_is_a_noop_at_zero(de4_baseline):
     """The pesticide target's yield-loss channel must act, and only downward.
 
     CAPRI implements the F2F pesticide target as four shocks; only the 10%
@@ -2188,7 +2233,8 @@ def test_pesticide_reduction_binds_and_is_a_noop_at_zero(model):
     """
     from capri_mod.policy.policy_module import PolicyScenario
 
-    regions = _german_units(8)
+    model, base_res = de4_baseline
+    regions = DE4
 
     def totals(res):
         out = {}
@@ -2200,7 +2246,7 @@ def test_pesticide_reduction_binds_and_is_a_noop_at_zero(model):
                 out[a] = out.get(a, 0.0) + float(val)
         return out
 
-    base = totals(model.run(scenario="BASELINE", regions=regions, max_outer_iter=1))
+    base = totals(base_res)
     zero = totals(model.run(custom_scenario=PolicyScenario(
         name="t", pesticide_reduction=0.0), regions=regions, max_outer_iter=1))
     cut = totals(model.run(custom_scenario=PolicyScenario(
@@ -2223,6 +2269,7 @@ def test_pesticide_reduction_binds_and_is_a_noop_at_zero(model):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_unconverged_run_warns_and_is_recorded(model):
     """A run that does not converge must say so, loudly and in metadata.
 
@@ -2240,7 +2287,9 @@ def test_unconverged_run_warns_and_is_recorded(model):
     """
     import warnings as _w
 
-    regions = _german_units(4)
+    # one region (four until 13 November 2026, 285 s on the CI runner): the warning and the record do not depend on
+    # how many regions the run solves
+    regions = ["DE110000"]
 
     with _w.catch_warnings(record=True) as caught:
         _w.simplefilter("always")
@@ -2290,6 +2339,7 @@ def test_no_bogus_activity_codes_in_crop_groups(data):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_land_bounds_do_not_rewrite_the_base_year(data):
     """Neither land bound may cut a crop the base year says exists.
 
@@ -2308,8 +2358,11 @@ def test_land_bounds_do_not_rewrite_the_base_year(data):
     from capri_mod.model import CAPRIModel
 
     # in the model's run state (feed rations: the NLP form): a bare SupplyModule.run takes the plain QP path, which
-    # no longer reproduces the base since the proxy removals of 23 October 2026 (KNOWN_ISSUES K68)
-    regions = _german_units(25)
+    # no longer reproduces the base since the proxy removals of 23 October 2026 (KNOWN_ISSUES K68). The regions
+    # (13 November 2026; 25 German units before): where the land figures fall shortest of the crop areas, arable
+    # (ES420000: 2,954 kha of arable crops against 2,023 of ARABLE land) and permanent (BG020000 32 against 13,
+    # NL320000 20 against 1.5), and a German unit
+    regions = ["ES420000", "BG020000", "NL320000", "DE110000"]
     m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
     m.run(scenario="BASELINE", regions=regions, max_outer_iter=2)
     sm = m.supply_module
@@ -2455,7 +2508,8 @@ def test_solve_leaves_no_state_behind(data):
         "something mutated state and was not restored")
 
 
-def test_livestock_gross_output_is_marketed_product(model):
+@pytest.mark.no_market_hessian
+def test_livestock_gross_output_is_marketed_product(de4_baseline):
     """Livestock gross output must be real marketed product, in kt.
 
     It used to be level x CAPRI's YILD, which for breeding and suckler
@@ -2469,8 +2523,8 @@ def test_livestock_gross_output_is_marketed_product(model):
     """
     import math
 
-    regions = _german_units(6)
-    res = model.run(scenario="BASELINE", regions=regions, max_outer_iter=1)
+    model, res = de4_baseline
+    regions = DE4
 
     # NOT checked: output per head. Head counts are in CAPRI's own units, which
     # differ by species (poultry are in MILLION head, cattle in thousand), and
@@ -2690,19 +2744,6 @@ def test_greendeal_switchboard_mirrors_capri():
         greendeal_scenario(surpRedu=33)          # not a CAPRI GUI option
 
 
-def test_environmental_results_are_populated(model):
-    """Every run must return environmental indicators for its regions.
-
-    Two bugs - an undefined name in compute_ammonia and a missing @dataclass
-    decorator - made every region fail inside run_all_regions, which swallowed
-    the errors and returned an EMPTY table from every model run, unnoticed.
-    """
-    regions = [r for r in ("FR240000", "DE400000") if r in model.data["areas"].index]
-    res = model.run(scenario="BASELINE", regions=regions, max_outer_iter=1)
-    env = res["environmental"]
-    assert env is not None and len(env) == len(regions), \
-        f"environmental table has {0 if env is None else len(env)} rows for {len(regions)} regions"
-    assert (env["n_surplus"] != 0).all() and (env["ghg_total"] > 0).all()
 
 
 def test_fertiliser_substitution_is_exact_at_base(data):
@@ -2785,17 +2826,31 @@ def test_cover_crop_requirement_and_winter_cover_row(data):
     model.ev.cover = None
 
 
+_FR52 = {}
+
+
+def _fr52_baseline():
+    """FR520000's baseline of two outer iterations without the market supply Hessian, once per test process, for the
+    split tests: the split columns are calibrated on the first solve and enter from the second (until 23 October 2026
+    the land fallback's inner loop solved each region at least twice per supply run, so one outer iteration was
+    enough; without it a supply run solves each region once). Read only by the tests."""
+    if "m" not in _FR52:
+        from capri_mod.model import CAPRIModel
+        from capri_mod.settings import override
+        with override({"market.market_supply_nq": False}):
+            m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
+            m.run(scenario="BASELINE", regions=["FR520000"], max_outer_iter=2)
+        _FR52["m"] = m
+    return _FR52["m"]
+
+
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_dairy_split_column_calibrated_at_base():
     """CAPRI's dairy split (Sprint 7b): the column of cows moved from DCOH to DCOL is calibrated on
     the first baseline solve (linear term from the duals of the rows it enters, the cows'
     requirement rows included), so a second baseline solve keeps the base split (z ~ 0)."""
-    from capri_mod.model import CAPRIModel
-    m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
-    # two outer iterations: the split columns are calibrated on the first solve and enter from the second. Until
-    # 23 October 2026 the land fallback's inner loop solved each region at least twice per supply run, so one outer
-    # iteration was enough; without it a supply run solves each region once
-    m.run(scenario="BASELINE", regions=["FR520000"], max_outer_iter=2)
+    m = _fr52_baseline()
     mo = m.supply_module._models["FR520000"]
     di = m.data["dairy_intensity"].loc["FR520000"]
     assert di["dcomi_rel"] < 0 and di["dmann_rel"] < 0 and di["denne_rel"] < 0
@@ -3049,13 +3104,13 @@ def test_model_regions_are_capris_regional_units(data):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_bull_heifer_split_calibrated_at_base():
     """CAPRI's low/high-intensity bulls and heifers (Sprint 7c): one column per animal, calibrated on
     the first baseline solve like the dairy split, so a second baseline solve keeps the base split; a
     low-intensity stall turns over more animals (more young animals bought) and less manure N."""
     from capri_mod.model import CAPRIModel
-    m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
-    m.run(scenario="BASELINE", regions=["FR520000"], max_outer_iter=2)
+    m = _fr52_baseline()
     mo = m.supply_module._models["FR520000"]
     ct = m.data["cattle_intensity"]["FR520000"]
     assert ct["BULL"]["dyoung_rel"] > 0 and ct["BULL"]["dmann_rel"] < 0
@@ -3080,6 +3135,7 @@ def test_bull_heifer_split_calibrated_at_base():
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_parallel_regional_solves_match_sequential():
     """Sprint 9r: the regional supply models are solved across worker processes (one per core; the setting
     run.n_workers or SupplyModule.n_workers to change it).
@@ -3220,6 +3276,7 @@ def test_ghg_accounts_take_capris_methane_and_co2(data):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_fixed_activities_land_market_and_grass_as_capri(model):
     """Sprint 9s, the audit's open items: CAPRI's fixed activities (FACT: other oilseeds, other industrial crops,
     other animals) stay at their data level and other oilseeds have no market (CAPRI nonXX_CROPS; the pooled world
@@ -3365,6 +3422,7 @@ def test_manure_spread_follows_capri(data):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_jrc_relaxed_n_target_is_kept(model, monkeypatch):
     """JRC121368 sect. 4.3.4: where the tiered N target is infeasible the region's cut is the EU average (36%).
     NL12's regional model in CAPRI's form has no solution at the target below; the target is relaxed in CAPRI's form
@@ -3813,6 +3871,7 @@ def test_processing_inpe_and_nonEU_feed_are_capris_2030():
     assert abs(fd["USA|SOYC"]["elasticities"]["SOYC"] - e) < 1e-4
 
 
+@pytest.mark.no_market_hessian
 def test_rations_are_chosen_only_inside_the_supply_models(model):
     """With feeding inside the regional models (CAPRI: v_feedInpCoeff only there), no ration is chosen outside them:
     the ration state is the feed per head of the last regional solution (the base ration before the first)."""
@@ -3846,6 +3905,7 @@ def test_luc_model_reproduces_capris_2030_transitions():
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_nlp_solver_cache_is_exact(model, tmp_path, monkeypatch):
     """The regional NLP's IPOPT solver is kept by structure, every data value being a parameter: a second build of
     the same region reuses it and solves to the same point; changed data (prices) reuse it as well and move the
@@ -4044,6 +4104,7 @@ def test_n_leaching_follows_capri():
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_nlp_failure_keeps_ipopts_last_point_as_capri(model, monkeypatch):
     """KNOWN_ISSUES K55-1: where IPOPT fails for a region from every start and the relaxations do not help, CAPRI carries
     on with the non-optimal solve and records it (supply/simu_supply.gms, widen_bounds.gms: p_INFES). IPOPT's last point
@@ -4069,6 +4130,7 @@ def test_nlp_failure_keeps_ipopts_last_point_as_capri(model, monkeypatch):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_nlp_form_takes_jrc121368_relaxation_where_the_tiered_n_target_fails(model):
     """KNOWN_ISSUES K57: NL32 (outside JRC121368's nine capped regions) has no solution in CAPRI's form at the tiered
     Farm-to-Fork N target (NL13 until the K75 fix of 26 October 2026; since then NL13 meets it and NL32 is the one
@@ -4091,6 +4153,7 @@ def test_nlp_form_takes_jrc121368_relaxation_where_the_tiered_n_target_fails(mod
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_winter_cover_is_chosen_in_the_nlp_form(model):
     """CAPRI's winter cover as a choice (envind/cover_crops.gms, v_Miti(CATC, WinterCov); tools/
     build_winter_cover_option.py): the baseline keeps the base share (calibrated first-order point), the Farm-to-Fork
@@ -4150,6 +4213,7 @@ def test_non_eu_supply_elasticities_are_capri_regional(data):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_shocked_baseline_does_not_replace_the_cached_baseline(model):
     """KNOWN_ISSUES K52c: a world-price shock under scenario="BASELINE" is a scenario against the unshocked baseline."""
     regs = ["DE110000"]
@@ -4160,6 +4224,7 @@ def test_shocked_baseline_does_not_replace_the_cached_baseline(model):
     assert before == after
 
 
+@pytest.mark.no_market_hessian
 def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
     """KNOWN_ISSUES K59, K60: with CAPRI's LandBalNoSlak_ the grassland row is an equality at the base use, as the arable
     and permanent rows (it kept the land data's headroom: IE04 173 kha of grass at no land cost), and an idled histosol
@@ -4178,6 +4243,7 @@ def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_capri_land_rents_at_the_2030_calibration_point(model):
     """docs/LAND_RENT_CALIBRATION_PLAN.md: at the 2030 market year the land market is balanced at CAPRI's land rents
     (D_AREA of its 2030 reference, land_rents_2030.csv) and the NLP calibration fixes the land balances' multipliers at
@@ -4436,6 +4502,7 @@ def test_intensity_splits_at_capris_2030_point_with_manure_npk(data):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_ammonia_options_stay_at_their_base_shares_in_the_2030_baseline():
     """K63 (22 October 2026): without a policy incentive on N the regional NLP holds CAPRI's ammonia options at their
     initial shares (CAPRI: costsavings0 makes each option's net marginal cost at its initial share zero, and CONOPT stays
@@ -4612,6 +4679,7 @@ def _dying_in_fr10(region):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_dead_worker_does_not_hang_the_regional_solves(monkeypatch):
     """A regional-solve worker that dies (killed for memory) must not hang the run: the regions left are solved in
     the parent process, with a warning, and the results equal a run in one process (26 October 2026)."""
@@ -4639,6 +4707,7 @@ def test_dead_worker_does_not_hang_the_regional_solves(monkeypatch):
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_nlp_form_has_capri_fodder_equality_without_lagged_band():
     """CAPRI's fodder balance SUPBAL_ is an equality with the feed columns (capri_regional_nlp); the conic form's band
     rows, which carried the previous solve's fodder per head (K75), are no longer built (27 October 2026)."""
@@ -4673,6 +4742,7 @@ def test_activities_without_a_capri_term_are_held():
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_warm_start_from_the_last_solution_as_it_is(model, tmp_path, monkeypatch):
     """K79: the warm start takes the last solution as it is (a regulated flow moved only where it lies outside its
     support), so the point fits the last solution's multipliers and IPOPT's warm start ends at once; the cold start's
@@ -4713,6 +4783,7 @@ def test_3nop_from_capris_digestibility_table():
     assert n.elig_share.between(0.0, 305 / 365 + 1e-12).all()
 
 
+@pytest.mark.no_market_hessian
 def test_crop_diversification_log_floors_cover_ipopts_bound_relaxation(model, tmp_path, monkeypatch):
     """K97: the Shannon index row (cropDivGreening_) takes the log of each crop group's area plus a floor of 1e-6 kha
     plus IPOPT's bound relaxation over the group's columns (1e-8 per scaled column, x 10); the same floors in the base
@@ -4738,6 +4809,7 @@ def test_crop_diversification_log_floors_cover_ipopts_bound_relaxation(model, tm
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_kkt_step_matches_the_resolve_at_a_small_price_change(model, tmp_path, monkeypatch):
     """market.hessian_method = "kkt" (beyond CAPRI): the regional solution at changed parameters as the first-order step
     of the KKT conditions from the base solution (CapriRegionalNLP.kkt_step). Its activity levels follow IPOPT's
@@ -4975,6 +5047,7 @@ def test_cap14_ceilings_follow_capris_chain():
     assert "NO000000" not in cuts
 
 
+@pytest.mark.no_market_hessian
 def test_entitlement_limit_in_the_2030_regional_model(model):
     """K136: the regional model in CAPRI's 2030 calibration point carries sumEntl_ and overShotEntl_ (one overshoot
     column at the member state's cut, one row: the crop columns - overshoot <= the trend area); the crops are at their
