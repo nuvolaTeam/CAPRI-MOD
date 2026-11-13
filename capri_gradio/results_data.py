@@ -25,6 +25,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 __import__("sys").path.insert(0, str(ROOT))
 from capri_mod import io_results as IO  # noqa: E402
+from capri_mod.data.definitions import CROPS  # noqa: E402
 
 #: the dimensions of a stored row a view can filter on and pivot by, with the browser's names for them
 DIMS = {"region": "region", "rows": "item (rows)", "cols": "column (cols)", "dim5": "dim5"}
@@ -426,3 +427,118 @@ def regional_items(root, scenario: str, run_id: str) -> pd.DataFrame:
                                                                         n=("region", "nunique")).reset_index()
     it["additive"] = it["unit"].map(additive)
     return it[it["n"] >= 2].drop(columns="n")
+
+
+# --------------------------------------------------------------------------- #
+# Green Deal 2030 against CAPRI's: tools/check/compare_capri_gd.py on a stored run
+# --------------------------------------------------------------------------- #
+#: the N balance items compared: label -> (the model's environmental account column, CAPRI's dataOut item with NITF);
+#: both in 1000 t N (the model's accounts are in t). At member-state level the model's manure item includes the
+#: manure traded between its regions (environmental_module), CAPRI's EXCRET does not
+GD_N_ITEMS = {"mineral fertiliser (MINFER)": ("n_mineral_input", "MINFER"),
+              "manure (EXCRET)": ("n_organic_input", "EXCRET"),
+              "biological fixation (BIOFIX)": ("n_fixation", "BIOFIX"),
+              "atmospheric deposition (ATMOSD)": ("n_deposition", "ATMOSD"),
+              "removal with crop products (EXPPRD)": ("n_crop_uptake", "EXPPRD"),
+              "gross surplus (SURTOT)": ("n_surplus", "SURTOT")}
+#: the model's accounts in t, CAPRI's dataOut in 1000 t
+GD_N_UNIT_FACTOR = 1.0e-3
+
+
+def _gd_tool():
+    return _tool("compare_capri_gd")
+
+
+def gd_capri_effect() -> pd.DataFrame:
+    """CAPRI's Green Deal 2030 step against its reference (capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz):
+    region, activity, item, ref, scen, pct_change."""
+    return _gd_tool().capri_effect()
+
+
+def _eu_regions(regions) -> list:
+    return [r for r in regions if not str(r).startswith("NO")]
+
+
+def gd_activities(root, scenario: str, run_id: str) -> pd.DataFrame:
+    """The activity levels' % changes, the model's and CAPRI's, EU27 and per member state (compare_capri_gd)."""
+    return _gd_tool().activity_table(_loaded(root, scenario, run_id), gd_capri_effect(), by_ms=True)
+
+
+def gd_prices(root, scenario: str, run_id: str) -> pd.DataFrame:
+    """The EU producer prices' % changes, the model's market prices against CAPRI's EU27yr19 UVAP (compare_capri_gd)."""
+    return _gd_tool().price_table(_loaded(root, scenario, run_id), gd_capri_effect())
+
+
+def gd_yields(root, scenario: str, run_id: str) -> pd.DataFrame:
+    """The EU crop yields' % changes: the model's EU output over its EU area, against CAPRI's EU27yr19 YILD, for the
+    crops compare_capri_gd maps one to one."""
+    o = _loaded(root, scenario, run_id)
+    c = gd_capri_effect()
+    c = c[(c["region"] == "EU27yr19") & (c["item"] == "YILD")].set_index("activity")
+    (ab, as_), (ob, os_) = o["act"], o["out"]
+    rows = []
+    for a, cc in _gd_tool().ACTIVITIES.items():
+        if a not in CROPS or len(cc) != 1 or cc[0] not in c.index:
+            continue
+        if not (ab.get(a, 0) > 0 and as_.get(a, 0) > 0 and ob.get(a, 0) > 0):
+            continue
+        model = 100.0 * ((os_.get(a, 0.0) / as_[a]) / (ob[a] / ab[a]) - 1.0)
+        rows.append((a, float(c.at[cc[0], "pct_change"]), model))
+    t = pd.DataFrame(rows, columns=["crop", "capri_pct", "model_pct"])
+    t["gap_pts"] = t["model_pct"] - t["capri_pct"]
+    return t
+
+
+def gd_n_balance(root, scenario: str, run_id: str) -> pd.DataFrame:
+    """The N balance items (GD_N_ITEMS), EU27 and per member state: region, item, the model's and CAPRI's reference
+    and scenario (1000 t N) and % changes."""
+    o = _loaded(root, scenario, run_id)
+    eb, es = o["environmental"]
+    c = gd_capri_effect()
+    c = c[c["item"] == "NITF"].set_index(["region", "activity"])
+    regs = _eu_regions(eb.index)
+    groups = [("EU27", "EU27yr19", regs)]
+    groups += [(m, f"{m}000000", [r for r in regs if str(r)[:2] == m]) for m in sorted({str(r)[:2] for r in regs})]
+    rows = []
+    for label, creg, rr in groups:
+        for name, (mc, cc) in GD_N_ITEMS.items():
+            if mc not in eb.columns or (creg, cc) not in c.index:
+                continue
+            mb = float(eb.loc[rr, mc].sum()) * GD_N_UNIT_FACTOR
+            ms_ = float(es.reindex(rr)[mc].sum()) * GD_N_UNIT_FACTOR
+            cb, cs = float(c.at[(creg, cc), "ref"]), float(c.at[(creg, cc), "scen"])
+            rows.append((label, name, mb, ms_, cb, cs))
+    t = pd.DataFrame(rows, columns=["region", "item", "model_ref", "model_scen", "capri_ref", "capri_scen"])
+    with np.errstate(divide="ignore", invalid="ignore"):
+        t["model_pct"] = 100.0 * (t["model_scen"] / t["model_ref"] - 1.0)
+        t["capri_pct"] = 100.0 * (t["capri_scen"] / t["capri_ref"] - 1.0)
+    t["gap_pts"] = t["model_pct"] - t["capri_pct"]
+    return t
+
+
+def gd_regional(root, scenario: str, run_id: str, activity: str) -> pd.DataFrame:
+    """One activity's level in every regional unit both have, the model's and CAPRI's (summing CAPRI's activities that
+    compare_capri_gd maps to it): capri_unit, model_ref, model_scen, capri_ref, capri_scen, model_pct, capri_pct."""
+    o = _loaded(root, scenario, run_id)
+    b, s = o["act_regional"]
+    cc = _gd_tool().ACTIVITIES.get(activity, [activity])
+    c = gd_capri_effect()
+    c = c[(c["item"] == "LEVL") & c["activity"].isin(cc)].groupby("region")[["ref", "scen"]].sum()
+    rows = []
+    for r in _eu_regions(b):
+        if r not in c.index:
+            continue
+        rows.append((r, float(b[r].get(activity, 0.0)), float(s.get(r, {}).get(activity, 0.0)),
+                     float(c.at[r, "ref"]), float(c.at[r, "scen"])))
+    t = pd.DataFrame(rows, columns=["capri_unit", "model_ref", "model_scen", "capri_ref", "capri_scen"])
+    with np.errstate(divide="ignore", invalid="ignore"):
+        t["model_pct"] = np.where(t["model_ref"] > 0, 100.0 * (t["model_scen"] / t["model_ref"] - 1.0), np.nan)
+        t["capri_pct"] = np.where(t["capri_ref"] > 0, 100.0 * (t["capri_scen"] / t["capri_ref"] - 1.0), np.nan)
+    return t
+
+
+def gd_unit_values(regional: pd.DataFrame, who: str) -> pd.DataFrame:
+    """gd_regional's model or CAPRI columns in unit_values' layout (capri_unit, unit, baseline, scenario), for
+    map_frame."""
+    return pd.DataFrame({"capri_unit": regional["capri_unit"], "unit": "1000 ha or 1000 heads",
+                         "baseline": regional[f"{who}_ref"], "scenario": regional[f"{who}_scen"]})

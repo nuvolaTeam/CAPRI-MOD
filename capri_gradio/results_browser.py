@@ -45,9 +45,10 @@ def _layout(fig, title: str, height: int):
     return fig
 
 
-def map_figure(frame: pd.DataFrame, measure: str, title: str):
+def map_figure(frame: pd.DataFrame, measure: str, title: str, lim=None):
     """A choropleth of a map_frame on NUTS 2024: a change on the diverging scale centred at 0, a level on the blue
-    ramp; regions without a value grey; hover with the region, the value and the CAPRI units behind it."""
+    ramp; regions without a value grey; hover with the region, the value and the CAPRI units behind it. lim: the
+    change's saturation (default the 90th percentile of |value|; two maps to be compared take the same)."""
     import plotly.graph_objects as go
     geo = RD.nuts_geometry()
     names = {f["id"]: f["properties"]["name"] for f in geo["features"]}
@@ -55,7 +56,8 @@ def map_figure(frame: pd.DataFrame, measure: str, title: str):
     change = measure in ("% change", "scenario - baseline")
     # colours saturate at the 90th percentile of |value| (a region with a tiny base can change by 1000%); the hover
     # shows every region's own value
-    lim = max(float(np.nanpercentile(np.abs(f["value"]), 90)), 1e-9) if len(f) else 1.0
+    if lim is None:
+        lim = _saturation(f["value"])
     text = [f"{n} ({c})<br>CAPRI units: {u}" + (f"<br>{note}" if note else "")
             for c, n, u, note in zip(f["nuts2024"], f["nuts2024"].map(names), f["units"], f["note"])]
     fig = go.Figure()
@@ -77,6 +79,13 @@ def map_figure(frame: pd.DataFrame, measure: str, title: str):
     fig.add_annotation(text=GISCO_NOTE, x=0, y=0, xref="paper", yref="paper", showarrow=False,
                        font=dict(size=10, color="#6b6b66"), xanchor="left", yanchor="bottom")
     return _layout(fig, title, 620)
+
+
+def _saturation(values) -> float:
+    """The colour scale's saturation of a change map: the 90th percentile of |value| (a region with a tiny base can
+    change by 1000%)."""
+    v = np.abs(pd.Series(values, dtype=float).dropna())
+    return max(float(np.percentile(v, 90)), 1e-9) if len(v) else 1.0
 
 
 def bar_figure(labels, values, title: str, axis: str, colour: str = SERIES[0]):
@@ -109,6 +118,42 @@ def indicator_figure(ind: pd.DataFrame, run_cols: list):
                       legend=dict(orientation="h", yanchor="bottom", y=1.0, x=0))
     fig.update_xaxes(title="% change from the baseline (EU27)", gridcolor="#e7e6e2", zeroline=False)
     return _layout(fig, "Farm-to-Fork indicators: capri-mod against JRC121368", 820)
+
+
+def pair_figure(labels, model, capri, title: str, axis: str):
+    """The model's % changes beside CAPRI's, grouped horizontal bars in the order given (capri-mod blue, CAPRI orange,
+    a legend)."""
+    import plotly.graph_objects as go
+    d = pd.DataFrame({"l": list(labels), "m": list(model), "c": list(capri)}).iloc[::-1]
+    fig = go.Figure()
+    fig.add_trace(go.Bar(y=d["l"], x=d["m"], orientation="h", name="capri-mod", marker_color=SERIES[0],
+                         hovertemplate="%{y}: <b>%{x:+.1f}</b><extra>capri-mod</extra>"))
+    fig.add_trace(go.Bar(y=d["l"], x=d["c"], orientation="h", name="CAPRI", marker_color=SERIES[1],
+                         hovertemplate="%{y}: <b>%{x:+.1f}</b><extra>CAPRI</extra>"))
+    fig.add_vline(x=0, line_width=1, line_color="#8a8984")
+    fig.update_layout(barmode="group", bargap=0.25, bargroupgap=0.08,
+                      legend=dict(orientation="h", yanchor="bottom", y=1.0, x=0))
+    fig.update_xaxes(title=axis, gridcolor="#e7e6e2", zeroline=False)
+    fig.update_yaxes(title=None)
+    return _layout(fig, title, max(320, 34 * len(d) + 110))
+
+
+def scatter_figure(frame: pd.DataFrame, title: str):
+    """The regional units' % changes, the model's (y) against CAPRI's (x), with the diagonal; hover with the unit."""
+    import plotly.graph_objects as go
+    f = frame.dropna(subset=["model_pct", "capri_pct"])
+    lo = float(min(f["model_pct"].min(), f["capri_pct"].min(), 0.0)) if len(f) else -1.0
+    hi = float(max(f["model_pct"].max(), f["capri_pct"].max(), 0.0)) if len(f) else 1.0
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=[lo, hi], y=[lo, hi], mode="lines", line=dict(color="#8a8984", width=1, dash="dot"),
+                             hoverinfo="skip", showlegend=False))
+    fig.add_trace(go.Scatter(x=f["capri_pct"], y=f["model_pct"], mode="markers", text=f["capri_unit"],
+                             marker=dict(size=8, color=SERIES[0], line=dict(color="#ffffff", width=1)),
+                             hovertemplate="%{text}<br>CAPRI %{x:+.1f}%<br>capri-mod %{y:+.1f}%<extra></extra>",
+                             showlegend=False))
+    fig.update_xaxes(title="CAPRI, % change", gridcolor="#e7e6e2", zeroline=True, zerolinecolor="#c9c8c3")
+    fig.update_yaxes(title="capri-mod, % change", gridcolor="#e7e6e2", zeroline=True, zerolinecolor="#c9c8c3")
+    return _layout(fig, title, 520)
 
 
 def _labels(root) -> list:
@@ -304,6 +349,37 @@ def add_results(stores: list, app):
             cp_stats = gr.Dataframe(interactive=False, label="per block: median |dev| %, share within 10%")
             cp_ind = gr.Dataframe(interactive=False, label="Farm-to-Fork indicators, % change from the baseline")
 
+        with gr.Tab("Green Deal vs CAPRI"):
+            gr.Markdown(
+                "A Green Deal 2030 run (lnds8_org18_pest20_mine13crp_surp30) against the project lead's CAPRI run of "
+                "the same scenario from the same 2030 reference (`capri_data/validation/greendeal_2030`, "
+                "`tools/check/compare_capri_gd.py`). Only % changes from each model's own reference are compared: "
+                "some herds are counted in other units than CAPRI's activity levels (KNOWN_ISSUES K63). EU27 = "
+                "CAPRI's EU27yr19 and the model's regions outside Norway. A run on a subset of regions is not "
+                "comparable (KNOWN_ISSUES K83).")
+            with gr.Row():
+                gd_run = gr.Dropdown(labs0, value=first0, label="run", scale=4)
+                gd_go = gr.Button("Compare", variant="primary", scale=1)
+            gd_msg = gr.Markdown()
+            with gr.Row():
+                gd_act = gr.Plot(label="EU27 activity levels")
+                gd_pri = gr.Plot(label="EU27 producer prices")
+            with gr.Row():
+                gd_yld = gr.Plot(label="EU27 crop yields")
+                gd_nbal = gr.Plot(label="EU27 N balance")
+            gr.Markdown("**By member state and region**")
+            with gr.Row():
+                gd_item = gr.Dropdown([], label="activity (or N balance item)", scale=3)
+                gd_go2 = gr.Button("Draw", scale=1)
+            gd_ms = gr.Plot(label="by member state")
+            with gr.Row():
+                gd_map_m = gr.Plot(label="capri-mod, regional units")
+                gd_map_c = gr.Plot(label="CAPRI, regional units")
+            gd_sc = gr.Plot(label="regional units: capri-mod against CAPRI")
+            with gr.Accordion("tables", open=False):
+                gd_table = gr.Dataframe(interactive=False, label="EU27 and member states")
+                gd_file = gr.File(label="all comparisons (CSV)")
+
         # ================================================================== callbacks
         def load_runs(root):
             r = RD.runs(root)
@@ -311,7 +387,7 @@ def add_results(stores: list, app):
             first = labs[0] if labs else None
             show = r.drop(columns=["reference_run_id"]) if not r.empty else r
             # one update per output: Gradio consumes an update when it applies it
-            return (show, *[gr.update(choices=labs, value=first) for _ in range(4)],
+            return (show, *[gr.update(choices=labs, value=first) for _ in range(5)],
                     gr.update(choices=labs, value=[]))
 
         def load_runs_b(root):
@@ -409,9 +485,9 @@ def add_results(stores: list, app):
             return "  \n".join(msg), _shown(base), _shown(stats) if stats is not None else None, _shown(ind)
 
         # wiring
-        store.change(load_runs, store, [runs_df, run_pick, sv_run, cr_a, cp_run, cp_more])
-        refresh.click(load_runs, store, [runs_df, run_pick, sv_run, cr_a, cp_run, cp_more])
-        app.load(load_runs, store, [runs_df, run_pick, sv_run, cr_a, cp_run, cp_more])
+        store.change(load_runs, store, [runs_df, run_pick, sv_run, cr_a, cp_run, gd_run, cp_more])
+        refresh.click(load_runs, store, [runs_df, run_pick, sv_run, cr_a, cp_run, gd_run, cp_more])
+        app.load(load_runs, store, [runs_df, run_pick, sv_run, cr_a, cp_run, gd_run, cp_more])
         app.load(load_runs_b, store_b, cr_b)
         store_b.change(load_runs_b, store_b, cr_b)
 
@@ -437,6 +513,71 @@ def add_results(stores: list, app):
                               cr_measure, cr_down, cr_across], [cr_msg, cr_dev, cr_table, cr_chart, cr_file])
 
         cp_go.click(cp_show, [store, cp_run, cp_more], [cp_msg, cp_base, cp_stats, cp_ind])
+
+        # ------------------------------------------------------------------ Green Deal vs CAPRI
+        def _subset_note(root, s_, r_):
+            regs = str((RD.read_meta(root, s_, r_).get("options") or {}).get("regions") or "")
+            return (f"The run solved {len(regs.split(','))} regional units only (--regions): not comparable with "
+                    "CAPRI's EU27 (KNOWN_ISSUES K83). " if regs else "")
+
+        def gd_show(root, label):
+            if not label:
+                return ("Pick a run.",) + (None,) * 6 + (gr.update(choices=[], value=None),)
+            s_, r_ = RD.parse_label(label)
+            act = RD.gd_activities(root, s_, r_)
+            pri = RD.gd_prices(root, s_, r_)
+            yld = RD.gd_yields(root, s_, r_)
+            nb = RD.gd_n_balance(root, s_, r_)
+            eu = act[act["region"] == "EU27"]
+            nbe = nb[nb["region"] == "EU27"]
+            same = np.mean(np.sign(eu["capri_pct"].round(1)) == np.sign(eu["model_pct"].round(1))) if len(eu) else 0
+            msg = (_subset_note(root, s_, r_) + f"EU27 activities: mean absolute gap {eu['gap_pts'].abs().mean():.1f} "
+                   f"points, same sign {same:.0%}; prices: mean absolute gap {pri['gap_pts'].abs().mean():.1f} points; "
+                   f"N surplus {float(nbe.loc[nbe['item'].str.startswith('gross'), 'model_pct'].sum()):+.1f}% against "
+                   f"{float(nbe.loc[nbe['item'].str.startswith('gross'), 'capri_pct'].sum()):+.1f}%.")
+            f_act = pair_figure(eu["activity"], eu["model_pct"], eu["capri_pct"], "Activity levels, EU27",
+                                "% change from the reference")
+            f_pri = pair_figure(pri["product"], pri["model_pct"], pri["capri_pct"], "Producer prices, EU27",
+                                "% change from the reference")
+            f_yld = pair_figure(yld["crop"], yld["model_pct"], yld["capri_pct"], "Crop yields, EU27",
+                                "% change from the reference")
+            f_nb = pair_figure(nbe["item"], nbe["model_pct"], nbe["capri_pct"], "N balance, EU27",
+                               "% change from the reference")
+            table = pd.concat([act.assign(kind="activity"),
+                               pri.rename(columns={"product": "activity"}).assign(region="EU27", kind="price"),
+                               yld.rename(columns={"crop": "activity"}).assign(region="EU27", kind="yield"),
+                               nb.rename(columns={"item": "activity"}).assign(kind="N balance")], ignore_index=True)
+            items = list(eu["activity"]) + [f"N: {x}" for x in nbe["item"]]
+            return (msg, f_act, f_pri, f_yld, f_nb, _shown(table), _csv(table, "greendeal_vs_capri"),
+                    gr.update(choices=items, value="GRAI" if "GRAI" in items else (items[0] if items else None)))
+
+        def gd_draw(root, label, item):
+            if not (label and item):
+                return None, None, None, None
+            s_, r_ = RD.parse_label(label)
+            if item.startswith("N: "):
+                nb = RD.gd_n_balance(root, s_, r_)
+                d = nb[(nb["item"] == item[3:]) & (nb["region"] != "EU27")]
+                return (pair_figure(d["region"], d["model_pct"], d["capri_pct"], f"{item[3:]} by member state",
+                                    "% change from the reference"), None, None, None)
+            act = RD.gd_activities(root, s_, r_)
+            d = act[(act["activity"] == item) & (act["region"] != "EU27")]
+            f_ms = pair_figure(d["region"], d["model_pct"], d["capri_pct"], f"{item} by member state",
+                               "% change from the reference")
+            reg = RD.gd_regional(root, s_, r_, item)
+            fm = RD.map_frame(RD.gd_unit_values(reg, "model"), "% change")
+            fc = RD.map_frame(RD.gd_unit_values(reg, "capri"), "% change")
+            lim = max(_saturation(fm["value"]), _saturation(fc["value"]))     # one scale for both maps
+            mm = map_figure(fm, "% change", f"{item} · capri-mod", lim)
+            mc = map_figure(fc, "% change", f"{item} · CAPRI", lim)
+            ok = reg.dropna(subset=["model_pct", "capri_pct"])
+            corr = (f"correlation {np.corrcoef(ok['model_pct'], ok['capri_pct'])[0, 1]:.2f}" if len(ok) > 2
+                    else "too few units for a correlation")
+            sc = scatter_figure(reg, f"{item}: {len(ok)} regional units, {corr}")
+            return f_ms, mm, mc, sc
+
+        gd_go.click(gd_show, [store, gd_run], [gd_msg, gd_act, gd_pri, gd_yld, gd_nbal, gd_table, gd_file, gd_item])
+        gd_go2.click(gd_draw, [store, gd_run, gd_item], [gd_ms, gd_map_m, gd_map_c, gd_sc])
 
         # ------------------------------------------------------------------ map and charts
         def _item_label(r):

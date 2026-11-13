@@ -32,6 +32,15 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 13 November 2026 — the results browser: a Green Deal vs CAPRI tab
+
+- capri_gradio: a "Green Deal vs CAPRI" tab sets a stored Green Deal 2030 run beside CAPRI's own 2030 Green Deal step
+  (the project lead's run against its reference): % changes of the activity levels and the N balance items (EU27
+  and per member state), of the EU producer prices and the EU crop yields; one activity's regional changes as two maps on a shared colour scale
+  and a scatter of the model's against CAPRI's, with the correlation; tables and a CSV.
+- tools/build/extract_capri_gd_pair.py also keeps the crop yields at every level and CAPRI's N balance items (NITF:
+  MINFER, EXCRET, BIOFIX, ATMOSD, EXPPRD, SURTOT and the loss items); capri_gd_effect.csv.xz rebuilt (79,802 rows).
+- Test: test_the_green_deal_tab_compares_the_run_with_capris_step.
 ## 13 November 2026 — the idled histosols in the reported land (K137)
 
 - The environmental table's arable land, grassland and UAA include the histosols the regional model idles, as CAPRI's

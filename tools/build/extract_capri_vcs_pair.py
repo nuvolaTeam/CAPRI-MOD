@@ -50,7 +50,9 @@ def _keep(r, q, a, i):
     return None
 
 
-def read_gdx(path, lib):
+def read_gdx(path, lib, keep=None):
+    """dataOut's 2030 rows of a CAPRI result file that keep (default _keep) selects: {key: level}."""
+    keep = keep or _keep
     from gams.core import gdx
     h = gdx.new_gdxHandle_tp()
     ok, msg = gdx.gdxCreateD(h, lib, gdx.GMS_SSSIZE)
@@ -66,7 +68,7 @@ def read_gdx(path, lib):
             break
         if k[4] != "2030":
             continue
-        key = _keep(k[0], k[1], k[2], k[3])
+        key = keep(k[0], k[1], k[2], k[3])
         if key:
             out[key] = float(v[gdx.GMS_VAL_LEVEL])
     gdx.gdxDataReadDone(h); gdx.gdxClose(h)

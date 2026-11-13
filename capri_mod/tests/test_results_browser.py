@@ -102,3 +102,22 @@ def test_member_states_sum_only_additive_items(store):
     ms = RD.member_state_frame(v.assign(unit="1000 ha"), "scenario").set_index("member_state")
     assert ms.at["DE", "scenario"] == 15.0 and ms.at["NO", "scenario"] == 75.0
     assert RD.member_state_frame(v.assign(unit="EUR/t"), "scenario").empty
+
+
+def test_the_green_deal_tab_compares_the_run_with_capris_step(store):
+    """The Green Deal tab (compare_capri_gd on a stored run): the fixture's wheat area rises 50% in its EU units, beside
+    CAPRI's own change of the same units; Norway's unit is left out of the EU and of the map; an N balance item the
+    run does not hold is left out."""
+    c = RD.gd_capri_effect()
+    lev = c[(c["item"] == "LEVL") & (c["activity"] == "SWHE")].set_index("region")
+    a = RD.gd_activities(store, "scen_a", IDS["r1"])
+    eu = a[(a["region"] == "EU27") & (a["activity"] == "SWHE")].iloc[0]
+    assert np.isclose(eu["model_pct"], 50.0) and np.isclose(eu["capri_pct"], lev.at["EU27yr19", "pct_change"])
+    assert "NO" not in set(a["region"])
+    reg = RD.gd_regional(store, "scen_a", IDS["r1"], "SWHE").set_index("capri_unit")
+    assert sorted(reg.index) == ["DE110000", "FR240000"]
+    assert np.isclose(reg.at["DE110000", "model_pct"], 50.0)
+    assert np.isclose(reg.at["DE110000", "capri_pct"], lev.at["DE110000", "pct_change"])
+    m = RD.map_frame(RD.gd_unit_values(reg.reset_index(), "capri"), "% change").set_index("nuts2024")
+    assert np.isclose(m.at["DE11", "value"], lev.at["DE110000", "pct_change"])
+    assert RD.gd_n_balance(store, "scen_a", IDS["r1"]).empty

@@ -886,7 +886,11 @@ local, read-only web page over one or more stores (default `run.results_dir`; `p
 the runs with their convergence, settings changed and code version; a run's scenario against its baseline and two runs
 against each other as pivot tables (one dimension down, one across, single stored rows, no sums) and bar charts, with a
 CSV download; the baseline against CAPRI's 2030 reference and the Farm-to-Fork indicators against JRC121368, computed
-by `tools/check/compare_baseline_capri.py` and `tools/check/compare_runs.py`.
+by `tools/check/compare_baseline_capri.py` and `tools/check/compare_runs.py`; a Green Deal 2030 run against the
+project lead's CAPRI run of the same scenario (since 13 November 2026; `tools/check/compare_capri_gd.py`): EU27
+activity levels, producer prices, crop yields and N balance items as % changes beside CAPRI's, each activity and N item
+by member state, and an activity's change in every regional unit on two maps with one colour scale and as a scatter
+with its correlation.
 
 **The GUI (draft, since 7 November 2026).** `python capri_gradio/capri_gui.py [--llm none|openai|anthropic]
 [--llm-model NAME] [--llm-base-url URL] [--llm-key-env VAR]` opens a local page in the spirit of CAPRI's GUI: an
