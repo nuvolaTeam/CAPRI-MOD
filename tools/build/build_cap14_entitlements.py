@@ -27,7 +27,8 @@ Outputs (capri_data/2017/policy/):
       the same files' premium rates per premium group (pgvcsDCOW, pgvcsPULS, ... ; EUR per unit of the group's
       activities, policy.gms's PRMR), as written
   cap14_settings.csv           item, key, value, source
-      the greening share of the national ceiling (p_dpGreeningShareCAP14, CAP_2014_2020.gms), the BPS years
+      the greening share of the national ceiling (p_dpGreeningShareCAP14, CAP_2014_2020.gms), the area schemes'
+      rates per premium group (area_rate_PGSAPS: DPGREEN, DPYOUNG, DPFIRHA, DPNATCO, DPBPS_SAPS 1000), the BPS years
       (BPSYEARS, policy/policy_sets.gms), the member states under the single area payment scheme (DPCAP14_SAPS) and
       the payment schemes cut endogenously (dpEndCut, def_endCut.gms) and the simulation year whose trend levels
       the levels file holds (SIMY), the last three from sim_ini_21730's sets
@@ -152,6 +153,18 @@ def main() -> None:
     settings = [("greening_share", "MS", scalar_assignment(cap, "p_dpGreeningShareCAP14"), src_cap),
                 ("bps_years", "first", float(bps.group(1)), f"star 3.0 {POLICY_SETS.as_posix()}"),
                 ("bps_years", "last", float(bps.group(2)), f"star 3.0 {POLICY_SETS.as_posix()}")]
+    # the area schemes' rate per premium group (CAP_2014_2020.gms l. 309-357: PGSAPS = 1000, EUR per ha, cut down to
+    # the ceiling by prmcut.gms; set where the scheme has a ceiling, with its application type)
+    rx = re.compile(r'^\s*p_premDataE\(MS,BPSYEARS,"(\w+)","(PG\w+)"\)[^=\n]*=\s*([-\d.Ee+]+)\s*;', re.I | re.M)
+    # a GAMS label keeps the case of its first declaration: the schemes as sim_ini's PSDPAY writes them (the
+    # gms file writes dpbps_SAPS, the set and the results DPBPS_SAPS)
+    label = {str(s).lower(): str(s) for s in read_csv(a.sets / "PSDPAY.csv", keep_default_na=False).d0}
+    area = [(f"area_rate_{g.upper()}", label.get(sch.lower(), sch), float(v), src_cap) for sch, g, v in rx.findall(cap)]
+    if not area:
+        raise SystemExit("CAP_2014_2020.gms: no area scheme rates found")
+    if any(sch.lower() not in label for sch, _, _ in rx.findall(cap)):
+        raise SystemExit("CAP_2014_2020.gms: an area scheme not in PSDPAY")
+    settings += area
     settings += [("saps", ms, 1.0, "sim_ini_21730 set DPCAP14_SAPS")
                  for ms in read_csv(a.sets / "DPCAP14_SAPS.csv", keep_default_na=False).d0]
     settings += [("cut_scheme", dp, 1.0, "sim_ini_21730 set dpEndCut (policy/def_endCut.gms)")

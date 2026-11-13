@@ -4946,7 +4946,7 @@ def test_cap14_ceilings_follow_capris_chain():
 
     c = E.ms_ceilings(2030)
     ref = {("FR000000", "dp_bps"): 3918.661, ("FR000000", "DPFIRHA"): 1438.354, ("HR000000", "dp_bps"): 215.428,
-           ("HR000000", "DPFIRHA"): 29.840, ("PL000000", "dpbps_SAPS"): 1684.352, ("RO000000", "dpbps_SAPS"): 1047.142,
+           ("HR000000", "DPFIRHA"): 29.840, ("PL000000", "DPBPS_SAPS"): 1684.352, ("RO000000", "DPBPS_SAPS"): 1047.142,
            ("DK000000", "DPNATCO"): 2.657, ("NL000000", "DPGREEN"): 210.263}
     for (ms, s), v in ref.items():
         assert abs(c[ms][s] - v) < 1e-3, (ms, s, c[ms].get(s), v)

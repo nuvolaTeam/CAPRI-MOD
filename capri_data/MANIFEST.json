@@ -2109,7 +2109,7 @@
    "vintage": "2014-2020",
    "domain": "policy",
    "status": "live",
-   "rows": 19,
+   "rows": 24,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [

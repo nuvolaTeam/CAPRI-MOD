@@ -93,3 +93,22 @@ def test_the_coupled_support_cuts_follow_capris_2030_reference():
         for k, v in ref.items():
             if k[0] in units:
                 assert out["cutt"][k] == pytest.approx(v, rel=1e-5), k
+
+
+def test_the_area_schemes_premiums_follow_capris_2030_reference():
+    """P2: the greening, young-farmer, redistributive, natural-constraint and SAPS payments declared at 1000 EUR/ha
+    (PGSAPS) where the member state has a 2030 ceiling of the scheme (K136's chain), cut to it with the trend levels:
+    the premium per hectare equals CAPRI's 2030 reference PRME (dataOut, used as a check) at all 17928 unit x activity
+    x scheme records within 1e-7; four of them written here (Poland a SAPS member state, Denmark one unit)."""
+    root = Path(__file__).resolve().parents[2]
+    lev = pd.read_csv(root / "capri_data" / "2017" / "policy" / "cap14_entitlement_levels.csv")
+    ref = {("PL110000", "SWHE", "DPBPS_SAPS"): 119.55753491809446, ("PL110000", "SWHE", "DPGREEN"): 65.19316121640671,
+           ("DEA10000", "GRAE", "DPFIRHA"): 19.988459143036692, ("DK000000", "BARL", "DPNATCO"): 0.9990719432299865}
+    for ms in ("PL000000", "DE000000", "DK000000"):
+        units = [r for r in lev.region.unique() if capri_ms(r) == ms and r != ms] or [ms]
+        levels = {(r.region, r.activity): r.trd_kha for r in lev[lev.region.isin(units)].itertuples()}
+        prmd, weight, ceil = C.area_premiums(units, levels, 2030)
+        out = premiums(levels, prmd, weight, ceil, CeilingRegions(member_states={ms: units}))
+        for k, v in ref.items():
+            if k[0] in units:
+                assert out["prme"][k] == pytest.approx(v, rel=1e-6), k

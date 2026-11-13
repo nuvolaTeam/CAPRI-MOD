@@ -7,7 +7,7 @@ sumEntl_ and overShotEntl_ put in the regional model (l. 1885-1892; objective l.
     objective - overshoot x Cut
 
 Limit is the sum of the region's trend levels (DATA "LEVL" "TRD"), Cut the member state's ceilings of the cut
-schemes (dp_bps or dpbps_SAPS, DPYOUNG, DPFIRHA, DPNATCO: dpEndCut) x 1000 / the sum of its regions' limits, EUR per
+schemes (dp_bps or DPBPS_SAPS, DPYOUNG, DPFIRHA, DPNATCO: dpEndCut) x 1000 / the sum of its regions' limits, EUR per
 ha: a hectare beyond the trend area earns no area payment.
 
 The ceilings, as CAPRI's chain computes them (data: tools/build/build_cap14_entitlements.py):
@@ -75,7 +75,7 @@ def _filled(values: dict, years, keep=()) -> dict:
 
 def ms_ceilings(year: int, d=None) -> dict:
     """{member state: {scheme: ceiling, million EUR}} of the simulation year: DPGREEN, the BPS ceiling (dp_bps, or
-    dpbps_SAPS in the single-area-payment member states) and the shares' schemes, CAPRI's chain (module docstring)."""
+    DPBPS_SAPS in the single-area-payment member states) and the shares' schemes, CAPRI's chain (module docstring)."""
     d = data() if d is None else d
     st = d["settings"]
     bps_years = list(range(int(st["bps_years"]["first"]), int(st["bps_years"]["last"]) + 1))
@@ -119,7 +119,7 @@ def ms_ceilings(year: int, d=None) -> dict:
             for s in SHARE_SCHEMES:
                 per_year[y][s] = sh[(ms, s)].get(y, 0.0) / 100.0 * c
             rest = c - cp[ms].get(y, 0.0) - per_year[y]["DPGREEN"] - sum(per_year[y][s] for s in SHARE_SCHEMES)
-            per_year[y]["dpbps_SAPS" if ms in saps else "dp_bps"] = rest
+            per_year[y]["DPBPS_SAPS" if ms in saps else "dp_bps"] = rest
         if year in per_year:
             out[ms] = {s: v for s, v in per_year[year].items() if v != 0.0}
             continue

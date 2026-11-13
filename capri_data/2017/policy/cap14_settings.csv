@@ -1,4 +1,9 @@
 item,key,value,source
+area_rate_PGSAPS,DPBPS_SAPS,1000.0,star 3.0 scen/base_scenarios/CAP_2014_2020.gms
+area_rate_PGSAPS,DPFIRHA,1000.0,star 3.0 scen/base_scenarios/CAP_2014_2020.gms
+area_rate_PGSAPS,DPGREEN,1000.0,star 3.0 scen/base_scenarios/CAP_2014_2020.gms
+area_rate_PGSAPS,DPNATCO,1000.0,star 3.0 scen/base_scenarios/CAP_2014_2020.gms
+area_rate_PGSAPS,DPYOUNG,1000.0,star 3.0 scen/base_scenarios/CAP_2014_2020.gms
 bps_years,first,2000.0,star 3.0 policy/policy_sets.gms
 bps_years,last,2029.0,star 3.0 policy/policy_sets.gms
 cut_scheme,DPBPS_SAPS,1.0,sim_ini_21730 set dpEndCut (policy/def_endCut.gms)

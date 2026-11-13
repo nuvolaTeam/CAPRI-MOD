@@ -14,6 +14,7 @@ from __future__ import annotations
 from collections import defaultdict
 
 from capri_mod.data.definitions import capri_ms
+from capri_mod.supply import entitlements as _entl
 from capri_mod.supply import inputs as _inputs
 
 
@@ -73,4 +74,34 @@ def coupled_premiums(units, levels: dict, year: int, d=None):
                 for u in below:
                     if levels.get((u, a), 0.0) > 0.0:
                         prmd[(u, a, s)] = prmd.get((u, a, s), 0.0) + rate
+    return prmd, {k: 1.0 for k in prmd}, ceilings
+
+
+def area_premiums(units, levels: dict, year: int):
+    """The CAP 2014-2020 area schemes' declared premiums at the given units, their weights (1) and their member
+    states' ceilings, for premium_cut.premiums: the greening, young-farmer, redistributive and natural-constraint
+    payments and the SAPS (CAP_2014_2020.gms l. 309-357): the rate per premium group (PGSAPS, 1000 EUR per ha of every
+    activity of the group) where the member state has a ceiling of the scheme (the application type is set only
+    there), the ceiling of the simulation year (capri_mod/supply/entitlements.py, K136). The BPS of the member states
+    with the basic payment scheme (dp_bps) has a rate per region from its convergence (implement_bps.gms): P2c."""
+    ent = _entl.data()
+    rates = {item[len("area_rate_"):]: v for item, v in ent["settings"].items() if item.startswith("area_rate_")}
+    ceil_ms = _entl.ms_ceilings(year, ent)
+    groups = data()["groups"]
+    units = list(units)
+    prmd, ceilings = {}, {}
+    for g, by_scheme in rates.items():
+        for s, rate in by_scheme.items():
+            for ms, c in ceil_ms.items():
+                v = c.get(s, 0.0)
+                if v <= 0.0:
+                    continue
+                below = [u for u in units if capri_ms(u) == ms]
+                if not below:
+                    continue
+                ceilings[(ms, s)] = {"CEILVAL": v}
+                for a in groups.get(g, []):
+                    for u in below:
+                        if levels.get((u, a), 0.0) > 0.0:
+                            prmd[(u, a, s)] = prmd.get((u, a, s), 0.0) + rate
     return prmd, {k: 1.0 for k in prmd}, ceilings

@@ -44,6 +44,14 @@ and `docs/KNOWN_ISSUES.md`.
 - Checks (CAPRI's 2030 reference, as checks): the area schemes' cuts (BPS, SAPS, greening, young farmers,
   redistributive, ANC) equal CUTT in all 701 unit x scheme pairs of the EU (with CAPRI's PRMD and weights, the trend
   levels); the crop coupled schemes' cuts in FR, EL, ES and IT in 799 pairs within 4e-6.
+- The area schemes' declared premiums (cap14_premiums.area_premiums): 1000 EUR/ha per PGSAPS activity (the rates of
+  CAP_2014_2020.gms, cap14_settings.csv area_rate_PGSAPS) where the member state has a 2030 ceiling of the scheme
+  (entitlements.ms_ceilings, K136), the application type being set only there. Cut to the ceilings with the trend
+  levels they give CAPRI's 2030 reference PRME at all 17928 unit x model activity x scheme records (greening and young
+  farmers 6682 each, redistributive 2958, SAPS 1581, ANC 25) within 1e-7. The BPS (dp_bps) per region needs
+  implement_bps.gms's convergence: P2c.
+- The SAPS scheme written DPBPS_SAPS, as CAPRI's set PSDPAY and results write it (dpbps_SAPS in the gms file; a GAMS
+  label keeps the case of its first declaration): the builder takes the area schemes' spelling from PSDPAY.
 - The model still takes its premiums from cap_premium_activity.csv; P2b and P2c (claude/p2_premium_module_scoping.md)
   come before the switch.
 - Tests: capri_mod/tests/test_premium_cut.py.
