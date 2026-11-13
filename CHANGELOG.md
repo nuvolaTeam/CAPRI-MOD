@@ -135,8 +135,14 @@ and `docs/KNOWN_ISSUES.md`.
   CAPRI's calculate_premiums.gms): at each step up to the tenth (supply.premium_response_max_step) prmcut on the
   weighted levels of the last steps (outer_loop.capri_step_weights), the ported premiums' change over their value at
   the trend levels applied as a factor on the model's premium per activity (the supply model's
-  premium_factor_regional); a model activity of several CAPRI activities split by their trend shares (DEP-48). Not
-  run in the calibrated baseline, where every factor is 1.
+  premium_factor_regional). Each CAPRI activity at its trend level times its model activity's change against the
+  model's own baseline (DEP-48), so every factor is 1 at that baseline and the levels' units cancel; not run in the
+  calibrated baseline. A first version had put CAPRI's activities at the model's levels in the model's units
+  (stalls, poultry in thousands): factors up to 2.3 at the first step. The model's own splits (dairy z, the bulls'
+  and heifers' intensity pairs) give each CAPRI activity its own change.
+- Fixed K143: a regional premium factor on animals compounded at every solve of a regional model (the solve did not
+  restore livestock_premium_coef). With the premium response the mini-EU Farm-to-Fork run diverged on it; earlier,
+  tools/run/run_vcs_2030.py's coupled-support experiment overstated the animals' response (to be redone).
 - The model's baseline premiums are still CAPRI's 2030 reference PRME (capri_cap_premium_2030.csv); replacing them
   by the port at the trend levels needs CAPRI's reporting aggregates of the animal activities (DCOW, BULF, HEIF) first.
 - Tests: capri_mod/tests/test_mtr.py, test_premiums.py, test_premium_response.py.

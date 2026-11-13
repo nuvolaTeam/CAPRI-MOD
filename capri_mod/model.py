@@ -580,9 +580,20 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         if (not _is_base and str(_settings().get("supply.premium_response")) == "capri" and _yr is not None
                 and int(_yr) == int(_settings().get("projection.sim_year"))):
             from capri_mod.policy.premium_response import PremiumResponse
-            _prem_resp = PremiumResponse(int(_yr), int(_settings().get("run.base_year")),
-                                         _settings().get("outer_loop.capri_step_weights"),
-                                         int(_settings().get("supply.premium_response_max_step")))
+            # the factors are 1 at the model's own baseline (DEP-48): its solution for these regions
+            _bres = (getattr(self.par, "base_supply_cache", None) or {}).get(_key)
+            if _bres:
+                from capri_mod.policy.premium_response import model_splits as _msplits, shifts as _pshifts
+                _prem_resp = PremiumResponse(int(_yr), int(_settings().get("run.base_year")),
+                                             _settings().get("outer_loop.capri_step_weights"),
+                                             int(_settings().get("supply.premium_response_max_step")),
+                                             {r: res.activities.to_dict() for r, res in _bres.items()
+                                              if getattr(res, "activities", None) is not None},
+                                             {r: _pshifts(res) for r, res in _bres.items()},
+                                             {r: _msplits(self.data, r) for r in _bres})
+            else:
+                warnings.warn("supply.premium_response: no baseline of these regions solved in this model, so the "
+                              "premiums stay fixed during the scenario's steps", stacklevel=2)
         for outer_iter in range(max_outer_iter):
             self.ev.outer_iter_now = outer_iter
             self.ev.greendeal_group = bool(getattr(pol_scenario, "greendeal_group", False))
@@ -730,8 +741,10 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             self.seen.last_spol = _spol
             self.seen.last_supply_results = supply_results   # fodder shadow prices for the rations
             if _prem_resp is not None:
+                from capri_mod.policy.premium_response import shifts as _pshifts
                 _prem_resp.record(outer_iter + 1, {r: res.activities.to_dict() for r, res in supply_results.items()
-                                                   if getattr(res, "activities", None) is not None})
+                                                   if getattr(res, "activities", None) is not None},
+                                  {r: _pshifts(res) for r, res in supply_results.items()})
                 _pf = _prem_resp.factors(outer_iter + 1)
                 if _pf is not None:
                     _prem_fac = _pf

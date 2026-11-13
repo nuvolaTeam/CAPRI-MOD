@@ -51484,7 +51484,8 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/pipeline/tests/test_captrd_dairy_supports.py"
+     "capri_mod/pipeline/tests/test_captrd_dairy_supports.py",
+     "capri_mod/tests/test_premium_response.py"
     ]
    }
   },
