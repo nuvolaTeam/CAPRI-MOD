@@ -1,0 +1,72 @@
+# The test suite and a syntax lint on every push and pull request to main (and by hand from the Actions tab)
+name: Python application
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        # pyproject.toml: requires-python >= 3.11 (duckdb >= 2.0 has no wheel for 3.10); 3.13 is what the suite is
+        # run on in development
+        python-version: [ "3.11", "3.13" ]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: pip
+        cache-dependency-path: requirements.txt
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8
+        pip install -r requirements.txt
+
+    - name: Lint with flake8
+      run: |
+        # stop the build on syntax errors and undefined names (the block modules' injected names are exempted in .flake8)
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # everything else as warnings only
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    # the market supply Hessians the tests measure are cached by content (.cache/market_supply_hessian): kept between
+    # runs so later runs reuse those whose inputs did not change
+    - name: Cache the market supply Hessians
+      uses: actions/cache@v4
+      with:
+        path: .cache
+        key: hessians-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('capri_data/**', 'capri_mod/**/*.py', 'capri_mod/settings/*.toml') }}
+        restore-keys: |
+          hessians-${{ runner.os }}-py${{ matrix.python-version }}-
+
+    - name: Test with pytest
+      run: |
+        # two test processes as on an 8 GB machine (the runner has 16 GB); the longest tests start first (conftest.py)
+        python -m pytest -n 2 -ra --durations=25 --junitxml=pytest-${{ matrix.python-version }}.xml
+
+    - name: Upload the test report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: pytest-report-${{ matrix.python-version }}
+        path: pytest-${{ matrix.python-version }}.xml
