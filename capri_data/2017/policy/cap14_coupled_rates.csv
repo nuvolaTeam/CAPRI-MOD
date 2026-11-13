@@ -1,0 +1,1574 @@
+region,year,scheme,group,rate
+AT000000,2015,vcs-220-Austria-Sheepmeat and goatmeat,PGVCSSHG,9.0
+AT000000,2015,vcs-221-Austria-Sheepmeat and goatmeat,PGVCSSHG,2.0
+AT000000,2015,vcs-6-Austria-Beef and veal,PGVCSSCOW,62.0
+AT000000,2015,vcs-7-Austria-Beef and veal,PGVCSBULL,20.0
+AT000000,2016,vcs-220-Austria-Sheepmeat and goatmeat,PGVCSSHG,9.0
+AT000000,2016,vcs-221-Austria-Sheepmeat and goatmeat,PGVCSSHG,2.0
+AT000000,2016,vcs-6-Austria-Beef and veal,PGVCSSCOW,62.0
+AT000000,2016,vcs-7-Austria-Beef and veal,PGVCSBULL,21.0
+AT000000,2017,vcs-220-Austria-Sheepmeat and goatmeat,PGVCSSHG,9.0
+AT000000,2017,vcs-221-Austria-Sheepmeat and goatmeat,PGVCSSHG,2.0
+AT000000,2017,vcs-6-Austria-Beef and veal,PGVCSSCOW,62.0
+AT000000,2017,vcs-7-Austria-Beef and veal,PGVCSBULL,21.0
+AT000000,2018,vcs-220-Austria-Sheepmeat and goatmeat,PGVCSSHG,9.0
+AT000000,2018,vcs-221-Austria-Sheepmeat and goatmeat,PGVCSSHG,2.0
+AT000000,2018,vcs-6-Austria-Beef and veal,PGVCSSCOW,62.0
+AT000000,2018,vcs-7-Austria-Beef and veal,PGVCSBULL,21.0
+AT000000,2019,vcs-220-Austria-Sheepmeat and goatmeat,PGVCSSHG,9.0
+AT000000,2019,vcs-221-Austria-Sheepmeat and goatmeat,PGVCSSHG,2.0
+AT000000,2019,vcs-6-Austria-Beef and veal,PGVCSSCOW,62.0
+AT000000,2019,vcs-7-Austria-Beef and veal,PGVCSBULL,21.0
+AT000000,2020,vcs-220-Austria-Sheepmeat and goatmeat,PGVCSSHG,9.0
+AT000000,2020,vcs-221-Austria-Sheepmeat and goatmeat,PGVCSSHG,2.0
+AT000000,2020,vcs-6-Austria-Beef and veal,PGVCSSCOW,62.0
+AT000000,2020,vcs-7-Austria-Beef and veal,PGVCSBULL,21.0
+BG000000,2015,cscs-Bulgaria-cotton,PGCSCSTEXT,585.0
+BG000000,2015,vcs-12-Bulgaria-Beef and veal,PGVCSSCOW,114.0
+BG000000,2015,vcs-13-Bulgaria-Beef and veal,PGVCSDCOW,198.0
+BG000000,2015,vcs-139-Bulgaria-Milk and milk products,PGVCSDCOW,123.0
+BG000000,2015,vcs-14-Bulgaria-Beef and veal,PGVCSBULL,215.0
+BG000000,2015,vcs-181-Bulgaria-Protein crops,PGVCSPULS,156.0
+BG000000,2015,vcs-223-Bulgaria-Sheepmeat and goatmeat,PGVCSEWE,6.0
+BG000000,2015,vcs-224-Bulgaria-Sheepmeat and goatmeat,PGVCSEWE,31.0
+BG000000,2015,vcs-68-Bulgaria-Fruit and vegetables,PGVCSAPPL_OFRU,507.0
+BG000000,2015,vcs-69-Bulgaria-Fruit and vegetables,PGVCSTOMA_OVEG,470.0
+BG000000,2015,vcs-70-Bulgaria-Fruit and vegetables,PGVCSTOMA_OVEG,2500.0
+BG000000,2016,cscs-Bulgaria-cotton,PGCSCSTEXT,649.0
+BG000000,2016,vcs-12-Bulgaria-Beef and veal,PGVCSSCOW,114.0
+BG000000,2016,vcs-13-Bulgaria-Beef and veal,PGVCSDCOW,198.0
+BG000000,2016,vcs-139-Bulgaria-Milk and milk products,PGVCSDCOW,123.0
+BG000000,2016,vcs-14-Bulgaria-Beef and veal,PGVCSBULL,215.0
+BG000000,2016,vcs-181-Bulgaria-Protein crops,PGVCSPULS,156.0
+BG000000,2016,vcs-223-Bulgaria-Sheepmeat and goatmeat,PGVCSEWE,6.0
+BG000000,2016,vcs-224-Bulgaria-Sheepmeat and goatmeat,PGVCSEWE,31.0
+BG000000,2016,vcs-68-Bulgaria-Fruit and vegetables,PGVCSAPPL_OFRU,507.0
+BG000000,2016,vcs-69-Bulgaria-Fruit and vegetables,PGVCSTOMA_OVEG,475.0
+BG000000,2016,vcs-70-Bulgaria-Fruit and vegetables,PGVCSTOMA_OVEG,2500.0
+BG000000,2017,cscs-Bulgaria-cotton,PGCSCSTEXT,649.0
+BG000000,2017,vcs-12-Bulgaria-Beef and veal,PGVCSSCOW,114.0
+BG000000,2017,vcs-13-Bulgaria-Beef and veal,PGVCSDCOW,198.0
+BG000000,2017,vcs-139-Bulgaria-Milk and milk products,PGVCSDCOW,123.0
+BG000000,2017,vcs-14-Bulgaria-Beef and veal,PGVCSBULL,215.0
+BG000000,2017,vcs-181-Bulgaria-Protein crops,PGVCSPULS,156.0
+BG000000,2017,vcs-223-Bulgaria-Sheepmeat and goatmeat,PGVCSEWE,6.0
+BG000000,2017,vcs-224-Bulgaria-Sheepmeat and goatmeat,PGVCSEWE,31.0
+BG000000,2017,vcs-68-Bulgaria-Fruit and vegetables,PGVCSAPPL_OFRU,507.0
+BG000000,2017,vcs-69-Bulgaria-Fruit and vegetables,PGVCSTOMA_OVEG,478.0
+BG000000,2017,vcs-70-Bulgaria-Fruit and vegetables,PGVCSTOMA_OVEG,2500.0
+BG000000,2018,cscs-Bulgaria-cotton,PGCSCSTEXT,649.0
+BG000000,2018,vcs-12-Bulgaria-Beef and veal,PGVCSSCOW,114.0
+BG000000,2018,vcs-13-Bulgaria-Beef and veal,PGVCSDCOW,198.0
+BG000000,2018,vcs-139-Bulgaria-Milk and milk products,PGVCSDCOW,123.0
+BG000000,2018,vcs-14-Bulgaria-Beef and veal,PGVCSBULL,215.0
+BG000000,2018,vcs-181-Bulgaria-Protein crops,PGVCSPULS,157.0
+BG000000,2018,vcs-223-Bulgaria-Sheepmeat and goatmeat,PGVCSEWE,6.0
+BG000000,2018,vcs-224-Bulgaria-Sheepmeat and goatmeat,PGVCSEWE,31.0
+BG000000,2018,vcs-68-Bulgaria-Fruit and vegetables,PGVCSAPPL_OFRU,507.0
+BG000000,2018,vcs-69-Bulgaria-Fruit and vegetables,PGVCSTOMA_OVEG,483.0
+BG000000,2018,vcs-70-Bulgaria-Fruit and vegetables,PGVCSTOMA_OVEG,2500.0
+BG000000,2019,cscs-Bulgaria-cotton,PGCSCSTEXT,649.0
+BG000000,2019,vcs-12-Bulgaria-Beef and veal,PGVCSSCOW,114.0
+BG000000,2019,vcs-13-Bulgaria-Beef and veal,PGVCSDCOW,198.0
+BG000000,2019,vcs-139-Bulgaria-Milk and milk products,PGVCSDCOW,123.0
+BG000000,2019,vcs-14-Bulgaria-Beef and veal,PGVCSBULL,215.0
+BG000000,2019,vcs-181-Bulgaria-Protein crops,PGVCSPULS,157.0
+BG000000,2019,vcs-223-Bulgaria-Sheepmeat and goatmeat,PGVCSEWE,6.0
+BG000000,2019,vcs-224-Bulgaria-Sheepmeat and goatmeat,PGVCSEWE,31.0
+BG000000,2019,vcs-68-Bulgaria-Fruit and vegetables,PGVCSAPPL_OFRU,507.0
+BG000000,2019,vcs-69-Bulgaria-Fruit and vegetables,PGVCSTOMA_OVEG,488.0
+BG000000,2019,vcs-70-Bulgaria-Fruit and vegetables,PGVCSTOMA_OVEG,2500.0
+BG000000,2020,cscs-Bulgaria-cotton,PGCSCSTEXT,649.0
+BG000000,2020,vcs-12-Bulgaria-Beef and veal,PGVCSSCOW,114.0
+BG000000,2020,vcs-13-Bulgaria-Beef and veal,PGVCSDCOW,198.0
+BG000000,2020,vcs-139-Bulgaria-Milk and milk products,PGVCSDCOW,123.0
+BG000000,2020,vcs-14-Bulgaria-Beef and veal,PGVCSBULL,215.0
+BG000000,2020,vcs-181-Bulgaria-Protein crops,PGVCSPULS,157.0
+BG000000,2020,vcs-223-Bulgaria-Sheepmeat and goatmeat,PGVCSEWE,6.0
+BG000000,2020,vcs-224-Bulgaria-Sheepmeat and goatmeat,PGVCSEWE,31.0
+BG000000,2020,vcs-68-Bulgaria-Fruit and vegetables,PGVCSAPPL_OFRU,507.0
+BG000000,2020,vcs-69-Bulgaria-Fruit and vegetables,PGVCSTOMA_OVEG,488.0
+BG000000,2020,vcs-70-Bulgaria-Fruit and vegetables,PGVCSTOMA_OVEG,2500.0
+BL000000,2015,vcs-10-Belgium Wallonia-Beef and veal,PGVCSSCOW,152.0
+BL000000,2015,vcs-11-Belgium Wallonia-Beef and veal,PGVCSDCOW,136.0
+BL000000,2015,vcs-138-Belgium Wallonia-Milk and milk products,PGVCSDCOW,28.0
+BL000000,2015,vcs-222-Belgium Wallonia-Sheepmeat and goatmeat,PGVCSSHG,27.0
+BL000000,2015,vcs-8-Belgium Flanders-Beef and veal,PGVCSSCOW,156.0
+BL000000,2015,vcs-9-Belgium Flanders-Beef and veal,PGVCSCALV,9.0
+BL000000,2016,vcs-10-Belgium Wallonia-Beef and veal,PGVCSSCOW,150.0
+BL000000,2016,vcs-11-Belgium Wallonia-Beef and veal,PGVCSDCOW,134.0
+BL000000,2016,vcs-138-Belgium Wallonia-Milk and milk products,PGVCSDCOW,27.0
+BL000000,2016,vcs-222-Belgium Wallonia-Sheepmeat and goatmeat,PGVCSSHG,27.0
+BL000000,2016,vcs-8-Belgium Flanders-Beef and veal,PGVCSSCOW,150.0
+BL000000,2016,vcs-9-Belgium Flanders-Beef and veal,PGVCSCALV,8.0
+BL000000,2017,vcs-10-Belgium Wallonia-Beef and veal,PGVCSSCOW,147.0
+BL000000,2017,vcs-11-Belgium Wallonia-Beef and veal,PGVCSDCOW,132.0
+BL000000,2017,vcs-138-Belgium Wallonia-Milk and milk products,PGVCSDCOW,27.0
+BL000000,2017,vcs-222-Belgium Wallonia-Sheepmeat and goatmeat,PGVCSSHG,27.0
+BL000000,2017,vcs-8-Belgium Flanders-Beef and veal,PGVCSSCOW,147.0
+BL000000,2017,vcs-9-Belgium Flanders-Beef and veal,PGVCSCALV,8.0
+BL000000,2018,vcs-10-Belgium Wallonia-Beef and veal,PGVCSSCOW,145.0
+BL000000,2018,vcs-11-Belgium Wallonia-Beef and veal,PGVCSDCOW,130.0
+BL000000,2018,vcs-138-Belgium Wallonia-Milk and milk products,PGVCSDCOW,27.0
+BL000000,2018,vcs-222-Belgium Wallonia-Sheepmeat and goatmeat,PGVCSSHG,26.0
+BL000000,2018,vcs-8-Belgium Flanders-Beef and veal,PGVCSSCOW,141.0
+BL000000,2018,vcs-9-Belgium Flanders-Beef and veal,PGVCSCALV,8.0
+BL000000,2019,vcs-10-Belgium Wallonia-Beef and veal,PGVCSSCOW,143.0
+BL000000,2019,vcs-11-Belgium Wallonia-Beef and veal,PGVCSDCOW,128.0
+BL000000,2019,vcs-138-Belgium Wallonia-Milk and milk products,PGVCSDCOW,26.0
+BL000000,2019,vcs-222-Belgium Wallonia-Sheepmeat and goatmeat,PGVCSSHG,26.0
+BL000000,2019,vcs-8-Belgium Flanders-Beef and veal,PGVCSSCOW,139.0
+BL000000,2019,vcs-9-Belgium Flanders-Beef and veal,PGVCSCALV,8.0
+BL000000,2020,vcs-10-Belgium Wallonia-Beef and veal,PGVCSSCOW,143.0
+BL000000,2020,vcs-11-Belgium Wallonia-Beef and veal,PGVCSDCOW,128.0
+BL000000,2020,vcs-138-Belgium Wallonia-Milk and milk products,PGVCSDCOW,26.0
+BL000000,2020,vcs-222-Belgium Wallonia-Sheepmeat and goatmeat,PGVCSSHG,26.0
+BL000000,2020,vcs-8-Belgium Flanders-Beef and veal,PGVCSSCOW,155.0
+BL000000,2020,vcs-9-Belgium Flanders-Beef and veal,PGVCSCALV,9.0
+BL400000,2015,vcs-196-Luxembourg-Protein crops,PGVCSPULS,200.0
+BL400000,2016,vcs-196-Luxembourg-Protein crops,PGVCSPULS,200.0
+BL400000,2017,vcs-196-Luxembourg-Protein crops,PGVCSPULS,200.0
+BL400000,2018,vcs-196-Luxembourg-Protein crops,PGVCSPULS,200.0
+BL400000,2019,vcs-196-Luxembourg-Protein crops,PGVCSPULS,200.0
+BL400000,2020,vcs-196-Luxembourg-Protein crops,PGVCSPULS,200.0
+CY000000,2015,vcs-141-Cyprus-Milk and milk products,PGVCSSHG,20.0
+CY000000,2015,vcs-226-Cyprus-Sheepmeat and goatmeat,PGVCSSHG,10.0
+CY000000,2015,vcs-73-Cyprus-Fruit and vegetables,PGVCSCITRUS,500.0
+CY000000,2016,vcs-141-Cyprus-Milk and milk products,PGVCSSHG,20.0
+CY000000,2016,vcs-226-Cyprus-Sheepmeat and goatmeat,PGVCSSHG,10.0
+CY000000,2016,vcs-73-Cyprus-Fruit and vegetables,PGVCSCITRUS,500.0
+CY000000,2017,vcs-141-Cyprus-Milk and milk products,PGVCSSHG,20.0
+CY000000,2017,vcs-226-Cyprus-Sheepmeat and goatmeat,PGVCSSHG,10.0
+CY000000,2017,vcs-73-Cyprus-Fruit and vegetables,PGVCSCITRUS,500.0
+CY000000,2018,vcs-141-Cyprus-Milk and milk products,PGVCSSHG,20.0
+CY000000,2018,vcs-226-Cyprus-Sheepmeat and goatmeat,PGVCSSHG,10.0
+CY000000,2018,vcs-73-Cyprus-Fruit and vegetables,PGVCSCITRUS,500.0
+CY000000,2019,vcs-141-Cyprus-Milk and milk products,PGVCSSHG,20.0
+CY000000,2019,vcs-226-Cyprus-Sheepmeat and goatmeat,PGVCSSHG,10.0
+CY000000,2019,vcs-73-Cyprus-Fruit and vegetables,PGVCSCITRUS,500.0
+CY000000,2020,vcs-141-Cyprus-Milk and milk products,PGVCSSHG,20.0
+CY000000,2020,vcs-226-Cyprus-Sheepmeat and goatmeat,PGVCSSHG,10.0
+CY000000,2020,vcs-73-Cyprus-Fruit and vegetables,PGVCSCITRUS,500.0
+CZ000000,2015,vcs-132-Czech Republic-Hops,PGVCSOCRO,593.0
+CZ000000,2015,vcs-142-Czech Republic-Milk and milk products,PGVCSDCOW,126.0
+CZ000000,2015,vcs-17-Czech Republic-Beef and veal,PGVCSCALV,203.0
+CZ000000,2015,vcs-183-Czech Republic-Protein crops,PGVCSPULS,126.0
+CZ000000,2015,vcs-227-Czech Republic-Sheepmeat and goatmeat,PGVCSEWE,21.0
+CZ000000,2015,vcs-266-Czech Republic-Starch potato,PGVCSPOTATO,719.0
+CZ000000,2015,vcs-273-Czech Republic-Sugar beet,PGVCSSUGARBEET,267.0
+CZ000000,2015,vcs-74-Czech Republic-Fruit and vegetables,PGVCSAPPL_OFRU,444.0
+CZ000000,2015,vcs-75-Czech Republic-Fruit and vegetables,PGVCSAPPL_OFRU,237.0
+CZ000000,2015,vcs-76-Czech Republic-Fruit and vegetables,PGVCSPOTATO,90.0
+CZ000000,2015,vcs-77-Czech Republic-Fruit and vegetables,PGVCSTOMA_OVEG,373.0
+CZ000000,2015,vcs-78-Czech Republic-Fruit and vegetables,PGVCSTOMA_OVEG,221.0
+CZ000000,2016,vcs-132-Czech Republic-Hops,PGVCSOCRO,593.0
+CZ000000,2016,vcs-142-Czech Republic-Milk and milk products,PGVCSDCOW,126.0
+CZ000000,2016,vcs-17-Czech Republic-Beef and veal,PGVCSCALV,203.0
+CZ000000,2016,vcs-183-Czech Republic-Protein crops,PGVCSPULS,126.0
+CZ000000,2016,vcs-227-Czech Republic-Sheepmeat and goatmeat,PGVCSEWE,21.0
+CZ000000,2016,vcs-266-Czech Republic-Starch potato,PGVCSPOTATO,719.0
+CZ000000,2016,vcs-273-Czech Republic-Sugar beet,PGVCSSUGARBEET,267.0
+CZ000000,2016,vcs-74-Czech Republic-Fruit and vegetables,PGVCSAPPL_OFRU,444.0
+CZ000000,2016,vcs-75-Czech Republic-Fruit and vegetables,PGVCSAPPL_OFRU,237.0
+CZ000000,2016,vcs-76-Czech Republic-Fruit and vegetables,PGVCSPOTATO,90.0
+CZ000000,2016,vcs-77-Czech Republic-Fruit and vegetables,PGVCSTOMA_OVEG,373.0
+CZ000000,2016,vcs-78-Czech Republic-Fruit and vegetables,PGVCSTOMA_OVEG,221.0
+CZ000000,2017,vcs-132-Czech Republic-Hops,PGVCSOCRO,593.0
+CZ000000,2017,vcs-142-Czech Republic-Milk and milk products,PGVCSDCOW,126.0
+CZ000000,2017,vcs-17-Czech Republic-Beef and veal,PGVCSCALV,202.0
+CZ000000,2017,vcs-183-Czech Republic-Protein crops,PGVCSPULS,126.0
+CZ000000,2017,vcs-227-Czech Republic-Sheepmeat and goatmeat,PGVCSEWE,21.0
+CZ000000,2017,vcs-266-Czech Republic-Starch potato,PGVCSPOTATO,719.0
+CZ000000,2017,vcs-273-Czech Republic-Sugar beet,PGVCSSUGARBEET,267.0
+CZ000000,2017,vcs-74-Czech Republic-Fruit and vegetables,PGVCSAPPL_OFRU,444.0
+CZ000000,2017,vcs-75-Czech Republic-Fruit and vegetables,PGVCSAPPL_OFRU,237.0
+CZ000000,2017,vcs-76-Czech Republic-Fruit and vegetables,PGVCSPOTATO,90.0
+CZ000000,2017,vcs-77-Czech Republic-Fruit and vegetables,PGVCSTOMA_OVEG,373.0
+CZ000000,2017,vcs-78-Czech Republic-Fruit and vegetables,PGVCSTOMA_OVEG,221.0
+CZ000000,2018,vcs-132-Czech Republic-Hops,PGVCSOCRO,593.0
+CZ000000,2018,vcs-142-Czech Republic-Milk and milk products,PGVCSDCOW,130.0
+CZ000000,2018,vcs-17-Czech Republic-Beef and veal,PGVCSCALV,209.0
+CZ000000,2018,vcs-183-Czech Republic-Protein crops,PGVCSPULS,129.0
+CZ000000,2018,vcs-227-Czech Republic-Sheepmeat and goatmeat,PGVCSEWE,22.0
+CZ000000,2018,vcs-266-Czech Republic-Starch potato,PGVCSPOTATO,719.0
+CZ000000,2018,vcs-273-Czech Republic-Sugar beet,PGVCSSUGARBEET,267.0
+CZ000000,2018,vcs-74-Czech Republic-Fruit and vegetables,PGVCSAPPL_OFRU,444.0
+CZ000000,2018,vcs-75-Czech Republic-Fruit and vegetables,PGVCSAPPL_OFRU,237.0
+CZ000000,2018,vcs-76-Czech Republic-Fruit and vegetables,PGVCSPOTATO,90.0
+CZ000000,2018,vcs-77-Czech Republic-Fruit and vegetables,PGVCSTOMA_OVEG,373.0
+CZ000000,2018,vcs-78-Czech Republic-Fruit and vegetables,PGVCSTOMA_OVEG,221.0
+CZ000000,2019,vcs-132-Czech Republic-Hops,PGVCSOCRO,593.0
+CZ000000,2019,vcs-142-Czech Republic-Milk and milk products,PGVCSDCOW,130.0
+CZ000000,2019,vcs-17-Czech Republic-Beef and veal,PGVCSCALV,209.0
+CZ000000,2019,vcs-183-Czech Republic-Protein crops,PGVCSPULS,129.0
+CZ000000,2019,vcs-227-Czech Republic-Sheepmeat and goatmeat,PGVCSEWE,22.0
+CZ000000,2019,vcs-266-Czech Republic-Starch potato,PGVCSPOTATO,719.0
+CZ000000,2019,vcs-273-Czech Republic-Sugar beet,PGVCSSUGARBEET,267.0
+CZ000000,2019,vcs-74-Czech Republic-Fruit and vegetables,PGVCSAPPL_OFRU,444.0
+CZ000000,2019,vcs-75-Czech Republic-Fruit and vegetables,PGVCSAPPL_OFRU,237.0
+CZ000000,2019,vcs-76-Czech Republic-Fruit and vegetables,PGVCSPOTATO,90.0
+CZ000000,2019,vcs-77-Czech Republic-Fruit and vegetables,PGVCSTOMA_OVEG,373.0
+CZ000000,2019,vcs-78-Czech Republic-Fruit and vegetables,PGVCSTOMA_OVEG,221.0
+CZ000000,2020,vcs-132-Czech Republic-Hops,PGVCSOCRO,593.0
+CZ000000,2020,vcs-142-Czech Republic-Milk and milk products,PGVCSDCOW,132.0
+CZ000000,2020,vcs-17-Czech Republic-Beef and veal,PGVCSCALV,212.0
+CZ000000,2020,vcs-183-Czech Republic-Protein crops,PGVCSPULS,130.0
+CZ000000,2020,vcs-227-Czech Republic-Sheepmeat and goatmeat,PGVCSEWE,22.0
+CZ000000,2020,vcs-266-Czech Republic-Starch potato,PGVCSPOTATO,719.0
+CZ000000,2020,vcs-273-Czech Republic-Sugar beet,PGVCSSUGARBEET,267.0
+CZ000000,2020,vcs-74-Czech Republic-Fruit and vegetables,PGVCSAPPL_OFRU,444.0
+CZ000000,2020,vcs-75-Czech Republic-Fruit and vegetables,PGVCSAPPL_OFRU,237.0
+CZ000000,2020,vcs-76-Czech Republic-Fruit and vegetables,PGVCSPOTATO,90.0
+CZ000000,2020,vcs-77-Czech Republic-Fruit and vegetables,PGVCSTOMA_OVEG,373.0
+CZ000000,2020,vcs-78-Czech Republic-Fruit and vegetables,PGVCSTOMA_OVEG,221.0
+DK000000,2015,vcs-18-Denmark-Beef and veal,PGVCSSLAUGHTERPRE,79.0
+DK000000,2016,vcs-18-Denmark-Beef and veal,PGVCSSLAUGHTERPRE,79.0
+DK000000,2017,vcs-18-Denmark-Beef and veal,PGVCSSLAUGHTERPRE,79.0
+DK000000,2018,vcs-18-Denmark-Beef and veal,PGVCSSLAUGHTERPRE,79.0
+DK000000,2019,vcs-18-Denmark-Beef and veal,PGVCSSLAUGHTERPRE,79.0
+DK000000,2020,vcs-18-Denmark-Beef and veal,PGVCSSLAUGHTERPRE,79.0
+EE000000,2015,vcs-143-Estonia-Milk and milk products,PGVCSDCOW,100.0
+EE000000,2015,vcs-19-Estonia-Beef and veal,PGVCSSCOW,100.0
+EE000000,2015,vcs-228-Estonia-Sheepmeat and goatmeat,PGVCSEWE,15.0
+EE000000,2015,vcs-79-Estonia-Fruit and vegetables,PGVCSOFRU,238.0
+EE000000,2016,vcs-143-Estonia-Milk and milk products,PGVCSDCOW,100.0
+EE000000,2016,vcs-19-Estonia-Beef and veal,PGVCSSCOW,100.0
+EE000000,2016,vcs-228-Estonia-Sheepmeat and goatmeat,PGVCSEWE,15.0
+EE000000,2016,vcs-79-Estonia-Fruit and vegetables,PGVCSOFRU,238.0
+EE000000,2017,vcs-143-Estonia-Milk and milk products,PGVCSDCOW,100.0
+EE000000,2017,vcs-19-Estonia-Beef and veal,PGVCSSCOW,100.0
+EE000000,2017,vcs-228-Estonia-Sheepmeat and goatmeat,PGVCSEWE,15.0
+EE000000,2017,vcs-79-Estonia-Fruit and vegetables,PGVCSOFRU,238.0
+EE000000,2018,vcs-143-Estonia-Milk and milk products,PGVCSDCOW,100.0
+EE000000,2018,vcs-19-Estonia-Beef and veal,PGVCSSCOW,100.0
+EE000000,2018,vcs-228-Estonia-Sheepmeat and goatmeat,PGVCSEWE,15.0
+EE000000,2018,vcs-79-Estonia-Fruit and vegetables,PGVCSOFRU,238.0
+EE000000,2019,vcs-143-Estonia-Milk and milk products,PGVCSDCOW,100.0
+EE000000,2019,vcs-19-Estonia-Beef and veal,PGVCSSCOW,100.0
+EE000000,2019,vcs-228-Estonia-Sheepmeat and goatmeat,PGVCSEWE,15.0
+EE000000,2019,vcs-79-Estonia-Fruit and vegetables,PGVCSOFRU,238.0
+EE000000,2020,vcs-143-Estonia-Milk and milk products,PGVCSDCOW,100.0
+EE000000,2020,vcs-19-Estonia-Beef and veal,PGVCSSCOW,100.0
+EE000000,2020,vcs-228-Estonia-Sheepmeat and goatmeat,PGVCSEWE,15.0
+EE000000,2020,vcs-79-Estonia-Fruit and vegetables,PGVCSOFRU,238.0
+EL000000,2015,cscs-Greece-cotton,PGCSCSTEXT,234.0
+EL000000,2015,vcs-122-Greece-Grain legumes,PGVCSPULS,303.0
+EL000000,2015,vcs-190-Greece-Protein crops,PGVCSPULS,175.0
+EL000000,2015,vcs-205-Greece-Rice,PGVCSRICE,267.0
+EL000000,2015,vcs-213-Greece-Seeds,PGVCSSEEDSOILFIBERLEGUMESFODDER,294.0
+EL000000,2015,vcs-239-Greece-Sheepmeat and goatmeat,PGVCSEWE,7.0
+EL000000,2015,vcs-241-Greece-Sheepmeat and goatmeat,PGVCSEWE,5.0
+EL000000,2015,vcs-261-Greece-Silkworms,PGVCSOANI,160.0
+EL000000,2015,vcs-264-Greece-Special entitlements,PGVCSSHG,150.0
+EL000000,2015,vcs-275-Greece-Sugar beet,PGVCSSUGARBEET,250.0
+EL000000,2015,vcs-35-Greece-Beef and veal,PGVCSSCOW,128.0
+EL000000,2015,vcs-62-Greece-Cereals,PGVCSDURUM,36.0
+EL000000,2015,vcs-86-Greece-Fruit and vegetables,PGVCSTOMA,274.0
+EL000000,2015,vcs-87-Greece-Fruit and vegetables,PGVCSCITRUS,316.0
+EL000000,2015,vcs-88-Greece-Fruit and vegetables,PGVCSOVEG,385.0
+EL000000,2015,vcs-89-Greece-Fruit and vegetables,PGVCSOFRU,200.0
+EL000000,2016,cscs-Greece-cotton,PGCSCSTEXT,234.0
+EL000000,2016,vcs-122-Greece-Grain legumes,PGVCSPULS,299.0
+EL000000,2016,vcs-190-Greece-Protein crops,PGVCSPULS,173.0
+EL000000,2016,vcs-205-Greece-Rice,PGVCSRICE,264.0
+EL000000,2016,vcs-213-Greece-Seeds,PGVCSSEEDSOILFIBERLEGUMESFODDER,291.0
+EL000000,2016,vcs-239-Greece-Sheepmeat and goatmeat,PGVCSEWE,7.0
+EL000000,2016,vcs-241-Greece-Sheepmeat and goatmeat,PGVCSEWE,5.0
+EL000000,2016,vcs-261-Greece-Silkworms,PGVCSOANI,158.0
+EL000000,2016,vcs-264-Greece-Special entitlements,PGVCSSHG,148.0
+EL000000,2016,vcs-275-Greece-Sugar beet,PGVCSSUGARBEET,346.0
+EL000000,2016,vcs-35-Greece-Beef and veal,PGVCSSCOW,127.0
+EL000000,2016,vcs-62-Greece-Cereals,PGVCSDURUM,47.0
+EL000000,2016,vcs-86-Greece-Fruit and vegetables,PGVCSTOMA,333.0
+EL000000,2016,vcs-87-Greece-Fruit and vegetables,PGVCSCITRUS,416.0
+EL000000,2016,vcs-88-Greece-Fruit and vegetables,PGVCSOVEG,380.0
+EL000000,2016,vcs-89-Greece-Fruit and vegetables,PGVCSOFRU,198.0
+EL000000,2017,cscs-Greece-cotton,PGCSCSTEXT,234.0
+EL000000,2017,vcs-122-Greece-Grain legumes,PGVCSPULS,296.0
+EL000000,2017,vcs-190-Greece-Protein crops,PGVCSPULS,171.0
+EL000000,2017,vcs-205-Greece-Rice,PGVCSRICE,260.0
+EL000000,2017,vcs-213-Greece-Seeds,PGVCSSEEDSOILFIBERLEGUMESFODDER,287.0
+EL000000,2017,vcs-239-Greece-Sheepmeat and goatmeat,PGVCSEWE,7.0
+EL000000,2017,vcs-241-Greece-Sheepmeat and goatmeat,PGVCSEWE,5.0
+EL000000,2017,vcs-261-Greece-Silkworms,PGVCSOANI,156.0
+EL000000,2017,vcs-264-Greece-Special entitlements,PGVCSSHG,146.0
+EL000000,2017,vcs-275-Greece-Sugar beet,PGVCSSUGARBEET,342.0
+EL000000,2017,vcs-35-Greece-Beef and veal,PGVCSSCOW,125.0
+EL000000,2017,vcs-62-Greece-Cereals,PGVCSDURUM,57.0
+EL000000,2017,vcs-86-Greece-Fruit and vegetables,PGVCSTOMA,411.0
+EL000000,2017,vcs-87-Greece-Fruit and vegetables,PGVCSCITRUS,411.0
+EL000000,2017,vcs-88-Greece-Fruit and vegetables,PGVCSOVEG,376.0
+EL000000,2017,vcs-89-Greece-Fruit and vegetables,PGVCSOFRU,195.0
+EL000000,2018,cscs-Greece-cotton,PGCSCSTEXT,234.0
+EL000000,2018,vcs-122-Greece-Grain legumes,PGVCSPULS,293.0
+EL000000,2018,vcs-190-Greece-Protein crops,PGVCSPULS,169.0
+EL000000,2018,vcs-205-Greece-Rice,PGVCSRICE,258.0
+EL000000,2018,vcs-213-Greece-Seeds,PGVCSSEEDSOILFIBERLEGUMESFODDER,284.0
+EL000000,2018,vcs-239-Greece-Sheepmeat and goatmeat,PGVCSEWE,7.0
+EL000000,2018,vcs-241-Greece-Sheepmeat and goatmeat,PGVCSEWE,5.0
+EL000000,2018,vcs-261-Greece-Silkworms,PGVCSOANI,155.0
+EL000000,2018,vcs-264-Greece-Special entitlements,PGVCSSHG,145.0
+EL000000,2018,vcs-275-Greece-Sugar beet,PGVCSSUGARBEET,338.0
+EL000000,2018,vcs-35-Greece-Beef and veal,PGVCSSCOW,124.0
+EL000000,2018,vcs-62-Greece-Cereals,PGVCSDURUM,56.0
+EL000000,2018,vcs-86-Greece-Fruit and vegetables,PGVCSTOMA,407.0
+EL000000,2018,vcs-87-Greece-Fruit and vegetables,PGVCSCITRUS,407.0
+EL000000,2018,vcs-88-Greece-Fruit and vegetables,PGVCSOVEG,371.0
+EL000000,2018,vcs-89-Greece-Fruit and vegetables,PGVCSOFRU,193.0
+EL000000,2019,cscs-Greece-cotton,PGCSCSTEXT,234.0
+EL000000,2019,vcs-122-Greece-Grain legumes,PGVCSPULS,289.0
+EL000000,2019,vcs-190-Greece-Protein crops,PGVCSPULS,167.0
+EL000000,2019,vcs-205-Greece-Rice,PGVCSRICE,255.0
+EL000000,2019,vcs-213-Greece-Seeds,PGVCSSEEDSOILFIBERLEGUMESFODDER,281.0
+EL000000,2019,vcs-239-Greece-Sheepmeat and goatmeat,PGVCSEWE,7.0
+EL000000,2019,vcs-241-Greece-Sheepmeat and goatmeat,PGVCSEWE,5.0
+EL000000,2019,vcs-261-Greece-Silkworms,PGVCSOANI,153.0
+EL000000,2019,vcs-264-Greece-Special entitlements,PGVCSSHG,143.0
+EL000000,2019,vcs-275-Greece-Sugar beet,PGVCSSUGARBEET,334.0
+EL000000,2019,vcs-35-Greece-Beef and veal,PGVCSSCOW,122.0
+EL000000,2019,vcs-62-Greece-Cereals,PGVCSDURUM,55.0
+EL000000,2019,vcs-86-Greece-Fruit and vegetables,PGVCSTOMA,402.0
+EL000000,2019,vcs-87-Greece-Fruit and vegetables,PGVCSCITRUS,402.0
+EL000000,2019,vcs-88-Greece-Fruit and vegetables,PGVCSOVEG,367.0
+EL000000,2019,vcs-89-Greece-Fruit and vegetables,PGVCSOFRU,191.0
+EL000000,2020,cscs-Greece-cotton,PGCSCSTEXT,234.0
+EL000000,2020,vcs-122-Greece-Grain legumes,PGVCSPULS,289.0
+EL000000,2020,vcs-190-Greece-Protein crops,PGVCSPULS,167.0
+EL000000,2020,vcs-205-Greece-Rice,PGVCSRICE,255.0
+EL000000,2020,vcs-213-Greece-Seeds,PGVCSSEEDSOILFIBERLEGUMESFODDER,281.0
+EL000000,2020,vcs-239-Greece-Sheepmeat and goatmeat,PGVCSEWE,7.0
+EL000000,2020,vcs-241-Greece-Sheepmeat and goatmeat,PGVCSEWE,5.0
+EL000000,2020,vcs-261-Greece-Silkworms,PGVCSOANI,153.0
+EL000000,2020,vcs-264-Greece-Special entitlements,PGVCSSHG,143.0
+EL000000,2020,vcs-275-Greece-Sugar beet,PGVCSSUGARBEET,334.0
+EL000000,2020,vcs-35-Greece-Beef and veal,PGVCSSCOW,122.0
+EL000000,2020,vcs-62-Greece-Cereals,PGVCSDURUM,55.0
+EL000000,2020,vcs-86-Greece-Fruit and vegetables,PGVCSTOMA,402.0
+EL000000,2020,vcs-87-Greece-Fruit and vegetables,PGVCSCITRUS,402.0
+EL000000,2020,vcs-88-Greece-Fruit and vegetables,PGVCSOVEG,367.0
+EL000000,2020,vcs-89-Greece-Fruit and vegetables,PGVCSOFRU,191.0
+ES000000,2015,cscs-Spain-cotton,PGCSCSTEXT,362.0
+ES000000,2015,vcs-119-Spain-Fruit and vegetables,PGVCSTOMA,254.0
+ES000000,2015,vcs-125-Spain-Grain legumes,PGVCSPULS,100.0
+ES000000,2015,vcs-165-Spain-Milk and milk products,PGVCSDCOW,119.0
+ES000000,2015,vcs-166-Spain-Milk and milk products,PGVCSDCOW,131.0
+ES000000,2015,vcs-167-Spain-Milk and milk products,PGVCSDCOW,61.0
+ES000000,2015,vcs-168-Spain-Milk and milk products,PGVCSDCOW,68.0
+ES000000,2015,vcs-169-Spain-Milk and milk products,PGVCSDCOW,142.0
+ES000000,2015,vcs-171-Spain-Nuts,PGVCSOCRO,33.0
+ES000000,2015,vcs-172-Spain-Nuts,PGVCSOCRO,38.0
+ES000000,2015,vcs-201-Spain-Protein crops,PGVCSPULS,60.0
+ES000000,2015,vcs-202-Spain-Protein crops,PGVCSOILSEED,40.0
+ES000000,2015,vcs-210-Spain-Rice,PGVCSRICE,100.0
+ES000000,2015,vcs-255-Spain-Sheepmeat and goatmeat,PGVCSEWE,8.0
+ES000000,2015,vcs-256-Spain-Sheepmeat and goatmeat,PGVCSEWE,13.0
+ES000000,2015,vcs-257-Spain-Sheepmeat and goatmeat,PGVCSSHG,6.0
+ES000000,2015,vcs-258-Spain-Sheepmeat and goatmeat,PGVCSSHG,7.0
+ES000000,2015,vcs-259-Spain-Sheepmeat and goatmeat,PGVCSEWE,28.0
+ES000000,2015,vcs-281-Spain-Sugar beet,PGVCSSUGARBEET,445.0
+ES000000,2015,vcs-282-Spain-Sugar beet,PGVCSSUGARBEET,311.0
+ES000000,2015,vcs-50-Spain-Beef and veal,PGVCSSCOW,89.0
+ES000000,2015,vcs-51-Spain-Beef and veal,PGVCSSCOW,150.0
+ES000000,2015,vcs-52-Spain-Beef and veal,PGVCSSLAUGHTERPRE,34.0
+ES000000,2015,vcs-53-Spain-Beef and veal,PGVCSSLAUGHTERPRE,57.0
+ES000000,2015,vcs-54-Spain-Beef and veal,PGVCSSLAUGHTERPRE,11.0
+ES000000,2015,vcs-55-Spain-Beef and veal,PGVCSSLAUGHTERPRE,13.0
+ES000000,2015,vcs-56-Spain-Beef and veal,PGVCSSLAUGHTERPRE,75.0
+ES000000,2016,cscs-Spain-cotton,PGCSCSTEXT,362.0
+ES000000,2016,vcs-119-Spain-Fruit and vegetables,PGVCSTOMA,254.0
+ES000000,2016,vcs-125-Spain-Grain legumes,PGVCSPULS,100.0
+ES000000,2016,vcs-165-Spain-Milk and milk products,PGVCSDCOW,119.0
+ES000000,2016,vcs-166-Spain-Milk and milk products,PGVCSDCOW,131.0
+ES000000,2016,vcs-167-Spain-Milk and milk products,PGVCSDCOW,61.0
+ES000000,2016,vcs-168-Spain-Milk and milk products,PGVCSDCOW,68.0
+ES000000,2016,vcs-169-Spain-Milk and milk products,PGVCSDCOW,142.0
+ES000000,2016,vcs-171-Spain-Nuts,PGVCSOCRO,33.0
+ES000000,2016,vcs-172-Spain-Nuts,PGVCSOCRO,38.0
+ES000000,2016,vcs-201-Spain-Protein crops,PGVCSPULS,60.0
+ES000000,2016,vcs-202-Spain-Protein crops,PGVCSOILSEED,40.0
+ES000000,2016,vcs-210-Spain-Rice,PGVCSRICE,100.0
+ES000000,2016,vcs-255-Spain-Sheepmeat and goatmeat,PGVCSEWE,8.0
+ES000000,2016,vcs-256-Spain-Sheepmeat and goatmeat,PGVCSEWE,13.0
+ES000000,2016,vcs-257-Spain-Sheepmeat and goatmeat,PGVCSSHG,6.0
+ES000000,2016,vcs-258-Spain-Sheepmeat and goatmeat,PGVCSSHG,7.0
+ES000000,2016,vcs-259-Spain-Sheepmeat and goatmeat,PGVCSEWE,28.0
+ES000000,2016,vcs-281-Spain-Sugar beet,PGVCSSUGARBEET,445.0
+ES000000,2016,vcs-282-Spain-Sugar beet,PGVCSSUGARBEET,311.0
+ES000000,2016,vcs-50-Spain-Beef and veal,PGVCSSCOW,89.0
+ES000000,2016,vcs-51-Spain-Beef and veal,PGVCSSCOW,150.0
+ES000000,2016,vcs-52-Spain-Beef and veal,PGVCSSLAUGHTERPRE,34.0
+ES000000,2016,vcs-53-Spain-Beef and veal,PGVCSSLAUGHTERPRE,57.0
+ES000000,2016,vcs-54-Spain-Beef and veal,PGVCSSLAUGHTERPRE,11.0
+ES000000,2016,vcs-55-Spain-Beef and veal,PGVCSSLAUGHTERPRE,13.0
+ES000000,2016,vcs-56-Spain-Beef and veal,PGVCSSLAUGHTERPRE,75.0
+ES000000,2017,cscs-Spain-cotton,PGCSCSTEXT,362.0
+ES000000,2017,vcs-119-Spain-Fruit and vegetables,PGVCSTOMA,254.0
+ES000000,2017,vcs-125-Spain-Grain legumes,PGVCSPULS,100.0
+ES000000,2017,vcs-165-Spain-Milk and milk products,PGVCSDCOW,119.0
+ES000000,2017,vcs-166-Spain-Milk and milk products,PGVCSDCOW,131.0
+ES000000,2017,vcs-167-Spain-Milk and milk products,PGVCSDCOW,61.0
+ES000000,2017,vcs-168-Spain-Milk and milk products,PGVCSDCOW,68.0
+ES000000,2017,vcs-169-Spain-Milk and milk products,PGVCSDCOW,142.0
+ES000000,2017,vcs-171-Spain-Nuts,PGVCSOCRO,33.0
+ES000000,2017,vcs-172-Spain-Nuts,PGVCSOCRO,38.0
+ES000000,2017,vcs-201-Spain-Protein crops,PGVCSPULS,60.0
+ES000000,2017,vcs-202-Spain-Protein crops,PGVCSOILSEED,40.0
+ES000000,2017,vcs-210-Spain-Rice,PGVCSRICE,100.0
+ES000000,2017,vcs-255-Spain-Sheepmeat and goatmeat,PGVCSEWE,8.0
+ES000000,2017,vcs-256-Spain-Sheepmeat and goatmeat,PGVCSEWE,13.0
+ES000000,2017,vcs-257-Spain-Sheepmeat and goatmeat,PGVCSSHG,6.0
+ES000000,2017,vcs-258-Spain-Sheepmeat and goatmeat,PGVCSSHG,7.0
+ES000000,2017,vcs-259-Spain-Sheepmeat and goatmeat,PGVCSEWE,28.0
+ES000000,2017,vcs-281-Spain-Sugar beet,PGVCSSUGARBEET,445.0
+ES000000,2017,vcs-282-Spain-Sugar beet,PGVCSSUGARBEET,311.0
+ES000000,2017,vcs-50-Spain-Beef and veal,PGVCSSCOW,89.0
+ES000000,2017,vcs-51-Spain-Beef and veal,PGVCSSCOW,150.0
+ES000000,2017,vcs-52-Spain-Beef and veal,PGVCSSLAUGHTERPRE,34.0
+ES000000,2017,vcs-53-Spain-Beef and veal,PGVCSSLAUGHTERPRE,57.0
+ES000000,2017,vcs-54-Spain-Beef and veal,PGVCSSLAUGHTERPRE,11.0
+ES000000,2017,vcs-55-Spain-Beef and veal,PGVCSSLAUGHTERPRE,13.0
+ES000000,2017,vcs-56-Spain-Beef and veal,PGVCSSLAUGHTERPRE,75.0
+ES000000,2018,cscs-Spain-cotton,PGCSCSTEXT,362.0
+ES000000,2018,vcs-119-Spain-Fruit and vegetables,PGVCSTOMA,254.0
+ES000000,2018,vcs-125-Spain-Grain legumes,PGVCSPULS,100.0
+ES000000,2018,vcs-165-Spain-Milk and milk products,PGVCSDCOW,119.0
+ES000000,2018,vcs-166-Spain-Milk and milk products,PGVCSDCOW,131.0
+ES000000,2018,vcs-167-Spain-Milk and milk products,PGVCSDCOW,61.0
+ES000000,2018,vcs-168-Spain-Milk and milk products,PGVCSDCOW,68.0
+ES000000,2018,vcs-169-Spain-Milk and milk products,PGVCSDCOW,142.0
+ES000000,2018,vcs-171-Spain-Nuts,PGVCSOCRO,33.0
+ES000000,2018,vcs-172-Spain-Nuts,PGVCSOCRO,38.0
+ES000000,2018,vcs-201-Spain-Protein crops,PGVCSPULS,60.0
+ES000000,2018,vcs-202-Spain-Protein crops,PGVCSOILSEED,40.0
+ES000000,2018,vcs-210-Spain-Rice,PGVCSRICE,100.0
+ES000000,2018,vcs-255-Spain-Sheepmeat and goatmeat,PGVCSEWE,8.0
+ES000000,2018,vcs-256-Spain-Sheepmeat and goatmeat,PGVCSEWE,13.0
+ES000000,2018,vcs-257-Spain-Sheepmeat and goatmeat,PGVCSSHG,6.0
+ES000000,2018,vcs-258-Spain-Sheepmeat and goatmeat,PGVCSSHG,7.0
+ES000000,2018,vcs-259-Spain-Sheepmeat and goatmeat,PGVCSEWE,28.0
+ES000000,2018,vcs-281-Spain-Sugar beet,PGVCSSUGARBEET,445.0
+ES000000,2018,vcs-282-Spain-Sugar beet,PGVCSSUGARBEET,311.0
+ES000000,2018,vcs-50-Spain-Beef and veal,PGVCSSCOW,89.0
+ES000000,2018,vcs-51-Spain-Beef and veal,PGVCSSCOW,150.0
+ES000000,2018,vcs-52-Spain-Beef and veal,PGVCSSLAUGHTERPRE,34.0
+ES000000,2018,vcs-53-Spain-Beef and veal,PGVCSSLAUGHTERPRE,57.0
+ES000000,2018,vcs-54-Spain-Beef and veal,PGVCSSLAUGHTERPRE,11.0
+ES000000,2018,vcs-55-Spain-Beef and veal,PGVCSSLAUGHTERPRE,13.0
+ES000000,2018,vcs-56-Spain-Beef and veal,PGVCSSLAUGHTERPRE,75.0
+ES000000,2019,cscs-Spain-cotton,PGCSCSTEXT,362.0
+ES000000,2019,vcs-119-Spain-Fruit and vegetables,PGVCSTOMA,254.0
+ES000000,2019,vcs-125-Spain-Grain legumes,PGVCSPULS,100.0
+ES000000,2019,vcs-165-Spain-Milk and milk products,PGVCSDCOW,119.0
+ES000000,2019,vcs-166-Spain-Milk and milk products,PGVCSDCOW,131.0
+ES000000,2019,vcs-167-Spain-Milk and milk products,PGVCSDCOW,61.0
+ES000000,2019,vcs-168-Spain-Milk and milk products,PGVCSDCOW,68.0
+ES000000,2019,vcs-169-Spain-Milk and milk products,PGVCSDCOW,142.0
+ES000000,2019,vcs-171-Spain-Nuts,PGVCSOCRO,33.0
+ES000000,2019,vcs-172-Spain-Nuts,PGVCSOCRO,38.0
+ES000000,2019,vcs-201-Spain-Protein crops,PGVCSPULS,60.0
+ES000000,2019,vcs-202-Spain-Protein crops,PGVCSOILSEED,40.0
+ES000000,2019,vcs-210-Spain-Rice,PGVCSRICE,100.0
+ES000000,2019,vcs-255-Spain-Sheepmeat and goatmeat,PGVCSEWE,8.0
+ES000000,2019,vcs-256-Spain-Sheepmeat and goatmeat,PGVCSEWE,13.0
+ES000000,2019,vcs-257-Spain-Sheepmeat and goatmeat,PGVCSSHG,6.0
+ES000000,2019,vcs-258-Spain-Sheepmeat and goatmeat,PGVCSSHG,7.0
+ES000000,2019,vcs-259-Spain-Sheepmeat and goatmeat,PGVCSEWE,28.0
+ES000000,2019,vcs-281-Spain-Sugar beet,PGVCSSUGARBEET,445.0
+ES000000,2019,vcs-282-Spain-Sugar beet,PGVCSSUGARBEET,311.0
+ES000000,2019,vcs-50-Spain-Beef and veal,PGVCSSCOW,89.0
+ES000000,2019,vcs-51-Spain-Beef and veal,PGVCSSCOW,150.0
+ES000000,2019,vcs-52-Spain-Beef and veal,PGVCSSLAUGHTERPRE,34.0
+ES000000,2019,vcs-53-Spain-Beef and veal,PGVCSSLAUGHTERPRE,57.0
+ES000000,2019,vcs-54-Spain-Beef and veal,PGVCSSLAUGHTERPRE,11.0
+ES000000,2019,vcs-55-Spain-Beef and veal,PGVCSSLAUGHTERPRE,13.0
+ES000000,2019,vcs-56-Spain-Beef and veal,PGVCSSLAUGHTERPRE,75.0
+ES000000,2020,cscs-Spain-cotton,PGCSCSTEXT,362.0
+ES000000,2020,vcs-119-Spain-Fruit and vegetables,PGVCSTOMA,254.0
+ES000000,2020,vcs-125-Spain-Grain legumes,PGVCSPULS,100.0
+ES000000,2020,vcs-165-Spain-Milk and milk products,PGVCSDCOW,119.0
+ES000000,2020,vcs-166-Spain-Milk and milk products,PGVCSDCOW,131.0
+ES000000,2020,vcs-167-Spain-Milk and milk products,PGVCSDCOW,61.0
+ES000000,2020,vcs-168-Spain-Milk and milk products,PGVCSDCOW,68.0
+ES000000,2020,vcs-169-Spain-Milk and milk products,PGVCSDCOW,142.0
+ES000000,2020,vcs-171-Spain-Nuts,PGVCSOCRO,33.0
+ES000000,2020,vcs-172-Spain-Nuts,PGVCSOCRO,38.0
+ES000000,2020,vcs-201-Spain-Protein crops,PGVCSPULS,60.0
+ES000000,2020,vcs-202-Spain-Protein crops,PGVCSOILSEED,40.0
+ES000000,2020,vcs-210-Spain-Rice,PGVCSRICE,100.0
+ES000000,2020,vcs-255-Spain-Sheepmeat and goatmeat,PGVCSEWE,8.0
+ES000000,2020,vcs-256-Spain-Sheepmeat and goatmeat,PGVCSEWE,13.0
+ES000000,2020,vcs-257-Spain-Sheepmeat and goatmeat,PGVCSSHG,6.0
+ES000000,2020,vcs-258-Spain-Sheepmeat and goatmeat,PGVCSSHG,7.0
+ES000000,2020,vcs-259-Spain-Sheepmeat and goatmeat,PGVCSEWE,28.0
+ES000000,2020,vcs-281-Spain-Sugar beet,PGVCSSUGARBEET,445.0
+ES000000,2020,vcs-282-Spain-Sugar beet,PGVCSSUGARBEET,311.0
+ES000000,2020,vcs-50-Spain-Beef and veal,PGVCSSCOW,89.0
+ES000000,2020,vcs-51-Spain-Beef and veal,PGVCSSCOW,150.0
+ES000000,2020,vcs-52-Spain-Beef and veal,PGVCSSLAUGHTERPRE,34.0
+ES000000,2020,vcs-53-Spain-Beef and veal,PGVCSSLAUGHTERPRE,57.0
+ES000000,2020,vcs-54-Spain-Beef and veal,PGVCSSLAUGHTERPRE,11.0
+ES000000,2020,vcs-55-Spain-Beef and veal,PGVCSSLAUGHTERPRE,13.0
+ES000000,2020,vcs-56-Spain-Beef and veal,PGVCSSLAUGHTERPRE,75.0
+FI000000,2015,vcs-144-Finland-Milk and milk products,PGVCSDCOW,497.0
+FI000000,2015,vcs-145-Finland-Milk and milk products,PGVCSDCOW,728.0
+FI000000,2015,vcs-146-Finland-Milk and milk products,PGVCSDCOW,696.0
+FI000000,2015,vcs-147-Finland-Milk and milk products,PGVCSSHG,118.0
+FI000000,2015,vcs-184-Finland-Protein crops,PGVCSPULS,36.0
+FI000000,2015,vcs-20-Finland-Beef and veal,PGVCSSCOW,363.0
+FI000000,2015,vcs-21-Finland-Beef and veal,PGVCSSCOW,536.0
+FI000000,2015,vcs-22-Finland-Beef and veal,PGVCSSCOW,141.0
+FI000000,2015,vcs-229-Finland-Sheepmeat and goatmeat,PGVCSEWE,45.0
+FI000000,2015,vcs-23-Finland-Beef and veal,PGVCSBULL,474.0
+FI000000,2015,vcs-230-Finland-Sheepmeat and goatmeat,PGVCSEWE,53.0
+FI000000,2015,vcs-231-Finland-Sheepmeat and goatmeat,PGVCSEWE,98.0
+FI000000,2015,vcs-232-Finland-Sheepmeat and goatmeat,PGVCSSHG,28.0
+FI000000,2015,vcs-24-Finland-Beef and veal,PGVCSBULL,561.0
+FI000000,2015,vcs-25-Finland-Beef and veal,PGVCSBULL,164.0
+FI000000,2015,vcs-26-Finland-Beef and veal,PGVCSSLAUGHTERPREHEIF,161.0
+FI000000,2015,vcs-267-Finland-Starch potato,PGVCSPOTATO,551.0
+FI000000,2015,vcs-27-Finland-Beef and veal,PGVCSSLAUGHTERPREHEIF,269.0
+FI000000,2015,vcs-274-Finland-Sugar beet,PGVCSSUGARBEET,67.0
+FI000000,2015,vcs-28-Finland-Beef and veal,PGVCSBULL,721.0
+FI000000,2015,vcs-60-Finland-Cereals,PGVCSRYE,56.0
+FI000000,2015,vcs-80-Finland-Fruit and vegetables,PGVCSTOMA_OVEG,171.0
+FI000000,2016,vcs-144-Finland-Milk and milk products,PGVCSDCOW,497.0
+FI000000,2016,vcs-145-Finland-Milk and milk products,PGVCSDCOW,728.0
+FI000000,2016,vcs-146-Finland-Milk and milk products,PGVCSDCOW,696.0
+FI000000,2016,vcs-147-Finland-Milk and milk products,PGVCSSHG,118.0
+FI000000,2016,vcs-184-Finland-Protein crops,PGVCSPULS,36.0
+FI000000,2016,vcs-20-Finland-Beef and veal,PGVCSSCOW,363.0
+FI000000,2016,vcs-21-Finland-Beef and veal,PGVCSSCOW,536.0
+FI000000,2016,vcs-22-Finland-Beef and veal,PGVCSSCOW,133.0
+FI000000,2016,vcs-229-Finland-Sheepmeat and goatmeat,PGVCSEWE,45.0
+FI000000,2016,vcs-23-Finland-Beef and veal,PGVCSBULL,474.0
+FI000000,2016,vcs-230-Finland-Sheepmeat and goatmeat,PGVCSEWE,53.0
+FI000000,2016,vcs-231-Finland-Sheepmeat and goatmeat,PGVCSEWE,98.0
+FI000000,2016,vcs-232-Finland-Sheepmeat and goatmeat,PGVCSSHG,28.0
+FI000000,2016,vcs-24-Finland-Beef and veal,PGVCSBULL,561.0
+FI000000,2016,vcs-25-Finland-Beef and veal,PGVCSBULL,152.0
+FI000000,2016,vcs-26-Finland-Beef and veal,PGVCSSLAUGHTERPREHEIF,161.0
+FI000000,2016,vcs-267-Finland-Starch potato,PGVCSPOTATO,551.0
+FI000000,2016,vcs-27-Finland-Beef and veal,PGVCSSLAUGHTERPREHEIF,269.0
+FI000000,2016,vcs-274-Finland-Sugar beet,PGVCSSUGARBEET,67.0
+FI000000,2016,vcs-28-Finland-Beef and veal,PGVCSBULL,721.0
+FI000000,2016,vcs-60-Finland-Cereals,PGVCSRYE,56.0
+FI000000,2016,vcs-80-Finland-Fruit and vegetables,PGVCSTOMA_OVEG,171.0
+FI000000,2017,vcs-144-Finland-Milk and milk products,PGVCSDCOW,497.0
+FI000000,2017,vcs-145-Finland-Milk and milk products,PGVCSDCOW,728.0
+FI000000,2017,vcs-146-Finland-Milk and milk products,PGVCSDCOW,696.0
+FI000000,2017,vcs-147-Finland-Milk and milk products,PGVCSSHG,118.0
+FI000000,2017,vcs-184-Finland-Protein crops,PGVCSPULS,36.0
+FI000000,2017,vcs-20-Finland-Beef and veal,PGVCSSCOW,363.0
+FI000000,2017,vcs-21-Finland-Beef and veal,PGVCSSCOW,536.0
+FI000000,2017,vcs-22-Finland-Beef and veal,PGVCSSCOW,126.0
+FI000000,2017,vcs-229-Finland-Sheepmeat and goatmeat,PGVCSEWE,45.0
+FI000000,2017,vcs-23-Finland-Beef and veal,PGVCSBULL,474.0
+FI000000,2017,vcs-230-Finland-Sheepmeat and goatmeat,PGVCSEWE,53.0
+FI000000,2017,vcs-231-Finland-Sheepmeat and goatmeat,PGVCSEWE,98.0
+FI000000,2017,vcs-232-Finland-Sheepmeat and goatmeat,PGVCSSHG,28.0
+FI000000,2017,vcs-24-Finland-Beef and veal,PGVCSBULL,561.0
+FI000000,2017,vcs-25-Finland-Beef and veal,PGVCSBULL,140.0
+FI000000,2017,vcs-26-Finland-Beef and veal,PGVCSSLAUGHTERPREHEIF,161.0
+FI000000,2017,vcs-267-Finland-Starch potato,PGVCSPOTATO,551.0
+FI000000,2017,vcs-27-Finland-Beef and veal,PGVCSSLAUGHTERPREHEIF,269.0
+FI000000,2017,vcs-274-Finland-Sugar beet,PGVCSSUGARBEET,67.0
+FI000000,2017,vcs-28-Finland-Beef and veal,PGVCSBULL,721.0
+FI000000,2017,vcs-60-Finland-Cereals,PGVCSRYE,56.0
+FI000000,2017,vcs-80-Finland-Fruit and vegetables,PGVCSTOMA_OVEG,171.0
+FI000000,2018,vcs-144-Finland-Milk and milk products,PGVCSDCOW,497.0
+FI000000,2018,vcs-145-Finland-Milk and milk products,PGVCSDCOW,728.0
+FI000000,2018,vcs-146-Finland-Milk and milk products,PGVCSDCOW,696.0
+FI000000,2018,vcs-147-Finland-Milk and milk products,PGVCSSHG,118.0
+FI000000,2018,vcs-184-Finland-Protein crops,PGVCSPULS,34.0
+FI000000,2018,vcs-20-Finland-Beef and veal,PGVCSSCOW,363.0
+FI000000,2018,vcs-21-Finland-Beef and veal,PGVCSSCOW,536.0
+FI000000,2018,vcs-22-Finland-Beef and veal,PGVCSSCOW,118.0
+FI000000,2018,vcs-229-Finland-Sheepmeat and goatmeat,PGVCSEWE,45.0
+FI000000,2018,vcs-23-Finland-Beef and veal,PGVCSBULL,474.0
+FI000000,2018,vcs-230-Finland-Sheepmeat and goatmeat,PGVCSEWE,53.0
+FI000000,2018,vcs-231-Finland-Sheepmeat and goatmeat,PGVCSEWE,98.0
+FI000000,2018,vcs-232-Finland-Sheepmeat and goatmeat,PGVCSSHG,28.0
+FI000000,2018,vcs-24-Finland-Beef and veal,PGVCSBULL,561.0
+FI000000,2018,vcs-25-Finland-Beef and veal,PGVCSBULL,131.0
+FI000000,2018,vcs-26-Finland-Beef and veal,PGVCSSLAUGHTERPREHEIF,161.0
+FI000000,2018,vcs-267-Finland-Starch potato,PGVCSPOTATO,551.0
+FI000000,2018,vcs-27-Finland-Beef and veal,PGVCSSLAUGHTERPREHEIF,269.0
+FI000000,2018,vcs-274-Finland-Sugar beet,PGVCSSUGARBEET,67.0
+FI000000,2018,vcs-28-Finland-Beef and veal,PGVCSBULL,721.0
+FI000000,2018,vcs-60-Finland-Cereals,PGVCSRYE,56.0
+FI000000,2018,vcs-80-Finland-Fruit and vegetables,PGVCSTOMA_OVEG,171.0
+FI000000,2019,vcs-144-Finland-Milk and milk products,PGVCSDCOW,497.0
+FI000000,2019,vcs-145-Finland-Milk and milk products,PGVCSDCOW,728.0
+FI000000,2019,vcs-146-Finland-Milk and milk products,PGVCSDCOW,696.0
+FI000000,2019,vcs-147-Finland-Milk and milk products,PGVCSSHG,118.0
+FI000000,2019,vcs-184-Finland-Protein crops,PGVCSPULS,32.0
+FI000000,2019,vcs-20-Finland-Beef and veal,PGVCSSCOW,363.0
+FI000000,2019,vcs-21-Finland-Beef and veal,PGVCSSCOW,536.0
+FI000000,2019,vcs-22-Finland-Beef and veal,PGVCSSCOW,111.0
+FI000000,2019,vcs-229-Finland-Sheepmeat and goatmeat,PGVCSEWE,45.0
+FI000000,2019,vcs-23-Finland-Beef and veal,PGVCSBULL,474.0
+FI000000,2019,vcs-230-Finland-Sheepmeat and goatmeat,PGVCSEWE,53.0
+FI000000,2019,vcs-231-Finland-Sheepmeat and goatmeat,PGVCSEWE,98.0
+FI000000,2019,vcs-232-Finland-Sheepmeat and goatmeat,PGVCSSHG,28.0
+FI000000,2019,vcs-24-Finland-Beef and veal,PGVCSBULL,561.0
+FI000000,2019,vcs-25-Finland-Beef and veal,PGVCSBULL,123.0
+FI000000,2019,vcs-26-Finland-Beef and veal,PGVCSSLAUGHTERPREHEIF,161.0
+FI000000,2019,vcs-267-Finland-Starch potato,PGVCSPOTATO,551.0
+FI000000,2019,vcs-27-Finland-Beef and veal,PGVCSSLAUGHTERPREHEIF,269.0
+FI000000,2019,vcs-274-Finland-Sugar beet,PGVCSSUGARBEET,67.0
+FI000000,2019,vcs-28-Finland-Beef and veal,PGVCSBULL,721.0
+FI000000,2019,vcs-60-Finland-Cereals,PGVCSRYE,56.0
+FI000000,2019,vcs-80-Finland-Fruit and vegetables,PGVCSTOMA_OVEG,156.0
+FI000000,2020,vcs-144-Finland-Milk and milk products,PGVCSDCOW,497.0
+FI000000,2020,vcs-145-Finland-Milk and milk products,PGVCSDCOW,728.0
+FI000000,2020,vcs-146-Finland-Milk and milk products,PGVCSDCOW,696.0
+FI000000,2020,vcs-147-Finland-Milk and milk products,PGVCSSHG,118.0
+FI000000,2020,vcs-184-Finland-Protein crops,PGVCSPULS,31.0
+FI000000,2020,vcs-20-Finland-Beef and veal,PGVCSSCOW,363.0
+FI000000,2020,vcs-21-Finland-Beef and veal,PGVCSSCOW,536.0
+FI000000,2020,vcs-22-Finland-Beef and veal,PGVCSSCOW,103.0
+FI000000,2020,vcs-229-Finland-Sheepmeat and goatmeat,PGVCSEWE,45.0
+FI000000,2020,vcs-23-Finland-Beef and veal,PGVCSBULL,474.0
+FI000000,2020,vcs-230-Finland-Sheepmeat and goatmeat,PGVCSEWE,53.0
+FI000000,2020,vcs-231-Finland-Sheepmeat and goatmeat,PGVCSEWE,98.0
+FI000000,2020,vcs-232-Finland-Sheepmeat and goatmeat,PGVCSSHG,28.0
+FI000000,2020,vcs-24-Finland-Beef and veal,PGVCSBULL,561.0
+FI000000,2020,vcs-25-Finland-Beef and veal,PGVCSBULL,112.0
+FI000000,2020,vcs-26-Finland-Beef and veal,PGVCSSLAUGHTERPREHEIF,161.0
+FI000000,2020,vcs-267-Finland-Starch potato,PGVCSPOTATO,551.0
+FI000000,2020,vcs-27-Finland-Beef and veal,PGVCSSLAUGHTERPREHEIF,269.0
+FI000000,2020,vcs-274-Finland-Sugar beet,PGVCSSUGARBEET,67.0
+FI000000,2020,vcs-28-Finland-Beef and veal,PGVCSBULL,721.0
+FI000000,2020,vcs-60-Finland-Cereals,PGVCSRYE,56.0
+FI000000,2020,vcs-80-Finland-Fruit and vegetables,PGVCSTOMA_OVEG,156.0
+FR000000,2015,vcs-127-France-Hemp,PGVCSFLAX,141.0
+FR000000,2015,vcs-133-France-Hops,PGVCSOCRO,427.0
+FR000000,2015,vcs-148-France-Milk and milk products,PGVCSDCOW,34.0
+FR000000,2015,vcs-149-France-Milk and milk products,PGVCSDCOW,71.0
+FR000000,2015,vcs-150-France-Milk and milk products,PGVCSDCOW,10.0
+FR000000,2015,vcs-151-France-Milk and milk products,PGVCSDCOW,15.0
+FR000000,2015,vcs-185-France-Protein crops,PGVCSFEEDCROPSLEGUM,107.0
+FR000000,2015,vcs-186-France-Protein crops,PGVCSSOY,117.0
+FR000000,2015,vcs-187-France-Protein crops,PGVCSPULS,122.0
+FR000000,2015,vcs-188-France-Protein crops,PGVCSPULS,105.0
+FR000000,2015,vcs-189-France-Protein crops,PGVCSFEEDCROPS,207.0
+FR000000,2015,vcs-212-France-Seeds,PGVCSGRASSEED,36.0
+FR000000,2015,vcs-233-France-Sheepmeat and goatmeat,PGVCSEWE,16.0
+FR000000,2015,vcs-234-France-Sheepmeat and goatmeat,PGVCSEWE,2.0
+FR000000,2015,vcs-235-France-Sheepmeat and goatmeat,PGVCSEWE,3.0
+FR000000,2015,vcs-236-France-Sheepmeat and goatmeat,PGVCSEWE,6.0
+FR000000,2015,vcs-237-France-Sheepmeat and goatmeat,PGVCSSHG,13.0
+FR000000,2015,vcs-238-France-Sheepmeat and goatmeat,PGVCSSHG,3.0
+FR000000,2015,vcs-268-France-Starch potato,PGVCSPOTATO,82.0
+FR000000,2015,vcs-29-France-Beef and veal,PGVCSSCOW,68.0
+FR000000,2015,vcs-30-France-Beef and veal,PGVCSSCOW,61.0
+FR000000,2015,vcs-31-France-Beef and veal,PGVCSSCOW,45.0
+FR000000,2015,vcs-32-France-Beef and veal,PGVCSCALV,37.0
+FR000000,2015,vcs-33-France-Beef and veal,PGVCSCALV,37.0
+FR000000,2015,vcs-61-France-Cereals,PGVCSDURUM,25.0
+FR000000,2015,vcs-81-France-Fruit and vegetables,PGVCSOFRU,833.0
+FR000000,2015,vcs-82-France-Fruit and vegetables,PGVCSOFRU,386.0
+FR000000,2015,vcs-83-France-Fruit and vegetables,PGVCSOFRU,255.0
+FR000000,2015,vcs-84-France-Fruit and vegetables,PGVCSOFRU,1065.0
+FR000000,2015,vcs-85-France-Fruit and vegetables,PGVCSTOMA,1066.0
+FR000000,2016,vcs-127-France-Hemp,PGVCSFLAX,140.0
+FR000000,2016,vcs-133-France-Hops,PGVCSOCRO,425.0
+FR000000,2016,vcs-148-France-Milk and milk products,PGVCSDCOW,34.0
+FR000000,2016,vcs-149-France-Milk and milk products,PGVCSDCOW,71.0
+FR000000,2016,vcs-150-France-Milk and milk products,PGVCSDCOW,10.0
+FR000000,2016,vcs-151-France-Milk and milk products,PGVCSDCOW,15.0
+FR000000,2016,vcs-185-France-Protein crops,PGVCSFEEDCROPSLEGUM,107.0
+FR000000,2016,vcs-186-France-Protein crops,PGVCSSOY,116.0
+FR000000,2016,vcs-187-France-Protein crops,PGVCSPULS,121.0
+FR000000,2016,vcs-188-France-Protein crops,PGVCSPULS,104.0
+FR000000,2016,vcs-189-France-Protein crops,PGVCSFEEDCROPS,206.0
+FR000000,2016,vcs-212-France-Seeds,PGVCSGRASSEED,36.0
+FR000000,2016,vcs-233-France-Sheepmeat and goatmeat,PGVCSEWE,16.0
+FR000000,2016,vcs-234-France-Sheepmeat and goatmeat,PGVCSEWE,2.0
+FR000000,2016,vcs-235-France-Sheepmeat and goatmeat,PGVCSEWE,3.0
+FR000000,2016,vcs-236-France-Sheepmeat and goatmeat,PGVCSEWE,6.0
+FR000000,2016,vcs-237-France-Sheepmeat and goatmeat,PGVCSSHG,13.0
+FR000000,2016,vcs-238-France-Sheepmeat and goatmeat,PGVCSSHG,3.0
+FR000000,2016,vcs-268-France-Starch potato,PGVCSPOTATO,82.0
+FR000000,2016,vcs-29-France-Beef and veal,PGVCSSCOW,68.0
+FR000000,2016,vcs-30-France-Beef and veal,PGVCSSCOW,61.0
+FR000000,2016,vcs-31-France-Beef and veal,PGVCSSCOW,45.0
+FR000000,2016,vcs-32-France-Beef and veal,PGVCSCALV,37.0
+FR000000,2016,vcs-33-France-Beef and veal,PGVCSCALV,37.0
+FR000000,2016,vcs-61-France-Cereals,PGVCSDURUM,25.0
+FR000000,2016,vcs-81-France-Fruit and vegetables,PGVCSOFRU,830.0
+FR000000,2016,vcs-82-France-Fruit and vegetables,PGVCSOFRU,384.0
+FR000000,2016,vcs-83-France-Fruit and vegetables,PGVCSOFRU,254.0
+FR000000,2016,vcs-84-France-Fruit and vegetables,PGVCSOFRU,1060.0
+FR000000,2016,vcs-85-France-Fruit and vegetables,PGVCSTOMA,1061.0
+FR000000,2017,vcs-127-France-Hemp,PGVCSFLAX,140.0
+FR000000,2017,vcs-133-France-Hops,PGVCSOCRO,424.0
+FR000000,2017,vcs-148-France-Milk and milk products,PGVCSDCOW,34.0
+FR000000,2017,vcs-149-France-Milk and milk products,PGVCSDCOW,70.0
+FR000000,2017,vcs-150-France-Milk and milk products,PGVCSDCOW,10.0
+FR000000,2017,vcs-151-France-Milk and milk products,PGVCSDCOW,15.0
+FR000000,2017,vcs-185-France-Protein crops,PGVCSFEEDCROPSLEGUM,107.0
+FR000000,2017,vcs-186-France-Protein crops,PGVCSSOY,116.0
+FR000000,2017,vcs-187-France-Protein crops,PGVCSPULS,121.0
+FR000000,2017,vcs-188-France-Protein crops,PGVCSPULS,104.0
+FR000000,2017,vcs-189-France-Protein crops,PGVCSFEEDCROPS,206.0
+FR000000,2017,vcs-212-France-Seeds,PGVCSGRASSEED,36.0
+FR000000,2017,vcs-233-France-Sheepmeat and goatmeat,PGVCSEWE,16.0
+FR000000,2017,vcs-234-France-Sheepmeat and goatmeat,PGVCSEWE,2.0
+FR000000,2017,vcs-235-France-Sheepmeat and goatmeat,PGVCSEWE,3.0
+FR000000,2017,vcs-236-France-Sheepmeat and goatmeat,PGVCSEWE,6.0
+FR000000,2017,vcs-237-France-Sheepmeat and goatmeat,PGVCSSHG,13.0
+FR000000,2017,vcs-238-France-Sheepmeat and goatmeat,PGVCSSHG,3.0
+FR000000,2017,vcs-268-France-Starch potato,PGVCSPOTATO,82.0
+FR000000,2017,vcs-29-France-Beef and veal,PGVCSSCOW,68.0
+FR000000,2017,vcs-30-France-Beef and veal,PGVCSSCOW,61.0
+FR000000,2017,vcs-31-France-Beef and veal,PGVCSSCOW,45.0
+FR000000,2017,vcs-32-France-Beef and veal,PGVCSCALV,37.0
+FR000000,2017,vcs-33-France-Beef and veal,PGVCSCALV,37.0
+FR000000,2017,vcs-61-France-Cereals,PGVCSDURUM,25.0
+FR000000,2017,vcs-81-France-Fruit and vegetables,PGVCSOFRU,826.0
+FR000000,2017,vcs-82-France-Fruit and vegetables,PGVCSOFRU,383.0
+FR000000,2017,vcs-83-France-Fruit and vegetables,PGVCSOFRU,252.0
+FR000000,2017,vcs-84-France-Fruit and vegetables,PGVCSOFRU,1055.0
+FR000000,2017,vcs-85-France-Fruit and vegetables,PGVCSTOMA,1057.0
+FR000000,2018,vcs-127-France-Hemp,PGVCSFLAX,139.0
+FR000000,2018,vcs-133-France-Hops,PGVCSOCRO,422.0
+FR000000,2018,vcs-148-France-Milk and milk products,PGVCSDCOW,34.0
+FR000000,2018,vcs-149-France-Milk and milk products,PGVCSDCOW,70.0
+FR000000,2018,vcs-150-France-Milk and milk products,PGVCSDCOW,10.0
+FR000000,2018,vcs-151-France-Milk and milk products,PGVCSDCOW,15.0
+FR000000,2018,vcs-185-France-Protein crops,PGVCSFEEDCROPSLEGUM,106.0
+FR000000,2018,vcs-186-France-Protein crops,PGVCSSOY,115.0
+FR000000,2018,vcs-187-France-Protein crops,PGVCSPULS,120.0
+FR000000,2018,vcs-188-France-Protein crops,PGVCSPULS,103.0
+FR000000,2018,vcs-189-France-Protein crops,PGVCSFEEDCROPS,205.0
+FR000000,2018,vcs-212-France-Seeds,PGVCSGRASSEED,36.0
+FR000000,2018,vcs-233-France-Sheepmeat and goatmeat,PGVCSEWE,16.0
+FR000000,2018,vcs-234-France-Sheepmeat and goatmeat,PGVCSEWE,2.0
+FR000000,2018,vcs-235-France-Sheepmeat and goatmeat,PGVCSEWE,3.0
+FR000000,2018,vcs-236-France-Sheepmeat and goatmeat,PGVCSEWE,6.0
+FR000000,2018,vcs-237-France-Sheepmeat and goatmeat,PGVCSSHG,13.0
+FR000000,2018,vcs-238-France-Sheepmeat and goatmeat,PGVCSSHG,3.0
+FR000000,2018,vcs-268-France-Starch potato,PGVCSPOTATO,82.0
+FR000000,2018,vcs-29-France-Beef and veal,PGVCSSCOW,67.0
+FR000000,2018,vcs-30-France-Beef and veal,PGVCSSCOW,61.0
+FR000000,2018,vcs-31-France-Beef and veal,PGVCSSCOW,45.0
+FR000000,2018,vcs-32-France-Beef and veal,PGVCSCALV,37.0
+FR000000,2018,vcs-33-France-Beef and veal,PGVCSCALV,37.0
+FR000000,2018,vcs-61-France-Cereals,PGVCSDURUM,25.0
+FR000000,2018,vcs-81-France-Fruit and vegetables,PGVCSOFRU,823.0
+FR000000,2018,vcs-82-France-Fruit and vegetables,PGVCSOFRU,381.0
+FR000000,2018,vcs-83-France-Fruit and vegetables,PGVCSOFRU,252.0
+FR000000,2018,vcs-84-France-Fruit and vegetables,PGVCSOFRU,1052.0
+FR000000,2018,vcs-85-France-Fruit and vegetables,PGVCSTOMA,1053.0
+FR000000,2019,vcs-127-France-Hemp,PGVCSFLAX,139.0
+FR000000,2019,vcs-133-France-Hops,PGVCSOCRO,421.0
+FR000000,2019,vcs-148-France-Milk and milk products,PGVCSDCOW,34.0
+FR000000,2019,vcs-149-France-Milk and milk products,PGVCSDCOW,70.0
+FR000000,2019,vcs-150-France-Milk and milk products,PGVCSDCOW,10.0
+FR000000,2019,vcs-151-France-Milk and milk products,PGVCSDCOW,15.0
+FR000000,2019,vcs-185-France-Protein crops,PGVCSFEEDCROPSLEGUM,106.0
+FR000000,2019,vcs-186-France-Protein crops,PGVCSSOY,115.0
+FR000000,2019,vcs-187-France-Protein crops,PGVCSPULS,120.0
+FR000000,2019,vcs-188-France-Protein crops,PGVCSPULS,103.0
+FR000000,2019,vcs-189-France-Protein crops,PGVCSFEEDCROPS,204.0
+FR000000,2019,vcs-212-France-Seeds,PGVCSGRASSEED,36.0
+FR000000,2019,vcs-233-France-Sheepmeat and goatmeat,PGVCSEWE,16.0
+FR000000,2019,vcs-234-France-Sheepmeat and goatmeat,PGVCSEWE,2.0
+FR000000,2019,vcs-235-France-Sheepmeat and goatmeat,PGVCSEWE,3.0
+FR000000,2019,vcs-236-France-Sheepmeat and goatmeat,PGVCSEWE,6.0
+FR000000,2019,vcs-237-France-Sheepmeat and goatmeat,PGVCSSHG,13.0
+FR000000,2019,vcs-238-France-Sheepmeat and goatmeat,PGVCSSHG,3.0
+FR000000,2019,vcs-268-France-Starch potato,PGVCSPOTATO,82.0
+FR000000,2019,vcs-29-France-Beef and veal,PGVCSSCOW,67.0
+FR000000,2019,vcs-30-France-Beef and veal,PGVCSSCOW,60.0
+FR000000,2019,vcs-31-France-Beef and veal,PGVCSSCOW,45.0
+FR000000,2019,vcs-32-France-Beef and veal,PGVCSCALV,36.0
+FR000000,2019,vcs-33-France-Beef and veal,PGVCSCALV,36.0
+FR000000,2019,vcs-61-France-Cereals,PGVCSDURUM,25.0
+FR000000,2019,vcs-81-France-Fruit and vegetables,PGVCSOFRU,820.0
+FR000000,2019,vcs-82-France-Fruit and vegetables,PGVCSOFRU,380.0
+FR000000,2019,vcs-83-France-Fruit and vegetables,PGVCSOFRU,251.0
+FR000000,2019,vcs-84-France-Fruit and vegetables,PGVCSOFRU,1048.0
+FR000000,2019,vcs-85-France-Fruit and vegetables,PGVCSTOMA,1050.0
+FR000000,2020,vcs-127-France-Hemp,PGVCSFLAX,143.0
+FR000000,2020,vcs-133-France-Hops,PGVCSOCRO,435.0
+FR000000,2020,vcs-148-France-Milk and milk products,PGVCSDCOW,35.0
+FR000000,2020,vcs-149-France-Milk and milk products,PGVCSDCOW,72.0
+FR000000,2020,vcs-150-France-Milk and milk products,PGVCSDCOW,10.0
+FR000000,2020,vcs-151-France-Milk and milk products,PGVCSDCOW,15.0
+FR000000,2020,vcs-185-France-Protein crops,PGVCSFEEDCROPSLEGUM,109.0
+FR000000,2020,vcs-186-France-Protein crops,PGVCSSOY,119.0
+FR000000,2020,vcs-187-France-Protein crops,PGVCSPULS,124.0
+FR000000,2020,vcs-188-France-Protein crops,PGVCSPULS,107.0
+FR000000,2020,vcs-189-France-Protein crops,PGVCSFEEDCROPS,211.0
+FR000000,2020,vcs-212-France-Seeds,PGVCSGRASSEED,37.0
+FR000000,2020,vcs-233-France-Sheepmeat and goatmeat,PGVCSEWE,16.0
+FR000000,2020,vcs-234-France-Sheepmeat and goatmeat,PGVCSEWE,2.0
+FR000000,2020,vcs-235-France-Sheepmeat and goatmeat,PGVCSEWE,3.0
+FR000000,2020,vcs-236-France-Sheepmeat and goatmeat,PGVCSEWE,6.0
+FR000000,2020,vcs-237-France-Sheepmeat and goatmeat,PGVCSSHG,14.0
+FR000000,2020,vcs-238-France-Sheepmeat and goatmeat,PGVCSSHG,3.0
+FR000000,2020,vcs-268-France-Starch potato,PGVCSPOTATO,83.0
+FR000000,2020,vcs-29-France-Beef and veal,PGVCSSCOW,70.0
+FR000000,2020,vcs-30-France-Beef and veal,PGVCSSCOW,62.0
+FR000000,2020,vcs-31-France-Beef and veal,PGVCSSCOW,46.0
+FR000000,2020,vcs-32-France-Beef and veal,PGVCSCALV,38.0
+FR000000,2020,vcs-33-France-Beef and veal,PGVCSCALV,38.0
+FR000000,2020,vcs-61-France-Cereals,PGVCSDURUM,26.0
+FR000000,2020,vcs-81-France-Fruit and vegetables,PGVCSOFRU,849.0
+FR000000,2020,vcs-82-France-Fruit and vegetables,PGVCSOFRU,393.0
+FR000000,2020,vcs-83-France-Fruit and vegetables,PGVCSOFRU,259.0
+FR000000,2020,vcs-84-France-Fruit and vegetables,PGVCSOFRU,1084.0
+FR000000,2020,vcs-85-France-Fruit and vegetables,PGVCSTOMA,1086.0
+HR000000,2015,vcs-140-Croatia-Milk and milk products,PGVCSDCOW,66.0
+HR000000,2015,vcs-15-Croatia-Beef and veal,PGVCSSLAUGHTERPRE,43.0
+HR000000,2015,vcs-16-Croatia-Beef and veal,PGVCSSCOW,58.0
+HR000000,2015,vcs-182-Croatia-Protein crops,PGVCSFEEDCROPS,52.0
+HR000000,2015,vcs-225-Croatia-Sheepmeat and goatmeat,PGVCSSHG,4.0
+HR000000,2015,vcs-272-Croatia-Sugar beet,PGVCSSUGARBEET,120.0
+HR000000,2015,vcs-71-Croatia-Fruit and vegetables,PGVCSTOMA_OVEG,180.0
+HR000000,2015,vcs-72-Croatia-Fruit and vegetables,PGVCSAPPL_OFRU,97.0
+HR000000,2016,vcs-140-Croatia-Milk and milk products,PGVCSDCOW,73.0
+HR000000,2016,vcs-15-Croatia-Beef and veal,PGVCSSLAUGHTERPRE,47.0
+HR000000,2016,vcs-16-Croatia-Beef and veal,PGVCSSCOW,65.0
+HR000000,2016,vcs-182-Croatia-Protein crops,PGVCSFEEDCROPS,58.0
+HR000000,2016,vcs-225-Croatia-Sheepmeat and goatmeat,PGVCSSHG,5.0
+HR000000,2016,vcs-272-Croatia-Sugar beet,PGVCSSUGARBEET,133.0
+HR000000,2016,vcs-71-Croatia-Fruit and vegetables,PGVCSTOMA_OVEG,199.0
+HR000000,2016,vcs-72-Croatia-Fruit and vegetables,PGVCSAPPL_OFRU,107.0
+HR000000,2017,vcs-140-Croatia-Milk and milk products,PGVCSDCOW,86.0
+HR000000,2017,vcs-15-Croatia-Beef and veal,PGVCSSLAUGHTERPRE,56.0
+HR000000,2017,vcs-16-Croatia-Beef and veal,PGVCSSCOW,77.0
+HR000000,2017,vcs-182-Croatia-Protein crops,PGVCSFEEDCROPS,69.0
+HR000000,2017,vcs-225-Croatia-Sheepmeat and goatmeat,PGVCSSHG,6.0
+HR000000,2017,vcs-272-Croatia-Sugar beet,PGVCSSUGARBEET,158.0
+HR000000,2017,vcs-71-Croatia-Fruit and vegetables,PGVCSTOMA_OVEG,237.0
+HR000000,2017,vcs-72-Croatia-Fruit and vegetables,PGVCSAPPL_OFRU,127.0
+HR000000,2018,vcs-140-Croatia-Milk and milk products,PGVCSDCOW,100.0
+HR000000,2018,vcs-15-Croatia-Beef and veal,PGVCSSLAUGHTERPRE,65.0
+HR000000,2018,vcs-16-Croatia-Beef and veal,PGVCSSCOW,89.0
+HR000000,2018,vcs-182-Croatia-Protein crops,PGVCSFEEDCROPS,79.0
+HR000000,2018,vcs-225-Croatia-Sheepmeat and goatmeat,PGVCSSHG,7.0
+HR000000,2018,vcs-272-Croatia-Sugar beet,PGVCSSUGARBEET,183.0
+HR000000,2018,vcs-71-Croatia-Fruit and vegetables,PGVCSTOMA_OVEG,274.0
+HR000000,2018,vcs-72-Croatia-Fruit and vegetables,PGVCSAPPL_OFRU,147.0
+HR000000,2019,vcs-140-Croatia-Milk and milk products,PGVCSDCOW,114.0
+HR000000,2019,vcs-15-Croatia-Beef and veal,PGVCSSLAUGHTERPRE,74.0
+HR000000,2019,vcs-16-Croatia-Beef and veal,PGVCSSCOW,101.0
+HR000000,2019,vcs-182-Croatia-Protein crops,PGVCSFEEDCROPS,90.0
+HR000000,2019,vcs-225-Croatia-Sheepmeat and goatmeat,PGVCSSHG,7.0
+HR000000,2019,vcs-272-Croatia-Sugar beet,PGVCSSUGARBEET,208.0
+HR000000,2019,vcs-71-Croatia-Fruit and vegetables,PGVCSTOMA_OVEG,311.0
+HR000000,2019,vcs-72-Croatia-Fruit and vegetables,PGVCSAPPL_OFRU,167.0
+HR000000,2020,vcs-140-Croatia-Milk and milk products,PGVCSDCOW,109.0
+HR000000,2020,vcs-15-Croatia-Beef and veal,PGVCSSLAUGHTERPRE,71.0
+HR000000,2020,vcs-16-Croatia-Beef and veal,PGVCSSCOW,97.0
+HR000000,2020,vcs-182-Croatia-Protein crops,PGVCSFEEDCROPS,87.0
+HR000000,2020,vcs-225-Croatia-Sheepmeat and goatmeat,PGVCSSHG,7.0
+HR000000,2020,vcs-272-Croatia-Sugar beet,PGVCSSUGARBEET,200.0
+HR000000,2020,vcs-71-Croatia-Fruit and vegetables,PGVCSTOMA_OVEG,300.0
+HR000000,2020,vcs-72-Croatia-Fruit and vegetables,PGVCSAPPL_OFRU,161.0
+HU000000,2015,vcs-152-Hungary-Milk and milk products,PGVCSDCOW,300.0
+HU000000,2015,vcs-191-Hungary-Protein crops,PGVCSFEEDCROPS,68.0
+HU000000,2015,vcs-192-Hungary-Protein crops,PGVCSPULS,209.0
+HU000000,2015,vcs-206-Hungary-Rice,PGVCSRICE,542.0
+HU000000,2015,vcs-242-Hungary-Sheepmeat and goatmeat,PGVCSSHG,23.0
+HU000000,2015,vcs-276-Hungary-Sugar beet,PGVCSSUGARBEET,396.0
+HU000000,2015,vcs-36-Hungary-Beef and veal,PGVCSSCOW,216.0
+HU000000,2015,vcs-37-Hungary-Beef and veal,PGVCSBULL,59.0
+HU000000,2015,vcs-90-Hungary-Fruit and vegetables,PGVCSTOMA_OVEG,196.0
+HU000000,2015,vcs-91-Hungary-Fruit and vegetables,PGVCSTOMA_OVEG,264.0
+HU000000,2015,vcs-92-Hungary-Fruit and vegetables,PGVCSAPPL_OFRU,471.0
+HU000000,2016,vcs-152-Hungary-Milk and milk products,PGVCSDCOW,300.0
+HU000000,2016,vcs-191-Hungary-Protein crops,PGVCSFEEDCROPS,68.0
+HU000000,2016,vcs-192-Hungary-Protein crops,PGVCSPULS,209.0
+HU000000,2016,vcs-206-Hungary-Rice,PGVCSRICE,541.0
+HU000000,2016,vcs-242-Hungary-Sheepmeat and goatmeat,PGVCSSHG,23.0
+HU000000,2016,vcs-276-Hungary-Sugar beet,PGVCSSUGARBEET,396.0
+HU000000,2016,vcs-36-Hungary-Beef and veal,PGVCSSCOW,216.0
+HU000000,2016,vcs-37-Hungary-Beef and veal,PGVCSBULL,59.0
+HU000000,2016,vcs-90-Hungary-Fruit and vegetables,PGVCSTOMA_OVEG,196.0
+HU000000,2016,vcs-91-Hungary-Fruit and vegetables,PGVCSTOMA_OVEG,264.0
+HU000000,2016,vcs-92-Hungary-Fruit and vegetables,PGVCSAPPL_OFRU,471.0
+HU000000,2017,vcs-152-Hungary-Milk and milk products,PGVCSDCOW,299.0
+HU000000,2017,vcs-191-Hungary-Protein crops,PGVCSFEEDCROPS,68.0
+HU000000,2017,vcs-192-Hungary-Protein crops,PGVCSPULS,209.0
+HU000000,2017,vcs-206-Hungary-Rice,PGVCSRICE,541.0
+HU000000,2017,vcs-242-Hungary-Sheepmeat and goatmeat,PGVCSSHG,23.0
+HU000000,2017,vcs-276-Hungary-Sugar beet,PGVCSSUGARBEET,395.0
+HU000000,2017,vcs-36-Hungary-Beef and veal,PGVCSSCOW,216.0
+HU000000,2017,vcs-37-Hungary-Beef and veal,PGVCSBULL,59.0
+HU000000,2017,vcs-90-Hungary-Fruit and vegetables,PGVCSTOMA_OVEG,196.0
+HU000000,2017,vcs-91-Hungary-Fruit and vegetables,PGVCSTOMA_OVEG,264.0
+HU000000,2017,vcs-92-Hungary-Fruit and vegetables,PGVCSAPPL_OFRU,471.0
+HU000000,2018,vcs-152-Hungary-Milk and milk products,PGVCSDCOW,299.0
+HU000000,2018,vcs-191-Hungary-Protein crops,PGVCSFEEDCROPS,68.0
+HU000000,2018,vcs-192-Hungary-Protein crops,PGVCSPULS,208.0
+HU000000,2018,vcs-206-Hungary-Rice,PGVCSRICE,541.0
+HU000000,2018,vcs-242-Hungary-Sheepmeat and goatmeat,PGVCSSHG,23.0
+HU000000,2018,vcs-276-Hungary-Sugar beet,PGVCSSUGARBEET,395.0
+HU000000,2018,vcs-36-Hungary-Beef and veal,PGVCSSCOW,216.0
+HU000000,2018,vcs-37-Hungary-Beef and veal,PGVCSBULL,59.0
+HU000000,2018,vcs-90-Hungary-Fruit and vegetables,PGVCSTOMA_OVEG,196.0
+HU000000,2018,vcs-91-Hungary-Fruit and vegetables,PGVCSTOMA_OVEG,264.0
+HU000000,2018,vcs-92-Hungary-Fruit and vegetables,PGVCSAPPL_OFRU,470.0
+HU000000,2019,vcs-152-Hungary-Milk and milk products,PGVCSDCOW,299.0
+HU000000,2019,vcs-191-Hungary-Protein crops,PGVCSFEEDCROPS,68.0
+HU000000,2019,vcs-192-Hungary-Protein crops,PGVCSPULS,208.0
+HU000000,2019,vcs-206-Hungary-Rice,PGVCSRICE,541.0
+HU000000,2019,vcs-242-Hungary-Sheepmeat and goatmeat,PGVCSSHG,23.0
+HU000000,2019,vcs-276-Hungary-Sugar beet,PGVCSSUGARBEET,395.0
+HU000000,2019,vcs-36-Hungary-Beef and veal,PGVCSSCOW,216.0
+HU000000,2019,vcs-37-Hungary-Beef and veal,PGVCSBULL,59.0
+HU000000,2019,vcs-90-Hungary-Fruit and vegetables,PGVCSTOMA_OVEG,196.0
+HU000000,2019,vcs-91-Hungary-Fruit and vegetables,PGVCSTOMA_OVEG,264.0
+HU000000,2019,vcs-92-Hungary-Fruit and vegetables,PGVCSAPPL_OFRU,470.0
+HU000000,2020,vcs-152-Hungary-Milk and milk products,PGVCSDCOW,283.0
+HU000000,2020,vcs-191-Hungary-Protein crops,PGVCSFEEDCROPS,65.0
+HU000000,2020,vcs-192-Hungary-Protein crops,PGVCSPULS,197.0
+HU000000,2020,vcs-206-Hungary-Rice,PGVCSRICE,511.0
+HU000000,2020,vcs-242-Hungary-Sheepmeat and goatmeat,PGVCSSHG,21.0
+HU000000,2020,vcs-276-Hungary-Sugar beet,PGVCSSUGARBEET,374.0
+HU000000,2020,vcs-36-Hungary-Beef and veal,PGVCSSCOW,204.0
+HU000000,2020,vcs-37-Hungary-Beef and veal,PGVCSBULL,56.0
+HU000000,2020,vcs-90-Hungary-Fruit and vegetables,PGVCSTOMA_OVEG,185.0
+HU000000,2020,vcs-91-Hungary-Fruit and vegetables,PGVCSTOMA_OVEG,249.0
+HU000000,2020,vcs-92-Hungary-Fruit and vegetables,PGVCSAPPL_OFRU,445.0
+IR000000,2015,vcs-193-Ireland-Protein crops,PGVCSPULS,250.0
+IR000000,2016,vcs-193-Ireland-Protein crops,PGVCSPULS,250.0
+IR000000,2017,vcs-193-Ireland-Protein crops,PGVCSPULS,250.0
+IR000000,2018,vcs-193-Ireland-Protein crops,PGVCSPULS,250.0
+IR000000,2019,vcs-193-Ireland-Protein crops,PGVCSPULS,250.0
+IR000000,2020,vcs-193-Ireland-Protein crops,PGVCSPULS,250.0
+IT000000,2015,vcs-121-Italy-Grain legumes,PGVCSPULS,53.0
+IT000000,2015,vcs-153-Italy-Milk and milk products,PGVCSDCOW,40.0
+IT000000,2015,vcs-154-Italy-Milk and milk products,PGVCSDCOW,32.0
+IT000000,2015,vcs-155-Italy-Milk and milk products,PGVCSDCOW,15.0
+IT000000,2015,vcs-174-Italy-Oilseeds,PGVCSSOY,54.0
+IT000000,2015,vcs-177-Italy-Olive oil,PGVCSOLIV,70.0
+IT000000,2015,vcs-178-Italy-Olive oil,PGVCSOLIV,75.0
+IT000000,2015,vcs-179-Italy-Olive oil,PGVCSOLIV,119.0
+IT000000,2015,vcs-203-Italy-Protein crops,PGVCSPULS,66.0
+IT000000,2015,vcs-207-Italy-Rice,PGVCSRICE,92.0
+IT000000,2015,vcs-243-Italy-Sheepmeat and goatmeat,PGVCSSHG,10.0
+IT000000,2015,vcs-244-Italy-Sheepmeat and goatmeat,PGVCSSHG,6.0
+IT000000,2015,vcs-277-Italy-Sugar beet,PGVCSSUGARBEET,276.0
+IT000000,2015,vcs-38-Italy-Beef and veal,PGVCSSCOW,127.0
+IT000000,2015,vcs-39-Italy-Beef and veal,PGVCSSLAUGHTERPRE,54.0
+IT000000,2015,vcs-59-Italy-Cereals,PGVCSDURUM,49.0
+IT000000,2015,vcs-93-Italy-Fruit and vegetables,PGVCSTOMA,117.0
+IT000000,2016,vcs-121-Italy-Grain legumes,PGVCSPULS,52.0
+IT000000,2016,vcs-153-Italy-Milk and milk products,PGVCSDCOW,39.0
+IT000000,2016,vcs-154-Italy-Milk and milk products,PGVCSDCOW,31.0
+IT000000,2016,vcs-155-Italy-Milk and milk products,PGVCSDCOW,15.0
+IT000000,2016,vcs-174-Italy-Oilseeds,PGVCSSOY,53.0
+IT000000,2016,vcs-177-Italy-Olive oil,PGVCSOLIV,69.0
+IT000000,2016,vcs-178-Italy-Olive oil,PGVCSOLIV,74.0
+IT000000,2016,vcs-179-Italy-Olive oil,PGVCSOLIV,118.0
+IT000000,2016,vcs-203-Italy-Protein crops,PGVCSPULS,65.0
+IT000000,2016,vcs-207-Italy-Rice,PGVCSRICE,91.0
+IT000000,2016,vcs-243-Italy-Sheepmeat and goatmeat,PGVCSSHG,10.0
+IT000000,2016,vcs-244-Italy-Sheepmeat and goatmeat,PGVCSSHG,6.0
+IT000000,2016,vcs-277-Italy-Sugar beet,PGVCSSUGARBEET,273.0
+IT000000,2016,vcs-38-Italy-Beef and veal,PGVCSSCOW,126.0
+IT000000,2016,vcs-39-Italy-Beef and veal,PGVCSSLAUGHTERPRE,53.0
+IT000000,2016,vcs-59-Italy-Cereals,PGVCSDURUM,48.0
+IT000000,2016,vcs-93-Italy-Fruit and vegetables,PGVCSTOMA,115.0
+IT000000,2017,vcs-121-Italy-Grain legumes,PGVCSPULS,51.0
+IT000000,2017,vcs-153-Italy-Milk and milk products,PGVCSDCOW,39.0
+IT000000,2017,vcs-154-Italy-Milk and milk products,PGVCSDCOW,31.0
+IT000000,2017,vcs-155-Italy-Milk and milk products,PGVCSDCOW,14.0
+IT000000,2017,vcs-174-Italy-Oilseeds,PGVCSSOY,52.0
+IT000000,2017,vcs-177-Italy-Olive oil,PGVCSOLIV,68.0
+IT000000,2017,vcs-178-Italy-Olive oil,PGVCSOLIV,73.0
+IT000000,2017,vcs-179-Italy-Olive oil,PGVCSOLIV,116.0
+IT000000,2017,vcs-203-Italy-Protein crops,PGVCSPULS,64.0
+IT000000,2017,vcs-207-Italy-Rice,PGVCSRICE,89.0
+IT000000,2017,vcs-243-Italy-Sheepmeat and goatmeat,PGVCSSHG,10.0
+IT000000,2017,vcs-244-Italy-Sheepmeat and goatmeat,PGVCSSHG,6.0
+IT000000,2017,vcs-277-Italy-Sugar beet,PGVCSSUGARBEET,269.0
+IT000000,2017,vcs-38-Italy-Beef and veal,PGVCSSCOW,124.0
+IT000000,2017,vcs-39-Italy-Beef and veal,PGVCSSLAUGHTERPRE,53.0
+IT000000,2017,vcs-59-Italy-Cereals,PGVCSDURUM,48.0
+IT000000,2017,vcs-93-Italy-Fruit and vegetables,PGVCSTOMA,114.0
+IT000000,2018,vcs-121-Italy-Grain legumes,PGVCSPULS,51.0
+IT000000,2018,vcs-153-Italy-Milk and milk products,PGVCSDCOW,38.0
+IT000000,2018,vcs-154-Italy-Milk and milk products,PGVCSDCOW,30.0
+IT000000,2018,vcs-155-Italy-Milk and milk products,PGVCSDCOW,14.0
+IT000000,2018,vcs-174-Italy-Oilseeds,PGVCSSOY,52.0
+IT000000,2018,vcs-177-Italy-Olive oil,PGVCSOLIV,67.0
+IT000000,2018,vcs-178-Italy-Olive oil,PGVCSOLIV,72.0
+IT000000,2018,vcs-179-Italy-Olive oil,PGVCSOLIV,115.0
+IT000000,2018,vcs-203-Italy-Protein crops,PGVCSPULS,63.0
+IT000000,2018,vcs-207-Italy-Rice,PGVCSRICE,88.0
+IT000000,2018,vcs-243-Italy-Sheepmeat and goatmeat,PGVCSSHG,10.0
+IT000000,2018,vcs-244-Italy-Sheepmeat and goatmeat,PGVCSSHG,6.0
+IT000000,2018,vcs-277-Italy-Sugar beet,PGVCSSUGARBEET,266.0
+IT000000,2018,vcs-38-Italy-Beef and veal,PGVCSSCOW,122.0
+IT000000,2018,vcs-39-Italy-Beef and veal,PGVCSSLAUGHTERPRE,52.0
+IT000000,2018,vcs-59-Italy-Cereals,PGVCSDURUM,47.0
+IT000000,2018,vcs-93-Italy-Fruit and vegetables,PGVCSTOMA,112.0
+IT000000,2019,vcs-121-Italy-Grain legumes,PGVCSPULS,50.0
+IT000000,2019,vcs-153-Italy-Milk and milk products,PGVCSDCOW,38.0
+IT000000,2019,vcs-154-Italy-Milk and milk products,PGVCSDCOW,30.0
+IT000000,2019,vcs-155-Italy-Milk and milk products,PGVCSDCOW,14.0
+IT000000,2019,vcs-174-Italy-Oilseeds,PGVCSSOY,51.0
+IT000000,2019,vcs-177-Italy-Olive oil,PGVCSOLIV,66.0
+IT000000,2019,vcs-178-Italy-Olive oil,PGVCSOLIV,71.0
+IT000000,2019,vcs-179-Italy-Olive oil,PGVCSOLIV,113.0
+IT000000,2019,vcs-203-Italy-Protein crops,PGVCSPULS,63.0
+IT000000,2019,vcs-207-Italy-Rice,PGVCSRICE,87.0
+IT000000,2019,vcs-243-Italy-Sheepmeat and goatmeat,PGVCSSHG,10.0
+IT000000,2019,vcs-244-Italy-Sheepmeat and goatmeat,PGVCSSHG,6.0
+IT000000,2019,vcs-277-Italy-Sugar beet,PGVCSSUGARBEET,262.0
+IT000000,2019,vcs-38-Italy-Beef and veal,PGVCSSCOW,121.0
+IT000000,2019,vcs-39-Italy-Beef and veal,PGVCSSLAUGHTERPRE,51.0
+IT000000,2019,vcs-59-Italy-Cereals,PGVCSDURUM,47.0
+IT000000,2019,vcs-93-Italy-Fruit and vegetables,PGVCSTOMA,111.0
+IT000000,2020,vcs-121-Italy-Grain legumes,PGVCSPULS,50.0
+IT000000,2020,vcs-153-Italy-Milk and milk products,PGVCSDCOW,38.0
+IT000000,2020,vcs-154-Italy-Milk and milk products,PGVCSDCOW,30.0
+IT000000,2020,vcs-155-Italy-Milk and milk products,PGVCSDCOW,14.0
+IT000000,2020,vcs-174-Italy-Oilseeds,PGVCSSOY,51.0
+IT000000,2020,vcs-177-Italy-Olive oil,PGVCSOLIV,66.0
+IT000000,2020,vcs-178-Italy-Olive oil,PGVCSOLIV,71.0
+IT000000,2020,vcs-179-Italy-Olive oil,PGVCSOLIV,113.0
+IT000000,2020,vcs-203-Italy-Protein crops,PGVCSPULS,63.0
+IT000000,2020,vcs-207-Italy-Rice,PGVCSRICE,87.0
+IT000000,2020,vcs-243-Italy-Sheepmeat and goatmeat,PGVCSSHG,10.0
+IT000000,2020,vcs-244-Italy-Sheepmeat and goatmeat,PGVCSSHG,6.0
+IT000000,2020,vcs-277-Italy-Sugar beet,PGVCSSUGARBEET,262.0
+IT000000,2020,vcs-38-Italy-Beef and veal,PGVCSSCOW,121.0
+IT000000,2020,vcs-39-Italy-Beef and veal,PGVCSSLAUGHTERPRE,51.0
+IT000000,2020,vcs-59-Italy-Cereals,PGVCSDURUM,47.0
+IT000000,2020,vcs-93-Italy-Fruit and vegetables,PGVCSTOMA,111.0
+LT000000,2015,vcs-158-Lithuania-Milk and milk products,PGVCSDCOW,77.0
+LT000000,2015,vcs-195-Lithuania-Protein crops,PGVCSPULS,142.0
+LT000000,2015,vcs-246-Lithuania-Sheepmeat and goatmeat,PGVCSSHG,20.0
+LT000000,2015,vcs-247-Lithuania-Sheepmeat and goatmeat,PGVCSEWE,24.0
+LT000000,2015,vcs-41-Lithuania-Beef and veal,PGVCSCATTLEBEEF,178.0
+LT000000,2015,vcs-42-Lithuania-Beef and veal,PGVCSBULLHEIF,134.0
+LT000000,2015,vcs-96-Lithuania-Fruit and vegetables,PGVCSTOMA_OVEG,80.0
+LT000000,2015,vcs-97-Lithuania-Fruit and vegetables,PGVCSTOMA_OVEG,14263.0
+LT000000,2015,vcs-98-Lithuania-Fruit and vegetables,PGVCSOFRU,75.0
+LT000000,2016,vcs-158-Lithuania-Milk and milk products,PGVCSDCOW,82.0
+LT000000,2016,vcs-195-Lithuania-Protein crops,PGVCSPULS,151.0
+LT000000,2016,vcs-246-Lithuania-Sheepmeat and goatmeat,PGVCSSHG,21.0
+LT000000,2016,vcs-247-Lithuania-Sheepmeat and goatmeat,PGVCSEWE,25.0
+LT000000,2016,vcs-41-Lithuania-Beef and veal,PGVCSCATTLEBEEF,189.0
+LT000000,2016,vcs-42-Lithuania-Beef and veal,PGVCSBULLHEIF,142.0
+LT000000,2016,vcs-96-Lithuania-Fruit and vegetables,PGVCSTOMA_OVEG,85.0
+LT000000,2016,vcs-97-Lithuania-Fruit and vegetables,PGVCSTOMA_OVEG,15104.0
+LT000000,2016,vcs-98-Lithuania-Fruit and vegetables,PGVCSOFRU,80.0
+LT000000,2017,vcs-158-Lithuania-Milk and milk products,PGVCSDCOW,86.0
+LT000000,2017,vcs-195-Lithuania-Protein crops,PGVCSPULS,159.0
+LT000000,2017,vcs-246-Lithuania-Sheepmeat and goatmeat,PGVCSSHG,22.0
+LT000000,2017,vcs-247-Lithuania-Sheepmeat and goatmeat,PGVCSEWE,27.0
+LT000000,2017,vcs-41-Lithuania-Beef and veal,PGVCSCATTLEBEEF,199.0
+LT000000,2017,vcs-42-Lithuania-Beef and veal,PGVCSBULLHEIF,150.0
+LT000000,2017,vcs-96-Lithuania-Fruit and vegetables,PGVCSTOMA_OVEG,90.0
+LT000000,2017,vcs-97-Lithuania-Fruit and vegetables,PGVCSTOMA_OVEG,15942.0
+LT000000,2017,vcs-98-Lithuania-Fruit and vegetables,PGVCSOFRU,84.0
+LT000000,2018,vcs-158-Lithuania-Milk and milk products,PGVCSDCOW,91.0
+LT000000,2018,vcs-195-Lithuania-Protein crops,PGVCSPULS,168.0
+LT000000,2018,vcs-246-Lithuania-Sheepmeat and goatmeat,PGVCSSHG,23.0
+LT000000,2018,vcs-247-Lithuania-Sheepmeat and goatmeat,PGVCSEWE,28.0
+LT000000,2018,vcs-41-Lithuania-Beef and veal,PGVCSCATTLEBEEF,210.0
+LT000000,2018,vcs-42-Lithuania-Beef and veal,PGVCSBULLHEIF,158.0
+LT000000,2018,vcs-96-Lithuania-Fruit and vegetables,PGVCSTOMA_OVEG,95.0
+LT000000,2018,vcs-97-Lithuania-Fruit and vegetables,PGVCSTOMA_OVEG,16795.0
+LT000000,2018,vcs-98-Lithuania-Fruit and vegetables,PGVCSOFRU,89.0
+LT000000,2019,vcs-158-Lithuania-Milk and milk products,PGVCSDCOW,95.0
+LT000000,2019,vcs-195-Lithuania-Protein crops,PGVCSPULS,176.0
+LT000000,2019,vcs-246-Lithuania-Sheepmeat and goatmeat,PGVCSSHG,25.0
+LT000000,2019,vcs-247-Lithuania-Sheepmeat and goatmeat,PGVCSEWE,30.0
+LT000000,2019,vcs-41-Lithuania-Beef and veal,PGVCSCATTLEBEEF,221.0
+LT000000,2019,vcs-42-Lithuania-Beef and veal,PGVCSBULLHEIF,166.0
+LT000000,2019,vcs-96-Lithuania-Fruit and vegetables,PGVCSTOMA_OVEG,100.0
+LT000000,2019,vcs-97-Lithuania-Fruit and vegetables,PGVCSTOMA_OVEG,17647.0
+LT000000,2019,vcs-98-Lithuania-Fruit and vegetables,PGVCSOFRU,93.0
+LT000000,2020,vcs-158-Lithuania-Milk and milk products,PGVCSDCOW,95.0
+LT000000,2020,vcs-195-Lithuania-Protein crops,PGVCSPULS,176.0
+LT000000,2020,vcs-246-Lithuania-Sheepmeat and goatmeat,PGVCSSHG,25.0
+LT000000,2020,vcs-247-Lithuania-Sheepmeat and goatmeat,PGVCSEWE,30.0
+LT000000,2020,vcs-41-Lithuania-Beef and veal,PGVCSCATTLEBEEF,221.0
+LT000000,2020,vcs-42-Lithuania-Beef and veal,PGVCSBULLHEIF,166.0
+LT000000,2020,vcs-96-Lithuania-Fruit and vegetables,PGVCSTOMA_OVEG,100.0
+LT000000,2020,vcs-97-Lithuania-Fruit and vegetables,PGVCSTOMA_OVEG,17647.0
+LT000000,2020,vcs-98-Lithuania-Fruit and vegetables,PGVCSOFRU,93.0
+LV000000,2015,vcs-156-Latvia-Milk and milk products,PGVCSDCOW,147.0
+LV000000,2015,vcs-157-Latvia-Milk and milk products,PGVCSSHG,20.0
+LV000000,2015,vcs-175-Latvia-Oilseeds,PGVCSRAPE,19.0
+LV000000,2015,vcs-194-Latvia-Protein crops,PGVCSPULS,56.0
+LV000000,2015,vcs-214-Latvia-Seeds,PGVCSGRASSEED_FODDER,116.0
+LV000000,2015,vcs-215-Latvia-Seeds,PGVCSPOTATO,505.0
+LV000000,2015,vcs-216-Latvia-Seeds,PGVCSCEREALSEED,104.0
+LV000000,2015,vcs-245-Latvia-Sheepmeat and goatmeat,PGVCSEWE,11.0
+LV000000,2015,vcs-269-Latvia-Starch potato,PGVCSPOTATO,409.0
+LV000000,2015,vcs-40-Latvia-Beef and veal,PGVCSBULLSCOWHEIF,85.0
+LV000000,2015,vcs-63-Latvia-Cereals,PGVCSBARL,26.0
+LV000000,2015,vcs-94-Latvia-Fruit and vegetables,PGVCSTOMA_OVEG,302.0
+LV000000,2015,vcs-95-Latvia-Fruit and vegetables,PGVCSAPPL_OFRU,126.0
+LV000000,2016,vcs-156-Latvia-Milk and milk products,PGVCSDCOW,167.0
+LV000000,2016,vcs-157-Latvia-Milk and milk products,PGVCSSHG,23.0
+LV000000,2016,vcs-175-Latvia-Oilseeds,PGVCSRAPE,25.0
+LV000000,2016,vcs-194-Latvia-Protein crops,PGVCSPULS,56.0
+LV000000,2016,vcs-214-Latvia-Seeds,PGVCSGRASSEED_FODDER,116.0
+LV000000,2016,vcs-215-Latvia-Seeds,PGVCSPOTATO,505.0
+LV000000,2016,vcs-216-Latvia-Seeds,PGVCSCEREALSEED,104.0
+LV000000,2016,vcs-245-Latvia-Sheepmeat and goatmeat,PGVCSEWE,18.0
+LV000000,2016,vcs-269-Latvia-Starch potato,PGVCSPOTATO,409.0
+LV000000,2016,vcs-40-Latvia-Beef and veal,PGVCSBULLSCOWHEIF,95.0
+LV000000,2016,vcs-63-Latvia-Cereals,PGVCSBARL,28.0
+LV000000,2016,vcs-94-Latvia-Fruit and vegetables,PGVCSTOMA_OVEG,344.0
+LV000000,2016,vcs-95-Latvia-Fruit and vegetables,PGVCSAPPL_OFRU,143.0
+LV000000,2017,vcs-156-Latvia-Milk and milk products,PGVCSDCOW,187.0
+LV000000,2017,vcs-157-Latvia-Milk and milk products,PGVCSSHG,25.0
+LV000000,2017,vcs-175-Latvia-Oilseeds,PGVCSRAPE,31.0
+LV000000,2017,vcs-194-Latvia-Protein crops,PGVCSPULS,56.0
+LV000000,2017,vcs-214-Latvia-Seeds,PGVCSGRASSEED_FODDER,116.0
+LV000000,2017,vcs-215-Latvia-Seeds,PGVCSPOTATO,505.0
+LV000000,2017,vcs-216-Latvia-Seeds,PGVCSCEREALSEED,104.0
+LV000000,2017,vcs-245-Latvia-Sheepmeat and goatmeat,PGVCSEWE,25.0
+LV000000,2017,vcs-269-Latvia-Starch potato,PGVCSPOTATO,409.0
+LV000000,2017,vcs-40-Latvia-Beef and veal,PGVCSBULLSCOWHEIF,105.0
+LV000000,2017,vcs-63-Latvia-Cereals,PGVCSBARL,30.0
+LV000000,2017,vcs-94-Latvia-Fruit and vegetables,PGVCSTOMA_OVEG,385.0
+LV000000,2017,vcs-95-Latvia-Fruit and vegetables,PGVCSAPPL_OFRU,160.0
+LV000000,2018,vcs-156-Latvia-Milk and milk products,PGVCSDCOW,193.0
+LV000000,2018,vcs-157-Latvia-Milk and milk products,PGVCSSHG,25.0
+LV000000,2018,vcs-175-Latvia-Oilseeds,PGVCSRAPE,37.0
+LV000000,2018,vcs-194-Latvia-Protein crops,PGVCSPULS,56.0
+LV000000,2018,vcs-214-Latvia-Seeds,PGVCSGRASSEED_FODDER,116.0
+LV000000,2018,vcs-215-Latvia-Seeds,PGVCSPOTATO,505.0
+LV000000,2018,vcs-216-Latvia-Seeds,PGVCSCEREALSEED,104.0
+LV000000,2018,vcs-245-Latvia-Sheepmeat and goatmeat,PGVCSEWE,29.0
+LV000000,2018,vcs-269-Latvia-Starch potato,PGVCSPOTATO,409.0
+LV000000,2018,vcs-40-Latvia-Beef and veal,PGVCSBULLSCOWHEIF,149.0
+LV000000,2018,vcs-63-Latvia-Cereals,PGVCSBARL,32.0
+LV000000,2018,vcs-94-Latvia-Fruit and vegetables,PGVCSTOMA_OVEG,427.0
+LV000000,2018,vcs-95-Latvia-Fruit and vegetables,PGVCSAPPL_OFRU,178.0
+LV000000,2019,vcs-156-Latvia-Milk and milk products,PGVCSDCOW,211.0
+LV000000,2019,vcs-157-Latvia-Milk and milk products,PGVCSSHG,25.0
+LV000000,2019,vcs-175-Latvia-Oilseeds,PGVCSRAPE,43.0
+LV000000,2019,vcs-194-Latvia-Protein crops,PGVCSPULS,56.0
+LV000000,2019,vcs-214-Latvia-Seeds,PGVCSGRASSEED_FODDER,116.0
+LV000000,2019,vcs-215-Latvia-Seeds,PGVCSPOTATO,505.0
+LV000000,2019,vcs-216-Latvia-Seeds,PGVCSCEREALSEED,104.0
+LV000000,2019,vcs-245-Latvia-Sheepmeat and goatmeat,PGVCSEWE,29.0
+LV000000,2019,vcs-269-Latvia-Starch potato,PGVCSPOTATO,409.0
+LV000000,2019,vcs-40-Latvia-Beef and veal,PGVCSBULLSCOWHEIF,169.0
+LV000000,2019,vcs-63-Latvia-Cereals,PGVCSBARL,34.0
+LV000000,2019,vcs-94-Latvia-Fruit and vegetables,PGVCSTOMA_OVEG,469.0
+LV000000,2019,vcs-95-Latvia-Fruit and vegetables,PGVCSAPPL_OFRU,195.0
+LV000000,2020,vcs-156-Latvia-Milk and milk products,PGVCSDCOW,231.0
+LV000000,2020,vcs-157-Latvia-Milk and milk products,PGVCSSHG,25.0
+LV000000,2020,vcs-175-Latvia-Oilseeds,PGVCSRAPE,49.0
+LV000000,2020,vcs-194-Latvia-Protein crops,PGVCSPULS,56.0
+LV000000,2020,vcs-214-Latvia-Seeds,PGVCSGRASSEED_FODDER,116.0
+LV000000,2020,vcs-215-Latvia-Seeds,PGVCSPOTATO,505.0
+LV000000,2020,vcs-216-Latvia-Seeds,PGVCSCEREALSEED,104.0
+LV000000,2020,vcs-245-Latvia-Sheepmeat and goatmeat,PGVCSEWE,29.0
+LV000000,2020,vcs-269-Latvia-Starch potato,PGVCSPOTATO,409.0
+LV000000,2020,vcs-40-Latvia-Beef and veal,PGVCSBULLSCOWHEIF,179.0
+LV000000,2020,vcs-63-Latvia-Cereals,PGVCSBARL,36.0
+LV000000,2020,vcs-94-Latvia-Fruit and vegetables,PGVCSTOMA_OVEG,506.0
+LV000000,2020,vcs-95-Latvia-Fruit and vegetables,PGVCSAPPL_OFRU,211.0
+MT000000,2015,vcs-159-Malta-Milk and milk products,PGVCSDCOW,244.0
+MT000000,2015,vcs-248-Malta-Sheepmeat and goatmeat,PGVCSEWE,15.0
+MT000000,2015,vcs-43-Malta-Beef and veal,PGVCSBULLHEIF,195.0
+MT000000,2015,vcs-99-Malta-Fruit and vegetables,PGVCSTOMA,6504.0
+MT000000,2016,vcs-159-Malta-Milk and milk products,PGVCSDCOW,244.0
+MT000000,2016,vcs-248-Malta-Sheepmeat and goatmeat,PGVCSEWE,15.0
+MT000000,2016,vcs-43-Malta-Beef and veal,PGVCSBULLHEIF,195.0
+MT000000,2016,vcs-99-Malta-Fruit and vegetables,PGVCSTOMA,6504.0
+MT000000,2017,vcs-159-Malta-Milk and milk products,PGVCSDCOW,244.0
+MT000000,2017,vcs-248-Malta-Sheepmeat and goatmeat,PGVCSEWE,15.0
+MT000000,2017,vcs-43-Malta-Beef and veal,PGVCSBULLHEIF,195.0
+MT000000,2017,vcs-99-Malta-Fruit and vegetables,PGVCSTOMA,6504.0
+MT000000,2018,vcs-159-Malta-Milk and milk products,PGVCSDCOW,244.0
+MT000000,2018,vcs-248-Malta-Sheepmeat and goatmeat,PGVCSEWE,15.0
+MT000000,2018,vcs-43-Malta-Beef and veal,PGVCSBULLHEIF,195.0
+MT000000,2018,vcs-99-Malta-Fruit and vegetables,PGVCSTOMA,6504.0
+MT000000,2019,vcs-159-Malta-Milk and milk products,PGVCSDCOW,244.0
+MT000000,2019,vcs-248-Malta-Sheepmeat and goatmeat,PGVCSEWE,15.0
+MT000000,2019,vcs-43-Malta-Beef and veal,PGVCSBULLHEIF,195.0
+MT000000,2019,vcs-99-Malta-Fruit and vegetables,PGVCSTOMA,6504.0
+MT000000,2020,vcs-159-Malta-Milk and milk products,PGVCSDCOW,244.0
+MT000000,2020,vcs-248-Malta-Sheepmeat and goatmeat,PGVCSEWE,15.0
+MT000000,2020,vcs-43-Malta-Beef and veal,PGVCSBULLHEIF,195.0
+MT000000,2020,vcs-99-Malta-Fruit and vegetables,PGVCSTOMA,6504.0
+NL000000,2015,vcs-249-Netherlands-Sheepmeat and goatmeat,PGVCSSHG,24.0
+NL000000,2015,vcs-44-Netherlands-Beef and veal,PGVCSSCOW,160.0
+NL000000,2016,vcs-249-Netherlands-Sheepmeat and goatmeat,PGVCSSHG,24.0
+NL000000,2016,vcs-44-Netherlands-Beef and veal,PGVCSSCOW,160.0
+NL000000,2017,vcs-249-Netherlands-Sheepmeat and goatmeat,PGVCSSHG,24.0
+NL000000,2017,vcs-44-Netherlands-Beef and veal,PGVCSSCOW,160.0
+NL000000,2018,vcs-249-Netherlands-Sheepmeat and goatmeat,PGVCSSHG,24.0
+NL000000,2018,vcs-44-Netherlands-Beef and veal,PGVCSSCOW,160.0
+NL000000,2019,vcs-249-Netherlands-Sheepmeat and goatmeat,PGVCSSHG,24.0
+NL000000,2019,vcs-44-Netherlands-Beef and veal,PGVCSSCOW,160.0
+NL000000,2020,vcs-249-Netherlands-Sheepmeat and goatmeat,PGVCSSHG,24.0
+NL000000,2020,vcs-44-Netherlands-Beef and veal,PGVCSSCOW,160.0
+PL000000,2015,vcs-100-Poland-Fruit and vegetables,PGVCSTOMA,327.0
+PL000000,2015,vcs-101-Poland-Fruit and vegetables,PGVCSOFRU,179.0
+PL000000,2015,vcs-128-Poland-Hemp,PGVCSFLAX,98.0
+PL000000,2015,vcs-131-Poland-Hops,PGVCSOCRO,365.0
+PL000000,2015,vcs-160-Poland-Milk and milk products,PGVCSDCOW,57.0
+PL000000,2015,vcs-197-Poland-Protein crops,PGVCSPULS,205.0
+PL000000,2015,vcs-250-Poland-Sheepmeat and goatmeat,PGVCSSHG,25.0
+PL000000,2015,vcs-251-Poland-Sheepmeat and goatmeat,PGVCSEWE,8.0
+PL000000,2015,vcs-270-Poland-Starch potato,PGVCSPOTATO,377.0
+PL000000,2015,vcs-278-Poland-Sugar beet,PGVCSSUGARBEET,384.0
+PL000000,2015,vcs-45-Poland-Beef and veal,PGVCSCATTLE,55.0
+PL000000,2015,vcs-66-Poland-Flax,PGVCSFLAX,145.0
+PL000000,2016,vcs-100-Poland-Fruit and vegetables,PGVCSTOMA,329.0
+PL000000,2016,vcs-101-Poland-Fruit and vegetables,PGVCSOFRU,180.0
+PL000000,2016,vcs-128-Poland-Hemp,PGVCSFLAX,99.0
+PL000000,2016,vcs-131-Poland-Hops,PGVCSOCRO,367.0
+PL000000,2016,vcs-160-Poland-Milk and milk products,PGVCSDCOW,57.0
+PL000000,2016,vcs-197-Poland-Protein crops,PGVCSPULS,206.0
+PL000000,2016,vcs-250-Poland-Sheepmeat and goatmeat,PGVCSSHG,25.0
+PL000000,2016,vcs-251-Poland-Sheepmeat and goatmeat,PGVCSEWE,8.0
+PL000000,2016,vcs-270-Poland-Starch potato,PGVCSPOTATO,379.0
+PL000000,2016,vcs-278-Poland-Sugar beet,PGVCSSUGARBEET,386.0
+PL000000,2016,vcs-45-Poland-Beef and veal,PGVCSCATTLE,56.0
+PL000000,2017,vcs-100-Poland-Fruit and vegetables,PGVCSTOMA,330.0
+PL000000,2017,vcs-101-Poland-Fruit and vegetables,PGVCSOFRU,181.0
+PL000000,2017,vcs-128-Poland-Hemp,PGVCSFLAX,99.0
+PL000000,2017,vcs-131-Poland-Hops,PGVCSOCRO,369.0
+PL000000,2017,vcs-160-Poland-Milk and milk products,PGVCSDCOW,57.0
+PL000000,2017,vcs-197-Poland-Protein crops,PGVCSPULS,207.0
+PL000000,2017,vcs-250-Poland-Sheepmeat and goatmeat,PGVCSSHG,25.0
+PL000000,2017,vcs-251-Poland-Sheepmeat and goatmeat,PGVCSEWE,8.0
+PL000000,2017,vcs-270-Poland-Starch potato,PGVCSPOTATO,380.0
+PL000000,2017,vcs-278-Poland-Sugar beet,PGVCSSUGARBEET,388.0
+PL000000,2017,vcs-45-Poland-Beef and veal,PGVCSCATTLE,56.0
+PL000000,2018,vcs-100-Poland-Fruit and vegetables,PGVCSTOMA,332.0
+PL000000,2018,vcs-101-Poland-Fruit and vegetables,PGVCSOFRU,182.0
+PL000000,2018,vcs-128-Poland-Hemp,PGVCSFLAX,100.0
+PL000000,2018,vcs-131-Poland-Hops,PGVCSOCRO,371.0
+PL000000,2018,vcs-160-Poland-Milk and milk products,PGVCSDCOW,58.0
+PL000000,2018,vcs-197-Poland-Protein crops,PGVCSPULS,209.0
+PL000000,2018,vcs-250-Poland-Sheepmeat and goatmeat,PGVCSSHG,25.0
+PL000000,2018,vcs-251-Poland-Sheepmeat and goatmeat,PGVCSEWE,8.0
+PL000000,2018,vcs-270-Poland-Starch potato,PGVCSPOTATO,383.0
+PL000000,2018,vcs-278-Poland-Sugar beet,PGVCSSUGARBEET,390.0
+PL000000,2018,vcs-45-Poland-Beef and veal,PGVCSCATTLE,56.0
+PL000000,2019,vcs-100-Poland-Fruit and vegetables,PGVCSTOMA,334.0
+PL000000,2019,vcs-101-Poland-Fruit and vegetables,PGVCSOFRU,183.0
+PL000000,2019,vcs-128-Poland-Hemp,PGVCSFLAX,100.0
+PL000000,2019,vcs-131-Poland-Hops,PGVCSOCRO,373.0
+PL000000,2019,vcs-160-Poland-Milk and milk products,PGVCSDCOW,58.0
+PL000000,2019,vcs-197-Poland-Protein crops,PGVCSPULS,210.0
+PL000000,2019,vcs-250-Poland-Sheepmeat and goatmeat,PGVCSSHG,26.0
+PL000000,2019,vcs-251-Poland-Sheepmeat and goatmeat,PGVCSEWE,8.0
+PL000000,2019,vcs-270-Poland-Starch potato,PGVCSPOTATO,385.0
+PL000000,2019,vcs-278-Poland-Sugar beet,PGVCSSUGARBEET,392.0
+PL000000,2019,vcs-45-Poland-Beef and veal,PGVCSCATTLE,56.0
+PL000000,2020,vcs-100-Poland-Fruit and vegetables,PGVCSTOMA,296.0
+PL000000,2020,vcs-101-Poland-Fruit and vegetables,PGVCSOFRU,162.0
+PL000000,2020,vcs-128-Poland-Hemp,PGVCSFLAX,89.0
+PL000000,2020,vcs-131-Poland-Hops,PGVCSOCRO,331.0
+PL000000,2020,vcs-160-Poland-Milk and milk products,PGVCSDCOW,51.0
+PL000000,2020,vcs-197-Poland-Protein crops,PGVCSPULS,186.0
+PL000000,2020,vcs-250-Poland-Sheepmeat and goatmeat,PGVCSSHG,23.0
+PL000000,2020,vcs-251-Poland-Sheepmeat and goatmeat,PGVCSEWE,7.0
+PL000000,2020,vcs-270-Poland-Starch potato,PGVCSPOTATO,341.0
+PL000000,2020,vcs-278-Poland-Sugar beet,PGVCSSUGARBEET,348.0
+PL000000,2020,vcs-45-Poland-Beef and veal,PGVCSCATTLE,50.0
+PT000000,2015,cscs-Portugal-cotton,PGCSCSTEXT,228.0
+PT000000,2015,vcs-102-Portugal-Fruit and vegetables,PGVCSTOMA,240.0
+PT000000,2015,vcs-161-Portugal-Milk and milk products,PGVCSDCOW,82.0
+PT000000,2015,vcs-208-Portugal-Rice,PGVCSRICE,194.0
+PT000000,2015,vcs-252-Portugal-Sheepmeat and goatmeat,PGVCSSHG,19.0
+PT000000,2015,vcs-46-Portugal-Beef and veal,PGVCSSCOW,120.0
+PT000000,2016,cscs-Portugal-cotton,PGCSCSTEXT,228.0
+PT000000,2016,vcs-102-Portugal-Fruit and vegetables,PGVCSTOMA,240.0
+PT000000,2016,vcs-161-Portugal-Milk and milk products,PGVCSDCOW,82.0
+PT000000,2016,vcs-208-Portugal-Rice,PGVCSRICE,194.0
+PT000000,2016,vcs-252-Portugal-Sheepmeat and goatmeat,PGVCSSHG,19.0
+PT000000,2016,vcs-46-Portugal-Beef and veal,PGVCSSCOW,120.0
+PT000000,2017,cscs-Portugal-cotton,PGCSCSTEXT,228.0
+PT000000,2017,vcs-102-Portugal-Fruit and vegetables,PGVCSTOMA,240.0
+PT000000,2017,vcs-161-Portugal-Milk and milk products,PGVCSDCOW,82.0
+PT000000,2017,vcs-208-Portugal-Rice,PGVCSRICE,194.0
+PT000000,2017,vcs-252-Portugal-Sheepmeat and goatmeat,PGVCSSHG,19.0
+PT000000,2017,vcs-46-Portugal-Beef and veal,PGVCSSCOW,120.0
+PT000000,2018,cscs-Portugal-cotton,PGCSCSTEXT,228.0
+PT000000,2018,vcs-102-Portugal-Fruit and vegetables,PGVCSTOMA,240.0
+PT000000,2018,vcs-161-Portugal-Milk and milk products,PGVCSDCOW,82.0
+PT000000,2018,vcs-208-Portugal-Rice,PGVCSRICE,194.0
+PT000000,2018,vcs-252-Portugal-Sheepmeat and goatmeat,PGVCSSHG,19.0
+PT000000,2018,vcs-46-Portugal-Beef and veal,PGVCSSCOW,120.0
+PT000000,2019,cscs-Portugal-cotton,PGCSCSTEXT,228.0
+PT000000,2019,vcs-102-Portugal-Fruit and vegetables,PGVCSTOMA,240.0
+PT000000,2019,vcs-161-Portugal-Milk and milk products,PGVCSDCOW,82.0
+PT000000,2019,vcs-208-Portugal-Rice,PGVCSRICE,194.0
+PT000000,2019,vcs-252-Portugal-Sheepmeat and goatmeat,PGVCSSHG,19.0
+PT000000,2019,vcs-46-Portugal-Beef and veal,PGVCSSCOW,120.0
+PT000000,2020,cscs-Portugal-cotton,PGCSCSTEXT,228.0
+PT000000,2020,vcs-102-Portugal-Fruit and vegetables,PGVCSTOMA,240.0
+PT000000,2020,vcs-161-Portugal-Milk and milk products,PGVCSDCOW,82.0
+PT000000,2020,vcs-208-Portugal-Rice,PGVCSRICE,194.0
+PT000000,2020,vcs-252-Portugal-Sheepmeat and goatmeat,PGVCSSHG,19.0
+PT000000,2020,vcs-46-Portugal-Beef and veal,PGVCSSCOW,120.0
+RO000000,2015,vcs-103-Romania-Fruit and vegetables,PGVCSTOMA,1400.0
+RO000000,2015,vcs-104-Romania-Fruit and vegetables,PGVCSOVEG,500.0
+RO000000,2015,vcs-105-Romania-Fruit and vegetables,PGVCSTOMA_OVEG,6200.0
+RO000000,2015,vcs-106-Romania-Fruit and vegetables,PGVCSTOMA_OVEG,3000.0
+RO000000,2015,vcs-107-Romania-Fruit and vegetables,PGVCSOFRU,300.0
+RO000000,2015,vcs-108-Romania-Fruit and vegetables,PGVCSAPPLE,300.0
+RO000000,2015,vcs-109-Romania-Fruit and vegetables,PGVCSOFRU,300.0
+RO000000,2015,vcs-110-Romania-Fruit and vegetables,PGVCSOFRU,300.0
+RO000000,2015,vcs-111-Romania-Fruit and vegetables,PGVCSOVEG,1000.0
+RO000000,2015,vcs-112-Romania-Fruit and vegetables,PGVCSPOTATO,700.0
+RO000000,2015,vcs-123-Romania-Grain legumes,PGVCSOFRU,180.0
+RO000000,2015,vcs-124-Romania-Grain legumes,PGVCSPULS,180.0
+RO000000,2015,vcs-129-Romania-Hemp,PGVCSFLAX,194.0
+RO000000,2015,vcs-134-Romania-Hops,PGVCSOCRO,500.0
+RO000000,2015,vcs-162-Romania-Milk and milk products,PGVCSDCOW,250.0
+RO000000,2015,vcs-163-Romania-Milk and milk products,PGVCSDCOW,190.0
+RO000000,2015,vcs-198-Romania-Protein crops,PGVCSSOY,325.0
+RO000000,2015,vcs-199-Romania-Protein crops,PGVCSFEEDCROPS,55.0
+RO000000,2015,vcs-209-Romania-Rice,PGVCSRICE,450.0
+RO000000,2015,vcs-217-Romania-Seeds,PGVCSPOTATO,960.0
+RO000000,2015,vcs-253-Romania-Sheepmeat and goatmeat,PGVCSSHG,7.0
+RO000000,2015,vcs-262-Romania-Silkworms,PGVCSOANI,5.0
+RO000000,2015,vcs-279-Romania-Sugar beet,PGVCSSUGARBEET,600.0
+RO000000,2015,vcs-47-Romania-Beef and veal,PGVCSBULLHEIF,300.0
+RO000000,2016,vcs-103-Romania-Fruit and vegetables,PGVCSTOMA,1410.0
+RO000000,2016,vcs-104-Romania-Fruit and vegetables,PGVCSOVEG,510.0
+RO000000,2016,vcs-105-Romania-Fruit and vegetables,PGVCSTOMA_OVEG,6210.0
+RO000000,2016,vcs-106-Romania-Fruit and vegetables,PGVCSTOMA_OVEG,3010.0
+RO000000,2016,vcs-107-Romania-Fruit and vegetables,PGVCSOFRU,310.0
+RO000000,2016,vcs-108-Romania-Fruit and vegetables,PGVCSAPPLE,310.0
+RO000000,2016,vcs-109-Romania-Fruit and vegetables,PGVCSOFRU,310.0
+RO000000,2016,vcs-110-Romania-Fruit and vegetables,PGVCSOFRU,310.0
+RO000000,2016,vcs-111-Romania-Fruit and vegetables,PGVCSOVEG,1000.0
+RO000000,2016,vcs-112-Romania-Fruit and vegetables,PGVCSPOTATO,710.0
+RO000000,2016,vcs-123-Romania-Grain legumes,PGVCSOFRU,190.0
+RO000000,2016,vcs-124-Romania-Grain legumes,PGVCSPULS,190.0
+RO000000,2016,vcs-129-Romania-Hemp,PGVCSFLAX,204.0
+RO000000,2016,vcs-134-Romania-Hops,PGVCSOCRO,510.0
+RO000000,2016,vcs-162-Romania-Milk and milk products,PGVCSDCOW,265.0
+RO000000,2016,vcs-163-Romania-Milk and milk products,PGVCSDCOW,200.0
+RO000000,2016,vcs-198-Romania-Protein crops,PGVCSSOY,335.0
+RO000000,2016,vcs-199-Romania-Protein crops,PGVCSFEEDCROPS,65.0
+RO000000,2016,vcs-209-Romania-Rice,PGVCSRICE,460.0
+RO000000,2016,vcs-217-Romania-Seeds,PGVCSPOTATO,970.0
+RO000000,2016,vcs-253-Romania-Sheepmeat and goatmeat,PGVCSSHG,8.0
+RO000000,2016,vcs-262-Romania-Silkworms,PGVCSOANI,5.0
+RO000000,2016,vcs-279-Romania-Sugar beet,PGVCSSUGARBEET,610.0
+RO000000,2016,vcs-47-Romania-Beef and veal,PGVCSBULLHEIF,315.0
+RO000000,2017,vcs-103-Romania-Fruit and vegetables,PGVCSTOMA,1420.0
+RO000000,2017,vcs-104-Romania-Fruit and vegetables,PGVCSOVEG,520.0
+RO000000,2017,vcs-105-Romania-Fruit and vegetables,PGVCSTOMA_OVEG,6220.0
+RO000000,2017,vcs-106-Romania-Fruit and vegetables,PGVCSTOMA_OVEG,3020.0
+RO000000,2017,vcs-107-Romania-Fruit and vegetables,PGVCSOFRU,320.0
+RO000000,2017,vcs-108-Romania-Fruit and vegetables,PGVCSAPPLE,320.0
+RO000000,2017,vcs-109-Romania-Fruit and vegetables,PGVCSOFRU,320.0
+RO000000,2017,vcs-110-Romania-Fruit and vegetables,PGVCSOFRU,320.0
+RO000000,2017,vcs-111-Romania-Fruit and vegetables,PGVCSOVEG,1000.0
+RO000000,2017,vcs-112-Romania-Fruit and vegetables,PGVCSPOTATO,720.0
+RO000000,2017,vcs-123-Romania-Grain legumes,PGVCSOFRU,200.0
+RO000000,2017,vcs-124-Romania-Grain legumes,PGVCSPULS,200.0
+RO000000,2017,vcs-129-Romania-Hemp,PGVCSFLAX,214.0
+RO000000,2017,vcs-134-Romania-Hops,PGVCSOCRO,520.0
+RO000000,2017,vcs-162-Romania-Milk and milk products,PGVCSDCOW,280.0
+RO000000,2017,vcs-163-Romania-Milk and milk products,PGVCSDCOW,210.0
+RO000000,2017,vcs-198-Romania-Protein crops,PGVCSSOY,345.0
+RO000000,2017,vcs-199-Romania-Protein crops,PGVCSFEEDCROPS,75.0
+RO000000,2017,vcs-209-Romania-Rice,PGVCSRICE,470.0
+RO000000,2017,vcs-217-Romania-Seeds,PGVCSPOTATO,980.0
+RO000000,2017,vcs-253-Romania-Sheepmeat and goatmeat,PGVCSSHG,9.0
+RO000000,2017,vcs-262-Romania-Silkworms,PGVCSOANI,5.0
+RO000000,2017,vcs-279-Romania-Sugar beet,PGVCSSUGARBEET,620.0
+RO000000,2017,vcs-47-Romania-Beef and veal,PGVCSBULLHEIF,330.0
+RO000000,2018,vcs-103-Romania-Fruit and vegetables,PGVCSTOMA,1430.0
+RO000000,2018,vcs-104-Romania-Fruit and vegetables,PGVCSOVEG,530.0
+RO000000,2018,vcs-105-Romania-Fruit and vegetables,PGVCSTOMA_OVEG,6230.0
+RO000000,2018,vcs-106-Romania-Fruit and vegetables,PGVCSTOMA_OVEG,3030.0
+RO000000,2018,vcs-107-Romania-Fruit and vegetables,PGVCSOFRU,330.0
+RO000000,2018,vcs-108-Romania-Fruit and vegetables,PGVCSAPPLE,330.0
+RO000000,2018,vcs-109-Romania-Fruit and vegetables,PGVCSOFRU,330.0
+RO000000,2018,vcs-110-Romania-Fruit and vegetables,PGVCSOFRU,330.0
+RO000000,2018,vcs-111-Romania-Fruit and vegetables,PGVCSOVEG,1000.0
+RO000000,2018,vcs-112-Romania-Fruit and vegetables,PGVCSPOTATO,730.0
+RO000000,2018,vcs-123-Romania-Grain legumes,PGVCSOFRU,210.0
+RO000000,2018,vcs-124-Romania-Grain legumes,PGVCSPULS,210.0
+RO000000,2018,vcs-129-Romania-Hemp,PGVCSFLAX,224.0
+RO000000,2018,vcs-134-Romania-Hops,PGVCSOCRO,530.0
+RO000000,2018,vcs-162-Romania-Milk and milk products,PGVCSDCOW,295.0
+RO000000,2018,vcs-163-Romania-Milk and milk products,PGVCSDCOW,220.0
+RO000000,2018,vcs-198-Romania-Protein crops,PGVCSSOY,355.0
+RO000000,2018,vcs-199-Romania-Protein crops,PGVCSFEEDCROPS,85.0
+RO000000,2018,vcs-209-Romania-Rice,PGVCSRICE,480.0
+RO000000,2018,vcs-217-Romania-Seeds,PGVCSPOTATO,990.0
+RO000000,2018,vcs-253-Romania-Sheepmeat and goatmeat,PGVCSSHG,10.0
+RO000000,2018,vcs-262-Romania-Silkworms,PGVCSOANI,5.0
+RO000000,2018,vcs-279-Romania-Sugar beet,PGVCSSUGARBEET,630.0
+RO000000,2018,vcs-47-Romania-Beef and veal,PGVCSBULLHEIF,345.0
+RO000000,2019,vcs-103-Romania-Fruit and vegetables,PGVCSTOMA,1440.0
+RO000000,2019,vcs-104-Romania-Fruit and vegetables,PGVCSOVEG,540.0
+RO000000,2019,vcs-105-Romania-Fruit and vegetables,PGVCSTOMA_OVEG,6240.0
+RO000000,2019,vcs-106-Romania-Fruit and vegetables,PGVCSTOMA_OVEG,3040.0
+RO000000,2019,vcs-107-Romania-Fruit and vegetables,PGVCSOFRU,340.0
+RO000000,2019,vcs-108-Romania-Fruit and vegetables,PGVCSAPPLE,340.0
+RO000000,2019,vcs-109-Romania-Fruit and vegetables,PGVCSOFRU,340.0
+RO000000,2019,vcs-110-Romania-Fruit and vegetables,PGVCSOFRU,340.0
+RO000000,2019,vcs-111-Romania-Fruit and vegetables,PGVCSOVEG,1000.0
+RO000000,2019,vcs-112-Romania-Fruit and vegetables,PGVCSPOTATO,740.0
+RO000000,2019,vcs-123-Romania-Grain legumes,PGVCSOFRU,220.0
+RO000000,2019,vcs-124-Romania-Grain legumes,PGVCSPULS,220.0
+RO000000,2019,vcs-129-Romania-Hemp,PGVCSFLAX,234.0
+RO000000,2019,vcs-134-Romania-Hops,PGVCSOCRO,540.0
+RO000000,2019,vcs-162-Romania-Milk and milk products,PGVCSDCOW,310.0
+RO000000,2019,vcs-163-Romania-Milk and milk products,PGVCSDCOW,230.0
+RO000000,2019,vcs-198-Romania-Protein crops,PGVCSSOY,365.0
+RO000000,2019,vcs-199-Romania-Protein crops,PGVCSFEEDCROPS,95.0
+RO000000,2019,vcs-209-Romania-Rice,PGVCSRICE,490.0
+RO000000,2019,vcs-217-Romania-Seeds,PGVCSPOTATO,1000.0
+RO000000,2019,vcs-253-Romania-Sheepmeat and goatmeat,PGVCSSHG,11.0
+RO000000,2019,vcs-262-Romania-Silkworms,PGVCSOANI,5.0
+RO000000,2019,vcs-279-Romania-Sugar beet,PGVCSSUGARBEET,640.0
+RO000000,2019,vcs-47-Romania-Beef and veal,PGVCSBULLHEIF,360.0
+RO000000,2020,vcs-103-Romania-Fruit and vegetables,PGVCSTOMA,1445.0
+RO000000,2020,vcs-104-Romania-Fruit and vegetables,PGVCSOVEG,545.0
+RO000000,2020,vcs-105-Romania-Fruit and vegetables,PGVCSTOMA_OVEG,6245.0
+RO000000,2020,vcs-106-Romania-Fruit and vegetables,PGVCSTOMA_OVEG,3045.0
+RO000000,2020,vcs-107-Romania-Fruit and vegetables,PGVCSOFRU,345.0
+RO000000,2020,vcs-108-Romania-Fruit and vegetables,PGVCSAPPLE,345.0
+RO000000,2020,vcs-109-Romania-Fruit and vegetables,PGVCSOFRU,345.0
+RO000000,2020,vcs-110-Romania-Fruit and vegetables,PGVCSOFRU,345.0
+RO000000,2020,vcs-111-Romania-Fruit and vegetables,PGVCSOVEG,1000.0
+RO000000,2020,vcs-112-Romania-Fruit and vegetables,PGVCSPOTATO,745.0
+RO000000,2020,vcs-123-Romania-Grain legumes,PGVCSOFRU,225.0
+RO000000,2020,vcs-124-Romania-Grain legumes,PGVCSPULS,225.0
+RO000000,2020,vcs-129-Romania-Hemp,PGVCSFLAX,239.0
+RO000000,2020,vcs-134-Romania-Hops,PGVCSOCRO,545.0
+RO000000,2020,vcs-162-Romania-Milk and milk products,PGVCSDCOW,325.0
+RO000000,2020,vcs-163-Romania-Milk and milk products,PGVCSDCOW,240.0
+RO000000,2020,vcs-198-Romania-Protein crops,PGVCSSOY,370.0
+RO000000,2020,vcs-199-Romania-Protein crops,PGVCSFEEDCROPS,100.0
+RO000000,2020,vcs-209-Romania-Rice,PGVCSRICE,495.0
+RO000000,2020,vcs-217-Romania-Seeds,PGVCSPOTATO,1005.0
+RO000000,2020,vcs-253-Romania-Sheepmeat and goatmeat,PGVCSSHG,12.0
+RO000000,2020,vcs-262-Romania-Silkworms,PGVCSOANI,5.0
+RO000000,2020,vcs-279-Romania-Sugar beet,PGVCSSUGARBEET,645.0
+RO000000,2020,vcs-47-Romania-Beef and veal,PGVCSBULLHEIF,375.0
+SE000000,2015,vcs-57-Sweden-Beef and veal,PGVCSCATTLE,85.0
+SE000000,2016,vcs-57-Sweden-Beef and veal,PGVCSBULL,85.0
+SE000000,2017,vcs-57-Sweden-Beef and veal,PGVCSBULL,85.0
+SE000000,2018,vcs-57-Sweden-Beef and veal,PGVCSBULL,85.0
+SE000000,2019,vcs-57-Sweden-Beef and veal,PGVCSBULL,85.0
+SE000000,2020,vcs-57-Sweden-Beef and veal,PGVCSBULL,85.0
+SI000000,2015,vcs-118-Slovenia-Fruit and vegetables,PGVCSTOMA_OVEG,533.0
+SI000000,2015,vcs-137-Slovenia-Milk and milk products,PGVCSDCOW,123.0
+SI000000,2015,vcs-200-Slovenia-Protein crops,PGVCSPULS,420.0
+SI000000,2015,vcs-49-Slovenia-Beef and veal,PGVCSBULL,50.0
+SI000000,2015,vcs-64-Slovenia-Cereals,PGVCSCEREALSEED,114.0
+SI000000,2016,vcs-118-Slovenia-Fruit and vegetables,PGVCSTOMA_OVEG,529.0
+SI000000,2016,vcs-137-Slovenia-Milk and milk products,PGVCSDCOW,122.0
+SI000000,2016,vcs-200-Slovenia-Protein crops,PGVCSPULS,417.0
+SI000000,2016,vcs-49-Slovenia-Beef and veal,PGVCSBULL,50.0
+SI000000,2016,vcs-64-Slovenia-Cereals,PGVCSCEREALSEED,112.0
+SI000000,2017,vcs-118-Slovenia-Fruit and vegetables,PGVCSTOMA_OVEG,526.0
+SI000000,2017,vcs-137-Slovenia-Milk and milk products,PGVCSDCOW,122.0
+SI000000,2017,vcs-200-Slovenia-Protein crops,PGVCSPULS,414.0
+SI000000,2017,vcs-49-Slovenia-Beef and veal,PGVCSBULL,49.0
+SI000000,2017,vcs-64-Slovenia-Cereals,PGVCSCEREALSEED,112.0
+SI000000,2018,vcs-118-Slovenia-Fruit and vegetables,PGVCSTOMA_OVEG,522.0
+SI000000,2018,vcs-137-Slovenia-Milk and milk products,PGVCSDCOW,121.0
+SI000000,2018,vcs-200-Slovenia-Protein crops,PGVCSPULS,411.0
+SI000000,2018,vcs-49-Slovenia-Beef and veal,PGVCSBULL,49.0
+SI000000,2018,vcs-64-Slovenia-Cereals,PGVCSCEREALSEED,111.0
+SI000000,2019,vcs-118-Slovenia-Fruit and vegetables,PGVCSTOMA_OVEG,519.0
+SI000000,2019,vcs-137-Slovenia-Milk and milk products,PGVCSDCOW,120.0
+SI000000,2019,vcs-200-Slovenia-Protein crops,PGVCSPULS,409.0
+SI000000,2019,vcs-49-Slovenia-Beef and veal,PGVCSBULL,49.0
+SI000000,2019,vcs-64-Slovenia-Cereals,PGVCSCEREALSEED,111.0
+SI000000,2020,vcs-118-Slovenia-Fruit and vegetables,PGVCSTOMA_OVEG,519.0
+SI000000,2020,vcs-137-Slovenia-Milk and milk products,PGVCSDCOW,120.0
+SI000000,2020,vcs-200-Slovenia-Protein crops,PGVCSPULS,409.0
+SI000000,2020,vcs-49-Slovenia-Beef and veal,PGVCSBULL,49.0
+SI000000,2020,vcs-64-Slovenia-Cereals,PGVCSCEREALSEED,111.0
+SK000000,2015,vcs-113-Slovakia-Fruit and vegetables,PGVCSAPPL_OFRU,106.0
+SK000000,2015,vcs-114-Slovakia-Fruit and vegetables,PGVCSAPPL_OFRU,168.0
+SK000000,2015,vcs-115-Slovakia-Fruit and vegetables,PGVCSTOMA_OVEG,41.0
+SK000000,2015,vcs-116-Slovakia-Fruit and vegetables,PGVCSTOMA_OVEG,113.0
+SK000000,2015,vcs-117-Slovakia-Fruit and vegetables,PGVCSTOMA,371.0
+SK000000,2015,vcs-135-Slovakia-Hops,PGVCSOCRO,362.0
+SK000000,2015,vcs-164-Slovakia-Milk and milk products,PGVCSDCOW,200.0
+SK000000,2015,vcs-254-Slovakia-Sheepmeat and goatmeat,PGVCSSHG,16.0
+SK000000,2015,vcs-280-Slovakia-Sugar beet,PGVCSSUGARBEET,390.0
+SK000000,2015,vcs-48-Slovakia-Beef and veal,PGVCSBULLHEIF,143.0
+SK000000,2016,vcs-113-Slovakia-Fruit and vegetables,PGVCSAPPL_OFRU,107.0
+SK000000,2016,vcs-114-Slovakia-Fruit and vegetables,PGVCSAPPL_OFRU,169.0
+SK000000,2016,vcs-115-Slovakia-Fruit and vegetables,PGVCSTOMA_OVEG,41.0
+SK000000,2016,vcs-116-Slovakia-Fruit and vegetables,PGVCSTOMA_OVEG,114.0
+SK000000,2016,vcs-117-Slovakia-Fruit and vegetables,PGVCSTOMA,374.0
+SK000000,2016,vcs-135-Slovakia-Hops,PGVCSOCRO,365.0
+SK000000,2016,vcs-164-Slovakia-Milk and milk products,PGVCSDCOW,201.0
+SK000000,2016,vcs-254-Slovakia-Sheepmeat and goatmeat,PGVCSSHG,16.0
+SK000000,2016,vcs-280-Slovakia-Sugar beet,PGVCSSUGARBEET,393.0
+SK000000,2016,vcs-48-Slovakia-Beef and veal,PGVCSBULLHEIF,144.0
+SK000000,2017,vcs-113-Slovakia-Fruit and vegetables,PGVCSAPPL_OFRU,108.0
+SK000000,2017,vcs-114-Slovakia-Fruit and vegetables,PGVCSAPPL_OFRU,170.0
+SK000000,2017,vcs-115-Slovakia-Fruit and vegetables,PGVCSTOMA_OVEG,41.0
+SK000000,2017,vcs-116-Slovakia-Fruit and vegetables,PGVCSTOMA_OVEG,115.0
+SK000000,2017,vcs-117-Slovakia-Fruit and vegetables,PGVCSTOMA,377.0
+SK000000,2017,vcs-135-Slovakia-Hops,PGVCSOCRO,368.0
+SK000000,2017,vcs-164-Slovakia-Milk and milk products,PGVCSDCOW,203.0
+SK000000,2017,vcs-254-Slovakia-Sheepmeat and goatmeat,PGVCSSHG,16.0
+SK000000,2017,vcs-280-Slovakia-Sugar beet,PGVCSSUGARBEET,396.0
+SK000000,2017,vcs-48-Slovakia-Beef and veal,PGVCSBULLHEIF,145.0
+SK000000,2018,vcs-113-Slovakia-Fruit and vegetables,PGVCSAPPL_OFRU,108.0
+SK000000,2018,vcs-114-Slovakia-Fruit and vegetables,PGVCSAPPL_OFRU,172.0
+SK000000,2018,vcs-115-Slovakia-Fruit and vegetables,PGVCSTOMA_OVEG,42.0
+SK000000,2018,vcs-116-Slovakia-Fruit and vegetables,PGVCSTOMA_OVEG,116.0
+SK000000,2018,vcs-117-Slovakia-Fruit and vegetables,PGVCSTOMA,380.0
+SK000000,2018,vcs-135-Slovakia-Hops,PGVCSOCRO,371.0
+SK000000,2018,vcs-164-Slovakia-Milk and milk products,PGVCSDCOW,204.0
+SK000000,2018,vcs-254-Slovakia-Sheepmeat and goatmeat,PGVCSSHG,16.0
+SK000000,2018,vcs-280-Slovakia-Sugar beet,PGVCSSUGARBEET,399.0
+SK000000,2018,vcs-48-Slovakia-Beef and veal,PGVCSBULLHEIF,146.0
+SK000000,2019,vcs-113-Slovakia-Fruit and vegetables,PGVCSAPPL_OFRU,109.0
+SK000000,2019,vcs-114-Slovakia-Fruit and vegetables,PGVCSAPPL_OFRU,173.0
+SK000000,2019,vcs-115-Slovakia-Fruit and vegetables,PGVCSTOMA_OVEG,42.0
+SK000000,2019,vcs-116-Slovakia-Fruit and vegetables,PGVCSTOMA_OVEG,117.0
+SK000000,2019,vcs-117-Slovakia-Fruit and vegetables,PGVCSTOMA,383.0
+SK000000,2019,vcs-135-Slovakia-Hops,PGVCSOCRO,373.0
+SK000000,2019,vcs-164-Slovakia-Milk and milk products,PGVCSDCOW,206.0
+SK000000,2019,vcs-254-Slovakia-Sheepmeat and goatmeat,PGVCSSHG,16.0
+SK000000,2019,vcs-280-Slovakia-Sugar beet,PGVCSSUGARBEET,402.0
+SK000000,2019,vcs-48-Slovakia-Beef and veal,PGVCSBULLHEIF,147.0
+SK000000,2020,vcs-113-Slovakia-Fruit and vegetables,PGVCSAPPL_OFRU,95.0
+SK000000,2020,vcs-114-Slovakia-Fruit and vegetables,PGVCSAPPL_OFRU,151.0
+SK000000,2020,vcs-115-Slovakia-Fruit and vegetables,PGVCSTOMA_OVEG,37.0
+SK000000,2020,vcs-116-Slovakia-Fruit and vegetables,PGVCSTOMA_OVEG,102.0
+SK000000,2020,vcs-117-Slovakia-Fruit and vegetables,PGVCSTOMA,334.0
+SK000000,2020,vcs-135-Slovakia-Hops,PGVCSOCRO,326.0
+SK000000,2020,vcs-164-Slovakia-Milk and milk products,PGVCSDCOW,180.0
+SK000000,2020,vcs-254-Slovakia-Sheepmeat and goatmeat,PGVCSSHG,14.0
+SK000000,2020,vcs-280-Slovakia-Sugar beet,PGVCSSUGARBEET,351.0
+SK000000,2020,vcs-48-Slovakia-Beef and veal,PGVCSBULLHEIF,129.0
+UK000000,2015,vcs-219-United Kingdom Scotland-Sheepmeat and goatmeat,PGVCSSHG,100.0
+UK000000,2015,vcs-4-United Kingdom Scotland-Beef and veal,PGVCSCALV,100.0
+UK000000,2015,vcs-5-United Kingdom Scotland-Beef and veal,PGVCSCALV,160.0
+UK000000,2016,vcs-219-United Kingdom Scotland-Sheepmeat and goatmeat,PGVCSSHG,100.0
+UK000000,2016,vcs-4-United Kingdom Scotland-Beef and veal,PGVCSCALV,100.0
+UK000000,2016,vcs-5-United Kingdom Scotland-Beef and veal,PGVCSCALV,160.0
+UK000000,2017,vcs-219-United Kingdom Scotland-Sheepmeat and goatmeat,PGVCSSHG,100.0
+UK000000,2017,vcs-4-United Kingdom Scotland-Beef and veal,PGVCSCALV,100.0
+UK000000,2017,vcs-5-United Kingdom Scotland-Beef and veal,PGVCSCALV,160.0
+UK000000,2018,vcs-219-United Kingdom Scotland-Sheepmeat and goatmeat,PGVCSSHG,100.0
+UK000000,2018,vcs-4-United Kingdom Scotland-Beef and veal,PGVCSCALV,100.0
+UK000000,2018,vcs-5-United Kingdom Scotland-Beef and veal,PGVCSCALV,160.0
+UK000000,2019,vcs-219-United Kingdom Scotland-Sheepmeat and goatmeat,PGVCSSHG,100.0
+UK000000,2019,vcs-4-United Kingdom Scotland-Beef and veal,PGVCSCALV,100.0
+UK000000,2019,vcs-5-United Kingdom Scotland-Beef and veal,PGVCSCALV,160.0
+UK000000,2020,vcs-219-United Kingdom Scotland-Sheepmeat and goatmeat,PGVCSSHG,100.0
+UK000000,2020,vcs-4-United Kingdom Scotland-Beef and veal,PGVCSCALV,100.0
+UK000000,2020,vcs-5-United Kingdom Scotland-Beef and veal,PGVCSCALV,160.0

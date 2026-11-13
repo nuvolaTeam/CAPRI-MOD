@@ -32,6 +32,22 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 13 November 2026 — P2 started: CAPRI's premium cut and the coupled support's 2030 premiums (not yet used by the model)
+
+- capri_mod/policy/premium_cut.py: policy/prmcut.gms, the premiums a region is paid when a scheme's paid quantity or
+  value exceeds its ceiling (the cut 1 / max(1, used / ceiling) by ceiling region, EPS ceilings, the cut passed down
+  to the units, PRME = PRMD x cut x weight).
+- capri_mod/policy/cap14_premiums.py: the coupled schemes' 2030 rates and ceilings (VCS and cotton: each item of its
+  last year, def_policy.gms) and their declared premiums per activity through CAPRI's premium groups.
+- Data: cap14_coupled_rates.csv (the files' rates per premium group, build_cap14_entitlements.py), codes/capri/
+  PSG_TO_A.csv (build_code_lists.py); the coupled schemes' labels without trailing blanks, as GAMS reads them.
+- Checks (CAPRI's 2030 reference, as checks): the area schemes' cuts (BPS, SAPS, greening, young farmers,
+  redistributive, ANC) equal CUTT in all 701 unit x scheme pairs of the EU (with CAPRI's PRMD and weights, the trend
+  levels); the crop coupled schemes' cuts in FR, EL, ES and IT in 799 pairs within 4e-6.
+- The model still takes its premiums from cap_premium_activity.csv; P2b and P2c (claude/p2_premium_module_scoping.md)
+  come before the switch.
+- Tests: capri_mod/tests/test_premium_cut.py.
+
 ## 13 November 2026 — CAPRI's endogenous entitlement limit (K136)
 
 - **Ported** policy/def_endCut.gms with supply_model.gms's sumEntl_ and overShotEntl_: in each region whose member

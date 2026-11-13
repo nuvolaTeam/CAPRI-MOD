@@ -2022,6 +2022,7 @@
    "columns": 4,
    "units": "U_MioEur",
    "read_by_model": [
+    "capri_mod/policy/cap14_premiums.py",
     "capri_mod/supply/entitlements.py"
    ],
    "origin": {
@@ -2029,6 +2030,24 @@
     "builder": "build_cap14_entitlements (not in the trace yet)"
    },
    "catalogue_note": "Ceilings of the voluntary coupled support and the cotton payment (vcs_2015_2020.gms, CropSpecificPremium_2015_2020.gms). (not re-checked)"
+  },
+  "capri_data/2017/policy/cap14_coupled_rates.csv": {
+   "description": "The rates of the voluntary coupled support and the crop-specific cotton payment per premium group, EUR per unit of the group's activities (scen/Premiums/Coupling/vcs_2015_2020.gms, CropSpecificPremium_2015_2020.gms) (tools/build/build_cap14_entitlements.py)",
+   "kind": "coefficients",
+   "vintage": "2015-2020",
+   "domain": "policy",
+   "status": "live",
+   "rows": 1573,
+   "columns": 5,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/policy/cap14_premiums.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_cap14_entitlements (not in the trace yet)"
+   },
+   "catalogue_note": "The rates of the voluntary coupled support and the cotton payment per premium group (vcs_2015_2020.gms, CropSpecificPremium_2015_2020.gms). (not re-checked)"
   },
   "capri_data/2017/policy/cap14_entitlement_levels.csv": {
    "description": "CAPRI's trend levels of its crop activities (DATA(ru, mcact, LEVL, TRD) of sim_ini_21730), whose sum is a region's entitlement limit (policy/def_endCut.gms) (tools/build/build_cap14_entitlements.py)",
@@ -4000,6 +4019,19 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/PSG_TO_A.csv": {
+   "description": "CAPRI psg_to_a: the activities of each premium group (policy/policy_sets.gms; a scheme's rate per group reaches them, policy.gms)",
+   "kind": "structure",
+   "rows": 6415,
+   "columns": 2,
+   "read_by_model": [
+    "capri_mod/policy/cap14_premiums.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/RALL.csv": {

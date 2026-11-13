@@ -4537,6 +4537,49 @@
     "tests": []
    }
   },
+  "capri_psg_to_a": {
+   "file": "capri_data/codes/capri/PSG_TO_A.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI psg_to_a: the activities of each premium group (policy/policy_sets.gms; a scheme's rate per group reaches them, policy.gms)",
+   "columns": [
+    {
+     "name": "psgroup",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "pact",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "psgroup",
+    "pact"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/cap14_premiums.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_rall": {
    "file": "capri_data/codes/capri/RALL.csv",
    "declared_in": "00_codes.sql",
@@ -31225,7 +31268,81 @@
    "notes": [],
    "read_by": {
     "model": [
+     "capri_mod/policy/cap14_premiums.py",
      "capri_mod/supply/entitlements.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "pol_cap14_coupled_rates": {
+   "file": "capri_data/2017/policy/cap14_coupled_rates.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The rates of the voluntary coupled support and the crop-specific cotton payment per premium group, EUR per unit of the group's activities (scen/Premiums/Coupling/vcs_2015_2020.gms, CropSpecificPremium_2015_2020.gms) (tools/build/build_cap14_entitlements.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "scheme",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "group",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "rate",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "year",
+    "scheme",
+    "group"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "rate",
+     "unit": null,
+     "status": "open",
+     "basis": "cap14_coupled_rates.rate: EUR per unit of the group's activities (per ha or per head)"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "cap14_coupled_rates.year: a calendar year"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_cap14_entitlements (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/cap14_premiums.py"
     ],
     "builders": [],
     "checks": [
@@ -31286,7 +31403,9 @@
     "checks": [
      "tools/check/make_provenance.py"
     ],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_premium_cut.py"
+    ]
    }
   },
   "pol_cap14_national_ceilings": {

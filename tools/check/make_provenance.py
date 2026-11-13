@@ -99,9 +99,11 @@ UNTRACED = {
     "capri_data/2017/policy/cap14_ceiling_shares.csv": ("build_cap14_entitlements", "CAPRI"),
     "capri_data/2017/policy/cap14_pillar_transfers.csv": ("build_cap14_entitlements", "CAPRI"),
     "capri_data/2017/policy/cap14_coupled_ceilings.csv": ("build_cap14_entitlements", "CAPRI"),
+    "capri_data/2017/policy/cap14_coupled_rates.csv": ("build_cap14_entitlements", "CAPRI"),
     "capri_data/2017/policy/cap14_settings.csv": ("build_cap14_entitlements", "CAPRI"),
     "capri_data/2017/policy/cap14_entitlement_levels.csv": ("build_cap14_entitlements", "CAPRI"),
     "capri_data/codes/capri/COLS.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/PSG_TO_A.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/ROWS.csv": ("build_code_lists", "CAPRI"),
 }
 #: the conversion of the sources that were not tables (tools/build/convert_sources.py, 30 October 2026),

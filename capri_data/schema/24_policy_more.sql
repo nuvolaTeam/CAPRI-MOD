@@ -203,3 +203,17 @@ CREATE TABLE pol_cap14_entitlement_levels (
 COMMENT ON TABLE pol_cap14_entitlement_levels IS 'CAPRI''s trend levels of its crop activities (DATA(ru, mcact, LEVL, TRD) of sim_ini_21730), whose sum is a region''s entitlement limit (policy/def_endCut.gms) (tools/build/build_cap14_entitlements.py)';
 INSERT INTO value_units VALUES
   ('pol_cap14_entitlement_levels', 'trd_kha', 'U_1000ha', 'capri', 'cap14_entitlement_levels.trd_kha: 1000 ha');
+
+-- file: capri_data/2017/policy/cap14_coupled_rates.csv
+CREATE TABLE pol_cap14_coupled_rates (
+    region VARCHAR NOT NULL,
+    "year" BIGINT NOT NULL,
+    scheme VARCHAR NOT NULL,
+    "group" VARCHAR NOT NULL,
+    rate DOUBLE NOT NULL,
+    PRIMARY KEY (region, "year", scheme, "group")
+);
+COMMENT ON TABLE pol_cap14_coupled_rates IS 'The rates of the voluntary coupled support and the crop-specific cotton payment per premium group, EUR per unit of the group''s activities (scen/Premiums/Coupling/vcs_2015_2020.gms, CropSpecificPremium_2015_2020.gms) (tools/build/build_cap14_entitlements.py)';
+INSERT INTO value_units VALUES
+  ('pol_cap14_coupled_rates', 'year', NULL, 'open', 'cap14_coupled_rates.year: a calendar year'),
+  ('pol_cap14_coupled_rates', 'rate', NULL, 'open', 'cap14_coupled_rates.rate: EUR per unit of the group''s activities (per ha or per head)');

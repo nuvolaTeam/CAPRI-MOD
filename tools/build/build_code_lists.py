@@ -309,6 +309,9 @@ def main():
     write(OUT / "capri" / "FEED_TRD.csv", ("code", "text"), list(read_set(a.sets, "FEED_TRD").items()))
     write(OUT / "capri" / "landTypes_to_pact.csv", ("land_type", "pact"), sorted(pairs("landTypes_to_pact")))
     write(OUT / "capri" / "cropDivGrps_mCact.csv", ("group", "mcact"), sorted(pairs("cropDivGrps_mCact")))
+    # CAPRI's premium groups and their activities (policy/policy.gms psg_to_a: a scheme's rate per group reaches the
+    # group's activities; the premium module, P2)
+    write(OUT / "capri" / "PSG_TO_A.csv", ("psgroup", "pact"), sorted((g.upper(), a) for g, a in pairs("PSG_TO_A")))
     write(OUT / "capri" / "MS_RU.csv", ("ms", "ru"), sorted((m, r) for m, r in pairs("Map_RR") if m in ms_ and r in ru_))
     write(OUT / "capri" / "RM.csv", ("code", "text"), list(rm.items()))
     write(OUT / "capri" / "RMTP.csv", ("code", "text"), list(rmtp.items()))

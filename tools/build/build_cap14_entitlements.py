@@ -23,6 +23,9 @@ Outputs (capri_data/2017/policy/):
       the voluntary coupled support (scen/Premiums/Coupling/vcs_2015_2020.gms, through CAP_2013_2020_vcs.gms) and
       the crop-specific cotton payment (CropSpecificPremium_2015_2020.gms, through CAP_2013_2020_cscs.gms), each
       scheme's ceiling per year in million EUR (the files' EUR / 1e6, as CAPRI divides them)
+  cap14_coupled_rates.csv      region, year, scheme, group, rate
+      the same files' premium rates per premium group (pgvcsDCOW, pgvcsPULS, ... ; EUR per unit of the group's
+      activities, policy.gms's PRMR), as written
   cap14_settings.csv           item, key, value, source
       the greening share of the national ceiling (p_dpGreeningShareCAP14, CAP_2014_2020.gms), the BPS years
       (BPSYEARS, policy/policy_sets.gms), the member states under the single area payment scheme (DPCAP14_SAPS) and
@@ -94,10 +97,18 @@ def scalar_assignment(text: str, name: str) -> float:
     return float(hits[0])
 
 
-def coupled_ceilings(text: str) -> list:
-    """(region, year, scheme, ceiling in million EUR) of the lines p_premDataE("R","Y","scheme","ceilval")=EUR;"""
-    rx = re.compile(r'^\s*p_premDataE\("(\w+)","(\d{4})","([^"]+)","ceilval"\)\s*=\s*([-\d.Ee+]+)\s*;', re.I | re.M)
-    return [(r, int(y), s, float(v) / 1e6) for r, y, s, v in rx.findall(text)]
+def coupled_items(text: str) -> tuple:
+    """The lines p_premDataE("R","Y","scheme","item")=value; of a coupled-support file: (ceilings (region, year,
+    scheme, million EUR), rates (region, year, scheme, premium group, EUR per unit)). A scheme's label as GAMS reads
+    it, trailing blanks dropped ("vcs-203-Italy-Protein crops " is CAPRI's vcs-203-Italy-Protein crops)."""
+    rx = re.compile(r'^\s*p_premDataE\("(\w+)","(\d{4})","([^"]+)","(\w+)"\)\s*=\s*([-\d.Ee+]+)\s*;', re.I | re.M)
+    ceil, rates = [], []
+    for r, y, s, item, v in rx.findall(text):
+        if item.lower() == "ceilval":
+            ceil.append((r, int(y), s.rstrip(), float(v) / 1e6))
+        else:
+            rates.append((r, int(y), s.rstrip(), item.upper(), float(v)))
+    return ceil, rates
 
 
 def main() -> None:
@@ -121,10 +132,15 @@ def main() -> None:
         raise SystemExit("p_cap_2013_2020_transfers_dp_rd: a row that is not 'rel.MS'")
     transfers = pd.DataFrame([(r[4:], int(y), v) for (r, y), v in tr.items()], columns=["ms", "year", "pct"])
 
-    cp = []
+    cp, cr = [], []
     for f in COUPLED:
-        cp += coupled_ceilings((a.gams / f).read_text(errors="ignore"))
+        c_, r_ = coupled_items((a.gams / f).read_text(errors="ignore"))
+        cp += c_
+        cr += r_
     coupled = pd.DataFrame(cp, columns=["region", "year", "scheme", "ceiling_meur"])
+    rates = pd.DataFrame(cr, columns=["region", "year", "scheme", "group", "rate"])
+    if rates.duplicated(["region", "year", "scheme", "group"]).any():
+        raise SystemExit("a coupled-support rate assigned twice")
     if coupled.duplicated(["region", "year", "scheme"]).any():
         raise SystemExit("a coupled-support ceiling assigned twice")
 
@@ -158,6 +174,7 @@ def main() -> None:
                               (shares, "cap14_ceiling_shares.csv", ["ms", "year", "scheme"]),
                               (transfers, "cap14_pillar_transfers.csv", ["ms", "year"]),
                               (coupled, "cap14_coupled_ceilings.csv", ["region", "year", "scheme"]),
+                              (rates, "cap14_coupled_rates.csv", ["region", "year", "scheme", "group"]),
                               (settings, "cap14_settings.csv", ["item", "key"]),
                               (levels, "cap14_entitlement_levels.csv", ["region", "activity"])):
         to_csv(frame.sort_values(keys).reset_index(drop=True), OUT / name, index=False)

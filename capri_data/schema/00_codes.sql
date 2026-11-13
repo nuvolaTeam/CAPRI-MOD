@@ -61,6 +61,10 @@ COMMENT ON TABLE capri_landtypes_to_pact IS 'CAPRI landTypes_to_pact: the land t
 CREATE TABLE capri_cropdivgrps_mcact ("group" VARCHAR NOT NULL, mcact VARCHAR NOT NULL, PRIMARY KEY ("group", mcact));
 COMMENT ON TABLE capri_cropdivgrps_mcact IS 'CAPRI cropDivGrps_mCact: the crop-diversification group of each annual crop (sets.gms)';
 
+-- file: capri_data/codes/capri/PSG_TO_A.csv
+CREATE TABLE capri_psg_to_a (psgroup VARCHAR NOT NULL, pact VARCHAR NOT NULL, PRIMARY KEY (psgroup, pact));
+COMMENT ON TABLE capri_psg_to_a IS 'CAPRI psg_to_a: the activities of each premium group (policy/policy_sets.gms; a scheme''s rate per group reaches them, policy.gms)';
+
 -- file: capri_data/codes/model_activity_classes.csv
 CREATE TABLE model_activity_classes (
     code VARCHAR PRIMARY KEY REFERENCES model_activities (code),
