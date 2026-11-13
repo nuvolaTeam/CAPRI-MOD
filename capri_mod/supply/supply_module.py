@@ -1554,8 +1554,10 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # attribute removes that burden: a new mutation is covered the moment it
         # is written. The cost is copying a handful of small pandas objects per
         # solve, which is negligible beside the QP itself.
+        # (livestock_premium_coef: the regional premium factors scale it for the solve; until 13 November 2026 it was
+        # not restored, so a factor compounded at every solve, KNOWN_ISSUES K143)
         _RESTORABLE = ("cap_payments", "cap_premium", "nutrient_coefs",
-                       "yields", "producer_prices", "variable_costs", "land")
+                       "yields", "producer_prices", "variable_costs", "land", "livestock_premium_coef")
         _backup = {}
         for _f in _RESTORABLE:
             _v = getattr(self.data, _f, None)

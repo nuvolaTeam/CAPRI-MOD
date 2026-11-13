@@ -207,6 +207,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
                                                  SOURCES / "course_capri_git" / "dat", GAMS / "policy",
                                                  GAMS / "scen" / "Premiums" / "rd"]),
     ("build_nordic_aid", ["--gams", str(GAMS)], [GAMS / "policy" / "nordicaid.gms", SETS]),
+    ("build_norway_premiums", ["--gams", str(GAMS)], [GAMS / "policy" / "norw_pol.gms"]),
     ("build_mtr_inputs", ["--gams", str(GAMS)], [GAMS / "pol_input" / "mtr_until2013.gms", GAMS / "policy" / "calc_mtr_top.gms",
                                                 GAMS / "scen" / "base_scenarios" / "CAP_2014_2020.gms",
                                                 SETS, REFERENCE / "simini" / "simini_21730" / "p_premDataE.csv.gz", REFERENCE / "simini" / "simini_21730" / "DATA.csv.gz",

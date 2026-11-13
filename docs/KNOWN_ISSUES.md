@@ -39,6 +39,8 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K139](#k139) | PL340000 converts all its forest to farmland in the Green Deal 2030 run (crop area +45% against CAPRI's -2%) | open (13 November 2026) |
 | [K140](#k140) | P2c, the rural development port: 286 of 20,098 effective RD premiums differ from CAPRI's 2030 reference (Praha's rates, Ile-de-France's inherited LFA cut, Sweden's technology-differentiated extensification measure) | open (13 November 2026); the port not yet used by the model |
 | [K142](#k142) | P2c, the BPS key (the MTR port): Croatia's key not found in CAPRI's chain (a uniform IUV used); sim_ini's NA sheep rates of 2002 taken as absent; France's Corsica 5% below CAPRI's 2030 BPS rate | open (13 November 2026) |
+| [K143](#k143) | A regional premium factor on animals compounded at every solve (livestock_premium_coef not restored) | fixed (13 November 2026) |
+| [K144](#k144) | CAPRI bug: Norway's output payments (DPNOR6, DPNOR7) pay nothing in the simulation year (policy.gms l. 97 reads the yields at the year's column) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it |
 
 ## Resolved (115)
 
@@ -758,7 +760,7 @@ CAPRI optimises its replacement heifers (HEIR) and its calf activities (CAMF, CA
 
 - **Effect:** the model's default leaves them off (`RegionalSupplyModel.use_cattle_member_splits = False`; pooled young-animal markets and the animals' herd terms of the intensity pairs, the validated state of r86 / r87); with them on, results are not usable
 - **In 9t:** –
-- **Status:** **open**, narrowed 23 October 2026 (night). The price update now takes each region's response from its solved NLP (`CapriRegionalNLP.response`: the implicit-function theorem on the KKT conditions, in the active rows' null space; `RegionalSupplyModel._yani_response`), on by default with the member splits. Checked: against finite differences on FRH0 the cattle goods' own responses agree within 1% (piglets within 20%); a price change reaches the regional objective as predicted. On 12 regions the markets reached 0.005 in 8 iterations (PMP terms: 0.016 after 8). The full Farm-to-Fork run (r96) still did not converge: the male calves' price rose to 6.1 x base and the female calves' fell below zero (-0.37) before the imbalance swung back up (0.03 -> 0.21). Under Farm-to-Fork the EU is short of male calves (fewer dairy births, fattening barely lower) and the calf activities hit their zero bounds, so the response nearly vanishes and the sexes' prices run apart. Next: compare the per-sex calf use and its flexibility with CAPRI (the calf activities' own PMP terms, CAPRI's per-sex young-animal prices in its Farm-to-Fork results, tools/gams/export_capmod_results.gms) before judging whether such prices are CAPRI's equilibrium or a defect here. Off by default. **Deferred, 23 October 2026**: CAPRI's own per-sex Farm-to-Fork results, needed to judge the prices, do not exist on the project lead's installation; it stays a DEPARTURE from CAPRI's setting (docs/DEPARTURES_FROM_CAPRI.md) until the divergence is understood from the model itself (the calf activities at their zero bounds).
+- **Status:** **open**, narrowed 23 October 2026 (night). The price update now takes each region's response from its solved NLP (`CapriRegionalNLP.response`: the implicit-function theorem on the KKT conditions, in the active rows' null space; `RegionalSupplyModel._yani_response`), on by default with the member splits. Checked: against finite differences on FRH0 the cattle goods' own responses agree within 1% (piglets within 20%); a price change reaches the regional objective as predicted. On 12 regions the markets reached 0.005 in 8 iterations (PMP terms: 0.016 after 8). The full Farm-to-Fork run (r96) still did not converge: the male calves' price rose to 6.1 x base and the female calves' fell below zero (-0.37) before the imbalance swung back up (0.03 -> 0.21). Under Farm-to-Fork the EU is short of male calves (fewer dairy births, fattening barely lower) and the calf activities hit their zero bounds, so the response nearly vanishes and the sexes' prices run apart. Next: compare the per-sex calf use and its flexibility with CAPRI (the calf activities' own PMP terms, CAPRI's per-sex young-animal prices in its Farm-to-Fork results, tools/gams/export_capmod_results.gms) before judging whether such prices are CAPRI's equilibrium or a defect here. Off by default. **Deferred, 23 October 2026**: CAPRI's own per-sex Farm-to-Fork results, needed to judge the prices, do not exist on the project lead's installation; it stays a DEPARTURE from CAPRI's setting (docs/DEPARTURES_FROM_CAPRI.md) until the divergence is understood from the model itself (the calf activities at their zero bounds). **13 November 2026**: the project lead agrees to bring the replacement heifers, the calves and the per-sex young-animal markets to CAPRI's setting where possible; scheduled after P2.
 
 <a id="k66"></a>
 ### K66: Farmland expands under the per-hectare N target more than in CAPRI (found 23 October 2026)
@@ -2945,3 +2947,42 @@ capri_mod/policy/bps.py keeps CAPRI's arithmetic (CAPRI's 2030 reference is comp
 - **In 9t:** -
 - **Status:** closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it by the project lead's decision ("keep
   capri but sign it as capri bug"); correcting it (x 1000) would be a departure, not offered as a setting
+
+<a id="k143"></a>
+### K143: A regional premium factor on animals compounded at every solve (found and fixed 13 November 2026)
+
+The supply model applies premium_factor_regional {region: {activity: factor}} for a solve: crops on cap_premium,
+animals on livestock_premium_coef. The solve restores what it changed in its data (RegionalSupplyModel._solve_once,
+_RESTORABLE) but not livestock_premium_coef, so an animal's premium was multiplied by its factor again at every later
+solve of the same regional model. Found with P2's premium response (capri_mod/policy/premium_response.py): factors of
+1.5-1.7 on Denmark's and Italy's pigs, poultry and calves (a livestock-unit scheme's fixed budget over fewer heads)
+grew geometrically and the mini-EU Farm-to-Fork run diverged (step changes above 100% at step 20). Fixed:
+livestock_premium_coef restored with the others; test_capri.py::test_regional_premium_factors_do_not_compound (fails
+without the fix)
+
+- **Effect:** every run with an animal premium factor different from 1 before 13 November 2026: the premium response's
+  first runs (13 November, not kept), tools/run/run_vcs_2030.py's coupled-support experiment (the animals' coupled
+  support removed by a factor below 1, compounded towards 0 over the outer iterations: the animals' response was
+  overstated; "test done: MAD 1.23 points" in COUPLING_SPRINTS to be redone), and scenarios with Pillar II budget
+  changes (none of the shipped scenarios has them). Farm-to-Fork and Green Deal runs without the premium response
+  had no factor and are not affected
+- **In 9t:** -
+- **Status:** fixed
+
+<a id="k144"></a>
+### K144: CAPRI bug: Norway's output payments pay nothing in the simulation year (found 13 November 2026)
+
+policy/norw_pol.gms declares Norway's price support per t of output (DPNOR6, amber box, and DPNOR7, blue box; APPTYPE
+noPriceSup). policy.gms pays it per activity unit as the yield x 0.001 x the rate, with the yields of
+p_dataCopy(rsNorw, pppact, o, %1), which l. 97 copies from DATA(rsNorw, pppact, o, %1): the year's own column
+("2030"), while CAPMOD's DATA holds the simulation year at "Y" (l. 92-94 copy the EU's yields from "Y"). So the
+weight is 0 and the output payments are not in the premiums: CAPRI's 2030 reference PRME of every Norwegian unit and
+production activity equals the direct payments (DPNOR1-DPNOR5) alone (capri_mod/policy/norway.py, test_norway.py: 108
+cells exact). With the yields at "Y" Norway's dairy cows would get about 40% more (NO020000: 1,798-2,032 against
+1,277 EUR per head), bulls 2.5-3.3 times as much, fattening pigs 3.8 times.
+
+- **Effect:** Norway's premiums per activity in the simulation year, as in CAPRI
+- **In 9t:** -
+- **Status:** closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it by the project lead's decision ("for
+  the moment keep capri and sign the fact, like you did with k141"); reading the yields at "Y" would be a departure,
+  not offered as a setting

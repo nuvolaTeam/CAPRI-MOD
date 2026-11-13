@@ -192,6 +192,12 @@ cap_greening = true
 # CAPRI's endogenous entitlement limit (policy/def_endCut.gms; supply_model.gms sumEntl_, overShotEntl_): a hectare of
 # crops beyond the region's trend area loses the member state's area payments per ha (K136)
 entitlement_limit = true
+# CAPRI's premium cut during a scenario's iterations (capmod/calculate_premiums.gms): prmcut.gms on the weighted levels
+# of the last steps (outer_loop.capri_step_weights) up to the step premium_response_max_step, the ported premiums'
+# change applied to the model's premiums per activity (capri_mod/policy/premium_response.py); "off" keeps them fixed
+premium_response = "capri"
+# the last step at which the premiums are recomputed (calculate_premiums.gms: step.pos le 10)
+premium_response_max_step = 10
 # DEPARTURE: CAPRI optimises replacement heifers and the four calf activities on their own and clears young animals
 # per sex; off because the Farm-to-Fork run does not converge with them (K65); to be switched to CAPRI's setting
 use_cattle_member_splits = false

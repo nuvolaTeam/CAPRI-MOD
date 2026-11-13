@@ -140,6 +140,22 @@ def test_supply_responds_positively_to_price(model):
     assert q1 >= q0 - 1e-6
 
 
+def test_regional_premium_factors_do_not_compound(model):
+    """K143: a regional premium factor scales the animals' premium (livestock_premium_coef) for the solve only, so two
+    solves with the same factor give the same levels and leave the coefficient as it was (until 13 November 2026 it
+    was not restored and the factor compounded at every solve)."""
+    sm = model.supply_module
+    reg = "IR010000"
+    sm.run(price_signals=None, regions=[reg])
+    sm.run(price_signals=None, regions=[reg])
+    c0 = sm._models[reg].data.livestock_premium_coef.copy()
+    pol = {"premium_factor_regional": {reg: {"BCOW": 2.0, "BULL": 2.0}}}
+    a = sm.run(price_signals=None, policy_scenario=pol, regions=[reg])[reg].activities
+    b = sm.run(price_signals=None, policy_scenario=pol, regions=[reg])[reg].activities
+    pd.testing.assert_series_equal(sm._models[reg].data.livestock_premium_coef, c0)
+    assert max(abs(a - b)) < 1e-6 * max(1.0, float(a.abs().max()))
+
+
 @pytest.mark.parametrize("reg, product, act, strict", [
     ("FR240000", "SWHE", "SWHE", True),        # arable (Centre)
     ("PL120000", "RYEM", "RYEM", True),        # eastern arable (Mazowieckie, CAPRI unit of PL91 + PL92)

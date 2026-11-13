@@ -65,6 +65,10 @@ COMMENT ON TABLE capri_cropdivgrps_mcact IS 'CAPRI cropDivGrps_mCact: the crop-d
 CREATE TABLE capri_psg_to_a (psgroup VARCHAR NOT NULL, pact VARCHAR NOT NULL, PRIMARY KEY (psgroup, pact));
 COMMENT ON TABLE capri_psg_to_a IS 'CAPRI psg_to_a: the activities of each premium group (policy/policy_sets.gms; a scheme''s rate per group reaches them, policy.gms)';
 
+-- file: capri_data/codes/capri/DACT_TO_PACT.csv
+CREATE TABLE capri_dact_to_pact (dact VARCHAR NOT NULL, pact VARCHAR NOT NULL, PRIMARY KEY (dact, pact));
+COMMENT ON TABLE capri_dact_to_pact IS 'CAPRI DACT_TO_PACT: the data base activities and their high / low variants (sets.gms: DCOW = DCOL + DCOH, BULF, HEIF, GRAS, the set-aside codes)';
+
 -- file: capri_data/codes/capri/MAP_RR.csv
 CREATE TABLE capri_map_rr (region VARCHAR NOT NULL, member VARCHAR NOT NULL, PRIMARY KEY (region, member));
 COMMENT ON TABLE capri_map_rr IS 'CAPRI MAP_RR: the members of each region (aggregates, member states, NUTS 1 and NUTS 2; policy.gms re-aggregates the declared premiums along it)';

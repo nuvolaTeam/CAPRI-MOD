@@ -748,7 +748,7 @@ weight, which ties them to the young-animal markets, not only intensity.
 | Fodder values in 2030 | fodder unit values = fodder-balance shadow prices, 2030/2017 | done | (above) |
 | Pesticide target on regional costs | conventional_io.gms: PLAP -target, INPO +50% per region and crop | done (res_17 PLAP x UVAG, INPO, FERT) | 6.29 -> 6.41 |
 | **Inhibitors on manure** | N2OMAN option, NMAN credit, NH3APP side effect (ghgMiti.gms l. 557-563) | **done**: decided at the N price also with technologies inside | **6.41 -> 5.70** |
-| Coupled-support response | cap_after_2014 ref vs without VCS | test done: MAD 1.23 points (29 indicators), r = +0.81 | - |
+| Coupled-support response | cap_after_2014 ref vs without VCS | test done: MAD 1.23 points (29 indicators), r = +0.81; the animals' factors compounded (KNOWN_ISSUES K143, 13 November 2026): to be redone | - |
 | Genetics | breeding.gms, calibrated on costsavings ini/max | **done (October 2026)**: genet_yld (0.2, as JRC121368's era) and genet_eff as supply-model columns with CAPRI's calibration; adoption 3.3% / 33% (Table 17: 15% / 9%) | 4.30 -> 4.36 |
 | Low-N feed | low_n_feed.gms | not built: 0 adoption in JRC121368's Farm-to-Fork (Table 17) | - |
 | Tillage | tillage.gms | not built: soil carbon only (not in the 20 indicators) | - |

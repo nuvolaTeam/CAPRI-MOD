@@ -320,6 +320,9 @@ def main():
     # group's activities; the premium module, P2)
     write(OUT / "capri" / "PSG_TO_A.csv", ("psgroup", "pact"), sorted((g.upper(), a) for g, a in pairs("PSG_TO_A")))
     write(OUT / "capri" / "MS_RU.csv", ("ms", "ru"), sorted((m, r) for m, r in pairs("Map_RR") if m in ms_ and r in ru_))
+    # the data base activities and their high / low variants (sets.gms DACT_TO_PACT: DCOW = DCOL + DCOH, BULF, HEIF,
+    # GRAS, the set-aside codes): Norway's rates per data activity reach the variants (policy/def_no_policy.gms l. 56-60)
+    write(OUT / "capri" / "DACT_TO_PACT.csv", ("dact", "pact"), sorted(pairs("DACT_TO_PACT")))
     # the region hierarchy policy/policy.gms breaks the premium declarations down and re-aggregates the declared
     # premiums along (the premium module, P2b): MAP_RR (a region and its members), R_RAGG (a region and the regions it
     # belongs to, itself included), the EU aggregates with premium declarations (REGAGGP, REGEU1015), the member states

@@ -18,7 +18,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 #: builder -> roundings of values outside print/f-strings that are allowed (none since K88 was fixed)
-ROUNDING_ALLOWED: dict = {}
+ROUNDING_ALLOWED: dict = {
+    # sim_ini stores a GAMS acronym as its index x 1e301 (_acronyms.csv): the builder decodes the index to write the
+    # acronym's name, and stops if the value is not an acronym's (no number is written rounded)
+    "build_mtr_inputs.py": 1,
+}
 
 
 def _parents(tree):

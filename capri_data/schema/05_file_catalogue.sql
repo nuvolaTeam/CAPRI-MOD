@@ -120,6 +120,7 @@ INSERT INTO file_catalogue VALUES
   ('capri_data/2017/policy/nordic_aid_ceilings.csv', '1995', 'policy', 'live', '-', NULL, 'CAPRI''s Nordic aid ceilings per scheme, Finland and Sweden, million EUR a year (nordicaid.gms).'),
   ('capri_data/2017/policy/nordic_aid_region_shares.csv', '1995', 'policy', 'live', '-', NULL, 'The shares of CAPRI''s regions in the Nordic aid regions (p_nordicAidRegionShare, nordicaid.gms).'),
   ('capri_data/2017/policy/nordic_aid_schemes.csv', '1995', 'policy', 'live', '-', NULL, 'The Nordic aid schemes'' application types and declared year (nordicaid.gms).'),
+  ('capri_data/2017/policy/norway_premiums.csv', '1995-2019', 'policy', 'live', '-', NULL, 'CAPRI''s Norwegian payment rates and regional factors by payment group and year (norw_pol.gms).'),
   ('capri_data/2017/policy/premium_group_edits.csv', '2030', 'policy', 'live', '-', NULL, 'The premium groups CAPRI''s chain redefines at run time (pol_input/mtr_until2013.gms: PGFRM, PGREF).'),
   ('capri_data/2017/policy/cndp_decoupled_groups.csv', '2015-2020', 'policy', 'live', '-', NULL, 'The decoupled complementary national payments'' premium groups (CAP_2013_2020_CNDP.gms).'),
   ('capri_data/2017/policy/mtr_declarations.csv', '1993-2030', 'policy', 'live', '-', NULL, 'The BPS key''s premium declarations: sim_ini_21730''s time series and mtr_until2013.gms''s literal assignments (by line).'),

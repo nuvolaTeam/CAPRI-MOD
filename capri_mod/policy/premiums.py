@@ -11,8 +11,8 @@ The schemes, each from its port:
   Nordic aid Finland's and Sweden's national aid (nordic_aid.py)
   DPIRSCOW   Ireland's suckler cow welfare payment (mtr_until2013.gms l. 351-352, carried to the year)
 CAP_2014_2020.gms l. 77 kills the entitlement weights before the year's policy.gms: every weight is 1 there except
-the slaughtered share of the schemes per slaughtered head (policy.gms). Not ported: Norway's payments (norw_pol.gms)
-and the non-CAP payments (DPNONCAP, paid outside the EU in 2030).
+the slaughtered share of the schemes per slaughtered head (policy.gms). Norway's payments are their own port
+(norway.py: no ceiling, so no cut); not ported: the non-CAP payments (DPNONCAP, paid outside the EU in 2030).
 
 The year's data (yields, young animals, historical yields) are sim_ini_21730's DATA "Y" (mtr_base_data.csv).
 """
@@ -133,3 +133,45 @@ def year_premiums(units, levels: dict, year: int, base_year: int, schemes=None) 
         out.regions[ms] = CeilingRegions(member_states={ms: us}, nuts1=nuts1)
     out.ceilings = ceil
     return out
+
+
+def trend_levels(inp=None) -> dict:
+    """{(unit, activity): the 2030 trend level} the year's chain runs at (CAPRI's DATA TRD, cap14_entitlement_levels.csv)."""
+    from capri_mod.supply import inputs as _inputs
+    inp = inp or _inputs.current()
+    lev = inp.csv("cap14_entitlement_levels.csv", "policy", keep_default_na=False)
+    return {(str(r), str(a)): float(v) for r, a, v in zip(lev.region, lev.activity, lev.trd_kha)}
+
+
+def eu_units(levels: dict, inp=None):
+    """The EU's regional units of the levels (the member states the ported schemes cover: not Norway, the UK and the
+    non-EU regions)."""
+    from capri_mod.supply import inputs as _inputs
+    inp = inp or _inputs.current()
+    ru = set(str(u) for u in inp.csv("regional_units.csv", "codes", keep_default_na=False).region)
+    eu = set(_mtr._ms_members(_mtr.data(), "EU028000"))
+    return sorted(u for u in {u for u, _ in levels} & ru if capri_ms(u) in eu and capri_ms(u) != "UK000000")
+
+
+def prme_table(year: int, base_year: int, levels: dict = None, units=None) -> dict:
+    """{(region, activity): PRME} the premium per activity unit over all ported schemes at the levels (the trend
+    levels by default), for the units and their member states (the units' level-weighted average, as
+    aggreg_ppepay.gms aggregates PRME)."""
+    levels = levels if levels is not None else trend_levels()
+    units = units if units is not None else eu_units(levels)
+    yp = year_premiums(units, levels, year, base_year)
+    out = defaultdict(float)
+    for (u, a, s), v in yp.cut(levels).items():
+        if v and v != EPS:
+            out[(u, a)] += v
+    num, den = defaultdict(float), defaultdict(float)
+    for u in units:
+        m = capri_ms(u)
+        for (r, a), L in levels.items():
+            if r == u and L > 0:
+                num[(m, a)] += out.get((u, a), 0.0) * L
+                den[(m, a)] += L
+    for k, L in den.items():
+        if L > 0 and num[k]:
+            out[k] = num[k] / L
+    return dict(out)
