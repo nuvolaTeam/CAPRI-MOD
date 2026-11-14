@@ -1890,7 +1890,8 @@
    "units": "U_1unit, U_Elasticity",
    "read_by_model": [
     "capri_mod/market/inputs.py",
-    "capri_mod/market/supply.py"
+    "capri_mod/market/supply.py",
+    "capri_mod/market/supply_system_ad.py"
    ],
    "origin": {
     "nature": "capri",

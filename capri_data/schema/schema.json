@@ -55711,7 +55711,8 @@
    "read_by": {
     "model": [
      "capri_mod/market/inputs.py",
-     "capri_mod/market/supply.py"
+     "capri_mod/market/supply.py",
+     "capri_mod/market/supply_system_ad.py"
     ],
     "builders": [],
     "checks": [],
@@ -59630,7 +59631,7 @@
   "capri/keep": 501,
   "capri-mod/keep": 2,
   "literature/keep": 11,
-  "numerical/keep": 32,
+  "numerical/keep": 33,
   "open/keep": 4,
   "physical/keep": 13,
   "technical/keep": 34

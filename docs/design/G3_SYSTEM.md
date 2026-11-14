@@ -121,6 +121,34 @@ milk and biofuel output on a solved baseline's market (capri_mod/tests/test_use_
 of the mini-EU Farm-to-Fork, equal to the evaluation's use on all 2,610 cells within 3.8e-16
 (tools/check/g3_use_residuals.py).
 
+### G3.2c/e: the supply side as one CasADi function with its blocks' equations (capri_mod/market/supply_system_ad.py)
+
+`supply_system(mm, exogenous_supply)`: (S, res_yani, res_dairy_eu, res_dairy_w, biofX) = supply(PA, RR, ry, uE, uW,
+fede, dr), the whole of `supply_response` with the blocks it solves inside each evaluation turned into unknowns and
+equations: the young-animal prices ry (yaniMarket_ of the EU market regions and Norway), each member state's dairy
+block (3 unknowns: fat, protein, raw milk price; FatsProtBal_ and DairyNQ_ = ProdNQ_ MILK with the milk supply's
+response to its price, the products' prices and the young-animal prices), the other regions' dairy blocks (3 each,
+raw milk from CAPRI's supply function with its cross-price, FEDE and rent terms); FEDE and the rents enter as unknowns
+(their equations, FeedBal_ and the land markets, are fedebal_function and land_residual_function: next). Composed: the
+anticipation of the supply models' output, the EU's EU_MARKET_SUPPLY ProdNQ_, the measured Hessian's rows with the
+young-animal and raw milk terms, Norway's rows, raw milk and dairy block, the K83 units outside a run, crushing, the
+non-EU ProdNQ_ rows, raw milk without a block, the biofuels and DDGS. The EU's residual feeds (MaprFeed_) are left to
+the assembly (they follow the use side). Built in about 1.2 s.
+
+Two departures from the default solve, both toward CAPRI's one simultaneous system: Norway's rows respond to its dairy
+block's current milk price (the default solve: the previous evaluation's, DEP-29); the young-animal markets are
+equations rather than 4 alternating rounds. One default-solve form kept for now: Norway's raw milk row takes the
+young-animal prices of a clearing without the milk price change (supply_response's two clearings); CAPRI has one set
+of young-animal prices, so G3 should use the cleared ones there too (a decision for G3.3, it moves Norway's milk).
+
+Checks: at the default solve's block solutions the supply equals `supply_response` within 1e-12 and the dairy
+blocks' residuals are below 1e-8, at a solved market of CAPRI's base supply rows and at two random price draws around it
+(capri_mod/tests/test_supply_system_ad.py, slow; no young animals or Norway there). At three captured solves of the
+mini-EU Farm-to-Fork (Norway's supply models, the young-animal markets, the member states' milk response and the K83
+units all present): the supply equals the evaluation's on all 2,610 cells within 6.2e-16; the dairy blocks' residuals
+within 2.8e-16 of their base raw milk (78 EU, 129 other equations); the young-animal markets' residuals are the
+4-round cap's (8.0e-7 at market_005, 1.7e-9 at market_011; none at market_002) (tools/check/g3_supply_system.py).
+
 Summary of the default solve's fixed points at its equilibria: the land and FEDE milk price lag is spent (5.4e-7
 EUR/ha, 5.3e-10); the young-animal markets carry the 4-round cap's residual above; everything else holds within the
 solve's tolerance or exactly.

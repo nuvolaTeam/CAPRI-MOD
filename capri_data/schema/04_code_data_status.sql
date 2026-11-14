@@ -313,6 +313,7 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/market/supply.py', 'SupplyMixin._yani_clear', -50.0, 'numerical', 'keep', NULL, 'default bounds of the young-animal price ratio when the state gives none'),
   ('capri_mod/market/supply.py', 'SupplyMixin._yani_clear', 50.0, 'numerical', 'keep', NULL, 'default bounds of the young-animal price ratio when the state gives none'),
   ('capri_mod/market/supply.py', 'SupplyMixin.supply_response', 0.2, 'numerical', 'keep', NULL, 'floor of the last-seen price ratio in the supply anticipation'),
+  ('capri_mod/market/supply_system_ad.py', 'supply_system', 0.2, 'numerical', 'keep', NULL, 'floor of the last-seen price ratio in the supply anticipation, as SupplyMixin.supply_response (G3.2c/e)'),
   ('capri_mod/market/welfare.py', 'WelfareMixin._welfare_cssp', 0.05, 'numerical', 'keep', NULL, 'consumer price floor at 5% of base, as in gl_food_ratio'),
   ('capri_mod/model.py', '_labour_table', 2030.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 labour columns'),
   ('capri_mod/model.py', '_set_aside_table', 2030.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 set-aside columns'),

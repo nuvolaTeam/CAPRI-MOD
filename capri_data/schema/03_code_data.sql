@@ -65,6 +65,7 @@ INSERT INTO code_data VALUES
   ('capri_mod/market/supply.py', 'SupplyMixin._yani_clear', -50.0, 1, '1122', 'lo, hi = st.get("bounds", (-50.0, 50.0))'),
   ('capri_mod/market/supply.py', 'SupplyMixin._yani_clear', 50.0, 1, '1122', 'lo, hi = st.get("bounds", (-50.0, 50.0))'),
   ('capri_mod/market/supply.py', 'SupplyMixin.supply_response', 0.2, 2, '204,223', 'sv = (np.maximum(np.nan_to_num(seen.reindex(cols).to_numpy(dtype=float), nan=1.0), 0.2)'),
+  ('capri_mod/market/supply_system_ad.py', 'supply_system', 0.2, 2, '113,124', 'sv = (np.maximum(np.nan_to_num(seen.reindex(cols).to_numpy(dtype=float), nan=1.0), 0.2)'),
   ('capri_mod/market/use_ad.py', 'use_function', 0.05, 3, '198,199,214', 'rho = [ca.fmax(PR[ie, Cc[mm.DAIRY_TRADED[k]]], 0.05) if mm.DAIRY_TRADED[k] in Cc'),
   ('capri_mod/market/welfare.py', 'WelfareMixin._welfare_cssp', 0.05, 1, '95', 'p = np.maximum(p, 0.05 * e["p0"])'),
   ('capri_mod/model.py', '_labour_table', 2030.0, 1, '1648', 'vt = "_2030" if yr == 2030 else ""'),
