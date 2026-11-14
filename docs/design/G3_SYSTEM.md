@@ -209,7 +209,13 @@ search:
 So the assembled system has the default solve's equilibrium as its solution, and Newton converges to it fast near it.
 For G3.3: (1) the lifted sparse form (above), which also gives the exact Jacobian cheaply; (2) a globalisation that
 copes with the quotas: IPOPT's filter line search on the system as constraints, or a continuation on the quotas'
-slope, or CAPRI's own solve order (to be read in CAPRI's market model before choosing); (3) the bounds.
+slope; (3) the bounds. CAPRI's own precedent for the quotas (read 14 November 2026): the slope p_trqSigmoidSlope is
+200 in the market model (arm/market_model.gms l. 336-339: the sigmoid "jumps from zero to one within the range of +-3%
+of the TRQ"; "a steeper slope would be more realistic, but potentially produces more infeasibilities"); its quota
+calibration starts at 10 and raises it by 10 per solve up to 200 "to maintain feasibility" (arm/trim_trqs.gms
+l. 734-737, 821-823), and after an infeasible simulation solve widen_bounds.gms (l. 613-615) sets the slope of the
+quotas with non-zero marginals to between 100 and 300. So a continuation on the slope is CAPRI's own way; CAPRI's
+simulation solve itself is CONOPT from the previous solution.
 
 Summary of the default solve's fixed points at its equilibria: the land and FEDE milk price lag is spent (5.4e-7
 EUR/ha, 5.3e-10); the young-animal markets carry the 4-round cap's residual above; everything else holds within the
