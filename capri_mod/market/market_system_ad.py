@@ -34,8 +34,11 @@ from __future__ import annotations
 import numpy as np
 
 
-def market_system(mm, exogenous_supply, trade_scenario=None):
-    """(Function x -> (F, pooled, S, D), layout)."""
+def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = False):
+    """(Function x -> (F, pooled, S, D), layout, x, F). lifted: the Armington ratios of the bilateral commodities,
+    the supply and the use are unknowns of their own with their defining equations (CAPRI's form: v_arm1Price,
+    v_prodQuant, v_arm1Quant), appended to x and F as PA, S, D and PAdef, Sdef, Ddef; the Jacobian is then sparse
+    (each region's use depends on its own prices, each Armington ratio on its commodity's prices)."""
     import casadi as ca
     from capri_mod.market.supply_system_ad import supply_system
     from capri_mod.market.trade_system_ad import active_quotas, trade_system_function
@@ -108,9 +111,23 @@ def market_system(mm, exogenous_supply, trade_scenario=None):
         sB, sW, _, _ = sig[c]
         PA[:, ci[c]] = tf[c](rB[c], sB, sW, zero, zero)[3]
 
+    # lifted: the Armington ratios, supply and use as unknowns (their values from the substituted functions)
+    bcols = [ci[c] for c in sysd]
+    PA_fun = PA
+    if lifted:
+        PAu = unk("PA", nR * len(bcols))
+        PA = ca.SX(RR)
+        for k, j in enumerate(bcols):
+            PA[:, j] = PAu[k * nR:(k + 1) * nR]
+        Su = unk("S", nR * nC)
+        Du = unk("D", nR * nC)
+        Sv = ca.reshape(Su, nR, nC)
+        Dv = ca.reshape(Du, nR, nC)
+
     # supply, use, and the residual feeds that follow the use
     S, res_y, res_E, res_W, biofX = sf(PA, RR, ry, uE, uW, fede, dr)
-    milk = ca.vertcat(*[S[R[r], ci["MILK"]] for r in ul["milk_regs"]]) if ul["milk_regs"] else ca.DM.zeros(0)
+    S_in = Sv if lifted else S
+    milk = ca.vertcat(*[S_in[R[r], ci["MILK"]] for r in ul["milk_regs"]]) if ul["milk_regs"] else ca.DM.zeros(0)
     ddgs = (ca.vertcat(*[RR[R[g], ci["DDGS"]] if "DDGS" in ci else 1.0 for g in ul["ddgs_regs"]])
             if ul["ddgs_regs"] else ca.DM.zeros(0))
     D, byp = uf(PA, RR, fede, milk, biofX, ddgs)
@@ -118,6 +135,11 @@ def market_system(mm, exogenous_supply, trade_scenario=None):
     for k, (reg, p) in enumerate(ul["byp_cells"]):
         if p in ci:
             S[R[reg], ci[p]] = byp[k]
+    S_sub, D_sub = S, D
+    if lifted:
+        lift_eqs = [("PAdef", ca.vertcat(*[PA[:, j] - PA_fun[:, j] for j in bcols])),
+                    ("Sdef", ca.reshape(Sv - S, nR * nC, 1)), ("Ddef", ca.reshape(Dv - D, nR * nC, 1))]
+        S, D = Sv, Dv
 
     # the trade blocks' equations
     bal, trq = [], []
@@ -179,12 +201,18 @@ def market_system(mm, exogenous_supply, trade_scenario=None):
     def cat(v):
         return ca.vertcat(*v) if v else ca.SX(0, 1)
     eqs = [("bal", cat(bal)), ("trq", cat(trq)), ("yani", res_y), ("dairyE", res_E), ("dairyW", res_W),
-           ("feed", cat(feed)), ("land", cat(land))]
+           ("feed", cat(feed)), ("land", cat(land))] + (lift_eqs if lifted else [])
     x = ca.vertcat(*xs)
     F = ca.vertcat(*[e for _, e in eqs])
     fn = ca.Function("market_system", [x], [F, pooled, S, D], ["x"], ["F", "pooled", "S", "D"])
     lay = dict(sl, x=names, eqs=[(n, int(e.shape[0])) for n, e in eqs], n_x=int(x.shape[0]), n_F=int(F.shape[0]),
-               sig=sig, byp_cells=ul["byp_cells"], milk_regs=ul["milk_regs"])
+               sig=sig, byp_cells=ul["byp_cells"], milk_regs=ul["milk_regs"], lifted=lifted)
+    if lifted:
+        # the lifted unknowns' values at given base unknowns: the substituted system's PA, S and D
+        nb = int(sum(n for nm, n in names if nm not in ("PA", "S", "D")))
+        sub = ca.Function("lift", [x], [ca.vertcat(*[PA_fun[:, j] for j in bcols]), ca.reshape(S_sub, nR * nC, 1),
+                                        ca.reshape(D_sub, nR * nC, 1)])
+        lay["lift"] = (sub, nb, nR * len(bcols), nR * nC)
     return fn, lay, x, F
 
 
@@ -209,4 +237,13 @@ def market_x0(mm, layout) -> np.ndarray:
                 out.append(np.asarray(sc.trq_sigmaW, float)[glo])
     rest = supply_inputs(mm, layout, np.ones((len(layout["regions"]), len(layout["cols"]))))[2:]
     out += [np.asarray(v, float).ravel() for v in rest]
-    return np.concatenate(out)
+    xb = np.concatenate(out)
+    if not layout.get("lifted"):
+        return xb
+    sub, nb, npa, ns = layout["lift"]
+    # in turn: the Armington ratios from the base unknowns, the supply at those ratios, the use at both
+    full = np.concatenate([xb, np.zeros(npa + 2 * ns)])
+    full[nb:nb + npa] = np.asarray(sub(full)[0], float).ravel()
+    full[nb + npa:nb + npa + ns] = np.asarray(sub(full)[1], float).ravel()
+    full[nb + npa + ns:] = np.asarray(sub(full)[2], float).ravel()
+    return full

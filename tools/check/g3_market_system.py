@@ -52,6 +52,12 @@ def _scales(mm, lay) -> np.ndarray:
             LP = mm._noneu_land_params()
             out.append(np.concatenate([np.maximum(LP[s]["L0"], 1.0) for s in lay["lrms"]]) if lay["lrms"]
                        else np.zeros(0))
+        elif name == "PAdef":
+            out.append(np.ones(n))
+        elif name in ("Sdef", "Ddef"):
+            b = (mm.par.base_production if name == "Sdef" else mm.par.base_consumption)
+            v = b.reindex(index=lay["regions"], columns=lay["cols"]).fillna(0.0).to_numpy(dtype=float)
+            out.append(np.maximum(np.abs(v).ravel(order="F"), 1.0))
     sc_ = np.concatenate(out) if out else np.zeros(0)
     assert sc_.size == lay["n_F"], (sc_.size, lay["n_F"])
     return sc_

@@ -217,6 +217,24 @@ l. 734-737, 821-823), and after an infeasible simulation solve widen_bounds.gms 
 quotas with non-zero marginals to between 100 and 300. So a continuation on the slope is CAPRI's own way; CAPRI's
 simulation solve itself is CONOPT from the previous solution.
 
+### G3.3, second trial: the lifted form (market_system(..., lifted=True); tools/check/g3_ipopt_trial.py)
+
+CAPRI's form: the bilateral commodities' Armington ratios, the supply and the use are unknowns of their own with their
+defining equations (PAdef, Sdef, Ddef), as v_arm1Price, v_prodQuant and v_arm1Quant in m_globMarket: 10,951 unknowns
+and equations at market_011 (3,166 + 2,565 + 2,610 + 2,610), 10,409 once the empty balances are out and their prices
+held. At the default solve's equilibrium its definitions hold exactly and its other equations equal the substituted
+form's (test_supply_system_ad.py).
+
+- Newton's method with the exact sparse Jacobian (CasADi's rootfinder, CSparse LU), from the state market_011 started
+  from: 3 steps, 2.0e-2 -> 1.3e-7 -> 7.3e-14, the same equilibrium as the default solve (prices within 3.7e-9; the
+  Armington ratios, supply and use within 4.3e-9). 134 s, with a full run on the same two cores; the time is to be
+  measured alone and with MUMPS (CSparse's LU is not built for this size).
+- The lifted Jacobian has 290,893 non-zeros (0.27% of the matrix; the substituted form's: 32%).
+- IPOPT (MUMPS, zero objective, the system as equality constraints, L-BFGS Hessian): stopped at its first iteration
+  ("Restoration failed") because MUMPS ran out of memory factorising the KKT matrix (648 MB refused under the 3 GB
+  limit the trial ran with beside a full run). To repeat alone with more memory; the factorisation's fill-in (the
+  regions' dense GL demand blocks, the commodities' Armington blocks) is the cost to watch.
+
 Summary of the default solve's fixed points at its equilibria: the land and FEDE milk price lag is spent (5.4e-7
 EUR/ha, 5.3e-10); the young-animal markets carry the 4-round cap's residual above; everything else holds within the
 solve's tolerance or exactly.

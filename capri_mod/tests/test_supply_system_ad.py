@@ -73,6 +73,27 @@ def _scale(mm, lay, name):
 
 
 @pytest.mark.slow
+def test_the_lifted_market_system_has_the_same_solution(solved_base):
+    """The lifted form (the Armington ratios, supply and use as unknowns with their defining equations, CAPRI's
+    form): at the default solve's equilibrium its definitions hold exactly and its other equations equal the
+    substituted form's; its Jacobian is sparse."""
+    from capri_mod.market.market_system_ad import market_system, market_x0
+    mm, exo = solved_base
+    mm._bilateral_eval(mm.sv.bilat_last_r.copy(), exo, None)
+    fs, ls, _, _ = market_system(mm, exo)
+    fl, ll, _, _ = market_system(mm, exo, lifted=True)
+    xs, xl = market_x0(mm, ls), market_x0(mm, ll)
+    assert np.array_equal(xl[:ls["n_x"]], xs)
+    Fs = np.asarray(fs(xs)[0], float).ravel()
+    Fl = np.asarray(fl(xl)[0], float).ravel()
+    # the same up to rounding of the quantities they are differences of (balances of 1e4 kt: 1e-12 is a few ulps)
+    assert float(np.max(np.abs(Fl[:ls["n_F"]] - Fs))) <= 1e-8
+    assert float(np.max(np.abs(Fl[ls["n_F"]:]))) <= 1e-9
+    sp = fl.jac_sparsity(0, 0)
+    assert sp.nnz() < 0.01 * ll["n_x"] * ll["n_F"]
+
+
+@pytest.mark.slow
 def test_the_supply_system_equals_supply_response_at_its_block_solutions(solved_base):
     from capri_mod.market.supply_system_ad import supply_inputs, supply_system
     mm, exo = solved_base
