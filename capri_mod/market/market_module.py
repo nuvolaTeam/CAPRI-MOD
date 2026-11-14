@@ -338,43 +338,17 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
     # ------------------------------------------------------------------
 
     def _solve_captured(self, folder, exogenous_supply, trade_scenario, policy_scenario, max_iter, verbose):
-        """G3.1 (claude/g3_plan.md): one market solve written to <folder>/market_NNN.pkl for tools/check/replay_market.py
-        - the module before the solve (its whole state: par, sv, seen, ev, data, caches), the solve's arguments, the
-        run's settings, and after it the equilibrium and the module's warm-start state (sv). The solve itself is the
-        default one. The module's attributes are stored once each by content (<folder>/blobs/<sha256>.pkl, referenced
-        from the module's pickle as persistent ids): the data and the blocks' caches do not change between solves."""
-        import hashlib
-        import io
-        import pickle
-        from pathlib import Path
-        d = Path(folder)
-        (d / "blobs").mkdir(parents=True, exist_ok=True)
-        ids = {}
-        for v in vars(self).values():
-            if v is None or isinstance(v, (bool, int, float, str)):
-                continue
-            b = pickle.dumps(v, protocol=pickle.HIGHEST_PROTOCOL)
-            h = hashlib.sha256(b).hexdigest()
-            f = d / "blobs" / f"{h}.pkl"
-            if not f.exists():
-                f.write_bytes(b)
-            ids[id(v)] = h
-
-        class _P(pickle.Pickler):
-            def persistent_id(self, obj):
-                return ids.get(id(obj))
-        buf = io.BytesIO()
-        _P(buf, protocol=pickle.HIGHEST_PROTOCOL).dump(self)
+        """G3.1 (docs/design/G3_SYSTEM.md): one market solve written to <folder>/market_NNN.pkl for
+        tools/check/replay_market.py, by capri_mod/market_capture.py (the market package reads and writes no files
+        itself: capri_mod/market/inputs.py reads its data). The solve itself is the default one."""
+        from capri_mod.market_capture import capture_solve
         args = dict(exogenous_supply=exogenous_supply, trade_scenario=trade_scenario,
                     policy_scenario=policy_scenario, max_iter=max_iter)
-        st = _settings()
-        with override({"diagnostics.capture_market_dir": ""}):
-            eq = self.solve(verbose=verbose, **args)
-        n = len(list(d.glob("market_*.pkl")))
-        with open(d / f"market_{n:03d}.pkl", "wb") as fh:
-            pickle.dump({"module": buf.getvalue(), "args": args, "settings": st, "result": eq, "sv_after": self.sv},
-                        fh, protocol=pickle.HIGHEST_PROTOCOL)
-        return eq
+
+        def solve():
+            with override({"diagnostics.capture_market_dir": ""}):
+                return self.solve(verbose=verbose, **args)
+        return capture_solve(self, folder, args, _settings(), solve)
 
     # ------------------------------------------------------------------
     # CAPRI's bilateral market (Sprint 8m; capri_mod/market/bilateral.py)

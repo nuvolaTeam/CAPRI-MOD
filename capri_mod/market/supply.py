@@ -30,6 +30,11 @@ class SupplyMixin(MarketStateMixin):
     #: arm/market_model.gms l. 1696-1790): the rents of TCRP, FODFAL, FRUN clear each non-EU region's land market
     #: (true, CAPRI's form) or are held at calibration (false, until 4 November 2026)
     noneu_land_market = setting("market.noneu_land_market")
+    #: the young-animal markets and the member states' raw milk inside each market evaluation (CAPRI: yaniMarket_ and
+    #: DairyNQ_ in one system, m_globMarket): cleared in alternating rounds until the milk prices change by less than
+    #: YANI_MILK_TOL, at most YANI_MILK_ROUNDS (4 until 14 November 2026)
+    YANI_MILK_ROUNDS = setting("market.yani_milk_rounds")
+    YANI_MILK_TOL = setting("market.yani_milk_tol")
     #: CAPRI's land-use-change estimation outside the EU (luc_market; capri_mod/market/luc.py), reported with the
     #: market's solution
     luc_market = setting("market.luc_market")
@@ -294,20 +299,25 @@ class SupplyMixin(MarketStateMixin):
                 mk_ = self._sup_milk_terms(reg, Hs, cols, xs, _sv_sup[reg])
                 # CAPRI's ProdNQ_ with the measured Hessian, written once in CasADi (market step G2b, supply_ad.py); the
                 # floor at 0 applies to the rows kept below, as before
-                _q = lambda dp_: [np.asarray(v_).ravel() for v_ in _hf(s0, dp_, np.broadcast_to(
-                    np.asarray(self._yani_clear(reg, Hs, xs, cols, dp_), float), s0.shape))]
+                _q = lambda dp_, eff_: [np.asarray(v_).ravel() for v_ in _hf(s0, dp_, np.broadcast_to(
+                    np.asarray(eff_, float), s0.shape))]
                 if mk_ is not None:
                     # Norway's raw milk inside the market (step F; CAPRI simu_calibration_to_supply.gms l. 423-427):
-                    # the MILK row without the milk price (its own term is in the dairy block, _sup_milk_delivered),
-                    # then every row with the milk price change from the dairy block's latest price
+                    # every row with the milk price change from the dairy block's latest price, the young-animal
+                    # markets cleared at those prices; the MILK row without its own milk price term (it is in the
+                    # dairy block, _sup_milk_delivered) at the same young-animal prices: one set of young-animal
+                    # prices, as CAPRI's one system (until 14 November 2026 the MILK row took those of a clearing
+                    # without the milk price change; the project lead's decision)
                     iM_ = xs.index("MILK")
-                    q_nm, q_nm_raw = _q(dP_)
+                    dP1_ = dP_.copy()
+                    dP1_[cols.index("MILK")] = mk_["dL"]
+                    eff_ = self._yani_clear(reg, Hs, xs, cols, dP1_)
+                    q = _q(dP1_, eff_)[0]
+                    q_nm, q_nm_raw = _q(dP_, eff_)
                     self.ev.sup_milk_cross[reg] = float(q_nm_raw[iM_] - s0[iM_])
-                    dP_[cols.index("MILK")] = mk_["dL"]
-                    q = _q(dP_)[0]
                     q[iM_] = q_nm[iM_]
                 else:
-                    q = _q(dP_)[0]
+                    q = _q(dP_, self._yani_clear(reg, Hs, xs, cols, dP_))[0]
                 keep = s0 > 1e-6
                 vals = supply.loc[reg, cols].to_numpy(dtype=float).copy()
                 vals[np.asarray(xj)[keep]] = q[keep]
@@ -591,7 +601,8 @@ class SupplyMixin(MarketStateMixin):
                           r_seen=np.array([float(st.get("seen", {}).get(g, 1.0)) for g in mt["goods"]]),
                           dL=np.zeros(len(mss)), dY=np.zeros(len(mt["goods"])), yq=0.0)
         res = None
-        for _ in range(4):
+        done = False
+        for _ in range(int(self.YANI_MILK_ROUNDS)):
             resp = {}
             for reg, (H, xs, dP, mt) in regs.items():
                 s_ = S[reg]
@@ -624,10 +635,14 @@ class SupplyMixin(MarketStateMixin):
                 s_ = S[reg]
                 dL_new = np.array([float(res["ms_price_ratio"][m]["MILK"]) - s_["Ls"][i]
                                    for i, m in enumerate(s_["mss"])])
-                done = done and float(np.max(np.abs(dL_new - s_["dL"]))) < 1e-10 if len(dL_new) else done
+                done = (done and float(np.max(np.abs(dL_new - s_["dL"]))) < float(self.YANI_MILK_TOL)
+                        if len(dL_new) else done)
                 s_["dL"] = dL_new
             if done:
                 break
+        if not done:
+            print(f"    young-animal and raw milk rounds stopped at market.yani_milk_rounds = {self.YANI_MILK_ROUNDS} "
+                  f"before the milk prices settled (market.yani_milk_tol {self.YANI_MILK_TOL:g})", flush=True)
         self.ev.dairy_m5_now = res
         # raw milk delivered against the supply models' (kt) per EU market region: the milk row of the market carries it
         self.ev.milk_dq_now = {reg: float(sum((float(res["ms_price_ratio"][m]["milk_delivered"]) - S[reg]["mr0"][i])

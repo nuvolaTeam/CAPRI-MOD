@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (30)
+## Open (33)
 
 | # | Issue | Status |
 |---|---|---|
@@ -43,6 +43,9 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K144](#k144) | CAPRI bug: Norway's output payments (DPNOR6, DPNOR7) pay nothing in the simulation year (policy.gms l. 97 reads the yields at the year's column) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it |
 | [K145](#k145) | The 2030 premium of wine (WINE) was never set from CAPRI's 2030 TWIN: the model kept the 2017 premium in 2030 | fixed (13 November 2026) |
 | [K146](#k146) | Switzerland's market supply responded to its market prices as if its producer prices carried no support per tonne (CAPRI's PPri_ adds PSEd): its price terms too large by PPRI0 / (PPRI0 - PSEd), soya 1.83 times | fixed (13 November 2026) |
+| [K147](#k147) | The market solve's convergence test does not control a lag: the non-EU land and feed energy blocks read the previous evaluation's raw milk prices, so the balances re-evaluate above market.tol (1.3e-7 on the base market) | open: accepted; removed by G3 (one system) |
+| [K148](#k148) | The young-animal markets and the member states' raw milk were cleared in at most 4 alternating rounds inside each market evaluation (CAPRI: one system): up to 8.0e-7 of net supply left | fixed (14 November 2026) |
+| [K149](#k149) | Norway's raw milk row took the young-animal prices of a clearing without the milk price change, its other rows those of a second clearing with it (CAPRI: one set) | fixed (14 November 2026) |
 
 ## Resolved (115)
 
@@ -3026,3 +3029,51 @@ INPE; CAPRI's p_elasSupp is still reproduced at the producer price (1.35e-14).
 - **In 9t:** -
 - **Status:** fixed (13 November 2026); test_market_layers.py
   test_switzerlands_supply_terms_take_its_support_per_tonne_off_the_producer_price
+
+
+<a id="k147"></a>
+### K147: The market solve's convergence test does not control the raw milk lag of the non-EU land and FEDE blocks (found 14 November 2026)
+
+Each evaluation of the bilateral market solve (bilateral_solve.py `_bilateral_eval`) solves the non-EU land markets
+and the feed energy balances (FeedBal_) with each region's raw milk price of the PREVIOUS evaluation: the dairy blocks
+are solved later, inside the supply response (docs/design/G3_MARKET_INVENTORY.md, the default solve's lags). The solve
+stops when the balances of the evaluation are below market.tol; the lag is not part of that test. On the market solved
+at CAPRI's base supply rows (capri_mod/tests/test_supply_system_ad.py): 9.0e-8 at the solve's own last evaluation,
+1.3e-7 evaluated again at the same prices, 1.4e-7 a third time. At the captured solves of a mini-EU Farm-to-Fork the
+lag is spent (the rents move by at most 5.4e-7 EUR/ha, FEDE by 5.3e-10: tools/check/g3_land_fede_residuals.py).
+
+- **Effect:** the balances of a solve can be up to about 1.4 x market.tol instead of below it; no indicator moves
+- **In 9t:** -
+- **Status:** open, accepted (the project lead, 14 November 2026: left in the default solve, which G3 replaces; G3's
+  one system has no lag, docs/design/G3_SYSTEM.md). The fallback if G3 is delayed: the land and FEDE blocks once more
+  after the dairy blocks, or the milk price change in the convergence test.
+
+<a id="k148"></a>
+### K148: The young-animal / raw milk rounds stopped at 4 (found and fixed 14 November 2026)
+
+CAPRI solves the young-animal markets (yaniMarket_) and the member states' raw milk (DairyNQ_ with ProdNQ_ MILK) in
+one system. The default solve clears them in alternating rounds inside each evaluation
+(`SupplyMixin._milk_and_yani_clear_all`): the young animals at the previous round's milk prices, then the dairy
+blocks at the new young-animal prices; it stopped when the milk prices changed by less than 1e-10 or after 4 rounds.
+At the captured solves of a mini-EU Farm-to-Fork the young-animal markets kept up to 8.0e-7 of net supply at the first
+scenario solve (1.7e-9 at the last; tools/check/g3_supply_residuals.py). Now market.yani_milk_rounds (50) and
+market.yani_milk_tol (1e-10), with a message when the rounds stop first. On the mini-EU Farm-to-Fork with 50 rounds:
+7 iterations as before, every indicator of compare_runs.py the same to the first decimal.
+
+- **Effect:** the young-animal markets clear with the raw milk, as CAPRI's
+- **In 9t:** -
+- **Status:** fixed (14 November 2026; the project lead's decision); validated with the full pair (CHANGELOG)
+
+<a id="k149"></a>
+### K149: Norway's raw milk row and its young-animal prices (found and fixed 14 November 2026)
+
+Norway's supply-model rows with its raw milk inside the market (supply_response, CAPRI simu_calibration_to_supply.gms
+l. 423-427): the MILK row without its own milk price term (that term is in Norway's dairy block), every other row with
+the milk price change. The default solve cleared Norway's young-animal market twice, without and with the milk price
+change, and took the MILK row from the first clearing: two sets of young-animal prices in one evaluation, where CAPRI
+has one. Now the young-animal market is cleared once, with the milk price change, and the MILK row takes those prices.
+Found in G3.2c (capri_mod/market/supply_system_ad.py, which now has the same form).
+
+- **Effect:** Norway's raw milk supply responds to the same young-animal prices as its other products
+- **In 9t:** -
+- **Status:** fixed (14 November 2026; the project lead's decision); validated with the full pair (CHANGELOG)

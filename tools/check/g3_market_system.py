@@ -26,41 +26,9 @@ sys.path.insert(0, str(ROOT / "tools" / "check"))
 
 
 def _scales(mm, lay) -> np.ndarray:
-    out = []
-    sysd = mm.par.bilat or {}
-    for name, n in lay["eqs"]:
-        if name == "bal":
-            for sc in sysd.values():
-                out.append(np.maximum(np.asarray(sc.S0 + sc.D0, float), 1.0))
-        elif name == "trq":
-            out.append(np.ones(n))
-        elif name == "yani":
-            st = mm.seen.yani_state or {}
-            out.append(np.array([max(abs(float(st[reg]["net"][g])), 1.0) for reg, goods in lay["ylay"] for g in goods]))
-        elif name == "dairyE":
-            dp = mm._dairy_params()
-            out.append(np.repeat([max(float(dp["ms"][m]["Q0"][dp["ms"][m]["iM"]]), 1.0) for m in lay["ms"]], 3))
-        elif name == "dairyW":
-            wp = mm._dairy_world_params()
-            out.append(np.repeat([max(float(wp[r]["Q0"][wp[r]["iM"]]), 1.0) for r in lay["wl"]], 3))
-        elif name == "feed":
-            from capri_mod.market.feed_ad import fedebal_arrays
-            nfp = mm._noneu_feed_params()
-            out.append(np.array([max(abs(fedebal_arrays(nfp["rms"][s], lay["cols"], [])["e_const"]), 1.0)
-                                 for s in lay["rms"]]))
-        elif name == "land":
-            LP = mm._noneu_land_params()
-            out.append(np.concatenate([np.maximum(LP[s]["L0"], 1.0) for s in lay["lrms"]]) if lay["lrms"]
-                       else np.zeros(0))
-        elif name == "PAdef":
-            out.append(np.ones(n))
-        elif name in ("Sdef", "Ddef"):
-            b = (mm.par.base_production if name == "Sdef" else mm.par.base_consumption)
-            v = b.reindex(index=lay["regions"], columns=lay["cols"]).fillna(0.0).to_numpy(dtype=float)
-            out.append(np.maximum(np.abs(v).ravel(order="F"), 1.0))
-    sc_ = np.concatenate(out) if out else np.zeros(0)
-    assert sc_.size == lay["n_F"], (sc_.size, lay["n_F"])
-    return sc_
+    """Each equation's scale (capri_mod/market/market_ipopt.py, the solver's own)."""
+    from capri_mod.market.market_ipopt import _scales as scales
+    return scales(mm, lay)
 
 
 def _count(names) -> dict:

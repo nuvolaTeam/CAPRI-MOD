@@ -382,6 +382,12 @@ noneu_supply_nq = true
 # noneu_land_mnl.csv; tools/build/build_noneu_market_supply_nq.py); false: the rents held at calibration (until
 # 4 November 2026). Needs noneu_supply_nq
 noneu_land_market = true
+# the young-animal markets and the member states' raw milk inside each market evaluation (CAPRI: yaniMarket_ and DairyNQ_
+# in one system, m_globMarket), cleared in alternating rounds until the milk prices change by less than yani_milk_tol,
+# at most yani_milk_rounds (a message when the rounds stop first). 4 rounds until 14 November 2026 (the project lead's
+# decision: lifted; on the mini-EU Farm-to-Fork no indicator moved at 0.1)
+yani_milk_rounds = 50
+yani_milk_tol = 1e-10
 # CAPRI's land-use-change estimation of the market outside the EU (luc_market, on with REPORTS_ENV,
 # capmod/set_global_variables.gms l. 395; arm/market_model.gms LinkLuWithShares_, luClassInitial_, luClassFinal_,
 # FocLUC_): the transitions between the UNFCCC land classes of each non-EU region with the land block, reported with the
@@ -434,8 +440,17 @@ exact_jacobian = false
 # successive linearisation above (each commodity's trade system exact, the links across commodities and blocks between
 # steps), or "newton_krylov", the same equations at once (capri_mod/market/market_nk.py: Newton on all prices, GMRES
 # with finite-difference directional derivatives, the fixed point's Jacobian as preconditioner); the same stopping rule.
-# The project lead's choice of 29 October 2026; the default until its full-run comparison
+# The project lead's choice of 29 October 2026; the default until its full-run comparison. "ipopt" (G3, 14 November
+# 2026; docs/design/G3_SYSTEM.md): the market's equations as one system in CAPRI's form solved by IPOPT
+# (capri_mod/market/market_ipopt.py) from the previous solve's solution, then the fixed point from IPOPT's solution
+# (it confirms it in its first evaluation); the run's first solve, which calibrates the market, is the fixed point's
 solver = "fixed_point"
+# market.solver = "ipopt": IPOPT's tolerances (the scaled equations' and the constraints' violation) and its iterations
+ipopt_tol = 1e-10
+ipopt_max_iter = 200
+# market.solver = "ipopt": evaluations of the fixed point at IPOPT's solution before it starts, until its supply and
+# use change by less than ipopt_tol (its blocks' lagged state, KNOWN_ISSUES K147), at most this many
+ipopt_settle_evals = 20
 # Newton-Krylov: step of the directional differences in log prices; Krylov vectors per Newton step
 nk_fd_step = 1e-6
 nk_max_krylov = 30

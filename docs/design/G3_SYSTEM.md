@@ -5,7 +5,8 @@ in G3_MARKET_INVENTORY.md (G3.0, refreshed 13 November 2026). This file records 
 
 ## G3.1: capture and replay
 
-- `MarketModule._solve_captured` (capri_mod/market/market_module.py), on with `diagnostics.capture_market_dir`
+- `MarketModule._solve_captured` (capri_mod/market/market_module.py; the writing in capri_mod/market_capture.py, outside
+  the market package, which reads and writes no files), on with `diagnostics.capture_market_dir`
   (default "", off): before each market solve the module itself (its whole state: par, sv, seen, ev, data, the
   blocks' caches; it holds no reference back to the model, and CasADi Functions pickle), the solve's arguments and the
   run's settings; after it the equilibrium and the module's warm-start state sv; in `<dir>/market_NNN.pkl`. The
@@ -80,9 +81,10 @@ relative to the good's net supply, falls from 8.0e-7 (EU_EAST calves, the first 
 last) as the milk prices' change between rounds shrinks; EU_WEST from 4.4e-8 to 5.0e-12.
 In G3 both are equations of one system and hold together; in the default solve the 4-round cap could be lifted at
 little cost (each round is one linear solve per region and one dairy solve), which would bring it closer to CAPRI's
-joint solution. Not changed: it moves results, so it waits for a validation pair. Measured on the mini-EU
-Farm-to-Fork (14 November, the same 20 units; the rounds up to 50 instead of 4, in a run copy): 7 iterations as with
-the cap, every one of the 24 indicators of compare_runs.py the same to the first decimal.
+joint solution. Measured on the mini-EU Farm-to-Fork (14 November, the same 20 units; the rounds up to 50 instead of
+4, in a run copy): 7 iterations as with the cap, every one of the 24 indicators of compare_runs.py the same to the
+first decimal. Lifted the same day (the project lead's decision; K148): market.yani_milk_rounds = 50,
+market.yani_milk_tol = 1e-10. The captures above were made with the cap of 4.
 
 ### G3.2c, the rows the market's own blocks set: crushing, dairy products, biofuels, feed by-products
 
@@ -139,9 +141,10 @@ the assembly (they follow the use side). Built in about 1.2 s.
 
 Two departures from the default solve, both toward CAPRI's one simultaneous system: Norway's rows respond to its dairy
 block's current milk price (the default solve: the previous evaluation's, DEP-29); the young-animal markets are
-equations rather than 4 alternating rounds. One default-solve form kept for now: Norway's raw milk row takes the
-young-animal prices of a clearing without the milk price change (supply_response's two clearings); CAPRI has one set
-of young-animal prices, so G3 should use the cleared ones there too (a decision for G3.3, it moves Norway's milk).
+equations rather than alternating rounds. Norway's raw milk row took the young-animal prices of a clearing without
+the milk price change (supply_response's two clearings), where CAPRI has one set; since 14 November 2026 both the
+default solve and this function use the one clearing with the milk price change (the project lead's decision; K149).
+The checks below were made before that change, with the earlier form in both.
 
 Checks: at the default solve's block solutions the supply equals `supply_response` within 1e-12 and the dairy
 blocks' residuals are below 1e-8, at a solved market of CAPRI's base supply rows and at two random price draws around it

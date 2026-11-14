@@ -26,9 +26,8 @@ blocks (`_dairy_solve`). Here their prices are unknowns and their equations outp
 The supply models' latest output and the calibration state (seen prices, Hessians) are constants, as CAPRI's parameters
 within a market solve. Norway (the non-EU market regions with supply models, K56) as the default solve composes it,
 with one difference: its rows respond to its dairy block's current milk price (the default solve: the previous
-evaluation's, DEP-29), and its raw milk row keeps the default solve's form (the young-animal prices of a clearing
-without the milk price change; a G3 decision: CAPRI has one set of young-animal prices). Not covered: the member
-states' raw milk price floor (MILK_PRICE_FLOOR, a bound in G3); the young-animal prices' bounds (st["bounds"], the
+evaluation's, DEP-29); its raw milk row takes the same young-animal prices as its other rows (CAPRI's one set; the
+default solve too since 14 November 2026). Not covered: the member states' raw milk price floor (MILK_PRICE_FLOOR, a bound in G3); the young-animal prices' bounds (st["bounds"], the
 same). `supply_inputs(mm, layout)` reads the unknowns at the module's latest evaluation; at a solve's equilibrium the
 outputs equal its supply and the residuals vanish up to the default solve's own tolerances
 (tools/check/g3_supply_system.py).
@@ -276,31 +275,26 @@ def supply_system(mm, exogenous_supply):
             ref = np.array([float(st["ref"].get(g, 0.0)) for g in goods])
             yfn = (H_YP, H_YY, H_PY, net, ref, ry[o_:o_ + len(goods)] - ca.DM(r_seen))
 
-        def rows_at(dPv, cleared):
-            """The rows at the price change dPv: with the young-animal prices that clear their market at dPv, solved
-            explicitly (cleared False: _yani_clear's least-squares step, as the default solve's first clearing) or the
-            unknowns ry (cleared True: their residual returned)."""
+        def rows_at(dPv):
+            """The rows at the price change dPv with the young-animal prices ry, and their markets' residual."""
             if yfn is None:
                 return s0 + ca.mtimes(ca.DM(Hm), dPv), None
             H_YP, H_YY, H_PY, net, ref, dy = yfn
-            if cleared:
-                res = ca.DM(net) + ca.mtimes(ca.DM(H_YP), dPv) + ca.mtimes(ca.DM(H_YY), dy) - ca.DM(ref)
-                return s0 + ca.mtimes(ca.DM(Hm), dPv) + ca.mtimes(ca.DM(H_PY), dy), res
-            Jp = np.linalg.pinv(H_YY, rcond=np.finfo(float).eps * max(H_YY.shape))
-            dy0 = -ca.mtimes(ca.DM(Jp), ca.DM(net) + ca.mtimes(ca.DM(H_YP), dPv) - ca.DM(ref))
-            return s0 + ca.mtimes(ca.DM(Hm), dPv) + ca.mtimes(ca.DM(H_PY), dy0), None
+            res = ca.DM(net) + ca.mtimes(ca.DM(H_YP), dPv) + ca.mtimes(ca.DM(H_YY), dy) - ca.DM(ref)
+            return s0 + ca.mtimes(ca.DM(Hm), dPv) + ca.mtimes(ca.DM(H_PY), dy), res
         if mk is not None:
             iM_ = xs.index("MILK")
-            qraw0, _ = rows_at(dP, False)
-            cross = qraw0[iM_] - s0[iM_]
             dP1 = ca.SX(dP)
             dP1[ci["MILK"]] = mk["dL"]
-            qraw, res = rows_at(dP1, True)
+            qraw, res = rows_at(dP1)
+            # the MILK row without its own milk price term, at the same young-animal prices (one set, as CAPRI)
+            qraw0, _ = rows_at(dP)
+            cross = qraw0[iM_] - s0[iM_]
             q = ca.fmax(qraw, 0.0)
             q[iM_] = ca.fmax(qraw0[iM_], 0.0)
             sup_milk[reg] = dict(mk, cross=cross)
         else:
-            qraw, res = rows_at(dP, True)
+            qraw, res = rows_at(dP)
             q = ca.fmax(qraw, 0.0)
         if res is not None:
             res_y.append(res)

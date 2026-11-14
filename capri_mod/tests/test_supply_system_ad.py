@@ -123,3 +123,31 @@ def test_the_supply_system_equals_supply_response_at_its_block_solutions(solved_
         else:
             # the random prices move the supply (the check is not between two constants)
             assert float((np.abs(ref - base) / np.maximum(np.abs(base), 1.0)).max()) > 0.05
+
+
+@pytest.mark.slow
+def test_the_market_solved_by_ipopt_is_the_fixed_points_equilibrium(solved_base, capsys):
+    """market.solver = "ipopt" (capri_mod/market/market_ipopt.py): from the solved base, a supply change (+5% soft
+    wheat everywhere) solved by IPOPT and by the fixed point gives the same prices; the fixed point confirms IPOPT's
+    solution in its first evaluation."""
+    import pickle
+    from capri_mod.settings import override
+    mm, exo = solved_base
+    exo2 = exo.copy()
+    exo2["SWHE"] = exo2["SWHE"] * 1.05
+    m_fp, m_ip = pickle.loads(pickle.dumps(mm)), pickle.loads(pickle.dumps(mm))
+    e_fp = m_fp.solve(exogenous_supply=exo2)
+    with override({"market.solver": "ipopt"}):
+        e_ip = m_ip.solve(exogenous_supply=exo2)
+    out = capsys.readouterr().out
+    assert "market solve by IPOPT: Solve_Succeeded" in out
+    assert e_fp.converged and e_ip.converged
+    assert e_ip.iterations <= 2 < e_fp.iterations, (e_ip.iterations, e_fp.iterations)
+    a, b = m_fp.sv.bilat_last_r, m_ip.sv.bilat_last_r.reindex(index=m_fp.sv.bilat_last_r.index,
+                                                              columns=m_fp.sv.bilat_last_r.columns)
+    cols = list(m_fp.par.bilat)
+    d = (np.abs(a[cols] - b[cols]) / np.maximum(np.abs(a[cols]), 1e-3)).to_numpy().max()
+    assert d <= 1e-5, d
+    r0 = mm.sv.bilat_last_r.reindex(index=a.index, columns=a.columns)
+    assert float((np.abs(a[cols] - r0[cols]) / np.maximum(np.abs(r0[cols]), 1e-3)).to_numpy().max()) > 1e-3
+
