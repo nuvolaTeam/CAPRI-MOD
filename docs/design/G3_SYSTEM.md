@@ -65,8 +65,36 @@ milk prices of the previous evaluation (a lag). At the captured solutions, solvi
 prices moves the rents by at most 5.4e-7 EUR/ha and FEDE by at most 5.3e-10 (ratio): at the default solve's
 equilibria the lag is spent, and the block holds as one simultaneous system.
 
-The rows the market's own blocks set (crushing, dairy, biofuels, by-products) and the young-animal and raw milk
-markets are next.
+### G3.2c, the young-animal markets and the raw milk (tools/check/g3_supply_residuals.py, the "yani" columns)
+
+CAPRI's yaniMarket_ of each EU market region (supply_ad.yani_function: net + H_YP dP + H_YY dr + H_YM dL = ref) at the
+captured solutions, with the young-animal prices the market cleared and the member states' final milk prices. The
+default solve clears the young-animal markets and the member states' raw milk in alternating rounds
+(`_milk_and_yani_clear_all`): each round clears the young animals at the previous round's milk prices, then solves the
+dairy blocks with the milk supply at the new young-animal prices; it stops when the milk prices change by less than
+1e-10 or after 4 rounds. The raw milk balances therefore hold at the final prices by construction (the last dairy solve
+uses the last young-animal prices), and the young-animal markets hold up to the last round's milk price change:
+at the 12 captured solves of the mini-EU Farm-to-Fork the young-animal markets are cleared in the last 7 (no
+young-animal market to check in the first 5: no young-animal state or Hessian block there), and their largest residual,
+relative to the good's net supply, falls from 8.0e-7 (EU_EAST calves, the first of them) to 1.7e-9 (EU_EAST lambs, the
+last) as the milk prices' change between rounds shrinks; EU_WEST from 4.4e-8 to 5.0e-12.
+In G3 both are equations of one system and hold together; in the default solve the 4-round cap could be lifted at
+little cost (each round is one linear solve per region and one dairy solve), which would bring it closer to CAPRI's
+joint solution. Not changed: it moves results, so it waits for a validation pair.
+
+### G3.2c, the rows the market's own blocks set: crushing, dairy products, biofuels, feed by-products
+
+Each is an explicit function of the evaluation's current prices, with no lag: the crushing (ProcO_, procYield_) at
+ev.crush_prices_now, set by the evaluation before the supply response; the dairy blocks at ev.bilat_ratio_now, the
+evaluation's own price ratios (the docstring of `_dairy_eu_prices` said "lagged within an outer iteration", which no
+longer held with the bilateral market; corrected); the biofuel blocks inside the demand response; the feed by-products
+(MaprFeed_) from that same demand response's food and biofuel ratios (`_apply_feed_byproduct_supply`, after the
+demand). In the assembled system they enter as defined quantities of the prices: no residual to check beyond their
+own CasADi functions (G2b-G2g, each tested against the code it replaced).
+
+Summary of the default solve's fixed points at its equilibria: the land and FEDE milk price lag is spent (5.4e-7
+EUR/ha, 5.3e-10); the young-animal markets carry the 4-round cap's residual above; everything else holds within the
+solve's tolerance or exactly.
 
 ### Next: the rest of the supply side (G3.2c), as MarketModule.supply_response composes it today
 
@@ -88,7 +116,8 @@ CasADi function already, G2b-G2g, called on numbers today; G3 calls them on the 
 The order of work: (1) the EU blocks' Hessian rows and the non-EU ProdNQ_ rows (most rows, linear in the unknowns);
 (2) the land and FEDE block (land_residual_function, fedebal_function) as unknowns; (3) the dairy blocks and raw
 milk; (4) the young-animal markets (yani_function); (5) crushing, biofuels, by-products. Each step checked at a
-captured solution (G3.1): the block's rows equal the default solve's supply there.
+captured solution (G3.1): the block's rows equal the default solve's supply there. Done for (1)-(5) on 14 November
+2026 (the sections above).
 
 ### Then
 

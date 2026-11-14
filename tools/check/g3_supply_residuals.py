@@ -107,6 +107,51 @@ def noneu_rows_expression(mm, reg, cols, r):
     return list(rows), q, q0 > 0
 
 
+def yani_residuals(mm, reg, cols, r):
+    """CAPRI's yaniMarket_ of an EU market region at the solution (supply_ad.yani_function): net + H_YP dP + H_YY dr +
+    H_YM dL - ref, with the young-animal prices the market cleared, the products' price change against those the
+    supply models saw and the member states' milk price change (the default solve's alternating rounds with the raw
+    milk end at a change below 1e-10 or after 4 rounds); relative to the goods' production scale as the outer loop's
+    test. Returns (largest, good) or None."""
+    H = (mm.par.supply_hessian or {}).get("blocks", {}).get(reg)
+    st = (mm.seen.yani_state or {}).get(reg)
+    if H is None or not st:
+        return None
+    goods = [g for g in st["goods"] if ("YANI:" + g) in H.index and ("YANI:" + g) in H.columns]
+    if not goods:
+        return None
+    yi = ["YANI:" + g for g in goods]
+    seen_all = mm.seen.eu_price_seen
+    seen = (seen_all.loc[reg] if hasattr(seen_all, "loc") and hasattr(seen_all, "index") and reg in seen_all.index
+            and hasattr(seen_all, "columns") else seen_all)
+    sv = (np.maximum(np.nan_to_num(seen.reindex(cols).to_numpy(dtype=float), nan=1.0), 0.2)
+          if seen is not None else np.ones(len(cols)))
+    for j, c in enumerate(cols):
+        if c in mm.EU_MARKET_SUPPLY:
+            sv[j] = 1.0
+    rr = np.maximum(np.nan_to_num(r.loc[reg, cols].to_numpy(dtype=float), nan=1.0), 1e-6)
+    dP = mm._nq_price_change(rr - sv, cols)
+    now = (mm.ev.yani_market_now or {}).get(reg) or {}
+    dr = np.array([float(now.get(g, st["seen"][g])) - float(st["seen"][g]) for g in goods])
+    net = np.array([float(st["net"][g]) for g in goods])
+    ref = np.array([float(st["ref"][g]) for g in goods])
+    H_YP = H.reindex(index=yi, columns=cols).fillna(0.0).to_numpy(dtype=float)
+    H_YY = H.reindex(index=yi, columns=yi).fillna(0.0).to_numpy(dtype=float)
+    res = net + H_YP @ dP + H_YY @ dr - ref
+    xs = (getattr(mm, "_hess_cache", None) or {}).get(reg, (None, []))[1]
+    mt = mm._milk_terms(cols, list(xs), H, reg) if xs else None
+    dl = mm.ev.dairy_last
+    if mt is not None and dl is not None and len(mt["goods"]):
+        dL = np.array([float(dl["ms_price_ratio"][m]["MILK"]) - float(mm.seen.milk_seen_ms.get(m, 1.0))
+                       for m in mt["ms"]])
+        ey = mt["colY"] @ dL
+        res = res + np.array([float(ey[mt["goods"].index(g)]) if g in mt["goods"] else 0.0 for g in goods])
+    scale = np.array([max(abs(float(net[i])), 1.0) for i in range(len(goods))])
+    rel = np.abs(res) / scale
+    k = int(np.argmax(rel))
+    return float(rel[k]), goods[k]
+
+
 def check(path: Path) -> dict:
     from replay_market import load_module
     from capri_mod.settings import override
@@ -138,6 +183,10 @@ def check(path: Path) -> dict:
         rel = np.abs(got - want) / np.maximum(np.abs(got), 1.0)
         k = int(np.argmax(rel))
         out[reg] = (float(rel[k]), xs[keep[k]], len(keep))
+    for reg in mm.EU:
+        y = yani_residuals(mm, reg, cols, r)
+        if y is not None:
+            out["yani " + reg] = (y[0], y[1], 0)
     # the non-EU market regions (Norway's supply-model products are its models'; biofuels and DDGS set later)
     sup = set(getattr(mm, "SUP", ()))
     for reg in (mm._noneu_nq_params() or {}):
@@ -164,9 +213,11 @@ def main() -> None:
     for f in files:
         res = check(f)
         eu = {k: v for k, v in res.items() if k in ("EU_WEST", "EU_EAST")}
-        ne = {k: v for k, v in res.items() if k not in eu}
+        ya = {k: v for k, v in res.items() if k.startswith("yani ")}
+        ne = {k: v for k, v in res.items() if k not in eu and k not in ya}
         w = max(ne.items(), key=lambda kv: kv[1][0]) if ne else None
         print(f"{f.name}: " + "; ".join(f"{reg} largest {v[0]:.2e} ({v[1]}) over {v[2]} rows" for reg, v in eu.items())
+              + "".join(f"; {k}: {v[0]:.2e} ({v[1]})" for k, v in ya.items())
               + (f"; non-EU: {len(ne)} regions, {sum(v[2] for v in ne.values())} rows, largest {w[1][0]:.2e} "
                  f"({w[0]}, {w[1][1]})" if w else ""), flush=True)
 

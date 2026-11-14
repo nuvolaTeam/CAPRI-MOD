@@ -409,9 +409,9 @@ class DairyMixin(MarketStateMixin):
         return fi * (pb / rho) ** sg
 
     def _dairy_eu_prices(self, world_prices) -> Dict[str, float]:
-        """EU prices of the traded dairy products relative to base, as the dairy block sees them: the
-        wedge price x the current EU Armington premium (lagged within an outer iteration). With two EU market
-        regions (bilateral market): {region: {product: ratio}}; 1 before the market's first evaluation."""
+        """EU prices of the traded dairy products relative to base, as the dairy block sees them: the current
+        evaluation's producer price ratios of each EU market region (ev.bilat_ratio_now, set by the evaluation before
+        the supply response), {region: {product: ratio}}; 1 before the market's first evaluation."""
         d0 = getattr(self, "_dom0_cache", None)
         if d0 is None:
             d0 = self.domestic_prices(self.world_prices_base)

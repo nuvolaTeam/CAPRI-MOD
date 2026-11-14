@@ -66,7 +66,8 @@ step clip market.step_clip. One outer step:
 Inner fixed points and lags G3 replaces by one simultaneous system: (a) the commodity-by-commodity trade solves on
 local elasticities (cross-commodity effects only through the outer step); (b) the land-FEDE rounds; (c) FeedBal_ on
 the previous evaluation's milk price (also DEP-29 for Norway); (d) the young-animal / raw-milk rounds; (e) the dairy
-blocks' Newton step; (f) the TRQ sigmoid when trq_joint is off. luc_market is solved after the market solve (DEP-44,
+blocks' Newton step; (f) the TRQ sigmoid when trq_joint is off. At the default solve's equilibria (G3_SYSTEM.md, G3.2c): (b) and (c) leave at most 5.4e-7 EUR/ha and 5.3e-10; (d) leaves the
+young-animal markets within 8.0e-7 of their net supply (the 4-round cap). luc_market is solved after the market solve (DEP-44,
 equivalent without lulucf_market).
 
 The glue (pandas, to become index maps in G3.2): `_bilateral_eval`'s frames (r, PAr, dom0, world), `supply_response`
