@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (26)
+## Open (30)
 
 | # | Issue | Status |
 |---|---|---|
@@ -37,10 +37,12 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K131](#k131) | Given CAPRI's own Green Deal supply, the market's EU prices follow CAPRI's within 0.3 points on average, but the dairy protein products rise 2-5 points more and butter 1 point less | open (12 November 2026): not yet traced |
 | [K138](#k138) | CAPRI's new energy crops (NECR, 251 kha of the EU's 2030 crop area) are not a model activity | open (13 November 2026) |
 | [K139](#k139) | PL340000 converts all its forest to farmland in the Green Deal 2030 run (crop area +45% against CAPRI's -2%) | open (13 November 2026) |
-| [K140](#k140) | P2c, the rural development port: 286 of 20,098 effective RD premiums differ from CAPRI's 2030 reference (Praha's rates, Ile-de-France's inherited LFA cut, Sweden's technology-differentiated extensification measure) | open (13 November 2026); the port not yet used by the model |
+| [K140](#k140) | P2c, the rural development port: 286 of 20,098 effective RD premiums differ from CAPRI's 2030 reference (Praha's rates, Ile-de-France's inherited LFA cut, Sweden's technology-differentiated extensification measure) | open (13 November 2026); in the model's 2030 premiums since P2 step 2 |
 | [K142](#k142) | P2c, the BPS key (the MTR port): Croatia's key not found in CAPRI's chain (a uniform IUV used); sim_ini's NA sheep rates of 2002 taken as absent; France's Corsica 5% below CAPRI's 2030 BPS rate | open (13 November 2026) |
 | [K143](#k143) | A regional premium factor on animals compounded at every solve (livestock_premium_coef not restored) | fixed (13 November 2026) |
 | [K144](#k144) | CAPRI bug: Norway's output payments (DPNOR6, DPNOR7) pay nothing in the simulation year (policy.gms l. 97 reads the yields at the year's column) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it |
+| [K145](#k145) | The 2030 premium of wine (WINE) was never set from CAPRI's 2030 TWIN: the model kept the 2017 premium in 2030 | fixed (13 November 2026) |
+| [K146](#k146) | Switzerland's market supply responded to its market prices as if its producer prices carried no support per tonne (CAPRI's PPri_ adds PSEd): its price terms too large by PPRI0 / (PPRI0 - PSEd), soya 1.83 times | fixed (13 November 2026) |
 
 ## Resolved (115)
 
@@ -760,7 +762,7 @@ CAPRI optimises its replacement heifers (HEIR) and its calf activities (CAMF, CA
 
 - **Effect:** the model's default leaves them off (`RegionalSupplyModel.use_cattle_member_splits = False`; pooled young-animal markets and the animals' herd terms of the intensity pairs, the validated state of r86 / r87); with them on, results are not usable
 - **In 9t:** –
-- **Status:** **open**, narrowed 23 October 2026 (night). The price update now takes each region's response from its solved NLP (`CapriRegionalNLP.response`: the implicit-function theorem on the KKT conditions, in the active rows' null space; `RegionalSupplyModel._yani_response`), on by default with the member splits. Checked: against finite differences on FRH0 the cattle goods' own responses agree within 1% (piglets within 20%); a price change reaches the regional objective as predicted. On 12 regions the markets reached 0.005 in 8 iterations (PMP terms: 0.016 after 8). The full Farm-to-Fork run (r96) still did not converge: the male calves' price rose to 6.1 x base and the female calves' fell below zero (-0.37) before the imbalance swung back up (0.03 -> 0.21). Under Farm-to-Fork the EU is short of male calves (fewer dairy births, fattening barely lower) and the calf activities hit their zero bounds, so the response nearly vanishes and the sexes' prices run apart. Next: compare the per-sex calf use and its flexibility with CAPRI (the calf activities' own PMP terms, CAPRI's per-sex young-animal prices in its Farm-to-Fork results, tools/gams/export_capmod_results.gms) before judging whether such prices are CAPRI's equilibrium or a defect here. Off by default. **Deferred, 23 October 2026**: CAPRI's own per-sex Farm-to-Fork results, needed to judge the prices, do not exist on the project lead's installation; it stays a DEPARTURE from CAPRI's setting (docs/DEPARTURES_FROM_CAPRI.md) until the divergence is understood from the model itself (the calf activities at their zero bounds). **13 November 2026**: the project lead agrees to bring the replacement heifers, the calves and the per-sex young-animal markets to CAPRI's setting where possible; scheduled after P2. Retried the same evening on CAPRI's own path, which did not exist when r89-r96 ran (22-23 October): since K75 (24 October) the young-animal markets clear inside the market model (yaniMarket_ with the market supply Hessian's young-animal rows, measured per good: the per-sex table holds CAPRI's seven goods YCAM, YCAF, YBUL, YHEI, YCOW, YPIG, YLAM), the outer loop passing the prices on as the products'. Mini-EU Farm-to-Fork with supply.use_cattle_member_splits (mini_k65_splits): converged in 14 iterations (7 with the pooled goods), young-animal imbalance 0.0033 (tolerance 0.005); EU_WEST female calves 1.55 x base, male 1.19 (pooled 1.34), young heifers 1.10, bulls 1.03; the Farm-to-Fork indicators within 0.4 point of the pooled run. Full-EU Farm-to-Fork and Green Deal runs next.
+- **Status:** **open**, narrowed 23 October 2026 (night). The price update now takes each region's response from its solved NLP (`CapriRegionalNLP.response`: the implicit-function theorem on the KKT conditions, in the active rows' null space; `RegionalSupplyModel._yani_response`), on by default with the member splits. Checked: against finite differences on FRH0 the cattle goods' own responses agree within 1% (piglets within 20%); a price change reaches the regional objective as predicted. On 12 regions the markets reached 0.005 in 8 iterations (PMP terms: 0.016 after 8). The full Farm-to-Fork run (r96) still did not converge: the male calves' price rose to 6.1 x base and the female calves' fell below zero (-0.37) before the imbalance swung back up (0.03 -> 0.21). Under Farm-to-Fork the EU is short of male calves (fewer dairy births, fattening barely lower) and the calf activities hit their zero bounds, so the response nearly vanishes and the sexes' prices run apart. Next: compare the per-sex calf use and its flexibility with CAPRI (the calf activities' own PMP terms, CAPRI's per-sex young-animal prices in its Farm-to-Fork results, tools/gams/export_capmod_results.gms) before judging whether such prices are CAPRI's equilibrium or a defect here. Off by default. **Deferred, 23 October 2026**: CAPRI's own per-sex Farm-to-Fork results, needed to judge the prices, do not exist on the project lead's installation; it stays a DEPARTURE from CAPRI's setting (docs/DEPARTURES_FROM_CAPRI.md) until the divergence is understood from the model itself (the calf activities at their zero bounds). **13 November 2026**: the project lead agrees to bring the replacement heifers, the calves and the per-sex young-animal markets to CAPRI's setting where possible; scheduled after P2. Retried the same evening on CAPRI's own path, which did not exist when r89-r96 ran (22-23 October): since K75 (24 October) the young-animal markets clear inside the market model (yaniMarket_ with the market supply Hessian's young-animal rows, measured per good: the per-sex table holds CAPRI's seven goods YCAM, YCAF, YBUL, YHEI, YCOW, YPIG, YLAM), the outer loop passing the prices on as the products'. Mini-EU Farm-to-Fork with supply.use_cattle_member_splits (mini_k65_splits): converged in 14 iterations (7 with the pooled goods), young-animal imbalance 0.0033 (tolerance 0.005); EU_WEST female calves 1.55 x base, male 1.19 (pooled 1.34), young heifers 1.10, bulls 1.03; the Farm-to-Fork indicators within 0.4 point of the pooled run. Full-EU Farm-to-Fork (full_f2f_k65, 13 November 2026, evening; not saved): the market supply Hessian measured in 2,157 s (1,882 without the splits); CAPRI's stop rule on prices and quantities met from iteration 15 (largest change then 0.002%), the market balances within 5e-9, but the young-animal imbalance fell by a near-constant 2.9% per iteration (0.111 at the first scenario iteration, 0.022 at the 6th, 0.0096 at the 28th, 0.0051 at the 49th) and the run reached its 7,180 s limit in iteration 50, just above the tolerance. So the splits converge on the full EU, but about 35 iterations after the prices and quantities have settled (14 iterations without them). Next: which good and market lag (the young-animal detail per iteration on the mini-EU run), and why the market's clearing corrects only 3% of the imbalance per step (a price at its bound, or the market's young-animal response far above the supply models'). The default stays off.
 
 <a id="k66"></a>
 ### K66: Farmland expands under the per-hectare N target more than in CAPRI (found 23 October 2026)
@@ -2900,8 +2902,10 @@ CAP_2014_2020.gms l. 77 does, the effective premiums PRME at 19,812 of 20,098 re
   technology shares (prmcut's p_technFactMod), which the check leaves at 50/50.
 - 16 records just above 1e-4 (BG030000's AE6: 4.2292 against 4.2296).
 
-- **Effect:** none on the model yet (its premiums are still cap_premium_activity.csv); in the integration, these regions'
-  RD premiums
+- **Effect:** since P2 step 2 (13 November 2026, tools/build/build_price_trajectory_2030.py: the 2030 premiums from
+  the ports in place of CAPRI's reference rows) these points are in the model's 2030 premiums: Praha's crop premiums
+  2 to 18 times CAPRI's (11.7 of Czechia's 3,893 thousand ha), Ile-de-France's about 3% above, Sweden's fallow 4-9%
+  above; elsewhere the ported premiums are CAPRI's within 1% (crops) and 1.5% (the livestock ratios)
 - **In 9t:** –
 - **Status:** open (the technology shares come with the integration, step <= 10 on the solved levels)
 
@@ -2986,3 +2990,38 @@ cells exact). With the yields at "Y" Norway's dairy cows would get about 40% mor
 - **Status:** closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it by the project lead's decision ("for
   the moment keep capri and sign the fact, like you did with k141"); reading the yields at "Y" would be a departure,
   not offered as a setting
+
+### K145: The 2030 premium of wine was left at 2017 (found and fixed 13 November 2026)
+
+tools/build/build_price_trajectory_2030.py writes the 2030 premiums per model region from CAPRI's 2030 PRME by
+activity; the model's crops that carry another CAPRI code took it from a map that held only CORN -> MAIZ. The model's
+wine activity (WINE, CAPRI's TWIN) therefore had no 2030 value in capri_cap_premium_2030.csv, and
+capri_mod/projection/prices.py, which keeps the 2017 premium where 2030 has none, left the 2017 premium in the 2030
+baseline at the 155 model regions where CAPRI's 2030 reference has one (Anatoliki Makedonia, EL110000: 637.7 EUR/ha kept against CAPRI's 2030 536.4,
+419.95 in 2017 money). The map is now read from codes/model_activities.csv (the crops with a single CAPRI code:
+CORN -> MAIZ, WINE -> TWIN).
+
+- **Effect:** the 2030 wine premium falls to CAPRI's (in 2017 money); wine's 2030 levels and the regions' premium
+  totals move with it
+- **In 9t:** -
+- **Status:** fixed (13 November 2026)
+
+### K146: Switzerland's supply terms without its support per tonne (found and fixed 13 November 2026)
+
+CAPRI's producer price is the market price times the producer price margin plus the support per tonne (PPri_,
+arm/market_model.gms l. 3046-3060: PSEi + PSEd + AREP x (1 - DECP), fixed in a simulation), so a market price change
+moves the producer price by (PPRI0 - support) x (ratio - 1), not PPRI0 x (ratio - 1). CAPRI's 2030 market data
+(data_market_1730defaulta.csv, Data_CAL) carry support only for Switzerland: PSEd on 25 items (soya 234 EUR/t of a
+516 producer price, pulses 160 of 614, sugar 113 of 573, beef 1,056 of 9,822; land 1,116 EUR/ha).
+tools/build/build_noneu_market_supply_nq.py stated that none of the non-EU regions had any and wrote every term as
+h x PPRI0 / INPE, so Switzerland's supply terms in 22 product prices (528 terms) were too large by PPRI0 /
+(PPRI0 - PSEd): soya x1.83, pulses x1.35, sugar x1.25, sunflower and rape x1.17, beef x1.12, sheep and goat meat
+x1.11, cereals x1.05-1.11. The rents (rent = producer price + PSEd: the change form drops it), raw milk (the dairy
+block's own price; "for MILK there is no PPRI_ equ", l. 1094) and FEDE were right. Found in G3.0 (the inventory
+refresh, docs/design/G3_MARKET_INVENTORY.md). The builder now writes support_y and h_ratio = h x (PPRI0 - support) /
+INPE; CAPRI's p_elasSupp is still reproduced at the producer price (1.35e-14).
+
+- **Effect:** Switzerland's market supply responds less to its product prices, as in CAPRI
+- **In 9t:** -
+- **Status:** fixed (13 November 2026); test_market_layers.py
+  test_switzerlands_supply_terms_take_its_support_per_tonne_off_the_producer_price

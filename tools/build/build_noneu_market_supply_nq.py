@@ -4,11 +4,16 @@ normalised-quadratic supply of every non-EU CAPRI market region, own and cross-p
 
 ProdNQ_: v_prodQuant(RMS, x) = p_cnstNQSupp + sum_y p_hessNQSupp(RMS, x, y) x v_prodPrice(RMS, y) / v_prodPrice(RMS,
 "INPE") (+ the feed-bulk price terms, which CAPRI's 2030 Hessian does not carry for any region). The change from the
-calibration point is sum_y h_xy x (the change of y's producer price) / INPE. The producer price moves with the market
-price by CAPRI's relative margin (PPri_, l. 3046-3060; the support items PSEi, PSEd, AREP are not in CAPRI's 2030
-calibration data for these regions, so the margin is the whole price), so the change of y's producer price is
-PPRI0_y x (y's price ratio - 1) and each term is written as h_xy x PPRI0_y / INPE: kt per unit change of y's price
-ratio, the form of the EU's other oils and fish (build_eu_market_supply_nq.py) and of the market supply Hessian.
+calibration point is sum_y h_xy x (the change of y's producer price) / INPE. The producer price is the market price
+times CAPRI's relative margin plus the support per tonne (PPri_, l. 3046-3060: PSEi + PSEd + AREP x (1 - DECP), all
+fixed in a simulation), so the change of y's producer price is (PPRI0_y - support_y) x (y's market price ratio - 1)
+and each term is written as h_xy x (PPRI0_y - support_y) / INPE: kt per unit change of y's market price ratio, the
+form of the EU's other oils and fish (build_eu_market_supply_nq.py) and of the market supply Hessian. CAPRI's 2030
+market data carry support only for Switzerland (PSEd on 25 products at CAL); until 13 November 2026 the builder
+took none (K146), so Switzerland's terms were too large by PPRI0 / (PPRI0 - PSEd), soya's 1.83 times. The rent
+columns (TCRP, FODFAL, FRUN) are the land's change itself (rent = producer price + PSEd, rentFromProdpriceLand_),
+raw milk's price is the dairy block's own (ProcMargM_: "for MILK there is no PPRI_ equ", l. 1094) and FEDE the feed
+energy balance's: no support taken off there.
 INPE is the price of the non-agricultural good in 2030 (1.2772 in every region, CAPRI's 2030 market dump, as
 build_eu_market_supply_nq.py takes it); it does not move in a simulation.
 
@@ -121,8 +126,13 @@ def main():
     ep = re.compile(r"^'([^']*)'\.'([^']*)'\.'([^']*)'\.'CAL'\s+(\S+)")
     elas = {(r, x, y): num(v) for r, x, y, v in read_param(ELAS, "p_elasSupp", ep, lambda m: m.group(1) in noneu)}
     stored = {(r, x, y) for r, x, y, _ in read_param(ELAS, "p_hessNQSupp", ep, lambda m: m.group(1) in noneu)}
-    dp = re.compile(r"^'([^']*)'\.'(PPRI|PROD)'\.'([^']*)'\.'CAL'\s+(\S+)")
-    data = {(r, it, p): num(v) for r, it, p, v in read_param(DATA, "Data_CAL", dp, lambda m: m.group(1) in noneu)}
+    dp = re.compile(r"^'([^']*)'\.'(PPRI|PROD|PSEI|PSED|AREP|DECP)'\.'([^']*)'\.'CAL'\s+(\S+)", re.I)
+    data = {(r, it.upper(), p): num(v) for r, it, p, v in read_param(DATA, "Data_CAL", dp, lambda m: m.group(1) in noneu)}
+
+    def support(r, y):
+        """CAPRI's support per tonne in the producer price (PPri_): PSEi + PSEd + AREP x (1 - DECP)."""
+        return (data.get((r, "PSEI", y), 0.0) + data.get((r, "PSED", y), 0.0)
+                + data.get((r, "AREP", y), 0.0) * (1.0 - data.get((r, "DECP", y), 0.0)))
     inpe = {}
     p3 = re.compile(r"^'([^']+)'\.''\.'PPRI'\.'INPE'\.'2030'\s+(\S+)")
     with open(DUMP, encoding="latin-1") as fh:
@@ -148,20 +158,21 @@ def main():
             # a price CAPRI's calibration data does not carry for the region (FEDE: the feed energy balance's
             # shadow price; young animals priced at RM level): such a column is held, its term not usable
             held[y] += 0.0
-            rows.append((model_region(rm_of[r]), r, to_model[x], "", x, y, h, 0.0, inpe[r], 0.0))
+            rows.append((model_region(rm_of[r]), r, to_model[x], "", x, y, h, 0.0, 0.0, inpe[r], 0.0))
             continue
         ym = to_model.get(y, "") if y != "FEDE" else "FEDE"
         if x in LAND:
             # the land rows are input demands: CAPRI turns their sign on loading (arm/market1.gms l. 593, supremaMrk on;
             # the Hessian's rows were netputs in the elasticity calibration), after making the Hessian symmetric
             h = -h
-        rows.append((model_region(rm_of[r]), r, to_model[x], ym, x, y, h, p, inpe[r], h * p / inpe[r]))
+        sp = support(r, y) if (y not in LAND and y not in ("FEDE", "MILK")) else 0.0
+        rows.append((model_region(rm_of[r]), r, to_model[x], ym, x, y, h, p, sp, inpe[r], h * (p - sp) / inpe[r]))
         if not ym:
-            held[y] += abs(h * p / inpe[r])
+            held[y] += abs(h * (p - sp) / inpe[r])
     if missing:
         raise SystemExit(f"no CAPRI 2030 INPE for {sorted(missing)[:10]}")
-    out = pd.DataFrame(rows, columns=["trade_region", "rms", "x", "y", "capri_x", "capri_y", "h", "ppri_y", "inpe",
-                                      "h_ratio"]).sort_values(["trade_region", "rms", "x", "capri_y"])
+    out = pd.DataFrame(rows, columns=["trade_region", "rms", "x", "y", "capri_x", "capri_y", "h", "ppri_y", "support_y",
+                                      "inpe", "h_ratio"]).sort_values(["trade_region", "rms", "x", "capri_y"])
     to_csv(out, OUT, index=False)
 
     # checks: the terms give CAPRI's p_elasSupp at the calibration point (h x PPRI_y / INPE / PROD_x, CAPRI's elasticity definition)
@@ -174,7 +185,7 @@ def main():
         if e is None or not q > 0 or not t.ppri_y:
             continue
         n += 1
-        worst = max(worst, abs(t.h_ratio / q - e) / max(abs(e), 1e-3))
+        worst = max(worst, abs(t.h * t.ppri_y / t.inpe / q - e) / max(abs(e), 1e-3))   # at the producer price
     used = out[out.y != ""]
     print(f"wrote {OUT.relative_to(ROOT)}: {len(out)} terms, {out.rms.nunique()} CAPRI regions, "
           f"{out.trade_region.nunique()} trade regions; {len(used)} on model prices "

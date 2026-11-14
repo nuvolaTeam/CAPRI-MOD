@@ -1718,7 +1718,7 @@
    "domain": "market",
    "status": "live",
    "rows": 49209,
-   "columns": 10,
+   "columns": 11,
    "units": "U_1000tPerEuPerTonOverINPE, U_1000tPerPriceRatio, U_1unit, U_EuPerTon",
    "read_by_model": [
     "capri_mod/market/feed.py",

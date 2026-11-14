@@ -298,3 +298,18 @@ def test_feed_bulks_respond_inside_the_market_as_capris_feedblk():
     assert q1[c0] < q0[c0]
     with override({"market.feed_bulk_in_market": False}):
         assert m.feed_bulk_market_factor({"SWHE": 1.1}) == {}
+
+
+def test_switzerlands_supply_terms_take_its_support_per_tonne_off_the_producer_price():
+    """K146: CAPRI's producer price is the market price times the margin plus the support per tonne (PPri_, PSEd for
+    Switzerland only in the 2030 data), so a supply term per unit change of the market price ratio is
+    h x (PPRI0 - support) / INPE; the rents, raw milk (the dairy block's price) and the other regions take none."""
+    from capri_mod.csvio import read_csv
+    t = read_csv("capri_data/2017/market/noneu_market_supply_nq.csv", keep_default_na=False)
+    assert set(t[t.support_y > 0].rms) == {"CH"}
+    soya = t[(t.rms == "CH") & (t.capri_x == "SOYA") & (t.capri_y == "SOYA")].iloc[0]
+    assert soya.support_y == pytest.approx(233.571428571429, rel=1e-12)          # Data_CAL 'CH'.'PSED'.'SOYA'
+    assert soya.h_ratio == pytest.approx(soya.h * (soya.ppri_y - soya.support_y) / soya.inpe, rel=1e-12)
+    assert (t[t.capri_y.isin(["MILK", "FEDE", "TCRP", "FODFAL", "FRUN"])].support_y == 0).all()
+    other = t[t.rms != "CH"]
+    assert (other.h_ratio - other.h * other.ppri_y / other.inpe).abs().max() < 1e-9

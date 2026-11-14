@@ -32,6 +32,40 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 13 November 2026, night — P2 step 2: the 2030 baseline premiums from the ports; K145 (wine), K146 (Switzerland's support per tonne); G3.0
+
+- P2 step 2 (tools/build/build_price_trajectory_2030.py, `_ported_premiums_2030`): the model's 2030 premiums
+  (capri_cap_premium_2030.csv, capri_livestock_premium_ratio_2030.csv) for every region the premium ports cover (the
+  EU's units and member states, capri_mod/policy/premiums.py at CAPRI's trend levels; Norway, norway.py) are the
+  ports' instead of CAPRI's 2030 reference rows, so no CAPRI result is a premium input there; the UK, the Western
+  Balkans and Turkey keep the reference's rows (not ported). The data base activities DCOW, BULF, HEIF take their
+  members' total premium per head of their herd on CAPREG's 2017 level (T30 H17 / (H30 L17), claude/
+  p2_integration_design.md). Against the files from the reference rows: crops equal within 1e-4 but 816 cells, 71
+  above 1%, all at K140's points (Praha x2 to x18 on 11.7 of Czechia's 3,893 kha, Ile-de-France +3%, Swedish fallow
+  +4-9%: now in the model, K140); livestock ratios 17 cells above 1% (11 Praha's, the others within 1.5%). Greece's
+  dairy cows (13 units) now have no 2030 premium, as in CAPRI's reference (levels, no PRME); before, the empty cell
+  kept the 2017 premium (63-72 EUR/head).
+- K145 (fixed): the 2030 wine premium was never set (the builder's column map held only CORN -> MAIZ, not WINE ->
+  TWIN), so the model kept the 2017 premium at 155 regions (EL110000 637.7 EUR/ha against CAPRI's 2030 536.4, 419.95
+  in 2017 money); the map is read from codes/model_activities.csv.
+- K146 (fixed, found in G3.0): CAPRI's producer price carries the support per tonne (PPri_: PSEi + PSEd + AREP
+  (1 - DECP)); its 2030 market data have it for Switzerland only, which build_noneu_market_supply_nq.py did not
+  take, so Switzerland's supply terms in 22 product prices (528 terms) were too large by PPRI0 / (PPRI0 - PSEd)
+  (soya x1.83, pulses x1.35, sugar x1.25, beef x1.12); the builder writes support_y and h_ratio = h (PPRI0 - support)
+  / INPE (raw milk, the rents and FEDE unaffected).
+- G3.0: docs/design/G3_MARKET_INVENTORY.md refreshed against the code (123 equations: 26 ported, 39 in another form,
+  2 departures, 1 to check, 39 not ported of which 32 inactive in 2030, 13 off, 2 not needed, 1 replaced), with the
+  default solve's inner fixed points and glue, and CAPRI's starting bounds and widen_bounds rules per variable family.
+- K65 (full-EU Farm-to-Fork with the cattle member splits, not saved): converges, but the young-animal imbalance
+  falls 2.9% per iteration; CAPRI's stop rule met at iteration 15, the young animals at 0.0051 in iteration 50 when
+  the run reached its time limit. The default stays off (KNOWN_ISSUES K65).
+- Checks: mini-EU Farm-to-Fork (20 units) before and after (mini_a, mini_b): converged in 7 iterations both, the
+  JRC121368 indicators equal to 0.1 point, the EU baseline levels equal (the baseline calibration absorbs the premium
+  changes), the scenario's levels within 0.001%; validate_data 0 violations; tests test_premium_baseline_2030.py,
+  test_market_layers.py (K146); the full suite passes (468 tests on this branch, with the test-suite review's changes
+  beneath it: 381 in two processes, the 69 that failed there for memory and for a folder missing in the test copy and
+  the 12 kept for serial runs one at a time).
+
 ## 13 November 2026 — P2: CAPRI's premium cut, policy.gms, the CAP 2014-2020 coupled and area schemes and the rural development payments (not yet used by the model)
 
 - capri_mod/policy/premium_cut.py: policy/prmcut.gms, the premiums a region is paid when a scheme's paid quantity or

@@ -17,6 +17,13 @@ and 2030 calibration points, capri_data/sources/raw/capri/capri_baseline/capri_m
 The reference run's 2030 output prices equal CAPRI's own calibrated 2030 baseline (p_uvagStore,
 results/baseline/data_uvag1730defaulta; capri_uvag_store_1730.parquet): ratio 1.000 for every traded product.
 
+P2 step 2 (13 November 2026): the 2030 PRME of the regions the premium ports cover (capri_mod/policy/premiums.py,
+the EU's units and member states at CAPRI's trend levels; norway.py) replace the reference's rows; an activity the
+ports give no premium has none (CAPRI's reference has none either: Greece's dairy cows, LEVL > 0 and no PRME). The
+data base activities DCOW, BULF and HEIF take their members' total premium on CAPREG's 2017 level (T30 H17 /
+(H30 L17), _ported_premiums_2030). The reference's rows remain for the regions the ports do not cover. The ports'
+open points against the reference: docs/KNOWN_ISSUES.md K140, K142.
+
 Sources: capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv and
 capri_marginal_terms_ref_2030.csv.xz (tools/build/extract_capri_marginal_terms.py); CAPRI 2017 results
 res_17<MS>.txt (national UVAG, regional PRME and LEVL).
@@ -55,6 +62,64 @@ def _load(path):
     spec = importlib.util.spec_from_file_location(path.stem, path)
     mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
     return mod
+
+
+def _ported_premiums_2030(p30: pd.DataFrame):
+    """CAPRI's 2030 premiums per activity unit from the ported premium module (capri_mod/policy/premiums.py at CAPRI's
+    trend levels: the EU's units and member states, level-weighted as aggreg_ppepay.gms; norway.py: Norway's units),
+    in place of the reference's rows for the regions they cover; and, for the data base activities (DCOW, BULF, HEIF,
+    codes/capri/DACT_TO_PACT.csv) of those regions, (T30, H30, H17): the members' total premium at the trend levels,
+    their herd at the trend levels and at the base (LEVL x DAYS / 365, sim_ini_21730's DATA "TRD"/"Y" and "BAS")."""
+    import csv as _csv
+    import gzip as _gz
+    sys.path.insert(0, str(ROOT))
+    from capri_mod.external_paths import REFERENCE
+    from capri_mod.policy import norway as _nw
+    from capri_mod.policy import premiums as _pm
+    trend = _pm.trend_levels()
+    prme = _pm.prme_table(2030, 2017)
+    for (u, a, _s), v in _nw.norway_premiums(2030).items():
+        prme[(u, a)] = prme.get((u, a), 0.0) + v
+    ported = sorted({r for r, _ in prme} & set(p30.index))
+    mpact = set(_read_csv(ROOT / "capri_data" / "codes" / "capri" / "MPACT.csv").code)
+    out = p30.copy()
+    for r in ported:
+        for a in out.columns:
+            if a in mpact:
+                v = prme.get((r, a))
+                out.at[r, a] = float(v) if v else float("nan")
+    # the data base activities' members and their days
+    d2p = _read_csv(ROOT / "capri_data" / "codes" / "capri" / "DACT_TO_PACT.csv")
+    members = defaultdict(list)
+    for a, m in zip(d2p.dact, d2p.pact):
+        members[str(a)].append(str(m))
+    aggs = [a for a in ("DCOW", "BULF", "HEIF") if a in members]
+    want = {m for a in aggs for m in members[a]}
+    units = {u for u, _ in trend}
+    D = {}
+    with _gz.open(REFERENCE / "simini" / "simini_21730" / "DATA.csv.gz", "rt") as f:
+        for r in _csv.DictReader(f):
+            if r["d0"] in units and r["d1"] in want and r["d2"] in ("LEVL", "DAYS", "PRME") and r["d3"] in ("BAS", "Y"):
+                D[(r["d0"], r["d1"], r["d2"], r["d3"])] = float(r["value"])
+    from capri_mod.data.definitions import capri_ms
+    herd = {}
+    for a in aggs:
+        acc = defaultdict(lambda: [0.0, 0.0, 0.0])
+        for u in sorted(units):
+            t30 = h30 = h17 = 0.0
+            for m in members[a]:
+                L30 = trend.get((u, m), 0.0)
+                t30 += float(prme.get((u, m), 0.0) or 0.0) * L30
+                h30 += L30 * D.get((u, m, "DAYS", "Y"), 0.0) / 365.0
+                h17 += D.get((u, m, "LEVL", "BAS"), 0.0) * D.get((u, m, "DAYS", "BAS"), 0.0) / 365.0
+            if h30 or h17:
+                for k in {u, capri_ms(u)}:              # a member state of one unit counted once
+                    x = acc[k]
+                    x[0] += t30; x[1] += h30; x[2] += h17
+        for k, (t30, h30, h17) in acc.items():
+            if k in ported:
+                herd[(k, a)] = (t30, h30, h17)
+    return out, herd
 
 
 def main() -> None:
@@ -111,6 +176,9 @@ def main() -> None:
 
     # --- premiums: 2030 PRME per unit (CAPRI regions and national rows) in 2017 money
     p30 = terms[terms["item"] == "PRME"].pivot_table(index="region", columns="activity", values="value")
+    # P2 step 2: the EU's and Norway's from the ported premium module at CAPRI's trend levels; the regions the ports
+    # do not cover (the UK, the Western Balkans, Turkey) keep CAPRI's reference
+    p30, herd = _ported_premiums_2030(p30)
     sys_path = str(ROOT)
     import sys; sys.path.insert(0, sys_path)
     from capri_mod.data.loaders import load_cap_premium, load_regional_animal_numbers  # the tables needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
@@ -122,7 +190,12 @@ def main() -> None:
     _sp_ = _ilu_.spec_from_file_location("_mr_", ROOT / "tools" / "lib" / "_model_regions.py")
     _mr_ = _ilu_.module_from_spec(_sp_); _sp_.loader.exec_module(_mr_)
     to_c8 = _mr_.region_to_capri()          # correspondence + NUTS splits and merges (tools/lib/_model_regions.py)
-    COLMAP = {"CORN": "MAIZ"}                         # cap_premium columns that use the model's code
+    # cap_premium columns that use the model's code: CAPRI's code from codes/model_activities.csv, crops mapped to one
+    # CAPRI activity (CORN -> MAIZ, WINE -> TWIN; K145: until 13 November 2026 only CORN, so WINE's 2030 premium was
+    # left empty and the model kept the 2017 premium)
+    _ma = _read_csv(ROOT / "capri_data" / "codes" / "model_activities.csv")
+    COLMAP = {str(c): str(k) for c, k, kind in zip(_ma.code, _ma.capri_codes, _ma.kind)
+              if kind == "crop" and ";" not in str(k) and str(k) != str(c)}
 
     def source(reg):
         """CAPRI region with 2030 premiums for a model region, else its national row."""
@@ -156,6 +229,12 @@ def main() -> None:
         for ca, ma in c2m.items():
             L = lv.get(ca, 0.0); a17 = p7.get(ca, 0.0)
             a30 = float(p30.at[src, ca]) if ca in p30.columns and pd.notna(p30.at[src, ca]) else None
+            if (src, ca) in herd:
+                # a data base activity of the ports' regions (DCOW, BULF, HEIF): its members' premium per head of
+                # their herd, on CAPREG's 2017 level of the activity (CAPRI's level of BULF moves with the members'
+                # herd, LEVL x DAYS / 365; claude/p2_integration_design.md): T30 H17 / (H30 L17)
+                t30, h30, h17 = herd[(src, ca)]
+                a30 = t30 * h17 / (h30 * L) if (h30 > 0 and L > 0) else None
             if L > 0 and a30 is not None:
                 num[ma] += L * a30 / df_; den[ma] += L * a17
         for ma in num:

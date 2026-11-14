@@ -768,7 +768,7 @@ class SupplyMixin(MarketStateMixin):
         """CAPRI's market supply functions of the non-EU market regions (arm/market_model.gms ProdNQ_; KNOWN_ISSUES
         K54-3; tools/build/build_noneu_market_supply_nq.py), summed over each trade region's CAPRI regions:
         {trade region: {"rows": {x: {y: h}}, "milk": {y: h}}}, h in kt per unit change of y's price ratio (CAPRI's
-        p_hessNQSupp x PPRI0_y / INPE). "rows": the market products' supply, y over the market products and raw milk;
+        p_hessNQSupp x (PPRI0_y - support_y) / INPE, the support per tonne of PPri_: Switzerland's PSEd, K146). "rows": the market products' supply, y over the market products and raw milk;
         "milk": per CAPRI region, the raw milk supply's terms in the other prices (its own term is the dairy block's).
         "fede": {CAPRI region: {x: h}} and "milk_fede": {CAPRI region: h}, the terms in the region's own feed energy
         price FEDE (CAPRI's FeedBal_, audit M3: one price per CAPRI region, so kept per region). Columns without a model

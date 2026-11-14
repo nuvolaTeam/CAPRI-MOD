@@ -29882,6 +29882,11 @@
      "not_null": true
     },
     {
+     "name": "support_y",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
      "name": "inpe",
      "type": "DOUBLE",
      "not_null": true
@@ -29938,6 +29943,7 @@
    ],
    "checks": [
     "(ppri_y >= 0)",
+    "((support_y = 0) OR ((support_y > 0) AND (support_y < ppri_y)))",
     "(inpe > 0)",
     "((ppri_y > 0) OR ((h_ratio = 0) AND (y IS NULL)))"
    ],
@@ -29952,7 +29958,7 @@
      "item": "h_ratio",
      "unit": "U_1000tPerPriceRatio",
      "status": "builder",
-     "basis": "h x ppri_y / inpe"
+     "basis": "h x (ppri_y - support_y) / inpe"
     },
     {
      "item": "inpe",
@@ -29965,6 +29971,12 @@
      "unit": "U_EuPerTon",
      "status": "capri",
      "basis": "CAPRI's PPRI (CAPRIunits: U_EuPerTon)"
+    },
+    {
+     "item": "support_y",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "CAPRI's support per tonne in the producer price (PPri_, arm/market_model.gms l. 3046-3060: PSEi + PSEd + AREP x (1 - DECP), Data_CAL); 0 for the rents, raw milk and FEDE (K146)"
     }
    ],
    "provenance": {
@@ -29983,7 +29995,8 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_capri.py"
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_market_layers.py"
     ]
    }
   },
@@ -56862,7 +56875,9 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_premium_baseline_2030.py"
+    ]
    }
   },
   "traj_capri_livestock_premium_ratio_2030": {
@@ -56999,7 +57014,9 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_premium_baseline_2030.py"
+    ]
    }
   },
   "traj_capri_price_ratios_2030": {
@@ -57102,7 +57119,9 @@
      "build_supplement_effects"
     ],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_premium_baseline_2030.py"
+    ]
    }
   },
   "traj_capri_ref_fodder_2030": {
