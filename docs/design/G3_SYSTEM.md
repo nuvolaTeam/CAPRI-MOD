@@ -39,6 +39,11 @@ not log-linear in the own price: in the assembled system they are unknowns defin
 the cross-commodity terms are exact. Equal to `BilateralCommodity.residual`, `flows` and `trq_arguments` within 3e-14
 on the 2030 market at random prices, sigmas, supply and use (capri_mod/tests/test_import_prices_ad.py).
 
+At the default solve's solutions (tools/check/g3_trade_residuals.py on the 12 captured solves of a mini-EU
+Farm-to-Fork, 14 November 2026): every bilateral commodity's balances hold within 1.1e-8 of the market's scale (S0 +
+D0; the default solve stops at market.tol 1e-7), the active quotas' equations within 8.8e-8. The trade system in
+CAPRI's form and the default solve agree at its equilibria; the residuals are the default solve's own tolerance.
+
 ### Next: the supply side (G3.2c), as MarketModule.supply_response composes it today
 
 Per row of the market's supply (region x commodity), the block that defines it, in supply_response's order (each a
