@@ -32,6 +32,38 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 14 November 2026, early morning — G3.2c-e and first G3.3 trials; the validation pair on today's dev
+
+- The validation pair on dev ffb8a0b (P2 step 2, K145, K146; the data identical to the later commits): the full-EU
+  Farm-to-Fork (full_f2f_s2) converged in 14 iterations as full_f2f_prem, every indicator within 1.0 point of it
+  (pork price +22.2 -> +21.2, beef price +31.8 -> +31.4, pigs -13.9 -> -13.5; mean absolute deviation from CAPRI's
+  JRC121368 figures 4.74 in both); the Green Deal 2030 (full_gd_s2) in 20 iterations (full_gd_prem 19), every
+  indicator within 0.1 point.
+- G3.2c checks at the default solve's solutions (12 captured solves of a mini-EU Farm-to-Fork): the EU and non-EU
+  supply rows reproduce exactly; the land / FEDE block's raw milk lag is spent there (5.4e-7 EUR/ha, 5.3e-10); the
+  young-animal markets keep the 4-round cap's residual (8.0e-7 of net supply at the first scenario solve, 1.7e-9 at
+  the last); crushing, the dairy products, biofuels and the residual feeds are functions of the evaluation's prices
+  (tools/check/g3_supply_residuals.py, g3_land_fede_residuals.py; a stale docstring in dairy.py corrected).
+- G3.2d: the equilibrium is a fixed point of one evaluation within 6e-11 there (g3_fixed_point.py); the use side as one
+  CasADi function (capri_mod/market/use_ad.py, with the EU's residual feeds' output), equal to demand_response within
+  1e-12.
+- G3.2c/e: the supply side as one CasADi function with the blocks the default solve solves inside each evaluation as
+  unknowns and equations (capri_mod/market/supply_system_ad.py: the young-animal prices, the member states' and the
+  other regions' dairy blocks; Norway, the K83 units, the member states' milk response); the market as one system
+  F(x) = 0 (capri_mod/market/market_system_ad.py; 3,166 unknowns and equations at the captures, every block within the
+  default solve's tolerances). Structure: 542 empty region-commodity balances; without them and with their prices
+  held, square with full structural rank, one strongly connected block of 2,621. The lifted form (CAPRI's: the
+  Armington ratios, supply and use as unknowns) is 0.27% dense against 32%.
+- G3.3 first trials (g3_newton_trial.py, g3_ipopt_trial.py): Newton from the previous solution reaches the default
+  solve's equilibrium (prices within 4e-9) in 2-3 steps at the last solve of a run, in 30 damped steps at the first
+  scenario solve (the quotas' steep sigmoids; CAPRI's own quota calibration raises their slope stepwise); IPOPT not yet
+  run to the end (MUMPS ran out of memory under the trial's limit).
+- Found: the default solve meets market.tol at its own last evaluation, but the non-EU land and FEDE blocks read the
+  previous evaluation's raw milk prices, so its balances re-evaluate above it (1.3e-7 on the base market); the
+  young-animal / raw milk rounds stop after 4; Norway's raw milk row takes the young-animal prices of a clearing
+  without the milk price change. Recorded in G3_SYSTEM.md; nothing of the default solve changed.
+- Tests (slow): test_use_ad.py, test_supply_system_ad.py.
+
 ## 14 November 2026 — G3.1 (capture and replay of the market solves) and G3.2a-b (import prices, trade system in CAPRI's form)
 
 - G3.1: `diagnostics.capture_market_dir` (off by default) writes every market solve (the market module's whole state
