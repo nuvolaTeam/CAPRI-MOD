@@ -271,6 +271,40 @@ form's (test_supply_system_ad.py).
   system before it: the market is calibrated inside that solve (`_bilateral_calibrate`), so G3 starts from a
   calibrated module.
 
+### G3.3, the solver comparison (14 November 2026; tools/check/g3_linsolve_trial.py, g3_ipopt_trial.py)
+
+The project lead: find the best solver; a commercial or academic solver with a licence the user obtains is acceptable,
+as CAPRI does with CONOPT. CONOPT itself is not used (no GAMS licence). Measured at the mini-EU Farm-to-Fork's
+captured solves (re-captured with K148/K149) and on the market at CAPRI's base supply rows, alone on this machine:
+
+| One factorisation and solve of the square Jacobian (10,409, 288,023 non-zeros, market_011) | Time |
+|---|---|
+| Intel MKL PARDISO (pypardiso 0.4.7, MKL 2026.2) | 1.16 s |
+| MUMPS (CasADi 3.8.2's) | 4.05 s |
+| SciPy SuperLU (COLAMD) | 9.13 s |
+| CSparse (CasADi's) | 115 s |
+
+| Method, linear solver | market_011 (the last solve) | market_005 (the first scenario solve) | Base market, +5% soft wheat |
+|---|---|---|---|
+| The fixed point (default) | 13.1 s | 43.6 s | 29 iterations |
+| Newton, PARDISO | 2 steps, 2.7 s | 22 steps, 36.0 s | stalls at 6.9e-3 (the soft wheat balance of EU_EAST, its quotas' sigmoids) |
+| Newton, MUMPS | 2 steps, 7.2 s | — | stalls the same |
+| Newton, SuperLU | 2 steps, 17.6 s | — | — |
+| IPOPT, MUMPS (METIS), L-BFGS | 2 iterations, 20.2 s | 25 iterations, 119 s | 16 iterations, about 93 s |
+| IPOPT, SPRAL (with OMP_CANCELLATION, OMP_PROC_BIND) | 2 iterations, 38.0 s | — | — |
+
+(Newton and IPOPT times exclude CasADi's set-up of the system and its derivatives, about 25-50 s per system: to be
+built once per run.) Not available here: HSL's MA57 / MA97 (licence; IPOPT 3.14 loads them at run time through
+ipopt.hsllib, so a user with the library can use them without a rebuild), IPOPT with MKL PARDISO (pardisomkl needs an
+IPOPT built against MKL; ipopt.pardisolib takes the Panua PARDISO library's interface, not MKL's).
+
+Choice (market.solver = "g3_newton", market.g3_linear_solver = "pardiso"): Newton with PARDISO where its line search
+gets through, IPOPT (MUMPS) from the start where it stalls; MUMPS for Newton when pypardiso is not installed. In the
+market solve, from the solved base at +5% soft wheat, Newton stalls, IPOPT solves, and the fixed point confirms the
+solution in its first evaluation (test_supply_system_ad.py, slow). To try next: PARDISO's analysis once per solve
+(only the numeric factorisation per Newton step), a continuation on the quotas' slope for Newton (CAPRI's own way in
+trim_trqs.gms), IPOPT built with MKL PARDISO; then G3-R inside mini runs.
+
 Summary of the default solve's fixed points at its equilibria: the land and FEDE milk price lag is spent (5.4e-7
 EUR/ha, 5.3e-10); the young-animal markets carry the 4-round cap's residual above; everything else holds within the
 solve's tolerance or exactly.

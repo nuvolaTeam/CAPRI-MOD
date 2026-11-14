@@ -667,12 +667,11 @@ class BilateralSolveMixin(MarketStateMixin):
         if str(_st.get("market.solver")) == "newton_krylov":
             # step G2: the same equations at once (capri_mod/market/market_nk.py)
             return self._nk_solve(r, exogenous_supply, trade_scenario, es, ed, size, tol, max_outer, verbose)
-        if str(_st.get("market.solver")) == "ipopt" and last is not None:
-            # G3: the market as one system in CAPRI's form solved by IPOPT (capri_mod/market/market_ipopt.py); the
-            # fixed point below then starts at its solution, which it confirms in its first evaluation (and continues
-            # from if it does not)
-            from capri_mod.market.market_ipopt import ipopt_market_solve
-            r_ = ipopt_market_solve(self, r, exogenous_supply, trade_scenario)
+        if str(_st.get("market.solver")) in ("g3_newton", "g3_ipopt") and last is not None:
+            # G3: the market as one system in CAPRI's form (capri_mod/market/market_g3.py); the fixed point below then
+            # starts at its solution, which it confirms in its first evaluation (and continues from if it does not)
+            from capri_mod.market.market_g3 import g3_market_solve
+            r_ = g3_market_solve(self, r, exogenous_supply, trade_scenario, str(_st.get("market.solver")))
             if r_ is not None:
                 r = r_
         prev = np.inf

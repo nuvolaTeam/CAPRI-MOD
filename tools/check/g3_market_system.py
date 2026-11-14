@@ -26,8 +26,8 @@ sys.path.insert(0, str(ROOT / "tools" / "check"))
 
 
 def _scales(mm, lay) -> np.ndarray:
-    """Each equation's scale (capri_mod/market/market_ipopt.py, the solver's own)."""
-    from capri_mod.market.market_ipopt import _scales as scales
+    """Each equation's scale (capri_mod/market/market_g3.py, the solver's own)."""
+    from capri_mod.market.market_g3 import _scales as scales
     return scales(mm, lay)
 
 

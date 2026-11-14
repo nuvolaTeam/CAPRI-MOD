@@ -440,17 +440,22 @@ exact_jacobian = false
 # successive linearisation above (each commodity's trade system exact, the links across commodities and blocks between
 # steps), or "newton_krylov", the same equations at once (capri_mod/market/market_nk.py: Newton on all prices, GMRES
 # with finite-difference directional derivatives, the fixed point's Jacobian as preconditioner); the same stopping rule.
-# The project lead's choice of 29 October 2026; the default until its full-run comparison. "ipopt" (G3, 14 November
-# 2026; docs/design/G3_SYSTEM.md): the market's equations as one system in CAPRI's form solved by IPOPT
-# (capri_mod/market/market_ipopt.py) from the previous solve's solution, then the fixed point from IPOPT's solution
-# (it confirms it in its first evaluation); the run's first solve, which calibrates the market, is the fixed point's
+# The project lead's choice of 29 October 2026; the default until its full-run comparison. G3 (14 November 2026;
+# docs/design/G3_SYSTEM.md, capri_mod/market/market_g3.py): the market's equations as one system in CAPRI's form from
+# the previous solve's solution, then the fixed point from that solution (it confirms it in its first evaluation); the
+# run's first solve, which calibrates the market, is the fixed point's. "g3_newton": Newton's method with the exact
+# sparse Jacobian; "g3_ipopt": IPOPT with a zero objective (CAPRI's use of CONOPT)
 solver = "fixed_point"
-# market.solver = "ipopt": IPOPT's tolerances (the scaled equations' and the constraints' violation) and its iterations
-ipopt_tol = 1e-10
-ipopt_max_iter = 200
-# market.solver = "ipopt": evaluations of the fixed point at IPOPT's solution before it starts, until its supply and
-# use change by less than ipopt_tol (its blocks' lagged state, KNOWN_ISSUES K147), at most this many
-ipopt_settle_evals = 20
+# G3: the tolerance on the scaled equations and the iteration limit
+g3_tol = 1e-10
+g3_max_iter = 200
+# "g3_newton": the sparse direct solver of its linear systems: "pardiso" (Intel MKL's PARDISO through the optional
+# package pypardiso, Intel's licence, installed by the user as CAPRI's CONOPT; MUMPS when it is missing) or "mumps"
+# (bundled with CasADi, open)
+g3_linear_solver = "pardiso"
+# G3: evaluations of the fixed point at the solution before it starts, until its supply and use change by less than
+# g3_tol (its blocks' lagged state, KNOWN_ISSUES K147), at most this many
+g3_settle_evals = 20
 # Newton-Krylov: step of the directional differences in log prices; Krylov vectors per Newton step
 nk_fd_step = 1e-6
 nk_max_krylov = 30

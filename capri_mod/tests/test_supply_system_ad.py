@@ -126,28 +126,30 @@ def test_the_supply_system_equals_supply_response_at_its_block_solutions(solved_
 
 
 @pytest.mark.slow
-def test_the_market_solved_by_ipopt_is_the_fixed_points_equilibrium(solved_base, capsys):
-    """market.solver = "ipopt" (capri_mod/market/market_ipopt.py): from the solved base, a supply change (+5% soft
-    wheat everywhere) solved by IPOPT and by the fixed point gives the same prices; the fixed point confirms IPOPT's
-    solution in its first evaluation."""
+@pytest.mark.parametrize("method,linsol", [("g3_newton", "pardiso"), ("g3_ipopt", "mumps")])
+def test_the_market_solved_by_g3_is_the_fixed_points_equilibrium(solved_base, capsys, method, linsol):
+    """market.solver = "g3_newton" / "g3_ipopt" (capri_mod/market/market_g3.py): from the solved base, a supply change
+    (+5% soft wheat everywhere) solved by G3 and by the fixed point gives the same prices; the fixed point confirms
+    G3's solution in at most two evaluations."""
     import pickle
     from capri_mod.settings import override
+    if linsol == "pardiso":
+        pytest.importorskip("pypardiso")
     mm, exo = solved_base
     exo2 = exo.copy()
     exo2["SWHE"] = exo2["SWHE"] * 1.05
-    m_fp, m_ip = pickle.loads(pickle.dumps(mm)), pickle.loads(pickle.dumps(mm))
+    m_fp, m_g3 = pickle.loads(pickle.dumps(mm)), pickle.loads(pickle.dumps(mm))
     e_fp = m_fp.solve(exogenous_supply=exo2)
-    with override({"market.solver": "ipopt"}):
-        e_ip = m_ip.solve(exogenous_supply=exo2)
+    with override({"market.solver": method, "market.g3_linear_solver": linsol}):
+        e_g3 = m_g3.solve(exogenous_supply=exo2)
     out = capsys.readouterr().out
-    assert "market solve by IPOPT: Solve_Succeeded" in out
-    assert e_fp.converged and e_ip.converged
-    assert e_ip.iterations <= 2 < e_fp.iterations, (e_ip.iterations, e_fp.iterations)
-    a, b = m_fp.sv.bilat_last_r, m_ip.sv.bilat_last_r.reindex(index=m_fp.sv.bilat_last_r.index,
+    assert "market solve by G3:" in out and ("converged" in out or "Solve_Succeeded" in out), out[-500:]
+    assert e_fp.converged and e_g3.converged
+    assert e_g3.iterations <= 2 < e_fp.iterations, (e_g3.iterations, e_fp.iterations)
+    a, b = m_fp.sv.bilat_last_r, m_g3.sv.bilat_last_r.reindex(index=m_fp.sv.bilat_last_r.index,
                                                               columns=m_fp.sv.bilat_last_r.columns)
     cols = list(m_fp.par.bilat)
     d = (np.abs(a[cols] - b[cols]) / np.maximum(np.abs(a[cols]), 1e-3)).to_numpy().max()
     assert d <= 1e-5, d
     r0 = mm.sv.bilat_last_r.reindex(index=a.index, columns=a.columns)
     assert float((np.abs(a[cols] - r0[cols]) / np.maximum(np.abs(r0[cols]), 1e-3)).to_numpy().max()) > 1e-3
-
