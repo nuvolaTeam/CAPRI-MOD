@@ -655,20 +655,24 @@ def supply_inputs(mm, layout: dict, PA: np.ndarray) -> list:
     regions, cols = layout["regions"], layout["cols"]
     RR = mm.ev.bilat_ratio_now.reindex(index=regions, columns=cols).fillna(1.0).to_numpy(dtype=float)
     ym = mm.ev.yani_market_now or {}
-    ry = np.array([float(ym[reg][g]) for reg, goods in layout["ylay"] for g in goods])
+    st = mm.seen.yani_state or {}
+    # where the module holds none (before a solve's first evaluation): the default solve's starting points (the
+    # young-animal prices the supply models saw, the dairy blocks at their base, FEDE 1, the rents at calibration)
+    ry = np.array([float((ym.get(reg) or {}).get(g, st[reg]["seen"].get(g, 1.0))) for reg, goods in layout["ylay"]
+                   for g in goods])
     dl = mm.ev.dairy_last or {}
     dp = mm._dairy_params() or {}
     uE = []
     for ms in layout["ms"]:
         prm = dp["ms"][ms]
-        z = dl["ms_z"][ms]
-        uE += [float(z[prm["iF"]]), float(z[prm["iP"]]), float(z[prm["iM"]])]
+        z = (dl.get("ms_z") or {}).get(ms)
+        uE += ([float(z[prm["iF"]]), float(z[prm["iP"]]), float(z[prm["iM"]])] if z is not None else [0.0] * 3)
     wp = mm._dairy_world_params() or {}
     wl_ = mm.ev.dairy_world_last or {}
     uW = []
     for r in layout["wl"]:
-        z = wl_[r]["z"]
-        uW += [float(z[wp[r]["iF"]]), float(z[wp[r]["iP"]]), float(z[wp[r]["iM"]])]
+        z = (wl_.get(r) or {}).get("z")
+        uW += ([float(z[wp[r]["iF"]]), float(z[wp[r]["iP"]]), float(z[wp[r]["iM"]])] if z is not None else [0.0] * 3)
     fe = mm.ev.fede_now or {}
     fede = np.array([float(fe.get(s, 1.0)) for s in layout["rms"]])
     land = mm.ev.land_now or {}

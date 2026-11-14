@@ -188,6 +188,29 @@ variables of their own with their defining equations, which keeps the Jacobian s
 same (the blocks are already functions of those quantities) and to let IPOPT see the intermediate unknowns; to check
 before building: the size of that sparse system and its factorisation time against the dense 2,624 one.
 
+### G3.3, first trial: Newton's method on the assembled system (tools/check/g3_newton_trial.py)
+
+From the state each captured solve started from (the previous solve's equilibrium and blocks), a damped Newton method
+on the square system (the empty balances out), with the Jacobian by forward differences (about 11 s each: CasADi's
+symbolic Jacobian of the substituted, 32% dense system ran out of memory beside a full run) and a backtracking line
+search:
+
+- market_011 (the last solve of the run, the supply models' output close to the previous): 2 steps, the residual
+  2.0e-2 -> 1.3e-7 -> 2.5e-12, quadratic; the equilibrium equals the default solve's within 3.7e-9 on the prices
+  (sigmas 1.2e-7, young animals 1.9e-9, FEDE 7.9e-10; the dairy unknowns and the rents within 2.2e-6 and 1.6e-5
+  EUR/ha). The default solve took 12.6 s.
+- market_005 (the first scenario solve: the supply rows move by up to 51%): with the line search on the largest
+  scaled residual, 30 steps (most of them shortened) to 5.7e-8, the same equilibrium within 1.4e-8 on the prices; with
+  the line search on the 2-norm it stalls at 0.46 on one quota's sigmoid equation (trq[22]). The default solve took
+  43 s. The steep quota sigmoids (CAPRI's trqSigmoidFunc_, slope TRQ_SLOPE) are nearly steps: far from the solution
+  Newton's linearisation of a saturated sigmoid is flat. The default solve solves them inside each commodity's trade
+  system.
+
+So the assembled system has the default solve's equilibrium as its solution, and Newton converges to it fast near it.
+For G3.3: (1) the lifted sparse form (above), which also gives the exact Jacobian cheaply; (2) a globalisation that
+copes with the quotas: IPOPT's filter line search on the system as constraints, or a continuation on the quotas'
+slope, or CAPRI's own solve order (to be read in CAPRI's market model before choosing); (3) the bounds.
+
 Summary of the default solve's fixed points at its equilibria: the land and FEDE milk price lag is spent (5.4e-7
 EUR/ha, 5.3e-10); the young-animal markets carry the 4-round cap's residual above; everything else holds within the
 solve's tolerance or exactly.
