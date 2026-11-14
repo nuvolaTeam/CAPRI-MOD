@@ -307,6 +307,7 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/market/dairy.py', 'DairyMixin.MILK_PRICE_FLOOR', 1e-07, 'capri-mod', 'keep', NULL, 'raw milk price ratio held where negative milk prices are not allowed, standing for CAPRI''s positive bound lowered tenfold; registered in DEPARTURES_FROM_CAPRI.md (policy-file switches)'),
   ('capri_mod/market/demand.py', 'DemandMixin.demand_response', 0.05, 'numerical', 'keep', NULL, 'floor of the dairy price ratio (5% of base) in the dairy feed factor'),
   ('capri_mod/market/demand_ad.py', 'gl_block_function', 0.05, 'numerical', 'keep', NULL, 'consumer price floor at 5% of base in the food demand system'),
+  ('capri_mod/market/use_ad.py', 'use_function', 0.05, 'numerical', 'keep', NULL, 'floor of the dairy price ratio (5% of base) in the dairy feed factor, as DemandMixin.demand_response (G3.2d)'),
   ('capri_mod/market/inputs.py', 'REPO_DATA', 2.0, 'technical', 'keep', NULL, 'parent-directory depth of the repository path'),
   ('capri_mod/data/inputs.py', 'REPO_DATA', 2.0, 'technical', 'keep', NULL, 'parent-directory depth of the repository path'),
   ('capri_mod/market/supply.py', 'SupplyMixin._yani_clear', -50.0, 'numerical', 'keep', NULL, 'default bounds of the young-animal price ratio when the state gives none'),

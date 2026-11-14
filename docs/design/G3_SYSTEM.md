@@ -106,6 +106,21 @@ delivered) is a function of the evaluation's prices, FEDE and the supply side's 
 repeated evaluation cannot show the young-animal rounds' cap: each evaluation repeats the same 4 rounds from the same
 start; its residual is measured directly above.
 
+### G3.2d: the use side as one CasADi function (capri_mod/market/use_ad.py)
+
+`use_function(mm)`: D = use(PR, RB, fede, milk, biofX, ddgs), the whole of `demand_response` on symbols: the GL
+demand (gl_block_function), FeedNQ_ with FEDE, p_ElasFeed, the EU's and Norway's feed bulks with their response
+within the market (feedBlk_, at the producer ratios RB), the FMIL block, the crushing (the seed at its Armington
+ratio, oil and cake at their producer ratios), ProcNQ_ with ProcFudge_, the biofuel feedstock CES at the groups'
+output and DDGS price, raw milk delivered (the supply side's quantities), the biofuels' own use and non-fuel
+processing; the same order, floors and clip as demand_response. The market solve's calibration state (seen prices,
+bulk indices, FMIL index, demand calibration) enters as constants. Built in about 1.7 s.
+
+Checks: equal to demand_response within 1e-12 (relative) at the base and at two random draws of prices, FEDE, raw
+milk and biofuel output on a solved baseline's market (capri_mod/tests/test_use_ad.py, slow); at three captured solves
+of the mini-EU Farm-to-Fork, equal to the evaluation's use on all 2,610 cells within 3.8e-16
+(tools/check/g3_use_residuals.py).
+
 Summary of the default solve's fixed points at its equilibria: the land and FEDE milk price lag is spent (5.4e-7
 EUR/ha, 5.3e-10); the young-animal markets carry the 4-round cap's residual above; everything else holds within the
 solve's tolerance or exactly.
@@ -135,5 +150,5 @@ captured solution (G3.1): the block's rows equal the default solve's supply ther
 
 ### Then
 
-- G3.2d: the use side (GL demand, feed, processing, biofuels' own use) the same way.
+- The supply side as one function the same way (the checks of G3.2c compose its rows as expressions already).
 - G3.2e: the assembled system: squareness, structural rank, the Dulmage–Mendelsohn decomposition; G3.3 IPOPT on it.
