@@ -32,6 +32,21 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 14 November 2026 — G3.1 (capture and replay of the market solves) and G3.2a-b (import prices, trade system in CAPRI's form)
+
+- G3.1: `diagnostics.capture_market_dir` (off by default) writes every market solve (the market module's whole state
+  before it, its arguments, the run's settings, the equilibrium after it; the module's attributes stored once each by
+  content) and tools/check/replay_market.py solves each again and compares bit for bit. Mini-EU Farm-to-Fork with
+  capture on: its results equal the run without (7 iterations, every indicator), and all 12 solves replay bit for bit
+  (392 MB of capture).
+- G3.2a: capri_mod/market/import_prices_ad.py, the import prices of a bilateral commodity in CasADi with every policy
+  regime (bilateral and global quotas with the ncpcm minimum, entry prices, flexible levies): equal to
+  BilateralCommodity.import_prices within 2e-16 on the 2017 and 2030 markets.
+- G3.2b: capri_mod/market/trade_system_ad.py, the trade system with supply and use as unknowns (CAPRI's form): the
+  balances, flows and quota equations equal the numeric ones within 3e-14 on the 2030 market.
+- docs/design/G3_SYSTEM.md: what is built, and the supply side's blocks for G3.2c. Tests: test_market_capture.py,
+  test_import_prices_ad.py (all slow). Nothing of the default solve changes.
+
 ## 14 November 2026 — the compressed CSVs as plain CSV
 
 - The project lead: no xz compression on the CSVs. capri_marginal_terms_ref_2030, capri_gd_effect,

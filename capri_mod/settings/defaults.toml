@@ -521,6 +521,9 @@ hessian_progress_every = 5
 # IPOPT solve, Clarabel's progress printout
 ipopt_print_level = 0
 clarabel_verbose = false
+# G3.1: a folder (relative to the working directory, e.g. runs/capture) into which every market solve is written with
+# its inputs and result for tools/check/replay_market.py; "" off (claude/g3_plan.md)
+capture_market_dir = ""
 
 [captrd]
 # CAPTRD-MOD (capri_mod/pipeline/captrd): CAPRI's baseline trend projection (docs/design/CAPTRD_MOD.md).

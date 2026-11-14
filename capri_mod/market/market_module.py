@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional, List, Tuple
 
 from capri_mod.params import param, param_table
-from capri_mod.settings import setting, current as _settings
+from capri_mod.settings import setting, current as _settings, override
 from capri_mod.data.definitions import (
     MARKET_COMMODITIES, ALL_TRADE_REGIONS,
 )
@@ -337,6 +337,45 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
     # Main solver (tatonnement / Newton)
     # ------------------------------------------------------------------
 
+    def _solve_captured(self, folder, exogenous_supply, trade_scenario, policy_scenario, max_iter, verbose):
+        """G3.1 (claude/g3_plan.md): one market solve written to <folder>/market_NNN.pkl for tools/check/replay_market.py
+        - the module before the solve (its whole state: par, sv, seen, ev, data, caches), the solve's arguments, the
+        run's settings, and after it the equilibrium and the module's warm-start state (sv). The solve itself is the
+        default one. The module's attributes are stored once each by content (<folder>/blobs/<sha256>.pkl, referenced
+        from the module's pickle as persistent ids): the data and the blocks' caches do not change between solves."""
+        import hashlib
+        import io
+        import pickle
+        from pathlib import Path
+        d = Path(folder)
+        (d / "blobs").mkdir(parents=True, exist_ok=True)
+        ids = {}
+        for v in vars(self).values():
+            if v is None or isinstance(v, (bool, int, float, str)):
+                continue
+            b = pickle.dumps(v, protocol=pickle.HIGHEST_PROTOCOL)
+            h = hashlib.sha256(b).hexdigest()
+            f = d / "blobs" / f"{h}.pkl"
+            if not f.exists():
+                f.write_bytes(b)
+            ids[id(v)] = h
+
+        class _P(pickle.Pickler):
+            def persistent_id(self, obj):
+                return ids.get(id(obj))
+        buf = io.BytesIO()
+        _P(buf, protocol=pickle.HIGHEST_PROTOCOL).dump(self)
+        args = dict(exogenous_supply=exogenous_supply, trade_scenario=trade_scenario,
+                    policy_scenario=policy_scenario, max_iter=max_iter)
+        st = _settings()
+        with override({"diagnostics.capture_market_dir": ""}):
+            eq = self.solve(verbose=verbose, **args)
+        n = len(list(d.glob("market_*.pkl")))
+        with open(d / f"market_{n:03d}.pkl", "wb") as fh:
+            pickle.dump({"module": buf.getvalue(), "args": args, "settings": st, "result": eq, "sv_after": self.sv},
+                        fh, protocol=pickle.HIGHEST_PROTOCOL)
+        return eq
+
     # ------------------------------------------------------------------
     # CAPRI's bilateral market (Sprint 8m; capri_mod/market/bilateral.py)
     # ------------------------------------------------------------------
@@ -370,6 +409,9 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         The premium market structure of earlier versions (SciPy root or tatonnement with an EU
         Armington premium) was removed on 20 October 2026 (KNOWN_ISSUES K54-2): no run path used it.
         """
+        cap = str(_settings().get("diagnostics.capture_market_dir") or "")
+        if cap:
+            return self._solve_captured(cap, exogenous_supply, trade_scenario, policy_scenario, max_iter, verbose)
         self._trade_scenario_now = trade_scenario
         if self.market_structure != "bilateral" or not self._bilateral_raw():
             raise ValueError(f"the market needs CAPRI's bilateral data ({self._inp().path('bilateral_flows_*.csv')})")

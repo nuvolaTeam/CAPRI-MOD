@@ -96,7 +96,7 @@ as one-key-per-line TOML (comments and [v] marks removed): it parses, 153 keys.
                npk_dual_bound_wide=1000 (CAPRI +-10); exempt_cap_factor=1.0 (CAPRI p_checkSmallMine: 1.0 x baseline for exempted groups); fd_tol=1e-9; fd_max_iter=100
 [environment]  luc_model=true; ad_dairy_ch4="fix" ("capri" = as coded); ammapp_sign="consistent" ("capri" = CAPRI's sign)
                luc_ipopt_tol=1e-12; luc_max_iter=500
-[diagnostics]  verbose=true; trace_outer=false; slow_region_seconds=60; disable_qp=false; dump_regions=""
+[diagnostics]  verbose=true; trace_outer=false; slow_region_seconds=60; disable_qp=false; dump_regions=""; capture_market_dir=""
                (+ nlp_dump, fd_dump, trace_recal, trace_yani, cal_debug, polish_log from the CAPRI_* env vars)
 ```
 
