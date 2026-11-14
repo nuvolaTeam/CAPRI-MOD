@@ -244,6 +244,26 @@ form's (test_supply_system_ad.py).
   19.5 s, AMD 84 s, AMF 87 s, QAMD 75 s. CasADi's set-up of the solver (its derivative functions) takes another 24 s
   per system built. So the linear algebra is the cost: an HSL solver (MA57, MA97) or SPRAL, the factorisation's
   fill-in (the regions' dense demand blocks), and building the system once per run with its constants as parameters.
+- At every captured solve of the mini-EU Farm-to-Fork (G3-R on the replayed states, the plan's check for G3.3), from
+  the state the solve started from:
+
+  | Solve | Start residual | IPOPT iterations | IPOPT s | Default solve s | Prices: largest relative difference |
+  |---|---|---|---|---|---|
+  | market_001 | 2.7e-3 | 3 | 25.2 | 16.2 | 1.7e-9 |
+  | market_002 | 1.2e-2 | 5 | 36.6 | 16.5 | 3.4e-9 |
+  | market_003 | 2.7e-3 | 3 | 25.5 | 14.2 | 2.8e-9 |
+  | market_004 | 5.1e-4 | 2 | 20.2 | 11.3 | 3.8e-9 |
+  | market_005 | 3.2 | 25 | 118.8 | 42.6 | 1.4e-8 |
+  | market_006 | 3.2 | 5 | 37.9 | 23.6 | 2.3e-8 |
+  | market_007 | 1.5e-1 | 3 | 24.5 | 18.1 | 3.3e-9 |
+  | market_008 | 6.9e-2 | 2 | 16.0 | 14.5 | 1.6e-9 |
+  | market_009 | 1.4e-1 | 2 | 14.7 | 13.0 | 2.4e-9 |
+  | market_010 | 2.4e-2 | 2 | 15.5 | 12.9 | 3.5e-9 |
+  | market_011 | 2.0e-2 | 2 | 19.8 | 12.1 | 3.7e-9 |
+
+  Every solve ends below 6e-12 (scaled) at the default solve's equilibrium. market_000, the run's first solve, has no
+  system before it: the market is calibrated inside that solve (`_bilateral_calibrate`), so G3 starts from a
+  calibrated module.
 
 Summary of the default solve's fixed points at its equilibria: the land and FEDE milk price lag is spent (5.4e-7
 EUR/ha, 5.3e-10); the young-animal markets carry the 4-round cap's residual above; everything else holds within the
