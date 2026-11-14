@@ -44,7 +44,18 @@ Farm-to-Fork, 14 November 2026): every bilateral commodity's balances hold withi
 D0; the default solve stops at market.tol 1e-7), the active quotas' equations within 8.8e-8. The trade system in
 CAPRI's form and the default solve agree at its equilibria; the residuals are the default solve's own tolerance.
 
-### Next: the supply side (G3.2c), as MarketModule.supply_response composes it today
+### G3.2c, first block: the EU blocks' supply of the supply models' products (tools/check/g3_supply_residuals.py)
+
+The rows CAPRI's ProdNQ_ with the measured Hessian gives the EU market regions, written as one expression of the
+system's unknowns: q_x = max(0, s0_x + sum_c H_xc dP_c + sum_g H_xg (r_g - r_g^seen) + sum_m col_xm dL_m), dP the
+product prices' change against those the supply models saw, r_g the young-animal prices, dL_m each member state's raw
+milk price change (the default solve gets r_g and dL_m from the alternating rounds of _milk_and_yani_clear_all; in G3
+they are unknowns with their own equations). At the 12 captured solves of a mini-EU Farm-to-Fork it reproduces the
+equilibrium's supply on those rows (29 in EU_WEST, 28 in EU_EAST, the K83 units outside the run added) within 2e-16,
+where the rows move up to 51% from the supply models' output (median 1.9%, the first scenario iteration). The rows
+the market's own blocks set (crushing, dairy, biofuels, by-products) are next.
+
+### Next: the rest of the supply side (G3.2c), as MarketModule.supply_response composes it today
 
 Per row of the market's supply (region x commodity), the block that defines it, in supply_response's order (each a
 CasADi function already, G2b-G2g, called on numbers today; G3 calls them on the system's unknowns):
