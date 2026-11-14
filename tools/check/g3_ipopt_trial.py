@@ -110,6 +110,8 @@ def main() -> None:
     print(f"default solve {t_def:.1f} s; lifted system {lay['n_x']} unknowns, built in {t_build:.1f} s; IPOPT set up "
           f"in {t_setup:.1f} s, {st['return_status']} in {st['iter_count']} iterations, {t_sol:.1f} s; largest scaled "
           f"residual {res.max():.2e} (start {np.max(np.abs(np.asarray(fn(x0)[0], float).ravel()[keep]) / sc[keep]):.2e})")
+    tw = {k[7:]: round(float(v), 2) for k, v in st.items() if k.startswith("t_wall_") and float(v) > 0.01}
+    print(f"  wall time by part (s): {tw}")
     _report(lay, xs, x_def)
 
 

@@ -239,8 +239,11 @@ form's (test_supply_system_ad.py).
     the filter line search through the quotas' sigmoids without a continuation; the default solve's equilibrium within
     1.4e-8 on the prices (sigmas 9.5e-7, young animals 5.4e-7, dairy unknowns 8.3e-6, rents 5.0e-5 EUR/ha).
   So IPOPT on CAPRI's form solves the market to the default solve's equilibrium, the hard case included, in 3 to 5
-  times its time on this machine; the time per iteration (about 5 s: the Jacobian and the factorisation) is where to
-  work (factor reuse, the linear solver, the Jacobian's evaluation).
+  times its time on this machine. Where the time goes (market_011): the constraints 0.02 s and their Jacobian 0.13 s
+  in all; the rest is MUMPS's factorisation of the KKT matrix (about 7 s each). MUMPS's orderings: METIS 20.2 s, PORD
+  19.5 s, AMD 84 s, AMF 87 s, QAMD 75 s. CasADi's set-up of the solver (its derivative functions) takes another 24 s
+  per system built. So the linear algebra is the cost: an HSL solver (MA57, MA97) or SPRAL, the factorisation's
+  fill-in (the regions' dense demand blocks), and building the system once per run with its constants as parameters.
 
 Summary of the default solve's fixed points at its equilibria: the land and FEDE milk price lag is spent (5.4e-7
 EUR/ha, 5.3e-10); the young-animal markets carry the 4-round cap's residual above; everything else holds within the
