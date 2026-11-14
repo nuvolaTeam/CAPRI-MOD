@@ -4,7 +4,7 @@
 processing + biofuel processing, raw milk delivered, the biofuels' own use) from the blocks' CasADi functions (G2b-G2g)
 called on numbers. `use_function(mm)` composes the same blocks, in the same order and with the same floors, on symbols:
 
-    D = use(PR, RB, fede, milk, biofX, ddgs)
+    (D, byp) = use(PR, RB, fede, milk, biofX, ddgs)
 
   PR     [nR x nC] the Armington price ratios (demand_response's PR)
   RB     [nR x nC] the producer price ratios r (the EU feed bulks' response within the market, feedBlk_; the oil and
@@ -20,6 +20,8 @@ FMIL index; the demand calibration) enters as constants, as CAPRI's parameters w
 rows are overridden and whether the biofuel markets are endogenous is read from the module when the function is built
 (the solve's settings and data, not its unknowns), and so is whether FeedNQ_ applies (as demand_response: only when the
 module holds FEDE, ev.fede_now, i.e. inside a bilateral evaluation).
+
+byp: the EU's residual feeds' output (MaprFeed_, byp_cells' order), a supply quantity that follows this use.
 
 `use_inputs(mm)` reads the numbers of the module's latest evaluation; `use_function(mm)(*use_inputs(mm))` equals that
 evaluation's use (tools/check/g3_use_residuals.py at captured solves).
@@ -269,6 +271,7 @@ def use_function(mm):
     biofX = ca.SX.sym("biofX", len(groups))
     dregs = sorted({g["region"] for g in groups if g["region"] in R})
     ddgs = ca.SX.sym("ddgs", len(dregs))
+    br: Dict[str, Dict[str, object]] = {}
     if bp:
         bq: Dict[Tuple[str, str], object] = {}
         for n, g in enumerate(groups):
@@ -288,6 +291,8 @@ def use_function(mm):
             if i is None or j is None or q0 <= 0 or Bf0[i, j] <= 0:
                 continue
             Bf[(i, j)] = Bf0[i, j] * q / q0
+            if reg in mm.EU:
+                br.setdefault(reg, {})[c] = q / q0
 
     D = (ca.DM(FIX) + _sx_matrix(ca, H, H0) + _sx_matrix(ca, F, F0) + _sx_matrix(ca, P, P0)
          + _sx_matrix(ca, Bf, Bf0))
@@ -345,9 +350,32 @@ def use_function(mm):
             else:
                 D[i, j] = D0[i, j]
     D = ca.fmax(D, 0.0)
-    f = ca.Function("use", [PR, RB, fede, milk, biofX, ddgs], [D], ["PR", "RB", "fede", "milk", "biofX", "ddgs"],
-                    ["D"])
-    return f, {"rms": rms, "milk_regs": milk_regs, "n_eu_sup": n_eu_sup, "groups": groups, "ddgs_regs": dregs}
+
+    # the EU's residual feeds (MaprFeed_, eu_feed_byproduct_output): their output follows their parents' food and
+    # processing use and biofuel feedstock use of this evaluation (a supply quantity set by the use side)
+    fp = mm._feed_byproduct_params()
+    byp, byp_cells = [], []
+    for reg in mm.EU:
+        ie = R.get(reg)
+        if ie is None:
+            continue
+        fr: Dict[str, object] = {}
+        for c in (fp.get("parents") or ()):
+            j = Cc.get(c)
+            if j is not None:
+                b0 = H0[ie, j] + P0[ie, j]
+                hj = H.get((ie, j), H0[ie, j])
+                pj = P.get((ie, j), P0[ie, j])
+                fr[c] = (hj + pj) / b0 if b0 > 0 else 1.0
+        for p_, d in (fp.get("products") or {}).items():
+            dr_ = (d.get("reg") or {}).get(reg, d)
+            x = sum(w * ((br.get(reg, {}) if use == "biofuel" else fr).get(c, 1.0)) for c, use, w in dr_["parts"])
+            byp.append(ca.fmax(0.0, dr_["prod0"] * x))
+            byp_cells.append((reg, p_))
+    f = ca.Function("use", [PR, RB, fede, milk, biofX, ddgs], [D, ca.vertcat(*byp) if byp else ca.SX(0, 1)],
+                    ["PR", "RB", "fede", "milk", "biofX", "ddgs"], ["D", "byp"])
+    return f, {"rms": rms, "milk_regs": milk_regs, "n_eu_sup": n_eu_sup, "groups": groups, "ddgs_regs": dregs,
+               "byp_cells": byp_cells}
 
 
 def use_inputs(mm, layout: dict) -> list:

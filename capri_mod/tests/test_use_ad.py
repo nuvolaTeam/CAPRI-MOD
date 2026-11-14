@@ -1,5 +1,6 @@
 """G3.2d: the market's use side in CasADi (capri_mod/market/use_ad.py) equals MarketModule.demand_response at random
-prices, feed energy prices, raw milk deliveries and biofuel outputs, on the market of a solved baseline."""
+prices, feed energy prices, raw milk deliveries and biofuel outputs, on the market of a solved baseline; and so do the
+EU's residual feeds' output that follows that use (MaprFeed_)."""
 import numpy as np
 import pandas as pd
 import pytest
@@ -33,7 +34,12 @@ def test_the_use_side_in_casadi_equals_demand_response(solved_market):
         mm.ev.crush_prices_now = cpd
         D_num = mm.demand_response(dp, mm.world_prices_base).reindex(index=regions, columns=comms)
         f, lay = use_function(mm)
-        D_ad = np.asarray(f(*use_inputs(mm, lay)), float)
+        out = f(*use_inputs(mm, lay))
+        D_ad = np.asarray(out[0], float)
+        # the residual feeds' output (MaprFeed_) at this use, as eu_feed_byproduct_output reads it
+        byp = np.asarray(out[1], float).ravel()
+        ref_b = np.array([max(0.0, float(mm.eu_feed_byproduct_output(reg)[p_])) for reg, p_ in lay["byp_cells"]])
+        assert byp.size and float((np.abs(byp - ref_b) / np.maximum(np.abs(ref_b), 1.0)).max()) <= 1e-12
         mm.ev.crush_prices_now = None
         ref = D_num.to_numpy(dtype=float)
         d = np.abs(D_ad - ref) / np.maximum(np.abs(ref), 1.0)

@@ -36,7 +36,7 @@ def check(path: Path) -> dict:
         t0 = time.time()
         f, lay = use_function(mm)
         built = time.time() - t0
-        D = np.asarray(f(*use_inputs(mm, lay)), float)
+        D = np.asarray(f(*use_inputs(mm, lay))[0], float)
     ref = D1.reindex(index=list(mm.regions), columns=list(mm.commodities)).to_numpy(dtype=float)
     d = np.abs(D - ref) / np.maximum(np.abs(ref), 1.0)
     k = np.unravel_index(int(np.argmax(d)), d.shape)

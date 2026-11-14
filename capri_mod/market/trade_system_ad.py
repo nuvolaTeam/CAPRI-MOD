@@ -5,12 +5,13 @@ around the outer step's point; G3 takes them as unknowns of their own (CAPRI's v
 the supply and use blocks, so this block is the trade part alone:
 
     trade_system_function(sc) -> CasADi Function (r[n], sB[nb], sW[ng], S[n], D[n]) ->
-        (bal[n], trq[nqa], X[cells])
+        (bal[n], trq[nqa], X[cells], PAr[n])
     bal  SupBalM_ / the trade system: S_j - DS_j - sum_i X_ij (1000 t), every region
     trq  trqSigmoidFunc_ of the active quotas (Q > 0), bilateral then global: sigma - Sigmoid(slope (fill / Q - 0.97)),
          fill TradeFlowsAgg_ (bilateral) or TRQImports_ (global: the cover's flows and the bilateral quotas' overfill,
          -ncpcm(-(fill_k - Q_k), 0, 1E-3 Q_k)); the argument clipped as BilateralCommodity._sig
     X    the flows of cells(sc) (importer, exporter), the diagonal the domestic sales
+    PAr  each region's Armington price over its base (the use side's and the crushers' price ratio)
 
 The prices are import_prices_ad's (every policy regime), the CES nests BilateralCommodity.prices / flows'. Checked
 against BilateralCommodity.residual and trq_arguments (capri_mod/tests/test_import_prices_ad.py).
@@ -106,9 +107,10 @@ def trade_system_function(sc):
             tot = tot - _ncpcm(ca, -(fill(q) - q["Q"]), 0.0, 1e-3 * q["Q"])
         arg = ca.fmin(ca.fmax(slope * (tot / g["Q"] - mid), -clip), clip)
         trq.append(sW[m_] - 1.0 / (1.0 + ca.exp(-arg)))
+    PAr = ca.vertcat(*[PA[i] / float(sc.PA0[i]) for i in range(n)])
     f = ca.Function("trade_system_" + sc.name, [r, sB, sW, S, D],
                     [ca.vertcat(*bal), ca.vertcat(*trq) if trq else ca.SX(0, 1),
-                     ca.vertcat(*[X[c] for c in cl]) if cl else ca.SX(0, 1)],
-                    ["r", "sB", "sW", "S", "D"], ["bal", "trq", "X"])
+                     ca.vertcat(*[X[c] for c in cl]) if cl else ca.SX(0, 1), PAr],
+                    ["r", "sB", "sW", "S", "D"], ["bal", "trq", "X", "PAr"])
     _CACHE[key] = f
     return f

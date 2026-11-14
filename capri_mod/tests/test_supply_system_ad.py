@@ -8,16 +8,74 @@ import numpy as np
 import pytest
 
 
-@pytest.mark.slow
-def test_the_supply_system_equals_supply_response_at_its_block_solutions():
+@pytest.fixture(scope="module")
+def solved_base():
+    """The market of the model's data solved at CAPRI's base supply rows."""
     from pathlib import Path
     from capri_mod.data.loaders import load_all_data
     from capri_mod.market.market_module import MarketModule
-    from capri_mod.market.supply_system_ad import supply_inputs, supply_system
     root = Path(__file__).resolve().parents[2]
     mm = MarketModule(load_all_data(str(root / "capri_data")))
     exo = mm.capri_base_supply_rows()
     assert mm.solve(exogenous_supply=exo).converged
+    return mm, exo
+
+
+@pytest.mark.slow
+def test_the_assembled_market_system_holds_at_the_default_solves_equilibrium(solved_base):
+    """G3.2e (capri_mod/market/market_system_ad.py): square, structurally nonsingular once the empty balances are out,
+    and at the default solve's equilibrium every block's equations hold within that solve's tolerances. The balances within 1e-6 of S0 + D0, not market.tol (1e-7): the
+    solve meets its test at its own last evaluation (9.0e-8 here), whose non-EU land and FEDE blocks read the previous
+    evaluation's raw milk prices; evaluated again at the same prices the residual is 1.3e-7, and it drifts on (1.4e-7)
+    as that lag is worked off (G3_SYSTEM.md, G3.2e)."""
+    from capri_mod.market.market_system_ad import market_system, market_x0
+    mm, exo = solved_base
+    mm._bilateral_eval(mm.sv.bilat_last_r.copy(), exo, None)
+    fn, lay, _, _ = market_system(mm, exo)
+    assert lay["n_x"] == lay["n_F"] > 2000
+    F, pooled, _, _ = (np.asarray(v, float).ravel() for v in fn(market_x0(mm, lay)))
+    o = 0
+    for name, n in lay["eqs"]:
+        v = F[o:o + n]
+        if name == "bal":
+            sc = np.concatenate([np.maximum(np.asarray(s.S0 + s.D0, float), 1.0) for s in mm.par.bilat.values()])
+            assert float(np.max(np.abs(v) / sc)) <= 1e-6, name
+        elif n:
+            assert float(np.max(np.abs(v) / _scale(mm, lay, name))) <= 1e-6, name
+        o += n
+    assert float(np.max(np.abs(pooled))) <= 1e-6
+    # structure: without the balances that are empty (no supply, use or trade) and with their prices fixed, the
+    # system is square with full structural rank
+    import casadi as ca
+    sp = fn.jac_sparsity(0, 0)
+    er = set(np.nonzero(np.diff(np.asarray(sp.T.colind())) == 0)[0].tolist())
+    keep = [i for i in range(sp.size1()) if i not in er]
+    assert ca.sprank(sp.sub(keep, keep, False)[0]) == len(keep)
+
+
+def _scale(mm, lay, name):
+    """An equation block's scale: the dairy blocks' base raw milk, FeedBal_'s energy fed at calibration, the land
+    markets' calibration land; 1 for the quotas (and the young animals, absent here)."""
+    if name == "dairyE":
+        dp = mm._dairy_params()
+        return np.repeat([max(float(dp["ms"][m]["Q0"][dp["ms"][m]["iM"]]), 1.0) for m in lay["ms"]], 3)
+    if name == "dairyW":
+        wp = mm._dairy_world_params()
+        return np.repeat([max(float(wp[r]["Q0"][wp[r]["iM"]]), 1.0) for r in lay["wl"]], 3)
+    if name == "feed":
+        from capri_mod.market.feed_ad import fedebal_arrays
+        nfp = mm._noneu_feed_params()
+        return np.array([max(abs(fedebal_arrays(nfp["rms"][s], lay["cols"], [])["e_const"]), 1.0) for s in lay["rms"]])
+    if name == "land":
+        LP = mm._noneu_land_params()
+        return np.concatenate([np.maximum(LP[s]["L0"], 1.0) for s in lay["lrms"]])
+    return 1.0
+
+
+@pytest.mark.slow
+def test_the_supply_system_equals_supply_response_at_its_block_solutions(solved_base):
+    from capri_mod.market.supply_system_ad import supply_inputs, supply_system
+    mm, exo = solved_base
     r0 = mm.sv.bilat_last_r.copy()
     rng = np.random.default_rng(14112026)
     byp = {(reg, p) for reg in mm.EU for p in mm.eu_feed_byproduct_output(reg)}

@@ -149,6 +149,45 @@ units all present): the supply equals the evaluation's on all 2,610 cells within
 within 2.8e-16 of their base raw milk (78 EU, 129 other equations); the young-animal markets' residuals are the
 4-round cap's (8.0e-7 at market_005, 1.7e-9 at market_011; none at market_002) (tools/check/g3_supply_system.py).
 
+### G3.2e: the assembled system, its size and its structure (capri_mod/market/market_system_ad.py)
+
+`market_system(mm, exogenous_supply)`: F(x) = 0 over x = (the producer price ratios of the 57 bilateral commodities in
+the 45 regions, the active quotas' sigmas, the young-animal prices, the dairy blocks' unknowns, FEDE, the free rents),
+F = (the supply balances SupBalM_, the quotas' sigmoids, yaniMarket_, the dairy blocks, FeedBal_, the land markets),
+supply from supply_system_ad, use from use_ad, the Armington ratios from each commodity's trade block (trade_system_ad,
+now with the ratios as an output), the EU's residual feeds from the use. Raw milk is a pooled commodity whose world
+balance is zero identically (supply and use are the same quantity in every region): its ratio is held, its balance
+returned apart (8.0e-11 kt). Built in about 7 s.
+
+At the 12-solve mini-EU Farm-to-Fork's captures (tools/check/g3_market_system.py), market_011 / market_005 /
+market_002: 3,166 / 3,166 / 3,151 unknowns and as many equations; largest residuals relative to their scales:
+balances 2.1e-9 / 3.8e-9 / 9.0e-10, quotas 7.8e-8 / 8.8e-8 / 7.7e-8, young animals 1.7e-9 / 8.0e-7 / none, dairy
+blocks below 3e-16, FeedBal_ below 9.1e-11, land below 1.4e-10; the system's supply and use equal the evaluation's
+within 5.9e-13. On the market solved at CAPRI's base supply rows (capri_mod/tests/test_supply_system_ad.py, slow): the
+balances within 1.3e-7, above market.tol (1e-7): the default solve meets its test at its own last evaluation (9.0e-8),
+whose non-EU land and FEDE blocks use the previous evaluation's raw milk prices; evaluated again at the same prices
+the residual is 1.3e-7, then 1.4e-7 (the lag being worked off). So the default solve's convergence test does not
+control that lag; in G3 it is gone.
+
+Structure (CasADi's Jacobian pattern, sprank and btf, the Dulmage–Mendelsohn decomposition) at market_011 (market_005
+the same; market_002, without the young-animal markets, 15 unknowns and equations fewer, the same pattern otherwise):
+3,176,660 non-zeros (32% of the matrix: each region's use depends on all its Armington prices through the
+GL demand, and each Armington price on the commodity's prices in every region, so substituting them out fills the
+Jacobian); structural rank 2,624 of 3,166. The deficiency is all in the balances: 542 region-commodity balances are
+empty (no supply, use or trade: no equation), and 534 of their 542 price ratios appear in no equation either. The
+other 8 enter elsewhere although their own balance is empty: Norway's CORN, FENI and SOYA (its supply models' rows
+have terms in them), the cakes RAPC in RSA, SOYC in BEL and BGD, SUNC in JAP and THAI (the crushing margin and its
+ProdNQ_ terms). Without the 542 empty balances and with those 542 prices fixed (as the default solve leaves them, and
+as CAPRI fixes the prices of a market without production or use), the system is square, 2,624 x 2,624, with full
+structural rank (the same holds on the base market: test_supply_system_ad.py), and its fine decomposition is one
+strongly connected block of 2,621 equations and three of one: the
+market has to be solved as one block.
+
+For G3.3 (IPOPT on it): the substituted form is dense (32%); CAPRI keeps the Armington prices, supply and use as
+variables of their own with their defining equations, which keeps the Jacobian sparse. Our recommendation is to do the
+same (the blocks are already functions of those quantities) and to let IPOPT see the intermediate unknowns; to check
+before building: the size of that sparse system and its factorisation time against the dense 2,624 one.
+
 Summary of the default solve's fixed points at its equilibria: the land and FEDE milk price lag is spent (5.4e-7
 EUR/ha, 5.3e-10); the young-animal markets carry the 4-round cap's residual above; everything else holds within the
 solve's tolerance or exactly.
@@ -178,5 +217,7 @@ captured solution (G3.1): the block's rows equal the default solve's supply ther
 
 ### Then
 
-- The supply side as one function the same way (the checks of G3.2c compose its rows as expressions already).
-- G3.2e: the assembled system: squareness, structural rank, the Dulmage–Mendelsohn decomposition; G3.3 IPOPT on it.
+- G3.3: IPOPT on the assembled system (the intermediate quantities as unknowns, as above), started from the default
+  solve's equilibrium first (it must stay there), then from the base prices; the bounds of CAPRI's table
+  (G3_MARKET_INVENTORY.md) and the decisions recorded above (Norway's raw milk row, the young-animal prices' bounds,
+  the member states' raw milk price floor).
