@@ -80,7 +80,9 @@ relative to the good's net supply, falls from 8.0e-7 (EU_EAST calves, the first 
 last) as the milk prices' change between rounds shrinks; EU_WEST from 4.4e-8 to 5.0e-12.
 In G3 both are equations of one system and hold together; in the default solve the 4-round cap could be lifted at
 little cost (each round is one linear solve per region and one dairy solve), which would bring it closer to CAPRI's
-joint solution. Not changed: it moves results, so it waits for a validation pair.
+joint solution. Not changed: it moves results, so it waits for a validation pair. Measured on the mini-EU
+Farm-to-Fork (14 November, the same 20 units; the rounds up to 50 instead of 4, in a run copy): 7 iterations as with
+the cap, every one of the 24 indicators of compare_runs.py the same to the first decimal.
 
 ### G3.2c, the rows the market's own blocks set: crushing, dairy products, biofuels, feed by-products
 
@@ -243,7 +245,8 @@ form's (test_supply_system_ad.py).
   in all; the rest is MUMPS's factorisation of the KKT matrix (about 7 s each). MUMPS's orderings: METIS 20.2 s, PORD
   19.5 s, AMD 84 s, AMF 87 s, QAMD 75 s. CasADi's set-up of the solver (its derivative functions) takes another 24 s
   per system built. So the linear algebra is the cost: an HSL solver (MA57, MA97) or SPRAL, the factorisation's
-  fill-in (the regions' dense demand blocks), and building the system once per run with its constants as parameters.
+  fill-in (the regions' dense demand blocks), and building the system once per run with its constants as parameters. SPRAL (in the
+  bundled IPOPT; MA27/MA57/MA97 are not) took 33.5 s at market_011 against MUMPS's 20.2 s (no OpenMP settings).
 - At every captured solve of the mini-EU Farm-to-Fork (G3-R on the replayed states, the plan's check for G3.3), from
   the state the solve started from:
 
