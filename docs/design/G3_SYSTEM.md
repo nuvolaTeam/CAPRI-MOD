@@ -92,6 +92,20 @@ longer held with the bilateral market; corrected); the biofuel blocks inside the
 demand). In the assembled system they enter as defined quantities of the prices: no residual to check beyond their
 own CasADi functions (G2b-G2g, each tested against the code it replaced).
 
+### G3.2d, first check: the equilibrium as a fixed point of one evaluation (tools/check/g3_fixed_point.py)
+
+Before writing the use side as expressions: does any block, supply or use, still read state the previous evaluation
+left at the default solve's equilibria? Each capture replayed, the whole model response (`_bilateral_eval`) evaluated
+twice more at the solve's final r. At three captures of the mini-EU Farm-to-Fork (market_002, a baseline solve;
+market_005, the first scenario iteration's; market_011, the last): two fresh evaluations differ by at most 5.8e-11
+in supply and 4.7e-11 in use (relative, scale max(|q|, 1 kt); the inner solvers' tolerances: the land / FEDE rounds
+stop at 1e-10, the non-EU dairy blocks start from the last solution); a fresh evaluation differs from the solve's own
+supply and use by at most 3.0e-10 and 2.4e-10; its balances hold within 3.8e-9 of the market's scale (market.tol
+1e-7). So every lag is spent at the equilibrium, and the use side (GL demand, feed, processing, biofuels, raw milk
+delivered) is a function of the evaluation's prices, FEDE and the supply side's quantities of the same evaluation. A
+repeated evaluation cannot show the young-animal rounds' cap: each evaluation repeats the same 4 rounds from the same
+start; its residual is measured directly above.
+
 Summary of the default solve's fixed points at its equilibria: the land and FEDE milk price lag is spent (5.4e-7
 EUR/ha, 5.3e-10); the young-animal markets carry the 4-round cap's residual above; everything else holds within the
 solve's tolerance or exactly.
