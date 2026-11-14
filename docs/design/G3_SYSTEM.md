@@ -230,10 +230,17 @@ form's (test_supply_system_ad.py).
   Armington ratios, supply and use within 4.3e-9). 134 s, with a full run on the same two cores; the time is to be
   measured alone and with MUMPS (CSparse's LU is not built for this size).
 - The lifted Jacobian has 290,893 non-zeros (0.27% of the matrix; the substituted form's: 32%).
-- IPOPT (MUMPS, zero objective, the system as equality constraints, L-BFGS Hessian): stopped at its first iteration
-  ("Restoration failed") because MUMPS ran out of memory factorising the KKT matrix (648 MB refused under the 3 GB
-  limit the trial ran with beside a full run). To repeat alone with more memory; the factorisation's fill-in (the
-  regions' dense GL demand blocks, the commodities' Armington blocks) is the cost to watch.
+- IPOPT (MUMPS, zero objective, the system as equality constraints, L-BFGS Hessian, tolerance 1e-10, alone on the
+  machine): with MUMPS's defaults it stops at its first iteration (MUMPS cannot allocate 648 MB for the factor, whatever
+  the process's memory limit); with mumps_mem_percent = 100 and the METIS ordering (mumps_pivot_order = 5) it solves:
+  - market_011: 2 iterations (2.0e-2 -> 1.3e-7 -> 7.3e-14), 20.2 s in IPOPT (the default solve 13.4 s), the default
+    solve's equilibrium within 3.7e-9 on the prices, 4.3e-9 on the Armington ratios, supply and use;
+  - market_005 (the first scenario solve, start residual 3.2): 25 iterations, 127 s in IPOPT (the default solve 42 s),
+    the filter line search through the quotas' sigmoids without a continuation; the default solve's equilibrium within
+    1.4e-8 on the prices (sigmas 9.5e-7, young animals 5.4e-7, dairy unknowns 8.3e-6, rents 5.0e-5 EUR/ha).
+  So IPOPT on CAPRI's form solves the market to the default solve's equilibrium, the hard case included, in 3 to 5
+  times its time on this machine; the time per iteration (about 5 s: the Jacobian and the factorisation) is where to
+  work (factor reuse, the linear solver, the Jacobian's evaluation).
 
 Summary of the default solve's fixed points at its equilibria: the land and FEDE milk price lag is spent (5.4e-7
 EUR/ha, 5.3e-10); the young-animal markets carry the 4-round cap's residual above; everything else holds within the

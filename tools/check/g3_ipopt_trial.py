@@ -8,7 +8,7 @@ Jacobian from CasADi; the Lagrangian's Hessian exact or limited-memory (option).
 scale (g3_market_system._scales). Reports IPOPT's status, iterations and time, the largest scaled residual, and each
 unknown block's largest relative difference from the default solve's equilibrium.
 
-    python tools/check/g3_ipopt_trial.py runs/capture/market_011.pkl [exact|lbfgs|newton]
+    python tools/check/g3_ipopt_trial.py runs/capture/market_011.pkl [exact|lbfgs|newton] [ipopt.option=value ...]
 
 newton: CasADi's rootfinder (Newton's method with the exact sparse Jacobian, CSparse) on the same square system instead
 of IPOPT.
@@ -88,6 +88,16 @@ def main() -> None:
             "ipopt.max_iter": 200, "ipopt.linear_solver": "mumps"}
     if hess == "lbfgs":
         opts["ipopt.hessian_approximation"] = "limited-memory"
+    for a in sys.argv[3:]:
+        k, v = a.split("=", 1)
+        try:
+            v = int(v)
+        except ValueError:
+            try:
+                v = float(v)
+            except ValueError:
+                pass
+        opts[k] = v
     t0 = time.time()
     solver = ca.nlpsol("g3", "ipopt", {"x": x, "f": ca.SX(0.0), "g": g}, opts)
     t_setup = time.time() - t0

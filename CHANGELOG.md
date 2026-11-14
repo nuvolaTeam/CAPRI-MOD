@@ -56,8 +56,9 @@ and `docs/KNOWN_ISSUES.md`.
   Armington ratios, supply and use as unknowns) is 0.27% dense against 32%.
 - G3.3 first trials (g3_newton_trial.py, g3_ipopt_trial.py): Newton from the previous solution reaches the default
   solve's equilibrium (prices within 4e-9) in 2-3 steps at the last solve of a run, in 30 damped steps at the first
-  scenario solve (the quotas' steep sigmoids; CAPRI's own quota calibration raises their slope stepwise); IPOPT not yet
-  run to the end (MUMPS ran out of memory under the trial's limit).
+  scenario solve (the quotas' steep sigmoids; CAPRI's own quota calibration raises their slope stepwise); IPOPT on the
+  lifted form (MUMPS with METIS ordering, mumps_mem_percent 100) reaches the same equilibrium in 2 iterations / 20 s at
+  the last solve (the default solve 13 s) and 25 iterations / 127 s at the first scenario solve (the default 42 s).
 - Found: the default solve meets market.tol at its own last evaluation, but the non-EU land and FEDE blocks read the
   previous evaluation's raw milk prices, so its balances re-evaluate above it (1.3e-7 on the base market); the
   young-animal / raw milk rounds stop after 4; Norway's raw milk row takes the young-animal prices of a clearing
