@@ -52,8 +52,21 @@ product prices' change against those the supply models saw, r_g the young-animal
 milk price change (the default solve gets r_g and dL_m from the alternating rounds of _milk_and_yani_clear_all; in G3
 they are unknowns with their own equations). At the 12 captured solves of a mini-EU Farm-to-Fork it reproduces the
 equilibrium's supply on those rows (29 in EU_WEST, 28 in EU_EAST, the K83 units outside the run added) within 2e-16,
-where the rows move up to 51% from the supply models' output (median 1.9%, the first scenario iteration). The rows
-the market's own blocks set (crushing, dairy, biofuels, by-products) are next.
+where the rows move up to 51% from the supply models' output (median 1.9%, the first scenario iteration).
+
+The non-EU market regions' rows (CAPRI's ProdNQ_, supply_ad.nq_rows_function: product prices, the dairy block's raw
+milk price ratio, FEDE, the land rents' shift: all unknowns in G3) reproduce the equilibrium's supply the same way:
+42 regions, 1,330 rows, exactly (same check).
+
+### G3.2c, the non-EU land markets and FeedBal_ together (tools/check/g3_land_fede_residuals.py)
+
+The default solve solves the 45 land markets and the 45 feed energy balances in turn at each evaluation, with the raw
+milk prices of the previous evaluation (a lag). At the captured solutions, solving both again with the current milk
+prices moves the rents by at most 5.4e-7 EUR/ha and FEDE by at most 5.3e-10 (ratio): at the default solve's
+equilibria the lag is spent, and the block holds as one simultaneous system.
+
+The rows the market's own blocks set (crushing, dairy, biofuels, by-products) and the young-animal and raw milk
+markets are next.
 
 ### Next: the rest of the supply side (G3.2c), as MarketModule.supply_response composes it today
 
