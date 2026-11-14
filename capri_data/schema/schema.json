@@ -26832,7 +26832,9 @@
      "capri_mod/market/market_module.py"
     ],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/check_capri_gd_market.py"
+    ],
     "tests": []
    }
   },
@@ -59631,7 +59633,7 @@
   "capri/keep": 501,
   "capri-mod/keep": 2,
   "literature/keep": 11,
-  "numerical/keep": 33,
+  "numerical/keep": 37,
   "open/keep": 4,
   "physical/keep": 13,
   "technical/keep": 34

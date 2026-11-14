@@ -13,6 +13,10 @@ CREATE TABLE code_data_status (
 );
 INSERT INTO code_data_status VALUES
   ('capri_mod/coupling/manure.py', '_T_PER_KT', 1000.0, 'physical', 'keep', 'gams/supply/def_supply_model_par.gms l. 501; gams/manuremarket/declare_manure_market.gms l. 496-500', 't per kt: CAPRI''s pool trade in kt, the supply in its excess-supply slope in t (outer_loop.manure_pool_es_slope "capri_doc")'),
+  ('capri_mod/market/market_g3.py', '_ma28.solve', 96.0, 'numerical', 'keep', NULL, 'the largest multiple of the non-zeros MA28''s arrays are grown to (doubled from 6 where MA28 reports them short), an option of G3''s Newton (market.g3_linear_solver = "ma28")'),
+  ('capri_mod/market/market_g3.py', '_newton', 0.25, 'numerical', 'keep', NULL, 'Powell''s dogleg trust region (market.g3_newton_step = "dogleg"): the region shrunk to a quarter of the step where the model''s prediction ratio is below 0.25 (the textbook rule, Nocedal and Wright, Numerical Optimization, algorithm 4.1)'),
+  ('capri_mod/market/market_g3.py', '_newton', 0.75, 'numerical', 'keep', NULL, 'Powell''s dogleg trust region: the region doubled where the prediction ratio is above 0.75 at its edge (Nocedal and Wright, algorithm 4.1)'),
+  ('capri_mod/market/market_g3.py', '_newton', 0.99, 'numerical', 'keep', NULL, 'Powell''s dogleg trust region: a step of at least 0.99 of the radius counts as on the region''s edge (rounding)'),
   ('capri_mod/market/market_nk.py', 'NewtonKrylovMixin._nk_solve', 32.0, 'numerical', 'keep', NULL, 'smallest backtracking step of the Newton-Krylov line search (1/32), a non-default solver option'),
   ('capri_mod/pipeline/captrd/estimate_bounds.py', 'CERE_MAX_YIELD', 15000.0, 'capri', 'keep', 'gams/captrd/fix_est.gms l. 565-567', 'physical upper limit of cereal yields, kg per ha'),
   ('capri_mod/pipeline/captrd/estimate_bounds.py', 'GRAS_MAX', 40000.0, 'capri', 'keep', 'gams/captrd/fix_est.gms l. 586-592', 'physical upper limit of grass yields (GRAI, GRAE), kg per ha'),

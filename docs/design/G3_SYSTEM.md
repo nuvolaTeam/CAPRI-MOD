@@ -309,6 +309,41 @@ Summary of the default solve's fixed points at its equilibria: the land and FEDE
 EUR/ha, 5.3e-10); the young-animal markets carry the 4-round cap's residual above; everything else holds within the
 solve's tolerance or exactly.
 
+### G3.3, the solver battery (14 November 2026; tools/check/g3_solver_battery.py)
+
+Seven supply shocks from the market solved at CAPRI's base supply rows (the supply rows scaled: soft wheat +5% and
+-20%, milk +10%, beef -10%, the seven cereals -10%, pork -15%, and "f2f-like": the cereals and the six animal products
+-10%), each solved by the fixed point (the reference) and, from the same start, by each method of market_g3.solve;
+the system built once per shock (31-35 s, not in the times). Prices of every method that converged within 2.5e-8 of
+the fixed point's.
+
+| Shock | Fixed point | Newton (PARDISO, line search) | Continuation | IPOPT (MUMPS) | auto (the chain) |
+|---|---|---|---|---|---|
+| soft wheat +5% | 29 it, 17.5 s | stalls (8 steps, 12 s) | 38 s | 128 s | 51 s |
+| soft wheat -20% | 31 it, 19.6 s | stalls (1 step, 4 s) | 40 s | 94 s | 45 s |
+| milk +10% | 33 it, 25.5 s | 19 steps, 31 s | 45 s | 206 s | 33 s |
+| beef -10% | 24 it, 17.3 s | 5 steps, 8 s | stalls at slope 200 (56 s) | 65 s | 9.5 s |
+| cereals -10% | 27 it, 17.9 s | 7 steps, 10.5 s | 44 s | 84 s | 9.6 s |
+| pork -15% | 29 it, 18.1 s | 5 steps, 9 s | 34.5 s | 81.5 s | 8.8 s |
+| f2f-like | 37 it, 24.1 s | stalls (14 steps, 25 s) | 38 s | 152 s | 55 s |
+
+- **The stall rule** (market.g3_stall_steps = 8: Newton stops where its residual is not halved over 8 steps): without
+  it Newton crept 200 steps (327 s) at soft wheat +5% before the chain moved on (the chain 362 s, now 51 s). It may stop
+  the continuation early at slope 200 (beef -10%), where plain Newton converges: not traced.
+- **The dogleg trust region** (market.g3_newton_step = "dogleg", Powell's, on 0.5 ||r||^2): no shock where it beats the
+  line search; Newton stalls on soft wheat +5% and -20%, milk +10% and f2f-like (the line search converges on milk
+  +10%); the continuation with it fails on soft wheat -20%. Kept as an option, not the default.
+- **HSL's solvers in IPOPT** (Coin-HSL 2023.11.17, built here from the project lead's archive against OpenBLAS and
+  METIS; market.g3_ipopt_linear_solver, market.g3_hsllib): the same iterations as MUMPS, slower. Soft wheat +5%: MUMPS
+  128 s, MA97 155 s, MA57 199 s, MA86 256 s, MA27 817 s; soft wheat -20%: MUMPS 94 s, MA97 107 s, MA57 120 s; f2f-like:
+  MUMPS 152 s, MA97 210 s, MA57 284 s.
+- **HSL's MA28 as Newton's linear solver** (market.g3_linear_solver = "ma28", through ctypes): above 13 minutes on the
+  first shock against 13 s with PARDISO; stopped.
+
+Decided with the project lead (14 November 2026): the chain Newton (PARDISO, line search) - continuation - IPOPT
+(MUMPS) stays G3's default; the fixed point stays the market's default solver until G3-R in the mini runs; revisited
+with CAPRI's bounds (G3.4) and real scenario iterations, where IPOPT's bounds may matter more than its speed.
+
 ### Next: the rest of the supply side (G3.2c), as MarketModule.supply_response composes it today
 
 Per row of the market's supply (region x commodity), the block that defines it, in supply_response's order (each a

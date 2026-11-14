@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (33)
+## Open (35)
 
 | # | Issue | Status |
 |---|---|---|
@@ -46,6 +46,8 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K147](#k147) | The market solve's convergence test does not control a lag: the non-EU land and feed energy blocks read the previous evaluation's raw milk prices, so the balances re-evaluate above market.tol (1.3e-7 on the base market) | open: accepted; removed by G3 (one system) |
 | [K148](#k148) | The young-animal markets and the member states' raw milk were cleared in at most 4 alternating rounds inside each market evaluation (CAPRI: one system): up to 8.0e-7 of net supply left | fixed (14 November 2026) |
 | [K149](#k149) | Norway's raw milk row took the young-animal prices of a clearing without the milk price change, its other rows those of a second clearing with it (CAPRI: one set) | fixed (14 November 2026) |
+| [K150](#k150) | The non-EU regions' raw milk at the market's base is FAO_agg's production, not CAPRI's market data (milk delivered to the dairies): Turkey 20,173 kt against CAPRI's 13,145 | open |
+| [K151](#k151) | CAPRI's market processes cheese and casein (v_procQuant CHES 407 kt in A_EU_WEST): the model has neither that use nor the dairies' output for it (EU West cheese production and use both 407 kt below CAPRI's) | open |
 
 ## Resolved (115)
 
@@ -3077,3 +3079,37 @@ Found in G3.2c (capri_mod/market/supply_system_ad.py, which now has the same for
 - **Effect:** Norway's raw milk supply responds to the same young-animal prices as its other products
 - **In 9t:** -
 - **Status:** fixed (14 November 2026; the project lead's decision); validated with the full pair (CHANGELOG)
+
+<a id="k150"></a>
+### K150: The non-EU regions' raw milk at the market's base (found 14 November 2026)
+
+Test A (tools/check/check_capri_market_dump.py, the market at CAPRI's calibration point against CAPRI's dump
+chk_market_data_greendeal_greendeal_scenarios): the non-EU regions' raw milk production is above CAPRI's v_prodQuant
+MILK: Turkey 20,173 kt against 13,145, Ukraine 9,289 against 6,583, South Korea 2,236 against 1,390, the Western Balkans
+5,449 against 2,008 (CAPRI's six member regions summed). Raw milk is not a bilateral commodity, so its base production
+outside the EU comes from CAPRI's FAO_agg balances (market/calibration.py: world_market_baseline.csv,
+dairy_world_baseline.csv); CAPRI's market takes DATA(RM, "PROD", "MILK", "CAL") of its 2030 market data, the milk
+delivered to the dairies (Turkey 13,145.48 = PRCM; cow and sheep and goat milk produced 26,859.78), which the model
+already holds (capri_data/baselines/capri_greendeal_ref/1730/market/market_prod_grof_2030.csv).
+
+- **Effect:** the non-EU regions' raw milk base and the pooled raw milk balance; prices, flows and Armington prices at
+  the calibration point are within 1e-3 of CAPRI's (Test A), so the dairy blocks' own terms are not affected there
+- **In 9t:** -
+- **Status:** open: read the base from market_prod_grof_2030.csv; first check how the regions' dairy blocks and raw
+  milk's pooled world balance use it
+
+<a id="k151"></a>
+### K151: Cheese and casein processed in CAPRI's market (found 14 November 2026)
+
+Test A: CAPRI's market at its calibration point processes cheese and casein (v_procQuant CHES 407.07 kt in A_EU_WEST,
+19.21 kt in A_EU_EAST, 2.92 kt in the Western Balkans; CASE 2.52, 2.81 and 1.40 kt). The model has no processing use
+of them, and its dairies produce correspondingly less: EU West cheese use 7,369.8 kt against CAPRI's 7,776.9 and
+production 8,470.8 against 8,877.9 (both 407.1 kt below), EU East casein use 23.8 against 26.6 and production 6.1
+against 8.9 (both 2.8 kt below). Human consumption, feed, prices and flows of both products match CAPRI's within 1e-4
+(casein's Armington price in EU East 2.2% low, the one Armington cell above 1e-3).
+
+- **Effect:** the EU's cheese and casein supply and use at the base, 4.6% of EU West's cheese production; the dairy
+  blocks' fat and protein balances that the processed quantity draws on
+- **In 9t:** -
+- **Status:** open: find CAPRI's processing of CHES and CASE (ProcNQ_/procYield_, arm/market_model.gms) and its data in
+  the 2030 market data, then port it with the dairy blocks

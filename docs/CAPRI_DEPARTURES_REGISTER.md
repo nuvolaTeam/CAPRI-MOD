@@ -93,7 +93,6 @@ CAPTRD_MOD.md §12.4).
 
 | DEP-30 | Fertiliser options (precision farming, timing, inhibitors, variable rate): the linear cost term is calibrated with the regional model's own marginal value of the N they save, so each option's observed initial share is exactly its optimum at the base. CAPRI values the saving with a notional formula (the national NITF price x nmE on N0 / (1 + nmE m)); where its model's actual value of N differs, its options leave the initial share in its own reference run (fertiliser timing NL410000 0.855, RO020000 0.61; inhibitors PT300000 0.335; initial shares 0). capri-mod meets the condition CAPRI's derivation states ("relsubsi is hypothetically chosen such that mi is optimal for i=0 or i=1") exactly; the project lead's decision of 31 October 2026, a deliberate departure up to CAPRI. Effect: in about ten EU regions CAPRI's 2030 reference has fertiliser timing or inhibitors where the model's baseline has none. | envind/ghgMiti.gms l. 725-745 (the FOC, the stated condition l. 731, beta = nmin_impact x p_fert - costParLin (1 - relsubs0) l. 745; verified), 1016-1035; res_2_1730greendeal_refpol_endotech_all_ini SHARE | supply/capri_regional_nlp.py (calibration: dabat("fert", option)) | in force (decision 31 Oct 2026) | KNOWN_ISSUES K77 |
 | DEP-31 | Pooled commodities with a world balance (one world price ratio per commodity). | m_globMarket trades every commodity bilaterally; a world balance (wldMarket_, nTrd_) is m_netTrade's (arm/market_model.gms l. 4218-4239) | market/bilateral_solve.py | in force; found by the step G review, 1 Nov 2026 | G_REVIEW_2026-11-01.md Q4 |
-| DEP-32 | Regions without supply of a commodity keep their price ratio; CAPRI's PMrk_ sets their market price from the Armington price. | PMrk_ (l. 3074-3080) | market/trade_ad.py l. 41, bilateral_solve.py | in force; review 1 Nov 2026 | G_REVIEW Q4 |
 | DEP-33 | No global (erga omnes) tariff-rate quotas: TRQImports_, tarSpecW_, tarAdValW_ not ported. | l. 3142, 3399, 3475 | market/bilateral.py (bilateral TRQs only) | **removed 4 November 2026** (market move stages 4-5: CAPRI's 70 global quotas, TRQImports_, tarAdValW_, tarSpecW_, the smaller of the global and bilateral rate by ncpcm; docs/design/PORTS_STAGE4.md) | G_REVIEW Q3.a4 |
 | DEP-34 | TRQs of the EU only. | CAPRI's TRQ equations apply to every policy block with quota data; whether its 2030 data have quotas outside the EU is not checked | tools/build/build_bilateral_market.py (reads 'EU' rows only) | **removed 4 November 2026** (stage 4: the 130 bilateral quotas of every importer, EU 81, MOR 16, TUR 15, MED 11, NO000000 5, RUS 2; PORTS_STAGE4.md) | G_REVIEW Q3.a4 |
 | DEP-35 | TRQ quotas and fills summed per model exporter, one sigmoid on the sum, the fill scaled by an import share. | trqSigmoidFunc_ per policy block pair (l. 3275) | market/bilateral.py, trade_ad.py | **removed 4 November 2026** (stage 4: one sigmoid per pair of policy blocks on the flows between their market regions, TradeFlowsAgg_; PORTS_STAGE4.md) | G_REVIEW Q3.a6 |
@@ -146,6 +145,16 @@ ones known to be stale.
 
 The settings switched to CAPRI's form are described in DEPARTURES_FROM_CAPRI.md, "Switched to CAPRI's setting". Also
 switched to CAPRI's form:
+- DEP-32, regions without supply of a bilateral commodity held at their price ratio: CAPRI's PMrk_ (arm/market_model.gms
+  l. 3074-3080), the market price = the Armington price + the calibrated margin PMrkMrg = PMrk - arm1P
+  (data_fit.gms l. 955), in the default solve (bilateral_solve.py `_bilateral_eval`) and in G3's system (in place of
+  the empty balances); 542 cells, CAPRI's 542 PMrk_ records of chk_market_data (14 November 2026). In the Green Deal
+  market check (tools/check/check_capri_gd_market.py) the 542 cells' price changes went from held (CAPRI moving 214 of
+  them by more than 1%) to within a median 0.02 points of CAPRI's (95% within 2.2).
+- MarketPriceAgg_ (to check until then; not a registered departure): the border measures of an aggregate exporter block
+  (MER) take CAPRI's average market price of its regions weighted by 1 + use (+ production without use in CAPRI's data),
+  at current quantities, instead of the pair's base-flow weighted price (14 November 2026; BilateralCommodity.border_spec,
+  import_prices_ad.py). The default solve weights with the previous evaluation's quantities (the same at a solution).
 - DEP-5's main part, the market's demand recalibrated to the supply models' supply in every baseline iteration and
   inherited frozen by the scenarios (`market.demand_calibration = "supply"`): the market is calibrated once per run
   at CAPRI's own 2030 market data, the baseline a market solution, only the supply side following the supply models

@@ -45,6 +45,35 @@ class BilateralCommodity:
     D0: Optional[np.ndarray] = None
     #: n x n transport cost of each flow (EUR/t, CAPRI TCost): with a0 r the base of an ad valorem tariff change
     tc: Optional[np.ndarray] = None
+    #: n: the region has a market price of its own in CAPRI's data (DATA PMrk; elsewhere Pd0 is a filled value)
+    pmrk_data: Optional[np.ndarray] = None
+    #: (S, D): the supply and use (1000 t) the policy blocks' average market prices are weighted with
+    #: (MarketPriceAgg_, mpagg_weights): the calibration point's, then each evaluation's (_bilateral_eval)
+    mpagg_SD: Optional[tuple] = None
+
+    def pmrk_cells(self) -> np.ndarray:
+        """CAPRI's PMrk_ cells (arm/market_model.gms l. 3074-3080): the regions without production of the commodity (no
+        base supply here; CAPRI: v_prodQuant.UP = 0) that have a market price in CAPRI's data and an Armington price.
+        Their market price is not set by a balance (they sell nothing) but by PMrk_: the Armington price plus the
+        margin calibrated at the calibration point, DATA PMrkMrg = PMrk - arm1P (arm/data_fit.gms l. 955), here
+        Pd0 - PA0 (pmrk_ratios)."""
+        m = np.asarray(self.S0, float) <= 1e-6
+        if self.pmrk_data is not None:
+            m = m & np.asarray(self.pmrk_data, bool)
+        return m & (np.asarray(self.PA0, float) > 0)
+
+    def pmrk_ratios(self, PA: np.ndarray) -> np.ndarray:
+        """PMrk_ as price ratios: (PA + Pd0 - PA0) / Pd0 at the Armington prices PA (EUR/t), every region (use on
+        pmrk_cells only). Floored at 1e-3: CAPRI bounds the market price below at P_lowLimitFactPrice x PMrk
+        (set_start_val.gms l. 527) and widens the bound where it binds (G3.4, not yet)."""
+        return np.maximum((np.asarray(PA, float) + self.Pd0 - self.PA0) / self.Pd0, 1e-3)
+
+    def mpagg_weights(self, S, D):
+        """CAPRI's MarketPriceAgg_ weights (arm/market_model.gms l. 3088-3101): 1 + v_Arm1Quant + v_prodQuant where the
+        region has no Armington quantity in CAPRI's data (no use at the calibration point), per region; numpy arrays or
+        CasADi expressions."""
+        nod = (np.asarray(self.D0, float) <= 0) if self.D0 is not None else np.zeros(len(self.regions), bool)
+        return [1.0 + D[i] + (S[i] if nod[i] else 0.0) for i in range(len(self.regions))]
 
     def calibrate(self, S0: np.ndarray) -> None:
         """Closure at the model's own base supply S0: CAPRI's trade flows are kept, domestic sales absorb the
@@ -87,6 +116,9 @@ class BilateralCommodity:
         self._off = off
         self._has_imp = M > 0
         self._has_dom = DS > 0
+        # the policy blocks' average market price (MarketPriceAgg_) weighted at the calibration point's quantities (the
+        # border measures' base, border_base, follows the calibration: _bilateral_calibrate)
+        self.mpagg_SD = (np.asarray(self.S0, float).copy(), np.asarray(self.D0, float).copy())
 
     # CAPRI's bilateral tariff-rate quotas (arm/market_model.gms trqSigmoidFunc_, tarSpec_, tarAdval_; stage 4 of the
     # market move, docs/design/PORTS_STAGE4.md): one per pair of policy blocks (importer RMTP, exporter RMTP), filled
@@ -416,13 +448,22 @@ class BilateralCommodity:
         sB, sW = (self.trq_sigma, self.trq_sigmaW) if sig is None else sig
         tc = self.tc if self.tc is not None else np.zeros_like(self.a0)
         cif = self.a0 * r[None, :] + tc
-        # CAPRI defines the measures per pair of policy blocks (v_marketPrice(RMTP1) + v_transpCost(RMTP, RMTP1),
-        # TransportCostsAgg_: the CIF price weighted by the pair's base flows), the same for every flow of the pair
+        # CAPRI defines the measures per pair of policy blocks: v_marketPrice(RMTP1) + v_transpCost(RMTP, RMTP1), the
+        # same for every flow of the pair. v_transpCost of a pair with an aggregate block: the RM pairs' transport costs
+        # weighted by their base flows (TransportCostsAgg_, fixed in simulation, data_cal.gms l. 2378); v_marketPrice
+        # of an aggregate exporter block: its regions' market prices weighted by 1 + use (+ production where the region
+        # has no use in CAPRI's data), MarketPriceAgg_ (mpagg_weights at mpagg_SD); of a single exporter region its
+        # market price (a0 = Pd0, the exporter's market price, in the data)
         grp = b.get("pairs")
         if grp:
             cif = cif.copy()
+            wq = (np.asarray(self.mpagg_weights(*self.mpagg_SD), float) if self.mpagg_SD is not None else None)
             for ii, jj, w in grp:
-                cif[np.ix_(ii, jj)] = float((w * cif[np.ix_(ii, jj)]).sum() / w.sum())
+                if len(jj) > 1 and wq is not None:
+                    pm = float((wq[jj] * self.Pd0[jj] * r[jj]).sum() / wq[jj].sum())
+                    cif[np.ix_(ii, jj)] = pm + float((w * tc[np.ix_(ii, jj)]).sum() / w.sum())
+                else:
+                    cif[np.ix_(ii, jj)] = float((w * cif[np.ix_(ii, jj)]).sum() / w.sum())
         k = b["kind"]
         en = k == 1
         if en.any():

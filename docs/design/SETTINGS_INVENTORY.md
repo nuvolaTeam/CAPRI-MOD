@@ -80,7 +80,7 @@ as one-key-per-line TOML (comments and [v] marks removed): it parses, 153 keys.
                nbal_tol_abs=0.01; nbal_tol_rel=1e-3; nbal_inner_max=16 (land_inner_max, land_tol: removed)
                nlp_tol=1e-8; nlp_max_iter=3000; nlp_warm_max_iter=200; nlp_acceptable_tol=1e-6; nlp_max_cpu_time=60
                nlp_cal_tol=1e-6; manure_pool_slope=0.05
-[market]       biofuel_markets=true (BIOF_M [v]); eu_blocks=false (CAPRI defaultA.agg: two blocks); use_dairy_block=true; yani_milk_rounds=50, yani_milk_tol=1e-10 (S505, S506; 14 Nov 2026); solver="g3_newton"/"g3_ipopt" options, g3_tol=1e-10, g3_max_iter=200, g3_linear_solver="pardiso", g3_settle_evals=20 (S507-S510)
+[market]       biofuel_markets=true (BIOF_M [v]); eu_blocks=false (CAPRI defaultA.agg: two blocks); use_dairy_block=true; yani_milk_rounds=50, yani_milk_tol=1e-10 (S505, S506; 14 Nov 2026); solver="g3_newton"/"g3_ipopt" options, g3_tol=1e-10, g3_max_iter=200, g3_linear_solver="pardiso", g3_settle_evals=20, g3_slope_steps=[25,50,100], g3_stall_steps=8, g3_newton_step="linesearch", g3_ipopt_linear_solver="mumps", g3_hsllib="" (S507-S515)
                food_demand_gl=true; gl_refit_commitments=true; processing_nq=true; use_region_supply_elas=true
                crush_margin_producer_prices=true; use_trq=true; market_supply_nq=false (calibrate_supply.gms)
                nq_price_shock=0.01; market_structure="bilateral"; acceleration="anderson"; aa_memory=5

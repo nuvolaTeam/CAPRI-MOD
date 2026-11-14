@@ -326,7 +326,7 @@ modelled inside ROW's demand while its market is WBA. The move fixes it (RMS_TO_
 | DEP-35 TRQs summed per model exporter | **removed** at stage 4 (RMTP pairs; MER restored) |
 | DEP-36 out-of-quota tariff frozen as a gap | touched: port tarAdVal_ per RMTP pair at stage 4 |
 | DEP-40 one Armington elasticity per commodity | touched: at sim_ini CAPRI's values are identical across RM, so it has no numerical effect at this baseline [V]; reading per RM makes the row moot |
-| DEP-31 pooled commodities with a world balance; DEP-32 PMrk_ for regions without supply; DEP-5 non-EU use factor in [0.2, 5] | touched: more regions, more regions without supply of a product [I] |
+| DEP-31 pooled commodities with a world balance; PMrk_ for regions without supply (DEP-32, ported 14 November 2026); DEP-5 non-EU use factor in [0.2, 5] | touched: more regions, more regions without supply of a product [I] |
 | DEP-16 fixed-point market solve; DEP-37, DEP-38, DEP-39 floors and fudges | touched (per region; size) [I] |
 | DEP-7 non-EU supply (UK, Turkey, WB without supply models), DEP-29 Norway's dairy lag, DEP-12 plain CES | unchanged |
 | KNOWN_ISSUES K45 (EGY, ALG mapped into ROW) | superseded: they sit in MED |

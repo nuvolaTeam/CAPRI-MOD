@@ -8,7 +8,8 @@ flexible levies FlexLevyNotCut_, FlexLevy_: BilateralCommodity.border_spec). The
 current sigmas; G3 needs them as expressions of the prices r and the quotas' sigmas, which this module writes, cell by
 cell in the numpy code's order of operations (the last quota writing a cell wins, as in _trq_rates).
 
-    import_price_function(sc) -> CasADi Function (r[n], sB[nb], sW[ng]) -> p[cells]
+    import_price_function(sc) -> CasADi Function (r[n], sB[nb], sW[ng], S[n], D[n]) -> p[cells]
+        (S, D: supply and use, the weights of an aggregate exporter block's average market price, MarketPriceAgg_)
     cells(sc) -> the (importer, exporter) pairs of p, the flows with beta > 0
 
 Checked against BilateralCommodity.import_prices at random prices and sigmas (capri_mod/tests/test_import_prices_ad.py).
@@ -76,9 +77,10 @@ def _mask(sc, ix) -> np.ndarray:
 
 
 def import_price_function(sc):
-    """CasADi Function (r[n], sB[nb], sW[ng]) -> p[cells(sc)]: the import prices of the flows at the exporters' price
-    ratios r and the quotas' sigmas (bilateral sB, global sW), BilateralCommodity.import_prices(r, sig=(sB, sW))
-    without the scenario's tariff additions."""
+    """CasADi Function (r[n], sB[nb], sW[ng], S[n], D[n]) -> p[cells(sc)]: the import prices of the flows at the
+    exporters' price ratios r and the quotas' sigmas (bilateral sB, global sW), BilateralCommodity.import_prices(r,
+    sig=(sB, sW)) without the scenario's tariff additions, with the border measures' average market price of an
+    aggregate exporter block (MarketPriceAgg_) weighted at supply S and use D (the numpy code: at mpagg_SD)."""
     key = (sc.name, id(sc))
     f = _CACHE.get(key)
     if f is not None:
@@ -88,6 +90,8 @@ def import_price_function(sc):
     nb, ng = len(sc.trq_quotas or ()), len(sc.trq_globals or ())
     r = ca.SX.sym("r", n)
     sB, sW = ca.SX.sym("sB", nb), ca.SX.sym("sW", ng)
+    S, D = ca.SX.sym("S", n), ca.SX.sym("D", n)
+    wq = sc.mpagg_weights(S, D)
     a, b, a0 = (np.asarray(x, float) for x in (sc.a, sc.b, sc.a0))
     tc = np.asarray(sc.tc, float) if sc.tc is not None else np.zeros((n, n))
     cl = cells(sc)
@@ -96,7 +100,9 @@ def import_price_function(sc):
     ta0 = np.nan_to_num(sc._trq_ta0) if has_trq else None
     ts0 = np.nan_to_num(sc._trq_ts0) if has_trq else None
     bd = sc.border
-    # the border measures' CIF price per cell: a0 r + tc, averaged over the pair of policy blocks with the base flows
+    # the border measures' CIF price per cell: a0 r + tc, averaged over the pair of policy blocks with the base flows;
+    # for an aggregate exporter block its average market price (MarketPriceAgg_) plus the pair's transport cost
+    # (TransportCostsAgg_), as BilateralCommodity.border_spec
     cif = {}
     if bd:
         grp_of = {}
@@ -107,6 +113,11 @@ def import_price_function(sc):
         grp_expr = {}
         for gi, (ii, jj, w) in enumerate(bd.get("pairs") or ()):
             ii, jj, w = np.atleast_1d(ii), np.atleast_1d(jj), np.asarray(w, float)
+            if len(jj) > 1:
+                pd0 = np.asarray(sc.Pd0, float)
+                pm = sum(wq[int(j)] * pd0[int(j)] * r[int(j)] for j in jj) / sum(wq[int(j)] for j in jj)
+                grp_expr[gi] = pm + float((w * tc[np.ix_(ii, jj)]).sum() / w.sum())
+                continue
             num = 0
             for x_, i in enumerate(ii):
                 for y_, j in enumerate(jj):
@@ -146,7 +157,7 @@ def import_price_function(sc):
                 spec = _ncpcm(ca, notcut, tars, z)
             p = p + (spec - float(bd["S0"][i, j]))
         out.append(p)
-    f = ca.Function("import_prices_" + sc.name, [r, sB, sW], [ca.vertcat(*out) if out else ca.SX(0, 1)],
-                    ["r", "sB", "sW"], ["p"])
+    f = ca.Function("import_prices_" + sc.name, [r, sB, sW, S, D], [ca.vertcat(*out) if out else ca.SX(0, 1)],
+                    ["r", "sB", "sW", "S", "D"], ["p"])
     _CACHE[key] = f
     return f

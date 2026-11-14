@@ -12,7 +12,8 @@ Unknowns x (in this order; `layout["x"]` names each slice):
 
 Equations F (same order and sizes):
   bal    every bilateral commodity's supply balance per region (SupBalM_; trade_system_ad, supply and use from the
-         blocks: supply_system_ad, use_ad, the EU's residual feeds from the use)
+         blocks: supply_system_ad, use_ad, the EU's residual feeds from the use); for a region without production
+         of the commodity, CAPRI's PMrk_ instead (BilateralCommodity.pmrk_cells)
   trq    the active quotas' sigmoid equations
   yani   yaniMarket_ of the EU market regions and Norway
   dairyE FatsProtBal_, DairyNQ_ = ProdNQ_ MILK per member state
@@ -34,11 +35,13 @@ from __future__ import annotations
 import numpy as np
 
 
-def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = False):
+def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = False, slope=None):
     """(Function x -> (F, pooled, S, D), layout, x, F). lifted: the Armington ratios of the bilateral commodities,
     the supply and the use are unknowns of their own with their defining equations (CAPRI's form: v_arm1Price,
     v_prodQuant, v_arm1Quant), appended to x and F as PA, S, D and PAdef, Sdef, Ddef; the Jacobian is then sparse
-    (each region's use depends on its own prices, each Armington ratio on its commodity's prices)."""
+    (each region's use depends on its own prices, each Armington ratio on its commodity's prices). slope: a CasADi
+    symbol for the quotas' sigmoid slope (CAPRI's p_trqSigmoidSlope) in F, for a continuation on it; None: the
+    constant TRQ_SLOPE."""
     import casadi as ca
     from capri_mod.market.supply_system_ad import supply_system
     from capri_mod.market.trade_system_ad import active_quotas, trade_system_function
@@ -103,26 +106,34 @@ def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = Fals
             RR[:, j] = rB[c]
         else:
             RR[:, j] = ca.DM(r0[c].reindex(regions).fillna(1.0).to_numpy(dtype=float))
-    # the Armington ratios from each commodity's trade block (its prices at r and the quotas' sigmas)
-    PA = ca.SX(RR)
-    tf = {c: trade_system_function(sc) for c, sc in sysd.items()}
-    zero = ca.DM.zeros(nR)
-    for c, sc in sysd.items():
-        sB, sW, _, _ = sig[c]
-        PA[:, ci[c]] = tf[c](rB[c], sB, sW, zero, zero)[3]
-
     # lifted: the Armington ratios, supply and use as unknowns (their values from the substituted functions)
     bcols = [ci[c] for c in sysd]
-    PA_fun = PA
     if lifted:
         PAu = unk("PA", nR * len(bcols))
-        PA = ca.SX(RR)
-        for k, j in enumerate(bcols):
-            PA[:, j] = PAu[k * nR:(k + 1) * nR]
         Su = unk("S", nR * nC)
         Du = unk("D", nR * nC)
         Sv = ca.reshape(Su, nR, nC)
         Dv = ca.reshape(Du, nR, nC)
+
+    # the Armington ratios from each commodity's trade block (its prices at r and the quotas' sigmas; supply and use
+    # weight an aggregate exporter block's average market price in the border measures, MarketPriceAgg_: the lifted
+    # form's unknowns, the substituted form the latest evaluation's, mpagg_SD)
+    PA = ca.SX(RR)
+    tf0 = {c: trade_system_function(sc, slope_input=slope is not None) for c, sc in sysd.items()}
+    tf = {c: ((lambda *a, _f=f: _f(*a, slope)) if slope is not None else f) for c, f in tf0.items()}
+    for c, sc in sysd.items():
+        sB, sW, _, _ = sig[c]
+        if lifted:
+            Sw, Dw = Sv[:, ci[c]], Dv[:, ci[c]]
+        else:
+            sd = sc.mpagg_SD if sc.mpagg_SD is not None else (np.zeros(nR), np.zeros(nR))
+            Sw, Dw = ca.DM(sd[0]), ca.DM(sd[1])
+        PA[:, ci[c]] = tf[c](rB[c], sB, sW, Sw, Dw)[3]
+    PA_fun = PA
+    if lifted:
+        PA = ca.SX(RR)
+        for k, j in enumerate(bcols):
+            PA[:, j] = PAu[k * nR:(k + 1) * nR]
 
     # supply, use, and the residual feeds that follow the use
     S, res_y, res_E, res_W, biofX = sf(PA, RR, ry, uE, uW, fede, dr)
@@ -146,7 +157,16 @@ def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = Fals
     for c, sc in sysd.items():
         sB, sW, bil, glo = sig[c]
         out = tf[c](rB[c], sB, sW, S[:, ci[c]], D[:, ci[c]])
-        bal.append(out[0])
+        b_ = out[0]
+        m = sc.pmrk_cells()
+        if m.any():
+            # CAPRI's PMrk_ (arm/market_model.gms l. 3074-3080) in place of the empty balance of a region without
+            # production: market price = Armington price + the calibrated margin Pd0 - PA0 (BilateralCommodity.
+            # pmrk_cells; the default solve sets these prices in _bilateral_eval, with a floor at 1e-3 not written here)
+            pa0, pd0 = np.asarray(sc.PA0, float), np.asarray(sc.Pd0, float)
+            b_ = ca.vertcat(*[(rB[c][i] - (PA[i, ci[c]] * pa0[i] + pd0[i] - pa0[i]) / pd0[i]) if m[i] else b_[i]
+                              for i in range(len(sc.regions))])
+        bal.append(b_)
         if bil or glo:
             trq.append(out[1])
     pooled = ca.vertcat(*[ca.sum1(S[:, ci[c]] - D[:, ci[c]]) for c in cols if c not in sysd]) \
@@ -204,7 +224,8 @@ def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = Fals
            ("feed", cat(feed)), ("land", cat(land))] + (lift_eqs if lifted else [])
     x = ca.vertcat(*xs)
     F = ca.vertcat(*[e for _, e in eqs])
-    fn = ca.Function("market_system", [x], [F, pooled, S, D], ["x"], ["F", "pooled", "S", "D"])
+    fn = ca.Function("market_system", [x] + ([slope] if slope is not None else []), [F, pooled, S, D],
+                     ["x"] + (["slope"] if slope is not None else []), ["F", "pooled", "S", "D"])
     lay = dict(sl, x=names, eqs=[(n, int(e.shape[0])) for n, e in eqs], n_x=int(x.shape[0]), n_F=int(F.shape[0]),
                sig=sig, byp_cells=ul["byp_cells"], milk_regs=ul["milk_regs"], lifted=lifted)
     if lifted:

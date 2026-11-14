@@ -32,6 +32,32 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 14 November 2026, afternoon — G3.3 solver battery; PMrk_ and MarketPriceAgg_ ported; the market against CAPRI's own (Test A, the Green Deal response)
+
+- **G3.3 (docs/design/G3_SYSTEM.md, the solver battery):** the chain Newton (PARDISO) - continuation on the quotas'
+  slope - IPOPT (MUMPS) solves all 7 supply shocks of tools/check/g3_solver_battery.py, prices within 2.5e-8 of the
+  fixed point's. New: the stall rule (market.g3_stall_steps), the dogleg step as an option (market.g3_newton_step),
+  IPOPT's linear solver and HSL's library as settings (market.g3_ipopt_linear_solver, market.g3_hsllib), HSL's MA28
+  for Newton (market.g3_linear_solver = "ma28"). The dogleg, HSL's MA27/57/86/97 in IPOPT and MA28 measured, not
+  adopted. The default solver is unchanged (the fixed point).
+- **PMrk_ (DEP-32 removed):** the market price of a region without production of a bilateral commodity is its Armington
+  price + the calibrated margin Pd0 - PA0 (CAPRI's PMrkMrg), in the default solve and in G3's system; 542 cells.
+- **MarketPriceAgg_:** the border measures where the exporter is an aggregate policy block (MER: the EU's imports from
+  Mercosur under the entry prices and the flexible levies) take CAPRI's quantity-weighted average market price.
+- **Test A** (tools/check/check_capri_market_dump.py, the market at CAPRI's calibration point against CAPRI's dump
+  chk_market_data_greendeal_greendeal_scenarios, a reference for checking only): prices of 2,160 cells within 1.5e-4,
+  16,728 trade flows within 1e-3, Armington prices within 1e-3 except casein in EU East (2.2%). Found: K150 (the
+  non-EU regions' raw milk base from FAO_agg, not CAPRI's market data), K151 (CAPRI's processing of cheese and casein,
+  missing: EU West cheese 407 kt).
+- **The Green Deal response** (tools/check/check_capri_gd_market.py: the market solved at CAPRI's baseline supply and
+  at CAPRI's Green Deal supply, feed bulks and supply-side prices, from the project lead's two CAPRI result files; a
+  check only): the changes of the EU's market prices within a median 0.08 points of CAPRI's (95% within 0.64), its
+  domestic use 0.16 (1.3), imports 0.12 (1.6), exports 0.14 (3.2); all market prices 0.04 (0.53). With PMrk_ the 542
+  cells it covers within a median 0.02 points. CAPRI's results file does not update the market regions' raw milk
+  price (PMRK MILK unchanged in all 36 entries); its member states' producer price rises 10.7% (weighted), the
+  model's EU blocks 11.0% and 10.3%.
+- Suite: the market tests touched (24) pass; the fast suite (see below).
+
 ## 14 November 2026, early morning — G3.2c-e and first G3.3 trials; the validation pair on today's dev
 
 - The validation pair on dev ffb8a0b (P2 step 2, K145, K146; the data identical to the later commits): the full-EU

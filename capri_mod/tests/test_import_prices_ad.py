@@ -52,19 +52,25 @@ def _check(market, need_border):
         for _ in range(4):
             trials.append((rng.uniform(0.7, 1.4, n), rng.uniform(0.0, 1.0, nb) if nb else None,
                            rng.uniform(0.0, 1.0, ng) if ng else None))
-        for r, sB, sW in trials:
+        if sc.border and any(len(jj_) > 1 for _, jj_, _ in (sc.border.get("pairs") or ())):
+            checked["aggregate exporters"] = checked.get("aggregate exporters", 0) + 1
+        sd0 = sc.mpagg_SD
+        for k, (r, sB, sW) in enumerate(trials):
             sB_ = np.zeros(0) if sB is None else np.asarray(sB, float)
             sW_ = np.zeros(0) if sW is None else np.asarray(sW, float)
             sig = (sB_, sW_) if (nb or ng) else None
+            # MarketPriceAgg_'s weights: the calibration point's, then supply and use moved at random
+            sc.mpagg_SD = sd0 if k == 0 else (sd0[0] * rng.uniform(0.5, 1.5, n), sd0[1] * rng.uniform(0.5, 1.5, n))
             p_num = sc.import_prices(r, sig=sig)[ii, jj]
-            p_ad = np.asarray(f(r, sB_, sW_)).ravel()
+            p_ad = np.asarray(f(r, sB_, sW_, sc.mpagg_SD[0], sc.mpagg_SD[1])).ravel()
             rel = np.abs(p_ad - p_num) / np.maximum(np.abs(p_num), 1.0)
             worst = max(worst, float(rel.max()))
             assert rel.max() < 1e-12, (c, float(rel.max()), cl[int(rel.argmax())])
+        sc.mpagg_SD = sd0
     print("checked", checked, "worst relative difference", worst)
     assert checked["quotas"] > 0 and checked["globals"] > 0
     if need_border:
-        assert checked["entry"] > 0 and checked["levy"] > 0
+        assert checked["entry"] > 0 and checked["levy"] > 0 and checked.get("aggregate exporters", 0) > 0
 
 
 @pytest.mark.slow
@@ -88,7 +94,9 @@ def test_trade_system_in_casadi_equals_the_numeric_one(market_2030):
             sB = rng.uniform(0, 1, nb) if nb else np.zeros(0)
             sW = rng.uniform(0, 1, ng) if ng else np.zeros(0)
             sig = (sB, sW) if (nb or ng) else None
+            sd0, sc.mpagg_SD = sc.mpagg_SD, (S, D)            # MarketPriceAgg_'s weights at this supply and use
             p = sc.import_prices(r, sig=sig)
+            sc.mpagg_SD = sd0
             X, _ = sc.flows(D, r, p)
             bal_num = sc.residual(S, D, r, p)
             out = f(r, sB, sW, S, D)

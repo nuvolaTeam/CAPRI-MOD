@@ -453,6 +453,21 @@ g3_max_iter = 200
 # package pypardiso, Intel's licence, installed by the user as CAPRI's CONOPT; MUMPS when it is missing) or "mumps"
 # (bundled with CasADi, open)
 g3_linear_solver = "pardiso"
+# "g3_newton": where Newton stalls, a continuation on the quotas' sigmoid slope (CAPRI's p_trqSigmoidSlope, 200):
+# Newton at these slopes in turn, then at CAPRI's, each from the last (CAPRI's trim_trqs.gms raises it from 10 to 200
+# by 10; on the base market at +5% soft wheat these four stages took 22 Newton steps, 10 to 200 by doubling 27, 50
+# then 200 26, Newton at 200 alone stalls)
+g3_slope_steps = [25.0, 50.0, 100.0]
+# G3 Newton: stalled when its residual is not halved over this many steps (then the next method of the chain)
+g3_stall_steps = 8
+# G3 Newton's step: "linesearch" (backtracking on the largest scaled residual) or "dogleg" (Powell's dogleg trust region
+# on the sum of squared scaled residuals, MINPACK's hybrj)
+g3_newton_step = "linesearch"
+# G3 IPOPT's linear solver: "mumps" (bundled with CasADi) or an HSL solver ("ma27", "ma57", "ma77", "ma86", "ma97":
+# Coin-HSL, under STFC's licence, which the user obtains and builds, as CAPRI's users obtain CONOPT's licence)
+g3_ipopt_linear_solver = "mumps"
+# the Coin-HSL library (libcoinhsl.so) for an HSL solver; "" lets IPOPT look for it on the library path
+g3_hsllib = ""
 # G3: evaluations of the fixed point at the solution before it starts, until its supply and use change by less than
 # g3_tol (its blocks' lagged state, KNOWN_ISSUES K147), at most this many
 g3_settle_evals = 20

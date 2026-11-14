@@ -31,9 +31,10 @@ def active_quotas(sc):
             [m for m, g in enumerate(sc.trq_globals or ()) if g["Q"] > 0])
 
 
-def trade_system_function(sc):
+def trade_system_function(sc, slope_input: bool = False):
     """See the module's docstring."""
-    key = (sc.name, id(sc), tuple(q["Q"] for q in (sc.trq_quotas or ())), tuple(g["Q"] for g in (sc.trq_globals or ())))
+    key = (sc.name, id(sc), tuple(q["Q"] for q in (sc.trq_quotas or ())), tuple(g["Q"] for g in (sc.trq_globals or ())),
+           slope_input)
     f = _CACHE.get(key)
     if f is not None:
         return f
@@ -43,8 +44,11 @@ def trade_system_function(sc):
     r = ca.SX.sym("r", n)
     sB, sW = ca.SX.sym("sB", nb), ca.SX.sym("sW", ng)
     S, D = ca.SX.sym("S", n), ca.SX.sym("D", n)
+    # the quotas' sigmoid slope: CAPRI's p_trqSigmoidSlope (TRQ_SLOPE), or an input (slope_input: a continuation on it,
+    # as CAPRI's trim_trqs.gms raises it from 10 to 200)
+    sl = ca.SX.sym("slope") if slope_input else None
     cl = cells(sc)
-    pv = import_price_function(sc)(r, sB, sW)
+    pv = import_price_function(sc)(r, sB, sW, S, D)       # S, D: MarketPriceAgg_'s weights
     beta = np.asarray(sc.beta, float)
     s1, s2 = float(sc.s1), float(sc.s2)
     p = {}
@@ -90,7 +94,7 @@ def trade_system_function(sc):
 
     def fill(q):
         return sum((X[int(i), int(j)] for i in q["rows"] for j in q["cols"] if (int(i), int(j)) in X), 0)
-    slope, mid, clip = float(sc.TRQ_SLOPE), float(sc.TRQ_FILL_MID), float(sc.TRQ_ARG_CLIP)
+    slope, mid, clip = (sl if slope_input else float(sc.TRQ_SLOPE)), float(sc.TRQ_FILL_MID), float(sc.TRQ_ARG_CLIP)
     bil, glo = active_quotas(sc)
     trq = []
     for k in bil:
@@ -108,9 +112,9 @@ def trade_system_function(sc):
         arg = ca.fmin(ca.fmax(slope * (tot / g["Q"] - mid), -clip), clip)
         trq.append(sW[m_] - 1.0 / (1.0 + ca.exp(-arg)))
     PAr = ca.vertcat(*[PA[i] / float(sc.PA0[i]) for i in range(n)])
-    f = ca.Function("trade_system_" + sc.name, [r, sB, sW, S, D],
+    f = ca.Function("trade_system_" + sc.name, [r, sB, sW, S, D] + ([sl] if slope_input else []),
                     [ca.vertcat(*bal), ca.vertcat(*trq) if trq else ca.SX(0, 1),
                      ca.vertcat(*[X[c] for c in cl]) if cl else ca.SX(0, 1), PAr],
-                    ["r", "sB", "sW", "S", "D"], ["bal", "trq", "X", "PAr"])
+                    ["r", "sB", "sW", "S", "D"] + (["slope"] if slope_input else []), ["bal", "trq", "X", "PAr"])
     _CACHE[key] = f
     return f

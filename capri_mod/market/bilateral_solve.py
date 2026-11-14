@@ -67,10 +67,11 @@ class BilateralSolveMixin(MarketStateMixin):
             pm = rg[rg.commodity == c].set_index("region")["pmrk"]
             Pd0 = np.array([float(pm.get(r, np.nan)) for r in R])
             fill = float(np.nanmedian(Pd0)) if np.isfinite(Pd0).any() else 1.0
-            Pd0 = np.where(np.isfinite(Pd0) & (Pd0 > 0), Pd0, fill)
+            has_p = np.isfinite(Pd0) & (Pd0 > 0)
+            Pd0 = np.where(has_p, Pd0, fill)
             out[c] = BilateralCommodity(c, R, X0, a, b, a0, Pd0,
                                         float(rho.at[c, "rho1"]) if c in rho.index else 8.0,
-                                        float(rho.at[c, "rho2"]) if c in rho.index else 10.0, tc=tc)
+                                        float(rho.at[c, "rho2"]) if c in rho.index else 10.0, tc=tc, pmrk_data=has_p)
         # CAPRI's bilateral tariff-rate quotas of every importer, per pair of policy blocks (tools/build/
         # build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md)
         if inp.exists(f"bilateral_trq_{year}.csv"):
@@ -331,12 +332,23 @@ class BilateralSolveMixin(MarketStateMixin):
         self.sv.bilat_local_el = None
 
     def _bilateral_eval(self, r: pd.DataFrame, exogenous_supply, trade_scenario=None):
-        """Full model response at producer price ratios r: supply, demand, consumer price ratios, residuals."""
+        """Full model response at producer price ratios r: supply, demand, consumer price ratios, residuals.
+
+        CAPRI's PMrk_: the market price of a region without production of a bilateral commodity (pmrk_cells) is its
+        Armington price plus the calibrated margin; it is set here, in r itself (the caller's frame), from the
+        Armington prices at r, before supply and use read the prices (a region without domestic sales has an
+        Armington price independent of its own market price)."""
         sysd = self.par.bilat
         dom0 = self._dom0()
-        PAr = r.copy()
         pcache = {}
         tadd = self._tariff_adds(trade_scenario)
+        for c, sc in sysd.items():
+            m = sc.pmrk_cells()
+            if m.any() and c in r.columns:
+                rc = r[c].values.astype(float)
+                _, _, PA, _ = sc.prices(rc, sc.import_prices(rc, tadd.get(c)))
+                r[c] = np.where(m, sc.pmrk_ratios(PA), rc)
+        PAr = r.copy()
         for c, sc in sysd.items():
             rc = r[c].values
             p = sc.import_prices(rc, tadd.get(c))
@@ -401,6 +413,13 @@ class BilateralSolveMixin(MarketStateMixin):
                 # the pooled commodities' world balance, written once in CasADi (market step G2b, supply_ad.py)
                 F[c] = np.asarray(pooled_residual_function(len(S))(S[c].to_numpy(dtype=float),
                                                                      D[c].to_numpy(dtype=float))).ravel()
+        # MarketPriceAgg_'s weights for the border measures of an aggregate exporter block: this evaluation's supply
+        # and use, read by the next evaluation's import prices (one evaluation behind, the same at a solution; the
+        # joint system, market_system_ad, has them in place)
+        for c, sc in sysd.items():
+            if sc.border and any(len(jj) > 1 for _, jj, _ in (sc.border.get("pairs") or ())):
+                sc.mpagg_SD = (S[c].reindex(sc.regions).fillna(0.0).to_numpy(dtype=float),
+                               D[c].reindex(sc.regions).fillna(0.0).to_numpy(dtype=float))
         return S, D, PAr, F, pcache
 
     def _bilateral_world_index(self, r: pd.DataFrame) -> pd.Series:
@@ -630,9 +649,13 @@ class BilateralSolveMixin(MarketStateMixin):
         return sorted(c for c, sc in (self._bilateral_raw() or {}).items() if getattr(sc, "trq_row", None) is not None)
 
     def _solve_bilateral(self, exogenous_supply, trade_scenario=None, tol=None, max_outer=None, verbose=False):
-        """CAPRI's market: successive linearisation - the full model response (supply module output anticipated,
-        crushing, dairy blocks, feed and biofuel demand) is re-evaluated each step, and each commodity's trade
-        system solved exactly with supply and use log-linear around that point."""
+        """The market's equations (CAPRI's m_globMarket as ported) solved by a fixed point, not CAPRI's method: CAPRI
+        solves m_globMarket as one system with CONOPT (arm/simu_market.gms); here, successive linearisation by
+        commodity - the full model response (supply module output anticipated, crushing, dairy blocks, feed and
+        biofuel demand) is re-evaluated each step, and each commodity's trade system solved exactly with supply and use
+        log-linear in its own price around that point (the other prices held), the step damped and Anderson-
+        accelerated. At convergence every balance holds, so the solution is the system's (G3, market_g3.py, checks it);
+        the path, not the equilibrium, is the fixed point's."""
         _st = _settings()                                   # market.* : tolerance, rounds, damping, step clip
         if tol is None:
             tol = float(_st.get("market.tol"))
