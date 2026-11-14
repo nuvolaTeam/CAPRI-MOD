@@ -25,7 +25,7 @@ data base activities DCOW, BULF and HEIF take their members' total premium on CA
 open points against the reference: docs/KNOWN_ISSUES.md K140, K142.
 
 Sources: capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv and
-capri_marginal_terms_ref_2030.csv.xz (tools/build/extract_capri_marginal_terms.py); CAPRI 2017 results
+capri_marginal_terms_ref_2030.csv (tools/build/extract_capri_marginal_terms.py); CAPRI 2017 results
 res_17<MS>.txt (national UVAG, regional PRME and LEVL).
 
 Written (capri_data/baselines/capri_greendeal_ref/1730/trajectories/):
@@ -129,7 +129,7 @@ def main() -> None:
     val = ROOT / "capri_data" / "validation" / "greendeal_2030"
     out = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "trajectories"
     uv30 = _read_csv(val / "capri_unit_values_ref_2030.csv")
-    terms = _read_csv(val / "capri_marginal_terms_ref_2030.csv.xz")
+    terms = _read_csv(val / "capri_marginal_terms_ref_2030.csv")
     products = set(uv30["product"])
 
     # --- CAPRI 2017: national UVAG, regional PRME and LEVL

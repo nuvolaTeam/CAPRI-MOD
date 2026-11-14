@@ -10,7 +10,7 @@ cost terms (shadow values) that sum to zero at an interior optimum (D_PROV = the
   D_OBJC   fixed accounting costs (p_linObjeCont)           D_PREM  premiums
   D_PMPL   PMP terms -(p_pmpCnst + quadratic at levels)     D_PMPF  feed PMP terms
   D_AREA   land shadow price                                D_CRPR/D_ENNE requirement duals (not in D_PROV)
-Written: capri_data/validation/greendeal_2030/capri_marginal_terms_<tag>_2030.csv.xz (region, activity, item, value)
+Written: capri_data/validation/greendeal_2030/capri_marginal_terms_<tag>_2030.csv (region, activity, item, value)
          capri_data/validation/greendeal_2030/capri_unit_values_<tag>_2030.csv (member state, product, UVAG 2030)
 The pipeline runs it with the tag ref on CAPRI's 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta.zip,
 tools/lib/paths.BASELINE_REF; until 9 November 2026 with the tag ini on its calibration run
@@ -58,8 +58,8 @@ def main(src: str, tag: str) -> None:
             terms.append((reg, a, it, val))
         elif a == "UVAG" and (reg.endswith("000000") or reg == "TUR") and it in UV_PRODUCTS:   # TUR: Turkey's national row
             uv.append((reg, it, val))
-    import lzma, io
-    with lzma.open(out / f"capri_marginal_terms_{tag}_2030.csv.xz", "wt", newline="") as f:   # xz: package size
+    # plain CSV (xz-compressed until 14 November 2026: the project's inputs are CSV, the project lead)
+    with open(out / f"capri_marginal_terms_{tag}_2030.csv", "w", newline="") as f:
         w = csv.writer(f); w.writerow(["region", "activity", "item", "value"]); w.writerows(terms)
     with open(out / f"capri_unit_values_{tag}_2030.csv", "w", newline="") as f:
         w = csv.writer(f); w.writerow(["region", "product", "uvag"]); w.writerows(uv)

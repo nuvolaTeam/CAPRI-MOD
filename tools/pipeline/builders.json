@@ -861,7 +861,7 @@
     "capri_data/codes/capri_member_state_codes.csv",
     "capri_data/codes/eu_market_blocks.csv",
     "capri_data/codes/regional_units.csv",
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz",
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv",
     "capri_mod/settings/defaults.toml"
    ],
    "code": [
@@ -1387,7 +1387,7 @@
     "capri_data/codes/regional_units.csv",
     "capri_data/sources/raw/capri/dat/policy/wintercovershare_p_winterCoverShare0.parquet",
     "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_price_ratios_2030.csv",
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz",
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv",
     "capri_mod/settings/defaults.toml"
    ],
    "code": [
@@ -2039,7 +2039,7 @@
     "capri_data/sources/raw/capri/dat/policy/livestock_units_p_LUUnits.parquet",
     "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_Heads.parquet",
     "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_sf.parquet",
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz",
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv",
     "capri_mod/settings/defaults.toml"
    ],
    "code": [
@@ -2707,7 +2707,7 @@
     "capri_data/sources/raw/capri/dat/envind/orgsoil_share_p_orgsoilori.parquet",
     "capri_data/sources/raw/capri/dat_local/envind/lulucf_emissions_original_source_p_PEATSH_def.parquet",
     "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_price_ratios_2030.csv",
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz",
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv",
     "capri_mod/settings/defaults.toml"
    ],
    "code": [
@@ -4898,7 +4898,7 @@
     "capri_data/codes/regional_units.csv",
     "capri_data/codes/rms_to_rm.csv",
     "capri_data/sources/raw/capri/capri_baseline/capri_market_prices_1730.parquet",
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz",
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv",
     "capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv",
     "capri_mod/settings/defaults.toml"
    ],
@@ -5598,7 +5598,7 @@
     "capri_data/codes/eu_market_blocks.csv",
     "capri_data/codes/regional_units.csv",
     "capri_data/sources/raw/capri/dat/policy/wintercovershare_p_winterCoverShare0.parquet",
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz",
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv",
     "capri_mod/settings/defaults.toml"
    ],
    "code": [
@@ -6063,7 +6063,7 @@
     "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz",
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv",
     "capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv"
    ]
   },
@@ -6081,7 +6081,7 @@
     "$EXPORTS/res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx"
    ],
    "outputs": [
-    "capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz"
+    "capri_data/validation/greendeal_2030/capri_gd_effect.csv"
    ]
   },
   {
@@ -6104,7 +6104,7 @@
     "$EXPORTS/res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx"
    ],
    "outputs": [
-    "capri_data/validation/greendeal_2030/capri_gd_market_2030.csv.xz"
+    "capri_data/validation/greendeal_2030/capri_gd_market_2030.csv"
    ]
   },
   {

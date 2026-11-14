@@ -2703,7 +2703,7 @@ the two TOIN per ha differ by up to 25% (input mix at another adoption level).
 
 tools/check/check_market_gd.py solves the market alone with CAPRI's own Green Deal 2030 supply-model results as its
 supply side (member states' production and raw milk, feed bulks, the prices the supply models saw;
-capri_data/validation/greendeal_2030/capri_gd_market_2030.csv.xz). The EU's prices follow CAPRI's within 0.3 points of
+capri_data/validation/greendeal_2030/capri_gd_market_2030.csv). The EU's prices follow CAPRI's within 0.3 points of
 price change on average (correlation 0.99; cereals, oilseeds, meats, eggs within about 0.4, beef -0.6); the other
 producing regions within 0.17 on average. The dairy products do not: raw milk +12.4 / +11.4% in EU_WEST / EU_EAST
 against CAPRI's producer price +11.3 / +10.6; skimmed milk powder +5.0 / +4.9 against +2.5 / +2.6, whey +6.1 / +5.2

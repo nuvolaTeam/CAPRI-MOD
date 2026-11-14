@@ -10359,11 +10359,19 @@
     "builder": "build_capri_eu27_levels"
    }
   },
-  "capri_data/validation/coupled_support_2030/capri_vcs_effect.csv.xz": {
+  "capri_data/validation/coupled_support_2030/capri_vcs_effect.csv": {
+   "description": "CAPRI's 2030 reference against its run without voluntary coupled support, per region, activity and item (tools/build/extract_capri_vcs_pair.py); empty where one of the runs has no record.",
+   "kind": "validation",
    "vintage": "2030",
    "domain": "validation",
    "status": "validation",
-   "units": "levels, EUR, % (not re-checked)"
+   "rows": 64784,
+   "columns": 6,
+   "units": "U_percent",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_vcs_pair (not in the trace yet)"
+   }
   },
   "capri_data/validation/eu_outlook_2020_2030.csv": {
    "description": "DG AGRI's EU agricultural outlook 2020-2030 (December 2020), annex tables 8.8-8.44: per table, title and item one value per year 2016-2030, extracted from the PDF (tools/build/build_eu_outlook_2030.py, not in the pipeline trace).",
@@ -10390,18 +10398,45 @@
    },
    "catalogue_note": "JRC121368's published Farm-to-Fork figures (EU27, % change from the baseline), each with its table, page or text; kept by hand. (not re-checked)"
   },
-  "capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz": {
+  "capri_data/validation/greendeal_2030/capri_gd_effect.csv": {
+   "description": "CAPRI's Green Deal 2030 step against its reference, per region, activity and item: the reference and scenario values and the % change (tools/build/extract_capri_gd_pair.py); empty where one of the runs has no record.",
+   "kind": "validation",
    "vintage": "2030",
    "domain": "validation",
    "status": "validation",
-   "units": "levels, EUR, % (not re-checked)"
+   "rows": 79802,
+   "columns": 6,
+   "units": "U_percent",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_gd_pair"
+   }
   },
-  "capri_data/validation/greendeal_2030/capri_gd_market_2030.csv.xz": {
+  "capri_data/validation/greendeal_2030/capri_gd_market_2030.csv": {
+   "description": "CAPRI's 2030 market of its Green Deal step and its reference, per market region, item and commodity (tools/build/extract_capri_gd_market.py).",
+   "kind": "validation",
    "vintage": "2030",
    "domain": "validation",
    "status": "validation",
-   "units": "kt, EUR/t (not re-checked)",
+   "rows": 10157,
+   "columns": 5,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_gd_market"
+   },
    "catalogue_note": "CAPRI's 2030 market of its Green Deal step and its reference: the market regions' balances and prices, the member states' production and feed bulks, under the model's commodity codes (tools/build/extract_capri_gd_market.py; tools/check/check_market_gd.py) (not re-checked)"
+  },
+  "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv": {
+   "description": "CAPRI's 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta) per region and activity: the marginal terms D_* and the items LEVL, MREV, TOOU, TOIN, MANN, PRME, ... of its dataOut (tools/build/extract_capri_marginal_terms.py, tag ref); read by the 2030 builders as CAPRI's 2030 levels and premiums and by the checks.",
+   "kind": "validation",
+   "rows": 332069,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_marginal_terms"
+   }
   },
   "capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv": {
    "description": "CAPRI's 2030 unit values UVAG per region and product from the dataOut of res_2_1730greendeal_refdefaulta (CAPRI's 2030 Green Deal baseline) (tools/build/extract_capri_marginal_terms.py, tag ini).",

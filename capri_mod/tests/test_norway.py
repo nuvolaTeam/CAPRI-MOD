@@ -1,11 +1,10 @@
 """CAPRI's Norwegian premiums (capri_mod/policy/norway.py; policy/norw_pol.gms, def_no_policy.gms, policy.gms) against
-CAPRI's 2030 reference PRME (capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz, used as a
+CAPRI's 2030 reference PRME (capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv, used as a
 check): every Norwegian unit and production activity, the direct payments only (the output payments pay nothing in
 the simulation year, K144)."""
 from __future__ import annotations
 
 import csv
-import lzma
 from collections import defaultdict
 from pathlib import Path
 
@@ -14,12 +13,12 @@ import pytest
 from capri_mod.policy import norway
 
 ROOT = Path(__file__).resolve().parents[2]
-REF = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv.xz"
+REF = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv"
 
 
 def _reference(units, mpact):
     prme, levl = {}, {}
-    with lzma.open(REF, "rt") as f:
+    with open(REF, newline="") as f:
         for r in csv.DictReader(f):
             if r["region"] in units and r["activity"] in mpact:
                 if r["item"] == "PRME":

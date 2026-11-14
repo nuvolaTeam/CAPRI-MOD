@@ -5,9 +5,9 @@ and folder conventions and have not been re-checked in a CAPRI installation sinc
 
 A comparison of response magnitudes needs a CAPRI run pair (reference and scenario) with a clear policy contrast,
 from the same CAPRI version capri-mod is built from (star 3.0, base 2017, 2030). Two such pairs are in hand: CAPRI's
-2030 run without voluntary coupled support against its reference (`coupled_support_2030/capri_vcs_effect.csv.xz`,
+2030 run without voluntary coupled support against its reference (`coupled_support_2030/capri_vcs_effect.csv`,
 `tools/build/extract_capri_vcs_pair.py`, compared by `tools/run/run_vcs_2030.py`), and, since 10 November 2026, CAPRI's
-Green Deal 2030 step against the Green Deal reference (`greendeal_2030/capri_gd_effect.csv.xz`,
+Green Deal 2030 step against the Green Deal reference (`greendeal_2030/capri_gd_effect.csv`,
 `tools/build/extract_capri_gd_pair.py`). Wanted next (README 11.4, 13; KNOWN_ISSUES
 K13):
 

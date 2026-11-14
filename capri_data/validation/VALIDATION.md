@@ -17,7 +17,7 @@ show; their numbers are historical.
    `tools/check/compare_runs.py --capri`.
 4. The EU agricultural outlook 2020-2030 (docs/OUTLOOK_2030_CHECK.md).
 5. A CAPRI scenario pair: CAPRI's 2030 run without voluntary coupled support against its reference
-   (`validation/coupled_support_2030/capri_vcs_effect.csv.xz`, `tools/run/run_vcs_2030.py`; KNOWN_ISSUES K48).
+   (`validation/coupled_support_2030/capri_vcs_effect.csv`, `tools/run/run_vcs_2030.py`; KNOWN_ISSUES K48).
 
 ## The early checks (8 October 2026), and what they show
 

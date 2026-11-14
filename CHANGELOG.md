@@ -32,6 +32,22 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 14 November 2026 — the compressed CSVs as plain CSV
+
+- The project lead: no xz compression on the CSVs. capri_marginal_terms_ref_2030, capri_gd_effect,
+  capri_gd_market_2030 (validation/greendeal_2030) and capri_vcs_effect (validation/coupled_support_2030) are plain
+  CSV (decompressed byte for byte; 22 MB against 5.4 MB compressed). Their writers (extract_capri_marginal_terms.py,
+  extract_capri_gd_pair.py, extract_capri_gd_market.py, extract_capri_vcs_pair.py) write plain CSV; every reader,
+  test, document, the file catalogue, the pipeline's trace and MANIFEST.json take the new names (the history in this
+  file and the registry log keep the old ones).
+- As CSVs under capri_data they now have declarations (31_validation.sql: keys checked unique; empty cells where one
+  of the runs has no record) and a data kind (06_data_kind.sql); capri_vcs_effect.csv's builder is recorded as
+  untraced (make_provenance.py UNTRACED: it reads a CSV export of CAPRI's run without coupled support).
+- The tools that read a former source table by its old name (tools/lib/_sources_io.py, convert_inputs_to_parquet.py,
+  reproduce_builders.py) still accept .csv.xz; no data file uses it.
+- Checks: validate_data 0 violations; test_data_schema, test_norway (it read the file with lzma), test_results_browser,
+  test_exact_io, test_capri_reference_trajectory_reproduces_its_crop_levels.
+
 ## 13 November 2026, night — P2 step 2: the 2030 baseline premiums from the ports; K145 (wine), K146 (Switzerland's support per tonne); G3.0
 
 - P2 step 2 (tools/build/build_price_trajectory_2030.py, `_ported_premiums_2030`): the model's 2030 premiums

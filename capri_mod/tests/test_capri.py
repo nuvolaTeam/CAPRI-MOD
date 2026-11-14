@@ -2993,7 +2993,7 @@ def test_capri_reference_trajectory_reproduces_its_crop_levels(data):
                                                                 "CS000000", "KO000000", "MK000000", "MO000000"]}):
         A = load_all_data(str(DATA_DIR))["areas"]
     assert len(A.index) == 250
-    ref = pd.read_csv(DATA_DIR / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv.xz")
+    ref = pd.read_csv(DATA_DIR / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv")
     # CAPRI's SETA row is VSET (K115), its GRAS row GRAE + GRAI (the model's own since S2, 7 November 2026)
     ref = ref[(ref["item"] == "LEVL") & ~ref["activity"].isin(["SETA", "GRAS"])]
     cap = {}

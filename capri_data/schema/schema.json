@@ -57456,6 +57456,224 @@
     ]
    }
   },
+  "val_capri_gd_effect": {
+   "file": "capri_data/validation/greendeal_2030/capri_gd_effect.csv",
+   "declared_in": "31_validation.sql",
+   "layout": [],
+   "comment": "CAPRI's Green Deal 2030 step against its reference, per region, activity and item: the reference and scenario values and the % change (tools/build/extract_capri_gd_pair.py); empty where one of the runs has no record.",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "ref",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "scen",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "pct_change",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "pct_change",
+     "unit": "U_percent",
+     "status": "builder",
+     "basis": "% change from the reference"
+    },
+    {
+     "item": "ref",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_gd_effect.ref: the unit of the item"
+    },
+    {
+     "item": "scen",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_gd_effect.scen: the unit of the item"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_gd_pair",
+    "sources": "$EXPORTS/res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx; $EXPORTS/res_2_1730greendeal_refdefaulta.gdx"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/compare_capri_gd.py"
+    ],
+    "tests": []
+   }
+  },
+  "val_capri_gd_market_2030": {
+   "file": "capri_data/validation/greendeal_2030/capri_gd_market_2030.csv",
+   "declared_in": "31_validation.sql",
+   "layout": [],
+   "comment": "CAPRI's 2030 market of its Green Deal step and its reference, per market region, item and commodity (tools/build/extract_capri_gd_market.py).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "commodity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "ref",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "scen",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "item",
+    "commodity"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "ref",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_gd_market_2030.ref: the unit of the item (kt, EUR/t)"
+    },
+    {
+     "item": "scen",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_gd_market_2030.scen: the unit of the item (kt, EUR/t)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_gd_market",
+    "sources": "$EXPORTS/market_base_1717.txt; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx; $EXPORTS/res_2_1730greendeal_refdefaulta.gdx; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_doubleZero.csv.gz; $REFERENCE/simini/simini_21730/p_entryPriceFac.csv.gz; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/special_ch/market1_ch.gms"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/check_market_gd.py"
+    ],
+    "tests": []
+   }
+  },
+  "val_capri_marginal_terms_ref_2030": {
+   "file": "capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv",
+   "declared_in": "31_validation.sql",
+   "layout": [],
+   "comment": "CAPRI's 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta) per region and activity: the marginal terms D_* and the items LEVL, MREV, TOOU, TOIN, MANN, PRME, ... of its dataOut (tools/build/extract_capri_marginal_terms.py, tag ref); read by the 2030 builders as CAPRI's 2030 levels and premiums and by the checks.",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_marginal_terms_ref_2030.value: the unit of the item (CAPRI's units per item)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_marginal_terms",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_capri_baseline_surplus",
+     "build_cover_crops",
+     "build_farm_size_noneu",
+     "build_histosol",
+     "build_price_trajectory_2030",
+     "build_winter_cover_option"
+    ],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_norway.py"
+    ]
+   }
+  },
   "val_capri_unit_values_ref_2030": {
    "file": "capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv",
    "declared_in": "31_validation.sql",
@@ -57506,6 +57724,87 @@
      "build_price_trajectory_2030"
     ],
     "checks": [],
+    "tests": []
+   }
+  },
+  "val_capri_vcs_effect": {
+   "file": "capri_data/validation/coupled_support_2030/capri_vcs_effect.csv",
+   "declared_in": "31_validation.sql",
+   "layout": [],
+   "comment": "CAPRI's 2030 reference against its run without voluntary coupled support, per region, activity and item (tools/build/extract_capri_vcs_pair.py); empty where one of the runs has no record.",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "ref",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "novcs",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "pct_change",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "novcs",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_vcs_effect.novcs: the unit of the item"
+    },
+    {
+     "item": "pct_change",
+     "unit": "U_percent",
+     "status": "builder",
+     "basis": "% change from the reference"
+    },
+    {
+     "item": "ref",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_vcs_effect.ref: the unit of the item"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_vcs_pair (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": []
    }
   },

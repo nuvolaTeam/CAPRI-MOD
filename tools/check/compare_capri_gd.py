@@ -1,5 +1,5 @@
 """A Green Deal 2030 run of the model against CAPRI's Green Deal 2030 step (capri_data/validation/greendeal_2030/
-capri_gd_effect.csv.xz, tools/build/extract_capri_gd_pair.py): % changes from the reference, EU27 and per member
+capri_gd_effect.csv, tools/build/extract_capri_gd_pair.py): % changes from the reference, EU27 and per member
 state, for the activity levels and the EU27 producer prices.
 
 Only % changes are compared: the model counts some herds in other units than CAPRI's activity levels (fattening pigs,
@@ -23,7 +23,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-TABLE = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_gd_effect.csv.xz"
+TABLE = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_gd_effect.csv"
 
 #: the model's activities and the CAPRI activities whose levels they compare with (BASELINE_REPRODUCTION.md)
 ACTIVITIES = {

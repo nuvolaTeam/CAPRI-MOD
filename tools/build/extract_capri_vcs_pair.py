@@ -14,7 +14,7 @@ Kept, year 2030 (current prices, as CAPRI stores them):
   market rows  (region, product, item)   item in UVAP, UVAG, MAPR, HCON, IMPT, EXPT; EU27yr19 and
                member states (CAPRI stores them as region.''.item.product)
 
-Output: capri_data/validation/coupled_support_2030/capri_vcs_effect.csv.xz
+Output: capri_data/validation/coupled_support_2030/capri_vcs_effect.csv
         (region, activity, item, ref, novcs, pct_change)
 
     python tools/build/extract_capri_vcs_pair.py REF.gdx NOVCS.csv [--lib-dir DIR]  (default: $CAPRI_GDXLIB)
@@ -103,9 +103,9 @@ def main():
     df.loc[~(df["ref"].abs() > 1e-9), "pct_change"] = float("nan")
     dest = ROOT / "capri_data" / "validation" / "coupled_support_2030"
     dest.mkdir(parents=True, exist_ok=True)
-    df.to_csv(dest / "capri_vcs_effect.csv.xz", index=False)
+    df.to_csv(dest / "capri_vcs_effect.csv", index=False)
     eu = df[(df.region == "EU27yr19") & (df.item == "LEVL")].set_index("activity")["pct_change"].dropna()
-    print(f"wrote capri_vcs_effect.csv.xz: {len(df)} rows ({len(ref)} ref, {len(nov)} without VCS)")
+    print(f"wrote capri_vcs_effect.csv: {len(df)} rows ({len(ref)} ref, {len(nov)} without VCS)")
     print("EU27 levels, % change:", eu.reindex(["DCOL", "DCOH", "SCOW", "BULL", "BULH", "HEIL", "HEIH", "SHGM", "SHGF",
                                                "SOYA", "PULS", "SUGB", "DWHE", "TOMA", "GRAS"]).round(1).dropna().to_dict())
 

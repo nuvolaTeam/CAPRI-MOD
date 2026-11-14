@@ -22,7 +22,7 @@ EXPT at EU and member-state level. Added for the Green Deal pair (13 November 20
 tab): the crop yields (YILD) of the NUTS 2 regions as well, and the N balance items (dataOut '' . item . NITF, 1000 t
 N; N_ITEMS) of every kept region, with item NITF.
 
-Output: capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz (region, activity, item, ref, scen, pct_change)
+Output: capri_data/validation/greendeal_2030/capri_gd_effect.csv (region, activity, item, ref, scen, pct_change)
 
     python tools/build/extract_capri_gd_pair.py [REF.gdx SCEN.gdx] [--lib-dir DIR]
 """
@@ -43,7 +43,7 @@ from extract_capri_vcs_pair import read_gdx, _keep, REG, EU_MS  # noqa: E402  (t
 
 REF = EXPORTS / "res_2_1730greendeal_refdefaulta.gdx"
 SCEN = EXPORTS / "res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx"
-OUT = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_gd_effect.csv.xz"
+OUT = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_gd_effect.csv"
 #: CAPRI's N balance items (dataOut '' . item . NITF, 1000 t N), as tools/build/extract_gd2030_nbalance.py reads them,
 #: and the total surplus SURTOT
 N_ITEMS = ("MINFER", "GASMIN", "RUNMIN", "NH3MIN", "EXPPRD", "IMPORT", "ATMOSD", "CRESID", "BIOFIX", "EXCRET",

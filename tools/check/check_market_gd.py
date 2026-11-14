@@ -2,7 +2,7 @@
 give CAPRI's prices? (claude/gd_market_check.md)
 
 CAPRI's last market solve of a converged run is reproduced with CAPRI's results as the supply side
-(capri_data/validation/greendeal_2030/capri_gd_market_2030.csv.xz, tools/build/extract_capri_gd_market.py):
+(capri_data/validation/greendeal_2030/capri_gd_market_2030.csv, tools/build/extract_capri_gd_market.py):
 
   supply              the EU's member states' production with raw milk delivered, one row per member state as a run
                       passes it (MarketModule.supply_rows_by_member_state, scaled to the market regions' totals);
@@ -34,7 +34,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-TABLE = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_gd_market_2030.csv.xz"
+TABLE = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_gd_market_2030.csv"
 BULKS = ("FCER", "FPRO", "FENE", "FOTH")
 
 

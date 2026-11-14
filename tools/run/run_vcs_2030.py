@@ -58,7 +58,7 @@ def _load(path):
 
 
 def premium_factors(regions):
-    eff = _read_csv(ROOT / "capri_data" / "validation" / "coupled_support_2030" / "capri_vcs_effect.csv.xz")
+    eff = _read_csv(ROOT / "capri_data" / "validation" / "coupled_support_2030" / "capri_vcs_effect.csv")
     prme = eff[eff["item"] == "PRME"].set_index(["region", "activity"])[["ref", "novcs"]]
     levl = eff[eff["item"] == "LEVL"].set_index(["region", "activity"])["ref"]
     mr = _load(ROOT / "tools" / "lib" / "_model_regions.py")
@@ -137,7 +137,7 @@ def main():
         return o
     ab, as_ = agg(b), agg(s)
     db, ds = b["market"].domestic_prices.loc["EU27"], s["market"].domestic_prices.loc["EU27"]
-    eff = _read_csv(ROOT / "capri_data" / "validation" / "coupled_support_2030" / "capri_vcs_effect.csv.xz")
+    eff = _read_csv(ROOT / "capri_data" / "validation" / "coupled_support_2030" / "capri_vcs_effect.csv")
     rows = []
     for k, ref in capri_eu(eff, "LEVL", HERDS).items():
         rows.append(("herd", k, 100 * (as_.get(k, 0) / ab[k] - 1) if ab.get(k) else np.nan, ref))

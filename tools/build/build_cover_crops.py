@@ -16,7 +16,7 @@ CAPRI (envind/cover_crops.gms, supply/supply_model.gms, pol_input/greendeal/*_io
     for Austria and a few German regions only); the potential-area row uses p_winterCoverShare, filled
     NUTS2 <- member state <- EU (policy/define_greening_limits.gms). Both are written.
 
-Sources: capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz (CATC LEVL and TOIN, UAAR
+Sources: capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv (CATC LEVL and TOIN, UAAR
 LEVL, crop LEVL; CAPRI's 2030 Green Deal baseline, the model's 2030 base), CAPRI's calibration run
 res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv (CATC TOIN where the baseline has no catch crop in a region), capri_data/sources/raw/capri/dat/policy/
 wintercovershare_p_winterCoverShare0.parquet (dat/policy/wintercovershare.gms, converted to CSV by
@@ -91,7 +91,7 @@ def main():
     ap.add_argument("--gams-dir", type=Path, default=SOURCES / "gams")
     ap.add_argument("--calibration", type=Path, default=CALIBRATION_REF)
     a = ap.parse_args()
-    terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv.xz",
+    terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv",
                         header=None, names=["region", "act", "item", "value"], dtype=str)
     terms["value"] = pd.to_numeric(terms["value"], errors="coerce")
     lev = terms[terms["item"] == "LEVL"].pivot_table(index="region", columns="act", values="value")

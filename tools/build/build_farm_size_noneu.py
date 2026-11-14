@@ -58,7 +58,7 @@ from _sources_io import read_source, source_records, write_source  # noqa: E402 
 
 SRC = ROOT / "capri_data" / "sources"
 AMM = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
-LEVELS = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv.xz"
+LEVELS = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv"
 
 
 def _rd(path):

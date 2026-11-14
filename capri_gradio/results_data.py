@@ -479,7 +479,7 @@ def _gd_tool():
 
 
 def gd_capri_effect() -> pd.DataFrame:
-    """CAPRI's Green Deal 2030 step against its reference (capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz):
+    """CAPRI's Green Deal 2030 step against its reference (capri_data/validation/greendeal_2030/capri_gd_effect.csv):
     region, activity, item, ref, scen, pct_change."""
     return _gd_tool().capri_effect()
 

@@ -16,7 +16,7 @@ OLIV <- OLIO, WINE <- TWIN, the rest by name; raw milk MILK):
   - raw milk's producer price PPRI (market regions and countries): CAPRI's PMRK of MILK is a constant of its market
     data (unchanged in the scenario; raw milk is not traded), its milk price is PPRI.
 
-Output: capri_data/validation/greendeal_2030/capri_gd_market_2030.csv.xz (region, item, commodity, ref, scen)
+Output: capri_data/validation/greendeal_2030/capri_gd_market_2030.csv (region, item, commodity, ref, scen)
 
     python tools/build/extract_capri_gd_market.py [REF.gdx SCEN.gdx] [--lib-dir DIR]
 """
@@ -37,7 +37,7 @@ from build_bilateral_market import MODEL  # noqa: E402
 
 REF = EXPORTS / "res_2_1730greendeal_refdefaulta.gdx"
 SCEN = EXPORTS / "res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx"
-OUT = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_gd_market_2030.csv.xz"
+OUT = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_gd_market_2030.csv"
 REGIONS = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "market" / "bilateral_regions_2030.csv"
 EU_BLOCKS = {"A_EU_WEST": "EU_WEST", "A_EU_EAST": "EU_EAST"}
 MARKET_ITEMS = ("PROD", "PMRK", "HCON", "FEDM", "IMPT", "EXPT", "DOMM", "PRCM", "INDM", "BIOF", "LOSM", "SEDM")
