@@ -35,6 +35,10 @@ SHOCKS = {
     "cereals-10": {c: 0.90 for c in CEREALS},
     "pork-15": {"PORK": 0.85},
     "f2f-like": {**{c: 0.90 for c in CEREALS}, **{c: 0.90 for c in ANIMALS}},
+    # large cuts (G3.4 step 4's tests): the EU's raw milk at 10% drives the dairy blocks' net supply towards and below
+    # their processing (the dairy fudge cells), pork at 10% a ProdNQ_ cell towards its floor
+    "milk-90": {"MILK": 0.10},
+    "pork-90": {"PORK": 0.10},
 }
 
 

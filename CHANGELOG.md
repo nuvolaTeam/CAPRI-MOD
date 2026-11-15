@@ -108,6 +108,17 @@ the rest of CAPRI's bounds and fudge equations (the start bounds, the widening a
 tradeFlowFudge_ to write; docs/dev/MARKET_BOUNDS_PLAN.md), the Armington extensions, the intervention stocks and
 subsidised exports, LULUCF in the market, the market regions' crop areas and yields.
 
+## 15 November 2026, late evening — G3.4 step 4: the dairy floors and the K83 rows as fudge cells
+
+- The dairy blocks' net supply (max(0, supply - processing)) and the K83 units' rows (the EU's units outside a run on
+  a subset, through their member states' ProdNQ_) are now fudge cells of the lifted system, like the ProdNQ_ cells:
+  mode 0 the model's floor (market.bounds = "none", the default: the system as before; the 7 tests of
+  test_supply_system_ad.py pass), 1 CAPRI's ProdFudge_, 2 the row within CAPRI's bounds.
+- ProdPriceFudge_ and tradeFlowFudge_ need no port: the first feeds only Yield_ (no feedback in CAPRI's default, not
+  ported), the second exists only with Armington commitments (none in sim_ini_21730; DEP-12).
+- The solver battery gets two large shocks (milk-90, pork-90). Its first run with market.bounds = "capri" did not
+  finish on wheat+5 (IPOPT under the bounds over 19 minutes, stopped); open (docs/dev/MARKET_BOUNDS_PLAN.md).
+
 ## 15 November 2026, evening — the fertiliser block's first-order condition at the flows' lower bound (DEP-49, K159)
 
 - **DEP-49 (the project lead's decision):** the inner fertilisation model's first-order condition with the flows'

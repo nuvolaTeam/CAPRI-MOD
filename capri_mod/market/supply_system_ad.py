@@ -90,6 +90,13 @@ def supply_system(mm, exogenous_supply):
         fm_cells.append((int(i_), int(j_), float(base)))
         return prod_fudge(qr, m, base)
 
+    def _dairy_base(r_, c_):
+        """The dairy cell's base production for ProdFudge_'s Z (DATA Prod; the market region's base net supply)."""
+        try:
+            return float(base.at[r_, c_])
+        except KeyError:
+            return 0.0
+
     # the supply models' output on the EU rows (supply_response before the price response)
     S0 = base.reindex(columns=cols).to_numpy(dtype=float).copy()
     sup_cols: Dict[str, set] = {}
@@ -354,7 +361,9 @@ def supply_system(mm, exogenous_supply):
                 if qc > 0:
                     rel = sum((h * (r_[ci[y]] - 1.0) for (x_, y), h in t_ms.items() if x_ == x and y in ci),
                               ca.SX(0.0)) / qc
-                add[(reg, x)] = add.get((reg, x), 0.0) + ca.fmax(b * (1.0 + rel), 0.0)
+                # a fudge cell (G3.4 step 4): CAPRI's switched-off countries are market regions with ProdNQ_ and
+                # ProdFudge_; the mode follows the bound of the market region's cell (as for the other cells)
+                add[(reg, x)] = add.get((reg, x), 0.0) + prodnq_cell(b * (1.0 + rel), R[reg], ci[x], b)
         for (reg, x), v in add.items():
             S[R[reg]][ci[x]] = S[R[reg]][ci[x]] + v
 
@@ -469,7 +478,10 @@ def supply_system(mm, exogenous_supply):
             for c in mm.DAIRY_TRADED.values():
                 if c in ci and rg in rgp:
                     k = [k_ for k_, c_ in mm.DAIRY_TRADED.items() if c_ == c][0]
-                    S[R[rg]][ci[c]] = ca.fmax(0.0, msupp[rg][c] - float(rgp[rg]["proc0"][dp["ix"][k]]))
+                    # the dairy blocks' net market supply as a fudge cell (G3.4 step 4: CAPRI's ProdFudge_ covers
+                    # the dairy products, XXX1; mode 0 the model's floor, as before)
+                    S[R[rg]][ci[c]] = prodnq_cell(msupp[rg][c] - float(rgp[rg]["proc0"][dp["ix"][k]]), R[rg], ci[c],
+                                                  _dairy_base(rg, c))
 
     # the other regions' DAIRY blocks: raw milk from CAPRI's supply function inside the block
     res_W = []
@@ -538,7 +550,8 @@ def supply_system(mm, exogenous_supply):
                 ik = prm["ix"][k]
                 q0 = float(prm["Q0"][ik] - prm["proc0"][ik])
                 if c in ci and q0 > 1e-9:
-                    S[i][ci[c]] = ca.fmax(0.0, float(base.at[r, c]) * (q[ik] - prm["proc0"][ik] - dproc[ik]) / q0)
+                    S[i][ci[c]] = prodnq_cell(float(base.at[r, c]) * (q[ik] - prm["proc0"][ik] - dproc[ik]) / q0, i,
+                                              ci[c], _dairy_base(r, c))
             continue
         shift = ca.SX(0.0)
         if mm.noneu_supply_nq:
@@ -559,7 +572,8 @@ def supply_system(mm, exogenous_supply):
             ik = prm["ix"][k]
             q0 = float(prm["Q0"][ik] - prm["proc0"][ik])
             if c in ci and q0 > 1e-9:
-                S[i][ci[c]] = ca.fmax(0.0, float(base.at[r, c]) * (q[ik] - prm["proc0"][ik] - dproc[ik]) / q0)
+                S[i][ci[c]] = prodnq_cell(float(base.at[r, c]) * (q[ik] - prm["proc0"][ik] - dproc[ik]) / q0, i,
+                                          ci[c], _dairy_base(r, c))
 
     # the non-EU regions' ProdNQ_ (prices, their dairy block's raw milk price, FEDE, the land rents)
     if mm.noneu_supply_nq:

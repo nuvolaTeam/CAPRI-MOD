@@ -91,11 +91,21 @@ bind in the full runs; they matter for large shocks.
    processing_ad.crush_function) stays in the model's form (mode 0) and the oil and cake output of the supply side
    follows it, not the lifted crush; CAPRI's upper bound on the negative auxiliaries (v_procQuantNeg.up = 10 |lower|,
    l. 132-133) is not carried. Test: test_supply_system_ad.py::test_the_lifted_processing_and_feed_reproduce_the_default_form.
-   **Still to write:** ProdPriceFudge_ (market_model.gms l. 2378: the producer prices of land and the land-using
-   products in the non-EU land block, kept positive where their lower bound is at or below 0; not the milk prices,
-   as this plan said until 15 November), the dairy blocks' net supply floors (supply_system_ad, max(0, supply -
-   processing)), the K83 units' rows; tradeFlowFudge_ with the Armington commitments (item 2 of the market port
-   plan). **Tests to run** (after the full-run pair, one heavy job
+   **Written (15 November 2026, evening): the dairy blocks' net supply and the K83 units' rows as fudge cells**
+   (supply_system_ad: max(0, supply - processing) and the switched-off units' max(0, b (1 + rel)) through
+   prodnq_cell, so each takes a mode as the ProdNQ_ cells: 0 the model's floor, as before, 1 CAPRI's ProdFudge_, 2 the
+   row within its bounds; CAPRI's ProdFudge_ covers the dairy products, XXX1, and a switched-off country is a market
+   region with ProdNQ_). Approximation as above: the cell is the market region's net row, CAPRI's the RMS's gross
+   v_prodQuant. **Not needed (15 November 2026):** ProdPriceFudge_ (market_model.gms l. 2378): with CAPRI's MNL land
+   block (supremaMrk on) it applies to the land-using products only, and its positive price enters Yield_ alone, which
+   has no feedback on quantities or prices in CAPRI's default and is not ported (MARKET_EQUATIONS_INVENTORY.md);
+   tradeFlowFudge_ (l. 2784): generated only with Armington commitments, and sim_ini_21730 has no p_arm2Commit (the
+   plain CES second nest is DEP-12). **First solve with CAPRI's bounds (15 November 2026, 22:40):** the solver
+   battery with market.bounds = "capri" (ipopt and auto; tools/check/market_solver_battery.py, shocks wheat+5,
+   f2f-like and the new milk-90 and pork-90): on wheat+5 the fixed point converged in 29 iterations (17.6 s), the
+   system built in 35 s, IPOPT under the bounds had not finished after 19 minutes and was stopped. Open: the cause
+   (slow convergence, the widening loop or the restoration phase), from IPOPT's log. market.bounds stays "none" by
+   default. **Tests to run** (after the full-run pair, one heavy job
    at a time): the chain with market.bounds "none" identical to before (modes 0); with "capri" on the solver
    battery's shocks; a shock that drives a cell below 0 (a supply cut of 90% in one region) solved with the widening
    and the fudge, against CAPRI's rules applied by hand.
