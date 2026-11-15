@@ -59,3 +59,10 @@ ENDO_MAN_AV_FLOOR,,0.2,share,capri,"CAPRI fert/endoManAvail.gms l. 79-81: the av
 ENDO_MAN_AV_FLOOR_KG,,300.0,kg N per ha,capri,"CAPRI fert/endoManAvail.gms l. 79-81: the application rate (max(300, base rate)) at which the availability floor holds",npk
 NITRATE_CH4_REDUCTION,,10.0,share of enteric CH4 per unit of nitrate share of dry matter,capri,"CAPRI envind/line_nitr.gms l. 100-102: QEmitt(Nitr) = QEmitt(NOC) x (1 - 0.1 x ShrOfDM x 100), so enteric CH4 falls by 10 x the nitrate share of dry matter",ghg
 FRAC_GASF,,0.1,kg NH3-N + NOx-N per kg mineral N,ipcc,"IPCC 2006 Vol. 4 ch. 11 Table 11.3 FracGASF: the volatilised share of synthetic N, used only where CAPRI's MITERRA losses are missing (CAPRI envind/gases.gms N2OSYN takes the MITERRA losses)",ghg; nitrogen
+LUC_LO_OWN_SHARE,ALL,0.9,share of the land type's level,capri,"CAPRI supply/prep_sim_luc.gms l. 589-591: v_actLevl.lo(FORE, OLND, ARTIF) = L - min(0.9 x L, 0.35 x ARTO)",supply_module
+LUC_LO_OWN_SHARE,FR830000,0.98,share of the land type's level,capri,CAPRI supply/prep_sim_luc.gms l. 590: Corsica's 0.9 + 0.08,supply_module
+LUC_LO_ARTO_SHARE,ALL,0.35,share of the region's total area,capri,"CAPRI supply/prep_sim_luc.gms l. 591: min(0.9 x L, 0.35 x ARTO)",supply_module
+LUC_LO_ARTO_SHARE,FR830000,0.75,share of the region's total area,capri,CAPRI supply/prep_sim_luc.gms l. 591: Corsica's 0.35 + 0.4,supply_module
+LUC_UP_OWN_FACTOR,,9.0,multiple of the land type's level,capri,"CAPRI supply/prep_sim_luc.gms l. 593-595: v_actLevl.up(FORE, OLND, ARTIF) = L + min(9 x L, 0.35 x ARTO)",supply_module
+LUC_UP_ARTO_SHARE,,0.35,share of the region's total area,capri,"CAPRI supply/prep_sim_luc.gms l. 593-595: L + min(9 x L, 0.35 x ARTO)",supply_module
+LUC_FORE_FLOOR,,0.99,share of the base forest area,capri,"CAPRI supply/prep_sim_luc.gms l. 597-606 (Trustee_land): with a landscape floor DATA(FALL,FLOOR), v_actLevl.lo(FORE) = 0.99 x data(FORE,LEVL) ('usually only a 1% decline is considered plausible')",supply_module

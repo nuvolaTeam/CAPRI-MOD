@@ -183,7 +183,7 @@ class NLPBlock:
             # baseline)
             # (and the entitlement limit: at the base the crops are at their trend levels, the overshoot zero and the
             # row's multiplier zero, as in CAPRI's PMP terms, prep_sim_pmp_terms.gms l. 166)
-            pol_rows = [l_ for l_ in ("N_balance", "mineral_N", "landscape_floor", "winter_cover", "entitlements")
+            pol_rows = [l_ for l_ in ("N_balance", "mineral_N", "landscape_floor", "forest_floor", "winter_cover", "entitlements")
                         if l_ in labels]
             spec_sim = spec
             spec = dict(spec_sim, drop_labels=list(drop) + pol_rows)

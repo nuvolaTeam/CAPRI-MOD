@@ -57,6 +57,8 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K153](#k153) | NUTNED_'s mineral N efficiency fixed at the base; in CAPRI the mineral N's loss share is a variable that the nitrification inhibitor and winter cover move (Bulgaria's and Romania's Green Deal collapse, K129) | fixed (14 November 2026), validated (15 November 2026, the full Green Deal pair) |
 | [K154](#k154) | The 2030 base mineral N per crop was CAPRI's 2017 NMIN on the 2030 levels (Romania 32% below CAPRI's 2030 reference, France 24% above) | fixed (14 November 2026), validated (15 November 2026, the full Green Deal pair) |
 | [K155](#k155) | The crops' technology mix columns could not move to CAPRI's low-yield technology T2: the regional NLP's default lower bound 0 held z >= 0 | fixed (15 November 2026), validated (15 November 2026, the full Green Deal pair) |
+| [K156](#k156) | CAPRI's bounds on forest and other land (prep_sim_luc.gms, Trustee_land) were missing: under the Green Deal's landscape floor the EU lost 5.4 Mha of forest (CAPRI 1.1 Mha, no region below 0.99 x base), loosening the surplus target per hectare | fixed (15 November 2026) |
+| [K157](#k157) | CAPRI's permanent-grassland rule counts the idled histosol grassland (GRSACT includes IHISGR); the model's counted GRAE + GRAI alone, so the productive grass stayed at its base and the idled area took new land | fixed (15 November 2026) |
 | [K141](#k141) | CAPRI bug: CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it (the project lead's decision) |
 | [K136](#k136) | CAPRI's endogenous entitlement limit (def_endCut.gms: no area payment beyond the trend area) was not in the model; ported with CAPRI's 2030 ceilings computed from its CAP 2014-2020 tables | fixed (13 November 2026) |
 | [K137](#k137) | The reported UAA left out the idled histosols (CAPRI's IHISGR, IHISCR stay in GRAS, ARAC and UAAR): the Green Deal's surplus per ha looked short of its target where the row met it | fixed (13 November 2026) |
@@ -699,7 +701,7 @@ NL11, NL13 and NL32 (ranked 11th-14th by CAPRI's baseline N surplus, just below 
 
 - **Effect:** three regions' results in the conic form; run time
 - **In 9t:** –
-- **Status:** **fixed** 21 October 2026: in the NLP form, where CAPRI's form fails at the tiered target, JRC121368's rule for regions whose target "generated infeasibilities in the model" (sect. 4.3.4: the EU-average cut, 36%), which the model already applied when the conic form failed, is tried in CAPRI's form first; kept for the scenario (sticky, as before); recorded in `metadata["nlp_fallback"]` ("... -> CAPRI's form at JRC121368's relaxed target"); if CAPRI's form fails at the relaxed target too, the conic form at the tiered target as before. REGISTERED: IPOPT's infeasibility is local, not a proof; these regions now get a looser target than the conic form reaches. Test: test_nlp_form_takes_jrc121368_relaxation_where_the_tiered_n_target_fails
+- **Status:** **fixed** 21 October 2026: in the NLP form, where CAPRI's form fails at the tiered target, JRC121368's rule for regions whose target "generated infeasibilities in the model" (sect. 4.3.4: the EU-average cut, 36%), which the model already applied when the conic form failed, is tried in CAPRI's form first; kept for the scenario (sticky, as before); recorded in `metadata["nlp_fallback"]` ("... -> CAPRI's form at JRC121368's relaxed target"); if CAPRI's form fails at the relaxed target too, the conic form at the tiered target as before. REGISTERED: IPOPT's infeasibility is local, not a proof; these regions now get a looser target than the conic form reaches. Test: test_nlp_form_takes_jrc121368_relaxation_where_the_tiered_n_target_fails until 15 November 2026: since K157 NL32 meets the tiered target in CAPRI's form and no Dutch region run alone needs the relaxation (K157); the path stays, without a test case
 
 <a id="k58"></a>
 ### K58: NLP form: degenerate multipliers in the calibration made the problem badly scaled and its solutions path-dependent (found 21 October 2026)
@@ -3203,4 +3205,71 @@ once that efficiency was CAPRI's variable (K153); with T2 available it is not on
   166, fallow 733 thousand ha against CAPRI's 845, 215, 200, 737 (before: 354, 19, 16, 727); the same optimum from the
   base point and from the recorded one. Test: test_techn_mix.py::test_mix_columns_move_to_the_low_yield_technology.
   Validated 15 November 2026 on the full Green Deal pair (run res_2_1730greendeal2030_gdk155: 17 iterations, every regional solve optimal; EU27 activity gap to CAPRI 3.5 points, 89% the same sign, member states 9.3 points; CHANGELOG, 15 November 2026)
+
+### K156: The forest and other land had none of CAPRI's bounds (found 15 November 2026)
+
+CAPRI bounds its land types forest, other land and artificial land in every simulation (supply/prep_sim_luc.gms
+l. 589-595): L0 - min(0.9 x L0, 0.35 x ARTO) <= L <= L0 + min(9 x L0, 0.35 x ARTO), ARTO the region's total area
+(Corsica 0.98 and 0.75); with Trustee_land on and a landscape floor (DATA(FALL, FLOOR)) the forest has a floor of
+0.99 x its base, artificial land 0.997 (l. 597-612: "usually only a 1% decline is considered plausible"). The model's
+land market (land.py) had the land types as variables with CAPRI's quadratic costs, the total area conserved and the
+grassland floor, but none of these bounds. In the Green Deal pair of 15 November 2026 (res_2_1730greendeal2030_gdk155)
+the EU's forest fell 5.4 Mha (3.0%) against CAPRI's 1.1 Mha (0.6%); 114 regions fell below 0.99 x base, none of
+CAPRI's 221; Attiki (EL30), Peloponnisos (EL43) and BL25 lost all of it, Weser-Ems (DE94) 40%. Most of the forest
+went to other land (EU +3.0 Mha against CAPRI's -0.9 Mha). Through CAPRI's surplus target per hectare of current land
+(e_SURTOTHa) farmland gained from forest loosens the target; whether this explains the run's livestock gap is what the
+validation run shows. That gap: the surplus cuts were CAPRI's (-26 to -29% in both), but the crops' N export fell
+less (Ireland IR01 -11% against CAPRI's -24%), and with it the herds (EU N excretion -9.2% against CAPRI's -12.1%)
+and the move from intensive to extensive grassland (EU GRAI -37% against -55%). In IR01 the 150 thousand ha of rewetted histosol grassland came on top of the productive
+grass (grassland land type +151, forest -50, other land -75 thousand ha) where CAPRI's came out of it (+13, -4, -25).
+
+Found while checking the herd gap against the fertiliser options: their model-level shares are CAPRI's (PRECFARM
+0.244 against 0.272, VRT_SRUC 0.153 against 0.130, the mineral inhibitor 0.356 against 0.311 over the EU's regions;
+CAPRI's per-crop and per-UAAR shares are a reporting allocation of v_Miti, recovered by its scaling and, for the
+inhibitor, a least-squares split of its mineral and manure parts, rms 0.007), so they do not explain it.
+
+- **Effect:** every scenario with a landscape floor (Farm-to-Fork, Green Deal) since the land market's land types
+  became variables; the general bounds bind only for large conversions
+- **In 9t:** -
+- **Status:** fixed 15 November 2026: land.py _land_type_bounds, rows forest_lo, forest_up, other_land_lo,
+  other_land_up and, under the landscape floor, forest_floor (a scenario row, kept out of the calibration as the
+  floor's); parameters LUC_* in model_parameters.csv; ARTO from luc_2030.csv; ARTIF is not a column of the model's
+  land market (held at its base). Test: test_capri.py::test_forest_and_other_land_keep_capris_bounds.
+- **Validation** (full Green Deal pair with K157, res_2_1730greendeal2030_gdk157, converged in 18 iterations, no
+  non-optimal regional solve): EU forest -0.4% (CAPRI -0.6%; before -3.1%), no region below 0.99 x base (min 0.990);
+  other land -1.0% (CAPRI -2.4%; before +7.8%). The livestock gap narrowed only a little (EU N excretion -9.9%
+  against CAPRI's -12.1%; before -9.2%; GRAI -39.7% against -54.8%, before -37.0%), so the forest loss was not its
+  main cause.
+
+### K157: The permanent-grassland rule left out the idled histosol grassland (found 15 November 2026)
+
+CAPRI's greening rule permGrasGreening_ (supply/supply_model.gms l. 1910-1912) sums GRSACT, which is GRAE, GRAI,
+IHISGR and FALLGR (sets.gms l. 2958), against the base GRAE + GRAI (policy/define_greening_limits.gms l. 139-140).
+The idled histosol grassland therefore counts: in CAPRI's Green Deal run GRAE + GRAI + IHISGR equals the base
+grass in every region (Denmark 171.6 + 47.4 = 219.0, Weser-Ems 194.6 + 93.2 = 287.8, Ireland's IR01 1611.1 + 152.3
+= 1763.4). The model's rule (policy._cap_rules_spec) counted GRAE and GRAI alone, so in the Green Deal pair of 15
+November 2026 the productive grass stayed at its base in every region and the idled area took new land: IR01's
+grassland land type +151 thousand ha from other land and arable land (with K156's bounds: arable -67, other land -79,
+against CAPRI's +18 and -25). Grass output, fodder and the herds did not fall as CAPRI's.
+
+- **Effect:** every scenario in which histosol grassland is idled (Green Deal; Farm-to-Fork; the emission tax)
+- **In 9t:** -
+- **Status:** fixed 15 November 2026: the grass histosol column (abatement._histosol_columns) enters the rule's row
+  with GRAE and GRAI; FALLGR has no column in the model (no level in CAPRI's 2030 reference and Green Deal runs).
+  Test: test_capri.py::test_permanent_grassland_rule_counts_the_idled_histosol_grassland.
+- **Farm-to-Fork, NL32 alone (the K57 test):** NL32 now meets the tiered N target in CAPRI's form; before, IPOPT found
+  no point there and JRC121368's relaxed target (K57) was taken. It idles all of its histosol grassland, 30.8 thousand
+  ha, CAPRI's bound (48.6% of its 63.4 thousand ha of grassland; maxshare 1), and 4.5 of histosol cropland; GRAE + GRAI
+  63.4 -> 32.6 thousand ha (before 63.4, unchanged), dairy cows 94.2 -> 23.6 thousand (before 71.3). With K156 alone
+  (K157 reverted) NL32 still takes the relaxation, so K157 is the cause. None of the other uncapped Dutch regions (NL11,
+  NL12, NL13, NL23, NL33, NL34) needs the relaxation alone, nor NL41 or NL22 taken off the capped list. The relaxation
+  path (K57) stays for a region whose target fails in a full run but has no test case left. Not checked against
+  CAPRI: we hold no Farm-to-Fork result of CAPRI for NL32. Test (renamed from
+  test_nlp_form_takes_jrc121368_relaxation_where_the_tiered_n_target_fails):
+  test_capri.py::test_nl32_meets_the_tiered_n_target_in_capris_form_by_idling_its_histosol_grassland.
+- **Validation** (the same full pair as K156): GRAE + GRAI now fall where histosol grassland is idled, as in CAPRI (by less in some regions): IR01 1598.8
+  thousand ha (CAPRI 1611.0; before 1750.5), Denmark 171.6 (171.6), Weser-Ems DE94 236.7 (194.6); IR01's grassland
+  land type 1750.5 (CAPRI 1763.4; before 1901.3). EU grassland land type +0.1% (CAPRI +1.2%; before +1.6%): CAPRI's
+  gain is mostly Ireland's IR02 (+469 thousand ha, its arable land 632 -> 238 thousand ha, other fodder on arable land
+  OFAR -69%), which the model does not reproduce (arable land unchanged, OFAR -12%); open, with the GRAI/GRAE shift.
 

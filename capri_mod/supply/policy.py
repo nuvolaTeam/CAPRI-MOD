@@ -103,7 +103,13 @@ class PolicyBlock:
             # 3.5e-11 kha (EL63, 2030) the rule asked for grass the bounds forbid and the NLP was infeasible (K69)
             _xg = float(sum(xb[j] for j in _gj))
             if _xg > float(_settings().get("supply.absent_level")):
-                out["permGras"] = {"row": [(j, -1.0) for j in _gj], "rhs": -_xg * (1 - 1e-9), "scale": _xg}
+                # CAPRI's GRSACT is GRAE, GRAI, IHISGR, FALLGR (sets.gms l. 2958): the idled histosol grassland counts
+                # towards the rule (permGrasGreening_ sums GRSACT; ddGreen maps every MCACT, policy_sets.gms l. 2055),
+                # the base limit is GRAE + GRAI (define_greening_limits.gms l. 139-140). Without it the rule held the
+                # productive grass at its base and the idled area took new land (KNOWN_ISSUES K157)
+                _hg = (getattr(self.ev, "hist_cols", None) or {}).get("grass")
+                _row = [(j, -1.0) for j in _gj] + ([(int(_hg), -1.0)] if _hg is not None else [])
+                out["permGras"] = {"row": _row, "rhs": -_xg * (1 - 1e-9), "scale": _xg}
                 # the rule's dual at the calibration point, CAPRI's assumption (supply/prep_cal.gms l. 118-131):
                 # p_dualGreening = -|rent of arable land - rent of grassland|, charged to GRAE and GRAI in the
                 # calibration's linear terms (EUR/ha; CapriRegionalNLP.calibrate fixes the row's multiplier at it)

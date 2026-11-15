@@ -53,6 +53,42 @@ class LandBlock:
         self.ev.seta_obl_vec = inc
         return Aa
 
+    def _land_type_bounds(self, Aa, ba, labels, n, li, L0):
+        """CAPRI's bounds on the land types forest and other land (supply/prep_sim_luc.gms l. 589-612, Trustee_land):
+          L0 - min(a x L0, b x ARTO) <= L <= L0 + min(9 x L0, 0.35 x ARTO)  (FORE, OLND; a = 0.9, b = 0.35, Corsica
+          0.98 and 0.75), ARTO the region's total area (luc_2030.csv);
+          and where the landscape floor holds (DATA(FALL, FLOOR) > 0): FORE >= 0.99 x L0 ('usually only a 1% decline
+          is considered plausible'). ARTIF, the third land type of CAPRI's set, is not a column of the model's land
+          market (fixed at its base: inside CAPRI's 0.997 floor and its upper bound). Not binding at the base point.
+        Rows forest_lo, forest_up, other_land_lo, other_land_up, forest_floor; a region without ARTO gets the floor
+        alone (none in the EU's data)."""
+        from capri_mod.environmental.luc import LUCModel
+        reg = self.data.region_id
+        arto = (LUCModel.get().v.get(reg) or {}).get("ARTO")
+        arto = float(arto) if arto is not None and arto == arto else None
+
+        def tab(t):
+            return float(t.get(reg, t["ALL"]))
+        new_r, new_b = [], []
+
+        def row(j, sign, rhs, lab):
+            r = np.zeros(Aa.shape[1]); r[n + j] = sign
+            new_r.append(r); new_b.append(rhs); labels.append(lab)
+        for t, lab in (("FORE", "forest"), ("OLND", "other_land")):
+            if t not in li or arto is None:
+                continue
+            j = li[t]; l0 = float(L0[j])
+            lo = l0 - min(tab(param_table("LUC_LO_OWN_SHARE")) * l0, tab(param_table("LUC_LO_ARTO_SHARE")) * arto)
+            up = l0 + min(param("LUC_UP_OWN_FACTOR") * l0, param("LUC_UP_ARTO_SHARE") * arto)
+            row(j, -1.0, -lo + 1e-9 * max(1.0, l0), f"{lab}_lo")
+            row(j, 1.0, up + 1e-9 * max(1.0, l0), f"{lab}_up")
+        if "FORE" in li and float(getattr(self.ev, "fall_floor", 0.0) or 0.0) > 0 and float(L0[li["FORE"]]) > 0:
+            l0 = float(L0[li["FORE"]])
+            row(li["FORE"], -1.0, -param("LUC_FORE_FLOOR") * l0 + 1e-9 * max(1.0, l0), "forest_floor")
+        if new_r:
+            Aa = np.vstack([Aa] + new_r); ba = np.concatenate([ba, new_b])
+        return Aa, ba
+
     def _land_augment(self, A_ub, b_ub, c_lin, x0):
         """Augment the regional QP with CAPRI's land market (LandMarket_,
         trustee-land variant): land-type areas L as variables, cost 1/2 L'Q L
@@ -378,6 +414,7 @@ class LandBlock:
         labels.extend(["land_total_up", "land_total_lo", "grassland_floor"])
         ba = np.concatenate([ba, [L0.sum() + 1e-9], [-L0.sum() + 1e-9 * max(1.0, L0.sum())],
                              [-(1.0 - allow) * L0[li["GRAS"]] + 1e-9]])
+        Aa, ba = self._land_type_bounds(Aa, ba, labels, n, li, L0)
         # CAPRI LandBalNoSlak_ (supply_model.gms): for arable crops (ARAC), fruit and
         # nurseries (FRUN) and grassland (GRAS) the crops using a land type EQUAL the land
         # type's area - no idle land. Land leaves agriculture only through the land market

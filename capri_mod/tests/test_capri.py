@@ -4170,11 +4170,13 @@ def test_nlp_failure_keeps_ipopts_last_point_as_capri(model, monkeypatch):
 
 @pytest.mark.slow
 @pytest.mark.no_market_hessian
-def test_nlp_form_takes_jrc121368_relaxation_where_the_tiered_n_target_fails(model):
-    """KNOWN_ISSUES K57: NL32 (outside JRC121368's nine capped regions) has no solution in CAPRI's form at the tiered
-    Farm-to-Fork N target (NL13 until the K75 fix of 26 October 2026; since then NL13 meets it and NL32 is the one
-    region relaxed in the reference run r145); JRC121368's rule for such regions (the EU-average cut, 36%) is applied in CAPRI's form,
-    recorded, and kept for the scenario."""
+def test_nl32_meets_the_tiered_n_target_in_capris_form_by_idling_its_histosol_grassland(model):
+    """KNOWN_ISSUES K57 and K157: NL32 (outside JRC121368's nine capped regions) had no solution in CAPRI's form at the
+    tiered Farm-to-Fork N target (NL13 until the K75 fix of 26 October 2026; NL32 the one region relaxed in the reference
+    run r145), and took JRC121368's rule for such regions (the EU-average cut, 36%). Since K157 (15 November 2026) the
+    idled histosol grassland counts towards the permanent-grassland rule, as CAPRI's GRSACT; NL32 then meets the tiered
+    target in CAPRI's form, without the relaxation, by idling its histosol grassland up to CAPRI's bound (the share of
+    histosols in its grassland). Run alone (NL32 as the EU), as before."""
     from capri_mod.policy.greendeal import farm_to_fork_scenario
     from capri_mod import settings as S
     model.supply_module.par.jrc_capped_cache = None
@@ -4185,10 +4187,13 @@ def test_nlp_form_takes_jrc121368_relaxation_where_the_tiered_n_target_fails(mod
     finally:
         model.supply_module.par.jrc_capped_cache = None
     fb = r["metadata"]["nlp_fallback"].get("NL320000") or []
-    assert len(fb) == 1 and "relaxed target" in fb[0], fb       # once, then kept (sticky)
+    assert not fb, fb
     mo = model.supply_module._models["NL320000"]
-    assert getattr(mo.res, "n_target_relaxed", False) and getattr(mo.ev, "nlp_fb_last", True) is False   # CAPRI's form
-    assert getattr(r["supply"]["NL320000"], "balance_shortfall", 0.0) > 0.0
+    assert not getattr(mo.res, "n_target_relaxed", True)
+    assert getattr(r["supply"]["NL320000"], "balance_shortfall", 1.0) == 0.0
+    h = mo.data.histosol
+    H = float(h.get("share_grass")) * float(h.get("maxshare_grass")) * mo._histosol_base_area("grass")
+    assert H > 0 and mo.res.last_hist_fallow["grass"] > 0.5 * H
 
 
 @pytest.mark.slow
@@ -4264,6 +4269,20 @@ def test_shocked_baseline_does_not_replace_the_cached_baseline(model):
 
 
 @pytest.mark.no_market_hessian
+def test_permanent_grassland_rule_counts_the_idled_histosol_grassland(model):
+    """KNOWN_ISSUES K157: CAPRI's permGrasGreening_ sums GRSACT (GRAE, GRAI, IHISGR, FALLGR) against the base GRAE +
+    GRAI; the idled histosol grassland's column is in the rule's row with GRAE and GRAI."""
+    model.run(scenario="BASELINE", regions=["IR010000"], max_outer_iter=1)
+    mo = model.supply_module._models["IR010000"]
+    mo.solve()
+    hg = (getattr(mo.ev, "hist_cols", None) or {}).get("grass")
+    assert hg is not None, "IR01 has histosol grassland"
+    pg = mo._cap_rules_spec()["permGras"]
+    cols = {j for j, _w in pg["row"]}
+    gj = {list(mo.acts).index(g) for g in ("GRAE", "GRAI")}
+    assert gj | {int(hg)} == cols and all(w == -1.0 for _j, w in pg["row"])
+
+
 def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
     """KNOWN_ISSUES K59, K60: with CAPRI's LandBalNoSlak_ the grassland row is an equality at the base use, as the arable
     and permanent rows (it kept the land data's headroom: IE04 173 kha of grass at no land cost), and an idled histosol
@@ -4279,6 +4298,24 @@ def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
     for cls, col in (getattr(mo.ev, "hist_cols", None) or {}).items():
         row = dict(mo.HISTOSOL_CLASSES)[cls]
         assert A[lab.index(row), col] == 1.0 and A[lab.index(row + "_lo"), col] == -1.0
+
+
+def test_forest_and_other_land_keep_capris_bounds(model):
+    """KNOWN_ISSUES K156: CAPRI's bounds on forest and other land (prep_sim_luc.gms l. 589-612, Trustee_land):
+    L0 - min(0.9 L0, 0.35 ARTO) <= L <= L0 + min(9 L0, 0.35 ARTO), not binding at the base; with a landscape floor
+    FORE >= 0.99 L0. Without them the Green Deal pair of 15 November 2026 converted 5.4 Mha of the EU's forest (CAPRI
+    1.1 Mha, none of its regions below 0.99), Attiki (EL30) all of it."""
+    region = "EL300000"
+    model.run(scenario="BASELINE", regions=[region], max_outer_iter=1)
+    mo = model.supply_module._models[region]
+    lab = list(mo.ev.aug_labels)
+    assert {"forest_lo", "forest_up", "other_land_lo", "other_land_up"} <= set(lab) and "forest_floor" not in lab
+    L0 = mo.data.land_market["base_kha"]
+    mo.solve(set_aside_requirement=0.10)
+    lab = list(mo.ev.aug_labels)
+    assert "forest_floor" in lab
+    fore = float(mo.res.land_solution["FORE"])
+    assert fore >= 0.99 * float(L0["FORE"]) - 1e-4 * max(1.0, float(L0["FORE"])), (fore, L0["FORE"])
 
 
 @pytest.mark.slow

@@ -64,7 +64,9 @@ cores), mean absolute deviation from CAPRI's published results (JRC121368) 4.74 
 Deal 2030 in 20 iterations (3,222 s), against the project lead's CAPRI run of the same scenario: activity changes within
 a mean 3.7 points of CAPRI's (the same sign for 83%), EU producer prices at a median 0.75 of CAPRI's changes. No
 regional solve non-optimal at the end in either run. The Green Deal pair with K152-K155 (15 November 2026): 17
-iterations (4,900 s), activity changes within a mean 3.5 points of CAPRI's (89% the same sign).
+iterations (4,900 s), activity changes within a mean 3.5 points of CAPRI's (89% the same sign); with K156-K157 as
+well: 18 iterations (4,710 s), a mean 3.3 points (91% the same sign), EU producer prices at a median 0.82 of CAPRI's
+changes.
 
 **The market against CAPRI's own market (14 November 2026).** At CAPRI's calibration point (Test A, against CAPRI's
 dump of its market model) prices of 2,160 cells are within 1.5e-4, 16,728 trade flows within 1e-3. Given CAPRI's own
@@ -81,7 +83,7 @@ NUTNED_; CAPRI's 2030 base mineral N per crop; and the crops' technology mix col
 able to move in both directions (since 8 November no scenario could move land to CAPRI's low-yield technology). The
 full Green Deal pair with them (15 November): activity changes within a mean 3.5 points of CAPRI's (89% the same
 sign; member states 9.3 points, from 12.2), EU crop production close to CAPRI's; herds and animal prices move less than
-CAPRI's (beef price +13.9% against +20.1%), the next gap to trace. The Farm-to-Fork figures above predate K152-K155.
+CAPRI's (beef price +13.9% against +20.1%), the next gap to trace. Two more found there (K156-K157, below): with them the beef price +15.1%. The Farm-to-Fork figures above predate K152-K157.
 
 **In progress.** The market as one system in CAPRI's form (docs/dev/MARKET_SYSTEM.md): built, checked against the
 default solve, and solving seven supply shocks within 2.5e-8 of it; an option (`market.solver = "chain"`); the
@@ -105,6 +107,39 @@ the rest of CAPRI's bounds and fudge equations (the start bounds, the widening a
 `market.bounds = "capri"`, not yet tested in a solve; FeedFudge_, ProcFudge_ as CAPRI's, ProdPriceFudge_ and
 tradeFlowFudge_ to write; docs/dev/MARKET_BOUNDS_PLAN.md), the Armington extensions, the intervention stocks and
 subsidised exports, LULUCF in the market, the market regions' crop areas and yields.
+
+## 15 November 2026 — CAPRI's bounds on forest and other land, the idled histosol grassland in the permanent-grassland rule (K156-K157)
+
+Tracing the Green Deal run's herd gap (EU N excretion -9.2% against CAPRI's -12.1%) found two more departures in the
+supply models' land:
+
+- **CAPRI's bounds on the land types forest and other land (KNOWN_ISSUES K156).** supply/prep_sim_luc.gms l. 589-595:
+  L0 - min(0.9 L0, 0.35 ARTO) <= L <= L0 + min(9 L0, 0.35 ARTO), Corsica 0.98 and 0.75; under a landscape floor
+  (Trustee_land, DATA(FALL, FLOOR)) the forest at least 0.99 x its base (l. 597-612). The model's land market had none:
+  under the Green Deal the EU's forest fell 3.1% (CAPRI 0.6%), 114 regions below 0.99 x base (CAPRI none), and other
+  land rose 7.8% (CAPRI -2.4%). Now rows forest_lo/up, other_land_lo/up and forest_floor (land.py
+  `_land_type_bounds`, a scenario row kept out of the calibration as the floor's); parameters LUC_* in
+  model_parameters.csv (SETTINGS_INVENTORY S521-S527).
+- **The idled histosol grassland in the permanent-grassland rule (K157).** CAPRI's permGrasGreening_ sums GRSACT =
+  GRAE, GRAI, IHISGR, FALLGR (sets.gms l. 2958) against the base GRAE + GRAI; the model's rule counted GRAE + GRAI
+  alone, so the productive grass could not fall where histosol grassland was rewetted and the idled area took new
+  land (Ireland's IR01 grassland +151 thousand ha against CAPRI's +13). The grass histosol column now enters the row.
+
+The full Green Deal pair with both (res_2_1730greendeal2030_gdk157; 18 iterations, 4,710 s, no non-optimal regional
+solve): EU forest -0.4% (CAPRI -0.6%), no region below 0.99 x base; other land -1.0% (-2.4%); IR01's productive
+grass 1598.8 thousand ha (CAPRI 1611.0, before 1750.5). Activity changes within a mean 3.3 points of CAPRI's (from
+3.5; 91% the same sign, from 89%); EU producer prices at a median 0.82 of CAPRI's changes (from 0.75; beef +15.1%
+against +20.1%, before +13.9%). The herd gap narrowed only a little (N excretion -9.9%; intensive grassland -39.7%
+against -54.8%), so the forest loss was not its main cause; fallow moved slightly away (+86.1% against +90.9%, before
++91.9%). Open there: CAPRI turns arable land into grassland in Ireland's IR02 (+469 thousand ha) and some other
+regions, the model does not (EU grassland land type +0.1% against +1.2%). Tests:
+test_forest_and_other_land_keep_capris_bounds, test_permanent_grassland_rule_counts_the_idled_histosol_grassland.
+
+Farm-to-Fork, NL32 run alone (the K57 test): with K157 NL32 meets the tiered N target in CAPRI's form instead of
+taking JRC121368's relaxed target. It idles all of its histosol grassland (30.8 thousand ha, CAPRI's bound), and its
+dairy cows fall 94.2 -> 23.6 thousand (71.3 with the relaxation). No other uncapped Dutch region run alone needs the
+relaxation; the path (K57) stays without a test case. Not checked against CAPRI (no Farm-to-Fork result of CAPRI for
+NL32). The test is renamed test_nl32_meets_the_tiered_n_target_in_capris_form_by_idling_its_histosol_grassland.
 
 ## 15 November 2026, night of 14-15 November — the Green Deal gap analysis: ammonia options, the mineral N's losses, the 2030 base mineral N, the technology splits in both directions (K152-K155); CAPRI's market bounds; the documentation split
 
