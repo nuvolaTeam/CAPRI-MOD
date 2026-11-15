@@ -117,7 +117,20 @@ bind in the full runs; they matter for large shocks.
    converges with "none": the "capri" system itself is harder, to be traced. The project lead's experience (15
    November 2026): CAPRI with IPOPT everywhere never converges in all regions. Next: the bounds in the Newton chain
    (a semismooth Newton on the bounded system, the bounds as complementarity) instead of IPOPT, for the project
-   lead's decision; first (3). **Tests to run** (after the full-run pair, one heavy job
+   lead's decision; first (3). **Why the chain fails (point 1, 16 November 2026, 00:00-00:20; wheat+5, pork-90,
+   milk-90, milk-50, pork-50):** (a) (3) is not the bounds: Newton stalls the same on wheat+5 with market.bounds =
+   "none", with every mode 0 and with every mode 2 (1.7e-2 in 8 steps); the residuals are the EU's soft wheat quota's
+   sigmoid and the wheat prices around it. The continuation in the sigmoid's slope (CAPRI's trim_trqs) converges, with
+   and without CAPRI's bounds (24-33 s), and the "auto" chain under CAPRI's bounds solves wheat+5 without reaching
+   IPOPT (35 s). (b) Under pork-90 the fixed point converges (34 iterations, 22 s), while the continuation of the
+   lifted system stalls at its first slope (25) with and without the bounds (residuals: the pork and other quotas'
+   sigmoids): for large shocks the lifted system's quota continuation is weaker than the fixed point. (c) Under
+   milk-90 and milk-50 the fixed point fails too ("the land markets and the feed energy balances did not settle
+   together"): a separate robustness issue of the inner blocks, before any bounds. (d) The quotas' sigmas sit at their
+   [0, 1] bounds where the sigmoid saturates, and the lifted solutions leave them slightly above 1 (to 1.02): hard
+   for an interior-point method. Point 2 (the project lead, 16 November): the semismooth Newton (Fischer-Burmeister,
+   our own on CasADi and PARDISO; no maintained Python MCP solver at this size without a licence) and scipy's
+   trust-region reflective least_squares in the battery, in the chain's order. **Tests to run** (after the full-run pair, one heavy job
    at a time): the chain with market.bounds "none" identical to before (modes 0); with "capri" on the solver
    battery's shocks; a shock that drives a cell below 0 (a supply cut of 90% in one region) solved with the widening
    and the fudge, against CAPRI's rules applied by hand.
