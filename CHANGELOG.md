@@ -83,7 +83,7 @@ NUTNED_; CAPRI's 2030 base mineral N per crop; and the crops' technology mix col
 able to move in both directions (since 8 November no scenario could move land to CAPRI's low-yield technology). The
 full Green Deal pair with them (15 November): activity changes within a mean 3.5 points of CAPRI's (89% the same
 sign; member states 9.3 points, from 12.2), EU crop production close to CAPRI's; herds and animal prices move less than
-CAPRI's (beef price +13.9% against +20.1%), the next gap to trace. Two more found there (K156-K157, below): with them the beef price +15.1%. The Farm-to-Fork figures above predate K152-K157.
+CAPRI's (beef price +13.9% against +20.1%), the next gap to trace. Two more found there (K156-K157, below): with them the beef price +15.1%. Then K158 (the idled histosol area on the current land, below): Ireland's IR02 follows CAPRI's turn of arable land into grassland, the EU grassland land type +1.1% (CAPRI +1.2%). The Farm-to-Fork figures above predate K152-K158.
 
 **In progress.** The market as one system in CAPRI's form (docs/dev/MARKET_SYSTEM.md): built, checked against the
 default solve, and solving seven supply shocks within 2.5e-8 of it; an option (`market.solver = "chain"`); the
@@ -107,6 +107,28 @@ the rest of CAPRI's bounds and fudge equations (the start bounds, the widening a
 `market.bounds = "capri"`, not yet tested in a solve; FeedFudge_, ProcFudge_ as CAPRI's, ProdPriceFudge_ and
 tradeFlowFudge_ to write; docs/dev/MARKET_BOUNDS_PLAN.md), the Armington extensions, the intervention stocks and
 subsidised exports, LULUCF in the market, the market regions' crop areas and yields.
+
+## 15 November 2026 — the idled histosol area on the current land (K158)
+
+- **CAPRI's idleHisto_ bounds the idled histosol area by the current land (KNOWN_ISSUES K158).** supply_model.gms
+  l. 2284-2295: v_Miti x share x v_actLevl(GRSLND) x v_landshare(GRAS) for grassland, x v_actLevl(CROP) for cropland,
+  v_Miti <= MaxShare. The model's bound was MaxShare x share x the base area. Now, with the land market, the row
+  F - MaxShare x share x L <= 0 on the land types' columns (GRAS; ARAC + FRUN). Under the Green Deal's landscape floor
+  each hectare turned into grassland brings idled histosol for the floor; CAPRI's Ireland IR02 turns arable land into
+  grassland for it.
+- **The full Green Deal pair** (res_2_1730greendeal2030_gdk158; 18 iterations, 4,751 s, no non-optimal regional
+  solve): IR02 arable land 233.1 thousand ha (CAPRI 237.7; before 647.6), grassland 2,344.9 (2,361.5; before 1,892.4),
+  OFAR 107.0 (108.9), soft wheat and barley at CAPRI's levels (4.3, 11.5), VSET 43.8 (43.3; before 71.3). EU
+  grassland land type +1.1% (CAPRI +1.2%; before +0.1%), idled histosols 1,789 thousand ha (CAPRI 1,819). EU activity
+  gap 3.4 points (3.3), price median ratio 0.83 (0.82). The GRAI/GRAE shift (GRAI -38.8% against -54.8%) stays open.
+- **A point for the project lead:** in CAPRI's form a hectare turned from cropland into grassland takes the
+  grassland's histosol share (IR02 6.1%, its cropland 0%), so land-use change makes idle-able histosol area. A physical
+  alternative would carry the histosol area with the land transitions; the model follows CAPRI.
+- Test: test_idled_histosol_area_is_bounded_by_the_current_land.
+- **Open (K159):** in the P accounts test's two-region, one-iteration Farm-to-Fork run, NL22's solve now ends at a
+  non-optimal point: IPOPT's path reaches a corner where the inner fertilisation model's first-order condition
+  (CAPRI's e_focFertDist, an equality) cannot hold with a manure flow at its 0.001 x mode bound. The test now runs on
+  DE11 and Weser-Ems DE94 and requires optimal solves; NL22 recorded as K159.
 
 ## 15 November 2026 — CAPRI's bounds on forest and other land, the idled histosol grassland in the permanent-grassland rule (K156-K157)
 

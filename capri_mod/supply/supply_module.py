@@ -1004,6 +1004,9 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: suffix (pmp_sqr_crop, share_grass, ...) and the model's own constraint row label, both internal names of the
     #: model, so kept in the code
     HISTOSOL_CLASSES = (("crop", "arable_land"), ("grass", "grassland"))
+    #: the land types of each class's histosol area (CAPRI's luClassAgr: CROP = ARAB = ARAC + FRUN; GRSLND x
+    #: v_landshare(GRAS) = the productive grassland GRAS), for the bound on the current land (K158)
+    HISTOSOL_LAND = {"crop": ("ARAC", "FRUN"), "grass": ("GRAS",)}
 
 
     def _build_constraints(

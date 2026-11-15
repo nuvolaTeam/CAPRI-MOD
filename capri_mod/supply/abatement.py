@@ -534,11 +534,15 @@ class AbatementBlock:
                              and c in base.index))
         return float(sum(float(base.get(g, 0.0) or 0.0) for g in CROPS_ON_LAND["GRAS"]))
 
-    def _histosol_columns(self, Qa, ca, Aa, ba, start, labels, n):
+    def _histosol_columns(self, Qa, ca, Aa, ba, start, labels, n, land_cols=None):
         """CAPRI's histosol fallowing (no_histosols.gms, idleHisto_), one column per class: F = 1000 ha of
         histosol cropland (iHisCr) or grassland (iHisGr) idled. It still occupies its land (arable or
-        grassland row +1); 0 <= F <= MaxShare x share x base area of the class (base area fixed:
-        REGISTERED); cost CAPRI's curvature 0.5 pmpParSqr F^2 / H per ha of histosol area H; linear term
+        grassland row +1); 0 <= F <= MaxShare x share x the class's land. With the land market (land_cols: the
+        land types' columns) the land is the current one, as CAPRI's idleHisto_ (supply_model.gms l. 2284-2295:
+        v_Miti x share x v_actLevl(CROP or GRSLND) x v_landshare(GRAS) for the grassland), CROP = ARAC + FRUN,
+        the productive grassland = GRAS (KNOWN_ISSUES K158); without it, the base area. Cost CAPRI's curvature
+        0.5 pmpParSqr F^2 / H per ha of histosol area H at the base area (REGISTERED: CAPRI's cost is on the share
+        v_Miti of the current area); linear term
         from the base dual of the land row (F = 0 optimal at base, CAPRI's IniShare 0), so fallowing
         rises where the land rent falls - CAPRI's calibration does the same with its own rent in
         costsaving0. Its N2O (and CO2, CH4) on the idled area stop (QEmitt = 1 - p_ghgTechHisto = 0)."""
@@ -580,7 +584,14 @@ class AbatementBlock:
                 continue
             Aa = np.hstack([Aa, col[:, None]])
             up = np.zeros(Aa.shape[1]); up[-1] = 1.0
-            Aa = np.vstack([Aa, up]); ba = np.concatenate([ba, [float(mx) * H]])
+            _lt = self.HISTOSOL_LAND.get(cls, ())
+            if land_cols and _lt and all(t in land_cols for t in _lt):
+                # F <= MaxShare x share x current land (K158): F - MaxShare x share x L <= 0
+                for t in _lt:
+                    up[land_cols[t]] = -float(mx) * sh
+                Aa = np.vstack([Aa, up]); ba = np.concatenate([ba, [1e-9 * max(1.0, H)]])
+            else:
+                Aa = np.vstack([Aa, up]); ba = np.concatenate([ba, [float(mx) * H]])
             labels.append(f"hist_{cls}_up")
             Qa = np.pad(Qa, ((0, 1), (0, 1))); Qa[-1, -1] = float(sqr) / H
             ca = np.concatenate([ca, [cal[cls] + self._ghg_cost('hist', cls)]])

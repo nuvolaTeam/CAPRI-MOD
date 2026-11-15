@@ -447,7 +447,8 @@ class LandBlock:
         start = np.concatenate([x0, L0] + ([np.array([getattr(self.ev, "alloc_m0", 0.0)])] if alloc_k else [])
                                + ([np.zeros(pool_k)] if pool_k else []))
         Qa, ca, Aa, ba, start = self._dairy_intensity_column(Qa, ca, Aa, ba, start, labels, n)
-        Qa, ca, Aa, ba, start = self._histosol_columns(Qa, ca, Aa, ba, start, labels, n)
+        Qa, ca, Aa, ba, start = self._histosol_columns(Qa, ca, Aa, ba, start, labels, n,
+                                                       land_cols={t: n + j for t, j in li.items()})
         Qa, ca, Aa, ba, start = self._mix_columns(Qa, ca, Aa, ba, start, labels, n)   # CAPRI's T1/T2
         Qa, ca, Aa, ba, start = self._entitlement_columns(Qa, ca, Aa, ba, start, labels, n)   # K136: def_endCut
         self.ev.aug_labels = labels              # one label per row of the augmented problem (the NLP form reads them)

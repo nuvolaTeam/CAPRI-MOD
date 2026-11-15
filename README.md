@@ -1159,31 +1159,31 @@ adjustment with its FADN yield gaps).
 The like-for-like check: the project lead's CAPRI star 3.0 runs of the Green Deal 2030 baseline and scenario
 (greendeal_scenarios.gms: lnds8 org18 pest20 mine13crp surp30) against the model's run of the same scenario on the same
 baseline (`tools/check/compare_capri_gd.py`; the results browser shows it by member state and region). The figures
-are the full-EU run with the supply-side fixes of KNOWN_ISSUES K152-K157 (converged in 18 iterations).
+are the full-EU run with the supply-side fixes of KNOWN_ISSUES K152-K158 (converged in 18 iterations).
 
-**Supply** (EU27, % change from the baseline). Mean gap over the activities 3.3 points; the same sign for 91%; per
-member state, the median gap over its activities 1.6 (Malta) to 6.0 points (the Netherlands).
+**Supply** (EU27, % change from the baseline). Mean gap over the activities 3.4 points; the same sign for 91%; per
+member state, the median gap over its activities 1.5 (Slovenia) to 6.0 points (the Netherlands).
 
 | Activity | CAPRI | CAPRI-mod |
 |---|---:|---:|
-| Rye | −11.9 | −10.5 |
-| Grain maize | −10.0 | −11.7 |
-| Fallow | +90.9 | +86.1 |
-| Voluntary set-aside | +79.5 | +68.8 |
-| Intensive grassland | −54.8 | −39.7 |
-| Suckler cows | −28.8 | −22.8 |
+| Rye | −11.9 | −10.9 |
+| Grain maize | −10.0 | −11.6 |
+| Fallow | +90.9 | +86.0 |
+| Voluntary set-aside | +79.5 | +67.5 |
+| Intensive grassland | −54.8 | −38.8 |
+| Suckler cows | −28.8 | −22.7 |
 | Fattening pigs | −9.2 | −6.8 |
 | Sheep | −9.9 | −6.6 |
 
-**Producer prices** (EU27, % change). Median ratio of the changes 0.82; mean gap 2.2 points.
+**Producer prices** (EU27, % change). Median ratio of the changes 0.83; mean gap 2.2 points.
 
 | Product | CAPRI | CAPRI-mod |
 |---|---:|---:|
-| Beef | +20.1 | +15.1 |
+| Beef | +20.1 | +15.0 |
 | Pork | +12.9 | +8.9 |
 | Poultry | +13.5 | +10.3 |
 | Milk | +11.2 | +9.2 |
-| Soft wheat | +8.9 | +7.9 |
+| Soft wheat | +8.9 | +8.1 |
 
 **The market alone** (CAPRI's own Green Deal supply, feed demand and supply-side prices fed into the model's market,
 `tools/check/check_capri_gd_market.py`; % change). The EU's market prices within a median 0.08 points of CAPRI's

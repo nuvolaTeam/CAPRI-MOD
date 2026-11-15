@@ -59,6 +59,8 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K155](#k155) | The crops' technology mix columns could not move to CAPRI's low-yield technology T2: the regional NLP's default lower bound 0 held z >= 0 | fixed (15 November 2026), validated (15 November 2026, the full Green Deal pair) |
 | [K156](#k156) | CAPRI's bounds on forest and other land (prep_sim_luc.gms, Trustee_land) were missing: under the Green Deal's landscape floor the EU lost 5.4 Mha of forest (CAPRI 1.1 Mha, no region below 0.99 x base), loosening the surplus target per hectare | fixed (15 November 2026) |
 | [K157](#k157) | CAPRI's permanent-grassland rule counts the idled histosol grassland (GRSACT includes IHISGR); the model's counted GRAE + GRAI alone, so the productive grass stayed at its base and the idled area took new land | fixed (15 November 2026) |
+| [K158](#k158) | The idled histosol area was bounded by the base land; CAPRI's idleHisto_ takes the current land (GRSLND x landshare(GRAS), CROP), so under the landscape floor new grassland brings idled histosol (Ireland's IR02 turns arable land into grassland) | fixed (15 November 2026), validated (the full Green Deal pair) |
+| [K159](#k159) | NL22's Farm-to-Fork solve ends at a non-optimal point in a two-region, one-iteration run since K158 (the inner fertilisation model's first-order condition cannot hold with a manure flow at its 0.001 x mode bound) | open |
 | [K141](#k141) | CAPRI bug: CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it (the project lead's decision) |
 | [K136](#k136) | CAPRI's endogenous entitlement limit (def_endCut.gms: no area payment beyond the trend area) was not in the model; ported with CAPRI's 2030 ceilings computed from its CAP 2014-2020 tables | fixed (13 November 2026) |
 | [K137](#k137) | The reported UAA left out the idled histosols (CAPRI's IHISGR, IHISCR stay in GRAS, ARAC and UAAR): the Green Deal's surplus per ha looked short of its target where the row met it | fixed (13 November 2026) |
@@ -3271,5 +3273,66 @@ against CAPRI's +18 and -25). Grass output, fodder and the herds did not fall as
   thousand ha (CAPRI 1611.0; before 1750.5), Denmark 171.6 (171.6), Weser-Ems DE94 236.7 (194.6); IR01's grassland
   land type 1750.5 (CAPRI 1763.4; before 1901.3). EU grassland land type +0.1% (CAPRI +1.2%; before +1.6%): CAPRI's
   gain is mostly Ireland's IR02 (+469 thousand ha, its arable land 632 -> 238 thousand ha, other fodder on arable land
-  OFAR -69%), which the model does not reproduce (arable land unchanged, OFAR -12%); open, with the GRAI/GRAE shift.
+  OFAR -69%), which the model does not reproduce (arable land unchanged, OFAR -12%); closed by K158 (the idled area on the current land); the GRAI/GRAE shift stays open.
 
+<a id="k158"></a>
+### K158: The idled histosol area was bounded by the base land, not the current land (found 15 November 2026)
+
+CAPRI's idleHisto_ (supply/supply_model.gms l. 2284-2295) sets the idled area to v_Miti x the histosol share x the
+current land of the class: v_actLevl(GRSLND) x v_landshare(GRAS), the productive grassland, for iHisGr, and
+v_actLevl(CROP) (CROP = ARAB = ARAC + FRUN in CAPRI's results) for iHisCr, with v_Miti <= MaxShare
+(set_miti_bounds.gms). The model bounded F by MaxShare x share x the base area. In CAPRI's Green Deal run Ireland's IR02
+idles 143.6 thousand ha of histosol grassland, which is its share 0.0608 x its scenario grassland 2,361.5: under the
+landscape floor (dual about 35,000 EUR/ha on set-aside in CAPRI's dual report, D_PMPL and D_PROV of SETA) each
+hectare turned to grassland brings 0.06 ha of idled histosol for the floor. CAPRI's IR02 turns arable land into
+grassland (arable 632 -> 238, grassland 1,892 -> 2,362 thousand ha; its land rents: arable 379 -> 807, grass 474 -> 62
+EUR/ha); the model's IR02 kept its arable land, met the floor with set-aside (VSET 71.3 against CAPRI's 43.3) at a
+floor dual of 47,786 EUR/ha.
+
+- **Effect:** Green Deal (the landscape floor), Farm-to-Fork; any scenario that idles histosols where land types move
+- **In 9t:** -
+- **Status:** fixed 15 November 2026: with the land market the bound is the row F - MaxShare x share x L <= 0 on the
+  land types' columns (GRAS for grass, ARAC + FRUN for crops; supply_module.HISTOSOL_LAND); without it, the base area as
+  before. REGISTERED: the curvature 0.5 pmpParSqr F^2 / H keeps the base area H (CAPRI's cost is on the share v_Miti
+  of the current area). Test: test_capri.py::test_idled_histosol_area_is_bounded_by_the_current_land.
+- **Validation** (full Green Deal pair res_2_1730greendeal2030_gdk158; 18 iterations, 4,751 s, no non-optimal regional
+  solve): IR02 now follows CAPRI's land change: arable land 233.1 thousand ha (CAPRI 237.7; before 647.6), grassland
+  2,344.9 (2,361.5; before 1,892.4), OFAR 107.0 (108.9; 308.6), soft wheat 4.3 (4.3; 45.1), barley 11.5 (11.5; 106.7),
+  GRAE 1,570.8 (1,618.6), GRAI 631.6 (599.3), VSET 43.8 (43.3); floor dual 28,034 EUR/ha, land rents arable 722
+  (CAPRI 807) and grass 92 (62). EU grassland land type +1.1% (CAPRI +1.2%; before +0.1%); EU idled histosols 1,789
+  thousand ha (CAPRI 1,819; before 1,757). EU activity gap 3.4 points (3.3 before, rounding: soft wheat -4.6% against
+  CAPRI's -1.9%, pulses -12.2% against -0.8%), OFAR -21.0% (CAPRI -28.9%; before -19.3%), GRAE +35.8% (+51.8%), GRAI
+  -38.8% (-54.8%); price median ratio 0.83 (0.82). IR01 unchanged (no land-type move there in CAPRI either: grassland
+  +0.7%); its GRAI gap (-30% against -56%) is the open herd/GRAI shift.
+- **A point for the project lead (stated 15 November 2026):** CAPRI's form makes histosol area out of land-use change:
+  a hectare turned from cropland into grassland takes the grassland's histosol share (IR02: 6.1%, cropland 0%), which can
+  then be idled for the floor. A physical alternative would carry the histosol area with the land transitions. The
+  model follows CAPRI; the alternative would be a stated departure, the project lead's decision.
+- **Farm-to-Fork, DE11 + NL22 (the P accounts test):** NL22's solve ends at a non-optimal point (K159); the test
+  now runs on DE11 and Weser-Ems DE94 (the project lead's decision, 15 November 2026).
+
+<a id="k159"></a>
+### K159: NL22's Farm-to-Fork solve fails in a two-region, one-iteration run since K158 (found 15 November 2026)
+
+In test_p_accounts_from_the_nlp_solution (DE11 and NL22 alone, one market iteration, no market supply Hessian), NL22's
+Farm-to-Fork solve with the landscape floor ends at IPOPT's last point (Infeasible_Problem_Detected, "converged to a
+point of local infeasibility"), so the P accounts the test checks do not close (MINFER 0 against a purchase of 2.1 t).
+With K157's code the solve is optimal; with K158's grassland bound alone (cropland on its base area) too: the trigger
+is the cropland half of CAPRI's idleHisto_. NL22 is one of JRC121368's capped regions, with almost no base set-aside
+(VSET 0.38, FALL 0.1 thousand ha), so the landscape floor is costly there and the cropland bound gives arable land a
+histosol value under it. IPOPT's path goes to a corner (most activities at their 10% floors, other land at its K156
+lower bound, arable land 100.6 -> 111.4 thousand ha), where the inner fertilisation model has no solution: the
+K-manure flow on grain maize sits at CAPRI's lower bound 0.001 x its prior mode, where CAPRI's e_focFertDist (an
+equality, supply_model.gms l. 1605-1641) cannot hold. Restarted from K157's solution (violation 0.016 in the
+fertilisation rows) IPOPT ends locally infeasible too. Not shown: whether the problem has a feasible point at the K158
+bound (K157's solution is not one, by 0.016). The model's fertilisation block is CAPRI's (same first-order conditions,
+same bounds). The full Green Deal pair with K158 had no non-optimal solve; the full Farm-to-Fork run is still to do.
+Separately, the calibration warning 'fertilisation block at base: P Infeasible' for NL22 (and DE94) comes from the
+recalibration at the base under the scenario's rules when the histosol columns enter (supply/nlp.py, _late); it is
+there with K157 too, and the calibration falls back as before.
+
+- **Effect:** NL22 under Farm-to-Fork in small test runs; in a full run, unknown until the Farm-to-Fork run
+- **In 9t:** -
+- **Status:** open. Next (the project lead's decision, 15 November 2026): a first-order condition that lets a flow sit at
+  its lower bound (a bound multiplier, complementarity), beyond CAPRI's equality; a stated departure. The P accounts
+  test runs on DE11 and DE94 meanwhile.

@@ -4300,6 +4300,24 @@ def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
         assert A[lab.index(row), col] == 1.0 and A[lab.index(row + "_lo"), col] == -1.0
 
 
+def test_idled_histosol_area_is_bounded_by_the_current_land(model):
+    """KNOWN_ISSUES K158: CAPRI's idleHisto_ (supply_model.gms l. 2284-2295) takes the idled area as v_Miti x share x
+    the current land (GRSLND x v_landshare(GRAS), the productive grassland; CROP = ARAC + FRUN), v_Miti <= MaxShare:
+    the bound row F - MaxShare x share x GRAS <= 0 on the land market's GRAS column, slack at the base."""
+    model.run(scenario="BASELINE", regions=["IR010000"], max_outer_iter=1)
+    mo = model.supply_module._models["IR010000"]
+    lab = list(mo.ev.aug_labels)
+    _Q, _c, A, b, y = mo.res.last_aug
+    col = mo.ev.hist_cols["grass"]
+    i = lab.index("hist_grass_up")
+    h = mo.data.histosol
+    n = len(mo.acts)
+    jg = n + list(mo.LAND_TYPES).index("GRAS")
+    assert A[i, col] == 1.0
+    assert abs(A[i, jg] + float(h.get("maxshare_grass")) * float(h.get("share_grass"))) < 1e-12
+    assert abs(float(b[i])) < 1e-6 and float(A[i] @ y) < float(b[i]) - 1.0     # slack at the base (F = 0)
+
+
 def test_forest_and_other_land_keep_capris_bounds(model):
     """KNOWN_ISSUES K156: CAPRI's bounds on forest and other land (prep_sim_luc.gms l. 589-612, Trustee_land):
     L0 - min(0.9 L0, 0.35 ARTO) <= L <= L0 + min(9 L0, 0.35 ARTO), not binding at the base; with a landscape floor
