@@ -105,7 +105,19 @@ bind in the full runs; they matter for large shocks.
    f2f-like and the new milk-90 and pork-90): on wheat+5 the fixed point converged in 29 iterations (17.6 s), the
    system built in 35 s, IPOPT under the bounds had not finished after 19 minutes and was stopped. Open: the cause
    (slow convergence, the widening loop or the restoration phase), from IPOPT's log. market.bounds stays "none" by
-   default. **Tests to run** (after the full-run pair, one heavy job
+   default. **Diagnosis (15-16 November 2026):** (1) CAPRI's start bounds fixed 781 of the 12,673 unknowns while the
+   square system kept all 12,673 equations (CAPRI generates no equation for a cell it fixes): 116 Armington prices of
+   regions without Armington demand and 4 small processing cells are still set by their equations (Newton moves 102
+   and 4 of them under wheat+5), so the bounded system had no solution and IPOPT went to its restoration phase at the
+   first iteration. Fixed: those cells keep CAPRI's ranges instead of being fixed (market_bounds.py; a departure from
+   CAPRI's fixing, required by the square system); the supply and use cells fixed at 0 stay fixed (their equations
+   hold there). (2) With that IPOPT takes regular steps (infeasibility 0.027 -> 0.06 in 5 iterations) but does not
+   converge in 60 iterations (5.5 s each, L-BFGS Hessian) and returns to restoration. (3) Newton under
+   market.bounds = "capri" (the lifted use block, the modes at 2) stalls at 1.7e-2 in 8 steps on wheat+5, where it
+   converges with "none": the "capri" system itself is harder, to be traced. The project lead's experience (15
+   November 2026): CAPRI with IPOPT everywhere never converges in all regions. Next: the bounds in the Newton chain
+   (a semismooth Newton on the bounded system, the bounds as complementarity) instead of IPOPT, for the project
+   lead's decision; first (3). **Tests to run** (after the full-run pair, one heavy job
    at a time): the chain with market.bounds "none" identical to before (modes 0); with "capri" on the solver
    battery's shocks; a shock that drives a cell below 0 (a supply cut of 90% in one region) solved with the widening
    and the fudge, against CAPRI's rules applied by hand.

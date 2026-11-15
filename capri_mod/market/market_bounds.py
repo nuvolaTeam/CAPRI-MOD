@@ -86,8 +86,12 @@ def capri_start_bounds(mm, lay, x0) -> tuple:
             pa[:] = v * pa0                                        # EUR/t
             lo = LOW_PRICE * pa
             hi = np.maximum(1000.0, pa) * UPP_PRICE
-            lb[sl] = np.where(has_q, lo / pa0, v)
-            ub[sl] = np.where(has_q, hi / pa0, v)
+            # CAPRI fixes v_arm1Price where the region has no Armington demand and generates no equation for the cell;
+            # the lifted system keeps the cell's equation (arm1Price_ still sets it), so the cell is not fixed but
+            # held within CAPRI's price range around its start (fixed, the bounded system had no solution: 102 such
+            # prices moved by up to 7e-5 under wheat+5, 15 November 2026)
+            lb[sl] = np.where(has_q, lo / pa0, LOW_PRICE * v)
+            ub[sl] = np.where(has_q, hi / pa0, np.maximum(1000.0 / np.maximum(pa0, 1e-12), v) * UPP_PRICE)
         elif name == "D":
             lb[sl] = np.where(v > 0, np.minimum(1e-6, v * LOW_QUANT), 0.0)
             ub[sl] = np.where(v > 0, np.maximum(1.0, v) * UPP_QUANT, 0.0)
@@ -102,8 +106,10 @@ def capri_start_bounds(mm, lay, x0) -> tuple:
             proc = kind == "proc"
             lo = np.where(proc, b * LOW_QUANT, np.maximum(1e-10, np.minimum(1e-8, b * LOW_QUANT)))
             hi = np.maximum(1.0, b) * UPP_QUANT
-            fix = proc & (v <= 0.1)
-            lb[sl], ub[sl] = np.where(fix, v, lo), np.where(fix, v, hi)
+            # CAPRI fixes small processing cells (v_procQuant at most 0.1 kt, set_start_val.gms) where it generates no
+            # ProcNQ_ for them; the lifted system keeps the cell's defining row, so the cell keeps its range (fixed,
+            # 4 such cells moved under wheat+5, 15 November 2026)
+            lb[sl], ub[sl] = lo, hi
         o += n
     return lb, ub
 
