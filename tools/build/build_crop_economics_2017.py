@@ -1,5 +1,5 @@
 """Crop yields, producer prices, input costs and CAP premiums for every model region from CAPRI's 2017 results
-(Sprint 9s: synthetic data removed, docs/SYNTHETIC_DATA_AUDIT.md A1-A3, A5).
+(the removal of synthetic data: synthetic data removed, docs/dev/SYNTHETIC_DATA_AUDIT.md A1-A3, A5).
 
 What was wrong. tools/build/build_capri_base.py rebuilt areas and herds from all 27 dumps but its per-hectare pass took only
 the FIRST CAPRI activity of each model crop and skipped wine costs and the textile crops; premiums were never rebuilt
@@ -62,7 +62,7 @@ from capri_mod.data import definitions as D  # noqa: E402
 PRICES_EXTRACT = ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_producer_prices_extract.parquet"
 
 ITEMS = ("LEVL", "YILD", "TOIN", "MPRI", "PRME", "MREV", "GRAS")
-#: CAPRI's grassland activities (the GRAS item is their grass output); the model's own since S2 (7 November 2026)
+#: CAPRI's grassland activities (the GRAS item is their grass output); the model's own since 7 November 2026
 GRASS = ("GRAE", "GRAI")
 GRASS_DM = ROOT / "capri_data" / "2017" / "supply" / "grass_dm_content.csv"
 PREMIUM = ROOT / "capri_data" / "2017" / "supply" / "crop_premium.csv"
@@ -154,7 +154,7 @@ def main(dump_dir: Path):
             if v is None:
                 # CAPRI has the crop nowhere in the member state: no yield and no cost (0, as the file had for rice
                 # outside the rice countries). Until 27 October 2026 such cells kept whatever the file held, in places
-                # values of the synthetic template removed in Sprint 9s (citrus yield 24.2 t/ha in DE11)
+                # values of the synthetic template removed in the removal of synthetic data (citrus yield 24.2 t/ha in DE11)
                 if col not in GRASS and col in yields.columns:
                     yields.at[reg, col] = 0.0
                 if col in costs.columns:
@@ -179,7 +179,7 @@ def main(dump_dir: Path):
     # GRASS: CAPRI's dry-matter content (DRMA of GRAS, 0.22 in every region) for the loader's fresh-to-dry conversion,
     # and the grass price on that basis: CAPRI's revenue per ha (MREV; its grass MPRI is a dummy 1,000) over the
     # dry-matter yield (build_capri_base used a share of 0.20). Per grassland activity, CAPRI's GRAE and GRAI, the
-    # model's own since S2 (7 November 2026; before, their aggregate GRAS)
+    # model's own since 7 November 2026 (before, their aggregate GRAS)
     dm = pd.Series(0.0, index=areas.index, name="drma")
     for reg in areas.index:
         src = spec.get(reg) or ((national(reg), 1.0),)

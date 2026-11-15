@@ -1,7 +1,7 @@
-"""G3.2d: the market's use side as one CasADi function of the system's unknowns.
+"""The market's use side as one CasADi function of the system's unknowns.
 
 `MarketModule.demand_response` composes the use per region and commodity (CAPRI's ArmBal1_: human consumption + feed +
-processing + biofuel processing, raw milk delivered, the biofuels' own use) from the blocks' CasADi functions (G2b-G2g)
+processing + biofuel processing, raw milk delivered, the biofuels' own use) from the blocks' CasADi functions
 called on numbers. `use_function(mm)` composes the same blocks, in the same order and with the same floors, on symbols:
 
     (D, byp) = use(PR, RB, fede, milk, biofX, ddgs)
@@ -24,7 +24,7 @@ module holds FEDE, ev.fede_now, i.e. inside a bilateral evaluation).
 byp: the EU's residual feeds' output (MaprFeed_, byp_cells' order), a supply quantity that follows this use.
 
 `use_inputs(mm)` reads the numbers of the module's latest evaluation; `use_function(mm)(*use_inputs(mm))` equals that
-evaluation's use (tools/check/g3_use_residuals.py at captured solves).
+evaluation's use (tools/check/market_system_use_residuals.py at captured solves).
 """
 from __future__ import annotations
 
@@ -41,9 +41,17 @@ def _sx_matrix(ca, cells: Dict[Tuple[int, int], object], base: np.ndarray):
     return M
 
 
-def use_function(mm):
+def use_function(mm, lift: bool = False):
     """(Function, layout) of the use side at the module's current calibration state; layout holds the inputs' orders
-    (rms, milk_regs, groups, ddgs_regs) and the flags read from the module."""
+    (rms, milk_regs, groups, ddgs_regs) and the flags read from the module.
+
+    lift (the whole-market system's lifted form with CAPRI's bounds, market.bounds "capri"; docs/dev/
+    MARKET_BOUNDS_PLAN.md step 4): the processing cells (crushing, ProcNQ_) and the non-EU FeedNQ_ cells are an input
+    L of the Function (CAPRI's v_procQuant and v_feedQuant as unknowns, with their bounds), in the order of
+    layout["lift_cells"] (kind "proc" or "feed", region row, commodity column, base level); two more outputs: Lcur,
+    their values in the model's form (ProcFudge_ always on in ProcNQ_ and per crushing entry, crushing and FeedNQ_
+    floored at 0), and Lraw, CAPRI's rows before its fudge (ProcNQ_ and FeedNQ_ alone: v_procQuantNeg, v_feedQuantNeg
+    where the lower bound is at or below 0)."""
     import casadi as ca
     from capri_mod.market.biofuel_ad import demand_function, feed_group_function, proc_function
 
@@ -95,6 +103,7 @@ def use_function(mm):
     fede = ca.SX.sym("fede", len(rms))
     dairy_fed = set(mm.DAIRY_TRADED.values())
     fnq_regs = set()
+    lcells: List[tuple] = []                       # lift: (kind, i, j, base, value in the model's form, CAPRI's row)
     if mm.noneu_feed_nq and nfp["rms"] and mm.ev.fede_now is not None:
         from capri_mod.market.feed_ad import feednq_arrays, feednq_function
         fnq_regs = {d.get("tr") for d in nfp["rms"].values()}
@@ -112,6 +121,8 @@ def use_function(mm):
             i, j = R.get(r), Cc.get(c)
             if tot > 0 and i is not None and j is not None and F0[i, j] > 0 and c not in dairy_fed:
                 F[(i, j)] = F0[i, j] * ca.fmax(0.0, 1.0 + v / tot)
+                if lift:
+                    lcells.append(("feed", i, j, float(F0[i, j]), F[(i, j)], F0[i, j] * (1.0 + v / tot)))
     for (r, c), p_ in (fdp or {}).items():
         i, j = R.get(r), Cc.get(c)
         if i is None or j is None or F0[i, j] <= 0:
@@ -231,7 +242,8 @@ def use_function(mm):
     if cp:
         from capri_mod.market.processing_ad import crush_columns, crush_function
         pq = mm._proc_nq_params() or {}
-        fn, cregs, pairs, _ = crush_function(cp, pq.get("seeds", {}), pq.get("Hrms", {}), mm.CRUSH_CHAINS)
+        fn, cregs, pairs, _ = crush_function(cp, pq.get("seeds", {}), pq.get("Hrms", {}), mm.CRUSH_CHAINS,
+                                             with_raw=lift)
         if pairs:
             d0 = mm._dom0().reindex(index=regions, columns=comms).to_numpy(dtype=float)
             seeds = set(mm.CRUSH_CHAINS)
@@ -247,23 +259,31 @@ def use_function(mm):
                     else:
                         row.append(PR[i, j] if x in seeds else RB[i, j])
                 rows.append(ca.horzcat(*row))
-            out = fn(ca.vertcat(*rows))[0]
+            outs = fn(ca.vertcat(*rows))
+            out = outs[0]
             for n, (r, sd) in enumerate(pairs):
                 i, j = R.get(r), Cc.get(sd)
                 if i is None or j is None:
                     continue
                 P[(i, j)] = ca.fmax(0.0, P0[i, j] + (out[n, 0] - cp[(r, sd)]["q0"]))
+                if lift and P0[i, j] > 0:
+                    lcells.append(("proc", i, j, float(P0[i, j]), P[(i, j)],
+                                   P0[i, j] + (outs[2][n] - cp[(r, sd)]["q0"])))
     pq = mm._proc_nq_params()
     if pq:
         from capri_mod.market.processing_ad import proc_nq_function
         fn, cells = proc_nq_function(pq, regions, comms, set(mm.CRUSH_CHAINS) | set(mm._PROC_NQ_SKIP),
-                                     set(mm.CRUSH_CHAINS))
+                                     set(mm.CRUSH_CHAINS), with_raw=lift)
         if cells:
             p0c = np.array([P0[i, j] for i, j in cells], dtype=float)
             pc = fn(PR, ca.DM(p0c))
+            if lift:
+                pc, pr = pc
             for k, (i, j) in enumerate(cells):
                 if p0c[k] > 0:
                     P[(i, j)] = pc[k]
+                    if lift:
+                        lcells.append(("proc", i, j, float(p0c[k]), P[(i, j)], pr[k]))
 
     # BIOFUEL PROCESSING: the feedstock CES at the groups' first-generation output and the DDGS price
     bp = mm._biofuel_params()
@@ -294,6 +314,23 @@ def use_function(mm):
             if reg in mm.EU:
                 br.setdefault(reg, {})[c] = q / q0
 
+    # lift: the cells' values are the input L (the latest writer of a cell is the one lifted)
+    Lv = ca.SX.sym("L", 0)
+    lift_cells: List[tuple] = []
+    Lcur, Lraw = [], []
+    if lift:
+        last = {}
+        for k, (kind, i, j, b0, cur, raw) in enumerate(lcells):
+            last[(kind, i, j)] = k
+        keep = [k for k, (kind, i, j, *_r) in enumerate(lcells) if last[(kind, i, j)] == k
+                and (P if kind == "proc" else F).get((i, j)) is lcells[k][4]]
+        Lv = ca.SX.sym("L", len(keep))
+        for n, k in enumerate(keep):
+            kind, i, j, b0, cur, raw = lcells[k]
+            (P if kind == "proc" else F)[(i, j)] = Lv[n]
+            lift_cells.append((kind, i, j, b0))
+            Lcur.append(cur)
+            Lraw.append(raw)
     D = (ca.DM(FIX) + _sx_matrix(ca, H, H0) + _sx_matrix(ca, F, F0) + _sx_matrix(ca, P, P0)
          + _sx_matrix(ca, Bf, Bf0))
 
@@ -372,10 +409,16 @@ def use_function(mm):
             x = sum(w * ((br.get(reg, {}) if use == "biofuel" else fr).get(c, 1.0)) for c, use, w in dr_["parts"])
             byp.append(ca.fmax(0.0, dr_["prod0"] * x))
             byp_cells.append((reg, p_))
-    f = ca.Function("use", [PR, RB, fede, milk, biofX, ddgs], [D, ca.vertcat(*byp) if byp else ca.SX(0, 1)],
-                    ["PR", "RB", "fede", "milk", "biofX", "ddgs"], ["D", "byp"])
+    byp_v = ca.vertcat(*byp) if byp else ca.SX(0, 1)
+    if lift:
+        cat = (lambda v: ca.vertcat(*v) if v else ca.SX(0, 1))
+        f = ca.Function("use", [PR, RB, fede, milk, biofX, ddgs, Lv], [D, byp_v, cat(Lcur), cat(Lraw)],
+                        ["PR", "RB", "fede", "milk", "biofX", "ddgs", "L"], ["D", "byp", "Lcur", "Lraw"])
+    else:
+        f = ca.Function("use", [PR, RB, fede, milk, biofX, ddgs], [D, byp_v],
+                        ["PR", "RB", "fede", "milk", "biofX", "ddgs"], ["D", "byp"])
     return f, {"rms": rms, "milk_regs": milk_regs, "n_eu_sup": n_eu_sup, "groups": groups, "ddgs_regs": dregs,
-               "byp_cells": byp_cells}
+               "byp_cells": byp_cells, "lift_cells": lift_cells}
 
 
 def use_inputs(mm, layout: dict) -> list:

@@ -283,7 +283,7 @@ def test_low_n_feed_follows_capri(model):
 
 
 def test_base_manure_trade_follows_capri_and_the_trade_setting(data):
-    """Sprint 9j: the base manure trade is CAPRI's 2030 reference per group of CAPRI and model regions (MTRADE,
+    """The manure trade at CAPRI's reference: the base manure trade is CAPRI's 2030 reference per group of CAPRI and model regions (MTRADE,
     EXCRET; Belgium, Romania and Ireland included) and counts only where the run trades manure (manureTradeNew):
     without trade every region keeps its manure, as JRC121368's CAPRI."""
     from capri_mod.environmental.environmental_module import EnvironmentalModule
@@ -359,7 +359,7 @@ def test_manure_p_and_k_have_markets_of_their_own(model):
     one market per nutrient): each EU region has P2O5 and K2O export and import columns besides N, priced at their own
     pool price, in the block's P and K manure balances only; the base stays a first-order point at the calibration
     point's prices (the baseline's first supply solve, at the reference prices; the baseline's later rounds are at its
-    own market's prices, S7). The emission tax's part: test_manure_n_trade_moves_under_the_emission_tax (K127)."""
+    own market's prices; CAPRI's market calibration). The emission tax's part: test_manure_n_trade_moves_under_the_emission_tax (K127)."""
     regs = [r for r in model.data["areas"].index if r.startswith("BL")][:4]
     at_ref = model.run(scenario="BASELINE", regions=regs, max_outer_iter=1, manure_trade=True)["supply"]
     sm = model.supply_module
@@ -376,7 +376,7 @@ def test_manure_p_and_k_have_markets_of_their_own(model):
         assert all(max(map(abs, v)) < 0.1 for v in at_ref[r].manure_trade_pk.values())           # t, at base
 
 
-@pytest.mark.xfail(reason="KNOWN_ISSUES K127: under CAPRI's market calibration (S7) the tax leaves N trade at zero in "
+@pytest.mark.xfail(reason="KNOWN_ISSUES K127: under CAPRI's market calibration the tax leaves N trade at zero in "
                           "these four Belgian units, where the former form traded 360 t; cause open", strict=False)
 @pytest.mark.slow
 @pytest.mark.no_market_hessian
@@ -396,13 +396,21 @@ def test_manure_n_trade_moves_under_the_emission_tax(model):
 @pytest.mark.slow
 @pytest.mark.no_market_hessian
 def test_manure_market_and_ammonia_options_in_every_eu_solve(model):
-    """Sprint 9k: CAPRI's crop nutrient balance (NUTNED_) and manure market (e_netMTrade, e_costMTrade) are in every
+    """The manure and ammonia accounts in every EU solve: CAPRI's crop nutrient balance (NUTNED_) and manure market (e_netMTrade, e_costMTrade) are in every
     run, not only under the N target: each EU solve carries the crop-need row and, with manure trade on, the pool
     columns, whose cost is the pool price alone (CAPRI's calibrated constants; no fertiliser terms), plus the tax on
     the mineral N bought or saved. Under the emission tax the ammonia options are in the regional model with their
     emissions (manure N2O through the loss cascade, indirect N2O of the NH3 kept, soil N2O of the mineral N
-    displaced) and are adopted beyond their base shares; outside the EU nothing changes."""
+    displaced) and are adopted beyond their base shares; outside the EU nothing changes. The options as choices are
+    CAPRI's ghgTechAmmEndog = 1 (its _ini and _max calibration files; the endotech setting, as JRC121368's reference),
+    set here; at star 3.0's default the next test holds them at their initial shares."""
     from capri_mod.scenarios.scenarios import carbon_tax_scenario
+    from capri_mod.settings import override
+    with override({"endotech.ghgTechAmmEndog": 1.0}):
+        _manure_and_ammonia_checks(model, carbon_tax_scenario)
+
+
+def _manure_and_ammonia_checks(model, carbon_tax_scenario):
     regs = ["BL210000", "NO080000"] if "NO080000" in model.data["areas"].index else ["BL210000"]
     b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
     mo = model.supply_module._models["BL210000"]
@@ -428,6 +436,37 @@ def test_manure_market_and_ammonia_options_in_every_eu_solve(model):
     e0, e1 = b["environmental"].loc["BL210000"], s["environmental"].loc["BL210000"]
     assert float(e1["ghg_manure_n2o"]) < float(e0["ghg_manure_n2o"])
     assert s["supply"]["BL210000"].animal_nh3_saved
+
+
+def test_ammonia_options_held_at_initial_shares_by_default():
+    """CAPRI's ghgTechAmmEndog in its capmod runs is 0: capmod/set_global_variables.gms l. 229 sets it before the
+    policy file (capmod.gms l. 98, l. 701) and refpol_endotech_all_sup.gms l. 97 only "if not SETGLOBAL", so
+    supply/set_miti_bounds.gms l. 209-211 fixes the animals' ammonia options at IniShare, also under the Green Deal's
+    N rows (the project lead's runs: every one fixed in res_greendeal_lnds8_..._21730, free in the _max run). The
+    default holds them at their initial shares under any N incentive; the switch on gives them back to the model."""
+    from types import SimpleNamespace
+    from capri_mod.policy.endotech import JRC121368_ENDOTECH, STAR3_DEFAULTS, effective
+    from capri_mod.scenarios import definition
+    from capri_mod.settings import override
+    from capri_mod.supply.abatement import AbatementBlock
+    assert STAR3_DEFAULTS["ghgTechAmmEndog"] == 0.0 and effective()["ghgTechAmmEndog"] == 0.0
+    # JRC121368's Farm-to-Fork reports the options adopted (Table 17): its reference has them as choices
+    assert JRC121368_ENDOTECH["ghgTechAmmEndog"] == 1.0
+    assert definition.load("farm_to_fork_jrc121368").endotech.as_dict()["ghgTechAmmEndog"] == 1.0
+    assert definition.load("greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00").endotech.as_dict().get(
+        "ghgTechAmmEndog", 0.0) == 0.0
+    blk = AbatementBlock.__new__(AbatementBlock)
+    blk.seen = SimpleNamespace(ghg_tax=100.0, amm_endog=False)
+    for labels in (["N_balance"], ["mineral_N"], []):
+        assert not blk._amm_incentive(labels)
+    blk.seen.amm_endog = True
+    assert blk._amm_incentive(["N_balance"]) and blk._amm_incentive([])     # the tax alone is an incentive
+    blk.seen = SimpleNamespace(ghg_tax=0.0, amm_endog=True)
+    assert not blk._amm_incentive([]) and blk._amm_incentive(["mineral_N"])
+    blk.seen = SimpleNamespace(ghg_tax=100.0)                                # not pushed yet: the run's settings
+    assert not blk._amm_incentive(["N_balance"])
+    with override({"endotech.ghgTechAmmEndog": 1.0}):
+        assert blk._amm_incentive(["N_balance"])
 
 
 def test_feed_supplements_follow_capri(model):
@@ -533,7 +572,7 @@ def test_option_saving_term_as_capri():
 
 
 def test_organic_and_mineral_caps_merge_as_capri():
-    """Audit S2: CAPRI's mineral reduction (minfert_redu_by_crop.gms, after the organic target's file) takes the more
+    """The supply audit's finding S2 (ARCHITECTURE_REFACTOR.md section 5.2): CAPRI's mineral reduction (minfert_redu_by_crop.gms, after the organic target's file) takes the more
     stringent cap per crop group, except for its small groups (p_checkSmallMine), whose cap it sets at factor x
     baseline, replacing the organic one; the residue regulation stays the mineral reduction's."""
     from capri_mod.supply.supply_module import RegionalSupplyModel as R
@@ -601,7 +640,7 @@ def test_ddgs_and_feed_bulks_follow_capri(model):
 
 
 def test_all_feed_bulks_and_residual_feeds_follow_capri(model):
-    """Sprint 9h: CAPRI's five tradable feed bulks (FCER, FPRO, FENE, FOTH, FMIL) per member state with
+    """The completion of CAPRI's feed bulks: CAPRI's five tradable feed bulks (FCER, FPRO, FENE, FOTH, FMIL) per member state with
     arm/market1.gms's p_rhoFeed (6, 6, 5, 0.5, 0.5); the residual feeds FENI and FPRI are traded markets whose EU
     output is CAPRI's MaprFeed_: the 2030 output at reference use, moving with the parents' food and processing use
     (milling: cereals; FENI: sugar, including its biofuel processing); the rations' bulks are priced by the
@@ -641,7 +680,7 @@ def test_all_feed_bulks_and_residual_feeds_follow_capri(model):
 
 
 def test_biofuel_feedstock_demand_in_market(model):
-    """Crushing stage 4: CAPRI's biofuel feedstock CES at fixed output (biofuel markets off, CAPRI without
+    """CAPRI's biofuel feedstock CES at fixed output (biofuel markets off, CAPRI without
     BIOF_M) reproduces the 2030 reference at base prices, shifts away from a dearer feedstock, and scales
     with output."""
     mm = model.market_module
@@ -739,7 +778,7 @@ def test_dairy_block_fat_protein_balance(model):
     c = mm.dairy_block({"CHES": 1.1}, 1.0)
     assert c["production"]["CHES"] > c["production0"]["CHES"]
     assert c["production"]["BUTT"] < c["production0"]["BUTT"]
-    # fewer calves: less milk feed - since Sprint 9f the products are traded, so the FMIL block acts on the
+    # fewer calves: less milk feed - since the switch-on of CAPRI's dairy block the products are traded, so the FMIL block acts on the
     # market's feed demand (CES at base prices: every product's feed use falls with the index)
     import numpy as np
     assert np.allclose(mm.dairy_feed_factor(np.ones(9), fi=0.8), 0.8)
@@ -747,7 +786,7 @@ def test_dairy_block_fat_protein_balance(model):
 
 
 def test_dairy_world_blocks(model):
-    """Dairy Stage 4: CAPRI's dairy block for the non-EU trade regions reproduces the base, and dearer
+    """CAPRI's dairy block for the non-EU trade regions reproduces the base, and dearer
     dairy products draw more raw milk (CAPRI's supply function) and more product."""
     mm = model.market_module
     mm._dairy_world_cache = None
@@ -867,7 +906,7 @@ def test_trq_rates_are_capris_sigmoid_and_tariff_equations():
     global one): sigma = 1 / (1 + exp(-200 (fill / TrqNT - 0.97))); the flow's import price moves by
     (Pmrk + TC) (TaMFN - TaPref) / 100 (sigma - sigma0) + (TsMFN - TsPref) (sigma - sigma0), the ad valorem part on
     the exporter's CURRENT market price (DEP-36 removed). Checked at fills in [0.9, 1.05], where the sigmoid is steep
-    (G_REVIEW Q5.2 test C)."""
+    (MARKET_NLP_REVIEW_2026-11-01.md Q5.2, test C)."""
     import numpy as np
     for fill in (0.90, 0.95, 0.97, 0.99, 1.0, 1.02, 1.05):
         sc = _trq_toy(100.0 * fill)
@@ -1426,7 +1465,7 @@ def test_synthetic_base_activities_excluded_from_elasticity_wiring():
     def detect_synthetic_base_activities(base_areas, min_regions=30):
         """Activities whose base level is a constant placeholder across at least min_regions regions (a real
         elasticity around a fake base level gives a real-looking but meaningless response: PMP curvature scales as
-        1/(eps x0)). Moved here from capri_pmp.py, where only this test used it (refactor stage 3, N5)."""
+        1/(eps x0)). Moved here from capri_pmp.py, where only this test used it."""
         out = set()
         for col in base_areas.columns:
             v = base_areas[col].replace(0, np.nan).dropna()
@@ -2045,7 +2084,7 @@ def test_projection_matches_capri_2030_reference(model):
 @pytest.mark.slow
 @pytest.mark.no_market_hessian
 def test_projection_starts_from_capri_reference_and_calibrates(model):
-    """Sprint 9p: the 2030 baseline is projected with CAPRI's own 2030 reference (CAPMOD's reference run over CAPRI's
+    """The projection layer at CAPRI's reference: the 2030 baseline is projected with CAPRI's own 2030 reference (CAPMOD's reference run over CAPRI's
     2017 results, levels, yields and land types per region: capri_data/scenarios/capri_ref_2030), not its trend projection, and the
     baseline is calibrated as CAPRI calibrates its supply models: the linear cost terms move until each region's
     solution is its projected levels (fodder crops excepted: the fodder balances hold them). The purchased feed bulks
@@ -2072,7 +2111,7 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
         assert abs(float(data["areas"].loc[eu, cols].sum().sum()) / float(cap[a]) - 1.0) < 0.015, a
     rb = data["ration_bulk_price"]
     assert rb[("DE000000", "FCER")] < 1.0 < rb[("DE000000", "FPRO")]
-    # Sprint 9q: CAPRI's 2030 rations (Upper Bavaria's dairy cows: more other fodder, less silage maize) and usable
+    # the port of CAPRI's 2030 rations and fodder: CAPRI's 2030 rations (Upper Bavaria's dairy cows: more other fodder, less silage maize) and usable
     # fodder per ha (silage maize for biogas in Germany)
     rf = data["ration_factor"][("DE210000", "DCOW")]
     assert rf["FOFA"] > 1.1 and rf["FMAI"] < 0.95
@@ -2456,7 +2495,7 @@ def test_yield_responds_to_price(data):
                 f"a zero price shock changed {act}")
 
     # 2. response: CAPRI's yield elasticities (supply/yield_elas.gms): cereals 0.3, oilseeds and potatoes 0.2, no
-    #    other crop (Sprint 9s; was 0.15 for every crop)
+    #    other crop (the removal of synthetic data; was 0.15 for every crop)
     el = SupplyModule.yield_price_elasticity() if hasattr(SupplyModule, "yield_price_elasticity") else \
         type(model).yield_price_elasticity()
     assert el["SWHE"] == 0.3 and el["CORN"] == 0.3 and el["RAPE"] == 0.2 and el["POTA"] == 0.2
@@ -2661,7 +2700,7 @@ def test_land_is_fixed_without_the_land_market(data, monkeypatch):
     """Agricultural land responds to its value only through CAPRI's land market. With the land market off (or where
     it fails), land is fixed, as in CAPRI without it: a crop-price rise moves land between crops but cannot use more
     arable land than the region has. Until 23 October 2026 a rent-elasticity expansion (0.15, capped at 15%) stood in
-    there; it was a proxy (docs/design/PROXY_AUDIT.md S149, S410, S411) and was removed. Plain solves stay
+    there; it was a proxy (docs/dev/PROXY_AUDIT.md S149, S410, S411) and was removed. Plain solves stay
     independent of history."""
     import numpy as np
     import pandas as pd
@@ -2775,7 +2814,7 @@ def test_fertiliser_substitution_is_exact_at_base(data):
 
 
 def test_grassland_activities_and_their_fodder_balance(data):
-    """CAPRI's two grassland activities, extensive GRAE and intensive GRAI, the model's own since S2 (7 November 2026;
+    """CAPRI's two grassland activities, extensive GRAE and intensive GRAI, the model's own since 7 November 2026 (
     before, GRAS and a split column): each its own grass output, mineral N and costs from CAPREG, and the grass fodder
     balance FGRA shared by their production (u_GRAE / u_GRAI = yield_GRAE / yield_GRAI, sum u x area = the herds'
     grass use)."""
@@ -2847,7 +2886,7 @@ def _fr52_baseline():
 @pytest.mark.slow
 @pytest.mark.no_market_hessian
 def test_dairy_split_column_calibrated_at_base():
-    """CAPRI's dairy split (Sprint 7b): the column of cows moved from DCOH to DCOL is calibrated on
+    """CAPRI's dairy split: the column of cows moved from DCOH to DCOL is calibrated on
     the first baseline solve (linear term from the duals of the rows it enters, the cows'
     requirement rows included), so a second baseline solve keeps the base split (z ~ 0)."""
     m = _fr52_baseline()
@@ -2965,7 +3004,7 @@ def test_norway_miterra_mirror_and_ad_option_as_capri():
             assert abs(a.loc[(reg, act), "ini"] - v) <= 5e-3 * v, (reg, act, a.loc[(reg, act), "ini"])
 
 def test_set_aside_trajectories_are_fallow_and_voluntary_set_aside():
-    """KNOWN_ISSUES K115, K122: VSET and FALL are the model's own activities since S2 (7 November 2026; before, SETA =
+    """KNOWN_ISSUES K115, K122: VSET and FALL are the model's own activities since 7 November 2026 (before, SETA =
     FALL + VSET), each with its own 2030 factor from CAPRI's 2030 Green Deal baseline over 2017 (IT400000: VSET 6.087 /
     10.70 = 0.569, FALL 14.229 / 7.22 = 1.971; PL120000: FALL 104.327 / 57.24 = 1.8226; in the calibration run, the base
     until 9 November 2026: 5.72, 14.21, 103.90), and no SETA left."""
@@ -2994,7 +3033,7 @@ def test_capri_reference_trajectory_reproduces_its_crop_levels(data):
         A = load_all_data(str(DATA_DIR))["areas"]
     assert len(A.index) == 250
     ref = pd.read_csv(DATA_DIR / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv")
-    # CAPRI's SETA row is VSET (K115), its GRAS row GRAE + GRAI (the model's own since S2, 7 November 2026)
+    # CAPRI's SETA row is VSET (K115), its GRAS row GRAE + GRAI (the model's own since 7 November 2026)
     ref = ref[(ref["item"] == "LEVL") & ~ref["activity"].isin(["SETA", "GRAS"])]
     cap = {}
     for r in ref.itertuples():
@@ -3055,7 +3094,7 @@ def test_tax_on_mineral_n_takes_the_accounts_miterra_factors():
     from capri_mod.supply.fertilisation import FertilisationBlock
     from capri_mod.supply.state import RegionalStateMixin
 
-    class _S(RegionalStateMixin, FertilisationBlock, AbatementBlock):     # the blocks' memos are in par (stage 3, S5)
+    class _S(RegionalStateMixin, FertilisationBlock, AbatementBlock):     # the blocks' memos are in par
         pass
     s = _S.__new__(_S)
     s.data = SimpleNamespace(region_id="DE110000")
@@ -3106,7 +3145,7 @@ def test_model_regions_are_capris_regional_units(data):
 @pytest.mark.slow
 @pytest.mark.no_market_hessian
 def test_bull_heifer_split_calibrated_at_base():
-    """CAPRI's low/high-intensity bulls and heifers (Sprint 7c): one column per animal, calibrated on
+    """CAPRI's low/high-intensity bulls and heifers (the port of CAPRI's bull and heifer splits): one column per animal, calibrated on
     the first baseline solve like the dairy split, so a second baseline solve keeps the base split; a
     low-intensity stall turns over more animals (more young animals bought) and less manure N."""
     from capri_mod.model import CAPRIModel
@@ -3137,7 +3176,7 @@ def test_bull_heifer_split_calibrated_at_base():
 @pytest.mark.slow
 @pytest.mark.no_market_hessian
 def test_parallel_regional_solves_match_sequential():
-    """Sprint 9r: the regional supply models are solved across worker processes (one per core; the setting
+    """The regional solves in parallel: the regional supply models are solved across worker processes (one per core; the setting
     run.n_workers or SupplyModule.n_workers to change it).
     At given market prices the regions are independent, as in CAPRI, so the
     results are the same, to the last digit, with one worker or several. Two models built in one process agree too:
@@ -3153,7 +3192,7 @@ def test_parallel_regional_solves_match_sequential():
         assert sm.workers(10) == 1
     # three regions, a livestock, a crop and a small mixed region: the first region is always solved in this process
     # (SupplyModule.workers: at most n_regions - 1 workers), so with two regions the second run had one worker and
-    # never forked (found 2 November 2026, docs/design/STAGE3B_PLAN.md); with three it forks two workers
+    # never forked (found 2 November 2026, docs/dev/REFACTOR_SUPPLY_PARAMETERS_PLAN.md); with three it forks two workers
     regs = ["NL220000", "IT200000", "MT000000"]
     out = []
     from capri_mod.supply import capri_regional_nlp as C
@@ -3170,7 +3209,7 @@ def test_parallel_regional_solves_match_sequential():
                     {r: dict(v.shadow_prices) for r, v in s["supply"].items()},
                     dict(m.supply_module.sv.nbal_state)))
         assert all(m.supply_module._models[r].seen.env_for_surplus is m.supply_module.par.env_for_surplus for r in regs)
-        # the solves' _nlp* fields, also those the workers brought back, are the declared ones (NLP_STATE, S0b)
+        # the solves' _nlp* fields, also those the workers brought back, are the declared ones (NLP_STATE)
         _decl = set(type(m.supply_module._models[regs[0]]).NLP_STATE)
         for r in regs:
             assert {k for k in m.supply_module._models[r].__dict__ if k.startswith("_nlp")} <= _decl, r
@@ -3178,7 +3217,7 @@ def test_parallel_regional_solves_match_sequential():
 
 
 def test_nlp_state_lists_every_nlp_attribute():
-    """Refactor stage 3, S0b (2 November 2026): the market supply Hessian saves and restores the regional models'
+    """Since 2 November 2026: the market supply Hessian saves and restores the regional models'
     _nlp* fields by the declared list RegionalSupplyModel.NLP_STATE (by the prefix "_nlp" before). Every _nlp* instance
     attribute the code writes (self._nlp_x = ..., obj._nlp_x = ..., __dict__ / setattr with the name) is in it, so the
     restore keeps the set the prefix gave."""
@@ -3201,7 +3240,7 @@ def test_nlp_state_lists_every_nlp_attribute():
 
 
 def test_no_synthetic_inputs_reach_the_model(data):
-    """Sprint 9s (docs/SYNTHETIC_DATA_AUDIT.md): crop premiums, costs, prices and yields are CAPRI's for every region
+    """The removal of synthetic data (docs/dev/SYNTHETIC_DATA_AUDIT.md): crop premiums, costs, prices and yields are CAPRI's for every region
     (tools/build/build_crop_economics_2017.py), the loaders no longer generate data, and every region with a herd or crops
     has CAPRI's environmental coefficients - the generic fallbacks were removed, so a gap must show here."""
     import os
@@ -3252,7 +3291,7 @@ def test_no_synthetic_inputs_reach_the_model(data):
 
 
 def test_ghg_accounts_take_capris_methane_and_co2(data):
-    """Sprint 9s: manure and enteric CH4 per head are CAPRI's (CH4MAN, CH4ENT totals / census heads, regional:
+    """The removal of synthetic data: manure and enteric CH4 per head are CAPRI's (CH4MAN, CH4ENT totals / census heads, regional:
     dairy manure CH4 in Germany ~2.6 times France's), CO2 from liming CAPRI's per ha of every crop (DE11 115.6
     kg/ha) and from urea mineral N x the member state's urea share x 44/28, the share CAPRI's simulation uses
     (FracUseFert, envind/gases.gms l. 833; CZ 0.016, where CAPREG's 2017 accounts imply 0.116; KNOWN_ISSUES K93); the
@@ -3278,7 +3317,7 @@ def test_ghg_accounts_take_capris_methane_and_co2(data):
 @pytest.mark.slow
 @pytest.mark.no_market_hessian
 def test_fixed_activities_land_market_and_grass_as_capri(model):
-    """Sprint 9s, the audit's open items: CAPRI's fixed activities (FACT: other oilseeds, other industrial crops,
+    """The removal of synthetic data, the audit's open items: CAPRI's fixed activities (FACT: other oilseeds, other industrial crops,
     other animals) stay at their data level and other oilseeds have no market (CAPRI nonXX_CROPS; the pooled world
     market rested on an invented world total); every region with farmland has CAPRI's land market (Ireland's three
     NUTS-2016 regions from IE01 + IE02, so the rent-elasticity fallback serves only a land market switched off);
@@ -3293,7 +3332,7 @@ def test_fixed_activities_land_market_and_grass_as_capri(model):
     assert [r for r in a.index if a.loc[r].sum() > 0 and r not in lm] == []
     y = model.data["yields"]
     # CAPRI's grass output of GRAE and GRAI (res_17DE: 19,347.398 and 45,143.930 kg/ha; their mean, 32,245.664, the
-    # model's GRAS until S2, 7 November 2026)
+    # model's GRAS until 7 November 2026)
     assert abs(y.at["DE110000", "GRAE"] - 19347.398 * 0.22 / 1000.0) < 1e-3
     assert abs(y.at["DE110000", "GRAI"] - 45143.930 * 0.22 / 1000.0) < 1e-3
     assert abs(0.5 * (y.at["DK000000", "GRAE"] + y.at["DK000000", "GRAI"]) - 35718.29 * 0.22 / 1000.0) < 1e-2   # was ~5 t
@@ -3305,7 +3344,7 @@ def test_fixed_activities_land_market_and_grass_as_capri(model):
 
 
 def test_parameter_file_and_code_agree():
-    """Sprint 9t: the model's parameters live in one file, capri_data/codes/model_parameters.csv (value, unit,
+    """The single parameter file: the model's parameters live in one file, capri_data/codes/model_parameters.csv (value, unit,
     kind, source). Every row is read by the code and every param() call names a row - the file cannot drift. Kinds
     are limited to the declared ones, every row has a source."""
     import csv, re, pathlib
@@ -3323,7 +3362,7 @@ def test_parameter_file_and_code_agree():
 
 
 def test_the_supplys_parameters_follow_the_runs_data_directory(tmp_path):
-    """Refactor stage 3, N1 (the project lead's decision Q6, 2 November 2026): param() reads
+    """The parameters read through the run's inputs (the project lead's decision, 2 November 2026): param() reads
     <data_dir>/codes/model_parameters.csv through the run's inputs (capri_mod.data.inputs), and the supply reads its
     parameters where it uses them, so a run on another data directory takes that directory's values."""
     import csv
@@ -3464,7 +3503,7 @@ def test_projection_carries_permanent_crops():
 
 def _marketed(ms: str, product: str) -> float:
     """CAPRI's marketed over gross production of a member state's product at the 2030 calibration point (grofNEprod;
-    market_prod_grof_2030.csv), the factor the bridge applies to the supply models' gross output (S7)."""
+    market_prod_grof_2030.csv), the factor the bridge applies to the supply models' gross output (CAPRI's market calibration)."""
     t = pd.read_csv(DATA_DIR / "baselines" / "capri_greendeal_ref" / "1730" / "market" / "market_prod_grof_2030.csv", float_precision="round_trip")
     r = t[(t.capri_ms == ms) & (t["product"] == product)]["ratio"]
     assert len(r) == 1, (ms, product)
@@ -3479,7 +3518,7 @@ def test_rye_and_oats_are_markets(model):
         assert c in MARKET_COMMODITIES
     agg = pd.DataFrame({"RYEM": [3.0], "OATS": [5.0], "OCER": [7.0]}, index=["DE000000"])
     ms = model._bridge_supply_to_market(agg)
-    # each reaches its own market at CAPRI's marketed share of the gross output (S7, grofNEprod)
+    # each reaches its own market at CAPRI's marketed share of the gross output (CAPRI's market calibration, grofNEprod)
     assert ms.at["DE000000", "RYEM"] == 3.0 * _marketed("DE000000", "RYEM")
     assert ms.at["DE000000", "OATS"] == 5.0 * _marketed("DE000000", "OATS")
     assert ms.at["DE000000", "OCER"] == 7.0 * _marketed("DE000000", "OCER")
@@ -3688,7 +3727,7 @@ def test_capri_activity_bounds(data):
         assert abs(up - max(10 * v, v + 100 * k * nt)) < 1e-9 and abs(lo - max(0.1 * v, nt * 1e-8)) < 1e-9, \
             (a, up, lo, v, k, nt)
 
-    # CAPRI exempts VSET (set_supply_bounds.gms l. 42-43) where the data have it; FALL takes the rule since S2
+    # CAPRI exempts VSET (set_supply_bounds.gms l. 42-43) where the data have it; FALL takes the rule since 7 November 2026
     if "bound_VSET_up" in lab:
         assert abs(b[lab.index("bound_VSET_up")] - _n_techn("VSET") * m.VSET_UP) < 1e-9
     assert not any(f"bound_{f}_up" in lab for f in FIXED_ACTIVITIES)
@@ -3712,7 +3751,7 @@ def test_lamb_balance_links_sheep_activities():
 
 
 def test_food_demand_is_capris_generalised_leontief(data):
-    """Step 2 of docs/archive/MARKET_STRUCTURE_PLAN.md: human consumption follows CAPRI's GL system per behavioural region
+    """Step 2 of docs/dev/archive/MARKET_STRUCTURE_PLAN.md: human consumption follows CAPRI's GL system per behavioural region
     (arm/market_model.gms:826-916) with p_pdGL, p_pbGL at CAPRI's 2030 calibration point. Checks: CAPRI's food
     demand reproduced at the calibration point; the price elasticities equal CAPRI's p_ElasDem (DE, own and cross);
     homogeneity of degree zero in prices and income; demand exactly at base at the base prices; cross-price
@@ -3751,7 +3790,7 @@ def test_food_demand_is_capris_generalised_leontief(data):
 
 
 def test_eu_trade_blocks_data_and_split(data):
-    """Step 3 of docs/archive/MARKET_STRUCTURE_PLAN.md: the EU is CAPRI's two trade blocks EU_WEST and
+    """Step 3 of docs/dev/archive/MARKET_STRUCTURE_PLAN.md: the EU is CAPRI's two trade blocks EU_WEST and
     EU_EAST (gams/aggregation/defaultA.agg). Checks: the block flows carry CAPRI's West-East trade (2030: 15.0 Mt of
     maize from East to West) and the same extra-EU flows as the one-region data; the EU's quotas are filled by both
     blocks; the EU-level data split between the blocks add up to the EU's (feed, biofuel feedstocks, residual feeds,
@@ -3947,7 +3986,7 @@ def test_npk_crop_need_is_the_crops_own():
     d = t[(t.capri_region == "DE210000") & (t.nutrient == "N")].set_index("model_crop").need_kg_ha
     assert d["FALL"] < 10.0 < d["SWHE"]
     assert d["GRAE"] < 0.5 * d["GRAI"]
-    assert "GRAS" not in d.index                      # GRAE and GRAI the model's own crops since S2 (7 November 2026)
+    assert "GRAS" not in d.index                      # GRAE and GRAI the model's own crops since 7 November 2026
 
 
 def test_n_cascade_reproduces_capri():
@@ -4245,10 +4284,10 @@ def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
 @pytest.mark.slow
 @pytest.mark.no_market_hessian
 def test_capri_land_rents_at_the_2030_calibration_point(model):
-    """docs/LAND_RENT_CALIBRATION_PLAN.md: at the 2030 market year the land market is balanced at CAPRI's land rents
+    """Docs/LAND_RENT_CALIBRATION_PLAN.md: at the 2030 market year the land market is balanced at CAPRI's land rents
     (D_AREA of its 2030 reference, land_rents_2030.csv) and the NLP calibration fixes the land balances' multipliers at
     them; the regional models at the calibration point (CAPRI's 2030 prices and rents, the baseline's first round)
-    reproduce the 2030 base. (Later rounds are at the baseline market's own prices, S7: their drift is K120's.)"""
+    reproduce the 2030 base. (Later rounds are at the baseline market's own prices, in CAPRI's market calibration: their drift is K120's.)"""
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
     root = _repo_root()
     traj = BaselineTrajectory.from_file(str(root / "capri_data" / "scenarios" / "capri_ref_2030"))
@@ -4442,7 +4481,7 @@ def test_fert_partial_slack_as_capris_greendeal_group(data):
 
 
 def test_obligatory_set_aside_as_capris_seta():
-    """P1 (10 November 2026): CAPRI's obligatory set-aside (supply_model.gms SETA_): an arable activity with a rate r
+    """Since 10 November 2026: CAPRI's obligatory set-aside (supply_model.gms SETA_): an arable activity with a rate r
     needs r / (1 - r) ha of set-aside (ISET) per ha on arable land; ISET has nothing in CAPRI's objective, so it is
     substituted into the arable land balance (both rows of the equality), whose base use stays the base's. The
     scenario set_aside_10 (scen/set_aside/set_aside_10.gms): 10% on CAPRI's Grandes Cultures (GRCU less RSET and VSET)
@@ -4468,7 +4507,7 @@ def test_obligatory_set_aside_as_capris_seta():
 
 
 def test_intensity_splits_at_capris_2030_point_with_manure_npk(data):
-    """S6 item 6 (9 November 2026): at the 2030 market year the dairy and cattle splits take CAPRI's own 2030 terms
+    """Since 9 November 2026: at the 2030 market year the dairy and cattle splits take CAPRI's own 2030 terms
     (the "_2030" columns, from the 2030 reference the model's base comes from), at 2017 the base year's; the split
     columns move their animal's manure N, P2O5 and K2O (CAPRI's MANN, MANP, MANK of the two activities), the genetics
     options manure N only (breeding.gms changes MANN). Anchor: CAPRI's 2030 MANP of DE110000, DCOL 73.853, DCOH 93.268,
@@ -4560,7 +4599,7 @@ def test_cattle_activities_and_young_animals_per_sex_as_capri():
 
 def test_labour_accounts_and_set_aside_as_capri(data):
     """22 October 2026: CAPRI's labour accounts (GROF LABT = sum of LABT x LEVL / 1000, million hours) and its two
-    set-aside activities VSET and FALL, the model's own since S2 (7 November 2026; tools/build/build_labour_setaside.py).
+    set-aside activities VSET and FALL, the model's own since 7 November 2026 (tools/build/build_labour_setaside.py).
     At the base levels the accounts give CAPRI's own regional total (DE11 2017: 20.66 million hours in res_17DE, where the
     dump is at hand; within 3%); the set-aside table reports the two levels and the premiums CAPRI's per ha."""
     import types
@@ -4720,7 +4759,7 @@ def test_nlp_form_has_capri_fodder_equality_without_lagged_band():
 
 
 def test_activities_without_a_capri_term_are_held():
-    """Audit S13: with CAPRI's PMP terms, an activity of a calibrated part (crops, animals) without a positive own term
+    """The supply audit's finding S13 (ARCHITECTURE_REFACTOR.md section 5.2): with CAPRI's PMP terms, an activity of a calibrated part (crops, animals) without a positive own term
     is held at its level, as CAPRI holds what it does not calibrate; the elasticity calibration is gone
     (pmp_source "elasticity" refused)."""
     import pandas as pd
@@ -4852,7 +4891,7 @@ def test_kkt_step_matches_the_resolve_at_a_small_price_change(model, tmp_path, m
 
 def test_noneu_land_market_is_capris(data):
     """CAPRI's market land block outside the EU (arm/market_model.gms LandSupplyMNL_, LndSupplyEqualsDemand_ and
-    ProdNQ_'s land rows; PORTS_STAGE4.md stage 7): at the calibration prices the rents stay CAPRI's (to its data's
+    ProdNQ_'s land rows; MARKET_TRQ_PORT.md, the market land block): at the calibration prices the rents stay CAPRI's (to its data's
     rounding); with the crop prices of the United States 10% higher the rent of its temporary-crop land rises and the
     MNL supply, recomputed here from the files, equals the land demand of ProdNQ_ at the solved rents."""
     import numpy as np

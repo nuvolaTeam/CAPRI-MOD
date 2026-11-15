@@ -7,7 +7,7 @@ Data written
 
 Read by tools/build/build_regional_units.py (CAPRI's units of the run) and tools/build/build_n_leaching.py (the leaching
 share). Until 29 October 2026 build_n_leaching.py wrote this file too, which made the unit list depend on the ammonia
-chain that depends on the unit list (a cycle; docs/design/DATA_PIPELINE_DOIT.md); one extractor per source file.
+chain that depends on the unit list (a cycle; docs/dev/DATA_PIPELINE_DOIT.md); one extractor per source file.
 
     python tools/build/extract_gd2030_nbalance.py [res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv]
 """

@@ -1,4 +1,4 @@
-"""Step G2d: CAPRI's non-EU feed block (FeedNQ_, FeedBal_) in CasADi (capri_mod/market/feed_ad.py) equals the loops
+"""CAPRI's non-EU feed block (FeedNQ_, FeedBal_) in CasADi (capri_mod/market/feed_ad.py) equals the loops
 feed.py had until 4 November 2026 (written out here as the reference), and FEDE clears the balance's residual."""
 import numpy as np
 import pandas as pd

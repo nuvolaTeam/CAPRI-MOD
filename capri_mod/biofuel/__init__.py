@@ -7,7 +7,7 @@ output, use and price change as well.
 Biofuel feedstock demand is part of the market model (MarketModule._biofuel_params,
 biofuel_feedstock_use; CAPRI arm/market_model.gms biofFeedCost_, biofFeedCostAgg_, Biof_,
 prodBiof_). The post-solve BiofuelModule - fixed blending share, hard-coded conversion
-yields and feedstock splits, a demand the market never saw - was retired with crushing stage 4.
+yields and feedstock splits, a demand the market never saw - was retired when the biofuel block moved into the market.
 This package only turns the market's biofuel block into a run result.
 """
 from __future__ import annotations

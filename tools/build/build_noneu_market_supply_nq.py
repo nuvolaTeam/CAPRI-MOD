@@ -111,7 +111,7 @@ def main():
     to_model = dict(CAPRI_TO_MODEL)
     to_model["MILK"] = "MILK"                                        # raw milk: the region's dairy block
     # CAPRI's land types in ProdNQ_ (xx1Land: land demand as rows, rents as columns; the market's land block,
-    # LndSupplyEqualsDemand_ and rentFromProdpriceLand_, stage 7 of the market move): kept under their own codes
+    # LndSupplyEqualsDemand_ and rentFromProdpriceLand_, the market land block): kept under their own codes
     LAND = ("TCRP", "FODFAL", "FRUN")
     to_model.update({x: x for x in LAND})
     rm_of = dict(read_csv(RMS_TO_RM)[["rms", "rm"]].itertuples(index=False))

@@ -34,9 +34,9 @@ class CalibrationMixin(MarketStateMixin):
           dairy_world_baseline.csv for the dairy products; capri_mod/data/nested_tables.py);
         - none of either: zero.
 
-        The bilateral market calibrates every region to its closure at these tables (S7, CAPRI's calibration point). This replaced hard-coded world production totals (~2012) allocated
+        The bilateral market calibrates every region to its closure at these tables (CAPRI's calibration point). This replaced hard-coded world production totals (~2012) allocated
         with fixed regional shares, which were overwritten for every product with CAPRI data and only remained as
-        fall-backs (retired: docs/archive/MARKET_STRUCTURE_PLAN.md step 3).
+        fall-backs (retired: docs/dev/archive/MARKET_STRUCTURE_PLAN.md step 3).
         """
         comms = self.commodities
         regions = self.regions
@@ -81,6 +81,17 @@ class CalibrationMixin(MarketStateMixin):
                     p_, u_ = float(rec.get("production", 0.0) or 0.0), float(rec.get("consumption", 0.0) or 0.0)
                 self.par.base_production.at[r, c] = p_
                 self.par.base_consumption.at[r, c] = u_ if u_ > 0 else p_
+        # RAW MILK outside the EU where a region has a dairy block: CAPRI's market data, the milk delivered to the
+        # dairies (DATA(RM, "PROD", "MILK", "CAL"), the block's own raw milk, dairy_world_processing.csv), as supply and
+        # use alike (raw milk is not traded; the dairies take the delivery). FAO_agg's production also counts the milk
+        # used on farms and drunk fresh: Turkey 20,173 kt against CAPRI's 13,145 (KNOWN_ISSUES K150). Norway's raw milk
+        # is its supply models' (sup_milk0).
+        if "MILK" in comms:
+            for r, prm in (self._dairy_world_params() or {}).items():
+                if r in regions and r not in self.EU and r not in getattr(self, "SUP", ()):
+                    q = float(prm["Q0"][prm["iM"]])
+                    self.par.base_production.at[r, "MILK"] = q
+                    self.par.base_consumption.at[r, "MILK"] = q
 
         # BIOFUELS: every region's base output and biofuel use from CAPRI's 2030 market results (FAO_agg holds
         # biofuel trade only); the bilateral market replaces the use by the flows' total use at calibration
@@ -102,7 +113,7 @@ class CalibrationMixin(MarketStateMixin):
                 self.par.base_production.at[region, "DDGS"] = q
                 self.par.base_consumption.at[region, "DDGS"] = (float(fb.get("feed0_reg", {}).get(region, {}).get("DDGS", q))
                                                             if region in self.EU else q)
-        # RESIDUAL FEEDS (CAPRI MaprFeed_, Sprint 9h): the EU's output and feed use of the 2030 reference; the other
+        # RESIDUAL FEEDS (CAPRI MaprFeed_, the completion of CAPRI's feed bulks): the EU's output and feed use of the 2030 reference; the other
         # regions' bases come from the bilateral market at calibration
         fp = self._feed_byproduct_params()
         if fp:
@@ -119,14 +130,14 @@ class CalibrationMixin(MarketStateMixin):
 
 
     # ------------------------------------------------------------------
-    # CAPRI's calibration point (S7)
+    # CAPRI's calibration point
     # ------------------------------------------------------------------
     # (Until 8 November 2026 the "supply" form set the EU's and Norway's base rows from the supply models' output,
     # _align_eu_base_balance and _align_sup_base, with the EU's use from CAPRI's member-state self-sufficiency; removed
     # with that form, register DEP-5.)
 
     def _capri_milk_point(self) -> None:
-        """Raw milk at CAPRI's calibration point (S7): each country's marketed raw
+        """Raw milk at CAPRI's calibration point: each country's marketed raw
         milk DATA(RMSSUP, "Prod", "MILK", "CAL") (market_prod_grof_2030.csv, prod_kt), as CAPRI's dairy block and
         market are calibrated (the supply models' milk enters each iteration in proportion, arm/simu_calibration_to_
         supply.gms l. 240-243). The EU blocks' raw milk production and use (CAPRI does not trade raw milk: delivered to

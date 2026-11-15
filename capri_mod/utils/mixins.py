@@ -1,4 +1,4 @@
-"""Mixins whose methods were moved out of one module (refactor stages 3a and 4a, docs/design/ARCHITECTURE_REFACTOR.md).
+"""Mixins whose methods were moved out of one module (the refactor's split into block mixins, docs/dev/ARCHITECTURE_REFACTOR.md).
 
 The methods were moved unchanged and use the module-level names of the module they came from (numpy as np, the
 settings, the data readers, ...). inject_names gives each mixin module those names once that module is loaded; a name

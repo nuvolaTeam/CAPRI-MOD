@@ -3,7 +3,7 @@
 Status: revised 20 October 2026 against the code. In the default NLP form CAPRI's fertilisation block (NUTNED_ per
 crop group and nutrient, the inner fertiliser distribution model) is part of every regional solve. The staged plan
 by which the conic form was built (a linearised mineral-N substitution, a regional crop-need row, the allocation
-checked after the solve) is summarised under "Conic form"; its run results (Sprint 9e) were removed.
+checked after the solve) is summarised under "Conic form"; its run results (the port of CAPRI's inner fertiliser model) were removed.
 
 ## CAPRI's crop need (`supply/supply_model.gms`, NUTNED_)
 
@@ -118,7 +118,7 @@ p_organicAreaTargetCrops(ru, ngrp) (load_organic_targets.gms l. 160-188): the me
 class (crops_to_ngrp: arable land for the cereal, oilseed, root, pulse and fodder groups MAIF, ROOF, OFAR and OAFC;
 grassland for GRAS; permanent crops for PERM; the UAA target for VEGE; capri_data/scenarios/greendeal_group/
 organic_ngrp_class.csv) scaled to the ambition, 0 where CAPRI's files give the member state none (since 9 November 2026,
-S6 item 2; before, the crops' conversion weighted by base area, which left the fodder and grassland groups without a
+STRUCTURAL_GAPS_PLAN S6, the other regional NLP departures, item 2; before, the crops' conversion weighted by base area, which left the fodder and grassland groups without a
 cap). Outside the EU, where CAPRI's files have no targets, the crops' conversion is kept.
 
 ## Conic form (removed 26 October 2026)

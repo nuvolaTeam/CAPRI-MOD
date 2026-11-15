@@ -1,7 +1,7 @@
 """The outer loop's price step and stop rule as CAPRI's (capmod/price_forecast.gms, the stop test).
 
-CAPRIModel's methods, moved unchanged from capri_mod/model.py (refactor stage 4a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
+CAPRIModel's methods, moved unchanged from capri_mod/model.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
 module once model is loaded (capri_mod.coupling.inject); the annotations are not evaluated.
 """
 from __future__ import annotations
@@ -98,7 +98,7 @@ class PriceStepBlock:
     @staticmethod
     def _capri_hist_len() -> int:
         """The price steps CAPRI's forecast keeps: the longer of its two weight lists (define_stepWeights.gms: 3 steps,
-        4 from the 20th; the histories held 4, written as a literal until refactor stage 4)."""
+        4 from the 20th; the histories held 4, written as a literal until the refactor of the coupling's state)."""
         st = _settings()
         return max(len(st.get("outer_loop.capri_step_weights")), len(st.get("outer_loop.capri_step_weights_late")))
 

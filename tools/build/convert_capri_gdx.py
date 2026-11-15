@@ -1,4 +1,4 @@
-"""CAPRI's GDX files as Parquet, one file per symbol: the converter of the published source set (docs/design/
+"""CAPRI's GDX files as Parquet, one file per symbol: the converter of the published source set (docs/dev/
 MODEL_CONTENT_PLAN.md section 12b, step 1; layout of 4 November 2026: capri/results/<CAPRI run or file>/<symbol>).
 
 Without a GAMS installation: GAMS's open-source GDX library (capri_sources/gdxlib, README section 3) through the

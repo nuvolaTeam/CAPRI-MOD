@@ -23,8 +23,8 @@ from capri_mod.data.definitions import capri_ms
 from capri_mod.params import param
 
 NUTRIENTS = ("N", "P", "K")
-from capri_mod.fert.inner_fert_dist import SOURCES   # noqa: E402  CAPRI's nutrient sources, one definition (stage 4)
-from capri_mod.data.definitions import CAPRI_PERM_NGRP as PERM_NGRP   # noqa: E402  CAPRI's set (stage 4)
+from capri_mod.fert.inner_fert_dist import SOURCES   # noqa: E402  CAPRI's nutrient sources, one definition
+from capri_mod.data.definitions import CAPRI_PERM_NGRP as PERM_NGRP   # noqa: E402  CAPRI's set
 
 
 

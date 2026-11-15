@@ -180,7 +180,7 @@ class SupplyMixin(MarketStateMixin):
             return np.maximum(np.where(np.isnan(v_), 1.0, v_), 1e-6)
         from capri_mod.market.supply_ad import anticipation_function
         if region_ratio is None:
-            # the own-price response, written once in CasADi (market step G2b, supply_ad.anticipation_function)
+            # the own-price response, written once in CasADi (supply_ad.anticipation_function)
             _S = supply[cols].to_numpy(dtype=float)
             supply[cols] = np.asarray(anticipation_function(*_S.shape)(
                 _S, np.tile(ratio.reindex(cols).to_numpy(dtype=float), (_S.shape[0], 1)), np.ones_like(_S), EV))
@@ -232,7 +232,7 @@ class SupplyMixin(MarketStateMixin):
                     if c in sc_:
                         SV_[i_, j] = sv[j]
             s_exo_sup = {reg: supply.loc[reg, cols].astype(float).copy() for reg in sup_cols}
-            # written once in CasADi (market step G2b, supply_ad.anticipation_function)
+            # written once in CasADi (supply_ad.anticipation_function)
             supply[cols] = np.asarray(anticipation_function(*rr.shape)(supply[cols].to_numpy(dtype=float), rr, SV_, E_))
             self._eu_market_supply_nq(supply, cols, lambda reg_: rr[list(supply.index).index(reg_)])
             # CAPRI's market supply function for the supply models' products (arm/market_model.gms ProdNQ_, the
@@ -276,7 +276,7 @@ class SupplyMixin(MarketStateMixin):
             else:
                 extra_ = {reg_: self._yani_clear(reg_, it_[0], it_[1], cols, it_[5]) for reg_, it_ in items_.items()}
             for reg_, (H, xs, xj, _hf, s0, dP_, mt) in items_.items():
-                # CAPRI's ProdNQ_ with the measured Hessian, written once in CasADi (market step G2b, supply_ad.py)
+                # CAPRI's ProdNQ_ with the measured Hessian, written once in CasADi (supply_ad.py)
                 q = np.asarray(_hf(s0, dP_, np.broadcast_to(np.asarray(extra_[reg_], float), s0.shape))[0]).ravel()
                 keep = s0 > 1e-6
                 vals = supply.loc[reg_, cols].to_numpy(dtype=float).copy()
@@ -297,7 +297,7 @@ class SupplyMixin(MarketStateMixin):
                 s0 = s_exo_sup[reg].to_numpy(dtype=float)[xj]
                 dP_ = self._nq_price_change(rr[i_] - _sv_sup[reg], cols)
                 mk_ = self._sup_milk_terms(reg, Hs, cols, xs, _sv_sup[reg])
-                # CAPRI's ProdNQ_ with the measured Hessian, written once in CasADi (market step G2b, supply_ad.py); the
+                # CAPRI's ProdNQ_ with the measured Hessian, written once in CasADi (supply_ad.py); the
                 # floor at 0 applies to the rows kept below, as before
                 _q = lambda dp_, eff_: [np.asarray(v_).ravel() for v_ in _hf(s0, dp_, np.broadcast_to(
                     np.asarray(eff_, float), s0.shape))]
@@ -380,7 +380,7 @@ class SupplyMixin(MarketStateMixin):
                             supply.at[r, c] = max(0.0, q)
                 self.ev.eu_milk_supply_now = dict(Sr)
                 self.ev.dairy_last = res
-        # NON-EU DAIRY (dairy Stage 4): each trade region's butter, SMP, cheese and whey from CAPRI's dairy
+        # NON-EU DAIRY: each trade region's butter, SMP, cheese and whey from CAPRI's dairy
         # block with CAPRI's raw milk supply function, at the region's domestic prices; the market's base
         # quantities move with the block's relative change (the flat per-product elasticity is replaced)
         wpar = self._dairy_world_params()
@@ -764,7 +764,7 @@ class SupplyMixin(MarketStateMixin):
         for rg, terms in P.items():
             if rg not in supply.index:
                 continue
-            # CAPRI's ProdNQ_ written once in CasADi (market step G2b, capri_mod/market/supply_ad.py); raw milk as a
+            # CAPRI's ProdNQ_ written once in CasADi (capri_mod/market/supply_ad.py); raw milk as a
             # price ratio of the market (its column here), as before the move
             fr = self._nq_rows(("eu", rg), terms, lambda t_: {x: {y: h for (x_, y), h in t_.items() if x_ == x}
                                                               for x in self.EU_MARKET_SUPPLY}, cols, None)
@@ -831,11 +831,11 @@ class SupplyMixin(MarketStateMixin):
         for rms, h in (prm.get("milk_fede") or {}).items():
             out[rms] = out.get(rms, 0.0) + h * (float(fede.get(rms, 1.0)) - 1.0)     # FEDE (audit M3)
         for rms, dq in self._noneu_land_shift(reg, by_rms=True).get("MILK", {}).items():
-            out[rms] = out.get(rms, 0.0) + dq                                        # the land rents (stage 7)
+            out[rms] = out.get(rms, 0.0) + dq                                        # the land rents
         return out
 
     # ------------------------------------------------------------------
-    # CAPRI's market land block outside the EU (stage 7 of the market move; arm/market_model.gms l. 1529-1572,
+    # CAPRI's market land block outside the EU (arm/market_model.gms l. 1529-1572,
     # 1696-1790)
     # ------------------------------------------------------------------
     def _noneu_land_params(self) -> dict:
@@ -931,8 +931,8 @@ class SupplyMixin(MarketStateMixin):
             fr = np.asarray(d["free"])
             dr = np.array(st.get(rms, np.zeros(len(fr))), dtype=float)
             scale = np.maximum(d["L0"], 1.0)
-            # the land block's equations written once in CasADi (market step G2b, supply_ad.land_residual_function),
-            # with their exact Jacobian; this Newton is the solver until the market NLP (G3) takes the rents as unknowns
+            # the land block's equations written once in CasADi (supply_ad.land_residual_function),
+            # with their exact Jacobian; this Newton is the solver until the whole-market system takes the rents as unknowns
             lf = self.__dict__.setdefault("_land_fn_cache", {}).get(rms)
             if lf is None or lf[0] is not d:
                 from capri_mod.market.supply_ad import land_residual_function
@@ -1000,7 +1000,7 @@ class SupplyMixin(MarketStateMixin):
         for reg, d in P.items():
             if reg not in supply.index:
                 continue
-            # CAPRI's ProdNQ_ written once in CasADi (market step G2b, capri_mod/market/supply_ad.py)
+            # CAPRI's ProdNQ_ written once in CasADi (capri_mod/market/supply_ad.py)
             fr = self._nq_rows(("noneu", reg), d["rows"], None, cols, d.get("fede") or {})
             if fr is None:
                 continue
@@ -1113,7 +1113,7 @@ class SupplyMixin(MarketStateMixin):
         ck = (reg, id(H), tuple(cols), tuple(xs), tuple(goods))
         hit = cache.get(ck)
         if hit is None or hit[0] is not H:
-            # yaniMarket_ in CasADi (supply_ad.yani_function, step G2g), rebuilt when the Hessian or the rows change
+            # yaniMarket_ in CasADi (supply_ad.yani_function), rebuilt when the Hessian or the rows change
             # (the region's former entries dropped)
             from capri_mod.market.supply_ad import yani_function
             for k_ in [k_ for k_ in cache if k_[0] == reg]:
@@ -1132,7 +1132,7 @@ class SupplyMixin(MarketStateMixin):
         dP = np.asarray(dP, float)
         z = np.zeros(len(goods))
         res0, J, _ = f(z, n_now, ref, dP, ex, z)
-        # the clearing prices: linear in dr, least squares where H_YY is singular (as before G2g)
+        # the clearing prices: linear in dr, least squares where H_YY is singular (as before the young-animal markets moved to CasADi)
         dr = np.linalg.lstsq(np.asarray(J, float), -np.asarray(res0, float).ravel(), rcond=None)[0]
         lo, hi = st.get("bounds", (-50.0, 50.0))
         r = np.clip(r_seen + dr, lo, hi)

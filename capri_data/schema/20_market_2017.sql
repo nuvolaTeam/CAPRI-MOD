@@ -76,7 +76,7 @@ CREATE TABLE noneu_market_supply_nq (
     PRIMARY KEY (rms, capri_x, capri_y),
     CHECK ((ppri_y > 0) OR (h_ratio = 0 AND y IS NULL))
 );
-COMMENT ON TABLE noneu_market_supply_nq IS 'CAPRI''s market supply functions of the non-EU market regions (ProdNQ_): p_hessNQSupp at CAL completed as arm/market1.gms, the land demand rows (x TCRP, FODFAL, FRUN) with their sign turned as arm/market1.gms l. 593, Data_CAL PPRI, INPE 2030 (tools/build/build_noneu_market_supply_nq.py; K54-3; the land market, PORTS_STAGE4.md stage 7)';
+COMMENT ON TABLE noneu_market_supply_nq IS 'CAPRI''s market supply functions of the non-EU market regions (ProdNQ_): p_hessNQSupp at CAL completed as arm/market1.gms, the land demand rows (x TCRP, FODFAL, FRUN) with their sign turned as arm/market1.gms l. 593, Data_CAL PPRI, INPE 2030 (tools/build/build_noneu_market_supply_nq.py; K54-3; the land market, MARKET_TRQ_PORT.md stage 7)';
 INSERT INTO value_units VALUES
   ('noneu_market_supply_nq', 'h', 'U_1000tPerEuPerTonOverINPE', 'capri', 'CAPRI''s p_hessNQSupp (ProdNQ_, arm/market_model.gms l. 1529-1572: quantity in 1000 t, prices over INPE)'),
   ('noneu_market_supply_nq', 'ppri_y', 'U_EuPerTon', 'capri', 'CAPRI''s PPRI (CAPRIunits: U_EuPerTon)'),
@@ -109,7 +109,7 @@ CREATE TABLE noneu_land_market (
     avail_kha DOUBLE NOT NULL CHECK (avail_kha > 0),
     PRIMARY KEY (rms, lu)
 );
-COMMENT ON TABLE noneu_land_market IS 'CAPRI''s market land block per non-EU market region without supply models (LandSupplyMNL_, LndSupplyEqualsDemand_, rentFromProdpriceLand_, arm/market_model.gms l. 1696-1790): land, rent, MNL constant p_aLU CUR and ARTO - INLW per land type, from sim_ini_21730 (tools/build/build_noneu_market_supply_nq.py build_land_market; PORTS_STAGE4.md stage 7)';
+COMMENT ON TABLE noneu_land_market IS 'CAPRI''s market land block per non-EU market region without supply models (LandSupplyMNL_, LndSupplyEqualsDemand_, rentFromProdpriceLand_, arm/market_model.gms l. 1696-1790): land, rent, MNL constant p_aLU CUR and ARTO - INLW per land type, from sim_ini_21730 (tools/build/build_noneu_market_supply_nq.py build_land_market; MARKET_TRQ_PORT.md stage 7)';
 INSERT INTO value_units VALUES
   ('noneu_land_market', 'land_kha', 'U_1000ha', 'capri', 'CAPRI v_land (1000 ha)'),
   ('noneu_land_market', 'rent', 'U_EuPerHa', 'capri', 'CAPRI v_rentPerHa'),

@@ -9,5 +9,5 @@ Modules
 
 Parity references (CAPRI's own files, read by the tests only): capri_sources/reference/capreg_tseries (CAPREG's time series)
 and capri_sources/reference/captrd_results (CAPTRD's p_result), built by tools/build/build_capreg_tseries_reference.py and
-tools/build/build_captrd_results_reference.py. Design and status: docs/design/CAPTRD_MOD.md section 12.
+tools/build/build_captrd_results_reference.py. Design and status: docs/dev/CAPTRD_MOD.md section 12.
 """

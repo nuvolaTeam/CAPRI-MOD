@@ -1,7 +1,7 @@
-"""G3.2b (claude/g3_plan.md): one bilateral commodity's market in CAPRI's form in CasADi, supply and use as unknowns.
+"""One bilateral commodity's market in CAPRI's form in CasADi, supply and use as unknowns.
 
 The default solve's trade function (trade_ad._system) takes supply and use log-linear in the commodity's own price
-around the outer step's point; G3 takes them as unknowns of their own (CAPRI's v_prodQuant and v_arm1Quant), defined by
+around the outer step's point; the whole-market system takes them as unknowns of their own (CAPRI's v_prodQuant and v_arm1Quant), defined by
 the supply and use blocks, so this block is the trade part alone:
 
     trade_system_function(sc) -> CasADi Function (r[n], sB[nb], sW[ng], S[n], D[n]) ->

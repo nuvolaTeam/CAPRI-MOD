@@ -1,4 +1,4 @@
-"""The run's metadata as declared models (refactor stage 5; docs/design/STAGE5_INVENTORY.md §2.3: pydantic for the scenario
+"""The run's metadata as declared models (docs/dev/REFACTOR_SCENARIOS_RESULTS_PLAN.md §2.3: pydantic for the scenario
 definitions and the run metadata, decided 2 November 2026).
 
 The run script (tools/run/run_f2f_2030.py) builds the metadata as a dict, kept in the pickle's "meta"; the long table's

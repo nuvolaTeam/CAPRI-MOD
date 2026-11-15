@@ -10,7 +10,7 @@ removed 29 October 2026 (read by no code; KNOWN_ISSUES K102): `fao_bilateral_tra
   uses CAPRI's own bilateral market (2017 and 2030 flows `2017/market/bilateral_flows_*.csv` from CAPRI's market
   results). `trade_flows_2021.csv` was read only by `tools/build/recalibrate_trade_2017.py`, as the comparison of its
   matrix `shared/trade_flows_2017.csv`, which no code read: both removed 3 November 2026 (the market's move onto
-  CAPRI's regions, stage 1).
+  CAPRI's regions).
 - `fao_market_baseline_2021.json`, `fao_2021_dictionaries.json` - 2021 production/consumption/trade quantities.
   Never applied (duplicate milk codes, coarser coverage); the market's balances are CAPRI's FAO_agg and market
   results.

@@ -1,7 +1,7 @@
 """Land in the regional model: CAPRI's land market (the land types as variables, Trustee_land).
 
-RegionalSupplyModel's methods, moved unchanged from capri_mod/supply/supply_module.py (refactor stage 3a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module's, given to
+RegionalSupplyModel's methods, moved unchanged from capri_mod/supply/supply_module.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module's, given to
 this module once supply_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated
 (they name supply_module's types).
 """
@@ -67,7 +67,7 @@ class LandBlock:
         if not lm or "quad" not in lm:
             return None
         labels = list(getattr(self.ev, "row_labels", []))
-        LTall = list(lm["types"])          # the land types of the data, in the order of its quad (N6)
+        LTall = list(lm["types"])          # the land types of the data, in the order of its quad
         keep = [LTall.index(t) for t in self.LAND_TYPES]
         Qf = np.array(lm["quad"], dtype=float)[np.ix_(keep, keep)]
         # UNITS: CAPRI's land-market terms are per HECTARE, the model's land
@@ -101,7 +101,7 @@ class LandBlock:
             return None
         # CAPRI takes the land rents as given in its calibration (supply/cal_land_nests.gms, prep_cal.gms l. 125-156):
         # at the 2030 calibration point the land market is balanced at CAPRI's rents, not at the model's recovered
-        # duals (docs/LAND_RENT_CALIBRATION_PLAN.md)
+        # duals (docs/dev/LAND_RENT_CALIBRATION_PLAN.md)
         # Every land type with a level in CAPRI's region has a positive calibration rent (tools/build/build_land_rents.py
         # applies cal_land_nests.gms l. 204-226 where CAPRI's reported D_AREA is not positive). Before 23 October 2026
         # the base dual recovered from the model's own QP solution stood in at 2017 and for those cells at 2030; that QP
@@ -218,7 +218,7 @@ class LandBlock:
         # substitution twice.) Manure-application row +-1; CAPRI's quadratic
         # cost; exports <= manure produced. REGISTERED: (1 - a) also where
         # mineral N sits at its floor (strictly 1 there).
-        # Sprint 9k: in EVERY EU solve with manure trade on (CAPRI: e_netMTrade, e_costMTrade are in every run), not
+        # the manure and ammonia accounts in every EU solve: in EVERY EU solve with manure trade on (CAPRI: e_netMTrade, e_costMTrade are in every run), not
         # only under the N target; the N row takes the trade only where it exists. OBJECTIVE: the pool price alone
         # (+ the emission tax). CAPRI's cost constants are calibrated from the base duals (define_manure_trade_costs.gms
         # FINALIZE) so the base trade is optimal; with a fixed fertiliser price the fertiliser saved or bought per t
@@ -327,7 +327,7 @@ class LandBlock:
         # make room (cereal area -31% in importing regions). Regions already
         # beyond it at base are held at their base deficit. REGISTERED: applied
         # where the N target applies (CAPRI: always).
-        # Sprint 9k: in every EU solve (CAPRI's NUTNED_ is in every run), not only under the N target
+        # the manure and ammonia accounts in every EU solve: in every EU solve (CAPRI's NUTNED_ is in every run), not only under the N target
         _mc = self._mctx()
         if _mc is not None:
             nmin, ybase, man_d = _mc.get("nmin"), _mc.get("ybase"), _mc.get("man_d")
@@ -411,7 +411,7 @@ class LandBlock:
                                + ([np.zeros(pool_k)] if pool_k else []))
         Qa, ca, Aa, ba, start = self._dairy_intensity_column(Qa, ca, Aa, ba, start, labels, n)
         Qa, ca, Aa, ba, start = self._histosol_columns(Qa, ca, Aa, ba, start, labels, n)
-        Qa, ca, Aa, ba, start = self._mix_columns(Qa, ca, Aa, ba, start, labels, n)   # S1: CAPRI's T1/T2
+        Qa, ca, Aa, ba, start = self._mix_columns(Qa, ca, Aa, ba, start, labels, n)   # CAPRI's T1/T2
         Qa, ca, Aa, ba, start = self._entitlement_columns(Qa, ca, Aa, ba, start, labels, n)   # K136: def_endCut
         self.ev.aug_labels = labels              # one label per row of the augmented problem (the NLP form reads them)
         return Qa, ca, Aa, ba, start, rows

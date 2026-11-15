@@ -1,7 +1,7 @@
 """Ammonia of the environmental accounts (CAPRI's NH3 factors and the ammonia technologies).
 
-EnvironmentalModule's methods, moved unchanged from capri_mod/environmental/environmental_module.py (refactor stage 4a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are environmental_module's, given to this
+EnvironmentalModule's methods, moved unchanged from capri_mod/environmental/environmental_module.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are environmental_module's, given to this
 module once environmental_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated.
 """
 from __future__ import annotations

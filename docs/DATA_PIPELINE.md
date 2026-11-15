@@ -1,6 +1,6 @@
 # Data pipeline: download layer (user guide and provider reference)
 
-This is step 2 of the CAPTRD-MOD work plan (docs/design/CAPTRD_MOD.md, sections 7 and 10). It covers the download
+This is step 2 of the CAPTRD-MOD work plan (docs/dev/CAPTRD_MOD.md, sections 7 and 10). It covers the download
 layer: provider adapters, the store, the manifest and the dataset catalogue.
 
 **State on 23 October 2026.**

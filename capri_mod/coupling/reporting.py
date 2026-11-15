@@ -1,7 +1,7 @@
 """Reports of a run: the welfare of the supply side, comparisons of runs, the reporter, the trace of the slowest regional solves.
 
-CAPRIModel's methods, moved unchanged from capri_mod/model.py (refactor stage 4a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
+CAPRIModel's methods, moved unchanged from capri_mod/model.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
 module once model is loaded (capri_mod.coupling.inject); the annotations are not evaluated.
 """
 from __future__ import annotations

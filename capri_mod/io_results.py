@@ -339,7 +339,7 @@ def _write_supply(sup, run_dir: Path):
 
 
 # --------------------------------------------------------------------------- #
-# The long results table (refactor stage 5; docs/design/STAGE5_INVENTORY.md §3.4 and its decisions of 3 November 2026)
+# The long results table (docs/dev/REFACTOR_SCENARIOS_RESULTS_PLAN.md §3.4 and its decisions of 3 November 2026)
 # --------------------------------------------------------------------------- #
 # One row per number, in the layout of CAPRI's results parameter DATAOUT(rall, dim5, cols, rows, year)
 # (capmod/set_and_store_dataout.gms l. 53-64). Each block keeps CAPRI's convention for which dimension carries the

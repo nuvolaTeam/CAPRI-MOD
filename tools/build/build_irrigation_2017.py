@@ -28,7 +28,7 @@ estimates, lines 325-440; 2017 itself has regional values for 8 units only); a u
 takes its member state's (CAPRI's rule where data are national only, line 658).
 The water requirement per irrigated ha is CROPWAT's net irrigation requirement CNIR (CAPRI's CWRB = 10 x CNIR m3/ha).
 
-Model activities: CORN = CAPRI's MAIZ, WINE = TWIN; ROOF and OFAR their own (until S2, 7 November 2026, OFOD = ROOF +
+Model activities: CORN = CAPRI's MAIZ, WINE = TWIN; ROOF and OFAR their own (until 7 November 2026, OFOD = ROOF +
 OFAR, CNIR weighted by CAPRI's 2017 levels).
 Grassland, rye, oats, other cereals and tobacco are not irrigable in CAPRI's water module (no WAggAct).
 
@@ -60,7 +60,7 @@ WAGG = ["SWHE", "DWHE", "BARL", "MAIZ", "RAPE", "SUNF", "SOYA", "MAIF", "ROOF", 
         "SUGB", "TEXT", "TOMA", "OVEG", "APPL", "OFRU", "CITR", "TAGR", "TABO", "TWIN"]
 #: model activity -> CAPRI activities
 MODEL = {**{c: (c,) for c in WAGG if c not in ("MAIZ", "TWIN")},
-         "CORN": ("MAIZ",), "WINE": ("TWIN",)}   # ROOF and OFAR the model's own since S2 (7 November 2026)
+         "CORN": ("MAIZ",), "WINE": ("TWIN",)}   # ROOF and OFAR the model's own since 7 November 2026
 #: capreg_activity_levels.parquet names CAPRI's MAIZ as the model does
 LEVEL_COL = {"MAIZ": "CORN"}
 IRSH_MIN = 0.001      # water_database.gms line 668: max(0.001, IRR2 share)

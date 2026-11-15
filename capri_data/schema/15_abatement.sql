@@ -45,8 +45,8 @@ INSERT INTO value_units VALUES
 CREATE TABLE fert_side_effects (
     region VARCHAR NOT NULL REFERENCES regional_units (region),
     technology VARCHAR NOT NULL CHECK (technology IN ('NITR_INH', 'NITR_INH_MAN')),
-    item VARCHAR NOT NULL CHECK (item IN ('N2OSYN', 'NH3SYN', 'NH3APP', 'N2OAPP', 'NO3SLEA', 'NO3SRUN', 'NO3MLEA',
-                                          'NO3MRUN')),
+    item VARCHAR NOT NULL CHECK (item IN ('N2OSYN', 'NH3SYN', 'NOXSYN', 'NH3APP', 'N2OAPP', 'NO3SLEA', 'NO3SRUN',
+                                          'NO3MLEA', 'NO3MRUN')),
     value DOUBLE NOT NULL CHECK (value > -1 AND value < 1),
     capri_region VARCHAR NOT NULL,   -- the CAPRI region the value is from, or '<country> median' (rule below)
     PRIMARY KEY (region, technology, item)

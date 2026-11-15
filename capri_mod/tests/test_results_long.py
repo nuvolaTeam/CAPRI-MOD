@@ -1,4 +1,4 @@
-"""The long results table (refactor stage 5; capri_mod/io_results.py): CAPRI's DATAOUT layout, CAPRI's codes declared
+"""The long results table (capri_mod/io_results.py): CAPRI's DATAOUT layout, CAPRI's codes declared
 in capri_data/codes/results_items.csv, the reference stored once in the Delta store, each run under the SHA-256 of
 its results and definition, the pickle's blocks rebuilt.
 

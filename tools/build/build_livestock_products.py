@@ -1,4 +1,4 @@
-"""Livestock output by final product, and product values by market (dairy Stage 1, sheep and goat milk).
+"""Livestock output by final product, and product values by market (sheep and goat milk included).
 
 Writes, from CAPRI's 2017 regional results (res_17<MS>.txt):
   capri_data/2017/supply/livestock_output_by_product_coef.csv    ACT.PRODUCT, kt per 1000 head

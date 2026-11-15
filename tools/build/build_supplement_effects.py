@@ -1,4 +1,4 @@
-"""CAPRI's feed supplements linseed, nitrate and 3-NOP per model region and animal (envind/line_nitr.gms; Sprint 9g).
+"""CAPRI's feed supplements linseed, nitrate and 3-NOP per model region and animal (envind/line_nitr.gms; the port of CAPRI's feed options).
 
 star 3.0's Green Deal reference technology file switches the supplements on (pol_input/greendeal/
 refpol_endotech_all_sup.gms: ghgTechLineNitr 1 includes envind/line_nitr.gms; ghgTechActiveFeed LINE, NITR, AComLN,

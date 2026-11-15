@@ -1,4 +1,4 @@
-"""CAPRI's dairy blocks in CasADi: market programme step G2f (docs/design/MARKET_IPOPT_DESIGN.md sections 5-6).
+"""CAPRI's dairy blocks in CasADi (docs/dev/MARKET_IPOPT_DESIGN.md sections 5-6).
 
 Written once, here, and evaluated from here by DairyMixin (capri_mod/market/dairy.py: dairy_block for the member
 states, _dairy_solve for the non-EU dairy regions): the project lead's choice of one implementation per block (section
@@ -13,12 +13,12 @@ ratios; DairyMixin._dairy_algebra), with z the price ratios - 1 of the nine prod
 kq the raw milk supply's slope on z_M (0 where the milk delivered is given: the EU's member states without the
 response of audit M5; Q0 k with it; SM outside the EU), mrhs the delivered milk's change (kt). With fix = 1 the milk row
 is replaced by z_M = zfix (a member state's price held at its lower bound, DairyMixin.MILK_PRICE_FLOOR). The unknowns u
-= (z_FATS, z_PROT, z_MILK); the products' z are given (all nine traded since Sprint 9f). The system is linear in u, so
-the default solve takes one Newton step from u = 0 with the function's Jacobian (solve_block); in G3 the residual is
+= (z_FATS, z_PROT, z_MILK); the products' z are given (all nine traded since the switch-on of CAPRI's dairy block). The system is linear in u, so
+the default solve takes one Newton step from u = 0 with the function's Jacobian (solve_block); in the whole-market system the residual is
 the block's equations with u among the NLP's unknowns.
 
 ProcFudge_ applies where the change is not exactly 0 (as dairy.py before the move: if_else, a jump of about 1e-11 kt at
-a zero change, to be registered or removed in G3). Floating point: CasADi's sums run in their own order, so the values
+a zero change, to be registered or removed in the whole-market system). Floating point: CasADi's sums run in their own order, so the values
 differ from dairy.py's code before the move by rounding only (capri_mod/tests/test_dairy_ad.py measures it).
 """
 from __future__ import annotations

@@ -1,9 +1,9 @@
-"""CAPRI's human consumption (the Generalised Leontief demand system) in CasADi: market programme step G2c
-(docs/design/MARKET_IPOPT_DESIGN.md sections 5-6).
+"""CAPRI's human consumption (the Generalised Leontief demand system) in CasADi
+(docs/dev/MARKET_IPOPT_DESIGN.md sections 5-6).
 
 The block is written once, here, and the model evaluates it from here (DemandMixin._gl_eval and gl_food_ratio,
 capri_mod/market/demand.py): the project lead's choice of one implementation per block (section 7, 30 October 2026). The
-assembled market NLP of step G3 composes gl_block_function with the trade systems' Armington prices; until then the
+assembled market system (market_system_ad.py) composes gl_block_function with the trade systems' Armington prices; until then the
 default solve calls it numerically. CAPRI's equations (arm/market_model.gms l. 826-916, Cpri_ l. 3032-3039):
 
     x_i = [G_i / G (Y ir - F) + d_i] INHA / 1000,   G = sqrt(p)' B sqrt(p),  G_i = (B sqrt(p))_i / sqrt(p_i),
@@ -12,7 +12,7 @@ default solve calls it numerically. CAPRI's equations (arm/market_model.gms l. 8
 per behavioural region (1000 t; p in EUR/kg, Y income per head, ir its ratio, INHA inhabitants), PR the Armington price
 ratio of the model region's commodity. Two floors are the model's, not CAPRI's (as in demand.py before the move): a
 consumer price at least 5% of its calibration value and a demand of at least 0 in the sums per model region.
-Smooth elsewhere; at G3 they are kinks of the NLP (CasADi's fmax), to be registered or removed there.
+Smooth elsewhere; in the whole-market system they are kinks of the NLP (CasADi's fmax), to be registered or removed there.
 
 Floating point: CasADi's matrix-vector products sum in their own order, so the values differ from NumPy's
 (sq @ B) @ sq by rounding only (capri_mod/tests/test_demand_ad.py measures it).

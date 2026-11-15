@@ -1,5 +1,5 @@
-"""The run's data adapter: the code that reads the model's input files (refactor stages 3b and 4b,
-docs/design/ARCHITECTURE_REFACTOR.md, layer "data adapters"; the market has its own, capri_mod/market/inputs.py).
+"""The run's data adapter: the code that reads the model's input files (the refactor's data adapters,
+docs/dev/ARCHITECTURE_REFACTOR.md, layer "data adapters"; the market has its own, capri_mod/market/inputs.py).
 
 Every input is located in the data directory and base year of the run:
     <data_dir>/<base_year>/<area>/<file>   area: supply, abatement, environment, feed, policy, market
@@ -7,7 +7,7 @@ Every input is located in the data directory and base year of the run:
                                            a file of another year (its name carries it, "_2030"): the run's baseline
                                            (run.baseline) projected to that year, CAPRI's Green Deal reference
                                            capri_data/baselines/capri_greendeal_ref/1730 (year_dir;
-                                           docs/design/DATA_LAYOUT.md steps (b) and (d): capri_data/2030 from 10
+                                           docs/dev/DATA_LAYOUT.md steps (b) and (d): capri_data/2030 from 10
                                            November 2026, under the base year's folder before)
     <data_dir>/codes/<file>                the codes and cross-vintage mappings (capri_data/shared until 10 November 2026)
     <data_dir>/sources/<sub>/<file>         CAPRI exports read as inputs
@@ -52,7 +52,7 @@ def year_dir(root, year, base_year=None, baseline=None) -> Path:
     """The folder of a year's inputs: the base year's own, <root>/<base_year>; another year's, the baseline's projection
     from the base year to it, <root>/baselines/<baseline>/<BAS><SIM> (baseline: run.baseline; <BAS><SIM>: the last
     two digits of the base year and of the year, as CAPRI names its results, %BAS%%SIM%: 1730). The data
-    directory keeps only the base years; a baseline, CAPRI's or another, has its own folder (docs/design/DATA_LAYOUT.md
+    directory keeps only the base years; a baseline, CAPRI's or another, has its own folder (docs/dev/DATA_LAYOUT.md
     step (d), the project lead, 11 November 2026; capri_data/2030 until then)."""
     by = str(base_year) if base_year is not None else default_base_year()
     if str(year) == by:
@@ -76,9 +76,9 @@ class RunInputs:
 
     # -- locations -----------------------------------------------------------------------------------------------
     def path(self, name: str, where: str) -> Path:
-        """where: an area of the base year (AREAS, with a subfolder: "abatement/ammonia"; a file whose name carries another
+        """Where: an area of the base year (AREAS, with a subfolder: "abatement/ammonia"; a file whose name carries another
         year in that year's folder, year_of_file), "codes",
-        "scenarios/<folder>" (a scenario group's or reference's data, refactor stage 5) or "root" (the data
+        "scenarios/<folder>" (a scenario group's or reference's data) or "root" (the data
         directory itself). Not "sources/<sub>": the model reads no file under capri_data/sources (refused since
         3 November 2026; the builders read it)."""
         if where == "root":
@@ -146,7 +146,7 @@ class RunInputs:
 
     def parameters(self) -> dict:
         """The model's parameters, {(name, key): value}, from <data_dir>/codes/model_parameters.csv (capri_mod.params;
-        refactor stage 3, N1: read through the run's inputs, not from a path next to the package)."""
+        read through the run's inputs, not from a path next to the package)."""
         def _load(s):
             import csv
             tab = {}

@@ -1,4 +1,4 @@
-"""CAPRI's inputs of policy/policy.gms that are not premium declarations (the premium module, P2b), from the sim_ini
+"""CAPRI's inputs of policy/policy.gms that are not premium declarations (the premium module), from the sim_ini
 restart file's extract (tools/build/build_simini_reference.py):
 
   capri_data/<base year>/policy/premium_entitlement_weights.csv  region, activity, scheme, weight, eps
@@ -11,7 +11,7 @@ restart file's extract (tools/build/build_simini_reference.py):
 
 The livestock units of the application type per livestock unit are CAPRI's dat/policy/livestock_units.gms, already
 in capri_data/pipeline/captrd/dat/p_luunits.csv (build_captrd_dat.py; equal to sim_ini's p_LUUnits). The premium
-modification factors (p_premModifFact) are written with P2c: in the 2030 restart file they are set only for the
+modification factors (p_premModifFact) are written with the rest of the premium module: in the 2030 restart file they are set only for the
 Agenda 2000 animal schemes, which have no premium in 2030.
 
     python tools/build/build_premium_policy_inputs.py [--simini DIR] [--base-year 2017]

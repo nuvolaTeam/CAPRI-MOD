@@ -1,11 +1,11 @@
 """Nitrogen of the environmental accounts: CAPRI's gross nitrogen balance (e_SURTOTHa) and its items, the fertiliser distribution, manure trade and substitution, the fertiliser options' side effects, winter cover, leaching and mineral N2O.
 
-EnvironmentalModule's methods, moved unchanged from capri_mod/environmental/environmental_module.py (refactor stage 4a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are environmental_module's, given to this
+EnvironmentalModule's methods, moved unchanged from capri_mod/environmental/environmental_module.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are environmental_module's, given to this
 module once environmental_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated.
 """
 from __future__ import annotations
-from capri_mod import statekit as _est   # the state objects' helpers (refactor stage 4)
+from capri_mod import statekit as _est   # the state objects' helpers
 from capri_mod.fert.npk import endo_slope as _endo_slope
 from capri_mod.fert.inner_fert_dist import SOURCES as _FERT_SOURCES   # CAPRI's nutrient sources, one definition
 
@@ -116,6 +116,19 @@ class NitrogenBlock:
                          if t is not None and hasattr(t, "index") and region in t.index else None)
         return cache[ck]
 
+    @classmethod
+    def _mineral_2030(cls):
+        """{CAPRI region: {model crop: kg mineral N per ha}} of CAPRI's 2030 reference (npk_crop_coefs_2030.csv, N)."""
+        if getattr(cls, "_MIN30", None) is None:
+            t = _inputs.current().csv("npk_crop_coefs_2030.csv", "environment")
+            t = t[t["nutrient"] == "N"]
+            cls._MIN30 = {}
+            for r in t.itertuples(index=False):
+                v = float(r.mine_kg_ha)
+                if v == v:
+                    cls._MIN30.setdefault(r.capri_region, {})[r.model_crop] = v
+        return cls._MIN30
+
     def _capri_crop_n(self, region):
         """{model crop: (removal, residues, fixation) kg N per ha} for this region from CAPRI's 2030
         reference, each item scaled so the region's totals equal CAPRI's EXPPRD and CRESID."""
@@ -173,8 +186,14 @@ class NitrogenBlock:
         return cls._CROP_N.get(r8)
 
     def _base_mineral_rate(self, region, crop):
-        """Base mineral N per ha of a crop: CAPRI's regional NMIN; none where CAPRI has none (fallow, set-aside: CAPRI's
-        results carry no NMIN for FALL, VSET, SETA; K100)."""
+        """Base mineral N per ha of a crop. environment.base_mineral_n "capri2030": CAPRI's 2030 reference, its inner
+        model's mineral flow per ha of the crop (fertDist_mine, npk_crop_coefs_2030.csv; the region's sum is CAPRI's
+        purchases), 0 where CAPRI's reference has no flow; "capri2017": CAPRI's regional 2017 NMIN, none where CAPRI has
+        none (fallow, set-aside: CAPRI's 2017 results carry no NMIN for FALL, VSET, SETA; K100)."""
+        if str(_settings().get("environment.base_mineral_n")) == "capri2030":
+            t30 = self._mineral_2030()
+            if region in t30:
+                return float(t30[region].get(crop, 0.0))
         _regn = self._cached_row("mineral_n_regional", region)
         rate = None
         if _regn is not None and crop in _regn:
@@ -378,7 +397,7 @@ class NitrogenBlock:
         # manure spread over their cropland. Shares from CAPRI's 2030 reference
         # (tools/build/build_manure_trade_base.py: 1.2 Mt N traded between regions).
         # only where the run trades manure (CAPRI's manureTradeNew; a scenario setting held for its baseline: without
-        # it, as JRC121368's CAPRI, every region keeps all its manure, Sprint 9j)
+        # it, as JRC121368's CAPRI, every region keeps all its manure, the manure trade at CAPRI's reference)
         _mt = self.data.get("manure_trade") if (hasattr(self, "data") and getattr(self.seen, "manure_trade_on", True)) else None
         _exp_sh, _imp_ha = 0.0, 0.0
         if _mt is not None and region in getattr(_mt, "index", []):

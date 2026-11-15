@@ -1,7 +1,7 @@
 """Policy rules in the regional model: CAP greening and crop diversification, the organic area target and yield gaps, the pesticide reduction, the Green Deal input changes, the yield response to prices and its input costs.
 
-RegionalSupplyModel's methods, moved unchanged from capri_mod/supply/supply_module.py (refactor stage 3a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module's, given to
+RegionalSupplyModel's methods, moved unchanged from capri_mod/supply/supply_module.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module's, given to
 this module once supply_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated
 (they name supply_module's types).
 """
@@ -80,7 +80,7 @@ class PolicyBlock:
           ecoSetAside  sum(crops but grassland) x r / (1 - r) <= sum(EFA activities x weight)  (r = 5%, efabasis
                        UAAR; weights FALL/VSET (SETA) 1, PULS 0.7, OFAR 0.7 x legume share, catch crops 0.3 where the
                        winter cover option is in the NLP; ISET 0, GSET/TSET none: CAPRI's 2017 and 2030 data have no
-                       area under them; VSET and FALL each at its own weight, 1, since S2, 7 November 2026: before, SETA = FALL + VSET)
+                       area under them; VSET and FALL each at its own weight, 1, since 7 November 2026: before, SETA = FALL + VSET)
           cropDiv      Shannon index of the annual crop groups >= its base value
         Where the base does not meet the ecological set-aside rule (the model's base data, not CAPRI's calibrated
         base), the rule is held at the base's own value (REGISTERED)."""
@@ -96,7 +96,7 @@ class PolicyBlock:
         acts = list(self.acts)
         xb = np.maximum(self._base_levels().reindex(acts).fillna(0.0).values.astype(float), 0.0)
         out = {}
-        _gj = [acts.index(g) for g in CROPS_ON_LAND["GRAS"] if g in acts]   # GRAE, GRAI (GRAS until S2, 7 Nov 2026)
+        _gj = [acts.index(g) for g in CROPS_ON_LAND["GRAS"] if g in acts]   # GRAE, GRAI (GRAS until 7 Nov 2026)
         if st.get(("active", "permGras")) and _gj:
             # only where grassland has a level: below the threshold of the activity bounds (an activity without a
             # level, held at zero, _build_constraints) CAPRI has no grassland variable and no rule; with a base of
@@ -116,8 +116,8 @@ class PolicyBlock:
             r = st.get(("setaside_rate_pct", "ARAB"), 0.0) / 100.0
             ms = self.data.region_id[:2]
             ms = MS_CODE.get(ms, ms)
-            # OFAR at CAPRI's weight times the member state's legume share (ROOF does not count); until S2 (7 November
-            # 2026) the model's OFOD = OFAR + ROOF carried it scaled by OFAR's share of the two
+            # OFAR at CAPRI's weight times the member state's legume share (ROOF does not count); until 7 November
+            # 2026 the model's OFOD = OFAR + ROOF carried it scaled by OFAR's share of the two
             w = {"VSET": st.get(("weight", "VSET"), 0.0), "FALL": st.get(("weight", "FALL"), 0.0),
                  "PULS": st.get(("weight", "PULS"), 0.0),
                  "OFAR": st.get(("weight", "OFAR"), 0.0) * float(fleg.get(ms, 0.0))}
@@ -255,7 +255,7 @@ class PolicyBlock:
             new_ylds[a] = y * (1.0 - loss * conv)
             nr[a] = float(nr.get(a, 0.0)) - p * y * loss * conv
         # plant protection and other inputs: CAPRI's regional input changes, set with the organic target's in
-        # _apply_greendeal_input_changes (24 October 2026; before, per crop on the conventional share: KNOWN_ISSUES K74 S3/S4)
+        # _apply_greendeal_input_changes (24 October 2026; before, per crop on the conventional share: KNOWN_ISSUES K74; the supply audit's findings S3 and S4, ARCHITECTURE_REFACTOR.md section 5.2)
         self.data.yields = new_ylds
         self.net_revenues = nr
         self._cover_crop_requirement(float(reduction), organic_share)

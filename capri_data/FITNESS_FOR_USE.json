@@ -19,12 +19,12 @@
   "supply.gross_output": {
    "status": "validated",
    "note": "Crops from area x yield; livestock from CAPRI's own product coefficients. EU livestock output equals CAPRI's EU27 total.",
-   "evidence": "docs/KNOWN_ISSUES_REGISTRY_LOG.md (the registry log, moved 29 October 2026): gross_output_unit_inconsistency"
+   "evidence": "docs/dev/KNOWN_ISSUES_REGISTRY_LOG.md (the registry log, moved 29 October 2026): gross_output_unit_inconsistency"
   },
   "supply.gross_margin": {
    "status": "validated",
    "note": "Net revenue x activity levels, livestock revenue from CAPRI's output value per head (TOOU; until October 2026 MREV). Responds to policy: organic 25% costs -10.8% of income, the nutrient rule -5.3%. (the policy effects measured on 29 September 2026, not re-measured)",
-   "evidence": "docs/KNOWN_ISSUES_REGISTRY_LOG.md (the registry log, moved 29 October 2026): gross_margin_contaminated"
+   "evidence": "docs/dev/KNOWN_ISSUES_REGISTRY_LOG.md (the registry log, moved 29 October 2026): gross_margin_contaminated"
   },
   "activities.WINE": {
    "status": "validated",
@@ -56,7 +56,7 @@
   "environmental.n_surplus": {
    "status": "validated",
    "note": "EU average 44.5 kg N/ha against a real ~46, with every component independently right: mineral 10.2 Mt (real ~10.8), manure 7.5 (real ~7), crop uptake 13.7. Regional distribution matches CAPRI's SURSOI (median 48.2 against 49.5 over 228 regions).",
-   "evidence": "docs/KNOWN_ISSUES_REGISTRY_LOG.md (the registry log, moved 29 October 2026): nitrogen_balance_rebuilt"
+   "evidence": "docs/dev/KNOWN_ISSUES_REGISTRY_LOG.md (the registry log, moved 29 October 2026): nitrogen_balance_rebuilt"
   },
   "market.prices": {
    "status": "use_with_care",

@@ -93,9 +93,9 @@ _FILE_CATEGORY = {
     "climate_zones.csv": "environment",
 }
 #: the files of capri_data/shared read under another name, {BY} the base year (K52f): none since 3 November 2026
-#: (trade_flows.csv, shared/trade_flows_2017.csv, read by no code, removed with the market's move, stage 1)
+#: (trade_flows.csv, shared/trade_flows_2017.csv, read by no code, removed when CAPRI's region lists became data)
 _SHARED_FILES: dict = {}
-#: the scenario data (refactor stage 5): the Green Deal group's data held once in its group folder, the 2030
+#: the scenario data: the Green Deal group's data held once in its group folder, the 2030
 #: reference's baseline surplus beside its trajectory (capri_data/scenarios/)
 _SCENARIO_FILES = {"landscape_targets_ms.csv": "scenarios/greendeal_group",
                    "organic_targets_ms.csv": "scenarios/greendeal_group",
@@ -168,7 +168,7 @@ def load_regional_base_areas(data_dir: Optional[Path] = None) -> pd.DataFrame:
     if data_dir and (resolve_data_file(data_dir, "base_areas.csv")).exists():
         return read_input(resolve_data_file(data_dir, "base_areas.csv"), index_col=0)
     raise FileNotFoundError(f"base_areas.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
+                            f"(the synthetic generator that stood here was removed with the rest of the synthetic data, October 2026)")
 
 
 #: raw animal_numbers.csv uses CAPRI-style names; the model uses these (shared with
@@ -213,7 +213,7 @@ def load_regional_animal_numbers(data_dir: Optional[Path] = None) -> pd.DataFram
                         renamed[tgt].fillna(0) > 0, df[src])
         return _reconcile_poultry_units(renamed)
     raise FileNotFoundError(f"animal_numbers.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
+                            f"(the synthetic generator that stood here was removed with the rest of the synthetic data, October 2026)")
 
 
 
@@ -269,7 +269,7 @@ def _reconcile_grass_yield_units(yields: pd.DataFrame, data_dir=None) -> pd.Data
     Converting at the source inverts that default: a new consumer now gets the
     right units without knowing this exists.
     """
-    cols = [g for g in ("GRAE", "GRAI") if g in yields.columns]   # CAPRI's grassland activities (GRAS until S2)
+    cols = [g for g in ("GRAE", "GRAI") if g in yields.columns]   # CAPRI's grassland activities (GRAS until 7 November 2026)
     if not cols:
         return yields
     out = yields.copy()
@@ -294,7 +294,7 @@ def load_yields(data_dir: Optional[Path] = None) -> pd.DataFrame:
         # animal columns: CAPRI's YILD per model head / 1000 (tools/build/build_animal_yields.py)
         return _reconcile_grass_yield_units(raw, data_dir)
     raise FileNotFoundError(f"yields.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
+                            f"(the synthetic generator that stood here was removed with the rest of the synthetic data, October 2026)")
 
 
 def load_regional_nutrients(data_dir=None):
@@ -354,7 +354,7 @@ def load_producer_prices(data_dir: Optional[Path] = None) -> pd.Series:
         return read_input(resolve_data_file(data_dir, "producer_prices.csv"),
                            index_col=0).squeeze()
     raise FileNotFoundError(f"producer_prices.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
+                            f"(the synthetic generator that stood here was removed with the rest of the synthetic data, October 2026)")
 
 
 def load_variable_costs_regional(data_dir: Optional[Path] = None) -> Optional[pd.DataFrame]:
@@ -388,7 +388,7 @@ def load_variable_costs(data_dir: Optional[Path] = None) -> pd.Series:
             return df.mean()
         return df.squeeze()
     raise FileNotFoundError(f"variable_costs.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
+                            f"(the synthetic generator that stood here was removed with the rest of the synthetic data, October 2026)")
 
 
 def load_land_availability(data_dir: Optional[Path] = None) -> pd.DataFrame:
@@ -400,7 +400,7 @@ def load_land_availability(data_dir: Optional[Path] = None) -> pd.DataFrame:
     if data_dir and (resolve_data_file(data_dir, "land_availability.csv")).exists():
         return read_input(resolve_data_file(data_dir, "land_availability.csv"), index_col=0)
     raise FileNotFoundError(f"land_availability.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
+                            f"(the synthetic generator that stood here was removed with the rest of the synthetic data, October 2026)")
 
 
 def load_world_prices(data_dir: Optional[Path] = None) -> pd.Series:
@@ -413,7 +413,7 @@ def load_world_prices(data_dir: Optional[Path] = None) -> pd.Series:
         return read_input(resolve_data_file(data_dir, "world_prices.csv"),
                            index_col=0).squeeze()
     raise FileNotFoundError(f"world_prices.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
+                            f"(the synthetic generator that stood here was removed with the rest of the synthetic data, October 2026)")
 
 
 # ---------------------------------------------------------------------------
@@ -429,7 +429,7 @@ def load_cap_payments(data_dir: Optional[Path] = None) -> pd.DataFrame:
     if data_dir and (resolve_data_file(data_dir, "cap_payments.csv")).exists():
         return read_input(resolve_data_file(data_dir, "cap_payments.csv"), index_col=0)
     raise FileNotFoundError(f"cap_payments.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
+                            f"(the synthetic generator that stood here was removed with the rest of the synthetic data, October 2026)")
 
 
 def _load_required_csv(data_dir, filename):
@@ -513,7 +513,7 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
     validated inputs or not at all: a silent synthetic fallback produces
     plausible-looking but fabricated results, which is the most dangerous failure
     mode for a model whose output informs policy. The synthetic generators were
-    removed (Sprint 9s): a missing file raises.
+    removed with the synthetic data (October 2026): a missing file raises.
     """
     if data_dir is None:
         raise ValueError(
@@ -574,7 +574,7 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "histosol": (lambda df: df.drop(columns=[c for c in ("capri_region",) if c in df.columns])
                      if df is not None else None)(_load_optional_csv(data_dir, "histosol.csv")),
         # CAPRI's cattle activities inside the model's animals (tools/build/build_cattle_intensity.py): the low/high-intensity
-        # fattening bulls and heifers (Sprint 7c, key = the animal), the replacement heifers ("HFRS:rep") and the
+        # fattening bulls and heifers (the port of CAPRI's bull and heifer splits, key = the animal), the replacement heifers ("HFRS:rep") and the
         # fattening / raising calves per sex ("CALV:male", "CALV:female"; 22 October 2026): {region: {key: Series}}
         "cattle_intensity": (lambda df: None if df is None else {
             r: {(row["animal"] if str(row.get("split", "int")) in ("int", "nan") else f"{row['animal']}:{row['split']}"):
@@ -595,13 +595,13 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
                     else pd.Series(dtype=object)])
                 for _, row in grp.iterrows()}
             for r, grp in df.groupby(level=0)})(
-            # CAPRI's breeding options and low-nitrogen feeding (envind/low_n_feed.gms; Sprint 9g,
+            # CAPRI's breeding options and low-nitrogen feeding (envind/low_n_feed.gms; the port of CAPRI's feed options,
             # tools/build/build_lownfeed_effects.py) share one table: per-head effects on requirements and manure N
             # and the feed supplements linseed and nitrate (envind/line_nitr.gms; tools/build/build_supplement_effects.py)
             (lambda *ts: (lambda xs: pd.concat(xs) if xs else None)([t for t in ts if t is not None]))(
                 _load_optional_csv(data_dir, "genetics_effects.csv"), _load_optional_csv(data_dir, "lownfeed_effects.csv"),
                 _load_optional_csv(data_dir, "supplement_effects.csv"))),
-        # CAPRI's two dairy activities, DCOL and DCOH (Sprint 7b; tools/build/build_dairy_intensity.py)
+        # CAPRI's two dairy activities, DCOL and DCOH (tools/build/build_dairy_intensity.py)
         "dairy_intensity": (lambda df: df.drop(columns=[c for c in df.columns if c == "capri_region" or c.startswith("q_source")])
                             if df is not None else None)(_load_optional_csv(data_dir, "dairy_intensity.csv")),
         # CAPRI's winter cover (catch) crops and winter cover shares (tools/build/build_cover_crops.py)
@@ -620,7 +620,7 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
                                                   if c in g.columns]]
                                               for r, g in df.reset_index().groupby("region")} if df is not None else None)(
             _load_optional_csv(data_dir, "plant_protection_cost.csv")),
-        # CAPRI's crop technologies T1/T2 (S1, docs/design/S1_MIX_COLUMNS.md): per region and crop with both, the
+        # CAPRI's crop technologies T1/T2 (docs/dev/CROP_TECHNOLOGY_MIX_COLUMNS.md): per region and crop with both, the
         # T1 - T2 differences (tools/build/build_techn_mix_2030.py) and CAPRI's 2030 technology block in the mix
         # columns' variables (build_pmp_capri_2030.py): {region: DataFrame by activity}
         "techn_mix": (lambda tm, pm: {r: g.set_index("activity").drop(columns=["capri_region"])
@@ -650,7 +650,7 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # and p_pmpQuadLandTypes of pmppar_21730); used with SupplyModule.pmp_source "capri2030" at the 2030 market year
         "land_market_2030": _land_market_io.read(_year_dir(data_dir, 2030, by) / "supply" / "land_market_2030"),
         # CAPRI's land rents at its calibration points, 2030 and 2017 (tools/build/build_land_rents.py --year;
-        # docs/LAND_RENT_CALIBRATION_PLAN.md): {year: {region: {land type: EUR/ha}}}
+        # docs/dev/LAND_RENT_CALIBRATION_PLAN.md): {year: {region: {land type: EUR/ha}}}
         "land_rents": {y: (lambda p: {r: {t: float(v) for t, v in (("ARAC", row["rent_arac"]), ("FRUN", row["rent_frun"]),
                                                                    ("GRAS", row["rent_gras"])) if v == v}
                                       for r, row in read_input(p, index_col=0).iterrows()} if p.exists() else None)(
@@ -742,7 +742,7 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
     # the run's supply-model countries only (CAPRI's per-country switches, the setting run.supply_countries_outside_eu):
     # the units of the countries outside the EU that are not selected are not loaded, as CAPRI does not load a country
     # switched off. regional_units.csv lists all 250 of CAPRI's units since 4 November 2026; without this the model's
-    # tables would carry the UK's, Turkey's and the Western Balkans' units in every run (docs/design/SUPPLY_NONEU_DESIGN.md)
+    # tables would carry the UK's, Turkey's and the Western Balkans' units in every run (docs/dev/SUPPLY_NONEU_DESIGN.md)
     data = _only_run_units(data)
     # cattle genomics at CAPRI star 3.0's default technology settings; CapriModel.run re-scales it to the
     # run's settings (scenario configuration, shared by reference and policy run)

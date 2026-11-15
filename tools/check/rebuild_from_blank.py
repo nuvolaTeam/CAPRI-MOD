@@ -1,7 +1,7 @@
 """The data rebuilt from blank with doit: every builder output removed, the pipeline run, the result compared with git.
 
 A rebuild over the committed files cannot show a cell that no builder writes (a builder that reads a table before
-writing it keeps such a cell as it was; docs/design/DATA_PIPELINE_DOIT.md, "How a rebuild is checked"). Here every
+writing it keeps such a cell as it was; docs/dev/DATA_PIPELINE_DOIT.md, "How a rebuild is checked"). Here every
 output of the pipeline (tools/pipeline/builders.json) whose builder can run (its CAPRI sources present) is deleted
 first, so each file must come from its builder and the files it reads; then `doit` runs the pipeline in its own
 order, and git compares each file with the committed one, byte for byte.

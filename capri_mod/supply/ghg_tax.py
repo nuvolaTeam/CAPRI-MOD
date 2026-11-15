@@ -1,5 +1,5 @@
 """CAPRI's emission tax in the supply models (ghgTax; supply/supply_model.gms objective, pol_input/ecampa/
-carbtax50_endotech_set*.gms; Sprint 9i).
+carbtax50_endotech_set*.gms; the retirement of the post-solve modules).
 
 CAPRI prices agricultural greenhouse gases inside each regional supply model when a scenario switches the tax on
 (%ghgTax% on): the objective carries - p_carbonTax(r, "GGWP") x (v_CO2EquEmis(r, "GGWP") - reference emissions),
@@ -19,9 +19,9 @@ enters the regional problem as each column's emission per unit, taken at the bas
       matter x GE x 4.1868 x Ym / 55.65 x GWP(CH4); the fixed feeds' CH4 per head goes with the animal (the
       accounts' finite difference holds the animals' feed, so their enteric CH4 is not counted twice).
 
-  ammonia options (Sprint 9k): manure N2O per unit of option share through the accounts' loss cascade ("mtech"),
+  ammonia options (the manure and ammonia accounts in every EU solve): manure N2O per unit of option share through the accounts' loss cascade ("mtech"),
       plus, in the supply model, the indirect N2O of the NH3 kept and the soil N2O of the mineral N it displaces;
-  manure trade (Sprint 9k): the mineral N bought by the exporter, saved by the importer (sub x soil N2O per t N),
+  manure trade (the manure and ammonia accounts in every EU solve): the mineral N bought by the exporter, saved by the importer (sub x soil N2O per t N),
       in the supply model.
 
 Registered: the coefficients are held at the baseline solution (the accounts are close to linear: per-head and
@@ -85,7 +85,7 @@ def ghg_coefficients(env, region: str, res, rations: Optional[dict]) -> dict:
             r1.activities = acts.copy()
             r1.activities[a] = float(acts[a]) + h_
         out["act"][a] = diff(m, h)
-    for fld, key in (("dairy_low_shift", "dairy"),):   # (and the grassland split until S2, 7 November 2026)
+    for fld, key in (("dairy_low_shift", "dairy"),):   # (and the grassland split until 7 November 2026)
         def m(r1, h_, fld=fld):
             setattr(r1, fld, float(getattr(res, fld, 0.0) or 0.0) + h_)
         out[key] = diff(m, 0.01)
@@ -107,7 +107,7 @@ def ghg_coefficients(env, region: str, res, rations: Optional[dict]) -> dict:
                 d[k] = float(d.get(k, 0.0) or 0.0) + h_
                 setattr(r1, fld, d)
             out[key][k] = diff(m, 0.01)
-    # CAPRI's ammonia options (Sprint 9k): manure N2O per unit of an animal's option share, through the accounts'
+    # CAPRI's ammonia options (the manure and ammonia accounts in every EU solve): manure N2O per unit of an animal's option share, through the accounts'
     # loss cascade (housing/storage and application N2O on the N left after NH3 losses), per 1000 heads - so per
     # unit of the regional model's M (share x heads). The NH3 kept and the mineral N it displaces are priced in the supply
     # model from the option's own N saving (SupplyModel._tech_list).

@@ -1,4 +1,4 @@
-"""CAPRI's declared premiums per activity (policy/policy.gms, P2b): the premium a region's activity is declared under
+"""CAPRI's declared premiums per activity (policy/policy.gms): the premium a region's activity is declared under
 each payment scheme (PRMD) and the activity's entitlement weight, from the year's premium declarations. prmcut.gms
 (capri_mod/policy/premium_cut.py) then cuts them to the schemes' ceilings.
 
@@ -22,7 +22,7 @@ regional unit), with the scheme's application type there. policy.gms:
 6. the entitlement weight: p_entlWght1 (1 where none, 0 where EPS) x the slaughtered share of the activity's heads
    (the slaughter coefficient / 1000) for the schemes per slaughtered head.
 
-Left to P2c: the farm types (p_AggregNUTS2 is 0 in CAPMOD's NUTS 2 runs), Norway's schemes, the subsidies per unit of
+Not ported yet: the farm types (p_AggregNUTS2 is 0 in CAPMOD's NUTS 2 runs), Norway's schemes, the subsidies per unit of
 output of the non-CAP payments (DPNONCAP: noncap_factor here, given by the caller), the set-aside floor of the
 Agenda 2000 regime (DATA OSET Floor, end of policy.gms).
 """

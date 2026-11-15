@@ -11,7 +11,7 @@ Compared, EU27, model baseline of a run saved by tools/run/run_f2f_2030.py again
                                             1000s of the model's unit; fattened pigs and broilers are left out
                                             (CAPRI counts animals produced a year, the model places)
   market production (1000 t)                capri_eu27_market_balance_2030_ref.json MAPR (GROF where no MAPR);
-                                            in a run with market.demand_calibration = "capri" (S7) the market takes
+                                            in a run with market.demand_calibration = "capri" (CAPRI's market calibration) the market takes
                                             the marketed production (CAPRI's grofNEprod: gross x PROD/GROF at the
                                             calibration point), so the block compares it with CAPRI's own marketed
                                             production instead: the sum over the EU's member states of
@@ -62,7 +62,7 @@ PROD_CODE = {"SWHE": "WHEA", "CORN": "MAIZ", "PARI": "RICE", "OLIV": "OLIO", "PO
 
 
 def capri_mode(o) -> bool:
-    """The run's market takes the marketed production (S7): every run since 8 November 2026, when the setting
+    """The run's market takes the marketed production (CAPRI's market calibration): every run since 8 November 2026, when the setting
     market.demand_calibration was removed with its "supply" form; a run of 6-8 November with "supply" set is not. (A
     run before 6 November 2026 has no such setting either and was in the "supply" form: not told apart here.)"""
     s = (o.get("meta") or {}).get("settings") or {}

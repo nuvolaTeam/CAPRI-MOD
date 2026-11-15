@@ -36,7 +36,7 @@ PLAP is also unsafe: in these dumps it carries the same value as PESTOTAL
 It is excluded.
 
 Until 29 October 2026 it also printed a comparison with the model's producer_prices.csv and nutrient_coefs.csv; that
-made the extract read tables built from it (a cycle in the data pipeline, docs/design/DATA_PIPELINE_DOIT.md) and was
+made the extract read tables built from it (a cycle in the data pipeline, docs/dev/DATA_PIPELINE_DOIT.md) and was
 removed: the extract reads CAPRI's dumps and the regional units only.
 
 Usage

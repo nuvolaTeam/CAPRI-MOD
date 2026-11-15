@@ -1,4 +1,4 @@
-"""The market's state between its blocks (refactor stage 2b, docs/design/MARKET_STATE_INVENTORY.md).
+"""The market's state between its blocks (docs/dev/MARKET_STATE_INVENTORY.md).
 
 MarketEvalState holds what one market evaluation (BilateralSolveMixin._bilateral_eval: supply_response ->
 demand_response -> the by-product blocks) passes from one block to the next, which the blocks kept before as
@@ -25,7 +25,7 @@ class MarketEvalState:
     #: the non-EU behavioural regions' feed energy price ratios of the evaluation (CAPRI's FeedBal_, audit M3:
     #: {CAPRI region: FEDE / FEDE at calibration}); None outside an evaluation or with market.noneu_feed_nq off
     fede_now: Any = None
-    #: the non-EU land markets' rents of the evaluation (CAPRI's LandSupplyMNL_ = LndSupplyEqualsDemand_, stage 7:
+    #: the non-EU land markets' rents of the evaluation (CAPRI's LandSupplyMNL_ = LndSupplyEqualsDemand_:
     #: {CAPRI region: change of the free rents TCRP, FODFAL, FRUN from calibration, EUR/ha}); None with
     #: market.noneu_land_market off
     land_now: Any = None
@@ -143,12 +143,12 @@ class MarketSeen:
     fmil_index_sup: Any = None
 
 
-#: the module attributes refactor stage 2b moved (old name: new place) or removed (step 3, write-only): a read or a
+#: the module attributes the refactor of the market's state moved (old name: new place) or removed (write-only): a read or a
 #: write of an old name raises (RuntimeError, so that getattr(obj, name, default) cannot hide it)
 MOVED = {
     "base_consumption": "par.base_consumption",
     "_base_consumption0": "par.base_consumption0",
-    "_base_net_exports_eu": "removed (S7, 8 November 2026: read only by the \"supply\" form)",
+    "_base_net_exports_eu": "removed (CAPRI's market calibration, 8 November 2026: read only by the \"supply\" form)",
     "base_production": "par.base_production",
     "_base_production0": "par.base_production0",
     "_bilat": "par.bilat",
@@ -164,13 +164,13 @@ MOVED = {
     "_dairy_S0_reg": "par.dairy_S0_reg",
     "_dairy_last": "ev.dairy_last",
     "_dairy_m5_now": "ev.dairy_m5_now",
-    "_dairy_u": "nothing (removed with step G2f: the dairy blocks are linear in their unknowns, no warm start)",
-    "_dairy_u_all": "nothing (removed with step G2f: the dairy blocks are linear in their unknowns, no warm start)",
+    "_dairy_u": "nothing (removed when the dairy blocks moved to CasADi: the dairy blocks are linear in their unknowns, no warm start)",
+    "_dairy_u_all": "nothing (removed when the dairy blocks moved to CasADi: the dairy blocks are linear in their unknowns, no warm start)",
     "_dairy_world_last": "ev.dairy_world_last",
     "_demand_cal": "par.demand_cal",
     "_demand_cal_frozen": "par.demand_cal_frozen",
     "_eu_aligned_use": "par.eu_aligned_use",
-    "_eu_base_supply": "removed (S7, 8 November 2026: read only by the \"supply\" form)",
+    "_eu_base_supply": "removed (CAPRI's market calibration, 8 November 2026: read only by the \"supply\" form)",
     "_eu_biof_ratio": "ev.eu_biof_ratio",
     "_eu_feed_now_reg": "ev.eu_feed_now_reg",
     "_eu_food_ratio": "ev.eu_food_ratio",
@@ -190,18 +190,18 @@ MOVED = {
     "_world_milk_now": "ev.world_milk_now",
     "_yani_market_now": "ev.yani_market_now",
     "_yani_state": "seen.yani_state",
-    "_prem_prev": "removed (stage 2b step 3: written, never read)",
-    "_prem_w": "removed (stage 2b step 3: written, never read)",
-    "_prem_d": "removed (stage 2b step 3: written, never read)",
-    "_eu_base_demand": "removed (stage 2b step 3: written, never read)",
-    "_eu_feed_now": "removed (stage 2b step 3: written, never read)",
-    "_milk_dL_now": "removed (stage 2b step 3: written, never read)",
-    "_wedge_eu_last": "removed (stage 2b step 3: written, never read)",
-    "last_market_solver": "removed (stage 2b step 3: written, never read)",
-    "_eu_aggregate_reported": "removed (stage 2b step 3: written, never read)",
-    "_rest_share": "removed (stage 2b step 3: written, never read)",
-    "_bilat_converged": "removed (stage 2b step 3: written, never read)",
-    "_bilat_unconverged": "removed (stage 2b step 3: written, never read)",
+    "_prem_prev": "removed (written, never read)",
+    "_prem_w": "removed (written, never read)",
+    "_prem_d": "removed (written, never read)",
+    "_eu_base_demand": "removed (written, never read)",
+    "_eu_feed_now": "removed (written, never read)",
+    "_milk_dL_now": "removed (written, never read)",
+    "_wedge_eu_last": "removed (written, never read)",
+    "last_market_solver": "removed (written, never read)",
+    "_eu_aggregate_reported": "removed (written, never read)",
+    "_rest_share": "removed (written, never read)",
+    "_bilat_converged": "removed (written, never read)",
+    "_bilat_unconverged": "removed (written, never read)",
 }
 
 

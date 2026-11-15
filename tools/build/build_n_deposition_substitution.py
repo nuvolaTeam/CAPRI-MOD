@@ -1,6 +1,6 @@
 """Atmospheric N deposition and the fertiliser substitution terms per model region, from CAPRI's 2030 reference.
 
-Both files were supplied without a builder until 27 October 2026 (docs/design/REGIONAL_UNITS_INVENTORY.md); on CAPRI's
+Both files were supplied without a builder until 27 October 2026 (docs/dev/REGIONAL_UNITS_INVENTORY.md); on CAPRI's
 regional units each region takes its own CAPRI row of capri_data/baselines/capri_greendeal_ref/1730/environment/capri_gnb_components_2030.csv
 (tools/build/build_capri_gnb_components.py: res_2_1730greendeal_refdefaulta dataOut, kg N per ha), else its member
 state's row.

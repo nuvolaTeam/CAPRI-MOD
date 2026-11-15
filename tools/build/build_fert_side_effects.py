@@ -9,7 +9,9 @@ option's N saving (othImpact NMIN) is counted apart:
 
     EF(option) / EF(NOC) = (1 - lit) x (1 + NMIN)
 
-NOx (NOXSYN) is not carried: the model keeps no NOx account. Nitrate leaching and runoff effects: capmod has
+NOx (NOXSYN) of mineral N is carried since 14 November 2026, from the full dump: the model keeps no NOx account, but
+CAPRI's mineral N losses (GASTOTNETF_, supply_model.gms l. 3368-3394) include the NOx lost, so the option's NOx effect
+changes how much of the N bought reaches the crops (NUTNED_, l. 1143; capri_mod/supply/capri_regional_nlp.py). Nitrate leaching and runoff effects: capmod has
 endoLeach on (capmod/set_global_variables.gms l. 55), so CAPRI keeps them (ghgMiti.gms l. 568-573 zeroes them only
 with endoLeach off): NITR_INH on mineral N NO3SLEA and NO3SRUN (system Mineral), NITR_INH_MAN NO3MLEA and NO3MRUN,
 weighted as ghgMiti.gms l. 557-563 does: liquid and solid entries by CAPRI's liquid share (n_cascade_factors.csv tsl,
@@ -50,6 +52,7 @@ from _sources_io import read_source, source_records, write_source  # noqa: E402 
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ITEMS = ("N2OSYN", "NH3SYN")
+NOX_MIN = ("NOXSYN",)
 MAN_ITEMS = ("NH3APP", "N2OAPP")
 NO3_MIN = ("NO3SLEA", "NO3SRUN")
 NO3_MAN = ("NO3MLEA", "NO3MRUN")
@@ -88,7 +91,9 @@ def no3_weighted():
     lit = {(r.region, r.activity, r.system, r.item): float(r.value) for r in mm.itertuples()}
     for reg in sorted({k[0] for k in lit}):
         for it in NO3_MAN:
-            acts = {k[1] for k in lit if k[0] == reg and k[3] == it}
+            # sorted: the weighted sum's order fixed (a set's order follows the process's string hashing, which moved
+            # the mean's last digit between runs)
+            acts = sorted({k[1] for k in lit if k[0] == reg and k[3] == it})
             src = reg if any((reg, a) in w for a in acts) else _national_code(reg)
             num = den = 0.0
             for a in acts:
@@ -112,9 +117,16 @@ def main():
     mm = mm.groupby(["region", "item"], as_index=False)["value"].mean().assign(technology="NITR_INH_MAN")
     no3 = pd.DataFrame([(r, t_, i, v) for (r, t_, i), v in no3_weighted().items()],
                        columns=["region", "technology", "item", "value"])
-    d = pd.concat([m, mm[["region", "technology", "item", "value"]], no3], ignore_index=True)
+    # the NOx records of the mineral-N options, from the full dump (the records file holds N2OSYN and NH3SYN only)
+    full = read_source(RAW / "LitRevFertTech_p_litRevFertTechs_all.parquet", dtype=str, keep_default_na=False)
+    nox = full[(full["system"] == "Mineral") & full["item"].isin(NOX_MIN)
+               & full["technology"].isin(sorted(set(m["technology"])))][["region", "technology", "item", "value"]]
+    nox = nox.astype({"value": float})
+    d = pd.concat([m, mm[["region", "technology", "item", "value"]], no3, nox], ignore_index=True)
     KEYS = ([(t, i) for t in sorted(set(m["technology"])) for i in ITEMS] + [("NITR_INH_MAN", i) for i in MAN_ITEMS]
             + [("NITR_INH", i) for i in NO3_MIN] + [("NITR_INH_MAN", i) for i in NO3_MAN])
+    # optional items: written where the chosen source has them (Norway's entries have no NOx record)
+    OPT = [(t, i) for t in sorted(set(m["technology"])) for i in NOX_MIN]
     val = {(r.region, r.technology, r.item): float(r.value) for r in d.itertuples()}
     import importlib.util as _ilu_
     _sp_ = _ilu_.spec_from_file_location("_mr_", ROOT / "tools" / "lib" / "_model_regions.py")
@@ -125,21 +137,23 @@ def main():
     for reg in mr.model_regions():
         for src, kind in ((to_c8.get(reg), "regional"), (mr.national_code(reg), "national")):
             if src and all((src, t, i) in val for t, i in KEYS):
-                for t, i in KEYS:
-                    rows.append((reg, t, i, val[(src, t, i)], src))
+                for t, i in KEYS + OPT:
+                    if (src, t, i) in val:
+                        rows.append((reg, t, i, val[(src, t, i)], src))
                 n_reg += kind == "regional"; n_nat += kind == "national"
                 break
         else:
             ms = mr.national_code(reg)[:2]
             if all((ms, t, i) in med for t, i in KEYS):
-                for t, i in KEYS:
-                    rows.append((reg, t, i, med[(ms, t, i)], ms + " median"))
+                for t, i in KEYS + OPT:
+                    if (ms, t, i) in med:
+                        rows.append((reg, t, i, med[(ms, t, i)], ms + " median"))
                 n_med += 1
     out = pd.DataFrame(rows, columns=["region", "technology", "item", "value", "capri_region"])
     dest = ROOT / "capri_data" / "2017" / "abatement" / "fert_side_effects.csv"
     out.to_csv(dest, index=False)
     print(f"wrote {dest.name}: {out.region.nunique()} regions ({n_reg} regional, {n_nat} national entries, {n_med} country medians); "
-          + ", ".join(f"{i} median {out[out.item == i].value.median():+.3f}" for i in ITEMS + MAN_ITEMS + NO3_MIN + NO3_MAN))
+          + ", ".join(f"{i} median {out[out.item == i].value.median():+.3f}" for i in ITEMS + NOX_MIN + MAN_ITEMS + NO3_MIN + NO3_MAN))
 
 
 if __name__ == "__main__":

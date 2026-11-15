@@ -1,4 +1,4 @@
-"""CAPRI's land rents per model region and land type at the 2030 reference (docs/LAND_RENT_CALIBRATION_PLAN.md).
+"""CAPRI's land rents per model region and land type at the 2030 reference (docs/dev/LAND_RENT_CALIBRATION_PLAN.md).
 
 CAPRI's supply calibration takes the land rents as given (supply/cal_land_nests.gms sets DATA(r, landType, "d_area");
 supply/prep_cal.gms l. 125-156 subtracts the "assumed land rent for arable and grass land" from the activities' costs;

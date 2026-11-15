@@ -23,7 +23,7 @@ Outputs (capri_data/baselines/capri_greendeal_ref/1730/environment/; the two liv
                             arable residue pool, fertDistCres_; non-permanent crops), own_kg_ha (permanent crops' own
                             residues, perm_cres), mine_kg_ha (CAPRI's mineral flow), levl_kha; CAPRI crops pooled into
                             the model's crops by area (CORN = MAIZ, WINE = TWIN; GRAE and GRAI the model's own
-                            since S2, 7 November 2026); main_share and straw_share, the parts of the need that follow the
+                            since 7 November 2026); main_share and straw_share, the parts of the need that follow the
                             main output's yield and the straw yield (fert/fertned.gms: need = MIN(cap, MAX(15, O_HP x
                             need per t + STRA x straw content)); 0 for crops at the floor or the cap), with CAPRI's straw
                             content and caps from envind/gascoeff.gms and fert/fertpar.gms (their statements converted
@@ -73,8 +73,8 @@ ELEM = ("SWHE", "DWHE", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "PARI", "RAPE", 
         "FLOW", "OCRO", "NECR", "MAIF", "ROOF", "OFAR", "GRAE", "GRAI", "PULS", "POTA", "SUGB", "TEXT", "TOBA", "TOMA",
         "OVEG", "APPL", "OFRU", "CITR", "TAGR", "TABO", "TWIN", "OLIV", "FALL", "ISET", "GSET", "TSET", "VSET", "NONF")
 #: model crop <- CAPRI crops
-MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",)}   # (GRAS = GRAE + GRAI until S2, 7 November 2026)
-#  (VSET and FALL the model's own since S2, 7 November 2026; before SETA = FALL + VSET + ISET + GSET + TSET; ISET, GSET
+MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",)}   # (GRAS = GRAE + GRAI until 7 November 2026)
+#  (VSET and FALL the model's own since 7 November 2026; before SETA = FALL + VSET + ISET + GSET + TSET; ISET, GSET
 #  and TSET have no area in CAPRI's 2017 and 2030 data)
 FLOWS = ("fertDist_mine", "fertDist_excr", "fertDist_cres", "perm_cres", "nutNed_mine_loss_gasRunTot",
          "nutNed_cres_loss_gasRunTot", "nutNed_excr_unavailable", "nutNed_cres_unavailable", "nutNed_lhs")
@@ -253,7 +253,7 @@ def main():
                 d["pool"] += pool_raw.get(c, 0.0) * kpool
                 d["own"] += f("perm_cres", c)
                 d["mine"] += f("fertDist_mine", c)
-            # (GRAE and GRAI on their own rows here too until S2, 7 November 2026: the model's crops since)
+            # (GRAE and GRAI on their own rows here too until 7 November 2026: the model's crops since)
             for mc, d in agg.items():
                 mc = mc.lstrip("_")
                 L = d["levl"]

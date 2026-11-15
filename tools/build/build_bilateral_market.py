@@ -1,4 +1,4 @@
-"""CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market).
+"""CAPRI's bilateral trade data for the model's trade regions (the port of CAPRI's bilateral market and 2030 baseline: CAPRI's full market).
 
 CAPRI's market model (arm/market_model.gms) clears, per market region and product, the region's own good:
 domestic sales + exports = production (SupBalM_), with total use an Armington aggregate of domestic sales and
@@ -74,11 +74,11 @@ MODEL = {
     # distillers' dried grains from ethanol plants (CAPRI prodQuantBiofBy_), a traded protein feed
     "DDGS": ("DDGS",),
     # CAPRI's other dairy products, traded bilaterally as the four above (dairy block: arm/market_model.gms
-    # DairyNQ_, ProcMargM_, FatsProtBal_; Sprint 9f): fresh milk products, cream, concentrated milk, whole milk
+    # DairyNQ_, ProcMargM_, FatsProtBal_; the switch-on of CAPRI's dairy block): fresh milk products, cream, concentrated milk, whole milk
     # powder, casein - model codes = CAPRI codes
     "FRMI": ("FRMI",), "CREM": ("CREM",), "COCM": ("COCM",), "WMIO": ("WMIO",), "CASE": ("CASE",),
     # CAPRI's residual feed products (RESIMP), traded bilaterally; EU supply from milling and sugar processing
-    # (MaprFeed_; Sprint 9h): energy-rich feed FENI (sugar-beet by-products, manioc, roots) and milling
+    # (MaprFeed_; the completion of CAPRI's feed bulks): energy-rich feed FENI (sugar-beet by-products, manioc, roots) and milling
     # by-products FPRI
     "FENI": ("FENI",), "FPRI": ("FPRI",),
 }
@@ -102,7 +102,7 @@ EU_BLOCKS = {"A_EU_WEST": "EU_WEST", "A_EU_EAST": "EU_EAST"}
 
 def extract(year):
     """CAPRI's market regions with the EU as its two A_EU_WEST and A_EU_EAST (defaultA.agg), not the EU27yr19
-    reporting block (the one-EU extract and its files were removed on 3 November 2026, market move stage 3)."""
+    reporting block (the one-EU extract and its files were removed on 3 November 2026, in the market's move onto CAPRI's regions)."""
     src = SRC[year]
     keep = KEEP_DIR[year] / f"bilateral_dataout_{year}.parquet"
     if src.exists():
@@ -198,8 +198,8 @@ def build(year, AGGREGATES):
 
 def build_trq(year, AGGREGATES):
     """CAPRI's bilateral tariff-rate quotas of every importer (p_trqBilat: TrqNT with its in- and out-of-quota rates),
-    on CAPRI's policy blocks (RMTP; RM_TO_RMTP), per model commodity (MARKET_REGIONS_INVENTORY §5 stage 4,
-    docs/design/PORTS_STAGE4.md). A quota counts where TrqNT > 0 and below 1E+9 (CAPRI: not 1E+10, free access, nor
+    on CAPRI's policy blocks (RMTP; RM_TO_RMTP), per model commodity (MARKET_REGIONS_INVENTORY §5, the bilateral quotas,
+    docs/dev/MARKET_TRQ_PORT.md). A quota counts where TrqNT > 0 and below 1E+9 (CAPRI: not 1E+10, free access, nor
     "prohibitive", an acronym the listing does not print as a number). Rates as CAPRI holds them for the pair: ad
     valorem TaMFN, TaPref (%), specific TsMFN, TsPref (EUR/t); one missing is 0, as in CAPRI's equations, which switch
     a rate only where one of its two values is above eps. CAPRI products of one model commodity (none at present with
@@ -236,9 +236,9 @@ def build_trq(year, AGGREGATES):
         k = agg[(i, j, CAPRI[p])]
         k["q"] += q
         # CAPRI's regime of the pair (arm/set_tariffs.gms, market_model.gms): the entry price system where a
-        # preferential trigger price is set (tariffs fixed at TARV and the entry price's specific part: stage 6); with
+        # preferential trigger price is set (tariffs fixed at TARV and the entry price's specific part); with
         # a global (erga omnes, exporter "World") quota of the importer that has rates, the smaller of the two rates
-        # (ncpcm in tarAdval_, tarSpec_: stage 5); else the bilateral sigmoid alone (stage 4)
+        # (ncpcm in tarAdval_, tarSpec_: the global quotas); else the bilateral sigmoid alone
         gl = d.get((i, "World", p), {})
         has_gl = 0 < gl.get("TRQNT", 0.0) < 1e9 and any(gl.get(x, 0.0) > 0 for x in ("TAMFN", "TAPREF", "TSMFN", "TSPREF"))
         reg = "entry_price" if v.get("PREFTRIGPRICE", 0.0) > 0 else ("with_global" if has_gl else "bilateral")
@@ -267,9 +267,9 @@ def build_trq(year, AGGREGATES):
 def build_trq_global(year):
     """CAPRI's global (erga omnes) tariff-rate quotas (p_trqGlobl: in the market listing as the importer's rows with
     exporter "World") and the free-trade pairs they leave out (p_doubleZero), for the global quotas of the market
-    (TRQImports_, tarAdValW_, tarSpecW_, arm/market_model.gms l. 3142, 3399, 3475; docs/design/PORTS_STAGE4.md).
+    (TRQImports_, tarAdValW_, tarSpecW_, arm/market_model.gms l. 3142, 3399, 3475; docs/dev/MARKET_TRQ_PORT.md).
     p_doubleZero is in no market listing: it is read from CAPRI's 2030 restart file sim_ini_21730 ("CUR"), for the
-    2017 market year too (the 2030 agreements; REGISTERED in PORTS_STAGE4.md).
+    2017 market year too (the 2030 agreements; REGISTERED in MARKET_TRQ_PORT.md).
     Output bilateral_trq_global_<year>.csv: importer (policy block), commodity, quota_kt, ta_mfn, ta_pref, ts_mfn,
     ts_pref, importer_regions, free_regions (the market regions of the exporter blocks with free trade, "|"-joined)."""
     df = read_source(KEEP_DIR[year] / f"bilateral_trq_dataout_{year}.parquet", keep_default_na=False)
@@ -312,7 +312,7 @@ def build_trq_global(year):
 def build_raw_milk_prices(year):
     """CAPRI's raw milk market price (DATA PMRK MILK) per market region, the one market commodity without bilateral
     trade: with the bilateral regions' PMRK, the market's reference price levels (MarketModule.domestic_prices; CAPRI's
-    own prices, the project lead's decision of 3 November 2026, docs/design/TARV_COMPARISON.md).
+    own prices, the project lead's decision of 3 November 2026, docs/dev/TARV_COMPARISON.md).
     Output raw_milk_prices_<year>.csv: region, pmrk (EUR/t)."""
     src = SRC[year]
     keep = KEEP_DIR[year] / f"raw_milk_prices_dataout_{year}.parquet"
@@ -332,12 +332,12 @@ def build_raw_milk_prices(year):
 
 
 def build_border_measures(year=2030):
-    """CAPRI's border measures that replace the specific tariff (stage 6 of the market move, docs/design/PORTS_STAGE4.md):
+    """CAPRI's border measures that replace the specific tariff (docs/dev/MARKET_TRQ_PORT.md):
     the entry price system (DATA TriggerP: EntryPriceDriver_, tarSpecIfEntryPrice_, prefTriggerPrice_) and the
     flexible levies under a minimum border price (DATA MinBordP: FlexLevyNotCut_, FlexLevy_), arm/market_model.gms
     l. 3174-3262, 3365-3390. From CAPRI's 2030 restart file sim_ini_21730 ("CUR": DATA, p_entryPriceFac, p_doubleZero)
     and the market listing's PrefTrigPrice; no 2017 listing carries p_entryPriceFac, so the 2017 market year has none
-    (REGISTERED in PORTS_STAGE4.md).
+    (REGISTERED in MARKET_TRQ_PORT.md).
     Outputs (capri_data/2017/market/):
       border_measures_<year>.csv  importer (policy block), commodity, kind (entry_price, flex_levy), price (TriggerP or
                                   MinBordP, EUR/t), tars (DATA TARS, EUR/t), importer_regions, free_regions

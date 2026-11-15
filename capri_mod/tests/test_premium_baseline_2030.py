@@ -1,4 +1,4 @@
-"""The model's 2030 baseline premiums (tools/build/build_price_trajectory_2030.py, P2 step 2): for the regions the ports
+"""The model's 2030 baseline premiums (tools/build/build_price_trajectory_2030.py): for the regions the ports
 cover they are the ported premiums (capri_mod/policy/premiums.py at CAPRI's trend levels) in 2017 money, every crop under
 its model code (K145), and an activity the ports give no premium has none in 2030."""
 from __future__ import annotations
@@ -48,7 +48,7 @@ def test_a_ported_units_crop_premiums_are_the_ports_in_2017_money(built, port):
 
 def test_an_activity_the_ports_give_no_premium_has_none_in_2030(built, port):
     """Greece's dairy cows: no 2030 premium in the ports (nor in CAPRI's 2030 reference, where they have levels), so
-    the 2030/2017 ratio is 0; before P2 step 2 the empty cell read as 1, the 2017 premium kept."""
+    the 2030/2017 ratio is 0; before 13 November 2026 the empty cell read as 1, the 2017 premium kept."""
     _, lsk, _ = built
     for unit in ("EL110000", "EL120000", "EL140000"):
         assert not port.get((unit, "DCOL")) and not port.get((unit, "DCOH"))

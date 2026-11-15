@@ -1,8 +1,8 @@
-"""CAPTRD-MOD stage 3: the NUTS 2 estimation m_trendNT2 (CAPRI star 3.0, captrd/estimate_nuts2.gms with
+"""CAPTRD-MOD: the NUTS 2 estimation m_trendNT2 (CAPRI star 3.0, captrd/estimate_nuts2.gms with
 captrd/equations.gms l. 909-912): the NUTS 2 regions of one member state estimated together, under the member state's
 own result (fixed).
 
-This module holds the equations (stage 3, first part). The model statement:
+This module holds the equations (the first part of its port). The model statement:
 
   AREAB_, LANDUSEB_, OSET_, GROF_, REQS_, GRPLVL_, STRA_, LU_, SplitFix_   per region, as estimate_ms.residuals has
                                                                          them; REQS_'s feed contents are the member

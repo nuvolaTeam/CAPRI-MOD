@@ -197,7 +197,7 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
     _add(toou, d_out, (d_yo,))          # total output: final products and young animals sold
     _add(toin, None, (d_yi, d_feed))    # total inputs: young animals and feed cereals bought
 
-    # --- purchased feed bulks in the rations (Sprint 9p): CAPRI's 2030 bulk prices are its feedBlkPrice_ CES indices of
+    # --- purchased feed bulks in the rations (the projection layer at CAPRI's reference): CAPRI's 2030 bulk prices are its feedBlkPrice_ CES indices of
     # the member state's feed products at their 2030 prices; the rations were priced at 2017 bulk prices, so the 2030
     # baseline's ration choice used 2017 relative prices of purchased feed against fodder (whose 2030 values are
     # CAPRI's). Index per (member state, bulk): sum_i s_i r_i^(1-rho) ^ (1/(1-rho)), s_i the value shares of

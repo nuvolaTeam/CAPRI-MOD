@@ -12,7 +12,7 @@ DCOL = s0 x DCOW + z), with per-head changes relative to the average cow (DCOW):
                      magnitudes used)
   <column>_2030      the same at CAPRI's 2030 calibration point (share_low and the d<item>_rel), from CAPRI's
                      2030 Green Deal baseline the model's 2030 base is taken from (res_2_1730greendeal_refdefaulta,
-                     dataOut LEVL at 2030; tools/lib/paths.BASELINE_REF); the model uses them at the 2030 market year (S6 item 6, 9 November 2026:
+                     dataOut LEVL at 2030; tools/lib/paths.BASELINE_REF); the model uses them at the 2030 market year (9 November 2026:
                      before, the 2017 differences were used at the 2030 point)
   q_low, q_high      CAPRI's own PMP diagonal terms of DCOL and DCOH (p_pmpQuadTechn,
                      capri_data/sources/intermediate/capreg/pmp_quad_techn.parquet); regions without them: the
@@ -147,7 +147,7 @@ def main():
                 out.at[r, col] = km / out.at[r, hd]
                 out.at[r, "q_source" + sfx] = "country median of q x heads (REGISTERED fallback)"
     out = out.drop(columns=["ms"])
-    # the columns as before S6 item 6 first, then manure P2O5 and K2O, then CAPRI's 2030 point
+    # the columns as before 9 November 2026 first, then manure P2O5 and K2O, then CAPRI's 2030 point
     new = ["dmanp_rel", "dmank_rel"] + [c for c in out.columns if c.endswith("_2030")]
     out = out[[c for c in out.columns if c not in new] + new]
     dest = ROOT / "capri_data" / "2017" / "supply" / "dairy_intensity.csv"

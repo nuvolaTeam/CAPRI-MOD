@@ -1,4 +1,4 @@
-"""CAPRI's CAP 2014-2020 premiums of the simulation year, for the premium cut (P2; policy/prmcut.gms,
+"""CAPRI's CAP 2014-2020 premiums of the simulation year, for the premium cut (policy/prmcut.gms,
 capri_mod/policy/premium_cut.py). So far the coupled support: the voluntary coupled support (VCS) and the
 crop-specific cotton payment.
 
@@ -114,7 +114,7 @@ def area_declarations(year: int):
     natural-constraint payments and the SAPS (CAP_2014_2020.gms l. 309-357): the rate per premium group (PGSAPS, 1000
     EUR per ha) in each member state, per level where the member state has a ceiling of the scheme (the year's, from
     capri_mod/supply/entitlements.py, K136), and those ceilings. The BPS of the member states with the basic payment
-    scheme (dp_bps) has a rate per region from implement_bps.gms's convergence: P2c."""
+    scheme (dp_bps) has a rate per region from implement_bps.gms's convergence."""
     ent = _entl.data()
     rates = {item[len("area_rate_"):]: v for item, v in ent["settings"].items() if item.startswith("area_rate_")}
     decl, ceilings = {}, {}

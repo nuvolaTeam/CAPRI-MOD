@@ -30,7 +30,7 @@ Since 27 October 2026 the model's regions are CAPRI's regional units under CAPRI
 CAPRI row. Until then the model had 248 NUTS-2016 regions, matched to CAPRI's codes by renames, merges,
 splits by Eurostat cattle numbers (Denmark, Lithuania, Slovenia, Croatia, Saxony, ...), Ireland's 2016
 boundary shares, Norway's pooled regions and crop-specific splits from CAPREG's p_REGIO; all of that is gone
-(docs/design/REGIONAL_UNITS_INVENTORY.md).
+(docs/dev/REGIONAL_UNITS_INVENTORY.md).
 
 What was NOT mapped when this was written (all are mapped now): table olives (307), other marketable crops (1,156), nursery plants (181),
 flowers (118) and other industrial crops (268). These are CAPRI activities the
@@ -92,8 +92,8 @@ HERD_MAP = {"DCOW": "DCOW", "SCOW": "SCOW", "BULL": "BULL", "HEIF": "HEIF",
 
 #: cost columns verified equal to CAPRI TOIN on DE11, FR10 and ES61
 COST_ANIMALS = ("DCOW", "BULL", "PIGF", "OANI")
-COST_EXCLUDE = ("VSET", "FALL", "WINE")   # (SETA until S2, 7 November 2026)
-# the crops on permanent-crop land: the model's classes (capri_data/codes/model_activity_classes.csv, N6), one list
+COST_EXCLUDE = ("VSET", "FALL", "WINE")   # (SETA until 7 November 2026)
+# the crops on permanent-crop land: the model's classes (capri_data/codes/model_activity_classes.csv), one list
 # with the supply model (DEP-43 fixed, 2 November 2026: nurseries on FRUN as CAPRI)
 PERMANENT_CROPS = _MC.permanent_crops()
 
@@ -208,7 +208,7 @@ def main(dump_dir: Path):
         # ---- land from the rebuilt areas
         v = areas.loc[reg]
         perm = float(v[[c for c in PERMANENT_CROPS if c in v.index]].sum())
-        grass = float(v.get("GRAE", 0.0)) + float(v.get("GRAI", 0.0))   # (GRAS until S2, 7 November 2026)
+        grass = float(v.get("GRAE", 0.0)) + float(v.get("GRAI", 0.0))   # (GRAS until 7 November 2026)
         fallow = float(v.get("VSET", 0.0)) + float(v.get("FALL", 0.0))
         land.at[reg, "PERMANENT"], land.at[reg, "GRASSLAND"] = perm, grass
         land.at[reg, "FALLOW"] = fallow

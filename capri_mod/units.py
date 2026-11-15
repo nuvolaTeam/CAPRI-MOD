@@ -1,4 +1,4 @@
-"""Physical constants and unit conversions, named once (refactor stage 3, N4; the project lead's decision Q5 of
+"""Physical constants and unit conversions, named once (the project lead's decision of
 2 November 2026: physical constants are named code constants, not rows of the parameters file).
 
 They are written as the code used them, so the arithmetic is unchanged: an N2O-N to N2O conversion reads

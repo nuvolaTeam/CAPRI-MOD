@@ -10,7 +10,7 @@ structure used by `CAPRIModel.run` (`MarketModule.market_structure = "bilateral"
 Code: `capri_mod/market/bilateral.py` (`BilateralCommodity`: one product's trade system, its calibration, TRQs) and
 `MarketModule._bilateral_raw`, `_bilateral_calibrate`, `_bilateral_eval`, `_solve_bilateral`,
 `_solve_bilateral_equilibrium` in `capri_mod/market/market_module.py`. How the system is solved:
-[MARKET_SOLVE_CHECK.md](MARKET_SOLVE_CHECK.md).
+[MARKET_SOLVE_CHECK.md](dev/MARKET_SOLVE_CHECK.md).
 
 ## Regions and products
 
@@ -130,8 +130,8 @@ converged baseline supply is frozen and inherited by the scenario (cached with t
 
 ## Tariff-rate quotas
 
-CAPRI's tariff-rate quotas on its policy blocks (RMTP), since 4 November 2026 (market move stages 4-5,
-docs/design/PORTS_STAGE4.md; `build_trq`, `build_trq_global` → `bilateral_trq_<year>.csv`, `bilateral_trq_global_<year>.csv`):
+CAPRI's tariff-rate quotas on its policy blocks (RMTP), since 4 November 2026 (the market's move onto CAPRI's regions,
+docs/dev/MARKET_TRQ_PORT.md; `build_trq`, `build_trq_global` → `bilateral_trq_<year>.csv`, `bilateral_trq_global_<year>.csv`):
 
 - the 130 bilateral quotas of every importer (EU 81, MOR 16, TUR 15, MED 11, NO000000 5, RUS 2), each filled by the
   flows between the two blocks' market regions (TradeFlowsAgg_; the EU's quotas by both EU blocks, those on MER by ARG,
@@ -142,7 +142,7 @@ docs/design/PORTS_STAGE4.md; `build_trq`, `build_trq_global` → `bilateral_trq_
   bilateral quota and without free trade (p_doubleZero) plus the bilateral quotas' overfill; those exporters pay the
   global rates, and a bilateral quota's flows pay the smaller of the two (ncpcm, GAMS's smoothed minimum);
 - the 4 quotas under the EU's entry price system (tomatoes and citrus from MOR and MED) keep their base tariffs until
-  stage 6.
+  the border measures' port (4 November 2026).
 
 The base import prices are CAPRI's; each regime adds the change of its rates from their value at the base flows, so
 the base is reproduced exactly. The quotas' sigmas are solved by bisection at every market step with the flows' own
@@ -172,12 +172,12 @@ world ratio × premium, i.e. the EU market price ratio. "Premium" is only this b
 - EU market supply between iterations: CAPRI's market supply elasticities as given; CAPRI recalibrates its supply
   approximation to the supply models (available as `market_supply_nq`, off).
 - No p_arm2Commit, no global TRQs (above).
-- Solver: Newton per product with Anderson acceleration instead of CONOPT ([MARKET_SOLVE_CHECK.md](MARKET_SOLVE_CHECK.md)).
+- Solver: Newton per product with Anderson acceleration instead of CONOPT ([MARKET_SOLVE_CHECK.md](dev/MARKET_SOLVE_CHECK.md)).
 
 ## Before the bilateral market (historical)
 
-Until Sprint 8m (October 2026) the market had one world price per commodity, each region's price was world price ×
+Until the port of CAPRI's bilateral market and 2030 baseline (October 2026) the market had one world price per commodity, each region's price was world price ×
 (1 + tariff), and the EU alone had an Armington premium cleared on its gross extra-EU trade. That structure was
 removed from the code on 20 October 2026 (no run path used it; KNOWN_ISSUES K54-2). Its development and the results of that period (including the fixes to the
-reported EU price and to the demand reference price) are recorded in CHANGELOG.md (sections up to "Sprint 8m") and
-`docs/archive/MARKET_STRUCTURE_PLAN.md`. Current results: README section 9 (Validation).
+reported EU price and to the demand reference price) are recorded in CHANGELOG.md (sections up to "the port of CAPRI's bilateral market and 2030 baseline") and
+`docs/dev/archive/MARKET_STRUCTURE_PLAN.md`. Current results: README section 9 (Validation).

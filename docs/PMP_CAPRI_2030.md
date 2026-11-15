@@ -84,7 +84,7 @@ Under the same switch, at the 2030 market year:
 
 **Item 2 (the market's supply anticipation), on reflection**: between two supply solves the market anticipates the
 supply models' response with CAPRI's market-level elasticities; at a converged point the anticipation vanishes, so the
-results do not depend on it, only the path (docs/MARKET_SOLVE_CHECK.md; CAPRI's measured Hessian, `market_supply_nq`,
+results do not depend on it, only the path (docs/dev/MARKET_SOLVE_CHECK.md; CAPRI's measured Hessian, `market_supply_nq`,
 gave no gain in speed when tested on 18 October). With CAPRI's crop terms Farm-to-Fork converged in 11 iterations
 (12 with the elasticity calibration), so the mismatch did not slow it. Not changed.
 
@@ -165,7 +165,7 @@ terms (their calibrations are not ported); at 2017 the 2017 ones.
 Both matrices are computed from the data at every run; nothing is overwritten. CAPRI's terms are rebuilt from a CAPRI
 installation with the export script and the two builders.
 
-## The elasticity calibration removed (28 October 2026, audit S13)
+## The elasticity calibration removed (28 October 2026; the supply audit's finding S13, ARCHITECTURE_REFACTOR.md section 5.2)
 
 `supply.pmp_source = "elasticity"` is gone. With CAPRI's terms (or the recipe's), an activity of a calibrated part
 (crops, animals) without a positive own term is held at its level (SupplyModule._uncalibrated), as the activities

@@ -1,4 +1,4 @@
-"""G3.2d: the market's use side in CasADi (capri_mod/market/use_ad.py) equals MarketModule.demand_response at random
+"""The market's use side in CasADi (capri_mod/market/use_ad.py) equals MarketModule.demand_response at random
 prices, feed energy prices, raw milk deliveries and biofuel outputs, on the market of a solved baseline; and so do the
 EU's residual feeds' output that follows that use (MaprFeed_)."""
 import numpy as np

@@ -1,7 +1,7 @@
 """Mitigation in the regional model: the ammonia technologies, manure techniques and inhibitors, the winter cover (catch crops), the GHG price terms, histosol fallowing.
 
-RegionalSupplyModel's methods, moved unchanged from capri_mod/supply/supply_module.py (refactor stage 3a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module's, given to
+RegionalSupplyModel's methods, moved unchanged from capri_mod/supply/supply_module.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module's, given to
 this module once supply_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated
 (they name supply_module's types).
 """
@@ -46,6 +46,14 @@ class AbatementBlock:
         return (mN * f / L0) if L0 > 0 else 0.0
 
     def _amm_incentive(self, labels) -> bool:
+        """Whether the ammonia options are choices of this solve: CAPRI's %ghgTechAmmEndog% on (the run's endotech
+        settings; off, set_miti_bounds.gms l. 209-211 fixes them at IniShare) and a policy incentive on N (K63)."""
+        _on = getattr(self.seen, "amm_endog", None)
+        if _on is None:
+            from capri_mod.policy.endotech import effective as _eff
+            _on = float(_eff()["ghgTechAmmEndog"]) > 0
+        if not _on:
+            return False
         return ("N_balance" in labels or "mineral_N" in labels
                 or float(getattr(self.seen, "ghg_tax", 0.0) or 0.0) > 0)
 
@@ -446,7 +454,7 @@ class AbatementBlock:
                 "v_tax": v_tax, "man_d": man_d}
 
     def _manure_inhibitor_tax_value(self, tax, sub, nman, man_d, app_nh3, base) -> float:
-        """CAPRI's emission tax on inhibitors on manure (Sprint 9m): EUR per t of manure N treated, the tax on the
+        """CAPRI's emission tax on inhibitors on manure (the inhibitors on manure under the emission tax): EUR per t of manure N treated, the tax on the
         emissions it saves, as the accounts count them - (1) the mineral N it displaces (sub x NMAN per t) at the soil
         N2O factor; (2) application N2O x CAPRI's literature effect N2OAPP (EnvironmentalModule: fa x (1 - share x
         lit)), from the animals' application factor per t of excreted N; less (3) the indirect N2O of the extra
@@ -479,7 +487,7 @@ class AbatementBlock:
         return tax * v
 
     # ------------------------------------------------------------------------------------------
-    # CAPRI's emission tax (ghgTax, Sprint 9i; capri_mod/supply/ghg_tax.py): EUR per t CO2-eq times each
+    # CAPRI's emission tax (ghgTax, the retirement of the post-solve modules; capri_mod/supply/ghg_tax.py): EUR per t CO2-eq times each
     # column's emission per unit at the baseline; set by CAPRIModel (ghg_tax, ghg_coef) for EU regions
     # ------------------------------------------------------------------------------------------
     def _ghg_cost(self, kind, key=None) -> float:

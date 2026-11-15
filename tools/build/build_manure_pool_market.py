@@ -10,7 +10,7 @@ Per CAPRI region r and FOUT (MANN, MANP, MANK; sets.gms FOUT_T_N: NITF, PHOF, PO
   slope_capri     p_mPoolSupSlope = p_manPointSupElas x supply_t / dual_cal_eur_t, p_manPointSupElas = 0.01 (l. 496):
                   CAPRI's number, used by CAPRI with the excess supply in kt (v_netPutQuant, v_manureExports: 1000 t,
                   supply_model.gms e_netMTrade) and prices in EUR per t - so its excess supply responds 1000 times more
-                  than the elasticity 0.01 written (supply in t, quantities in kt; docs/design/MANURE_POOL_PORT.md)
+                  than the elasticity 0.01 written (supply in t, quantities in kt; docs/dev/MANURE_POOL_PORT.md)
   es_slope        slope_capri in the model's units: excess supply in t per EUR 1000 (the model's 2017 money) per t,
                   slope_capri x 1000 (kt to t) x 1000 (EUR to EUR 1000) x deflator(2030) (tools/lib/_money.py, K108)
   dual_cal        dual_cal_eur_t in the model's units, EUR 1000 (2017 money) per t: the market model's fall-back value

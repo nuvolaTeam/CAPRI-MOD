@@ -120,7 +120,7 @@ def main() -> None:
         key = "+".join(codes)
         # The land owners of the combined CAPRI regions each respond to the same rents, so the combined land supply
         # is the SUM of their responses, dL = (Q1^-1 + Q2^-1 + ...) dr: the combined curvature is the inverse of the
-        # sum of the inverses (Sprint 9t). An area-weighted average of the matrices, used before, treated the
+        # sum of the inverses (the single parameter file). An area-weighted average of the matrices, used before, treated the
         # combination as if it were one of its parts and overstated its curvature (FI1D: about twice).
         def _mat(c):
             M = np.array([[Q[c].get((a, b), Q[c].get((b, a), 0.0)) for b in LT] for a in LT])

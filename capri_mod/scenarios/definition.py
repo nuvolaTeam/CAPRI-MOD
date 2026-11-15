@@ -1,4 +1,4 @@
-"""Scenarios as data (refactor stage 5; docs/design/STAGE5_INVENTORY.md, the project lead's decisions of
+"""Scenarios as data (docs/dev/REFACTOR_SCENARIOS_RESULTS_PLAN.md, the project lead's decisions of
 3 November 2026).
 
 Each reference and each scenario is a folder capri_data/scenarios/<name>/ with a settings.toml (and, where a scenario
@@ -73,6 +73,7 @@ class Endotech(_Strict):
     fixGenetToIni: Optional[float] = None
     fallowInAllRmssup: Optional[float] = None
     winterCovInAllRmssup: Optional[float] = None
+    ghgTechAmmEndog: Optional[float] = None
 
     def as_dict(self) -> Dict[str, float]:
         return {k: float(v) for k, v in self.model_dump().items() if v is not None}

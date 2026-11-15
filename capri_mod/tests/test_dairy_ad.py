@@ -1,4 +1,4 @@
-"""Step G2f: CAPRI's dairy blocks in CasADi (capri_mod/market/dairy_ad.py) equal the code dairy.py had until 4 November
+"""CAPRI's dairy blocks in CasADi (capri_mod/market/dairy_ad.py) equal the code dairy.py had until 4 November
 2026 (written out here as the reference: _dairy_proc_change, the member states' three solves and the non-EU block's
 solve), and their Jacobian is the equations' matrix."""
 import numpy as np

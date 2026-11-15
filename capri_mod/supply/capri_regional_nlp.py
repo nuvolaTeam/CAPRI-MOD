@@ -42,7 +42,7 @@ from collections import OrderedDict
 
 import numpy as np
 
-from capri_mod.settings import current as _settings   # the numerical settings (refactor stage 3, N5)
+from capri_mod.settings import current as _settings   # the numerical settings
 
 
 #: IPOPT solvers by the structure of the problem (SOLVER CACHE). Every data value of the model enters its CasADi graph
@@ -418,6 +418,14 @@ class CapriRegionalNLP:
                 extra[ri] = extra.get(ri, 0) + F[k] / 1000.0
         # classify rows
         lbx = np.zeros(n0 + nf); ubx = np.full(n0 + nf, np.inf)
+        # the crops' technology mix columns z (x_T1 = X/2 + z, x_T2 = X/2 - z) are bounded by their two rows alone,
+        # -X/2 <= z <= X/2 (techn_mix.py): z < 0 is the shift to CAPRI's low-yield technology T2; so are the dairy and
+        # cattle intensity splits' (livestock.py: low = s_low X + z >= 0, high = s_high X - z >= 0; z < 0 moves heads
+        # to the high-intensity activity). Until 15 November 2026 the default lower bound 0 held every such z at or
+        # above the calibration point (KNOWN_ISSUES K155)
+        for k_ in list(spec.get("mix_cols") or ()) + list(spec.get("split_cols") or ()):
+            if int(k_) < n0:
+                lbx[int(k_)] = -np.inf
         bound_rows = {}                                    # row -> (col, coef)
         nnz = (A != 0).sum(axis=1)
         for i in range(m_A):
@@ -631,6 +639,20 @@ class CapriRegionalNLP:
             xv = u * pv([f[2] for f in flows])                      # flows in t
             x = [xv[i] for i in range(nfl)]
             e = {"MINE": pv(float(d["eff"])), "EXCR": pv(float(d["g0"])), "CRES": pv(float(d["gc"]))}
+            # NUTNED_'s mineral and residue efficiencies: CAPRI's v_emiLoss of mineral N as functions of the options
+            # (1 - GasRunTot, and 1 - N2O GasTot for the residues; supply_model.gms l. 1143, 1196, 1211), the first-order
+            # conditions keep the base loss (CAPRI's p_emiLoss, l. 1629-1633)
+            eN = self._netf_eff(d) if nut == "N" else None
+            effM, effC = (eN if eN is not None else (e["MINE"], e["CRES"]))
+            # the first-order conditions' factors (e_focFertDist, supply_model.gms l. 1625-1634): CAPRI writes the
+            # residues' with the mineral N's total loss, v_nutAvailFactCRes x (1 - p_emiLoss(NETF, N, GasRunTot)),
+            # where NUTNED_ (l. 1196) has their N2O loss alone; taken as CAPRI writes it (14 November 2026; with
+            # CAPRI's priors the base allocation moves by less than 0.5 kg/ha, BG02 and RO05 checked)
+            eF = dict(e)
+            if nut == "N" and d.get("netf"):
+                from capri_mod.supply import n_cascade as _nc
+                _L0 = _nc.netf(d["netf"]["fr"], float(d["netf"]["run_surf"]))
+                eF["CRES"] = pv(float(d["gc"]) / (1.0 - float(_L0["N2O"])) * float(d["eff"]))
             E = lin(d["E"]); C = lin(d["C"])
             if nut == "N" and getattr(self, "catc_n", None) is not None:
                 C = C + self.catc_n                                 # catch crops' BioFix N (fertDistCres_)
@@ -645,11 +667,11 @@ class CapriRegionalNLP:
                 sc_ = max(sum(m for (gj, s_, m, acc) in flows if gj == gi), 1.0)
                 need = self._lin(y, g_["need"], scale=sc_)
                 if g_["perm"] and g_["own"]:
-                    need = need - self._lin(y, [(c_, float(d["gc"]) * float(v_)) for c_, v_ in g_["own"]], scale=sc_)
+                    need = need - self._lin(y, [(c_, float(v_)) for c_, v_ in g_["own"]], scale=sc_) * effC
                 sup = 0
                 for i, (gj, s_, m, acc) in enumerate(flows):
                     if gj == gi:
-                        f_ = availE if s_ == "EXCR" else e[s_]
+                        f_ = availE if s_ == "EXCR" else (effM if s_ == "MINE" else effC if s_ == "CRES" else e[s_])
                         if nut == "N" and s_ == "MINE" and self.fert_eff is not None:
                             f_ = f_ * (1 + self.fert_eff)            # fertiliser options (1 + sum v_Miti NMIN)
                         if nut == "N" and s_ == "EXCR" and self.man_eff is not None:
@@ -692,7 +714,7 @@ class CapriRegionalNLP:
                 var_k = 1.0 / acc ** 2
                 bm = (1.0 + np.sqrt(1.0 + 4.0 * var_k)) / (2.0 * var_k)      # beta x mode
                 a1 = bm * bm * var_k - 1.0                                  # alpha - 1
-                dual = lam[gi] * e[s_] - (mu[pools.index(s_)] if s_ in pools else 0)
+                dual = lam[gi] * eF[s_] - (mu[pools.index(s_)] if s_ in pools else 0)
                 if i in sig_of:
                     # the prior's part with the slack, the regulation's (e_fertDistPartialRegu) without it
                     Y_, b1_, b2_ = regs.get((gi, s_), (None, 1.0, 1.0))
@@ -766,6 +788,40 @@ class CapriRegionalNLP:
         X = ca.vertcat(X, *new)
         return X, obj
 
+    def _netf_eff(self, d):
+        """(mineral, residue) N efficiencies of NUTNED_ at the options' shares: CAPRI's GASTOTNETF_, RUNTOTNETF_ and
+        GASRUNTOTNETF_ (supply_model.gms l. 3335-3394) with the mineral-N options' othImpact = 1 - (1 - lit)(1 + NMIN)
+        on NH3SYN, NOXSYN, N2OSYN and NO3SRUN and winter cover's runoff reduction, written as the base efficiencies
+        plus the change from the base point (the options at 0, winter cover at its base share), so the base is exactly
+        CAPRI's reported one: eff = eff0 - (GasRunTot(s) - GasRunTot(s0)), gc = gc0 (1 - N2O(s)) / (1 - N2O(s0)).
+        None without the region's loss data or without options that move them."""
+        nf = d.get("netf")
+        if not nf:
+            return None
+        from capri_mod.supply import n_cascade as _nc
+        pv = self._pv
+        syn = {"NH3": 0, "NOX": 0, "N2O": 0}; srun = 0; used = False
+        for name, (ph, nm) in (self._fert_phi or {}).items():
+            lit = (nf.get("lit") or {}).get(name) or {}
+            for gas, item in (("NH3", "NH3SYN"), ("NOX", "NOXSYN"), ("N2O", "N2OSYN")):
+                if item in lit:
+                    syn[gas] = syn[gas] + pv(1.0 - (1.0 - float(lit[item])) * (1.0 + float(nm))) * ph; used = True
+            if "NO3SRUN" in lit:
+                srun = srun + pv(1.0 - (1.0 - float(lit["NO3SRUN"])) * (1.0 + float(nm))) * ph; used = True
+        m_wc, m0 = getattr(self, "_catc_m", None), float((self.spec.get("catc") or {}).get("m0", 0.0) or 0.0)
+        wr = float(nf.get("wc_red", 0.0))
+        if m_wc is not None and wr > 0:
+            used = True
+        if not used:
+            return None
+        fr, rsurf = nf["fr"], float(nf["run_surf"])
+        L1 = _nc.netf(fr, rsurf, fert_syn=syn, m_run=1 - wr * (m_wc if m_wc is not None else m0) - srun)
+        L0 = _nc.netf(fr, rsurf, m_run=1.0 - wr * m0)
+        effM = pv(float(d["eff"])) - (L1["GasRunTot"] - pv(float(L0["GasRunTot"])))
+        effC = pv(float(d["gc"]) / (1.0 - float(L0["N2O"]))) * (1 - L1["N2O"])
+        self.netf_eff = (effM, effC)
+        return effM, effC
+
     def _abatement_block(self, spec, X, y, obj, g_rows, lbg, ubg, lbx, ubx):
         self._fert_tech_pending = None; self._fert_tech_P = None
         """CAPRI's abatement options inside the regional model (ghgAbatement on; supply_model.gms GHG_Mit_Cost_,
@@ -780,7 +836,7 @@ class CapriRegionalNLP:
           nitrification inhibitor on manure: one regional share, manure N x (1 + share NMAN) in NUTNED_, cost per t of
             manure N treated"""
         import casadi as ca
-        self.amm_kept = None; self.fert_eff = None; self.man_eff = None; self._nitr_phi = None
+        self.amm_kept = None; self.fert_eff = None; self.man_eff = None; self._nitr_phi = None; self._fert_phi = {}
         self.n_rows_g = {}; self.synN_row = None
         self.abat = {}
         new = []
@@ -899,6 +955,7 @@ class CapriRegionalNLP:
             for tt, (name, nm, a_, b_, smax) in enumerate(T_):
                 if str(name).upper() == "NITR_INH":
                     self._nitr_phi = (phi[tt], float(nm))
+                self._fert_phi[str(name)] = (phi[tt], float(nm))
                 Eff = Eff + pv(float(nm)) * phi[tt]
                 a_ = float(a_) + float((spec.get("dabat") or {}).get(("fert", name), 0.0))
                 cost = cost + (pv(a_) * phi[tt] + pv(0.5 * float(b_)) * phi[tt] * phi[tt])
@@ -997,7 +1054,7 @@ class CapriRegionalNLP:
         hi_l = np.where(at_u[act] & at_l[act], np.inf, np.where(at_u[act], np.inf, 0.0))
         # variable bounds active at base (not the activities': their residual is the calibration)
         free = np.ones(nX, bool); free[:len(self.acts)] = False
-        # the crops' technology mix columns (S1) are calibrated as the activities are: their residual is their linear
+        # the crops' technology mix columns are calibrated as the activities are: their residual is their linear
         # term (CAPRI's p_pmpCnst per technology), not a source of row multipliers
         for k_ in self.spec.get("mix_cols") or ():
             if k_ < nX:

@@ -347,7 +347,7 @@ class FeedMixin(MarketStateMixin):
             if d is None or t.capri_x not in anim or not t.y:
                 continue
             if t.y in land:
-                # the animal products' terms in the land rents (h / INPE per EUR/ha; the land market, stage 7)
+                # the animal products' terms in the land rents (h / INPE per EUR/ha; the land market outside the EU)
                 row = d.setdefault("lterms", {}).setdefault(t.capri_x, {})
                 row[t.y] = row.get(t.y, 0.0) + float(t.h) / float(t.inpe)
                 continue
@@ -379,7 +379,7 @@ class FeedMixin(MarketStateMixin):
             tr = d.get("tr")
             if tr is None or tr not in arm_ratio.index:
                 continue
-            # FeedBal_ written once in CasADi (market step G2d, capri_mod/market/feed_ad.py)
+            # FeedBal_ written once in CasADi (capri_mod/market/feed_ad.py)
             f, lts = self._fedebal_fn(rms, d, cols)
             ra = arm_ratio.loc[tr].to_numpy(dtype=float)
             rp = (prod_ratio.loc[tr].reindex(cols).fillna(1.0).to_numpy(dtype=float) if tr in prod_ratio.index else ra)
@@ -413,7 +413,7 @@ class FeedMixin(MarketStateMixin):
             tr = d.get("tr")
             if tr is None or tr not in arm_ratio.index:
                 continue
-            # FeedNQ_ written once in CasADi (market step G2d, capri_mod/market/feed_ad.py)
+            # FeedNQ_ written once in CasADi (capri_mod/market/feed_ad.py)
             hit = cache.get(rms)
             if hit is None or hit[0] is not d or hit[1] != tuple(cols):
                 from capri_mod.market.feed_ad import feednq_arrays, feednq_function

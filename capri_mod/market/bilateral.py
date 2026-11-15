@@ -65,7 +65,7 @@ class BilateralCommodity:
     def pmrk_ratios(self, PA: np.ndarray) -> np.ndarray:
         """PMrk_ as price ratios: (PA + Pd0 - PA0) / Pd0 at the Armington prices PA (EUR/t), every region (use on
         pmrk_cells only). Floored at 1e-3: CAPRI bounds the market price below at P_lowLimitFactPrice x PMrk
-        (set_start_val.gms l. 527) and widens the bound where it binds (G3.4, not yet)."""
+        (set_start_val.gms l. 527) and widens the bound where it binds (market.bounds, in progress)."""
         return np.maximum((np.asarray(PA, float) + self.Pd0 - self.PA0) / self.Pd0, 1e-3)
 
     def mpagg_weights(self, S, D):
@@ -120,8 +120,8 @@ class BilateralCommodity:
         # border measures' base, border_base, follows the calibration: _bilateral_calibrate)
         self.mpagg_SD = (np.asarray(self.S0, float).copy(), np.asarray(self.D0, float).copy())
 
-    # CAPRI's bilateral tariff-rate quotas (arm/market_model.gms trqSigmoidFunc_, tarSpec_, tarAdval_; stage 4 of the
-    # market move, docs/design/PORTS_STAGE4.md): one per pair of policy blocks (importer RMTP, exporter RMTP), filled
+    # CAPRI's bilateral tariff-rate quotas (arm/market_model.gms trqSigmoidFunc_, tarSpec_, tarAdval_; ported in the
+    # market's move onto CAPRI's regions, docs/dev/MARKET_TRQ_PORT.md): one per pair of policy blocks (importer RMTP, exporter RMTP), filled
     # by the flows between their market regions (TradeFlowsAgg_). Each is a dict: rows, cols (the importer's and the
     # exporter's market regions), Q (TrqNT, 1000 t), Q0 (its base volume), dta (TaMFN - TaPref, points), dts
     # (TsMFN - TsPref, EUR/t), importer, exporter. Its sigmoid moves the flows' tariffs from the preferential to the MFN
@@ -145,7 +145,7 @@ class BilateralCommodity:
     #: computes every trial on the full matrices (the reference the test compares with)
     TRQ_CELLS = True
 
-    #: CAPRI's global (erga omnes) quotas of the importers (TRQImports_, tarAdValW_, tarSpecW_; stage 5 with stage 4):
+    #: CAPRI's global (erga omnes) quotas of the importers (TRQImports_, tarAdValW_, tarSpecW_; with the bilateral quotas):
     #: dicts rows (the importer's market regions), Q, Q0, ta_pref, dta, ts_pref, dts, cover (n x n bool: the flows that
     #: pay the global rates, from exporters without a bilateral quota and without free trade), bil (indices of the
     #: bilateral quotas of the same importer, whose overfill enters the global imports and whose rate is the smaller of
@@ -426,7 +426,7 @@ class BilateralCommodity:
         self.trq_sigma, self.trq_sigmaW = new[:nb], new[nb:]
         self.trq_set_offsets(r)
 
-    #: CAPRI's border measures replacing the specific tariff (stage 6, docs/design/PORTS_STAGE4.md): a dict of n x n
+    #: CAPRI's border measures replacing the specific tariff (docs/dev/MARKET_TRQ_PORT.md): a dict of n x n
     #: arrays over the flows they apply to: kind (1 entry price, 2 flexible levy, 0 none), price (TriggerP or
     #: MinBordP), tars (the bound specific rate DATA TARS, or the quota's TsPref under the entry price), fac
     #: (p_entryPriceFac), pref (PrefTrigPrice: the entry price of an unlimited preference, or the low end of a quota's),

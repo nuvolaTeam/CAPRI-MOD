@@ -1,4 +1,4 @@
-"""G3.2e: the market as one system of equations F(x) = 0 in CasADi, assembled from the blocks of G3.2a-d.
+"""The market as one system of equations F(x) = 0 in CasADi, assembled from the blocks (import_prices_ad, trade_system_ad, supply_system_ad, use_ad).
 
 Unknowns x (in this order; `layout["x"]` names each slice):
   r      the producer price ratios of every bilateral commodity, per region (sc.regions' order, the commodities in
@@ -35,13 +35,20 @@ from __future__ import annotations
 import numpy as np
 
 
-def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = False, slope=None):
+def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = False, slope=None, fudge: bool = False,
+                  lift_use: bool = False):
     """(Function x -> (F, pooled, S, D), layout, x, F). lifted: the Armington ratios of the bilateral commodities,
     the supply and the use are unknowns of their own with their defining equations (CAPRI's form: v_arm1Price,
     v_prodQuant, v_arm1Quant), appended to x and F as PA, S, D and PAdef, Sdef, Ddef; the Jacobian is then sparse
     (each region's use depends on its own prices, each Armington ratio on its commodity's prices). slope: a CasADi
     symbol for the quotas' sigmoid slope (CAPRI's p_trqSigmoidSlope) in F, for a continuation on it; None: the
-    constant TRQ_SLOPE."""
+    constant TRQ_SLOPE. fudge: the ProdNQ_ cells' modes (supply_system_ad's fm: 0 the model's floor, 1 CAPRI's
+    ProdFudge_, 2 the row within its bounds) as a parameter of F, the symbol in layout["fm"] (the cells in
+    layout["fudge_cells"]); False: every cell at the model's floor. lift_use (with lifted and fudge; market.bounds
+    "capri"): the processing and non-EU feed cells as unknowns L with their defining rows Ldef (use_ad.use_function's
+    lift; CAPRI's v_procQuant, v_feedQuant with ProcFudge_ and FeedFudge_), their modes appended to fm after the
+    ProdNQ_ cells' (0 the model's form, 1 CAPRI's fudge on the row, 2 the row itself within its bounds), the cells in
+    layout["lift_cells"]."""
     import casadi as ca
     from capri_mod.market.supply_system_ad import supply_system
     from capri_mod.market.trade_system_ad import active_quotas, trade_system_function
@@ -50,7 +57,8 @@ def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = Fals
     if any(v is not None for v in (mm._tariff_adds(trade_scenario) or {}).values()):
         raise NotImplementedError("market_system: the scenario's tariff additions are not in import_prices_ad yet")
     sf, sl = supply_system(mm, exogenous_supply)
-    uf, ul = use_function(mm)
+    lift_use = bool(lift_use and lifted and fudge)
+    uf, ul = use_function(mm, lift=lift_use)
     regions, cols = sl["regions"], sl["cols"]
     if list(mm.commodities) != cols or list(mm.regions) != regions:
         raise NotImplementedError("market_system: supply rows or columns differ from the market's")
@@ -114,6 +122,8 @@ def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = Fals
         Du = unk("D", nR * nC)
         Sv = ca.reshape(Su, nR, nC)
         Dv = ca.reshape(Du, nR, nC)
+    nL = len(ul.get("lift_cells") or ())
+    Lu = unk("L", nL) if lift_use else ca.SX(0, 1)
 
     # the Armington ratios from each commodity's trade block (its prices at r and the quotas' sigmas; supply and use
     # weight an aggregate exporter block's average market price in the border measures, MarketPriceAgg_: the lifted
@@ -136,12 +146,22 @@ def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = Fals
             PA[:, j] = PAu[k * nR:(k + 1) * nR]
 
     # supply, use, and the residual feeds that follow the use
-    S, res_y, res_E, res_W, biofX = sf(PA, RR, ry, uE, uW, fede, dr)
+    nfm = len(sl["fudge_cells"])
+    fm = ca.SX.sym("fm", nfm + nL) if fudge else ca.DM.zeros(nfm)
+    S, res_y, res_E, res_W, biofX = sf(PA, RR, ry, uE, uW, fede, dr, fm[:nfm] if nL else fm)
     S_in = Sv if lifted else S
     milk = ca.vertcat(*[S_in[R[r], ci["MILK"]] for r in ul["milk_regs"]]) if ul["milk_regs"] else ca.DM.zeros(0)
     ddgs = (ca.vertcat(*[RR[R[g], ci["DDGS"]] if "DDGS" in ci else 1.0 for g in ul["ddgs_regs"]])
             if ul["ddgs_regs"] else ca.DM.zeros(0))
-    D, byp = uf(PA, RR, fede, milk, biofX, ddgs)
+    if lift_use:
+        from capri_mod.market.supply_system_ad import prod_fudge
+        D, byp, Lcur, Lraw = uf(PA, RR, fede, milk, biofX, ddgs, Lu)
+        # Ldef: L at its mode, CAPRI's ProcFudge_ / FeedFudge_ on the row (market_model.gms l. 1054-1063, 1158-1163:
+        # the same smoothing as ProdFudge_, Z = 1e-2 min(1000, max(1e-11, base))) or the row within its bounds
+        Lsel = ca.vertcat(*[ca.if_else(fm[nfm + k] < 0.5, Lcur[k], prod_fudge(Lraw[k], fm[nfm + k], b0))
+                            for k, (_kd, _i, _j, b0) in enumerate(ul["lift_cells"])]) if nL else ca.SX(0, 1)
+    else:
+        D, byp = uf(PA, RR, fede, milk, biofX, ddgs)
     S = ca.SX(S)
     for k, (reg, p) in enumerate(ul["byp_cells"]):
         if p in ci:
@@ -150,6 +170,8 @@ def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = Fals
     if lifted:
         lift_eqs = [("PAdef", ca.vertcat(*[PA[:, j] - PA_fun[:, j] for j in bcols])),
                     ("Sdef", ca.reshape(Sv - S, nR * nC, 1)), ("Ddef", ca.reshape(Dv - D, nR * nC, 1))]
+        if lift_use:
+            lift_eqs.append(("Ldef", Lu - Lsel))
         S, D = Sv, Dv
 
     # the trade blocks' equations
@@ -224,16 +246,24 @@ def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = Fals
            ("feed", cat(feed)), ("land", cat(land))] + (lift_eqs if lifted else [])
     x = ca.vertcat(*xs)
     F = ca.vertcat(*[e for _, e in eqs])
-    fn = ca.Function("market_system", [x] + ([slope] if slope is not None else []), [F, pooled, S, D],
-                     ["x"] + (["slope"] if slope is not None else []), ["F", "pooled", "S", "D"])
+    fn = ca.Function("market_system", [x] + ([slope] if slope is not None else []) + ([fm] if fudge else []),
+                     [F, pooled, S, D], ["x"] + (["slope"] if slope is not None else []) + (["fm"] if fudge else []),
+                     ["F", "pooled", "S", "D"])
     lay = dict(sl, x=names, eqs=[(n, int(e.shape[0])) for n, e in eqs], n_x=int(x.shape[0]), n_F=int(F.shape[0]),
-               sig=sig, byp_cells=ul["byp_cells"], milk_regs=ul["milk_regs"], lifted=lifted)
+               sig=sig, byp_cells=ul["byp_cells"], milk_regs=ul["milk_regs"], lifted=lifted,
+               fm=fm if fudge else None, lift_cells=list(ul.get("lift_cells") or ()))
     if lifted:
         # the lifted unknowns' values at given base unknowns: the substituted system's PA, S and D
-        nb = int(sum(n for nm, n in names if nm not in ("PA", "S", "D")))
-        sub = ca.Function("lift", [x], [ca.vertcat(*[PA_fun[:, j] for j in bcols]), ca.reshape(S_sub, nR * nC, 1),
-                                        ca.reshape(D_sub, nR * nC, 1)])
-        lay["lift"] = (sub, nb, nR * len(bcols), nR * nC)
+        nb = int(sum(n for nm, n in names if nm not in ("PA", "S", "D", "L")))
+        outs_l = [ca.vertcat(*[PA_fun[:, j] for j in bcols]), ca.reshape(S_sub, nR * nC, 1), ca.reshape(D_sub, nR * nC, 1)]
+        if lift_use:
+            # the lifted processing and feed at the model's form, and the use and residual feeds at them
+            outs_l = ca.substitute(outs_l, [Lu], [Lcur]) + [Lcur]
+        if fudge:
+            # the start is the default solve's state: its cells at the model's floor
+            outs_l = ca.substitute(outs_l, [fm], [ca.SX.zeros(nfm + nL)])
+        sub = ca.Function("lift", [x], outs_l)
+        lay["lift"] = (sub, nb, nR * len(bcols), nR * nC) + ((nL,) if lift_use else ())
     return fn, lay, x, F
 
 
@@ -256,15 +286,22 @@ def market_x0(mm, layout) -> np.ndarray:
                 out.append(np.asarray(sc.trq_sigma, float)[bil])
             else:
                 out.append(np.asarray(sc.trq_sigmaW, float)[glo])
-    rest = supply_inputs(mm, layout, np.ones((len(layout["regions"]), len(layout["cols"]))))[2:]
+    rest = supply_inputs(mm, layout, np.ones((len(layout["regions"]), len(layout["cols"]))))[2:7]
     out += [np.asarray(v, float).ravel() for v in rest]
     xb = np.concatenate(out)
     if not layout.get("lifted"):
         return xb
-    sub, nb, npa, ns = layout["lift"]
-    # in turn: the Armington ratios from the base unknowns, the supply at those ratios, the use at both
-    full = np.concatenate([xb, np.zeros(npa + 2 * ns)])
-    full[nb:nb + npa] = np.asarray(sub(full)[0], float).ravel()
-    full[nb + npa:nb + npa + ns] = np.asarray(sub(full)[1], float).ravel()
-    full[nb + npa + ns:] = np.asarray(sub(full)[2], float).ravel()
+    sub, nb, npa, ns = layout["lift"][:4]
+    nl = layout["lift"][4] if len(layout["lift"]) > 4 else 0
+    # in turn: the Armington ratios from the base unknowns, the supply at those ratios, the use at both; twice, since
+    # the Armington ratios read supply and use too (MarketPriceAgg_'s weights in the border measures); the lifted
+    # processing and feed (lift_use) at the model's form
+    full = np.concatenate([xb, np.zeros(npa + 2 * ns + nl)])
+    o_d = nb + npa + ns
+    for _ in range(2):
+        full[nb:nb + npa] = np.asarray(sub(full)[0], float).ravel()
+        full[nb + npa:o_d] = np.asarray(sub(full)[1], float).ravel()
+        full[o_d:o_d + ns] = np.asarray(sub(full)[2], float).ravel()
+        if nl:
+            full[o_d + ns:] = np.asarray(sub(full)[3], float).ravel()
     return full

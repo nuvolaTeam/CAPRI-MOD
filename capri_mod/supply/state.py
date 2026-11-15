@@ -1,4 +1,4 @@
-"""The supply models' parameters and state, by kind (refactor stage 3, second half; docs/design/STAGE3B_PLAN.md).
+"""The supply models' parameters and state, by kind (the refactor of the supply's parameters and state; docs/dev/REFACTOR_SUPPLY_PARAMETERS_PLAN.md).
 
 Each regional model (RegionalSupplyModel) and the supply module (SupplyModule) will hold what they keep between
 calls in a few declared objects instead of loose attributes:
@@ -8,11 +8,11 @@ calls in a few declared objects instead of loose attributes:
 - ``seen``: what the caller sets on the model before a solve (prices, rations, switches of the run);
 - ``res``: the last solve's results and diagnostics.
 
-They are slot classes, not dataclasses with None defaults (the project lead's decision of 2 November 2026, plan Q1):
+They are slot classes, not dataclasses with None defaults (the project lead's decision of 2 November 2026):
 a field that was never set is absent, as an attribute that was never set is today, so the code's
 ``getattr(obj, name, default)`` reads keep their behaviour when they move (``getattr(obj.sv, name, default)``).
 
-S0c added the objects empty and the guard; the fields move into them block by block (S2 onward), each commit a pure
+The refactor added the objects empty and the guard; the fields move into them block by block (from the NLP block on), each commit a pure
 move checked against the mini-EU run. A moved name is listed in MOVED_REGIONAL / MOVED_MODULE:
 reading or writing it on the model raises RuntimeError (not AttributeError, so a getattr default cannot hide it), as
 the market's MOVED (capri_mod/market/state.py). Reads and writes through ``__dict__`` and names held in strings are
@@ -24,7 +24,7 @@ solves is the variables' levels CONOPT starts from.
 from __future__ import annotations
 
 
-from capri_mod.statekit import (  # noqa: F401  (re-exported: the kit moved to capri_mod/statekit.py, stage 4)
+from capri_mod.statekit import (  # noqa: F401  (re-exported: the kit moved to capri_mod/statekit.py)
     _Slots, _StateMixin, setdefault, discard, pop, _split, get_path_or, setdefault_path, has_path, get_path, set_path,
     del_path,
 )
@@ -37,7 +37,7 @@ class RegionalParameters(_Slots):
         "nlp_base_alloc",     # the fertiliser allocation at the calibration point (nlp_cal's base_alloc)
         "nlp_cal_store",      # the calibrations by settings key, so a switch of settings and back keeps both
         "npk_dual_bound",     # the fertiliser distribution's dual bound where it was widened for the region
-        # livestock (S4): the split columns' linear terms, calibrated from the duals of the first solves, and the
+        # livestock: the split columns' linear terms, calibrated from the duals of the first solves, and the
         # calibrations still pending
         "cattle_cz",          # the cattle splits' terms by split
         "cattle_pending",     # the cattle splits whose terms wait for the duals
@@ -48,17 +48,17 @@ class RegionalParameters(_Slots):
         "genet_key",          # the genetics settings key genet_cz belongs to
         "genet_pending",      # the genetics options whose terms wait for the duals
         "genet_rows_memo",    # the genetics options' rows (a memo)
-        # fertilisation (S5): memos of the base and CAPRI's priors recalibrated at the first solve
+        # fertilisation: memos of the base and CAPRI's priors recalibrated at the first solve
         "ef_lea_cache",       # the leaching emission factor (a memo)
         "ef_min_n2o_cache",   # mineral fertiliser's N2O per kg N, CO2 equivalent (a memo)
         "min_n2o_parts_cache",  # its parts (a memo)
         "npk_kappa",          # the fertiliser distribution's kappa by nutrient (a memo)
         "npk_prior_override", # CAPRI's priors where the calibration recalibrated them
         "npk_prior_recalibrated",  # the nutrients whose priors were recalibrated
-        # abatement (S7): the histosol fallowing's terms, calibrated from the duals
+        # abatement: the histosol fallowing's terms, calibrated from the duals
         "hist_cal",           # the terms by histosol class
         "hist_pending",       # the classes whose terms wait for the duals
-        # core and policy (S8)
+        # core and policy
         "base_cal_shift",     # the linear terms' shift from SupplyModule.calibrate_to_base
         "base_levels_cache",  # the base levels (a memo keyed on the base data's identity)
         "input_cost_memo",    # the input costs (a memo)
@@ -76,9 +76,9 @@ class RegionalSolveState(_Slots):
         "nlp_relax_keep",     # the mineral-cap exemption kept from the first solve of a problem (its fingerprint)
         "kkt_base",           # the base solve's KKT records by graph key (the Hessian's KKT mode)
         "wc_solved",          # the winter cover share chosen by the last solve (None where not endogenous)
-        # fertilisation (S5)
+        # fertilisation
         "n_relax_sticky",     # the N-target relaxation kept from one solve to the next (in SOLVE_STATE)
-        # abatement (S7)
+        # abatement
         "amm_last",           # the ammonia options' linearisation point, from the previous solve
     )
 
@@ -93,15 +93,15 @@ class RegionalEvalState(_Slots):
         "nlp_fb_last",        # how the last fallback ended (False, or "n_target")
         "nlp_n_target_cause", # the tiered N target was the cause of a failure
         "nlp_try_n_relax",    # set around a call: the N-target relaxation may be tried
-        # livestock (S4): the split columns of this solve's problem
+        # livestock: the split columns of this solve's problem
         "cattle_cols",        # the cattle splits' columns
         "dairy_col",          # the low-yield dairy split's column
         "dairy_req_extra",    # the splits' extra requirement entries by animal
         "genet_cols",         # the genetics options' columns
-        # fertilisation (S5)
+        # fertilisation
         "n_intensity",        # the mineral N intensity factors of the solve, by crop and the manure credit
         "nlp_mine_small",     # the fertiliser groups too small for the mineral-N row
-        # land (S6): the land market's layout in the augmented problem and the manure pools
+        # land: the land market's layout in the augmented problem and the manure pools
         "alloc_cols",         # the mineral-N allocation columns (0 or 1)
         "alloc_m0",           # the allocation's start
         "alloc_row",          # the allocation's row
@@ -114,7 +114,7 @@ class RegionalEvalState(_Slots):
         "pool_avail",         # the manure available to the pool
         "pool_cols",          # the manure pool's export and import columns (N)
         "pool_cols_pk",       # idem for P and K
-        # abatement (S7): the ammonia and inhibitor accounts of the solve, the catch-crop requirement, histosols, the
+        # abatement: the ammonia and inhibitor accounts of the solve, the catch-crop requirement, histosols, the
         # emission tax's undo record
         "amm_cost",           # the ammonia options' cost by animal
         "animal_n_relief",    # the manure N the ammonia options keep, by animal (the N row's relief)
@@ -123,13 +123,13 @@ class RegionalEvalState(_Slots):
         "ghg_nr_obj",         # the net revenues object the tax was added to (an identity check, never a copy)
         "hist_cols",          # the histosol fallowing's columns
         "entl_col",           # the entitlement overshoot's column (K136)
-        "mix_cols",           # {crop: column} of the technology mix columns (S1)
-        "mix_dnr",            # {crop: net revenue T1 - T2 per ha} of this solve (S1)
-        "mix_n_min",          # {crop: mineral N input T1 - T2 per ha} of the N_balance row (S1)
+        "mix_cols",           # {crop: column} of the technology mix columns
+        "mix_dnr",            # {crop: net revenue T1 - T2 per ha} of this solve
+        "mix_n_min",          # {crop: mineral N input T1 - T2 per ha} of the N_balance row
         "manure_ni_nh3",      # NH3 of the manure inhibitors, by activity
         "manure_ni_relief",   # the manure N the inhibitors keep, by activity
         "nlp_nip",            # the manure inhibitors' parameters
-        # core and policy (S8): the solve's arguments, the problem's rows, the scenario's per-solve terms
+        # core and policy: the solve's arguments, the problem's rows, the scenario's per-solve terms
         "fall_floor",         # the landscape (fallow) floor
         "mineral_cap",        # the mineral fertiliser caps of this solve
         "mineral_row",        # the mineral-N row's terms
@@ -150,7 +150,7 @@ class RegionalEvalState(_Slots):
 
 
 class RegionalSeen(_Slots):
-    """What the supply module and the coupling set on a regional model before its solve (S9; read with a getattr
+    """What the supply module and the coupling set on a regional model before its solve (read with a getattr
     default where it may be unset, as the attributes were: yani_price_ratio and manure_ctx had class defaults None)."""
     __slots__ = (
         "ration_state",       # the feed block's ration state of the region
@@ -163,11 +163,12 @@ class RegionalSeen(_Slots):
         "ghg_tax",            # the emission tax (EUR per t CO2-eq; 0 outside the EU)
         "ghg_coef",           # the emission coefficients of the region
         "env_for_surplus",    # the supply module's shared EnvironmentalModule (removed before pickling, re-attached)
-        "manure_ctx",         # CAPRI's crop nutrient balance terms (Sprint 9k; None outside the EU)
+        "manure_ctx",         # CAPRI's crop nutrient balance terms (the manure and ammonia accounts in every EU solve; None outside the EU)
         "fert_techs_all",     # CAPRI's fertiliser options (NLP form)
         "nlp_cal_check",      # set by CAPRIModel at a baseline: check the NLP calibration at the next solve
         "fallow_in_all_rmssup",  # CAPRI's %fallowInAllRmssup%: histosol fallowing outside the EU (endotech settings)
         "wintercov_in_all_rmssup",  # CAPRI's %winterCovInAllRmssup%: the winter cover outside the EU (endotech settings)
+        "amm_endog",          # CAPRI's %ghgTechAmmEndog%: the animals' ammonia options as choices (endotech settings)
     )
 
 
@@ -192,29 +193,29 @@ class RegionalResults(_Slots):
         "nlp_status",         # IPOPT's status
         "solver_log",         # run.verbosity "solver": each IPOPT solve's log, size and status (runlog.supply_solves)
         "yani_dnet",          # the solution's response to the young-animal prices (K65)
-        # livestock (S4): the split columns' levels in the last solution
+        # livestock: the split columns' levels in the last solution
         "last_cattle_z",
         "last_dairy_z",
         "last_genet_z",
-        # fertilisation (S5)
+        # fertilisation
         "fert_tech_shares",   # the fertiliser technologies' shares
         "n_target_relaxed",   # the solve ended at JRC121368's relaxed N target
-        # land (S6): the manure pools, read by the manure market (coupling/manure.py)
+        # land: the manure pools, read by the manure market (coupling/manure.py)
         "manure_supply0",     # the region's manure N supply at the start
         "manure_supply0_pk",  # idem for P and K
         "manure_value",       # the manure nutrients' value at the solution (PSHW, CAPRI's ManureNPK_.M), by nutrient
         "pool_manure_vec",    # the manure N by column
         "pool_manure_vec_pk", # idem for P and K
-        # abatement (S7)
+        # abatement
         "animal_n_kept",      # the manure N kept by the ammonia options, by animal
         "animal_nh3_saved",   # the NH3 they save, by animal
         "manure_tech_shares", # the manure technologies' shares
-        # core (S8)
+        # core
         "land_solution",      # the land types' levels
         "last_aug",           # the augmented problem the land-market solve used (Q, c, A, b, y)
         "last_hist_fallow",   # the histosol fallowing by class
         "entl",               # the entitlement limit of the solve: cut, limit, overshoot, dual (K136)
-        "last_mix_z",         # {crop: z} of the technology mix columns, 1000 ha moved from T2 to T1 (S1)
+        "last_mix_z",         # {crop: z} of the technology mix columns, 1000 ha moved from T2 to T1
         "last_manure_trade",  # the manure trade (N)
         "last_manure_trade_pk",  # idem for P and K
         "last_mineral_n",     # the mineral N bought
@@ -225,7 +226,7 @@ class RegionalResults(_Slots):
 class ModuleParameters(_Slots):
     """The supply module's parameters, built once per base."""
     __slots__ = (
-        # S10a; the per-region caches returned by the workers (_PAR_CACHES) are merged into the parent's
+        # the per-region caches returned by the workers (_PAR_CACHES) are merged into the parent's
         "balance_cache",      # the N-balance coefficients by region
         "env_for_surplus",    # the EnvironmentalModule shared with the regional models (seen.env_for_surplus)
         "jrc_capped_cache",   # JRC121368's capped regions (popped by CAPRIModel every outer iteration)
@@ -238,7 +239,7 @@ class ModuleParameters(_Slots):
 class ModuleSolveState(_Slots):
     """The supply module's state carried between regional passes."""
     __slots__ = (
-        # S10a; the N-balance price state is per region and returned by the workers (_PAR_STATE)
+        # the N-balance price state is per region and returned by the workers (_PAR_STATE)
         "base_cal_prev",      # the base calibration's previous round
         "base_cal_round",     # its rounds across the baseline's iterations
         "base_cal_stalled",   # the regions where it stalled
@@ -249,7 +250,7 @@ class ModuleSolveState(_Slots):
 
 
 class ModuleSeen(_Slots):
-    """What the model (CAPRIModel) and the coupling set on the supply module (S10b), passed on to each regional
+    """What the model (CAPRIModel) and the coupling set on the supply module, passed on to each regional
     model's seen before its solve."""
     __slots__ = (
         "feed_prices",        # the feed prices by region (also set by the supply module's base rations)
@@ -275,7 +276,7 @@ class ModuleSeen(_Slots):
 class ModuleResults(_Slots):
     """The supply module's last pass: results and diagnostics."""
     __slots__ = (
-        # S10a
+        # the supply module's own
         "hess_fp",            # the Hessian's skip probe: the regions' first-solve digests (set and popped by it)
         "hess_verify",        # idem, verify mode
         "max_nbal_region",    # the region of the largest N-balance price update
@@ -284,7 +285,7 @@ class ModuleResults(_Slots):
     )
 
 
-_REMOVED = "removed (refactor stage 3 S1, 2 November 2026: written, never read)"
+_REMOVED = "removed (the refactor of the supply's parameters and state, 2 November 2026: written, never read)"
 #: the regional models' former attribute names, with where each now lives ("sv.nlp_prev", or "removed (...)")
 MOVED_REGIONAL: dict = {
     "_last_land": _REMOVED,
@@ -298,8 +299,8 @@ MOVED_REGIONAL: dict = {
     "_manure_ni_share": _REMOVED,
     "_last_feed": _REMOVED,
     "_nlp_times": _REMOVED,
-    "_last_aug_cols": "removed (refactor stage 3 S1, 2 November 2026: read with a default, never written)",
-    # S2: the NLP block's carried state and calibration
+    "_last_aug_cols": "removed (the refactor of the supply's parameters and state, 2 November 2026: read with a default, never written)",
+    # the NLP block's carried state and calibration
     "_nlp_prev": "sv.nlp_prev",
     "_nlp_prev_f": "sv.nlp_prev_f",
     "_nlp_y": "sv.nlp_y",
@@ -311,7 +312,7 @@ MOVED_REGIONAL: dict = {
     "_nlp_base_alloc": "par.nlp_base_alloc",
     "_nlp_cal_store": "par.nlp_cal_store",
     "_npk_dual_bound": "par.npk_dual_bound",
-    # S3: the NLP block's working state and results
+    # the NLP block's working state and results
     "_last_duals": "ev.last_duals",
     "_last_req_duals": "ev.last_req_duals",
     "_nlp_accept_last": "ev.nlp_accept_last",
@@ -336,7 +337,7 @@ MOVED_REGIONAL: dict = {
     "_nlp_relaxed": "res.nlp_relaxed",
     "_nlp_status": "res.nlp_status",
     "_yani_dnet": "res.yani_dnet",
-    # S4: livestock and feed
+    # livestock and feed
     "_cattle_cz": "par.cattle_cz",
     "_cattle_pending": "par.cattle_pending",
     "_dairy_cz": "par.dairy_cz",
@@ -353,7 +354,7 @@ MOVED_REGIONAL: dict = {
     "_last_cattle_z": "res.last_cattle_z",
     "_last_dairy_z": "res.last_dairy_z",
     "_last_genet_z": "res.last_genet_z",
-    # S5: fertilisation
+    # fertilisation
     "_ef_lea_cache": "par.ef_lea_cache",
     "_ef_min_n2o_cache": "par.ef_min_n2o_cache",
     "_min_n2o_parts_cache": "par.min_n2o_parts_cache",
@@ -365,7 +366,7 @@ MOVED_REGIONAL: dict = {
     "_nlp_mine_small": "ev.nlp_mine_small",
     "_fert_tech_shares": "res.fert_tech_shares",
     "_n_target_relaxed": "res.n_target_relaxed",
-    # S6: land
+    # land
     "_alloc_cols": "ev.alloc_cols",
     "_alloc_m0": "ev.alloc_m0",
     "_alloc_row": "ev.alloc_row",
@@ -382,7 +383,7 @@ MOVED_REGIONAL: dict = {
     "_manure_supply0_pk": "res.manure_supply0_pk",
     "_pool_manure_vec": "res.pool_manure_vec",
     "_pool_manure_vec_pk": "res.pool_manure_vec_pk",
-    # S7: abatement
+    # abatement
     "_hist_cal": "par.hist_cal",
     "_hist_pending": "par.hist_pending",
     "_amm_last": "sv.amm_last",
@@ -398,7 +399,7 @@ MOVED_REGIONAL: dict = {
     "_animal_n_kept": "res.animal_n_kept",
     "_animal_nh3_saved": "res.animal_nh3_saved",
     "_manure_tech_shares": "res.manure_tech_shares",
-    # S8: core and policy (net_revenues, premiums, f, Q and balance_shortfall stay on the model, plan Q8)
+    # core and policy (net_revenues, premiums, f, Q and balance_shortfall stay on the model)
     "_base_cal_shift": "par.base_cal_shift",
     "_base_levels_cache": "par.base_levels_cache",
     "_input_cost_memo": "par.input_cost_memo",
@@ -421,7 +422,7 @@ MOVED_REGIONAL: dict = {
     "_last_manure_trade_pk": "res.last_manure_trade_pk",
     "_last_mineral_n": "res.last_mineral_n",
     "_last_plain": "res.last_plain",
-    # S9: the regional models' inputs
+    # the regional models' inputs
     "ration_state": "seen.ration_state",
     "manure_pool_price": "seen.manure_pool_price",
     "manure_pool_price_pk": "seen.manure_pool_price_pk",
@@ -439,7 +440,7 @@ MOVED_REGIONAL: dict = {
 #: the supply module's former attribute names
 MOVED_MODULE: dict = {
     "_base_cal_drift": _REMOVED,
-    # S10a: the supply module's parameters, carried state and results
+    # the supply module's parameters, carried state and results
     "_balance_cache": "par.balance_cache",
     "_env_for_surplus": "par.env_for_surplus",
     "_jrc_capped_cache": "par.jrc_capped_cache",
@@ -457,7 +458,7 @@ MOVED_MODULE: dict = {
     "max_nbal_region": "res.max_nbal_region",
     "max_nbal_update": "res.max_nbal_update",
     "worker_failures": "res.worker_failures",
-    # S10b: what CAPRIModel and the coupling set on the supply module
+    # what CAPRIModel and the coupling set on the supply module
     "feed_prices": "seen.feed_prices",
     "feed_rations": "seen.feed_rations",
     "feed_bulk_ratio": "seen.feed_bulk_ratio",

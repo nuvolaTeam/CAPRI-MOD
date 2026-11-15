@@ -1,5 +1,5 @@
-"""The layer rules of the supply, environment, fertiliser and water packages (docs/design/ARCHITECTURE_REFACTOR.md,
-stages 3b and 4b): only the run's data adapter (capri_mod/data/inputs.py; the supply package's name for it,
+"""The layer rules of the supply, environment, fertiliser and water packages (docs/dev/ARCHITECTURE_REFACTOR.md,
+the refactor's data adapters): only the run's data adapter (capri_mod/data/inputs.py; the supply package's name for it,
 capri_mod/supply/inputs.py) reads files, and the inputs follow the run's data directory and base year."""
 import io
 import tokenize
@@ -11,8 +11,8 @@ SUPPLY = Path(__file__).resolve().parents[1] / "supply"
 WRITES = ("CAPRI_NLP_DUMP", "_fn, \"ab\"")
 
 
-#: the packages that read their inputs through the run's data adapter (capri_mod/data/inputs.py): supply (stage 3b),
-#: environment, fertiliser distribution and water (stage 4b)
+#: the packages that read their inputs through the run's data adapter (capri_mod/data/inputs.py): supply (the supply's data adapter),
+#: environment, fertiliser distribution and water (the run's data adapter)
 PACKAGES = [SUPPLY] + [SUPPLY.parent / d for d in ("environmental", "fert", "water")]
 
 
@@ -66,7 +66,7 @@ def test_module_tables_are_read_from_the_run_inputs(tmp_path):
 
 
 def test_a_missing_supply_input_stops_the_run(tmp_path):
-    """A required input that is missing raises, naming the file (stage 3b; before, several tables fell back to none,
+    """A required input that is missing raises, naming the file (the supply's data adapter; before, several tables fell back to none,
     some with a warning, some silently)."""
     import pytest
     from capri_mod.supply import inputs as I

@@ -1,11 +1,11 @@
-"""CAPTRD's supports after the first estimation (stage 2f, define_eu_supports.gms; eu_supports.py), in the order of the
+"""CAPTRD's supports after the first estimation (define_eu_supports.gms; eu_supports.py), in the order of the
 ex-ante loop, on the supports as define_stats_and_supports.gms leaves them (test_captrd_expert_support.py's assembled
 chain) and CAPTRD's stored Solve1 results (step2) and Solve2 results of the earlier years (step3, for the
 extrapolation beyond %lst_dgagri%); compared with CAPTRD's final support, TrustLevl, wVarErr and DGAgri1 of the member
 states in the ex-ante years without data (2020-2070; 2018 is a nowcast year whose supports are COCO's).
 
 Results on 11 November 2026 (positions equal / compared; "later": rewritten after this stage, as in
-test_support1_equal_captrds; "2c": rows whose EU parts' DGAgri1 already differ from CAPTRD's as stage 2c leaves them,
+test_support1_equal_captrds; "2c": rows whose EU parts' DGAgri1 already differ from CAPTRD's as the DG AGRI scaling (scale_DG_AGRI_baseline.gms) leaves them,
 EU014000's INDM, FEDM, PRCM and DOMM of WHEP, DWHE, RYEM, OCER, RAPO, MAIZ, HFCS and CERE, which no later stage
 rewrites there, from p_data that CAPTRD's stored P_Data no longer holds; "fossil": UVAG of DISL, GASL, open since
 support1):
@@ -46,7 +46,7 @@ AACT_365 = ["DCOW", "DCOL", "DCOH", "SCOW", "SOWS", "SHGM", "HENS"]
 PRIC = ["UVAG"]
 #: captrd.gms l. 166
 PHASE_IN = 2025
-#: the rows whose EU parts' DGAgri1 differ from CAPTRD's after stage 2c (test_eu_supports_equal_captrds)
+#: the rows whose EU parts' DGAgri1 differ from CAPTRD's after the DG AGRI scaling (scale_DG_AGRI_baseline.gms; test_eu_supports_equal_captrds)
 ROWS_2C = ["WHEP", "DWHE", "RYEM", "OCER", "RAPO", "MAIZ", "HFCS", "CERE"]
 
 
@@ -82,7 +82,7 @@ def after(assembled, scaled):  # noqa: F811
                      if k[0] in msset and k[3] in yrs}
     # wVarErr as define_stats_and_supports.gms leaves it for the expert positions (l. 646-650) and the domestic use
     # components (l. 655-663); the trend positions' (l. 327-329, from the statistics' error variance) are not rebuilt
-    # here, so wVarErr is compared where a trust level is set (stage 2f's l. 883-886 and the expert positions')
+    # here, so wVarErr is compared where a trust level is set (define_EU_supports.gms l. 883-886 and the expert positions')
     d1 = X.dgagri1
     W = F.wvarerr(E0, TL0)
     F.domm_wvarerr(W, sup0, [d1, E0, ex["longrun1"]], ms=X.ms, s_colsest=s.s_colsest, s_rowsest=s.s_rowsest,

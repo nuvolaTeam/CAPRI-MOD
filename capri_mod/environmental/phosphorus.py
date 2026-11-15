@@ -1,11 +1,11 @@
 """The phosphorus balance (P2O5; docs/P_BALANCE.md): CAPRI's applied ratios and runoff.
 
-EnvironmentalModule's methods, moved unchanged from capri_mod/environmental/environmental_module.py (refactor stage 4a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are environmental_module's, given to this
+EnvironmentalModule's methods, moved unchanged from capri_mod/environmental/environmental_module.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are environmental_module's, given to this
 module once environmental_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated.
 """
 from __future__ import annotations
-from capri_mod import statekit as _est   # the state objects' helpers (refactor stage 4)
+from capri_mod import statekit as _est   # the state objects' helpers
 from capri_mod.data.definitions import capri_ms  # noqa: E402  (TUR for Turkey's units)
 
 
@@ -69,7 +69,7 @@ class PhosphorusBlock:
         EXCRET  sum over animals of herd x manure P2O5 per head (CAPRI's 2017 MANP totals / the model's herds,
                 livestock_manure_p_coef.csv); the dairy and cattle split columns move it by their manure P2O5 per head
                 relative to their animal's (dairy_intensity / cattle_intensity dmanp_rel, CAPRI's MANP of the two
-                activities), as in the regional model's fertilisation block (S6 item 6, 9 November 2026: before, the
+                activities), as in the regional model's fertilisation block (9 November 2026: before, the
                 split columns left it unchanged)
         MTRADE  EXCRET - manure P2O5 applied in the region (ManureNPK_): with the NLP form's fertilisation block the
                 sum of its manure flows; without it (no supply result: the accounts at the base data) CAPRI's 2030 share applied

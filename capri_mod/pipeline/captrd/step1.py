@@ -15,7 +15,7 @@ Conventions of the GAMS code kept here:
               sum runs over the ex-post years with a nonzero value (NaN is read as 0, so also missing);
       false - the default: NaN is a missing observation and a recorded zero is an observation (value 0). CAPREG's
               series as GAMS writes them carry no zeros (GAMS stores none), so on them the two agree; they differ
-              once the data layer passes true zeros (docs/design/CAPTRD_MOD.md section 6);
+              once the data layer passes true zeros (docs/dev/CAPTRD_MOD.md section 6);
   - a GAMS parameter that is not assigned is 0: the formulas below assign 0 where the GAMS code assigns nothing.
 
 The domain conditions on the number of observations n (estimate_trends.gms l. 76-123):

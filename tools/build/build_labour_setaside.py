@@ -8,13 +8,13 @@ request).
    levels (hours per CAPRI unit), for animals divided by capri_level_ratio (model heads per CAPRI unit), so that
    model level x coefficient / 1000 is CAPRI's million hours. Two vintages: 2017 (res_17 dumps, item 'Y') and
    2030 (CAPRI's 2030 reference the model's trajectory is built from). Members: tools/build/build_capri_base.CROP_MAP for
-   crops (GRAS = GRAE + GRAI as CAPRI's activities; VSET and FALL their own since S2), the cattle and other animals as
+   crops (GRAS = GRAE + GRAI as CAPRI's activities; VSET and FALL their own since 7 November 2026), the cattle and other animals as
    tools/build/build_livestock_output_coef.py. Labour enters CAPRI's results as an indicator, not as a constraint of its
    supply model; here it is an account after the solve. REGISTERED: within an animal the members' mix is the base
    one (the cattle splits' labour differences are not carried).
 
 2. Set-aside (capri_data/2017/supply/set_aside_split.csv): the premiums PRME (EUR/ha) of CAPRI's VSET (voluntary
-   set-aside) and FALL (fallow), the model's own activities since S2 (7 November 2026), for the report of set-aside
+   set-aside) and FALL (fallow), the model's own activities since 7 November 2026, for the report of set-aside
    premiums (model._set_aside_table). Until then the model's SETA was VSET + FALL, and the file held the reported split
    of a SETA level (CAPRI's VSET share and the share of a change CAPRI's PMP terms give VSET) and their labour, now
    in labour_coef.csv under VSET and FALL.
@@ -22,7 +22,7 @@ request).
 Sources: CAPRI 2017 results capri_sources/capreg/res_17*.txt; CAPRI's 2030 Green Deal baseline
 capri_sources/exports/res_2_1730greendeal_refdefaulta.zip (tools/lib/paths.BASELINE_REF; its calibration run
 refpol_endotech_all_ini until 9 November 2026); PMP terms
-(the PMP terms, capri_data/sources/intermediate/baseline_pmp/intensity_q_*.csv, were read for the split until S2).
+(the PMP terms, capri_data/sources/intermediate/baseline_pmp/intensity_q_*.csv, were read for the split until 7 November 2026).
 
     python tools/build/build_labour_setaside.py
 """

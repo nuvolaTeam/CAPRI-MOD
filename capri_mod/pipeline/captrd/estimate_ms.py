@@ -3,7 +3,7 @@ CAPRI star 3.0; captrd.gms l. 1058-1060, Solve1 and Solve2 of the ex-ante loop):
 the values V_EstV(MS, col, row, t) closest to the supports (the weighted squared deviations SSQ) that meet the
 consistency equations below.
 
-This module holds the equations (stage 2e, first part): `residuals` evaluates each of m_trendMS's equations
+This module holds the equations (the first part of its port): `residuals` evaluates each of m_trendMS's equations
 (equations.gms l. 896-902) at a point, with the domain conditions of equations.gms, for one member state (CAPTRD's
 Rest and MSEst are the member state alone in estimate_ms.gms l. 41-46, so CARD(Rest) = 1 and the EU000000 exclusions
 do not apply). A residual is lhs - rhs: zero for =E=, at most zero for =L=, at least zero for =G=.

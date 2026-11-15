@@ -1,7 +1,7 @@
 # Dairy processing: CAPRI's fat and protein block in the market
 
 Status: revised 21 October 2026 against the code (Norway's block: K56). The block is on by default, as in CAPRI, where it is part of the
-market model. The development stages (October 2026: Stages 1-4, Sprint 9f) and their run results are summarised in
+market model. The development steps (October 2026, up to the switch-on of CAPRI's dairy block) and their run results are summarised in
 "History" and recorded in CHANGELOG.md; current results are in README section 9 (Validation).
 
 Always on (the switch `market.use_dairy_block` and the run option `--no-dairy-block` were removed on 27 October
@@ -89,15 +89,15 @@ results would settle it). The model is not calibrated to the figure.
 
 ## History (October 2026)
 
-- Stage 1: the block in the market, opt-in, one EU price ratio for fat, protein and raw milk; the four traded
+- First: the block in the market, opt-in, one EU price ratio for fat, protein and raw milk; the four traded
   products (butter, SMP, cheese, whey) from the block. Found on the way: the reported EU price carried the Armington
   premium twice (fixed; CHANGELOG "Biofuels and dairy into the market").
-- Stage 2: sheep and goat milk counted as raw milk instead of sheep meat; livestock output split by CAPRI final
+- Second: sheep and goat milk counted as raw milk instead of sheep meat; livestock output split by CAPRI final
   product.
-- Stage 3: EU feed demand through FMIL and EU food demand with CAPRI's cross-price elasticities.
-- Stage 4: CAPRI's block for the non-EU regions with CAPRI's raw milk supply functions (replacing a flat 0.2-0.3
+- Third: EU feed demand through FMIL and EU food demand with CAPRI's cross-price elasticities.
+- Fourth: CAPRI's block for the non-EU regions with CAPRI's raw milk supply functions (replacing a flat 0.2-0.3
   supply elasticity per product).
-- Sprint 9f: on by default as star 3.0 runs it; all nine products traded bilaterally (they had cleared inside the
+- the switch-on of CAPRI's dairy block: on by default as star 3.0 runs it; all nine products traded bilaterally (they had cleared inside the
   block with fixed extra-EU trade); raw milk, fat and protein priced per member state. Against CAPRI's 2030 reference
   every dairy product's EU production and use was then within 3.6% (`tools/check/compare_baseline_capri.py`).
 - 18 October 2026: CAPRI's GL food demand applies to the dairy products' human consumption.

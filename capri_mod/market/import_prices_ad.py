@@ -1,11 +1,11 @@
-"""G3.2a (claude/g3_plan.md): CAPRI's import prices of one bilateral commodity in CasADi, every policy regime included.
+"""CAPRI's import prices of one bilateral commodity in CasADi, every policy regime included.
 
 BilateralCommodity.import_prices (market/bilateral.py) computes them with numpy: p_ij = a_ij r_j + b_ij, plus the
 change of the tariff-rate quotas' rates from their base (bilateral trqSigmoidFunc_ / tarSpec_ / tarAdVal_ and global
 TRQImports_ / tarSpecW_ / tarAdValW_, the smaller of the two by ncpcm: BilateralCommodity._trq_off), plus the change
 of the border measures' specific part (entry prices EntryPriceDriver_, tarSpecIfEntryPrice_, prefTriggerPrice_;
 flexible levies FlexLevyNotCut_, FlexLevy_: BilateralCommodity.border_spec). The default solve evaluates them at the
-current sigmas; G3 needs them as expressions of the prices r and the quotas' sigmas, which this module writes, cell by
+current sigmas; the whole-market system needs them as expressions of the prices r and the quotas' sigmas, which this module writes, cell by
 cell in the numpy code's order of operations (the last quota writing a cell wins, as in _trq_rates).
 
     import_price_function(sc) -> CasADi Function (r[n], sB[nb], sW[ng], S[n], D[n]) -> p[cells]

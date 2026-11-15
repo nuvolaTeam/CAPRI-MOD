@@ -97,7 +97,7 @@ def test_market_welfare_at_base_and_after_a_supply_shock():
     EU_ROWS = [r for r in exo.index if mm.eu_region_of_country(r) is not None]
     EU = list(mm.EU)                                           # CAPRI's two EU blocks (since 3 November 2026)
     eq0 = mm.solve(exogenous_supply=exo)
-    # the second solve keeps the run's calibration (S7: calibrated once per run at CAPRI's calibration point)
+    # the second solve keeps the run's calibration (CAPRI's market calibration: calibrated once per run at CAPRI's calibration point)
     weu = lambda w, c: float(w.loc[EU, c].sum())                  # the EU's welfare: its blocks' sum
     w0 = eq0.welfare
     assert list(w0.columns) == list(mm.WELFARE_COMPONENTS) + ["Welfare"]

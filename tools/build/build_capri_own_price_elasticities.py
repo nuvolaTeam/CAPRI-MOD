@@ -1,6 +1,6 @@
 """CAPRI's calibrated own-price supply elasticities per member state, p_ElasSupp(MS, x, x, 'CAL') of CAPRI's 2020
 supply-model calibration runs (KNOWN_ISSUES K101): the elasticity-calibrated PMP's CAPRI_COUNTRY source
-(docs/PMP_ELASTICITY_WIRING.md), not the default PMP (CAPRI's 2030 terms).
+(docs/dev/PMP_ELASTICITY_WIRING.md), not the default PMP (CAPRI's 2030 terms).
 
     capri_data/2017/supply/capri_own_price_elasticities.csv   capri_country, <product>...
 

@@ -1,4 +1,4 @@
-"""CAPRI's rural development (pillar 2) inputs of the 2030 premium chain (the premium module, P2c: policy/
+"""CAPRI's rural development (pillar 2) inputs of the 2030 premium chain (the premium module: policy/
 extend_rd_baseline.gms and policy/rd_logic.gms, called from scen/Premiums/rd/define_second_pillar_baseline.gms):
 
   capri_data/<base year>/policy/rd_budget.csv          region, year, measure, plan_spend, meur, eps

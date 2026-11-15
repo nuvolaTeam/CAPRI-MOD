@@ -1,5 +1,5 @@
 """CAPRI's calibrated 2030 market state from a CAPMOD restart file (sim_ini) as CSV, for the move of the market onto
-CAPRI's market regions (docs/design/MARKET_REGIONS_INVENTORY.md section 7 item 4: "the 2030 market is built from
+CAPRI's market regions (docs/dev/MARKET_REGIONS_INVENTORY.md section 7 item 4: "the 2030 market is built from
 sim_ini, extracted to CSV sources") and for the parity checks of the ports (MODEL_CONTENT_PLAN.md sections 1-2).
 
 Source: the project lead's sim_ini_21730.gdx (the endotech Green Deal 2030 run with base year 2017, written at the

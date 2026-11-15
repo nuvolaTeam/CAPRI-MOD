@@ -73,7 +73,7 @@ def indicators(o):
                    ("manure CH4", "ghg_manure_ch4"), ("GHG total", "ghg_total"), ("ammonia", "nh3_total"),
                    ("manure N2O", "ghg_manure_n2o"), ("UAA", "uaa_total")]:
         if lab == "GHG total" and "ghg_non_co2" in eb and "ghg_non_co2" in es:
-            c = "ghg_non_co2"            # JRC121368's figure is non-CO2 GHG (Sprint 9s; older runs: all items)
+            c = "ghg_non_co2"            # JRC121368's figure is non-CO2 GHG (the removal of synthetic data; older runs: all items)
         if c in eb:
             out[lab] = _pct(es[c].sum(), eb[c].sum())
     return out

@@ -41,13 +41,13 @@ def main() -> None:
     prices = read_source(ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_producer_prices.parquet", index_col=0)
     # the EU-wide price over the units it was taken over before CAPRI's other 29 were listed (FALLBACK_UNITS, 4 November
     # 2026); over the EU's member states only, with a unit outside the EU at its own country's price, is the project
-    # lead's decision of 31 October 2026 (docs/design/SUPPLY_NONEU_DESIGN.md section 4), a separate change
+    # lead's decision of 31 October 2026 (docs/dev/SUPPLY_NONEU_DESIGN.md section 4), a separate change
     keep = [r for r in prices.index if r in FALLBACK_UNITS]
     prices, herds = prices.loc[keep], herds.loc[[r for r in herds.index if r in FALLBACK_UNITS]]
     rows = {}
     for c in areas.columns:
         # set-aside has no output; other marketable and industrial crops, nurseries and flowers are carried in CAPRI as
-        # values, not tonnes (docs/design/DATA_SCHEMA_DUCKDB.md, the units of OCRO, OIND, NURS, FLOW), so a per-tonne EU price is not defined for them
+        # values, not tonnes (docs/dev/DATA_SCHEMA_DUCKDB.md, the units of OCRO, OIND, NURS, FLOW), so a per-tonne EU price is not defined for them
         if c in ("VSET", "FALL", "OCRO", "OIND", "NURS", "FLOW") or c not in ylds.columns or c not in prices.columns:
             continue
         q = (areas[c] * ylds[c]).reindex(prices.index).fillna(0.0)

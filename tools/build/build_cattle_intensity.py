@@ -1,5 +1,5 @@
 """CAPRI's two-intensity cattle fattening activities, per model region: bulls BULL/BULH and fattening
-heifers HEIL/HEIH (Sprint 7c; dairy cows DCOL/DCOH are in tools/build/build_dairy_intensity.py).
+heifers HEIL/HEIH (the port of CAPRI's bull and heifer splits; dairy cows DCOL/DCOH are in tools/build/build_dairy_intensity.py).
 
 CAPRI fattens young bulls and heifers in a low- and a high-intensity activity (res_17: equal numbers at
 base). They differ in fattening length (DAYS: DE94 bulls 173 vs 270 days, heifers 78 vs 223), slaughter
@@ -21,7 +21,7 @@ from the high to the low activity, z (1000 model heads), as for the dairy split:
 
   <column>_2030  the shares, fattening lengths and d<item>_rel at CAPRI's 2030 calibration point, from CAPRI's 2030
              Green Deal baseline the model's 2030 base is taken from (res_2_1730greendeal_refdefaulta, dataOut at
-             2030; tools/lib/paths.BASELINE_REF); the model uses them at the 2030 market year (S6 item 6, 9 November 2026: before, the 2017
+             2030; tools/lib/paths.BASELINE_REF); the model uses them at the 2030 market year (9 November 2026: before, the 2017
              differences were used at the 2030 point). q_z and q_b keep the 2017 stall conversion.
 
 Sources: CAPRI 2017 results res_17<MS>.txt; CAPRI's 2030 Green Deal baseline res_2_1730greendeal_refdefaulta
@@ -56,7 +56,7 @@ ITEMS = ("LEVL", "DAYS", "MANN", "MANP", "MANK", "BEEF", "IBUL", "IHEI", "ICAM",
 ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'(BULL|BULH|HEIL|HEIH|HEIR|CAMF|CAFF|CAMR|CAFR)'\.'(" + "|".join(ITEMS)
                  + r")'\.'Y'\s+(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
 #: (model animal, split, member a (+z), member b (-z), the model animal's CAPRI members, young items it buys).
-#: "int": the intensity pairs (Sprint 7c); "rep": the replacement heifers HEIR against the high-intensity fattening
+#: "int": the intensity pairs (the port of CAPRI's bull and heifer splits); "rep": the replacement heifers HEIR against the high-intensity fattening
 #: heifers (HEIR produces replacement cows YCOW instead of beef); "male" / "female": fattening calves (veal) against
 #: raising calves (young bulls / heifers sold, YBUL / YHEI), per sex, and "sex": male against female raising calves
 #: (22 October 2026: every CAPRI cattle activity with its own level; the young-animal markets per sex, as CAPRI's).
@@ -219,7 +219,7 @@ def main():
     # the base year's columns first, as before the 2030 columns were added
     base_cols = ["region", "animal", "capri_region", "share_low", "share_high", "days_low", "days_high"] + \
         [f"d{it.lower()}_rel" for it in FLOW + DAILY if it not in ("MANP", "MANK")] + ["q_z", "q_source", "heads"]
-    # then the columns added before S6 item 6, then manure P2O5 and K2O, then CAPRI's 2030 point
+    # then the columns added before 9 November 2026, then manure P2O5 and K2O, then CAPRI's 2030 point
     new = ["dmanp_rel", "dmank_rel"] + [c for c in out.columns if c.endswith("_2030") and not c.endswith(("_capri2030",
                                                                                                          "_recipe2030"))]
     first = base_cols + [c for c in out.columns if c not in base_cols and c not in new

@@ -17,7 +17,7 @@ and 2030 calibration points, capri_data/sources/raw/capri/capri_baseline/capri_m
 The reference run's 2030 output prices equal CAPRI's own calibrated 2030 baseline (p_uvagStore,
 results/baseline/data_uvag1730defaulta; capri_uvag_store_1730.parquet): ratio 1.000 for every traded product.
 
-P2 step 2 (13 November 2026): the 2030 PRME of the regions the premium ports cover (capri_mod/policy/premiums.py,
+Since 13 November 2026: the 2030 PRME of the regions the premium ports cover (capri_mod/policy/premiums.py,
 the EU's units and member states at CAPRI's trend levels; norway.py) replace the reference's rows; an activity the
 ports give no premium has none (CAPRI's reference has none either: Greece's dairy cows, LEVL > 0 and no PRME). The
 data base activities DCOW, BULF and HEIF take their members' total premium on CAPREG's 2017 level (T30 H17 /
@@ -176,7 +176,7 @@ def main() -> None:
 
     # --- premiums: 2030 PRME per unit (CAPRI regions and national rows) in 2017 money
     p30 = terms[terms["item"] == "PRME"].pivot_table(index="region", columns="activity", values="value")
-    # P2 step 2: the EU's and Norway's from the ported premium module at CAPRI's trend levels; the regions the ports
+    # the EU's and Norway's from the ported premium module at CAPRI's trend levels; the regions the ports
     # do not cover (the UK, the Western Balkans, Turkey) keep CAPRI's reference
     p30, herd = _ported_premiums_2030(p30)
     sys_path = str(ROOT)

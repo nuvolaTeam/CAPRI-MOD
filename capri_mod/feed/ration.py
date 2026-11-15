@@ -338,7 +338,7 @@ class RationModel:
 def ration_model_for(data, data_dir=None, pmp_source: str = "capri2030", pmp_capri_parts=()) -> RationModel:
     """CAPRI's rations of a run: the RationModel the model builds once per run (CAPRIModel._update_rations) and a
     SupplyModule used on its own builds at base (SupplyModule._base_rations), from the same data. (Nitrate is CAPRI's
-    supplement option in the supply model, envind/line_nitr.gms, Sprint 9g; the ration model's own nitrate ingredient
+    supplement option in the supply model, envind/line_nitr.gms, the port of CAPRI's feed options; the ration model's own nitrate ingredient
     was removed 27 October 2026.) With CAPRI's 2030 PMP terms for feed, the feed-PMP slopes of CAPRI's 2030 baseline
     calibration (K61)."""
     d = data if isinstance(data, dict) else {}

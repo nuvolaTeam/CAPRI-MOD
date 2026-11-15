@@ -1,7 +1,7 @@
 """The regional model's solve in CAPRI's form (capri_regional_nlp.CapriRegionalNLP with IPOPT): the build, the starts, the warm and jump checks, the mineral-cap exemptions, the last-point fallback.
 
-RegionalSupplyModel's methods, moved unchanged from capri_mod/supply/supply_module.py (refactor stage 3a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module's, given to
+RegionalSupplyModel's methods, moved unchanged from capri_mod/supply/supply_module.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module's, given to
 this module once supply_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated
 (they name supply_module's types).
 """
@@ -11,7 +11,7 @@ from __future__ import annotations
 class NLPBlock:
     def _aug_col_labels(self, n_cols):
         """One label per column of the regional problem: activities, land types, the mineral-N allocation column,
-        manure exports and imports, the split and option columns, histosol fallow, the crops' technology mix (S1)."""
+        manure exports and imports, the split and option columns, histosol fallow, the crops' technology mix."""
         lab = list(self.acts)
         n = len(lab)
         extra = {}
@@ -138,7 +138,7 @@ class NLPBlock:
                     # (on converted land the organic I/O change already took the fertiliser cost out: only the
                     # conventional share's is left in c)
                     c[j] -= float(self._input_cost(a, "fert", self.FERT_COST_SHARE)) * float(oc_.get(a, 1.0))
-            # the technology mix columns (S1): their fertiliser cost difference likewise (need_diff x the crop's)
+            # the technology mix columns: their fertiliser cost difference likewise (need_diff x the crop's)
             _tm = getattr(self.data, "techn_mix", None)
             for a_, k_ in (getattr(self.ev, "mix_cols", None) or {}).items():
                 if k_ < len(c):
@@ -155,7 +155,11 @@ class NLPBlock:
                     prices=getattr(self.seen, "feed_prices", None), req_extra=_rx, feed_ghg=self._ghg_feed_cost(),
                     npk=npk, drop_labels=drop, cap_rules=self._cap_rules_spec(), ghg_min=ghg_min,
                     land_rent_rows=dict(getattr(self.ev, "land_rent_rows", None) or {}),
-                    mix_cols=sorted(int(k_) for k_ in (getattr(self.ev, "mix_cols", None) or {}).values()), **abat)
+                    mix_cols=sorted(int(k_) for k_ in (getattr(self.ev, "mix_cols", None) or {}).values()),
+                    # the dairy and cattle intensity splits' columns: like the mix columns, bounded by their rows alone
+                    split_cols=sorted([int(k_) for k_ in (getattr(self.ev, "cattle_cols", None) or {}).values()]
+                                      + ([int(self.ev.dairy_col)] if getattr(self.ev, "dairy_col", None) is not None
+                                         else [])), **abat)
         if npk is not None and getattr(self.ev, "alloc_cols", 0):
             spec["fix_cols"] = {n + len(getattr(self.ev, "land_types_used", [])): 0.0}
         self.res.last_feed_dm = None

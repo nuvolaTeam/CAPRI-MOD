@@ -73,7 +73,7 @@ class BilateralSolveMixin(MarketStateMixin):
                                         float(rho.at[c, "rho1"]) if c in rho.index else 8.0,
                                         float(rho.at[c, "rho2"]) if c in rho.index else 10.0, tc=tc, pmrk_data=has_p)
         # CAPRI's bilateral tariff-rate quotas of every importer, per pair of policy blocks (tools/build/
-        # build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md)
+        # build_bilateral_market.py build_trq; docs/dev/MARKET_TRQ_PORT.md)
         if inp.exists(f"bilateral_trq_{year}.csv"):
             tq = inp.csv(f"bilateral_trq_{year}.csv", keep_default_na=False)
             for c, g in tq.groupby("commodity"):
@@ -120,7 +120,7 @@ class BilateralSolveMixin(MarketStateMixin):
                 for k in bil:
                     if sc.trq_quotas[k]["regime"] == "with_global":
                         sc.trq_quotas[k]["glob"] = len(gl) - 1
-        # CAPRI's entry prices and flexible levies (build_border_measures; stage 6): they replace the specific tariff
+        # CAPRI's entry prices and flexible levies (build_border_measures): they replace the specific tariff
         if inp.exists(f"border_measures_{year}.csv"):
             bm = inp.csv(f"border_measures_{year}.csv", keep_default_na=False)
             bp = inp.csv(f"border_pairs_{year}.csv", keep_default_na=False)
@@ -217,7 +217,7 @@ class BilateralSolveMixin(MarketStateMixin):
 
     def _bilateral_calibrate(self) -> None:
         """The bilateral market calibrated once per run at CAPRI's own 2030 market supply, every region's (the EU's and
-        Norway's included), as CAPRI calibrates its market at the calibration point (S7; arm/prep_market.gms
+        Norway's included), as CAPRI calibrates its market at the calibration point (CAPRI's market calibration; arm/prep_market.gms
         cal_cnst_terms, recalibrate_commitments): CAPRI's flows, demand calibration 1 for the bilateral commodities,
         the world clearing calibration for the pooled one (raw milk, at CAPRI's 2030 marketed milk: _capri_milk_point).
         The supply models do not enter the calibration; only the supply side follows them each iteration. (Until
@@ -376,7 +376,7 @@ class BilateralSolveMixin(MarketStateMixin):
             _mr = {g: 1.0 + float(v["z"][_wp[g]["iM"]]) for g, v in _wl.items() if g in _wp and "z" in v}
             self.ev.fede_now = self.noneu_fede(PAr, r, _mr, self.land_by_type(self.ev.land_now))
         if self._noneu_land_params():
-            # CAPRI's market land block (stage 7): the rents that clear each non-EU region's land market at these
+            # CAPRI's market land block: the rents that clear each non-EU region's land market at these
             # prices, simultaneous with FeedBal_ (FEDE moves the land demand, the rents the animal output): solved in
             # turn until both settle (the land solve from the latest rents)
             _wl = self.ev.dairy_world_last or {}
@@ -410,7 +410,7 @@ class BilateralSolveMixin(MarketStateMixin):
         from capri_mod.market.supply_ad import pooled_residual_function
         for c in r.columns:
             if c not in sysd:
-                # the pooled commodities' world balance, written once in CasADi (market step G2b, supply_ad.py)
+                # the pooled commodities' world balance, written once in CasADi (supply_ad.py)
                 F[c] = np.asarray(pooled_residual_function(len(S))(S[c].to_numpy(dtype=float),
                                                                      D[c].to_numpy(dtype=float))).ravel()
         # MarketPriceAgg_'s weights for the border measures of an aggregate exporter block: this evaluation's supply
@@ -478,9 +478,9 @@ class BilateralSolveMixin(MarketStateMixin):
 
         z = np.log(rk[act])
         if bool(_settings().get("market.exact_jacobian")) and not sc.border:
-            # (a commodity under CAPRI's entry prices or flexible levies takes the default path: G1's CasADi system has
-            # neither, stage 6)
-            # step G1: the same residual and its exact Jacobian from CasADi (capri_mod/market/trade_ad.py)
+            # (a commodity under CAPRI's entry prices or flexible levies takes the default path: the exact-Jacobian system has
+            # neither)
+            # the exact Jacobian: the same residual and its exact Jacobian from CasADi (capri_mod/market/trade_ad.py)
             from capri_mod.market.trade_ad import trade_function, import_price_matrices
             Am, Bm = import_price_matrices(sc, tadd)
             fn = trade_function(sc, act)
@@ -654,7 +654,7 @@ class BilateralSolveMixin(MarketStateMixin):
         commodity - the full model response (supply module output anticipated, crushing, dairy blocks, feed and
         biofuel demand) is re-evaluated each step, and each commodity's trade system solved exactly with supply and use
         log-linear in its own price around that point (the other prices held), the step damped and Anderson-
-        accelerated. At convergence every balance holds, so the solution is the system's (G3, market_g3.py, checks it);
+        accelerated. At convergence every balance holds, so the solution is the system's (the whole-market system, market_chain.py, checks it);
         the path, not the equilibrium, is the fixed point's."""
         _st = _settings()                                   # market.* : tolerance, rounds, damping, step clip
         if tol is None:
@@ -663,7 +663,7 @@ class BilateralSolveMixin(MarketStateMixin):
             max_outer = int(_st.get("market.max_iter"))
         _sclip = tuple(_st.get("market.step_clip"))
         if self.par.demand_cal_frozen is None:
-            # S7, CAPRI's form (arm/prep_market.gms l. 635-749): the behavioural functions calibrated once per run at
+            # CAPRI's form (arm/prep_market.gms l. 635-749): the behavioural functions calibrated once per run at
             # CAPRI's own 2030 market data, not at the supply models' output; then the market is solved, the baseline
             # included (no return at the reference prices): only the supply side follows the supply models
             self._bilateral_calibrate()
@@ -688,13 +688,13 @@ class BilateralSolveMixin(MarketStateMixin):
             return np.array([max(float(self.par.base_production[c].sum()), 1.0)])
 
         if str(_st.get("market.solver")) == "newton_krylov":
-            # step G2: the same equations at once (capri_mod/market/market_nk.py)
+            # the Newton-Krylov solve: the same equations at once (capri_mod/market/market_nk.py)
             return self._nk_solve(r, exogenous_supply, trade_scenario, es, ed, size, tol, max_outer, verbose)
-        if str(_st.get("market.solver")) in ("g3_newton", "g3_ipopt") and last is not None:
-            # G3: the market as one system in CAPRI's form (capri_mod/market/market_g3.py); the fixed point below then
+        if str(_st.get("market.solver")) in ("chain", "ipopt") and last is not None:
+            # the market as one system in CAPRI's form (capri_mod/market/market_chain.py); the fixed point below then
             # starts at its solution, which it confirms in its first evaluation (and continues from if it does not)
-            from capri_mod.market.market_g3 import g3_market_solve
-            r_ = g3_market_solve(self, r, exogenous_supply, trade_scenario, str(_st.get("market.solver")))
+            from capri_mod.market.market_chain import chain_market_solve
+            r_ = chain_market_solve(self, r, exogenous_supply, trade_scenario, str(_st.get("market.solver")))
             if r_ is not None:
                 r = r_
         prev = np.inf

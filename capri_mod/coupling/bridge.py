@@ -1,7 +1,7 @@
 """Supply to market: the supply models' output aggregated to the market's commodities and regions (livestock products, dairy and processing yields, sugar per beet).
 
-CAPRIModel's methods, moved unchanged from capri_mod/model.py (refactor stage 4a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
+CAPRIModel's methods, moved unchanged from capri_mod/model.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
 module once model is loaded (capri_mod.coupling.inject); the annotations are not evaluated.
 """
 from __future__ import annotations
@@ -169,7 +169,7 @@ class BridgeBlock:
         return self._marketed_supply(market_supply, supply_agg)
 
     def _marketed_supply(self, market_supply, supply_agg):
-        """CAPRI's grofNEprod (S7): the market takes each supply product as the supply models' gross production times
+        """CAPRI's grofNEprod (CAPRI's market calibration): the market takes each supply product as the supply models' gross production times
         CAPRI's marketed over gross production at the calibration point, per country (arm/simu_calibration_to_supply.gms
         l. 219-247; market_prod_grof_2030.csv, tools/build/build_market_prod_grof_2030.py): seed use and losses follow
         production and never reach the market. Olive oil and milled rice from the olive and paddy harvest at CAPRI's
@@ -217,7 +217,7 @@ class BridgeBlock:
         areas = d.get("areas")
         run = set(run_regions or [])
         if non_eu:
-            # non_eu (S7): the units outside the run of the non-EU countries with supply models in the market (Norway),
+            # non_eu (CAPRI's market calibration): the units outside the run of the non-EU countries with supply models in the market (Norway),
             # whose market base is CAPRI's whole country; their base output is added to the country's row as it is (no
             # market supply function: the departure of K83 for these countries)
             from capri_mod.data.definitions import REGION_TO_COUNTRY

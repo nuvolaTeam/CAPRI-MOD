@@ -1,4 +1,4 @@
-"""The manifest of the published CAPRI source set (docs/design/MODEL_CONTENT_PLAN.md section 12b, step 2): every file
+"""The manifest of the published CAPRI source set (docs/dev/MODEL_CONTENT_PLAN.md section 12b, step 2): every file
 of a version of the gated Hugging Face dataset nuvolaTeam/capri-mod-raw with its SHA-256 and size, kept in git
 (tools/pipeline/capri_raw_manifest.json) so that a run or a builder names the exact files it rests on.
 

@@ -1,4 +1,4 @@
-"""Step G2b, first part: CAPRI's market supply functions ProdNQ_ in CasADi (capri_mod/market/supply_ad.py) equal the
+"""CAPRI's market supply functions ProdNQ_ in CasADi (capri_mod/market/supply_ad.py) equal the
 loops supply.py had until 4 November 2026 (written out here as the reference), and their Jacobian equals finite
 differences."""
 import numpy as np
@@ -185,7 +185,7 @@ def test_land_residual_function_equals_the_numpy_form(market):
 
 @pytest.mark.parametrize("singular", [False, True])
 def test_young_animal_clearing_equals_the_former_code(singular):
-    """yaniMarket_ (supply_ad.yani_function, step G2g) through SupplyMixin._yani_clear equals the NumPy code it had
+    """YaniMarket_ (supply_ad.yani_function) through SupplyMixin._yani_clear equals the NumPy code it had
     until 4 November 2026 (least squares on H_YY, prices clipped to the bounds), with a singular H_YY too."""
     from capri_mod.market import supply as msup
     cls = next(v for k, v in vars(msup).items() if isinstance(v, type) and hasattr(v, "_yani_clear"))

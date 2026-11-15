@@ -1,4 +1,4 @@
-"""The pipeline's store: raw files, Delta tables per stage, CSV export (docs/design/CAPTRD_MOD.md section 6).
+"""The pipeline's store: raw files, Delta tables per stage, CSV export (docs/dev/CAPTRD_MOD.md section 6).
 
 Delta tables keep every write as a version (deltalake, Apache-2.0); each row carries the download_id it came from,
 so a table holds all downloads of a dataset and `latest()` selects the newest. True zeros and missing values stay

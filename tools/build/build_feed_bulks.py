@@ -57,7 +57,7 @@ GAMS = SOURCES / "gams"
 BULKS = {"FCER": ("WHEA", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "RICE"),
          "FPRO": ("PULS", "RAPO", "SUNO", "SOYO", "OLIO", "OTHO", "RAPC", "SUNC", "SOYC", "OLIC", "OTHC", "DDGS",
                   "FPRI", "SFIS", "FFIS", "OAQU"),
-         # Sprint 9h: CAPRI's other tradable bulks (global/fromimpact/sets.gms FEED_TO_O, MLK_DISAGG)
+         # the completion of CAPRI's feed bulks: CAPRI's other tradable bulks (global/fromimpact/sets.gms FEED_TO_O, MLK_DISAGG)
          "FENE": ("MOLA", "STAR", "FENI"),
          "FOTH": ("POTA", "RAPE", "SUNF", "SOYA", "OLIV", "OOIL", "TEXT", "TOMA", "OVEG", "APPL", "OFRU", "CITR",
                   "TAGR", "TABO", "TWIN", "SUGA", "EGGS", "PORK", "BEEF"),
@@ -67,7 +67,7 @@ USE_ITEMS = ("HCOM", "FEDM", "INDM", "BIOF", "LOSM", "PRCM")
 COMMODITY = {"WHEA": "SWHE", "MAIZ": "CORN", "RYEM": "RYEM", "OATS": "OATS", "OCER": "OCER", "RICE": "PARI",
              "OLIO": "OLIV", "BARL": "BARL", "PULS": "PULS", "RAPO": "RAPO", "SUNO": "SUNO", "SOYO": "SOYO",
              "RAPC": "RAPC", "SUNC": "SUNC", "SOYC": "SOYC", "DDGS": "DDGS",
-             # Sprint 9h: residual feeds traded (FENI, FPRI), other feed products with a model market
+             # the completion of CAPRI's feed bulks: residual feeds traded (FENI, FPRI), other feed products with a model market
              "FENI": "FENI", "FPRI": "FPRI", "POTA": "POTA", "RAPE": "RAPE", "SUNF": "SUNF", "SOYA": "SOYA",
              "OOIL": "OOIL", "TOMA": "TOMA", "OVEG": "OVEG", "APPL": "APPL", "OFRU": "OFRU", "CITR": "CITR",
              "TWIN": "WINE", "SUGA": "SUGR", "EGGS": "EGGS", "PORK": "PORK", "BEEF": "BEEF",
@@ -197,7 +197,7 @@ def main():
     for c, grp in GROUPS.items():
         # the residual feeds are used as feed only (CAPRI DOMM = FEED)
         # total use includes processing (PRCM: crushing of the oilseeds fed whole, cereal processing), as the
-        # model's EU use does (Sprint 9h; before only HCOM + FEDM + INDM + BIOF + LOSM)
+        # model's EU use does (the completion of CAPRI's feed bulks; before only HCOM + FEDM + INDM + BIOF + LOSM)
         use = sum(float(bal.get(x, {}).get(k, 0.0)) for x in grp
                   for k in ("HCOM", "FEDM", "INDM", "BIOF", "LOSM", "PRCM"))
         if c in ("FENI", "FPRI"):

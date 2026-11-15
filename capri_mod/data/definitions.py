@@ -45,12 +45,12 @@ CROPS = [
     "TABO",  # Table olives (CAPRI TABO, a market product of its own)
     "TOBA",  # Tobacco
     "TEXT",  # Textile crops (CAPRI TEXT: cotton in EL, ES, BG, flax and hemp elsewhere; a market product of its own)
-    "GRAE",  # Grass and grazings, extensive (CAPRI GRAE; with GRAI the model's GRAS until S2, 7 November 2026)
+    "GRAE",  # Grass and grazings, extensive (CAPRI GRAE; with GRAI the model's GRAS until 7 November 2026)
     "GRAI",  # Grass and grazings, intensive (CAPRI GRAI)
     "MAIF",  # Maize for forage / silage
-    "OFAR",  # Fodder other on arable land (CAPRI OFAR; with ROOF the model's OFOD until S2, 7 November 2026)
+    "OFAR",  # Fodder other on arable land (CAPRI OFAR; with ROOF the model's OFOD until 7 November 2026)
     "ROOF",  # Fodder root crops (CAPRI ROOF)
-    "VSET",  # Set-aside voluntary (CAPRI VSET; with FALL the model's SETA until S2, 7 November 2026)
+    "VSET",  # Set-aside voluntary (CAPRI VSET; with FALL the model's SETA until 7 November 2026)
     "FALL",  # Fallow land (CAPRI FALL)
 ]
 
@@ -77,7 +77,7 @@ MARKET_COMMODITIES = [
     "SWHE", "BARL", "CORN", "RYEM", "OATS", "OCER", "PARI",
     "RAPE", "SUNF", "SOYA",                    # Oilseeds (other oilseeds, OOIL: no CAPRI market - nonXX_CROPS;
                                                  # a fixed activity, FACT; the pooled world market it had here
-                                                 # rested on an invented world total, removed in Sprint 9s)
+                                                 # rested on an invented world total, removed with the rest of the synthetic data)
     # white sugar; sugar beet is processed in the member states (CAPRI: PRCY, beet price follows the sugar
     # price), it has no world market (tools/build/build_sugar_processing.py)
     "SUGR",
@@ -90,7 +90,7 @@ MARKET_COMMODITIES = [
     "TEXT",                                      # Textile crops (a CAPRI market, arm_sets CROPS_DEF)
     "WINE", "OLIV",                              # Wine, olive oil (OLIV = CAPRI's olive oil OLIO)
     "MILK", "BUTR", "SKIM", "CHES", "WHEY",    # Dairy products
-    # CAPRI's other dairy products, traded as in CAPRI (Sprint 9f): fresh milk products, cream, concentrated
+    # CAPRI's other dairy products, traded as in CAPRI (the switch-on of CAPRI's dairy block): fresh milk products, cream, concentrated
     # milk, whole milk powder, casein (CAPRI codes)
     "FRMI", "CREM", "COCM", "WMIO", "CASE",
     "BEEF", "PORK", "POUL", "SGMT", "EGGS",    # Livestock products
@@ -111,7 +111,7 @@ MARKET_COMMODITIES = [
     # distillers' dried grains, the ethanol plants' by-product (CAPRI prodQuantBiofBy_), a traded protein feed
     "DDGS",
     # CAPRI's residual feeds (RESIMP), traded; EU output from milling (FPRI) and sugar processing (FENI) - MaprFeed_
-    # (Sprint 9h)
+    # (the completion of CAPRI's feed bulks)
     "FENI", "FPRI",
 ]
 
@@ -134,7 +134,7 @@ ALL_ACTIVITIES = CROPS + ANIMALS
 # DK000000), as CAPRI solves them (RU(SRNUTS2) $ MAP_RR, capmod/define_regional_sets.gms l. 230). Data:
 # capri_data/codes/regional_units.csv (tools/build/build_regional_units.py). Until 27 October 2026 the model had 248
 # NUTS-2016 regions listed here, mapped to CAPRI's units through crosswalks and split where they did not match
-# (docs/design/REGIONAL_UNITS_INVENTORY.md).
+# (docs/dev/REGIONAL_UNITS_INVENTORY.md).
 # ---------------------------------------------------------------------------
 def _load_units():
     import csv
@@ -198,7 +198,7 @@ EU_BLOCKS = tuple(dict.fromkeys(EU_MS_BLOCK.values()))
 def _load_trade_regions() -> tuple:
     """The market's trade regions in their order and CAPRI's region code of each (capri_data/codes/
     model_trade_regions.csv, a declared code list with a source per row: CAPRI's market regions, the EU's two as EU27;
-    ROW, CAPRI's 17 other regions together, was split into them on 3 November 2026, market move stage 3). The
+    ROW, CAPRI's 17 other regions together, was split into them on 3 November 2026, in the market's move onto CAPRI's regions). The
     United Kingdom (UK000000) and the Western Balkans (WBA) are trade regions of their own as in CAPRI since batch 7, Norway
     (NO000000) since K56; Egypt, Algeria, Saudi Arabia and Iran, trade regions here without any data until 29 October 2026,
     fold into ROW (KNOWN_ISSUES K45)."""
@@ -267,7 +267,7 @@ def in_run(region: str, countries=None) -> bool:
 # ---------------------------------------------------------------------------
 
 def _load_activity_classes():
-    """The model's activity classes (capri_data/codes/model_activity_classes.csv, declared; refactor stage 3, N6): per
+    """The model's activity classes (capri_data/codes/model_activity_classes.csv, declared): per
     activity its land type, crop-diversification group, fodder and fixed flags, a source per row; checked against
     CAPRI's sets by tools/build/build_code_lists.py (a row that differs names its departure). And the land types of the
     land market (model_land_types.csv, CAPRI's landTypesMrk). The list LAND_TYPES that stood here (ARABLE, PERMANENT,
@@ -312,7 +312,7 @@ CAPRI_TO_MODEL_ACTIVITY, COMMODITY_CAPRI_CODE, CAPRI_MEMBERS, CAPMOD_MEMBERS = _
 
 
 def _load_cattle_splits():
-    """CAPRI's cattle activities inside the model's animals (capri_data/codes/model_cattle_splits.csv, declared; N6):
+    """CAPRI's cattle activities inside the model's animals (capri_data/codes/model_cattle_splits.csv, declared):
     split -> (the CAPRI activity that gains the stalls z, the one that gives them up), in the table's order."""
     import csv
     from pathlib import Path
@@ -325,7 +325,7 @@ CATTLE_SPLITS = _load_cattle_splits()
 
 def _load_price_follows():
     """The activities whose price follows a market commodity (capri_data/codes/model_price_follows.csv, declared;
-    refactor stage 4): (activity, commodity) in the table's order, those of the EU's markets first-class
+    the refactor of the coupling's state): (activity, commodity) in the table's order, those of the EU's markets first-class
     (eu_market 1: beet follows sugar, durum wheat the wheat market) and all of them (Norway's step adds raw milk)."""
     import csv
     from pathlib import Path

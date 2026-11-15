@@ -1,4 +1,4 @@
-"""Scenarios as data (refactor stage 5): each scenario folder gives the scenario its Python factory gives, field by
+"""Scenarios as data: each scenario folder gives the scenario its Python factory gives, field by
 field; the definitions are checked before a run (capri_mod/scenarios/definition.py)."""
 from __future__ import annotations
 

@@ -35,7 +35,7 @@ CREATE TABLE supply_elasticities_regional (
     model_region VARCHAR NOT NULL REFERENCES regional_units (region),
     crop VARCHAR NOT NULL CHECK (crop IN ('BARL', 'CORN', 'DWHE', 'MAIF', 'OATS', 'OCER', 'OFAR', 'POTA', 'PULS', 'RAPE',
                                           'RYEM', 'SOYA', 'SUGB', 'SUNF', 'SWHE')),
-                                          -- model codes (OFAR the model's own since S2, 7 November 2026)
+                                          -- model codes (OFAR the model's own since 7 November 2026)
     value DOUBLE CHECK (value > 0 AND value <= 8),     -- empty: PELA has none; <= 8: CAPRI's bound min(8, ...)
     PRIMARY KEY (model_region, crop)
 );
@@ -51,7 +51,7 @@ CREATE TABLE pmp_own_price_elasticities (
     own_price_elas DOUBLE NOT NULL CHECK (own_price_elas > 0),
     PRIMARY KEY (region, crop)
 );
-COMMENT ON TABLE pmp_own_price_elasticities IS 'CAPRI''s estimated own-price elasticities (PELA) per CAPRI region and CAPRI activity, raw (bounded on load, capri_pmp.dampen_elasticity); the elasticity-calibrated PMP''s PMP_CAPRI source (docs/PMP_ELASTICITY_WIRING.md), not the default PMP (CAPRI''s 2030 terms). Built by tools/build/build_pmp_own_price_elasticities.py from PELA''s 2005 own-price slice (an earlier year where 2005 is missing)';
+COMMENT ON TABLE pmp_own_price_elasticities IS 'CAPRI''s estimated own-price elasticities (PELA) per CAPRI region and CAPRI activity, raw (bounded on load, capri_pmp.dampen_elasticity); the elasticity-calibrated PMP''s PMP_CAPRI source (docs/dev/PMP_ELASTICITY_WIRING.md), not the default PMP (CAPRI''s 2030 terms). Built by tools/build/build_pmp_own_price_elasticities.py from PELA''s 2005 own-price slice (an earlier year where 2005 is missing)';
 INSERT INTO value_units VALUES
   ('pmp_own_price_elasticities', 'own_price_elas', 'U_Elasticity', 'capri', 'CAPRI''s PELA, own-price, unbounded');
 
@@ -63,7 +63,7 @@ CREATE TABLE capri_own_price_elasticities (
     value DOUBLE CHECK (value > 0),                    -- empty: no supply elasticity of the product in the country
     PRIMARY KEY (capri_country, product)
 );
-COMMENT ON TABLE capri_own_price_elasticities IS 'CAPRI''s calibrated own-price supply elasticities p_ElasSupp (''CAL'', results/arm supply_elas_*) per member state (CAPRI''s two-letter country, BL = BE + LU, IR = IE) and product; the elasticity-calibrated PMP''s CAPRI_COUNTRY source for activities no regional source covers (docs/PMP_ELASTICITY_WIRING.md), not the default PMP. No builder in the repository';
+COMMENT ON TABLE capri_own_price_elasticities IS 'CAPRI''s calibrated own-price supply elasticities p_ElasSupp (''CAL'', results/arm supply_elas_*) per member state (CAPRI''s two-letter country, BL = BE + LU, IR = IE) and product; the elasticity-calibrated PMP''s CAPRI_COUNTRY source for activities no regional source covers (docs/dev/PMP_ELASTICITY_WIRING.md), not the default PMP. No builder in the repository';
 INSERT INTO value_units SELECT 'capri_own_price_elasticities', c, 'U_Elasticity', 'capri', 'CAPRI''s p_ElasSupp (own-price elasticity of supply)'
 FROM (VALUES ('RYEM'), ('BARL'), ('OATS'), ('MAIZ'), ('OCER'), ('RAPE'), ('SUNF'), ('PULS'), ('POTA'), ('TEXT'), ('TOBA'),
              ('TOMA'), ('OVEG'), ('APPL'), ('OFRU'), ('TAGR'), ('TWIN'), ('YCOW'), ('YBUL'), ('YHEI'), ('YCAM'), ('YCAF'),

@@ -1,4 +1,4 @@
-"""Provider adapters of the download layer, one per provider, behind one interface (docs/design/CAPTRD_MOD.md
+"""Provider adapters of the download layer, one per provider, behind one interface (docs/dev/CAPTRD_MOD.md
 section 7): fetch(dataset, ...) downloads the provider's file and returns it with its URL and metadata; parse(...)
 turns it into a long table (the provider's own dimension codes, time, value, flag). The fetch entry point
 (capri_mod.pipeline.fetch) stores both and writes the manifest row.

@@ -1,8 +1,8 @@
 """CAPRI's 2030 PMP terms of the intensity variants, per model region, for the model's intensity splits (K61).
 
 The model's intensity splits (dairy DCOL / DCOH, fattening bulls BULL / BULH, heifers HEIL / HEIH; tools/build/
-build_dairy_intensity.py, build_cattle_intensity.py; grassland GRAE / GRAI and the set-aside split until S2, 7
-November 2026, when they became the model's own activities with their own PMP terms) take their
+build_dairy_intensity.py, build_cattle_intensity.py; grassland GRAE / GRAI and the set-aside split until 7 November 2026,
+when they became the model's own activities with their own PMP terms) take their
 curvature from CAPRI's own diagonal terms p_pmpQuadTechn of the two variants. Those builders read CAPRI's base-year
 terms (capri_data/sources/intermediate/capreg/pmp_quad_techn.parquet: the first technology's diagonal per model region). This tool
 writes the same file format from the terms at the 2030 calibration point, so the builders can add the 2030 curvature
@@ -38,7 +38,7 @@ from _sources_io import read_source, source_records, write_source  # noqa: E402 
 SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
 ACTS = ("DCOL", "DCOH", "BULL", "BULH", "HEIL", "HEIH", "HEIR", "CAMF", "CAFF", "CAMR", "CAFR")
 FILES = {"capri2030": SRC / "pmp_quad_techn_2030.parquet", "recipe2030": SRC / "recipe_2030_quad_techn.parquet"}
-# (until S2, 7 November 2026, also GRAE, GRAI, VSET, FALL, ROOF, OFAR, and the recipe's 2017 terms for the set-aside
+# (until 7 November 2026, also GRAE, GRAI, VSET, FALL, ROOF, OFAR, and the recipe's 2017 terms for the set-aside
 # split's base-year weights, intensity_q_recipe2017.csv)
 
 

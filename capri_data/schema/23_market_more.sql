@@ -86,7 +86,7 @@ CREATE TABLE mkt_bilateral_trq_2017 (
     regime VARCHAR NOT NULL CHECK (regime IN ('bilateral', 'with_global', 'entry_price')),
     PRIMARY KEY (importer, exporter, commodity)
 );
-COMMENT ON TABLE mkt_bilateral_trq_2017 IS 'CAPRI''s bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks'' market regions and the regime of the pair (bilateral sigmoid; with the importer''s global quota: the smaller rate; entry price system), 2017 (tools/build/build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md).';
+COMMENT ON TABLE mkt_bilateral_trq_2017 IS 'CAPRI''s bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks'' market regions and the regime of the pair (bilateral sigmoid; with the importer''s global quota: the smaller rate; entry price system), 2017 (tools/build/build_bilateral_market.py build_trq; docs/dev/MARKET_TRQ_PORT.md).';
 INSERT INTO value_units VALUES
   ('mkt_bilateral_trq_2017', 'quota_kt', 'U_1000t', 'builder', 'CAPRI p_trqBilat TrqNT'),
   ('mkt_bilateral_trq_2017', 'ta_mfn', 'U_percent', 'builder', 'CAPRI p_trqBilat TaMFN'),
@@ -107,7 +107,7 @@ CREATE TABLE mkt_bilateral_trq_global_2017 (
     free_regions VARCHAR,
     PRIMARY KEY (importer, commodity)
 );
-COMMENT ON TABLE mkt_bilateral_trq_global_2017 IS 'CAPRI''s global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer''s rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2017 (tools/build/build_bilateral_market.py build_trq_global; docs/design/PORTS_STAGE4.md).';
+COMMENT ON TABLE mkt_bilateral_trq_global_2017 IS 'CAPRI''s global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer''s rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2017 (tools/build/build_bilateral_market.py build_trq_global; docs/dev/MARKET_TRQ_PORT.md).';
 INSERT INTO value_units VALUES
   ('mkt_bilateral_trq_global_2017', 'quota_kt', 'U_1000t', 'builder', 'CAPRI p_trqGlobl TrqNT'),
   ('mkt_bilateral_trq_global_2017', 'ta_mfn', 'U_percent', 'builder', 'CAPRI p_trqGlobl TaMFN'),
@@ -130,7 +130,7 @@ CREATE TABLE mkt_bilateral_trq_2030 (
     regime VARCHAR NOT NULL CHECK (regime IN ('bilateral', 'with_global', 'entry_price')),
     PRIMARY KEY (importer, exporter, commodity)
 );
-COMMENT ON TABLE mkt_bilateral_trq_2030 IS 'CAPRI''s bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks'' market regions and the regime of the pair (bilateral sigmoid; with the importer''s global quota: the smaller rate; entry price system), 2030 (tools/build/build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md).';
+COMMENT ON TABLE mkt_bilateral_trq_2030 IS 'CAPRI''s bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks'' market regions and the regime of the pair (bilateral sigmoid; with the importer''s global quota: the smaller rate; entry price system), 2030 (tools/build/build_bilateral_market.py build_trq; docs/dev/MARKET_TRQ_PORT.md).';
 INSERT INTO value_units VALUES
   ('mkt_bilateral_trq_2030', 'quota_kt', 'U_1000t', 'builder', 'CAPRI p_trqBilat TrqNT'),
   ('mkt_bilateral_trq_2030', 'ta_mfn', 'U_percent', 'builder', 'CAPRI p_trqBilat TaMFN'),
@@ -151,7 +151,7 @@ CREATE TABLE mkt_bilateral_trq_global_2030 (
     free_regions VARCHAR,
     PRIMARY KEY (importer, commodity)
 );
-COMMENT ON TABLE mkt_bilateral_trq_global_2030 IS 'CAPRI''s global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer''s rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2030 (tools/build/build_bilateral_market.py build_trq_global; docs/design/PORTS_STAGE4.md).';
+COMMENT ON TABLE mkt_bilateral_trq_global_2030 IS 'CAPRI''s global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer''s rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2030 (tools/build/build_bilateral_market.py build_trq_global; docs/dev/MARKET_TRQ_PORT.md).';
 INSERT INTO value_units VALUES
   ('mkt_bilateral_trq_global_2030', 'quota_kt', 'U_1000t', 'builder', 'CAPRI p_trqGlobl TrqNT'),
   ('mkt_bilateral_trq_global_2030', 'ta_mfn', 'U_percent', 'builder', 'CAPRI p_trqGlobl TaMFN'),
@@ -491,7 +491,7 @@ CREATE TABLE mkt_dairy_world_demand_elas (
     elas DOUBLE NOT NULL,
     PRIMARY KEY (rms, row, col)
 );
-COMMENT ON TABLE mkt_dairy_world_demand_elas IS 'CAPRI''s dairy block for the non-EU market regions (dairy Stage 4). (tools/build/build_dairy_world_blocks.py)';
+COMMENT ON TABLE mkt_dairy_world_demand_elas IS 'CAPRI''s dairy block for the non-EU market regions. (tools/build/build_dairy_world_blocks.py)';
 INSERT INTO value_units VALUES
   ('mkt_dairy_world_demand_elas', 'elas', NULL, 'open', 'dairy_world_demand_elas.elas: unit to be established');
 
@@ -503,7 +503,7 @@ CREATE TABLE mkt_dairy_world_hessian (
     h DOUBLE NOT NULL,
     PRIMARY KEY (rms, row, col)
 );
-COMMENT ON TABLE mkt_dairy_world_hessian IS 'CAPRI''s dairy block for the non-EU market regions (dairy Stage 4). (tools/build/build_dairy_world_blocks.py)';
+COMMENT ON TABLE mkt_dairy_world_hessian IS 'CAPRI''s dairy block for the non-EU market regions. (tools/build/build_dairy_world_blocks.py)';
 INSERT INTO value_units VALUES
   ('mkt_dairy_world_hessian', 'h', NULL, 'open', 'dairy_world_hessian.h: unit to be established');
 
@@ -522,7 +522,7 @@ CREATE TABLE mkt_dairy_world_processing (
     net_imports_kt DOUBLE,
     PRIMARY KEY (trade_region, rms, "item")
 );
-COMMENT ON TABLE mkt_dairy_world_processing IS 'CAPRI''s dairy block for the non-EU market regions (dairy Stage 4). (tools/build/build_dairy_world_blocks.py)';
+COMMENT ON TABLE mkt_dairy_world_processing IS 'CAPRI''s dairy block for the non-EU market regions. (tools/build/build_dairy_world_blocks.py)';
 INSERT INTO value_units VALUES
   ('mkt_dairy_world_processing', 'price', NULL, 'open', 'dairy_world_processing.price: unit to be established'),
   ('mkt_dairy_world_processing', 'q_kt', NULL, 'open', 'dairy_world_processing.q_kt: unit to be established'),
@@ -804,7 +804,7 @@ CREATE TABLE mkt_border_measures_2030 (
     free_regions VARCHAR,
     PRIMARY KEY (importer, commodity)
 );
-COMMENT ON TABLE mkt_border_measures_2030 IS 'CAPRI''s entry prices (DATA TriggerP) and flexible levies (DATA MinBordP) per importer policy block and model commodity, with the bound specific rate DATA TARS and the free-trade exporters (p_doubleZero), from sim_ini_21730 CUR (tools/build/build_bilateral_market.py build_border_measures; docs/design/PORTS_STAGE4.md, stage 6).';
+COMMENT ON TABLE mkt_border_measures_2030 IS 'CAPRI''s entry prices (DATA TriggerP) and flexible levies (DATA MinBordP) per importer policy block and model commodity, with the bound specific rate DATA TARS and the free-trade exporters (p_doubleZero), from sim_ini_21730 CUR (tools/build/build_bilateral_market.py build_border_measures; docs/dev/MARKET_TRQ_PORT.md, stage 6).';
 INSERT INTO value_units VALUES
   ('mkt_border_measures_2030', 'price', 'U_EuPerTon', 'builder', 'CAPRI DATA TriggerP or MinBordP'),
   ('mkt_border_measures_2030', 'tars', 'U_EuPerTon', 'builder', 'CAPRI DATA TARS');

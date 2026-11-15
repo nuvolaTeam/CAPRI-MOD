@@ -1,6 +1,6 @@
-"""Refactor stage 3a (docs/design/ARCHITECTURE_REFACTOR.md): the regional supply model's methods moved, unchanged, from
+"""The block-mixin refactor of the supply (docs/dev/ARCHITECTURE_REFACTOR.md): the regional supply model's methods moved, unchanged, from
 capri_mod/supply/supply_module.py into one module per block (capri_mod/supply/blocks/), the blocks mixins of
-RegionalSupplyModel, as stage 1 did for the market. A move only: every method's text is copied as it is (with the
+RegionalSupplyModel, as was done for the market. A move only: every method's text is copied as it is (with the
 comment lines directly above it), the class attributes stay on RegionalSupplyModel, and the blocks see supply_module's
 module-level names, which supply_module gives them once it is loaded (blocks/__init__.py, inject).
 
@@ -111,14 +111,14 @@ def main() -> None:
             s, e = meth[m]
             body.append("\n".join(lines[s - 1:e]))
         text = (f'"""{doc}\n\nRegionalSupplyModel\'s methods, moved unchanged from capri_mod/supply/supply_module.py (refactor '
-                f'stage 3a,\ndocs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module\'s, '
+                f'stage 3a,\ndocs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module\'s, '
                 f'given to\nthis module once supply_module is loaded (capri_mod.supply.blocks.inject); the annotations are '
                 f'not evaluated\n(they name supply_module\'s types).\n"""\nfrom __future__ import annotations\n\n\n'
                 f"class {cname}:\n" + "\n\n".join(body) + "\n")
         # a block sits one folder below supply_module.py: the repository root is one parent further from __file__
         text = text.replace("__file__).resolve().parents[2]", "__file__).resolve().parents[3]")
         (BLOCKS / f"{blk}.py").write_text(text)
-    init = ('"""The regional supply model\'s blocks (refactor stage 3a): mixins of supply_module.RegionalSupplyModel.\n\n'
+    init = ('"""The regional supply model\'s blocks (the block-mixin refactor): mixins of supply_module.RegionalSupplyModel.\n\n'
             "Their methods were moved unchanged from supply_module.py and use its module-level names (numpy as np, the "
             "settings,\nthe data tables' readers, SupplyModule, ...): inject gives each block module those names once "
             "supply_module is\nloaded (a name a block defines itself is kept).\n\"\"\"\n"
@@ -143,7 +143,7 @@ def main() -> None:
         if i in drop:
             continue
         if i == cls.lineno:
-            out.append("from capri_mod.supply.blocks import (  # noqa: E402  (refactor stage 3a: the blocks)")
+            out.append("from capri_mod.supply.blocks import (  # noqa: E402  (the block-mixin refactor: the blocks)")
             out.append("    " + ", ".join(c for c, _, _ in ASSIGN.values()) + ",")
             out.append(")")
             out.append("")
@@ -158,7 +158,7 @@ def main() -> None:
         if blank <= 2:
             res.append(ln)
     text = "\n".join(res).rstrip("\n") + "\n"
-    text += ("\n\n# refactor stage 3a: the blocks' methods see this module's names (capri_mod/supply/blocks/__init__.py)\n"
+    text += ("\n\n# the refactor's split into block mixins: the blocks' methods see this module's names (capri_mod/supply/blocks/__init__.py)\n"
              "from capri_mod.supply import blocks as _blocks  # noqa: E402\n"
              "_blocks.inject(globals())\n")
     SRC.write_text(text)

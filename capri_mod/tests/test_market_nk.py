@@ -1,4 +1,4 @@
-"""Step G2: the market's Newton-Krylov solve (capri_mod/market/market_nk.py) reaches the default solve's equilibrium."""
+"""The market's Newton-Krylov solve (capri_mod/market/market_nk.py) reaches the default solve's equilibrium."""
 from pathlib import Path
 
 import numpy as np

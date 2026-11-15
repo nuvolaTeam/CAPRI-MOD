@@ -1,5 +1,5 @@
-"""The coefficients of CAPRI's crop technologies T1 and T2 that the model's mix columns carry (S1,
-docs/design/S1_MIX_COLUMNS.md): per model region and crop with both technologies, the difference T1 - T2 per ha of
+"""The coefficients of CAPRI's crop technologies T1 and T2 that the model's mix columns carry (
+docs/dev/CROP_TECHNOLOGY_MIX_COLUMNS.md): per model region and crop with both technologies, the difference T1 - T2 per ha of
 each item the technology factors move.
 
 CAPRI (intens/techf.gms l. 64-108, fert/fertned.gms l. 206-207, policy/rd_logic.gms l. 330-334, policy/prmcut.gms
@@ -27,7 +27,7 @@ have its LEVL T1 and T2 in p_technFact):
 
 Not carried: irrigation water (factor 0), the fertiliser cost (through the nutrient need), sugar beet's VCOF
 (sugar/techf.gms l. 103, the sugar quota regime's variable cost share, without effect since the quotas ended in 2017;
-to be confirmed, docs/design/S1_MIX_COLUMNS.md section 6).
+to be confirmed, docs/dev/CROP_TECHNOLOGY_MIX_COLUMNS.md section 6).
 
 Sources: capri_data/sources/intermediate/technology/techn_fact_2030.parquet (tools/build/build_techn_2030.py),
 capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.parquet, CAPREG's 2017 results res_17<MS>.txt (input
@@ -144,7 +144,7 @@ def main() -> None:
             mc = model_of.get(act)
             if mc is None or mc in multi:
                 # a model crop of several CAPRI activities has one mix column only if they are one activity (none
-                # since S2, 7 November 2026)
+                # since 7 November 2026)
                 assert mc is None, f"{mc} = {multi[mc]}: a mix column per CAPRI activity is not defined"
                 continue
             d = F[(cr, act)]

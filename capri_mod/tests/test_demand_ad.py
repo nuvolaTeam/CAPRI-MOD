@@ -1,4 +1,4 @@
-"""Step G2c: CAPRI's GL human consumption in CasADi (capri_mod/market/demand_ad.py) equals the equations as NumPy had
+"""CAPRI's GL human consumption in CasADi (capri_mod/market/demand_ad.py) equals the equations as NumPy had
 them until 31 October 2026 (written out here as the reference), and its Jacobian equals finite differences."""
 import numpy as np
 import pytest

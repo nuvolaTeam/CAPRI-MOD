@@ -1,6 +1,6 @@
 """The inputs of CAPRI's 2004-2013 premium regime as its CAP 2014-2020 chain evaluates it for the BPS's historical key
 (scen/base_scenarios/CAP_2014_2020.gms l. 44-77: pol_input/mtr_RD.gms -> pol_input/mtr_until2013.gms, then
-policy/calc_mtr_top.gms with policy/calc_mtr.gms; the premium module, P2c, port A).
+policy/calc_mtr_top.gms with policy/calc_mtr.gms; the premium module).
 
 sim_ini_21730 is written at the simulation start: it holds the premium declarations of the time series (Agenda 2000,
 1993-2003, and the other files' edits) but not mtr_until2013.gms's, which the 2030 run executes on top of them (its

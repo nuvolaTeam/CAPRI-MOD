@@ -1,4 +1,4 @@
-"""G3.2a: the import prices of every bilateral commodity in CasADi (capri_mod/market/import_prices_ad.py) equal
+"""The import prices of every bilateral commodity in CasADi (capri_mod/market/import_prices_ad.py) equal
 BilateralCommodity.import_prices with the quotas' sigmas given (bilateral and global quotas, entry prices, flexible
 levies), at the base and at random prices and sigmas: the 2017 market of a solved baseline (quotas; the 2017 market
 year has no entry prices nor levies) and the 2030 market calibrated at CAPRI's 2030 data (the border measures too)."""
@@ -75,7 +75,7 @@ def _check(market, need_border):
 
 @pytest.mark.slow
 def test_trade_system_in_casadi_equals_the_numeric_one(market_2030):
-    """G3.2b: trade_system_function's balances, quota equations and flows equal BilateralCommodity.residual, flows and
+    """Trade_system_function's balances, quota equations and flows equal BilateralCommodity.residual, flows and
     trq_arguments at random prices, sigmas, supply and use (the 2030 market: every policy regime)."""
     from capri_mod.market.import_prices_ad import cells
     from capri_mod.market.trade_system_ad import active_quotas, trade_system_function

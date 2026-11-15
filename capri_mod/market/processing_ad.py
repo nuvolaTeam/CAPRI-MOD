@@ -1,6 +1,6 @@
 """CAPRI's processing demand in CasADi: oilseed crushing (ProcMargO_, ProcNQ_, ProcFudge_, ProcO_, procYield_) and the
-normalised quadratic processing of the other products (ProcNQ_, ProcFudge_); market programme step G2e
-(docs/design/MARKET_IPOPT_DESIGN.md sections 5-6).
+normalised quadratic processing of the other products (ProcNQ_, ProcFudge_)
+(docs/dev/MARKET_IPOPT_DESIGN.md sections 5-6).
 
 Written once, here; the model evaluates it from here (ProcessingMixin._crush_state, DemandMixin.demand_response),
 the project lead's choice of one implementation per block (section 7, 30 October 2026). The equations, operations and
@@ -23,7 +23,7 @@ def crush_columns(chains: Dict[str, Tuple[str, str]]) -> List[str]:
 
 
 def _fudge(ca, q, q0):
-    """CAPRI's ProcFudge_ (market_model.gms l. 1158-1163; processing.py _proc_fudge until G2f): q0 a number or a CasADi
+    """CAPRI's ProcFudge_ (market_model.gms l. 1158-1163; processing.py _proc_fudge until 4 November 2026): q0 a number or a CasADi
     expression."""
     if isinstance(q0, (int, float)):
         z = 0.01 * min(1000.0, max(1e-11, float(q0)))
@@ -44,7 +44,7 @@ def _cet(ca, e, ro, rc):
     return Ao + (S0 - T) / 2.0, Ac + (S0 - T) / 2.0
 
 
-def crush_function(cp: dict, seeds: dict, Hrms: dict, chains: Dict[str, Tuple[str, str]]):
+def crush_function(cp: dict, seeds: dict, Hrms: dict, chains: Dict[str, Tuple[str, str]], with_raw: bool = False):
     """CasADi Function rat[nr x 9] -> (out[n_pairs x 3], detail[n_entries x 2]) for every (region, seed) of cp
     (ProcessingMixin._crush_params, in its order):
       - rat: per region of cp (in order of first appearance) the price ratios of the chain's commodities
@@ -52,6 +52,9 @@ def crush_function(cp: dict, seeds: dict, Hrms: dict, chains: Dict[str, Tuple[st
       - out: crush, oil output, cake output per pair;
       - detail: per behavioural region of the pairs with entries (in order): the crush change before ProcFudge_ and
         the own margin change (the welfare report's detail of _crush_state).
+      - raw (with_raw only): per pair, the crush of ProcNQ_ alone, its entries' rows summed without ProcFudge_ (CAPRI's
+        v_procQuantNeg where the lower bound is at or below 0, v_procQuant within its bounds otherwise), for the
+        whole-market system's lifted processing (market_system_ad, market.bounds "capri").
     Returns (Function, regions (rows of rat), pairs, the entries' keys (region, seed, behavioural region))."""
     import casadi as ca
     cols = crush_columns(chains)
@@ -65,7 +68,7 @@ def crush_function(cp: dict, seeds: dict, Hrms: dict, chains: Dict[str, Tuple[st
 
     def ratio(r, x):
         return rat[ri[r], ci[x]]
-    rows, det, keys = [], [], []
+    rows, det, keys, raws = [], [], [], []
     pairs = list(cp)
     for (r, s) in pairs:
         p = cp[(r, s)]
@@ -73,10 +76,12 @@ def crush_function(cp: dict, seeds: dict, Hrms: dict, chains: Dict[str, Tuple[st
         ents = seeds.get((r, s), [])
         if not ents:
             rows.append(ca.horzcat(p["q0"], p["q0"] * p["yo"], p["q0"] * p["yc"]))
+            raws.append(ca.SX(p["q0"]))
             continue
         k = p["q0"] / sum(e["q0"] for e in ents)
         crush = oil = cake = 0.0
         oil0 = cake0 = 0.0
+        raw = 0.0
         for e in ents:
             Hr = Hrms.get(r, {}).get(e["rms"], {})
             q = k * e["q0"]
@@ -97,6 +102,7 @@ def crush_function(cp: dict, seeds: dict, Hrms: dict, chains: Dict[str, Tuple[st
                 - (-e["a1"] + e["ppo"] * e["yo0"] + e["ppc"] * e["yc0"])
             det.append(ca.horzcat(q - k * e["q0"], dm_))
             keys.append((r, s, e["rms"]))
+            raw = raw + q
             q = _fudge(ca, q, k * e["q0"])
             crush = crush + q
             oil = oil + q * yo_
@@ -105,18 +111,25 @@ def crush_function(cp: dict, seeds: dict, Hrms: dict, chains: Dict[str, Tuple[st
             cake0 += k * e["q0"] * e["yc0"]
         rows.append(ca.horzcat(crush, p["q0"] * p["yo"] * (oil / oil0 if oil0 > 0 else 1.0),
                                p["q0"] * p["yc"] * (cake / cake0 if cake0 > 0 else 1.0)))
+        raws.append(raw)
     out = ca.vertcat(*rows) if rows else ca.SX(0, 3)
     detail = ca.vertcat(*det) if det else ca.SX(0, 2)
-    f = ca.Function("crush", [rat], [out, detail], ["rat"], ["out", "detail"])
+    if with_raw:
+        rw = ca.vertcat(*raws) if raws else ca.SX(0, 1)
+        f = ca.Function("crush", [rat], [out, detail, rw], ["rat"], ["out", "detail", "raw"])
+    else:
+        f = ca.Function("crush", [rat], [out, detail], ["rat"], ["out", "detail"])
     return f, regions, pairs, keys
 
 
-def proc_nq_function(pq: dict, regions: List[str], commodities: List[str], skip: set, skip_price: set):
+def proc_nq_function(pq: dict, regions: List[str], commodities: List[str], skip: set, skip_price: set,
+                     with_raw: bool = False):
     """CasADi Function (PR[nR x nC], P0[cells]) -> P[cells]: the processing of the other products (demand.py's
     PROCESSING loop: ProcNQ_ with CAPRI's Hessian on the Armington price ratios, then ProcFudge_), for the cells
     (region row, commodity column) of pq's shares that it covers, in their order. `skip`: the processed commodities
     left out (the oilseeds, crushed in their own block, and ProcessingMixin._PROC_NQ_SKIP); `skip_price`: the prices
-    left out of the Hessian's terms (the oilseeds'). P0 > 0 is the caller's condition, checked per call."""
+    left out of the Hessian's terms (the oilseeds'). P0 > 0 is the caller's condition, checked per call. with_raw: a
+    second output, ProcNQ_'s rows before ProcFudge_ (the whole-market system's lifted processing, market.bounds "capri")."""
     import casadi as ca
     R = {r: i for i, r in enumerate(regions)}
     Cc = {c: j for j, c in enumerate(commodities)}
@@ -138,5 +151,9 @@ def proc_nq_function(pq: dict, regions: List[str], commodities: List[str], skip:
         terms.append(dq)
     P0 = ca.SX.sym("P0", len(cells))
     P = ca.vertcat(*[_fudge(ca, P0[k] + terms[k], P0[k]) for k in range(len(cells))]) if cells else ca.SX(0, 1)
-    f = ca.Function("proc_nq", [PR, P0], [P], ["PR", "P0"], ["P"])
+    if with_raw:
+        Pr = ca.vertcat(*[P0[k] + terms[k] for k in range(len(cells))]) if cells else ca.SX(0, 1)
+        f = ca.Function("proc_nq", [PR, P0], [P, Pr], ["PR", "P0"], ["P", "raw"])
+    else:
+        f = ca.Function("proc_nq", [PR, P0], [P], ["PR", "P0"], ["P"])
     return f, cells

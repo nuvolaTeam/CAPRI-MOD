@@ -1,6 +1,6 @@
 """CAPRI's bilateral trade system of one commodity in CasADi: the residual of `BilateralCommodity.residual` with
 supply and use log-linear around the current point (as `MarketModule._bilateral_inner`), and its exact Jacobian
-(market programme step G1, docs/design/ARCHITECTURE_REFACTOR.md section 6, G).
+(the trade systems' exact Jacobian, docs/dev/ARCHITECTURE_REFACTOR.md section 6, G).
 
 The equations are those of capri_mod/market/bilateral.py (arm/market_model.gms impPrice_, the two Armington nests,
 SupBalM_), written once more as a CasADi expression so the Newton step has the exact Jacobian instead of finite
@@ -10,7 +10,7 @@ Unknowns: z = log r over the regions that supply the commodity (the others held 
 (numeric, set per call): the import-price matrices of the current tariffs and quota offsets, p = A r + B; the current
 point (Sk, Dk, rk, PAk) and the local supply and use elasticities (es, ed); the residual scale.
 
-trade_trq_function (step G2a, docs/design/MARKET_IPOPT_DESIGN.md section 6) adds CAPRI's tariff-rate quotas to the
+trade_trq_function (docs/dev/MARKET_IPOPT_DESIGN.md section 6) adds CAPRI's tariff-rate quotas to the
 system: their offsets become unknowns with CAPRI's sigmoid as their equations.
 """
 from __future__ import annotations
@@ -115,8 +115,8 @@ def trq_quotas(sc) -> list:
 
 
 def trade_trq_function(sc, act):
-    """Market programme step G2a: the trade system with CAPRI's bilateral tariff-rate quotas inside it, as in
-    m_globMarket (trqSigmoidFunc_, tarSpec_, tarAdval_ of arm/market_model.gms; docs/design/PORTS_STAGE4.md), instead
+    """The trade system with CAPRI's bilateral tariff-rate quotas inside it, as in
+    m_globMarket (trqSigmoidFunc_, tarSpec_, tarAdval_ of arm/market_model.gms; docs/dev/MARKET_TRQ_PORT.md), instead
     of the outer fixed point of BilateralCommodity.trq_solve.
 
     CasADi Function (z, s, A, B0, Sk, Dk, rk, PAk, es, ed, scale) -> (g, J):
@@ -128,9 +128,9 @@ def trade_trq_function(sc, act):
       - J = the Jacobian of g in (z, s).
     The TRQ equation is trq_solve's fixed point with the flows' full response, not its local one."""
     if getattr(sc, "trq_globals", None) or any(q["regime"] != "bilateral" for q in (sc.trq_quotas or ())):
-        raise NotImplementedError(f"{sc.name}: G2a's trade function has CAPRI's bilateral quotas only; the global quotas "
+        raise NotImplementedError(f"{sc.name}: this trade function has CAPRI's bilateral quotas only; the global quotas "
                                   "(TRQImports_, the ncpcm minimum) and the entry prices are in the fixed-point solve "
-                                  "(BilateralCommodity.trq_solve) until G3 writes them as equations")
+                                  "(BilateralCommodity.trq_solve) until the whole-market system writes them as equations")
     k_ = ("trq",) + _key(sc, act)
     f = _CACHE.get(k_)
     if f is not None:
@@ -173,10 +173,10 @@ def trade_trq_function(sc, act):
 
 
 def import_price_matrices(sc, tariff_adds=None, offsets: bool = True) -> Tuple[np.ndarray, np.ndarray]:
-    """p = A r + B: the import prices of `BilateralCommodity.import_prices` split into the part proportional to the
+    """P = A r + B: the import prices of `BilateralCommodity.import_prices` split into the part proportional to the
     exporters' price ratios and the rest (base terms, quota offsets, CAPRI's ad valorem tariff on price plus transport).
     offsets=False leaves the quota offsets out (trade_trq_function has them as unknowns). CAPRI's entry prices and
-    flexible levies (BilateralCommodity.border_spec, stage 6) are not in A, B: G1's system holds them at their values
+    flexible levies (BilateralCommodity.border_spec) are not in A, B: the exact-Jacobian system holds them at their values
     at r = 1 for a commodity that has them (the Newton-Krylov preconditioner; the default solve's exact path is not
     taken for such a commodity)."""
     n = len(sc.regions)
@@ -184,7 +184,7 @@ def import_price_matrices(sc, tariff_adds=None, offsets: bool = True) -> Tuple[n
     B = np.array(sc.b, float, copy=True)
     # the offsets of the bilateral and the global quotas, as BilateralCommodity.import_prices adds them (until
     # 9 November 2026 only with a bilateral quota: a commodity with global quotas alone, casein, lost its offset in the
-    # optional exact-Jacobian and Newton-Krylov solves; at CAPRI's calibration point (S7) its largest offset is 278 EUR/t)
+    # optional exact-Jacobian and Newton-Krylov solves; at CAPRI's calibration point its largest offset is 278 EUR/t)
     if offsets and (getattr(sc, "trq_quotas", None) or getattr(sc, "trq_globals", None)) and sc.trq_offset is not None:
         B = B + sc.trq_offset
     for importer, pts in (tariff_adds or ()):

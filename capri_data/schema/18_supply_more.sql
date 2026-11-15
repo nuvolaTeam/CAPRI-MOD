@@ -463,7 +463,7 @@ CREATE TABLE sup_techn_mix_2030 (
     capri_region VARCHAR NOT NULL,
     PRIMARY KEY (region, activity)
 );
-COMMENT ON TABLE sup_techn_mix_2030 IS 'The T1 - T2 differences per ha of the items CAPRI''s technology factors move (intens/techf.gms, fert/fertned.gms, policy/rd_logic.gms, NUTNED_), per model region and crop with both technologies: the coefficients of the mix columns (S1, docs/design/S1_MIX_COLUMNS.md; tools/build/build_techn_mix_2030.py)';
+COMMENT ON TABLE sup_techn_mix_2030 IS 'The T1 - T2 differences per ha of the items CAPRI''s technology factors move (intens/techf.gms, fert/fertned.gms, policy/rd_logic.gms, NUTNED_), per model region and crop with both technologies: the coefficients of the mix columns (S1, docs/dev/CROP_TECHNOLOGY_MIX_COLUMNS.md; tools/build/build_techn_mix_2030.py)';
 INSERT INTO value_units VALUES
   ('sup_techn_mix_2030', 'yield_diff', 'U_ratio', 'capri', 'p_technFact Yield T1 - T2: outputs and nutrient removal per unit z over the crop''s per ha'),
   ('sup_techn_mix_2030', 'need_diff', 'U_ratio', 'builder', '(g_T1 - g_T2) / gbar, g = SQRT(1 + y)(1 + y) (NUTNED_): nutrient need per unit z over the crop''s need per ha'),
@@ -511,7 +511,7 @@ CREATE TABLE sup_set_aside_split (
     prem_fall_2030 DOUBLE NOT NULL,
     PRIMARY KEY (region)
 );
-COMMENT ON TABLE sup_set_aside_split IS 'CAPRI''s premiums PRME (EUR/ha) of its two set-aside activities VSET and FALL per model region, 2017 and 2030 (the 2030 values in the model''s 2017 money), for the set-aside report (tools/build/build_labour_setaside.py; until S2, 7 November 2026, also the split of the model''s SETA and its labour)';
+COMMENT ON TABLE sup_set_aside_split IS 'CAPRI''s premiums PRME (EUR/ha) of its two set-aside activities VSET and FALL per model region, 2017 and 2030 (the 2030 values in the model''s 2017 money), for the set-aside report (tools/build/build_labour_setaside.py; until 7 November 2026, also the split of the model''s SETA and its labour)';
 INSERT INTO value_units VALUES
   ('sup_set_aside_split', 'prem_vset', 'U_EuPerHa', 'capri', 'CAPRI''s PRME of VSET'),
   ('sup_set_aside_split', 'prem_fall', 'U_EuPerHa', 'capri', 'CAPRI''s PRME of FALL'),
@@ -873,7 +873,7 @@ CREATE TABLE sup_producer_prices_regional (
     WINE DOUBLE,
     PRIMARY KEY (model_region)
 );
-COMMENT ON TABLE sup_producer_prices_regional IS 'CAPRI''s regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.parquet), CAPRI''s TWIN column for WINE where it is empty (and OFAR for OFOD until S2, 7 November 2026), and a missing regional price filled with the country''s national price (sources/capreg/capreg_national_prices.parquet; tools/build/build_model_premium_prices.py; done by the model''s loader at run time until 31 October 2026)';
+COMMENT ON TABLE sup_producer_prices_regional IS 'CAPRI''s regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.parquet), CAPRI''s TWIN column for WINE where it is empty (and OFAR for OFOD until 7 November 2026), and a missing regional price filled with the country''s national price (sources/capreg/capreg_national_prices.parquet; tools/build/build_model_premium_prices.py; done by the model''s loader at run time until 31 October 2026)';
 INSERT INTO value_units VALUES
   ('sup_producer_prices_regional', 'AGGT', NULL, 'open', 'producer_prices_regional.AGGT: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
   ('sup_producer_prices_regional', 'APPL', NULL, 'open', 'producer_prices_regional.APPL: EUR/t as CAPRI''s MPRI, to be confirmed per column'),

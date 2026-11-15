@@ -1,9 +1,9 @@
-"""CAPRI's market supply functions (ProdNQ_) in CasADi: market programme step G2b, first part
-(docs/design/MARKET_IPOPT_DESIGN.md sections 5-6).
+"""CAPRI's market supply functions (ProdNQ_) in CasADi
+(docs/dev/MARKET_IPOPT_DESIGN.md sections 5-6).
 
 The functions are written once, here, and the model evaluates them from here (SupplyMixin._noneu_market_supply_nq and
 _eu_market_supply_nq, capri_mod/market/supply.py): the project lead's choice of one implementation per block (section
-7, 30 October 2026). The assembled market NLP of step G3 composes them with the trade systems' prices; until then the
+7, 30 October 2026). The assembled market system (market_system_ad.py) composes them with the trade systems' prices; until then the
 default solve calls them numerically. CAPRI's equation (arm/market_model.gms ProdNQ_, the normalised quadratic supply
 function with p_hessNQSupp, here in the ratio form of tools/build/build_noneu_market_supply_nq.py):
 
@@ -12,7 +12,7 @@ function with p_hessNQSupp, here in the ratio form of tools/build/build_noneu_ma
 per market region and product x: r the region's price ratios of the market products, m its dairy block's raw milk
 price ratio, FEDE_s the feed energy price ratio of its CAPRI region s (audit M3), l_x the change from the land rents of
 its CAPRI regions (the land block, noneu_land_solve, an input here: it is lifted with the land block). h in kt per unit
-of price ratio. The floor at 0 is the model's (as supply.py before the move): a kink for G3 (CasADi's fmax), to be
+of price ratio. The floor at 0 is the model's (as supply.py before the move): a kink for the whole-market system (CasADi's fmax), to be
 registered or removed there.
 
 Floating point: the sums run in CasADi's order (matrix-vector products), so the values differ from the loops of
@@ -67,7 +67,7 @@ def hess_rows_function(name: str, Hm: np.ndarray):
     (the market supply Hessian measured on the supply models at the baseline, arm/simu_calibration_to_supply.gms
     l. 360-368: the constant re-anchored to the models' latest output s0 at the prices they saw), q = max(0, s0 + Hm dP
     + extra), dP the price change against the prices the models saw (raw milk's at 0 where the dairy block prices it,
-    NQ_PRICE_AS_SEEN), extra the young animals' and raw milk's terms of their clearing (lifted in G2g); q_raw the same
+    NQ_PRICE_AS_SEEN), extra the young animals' and raw milk's terms of their clearing (lifted as unknowns); q_raw the same
     without the floor."""
     import casadi as ca
     nx, nc = Hm.shape
@@ -134,7 +134,7 @@ def land_residual_function(name: str, d: dict):
 
 def yani_function(name: str, H_YP: np.ndarray, H_YY: np.ndarray, H_PY: np.ndarray):
     """CasADi Function (dr[n_y], net[n_y], ref[n_y], dP[n_c], extra[n_y], dlev[n_y]) -> (res[n_y], J[n_y x n_y],
-    eff[n_x]): CAPRI's yaniMarket_ of one market region (arm/market_model.gms l. 1579-1603; step G2g): the net supply
+    eff[n_x]): CAPRI's yaniMarket_ of one market region (arm/market_model.gms l. 1579-1603): the net supply
     of each young-animal good, a normalised-quadratic function of all prices recalibrated to the supply models' latest
     solution (net), equals its reference, res = net + H_YP dP + H_YY dr + extra - ref, dr the young-animal prices'
     change from those the models saw, dP the products', extra the change from the member states' milk prices; J its

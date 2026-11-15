@@ -1,4 +1,4 @@
-"""CAPRI's Norwegian premiums (policy/norw_pol.gms, star 3.0; P2): the seven tables of payment rates, national rates
+"""CAPRI's Norwegian premiums (policy/norw_pol.gms, star 3.0): the seven tables of payment rates, national rates
 (NO000000, EUR per ha, head or t) and regional factors (the NUTS 2 units), each payment group by year.
 
   p_norwPremPact_E(region, year, scheme, activity)   DPNOR1-DPNOR5: per activity unit (APPTYPE noDirPay)

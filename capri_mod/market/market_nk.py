@@ -1,5 +1,5 @@
-"""MarketModule: the market's simultaneous solve by Newton-Krylov (market programme step G2, the project lead's choice
-of 29 October 2026; docs/design/ARCHITECTURE_REFACTOR.md section 6, G).
+"""MarketModule: the market's simultaneous solve by Newton-Krylov (the project lead's choice
+of 29 October 2026; docs/dev/ARCHITECTURE_REFACTOR.md section 6, G).
 
 CAPRI solves its market model as one simultaneous system (CONOPT on arm/market_model.gms). capri-mod's default solve
 (BilateralSolveMixin._solve_bilateral) is a successive linearisation: each step re-evaluates the full model response

@@ -11,7 +11,7 @@ The dumps carry 15 significant digits (the GDX files 17): parity with CAPTRD is 
 taken from a dump. A country present in both forms is taken from the GDX file.
 
 Output (CAPRI's own data: read-only reference, read by the tests and the parity runs, never by the model;
-docs/design/CAPTRD_MOD.md section 6):
+docs/dev/CAPTRD_MOD.md section 6):
   capri_sources/reference/capreg_base/17/<CC>.csv.gz    region, col, row, t, value, eps   (t = Y)
 
 Zeros: a record listed as Eps is written with value 0 and eps = 1; a record not listed is absent.

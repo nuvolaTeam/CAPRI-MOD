@@ -1,4 +1,4 @@
-"""CAPRI's Nordic aid (policy/nordicaid.gms, P2c): the national aid to northern Finland and Sweden granted on their
+"""CAPRI's Nordic aid (policy/nordicaid.gms): the national aid to northern Finland and Sweden granted on their
 accession (regulation 142), as CAPRI declares it for 1995 and def_policy.gms carries it to the simulation year.
 
 A CAPRI region's rate of a scheme for a premium group is the sum over the Nordic aid regions of its share in each

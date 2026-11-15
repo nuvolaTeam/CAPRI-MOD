@@ -82,7 +82,7 @@ def test_the_application_factors_and_the_entitlement_weights():
 
 
 def test_the_cap14_declared_premiums_follow_capris_2030_reference():
-    """P2b: the coupled and area schemes' 2030 declarations (cap14_premiums) through policy.gms with the trend levels
+    """The coupled and area schemes' 2030 declarations (cap14_premiums) through policy.gms with the trend levels
     (cap14_entitlement_levels.csv, all production activities): the declared premium equals CAPRI's 2030 reference
     PRMD (dataOut, used as a check) at all 22564 unit x activity x scheme records and the 1893 member states'
     (re-aggregated) within 1e-6, none missing or extra at the units. Four written here: CAPRI's unit BL400000, its

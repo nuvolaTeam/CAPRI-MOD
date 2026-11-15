@@ -1,5 +1,5 @@
 """CAPRI's 2030 market balance per EU member state (Data_CAL of data_market_1730defaulta), for the market with the EU
-as CAPRI's two trade blocks (docs/archive/MARKET_STRUCTURE_PLAN.md step 3).
+as CAPRI's two trade blocks (docs/dev/archive/MARKET_STRUCTURE_PLAN.md step 3).
 
 CAPRI clears the EU market per trade block, A_EU_WEST and A_EU_EAST (gams/aggregation/defaultA.agg), with the member
 states as behavioural regions inside. The market's EU-level data that have no member-state detail of their own (feed

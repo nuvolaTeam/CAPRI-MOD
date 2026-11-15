@@ -1,4 +1,4 @@
-"""Paths and settings of the data pipeline (docs/design/CAPTRD_MOD.md sections 6-7, 9).
+"""Paths and settings of the data pipeline (docs/dev/CAPTRD_MOD.md sections 6-7, 9).
 
 The store holds what the pipeline downloads and builds:
     <store>/raw/<provider>/<dataset>/<download_id>.<ext>   the provider's file as received (never edited)

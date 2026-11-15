@@ -26,7 +26,7 @@ The four pieces
 3. Crop-to-group mapping (EPRD_TO_GRP, gams/sets.gms; the variant in gams/capdis/sets.gms uses a different group
    set and must not be used here): the share term's arable activities, read from
    capri_data/codes/model_activity_classes.csv (share_term_arable), checked against CAPRI's set by
-   tools/build/build_code_lists.py (refactor stage 3, N6).
+   tools/build/build_code_lists.py.
 
 4. Provenance. Every region x activity elasticity is recorded as REGIONAL_CAPRI, PMP_CAPRI,
    CAPRI_COUNTRY (member state's calibrated value), CAPRI_CAL_PRODUCT (livestock: the product's
@@ -47,7 +47,7 @@ from capri_mod.data.definitions import MS_CODE, ACTIVITY_CLASSES, CAPRI_TO_MODEL
 
 def dampen_elasticity(eps):
     """CAPRI's heuristic upper bound. Values at or below p_elasHigh (the parameter ELAS_HIGH) pass through; the
-    bound is MIN(8, ...) (ELAS_CAP). Both read through the run's inputs (refactor stage 3, N1)."""
+    bound is MIN(8, ...) (ELAS_CAP). Both read through the run's inputs."""
     elas_high, elas_cap = param("ELAS_HIGH"), param("ELAS_CAP")
     e = np.asarray(eps, dtype=float)
     damped = np.minimum(elas_cap, np.sqrt(np.maximum(e, 0.0))
@@ -74,8 +74,8 @@ def share_term(activity_levels: pd.Series, arable_total: float,
 
 # Activities on arable land, used for the share term denominator: CAPRI's crop groups EPRD_TO_GRP (gams/sets.gms
 # l. 2918 ff.; CERE, CER2, OILS, OARA, FARA) through the crosswalk (MAIZ = CORN), plus set-aside,
-# textiles and tobacco (the model's); capri_data/codes/model_activity_classes.csv share_term_arable (refactor stage 3,
-# N6). Permanent crops, grassland and livestock are excluded.
+# textiles and tobacco (the model's); capri_data/codes/model_activity_classes.csv share_term_arable.
+# Permanent crops, grassland and livestock are excluded.
 ARABLE_ACTIVITIES = tuple(a for a, r in ACTIVITY_CLASSES.items() if r["share_term_arable"] == "1")   # in CROPS order
 
 
@@ -89,14 +89,14 @@ REGIONAL_FILE = "supply_elasticities_regional.csv"
 PMP_ELAS_FILE = "pmp_own_price_elasticities.csv"
 COUNTRY_ELAS_FILE = "capri_own_price_elasticities.csv"
 #: the country file's CAPRI codes -> model activities (animal products and young animals are not activities)
-COUNTRY_ELAS_ALIASES = CAPRI_TO_MODEL_ACTIVITY        # MAIZ = CORN, TWIN = WINE (codes/model_activities.csv, N6)
+COUNTRY_ELAS_ALIASES = CAPRI_TO_MODEL_ACTIVITY        # MAIZ = CORN, TWIN = WINE (codes/model_activities.csv)
 
-# CAPRI names grain maize MAIZ; the model calls it CORN (until S2, 7 November 2026, also OFAR = OFOD: without that
+# CAPRI names grain maize MAIZ; the model calls it CORN (until 7 November 2026, also OFAR = OFOD: without that
 # alias the 14 Mha of other fodder stayed on the literature default 0.12 against CAPRI's median 1.05, K32; OFAR and ROOF
 # are the model's own activities since).
-ACTIVITY_ALIASES = CAPRI_TO_MODEL_ACTIVITY            # MAIZ = CORN, TWIN = WINE (codes/model_activities.csv, N6)
+ACTIVITY_ALIASES = CAPRI_TO_MODEL_ACTIVITY            # MAIZ = CORN, TWIN = WINE (codes/model_activities.csv)
 LIVESTOCK_ELAS_FILE = "capri_supply_elas_market_1717.csv"   # in the base year's supply inputs
-#: the CAPRI market product of each animal: its price source (model_activity_classes.csv) in CAPRI's code (N6)
+#: the CAPRI market product of each animal: its price source (model_activity_classes.csv) in CAPRI's code
 LIVESTOCK_PRODUCT = {a: COMMODITY_CAPRI_CODE[r["price_source"]] for a, r in ACTIVITY_CLASSES.items() if r["price_source"]}
 LIVESTOCK_MS = MS_CODE
 YOUNG_ELAS_FILE = "capri_supply_elas_young_1720.csv"       # in the base year's supply inputs
@@ -142,7 +142,7 @@ def build_elasticity_table(
     apply_dampening = True        # CAPRI's dampening (impose_upper_bound_on_elasticity.gms)
     # (The runtime guard against activities anchored on a constant placeholder base blocked none since the synthetic
     # data was replaced and was removed from here on 23 October 2026; the check lives in its test,
-    # test_capri.py test_synthetic_base_activities_excluded_from_elasticity_wiring: refactor stage 3, N5.)
+    # test_capri.py test_synthetic_base_activities_excluded_from_elasticity_wiring: the refactor of the supply's parameters and state.)
     # no literature defaults (23 October 2026): a cell without a CAPRI value stays NaN, provenance NO_CAPRI_VALUE
     eps = pd.DataFrame(
         np.tile(defaults.reindex(activities).values.astype(float), (len(regions), 1)),

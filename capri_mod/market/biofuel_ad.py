@@ -1,4 +1,4 @@
-"""CAPRI's biofuel block in CasADi: market programme step G2g, first part (docs/design/MARKET_IPOPT_DESIGN.md sections
+"""CAPRI's biofuel block in CasADi (docs/dev/MARKET_IPOPT_DESIGN.md sections
 5-6).
 
 Written once, here, and evaluated from here by BiofuelMixin (capri_mod/market/biofuel.py): the project lead's choice of
@@ -17,7 +17,7 @@ biofuel.py's docstrings), with the operations in the order biofuel.py had them b
     ProcNQ_ (own term) PROC = max(0, PROC0 - hess ARM1P0 (ra - 1) / INPE)
 
 SIGMOID(x) = 1 / (1 + exp(-x)) with x clipped to [-500, 500] (as biofuel.py: exp overflows beyond). The max(0, .) and
-max(1e-6, .) floors are the model's, kinks for G3 (CasADi's fmax), to be registered or removed there.
+max(1e-6, .) floors are the model's, kinks for the whole-market system (CasADi's fmax), to be registered or removed there.
 """
 from __future__ import annotations
 

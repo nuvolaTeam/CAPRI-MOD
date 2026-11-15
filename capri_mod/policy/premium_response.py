@@ -1,4 +1,4 @@
-"""CAPRI's premium cut during a scenario's iterations (capmod/calculate_premiums.gms; P2): at each step up to the
+"""CAPRI's premium cut during a scenario's iterations (capmod/calculate_premiums.gms): at each step up to the
 tenth, prmcut.gms on the weighted average of the last steps' activity levels (capmod/define_stepWeights.gms), the
 premiums so computed used in the next step's supply solve; after the tenth step they stay.
 
@@ -14,7 +14,7 @@ model's own baseline level (DEP-48): the model's baseline is its own projection,
 baseline premiums are CAPRI's at CAPRI's trend levels, so the factors are 1 at the model's baseline and the cut
 responds to the scenario's change; the levels' units (the model's stalls against CAPRI's produced heads, poultry in
 thousands against millions) cancel. Where the model splits an animal into CAPRI's activities itself (the dairy cows'
-DCOL / DCOH, Sprint 7b; the bulls' and heifers' intensity pairs, Sprint 7c; the replacement heifers and calves with
+DCOL / DCOH, the port of CAPRI's two dairy activities; the bulls' and heifers' intensity pairs, the port of CAPRI's bull and heifer splits; the replacement heifers and calves with
 supply.use_cattle_member_splits, K65), the change is the CAPRI activity's own: its stalls x_m = s_m X + sum_k E_mk z_k
 (s_m its stall share, z_k the split's shift, E_mk +1 for the activity gaining the stalls, -1 for the one giving them
 up; supply/livestock.py) now over the baseline's. The CAPRI activities no model activity holds (NECR, the idled

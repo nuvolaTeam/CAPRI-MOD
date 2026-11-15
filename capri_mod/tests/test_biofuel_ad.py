@@ -1,4 +1,4 @@
-"""Step G2g, first part: CAPRI's biofuel block in CasADi (capri_mod/market/biofuel_ad.py) equals the code biofuel.py had
+"""CAPRI's biofuel block in CasADi (capri_mod/market/biofuel_ad.py) equals the code biofuel.py had
 until 4 November 2026 (written out here as the reference: _biofuel_feed_group, _sigmoid and biofuel_state's
 equations)."""
 import numpy as np

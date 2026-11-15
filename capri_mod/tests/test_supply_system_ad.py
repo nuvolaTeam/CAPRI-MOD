@@ -1,9 +1,9 @@
-"""G3.2c/e: the market's supply side as one CasADi function with its blocks' equations (capri_mod/market/
+"""The market's supply side as one CasADi function with its blocks' equations (capri_mod/market/
 supply_system_ad.py) equals MarketModule.supply_response, and the blocks' residuals vanish, at the evaluation's own
 block solutions: at a solved market and at random prices around it (the market of the model's data at CAPRI's base
 supply rows: crushing, the dairy blocks, the non-EU ProdNQ_ rows with FEDE and the land rents, biofuels). The young
 animals, the member states' raw milk response and Norway's supply models need a supply run's state: checked at captured
-solves of a Farm-to-Fork run (tools/check/g3_supply_system.py, G3_SYSTEM.md)."""
+solves of a Farm-to-Fork run (tools/check/market_system_supply.py, MARKET_SYSTEM.md)."""
 import numpy as np
 import pytest
 
@@ -23,11 +23,11 @@ def solved_base():
 
 @pytest.mark.slow
 def test_the_assembled_market_system_holds_at_the_default_solves_equilibrium(solved_base):
-    """G3.2e (capri_mod/market/market_system_ad.py): square, structurally nonsingular once the empty balances are out,
+    """The assembled market system (capri_mod/market/market_system_ad.py): square, structurally nonsingular once the empty balances are out,
     and at the default solve's equilibrium every block's equations hold within that solve's tolerances. The balances within 1e-6 of S0 + D0, not market.tol (1e-7): the
     solve meets its test at its own last evaluation (9.0e-8 here), whose non-EU land and FEDE blocks read the previous
     evaluation's raw milk prices; evaluated again at the same prices the residual is 1.3e-7, and it drifts on (1.4e-7)
-    as that lag is worked off (G3_SYSTEM.md, G3.2e)."""
+    as that lag is worked off (MARKET_SYSTEM.md, the assembled system)."""
     from capri_mod.market.market_system_ad import market_system, market_x0
     mm, exo = solved_base
     mm._bilateral_eval(mm.sv.bilat_last_r.copy(), exo, None)
@@ -126,11 +126,11 @@ def test_the_supply_system_equals_supply_response_at_its_block_solutions(solved_
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("method,linsol", [("g3_newton", "pardiso"), ("g3_ipopt", "mumps")])
-def test_the_market_solved_by_g3_is_the_fixed_points_equilibrium(solved_base, capsys, method, linsol):
-    """market.solver = "g3_newton" / "g3_ipopt" (capri_mod/market/market_g3.py): from the solved base, a supply change
-    (+5% soft wheat everywhere) solved by G3 and by the fixed point gives the same prices; the fixed point confirms
-    G3's solution in at most two evaluations."""
+@pytest.mark.parametrize("method,linsol", [("chain", "pardiso"), ("ipopt", "mumps")])
+def test_the_market_solved_by_the_chain_is_the_fixed_points_equilibrium(solved_base, capsys, method, linsol):
+    """Market.solver = "chain" / "ipopt" (capri_mod/market/market_chain.py): from the solved base, a supply change
+    (+5% soft wheat everywhere) solved by the chain and by the fixed point gives the same prices; the fixed point confirms
+    the chain's solution in at most two evaluations."""
     import pickle
     from capri_mod.settings import override
     if linsol == "pardiso":
@@ -138,18 +138,80 @@ def test_the_market_solved_by_g3_is_the_fixed_points_equilibrium(solved_base, ca
     mm, exo = solved_base
     exo2 = exo.copy()
     exo2["SWHE"] = exo2["SWHE"] * 1.05
-    m_fp, m_g3 = pickle.loads(pickle.dumps(mm)), pickle.loads(pickle.dumps(mm))
+    m_fp, m_chain = pickle.loads(pickle.dumps(mm)), pickle.loads(pickle.dumps(mm))
     e_fp = m_fp.solve(exogenous_supply=exo2)
-    with override({"market.solver": method, "market.g3_linear_solver": linsol}):
-        e_g3 = m_g3.solve(exogenous_supply=exo2)
+    with override({"market.solver": method, "market.newton_linear_solver": linsol}):
+        e_chain = m_chain.solve(exogenous_supply=exo2)
     out = capsys.readouterr().out
-    assert "market solve by G3:" in out and ("converged" in out or "Solve_Succeeded" in out), out[-500:]
-    assert e_fp.converged and e_g3.converged
-    assert e_g3.iterations <= 2 < e_fp.iterations, (e_g3.iterations, e_fp.iterations)
-    a, b = m_fp.sv.bilat_last_r, m_g3.sv.bilat_last_r.reindex(index=m_fp.sv.bilat_last_r.index,
+    assert "market solve by the chain:" in out and ("converged" in out or "Solve_Succeeded" in out), out[-500:]
+    assert e_fp.converged and e_chain.converged
+    assert e_chain.iterations <= 2 < e_fp.iterations, (e_chain.iterations, e_fp.iterations)
+    a, b = m_fp.sv.bilat_last_r, m_chain.sv.bilat_last_r.reindex(index=m_fp.sv.bilat_last_r.index,
                                                               columns=m_fp.sv.bilat_last_r.columns)
     cols = list(m_fp.par.bilat)
     d = (np.abs(a[cols] - b[cols]) / np.maximum(np.abs(a[cols]), 1e-3)).to_numpy().max()
     assert d <= 1e-5, d
     r0 = mm.sv.bilat_last_r.reindex(index=a.index, columns=a.columns)
     assert float((np.abs(a[cols] - r0[cols]) / np.maximum(np.abs(r0[cols]), 1e-3)).to_numpy().max()) > 1e-3
+
+
+def test_prod_fudge_is_capris_ncpcm_form():
+    """supply_system_ad.prod_fudge: mode 0 the model's floor, 2 the row, 1 CAPRI's ProdFudge_ (market_model.gms
+    l. 2420-2431) as GAMS defines ncpCM(x, y, Z) = x - Z ln(1 + exp((x - y) / Z)), evaluated here directly where exp
+    does not overflow, at bases below, inside and above the clip of Z (1e-11 to 1000)."""
+    import casadi as ca
+    from capri_mod.market.supply_system_ad import prod_fudge
+    q, m = ca.SX.sym("q"), ca.SX.sym("m")
+    for base in (1e-14, 0.37, 52.0, 5.0e4):
+        f = ca.Function("f", [q, m], [prod_fudge(q, m, base)])
+        z = 1e-2 * min(1000.0, max(1e-11, base))
+        for v in np.concatenate([np.linspace(-30 * z, 30 * z, 61), [-1e3, -1.0, 0.0, 1.0, 1e3]]):
+            assert float(f(v, 0)) == max(v, 0.0)
+            assert float(f(v, 2)) == v
+            if abs(v) / z < 600:
+                x = -v
+                ncpcm = x - z * np.log1p(np.exp((x - 0.0) / z))
+                ref = -ncpcm + 1e-11
+                assert abs(float(f(v, 1)) - ref) <= 1e-12 * max(1.0, abs(ref)), (base, v)
+        # smooth: the derivative of the fudge goes from 0 to 1 through 1/2 at 0
+        dg = ca.Function("dg", [q], [ca.jacobian(prod_fudge(q, 1.0, base), q)])
+        assert abs(float(dg(0.0)) - 0.5) < 1e-12
+        assert float(dg(-50 * z)) < 1e-20 and abs(float(dg(50 * z)) - 1.0) < 1e-20
+
+
+@pytest.mark.slow
+def test_the_lifted_processing_and_feed_reproduce_the_default_form(solved_base):
+    """CAPRI's v_procQuant and v_feedQuant as unknowns of the lifted system (market.bounds "capri", MARKET_BOUNDS_PLAN
+    step 4): with every mode at 0 (the model's form) their defining rows hold at the start and every other equation
+    equals the system without them; at the calibration point no fudge row is needed (CAPRI's chk_market_data holds no
+    ProcFudge_ or FeedFudge_): ProcNQ_'s and FeedNQ_'s rows equal the model's values there to rounding, within CAPRI's
+    start bounds, and CAPRI's fudge (mode 1) moves them by less than its smoothing term."""
+    import casadi as ca
+    from capri_mod.market.market_bounds import capri_start_bounds
+    from capri_mod.market.market_system_ad import market_system, market_x0
+    mm, exo = solved_base
+    mm._bilateral_eval(mm.sv.bilat_last_r.copy(), exo, None)
+    f0, l0, _, _ = market_system(mm, exo, lifted=True, fudge=True)
+    f1, l1, _, _ = market_system(mm, exo, lifted=True, fudge=True, lift_use=True)
+    lc = l1["lift_cells"]
+    kinds = {c[0] for c in lc}
+    assert {"proc", "feed"} <= kinds, kinds
+    x0, x1 = market_x0(mm, l0), market_x0(mm, l1)
+    nL = len(lc)
+    assert np.array_equal(x1[:l0["n_x"]], x0)
+    nfm = len(l0["fudge_cells"])
+    F0 = np.asarray(f0(x0, np.zeros(nfm))[0], float).ravel()
+    F1 = np.asarray(f1(x1, np.zeros(nfm + nL))[0], float).ravel()
+    assert l1["eqs"][-1] == ("Ldef", nL)
+    assert float(np.max(np.abs(F1[-nL:]))) <= 1e-9
+    assert float(np.max(np.abs(F1[:l0["n_F"]] - F0))) <= 1e-8
+    # at the start the cells are inside CAPRI's start bounds
+    lb, ub = capri_start_bounds(mm, l1, x1)
+    L = x1[-nL:]
+    assert np.all(L >= lb[-nL:] - 1e-12) and np.all(L <= ub[-nL:] + 1e-12)
+    # CAPRI's fudge on the row (mode 1): at the calibration point within its smoothing term of the row itself
+    b = np.array([c[3] for c in lc])
+    F1f = np.asarray(f1(x1, np.concatenate([np.zeros(nfm), np.ones(nL)]))[0], float).ravel()[-nL:]
+    z = 1e-2 * np.minimum(1000.0, np.maximum(1e-11, b))
+    assert np.all(np.abs(F1f) <= z * np.log(2.0) + 1e-8)
+    del ca

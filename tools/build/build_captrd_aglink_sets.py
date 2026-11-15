@@ -1,4 +1,4 @@
-"""CAPTRD's Aglink-COSIMO sets and mappings (Aglink 2023, DG AGRI), as mapping CSVs for CAPTRD-MOD's stage 2a.
+"""CAPTRD's Aglink-COSIMO sets and mappings (Aglink 2023, DG AGRI), as mapping CSVs for CAPTRD-MOD's load of the Aglink-COSIMO data.
 
 CAPTRD loads the Aglink data in baseline/load_aglink2023dgAgri.gms (captrd.gms l. 593; CAPRI star 3.0). Its sets come
 from, in the order GAMS compiles them:

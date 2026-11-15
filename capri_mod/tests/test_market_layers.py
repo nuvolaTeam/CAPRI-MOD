@@ -1,4 +1,4 @@
-"""The market's layer rules (docs/design/ARCHITECTURE_REFACTOR.md): only the data adapter reads files, and a missing
+"""The market's layer rules (docs/dev/ARCHITECTURE_REFACTOR.md): only the data adapter reads files, and a missing
 input stops the run with the name of its builder."""
 from pathlib import Path
 
@@ -34,7 +34,7 @@ def test_missing_input_names_its_builder(tmp_path):
 
 def test_model_does_not_read_delta_tables():
     """Data formats (ARCHITECTURE_REFACTOR.md): the model reads CSV; Delta Lake is the pipeline's internal format and,
-    since refactor stage 5, the format of the runs' results, written by capri_mod/io_results.py alone (its single
+    since 3 November 2026, the format of the runs' results, written by capri_mod/io_results.py alone (its single
     writer). No other model code imports deltalake."""
     pkg = MARKET.parent
     writer = pkg / "io_results.py"
@@ -123,7 +123,7 @@ def test_market_supply_hessian_measured_at_base_and_at_scenario_state():
         m = CAPRIModel(data_dir="capri_data", verbose=False)
         m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
         # the baseline measures it at its start, on calibrated models at the reference prices, since its own market
-        # uses it (S7, K120; until 8 November 2026 a baseline alone did not, the decision of 28 October 2026 for the
+        # uses it (CAPRI's market calibration, K120; until 8 November 2026 a baseline alone did not, the decision of 28 October 2026 for the
         # "supply" form, whose baseline did not solve the market); the scenario keeps it and measures it again
         assert len(m.res.market_supply_hessian_log) == 1
         assert m.market_module.par.supply_hessian is not None
@@ -151,7 +151,7 @@ def test_hessian_skip_of_unreached_regions_is_exact(monkeypatch):
     with override({"market.hessian_skip_unchanged": True, "market.market_supply_nq": True}):
         m = CAPRIModel(data_dir="capri_data", verbose=False)
         # the verification needs a measured Hessian, not the cache: the verify mode's file is removed after the run.
-        # The baseline measures it at its start (S7: its market uses it); the world-price shock runs on it
+        # The baseline measures it at its start (CAPRI's market calibration: its market uses it); the world-price shock runs on it
         m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
         m.run(world_price_shock={"SWHE": 0.05}, regions=regs, max_outer_iter=1)
         info = dict(m.res.market_supply_hessian_log[0])
@@ -195,7 +195,7 @@ def test_milk_price_held_above_zero_unless_the_scenario_allows_negative_prices()
 
 
 def test_moved_market_attributes_fail_loudly():
-    """Refactor stage 2b moved the market's state into par/ev/sv/seen; a read or a write of an old name raises
+    """The refactor of the market's state moved the market's state into par/ev/sv/seen; a read or a write of an old name raises
     (RuntimeError: getattr(obj, name, default) cannot hide it), naming the new place."""
     import pytest
     from capri_mod.market.market_module import MarketModule

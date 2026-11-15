@@ -1,5 +1,5 @@
-"""The environmental module's parameters and state, by kind (refactor stage 4, second half;
-docs/design/ENV_COUPLING_STATE_INVENTORY.md).
+"""The environmental module's parameters and state, by kind (the refactor of the environment's and the coupling's state;
+docs/dev/ENV_COUPLING_STATE_INVENTORY.md).
 
 EnvironmentalModule holds what it keeps between calls in declared objects, as the supply's models do
 (capri_mod/supply/state.py):
@@ -69,7 +69,7 @@ class EnvResults(_Slots):
     )
 
 
-_REMOVED = "removed (refactor stage 4 E1, 2 November 2026: written, never read)"
+_REMOVED = "removed (the refactor of the environment's and the coupling's state, 2 November 2026: written, never read)"
 
 MOVED_ENV: dict = {
     "_leaching_last": _REMOVED,

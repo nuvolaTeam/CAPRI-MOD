@@ -1,14 +1,14 @@
 """Young animals between the supply models and the market: their balance by market region, prices from the market or the model's own update, the state the market clears.
 
-CAPRIModel's methods, moved unchanged from capri_mod/model.py (refactor stage 4a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
+CAPRIModel's methods, moved unchanged from capri_mod/model.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
 module once model is loaded (capri_mod.coupling.inject); the annotations are not evaluated.
 """
 from __future__ import annotations
 
 
-from capri_mod import statekit as _cst   # the state objects' helpers (refactor stage 4)
-from capri_mod import statekit as _cst   # the state objects' helpers (refactor stage 4)
+from capri_mod import statekit as _cst   # the state objects' helpers
+from capri_mod import statekit as _cst   # the state objects' helpers
 class YoungAnimalBlock:
     def _yani_market_region(self, reg: str) -> str:
         """The young-animal market of a supply region: CAPRI clears young animals per market region (yaniMarket_ per
@@ -43,7 +43,7 @@ class YoungAnimalBlock:
                 continue
             mr = self._yani_market_region(reg)
             # bulls and heifers at the low-intensity activity turn over more animals per stall, each
-            # bought as a young animal (Sprint 7c): z stalls x use per head x (low - high) / average
+            # bought as a young animal (the port of CAPRI's bull and heifer splits): z stalls x use per head x (low - high) / average
             cz = getattr(res, "cattle_shift", None) or {}
             ct = (self.data.get("cattle_intensity") or {}).get(reg) or {}
             from capri_mod.supply.supply_module import RegionalSupplyModel as _RSM0
@@ -54,7 +54,7 @@ class YoungAnimalBlock:
                 # every split of a cattle animal (key "BULL", "HFRS:rep", "CALV:male", ...): z stalls x use / production
                 # per head x (a - b) / average; the intensity pairs' young bought as before (dyoung_rel)
                 if not _member_splits:
-                    # the intensity pairs alone (Sprint 7c), as in the validated runs r86 / r87
+                    # the intensity pairs alone (the port of CAPRI's bull and heifer splits), as in the validated runs r86 / r87
                     u_ += sum(float(c) * float(cz.get(a, 0.0)) * float(ct[a]["dyoung_rel"])
                               for a, c in r.get("use", {}).items() if a in cz and a in ct)
                     net[(mr, g)] = net.get((mr, g), 0.0) + p_ - u_

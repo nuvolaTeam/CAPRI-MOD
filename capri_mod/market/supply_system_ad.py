@@ -1,4 +1,4 @@
-"""G3.2c/e: the market's supply side as one CasADi function of the system's unknowns, with the equations of the blocks
+"""The market's supply side as one CasADi function of the system's unknowns, with the equations of the blocks
 the default solve solves inside each evaluation.
 
 `MarketModule.supply_response` (bilateral market, the supply models' output given) composes the supply per region and
@@ -6,7 +6,7 @@ commodity from the blocks' CasADi functions called on numbers, and solves three 
 markets and the member states' raw milk in alternating rounds (`_milk_and_yani_clear_all`), the other regions' dairy
 blocks (`_dairy_solve`). Here their prices are unknowns and their equations outputs:
 
-    (S, res_yani, res_dairy_eu, res_dairy_w, biofX) = supply(PA, RR, ry, uE, uW, fede, dr)
+    (S, res_yani, res_dairy_eu, res_dairy_w, biofX) = supply(PA, RR, ry, uE, uW, fede, dr, fm)
 
   PA    [nR x nC]  the Armington price ratios (the crushers' seed price, the biofuel feedstocks)
   RR    [nR x nC]  the producer price ratios r (the region_ratio of supply_response)
@@ -15,6 +15,8 @@ blocks (`_dairy_solve`). Here their prices are unknowns and their equations outp
   uW    [3 n_w]    the other regions' dairy blocks' unknowns
   fede  [n_rms]    the non-EU behavioural regions' feed energy price ratios (use_ad's order)
   dr    [n_dr]     the non-EU land markets' free rents' change (EUR/ha; the land block's order)
+  fm    [n_fm]     each ProdNQ_ cell's mode (prod_fudge: 0 the model's floor, 1 CAPRI's ProdFudge_, 2 the row
+                   within its bounds), the cells in layout["fudge_cells"] as (row, column, base)
 
   S            [nR x nC] the supply, without the EU's residual feeds (MaprFeed_, set after the use side:
                `_apply_feed_byproduct_supply`; an equation of the assembled system)
@@ -27,16 +29,32 @@ The supply models' latest output and the calibration state (seen prices, Hessian
 within a market solve. Norway (the non-EU market regions with supply models, K56) as the default solve composes it,
 with one difference: its rows respond to its dairy block's current milk price (the default solve: the previous
 evaluation's, DEP-29); its raw milk row takes the same young-animal prices as its other rows (CAPRI's one set; the
-default solve too since 14 November 2026). Not covered: the member states' raw milk price floor (MILK_PRICE_FLOOR, a bound in G3); the young-animal prices' bounds (st["bounds"], the
+default solve too since 14 November 2026). Not covered: the member states' raw milk price floor (MILK_PRICE_FLOOR, a bound in the whole-market system); the young-animal prices' bounds (st["bounds"], the
 same). `supply_inputs(mm, layout)` reads the unknowns at the module's latest evaluation; at a solve's equilibrium the
 outputs equal its supply and the residuals vanish up to the default solve's own tolerances
-(tools/check/g3_supply_system.py).
+(tools/check/market_system_supply.py).
 """
 from __future__ import annotations
 
 from typing import Dict, List
 
 import numpy as np
+
+
+def prod_fudge(qr, m, base):
+    """A ProdNQ_ cell's supply from its row qr by its mode m (G3.4, docs/dev/MARKET_BOUNDS_PLAN.md step 4):
+      0  the model's floor max(qr, 0) (the default solve's; DEP-39)
+      1  CAPRI's ProdFudge_ (arm/market_model.gms l. 2420-2431): v_prodQuant = -ncpcm(-qr, 0, Z) + 1e-11 with
+         Z = 1e-2 min(1000, max(1e-11, base)), base the cell's base production (DATA Prod); GAMS's ncpCM(x, y, Z) =
+         x - Z ln(1 + exp((x - y) / Z)), so -ncpcm(-qr, 0, Z) = max(qr, 0) + Z ln(1 + exp(-|qr| / Z)), written so to
+         keep exp's argument at or below 0. CAPRI generates it where the cell's lower bound is at or below 0 (after a
+         widening)
+      2  the row itself (CAPRI's v_prodQuant without ProdFudge_, held by its bounds)
+    qr and m CasADi expressions (or numbers), base a number."""
+    import casadi as ca
+    z = 1e-2 * min(1000.0, max(1e-11, float(base)))
+    fudge = ca.fmax(qr, 0.0) + z * ca.log1p(ca.exp(-ca.fabs(qr) / z)) + 1e-11
+    return ca.if_else(m < 0.5, ca.fmax(qr, 0.0), ca.if_else(m < 1.5, fudge, qr))
 
 
 def supply_system(mm, exogenous_supply):
@@ -59,6 +77,18 @@ def supply_system(mm, exogenous_supply):
     PA = ca.SX.sym("PA", nR, nC)
     RR = ca.SX.sym("RR", nR, nC)
     rr = ca.fmax(RR, 1e-6)
+
+    # CAPRI's ProdFudge_ (market_model.gms l. 2420-2431), cell by cell: each floored ProdNQ_ cell carries a mode, an
+    # entry of the input fm, so that a widening of the bounds switches it without a rebuild
+    fm_syms: List = []
+    fm_cells: List[tuple] = []
+
+    def prodnq_cell(qr, i_, j_, base):
+        """The supply of cell (i_, j_) from its ProdNQ_ row qr, by the cell's mode (an entry of fm; prod_fudge)."""
+        m = ca.SX.sym(f"fm{len(fm_syms)}")
+        fm_syms.append(m)
+        fm_cells.append((int(i_), int(j_), float(base)))
+        return prod_fudge(qr, m, base)
 
     # the supply models' output on the EU rows (supply_response before the price response)
     S0 = base.reindex(columns=cols).to_numpy(dtype=float).copy()
@@ -140,10 +170,10 @@ def supply_system(mm, exogenous_supply):
         f, rows, _ = fr
         r_ = rr[R[rg], :].T
         q0 = mm._nq_q0(rg, rows)
-        q = f(ca.DM(q0), r_, r_[ci["MILK"]] if "MILK" in ci else 1.0, ca.DM.zeros(0), ca.DM.zeros(len(rows)))[0]
+        dq = f(ca.DM(q0), r_, r_[ci["MILK"]] if "MILK" in ci else 1.0, ca.DM.zeros(0), ca.DM.zeros(len(rows)))[1]
         for k, x in enumerate(rows):
             if x in ci and q0[k] > 0:
-                S[R[rg]][ci[x]] = q[k]
+                S[R[rg]][ci[x]] = prodnq_cell(q0[k] + dq[k], R[rg], ci[x], q0[k])
 
     # the EU blocks' ProdNQ_ with the measured Hessian, the young-animal markets and the member states' raw milk
     hs_blocks = dict(((mm.par.supply_hessian or {}).get("blocks") or {}))
@@ -234,10 +264,10 @@ def supply_system(mm, exogenous_supply):
 
     # the EU blocks' rows
     for reg, it in items.items():
-        q = mm._hess_fn(f"hess_{reg}", it["Hm"])(ca.DM(it["s0"]), it["dP"], extra[reg])[0]
+        qr = mm._hess_fn(f"hess_{reg}", it["Hm"])(ca.DM(it["s0"]), it["dP"], extra[reg])[1]
         for k, j in enumerate(it["xj"]):
             if it["s0"][k] > 1e-6:
-                S[R[reg]][j] = q[k]
+                S[R[reg]][j] = prodnq_cell(qr[k], R[reg], j, it["s0"][k])
 
     # NORWAY (the non-EU market regions with supply models, K56): its measured Hessian's rows against the prices its
     # models saw, its young-animal market, its raw milk inside its dairy block (_sup_milk_terms; the milk price change
@@ -290,17 +320,16 @@ def supply_system(mm, exogenous_supply):
             # the MILK row without its own milk price term, at the same young-animal prices (one set, as CAPRI)
             qraw0, _ = rows_at(dP)
             cross = qraw0[iM_] - s0[iM_]
-            q = ca.fmax(qraw, 0.0)
-            q[iM_] = ca.fmax(qraw0[iM_], 0.0)
+            qraw = ca.SX(qraw)
+            qraw[iM_] = qraw0[iM_]
             sup_milk[reg] = dict(mk, cross=cross)
         else:
             qraw, res = rows_at(dP)
-            q = ca.fmax(qraw, 0.0)
         if res is not None:
             res_y.append(res)
         for k_, j in enumerate(xj):
             if s0[k_] > 1e-6:
-                S[i_][j] = q[k_]
+                S[i_][j] = prodnq_cell(qraw[k_], i_, j, s0[k_])
 
     # K83: the EU's units outside a run on a subset, moved by their member states' ProdNQ_
     xb = mm.seen.eu_excluded_base
@@ -543,13 +572,13 @@ def supply_system(mm, exogenous_supply):
             f, rows, rms_f = fr
             q0 = mm._nq_q0(reg, rows)
             ls = land_shift(reg)
-            q = f(ca.DM(q0), rr[R[reg], :].T, milkW.get(reg, ca.SX(1.0)),
-                  ca.vertcat(*[fede_of(s) for s in rms_f]) if rms_f else ca.DM.zeros(0),
-                  ca.vertcat(*[ls.get(x, ca.SX(0.0)) for x in rows]))[0]
+            dq = f(ca.DM(q0), rr[R[reg], :].T, milkW.get(reg, ca.SX(1.0)),
+                   ca.vertcat(*[fede_of(s) for s in rms_f]) if rms_f else ca.DM.zeros(0),
+                   ca.vertcat(*[ls.get(x, ca.SX(0.0)) for x in rows]))[1]
             skip = sup_cols.get(reg, set())
             for k, x in enumerate(rows):
                 if x in ci and q0[k] > 0 and x not in skip:
-                    S[R[reg]][ci[x]] = q[k]
+                    S[R[reg]][ci[x]] = prodnq_cell(q0[k] + dq[k], R[reg], ci[x], q0[k])
     if "MILK" in ci:
         for r in regions:
             if r not in mm.EU and r not in mm.SUP and r not in milkW:
@@ -605,11 +634,12 @@ def supply_system(mm, exogenous_supply):
     Sx = ca.vertcat(*[ca.horzcat(*row) for row in S])
     outs = [Sx, ca.vertcat(*res_y) if res_y else ca.SX(0, 1), ca.vertcat(*res_E) if res_E else ca.SX(0, 1),
             ca.vertcat(*res_W) if res_W else ca.SX(0, 1), ca.vertcat(*biofX) if biofX else ca.SX(0, 1)]
-    f = ca.Function("supply_system", [PA, RR, ry, uE, uW, fede, dr], outs,
-                    ["PA", "RR", "ry", "uE", "uW", "fede", "dr"],
+    fm = ca.vertcat(*fm_syms) if fm_syms else ca.SX(0, 1)
+    f = ca.Function("supply_system", [PA, RR, ry, uE, uW, fede, dr, fm], outs,
+                    ["PA", "RR", "ry", "uE", "uW", "fede", "dr", "fm"],
                     ["S", "res_yani", "res_dairy_eu", "res_dairy_w", "biofX"])
     return f, {"regions": regions, "cols": cols, "ylay": ylay, "ms": ms_list, "wl": wl, "rms": frms, "lrms": lrms,
-               "milk_path": milk_path}
+               "milk_path": milk_path, "fudge_cells": fm_cells}
 
 
 def _excluded_milk_resp_sx(mm, ca, cols, ci, rr, R, m0) -> dict:
@@ -673,4 +703,4 @@ def supply_inputs(mm, layout: dict, PA: np.ndarray) -> list:
     LP = mm._noneu_land_params()
     dr = np.concatenate([np.asarray(land.get(s, np.zeros(len(LP[s]["free"]))), float) for s in layout["lrms"]]) \
         if layout["lrms"] else np.zeros(0)
-    return [PA, RR, ry, np.array(uE), np.array(uW), fede, dr]
+    return [PA, RR, ry, np.array(uE), np.array(uW), fede, dr, np.zeros(len(layout.get("fudge_cells") or ()))]

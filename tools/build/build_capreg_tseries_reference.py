@@ -9,7 +9,7 @@ This is what CAPTRD reads as DATA1 from %results_in%\\capreg\\res_time_series_%B
 p_data (captrd.gms l. 504); the non-year entries are kept here unchanged so the file is a complete copy of DATA.
 
 Output (CAPRI's own data: read-only reference, read by the tests and the parity runs, never by the model;
-docs/design/CAPTRD_MOD.md section 6):
+docs/dev/CAPTRD_MOD.md section 6):
   capri_sources/reference/capreg_tseries/17/<CC>.csv.gz    region, col, row, t, value
 
 Zeros and missing values: a record stored as GAMS Eps (an explicit zero) is written with value 0 and eps = 1;

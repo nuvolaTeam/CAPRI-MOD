@@ -25,7 +25,7 @@ ROOT = next(p for p in Path(__file__).resolve().parents if (p / "pyproject.toml"
 TOOLS = ROOT / "tools"
 FOLDERS = ("lib", "build", "run", "check", "gams", "solvers")
 
-#: the model's data: the base years' folders and the baselines' (docs/design/DATA_LAYOUT.md step (d), 11 November 2026)
+#: the model's data: the base years' folders and the baselines' (docs/dev/DATA_LAYOUT.md step (d), 11 November 2026)
 DATA = ROOT / "capri_data"
 #: the builders' baseline: CAPRI's 2030 Green Deal baseline projected from 2017 (run.baseline = "capri_greendeal_ref")
 BASELINE_DATA = DATA / "baselines" / "capri_greendeal_ref" / "1730"

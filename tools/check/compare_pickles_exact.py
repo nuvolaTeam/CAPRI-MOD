@@ -4,7 +4,7 @@ the reference run). Floats compared with a relative tolerance (default 1e-10); r
     python tools/check/compare_pickles_exact.py REF.pkl NEW.pkl [--rtol 1e-10] [--ignore meta.time_s,...]
 
 A run may also be a stored one, store:ROOT:SCENARIO[:RUN_ID] (capri_mod/io_results.py load_run; the long table and
-its records, written by the run script since refactor stage 5).
+its records, written by the run script since 3 November 2026).
 """
 from __future__ import annotations
 

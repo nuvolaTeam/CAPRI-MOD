@@ -35,7 +35,7 @@ CREATE TABLE pmp_capri_2030_mix (
     capri_region VARCHAR NOT NULL,
     PRIMARY KEY (region, activity)
 );
-COMMENT ON TABLE pmp_capri_2030_mix IS 'CAPRI''s 2x2 technology block p_pmpQuadTechn(act, T1/T2) of each crop with both technologies in the mix columns'' variables (X, z), x_T1 = X/2 + z, x_T2 = X/2 - z (S1, docs/design/S1_MIX_COLUMNS.md): g_xx_extra = (Q_XX - c) X^2 added to the crop''s diagonal of pmp_capri_2030 (c its collapsed curvature), g_xz = Q_Xz X^2, g_zz = Q_zz X^2 (tools/build/build_pmp_capri_2030.py, mix_terms)';
+COMMENT ON TABLE pmp_capri_2030_mix IS 'CAPRI''s 2x2 technology block p_pmpQuadTechn(act, T1/T2) of each crop with both technologies in the mix columns'' variables (X, z), x_T1 = X/2 + z, x_T2 = X/2 - z (S1, docs/dev/CROP_TECHNOLOGY_MIX_COLUMNS.md): g_xx_extra = (Q_XX - c) X^2 added to the crop''s diagonal of pmp_capri_2030 (c its collapsed curvature), g_xz = Q_Xz X^2, g_zz = Q_zz X^2 (tools/build/build_pmp_capri_2030.py, mix_terms)';
 INSERT INTO value_units VALUES
   ('pmp_capri_2030_mix', 'g_xx_extra', 'U_EuPerHa', 'builder', '(Q_XX - c) X^2: CAPRI''s technology block (1000 EUR per (1000 ha)^2) in (X, z) times the crop''s level squared, the convention of pmp_capri_2030.g'),
   ('pmp_capri_2030_mix', 'g_xz', 'U_EuPerHa', 'builder', 'Q_Xz X^2, as g_xx_extra'),

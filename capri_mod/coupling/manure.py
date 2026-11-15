@@ -1,13 +1,13 @@
 """The manure pools between regions (CAPRI's manure trade, cleared between solves).
 
-CAPRIModel's methods, moved unchanged from capri_mod/model.py (refactor stage 4a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
+CAPRIModel's methods, moved unchanged from capri_mod/model.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
 module once model is loaded (capri_mod.coupling.inject); the annotations are not evaluated.
 """
 from __future__ import annotations
 
 
-from capri_mod import statekit as _cst   # the state objects' helpers (refactor stage 4)
+from capri_mod import statekit as _cst   # the state objects' helpers
 #: the clearing's state kept per market between outer iterations, as paths in the model's state objects (the N
 #: market's in the model's own sv and res; the P and K markets' copies in sv.pool_pk, swapped in for their clearing)
 #: t per kt: CAPRI's pool trade is in kt, the supply in its slope in t (outer_loop.manure_pool_es_slope "capri_doc")

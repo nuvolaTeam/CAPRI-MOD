@@ -46,7 +46,7 @@ SOURCE_ORIGIN = {
 
 def _source_folder(rel):
     """The publisher folder of a file under capri_data/sources: raw/<publisher>/... (since 6 November 2026,
-    docs/design/DATA_LAYOUT.md), else the folder under sources (intermediate/, fao_2021/)."""
+    docs/dev/DATA_LAYOUT.md), else the folder under sources (intermediate/, fao_2021/)."""
     parts = rel.split("/")
     return parts[3] if parts[2] == "raw" and len(parts) > 4 else parts[2]
 #: CAPRI's folders under sources (every other folder): CAPRI's code, data (dat), CAPREG, COCO, CAPMOD results

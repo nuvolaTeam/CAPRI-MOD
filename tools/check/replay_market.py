@@ -1,4 +1,4 @@
-"""Replay market solves written by a run with diagnostics.capture_market_dir (G3.1, claude/g3_plan.md).
+"""Replay market solves written by a run with diagnostics.capture_market_dir (docs/dev/MARKET_SYSTEM.md).
 
 Each file holds the market module as it was before one solve (MarketModule._solve_captured; its attributes stored
 once each by content in <folder>/blobs), the solve's arguments,

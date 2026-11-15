@@ -306,7 +306,7 @@ if __name__ == "__main__":
     # Manure N, final product value and purchased feed per head, the same way (LEVL x item / model heads). Written by
     # build_shg_split.py's coefficient step until 29 October 2026 (its only writer; the one-time sheep-and-goat split
     # was retired once a rebuild without it reproduced every file): one writer per file
-    # (docs/design/DATA_PIPELINE_DOIT.md)
+    # (docs/dev/DATA_PIPELINE_DOIT.md)
     man = build(src, "MANN")
     dest5 = _ROOT / "capri_data" / "2017" / "environment" / "livestock_manure_n_coef.csv"
     man.to_csv(dest5)

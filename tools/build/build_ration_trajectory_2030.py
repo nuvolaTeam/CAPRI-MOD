@@ -1,4 +1,4 @@
-"""CAPRI's 2030 rations and requirements as factors on the model's 2017 rations (Sprint 9q).
+"""CAPRI's 2030 rations and requirements as factors on the model's 2017 rations (the port of CAPRI's 2030 rations and fodder).
 
 The 2030 baseline took each animal's 2017 ration scaled by one factor (its projected requirements), so every feed moved
 alike - grass, silage maize and other fodder as much as concentrates. CAPRI's 2030 reference has its own rations: in
@@ -11,7 +11,7 @@ tools/build/build_feed_ration.CAPRI_TO_MODEL), per feed and per requirement:
 
     factor = (sum_a LEVL_a,2030 x item_a,2030 / sum_a LEVL_a,2030) / (same in 2017)
 
-items: the feeds (kg per head), ENNE and CRPR per day x DAYS, DRMN and |DRMX| x DAYS, and (Sprint 9s) manure and
+items: the feeds (kg per head), ENNE and CRPR per day x DAYS, DRMN and |DRMX| x DAYS, and (the removal of synthetic data) manure and
 enteric methane per head, CH4MAN and CH4ENT (items ghg_CH4MAN, ghg_CH4ENT: the 2030 factors on the 2017 per-head
 methane of tools/build/build_ghg_coefs_2017.py). Groups without regional rows take
 their member state's factor (national rows). Inputs: CAPRI's 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta,
@@ -94,7 +94,7 @@ def main():
                     acc["req_" + q] += lv * d.get(q, 0.0) * days
                 acc["req_DMIN"] += lv * d.get("DRMN", 0.0) * days
                 acc["req_DMAX"] += lv * abs(d.get("DRMX", 0.0)) * days
-                for q in ("CH4MAN", "CH4ENT"):                   # methane per head (Sprint 9s)
+                for q in ("CH4MAN", "CH4ENT"):                   # methane per head (the removal of synthetic data)
                     acc["ghg_" + q] += lv * d.get(q, 0.0)
         return ({k: v / lv_sum for k, v in acc.items()} if lv_sum > 0 else None)
 
@@ -130,7 +130,7 @@ def main():
     # fodder crop, 2030 over 2017 (yield, losses and the non-feed use, e.g. silage maize for biogas in Germany: INDM
     # 3.6 of 6.9 Mt in Upper Bavaria's 2030 reference); per group, else member state
     # the model's fodder crop -> CAPRI's: GRAE and GRAI take the use per ha of CAPRI's whole grassland GRAS (CAPRI's FEDM
-    # of grass is not split by activity); (OFOD: OFAR alone until S2, 7 November 2026)
+    # of grass is not split by activity); (OFOD: OFAR alone until 7 November 2026)
     fcrop = {"GRAE": "GRAS", "GRAI": "GRAS", "MAIF": "MAIF", "OFAR": "OFAR", "ROOF": "ROOF"}
     fdat = {"2017": {}, "2030": {}}
     pf30 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'(FEDM|LEVL)'\.'(GRAS|MAIF|OFAR|ROOF)'\.'2030'\s+(-?[\d.Ee+\-]+)")

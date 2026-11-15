@@ -1,4 +1,4 @@
-"""Step G2e: CAPRI's processing demand in CasADi (capri_mod/market/processing_ad.py) equals the Python code it replaced
+"""CAPRI's processing demand in CasADi (capri_mod/market/processing_ad.py) equals the Python code it replaced
 on 31 October 2026 (written out here as the reference: ProcessingMixin._crush_state and demand_response's ProcNQ_
 loop), and its Jacobian equals finite differences."""
 import numpy as np
@@ -18,7 +18,7 @@ def _cet_yields(e, ro, rc):
 
 
 def _proc_fudge(q, q0):
-    """ProcessingMixin._proc_fudge before steps G2e and G2f (CAPRI's ProcFudge_, market_model.gms l. 1158-1163)."""
+    """ProcessingMixin._proc_fudge before the processing and dairy blocks moved to CasADi (CAPRI's ProcFudge_, market_model.gms l. 1158-1163)."""
     z = 0.01 * min(1000.0, max(1e-11, float(q0)))
     return float(q + z * np.logaddexp(0.0, -q / z) + 1e-11)
 

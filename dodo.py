@@ -1,4 +1,4 @@
-"""The data pipeline of capri-mod as doit tasks (docs/design/DATA_PIPELINE_DOIT.md).
+"""The data pipeline of capri-mod as doit tasks (docs/dev/DATA_PIPELINE_DOIT.md).
 
 Every model input under capri_data is written by exactly one builder (tools/build/*.py). tools/pipeline/builders.json
 declares, per builder invocation, the files it reads and writes (generated from a traced run by

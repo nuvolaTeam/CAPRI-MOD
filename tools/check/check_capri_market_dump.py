@@ -1,4 +1,4 @@
-"""Test A (G3, GR Q5.2): the market at CAPRI's own calibration point, against CAPRI's dump of its market model there.
+"""The external check of MARKET_NLP_REVIEW_2026-11-01.md Q5.2 (test A): the market at CAPRI's own calibration point, against CAPRI's dump of its market model there.
 
 CAPRI writes chk_market_data_<run>.gdx in arm/prep_market.gms (l. 1211, unload_market_data_for_debugging.gms) after
 its check solve of m_globMarket at the calibrated point (l. 1207): every parameter of the market model and the levels
@@ -71,10 +71,22 @@ def main() -> None:
             if m is None:
                 continue
             rows.append(dict(kind=kind, region=rg, commodity=c, model=float(m), capri=float(v)))
-    add("production", by_rm(_var(a.dump, "v_prodQuant"), True),
+    # the EU's dairy products: the equilibrium reports the dairy blocks' market supply net of their processing
+    # (ProcNQ_ inside the blocks) and the use without it; CAPRI reports gross output and the processing as a use, so its
+    # processing is taken out of both for them (KNOWN_ISSUES K151)
+    proc = by_rm(_var(a.dump, "v_procQuant"), True)
+    dairy = set(mm.DAIRY_TRADED.values()) if getattr(mm, "DAIRY_TRADED", None) else set()
+
+    def net(series):
+        out = series.copy()
+        for (rg, c) in out.index:
+            if rg in mm.EU and c in dairy and (rg, c) in proc.index:
+                out.at[(rg, c)] = out.at[(rg, c)] - proc.at[(rg, c)]
+        return out
+    add("production", net(by_rm(_var(a.dump, "v_prodQuant"), True)),
         lambda rg, c: eq.production.at[rg, c] if (rg in eq.production.index and c in eq.production.columns) else None)
     # raw milk is not in CAPRI's Armington system (not traded; v_arm1Quant MILK 0): its use is the dairies' intake
-    add("use", by_rm(_var(a.dump, "v_arm1Quant"), False),
+    add("use", net(by_rm(_var(a.dump, "v_arm1Quant"), False)),
         lambda rg, c: eq.consumption.at[rg, c] if (c != "MILK" and rg in eq.consumption.index
                                                    and c in eq.consumption.columns) else None)
     # the use's base components (demand_response: calibrated base use x the components' shares)
@@ -91,7 +103,7 @@ def main() -> None:
         return f
     add("human cons.", by_rm(_var(a.dump, "v_consQuant"), True), component("hcon"))
     add("feed", by_rm(_var(a.dump, "v_feedQuant"), True), component("feed"))
-    add("processing", by_rm(_var(a.dump, "v_procQuant"), True), component("proc"))
+    add("processing", proc[[not (rg in mm.EU and c in dairy) for rg, c in proc.index]], component("proc"))
     add("price", by_rm(_var(a.dump, "v_marketPrice"), False),
         lambda rg, c: eq.domestic_prices.at[rg, c] if (rg in eq.domestic_prices.index
                                                        and c in eq.domestic_prices.columns) else None)

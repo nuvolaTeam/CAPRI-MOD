@@ -6,8 +6,8 @@ production, the sugar beet trade, TrustLevl); compared with CAPTRD's Expert and 
 
 Results on 11 November 2026: of the 39,567 positions of the member states in the years after 2018 (DEMD, the
 reporting's copy of DOMM, and the positions the reporting adds without a trust level left out), 39,495 equal in value
-and trust level. The other 72 are define_EU_supports.gms's (stage 2f): the trust levels of NO000000's and TUR's market
-positions with DG AGRI targets, which it sets again (l. 719-760). With stage 2f chained, they equal CAPTRD's (test_captrd_eu_supports.py).
+and trust level. The other 72 are define_EU_supports.gms's: the trust levels of NO000000's and TUR's market
+positions with DG AGRI targets, which it sets again (l. 719-760). With define_EU_supports.gms chained, they equal CAPTRD's (test_captrd_eu_supports.py).
 
 test_support1_equal_captrds: the supports as define_stats_and_supports.gms leaves them (support1) against CAPTRD's; see
 its docstring.
@@ -35,7 +35,7 @@ REQST = {"ENNE", "CRPR", "FILG", "FICT", "FISM", "FISF"}            # sets_captr
 @pytest.fixture(scope="module")
 def assembled(state, population, result):  # noqa: F811
     """Every ported source of the expert supports chained, then define_stats_and_supports.gms l. 485-633: (E: Expert,
-    TL: TrustLevl, sup: the supports as support1, X, s, nobs, ex: what stage 2f takes over - the sets of
+    TL: TrustLevl, sup: the supports as support1, X, s, nobs, ex: what define_EU_supports.gms takes over - the sets of
     adjust_to_biof_supports.gms (FS), its parameters as GAMS keeps them between calls (prd_adj, low_lim, upp_lim) and the
     long-run positions (longrun, longrun1))."""
     S0, prior, nat, X, s = state
@@ -137,7 +137,7 @@ def test_support1_equal_captrds(assembled):
     the requirement rows, captrd.gms l. 1190-1215; HFCS, aggreg_and_report.gms l. 70-81) or cannot be rebuilt from the
     stored Step1 (the product groups' UVAG, INHA, UVAD, CSSP: the reporting's, l. 214-223). The other 40 are open: the
     prices of the fossil fuels (UVAG of DISL, GASL) of NO000000, EL000000, IR000000 and UK000000 in 2020-2040, which
-    our DGAgri1 holds and CAPTRD's support1 does not (its stored DGAgri1 of these years is rewritten by stage 2f, so
+    our DGAgri1 holds and CAPTRD's support1 does not (its stored DGAgri1 of these years is rewritten by define_EU_supports.gms, so
     it cannot tell which is right)."""
     E, TL, sup, X, s, nobs, _ = assembled
     yrs, msset = set(X.exantet), set(X.ms)
@@ -150,14 +150,14 @@ def test_support1_equal_captrds(assembled):
     m = pd.DataFrame(rows_, columns=K + ["mine", "ref"])
     m["ok"] = (m.mine - m.ref).abs() <= 1e-6 * m.ref.abs().clip(lower=1e-6)
     # not this stage's: captrd.gms l. 1190-1215 rewrite support1's yields (YILD, the sum of the outputs) and turns the
-    # requirement rows into absolute amounts after the estimation (stage 4); aggreg_and_report.gms l. 70-81 sets the
+    # requirement rows into absolute amounts after the estimation (aggreg_and_report.gms); aggreg_and_report.gms l. 70-81 sets the
     # isoglucose rows (HFCS); the stored Step1 of the price, consumption and expenditure rows of the product groups
     # (UVAG, INHA, UVAD, CSSP of OAGG) is the reporting's (l. 214-223), so their supports cannot be rebuilt from it
     oagg = ["CERE", "OILS", "INDU", "VEGE", "FRUI", "FORA", "MEAS"]
     later = m.row.isin(["YILD", "HFCS"] + sorted(REQST)) | (m.col.isin(["UVAG", "INHA", "UVAD", "CSSP"])
                                                              & m.row.isin(oagg))
     bad = m[~m.ok & ~later]
-    print("support1:", len(m), "equal", int(m.ok.sum()), "| stage 4 or not rebuildable:", int((~m.ok & later).sum()),
+    print("support1:", len(m), "equal", int(m.ok.sum()), "| set later (aggreg_and_report.gms) or not rebuildable:", int((~m.ok & later).sum()),
           "| other:", len(bad))
     print(bad.assign(pos=bad.col + "." + bad.row).groupby("pos").size().sort_values(ascending=False).head(30).to_string())
     print(bad.head(30).to_string())

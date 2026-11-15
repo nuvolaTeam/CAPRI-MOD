@@ -62,7 +62,7 @@ def _all_units(regs) -> bool:
 def model_regions():
     """The model's regional units in their order: capri_data/codes/regional_units.csv (the model's areas are indexed
     the same, checked by tests). Until 29 October 2026 the model's whole data were loaded for this list, so every
-    builder calling it opened about 80 model inputs, its own outputs among them (docs/design/DATA_PIPELINE_DOIT.md)."""
+    builder calling it opened about 80 model inputs, its own outputs among them (docs/dev/DATA_PIPELINE_DOIT.md)."""
     import csv
     with open(ROOT / "capri_data" / "codes" / "regional_units.csv", newline="") as fh:
         return [r["region"] for r in csv.DictReader(fh)]
@@ -78,7 +78,7 @@ def national_code(nuts2: str) -> str:
 
 #: the regional units the EU-wide fallbacks, medians and averages of the builders are taken over: the EU's and those of
 #: the default countries outside it (Norway), the units the model had before CAPRI's other 29 were listed (4 November
-#: 2026, docs/design/SUPPLY_NONEU_DESIGN.md). Behaviour as before; the project lead's decision of 31 October 2026 (the
+#: 2026, docs/dev/SUPPLY_NONEU_DESIGN.md). Behaviour as before; the project lead's decision of 31 October 2026 (the
 #: EU's fallback over the EU's member states only, a unit outside the EU its own country's) is a separate change.
 FALLBACK_UNITS = frozenset(u for u in UNITS if national_code(u) in (EU_MS | _default_outside_eu()))
 

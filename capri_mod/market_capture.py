@@ -1,4 +1,4 @@
-"""G3.1 (docs/design/G3_SYSTEM.md): one market solve written to <folder>/market_NNN.pkl for
+"""The market solve capture (docs/dev/MARKET_SYSTEM.md): one market solve written to <folder>/market_NNN.pkl for
 tools/check/replay_market.py (on with diagnostics.capture_market_dir; MarketModule._solve_captured).
 
 Written: the module before the solve (its whole state: par, sv, seen, ev, data, caches), the solve's arguments, the

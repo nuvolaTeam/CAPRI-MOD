@@ -1,4 +1,4 @@
-"""CAPTRD-MOD stage 2f: clean_tiny.gms (CAPRI star 3.0, captrd/clean_tiny.gms, included by estimate_ms.gms l. 446 after
+"""CAPTRD-MOD: clean_tiny.gms (CAPRI star 3.0, captrd/clean_tiny.gms, included by estimate_ms.gms l. 446 after
 Solve2): one more solve of m_trendMS that cleans the member state's result of tiny values.
 
 From Solve2's levels (v_estV.L) and bounds, as clean_tiny.gms:

@@ -17,8 +17,8 @@ dependencies = [
     "casadi>=3.6",       # bundles IPOPT: the regional supply models in CAPRI's NLP form
     "clarabel>=0.7",     # the manure-market pool equilibrium
     "pyarrow>=14",       # Parquet for the model's caches (the market supply Hessians)
-    "deltalake>=0.18",   # the runs' results table (capri_mod/io_results.py; refactor stage 5) and the pipeline's store
-    "pydantic>=2.0",     # the scenario definitions and the run's metadata (refactor stage 5)
+    "deltalake>=0.18",   # the runs' results table (capri_mod/io_results.py) and the pipeline's store
+    "pydantic>=2.0",     # the scenario definitions and the run's metadata
 ]
 
 [project.optional-dependencies]

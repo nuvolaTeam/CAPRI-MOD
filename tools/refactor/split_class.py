@@ -1,5 +1,5 @@
-"""Refactor stages 4a and 4c (docs/design/ARCHITECTURE_REFACTOR.md): a class's methods moved, unchanged, into block mixins in a
-sub-package beside its module, as stage 3a did for the regional supply model (tools/refactor/split_regional_model.py,
+"""The block-mixin refactor of the environmental module and CAPRIModel (docs/dev/ARCHITECTURE_REFACTOR.md): a class's methods moved, unchanged, into block mixins in a
+sub-package beside its module, as was done for the regional supply model (tools/refactor/split_regional_model.py,
 of which this is the general form). A move only: every method's text is copied as it is (with its decorators and the
 comment lines directly above it), the class attributes stay on the class, and the blocks see the module's module-level
 names, which the module gives them once it is loaded (blocks/__init__.py, inject).
@@ -136,14 +136,14 @@ def main() -> None:
         for m in sorted(ms, key=lambda m_: meth[m_][0]):          # the order of the module
             s, e = meth[m]
             body.append("\n".join(lines[s - 1:e]))
-        text = (f'"""{doc}\n\n{cname_main}\'s methods, moved unchanged from {rel} (refactor stage 4a,\n'
-                f'docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are {mod_name}\'s, given to '
+        text = (f'"""{doc}\n\n{cname_main}\'s methods, moved unchanged from {rel} (the block-mixin refactor,\n'
+                f'docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are {mod_name}\'s, given to '
                 f'this\nmodule once {mod_name} is loaded ({pkg}.inject); the annotations are not evaluated.\n"""\n'
                 f"from __future__ import annotations\n\n\nclass {cname}:\n" + "\n\n".join(body) + "\n")
         # a block sits one folder below the module: the repository root is one parent further from __file__
         text = text.replace(f"__file__).resolve().parents[{depth}]", f"__file__).resolve().parents[{depth + 1}]")
         (blocks_dir / f"{blk}.py").write_text(text)
-    init = (f'"""The blocks of {cname_main} (refactor stage 4a): mixins of {mod_name}.{cname_main}.\n\n'
+    init = (f'"""The blocks of {cname_main} (the block-mixin refactor): mixins of {mod_name}.{cname_main}.\n\n'
             f"Their methods were moved unchanged from {mod_name}.py and use its module-level names: inject gives each "
             f"block module\nthose names once {mod_name} is loaded (a name a block defines itself is kept).\n\"\"\"\n"
             + "".join(f"from {pkg}.{b} import {c}  # noqa: F401\n" for b, (c, _, _) in assign.items())
@@ -167,7 +167,7 @@ def main() -> None:
         if i in drop:
             continue
         if i == cls.lineno:
-            out += [f"from {pkg} import (  # noqa: E402  (refactor stage 4a: the blocks)", f"    {names},", ")", "", "",
+            out += [f"from {pkg} import (  # noqa: E402  (the blocks)", f"    {names},", ")", "", "",
                     f"class {cname_main}({names}):"]
             continue
         out.append(ln)
@@ -177,7 +177,7 @@ def main() -> None:
         if blank <= 2:
             res.append(ln)
     text = "\n".join(res).rstrip("\n") + "\n"
-    text += (f"\n\n# refactor stage 4a: the blocks' methods see this module's names ({pkg.replace('.', '/')}/__init__.py)\n"
+    text += (f"\n\n# the blocks' methods see this module's names ({pkg.replace('.', '/')}/__init__.py)\n"
              f"from {pkg.rsplit('.', 1)[0]} import {pkg.rsplit('.', 1)[1]} as _blocks  # noqa: E402\n"
              "_blocks.inject(globals())\n")
     src_path.write_text(text)

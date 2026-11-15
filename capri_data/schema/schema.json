@@ -4387,7 +4387,7 @@
    "layout": [
     "wide"
    ],
-   "comment": "CAPRI's calibrated own-price supply elasticities p_ElasSupp ('CAL', results/arm supply_elas_*) per member state (CAPRI's two-letter country, BL = BE + LU, IR = IE) and product; the elasticity-calibrated PMP's CAPRI_COUNTRY source for activities no regional source covers (docs/PMP_ELASTICITY_WIRING.md), not the default PMP. No builder in the repository",
+   "comment": "CAPRI's calibrated own-price supply elasticities p_ElasSupp ('CAL', results/arm supply_elas_*) per member state (CAPRI's two-letter country, BL = BE + LU, IR = IE) and product; the elasticity-calibrated PMP's CAPRI_COUNTRY source for activities no regional source covers (docs/dev/PMP_ELASTICITY_WIRING.md), not the default PMP. No builder in the repository",
    "columns": [
     {
      "name": "capri_country",
@@ -20442,12 +20442,14 @@
    "notes": [],
    "read_by": {
     "model": [
+     "capri_mod/environmental/nitrogen.py",
      "capri_mod/fert/npk.py"
     ],
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_capri.py"
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_mineral_n_losses.py"
     ]
    }
   },
@@ -20617,7 +20619,9 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_mineral_n_losses.py"
+    ]
    }
   },
   "env_p_balance_crop_coefs_2030": {
@@ -21546,7 +21550,7 @@
    "file": "capri_data/2017/feed/fodder_balance_2017.csv",
    "declared_in": "25_feed.sql",
    "layout": [],
-   "comment": "the regional balances of the non-tradable fodder (CAPRI supply_model.gms SUPBAL_): the crops producing it (one row each: grass FGRA from GRAE and GRAI since S2, 7 November 2026), the usable fresh fodder per ha (base fodder use / base area) and its base value (CAPRI's UVAG); built from feed_ration_2017.csv, base_areas.csv and animal_numbers.csv (tools/build/build_fodder_balance.py; fodder_balance_2017.json until 31 October 2026; capri_mod/data/nested_tables.py)",
+   "comment": "the regional balances of the non-tradable fodder (CAPRI supply_model.gms SUPBAL_): the crops producing it (one row each: grass FGRA from GRAE and GRAI since 7 November 2026), the usable fresh fodder per ha (base fodder use / base area) and its base value (CAPRI's UVAG); built from feed_ration_2017.csv, base_areas.csv and animal_numbers.csv (tools/build/build_fodder_balance.py; fodder_balance_2017.json until 31 October 2026; capri_mod/data/nested_tables.py)",
    "columns": [
     {
      "name": "region",
@@ -22247,7 +22251,7 @@
    ],
    "checks": [
     "(technology IN ('NITR_INH', 'NITR_INH_MAN'))",
-    "(item IN ('N2OSYN', 'NH3SYN', 'NH3APP', 'N2OAPP', 'NO3SLEA', 'NO3SRUN', 'NO3MLEA', 'NO3MRUN'))",
+    "(item IN ('N2OSYN', 'NH3SYN', 'NOXSYN', 'NH3APP', 'N2OAPP', 'NO3SLEA', 'NO3SRUN', 'NO3MLEA', 'NO3MRUN'))",
     "((\"value\" > -1) AND (\"value\" < 1))"
    ],
    "units": [
@@ -24077,7 +24081,7 @@
    "file": "capri_data/2017/market/bilateral_trq_2017.csv",
    "declared_in": "23_market_more.sql",
    "layout": [],
-   "comment": "CAPRI's bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks' market regions and the regime of the pair (bilateral sigmoid; with the importer's global quota: the smaller rate; entry price system), 2017 (tools/build/build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md).",
+   "comment": "CAPRI's bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks' market regions and the regime of the pair (bilateral sigmoid; with the importer's global quota: the smaller rate; entry price system), 2017 (tools/build/build_bilateral_market.py build_trq; docs/dev/MARKET_TRQ_PORT.md).",
    "columns": [
     {
      "name": "importer",
@@ -24197,7 +24201,7 @@
    "file": "capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_trq_2030.csv",
    "declared_in": "23_market_more.sql",
    "layout": [],
-   "comment": "CAPRI's bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks' market regions and the regime of the pair (bilateral sigmoid; with the importer's global quota: the smaller rate; entry price system), 2030 (tools/build/build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md).",
+   "comment": "CAPRI's bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks' market regions and the regime of the pair (bilateral sigmoid; with the importer's global quota: the smaller rate; entry price system), 2030 (tools/build/build_bilateral_market.py build_trq; docs/dev/MARKET_TRQ_PORT.md).",
    "columns": [
     {
      "name": "importer",
@@ -24320,7 +24324,7 @@
    "file": "capri_data/2017/market/bilateral_trq_global_2017.csv",
    "declared_in": "23_market_more.sql",
    "layout": [],
-   "comment": "CAPRI's global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer's rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2017 (tools/build/build_bilateral_market.py build_trq_global; docs/design/PORTS_STAGE4.md).",
+   "comment": "CAPRI's global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer's rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2017 (tools/build/build_bilateral_market.py build_trq_global; docs/dev/MARKET_TRQ_PORT.md).",
    "columns": [
     {
      "name": "importer",
@@ -24427,7 +24431,7 @@
    "file": "capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_trq_global_2030.csv",
    "declared_in": "23_market_more.sql",
    "layout": [],
-   "comment": "CAPRI's global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer's rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2030 (tools/build/build_bilateral_market.py build_trq_global; docs/design/PORTS_STAGE4.md).",
+   "comment": "CAPRI's global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer's rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2030 (tools/build/build_bilateral_market.py build_trq_global; docs/dev/MARKET_TRQ_PORT.md).",
    "columns": [
     {
      "name": "importer",
@@ -25661,7 +25665,7 @@
    "file": "capri_data/baselines/capri_greendeal_ref/1730/market/border_measures_2030.csv",
    "declared_in": "23_market_more.sql",
    "layout": [],
-   "comment": "CAPRI's entry prices (DATA TriggerP) and flexible levies (DATA MinBordP) per importer policy block and model commodity, with the bound specific rate DATA TARS and the free-trade exporters (p_doubleZero), from sim_ini_21730 CUR (tools/build/build_bilateral_market.py build_border_measures; docs/design/PORTS_STAGE4.md, stage 6).",
+   "comment": "CAPRI's entry prices (DATA TriggerP) and flexible levies (DATA MinBordP) per importer policy block and model commodity, with the bound specific rate DATA TARS and the free-trade exporters (p_doubleZero), from sim_ini_21730 CUR (tools/build/build_bilateral_market.py build_border_measures; docs/dev/MARKET_TRQ_PORT.md, stage 6).",
    "columns": [
     {
      "name": "importer",
@@ -26472,7 +26476,7 @@
    "file": "capri_data/2017/market/dairy_world_demand_elas.csv",
    "declared_in": "23_market_more.sql",
    "layout": [],
-   "comment": "CAPRI's dairy block for the non-EU market regions (dairy Stage 4). (tools/build/build_dairy_world_blocks.py)",
+   "comment": "CAPRI's dairy block for the non-EU market regions. (tools/build/build_dairy_world_blocks.py)",
    "columns": [
     {
      "name": "rms",
@@ -26533,7 +26537,7 @@
    "file": "capri_data/2017/market/dairy_world_hessian.csv",
    "declared_in": "23_market_more.sql",
    "layout": [],
-   "comment": "CAPRI's dairy block for the non-EU market regions (dairy Stage 4). (tools/build/build_dairy_world_blocks.py)",
+   "comment": "CAPRI's dairy block for the non-EU market regions. (tools/build/build_dairy_world_blocks.py)",
    "columns": [
     {
      "name": "rms",
@@ -26594,7 +26598,7 @@
    "file": "capri_data/2017/market/dairy_world_processing.csv",
    "declared_in": "23_market_more.sql",
    "layout": [],
-   "comment": "CAPRI's dairy block for the non-EU market regions (dairy Stage 4). (tools/build/build_dairy_world_blocks.py)",
+   "comment": "CAPRI's dairy block for the non-EU market regions. (tools/build/build_dairy_world_blocks.py)",
    "columns": [
     {
      "name": "trade_region",
@@ -29639,7 +29643,7 @@
    "file": "capri_data/2017/market/noneu_land_market.csv",
    "declared_in": "20_market_2017.sql",
    "layout": [],
-   "comment": "CAPRI's market land block per non-EU market region without supply models (LandSupplyMNL_, LndSupplyEqualsDemand_, rentFromProdpriceLand_, arm/market_model.gms l. 1696-1790): land, rent, MNL constant p_aLU CUR and ARTO - INLW per land type, from sim_ini_21730 (tools/build/build_noneu_market_supply_nq.py build_land_market; PORTS_STAGE4.md stage 7)",
+   "comment": "CAPRI's market land block per non-EU market region without supply models (LandSupplyMNL_, LndSupplyEqualsDemand_, rentFromProdpriceLand_, arm/market_model.gms l. 1696-1790): land, rent, MNL constant p_aLU CUR and ARTO - INLW per land type, from sim_ini_21730 (tools/build/build_noneu_market_supply_nq.py build_land_market; MARKET_TRQ_PORT.md stage 7)",
    "columns": [
     {
      "name": "trade_region",
@@ -29841,7 +29845,7 @@
    "file": "capri_data/2017/market/noneu_market_supply_nq.csv",
    "declared_in": "20_market_2017.sql",
    "layout": [],
-   "comment": "CAPRI's market supply functions of the non-EU market regions (ProdNQ_): p_hessNQSupp at CAL completed as arm/market1.gms, the land demand rows (x TCRP, FODFAL, FRUN) with their sign turned as arm/market1.gms l. 593, Data_CAL PPRI, INPE 2030 (tools/build/build_noneu_market_supply_nq.py; K54-3; the land market, PORTS_STAGE4.md stage 7)",
+   "comment": "CAPRI's market supply functions of the non-EU market regions (ProdNQ_): p_hessNQSupp at CAL completed as arm/market1.gms, the land demand rows (x TCRP, FODFAL, FRUN) with their sign turned as arm/market1.gms l. 593, Data_CAL PPRI, INPE 2030 (tools/build/build_noneu_market_supply_nq.py; K54-3; the land market, MARKET_TRQ_PORT.md stage 7)",
    "columns": [
     {
      "name": "trade_region",
@@ -30666,7 +30670,7 @@
     {
      "kind": "gap",
      "note": "The crop terms are CAPRI's two technologies per crop (T1 high-yield, T2 low-yield) collapsed into one activity with the curvature of the optimal split (the Schur complement of CAPRI's 2x2 block). With supply.crop_technologies on (CAPRI's setting, the default since 8 November 2026) the model adds the mix as one column per crop with both technologies (pmp_capri_2030_mix.csv, techn_mix_2030.csv), and X's curvature with the mix optimised out is this file's (checked on all 5,417 blocks, 1.4e-13 relative); off, the change in average yield that CAPRI gets from shifting between T1 and T2 is not represented.",
-     "evidence": "tools/build/build_pmp_capri_2030.py (mix_terms); capri_mod/supply/techn_mix.py; capri_mod/tests/test_techn_mix.py; allgms/gams/capmod.gms:246-249 (SET A: T, T1, T2); docs/design/S1_MIX_COLUMNS.md",
+     "evidence": "tools/build/build_pmp_capri_2030.py (mix_terms); capri_mod/supply/techn_mix.py; capri_mod/tests/test_techn_mix.py; allgms/gams/capmod.gms:246-249 (SET A: T, T1, T2); docs/dev/CROP_TECHNOLOGY_MIX_COLUMNS.md",
      "checked": "2026-11-08"
     },
     {
@@ -30917,7 +30921,7 @@
    "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_capri_2030_mix.csv",
    "declared_in": "12_supply_pmp.sql",
    "layout": [],
-   "comment": "CAPRI's 2x2 technology block p_pmpQuadTechn(act, T1/T2) of each crop with both technologies in the mix columns' variables (X, z), x_T1 = X/2 + z, x_T2 = X/2 - z (S1, docs/design/S1_MIX_COLUMNS.md): g_xx_extra = (Q_XX - c) X^2 added to the crop's diagonal of pmp_capri_2030 (c its collapsed curvature), g_xz = Q_Xz X^2, g_zz = Q_zz X^2 (tools/build/build_pmp_capri_2030.py, mix_terms)",
+   "comment": "CAPRI's 2x2 technology block p_pmpQuadTechn(act, T1/T2) of each crop with both technologies in the mix columns' variables (X, z), x_T1 = X/2 + z, x_T2 = X/2 - z (S1, docs/dev/CROP_TECHNOLOGY_MIX_COLUMNS.md): g_xx_extra = (Q_XX - c) X^2 added to the crop's diagonal of pmp_capri_2030 (c its collapsed curvature), g_xz = Q_Xz X^2, g_zz = Q_zz X^2 (tools/build/build_pmp_capri_2030.py, mix_terms)",
    "columns": [
     {
      "name": "region",
@@ -31040,7 +31044,7 @@
    "file": "capri_data/2017/supply/pmp_own_price_elasticities.csv",
    "declared_in": "13_supply_rents_elas.sql",
    "layout": [],
-   "comment": "CAPRI's estimated own-price elasticities (PELA) per CAPRI region and CAPRI activity, raw (bounded on load, capri_pmp.dampen_elasticity); the elasticity-calibrated PMP's PMP_CAPRI source (docs/PMP_ELASTICITY_WIRING.md), not the default PMP (CAPRI's 2030 terms). Built by tools/build/build_pmp_own_price_elasticities.py from PELA's 2005 own-price slice (an earlier year where 2005 is missing)",
+   "comment": "CAPRI's estimated own-price elasticities (PELA) per CAPRI region and CAPRI activity, raw (bounded on load, capri_pmp.dampen_elasticity); the elasticity-calibrated PMP's PMP_CAPRI source (docs/dev/PMP_ELASTICITY_WIRING.md), not the default PMP (CAPRI's 2030 terms). Built by tools/build/build_pmp_own_price_elasticities.py from PELA's 2005 own-price slice (an earlier year where 2005 is missing)",
    "columns": [
     {
      "name": "region",
@@ -35227,7 +35231,7 @@
    "layout": [
     "unnamed"
    ],
-   "comment": "EU producer prices 2017 (build_eu_producer_prices.py): crops from CAPRI's regional prices; SHGM, SHGF from tools/lib/_sheep_goat.eu_prices; VSET's and FALL's 0 (SETA's until S2, 7 November 2026) from sources/unsourced/producer_prices_no_builder.parquet",
+   "comment": "EU producer prices 2017 (build_eu_producer_prices.py): crops from CAPRI's regional prices; SHGM, SHGF from tools/lib/_sheep_goat.eu_prices; VSET's and FALL's 0 (SETA's until 7 November 2026) from sources/unsourced/producer_prices_no_builder.parquet",
    "columns": [
     {
      "name": "activity",
@@ -53742,7 +53746,8 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_capri.py"
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_mineral_n_losses.py"
     ]
    }
   },
@@ -53908,7 +53913,7 @@
    "file": "capri_data/2017/supply/producer_prices_regional.csv",
    "declared_in": "18_supply_more.sql",
    "layout": [],
-   "comment": "CAPRI's regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.parquet), CAPRI's TWIN column for WINE where it is empty (and OFAR for OFOD until S2, 7 November 2026), and a missing regional price filled with the country's national price (sources/capreg/capreg_national_prices.parquet; tools/build/build_model_premium_prices.py; done by the model's loader at run time until 31 October 2026)",
+   "comment": "CAPRI's regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.parquet), CAPRI's TWIN column for WINE where it is empty (and OFAR for OFOD until 7 November 2026), and a missing regional price filled with the country's national price (sources/capreg/capreg_national_prices.parquet; tools/build/build_model_premium_prices.py; done by the model's loader at run time until 31 October 2026)",
    "columns": [
     {
      "name": "model_region",
@@ -54737,7 +54742,7 @@
    "file": "capri_data/2017/supply/set_aside_split.csv",
    "declared_in": "18_supply_more.sql",
    "layout": [],
-   "comment": "CAPRI's premiums PRME (EUR/ha) of its two set-aside activities VSET and FALL per model region, 2017 and 2030 (the 2030 values in the model's 2017 money), for the set-aside report (tools/build/build_labour_setaside.py; until S2, 7 November 2026, also the split of the model's SETA and its labour)",
+   "comment": "CAPRI's premiums PRME (EUR/ha) of its two set-aside activities VSET and FALL per model region, 2017 and 2030 (the 2030 values in the model's 2017 money), for the set-aside report (tools/build/build_labour_setaside.py; until 7 November 2026, also the split of the model's SETA and its labour)",
    "columns": [
     {
      "name": "region",
@@ -54817,7 +54822,7 @@
    "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/techn_mix_2030.csv",
    "declared_in": "18_supply_more.sql",
    "layout": [],
-   "comment": "The T1 - T2 differences per ha of the items CAPRI's technology factors move (intens/techf.gms, fert/fertned.gms, policy/rd_logic.gms, NUTNED_), per model region and crop with both technologies: the coefficients of the mix columns (S1, docs/design/S1_MIX_COLUMNS.md; tools/build/build_techn_mix_2030.py)",
+   "comment": "The T1 - T2 differences per ha of the items CAPRI's technology factors move (intens/techf.gms, fert/fertned.gms, policy/rd_logic.gms, NUTNED_), per model region and crop with both technologies: the coefficients of the mix columns (S1, docs/dev/CROP_TECHNOLOGY_MIX_COLUMNS.md; tools/build/build_techn_mix_2030.py)",
    "columns": [
     {
      "name": "region",
@@ -54938,7 +54943,7 @@
    "notes": [
     {
      "kind": "gap",
-     "note": "Not carried, registered (docs/design/S1_MIX_COLUMNS.md section 6, KNOWN_ISSUES K124): sugar beet's VCOF factor (sugar/techf.gms l. 103; the quota regime's variable cost share, taken as without effect since 2017, to be confirmed); irrigation water (factor 0 in CAPRI). The premium shares per crop are computed from CAPRI's 2030 reference results (PRME by scheme, res_2_1730greendeal_refpol_endotech_all_inidefaulta) and applied to the model's premium of the solve, so a scenario that changes the schemes' mix is not followed. The input costs per ha are CAPREG 2017's (as plant_protection_cost.csv); 0 where CAPREG has no level for the crop.",
+     "note": "Not carried, registered (docs/dev/CROP_TECHNOLOGY_MIX_COLUMNS.md section 6, KNOWN_ISSUES K124): sugar beet's VCOF factor (sugar/techf.gms l. 103; the quota regime's variable cost share, taken as without effect since 2017, to be confirmed); irrigation water (factor 0 in CAPRI). The premium shares per crop are computed from CAPRI's 2030 reference results (PRME by scheme, res_2_1730greendeal_refpol_endotech_all_inidefaulta) and applied to the model's premium of the solve, so a scenario that changes the schemes' mix is not followed. The input costs per ha are CAPREG 2017's (as plant_protection_cost.csv); 0 where CAPREG has no level for the crop.",
      "evidence": "tools/build/build_techn_mix_2030.py; capri_mod/supply/techn_mix.py (_mix_linear)",
      "checked": "2026-11-08"
     }
@@ -59630,13 +59635,13 @@
   }
  ],
  "code_data": {
-  "capri/keep": 501,
+  "capri/keep": 502,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 37,
   "open/keep": 4,
   "physical/keep": 13,
-  "technical/keep": 34
+  "technical/keep": 35
  },
  "other_notes": {}
 }

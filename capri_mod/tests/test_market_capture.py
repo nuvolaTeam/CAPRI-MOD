@@ -1,4 +1,4 @@
-"""G3.1 (claude/g3_plan.md): a captured market solve replays bit for bit (MarketModule._solve_captured,
+"""The market solve capture (docs/dev/MARKET_SYSTEM.md): a captured market solve replays bit for bit (MarketModule._solve_captured,
 tools/check/replay_market.py) - the cold first solve and a warm second one at a changed supply."""
 from __future__ import annotations
 

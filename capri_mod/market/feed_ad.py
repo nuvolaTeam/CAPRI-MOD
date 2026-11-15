@@ -1,4 +1,4 @@
-"""CAPRI's feed block of the non-EU market regions in CasADi: market programme step G2d (docs/design/
+"""CAPRI's feed block of the non-EU market regions in CasADi (docs/dev/
 MARKET_IPOPT_DESIGN.md sections 5-6).
 
 Written once, here, and evaluated from here by FeedMixin.noneu_fede and noneu_feed_change (capri_mod/market/feed.py):
@@ -11,7 +11,7 @@ the project lead's choice of one implementation per block (section 7, 30 October
 
 ra the trade region's Armington price ratios, rp its producer price ratios, m its dairy block's raw milk price ratio, dr
 the land rents' changes of the region (EUR/ha; the land block). FeedBal_ is linear in FEDE, so FEDE has a closed form;
-fedebal_function gives it and the balance's residual at any FEDE (the residual is G3's equation, with FEDE an unknown).
+fedebal_function gives it and the balance's residual at any FEDE (the residual is an equation of the whole-market system, with FEDE an unknown).
 Floating point: CasADi's sums run in their own order, so the values differ from feed.py's loops before the move by
 rounding only (capri_mod/tests/test_feed_ad.py measures it).
 """

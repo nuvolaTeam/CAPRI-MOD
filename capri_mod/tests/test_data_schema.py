@@ -1,4 +1,4 @@
-"""The data declarations (capri_data/schema, capri_mod/data/validate_data.py; docs/design/DATA_SCHEMA_DUCKDB.md): the
+"""The data declarations (capri_data/schema, capri_mod/data/validate_data.py; docs/dev/DATA_SCHEMA_DUCKDB.md): the
 repository's data meet them, and every kind of violation is found, with the CSV line, in a damaged copy."""
 import shutil
 import sys

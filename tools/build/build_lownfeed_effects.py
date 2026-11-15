@@ -1,4 +1,4 @@
-"""CAPRI's low-nitrogen feeding option per model region and animal (envind/low_n_feed.gms; Sprint 9g).
+"""CAPRI's low-nitrogen feeding option per model region and animal (envind/low_n_feed.gms; the port of CAPRI's feed options).
 
 star 3.0's Green Deal reference technology file sets ghgTechLowNFeed = 1 (pol_input/greendeal/refpol_endotech_all_sup.gms,
 as the JRC121368-era ecampa references): the option exists for every animal whose ration carries more crude protein
