@@ -108,6 +108,18 @@ the rest of CAPRI's bounds and fudge equations (the start bounds, the widening a
 tradeFlowFudge_ to write; docs/dev/MARKET_BOUNDS_PLAN.md), the Armington extensions, the intervention stocks and
 subsidised exports, LULUCF in the market, the market regions' crop areas and yields.
 
+## 15 November 2026, evening — the fertiliser block's first-order condition at the flows' lower bound (DEP-49, K159)
+
+- **DEP-49 (the project lead's decision):** the inner fertilisation model's first-order condition with the flows'
+  lower-bound multiplier: a flow above 0.001 x its prior mode meets CAPRI's e_focFertDist, a flow at the bound only its
+  inequality (a smoothed Fischer-Burmeister function). Settings fertiliser.foc_lower_bound_complementarity (true;
+  false = CAPRI's equality), foc_fb_smoothing, flow_lower_bound_mode_share (CAPRI's 0.001). Inside the bounds CAPRI's
+  solution (DE11's baseline within 1e-5; test_fertiliser_first_order_condition_with_the_bound_multiplier_is_capris_inside_the_bounds).
+- **K159 still open:** NL22 (DE11 + NL22, one iteration, Farm-to-Fork) still ends locally infeasible; its first-order
+  conditions now hold and its accounts close, the K balance of its grain-maize group does not at the point reached.
+- Not yet in the full runs: validated with the batch (the project lead's plan of 15 November 2026: the fixes of step 3
+  and step 4 committed on the work branch after their own tests, one full Green Deal pair and the suite at the end).
+
 ## 15 November 2026 — the idled histosol area on the current land (K158)
 
 - **CAPRI's idleHisto_ bounds the idled histosol area by the current land (KNOWN_ISSUES K158).** supply_model.gms

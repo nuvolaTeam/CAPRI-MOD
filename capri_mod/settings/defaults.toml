@@ -337,6 +337,14 @@ exempt_cap_factor = 1.0
 # x 1000 t)
 partial_slack_tiny_t = 5.0
 partial_slack_listed_add_t = 100.0
+# the fertiliser flows' lower bound, in units of their prior mode (CAPRI's set_fert_priors.gms: 0.001 x mode)
+flow_lower_bound_mode_share = 0.001
+# DEPARTURE (KNOWN_ISSUES K159, the project lead's decision of 15 November 2026): the inner model's first-order
+# condition with the flow's lower-bound multiplier (complementarity, a smoothed Fischer-Burmeister function); false:
+# CAPRI's e_focFertDist, an equality that cannot hold at the bound
+foc_lower_bound_complementarity = true
+# numerical: the smoothing of the Fischer-Burmeister function (squared, in the flows' scaled units)
+foc_fb_smoothing = 1e-12
 # inner distribution solve: tolerance, iterations
 fd_tol = 1e-9
 fd_max_iter = 100

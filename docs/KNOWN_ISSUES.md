@@ -60,7 +60,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K156](#k156) | CAPRI's bounds on forest and other land (prep_sim_luc.gms, Trustee_land) were missing: under the Green Deal's landscape floor the EU lost 5.4 Mha of forest (CAPRI 1.1 Mha, no region below 0.99 x base), loosening the surplus target per hectare | fixed (15 November 2026) |
 | [K157](#k157) | CAPRI's permanent-grassland rule counts the idled histosol grassland (GRSACT includes IHISGR); the model's counted GRAE + GRAI alone, so the productive grass stayed at its base and the idled area took new land | fixed (15 November 2026) |
 | [K158](#k158) | The idled histosol area was bounded by the base land; CAPRI's idleHisto_ takes the current land (GRSLND x landshare(GRAS), CROP), so under the landscape floor new grassland brings idled histosol (Ireland's IR02 turns arable land into grassland) | fixed (15 November 2026), validated (the full Green Deal pair) |
-| [K159](#k159) | NL22's Farm-to-Fork solve ends at a non-optimal point in a two-region, one-iteration run since K158 (the inner fertilisation model's first-order condition cannot hold with a manure flow at its 0.001 x mode bound) | open |
+| [K159](#k159) | NL22's Farm-to-Fork solve ends at a non-optimal point in a two-region, one-iteration run since K158 (first the inner fertilisation model's first-order condition at a flow's bound, DEP-49 for it; then the K balance of one crop group at the point IPOPT reaches) | open |
 | [K141](#k141) | CAPRI bug: CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it (the project lead's decision) |
 | [K136](#k136) | CAPRI's endogenous entitlement limit (def_endCut.gms: no area payment beyond the trend area) was not in the model; ported with CAPRI's 2030 ceilings computed from its CAP 2014-2020 tables | fixed (13 November 2026) |
 | [K137](#k137) | The reported UAA left out the idled histosols (CAPRI's IHISGR, IHISCR stay in GRAS, ARAC and UAAR): the Green Deal's surplus per ha looked short of its target where the row met it | fixed (13 November 2026) |
@@ -3333,6 +3333,10 @@ there with K157 too, and the calibration falls back as before.
 
 - **Effect:** NL22 under Farm-to-Fork in small test runs; in a full run, unknown until the Farm-to-Fork run
 - **In 9t:** -
-- **Status:** open. Next (the project lead's decision, 15 November 2026): a first-order condition that lets a flow sit at
-  its lower bound (a bound multiplier, complementarity), beyond CAPRI's equality; a stated departure. The P accounts
-  test runs on DE11 and DE94 meanwhile.
+- **Status:** open. Step 1 done (15 November 2026, the project lead's decision): the inner model's first-order condition
+  with the flows' lower-bound multiplier (DEP-49, fertiliser.foc_lower_bound_complementarity; CAPRI's form inside the
+  bounds, test_fertiliser_first_order_condition_with_the_bound_multiplier_is_capris_inside_the_bounds). With it NL22's
+  first-order conditions hold at IPOPT's last point and its accounts close (P purchase 21.0 t = NUTNED_'s), but the
+  solve still ends locally infeasible: at that activity point the K balance of the grain-maize group (NUTNED_ MAIZ, 0.07
+  in scaled units) has no solution even for the fertilisation block solved alone (fert_at), so the remaining cause is
+  the activity mix IPOPT's path reaches, not the condition's form. The P accounts test runs on DE11 and DE94.

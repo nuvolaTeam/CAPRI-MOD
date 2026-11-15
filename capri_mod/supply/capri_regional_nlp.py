@@ -618,6 +618,9 @@ class CapriRegionalNLP:
         lc = [int(j) for j in (npk.get("land_cols") or npk.get("crop_cols") or [])]
         land = ca.sum1(y[lc]) if len(lc) > 1 else (y[lc[0]] if lc else 0)
         self.fert_rows = [len(g_rows), None]
+        _u_lo = float(_settings().get("fertiliser.flow_lower_bound_mode_share"))
+        _fb_on = bool(_settings().get("fertiliser.foc_lower_bound_complementarity"))
+        _fb_eps = float(_settings().get("fertiliser.foc_fb_smoothing"))
         self.excr_rows = {}                     # nutrient -> (row of fertDistExcr_, its scale): ManureNPK_'s value
         for nut, d in npk["nutrients"].items():
             G = d["groups"]
@@ -728,7 +731,19 @@ class CapriRegionalNLP:
                     g_rows.append((x[i] - float(_settings().get("fertiliser.support_margin")) * Y) * pv(1.0 / m)); lbg.append(-np.inf); ubg.append(0.0)
                 else:
                     term = pv(a1) / u[i] - pv(bm) - pv(m / T) * dual
-                g_rows.append(term); lbg.append(0.0); ubg.append(0.0)
+                if _fb_on:
+                    # DEPARTURE (K159, the project lead's decision of 15 November 2026): CAPRI's e_focFertDist is an
+                    # equality, the inner model's first-order condition for a flow inside its bounds; a flow at its
+                    # lower bound 0.001 x mode (set_fert_priors.gms) has one more term, the bound's multiplier
+                    # nu >= 0: term + nu = 0, nu (u - lb) = 0. Written as the smoothed Fischer-Burmeister function
+                    # of the pair (u - lb, -term): zero where term = 0 inside the bounds, or u = lb and term <= 0.
+                    # Inside the bounds it is CAPRI's equation (to within the smoothing)
+                    a_ = u[i] - _u_lo
+                    b_ = -term
+                    g_rows.append(a_ + b_ - ca.sqrt(a_ * a_ + b_ * b_ + _fb_eps))
+                else:
+                    g_rows.append(term)
+                lbg.append(0.0); ubg.append(0.0)
             # CAPRI's mineral N cap per ha of land (minfert_redu_uaa.gms, e_synNMax): purchases <= cap x land
             if d.get("synNMax") is not None:
                 self.synN_row = (len(g_rows), Pscale)
@@ -776,7 +791,7 @@ class CapriRegionalNLP:
             o = nx0 + sum(int(v.shape[0]) for v in new)
             new.append(vars_)
             db = float(npk.get("dual_bound", 10.0))
-            lbx += [1e-3] * nfl + [-db * T] * (len(G) + len(pools)) + [-b_ for _, b_ in sl_i] + [0.0]
+            lbx += [_u_lo] * nfl + [-db * T] * (len(G) + len(pools)) + [-b_ for _, b_ in sl_i] + [0.0]
             ubx += [1e3] * nfl + [db * T] * (len(G) + len(pools)) + [b_ for _, b_ in sl_i] + [np.inf]
             self.fert[nut] = {"rows": (r_nut0, len(g_rows)), "flows": flows, "groups": [g_["g"] for g_ in G],
                               "pools": pools, "off": o, "nfl": nfl, "slack": [i for i, _ in sl_i],

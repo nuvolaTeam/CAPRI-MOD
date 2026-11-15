@@ -4300,6 +4300,26 @@ def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
         assert A[lab.index(row), col] == 1.0 and A[lab.index(row + "_lo"), col] == -1.0
 
 
+@pytest.mark.slow
+@pytest.mark.no_market_hessian
+def test_fertiliser_first_order_condition_with_the_bound_multiplier_is_capris_inside_the_bounds(_fresh_model, monkeypatch):
+    """DEP-49 (KNOWN_ISSUES K159): the inner fertilisation model's first-order condition with the flows' lower-bound
+    multiplier (fertiliser.foc_lower_bound_complementarity) gives CAPRI's solution where no flow is at its bound: DE11's
+    baseline with the switch on and off (CAPRI's e_focFertDist) within 1e-5 on the activities and the purchases."""
+    import copy
+    out = {}
+    for on in (True, False):
+        _set(monkeypatch, {"fertiliser.foc_lower_bound_complementarity": on})
+        m = copy.deepcopy(_fresh_model)
+        r = m.run(scenario="BASELINE", regions=["DE110000"], max_outer_iter=1)
+        sr = r["supply"]["DE110000"]
+        out[on] = (sr.activities, {k: v["purchase"] for k, v in (sr.fert_npk or {}).items()})
+    a1, a0 = out[True][0], out[False][0]
+    assert ((a1 - a0).abs() <= 1e-5 * a0.abs().clip(lower=1.0)).all(), (a1 - a0).abs().sort_values().tail()
+    for k, v in out[False][1].items():
+        assert abs(out[True][1][k] - v) <= 1e-5 * max(1.0, abs(v)), (k, out[True][1][k], v)
+
+
 def test_idled_histosol_area_is_bounded_by_the_current_land(model):
     """KNOWN_ISSUES K158: CAPRI's idleHisto_ (supply_model.gms l. 2284-2295) takes the idled area as v_Miti x share x
     the current land (GRSLND x v_landshare(GRAS), the productive grassland; CROP = ARAC + FRUN), v_Miti <= MaxShare:
