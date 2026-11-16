@@ -36,7 +36,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K130](#k130) | Catch crops' cost per ha is CAPRI's reported TOIN of CATC, not its cost coefficients; where CAPRI's Green Deal baseline has no catch crops (160 of 250 units), the calibration run's TOIN | open (9 November 2026): to read CAPRI's own cost data of the winter-cover technology |
 | [K131](#k131) | Given CAPRI's own Green Deal supply, the market's EU prices follow CAPRI's within 0.3 points on average, but the dairy protein products rise 2-5 points more and butter 1 point less | open (12 November 2026): not yet traced |
 | [K138](#k138) | CAPRI's new energy crops (NECR, 251 kha of the EU's 2030 crop area) are not a model activity | open (13 November 2026) |
-| [K139](#k139) | PL340000 converts all its forest to farmland in the Green Deal 2030 run (crop area +45% against CAPRI's -2%) | open (13 November 2026) |
+| [K139](#k139) | PL340000 converts all its forest to farmland in the Green Deal 2030 run (crop area +45% against CAPRI's -2%) | fixed by K156 (closed 16 November 2026) |
 | [K140](#k140) | The rural development port: 286 of 20,098 effective RD premiums differ from CAPRI's 2030 reference (Praha's rates, Ile-de-France's inherited LFA cut, Sweden's technology-differentiated extensification measure) | open (13 November 2026); in the model's 2030 premiums since 13 November 2026 |
 | [K142](#k142) | The BPS key (the MTR port): Croatia's key not found in CAPRI's chain (a uniform IUV used); sim_ini's NA sheep rates of 2002 taken as absent; France's Corsica 5% below CAPRI's 2030 BPS rate | open (13 November 2026) |
 | [K143](#k143) | A regional premium factor on animals compounded at every solve (livestock_premium_coef not restored) | fixed (13 November 2026) |
@@ -63,6 +63,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K159](#k159) | NL22's Farm-to-Fork solve ends at a non-optimal point in a two-region, one-iteration run since K158 (first the inner fertilisation model's first-order condition at a flow's bound, DEP-49 for it; then the K balance of one crop group at the point IPOPT reaches) | open; not reproduced since 16 November 2026, to confirm in the full Farm-to-Fork run |
 | [K160](#k160) | The grassland need lacked CAPRI's split SQRT(1 +/- 0.2) between intensive and extensive grassland (NUTNED_) | fixed (16 November 2026) |
 | [K161](#k161) | The 2030 base value of the fodders was the highest 2017 ration price of the region's animals times the member state's 2030/2017 ratio, not CAPRI's own regional 2030 unit value (UVAG) | fixed (16 November 2026); no effect on quantities |
+| [K162](#k162) | The permanent groups' own residues in NUTNED_ were the group's total spread by area (GRAE and GRAI the same per ha), not CAPRI's per-crop DATA(crop, MANN/MANP/MANK) | fixed (16 November 2026) |
 | [K141](#k141) | CAPRI bug: CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it (the project lead's decision) |
 | [K136](#k136) | CAPRI's endogenous entitlement limit (def_endCut.gms: no area payment beyond the trend area) was not in the model; ported with CAPRI's 2030 ceilings computed from its CAP 2014-2020 tables | fixed (13 November 2026) |
 | [K137](#k137) | The reported UAA left out the idled histosols (CAPRI's IHISGR, IHISCR stay in GRAS, ARAC and UAAR): the Green Deal's surplus per ha looked short of its target where the row met it | fixed (13 November 2026) |
@@ -2901,7 +2902,9 @@ market's quadratic is not unusual there: smallest eigenvalue 1.5e-4, the median 
 
 - **Effect:** PL340000's land use and supply in the Green Deal; part of the EU's UAA gap (K136)
 - **In 9t:** –
-- **Status:** open: to be traced (the land market's transformation costs at the solution against CAPRI's 2030 LUC)
+- **Status:** fixed by K156 (CAPRI's bounds on forest and other land, 15 November 2026): in the K158 Green Deal pair
+  (15 November 2026) PL340000's forest -1.0%, arable land +0.9%, grassland unchanged (CAPRI: crop area -2%). Closed
+  16 November 2026
 
 ### K140: the rural development port's open differences from CAPRI's 2030 reference (found 13 November 2026)
 
@@ -3374,6 +3377,7 @@ Green Deal's GRAI gap (EU -38.8% against CAPRI's -54.8%): in ES41 CAPRI's NUTNED
   grass's value per ha 1.67 x CAPRI's D_O) are not the 2030 run's and are withdrawn; the 2030 run's base value of
   grass is 0.87 x CAPRI's 2030 UVAG (median over regions; K161). Full runs with the batch.
 
+<a id="k161"></a>
 ### K161: The fodders' 2030 base value was not CAPRI's own regional unit value (found 16 November 2026)
 
 The fodder balance's base dual (the value the PMP calibration makes optimal, supply_module: f = f - row x lambda0) was
@@ -3404,3 +3408,40 @@ produced and 0.03 kt fed: 77,560 EUR/t). With the projected fodder per ha it giv
   -> capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_value_2030.csv, read by projection/prices.py.
   Validation with the batch's full Green Deal pair.
 
+<a id="k162"></a>
+### K162: The permanent crops' own residues were the group's total spread by area (found 16 November 2026)
+
+CAPRI's NUTNED_ adds, for the permanent groups (PERM_NGRP: grassland, orchards, olives, vines), the own residues of
+each crop: levl x DATA(R, crop, FOUT, "Y") x (techFact + 1) x v_nutAvailFactCres, with FOUT = MANN, MANP, MANK
+(supply_model.gms, the PERM_NGRP term of NUTNED_; FOUT_T_N, global/fromimpact/sets.gms l. 2529). The model's own
+residues per crop (npk_crop_coefs_2030.csv own_kg_ha, tools/build/build_npk_balance_2030.py) came from the dump's
+perm_cres per crop, which is the group's total spread by area: GRAE and GRAI had the same value. ES41's grassland:
+29.94 kg K/ha each, against CAPRI's MANK 18.03 (GRAE) and 41.85 (GRAI). Under the Green Deal, as the grassland moves to
+GRAE, CAPRI's own residues fall with the mix (the group's 20.26 kg K/ha, = the crops' MANK level-weighted), the
+model's stayed at 29.94: the group's K need net of its own residues went to about zero, both K flows of the grassland
+to their lower bound (manure K 0.03 kg/ha against CAPRI's 11.2), and the K need's multiplier to -12.1, which rewarded
+GRAI over GRAE by about 360 EUR/ha. Found through the exact first-order-condition decomposition of ES41's grassland.
+
+- **Effect:** the permanent crops' own residues in every region (3,813 of 23,511 rows: GRAE, GRAI, APPL, CITR, OLIV,
+  TABO, TAGR, WINE); the groups' totals at the base unchanged (the per-crop values add up to CAPRI's perm_cres to
+  8e-15 in every region and nutrient)
+- **In 9t:** -
+- **Status:** fixed 16 November 2026 (the builder takes CAPRI's MANN/MANP/MANK per crop). Test:
+  test_capri.py::test_the_permanent_crops_own_residues_are_capris_per_crop.
+- **Effect (single-region Green Deal runs, ES41 and DE21 alone, so the market is the one-region market of K83 and not
+  comparable one-to-one with a full-EU run; thousand ha, 2030 scenario level; CAPRI from
+  res_2_1730greendeal_lnds8_..._oth00defaultA, for checking only):**
+
+  | Region | Activity | Before K162 | With K162 | CAPRI |
+  |---|---|---:|---:|---:|
+  | ES41 | GRAE | 1,341.1 | 1,914.7 | 1,966.8 |
+  | ES41 | GRAI | 819.6 | 246.1 | 203.3 |
+  | DE21 | SWHE | 107.4 | 112.5 | 118.7 |
+  | DE21 | OCER | 8.3 | 11.0 | 14.3 |
+  | DE21 | PULS | 8.2 | 9.1 | 6.7 |
+  | DE21 | RAPE | 24.3 | 24.3 | 29.3 |
+  | DE21 | OFAR | 42.7 | 42.7 | 25.4 |
+
+  In ES41 the K need's term on GRAI goes from -222.7 to -76.4 EUR/ha (GRAE +136.0 to +9.8). In DE21 the arable crops'
+  K need terms change sign (SWHE -40.1 to +24.3 EUR/ha) as the grassland no longer takes the region's K. OFAR (the
+  fodder balance's dual, -535 EUR/ha) and RAPE are not moved by this fix; open.

@@ -5260,3 +5260,18 @@ def test_the_fodders_2030_base_value_is_capris_regional_unit_value():
     assert float(r.p0[list(r.feeds).index("FGRA")]) == pytest.approx(0.0112, rel=1e-12)
     r17 = RationModel(str(DATA_DIR)).rations[("ES410000", "DCOW")]
     assert float(r17.p0[list(r17.feeds).index("FGRA")]) == pytest.approx(0.02015, rel=1e-3)   # the 2017 value
+
+
+def test_the_permanent_crops_own_residues_are_capris_per_crop():
+    """K162: the own residues of a permanent group's crops in NUTNED_ are CAPRI's per crop, levl x DATA(crop, MANN/MANP/
+    MANK) (supply_model.gms, the PERM_NGRP term), not the group's total spread by area: ES41's grassland GRAE 18.03 and
+    GRAI 41.85 kg K/ha (CAPRI's 2030 MANK), whose level-weighted mean is the group's reported perm_cres (29.94 at the
+    reference, both crops on 1080 thousand ha)."""
+    c = pd.read_csv(DATA_DIR / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "npk_crop_coefs_2030.csv",
+                    float_precision="round_trip").set_index(["capri_region", "model_crop", "nutrient"])
+    own = lambda crop, nut: float(c.at[("ES410000", crop, nut), "own_kg_ha"])
+    assert own("GRAE", "K") == pytest.approx(18.0314, abs=1e-4) and own("GRAI", "K") == pytest.approx(41.8493, abs=1e-4)
+    assert own("GRAE", "N") == pytest.approx(26.6329, abs=1e-4) and own("GRAI", "N") == pytest.approx(54.4597, abs=1e-4)
+    lv = lambda crop: float(c.at[("ES410000", crop, "K"), "levl_kha"])
+    mean = (lv("GRAE") * own("GRAE", "K") + lv("GRAI") * own("GRAI", "K")) / (lv("GRAE") + lv("GRAI"))
+    assert mean == pytest.approx(29.940367907142, rel=1e-9)      # CAPRI's perm_cres of the group, per ha

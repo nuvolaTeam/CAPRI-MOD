@@ -110,6 +110,11 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
 
 ## 16 November 2026 — the grassland split of the need (K160); the market under CAPRI's bounds (DEP-50)
 
+- **K162:** the permanent crops' own residues in NUTNED_ are CAPRI's per crop (levl x DATA(crop, MANN/MANP/MANK)),
+  not the group's total spread by area (GRAE and GRAI had the same value; ES41 29.94 kg K/ha each against CAPRI's
+  18.03 and 41.85). Under the Green Deal the grassland's K need net of its own residues fell to about zero and its K
+  need multiplier to -12.1, rewarding GRAI over GRAE. The groups' base totals unchanged (to 8e-15).
+- **K139 closed:** PL34's forest conversion was fixed by K156 (K158 Green Deal pair: forest -1.0%).
 - **DEP-49 as a fallback (the project lead's decision):** every regional solve uses CAPRI's e_focFertDist (an
   equality); a solve that fails with it is retried once with the lower-bound complementarity (cold), recorded as
   nlp_relaxed "foc_fb". Always on, the complementarity rows kept IPOPT from a feasible point in ES41's Green Deal

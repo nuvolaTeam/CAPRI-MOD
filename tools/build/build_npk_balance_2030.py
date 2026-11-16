@@ -21,7 +21,10 @@ Outputs (capri_data/baselines/capri_greendeal_ref/1730/environment/; the two liv
   npk_crop_coefs_2030.csv   capri_region, model_crop, nutrient (N, P, K), need_kg_ha (the crop's own NITF/PHOF/POTF),
                             pool_kg_ha (contribution to the
                             arable residue pool, fertDistCres_; non-permanent crops), own_kg_ha (permanent crops' own
-                            residues, perm_cres), mine_kg_ha (CAPRI's mineral flow), levl_kha; CAPRI crops pooled into
+                            residues: CAPRI's DATA(R, crop, MANN/MANP/MANK, "Y") of each crop, the term NUTNED_ adds for
+                            PERM_NGRP, supply_model.gms; until 16 November 2026 the dump's perm_cres per crop, which is
+                            the group's total spread by area: GRAE and GRAI had the same value, KNOWN_ISSUES K162),
+                            mine_kg_ha (CAPRI's mineral flow), levl_kha; CAPRI crops pooled into
                             the model's crops by area (CORN = MAIZ, WINE = TWIN; GRAE and GRAI the model's own
                             since 7 November 2026); main_share and straw_share, the parts of the need that follow the
                             main output's yield and the straw yield (fert/fertned.gms: need = MIN(cap, MAX(15, O_HP x
@@ -67,6 +70,9 @@ from build_fert_dist_priors import GROUP, PERM_NGRP, NGRPS, ngrp  # noqa: E402
 
 NUTS = {"NITF": "N", "PHOF": "P", "POTF": "K"}
 CRD = {"NITF": "NCRD", "PHOF": "PCRD", "POTF": "KCRD"}
+#: the permanent crops' own residue (and, for N, deposition) output per ha in NUTNED_ (FOUT_T_N: MANN.NITF, MANP.PHOF,
+#: MANK.POTF; global/fromimpact/sets.gms l. 2529-2530)
+MANX = {"NITF": "MANN", "PHOF": "MANP", "POTF": "MANK"}
 #: CAPRI's crop activities (sets.gms MCACT: MECACT + MFCACT), the elementary rows of the dump; the dump's other crop
 #: rows (CERE, OILS, ARAB, PERM, GRAS, SETA, VEGE, WHEA, RAPN, OAFC, ...) are aggregates
 ELEM = ("SWHE", "DWHE", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "PARI", "RAPE", "SUNF", "SOYA", "OOIL", "OIND", "NURS",
@@ -113,7 +119,7 @@ def extract(dump: Path) -> pd.DataFrame:
     cr = "|".join(ELEM + ("AGGT",))
     nu = "NITF|PHOF|POTF"
     pat = (rf"^'[A-Z0-9]+'\.'({'|'.join(FLOWS)})'\.'({cr})'\.'({nu})'\.'2030'"
-           rf"|^'[A-Z0-9]+'\.''\.'({'|'.join(ELEM)})'\.'(LEVL|{nu}|NCRD|PCRD|KCRD|STRA)'\.'2030'"
+           rf"|^'[A-Z0-9]+'\.''\.'({'|'.join(ELEM)})'\.'(LEVL|{nu}|NCRD|PCRD|KCRD|STRA|MANN|MANP|MANK)'\.'2030'"
            rf"|^'[A-Z0-9]+'\.''\.'({'|'.join(BAL)})'\.'({nu})'\.'2030'"
            rf"|^'[A-Z0-9]+'\.''\.'UAAR'\.'LEVL'\.'2030'")
     out = grep(pat, str(dump))
@@ -172,7 +178,7 @@ def main():
     print(f"CAPRI straw content {stra_c} kg/t; need bounds {floor_} kg/ha, MAXF {maxf} (x2 for {sorted(dbl)})")
     n_bound = n_crop = 0
     crow, rrow, prow = [], [], []
-    worst_need = worst_man = worst_min = worst_grp = 0.0
+    worst_need = worst_man = worst_min = worst_grp = worst_own = 0.0
     grp_err = []
     for r in regions:
         lev = {c: v.get((r, "", c, "LEVL"), 0.0) for c in ELEM}
@@ -210,6 +216,13 @@ def main():
                 worst_man = max(worst_man, abs(man - tot["fertDist_excr"]) / max(1.0, abs(man)))
             if (r, "", "NETF", col) in v:
                 worst_min = max(worst_min, abs(v[(r, "", "NETF", col)] - tot["fertDist_mine"]) / max(1.0, tot["fertDist_mine"]))
+            # the crops' own residues (levl x MANx) add up to CAPRI's reported total per permanent group (the split
+            # between the group's crops is all that K162 changes)
+            for g_ in PERM_NGRP:
+                o_rep = sum(f("perm_cres", c) for c in lev if ngrp(c) == g_)
+                o_dat = sum(lev[c] * v.get((r, "", c, MANX[col]), 0.0) / 1000.0 for c in lev if ngrp(c) == g_)
+                if o_rep > 1e-6:
+                    worst_own = max(worst_own, abs(o_dat - o_rep) / o_rep)
             mine, excr = tot["fertDist_mine"], tot["fertDist_excr"]
             cres, own = tot["fertDist_cres"], tot["perm_cres"]
             meff = 1.0 + tot["nutNed_mine_loss_gasRunTot"] / mine if mine > 0 else 1.0
@@ -251,7 +264,9 @@ def main():
                 # ha); NUTNED_ sums levl x need over the group's crops
                 d["need"] += x * v.get((r, "", c, col), 0.0) / 1000.0
                 d["pool"] += pool_raw.get(c, 0.0) * kpool
-                d["own"] += f("perm_cres", c)
+                # the permanent crops' own residues per crop, CAPRI's NUTNED_ term: levl x DATA(crop, MANx) (the dump's
+                # perm_cres per crop is the group's total spread by area; K162)
+                d["own"] += (x * v.get((r, "", c, MANX[col]), 0.0) / 1000.0) if ngrp(c) in PERM_NGRP else f("perm_cres", c)
                 d["mine"] += f("fertDist_mine", c)
             # (GRAE and GRAI on their own rows here too until 7 November 2026: the model's crops since)
             for mc, d in agg.items():
@@ -283,6 +298,7 @@ def main():
     print(f"group need from the crops' own need (sum levl x NITF) against CAPRI's group need: worst {worst_grp:.2e}, "
           f"median {np.median(grp_err) if grp_err else float('nan'):.2e}")
     print(f"ManureNPK_ (EXCRET - GASANI - RUNANI - MTRADE = sum of manure flows): worst {worst_man:.2e}")
+    print(f"permanent groups' own residues, sum of levl x MANx against CAPRI's perm_cres: worst {worst_own:.2e}")
     print(f"fertDistMine_ (NETF = sum of mineral flows): worst {worst_min:.2e}")
     cdf = pd.DataFrame(crow).sort_values(["capri_region", "model_crop", "nutrient"])
     rdf = pd.DataFrame(rrow).sort_values(["capri_region", "nutrient"])
