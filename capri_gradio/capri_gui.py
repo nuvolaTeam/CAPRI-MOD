@@ -8,6 +8,7 @@ Tabs:
               checked and written to the user's scenario folder
   Run         start a scenario (full EU or the 20 mini-EU units), one run at a time, and follow its iterations
   Results     the results browser (results_browser.py) on the results store
+By default the page shows the results only (the other three tabs are built hidden); --all-tabs shows them all.
 
 Draft, local and single-user: it runs capri-mod on this machine and writes scenarios to the user's folder (setting
 run.scenarios_dir, else user_scenarios/ in the repository), never to capri_data/scenarios.
@@ -15,6 +16,7 @@ run.scenarios_dir, else user_scenarios/ in the repository), never to capri_data/
 Usage:
     python capri_gradio/capri_gui.py [--llm none|openai|anthropic] [--llm-model NAME] [--llm-base-url URL]
                                      [--llm-key-env VAR] [--scenarios-dir DIR] [--store DIR] [--port 7860]
+                                     [--all-tabs]
 Needs gradio (pip install ".[gui]"); requests for a language model.
 """
 from __future__ import annotations
@@ -76,10 +78,11 @@ def _chat_messages(hist: list) -> list:
     return out
 
 
-def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False):
+def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False, all_tabs: bool = False):
     """The page. shared: a page several people use (a hosted Space): each browser session writes its scenarios to its
     own folder under sdir, only mini-EU runs can be started, and a run is stopped only by the session that started
-    it; one run at a time for everyone."""
+    it; one run at a time for everyone. all_tabs: the Assistant, Scenario and Run tabs as well; without it (the
+    default) the page shows the results only, and the other tabs are built hidden."""
     scen0, refs0 = _scenario_choices(None if shared else sdir)
     gd_vals = T.GREENDEAL_VALUES
 
@@ -96,13 +99,18 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False):
 
     with gr.Blocks(title="capri-mod") as app:
         where = "your session's folder" if shared else f"`{sdir}`"
-        gr.Markdown(f"## capri-mod\nScenarios in {where} · results in `{stores[0].name}` · "
-                    f"assistant: **{backend.name}**" + (" · shared page: mini-EU runs only, one run at a time"
-                                                        if shared else ""))
+        if all_tabs:
+            gr.Markdown(f"## capri-mod\nScenarios in {where} · results in `{stores[0].name}` · "
+                        f"assistant: **{backend.name}**" + (" · shared page: mini-EU runs only, one run at a time"
+                                                            if shared else ""))
+        else:
+            gr.Markdown("## capri-mod results\nThe stored runs of capri-mod, a Python re-implementation of the CAPRI "
+                        "agricultural model: browse a run's results, compare a scenario with its baseline or two runs "
+                        "with each other, map them, and check them against CAPRI. Each tab says what it shows.")
         hist_state = gr.State([])
 
         # ------------------------------------------------------------------ assistant
-        with gr.Tab("Assistant"):
+        with gr.Tab("Assistant", visible=all_tabs):
             gr.Markdown("Describe a scenario; the assistant writes it with checked tool calls. It cannot run the "
                         "model: start the run in the **Run** tab. " +
                         ("" if backend.name != "none" else
@@ -115,7 +123,7 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False):
             clear = gr.Button("New conversation", size="sm")
 
         # ------------------------------------------------------------------ scenario form
-        with gr.Tab("Scenario"):
+        with gr.Tab("Scenario", visible=all_tabs):
             with gr.Row():
                 f_name = gr.Textbox(label="name (letters, digits, _)")
                 f_ref = gr.Dropdown(refs0, value=refs0[0] if refs0 else None, label="reference")
@@ -143,7 +151,7 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False):
             f_toml = gr.Code(language=None, label="settings.toml")
 
         # ------------------------------------------------------------------ run
-        with gr.Tab("Run"):
+        with gr.Tab("Run", visible=all_tabs):
             with gr.Row():
                 r_scen = gr.Dropdown(scen0, value=scen0[0] if scen0 else None, label="scenario", scale=3)
                 r_refresh = gr.Button("Reload scenarios", size="sm", scale=1)
@@ -163,10 +171,10 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False):
             r_title = gr.Markdown()
             r_iters = gr.Textbox(label="iterations (step report)", lines=8, interactive=False)
             r_tail = gr.Textbox(label="log", lines=24, max_lines=24, interactive=False, autoscroll=True)
-            timer = gr.Timer(5.0)
+            timer = gr.Timer(5.0, active=all_tabs)
 
         # ------------------------------------------------------------------ results
-        with gr.Tab("Results"):
+        with (gr.Tab("Results") if all_tabs else gr.Column()):
             RB.add_results(stores, app)
 
         # ================================================================== callbacks
@@ -278,6 +286,8 @@ def main():
     ap.add_argument("--store", action="append", default=[], help="a results store (repeat for several)")
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=7860)
+    ap.add_argument("--all-tabs", action="store_true",
+                    help="show the Assistant, Scenario and Run tabs too (default: the results only)")
     a = ap.parse_args()
     backend = L.make_backend(a.llm, a.llm_model, a.llm_base_url, a.llm_key_env)
     sdir = Path(a.scenarios_dir).expanduser().resolve() if a.scenarios_dir else T.default_scenarios_dir()
@@ -286,7 +296,8 @@ def main():
     missing = [s for s in stores if not (s / "runs").exists()]
     if missing:
         raise SystemExit(f"not a results store (no runs table): {', '.join(map(str, missing))}")
-    build(backend, sdir, stores).launch(server_name=a.host, server_port=a.port, show_api=False)
+    build(backend, sdir, stores, all_tabs=a.all_tabs).launch(server_name=a.host, server_port=a.port,
+                                                              show_api=False)
 
 
 if __name__ == "__main__":

@@ -117,6 +117,132 @@ def run_label(scenario: str, run_id: str) -> str:
     return f"{scenario} | {run_id[:ID_SHOWN]}"
 
 
+def run_shown(scenario: str, run_id: str, created="") -> str:
+    """What a run dropdown shows: the label and the run's date and time (its record's created, to the minute)."""
+    d = str(created or "")[:16]
+    return f"{run_label(scenario, run_id)} · {d}" if d else run_label(scenario, run_id)
+
+
+def run_choices(root) -> list:
+    """The store's runs for a dropdown, newest first: (shown text with the date, the label the callbacks parse)."""
+    r = runs(root)
+    return [(run_shown(s, i, c), run_label(s, i)) for s, i, c in zip(r["scenario"], r["run_id"], r["created"])]
+
+
+# --------------------------------------------------------------------------- #
+# Names beside the codes
+# --------------------------------------------------------------------------- #
+CODES = ROOT / "capri_data" / "codes"
+
+
+def _texts(name: str) -> dict:
+    t = pd.read_csv(CODES / "capri" / f"{name}.csv", dtype=str, keep_default_na=False)
+    return {c: " ".join(x.split()) for c, x in zip(t["code"], t["text"]) if x.strip()}
+
+
+def _mapped(fname: str, col: str) -> dict:
+    """A model code -> the CAPRI codes it stands for, where they are not the code itself."""
+    m = pd.read_csv(CODES / fname, dtype=str, keep_default_na=False)
+    out = {}
+    for c, v in zip(m["code"], m[col]):
+        caps = [x for x in v.split(";") if x]
+        if caps and caps != [c]:
+            out[c] = caps
+    return out
+
+
+@lru_cache(maxsize=1)
+def _name_tables() -> dict:
+    rows, cols = _texts("ROWS"), _texts("COLS")
+    return {"own": {**cols, **rows},           # ROWS's text where both sets have one (products, items)
+            "rall": _texts("RALL"),
+            "acts": _mapped("model_activities.csv", "capri_codes"),
+            "comm": _mapped("model_commodities.csv", "capri_code"),
+            "trade": _mapped("model_trade_regions.csv", "capri_rm")}
+
+
+def _joined(names: list) -> str:
+    """Several CAPRI texts as one name: their common leading words, then what differs ("Male adult fattening activity
+    (low final weight / high final weight)"); joined by " + " where they share no word."""
+    if len(names) == 1:
+        return names[0]
+    words = [n.split() for n in names]
+    k = 0
+    while all(len(w) > k + 1 for w in words) and len({w[k] for w in words}) == 1:
+        k += 1
+    if k == 0:
+        return " + ".join(names)
+    return " ".join(words[0][:k]) + " (" + " / ".join(" ".join(w[k:]) for w in words) + ")"
+
+
+def code_name(code, dim: str = "", block: Optional[str] = None) -> str:
+    """A code's name from CAPRI's own texts (capri_data/codes/capri: ROWS.csv, then COLS.csv; RALL.csv for regions).
+    A model code standing for other CAPRI codes is named by them (codes/model_activities.csv for an activity,
+    model_commodities.csv for a product of the market block, model_trade_regions.csv for a market region; several
+    CAPRI codes joined by " + "). A composite code (a|b) is named part by part. "" where nothing names it."""
+    c = str(code or "")
+    if not c:
+        return ""
+    T = _name_tables()
+
+    def join(caps, table):
+        names = [table.get(x, "") for x in caps]
+        return _joined(names) if all(names) else ""
+
+    regional = dim == "region" or (block == "market" and dim == "dim5")
+    if regional and c in T["rall"]:
+        return T["rall"][c]
+    if block == "market" and c in T["comm"]:
+        n = join(T["comm"][c], T["own"])
+        if n:
+            return n
+    if block != "market" and c in T["acts"]:
+        n = join(T["acts"][c], T["own"])
+        if n:
+            return n
+    if c in T["own"]:
+        return T["own"][c]
+    if c in T["rall"]:
+        return T["rall"][c]
+    if c in T["trade"]:
+        n = join(T["trade"][c], T["rall"])
+        if n:
+            return n
+    if "|" in c:
+        parts = c.split("|")
+        named = [code_name(p, dim, block) for p in parts]
+        if any(named):
+            return " | ".join(n or p for n, p in zip(named, parts))
+    return ""
+
+
+#: the characters of a name shown beside its code in dropdowns and charts (the tables' name columns keep it whole)
+NAME_SHOWN = 48
+
+
+def code_label(code, dim: str = "", block: Optional[str] = None) -> str:
+    """The code with its name beside it ("SWHE · Soft wheat"), the name cut at NAME_SHOWN characters; or the code
+    alone (no name, or a name that only repeats the code)."""
+    n = code_name(code, dim, block)
+    if not n or n.strip().lower() == str(code).lower():
+        return str(code)
+    return f"{code} · {n if len(n) <= NAME_SHOWN else n[:NAME_SHOWN - 1].rstrip() + '…'}"
+
+
+def with_names(df: pd.DataFrame, block: Optional[str] = None) -> pd.DataFrame:
+    """A table of stored rows with a name column after each of region, rows, cols and dim5 that has a named value."""
+    d = df.copy()
+    blocks = d["block"] if (block is None and "block" in d.columns) else pd.Series(block, index=d.index)
+    for dim in ("region", "rows", "cols", "dim5"):
+        if dim in d.columns:
+            keys = list(zip(d[dim], blocks))
+            named = {k: code_name(k[0], dim, k[1]) for k in set(keys)}
+            names = pd.Series([named[k] for k in keys], index=d.index, dtype=object)
+            if names.astype(bool).any():
+                d.insert(d.columns.get_loc(dim) + 1, f"{dim} name", names)
+    return d
+
+
 def parse_label(label: str) -> tuple:
     s, r = label.split(" | ")
     return s.strip(), r.strip()

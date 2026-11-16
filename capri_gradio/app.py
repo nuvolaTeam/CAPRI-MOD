@@ -10,6 +10,7 @@ Environment (a Space's variables and secrets; nothing is read from files):
   CAPRI_SCENARIOS_DIR  where the sessions' scenario folders go          (default user_scenarios/ in the repository)
   CAPRI_RESULTS_DIR    the results store                               (default: the setting run.results_dir)
   CAPRI_SHARED         1 (default) for a page several people use, 0 for one user
+  CAPRI_ALL_TABS       1 to show the Assistant, Scenario and Run tabs too (default 0: the results only)
 A Space starts this file (README front matter app_file: capri_gradio/app.py) and serves on its port 7860.
 """
 from __future__ import annotations
@@ -50,7 +51,8 @@ def make_app():
     store = Path(env("CAPRI_RESULTS_DIR", "") or RD.default_store()).expanduser()
     if not (store / "runs").exists():
         raise SystemExit(f"{store}: not a results store (no runs table); set CAPRI_RESULTS_DIR")
-    return G.build(backend, sdir, [store], shared=env("CAPRI_SHARED", "1") != "0")
+    return G.build(backend, sdir, [store], shared=env("CAPRI_SHARED", "1") != "0",
+                   all_tabs=env("CAPRI_ALL_TABS", "0") == "1")
 
 
 if __name__ == "__main__":

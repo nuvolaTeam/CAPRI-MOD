@@ -157,8 +157,12 @@ def scatter_figure(frame: pd.DataFrame, title: str):
 
 
 def _labels(root) -> list:
-    r = RD.runs(root)
-    return [RD.run_label(s, i) for s, i in zip(r["scenario"], r["run_id"])]
+    """The store's runs for a dropdown: (label with the run's date, the label the callbacks parse)."""
+    return RD.run_choices(root)
+
+
+def _first(choices: list):
+    return choices[0][1] if choices else None
 
 
 def _filters(region, rows, cols, dim5) -> dict:
@@ -200,12 +204,23 @@ def _chart_frame(table: pd.DataFrame, measure: str, row_dim: str, col_dim: str) 
     return keep[["x", "value", "series"]].sort_values("value")
 
 
-def _keep_selected(choices: list, selected) -> dict:
-    """A dropdown's new choices with its selection kept, and the selection given again: a multiselect dropdown whose
-    choices change otherwise may show other labels than the values it sends."""
+def _keep_selected(codes: list, selected, dim: str = "", block=None) -> dict:
+    """A dropdown's new choices, each code shown with its name (the value stays the code), with its selection kept and
+    given again: a multiselect dropdown whose choices change otherwise may show other labels than the values it
+    sends."""
     import gradio as gr
     sel = list(selected or [])
-    return gr.update(choices=sorted(set(choices) | set(sel)), value=sel)
+    return gr.update(choices=[(RD.code_label(c, dim, block), c) for c in sorted(set(codes) | set(sel))], value=sel)
+
+
+def _named(table: pd.DataFrame, down: str, across, block=None) -> pd.DataFrame:
+    """A pivot with each code of its index and columns shown with its name."""
+    t = table.copy()
+    t.index = [RD.code_label(v, down, block) for v in t.index]
+    t.index.name = down
+    if across and across != down:
+        t.columns = [RD.code_label(v, across, block) for v in t.columns]
+    return t
 
 
 def build(stores: list):
@@ -226,13 +241,15 @@ def add_results(stores: list, app):
     store_names = [str(s) for s in stores]
     dim_names = list(RD.DIMS)
     labs0 = _labels(stores[0])          # the first store's runs, shown before the page's load event fills them
-    first0 = labs0[0] if labs0 else None
+    first0 = _first(labs0)
 
     with gr.Column():
         store = gr.Dropdown(store_names, value=store_names[0], label="results store", allow_custom_value=True)
 
         # ------------------------------------------------------------------ runs
         with gr.Tab("Runs"):
+            gr.Markdown("The runs in the store, newest first. Pick one to see how it converged, its metadata and the "
+                        "settings it ran with.")
             refresh = gr.Button("Reload runs", size="sm")
             runs_df = gr.Dataframe(interactive=False, wrap=False, max_height=420, show_search="filter",
                                    pinned_columns=1, label="scenario runs (newest first)")
@@ -253,6 +270,8 @@ def add_results(stores: list, app):
 
         # ------------------------------------------------------------------ scenario vs baseline
         with gr.Tab("Scenario vs baseline"):
+            gr.Markdown("Shows a run's scenario against its own baseline: pick a block, narrow the rows with the "
+                        "filters, choose the measure and what goes down and across the table, then press Show.")
             with gr.Row():
                 sv_run = gr.Dropdown(labs0, value=first0, label="run")
                 sv_block = gr.Dropdown([], label="block")
@@ -276,6 +295,8 @@ def add_results(stores: list, app):
 
         # ------------------------------------------------------------------ two runs
         with gr.Tab("Compare two runs"):
+            gr.Markdown("Compares two runs, from the same store or from two stores, row by row: where they differ, as "
+                        "a table and a chart.")
             with gr.Row():
                 store_b = gr.Dropdown(store_names, value=store_names[-1], label="store of run B",
                                       allow_custom_value=True)
@@ -303,10 +324,11 @@ def add_results(stores: list, app):
 
         # ------------------------------------------------------------------ CAPRI
         with gr.Tab("Map"):
-            gr.Markdown("A result of every regional unit on the NUTS-2024 regions it covers "
-                        "(capri_data/codes/capri_units_nuts2024.csv). Where a unit covers several regions, each shows "
-                        "the unit's rate; a level of an additive item is split by the regions' farmland (UAA) shares. "
-                        "Below: the same item by member state (additive items only).")
+            gr.Markdown("Draws one result of a run on a map of the EU's regions: pick a block and an item, and "
+                        "whether to show the scenario, the baseline or the change between them. Where one of the "
+                        "model's regional units covers several regions, each of them shows the unit's value (an area "
+                        "or a quantity is split by the regions' farmland). Below the map, the same item added up by "
+                        "member state, for items that can be added up.")
             with gr.Row():
                 mp_run = gr.Dropdown(labs0, value=first0, label="run", scale=3)
                 mp_block = gr.Dropdown([], label="block", scale=1)
@@ -321,9 +343,9 @@ def add_results(stores: list, app):
                 mp_table = gr.Dataframe(interactive=False)
 
         with gr.Tab("Charts"):
-            gr.Markdown("capri-mod's Farm-to-Fork indicators (% change from the baseline, EU27; "
-                        "tools/check/compare_runs.py) beside the figures JRC121368 published from CAPRI. A run on a "
-                        "subset of regions is not comparable with them (KNOWN_ISSUES K83).")
+            gr.Markdown("Puts the Farm-to-Fork indicators of up to four runs side by side (EU27, % change from each "
+                        "run's baseline) with the figures the JRC published from CAPRI in its Farm-to-Fork study "
+                        "(JRC121368). Meaningful for Farm-to-Fork runs on all regions.")
             with gr.Row():
                 ch_runs = gr.Dropdown(labs0, value=[first0] if first0 else [], multiselect=True,
                                       label="runs (up to four)", scale=4)
@@ -333,12 +355,11 @@ def add_results(stores: list, app):
 
         with gr.Tab("Against CAPRI"):
             gr.Markdown(
-                "**Baseline vs CAPRI 2030**: `tools/check/compare_baseline_capri.py` on the run (EU27; CAPRI star "
-                "3.0's "
-                "own 2030 reference in `capri_data/validation`; prices as relative structure, each ratio over the "
-                "median ratio).  \n**Farm-to-Fork indicators**: `tools/check/compare_runs.py` (% change from the "
-                "baseline, EU27) beside the figures JRC121368 published from CAPRI; meaningful for Farm-to-Fork runs "
-                "only, and a run on a subset of regions is not comparable with them (KNOWN_ISSUES K83).")
+                "Checks a run against CAPRI. The first table compares the run's 2030 baseline with CAPRI's own 2030 "
+                "reference for the EU27, block by block (prices by their relative levels, not in euros); the second "
+                "summarises how close each block is. The last table compares the run's Farm-to-Fork indicators with "
+                "the figures the JRC published from CAPRI (JRC121368): it applies to Farm-to-Fork runs on all "
+                "regions.")
             with gr.Row():
                 cp_run = gr.Dropdown(labs0, value=first0, label="run")
                 cp_more = gr.Dropdown(labs0, value=[], multiselect=True,
@@ -351,17 +372,11 @@ def add_results(stores: list, app):
 
         with gr.Tab("Scenarios vs CAPRI"):
             gr.Markdown(
-                "**Green Deal 2030**: a run (lnds8_org18_pest20_mine13crp_surp30) against the project lead's CAPRI "
-                "run of the same scenario from the same 2030 reference (`capri_data/validation/greendeal_2030`, "
-                "`tools/check/compare_capri_gd.py`), EU27, member states and regional units.  \n"
-                "**Farm-to-Fork 2030**: a run against the figures JRC121368 published from CAPRI (Barreiro-Hurle et "
-                "al. 2021, the F2F and BDS targets and CAP 2014-2020 scenario; "
-                "`capri_data/validation/farm_to_fork_2030/jrc121368_eu27.csv`, each figure with its table, page or "
-                "text; \"figure\" marks a reading measured on the report's chart), EU27 only: the report publishes no "
-                "member-state figures.  \n"
-                "Only % changes from each model's own reference are compared: some herds are counted in other units "
-                "than CAPRI's activity levels (KNOWN_ISSUES K63). EU27 = the model's regions outside Norway. A run on "
-                "a subset of regions is not comparable (KNOWN_ISSUES K83).")
+                "Compares a scenario run with CAPRI's result for the same scenario: the Green Deal 2030 with the "
+                "project's CAPRI run of it, or Farm-to-Fork 2030 with the figures published in JRC121368 (EU27 only). "
+                "Both sides are shown as % changes from each model's own reference: first the EU27 activities, "
+                "prices, yields and nitrogen balance, then one activity by member state, on two maps and region by "
+                "region.")
             with gr.Row():
                 gd_kind = gr.Radio(["Green Deal 2030 · CAPRI's run", "Farm-to-Fork 2030 · JRC121368"],
                                    value="Green Deal 2030 · CAPRI's run", label="comparison", scale=3)
@@ -390,8 +405,8 @@ def add_results(stores: list, app):
         # ================================================================== callbacks
         def load_runs(root):
             r = RD.runs(root)
-            labs = [RD.run_label(s, i) for s, i in zip(r["scenario"], r["run_id"])]
-            first = labs[0] if labs else None
+            labs = _labels(root)
+            first = _first(labs)
             show = r.drop(columns=["reference_run_id"]) if not r.empty else r
             # one update per output: Gradio consumes an update when it applies it
             return (show, *[gr.update(choices=labs, value=first) for _ in range(5)],
@@ -399,7 +414,7 @@ def add_results(stores: list, app):
 
         def load_runs_b(root):
             labs = _labels(root)
-            return gr.update(choices=labs, value=labs[0] if labs else None)
+            return gr.update(choices=labs, value=_first(labs))
 
         def show_run(root, label, point):
             if not label:
@@ -422,7 +437,8 @@ def add_results(stores: list, app):
                 return [gr.update()] * 4
             _, scen = RD.points(root, *RD.parse_label(label))
             f = _filters(region, rows, cols, dim5)
-            return [_keep_selected(RD.choices(scen, block, f, d), f[d]) for d in ("region", "rows", "cols", "dim5")]
+            return [_keep_selected(RD.choices(scen, block, f, d), f[d], d, block)
+                    for d in ("region", "rows", "cols", "dim5")]
 
         def sv_show(root, label, block, region, rows, cols, dim5, measure, down, across):
             if not label:
@@ -433,13 +449,14 @@ def add_results(stores: list, app):
             try:
                 t = RD.pivot(j, measure, down, across or None)
             except ValueError as e:
-                return f"{msg}. **{e}**", None, None, _shown(j), _csv(j, "scenario_vs_baseline")
+                return f"{msg}. **{e}**", None, None, _shown(RD.with_names(j, block)), _csv(j, "scenario_vs_baseline")
             units = sorted(set(j["unit"]) - {""})
             msg += f"; unit: {', '.join(units) if units else 'not recorded'}"
             if measure == "% change":
                 msg += "; % change is empty where the baseline is 0"
-            return (msg, _shown(t.reset_index()), _chart_frame(t, measure, down, across), _shown(j),
-                    _csv(j, "scenario_vs_baseline"))
+            t = _named(t, down, across, block)
+            return (msg, _shown(t.reset_index()), _chart_frame(t, measure, down, across),
+                    _shown(RD.with_names(j, block)), _csv(j, "scenario_vs_baseline"))
 
         def cr_blocks(root_a, a, root_b, b):
             if not a or not b:
@@ -453,7 +470,8 @@ def add_results(stores: list, app):
                 return [gr.update()] * 3
             _, sa = RD.points(root_a, *RD.parse_label(a))
             f = _filters(region, rows, cols, [])
-            return [_keep_selected(RD.choices(sa, block or None, f, d), f[d]) for d in ("region", "rows", "cols")]
+            return [_keep_selected(RD.choices(sa, block or None, f, d), f[d], d, block or None)
+                    for d in ("region", "rows", "cols")]
 
         def cr_show(root_a, a, pa, root_b, b, pb, block, region, rows, cols, measure, down, across):
             if not a or not b:
@@ -464,7 +482,7 @@ def add_results(stores: list, app):
             msg = (f"{len(j)} rows; {n_diff} differ; "
                    f"{int(dev['one run only'].sum()) if not dev.empty else 0} in one run only")
             try:
-                t = RD.pivot(j, measure, down, across or None)
+                t = _named(RD.pivot(j, measure, down, across or None), down, across, block or None)
                 shown, chart = _shown(t.reset_index()), _chart_frame(t, measure, down, across)
             except ValueError as e:
                 msg += f". **{e}**"
@@ -559,11 +577,14 @@ def add_results(stores: list, app):
                    f"points, same sign {same:.0%}; prices: mean absolute gap {pri['gap_pts'].abs().mean():.1f} points; "
                    f"N surplus {float(nbe.loc[nbe['item'].str.startswith('gross'), 'model_pct'].sum()):+.1f}% against "
                    f"{float(nbe.loc[nbe['item'].str.startswith('gross'), 'capri_pct'].sum()):+.1f}%.")
-            f_act = pair_figure(eu["activity"], eu["model_pct"], eu["capri_pct"], "Activity levels, EU27",
+            f_act = pair_figure([RD.code_label(a, "cols", "supply") for a in eu["activity"]], eu["model_pct"],
+                                eu["capri_pct"], "Activity levels, EU27",
                                 "% change from the reference")
-            f_pri = pair_figure(pri["product"], pri["model_pct"], pri["capri_pct"], "Producer prices, EU27",
+            f_pri = pair_figure([RD.code_label(p, "rows", "market") for p in pri["product"]], pri["model_pct"],
+                                pri["capri_pct"], "Producer prices, EU27",
                                 "% change from the reference")
-            f_yld = pair_figure(yld["crop"], yld["model_pct"], yld["capri_pct"], "Crop yields, EU27",
+            f_yld = pair_figure([RD.code_label(c, "cols", "supply") for c in yld["crop"]], yld["model_pct"],
+                                yld["capri_pct"], "Crop yields, EU27",
                                 "% change from the reference")
             f_nb = pair_figure(nbe["item"], nbe["model_pct"], nbe["capri_pct"], "N balance, EU27",
                                "% change from the reference")
@@ -571,9 +592,11 @@ def add_results(stores: list, app):
                                pri.rename(columns={"product": "activity"}).assign(region="EU27", kind="price"),
                                yld.rename(columns={"crop": "activity"}).assign(region="EU27", kind="yield"),
                                nb.rename(columns={"item": "activity"}).assign(kind="N balance")], ignore_index=True)
-            items = list(eu["activity"]) + [f"N: {x}" for x in nbe["item"]]
+            items = ([(RD.code_label(a, "cols", "supply"), a) for a in eu["activity"]]
+                     + [(f"N: {x}", f"N: {x}") for x in nbe["item"]])
+            codes = [v for _, v in items]
             return (msg, f_act, f_pri, f_yld, f_nb, _shown(table), _csv(table, "greendeal_vs_capri"),
-                    gr.update(choices=items, value="GRAI" if "GRAI" in items else (items[0] if items else None)))
+                    gr.update(choices=items, value="GRAI" if "GRAI" in codes else (codes[0] if codes else None)))
 
         def gd_draw(root, label, item):
             if not (label and item):
@@ -582,22 +605,24 @@ def add_results(stores: list, app):
             if item.startswith("N: "):
                 nb = RD.gd_n_balance(root, s_, r_)
                 d = nb[(nb["item"] == item[3:]) & (nb["region"] != "EU27")]
-                return (pair_figure(d["region"], d["model_pct"], d["capri_pct"], f"{item[3:]} by member state",
+                return (pair_figure([RD.code_label(x, "region") for x in d["region"]], d["model_pct"], d["capri_pct"],
+                                    f"{item[3:]} by member state",
                                     "% change from the reference"), None, None, None)
             act = RD.gd_activities(root, s_, r_)
             d = act[(act["activity"] == item) & (act["region"] != "EU27")]
-            f_ms = pair_figure(d["region"], d["model_pct"], d["capri_pct"], f"{item} by member state",
-                               "% change from the reference")
+            name = RD.code_label(item, "cols", "supply")
+            f_ms = pair_figure([RD.code_label(x, "region") for x in d["region"]], d["model_pct"], d["capri_pct"],
+                               f"{name} by member state", "% change from the reference")
             reg = RD.gd_regional(root, s_, r_, item)
             fm = RD.map_frame(RD.gd_unit_values(reg, "model"), "% change")
             fc = RD.map_frame(RD.gd_unit_values(reg, "capri"), "% change")
             lim = max(_saturation(fm["value"]), _saturation(fc["value"]))     # one scale for both maps
-            mm = map_figure(fm, "% change", f"{item} · capri-mod", lim)
-            mc = map_figure(fc, "% change", f"{item} · CAPRI", lim)
+            mm = map_figure(fm, "% change", f"{name} · capri-mod", lim)
+            mc = map_figure(fc, "% change", f"{name} · CAPRI", lim)
             ok = reg.dropna(subset=["model_pct", "capri_pct"])
             corr = (f"correlation {np.corrcoef(ok['model_pct'], ok['capri_pct'])[0, 1]:.2f}" if len(ok) > 2
                     else "too few units for a correlation")
-            sc = scatter_figure(reg, f"{item}: {len(ok)} regional units, {corr}")
+            sc = scatter_figure(reg, f"{name}: {len(ok)} regional units, {corr}")
             return f_ms, mm, mc, sc
 
         gd_go.click(gd_show, [store, gd_run, gd_kind], [gd_msg, gd_act, gd_pri, gd_yld, gd_nbal, gd_table, gd_file,
@@ -606,7 +631,7 @@ def add_results(stores: list, app):
 
         # ------------------------------------------------------------------ map and charts
         def _item_label(r):
-            parts = [x for x in (r["rows"], r["cols"], r["dim5"]) if str(x)]
+            parts = [RD.code_label(r[d], d, r["block"]) for d in ("rows", "cols", "dim5") if str(r[d])]
             return " · ".join(parts) + (f" [{r['unit']}]" if r["unit"] else "")
 
         def mp_blocks(root, label):

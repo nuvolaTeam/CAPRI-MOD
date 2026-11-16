@@ -136,3 +136,49 @@ def test_the_farm_to_fork_comparison_reads_jrc121368_with_its_sources(store):
     assert d.at["pork price", "jrc_pct"] == 43.0 and d.at["pork price", "kind"] == "table"
     assert np.isclose(d.at["N surplus", "jrc_pct"], -33.5)
     assert set(d["group"]) == {"prices", "herds and production", "environment"}
+
+
+def test_the_run_choices_show_the_date_and_keep_the_parsed_label(store):
+    ch = RD.run_choices(store)
+    r = RD.runs(store)
+    shown, value = ch[0]
+    assert value == RD.run_label(r.iloc[0]["scenario"], r.iloc[0]["run_id"])
+    assert shown == f"{value} · {str(r.iloc[0]['created'])[:16]}"
+    assert RD.parse_label(value) == (r.iloc[0]["scenario"], str(r.iloc[0]["run_id"])[:RD.ID_SHOWN])
+
+
+def test_codes_are_named_from_capris_texts_by_their_context():
+    # CAPRI's own code: ROWS.csv's text
+    assert RD.code_label("SWHE", "cols", "supply") == "SWHE · Soft wheat"
+    # a model activity under its own code, named by the CAPRI activity it stands for (codes/model_activities.csv)
+    assert RD.code_name("PIGS", "cols", "supply") == "Sows for piglet production"
+    assert RD.code_name("CORN", "cols", "supply") == "Grain maize"
+    # the same code as a market product: the CAPRI product it stands for (codes/model_commodities.csv)
+    assert RD.code_name("SWHE", "rows", "market") == "Aggregate of soft wheat and durum"
+    # regions from RALL.csv, the model's EU27 through its CAPRI market region
+    assert RD.code_label("ES410000", "region") == "ES410000 · Castilla-Leon"
+    assert RD.code_name("EU27", "region") == "European Union 27 after Brexit year 2019"
+    # no name: the code alone; a name repeating the code is not shown
+    assert RD.code_label("activities", "rows", "supply") == "activities"
+    assert RD.code_label("USA", "dim5", "market") == "USA"
+
+
+def test_the_matched_rows_get_name_columns(store):
+    j = RD.scenario_vs_baseline(store, "scen_a", IDS["r1"], "supply", {"rows": ["activities"]})
+    n = RD.with_names(j, "supply")
+    assert list(n.columns).index("cols name") == list(n.columns).index("cols") + 1
+    assert set(n.loc[n["cols"] == "SWHE", "cols name"]) == {"Soft wheat"}
+    assert len(n) == len(j)
+
+
+def test_the_page_shows_the_results_only_unless_asked_for_all_tabs(store, tmp_path):
+    gr = pytest.importorskip("gradio")
+    import sys
+    sys.path.insert(0, str(ROOT / "capri_gradio"))
+    import capri_gui as G
+    import assistant_llm as L
+    for all_tabs in (False, True):
+        app = G.build(L.make_backend("none", "", "", ""), tmp_path / "scen", [store], all_tabs=all_tabs)
+        tabs = {b.label: b.visible for b in app.blocks.values() if isinstance(b, gr.Tab)}
+        assert all(tabs[k] is all_tabs for k in ("Assistant", "Scenario", "Run"))
+        assert ("Results" in tabs) is all_tabs and tabs["Map"] is True
