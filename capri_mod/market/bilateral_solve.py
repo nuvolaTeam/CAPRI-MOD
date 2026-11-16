@@ -786,6 +786,20 @@ class BilateralSolveMixin(MarketStateMixin):
                 r = pd.DataFrame(np.exp(z + step).reshape(r.shape), index=r.index, columns=r.columns)
             else:
                 r = r * (new / r).clip(lower=_sclip[0], upper=_sclip[1]) ** damp
+        if converged and str(_st.get("market.bounds")) == "capri" and str(_st.get("market.solver")) not in (
+                "chain", "ipopt", "newton_krylov"):
+            # CAPRI's bounds (G3.4, the project lead's decision of 16 November 2026): the fixed point's equilibrium
+            # handed to the semismooth Newton on the bounded system's MCP form (market_chain "ssn"), which keeps it
+            # where no bound binds and imposes the bounds where one does (CAPRI: CONOPT with widen_bounds.gms; a solver
+            # departure, docs/dev/MARKET_BOUNDS_PLAN.md); the outputs evaluated at its prices
+            from capri_mod.market.market_chain import chain_market_solve
+            r_ = chain_market_solve(self, r, exogenous_supply, trade_scenario, "ssn")
+            if r_ is None:
+                converged = False
+            else:
+                r = r_
+                S, D, PAr, F, pc = self._bilateral_eval(r, exogenous_supply, trade_scenario)
+                err = max(float(np.max(np.abs(F[c] / size(c)))) for c in F)
         self.sv.bilat_last_r = r.copy()
         self._bilat_err = err
         return r, S, D, PAr, pc, converged, it + 1

@@ -248,3 +248,26 @@ def test_the_semismooth_newton_solves_the_bounded_market_from_the_fixed_point(so
         inside = free & ~atl & ~atu
         assert float(np.abs(Fo[inside]).max()) <= 1e-7
         assert (Fo[atl] >= -1e-8).all() and (Fo[atu] <= 1e-8).all()
+
+
+@pytest.mark.slow
+def test_the_market_under_capris_bounds_is_the_fixed_point_then_the_semismooth_newton(solved_base, capsys):
+    """market.bounds = "capri" (the project lead's decision of 16 November 2026): MarketModule.solve runs the fixed
+    point, then the semismooth Newton from its equilibrium (bilateral_solve, market_chain "ssn"); on +5% soft wheat it
+    converges and its prices are the fixed point's within 1e-6 (no bound but the quotas' saturated sigmas binds)."""
+    import pickle
+    from capri_mod.settings import override
+    pytest.importorskip("pypardiso")
+    mm, exo = solved_base
+    exo2 = exo.copy()
+    exo2["SWHE"] = exo2["SWHE"] * 1.05
+    m_fp, m_b = pickle.loads(pickle.dumps(mm)), pickle.loads(pickle.dumps(mm))
+    assert m_fp.solve(exogenous_supply=exo2).converged
+    with override({"market.bounds": "capri"}):
+        e_b = m_b.solve(exogenous_supply=exo2)
+    out = capsys.readouterr().out
+    assert e_b.converged and "semismooth Newton" in out, out[-500:]
+    a, b = m_fp.sv.bilat_last_r, m_b.sv.bilat_last_r.reindex(index=m_fp.sv.bilat_last_r.index,
+                                                            columns=m_fp.sv.bilat_last_r.columns)
+    cols = list(m_fp.par.bilat)
+    assert (np.abs(a[cols] - b[cols]) / np.maximum(np.abs(a[cols]), 1e-3)).to_numpy().max() <= 1e-6

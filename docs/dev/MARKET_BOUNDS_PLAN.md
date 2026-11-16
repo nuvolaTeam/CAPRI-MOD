@@ -153,7 +153,11 @@ bind in the full runs; they matter for large shocks.
    land and feed energy blocks fail). Candidate chain, for the project lead's decision: the fixed point, then the
    semismooth Newton from its equilibrium to impose CAPRI's bounds (a solver departure: CAPRI's CONOPT with
    widen_bounds; the model and the bounds unchanged). Test: test_supply_system_ad.py::
-   test_the_semismooth_newton_solves_the_bounded_market_from_the_fixed_point. **Tests to run** (after the full-run pair, one heavy job
+   test_the_semismooth_newton_solves_the_bounded_market_from_the_fixed_point. **Decided (the project lead, 16
+   November 2026, 01:40):** with market.bounds = "capri" the market solve is the fixed point, then the semismooth
+   Newton from its equilibrium (bilateral_solve._solve_bilateral; DEP-50); whether CAPRI's bounds become the default
+   after the Green Deal run; the milk cuts' failure of the fixed point traced later. Test: test_supply_system_ad.py::
+   test_the_market_under_capris_bounds_is_the_fixed_point_then_the_semismooth_newton. **Tests to run** (after the full-run pair, one heavy job
    at a time): the chain with market.bounds "none" identical to before (modes 0); with "capri" on the solver
    battery's shocks; a shock that drives a cell below 0 (a supply cut of 90% in one region) solved with the widening
    and the fudge, against CAPRI's rules applied by hand.

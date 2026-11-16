@@ -46,7 +46,7 @@ INSERT INTO code_data VALUES
   ('capri_mod/market/bilateral.py', 'BilateralCommodity.trq_solve', 0.05, 2, '417,421', '& (np.abs(rho - rho0) < 0.05) & (np.abs(d3) > 0)'),
   ('capri_mod/market/bilateral.py', 'BilateralCommodity.trq_solve', 0.99, 1, '416', 'ok = ((np.sign(d1) == np.sign(d2)) & (np.sign(d2) == np.sign(d3)) & (rho >= 0.5) & (rho <= 0.99)'),
   ('capri_mod/market/bilateral.py', '_TrqCells._G', 1000000.0, 1, '560', '_G = 1_000_000                                       # a global quota''s writer code: _G + its index'),
-  ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin', 60.0, 1, '793', 'def _solve_bilateral_equilibrium(self, exogenous_supply, trade_scenario, verbose=False, max_outer=60) -> MarketEquilibri'),
+  ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin', 60.0, 1, '807', 'def _solve_bilateral_equilibrium(self, exogenous_supply, trade_scenario, verbose=False, max_outer=60) -> MarketEquilibri'),
   ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin._bilateral_calibrate', 0.2, 1, '313', 'cal[c] = min(5.0, max(0.2, _raw))'),
   ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin._bilateral_inner', -0.5, 2, '501,534', 'dz = np.clip(dz, -0.5, 0.5)'),
   ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin._bilateral_inner', 0.25, 1, '523', 'if J is None or prev is None or nrm > 0.25 * prev or not self.TRADE_CHORD:'),

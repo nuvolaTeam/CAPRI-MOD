@@ -617,7 +617,8 @@ def apply(mm, ctx, xs, r, exogenous_supply, trade_scenario):
 
 def chain_market_solve(mm, r, exogenous_supply, trade_scenario, method: str = "chain"):
     """The market system solved from the start r (and the module's state); method "chain" (Newton, then the
-    continuation, then IPOPT: solve(ctx, "auto")) or "ipopt"; the solution's price ratios as a frame like r, or None
+    continuation, then IPOPT: solve(ctx, "auto")), "ipopt" or "ssn" (the semismooth Newton on the MCP form, CAPRI's
+    bounds; after the fixed point with market.bounds = "capri"); the solution's price ratios as a frame like r, or None
     (see the module's docstring)."""
     try:
         ctx = build(mm, r, exogenous_supply, trade_scenario)
@@ -625,7 +626,7 @@ def chain_market_solve(mm, r, exogenous_supply, trade_scenario, method: str = "c
         print(f"    market solve by the chain not possible here ({e}); the fixed point solves it", flush=True)
         return None
     t1 = time.time()
-    xs, ok, msg = solve(ctx, "auto" if method == "chain" else "ipopt")
+    xs, ok, msg = solve(ctx, {"chain": "auto", "ipopt": "ipopt", "ssn": "ssn"}[method])
     worst, rr = residual(ctx, xs)
     lay, keep = ctx["lay"], ctx["keep"]
     if not ok and rr.size:
