@@ -117,7 +117,7 @@ def indicator_figure(ind: pd.DataFrame, run_cols: list):
     fig.update_layout(barmode="group", bargap=0.25, bargroupgap=0.08,
                       legend=dict(orientation="h", yanchor="bottom", y=1.0, x=0))
     fig.update_xaxes(title="% change from the baseline (EU27)", gridcolor="#e7e6e2", zeroline=False)
-    return _layout(fig, "Farm-to-Fork indicators: capri-mod against JRC121368", 820)
+    return _layout(fig, "Farm-to-Fork indicators: capri-mod compared with JRC121368", 820)
 
 
 def pair_figure(labels, model, capri, title: str, axis: str, ref_name: str = "CAPRI"):
@@ -139,7 +139,7 @@ def pair_figure(labels, model, capri, title: str, axis: str, ref_name: str = "CA
 
 
 def scatter_figure(frame: pd.DataFrame, title: str):
-    """The regional units' % changes, the model's (y) against CAPRI's (x), with the diagonal; hover with the unit."""
+    """The regional units' % changes, the model's (y) and CAPRI's (x), with the diagonal; hover with the unit."""
     import plotly.graph_objects as go
     f = frame.dropna(subset=["model_pct", "capri_pct"])
     lo = float(min(f["model_pct"].min(), f["capri_pct"].min(), 0.0)) if len(f) else -1.0
@@ -268,9 +268,9 @@ def add_results(stores: list, app):
             with gr.Accordion("effective settings (settings.toml)", open=False):
                 settings_txt = gr.Code(language=None, label="settings")
 
-        # ------------------------------------------------------------------ scenario vs baseline
-        with gr.Tab("Scenario vs baseline"):
-            gr.Markdown("Shows a run's scenario against its own baseline: pick a block, narrow the rows with the "
+        # ------------------------------------------------------------------ scenario and its baseline
+        with gr.Tab("Scenario and its baseline"):
+            gr.Markdown("Shows a run's scenario beside its own baseline: pick a block, narrow the rows with the "
                         "filters, choose the measure and what goes down and across the table, then press Show.")
             with gr.Row():
                 sv_run = gr.Dropdown(labs0, value=first0, label="run")
@@ -353,54 +353,57 @@ def add_results(stores: list, app):
             ch_msg = gr.Markdown()
             ch_plot = gr.Plot(label="indicators")
 
-        with gr.Tab("Against CAPRI"):
-            gr.Markdown(
-                "Checks a run against CAPRI. The first table compares the run's 2030 baseline with CAPRI's own 2030 "
-                "reference for the EU27, block by block (prices by their relative levels, not in euros); the second "
-                "summarises how close each block is. The last table compares the run's Farm-to-Fork indicators with "
-                "the figures the JRC published from CAPRI (JRC121368): it applies to Farm-to-Fork runs on all "
-                "regions.")
-            with gr.Row():
-                cp_run = gr.Dropdown(labs0, value=first0, label="run")
-                cp_more = gr.Dropdown(labs0, value=[], multiselect=True,
-                                      label="more runs for the indicators (same store)")
-                cp_go = gr.Button("Compute", variant="primary")
-            cp_msg = gr.Markdown()
-            cp_base = gr.Dataframe(interactive=False, label="baseline vs CAPRI 2030")
-            cp_stats = gr.Dataframe(interactive=False, label="per block: median |dev| %, share within 10%")
-            cp_ind = gr.Dataframe(interactive=False, label="Farm-to-Fork indicators, % change from the baseline")
+        with gr.Tab("Comparison with CAPRI"):
+            gr.Markdown("Compares a run with CAPRI, as a check: the run's 2030 baseline with CAPRI's own 2030 "
+                        "reference, and the run's scenario with CAPRI's result for the same scenario.")
+            with gr.Tab("2030 baseline"):
+                gr.Markdown(
+                    "The first table compares the run's 2030 baseline with CAPRI's own 2030 "
+                    "reference for the EU27, block by block (prices by their relative levels, not in euros); the second "
+                    "summarises how close each block is. The last table compares the run's Farm-to-Fork indicators with "
+                    "the figures the JRC published from CAPRI (JRC121368): it applies to Farm-to-Fork runs on all "
+                    "regions.")
+                with gr.Row():
+                    cp_run = gr.Dropdown(labs0, value=first0, label="run")
+                    cp_more = gr.Dropdown(labs0, value=[], multiselect=True,
+                                          label="more runs for the indicators (same store)")
+                    cp_go = gr.Button("Compute", variant="primary")
+                cp_msg = gr.Markdown()
+                cp_base = gr.Dataframe(interactive=False, label="2030 baseline compared with CAPRI's 2030 reference")
+                cp_stats = gr.Dataframe(interactive=False, label="per block: median gap from CAPRI (%) and share of rows within 10%")
+                cp_ind = gr.Dataframe(interactive=False, label="Farm-to-Fork indicators, % change from the baseline")
 
-        with gr.Tab("Scenarios vs CAPRI"):
-            gr.Markdown(
-                "Compares a scenario run with CAPRI's result for the same scenario: the Green Deal 2030 with the "
-                "project's CAPRI run of it, or Farm-to-Fork 2030 with the figures published in JRC121368 (EU27 only). "
-                "Both sides are shown as % changes from each model's own reference: first the EU27 activities, "
-                "prices, yields and nitrogen balance, then one activity by member state, on two maps and region by "
-                "region.")
-            with gr.Row():
-                gd_kind = gr.Radio(["Green Deal 2030 · CAPRI's run", "Farm-to-Fork 2030 · JRC121368"],
-                                   value="Green Deal 2030 · CAPRI's run", label="comparison", scale=3)
-                gd_run = gr.Dropdown(labs0, value=first0, label="run", scale=4)
-                gd_go = gr.Button("Compare", variant="primary", scale=1)
-            gd_msg = gr.Markdown()
-            with gr.Row():
-                gd_act = gr.Plot(label="EU27 activity levels")
-                gd_pri = gr.Plot(label="EU27 producer prices")
-            with gr.Row():
-                gd_yld = gr.Plot(label="EU27 crop yields")
-                gd_nbal = gr.Plot(label="EU27 N balance")
-            gr.Markdown("**By member state and region**")
-            with gr.Row():
-                gd_item = gr.Dropdown([], label="activity (or N balance item)", scale=3)
-                gd_go2 = gr.Button("Draw", scale=1)
-            gd_ms = gr.Plot(label="by member state")
-            with gr.Row():
-                gd_map_m = gr.Plot(label="capri-mod, regional units")
-                gd_map_c = gr.Plot(label="CAPRI, regional units")
-            gd_sc = gr.Plot(label="regional units: capri-mod against CAPRI")
-            with gr.Accordion("tables", open=False):
-                gd_table = gr.Dataframe(interactive=False, label="EU27 and member states")
-                gd_file = gr.File(label="all comparisons (CSV)")
+            with gr.Tab("Scenarios"):
+                gr.Markdown(
+                    "Compares a scenario run with CAPRI's result for the same scenario: the Green Deal 2030 with the "
+                    "project's CAPRI run of it, or Farm-to-Fork 2030 with the figures published in JRC121368 (EU27 only). "
+                    "Both sides are shown as % changes from each model's own reference: first the EU27 activities, "
+                    "prices, yields and nitrogen balance, then one activity by member state, on two maps and region by "
+                    "region.")
+                with gr.Row():
+                    gd_kind = gr.Radio(["Green Deal 2030 · CAPRI's run", "Farm-to-Fork 2030 · JRC121368"],
+                                       value="Green Deal 2030 · CAPRI's run", label="comparison", scale=3)
+                    gd_run = gr.Dropdown(labs0, value=first0, label="run", scale=4)
+                    gd_go = gr.Button("Compare", variant="primary", scale=1)
+                gd_msg = gr.Markdown()
+                with gr.Row():
+                    gd_act = gr.Plot(label="EU27 activity levels")
+                    gd_pri = gr.Plot(label="EU27 producer prices")
+                with gr.Row():
+                    gd_yld = gr.Plot(label="EU27 crop yields")
+                    gd_nbal = gr.Plot(label="EU27 N balance")
+                gr.Markdown("**By member state and region**")
+                with gr.Row():
+                    gd_item = gr.Dropdown([], label="activity (or N balance item)", scale=3)
+                    gd_go2 = gr.Button("Draw", scale=1)
+                gd_ms = gr.Plot(label="by member state")
+                with gr.Row():
+                    gd_map_m = gr.Plot(label="capri-mod, regional units")
+                    gd_map_c = gr.Plot(label="CAPRI, regional units")
+                gd_sc = gr.Plot(label="regional units: capri-mod compared with CAPRI")
+                with gr.Accordion("tables", open=False):
+                    gd_table = gr.Dataframe(interactive=False, label="EU27 and member states")
+                    gd_file = gr.File(label="all comparisons (CSV)")
 
         # ================================================================== callbacks
         def load_runs(root):
@@ -539,7 +542,7 @@ def add_results(stores: list, app):
 
         cp_go.click(cp_show, [store, cp_run, cp_more], [cp_msg, cp_base, cp_stats, cp_ind])
 
-        # ------------------------------------------------------------------ Scenarios vs CAPRI (Green Deal, Farm-to-Fork)
+        # ------------------------------------------------------------------ Comparison with CAPRI: scenarios (Green Deal, Farm-to-Fork)
         def _subset_note(root, s_, r_):
             regs = str((RD.read_meta(root, s_, r_).get("options") or {}).get("regions") or "")
             return (f"The run solved {len(regs.split(','))} regional units only (--regions): not comparable with "
@@ -575,8 +578,8 @@ def add_results(stores: list, app):
             same = np.mean(np.sign(eu["capri_pct"].round(1)) == np.sign(eu["model_pct"].round(1))) if len(eu) else 0
             msg = (_subset_note(root, s_, r_) + f"EU27 activities: mean absolute gap {eu['gap_pts'].abs().mean():.1f} "
                    f"points, same sign {same:.0%}; prices: mean absolute gap {pri['gap_pts'].abs().mean():.1f} points; "
-                   f"N surplus {float(nbe.loc[nbe['item'].str.startswith('gross'), 'model_pct'].sum()):+.1f}% against "
-                   f"{float(nbe.loc[nbe['item'].str.startswith('gross'), 'capri_pct'].sum()):+.1f}%.")
+                   f"N surplus {float(nbe.loc[nbe['item'].str.startswith('gross'), 'model_pct'].sum()):+.1f}% (CAPRI "
+                   f"{float(nbe.loc[nbe['item'].str.startswith('gross'), 'capri_pct'].sum()):+.1f}%).")
             f_act = pair_figure([RD.code_label(a, "cols", "supply") for a in eu["activity"]], eu["model_pct"],
                                 eu["capri_pct"], "Activity levels, EU27",
                                 "% change from the reference")

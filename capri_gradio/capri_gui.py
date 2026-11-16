@@ -106,7 +106,7 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False, al
         else:
             gr.Markdown("## capri-mod results\nThe stored runs of capri-mod, a Python re-implementation of the CAPRI "
                         "agricultural model: browse a run's results, compare a scenario with its baseline or two runs "
-                        "with each other, map them, and check them against CAPRI. Each tab says what it shows.")
+                        "with each other, map them, and compare them with CAPRI. Each tab says what it shows.")
         hist_state = gr.State([])
 
         # ------------------------------------------------------------------ assistant
