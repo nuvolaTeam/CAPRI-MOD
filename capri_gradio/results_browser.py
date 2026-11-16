@@ -360,18 +360,13 @@ def add_results(stores: list, app):
                 gr.Markdown(
                     "The first table compares the run's 2030 baseline with CAPRI's own 2030 "
                     "reference for the EU27, block by block (prices by their relative levels, not in euros); the second "
-                    "summarises how close each block is. The last table compares the run's Farm-to-Fork indicators with "
-                    "the figures the JRC published from CAPRI (JRC121368): it applies to Farm-to-Fork runs on all "
-                    "regions.")
+                    "summarises how close each block is.")
                 with gr.Row():
                     cp_run = gr.Dropdown(labs0, value=first0, label="run")
-                    cp_more = gr.Dropdown(labs0, value=[], multiselect=True,
-                                          label="more runs for the indicators (same store)")
                     cp_go = gr.Button("Compute", variant="primary")
                 cp_msg = gr.Markdown()
                 cp_base = gr.Dataframe(interactive=False, label="2030 baseline compared with CAPRI's 2030 reference")
                 cp_stats = gr.Dataframe(interactive=False, label="per block: median gap from CAPRI (%) and share of rows within 10%")
-                cp_ind = gr.Dataframe(interactive=False, label="Farm-to-Fork indicators, % change from the baseline")
 
             with gr.Tab("Scenarios"):
                 gr.Markdown(
@@ -404,6 +399,13 @@ def add_results(stores: list, app):
                 with gr.Accordion("tables", open=False):
                     gd_table = gr.Dataframe(interactive=False, label="EU27 and member states")
                     gd_file = gr.File(label="all comparisons (CSV)")
+                gr.Markdown("**Farm-to-Fork indicators of several runs**: the runs' Farm-to-Fork indicators side by side "
+                            "with the figures the JRC published from CAPRI (JRC121368), % change from the baseline. It "
+                            "applies to Farm-to-Fork runs on all regions.")
+                with gr.Row():
+                    cp_more = gr.Dropdown(labs0, value=[], multiselect=True, label="runs (same store)", scale=4)
+                    ind_go = gr.Button("Show", scale=1)
+                cp_ind = gr.Dataframe(interactive=False, label="Farm-to-Fork indicators, % change from the baseline")
 
         # ================================================================== callbacks
         def load_runs(root):
@@ -413,7 +415,7 @@ def add_results(stores: list, app):
             show = r.drop(columns=["reference_run_id"]) if not r.empty else r
             # one update per output: Gradio consumes an update when it applies it
             return (show, *[gr.update(choices=labs, value=first) for _ in range(5)],
-                    gr.update(choices=labs, value=[]))
+                    gr.update(choices=labs, value=[first] if first else []))
 
         def load_runs_b(root):
             labs = _labels(root)
@@ -492,9 +494,9 @@ def add_results(stores: list, app):
                 shown, chart = None, None
             return msg, _shown(dev), shown, chart, _csv(j, "compare_runs")
 
-        def cp_show(root, label, more):
+        def cp_show(root, label):
             if not label:
-                return "Pick a run.", None, None, None
+                return "Pick a run.", None, None
             s, r = RD.parse_label(label)
             msg = []
             base = RD.baseline_vs_capri(root, s, r)
@@ -509,8 +511,11 @@ def add_results(stores: list, app):
             if regs:
                 msg.append(f"The run solved {len(regs.split(','))} regional units (--regions): its EU figures mix "
                            "two sets of units; not comparable with CAPRI's EU27 (KNOWN_ISSUES K83).")
-            ind = RD.jrc_indicators(root, [label] + [m for m in (more or []) if m != label])
-            return "  \n".join(msg), _shown(base), _shown(stats) if stats is not None else None, _shown(ind)
+            return "  \n".join(msg), _shown(base), _shown(stats) if stats is not None else None
+
+        def ind_show(root, labels):
+            labels = [m for m in (labels or []) if m]
+            return _shown(RD.jrc_indicators(root, labels).round(1)) if labels else None
 
         # wiring
         store.change(load_runs, store, [runs_df, run_pick, sv_run, cr_a, cp_run, gd_run, cp_more])
@@ -540,7 +545,8 @@ def add_results(stores: list, app):
         cr_go.click(cr_show, [store, cr_a, cr_pa, store_b, cr_b, cr_pb, cr_block, cr_region, cr_rows, cr_cols,
                               cr_measure, cr_down, cr_across], [cr_msg, cr_dev, cr_table, cr_chart, cr_file])
 
-        cp_go.click(cp_show, [store, cp_run, cp_more], [cp_msg, cp_base, cp_stats, cp_ind])
+        cp_go.click(cp_show, [store, cp_run], [cp_msg, cp_base, cp_stats])
+        ind_go.click(ind_show, [store, cp_more], cp_ind)
 
         # ------------------------------------------------------------------ Comparison with CAPRI: scenarios (Green Deal, Farm-to-Fork)
         def _subset_note(root, s_, r_):
