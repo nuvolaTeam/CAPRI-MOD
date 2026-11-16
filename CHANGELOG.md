@@ -108,6 +108,17 @@ the rest of CAPRI's bounds and fudge equations (the start bounds, the widening a
 tradeFlowFudge_ to write; docs/dev/MARKET_BOUNDS_PLAN.md), the Armington extensions, the intervention stocks and
 subsidised exports, LULUCF in the market, the market regions' crop areas and yields.
 
+## 16 November 2026 — the grassland split of the need (K160); the market under CAPRI's bounds (DEP-50)
+
+- **K160:** CAPRI's NUTNED_ multiplies the need by SQRT(1 + p_technFact(Yield, A) + 0.2 $ GRAI - 0.2 $ GRAE); the
+  model's grassland need lacked the split (parameter GRASS_NEED_YIELD_SHIFT; fert/npk.py grass_need_factor). In ES41
+  alone the GRAI response hardly moves (-26.3% against -26.0%; CAPRI -81%): the larger difference found there is the
+  grass's feed value (the model's 1.67 x CAPRI's per ha at the base), the next trace.
+- **The market under CAPRI's bounds (DEP-50, the project lead's decision):** the fixed point, then the semismooth
+  Newton on the bounded system's MCP form from its equilibrium (market_chain "ssn"); market.bounds stays "none" by
+  default. The bounds no longer fix cells whose equations the square system keeps. Battery and diagnosis in
+  docs/dev/MARKET_BOUNDS_PLAN.md; trust-region least squares tried and not kept.
+
 ## 15 November 2026, late evening — G3.4 step 4: the dairy floors and the K83 rows as fudge cells
 
 - The dairy blocks' net supply (max(0, supply - processing)) and the K83 units' rows (the EU's units outside a run on

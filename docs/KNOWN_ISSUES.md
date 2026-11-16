@@ -61,6 +61,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K157](#k157) | CAPRI's permanent-grassland rule counts the idled histosol grassland (GRSACT includes IHISGR); the model's counted GRAE + GRAI alone, so the productive grass stayed at its base and the idled area took new land | fixed (15 November 2026) |
 | [K158](#k158) | The idled histosol area was bounded by the base land; CAPRI's idleHisto_ takes the current land (GRSLND x landshare(GRAS), CROP), so under the landscape floor new grassland brings idled histosol (Ireland's IR02 turns arable land into grassland) | fixed (15 November 2026), validated (the full Green Deal pair) |
 | [K159](#k159) | NL22's Farm-to-Fork solve ends at a non-optimal point in a two-region, one-iteration run since K158 (first the inner fertilisation model's first-order condition at a flow's bound, DEP-49 for it; then the K balance of one crop group at the point IPOPT reaches) | open |
+| [K160](#k160) | The grassland need lacked CAPRI's split SQRT(1 +/- 0.2) between intensive and extensive grassland (NUTNED_) | fixed (16 November 2026) |
 | [K141](#k141) | CAPRI bug: CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it (the project lead's decision) |
 | [K136](#k136) | CAPRI's endogenous entitlement limit (def_endCut.gms: no area payment beyond the trend area) was not in the model; ported with CAPRI's 2030 ceilings computed from its CAP 2014-2020 tables | fixed (13 November 2026) |
 | [K137](#k137) | The reported UAA left out the idled histosols (CAPRI's IHISGR, IHISCR stay in GRAS, ARAC and UAAR): the Green Deal's surplus per ha looked short of its target where the row met it | fixed (13 November 2026) |
@@ -3340,3 +3341,26 @@ there with K157 too, and the calibration falls back as before.
   solve still ends locally infeasible: at that activity point the K balance of the grain-maize group (NUTNED_ MAIZ, 0.07
   in scaled units) has no solution even for the fertilisation block solved alone (fert_at), so the remaining cause is
   the activity mix IPOPT's path reaches, not the condition's form. The P accounts test runs on DE11 and DE94.
+
+<a id="k160"></a>
+### K160: The grassland need lacked CAPRI's split between intensive and extensive grassland (found 16 November 2026)
+
+CAPRI's NUTNED_ (supply/supply_model.gms l. 1131-1135) multiplies each crop's need by SQRT(1 + p_technFact(Yield, A)
++ 0.2 $ GRAI - 0.2 $ GRAE), for every nutrient the crop has a need of: at the standard technology the intensive
+grassland's need x SQRT(1.2) = 1.095, the extensive grassland's x SQRT(0.8) = 0.894. The model's need per ha
+(npk_crop_coefs_2030.csv, tools/build/build_npk_balance_2030.py) is the crop's own NITF/PHOF/POTF, and the build's
+check compares the groups' totals only (GRAE and GRAI are in one group, GRAS), so the split was missed;
+capri_mod/fert/npk.py's need_yield_factor read the square root as the technology variants' only. Found tracing the
+Green Deal's GRAI gap (EU -38.8% against CAPRI's -54.8%): in ES41 CAPRI's NUTNED_ multipliers per kg of NITF are
+0.76 (GRAE) and 0.99 (GRAI) at the reference, 3.18 and 4.59 under the Green Deal, the model's the same for both.
+
+- **Effect:** the N, P and K need of GRAE and GRAI in every region and scenario; the region's need multiplier
+  recalibrates the total at the base
+- **In 9t:** -
+- **Status:** fixed 16 November 2026 (fert/npk.py grass_need_factor, parameter GRASS_NEED_YIELD_SHIFT 0.2; applied in
+  the fertilisation block's need and the P accounts' NUTNED_). Test: test_capri.py::test_the_grassland_need_carries_capris_split.
+  ES41 alone under the Green Deal 2030 step: N need GRAE 23.4, GRAI 76.1 kg/ha (26.4, 70.3 before), the N cost gap
+  GRAI - GRAE 190 EUR/ha (171 before; CAPRI 240), GRAI -26.3% (-26.0% before; CAPRI -81%): the split is CAPRI's, not
+  the main lever. The larger difference found there: the grass's value as feed, the model's fodder_FGRA dual x yield
+  155 (GRAI) and 66 (GRAE) EUR/ha at the base against CAPRI's D_O 93 and 40 (1.67 x), nearly unchanged under the Green
+  Deal (20.7 -> 20.3 per t, CAPRI's grass price 6.94 -> 8.89 EUR/t); open, the next trace. Full runs with the batch.

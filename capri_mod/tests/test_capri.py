@@ -5187,3 +5187,13 @@ def test_entitlement_limit_in_the_2030_regional_model(model):
     assert "entitlements" in labels
     drift = res.baseline[2030]["metadata"].get("base_calibration_drift") or [0.0]
     assert float(drift[0]) < 0.002, drift
+
+
+def test_the_grassland_need_carries_capris_split():
+    """KNOWN_ISSUES K160: CAPRI's NUTNED_ multiplies a crop's need by SQRT(1 + p_technFact(Yield, A) + 0.2 $ GRAI - 0.2
+    $ GRAE) (supply_model.gms l. 1131-1135); at the standard technology intensive grassland's need is the data's x
+    SQRT(1.2) and extensive grassland's x SQRT(0.8), the other crops' unchanged."""
+    from capri_mod.fert.npk import grass_need_factor
+    assert abs(grass_need_factor("GRAI") - np.sqrt(1.2)) < 1e-12
+    assert abs(grass_need_factor("GRAE") - np.sqrt(0.8)) < 1e-12
+    assert grass_need_factor("SWHE") == 1.0 and grass_need_factor("MAIF") == 1.0

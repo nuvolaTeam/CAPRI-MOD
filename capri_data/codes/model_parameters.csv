@@ -66,3 +66,4 @@ LUC_LO_ARTO_SHARE,FR830000,0.75,share of the region's total area,capri,CAPRI sup
 LUC_UP_OWN_FACTOR,,9.0,multiple of the land type's level,capri,"CAPRI supply/prep_sim_luc.gms l. 593-595: v_actLevl.up(FORE, OLND, ARTIF) = L + min(9 x L, 0.35 x ARTO)",supply_module
 LUC_UP_ARTO_SHARE,,0.35,share of the region's total area,capri,"CAPRI supply/prep_sim_luc.gms l. 593-595: L + min(9 x L, 0.35 x ARTO)",supply_module
 LUC_FORE_FLOOR,,0.99,share of the base forest area,capri,"CAPRI supply/prep_sim_luc.gms l. 597-606 (Trustee_land): with a landscape floor DATA(FALL,FLOOR), v_actLevl.lo(FORE) = 0.99 x data(FORE,LEVL) ('usually only a 1% decline is considered plausible')",supply_module
+GRASS_NEED_YIELD_SHIFT,,0.2,share,capri,"CAPRI supply/supply_model.gms NUTNED_ l. 1131-1135: SQRT(1 + p_technFact(Yield, A) + 0.2 $ GRAI - 0.2 $ GRAE), the grassland split of the need",npk
