@@ -70,7 +70,7 @@ def main() -> None:
     a = ap.parse_args()
     cap = read(a.src)
     defl = float(_money.deflator(2030))
-    pairs = pd.read_csv(FB)[["region", "fodder"]].drop_duplicates()
+    pairs = pd.read_csv(FB, float_precision="round_trip")[["region", "fodder"]].drop_duplicates()
     rows = [dict(region=r, fodder=f, value_eur_t=cap[(r, f)] / defl, uvag_capri_2030=cap[(r, f)])
             for r, f in pairs.itertuples(index=False) if cap.get((r, f), 0.0) > 0]
     o = pd.DataFrame(rows).sort_values(["region", "fodder"])
