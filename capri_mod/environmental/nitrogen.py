@@ -157,11 +157,15 @@ class NitrogenBlock:
                     fx = float(x.biofix_t) * 1000.0 / float(x.levl) if (x.biofix_t == x.biofix_t and float(x.levl) > 0) else 0.0
                     return float(x.nitf) + fx
                 sx = sum(float(x.levl) * _gross(x) for x in d.values())
-                # NCRD = "N from crop residues and atmospheric deposition, kg/ha" (sets.gms);
-                # e_CRESID: CRESID + ATMOSD = sum levl x NCRD, so residues = NCRD - deposition
+                # CAPRI's e_CRESID (supply_model.gms): (v_Cresid + v_atmosd) x UAA = sum levl x DATA(crop, MANN)
+                # x (techFact + 1), MANN being FOUT_T_N's output for NITF (global/fromimpact/sets.gms), and
+                # e_ATMOSD the deposition per ha of every crop: a crop's own residues are its MANN - deposition.
+                # (Until 16 November 2026 its NCRD, "N from crop residues and atmospheric deposition": the same
+                # regional total, spread differently over the crops: DE21 rapeseed 138 against MANN 70, other
+                # arable fodder 69 against 195 kg N/ha; KNOWN_ISSUES K163)
                 dep = float(tot.at[r8, "ATMOSD"]) if "ATMOSD" in tot.columns else 0.0
-                res_ha = lambda x: max(0.0, (float(x.ncrd) if x.ncrd == x.ncrd else 0.0) - dep) \
-                    if (x.ncrd == x.ncrd and float(x.ncrd) > 0) else 0.0
+                res_ha = lambda x: max(0.0, (float(x.mann) if x.mann == x.mann else 0.0) - dep) \
+                    if (x.mann == x.mann and float(x.mann) > 0) else 0.0
                 sr = sum(float(x.levl) * res_ha(x) for x in d.values())
                 uaa = lv
                 ke = float(tot.at[r8, "EXPPRD"]) * uaa / sx if sx > 0 and "EXPPRD" in tot.columns else 1.0

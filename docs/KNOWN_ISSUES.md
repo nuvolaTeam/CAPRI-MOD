@@ -64,6 +64,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K160](#k160) | The grassland need lacked CAPRI's split SQRT(1 +/- 0.2) between intensive and extensive grassland (NUTNED_) | fixed (16 November 2026) |
 | [K161](#k161) | The 2030 base value of the fodders was the highest 2017 ration price of the region's animals times the member state's 2030/2017 ratio, not CAPRI's own regional 2030 unit value (UVAG) | fixed (16 November 2026); no effect on quantities |
 | [K162](#k162) | The permanent groups' own residues in NUTNED_ were the group's total spread by area (GRAE and GRAI the same per ha), not CAPRI's per-crop DATA(crop, MANN/MANP/MANK) | fixed (16 November 2026) |
+| [K163](#k163) | The gross N balance spread each region's crop residues by NCRD (residues and deposition), not CAPRI's per-crop e_CRESID coefficient DATA(crop, MANN), and NUTNED_'s residue pool the same: the same regional totals, another crop mix | fixed (16 November 2026) |
 | [K141](#k141) | CAPRI bug: CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it (the project lead's decision) |
 | [K136](#k136) | CAPRI's endogenous entitlement limit (def_endCut.gms: no area payment beyond the trend area) was not in the model; ported with CAPRI's 2030 ceilings computed from its CAP 2014-2020 tables | fixed (13 November 2026) |
 | [K137](#k137) | The reported UAA left out the idled histosols (CAPRI's IHISGR, IHISCR stay in GRAS, ARAC and UAAR): the Green Deal's surplus per ha looked short of its target where the row met it | fixed (13 November 2026) |
@@ -3446,3 +3447,45 @@ GRAI over GRAE by about 360 EUR/ha. Found through the exact first-order-conditio
   K need terms change sign (SWHE -40.1 to +24.3 EUR/ha) as the grassland no longer takes the region's K. OFAR (the
   fodder balance's dual, -535 EUR/ha) and RAPE are not moved by this fix; open.
 - **Full EU** (full_gd_k162, with K159-K161 and DEP-50's market chain since the K158 run, so not K162 alone): EU27 GRAI -48.1% (K158 run -38.8, CAPRI -54.8), GRAE +44.5 (+35.8, +51.8); activities' mean gap to CAPRI 2.5 points (3.4).
+
+<a id="k163"></a>
+### K163: The N balance's crop residues spread by NCRD, not CAPRI's per-crop MANN (found 16 November 2026)
+
+CAPRI's gross N balance (supply_model.gms e_SURTOTHa, the Green Deal's surplus target SURTOT_REST_) counts each crop's
+residues and deposition through e_CRESID, (v_Cresid + v_atmosd) x UAA = sum levl x DATA(crop, MANN) x (techFact + 1)
+(MANN: FOUT_T_N's output for NITF, global/fromimpact/sets.gms), and the deposition through e_ATMOSD, the same per ha of
+every crop: a crop's own residues are its MANN less the deposition. The model's balance (environmental/nitrogen.py,
+_capri_crop_n; the surplus row of the supply models takes its per-crop coefficients from it) took NCRD, CAPRI's "N from
+crop residues and atmospheric deposition": in every region the same level-weighted total as MANN (within 2.4%; CRESID +
+ATMOSD), but spread differently over the crops. EU, level-weighted kg N/ha, NCRD against MANN: rapeseed 111.8 / 72.8,
+sugar beet 260.9 / 210.8, sunflower 77.6 / 50.0, grain maize 115.3 / 101.0, other arable fodder 98.6 / 135.0, soya 35.4
+/ 99.1, fodder maize 39.2 / 59.5, fallow and set-aside 0 / about 10. DE21: rapeseed 137.8 / 69.7, other arable fodder
+68.5 / 195.3. Found from the open DE21 gaps (rapeseed and other arable fodder against CAPRI's Green Deal run), which the
+difference fits in sign: the surplus row charged rapeseed too much residue N and other arable fodder too little.
+
+- **Effect:** each crop's coefficient in the surplus row and in the reported N balance; the regions' residue totals
+  unchanged (still scaled to CAPRI's CRESID). Single-region Green Deal runs (each region alone: the one-region market
+  of K83, not comparable one-to-one with a full-EU run; thousand ha, scenario level; CAPRI for checking only):
+
+  | Region | Activity | Before | With K163 | CAPRI |
+  |---|---|---:|---:|---:|
+  | DE21 | SWHE | 112.5 | 113.5 | 118.7 |
+  | DE21 | RAPE | 24.3 | 26.3 | 29.3 |
+  | DE21 | OCER | 11.0 | 13.9 | 14.3 |
+  | DE21 | PULS | 9.1 | 8.8 | 6.7 |
+  | DE21 | OFAR | 42.7 | 34.6 | 25.4 |
+  | ES42 | PULS | 133.9 | 232.0 | 200.1 |
+  | ES42 | OATS | 286.2 | 205.9 | 199.5 |
+  | ES42 | RYEM | 92.0 | 79.5 | 58.7 |
+  | ES42 | SUNF | 188.0 | 212.5 | 214.9 |
+  | ES42 | BARL | - | 791.4 | 845.1 |
+
+  (DE21's "before" is the K162 run; ES42's is the run before K162, so its column carries both.) In DE21 the N-surplus
+  row's term on rapeseed goes from +4.0 to -263.9 EUR/ha and on other arable fodder from -308.2 to +150.9 (a cost).
+  Full-EU run: to follow.
+- **In 9t:** -
+- **Status:** fixed 16 November 2026 (tools/build/build_capri_crop_n_coefs.py extracts MANN; _capri_crop_n uses MANN less
+  the deposition). The same item in NUTNED_'s arable residue pool: CAPRI's fertDistCres_ distributes sum levl x DATA(crop,
+  MANN/MANP/MANK) of the non-permanent crops; the model's per-crop contribution (npk_crop_coefs_2030.csv pool_kg_ha,
+  tools/build/build_npk_balance_2030.py) took NCRD/PCRD/KCRD, now MANN/MANP/MANK (18,625 rows; the pools' totals and
+  scale unchanged). Test: test_capri.py::test_the_crops_residues_in_the_n_balance_are_capris_mann.

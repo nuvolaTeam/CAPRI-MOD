@@ -17436,6 +17436,11 @@
      "not_null": false
     },
     {
+     "name": "mann",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
      "name": "biofix_t",
      "type": "DOUBLE",
      "not_null": false
@@ -17460,6 +17465,12 @@
      "unit": null,
      "status": "open",
      "basis": "capri_crop_n_coefs_2030.levl: unit to be established"
+    },
+    {
+     "item": "mann",
+     "unit": "U_kgperha",
+     "status": "capri",
+     "basis": "CAPRI DATA(crop, MANN), e_CRESID coefficient (supply_model.gms)"
     },
     {
      "item": "ncrd",
@@ -17493,7 +17504,9 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
    }
   },
   "env_capri_gnb_components_2030": {

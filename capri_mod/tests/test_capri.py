@@ -5275,3 +5275,31 @@ def test_the_permanent_crops_own_residues_are_capris_per_crop():
     lv = lambda crop: float(c.at[("ES410000", crop, "K"), "levl_kha"])
     mean = (lv("GRAE") * own("GRAE", "K") + lv("GRAI") * own("GRAI", "K")) / (lv("GRAE") + lv("GRAI"))
     assert mean == pytest.approx(29.940367907142, rel=1e-9)      # CAPRI's perm_cres of the group, per ha
+
+
+def test_the_crops_residues_in_the_n_balance_are_capris_mann(data):
+    """K163: a crop's own residue N in the gross N balance is CAPRI's e_CRESID coefficient, DATA(crop, MANN) less the
+    region's deposition (e_ATMOSD), scaled so the region's residues are CAPRI's CRESID; not NCRD ("N from crop residues
+    and atmospheric deposition"), which has the same regional total but another spread over the crops (DE21 rapeseed
+    NCRD 137.8 against MANN 69.7, other arable fodder 68.5 against 195.3 kg N/ha)."""
+    from capri_mod.environmental.environmental_module import EnvironmentalModule
+    env = EnvironmentalModule(data)
+    co = env._capri_crop_n("DE210000")
+    dep = 12.5229921480364                                   # CAPRI's ATMOSD of DE21 (capri_gnb_components_2030)
+    ratio = (195.317028 - dep) / (69.740727 - dep)           # OFAR over RAPE, MANN less deposition
+    assert co["OFAR"][1] / co["RAPE"][1] == pytest.approx(ratio, rel=1e-5)
+    # the region's residues are CAPRI's CRESID per ha of its crops (the scaling factor of _capri_crop_n)
+    c = pd.read_csv(DATA_DIR / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "capri_crop_n_coefs_2030.csv",
+                    float_precision="round_trip")
+    c = c[(c.capri_region == "DE210000") & (c.crop != "GRAS")].fillna(0.0)          # GRAS: the sum of GRAE and GRAI
+    tot = lambda col: float((c.levl * c[col]).sum())
+    assert tot("mann") == pytest.approx(tot("ncrd"), rel=3e-3)        # the same regional total (within 0.2% here)
+    res = sum(float(r.levl) * co[r.crop][1] for r in c.itertuples() if r.crop in co and r.crop in ("SWHE", "RAPE",
+                                                                                                  "OFAR", "GRAE", "GRAI"))
+    assert res > 0
+    # the arable residue pool of NUTNED_ (fertDistCres_): each crop's contribution is levl x DATA(crop, MANN), scaled to
+    # CAPRI's pool (scale 1 in DE21): rapeseed 69.74, other arable fodder 195.32 kg N/ha, not NCRD's 137.81 and 68.53
+    n = pd.read_csv(DATA_DIR / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "npk_crop_coefs_2030.csv",
+                    float_precision="round_trip").set_index(["capri_region", "model_crop", "nutrient"])
+    assert float(n.at[("DE210000", "RAPE", "N"), "pool_kg_ha"]) == pytest.approx(69.740727, rel=1e-4)
+    assert float(n.at[("DE210000", "OFAR", "N"), "pool_kg_ha"]) == pytest.approx(195.317028, rel=1e-4)

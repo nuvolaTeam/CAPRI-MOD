@@ -10,6 +10,7 @@ CREATE TABLE env_capri_crop_n_coefs_2030 (
     yild DOUBLE,
     nitf DOUBLE NOT NULL,
     ncrd DOUBLE,
+    mann DOUBLE,
     biofix_t DOUBLE,
     PRIMARY KEY (capri_region, crop)
 );
@@ -19,6 +20,7 @@ INSERT INTO value_units VALUES
   ('env_capri_crop_n_coefs_2030', 'yild', NULL, 'open', 'capri_crop_n_coefs_2030.yild: unit to be established'),
   ('env_capri_crop_n_coefs_2030', 'nitf', NULL, 'open', 'capri_crop_n_coefs_2030.nitf: unit to be established'),
   ('env_capri_crop_n_coefs_2030', 'ncrd', NULL, 'open', 'capri_crop_n_coefs_2030.ncrd: unit to be established'),
+  ('env_capri_crop_n_coefs_2030', 'mann', 'U_kgperha', 'capri', 'CAPRI DATA(crop, MANN), e_CRESID coefficient (supply_model.gms)'),
   ('env_capri_crop_n_coefs_2030', 'biofix_t', NULL, 'open', 'capri_crop_n_coefs_2030.biofix_t: unit to be established');
 
 -- file: capri_data/baselines/capri_greendeal_ref/1730/environment/capri_gnb_components_2030.csv

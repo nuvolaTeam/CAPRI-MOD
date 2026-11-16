@@ -3685,8 +3685,8 @@
    "description": "CAPRI's per-crop nitrogen coefficients per region, 2030 reference (for the gross N balance). (tools/build/build_capri_crop_n_coefs.py)",
    "kind": "coefficients",
    "rows": 8568,
-   "columns": 7,
-   "units": "to be established (value_units: open)",
+   "columns": 8,
+   "units": "U_kgperha",
    "read_by_model": [
     "capri_mod/environmental/nitrogen.py"
    ],

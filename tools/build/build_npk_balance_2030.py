@@ -20,7 +20,8 @@ RUNANI - MTRADE (ManureNPK_, manExportOrAppl_), sum of mineral flows = NETF (fer
 Outputs (capri_data/baselines/capri_greendeal_ref/1730/environment/; the two livestock_manure_*_coef.csv, 2017 values, in capri_data/2017/environment/):
   npk_crop_coefs_2030.csv   capri_region, model_crop, nutrient (N, P, K), need_kg_ha (the crop's own NITF/PHOF/POTF),
                             pool_kg_ha (contribution to the
-                            arable residue pool, fertDistCres_; non-permanent crops), own_kg_ha (permanent crops' own
+                            arable residue pool, fertDistCres_: levl x DATA(crop, MANN/MANP/MANK), scaled to CAPRI's pool;
+                            non-permanent crops; until 16 November 2026 from NCRD/PCRD/KCRD, KNOWN_ISSUES K163), own_kg_ha (permanent crops' own
                             residues: CAPRI's DATA(R, crop, MANN/MANP/MANK, "Y") of each crop, the term NUTNED_ adds for
                             PERM_NGRP, supply_model.gms; until 16 November 2026 the dump's perm_cres per crop, which is
                             the group's total spread by area: GRAE and GRAI had the same value, KNOWN_ISSUES K162),
@@ -69,7 +70,6 @@ sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "chec
 from build_fert_dist_priors import GROUP, PERM_NGRP, NGRPS, ngrp  # noqa: E402
 
 NUTS = {"NITF": "N", "PHOF": "P", "POTF": "K"}
-CRD = {"NITF": "NCRD", "PHOF": "PCRD", "POTF": "KCRD"}
 #: the permanent crops' own residue (and, for N, deposition) output per ha in NUTNED_ (FOUT_T_N: MANN.NITF, MANP.PHOF,
 #: MANK.POTF; global/fromimpact/sets.gms l. 2529-2530)
 MANX = {"NITF": "MANN", "PHOF": "MANP", "POTF": "MANK"}
@@ -229,10 +229,11 @@ def main():
             eav = 1.0 + tot["nutNed_excr_unavailable"] / excr if excr > 0 else float("nan")
             cav = 1.0 + (tot["nutNed_cres_unavailable"] + tot["nutNed_cres_loss_gasRunTot"]) / (cres + own) \
                 if (cres + own) > 0 else float("nan")
-            # the arable residue pool (fertDistCres_ rhs): per crop, levl x the crop's residue output. CAPRI's
-            # residue item (NCRD/PCRD/KCRD) is taken as each non-permanent crop's share of the pool; scaled so the
-            # crops add up to the pool CAPRI distributes
-            pool_raw = {c: lev[c] * v.get((r, "", c, CRD[col]), 0.0) / 1000.0 for c in lev if ngrp(c) not in PERM_NGRP}
+            # the arable residue pool (fertDistCres_ rhs, supply_model.gms): per non-permanent crop, levl x DATA(crop,
+            # MANN/MANP/MANK) (FOUT_T_N's output for the nutrient), scaled so the crops add up to the pool CAPRI
+            # distributes. (Until 16 November 2026 the crops' NCRD/PCRD/KCRD, "from crop residues and atmospheric
+            # deposition": another spread over the crops; KNOWN_ISSUES K163)
+            pool_raw = {c: lev[c] * v.get((r, "", c, MANX[col]), 0.0) / 1000.0 for c in lev if ngrp(c) not in PERM_NGRP}
             sraw = sum(pool_raw.values())
             kpool = cres / sraw if sraw > 0 else 0.0
             rrow.append(dict(capri_region=r, level="nuts0" if r in nuts0 else "ru", nutrient=nut, mine_eff=meff,
