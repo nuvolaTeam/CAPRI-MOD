@@ -1310,6 +1310,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             # slack, and the nitrogen and land loops pulled against each other
             # without settling. The required cut in kg N is unchanged; buying
             # land no longer meets it.
+            # (With the land market, land.py rewrites this row to CAPRI's form, the target per ha x the current land
+            # ARAC + GRAS + FRUN: e_SURTOTHa / SURTOT_REST_, "SURPLUS PER HECTARE OF CURRENT LAND"; identical at base.)
             base_area = float(sum(v for a, v in self._base_levels().items() if a in CROPS))
             A_rows.append(row_B)
             b_rows.append(float(target) * base_area)
