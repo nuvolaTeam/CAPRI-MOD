@@ -3445,3 +3445,4 @@ GRAI over GRAE by about 360 EUR/ha. Found through the exact first-order-conditio
   In ES41 the K need's term on GRAI goes from -222.7 to -76.4 EUR/ha (GRAE +136.0 to +9.8). In DE21 the arable crops'
   K need terms change sign (SWHE -40.1 to +24.3 EUR/ha) as the grassland no longer takes the region's K. OFAR (the
   fodder balance's dual, -535 EUR/ha) and RAPE are not moved by this fix; open.
+- **Full EU** (full_gd_k162, with K159-K161 and DEP-50's market chain since the K158 run, so not K162 alone): EU27 GRAI -48.1% (K158 run -38.8, CAPRI -54.8), GRAE +44.5 (+35.8, +51.8); activities' mean gap to CAPRI 2.5 points (3.4).
