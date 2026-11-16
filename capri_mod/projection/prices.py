@@ -108,8 +108,9 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
         # November 2026): the region's UVAG of the fed fodder, the dual of CAPRI's SUPBAL_ per t fed, in 2017 money
         # (tools/build/build_fodder_value_2030.py, the baseline layer's feed folder); it replaces the 2017 value scaled
         # above (the highest 2017 ration price of the region's animals x the member state's 2030/2017 UVAG ratio)
-        from capri_mod.data.inputs import current as _inputs
-        fv = _inputs().csv("fodder_value_2030.csv", "feed", required=False)
+        # read from the same baseline layer as the price ratios (traj_dir = <baseline>/<BAS><SIM>/trajectories)
+        _fvp = Path(traj_dir).parent / "feed" / "fodder_value_2030.csv"
+        fv = read_input(_fvp) if _fvp.exists() else None
         if fv is not None:
             v30 = {(t.region, t.fodder): float(t.value_eur_t) for t in fv.itertuples(index=False)}
             n_30 = 0

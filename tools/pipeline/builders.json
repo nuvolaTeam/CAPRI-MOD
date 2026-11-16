@@ -688,11 +688,15 @@
    "inputs": [
     "capri_data/2017/feed/fodder_balance_2017.csv",
     "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_price_ratios_2030.csv",
+    "capri_data/codes/capri_member_state_codes.csv",
+    "capri_data/codes/eu_market_blocks.csv",
+    "capri_data/codes/regional_units.csv",
     "capri_mod/settings/defaults.toml"
    ],
    "code": [
     "tools/build/build_fodder_value_2030.py",
     "tools/lib/_grep.py",
+    "tools/lib/_model_regions.py",
     "tools/lib/_money.py",
     "tools/lib/paths.py"
    ],

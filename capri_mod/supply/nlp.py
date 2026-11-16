@@ -424,7 +424,8 @@ class NLPBlock:
                                      tol=float(_settings().get("supply.nlp_relax_try_tol")))
             except Exception:
                 return None, None
-        if not _ok(res) and _crn.foc_fb_mode() == "fallback" and not (spec.get("npk") or {}).get("foc_fb"):
+        if (not _ok(res) and spec.get("npk") and not spec["npk"].get("foc_fb")
+                and _crn.foc_fb_mode() == "fallback"):
             # DEP-49 as a fallback (the project lead's decision of 16 November 2026): CAPRI's e_focFertDist, an equality,
             # in every solve; where that solve fails, once more with the first-order condition's lower-bound
             # multiplier (the complementarity form), cold from the caller's start. Always on (15 November), the
