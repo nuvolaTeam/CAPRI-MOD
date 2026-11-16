@@ -3482,7 +3482,27 @@ difference fits in sign: the surplus row charged rapeseed too much residue N and
 
   (DE21's "before" is the K162 run; ES42's is the run before K162, so its column carries both.) In DE21 the N-surplus
   row's term on rapeseed goes from +4.0 to -263.9 EUR/ha and on other arable fodder from -308.2 to +150.9 (a cost).
-  Full-EU run: to follow.
+- **Full EU** (full_gd_k163 against full_gd_k162, which differ by K163 only; converged in 20 iterations, 4,690 s;
+  % change from the reference, EU27, CAPRI for checking only): activities' mean gap to CAPRI 2.1 points (2.5), same
+  sign 91% (91%); prices' mean gap 1.8 points (1.8), model / CAPRI median ratio 0.84 (0.86).
+
+  | Activity | K162 | K163 | CAPRI |
+  |---|---:|---:|---:|
+  | PULS | -12.0 | -2.5 | -0.8 |
+  | DWHE | -18.6 | -7.8 | -15.3 |
+  | SWHE | -3.9 | -3.3 | -1.9 |
+  | OATS | -3.0 | -4.1 | -0.9 |
+  | RAPE | -3.7 | -2.9 | -3.4 |
+  | GRAE | +44.5 | +41.8 | +51.8 |
+  | GRAI | -48.1 | -45.5 | -54.8 |
+  | FALL | +85.4 | +87.0 | +90.9 |
+  | VSET | +69.0 | +71.0 | +79.5 |
+
+  Durum is Italy's (IT -33.1 -> -12.7%, CAPRI -18.9): it moved past CAPRI's change. The shift from intensive to
+  extensive grassland is smaller: PL (GRAI -56.6 -> -46.9, CAPRI -44.3) and AT (-44.2 -> -32.3, CAPRI -33.1) now close to
+  CAPRI's, FR (-48.5 -> -44.2, CAPRI -63.2) and DE (-41.4 -> -37.8, CAPRI -48.1) further from it. Prices: pulses +3.7 ->
+  +1.8 (CAPRI +0.1), soft wheat +8.3 -> +7.4 (+8.9), rapeseed +8.6 -> +7.1 (+8.2), beef +18.1 -> +17.8 (+20.1), milk
+  +10.5 -> +10.4 (+11.2). The regions relaxed on the mineral caps' duals: DEA1, IT31, IT93 (K162 run: ES51, IT31).
 - **In 9t:** -
 - **Status:** fixed 16 November 2026 (tools/build/build_capri_crop_n_coefs.py extracts MANN; _capri_crop_n uses MANN less
   the deposition). The same item in NUTNED_'s arable residue pool: CAPRI's fertDistCres_ distributes sum levl x DATA(crop,
