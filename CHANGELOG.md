@@ -110,6 +110,7 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
 
 ## 16 November 2026 — the grassland split of the need (K160); the market under CAPRI's bounds (DEP-50)
 
+- **K131 closed:** the Green Deal market check (tools/check/check_market_gd.py) did not pass CAPRI's FMIL bulk change, so the dairy products' feed stayed at its base there; with it every EU dairy price is within 0.35 points of CAPRI's, the EU's 116 prices within 0.10 on average. An error of the check; runs set the bulk from the supply models.
 - **K162:** the permanent crops' own residues in NUTNED_ are CAPRI's per crop (levl x DATA(crop, MANN/MANP/MANK)),
   not the group's total spread by area (GRAE and GRAI had the same value; ES41 29.94 kg K/ha each against CAPRI's
   18.03 and 41.85). Under the Green Deal the grassland's K need net of its own residues fell to about zero and its K

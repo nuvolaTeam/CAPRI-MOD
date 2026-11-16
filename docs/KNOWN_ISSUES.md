@@ -34,7 +34,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K128](#k128) | Farm-to-Fork's meat prices against JRC121368: beef +29.5% against +24.0%, poultry +20.4% against +18.0%, pork +20.5% against +43.0%, with EU production close to CAPRI's | open (9 November 2026): the market's inputs checked against CAPRI's (base, demand elasticities, Armington, quotas), no departure found; needs CAPRI's own scenario run on the same version |
 | [K129](#k129) | BG020000 under the Green Deal: the coupled iteration settles on one of two branches of the region's response (maize 169 or 16 thousand ha between two runs); each iteration's problem mostly has one solution the starts agree on | open (10 November 2026): the branch follows the market iteration's path; more starts per solve did not change it (tried and dropped) |
 | [K130](#k130) | Catch crops' cost per ha is CAPRI's reported TOIN of CATC, not its cost coefficients; where CAPRI's Green Deal baseline has no catch crops (160 of 250 units), the calibration run's TOIN | open (9 November 2026): to read CAPRI's own cost data of the winter-cover technology |
-| [K131](#k131) | Given CAPRI's own Green Deal supply, the market's EU prices follow CAPRI's within 0.3 points on average, but the dairy protein products rise 2-5 points more and butter 1 point less | open (12 November 2026): not yet traced |
+| [K131](#k131) | Given CAPRI's own Green Deal supply, the market's EU prices follow CAPRI's within 0.3 points on average, but the dairy protein products rise 2-5 points more and butter 1 point less | closed (16 November 2026): an error of the check (FMIL bulk not passed); with it every dairy price within 0.35 points |
 | [K138](#k138) | CAPRI's new energy crops (NECR, 251 kha of the EU's 2030 crop area) are not a model activity | open (13 November 2026) |
 | [K139](#k139) | PL340000 converts all its forest to farmland in the Green Deal 2030 run (crop area +45% against CAPRI's -2%) | fixed by K156 (closed 16 November 2026) |
 | [K140](#k140) | The rural development port: 286 of 20,098 effective RD premiums differ from CAPRI's 2030 reference (Praha's rates, Ile-de-France's inherited LFA cut, Sweden's technology-differentiated extensification measure) | open (13 November 2026); in the model's 2030 premiums since 13 November 2026 |
@@ -2737,7 +2737,7 @@ Whether those regions' consumer prices differ was not checked.
 
 - **Effect:** EU dairy product prices in scenario runs
 - **In 9t:** –
-- **Status:** open
+- **Status:** **closed** 16 November 2026: an error of the check, not of the market. tools/check/check_market_gd.py passed CAPRI's feed change per member state for four feed bulks (FCER, FPRO, FENE, FOTH) and calves' milk only as the EU's FMIL index; the market's EU dairy feed follows the FMIL bulk of the feed-bulk system where it covers the product (market/demand.py), which a run sets from the supply models (coupling/feed.py) and the check left at its base: the dairy products' feed stayed at the reference (EU_WEST whey use 1,078 kt against CAPRI's 971, its feed -111 kt). With FMIL passed as a bulk: every dairy price within 0.35 points of CAPRI's (EU_WEST / EU_EAST: skimmed milk powder +2.25 / +2.36 against +2.53 / +2.59, whey +1.15 / +2.26 against +1.45 / +2.59, butter +8.24 / +10.42 against +8.34 / +10.77, raw milk +11.04 / +10.34 against +11.33 / +10.63); the EU's 116 prices within 0.10 points of price change on average (median 0.04, 90th percentile 0.28; correlation 1.000). The model's own runs were not affected.
 
 
 <a id="k132"></a>
