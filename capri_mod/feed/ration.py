@@ -222,7 +222,7 @@ class RationModel:
     """All EU region-animal rations, from feed_ration_2017.csv (capri_mod/data/nested_tables.py)."""
 
     def __init__(self, data_dir: str | Path = None, scale: dict = None, price_scale: dict = None,
-                 factor: dict = None, slope_key: str = "capri_slope"):
+                 factor: dict = None, slope_key: str = "capri_slope", fodder_price: dict = None):
         """scale: {(region, animal): (f_energy, f_protein, f_dry_matter)} - requirements of a projected year
         (capri_mod/projection: output per head follows the projected yield); the base ration is scaled by
         the largest factor so it stays feasible, and the ration is calibrated to it."""
@@ -244,6 +244,11 @@ class RationModel:
                 if price_scale:
                     rec = dict(rec, price={f: float(v) * float(price_scale.get((_ms, f), 1.0))
                                            for f, v in rec["price"].items()})
+                if fodder_price:
+                    # the non-tradable fodders at their balance's base value of a projected year, {(region, fodder):
+                    # EUR per kg} (projection/prices.py, ration_fodder_price): CAPRI prices a fodder in the feeding
+                    # problem at the dual of its balance, one per region
+                    rec = dict(rec, price={f: float(fodder_price.get((reg, f), v)) for f, v in rec["price"].items()})
                 pc = float(rec["price"].get("FCER", 0.0))
                 if not pc > 0:                             # no stand-in (removed 23 October 2026: 0.2)
                     raise ValueError(f"{reg} {act}: no FCER price in the ration data")
@@ -346,7 +351,7 @@ def ration_model_for(data, data_dir=None, pmp_source: str = "capri2030", pmp_cap
                  and str(pmp_source) in ("capri2030", "recipe") and "feed" in tuple(pmp_capri_parts or ())
                  else "capri_slope")
     return RationModel(data_dir, scale=d.get("ration_scale"), price_scale=d.get("ration_bulk_price"),
-                       factor=d.get("ration_factor"), slope_key=slope_key)
+                       factor=d.get("ration_factor"), slope_key=slope_key, fodder_price=d.get("ration_fodder_price"))
 
 
 def rations_by_region(rm: RationModel) -> dict:

@@ -121,6 +121,14 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
                         rec["value_eur_t"] = v
                         n_30 += 1
             summary["fodder_values_capri_2030"] = n_30
+        # the rations price each fodder at its balance's base value (CAPRI: the fodder's price in the feeding problem
+        # is the dual of its SUPBAL_, one per region): the projected value, EUR per kg as the ration data
+        # (feed/ration.py, ration_model_for). Until 16 November 2026 the rations kept the 2017 value (ES41 grass 20.15
+        # EUR/t), and the balance's dual at the 2030 base followed it (20.8 against CAPRI's UVAG 11.28)
+        data["ration_fodder_price"] = {(reg, feed): float(rec["value_eur_t"]) / 1000.0
+                                       for reg, feeds in fb.items() for feed, rec in (feeds or {}).items()
+                                       if float(rec.get("value_eur_t", 0.0) or 0.0) > 0}
+        summary["ration_fodder_prices"] = len(data["ration_fodder_price"])
 
     # --- livestock: final products by market
     bym = data.get("livestock_product_value_by_market_coef")

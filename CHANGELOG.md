@@ -119,7 +119,9 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   fodder (dataOut UVAG, the dual of SUPBAL_ per t fed, in 2017 money; tools/build/build_fodder_value_2030.py), in
   place of the 2017 ration price times the member state's 2030/2017 ratio (median 0.87 x CAPRI's for grass, 0.96 for
   silage maize). No effect on quantities (the balance is an equality, so its base dual is a constant on the feasible
-  set; ES41 under the Green Deal identical to the last digit): it changes the dual only.
+  set; ES41 under the Green Deal identical to the last digit): it changes the dual only. The rations take the same
+  projected value as the fodder's price (they kept the 2017 value, which set the dual at the 2030 base: ES41 grass 20.8
+  against CAPRI's 11.28; now 11.9), again with no effect on quantities.
 - **K160:** CAPRI's NUTNED_ multiplies the need by SQRT(1 + p_technFact(Yield, A) + 0.2 $ GRAI - 0.2 $ GRAE); the
   model's grassland need lacked the split (parameter GRASS_NEED_YIELD_SHIFT; fert/npk.py grass_need_factor). The
   first check of its effect in ES41 was run on the 2017 data without the 2030 projection and is withdrawn (its grass

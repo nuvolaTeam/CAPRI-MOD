@@ -5252,3 +5252,11 @@ def test_the_fodders_2030_base_value_is_capris_regional_unit_value():
     ratio, eu = load_price_tables(trajectories_dir(DATA_DIR, 2030))[:2]
     f = ratio.get((_ms("DE910000"), "ROOF"), eu.get("ROOF"))
     assert d["fodder_balance"]["DE910000"]["FROO"]["value_eur_t"] == pytest.approx(29.354064 * f, rel=1e-12)
+    # the rations price each fodder at its balance's base value of the projected year (EUR per kg)
+    assert d["ration_fodder_price"][("ES410000", "FGRA")] == pytest.approx(float(es.value_eur_t) / 1000.0, rel=1e-12)
+    from capri_mod.feed.ration import RationModel
+    rm = RationModel(str(DATA_DIR), fodder_price={("ES410000", "FGRA"): 0.0112})
+    r = rm.rations[("ES410000", "DCOW")]
+    assert float(r.p0[list(r.feeds).index("FGRA")]) == pytest.approx(0.0112, rel=1e-12)
+    r17 = RationModel(str(DATA_DIR)).rations[("ES410000", "DCOW")]
+    assert float(r17.p0[list(r17.feeds).index("FGRA")]) == pytest.approx(0.02015, rel=1e-3)   # the 2017 value

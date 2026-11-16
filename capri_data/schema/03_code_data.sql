@@ -25,7 +25,7 @@ INSERT INTO code_data VALUES
   ('capri_mod/feed/ration.py', 'FEED_ELAS', -10.0, 7, '39,39,39,39,39,40,40', 'FEED_ELAS = {"FGRA": -10.0, "FMAI": -10.0, "FOFA": -10.0, "FROO": -10.0, "FCOM": -10.0,'),
   ('capri_mod/feed/ration.py', 'FEED_ELAS', -5.0, 1, '40', '"FSGM": -10.0, "FCER": -10.0, "FPRO": -5.0, "FOTH": -1.0, "FENE": -0.5,'),
   ('capri_mod/feed/ration.py', 'FEED_ELAS', -0.5, 3, '40,41,41', '"FSGM": -10.0, "FCER": -10.0, "FPRO": -5.0, "FOTH": -1.0, "FENE": -0.5,'),
-  ('capri_mod/feed/ration.py', 'ration_model_for', 2030.0, 1, '345', 'slope_key = ("capri_slope_2030" if _market_year(d) == 2030'),
+  ('capri_mod/feed/ration.py', 'ration_model_for', 2030.0, 1, '350', 'slope_key = ("capri_slope_2030" if _market_year(d) == 2030'),
   ('capri_mod/feed/ration.py', 'share_rules', 0.005, 1, '91', 'setr("FOTH", lo=0.001 if act in ("SHGM", "SHGF", "BCOW") else 0.005)'),
   ('capri_mod/feed/ration.py', 'share_rules', 0.05, 6, '82,88,88,90,99,104', 'setr("FPRO", hi=0.3 if act == "PIGS" else 0.2); setr("FCER", lo=0.6); setr("FENE", lo=0.05, hi=0.15)'),
   ('capri_mod/feed/ration.py', 'share_rules', 0.15, 1, '82', 'setr("FPRO", hi=0.3 if act == "PIGS" else 0.2); setr("FCER", lo=0.6); setr("FENE", lo=0.05, hi=0.15)'),

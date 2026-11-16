@@ -3392,7 +3392,13 @@ produced and 0.03 kt fed: 77,560 EUR/t). With the projected fodder per ha it giv
   values; the rest keep the projected 2017 value). No effect on quantities: the balance is an equality and its base
   value enters the objective as f - A' lambda0, a constant (lambda0 x b) on the feasible set; ES41 alone under the
   Green Deal gives the same levels to the last digit with and without it (16 November 2026). So the fodder value is
-  not a lever on the GRAI gap; it matters for the dual and the accounts that use it, and where a balance is not binding
+  not a lever on the GRAI gap; it matters for the dual and the accounts that use it, and where a balance is not binding.
+  Correction the same day: in the NLP form the base dual is set by the rations' fodder price (the feed calibration's
+  expected dual), which the projection left at the 2017 value (ES41 grass 20.15 EUR/t; the dual at the 2030 base 20.8,
+  1.8 x CAPRI's UVAG); fodder_value_2030 alone did not reach it, the regional calibration absorbed it. The rations now
+  take the balance's projected value (projection/prices.py ration_fodder_price, feed/ration.py): ES41's grass dual
+  at the 2030 base 11.9 (CAPRI 11.28), the quantities again identical to the last digit (a uniform change of the base
+  value shifts the animals' and the crops' calibrated terms by the same amount, a constant on the equality balance)
 - **In 9t:** -
 - **Status:** fixed 16 November 2026 (the project lead's decision: CAPRI's 2030 value): tools/build/build_fodder_value_2030.py
   -> capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_value_2030.csv, read by projection/prices.py.
