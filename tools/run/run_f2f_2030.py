@@ -597,7 +597,7 @@ def main():
                f" | non-optimal regional solves kept: baseline {len(_no['baseline'])}, scenario {len(_no['scenario'])}"
                + (f" ({', '.join(_no['baseline'] + _no['scenario'])})" if _no['baseline'] or _no['scenario'] else "")
                + f" | PMP {out['meta'].get('pmp_source')}"
-               + (f", mineral caps relaxed: {out['meta']['nlp_relaxed']}" if out['meta'].get('nlp_relaxed') else "")
+               + (f", NLP relaxed (mineral caps; foc_fb: DEP-49's retry): {out['meta']['nlp_relaxed']}" if out['meta'].get('nlp_relaxed') else "")
                + ("" if all(out["meta"]["market_converged"].values()) else
                   f" | MARKET NOT CONVERGED: {[k_ for k_, v_ in out['meta']['market_converged'].items() if not v_]}"))
 

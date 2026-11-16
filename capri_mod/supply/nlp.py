@@ -424,6 +424,23 @@ class NLPBlock:
                                      tol=float(_settings().get("supply.nlp_relax_try_tol")))
             except Exception:
                 return None, None
+        if not _ok(res) and _crn.foc_fb_mode() == "fallback" and not (spec.get("npk") or {}).get("foc_fb"):
+            # DEP-49 as a fallback (the project lead's decision of 16 November 2026): CAPRI's e_focFertDist, an equality,
+            # in every solve; where that solve fails, once more with the first-order condition's lower-bound
+            # multiplier (the complementarity form), cold from the caller's start. Always on (15 November), the
+            # complementarity rows kept IPOPT from a feasible point in ES41's Green Deal solves (3000 iterations,
+            # constraint violation 12.6, the rows of many N and K flows), which the equality solves at once
+            sp_fb = dict(spec, npk=dict(spec["npk"], foc_fb=True))
+            nlp_fb, res_fb = _try(sp_fb)
+            _tried.append(("foc_fb", res_fb["status"] if res_fb is not None else "build failed",
+                           float(res_fb["f"]) if res_fb is not None else float("nan"),
+                           int(res_fb["iterations"] or 0) if res_fb is not None else 0))
+            if res_fb is not None and _ok(res_fb):
+                nlp, res, spec, npk = nlp_fb, res_fb, sp_fb, sp_fb["npk"]
+                gk = nlp.graph_key()
+                shape = (nlp.n0, tuple(k[:2] for k in nlp.feeds), len(nlp.lbx))
+                kinds.append("foc_fb")
+                self.res.nlp_relaxed = "foc_fb"          # in the run's metadata nlp_relaxed beside the caps' exemptions
         if (not _ok(res) and _fp is not None and _todo and getattr(self.ev, "nlp_try_n_relax", False)
                 and _km != "apply"):
             # K89: with a tiered N target in force, which constraint makes the problem infeasible: solved once without

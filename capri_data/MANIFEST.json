@@ -3937,6 +3937,20 @@
     "builder": "build_feed_bulks"
    }
   },
+  "capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_value_2030.csv": {
+   "description": "CAPRI's 2030 unit value of the fed non-tradable fodders (UVAG, the dual of SUPBAL_ per t fed) as the fodder balance's base dual, in 2017 money (KNOWN_ISSUES K161; tools/build/build_fodder_value_2030.py)",
+   "kind": "reference",
+   "rows": 861,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/projection/prices.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_fodder_value_2030"
+   }
+  },
   "capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_flows_2030.csv": {
    "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
    "kind": "reference",

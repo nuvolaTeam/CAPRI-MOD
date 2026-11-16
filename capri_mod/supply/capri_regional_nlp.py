@@ -229,6 +229,15 @@ def _feed_scale(r, j):
     return max(0.01 * D0 / max(float(r.dm[j]), 1e-6), 1e-6)
 
 
+def foc_fb_mode() -> str:
+    """fertiliser.foc_lower_bound_complementarity: "fallback", "always" or "off" (DEP-49; a switch true/false until 16
+    November 2026, "always"/"off" now)."""
+    v = str(_settings().get("fertiliser.foc_lower_bound_complementarity")).strip().lower()
+    if v not in ("fallback", "always", "off"):
+        raise ValueError(f"fertiliser.foc_lower_bound_complementarity: {v!r} (fallback, always or off)")
+    return v
+
+
 def calibrate_feed_terms(r, fodder=()):
     """CNST of each flexible feed so that the base ration solves CAPRI's simulation feeding problem (REQSE_ only).
 
@@ -619,7 +628,9 @@ class CapriRegionalNLP:
         land = ca.sum1(y[lc]) if len(lc) > 1 else (y[lc[0]] if lc else 0)
         self.fert_rows = [len(g_rows), None]
         _u_lo = float(_settings().get("fertiliser.flow_lower_bound_mode_share"))
-        _fb_on = bool(_settings().get("fertiliser.foc_lower_bound_complementarity"))
+        # DEP-49's form of the first-order condition: "always", "off" (CAPRI's equality), or "fallback" (the default: CAPRI's
+        # equality, the complementarity only in the retry of a solve that failed with it, nlp.py; npk["foc_fb"])
+        _fb_on = bool(npk["foc_fb"]) if "foc_fb" in npk else foc_fb_mode() == "always"
         _fb_eps = float(_settings().get("fertiliser.foc_fb_smoothing"))
         self.excr_rows = {}                     # nutrient -> (row of fertDistExcr_, its scale): ManureNPK_'s value
         for nut, d in npk["nutrients"].items():

@@ -682,6 +682,28 @@
    ]
   },
   {
+   "task": "build_fodder_value_2030",
+   "builder": "build_fodder_value_2030",
+   "args": [],
+   "inputs": [
+    "capri_data/2017/feed/fodder_balance_2017.csv",
+    "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_price_ratios_2030.csv",
+    "capri_mod/settings/defaults.toml"
+   ],
+   "code": [
+    "tools/build/build_fodder_value_2030.py",
+    "tools/lib/_grep.py",
+    "tools/lib/_money.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+   ],
+   "outputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_value_2030.csv"
+   ]
+  },
+  {
    "task": "build_cap_greening",
    "builder": "build_cap_greening",
    "args": [],

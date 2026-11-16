@@ -4305,11 +4305,11 @@ def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
 def test_fertiliser_first_order_condition_with_the_bound_multiplier_is_capris_inside_the_bounds(_fresh_model, monkeypatch):
     """DEP-49 (KNOWN_ISSUES K159): the inner fertilisation model's first-order condition with the flows' lower-bound
     multiplier (fertiliser.foc_lower_bound_complementarity) gives CAPRI's solution where no flow is at its bound: DE11's
-    baseline with the switch on and off (CAPRI's e_focFertDist) within 1e-5 on the activities and the purchases."""
+    baseline with the form always on and off (CAPRI's e_focFertDist) within 1e-5 on the activities and the purchases."""
     import copy
     out = {}
     for on in (True, False):
-        _set(monkeypatch, {"fertiliser.foc_lower_bound_complementarity": on})
+        _set(monkeypatch, {"fertiliser.foc_lower_bound_complementarity": "always" if on else "off"})
         m = copy.deepcopy(_fresh_model)
         r = m.run(scenario="BASELINE", regions=["DE110000"], max_outer_iter=1)
         sr = r["supply"]["DE110000"]
@@ -4318,6 +4318,37 @@ def test_fertiliser_first_order_condition_with_the_bound_multiplier_is_capris_in
     assert ((a1 - a0).abs() <= 1e-5 * a0.abs().clip(lower=1.0)).all(), (a1 - a0).abs().sort_values().tail()
     for k, v in out[False][1].items():
         assert abs(out[True][1][k] - v) <= 1e-5 * max(1.0, abs(v)), (k, out[True][1][k], v)
+
+
+def test_the_complementarity_form_is_the_retry_of_a_failed_solve(monkeypatch):
+    """DEP-49 as a fallback (the project lead's decision of 16 November 2026): the setting's modes, the spec's own flag
+    over the setting, and the retry: a regional solve whose equality form fails is solved again with the
+    complementarity form (cold), kept where it succeeds and recorded as nlp_relaxed "foc_fb"."""
+    from capri_mod.supply import capri_regional_nlp as C
+    for v, mode in (("always", "always"), ("off", "off"), ("fallback", "fallback"), ("Always", "always")):
+        _set(monkeypatch, {"fertiliser.foc_lower_bound_complementarity": v})
+        assert C.foc_fb_mode() == mode
+    _set(monkeypatch, {"fertiliser.foc_lower_bound_complementarity": "sometimes"})
+    with pytest.raises(ValueError):
+        C.foc_fb_mode()
+    _set(monkeypatch, {"fertiliser.foc_lower_bound_complementarity": "fallback"})
+    from capri_mod.model import CAPRIModel
+    m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
+    _orig = C.CapriRegionalNLP.solve
+    seen = []
+
+    def failing_equality(self, x0, *a, **k):
+        r = _orig(self, x0, *a, **k)
+        fb = bool((self.spec.get("npk") or {}).get("foc_fb"))
+        seen.append(fb)
+        if not fb:
+            r = dict(r, success=False, status="Maximum_Iterations_Exceeded")
+        return r
+    monkeypatch.setattr(C.CapriRegionalNLP, "solve", failing_equality)
+    m.run(scenario="BASELINE", regions=["DE110000"], max_outer_iter=1)
+    mo = m.supply_module._models["DE110000"]
+    assert True in seen and False in seen and seen.index(True) > seen.index(False)
+    assert mo.res.nlp_relaxed == "foc_fb" and not getattr(mo.res, "nlp_nonoptimal", None)
 
 
 def test_idled_histosol_area_is_bounded_by_the_current_land(model):
@@ -5197,3 +5228,27 @@ def test_the_grassland_need_carries_capris_split():
     assert abs(grass_need_factor("GRAI") - np.sqrt(1.2)) < 1e-12
     assert abs(grass_need_factor("GRAE") - np.sqrt(0.8)) < 1e-12
     assert grass_need_factor("SWHE") == 1.0 and grass_need_factor("MAIF") == 1.0
+
+
+def test_the_fodders_2030_base_value_is_capris_regional_unit_value():
+    """K161: the fodder balance's 2030 base value is CAPRI's own UVAG of the fed fodder (region, fodder), in 2017
+    money; a pair without CAPRI's UVAG keeps the 2017 value times CAPRI's 2030/2017 ratio."""
+    from capri_mod.projection.prices import apply_capri_prices_2030
+    sys.path.insert(0, str(ROOT / "tools" / "lib"))
+    import _money
+    fv = pd.read_csv(DATA_DIR / "baselines" / "capri_greendeal_ref" / "1730" / "feed" / "fodder_value_2030.csv")
+    # the file is CAPRI's UVAG over its 2030 deflator
+    assert np.allclose(fv.value_eur_t, fv.uvag_capri_2030 / float(_money.deflator(2030)), rtol=1e-12)
+    es = fv.set_index(["region", "fodder"]).loc[("ES410000", "FGRA")]
+    assert es.uvag_capri_2030 == pytest.approx(14.4096391315753)     # dataOut('ES410000','','UVAG','FGRA','2030')
+    assert not ((fv.region == "DE910000") & (fv.fodder == "FROO")).any()
+    d = {"fodder_balance": {"ES410000": {"FGRA": {"crops": {"GRAE": 1.0, "GRAI": 2.0}, "value_eur_t": 20.15}},
+                            "DE910000": {"FROO": {"crops": {"ROOF": 1.0}, "value_eur_t": 29.354064}}}}
+    s = apply_capri_prices_2030(d, trajectories_dir(DATA_DIR, 2030), {}, {})
+    assert d["fodder_balance"]["ES410000"]["FGRA"]["value_eur_t"] == pytest.approx(float(es.value_eur_t), rel=1e-12)
+    assert s["fodder_values_capri_2030"] == 1
+    # DE91's fodder roots: no UVAG in CAPRI's 2030 baseline, the 2017 value times the ratio
+    from capri_mod.projection.prices import load_price_tables, _ms
+    ratio, eu = load_price_tables(trajectories_dir(DATA_DIR, 2030))[:2]
+    f = ratio.get((_ms("DE910000"), "ROOF"), eu.get("ROOF"))
+    assert d["fodder_balance"]["DE910000"]["FROO"]["value_eur_t"] == pytest.approx(29.354064 * f, rel=1e-12)

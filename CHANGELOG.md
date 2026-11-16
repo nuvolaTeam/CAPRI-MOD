@@ -110,10 +110,20 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
 
 ## 16 November 2026 — the grassland split of the need (K160); the market under CAPRI's bounds (DEP-50)
 
+- **DEP-49 as a fallback (the project lead's decision):** every regional solve uses CAPRI's e_focFertDist (an
+  equality); a solve that fails with it is retried once with the lower-bound complementarity (cold), recorded as
+  nlp_relaxed "foc_fb". Always on, the complementarity rows kept IPOPT from a feasible point in ES41's Green Deal
+  solves (with the equality: converged in 20 iterations, no non-optimal solve). Setting
+  fertiliser.foc_lower_bound_complementarity: "fallback" (default), "always", "off".
+- **K161 (the project lead's decision):** the fodders' 2030 base value is CAPRI's own regional unit value of the fed
+  fodder (dataOut UVAG, the dual of SUPBAL_ per t fed, in 2017 money; tools/build/build_fodder_value_2030.py), in
+  place of the 2017 ration price times the member state's 2030/2017 ratio (median 0.87 x CAPRI's for grass, 0.96 for
+  silage maize). No effect on quantities (the balance is an equality, so its base dual is a constant on the feasible
+  set; ES41 under the Green Deal identical to the last digit): it changes the dual only.
 - **K160:** CAPRI's NUTNED_ multiplies the need by SQRT(1 + p_technFact(Yield, A) + 0.2 $ GRAI - 0.2 $ GRAE); the
-  model's grassland need lacked the split (parameter GRASS_NEED_YIELD_SHIFT; fert/npk.py grass_need_factor). In ES41
-  alone the GRAI response hardly moves (-26.3% against -26.0%; CAPRI -81%): the larger difference found there is the
-  grass's feed value (the model's 1.67 x CAPRI's per ha at the base), the next trace.
+  model's grassland need lacked the split (parameter GRASS_NEED_YIELD_SHIFT; fert/npk.py grass_need_factor). The
+  first check of its effect in ES41 was run on the 2017 data without the 2030 projection and is withdrawn (its grass
+  value of 1.67 x CAPRI's was the unprojected 2017 value).
 - **The market under CAPRI's bounds (DEP-50, the project lead's decision):** the fixed point, then the semismooth
   Newton on the bounded system's MCP form from its equilibrium (market_chain "ssn"); market.bounds stays "none" by
   default. The bounds no longer fix cells whose equations the square system keeps. Battery and diagnosis in

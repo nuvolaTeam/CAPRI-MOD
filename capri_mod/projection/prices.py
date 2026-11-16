@@ -104,6 +104,22 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
         summary["fodder_values"] = n_f
         if fr:
             summary["fodder_value_ratio_median"] = float(pd.Series(fr).median())
+        # CAPRI's own 2030 value where its reference has it (KNOWN_ISSUES K161, the project lead's decision of 16
+        # November 2026): the region's UVAG of the fed fodder, the dual of CAPRI's SUPBAL_ per t fed, in 2017 money
+        # (tools/build/build_fodder_value_2030.py, the baseline layer's feed folder); it replaces the 2017 value scaled
+        # above (the highest 2017 ration price of the region's animals x the member state's 2030/2017 UVAG ratio)
+        from capri_mod.data.inputs import current as _inputs
+        fv = _inputs().csv("fodder_value_2030.csv", "feed", required=False)
+        if fv is not None:
+            v30 = {(t.region, t.fodder): float(t.value_eur_t) for t in fv.itertuples(index=False)}
+            n_30 = 0
+            for reg, feeds in fb.items():
+                for feed, rec in (feeds or {}).items():
+                    v = v30.get((reg, feed))
+                    if v is not None and v > 0:
+                        rec["value_eur_t"] = v
+                        n_30 += 1
+            summary["fodder_values_capri_2030"] = n_30
 
     # --- livestock: final products by market
     bym = data.get("livestock_product_value_by_market_coef")
