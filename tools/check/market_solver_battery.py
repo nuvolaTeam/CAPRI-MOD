@@ -4,7 +4,8 @@ set of supply shocks from the market solved at CAPRI's base supply rows.
 For each shock (the supply models' rows scaled, below): the fixed point solves it from the solved base (its time and
 iterations, and its equilibrium); the lifted system is built once at the base's state, and each method solves it from
 the same start: "newton" (Newton at CAPRI's slope), "continuation" (Newton at market.trq_slope_steps then CAPRI's), "ipopt",
-"auto" (the default chain). A method may carry variants after a colon, joined by +: dogleg or linesearch
+"auto" (the default chain), "ssn" (the semismooth Newton on the MCP form, at the continuation's slopes), "trf" (SciPy's
+trust-region reflective least squares, the same slopes). A method may carry variants after a colon, joined by +: dogleg or linesearch
 (market.newton_step), a linear solver (market.newton_linear_solver for Newton: pardiso, mumps, ma28; for ipopt
 market.ipopt_linear_solver: mumps, ma27, ma57, ma77, ma86, ma97), e.g. newton:dogleg+ma28, ipopt:ma57. Reported per
 method: converged or not, time, and the largest relative difference of the
@@ -39,6 +40,7 @@ SHOCKS = {
     # their processing (the dairy fudge cells), pork at 10% a ProdNQ_ cell towards its floor
     "milk-90": {"MILK": 0.10},
     "pork-90": {"PORK": 0.10},
+    "pork-50": {"PORK": 0.50},
 }
 
 
@@ -47,6 +49,8 @@ def main() -> None:
     ap.add_argument("--shocks", default=",".join(SHOCKS))
     ap.add_argument("--methods", default="newton,continuation,ipopt,auto")
     ap.add_argument("--set", action="append", default=[])
+    ap.add_argument("--from-fp", action="store_true",
+                    help="also build the system at the fixed point's equilibrium and solve from there (methods tagged @fp)")
     a = ap.parse_args()
     from capri_mod.data.loaders import load_all_data
     from capri_mod.market.market_module import MarketModule
@@ -96,6 +100,17 @@ def main() -> None:
                 d = float(np.max(np.abs(xs[:nr] - ref) / np.maximum(np.abs(ref), 1e-3)))
                 print(f"   {spec:20s} {'ok ' if ok else 'FAIL'} {t:7.1f} s  prices within {d:.1e}  ({msg})",
                       flush=True)
+            if a.from_fp and e.converged:
+                m2 = pickle.loads(base)
+                m2.solve(exogenous_supply=exo2)
+                ctx2 = build(m2, m2.sv.bilat_last_r.copy(), exo2, None)
+                for spec in a.methods.split(","):
+                    meth = spec.partition(":")[0]
+                    t0 = time.time()
+                    xs, ok, msg = solve(ctx2, meth)
+                    d = float(np.max(np.abs(xs[:nr] - ref) / np.maximum(np.abs(ref), 1e-3)))
+                    print(f"   {spec + '@fp':20s} {'ok ' if ok else 'FAIL'} {time.time() - t0:7.1f} s  prices within {d:.1e}"
+                          f"  ({msg})", flush=True)
             del lay
 
 

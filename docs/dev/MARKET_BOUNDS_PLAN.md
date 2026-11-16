@@ -130,7 +130,30 @@ bind in the full runs; they matter for large shocks.
    [0, 1] bounds where the sigmoid saturates, and the lifted solutions leave them slightly above 1 (to 1.02): hard
    for an interior-point method. Point 2 (the project lead, 16 November): the semismooth Newton (Fischer-Burmeister,
    our own on CasADi and PARDISO; no maintained Python MCP solver at this size without a licence) and scipy's
-   trust-region reflective least_squares in the battery, in the chain's order. **Tests to run** (after the full-run pair, one heavy job
+   trust-region reflective least_squares in the battery, in the chain's order. **Point 2, first battery (16 November
+   2026, 01:00-01:40; market.bounds = "capri"):** methods "ssn" (market_chain._mcp_system: the semismooth Newton on
+   the MCP form, Billups' box Fischer-Burmeister function of each unknown and its paired equation, the blocks
+   oriented by their Jacobian diagonal, at the continuation's slopes) and "trf" (SciPy's least_squares, trust-region
+   reflective, LSMR), from the base and from the fixed point's equilibrium (battery --from-fp):
+
+   | Shock | continuation | ssn | continuation from the FP | ssn from the FP |
+   |---|---|---|---|---|
+   | wheat+5 | ok, 2e-8 | ok, 2e-8 (57 s) | - | - |
+   | f2f-like | ok, 2e-9 | ok, 2e-8 | stalls at slope 100 | ok, 4e-9 (57 s) |
+   | pork-50 | ok, another solution (4e-2) | stalls at slope 25 | stalls at slope 200 | ok, 1e-6 (70 s) |
+   | pork-90 | stalls | stalls | stalls at slope 200 | ok, 1e-6 (62 s) |
+
+   (prices against the fixed point's equilibrium, largest relative difference). trf: not converged on wheat+5 (100
+   evaluations, residual 0.21, 351 s), not pursued. At the ssn solutions the complementarity holds (inside the
+   bounds the equations within 1e-8; oriented equations >= 0 at lower bounds, <= 0 at upper ones); what binds: about
+   170 quota sigmas at 0 or 1 (the fixed point's equilibrium has them so too) and, under pork-90, 1 use cell and 6
+   lifted processing cells at CAPRI's lower bounds (1e-5 x base). Difference from CAPRI's rules there: CAPRI widens
+   such a bound and activates the fudge equation (widen_bounds.gms, ProcFudge_), the MCP holds the cell at the bound
+   with its equation slack. The milk cuts (milk-50, milk-90) stay unsolved by every method (the fixed point's inner
+   land and feed energy blocks fail). Candidate chain, for the project lead's decision: the fixed point, then the
+   semismooth Newton from its equilibrium to impose CAPRI's bounds (a solver departure: CAPRI's CONOPT with
+   widen_bounds; the model and the bounds unchanged). Test: test_supply_system_ad.py::
+   test_the_semismooth_newton_solves_the_bounded_market_from_the_fixed_point. **Tests to run** (after the full-run pair, one heavy job
    at a time): the chain with market.bounds "none" identical to before (modes 0); with "capri" on the solver
    battery's shocks; a shock that drives a cell below 0 (a supply cut of 90% in one region) solved with the widening
    and the fudge, against CAPRI's rules applied by hand.

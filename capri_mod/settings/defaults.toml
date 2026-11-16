@@ -469,6 +469,13 @@ newton_linear_solver = "pardiso"
 trq_slope_steps = [25.0, 50.0, 100.0]
 # the chain's Newton: stalled when its residual is not halved over this many steps (then the next method of the chain)
 newton_stall_steps = 8
+# G3.4 point 2 (the project lead's choice, 16 November 2026), solver methods "ssn" and "trf" of the market chain: the
+# smoothing of the Fischer-Burmeister function of the semismooth Newton (in the scaled equations' units, squared); the
+# evaluations of SciPy's trust-region reflective least squares per slope
+ssn_fb_smoothing = 1e-20
+trf_max_nfev = 100
+# the quotas' sigmas under CAPRI's bounds: "unit" (0 to 1, the sigmoid's range) or "free" (the solver battery's variant)
+sigma_bounds = "unit"
 # the chain's Newton step: "linesearch" (backtracking on the largest scaled residual) or "dogleg" (Powell's dogleg trust region
 # on the sum of squared scaled residuals, MINPACK's hybrj)
 newton_step = "linesearch"

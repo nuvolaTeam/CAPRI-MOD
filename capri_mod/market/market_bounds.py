@@ -46,6 +46,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from capri_mod.settings import current as _settings
+
 #: CAPRI's factors, arm/market_model.gms l. 322-326
 LOW_QUANT, UPP_QUANT = 1e-5, 1e3
 LOW_PRICE, UPP_PRICE = 0.10, 10.0
@@ -72,7 +74,12 @@ def capri_start_bounds(mm, lay, x0) -> tuple:
             lb[sl] = np.where(has, LOW_PRICE, v)
             ub[sl] = np.where(has, UPP_PRICE, v)
         elif name.startswith("sB_") or name.startswith("sW_"):
-            lb[sl], ub[sl] = 0.0, 1.0
+            # the quotas' sigmas: 0 to 1, the sigmoid's range; market.sigma_bounds = "free" leaves them unbounded (the
+            # solver battery's variant, G3.4 point 2: the bound sits where the sigmoid saturates)
+            if str(_settings().get("market.sigma_bounds")) == "free":
+                lb[sl], ub[sl] = -np.inf, np.inf
+            else:
+                lb[sl], ub[sl] = 0.0, 1.0
         elif name == "PA":
             # column-blocks of the bilateral commodities in the system's order, regions within
             pa = np.empty(n)

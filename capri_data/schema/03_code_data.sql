@@ -61,7 +61,7 @@ INSERT INTO code_data VALUES
   ('capri_mod/market/import_prices_ad.py', 'import_price_function', 0.95, 1, '150', 'd = (E * 0.95 - c) / (price if price > 0 else 1.0) * float(bd["fac"][i, j])'),
   ('capri_mod/market/import_prices_ad.py', 'import_price_function', 20.0, 1, '151', 'g = ca.exp(ca.fmin(0, d)) / (1.0 + 20.0 * ca.exp(-ca.fabs(d)))'),
   ('capri_mod/market/inputs.py', 'REPO_DATA', 2.0, 1, '23', 'REPO_DATA = Path(__file__).resolve().parents[2] / "capri_data"'),
-  ('capri_mod/market/market_bounds.py', 'widen', 0.2, 2, '174,179', 'new_l = np.where(at_lo & mk, np.maximum.reduce([np.full(n, 1e-7), 0.2 * lo_lev, 1e-4 * pd0]) / pd0, l_)'),
+  ('capri_mod/market/market_bounds.py', 'widen', 0.2, 2, '181,186', 'new_l = np.where(at_lo & mk, np.maximum.reduce([np.full(n, 1e-7), 0.2 * lo_lev, 1e-4 * pd0]) / pd0, l_)'),
   ('capri_mod/market/market_chain.py', '_ma28.solve', 96.0, 1, '116', 'if flag.value in (-3, -4, -5, -6) and fill < 96:'),
   ('capri_mod/market/market_chain.py', '_newton', 0.25, 2, '230,231', 'if rho < 0.25:'),
   ('capri_mod/market/market_chain.py', '_newton', 0.75, 1, '232', 'elif rho > 0.75 and np_ >= 0.99 * delta:'),

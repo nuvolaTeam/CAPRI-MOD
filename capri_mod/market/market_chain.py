@@ -312,6 +312,88 @@ def _eqs(ctx, expr):
     return ca.substitute([expr], [ctx["s"], ctx["fm"]], [ca.SX(ctx["slope"]), ca.SX(ca.DM(ctx["fmv"]))])[0]
 
 
+def _mcp_system(ctx, lbx, ubx):
+    """The bounded system as a mixed complementarity problem (G3.4 point 2, the project lead's choice of 16 November
+    2026): each unknown x_i with its equation F_i (the lifted system's blocks pair one to one: balances and prices,
+    quota rows and sigmas, the dairy blocks, FEDE, the land rents, each lifted definition and its unknown), l <= x <= u
+    perp F: F_i = 0 inside the bounds, F_i >= 0 at l, F_i <= 0 at u. Written with the Fischer-Burmeister function
+    phi(a, b) = a + b - sqrt(a^2 + b^2 + eps) in Billups' box form Phi = phi(x - l, -phi(u - x, -F)) (one-sided
+    bounds phi(x - l, F), -phi(u - x, -F); free F; fixed x - l: the cell's equation dropped, as CAPRI generates none
+    for a fixed cell), on the scaled equations F / sc oriented per block so that each rises with its own unknown
+    (the sign of the block's median Jacobian diagonal at the start). eps = market.ssn_fb_smoothing. Returns
+    (Phi(x, slope), its Jacobian) as Functions of (x, slope) at the current modes."""
+    import casadi as ca
+    x, F, sc = ctx["x"], ctx["F"], ctx["sc"]
+    n = int(x.shape[0])
+    lay = ctx["lay"]
+    J0 = ctx["fJ"](ctx["x0"], ctx["slope"]).sparse().tocsr()
+    dg = np.asarray(J0.diagonal(), float)
+    sgn = np.ones(n)
+    o = 0
+    for nm, k in lay["eqs"]:
+        if k:
+            d = dg[o:o + k]
+            d = d[np.abs(d) > 1e-14]
+            sgn[o:o + k] = -1.0 if (d.size and np.median(d) < 0) else 1.0
+        o += k
+    eps = float(_settings().get("market.ssn_fb_smoothing"))
+    # the modes substituted, the slope kept as the continuation's parameter (_eqs fixes it at CAPRI's)
+    Fs = ca.substitute([F], [ctx["fm"]], [ca.SX(ca.DM(ctx["fmv"]))])[0] / ca.DM(sc) * ca.DM(sgn)
+
+    def phi(a, b):
+        return a + b - ca.sqrt(a * a + b * b + eps)
+    lo, up = np.isfinite(lbx), np.isfinite(ubx)
+    fixed = lo & up & (lbx == ubx)
+    out = []
+    for i in range(n):
+        f = Fs[i]
+        if fixed[i]:
+            out.append(x[i] - lbx[i])
+        elif lo[i] and up[i]:
+            out.append(phi(x[i] - lbx[i], -phi(ubx[i] - x[i], -f)))
+        elif lo[i]:
+            out.append(phi(x[i] - lbx[i], f))
+        elif up[i]:
+            out.append(-phi(ubx[i] - x[i], -f))
+        else:
+            out.append(f)
+    P = ca.vertcat(*out)
+    s = ctx["s"]
+    fP = ca.Function("market_mcp_F", [x, s], [P])
+    fJP = ca.Function("market_mcp_J", [x, s], [ca.jacobian(P, x)])
+    return fP, fJP, sgn
+
+
+def _trf(ctx, x0, lbx, ubx, tol, slope):
+    """SciPy's trust-region reflective least squares (least_squares, method "trf", the sparse Jacobian, LSMR) on the
+    scaled system within [lbx, ubx] (G3.4 point 2): min ||F / sc||^2; a residual left where a bound binds (as CAPRI's
+    infeasible solve before widen_bounds). Fixed unknowns held. Returns (x, ok, message)."""
+    from scipy.optimize import least_squares
+    keep, sc = ctx["keep"], ctx["sc"]
+    free = lbx < ubx
+    x = np.clip(x0.copy(), lbx, ubx)
+    idx = np.nonzero(free)[0]
+
+    def full(z):
+        v = x.copy(); v[idx] = z
+        return v
+
+    def fun(z):
+        return np.asarray(ctx["fF"](full(z), slope), float).ravel()[keep] / sc[keep]
+
+    def jac(z):
+        J = ctx["fJ"](full(z), slope).sparse().tocsr()[keep, :][:, idx]
+        import scipy.sparse as sps
+        return sps.diags(1.0 / sc[keep]) @ J
+    lb_, ub_ = lbx[idx], ubx[idx]
+    z0 = np.clip(x[idx], np.nextafter(lb_, np.inf), np.nextafter(ub_, -np.inf))
+    r = least_squares(fun, z0, jac=jac, bounds=(lb_, ub_), method="trf", tr_solver="lsmr", x_scale="jac",
+                      xtol=1e-15, ftol=1e-15, gtol=1e-15, max_nfev=int(_settings().get("market.trf_max_nfev")))
+    xs = full(r.x)
+    nk = float(np.max(np.abs(r.fun))) if r.fun.size else 0.0
+    return xs, nk <= tol, f"TRF {r.status} in {r.nfev} evaluations, largest residual {nk:.1e}"
+
+
 def solve(ctx, method: str):
     """Solve the built system by method: "newton" (at CAPRI's slope), "continuation" (Newton at the slopes of
     market.trq_slope_steps, then CAPRI's, each from the last; CAPRI's own way in trim_trqs.gms), "ipopt", or "auto"
@@ -334,6 +416,32 @@ def solve(ctx, method: str):
             if not ok:
                 return x, False, f"continuation ({lin}) stalled at slope {sl:g} at {nk:.1e} (steps {', '.join(done)})"
         return x, True, f"continuation ({lin}) converged (steps per slope {', '.join(done)})"
+    if method in ("ssn", "trf"):
+        # G3.4 point 2: the bounds in the Newton chain. ssn: the semismooth Newton on the MCP form (_mcp_system), at the
+        # continuation's slopes (each from the last, as "continuation"); trf: the trust-region reflective least squares
+        # at the same slopes. With market.bounds = "none" both are the unbounded system (ssn = Newton)
+        lbx, ubx = _bounds(ctx)
+        lbx, ubx = lbx.copy(), ubx.copy()
+        lbx[ctx["empty"]], ubx[ctx["empty"]] = x0[ctx["empty"]], x0[ctx["empty"]]
+        steps = [float(v) for v in st.get("market.trq_slope_steps") if float(v) < slope] + [slope]
+        x, done = np.clip(x0.copy(), lbx, ubx), []
+        if method == "ssn":
+            fP, fJP, _ = _mcp_system(ctx, lbx, ubx)
+            allk = np.arange(int(x0.size))
+            one = np.ones(int(x0.size))
+            for sl in steps:
+                x, ok, it, nk = _newton(fP, fJP, x, allk, one, tol, max_iter, sl)
+                done.append(f"{sl:g}: {it}")
+                if not ok:
+                    return x, False, (f"semismooth Newton ({lin}) stalled at slope {sl:g} at {nk:.1e} "
+                                      f"(steps {', '.join(done)})")
+            return x, True, f"semismooth Newton ({lin}) converged (steps per slope {', '.join(done)})"
+        for sl in steps:
+            x, ok, msg = _trf(ctx, x, lbx, ubx, tol, sl)
+            done.append(f"{sl:g}: {msg}")
+            if not ok:
+                return x, False, "; ".join(done)
+        return x, True, "; ".join(done)
     if method == "ipopt":
         lbx, ubx = _bounds(ctx)
         lbx, ubx = lbx.copy(), ubx.copy()

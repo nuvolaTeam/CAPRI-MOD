@@ -215,3 +215,36 @@ def test_the_lifted_processing_and_feed_reproduce_the_default_form(solved_base):
     z = 1e-2 * np.minimum(1000.0, np.maximum(1e-11, b))
     assert np.all(np.abs(F1f) <= z * np.log(2.0) + 1e-8)
     del ca
+
+
+@pytest.mark.slow
+def test_the_semismooth_newton_solves_the_bounded_market_from_the_fixed_point(solved_base):
+    """G3.4 point 2 (market_chain "ssn", _mcp_system): under CAPRI's bounds (market.bounds = "capri"), started at the
+    fixed point's equilibrium of +5% soft wheat, the semismooth Newton on the MCP form converges and keeps that
+    equilibrium's prices within 1e-6; at its solution the complementarity holds: the equations within 1e-7 inside
+    the bounds, the oriented equation >= 0 at a lower bound and <= 0 at an upper one."""
+    import pickle
+    from capri_mod.market import market_chain as MC
+    from capri_mod.settings import override
+    pytest.importorskip("pypardiso")
+    mm, exo = solved_base
+    exo2 = exo.copy()
+    exo2["SWHE"] = exo2["SWHE"] * 1.05
+    with override({"market.bounds": "capri"}):
+        m = pickle.loads(pickle.dumps(mm))
+        assert m.solve(exogenous_supply=exo2).converged
+        ctx = MC.build(m, m.sv.bilat_last_r.copy(), exo2, None)
+        xs, ok, msg = MC.solve(ctx, "ssn")
+        assert ok, msg
+        lb, ub = MC._bounds(ctx)
+        nr = sum(len(sc.regions) for sc in m.par.bilat.values())
+        x0 = ctx["x0"]
+        assert float(np.max(np.abs(xs[:nr] - x0[:nr]) / np.maximum(np.abs(x0[:nr]), 1e-3))) <= 1e-6
+        _, _, sgn = MC._mcp_system(ctx, lb, ub)
+        Fo = np.asarray(ctx["fF"](xs, ctx["slope"]), float).ravel() / ctx["sc"] * sgn
+        free = lb < ub
+        tol = 1e-8 * np.maximum(1.0, np.abs(xs))
+        atl, atu = free & (xs - lb <= tol), free & (ub - xs <= tol)
+        inside = free & ~atl & ~atu
+        assert float(np.abs(Fo[inside]).max()) <= 1e-7
+        assert (Fo[atl] >= -1e-8).all() and (Fo[atu] <= 1e-8).all()
