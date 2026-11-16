@@ -60,7 +60,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K156](#k156) | CAPRI's bounds on forest and other land (prep_sim_luc.gms, Trustee_land) were missing: under the Green Deal's landscape floor the EU lost 5.4 Mha of forest (CAPRI 1.1 Mha, no region below 0.99 x base), loosening the surplus target per hectare | fixed (15 November 2026) |
 | [K157](#k157) | CAPRI's permanent-grassland rule counts the idled histosol grassland (GRSACT includes IHISGR); the model's counted GRAE + GRAI alone, so the productive grass stayed at its base and the idled area took new land | fixed (15 November 2026) |
 | [K158](#k158) | The idled histosol area was bounded by the base land; CAPRI's idleHisto_ takes the current land (GRSLND x landshare(GRAS), CROP), so under the landscape floor new grassland brings idled histosol (Ireland's IR02 turns arable land into grassland) | fixed (15 November 2026), validated (the full Green Deal pair) |
-| [K159](#k159) | NL22's Farm-to-Fork solve ends at a non-optimal point in a two-region, one-iteration run since K158 (first the inner fertilisation model's first-order condition at a flow's bound, DEP-49 for it; then the K balance of one crop group at the point IPOPT reaches) | open |
+| [K159](#k159) | NL22's Farm-to-Fork solve ends at a non-optimal point in a two-region, one-iteration run since K158 (first the inner fertilisation model's first-order condition at a flow's bound, DEP-49 for it; then the K balance of one crop group at the point IPOPT reaches) | open; not reproduced since 16 November 2026, to confirm in the full Farm-to-Fork run |
 | [K160](#k160) | The grassland need lacked CAPRI's split SQRT(1 +/- 0.2) between intensive and extensive grassland (NUTNED_) | fixed (16 November 2026) |
 | [K161](#k161) | The 2030 base value of the fodders was the highest 2017 ration price of the region's animals times the member state's 2030/2017 ratio, not CAPRI's own regional 2030 unit value (UVAG) | fixed (16 November 2026); no effect on quantities |
 | [K141](#k141) | CAPRI bug: CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it (the project lead's decision) |
@@ -3347,6 +3347,10 @@ there with K157 too, and the calibration falls back as before.
   with CAPRI's equality the same run converged in 20 iterations, no non-optimal solve; a smoothing of 1e-6 in place
   of 1e-12 did not help). DEP-49 is now the retry of a solve that fails with CAPRI's equality (the project lead's
   decision; fertiliser.foc_lower_bound_complementarity = "fallback"; test_the_complementarity_form_is_the_retry_of_a_failed_solve).
+  Not reproduced at 58d7def (16 November 2026): DE11 + NL22, Farm-to-Fork, one market iteration, NL22's solve is
+  optimal with CAPRI's equality (no retry, no relaxation, no last point kept). Which change since K158 removed the
+  trigger is not bisected (the batch's K160 changes the fertilisation block's grassland need). Kept open until the
+  full Farm-to-Fork run (plan step 7).
 
 <a id="k160"></a>
 ### K160: The grassland need lacked CAPRI's split between intensive and extensive grassland (found 16 November 2026)
