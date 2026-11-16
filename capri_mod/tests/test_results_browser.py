@@ -143,7 +143,7 @@ def test_the_run_choices_show_the_date_and_keep_the_parsed_label(store):
     r = RD.runs(store)
     shown, value = ch[0]
     assert value == RD.run_label(r.iloc[0]["scenario"], r.iloc[0]["run_id"])
-    assert shown == f"{value} · {str(r.iloc[0]['created'])[:16]}"
+    assert shown == f"{str(r.iloc[0]['created'])[:16]} · {value}"
     assert RD.parse_label(value) == (r.iloc[0]["scenario"], str(r.iloc[0]["run_id"])[:RD.ID_SHOWN])
 
 

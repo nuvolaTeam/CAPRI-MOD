@@ -118,9 +118,10 @@ def run_label(scenario: str, run_id: str) -> str:
 
 
 def run_shown(scenario: str, run_id: str, created="") -> str:
-    """What a run dropdown shows: the label and the run's date and time (its record's created, to the minute)."""
+    """What a run dropdown shows: the run's date and time (its record's created, to the minute; first, so a long
+    scenario name does not hide it), then the label."""
     d = str(created or "")[:16]
-    return f"{run_label(scenario, run_id)} · {d}" if d else run_label(scenario, run_id)
+    return f"{d} · {run_label(scenario, run_id)}" if d else run_label(scenario, run_id)
 
 
 def run_choices(root) -> list:
