@@ -50911,7 +50911,7 @@
    "unique": [],
    "foreign_keys": [],
    "checks": [
-    "(cost_source IN ('baseline', 'calibration'))"
+    "(cost_source IN ('rule'))"
    ],
    "units": [
     {
@@ -50922,9 +50922,9 @@
     },
     {
      "item": "catc_cost_eur_ha",
-     "unit": null,
-     "status": "open",
-     "basis": "cover_crops.catc_cost_eur_ha: unit to be established"
+     "unit": "U_EuPerHa",
+     "status": "builder",
+     "basis": "EUR per ha in the model's 2017 money: CAPRI's CATC input coefficients (policy/define_greening_limits.gms l. 77-84, x TF_I) x the member state's 2030 unit values / 1000 (capmod/define_objc.gms), over CAPRI's inflation to 2030"
     },
     {
      "item": "catc_share_2030",
@@ -50955,7 +50955,9 @@
      "build_winter_cover_option"
     ],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
    }
   },
   "sup_crop_cost_shares": {
@@ -57897,6 +57899,7 @@
    "read_by": {
     "model": [],
     "builders": [
+     "build_cover_crops",
      "build_price_trajectory_2030"
     ],
     "checks": [],

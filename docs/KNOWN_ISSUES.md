@@ -33,7 +33,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K127](#k127) | Under CAPRI's market calibration an emission tax leaves N manure trade at zero in a four-unit Belgian run where the former form traded 360 t | open (9 November 2026): cause not established |
 | [K128](#k128) | Farm-to-Fork's meat prices against JRC121368: beef +29.5% against +24.0%, poultry +20.4% against +18.0%, pork +20.5% against +43.0%, with EU production close to CAPRI's | open (9 November 2026): the market's inputs checked against CAPRI's (base, demand elasticities, Armington, quotas), no departure found; needs CAPRI's own scenario run on the same version |
 | [K129](#k129) | BG020000 under the Green Deal: the coupled iteration settles on one of two branches of the region's response (maize 169 or 16 thousand ha between two runs); each iteration's problem mostly has one solution the starts agree on | open (10 November 2026): the branch follows the market iteration's path; more starts per solve did not change it (tried and dropped) |
-| [K130](#k130) | Catch crops' cost per ha is CAPRI's reported TOIN of CATC, not its cost coefficients; where CAPRI's Green Deal baseline has no catch crops (160 of 250 units), the calibration run's TOIN | open (9 November 2026): to read CAPRI's own cost data of the winter-cover technology |
+| [K130](#k130) | Catch crops' cost per ha is CAPRI's reported TOIN of CATC, not its cost coefficients; where CAPRI's Green Deal baseline has no catch crops (160 of 250 units), the calibration run's TOIN | closed (17 November 2026): the cost is CAPRI's rule (define_greening_limits.gms), the same numbers to 1e-14 |
 | [K131](#k131) | Given CAPRI's own Green Deal supply, the market's EU prices follow CAPRI's within 0.3 points on average, but the dairy protein products rise 2-5 points more and butter 1 point less | closed (16 November 2026): an error of the check (FMIL bulk not passed); with it every dairy price within 0.35 points |
 | [K138](#k138) | CAPRI's new energy crops (NECR, 251 kha of the EU's 2030 crop area) are not a model activity | open (13 November 2026) |
 | [K139](#k139) | PL340000 converts all its forest to farmland in the Green Deal 2030 run (crop area +45% against CAPRI's -2%) | fixed by K156 (closed 16 November 2026) |
@@ -2716,8 +2716,19 @@ the two TOIN per ha differ by up to 25% (input mix at another adoption level).
 
 - **Effect:** the Green Deal's and Farm-to-Fork's catch-crop requirement (e_minCoverCrops) in those units costs the
   calibration run's input bill per ha; mini-EU indicators within 0.4 point of the runs with the calibration run's base
-- **Status:** **open**: to read CAPRI's own cost data of the winter-cover technology (the ghg technology tables of
-  envind/cover_crops.gms) instead of the reported TOIN, for every unit
+- **Status:** **closed** 17 November 2026, no change of numbers. CAPRI has no data on CATC: its cost is its input
+  coefficients (envind/cover_crops.gms l. 410: costParLin = -p_linObjeCont(rs, "catc", "T"), capmod/define_objc.gms),
+  which policy/define_greening_limits.gms l. 77-84 builds for every unit as 25% (SEED 50%) of the average of the
+  cheapest cereal's (the lowest non-zero coefficient over CERE) and OFAR's base-year coefficient, for each of CATC's
+  inputs (PACT_TO_I: SEED, REPM, REPB, EFUL, ELUB, IRRO, INPO), projected as a crop without yield growth (x TF_I,
+  capmod/define_inputs.gms) and valued at the member state's 2030 unit value. The rule reproduces CAPRI's 2030 CATC
+  coefficients exactly in the 90 units whose catch crops CAPRI reports, and its TOIN (DE000000: 172.78 EUR per ha). It
+  does not depend on the catch-crop level, so the baseline's and the calibration run's TOIN per ha are the same in every
+  NUTS2 unit; they differ (up to 15%, not 25%) only in the member states' rows, level-weighted averages over another
+  regional pattern, which the model does not use. tools/build/build_cover_crops.py computes the cost by the rule for every
+  region (from CAPRI's 2017 results res_17<MS>.txt and the 2030 unit values, cost_source "rule"); the 250 regions'
+  costs are those of before to 1e-14. Test: test_capri.py::test_catch_crops_cost_is_capris_rule (the rule gives CAPRI's
+  2030 TOIN of CATC in every unit it reports, and the table holds it for every region).
 
 <a id="k131"></a>
 ### K131: Given CAPRI's Green Deal supply, the market's dairy protein products rise more than CAPRI's (found 12 November 2026)

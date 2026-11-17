@@ -2998,7 +2998,7 @@
    "vintage_exception": "CAPRI's 2030 catch-crop share of UAAR: the Farm-to-Fork requirement adds to the 2030 baseline",
    "rows": 250,
    "columns": 6,
-   "units": "to be established (value_units: open)",
+   "units": "U_EuPerHa",
    "read_by_model": [
     "capri_mod/data/loaders.py"
    ],

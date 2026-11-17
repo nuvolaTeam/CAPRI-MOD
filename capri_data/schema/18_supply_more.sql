@@ -117,14 +117,14 @@ CREATE TABLE sup_cover_crops (
     capri_region VARCHAR NOT NULL,
     catc_share_2030 DOUBLE NOT NULL,
     catc_cost_eur_ha DOUBLE NOT NULL,
-    cost_source VARCHAR NOT NULL CHECK (cost_source IN ('baseline', 'calibration')),
+    cost_source VARCHAR NOT NULL CHECK (cost_source IN ('rule')),   -- CAPRI's rule for every region (K130)
     biofix_t_n_ha DOUBLE,
     PRIMARY KEY (region, capri_region)
 );
 COMMENT ON TABLE sup_cover_crops IS 'CAPRI''s winter cover (catch) crops, CATC, per model region: 2030 level, cost, N fixation, winter cover shares. (tools/build/build_cover_crops.py)';
 INSERT INTO value_units VALUES
   ('sup_cover_crops', 'catc_share_2030', NULL, 'open', 'cover_crops.catc_share_2030: unit to be established'),
-  ('sup_cover_crops', 'catc_cost_eur_ha', NULL, 'open', 'cover_crops.catc_cost_eur_ha: unit to be established'),
+  ('sup_cover_crops', 'catc_cost_eur_ha', 'U_EuPerHa', 'builder', 'EUR per ha in the model''s 2017 money: CAPRI''s CATC input coefficients (policy/define_greening_limits.gms l. 77-84, x TF_I) x the member state''s 2030 unit values / 1000 (capmod/define_objc.gms), over CAPRI''s inflation to 2030'),
   ('sup_cover_crops', 'biofix_t_n_ha', NULL, 'open', 'cover_crops.biofix_t_n_ha: unit to be established');
 
 -- file: capri_data/2017/supply/crop_cost_shares.csv

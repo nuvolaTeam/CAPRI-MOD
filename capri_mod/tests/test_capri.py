@@ -2861,6 +2861,36 @@ def test_grassland_activities_and_their_fodder_balance(data):
     assert abs(sum(u[c] * a.at[reg, c] for c in u) - use) < 1e-6 * use
 
 
+def test_catch_crops_cost_is_capris_rule():
+    """K130: the catch crops' cost per ha (cover_crops.csv catc_cost_eur_ha) is CAPRI's own: CATC has no data in CAPRI,
+    policy/define_greening_limits.gms builds each input coefficient as 25% (SEED 50%) of the average of the cheapest
+    cereal's and OFAR's base coefficient, define_inputs.gms projects it with TF_I, define_objc.gms values it at the
+    member state's unit value. The rule (tools/build/build_cover_crops.py catc_costs) gives CAPRI's reported 2030 TOIN
+    of CATC in every unit whose catch crops CAPRI reports (capri_marginal_terms_ref_2030.csv), in the model's money,
+    and the table holds it for every region."""
+    import importlib.util
+    if not (SOURCES / "capreg" / "res_17DE.txt").exists():
+        pytest.skip("CAPRI's 2017 results (capri_sources/capreg) not available")
+    sys.path.insert(0, str(ROOT / "tools" / "lib"))
+    import _money
+    spec = importlib.util.spec_from_file_location("bcc", ROOT / "tools" / "build" / "build_cover_crops.py")
+    bcc = importlib.util.module_from_spec(spec); spec.loader.exec_module(bcc)
+    rule = bcc.catc_costs(SOURCES / "capreg", _money.deflator(2030))
+    cc = pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "cover_crops.csv", float_precision="round_trip")
+    assert set(cc.cost_source) == {"rule"}
+    for r_, c_, x in zip(cc.region, cc.capri_region, cc.catc_cost_eur_ha):
+        assert abs(rule[c_] - x) <= 1e-9 * max(1.0, abs(x)), r_
+    t = pd.read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv",
+                    header=None, names=["region", "act", "item", "value"], dtype=str)
+    toin = {r_: float(v) / _money.deflator(2030) for r_, a_, i_, v in zip(t.region, t.act, t["item"], t.value)
+            if a_ == "CATC" and i_ == "TOIN"}
+    units = set(cc.capri_region)
+    checked = [r_ for r_ in toin if r_ in units and rule.get(r_) is not None]
+    assert len(checked) >= 80
+    for r_ in checked:
+        assert abs(rule[r_] - toin[r_]) <= 1e-6 * toin[r_], (r_, rule[r_], toin[r_])
+
+
 def test_cover_crop_requirement_and_winter_cover_row(data):
     """CAPRI's Farm-to-Fork catch-crop minimum (organic_io.gms + conventional_io.gms): with a 25%
     organic share and a 50% pesticide cut the requirement is a quarter of the area without winter
