@@ -40,7 +40,7 @@ base data, when built):
   `land_rents_2030.csv`, tools/build/build_land_rents.py; CAPRI takes them as given in its calibration, cal_land_nests.gms,
   prep_cal.gms), else (2017 base) the shadow prices of the land rows recovered once from the region's ordinary QP
   solution (REGISTERED: no CAPRI EU rents for 2017 in hand). The NLP form's calibration fixes the land balances'
-  multipliers at the same rents (docs/LAND_RENT_CALIBRATION_PLAN.md).
+  multipliers at the same rents (docs/dev/LAND_RENT_CALIBRATION_PLAN.md).
 - Land rows: arable crops against ARAC, grassland crops against GRAS, permanent crops against FRUN, as
   activities - land = base crops - base land (the grassland row too since 21 October 2026: it kept the land data's
   headroom above the base use, IE04 173 kha, on which grass could grow at no land cost; KNOWN_ISSUES K60). Idled

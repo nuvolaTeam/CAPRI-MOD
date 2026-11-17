@@ -97,7 +97,7 @@ copies of the area table are identical in levels: one kept).
 - Read by: tools/build/build_captrd_longrun.py (through dat_parquet/global/longrun_info_fac_defaulta).
 
 **`gams_extra/`**: `fortrd.gms`, CAPTRD's settings include as delivered (empty: the GUI sets CAPTRD's settings; the
-reference run's are its META, docs/design/CAPTRD_MOD.md).
+reference run's are its META, docs/dev/CAPTRD_MOD.md).
 
 **`dat_parquet/`**: GDX files of `dat_local/` converted to Parquet by tools/build/convert_capri_gdx.py (every record,
 NA and UNDF named in the column `special`), one folder per file and one file per symbol:
@@ -115,7 +115,7 @@ added on 11 November 2026: `baseline/data_SSPV3_update/` (SSP_DATA), `arm/allpop
 - Read by: extract_capri_dat_local (p_PEATSH_def); convert_sources_to_csv (p_LUUnits). holdingsLSU.gdx confirms
   capri_data/2017/abatement/ammonia/p_holdLSU.csv (identical records), built from a dump before.
 - Goes to the Hugging Face set with the rest of capri_sources (MODEL_CONTENT_PLAN §12b).
-- Added on 10 November 2026 (the project lead's installation; CAPTRD's inputs for Steps 2-3, docs/design/CAPTRD_MOD.md
+- Added on 10 November 2026 (the project lead's installation; CAPTRD's inputs for Steps 2-3, docs/dev/CAPTRD_MOD.md
   section 12.1), under their paths in `dat`:
   - `baseline/`: `aglink2023dgAgri_oriEUdata.gdx` (c, m, m_eq, p, p_dbvar), `AGLINK2019dgagri_oridata.gdx`
     (p_aglinkOri; delivered as aglink2019dgAgri_oriData.gdx, renamed to the name load_aglink2023dgAgri.gms l. 205
@@ -156,7 +156,7 @@ recorded); and the market model's debug dump at the Green Deal step's preparator
 l. 1211, chk_market_data_greendeal_greendeal_scenarios.gdx; META: 10 November 2026, GAMS 53.3).
 - Read by: not yet (technology uptake and market-calibration checks).
 
-**The published set** (Hugging Face, gated: nuvolaTeam/capri-mod-raw; docs/design/MODEL_CONTENT_PLAN.md §12b): the
+**The published set** (Hugging Face, gated: nuvolaTeam/capri-mod-raw; docs/dev/MODEL_CONTENT_PLAN.md §12b): the
 files above under `originals/<path under capri_sources>` byte for byte, and their symbols as Parquet under
 `capri/results/<file stem>/` (tools/build/convert_capri_gdx.py). Every file with its SHA-256 and size in
 tools/pipeline/capri_raw_manifest.json, which also names the dataset commit the files are at ("revision") and the history
@@ -203,8 +203,8 @@ CAPRI's 2030 reference results:
   2026, GAMS 53.3). Its META lists "Sensitivity experiments with features in supply model: true [default]", but its
   dataOut holds no experiment's records (set_and_store_dataout.gms l. 258-269 would store them under the experiments'
   names in the second dimension): the experiments did not run or did not write results.
-  - Read by: extract_capri_gd_pair (capri_data/validation/greendeal_2030/capri_gd_effect.csv.xz) and
-    extract_capri_gd_market (capri_data/validation/greendeal_2030/capri_gd_market_2030.csv.xz).
+  - Read by: extract_capri_gd_pair (capri_data/validation/greendeal_2030/capri_gd_effect.csv) and
+    extract_capri_gd_market (capri_data/validation/greendeal_2030/capri_gd_market_2030.csv).
 
 The zip above, **`gd_full.zip`** (gd_full.txt) and **`markmarket_greendeal_1730et_base_1717.txt`** are one file: the
 same dataOut dump of the 2030 reference (387,918,153 bytes, CRC 5c5903b6; checked 10 November 2026), under three names.
@@ -249,7 +249,7 @@ The complete and exact list, per builder invocation, is the `external` field of 
 ## The reference folder (`capri_sources/reference/`)
 
 These are CAPRI files from the project lead's installation, converted to CSV. They are read-only and are read only by
-the tests and the parity runs, never by the model (docs/design/CAPTRD_MOD.md section 6). Two folders are sources of
+the tests and the parity runs, never by the model (docs/dev/CAPTRD_MOD.md section 6). Two folders are sources of
 the data pipeline: `sets/simini_21730`, read by `tools/build/build_code_lists.py` (the code lists of
 `capri_data/codes` and, since 3 November 2026, CAPRI's RMS and RMS_TO_RM in `capri_data/shared`), and
 `captrd_results/1770`, read by `tools/build/build_captrd_trajectory.py` (the CAPTRD 2030 scenario). They are
@@ -264,7 +264,7 @@ named below.
 | `fao_agg/17/<symbol>.csv.gz` | text listing `FAO_agg_17_defaulta.csv` of the global database `fao_agg_17_defaulta.gdx` (upload FAO_agg_17_defaulta.zip) | `p_biofuelData`, `p_aglinkGrowthFactor` (load_coco1_data.gms l. 360); columns d0…dn, value, eps | `tools/build/build_fao_agg_reference.py --src FAO_agg_17_defaulta.zip` |
 | `captrd_results/1770/<respos>.csv.gz` | `results_1770.gdx` (base 2017, simulation years 2018–2070) | CAPTRD's `p_result(region, col, row, t, respos)`, one file per result position (Step1, support, support1, wVarErr, step2, step3, series, P_Data, data statistics, …); `respos_counts.csv` lists all positions and `settings.csv` the run settings | `tools/build_captrd_results_reference.py --src results_1770.gdx --tag 1770` |
 | `sets/simini_21730/<SET>.csv` | `sim_ini_21730.gdx` (CAPMOD restart file of the endotech Green Deal 2030 run) | the 1,972 CAPRI sets of that run (global sets.gms and loaded modules, with the run's switches applied), one file per set with `_index.csv`; sets defined only in CAPTRD (sets_captrd.gms) are not among them | `tools/build_capri_sets_reference.py --src sim_ini_21730.gdx --tag simini_21730` |
-| `simini/simini_21730/<symbol>.csv.gz` | `sim_ini_21730.gdx` (the same restart file as `sets/simini_21730`) | CAPRI's calibrated 2030 market state for the move onto CAPRI's market regions and the ports' checks, and the per-technology terms of S1 (p_pmpCnst, p_technFact, since 7 November 2026): the symbols listed with their use in `tools/build/simini_reference_symbols.csv` (DATA, the trade flows and prices, TRQs, levies, entry prices, Armington and CES parameters, the GL demand and NQ Hessians, the market variables' levels and bounds), with `_index.csv`; parameters `d0…dn, value, eps`, variables `d0…dn, level, eps, lower, upper, marginal`; +INF/-INF as inf/-inf, NA as nan. `--check sim_ini_21730_1.gdx` found the 37 symbols identical in the second upload (2 November 2026), and all 51 on 7 November 2026 | `tools/build/build_simini_reference.py --src sim_ini_21730.gdx --tag simini_21730` |
+| `simini/simini_21730/<symbol>.csv.gz` | `sim_ini_21730.gdx` (the same restart file as `sets/simini_21730`) | CAPRI's calibrated 2030 market state for the move onto CAPRI's market regions and the ports' checks, and the per-technology terms of CAPRI's crop technologies (p_pmpCnst, p_technFact, since 7 November 2026): the symbols listed with their use in `tools/build/simini_reference_symbols.csv` (DATA, the trade flows and prices, TRQs, levies, entry prices, Armington and CES parameters, the GL demand and NQ Hessians, the market variables' levels and bounds), with `_index.csv`; parameters `d0…dn, value, eps`, variables `d0…dn, level, eps, lower, upper, marginal`; +INF/-INF as inf/-inf, NA as nan. `--check sim_ini_21730_1.gdx` found the 37 symbols identical in the second upload (2 November 2026), and all 51 on 7 November 2026 | `tools/build/build_simini_reference.py --src sim_ini_21730.gdx --tag simini_21730` |
 | `datam_mirror_2040/<table>.csv` | the project lead's extracts of the JRC DataM dashboard MRL_TO_LOQ_2 (`capri_sources/datam_mirror_2040/*.xlsx`, uploaded 5 November 2026; data valid as of February 2026 per the dashboard) | CAPRI's 2040 results of the JRC study on aligning import production standards (pesticide active substances not approved in the EU), four scenarios (Baseline, switchX-scaleEFSA_5, switchX-scaleEFSA+min20, noadapt-noscale): utilised area per member state, EU production change per product (scenario not stated in the extract), producer prices per trade region and product, bilateral trade per reporter, product and partner (variable and unit not stated). Not read by the model or the pipeline: a future 2040 check for CAPTRD-MOD (MODEL_CONTENT_PLAN §14 item 19); the shock inputs and CAPRI's scenario code are not in the extracts | `tools/build/build_datam_mirror_2040_reference.py` |
 
 Columns of the data files: `region, col, row, t, value, eps`.

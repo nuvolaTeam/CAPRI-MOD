@@ -29,6 +29,10 @@ columns of the regional QP).
 The active set is CAPRI's Green Deal reference (`pol_input/greendeal/refpol_endotech_all_sup.gms`, activeTech;
 `capri_data/2017/abatement/active_technologies.csv`). The copy of the JRC121368-era reference supplied with CAPRI
 switches the ammonia options off, while the report's Table 17 shows them adopted; capri-mod follows the report.
+Star 3.0's capmod runs hold the animals' ammonia options at their initial shares (ghgTechAmmEndog 0: capmod/
+set_global_variables.gms l. 229 runs before the policy file, which sets 1 only if it is not set; set_miti_bounds.gms
+l. 209-211; KNOWN_ISSUES K152): the endogenous-technology setting `ghgTechAmmEndog` is 0 by default and 1 in the
+JRC121368 reference (the report's adoption) and in CAPRI's _ini and _max calibration files.
 
 ## CAPRI's formulation
 

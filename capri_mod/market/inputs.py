@@ -1,4 +1,4 @@
-"""The market's data adapter: the only code of the market package that reads files (docs/design/ARCHITECTURE_REFACTOR.md,
+"""The market's data adapter: the only code of the market package that reads files (docs/dev/ARCHITECTURE_REFACTOR.md,
 layer "data adapters").
 
 Every input of the market blocks is named here with its location in the data directory:

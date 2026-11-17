@@ -81,3 +81,64 @@ CREATE TABLE val_jrc121368_eu27 (
 COMMENT ON TABLE val_jrc121368_eu27 IS 'JRC121368 (Barreiro-Hurle et al. 2021, EUR 30317 EN), the F2F and BDS targets and CAP 2014-2020 scenario: EU27 % changes from the 2030 baseline of the indicators tools/check/compare_runs.py computes, each with its table, page or text; "figure" marks a reading measured on the report''s chart (kept by hand, 13 November 2026)';
 INSERT INTO value_units VALUES
   ('val_jrc121368_eu27', 'value_pct', 'U_percent', 'capri', 'JRC121368: % change from the baseline in 2030');
+
+-- The four CAPRI comparison tables kept xz-compressed until 14 November 2026 (outside the declarations then), plain CSV
+-- since (the project lead: the inputs are CSV).
+
+-- file: capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv
+CREATE TABLE val_capri_marginal_terms_ref_2030 (
+    region VARCHAR NOT NULL,
+    activity VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, activity, "item")
+);
+COMMENT ON TABLE val_capri_marginal_terms_ref_2030 IS 'CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta) per region and activity: the marginal terms D_* and the items LEVL, MREV, TOOU, TOIN, MANN, PRME, ... of its dataOut (tools/build/extract_capri_marginal_terms.py, tag ref); read by the 2030 builders as CAPRI''s 2030 levels and premiums and by the checks.';
+INSERT INTO value_units VALUES
+  ('val_capri_marginal_terms_ref_2030', 'value', NULL, 'open', 'capri_marginal_terms_ref_2030.value: the unit of the item (CAPRI''s units per item)');
+
+-- file: capri_data/validation/greendeal_2030/capri_gd_effect.csv
+CREATE TABLE val_capri_gd_effect (
+    region VARCHAR NOT NULL,
+    activity VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL,
+    ref DOUBLE,
+    scen DOUBLE,
+    pct_change DOUBLE,
+    PRIMARY KEY (region, activity, "item")
+);
+COMMENT ON TABLE val_capri_gd_effect IS 'CAPRI''s Green Deal 2030 step against its reference, per region, activity and item: the reference and scenario values and the % change (tools/build/extract_capri_gd_pair.py); empty where one of the runs has no record.';
+INSERT INTO value_units VALUES
+  ('val_capri_gd_effect', 'ref', NULL, 'open', 'capri_gd_effect.ref: the unit of the item'),
+  ('val_capri_gd_effect', 'scen', NULL, 'open', 'capri_gd_effect.scen: the unit of the item'),
+  ('val_capri_gd_effect', 'pct_change', 'U_percent', 'builder', '% change from the reference');
+
+-- file: capri_data/validation/greendeal_2030/capri_gd_market_2030.csv
+CREATE TABLE val_capri_gd_market_2030 (
+    region VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    ref DOUBLE,
+    scen DOUBLE,
+    PRIMARY KEY (region, "item", commodity)
+);
+COMMENT ON TABLE val_capri_gd_market_2030 IS 'CAPRI''s 2030 market of its Green Deal step and its reference, per market region, item and commodity (tools/build/extract_capri_gd_market.py).';
+INSERT INTO value_units VALUES
+  ('val_capri_gd_market_2030', 'ref', NULL, 'open', 'capri_gd_market_2030.ref: the unit of the item (kt, EUR/t)'),
+  ('val_capri_gd_market_2030', 'scen', NULL, 'open', 'capri_gd_market_2030.scen: the unit of the item (kt, EUR/t)');
+
+-- file: capri_data/validation/coupled_support_2030/capri_vcs_effect.csv
+CREATE TABLE val_capri_vcs_effect (
+    region VARCHAR NOT NULL,
+    activity VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL,
+    ref DOUBLE,
+    novcs DOUBLE,
+    pct_change DOUBLE,
+    PRIMARY KEY (region, activity, "item")
+);
+COMMENT ON TABLE val_capri_vcs_effect IS 'CAPRI''s 2030 reference against its run without voluntary coupled support, per region, activity and item (tools/build/extract_capri_vcs_pair.py); empty where one of the runs has no record.';
+INSERT INTO value_units VALUES
+  ('val_capri_vcs_effect', 'ref', NULL, 'open', 'capri_vcs_effect.ref: the unit of the item'),
+  ('val_capri_vcs_effect', 'novcs', NULL, 'open', 'capri_vcs_effect.novcs: the unit of the item'),
+  ('val_capri_vcs_effect', 'pct_change', 'U_percent', 'builder', '% change from the reference');

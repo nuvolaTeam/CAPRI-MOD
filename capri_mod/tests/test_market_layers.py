@@ -1,4 +1,4 @@
-"""The market's layer rules (docs/design/ARCHITECTURE_REFACTOR.md): only the data adapter reads files, and a missing
+"""The market's layer rules (docs/dev/ARCHITECTURE_REFACTOR.md): only the data adapter reads files, and a missing
 input stops the run with the name of its builder."""
 from pathlib import Path
 
@@ -34,7 +34,7 @@ def test_missing_input_names_its_builder(tmp_path):
 
 def test_model_does_not_read_delta_tables():
     """Data formats (ARCHITECTURE_REFACTOR.md): the model reads CSV; Delta Lake is the pipeline's internal format and,
-    since refactor stage 5, the format of the runs' results, written by capri_mod/io_results.py alone (its single
+    since 3 November 2026, the format of the runs' results, written by capri_mod/io_results.py alone (its single
     writer). No other model code imports deltalake."""
     pkg = MARKET.parent
     writer = pkg / "io_results.py"
@@ -123,7 +123,7 @@ def test_market_supply_hessian_measured_at_base_and_at_scenario_state():
         m = CAPRIModel(data_dir="capri_data", verbose=False)
         m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
         # the baseline measures it at its start, on calibrated models at the reference prices, since its own market
-        # uses it (S7, K120; until 8 November 2026 a baseline alone did not, the decision of 28 October 2026 for the
+        # uses it (CAPRI's market calibration, K120; until 8 November 2026 a baseline alone did not, the decision of 28 October 2026 for the
         # "supply" form, whose baseline did not solve the market); the scenario keeps it and measures it again
         assert len(m.res.market_supply_hessian_log) == 1
         assert m.market_module.par.supply_hessian is not None
@@ -151,7 +151,7 @@ def test_hessian_skip_of_unreached_regions_is_exact(monkeypatch):
     with override({"market.hessian_skip_unchanged": True, "market.market_supply_nq": True}):
         m = CAPRIModel(data_dir="capri_data", verbose=False)
         # the verification needs a measured Hessian, not the cache: the verify mode's file is removed after the run.
-        # The baseline measures it at its start (S7: its market uses it); the world-price shock runs on it
+        # The baseline measures it at its start (CAPRI's market calibration: its market uses it); the world-price shock runs on it
         m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
         m.run(world_price_shock={"SWHE": 0.05}, regions=regs, max_outer_iter=1)
         info = dict(m.res.market_supply_hessian_log[0])
@@ -195,7 +195,7 @@ def test_milk_price_held_above_zero_unless_the_scenario_allows_negative_prices()
 
 
 def test_moved_market_attributes_fail_loudly():
-    """Refactor stage 2b moved the market's state into par/ev/sv/seen; a read or a write of an old name raises
+    """The refactor of the market's state moved the market's state into par/ev/sv/seen; a read or a write of an old name raises
     (RuntimeError: getattr(obj, name, default) cannot hide it), naming the new place."""
     import pytest
     from capri_mod.market.market_module import MarketModule
@@ -298,3 +298,18 @@ def test_feed_bulks_respond_inside_the_market_as_capris_feedblk():
     assert q1[c0] < q0[c0]
     with override({"market.feed_bulk_in_market": False}):
         assert m.feed_bulk_market_factor({"SWHE": 1.1}) == {}
+
+
+def test_switzerlands_supply_terms_take_its_support_per_tonne_off_the_producer_price():
+    """K146: CAPRI's producer price is the market price times the margin plus the support per tonne (PPri_, PSEd for
+    Switzerland only in the 2030 data), so a supply term per unit change of the market price ratio is
+    h x (PPRI0 - support) / INPE; the rents, raw milk (the dairy block's price) and the other regions take none."""
+    from capri_mod.csvio import read_csv
+    t = read_csv("capri_data/2017/market/noneu_market_supply_nq.csv", keep_default_na=False)
+    assert set(t[t.support_y > 0].rms) == {"CH"}
+    soya = t[(t.rms == "CH") & (t.capri_x == "SOYA") & (t.capri_y == "SOYA")].iloc[0]
+    assert soya.support_y == pytest.approx(233.571428571429, rel=1e-12)          # Data_CAL 'CH'.'PSED'.'SOYA'
+    assert soya.h_ratio == pytest.approx(soya.h * (soya.ppri_y - soya.support_y) / soya.inpe, rel=1e-12)
+    assert (t[t.capri_y.isin(["MILK", "FEDE", "TCRP", "FODFAL", "FRUN"])].support_y == 0).all()
+    other = t[t.rms != "CH"]
+    assert (other.h_ratio - other.h * other.ppri_y / other.inpe).abs().max() < 1e-9

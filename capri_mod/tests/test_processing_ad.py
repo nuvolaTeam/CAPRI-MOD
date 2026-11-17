@@ -1,4 +1,4 @@
-"""Step G2e: CAPRI's processing demand in CasADi (capri_mod/market/processing_ad.py) equals the Python code it replaced
+"""CAPRI's processing demand in CasADi (capri_mod/market/processing_ad.py) equals the Python code it replaced
 on 31 October 2026 (written out here as the reference: ProcessingMixin._crush_state and demand_response's ProcNQ_
 loop), and its Jacobian equals finite differences."""
 import numpy as np
@@ -18,7 +18,7 @@ def _cet_yields(e, ro, rc):
 
 
 def _proc_fudge(q, q0):
-    """ProcessingMixin._proc_fudge before steps G2e and G2f (CAPRI's ProcFudge_, market_model.gms l. 1158-1163)."""
+    """ProcessingMixin._proc_fudge before the processing and dairy blocks moved to CasADi (CAPRI's ProcFudge_, market_model.gms l. 1158-1163)."""
     z = 0.01 * min(1000.0, max(1e-11, float(q0)))
     return float(q + z * np.logaddexp(0.0, -q / z) + 1e-11)
 
@@ -99,13 +99,9 @@ def _proc_nq_python(mk, PR, P0):
 
 
 @pytest.fixture(scope="module")
-def market():
-    from capri_mod.model import CAPRIModel
-    from capri_mod.settings import override
-    with override({"market.market_supply_nq": False}):
-        m = CAPRIModel(data_dir="capri_data", verbose=False)
-        m.run(scenario="BASELINE", regions=["DE110000", "FR100000"], max_outer_iter=1)
-    return m.market_module
+def market(solved_market):
+    """The market after one baseline iteration on DE110000 and FR100000 (conftest.py)."""
+    return solved_market
 
 
 def _rel(a, b):

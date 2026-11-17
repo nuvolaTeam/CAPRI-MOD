@@ -177,7 +177,7 @@ def read_fodder_balances(path: Path) -> dict:
     out: dict = {}
     for r, f, crop, u, val in _rows(path, FODDER):
         # {"crops": {producing activity: u_t_per_ha}, value_eur_t, use_t_head}: one row per producing activity (grass:
-        # GRAE and GRAI, since S2, 7 November 2026)
+        # GRAE and GRAI, since 7 November 2026)
         rec = out.setdefault(r, {}).get(f)
         if rec is None:
             rec = out[r][f] = {"crops": {}, "value_eur_t": float(val), "use_t_head": use.pop((r, f), {})}

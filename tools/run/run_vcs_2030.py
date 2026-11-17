@@ -17,14 +17,14 @@ national row (as in the other builders).
 A validation test, not a scenario: the premium change it applies is CAPRI's own result for this pair of runs. A
 "without VCS" scenario as CAPRI defines it (the coupled premium types at zero, the envelope moved into the decoupled
 payment) needs the coupled-support part of each premium and CAPRI's ceiling logic, which the model does not have
-(docs/design/MODEL_CONTENT_PLAN.md §12a P2; the project lead's decision, 3 November 2026).
+(docs/dev/MODEL_CONTENT_PLAN.md §12a, the coupled support; the project lead's decision, 3 November 2026).
 """
 from __future__ import annotations
 import os as _os
 import sys as _sys
 # reproducible runs: the model iterates sets of names in a few places, and Python randomises string hashing per
 # process, which changed results by up to ~0.2% between two runs of the same scenario (degenerate regions more).
-# A fixed hash seed makes a run repeat exactly (Sprint 9n).
+# A fixed hash seed makes a run repeat exactly (the milk price re-check).
 if _os.environ.get("PYTHONHASHSEED") != "0":
     _os.environ["PYTHONHASHSEED"] = "0"
     _os.execv(_sys.executable, [_sys.executable] + _sys.argv)
@@ -58,7 +58,7 @@ def _load(path):
 
 
 def premium_factors(regions):
-    eff = _read_csv(ROOT / "capri_data" / "validation" / "coupled_support_2030" / "capri_vcs_effect.csv.xz")
+    eff = _read_csv(ROOT / "capri_data" / "validation" / "coupled_support_2030" / "capri_vcs_effect.csv")
     prme = eff[eff["item"] == "PRME"].set_index(["region", "activity"])[["ref", "novcs"]]
     levl = eff[eff["item"] == "LEVL"].set_index(["region", "activity"])["ref"]
     mr = _load(ROOT / "tools" / "lib" / "_model_regions.py")
@@ -137,7 +137,7 @@ def main():
         return o
     ab, as_ = agg(b), agg(s)
     db, ds = b["market"].domestic_prices.loc["EU27"], s["market"].domestic_prices.loc["EU27"]
-    eff = _read_csv(ROOT / "capri_data" / "validation" / "coupled_support_2030" / "capri_vcs_effect.csv.xz")
+    eff = _read_csv(ROOT / "capri_data" / "validation" / "coupled_support_2030" / "capri_vcs_effect.csv")
     rows = []
     for k, ref in capri_eu(eff, "LEVL", HERDS).items():
         rows.append(("herd", k, 100 * (as_.get(k, 0) / ab[k] - 1) if ab.get(k) else np.nan, ref))

@@ -16,7 +16,7 @@ import os as _os
 import sys as _sys
 # reproducible runs: the model iterates sets of names in a few places, and Python randomises string hashing per
 # process, which changed results by up to ~0.2% between two runs of the same scenario (degenerate regions more).
-# A fixed hash seed makes a run repeat exactly (Sprint 9n).
+# A fixed hash seed makes a run repeat exactly (the milk price re-check).
 if _os.environ.get("PYTHONHASHSEED") != "0":
     _os.environ["PYTHONHASHSEED"] = "0"
     _os.execv(_sys.executable, [_sys.executable] + _sys.argv)
@@ -161,7 +161,7 @@ def main():
     _et = (dict(JRC121368_ENDOTECH) if a.endotech.lower() == "jrc121368"
            else {k: float(v) for k, v in (x.split("=") for x in a.endotech.split(",") if x)})
     from capri_mod.policy.greendeal import farm_to_fork_scenario
-    # the scenario folders (capri_data/scenarios/<name>/, refactor stage 5): a folder's name, or the short names of
+    # the scenario folders (capri_data/scenarios/<name>/): a folder's name, or the short names of
     # the scenarios defined there when no --targets change them
     from capri_mod.scenarios import definition as _SD
     _folders = {k for k, v in _SD.available().items() if v == "scenario"}
@@ -240,7 +240,7 @@ def main():
     # 0 vs 0 - while shares of eligible units do not: 38 and 33). Fertiliser options: share of
     # crop area (regions weighted by crop area). Ammonia options: share of animal units weighted
     # by excreted N (units x N per head); 'eligible' = the options' maximum shares, same weights.
-    from capri_mod.data.definitions import CROPS, CROPS_ON_LAND
+    from capri_mod.data.definitions import CROPS, CROPS_ON_LAND, NO_WORLD_PRICE
     env = m.env_module
 
     def adoption(r):
@@ -292,7 +292,7 @@ def main():
            "prod": tuple({c: float(x["market"].production.loc["EU27"].get(c, float("nan")))
                           for c in ("BEEF", "PORK", "POUL", "MILK", "EGGS", "SGMT")} for x in (b, s)),
            "environmental": (b["environmental"], s["environmental"]),
-           # EU biofuel block (crushing stage 4): feedstock use by commodity and feedstock, baseline and
+           # EU biofuel block: feedstock use by commodity and feedstock, baseline and
            # scenario (MarketEquilibrium.biofuel)
            "biofuel": tuple(getattr(x["market"], "biofuel", None) for x in (b, s)),
            # CAPRI's land-use change outside the EU (MarketEquilibrium.luc, luc_market): per non-EU region with the
@@ -345,14 +345,14 @@ def main():
                            "net_exports": (b["market"].net_exports.loc["EU27"].astype(float).to_dict()
                                            if "EU27" in b["market"].net_exports.index else {}),
                            "price": db.astype(float).to_dict(),
-                           "world": b["market"].world_prices.astype(float).to_dict()},
+                           "world": {c: v for c, v in b["market"].world_prices.astype(float).items() if c not in NO_WORLD_PRICE}},
            # EU market levels of the SCENARIO (1000 t; EUR/t at the reported domestic price)
            "scen_market": {"prod": s["market"].production.loc["EU27"].astype(float).to_dict(),
                            "cons": s["market"].consumption.loc["EU27"].astype(float).to_dict(),
                            "net_exports": (s["market"].net_exports.loc["EU27"].astype(float).to_dict()
                                            if "EU27" in s["market"].net_exports.index else {}),
                            "price": s["market"].domestic_prices.loc["EU27"].astype(float).to_dict(),
-                           "world": s["market"].world_prices.astype(float).to_dict()},
+                           "world": {c: v for c, v in s["market"].world_prices.astype(float).items() if c not in NO_WORLD_PRICE}},
            # CAPRI's welfare report (docs/WELFARE.md), base and scenario: the market's components per market region
            # (EUR million, changes against the calibration point; tariffs and quota rents levels) and the supply
            # models' MGVA and premiums' budget cost per supply region (EUR million, levels)
@@ -388,7 +388,7 @@ def main():
                               "heads": sum(float(v.activities.get(a_, 0.0)) for v in sEU.values()
                                            for a_ in (("DCOW",) if opt == "genet_yld" else ("BULL", "BCOW", "CALV", "HFRS", "SHGF")))}
                         for opt in ("genet_yld", "genet_eff")},
-           # CAPRI's low-nitrogen feeding (Sprint 9g): manure N of the heads adopting / manure N of all heads (base
+           # CAPRI's low-nitrogen feeding (the port of CAPRI's feed options): manure N of the heads adopting / manure N of all heads (base
            # manure N per head of each region and animal), scenario
            "lownfeed": (lambda mn: {"adopting_n": sum(float(z_) * float(mn.at[r, a_]) for r, v in sEU.items()
                                                        for (a_, o_), z_ in (getattr(v, "genetics_shift", None) or {}).items()
@@ -397,7 +397,7 @@ def main():
                                       "manure_n": sum(float(v.activities.get(a_, 0.0)) * float(mn.at[r, a_]) for r, v in sEU.items()
                                                       if r in mn.index for a_ in mn.columns if mn.at[r, a_] == mn.at[r, a_])})(
                m.data.get("livestock_manure_n_coef")) if m.data.get("livestock_manure_n_coef") is not None else None,
-           # CAPRI's feed supplements (Sprint 9g): cattle heads fed linseed / nitrate, of all cattle heads, scenario
+           # CAPRI's feed supplements (the port of CAPRI's feed options): cattle heads fed linseed / nitrate, of all cattle heads, scenario
            "supplements": {opt: {"adopting": sum(float(z_) for v in sEU.values()
                                                   for (a_, o_), z_ in (getattr(v, "genetics_shift", None) or {}).items() if o_ == opt),
                                  "heads": sum(float(v.activities.get(a_, 0.0)) for v in sEU.values()
@@ -405,7 +405,7 @@ def main():
                            for opt in ("LINE_Tot", "Nitr_Tot")},
            "dairy_split": {"low_shift": sum(float(getattr(v, "dairy_low_shift", 0.0) or 0.0) for v in sEU.values()),
                            "cows": sum(float(v.activities.get("DCOW", 0.0)) for v in sEU.values())},
-           # bulls and heifers (Sprint 7c): low-intensity stalls, baseline and scenario (share_low x heads + z)
+           # bulls and heifers (the port of CAPRI's bull and heifer splits): low-intensity stalls, baseline and scenario (share_low x heads + z)
            # CAPRI's cattle activities inside the model's animals: the "low" activity's stalls (BULL; HEIL; HEIR for
            # HFRS:rep; fattening calves CAMF / CAFF for CALV:male / female), baseline and scenario (share x heads + z)
            "cattle_split": {k: {"low_base": sum(float(((m.data.get("cattle_intensity") or {}).get(r) or {}).get(k, {}).get("share_low", 0.0))
@@ -495,7 +495,7 @@ def main():
             md_ = _pm.supply_module._models.get(r_)
             if md_ is None:
                 continue
-            # the model's fields by attribute name or by their path in its state objects (refactor stage 3); the
+            # the model's fields by attribute name or by their path in its state objects; the
             # dump's keys are the field names without the object and the leading underscore
             _d[r_] = {k_.rpartition(".")[2].lstrip("_"):
                       getattr(getattr(md_, k_.rpartition(".")[0]) if "." in k_ else md_, k_.rpartition(".")[2], None)
@@ -512,13 +512,13 @@ def main():
     run_settings.save(str(a.out).rsplit(".", 1)[0] + ".settings.toml")
     with open(str(a.out).rsplit(".", 1)[0] + ".manifest.json", "w") as fh_:
         json.dump(out["meta"]["run_manifest"], fh_, indent=1)
-    # the metadata against its declaration (capri_mod/run_meta.py; refactor stage 5): after the pickle is saved, so a
+    # the metadata against its declaration (capri_mod/run_meta.py): after the pickle is saved, so a
     # change of the metadata stops the run's table, never its results
     from capri_mod.run_meta import ResultsMeta
     ResultsMeta.model_validate(out["meta"])
     _results_dir = str(run_settings.get("run.results_dir") or "")
     if _results_dir:
-        # the long results table (capri_mod/io_results.py; refactor stage 5): the scenario's rows and its reference's,
+        # the long results table (capri_mod/io_results.py): the scenario's rows and its reference's,
         # stored once; read back and checked against this pickle's blocks
         from capri_mod import io_results as _IO
         _rroot = Path(_results_dir) if Path(_results_dir).is_absolute() else ROOT / _results_dir
@@ -597,7 +597,7 @@ def main():
                f" | non-optimal regional solves kept: baseline {len(_no['baseline'])}, scenario {len(_no['scenario'])}"
                + (f" ({', '.join(_no['baseline'] + _no['scenario'])})" if _no['baseline'] or _no['scenario'] else "")
                + f" | PMP {out['meta'].get('pmp_source')}"
-               + (f", mineral caps relaxed: {out['meta']['nlp_relaxed']}" if out['meta'].get('nlp_relaxed') else "")
+               + (f", NLP relaxed (mineral caps; foc_fb: DEP-49's retry): {out['meta']['nlp_relaxed']}" if out['meta'].get('nlp_relaxed') else "")
                + ("" if all(out["meta"]["market_converged"].values()) else
                   f" | MARKET NOT CONVERGED: {[k_ for k_, v_ in out['meta']['market_converged'].items() if not v_]}"))
 

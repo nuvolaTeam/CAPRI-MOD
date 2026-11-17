@@ -99,7 +99,7 @@ class DemandMixin(MarketStateMixin):
     @staticmethod
     def _gl_eval(e: dict, p: np.ndarray, ir: float) -> np.ndarray:
         """CAPRI's GL demand of one region (1000 t): x_i = [G_i/G (Y - F) + d_i] INHA / 1000; the block in CasADi
-        (capri_mod/market/demand_ad.py, step G2c; NumPy here until 31 October 2026)."""
+        (capri_mod/market/demand_ad.py; NumPy here until 31 October 2026)."""
         return gl_eval(e, p, ir)
 
     #: CAPRI's re-calibration of the GL commitments to given quantities and prices (arm/recalibrate_commitments.gms,
@@ -163,7 +163,7 @@ class DemandMixin(MarketStateMixin):
                 self._gl_refit(D0c)
                 self._gl_refit_key = D0c.copy()
         Rr = {r: i for i, r in enumerate(self.regions)}
-        # every behavioural region's demand at once, from the block's CasADi function (step G2c, demand_ad.py; until
+        # every behavioural region's demand at once, from the block's CasADi function (demand_ad.py; until
         # 31 October 2026 a NumPy loop over the regions with the same equations, floors and order of the sums)
         blk = getattr(self, "_gl_block", None)
         if blk is None or blk[0] is not prm["groups"] or blk[1] != PR.shape:
@@ -230,7 +230,7 @@ class DemandMixin(MarketStateMixin):
           human consumption  CAPRI's GL demand per behavioural region (gl_food_ratio; Cpri_ on ARM1P)
           feed               EU: the member states' feed bulks (feedBlkPrice_, feedShareEqu_) and the FMIL block for
                              dairy products; Norway: its bulks; other regions: p_ElasFeed (FeedNQ_ not yet ported,
-                             docs/design/ARCHITECTURE_REFACTOR.md 5.1 M3) and the FMIL block for dairy products
+                             docs/dev/ARCHITECTURE_REFACTOR.md 5.1 M3) and the FMIL block for dairy products
           processing         oilseeds: crushing (_crush_state); other products: ProcNQ_ (H x ARM1P0 x (ratio - 1)) with
                              ProcFudge_; the dairy products' processing stays fixed for now (CAPRI has ProcNQ_ terms
                              for them; audit M9, open)
@@ -257,9 +257,8 @@ class DemandMixin(MarketStateMixin):
         PR = (dp / ref).to_numpy(dtype=float)                           # Armington price ratios
         DPv = dp.to_numpy(dtype=float)
         REFv = ref.to_numpy(dtype=float)
-        cal = np.array([float(self._demand_cal_factor(c)) for c in self.commodities])
-        Bv = self.par.base_consumption.reindex(index=self.regions, columns=self.commodities).fillna(0.0).to_numpy(dtype=float)
-        D0 = Bv * cal[None, :]                                          # calibrated base use
+        D0 = self.par.base_consumption.reindex(index=self.regions, columns=self.commodities).fillna(0.0).to_numpy(
+            dtype=float)                                                # base use (CAPRI's calibration point)
 
         # base components (kt) from CAPRI's shares
         uc = self._use_components()
@@ -393,7 +392,7 @@ class DemandMixin(MarketStateMixin):
                 P[i, j] = max(0.0, P0[i, j] + (q - cp[(r, sd)]["q0"]))
         pq = self._proc_nq_params()
         if pq:
-            # ProcNQ_ and ProcFudge_ from the block's CasADi function (step G2e, processing_ad.py; until 31 October
+            # ProcNQ_ and ProcFudge_ from the block's CasADi function (processing_ad.py; until 31 October
             # 2026 the same loop here, dq -= hv x (DP / REF - 1) over the Hessian's terms, then _proc_fudge); REF > 0
             # by construction above, so the ratio is PR
             blk = getattr(self, "_procnq_block", None)

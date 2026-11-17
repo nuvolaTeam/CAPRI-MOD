@@ -1,4 +1,4 @@
-"""The model's code lists and their CAPRI codes, from CAPRI's own sets (data batch, docs/design/DATA_SCHEMA_DUCKDB.md).
+"""The model's code lists and their CAPRI codes, from CAPRI's own sets (data batch, docs/dev/DATA_SCHEMA_DUCKDB.md).
 
 The model keeps its own codes (the project lead's decision of 29 October 2026: option 1, a mapping table; CAPRI's codes
 throughout may follow later). This builder writes:
@@ -10,16 +10,16 @@ throughout may follow later). This builder writes:
   capri_data/codes/capri/FEED_TO_O.csv  CAPRI's feed bulks and their products: feed, row
   capri_data/codes/capri/MS_RU.csv     CAPRI's member states and their regional units (MAP_RR x MS x RU)
   capri_data/codes/capri/MAP_RR.csv, R_RAGG.csv, REGAGGP.csv, REGEU1015.csv, MSAGG.csv, NUTS1A.csv, SRNUTS1.csv
-                                       the region hierarchy of policy/policy.gms (P2b)
+                                       the region hierarchy of policy/policy.gms (the premium module)
   capri_data/codes/capri/NUTS0.csv, SRNUTS2.csv, SRNUTS2_EXT.csv, PSDPAY_RD.csv, PSDPAY_AE.csv
-                                       the regions and schemes of the rural development chain (P2c)
+                                       the regions and schemes of the rural development chain (the premium module)
   capri_data/codes/capri/PSDPAY_vcs.csv, PSDPAY_cscs.csv
                                        the voluntary coupled support's and cotton's schemes (taken out of the BPS
                                        ceiling, CAP_2014_2020.gms; K136)
   capri_data/codes/capri/RM.csv, RMTP.csv, RM_TO_RMTP.csv, RMEU_to_RM.csv
                                        CAPRI's market regions, trade-policy blocks, the block of each market region
                                               and the EU's two market blocks, in CAPRI's set order (the market's move
-                                              onto CAPRI's regions, MARKET_REGIONS_INVENTORY.md stage 1)
+                                              onto CAPRI's regions, MARKET_REGIONS_INVENTORY.md)
   capri_data/codes/model_commodities.csv the model's 58 market commodities (MARKET_COMMODITIES): code,
                                               capri_code, mapping_source
 
@@ -88,7 +88,7 @@ def main():
     a = ap.parse_args()
     # the model's activity and commodity lists read from definitions.py's source, not by importing it: importing
     # capri_mod.data reads the code lists this builder writes (codes/model_commodities.csv, codes/capri/CACT_TO_NGRP.csv,
-    # PERM_NGRP.csv, FEED_TRD.csv; refactor stages 3-4), so the import made the builder depend on its own outputs and
+    # PERM_NGRP.csv, FEED_TRD.csv; since 2 November 2026), so the import made the builder depend on its own outputs and
     # the data could not be rebuilt from blank (tools/check/rebuild_from_blank.py, 3 November 2026)
     class D:
         CROPS, ANIMALS, MARKET_COMMODITIES = (literal("capri_mod/data/definitions.py", n)
@@ -165,7 +165,7 @@ def main():
     if miss:
         problems.append(f"regional units not in CAPRI's RALL: {miss}")
 
-    # the model's activity classes (codes/model_activity_classes.csv, declared; N6) against CAPRI's sets, through the
+    # the model's activity classes (codes/model_activity_classes.csv, declared) against CAPRI's sets, through the
     # activities' CAPRI codes: a row that differs must say so (its source names the departure, DEP-...)
     lt_of = {}
     for lt, pa in pairs("landTypes_to_pact"):
@@ -175,7 +175,7 @@ def main():
         grp_of.setdefault(ca, set()).add(g)
     fodcrp = set(read_set(a.sets, "FODCRP"))
     # an activity is a fodder crop where CAPRI's FEDACT_TO_FODDI gives it a fodder item (MAIF, ROOF, OFAR, GRAE, GRAI);
-    # FODCRP names the grass product GRAS, not GRAE and GRAI (the model's own activities since S2, 7 November 2026)
+    # FODCRP names the grass product GRAS, not GRAE and GRAI (the model's own activities since 7 November 2026)
     fedact = {pa for pa, _f in pairs("FEDACT_TO_FODDI")}
     fod_of = lambda c: ({c} & fodcrp) | ({c} & fedact)
     capri_of = {r["code"]: r["capri_codes"].split(";") for r in acts}
@@ -194,7 +194,7 @@ def main():
         fc = set().union(*(fod_of(c) for c in cc)) if cc else set()
         if bool(int(r["fodder"])) != bool(fc) and not declared:
             problems.append(f"model_activity_classes.csv {r['code']}: fodder {r['fodder']}, CAPRI FODCRP {sorted(fc)}")
-    # the further classes (N6, second part): a value that differs from CAPRI's set must say "<column>...: the model's"
+    # the further classes: a value that differs from CAPRI's set must say "<column>...: the model's"
     # in its source (or name its departure)
     mcact, oyani = set(read_set(a.sets, "MCACT")), set(read_set(a.sets, "OYANI"))
     eprd = {c for c, _ in pairs("EPRD_TO_GRP")}
@@ -250,7 +250,7 @@ def main():
                        ("capri_mod/supply/n_cascade.py", "RUNH_TECHS"), ("capri_mod/supply/n_cascade.py", "APPL_TECHS"),
                        ("capri_mod/supply/n_leaching.py", "APPL")):
         problems += [f"{path} {name}: {t} is not in CAPRI's MitiTechAmm" for t in literal(path, name) if t not in amm]
-    # the prices that follow a market's (codes/model_price_follows.csv, declared; refactor stage 4)
+    # the prices that follow a market's (codes/model_price_follows.csv, declared)
     with open(OUT / "model_price_follows.csv", newline="", encoding="utf-8") as fh:
         for r in csv.DictReader(fh):
             if r["activity"] not in capri_of:
@@ -271,7 +271,7 @@ def main():
             if r["code"] not in lt_mrk:
                 problems.append(f"model_land_types.csv: {r['code']} is not in CAPRI's landTypesMrk")
 
-    # CAPRI's market regions (the market's move onto CAPRI's regions, stage 1: MARKET_REGIONS_INVENTORY.md section 5):
+    # CAPRI's market regions (the market's move onto CAPRI's regions: MARKET_REGIONS_INVENTORY.md section 5):
     # RM (45 market regions), RMTP (42 trade-policy blocks), RM_TO_RMTP, RMEU_to_RM (the EU's two market blocks), in
     # CAPRI's set order; checked against RALL and against the behavioural regions' map codes/rms_to_rm.csv
     rm, rmtp = read_set(a.sets, "RM"), read_set(a.sets, "RMTP")
@@ -305,26 +305,26 @@ def main():
     # regional units (MS x RU), as envind/digestibility.gms and line_nitr.gms use them (3-NOP, K93)
     ms_, ru_ = set(read_set(a.sets, "MS")), set(read_set(a.sets, "RU"))
     write(OUT / "capri" / "FEED_TO_O.csv", ("feed", "row"), sorted(pairs("FEED_TO_O")))
-    # the sets the model's activity classes are checked against (refactor stage 3, N6): land types of the land market
+    # the sets the model's activity classes are checked against: land types of the land market
     # and of each activity, crop-diversification groups, fodder crops
     write(OUT / "capri" / "landTypesMrk.csv", ("code", "text"), sorted(read_set(a.sets, "landTypesMrk").items()))
     write(OUT / "capri" / "FODCRP.csv", ("code", "text"), sorted(read_set(a.sets, "FODCRP").items()))
-    # CAPRI's permanent crop groups and the crop -> nutrient group map (fertiliser distribution; refactor stage 4)
+    # CAPRI's permanent crop groups and the crop -> nutrient group map (fertiliser distribution)
     write(OUT / "capri" / "PERM_NGRP.csv", ("code", "text"), list(read_set(a.sets, "PERM_NGRP").items()))
     write(OUT / "capri" / "CACT_TO_NGRP.csv", ("cact", "ngrp"), pairs("CACT_TO_NGRP"))
-    # CAPRI's traded feed bulks (global/fromimpact/sets.gms FEED_TRD), in CAPRI's set order (refactor stage 4)
+    # CAPRI's traded feed bulks (global/fromimpact/sets.gms FEED_TRD), in CAPRI's set order
     write(OUT / "capri" / "FEED_TRD.csv", ("code", "text"), list(read_set(a.sets, "FEED_TRD").items()))
     write(OUT / "capri" / "landTypes_to_pact.csv", ("land_type", "pact"), sorted(pairs("landTypes_to_pact")))
     write(OUT / "capri" / "cropDivGrps_mCact.csv", ("group", "mcact"), sorted(pairs("cropDivGrps_mCact")))
     # CAPRI's premium groups and their activities (policy/policy.gms psg_to_a: a scheme's rate per group reaches the
-    # group's activities; the premium module, P2)
+    # group's activities; the premium module)
     write(OUT / "capri" / "PSG_TO_A.csv", ("psgroup", "pact"), sorted((g.upper(), a) for g, a in pairs("PSG_TO_A")))
     write(OUT / "capri" / "MS_RU.csv", ("ms", "ru"), sorted((m, r) for m, r in pairs("Map_RR") if m in ms_ and r in ru_))
     # the data base activities and their high / low variants (sets.gms DACT_TO_PACT: DCOW = DCOL + DCOH, BULF, HEIF,
     # GRAS, the set-aside codes): Norway's rates per data activity reach the variants (policy/def_no_policy.gms l. 56-60)
     write(OUT / "capri" / "DACT_TO_PACT.csv", ("dact", "pact"), sorted(pairs("DACT_TO_PACT")))
     # the region hierarchy policy/policy.gms breaks the premium declarations down and re-aggregates the declared
-    # premiums along (the premium module, P2b): MAP_RR (a region and its members), R_RAGG (a region and the regions it
+    # premiums along (the premium module): MAP_RR (a region and its members), R_RAGG (a region and the regions it
     # belongs to, itself included), the EU aggregates with premium declarations (REGAGGP, REGEU1015), the member states
     # (MSAGG), the NUTS 1 regions (NUTS1A, SRNUTS1)
     write(OUT / "capri" / "MAP_RR.csv", ("region", "member"), sorted(pairs("Map_RR")))

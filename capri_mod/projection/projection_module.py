@@ -151,7 +151,7 @@ class ProjectionModule:
         data["market_year"] = int(year)
         # CAPRI's intensity splits (dairy DCOL/DCOH, the cattle pairs) at the year's calibration point: the columns
         # "<column>_<year>" (CAPRI's own terms of that year, tools/build/build_dairy_intensity.py) replace the base
-        # year's (S6 item 6, 9 November 2026)
+        # year's (9 November 2026)
         _split_terms_at_year(data, int(year))
         # CAPRI's baseline calibration applies where the trajectory moves the data (a null trajectory must return the
         # comparative-static result exactly: the projection layer's correctness gate)
@@ -244,7 +244,7 @@ class ProjectionModule:
                 cake_index=RegionalSupplyModel._cake_index())
 
         self._project_livestock(data, self.model.data, year)
-        # CAPRI's own 2030 rations and requirements with its 2030 reference (Sprint 9q): factors per region, animal and
+        # CAPRI's own 2030 rations and requirements with its 2030 reference (the port of CAPRI's 2030 rations and fodder): factors per region, animal and
         # feed on the 2017 rations (tools/build/build_ration_trajectory_2030.py); where present they replace the uniform
         # requirement scaling of _project_livestock for that ration
         if str(getattr(traj, "name", "")).startswith("capri_ref") and self.capri_prices_dir:
@@ -260,7 +260,7 @@ class ProjectionModule:
                     else:
                         rf.setdefault((r_.region, r_.animal), {})[r_.item] = float(r_.factor)
                 data["ration_factor"] = rf
-                # CAPRI's 2030 manure and enteric methane per head (CH4MAN, CH4ENT; Sprint 9s): the 2030 / 2017
+                # CAPRI's 2030 manure and enteric methane per head (CH4MAN, CH4ENT; the removal of synthetic data): the 2030 / 2017
                 # factor on the 2017 per-head coefficients
                 for key_, item_ in (("livestock_ch4man_coef", "CH4MAN"), ("livestock_ch4ent_coef", "CH4ENT")):
                     tab_ = data.get(key_)

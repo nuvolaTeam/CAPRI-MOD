@@ -18,3 +18,6 @@ fixGenetToIni = 1.0
 # not set in refpol_endotech_set14_ini.gms: star 3.0's Green Deal reference values (capri_mod/policy/endotech.py)
 fallowInAllRmssup = 1.0
 winterCovInAllRmssup = 1.0
+# the animals' ammonia options as choices: JRC121368's Farm-to-Fork reports them adopted (Table 17: storage covers 14 ->
+# 34%, air purification 0 -> 10%); star 3.0's code would hold them at their initial shares (KNOWN_ISSUES K152)
+ghgTechAmmEndog = 1.0

@@ -1,4 +1,4 @@
-"""CAPRI's two crop technologies T1 (high yield) and T2 (low yield) as mix columns (S1, docs/design/S1_MIX_COLUMNS.md).
+"""CAPRI's two crop technologies T1 (high yield) and T2 (low yield) as mix columns (docs/dev/CROP_TECHNOLOGY_MIX_COLUMNS.md).
 
 For a crop a with both technologies in the region, the model's activity X and one column z, x_T1 = X/2 + z,
 x_T2 = X/2 - z (z = 0 at CAPRI's 50-50 calibration point); -X/2 <= z <= X/2 as two rows. Per unit of z, the
@@ -12,7 +12,7 @@ base is a first-order point at z = 0, as CAPRI's p_pmpCnst per technology makes 
 On with supply.crop_technologies at the 2030 market year with CAPRI's 2030 PMP terms (the mix terms are CAPRI's 2030
 calibration's); off, the model is the collapsed form (DEP-9).
 
-RegionalSupplyModel's methods (refactor stage 3a pattern); the module-level names they use are supply_module's
+RegionalSupplyModel's methods (the block-mixin pattern); the module-level names they use are supply_module's
 (capri_mod.utils.mixins.inject_names).
 """
 from __future__ import annotations

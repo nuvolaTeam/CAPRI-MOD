@@ -1,7 +1,7 @@
 """Feed between the supply models and the market: the bulk feed price ratios, the rations' update, the market's feed demand from the supply models.
 
-CAPRIModel's methods, moved unchanged from capri_mod/model.py (refactor stage 4a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
+CAPRIModel's methods, moved unchanged from capri_mod/model.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
 module once model is loaded (capri_mod.coupling.inject); the annotations are not evaluated.
 """
 from __future__ import annotations
@@ -121,7 +121,7 @@ class FeedBlock:
                         xb = dict(zip(_rb.feeds, _rb.x0))
                         # feeding inside the supply model: the region's own feed totals (t)
                         _ft = (getattr(res, "feed_t", None) or {}).get(a)
-                        # every tradable bulk of CAPRI (FEED_TRD: FCER, FPRO, FENE, FMIL, FOTH; Sprint 9h adds the
+                        # every tradable bulk of CAPRI (FEED_TRD: FCER, FPRO, FENE, FMIL, FOTH; the completion of CAPRI's feed bulks adds the
                         # last three per member state)
                         for _b in self.FEED_BULKS:
                             if _b in xb:
@@ -181,7 +181,7 @@ class FeedBlock:
             # the bulks at base (kt): the market's bulk demand (feedBlk_, audit M4) turns the measured responses into
             # elasticities with them
             mm.seen.feed_bulk_base = {k: float(v[1]) for k, v in blk.items()}
-            # DAIRY PRODUCTS FED (dairy Stage 3): the FMIL block follows the calves' milk feed, as CAPRI's
+            # DAIRY PRODUCTS FED: the FMIL block follows the calves' milk feed, as CAPRI's
             # feed block FMIL (SMIP, WMIO, CASE, WHEP, BUTT, CREM, COCM, CHES, FRMI) follows the supply models
             mm.seen.fmil_index = (fmil[0] / fmil[1]) if fmil[1] > 0 else 1.0
             mm.seen.fmil_index_sup = {rg: (v[0] / v[1] if v[1] > 0 else 1.0) for rg, v in fmil_sup.items()}

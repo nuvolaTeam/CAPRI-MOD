@@ -11,6 +11,19 @@ COMMENT ON TABLE feed_feed_cereal_mix_2030 IS 'CAPRI''s feed bulks in the market
 INSERT INTO value_units VALUES
   ('feed_feed_cereal_mix_2030', 'fedm_kt', NULL, 'open', 'feed_cereal_mix_2030.fedm_kt: unit to be established');
 
+-- file: capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_value_2030.csv
+CREATE TABLE feed_fodder_value_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    fodder VARCHAR NOT NULL CHECK (fodder IN ('FGRA', 'FMAI', 'FOFA', 'FROO')),
+    value_eur_t DOUBLE NOT NULL CHECK (value_eur_t > 0),
+    uvag_capri_2030 DOUBLE NOT NULL CHECK (uvag_capri_2030 > 0),
+    PRIMARY KEY (region, fodder)
+);
+COMMENT ON TABLE feed_fodder_value_2030 IS 'CAPRI''s 2030 unit value of the fed non-tradable fodders (UVAG, the dual of SUPBAL_ per t fed) as the fodder balance''s base dual, in 2017 money (KNOWN_ISSUES K161; tools/build/build_fodder_value_2030.py)';
+INSERT INTO value_units VALUES
+  ('feed_fodder_value_2030', 'value_eur_t', NULL, 'open', 'EUR of 2017 per t fed (CAPRI''s UVAG over its 2030 deflator; the builder; no unit code in the catalogue)'),
+  ('feed_fodder_value_2030', 'uvag_capri_2030', NULL, 'open', 'CAPRI''s UVAG, EUR of 2030 per t fed (the builder; no unit code in the catalogue)');
+
 -- file: capri_data/2017/feed/livestock_feed_coef.csv
 -- layout: wide, unnamed
 CREATE TABLE feed_livestock_feed_coef (
@@ -52,7 +65,7 @@ CREATE TABLE feed_fodder_balance_2017 (
     value_eur_t DOUBLE NOT NULL,
     PRIMARY KEY (region, fodder, crop)
 );
-COMMENT ON TABLE feed_fodder_balance_2017 IS 'the regional balances of the non-tradable fodder (CAPRI supply_model.gms SUPBAL_): the crops producing it (one row each: grass FGRA from GRAE and GRAI since S2, 7 November 2026), the usable fresh fodder per ha (base fodder use / base area) and its base value (CAPRI''s UVAG); built from feed_ration_2017.csv, base_areas.csv and animal_numbers.csv (tools/build/build_fodder_balance.py; fodder_balance_2017.json until 31 October 2026; capri_mod/data/nested_tables.py)';
+COMMENT ON TABLE feed_fodder_balance_2017 IS 'the regional balances of the non-tradable fodder (CAPRI supply_model.gms SUPBAL_): the crops producing it (one row each: grass FGRA from GRAE and GRAI since 7 November 2026), the usable fresh fodder per ha (base fodder use / base area) and its base value (CAPRI''s UVAG); built from feed_ration_2017.csv, base_areas.csv and animal_numbers.csv (tools/build/build_fodder_balance.py; fodder_balance_2017.json until 31 October 2026; capri_mod/data/nested_tables.py)';
 INSERT INTO value_units VALUES
   ('feed_fodder_balance_2017', 'u_t_per_ha', 'U_TonPerHa', 'builder', 'fodder_balance_2017.u_t_per_ha: t fresh fodder per ha (the builder)'),
   ('feed_fodder_balance_2017', 'value_eur_t', NULL, 'open', 'fodder_balance_2017.value_eur_t: EUR per t (the builder; no unit code in the catalogue)');

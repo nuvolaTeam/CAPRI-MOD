@@ -1,5 +1,5 @@
 """CAPRI's Nordic aid (policy/nordicaid.gms, included by pol_input/mtr_RD.gms in CAP_2014_2020.gms's chain): the
-national aid to northern Finland and Sweden granted on their accession, regulation 142 (the premium module, P2c).
+national aid to northern Finland and Sweden granted on their accession, regulation 142 (the premium module).
 
   capri_data/<base year>/policy/nordic_aid_rates.csv    scheme, group, nordic_region, basis, rate
         p_nordicAid_2_5_perLU (basis per_lu: EUR per livestock unit, or per ton of milk) and p_nordicAid_2_9_PerHa

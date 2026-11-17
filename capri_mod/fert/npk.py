@@ -23,8 +23,8 @@ from capri_mod.data.definitions import capri_ms
 from capri_mod.params import param
 
 NUTRIENTS = ("N", "P", "K")
-from capri_mod.fert.inner_fert_dist import SOURCES   # noqa: E402  CAPRI's nutrient sources, one definition (stage 4)
-from capri_mod.data.definitions import CAPRI_PERM_NGRP as PERM_NGRP   # noqa: E402  CAPRI's set (stage 4)
+from capri_mod.fert.inner_fert_dist import SOURCES   # noqa: E402  CAPRI's nutrient sources, one definition
+from capri_mod.data.definitions import CAPRI_PERM_NGRP as PERM_NGRP   # noqa: E402  CAPRI's set
 
 
 
@@ -182,6 +182,18 @@ class NPKData:
         return float(v) if pd.notna(v) and v > 0 else 0.0
 
 
+def grass_need_factor(crop: str) -> float:
+    """CAPRI's grassland term in NUTNED_ (supply/supply_model.gms l. 1131-1135): the crop's need times SQRT(1 +
+    p_technFact(Yield, A) + 0.2 $ GRAI - 0.2 $ GRAE), for every nutrient the crop has a need of; at the standard
+    technology (p_technFact 0) SQRT(1.2) for intensive and SQRT(0.8) for extensive grassland, 1 for the other crops.
+    The shift is parameter GRASS_NEED_YIELD_SHIFT. The data's need per ha (npk_crop_coefs_2030.csv) is the crop's own
+    NITF/PHOF/POTF, without it (KNOWN_ISSUES K160; until 16 November 2026 GRAE and GRAI took the same need per kg)."""
+    if crop not in ("GRAI", "GRAE"):
+        return 1.0
+    sh = float(param("GRASS_NEED_YIELD_SHIFT"))
+    return float(np.sqrt(1.0 + (sh if crop == "GRAI" else -sh)))
+
+
 def need_yield_factor(region: Optional[str], crop: str, y0: float, y: float, y_scen: Optional[float] = None,
                       nut: str = "N") -> float:
     """A crop's nutrient need per ha at yield y relative to its need at the base yield y0, CAPRI's rule.
@@ -194,8 +206,9 @@ def need_yield_factor(region: Optional[str], crop: str, y0: float, y: float, y_s
     of the base need (NPKData.yield_shares; 0 for crops at the floor or cap):
         factor = (1 - m - s) + m x y / y0 + s x y_scen / y0
     y_scen: the yield before the price response (the scenario's shifted yield); None: y (no price response).
-    The square root in CAPRI's NUTNED_ (SQRT(1 + p_technFact(yield, A))) acts on the technology variants' yield
-    factor, which the model does not have, not on yield changes. A change that would cross the floor or the cap is
+    The square root in CAPRI's NUTNED_ (SQRT(1 + p_technFact(yield, A) + 0.2 $ GRAI - 0.2 $ GRAE)) acts on the
+    technology variants' yield factor and the grassland split (grass_need_factor, applied to the need itself), not
+    on yield changes. A change that would cross the floor or the cap is
     not bounded here (the shares are fixed at the base). region: model or CAPRI region (None: (m, s) = (1, 0))."""
     if not (y0 > 0 and y > 0):
         return 1.0

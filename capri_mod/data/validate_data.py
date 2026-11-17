@@ -1,4 +1,4 @@
-"""The data checks: the declarations under capri_data/schema enforced on the CSV files (docs/design/DATA_SCHEMA_DUCKDB.md).
+"""The data checks: the declarations under capri_data/schema enforced on the CSV files (docs/dev/DATA_SCHEMA_DUCKDB.md).
 
 Each `capri_data/schema/*.sql` file declares tables (DuckDB DDL: column types, NOT NULL, PRIMARY KEY, UNIQUE,
 REFERENCES to the code lists, CHECK ranges; units and sources as comments) and rules (queries that must return no

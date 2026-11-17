@@ -1,5 +1,5 @@
 """CAPRI's marketed over gross production at the 2030 calibration point, per country with supply models and market
-product (S7, docs/design/S7_DEMAND_CALIBRATION.md; 6 November 2026).
+product (CAPRI's market calibration, docs/dev/MARKET_DEMAND_CALIBRATION.md; 6 November 2026).
 
 CAPRI's default $setglobal grofNEprod on (capmod/set_global_variables.gms l. 144-148: "PROD does not include seed use
 and losses") hands the market each supply product as the supply models' gross production times CAPRI's ratio at the

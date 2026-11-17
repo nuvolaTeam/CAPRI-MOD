@@ -1,4 +1,4 @@
-"""CAPRI's 2004-2013 premium regime as its CAP 2014-2020 chain evaluates it for the BPS's historical key (P2c, port A):
+"""CAPRI's 2004-2013 premium regime as its CAP 2014-2020 chain evaluates it for the BPS's historical key:
 pol_input/mtr_until2013.gms (run by CAP_2014_2020.gms through mtr_RD.gms), policy/calc_mtr_top.gms and
 policy/calc_mtr.gms, then the pass CAP_2014_2020.gms l. 50-66 writes to policyIUV.gdx.
 

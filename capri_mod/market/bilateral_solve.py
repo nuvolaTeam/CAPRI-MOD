@@ -67,12 +67,13 @@ class BilateralSolveMixin(MarketStateMixin):
             pm = rg[rg.commodity == c].set_index("region")["pmrk"]
             Pd0 = np.array([float(pm.get(r, np.nan)) for r in R])
             fill = float(np.nanmedian(Pd0)) if np.isfinite(Pd0).any() else 1.0
-            Pd0 = np.where(np.isfinite(Pd0) & (Pd0 > 0), Pd0, fill)
+            has_p = np.isfinite(Pd0) & (Pd0 > 0)
+            Pd0 = np.where(has_p, Pd0, fill)
             out[c] = BilateralCommodity(c, R, X0, a, b, a0, Pd0,
                                         float(rho.at[c, "rho1"]) if c in rho.index else 8.0,
-                                        float(rho.at[c, "rho2"]) if c in rho.index else 10.0, tc=tc)
+                                        float(rho.at[c, "rho2"]) if c in rho.index else 10.0, tc=tc, pmrk_data=has_p)
         # CAPRI's bilateral tariff-rate quotas of every importer, per pair of policy blocks (tools/build/
-        # build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md)
+        # build_bilateral_market.py build_trq; docs/dev/MARKET_TRQ_PORT.md)
         if inp.exists(f"bilateral_trq_{year}.csv"):
             tq = inp.csv(f"bilateral_trq_{year}.csv", keep_default_na=False)
             for c, g in tq.groupby("commodity"):
@@ -119,7 +120,7 @@ class BilateralSolveMixin(MarketStateMixin):
                 for k in bil:
                     if sc.trq_quotas[k]["regime"] == "with_global":
                         sc.trq_quotas[k]["glob"] = len(gl) - 1
-        # CAPRI's entry prices and flexible levies (build_border_measures; stage 6): they replace the specific tariff
+        # CAPRI's entry prices and flexible levies (build_border_measures): they replace the specific tariff
         if inp.exists(f"border_measures_{year}.csv"):
             bm = inp.csv(f"border_measures_{year}.csv", keep_default_na=False)
             bp = inp.csv(f"border_pairs_{year}.csv", keep_default_na=False)
@@ -216,10 +217,12 @@ class BilateralSolveMixin(MarketStateMixin):
 
     def _bilateral_calibrate(self) -> None:
         """The bilateral market calibrated once per run at CAPRI's own 2030 market supply, every region's (the EU's and
-        Norway's included), as CAPRI calibrates its market at the calibration point (S7; arm/prep_market.gms
-        cal_cnst_terms, recalibrate_commitments): CAPRI's flows, demand calibration 1 for the bilateral commodities,
-        the world clearing calibration for the pooled one (raw milk, at CAPRI's 2030 marketed milk: _capri_milk_point).
-        The supply models do not enter the calibration; only the supply side follows them each iteration. (Until
+        Norway's included), as CAPRI calibrates its market at the calibration point (CAPRI's market calibration; arm/prep_market.gms
+        cal_cnst_terms, recalibrate_commitments): CAPRI's flows and demand at the calibration point. Raw milk, the one
+        market product without bilateral trade, is not traded in CAPRI: each region's raw milk is cleared in its own
+        dairy block (DairyNQ_, ProcMargM_, FatsProtBal_ per market region), at CAPRI's 2030 marketed milk
+        (_capri_milk_point); there is no world balance and no calibration factor for it (K165: the world pool and its
+        non-EU use factor bounded to [0.2, 5], register DEP-5 and DEP-31, removed 17 November 2026). The supply models do not enter the calibration; only the supply side follows them each iteration. (Until
         8 November 2026 a second form, market.demand_calibration = "supply", calibrated the demand to the supply models'
         output in every baseline iteration: register DEP-5, removed.)"""
         import copy as _copy
@@ -246,7 +249,11 @@ class BilateralSolveMixin(MarketStateMixin):
                     break
         self.par.crush_q0_override = over
         self._crush_cache = None
-        self.par.demand_cal = pd.Series(1.0, index=self.commodities)
+        # raw milk is the only market product without bilateral trade (its regions' dairy blocks clear it); any
+        # other would have no equation that sets its price
+        nobil = [c for c in self.commodities if c not in raw and c != "MILK"]
+        if nobil:
+            raise ValueError(f"market: products without bilateral trade other than raw milk: {nobil}")
         # CAPRI's own supply: the market's base tables as read (calibration.py _calibrate_baseline: CAPRI's 2030 flows
         # and regions), raw milk at CAPRI's marketed milk; the supply models do not enter the calibration, nor do the
         # units outside a run on a subset (K83: CAPRI's tables already hold the whole EU; their base output is added
@@ -291,36 +298,14 @@ class BilateralSolveMixin(MarketStateMixin):
                         self.par.base_consumption.at[r, c] = float(self.par.base_consumption.at[r, c]) * f
             if worst < 1e-12:
                 break
-        # pooled commodities: non-EU demand calibrated so the world clears at base (EU use set by alignment)
-        pooled = [c for c in self.commodities if c not in sysd]
-        S = self.supply_response(self.world_prices_base, exogenous_supply, region_ratio=one, crush_dom=dom0)
-        D = self.demand_response(dom0, self.world_prices_base)
-        # the regions with supply models (the EU; Norway, whose raw milk goes to its own dairies) keep their use; the
-        # others' use is calibrated so that the world clears
-        fixed = list(self.EU) + list(self.SUP)
-        others = [r for r in R if r not in fixed]
-        cal = pd.Series(1.0, index=self.commodities)
-        # where the bounds [0.2, 5] (not CAPRI's: PROXY_AUDIT S185) bind: {commodity: unbounded factor}; and the
-        # regions whose CAPRI exports exceed their base supply (scaled to it, BilateralCommodity.calibrate). Recorded
-        # for the runs' metadata and warned
-        self.calibration_bound_hits = {"non_eu_use": {}, "export_share": {
+        # the regions whose CAPRI exports exceed their base supply (scaled to it, BilateralCommodity.calibrate):
+        # recorded for the runs' metadata and warned
+        self.calibration_bound_hits = {"export_share": {
             c: list(sc.export_cap_hits) for c, sc in sysd.items() if getattr(sc, "export_cap_hits", None)}}
-        for c in pooled:
-            s_all, d_eu, d_oth = float(S[c].sum()), float(D.loc[fixed, c].sum()), float(D.loc[others, c].sum())
-            if d_oth > 1.0 and s_all - d_eu > 1.0:
-                _raw = (s_all - d_eu) / d_oth
-                cal[c] = min(5.0, max(0.2, _raw))
-                if cal[c] != _raw:
-                    self.calibration_bound_hits["non_eu_use"][c] = _raw
-            if cal[c] != 1.0:
-                for _rg in fixed:
-                    self.par.base_consumption.at[_rg, c] /= float(cal[c])
-        self.par.demand_cal = cal
         _h = self.calibration_bound_hits
-        if _h["non_eu_use"] or _h["export_share"]:
+        if _h["export_share"]:
             import warnings as _w
-            _w.warn(f"market calibration bounds reached: non-EU use factor outside [0.2, 5] for "
-                    f"{sorted(_h['non_eu_use'])}; CAPRI's exports above the base supply for {_h['export_share']}",
+            _w.warn(f"market calibration bounds reached: CAPRI's exports above the base supply for {_h['export_share']}",
                     RuntimeWarning)
         for sc in sysd.values():
             sc.trq_base()                               # each quota's sigma at the calibrated base flows
@@ -331,12 +316,23 @@ class BilateralSolveMixin(MarketStateMixin):
         self.sv.bilat_local_el = None
 
     def _bilateral_eval(self, r: pd.DataFrame, exogenous_supply, trade_scenario=None):
-        """Full model response at producer price ratios r: supply, demand, consumer price ratios, residuals."""
+        """Full model response at producer price ratios r: supply, demand, consumer price ratios, residuals.
+
+        CAPRI's PMrk_: the market price of a region without production of a bilateral commodity (pmrk_cells) is its
+        Armington price plus the calibrated margin; it is set here, in r itself (the caller's frame), from the
+        Armington prices at r, before supply and use read the prices (a region without domestic sales has an
+        Armington price independent of its own market price)."""
         sysd = self.par.bilat
         dom0 = self._dom0()
-        PAr = r.copy()
         pcache = {}
         tadd = self._tariff_adds(trade_scenario)
+        for c, sc in sysd.items():
+            m = sc.pmrk_cells()
+            if m.any() and c in r.columns:
+                rc = r[c].values.astype(float)
+                _, _, PA, _ = sc.prices(rc, sc.import_prices(rc, tadd.get(c)))
+                r[c] = np.where(m, sc.pmrk_ratios(PA), rc)
+        PAr = r.copy()
         for c, sc in sysd.items():
             rc = r[c].values
             p = sc.import_prices(rc, tadd.get(c))
@@ -364,7 +360,7 @@ class BilateralSolveMixin(MarketStateMixin):
             _mr = {g: 1.0 + float(v["z"][_wp[g]["iM"]]) for g, v in _wl.items() if g in _wp and "z" in v}
             self.ev.fede_now = self.noneu_fede(PAr, r, _mr, self.land_by_type(self.ev.land_now))
         if self._noneu_land_params():
-            # CAPRI's market land block (stage 7): the rents that clear each non-EU region's land market at these
+            # CAPRI's market land block: the rents that clear each non-EU region's land market at these
             # prices, simultaneous with FeedBal_ (FEDE moves the land demand, the rents the animal output): solved in
             # turn until both settle (the land solve from the latest rents)
             _wl = self.ev.dairy_world_last or {}
@@ -392,20 +388,24 @@ class BilateralSolveMixin(MarketStateMixin):
         finally:
             self.ev.crush_prices_now = None
         self._apply_feed_byproduct_supply(S)
+        # the market-clearing residuals of the bilateral commodities; raw milk has none here: each region's dairy
+        # block clears it (K165)
         F = {}
         for c, sc in sysd.items():
             F[c] = sc.residual(S[c].values, D[c].values, r[c].values, pcache[c])
-        from capri_mod.market.supply_ad import pooled_residual_function
-        for c in r.columns:
-            if c not in sysd:
-                # the pooled commodities' world balance, written once in CasADi (market step G2b, supply_ad.py)
-                F[c] = np.asarray(pooled_residual_function(len(S))(S[c].to_numpy(dtype=float),
-                                                                     D[c].to_numpy(dtype=float))).ravel()
+        # MarketPriceAgg_'s weights for the border measures of an aggregate exporter block: this evaluation's supply
+        # and use, read by the next evaluation's import prices (one evaluation behind, the same at a solution; the
+        # joint system, market_system_ad, has them in place)
+        for c, sc in sysd.items():
+            if sc.border and any(len(jj) > 1 for _, jj, _ in (sc.border.get("pairs") or ())):
+                sc.mpagg_SD = (S[c].reindex(sc.regions).fillna(0.0).to_numpy(dtype=float),
+                               D[c].reindex(sc.regions).fillna(0.0).to_numpy(dtype=float))
         return S, D, PAr, F, pcache
 
     def _bilateral_world_index(self, r: pd.DataFrame) -> pd.Series:
         """World price index per commodity: exporters' price ratios weighted by their base exports (bilateral
-        commodities); the pooled commodities' common ratio."""
+        commodities). Raw milk has no world price (it is not traded; each region's dairy block prices it): its index is
+        1, so its regional premium over the index is the region's raw milk price ratio itself (K165)."""
         out = pd.Series(1.0, index=self.commodities)
         sysd = self.par.bilat or {}
         for c in self.commodities:
@@ -414,8 +414,6 @@ class BilateralSolveMixin(MarketStateMixin):
                 e = (sc.X0 * sc._off).sum(axis=0)
                 if e.sum() > 0:
                     out[c] = float((e * r[c].values).sum() / e.sum())
-            else:
-                out[c] = float(r[c].iloc[0])
         return out
 
     def _bilateral_local_el(self, r, exogenous_supply, trade_scenario):
@@ -459,9 +457,9 @@ class BilateralSolveMixin(MarketStateMixin):
 
         z = np.log(rk[act])
         if bool(_settings().get("market.exact_jacobian")) and not sc.border:
-            # (a commodity under CAPRI's entry prices or flexible levies takes the default path: G1's CasADi system has
-            # neither, stage 6)
-            # step G1: the same residual and its exact Jacobian from CasADi (capri_mod/market/trade_ad.py)
+            # (a commodity under CAPRI's entry prices or flexible levies takes the default path: the exact-Jacobian system has
+            # neither)
+            # the exact Jacobian: the same residual and its exact Jacobian from CasADi (capri_mod/market/trade_ad.py)
             from capri_mod.market.trade_ad import trade_function, import_price_matrices
             Am, Bm = import_price_matrices(sc, tadd)
             fn = trade_function(sc, act)
@@ -630,23 +628,26 @@ class BilateralSolveMixin(MarketStateMixin):
         return sorted(c for c, sc in (self._bilateral_raw() or {}).items() if getattr(sc, "trq_row", None) is not None)
 
     def _solve_bilateral(self, exogenous_supply, trade_scenario=None, tol=None, max_outer=None, verbose=False):
-        """CAPRI's market: successive linearisation - the full model response (supply module output anticipated,
-        crushing, dairy blocks, feed and biofuel demand) is re-evaluated each step, and each commodity's trade
-        system solved exactly with supply and use log-linear around that point."""
+        """The market's equations (CAPRI's m_globMarket as ported) solved by a fixed point, not CAPRI's method: CAPRI
+        solves m_globMarket as one system with CONOPT (arm/simu_market.gms); here, successive linearisation by
+        commodity - the full model response (supply module output anticipated, crushing, dairy blocks, feed and
+        biofuel demand) is re-evaluated each step, and each commodity's trade system solved exactly with supply and use
+        log-linear in its own price around that point (the other prices held), the step damped and Anderson-
+        accelerated. At convergence every balance holds, so the solution is the system's (the whole-market system, market_chain.py, checks it);
+        the path, not the equilibrium, is the fixed point's."""
         _st = _settings()                                   # market.* : tolerance, rounds, damping, step clip
         if tol is None:
             tol = float(_st.get("market.tol"))
         if max_outer is None:
             max_outer = int(_st.get("market.max_iter"))
         _sclip = tuple(_st.get("market.step_clip"))
-        if self.par.demand_cal_frozen is None:
-            # S7, CAPRI's form (arm/prep_market.gms l. 635-749): the behavioural functions calibrated once per run at
+        if not self.par.market_calibrated:
+            # CAPRI's form (arm/prep_market.gms l. 635-749): the behavioural functions calibrated once per run at
             # CAPRI's own 2030 market data, not at the supply models' output; then the market is solved, the baseline
             # included (no return at the reference prices): only the supply side follows the supply models
             self._bilateral_calibrate()
             self._apply_trq_volumes(self.par.bilat)
-            self.par.demand_cal_frozen = self.par.demand_cal.copy()
-        self.par.demand_cal = self.par.demand_cal_frozen.copy()
+            self.par.market_calibrated = True
         sysd = self.par.bilat
         self._apply_trq_volumes(sysd)
         R = list(self.regions)
@@ -665,8 +666,15 @@ class BilateralSolveMixin(MarketStateMixin):
             return np.array([max(float(self.par.base_production[c].sum()), 1.0)])
 
         if str(_st.get("market.solver")) == "newton_krylov":
-            # step G2: the same equations at once (capri_mod/market/market_nk.py)
+            # the Newton-Krylov solve: the same equations at once (capri_mod/market/market_nk.py)
             return self._nk_solve(r, exogenous_supply, trade_scenario, es, ed, size, tol, max_outer, verbose)
+        if str(_st.get("market.solver")) in ("chain", "ipopt") and last is not None:
+            # the market as one system in CAPRI's form (capri_mod/market/market_chain.py); the fixed point below then
+            # starts at its solution, which it confirms in its first evaluation (and continues from if it does not)
+            from capri_mod.market.market_chain import chain_market_solve
+            r_ = chain_market_solve(self, r, exogenous_supply, trade_scenario, str(_st.get("market.solver")))
+            if r_ is not None:
+                r = r_
         prev = np.inf
         damp = 1.0
         converged = False
@@ -730,13 +738,8 @@ class BilateralSolveMixin(MarketStateMixin):
                              else self._bilateral_inner)
                     new[c] = inner(sysd[c], S[c].values, D[c].values, rk, PAr[c].values * sysd[c].PA0,
                                    es[c].values, ed[c].values, tadd.get(c))
-                else:
-                    # pooled market: one price ratio for all regions
-                    s_, d_ = float(S[c].sum()), float(D[c].sum())
-                    e_s = float((S[c] * es[c]).sum() / max(s_, 1e-9))
-                    e_d = float((D[c] * ed[c]).sum() / max(d_, 1e-9))
-                    if s_ > 0 and d_ > 0 and (e_s - e_d) > 1e-6:
-                        new[c] = r[c] * (d_ / s_) ** (1.0 / (e_s - e_d))
+                # raw milk (the one product without bilateral trade): its price is each region's dairy block's
+                # (K165), not an unknown of this solve; its column is left as it is
             if aa:
                 z = np.log(r.to_numpy(dtype=float)).ravel()
                 g = np.log(np.maximum(new.to_numpy(dtype=float), 1e-300)).ravel()
@@ -756,6 +759,20 @@ class BilateralSolveMixin(MarketStateMixin):
                 r = pd.DataFrame(np.exp(z + step).reshape(r.shape), index=r.index, columns=r.columns)
             else:
                 r = r * (new / r).clip(lower=_sclip[0], upper=_sclip[1]) ** damp
+        if converged and str(_st.get("market.bounds")) == "capri" and str(_st.get("market.solver")) not in (
+                "chain", "ipopt", "newton_krylov"):
+            # CAPRI's bounds (G3.4, the project lead's decision of 16 November 2026): the fixed point's equilibrium
+            # handed to the semismooth Newton on the bounded system's MCP form (market_chain "ssn"), which keeps it
+            # where no bound binds and imposes the bounds where one does (CAPRI: CONOPT with widen_bounds.gms; a solver
+            # departure, docs/dev/MARKET_BOUNDS_PLAN.md); the outputs evaluated at its prices
+            from capri_mod.market.market_chain import chain_market_solve
+            r_ = chain_market_solve(self, r, exogenous_supply, trade_scenario, "ssn")
+            if r_ is None:
+                converged = False
+            else:
+                r = r_
+                S, D, PAr, F, pc = self._bilateral_eval(r, exogenous_supply, trade_scenario)
+                err = max(float(np.max(np.abs(F[c] / size(c)))) for c in F)
         self.sv.bilat_last_r = r.copy()
         self._bilat_err = err
         return r, S, D, PAr, pc, converged, it + 1
@@ -776,11 +793,8 @@ class BilateralSolveMixin(MarketStateMixin):
         sysd = self.par.bilat
         # CAPRI's welfare report (market/welfare.py) at the solution, at the prices the market's functions saw
         welfare = self._capri_welfare(r, PAr, S, D, pc)
-        # RAW MILK with the dairy block: the EU milk price is the block's (fat and protein values of the products
-        # less margins); raw milk is not traded, so it replaces the pooled market's ratio for the EU
-        # world index from the market's own ratios, BEFORE the EU's raw milk takes the dairy block's price: for a
-        # pooled product the index is the first region's ratio, and EU27 is the first region, so the reported world
-        # raw milk price was the EU dairy block's (K17; the EU price signal itself was right: premium x world)
+        # RAW MILK: not traded (CAPRI); every region's raw milk price is its dairy block's (fat and protein values of
+        # the products less margins, ProcMargM_ of MILK), set into the price frame here; no world price (K165)
         widx = self._bilateral_world_index(r)
         _dl = self.ev.dairy_last
         if self._dairy_params() and _dl is not None and "MILK" in r.columns and all(x in r.index for x in self.EU):

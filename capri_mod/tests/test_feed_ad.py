@@ -1,4 +1,4 @@
-"""Step G2d: CAPRI's non-EU feed block (FeedNQ_, FeedBal_) in CasADi (capri_mod/market/feed_ad.py) equals the loops
+"""CAPRI's non-EU feed block (FeedNQ_, FeedBal_) in CasADi (capri_mod/market/feed_ad.py) equals the loops
 feed.py had until 4 November 2026 (written out here as the reference), and FEDE clears the balance's residual."""
 import numpy as np
 import pandas as pd
@@ -69,11 +69,9 @@ def _feed_change_loop(P, arm_ratio, fede):
 
 
 @pytest.fixture(scope="module")
-def market():
-    from pathlib import Path
-    from capri_mod.data.loaders import load_all_data
-    from capri_mod.market.market_module import MarketModule
-    return MarketModule(load_all_data(Path(__file__).resolve().parents[2] / "capri_data"))
+def market(base_market):
+    """The market module built from the model's data (conftest.py)."""
+    return base_market
 
 
 @pytest.mark.parametrize("seed", [0, 1])

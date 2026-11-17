@@ -1,4 +1,4 @@
-"""CAPRI's Norwegian premiums (policy/norw_pol.gms, policy/def_no_policy.gms, policy/policy.gms; P2): the national
+"""CAPRI's Norwegian premiums (policy/norw_pol.gms, policy/def_no_policy.gms, policy/policy.gms): the national
 rates of each payment group by year (NO000000) times the regional factors of the NUTS 2 units, as CAPRI computes them
 for the simulation year.
 

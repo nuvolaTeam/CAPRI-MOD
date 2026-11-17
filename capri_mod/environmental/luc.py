@@ -26,7 +26,7 @@ from typing import Dict, Optional
 import numpy as np
 import pandas as pd
 
-from capri_mod.data.definitions import LAND_MARKET_TYPES   # the land market's free land types (N6)
+from capri_mod.data.definitions import LAND_MARKET_TYPES   # the land market's free land types
 
 CLS = {"CRP": "CROP", "FOR": "FORE", "ART": "ARTIF", "GRS": "GRSLND", "WET": "WETLND", "RES": "RESLND"}
 

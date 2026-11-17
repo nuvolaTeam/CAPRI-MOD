@@ -19,7 +19,7 @@ solvable from) and the tie-break; the tests' thresholds hold with it.
 test_solve1_objective_equals_captrds: Solve1 (CAPTRD's stored support1, the port's bounds on it, the start
 at the support) against CAPTRD's step2, Solve1's result. CAPTRD stores the wVarErr of Solve2 only; Solve1's is rebuilt:
 on the 2d chain's expert positions as define_stats_and_supports.gms l. 646-663 sets it (test_captrd_eu_supports.py's
-chain), on the positions whose trust level stage 2f adds the trend's, MAX(0.05 |wAve|, wVarErr) (l. 327-329, as coded,
+chain), on the positions whose trust level define_EU_supports.gms adds the trend's, MAX(0.05 |wAve|, wVarErr) (l. 327-329, as coded,
 not for requirement and feed rows), wVarErr from CAPTRD's stored statistics as wVar x (1 - wR2) (l. 177-179 inverted;
 wVar where wR2 is 0, its lower bound) or wAve^2 / 4 with one or two observations (l. 130); elsewhere the stored one.
 Checked 12 November 2026 with the phase-1 marginals: Denmark 2030, the port's optimum 0.51391, CAPTRD's step2 0.51385
@@ -27,7 +27,7 @@ under the same objective, 62% of the positions within 2% of step2; Austria 2030,
 2% (with IPOPT's own marginals 787.6: bounds of INHA, foodSh and HCOM opened that CAPTRD did not open). The other
 positions are mostly trade (EXPT, IMPT, NTRD) and other directions the objective leaves nearly free, so the objective,
 not the share of equal positions, is the test. With the stored (Solve2) wVarErr instead, step2 scores 2.27 against the port's 0.23:
-stage 2f gives FEDM.OCER, FEDM.MOLA and INDM.OCER trust levels at DG AGRI's values (about a hundredth of support1),
+define_EU_supports.gms gives FEDM.OCER, FEDM.MOLA and INDM.OCER trust levels at DG AGRI's values (about a hundredth of support1),
 and with them standard errors of about 0.2 where Solve1's, the trend's, are near 156 (FEDM.OCER).
 
 Open: the solution itself against CAPTRD's step3 (about 36% of the positions within 0.5%): step3 is the result of a
@@ -89,7 +89,7 @@ def test_denmark_2030_solve2_widens_to_captrds_bounds(prepared):  # noqa: F811
     # every equation holds at the solution
     res = E.residuals(E.Point(**{**p.__dict__, "V": r.x, "lo": r.lo, "up": r.up}), S, level=start)
     assert not E.violations(res, 1e-4)
-    # stage 2f: clean_tiny.gms, then copy_labour_biofuel_on_presult.gms, against CAPTRD's step3 on the positions it
+    # clean_tiny.gms, then copy_labour_biofuel_on_presult.gms, against CAPTRD's step3 on the positions it
     # holds. The widening's path moves the result by several points (the share within 2% after Solve2 on the port's
     # bounds was 84-94% between runs whose inputs differed in their last digits), so the check starts from Solve2 on
     # CAPTRD's own final bounds (a bound CAPTRD does not store is 0, or infinite where the port's is: an infinite bound

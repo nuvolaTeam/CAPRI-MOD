@@ -1,4 +1,4 @@
-"""The blocks of CAPRIModel (refactor stage 4a): mixins of model.CAPRIModel.
+"""The blocks of CAPRIModel (the refactor's split into block mixins): mixins of model.CAPRIModel.
 
 Their methods were moved unchanged from model.py and use its module-level names: inject gives each block module
 those names once model is loaded (a name a block defines itself is kept).

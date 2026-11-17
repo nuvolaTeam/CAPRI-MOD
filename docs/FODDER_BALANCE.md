@@ -39,7 +39,8 @@ Row (`RegionalSupplyModel._fodder_rows`), per region and fodder:
   directions, as CAPRI's baseline holds its balances (K36, K46). In projected years the projected herds' use and the
   projected fodder output need not match; before K36 the row forced the fodder area down to the use.
 - Projection: `u_t_per_ha` follows CAPRI's 2030 usable fodder per ha (FEDM / LEVL of the fodder crops, 2030 over 2017,
-  `capri_ref_fodder_2030.csv`) and `value_eur_t` CAPRI's 2030 fodder price ratio.
+  `capri_ref_fodder_2030.csv`) and `value_eur_t` CAPRI's own 2030 unit value of the fed fodder (UVAG, region and
+  fodder, in 2017 money; `fodder_value_2030.csv`, K161); pairs without it take CAPRI's 2030/2017 ratio of the value.
 
 Valuation. Fodder carries no price in the objective; its value is the dual of its balance. The regional calibration
 makes the base a first-order point with the balance binding and its dual at CAPRI's unit value (the feeds' calibration

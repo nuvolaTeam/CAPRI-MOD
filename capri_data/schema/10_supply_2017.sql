@@ -96,7 +96,7 @@ CREATE TABLE producer_prices (
     activity VARCHAR PRIMARY KEY REFERENCES model_activities (code),
     price DOUBLE NOT NULL CHECK (price >= 0)
 );
-COMMENT ON TABLE producer_prices IS 'EU producer prices 2017 (build_eu_producer_prices.py): crops from CAPRI''s regional prices; SHGM, SHGF from tools/lib/_sheep_goat.eu_prices; VSET''s and FALL''s 0 (SETA''s until S2, 7 November 2026) from sources/unsourced/producer_prices_no_builder.parquet';
+COMMENT ON TABLE producer_prices IS 'EU producer prices 2017 (build_eu_producer_prices.py): crops from CAPRI''s regional prices; SHGM, SHGF from tools/lib/_sheep_goat.eu_prices; VSET''s and FALL''s 0 (SETA''s until 7 November 2026) from sources/unsourced/producer_prices_no_builder.parquet';
 INSERT INTO value_units SELECT 'producer_prices', code, 'U_EuPerTon', 'builder', 'revenue over production of CAPRI''s YILD x MPRI (build_crop_economics_2017.py: EUR/t)'
 FROM model_activities WHERE kind = 'crop' AND code NOT IN ('GRAE', 'GRAI', 'VSET', 'FALL', 'OCRO', 'OIND', 'NURS', 'FLOW');
 INSERT INTO value_units VALUES

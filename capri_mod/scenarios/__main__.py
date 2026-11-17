@@ -1,4 +1,4 @@
-"""Create and check scenarios (refactor stage 5; capri_mod/scenarios/definition.py).
+"""Create and check scenarios (capri_mod/scenarios/definition.py).
 
     python -m capri_mod.scenarios list                         the references, groups and scenarios found
     python -m capri_mod.scenarios new NAME --reference REF [--group greendeal_group] [--dir FOLDER]

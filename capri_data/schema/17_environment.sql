@@ -10,6 +10,7 @@ CREATE TABLE env_capri_crop_n_coefs_2030 (
     yild DOUBLE,
     nitf DOUBLE NOT NULL,
     ncrd DOUBLE,
+    mann DOUBLE,
     biofix_t DOUBLE,
     PRIMARY KEY (capri_region, crop)
 );
@@ -19,6 +20,7 @@ INSERT INTO value_units VALUES
   ('env_capri_crop_n_coefs_2030', 'yild', NULL, 'open', 'capri_crop_n_coefs_2030.yild: unit to be established'),
   ('env_capri_crop_n_coefs_2030', 'nitf', NULL, 'open', 'capri_crop_n_coefs_2030.nitf: unit to be established'),
   ('env_capri_crop_n_coefs_2030', 'ncrd', NULL, 'open', 'capri_crop_n_coefs_2030.ncrd: unit to be established'),
+  ('env_capri_crop_n_coefs_2030', 'mann', 'U_kgperha', 'capri', 'CAPRI DATA(crop, MANN), e_CRESID coefficient (supply_model.gms)'),
   ('env_capri_crop_n_coefs_2030', 'biofix_t', NULL, 'open', 'capri_crop_n_coefs_2030.biofix_t: unit to be established');
 
 -- file: capri_data/baselines/capri_greendeal_ref/1730/environment/capri_gnb_components_2030.csv
@@ -306,9 +308,15 @@ CREATE TABLE env_manure_pool_market_2030 (
     base_net_export_kt DOUBLE NOT NULL,
     buffer DOUBLE NOT NULL,
     buffer_greendeal DOUBLE NOT NULL,
+    base_export_kt DOUBLE NOT NULL,
+    base_import_kt DOUBLE NOT NULL,
+    sell_slope DOUBLE NOT NULL,
+    buy_slope DOUBLE NOT NULL,
+    open_export DOUBLE NOT NULL,
+    open_import DOUBLE NOT NULL,
     PRIMARY KEY (region, fout)
 );
-COMMENT ON TABLE env_manure_pool_market_2030 IS 'CAPRI''s manure pool market terms per CAPRI region and manure nutrient (MANN, MANP, MANK): the manure distributed to crops, the calibration dual, CAPRI''s excess-supply slope p_mPoolSupSlope and its value in the model''s units (manuremarket/declare_manure_market.gms l. 466-505; outer_loop.manure_pool_form "capri"). (tools/build/build_manure_pool_market.py)';
+COMMENT ON TABLE env_manure_pool_market_2030 IS 'CAPRI''s manure pool market terms per CAPRI region and manure nutrient (MANN, MANP, MANK): the manure distributed to crops, the calibration dual, CAPRI''s excess-supply slope p_mPoolSupSlope and its value in the model''s units (manuremarket/declare_manure_market.gms l. 466-505; outer_loop.manure_pool_form "capri"); the region''s gross trade at the calibration point, its trade cost slopes and the opening costs of the direction it does not trade (supply/define_manure_trade_costs.gms; supply.manure_trade_form "capri"). (tools/build/build_manure_pool_market.py)';
 INSERT INTO value_units VALUES
   ('env_manure_pool_market_2030', 'supply_t', 'U_Ton', 'capri', 'sum of p_priFertDist postMode EXCR over the fertiliser groups (v_fertDist, t)'),
   ('env_manure_pool_market_2030', 'dual_cal_eur_t', 'U_EuPerTon', 'capri', 'p_dualValueManureCal (CAPRI''s 2030 money): ManureNPK_.M, the supply model objective in 1000 EUR over the balance in 1000 t'),
@@ -317,7 +325,13 @@ INSERT INTO value_units VALUES
   ('env_manure_pool_market_2030', 'dual_cal', 'U_1000EuPerTon', 'builder', 'dual_cal_eur_t / 1000 / deflator(2030)'),
   ('env_manure_pool_market_2030', 'base_net_export_kt', 'U_1000t', 'capri', 'p_priorMTrade(r, "postMode", FOUT, 2030): net manure export at the calibration point, 1000 t of nutrient (v_manureExports, v_manureImports: 1000 t)'),
   ('env_manure_pool_market_2030', 'buffer', 'U_1000EuPerTon', 'builder', 'p_mTradeAutarkyBuffer 10 EUR per t / 1000 / deflator(2030)'),
-  ('env_manure_pool_market_2030', 'buffer_greendeal', 'U_1000EuPerTon', 'builder', 'p_mTradeAutarkyBuffer in the Green Deal group (50,000 EUR per t for the isolated pools) / 1000 / deflator(2030)');
+  ('env_manure_pool_market_2030', 'buffer_greendeal', 'U_1000EuPerTon', 'builder', 'p_mTradeAutarkyBuffer in the Green Deal group (50,000 EUR per t for the isolated pools) / 1000 / deflator(2030)'),
+  ('env_manure_pool_market_2030', 'base_export_kt', 'U_1000t', 'capri', 'p_manureExports(r, FOUT, 2030): gross manure exports at the calibration point, 1000 t of nutrient'),
+  ('env_manure_pool_market_2030', 'base_import_kt', 'U_1000t', 'capri', 'p_manureImports(r, FOUT, 2030): gross manure imports at the calibration point, 1000 t of nutrient'),
+  ('env_manure_pool_market_2030', 'sell_slope', 'U_1000EuPerTonPerTon', 'builder', 'p_manureSellCostSlope (EUR per t per 1000 t) / 1000 / 1000 / deflator(2030)'),
+  ('env_manure_pool_market_2030', 'buy_slope', 'U_1000EuPerTonPerTon', 'builder', 'p_manureBuyCostSlope (EUR per t per 1000 t) / 1000 / 1000 / deflator(2030)'),
+  ('env_manure_pool_market_2030', 'open_export', 'U_1000EuPerTon', 'builder', 'zero where the region exports at calibration, else p_manureSellCostConst - (p_manurePoolPrice - p_dualValueManureCal), / 1000 / deflator(2030)'),
+  ('env_manure_pool_market_2030', 'open_import', 'U_1000EuPerTon', 'builder', 'zero where the region imports at calibration, else p_manureBuyCostConst + (p_manurePoolPrice - p_dualValueManureCal), / 1000 / deflator(2030)');
 
 -- file: capri_data/2017/environment/n_deposition_regional.csv
 CREATE TABLE env_n_deposition_regional (

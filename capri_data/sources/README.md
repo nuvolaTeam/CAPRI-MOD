@@ -4,7 +4,7 @@ The builders (`tools/build`) read this folder; the model does not: its input lay
 `capri_mod/market/inputs.py`) refuse a `sources/...` location since 3 November 2026. A number the model needs from
 here is written by a builder as a model input under `capri_data/<base year>/`, `trajectories/` or `shared/`.
 
-Layout by role (since 6 November 2026; docs/design/DATA_LAYOUT.md, file by file in DATA_LAYOUT_files.csv). Every table
+Layout by role (since 6 November 2026; docs/dev/DATA_LAYOUT.md, file by file in DATA_LAYOUT_files.csv). Every table
 here is Parquet since 8 November 2026 (the data layout's step (c)): each is the table its former CSV held, values to the
 last bit, and every builder reads and writes them through `tools/lib/_sources_io.py` (`read_source`, `write_source`);
 the model's inputs outside this folder stay CSV. To look at one: `python tools/check/show_table.py <file>`, or

@@ -25,7 +25,7 @@ ALIASES = {
                "PIGS": "SOWS", "LAYS": "HENS", "BROI": "POUF", "BULL": "BULF"},
     # the herds block carries CAPRI's activity levels (LEVL), crops included: model crop names too
     "herds": {"BULL": "BULF", "PIGS": "SOWS", "POUL": "POUF", "SCOW": "SCOW", "HEIF": "HEIF",
-              "CORN": "MAIZ", "WINE": "TWIN",   # (OFOD = OFAR until S2, 7 November 2026: OFAR and ROOF their own)
+              "CORN": "MAIZ", "WINE": "TWIN",   # (OFOD = OFAR until 7 November 2026: OFAR and ROOF their own)
               # the model's own animal names (animal_numbers columns) had no herd factor: suckler cows, heifers,
               # laying hens, broilers, calves, sheep and goats stayed at 2017 in the projected data (K12)
               "BCOW": "SCOW", "HFRS": "HEIF", "LAYS": "HENS", "BROI": "POUF", "CALV": "CACR"},

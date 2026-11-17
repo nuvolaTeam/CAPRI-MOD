@@ -29,7 +29,7 @@ manure_trade = true
 # base year of the data (only capri_data/2017 exists; 2030 runs go through the projection layer)
 base_year = "2017"
 # the baseline whose projection from the base year the run uses: its folder capri_data/baselines/<baseline>/
-# <BAS><SIM>, CAPRI's %BAS%%SIM% (1730; capri_mod.data.inputs.year_dir; docs/design/DATA_LAYOUT.md step (d)). capri_greendeal_ref:
+# <BAS><SIM>, CAPRI's %BAS%%SIM% (1730; capri_mod.data.inputs.year_dir; docs/dev/DATA_LAYOUT.md step (d)). capri_greendeal_ref:
 # CAPRI's 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta), the only one for now. CAPRI's equivalent: the
 # baseline a CAPMOD scenario starts from (CAPTRD's %results_in%/baseline/trends_<BAS><SIM>.gdx, e.g.
 # envind/bfp_sets_parameters.gms l. 54-59, and the baseline run calibrated to it)
@@ -43,17 +43,17 @@ run_environmental = true
 report_biofuel = false
 # IPOPT solver objects kept per region graph (about 6 MB each)
 nlp_cache_size = 64
-# the regional NLP's derivative functions kept (sensitivity and KKT factorisations, each; refactor stage 3, N5)
+# the regional NLP's derivative functions kept (sensitivity and KKT factorisations, each)
 nlp_derivative_cache_size = 16
 # the countries outside the EU whose supply models are in the run, by CAPRI member-state code (CAPRI's per-country
 # switches, %CountriesNO000000% ... %CountriesTUR%, capmod/define_regional_sets.gms l. 40-77). Each must have regional
 # units (capri_data/codes/regional_units.csv). Their market region takes its supply from their models; a country
 # left out keeps its market region's supply functions. The EU's member states are always in.
 supply_countries_outside_eu = ["NO000000"]
-# a folder of the user's own scenarios (refactor stage 5), looked in before capri_data/scenarios; "" = none. A scenario
+# a folder of the user's own scenarios, looked in before capri_data/scenarios; "" = none. A scenario
 # there may name a reference or group of the repository's (python -m capri_mod.scenarios new / check)
 scenarios_dir = ""
-# where the run's long results table is written (refactor stage 5; capri_mod/io_results.py write_run): a Delta table
+# where the run's long results table is written (capri_mod/io_results.py write_run): a Delta table
 # results_dir/long, each reference and scenario under its run id (the SHA-256 of its results and its definition,
 # io_results.run_id_of; scenario and run_id are columns, the tables are not partitioned), the reference stored once
 # (results_dir/runs records each one with its fingerprint), the run's metadata, settings and manifest in
@@ -142,7 +142,7 @@ manure_pool_qp_tol = 1e-8
 # a step towards the new clearing prices, the omega bounds above; the default 11-12 November 2026). CAPRI's averaging on
 # capri-mod's former pool market ("schedules") kept regional crop and feed mixes swinging (full-EU Green Deal 2030 not
 # converged after 36 iterations); with CAPRI's pool market ("capri") it converges: full-EU Green Deal 2030 in
-# 19 iterations, the equilibrium within 0.1-0.4 points of the damped run's (docs/design/MANURE_POOL_PORT.md)
+# 19 iterations, the equilibrium within 0.1-0.4 points of the damped run's (docs/dev/MANURE_POOL_PORT.md)
 manure_pool_price_update = "capri"
 # the pools' clearing model: "capri" (CAPRI's m_mPoolMarket, manuremarket/declare_manure_market.gms l. 99-204: each
 # region's linear excess supply, refitted at its manure value and net trade of the last solve, its trade costs, the
@@ -160,7 +160,7 @@ manure_pool_pshw_floor = 1e-9
 # the "capri" form: a pool's base net export (kt) beyond this counts as trade at CAPRI's calibration point (CAPRI's
 # p_mTradeAutarkyTol, declare_manure_market.gms l. 422-423), for the links exempt from the autarky buffer
 manure_pool_autarky_tol = 0.001
-# numerical (refactor stage 4): the multiplier recovery of a region's stored problem (NNLS on its active rows): a row
+# numerical: the multiplier recovery of a region's stored problem (NNLS on its active rows): a row
 # is active within this relative tolerance, a column at its bound below this level, at most this many iterations per
 # column; the pools' trade cost slopes are divided by kappa, at least this floor; the arcs' ridge as a share of the
 # smallest slope
@@ -177,7 +177,7 @@ manure_pool_arc_ridge = 1e-3
 ecosetaside_hold_tol = 1e-6
 # PMP terms: "capri2030" (CAPRI's exported 2030 terms at 2030; CAPRI's recipe at its 2017 point at 2017) or "recipe"
 # (capri-mod's own with CAPRI's recipe); activities without a term are held at their level ("elasticity", the legacy
-# calibration from CAPRI's elasticities, removed 28 October 2026, audit S13)
+# calibration from CAPRI's elasticities, removed 28 October 2026; the supply audit's finding S13, ARCHITECTURE_REFACTOR.md section 5.2)
 pmp_source = "capri2030"
 # with capri2030: which parts take CAPRI's terms
 pmp_capri_parts = ["crops", "animals", "feed", "land"]
@@ -206,8 +206,8 @@ use_cattle_member_splits = false
 # diversification index took the fixed columns' logs, and the permanent-grassland rule applied to a grassland of
 # 3.5e-11 kha (KNOWN_ISSUES K69)
 absent_activities_fixed = true
-# CAPRI's two technologies per crop, T1 (high yield) and T2 (low yield), as one mix column per crop with both (S1,
-# docs/design/S1_MIX_COLUMNS.md; with CAPRI's 2030 PMP terms only). false: the collapsed form (DEP-9, closed). CAPRI's
+# CAPRI's two technologies per crop, T1 (high yield) and T2 (low yield), as one mix column per crop with both (see
+# docs/dev/CROP_TECHNOLOGY_MIX_COLUMNS.md; with CAPRI's 2030 PMP terms only). false: the collapsed form (DEP-9, closed). CAPRI's
 # setting, the default since 8 November 2026 (full-EU Farm-to-Fork and Green Deal, KNOWN_ISSUES K124)
 crop_technologies = true
 # JRC121368 capped regions given instead of the nine highest baseline surpluses (comma list; "" = the rule)
@@ -216,15 +216,15 @@ jrc_capped_override = ""
 # solve tolerance is outer_loop.nlp_tol_final / nlp_tol_early)
 nlp_max_iter = 3000
 nlp_warm_max_iter = 200
-# numerical (refactor stage 3, N5): the ridge weight of the NLP calibration's multiplier fit, relative to the scaled
+# numerical: the ridge weight of the NLP calibration's multiplier fit, relative to the scaled
 # columns (also in the market supply Hessian's cache key); the fit's iteration limit (scipy lsq_linear)
 nlp_cal_ridge = 1e-10
 nlp_cal_lsq_max_iter = 5000
-# numerical (N5): the IPOPT start moved inside the fertiliser regulations' support, to this share of each bound
+# numerical: the IPOPT start moved inside the fertiliser regulations' support, to this share of each bound
 nlp_start_regulation_margin = 0.95
-# numerical (N5): an activity at or below this level counts as absent (CAPRI: no p_technFact)
+# numerical: an activity at or below this level counts as absent (CAPRI: no p_technFact)
 absent_level = 1e-8
-# numerical (N5): the organic share capped so the conventional share stays positive
+# numerical: the organic share capped so the conventional share stays positive
 organic_share_cap = 0.99
 # numerical safeguard (not a CAPRI parameter): a warm-started solution whose objective is more than this share worse
 # than the last iteration's is checked against the solves from the previous point and the standard start, keeping the
@@ -301,6 +301,13 @@ nbal_inner_max = 16
 # manure trade cost slope: CAPRI define_manure_trade_costs.gms l. 66-71, EUR 50 per t N for each 1% of the region's
 # manure N traded (0.05 in the model's EUR 1000)
 manure_pool_slope = 0.05
+# the regional model's manure trade columns: "capri" (CAPRI's e_costMTrade: exports and imports each with its own
+# cost, supply/define_manure_trade_costs.gms; as changes from the region's gross trade at the calibration point, each
+# down to zero; the direction a region does not trade at the calibration point opens at CAPRI's calibrated constant;
+# CAPRI's slopes p_manureSellCostSlope / p_manureBuyCostSlope; manure_pool_market_2030.csv; the default since
+# 17 November 2026) or "net" (capri-mod's form until then: one change of net trade each way from zero, both at
+# manure_pool_slope over the model's manure in CAPRI's money, no opening cost; needs it for the "schedules" pool form)
+manure_trade_form = "capri"
 # Green Deal organic and pesticide targets: CAPRI's regional input changes (define_inputs.gms l. 66-73).
 # CAPRI-ERROR-FIX. conventional_io.gms l. 361 sets scenAugmentsTechChange off at compile time, after organic_io.gms
 # l. 94 and conventional_io.gms l. 171 set it on, so the scenario's input change REPLACES the 2017-2030 input-saving
@@ -312,7 +319,7 @@ greendeal_inputs_keep_tech_change = true
 # unit value. true: valued at the fuel cost; false: CAPRI's code as written (parity switch)
 organic_topup_at_fuel_cost = true
 # CAPRI's fertiliser-option curvature with the fertiliser saving valued at the member state's NITF price (envind/
-# ghgMiti.gms l. 1016-1035, audit S5); false: without (this model before 24 October 2026). OFF by default (25 October
+# ghgMiti.gms l. 1016-1035, the supply audit's finding S5, ARCHITECTURE_REFACTOR.md section 5.2); false: without (this model before 24 October 2026). OFF by default (25 October
 # 2026): with it and the cost on the N purchases, the curvature turns negative where NMIN is large and the baseline
 # leaves the base share (FR10 precision farming 0.44 at the 2030 baseline, run r128: EU 9.6%); either part alone
 # keeps the base. Open (KNOWN_ISSUES K77)
@@ -322,10 +329,10 @@ fert_slope_with_saving = false
 # the inner model's duals widened to +-1000 where CAPRI's +-10 admit no allocation (REGISTERED, CAPRI's own
 # workaround is a slack)
 npk_dual_bound_wide = 1000.0
-# numerical (refactor stage 3, N5): regulated flows kept strictly inside the beta density's support, at this share of
+# numerical: regulated flows kept strictly inside the beta density's support, at this share of
 # its upper end (CAPRI: an open support)
 support_margin = 0.999
-# numerical (refactor stage 4): the mineral caps scaled so the distribution keeps this share of them (0.2% room)
+# numerical: the mineral caps scaled so the distribution keeps this share of them (0.2% room)
 cap_room = 0.998
 # a crop group whose mineral cap leaves its N need out of reach (NLP infeasible) is exempted as CAPRI exempts groups
 # (minfert_redu_by_crop.gms, p_checkSmallMine): its cap at this multiple of its baseline mineral N per ha (CAPRI: 1.0
@@ -337,6 +344,15 @@ exempt_cap_factor = 1.0
 # x 1000 t)
 partial_slack_tiny_t = 5.0
 partial_slack_listed_add_t = 100.0
+# the fertiliser flows' lower bound, in units of their prior mode (CAPRI's set_fert_priors.gms: 0.001 x mode)
+flow_lower_bound_mode_share = 0.001
+# DEPARTURE DEP-49 (KNOWN_ISSUES K159, the project lead's decisions of 15 and 16 November 2026): the inner model's
+# first-order condition with the flow's lower-bound multiplier (complementarity, a smoothed Fischer-Burmeister
+# function). "fallback": CAPRI's e_focFertDist (an equality, which cannot hold at the bound) in every solve, the
+# complementarity only in the retry of a solve that failed with the equality; "always"; "off": CAPRI's equality only
+foc_lower_bound_complementarity = "fallback"
+# numerical: the smoothing of the Fischer-Burmeister function (squared, in the flows' scaled units)
+foc_fb_smoothing = 1e-12
 # inner distribution solve: tolerance, iterations
 fd_tol = 1e-9
 fd_max_iter = 100
@@ -359,7 +375,7 @@ hessian_skip_unchanged = true
 # set: the exact derivative where CAPRI's is a 1% difference quotient; no change of the active set within the shock).
 # Needs hessian_skip_unchanged (its base re-solve records the base points)
 hessian_method = "capri"
-# numerical (refactor stage 4): a product is shocked only if its base supply exceeds this (kt); Hessian entries below
+# numerical: a product is shocked only if its base supply exceeds this (kt); Hessian entries below
 # this size are dropped
 hessian_min_supply_kt = 1e-6
 hessian_entry_floor = 1e-9
@@ -382,6 +398,12 @@ noneu_supply_nq = true
 # noneu_land_mnl.csv; tools/build/build_noneu_market_supply_nq.py); false: the rents held at calibration (until
 # 4 November 2026). Needs noneu_supply_nq
 noneu_land_market = true
+# the young-animal markets and the member states' raw milk inside each market evaluation (CAPRI: yaniMarket_ and DairyNQ_
+# in one system, m_globMarket), cleared in alternating rounds until the milk prices change by less than yani_milk_tol,
+# at most yani_milk_rounds (a message when the rounds stop first). 4 rounds until 14 November 2026 (the project lead's
+# decision: lifted; on the mini-EU Farm-to-Fork no indicator moved at 0.1)
+yani_milk_rounds = 50
+yani_milk_tol = 1e-10
 # CAPRI's land-use-change estimation of the market outside the EU (luc_market, on with REPORTS_ENV,
 # capmod/set_global_variables.gms l. 395; arm/market_model.gms LinkLuWithShares_, luClassInitial_, luClassFinal_,
 # FocLUC_): the transitions between the UNFCCC land classes of each non-EU region with the land block, reported with the
@@ -424,18 +446,63 @@ trq_joint = true
 # the non-EU land markets' Newton (MarketModule land rents, supply.py): the residual, relative to each land use's
 # base area (floor 1 kha), below which the solve is accepted when 100 Newton steps have not met the 1e-13 target (the
 # line search no longer reduces it: round-off); otherwise the run stops as before. 1e-8: the order of CONOPT's
-# default feasibility tolerance (CAPRI solves the rents inside m_globMarket with CONOPT). Added 6 November 2026 (S7:
+# default feasibility tolerance (CAPRI solves the rents inside m_globMarket with CONOPT). Added 6 November 2026 (CAPRI's market calibration:
 # away from the reference prices NZL stopped at 2e-9 kha, about 2 m2)
 land_stall_tol = 1e-8
-# the trade systems' Newton with the exact Jacobian from CasADi (market programme step G1, capri_mod/market/trade_ad.py)
+# the trade systems' Newton with the exact Jacobian from CasADi (capri_mod/market/trade_ad.py)
 # instead of finite differences; same equations and root
 exact_jacobian = false
-# the market solve (market programme step G2, docs/design/ARCHITECTURE_REFACTOR.md section 6): "fixed_point", the
+# the market solve (docs/dev/ARCHITECTURE_REFACTOR.md section 6): "fixed_point", the
 # successive linearisation above (each commodity's trade system exact, the links across commodities and blocks between
 # steps), or "newton_krylov", the same equations at once (capri_mod/market/market_nk.py: Newton on all prices, GMRES
 # with finite-difference directional derivatives, the fixed point's Jacobian as preconditioner); the same stopping rule.
-# The project lead's choice of 29 October 2026; the default until its full-run comparison
+# The project lead's choice of 29 October 2026; the default until its full-run comparison. "chain" and "ipopt" (14 November 2026;
+# docs/dev/MARKET_SYSTEM.md, capri_mod/market/market_chain.py): the market's equations as one system in CAPRI's form from
+# the previous solve's solution, then the fixed point from that solution (it confirms it in its first evaluation); the
+# run's first solve, which calibrates the market, is the fixed point's. "chain": Newton's method with the exact
+# sparse Jacobian, then a continuation on the quotas' sigmoid slope, then IPOPT, each where the one before stalls;
+# "ipopt": IPOPT alone, with a zero objective (CAPRI's use of CONOPT)
 solver = "fixed_point"
+# the chain: the tolerance on the scaled equations and the iteration limit
+chain_tol = 1e-10
+chain_max_iter = 200
+# Newton (in "chain"): the sparse direct solver of its linear systems: "pardiso" (Intel MKL's PARDISO through the optional
+# package pypardiso, Intel's licence, installed by the user as CAPRI's CONOPT; MUMPS when it is missing) or "mumps"
+# (bundled with CasADi, open)
+newton_linear_solver = "pardiso"
+# "chain": where Newton stalls, a continuation on the quotas' sigmoid slope (CAPRI's p_trqSigmoidSlope, 200):
+# Newton at these slopes in turn, then at CAPRI's, each from the last (CAPRI's trim_trqs.gms raises it from 10 to 200
+# by 10; on the base market at +5% soft wheat these four stages took 22 Newton steps, 10 to 200 by doubling 27, 50
+# then 200 26, Newton at 200 alone stalls)
+trq_slope_steps = [25.0, 50.0, 100.0]
+# the chain's Newton: stalled when its residual is not halved over this many steps (then the next method of the chain)
+newton_stall_steps = 8
+# G3.4 point 2 (the project lead's choice, 16 November 2026), solver methods "ssn" and "trf" of the market chain: the
+# smoothing of the Fischer-Burmeister function of the semismooth Newton (in the scaled equations' units, squared); the
+# evaluations of SciPy's trust-region reflective least squares per slope
+ssn_fb_smoothing = 1e-20
+trf_max_nfev = 100
+# the quotas' sigmas under CAPRI's bounds: "unit" (0 to 1, the sigmoid's range) or "free" (the solver battery's variant)
+sigma_bounds = "unit"
+# the chain's Newton step: "linesearch" (backtracking on the largest scaled residual) or "dogleg" (Powell's dogleg trust region
+# on the sum of squared scaled residuals, MINPACK's hybrj)
+newton_step = "linesearch"
+# IPOPT's linear solver: "mumps" (bundled with CasADi) or an HSL solver ("ma27", "ma57", "ma77", "ma86", "ma97":
+# Coin-HSL, under STFC's licence, which the user obtains and builds, as CAPRI's users obtain CONOPT's licence)
+ipopt_linear_solver = "mumps"
+# the Coin-HSL library (libcoinhsl.so) for an HSL solver; "" lets IPOPT look for it on the library path
+hsl_library = ""
+# the bounds on the market's unknowns (the port of CAPRI's bounds, their widening and the fudge equations): "none", or "capri" (CAPRI's start bounds of set_start_val.gms,
+# market_bounds.py: IPOPT takes them, a Newton or continuation solution outside them goes on to IPOPT)
+bounds = "none"
+# the widening (with bounds = "capri"): the solves after the first (CAPRI's simu_market.gms: two solves in
+# all, the bounds widened between), and the proximity term of the least-infeasibility solve that names the bounds to
+# widen (IPOPT has no CONOPT's infeasibility marginals; CAPTRD-MOD's DEP-45 the same)
+widen_bounds_tries = 1
+widen_phase1_proximity = 1e-6
+# the chain: evaluations of the fixed point at the solution before it starts, until its supply and use change by less than
+# chain_tol (its blocks' lagged state, KNOWN_ISSUES K147), at most this many
+chain_settle_evals = 20
 # Newton-Krylov: step of the directional differences in log prices; Krylov vectors per Newton step
 nk_fd_step = 1e-6
 nk_max_krylov = 30
@@ -468,6 +535,12 @@ max_step = 0.3
 small_market_scale = 0.1
 
 [environment]
+# the base mineral N per ha of each crop (the accounts' and the supply models' base, CAPRI's NMIN in data["mineral_n_regional"]
+# for 2017): "capri2030", CAPRI's 2030 reference (its inner model's mineral flow per crop, fertDist_mine, whose sum is
+# CAPRI's purchases MINFER; npk_crop_coefs_2030.csv), as the accounts' other 2030 coefficients (capri_crop_n_coefs_2030);
+# "capri2017", CAPRI's 2017 NMIN on the 2030 levels (the model's base until 14 November 2026: Romania's mineral N 32%
+# below CAPRI's 2030 reference, France's 24% above)
+base_mineral_n = "capri2030"
 # CAPRI-ERROR-FIX: CAPRI's ad_data_and_cali.gms l. 588 zeroes the factor dairy AD needs; "fix" applies CAPRI's CH4 factor
 # to dairy cows as to the other animals, "capri" reproduces CAPRI as coded
 ad_dairy_ch4 = "fix"
@@ -504,6 +577,13 @@ fixGenetToIni = 1.0
 fallowInAllRmssup = 1.0
 # %winterCovInAllRmssup% (cover_crops.gms): the winter cover outside the EU too, 1 on (MitiInAllRmssup on)
 winterCovInAllRmssup = 1.0
+# %ghgTechAmmEndog% (supply/set_miti_bounds.gms l. 209-211): the animals' ammonia options (housing, storage, air
+# purification, acidification, application) as choices of the regional model (1) or held at their initial shares (0).
+# CAPRI's effective value in its capmod runs is 0: capmod/set_global_variables.gms l. 229 sets it before the policy
+# file (capmod.gms l. 98 before l. 701), and refpol_endotech_all_sup.gms l. 97 sets 1 only "if not SETGLOBAL"; only the
+# _ini and _max calibration files set 1. Checked on the project lead's Green Deal runs: every option fixed at IniShare,
+# free in the _max run (KNOWN_ISSUES K152)
+ghgTechAmmEndog = 0.0
 
 [diagnostics]
 verbose = true
@@ -521,9 +601,12 @@ hessian_progress_every = 5
 # IPOPT solve, Clarabel's progress printout
 ipopt_print_level = 0
 clarabel_verbose = false
+# the market solve capture: a folder (relative to the working directory, e.g. runs/capture) into which every market solve is written with
+# its inputs and result for tools/check/replay_market.py; "" off (docs/dev/MARKET_SYSTEM.md)
+capture_market_dir = ""
 
 [captrd]
-# CAPTRD-MOD (capri_mod/pipeline/captrd): CAPRI's baseline trend projection (docs/design/CAPTRD_MOD.md).
+# CAPTRD-MOD (capri_mod/pipeline/captrd): CAPRI's baseline trend projection (docs/dev/CAPTRD_MOD.md).
 # %FirstYear%: first year of CAPTRD's YEARS set; the trend variable is p_trend(t) = ORD(t)/10, so 1984 -> 0.1
 # (captrd.gms l. 203, 271; GUI default 1984, gui/capri_gui_definition.xml l. 3906)
 first_year = 1984

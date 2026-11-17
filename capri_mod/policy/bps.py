@@ -1,4 +1,4 @@
-"""CAPRI's basic payment scheme per region (policy/implement_bps.gms with scen/Premiums/bps_convergence.gms, P2c): the
+"""CAPRI's basic payment scheme per region (policy/implement_bps.gms with scen/Premiums/bps_convergence.gms): the
 member state's BPS ceiling of each year distributed to its regional units by their historical (MTR) payments, then
 converged within each BPS region to its average unit value (IUV) by the member state's model.
 

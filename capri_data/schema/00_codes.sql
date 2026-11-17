@@ -1,5 +1,5 @@
 -- The code lists: CAPRI's own sets and the model's codes mapped to them (tools/build/build_code_lists.py).
--- Declarations of the data batch (docs/design/DATA_SCHEMA_DUCKDB.md): tools/check/validate_data.py creates each table,
+-- Declarations of the data batch (docs/dev/DATA_SCHEMA_DUCKDB.md): tools/check/validate_data.py creates each table,
 -- loads the CSV named by the "-- file:" line above it and enforces the types, keys, ranges and references declared here.
 -- Files load in name order (00_ first), so later declarations can reference these tables.
 

@@ -1,4 +1,4 @@
-"""CAPRI's 2030 manure trade per model region (manureTradeNew; Sprint 9j).
+"""CAPRI's 2030 manure trade per model region (manureTradeNew; the manure trade at CAPRI's reference).
 
 CAPRI's 2030 Green Deal baseline (star 3.0, `res_2_1730greendeal_refdefaulta`, tools/lib/paths.BASELINE_REF: the
 run the model's 2030 baseline reproduces; its calibration run `refpol_endotech_all_ini` until 9 November 2026) trades manure between regions

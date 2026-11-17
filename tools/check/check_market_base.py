@@ -1,5 +1,5 @@
 """Does the market alone reproduce CAPRI's 2030 calibrated market in every market region? (MARKET_REGIONS_INVENTORY §5,
-stages 2-3: "base reproduces")
+the EU blocks and the 17 other regions: "base reproduces")
 
 The market module is built from the model's data, the supply of the EU's and the other supply-model countries'
 market regions held at their base production, and solved at base world prices with no scenario. The EU's supply is

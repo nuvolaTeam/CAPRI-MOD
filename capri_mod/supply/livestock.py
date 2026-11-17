@@ -1,7 +1,7 @@
 """Animals in the regional model: the young-animal coefficients, columns and markets' response, the intensity and member splits of cattle, dairy and grassland (CAPRI's split activities), genetics, the fodder rows, the cake index and protein feed cost, the animals' cost per head.
 
-RegionalSupplyModel's methods, moved unchanged from capri_mod/supply/supply_module.py (refactor stage 3a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module's, given to
+RegionalSupplyModel's methods, moved unchanged from capri_mod/supply/supply_module.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module's, given to
 this module once supply_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated
 (they name supply_module's types).
 """
@@ -86,7 +86,7 @@ class LivestockBlock:
         nutrient `nut` (N, P2O5 or K2O; CAPRI's MANN, MANP, MANK): the dairy intensity split (dairy_intensity
         dmann_rel / dmanp_rel / dmank_rel), the cattle splits (cattle_intensity[key], the same) and, for N only, the
         genetics options (genetics_effects[(animal, option)] d_mann_rel: CAPRI's breeding.gms changes MANN only).
-        Until 9 November 2026 (S6 item 6) the split columns moved manure N only."""
+        Until 9 November 2026 the split columns moved manure N only."""
         rc = {"N": "dmann_rel", "P": "dmanp_rel", "K": "dmank_rel"}[nut]
         out = []
         j = getattr(self.ev, "dairy_col", None)
@@ -139,8 +139,8 @@ class LivestockBlock:
         return v if np.isfinite(v) else 0.0          # an activity the region does not have (level fixed at 0)
 
     def _dairy_intensity_column(self, Qa, ca, Aa, ba, start, labels, n):
-        """CAPRI's two-intensity cattle activities: dairy cows (DCOL/DCOH, Sprint 7b), then fattening
-        bulls (BULL/BULH) and heifers (HEIL/HEIH) (Sprint 7c)."""
+        """CAPRI's two-intensity cattle activities: dairy cows (DCOL/DCOH, the port of CAPRI's two dairy activities), then fattening
+        bulls (BULL/BULH) and heifers (HEIL/HEIH) (the port of CAPRI's bull and heifer splits)."""
         Qa, ca, Aa, ba, start = self._dairy_column_only(Qa, ca, Aa, ba, start, labels, n)
         Qa, ca, Aa, ba, start = self._cattle_columns(Qa, ca, Aa, ba, start, labels, n)
         return self._genetics_columns(Qa, ca, Aa, ba, start, labels, n)
@@ -158,7 +158,7 @@ class LivestockBlock:
 
     def _cattle_columns(self, Qa, ca, Aa, ba, start, labels, n):
         """One column z per split of a cattle animal into CAPRI's activities (1000 stalls moved from one CAPRI
-        activity to another, CATTLE_SPLIT_MEMBERS): the intensity pairs (BULL: BULL/BULH; HFRS: HEIL/HEIH, Sprint 7c),
+        activity to another, CATTLE_SPLIT_MEMBERS): the intensity pairs (BULL: BULL/BULH; HFRS: HEIL/HEIH, the port of CAPRI's bull and heifer splits),
         the replacement heifers (HFRS:rep, HEIR against HEIH) and the calves (CALV:male CAMF against CAMR, CALV:female
         CAFF against CAFR). As the dairy split: manure-driven rows x (MANN per stall, a - b) / average; the feed
         block's requirement rows (feeding inside); bounds a = s_a X + z >= 0 and b = s_b X - (sum of the z taking from
@@ -204,7 +204,7 @@ class LivestockBlock:
                 continue
             Aa = np.hstack([Aa, col[:, None]])
             if not member_splits:
-                # the intensity pair alone (Sprint 7c), rows in the order of the validated runs r86 / r87: bounds
+                # the intensity pair alone (the port of CAPRI's bull and heifer splits), rows in the order of the validated runs r86 / r87: bounds
                 # low = s_low X + z >= 0, high = s_high X - z >= 0 right after the column, term q_z
                 lo = np.zeros(Aa.shape[1]); lo[-1] = -1.0; lo[j] = -float(di["share_low"])
                 hi = np.zeros(Aa.shape[1]); hi[-1] = 1.0; hi[j] = -float(di["share_high"])
@@ -312,7 +312,7 @@ class LivestockBlock:
 
     def _genetics_columns(self, Qa, ca, Aa, ba, start, labels, n):
         """One column g per region, animal and option (1000 heads adopting), CAPRI's breeding options and its
-        low-nitrogen feeding (lowNFeed, Sprint 9g):
+        low-nitrogen feeding (lowNFeed, the port of CAPRI's feed options):
           - manure-driven rows (N balance, manure application, crop-need limit, mineral-N allocation):
             the animal's own coefficient x d_mann_rel;
           - the animal's requirement rows in the feed block: requirement x d_ener / d_crpr / d_drmn / d_drmx
@@ -414,7 +414,7 @@ class LivestockBlock:
 
     def _dairy_column_only(self, Qa, ca, Aa, ba, start, labels, n):
         """Append CAPRI's dairy split as one column z (1000 heads moved from DCOH to DCOL; DCOL =
-        s0 x DCOW + z, DCOH = (1 - s0) x DCOW - z, so z = 0 is the base split), Sprint 7b:
+        s0 x DCOW + z, DCOH = (1 - s0) x DCOW - z, so z = 0 is the base split), the port of CAPRI's two dairy activities:
           - rows driven by manure N (N balance, manure application, crop-need limit, mineral-N
             allocation): DCOW's own coefficient x (MANN_DCOL - MANN_DCOH) / MANN_DCOW;
           - the cows' requirement rows in the feed block (energy, protein, dry-matter

@@ -46,7 +46,7 @@ SOURCE_ORIGIN = {
 
 def _source_folder(rel):
     """The publisher folder of a file under capri_data/sources: raw/<publisher>/... (since 6 November 2026,
-    docs/design/DATA_LAYOUT.md), else the folder under sources (intermediate/, fao_2021/)."""
+    docs/dev/DATA_LAYOUT.md), else the folder under sources (intermediate/, fao_2021/)."""
     parts = rel.split("/")
     return parts[3] if parts[2] == "raw" and len(parts) > 4 else parts[2]
 #: CAPRI's folders under sources (every other folder): CAPRI's code, data (dat), CAPREG, COCO, CAPMOD results
@@ -84,6 +84,10 @@ UNTRACED = {
     "capri_data/pipeline/captrd/dat/biofuel_p_primeswithunits.csv": ("build_captrd_biofuel", "CAPRI"),
     "capri_data/pipeline/captrd/dat/biofuel_p_fossilfuel.csv": ("build_captrd_biofuel", "CAPRI"),
     "capri_data/pipeline/captrd/dat/biofuel_p_taxdata.csv": ("build_captrd_biofuel", "CAPRI"),
+    # CAPRI's 2030 reference against its run without voluntary coupled support: extract_capri_vcs_pair.py reads the
+    # reference GDX and the project lead's CSV export of the other run (not in the trace); a .csv.xz until 14 November
+    # 2026, outside the provenance scan then
+    "capri_data/validation/coupled_support_2030/capri_vcs_effect.csv": ("extract_capri_vcs_pair", "CAPRI"),
     "capri_data/pipeline/captrd/sets/": ("build_captrd_sets", "CAPRI"),
     "capri_data/pipeline/captrd/params/": ("build_captrd_estimation_params", "CAPRI"),
     "capri_data/pipeline/captrd/dat/dairy_ms_agri_to_ms.csv": ("build_captrd_dairy", "CAPRI"),

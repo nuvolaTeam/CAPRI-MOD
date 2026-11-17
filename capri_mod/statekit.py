@@ -1,6 +1,6 @@
-"""The state objects' kit (refactor stages 3 and 4): the slot base class, the mixin that gives a model its par, sv,
+"""The state objects' kit (the refactor into state objects): the slot base class, the mixin that gives a model its par, sv,
 ev, seen and res objects with the guard on moved names, and the helpers that read and write a field or a "kind.field"
-path. Written for the supply (capri_mod/supply/state.py, STAGE3B_PLAN.md) and shared since stage 4's second half with
+path. Written for the supply (capri_mod/supply/state.py, REFACTOR_SUPPLY_PARAMETERS_PLAN.md) and shared since the refactor of the environment's and the coupling's state with
 the environment (capri_mod/environmental/state.py) and the coupling (capri_mod/coupling/state.py); the supply's module
 re-exports every name, so its importers are unchanged.
 """

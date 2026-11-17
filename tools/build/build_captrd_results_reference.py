@@ -5,7 +5,7 @@ results_1770.gdx: base year 2017, last simulation year 2070), written by captrd.
 p_result(rall, cols, rows, t, respos) (respos: sets_captrd.gms l. 493-531; CAPTRD_MAP.md section 6).
 
 Output (CAPRI's own data: read-only reference for the tests and parity runs, never read by the model;
-docs/design/CAPTRD_MOD.md section 6):
+docs/dev/CAPTRD_MOD.md section 6):
   capri_sources/reference/captrd_results/<tag>/<respos>.csv.gz     region, col, row, t, value, eps
   capri_sources/reference/captrd_results/<tag>/respos_counts.csv   records per result position (all positions)
   capri_sources/reference/captrd_results/<tag>/settings.csv        the SETTINGS symbol of the file

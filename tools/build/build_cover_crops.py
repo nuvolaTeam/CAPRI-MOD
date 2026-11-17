@@ -3,7 +3,15 @@
 CAPRI (envind/cover_crops.gms, supply/supply_model.gms, pol_input/greendeal/*_io.gms):
   * CATC is an activity on top of the arable land: a catch crop sown after the main crop. Its level is
     limited by the land not already under winter cover, UAAR - sum_c crop_c x p_winterCoverShare(c)
-    (+ fallow floor), and costs its input row (TOIN) per ha.
+    (+ fallow floor), and costs its inputs per ha (capmod/define_objc.gms p_linObjeCont, the cost of the
+    winter-cover option in envind/cover_crops.gms l. 410).
+  * Its inputs (policy/define_greening_limits.gms l. 70-84): CAPRI has no CATC data; for each of its inputs
+    (PACT_TO_I: SEED, REPM, REPB, EFUL, ELUB, IRRO, INPO) the coefficient is 25% (SEED: 50%) of the average of the
+    cheapest cereal's (the lowest non-zero coefficient over CERE: SWHE, DWHE, RYEM, BARL, OATS, MAIZ, OCER) and OFAR's
+    base-year coefficient, projected to 2030 as a crop without yield growth (capmod/define_inputs.gms: x TF_I, the
+    input-saving progress 1 - 0.005 x (2030 - 2017)), valued at the member state's 2030 unit value (UVAG = UVAP,
+    define_objc.gms). The rule reproduces CAPRI's 2030 CATC coefficients exactly in the 90 regions whose catch crops
+    CAPRI reports (17 November 2026) and its TOIN (DE000000: 172.78 EUR per ha either way).
   * Its N: biological fixation and residues p_ghgMiti(CATC, WinterCov, othImpact, BioFix)
     = p_cInput(winterCov) / 24 x 0.75 x 0.5 (t N per ha; reports/calc_cbalance.gms l. 672, carbon input
     from the Century table p_cInput in reports/def_cbalance.gms). It is N supplied to the crops
@@ -16,17 +24,18 @@ CAPRI (envind/cover_crops.gms, supply/supply_model.gms, pol_input/greendeal/*_io
     for Austria and a few German regions only); the potential-area row uses p_winterCoverShare, filled
     NUTS2 <- member state <- EU (policy/define_greening_limits.gms). Both are written.
 
-Sources: capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz (CATC LEVL and TOIN, UAAR
-LEVL, crop LEVL; CAPRI's 2030 Green Deal baseline, the model's 2030 base), CAPRI's calibration run
-res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv (CATC TOIN where the baseline has no catch crop in a region), capri_data/sources/raw/capri/dat/policy/
+Sources: capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv (CATC LEVL, UAAR LEVL, crop LEVL;
+CAPRI's 2030 Green Deal baseline, the model's 2030 base), CAPRI's 2017 results res_17<MS>.txt (the cereals' and OFAR's
+input coefficients; capri_sources/capreg), capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv (the
+member states' 2030 unit values of the inputs), capri_data/sources/raw/capri/dat/policy/
 wintercovershare_p_winterCoverShare0.parquet (dat/policy/wintercovershare.gms, converted to CSV by
 tools/build/convert_sources.py), the GAMS source reports/def_cbalance.gms (p_cInput).
 
 Written (capri_data/2017/supply/):
-  cover_crops.csv          region, capri_region, catc_share_2030 (CATC / UAAR), catc_cost_eur_ha (TOIN over CAPRI's
-                           inflation to 2030: the model's 2017 money, K108), cost_source (baseline: the
-                           baseline's TOIN; calibration: CAPRI's calibration run's, where the baseline has no catch
-                           crop in the region; none), biofix_t_n_ha
+  cover_crops.csv          region, capri_region, catc_share_2030 (CATC / UAAR), catc_cost_eur_ha (CAPRI's rule above,
+                           over CAPRI's inflation to 2030: the model's 2017 money, K108), cost_source ("rule": CAPRI's
+                           rule for every region since 17 November 2026, K130; until then its reported TOIN, from its
+                           calibration run where its baseline had no catch crop), biofix_t_n_ha
   winter_cover_share.csv   region, crop, share (filled), share0 (as given; 0 where not given)
 
 Model crops that sum several CAPRI activities take their shares weighted by CAPRI's 2030 levels in the
@@ -44,8 +53,7 @@ import pandas as pd
 import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
-from paths import CALIBRATION_REF, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
-from _grep import grep  # noqa: E402  (grep -E in Python: any system)
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
@@ -86,12 +94,60 @@ def read_cinput(path: Path) -> dict:
     return out
 
 
+#: policy/define_greening_limits.gms l. 77-84: CATC's inputs (PACT_TO_I) and the shares of the cheapest cereal's and
+#: OFAR's average base coefficient they take
+CATC_INPUTS = {"SEED": 0.50, "REPM": 0.25, "REPB": 0.25, "EFUL": 0.25, "ELUB": 0.25, "IRRO": 0.25, "INPO": 0.25}
+#: global/fromimpact/sets.gms CERE
+CERE = ("SWHE", "DWHE", "RYEM", "BARL", "OATS", "MAIZ", "OCER")
+#: capmod/define_inputs.gms l. 66: TF_I = 1 - 0.005 x (simulation year - base year), 2030 from 2017
+TF_I_2030 = 1.0 - 0.005 * (2030 - 2017)
+ROW17 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'([A-Z0-9]+)'\.'([A-Z0-9]+)'\.'Y'\s+([-\d.Ee+]+)")
+
+
+def catc_coefficients(dump_dir: Path) -> dict:
+    """{capri region: {input: CAPRI's 2030 CATC coefficient}} by CAPRI's rule (define_greening_limits.gms l. 77-84,
+    define_inputs.gms): share x (the lowest non-zero cereal coefficient + OFAR's) / 2 x TF_I, from the 2017 results."""
+    import glob
+    v = defaultdict(dict)
+    for f in glob.glob(str(dump_dir / "res_17*.txt")):
+        for line in open(f, errors="ignore"):
+            m = ROW17.match(line)
+            if m and m.group(3) in CATC_INPUTS and (m.group(2) in CERE or m.group(2) == "OFAR"):
+                v[m.group(1)][(m.group(2), m.group(3))] = float(m.group(4))
+    if not v:
+        raise SystemExit(f"no CAPRI 2017 results under {dump_dir}")
+    out = {}
+    for r, d in v.items():
+        co = {}
+        for i, f_ in CATC_INPUTS.items():
+            cer = [d[(c, i)] for c in CERE if d.get((c, i))]
+            co[i] = f_ * ((min(cer) if cer else 0.0) + d.get(("OFAR", i), 0.0)) / 2.0 * TF_I_2030
+        out[r] = co
+    return out
+
+
+def catc_costs(dump_dir: Path, deflator: float) -> dict:
+    """{capri region: CATC's input cost per ha in the model's 2017 money}: CAPRI's coefficients (catc_coefficients)
+    x the member state's 2030 unit values / 1000 (define_objc.gms), over CAPRI's inflation to 2030 (K108)."""
+    uv = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_unit_values_ref_2030.csv")
+    uv = {(r, p): float(x) for r, p, x in zip(uv.region, uv["product"], uv.uvag)}
+    out = {}
+    for r, co in catc_coefficients(dump_dir).items():
+        # the member state's row in CAPRI's results (Turkey's regions TR..., its row TUR)
+        ms = "TUR" if r[:2] == "TR" else CTRY_CAPRI.get(r[:2], r[:2]) + "000000"
+        miss = [i for i, x in co.items() if x and (ms, i) not in uv]
+        # None where a unit value is missing (CAPRI's units outside the model: Turkey's regions); an error where the
+        # model needs the region (main)
+        out[r] = None if miss else sum(x * uv[(ms, i)] for i, x in co.items() if x) / 1000.0 / deflator
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--gams-dir", type=Path, default=SOURCES / "gams")
-    ap.add_argument("--calibration", type=Path, default=CALIBRATION_REF)
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     a = ap.parse_args()
-    terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv.xz",
+    terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv",
                         header=None, names=["region", "act", "item", "value"], dtype=str)
     terms["value"] = pd.to_numeric(terms["value"], errors="coerce")
     lev = terms[terms["item"] == "LEVL"].pivot_table(index="region", columns="act", values="value")
@@ -101,13 +157,7 @@ def main():
     import sys as _sys
     _sys.path.insert(0, str(ROOT / "tools" / "lib"))
     import _money
-    toin = terms[(terms["act"] == "CATC") & (terms["item"] == "TOIN")].set_index("region")["value"] \
-        / _money.deflator(2030)
-    # CAPRI's catch crops in its calibration run, for the cost where the baseline has none (see below)
-    rx_ = re.compile(r"^'([A-Z0-9]{8})'\.''\.'CATC'\.'TOIN'\.'2030'\s+([-\d.Ee+]+)")
-    toin_cal = {m.group(1): float(m.group(2)) / _money.deflator(2030)
-                for m in map(rx_.match, grep(r"^'[A-Z0-9]{8}'\.''\.'CATC'\.'TOIN'\.'2030'", str(a.calibration)).splitlines())
-                if m}
+    cost_rule = catc_costs(a.dump_dir, _money.deflator(2030))
     wcs0 = read_wcs(WCS)
     cin = read_cinput(a.gams_dir / "reports" / "def_cbalance.gms")
 
@@ -140,15 +190,13 @@ def main():
         if src not in lev.index or "UAAR" not in lev.columns or not (lev.at[src, "UAAR"] > 0):
             continue
         catc = float(lev.at[src, "CATC"]) if "CATC" in lev.columns and pd.notna(lev.at[src, "CATC"]) else 0.0
-        # the cost per ha: CATC's TOIN in the baseline; where the baseline has no catch crop in the region, the
-        # region's own TOIN in CAPRI's calibration run (the activity's input cost there, CAPRI's number for the same
-        # region; the baseline's and the calibration's TOIN per ha differ by up to 25% where both exist)
-        if src in toin.index and pd.notna(toin.get(src)):
-            cost, csrc = float(toin[src]), "baseline"
-        elif src in toin_cal:
-            cost, csrc = toin_cal[src], "calibration"
-        else:
-            cost, csrc = float("nan"), "none"
+        # the cost per ha: CAPRI's rule for the region (the CAPRI region the model region maps to, else the member
+        # state), as CAPRI computes it for every unit
+        rsrc = c8 if c8 in cost_rule else ms
+        if cost_rule.get(rsrc) is None:
+            raise SystemExit(f"{reg}: no CAPRI 2017 coefficients or 2030 unit values for the catch crops' cost "
+                             f"({c8}, {ms})")
+        cost, csrc = cost_rule[rsrc], "rule"
         bf = cin.get(c8 or "", cin.get(ms))
         rows.append({"region": reg, "capri_region": src, "catc_share_2030": catc / float(lev.at[src, "UAAR"]),
                      "catc_cost_eur_ha": cost, "cost_source": csrc,

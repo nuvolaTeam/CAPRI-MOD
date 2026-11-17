@@ -160,8 +160,8 @@ class BiofuelMixin(MarketStateMixin):
         """One CAPRI region's feedstock CES for one biofuel at feedstock price ratios (Arm1 prices relative to
         the reference): returns (q per feedstock, mu_b). X = first-generation output (default: the reference
         output x biofuel_output_scale); ddgs_ratio = the region's DDGS producer price relative to the reference.
-        CAPRI's biofFeedCost_, biofFeedCostAgg_, Biof_ and prodBiof_ in biofuel_ad.feed_group_function (step G2g;
-        DDGS at its producer price, glycerine fixed at 600 EUR/t as in CAPRI)."""
+        CAPRI's biofFeedCost_, biofFeedCostAgg_, Biof_ and prodBiof_ in biofuel_ad.feed_group_function
+        (DDGS at its producer price, glycerine fixed at 600 EUR/t as in CAPRI)."""
         c_ = self.__dict__.setdefault("_biof_fg_fns", {})
         hit = c_.get(id(g))
         if hit is None or hit[0] is not g:
@@ -223,7 +223,7 @@ class BiofuelMixin(MarketStateMixin):
 
         X, MUB, prod, use, proc, ddgs, drat = {}, {}, {}, {}, {}, {}, {}
         rows = bm.get("rows", {})
-        # CAPRI's equations in CasADi (biofuel_ad.py, step G2g)
+        # CAPRI's equations in CasADi (biofuel_ad.py)
         from capri_mod.market.biofuel_ad import demand_function, proc_function, supply_function
         f_sup, f_dem, f_proc = supply_function(), demand_function(), proc_function()
         # first-generation output and feedstock cost of every feedstock group (not needed for use and processing)

@@ -43,7 +43,7 @@ def read(stem: Path):
     for reg in base:
         q = quad.get(reg, {})
         out[reg] = {"base_kha": base[reg], "quad": [[q.get((a, b), 0.0) for b in order] for a in order],
-                    "types": list(order), **meta.get(reg, {})}       # the land types in the order of quad (N6)
+                    "types": list(order), **meta.get(reg, {})}       # the land types in the order of quad
     return out
 
 

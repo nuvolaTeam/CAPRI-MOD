@@ -1,13 +1,13 @@
 """Greenhouse gases of the environmental accounts: manure N excretion and its loss shares, enteric and manure CH4, manure N2O (CAPRI's factors, the ammonia technologies' cascade, anaerobic digestion), CO2 coefficients (CAPRI's gases.gms and envind files).
 
-EnvironmentalModule's methods, moved unchanged from capri_mod/environmental/environmental_module.py (refactor stage 4a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are environmental_module's, given to this
+EnvironmentalModule's methods, moved unchanged from capri_mod/environmental/environmental_module.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are environmental_module's, given to this
 module once environmental_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated.
 """
 from __future__ import annotations
 from capri_mod import statekit as _est
 from capri_mod.params import param
-from capri_mod.units import M_N2O, M_N2O_N, M_CO2, M_UREA_N, MJ_PER_MCAL   # the state objects' helpers (refactor stage 4)
+from capri_mod.units import M_N2O, M_N2O_N, M_CO2, M_UREA_N, MJ_PER_MCAL   # the state objects' helpers
 
 
 class GHGBlock:
@@ -95,7 +95,7 @@ class GHGBlock:
     ) -> Dict[str, float]:
         """
         Compute GHG emissions (kt CO2-eq) for a region (the grassland activities GRAE and GRAI each with its own
-        fertiliser rate since S2, 7 November 2026; before, the grassland split's shift as an argument).
+        fertiliser rate since 7 November 2026; before, the grassland split's shift as an argument).
 
         Uses IPCC Tier 1 emission factors with EU-specific adjustments.
         """

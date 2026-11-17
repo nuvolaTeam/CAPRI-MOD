@@ -1,7 +1,7 @@
 """The market supply Hessian measured on the supply models (CAPRI's simu_calibration_to_supply: price shocks, the split by member state, the pending measurements).
 
-CAPRIModel's methods, moved unchanged from capri_mod/model.py (refactor stage 4a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
+CAPRIModel's methods, moved unchanged from capri_mod/model.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
 module once model is loaded (capri_mod.coupling.inject); the annotations are not evaluated.
 """
 from __future__ import annotations
@@ -11,7 +11,7 @@ from capri_mod import runlog as _runlog
 import functools as _functools
 import hashlib as _hashlib
 from pathlib import Path as _Path
-from capri_mod import statekit as _cst   # the state objects' helpers (refactor stage 4)
+from capri_mod import statekit as _cst   # the state objects' helpers
 
 #: the packages whose code cannot change the supply models' price response: the market, the tests, the CAPTRD pipeline
 _NOT_SUPPLY_CODE = ("market", "tests", "pipeline")
@@ -61,7 +61,7 @@ def supply_data_fingerprint(data_dir=None) -> str:
 class HessianBlock:
     def _measure_pending_hessian(self, pend) -> None:
         """The market supply Hessian of the baseline, measured at the baseline's start on calibrated models (the
-        regional models solved once more at the reference prices first; K120, S7)."""
+        regional models solved once more at the reference prices first; K120; CAPRI's market calibration)."""
         from capri_mod.supply.supply_module import RegionalSupplyModel as _RSMh
         _RSMh.nlp_tol = float(self.nlp_tol_final)          # the baseline's solves after its loop
         try:
@@ -139,7 +139,7 @@ class HessianBlock:
                         tuple(getattr(self.supply_module, "pmp_capri_parts", ())),
                         float(_settings().get("supply.nlp_cal_ridge")),
                         tuple(yani_goods),
-                        # 28 October 2026 (audit S13): activities of a calibrated part without a positive own PMP term
+                        # 28 October 2026 (the supply audit's finding S13, ARCHITECTURE_REFACTOR.md section 5.2): activities of a calibrated part without a positive own PMP term
                         # are held at their level; their price response changes, their base level does not, so the
                         # base totals above would not tell a Hessian measured before from one measured after
                         "held-without-own-term",
@@ -149,7 +149,7 @@ class HessianBlock:
                         ("nlp_jump_gain", str(_settings().get("supply.nlp_jump_gain"))),
                         # 29 October 2026 (K79): the warm start from the last solution as it is
                         "warm-start-last-solution",
-                        # the supply models' rules that change their price response (24 October 2026: S6-S10)
+                        # the supply models' rules that change their price response (24 October 2026: the supply audit's findings S6-S10, ARCHITECTURE_REFACTOR.md section 5.2)
                         # (the rules whose switches were removed 27 October 2026 keep their values' place, so the
                         # cached Hessians' keys stay valid)
                         tuple(str(_settings().get(k_)) if k_ else v_ for k_, v_ in (
@@ -219,7 +219,7 @@ class HessianBlock:
         # left (the ammonia options' point differed at 1e-36, rations and splits possibly more)
         # the _nlp* fields by their declared list (RegionalSupplyModel.NLP_STATE; the prefix "_nlp" until 2 November
         # 2026, the same set)
-        # (refactor stage 3, S2: an entry is an attribute name or the path of a field in the model's state objects,
+        # (the refactor of the supply's parameters and state: an entry is an attribute name or the path of a field in the model's state objects,
         # "sv.nlp_prev"; each field is copied on its own, as before, never a whole object)
         from capri_mod.supply import state as _st
 

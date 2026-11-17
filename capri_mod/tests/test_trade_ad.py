@@ -1,17 +1,13 @@
-"""Step G1: the bilateral trade system in CasADi equals the numeric one, and its Jacobian equals finite differences
+"""The exact Jacobian: the bilateral trade system in CasADi equals the numeric one, and its Jacobian equals finite differences
 (capri_mod/market/trade_ad.py against capri_mod/market/bilateral.py)."""
 import numpy as np
 import pytest
 
 
 @pytest.fixture(scope="module")
-def market():
-    from capri_mod.model import CAPRIModel
-    from capri_mod.settings import override
-    with override({"market.market_supply_nq": False}):
-        m = CAPRIModel(data_dir="capri_data", verbose=False)
-        m.run(scenario="BASELINE", regions=["DE110000", "FR100000"], max_outer_iter=1)
-    return m.market_module
+def market(solved_market):
+    """The market after one baseline iteration on DE110000 and FR100000 (conftest.py)."""
+    return solved_market
 
 
 def test_casadi_trade_residual_and_jacobian_match(market):
@@ -21,7 +17,7 @@ def test_casadi_trade_residual_and_jacobian_match(market):
     for c, sc in list(market.par.bilat.items())[:12]:
         act = np.where(sc.S0 > 1e-6)[0]
         if len(act) == 0 or sc.border:
-            continue                                  # G1's system has no entry prices nor flexible levies
+            continue                                  # the exact-Jacobian system has no entry prices nor flexible levies
         n = len(sc.regions)
         rk = np.exp(rng.normal(0, 0.05, n))
         _, _, PAk, _ = sc.prices(rk, sc.import_prices(rk))
@@ -48,7 +44,7 @@ def test_casadi_trade_residual_and_jacobian_match(market):
 
 
 def test_casadi_trade_with_trq_matches(market):
-    """Step G2a: the trade system with CAPRI's bilateral tariff-rate quotas inside it (trade_trq_function) equals the
+    """The trade system with CAPRI's bilateral tariff-rate quotas inside it (trade_trq_function) equals the
     numeric one (import_prices with the quotas' offsets at their sigma, flows, CAPRI's sigmoid as
     BilateralCommodity._sig), Jacobian included."""
     from capri_mod.market.trade_ad import trade_trq_function, import_price_matrices, trq_quotas
@@ -59,7 +55,7 @@ def test_casadi_trade_with_trq_matches(market):
         act = np.where(sc.S0 > 1e-6)[0]
         if (len(qk) == 0 or len(act) == 0 or sc.trq_globals or sc.border
                 or any(q["regime"] != "bilateral" for q in sc.trq_quotas)):
-            continue                                  # G2a: CAPRI's bilateral quotas only (trade_trq_function)
+            continue                                  # CAPRI's bilateral quotas only (trade_trq_function)
         n = len(sc.regions)
         sig_now, off_now = sc.trq_sigma.copy(), sc.trq_offset.copy()
         rk = np.exp(rng.normal(0, 0.05, n))

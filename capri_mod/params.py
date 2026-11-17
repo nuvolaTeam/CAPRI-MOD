@@ -22,7 +22,7 @@ FILE = Path(__file__).resolve().parents[1] / "capri_data" / "codes" / "model_par
 def _load() -> Dict[tuple, float]:
     """The run's parameters: the file of the data directory the run's inputs follow (capri_mod.data.inputs.current();
     the repository's data until a model sets them). A name read at import (a module constant) takes the repository's
-    file; the supply's parameters are read where they are used (refactor stage 3, N1)."""
+    file; the supply's parameters are read where they are used."""
     from capri_mod.data import inputs as _inputs
     return _inputs.current().parameters()
 

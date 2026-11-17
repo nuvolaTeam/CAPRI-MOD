@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,7 +8,8 @@ version = "0.1.0"
 description = "A Python reimplementation of the CAPRI star 3.0 agricultural economic model"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "GPL-3.0-only" }
+license = "GPL-3.0-only"
+license-files = ["LICENSE", "NOTICE"]
 dependencies = [
     "pandas>=2.0",
     "numpy>=1.24",
@@ -16,8 +17,8 @@ dependencies = [
     "casadi>=3.6",       # bundles IPOPT: the regional supply models in CAPRI's NLP form
     "clarabel>=0.7",     # the manure-market pool equilibrium
     "pyarrow>=14",       # Parquet for the model's caches (the market supply Hessians)
-    "deltalake>=0.18",   # the runs' results table (capri_mod/io_results.py; refactor stage 5) and the pipeline's store
-    "pydantic>=2.0",     # the scenario definitions and the run's metadata (refactor stage 5)
+    "deltalake>=0.18",   # the runs' results table (capri_mod/io_results.py) and the pipeline's store
+    "pydantic>=2.0",     # the scenario definitions and the run's metadata
 ]
 
 [project.optional-dependencies]
@@ -34,13 +35,16 @@ gui = ["gradio>=5.0", "plotly>=5.0"]
 
 [tool.setuptools.packages.find]
 include = ["capri_mod*"]
+# the tests read the repository's capri_data and tools: they stay in the source tree, not in the wheel
+exclude = ["capri_mod.tests*", "capri_mod.pipeline.tests*"]
 
 [tool.setuptools.package-data]
 capri_mod = ["*.json", "*.md", "settings/*.toml"]
 
 [tool.pytest.ini_options]
 markers = ["slow: full-EU or multi-solve tests over 30 s (deselect per step with -m 'not slow'; the batch-end run takes all)",
-           "online: live provider API tests of the data pipeline (run on request: -m online)"]
+           "online: live provider API tests of the data pipeline (run on request: -m online)",
+           "no_market_hessian: a test of a regional-model mechanism run with market.market_supply_nq off, so no market supply Hessian is measured (capri_mod/tests/conftest.py)"]
 testpaths = ["capri_mod/tests", "capri_mod/pipeline/tests"]
 # tests that check a mechanism (adoption, accounts, reporting) run the market loop for 1-2 iterations on purpose; the
 # model warns loudly about any unconverged run, so this one expected warning is filtered here and every other warning

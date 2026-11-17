@@ -7,7 +7,7 @@ pytest collects, the market commodities, the activities, and the data files decl
 (capri_data/schema/schema.json, generated from the declarations).
 
 Until 29 October 2026 the script also checked that every capability recorded in DATA_SOURCING_REGISTRY.json was
-mentioned in the README or the CHANGELOG. The registry's log moved to docs/KNOWN_ISSUES_REGISTRY_LOG.md and the
+mentioned in the README or the CHANGELOG. The registry's log moved to docs/dev/KNOWN_ISSUES_REGISTRY_LOG.md and the
 registry was retired (its provenance notes are checked statements in capri_data/schema/02_provenance_notes.sql), so
 that check went with it.
 

@@ -76,7 +76,7 @@ def test_the_modification_factor_replaces_the_weight():
 
 
 def test_the_coupled_support_cuts_follow_capris_2030_reference():
-    """P2: the coupled schemes' 2030 rates and ceilings from CAPRI's VCS and cotton files (capri_mod/policy/
+    """The coupled schemes' 2030 rates and ceilings from CAPRI's VCS and cotton files (capri_mod/policy/
     cap14_premiums.py), the premium groups' activities, the trend levels: the cut of the crops' schemes in France and
     Spain equals CAPRI's 2030 reference (dataOut CUTT, used as a check): 328 and 151 unit x scheme pairs within 1e-5;
     three of them written here."""
@@ -96,7 +96,7 @@ def test_the_coupled_support_cuts_follow_capris_2030_reference():
 
 
 def test_the_area_schemes_premiums_follow_capris_2030_reference():
-    """P2: the greening, young-farmer, redistributive, natural-constraint and SAPS payments declared at 1000 EUR/ha
+    """The greening, young-farmer, redistributive, natural-constraint and SAPS payments declared at 1000 EUR/ha
     (PGSAPS) where the member state has a 2030 ceiling of the scheme (K136's chain), cut to it with the trend levels:
     the premium per hectare equals CAPRI's 2030 reference PRME (dataOut, used as a check) at all 17928 unit x activity
     x scheme records within 1e-7; four of them written here (Poland a SAPS member state, Denmark one unit)."""

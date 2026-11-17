@@ -1,6 +1,6 @@
 # CAPRI-mod data layout
 
-Status: revised 11 November 2026 against the code and the folder (docs/design/DATA_LAYOUT.md, steps (a)-(d)).
+Status: revised 11 November 2026 against the code and the folder (docs/dev/DATA_LAYOUT.md, steps (a)-(d)).
 
 Every model input is CSV (or JSON), extracted from CAPRI star 3.0's data and results, or from other publishers, by a
 builder in `tools/build/` that names its source; the model never reads GDX. The builders' own sources are Parquet, under
@@ -71,7 +71,7 @@ the codes in `codes/`. The projection layer's tables are in the baseline's `traj
 ## Adding a new base year
 
 Not a working path yet: PMP terms and elasticities are CAPRI estimation outputs and need CAPRI's estimation for the
-new year, not a copy; the planned route is the data pipeline (docs/design/CAPTRD_MOD.md: the COCO and CAPREG ports).
+new year, not a copy; the planned route is the data pipeline (docs/dev/CAPTRD_MOD.md: the COCO and CAPREG ports).
 The readers take the base year from the run (`run.base_year`; KNOWN_ISSUES K52f).
 
 ## Checks

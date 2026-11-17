@@ -22,7 +22,7 @@ from the calibration point to the simulation (reports/welfare.gms):
 
 The model's functions are CAPRI's where the model has them (GL demand, ProcNQ_, crushing, DairyNQ_, the non-EU raw
 milk supply, the bilateral import prices, TRQs); its non-EU supply and feed demand are constant-elasticity functions
-(CAPRI: NQ functions; docs/design/ARCHITECTURE_REFACTOR.md 5.1, M3), so their integrals are the integrals of those
+(CAPRI: NQ functions; docs/dev/ARCHITECTURE_REFACTOR.md 5.1, M3), so their integrals are the integrals of those
 functions. Each component is the exact integral of the function the market solved with:
   - a linear (NQ) function with a symmetric Hessian: integral = sum_i (q0_i + dq_i / 2) dp_i, the value CAPRI's
     good-by-good sum gives for a quadratic profit function (independent of the order);

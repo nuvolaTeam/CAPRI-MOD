@@ -6,7 +6,7 @@ and where a better or newer version would come from.
 ## 1. Current state
 
 The model runs on CAPRI's data only: the loaders raise when a file is missing, and there is no synthetic generator or
-generic fallback left (docs/SYNTHETIC_DATA_AUDIT.md). The data checks (`python -m capri_mod.data.validate_data`, or
+generic fallback left (docs/dev/SYNTHETIC_DATA_AUDIT.md). The data checks (`python -m capri_mod.data.validate_data`, or
 `load_all_data(validate=True)`) list every violation of the declarations; 0 at each gate. (The MANIFEST.json validator
 they replaced on 31 October 2026 reported on 20 October 2026: 12 pass, 1 warning, a stale row count for
 `fert_side_effects.csv`; "no live synthetic data"; provenance of the registry's datasets: 38 CAPRI, 4 FAO, 0 synthetic.)
@@ -20,7 +20,7 @@ they replaced on 31 October 2026 reported on 20 October 2026: 12 pass, 1 warning
 | Mitigation options, N cascade, leaching | CAPRI's Green Deal reference and its option data | CAPRI's mitigation data (`miti_data_jul15`), MITERRA tables, CAPRI's literature review |
 | Constants | – | `codes/model_parameters.csv`, each with its source |
 
-What is still not CAPRI's data, and where it acts: docs/SYNTHETIC_DATA_AUDIT.md, "Current state".
+What is still not CAPRI's data, and where it acts: docs/dev/SYNTHETIC_DATA_AUDIT.md, "Current state".
 
 Known inconsistencies in the metadata (the data themselves are not affected):
 
@@ -36,7 +36,7 @@ Known inconsistencies in the metadata (the data themselves are not affected):
   held in the model's code and their classification (`03_code_data.sql`, `04_code_data_status.sql`), and
   `schema.json`, the same catalogue as JSON (`tools/check/make_schema_json.py`). These replaced
   `DATA_SOURCING_REGISTRY.json`, `INPUT_SCHEMA.json` and `INPUT_MANIFEST.json` (29 October 2026; the registry's log of
-  findings is in docs/KNOWN_ISSUES_REGISTRY_LOG.md).
+  findings is in docs/dev/KNOWN_ISSUES_REGISTRY_LOG.md).
 - **`schema/05_file_catalogue.sql`**: each file's vintage, domain and status, and the reason a base-year file carries
   another vintage (from MANIFEST.json, retired on 31 October 2026; the base-year vintage rule is in `99_rules.sql`).
 - **Coverage**: `tools/check/verify_schema.py` counts the non-zero cells of the files the model reads by origin;
@@ -76,4 +76,4 @@ the loader with random noise; the files that replaced them had no builder in the
 regional totals (livestock_feed_coef.csv); `nutrient_coefs.csv` was removed too (K100), the coefficients being CAPRI's
 regional NITF / PHOF / POTF on the model's crops (nutrient_coefs_regional.csv) and NMIN. The remaining
 synthetic items found later (premiums, costs, fibre yields, wine prices, tariffs, methane and CO2 factors) were
-replaced in Sprints 9r-9t (docs/SYNTHETIC_DATA_AUDIT.md).
+replaced in Sprints 9r-9t (docs/dev/SYNTHETIC_DATA_AUDIT.md).

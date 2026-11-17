@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional
 
 from capri_mod.params import param, param_table
-from capri_mod.data.definitions import CROPS_ON_LAND as _CROPS_ON_LAND   # N6
+from capri_mod.data.definitions import CROPS_ON_LAND as _CROPS_ON_LAND
 from capri_mod.settings import setting
 from capri_mod.settings import current as _settings
 from capri_mod.units import M_N2O, M_N2O_N, M_NH3, M_NH3_N, M_CO2, M_UREA_N
@@ -49,7 +49,7 @@ GWP_CH4 = param("GWP_CH4")
 GWP_N2O = param("GWP_N2O")
 # Every other coefficient of the accounts is CAPRI's own regional data (manure N, manure N2O shares, ammonia
 # shares, manure and enteric CH4 per head, liming and urea CO2, crop N, deposition). The IPCC Tier 1 and
-# literature tables that stood here as fallbacks were removed (Sprint 9s, docs/SYNTHETIC_DATA_AUDIT.md): a
+# literature tables that stood here as fallbacks were removed with the synthetic data (October 2026, docs/dev/SYNTHETIC_DATA_AUDIT.md): a
 # region without CAPRI's data now fails loudly instead of taking a generic value.
 
 
@@ -138,7 +138,7 @@ class EnvironmentalIndicators:
 # ENVIRONMENTAL MODULE
 # ---------------------------------------------------------------------------
 
-# refactor stage 4a: the module's methods in mixin modules of this package
+# the refactor's split into block mixins: the module's methods in mixin modules of this package
 from capri_mod.environmental.ghg import GHGBlock  # noqa: E402
 from capri_mod.environmental.nitrogen import NitrogenBlock  # noqa: E402
 from capri_mod.environmental.ammonia import AmmoniaBlock  # noqa: E402
@@ -146,7 +146,7 @@ from capri_mod.environmental.phosphorus import PhosphorusBlock  # noqa: E402
 from capri_mod.environmental.biodiversity import BiodiversityBlock  # noqa: E402
 
 
-from capri_mod.environmental.state import EnvStateMixin  # par, ev, seen, res (refactor stage 4)
+from capri_mod.environmental.state import EnvStateMixin  # par, ev, seen, res
 
 class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, PhosphorusBlock, BiodiversityBlock):
     """
@@ -169,7 +169,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         _dtab = self.data.get("dairy_intensity")
         if _dz and _dtab is not None and region in _dtab.index and rel in _dtab.columns:
             out["DCOW"] = _dz * float(_dtab.at[region, rel])
-        # the bull and heifer splits (Sprint 7c) and the calves' the same way, every split of the animal (key "BULL",
+        # the bull and heifer splits and the calves' the same way, every split of the animal (key "BULL",
         # "HFRS:rep", "CALV:male", ...)
         _ctab = (self.data.get("cattle_intensity") or {}).get(region)
         for _k, _z in (getattr(supply_result, "cattle_shift", None) or {}).items():
@@ -198,7 +198,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
     #: with the crop that produced it"
     #: crops whose own residues cover their own need, CAPRI's permanent crop groups (supply/define_ngrp_sets.gms
     #: PERM_NGRP: GRAS, and PERM = OLIV, TABO, TAGR, TWIN, CITR, APPL); every other crop draws on the arable residue
-    #: pool (fertDistCres_). Other fruit (VEGE in CAPRI) and nurseries (OAFC) were here until Sprint 9e.
+    #: pool (fertDistCres_). Other fruit (VEGE in CAPRI) and nurseries (OAFC) were here until the port of CAPRI's inner fertiliser model.
     OWN_RESIDUE_CROPS = frozenset(c for c in CROPS if any(CAPRI_CACT_TO_NGRP.get(m) in CAPRI_PERM_NGRP
                                                           for m in CAPRI_MEMBERS[c]))   # CACT_TO_NGRP, PERM_NGRP
 
@@ -237,7 +237,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         region = supply_result.region_id
         # nitrate shares of this region's rations, BEFORE the GHG calculation uses them
         self.ev.nitrate_share_now = dict(getattr(supply_result, "nitrate_share", None) or {})
-        # CAPRI's feed supplements (envind/line_nitr.gms; Sprint 9g): enteric CH4 per head of the adopting share
+        # CAPRI's feed supplements (envind/line_nitr.gms; the port of CAPRI's feed options): enteric CH4 per head of the adopting share
         # x (1 + ch4ent_rel) - linseed -25%, nitrate -15%; both on the same animals (AComLN) multiply, the
         # overlap taken as large as the shares allow (CAPRI's maximum run puts all its linseed on nitrate
         # cows; without an emission price the split is not determined: REGISTERED)
@@ -317,8 +317,8 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             nb["n_organic_input"] = float(nb["n_organic_input"]) + _d
             nb["n_mineral_input"] = float(nb["n_mineral_input"]) - _a * _d
             nb["n_surplus"] = float(nb["n_surplus"]) + (1.0 - _a) * _d
-        # (CAPRI's grassland split was a column z here until S2, 7 November 2026: GRAE and GRAI are activities since)
-        # CAPRI's dairy split (Sprint 7b): z cows at DCOL instead of DCOH excrete
+        # (CAPRI's grassland split was a column z here until 7 November 2026: GRAE and GRAI are activities since)
+        # CAPRI's dairy split: z cows at DCOL instead of DCOH excrete
         # (MANN_DCOL - MANN_DCOH) / MANN_DCOW of a cow's manure N more each - the supply model's
         # manure rows use the same factor. Accounted as k = z x that factor manure-equivalent cows:
         # the balance and manure N2O with and without them (enteric CH4 already follows the cows'
@@ -425,7 +425,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         # in the EU, mineral and organic) rescaled by the mineral ratio, so manure-borne soil N2O moved
         # with mineral N; manure N2O is N2O_MAN. Crop residues are their own source (CAPRI N2OCRO).
         # The factors are CAPRI's (gases.gms (7) N2OSYN = NMIN x emiLoss(NETF, N2O) and the mineral part of (9) N2OAMM =
-        # NMIN x (emiLoss(NETF, NH3) + emiLoss(NETF, NOx)) x EF4), from the region's MITERRA loss fractions (K74 S12,
+        # NMIN x (emiLoss(NETF, NH3) + emiLoss(NETF, NOx)) x EF4), from the region's MITERRA loss fractions (K74, the supply audit's finding S12 of ARCHITECTURE_REFACTOR.md section 5.2,
         # 27 October 2026; before, IPCC's EF1 + 10% x EF4 everywhere); IPCC's where CAPRI's fractions are missing
         _dn = self._mineral_n2o_n(region)
         if "N2O_SOIL" in ghg:
@@ -444,7 +444,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         if _ht is not None and region in _ht.index:
             _h = _ht.loc[region]
             _fa = getattr(supply_result, "histosol_fallow", None) or {}
-            _gr = _CROPS_ON_LAND["GRAS"]     # GRAE, GRAI (GRAS until S2, 7 November 2026)
+            _gr = _CROPS_ON_LAND["GRAS"]     # GRAE, GRAI (GRAS until 7 November 2026)
             _crop_area = sum(float(acts.get(c, 0.0) or 0.0) for c in CROPS if c not in _gr)
             _n2o_t = (_crop_area * float(_h.get("n2o_t_ha_crop", 0.0) or 0.0)
                       + sum(float(acts.get(g, 0.0) or 0.0) for g in _gr) * float(_h.get("n2o_t_ha_grass", 0.0) or 0.0))
@@ -587,7 +587,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         _oc = getattr(supply_result, "organic_conv", None) or {}
         organic = sum(float(acts.get(c, 0.0) or 0.0) * (1.0 - float(v)) for c, v in _oc.items() if c in CROPS)
 
-        PERM = _CROPS_ON_LAND["FRUN"]      # the crops on permanent-crop land (model_activity_classes.csv, N6)
+        PERM = _CROPS_ON_LAND["FRUN"]      # the crops on permanent-crop land (model_activity_classes.csv)
         perm   = sum(acts.get(c, 0.0) for c in PERM)
         grass  = sum(acts.get(g, 0.0) for g in _CROPS_ON_LAND["GRAS"])
         arable = sum(acts.get(c, 0.0) for c in CROPS if c not in PERM + _CROPS_ON_LAND["GRAS"])
@@ -683,7 +683,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         return df
 
 
-# refactor stage 4a: the mixin modules' methods see this module's names (capri_mod/utils/mixins.py)
+# the refactor's split into block mixins: the mixin modules' methods see this module's names (capri_mod/utils/mixins.py)
 from capri_mod.utils.mixins import inject_names as _inject_names  # noqa: E402
 _inject_names(globals(), ["capri_mod.environmental." + _m for _m in ("ghg", "nitrogen", "ammonia", "phosphorus",
                                                                      "biodiversity")])

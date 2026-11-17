@@ -52,7 +52,7 @@ Links to the rest of the model:
 
 The crushing margin takes the oil and cake at their producer prices and the seed at its Arm1 price, as CAPRI's
 `ProcMargO_` (setting `market.crush_margin_producer_prices`, KNOWN_ISSUES K54-4). Open difference: the price levels
-the changes are formed on (docs/design/ARCHITECTURE_REFACTOR.md 5.1, M1).
+the changes are formed on (docs/dev/ARCHITECTURE_REFACTOR.md 5.1, M1).
 
 ## Data: CAPRI's 2030 reference balance, EU27 (kt)
 

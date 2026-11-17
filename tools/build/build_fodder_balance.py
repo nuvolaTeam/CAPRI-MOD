@@ -2,7 +2,7 @@
 
 Per region and non-tradable fodder (grass, fodder maize, other fodder):
   crop          the supply activities producing it, one row each (GRAE and GRAI for FGRA, MAIF, OFAR, ROOF: CAPRI's
-                FODCRP; until S2, 7 November 2026, GRAS = GRAE + GRAI produced FGRA, OFOD = OFAR + ROOF produced FOFA
+                FODCRP; until 7 November 2026, GRAS = GRAE + GRAI produced FGRA, OFOD = OFAR + ROOF produced FOFA
                 and fodder root crops FROO had no balance)
   u_t_per_ha    usable fresh fodder per ha = CAPRI base fodder use / base area (CAPRI SUPBAL_: use = production x
                 (1 - on-farm share); the coefficient embeds CAPRI's loss share and yield); with two activities (grass)

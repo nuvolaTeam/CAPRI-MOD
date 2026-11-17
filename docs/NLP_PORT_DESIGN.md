@@ -50,7 +50,7 @@ terms and the feeds' CNST. Since 21 October 2026 (KNOWN_ISSUES K58) the fit carr
 1e-10), which picks the least-norm multipliers where a row and a bound active on the same variable leave them
 undetermined. Without it the fit returned multipliers of 6e13, and IPOPT's results depended on the path. CAPRI instead
 sets the land rents exogenously in its calibration (prep_cal.gms, cal_land_nests.gms); that is planned in
-docs/LAND_RENT_CALIBRATION_PLAN.md.
+docs/dev/LAND_RENT_CALIBRATION_PLAN.md.
 
 ## Solving
 

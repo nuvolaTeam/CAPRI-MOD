@@ -1,4 +1,4 @@
-"""CAPRI's dairy block for the non-EU market regions (dairy Stage 4).
+"""CAPRI's dairy block for the non-EU market regions.
 
 CAPRI solves DairyNQ_, ProcMargM_ and FatsProtBal_ for every market region with dairy data, not only the
 member states, and outside the EU raw milk comes from the market model's own supply function (the

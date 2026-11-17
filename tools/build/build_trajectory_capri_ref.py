@@ -1,4 +1,4 @@
-"""CAPRI's own 2030 reference as the projection's trajectory (Sprint 9p): the scenario folder
+"""CAPRI's own 2030 reference as the projection's trajectory (the projection layer at CAPRI's reference): the scenario folder
 capri_data/scenarios/capri_ref_2030 (settings.toml, growth.csv, regional.csv; capri_mod/projection/scenario_io.py;
 capri_data/baselines/capri_greendeal_ref/1730/capri_ref_2030.json until 31 October 2026).
 
@@ -92,16 +92,16 @@ def main():
     # plus its voluntary set-aside VSET (CAPRI_TO_MODEL_ACTIVITY; the set-aside split, KNOWN_ISSUES K111), while CAPRI's
     # own SETA row is VSET alone (res_17IT: IT400000 SETA = VSET = 10.70, FALL 7.22): until 4 November 2026 the model's
     # SETA took that row's growth, or the EU median where a region has no VSET (KNOWN_ISSUES K115)
-    # (The model's other fodder OFOD was CAPRI's OFAR plus its fodder roots ROOF until S2, 7 November 2026; OFAR and
+    # (The model's other fodder OFOD was CAPRI's OFAR plus its fodder roots ROOF until 7 November 2026; OFAR and
     # ROOF are the model's own activities since, with CAPRI's own trajectories.)
-    # (and SETA = FALL + VSET until S2, 7 November 2026: VSET and FALL the model's own since)
+    # (and SETA = FALL + VSET until 7 November 2026: VSET and FALL the model's own since)
     for comp, parts in (("SHGT", ("SHGM", "SHGF")), ("CACR", ("CAMF", "CAFF", "CAMR", "CAFR"))):
         for reg in {k[0] for k in v}:
             for yr in ("2017", "2030"):
                 xs = [v.get((reg, p_, "LEVL", yr)) for p_ in parts]
                 if any(x is not None for x in xs):
                     v[(reg, comp, "LEVL", yr)] = sum(x for x in xs if x is not None)
-    # Yields of the model's livestock activities that CAPRI's 2030 reference splits (Sprint 9p regression, found against
+    # Yields of the model's livestock activities that CAPRI's 2030 reference splits (the projection layer at CAPRI's reference regression, found against
     # the EU outlook 2020-2030): the reference reports DCOL/DCOH, HEIL/HEIH, BULL/BULH, CAMF/CAFF and SHGM/SHGF per region
     # but not the model's aggregates, so DCOW, HFRS, BULL, CALV and SHGP had no regional yield factor and no EU one -
     # 2030 output per head stayed at 2017 (EU cow milk 139.6 Mt against CAPRI's 154.3). Their factor is the ratio of the

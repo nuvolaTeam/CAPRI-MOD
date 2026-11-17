@@ -4,7 +4,7 @@ CAPRI measures its supply models' elasticities by perturbing the prices one prod
 (capmod: supply_elas_<NTS><BAS><SIM><MS>.gdx, p_ElasSupp(MS, product, price, 'CAL'); the project lead's files are for
 2020, supply_elas_2_1720<MS>defaulta). Here the same experiment on the model's regional supply models at its 2030
 baseline, with CAPRI's own 2030 terms ("capri2030", KNOWN_ISSUES K61; the elasticity calibration it was compared with
-was removed on 28 October 2026, audit S13): each product's price +/- shock (central difference), all other prices
+was removed on 28 October 2026; the supply audit's finding S13, ARCHITECTURE_REFACTOR.md section 5.2): each product's price +/- shock (central difference), all other prices
 fixed, no market feedback; the member state's production (gross output) summed over its regions.
 
 The CAPRI values are for 2020, not 2030: a guide to magnitudes, not a target to match.

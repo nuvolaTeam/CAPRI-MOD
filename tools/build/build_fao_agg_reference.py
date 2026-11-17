@@ -8,7 +8,7 @@ p_aglinkGrowthFactor from it (captrd/load_coco1_data.gms l. 358-360).
 The listing carries 15 significant digits (the GDX file 17).
 
 Output (CAPRI's own data: read-only reference, read by the tests and the parity runs, never by the model;
-docs/design/CAPTRD_MOD.md section 6):
+docs/dev/CAPTRD_MOD.md section 6):
   capri_sources/reference/fao_agg/17/<symbol>.csv.gz    d0, d1, ..., value, eps
 
 Zeros: a record listed as Eps is written with value 0 and eps = 1; a record not listed is absent.

@@ -1,7 +1,7 @@
 """Fertilisation and nitrogen in the regional model: CAPRI's NPK block (NUTNED_, the purchases, the organic and mineral caps, the fertiliser options), the emission factors of mineral N, the N balance price and tiered surplus target with JRC121368's relaxation, the nitrate terms.
 
-RegionalSupplyModel's methods, moved unchanged from capri_mod/supply/supply_module.py (refactor stage 3a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module's, given to
+RegionalSupplyModel's methods, moved unchanged from capri_mod/supply/supply_module.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module's, given to
 this module once supply_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated
 (they name supply_module's types).
 """
@@ -13,7 +13,7 @@ class FertilisationBlock:
         """CAPRI's crop nutrient balance terms for this solve: {"man_d": manure N per activity unit, "nmin": crops'
         base mineral N per ha, "ybase": base yields}, from the N target's row when the scenario has one, else from
         the context SupplyModule sets for every EU solve (CAPRI's NUTNED_ and manure market are in every run,
-        Sprint 9k); None when neither is there."""
+        the manure and ammonia accounts in every EU solve); None when neither is there."""
         srow = getattr(self.ev, "surplus_row", None)
         if srow is not None and len(srow) > 6:
             man_d = srow[6] if srow[6] is not None and hasattr(srow[6], "get") else None
@@ -23,8 +23,8 @@ class FertilisationBlock:
         return ctx if ctx and ctx.get("man_d") is not None else None
 
     def _ef_mineral_n2o(self) -> float:
-        """t CO2-eq per t of mineral N in the accounts' soil N2O: CAPRI's N2OSYN + the mineral part of N2OAMM, from the
-        region's MITERRA loss fractions (n_cascade.mineral_n2o_n; K74 S12, 27 October 2026: before, IPCC's EF1 + 10% x
+        """T CO2-eq per t of mineral N in the accounts' soil N2O: CAPRI's N2OSYN + the mineral part of N2OAMM, from the
+        region's MITERRA loss fractions (n_cascade.mineral_n2o_n; K74, the supply audit's finding S12 (ARCHITECTURE_REFACTOR.md section 5.2), 27 October 2026: before, IPCC's EF1 + 10% x
         EF4 everywhere); IPCC's factors where CAPRI's fractions are missing (Norway: no cascade built, registered)."""
         c_ = getattr(self.par, "ef_min_n2o_cache", None)
         if c_ is None:
@@ -46,6 +46,26 @@ class FertilisationBlock:
             p_ = (float(dn[0]), float(dn[1])) if dn else (EF_SOIL_N2O_DIRECT, 0.10 * EF_SOIL_N2O_INDIRECT)
             self.par.min_n2o_parts_cache = p_
         return p_
+
+    def _netf_spec(self):
+        """The data of CAPRI's mineral N losses as functions of the options (supply_model.gms GASTOTNETF_, RUNTOTNETF_,
+        GASRUNTOTNETF_, l. 3335-3394), for NUTNED_ (l. 1143, 1196, 1211): the region's MITERRA fractions (fr: netf_NH3,
+        netf_NOX, netf_N2O, n_cascade_region.csv), its surface runoff share, winter cover's runoff reduction
+        (WINTERCOV_NO3_REDUCTION) and, per mineral-N option, the literature review's effects on NH3SYN, NOXSYN, N2OSYN
+        and NO3SRUN (fert_side_effects.csv; CAPRI's othImpact is 1 - (1 - lit)(1 + NMIN), ghgMiti.gms l. 552-563).
+        None without the region's fractions (the efficiency then stays at the base, as before 14 November 2026)."""
+        from capri_mod.supply import n_cascade as _nc, n_leaching as _nl
+        rs = _nl.capri_region(self.data.region_id)
+        g = _nc.load()[1].get(rs, {}) if rs else {}
+        fr_keys = ("netf_NH3", "netf_NOX", "netf_N2O")
+        if not all(k in g for k in fr_keys) or "run_surf" not in g:
+            return None
+        lit = {}
+        for (reg_, tech, item), v in fert_side_table().items():
+            if reg_ == self.data.region_id and item in ("NH3SYN", "NOXSYN", "N2OSYN", "NO3SRUN"):
+                lit.setdefault(tech, {})[item] = float(v)
+        return {"fr": {k: float(g[k]) for k in fr_keys}, "run_surf": float(g["run_surf"]),
+                "wc_red": float(param("WINTERCOV_NO3_REDUCTION")), "lit": lit}
 
     def _ef_mineral_lea(self) -> float:
         """t CO2-eq per t of mineral N bought in the indirect N2O of its runoff and leaching (CAPRI GWPN2OLEA_ a and c,
@@ -113,7 +133,7 @@ class FertilisationBlock:
         return out
 
     def _fert_tax_terms(self, ft) -> dict:
-        """CAPRI's emission tax on mineral N and the fertiliser options (Sprint 9l), in the regional model's 1000 EUR:
+        """CAPRI's emission tax on mineral N and the fertiliser options (the fertiliser options under the emission tax), in the regional model's 1000 EUR:
         "m" per t of mineral N (the accounts' soil N2O, direct + volatilised x indirect, and the indirect N2O of its
         runoff and leaching, _ef_mineral_lea); "h" per unit of adopted area
         (1000 ha) per kg N/ha of need, by option. The accounts (EnvironmentalModule.fert_side_factors) count an option
@@ -198,7 +218,7 @@ class FertilisationBlock:
         x kappa, kappa the region's need
         factor that closes NUTNED_ at base with the base mineral use (CAPRI's v_cropNutNeedMultFact, calibrated in
         the base and fixed in simulation; here one per region and nutrient). None outside CAPRI's EU data."""
-        from capri_mod.fert.npk import NPKData, NUTRIENTS, PERM_NGRP, endo_slope, need_multiplier
+        from capri_mod.fert.npk import NPKData, NUTRIENTS, PERM_NGRP, endo_slope, grass_need_factor, need_multiplier
         from capri_mod.fert.inner_fert_dist import FERT_POST_ACCURACY
         env_ = getattr(self.seen, "env_for_surplus", None)
         if env_ is None:
@@ -239,7 +259,7 @@ class FertilisationBlock:
             float(sum(np.asarray(x_start, float)[j] for j in land_cols))
         kap = _st.setdefault(self.par, "npk_kappa", {})
         out = {"capri_region": cr, "nutrients": {}, "land_cols": land_cols, "crop_cols": crop_cols}
-        # the split columns (GRAE and GRAI are the model's own activities since S2, 7 November 2026; before, the
+        # the split columns (GRAE and GRAI are the model's own activities since 7 November 2026; before, the
         # grassland split column moved area from GRAI to GRAE and changed the GRAS groups' need): the animal
         # split and option columns change their animal's manure in the proportion of their manure per head to the
         # animal's (the tables' dmann_rel / dmanp_rel / dmank_rel, d_mann_rel for N only), which reaches
@@ -260,7 +280,7 @@ class FertilisationBlock:
             for j, a in enumerate(acts):
                 if a not in CROPS:
                     continue
-                need[j] = D.crop_coef(cr, nut, a, "need_kg_ha")
+                need[j] = D.crop_coef(cr, nut, a, "need_kg_ha") * grass_need_factor(a)    # NUTNED_'s grass term (K160)
                 own[j] = D.crop_coef(cr, nut, a, "own_kg_ha")
                 poolc[j] = D.crop_coef(cr, nut, a, "pool_kg_ha")
                 mine0[j] = float(env_._base_mineral_rate(rid, a)) if nut == "N" else D.crop_coef(cr, nut, a, "mine_kg_ha")
@@ -312,7 +332,7 @@ class FertilisationBlock:
                 if not modes:
                     continue
                 needl = [(j, sh * k * need[j] * sq.get(acts[j], 1.0)) for j, sh in crops if need[j] > 0]
-                # the technology mix columns (S1): z ha moved from T2 to T1 need need_diff x the crop's need per ha
+                # the technology mix columns: z ha moved from T2 to T1 need need_diff x the crop's need per ha
                 # (NUTNED_: SQRT(1 + y)(1 + y) per technology); in the group's need only, no area
                 for j, sh in crops:
                     kz = mixc.get(acts[j])
@@ -338,7 +358,7 @@ class FertilisationBlock:
                             ps_[(g_["g"], s_)] = float(m_) + (_add if lst_ else 0.0)
             Ecols = [(j, float(man[j])) for j in range(n) if man[j] != 0.0]
             # the split columns move their animal's manure of this nutrient (CAPRI's MANN, MANP, MANK per activity;
-            # P and K since 9 November 2026, S6 item 6)
+            # P and K since 9 November 2026)
             Ecols += [(j, float(man[acts.index(a_)]) * r_) for j, a_, r_ in man_split[nut]
                       if man[acts.index(a_)] * r_ != 0.0]
             if pool and nut == "N" and len(pool) == 2:
@@ -356,6 +376,8 @@ class FertilisationBlock:
                 "price": float(R.uvag_eur_t) if R.uvag_eur_t == R.uvag_eur_t else 0.0, "kappa": k,
                 "own_scaled": bool(kap.get((key, "own_scaled"), True)),
                 "M0": base["M0"], "partial_slack": ps_}
+            if nut == "N":
+                out["nutrients"][nut]["netf"] = self._netf_spec()
         out["dual_bound"] = float(getattr(self.par, "npk_dual_bound", 10.0) or 10.0)
         return out if out["nutrients"] else None
 
@@ -433,7 +455,7 @@ class FertilisationBlock:
         then minfert_redu_by_crop.gms): a regulation only the organic target sets is kept; for a mineral flow both
         set, the more stringent (min, minfert_redu_by_crop.gms l. 243-246), except for CAPRI's small groups
         (p_checkSmallMine, `small`), whose cap the mineral reduction sets at factor x baseline, replacing the organic
-        one (l. 233-235; audit S2); the residue regulation (limCres) is the mineral reduction's."""
+        one (l. 233-235; the supply audit's finding S2, ARCHITECTURE_REFACTOR.md section 5.2); the residue regulation (limCres) is the mineral reduction's."""
         out = dict(cur)
         for k_, v_ in org.items():
             if k_ not in out:
@@ -461,7 +483,7 @@ class FertilisationBlock:
             if inner is None:
                 return
             caps = inner.mineral_caps(self.data.region_id, base, r)
-            # CAPRI's small groups (p_checkSmallMine): their cap replaces the organic target's (S2)
+            # CAPRI's small groups (p_checkSmallMine): their cap replaces the organic target's (the supply audit's finding S2)
             self.ev.nlp_mine_small = inner.small_mine_groups(self.data.region_id, base)
             lim = inner.limcres_caps(self.data.region_id, base)
             b1, b2 = beta_regulation(param("FERT_REGU_ACCURACY"), param("FERT_REGU_MODE_SHARE"))
@@ -490,7 +512,7 @@ class FertilisationBlock:
         """The mineral-N parts of the N_balance row's coefficients (t mineral N per unit of each column), from the
         environmental accounts' own unit balances (n_mineral_input) as the row is built from them: activities their
         unit balance's, manure exports and imports -/+ the substitution factor, the dairy, cattle and option columns
-        their animal's in proportion to their manure coefficient, the technology mix columns their T1 - T2 (S1)."""
+        their animal's in proportion to their manure coefficient, the technology mix columns their T1 - T2."""
         env_ = getattr(self.seen, "env_for_surplus", None)
         i_nb = labels.index("N_balance")
         mp = np.zeros(A.shape[1])
@@ -523,7 +545,7 @@ class FertilisationBlock:
             elif lab.startswith("genet_z_"):
                 a = lab[len("genet_z_"):].split("_")[0]
             elif lab.startswith("mix_"):
-                # the technology mix (S1): its own mineral part, the unit balances' T1 - T2 (techn_mix._mix_n_terms)
+                # the technology mix: its own mineral part, the unit balances' T1 - T2 (techn_mix._mix_n_terms)
                 mp[j] = float((getattr(self.ev, "mix_n_min", None) or {}).get(lab[len("mix_"):], 0.0))
                 continue
             if a in acts:
@@ -614,7 +636,7 @@ class FertilisationBlock:
         """The crop's base mineral N application (kg N/ha; the environmental module's rate): the part of its
         balance coefficient that CAPRI's fertiliser technologies act on. Its unit coefficient also carries its
         share of the manure- and residue-covered need, which the animals' manure and the residues displace; at the
-        base those cancel over the region. (Until Sprint 9e the technologies scaled the whole unit coefficient,
+        base those cancel over the region. (Until the port of CAPRI's inner fertiliser model the technologies scaled the whole unit coefficient,
         which saved on the manure-covered need as well: ~40% more mineral N saved in the rows than in the accounts,
         Upper Bavaria wheat 108 against 77 kg N/ha.)"""
         env_ = getattr(self.seen, "env_for_surplus", None)
@@ -767,7 +789,7 @@ class FertilisationBlock:
     def _fert_alloc_params(self, always=False):
         """(manure availability, mineral N price kEUR/t N) for this region, from
         CAPRI's reference allocation and its 2017 national UVAG of NITF; (None, None) where the switch
-        use_fert_allocation is off, unless always. (2 November 2026, docs/design/STAGE3_BEHAVIOUR_CHANGES.md 3: the
+        use_fert_allocation is off, unless always. (2 November 2026, docs/dev/REFACTOR_BEHAVIOUR_CHANGES.md 3: the
         switch was set on the instance around the call and set back as an instance attribute, which then hid any
         later change of the class setting.)"""
         if not (always or getattr(self, "use_fert_allocation", False)):

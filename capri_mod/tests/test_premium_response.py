@@ -64,7 +64,7 @@ def test_the_steps_weights_and_the_tenth_step(pr):
 
 
 def test_the_models_own_dairy_split_moves_dcol_and_dcoh_apart():
-    """The dairy cows' shift z (Sprint 7b) moves z stalls from DCOH to DCOL: at an unchanged herd X, DCOL's level is
+    """The dairy cows' shift z (the port of CAPRI's two dairy activities) moves z stalls from DCOH to DCOL: at an unchanged herd X, DCOL's level is
     its trend level times (s X + z) / (s X) and DCOH's times ((1 - s) X - z) / ((1 - s) X)."""
     import pandas as pd
     from capri_mod.policy import premiums as pm

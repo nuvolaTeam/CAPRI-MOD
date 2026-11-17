@@ -70,17 +70,19 @@ CREATE TABLE noneu_market_supply_nq (
     capri_y VARCHAR NOT NULL REFERENCES capri_xx1 (code),
     h DOUBLE NOT NULL,
     ppri_y DOUBLE NOT NULL CHECK (ppri_y >= 0),           -- 0: no CAPRI price (FEDE)
+    support_y DOUBLE NOT NULL CHECK (support_y = 0 OR (support_y > 0 AND support_y < ppri_y)),  -- PPri_'s support per tonne (K146)
     inpe DOUBLE NOT NULL CHECK (inpe > 0),
     h_ratio DOUBLE NOT NULL,
     PRIMARY KEY (rms, capri_x, capri_y),
     CHECK ((ppri_y > 0) OR (h_ratio = 0 AND y IS NULL))
 );
-COMMENT ON TABLE noneu_market_supply_nq IS 'CAPRI''s market supply functions of the non-EU market regions (ProdNQ_): p_hessNQSupp at CAL completed as arm/market1.gms, the land demand rows (x TCRP, FODFAL, FRUN) with their sign turned as arm/market1.gms l. 593, Data_CAL PPRI, INPE 2030 (tools/build/build_noneu_market_supply_nq.py; K54-3; the land market, PORTS_STAGE4.md stage 7)';
+COMMENT ON TABLE noneu_market_supply_nq IS 'CAPRI''s market supply functions of the non-EU market regions (ProdNQ_): p_hessNQSupp at CAL completed as arm/market1.gms, the land demand rows (x TCRP, FODFAL, FRUN) with their sign turned as arm/market1.gms l. 593, Data_CAL PPRI, INPE 2030 (tools/build/build_noneu_market_supply_nq.py; K54-3; the land market, MARKET_TRQ_PORT.md stage 7)';
 INSERT INTO value_units VALUES
   ('noneu_market_supply_nq', 'h', 'U_1000tPerEuPerTonOverINPE', 'capri', 'CAPRI''s p_hessNQSupp (ProdNQ_, arm/market_model.gms l. 1529-1572: quantity in 1000 t, prices over INPE)'),
   ('noneu_market_supply_nq', 'ppri_y', 'U_EuPerTon', 'capri', 'CAPRI''s PPRI (CAPRIunits: U_EuPerTon)'),
+  ('noneu_market_supply_nq', 'support_y', 'U_EuPerTon', 'capri', 'CAPRI''s support per tonne in the producer price (PPri_, arm/market_model.gms l. 3046-3060: PSEi + PSEd + AREP x (1 - DECP), Data_CAL); 0 for the rents, raw milk and FEDE (K146)'),
   ('noneu_market_supply_nq', 'inpe', 'U_1unit', 'builder', 'the price index of the non-agricultural good, 1.019^13 in 2030'),
-  ('noneu_market_supply_nq', 'h_ratio', 'U_1000tPerPriceRatio', 'builder', 'h x ppri_y / inpe');
+  ('noneu_market_supply_nq', 'h_ratio', 'U_1000tPerPriceRatio', 'builder', 'h x (ppri_y - support_y) / inpe');
 
 -- rule: the market supply functions' model codes are market commodities (raw milk included), mapped from CAPRI's, or
 -- CAPRI's market land types TCRP, FODFAL, FRUN under their own codes (the land market, noneu_land_market.csv); a
@@ -107,7 +109,7 @@ CREATE TABLE noneu_land_market (
     avail_kha DOUBLE NOT NULL CHECK (avail_kha > 0),
     PRIMARY KEY (rms, lu)
 );
-COMMENT ON TABLE noneu_land_market IS 'CAPRI''s market land block per non-EU market region without supply models (LandSupplyMNL_, LndSupplyEqualsDemand_, rentFromProdpriceLand_, arm/market_model.gms l. 1696-1790): land, rent, MNL constant p_aLU CUR and ARTO - INLW per land type, from sim_ini_21730 (tools/build/build_noneu_market_supply_nq.py build_land_market; PORTS_STAGE4.md stage 7)';
+COMMENT ON TABLE noneu_land_market IS 'CAPRI''s market land block per non-EU market region without supply models (LandSupplyMNL_, LndSupplyEqualsDemand_, rentFromProdpriceLand_, arm/market_model.gms l. 1696-1790): land, rent, MNL constant p_aLU CUR and ARTO - INLW per land type, from sim_ini_21730 (tools/build/build_noneu_market_supply_nq.py build_land_market; MARKET_TRQ_PORT.md stage 7)';
 INSERT INTO value_units VALUES
   ('noneu_land_market', 'land_kha', 'U_1000ha', 'capri', 'CAPRI v_land (1000 ha)'),
   ('noneu_land_market', 'rent', 'U_EuPerHa', 'capri', 'CAPRI v_rentPerHa'),
@@ -210,6 +212,7 @@ WHERE a.h <> b.h;
 -- rule: every column of the long tables declared here has its unit, every unit is in the catalogue
 SELECT t.tbl, t.item FROM (VALUES ('eu_market_supply_nq', 'h'), ('eu_market_supply_nq', 'ppri_y'),
     ('eu_market_supply_nq', 'inpe'), ('eu_market_supply_nq', 'h_ratio'), ('noneu_market_supply_nq', 'h'),
-    ('noneu_market_supply_nq', 'ppri_y'), ('noneu_market_supply_nq', 'inpe'), ('noneu_market_supply_nq', 'h_ratio'))
+    ('noneu_market_supply_nq', 'ppri_y'), ('noneu_market_supply_nq', 'support_y'), ('noneu_market_supply_nq', 'inpe'),
+    ('noneu_market_supply_nq', 'h_ratio'))
     t(tbl, item)
 WHERE NOT EXISTS (SELECT 1 FROM value_units v WHERE v.tbl = t.tbl AND v.item = t.item AND v.unit IN (SELECT code FROM units));

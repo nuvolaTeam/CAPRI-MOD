@@ -33,7 +33,7 @@ sources/raw/capri/dat/envind/fao_peatland/fao_peatland_P.parquet and lulucf_emis
 Western Balkans and Turkey; the WBA6 set from sets.gms),
 fao_landuse_2000_P.parquet (the project lead's gdxdumps, converted by tools/build/convert_sources.py); FAO
 country codes from the GAMS source (global/fao_codes_new.gms FAORegions_map); sources/intermediate/ghgtech/capri_costsavings_2030.parquet; CROP and GRAS 2030 levels
-from validation/greendeal_2030/capri_marginal_terms_ref_2030.csv.xz; deflator from
+from validation/greendeal_2030/capri_marginal_terms_ref_2030.csv; deflator from
 baselines/capri_greendeal_ref/1730/trajectories/capri_price_ratios_2030.csv.
 
     python tools/build/build_histosol.py [--gams-dir capri_sources/gams]
@@ -172,7 +172,7 @@ def main():
 
     cs = read_source(SRC / "intermediate" / "ghgtech" / "capri_costsavings_2030.parquet")
     cs = cs[cs["technology"] == "FALLOW"]
-    terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv.xz",
+    terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ref_2030.csv",
                         header=None, names=["region", "act", "item", "value"], dtype=str)
     terms = terms[(terms["item"] == "LEVL") & terms["act"].isin(["CROP", "GRAS"])]
     lev = {(r.region, r.act): float(r.value) for r in terms.itertuples()}

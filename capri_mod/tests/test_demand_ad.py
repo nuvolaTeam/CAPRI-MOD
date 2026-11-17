@@ -1,4 +1,4 @@
-"""Step G2c: CAPRI's GL human consumption in CasADi (capri_mod/market/demand_ad.py) equals the equations as NumPy had
+"""CAPRI's GL human consumption in CasADi (capri_mod/market/demand_ad.py) equals the equations as NumPy had
 them until 31 October 2026 (written out here as the reference), and its Jacobian equals finite differences."""
 import numpy as np
 import pytest
@@ -31,13 +31,9 @@ def _num_numpy(prm, regions, PR, ir):
 
 
 @pytest.fixture(scope="module")
-def market():
-    from capri_mod.model import CAPRIModel
-    from capri_mod.settings import override
-    with override({"market.market_supply_nq": False}):
-        m = CAPRIModel(data_dir="capri_data", verbose=False)
-        m.run(scenario="BASELINE", regions=["DE110000", "FR100000"], max_outer_iter=1)
-    return m.market_module
+def market(solved_market):
+    """The market after one baseline iteration on DE110000 and FR100000 (conftest.py)."""
+    return solved_market
 
 
 def test_gl_entry_matches_numpy(market):

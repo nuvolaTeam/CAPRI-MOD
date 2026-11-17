@@ -1,6 +1,6 @@
 """The market's grouping step: CAPRI's market regions (RM) and behavioural regions (RMS) to the model's market regions.
 
-The market's move onto CAPRI's regions (docs/design/MARKET_REGIONS_INVENTORY.md, stage 1): every builder of the
+The market's move onto CAPRI's regions (docs/dev/MARKET_REGIONS_INVENTORY.md): every builder of the
 market's data groups CAPRI's regions through this one step, read from data:
 
   capri_data/codes/capri/RM.csv          CAPRI's 45 market regions (set RM; tools/build/build_code_lists.py)
@@ -10,7 +10,7 @@ market's data groups CAPRI's regions through this one step, read from data:
                                          each market region's model region (declared): today 26 market regions are
                                          their own, the two EU blocks are the model's EU27, 17 are its ROW
 
-Stage 2 makes the EU blocks the model's regions and stage 3 every market region its own; each changes only the
+The next steps make the EU blocks the model's regions and then every market region its own; each changes only the
 declared table. A code that is neither a market nor a behavioural region raises KeyError: until 3 November 2026 the
 builders folded every unknown code into ROW (REGION_MAP.get(r, "ROW")), so a code they had not skipped as an
 aggregate went to ROW silently.

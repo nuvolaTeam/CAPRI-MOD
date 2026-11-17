@@ -1,5 +1,5 @@
-"""CAPRI's manure and enteric methane per head and its CO2 from liming and urea, per model region (Sprint 9s;
-docs/SYNTHETIC_DATA_AUDIT.md B1-B3, B5).
+"""CAPRI's manure and enteric methane per head and its CO2 from liming and urea, per model region (the removal of synthetic data;
+docs/dev/SYNTHETIC_DATA_AUDIT.md B1-B3, B5).
 
 The accounts used IPCC Tier 1 defaults: one manure-CH4 factor per animal for every region (dairy 16 kg, sows 4.2 kg;
 CAPRI's 2017 results: dairy 42.8 kg in Germany, 10.9 in France, sows 8.9-11.5), and CO2 from 600 kg of limestone on

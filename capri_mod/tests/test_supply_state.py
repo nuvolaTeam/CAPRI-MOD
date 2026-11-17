@@ -1,4 +1,4 @@
-"""The supply models' state objects and the guard on moved names (refactor stage 3, capri_mod/supply/state.py)."""
+"""The supply models' state objects and the guard on moved names (the refactor of the supply's parameters and state, capri_mod/supply/state.py)."""
 from __future__ import annotations
 
 import ast
@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def test_state_objects_are_created_on_first_use_and_absent_fields_stay_absent():
     """The objects exist on a model built without __init__ (as tests' stubs are); a field never set is absent, so a
-    getattr default applies as it did for an attribute never set (plan Q1: slot classes)."""
+    getattr default applies as it did for an attribute never set (slot classes)."""
     m = RegionalSupplyModel.__new__(RegionalSupplyModel)
     for kind, cls in (("par", S.RegionalParameters), ("sv", S.RegionalSolveState), ("ev", S.RegionalEvalState),
                       ("seen", S.RegionalSeen), ("res", S.RegionalResults)):
@@ -74,9 +74,9 @@ def _string_uses(names):
 
 
 def test_no_moved_name_is_used_as_a_string():
-    """Refactor stage 3: after a move no code reaches the old name through a string (getattr(obj, "_x"),
+    """The refactor of the supply's state: after a move no code reaches the old name through a string (getattr(obj, "_x"),
     obj.__dict__["_x"], a tuple of names), which the runtime guard cannot catch."""
-    # a public input moved under its own name (feed_rations -> seen.feed_rations, S9) is not searched: its new field
+    # a public input moved under its own name (feed_rations -> seen.feed_rations) is not searched: its new field
     # and the supply module's own attribute of that name are read by the same string; the runtime guard covers it
     names = {k for k, v in (*S.MOVED_REGIONAL.items(), *S.MOVED_MODULE.items()) if v.rpartition(".")[2] != k}
     found = _string_uses(names) if names else []
@@ -84,7 +84,7 @@ def test_no_moved_name_is_used_as_a_string():
 
 
 def test_the_emission_tax_is_taken_back_once_on_the_same_net_revenues():
-    """Refactor stage 3, S7 (plan section 4.2): _apply_ghg_tax's undo record (ev.ghg_applied) acts only on the net
+    """The refactor of the supply's state (REFACTOR_SUPPLY_PARAMETERS_PLAN.md section 4.2): _apply_ghg_tax's undo record (ev.ghg_applied) acts only on the net
     revenues object it was added to (ev.ghg_nr_obj, an identity check): applied twice on the same object the tax is
     there once; on a rebuilt object nothing is taken back."""
     import pandas as pd

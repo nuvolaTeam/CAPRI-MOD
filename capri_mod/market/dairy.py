@@ -27,16 +27,16 @@ class DairyMixin(MarketStateMixin):
     # DAIRY PROCESSING (CAPRI arm/market_model.gms DairyNQ_, ProcMargM_, FatsProtBal_)
     # ------------------------------------------------------------------
     #: CAPRI dairy product -> market commodity. CAPRI trades all nine products of its dairy block bilaterally
-    #: (Sprint 9f; until then fresh milk products, cream, concentrated milk, whole milk powder and casein cleared
+    #: (the switch-on of CAPRI's dairy block; until then fresh milk products, cream, concentrated milk, whole milk powder and casein cleared
     #: inside each block with fixed extra-regional trade)
     DAIRY_TRADED = {"BUTT": "BUTR", "SMIP": "SKIM", "CHES": "CHES", "WHEP": "WHEY", "FRMI": "FRMI", "CREM": "CREM",
                     "COCM": "COCM", "WMIO": "WMIO", "CASE": "CASE"}
     DAIRY_PRODUCTS = ("BUTT", "SMIP", "CHES", "FRMI", "CREM", "COCM", "WMIO", "CASE", "WHEP")
-    #: products cleared inside a block (none since Sprint 9f; the block's algebra keeps the option)
+    #: products cleared inside a block (none since the switch-on of CAPRI's dairy block; the block's algebra keeps the option)
     DAIRY_DOMESTIC = ()
 
     #: CAPRI's dairy processing in the market (docs/DAIRY_PROCESSING.md): on, as in CAPRI, where the dairy
-    #: block is part of the market model (no switch). Since Sprint 9f all nine dairy products are traded and raw
+    #: block is part of the market model (no switch). Since the switch-on of CAPRI's dairy block all nine dairy products are traded and raw
     #: milk, fat and protein are priced per member state.
 
     def _dairy_algebra(self, tables):
@@ -158,7 +158,7 @@ class DairyMixin(MarketStateMixin):
         return out
 
     def _dairy_world_params(self) -> dict:
-        """CAPRI's dairy block for the non-EU trade regions (dairy Stage 4, tools/build/build_dairy_world_blocks.py):
+        """CAPRI's dairy block for the non-EU trade regions (tools/build/build_dairy_world_blocks.py):
         {trade region: params}, CAPRI's market regions of the trade region sharing price ratios; raw milk from
         CAPRI's own supply function (p_hessNQSupp MILK); food demand among the nine products with the
         regions' p_ElasDem weighted by food use; feed use of the products at CAPRI's level (FMIL index 1: the
@@ -206,7 +206,7 @@ class DairyMixin(MarketStateMixin):
         return out
 
     def _dairy_fn(self, prm: dict):
-        """The block's CasADi function (dairy_ad.dairy_block_function, step G2f) with its regions' processing (ProcNQ_,
+        """The block's CasADi function (dairy_ad.dairy_block_function) with its regions' processing (ProcNQ_,
         ProcFudge_; audit M9: the processing Hessian's Harms, ProcessingMixin._proc_nq_params), cached on the block's
         arrays (a block's copy with another raw milk slope, _sup_milk_delivered, shares them)."""
         H = (self._proc_nq_params() or {}).get("Harms") or {}
@@ -236,13 +236,13 @@ class DairyMixin(MarketStateMixin):
 
     def _dairy_solve(self, dp, traded_ratio, milk_ratio=None, fi=1.0, milk_shift=0.0):
         """Solve one dairy block of a non-EU trade region (dairy_ad.py). Unknowns: fat, protein and raw milk price
-        ratios (the nine products are traded bilaterally since Sprint 9f, their prices given). Equations: fat and
+        ratios (the nine products are traded bilaterally since the switch-on of CAPRI's dairy block, their prices given). Equations: fat and
         protein balances (FatsProtBal_); raw milk: dairies' demand = milk delivered (milk_ratio given) or = CAPRI's raw
         milk supply function (milk_ratio None; milk_shift, kt: its change from the other products' prices, ProdNQ_
         MILK's cross-price terms)."""
         if dp["dom"]:
             raise NotImplementedError("market: products cleared inside a dairy block (DAIRY_DOMESTIC) have no "
-                                      "equations since step G2f (none since Sprint 9f)")
+                                      "equations since 4 November 2026 (none since the switch-on of CAPRI's dairy block)")
         n = len(dp["items"]) + 2
         iF, iP, iM = dp["iF"], dp["iP"], dp["iM"]
         zt = np.zeros(n)
@@ -409,9 +409,9 @@ class DairyMixin(MarketStateMixin):
         return fi * (pb / rho) ** sg
 
     def _dairy_eu_prices(self, world_prices) -> Dict[str, float]:
-        """EU prices of the traded dairy products relative to base, as the dairy block sees them: the
-        wedge price x the current EU Armington premium (lagged within an outer iteration). With two EU market
-        regions (bilateral market): {region: {product: ratio}}; 1 before the market's first evaluation."""
+        """EU prices of the traded dairy products relative to base, as the dairy block sees them: the current
+        evaluation's producer price ratios of each EU market region (ev.bilat_ratio_now, set by the evaluation before
+        the supply response), {region: {product: ratio}}; 1 before the market's first evaluation."""
         d0 = getattr(self, "_dom0_cache", None)
         if d0 is None:
             d0 = self.domestic_prices(self.world_prices_base)

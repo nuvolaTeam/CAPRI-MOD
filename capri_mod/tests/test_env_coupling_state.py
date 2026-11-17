@@ -1,5 +1,5 @@
-"""The environment's and the coupling's state objects and the guard on moved names (refactor stage 4, second half;
-capri_mod/environmental/state.py, capri_mod/coupling/state.py; docs/design/ENV_COUPLING_STATE_INVENTORY.md)."""
+"""The environment's and the coupling's state objects and the guard on moved names (the refactor of the environment's and the coupling's state;
+capri_mod/environmental/state.py, capri_mod/coupling/state.py; docs/dev/ENV_COUPLING_STATE_INVENTORY.md)."""
 from __future__ import annotations
 
 import ast

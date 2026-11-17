@@ -107,7 +107,7 @@ class IncomeDistributionModule:
         if pr is None:
             raise ValueError(f"{region}: the supply model carries no premiums")
         lev = {a: float(acts.get(a, 0.0)) for a in nr.index}
-        # CAPRI's crop technologies (S1): the net revenue and premium of T1 less T2 on the area moved to T1 (z); the
+        # CAPRI's crop technologies: the net revenue and premium of T1 less T2 on the area moved to T1 (z); the
         # premium difference is prem_diff_share x the crop's premium (supply/techn_mix.py)
         mz = dict(getattr(res, "technology_mix", None) or {})
         dnr = dict(getattr(getattr(m, "ev", None), "mix_dnr", None) or {})

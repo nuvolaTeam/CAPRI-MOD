@@ -1,7 +1,7 @@
 {
   "_note": "seconds per test, from tests_next2.xml (2026-10-27); conftest.py starts the longest first",
   "durations": {
-    "capri_mod/tests/test_capri.py::test_nlp_form_takes_jrc121368_relaxation_where_the_tiered_n_target_fails": 309.3,
+    "capri_mod/tests/test_capri.py::test_nl32_meets_the_tiered_n_target_in_capris_form_by_idling_its_histosol_grassland": 309.3,
     "capri_mod/tests/test_capri.py::test_livestock_gross_output_is_marketed_product": 300.8,
     "capri_mod/tests/test_capri.py::test_unconverged_run_warns_and_is_recorded": 281.0,
     "capri_mod/tests/test_capri.py::test_set_aside_requirement_actually_binds": 210.7,

@@ -1,4 +1,4 @@
-"""CAPRI's residual feed products FENI and FPRI as markets (arm/market_model.gms MaprFeed_; Sprint 9h).
+"""CAPRI's residual feed products FENI and FPRI as markets (arm/market_model.gms MaprFeed_; the completion of CAPRI's feed bulks).
 
 CAPRI trades two residual feeds (set RESIMP) bilaterally like any market product: FENI, energy-rich feed
 (sugar-beet processing by-products, manioc, cassava, roots and tubers), in the energy bulk FENE, and FPRI, the

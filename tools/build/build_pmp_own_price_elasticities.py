@@ -1,5 +1,5 @@
 """CAPRI's estimated own-price elasticities of the crops per CAPRI region, raw (KNOWN_ISSUES K101): the
-elasticity-calibrated PMP's PMP_CAPRI source (docs/PMP_ELASTICITY_WIRING.md; bounded on load by
+elasticity-calibrated PMP's PMP_CAPRI source (docs/dev/PMP_ELASTICITY_WIRING.md; bounded on load by
 capri_pmp.dampen_elasticity), not the default PMP (CAPRI's 2030 terms).
 
     capri_data/2017/supply/pmp_own_price_elasticities.csv   region, crop, own_price_elas

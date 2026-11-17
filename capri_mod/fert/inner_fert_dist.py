@@ -40,7 +40,7 @@ from capri_mod.params import param, param_table
 from capri_mod.data.definitions import capri_ms
 
 SOURCES = ("MINE", "EXCR", "CRES")
-from capri_mod.data.definitions import CAPRI_PERM_NGRP as PERM_NGRP   # noqa: E402  CAPRI's set (stage 4)
+from capri_mod.data.definitions import CAPRI_PERM_NGRP as PERM_NGRP   # noqa: E402  CAPRI's set
 
 
 def gamma_params(mode: float, accuracy: float) -> Tuple[float, float]:
@@ -286,7 +286,7 @@ class InnerFertDist:
 
     def _rules(self):
         if not hasattr(self, "_exm"):
-            # the Green Deal group's data (capri_data/scenarios/greendeal_group, refactor stage 5)
+            # the Green Deal group's data (capri_data/scenarios/greendeal_group)
             self._exm = self._inp.csv("mineral_redu_exemptions.csv", "scenarios/greendeal_group")
             self._lim = self._inp.csv("mineral_redu_limcres.csv", "scenarios/greendeal_group")
         return self._exm, self._lim

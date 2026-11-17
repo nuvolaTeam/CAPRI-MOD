@@ -1,5 +1,5 @@
 """CAPRI's per-technology terms of its 2030 simulation start, as CSV: the linear PMP terms per technology and the
-technology factors (S1, CAPRI's T1/T2 technologies; docs/design/S1_S2_DESIGN.md, steps 0a and 0b of the
+technology factors (CAPRI's T1/T2 technologies; docs/dev/CROP_TECHNOLOGIES_AND_SPLIT_ACTIVITIES.md, steps 0a and 0b of the
 implementation plan, 7 November 2026).
 
 CAPRI gives each crop activity but grassland and set-aside two technologies (intens/techf.gms l. 64-75): T1, the

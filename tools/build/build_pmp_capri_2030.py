@@ -8,7 +8,7 @@ CAPRI's PMP terms (supply/supply_model.gms QUADRA_ l. 5284, GRPLEVL_ l. 4892; p_
     L_grp = sum of the levels of the group's crops (EPRD_TO_GRP: CERE, CER2, OILS, OARA, FARA)
 
 The model has one activity per crop where CAPRI has two technologies (T1 high-yield, T2 low-yield, capmod.gms
-l. 246), and some model activities sum several CAPRI ones (GRAS = GRAE + GRAI, SETA = VSET + FALL; OFOD = OFAR + ROOF until S2, 7 November 2026).
+l. 246), and some model activities sum several CAPRI ones (GRAS = GRAE + GRAI, SETA = VSET + FALL; OFOD = OFAR + ROOF until 7 November 2026).
 Its curvature on the model's activity levels is derived exactly for a quadratic cost whose linear terms adjust:
   1. technologies: the cost of a crop's level X split optimally over its technologies is 1/2 c X^2 with
      c = 1 / (1' Qt^-1 1) (Qt the crop's technology block; c = Qt for a crop with one technology T);
@@ -29,7 +29,7 @@ exported from the project lead's CAPRI 2030 baseline calibration); CAPRI 2030 le
 baseline the model's trajectory is built from (res_2_1730greendeal_refdefaulta, tools/lib/paths.BASELINE_REF): with
 the model's base at those levels, Q = H there, CAPRI's own curvature (its calibration run refpol_endotech_all_ini until
 9 November 2026, when the base moved to the Green Deal baseline).
-Outputs: capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_capri_2030_mix.csv (S1's mix columns, mix_terms; the default run only) and
+Outputs: capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_capri_2030_mix.csv (CAPRI's crop technologies' mix columns, mix_terms; the default run only) and
 capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_capri_2030.csv (region, act_i, act_j, g, x_i, x_j, capri_regions); g in the
 model's 2017 money: CAPRI's 2030 terms over CAPRI's inflation to 2030 (tools/lib/_money.deflator, the deflator the
 2030 prices take; KNOWN_ISSUES K108, 31 October 2026: before, in CAPRI's 2030 money)
@@ -55,7 +55,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
 OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "supply" / "pmp_capri_2030.csv"
 REF = BASELINE_REF
-#: the mix columns' PMP terms (S1): g_xx_extra (Q_XX - c) X^2 to add to the crop's diagonal, g_xz and g_zz, per model
+#: the mix columns' PMP terms (CAPRI's crop technologies): g_xx_extra (Q_XX - c) X^2 to add to the crop's diagonal, g_xz and g_zz, per model
 #: region and crop with both technologies, in the convention of OUT (g = Q x X^2 at CAPRI's 2030 level x, the model's
 #: 2017 money)
 OUT_MIX = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "supply" / "pmp_capri_2030_mix.csv"
@@ -132,7 +132,7 @@ def capri_hessian(region: str, techn: pd.DataFrame, pact: pd.DataFrame, levels: 
 
 def mix_terms(region: str, techn: pd.DataFrame) -> dict:
     """{CAPRI crop: (Q_XX - c, Q_Xz, Q_zz)} of one CAPRI region's crops with both technologies: CAPRI's 2x2 block Qt
-    in the mix columns' variables (X, z), x_T1 = X/2 + z, x_T2 = X/2 - z (S1, docs/design/S1_MIX_COLUMNS.md section 2):
+    in the mix columns' variables (X, z), x_T1 = X/2 + z, x_T2 = X/2 - z (docs/dev/CROP_TECHNOLOGY_MIX_COLUMNS.md section 2):
     M' Qt M with M = [[1/2, 1], [1/2, -1]]; c = 1 / (1' Qt^-1 1), the crop's curvature in capri_hessian (the Schur
     complement Q_XX - Q_Xz^2 / Q_zz, checked here)."""
     out = {}
@@ -214,7 +214,7 @@ def main() -> None:
         Hm = 0.5 * (Hm + Hm.T)
         n_groups += 1
         if len(cs) == 1:
-            # the mix columns' terms (S1): one CAPRI region per model region (all 250 since S2), the crop's 2030 level
+            # the mix columns' terms (CAPRI's crop technologies): one CAPRI region per model region (all 250 since 7 November 2026), the crop's 2030 level
             # as the scale (g = Q x X^2, the convention of g below)
             for act, (dxx, xz, zz) in mix_terms(cs[0], techn).items():
                 if act in CAPRI_TO_MODEL and lev[cs[0]].get(act, 0.0) > 0:

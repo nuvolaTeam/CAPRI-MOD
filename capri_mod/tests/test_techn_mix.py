@@ -1,4 +1,4 @@
-"""S1, CAPRI's crop technologies as mix columns (docs/design/S1_MIX_COLUMNS.md): the data and the PMP transform."""
+"""CAPRI's crop technologies as mix columns (docs/dev/CROP_TECHNOLOGY_MIX_COLUMNS.md): the data and the PMP transform."""
 from __future__ import annotations
 
 import importlib.util
@@ -6,6 +6,7 @@ import math
 from pathlib import Path
 
 import numpy as np
+import pytest
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -61,3 +62,31 @@ def test_mix_pmp_terms_reproduce_the_collapsed_curvature():
             assert math.isclose(xz, (Qt[0, 0] - Qt[1, 1]) / 2, rel_tol=1e-12, abs_tol=1e-12)
             n += 1
     assert n > 50
+
+
+@pytest.mark.slow
+def test_mix_columns_move_to_the_low_yield_technology():
+    """The mix column z of a crop (x_T1 = X/2 + z, x_T2 = X/2 - z) is bounded by its two rows alone, -X/2 <= z <= X/2:
+    z < 0 is the shift to CAPRI's low-yield technology T2, the Green Deal's main lever on the crops' N need (CAPRI's ES42
+    reference -> Green Deal: N need per ha -42% grass, -23% rape, -11% maize). Until 15 November 2026 the regional NLP's
+    default lower bound 0 held every z at or above the calibration point (KNOWN_ISSUES K155); in Castilla-La Mancha
+    the Green Deal then left sunflower and pulses at their 0.1 x base floor (CAPRI +15% and +24%). ES42 alone, the
+    Green Deal 2030 step from CAPRI's 2030 reference."""
+    from capri_mod.model import CAPRIModel
+    from capri_mod.projection import BaselineTrajectory, ProjectionModule
+    from capri_mod.data.inputs import trajectories_dir
+    from capri_mod.policy.endotech import effective
+    from capri_mod.scenarios import definition
+    R = "ES420000"
+    m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False)
+    traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "scenarios" / "capri_ref_2030"))
+    pmod = ProjectionModule(m, traj, capri_prices_dir=str(trajectories_dir(ROOT / "capri_data", 2030)))
+    scen = definition.to_policy_scenario(definition.load("greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00"))
+    scen.endotech = effective(scen.endotech)
+    res = pmod.run(policy_scenario=scen, years=[2030], regions=[R])
+    rm = (getattr(pmod, "_last_projected_model", None) or m).supply_module._models[R]
+    z = dict(getattr(rm.res, "last_mix_z", None) or {})
+    assert z and min(z.values()) < -1.0, z                       # thousand ha moved from T1 to T2
+    base, scn = (res.baseline[2030]["supply"][R].activities, res.scenario[2030]["supply"][R].activities)
+    for a in ("SUNF", "PULS", "BARL"):                           # CAPRI: +15%, +24%, -1%
+        assert float(scn[a]) > 0.6 * float(base[a]), (a, float(base[a]), float(scn[a]))

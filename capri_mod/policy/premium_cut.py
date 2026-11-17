@@ -1,4 +1,4 @@
-"""CAPRI's premium cut (policy/prmcut.gms, P2a): the premiums per activity a region is paid, from the declared ones, when
+"""CAPRI's premium cut (policy/prmcut.gms): the premiums per activity a region is paid, from the declared ones, when
 a scheme's paid quantity or value exceeds its ceiling.
 
 For each payment scheme s with a ceiling in a ceiling region R (an EU aggregate, a member state, a NUTS 1 region or a

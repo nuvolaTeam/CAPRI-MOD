@@ -1,4 +1,4 @@
-"""tools/check/compare_baseline_capri.py in the S7 coupling form ("capri"): the production compared with CAPRI's
+"""Tools/check/compare_baseline_capri.py in the "capri" coupling form (CAPRI's market calibration): the production compared with CAPRI's
 marketed production (PROD at the calibration point) over the EU's member states only."""
 from __future__ import annotations
 

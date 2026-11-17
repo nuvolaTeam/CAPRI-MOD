@@ -19,7 +19,7 @@ Usage
     python tools/run/run_policy_comparison.py --scenario NAME          # another scenario folder
     python tools/run/run_policy_comparison.py --regions 30             # explicit subset, flagged
 
-The scenario is a folder of capri_data/scenarios (refactor stage 5); until 3 November 2026 the script built its own
+The scenario is a folder of capri_data/scenarios; until 3 November 2026 the script built its own
 Farm-to-Fork from four instruments (pesticides -50%, organic 25%, set-aside 10% of UAA, the nutrient target), which was
 not JRC121368's scenario (the project lead's decision: removed, the script uses the folder).
 """

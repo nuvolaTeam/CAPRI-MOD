@@ -5,7 +5,7 @@ Until then this file was also a builder: it wrote shared/trade_flows_2017.csv, C
 (capmod res_0_1717) folded into the model's trade regions, and a report comparing it with FAOSTAT's 2021 matrix
 (sources/fao_2021/trade_flows_2021.csv). No code read the matrix (the model's flows are 2017/market/
 bilateral_flows_*.csv, tools/build/build_bilateral_market.py), so both files were removed with the market's move onto
-CAPRI's regions (docs/design/MARKET_REGIONS_INVENTORY.md stage 1), and its region map (REGION_MAP, trade_region)
+CAPRI's regions (docs/dev/MARKET_REGIONS_INVENTORY.md), and its region map (REGION_MAP, trade_region)
 gave way to the market's grouping step, tools/lib/_market_regions.py.
 
   AGGREGATES     CAPRI's reporting sums in its market data, dropped by the builders that read every region (each

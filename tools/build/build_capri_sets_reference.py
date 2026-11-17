@@ -4,7 +4,7 @@ Source: a CAPMOD restart file from the project lead's installation (uploaded as 
 Green Deal 2030 run with base year 2017, written at the simulation start). It holds 1,972 sets, those of CAPRI's
 global sets.gms and of the modules loaded in that run, with that run's compile-time switches ($ifi) applied.
 
-Output (CAPRI's own data, read-only; docs/design/CAPTRD_MOD.md section 6):
+Output (CAPRI's own data, read-only; docs/dev/CAPTRD_MOD.md section 6):
   capri_sources/reference/sets/<tag>/<SET>.csv      d0, d1, ..., text (one row per element / tuple)
   capri_sources/reference/sets/<tag>/_index.csv     set, dim, records, description
 

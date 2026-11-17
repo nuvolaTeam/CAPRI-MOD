@@ -2,7 +2,7 @@
 
 Status: revised 20 October 2026 against the code. The current result is that of run r48 (README section 9 (Validation)); the
 section "How the 2030 baseline is built" describes the code as it is; "Findings" are kept from the October 2026
-checks and dated where they carry numbers. The development history is in CHANGELOG.md and docs/COUPLING_SPRINTS.md.
+checks and dated where they carry numbers. The development history is in CHANGELOG.md and docs/dev/COUPLING_SPRINTS.md.
 
 ## Why
 

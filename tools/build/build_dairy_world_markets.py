@@ -1,4 +1,4 @@
-"""World base balances of the traded dairy products from CAPRI's FAO_agg (dairy processing, Stage 2).
+"""World base balances of the traded dairy products from CAPRI's FAO_agg (dairy processing).
 
 The market's world dairy-product balances were not CAPRI's: butter, skimmed milk powder and whey powder
 never matched CAPRI's codes (BUTT, SMIP, WHEP), so every non-EU region got an invented share of a
@@ -32,7 +32,7 @@ from _sources_io import read_source, source_records, write_source  # noqa: E402 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "fao_agg_17_datamarket" / "fao_agg_dairy_products_bas.parquet"
 COMM = {"BUTT": "BUTR", "SMIP": "SKIM", "CHES": "CHES", "WHEP": "WHEY",
-        # Sprint 9f: CAPRI's other dairy products, traded bilaterally as in CAPRI (model codes = CAPRI codes)
+        # the switch-on of CAPRI's dairy block: CAPRI's other dairy products, traded bilaterally as in CAPRI (model codes = CAPRI codes)
         "FRMI": "FRMI", "CREM": "CREM", "COCM": "COCM", "WMIO": "WMIO", "CASE": "CASE"}
 ITEMS = {"MAPR": "production", "DOMM": "consumption", "IMPT": "imports", "EXPT": "exports"}
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))

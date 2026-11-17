@@ -1,4 +1,4 @@
-"""CAPRI's rural development (pillar 2) payments of the year (P2c): policy/extend_rd_baseline.gms and policy/rd_logic.gms,
+"""CAPRI's rural development (pillar 2) payments of the year: policy/extend_rd_baseline.gms and policy/rd_logic.gms,
 called from scen/Premiums/rd/define_second_pillar_baseline.gms in CAP_2014_2020.gms's chain. They turn the public
 money of the rural development programmes (rd_budget.gdx: planned and spent per region, year and RDP measure) into
 CAPRI premium declarations: the ceilings, rates per premium group and application types of the less-favoured-area

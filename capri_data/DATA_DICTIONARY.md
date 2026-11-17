@@ -18,9 +18,9 @@ Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists; `capr
 | File | Content | Source | Shape |
 |---|---|---|---|
 | `base_areas.csv` | base-year crop area by region and crop activity (1000 ha) | CAPRI 2017 regional results (capreg DATA2 LEVL; `tools/build/build_capri_base.py`) | 221 × 34 (all crop activities and OCRO, OIND, NURS, FLOW) |
-| `yields.csv` | yield per ha (crops, t/ha; GRAS fresh matter kg/ha, converted at load) or per model head (animals: CAPRI's YILD / 1000, t of milk or meat; sows and hens in CAPRI's output unit / 1000) by region and activity | CAPRI 2017 regional results; crop columns rebuilt in Sprint 9s (`tools/build/build_crop_economics_2017.py`); animal columns from CAPRI's YILD on 23 October 2026 (`tools/build/build_animal_yields.py`; the load-time unit rescaling was removed) | 221 × 46 |
+| `yields.csv` | yield per ha (crops, t/ha; GRAS fresh matter kg/ha, converted at load) or per model head (animals: CAPRI's YILD / 1000, t of milk or meat; sows and hens in CAPRI's output unit / 1000) by region and activity | CAPRI 2017 regional results; crop columns rebuilt in the removal of synthetic data (`tools/build/build_crop_economics_2017.py`); animal columns from CAPRI's YILD on 23 October 2026 (`tools/build/build_animal_yields.py`; the load-time unit rescaling was removed) | 221 × 46 |
 | `animal_numbers.csv` | herds by region (1000 head) | CAPRI 2017 regional results, DATA2 HERD (`tools/build/build_capri_base.py`); per-head coefficients are CAPRI's totals over these heads | 221 × 12: `DCOW`, `SCOW`, `COWS`, `BULL`, `HEIF`, `CALV`, `PIGS` (breeding sows), `PIGF` (fattening pigs = census pigs − sows; CAPRI's PIGF herd where CAPRI has no census total: DEA20000, DEB10000, FI200000), `HENS`, `POUL`, `SHGM`, `SHGF` (CAPRI's HERD) |
-| `variable_costs.csv` | variable cost per activity (EUR/ha) | CAPRI DATA2 TOIN (Sprint 9s for crops; `tools/build/build_crop_economics_2017.py`, `build_shg_split.py`) | 221 × 46 |
+| `variable_costs.csv` | variable cost per activity (EUR/ha) | CAPRI DATA2 TOIN (the removal of synthetic data for crops; `tools/build/build_crop_economics_2017.py`, `build_shg_split.py`) | 221 × 46 |
 | `crop_premium.csv` | CAP premium per region and model crop (EUR/ha) | CAPRI DATA2 PRME (`tools/build/build_crop_economics_2017.py`) | 221 × 34 |
 | `land_availability.csv` | land by type (1000 ha): `ARABLE`, `PERMANENT`, `GRASSLAND`, `FALLOW` (`OTHER_AG` dropped on 27 October 2026: no builder) | CAPRI 2017 regional results (`tools/build/build_capri_base.py`) | 221 × 4 |
 | `pmp_own_price_elasticities.csv` | own-price elasticities for the PMP calibration, per CAPRI region (228, member states included) and crop | CAPRI PELA | 2,375 rows |
@@ -40,7 +40,7 @@ Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists; `capr
 | `cap_payments.csv` | payment engine rates per region (EUR/ha); `BPS` = CAPRI's premiums per ha of UAA over all schemes; `ANC`, `AES`, `ORGANIC`, `COUPLED` = 0 and unused (the split by scheme comes from `premium_scheme_shares_2030.csv`) | CAPRI PRME (`tools/build/build_crop_economics_2017.py`) | 221 × 5 |
 | `cap_ceilings_2030.csv` | CAPRI's 2030 budgets by premium scheme, Mio EUR, per CAPRI member state and NUTS2 region: DPPIL1, DPPIL2, DPRD_LFA, DPRD_N2K, DPAE, DPNAT, DPTOTAL; the payments report's national envelopes (DPTOTAL) | CAPRI 2030 reference, dataOut CEILVAL (`tools/build/build_cap_ceilings_2030.py`) | 289 × 7 |
 | `premium_scheme_shares_2030.csv` | per model region and activity, the part of the premium paid under DPPIL1, DPRD_LFA, DPRD_N2K, DPAE and DPNAT (sums to 1); Pillar II budget changes and the report's split by scheme | CAPRI 2030 reference, dataOut PRME by scheme / DPTOTAL, LEVL-weighted (`tools/build/build_cap_ceilings_2030.py`) | 8,709 rows (221 regions) |
-| `tariffs.csv` | ad valorem protection per trade region and commodity | CAPRI's total protection from its 2017 bilateral flows (Sprint 9r; `tools/build/build_tariffs_2017.py`) | 30 × 52 |
+| `tariffs.csv` | ad valorem protection per trade region and commodity | CAPRI's total protection from its 2017 bilateral flows (the regional solves in parallel; `tools/build/build_tariffs_2017.py`) | 30 × 52 |
 
 ### Environment (`2017/environment/`) and feed (`2017/feed/`)
 
@@ -165,7 +165,7 @@ prices and slopes).
 | `2030/capri_price_ratios_2030.csv` | member state, CAPRI product: UVAG 2017 and 2030, input deflator, real ratio (2030 price in 2017 money / 2017 price) | `tools/build/build_price_trajectory_2030.py` |
 | `2030/capri_cap_premium_2030.csv` | model region × CAPRI activity: CAPRI's 2030 premium per unit in 2017 money | same |
 | `2030/capri_livestock_premium_ratio_2030.csv` | model region × model animal: 2030/2017 premium ratio (real, 2017 activity-level weights) | same |
-| `validation/greendeal_2030/capri_marginal_terms_{ini,max}_2030.csv.xz` (xz-compressed), `capri_unit_values_{ini,max}_2030.csv` | CAPRI's Farm-to-Fork reference: per-activity marginal terms (D_*), LEVL, MREV, TOOU, TOIN, MANN, PRME; national unit values | `tools/build/extract_capri_marginal_terms.py` |
+| `validation/greendeal_2030/capri_marginal_terms_{ini,max}_2030.csv`, `capri_unit_values_{ini,max}_2030.csv` | CAPRI's Farm-to-Fork reference: per-activity marginal terms (D_*), LEVL, MREV, TOOU, TOIN, MANN, PRME; national unit values | `tools/build/extract_capri_marginal_terms.py` |
 | `sources/capri_baseline/capri_uvag_store_1730.csv` | CAPRI's calibrated 2030 unit values (p_uvagStore), member state × product | gdxdump of `data_uvag1730defaulta` |
 | `sources/capri_baseline/capri_market_prices_1730.csv` | CAPRI market baseline prices (PPRI, CPRI) at the 2017 (BAS) and 2030 (CAL) points, member state × product | gdxdump of `data_market_1730defaulta` |
 | `2017/supply/grass_intensity.csv` | CAPRI's two grassland activities per model region: extensive share of GRAS (share_ext), yields relative to the GRAS mean (yield_ext_rel, yield_int_rel), areas, CAPRI's PMP diagonal terms (q_ext, q_int, EUR/ha per 1000 ha) and their source | `tools/build/build_grass_intensity.py` (res_17, p_pmpQuadTechn) |
@@ -228,7 +228,7 @@ prices and slopes).
 | `2017/supply/cover_crops.csv` | CAPRI's catch crops per model region: 2030 area as a share of UAAR, cost per ha (TOIN), N from fixation and residues per ha (BioFix from p_cInput) | `tools/build/build_cover_crops.py` |
 | `2017/supply/winter_cover_share.csv` | Share of each crop's area under winter cover: as given in CAPRI (share0) and filled NUTS2 <- member state <- EU (share) | `tools/build/build_cover_crops.py` (wintercovershare.gms) |
 | `2017/abatement/fert_side_effects.csv` | CAPRI's literature-review side effects of nitrification inhibitors: mineral N (N2OSYN, NH3SYN) and applied manure (NITR_INH_MAN: NH3APP, N2OAPP), relative change of emissions | `tools/build/build_fert_side_effects.py` (p_litRevFertTechs) |
-| `validation/coupled_support_2030/capri_vcs_effect.csv.xz` | CAPRI 2030: reference vs no voluntary coupled support (levels, premiums, prices) | `tools/build/extract_capri_vcs_pair.py` |
+| `validation/coupled_support_2030/capri_vcs_effect.csv` | CAPRI 2030: reference vs no voluntary coupled support (levels, premiums, prices) | `tools/build/extract_capri_vcs_pair.py` |
 | `sources/ghgtech/capri_costsavings_2030.csv` | CAPRI's mitigation calibration runs (ini, max): v_Miti levels and marginals | `tools/build/extract_capri_costsavings.py` |
 
 ### Files added after the tables above (not described in detail here)

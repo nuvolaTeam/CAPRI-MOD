@@ -2,7 +2,7 @@
 give CAPRI's prices? (claude/gd_market_check.md)
 
 CAPRI's last market solve of a converged run is reproduced with CAPRI's results as the supply side
-(capri_data/validation/greendeal_2030/capri_gd_market_2030.csv.xz, tools/build/extract_capri_gd_market.py):
+(capri_data/validation/greendeal_2030/capri_gd_market_2030.csv, tools/build/extract_capri_gd_market.py):
 
   supply              the EU's member states' production with raw milk delivered, one row per member state as a run
                       passes it (MarketModule.supply_rows_by_member_state, scaled to the market regions' totals);
@@ -11,8 +11,8 @@ CAPRI's last market solve of a converged run is reproduced with CAPRI's results 
                       price PPRI, CAPRI's PMRK of MILK being a constant of its market data): the prices the supply
                       models saw in a converged run (CAPRI's ProdNQ_ is centred on them, so the market's supply response
                       is zero where the market's prices are CAPRI's)
-  feed bulks          per (member state, bulk FCER FPRO FENE FOTH) CAPRI's scenario feed over the reference's; FMIL as the
-                      EU's (and Norway's) total
+  feed bulks          per (member state, bulk FCER FPRO FENE FOTH FMIL) CAPRI's scenario feed over the reference's;
+                      FMIL also as the EU's (and Norway's) total
 
 The market is calibrated first at the reference, as a run calibrates it at the baseline (bilateral_solve.py), then
 solved. --case ref puts every input at the reference: the control, which must give CAPRI's 2030 market back.
@@ -34,8 +34,12 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-TABLE = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_gd_market_2030.csv.xz"
-BULKS = ("FCER", "FPRO", "FENE", "FOTH")
+TABLE = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_gd_market_2030.csv"
+#: the feed bulks whose change is passed per member state, FMIL included: a run passes every bulk of CAPRI's FEED_TRD
+#: (coupling/feed.py, mm.seen.feed_bulk_index), and the market's EU dairy feed follows the FMIL bulk where the feed
+#: bulks cover the product (demand.py); until 16 November 2026 FMIL was left out here, so the dairy products' feed use
+#: stayed at its base in this check (KNOWN_ISSUES K131)
+BULKS = ("FCER", "FPRO", "FENE", "FOTH", "FMIL")
 
 
 def main():
@@ -55,7 +59,7 @@ def main():
     # calibrated at the reference before any scenario input is set (a run calibrates at the baseline and keeps it)
     mm._bilateral_calibrate()
     mm._apply_trq_volumes(mm.par.bilat)
-    mm.par.demand_cal_frozen = mm.par.demand_cal.copy()
+    mm.par.market_calibrated = True
     cm = list(mm.commodities)
 
     prod = piv("PROD", col)

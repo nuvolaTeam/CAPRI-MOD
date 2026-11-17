@@ -1,7 +1,7 @@
 """
 CAPRI's global market model (arm/market_model.gms) for the EU supply that the regional supply models deliver.
 
-Structure (docs/design/ARCHITECTURE_REFACTOR.md): MarketModule is assembled from one mixin per block of CAPRI's
+Structure (docs/dev/ARCHITECTURE_REFACTOR.md): MarketModule is assembled from one mixin per block of CAPRI's
 market model, each in its own file of this package:
   calibration.py      base calibration (base quantities and prices, EU rows aligned to the supply models)
   bilateral_solve.py  the bilateral system (Armington nests, transport costs, tariffs, TRQs; bilateral.py) and its
@@ -14,7 +14,7 @@ market model, each in its own file of this package:
   supply.py           supply response outside the supply models (non-EU regions)
   welfare.py          CAPRI's welfare report (reports/welfare.gms)
   equilibrium.py      the result object (MarketEquilibrium)
-Known differences from CAPRI's market are listed in docs/design/ARCHITECTURE_REFACTOR.md section 5.1 and
+Known differences from CAPRI's market are listed in docs/dev/ARCHITECTURE_REFACTOR.md section 5.1 and
 docs/KNOWN_ISSUES.md.
 """
 
@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional, List, Tuple
 
 from capri_mod.params import param, param_table
-from capri_mod.settings import setting, current as _settings
+from capri_mod.settings import setting, current as _settings, override
 from capri_mod.data.definitions import (
     MARKET_COMMODITIES, ALL_TRADE_REGIONS,
 )
@@ -73,7 +73,7 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
     #: model's EU_WEST (EU-14) and EU_EAST (EU-13), each with its own market and Armington prices and bilateral trade
     #: between them, the member states inside (capri_data/codes/eu_market_blocks.csv; definitions.EU_BLOCKS). The one
     #: EU27 region of before (market.eu_blocks = false) was removed on 3 November 2026 (the market's move onto CAPRI's
-    #: regions, stage 2); "EU27" stays a reporting row, the sum of the two (bilateral_solve._with_eu_aggregate).
+    #: regions); "EU27" stays a reporting row, the sum of the two (bilateral_solve._with_eu_aggregate).
     EU_BLOCK_REGIONS = _defs.EU_BLOCKS
     def __init__(self, data: dict, inputs: Optional["MarketInputs"] = None):
         self.data       = data
@@ -109,7 +109,7 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         if _miss:
             # no invented price (a fixed 200 EUR/t was used here): every market product needs CAPRI's world price
             raise ValueError(f"no base world price for market products {_miss} (capri_data world prices)")
-        self.par.demand_cal   = None  # set by the bilateral calibration at the first solve
+        self.par.market_calibrated = False  # the bilateral calibration at the first solve
 
         # Compute baseline consumption and production
         self._calibrate_baseline()
@@ -300,7 +300,7 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         moved by the commodity's world price index (world price / base world price). The reference price level of the
         response functions (dom0 at base world prices: crushing margins, the dairy blocks) and of the reported prices.
 
-        Since 4 November 2026 (the project lead's decision of 3 November, docs/design/TARV_COMPARISON.md): until then
+        Since 4 November 2026 (the project lead's decision of 3 November, docs/dev/TARV_COMPARISON.md): until then
         world price x (1 + the region's aggregate ad valorem equivalent, policy/tariffs.csv), which put the levels at a
         median 0.84 of CAPRI's own (a factor beyond 2 in 254 of 2,565 cells). A scenario's tariff change acts through
         the import prices of the bilateral market (CAPRI's impPrice_: BilateralCommodity.import_prices'
@@ -337,8 +337,21 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
     # Main solver (tatonnement / Newton)
     # ------------------------------------------------------------------
 
+    def _solve_captured(self, folder, exogenous_supply, trade_scenario, policy_scenario, max_iter, verbose):
+        """The market solve capture (docs/dev/MARKET_SYSTEM.md): one market solve written to <folder>/market_NNN.pkl for
+        tools/check/replay_market.py, by capri_mod/market_capture.py (the market package reads and writes no files
+        itself: capri_mod/market/inputs.py reads its data). The solve itself is the default one."""
+        from capri_mod.market_capture import capture_solve
+        args = dict(exogenous_supply=exogenous_supply, trade_scenario=trade_scenario,
+                    policy_scenario=policy_scenario, max_iter=max_iter)
+
+        def solve():
+            with override({"diagnostics.capture_market_dir": ""}):
+                return self.solve(verbose=verbose, **args)
+        return capture_solve(self, folder, args, _settings(), solve)
+
     # ------------------------------------------------------------------
-    # CAPRI's bilateral market (Sprint 8m; capri_mod/market/bilateral.py)
+    # CAPRI's bilateral market (the port of CAPRI's bilateral market and 2030 baseline; capri_mod/market/bilateral.py)
     # ------------------------------------------------------------------
 
     #: "bilateral": CAPRI's market model - a market price per region, total use an Armington aggregate of
@@ -370,6 +383,9 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         The premium market structure of earlier versions (SciPy root or tatonnement with an EU
         Armington premium) was removed on 20 October 2026 (KNOWN_ISSUES K54-2): no run path used it.
         """
+        cap = str(_settings().get("diagnostics.capture_market_dir") or "")
+        if cap:
+            return self._solve_captured(cap, exogenous_supply, trade_scenario, policy_scenario, max_iter, verbose)
         self._trade_scenario_now = trade_scenario
         if self.market_structure != "bilateral" or not self._bilateral_raw():
             raise ValueError(f"the market needs CAPRI's bilateral data ({self._inp().path('bilateral_flows_*.csv')})")

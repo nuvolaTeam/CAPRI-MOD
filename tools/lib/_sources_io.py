@@ -1,4 +1,4 @@
-"""capri_data/sources as Parquet (the data layout's step (c): docs/design/DATA_LAYOUT.md section 5 item 5, the project
+"""capri_data/sources as Parquet (the data layout's step (c): docs/dev/DATA_LAYOUT.md section 5 item 5, the project
 lead's decision of 6 November 2026).
 
 The files under capri_data/sources (raw/: CAPRI's and the other publishers' files converted one to one; intermediate/:

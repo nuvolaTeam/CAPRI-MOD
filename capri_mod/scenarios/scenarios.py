@@ -36,7 +36,7 @@ from capri_mod.policy.policy_module import PolicyScenario
 # capri_mod.policy.greendeal.farm_to_fork_scenario / greendeal_scenario). SET_ASIDE_10PCT removed 3 November 2026
 # (the project lead's decision): a 10% floor on all arable land met by voluntary set-aside and fallow, while CAPRI's
 # scen/set_aside/set_aside_10.gms puts 10% on the grandes cultures met by the obligatory set-aside activities (ISET,
-# GSET, TSET: supply/supply_model.gms SETA_), which the model does not have (docs/design/MODEL_CONTENT_PLAN.md).
+# GSET, TSET: supply/supply_model.gms SETA_), which the model does not have (docs/dev/MODEL_CONTENT_PLAN.md).
 
 def baseline_scenario() -> PolicyScenario:
     """Reference baseline scenario (no policy change)."""
@@ -67,7 +67,7 @@ def carbon_tax_scenario(carbon_price: float = 50.0) -> PolicyScenario:
     p_ghgEmisTax on the EU regions): EUR per t CO2-eq on agricultural emissions inside the supply models, with the
     mitigation options endogenous (capri_mod/supply/ghg_tax.py). The tax is the scenario's only shock, as in CAPRI's
     file (the earlier version stood in for it with agri-environment payments, a nitrate limit and an eco-scheme
-    budget: retired, Sprint 9i)."""
+    budget: retired in October 2026)."""
     return PolicyScenario(
         name=f"CARBON_TAX_{int(carbon_price)}",
         description=f"CAPRI emission tax at EUR {carbon_price}/t CO2-eq on EU agricultural emissions (ghgTax).",

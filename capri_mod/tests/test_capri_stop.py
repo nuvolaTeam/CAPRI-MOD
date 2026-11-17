@@ -82,6 +82,7 @@ def test_capri_forecast_weights():
 
 
 @pytest.mark.slow
+@pytest.mark.no_market_hessian
 def test_model_records_capri_verdict_and_can_stop_on_it():
     from capri_mod.settings import override
     from capri_mod.model import CAPRIModel

@@ -5,7 +5,7 @@ for the ex-post years of the series CAPTRD estimated (data position nObs > 0), f
 run (capri_sources/reference/capreg_tseries/17). Denmark is one file without NUTS 2 regions; the parity of the regional rules
 waits for the full run.
 
-Records the stages not yet ported change, excluded by rule (docs/design/CAPTRD_MOD.md section 12.2):
+Records the stages not yet ported change, excluded by rule (docs/dev/CAPTRD_MOD.md section 12.2):
   - reporting: aggreg_and_report.gms writes the product aggregates (OAGG rows of the market balance, UVAG, INHA, UVAD;
     l. 203-220) and the activity aggregates' TOOU into the same p_data position, after the estimation;
   - policy (captrd_policy.gms): the quotas;

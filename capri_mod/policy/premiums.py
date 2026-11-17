@@ -1,4 +1,4 @@
-"""CAPRI's premiums of the simulation year, all ported schemes together (P2): the declared premiums of policy.gms
+"""CAPRI's premiums of the simulation year, all ported schemes together: the declared premiums of policy.gms
 (declared.py) fixed at the year's trend data, cut by prmcut.gms (premium_cut.py) at any levels.
 
 The schemes, each from its port:

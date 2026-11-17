@@ -1,5 +1,5 @@
-"""The coupling's parameters and state, by kind (refactor stage 4, second half;
-docs/design/ENV_COUPLING_STATE_INVENTORY.md).
+"""The coupling's parameters and state, by kind (the refactor of the environment's and the coupling's state;
+docs/dev/ENV_COUPLING_STATE_INVENTORY.md).
 
 CAPRIModel (capri_mod/model.py with the mixins of capri_mod/coupling) holds what it keeps between calls in declared
 objects, as the market's and the supply's modules do (capri_mod/market/state.py, capri_mod/supply/state.py):
@@ -35,7 +35,7 @@ class ModelParameters(_Slots):
         "endotech_key",       # the key of the applied endotech settings (in the Hessian's cache key)
         "dairy_yield_cache",  # dairy products per t raw milk by member state
         "proc_yield_cache",   # olive oil and milled rice yields
-        "prod_grof_cache",    # CAPRI's marketed over gross production per member state and product (S7, grofNEprod)
+        "prod_grof_cache",    # CAPRI's marketed over gross production per member state and product (CAPRI's market calibration, grofNEprod)
         "sugar_rate_cache",   # sugar per t beet by member state
         "pool_cost_cache",    # the manure pools' trade costs
         "pool_es_cache",      # the "capri" pool market's excess-supply slopes and calibration duals by region and FOUT
@@ -43,8 +43,8 @@ class ModelParameters(_Slots):
         "feed_rations_stable",  # rations by region, built once per ration model (its identity keys the feed cache)
         "feed_rations_for",   # the ration model feed_rations_stable was built for (identity)
         "excluded_units",     # the EU units outside a run on a subset (K83)
-        "excluded_sup_base",  # the base output of the non-EU supply-model units outside a subset run (S7)
-        "base_start",         # per baseline key: the baseline's price signal, block departures and market ratios (S7)
+        "excluded_sup_base",  # the base output of the non-EU supply-model units outside a subset run (CAPRI's market calibration)
+        "base_start",         # per baseline key: the baseline's price signal, block departures and market ratios (CAPRI's market calibration)
     )
 
 
@@ -89,7 +89,7 @@ class ModelEvalState(_Slots):
         "outer_iter_now",     # the outer iteration
         "greendeal_group",    # the run's scenario is of CAPRI's Green Deal group (%scenarioGroup%==greendeal)
         "ls_by_country",      # livestock products by country (the bridge's input; the Hessian overwrites it)
-        "unmarketed_supply",  # gross output the market does not take (no marketed production in CAPRI; S7, grofNEprod)
+        "unmarketed_supply",  # gross output the market does not take (no marketed production in CAPRI; grofNEprod)
         "blockdev_target_now", # the trade blocks' target departures of the iteration
         "hessian_at_scenario", # set around a scenario's Hessian measurement (in its cache key)
         "yani_np",            # the young animals' (net, production) of the iteration
@@ -132,7 +132,7 @@ class ModelResults(_Slots):
     )
 
 
-_REMOVED = "removed (refactor stage 4 E1, 2 November 2026: written, never read)"
+_REMOVED = "removed (the refactor of the environment's and the coupling's state, 2 November 2026: written, never read)"
 
 MOVED_MODEL: dict = {
     "endotech": _REMOVED,
@@ -156,7 +156,7 @@ MOVED_MODEL: dict = {
     "_feed_rations_stable": "par.feed_rations_stable",
     "_feed_rations_for": "par.feed_rations_for",
     "_excluded_units": "par.excluded_units",
-    "_hessian_pending": "removed (S7, 8 November 2026: the Hessian is measured at the baseline's start)",
+    "_hessian_pending": "removed (CAPRI's market calibration, 8 November 2026: the Hessian is measured at the baseline's start)",
     "_relax_w": "sv.relax_w",
     "_relax_gprev": "sv.relax_gprev",
     "_capri_target_hist": "sv.capri_target_hist",

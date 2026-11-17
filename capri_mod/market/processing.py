@@ -220,7 +220,7 @@ class ProcessingMixin(MarketStateMixin):
         with {(region, seed, behavioural region): (base crush, crush change before ProcFudge_, margin change)}."""
         cp = self._crush_params()
         pq = self._proc_nq_params() or {}
-        # the block's CasADi function (step G2e, processing_ad.py; until 31 October 2026 the same equations here in
+        # the block's CasADi function (processing_ad.py; until 31 October 2026 the same equations here in
         # Python with the CET yields of _cet_yields and _proc_fudge, both removed), rebuilt when the parameters change
         blk = getattr(self, "_crush_block", None)
         if blk is None or blk[0] is not cp or blk[1] is not pq:

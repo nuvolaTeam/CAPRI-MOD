@@ -1,7 +1,7 @@
 """Reports of a run: the welfare of the supply side, comparisons of runs, the reporter, the trace of the slowest regional solves.
 
-CAPRIModel's methods, moved unchanged from capri_mod/model.py (refactor stage 4a,
-docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
+CAPRIModel's methods, moved unchanged from capri_mod/model.py (the refactor's split into block mixins,
+docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's, given to this
 module once model is loaded (capri_mod.coupling.inject); the annotations are not evaluated.
 """
 from __future__ import annotations
@@ -93,7 +93,10 @@ class ReportingBlock:
         if baseline_results.get("market") and scenario_results.get("market"):
             b_prices = baseline_results["market"].world_prices
             s_prices = scenario_results["market"].world_prices
+            from capri_mod.data.definitions import NO_WORLD_PRICE
             for comm in b_prices.index:
+                if comm in NO_WORLD_PRICE:
+                    continue                   # raw milk: no world price (K165)
                 bp = b_prices.get(comm, np.nan)
                 sp = s_prices.get(comm, np.nan)
                 if bp and not np.isnan(bp) and bp > 0:

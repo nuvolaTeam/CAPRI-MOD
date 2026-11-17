@@ -1,4 +1,4 @@
-"""Step G2f: CAPRI's dairy blocks in CasADi (capri_mod/market/dairy_ad.py) equal the code dairy.py had until 4 November
+"""CAPRI's dairy blocks in CasADi (capri_mod/market/dairy_ad.py) equal the code dairy.py had until 4 November
 2026 (written out here as the reference: _dairy_proc_change, the member states' three solves and the non-EU block's
 solve), and their Jacobian is the equations' matrix."""
 import numpy as np
@@ -59,11 +59,9 @@ def _solve_ref(prm, zt, rfp, kq=0.0, mrhs=0.0, zfix=None):
 
 
 @pytest.fixture(scope="module")
-def market():
-    from pathlib import Path
-    from capri_mod.data.loaders import load_all_data
-    from capri_mod.market.market_module import MarketModule
-    return MarketModule(load_all_data(Path(__file__).resolve().parents[2] / "capri_data"))
+def market(base_market):
+    """The market module built from the model's data (conftest.py)."""
+    return base_market
 
 
 def _zt(mm, prm, rng):

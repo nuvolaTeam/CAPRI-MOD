@@ -33,7 +33,7 @@ def test_the_rd_money_after_2013_is_the_2007_2013_average_and_eps_spend_keeps_a_
 
 
 def test_the_rd_declared_premiums_follow_capris_2030_reference():
-    """P2c: the RD schemes' 2030 declarations from rd_budget.gdx (extend_rd_baseline, rd_logic, def_policy's fill)
+    """The RD schemes' 2030 declarations from rd_budget.gdx (extend_rd_baseline, rd_logic, def_policy's fill)
     at the trend levels, through policy.gms: their ceilings and rates equal sim_ini's (2607 ceilings, 3658 rates;
     13 November 2026), and the declared premiums CAPRI's 2030 reference PRMD at 21673 of the 21733 unit x activity x
     scheme records within 1e-6. The 60 others are Praha's (CZ010000): in CAPRI's simulation its own rates are absent

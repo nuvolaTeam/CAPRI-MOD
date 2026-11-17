@@ -38,7 +38,7 @@ def _num(v):
 
 
 TECHS = {"GENET_YLD", "GENET_EFF", "GENET_REP", "LOWNFEED", "FALLOW", "WINTERCOV", "CONSTILL", "NOTILL", "LEGSH",
-         # feed supplements (envind/line_nitr.gms; Sprint 9g): the totals carry costs and maximum shares
+         # feed supplements (envind/line_nitr.gms; the port of CAPRI's feed options): the totals carry costs and maximum shares
          "LINE_TOT", "NITR_TOT", "3NOP_TOT"}
 
 

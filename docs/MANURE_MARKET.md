@@ -62,7 +62,7 @@ Pools (`CAPRIModel._update_manure_pools`): CAPRI's 34 country pools and 930 link
 (`capri_data/2017/environment/manure_pool_costs.csv`, `tools/build/build_manure_pool_costs.py`), one market per
 nutrient. Each outer iteration the pools clear in the form `outer_loop.manure_pool_form`:
 
-- "capri" (the default since 12 November 2026; docs/design/MANURE_POOL_PORT.md): CAPRI's m_mPoolMarket
+- "capri" (the default since 12 November 2026; docs/dev/MANURE_POOL_PORT.md): CAPRI's m_mPoolMarket
   (manuremarket/declare_manure_market.gms l. 99-204). Each region's linear excess supply ES = a + b p is refitted at
   its manure value (the fertilisation block's manure balance multiplier, CAPRI's PSHW = ManureNPK_.M) and its net trade
   of the last solve, with CAPRI's slope b = 0.01 supply / calibration dual
