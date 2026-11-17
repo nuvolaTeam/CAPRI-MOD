@@ -97,7 +97,7 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False, al
     def _who(request) -> str:
         return str(getattr(request, "session_hash", "") or "")
 
-    with gr.Blocks(title="capri-mod", css=RB.BUTTON_CSS) as app:
+    with gr.Blocks(title="capri-mod", **RB.blocks_args(RB.BUTTON_CSS)) as app:
         where = "your session's folder" if shared else f"`{sdir}`"
         if all_tabs:
             gr.Markdown(f"## capri-mod\nScenarios in {where} · results in `{stores[0].name}` · "
@@ -117,7 +117,7 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False, al
                             "model: start the run in the **Run** tab. " +
                             ("" if backend.name != "none" else
                              "_No language model configured: use the Scenario tab, or restart with `--llm`._"))
-                chat = gr.Chatbot(type="messages", height=480, label="assistant")
+                chat = gr.Chatbot(height=480, label="assistant", **RB.chatbot_args())
                 with gr.Row():
                     msg = gr.Textbox(placeholder="e.g. Farm-to-Fork as JRC121368 but with a 25% organic target only",
                                      scale=5, show_label=False)
@@ -299,7 +299,7 @@ def main():
     if missing:
         raise SystemExit(f"not a results store (no runs table): {', '.join(map(str, missing))}")
     build(backend, sdir, stores, all_tabs=a.all_tabs).launch(server_name=a.host, server_port=a.port,
-                                                              show_api=False)
+                                                              **RB.launch_args(RB.BUTTON_CSS))
 
 
 if __name__ == "__main__":

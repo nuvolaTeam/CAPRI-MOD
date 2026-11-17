@@ -56,4 +56,5 @@ def make_app():
 
 
 if __name__ == "__main__":
-    make_app().launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", "7860")), show_api=False)
+    make_app().launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", "7860")),
+                      **G.RB.launch_args(G.RB.BUTTON_CSS))
