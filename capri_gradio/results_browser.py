@@ -38,6 +38,16 @@ SERIES = ("#2a78d6", "#eb6834")
 GISCO_NOTE = "Boundaries: Eurostat GISCO, NUTS 2024 (c) EuroGeographics"
 
 
+
+#: buttons as wide as their label (Gradio stretches a button to the row's or column's width otherwise); in a row they
+#: sit at the bottom, level with the inputs beside them
+BUTTON_CSS = """
+.capri-btn { flex-grow: 0 !important; flex-basis: auto !important; width: auto !important; min-width: 7em !important;
+             max-width: 16em; align-self: flex-end; }
+.column > .capri-btn, .tabitem > .capri-btn, .gap > .capri-btn:only-child { align-self: flex-start; }
+"""
+BTN = dict(scale=0, min_width=0, elem_classes=["capri-btn"])
+
 def _layout(fig, title: str, height: int):
     fig.update_layout(title=dict(text=title, x=0.01, font=dict(size=15)), height=height,
                       margin=dict(l=10, r=10, t=50, b=40), paper_bgcolor="rgba(0,0,0,0)",
@@ -226,7 +236,7 @@ def _named(table: pd.DataFrame, down: str, across, block=None) -> pd.DataFrame:
 def build(stores: list):
     """The results browser as a page of its own."""
     import gradio as gr
-    with gr.Blocks(title="capri-mod results") as app:
+    with gr.Blocks(title="capri-mod results", css=BUTTON_CSS) as app:
         gr.Markdown("## capri-mod results browser\nRead-only view of stored runs (`results_dir`). "
                     "Pick a store and a run; the filters narrow the rows, the pivot puts one dimension down and one "
                     "across.")
@@ -246,166 +256,183 @@ def add_results(stores: list, app):
     with gr.Column():
         store = gr.Dropdown(store_names, value=store_names[0], label="results store", allow_custom_value=True)
 
-        # ------------------------------------------------------------------ runs
-        with gr.Tab("Runs"):
-            gr.Markdown("The runs in the store, newest first. Pick one to see how it converged, its metadata and the "
-                        "settings it ran with.")
-            refresh = gr.Button("Reload runs", size="sm")
-            runs_df = gr.Dataframe(interactive=False, wrap=False, max_height=420, show_search="filter",
-                                   pinned_columns=1, label="scenario runs (newest first)")
-            with gr.Row():
-                run_pick = gr.Dropdown(labs0, value=first0, label="run", interactive=True, scale=3)
-                conv_point = gr.Radio(["baseline", "scenario"], value="scenario", label="point", scale=1)
-            conv_plot = gr.LinePlot(x="it", y="value", color="measure", color_title="measure", color_map=CONV_COLOURS,
-                                    x_title="outer iteration",
-                                    y_title="log10 of the measure",
-                                    label="convergence measures per outer iteration (a measure at 0 is not drawn)",
-                                    height=340)
-            # the colour key in text: Gradio 5.49's line chart draws the legend's title without its entries here
-            gr.Markdown("\n".join(f'- <span style="color:{CONV_COLOURS[k]}">&#9632;</span> `{k}`: {v}'
-                                   for k, v in RD.CONV_MEASURES.items()))
-            summary = gr.JSON(label="run metadata: convergence, solver fallbacks, settings changed, code version")
-            with gr.Accordion("effective settings (settings.toml)", open=False):
-                settings_txt = gr.Code(language=None, label="settings")
+        # the result tabs; the page opens on the comparison with CAPRI
+        with gr.Tabs(selected="capri"):
+            # ------------------------------------------------------------------ runs
+            with gr.Tab("Runs"):
+                gr.Markdown("The runs in the store, newest first. Pick one to see how it converged, its metadata and "
+                            "the "
+                            "settings it ran with.")
+                refresh = gr.Button("Reload runs", size="sm", **BTN)
+                runs_df = gr.Dataframe(interactive=False, wrap=False, max_height=420, show_search="filter",
+                                       pinned_columns=1, label="scenario runs (newest first)")
+                with gr.Row():
+                    run_pick = gr.Dropdown(labs0, value=first0, label="run", interactive=True, scale=3)
+                    conv_point = gr.Radio(["baseline", "scenario"], value="scenario", label="point", scale=1)
+                conv_plot = gr.LinePlot(x="it", y="value", color="measure", color_title="measure",
+                                        color_map=CONV_COLOURS,
+                                        x_title="outer iteration",
+                                        y_title="log10 of the measure",
+                                        label="convergence measures per outer iteration (a measure at 0 is not drawn)",
+                                        height=340)
+                # the colour key in text: Gradio 5.49's line chart draws the legend's title without its entries here
+                gr.Markdown("\n".join(f'- <span style="color:{CONV_COLOURS[k]}">&#9632;</span> `{k}`: {v}'
+                                       for k, v in RD.CONV_MEASURES.items()))
+                summary = gr.JSON(label="run metadata: convergence, solver fallbacks, settings changed, code version")
+                with gr.Accordion("effective settings (settings.toml)", open=False):
+                    settings_txt = gr.Code(language=None, label="settings")
 
-        # ------------------------------------------------------------------ scenario and its baseline
-        with gr.Tab("Scenario and its baseline"):
-            gr.Markdown("Shows a run's scenario beside its own baseline: pick a block, narrow the rows with the "
-                        "filters, choose the measure and what goes down and across the table, then press Show.")
-            with gr.Row():
-                sv_run = gr.Dropdown(labs0, value=first0, label="run")
-                sv_block = gr.Dropdown([], label="block")
-            with gr.Row():
-                sv_region = gr.Dropdown([], multiselect=True, label="region")
-                sv_rows = gr.Dropdown([], multiselect=True, label="item (rows)")
-                sv_cols = gr.Dropdown([], multiselect=True, label="column (cols)")
-                sv_dim5 = gr.Dropdown([], multiselect=True, label="dim5")
-            with gr.Row():
-                sv_measure = gr.Radio(list(RD.MEASURES), value="% change", label="measure")
-                sv_down = gr.Dropdown(dim_names, value="region", label="down")
-                sv_across = gr.Dropdown([""] + dim_names, value="rows", label="across")
-                sv_go = gr.Button("Show", variant="primary")
-            sv_msg = gr.Markdown()
-            sv_table = gr.Dataframe(interactive=False, label="pivot")
-            sv_chart = gr.BarPlot(x="x", y="value", color="series", label="chart", height=460, sort="y",
-                                  x_label_angle=-60)
-            with gr.Accordion("matched rows", open=False):
-                sv_rows_df = gr.Dataframe(interactive=False)
-                sv_file = gr.File(label="download (CSV)")
+            # ------------------------------------------------------------------ scenario and its baseline
+            with gr.Tab("Scenario and its baseline"):
+                gr.Markdown("Shows a run's scenario beside its own baseline: pick a block, narrow the rows with the "
+                            "filters, choose the measure and what goes down and across the table, then press Show.")
+                with gr.Row():
+                    sv_run = gr.Dropdown(labs0, value=first0, label="run")
+                    sv_block = gr.Dropdown([], label="block")
+                with gr.Row():
+                    sv_region = gr.Dropdown([], multiselect=True, label="region")
+                    sv_rows = gr.Dropdown([], multiselect=True, label="item (rows)")
+                    sv_cols = gr.Dropdown([], multiselect=True, label="column (cols)")
+                    sv_dim5 = gr.Dropdown([], multiselect=True, label="dim5")
+                with gr.Row():
+                    sv_measure = gr.Radio(list(RD.MEASURES), value="% change", label="measure")
+                    sv_down = gr.Dropdown(dim_names, value="region", label="down")
+                    sv_across = gr.Dropdown([""] + dim_names, value="rows", label="across")
+                    sv_go = gr.Button("Show", variant="primary", **BTN)
+                sv_msg = gr.Markdown()
+                sv_table = gr.Dataframe(interactive=False, label="pivot")
+                sv_chart = gr.BarPlot(x="x", y="value", color="series", label="chart", height=460, sort="y",
+                                      x_label_angle=-60)
+                with gr.Accordion("matched rows", open=False):
+                    sv_rows_df = gr.Dataframe(interactive=False)
+                    sv_file = gr.File(label="download (CSV)")
 
-        # ------------------------------------------------------------------ two runs
-        with gr.Tab("Compare two runs"):
-            gr.Markdown("Compares two runs, from the same store or from two stores, row by row: where they differ, as "
-                        "a table and a chart.")
-            with gr.Row():
-                store_b = gr.Dropdown(store_names, value=store_names[-1], label="store of run B",
-                                      allow_custom_value=True)
-            with gr.Row():
-                cr_a = gr.Dropdown(labs0, value=first0, label="run A")
-                cr_pa = gr.Radio(["baseline", "scenario"], value="scenario", label="point of A")
-                cr_b = gr.Dropdown([], label="run B")
-                cr_pb = gr.Radio(["baseline", "scenario"], value="scenario", label="point of B")
-            with gr.Row():
-                cr_block = gr.Dropdown([], label="block")
-                cr_region = gr.Dropdown([], multiselect=True, label="region")
-                cr_rows = gr.Dropdown([], multiselect=True, label="item (rows)")
-                cr_cols = gr.Dropdown([], multiselect=True, label="column (cols)")
-            with gr.Row():
-                cr_measure = gr.Radio(["A", "B", "B - A", "% change"], value="% change", label="measure")
-                cr_down = gr.Dropdown(dim_names, value="region", label="down")
-                cr_across = gr.Dropdown([""] + dim_names, value="rows", label="across")
-                cr_go = gr.Button("Compare", variant="primary")
-            cr_msg = gr.Markdown()
-            cr_dev = gr.Dataframe(interactive=False, label="where the runs differ (per block and column)")
-            cr_table = gr.Dataframe(interactive=False, label="pivot")
-            cr_chart = gr.BarPlot(x="x", y="value", color="series", label="chart", height=460, sort="y",
-                                  x_label_angle=-60)
-            cr_file = gr.File(label="matched rows (CSV)")
+            # ------------------------------------------------------------------ two runs
+            with gr.Tab("Compare two runs"):
+                gr.Markdown("Compares two runs, from the same store or from two stores, row by row: where they "
+                            "differ, as "
+                            "a table and a chart.")
+                with gr.Row():
+                    store_b = gr.Dropdown(store_names, value=store_names[-1], label="store of run B",
+                                          allow_custom_value=True)
+                with gr.Row():
+                    cr_a = gr.Dropdown(labs0, value=first0, label="run A")
+                    cr_pa = gr.Radio(["baseline", "scenario"], value="scenario", label="point of A")
+                    cr_b = gr.Dropdown([], label="run B")
+                    cr_pb = gr.Radio(["baseline", "scenario"], value="scenario", label="point of B")
+                with gr.Row():
+                    cr_block = gr.Dropdown([], label="block")
+                    cr_region = gr.Dropdown([], multiselect=True, label="region")
+                    cr_rows = gr.Dropdown([], multiselect=True, label="item (rows)")
+                    cr_cols = gr.Dropdown([], multiselect=True, label="column (cols)")
+                with gr.Row():
+                    cr_measure = gr.Radio(["A", "B", "B - A", "% change"], value="% change", label="measure")
+                    cr_down = gr.Dropdown(dim_names, value="region", label="down")
+                    cr_across = gr.Dropdown([""] + dim_names, value="rows", label="across")
+                    cr_go = gr.Button("Compare", variant="primary", **BTN)
+                cr_msg = gr.Markdown()
+                cr_dev = gr.Dataframe(interactive=False, label="where the runs differ (per block and column)")
+                cr_table = gr.Dataframe(interactive=False, label="pivot")
+                cr_chart = gr.BarPlot(x="x", y="value", color="series", label="chart", height=460, sort="y",
+                                      x_label_angle=-60)
+                cr_file = gr.File(label="matched rows (CSV)")
 
-        # ------------------------------------------------------------------ CAPRI
-        with gr.Tab("Map"):
-            gr.Markdown("Draws one result of a run on a map of the EU's regions: pick a block and an item, and "
-                        "whether to show the scenario, the baseline or the change between them. Where one of the "
-                        "model's regional units covers several regions, each of them shows the unit's value (an area "
-                        "or a quantity is split by the regions' farmland). Below the map, the same item added up by "
-                        "member state, for items that can be added up.")
-            with gr.Row():
-                mp_run = gr.Dropdown(labs0, value=first0, label="run", scale=3)
-                mp_block = gr.Dropdown([], label="block", scale=1)
-            with gr.Row():
-                mp_item = gr.Dropdown([], label="item (rows · cols · dim5 [unit])", scale=3)
-                mp_measure = gr.Radio(list(RD.MEASURES), value="% change", label="measure", scale=2)
-            mp_go = gr.Button("Draw", variant="primary")
-            mp_msg = gr.Markdown()
-            mp_map = gr.Plot(label="map")
-            mp_ms = gr.Plot(label="by member state")
-            with gr.Accordion("regions (table)", open=False):
-                mp_table = gr.Dataframe(interactive=False)
+            # ------------------------------------------------------------------ CAPRI
+            with gr.Tab("Map"):
+                gr.Markdown("Draws one result of a run on a map of the EU's regions: pick a block and an item, and "
+                            "whether to show the scenario, the baseline or the change between them. Where one of the "
+                            "model's regional units covers several regions, each of them shows the unit's value (an "
+                            "area "
+                            "or a quantity is split by the regions' farmland). Below the map, the same item added up "
+                            "by "
+                            "member state, for items that can be added up.")
+                with gr.Row():
+                    mp_run = gr.Dropdown(labs0, value=first0, label="run", scale=3)
+                    mp_block = gr.Dropdown([], label="block", scale=1)
+                with gr.Row():
+                    mp_item = gr.Dropdown([], label="item (rows · cols · dim5 [unit])", scale=3)
+                    mp_measure = gr.Radio(list(RD.MEASURES), value="% change", label="measure", scale=2)
+                mp_go = gr.Button("Draw", variant="primary", **BTN)
+                mp_msg = gr.Markdown()
+                mp_map = gr.Plot(label="map")
+                mp_ms = gr.Plot(label="by member state")
+                with gr.Accordion("regions (table)", open=False):
+                    mp_table = gr.Dataframe(interactive=False)
 
-        with gr.Tab("Charts"):
-            gr.Markdown("Puts the Farm-to-Fork indicators of up to four runs side by side (EU27, % change from each "
-                        "run's baseline) with the figures the JRC published from CAPRI in its Farm-to-Fork study "
-                        "(JRC121368). Meaningful for Farm-to-Fork runs on all regions.")
-            with gr.Row():
-                ch_runs = gr.Dropdown(labs0, value=[first0] if first0 else [], multiselect=True,
-                                      label="runs (up to four)", scale=4)
-                ch_go = gr.Button("Draw", variant="primary", scale=1)
-            ch_msg = gr.Markdown()
-            ch_plot = gr.Plot(label="indicators")
+            with gr.Tab("Charts"):
+                gr.Markdown("Puts the Farm-to-Fork indicators of up to four runs side by side (EU27, % change from "
+                            "each "
+                            "run's baseline) with the figures the JRC published from CAPRI in its Farm-to-Fork study "
+                            "(JRC121368). Meaningful for Farm-to-Fork runs on all regions.")
+                with gr.Row():
+                    ch_runs = gr.Dropdown(labs0, value=[first0] if first0 else [], multiselect=True,
+                                          label="runs (up to four)", scale=4)
+                    ch_go = gr.Button("Draw", variant="primary", **BTN)
+                ch_msg = gr.Markdown()
+                ch_plot = gr.Plot(label="indicators")
 
-        with gr.Tab("Comparison with CAPRI"):
-            gr.Markdown("Compares a run with CAPRI, as a check: the run's 2030 baseline with CAPRI's own 2030 "
-                        "reference, and the run's scenario with CAPRI's result for the same scenario.")
-            with gr.Tab("2030 baseline"):
-                gr.Markdown(
-                    "The first table compares the run's 2030 baseline with CAPRI's own 2030 "
-                    "reference for the EU27, block by block (prices by their relative levels, not in euros); the second "
-                    "summarises how close each block is.")
-                with gr.Row():
-                    cp_run = gr.Dropdown(labs0, value=first0, label="run")
-                    cp_go = gr.Button("Compute", variant="primary")
-                cp_msg = gr.Markdown()
-                cp_base = gr.Dataframe(interactive=False, label="2030 baseline compared with CAPRI's 2030 reference")
-                cp_stats = gr.Dataframe(interactive=False, label="per block: median gap from CAPRI (%) and share of rows within 10%")
+            with gr.Tab("Comparison with CAPRI", id="capri"):
+                gr.Markdown("Compares a run with CAPRI, as a check: the run's 2030 baseline with CAPRI's own 2030 "
+                            "reference, and the run's scenario with CAPRI's result for the same scenario.")
+                with gr.Tab("2030 baseline"):
+                    gr.Markdown(
+                        "The first table compares the run's 2030 baseline with CAPRI's own 2030 "
+                        "reference for the EU27, block by block (prices by their relative levels, not in euros); the "
+                        "second "
+                        "summarises how close each block is.")
+                    with gr.Row():
+                        cp_run = gr.Dropdown(labs0, value=first0, label="run")
+                        cp_go = gr.Button("Compute", variant="primary", **BTN)
+                    cp_msg = gr.Markdown()
+                    cp_base = gr.Dataframe(interactive=False, label="2030 baseline compared with CAPRI's 2030 "
+                                                                    "reference")
+                    cp_stats = gr.Dataframe(interactive=False, label="per block: median gap from CAPRI (%) and share "
+                                                                     "of rows within 10%")
 
-            with gr.Tab("Scenarios"):
-                gr.Markdown(
-                    "Compares a scenario run with CAPRI's result for the same scenario: the Green Deal 2030 with the "
-                    "project's CAPRI run of it, or Farm-to-Fork 2030 with the figures published in JRC121368 (EU27 only). "
-                    "Both sides are shown as % changes from each model's own reference: first the EU27 activities, "
-                    "prices, yields and nitrogen balance, then one activity by member state, on two maps and region by "
-                    "region.")
-                with gr.Row():
-                    gd_kind = gr.Radio(["Green Deal 2030 · CAPRI's run", "Farm-to-Fork 2030 · JRC121368"],
-                                       value="Green Deal 2030 · CAPRI's run", label="comparison", scale=3)
-                    gd_run = gr.Dropdown(labs0, value=first0, label="run", scale=4)
-                    gd_go = gr.Button("Compare", variant="primary", scale=1)
-                gd_msg = gr.Markdown()
-                with gr.Row():
-                    gd_act = gr.Plot(label="EU27 activity levels")
-                    gd_pri = gr.Plot(label="EU27 producer prices")
-                with gr.Row():
-                    gd_yld = gr.Plot(label="EU27 crop yields")
-                    gd_nbal = gr.Plot(label="EU27 N balance")
-                gr.Markdown("**By member state and region**")
-                with gr.Row():
-                    gd_item = gr.Dropdown([], label="activity (or N balance item)", scale=3)
-                    gd_go2 = gr.Button("Draw", scale=1)
-                gd_ms = gr.Plot(label="by member state")
-                with gr.Row():
-                    gd_map_m = gr.Plot(label="capri-mod, regional units")
-                    gd_map_c = gr.Plot(label="CAPRI, regional units")
-                gd_sc = gr.Plot(label="regional units: capri-mod compared with CAPRI")
-                with gr.Accordion("tables", open=False):
-                    gd_table = gr.Dataframe(interactive=False, label="EU27 and member states")
-                    gd_file = gr.File(label="all comparisons (CSV)")
-                gr.Markdown("**Farm-to-Fork indicators of several runs**: the runs' Farm-to-Fork indicators side by side "
-                            "with the figures the JRC published from CAPRI (JRC121368), % change from the baseline. It "
-                            "applies to Farm-to-Fork runs on all regions.")
-                with gr.Row():
-                    cp_more = gr.Dropdown(labs0, value=[], multiselect=True, label="runs (same store)", scale=4)
-                    ind_go = gr.Button("Show", scale=1)
-                cp_ind = gr.Dataframe(interactive=False, label="Farm-to-Fork indicators, % change from the baseline")
+                with gr.Tab("Scenarios"):
+                    gr.Markdown(
+                        "Compares a scenario run with CAPRI's result for the same scenario: the Green Deal 2030 with "
+                        "the "
+                        "project's CAPRI run of it, or Farm-to-Fork 2030 with the figures published in JRC121368 "
+                        "(EU27 only). "
+                        "Both sides are shown as % changes from each model's own reference: first the EU27 activities, "
+                        "prices, yields and nitrogen balance, then one activity by member state, on two maps and "
+                        "region by "
+                        "region.")
+                    with gr.Row():
+                        gd_kind = gr.Radio(["Green Deal 2030 · CAPRI's run", "Farm-to-Fork 2030 · JRC121368"],
+                                           value="Green Deal 2030 · CAPRI's run", label="comparison", scale=3)
+                        gd_run = gr.Dropdown(labs0, value=first0, label="run", scale=4)
+                        gd_go = gr.Button("Compare", variant="primary", **BTN)
+                    gd_msg = gr.Markdown()
+                    with gr.Row():
+                        gd_act = gr.Plot(label="EU27 activity levels")
+                        gd_pri = gr.Plot(label="EU27 producer prices")
+                    with gr.Row():
+                        gd_yld = gr.Plot(label="EU27 crop yields")
+                        gd_nbal = gr.Plot(label="EU27 N balance")
+                    gr.Markdown("**By member state and region**")
+                    with gr.Row():
+                        gd_item = gr.Dropdown([], label="activity (or N balance item)", scale=3)
+                        gd_go2 = gr.Button("Draw", **BTN)
+                    gd_ms = gr.Plot(label="by member state")
+                    with gr.Row():
+                        gd_map_m = gr.Plot(label="capri-mod, regional units")
+                        gd_map_c = gr.Plot(label="CAPRI, regional units")
+                    gd_sc = gr.Plot(label="regional units: capri-mod compared with CAPRI")
+                    with gr.Accordion("tables", open=False):
+                        gd_table = gr.Dataframe(interactive=False, label="EU27 and member states")
+                        gd_file = gr.File(label="all comparisons (CSV)")
+                    gr.Markdown("**Farm-to-Fork indicators of several runs**: the runs' Farm-to-Fork indicators side "
+                                "by side "
+                                "with the figures the JRC published from CAPRI (JRC121368), % change from the "
+                                "baseline. It "
+                                "applies to Farm-to-Fork runs on all regions.")
+                    with gr.Row():
+                        cp_more = gr.Dropdown(labs0, value=[], multiselect=True, label="runs (same store)", scale=4)
+                        ind_go = gr.Button("Show", **BTN)
+                    cp_ind = gr.Dataframe(interactive=False, label="Farm-to-Fork indicators, % change from the "
+                                                                   "baseline")
 
         # ================================================================== callbacks
         def load_runs(root):

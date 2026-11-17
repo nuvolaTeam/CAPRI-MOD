@@ -187,3 +187,9 @@ def test_the_page_opens_on_results_with_the_other_tabs_disabled_unless_asked_for
         # the page opens on Results
         top = [b for b in app.blocks.values() if isinstance(b, gr.Tabs) and b.selected == "results"]
         assert len(top) == 1 and tabs["Results"].id == "results"
+        # and the results on the comparison with CAPRI
+        inner = [b for b in app.blocks.values() if isinstance(b, gr.Tabs) and b.selected == "capri"]
+        assert len(inner) == 1 and tabs["Comparison with CAPRI"].id == "capri"
+        # every button as wide as its label (no growth in its row; the page's CSS for columns)
+        btns = [b for b in app.blocks.values() if isinstance(b, gr.Button)]
+        assert btns and all(b.scale == 0 and "capri-btn" in (b.elem_classes or []) for b in btns)

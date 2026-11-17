@@ -97,7 +97,7 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False, al
     def _who(request) -> str:
         return str(getattr(request, "session_hash", "") or "")
 
-    with gr.Blocks(title="capri-mod") as app:
+    with gr.Blocks(title="capri-mod", css=RB.BUTTON_CSS) as app:
         where = "your session's folder" if shared else f"`{sdir}`"
         if all_tabs:
             gr.Markdown(f"## capri-mod\nScenarios in {where} · results in `{stores[0].name}` · "
@@ -121,8 +121,8 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False, al
                 with gr.Row():
                     msg = gr.Textbox(placeholder="e.g. Farm-to-Fork as JRC121368 but with a 25% organic target only",
                                      scale=5, show_label=False)
-                    send = gr.Button("Send", variant="primary", scale=1)
-                clear = gr.Button("New conversation", size="sm")
+                    send = gr.Button("Send", variant="primary", **RB.BTN)
+                clear = gr.Button("New conversation", size="sm", **RB.BTN)
 
             # ------------------------------------------------------------------ scenario form
             with gr.Tab("Scenario", interactive=all_tabs):
@@ -148,7 +148,7 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False, al
                     f_biof = gr.Dropdown(["from the reference", "true", "false"], value="from the reference",
                                          label="biofuel_markets")
                     f_over = gr.Checkbox(label="overwrite an existing user scenario")
-                f_save = gr.Button("Check and save", variant="primary")
+                f_save = gr.Button("Check and save", variant="primary", **RB.BTN)
                 f_msg = gr.Markdown()
                 f_toml = gr.Code(language=None, label="settings.toml")
 
@@ -156,7 +156,7 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False, al
             with gr.Tab("Run", interactive=all_tabs):
                 with gr.Row():
                     r_scen = gr.Dropdown(scen0, value=scen0[0] if scen0 else None, label="scenario", scale=3)
-                    r_refresh = gr.Button("Reload scenarios", size="sm", scale=1)
+                    r_refresh = gr.Button("Reload scenarios", size="sm", **RB.BTN)
                 r_regions = gr.Radio([MINI_EU] if shared else [MINI_EU, FULL_EU, "custom"], value=MINI_EU,
                                      label="regions")
                 r_custom = gr.Textbox(label="custom regions (comma-separated regional units)", visible=False)
@@ -166,8 +166,8 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False, al
                 # CAPRI's GUI shows GAMS's output with the solvers' iteration logs)
                 r_verb = gr.Radio(T.LOG_LEVELS, value="capri", label="log (run.verbosity)")
                 with gr.Row():
-                    r_start = gr.Button("Start run", variant="primary")
-                    r_stop = gr.Button("Stop run", variant="stop")
+                    r_start = gr.Button("Start run", variant="primary", **RB.BTN)
+                    r_stop = gr.Button("Stop run", variant="stop", **RB.BTN)
                 r_msg = gr.Markdown()
                 r_job = gr.State("")
                 r_title = gr.Markdown()
