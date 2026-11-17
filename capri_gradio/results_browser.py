@@ -48,6 +48,43 @@ BUTTON_CSS = """
 """
 BTN = dict(scale=0, min_width=0, elem_classes=["capri-btn"])
 
+
+# Gradio 5 and 6 both: Gradio 6.0 moved css from the Blocks constructor to launch(), replaced launch(show_api) by
+# footer_links and dropped Chatbot(type=...) (messages are its only format). The keyword arguments for the version
+# installed, read off its signatures.
+def _accepts(fn, name: str) -> bool:
+    import inspect
+    try:
+        return name in inspect.signature(fn).parameters
+    except (TypeError, ValueError):
+        return False
+
+
+def blocks_args(css: str) -> dict:
+    """gr.Blocks(...)'s style argument: css on the constructor up to Gradio 5, none from Gradio 6 (launch_args)."""
+    import gradio as gr
+    return {"css": css} if _accepts(gr.Blocks.__init__, "css") else {}
+
+
+def launch_args(css: str) -> dict:
+    """app.launch(...)'s arguments: no API page link (show_api=False up to Gradio 5, footer_links without "api" from
+    Gradio 6) and, from Gradio 6, the css."""
+    import gradio as gr
+    a = {}
+    if _accepts(gr.Blocks.launch, "show_api"):
+        a["show_api"] = False
+    if _accepts(gr.Blocks.launch, "footer_links"):
+        a["footer_links"] = ["gradio", "settings"]
+    if _accepts(gr.Blocks.launch, "css") and not _accepts(gr.Blocks.__init__, "css"):
+        a["css"] = css
+    return a
+
+
+def chatbot_args() -> dict:
+    """gr.Chatbot(...)'s message format: type="messages" up to Gradio 5, the only format from Gradio 6."""
+    import gradio as gr
+    return {"type": "messages"} if _accepts(gr.Chatbot.__init__, "type") else {}
+
 def _layout(fig, title: str, height: int):
     fig.update_layout(title=dict(text=title, x=0.01, font=dict(size=15)), height=height,
                       margin=dict(l=10, r=10, t=50, b=40), paper_bgcolor="rgba(0,0,0,0)",
@@ -236,7 +273,7 @@ def _named(table: pd.DataFrame, down: str, across, block=None) -> pd.DataFrame:
 def build(stores: list):
     """The results browser as a page of its own."""
     import gradio as gr
-    with gr.Blocks(title="capri-mod results", css=BUTTON_CSS) as app:
+    with gr.Blocks(title="capri-mod results", **blocks_args(BUTTON_CSS)) as app:
         gr.Markdown("## capri-mod results browser\nRead-only view of stored runs (`results_dir`). "
                     "Pick a store and a run; the filters narrow the rows, the pivot puts one dimension down and one "
                     "across.")
@@ -742,7 +779,7 @@ def main():
     missing = [s for s in stores if not (s / "runs").exists()]
     if missing:
         raise SystemExit(f"not a results store (no runs table): {', '.join(map(str, missing))}")
-    build(stores).launch(server_name=a.host, server_port=a.port, show_api=False)
+    build(stores).launch(server_name=a.host, server_port=a.port, **launch_args(BUTTON_CSS))
 
 
 if __name__ == "__main__":
