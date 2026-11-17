@@ -81,8 +81,8 @@ def _chat_messages(hist: list) -> list:
 def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False, all_tabs: bool = False):
     """The page. shared: a page several people use (a hosted Space): each browser session writes its scenarios to its
     own folder under sdir, only mini-EU runs can be started, and a run is stopped only by the session that started
-    it; one run at a time for everyone. all_tabs: the Assistant, Scenario and Run tabs as well; without it (the
-    default) the page shows the results only, and the other tabs are built hidden."""
+    it; one run at a time for everyone. all_tabs: the Assistant, Scenario and Run tabs usable as well; without it (the
+    default) they are shown but disabled, and the page opens on Results."""
     scen0, refs0 = _scenario_choices(None if shared else sdir)
     gd_vals = T.GREENDEAL_VALUES
 
@@ -109,73 +109,75 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False, al
                         "with each other, map them, and compare them with CAPRI. Each tab says what it shows.")
         hist_state = gr.State([])
 
-        # ------------------------------------------------------------------ assistant
-        with gr.Tab("Assistant", visible=all_tabs):
-            gr.Markdown("Describe a scenario; the assistant writes it with checked tool calls. It cannot run the "
-                        "model: start the run in the **Run** tab. " +
-                        ("" if backend.name != "none" else
-                         "_No language model configured: use the Scenario tab, or restart with `--llm`._"))
-            chat = gr.Chatbot(type="messages", height=480, label="assistant")
-            with gr.Row():
-                msg = gr.Textbox(placeholder="e.g. Farm-to-Fork as JRC121368 but with a 25% organic target only",
-                                 scale=5, show_label=False)
-                send = gr.Button("Send", variant="primary", scale=1)
-            clear = gr.Button("New conversation", size="sm")
-
-        # ------------------------------------------------------------------ scenario form
-        with gr.Tab("Scenario", visible=all_tabs):
-            with gr.Row():
-                f_name = gr.Textbox(label="name (letters, digits, _)")
-                f_ref = gr.Dropdown(refs0, value=refs0[0] if refs0 else None, label="reference")
-            f_desc = gr.Textbox(label="description")
-            f_mode = gr.Radio(["Green Deal group", "policy shocks"], value="Green Deal group", label="kind")
-            with gr.Group(visible=True) as gd_box:
+        # the top tabs: all shown; without all_tabs only Results is enabled, and the page opens on it
+        with gr.Tabs(selected="results"):
+            # ------------------------------------------------------------------ assistant
+            with gr.Tab("Assistant", interactive=all_tabs):
+                gr.Markdown("Describe a scenario; the assistant writes it with checked tool calls. It cannot run the "
+                            "model: start the run in the **Run** tab. " +
+                            ("" if backend.name != "none" else
+                             "_No language model configured: use the Scenario tab, or restart with `--llm`._"))
+                chat = gr.Chatbot(type="messages", height=480, label="assistant")
                 with gr.Row():
-                    gd_inputs = {k: gr.Dropdown([str(v) for v in vals], value=str(vals[0]), label=k)
-                                 for k, vals in gd_vals.items()}
-                with gr.Row():
-                    gd_surplus = gr.Dropdown(["star3", "jrc121368"], value="star3", label="surplus_rule")
-                    gd_pest = gr.Dropdown(["star3", "jrc121368"], value="star3", label="pesticide_rule")
-            with gr.Group(visible=False) as sh_box:
-                shock_fields = [k for k in T.SD.Shocks.model_fields]
-                with gr.Row():
-                    sh_inputs = {k: gr.Textbox(label=k, placeholder="default") for k in shock_fields}
-            with gr.Row():
-                f_manure = gr.Dropdown(["from the reference", "true", "false"], value="from the reference",
-                                       label="manure_trade")
-                f_biof = gr.Dropdown(["from the reference", "true", "false"], value="from the reference",
-                                     label="biofuel_markets")
-                f_over = gr.Checkbox(label="overwrite an existing user scenario")
-            f_save = gr.Button("Check and save", variant="primary")
-            f_msg = gr.Markdown()
-            f_toml = gr.Code(language=None, label="settings.toml")
+                    msg = gr.Textbox(placeholder="e.g. Farm-to-Fork as JRC121368 but with a 25% organic target only",
+                                     scale=5, show_label=False)
+                    send = gr.Button("Send", variant="primary", scale=1)
+                clear = gr.Button("New conversation", size="sm")
 
-        # ------------------------------------------------------------------ run
-        with gr.Tab("Run", visible=all_tabs):
-            with gr.Row():
-                r_scen = gr.Dropdown(scen0, value=scen0[0] if scen0 else None, label="scenario", scale=3)
-                r_refresh = gr.Button("Reload scenarios", size="sm", scale=1)
-            r_regions = gr.Radio([MINI_EU] if shared else [MINI_EU, FULL_EU, "custom"], value=MINI_EU,
-                                 label="regions")
-            r_custom = gr.Textbox(label="custom regions (comma-separated regional units)", visible=False)
-            r_over = gr.Code(language="json", value="{}", label="setting overrides (JSON, e.g. "
-                             "{\"outer_loop.max_outer_iter\": 30})")
-            # the log's level (run.verbosity): CAPRI's run log, the model's timed lines, each solve's own log (as
-            # CAPRI's GUI shows GAMS's output with the solvers' iteration logs)
-            r_verb = gr.Radio(T.LOG_LEVELS, value="capri", label="log (run.verbosity)")
-            with gr.Row():
-                r_start = gr.Button("Start run", variant="primary")
-                r_stop = gr.Button("Stop run", variant="stop")
-            r_msg = gr.Markdown()
-            r_job = gr.State("")
-            r_title = gr.Markdown()
-            r_iters = gr.Textbox(label="iterations (step report)", lines=8, interactive=False)
-            r_tail = gr.Textbox(label="log", lines=24, max_lines=24, interactive=False, autoscroll=True)
-            timer = gr.Timer(5.0, active=all_tabs)
+            # ------------------------------------------------------------------ scenario form
+            with gr.Tab("Scenario", interactive=all_tabs):
+                with gr.Row():
+                    f_name = gr.Textbox(label="name (letters, digits, _)")
+                    f_ref = gr.Dropdown(refs0, value=refs0[0] if refs0 else None, label="reference")
+                f_desc = gr.Textbox(label="description")
+                f_mode = gr.Radio(["Green Deal group", "policy shocks"], value="Green Deal group", label="kind")
+                with gr.Group(visible=True) as gd_box:
+                    with gr.Row():
+                        gd_inputs = {k: gr.Dropdown([str(v) for v in vals], value=str(vals[0]), label=k)
+                                     for k, vals in gd_vals.items()}
+                    with gr.Row():
+                        gd_surplus = gr.Dropdown(["star3", "jrc121368"], value="star3", label="surplus_rule")
+                        gd_pest = gr.Dropdown(["star3", "jrc121368"], value="star3", label="pesticide_rule")
+                with gr.Group(visible=False) as sh_box:
+                    shock_fields = [k for k in T.SD.Shocks.model_fields]
+                    with gr.Row():
+                        sh_inputs = {k: gr.Textbox(label=k, placeholder="default") for k in shock_fields}
+                with gr.Row():
+                    f_manure = gr.Dropdown(["from the reference", "true", "false"], value="from the reference",
+                                           label="manure_trade")
+                    f_biof = gr.Dropdown(["from the reference", "true", "false"], value="from the reference",
+                                         label="biofuel_markets")
+                    f_over = gr.Checkbox(label="overwrite an existing user scenario")
+                f_save = gr.Button("Check and save", variant="primary")
+                f_msg = gr.Markdown()
+                f_toml = gr.Code(language=None, label="settings.toml")
 
-        # ------------------------------------------------------------------ results
-        with (gr.Tab("Results") if all_tabs else gr.Column()):
-            RB.add_results(stores, app)
+            # ------------------------------------------------------------------ run
+            with gr.Tab("Run", interactive=all_tabs):
+                with gr.Row():
+                    r_scen = gr.Dropdown(scen0, value=scen0[0] if scen0 else None, label="scenario", scale=3)
+                    r_refresh = gr.Button("Reload scenarios", size="sm", scale=1)
+                r_regions = gr.Radio([MINI_EU] if shared else [MINI_EU, FULL_EU, "custom"], value=MINI_EU,
+                                     label="regions")
+                r_custom = gr.Textbox(label="custom regions (comma-separated regional units)", visible=False)
+                r_over = gr.Code(language="json", value="{}", label="setting overrides (JSON, e.g. "
+                                 "{\"outer_loop.max_outer_iter\": 30})")
+                # the log's level (run.verbosity): CAPRI's run log, the model's timed lines, each solve's own log (as
+                # CAPRI's GUI shows GAMS's output with the solvers' iteration logs)
+                r_verb = gr.Radio(T.LOG_LEVELS, value="capri", label="log (run.verbosity)")
+                with gr.Row():
+                    r_start = gr.Button("Start run", variant="primary")
+                    r_stop = gr.Button("Stop run", variant="stop")
+                r_msg = gr.Markdown()
+                r_job = gr.State("")
+                r_title = gr.Markdown()
+                r_iters = gr.Textbox(label="iterations (step report)", lines=8, interactive=False)
+                r_tail = gr.Textbox(label="log", lines=24, max_lines=24, interactive=False, autoscroll=True)
+                timer = gr.Timer(5.0, active=all_tabs)
+
+            # ------------------------------------------------------------------ results
+            with gr.Tab("Results", id="results"):
+                RB.add_results(stores, app)
 
         # ================================================================== callbacks
         def on_send(text, hist, request: gr.Request):

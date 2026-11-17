@@ -171,7 +171,7 @@ def test_the_matched_rows_get_name_columns(store):
     assert len(n) == len(j)
 
 
-def test_the_page_shows_the_results_only_unless_asked_for_all_tabs(store, tmp_path):
+def test_the_page_opens_on_results_with_the_other_tabs_disabled_unless_asked_for_all_tabs(store, tmp_path):
     gr = pytest.importorskip("gradio")
     import sys
     sys.path.insert(0, str(ROOT / "capri_gradio"))
@@ -179,6 +179,11 @@ def test_the_page_shows_the_results_only_unless_asked_for_all_tabs(store, tmp_pa
     import assistant_llm as L
     for all_tabs in (False, True):
         app = G.build(L.make_backend("none", "", "", ""), tmp_path / "scen", [store], all_tabs=all_tabs)
-        tabs = {b.label: b.visible for b in app.blocks.values() if isinstance(b, gr.Tab)}
-        assert all(tabs[k] is all_tabs for k in ("Assistant", "Scenario", "Run"))
-        assert ("Results" in tabs) is all_tabs and tabs["Map"] is True
+        tabs = {b.label: b for b in app.blocks.values() if isinstance(b, gr.Tab)}
+        # every top tab shown; Assistant, Scenario and Run usable only with all_tabs
+        assert all(tabs[k].visible is True for k in ("Assistant", "Scenario", "Run", "Results", "Map"))
+        assert all(tabs[k].interactive is all_tabs for k in ("Assistant", "Scenario", "Run"))
+        assert tabs["Results"].interactive is True
+        # the page opens on Results
+        top = [b for b in app.blocks.values() if isinstance(b, gr.Tabs) and b.selected == "results"]
+        assert len(top) == 1 and tabs["Results"].id == "results"
