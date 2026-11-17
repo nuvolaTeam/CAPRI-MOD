@@ -301,6 +301,13 @@ nbal_inner_max = 16
 # manure trade cost slope: CAPRI define_manure_trade_costs.gms l. 66-71, EUR 50 per t N for each 1% of the region's
 # manure N traded (0.05 in the model's EUR 1000)
 manure_pool_slope = 0.05
+# the regional model's manure trade columns: "capri" (CAPRI's e_costMTrade: exports and imports each with its own
+# cost, supply/define_manure_trade_costs.gms; as changes from the region's gross trade at the calibration point, each
+# down to zero; the direction a region does not trade at the calibration point opens at CAPRI's calibrated constant;
+# CAPRI's slopes p_manureSellCostSlope / p_manureBuyCostSlope; manure_pool_market_2030.csv; the default since
+# 17 November 2026) or "net" (capri-mod's form until then: one change of net trade each way from zero, both at
+# manure_pool_slope over the model's manure in CAPRI's money, no opening cost; needs it for the "schedules" pool form)
+manure_trade_form = "capri"
 # Green Deal organic and pesticide targets: CAPRI's regional input changes (define_inputs.gms l. 66-73).
 # CAPRI-ERROR-FIX. conventional_io.gms l. 361 sets scenAugmentsTechChange off at compile time, after organic_io.gms
 # l. 94 and conventional_io.gms l. 171 set it on, so the scenario's input change REPLACES the 2017-2030 input-saving

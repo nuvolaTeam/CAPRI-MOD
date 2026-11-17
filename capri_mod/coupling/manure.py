@@ -147,11 +147,19 @@ class ManureBlock:
             emax = float(ev @ y[:len(ev)]) if ev is not None else 0.0
             k = self.POOL_OF_PREFIX.get(reg[:2], reg[:2])
             sched.setdefault(k, []).append((th_e, th_i, sl, max(emax, 0.0)))
+            # the trade columns' lower bounds (supply.manure_trade_form "capri": minus the gross trade at CAPRI's
+            # calibration point; "net": zero)
+            lb_ = (getattr(mo.ev, "pool_lb", None) or {}).get(prod) or {}
+            elo, ilo = float(lb_.get(je, 0.0)), float(lb_.get(ji, 0.0))
+            if form != "capri" and (elo < 0 or ilo < 0):
+                raise ValueError('outer_loop.manure_pool_form "schedules" clears trade from zero: it needs '
+                                 'supply.manure_trade_form "net"')
             if form == "capri":
                 mv_ = (getattr(mo.res, "manure_value", None) or {}).get(prod)
                 crec.append({"reg": reg, "k": k, "e": float(y[je]), "i": float(y[ji]), "f": pnow,
                              "cs1": float(Q[je, je]), "cb1": float(Q[ji, ji]), "rce": rce, "rci": rci,
-                             "v": None if mv_ is None else float(mv_), "emax": max(emax, 0.0)})
+                             "v": None if mv_ is None else float(mv_), "emax": max(emax, 0.0),
+                             "elo": elo, "ilo": ilo})
             es[k] = es.get(k, 0.0) + float(y[je]) - float(y[ji])
             sup[k] = sup.get(k, 0.0) + s0
         keys = sorted(sched)
@@ -423,9 +431,18 @@ class ManureBlock:
                 if a_ == k: Aeq[j, 2 * nr + t] -= 1.0
                 if b_ == k: Aeq[j, 2 * nr + t] += 1.0
         from capri_mod.supply.convex_qp import solve_convex_qp
-        _sc = max(float(np.abs(cp_).max()), float(np.abs(Qp).max()), 1e-12)
-        sol, ok, info = solve_convex_qp(Qp / _sc, cp_ / _sc, Ap, bp, Aeq, np.zeros(len(keys)),
+        # the regions' trade bounded below by minus their gross trade at CAPRI's calibration point (supply.manure_trade_
+        # form "capri"; zero under "net"): solved in the shifted variables x' = x + s >= 0 (the solver bounds every
+        # variable at zero), the same problem: c' = c - Q s, A x' <= b + A s, Aeq x' = Aeq s
+        sh = np.zeros(nv)
+        for q, r_ in enumerate(crec):
+            sh[q], sh[nr + q] = -float(r_.get("elo", 0.0)), -float(r_.get("ilo", 0.0))
+        cps = cp_ - Qp @ sh
+        _sc = max(float(np.abs(cps).max()), float(np.abs(Qp).max()), 1e-12)
+        sol, ok, info = solve_convex_qp(Qp / _sc, cps / _sc, Ap, bp + Ap @ sh, Aeq, Aeq @ sh,
                                         tol=float(st.get("outer_loop.manure_pool_qp_tol")))
+        if sol is not None:
+            sol = np.asarray(sol, float) - sh
         status = str(info.get("status", "?"))
         if not ok and "AlmostSolved" in status:
             ok = True

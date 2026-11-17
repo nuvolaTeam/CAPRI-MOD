@@ -96,6 +96,7 @@ attribute's getattr did.
 - `pool_avail`: the manure available to the pool
 - `pool_cols`: the manure pool's export and import columns (N)
 - `pool_cols_pk`: idem for P and K
+- `pool_lb`: {nutrient: {column: lower bound, t}}: minus the gross trade at CAPRI's calibration point
 *abatement (S7): the ammonia and inhibitor accounts of the solve, the catch-crop requirement, histosols, the*
 *emission tax's undo record*
 - `amm_cost`: the ammonia options' cost by animal

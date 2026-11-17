@@ -3838,16 +3838,17 @@
    }
   },
   "capri_data/baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv": {
-   "description": "CAPRI's manure pool market terms per CAPRI region and manure nutrient (MANN, MANP, MANK): the manure distributed to crops, the calibration dual, CAPRI's excess-supply slope p_mPoolSupSlope and its value in the model's units (manuremarket/declare_manure_market.gms l. 466-505; outer_loop.manure_pool_form \"capri\"). (tools/build/build_manure_pool_market.py)",
+   "description": "CAPRI's manure pool market terms per CAPRI region and manure nutrient (MANN, MANP, MANK): the manure distributed to crops, the calibration dual, CAPRI's excess-supply slope p_mPoolSupSlope and its value in the model's units (manuremarket/declare_manure_market.gms l. 466-505; outer_loop.manure_pool_form \"capri\"); the region's gross trade at the calibration point, its trade cost slopes and the opening costs of the direction it does not trade (supply/define_manure_trade_costs.gms; supply.manure_trade_form \"capri\"). (tools/build/build_manure_pool_market.py)",
    "kind": "coefficients",
    "vintage": "2030",
    "domain": "environment",
    "status": "live",
    "rows": 750,
-   "columns": 10,
-   "units": "U_1000EuPerTon, U_1000t, U_1000tPerEuPerTon, U_EuPerTon, U_Ton, U_TonPer1000EuPerTon",
+   "columns": 16,
+   "units": "U_1000EuPerTon, U_1000EuPerTonPerTon, U_1000t, U_1000tPerEuPerTon, U_EuPerTon, U_Ton, U_TonPer1000EuPerTon",
    "read_by_model": [
-    "capri_mod/coupling/manure.py"
+    "capri_mod/coupling/manure.py",
+    "capri_mod/supply/supply_module.py"
    ],
    "origin": {
     "nature": "capri",
@@ -5129,7 +5130,7 @@
   "capri_data/codes/model_units.csv": {
    "description": "The model's own units that CAPRI's unit catalogue (CAPRIunits.gms) lacks: code, description and the tables using it; hand-kept, no builder; tools/build/build_unit_catalogue.py adds them to units.csv with capri = no.",
    "kind": "structure",
-   "rows": 13,
+   "rows": 14,
    "columns": 3,
    "origin": {
     "nature": "declared"
@@ -5205,7 +5206,7 @@
   "capri_data/codes/units.csv": {
    "description": "the unit catalogue: CAPRI's set capri_u (gams/CAPRIunits.gms) and the model's own units (tools/build/build_unit_catalogue.py)",
    "kind": "structure",
-   "rows": 52,
+   "rows": 53,
    "columns": 3,
    "origin": {
     "nature": "capri",
@@ -9969,7 +9970,7 @@
    "vintage": "2030",
    "domain": "environment",
    "status": "source",
-   "rows": 2250,
+   "rows": 7500,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {

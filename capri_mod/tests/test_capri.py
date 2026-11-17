@@ -354,6 +354,29 @@ def test_emission_tax_in_supply_follows_capri(model):
 
 @pytest.mark.slow
 @pytest.mark.no_market_hessian
+def test_manure_trade_opens_at_capris_calibrated_constants():
+    """CAPRI's manure trade costs (supply/define_manure_trade_costs.gms FINALIZE) as the regional model takes them
+    (manure_pool_market_2030.csv, tools/build/build_manure_pool_market.py, from the constants CAPRI stores in its
+    priFertDist files): a region that does not export (import) at the calibration point opens that direction at
+    MAX(10, P - v) - (P - v) (MAX(10, v - P) - (v - P)), P = 0.5 EUR per t the pool price at calibration (l. 45), v its
+    calibration dual; a direction it trades has no opening cost (its constant is calibrated to its trade); the slopes are
+    CAPRI's, 50 / (GROF / 100) (ES410000, N: 32.07 EUR per t per kt). In the model's money (EUR 1000, 2017, per t), the 2030 deflator being the dual's."""
+    t = pd.read_csv(ROOT / "capri_data/baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv",
+                    float_precision="round_trip")
+    money = (t.dual_cal_eur_t / (1000.0 * t.dual_cal)).median()
+    assert abs(money - 1.2772) < 1e-3
+    gap = 0.5 - t.dual_cal_eur_t                                        # P - v
+    o_e = np.where(t.base_export_kt > 0, 0.0, np.maximum(10.0, gap) - gap) / 1000.0 / money
+    o_i = np.where(t.base_import_kt > 0, 0.0, np.maximum(10.0, -gap) + gap) / 1000.0 / money
+    assert np.allclose(t.open_export, o_e, rtol=1e-9, atol=1e-12) and np.allclose(t.open_import, o_i, rtol=1e-9, atol=1e-12)
+    # gross trade consistent with CAPRI's net trade; one direction per region at the calibration point
+    assert np.allclose(t.base_export_kt - t.base_import_kt, t.base_net_export_kt, atol=1e-6)
+    es = t[(t.region == "ES410000") & (t.fout == "MANN")].iloc[0]
+    assert abs(es.base_import_kt - 145.5175) < 1e-3 and es.base_export_kt == 0.0
+    assert abs(es.open_export * 1000.0 * money - 306.979) < 1e-2 and es.open_import == 0.0
+    assert abs(es.sell_slope * 1e6 * money - 32.0744) < 1e-3 and es.buy_slope == es.sell_slope   # CAPRI's, EUR/t/kt
+
+
 def test_manure_p_and_k_have_markets_of_their_own(model):
     """CAPRI's manure trade by FOUT (supply_model.gms e_netMTrade, e_costMTrade; manuremarket/simu_manure_market.gms,
     one market per nutrient): each EU region has P2O5 and K2O export and import columns besides N, priced at their own
@@ -368,8 +391,14 @@ def test_manure_p_and_k_have_markets_of_their_own(model):
         pk = mo.ev.pool_cols_pk
         assert set(pk) == {"P", "K"} and len({*mo.ev.pool_cols, *pk["P"], *pk["K"]}) == 6
         Q, c, A, bb, y = mo.res.last_aug
+        from capri_mod.supply.supply_module import manure_trade_terms
         for nut, (je, ji) in pk.items():
-            assert abs(float(c[je]) - mo.seen.manure_pool_price_pk[nut]) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
+            # the pool price, plus CAPRI's opening cost of a direction the region does not trade at calibration
+            tt = manure_trade_terms(r, {"P": "MANP", "K": "MANK"}[nut])
+            pp_ = mo.seen.manure_pool_price_pk[nut]
+            assert abs(float(c[je]) - pp_ - tt["open_export"]) < 1e-9 and abs(float(c[ji]) + pp_ - tt["open_import"]) < 1e-9
+            assert Q[je, je] == tt["sell_slope"] and Q[ji, ji] == tt["buy_slope"]
+            assert mo.ev.pool_lb[nut] == {je: -tt["e0"], ji: -tt["i0"]}
         x0 = mo._base_levels().reindex(mo.acts).fillna(0.0).values
         xa = np.array([at_ref[r].activities.get(a, 0.0) for a in mo.acts])
         assert float(np.max(np.abs(xa - x0) / np.maximum(np.abs(x0), 1.0))) < 1e-4

@@ -114,6 +114,7 @@ class RegionalEvalState(_Slots):
         "pool_avail",         # the manure available to the pool
         "pool_cols",          # the manure pool's export and import columns (N)
         "pool_cols_pk",       # idem for P and K
+        "pool_lb",            # {nutrient: {column: lower bound, t}}: minus the gross trade at CAPRI's calibration point
         # abatement: the ammonia and inhibitor accounts of the solve, the catch-crop requirement, histosols, the
         # emission tax's undo record
         "amm_cost",           # the ammonia options' cost by animal
@@ -379,6 +380,7 @@ MOVED_REGIONAL: dict = {
     "_pool_avail": "ev.pool_avail",
     "_pool_cols": "ev.pool_cols",
     "_pool_cols_pk": "ev.pool_cols_pk",
+    "_pool_lb": "ev.pool_lb",
     "_manure_supply0": "res.manure_supply0",
     "_manure_supply0_pk": "res.manure_supply0_pk",
     "_pool_manure_vec": "res.pool_manure_vec",

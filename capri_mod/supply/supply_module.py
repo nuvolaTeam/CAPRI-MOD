@@ -105,6 +105,22 @@ def fert_option_table() -> dict:
     return _inputs.current().cached("fert_options", load)
 
 
+def manure_trade_terms(region: str, fout: str) -> Optional[dict]:
+    """CAPRI's manure trade terms of a region and nutrient (FOUT MANN, MANP, MANK) at the calibration point, in the
+    model's units (manure_pool_market_2030.csv; tools/build/build_manure_pool_market.py): gross exports and imports
+    e0, i0 (t), the sell and buy cost slopes (EUR 1000 per t per t) and the opening costs of the direction the region
+    does not trade (EUR 1000 per t). None for a region without CAPRI's pool terms."""
+    def load(inp):
+        t = inp.csv("manure_pool_market_2030.csv", "environment", float_precision="round_trip")
+        return {(str(r.region), str(r.fout)): {"e0": 1000.0 * float(r.base_export_kt),
+                                               "i0": 1000.0 * float(r.base_import_kt),
+                                               "sell_slope": float(r.sell_slope), "buy_slope": float(r.buy_slope),
+                                               "open_export": float(r.open_export),
+                                               "open_import": float(r.open_import)}
+                for r in t.itertuples(index=False)}
+    return _inputs.current().cached("manure_trade_terms", load).get((region, fout))
+
+
 def _spec_fingerprint(spec, **extra) -> str:
     """A digest of a regional NLP's calibration problem (every array, number and label of the spec, and the base
     point): two calibrations of equal digests solve the same problem."""

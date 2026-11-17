@@ -99,6 +99,39 @@ CAPRI's step weights (capmod/define_stepWeights.gms) = outer_loop.manure_pool_pr
      +8.0 against +7.9, GHG total -13.7 against -13.6, fertiliser N2O -33.0 against -32.6); Malta's N exports, 96 t
      without the buffers, are zero (its pool closed as in CAPRI's Green Deal group), Cyprus' stay zero.
 
+## The regions' two trade directions (17 November 2026, K164)
+
+CAPRI's supply model trades manure with two columns per region and FOUT, v_manureExports and v_manureImports, each with
+its own cost, e (cs0 + cs1 e / 2) and i (cb0 + cb1 i / 2) (supply_model.gms e_costMTrade). FINALIZE of
+supply/define_manure_trade_costs.gms calibrates the constant of a direction the region trades so that its trade is
+optimal (cs0 = P - v - cs1 e0; cb0 = v - P - cb1 i0) and sets the other's to MAX(10, P - v) (exports) or MAX(10, v - P)
+(imports), P the pool price at calibration (0.5 EUR per t, l. 45), v the calibration dual. So:
+- an importer (ES410000 N: 145.5 kt, v 297.5 EUR per t) starts to export once its manure value falls 307 EUR per t below
+  its calibration point, while its imports fall along their own curve; with both open its net trade responds with
+  slope 1 / (1/cs1 + 1/cb1);
+- an exporter's (and an autarkic region's with v - P above 10) import constant is at its threshold at calibration: its
+  imports respond from the calibration point on, beside its exports.
+CAPRI's Green Deal result has ES410000 importing 117.5 kt and exporting 18.4 at once; the first-order conditions hold
+with the file's constants (import: v - P = -4370.4 + 32.07 x 117.5 = -602; export: P - v = 10 + 32.07 x 18.4 = 600).
+
+capri-mod's port until then ("net", supply.manure_trade_form) had one change of net trade each way from zero, both at
+the same slope: an importer's cut in imports and its new exports on one curve, no opening cost, so about half CAPRI's
+response once both directions are open (ES410000 under the Green Deal: 24.7 kt of relief against CAPRI's 46.4), and its
+slope 0.05 / (the model's manure / 100) in CAPRI's money (no deflator; CAPRI's excretion GROF, not the model's).
+
+Since 17 November 2026 ("capri", the default):
+- tools/build/build_manure_pool_market.py adds CAPRI's gross trade at calibration (p_manureExports, p_manureImports,
+  2030), its slopes (p_manureSellCostSlope, p_manureBuyCostSlope) and the opening costs of the direction a region does not
+  trade, from the constants CAPRI stores in priFertDist (p_manureSellCostConst, p_manureBuyCostConst,
+  p_manurePoolPrice), in the model's money (columns base_export_kt, base_import_kt, sell_slope, buy_slope, open_export,
+  open_import of manure_pool_market_2030.csv);
+- the regional NLP's two columns are the changes of gross exports and imports from the calibration point, each bounded
+  below by minus that trade (supply/land.py ev.pool_lb, the NLP's col_lb), at CAPRI's slopes, the direction not traded
+  carrying its opening cost; the constant of the direction traded follows from the model's own base calibration (the
+  column is interior at base, its residual goes into its linear term: CAPRI's FINALIZE);
+- the pool market's regional exports and imports take the same lower bounds (solved in shifted variables).
+The "schedules" pool form needs "net".
+
 ## Open
 
 - outer_loop.manure_pool_es_slope: CAPRI's code ("capri_code", the project lead's choice of 12 November 2026: "start

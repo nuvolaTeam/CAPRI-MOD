@@ -435,6 +435,11 @@ class CapriRegionalNLP:
         for k_ in list(spec.get("mix_cols") or ()) + list(spec.get("split_cols") or ()):
             if int(k_) < n0:
                 lbx[int(k_)] = -np.inf
+        # the manure trade columns under CAPRI's form (supply.manure_trade_form "capri"): changes of the gross exports
+        # and imports from CAPRI's calibration point, down to minus that trade
+        for k_, v_ in (spec.get("col_lb") or {}).items():
+            if int(k_) < n0:
+                lbx[int(k_)] = float(v_) / sc[int(k_)]
         bound_rows = {}                                    # row -> (col, coef)
         nnz = (A != 0).sum(axis=1)
         for i in range(m_A):

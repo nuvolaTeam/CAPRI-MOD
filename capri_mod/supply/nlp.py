@@ -159,7 +159,11 @@ class NLPBlock:
                     # the dairy and cattle intensity splits' columns: like the mix columns, bounded by their rows alone
                     split_cols=sorted([int(k_) for k_ in (getattr(self.ev, "cattle_cols", None) or {}).values()]
                                       + ([int(self.ev.dairy_col)] if getattr(self.ev, "dairy_col", None) is not None
-                                         else [])), **abat)
+                                         else [])),
+                    # the manure trade columns' lower bounds (supply.manure_trade_form "capri": minus the gross trade
+                    # at CAPRI's calibration point; a region can cut its exports or imports to zero)
+                    col_lb={int(j_): float(v_) for d_ in (getattr(self.ev, "pool_lb", None) or {}).values()
+                            for j_, v_ in d_.items()}, **abat)
         if npk is not None and getattr(self.ev, "alloc_cols", 0):
             spec["fix_cols"] = {n + len(getattr(self.ev, "land_types_used", [])): 0.0}
         self.res.last_feed_dm = None

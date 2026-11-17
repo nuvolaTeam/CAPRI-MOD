@@ -12,3 +12,4 @@ U_Ton,Metric ton,"baselines/capri_greendeal_ref/1730/environment/manure_pool_mar
 U_1000EuPerTon,"1000 Euro per metric ton (the model's money, EUR 1000 of 2017 per t)","baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv dual_cal"
 U_1000tPerEuPerTon,"1000 t per Euro per metric ton (CAPRI's p_mPoolSupSlope as its pool market uses it)","baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv slope_capri"
 U_TonPer1000EuPerTon,"Metric ton per 1000 Euro (2017) per metric ton: a quantity's response to a price, in the model's units","baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv es_slope"
+U_1000EuPerTonPerTon,"1000 Euro (2017) per metric ton per metric ton: a unit cost's change per t traded, in the model's units","baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv sell_slope, buy_slope"

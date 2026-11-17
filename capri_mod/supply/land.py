@@ -9,6 +9,24 @@ from __future__ import annotations
 
 
 class LandBlock:
+    def _manure_trade_terms(self, fout: str):
+        """CAPRI's trade terms of the region's manure market for nutrient fout (supply_module.manure_trade_terms) when
+        supply.manure_trade_form is "capri", else None (the "net" form: one change of net trade each way from zero at
+        supply.manure_pool_slope over the model's manure, no opening cost). Under "capri" the two columns are the
+        changes of the region's gross exports and imports from CAPRI's calibration point (CAPRI's e_costMTrade: each
+        direction with its own cost, supply/define_manure_trade_costs.gms), each bounded below by minus that trade
+        (ev.pool_lb), the direction the region does not trade opening at CAPRI's calibrated constant; the constants of
+        the trade the region has are calibrated with the model's base (CAPRI's FINALIZE)."""
+        form = str(_settings().get("supply.manure_trade_form"))
+        if form not in ("capri", "net"):
+            raise ValueError(f'supply.manure_trade_form = "{form}": "capri" or "net"')
+        if form == "net":
+            return None
+        tt = manure_trade_terms(self.data.region_id, fout)
+        if tt is None:
+            raise KeyError(f"{self.data.region_id} {fout}: no CAPRI manure trade terms (manure_pool_market_2030.csv)")
+        return tt
+
     def _land_of(self, kind: str) -> float:
         """The region's land of a type (1000 ha; capri_data land_availability.csv, CAPRI's data). Missing data stop the
         run (no fallback: the former 200 / 30 / 80 kha stand-ins were never reached and are gone, 23 October 2026)."""
@@ -242,6 +260,7 @@ class LandBlock:
         self.ev.alloc_cols = alloc_k
         self.ev.pool_cols = []
         self.ev.pool_cols_pk = {}
+        self.ev.pool_lb = {}
         # ---- NATIONAL MANURE MARKET (CAPRI e_costMTrade, manuremarket/*). The
         # balance ALREADY makes manure replace mineral N linearly (availability
         # a, CAPRI fertiliser_substitution): the animals' row terms are about
@@ -302,10 +321,13 @@ class LandBlock:
                     # the NLP form takes exactly this term out again (_nlp_tax_terms), mineral N being endogenous there
                     g_ = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0) * sub \
                         * (self._ef_mineral_n2o() + self._ef_mineral_lea()) / 1000.0
+                    tt = self._manure_trade_terms("MANN")
                     pcols = []
                     for sign in (-1.0, +1.0):                  # -1 export, +1 import
-                        Qa = np.pad(Qa, ((0, 1), (0, 1))); Qa[-1, -1] = slope
-                        ca = np.concatenate([ca, [(pp + g_) if sign < 0 else (-pp - g_)]])
+                        Qa = np.pad(Qa, ((0, 1), (0, 1)))
+                        Qa[-1, -1] = slope if tt is None else tt["sell_slope" if sign < 0 else "buy_slope"]
+                        op = 0.0 if tt is None else tt["open_export" if sign < 0 else "open_import"]
+                        ca = np.concatenate([ca, [(pp + g_ + op) if sign < 0 else (-pp - g_ + op)]])
                         Aa = np.hstack([Aa, np.zeros((Aa.shape[0], 1))])
                         if i_nb is not None:
                             Aa[i_nb, -1] = sign * (1.0 - sub)
@@ -317,6 +339,8 @@ class LandBlock:
                     Aa = np.vstack([Aa, capr]); ba = np.concatenate([ba, [0.0]])
                     labels.append("manure_export_cap")
                     self.ev.pool_cols = pcols
+                    if tt is not None:
+                        self.ev.pool_lb["N"] = {pcols[0]: -tt["e0"], pcols[1]: -tt["i0"]}
                     self.res.manure_supply0 = man0
                     self.res.pool_manure_vec = e.copy()
                     self.ev.pool_avail = sub
@@ -340,12 +364,17 @@ class LandBlock:
                         continue
                     slope_k = float(_settings().get("supply.manure_pool_slope")) / (grof / 100.0)
                     pp_k = float((getattr(self.seen, "manure_pool_price_pk", None) or {}).get(nut, 0.0) or 0.0)
+                    tt_k = self._manure_trade_terms({"P": "MANP", "K": "MANK"}[nut])
                     cols_k = []
                     for sign in (-1.0, +1.0):              # -1 export, +1 import
-                        Qa = np.pad(Qa, ((0, 1), (0, 1))); Qa[-1, -1] = slope_k
-                        ca = np.concatenate([ca, [pp_k if sign < 0 else -pp_k]])
+                        Qa = np.pad(Qa, ((0, 1), (0, 1)))
+                        Qa[-1, -1] = slope_k if tt_k is None else tt_k["sell_slope" if sign < 0 else "buy_slope"]
+                        op = 0.0 if tt_k is None else tt_k["open_export" if sign < 0 else "open_import"]
+                        ca = np.concatenate([ca, [(pp_k + op) if sign < 0 else (-pp_k + op)]])
                         Aa = np.hstack([Aa, np.zeros((Aa.shape[0], 1))])
                         cols_k.append(Aa.shape[1] - 1)
+                    if tt_k is not None:
+                        self.ev.pool_lb[nut] = {cols_k[0]: -tt_k["e0"], cols_k[1]: -tt_k["i0"]}
                     capr = np.zeros(Aa.shape[1]); capr[:n] = -app; capr[cols_k[0]] = 1.0
                     Aa = np.vstack([Aa, capr]); ba = np.concatenate([ba, [0.0]])
                     labels.append(f"manure_export_cap_{nut}")

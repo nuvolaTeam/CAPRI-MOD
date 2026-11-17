@@ -65,6 +65,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K161](#k161) | The 2030 base value of the fodders was the highest 2017 ration price of the region's animals times the member state's 2030/2017 ratio, not CAPRI's own regional 2030 unit value (UVAG) | fixed (16 November 2026); no effect on quantities |
 | [K162](#k162) | The permanent groups' own residues in NUTNED_ were the group's total spread by area (GRAE and GRAI the same per ha), not CAPRI's per-crop DATA(crop, MANN/MANP/MANK) | fixed (16 November 2026) |
 | [K163](#k163) | The gross N balance spread each region's crop residues by NCRD (residues and deposition), not CAPRI's per-crop e_CRESID coefficient DATA(crop, MANN), and NUTNED_'s residue pool the same: the same regional totals, another crop mix | fixed (16 November 2026) |
+| [K164](#k164) | The regions' manure trade had one change of net trade each way, on one curve: CAPRI's two directions with their own costs (an importer can export once its manure value falls past its calibrated constant), its slopes and the deflator were missing | fixed (17 November 2026) |
 | [K141](#k141) | CAPRI bug: CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it (the project lead's decision) |
 | [K136](#k136) | CAPRI's endogenous entitlement limit (def_endCut.gms: no area payment beyond the trend area) was not in the model; ported with CAPRI's 2030 ceilings computed from its CAP 2014-2020 tables | fixed (13 November 2026) |
 | [K137](#k137) | The reported UAA left out the idled histosols (CAPRI's IHISGR, IHISCR stay in GRAS, ARAC and UAAR): the Green Deal's surplus per ha looked short of its target where the row met it | fixed (13 November 2026) |
@@ -3447,6 +3448,54 @@ GRAI over GRAE by about 360 EUR/ha. Found through the exact first-order-conditio
   K need terms change sign (SWHE -40.1 to +24.3 EUR/ha) as the grassland no longer takes the region's K. OFAR (the
   fodder balance's dual, -535 EUR/ha) and RAPE are not moved by this fix; open.
 - **Full EU** (full_gd_k162, with K159-K161 and DEP-50's market chain since the K158 run, so not K162 alone): EU27 GRAI -48.1% (K158 run -38.8, CAPRI -54.8), GRAE +44.5 (+35.8, +51.8); activities' mean gap to CAPRI 2.5 points (3.4).
+
+<a id="k164"></a>
+### K164: The regions' manure trade: one change of net trade each way, not CAPRI's two directions (found 17 November 2026)
+
+CAPRI's supply model trades manure with two columns per region and FOUT, exports and imports, each with its own cost
+(supply_model.gms e_costMTrade; supply/define_manure_trade_costs.gms). FINALIZE calibrates the constant of a direction the
+region trades to its trade and sets the other's to MAX(10, P - v) (exports) or MAX(10, v - P) (imports), P the pool
+price at calibration (0.5 EUR per t), v the calibration dual: an importer starts to export once its manure value has
+fallen past that constant, while its imports fall along their own curve, and an exporter's imports respond from the
+calibration point on. With both directions open a region's net trade responds with slope 1 / (1/cs1 + 1/cb1), half
+the slope of one direction where the slopes are equal. In CAPRI's Green Deal run Castilla-León (ES410000) imports
+145.5 -> 117.5 kt N and exports 0 -> 18.4 at once (the first-order conditions hold with its constants: import v - P =
+-4370.4 + 32.07 x 117.5 = -602 EUR per t, export P - v = 10 + 32.07 x 18.4 = 600).
+
+The model's two columns were one change of net trade each way from zero at the same slope, so an importer's cut in
+imports and its new exports were on one curve, without the opening cost; and the slope was 0.05 / (the model's manure /
+100) in CAPRI's 2030 money (no deflator to the model's 2017 money; the model's manure, not CAPRI's GROF). Found from the
+Green Deal herds of Spain and Poland, cut much more than CAPRI's at CAPRI's prices (claude/gd_supply_response_check.md):
+under the N surplus cap the model moved about half to three quarters of CAPRI's manure between regions (K163 full EU:
+ES410000 relief 24.7 kt N against CAPRI's 46.4), and the importing regions cut more herds instead. CAPRI's manure trade
+check file of the reference (chk_manure_trade_1730userScens_ladder_0_ref.gdx, the project lead's installation) confirms
+the constants: ES410000 sell constant 10, buy constant -4370.4, slopes 32.07.
+
+- **In 9t:** -
+- **Status:** fixed 17 November 2026 (supply.manure_trade_form "capri", the default; "net" the former form):
+  tools/build/build_manure_pool_market.py adds CAPRI's gross trade at calibration, its slopes and the opening costs of
+  the direction not traded, from the constants CAPRI stores in priFertDist (manure_pool_market_2030.csv base_export_kt,
+  base_import_kt, sell_slope, buy_slope, open_export, open_import); the regional NLP's columns are the changes of gross
+  exports and imports, each bounded below by minus that trade (supply/land.py ev.pool_lb), at CAPRI's slopes, the
+  direction not traded carrying its opening cost, the constant of the direction traded from the model's own base
+  calibration (CAPRI's FINALIZE); the pool market takes the same bounds (coupling/manure.py). Docs:
+  docs/dev/MANURE_POOL_PORT.md. Test: test_capri.py::test_manure_trade_opens_at_capris_calibrated_constants (the opening
+  costs are CAPRI's rule for all 750 region-nutrient rows), test_manure_p_and_k_have_markets_of_their_own (the columns'
+  costs, slopes and bounds).
+- **Measured** (the 33 Spanish and Polish units at CAPRI's Green Deal prices, the market's prices replaced by CAPRI's
+  after each solve, young animals cleared between solves; "net" against "capri", same regions; CAPRI for checking):
+
+  | | net | capri | CAPRI |
+  |---|---:|---:|---:|
+  | manure N moved between regions, sum of the changes of net exports (kt) | 184 | 260 | 282 |
+  | mean gap to CAPRI per region (kt N) | 3.6 | 2.0 | |
+  | herds' mean gap to CAPRI (points) | 4.9 | 3.8 | |
+  | herds' same sign as CAPRI | 81% | 89% | |
+
+  ES410000: net exports +26.3 -> +35.1 kt (imports -27.0, exports +8.1; CAPRI +46.4: -28.0 and +18.4); suckler cows
+  -44.0 -> -35.5% (CAPRI -22.4), fattening pigs -16.8 -> -13.8 (-14.7), broilers -14.4 -> -11.3 (-11.8). PL120000:
+  +15.7 -> +19.9 kt (CAPRI +21.0). Open: Cataluña (ES510000) moves the other way (+12.0 against CAPRI's -8.9 kt) and its
+  herds fall less than CAPRI's (suckler cows +3.6 against -17.9%); ES410000's suckler cows stay 13 points below CAPRI's.
 
 <a id="k163"></a>
 ### K163: The N balance's crop residues spread by NCRD, not CAPRI's per-crop MANN (found 16 November 2026)
