@@ -38,7 +38,7 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
-from capri_mod.data.definitions import is_eu
+from capri_mod.data.definitions import NO_WORLD_PRICE, is_eu
 
 DEFAULT_OUTPUT_ROOT = "outputs"
 
@@ -63,6 +63,8 @@ def flatten_outputs(results: dict) -> dict:
         wp = getattr(mkt, "world_prices", None)
         if wp is not None:
             for c, v in dict(wp).items():
+                if c in NO_WORLD_PRICE:
+                    continue                   # raw milk: no world price (K165)
                 try:
                     out[f"price_{c}"] = float(v)
                 except (TypeError, ValueError):
@@ -464,6 +466,8 @@ def to_long(results: dict, point: str) -> pd.DataFrame:
                     add((point, "market", str(exim[1]), str(exim[0]), f, str(com), val))
             elif f in ("world_prices", "excess_demand") and x is not None:
                 for (com,), val in _leaves(x):
+                    if f == "world_prices" and str(com) in NO_WORLD_PRICE:
+                        continue               # raw milk: no world price (K165)
                     add((point, "market", "WORLD", "", f, str(com), val))
             elif f == "welfare" and x is not None:
                 for (reg, pos), val in _leaves(x):

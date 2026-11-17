@@ -166,7 +166,21 @@ def supply_system(mm, exogenous_supply):
     Smat = anticipation_function(nR, nC)(ca.DM(S0), rr, ca.DM(SV_), ca.DM(E_))
     S = [[Smat[i, j] for j in range(nC)] for i in range(nR)]
 
-    # the EU's products no supply model produces (EU_MARKET_SUPPLY): CAPRI's ProdNQ_ against base
+    # the member states' dairy unknowns
+    dp = mm._dairy_params() or {}
+    ms_list = list((dp.get("ms") or {}))
+    uE = ca.SX.sym("uE", 3 * len(ms_list))
+
+    def zM_ms(m):
+        return uE[3 * ms_list.index(m) + 2]
+
+    def milk_ms(m):
+        # a member state's raw milk price ratio: its dairy block's (CAPRI's v_prodPrice(MS, "MILK")); 1 without one
+        return 1.0 + zM_ms(m) if m in ms_list else ca.SX(1.0)
+
+    # the EU's products no supply model produces (EU_MARKET_SUPPLY): CAPRI's ProdNQ_ against base, raw milk at each
+    # member state's own price (K165)
+    MT = mm._eu_market_supply_milk_terms()
     for rg, terms in mm._eu_market_supply_nq_params().items():
         if rg not in R:
             continue
@@ -177,7 +191,9 @@ def supply_system(mm, exogenous_supply):
         f, rows, _ = fr
         r_ = rr[R[rg], :].T
         q0 = mm._nq_q0(rg, rows)
-        dq = f(ca.DM(q0), r_, r_[ci["MILK"]] if "MILK" in ci else 1.0, ca.DM.zeros(0), ca.DM.zeros(len(rows)))[1]
+        lsh = ca.vertcat(*[sum((h * (milk_ms(ms) - 1.0) for ms, h in (MT.get(rg, {}).get(x) or {}).items()),
+                               ca.SX(0.0)) for x in rows])
+        dq = f(ca.DM(q0), r_, 1.0, ca.DM.zeros(0), lsh)[1]
         for k, x in enumerate(rows):
             if x in ci and q0[k] > 0:
                 S[R[rg]][ci[x]] = prodnq_cell(q0[k] + dq[k], R[rg], ci[x], q0[k])
@@ -227,14 +243,6 @@ def supply_system(mm, exogenous_supply):
     for reg, goods in ylay:
         yoff[reg] = (o, goods)
         o += len(goods)
-
-    # the member states' dairy unknowns
-    dp = mm._dairy_params() or {}
-    ms_list = list((dp.get("ms") or {}))
-    uE = ca.SX.sym("uE", 3 * len(ms_list))
-
-    def zM_ms(m):
-        return uE[3 * ms_list.index(m) + 2]
 
     res_y = []
     extra = {}
@@ -359,8 +367,9 @@ def supply_system(mm, exogenous_supply):
                 qc = float(q_ms.get(x, 0.0))
                 rel = 0.0
                 if qc > 0:
-                    rel = sum((h * (r_[ci[y]] - 1.0) for (x_, y), h in t_ms.items() if x_ == x and y in ci),
-                              ca.SX(0.0)) / qc
+                    # raw milk at the member state's own dairy-block price (K165)
+                    rel = sum((h * ((milk_ms(ms) if y == "MILK" else r_[ci[y]]) - 1.0) for (x_, y), h in t_ms.items()
+                               if x_ == x and (y in ci or y == "MILK")), ca.SX(0.0)) / qc
                 # a fudge cell (G3.4 step 4): CAPRI's switched-off countries are market regions with ProdNQ_ and
                 # ProdFudge_; the mode follows the bound of the market region's cell (as for the other cells)
                 add[(reg, x)] = add.get((reg, x), 0.0) + prodnq_cell(b * (1.0 + rel), R[reg], ci[x], b)

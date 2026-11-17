@@ -26,9 +26,9 @@ Code: `capri_mod/market/bilateral.py` (`BilateralCommodity`: one product's trade
   tariff-rate quotas apply to both blocks; an `EU27` row (quantities summed, prices production-weighted) is added to
   the results for reporting (`_with_eu_aggregate`). Norway is its own market region NO000000 in both settings, as in
   CAPRI.
-- 58 market commodities (`definitions.MARKET_COMMODITIES`). 57 have CAPRI bilateral flows; raw milk (MILK) has none
-  and clears as a pooled market (one price ratio for the non-EU regions); the EU's raw milk is priced by the dairy
-  block ([DAIRY_PROCESSING.md](DAIRY_PROCESSING.md)).
+- 58 market commodities (`definitions.MARKET_COMMODITIES`). 57 have CAPRI bilateral flows; raw milk (MILK) is not
+  traded, as in CAPRI: every market region clears its raw milk in its own dairy block, which prices it
+  ([DAIRY_PROCESSING.md](DAIRY_PROCESSING.md)); there is no world raw milk price (KNOWN_ISSUES K165).
 - Products follow CAPRI's market products: wheat is soft plus durum wheat (durum's price signal follows wheat's,
   `model.py`), olives reach the market as olive oil and paddy rice as milled rice at CAPRI's member-state processing
   yields (`processing_yields.csv`, `tools/build/build_processing_yields.py`), sugar beet as white sugar
@@ -118,9 +118,9 @@ QD0 (P/P0)^eta.
 CAPRI's flows are kept and each region's domestic sales absorb the difference between the model's own production and
 CAPRI's (DS0 = S0 − exports; exports are scaled down where they would exceed 98% of production). Share parameters
 (beta, dd, dm) are calibrated so that base flows and base prices are reproduced exactly. The demand functions are
-then rescaled so that use at the reference prices is exactly the closure's D0. For the pooled product (raw milk)
-the demand of the regions without supply models is scaled so that the world clears at base (the EU's and Norway's
-raw milk use is their supply models' milk delivered to their own dairies). Norway's base is taken at its supply
+then rescaled so that use at the reference prices is exactly the closure's D0. Raw milk has no such calibration: each
+region's dairies take its delivery (CAPRI's 2030 delivery outside the EU, the supply models' milk for the EU and
+Norway; KNOWN_ISSUES K150, K165). Norway's base is taken at its supply
 models' output as the EU's (`_align_sup_base`; the closure's domestic sales absorb the difference to CAPRI's
 flows).
 

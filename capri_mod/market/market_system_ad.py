@@ -22,9 +22,10 @@ Equations F (same order and sizes):
   land   LandSupplyMNL_ = LndSupplyEqualsDemand_ per non-EU land market and free land type (supply_ad.
          land_residual_function)
 
-Square by construction (each unknown block has its equation block of the same size). The pooled commodities (raw
-milk: not traded, CAPRI) keep their ratio at the default solve's; their world balance is returned as `pooled` (raw
-milk: supply and use are the same quantity in every region, so it is zero identically; checked).
+Square by construction (each unknown block has its equation block of the same size). Raw milk is not traded
+(CAPRI): its price in each region is its dairy block's unknown (uE per member state, uW per other region), so its
+column of the price matrix is held at the default solve's and read by no function here; each region's raw milk
+supply less use is returned as `milk_bal` (the block takes the delivery, so it is zero identically; checked; K165).
 
 Not covered: a trade scenario's tariff additions (import_prices_ad has none yet); see supply_system_ad and use_ad for
 their own limits. `market_x0(mm, layout)` reads x at the module's latest evaluation (a solve's equilibrium after a
@@ -37,7 +38,7 @@ import numpy as np
 
 def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = False, slope=None, fudge: bool = False,
                   lift_use: bool = False):
-    """(Function x -> (F, pooled, S, D), layout, x, F). lifted: the Armington ratios of the bilateral commodities,
+    """(Function x -> (F, milk_bal, S, D), layout, x, F). lifted: the Armington ratios of the bilateral commodities,
     the supply and the use are unknowns of their own with their defining equations (CAPRI's form: v_arm1Price,
     v_prodQuant, v_arm1Quant), appended to x and F as PA, S, D and PAdef, Sdef, Ddef; the Jacobian is then sparse
     (each region's use depends on its own prices, each Armington ratio on its commodity's prices). slope: a CasADi
@@ -107,7 +108,8 @@ def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = Fals
     if ul["rms"] != sl["rms"]:
         raise NotImplementedError("market_system: the use and supply sides' FEDE regions differ")
 
-    # the price matrix: bilateral commodities' unknowns, the pooled ones at the default solve's ratio
+    # the price matrix: bilateral commodities' unknowns; raw milk's column (no market price: each region's dairy
+    # block prices it, K165) at the default solve's, read by no function
     RR = ca.SX(nR, nC)
     for j, c in enumerate(cols):
         if c in rB:
@@ -191,8 +193,8 @@ def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = Fals
         bal.append(b_)
         if bil or glo:
             trq.append(out[1])
-    pooled = ca.vertcat(*[ca.sum1(S[:, ci[c]] - D[:, ci[c]]) for c in cols if c not in sysd]) \
-        if any(c not in sysd for c in cols) else ca.SX(0, 1)
+    # raw milk per region: supply less use (its dairy block takes the delivery; a check, not an equation)
+    milk_bal = (S[:, ci["MILK"]] - D[:, ci["MILK"]]) if "MILK" in ci else ca.SX(0, 1)
 
     # FeedBal_ per behavioural region: the Armington and producer ratios of its trade region, its dairy block's raw
     # milk price, its land rents' change
@@ -247,8 +249,8 @@ def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = Fals
     x = ca.vertcat(*xs)
     F = ca.vertcat(*[e for _, e in eqs])
     fn = ca.Function("market_system", [x] + ([slope] if slope is not None else []) + ([fm] if fudge else []),
-                     [F, pooled, S, D], ["x"] + (["slope"] if slope is not None else []) + (["fm"] if fudge else []),
-                     ["F", "pooled", "S", "D"])
+                     [F, milk_bal, S, D], ["x"] + (["slope"] if slope is not None else []) + (["fm"] if fudge else []),
+                     ["F", "milk_bal", "S", "D"])
     lay = dict(sl, x=names, eqs=[(n, int(e.shape[0])) for n, e in eqs], n_x=int(x.shape[0]), n_F=int(F.shape[0]),
                sig=sig, byp_cells=ul["byp_cells"], milk_regs=ul["milk_regs"], lifted=lifted,
                fm=fm if fudge else None, lift_cells=list(ul.get("lift_cells") or ()))

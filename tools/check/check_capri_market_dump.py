@@ -89,8 +89,7 @@ def main() -> None:
     add("use", net(by_rm(_var(a.dump, "v_arm1Quant"), False)),
         lambda rg, c: eq.consumption.at[rg, c] if (c != "MILK" and rg in eq.consumption.index
                                                    and c in eq.consumption.columns) else None)
-    # the use's base components (demand_response: calibrated base use x the components' shares)
-    cal = {c: float(mm._demand_cal_factor(c)) for c in comms}
+    # the use's base components (demand_response: base use x the components' shares)
     comp = mm._use_components()
     B = mm.par.base_consumption
 
@@ -99,7 +98,7 @@ def main() -> None:
             s = comp.get((rg, c))
             if s is None or rg not in B.index or c not in B.columns:
                 return None
-            return float(B.at[rg, c]) * cal[c] * s[key]
+            return float(B.at[rg, c]) * s[key]
         return f
     add("human cons.", by_rm(_var(a.dump, "v_consQuant"), True), component("hcon"))
     add("feed", by_rm(_var(a.dump, "v_feedQuant"), True), component("feed"))

@@ -109,7 +109,7 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         if _miss:
             # no invented price (a fixed 200 EUR/t was used here): every market product needs CAPRI's world price
             raise ValueError(f"no base world price for market products {_miss} (capri_data world prices)")
-        self.par.demand_cal   = None  # set by the bilateral calibration at the first solve
+        self.par.market_calibrated = False  # the bilateral calibration at the first solve
 
         # Compute baseline consumption and production
         self._calibrate_baseline()

@@ -52,15 +52,14 @@ step clip market.step_clip. One outer step:
    - demand (`demand_response`): human consumption (demand_ad.py), feed (FeedNQ_, the EU's feed bulks), processing and
      crushing at CAPRI's crushing margin (oil and cake at their producer prices), biofuels;
    - feed by-products (MaprFeed_, `_apply_feed_byproduct_supply`);
-   - residuals: per bilateral commodity `sc.residual` (SupBalM_, ArmBal1_ and the trade system), per pooled commodity
-     the world balance (supply_ad.pooled_residual_function, DEP-31).
+   - residuals: per bilateral commodity `sc.residual` (SupBalM_, ArmBal1_ and the trade system); raw milk has none
+     here, each region's dairy block clears it (K165; until 17 November 2026 a world balance, DEP-31).
 2. **TRQs:** with market.trq_joint (default) the quotas' sigmoid is solved with each commodity's prices
    (`_bilateral_inner_trq`) and its residual is a convergence measure; without it, a lagged, damped update.
 3. **Per commodity, the trade solve** around the current point (`_bilateral_inner`, `_bilateral_inner_trq`): supply
    and use log-linear in the commodity's own price (`_bilateral_local_el`: elasticities measured once per run by a 1%
    price change, clipped to [-0.5, 5] and [-5, 0.5]), the trade system solved exactly by Newton (finite-difference or
-   chord Jacobian, up to 60 steps with backtracking). Pooled commodities: one ratio from the world balance with the
-   same elasticities.
+   chord Jacobian, up to 60 steps with backtracking).
 4. **Update** r (Anderson on log r, restart when the residual does not fall; damping otherwise).
 
 Inner fixed points and lags the whole-market system replaces by one simultaneous system: (a) the commodity-by-commodity trade solves on

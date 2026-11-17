@@ -257,9 +257,8 @@ class DemandMixin(MarketStateMixin):
         PR = (dp / ref).to_numpy(dtype=float)                           # Armington price ratios
         DPv = dp.to_numpy(dtype=float)
         REFv = ref.to_numpy(dtype=float)
-        cal = np.array([float(self._demand_cal_factor(c)) for c in self.commodities])
-        Bv = self.par.base_consumption.reindex(index=self.regions, columns=self.commodities).fillna(0.0).to_numpy(dtype=float)
-        D0 = Bv * cal[None, :]                                          # calibrated base use
+        D0 = self.par.base_consumption.reindex(index=self.regions, columns=self.commodities).fillna(0.0).to_numpy(
+            dtype=float)                                                # base use (CAPRI's calibration point)
 
         # base components (kt) from CAPRI's shares
         uc = self._use_components()

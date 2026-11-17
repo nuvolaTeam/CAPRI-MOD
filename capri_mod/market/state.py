@@ -107,9 +107,8 @@ class MarketParameters:
     sup_milk0: Any = None
     #: crushing base quantities from the baseline's alignment
     crush_q0_override: Any = None
-    #: the demand calibration (working copy) and its frozen copy (None: recalibrate at the next solve)
-    demand_cal: Any = None
-    demand_cal_frozen: Any = None
+    #: the market calibrated at CAPRI's calibration point for this run (False: calibrate at the next solve)
+    market_calibrated: bool = False
     #: the calibrated bilateral trade systems per commodity
     bilat: Any = None
     #: the market supply Hessian (CAPRI's p_hessNQSupp, measured by model.py)
@@ -167,8 +166,8 @@ MOVED = {
     "_dairy_u": "nothing (removed when the dairy blocks moved to CasADi: the dairy blocks are linear in their unknowns, no warm start)",
     "_dairy_u_all": "nothing (removed when the dairy blocks moved to CasADi: the dairy blocks are linear in their unknowns, no warm start)",
     "_dairy_world_last": "ev.dairy_world_last",
-    "_demand_cal": "par.demand_cal",
-    "_demand_cal_frozen": "par.demand_cal_frozen",
+    "_demand_cal": "removed (K165, 17 November 2026: the raw milk world pool's non-EU use factor, the only factor not 1)",
+    "_demand_cal_frozen": "par.market_calibrated (K165: the marker that the run's calibration is done)",
     "_eu_aligned_use": "par.eu_aligned_use",
     "_eu_base_supply": "removed (CAPRI's market calibration, 8 November 2026: read only by the \"supply\" form)",
     "_eu_biof_ratio": "ev.eu_biof_ratio",

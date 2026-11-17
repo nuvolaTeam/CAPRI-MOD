@@ -8,13 +8,14 @@ exactly with supply and use log-linear around that point; the links across commo
 steps (Anderson mixing accelerates them). This module solves the same equations at once:
 
     R(z) = 0,   z = log r (the producer price ratios the default solve moves),
-    R    = each commodity's market-clearing residual (BilateralCommodity.residual; a pooled commodity's world balance),
-           divided by the same scale as the default solve (S0 + D0, at least 1),
+    R    = each bilateral commodity's market-clearing residual (BilateralCommodity.residual; raw milk, not traded, is
+           cleared in each region's dairy block, K165), divided by the same scale as the default solve (S0 + D0, at
+           least 1),
 
 by Newton's method with the Jacobian-vector products taken as directional finite differences of R (one evaluation of
 the full model response each), solved by GMRES, preconditioned by the block-diagonal Jacobian of the default solve's
-own model (each commodity's trade system with the local supply and use elasticities, exact from CasADi, trade_ad.py;
-a pooled commodity's scalar slope). The first Krylov iterate is therefore the default solve's step; further
+own model (each commodity's trade system with the local supply and use elasticities, exact from CasADi, trade_ad.py).
+The first Krylov iterate is therefore the default solve's step; further
 iterates add the links across commodities and blocks. A backtracking line search on |R|_2 keeps each step a descent
 step; the step clip of the default solve applies.
 
@@ -38,16 +39,14 @@ class NewtonKrylovMixin:
     """MarketModule methods for the Newton-Krylov market solve (setting market.solver = "newton_krylov")."""
 
     def _nk_layout(self, r: pd.DataFrame, sysd) -> List[Tuple[str, np.ndarray]]:
-        """The unknowns: per commodity the regions the default solve moves (the supplying regions of a bilateral
-        commodity; the common ratio of a pooled one, index -1)."""
+        """The unknowns: per bilateral commodity the regions the default solve moves (its supplying regions). Raw milk,
+        the one product without bilateral trade, has none: each region's dairy block prices it (K165)."""
         out = []
         for c in r.columns:
             if c in sysd:
                 act = np.where(sysd[c].S0 > 1e-6)[0]
                 if len(act):
                     out.append((c, act))
-            else:
-                out.append((c, np.array([-1])))
         return out
 
     def _nk_solve(self, r, exogenous_supply, trade_scenario, es, ed, size, tol, max_outer, verbose=False):
@@ -73,17 +72,13 @@ class NewtonKrylovMixin:
             z = np.empty(n)
             for k, (c, act) in enumerate(lay):
                 v = a[:, ci[c]]
-                z[offs[k]:offs[k + 1]] = np.log(v[0:1] if act[0] < 0 else v[act])
+                z[offs[k]:offs[k + 1]] = np.log(v[act])
             return z
 
         def unpack(z: np.ndarray, base: pd.DataFrame) -> pd.DataFrame:
             a = base.to_numpy(dtype=float, copy=True)
             for k, (c, act) in enumerate(lay):
-                v = np.exp(z[offs[k]:offs[k + 1]])
-                if act[0] < 0:
-                    a[:, ci[c]] = v[0]
-                else:
-                    a[act, ci[c]] = v
+                a[act, ci[c]] = np.exp(z[offs[k]:offs[k + 1]])
             return pd.DataFrame(a, index=base.index, columns=base.columns)
 
         # The evaluation carries state from one call to the next (MarketEvalState: the dairy blocks' raw milk prices
@@ -99,28 +94,13 @@ class NewtonKrylovMixin:
             g = np.empty(n)
             for k, (c, act) in enumerate(lay):
                 sz = size(c)
-                g[offs[k]:offs[k + 1]] = (F[c] / sz) if act[0] < 0 else (F[c][act] / sz[act])
+                g[offs[k]:offs[k + 1]] = F[c][act] / sz[act]
             return g, (S, D, PAr, F, pc), self.ev
-
-        frozen = np.zeros(n, dtype=bool)                       # the unknowns held (precond_blocks marks them)
 
         def precond_blocks(rr, S, D, PAr):
             """The default solve's Jacobian per commodity at rr, as LU-ready dense blocks."""
-            frozen[:] = False
             blocks = []
             for k, (c, act) in enumerate(lay):
-                if act[0] < 0:
-                    s_, d_ = float(S[c].sum()), float(D[c].sum())
-                    e_s = float((S[c] * es[c]).sum() / max(s_, 1e-9))
-                    e_d = float((D[c] * ed[c]).sum() / max(d_, 1e-9))
-                    if not (s_ > 0 and d_ > 0 and (e_s - e_d) > 1e-6):
-                        # the default solve's own test (it moves a pooled ratio only when supply and use answer to
-                        # it): a ratio no quantity answers to is not determined by the equations; it is held
-                        frozen[offs[k]] = True
-                        blocks.append(np.array([[1.0]]))
-                        continue
-                    blocks.append(np.array([[(s_ * e_s - d_ * e_d) / float(size(c)[0])]]))
-                    continue
                 sc = sysd[c]
                 Am, Bm = import_price_matrices(sc, tadd.get(c))
                 fn = trade_function(sc, act)
@@ -196,27 +176,25 @@ class NewtonKrylovMixin:
             g0 = g.copy()
 
             def jv(v):
-                """J v on the free unknowns; the identity on the held ones (their step is 0: right-hand side 0)."""
+                """J v by a directional finite difference."""
                 nonlocal n_evals
-                vf = np.where(frozen, 0.0, v)
-                nv = float(np.linalg.norm(vf))
+                nv = float(np.linalg.norm(v))
                 if nv == 0:
-                    return np.where(frozen, v, 0.0)
+                    return np.zeros_like(v)
                 eps = h / nv
-                g1, _, _ = resid(unpack(z + eps * vf, r))
+                g1, _, _ = resid(unpack(z + eps * v, r))
                 n_evals += 1
-                return np.where(frozen, v, (g1 - g0) / eps)
+                return (g1 - g0) / eps
             J = LinearOperator((n, n), matvec=jv, dtype=float)
             M = LinearOperator((n, n), matvec=lambda v: apply_prec(blocks, v), dtype=float)
-            rhs = np.where(frozen, 0.0, -g0)
+            rhs = -g0
             eta = min(eta_hi, max(float(np.linalg.norm(rhs)), eta_lo))
             try:
                 dz, info = gmres(J, rhs, M=M, rtol=eta, restart=kmax, maxiter=1)
             except TypeError:                                      # SciPy before 1.12 names the tolerance tol
                 dz, info = gmres(J, rhs, M=M, tol=eta, restart=kmax, maxiter=1)
-            dz = np.where(frozen, 0.0, dz)
             if not np.all(np.isfinite(dz)):
-                dz = np.where(frozen, 0.0, -apply_prec(blocks, g0))   # the default solve's step
+                dz = -apply_prec(blocks, g0)                           # the default solve's step
             dz = np.clip(dz, np.log(sclip[0]), np.log(sclip[1]))
             # backtracking line search on |R|_2 (Armijo, c = 1e-4)
             f0 = float(np.dot(g0, g0))
@@ -231,7 +209,7 @@ class NewtonKrylovMixin:
                 t *= 0.5
             if not acc:
                 # no descent along the Newton direction: the default solve's (preconditioner) step, damped
-                dz = np.clip(np.where(frozen, 0.0, -apply_prec(blocks, g0)), np.log(sclip[0]), np.log(sclip[1]))
+                dz = np.clip(-apply_prec(blocks, g0), np.log(sclip[0]), np.log(sclip[1]))
                 rt = unpack(z + 0.5 * dz, r)
                 gt, evt, pt = resid(rt)
                 n_evals += 1

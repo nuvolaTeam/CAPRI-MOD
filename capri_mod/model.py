@@ -407,7 +407,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             # calibration taken at the wrong point into every later run - results
             # depended on the instance's history (a null-trajectory projection,
             # built on a fresh instance, then differed from the base by 0.06%).
-            _mm.par.demand_cal_frozen = None
+            _mm.par.market_calibrated = False
             # ...and restore the market's PRISTINE base tables: EU rows of
             # commodities without farm-model supply are not re-aligned per run
             # and carried an earlier run's values (a model with a full-region
@@ -437,7 +437,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             # reuse the calibration of the baseline for the same region set
             if len(_cache[_key]) > 2:
                 _cal, _bp, _bc = _cache[_key][2:5]
-                _mm.par.demand_cal_frozen = _cal.copy()
+                _mm.par.market_calibrated = bool(_cal)
                 _mm.par.base_production.loc[list(_mm.EU)] = _bp
                 _mm.par.base_consumption.loc[list(_mm.EU)] = _bc
                 if len(_cache[_key]) > 5 and _cache[_key][5][0] is not None:
@@ -1411,7 +1411,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 self.par.eu_base_cache[_key] = (
                     market_eq.production.loc["EU27"].copy(),
                     market_eq.consumption.loc["EU27"].copy(),
-                    self.market_module.par.demand_cal_frozen.copy(),
+                    bool(self.market_module.par.market_calibrated),      # the run's market calibration done
                     self.market_module.par.base_production.loc[list(self.market_module.EU)].copy(),
                     self.market_module.par.base_consumption.loc[list(self.market_module.EU)].copy(),
                     # bilateral market: calibrated systems and full base tables of this baseline

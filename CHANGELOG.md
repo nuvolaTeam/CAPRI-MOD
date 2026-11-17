@@ -111,6 +111,16 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
 ## 16 November 2026 — the grassland split of the need (K160); the market under CAPRI's bounds (DEP-50)
 
 - **K130 closed:** the catch crops' cost per ha is computed by CAPRI's own rule for every region (policy/define_greening_limits.gms: 25% of the cheapest cereal's and OFAR's average base coefficient, 50% for seed, x TF_I, at the member state's 2030 unit values), not read from CAPRI's reported TOIN; the rule reproduces CAPRI's 2030 TOIN of CATC in every unit it reports, and the 250 regions' costs are unchanged (to 1e-14).
+- **K165:** raw milk without a world pool (register DEP-5, DEP-31 closed; PROXY_AUDIT S185 closed): every region
+  already cleared its raw milk in its own dairy block at CAPRI's 2030 delivery, so the pooled world ratio, its world
+  balance and the non-EU use factor bounded to [0.2, 5] are removed from the calibration, the fixed-point solve, the
+  Newton-Krylov solve and the whole-market system (which returns each region's raw milk balance as a check instead).
+  The factor was 1.0000000000000002 on the mini-EU Farm-to-Fork at 70b07ae. The pool's ratio still reached the EU
+  market supply function of other vegetable oils (OTHO's raw milk term); that term now takes each member state's own
+  raw milk price, as CAPRI's ProdNQ_. No world raw milk price is reported (the project lead's decision). Mini-EU
+  Farm-to-Fork before and after: 7 iterations each; prices within 1.7e-05 (baseline) and 2.4e-04 (scenario), regional
+  activities within 6.4e-05 in the baseline; in the scenario NL220000 lands on another branch of its arable mix from
+  the first scenario solve (grain maize 3.2 against 0.4 thousand ha, broilers -0.6%; K129).
 - **K164:** the regions' manure trade in CAPRI's form (supply.manure_trade_form "capri", the default; "net" the former): exports and imports each with its own cost, as changes from the gross trade at CAPRI's calibration point down to zero, at CAPRI's slopes in the model's money, the direction a region does not trade opening at CAPRI's calibrated constant (an importer can start to export, an exporter's imports respond); the pool market takes the same bounds. Spain and Poland at CAPRI's Green Deal prices: manure moved between regions 184 -> 260 kt N (CAPRI 282), herds' mean gap to CAPRI 4.9 -> 3.8 points.
 - **K163:** the gross N balance's crop residues are CAPRI's per-crop e_CRESID coefficient, DATA(crop, MANN) less the deposition, not NCRD (the same regional total, another spread: DE21 rapeseed 70 instead of 138 kg N/ha, other arable fodder 195 instead of 69); the surplus row's crop coefficients change, the regions' residue totals do not; the same for each crop's share of NUTNED_'s arable residue pool (fertDistCres_). Full-EU Green Deal pair: activities' mean gap to CAPRI 2.5 -> 2.1 points (pulses -12.0 -> -2.5%, CAPRI -0.8; durum -18.6 -> -7.8, CAPRI -15.3), prices' 1.8 unchanged.
 - **Results page (Gradio):** the results only by default (the Assistant, Scenario and Run tabs built hidden; `--all-tabs`, or CAPRI_ALL_TABS=1 on the Space, shows them); each code with its name beside it (CAPRI's own texts, codes/capri ROWS, COLS, RALL; the model's own codes by the CAPRI codes they stand for); each run with its date; each tab opens with a sentence on what it shows.

@@ -33,7 +33,7 @@ def test_the_assembled_market_system_holds_at_the_default_solves_equilibrium(sol
     mm._bilateral_eval(mm.sv.bilat_last_r.copy(), exo, None)
     fn, lay, _, _ = market_system(mm, exo)
     assert lay["n_x"] == lay["n_F"] > 2000
-    F, pooled, _, _ = (np.asarray(v, float).ravel() for v in fn(market_x0(mm, lay)))
+    F, milk_bal, _, _ = (np.asarray(v, float).ravel() for v in fn(market_x0(mm, lay)))
     o = 0
     for name, n in lay["eqs"]:
         v = F[o:o + n]
@@ -43,7 +43,8 @@ def test_the_assembled_market_system_holds_at_the_default_solves_equilibrium(sol
         elif n:
             assert float(np.max(np.abs(v) / _scale(mm, lay, name))) <= 1e-6, name
         o += n
-    assert float(np.max(np.abs(pooled))) <= 1e-6
+    # raw milk is cleared in each region's dairy block (K165)
+    assert milk_bal.size and float(np.max(np.abs(milk_bal))) <= 1e-6
     # structure: without the balances that are empty (no supply, use or trade) and with their prices fixed, the
     # system is square with full structural rank
     import casadi as ca

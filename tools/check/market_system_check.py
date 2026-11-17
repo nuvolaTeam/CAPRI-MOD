@@ -5,8 +5,9 @@ Each capture is replayed and the market evaluated once more at the solve's final
 the system is built and evaluated at that evaluation's unknowns. Reported: the system's size; per equation block the
 largest residual relative to its scale (balances: S0 + D0, the default solve's test; quotas: as they are; young
 animals: their net supply; dairy blocks: their base raw milk; FeedBal_: the energy fed at calibration; land: the
-calibration land); the pooled balances; the system's supply and use against the evaluation's; and the Jacobian's
-structure (non-zeros, structural rank, the Dulmage-Mendelsohn blocks' sizes from CasADi's btf).
+calibration land); raw milk's balance per region (its dairy block takes the delivery); the system's supply and use
+against the evaluation's; and the Jacobian's structure (non-zeros, structural rank, the Dulmage-Mendelsohn blocks'
+sizes from CasADi's btf).
 
     python tools/check/market_system_check.py runs/capture [--files market_000.pkl,...] [--structure]
 """
@@ -58,7 +59,7 @@ def check(path: Path, structure: bool) -> dict:
         fn, lay, x, F = market_system(mm, args.get("exogenous_supply"), args.get("trade_scenario"))
         built = time.time() - t0
         x0 = market_x0(mm, lay)
-        Fv, pooled, S, D = (np.asarray(v, float) for v in fn(x0))
+        Fv, milk_bal, S, D = (np.asarray(v, float) for v in fn(x0))
     sc_ = _scales(mm, lay)
     rel = np.abs(Fv.ravel()) / sc_
     blocks, o = {}, 0
@@ -69,7 +70,7 @@ def check(path: Path, structure: bool) -> dict:
     refD = D1.reindex(index=lay["regions"], columns=lay["cols"]).to_numpy(dtype=float)
     dS = float((np.abs(S - refS) / np.maximum(np.abs(refS), 1.0)).max())
     dD = float((np.abs(D - refD) / np.maximum(np.abs(refD), 1.0)).max())
-    out = {"n_x": lay["n_x"], "n_F": lay["n_F"], "blocks": blocks, "pooled": pooled.ravel().tolist(), "dS": dS,
+    out = {"n_x": lay["n_x"], "n_F": lay["n_F"], "blocks": blocks, "milk_bal": float(np.max(np.abs(milk_bal))) if milk_bal.size else 0.0, "dS": dS,
            "dD": dD, "built": round(built, 1)}
     if structure:
         t0 = time.time()
@@ -126,7 +127,7 @@ def main() -> None:
         o = check(f, a.structure)
         print(f"{f.name}: {o['n_x']} unknowns, {o['n_F']} equations (built in {o['built']} s); "
               + "; ".join(f"{k} {n}: {v:.2e}" for k, (n, v) in o["blocks"].items())
-              + f"; pooled {o['pooled']}; supply vs the evaluation {o['dS']:.2e}, use {o['dD']:.2e}", flush=True)
+              + f"; raw milk per region max |supply - use| {o['milk_bal']:.2e}; supply vs the evaluation {o['dS']:.2e}, use {o['dD']:.2e}", flush=True)
         if "nnz" in o:
             print(f"   Jacobian: {o['nnz']} non-zeros, structural rank {o['sprank']}, btf {o['btf']} "
                   f"({o['structure_s']} s)", flush=True)

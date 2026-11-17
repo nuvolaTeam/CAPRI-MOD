@@ -169,9 +169,3 @@ class CalibrationMixin(MarketStateMixin):
                 self.par.base_production.at[rg, "MILK"] = q
                 self.par.base_consumption.at[rg, "MILK"] = q
         self.ev.sup_milk_now = dict(self.par.sup_milk0)
-
-    def _demand_cal_factor(self, comm: str) -> float:
-        cal = self.par.demand_cal
-        if cal is not None and comm in cal.index:
-            return float(cal[comm])
-        return 1.0

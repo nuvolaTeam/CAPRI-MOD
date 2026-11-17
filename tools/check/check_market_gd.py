@@ -59,7 +59,7 @@ def main():
     # calibrated at the reference before any scenario input is set (a run calibrates at the baseline and keeps it)
     mm._bilateral_calibrate()
     mm._apply_trq_volumes(mm.par.bilat)
-    mm.par.demand_cal_frozen = mm.par.demand_cal.copy()
+    mm.par.market_calibrated = True
     cm = list(mm.commodities)
 
     prod = piv("PROD", col)

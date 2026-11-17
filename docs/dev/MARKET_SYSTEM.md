@@ -164,9 +164,10 @@ within 2.8e-16 of their base raw milk (78 EU, 129 other equations); the young-an
 the 45 regions, the active quotas' sigmas, the young-animal prices, the dairy blocks' unknowns, FEDE, the free rents),
 F = (the supply balances SupBalM_, the quotas' sigmoids, yaniMarket_, the dairy blocks, FeedBal_, the land markets),
 supply from supply_system_ad, use from use_ad, the Armington ratios from each commodity's trade block (trade_system_ad,
-now with the ratios as an output), the EU's residual feeds from the use. Raw milk is a pooled commodity whose world
-balance is zero identically (supply and use are the same quantity in every region): its ratio is held, its balance
-returned apart (8.0e-11 kt). Built in about 7 s.
+now with the ratios as an output), the EU's residual feeds from the use. Raw milk is not traded: its price in each
+region is its dairy block's unknown, its column of the price matrix is held and read by nothing, and each region's
+raw milk supply less use is returned apart as a check (`milk_bal`, zero identically; until K165, 17 November 2026, a
+world balance of a pooled ratio, 8.0e-11 kt). Built in about 7 s.
 
 At the 12-solve mini-EU Farm-to-Fork's captures (tools/check/market_system_check.py), market_011 / market_005 /
 market_002: 3,166 / 3,166 / 3,151 unknowns and as many equations; largest residuals relative to their scales:

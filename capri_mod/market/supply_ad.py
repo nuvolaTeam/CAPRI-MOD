@@ -95,22 +95,6 @@ def anticipation_function(n_r: int, n_c: int):
     return f
 
 
-_POOL = {}
-
-
-def pooled_residual_function(n_r: int):
-    """CasADi Function (S[n_r], D[n_r]) -> F: the world balance of a pooled commodity (one price ratio for all market
-    regions: raw milk outside the dairy blocks, the other oilseeds; capri-mod's departure DEP-31, CAPRI's wldMarket_
-    being m_netTrade's), sum S - sum D."""
-    f = _POOL.get(n_r)
-    if f is None:
-        import casadi as ca
-        S, D = ca.SX.sym("S", n_r), ca.SX.sym("D", n_r)
-        f = ca.Function(f"pooled_{n_r}", [S, D], [ca.sum1(S) - ca.sum1(D)], ["S", "D"], ["F"])
-        _POOL[n_r] = f
-    return f
-
-
 def land_residual_function(name: str, d: dict):
     """CasADi Function (dr[n_f], base[n_f]) -> (F[n_f], J[n_f x n_f]): CAPRI's market land block outside the EU for one
     CAPRI region (LandSupplyMNL_ = LndSupplyEqualsDemand_ with ProdNQ_'s land rows, arm/market_model.gms l. 1543-1572,

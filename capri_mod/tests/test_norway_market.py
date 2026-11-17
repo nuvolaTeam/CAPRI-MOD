@@ -352,12 +352,29 @@ def test_norway_run_on_its_own_supply_models():
     S = mm.supply_response(mm.world_prices_base * mm._bilateral_world_index(r), ex, region_ratio=r,
                            crush_dom=mm._dom0())
     xr = mm._eu_excluded_rows()
+    # no EU unit in the run: the EU's supply is its units' base output (K83) moved by their member states' ProdNQ_ at
+    # these prices, i.e. by the raw milk terms alone: raw milk is not in the price frame (K165), each member state's
+    # raw milk price is its EU dairy block's of this evaluation (CAPRI's v_prodPrice(MS, "MILK")); the EU's raw milk
+    # itself is the units' base delivery. (The block is not at its base here: K166)
+    from capri_mod.data.definitions import capri_ms
+    terms, q0 = mm._eu_ms_supply_nq()
+    exp = {}
+    for cc, row in mm.seen.eu_excluded_base.iterrows():
+        ms = capri_ms(cc)
+        rg = mm.eu_region_of_ms(ms)
+        for c in ("BARL", "OATS", "BEEF", "SGMT", "PORK"):
+            b_, qc = float(row.get(c, 0.0)), float(q0.get(ms, {}).get(c, 0.0))
+            rel = (sum(h * (mm._ms_milk_ratio_now(ms) - 1.0) for (x_, y), h in terms.get(ms, {}).items()
+                       if x_ == c and y == "MILK") / qc if qc > 0 else 0.0)
+            exp[(rg, c)] = exp.get((rg, c), 0.0) + (max(b_ * (1.0 + rel), 0.0) if b_ > 0 else 0.0)
     for c in ("BARL", "OATS", "BEEF", "MILK", "SGMT", "PORK"):
         assert abs(float(S.at["NO000000", c]) - float(ex.at["NO", c])) < 1e-6 * max(1.0, float(ex.at["NO", c])), c
-        # no EU unit in the run: the EU's supply is its units' base output (K83), Norway's output not in it
         for rg in mm.EU:
-            assert abs(float(S.at[rg, c]) - float(xr.at[rg, c])) < 1e-6 * max(1.0, float(S.at[rg, c])), (rg, c)
+            e_ = float(xr.at[rg, c]) if c == "MILK" else exp[(rg, c)]
+            assert abs(float(S.at[rg, c]) - e_) < 1e-6 * max(1.0, float(S.at[rg, c])), (rg, c)
         assert float(P.at["NO000000", c]) > 0
+    # and the raw milk terms do move it (the check is not between two constants)
+    assert abs(exp[("EU_WEST", "BARL")] - float(xr.at["EU_WEST", "BARL"])) > 1.0
     assert float(mm._bilat_err) < 1e-6
 
 

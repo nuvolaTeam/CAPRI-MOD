@@ -301,7 +301,6 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/market/bilateral.py', 'BilateralCommodity.trq_solve', 0.05, 'numerical', 'keep', NULL, 'Aitken step of a quota''s sigma at most 0.05 up; and the largest change of the contraction factor between steps for the step to be taken'),
   ('capri_mod/market/bilateral.py', 'BilateralCommodity.trq_solve', 0.99, 'numerical', 'keep', NULL, 'largest contraction factor for which Aitken''s step is taken (with 0.5 the smallest)'),
   ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin', 60.0, 'numerical', 'keep', NULL, 'default iteration limit; the caller passes the setting market.max_iter'),
-  ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin._bilateral_calibrate', 0.2, 'capri-mod', 'keep', NULL, 'lower bound of the non-EU use recalibration factor [0.2, 5]; registered in DEPARTURES_FROM_CAPRI.md (the market''s demand at the baseline; PROXY_AUDIT S185)'),
   ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin._bilateral_inner', -0.5, 'numerical', 'keep', NULL, 'Newton step clip in log prices'),
   ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin._bilateral_inner', 0.25, 'numerical', 'keep', NULL, 'residual ratio above which the chord Newton refreshes its Jacobian'),
   ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin._bilateral_inner_trq', 0.25, 'numerical', 'keep', NULL, 'residual ratio above which the joint trade-and-quota Newton refreshes its Jacobian (as _bilateral_inner)'),

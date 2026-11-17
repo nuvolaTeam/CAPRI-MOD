@@ -62,10 +62,8 @@ def use_function(mm, lift: bool = False):
     PR = ca.SX.sym("PR", nR, nC)
     RB = ca.SX.sym("RB", nR, nC)
 
-    # the calibrated base use and its components (demand_response)
-    cal = np.array([float(mm._demand_cal_factor(c)) for c in comms])
-    Bv = mm.par.base_consumption.reindex(index=regions, columns=comms).fillna(0.0).to_numpy(dtype=float)
-    D0 = Bv * cal[None, :]
+    # the base use and its components (demand_response)
+    D0 = mm.par.base_consumption.reindex(index=regions, columns=comms).fillna(0.0).to_numpy(dtype=float)
     H0, F0, P0, Bf0 = (np.zeros((nR, nC)) for _ in range(4))
     for (r, c), s in mm._use_components().items():
         i, j = R.get(r), Cc.get(c)

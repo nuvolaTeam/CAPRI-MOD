@@ -93,7 +93,10 @@ class ReportingBlock:
         if baseline_results.get("market") and scenario_results.get("market"):
             b_prices = baseline_results["market"].world_prices
             s_prices = scenario_results["market"].world_prices
+            from capri_mod.data.definitions import NO_WORLD_PRICE
             for comm in b_prices.index:
+                if comm in NO_WORLD_PRICE:
+                    continue                   # raw milk: no world price (K165)
                 bp = b_prices.get(comm, np.nan)
                 sp = s_prices.get(comm, np.nan)
                 if bp and not np.isnan(bp) and bp > 0:

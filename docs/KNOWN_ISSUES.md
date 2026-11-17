@@ -17,7 +17,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open: waiting for CAPRI's scenario results |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | open |
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | open |
-| [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | open |
+| [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | open: converge since 17 November 2026 (full EU, 14 iterations); their effect on results to measure before the default changes |
 | [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open: waiting for CAPRI's scenario results |
 | [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open: waiting for CAPRI's scenario results |
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
@@ -66,6 +66,8 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K162](#k162) | The permanent groups' own residues in NUTNED_ were the group's total spread by area (GRAE and GRAI the same per ha), not CAPRI's per-crop DATA(crop, MANN/MANP/MANK) | fixed (16 November 2026) |
 | [K163](#k163) | The gross N balance spread each region's crop residues by NCRD (residues and deposition), not CAPRI's per-crop e_CRESID coefficient DATA(crop, MANN), and NUTNED_'s residue pool the same: the same regional totals, another crop mix | fixed (16 November 2026) |
 | [K164](#k164) | The regions' manure trade had one change of net trade each way, on one curve: CAPRI's two directions with their own costs (an importer can export once its manure value falls past its calibrated constant), its slopes and the deflator were missing | fixed (17 November 2026) |
+| [K165](#k165) | Raw milk cleared in a world pool (one ratio, a world balance, a non-EU use factor bounded to [0.2, 5]) although every region already cleared it in its own dairy block; the pool's ratio reached the EU market supply of other vegetable oils | fixed (17 November 2026) |
+| [K166](#k166) | Runs on a subset of regions: the EU dairy block starts off its base, the units outside the run delivering their model base milk against CAPRI's marketed milk (EU -4.6%, Estonia -28%, Bulgaria +7%) | open |
 | [K141](#k141) | CAPRI bug: CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it (the project lead's decision) |
 | [K136](#k136) | CAPRI's endogenous entitlement limit (def_endCut.gms: no area payment beyond the trend area) was not in the model; ported with CAPRI's 2030 ceilings computed from its CAP 2014-2020 tables | fixed (13 November 2026) |
 | [K137](#k137) | The reported UAA left out the idled histosols (CAPRI's IHISGR, IHISCR stay in GRAS, ARAC and UAAR): the Green Deal's surplus per ha looked short of its target where the row met it | fixed (13 November 2026) |
@@ -782,6 +784,21 @@ CAPRI optimises its replacement heifers (HEIR) and its calf activities (CAMF, CA
 - **In 9t:** –
 - **Status:** **open**, narrowed 23 October 2026 (night). The price update now takes each region's response from its solved NLP (`CapriRegionalNLP.response`: the implicit-function theorem on the KKT conditions, in the active rows' null space; `RegionalSupplyModel._yani_response`), on by default with the member splits. Checked: against finite differences on FRH0 the cattle goods' own responses agree within 1% (piglets within 20%); a price change reaches the regional objective as predicted. On 12 regions the markets reached 0.005 in 8 iterations (PMP terms: 0.016 after 8). The full Farm-to-Fork run (r96) still did not converge: the male calves' price rose to 6.1 x base and the female calves' fell below zero (-0.37) before the imbalance swung back up (0.03 -> 0.21). Under Farm-to-Fork the EU is short of male calves (fewer dairy births, fattening barely lower) and the calf activities hit their zero bounds, so the response nearly vanishes and the sexes' prices run apart. Next: compare the per-sex calf use and its flexibility with CAPRI (the calf activities' own PMP terms, CAPRI's per-sex young-animal prices in its Farm-to-Fork results, tools/gams/export_capmod_results.gms) before judging whether such prices are CAPRI's equilibrium or a defect here. Off by default. **Deferred, 23 October 2026**: CAPRI's own per-sex Farm-to-Fork results, needed to judge the prices, do not exist on the project lead's installation; it stays a DEPARTURE from CAPRI's setting (docs/DEPARTURES_FROM_CAPRI.md) until the divergence is understood from the model itself (the calf activities at their zero bounds). **13 November 2026**: the project lead agrees to bring the replacement heifers, the calves and the per-sex young-animal markets to CAPRI's setting where possible; scheduled after the premium module's port. Retried the same evening on CAPRI's own path, which did not exist when r89-r96 ran (22-23 October): since K75 (24 October) the young-animal markets clear inside the market model (yaniMarket_ with the market supply Hessian's young-animal rows, measured per good: the per-sex table holds CAPRI's seven goods YCAM, YCAF, YBUL, YHEI, YCOW, YPIG, YLAM), the outer loop passing the prices on as the products'. Mini-EU Farm-to-Fork with supply.use_cattle_member_splits (mini_k65_splits): converged in 14 iterations (7 with the pooled goods), young-animal imbalance 0.0033 (tolerance 0.005); EU_WEST female calves 1.55 x base, male 1.19 (pooled 1.34), young heifers 1.10, bulls 1.03; the Farm-to-Fork indicators within 0.4 point of the pooled run. Full-EU Farm-to-Fork (full_f2f_k65, 13 November 2026, evening; not saved): the market supply Hessian measured in 2,157 s (1,882 without the splits); CAPRI's stop rule on prices and quantities met from iteration 15 (largest change then 0.002%), the market balances within 5e-9, but the young-animal imbalance fell by a near-constant 2.9% per iteration (0.111 at the first scenario iteration, 0.022 at the 6th, 0.0096 at the 28th, 0.0051 at the 49th) and the run reached its 7,180 s limit in iteration 50, just above the tolerance. So the splits converge on the full EU, but about 35 iterations after the prices and quantities have settled (14 iterations without them). Next: which good and market lag (the young-animal detail per iteration on the mini-EU run), and why the market's clearing corrects only 3% of the imbalance per step (a price at its bound, or the market's young-animal response far above the supply models'). The default stays off.
 Diagnosis on the mini-EU Farm-to-Fork with the splits (14 November 2026, night; the young-animal markets' state written per iteration, scratchpad k65_diag.py): converged in 14 iterations; the first scenario iteration opens gaps of 20-31% (EU_WEST male and female calves, the young heifers and bulls), closed to under 2% by the fifth; then the EU_EAST young bulls and heifers hold a gap of 1.3-3.1% for five iterations (young bulls -2.0, -2.4, -1.8, -1.6, -1.4%) while the market clears them at almost the prices the supply models saw (young bulls 0.9743 against 0.9747): at the seen young-animal prices the market's clearing (yaniMarket_ with the measured Hessian, recalibrated to the supply models' latest net supply) attributes the gap to the product prices' change through the Hessian's cross terms, and the supply models' response to those prices does not close it. To test next: the cross terms of the young-animal rows against the supply models' response between iterations, and a re-measured Hessian at a scenario iteration (market.hessian_scenario_iter; CAPRI's practice is a question for CAPRI's developers in Bonn). Tried 14 November 2026 (morning; the same mini-EU run with market.hessian_scenario_iter = 2): worse. The EU markets follow the first run to the third scenario iteration (calves 25.3% then 19.1% instead of 10.2%), then Norway's young-animal market, with its Hessian measured again at the scenario's state, moves away (the largest gap Norway's at every iteration from the fifth: young animals -93%, -272%, -236%, -196%, calves -176% to -180%); not converged after 14 iterations, stopped by the run's time limit at 4,800 s (the first run: 14 iterations, 656 s). So a scenario-state Hessian is not the way to close the EU_EAST gap; the cross terms remain to test.
+Measured again 17 November 2026 at 70b07ae (after K155-K164), with a recorder that changes nothing in the model
+(scratchpad k65_cross.py: per outer iteration the supply models' young-animal response from their solved NLPs,
+res.yani_dnet, against the market's H_YY; the products' cross term H_YP dP; the cleared and the forwarded prices).
+Mini-EU Farm-to-Fork with the splits: converged in 7 iterations (14 on 14 November); the market's own response H_YY
+and the supply models' differ by 1-7% on the diagonal (EU_WEST female calves 422 against 392-394, young bulls 2,462
+against 2,456; EU_EAST 73.4 against 73.2), the cross term is small, 60-90% of the cleared price change is forwarded,
+and the imbalance falls by a factor of 2-3 per iteration. So the hypothesis that the market's young-animal response
+is far above the supply models' does not hold at this code. **Full-EU Farm-to-Fork with the splits
+(k65_cross_full_run): converged in 14 iterations, 4,634 s** (13 November: not converged in 50), every regional solve
+optimal; the young-animal imbalance 0.156, 0.060, 0.036, 0.024, 0.014, 0.009, 0.006, 0.0037 (below the tolerance at
+the 8th scenario iteration), 0.0004 at the 14th, which CAPRI's stop rule on prices and quantities set. Final price
+ratios: EU_WEST female calves 2.75, male 2.54, young heifers 1.45, bulls 1.41, cows 1.54; EU_EAST 1.32, 1.34, 1.12,
+1.11, 1.21 (the sexes' prices no longer run apart, as in r96). Which change since 13 November removed the slow mode
+is not isolated. Next: the same run without the splits at the same commit (full_f2f_pooled_70b07ae), to measure the
+splits' own effect on the Farm-to-Fork results before the default (DEP-4) is reconsidered.
 
 <a id="k66"></a>
 ### K66: Farmland expands under the per-hectare N target more than in CAPRI (found 23 October 2026)
@@ -2592,7 +2609,7 @@ on 7 November 2026 (K120: full-EU Farm-to-Fork and Green Deal converged; baselin
 8 November 2026 (an omission). Removed: the setting, the EU's and Norway's base alignment to the supply models
 (_align_eu_base_balance, _align_sup_base, base_net_exports_eu), the baseline's return at the reference prices, the
 Hessian "pending" after a baseline (sv.hessian_pending) and seen.eu_base_supply; DEP-5's main part to the register's
-history, its raw milk world pool kept (DEP-5, to close with the non-EU dairy blocks).
+history, its raw milk world pool kept (DEP-5, to close with the non-EU dairy blocks; closed 17 November 2026, K165).
 
 Consequence: a baseline measures the market supply Hessian at its start (on calibrated models at the reference prices,
 K120), because its own market uses it; the decision of 28 October 2026 (a baseline alone does not measure it, the
@@ -2701,7 +2718,7 @@ run, when its results are stored.
 - **Effect:** the mini-EU Green Deal's cereal production -9.6% against -8.6% between the two runs, most of it this
   region; any run's BG020000 result, and comparisons between runs where the region changes branch
 - **Status:** **open**: to compare with CAPRI's Green Deal result for the region; until then a run-to-run difference
-  concentrated in such a region is not attributed to the change under test
+  concentrated in such a region is not attributed to the change under test. Another region of the same kind (17 November 2026, K165's check): NL220000 in the mini-EU Farm-to-Fork takes one of two arable mixes from the first scenario solve (grain maize -14% or -47% at that solve) when the baseline's prices differ by about 1e-05
 
 ### K130: Catch crops' cost per ha from CAPRI's reported TOIN (found 9 November 2026)
 
@@ -3508,6 +3525,64 @@ the constants: ES410000 sell constant 10, buy constant -4370.4, slopes 32.07.
   +15.7 -> +19.9 kt (CAPRI +21.0). Open: Cataluña (ES510000) moves the other way (+12.0 against CAPRI's -8.9 kt) and its
   herds fall less than CAPRI's (suckler cows +3.6 against -17.9%); ES410000's suckler cows stay 13 points below CAPRI's.
 
+<a id="k165"></a>
+### K165: Raw milk in a world pool that no longer priced any region (found 17 November 2026)
+
+CAPRI does not trade raw milk: each market region's supply (ProdNQ_ MILK, or the supply models' delivery in RMSSUP)
+meets its dairies' use in its own dairy block (arm/market_model.gms DairyNQ_ l. 1069, ProcMargM_ l. 1089,
+FatsProtBal_ l. 1103), and m_globMarket has no world balance for it. capri-mod had cleared each region's raw milk in
+its block since audit M11 (24 October 2026), at CAPRI's 2030 delivery outside the EU since K150, and every region's
+raw milk price was overwritten by its block's; but the market still carried a pooled world ratio for raw milk with its
+world balance, a non-EU use factor bounded to [0.2, 5] in the calibration (PROXY_AUDIT S185), the pooled branches of
+the Newton-Krylov solve and of the whole-market system, and a reported world raw milk price (K17). Measured at 70b07ae
+(mini-EU Farm-to-Fork): the factor was 1.0000000000000002 and its bounds were never hit. The pool's ratio still
+reached one function: the EU market supply of other vegetable oils (OTHO), whose CAPRI ProdNQ_ has a raw milk term
+(eu_market_supply_nq.csv, 24 member states, -0.002 to -6.1 kt per unit of the price ratio), took the region's column
+of the price frame, i.e. the pool's ratio.
+
+- **Effect:** the EU's OTHO supply (0.014% in the mini-EU Farm-to-Fork); otherwise none beyond the solver's tolerance
+- **In 9t:** -
+- **Status:** fixed 17 November 2026: the pool, its factor and guard, the pooled residual (supply_ad.
+  pooled_residual_function) and the pooled branches removed (market/bilateral_solve.py, market_nk.py,
+  market_system_ad.py, which now returns each region's raw milk supply less use, `milk_bal`, as a check); the demand
+  factor `par.demand_cal` removed with them (1 for every other product), the run's calibration marked by
+  `par.market_calibrated`; a product without bilateral trade other than raw milk now stops the calibration. OTHO's raw
+  milk term per member state at its own dairy-block price (SupplyMixin._eu_market_supply_milk_terms,
+  _ms_milk_ratio_now; the K83 units outside a subset run the same; supply_system_ad.py on the member states' raw milk
+  unknowns). No world raw milk price is reported (definitions.NO_WORLD_PRICE; the project lead's decision, 17 November
+  2026); the regions' raw milk prices stay in the results. Register DEP-5 and DEP-31 closed. Checked on the mini-EU
+  Farm-to-Fork (before at 70b07ae, after with the change): 7 iterations each, raw milk supply equal to use in every
+  region; EU prices within 1.7e-05 (baseline) and 2.4e-04 (scenario) relative, EU production within 2.3e-05 and
+  2.3e-04, regional activities within 6.4e-05 in the baseline. In the scenario NL220000 takes another branch of its
+  arable mix from the first scenario solve (grain maize -14% against -47% at that solve; at the end 3.2 against 0.4
+  thousand ha, other cereals 1.0 against 1.8, broilers -0.6%), and HU220000 needed CAPRI's relaxed-duals retry in the
+  after run; NL220000's supply model is unchanged, so this is its sensitivity to a 1e-05 change of the prices it saw
+  (K129's kind), recorded there. Also 17 November 2026: the EU market supply of EU_MARKET_SUPPLY and the K83 units' supply are now computed
+  after the EU dairy block within each market evaluation (SupplyMixin.supply_response), so their raw milk terms take
+  the member states' prices of the same evaluation, as CAPRI's simultaneous market and the whole-market system
+  (test_the_supply_system_equals_supply_response_at_its_block_solutions); no other step reads or writes those rows in
+  between. test_norway_run_on_its_own_supply_models now expects the K83 units' supply moved by those raw milk terms;
+  its case showed K166
+
+<a id="k166"></a>
+### K166: In runs on a subset of regions the EU dairy block starts off its base (found 17 November 2026)
+
+With K165's check (test_norway_run_on_its_own_supply_models: a Norway-only baseline, one outer iteration, no EU unit in
+the run), the EU dairy block solves at raw milk deliveries far from its base: the units outside the run deliver their
+model base milk (seen.eu_excluded_base, MILK 139,981 kt) where the block's base is CAPRI's marketed milk
+(par.dairy_S0_ms, market_prod_grof_2030.csv PROD, 146,728 kt): Estonia 483 against 670 kt (0.72), Cyprus 0.84, Austria
+0.95, France 0.98, Germany 1.003, Bulgaria 1.07; the member states' raw milk prices then come out at 1.11 to 1.90 of
+base at the reference product prices. The delivered milk enters the block against CAPRI's level
+(DairyMixin.dairy_block via _milk_by_ms / dairy_S0_ms), where CAPRI's market takes the supply models' milk in proportion
+to their calibration point (arm/simu_calibration_to_supply.gms l. 240-243). Before K165 the raw milk ratio in the
+market supply functions was the pool's, which hid it in this test.
+
+- **Effect:** the EU's dairy prices and raw milk prices in runs on a subset of regions (the mini-EU among them); a full
+  EU run is to be checked the same way (its supply models' milk against CAPRI's PROD)
+- **In 9t:** -
+- **Status:** **open**: to check whether the full run's EU deliveries match CAPRI's PROD at the base (the supply models'
+  milk delivered against the units' base output in the bridge), then CAPRI's proportional form for the units outside
+  the run
 <a id="k163"></a>
 ### K163: The N balance's crop residues spread by NCRD, not CAPRI's per-crop MANN (found 16 November 2026)
 

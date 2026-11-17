@@ -115,6 +115,10 @@ MARKET_COMMODITIES = [
     "FENI", "FPRI",
 ]
 
+#: market products without a world price: raw milk is not traded (CAPRI), each region's dairy block prices it, so no
+#: world raw milk price is reported (K165, the project lead's decision of 17 November 2026); its price is per region
+NO_WORLD_PRICE = frozenset({"MILK"})
+
 # (PROCESSING_OUTPUTS removed 23 October 2026: read by no model code; the market's processing is MarketModule's
 # CRUSH_CHAINS, dairy block and sugar processing, in CAPRI's codes)
 

@@ -240,7 +240,7 @@ def main():
     # 0 vs 0 - while shares of eligible units do not: 38 and 33). Fertiliser options: share of
     # crop area (regions weighted by crop area). Ammonia options: share of animal units weighted
     # by excreted N (units x N per head); 'eligible' = the options' maximum shares, same weights.
-    from capri_mod.data.definitions import CROPS, CROPS_ON_LAND
+    from capri_mod.data.definitions import CROPS, CROPS_ON_LAND, NO_WORLD_PRICE
     env = m.env_module
 
     def adoption(r):
@@ -345,14 +345,14 @@ def main():
                            "net_exports": (b["market"].net_exports.loc["EU27"].astype(float).to_dict()
                                            if "EU27" in b["market"].net_exports.index else {}),
                            "price": db.astype(float).to_dict(),
-                           "world": b["market"].world_prices.astype(float).to_dict()},
+                           "world": {c: v for c, v in b["market"].world_prices.astype(float).items() if c not in NO_WORLD_PRICE}},
            # EU market levels of the SCENARIO (1000 t; EUR/t at the reported domestic price)
            "scen_market": {"prod": s["market"].production.loc["EU27"].astype(float).to_dict(),
                            "cons": s["market"].consumption.loc["EU27"].astype(float).to_dict(),
                            "net_exports": (s["market"].net_exports.loc["EU27"].astype(float).to_dict()
                                            if "EU27" in s["market"].net_exports.index else {}),
                            "price": s["market"].domestic_prices.loc["EU27"].astype(float).to_dict(),
-                           "world": s["market"].world_prices.astype(float).to_dict()},
+                           "world": {c: v for c, v in s["market"].world_prices.astype(float).items() if c not in NO_WORLD_PRICE}},
            # CAPRI's welfare report (docs/WELFARE.md), base and scenario: the market's components per market region
            # (EUR million, changes against the calibration point; tariffs and quota rents levels) and the supply
            # models' MGVA and premiums' budget cost per supply region (EUR million, levels)

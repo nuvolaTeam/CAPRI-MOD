@@ -198,7 +198,9 @@ SEDM + SEDF + LOSF 4.3 Mt of 44.7 Mt (about 10%). CAPRI's market use (arm/data_p
       the export scaling; the crush chains at CAPRI's seed use. The one pooled commodity, raw milk (every other
       market product has CAPRI's bilateral flows, other oils included), keeps its world-clearing factor for now: the
       non-EU regions' raw milk base is FAO's base period (world_market_baseline.csv, dairy_world_baseline.csv), not
-      2030, so the pool does not close at the calibration point (PROXY_AUDIT S185 stays open for raw milk). CAPRI does
+      2030, so the pool does not close at the calibration point (PROXY_AUDIT S185 stays open for raw milk). **Done
+      17 November 2026** (KNOWN_ISSUES K150, K165): the non-EU raw milk base is CAPRI's 2030 delivery to the dairies,
+      every region clears it in its own dairy block, the pool and its factor are removed, S185 closed. CAPRI does
       not trade raw milk: each region's milk goes to its own dairies. The fix in CAPRI's form, a separate item after
       Milestone A (with G3): each non-EU region's raw milk cleared in its own dairy block, as the EU's and Norway's
       already are, at CAPRI's 2030 calibration point; the pool and the factor then go.
