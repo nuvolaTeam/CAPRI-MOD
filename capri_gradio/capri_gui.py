@@ -46,8 +46,8 @@ LOGO_CSS = """
 .capri-logo { height: 50px; width: auto; }
 .dark .capri-logo { background: #ffffff; border-radius: 8px; padding: 2px 6px; }
 """
-#: the page's style: the results browser's buttons and the title line
-PAGE_CSS = RB.BUTTON_CSS + LOGO_CSS
+#: the page's style: the results browser's buttons and tabs, and the title line
+PAGE_CSS = RB.PAGE_STYLE + LOGO_CSS
 MINI_EU = "mini-EU (20 units, about 10 minutes)"
 FULL_EU = "full EU (1-2 hours)"
 
@@ -143,7 +143,7 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False, al
         hist_state = gr.State([])
 
         # the top tabs: all shown; without all_tabs only Results is enabled, and the page opens on it
-        with gr.Tabs(selected="results"):
+        with gr.Tabs(selected="results", elem_classes=["capri-tabs-top"]):
             # ------------------------------------------------------------------ assistant
             with gr.Tab("Assistant", interactive=all_tabs):
                 gr.Markdown("Describe a scenario; the assistant writes it with checked tool calls. It cannot run the "

@@ -218,3 +218,25 @@ def test_the_page_title_carries_the_logo_on_its_line(store, tmp_path):
         b64 = h.split("data:image/svg+xml;base64,")[1].split('"')[0]
         assert base64.b64decode(b64).decode() == svg
     assert ".capri-head" in G.PAGE_CSS and ".dark .capri-logo" in G.PAGE_CSS and ".capri-btn" in G.PAGE_CSS
+
+
+def test_the_tabs_read_as_a_menu(store, tmp_path):
+    """18 November 2026 (the project lead: the tabs looked like plain text): the page's top tabs carry capri-tabs-top,
+    the results' tabs capri-tabs-sub, and the page's CSS gives both bold labels on a framed, tinted ground, the open tab
+    in the accent colour; the tabs nested in them (the comparison with CAPRI's) take the sub style."""
+    gr = pytest.importorskip("gradio")
+    import sys
+    sys.path.insert(0, str(ROOT / "capri_gradio"))
+    import capri_gui as G
+    import results_browser as RB
+    import assistant_llm as L
+    app = G.build(L.make_backend("none", "", "", ""), tmp_path / "scen", [store])
+    tabs = [b for b in app.blocks.values() if isinstance(b, gr.Tabs)]
+    top = [b for b in tabs if "capri-tabs-top" in (b.elem_classes or [])]
+    sub = [b for b in tabs if "capri-tabs-sub" in (b.elem_classes or [])]
+    assert len(top) == 1 and top[0].selected == "results"
+    assert len(sub) == 1 and sub[0].selected == "capri"
+    for part in ('.capri-tabs-top > .tab-wrapper button[role="tab"]', '.capri-tabs-sub .tabs > .tab-wrapper',
+                 "font-weight: 700", "font-weight: 600", ".selected", "var(--color-accent)", ":disabled"):
+        assert part in RB.TAB_CSS, part
+    assert RB.TAB_CSS in G.PAGE_CSS and RB.TAB_CSS in RB.PAGE_STYLE
