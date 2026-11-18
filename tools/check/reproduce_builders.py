@@ -140,6 +140,10 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_ghg_coefs_2017", [str(D17)], [D17]),
     ("build_npk_balance_2030", [], [EXPORTS / "res_2_1730greendeal_refdefaulta.zip", D17]),
     ("build_young_animals", [], [D17]),
+    # after build_young_animals: its 2017 tables give the categories and values per head
+    ("build_young_animals_2030", [], [REFERENCE / "simini" / "simini_21730" / "DATA.csv.gz"]),
+    # CAPRI's 2030 manure per model 2030 head (the 2030 heads of build_young_animals_2030.herds_2030)
+    ("build_livestock_manure_2030", [], [EXPORTS / "res_2_1730greendeal_refdefaulta.zip"]),
     ("build_feed_ration", [], [D17, SOURCES / "feed_export"]),
     ("build_ration_trajectory_2030", [], [REF, D17]),
     ("build_price_trajectory_2030", [], [D17]),

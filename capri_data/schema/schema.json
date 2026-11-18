@@ -3009,6 +3009,7 @@
      "build_feed_ration",
      "build_fodder_balance",
      "build_ghg_coefs_2017",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -3016,7 +3017,8 @@
      "build_npk_balance_2030",
      "build_price_trajectory_2030",
      "build_ration_trajectory_2030",
-     "build_young_animals"
+     "build_young_animals",
+     "build_young_animals_2030"
     ],
     "checks": [
      "tools/check/compare_baseline_capri.py"
@@ -3480,6 +3482,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -3498,7 +3501,8 @@
      "build_trajectory_capri_ref",
      "build_world_market_baseline",
      "build_world_prices",
-     "build_young_animals"
+     "build_young_animals",
+     "build_young_animals_2030"
     ],
     "checks": [],
     "tests": []
@@ -3716,6 +3720,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -3734,7 +3739,8 @@
      "build_trajectory_capri_ref",
      "build_world_market_baseline",
      "build_world_prices",
-     "build_young_animals"
+     "build_young_animals",
+     "build_young_animals_2030"
     ],
     "checks": [],
     "tests": []
@@ -4733,6 +4739,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -4751,7 +4758,8 @@
      "build_trajectory_capri_ref",
      "build_world_market_baseline",
      "build_world_prices",
-     "build_young_animals"
+     "build_young_animals",
+     "build_young_animals_2030"
     ],
     "checks": [],
     "tests": []
@@ -5187,6 +5195,7 @@
      "build_ghg_coefs_2017",
      "build_gl_demand",
      "build_land_market",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -5210,7 +5219,8 @@
      "build_use_components",
      "build_world_market_baseline",
      "build_world_prices",
-     "build_young_animals"
+     "build_young_animals",
+     "build_young_animals_2030"
     ],
     "checks": [],
     "tests": []
@@ -5385,6 +5395,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -5403,7 +5414,8 @@
      "build_trajectory_capri_ref",
      "build_world_market_baseline",
      "build_world_prices",
-     "build_young_animals"
+     "build_young_animals",
+     "build_young_animals_2030"
     ],
     "checks": [],
     "tests": []
@@ -19014,9 +19026,148 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/fert/npk.py"
-    ],
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "env_livestock_manure_k_coef_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_manure_k_coef_2030.csv",
+   "declared_in": "17_environment.sql",
+   "layout": [
+    "unnamed",
+    "wide"
+   ],
+   "comment": "CAPRI's 2030 manure MANK per model head: its 2030 baseline's LEVL x MANK (dataOut; CAPRI computes MANK from the 2030 rations before it solves, capmod.gms l. 1090) over the model's 2030 base heads, read at the 2030 market year (KNOWN_ISSUES K179; tools/build/build_livestock_manure_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "animal"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(\"value\" >= 0)"
+   ],
+   "units": [
+    {
+     "item": "BCOW",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg K2O per head (CAPRI's K item in K2O)"
+    },
+    {
+     "item": "BROI",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg K2O per head (CAPRI's K item in K2O)"
+    },
+    {
+     "item": "BULL",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg K2O per head (CAPRI's K item in K2O)"
+    },
+    {
+     "item": "CALV",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg K2O per head (CAPRI's K item in K2O)"
+    },
+    {
+     "item": "DCOW",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg K2O per head (CAPRI's K item in K2O)"
+    },
+    {
+     "item": "HFRS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg K2O per head (CAPRI's K item in K2O)"
+    },
+    {
+     "item": "LAYS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg K2O per head (CAPRI's K item in K2O)"
+    },
+    {
+     "item": "OANI",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg K2O per head (CAPRI's K item in K2O)"
+    },
+    {
+     "item": "PIGF",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg K2O per head (CAPRI's K item in K2O)"
+    },
+    {
+     "item": "PIGS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg K2O per head (CAPRI's K item in K2O)"
+    },
+    {
+     "item": "SHGF",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg K2O per head (CAPRI's K item in K2O)"
+    },
+    {
+     "item": "SHGM",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg K2O per head (CAPRI's K item in K2O)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_livestock_manure_2030",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
     "builders": [],
     "checks": [],
     "tests": []
@@ -19169,6 +19320,149 @@
     ]
    }
   },
+  "env_livestock_manure_n_coef_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_manure_n_coef_2030.csv",
+   "declared_in": "17_environment.sql",
+   "layout": [
+    "unnamed",
+    "wide"
+   ],
+   "comment": "CAPRI's 2030 manure MANN per model head: its 2030 baseline's LEVL x MANN (dataOut; CAPRI computes MANN from the 2030 rations before it solves, capmod.gms l. 1090) over the model's 2030 base heads, read at the 2030 market year (KNOWN_ISSUES K179; tools/build/build_livestock_manure_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "animal"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(\"value\" >= 0)"
+   ],
+   "units": [
+    {
+     "item": "BCOW",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "BROI",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "BULL",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "CALV",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "DCOW",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "HFRS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "LAYS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "OANI",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "PIGF",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "PIGS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "SHGF",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "SHGM",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_livestock_manure_2030",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "env_livestock_manure_p_coef": {
    "file": "capri_data/2017/environment/livestock_manure_p_coef.csv",
    "declared_in": "17_environment.sql",
@@ -19304,9 +19598,148 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/fert/npk.py"
-    ],
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "env_livestock_manure_p_coef_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_manure_p_coef_2030.csv",
+   "declared_in": "17_environment.sql",
+   "layout": [
+    "unnamed",
+    "wide"
+   ],
+   "comment": "CAPRI's 2030 manure MANP per model head: its 2030 baseline's LEVL x MANP (dataOut; CAPRI computes MANP from the 2030 rations before it solves, capmod.gms l. 1090) over the model's 2030 base heads, read at the 2030 market year (KNOWN_ISSUES K179; tools/build/build_livestock_manure_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "animal"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(\"value\" >= 0)"
+   ],
+   "units": [
+    {
+     "item": "BCOW",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg P2O5 per head (CAPRI's P item in P2O5)"
+    },
+    {
+     "item": "BROI",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg P2O5 per head (CAPRI's P item in P2O5)"
+    },
+    {
+     "item": "BULL",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg P2O5 per head (CAPRI's P item in P2O5)"
+    },
+    {
+     "item": "CALV",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg P2O5 per head (CAPRI's P item in P2O5)"
+    },
+    {
+     "item": "DCOW",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg P2O5 per head (CAPRI's P item in P2O5)"
+    },
+    {
+     "item": "HFRS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg P2O5 per head (CAPRI's P item in P2O5)"
+    },
+    {
+     "item": "LAYS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg P2O5 per head (CAPRI's P item in P2O5)"
+    },
+    {
+     "item": "OANI",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg P2O5 per head (CAPRI's P item in P2O5)"
+    },
+    {
+     "item": "PIGF",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg P2O5 per head (CAPRI's P item in P2O5)"
+    },
+    {
+     "item": "PIGS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg P2O5 per head (CAPRI's P item in P2O5)"
+    },
+    {
+     "item": "SHGF",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg P2O5 per head (CAPRI's P item in P2O5)"
+    },
+    {
+     "item": "SHGM",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg P2O5 per head (CAPRI's P item in P2O5)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_livestock_manure_2030",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
     "builders": [],
     "checks": [],
     "tests": []
@@ -28432,6 +28865,7 @@
      "build_ghg_coefs_2017",
      "build_labour_setaside",
      "build_land_market",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -28459,7 +28893,8 @@
      "build_world_market_baseline",
      "build_world_prices",
      "build_yield_price_elasticity",
-     "build_young_animals"
+     "build_young_animals",
+     "build_young_animals_2030"
     ],
     "checks": [
      "tools/check/make_provenance.py"
@@ -28633,6 +29068,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -28656,7 +29092,8 @@
      "build_winter_cover_option",
      "build_world_market_baseline",
      "build_world_prices",
-     "build_young_animals"
+     "build_young_animals",
+     "build_young_animals_2030"
     ],
     "checks": [
      "tools/check/make_provenance.py"
@@ -28743,6 +29180,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -28761,7 +29199,8 @@
      "build_trajectory_capri_ref",
      "build_world_market_baseline",
      "build_world_prices",
-     "build_young_animals"
+     "build_young_animals",
+     "build_young_animals_2030"
     ],
     "checks": [
      "tools/check/make_provenance.py"
@@ -28839,6 +29278,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -28858,7 +29298,8 @@
      "build_trajectory_capri_ref",
      "build_world_market_baseline",
      "build_world_prices",
-     "build_young_animals"
+     "build_young_animals",
+     "build_young_animals_2030"
     ],
     "checks": [],
     "tests": [
@@ -28940,6 +29381,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -28958,7 +29400,8 @@
      "build_trajectory_capri_ref",
      "build_world_market_baseline",
      "build_world_prices",
-     "build_young_animals"
+     "build_young_animals",
+     "build_young_animals_2030"
     ],
     "checks": [
      "tools/check/make_provenance.py"
@@ -29137,6 +29580,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -29155,7 +29599,8 @@
      "build_trajectory_capri_ref",
      "build_world_market_baseline",
      "build_world_prices",
-     "build_young_animals"
+     "build_young_animals",
+     "build_young_animals_2030"
     ],
     "checks": [
      "tools/check/make_provenance.py"
@@ -29227,6 +29672,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -29245,7 +29691,8 @@
      "build_trajectory_capri_ref",
      "build_world_market_baseline",
      "build_world_prices",
-     "build_young_animals"
+     "build_young_animals",
+     "build_young_animals_2030"
     ],
     "checks": [
      "tools/check/make_provenance.py"
@@ -35791,6 +36238,7 @@
      "build_labour_setaside",
      "build_land_market",
      "build_land_rents",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -35831,6 +36279,7 @@
      "build_world_market_baseline",
      "build_world_prices",
      "build_young_animals",
+     "build_young_animals_2030",
      "extract_all_from_data2",
      "extract_remaining_nine",
      "ingest_pela_gtap",
@@ -36001,6 +36450,7 @@
      "build_ghg_coefs_2017",
      "build_gl_demand",
      "build_land_market",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -36025,7 +36475,8 @@
      "build_welfare_base",
      "build_world_market_baseline",
      "build_world_prices",
-     "build_young_animals"
+     "build_young_animals",
+     "build_young_animals_2030"
     ],
     "checks": [],
     "tests": [
@@ -36097,7 +36548,10 @@
     "model": [
      "capri_mod/projection/scenario_io.py"
     ],
-    "builders": [],
+    "builders": [
+     "build_livestock_manure_2030",
+     "build_young_animals_2030"
+    ],
     "checks": [],
     "tests": []
    }
@@ -36171,7 +36625,10 @@
     "model": [
      "capri_mod/projection/scenario_io.py"
     ],
-    "builders": [],
+    "builders": [
+     "build_livestock_manure_2030",
+     "build_young_animals_2030"
+    ],
     "checks": [],
     "tests": [
      "capri_mod/tests/test_capri.py"
@@ -36461,6 +36918,7 @@
      "build_labour_setaside",
      "build_land_market",
      "build_land_rents",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -36502,6 +36960,7 @@
      "build_world_market_baseline",
      "build_world_prices",
      "build_young_animals",
+     "build_young_animals_2030",
      "extract_all_from_data2",
      "extract_remaining_nine",
      "ingest_pela_gtap",
@@ -36676,6 +37135,7 @@
      "build_labour_setaside",
      "build_land_market",
      "build_land_rents",
+     "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
@@ -36717,6 +37177,7 @@
      "build_world_market_baseline",
      "build_world_prices",
      "build_young_animals",
+     "build_young_animals_2030",
      "extract_all_from_data2",
      "extract_remaining_nine",
      "ingest_pela_gtap",
@@ -36794,9 +37255,11 @@
     ],
     "builders": [
      "build_captrd_trajectory",
+     "build_livestock_manure_2030",
      "build_luc_market",
      "build_supply_elasticities_regional",
-     "build_trajectory_capri_ref"
+     "build_trajectory_capri_ref",
+     "build_young_animals_2030"
     ],
     "checks": [
      "tools/check/make_provenance.py"
@@ -55430,7 +55893,9 @@
     "model": [
      "capri_mod/supply/supply_module.py"
     ],
-    "builders": [],
+    "builders": [
+     "build_young_animals_2030"
+    ],
     "checks": [],
     "tests": [
      "capri_mod/tests/test_capri.py"
@@ -55517,6 +55982,172 @@
    "notes": [],
    "read_by": {
     "model": [],
+    "builders": [
+     "build_young_animals_2030"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "sup_young_animals_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPRI's young-animal balances per model region at its 2030 calibration point, calves and young cattle pooled across the sexes (the cattle member splits off): the base net export at the model's 2030 base heads (CAPRI's 2030 flows) and the 2017 unit value (the projection layer applies the 2030 / 2017 ratio); the coefficients in young_animals_2030_coef.csv. Read at the 2030 market year (supply_module.young_animal_table; CAPRI's INPANI_ takes DATA(.., \"Y\"), KNOWN_ISSUES K178; tools/build/build_young_animals_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "category",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "base_net_export",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "value_eur_head",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "category"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    }
+   ],
+   "checks": [
+    "(category IN ('calves', 'young', 'cows', 'piglets', 'lambs'))"
+   ],
+   "units": [
+    {
+     "item": "base_net_export",
+     "unit": null,
+     "status": "open",
+     "basis": "young_animals_2030.base_net_export: 1000 head (the builder; no unit code in the catalogue)"
+    },
+    {
+     "item": "value_eur_head",
+     "unit": null,
+     "status": "open",
+     "basis": "young_animals_2030.value_eur_head: EUR per head, 2017 (the builder; no unit code in the catalogue)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_young_animals_2030",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/supply/supply_module.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "sup_young_animals_2030_coef": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_2030_coef.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "young animals produced or used per model head of an activity at CAPRI's 2030 calibration point (sim_ini_21730's DATA at \"Y\", LEVL x coefficient / 1000 over the model's 2030 base heads), the balances of young_animals_2030.csv (tools/build/build_young_animals_2030.py, KNOWN_ISSUES K178)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "category",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "side",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "coefficient",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "category",
+    "side",
+    "activity"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(category IN ('calves', 'young', 'cows', 'piglets', 'lambs'))",
+    "(side IN ('produce', 'use'))"
+   ],
+   "units": [
+    {
+     "item": "coefficient",
+     "unit": "U_HdPerHd",
+     "status": "builder",
+     "basis": "young_animals_2030_coef.coefficient: head per head (the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_young_animals_2030",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
     "builders": [],
     "checks": [],
     "tests": []
@@ -55600,7 +56231,9 @@
     "model": [
      "capri_mod/supply/supply_module.py"
     ],
-    "builders": [],
+    "builders": [
+     "build_young_animals_2030"
+    ],
     "checks": [],
     "tests": [
      "capri_mod/tests/test_capri.py"
@@ -55687,6 +56320,172 @@
    "notes": [],
    "read_by": {
     "model": [],
+    "builders": [
+     "build_young_animals_2030"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "sup_young_animals_by_sex_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_by_sex_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPRI's young-animal balances per model region at its 2030 calibration point, per sex (the default, the cattle member splits on): the base net export at the model's 2030 base heads (CAPRI's 2030 flows) and the 2017 unit value (the projection layer applies the 2030 / 2017 ratio); the coefficients in young_animals_by_sex_2030_coef.csv. Read at the 2030 market year (supply_module.young_animal_table; CAPRI's INPANI_ takes DATA(.., \"Y\"), KNOWN_ISSUES K178; tools/build/build_young_animals_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "category",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "base_net_export",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "value_eur_head",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "category"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    }
+   ],
+   "checks": [
+    "(category IN ('calves_m', 'calves_f', 'young_m', 'young_f', 'cows', 'piglets', 'lambs'))"
+   ],
+   "units": [
+    {
+     "item": "base_net_export",
+     "unit": null,
+     "status": "open",
+     "basis": "young_animals_by_sex_2030.base_net_export: 1000 head (the builder; no unit code in the catalogue)"
+    },
+    {
+     "item": "value_eur_head",
+     "unit": null,
+     "status": "open",
+     "basis": "young_animals_by_sex_2030.value_eur_head: EUR per head, 2017 (the builder; no unit code in the catalogue)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_young_animals_2030",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/supply/supply_module.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "sup_young_animals_by_sex_2030_coef": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_by_sex_2030_coef.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "young animals produced or used per model head of an activity at CAPRI's 2030 calibration point (sim_ini_21730's DATA at \"Y\", LEVL x coefficient / 1000 over the model's 2030 base heads), the balances of young_animals_by_sex_2030.csv (tools/build/build_young_animals_2030.py, KNOWN_ISSUES K178)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "category",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "side",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "coefficient",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "category",
+    "side",
+    "activity"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(category IN ('calves_m', 'calves_f', 'young_m', 'young_f', 'cows', 'piglets', 'lambs'))",
+    "(side IN ('produce', 'use'))"
+   ],
+   "units": [
+    {
+     "item": "coefficient",
+     "unit": "U_HdPerHd",
+     "status": "builder",
+     "basis": "young_animals_by_sex_2030_coef.coefficient: head per head (the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_young_animals_2030",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
     "builders": [],
     "checks": [],
     "tests": []

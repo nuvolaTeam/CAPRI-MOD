@@ -1019,3 +1019,55 @@ CREATE TABLE sup_young_animals_by_sex_2017_coef (
 COMMENT ON TABLE sup_young_animals_by_sex_2017_coef IS 'young animals produced or used per model head of an activity in the per-sex balances of young_animals_by_sex_2017.csv (tools/build/build_young_animals.py)';
 INSERT INTO value_units VALUES
   ('sup_young_animals_by_sex_2017_coef', 'coefficient', 'U_HdPerHd', 'builder', 'young_animals_by_sex_2017_coef.coefficient: head per head (the builder)');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_2030.csv
+CREATE TABLE sup_young_animals_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    category VARCHAR NOT NULL CHECK (category IN ('calves', 'young', 'cows', 'piglets', 'lambs')),
+    base_net_export DOUBLE NOT NULL,
+    value_eur_head DOUBLE NOT NULL,
+    PRIMARY KEY (region, category)
+);
+COMMENT ON TABLE sup_young_animals_2030 IS 'CAPRI''s young-animal balances per model region at its 2030 calibration point, calves and young cattle pooled across the sexes (the cattle member splits off): the base net export at the model''s 2030 base heads (CAPRI''s 2030 flows) and the 2017 unit value (the projection layer applies the 2030 / 2017 ratio); the coefficients in young_animals_2030_coef.csv. Read at the 2030 market year (supply_module.young_animal_table; CAPRI''s INPANI_ takes DATA(.., "Y"), KNOWN_ISSUES K178; tools/build/build_young_animals_2030.py)';
+INSERT INTO value_units VALUES
+  ('sup_young_animals_2030', 'base_net_export', NULL, 'open', 'young_animals_2030.base_net_export: 1000 head (the builder; no unit code in the catalogue)'),
+  ('sup_young_animals_2030', 'value_eur_head', NULL, 'open', 'young_animals_2030.value_eur_head: EUR per head, 2017 (the builder; no unit code in the catalogue)');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_2030_coef.csv
+CREATE TABLE sup_young_animals_2030_coef (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    category VARCHAR NOT NULL CHECK (category IN ('calves', 'young', 'cows', 'piglets', 'lambs')),
+    side VARCHAR NOT NULL CHECK (side IN ('produce', 'use')),
+    activity VARCHAR NOT NULL REFERENCES model_activities (code),
+    coefficient DOUBLE NOT NULL,
+    PRIMARY KEY (region, category, side, activity)
+);
+COMMENT ON TABLE sup_young_animals_2030_coef IS 'young animals produced or used per model head of an activity at CAPRI''s 2030 calibration point (sim_ini_21730''s DATA at "Y", LEVL x coefficient / 1000 over the model''s 2030 base heads), the balances of young_animals_2030.csv (tools/build/build_young_animals_2030.py, KNOWN_ISSUES K178)';
+INSERT INTO value_units VALUES
+  ('sup_young_animals_2030_coef', 'coefficient', 'U_HdPerHd', 'builder', 'young_animals_2030_coef.coefficient: head per head (the builder)');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_by_sex_2030.csv
+CREATE TABLE sup_young_animals_by_sex_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    category VARCHAR NOT NULL CHECK (category IN ('calves_m', 'calves_f', 'young_m', 'young_f', 'cows', 'piglets', 'lambs')),
+    base_net_export DOUBLE NOT NULL,
+    value_eur_head DOUBLE NOT NULL,
+    PRIMARY KEY (region, category)
+);
+COMMENT ON TABLE sup_young_animals_by_sex_2030 IS 'CAPRI''s young-animal balances per model region at its 2030 calibration point, per sex (the default, the cattle member splits on): the base net export at the model''s 2030 base heads (CAPRI''s 2030 flows) and the 2017 unit value (the projection layer applies the 2030 / 2017 ratio); the coefficients in young_animals_by_sex_2030_coef.csv. Read at the 2030 market year (supply_module.young_animal_table; CAPRI''s INPANI_ takes DATA(.., "Y"), KNOWN_ISSUES K178; tools/build/build_young_animals_2030.py)';
+INSERT INTO value_units VALUES
+  ('sup_young_animals_by_sex_2030', 'base_net_export', NULL, 'open', 'young_animals_by_sex_2030.base_net_export: 1000 head (the builder; no unit code in the catalogue)'),
+  ('sup_young_animals_by_sex_2030', 'value_eur_head', NULL, 'open', 'young_animals_by_sex_2030.value_eur_head: EUR per head, 2017 (the builder; no unit code in the catalogue)');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_by_sex_2030_coef.csv
+CREATE TABLE sup_young_animals_by_sex_2030_coef (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    category VARCHAR NOT NULL CHECK (category IN ('calves_m', 'calves_f', 'young_m', 'young_f', 'cows', 'piglets', 'lambs')),
+    side VARCHAR NOT NULL CHECK (side IN ('produce', 'use')),
+    activity VARCHAR NOT NULL REFERENCES model_activities (code),
+    coefficient DOUBLE NOT NULL,
+    PRIMARY KEY (region, category, side, activity)
+);
+COMMENT ON TABLE sup_young_animals_by_sex_2030_coef IS 'young animals produced or used per model head of an activity at CAPRI''s 2030 calibration point (sim_ini_21730''s DATA at "Y", LEVL x coefficient / 1000 over the model''s 2030 base heads), the balances of young_animals_by_sex_2030.csv (tools/build/build_young_animals_2030.py, KNOWN_ISSUES K178)';
+INSERT INTO value_units VALUES
+  ('sup_young_animals_by_sex_2030_coef', 'coefficient', 'U_HdPerHd', 'builder', 'young_animals_by_sex_2030_coef.coefficient: head per head (the builder)');

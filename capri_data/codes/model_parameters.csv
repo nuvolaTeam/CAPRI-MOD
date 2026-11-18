@@ -27,7 +27,6 @@ REQ_CRPR_KG,,0.084,kg CP per kg milk,capri,CAPRI breeding.gms requirement functi
 REQ_CRPR_FIX,,228.70499999999998,kg CP per year,capri,CAPRI breeding.gms requirement function,projection_module
 REQ_DRMN_KG,,0.305,kg DM per kg milk,capri,CAPRI breeding.gms requirement function,projection_module
 REQ_DRMN_FIX,,4051.5,kg DM per year,capri,CAPRI breeding.gms requirement function,projection_module
-REQ_N_KG_MILK,,0.0086,kg N per kg milk,capri,CAPRI breeding.gms: manure N per kg of extra milk,projection_module
 ORGANIC_BASELINE_SHARE,,0.1,share of UAA,capri,CAPRI load_organic_targets.gms: p_organicAreaTarget(EU) = 0.25 - 0.10 (fallback where no member-state breakdown),supply_module
 PESTICIDE_YIELD_LOSS_AT_50PCT,,0.1,share,jrc121368,JRC121368 (Sanchez et al. 2019): yield loss for a 50% pesticide cut,supply_module
 JRC_CAPPED_N_REGIONS,,9.0,regions,jrc121368,JRC121368 sect. 4.3.4: nine regions with the highest baseline surplus,supply_module

@@ -36,9 +36,11 @@ class GHGBlock:
     def _n_excretion_uncached(self, region: str, animal: str) -> float:
         """Manure N per head (kg), consistent with this model's herd units.
 
-        First choice: CAPRI's 2017 regional manure N TOTAL for the activity
-        divided by this model's herd (livestock_manure_n_coef.csv), built the
-        same way as revenue per head. The previous source gave manure per CAPRI
+        First choice: CAPRI's regional manure N TOTAL for the activity divided
+        by this model's herd (data["livestock_manure_n_coef"]: the base year's,
+        livestock_manure_n_coef.csv, built the same way as revenue per head; at
+        the 2030 market year CAPRI's 2030 one, livestock_manure_n_coef_2030.csv,
+        which the projection puts there, KNOWN_ISSUES K179). The previous source gave manure per CAPRI
         UNIT (animals fattened per year, 1,000 birds ...), while herds here are
         census stock, so EU totals were off by animal: bulls 0.17, heifers 0.10,
         calves 0.35, broilers 0.08, pigs 1.28, sheep and goats 1.49 of CAPRI's

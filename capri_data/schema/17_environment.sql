@@ -485,6 +485,39 @@ CREATE TABLE env_livestock_manure_k_coef (
 COMMENT ON TABLE env_livestock_manure_k_coef IS 'CAPRI''s manure K (MANK) per model head (tools/build/build_npk_balance_2030.py)';
 INSERT INTO value_units SELECT 'env_livestock_manure_k_coef', code, 'U_kgperhd', 'builder', 'kg K2O per head (CAPRI''s K item in K2O)' FROM model_activities WHERE kind = 'animal';
 
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_manure_n_coef_2030.csv
+-- layout: wide, unnamed
+CREATE TABLE env_livestock_manure_n_coef_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    animal VARCHAR NOT NULL REFERENCES model_activities (code),
+    value DOUBLE CHECK (value >= 0),        -- empty: the animal has no herd in the region
+    PRIMARY KEY (region, animal)
+);
+COMMENT ON TABLE env_livestock_manure_n_coef_2030 IS 'CAPRI''s 2030 manure MANN per model head: its 2030 baseline''s LEVL x MANN (dataOut; CAPRI computes MANN from the 2030 rations before it solves, capmod.gms l. 1090) over the model''s 2030 base heads, read at the 2030 market year (KNOWN_ISSUES K179; tools/build/build_livestock_manure_2030.py)';
+INSERT INTO value_units SELECT 'env_livestock_manure_n_coef_2030', code, 'U_kgperhd', 'builder', 'kg N per head' FROM model_activities WHERE kind = 'animal';
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_manure_p_coef_2030.csv
+-- layout: wide, unnamed
+CREATE TABLE env_livestock_manure_p_coef_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    animal VARCHAR NOT NULL REFERENCES model_activities (code),
+    value DOUBLE CHECK (value >= 0),        -- empty: the animal has no herd in the region
+    PRIMARY KEY (region, animal)
+);
+COMMENT ON TABLE env_livestock_manure_p_coef_2030 IS 'CAPRI''s 2030 manure MANP per model head: its 2030 baseline''s LEVL x MANP (dataOut; CAPRI computes MANP from the 2030 rations before it solves, capmod.gms l. 1090) over the model''s 2030 base heads, read at the 2030 market year (KNOWN_ISSUES K179; tools/build/build_livestock_manure_2030.py)';
+INSERT INTO value_units SELECT 'env_livestock_manure_p_coef_2030', code, 'U_kgperhd', 'builder', 'kg P2O5 per head (CAPRI''s P item in P2O5)' FROM model_activities WHERE kind = 'animal';
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_manure_k_coef_2030.csv
+-- layout: wide, unnamed
+CREATE TABLE env_livestock_manure_k_coef_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    animal VARCHAR NOT NULL REFERENCES model_activities (code),
+    value DOUBLE CHECK (value >= 0),        -- empty: the animal has no herd in the region
+    PRIMARY KEY (region, animal)
+);
+COMMENT ON TABLE env_livestock_manure_k_coef_2030 IS 'CAPRI''s 2030 manure MANK per model head: its 2030 baseline''s LEVL x MANK (dataOut; CAPRI computes MANK from the 2030 rations before it solves, capmod.gms l. 1090) over the model''s 2030 base heads, read at the 2030 market year (KNOWN_ISSUES K179; tools/build/build_livestock_manure_2030.py)';
+INSERT INTO value_units SELECT 'env_livestock_manure_k_coef_2030', code, 'U_kgperhd', 'builder', 'kg K2O per head (CAPRI''s K item in K2O)' FROM model_activities WHERE kind = 'animal';
+
 -- file: capri_data/2017/environment/livestock_n_export_coef.csv
 -- layout: wide, unnamed
 CREATE TABLE env_livestock_n_export_coef (

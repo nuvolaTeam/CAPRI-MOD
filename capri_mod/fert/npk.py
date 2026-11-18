@@ -9,7 +9,9 @@ Data (tools/build/build_npk_balance_2030.py, from CAPRI's 2030 reference results
   npk_region_2030.csv            per CAPRI region and nutrient: mineral efficiency, manure and residue availability,
                                  CAPRI's unit value (EUR/t)
   fert_dist_priors_npk_2030.csv  the inner model's priors per crop group, source and nutrient (posterior mode per ha)
-  livestock_manure_p_coef.csv, livestock_manure_k_coef.csv   manure P2O5 / K2O per model head (kg)
+  livestock_manure_p_coef.csv, livestock_manure_k_coef.csv   manure P2O5 / K2O per model head (kg) at the base year;
+                                 at the 2030 market year CAPRI's 2030 ones (livestock_manure_p_coef_2030.csv,
+                                 livestock_manure_k_coef_2030.csv, KNOWN_ISSUES K179): manure_coef_table
 Crop groups of the model crops: fert_dist_crop_groups_2030.csv (CAPRI's 2030 areas).
 """
 from __future__ import annotations
@@ -23,6 +25,24 @@ from capri_mod.data.definitions import capri_ms
 from capri_mod.params import param
 
 NUTRIENTS = ("N", "P", "K")
+#: the manure-per-head table of each nutrient (file stem; CAPRI's MANN, MANP, MANK)
+MANURE_TABLES = {"N": "livestock_manure_n_coef", "P": "livestock_manure_p_coef", "K": "livestock_manure_k_coef"}
+
+
+def manure_coef_table(nut: str, year=None) -> pd.DataFrame:
+    """CAPRI's manure N, P2O5 or K2O per model head (kg; model region x model animal, empty where the model has no
+    such animal) at a calibration year: the base year's (<stem>.csv: CAPRI's base-year totals over the model's heads,
+    tools/build/build_livestock_output_coef.py, build_npk_balance_2030.py) or, at another market year, CAPRI's
+    coefficients of that year in the baseline's folder (<stem>_<year>.csv; 2030: tools/build/
+    build_livestock_manure_2030.py: CAPRI computes them from the simulation year's rations before it solves,
+    capmod.gms l. 1090, KNOWN_ISSUES K179). year: by default the run's (RunInputs.market_year, set by SupplyModule; the
+    base year where unset). A year without its table is an error (no fall back to the base year's)."""
+    from capri_mod.data import inputs as _inputs
+    by = str(_inputs.base_year())
+    yr = year if year is not None else getattr(_inputs.current(), "market_year", None)
+    yr = str(yr) if yr is not None else by
+    name = f"{MANURE_TABLES[nut]}.csv" if yr == by else f"{MANURE_TABLES[nut]}_{yr}.csv"
+    return _inputs.current().cached(name, lambda inp: inp.csv(name, "environment", index_col=0))
 from capri_mod.fert.inner_fert_dist import SOURCES   # noqa: E402  CAPRI's nutrient sources, one definition
 from capri_mod.data.definitions import CAPRI_PERM_NGRP as PERM_NGRP   # noqa: E402  CAPRI's set
 
@@ -94,9 +114,6 @@ class NPKData:
         self.reg = {(t.capri_region, t.nutrient): t for t in g.itertuples(index=False)}
         p = inp.csv("fert_dist_priors_npk_2030.csv", "environment")
         self.pri = {(r, n): d.set_index("ngrp") for (r, n), d in p.groupby(["capri_region", "nutrient"])}
-        self.man = {}
-        for nut, f in (("P", "livestock_manure_p_coef.csv"), ("K", "livestock_manure_k_coef.csv")):
-            self.man[nut] = inp.csv(f, "environment", index_col=0)
         gr = inp.csv("fert_dist_crop_groups_2030.csv", "environment")
         self.groups = {r: d for r, d in gr.groupby("capri_region")}
         w = gr.groupby(["model_crop", "ngrp"]).share.sum()
@@ -175,8 +192,12 @@ class NPKData:
         return d
 
     def manure_per_head(self, region: str, nut: str, animal: str) -> float:
-        t = self.man.get(nut)
-        if t is None or region not in t.index or animal not in t.columns:
+        """Manure P2O5 or K2O per model head of the region's animal (kg) at the run's market year (manure_coef_table);
+        0 where the model has no such animal. N: the environmental module's (data["livestock_manure_n_coef"])."""
+        if nut not in ("P", "K"):
+            raise ValueError(f"manure_per_head: P or K, not {nut!r} (manure N: the environmental module's)")
+        t = manure_coef_table(nut)
+        if region not in t.index or animal not in t.columns:
             return 0.0
         v = t.at[region, animal]
         return float(v) if pd.notna(v) and v > 0 else 0.0

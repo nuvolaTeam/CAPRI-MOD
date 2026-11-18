@@ -2233,6 +2233,10 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
     # fodder per ha (silage maize for biogas in Germany)
     rf = data["ration_factor"][("DE210000", "DCOW")]
     assert rf["FOFA"] > 1.1 and rf["FMAI"] < 0.95
+    # CAPRI's 2030 manure N per head (K179)
+    from capri_mod.fert.npk import manure_coef_table
+    assert data["livestock_manure_n_coef"].equals(manure_coef_table("N", 2030))
+    assert model.data["livestock_manure_n_coef"].at["FR520000", "DCOW"] == manure_coef_table("N", 2017).at["FR520000", "DCOW"]
     mo = pm._model_for(data)
     res = mo.run(scenario="BASELINE", regions=["FR520000", "IR010000", "DE210000"], max_outer_iter=8)
     assert res["metadata"]["outer_converged"]
@@ -4865,6 +4869,90 @@ def test_cattle_activities_and_young_animals_per_sex_as_capri():
     assert d.at["sex", "dprod_young_m_rel"] > 0 > d.at["sex", "dprod_young_f_rel"]
     # the curvature of the splits: q_z = q of both activities, q_b of the one giving up stalls
     assert (ct.q_z > ct.q_b).all() and (ct.q_b > 0).all()
+
+
+def test_young_animals_take_capris_2030_coefficients_at_the_2030_market_year(data):
+    """K178 (18 November 2026): CAPRI's INPANI_ (supply_model.gms l. 839-856) takes the simulation year's coefficients,
+    DATA(r, act, young animal, "Y"); the model's 2030 runs took the 2017 ones. At the 2030 market year the table is
+    CAPRI's 2030 one per model head (tools/build/build_young_animals_2030.py): ES41's suckler cows (model heads = CAPRI's
+    SCOW level there) sell 456.98 male calves per 1000 cows (sim_ini_21730, "Y"; 422.77 at "BAS", the 2017 table's),
+    FR52's 372.77 (397.65); CAPRI's 2030 calf balances close over the EU (the 2017 coefficients at the 2030 heads do
+    not: 121 thousand male calves). The heads are the model's projected ones (data["animal_numbers"] in the model's
+    codes x the trajectory's factor of that column, as ProjectionModule.project_data): at them the young-cattle
+    balances, where heifers (HFRS) take part, give the table's base net exports (until 18 November 2026 the builder
+    projected the raw HEIF column with CAPRI's factor of its fattening heifers, AT11's heifers 1.36 times the
+    projected heads). The year follows the run's inputs (SupplyModule sets RunInputs.market_year from its data); the base year's
+    table is unchanged."""
+    from capri_mod.supply.supply_module import young_animal_table
+    from capri_mod.projection.trajectory import BaselineTrajectory
+    from capri_mod.data import inputs as I
+    t30, t17 = young_animal_table(year=2030), young_animal_table(year=2017)
+    tr = BaselineTrajectory.from_file(str(DATA_DIR / "scenarios" / "capri_ref_2030"))
+    h = data["animal_numbers"]
+    for reg in ("AT110000", "FR520000"):
+        for g in ("young_f", "cows"):
+            b = t30[reg][g]
+            x = {m: float(h.at[reg, m]) * tr.factor("herds", m, 2030, region=reg) for m in set(b["produce"]) | set(b["use"])}
+            net = sum(c * x[m] for m, c in b["produce"].items()) - sum(c * x[m] for m, c in b["use"].items())
+            assert "HFRS" in x and abs(net - b["base_net_export"]) < 1e-6 * max(1.0, abs(b["base_net_export"])), (reg, g, net)
+    assert abs(t30["ES410000"]["calves_m"]["produce"]["BCOW"] - 0.45697616479650037) < 1e-6   # model heads: 2017 x the factor
+    assert abs(t17["ES410000"]["calves_m"]["produce"]["BCOW"] - 0.42276924838478996) < 1e-9
+    assert t30["FR520000"]["calves_m"]["produce"]["BCOW"] < t17["FR520000"]["calves_m"]["produce"]["BCOW"]
+    eu = [r for r in t30 if r[:2] not in ("NO", "UK", "TR", "AL", "MK", "ME", "RS", "BA", "XK", "CH")]
+    for g in ("calves_m", "calves_f"):
+        prod = sum(t30[r][g]["base_net_export"] for r in eu if g in t30[r])
+        assert abs(prod) < 1.0, (g, prod)                    # 1000 head, against about 12,500 produced
+    cur = I.current()
+    old = getattr(cur, "market_year", None)
+    try:
+        cur.market_year = 2030
+        assert young_animal_table()["ES410000"]["calves_m"]["produce"]["BCOW"] == t30["ES410000"]["calves_m"]["produce"]["BCOW"]
+        cur.market_year = None
+        assert young_animal_table()["ES410000"]["calves_m"]["produce"]["BCOW"] == t17["ES410000"]["calves_m"]["produce"]["BCOW"]
+    finally:
+        cur.market_year = old
+
+
+def test_manure_per_head_takes_capris_2030_coefficients_at_the_2030_market_year(data):
+    """K179 (18 November 2026): in a simulation CAPRI computes each animal activity's manure N, P2O5 and K2O per head
+    from the simulation year's rations before it solves (capmod.gms l. 1090, req_or_man_fnc.gms 'man'); the model's 2030
+    runs took the 2017 coefficients, the dairy cows' manure N raised by 0.0086 kg per kg of extra milk. At the 2030
+    market year the tables are CAPRI's 2030 ones per model head (tools/build/build_livestock_manure_2030.py, from the
+    2030 baseline's dataOut): FR52's suckler cows 65.159 kg N per head (CAPRI's SCOW MANN; the model's 2030 heads are
+    CAPRI's level there; 68.575 in 2017), its dairy cows 144.79 (CAPRI's DCOW, the DCOL and DCOH mix; 169.25 in 2017).
+    At the model's projected 2030 heads the EU's excretion is CAPRI's 2030 EXCRET (8,985.6 kt N, 4,475.2 kt P2O5,
+    8,686.6 kt K2O): within 0.05%, the rest Slovakia's replacement heifers, which the model's herd table does not hold
+    (CAPRI's 2017 census has no HEIF there; 1.8 kt N). With the 2017 coefficients it was +3.6% N, -2.9% P2O5, -1.7% K2O.
+    The P2O5 and K2O tables follow the run's market year (NPKData.manure_per_head); N reaches the environmental module
+    through data["livestock_manure_n_coef"], which the projection sets to the year's table."""
+    from capri_mod.fert.npk import manure_coef_table, NPKData
+    from capri_mod.projection.trajectory import BaselineTrajectory
+    from capri_mod.data.definitions import is_eu
+    from capri_mod.data import inputs as I
+    n30, n17 = manure_coef_table("N", 2030), manure_coef_table("N", 2017)
+    assert n17.at["FR520000", "BCOW"] == data["livestock_manure_n_coef"].at["FR520000", "BCOW"]
+    assert abs(n30.at["FR520000", "BCOW"] - 65.1589345506685) < 1e-6 and abs(n17.at["FR520000", "BCOW"] - 68.5746459752) < 1e-6
+    assert abs(n30.at["FR520000", "DCOW"] - 144.786141737975) < 1e-6
+    tr = BaselineTrajectory.from_file(str(DATA_DIR / "scenarios" / "capri_ref_2030"))
+    h = data["animal_numbers"]
+    eu = [r for r in h.index if is_eu(r)]
+    for nut, capri in (("N", 8985.627), ("P", 4475.207), ("K", 8686.593)):
+        t = manure_coef_table(nut, 2030)
+        tot = sum(float(h.at[r, a]) * tr.factor("herds", a, 2030, region=r) * float(t.at[r, a])
+                  for r in eu for a in t.columns if a in h.columns and pd.notna(t.at[r, a])) / 1000.0
+        assert abs(tot / capri - 1.0) < 5e-4, (nut, tot)
+    cur = I.current()
+    old = getattr(cur, "market_year", None)
+    D = NPKData.get()
+    try:
+        cur.market_year = 2030
+        assert D.manure_per_head("FR520000", "P", "DCOW") == manure_coef_table("P", 2030).at["FR520000", "DCOW"]
+        cur.market_year = None
+        assert D.manure_per_head("FR520000", "P", "DCOW") == manure_coef_table("P", 2017).at["FR520000", "DCOW"]
+    finally:
+        cur.market_year = old
+    with pytest.raises(ValueError):
+        D.manure_per_head("FR520000", "N", "DCOW")
 
 
 def test_labour_accounts_and_set_aside_as_capri(data):

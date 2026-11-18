@@ -153,15 +153,20 @@ def _spec_fingerprint(spec, **extra) -> str:
     return h.hexdigest()
 
 
-def young_animal_table() -> dict:
+def young_animal_table(year=None) -> dict:
     """CAPRI's young-animal coefficients per model region (calves, young cattle, cows, piglets, lambs): per sex as
-    CAPRI's balances (young_animals_by_sex_<base year>.csv) with the cattle member splits (the default since
-    17 November 2026, K65), or pooled across the sexes (young_animals_<base year>.csv) with
-    RegionalSupplyModel.use_cattle_member_splits off (tools/build/build_young_animals.py; capri_mod/data/
-    nested_tables.py)."""
+    CAPRI's balances (young_animals_by_sex_<year>.csv) with the cattle member splits (the default since
+    17 November 2026, K65), or pooled across the sexes (young_animals_<year>.csv) with
+    RegionalSupplyModel.use_cattle_member_splits off (capri_mod/data/nested_tables.py). year: the data set's
+    calibration year, by default the run's (RunInputs.market_year, set by SupplyModule; the base year where unset): the
+    base year's tables (tools/build/build_young_animals.py) or, at the 2030 market year, CAPRI's 2030 coefficients in
+    the baseline's folder (tools/build/build_young_animals_2030.py; CAPRI's INPANI_ takes the simulation year's
+    DATA(.., "Y"), KNOWN_ISSUES K178). A year without its tables is an error (no fall back to the base year's)."""
     by_sex = bool(getattr(RegionalSupplyModel, "use_cattle_member_splits", False))
     by = _inputs.base_year()                                          # the base year's tables (K52f)
-    name = f"young_animals_by_sex_{by}.csv" if by_sex else f"young_animals_{by}.csv"
+    yr = year if year is not None else getattr(_inputs.current(), "market_year", None)
+    yr = str(yr) if yr is not None else str(by)
+    name = f"young_animals_by_sex_{yr}.csv" if by_sex else f"young_animals_{yr}.csv"
 
     def load(inp):
         from capri_mod.data.nested_tables import read_young_animals
@@ -2174,6 +2179,9 @@ class SupplyModule(ModuleStateMixin):
         year (capri_mod/supply/inputs.py; the repository's data and 2017 by default), made the supply code's inputs."""
         self.data = data
         self.inputs = _inputs.use(inputs if inputs is not None else _inputs.SupplyInputs())
+        # the calibration year of the data set (2030 for a projected one): the young-animal coefficients of that year
+        # (young_animal_table, K178)
+        self.inputs.market_year = _inputs.market_year(data)
         self.regions = list(data["areas"].index)
 
         if supply_elasticities is None:

@@ -60,6 +60,8 @@ _FILE_CATEGORY = {
     # read by supply_module.young_animal_table (capri_mod/data/nested_tables.py)
     "young_animals_{BY}.csv": "supply", "young_animals_{BY}_coef.csv": "supply",
     "young_animals_by_sex_{BY}.csv": "supply", "young_animals_by_sex_{BY}_coef.csv": "supply",
+    "young_animals_2030.csv": "supply", "young_animals_2030_coef.csv": "supply",
+    "young_animals_by_sex_2030.csv": "supply", "young_animals_by_sex_2030_coef.csv": "supply",
     "mineral_n_price.csv": "supply",       # located for validation; not loaded yet
     "manure_pool_costs.csv": "environment", "manure_pool_centres.csv": "environment",
     "land_market_{BY}.csv": "supply", "land_market_2030.csv": "supply",
@@ -70,7 +72,8 @@ _FILE_CATEGORY = {
     "manure_trade_2030.csv": "environment",
     "manure_housing_losses_2030.csv": "environment",
     "fertiliser_substitution_2030.csv": "environment",
-    "livestock_manure_n_coef.csv": "environment", "livestock_n_export_coef.csv": "environment",
+    "livestock_manure_n_coef.csv": "environment", "livestock_manure_n_coef_2030.csv": "environment",
+    "livestock_n_export_coef.csv": "environment",
     "livestock_ch4man_coef.csv": "environment", "livestock_ch4ent_coef.csv": "environment",
     "crop_co2_coef.csv": "environment",
     # CAPRI's inner fertiliser distribution model and mineRedu (read by capri_mod.fert.inner_fert_dist)

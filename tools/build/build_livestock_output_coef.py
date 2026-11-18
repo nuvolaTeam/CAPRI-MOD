@@ -200,9 +200,24 @@ def build(dump_dir: Path, value_item: str = None) -> pd.DataFrame:
     from capri_mod.data.loaders import load_regional_animal_numbers  # the one table needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
 
     herds = load_regional_animal_numbers(str(_ROOT / "capri_data"))
+    if value_item == "FINAL_VALUE":
+        totals = _final_product_value_totals(dump_dir)
+    elif value_item and value_item.startswith("FINAL_VALUE:"):          # one final product only
+        totals = _final_product_value_totals(dump_dir, (value_item.split(":", 1)[1],))
+    elif value_item and value_item.startswith("QTY:"):                  # one final product's quantity
+        totals = _capri_totals(dump_dir, None, (value_item.split(":", 1)[1],))
+    else:
+        totals = _capri_totals(dump_dir, value_item)
+    return per_head(totals, herds)
+
+
+def per_head(totals: dict, herds: pd.DataFrame) -> pd.DataFrame:
+    """CAPRI's regional totals {(8-character CAPRI region, model animal): total} over the model's heads (herds: model
+    region x model animal, 1000 head): a coefficient per model region and animal such that heads x coefficient gives
+    CAPRI's total of the territory. Also used for CAPRI's 2030 totals over the model's 2030 heads
+    (tools/build/build_livestock_manure_2030.py)."""
     model_regions = set(herds.index)
     model_acts = sorted(set(CAPRI_TO_MODEL.values()))
-
 
     # CAPRI regions -> model regions in GROUPS covering the same territory (tools/lib/_model_regions.py:
     # one to one, splits, merges). The first-candidate rule used before put a split parent's whole
@@ -213,15 +228,6 @@ def build(dump_dir: Path, value_item: str = None) -> pd.DataFrame:
     _sp = _ilu.spec_from_file_location("_mr", _ROOT / "tools" / "lib" / "_model_regions.py")
     _mr = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_mr)
     code_to_group, groups = _mr.capri_groups(sorted(model_regions))
-
-    if value_item == "FINAL_VALUE":
-        totals = _final_product_value_totals(dump_dir)
-    elif value_item and value_item.startswith("FINAL_VALUE:"):          # one final product only
-        totals = _final_product_value_totals(dump_dir, (value_item.split(":", 1)[1],))
-    elif value_item and value_item.startswith("QTY:"):                  # one final product's quantity
-        totals = _capri_totals(dump_dir, None, (value_item.split(":", 1)[1],))
-    else:
-        totals = _capri_totals(dump_dir, value_item)
 
     grouped = defaultdict(float)           # (group, act) -> kt
     national = defaultdict(float)          # (capri country, act) -> kt

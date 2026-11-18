@@ -73,6 +73,10 @@ class RunInputs:
         self.root = Path(data_dir) if data_dir else REPO_DATA
         self.base_year = str(base_year) if base_year is not None else default_base_year()
         self.cache: dict = {}
+        #: the year of CAPRI's data the run's data set is calibrated to (market_year), set by SupplyModule from its
+        #: data; None: the base year. Read where a table has a version per calibration year that the code reads
+        #: without the data set at hand (the young-animal coefficients, KNOWN_ISSUES K178)
+        self.market_year: Optional[int] = None
 
     # -- locations -----------------------------------------------------------------------------------------------
     def path(self, name: str, where: str) -> Path:

@@ -66,8 +66,8 @@ class PhosphorusBlock:
     def compute_phosphorus_balance(self, acts, yields, region: str, supply_result=None) -> Dict[str, float]:
         """CAPRI's gross phosphate balance of the region (reports/calc_nbalance.gms, FNUT = PHOF), t P2O5.
 
-        EXCRET  sum over animals of herd x manure P2O5 per head (CAPRI's 2017 MANP totals / the model's herds,
-                livestock_manure_p_coef.csv); the dairy and cattle split columns move it by their manure P2O5 per head
+        EXCRET  sum over animals of herd x manure P2O5 per head (CAPRI's MANP totals / the model's herds at the run's
+                market year: livestock_manure_p_coef.csv, at 2030 livestock_manure_p_coef_2030.csv, K179); the dairy and cattle split columns move it by their manure P2O5 per head
                 relative to their animal's (dairy_intensity / cattle_intensity dmanp_rel, CAPRI's MANP of the two
                 activities), as in the regional model's fertilisation block (9 November 2026: before, the
                 split columns left it unchanged)

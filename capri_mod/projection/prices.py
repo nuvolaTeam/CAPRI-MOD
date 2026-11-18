@@ -24,7 +24,7 @@ do not change. Purchased protein feed follows CAPRI's 2030 oilcake producer pric
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import pandas as pd
 from capri_mod.data.definitions import MS_CODE, is_eu
@@ -64,8 +64,11 @@ def load_price_tables(traj_dir: Path):
 
 
 def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_cereal_mix: Dict,
-                            cake_index=None) -> Dict:
-    """Put CAPRI's 2030 prices (2017 money) into a projected data dict, in place. Returns a summary."""
+                            cake_index=None, young_table_base: Optional[Dict] = None) -> Dict:
+    """Put CAPRI's 2030 prices (2017 money) into a projected data dict, in place. Returns a summary. young_table: the
+    young-animal coefficients of the year (2030: CAPRI's, KNOWN_ISSUES K178); young_table_base: the base year's, whose
+    young animals the base year's total output and inputs per head hold (None: the year's table, the change of the
+    value alone)."""
     ratio, eu, cap30, lsk = load_price_tables(traj_dir)
     r = lambda reg, prod: ratio.get((_ms(reg), prod), eu.get(prod))
     summary = {}
@@ -170,10 +173,14 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
             f = sum(vals) / len(vals)
             yfac.setdefault(reg, {})[good] = f
             v0 = float(g.get("value_eur_head", 0.0))
-            for act, c in g.get("produce", {}).items():
-                d_yo[(reg, act)] = d_yo.get((reg, act), 0.0) + c * v0 * (f - 1.0)
-            for act, c in g.get("use", {}).items():
-                d_yi[(reg, act)] = d_yi.get((reg, act), 0.0) + c * v0 * (f - 1.0)
+            # the year's young animals at the year's value less the base year's at the base value (the base year's
+            # TOOU / TOIN hold those): c x v0 x f - c0 x v0, c0 = c without the base year's table
+            g0 = ((young_table_base or {}).get(reg) or {}).get(good) if young_table_base is not None else g
+            g0 = g0 or {"produce": {}, "use": {}}
+            for side, dd in (("produce", d_yo), ("use", d_yi)):
+                c1, c0 = g.get(side, {}), g0.get(side, {})
+                for act in set(c1) | set(c0):
+                    dd[(reg, act)] = dd.get((reg, act), 0.0) + (float(c1.get(act, 0.0)) * f - float(c0.get(act, 0.0))) * v0
     data["young_animal_value_factor"] = yfac
 
     # --- purchased feed cereals in total inputs (EU 2017 prices, member-state price ratios)

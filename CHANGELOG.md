@@ -149,7 +149,35 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   -> 0.28 points, correlation 0.84 -> 0.90.
 - **K177:** the entitlement overshoot keeps its cost, the cut, in the NLP calibration: where the QP's start held the
   base's rounding above the trend area, the calibration put minus the cut into the column's linear term and the
-  overshoot was free (about 199,000 thousand ha in BG01, HU32, LV, PL11, PL31, PL41 and RO05).
+  overshoot was free (about 199,000 thousand ha in BG01, HU32, LV, PL11, PL31, PL41 and RO05). Full-EU Green Deal run
+  with K174-K177: EU UAAR +1,294 -> +1,476 thousand ha (CAPRI +2,046), mean gap 0.76 -> 0.63 points; activities' mean
+  gap 1.9 -> 2.0, prices' 1.5 (unchanged).
+- **K178:** the 2030 runs take CAPRI's 2030 young-animal coefficients (INPANI_ takes DATA(.., "Y")), not the 2017
+  ones: tools/build/build_young_animals_2030.py, young_animals_(by_sex_)2030.csv in the baseline's folder, read at the
+  2030 market year. Spain's suckler cows 0.83 -> 0.90 calves per head; the EU's 2030 base balances close as CAPRI's
+  (piglets were 6.6% short). Full-EU Green Deal run: Spain's suckler cows closer to CAPRI's (ES41 -37.0 -> -35.0%,
+  CAPRI -22.4), the EU's -25.5 -> -24.8 (-28.8); activities' mean gap 2.0, prices' 1.5 -> 1.6. Corrected before its
+  commit: the heifers' 2030 coefficients are per the model's projected HFRS heads (the builder had projected CAPRI's
+  HEIF column; the EU's cows balance at the 2030 base 108 thousand head above CAPRI's flows); the run above was
+  before the correction.
+- **K179:** the 2030 runs take CAPRI's 2030 manure N, P2O5 and K2O per head (CAPRI computes them from the 2030 rations
+  before it solves, capmod.gms l. 1090), not the 2017 ones with the dairy cows' N raised by the milk yield:
+  tools/build/build_livestock_manure_2030.py, livestock_manure_{n,p,k}_coef_2030.csv in the baseline's folder, read
+  at the 2030 market year (capri_mod/fert/npk.manure_coef_table); the parameter REQ_N_KG_MILK removed. The EU's N
+  excretion at the 2030 base 9,471 -> 8,984 kt (CAPRI's EXCRET 8,986; dairy cows -12%). Full-EU Green Deal run with
+  K178's correction: the EU's base N surplus +2.5% -> -1.6% of CAPRI's; suckler cows -24.8 -> -23.9% (CAPRI -28.8),
+  heifers -12.1 -> -10.2 (-10.3); activities' mean gap 2.0 -> 2.1, prices' 1.6; CAPRI's implied N-surplus duals now
+  consistent across animals, 1.25-1.56 times the model's.
+- **K180 (open):** the model has no heifers where CAPRI's census has no fattening heifers (SK, AL, BA, MO), though
+  CAPRI's replacement heifers have levels there (Slovakia 1.8 kt N of manure missing).
+- **K172, the 2017 bulls explained:** CAPRI's 2017 regional bull rows do not add up to its national ones (FR 934
+  against 1,177); the model reproduces the regional rows (the -10.4% of the baseline check); the 2030 bulls are
+  CAPRI's within 0.3%.
+- **GUI:** capri-mod's logo beside the page's title (drawn at its size from the first paint); the tabs read as a menu
+  (bold labels on a framed ground, the open tab in the accent colour). Commits 2899a64, ab93d86, 9f57e65.
+- **K175, corrected reading:** the model's fertiliser options are not above CAPRI's: on mineral N CAPRI's precision
+  farming share is 0.213 (model 0.191), its inhibitors 0.251 (0.346), and both models sit at Tot_MitFert_'s cap in ES42
+  with a different mix (the earlier figures were CAPRI's per-crop shares, which mix mineral and manure N).
 - **GUI:** runs with Gradio 5 and Gradio 6 (the GitHub runner installed 6.32: Chatbot(type) dropped, css and show_api
   moved; commit 43c2a61).
 - **K65 closed, DEP-4 closed:** the cattle member splits on by default (`supply.use_cattle_member_splits = true`,

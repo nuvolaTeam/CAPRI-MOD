@@ -295,8 +295,8 @@ class FertilisationBlock:
                 if _lvl:
                     E_const = float(env_.nitrogen_balance_constants(rid, ycur).get("n_manure_applied", 0.0) or 0.0)
             else:
-                # manure P2O5 / K2O per head (CAPRI 2017 totals / the model's herds), applied in the region in the
-                # proportion CAPRI's 2030 reference applies it (net of the base net exports, ManureNPK_)
+                # manure P2O5 / K2O per head (CAPRI's totals / the model's herds at the market year, K179), applied in
+                # the region in the proportion CAPRI's 2030 reference applies it (net of the base net exports, ManureNPK_)
                 man = np.array([D.manure_per_head(rid, nut, a) if a in ANIMALS else 0.0 for a in acts])
                 # with manure trade off nothing leaves the region: all manure P / K applied, as for N
                 if bool(getattr(getattr(getattr(self.seen, "env_for_surplus", None), "seen", None), "manure_trade_on", True)):
