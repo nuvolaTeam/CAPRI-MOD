@@ -200,6 +200,15 @@ class NLPBlock:
                 nlp0 = CapriRegionalNLP(spec)
                 yb = np.asarray(x_start, float).copy()
                 yb[:n] = xb[:n]
+                # the entitlement overshoot at the calibration point: zero, as in CAPRI (the crops at their trend
+                # levels; the row is dropped above), so that the column sits at its bound and its cost, the cut, stays
+                # its own linear term. The QP's start holds the base's rounding above the trend area (PL110000 4.3e-5
+                # thousand ha): above the calibration's bound tolerance (supply.nlp_cal_tol) the column counted as
+                # interior, its residual, the cut, went into its linear term, and the overshoot was free (KNOWN_ISSUES
+                # K177: about 199,000 thousand ha in BG01, HU32, LV, PL11, PL31, PL41 and RO05)
+                _ej = getattr(self.ev, "entl_col", None)
+                if _ej is not None and int(_ej) < len(yb):
+                    yb[int(_ej)] = 0.0
                 out = nlp0.calibrate(yb)
                 if not out.get("ok") and out.get("fert_failed") and npk is not None:
                     # CAPRI's priors (its 2030 posterior per ha) admit no allocation at this model's base: CAPRI's

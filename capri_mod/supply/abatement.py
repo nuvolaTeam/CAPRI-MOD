@@ -120,7 +120,8 @@ class AbatementBlock:
             mr = self._crop_mineral_now()
             cr = [(list(self.acts).index(c_), v_) for c_, v_ in mr.items() if c_ in self.acts and v_ > 0]
             if ft and cr:
-                out["fert_tech"] = {"crops": cr, "techs": ft, "ecap": fert_efficiency_cap(self.data.region_id)}
+                out["fert_tech"] = {"crops": cr, "techs": ft, "ecap": fert_efficiency_cap(self.data.region_id),
+                                    "emical": dict(getattr(self.seen, "fert_techs_emical", None) or {})}
         if self._ni_inside():
             nip = self._manure_inhibitor_params()
             if nip is not None:

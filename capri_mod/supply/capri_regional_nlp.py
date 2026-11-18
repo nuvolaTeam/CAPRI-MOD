@@ -771,7 +771,8 @@ class CapriRegionalNLP:
                 g_rows.append((P - pv(float(d["synNMax"])) * land) * pv(1.0 / Pscale)); lbg.append(-np.inf); ubg.append(0.0)
             obj = obj + pv(float(d["price"]) / 1000.0) * P
             if nut == "N" and getattr(self, "_fert_tech_pending", None) is not None:
-                # the fertiliser options' cost on the N purchases (GHG_Mit_Cost_: - cost x v_netPutQuant(NITF), kt)
+                # the fertiliser options' cost on the N purchases (GHG_Mit_Cost_: - cost x v_netPutQuant(NITF) x (1 + sum
+                # (NMIN + EmiCalMin) v_Miti), kt; the factor is in the pending term, K175)
                 obj = obj + P * pv(1.0 / 1000.0) * self._fert_tech_pending[0]
                 self._fert_tech_pending = None
                 self._fert_tech_P = True
@@ -989,19 +990,23 @@ class CapriRegionalNLP:
         if ft and ft.get("techs") and ft.get("crops"):
             T_ = ft["techs"]
             phi = ca.SX.sym("phi", len(T_))
-            Eff = 0; cost = 0
+            Eff = 0; cost = 0; Ebase = 0
             pv = self._pv
+            ec_ = ft.get("emical") or {}
             for tt, (name, nm, a_, b_, smax) in enumerate(T_):
                 if str(name).upper() == "NITR_INH":
                     self._nitr_phi = (phi[tt], float(nm))
                 self._fert_phi[str(name)] = (phi[tt], float(nm))
                 Eff = Eff + pv(float(nm)) * phi[tt]
+                Ebase = Ebase + pv(float(nm) + float(ec_.get(name, 0.0) or 0.0)) * phi[tt]
                 a_ = float(a_) + float((spec.get("dabat") or {}).get(("fert", name), 0.0))
                 cost = cost + (pv(a_) * phi[tt] + pv(0.5 * float(b_)) * phi[tt] * phi[tt])
-            # CAPRI's GHG_Mit_Cost_: the fertiliser options' cost per t of mineral N purchased (- cost x
-            # v_netPutQuant(NITF)); the fertilisation block's N purchases take it (_fert_block), else the crops' base
-            # mineral N (the build's end)
-            self._fert_tech_pending = (cost, list(ft["crops"]))
+            # CAPRI's GHG_Mit_Cost_ (supply_model.gms l. 4945-4950): the fertiliser options' cost per t of crop N need
+            # met by mineral N, - cost x v_netPutQuant(NITF) x (1 + sum (NMIN + EmiCalMin) v_Miti) (KNOWN_ISSUES K175:
+            # until 18 November 2026 on the purchases alone, 10-17% too cheap at the Green Deal's shares); the
+            # fertilisation block's N purchases take it (_fert_block), else the crops' base mineral N (the build's end).
+            # Every option's IniShare is 0, so the base and its calibration are unchanged
+            self._fert_tech_pending = (cost * (1 + Ebase), list(ft["crops"]))
             self.fert_eff = Eff
             g_rows.append(sum(phi[tt] for tt in range(len(T_)))); lbg.append(-np.inf); ubg.append(1.0)
             if ft.get("ecap") is not None:

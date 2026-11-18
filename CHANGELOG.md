@@ -138,6 +138,18 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
 - **K173:** the bulls' and heifers' herd PMP terms convert to model heads with the CAPRI level the head ratio is taken on
   (BULF; HEIF + HEIR), not the members' (BULL + BULH; HEIL + HEIH + HEIR): their curvature was 0.61 and 0.87 of
   CAPRI's.
+- **K174:** the entitlement cut (K136) in the model's money: CAPRI's cut of 2030 over the deflator 1.2772, as the
+  premiums it takes away (Spain 118.06 -> 92.4 EUR/ha). A hectare beyond the trend area lost 1.28 times its area payment.
+- **K175:** the fertiliser options' cost in the NLP form on CAPRI's base, the N purchases x (1 + sum (NMIN + EmiCalMin)
+  x share) (GHG_Mit_Cost_), not the purchases alone: 10-17% too cheap at the Green Deal's shares; the base unchanged
+  (every initial share 0).
+- **K176:** the land's credit under the per-ha N-surplus target is the target per ha (CAPRI's MAXS); since K167 it was
+  the N row's right-hand side per ha, which holds the region's base manure trade (ES42 20.2 against 29.5 kg N/ha,
+  Cataluña 155 against 93). At CAPRI's Green Deal prices (33 units, with K174 and K175): UAAR's mean gap to CAPRI 0.46
+  -> 0.28 points, correlation 0.84 -> 0.90.
+- **K177:** the entitlement overshoot keeps its cost, the cut, in the NLP calibration: where the QP's start held the
+  base's rounding above the trend area, the calibration put minus the cut into the column's linear term and the
+  overshoot was free (about 199,000 thousand ha in BG01, HU32, LV, PL11, PL31, PL41 and RO05).
 - **GUI:** runs with Gradio 5 and Gradio 6 (the GitHub runner installed 6.32: Chatbot(type) dropped, css and show_api
   moved; commit 43c2a61).
 - **K65 closed, DEP-4 closed:** the cattle member splits on by default (`supply.use_cattle_member_splits = true`,

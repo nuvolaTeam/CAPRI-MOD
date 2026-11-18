@@ -57206,6 +57206,7 @@
     "builders": [],
     "checks": [],
     "tests": [
+     "capri_mod/tests/test_entitlement_money.py",
      "capri_mod/tests/test_premium_baseline_2030.py"
     ]
    }
@@ -57428,6 +57429,7 @@
    "notes": [],
    "read_by": {
     "model": [
+     "capri_mod/data/inputs.py",
      "capri_mod/projection/prices.py"
     ],
     "builders": [

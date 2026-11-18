@@ -75,6 +75,10 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K171](#k171) | The results pages' baseline check compared unlike quantities: market prices with CAPRI's EU27yr19 producer unit value after a median deflator, a 2017-2030 growth over all 250 units, calves and fattened sheep and goats in heads | fixed (18 November 2026) |
 | [K172](#k172) | The 2030 base heifers grew as CAPRI's fattening heifers (HEIF) although the model's HFRS holds the replacement heifers too (+4.8% in CAPRI's units, EU); the 2017 bulls in CAPRI's units 10.4% below CAPREG's | heifers fixed (18 November 2026); the 2017 bulls open |
 | [K173](#k173) | The bulls' and heifers' herd PMP terms were converted to model heads with a ratio taken on CAPRI's database activities (BULF; HEIF + HEIR), whose levels are not the sum of the activities carrying the terms: curvature 0.61 and 0.87 of CAPRI's | fixed (18 November 2026) |
+| [K174](#k174) | The entitlement cut (K136) was in CAPRI's money of 2030 in an objective in 2017 money: a hectare beyond the trend area lost 1.28 times its area payment | fixed (18 November 2026) |
+| [K175](#k175) | The fertiliser options' cost in the NLP form was charged on the N purchases, not on CAPRI's base, the purchases x (1 + sum (NMIN + EmiCalMin) x share): 10-17% too cheap at the Green Deal's shares | fixed (18 November 2026) |
+| [K176](#k176) | Since K167 the land columns of the N-surplus row took the row's right-hand side per ha as the target per ha, which holds the region's base manure trade (a level of the region): importers' land earned too little, exporters' too much | fixed (18 November 2026) |
+| [K177](#k177) | The NLP calibration put minus the entitlement cut into the overshoot column's linear term where the QP's start held the base's rounding above the trend area: the overshoot was free in BG01, HU32, LV, PL11, PL31, PL41 and RO05 (about 199,000 thousand ha, a zero dual) | fixed (18 November 2026) |
 | [K141](#k141) | CAPRI bug: CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it (the project lead's decision) |
 | [K136](#k136) | CAPRI's endogenous entitlement limit (def_endCut.gms: no area payment beyond the trend area) was not in the model; ported with CAPRI's 2030 ceilings computed from its CAP 2014-2020 tables | fixed (13 November 2026) |
 | [K137](#k137) | The reported UAA left out the idled histosols (CAPRI's IHISGR, IHISCR stay in GRAS, ARAC and UAAR): the Green Deal's surplus per ha looked short of its target where the row met it | fixed (13 November 2026) |
@@ -2909,6 +2913,9 @@ trend level.
   The full EU Farm-to-Fork run with it (dev f5da6c7, 13 November 2026): converged in 14 iterations, 4,051 s, every
   regional solve optimal; the mean absolute deviation from JRC121368's 20 indicators 4.77 points (UAA +3.2%,
   JRC121368 +3%). Both runs are in the results store (ebc377a04811, 3c1dee09f16b)
+  The cut was handed to the 2030 objective in CAPRI's money, not the model's 2017 money: K174 (18 November 2026).
+  In seven units the NLP calibration took the overshoot's cost away (the base's rounding above the trend area): K177
+  (18 November 2026).
 
 <a id="k137"></a>
 ### K137: The reported UAA left out the idled histosols (found 13 November 2026)
@@ -3799,6 +3806,107 @@ animal_numbers.csv). The 2030 bulls match CAPRI's within 0.3%.
 - **Status:** the heifers fixed 18 November 2026: HFRS takes the growth of CAPRI's HEIF + HEIR (tools/build/
   build_trajectory_capri_ref.py, the composite HEIT; capri_data/scenarios/capri_ref_2030: the EU fallback 0.990 ->
   0.933, regional factors in 520 regions against 243 before). The 2017 bulls **open**.
+
+<a id="k177"></a>
+### K177: The entitlement overshoot calibrated to no cost in seven units (found 18 November 2026)
+
+K136's overshoot column o (CAPRI's overShotEntl, at the cut in the objective) is not part of CAPRI's calibration: at
+the calibration point the crops are at their trend levels, the overshoot is zero, and its cost is the cut. The NLP form
+drops the entitlement row from its calibration (capri_mod/supply/nlp.py, with the scenario's policy rows) and takes the
+column's base value from the QP's start, max(0, crop area - trend area) (capri_mod/supply/policy.py). Where the base
+crop area exceeds the trend area by rounding (PL110000: 4.3e-5 thousand ha, 0.04 ha), the column sat above the
+calibration's bound tolerance (supply.nlp_cal_tol, 1e-6), counted as interior, and CapriRegionalNLP.calibrate put its
+residual, the cut, into its linear term with the opposite sign: the overshoot cost nothing and IPOPT left it at about
+199,000 thousand ha, with a zero dual on the row, at the base and in the scenario. Full-EU Green Deal run of 18
+November (K167-K173): BG010000, HU320000, LV000000, PL110000, PL310000, PL410000, RO050000 (in both runs); the other 208
+units with a cut were not affected. Found from the 33-unit probes of K174-K176 (PL11, PL31, PL41).
+
+- **Effect:** in those seven units the entitlement limit had no effect: land beyond the trend area kept its area
+  payment, in every 2030 run since K136. The units' results tables do not use the overshoot (only the run's pickle
+  holds it, premium_lost about 21.7 million thousand EUR per unit). Not yet measured on a run.
+- **In 9t:** -
+- **Status:** fixed 18 November 2026: the calibration point's overshoot is zero (nlp.py, before calibrate), so the
+  column sits at its bound and keeps the cut; PL110000's overshoot at the 2030 base -1e-8, its row dual 0.015 EUR/ha.
+  Test: test_capri.py::test_the_entitlement_overshoot_keeps_its_cut_in_the_nlp_calibration (fails without the fix:
+  overshoot 198,611)
+
+<a id="k176"></a>
+### K176: The land's surplus credit took the base manure trade with it (found 18 November 2026)
+
+CAPRI's N-surplus target is per ha of current land (SURTOT_REST_: v_nutSurTot <= MAXS, e_SURTOTHa every term per ha of
+the land), so a hectare added earns MAXS, the target per ha. capri_mod/supply/land.py writes it as the land columns'
+coefficient -t in the N row (land market on), with t = the row's right-hand side over the base crop area. Since K167
+that right-hand side is target x area minus the region's base manure trade's part of the surplus (a level of the
+region, v_manureExports / v_manureImports, which does not grow with the land), so t was not the target: below it for
+an importer, above it for an exporter. In the probe at CAPRI's Green Deal prices of 18 November (33 Spanish and Polish
+units): the land's credit (t x the row's dual) ES41 23.4 kg N per ha, ES42 20.2, ES51 (Cataluña, exports 89.5 kt N)
+155.0, ES62 38.9, against the regions' targets per ha of 43.3, 29.5, 93.1 and 37.1 (0.7 x CAPRI's reference surplus per ha:
+about 43.9, 30.5, 95.8, 38.2). Found from the exact decomposition of the land columns (K174).
+
+- **Effect:** the land's value under a per-ha surplus target, in every region with a base manure trade. Measured at
+  CAPRI's Green Deal prices (33 Spanish and Polish units, 18 November 2026, with K174 and K175, against them alone):
+  UAAR's mean gap to CAPRI 0.37 -> 0.28 points, correlation 0.85 -> 0.90 (ES41 +0.29 -> +1.11%, CAPRI +1.12; ES42 0.00
+  -> +0.39, CAPRI +1.24; ES51 +2.63 -> +1.94, CAPRI +2.21); ES41 durum +23.4 -> +30.7% (CAPRI +42.2), ES42 +37.4 ->
+  +33.3 (+13.8); herds' mean gap 2.92 unchanged, crops' 22.97 -> 22.91; the manure trade's mean gap 0.81 -> 0.92 kt N
+- **In 9t:** -
+- **Status:** fixed 18 November 2026: t = the target per ha (surplus_row[1]); the base trade stays on the right-hand
+  side. The JRC121368 relaxation scales the same coefficient (nrow_land). Test:
+  test_capri.py::test_land_earns_the_surplus_target_per_ha_with_the_base_trade_a_level
+
+<a id="k175"></a>
+### K175: The fertiliser options' cost base without CAPRI's factor (found 18 November 2026)
+
+CAPRI's GHG_Mit_Cost_ (supply/supply_model.gms l. 4945-4950) charges the mineral-fertiliser options (cropMiti, the
+GAINS fertiliser technologies, target N2OSYN) per t of crop N need met by mineral N: the option's cost per t (costParLin,
+pmpParLin, pmpParSqr) x (- v_netPutQuant(NITF)) x (1 + sum over the options of (NMIN + EmiCalMin) x v_Miti). The
+regional NLP form (capri_mod/supply/capri_regional_nlp.py) charged the cost on the purchases alone, although
+docs/MITIGATION_IN_SUPPLY.md and the registry (KNOWN_ISSUES_REGISTRY_LOG fert_cost_basis) state CAPRI's base; the
+external rule of the non-NLP path (fertilisation.py) has it. Found from the N need dual of the Green Deal (ES41, ES42 14-20%
+below CAPRI's at CAPRI's prices): the model's precision-farming share is 1.5 times CAPRI's (full-EU Green Deal of 18
+November: mean 0.241 against 0.160, median 0.227 against 0.138; ES42 0.232 against 0.176), and ES42's options reached
+CAPRI's cap Tot_MitFert_ (E = 0.147, cap 0.146), which CAPRI's shares do not.
+
+- **Effect:** none at the base (every IniShare of fert_options_jul15.csv is 0, so the cost and the factor's
+  derivative are 0 there and the calibration is unchanged); in a scenario with an incentive on N the options were
+  10-17% too cheap at the Green Deal's shares (factor ES42 1.147, ES51 1.174, DE21 1.113) and their marginal cost
+  lacked cost x (NMIN + EmiCalMin): ES42's precision farming about 24% at the same shares. Measured with K174 at CAPRI's
+  Green Deal prices (33 Spanish and Polish units, 18 November 2026, against the code before both): the shares hardly
+  move (ES42 inhibitors 0.242 -> 0.231, precision farming 0.232 -> 0.234; ES51 inhibitors 0.273 -> 0.243), because the
+  cap Tot_MitFert_ binds in the model (ES42's cap's multiplier about 2.5 times the options' marginal cost there) and
+  CAPRI's shares stay below it (ES42 0.188 and 0.176). The N need dual unchanged within 1%. The options' remaining
+  gap is in their calibration (the model's own linear terms at the base, DEP-30 / K77), still open.
+- **In 9t:** -
+- **Status:** fixed 18 November 2026: the regional model gets each option's EmiCalMin (supply_module, seen.
+  fert_techs_emical; envind/ghgMiti.gms l. 936-944, SupplyModule._emi_cal_min) and the NLP form charges cost x (1 + sum
+  (NMIN + EmiCalMin) x share) on the purchases. Test:
+  test_fert_option_cost.py::test_option_cost_on_the_purchases_times_capris_need_factor
+
+<a id="k174"></a>
+### K174: The entitlement cut in CAPRI's money in an objective in 2017 money (found 18 November 2026)
+
+K136 ported CAPRI's endogenous entitlement limit (policy/def_endCut.gms): Cut = the member state's ceilings of the cut
+schemes x 1000 / its regions' trend area, EUR per ha, in CAPRI's money of the simulation year (the ceilings are the
+regulation's nominal amounts, which CAPRI's objective takes as they are, beside its premiums PRME in the same money).
+The model's 2030 objective is in 2017 money (K108): its premiums are CAPRI's over the deflator 1.2772 (ES420000 soft
+wheat: CAPRI's PRME 182.93 EUR/ha, the model's 143.23), but capri_mod/supply/entitlements.py handed the cut over
+undeflated (Spain 118.06, Ireland 186.55, the Netherlands 272.64 EUR/ha). A hectare beyond the trend area therefore
+lost 1.28 times its area payment (Spain 25.6 EUR/ha more, the Netherlands 59). K136's check compared the cut with
+CAPRI's D_sumEntl, both in CAPRI's money, so it did not show. Found from the land use of the Green Deal (full-EU run of
+18 November): EU UAAR +1,301 thousand ha against CAPRI's +2,050; Castilla-León and Castilla-La Mancha unchanged
+(CAPRI +1.1% and +1.2%), their crops at the trend area with the entitlement row's dual below the cut (ES41 113.0, ES42
+63.8 against 118.06); CAPRI's Green Deal overshoots in 211 units, the model's in 161.
+
+- **Effect:** the cost of land beyond the trend area, in every scenario where land expands (the Green Deal: the per-ha
+  surplus target makes land worth more). Measured with K175 at CAPRI's Green Deal prices (33 Spanish and Polish units,
+  18 November 2026, against the code before both): UAAR's mean change +0.82 -> +1.01% (CAPRI +1.21), mean gap to CAPRI
+  0.46 -> 0.37 points, correlation 0.84 -> 0.85; ES41's overshoot 5.3 -> 15.6 thousand ha; ES42 still at the limit
+  (dual 77.9 against the cut 92.4) until K176. Activities: herds' mean gap 2.82 -> 2.92 points, crops' 23.45 -> 22.97
+- **In 9t:** -
+- **Status:** fixed 18 November 2026: region_limit gives the cut over the simulation year's money deflator
+  (capri_mod/data/inputs.py money_deflator: the deflator of the baseline's capri_price_ratios_<year>.csv, the number
+  tools/lib/_money.deflator gives the builders; 1 in the base year); ms_cuts stays in CAPRI's money (the check against
+  CAPRI's D_sumEntl). Tests: test_entitlement_money.py::test_the_cut_is_capris_over_the_years_money_deflator,
+  test_capri.py::test_entitlement_limit_in_the_2030_regional_model (the cut in the model's money)
 
 <a id="k173"></a>
 ### K173: The bulls' and heifers' herd PMP terms in the wrong unit (found 18 November 2026)

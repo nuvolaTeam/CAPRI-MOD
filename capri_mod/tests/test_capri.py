@@ -5374,7 +5374,10 @@ def test_entitlement_limit_in_the_2030_regional_model(model):
 
     e = mo.res.entl
     assert e is not None and mo.ev.entl_col is not None
-    assert abs(e["cut"] - E.ms_cuts(2030)["IR000000"]) < 1e-9 and abs(e["cut"] - 186.55) < 0.01
+    # the cut in the model's (2017) money: CAPRI's 186.55 EUR/ha of 2030 over the deflator (K174)
+    from capri_mod.data.inputs import money_deflator
+    dfl = money_deflator(2030)
+    assert abs(e["cut"] - E.ms_cuts(2030)["IR000000"] / dfl) < 1e-9 and abs(e["cut"] * dfl - 186.55) < 0.01
     lev = E.data()["levels"]["IR020000"]
     assert abs(e["limit"] - sum(lev.values())) < 1e-6           # every crop of CAPRI's in IR020000 is a model column
     assert e["overshoot"] < 1e-3 * e["limit"], e
@@ -5382,6 +5385,26 @@ def test_entitlement_limit_in_the_2030_regional_model(model):
     assert "entitlements" in labels
     drift = res.baseline[2030]["metadata"].get("base_calibration_drift") or [0.0]
     assert float(drift[0]) < 0.002, drift
+
+
+def test_the_entitlement_overshoot_keeps_its_cut_in_the_nlp_calibration(model):
+    """K177: the NLP calibration drops the entitlement row (the crops at their trend levels, as CAPRI's calibration
+    point) and takes the overshoot at zero, at its bound, so that its cost stays the cut. Mazowieckie's QP start held
+    the base's rounding above the trend area (4.3e-5 thousand ha): the column counted as interior, the calibration put
+    minus the cut into its linear term, and the overshoot ran to about 199,000 thousand ha with a zero dual."""
+    from capri_mod.projection import ProjectionModule, BaselineTrajectory
+
+    root = _repo_root()
+    traj = BaselineTrajectory.from_file(str(root / "capri_data" / "scenarios" / "capri_ref_2030"))
+    pmod = ProjectionModule(model, traj, capri_prices_dir=str(trajectories_dir(root / "capri_data", 2030)))
+    pmod.run(years=[2030], regions=["PL110000"], max_outer_iter=1)
+    pm = getattr(pmod, "_last_projected_model", None) or model
+    mo = pm.supply_module._models["PL110000"]
+    e = mo.res.entl
+    assert e is not None and mo.res.nlp_ok, e
+    assert abs(e["overshoot"]) < 1e-3, e
+    cal = mo.par.nlp_cal
+    assert abs(float(cal["dq"].get("entl_overshoot", 0.0))) < 1e-6 * e["cut"], cal["dq"].get("entl_overshoot")
 
 
 def test_the_grassland_need_carries_capris_split():
@@ -5467,3 +5490,38 @@ def test_the_crops_residues_in_the_n_balance_are_capris_mann(data):
                     float_precision="round_trip").set_index(["capri_region", "model_crop", "nutrient"])
     assert float(n.at[("DE210000", "RAPE", "N"), "pool_kg_ha"]) == pytest.approx(69.740727, rel=1e-4)
     assert float(n.at[("DE210000", "OFAR", "N"), "pool_kg_ha"]) == pytest.approx(195.317028, rel=1e-4)
+
+
+@pytest.mark.slow
+@pytest.mark.no_market_hessian
+def test_land_earns_the_surplus_target_per_ha_with_the_base_trade_a_level(model):
+    """K176: CAPRI's N-surplus target is per ha of current land (SURTOT_REST_ on e_SURTOTHa), so a hectare added earns
+    the target per ha, MAXS; the region's base manure trade is a level of the region (K167), on the row's right-hand
+    side, and does not grow with the land. The land columns' coefficient in the N row is the target per ha, not the
+    right-hand side per ha: Castilla y León imports manure (a positive constant in its surplus). The Green Deal of 2030
+    (greendeal_2030_scenario) trades manure; JRC121368's farm-to-fork does not, so its constant is 0."""
+    from capri_mod.policy.greendeal import greendeal_2030_scenario
+    from capri_mod.supply.supply_module import RegionalSupplyModel
+    regs = ["ES410000"]
+    # the solve's surplus row is held for that solve only (RegionalSupplyModel.solve resets it): record its target
+    seen = []
+    _solve = RegionalSupplyModel.solve
+
+    def _rec(self, *a, surplus_row=None, **k):
+        if surplus_row is not None and self.data.region_id == "ES410000":
+            seen.append(float(surplus_row[1]))
+        return _solve(self, *a, surplus_row=surplus_row, **k)
+    RegionalSupplyModel.solve = _rec
+    try:
+        model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
+        model.run(custom_scenario=greendeal_2030_scenario(), regions=regs, max_outer_iter=1)
+    finally:
+        RegionalSupplyModel.solve = _solve
+    mo = model.supply_module._models["ES410000"]
+    assert mo.ev.nrow_land is not None and seen
+    cols, L0, tgt = mo.ev.nrow_land
+    assert len(cols) == 3 and tgt == seen[-1] and tgt > 0
+    c = float(mo.ev.nb_const[0])
+    assert c > 0.0                                      # the base imports' surplus: a constant of the region
+    # the row's right-hand side per ha, the coefficient before K176, is below the target by that constant per ha
+    assert c / L0 > 0.01 * tgt

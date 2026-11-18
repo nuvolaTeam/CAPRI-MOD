@@ -189,7 +189,13 @@ class LandBlock:
             i_nb_ = labels.index("N_balance")
             base_area_ = float(sum(v for a_, v in self._base_levels().items() if a_ in CROPS))
             if base_area_ > 0:
-                tgt_ = float(ba[i_nb_]) / base_area_
+                # the target per ha (CAPRI's MAXS: SURTOT_REST_ on e_SURTOTHa, every term per ha of current land), not
+                # the row's right-hand side per ha: that also holds the region's base manure trade (supply.
+                # manure_base_trade "capri", K167), a level of the region (v_manureExports, v_manureImports), which does
+                # not grow with the land (KNOWN_ISSUES K176: until 18 November 2026 an importer's land earned less than
+                # the target per ha, ES420000 20.2 against 29.5 kg N; ES510000, an exporter, 155 against 93)
+                _sr = getattr(self.ev, "surplus_row", None)
+                tgt_ = float(_sr[1]) if _sr is not None else float(ba[i_nb_]) / base_area_
                 lt_ = [t for t in ("ARAC", "GRAS", "FRUN") if t in li]
                 for t in lt_:
                     Aa[i_nb_, n + li[t]] -= tgt_

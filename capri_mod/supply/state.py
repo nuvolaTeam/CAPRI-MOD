@@ -168,6 +168,7 @@ class RegionalSeen(_Slots):
         "env_for_surplus",    # the supply module's shared EnvironmentalModule (removed before pickling, re-attached)
         "manure_ctx",         # CAPRI's crop nutrient balance terms (the manure and ammonia accounts in every EU solve; None outside the EU)
         "fert_techs_all",     # CAPRI's fertiliser options (NLP form)
+        "fert_techs_emical",  # their EmiCalMin {option: value} (GHG_Mit_Cost_'s cost base, K175)
         "nlp_cal_check",      # set by CAPRIModel at a baseline: check the NLP calibration at the next solve
         "fallow_in_all_rmssup",  # CAPRI's %fallowInAllRmssup%: histosol fallowing outside the EU (endotech settings)
         "wintercov_in_all_rmssup",  # CAPRI's %winterCovInAllRmssup%: the winter cover outside the EU (endotech settings)

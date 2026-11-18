@@ -181,6 +181,25 @@ def base_year() -> str:
     return current().base_year
 
 
+def money_deflator(year, inputs: Optional["RunInputs"] = None) -> float:
+    """CAPRI's money of `year` per unit of the model's (the base year's) money, at run time: the deflator of the
+    baseline's capri_price_ratios_<year>.csv (trajectories_dir), the first EU member state's in the file's order, the
+    number tools/lib/_money.deflator gives the builders (KNOWN_ISSUES K108, K174); 1 for the base year. The model's
+    runs of another year work in base-year money: CAPRI's prices and premiums of that year over this number. A term
+    the model takes from CAPRI's own money of the year at run time (the entitlement cut, K174) is divided by it."""
+    inp = inputs if inputs is not None else current()
+    if str(year) == str(inp.base_year):
+        return 1.0
+    from capri_mod.data.definitions import is_eu
+    p = trajectories_dir(inp.root, year, inp.base_year) / f"capri_price_ratios_{int(year)}.csv"
+    d = [float(r["deflator"]) for r in inp.rows_at(p) if is_eu(r["ms"])]
+    if not d:
+        raise ValueError(f"{p.name}: no EU member state")
+    if max(d) - min(d) > 1e-12 * max(d):
+        raise ValueError(f"{p.name}: the deflator is not one value ({min(d)} to {max(d)})")
+    return d[0]
+
+
 def market_year(data) -> int:
     """The year of CAPRI's market data a data set is calibrated to: data["market_year"] (the projection layer sets it),
     else the data's base year, else the run's."""

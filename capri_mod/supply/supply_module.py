@@ -3151,6 +3151,9 @@ class SupplyModule(ModuleStateMixin):
                 model.seen.fert_techs_all = self._fert_techs(region)      # CAPRI's fertiliser options (NLP form)
             except Exception:
                 model.seen.fert_techs_all = []
+            # their EmiCalMin (envind/ghgMiti.gms l. 936-944), which GHG_Mit_Cost_'s cost base adds to NMIN (K175)
+            model.seen.fert_techs_emical = {o_[0]: float(self._emi_cal_min(region, region, o_[0]))
+                                            for o_ in model.seen.fert_techs_all}
             result = model.solve(n_balance_price=nb_used, **solve_kw)
             # manure market: hand the region's endogenous manure trade and allocated
             # mineral N to the environmental accounting (else the reported N balance
