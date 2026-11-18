@@ -193,3 +193,26 @@ def test_the_page_opens_on_results_with_the_other_tabs_disabled_unless_asked_for
         # every button as wide as its label (no growth in its row; the page's CSS for columns)
         btns = [b for b in app.blocks.values() if isinstance(b, gr.Button)]
         assert btns and all(b.scale == 0 and "capri-btn" in (b.elem_classes or []) for b in btns)
+
+
+def test_the_page_title_carries_the_logo_on_its_line(store, tmp_path):
+    """18 November 2026 (the project lead): capri-mod's logo beside the page's title, on the same line; the vector
+    logo (capri_gradio/assets/capri_mod_logo.svg, no embedded image) inline, with the title line's style in the page's
+    CSS (a light ground under the logo in the dark theme)."""
+    gr = pytest.importorskip("gradio")
+    import base64
+    import sys
+    sys.path.insert(0, str(ROOT / "capri_gradio"))
+    import capri_gui as G
+    import assistant_llm as L
+    svg = G.LOGO.read_text()
+    assert svg.startswith("<svg") and "<image" not in svg and "<path" in svg
+    for all_tabs, title in ((False, "capri-mod results"), (True, "capri-mod")):
+        app = G.build(L.make_backend("none", "", "", ""), tmp_path / "scen", [store], all_tabs=all_tabs)
+        heads = [b.value for b in app.blocks.values() if isinstance(b, gr.HTML) and "capri-head" in str(b.value)]
+        assert len(heads) == 1, heads
+        h = heads[0]
+        assert f"<h2>{title}</h2>" in h and 'class="capri-logo"' in h
+        b64 = h.split("data:image/svg+xml;base64,")[1].split('"')[0]
+        assert base64.b64decode(b64).decode() == svg
+    assert ".capri-head" in G.PAGE_CSS and ".dark .capri-logo" in G.PAGE_CSS and ".capri-btn" in G.PAGE_CSS
