@@ -212,7 +212,9 @@ def test_the_page_title_carries_the_logo_on_its_line(store, tmp_path):
         heads = [b.value for b in app.blocks.values() if isinstance(b, gr.HTML) and "capri-head" in str(b.value)]
         assert len(heads) == 1, heads
         h = heads[0]
-        assert f"<h2>{title}</h2>" in h and 'class="capri-logo"' in h
+        assert f'<h2 style="margin:0">{title}</h2>' in h and 'class="capri-logo"' in h
+        # the size inline, so the logo is drawn at it before the page's CSS arrives
+        assert f'height="{G.LOGO_H}"' in h and f"height:{G.LOGO_H}px" in h and "display:flex" in h
         b64 = h.split("data:image/svg+xml;base64,")[1].split('"')[0]
         assert base64.b64decode(b64).decode() == svg
     assert ".capri-head" in G.PAGE_CSS and ".dark .capri-logo" in G.PAGE_CSS and ".capri-btn" in G.PAGE_CSS

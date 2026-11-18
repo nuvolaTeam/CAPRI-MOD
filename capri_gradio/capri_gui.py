@@ -43,7 +43,7 @@ LOGO = HERE / "assets" / "capri_mod_logo.svg"
 LOGO_CSS = """
 .capri-head { display: flex; align-items: center; gap: 0.9em; flex-wrap: wrap; }
 .capri-head h2 { margin: 0 !important; }
-.capri-logo { height: 3.6em; width: auto; }
+.capri-logo { height: 50px; width: auto; }
 .dark .capri-logo { background: #ffffff; border-radius: 8px; padding: 2px 6px; }
 """
 #: the page's style: the results browser's buttons and the title line
@@ -58,15 +58,24 @@ def _mini_units() -> str:
     return ",".join(UNITS)
 
 
+#: the logo's height on the title line (px) and its width at the logo's aspect (684 x 540)
+LOGO_H = 50
+LOGO_W = round(LOGO_H * 684 / 540)
+
+
 def _title_html(title: str) -> str:
-    """The page's title line: the logo (an inline image, so the page needs no static files) beside the title."""
+    """The page's title line: the logo (an inline image, so the page needs no static files) beside the title. Its size
+    and the line's layout are inline, not only in the page's CSS: Gradio applies the CSS after the page is drawn, and
+    the image showed at its own size (684 x 540) until then (the project lead, 18 November 2026)."""
     import base64
     import html
     logo = ""
     if LOGO.exists():
         b64 = base64.b64encode(LOGO.read_bytes()).decode()
-        logo = f'<img class="capri-logo" src="data:image/svg+xml;base64,{b64}" alt="CAPRI-MOD logo">'
-    return f'<div class="capri-head">{logo}<h2>{html.escape(title)}</h2></div>'
+        logo = (f'<img class="capri-logo" src="data:image/svg+xml;base64,{b64}" alt="CAPRI-MOD logo" '
+                f'width="{LOGO_W}" height="{LOGO_H}" style="height:{LOGO_H}px;width:{LOGO_W}px;flex:none">')
+    return (f'<div class="capri-head" style="display:flex;align-items:center;gap:0.9em;flex-wrap:wrap">{logo}'
+            f'<h2 style="margin:0">{html.escape(title)}</h2></div>')
 
 
 def _scenario_choices(sdir):
