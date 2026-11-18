@@ -168,8 +168,10 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   K178's correction: the EU's base N surplus +2.5% -> -1.6% of CAPRI's; suckler cows -24.8 -> -23.9% (CAPRI -28.8),
   heifers -12.1 -> -10.2 (-10.3); activities' mean gap 2.0 -> 2.1, prices' 1.6; CAPRI's implied N-surplus duals now
   consistent across animals, 1.25-1.56 times the model's.
-- **K180 (open):** the model has no heifers where CAPRI's census has no fattening heifers (SK, AL, BA, MO), though
-  CAPRI's replacement heifers have levels there (Slovakia 1.8 kt N of manure missing).
+- **K180:** the bulls and heifers count CAPRI's census herds of all the activities they hold (bulls BULL + BULH,
+  heifers HEIL + HEIH + HEIR), not one activity's (the low-intensity bulls, the fattening heifers): a model head is one
+  animal; Slovakia's replacement heifers enter the model. Every per-head table rebuilt, totals unchanged; outside
+  Slovakia the solution is the same (within the solver's tolerance).
 - **K172, the 2017 bulls explained:** CAPRI's 2017 regional bull rows do not add up to its national ones (FR 934
   against 1,177); the model reproduces the regional rows (the -10.4% of the baseline check); the 2030 bulls are
   CAPRI's within 0.3%.

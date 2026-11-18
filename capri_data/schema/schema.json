@@ -2870,7 +2870,7 @@
     "unnamed",
     "wide"
    ],
-   "comment": "herd sizes 2017: CAPRI's HERD item (build_capri_base.py HERD_MAP; COWS = DCOW + SCOW; PIGS = CAPRI's SOWS herd, PIGF = the PIGS census less the sows); the loader renames SCOW, HEIF, HENS, POUL (loaders.HERD_ALIASES)",
+   "comment": "herd sizes 2017: CAPRI's HERD item summed over the CAPRI activities each model animal holds (build_capri_base.py HERD_MAP; BULL = CAPRI's BULL + BULH, HEIF = HEIL + HEIH + HEIR, the model's HFRS, since 18 November 2026, KNOWN_ISSUES K180; COWS = DCOW + SCOW; PIGS = CAPRI's SOWS herd, PIGF = the PIGS census less the sows); the loader renames SCOW, HEIF, HENS, POUL (loaders.HERD_ALIASES)",
    "columns": [
     {
      "name": "region",
@@ -2991,7 +2991,7 @@
    "notes": [
     {
      "kind": "origin",
-     "note": "Herds (1000 head) for the 221 regional units from CAPRI's 2017 HERD item; COWS = DCOW + SCOW; PIGS = sows (CAPRI SOWS), PIGF = CAPRI's PIGS census herd minus sows (Norway: CAPRI's PIGF herd); SHGM and SHGF are CAPRI's two sheep-and-goat herds. Read by the model (loaders.load_regional_animal_numbers, which renames to model codes) and by 15 builders.",
+     "note": "Herds (1000 head) for the 221 regional units from CAPRI's 2017 HERD item, summed over the activities each model animal holds (bulls BULL + BULH, heifers HEIL + HEIH + HEIR since 18 November 2026, KNOWN_ISSUES K180); COWS = DCOW + SCOW; PIGS = sows (CAPRI SOWS), PIGF = CAPRI's PIGS census herd minus sows (Norway: CAPRI's PIGF herd); SHGM and SHGF are CAPRI's two sheep-and-goat herds. Read by the model (loaders.load_regional_animal_numbers, which renames to model codes) and by 15 builders.",
      "evidence": "tools/build/build_capri_base.py:105-108 (HERD_MAP), :206-215, :233; capri_mod/data/loaders.py:147-169, :567; tools/pipeline/builders.json; CSV: 221 x 12 (index unnamed), COWS == DCOW+SCOW in every row",
      "checked": "2026-10-29"
     }

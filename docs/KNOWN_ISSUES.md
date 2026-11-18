@@ -81,7 +81,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K177](#k177) | The NLP calibration put minus the entitlement cut into the overshoot column's linear term where the QP's start held the base's rounding above the trend area: the overshoot was free in BG01, HU32, LV, PL11, PL31, PL41 and RO05 (about 199,000 thousand ha, a zero dual) | fixed (18 November 2026) |
 | [K178](#k178) | The 2030 runs took the young-animal coefficients of 2017 (calves per cow, replacements, piglets per sow): CAPRI's INPANI_ takes the simulation year's, DATA(.., "Y"); Spain's suckler cows 0.83 calves per head against CAPRI's 2030 0.90, the EU's piglet balance 6.6% short at the 2030 base | fixed (18 November 2026) |
 | [K179](#k179) | The 2030 runs took the 2017 manure N, P2O5 and K2O per head (dairy cows' N raised with the milk yield): CAPRI computes them from the simulation year's rations before it solves; the EU's N excretion at the 2030 base 5.4% above CAPRI's 2030 EXCRET (dairy cows +13%) | fixed (18 November 2026) |
-| [K180](#k180) | The model's herd table holds CAPRI's census heifers (HERD of HEIF), none in Slovakia, Albania, Bosnia and Montenegro, where CAPRI's replacement heifers (HEIR) have levels: their manure, feed and young-heifer use are missing there | open |
+| [K180](#k180) | The model's bulls and heifers were CAPRI's census herds of one of their activities (bulls: the low-intensity BULL, a third of CAPRI's BULF; heifers: the fattening heifers HEIF, 15% of HEIF + HEIR) while their coefficients carry all of them; Slovakia, with replacement heifers but no fattening heifers, had none | fixed (18 November 2026) |
 | [K141](#k141) | CAPRI bug: CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it (the project lead's decision) |
 | [K136](#k136) | CAPRI's endogenous entitlement limit (def_endCut.gms: no area payment beyond the trend area) was not in the model; ported with CAPRI's 2030 ceilings computed from its CAP 2014-2020 tables | fixed (13 November 2026) |
 | [K137](#k137) | The reported UAA left out the idled histosols (CAPRI's IHISGR, IHISCR stay in GRAS, ARAC and UAAR): the Green Deal's surplus per ha looked short of its target where the row met it | fixed (13 November 2026) |
@@ -3818,19 +3818,32 @@ animal_numbers.csv). The 2030 bulls match CAPRI's within 0.3%.
   within 0.3%, so the 2030 runs are not affected; a 2017 comparison of bulls takes CAPRI's regional rows.
 
 <a id="k180"></a>
-### K180: No heifers in the model where CAPRI's census has no fattening heifers (found 18 November 2026)
+### K180: The bulls' and heifers' heads were one of their CAPRI activities' herds (found 18 November 2026)
 
-The model's heifer herd (HFRS) is CAPRI's census herd of its fattening heifers, HERD of HEIF (tools/build/
-build_capri_base.py HERD_MAP), while the heifers' coefficients carry the fattening and the replacement heifers (HEIL,
-HEIH, HEIR) over those heads. In Slovakia, Albania, Bosnia and Herzegovina and Montenegro CAPRI's 2017 results have
-replacement heifers (HEIR: SK02 13.5 thousand, AL 40.5, BA 21.1, MO 6.5 LEVL) but no HEIF row, so the model has no
-heifers there and their manure, feed and use of young heifers are not in the model. Found with K179: at the 2030
-base the model's manure N is CAPRI's 2030 EXCRET in every member state but these four (SK 1.8 kt N short, 4.4% of
-its excretion; AL 2.2 kt, BA 1.2, MO 0.3; P2O5 and K2O 4-10%).
+The model's herd table (animal_numbers.csv, tools/build/build_capri_base.py HERD_MAP) took each animal's census herd
+from CAPRI's HERD item of one CAPRI activity: the bulls from BULL, CAPRI's low-intensity bull fattening, not BULF =
+BULL + BULH; the heifers (HFRS) from HEIF, the fattening heifers HEIL + HEIH, without the replacement heifers HEIR.
+The heifers' and bulls' coefficients (output, costs, feed, manure, young animals, PMP terms) carry the totals of all
+their activities (HEIF and HEIR; BULF), divided by those heads, so the totals were CAPRI's but a model head stood for
+3.0 bulls and 6.7 heifers on average (FR52: bulls 20.1 of 67.0 thousand head, heifers 46.4 of 461.2), and where CAPRI
+has replacement heifers but no fattening heifers the model had no heifers: Slovakia (SK02 18.7 thousand head; in the
+data also Albania, Bosnia and Herzegovina, Montenegro, not yet supply regions). Found with K179: Slovakia's 2030 base
+excretion 1.8 kt N short of CAPRI's (4.4%). Over all the data's regions the bulls were 2,590 thousand against
+CAPRI's 7,774, the heifers 3,007 against 20,279.
 
-- **Effect:** the four countries' heifers (the EU: Slovakia's, 0.02% of the EU's manure N)
+- **Effect:** Slovakia's heifers (their manure, feed, young heifers, replacement cows); elsewhere the unit of a bull
+  and heifer head only: every per-head coefficient divided totals by the heads, so the totals and the solution are
+  unchanged (checked, see the status)
 - **In 9t:** -
-- **Status:** open (the herd basis of the heifers: K172, K173)
+- **Status:** fixed 18 November 2026: HERD_MAP sums the census herds of every activity the model's animal holds
+  (bulls BULL + BULH, heifers HEIL + HEIH + HEIR; CAPRI's aggregate herds equal the sums in all 314 of its regions);
+  the 45 tables downstream rebuilt (tools/pipeline/builders.json). Audit: every per-head table keeps heads x
+  coefficient per region (manure N, P, K and methane per head, output, revenue, costs, feed, labour, livestock units,
+  premiums, the mitigation options' costs and savings, the young-animal balances; per head x0.32 bulls, x0.12
+  heifers); the PMP terms scale as the head unit requires (g x h0/h1 as Q = g / x; the cattle splits' q x (h0/h1)^2).
+  Solved at the 2017 base with the old and the new tables, DE21 and ES41 agree within 5e-7 (relative), FR52 within
+  2e-6 but for its fallow (4e-6 kha, 5e-5 relative); SK02 moves by up to 0.07% (its heifers). With it the 2030 base excretion (K179) is CAPRI's EXCRET in every member
+  state, Slovakia's too (N, P2O5, K2O to rounding). Test: test_capri.py::test_cattle_heads_are_capris_herds_of_every_activity_they_hold
 
 <a id="k179"></a>
 ### K179: The 2030 runs took the 2017 manure per head (found 18 November 2026)
@@ -3869,7 +3882,7 @@ manure N per head the duals implied by CAPRI's animals were consistent across an
   capri_greendeal_ref/1730/environment): the 2030 baseline's LEVL x MANN/MANP/MANK over its activities (MAACT) per
   territory group over the model's 2030 base heads, as the 2017 coefficients are built (build_livestock_output_coef.
   per_head) and with the 2030 heads of K178 (build_young_animals_2030.herds_2030); at the model's 2030 base the
-  excretion is CAPRI's EXCRET in every member state but K180's four (EU: within 0.04%). The projection puts the
+  excretion is CAPRI's EXCRET in every member state (to rounding; until K180, the same day, all but four: EU within 0.04%). The projection puts the
   year's N table into data["livestock_manure_n_coef"] (ProjectionModule.project_data; the milk rule and its parameter
   REQ_N_KG_MILK removed); the P2O5 and K2O tables follow the run's market year (capri_mod/fert/npk.manure_coef_table,
   NPKData.manure_per_head). A year without its tables is an error. Limits: the dataOut coefficients are those at the

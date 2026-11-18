@@ -4921,8 +4921,8 @@ def test_manure_per_head_takes_capris_2030_coefficients_at_the_2030_market_year(
     2030 baseline's dataOut): FR52's suckler cows 65.159 kg N per head (CAPRI's SCOW MANN; the model's 2030 heads are
     CAPRI's level there; 68.575 in 2017), its dairy cows 144.79 (CAPRI's DCOW, the DCOL and DCOH mix; 169.25 in 2017).
     At the model's projected 2030 heads the EU's excretion is CAPRI's 2030 EXCRET (8,985.6 kt N, 4,475.2 kt P2O5,
-    8,686.6 kt K2O): within 0.05%, the rest Slovakia's replacement heifers, which the model's herd table does not hold
-    (CAPRI's 2017 census has no HEIF there; 1.8 kt N). With the 2017 coefficients it was +3.6% N, -2.9% P2O5, -1.7% K2O.
+    8,686.6 kt K2O; to rounding since K180 gave Slovakia its replacement heifers, 1.8 kt N short before). With the 2017
+    coefficients it was +3.6% N, -2.9% P2O5, -1.7% K2O.
     The P2O5 and K2O tables follow the run's market year (NPKData.manure_per_head); N reaches the environmental module
     through data["livestock_manure_n_coef"], which the projection sets to the year's table."""
     from capri_mod.fert.npk import manure_coef_table, NPKData
@@ -4940,7 +4940,7 @@ def test_manure_per_head_takes_capris_2030_coefficients_at_the_2030_market_year(
         t = manure_coef_table(nut, 2030)
         tot = sum(float(h.at[r, a]) * tr.factor("herds", a, 2030, region=r) * float(t.at[r, a])
                   for r in eu for a in t.columns if a in h.columns and pd.notna(t.at[r, a])) / 1000.0
-        assert abs(tot / capri - 1.0) < 5e-4, (nut, tot)
+        assert abs(tot / capri - 1.0) < 1e-6, (nut, tot)
     cur = I.current()
     old = getattr(cur, "market_year", None)
     D = NPKData.get()
@@ -4953,6 +4953,26 @@ def test_manure_per_head_takes_capris_2030_coefficients_at_the_2030_market_year(
         cur.market_year = old
     with pytest.raises(ValueError):
         D.manure_per_head("FR520000", "N", "DCOW")
+
+
+def test_cattle_heads_are_capris_herds_of_every_activity_they_hold(data):
+    """K180 (18 November 2026): the model's bulls and heifers count CAPRI's census herd (HERD) of every activity their
+    coefficients carry: bulls CAPRI's BULL + BULH (its BULF herd), heifers HEIL + HEIH + HEIR (fattening and
+    replacement heifers). Until then the bulls were the low-intensity BULL herd alone and the heifers the fattening
+    heifers' HEIF alone, the coefficients dividing all the activities' totals by those heads; where CAPRI has
+    replacement heifers but no fattening heifers (Slovakia, Albania, Bosnia, Montenegro) the model had none. FR52 (res_17FR
+    HERD): bulls 20.14 + 46.86, heifers 16.10 + 30.34 + 414.72 (thousand head); SK02's 18.65 replacement heifers. The
+    totals stay CAPRI's: FR52's heifers excrete CAPRI's 2017 HEIF and HEIR LEVL x MANN, 21,776 t N."""
+    h = data["animal_numbers"]
+    assert abs(h.at["FR520000", "BULL"] - (20.1380072854242 + 46.8626792692183)) < 1e-9
+    assert abs(h.at["FR520000", "HFRS"] - (16.096323226091 + 30.3380367570865 + 414.721754360918)) < 1e-9
+    assert abs(h.at["SK020000", "HFRS"] - 18.6524037673613) < 1e-9
+    for reg in ("SK010000", "SK020000", "SK030000", "SK040000"):
+        assert h.at[reg, "HFRS"] > 0 and data["livestock_manure_n_coef"].at[reg, "HFRS"] > 0, reg
+    raw = pd.read_csv(DATA_DIR / "2017" / "supply" / "animal_numbers.csv", index_col=0)   # the Western Balkans too
+    assert (raw.loc[["AL000000", "BA000000", "MO000000"], "HEIF"] > 0).all()
+    tot = h.at["FR520000", "HFRS"] * data["livestock_manure_n_coef"].at["FR520000", "HFRS"]
+    assert abs(tot - (219.880590090563 * 87.2223692995144 + 35.5378556639329 * 73.102089549667)) < 1e-6 * tot
 
 
 def test_labour_accounts_and_set_aside_as_capri(data):

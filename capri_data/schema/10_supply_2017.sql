@@ -35,7 +35,7 @@ CREATE TABLE animal_numbers (
     value DOUBLE NOT NULL CHECK (value >= 0),
     PRIMARY KEY (region, herd)
 );
-COMMENT ON TABLE animal_numbers IS 'herd sizes 2017: CAPRI''s HERD item (build_capri_base.py HERD_MAP; COWS = DCOW + SCOW; PIGS = CAPRI''s SOWS herd, PIGF = the PIGS census less the sows); the loader renames SCOW, HEIF, HENS, POUL (loaders.HERD_ALIASES)';
+COMMENT ON TABLE animal_numbers IS 'herd sizes 2017: CAPRI''s HERD item summed over the CAPRI activities each model animal holds (build_capri_base.py HERD_MAP; BULL = CAPRI''s BULL + BULH, HEIF = HEIL + HEIH + HEIR, the model''s HFRS, since 18 November 2026, KNOWN_ISSUES K180; COWS = DCOW + SCOW; PIGS = CAPRI''s SOWS herd, PIGF = the PIGS census less the sows); the loader renames SCOW, HEIF, HENS, POUL (loaders.HERD_ALIASES)';
 INSERT INTO value_units SELECT 'animal_numbers', h, 'U_1000hd', 'builder', 'CAPRI''s HERD item; CAPRI''s unit table gives these animals'' LEVL in U_1000hd, not their HERD'
 FROM (VALUES ('DCOW'), ('SCOW'), ('COWS'), ('BULL'), ('HEIF'), ('CALV'), ('PIGS'), ('PIGF'), ('SHGM'), ('SHGF')) t(h);
 INSERT INTO value_units SELECT 'animal_numbers', h, 'U_Miohd', 'builder', 'CAPRI''s HERD item of poultry, read as million heads by the loader (loaders.POULTRY_MILLION_HEAD); CAPRI''s unit table gives HENS and POUF LEVL in U_Miohd'
