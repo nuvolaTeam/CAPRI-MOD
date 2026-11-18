@@ -336,11 +336,14 @@ def _load_price_follows():
     with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "model_price_follows.csv", newline="") as f:
         rows = list(csv.DictReader(f))
     return (tuple((r["activity"], r["commodity"]) for r in rows if r["eu_market"] == "1"),
-            tuple((r["activity"], r["commodity"]) for r in rows))
+            tuple((r["activity"], r["commodity"]) for r in rows),
+            {r["activity"]: float(r["share"]) for r in rows})
 
 
-#: (activity, commodity): the price that follows a market's, in the EU's markets and in all (with Norway's raw milk)
-PRICE_FOLLOWS_EU, PRICE_FOLLOWS_ALL = _load_price_follows()
+#: (activity, commodity): the price that follows a market's, in the EU's markets and in all (with Norway's raw milk);
+#: PRICE_FOLLOWS_SHARE: the share of the commodity's relative price change the activity's price takes (CAPRI's 0.5
+#: for durum wheat, arm/set_prices.gms l. 57-61, K168; 1 for beet and raw milk)
+PRICE_FOLLOWS_EU, PRICE_FOLLOWS_ALL, PRICE_FOLLOWS_SHARE = _load_price_follows()
 
 
 def _load_capri_set(name):

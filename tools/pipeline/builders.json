@@ -708,6 +708,28 @@
    ]
   },
   {
+   "task": "build_price_transmission_2030",
+   "builder": "build_price_transmission_2030",
+   "args": [],
+   "inputs": [
+    "capri_data/2017/supply/livestock_product_value_by_market_coef.csv",
+    "capri_data/codes/model_activities.csv",
+    "capri_data/codes/model_activity_classes.csv",
+    "capri_data/codes/model_commodities.csv"
+   ],
+   "code": [
+    "tools/build/build_price_transmission_2030.py",
+    "tools/lib/_grep.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+   ],
+   "outputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/price_transmission_2030.csv"
+   ]
+  },
+  {
    "task": "build_cap_greening",
    "builder": "build_cap_greening",
    "args": [],
@@ -965,6 +987,23 @@
    "outputs": [
     "capri_data/validation/capri_eu27_levels_2017_capreg.csv",
     "capri_data/validation/capri_eu27_levels_2030_ref.csv"
+   ]
+  },
+  {
+   "task": "build_capri_ms_market_prices_2030",
+   "builder": "build_capri_ms_market_prices_2030",
+   "args": [],
+   "inputs": [],
+   "code": [
+    "tools/build/build_capri_ms_market_prices_2030.py",
+    "tools/lib/_grep.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+   ],
+   "outputs": [
+    "capri_data/validation/capri_ms_market_prices_2030_ref.csv"
    ]
   },
   {

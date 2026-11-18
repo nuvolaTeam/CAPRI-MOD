@@ -249,6 +249,12 @@ class NLPBlock:
                 if _cv and float(_cv.get("uaa", 0.0) or 0.0) > 0:
                     _lb = float(_cv["req"]) / float(spec["catc"]["uaa"])
                     spec["catc"] = dict(spec["catc"], lb=_lb, ub=max(float(spec["catc"]["ub"]), _lb))
+                if self._wc_fixed():
+                    # CAPRI's Green Deal group: the option's share fixed at 1e-6 (FixMiti), so the catch crops are the
+                    # CATC activity at its input cost (no cost curve of the option, no calibration term, no MaxShare;
+                    # winterCover_ limits them) and leave the loss cascade at its base (K170)
+                    spec["catc"] = dict(spec["catc"], lin=0.0, sqr=0.0, fixmiti=True,
+                                        ub=max(1.0, float(spec["catc"].get("lb", 0.0) or 0.0)))
                 spec["drop_labels"] = list(spec["drop_labels"]) + ["winter_cover"]
             if npk is not None:
                 import copy as _cp
@@ -274,10 +280,15 @@ class NLPBlock:
                     # the N-surplus target with the mineral N of the fertilisation block (CAPRI SURTOT_REST_ /
                     # e_SURTOTHa): the row's linear mineral parts out, the purchases in
                     npk["n_rows"] = [("N_balance", self._n_row_mineral_parts(A, labels))]
+                    # the row's constant without its mineral part (the base manure trade's displacement of mineral N,
+                    # supply.manure_base_trade "capri"): the purchases carry the mineral N here (K167)
+                    _nbc = getattr(self.ev, "nb_const", None)
+                    _add_min = float(_nbc[1]) if _nbc else 0.0
+                    npk["n_rows_rhs_add"] = {"N_balance": _add_min}
                     if spec.get("catc"):
                         # the requirement's catch-crop N was put on the row as a constant; the
                         # NLP form's catch-crop share carries it (catc_n), so the constant is taken back out
-                        npk["n_rows_rhs_add"] = {"N_balance": float(getattr(self.ev, "cover_dbf_nb", 0.0) or 0.0)}
+                        npk["n_rows_rhs_add"] = {"N_balance": _add_min + float(getattr(self.ev, "cover_dbf_nb", 0.0) or 0.0)}
                     spec["drop_labels"] = list(spec["drop_labels"]) + ["N_balance"]
             if cal is not None:
                 spec["dq"] = np.array([cal["dq"].get(l_, 0.0) for l_ in cols])
@@ -563,6 +574,7 @@ class NLPBlock:
                                   "delta": (self.sv.wc_solved - _c["m0"]) * _c["uaa"], "biofix": _c["biofix"],
                                   "share": self.sv.wc_solved, "lb_share": float(_c.get("lb", 0.0)),
                                   "max_share": float(_c["ub"]), "endogenous": True,
+                                  "cascade_share": float(_c["m0"]) if _c.get("fixmiti") else self.sv.wc_solved,
                                   "potential": float(_c.get("potential", 0.0))}
         if self.res.last_npk:
             for nut, o_ in self.res.last_npk.items():

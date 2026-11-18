@@ -48,9 +48,9 @@ MAP = {"DCOW": "DCOW", "SCOW": "BCOW", "BULF": "BULL", "HEIF": "HFRS", "HEIR": "
 #: two groupings, two files:
 #: - BAL_BY_SEX (young_animals_by_sex_2017.csv), CAPRI's balances (INPANI_ per young animal): male and female calves
 #:   (YCAM / ICAM, YCAF / ICAF), young bulls and young heifers (YBUL / IBUL, YHEI / IHEI); read with the model's cattle
-#:   member splits (RegionalSupplyModel.use_cattle_member_splits);
-#: - BAL_POOLED (young_animals_2017.csv, the model's default): calves and young cattle pooled across the sexes (the
-#:   per-sex markets did not converge yet, KNOWN_ISSUES K65)
+#:   member splits (RegionalSupplyModel.use_cattle_member_splits, the model's default since 17 November 2026);
+#: - BAL_POOLED (young_animals_2017.csv): calves and young cattle pooled across the sexes, read with the splits off
+#:   (the default from 22 October to 17 November 2026, KNOWN_ISSUES K65)
 BAL_BY_SEX = {"calves_m": ({"YCAM"}, {"ICAM"}, ("YCAM",)),
        "calves_f": ({"YCAF"}, {"ICAF"}, ("YCAF",)),
        "young_m": ({"YBUL"}, {"IBUL"}, ("YBUL",)),

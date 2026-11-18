@@ -31,6 +31,7 @@ class EnvParameters(_Slots):
         "amm_tm",             # CAPRI's ammonia sub-activities (ammonia_tech_model.csv), loaded by _manure_n2o_tech
         "nh3_fac_cache",      # NH3 factors, by region
         "sub_cache",          # manure substitution terms, by region (dropped when the manure-trade switch changes)
+        "base_trade_cache",   # the base manure trade levels (exports, imports; t N), by (region, areas, herds) (K167)
         "row_cache",          # one region's row of a data table, by (table, region)
         "need_base_cache",    # the base crop need weights, by region
         "res_av_cache",       # residue availability, by region
@@ -82,6 +83,7 @@ MOVED_ENV: dict = {
     "_amm_tm": "par.amm_tm",
     "_nh3_fac_cache": "par.nh3_fac_cache",
     "_sub_cache": "par.sub_cache",
+    "_base_trade_cache": "par.base_trade_cache",
     "_row_cache": "par.row_cache",
     "_need_base_cache": "par.need_base_cache",
     "_res_av_cache": "par.res_av_cache",

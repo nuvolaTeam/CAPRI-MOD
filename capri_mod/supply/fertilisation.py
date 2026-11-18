@@ -244,7 +244,8 @@ class FertilisationBlock:
                     sqn[nut_][a] = self._need_yf(a, y0, yc, nut_) if (y0 > 0 and yc > 0) else 1.0
         shares = D.crop_shares(cr)
         # manure N applied per unit of each column: the environmental accounts' own (excreted less housing and storage
-        # losses, net of the base trade shares, imports per ha of crops), as the inner model reads it
+        # losses; with supply.manure_base_trade "shares" also net of the base trade shares, imports per ha of crops; with
+        # "capri" the base trade is the region's constant E_const below), as the inner model reads it
         mint = dict(getattr(self.ev, "n_intensity", {}) or {})
         unitsN = {a: env_.unit_nitrogen_balance(a, ycur, rid, {k_: v_ for k_, v_ in mint.items() if k_ in (a, "__credit__")},
                                            yields_scen=self._yields_scen_now())
@@ -284,15 +285,25 @@ class FertilisationBlock:
                 own[j] = D.crop_coef(cr, nut, a, "own_kg_ha")
                 poolc[j] = D.crop_coef(cr, nut, a, "pool_kg_ha")
                 mine0[j] = float(env_._base_mineral_rate(rid, a)) if nut == "N" else D.crop_coef(cr, nut, a, "mine_kg_ha")
+            # the region's base manure trade: with supply.manure_base_trade "capri" a level of the region (CAPRI's
+            # ManureNPK_ with v_manureExports / v_manureImports at the calibration point), base imports - base
+            # exports in t, and the columns' manure their full manure; with "shares" carried by the columns (K167)
+            _lvl = str(_settings().get("supply.manure_base_trade")) == "capri"
+            E_const = 0.0
             if nut == "N":
                 man = eN.copy()
+                if _lvl:
+                    E_const = float(env_.nitrogen_balance_constants(rid, ycur).get("n_manure_applied", 0.0) or 0.0)
             else:
                 # manure P2O5 / K2O per head (CAPRI 2017 totals / the model's herds), applied in the region in the
                 # proportion CAPRI's 2030 reference applies it (net of the base net exports, ManureNPK_)
                 man = np.array([D.manure_per_head(rid, nut, a) if a in ANIMALS else 0.0 for a in acts])
                 # with manure trade off nothing leaves the region: all manure P / K applied, as for N
                 if bool(getattr(getattr(getattr(self.seen, "env_for_surplus", None), "seen", None), "manure_trade_on", True)):
-                    man = man * self._npk_applied_ratio(cr, nut)
+                    if _lvl:
+                        E_const = (self._npk_applied_ratio(cr, nut) - 1.0) * float(man @ xb)
+                    else:
+                        man = man * self._npk_applied_ratio(cr, nut)
             # kappa: NUTNED_ summed over the groups at base (all flows interior), the need net of the permanent
             # crops' own residues scaled together (REGISTERED: CAPRI's multiplier is on the need alone; with the model's
             # base levels and CAPRI's 2030 coefficients, scaling the need alone left the permanent groups' own residues
@@ -300,7 +311,7 @@ class FertilisationBlock:
             #   kappa x (need0 - gc x own0) = eff x M0 + g0 x E0 + gc x C0
             key = (cr, nut)
             if key not in kap:
-                need0 = float(need @ xb); M0 = float(mine0 @ xb); E0 = float(man @ xb)
+                need0 = float(need @ xb); M0 = float(mine0 @ xb); E0 = float(man @ xb) + E_const
                 C0 = float(poolc @ xb); O0 = float(own @ xb)
                 perm_g = [(sum(float(shares.get(acts[j], {}).get(g_, 0.0)) * need[j] * xb[j] for j in crop_cols),
                            sum(float(shares.get(acts[j], {}).get(g_, 0.0)) * own[j] * xb[j] for j in crop_cols))
@@ -372,6 +383,7 @@ class FertilisationBlock:
                     Ecols += [(pk_[0], -1.0), (pk_[1], 1.0)]
             out["nutrients"][nut] = {
                 "groups": groups, "E": Ecols, "C": [(j, float(poolc[j])) for j in range(n) if poolc[j] > 0],
+                "E_const": E_const,
                 "eff": eff, "g0": g0, "gc": gc, "slope": endo_slope(g0, m0E, nut), "m0E": m0E,
                 "price": float(R.uvag_eur_t) if R.uvag_eur_t == R.uvag_eur_t else 0.0, "kappa": k,
                 "own_scaled": bool(kap.get((key, "own_scaled"), True)),

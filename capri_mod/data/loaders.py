@@ -48,7 +48,7 @@ _FILE_CATEGORY = {
     "base_areas.csv": "supply", "yields.csv": "supply", "animal_numbers.csv": "supply",
     "cap_premium_activity.csv": "supply", "producer_prices_regional.csv": "supply",
     "livestock_output_coef.csv": "supply", "nutrients_regional.csv": "supply",
-    "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "market_prod_grof_2030.csv": "market", "bilateral_flows_{BY}.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_{BY}.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_{BY}.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.csv": "market", "world_market_baseline_products.csv": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "techn_mix_2030.csv": "supply", "pmp_capri_2030_mix.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_{BY}.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
+    "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "market_prod_grof_2030.csv": "market", "bilateral_flows_{BY}.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_{BY}.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_{BY}.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.csv": "market", "world_market_baseline_products.csv": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "techn_mix_2030.csv": "supply", "price_transmission_2030.csv": "supply", "pmp_capri_2030_mix.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_{BY}.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
     "livestock_feed_coef.csv": "feed",
     "eu_cake_feed_bas.csv": "market",
     "biofuel_feedstock_{BY}.csv": "market", "biofuel_use_share_{BY}.csv": "market", "biofuel_market_{BY}.csv": "market", "biofuel_feedstock_2030.csv": "market", "biofuel_use_share_2030.csv": "market", "biofuel_market_2030.csv": "market", "crushing_parameters_{BY}.csv": "market", "crushing_parameters_2030.csv": "market", "feed_bulks_eu.csv": "market", "feed_bulks_eu_share.csv": "market", "dairy_processing.csv": "market",
@@ -460,7 +460,8 @@ def _load_pmp_capri_2030(d: Path, stem: str = "pmp_capri_2030"):
     out = {r: {(a, b): float(v) for a, b, v in zip(g.act_i, g.act_j, g.g)} for r, g in read_input(f).groupby("region")}
     fa = d / f"{stem}_animals.csv"
     # the animals' herd terms grouped for the cattle member splits (HEIL/HEIH/HEIR, the calves per sex) when those are
-    # on (RegionalSupplyModel.use_cattle_member_splits, off by default; tools/build/build_animal_pmp_capri_2030.py --splits)
+    # on (RegionalSupplyModel.use_cattle_member_splits, on by default since 17 November 2026, K65;
+    # tools/build/build_animal_pmp_capri_2030.py --splits)
     try:
         from capri_mod.supply.supply_module import RegionalSupplyModel as _RSM
         if getattr(_RSM, "use_cattle_member_splits", False) and (d / f"{stem}_animals_members.csv").exists():
@@ -629,6 +630,11 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
                                           on=["region", "activity"], how="inner", validate="one_to_one").groupby("region")}
                       if tm is not None and pm is not None else None)(
             _load_optional_csv(data_dir, "techn_mix_2030.csv"), _load_optional_csv(data_dir, "pmp_capri_2030_mix.csv")),
+        # CAPRI's transmission of the market prices to the outputs' unit values (arm/set_prices.gms: the absolute change;
+        # tools/build/build_price_transmission_2030.py, K169): {member state: {(activity, commodity): factor}}
+        "price_transmission": (lambda t: {ms: {(r.activity, r.commodity): float(r.factor) for r in g.itertuples()}
+                                          for ms, g in t.reset_index().groupby("ms")} if t is not None else None)(
+            _load_optional_csv(data_dir, "price_transmission_2030.csv")),
         # the same by product, columns 'ACT.MARKET' (EUR per head): what each market price moves
         "livestock_product_value_by_market_coef": _load_optional_csv(
             data_dir, "livestock_product_value_by_market_coef.csv"),

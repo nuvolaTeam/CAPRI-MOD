@@ -218,7 +218,7 @@ class LivestockBlock:
             if ps is not None and pv is not None and hasattr(pv, "get"):
                 bv = pv.get(f"{a}.BEEF")
                 if bv is not None and pd.notna(bv):
-                    dv += float(di["dbeef_rel"]) * float(bv) * float(ps.get("BEEF", ps.get(a, 0.0)) or 0.0)
+                    dv += float(di["dbeef_rel"]) * float(bv) * self._pt(a, "BEEF") * float(ps.get("BEEF", ps.get(a, 0.0)) or 0.0)
             for g, rec in ycoef.items():                          # young animals bought and sold per stall
                 chg = float(rec.get("value_eur_head", 0.0) or 0.0) * (float(yr.get(g, 1.0)) - 1.0)
                 if not chg:
@@ -386,7 +386,7 @@ class LivestockBlock:
             if dmr and ps is not None and pv is not None and hasattr(pv, "get"):
                 mv = pv.get(f"{a}.MILK")
                 if mv is not None and pd.notna(mv):
-                    dv = dmr * float(mv) * float(ps.get("MILK", ps.get(a, 0.0)) or 0.0)
+                    dv = dmr * float(mv) * self._pt(a, "MILK") * float(ps.get("MILK", ps.get(a, 0.0)) or 0.0)
             ca = np.concatenate([ca, [cal[(a, opt)] + r0 * c - dv + self._ghg_cost('genet', (a, opt))]])
             start = np.concatenate([start, [0.0]])
             self.ev.genet_cols[(a, opt)] = Aa.shape[1] - 1
@@ -463,7 +463,7 @@ class LivestockBlock:
         if ps is not None and pv is not None and hasattr(pv, "get"):
             mv = pv.get("DCOW.MILK")
             if mv is not None and pd.notna(mv):
-                dmilk = float(di["dcomi_rel"]) * float(mv) * float(ps.get("MILK", ps.get("DCOW", 0.0)) or 0.0)
+                dmilk = float(di["dcomi_rel"]) * float(mv) * self._pt("DCOW", "MILK") * float(ps.get("MILK", ps.get("DCOW", 0.0)) or 0.0)
         ca = np.concatenate([ca, [cz - dmilk + self._ghg_cost('dairy')]])
         start = np.concatenate([start, [0.0]])
         self.ev.dairy_col = Aa.shape[1] - 1

@@ -310,6 +310,12 @@ class LandBlock:
                         _w.warn(f"manure market: substitution factor unavailable for "
                                 f"{self.data.region_id} ({_exc!r}); using availability")
                         sub = float(a_av)
+                # with the base trade a level of the region (supply.manure_base_trade "capri", K167) the animals'
+                # manure (man_d) is their full manure and the base exports a constant of the region: the manure kept
+                # at base, the pool's measure of the region's supply, is the same as with the shares
+                _x0 = float(env_.base_manure_trade(self.data.region_id)[0]) \
+                    if (env_ is not None and str(_settings().get("supply.manure_base_trade")) == "capri") else 0.0
+                man0 = man0 - _x0
                 if man0 > 1e-6:
                     pp = float(getattr(self.seen, "manure_pool_price", 0.0) or 0.0)
                     # CAPRI supply/define_manure_trade_costs.gms l. 66-71: p_manureBuyCostSlope = 50 / (GROF / 100), EUR
@@ -336,13 +342,15 @@ class LandBlock:
                             Aa[labels.index("mineral_N"), -1] = -sign * sub
                         pcols.append(Aa.shape[1] - 1)
                     capr = np.zeros(Aa.shape[1]); capr[:n] = -e; capr[pcols[0]] = 1.0
-                    Aa = np.vstack([Aa, capr]); ba = np.concatenate([ba, [0.0]])
+                    # (with the base exports a constant, K167: base exports + change <= manure)
+                    Aa = np.vstack([Aa, capr]); ba = np.concatenate([ba, [-_x0]])
                     labels.append("manure_export_cap")
                     self.ev.pool_cols = pcols
                     if tt is not None:
                         self.ev.pool_lb["N"] = {pcols[0]: -tt["e0"], pcols[1]: -tt["i0"]}
                     self.res.manure_supply0 = man0
                     self.res.pool_manure_vec = e.copy()
+                    self.res.pool_manure_x0 = _x0
                     self.ev.pool_avail = sub
                     pool_k = 2
             # ---- CAPRI's P and K manure markets (manureTradeNew: e_netMTrade, e_costMTrade and the pools by FOUT,

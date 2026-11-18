@@ -310,7 +310,7 @@ class HessianBlock:
                     sig[y] = float(sig0.get(y, 0.0)) + dr
                     for _a_f, _c_f in PRICE_FOLLOWS_EU:          # capri_data/codes/model_price_follows.csv
                         if y == _c_f and _a_f in sig.index:
-                            sig[_a_f] = sig[_c_f]
+                            sig[_a_f] = PRICE_FOLLOWS_SHARE[_a_f] * sig[_c_f]
                     sm.seen.yani_price_ratio, sm.seen.yani_price_ratio_ms, sm.seen.yani_price_ratio_m = yr0
                     dr_ms = {}
                 sm.seen.feed_bulk_ratio = self.feed_bulk_price_ratios(sig)

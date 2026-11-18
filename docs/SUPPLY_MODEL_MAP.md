@@ -160,5 +160,6 @@ abatement block's inputs) were supplied from the CAPRI installation; each builde
 
 Policy file of a "default" star 3.0 scenario; whether set-aside, sugar quota and entitlement data are zero in 2030;
 whether the LUC FOC system binds land without a carbon price; PSD of CAPRI's group PMP matrix; whether the fertiliser
-prior modes are reset each market iteration; how far the Green Deal fixings (FixMiti, set_miti_bounds) leave the
-non-convex abatement terms live; whether CAPRI fixes FRMI/FPRI/FENI and how it treats straw and COMF feed losses.
+prior modes are reset each market iteration; whether CAPRI fixes FRMI/FPRI/FENI and how it treats straw and COMF feed
+losses. Determined 18 November 2026 (was listed here): the Green Deal group's FixMiti fixes only the winter cover
+option (v_Miti(CATC, WinterCov) = 1e-6; its run reports that share in every unit); the other options stay free (K170).

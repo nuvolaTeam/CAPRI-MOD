@@ -145,6 +145,10 @@ class ManureBlock:
             ev = getattr(mo.res, "pool_manure_vec", None) if prod == "N" else \
                 (getattr(mo.res, "pool_manure_vec_pk", None) or {}).get(prod)
             emax = float(ev @ y[:len(ev)]) if ev is not None else 0.0
+            if prod == "N":
+                # the base exports a constant of the region (supply.manure_base_trade "capri", K167): what the change
+                # of exports can take is the manure produced less them, as the region's own cap row
+                emax -= float(getattr(mo.res, "pool_manure_x0", 0.0) or 0.0)
             k = self.POOL_OF_PREFIX.get(reg[:2], reg[:2])
             sched.setdefault(k, []).append((th_e, th_i, sl, max(emax, 0.0)))
             # the trade columns' lower bounds (supply.manure_trade_form "capri": minus the gross trade at CAPRI's

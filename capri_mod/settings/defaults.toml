@@ -198,9 +198,10 @@ entitlement_limit = true
 premium_response = "capri"
 # the last step at which the premiums are recomputed (calculate_premiums.gms: step.pos le 10)
 premium_response_max_step = 10
-# DEPARTURE: CAPRI optimises replacement heifers and the four calf activities on their own and clears young animals
-# per sex; off because the Farm-to-Fork run does not converge with them (K65); to be switched to CAPRI's setting
-use_cattle_member_splits = false
+# CAPRI's setting since 17 November 2026 (K65, register DEP-4 closed): replacement heifers and the four calf activities
+# optimised on their own, young animals cleared per sex (INPANI_). false: the pooled young-animal markets and the
+# intensity pairs only (the former default, kept to compare)
+use_cattle_member_splits = true
 # CAPRI has no variable for an activity without a level (p_technFact): held at zero by its bounds (CAPRI's setting
 # since 23 October 2026). The NLP failures that had kept it off were two inconsistencies, both fixed: the crop
 # diversification index took the fixed columns' logs, and the permanent-grassland rule applied to a grassland of
@@ -308,6 +309,31 @@ manure_pool_slope = 0.05
 # 17 November 2026) or "net" (capri-mod's form until then: one change of net trade each way from zero, both at
 # manure_pool_slope over the model's manure in CAPRI's money, no opening cost; needs it for the "schedules" pool form)
 manure_trade_form = "capri"
+# the region's base manure trade (CAPRI's 2030 reference, manure_trade_2030.csv) in the balances: "capri" (CAPRI's
+# ManureNPK_ and SURTOT: the trade is a level, v_manureExports / v_manureImports at the calibration point, so an
+# animal's manure applied and its N-surplus term are its full manure, and a hectare of crops brings no manure of
+# its own; the base trade a constant of the region; the default since 17 November 2026, K167) or "shares"
+# (capri-mod's form until then: exporters keep 1 - export share of each animal's manure, importers receive manure
+# per ha of crops, so the base trade moved with the herds and the crop area). Identical at the base point
+manure_base_trade = "capri"
+# how a market's producer price change reaches the outputs' unit values the supply models are paid: "capri" (CAPRI's
+# arm/set_prices.gms: the unit value moves by the market price's absolute change, UVAG + PPRI - PPRI0, and its own rules
+# for raw and sheep milk, olives and paddy rice; a factor PPRI0 / UVAG0 per member state and output on the market's
+# relative change, price_transmission_2030.csv, at the 2030 market year; the default since 17 November 2026, K169) or
+# "relative" (capri-mod's form until then: every output by the market's relative change)
+price_transmission = "capri"
+# The Green Deal / Farm-to-Fork minimum catch-crop area (e_minCoverCrops, pol_input/greendeal/organic_io.gms and
+# conventional_io.gms): "capri" (CAPRI's: the share of UAAR less the crops under winter cover by the shares as given,
+# p_winterCoverShare0, in practice the whole UAAR outside Austria and a few German units; capped at the land the
+# winterCover_ row leaves at the base point; the default since 18 November 2026, K170) or "filled" (capri-mod's form
+# until then: less the crops under winter cover by the filled shares)
+cover_crop_requirement_area = "capri"
+# CAPRI's Green Deal group fixes the winter cover option's share at 1e-6 (greendeal_scenarios.gms FixMiti,
+# set_miti_bounds.gms l. 556-566): "capri" (in the group's scenarios the catch crops are the CATC activity at its input
+# cost, held by the requirement and winterCover_, without the option's cost curve, and the loss cascade keeps its base
+# share; the default since 18 November 2026, K170) or "option" (capri-mod's form until then: the option chosen with its
+# cost curve, its share in the cascade)
+greendeal_winter_cover = "capri"
 # Green Deal organic and pesticide targets: CAPRI's regional input changes (define_inputs.gms l. 66-73).
 # CAPRI-ERROR-FIX. conventional_io.gms l. 361 sets scenAugmentsTechChange off at compile time, after organic_io.gms
 # l. 94 and conventional_io.gms l. 171 set it on, so the scenario's input change REPLACES the 2017-2030 input-saving

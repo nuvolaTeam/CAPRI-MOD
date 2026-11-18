@@ -1,7 +1,8 @@
 """CAPRI's EU27 activity levels, 2017 (CAPREG) and 2030 (CAPRI's Green Deal reference), for the baseline check.
 
 tools/check/compare_baseline_capri.py compares the model's 2030 baseline with CAPRI star 3.0's own 2030 reference
-(levels, market balances, prices) and the livestock growth 2017-2030. Until 29 October 2026 its two level files had no
+(levels, market balances, prices) and the model's 2017 herds in CAPRI's units (the livestock growth 2017-2030
+until 18 November 2026, KNOWN_ISSUES K171). Until 29 October 2026 its two level files had no
 builder (they arrived with the repository's first commit; KNOWN_ISSUES K103); this builder reproduces both exactly
 (2030: every value as written; 2017: equal to the four decimals the old file kept).
 
@@ -12,7 +13,7 @@ builder (they arrived with the repository's first commit; KNOWN_ISSUES K103); th
       activity levels
   capri_data/validation/capri_eu27_levels_2017_capreg.csv   act, val: the sum over the 27 member states of CAPREG's
       base-year levels DATA2('<MS>000000', act, 'LEVL', 'Y') (res_17<CC>.txt dumps; Norway left out) for the
-      livestock activities the check compares as growth: BULF, HEIF, HEIR, PIGF, POUF, SOWS, HENS
+      livestock activities whose 2017 herds the check compares: BULF, HEIF, HEIR, PIGF, POUF, SOWS, HENS
 
 Levels in CAPRI's units (1000 ha, 1000 head; hens and poultry 1000 of the model's unit: compare_baseline_capri.py).
 

@@ -52,6 +52,28 @@ class NitrogenBlock:
         cache[region] = out
         return out
 
+    def base_manure_trade(self, region):
+        """(base exports, base imports) of manure N in t, or (0, 0) without trade: CAPRI's 2030 reference shares
+        (manure_trade_2030.csv) at the region's base herds and crop area, the same base as _substitution's. With
+        supply.manure_base_trade "capri" these are levels of the region (CAPRI's v_manureExports / v_manureImports at
+        the calibration point): the totals carry them as constants and a unit's balance does not (K167)."""
+        if not getattr(self.seen, "manure_trade_on", True):
+            return 0.0, 0.0
+        mt = self.data.get("manure_trade")
+        if mt is None or region not in mt.index:
+            return 0.0, 0.0
+        A = self.data["areas"]; H = self.data.get("animal_numbers")
+        cache = _est.setdefault(self.par, "base_trade_cache", {})
+        key = (region, id(A), id(H))
+        if key not in cache:
+            area0 = float(sum(float(A.at[region, c]) for c in A.columns if c in CROPS)) if region in A.index else 0.0
+            man0 = 0.0
+            if H is not None and region in H.index:
+                man0 = sum(float(H.at[region, a]) * self._n_excretion(region, a) for a in H.columns if a in ANIMALS)
+            cache[key] = (max(0.0, float(mt.at[region, "export_share"])) * man0,
+                          float(mt.at[region, "import_kg_n_per_ha"]) * area0)
+        return cache[key]
+
     def _gnb_row(self, region):
         """CAPRI's 2030 balance items for the CAPRI region of a model region (national where the
         region is not separate in CAPRI), from capri_gnb_components_2030.csv, or {}."""
@@ -285,13 +307,26 @@ class NitrogenBlock:
         ys = yields_scen.get(activity) if hasattr(yields_scen, "get") else None
         mi = n_intensity or {}
         key = (region, activity, None if y is None else float(y), None if ys is None else float(ys),
-               mi.get(activity), mi.get("__credit__"), bool(getattr(self.seen, "manure_trade_on", True)))
+               mi.get(activity), mi.get("__credit__"), bool(getattr(self.seen, "manure_trade_on", True)),
+               str(_settings().get("supply.manure_base_trade")))
         memo = _est.setdefault(self.par, "unit_nb_memo", {})
         r = memo.get(key)
         if r is None:
-            r = self.compute_nitrogen_balance({activity: 1.0}, yields, region, n_intensity, yields_scen=yields_scen)
+            r = self.compute_nitrogen_balance({activity: 1.0}, yields, region, n_intensity, yields_scen=yields_scen,
+                                              unit=True)
             memo[key] = r
         return dict(r)
+
+    def nitrogen_balance_constants(self, region: str, yields=None, n_intensity: Optional[Dict[str, float]] = None,
+                                   yields_scen=None) -> Dict[str, float]:
+        """The part of the region's balance that no activity carries: with supply.manure_base_trade "capri" the base
+        manure trade (CAPRI's trade variables at the calibration point; base imports - base exports in the organic
+        input and manure applied, the mineral N they displace, the surplus), the balance of no activity at all; zero
+        with "shares", where the units carry the trade. A region's total is the units' sum plus these (K167)."""
+        if str(_settings().get("supply.manure_base_trade")) != "capri":
+            return {}
+        return self.compute_nitrogen_balance({}, yields if yields is not None else {}, region, n_intensity,
+                                             yields_scen=yields_scen)
 
     def compute_nitrogen_balance(
         self,
@@ -300,6 +335,7 @@ class NitrogenBlock:
         region: str,
         n_intensity: Optional[Dict[str, float]] = None,
         yields_scen=None,
+        unit: bool = False,
     ) -> Dict[str, float]:
         """
         Compute soil nitrogen balance (OECD/Eurostat methodology).
@@ -404,10 +440,19 @@ class NitrogenBlock:
         # it, as JRC121368's CAPRI, every region keeps all its manure, the manure trade at CAPRI's reference)
         _mt = self.data.get("manure_trade") if (hasattr(self, "data") and getattr(self.seen, "manure_trade_on", True)) else None
         _exp_sh, _imp_ha = 0.0, 0.0
+        _trade_lvl = None
         if _mt is not None and region in getattr(_mt, "index", []):
-            _exp_sh = float(_mt.at[region, "export_share"])
-            _imp_ha = float(_mt.at[region, "import_kg_n_per_ha"])
+            if str(_settings().get("supply.manure_base_trade")) == "capri":
+                # CAPRI's ManureNPK_ / SURTOT: exports and imports are levels of the region (v_manureExports,
+                # v_manureImports; at the calibration point CAPRI's 2030 reference trade), not shares of the current
+                # herd or crop area: the totals carry them, a unit's balance (unit=True) does not (K167)
+                _trade_lvl = (0.0, 0.0) if unit else self.base_manure_trade(region)
+            else:
+                _exp_sh = float(_mt.at[region, "export_share"])
+                _imp_ha = float(_mt.at[region, "import_kg_n_per_ha"])
         n_organic *= max(0.0, 1.0 - _exp_sh)
+        if _trade_lvl is not None:
+            n_organic -= _trade_lvl[0]
 
         # CAPRI's crop removal, crop residues and biological fixation per crop and region
         # (supply_model.gms e_EXPPRD, e_CRESID, e_BIOFIX; 2030 reference coefficients,
@@ -464,6 +509,8 @@ class NitrogenBlock:
         n_deposition = total_uaa * _dep_ha
 
         n_manure_import = sum(activities.get(a, 0.0) for a in CROPS) * _imp_ha
+        if _trade_lvl is not None:
+            n_manure_import = _trade_lvl[1]
         # MINERAL FERTILISER FOLLOWS CROP NEED (CAPRI supply_model.gms NUTNED_):
         # mineral N covers what manure, residues and deposition leave of the
         # crops' need, each net of losses. Linearised around the base: crops
@@ -645,6 +692,8 @@ class NitrogenBlock:
             w0 = float(v) if v == v else 0.0
         cv = getattr(supply_result, "cover_crops", None) or {}
         w1 = float(cv["req"]) / float(cv["uaa"]) if cv.get("req") is not None and float(cv.get("uaa", 0.0) or 0.0) > 0 else w0
+        if cv.get("cascade_share") is not None:
+            w1 = float(cv["cascade_share"])         # the share the loss cascade takes (fixed in the Green Deal group, K170)
         return w0, w1
 
     def _leach_animals(self, region, acts, ms, wc, initial=False, fert_mrun=0.0):

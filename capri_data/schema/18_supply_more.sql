@@ -472,6 +472,26 @@ INSERT INTO value_units VALUES
   ('sup_techn_mix_2030', 'plap_diff', 'U_ratio', 'capri', 'p_technFact PLAP T1 - T2'),
   ('sup_techn_mix_2030', 'prem_diff_share', 'U_ratio', 'builder', 'sum over the technology-differentiated schemes of PRME(scheme) / PRME(DPTOTAL) x p_technFact T1 - T2, CAPRI''s 2030 reference');
 
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/price_transmission_2030.csv
+CREATE TABLE sup_price_transmission_2030 (
+    ms VARCHAR NOT NULL REFERENCES capri_rall (code),
+    activity VARCHAR NOT NULL REFERENCES model_activities (code),
+    commodity VARCHAR NOT NULL REFERENCES model_commodities (code),
+    capri_item VARCHAR NOT NULL,
+    capri_market VARCHAR NOT NULL,
+    uvag_2030 DOUBLE NOT NULL CHECK (uvag_2030 > 0),
+    ppri_2030 DOUBLE NOT NULL CHECK (ppri_2030 > 0),
+    factor DOUBLE NOT NULL CHECK (factor > 0),
+    rule VARCHAR NOT NULL,
+    PRIMARY KEY (ms, activity, commodity)
+);
+COMMENT ON TABLE sup_price_transmission_2030 IS 'CAPRI''s transmission of the market''s producer price to the unit value its supply models are paid (arm/set_prices.gms: UVAG moves by the ABSOLUTE change of PPRI), per member state, as the factor on the market price''s relative change (PPRI0 / UVAG0; paddy rice x MAPR / GROF). Only factors other than 1; durum and sugar beet keep CAPRI''s relative rules (model_price_follows.csv). KNOWN_ISSUES K169 (tools/build/build_price_transmission_2030.py)';
+INSERT INTO value_units VALUES
+  ('sup_price_transmission_2030', 'uvag_2030', 'U_EuPerTon', 'capri', 'UVAG of the CAPRI output, member state, 2030, CAPRI''s Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_price_transmission_2030', 'ppri_2030', 'U_EuPerTon', 'capri', 'PPRI of the CAPRI market product, member state, 2030, same run'),
+  ('sup_price_transmission_2030', 'factor', 'U_ratio', 'builder', 'PPRI / UVAG (paddy rice: PPRI(RICE) x MAPR(RICE) / GROF(PARI) / UVAG(PARI)): the relative change of the unit value per relative change of the market price'),
+  ('model_price_follows', 'share', 'U_ratio', 'capri', 'the share of the followed commodity''s relative price change: durum 0.5 (arm/set_prices.gms l. 57-61), beet 1 (l. 91-95), Norway''s raw milk 1');
+
 -- file: capri_data/2017/supply/plant_protection_cost.csv
 CREATE TABLE sup_plant_protection_cost (
     region VARCHAR NOT NULL,

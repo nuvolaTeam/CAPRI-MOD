@@ -1,4 +1,4 @@
-activity,commodity,eu_market,source
-SUGB,SUGR,1,"CAPRI arm/set_prices.gms l. 93-95: the beet price follows the sugar price (UVAG(SUGB) x v_prodPrice(SUGA) / PPRI(SUGA)); beet has no market of its own"
-DWHE,SWHE,1,"durum wheat is part of CAPRI's wheat market WHEA (model_commodities.csv: SWHE = WHEA)"
-DCOW,MILK,0,"the model's: where no dairy block prices raw milk (Norway's step), the dairy cows' price follows the MILK market"
+activity,commodity,eu_market,share,source
+SUGB,SUGR,1,1,"CAPRI arm/set_prices.gms l. 93-95: the beet price follows the sugar price (UVAG(SUGB) x v_prodPrice(SUGA) / PPRI(SUGA)); beet has no market of its own"
+DWHE,SWHE,1,0.5,"CAPRI arm/set_prices.gms l. 57-61: durum wheat is part of CAPRI's wheat market WHEA (CAP_TO_TRD (SWHE,DWHE).WHEA; model_commodities.csv: SWHE = WHEA) and takes half of its relative price change (""only 50% of price change in wheat aggregate taken over to durum wheat""): UVAG(DWHE) x (1 + 0.5 x (v_prodPrice(WHEA) / PPRI(WHEA) - 1))"
+DCOW,MILK,0,1,"the model's: where no dairy block prices raw milk (Norway's step), the dairy cows' price follows the MILK market"

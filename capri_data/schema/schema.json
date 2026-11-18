@@ -3996,8 +3996,12 @@
      "build_lownfeed_effects",
      "build_supplement_effects"
     ],
-    "checks": [],
-    "tests": []
+    "checks": [
+     "tools/check/compare_baseline_capri.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_compare_baseline_capri.py"
+    ]
    }
   },
   "capri_maact": {
@@ -28445,6 +28449,7 @@
      "build_plant_protection_cost",
      "build_pmp_capri_2030",
      "build_price_trajectory_2030",
+     "build_price_transmission_2030",
      "build_supplement_effects",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
@@ -28642,6 +28647,7 @@
      "build_nutrient_coefs_regional",
      "build_plant_protection_cost",
      "build_price_trajectory_2030",
+     "build_price_transmission_2030",
      "build_supplement_effects",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
@@ -28845,6 +28851,7 @@
      "build_nh3_factors",
      "build_npk_balance_2030",
      "build_price_trajectory_2030",
+     "build_price_transmission_2030",
      "build_supplement_effects",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
@@ -29043,7 +29050,7 @@
    "file": "capri_data/codes/model_price_follows.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
-   "comment": "the activities whose price follows a market commodity's (refactor stage 4: beet follows sugar, durum wheat the wheat market, Norway's raw milk the MILK market); a declared table",
+   "comment": "the activities whose price follows a market commodity's (refactor stage 4: beet follows sugar, durum wheat half of the wheat market's relative change, Norway's raw milk the MILK market); a declared table",
    "columns": [
     {
      "name": "activity",
@@ -29058,6 +29065,11 @@
     {
      "name": "eu_market",
      "type": "INTEGER",
+     "not_null": true
+    },
+    {
+     "name": "share",
+     "type": "DOUBLE",
      "not_null": true
     },
     {
@@ -29082,7 +29094,8 @@
     }
    ],
    "checks": [
-    "(eu_market IN (0, 1))"
+    "(eu_market IN (0, 1))",
+    "((\"share\" > 0) AND (\"share\" <= 1))"
    ],
    "units": [
     {
@@ -29090,6 +29103,12 @@
      "unit": null,
      "status": "open",
      "basis": "a flag (1: in the EU markets' price step)"
+    },
+    {
+     "item": "share",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "the share of the followed commodity's relative price change: durum 0.5 (arm/set_prices.gms l. 57-61), beet 1 (l. 91-95), Norway's raw milk 1"
     }
    ],
    "provenance": {
@@ -31078,7 +31097,9 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_animal_pmp_units.py"
+    ]
    }
   },
   "pmp_capri_2030_mix": {
@@ -53048,7 +53069,9 @@
     "model": [
      "capri_mod/data/loaders.py"
     ],
-    "builders": [],
+    "builders": [
+     "build_price_transmission_2030"
+    ],
     "checks": [],
     "tests": []
    }
@@ -54076,6 +54099,136 @@
     "builders": [],
     "checks": [],
     "tests": []
+   }
+  },
+  "sup_price_transmission_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/price_transmission_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPRI's transmission of the market's producer price to the unit value its supply models are paid (arm/set_prices.gms: UVAG moves by the ABSOLUTE change of PPRI), per member state, as the factor on the market price's relative change (PPRI0 / UVAG0; paddy rice x MAPR / GROF). Only factors other than 1; durum and sugar beet keep CAPRI's relative rules (model_price_follows.csv). KNOWN_ISSUES K169 (tools/build/build_price_transmission_2030.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "commodity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "capri_item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "capri_market",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "uvag_2030",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "ppri_2030",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "factor",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "rule",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "activity",
+    "commodity"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "ms"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "commodity"
+     ],
+     "references": "model_commodities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(uvag_2030 > 0)",
+    "(ppri_2030 > 0)",
+    "(factor > 0)"
+   ],
+   "units": [
+    {
+     "item": "factor",
+     "unit": "U_ratio",
+     "status": "builder",
+     "basis": "PPRI / UVAG (paddy rice: PPRI(RICE) x MAPR(RICE) / GROF(PARI) / UVAG(PARI)): the relative change of the unit value per relative change of the market price"
+    },
+    {
+     "item": "ppri_2030",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "PPRI of the CAPRI market product, member state, 2030, same run"
+    },
+    {
+     "item": "uvag_2030",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "UVAG of the CAPRI output, member state, 2030, CAPRI's Green Deal baseline (res_2_1730greendeal_refdefaulta)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_price_transmission_2030",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
    }
   },
   "sup_producer_prices_regional": {
@@ -57541,7 +57694,7 @@
    "file": "capri_data/validation/capri_eu27_levels_2017_capreg.csv",
    "declared_in": "31_validation.sql",
    "layout": [],
-   "comment": "EU27 level per animal activity (BULF, HEIF, HEIR, PIGF, POUF, SOWS, HENS; 7 rows), read by tools/check/compare_baseline_capri.py for the growth 2017-2030; no builder, origin not documented (KNOWN_ISSUES K103).",
+   "comment": "EU27 level per animal activity (BULF, HEIF, HEIR, PIGF, POUF, SOWS, HENS; 7 rows): the sum over the member states of CAPREG's 2017 LEVL (tools/build/build_capri_eu27_levels.py), read by tools/check/compare_baseline_capri.py for the model's 2017 herds in CAPRI's units (the growth 2017-2030 until 18 November 2026, KNOWN_ISSUES K171).",
    "columns": [
     {
      "name": "act",
@@ -57849,6 +58002,95 @@
     "tests": [
      "capri_mod/tests/test_capri.py",
      "capri_mod/tests/test_norway.py"
+    ]
+   }
+  },
+  "val_capri_ms_market_prices_2030_ref": {
+   "file": "capri_data/validation/capri_ms_market_prices_2030_ref.csv",
+   "declared_in": "31_validation.sql",
+   "layout": [],
+   "comment": "CAPRI's 2030 market prices PMRK of the EU member states with their gross production GROF and market use DOMM, CAPRI's Green Deal baseline (res_2_1730greendeal_refdefaulta), for the baseline check's market prices (tools/check/compare_baseline_capri.py; tools/build/build_capri_ms_market_prices_2030.py; KNOWN_ISSUES K171)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "pmrk_eur_t",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "grof_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "domm_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "product"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "ms"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(pmrk_eur_t > 0)"
+   ],
+   "units": [
+    {
+     "item": "domm_kt",
+     "unit": "U_Ton",
+     "status": "capri",
+     "basis": "DOMM, member state, 2030, 1000 t"
+    },
+    {
+     "item": "grof_kt",
+     "unit": "U_Ton",
+     "status": "capri",
+     "basis": "GROF, member state, 2030, 1000 t"
+    },
+    {
+     "item": "pmrk_eur_t",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "PMRK, member state, 2030, CAPRI's 2030 money"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_capri_ms_market_prices_2030",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/compare_baseline_capri.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_compare_baseline_capri.py"
     ]
    }
   },
@@ -59812,7 +60054,7 @@
   "numerical/keep": 37,
   "open/keep": 4,
   "physical/keep": 13,
-  "technical/keep": 35
+  "technical/keep": 36
  },
  "other_notes": {}
 }

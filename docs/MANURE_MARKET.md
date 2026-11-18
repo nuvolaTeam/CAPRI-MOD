@@ -26,10 +26,22 @@ model assumes that all manure generated in a region has to be used within that r
 
 The 2030 baseline's flows between regions are CAPRI's (2030 Green Deal reference with endogenous technologies,
 `res_2_1730greendeal_refpol_endotech_all_ini`: MTRADE.NITF and EXCRET.NITF per CAPRI region;
-`tools/build/build_manure_trade_base.py` -> `capri_data/baselines/capri_greendeal_ref/1730/environment/manure_trade_2030.csv`): exporting regions keep
-(1 - export share) of their manure N, importing regions receive manure N per ha of cropland; 1.2 Mt N moves between EU
-regions (113 exporters, 111 importers when built). The base trade counts only where the run trades manure: without
-trade (Farm-to-Fork as JRC121368) the scenario and its baseline keep all manure in its region.
+`tools/build/build_manure_trade_base.py` -> `capri_data/baselines/capri_greendeal_ref/1730/environment/manure_trade_2030.csv`): an export share
+of the excreted manure N per exporting region and manure N per ha of cropland per importing region; 1.2 Mt N moves
+between EU regions (113 exporters, 111 importers when built). The base trade counts only where the run trades manure:
+without trade (Farm-to-Fork as JRC121368) the scenario and its baseline keep all manure in its region.
+
+As CAPRI's ManureNPK_ (supply_model.gms l. 935-956: manure applied = manure net of losses - v_manureExports +
+v_manureImports) the base trade is a level of the region, its export share times the excretion at the base herds and
+its imports per ha times the base crop area (EnvironmentalModule.base_manure_trade), held as a constant of the
+region's balance; an animal's manure applied and its N-surplus term are its full manure, and a hectare of crops
+brings no manure of its own (`supply.manure_base_trade = "capri"`, the default since 17 November 2026, K167). The
+regional totals are the units' sum plus these constants (EnvironmentalModule.nitrogen_balance_constants), so the
+N-surplus row, ManureNPK_ (the fertilisation block's E_const) and the export cap (base exports + change <= manure)
+carry them. Until then ("shares", kept to compare) exporters kept 1 - export share of each animal's manure and
+importers received manure per ha of crops, so the base trade moved with the herds and the crop area: Cataluña's
+pigs (export share 0.45) counted 55% of their manure in the N-surplus cap. The two forms are identical at the base
+point.
 
 ## capri-mod
 

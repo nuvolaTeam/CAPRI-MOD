@@ -120,6 +120,8 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_techn_2030", [], [REFERENCE / "simini" / "simini_21730" / "p_pmpCnst.csv.gz",
                               REFERENCE / "simini" / "simini_21730" / "p_technFact.csv.gz"]),
     ("build_techn_mix_2030", [], [REF]),
+    ("build_price_transmission_2030", [], [REF]),
+    ("build_capri_ms_market_prices_2030", [], [REF]),
     ("build_pmp_recipe", ["--year", "2017"], [D17, REF]),
     ("build_pmp_recipe", ["--year", "2030"], [D17, REF]),
     ("build_pmp_capri_2030", [], [REF]),

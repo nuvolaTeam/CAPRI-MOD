@@ -111,6 +111,7 @@ class RegionalEvalState(_Slots):
         "land_types_used",    # the land types of the problem
         "need_row",           # the feed need row
         "nrow_land",          # the land rows of the N row (columns, base land, target)
+        "nb_const",           # the N row's constants (surplus, mineral N) no column carries: the base manure trade (K167)
         "pool_avail",         # the manure available to the pool
         "pool_cols",          # the manure pool's export and import columns (N)
         "pool_cols_pk",       # idem for P and K
@@ -144,6 +145,7 @@ class RegionalEvalState(_Slots):
         "organic_conv",       # the organic conversion shares by crop
         "organic_group_target",  # CAPRI's organic target per fertiliser crop group (p_organicAreaTargetCrops)
         "fert_partial_slack",    # the Green Deal group's slack on the fertiliser priors' partial derivative
+        "greendeal_group",       # the scenario is CAPRI's Green Deal group (greendeal_scenarios.gms)
         "set_aside_rates",       # CAPRI's obligatory set-aside rates of the region's arable activities (SETA_)
         "seta_obl_vec",          # the obligatory set-aside per unit of each activity, r / (1 - r) (SETA_; land.py)
         "yield_price_factor", # the yields' price factors
@@ -206,6 +208,7 @@ class RegionalResults(_Slots):
         "manure_supply0_pk",  # idem for P and K
         "manure_value",       # the manure nutrients' value at the solution (PSHW, CAPRI's ManureNPK_.M), by nutrient
         "pool_manure_vec",    # the manure N by column
+        "pool_manure_x0",     # the base manure N exports a constant of the region (supply.manure_base_trade "capri", K167)
         "pool_manure_vec_pk", # idem for P and K
         # abatement
         "animal_n_kept",      # the manure N kept by the ammonia options, by animal

@@ -20,7 +20,9 @@ supply rows (region, activity, item) with item LEVL, PRME (and PROD, YILD at EU 
 the member states and their NUTS 2 regions; market rows (region, item, product) with UVAP, UVAG, MAPR, HCON, IMPT,
 EXPT at EU and member-state level. Added for the Green Deal pair (13 November 2026, the results browser's Green Deal
 tab): the crop yields (YILD) of the NUTS 2 regions as well, and the N balance items (dataOut '' . item . NITF, 1000 t
-N; N_ITEMS) of every kept region, with item NITF.
+N; N_ITEMS) of every kept region, with item NITF; and (18 November 2026, K171) the market prices PMRK and gross
+production GROF of the member states and EU27yr19, for the check's market prices (the model's market prices are
+CAPRI's PMRK; UVAP is another price).
 
 Output: capri_data/validation/greendeal_2030/capri_gd_effect.csv (region, activity, item, ref, scen, pct_change)
 
@@ -55,6 +57,8 @@ def _keep_gd(r, q, a, i):
     key = _keep(r, q, a, i)
     if key is not None:
         return key
+    if q == "" and a in ("PMRK", "GROF") and REG.match(r) and (r == "EU27yr19" or (r[:2] in EU_MS and r.endswith("000000"))):
+        return (r, i, a)                     # market price and gross production (K171: the check's market prices)
     if q != "" or not REG.match(r) or not (r == "EU27yr19" or r[:2] in EU_MS):
         return None
     if i == "YILD" or (i == "NITF" and a in N_ITEMS):

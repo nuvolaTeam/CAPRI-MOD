@@ -190,12 +190,14 @@ class AbatementBlock:
             minimum CATC = [0.5 o + 0.5 max(0, r - o)] x (UAAR - sum_c crop_c x winter cover share_c)
                            + baseline CATC
         CAPRI subtracts the area under winter cover with p_winterCoverShare0, the shares as given
-        (NUTS2 entries for Austria and a few German regions only); elsewhere nothing is subtracted
-        and the requirement exceeds the area that can carry a catch crop (its own winterCover_ row,
-        with the filled shares) in 100 regions, an infeasible pair. REGISTERED: the filled shares
-        (NUTS2 <- member state <- EU, define_greening_limits.gms) in both, and the requirement capped
-        at that potential area at base. Sets self.ev.cover: requirement and increment (1000 ha),
-        UAAR, catch-crop N per ha and cost per ha."""
+        (NUTS2 entries for Austria and a few German regions only), so elsewhere the requirement is on
+        the whole UAAR: in CAPRI's Green Deal run (lnds8_org18_pest20) the catch crops rise by 9.5-10.5%
+        of UAAR in 182 of 207 EU units. Its own winterCover_ row uses the filled shares (NUTS2 <-
+        member state <- EU, define_greening_limits.gms); where the requirement exceeds the land that
+        row leaves at the base point it is capped there (REGISTERED, KNOWN_ISSUES K170: CAPRI's
+        Farm-to-Fork targets exceed it in about 100 units; until 18 November 2026 the filled shares
+        were used for the requirement too, supply.cover_crop_requirement_area "filled"). Sets
+        self.ev.cover: requirement and increment (1000 ha), UAAR, catch-crop N per ha and cost per ha."""
         cc = getattr(self.data, "cover_crops", None)
         wcs = getattr(self.data, "winter_cover_share", None)
         if cc is None or wcs is None or reduction <= 0:
@@ -206,6 +208,14 @@ class AbatementBlock:
             return
         covered = sum(float(base.get(c, 0.0) or 0.0) * float(wcs.at[c, "share"])
                       for c in wcs.index if c in base.index)
+        # the area the requirement applies to: CAPRI's, UAAR less the crops under winter cover by the shares as given
+        # (p_winterCoverShare0; supply.cover_crop_requirement_area "capri", the default since 18 November 2026), or
+        # by the filled shares ("filled", capri-mod's form until then)
+        if str(_settings().get("supply.cover_crop_requirement_area")) == "capri" and "share0" in wcs.columns:
+            covered_req = sum(float(base.get(c, 0.0) or 0.0) * float(wcs.at[c, "share0"] or 0.0)
+                              for c in wcs.index if c in base.index)
+        else:
+            covered_req = covered
         targets = getattr(self.data, "organic_targets_pp", None)
         o = 0.0
         if organic_share:
@@ -214,10 +224,11 @@ class AbatementBlock:
                  else max(0.0, float(organic_share) - self._organic_baseline()))
         f = 0.5 * o + 0.5 * max(0.0, reduction - o)
         c0 = float(cc.get("catc_share_2030", 0.0) or 0.0) * uaa
-        pot = max(0.0, uaa - covered)
-        req = min(f * pot + c0, max(pot, c0))
+        pot = max(0.0, uaa - covered)                  # the land the winterCover_ row leaves at the base point
+        req = min(f * max(0.0, uaa - covered_req) + c0, max(pot, c0))
         bf = cc.get("biofix_t_n_ha")
         self.ev.cover = {"req": req, "delta": max(0.0, req - c0), "base": c0, "uaa": uaa, "potential": pot,
+                       "req_area": max(0.0, uaa - covered_req),
                        "biofix": float(bf) if bf is not None and not pd.isna(bf) else 0.0,
                        "cost": float(cc.get("catc_cost_eur_ha", 0.0) or 0.0)}
 
@@ -243,6 +254,15 @@ class AbatementBlock:
             return out
         return techs
 
+    def _wc_fixed(self) -> bool:
+        """CAPRI's Green Deal group fixes the winter cover option's share (pol_input/greendeal/greendeal_scenarios.gms
+        l. 86-105, FixMiti with only wintercov fixed; supply/set_miti_bounds.gms l. 556-566: v_Miti(CATC, WinterCov)
+        = p_fixMiti = 1e-6; its Green Deal run reports SHARE CATC WinterCov 1e-6 in every unit): the catch crops are
+        then the CATC activity at its input cost, steered by the requirement (e_minCoverCrops) and winterCover_ only,
+        and they do not change the loss cascade (supply.greendeal_winter_cover "capri", K170)."""
+        return bool(getattr(self.ev, "greendeal_group", False)) and \
+            str(_settings().get("supply.greendeal_winter_cover")) == "capri"
+
     def _winter_cover_shares(self):
         """(base, current) winter cover share of the region, CAPRI's v_Miti(CATC, WinterCov): the 2030 catch-crop share
         (cover_crops.csv catc_share_2030, CAPRI's value) and, under the Farm-to-Fork catch-crop requirement, the required
@@ -252,6 +272,8 @@ class AbatementBlock:
         if cc is not None and hasattr(cc, "get"):
             v = cc.get("catc_share_2030")
             w0 = float(v) if v is not None and not pd.isna(v) else 0.0
+        if self._wc_fixed():
+            return w0, w0                                           # the Green Deal group's fixed share (K170)
         if getattr(self.sv, "wc_solved", None) is not None:
             return w0, float(self.sv.wc_solved)                     # chosen in the NLP form
         cv = getattr(self.ev, "cover", None)

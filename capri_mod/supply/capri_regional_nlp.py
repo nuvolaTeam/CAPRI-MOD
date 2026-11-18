@@ -673,6 +673,11 @@ class CapriRegionalNLP:
                 _L0 = _nc.netf(d["netf"]["fr"], float(d["netf"]["run_surf"]))
                 eF["CRES"] = pv(float(d["gc"]) / (1.0 - float(_L0["N2O"])) * float(d["eff"]))
             E = lin(d["E"]); C = lin(d["C"])
+            if float(d.get("E_const", 0.0) or 0.0) != 0.0:
+                # the region's base manure trade as a level (CAPRI's ManureNPK_ with v_manureExports /
+                # v_manureImports at the calibration point; supply.manure_base_trade "capri", K167): base imports - base
+                # exports, t; the columns' manure is their full manure
+                E = E + pv(float(d["E_const"]))
             if nut == "N" and getattr(self, "catc_n", None) is not None:
                 C = C + self.catc_n                                 # catch crops' BioFix N (fertDistCres_)
             if nut == "N" and self.amm_kept is not None:
@@ -840,6 +845,8 @@ class CapriRegionalNLP:
             if "NO3SRUN" in lit:
                 srun = srun + pv(1.0 - (1.0 - float(lit["NO3SRUN"])) * (1.0 + float(nm))) * ph; used = True
         m_wc, m0 = getattr(self, "_catc_m", None), float((self.spec.get("catc") or {}).get("m0", 0.0) or 0.0)
+        if (self.spec.get("catc") or {}).get("fixmiti"):
+            m_wc = None                       # the Green Deal group's fixed winter cover share: the cascade at base (K170)
         wr = float(nf.get("wc_red", 0.0))
         if m_wc is not None and wr > 0:
             used = True
@@ -882,7 +889,7 @@ class CapriRegionalNLP:
             zc = ca.SX.sym("catc", 1)
             m = zc[0]
             uaa, m0 = float(cs["uaa"]), float(cs["m0"])
-            dl = float((spec.get("dabat") or {}).get(("catc",), 0.0))
+            dl = 0.0 if cs.get("fixmiti") else float((spec.get("dabat") or {}).get(("catc",), 0.0))
             obj = obj + self._pv(uaa) * (self._pv(float(cs["k1"]) + float(cs["lin"]) + dl) * m
                                         + self._pv(0.5 * float(cs["sqr"])) * m * m)
             g_rows.append((self._lin(y, [(int(j), float(s)) for j, s in cs["row"]]) + self._pv(uaa) * m)
@@ -936,7 +943,8 @@ class CapriRegionalNLP:
                     # CAPRI's full cascade (GRAZN_ ... APPLN_): the manure keeps every N loss the options avoid
                     # (manExportOrAppl_: MANN x (1 - GasRunTot)); the NH3 part for the tax's indirect N2O
                     w0_, w1_ = am.get("wc") or (0.0, 0.0)
-                    if self._catc_m is not None:
+                    _wc_free = self._catc_m is not None and not (spec.get("catc") or {}).get("fixmiti")
+                    if _wc_free:
                         w1_ = self._catc_m
                     # CAPRI bounds every loss at zero (set_supply_bounds.gms: v_emiLoss.lo = 0): options from different
                     # groups whose effects on one loss add up to more than 1 must not drive it negative. A row for
@@ -946,7 +954,7 @@ class CapriRegionalNLP:
                     L1 = _at.cascade(sub, sh, w1_)
                     smx_ = {tt_["tech"]: float(tt_["smax"]) for tt_ in techs if tt_["act"] == a and tt_["key"] == key}
                     shx = {tt["tech"]: smx_.get(tt["tech"], tt["ini"]) for tt in sub["techs"]}
-                    Lx = _at.cascade(sub, shx, 1.0 if self._catc_m is not None else float(w0_))
+                    Lx = _at.cascade(sub, shx, 1.0 if _wc_free else float(w0_))
                     for k_, v_ in Lx.items():
                         if k_[1] in ("RunTot", "GasRunTot") or float(v_) >= -1e-12 or float(L0.get(k_, 0.0)) < 0.0:
                             continue

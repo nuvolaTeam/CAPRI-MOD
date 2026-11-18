@@ -301,6 +301,95 @@ def test_base_manure_trade_follows_capri_and_the_trade_setting(data):
     assert float(off["n_organic_input"]) > float(on["n_organic_input"]) * 1.2      # Weser-Ems exports ~30%
 
 
+def test_base_manure_trade_is_a_level_of_the_region_as_capris(data):
+    """K167: CAPRI's ManureNPK_ and N surplus carry the manure trade as levels of the region (v_manureExports,
+    v_manureImports; supply_model.gms l. 935-956), so an animal's manure applied and its surplus term are its full
+    manure and a hectare of crops brings no manure of its own; the base trade is a constant of the region
+    (supply.manure_base_trade "capri"). At the base point the accounts are those of the former shares form; away from
+    it a region's total is its units' sum plus the constants, and an exporter's herd no longer takes its share of the
+    base exports with it."""
+    from capri_mod import settings as S
+    from capri_mod.data.definitions import CROPS, ANIMALS
+    from capri_mod.environmental.environmental_module import EnvironmentalModule
+    env = EnvironmentalModule(data)
+    keys = ("n_surplus", "n_mineral_input", "n_organic_input", "n_manure_applied", "n_manure_import")
+    for reg in ("ES510000", "ES410000"):                     # Cataluña exports 45% of its manure N, Castilla y León imports
+        A, H, y = data["areas"].loc[reg], data["animal_numbers"].loc[reg], data["yields"].loc[reg]
+        base = {c: float(A.get(c, 0.0)) for c in CROPS if c in A.index}
+        base.update({a: float(H.get(a, 0.0)) for a in ANIMALS if a in H.index})
+        pert = {k: v * (0.8 if k in ANIMALS else 1.1) for k, v in base.items()}
+        res = {}
+        for form in ("shares", "capri"):
+            with S.override({"supply.manure_base_trade": form}):
+                env.par.unit_nb_memo = {}
+                cst = env.nitrogen_balance_constants(reg, y)
+                units = {a: env.unit_nitrogen_balance(a, y, reg) for a in pert}
+                res[form] = (env.compute_nitrogen_balance(base, y, reg), env.compute_nitrogen_balance(pert, y, reg),
+                             {k: sum(units[a][k] * pert[a] for a in pert) + float(cst.get(k, 0.0)) for k in keys},
+                             units, env.base_manure_trade(reg))
+        x0, i0 = res["capri"][4]
+        for k in keys:
+            assert abs(res["capri"][0][k] - res["shares"][0][k]) <= 1e-6 * max(1.0, abs(res["shares"][0][k])), (reg, k)
+            assert abs(res["capri"][2][k] - res["capri"][1][k]) <= 1e-6 * max(1.0, abs(res["capri"][1][k])), (reg, k)
+        uc, us = res["capri"][3], res["shares"][3]
+        if reg == "ES510000":
+            assert x0 > 50000 and i0 == 0.0
+            s_ = float(data["manure_trade"].at[reg, "export_share"])
+            assert abs(us["PIGF"]["n_organic_input"] - (1 - s_) * uc["PIGF"]["n_organic_input"]) < 1e-9
+            # the herd 20% lower: the base exports stay (the trade columns move them), the manure applied falls by the
+            # herd's full manure
+            d_ = res["capri"][0]["n_manure_applied"] - res["capri"][1]["n_manure_applied"]
+            assert d_ > 1.5 * (res["shares"][0]["n_manure_applied"] - res["shares"][1]["n_manure_applied"])
+        else:
+            assert i0 > 100000 and x0 == 0.0
+            assert uc["SWHE"]["n_manure_import"] == 0.0 and us["SWHE"]["n_manure_import"] > 20
+            assert res["capri"][1]["n_manure_import"] == i0
+
+
+def test_durum_wheat_takes_half_of_the_wheat_price_change_as_capri():
+    """K168: CAPRI's durum wheat has no market of its own (CAP_TO_TRD (SWHE, DWHE).WHEA) and takes half of the wheat
+    market's relative price change (arm/set_prices.gms l. 57-61: UVAG(DWHE) x (1 + 0.5 x (v_prodPrice(WHEA) /
+    PPRI(WHEA) - 1))); beet takes all of the sugar price's (l. 93-95)."""
+    from capri_mod.data.definitions import PRICE_FOLLOWS_EU, PRICE_FOLLOWS_SHARE
+    assert ("DWHE", "SWHE") in PRICE_FOLLOWS_EU and ("SUGB", "SUGR") in PRICE_FOLLOWS_EU
+    assert PRICE_FOLLOWS_SHARE["DWHE"] == 0.5 and PRICE_FOLLOWS_SHARE["SUGB"] == 1.0
+    import inspect
+    from capri_mod import model as M
+    src = inspect.getsource(M)
+    # every site that sets a follower's signal from its commodity's takes the share
+    assert src.count("PRICE_FOLLOWS_SHARE[") == 4
+
+
+def test_unit_values_move_by_the_market_price_absolute_change_as_capri(data):
+    """K169: CAPRI moves an output's unit value by the ABSOLUTE change of its market's producer price (arm/set_prices.gms
+    l. 43-46: UVAG(o) += PPRI(XX) - PPRI0(XX); raw milk by MILK's, l. 63-75; olives by olive oil's, l. 85-89; paddy rice
+    by milled rice's x MAPR / GROF, l. 79-83), and its supply models are paid the member state's unit value
+    (supply_model.gms l. 4701). On the model's relative change that is the factor PPRI0 / UVAG0 per member state."""
+    import pandas as pd
+    from types import SimpleNamespace
+    from capri_mod.supply.supply_module import RegionalSupplyModel
+    pt = data.get("price_transmission") or {}
+    assert len(pt) == 26                                          # CAPRI's EU member states with a factor other than 1
+    r = pd.read_csv(DATA_DIR / "baselines" / "capri_greendeal_ref" / "1730" / "supply" / "price_transmission_2030.csv")
+    plain = r[r["capri_item"] != "PARI"]
+    # the absolute rule: UVAG0 x (1 + factor x d) - UVAG0 = PPRI0 x d
+    assert ((plain["factor"] - plain["ppri_2030"] / plain["uvag_2030"]).abs() < 1e-9).all()
+    assert not r.duplicated(["ms", "activity", "commodity"]).any() and set(r["activity"]) & {"DWHE", "SUGB"} == set()
+    el = pt["EL000000"]
+    f = el[("DCOW", "MILK")]
+    assert 1.5 < f < 1.7                  # Greek raw milk's unit value is about 60% of the EU milk market's price
+    m = RegionalSupplyModel.__new__(RegionalSupplyModel)
+    m.data = SimpleNamespace(price_transmission=el)
+    assert m._pt("DCOW", "MILK") == f and m._pt("BARL", "BARL") == 1.0
+    ps = pd.Series({"SWHE": 0.10, "BARL": 0.10, "MILK": 0.10})
+    out = m._transmit_crops(ps)
+    assert abs(out["SWHE"] - 0.10 * el[("SWHE", "SWHE")]) < 1e-12 and el[("SWHE", "SWHE")] > 1.1
+    assert out["BARL"] == 0.10 and out["MILK"] == 0.10             # animals' outputs are taken where each is valued
+    assert ps["SWHE"] == 0.10                                       # the market's shock itself is unchanged
+    m.data = SimpleNamespace(price_transmission=None)
+    assert m._pt("DCOW", "MILK") == 1.0 and m._transmit_crops(ps) is ps
+
+
 @pytest.mark.slow
 @pytest.mark.no_market_hessian
 def test_emission_tax_in_supply_follows_capri(model):
@@ -2836,7 +2925,10 @@ def test_fertiliser_substitution_is_exact_at_base(data):
     assert worst < 1e-9, f"substitution moved the base balance (max relative {worst:.2e})"
     fs = data.get("fertiliser_substitution")
     if fs is not None and {"NL410000", "FR240000"} <= set(fs.index) and {"NL410000", "FR240000"} <= set(A.index):
+        # a cow's own weight: the balance with one cow less the balance with none (since K167 the region's base manure
+        # trade, CAPRI's v_manureExports / v_manureImports at the calibration point, is a constant of the balance)
         cow = {r: e_sub.compute_nitrogen_balance({"DCOW": 1.0}, data["yields"].loc[r], r)["n_surplus"]
+               - e_sub.compute_nitrogen_balance({"DCOW": 0.0}, data["yields"].loc[r], r)["n_surplus"]
                for r in ("NL410000", "FR240000")}
         assert cow["NL410000"] > cow["FR240000"], \
             f"a cow should weigh more where manure is saturated: {cow}"
@@ -2893,9 +2985,10 @@ def test_catch_crops_cost_is_capris_rule():
 
 def test_cover_crop_requirement_and_winter_cover_row(data):
     """CAPRI's Farm-to-Fork catch-crop minimum (organic_io.gms + conventional_io.gms): with a 25%
-    organic share and a 50% pesticide cut the requirement is a quarter of the area without winter
-    cover plus the baseline catch crops (capped at that area), and it adds CAPRI's winterCover_ row:
-    winter-covering crops <= UAAR - catch crops."""
+    organic share and a 50% pesticide cut the requirement is a quarter of UAAR less the crops under
+    winter cover by CAPRI's shares as given (p_winterCoverShare0; none in this unit, so the whole UAAR)
+    plus the baseline catch crops, capped at the land the winterCover_ row leaves at the base point
+    (K170), and it adds CAPRI's winterCover_ row: winter-covering crops <= UAAR - catch crops."""
     from capri_mod.supply.supply_module import SupplyModule
     from capri_mod.utils.utils import calibrate_supply_elasticities
 
@@ -2908,8 +3001,18 @@ def test_cover_crop_requirement_and_winter_cover_row(data):
     model._cover_crop_requirement(0.50, o_share)
     cv = model.ev.cover
     assert cv is not None and cv["potential"] > 0 and cv["biofix"] > 0
-    expect = min(0.25 * cv["potential"] + cv["base"], max(cv["potential"], cv["base"]))
+    wcs = model.data.winter_cover_share
+    assert float(wcs["share0"].abs().sum()) == 0.0 and abs(cv["req_area"] - cv["uaa"]) < 1e-9 * cv["uaa"]
+    expect = min(0.25 * cv["req_area"] + cv["base"], max(cv["potential"], cv["base"]))
     assert abs(cv["req"] - expect) < 1e-6 * max(1.0, expect)
+    # capri-mod's former form: the filled shares for the requirement too
+    from capri_mod.settings import override
+    with override({"supply.cover_crop_requirement_area": "filled"}):
+        model._cover_crop_requirement(0.50, o_share)
+    cvf = model.ev.cover
+    assert abs(cvf["req_area"] - cvf["potential"]) < 1e-9 * cvf["uaa"] and cvf["req"] <= cv["req"] + 1e-9
+    model._cover_crop_requirement(0.50, o_share)
+    cv = model.ev.cover
     assert cv["delta"] > 0
     A, b, _, _ = model._build_constraints()
     assert "winter_cover" in model.ev.row_labels
@@ -3213,19 +3316,19 @@ def test_bull_heifer_split_calibrated_at_base():
     ct = m.data["cattle_intensity"]["FR520000"]
     assert ct["BULL"]["dyoung_rel"] > 0 and ct["BULL"]["dmann_rel"] < 0
     assert set(getattr(mo.par, "cattle_cz", {}) or {}) >= {"BULL"} and "BULL" in (mo.ev.cattle_cols or {})
-    # by default (the cattle member splits off, K65) only the intensity pairs carry a split, each at the base split
-    assert set(mo.res.last_cattle_z or {}) == {"BULL", "HFRS"}
+    # by default (the cattle member splits on, K65, CAPRI's setting) every split gets its column - the intensity pairs,
+    # the replacement heifers HFRS:rep, the calves CALV:male / female / sex - and stays at the base split
+    assert set(mo.res.last_cattle_z or {}) >= {"BULL", "HFRS", "HFRS:rep", "CALV:male", "CALV:female", "CALV:sex"}
     for a, z in (mo.res.last_cattle_z or {}).items():
         assert abs(float(z)) < 1e-3 * max(1.0, float(m.data["animal_numbers"].at["FR520000", a.split(":")[0]])), (a, z)
-    # with the member splits on, every split (the replacement heifers HFRS:rep, the calves CALV:male / female / sex)
-    # gets its column and stays at the base split too
+    # with the member splits off only the intensity pairs carry a split, each at the base split too
     from capri_mod import settings as S
-    _prev = S.activate(S.current().replace({"supply.use_cattle_member_splits": True}))
+    _prev = S.activate(S.current().replace({"supply.use_cattle_member_splits": False}))
     try:
         m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
         m.run(scenario="BASELINE", regions=["FR520000"], max_outer_iter=2)
         mo = m.supply_module._models["FR520000"]
-        assert set(mo.res.last_cattle_z or {}) >= {"BULL", "HFRS", "HFRS:rep", "CALV:male", "CALV:female", "CALV:sex"}
+        assert set(mo.res.last_cattle_z or {}) == {"BULL", "HFRS"}
         for a, z in (mo.res.last_cattle_z or {}).items():
             assert abs(float(z)) < 1e-3 * max(1.0, float(m.data["animal_numbers"].at["FR520000", a.split(":")[0]])), (a, z)
     finally:
@@ -4260,7 +4363,9 @@ def test_nl32_meets_the_tiered_n_target_in_capris_form_by_idling_its_histosol_gr
 def test_winter_cover_is_chosen_in_the_nlp_form(model):
     """CAPRI's winter cover as a choice (envind/cover_crops.gms, v_Miti(CATC, WinterCov); tools/
     build_winter_cover_option.py): the baseline keeps the base share (calibrated first-order point), the Farm-to-Fork
-    requirement is its lower bound, and the accounts take the chosen share (supply result's cover_crops)."""
+    requirement is its lower bound. Farm-to-Fork is a scenario of CAPRI's Green Deal group, which fixes the option's share
+    (greendeal_scenarios.gms FixMiti, K170): the catch crops are the CATC activity at its input cost and the loss cascade
+    and the accounts keep the base share."""
     from capri_mod.policy.greendeal import farm_to_fork_scenario
     # one supply-market iteration: the choice is the supply model's. With two, the market of this one-region run
     # (DE110000 alone as the EU) diverged in the second Farm-to-Fork step, 2 x 100 market steps, ~550 of the test's 590 s
@@ -4275,7 +4380,7 @@ def test_winter_cover_is_chosen_in_the_nlp_form(model):
     assert cs["lb_share"] > cs["base"] / cs["uaa"] + 0.01          # the requirement raises the floor
     assert cs["share"] >= cs["lb_share"] - 1e-6 and cs["share"] <= cs["max_share"] + 1e-6
     w0, w1 = model.env_module._winter_cover_now("DE110000", s["supply"]["DE110000"])
-    assert abs(w1 - cs["share"]) < 1e-9
+    assert abs(w1 - cs["base"] / cs["uaa"]) < 1e-9 and abs(cs["cascade_share"] - w1) < 1e-12 and abs(w0 - w1) < 1e-9
 
 
 def test_interface_audit_fixes():
@@ -4737,9 +4842,9 @@ def test_cattle_activities_and_young_animals_per_sex_as_capri():
     (male / female calves, young bulls / heifers; INPANI_): the per-sex balances add up to the pooled ones (DCOW's
     calves split evenly by sex in CAPRI's data), bulls buy young bulls only, heifers young heifers only. The split
     rows: HEIR produces the replacement cows (a stall of HEIR more, beef less), a fattening calf stall buys more calves
-    and sells no young cattle. Off by default (RegionalSupplyModel.use_cattle_member_splits; K65: the per-sex markets
-    did not converge yet): the default file keeps the pooled balances, the per-sex file sits beside it and adds up
-    to them."""
+    and sells no young cattle. On by default since 17 November 2026 (RegionalSupplyModel.use_cattle_member_splits,
+    K65): the model reads the per-sex file; the pooled file (the setting off) sits beside it and the per-sex
+    balances add up to it."""
     import json
     from capri_mod.data.nested_tables import read_young_animals
     ya = read_young_animals(DATA_DIR / "2017" / "supply" / "young_animals_by_sex_2017.csv")["DE110000"]
@@ -4748,7 +4853,7 @@ def test_cattle_activities_and_young_animals_per_sex_as_capri():
     assert {"calves", "young", "cows"} <= set(yp) and "calves_m" not in yp
     assert abs(ya["calves_m"]["produce"]["DCOW"] + ya["calves_f"]["produce"]["DCOW"] - yp["calves"]["produce"]["DCOW"]) < 1e-9
     from capri_mod.supply.supply_module import RegionalSupplyModel, young_animal_table
-    assert not RegionalSupplyModel.use_cattle_member_splits and "calves" in young_animal_table()["DE110000"]
+    assert RegionalSupplyModel.use_cattle_member_splits and "calves_m" in young_animal_table()["DE110000"]
     assert set(ya["young_m"]["use"]) == {"BULL"} and set(ya["young_f"]["use"]) == {"HFRS"}
     assert abs(ya["calves_m"]["produce"]["DCOW"] + ya["calves_f"]["produce"]["DCOW"] - 0.8086492838767341) < 1e-9
     ct = pd.read_csv(DATA_DIR / "2017" / "supply" / "cattle_intensity.csv")

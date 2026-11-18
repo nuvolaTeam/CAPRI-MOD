@@ -111,6 +111,40 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
 ## 16 November 2026 — the grassland split of the need (K160); the market under CAPRI's bounds (DEP-50)
 
 - **K130 closed:** the catch crops' cost per ha is computed by CAPRI's own rule for every region (policy/define_greening_limits.gms: 25% of the cheapest cereal's and OFAR's average base coefficient, 50% for seed, x TF_I, at the member state's 2030 unit values), not read from CAPRI's reported TOIN; the rule reproduces CAPRI's 2030 TOIN of CATC in every unit it reports, and the 250 regions' costs are unchanged (to 1e-14).
+- **K167:** the base manure trade is a level of the region, as CAPRI's ManureNPK_ and N surplus
+  (`supply.manure_base_trade = "capri"`; "shares" the former form): an animal's manure applied and its N-surplus term
+  are its full manure, a hectare of crops brings no manure of its own, the base trade is a constant of the region's
+  balance (accounts, N-surplus row, ManureNPK_, export cap). Identical at the base point. At CAPRI's Green Deal prices
+  (33 Spanish and Polish units) the trade's mean gap to CAPRI halves (2.04 -> 1.06 kt N, correlation 0.93 -> 0.99),
+  Cataluña's net exports turn as CAPRI's (+12.0 -> -2.3 kt, CAPRI -8.9) and its herds fall (pigs -4.2 -> -7.1%, CAPRI
+  -11.3); herds' mean gap 3.81 -> 3.50 points.
+- **K168:** durum wheat takes half of the wheat market's relative price change, as CAPRI's arm/set_prices.gms
+  (model_price_follows.csv share 0.5); it took all of it.
+- **K169:** an output's unit value moves by the absolute change of its market's producer price, as CAPRI's
+  arm/set_prices.gms (`supply.price_transmission = "capri"`): the factor PPRI0 / UVAG0 per member state on the market's
+  relative change (price_transmission_2030.csv; soft wheat in Italy and Greece 1.2, Greek raw milk 1.6, sheep and goat
+  milk 0.15 to 0.91, olives, paddy rice). The model moved every output by the market's relative change.
+- **K170:** the Green Deal's catch-crop requirement on CAPRI's area (UAAR less the crops under winter cover by the
+  shares as given, in practice the whole UAAR; `supply.cover_crop_requirement_area`), and in the Green Deal group's
+  scenarios the winter cover option's share fixed as CAPRI's FixMiti (`supply.greendeal_winter_cover`). At CAPRI's
+  Green Deal prices (33 Spanish and Polish units): catch crops 1.86 -> 4.15 million ha (CAPRI 4.19), fixation as
+  CAPRI's, herds' mean gap 3.50 -> 3.11 points, ES41 durum -8.3 -> +26.3% (CAPRI +42.2).
+- **K171:** the results pages' baseline check compares like with like: market prices with CAPRI's member states'
+  market prices (median 0.6% off, was a "relative price" gap of 12% against another CAPRI price), animals in CAPRI's
+  units (was a 2017-2030 growth over all 250 units); the Green Deal check's prices likewise (CAPRI's member states'
+  market prices, not its EU27yr19 unit value).
+- **K172:** the 2030 base heifers grow as CAPRI's fattening and replacement heifers (HEIF + HEIR), not the fattening
+  heifers alone (they were +4.8% in CAPRI's units, EU). The 2017 bulls' gap (-10.4% in CAPRI's units) open.
+- **K173:** the bulls' and heifers' herd PMP terms convert to model heads with the CAPRI level the head ratio is taken on
+  (BULF; HEIF + HEIR), not the members' (BULL + BULH; HEIL + HEIH + HEIR): their curvature was 0.61 and 0.87 of
+  CAPRI's.
+- **GUI:** runs with Gradio 5 and Gradio 6 (the GitHub runner installed 6.32: Chatbot(type) dropped, css and show_api
+  moved; commit 43c2a61).
+- **K65 closed, DEP-4 closed:** the cattle member splits on by default (`supply.use_cattle_member_splits = true`,
+  CAPRI's setting: replacement heifers and the four calf activities with their own levels, young animals cleared per
+  sex). The full-EU Farm-to-Fork run with them converged in 14 iterations at 70b07ae (13 November: not in 50); on the
+  mini-EU Farm-to-Fork at the same commit every compare_runs.py indicator is within 0.1 point of the pooled form
+  (calves x1.34 female, x1.25 male against x1.36 pooled). `false` keeps the pooled markets, to compare.
 - **K165:** raw milk without a world pool (register DEP-5, DEP-31 closed; PROXY_AUDIT S185 closed): every region
   already cleared its raw milk in its own dairy block at CAPRI's 2030 delivery, so the pooled world ratio, its world
   balance and the non-EU use factor bounded to [0.2, 5] are removed from the calibration, the fixed-point solve, the

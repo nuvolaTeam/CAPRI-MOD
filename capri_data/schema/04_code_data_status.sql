@@ -606,6 +606,7 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/supply/supply_module.py', 'SupplyModule._build_region_data', 2030.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 data variant'),
   ('capri_mod/supply/supply_module.py', 'SupplyModule._intensity_q_at', 2030.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 data variant'),
   ('capri_mod/supply/supply_module.py', 'SupplyModule._pmp_terms_for', 2030.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 data variant'),
+  ('capri_mod/supply/supply_module.py', 'SupplyModule._price_transmission_for', 2030.0, 'technical', 'keep', NULL, 'market-year switch: the price transmission factors are CAPRI''s 2030 reference''s'),
   ('capri_mod/supply/supply_module.py', 'SupplyModule._techn_mix_for', 2030.0, 'technical', 'keep', NULL, 'market-year switch: the crop technologies'' mix terms are CAPRI''s 2030 calibration''s'),
   ('capri_mod/utils/capri_stop.py', 'CapriStopRule', 0.05, 'capri', 'keep', 'gams/capmod.gms l. 386, 388', 'p_minAbsPriceIterChg (EUR) and p_minIterChg (%)'),
   ('capri_mod/utils/capri_stop.py', 'CapriStopRule', 2.5, 'capri', 'keep', 'gams/capmod.gms l. 385', 'p_minAbsFeedIterChg (1000 t)'),

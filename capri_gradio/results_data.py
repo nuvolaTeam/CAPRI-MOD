@@ -426,7 +426,8 @@ def _loaded(root, scenario: str, run_id: str) -> dict:
 
 def baseline_vs_capri(root, scenario: str, run_id: str) -> pd.DataFrame:
     """tools/check/compare_baseline_capri.py on the run: the model's 2030 baseline against CAPRI's own 2030 reference
-    (EU27 activity levels, market production and domestic use; prices as relative structure)."""
+    (EU27 activity levels, animals in CAPRI's units, market production and domestic use; market prices against CAPRI's
+    member states' market prices, KNOWN_ISSUES K171)."""
     o = _loaded(root, scenario, run_id)
     if not o.get("base_market"):
         return pd.DataFrame()
@@ -621,7 +622,8 @@ def gd_activities(root, scenario: str, run_id: str) -> pd.DataFrame:
 
 
 def gd_prices(root, scenario: str, run_id: str) -> pd.DataFrame:
-    """The EU producer prices' % changes, the model's market prices against CAPRI's EU27yr19 UVAP (compare_capri_gd)."""
+    """The EU market prices' % changes, the model's against CAPRI's member states' market prices PMRK weighted by their
+    production (raw milk: CAPRI's EU27yr19 UVAP; compare_capri_gd, KNOWN_ISSUES K171)."""
     return _gd_tool().price_table(_loaded(root, scenario, run_id), gd_capri_effect())
 
 

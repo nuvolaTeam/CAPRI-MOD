@@ -45,8 +45,10 @@ HERDS = {"DCOW": "DCOW", "BCOW": "SCOW", "BULL": "BULF", "HFRS": "HEIF", "SHGM":
 CROPS_ = {"PULS": "PULS", "SOYA": "SOYA", "SUGB": "SUGB", "DWHE": "DWHE", "SWHE": "SWHE", "CORN": "MAIZ",
           "BARL": "BARL", "RAPE": "RAPE", "SUNF": "SUNF", "TOMA": "TOMA", "GRAE": "GRAE", "GRAI": "GRAI",
           "MAIF": "MAIF"}
-#: the model's young-animal goods (tools/build/build_young_animals.py) -> CAPRI's products
-YANI = {"calves": ("YCAM", "YCAF"), "young": ("YBUL", "YHEI"), "cows": "YCOW", "piglets": "YPIG", "lambs": "YLAM"}
+#: the model's young-animal goods (tools/build/build_young_animals.py) -> CAPRI's products: per sex with the cattle member
+#: splits (the default since 17 November 2026), pooled across the sexes without them
+YANI = {"calves_m": "YCAM", "calves_f": "YCAF", "young_m": "YBUL", "young_f": "YHEI",
+        "calves": ("YCAM", "YCAF"), "young": ("YBUL", "YHEI"), "cows": "YCOW", "piglets": "YPIG", "lambs": "YLAM"}
 PRICES = {"BEEF": "BEEF", "MILK": "COMI", "SGMT": "SGMT", "PORK": "PORK", "PULS": "PULS", "SOYA": "SOYA",
           "SUGB": "SUGB", "DWHE": "DWHE", "SWHE": "SWHE"}
 
@@ -148,17 +150,19 @@ def main():
         ref = 100 * (float(pe.at[c, "novcs"]) / float(pe.at[c, "ref"]) - 1) if c in pe.index else np.nan
         mod = 100 * (float(ds[k]) / float(db[k]) - 1) if k in db.index and db[k] > 0 else np.nan
         rows.append(("price", k, mod, ref))
-    # YOUNG-ANIMAL PRICES (CAPRI clears them in its market, yaniMarket_; here per market region): the model's price
-    # ratio in the scenario over the baseline's, against CAPRI's UVAG change (a good of two CAPRI products: the
-    # change of the sum of their unit values)
-    yb = (b.get("metadata", {}) or {}).get("young_animal_markets") or {}
-    ys = (s.get("metadata", {}) or {}).get("young_animal_markets") or {}
+    # YOUNG-ANIMAL PRICES (CAPRI clears them in its market, yaniMarket_, per market region: the EU's two blocks): the
+    # model's EU price ratio (the blocks' production-weighted, as the supply models' EU average; metadata
+    # young_animal_prices) in the scenario over the baseline's, against CAPRI's EU UVAG change (a good of two CAPRI
+    # products: the change of the sum of their unit values). Until 17 November 2026 the keys read were "EU27|<good>",
+    # which the market has not had since its two EU blocks (3 November 2026)
+    yb = (b.get("metadata", {}) or {}).get("young_animal_prices") or {}
+    ys = (s.get("metadata", {}) or {}).get("young_animal_prices") or {}
     for k, c in YANI.items():
+        if k not in ys:
+            continue                           # the other grouping (per sex or pooled)
         ref = capri_eu(eff, "UVAG", {k: c})[k]
-        kk = f"EU27|{k}"
-        # the ratio is to the baseline's price (1 where the baseline records no clearing of its own)
-        r0 = float(yb[kk][0]) if kk in yb else 1.0
-        mod = 100 * (float(ys[kk][0]) / r0 - 1) if kk in ys and r0 != 0 else np.nan
+        r0 = float(yb.get(k, 1.0))             # 1 where the baseline records no price of its own
+        mod = 100 * (float(ys[k]) / r0 - 1) if r0 != 0 else np.nan
         rows.append(("young animal price", k, mod, ref))
     tab = pd.DataFrame(rows, columns=["kind", "indicator", "model", "capri"])
     tab["diff"] = tab["model"] - tab["capri"]
