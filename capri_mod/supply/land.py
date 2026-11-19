@@ -123,17 +123,20 @@ class LandBlock:
         labels = list(getattr(self.ev, "row_labels", []))
         LTall = list(lm["types"])          # the land types of the data, in the order of its quad
         keep = [LTall.index(t) for t in self.LAND_TYPES]
-        Qf = np.array(lm["quad"], dtype=float)[np.ix_(keep, keep)]
+        # CAPRI's land block (supply_model.gms LandMarket_, LandBalNoSlak_, e_artoBal; equations/supply_model/land.py)
+        from capri_mod.supply.equations.supply_model.land import (
+            LandMarket_quad, LandMarket_cnst, LandBalNoSlak_landCol, LandBalNoSlak_baseUse, e_artoBal,
+            permGrasGreening_land)
         # UNITS: CAPRI's land-market terms are per HECTARE, the model's land
         # variables in 1000 ha - hence x 1000. Verified: with observed land
         # rents the matrix then implies an arable land-supply elasticity of
         # median 0.062 (10th 0.010, 90th 0.334), the range of CAPRI's priors;
         # unscaled it implied a median of 62 and land converted far too easily.
-        Qf = 1000.0 * 0.5 * (Qf + Qf.T) + 1e-9 * np.eye(len(keep))
+        Qf = LandMarket_quad(lm["quad"], keep)
         L0 = np.array([float(lm["base_kha"].get(t, 0.0)) for t in self.LAND_TYPES])
         n, k = len(x0), len(keep)
         Qa = np.zeros((n + k, n + k)); Qa[:n, :n] = self.Q; Qa[n:, n:] = Qf
-        ca = np.concatenate([c_lin, -Qf @ L0])
+        ca = np.concatenate([c_lin, LandMarket_cnst(Qf, L0)])
         Aa = np.hstack([A_ub, np.zeros((A_ub.shape[0], k))]); ba = b_ub.astype(float).copy()
         li = {t: j for j, t in enumerate(self.LAND_TYPES)}
         rowmap = {"arable_land": [(li["ARAC"], 1.0)],
@@ -146,7 +149,7 @@ class LandBlock:
             if lab not in labels:
                 continue
             i = labels.index(lab)
-            const = float(b_ub[i]) - sum(cf * L0[j] for j, cf in coeffs)
+            const = LandBalNoSlak_landCol(b_ub[i], coeffs, L0)
             for j, cf in coeffs:
                 Aa[i, n + j] -= cf
             ba[i] = const
@@ -446,17 +449,16 @@ class LandBlock:
                     self.ev.need_row = Aa.shape[0] - 1
                     labels.append("crop_need")
         k_extra = alloc_k + pool_k
-        tot = np.zeros(n + k + k_extra); tot[n:n + k] = 1.0
         allow = float(getattr(self, "grassland_allowance", 0.0))
-        grs = np.zeros(n + k + k_extra); grs[n + li["GRAS"]] = -1.0
+        (tot_up, tot_lo), (b_tot_up, b_tot_lo) = e_artoBal(n + k + k_extra, n, k, L0)
+        grs, b_grs = permGrasGreening_land(n + k + k_extra, n + li["GRAS"], L0[li["GRAS"]], allow)
         # TOTAL LAND IS CONSERVED (CAPRI's land-use balance: the land types add up to the region's
         # area). As an upper bound only, land leaving farming could vanish: under the nitrogen target
         # Brittany's land types fell from 2,328 to 1,495 kha, forest included. Now land leaving
         # farming goes to forest and other land, at the land market's own transformation costs.
-        Aa = np.vstack([Aa, tot, -tot, grs])
+        Aa = np.vstack([Aa, tot_up, tot_lo, grs])
         labels.extend(["land_total_up", "land_total_lo", "grassland_floor"])
-        ba = np.concatenate([ba, [L0.sum() + 1e-9], [-L0.sum() + 1e-9 * max(1.0, L0.sum())],
-                             [-(1.0 - allow) * L0[li["GRAS"]] + 1e-9]])
+        ba = np.concatenate([ba, [b_tot_up], [b_tot_lo], [b_grs]])
         Aa, ba = self._land_type_bounds(Aa, ba, labels, n, li, L0)
         # CAPRI LandBalNoSlak_ (supply_model.gms): for arable crops (ARAC), fruit and
         # nurseries (FRUN) and grassland (GRAS) the crops using a land type EQUAL the land
@@ -473,15 +475,14 @@ class LandBlock:
         extra_r, extra_b = [], []
         xb_ = np.concatenate([np.maximum(np.asarray(x0, dtype=float), 0.0), L0])
         for i, coeffs, const in rows:
-            scale = float(np.abs(Aa[i]).max()) if Aa[i].any() else 1.0
-            # (never above the row's own limit: base crops exceed some regions' land data by
+            # (the base use never above the row's own limit: base crops exceed some regions' land data by
             # rounding, 0.002 kha in Brittany, and the pair of rows was then infeasible)
-            used = min(float(Aa[i, :n + k] @ xb_), float(const))
-            extra_r.append(-Aa[i].copy()); extra_b.append(-used + 1e-7 * max(1.0, abs(used)) + 1e-9 * scale)
             # the upper row at the base use too: an equality, as CAPRI's LandBalNoSlak_. The grassland row kept the
             # land data's headroom above the base use (IE04 173 kha, NL13 6.5 kha): grass could grow onto it at no
             # land cost, and the base had no land rent for grass (its row slack, the lower row binding)
-            ba[i] = used + 1e-7 * max(1.0, abs(used)) + 1e-9 * scale
+            up_b, lo_r, lo_b = LandBalNoSlak_baseUse(Aa[i], const, xb_, n, k)
+            extra_r.append(lo_r); extra_b.append(lo_b)
+            ba[i] = up_b
         if extra_r:
             Aa = np.vstack([Aa] + extra_r); ba = np.concatenate([ba, extra_b])
             labels.extend([labels[i] + "_lo" for i, _c, _k in rows])

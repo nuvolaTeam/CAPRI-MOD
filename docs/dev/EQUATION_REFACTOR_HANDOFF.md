@@ -30,6 +30,8 @@ functions. **A move, not a change: results identical to 1e-10**, checked by a ga
 | N5d | the catch crops: winterCover_, catcMiti_, ecoSetAside_'s term (premiums.py), GHG_Mit_Cost_ on the UAA, the BioFix N, the tax | gate at N5d; the NLPs identical; K186's two porting differences kept and listed (section 6) |
 | N6 | the options' terms of GASTOTNETF_ and RUNTOTNETF_, NUTNED_'s factors at the options' shares (CapriRegionalNLP._netf_eff) | _netf_eff identical for every region (229 regions, 3 winter-cover cases); the NLPs identical; gate with N8 |
 | N7 | the mitigation block's other rows classified (inventory statuses with evidence); the switch table's envConst corrected to OFF, the inventory rebuilt (161 equations in the step) | docs only |
+| N8a | the base QP's land balances (arable_land, permanent_land, grassland) as LandBalNoSlak_ (supply_model/land.py) | 442 QPs identical bit for bit (221 regions, with and without a set-aside floor); gate with N8b |
+| N8b | the land market (supply/land.py _land_augment): LandMarket_, LandBalNoSlak_ on the land columns and at the base use, e_artoBal, the grassland floor | the functions identical bit for bit to the old code (2,000 random cases); gate at N8b (one run for N6-N8b) |
 
 Not on the branch (on purpose):
 - `docs/equations/` (the equation book, page 01 the regional N balance) and its README paragraph: waiting for the
@@ -160,6 +162,12 @@ comes, check against CAPRI's _pw feed version and register what differs.
   ecoSetAside_ and cropDivGreening_ (supply_model_e_list_linear.gms l. 235-236) are empty in the step; the model
   writes ecoSetAside_ and cropDivGreening_ in its Green Deal runs and the 2030 reference: KNOWN_ISSUES K187 (the main
   line). Every other switch set after that `$exit` is to be checked against its default (endoManAvFact: on, l. 52).
+- **Porting differences of N8 (for the main line; kept in the move):** the base QP's land rows' right-hand side is
+  max(the land data, the base area) (supply_model/land.py LandBal_rhs; CAPRI: the land type's level); the land
+  market's Q has a 1e-9 I regularisation; LandBalNoSlak_ holds at the base use (crops - land = base crops - base
+  land; the model's land data carry idle land) with tolerances of 1e-7 and 1e-9; e_artoBal's total is the base land
+  types' sum (CAPRI: ARTO - INLW); the grassland floor on the GRAS column duplicates permGrasGreening_, which the
+  model also writes as its "CAP greening" row (N10).
 - CAPRI's sugar quota equations (sugar.py's block) are empty in the 2030 step: their condition
   p_technFact(SUGB, VCOF) is set to 0 where DATA(QUTS, SUGB) <= eps (supply/prep_sim.gms l. 171), and the quotas
   ended in 2017; to confirm from CAPRI's 2030 DATA (N15).

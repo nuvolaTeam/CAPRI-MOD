@@ -50,7 +50,7 @@ terms below, substituted) against the target times the current land:
 - the activities' coefficients: `capri_mod/environmental/nitrogen.py` (`unit_nitrogen_balance`, l. 300), the region's
   constant part (`nitrogen_balance_constants`, l. 320);
 - the row: `capri_mod/supply/supply_module.py` (`_build_constraints`, the `N_balance` row, l. 1271-1368); per
-  hectare of current land, CAPRI's denominator $L_r$ = ARAC + GRAS + FRUN: `capri_mod/supply/land.py` l. 183-205;
+  hectare of current land, CAPRI's denominator $L_r$ = ARAC + GRAS + FRUN: `capri_mod/supply/land.py` l. 186-208;
 - with the fertilisation block, the mineral part replaced by the purchases $v\_netPutQuant$ (e_MINFERT below):
   `capri_mod/supply/capri_regional_nlp.py` (`_fert_block`, l. 819-834) with
   `capri_mod/supply/equations/supply_model/n_surplus.py` (`SURTOT_REST_`).
