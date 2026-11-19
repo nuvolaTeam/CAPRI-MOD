@@ -1112,7 +1112,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         #     arable land, which is where its -9% cereal-area effect under
         #     Farm-to-Fork comes from; here cereals kept their land and fell only
         #     9.8% against CAPRI's 15%, with the cereal price already matching.
-        row_arable = np.zeros(n)
+        # CAPRI's land balances (supply_model.gms LandBalNoSlak_; equations/supply_model/land.py)
+        from capri_mod.supply.equations.supply_model.land import LandBalNoSlak_, LandBal_rhs
         # One classification for both rows, the same one the land data is built
         # with (tools/build/build_capri_base.py PERMANENT_CROPS): tobacco, cotton and
         # other fibre are ANNUAL crops on arable land. They used to sit in the
@@ -1120,9 +1121,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # was measured against land built on a different definition.
         arable_crops = [a for a in CROPS
                         if a not in CROPS_ON_LAND["GRAS"] + self.PERMANENT_LAND_CROPS]
-        for a in arable_crops:
-            if a in acts_idx:
-                row_arable[acts_idx[a]] = 1.0
+        row_arable = LandBalNoSlak_(n, acts_idx, arable_crops)          # ARAC
         A_rows.append(row_arable)
         self.ev.row_labels.append("arable_land")
         # The ARABLE land figure and the crop areas come from different
@@ -1143,8 +1142,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # arable land INCLUDING fallow, now that SETA is in the row
         _land_arable = (float(self._land_of("ARABLE"))
                         + self._land_of("FALLOW"))
-        arable_avail = max(_land_arable, arable_base)
-        b_rows.append(arable_avail)
+        b_rows.append(LandBal_rhs(_land_arable, arable_base))
 
         # 1b. Landscape-elements floor: at least `set_aside_requirement` of UAA
         # held as the non-productive activity. Expressed as -x_SETA <= -target
@@ -1186,11 +1184,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             b_rows.append(-floor)
 
         # 2. Permanent crops land constraint
-        row_perm = np.zeros(n)
         perm_crops = list(self.PERMANENT_LAND_CROPS)
-        for a in perm_crops:
-            if a in acts_idx:
-                row_perm[acts_idx[a]] = 1.0
+        row_perm = LandBalNoSlak_(n, acts_idx, perm_crops)              # FRUN
         A_rows.append(row_perm)
         self.ev.row_labels.append("permanent_land")
         # The PERMANENT land figure and the crop areas come from different
@@ -1210,19 +1205,16 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # rewriting the base year where it does not.
         perm_base = sum(float(self._base_levels().get(a, 0.0))
                         for a in perm_crops if a in acts_idx)
-        b_rows.append(max(self._land_of("PERMANENT"), perm_base))
+        b_rows.append(LandBal_rhs(self._land_of("PERMANENT"), perm_base))
 
         # 3. Grassland constraint
-        row_grass = np.zeros(n)
         # CAPRI's land rules (LandBalNoSlak_): the row is CAPRI's grassland balance, the grassland activity (CAPRI's
         # GRAE + GRAI, the model's own activities since 7 November 2026) equals the grassland area. Maize and other fodder are ARABLE crops (CAPRI MAIF, OFAR, ROOF) and
         # are already in the arable row. (The model's earlier row - fodder on grassland plus a fifth of arable land -
         # fixed arable fodder at its base area plus a fifth of any arable change: regions under the N target could not
         # replace fertilised fodder leys.)
         grass_acts = list(CROPS_ON_LAND["GRAS"])
-        for a in grass_acts:
-            if a in acts_idx:
-                row_grass[acts_idx[a]] = 1.0
+        row_grass = LandBalNoSlak_(n, acts_idx, grass_acts)             # GRAS
         A_rows.append(row_grass)
         self.ev.row_labels.append("grassland")
         # RHS must admit the calibrated base fodder area. The land-availability
@@ -1237,7 +1229,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # LandBalNoSlak_. The larger of the land figure and the base area stays, as for the other land rows)
         grass_land_limit = self._land_of("GRASSLAND")
         base_fodder = sum(self._base_levels().get(a, 0.0) for a in grass_acts)
-        b_rows.append(max(grass_land_limit, base_fodder))
+        b_rows.append(LandBal_rhs(grass_land_limit, base_fodder))
 
         # (4. the legacy nitrate-limit row on total applied N, not CAPRI's, was retired on 27 October 2026, K33: nitrogen
         # limits are CAPRI's N-balance target)

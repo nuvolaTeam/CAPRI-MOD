@@ -49,7 +49,7 @@ CAPRI-MOD: one row of the regional NLP, `N_balance`, written as the levels times
 terms below, substituted) against the target times the current land:
 - the activities' coefficients: `capri_mod/environmental/nitrogen.py` (`unit_nitrogen_balance`, l. 300), the region's
   constant part (`nitrogen_balance_constants`, l. 320);
-- the row: `capri_mod/supply/supply_module.py` (`_build_constraints`, the `N_balance` row, l. 1279-1376); per
+- the row: `capri_mod/supply/supply_module.py` (`_build_constraints`, the `N_balance` row, l. 1271-1368); per
   hectare of current land, CAPRI's denominator $L_r$ = ARAC + GRAS + FRUN: `capri_mod/supply/land.py` l. 183-205;
 - with the fertilisation block, the mineral part replaced by the purchases $v\_netPutQuant$ (e_MINFERT below):
   `capri_mod/supply/capri_regional_nlp.py` (`_fert_block`, l. 819-834) with
@@ -226,7 +226,7 @@ $$
 
 with $S^{\text{base}}_r$ the baseline surplus per ha and $\rho$ the reduction (surpRedu: 30 in the 2030 Green Deal run).
 
-CAPRI-MOD: the target per ha from the model's own baseline surplus (`capri_mod/supply/supply_module.py` l. 3046-3064,
+CAPRI-MOD: the target per ha from the model's own baseline surplus (`capri_mod/supply/supply_module.py` l. 3038-3056,
 rule "star3"), the cap on the `N_balance` row (section 1).
 
 Status: ported. The target is the model's own baseline surplus less 30%, as CAPRI takes its own: where the two
