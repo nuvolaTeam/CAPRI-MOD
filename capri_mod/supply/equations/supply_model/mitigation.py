@@ -4,6 +4,23 @@ option's cost is charged on.
 CAPRI's GAMS statement of each equation is in the docstring of the function that writes it (the project lead's
 decision of 19 November 2026); this docstring keeps the block's overview, notation and departures.
 
+The options' upper bounds are CAPRI's TotMitFertMin_ and TotMitFertMan_ (each option's maximum share; the model has one
+target per option, so the sum over N2OSYN and N2OSYN2 is the share) and Tot_soilCov_ (the catch crops' maximum
+share); written as the variables' bounds, they have no function:
+
+   TotMitFertMin_(RUNR,gainsTechFert) $ sum(R_RAGG(RUNR,MSACT) $ mitiTech_map(MSACT,"cropMiti",gainsTechFert,"N2OSYN"),1)..
+      Sum(R_RAGG(RUNR,MSACT) $ mitiTech_map(MSACT,"cropMiti",gainsTechFert,"N2OSYN"),
+         v_Miti(RUNR,"cropMiti", gainsTechFert,"N2OSYN") + v_Miti(RUNR,"cropMiti", gainsTechFert,"N2OSYN2"))
+    =L=  p_ghgMiti(RUNR,"cropMiti",gainsTechFert,"N2OSYN","MaxShare");
+
+   TotMitFertMan_(RUNR,gainsTechFert) $ sum(R_RAGG(RUNR,MSACT) $ mitiTech_map(MSACT,"cropMiti",gainsTechFert,"N2OSYN"),1)..
+      Sum(R_RAGG(RUNR,MSACT) $ mitiTech_map(MSACT,"cropMiti",gainsTechFert,"N2OMAN"),
+         v_Miti(RUNR,"cropMiti", gainsTechFert,"N2OMAN") + v_Miti(RUNR,"cropMiti", gainsTechFert,"N2OMAN2"))
+    =L=  p_ghgMiti(RUNR,"cropMiti",gainsTechFert,"N2OMAN","MaxShare");
+
+    Tot_soilCov_(RUNR) $ sum((R_RAGG(RUNR,MSACT),mitiTech_map(MSACT,"catc",mitiTechCov,"co2seq")),1)..
+      sum(mitiTechCov,v_Miti(RUNR,"catc",mitiTechCov,"co2seq")) =l= p_ghgMiti(RUNR,"catc","winterCov","co2seq","maxShare");
+
 Written so far: the manure options' part (K183): the fertiliser options aimed at applied manure (mitiTarget in
 targFertMan: the nitrification inhibitor on manure, NITR_INH with target N2OMAN); and the mineral fertiliser options'
 base (targFertSyn: the purchases, K175), on which the regional NLP's fertilisation block charges their cost.
