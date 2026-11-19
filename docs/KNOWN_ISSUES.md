@@ -16,7 +16,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K13](#k13) | Farm-to-Fork milk price | open: waiting for CAPRI's scenario results |
 | [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open: waiting for CAPRI's scenario results |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | closed (17 November 2026): CAPRI's stop rule settles it (young-animal imbalance 0.0004); a 1e-05 price change leaves the beef price unchanged |
-| [K48](#k48) | Young-animal prices against CAPRI's own market run | open |
+| [K48](#k48) | Young-animal prices against CAPRI's own market run | open: calves below CAPRI's; the replacement cows' gap closed (19 November 2026) |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | fixed (17 November 2026): they converge on the full EU (14 iterations) and are on by default |
 | [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open: waiting for CAPRI's scenario results |
 | [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open: waiting for CAPRI's scenario results |
@@ -651,11 +651,11 @@ Farm-to-Fork runs that differ only in this batch's processing change (K39) give 
 <a id="k48"></a>
 ### K48: Young-animal prices against CAPRI's own market run
 
-Check against CAPRI's cap_after_2014 run without voluntary coupled support (tools/run/run_vcs_2030.py; before K46): calves +15.0% (CAPRI +26.3%), young cattle +3.6 (+4.0), replacement cows -14.5 (-0.2), piglets -0.1 (-0.05), lambs +17.0 (+10.7), beef price +0.4 (+2.2). CAPRI's calf price moves twelve times its beef price there: large young-animal price changes (Farm-to-Fork calves x2.2-2.7, Green Deal x5) are CAPRI's behaviour in kind, not a model artefact by themselves
+Check against CAPRI's cap_after_2014 run without voluntary coupled support (tools/run/run_vcs_2030.py). First check (before K46, and with K143's compounding animal premium factors, which overstated the animals' response): calves +15.0% (CAPRI +26.3%), young cattle +3.6 (+4.0), replacement cows -14.5 (-0.2), piglets -0.1 (-0.05), lambs +17.0 (+10.7), beef price +0.4 (+2.2). Re-run 19 November 2026 at 640a4e5 (K143 fixed; cattle member splits with per-sex young-animal markets; converged in 14 iterations, 3,987 s): male calves +18.2% (CAPRI +21.2%), female calves +24.3 (+31.9), young bulls +3.2 (+3.5), young heifers +3.6 (+4.6), replacement cows -0.5 (-0.2), piglets -0.05 (-0.05), lambs +13.2 (+10.7), beef price +2.1 (+2.2). The male calves' price moves 8.7 times the beef price (CAPRI 9.6), the female calves' 11.6 times (CAPRI 14.5): large young-animal price changes (Farm-to-Fork calves x2.2-2.7, Green Deal x5) are CAPRI's behaviour in kind, not a model artefact by themselves. Which of the changes since the first check closed the replacement cows' gap is not separated
 
-- **Effect:** young-animal prices; the replacement-cow price far more responsive than CAPRI's
+- **Effect:** young-animal prices: the calves' price rises less than CAPRI's (male -3.0 points, female -7.6), the lambs' more (+2.4). The test's other indicators: 29, mean absolute deviation 0.49 points, correlation +0.97 (first check: 28, 1.24, +0.85); the largest gaps sugar beet area -2.1% (CAPRI -5.1), soya price +0.6 (+3.3), heifers -1.7 (-0.5). The model's durum and sugar beet prices are not compared: they follow the wheat and sugar markets (K168) and are not in the market's price table the runner reads
 - **In 9t:** yes
-- **Status:** **open** (replacement cows); registered (the rest). Other indicators of the test: 28, mean absolute deviation 1.24 points, correlation +0.85
+- **Status:** **open** (calves: below CAPRI's here and in the Green Deal run, where on 19 November 2026 EU_WEST's male calves rise x1.86 against CAPRI's x2.07, its female calves x1.99 against x2.33); the replacement cows' gap closed in the re-run (19 November 2026)
 
 <a id="k49"></a>
 ### K49: Diagnosis of the regions where CAPRI's crop-group allocation fails (20 October 2026): not the solver
@@ -3054,7 +3054,7 @@ without the fix)
 - **Effect:** every run with an animal premium factor different from 1 before 13 November 2026: the premium response's
   first runs (13 November, not kept), tools/run/run_vcs_2030.py's coupled-support experiment (the animals' coupled
   support removed by a factor below 1, compounded towards 0 over the outer iterations: the animals' response was
-  overstated; "test done: MAD 1.23 points" in COUPLING_SPRINTS to be redone), and scenarios with Pillar II budget
+  overstated; "test done: MAD 1.23 points" in COUPLING_SPRINTS, redone 19 November 2026: K48), and scenarios with Pillar II budget
   changes (none of the shipped scenarios has them). Farm-to-Fork and Green Deal runs without the premium response
   had no factor and are not affected
 - **In 9t:** -
