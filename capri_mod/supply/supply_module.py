@@ -1176,12 +1176,12 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             self.ev.fall_floor = float(floor)
             if floor > 0:
                 _fall_up = self.FALL_FLOOR_UP_SHARE * _n_techn("FALL") * uaa_total
-            row_seta = np.zeros(n)
-            for a in _seta_acts:
-                row_seta[acts_idx[a]] = -1.0
+            # CAPRI's e_setaLandscape (equations/supply_model/set_aside.py)
+            from capri_mod.supply.equations.supply_model.set_aside import e_setaLandscape
+            row_seta, b_seta = e_setaLandscape(n, acts_idx, _seta_acts, floor)
             A_rows.append(row_seta)
             self.ev.row_labels.append("landscape_floor")
-            b_rows.append(-floor)
+            b_rows.append(b_seta)
 
         # 2. Permanent crops land constraint
         perm_crops = list(self.PERMANENT_LAND_CROPS)
