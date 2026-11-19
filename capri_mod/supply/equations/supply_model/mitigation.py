@@ -56,7 +56,7 @@ def GHG_Mit_Cost_targFertMan(v_ManureNPK_tail, v_Miti, costPar_lin, costPar_sqr,
                                                 $ (sameas(PACT,"cropMiti") and sum(gainsTechFert $ sameas(allMitiTech,gainsTechFert),1) and sum(targFertMan $ sameas(mitiTarget,targFertMan),1))
                 ... ] ...;
 
-    Other sources: l. 983-1030 (InclEmiAppl_), l. 935-975 (ManureNPK_, manExportOrAppl_); EmiCalMan: envind/ghgMiti.gms
+    Other sources: l. 984-1044 (InclEmiAppl_), l. 935-955 and 962-978 (ManureNPK_, manExportOrAppl_); EmiCalMan: envind/ghgMiti.gms
     l. 945-962.
 
     In this project's notation (per region r, summed over the options o with a targFertMan target):

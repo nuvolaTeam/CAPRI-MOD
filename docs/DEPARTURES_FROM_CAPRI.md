@@ -162,6 +162,11 @@ change: in 2030 their coefficients are 1/0.935 = 7% higher than intended, on top
 **Scope.** Farm-to-Fork runs with the organic or pesticide target. Decided on 24 October 2026 under the rule for CAPRI
 code errors (findings S3 and S4 of the supply audit, ARCHITECTURE_REFACTOR.md section 5.2).
 
+**Comparison runs.** The runs compared with CAPRI's own results take `false` (the project lead, 19 November 2026),
+with FIX-6's setting: `--settings capri_mod/settings/capri_comparison.toml`. Measured on the full-EU 2030 Green Deal
+run, both false against both true: EU producer prices' mean gap to CAPRI 1.6 -> 1.2 points, member states'
+activities 5.2 -> 4.6 (Lithuania's and Finland's cereal areas close to CAPRI's).
+
 ### `supply.organic_topup_at_fuel_cost = true` (CAPRI as coded: `false`) — organic other-input top-up
 
 **What CAPRI's code does.** For each organic crop, `organic_io.gms` l. 111-115 adds EFUL x 2 x the crop's organic
@@ -178,6 +183,9 @@ wheat's fuel costs 331 EUR/ha but its top-up as coded is 2 x 848 EUR/ha per unit
 kept. `false` reproduces CAPRI's code (plant_protection_cost.csv carries both values).
 
 **Scope.** Farm-to-Fork runs with the organic target. Decided on 24 October 2026 under the rule for CAPRI code errors.
+
+**Comparison runs.** `false`, with FIX-5's setting (the project lead, 19 November 2026;
+`capri_mod/settings/capri_comparison.toml`, above).
 
 ## Switched to CAPRI's setting
 

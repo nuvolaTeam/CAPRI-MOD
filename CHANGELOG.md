@@ -196,6 +196,25 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   wheat -2.5 -> -7.8% (CAPRI -8.4), barley -3.3 -> -6.3 (-11.9), FR52 barley -6.6 -> -9.2 (-10.1), Spain little (ES41
   barley -5.5 -> -6.5, -10.7); the areas' gap unchanged; the N-surplus dual lower (DE21 5.09 -> 4.80 EUR/kg). The
   register's DE21 wheat cost corrected to capri-mod's money (about 143 EUR/ha). Documentation only.
+- **K185:** fallow and set-aside have no nutrient need, as CAPRI's fert/fertned.gms sets it for a crop without a
+  main-output yield (capri_mod/supply/equations/fertned.py, DATA_FNUT): they no longer pay their group's N need in
+  NUTNED_. At CAPRI's Green Deal prices (five units) fallow FI18 +9.8 -> +16.1 thousand ha (CAPRI +52.3), FI19
+  +43.2 -> +52.0 (+85.6), LT +149.7 -> +153.1 (+153.1); the units' absolute area gaps 844 -> 769 thousand ha.
+- **DEP-51's crop-level part (19 November 2026):** CAPRI's reference values each crop's plant protection at its
+  pesticide module's aggregates, its Green Deal step at PLAP x price; per crop the two differ (DE80 barley 70 against
+  121 EUR/ha in CAPRI's money), so CAPRI's step raises the cereals' cost before any policy. With it, the T1 - T2 part
+  and FIX-5/6 as CAPRI codes them (five units at CAPRI's prices, comparison only) DE80 barley +8.7 -> -6.4% (CAPRI
+  -9.0), rye -1.5 -> -8.9 (-8.7): DE80's barley gap is CAPRI's step, not a porting error. Documentation only
+  (docs/CAPRI_DEPARTURES_REGISTER.md DEP-51).
+- **FIX-5 and FIX-6 measured (19 November 2026):** the full-EU 2030 Green Deal run with both CAPRI-error fixes set to
+  CAPRI's coding (`supply.greendeal_inputs_keep_tech_change` and `supply.organic_topup_at_fuel_cost` false;
+  comparison only) against the same code with both in force: EU producer prices' mean gap to CAPRI 1.6 -> 1.2 points
+  (the crop prices 0.3 to 1.8 points higher, the animal products within 0.2), EU activities' 1.2 -> 1.0, member
+  states' 5.2 -> 4.6; the cereal areas of Lithuania and Finland close to CAPRI's (mean gap 13.1 -> 2.4 and 10.7 ->
+  2.9 points), Latvia's and Slovakia's further (8.6 -> 15.5, 2.3 -> 7.5). The fixes stay in force by default; the
+  runs compared with CAPRI's results take CAPRI's coding (the project lead's decision of 19 November 2026), with the
+  new settings file capri_mod/settings/capri_comparison.toml (`--settings`; test
+  test_capri_comparison_settings_run_fix5_and_fix6_as_capri_codes_them).
 - **K48, the coupled-support check redone (19 November 2026, at 640a4e5, after K143):** against CAPRI's cap_after_2014
   run without voluntary coupled support, the replacement cows' price -0.5% (CAPRI -0.2; first check -14.5), male
   calves +18.2 (+21.2), female calves +24.3 (+31.9), lambs +13.2 (+10.7), beef +2.1 (+2.2); the other 29 indicators'
