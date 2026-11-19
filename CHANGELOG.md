@@ -187,6 +187,11 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   NLP's N residue pool (fertDistCres_) and on the N-surplus row (e_ATMOSD, e_CRESID), and in the accounts.
   At CAPRI's Green Deal prices DE21's deposition is CAPRI's (9.74 against 9.72 kt; before 9.20), its mineral
   N cut moves toward CAPRI's (-14.8 against -15.6 kt; before -14.2), the N-surplus dual 5.06 -> 5.09 EUR/kg.
+- **DEP-51 measured (19 November 2026):** the six units at CAPRI's Green Deal prices with CAPRI's Green Deal step
+  representation of plant protection (comparison only, not in the model): the technology shift's yield effect DE21
+  wheat -2.5 -> -7.8% (CAPRI -8.4), barley -3.3 -> -6.3 (-11.9), FR52 barley -6.6 -> -9.2 (-10.1), Spain little (ES41
+  barley -5.5 -> -6.5, -10.7); the areas' gap unchanged; the N-surplus dual lower (DE21 5.09 -> 4.80 EUR/kg). The
+  register's DE21 wheat cost corrected to capri-mod's money (about 143 EUR/ha). Documentation only.
 - **K48, the coupled-support check redone (19 November 2026, at 640a4e5, after K143):** against CAPRI's cap_after_2014
   run without voluntary coupled support, the replacement cows' price -0.5% (CAPRI -0.2; first check -14.5), male
   calves +18.2 (+21.2), female calves +24.3 (+31.9), lambs +13.2 (+10.7), beef +2.1 (+2.2); the other 29 indicators'
