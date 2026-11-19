@@ -28,6 +28,8 @@ functions. **A move, not a change: results identical to 1e-10**, checked by a ga
 | N5b | the ammonia options (CapriRegionalNLP._abatement_block): TotMit_, GHG_Mit_Cost_ on the herd, manExportOrAppl_'s N kept, the emission tax | one gate with N5c; the NLPs identical, also with the taxes, free shares and no N block |
 | N5c | the fertiliser options and the inhibitor on manure: Tot_MitFert_, TotMit_, GHG_Mit_Cost_'s parts, NUTNED_'s NMAN term, the tax | gate at N5c (with N5b); the NLPs identical |
 | N5d | the catch crops: winterCover_, catcMiti_, ecoSetAside_'s term (premiums.py), GHG_Mit_Cost_ on the UAA, the BioFix N, the tax | gate at N5d; the NLPs identical; K186's two porting differences kept and listed (section 6) |
+| N6 | the options' terms of GASTOTNETF_ and RUNTOTNETF_, NUTNED_'s factors at the options' shares (CapriRegionalNLP._netf_eff) | _netf_eff identical for every region (229 regions, 3 winter-cover cases); the NLPs identical; gate with N8 |
+| N7 | the mitigation block's other rows classified (inventory statuses with evidence); the switch table's envConst corrected to OFF, the inventory rebuilt (161 equations in the step) | docs only |
 
 Not on the branch (on purpose):
 - `docs/equations/` (the equation book, page 01 the regional N balance) and its README paragraph: waiting for the
