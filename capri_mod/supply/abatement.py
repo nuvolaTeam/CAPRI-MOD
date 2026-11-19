@@ -611,15 +611,13 @@ class AbatementBlock:
                 pend[cls] = col
                 continue
             Aa = np.hstack([Aa, col[:, None]])
-            up = np.zeros(Aa.shape[1]); up[-1] = 1.0
             _lt = self.HISTOSOL_LAND.get(cls, ())
-            if land_cols and _lt and all(t in land_cols for t in _lt):
-                # F <= MaxShare x share x current land (K158): F - MaxShare x share x L <= 0
-                for t in _lt:
-                    up[land_cols[t]] = -float(mx) * sh
-                Aa = np.vstack([Aa, up]); ba = np.concatenate([ba, [1e-9 * max(1.0, H)]])
-            else:
-                Aa = np.vstack([Aa, up]); ba = np.concatenate([ba, [float(mx) * H]])
+            # CAPRI's idleHisto_ as the area's bound (equations/supply_model/set_aside.py): F <= MaxShare x share x
+            # current land with the land market (K158), else x the base area
+            from capri_mod.supply.equations.supply_model.set_aside import idleHisto_
+            _lc = [land_cols[t] for t in _lt] if (land_cols and _lt and all(t in land_cols for t in _lt)) else None
+            up, b_up = idleHisto_(Aa.shape[1], _lc, mx, sh, H)
+            Aa = np.vstack([Aa, up]); ba = np.concatenate([ba, [b_up]])
             labels.append(f"hist_{cls}_up")
             Qa = np.pad(Qa, ((0, 1), (0, 1))); Qa[-1, -1] = float(sqr) / H
             ca = np.concatenate([ca, [cal[cls] + self._ghg_cost('hist', cls)]])
