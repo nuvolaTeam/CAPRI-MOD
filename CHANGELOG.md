@@ -175,6 +175,12 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   N-surplus dual rises toward CAPRI's implied one (FR52 4.52 -> 5.82 against 6.1-6.3; DE21 4.39 -> 5.06 against
   5.9-6.2; ES42 4.69 -> 5.32 against 6.2); the suckler cows' mean gap 5.0 -> 1.9 points, the grassland split's
   8.7 -> 3.1.
+- **DEP-51 registered (the project lead's decision, 19 November 2026):** one representation of plant protection in the
+  base and the scenario (PLAP with CAPRI's technology factors, calibrated at the base). CAPRI's 2030 Green Deal
+  reference ran with its pesticide module (pestDisaggStage 5_aggregates: T1 and T2 apply the same pesticides per ha),
+  its Green Deal step with "none" (PLAP +-0.4 per technology): the step adds a T1 - T2 cost of 0.8 x the PLAP cost
+  before any policy acts (DE21 soft wheat about 139 EUR/ha, about -5.5 points of yield through the shift to T2).
+  Comparisons with CAPRI's Green Deal step state it. Documentation only.
 - **K180:** the bulls and heifers count CAPRI's census herds of all the activities they hold (bulls BULL + BULH,
   heifers HEIL + HEIH + HEIR), not one activity's (the low-intensity bulls, the fattening heifers): a model head is one
   animal; Slovakia's replacement heifers enter the model. Every per-head table rebuilt, totals unchanged; outside

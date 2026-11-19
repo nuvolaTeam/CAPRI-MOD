@@ -28,7 +28,7 @@ Which equations are live depends on switches. Two configurations matter:
 | `lulucf_supply` | off | on (follows ghgAbatement) |
 | LUC equations (land transitions) | on (task with market model and environmental reports) | on |
 | Feed version | `_pw`: only REQSE_ (energy, protein) as requirement constraints | same |
-| `PEST_DISAGG` (pesticide yield response) | off | off |
+| `PEST_DISAGG` (pesticide yield response) | off | off (the Green Deal step; its 2030 reference run, res_2_1730greendeal_refdefaulta, and the baseline calibration ran with `pestDisaggStage` 5_aggregates: DEP-51) |
 | `envConst`, `NMINREST`, BFP, water | off | off |
 | CAP policy chain | the policy file decides (GUI default `mtr_rd_ref` looks legacy; CAP 2023-27 reference turns on the GAECs) | cap_after_2014 greening chain (permanent grassland, 5% ecological set-aside, crop diversification) |
 
