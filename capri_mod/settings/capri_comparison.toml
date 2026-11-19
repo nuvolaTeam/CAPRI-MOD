@@ -1,0 +1,16 @@
+# Settings of the runs compared with CAPRI's own results (the comparison runs for the CAPRI team in Bonn; the project
+# lead's decision of 19 November 2026). Two of CAPRI's code errors that capri-mod fixes by default are run as CAPRI
+# codes them, so that a comparison with CAPRI's runs shows the port and not the fixes. The defaults (defaults.toml)
+# keep the fixes. Use: tools/run/run_f2f_2030.py OUT.pkl --scenario greendeal2030 --settings
+# capri_mod/settings/capri_comparison.toml (docs/DEPARTURES_FROM_CAPRI.md; docs/CAPRI_DEPARTURES_REGISTER.md FIX-5, FIX-6).
+#
+# Measured on the full-EU 2030 Green Deal run (19 November 2026, both false against both true): EU producer prices'
+# mean gap to CAPRI 1.6 -> 1.2 points, member states' activities 5.2 -> 4.6.
+
+[supply]
+# FIX-5: the Green Deal input changes replace the 2017-2030 input-saving factor TF_I (capmod/define_inputs.gms l. 66-73,
+# pol_input/greendeal/conventional_io.gms l. 361)
+greendeal_inputs_keep_tech_change = false
+# FIX-6: the organic top-up's fuel coefficient added to INPO and valued at INPO's unit value
+# (pol_input/greendeal/organic_io.gms l. 107-115)
+organic_topup_at_fuel_cost = false

@@ -3585,6 +3585,19 @@ def test_settings_layer_is_the_one_source_of_run_settings():
                              ((f"{sec}.{k2}", v2) for k2, v2 in kv.items())}).get("market.biofuel_markets") is False
 
 
+def test_capri_comparison_settings_run_fix5_and_fix6_as_capri_codes_them():
+    """The comparison runs with CAPRI's results (the project lead, 19 November 2026) take
+    capri_mod/settings/capri_comparison.toml: FIX-5 and FIX-6 as CAPRI codes them, everything else the defaults; the
+    defaults keep both fixes."""
+    import pathlib
+    from capri_mod import settings as S
+    f = pathlib.Path(S.__file__).parent / "capri_comparison.toml"
+    s = S.load([f])
+    assert s.diff() == {"supply.greendeal_inputs_keep_tech_change": False, "supply.organic_topup_at_fuel_cost": False}
+    d = S.defaults()
+    assert d.get("supply.greendeal_inputs_keep_tech_change") is True and d.get("supply.organic_topup_at_fuel_cost") is True
+
+
 
 def test_projection_trajectory_moves_every_livestock_yield(data):
     """K12 (docs/KNOWN_ISSUES.md): CAPRI's 2030 reference splits dairy cows, heifers, bulls and calves into intensity
@@ -4574,6 +4587,31 @@ def test_idled_histosols_keep_their_deposition(model):
     e1 = model.env_module.compute_indicators(sr)
     assert abs((e1.n_deposition - e0.n_deposition) - 10.0 * dep) < 1e-9
     assert abs((e1.n_surplus - e0.n_surplus) - 10.0 * dep) < 1e-9
+
+
+def test_fallow_and_set_aside_have_no_nutrient_need(model):
+    """KNOWN_ISSUES K185: CAPRI's simulation sets each crop's nutrient need with fert/fertned.gms (run by
+    capmod/def_fert_and_requirements.gms l. 134): zero without a main-output yield O_HP (l. 98-99) and for fallow
+    (l. 233). So fallow and set-aside add nothing to NUTNED_; the data's reported need (npk_crop_coefs_2030.csv,
+    FI19 FALL 4.33 kg N/ha) does not enter the NLP's group need, while a cropped crop keeps its own."""
+    from capri_mod.fert.npk import NPKData
+    from capri_mod.supply.equations.fertned import DATA_FNUT
+    assert DATA_FNUT(4.33, 0.0) == 0.0 and DATA_FNUT(92.67, 4.29) == 92.67
+    region = "FI190000"
+    model.run(scenario="BASELINE", regions=[region], max_outer_iter=1)
+    mo = model.supply_module._models[region]
+    acts = list(mo.acts)
+    assert {"FALL", "VSET", "BARL"} <= set(acts)
+    D = NPKData.get()
+    cr = D.capri_region(region)
+    for a in ("FALL", "VSET", "BARL"):
+        assert D.crop_coef(cr, "N", a, "need_kg_ha") > 0, a          # the data carry a reported need for all three
+    Q, c, A, b, y = mo.res.last_aug
+    spec = mo._npk_spec(A.shape[1], y, A, list(mo.ev.aug_labels))
+    for nut, d in spec["nutrients"].items():
+        cols = {j for g in d["groups"] for j, _v in g["need"]}
+        assert acts.index("FALL") not in cols and acts.index("VSET") not in cols, nut
+        assert acts.index("BARL") in cols, nut
 
 
 def test_forest_and_other_land_keep_capris_bounds(model):

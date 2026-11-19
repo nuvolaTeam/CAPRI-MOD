@@ -6,8 +6,8 @@ def GHG_Mit_Cost_targFertMan(v_ManureNPK_tail, v_Miti, costPar_lin, costPar_sqr,
     """CAPRI: the manure options' part of GHG_Mit_Cost_(r), the fertiliser options aimed at applied manure
     (mitiTarget in targFertMan: the nitrification inhibitor on manure, NITR_INH with target N2OMAN).
 
-    Source: supply/supply_model.gms l. 5057-5160 (GHG_Mit_Cost_, the standard version; its base for targFertMan
-    l. 5144-5149), l. 983-1030 (InclEmiAppl_), l. 935-975 (ManureNPK_, manExportOrAppl_); EmiCalMan:
+    Source: supply/supply_model.gms l. 5057-5190 (GHG_Mit_Cost_, the standard version; its base for targFertMan
+    l. 5144-5149), l. 984-1044 (InclEmiAppl_), l. 935-955 and 962-978 (ManureNPK_, manExportOrAppl_); EmiCalMan:
     envind/ghgMiti.gms l. 945-962.
 
     Equation (per region r, summed over the options o with a targFertMan target):

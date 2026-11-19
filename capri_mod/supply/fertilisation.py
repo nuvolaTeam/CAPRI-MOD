@@ -278,10 +278,15 @@ class FertilisationBlock:
             g0 = float(R.excr_avail) if R.excr_avail == R.excr_avail else 0.0
             gc = float(R.cres_avail) if R.cres_avail == R.cres_avail else 0.0
             need = np.zeros(n); own = np.zeros(n); poolc = np.zeros(n); mine0 = np.zeros(n)
+            from capri_mod.supply.equations.fertned import DATA_FNUT
+            _yld = self.data.yields
             for j, a in enumerate(acts):
                 if a not in CROPS:
                     continue
-                need[j] = D.crop_coef(cr, nut, a, "need_kg_ha") * grass_need_factor(a)    # NUTNED_'s grass term (K160)
+                # CAPRI's DATA(crop, FNUT) after fertned.gms: no need without a main-output yield (fallow, set-aside;
+                # K185), NUTNED_'s grass term (K160)
+                O_HP = float(_yld.get(a, 0.0) or 0.0) if hasattr(_yld, "get") else 0.0
+                need[j] = DATA_FNUT(D.crop_coef(cr, nut, a, "need_kg_ha"), O_HP) * grass_need_factor(a)
                 own[j] = D.crop_coef(cr, nut, a, "own_kg_ha")
                 poolc[j] = D.crop_coef(cr, nut, a, "pool_kg_ha")
                 mine0[j] = float(env_._base_mineral_rate(rid, a)) if nut == "N" else D.crop_coef(cr, nut, a, "mine_kg_ha")

@@ -6,10 +6,10 @@ N from residues and atmospheric deposition per ha, is the region's deposition p_
 Deal run: within 0.15 kg N/ha of ATMOSD / UAAR in all 143 units with idled histosols; DE21 12.52 kg/ha). So the
 idled area keeps its deposition in two of CAPRI's equations, both written here as their idled-histosol term:
 
-- the residue pool distributed over the crop groups (fertDistCres_, supply/supply_model.gms l. 1049-1085): the sum over
+- the residue pool distributed over the crop groups (fertDistCres_, supply/supply_model.gms l. 1049-1088): the sum over
   the annual crops of v_actLevl x DATA(MANN) x (1 + p_technFact(MANN, A)), idlHis being an annual group;
-- the N surplus (e_SURTOTHa, l. 1463-1475): + v_atmosd + v_Cresid, where e_ATMOSD (l. 1381-1389) sums
-  v_actLevl x AtmDep over MCACT and e_CRESID (l. 1393-1414) makes v_Cresid + v_atmosd the sum of v_actLevl x MANN
+- the N surplus (e_SURTOTHa, l. 1471-1483): + v_atmosd + v_Cresid, where e_ATMOSD (l. 1389-1397) sums
+  v_actLevl x AtmDep over MCACT and e_CRESID (l. 1401-1422) makes v_Cresid + v_atmosd the sum of v_actLevl x MANN
   over MCACT: for an idled hectare MANN = AtmDep, its deposition, and no residues.
 
 The model's histosol columns (supply.abatement._histosol_columns, F = 1000 ha idled) took the land from the crops
@@ -29,7 +29,7 @@ def MANN_idlHis(AtmDep: float) -> float:
 
 
 def fertDistCres_idlHis(v_actLevl, AtmDep: float):
-    """The idled histosols' part of fertDistCres_'s right-hand side (supply_model.gms l. 1049-1085):
+    """The idled histosols' part of fertDistCres_'s right-hand side (supply_model.gms l. 1049-1088):
     v_actLevl(iHis) x DATA(iHis, MANN), t N (v_actLevl in 1000 ha)."""
     return v_actLevl * MANN_idlHis(AtmDep)
 

@@ -48,7 +48,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K149](#k149) | Norway's raw milk row took the young-animal prices of a clearing without the milk price change, its other rows those of a second clearing with it (CAPRI: one set) | fixed (14 November 2026) |
 | [K150](#k150) | The non-EU regions' raw milk at the market's base is FAO_agg's production, not CAPRI's market data (milk delivered to the dairies): Turkey 20,173 kt against CAPRI's 13,145 | fixed (14 November 2026), validated (15 November 2026, the full Green Deal pair) |
 
-## Resolved (116)
+## Resolved (117)
 
 | # | Issue | Status |
 |---|---|---|
@@ -81,6 +81,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K177](#k177) | The NLP calibration put minus the entitlement cut into the overshoot column's linear term where the QP's start held the base's rounding above the trend area: the overshoot was free in BG01, HU32, LV, PL11, PL31, PL41 and RO05 (about 199,000 thousand ha, a zero dual) | fixed (18 November 2026) |
 | [K178](#k178) | The 2030 runs took the young-animal coefficients of 2017 (calves per cow, replacements, piglets per sow): CAPRI's INPANI_ takes the simulation year's, DATA(.., "Y"); Spain's suckler cows 0.83 calves per head against CAPRI's 2030 0.90, the EU's piglet balance 6.6% short at the 2030 base | fixed (18 November 2026) |
 | [K179](#k179) | The 2030 runs took the 2017 manure N, P2O5 and K2O per head (dairy cows' N raised with the milk yield): CAPRI computes them from the simulation year's rations before it solves; the EU's N excretion at the 2030 base 5.4% above CAPRI's 2030 EXCRET (dairy cows +13%) | fixed (18 November 2026) |
+| [K185](#k185) | Fallow and set-aside carried a nutrient need; CAPRI's fertned.gms leaves a crop without a main-output yield (FALL, VSET) without one, so NUTNED_ has none for them | fixed (19 November 2026) |
 | [K184](#k184) | The idled histosols lost their deposition; CAPRI's iHisCr and iHisGr carry MANN = the region's deposition, in the residue pool (fertDistCres_) and the N surplus (e_ATMOSD, e_CRESID) | fixed (19 November 2026) |
 | [K183](#k183) | The inhibitor on manure was charged on the excreted manure N; CAPRI's GHG_Mit_Cost_ charges its manure options on ManureNPK x (1 + incEmiAppl) x (1 + NMAN x share), the manure N at the tail (FR52: 13-38% less) | fixed (19 November 2026) |
 | [K182](#k182) | The fert_dist report's mineral caps (mine_cap_kg_ha) came from another allocation than the NLP's (the cap spec's inner model at the accounts' base totals): FR52 other cereals 72.3 kg/ha reported against the NLP's 80.5 | fixed (19 November 2026; reporting only) |
@@ -3822,6 +3823,39 @@ animal_numbers.csv). The 2030 bulls match CAPRI's within 0.3%.
   thousand head in the EU against the member states' 5,552.0: the 10.4%. The 2030 bulls match CAPRI's 2030 levels
   within 0.3%, so the 2030 runs are not affected; a 2017 comparison of bulls takes CAPRI's regional rows.
 
+<a id="k185"></a>
+### K185: Fallow and set-aside carried a nutrient need (found 19 November 2026)
+
+CAPRI's fert/fertned.gms, which the simulation runs for the crops before each solve (capmod/def_fert_and_requirements.gms
+l. 134), sets every crop's need DATA(RS, crop, FNUT, "Y") to zero (l. 98), leaves it zero for a crop without a
+main-output yield O_HP (l. 99), rebuilds it for the others from their main outputs (PACT_TO_Y, l. 180-192) and sets
+FALL's to zero at the end (l. 233). Fallow FALL and voluntary set-aside VSET have no main output (they are not in
+PACT_TO_Y, sets.gms l. 5534-5613), so in CAPRI's NUTNED_ (supply/supply_model.gms l. 1103-1220) they add nothing to
+their group's need. CAPRI's margins agree: at the 2030 base their first-order condition holds without a need term
+(reports/margcr.gms: D_AREA + D_PMPL + D_PREM + D_NUT = 0, D_PROV = 0) in every interior case checked (351 without and
+41 with an NITF in sim_ini's DATA, DE B3 among them, 4.66 kg N/ha), while their group OAFC carries positive duals
+(TEXT, TOBA: D_NUTNED -219 to -860 EUR/ha). The model took the need per ha from CAPRI's reported 2030 DATA
+(npk_crop_coefs_2030.csv, need_kg_ha: FI19 fallow 4.33 kg N/ha), which fertned.gms overwrites in the simulation, so its
+fallow and set-aside paid their group's N need dual. A first reading (NUTNED_'s $ DATA condition) did not hold: in DE B3
+sim_ini's DATA has the need and the margins still show none.
+
+- **Effect:** measured at CAPRI's Green Deal prices on five units (FI18, FI19, ES41, LT, DE80; the surplus cut 30%; runs
+  s11_base_surp30 against s11_k185_surp30, the defaults otherwise): the 2030 base unchanged (the calibration takes the
+  need's cost into the linear terms); in the scenario fallow (thousand ha, change; CAPRI) FI18 +9.8 -> +16.1 (+52.3),
+  FI19 +43.2 -> +52.0 (+85.6), LT +149.7 -> +153.1 (+153.1), DE80 +1.5 -> +1.8 (+2.0); set-aside FI18 +4.4 -> +7.9
+  (+25.7), FI19 +3.7 -> +4.9 (+9.6); barley FI18 +8.6 -> +5.6 (-23.3), FI19 +20.3 -> +17.4 (-9.8); the sum of the
+  absolute area gaps to CAPRI over the five units 844 -> 769 thousand ha, smaller in each; the N-surplus dual 2-4%
+  lower (FI19 3.63 -> 3.49 EUR/kg, DE80 4.29 -> 4.13). Finland's idling stays well below CAPRI's (FIX-5 and FIX-6
+  explain most of the rest, docs/CAPRI_DEPARTURES_REGISTER.md)
+- **In 9t:** -
+- **Status:** fixed 19 November 2026 as CAPRI: capri_mod/supply/equations/fertned.py, DATA_FNUT (CAPRI's GAMS text at
+  the top), the need zero for a crop without a main-output yield, in NUTNED_'s need (fertilisation.py _npk_spec) and in
+  the P accounts' NUTNED_ (phosphorus.py, the mineral P without the NLP's block; the suite's
+  test_p_accounts_from_the_nlp_solution found it missing there); the need multiplier (kappa) recalibrates without the
+  fallow need, as CAPRI's v_cropNutNeedMultFact. In the model's data
+  FALL (247 regions) and VSET (166) have area without a main-output yield, no other crop. Test:
+  test_capri.py::test_fallow_and_set_aside_have_no_nutrient_need
+
 <a id="k184"></a>
 ### K184: The idled histosols lost their deposition from the residue pool and the N surplus (found 19 November 2026)
 
@@ -3829,10 +3863,10 @@ CAPRI's idled histosols, iHisCr and iHisGr, are crop activities of MCACT (sets.g
 group of their own without fertiliser use, idlHis (supply/define_ngrp_sets.gms l. 93-94). Their DATA(MANN), the N
 from residues and deposition per ha, is the region's deposition p_nitrBalance(AtmDep): in CAPRI's Green Deal run within
 0.15 kg N/ha of ATMOSD / UAAR in all 143 units with idled histosols (DE21 12.52 kg/ha). So an idled hectare keeps its
-deposition in the residue pool distributed over the crop groups (fertDistCres_, supply_model.gms l. 1049-1085: CAPRI's
+deposition in the residue pool distributed over the crop groups (fertDistCres_, supply_model.gms l. 1049-1088: CAPRI's
 DE21 pool without the catch crops, 27.74 kt, is the sum of level x MANN over the annual crops including idlHis' 0.54
-kt) and in the N surplus (e_SURTOTHa: e_ATMOSD sums the deposition over MCACT, l. 1381-1389; e_CRESID makes residues
-plus deposition the sum of level x MANN, l. 1393-1414): CAPRI's DE21 ATMOSD rises with its UAAR under the Green Deal,
+kt) and in the N surplus (e_SURTOTHa: e_ATMOSD sums the deposition over MCACT, l. 1389-1397; e_CRESID makes residues
+plus deposition the sum of level x MANN, l. 1401-1422): CAPRI's DE21 ATMOSD rises with its UAAR under the Green Deal,
 +0.22 kt. The model's histosol columns (supply.abatement._histosol_columns) took the land from the crops without
 either term, so the idled area lost its deposition: DE21 -0.30 kt.
 
