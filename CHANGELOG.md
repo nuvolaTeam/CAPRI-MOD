@@ -168,6 +168,13 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   K178's correction: the EU's base N surplus +2.5% -> -1.6% of CAPRI's; suckler cows -24.8 -> -23.9% (CAPRI -28.8),
   heifers -12.1 -> -10.2 (-10.3); activities' mean gap 2.0 -> 2.1, prices' 1.6; CAPRI's implied N-surplus duals now
   consistent across animals, 1.25-1.56 times the model's.
+- **K181:** the crops' residue pool (CAPRI's fertDistCres_) and the permanent crops' own residues in NUTNED_ follow
+  the technology mix as CAPRI's (DATA(MANN) x (1 + p_technFact(MANN, A)), MANP and MANK for P2O5 and K2O): a mix
+  column z brings 0.4 x the crop's residues per ha; techn_mix_2030.csv gains mann_diff, manp_diff, mank_diff. Under
+  the Green Deal the shift to T2 now takes residues out of the pool as in CAPRI. At CAPRI's prices (six units) the
+  N-surplus dual rises toward CAPRI's implied one (FR52 4.52 -> 5.82 against 6.1-6.3; DE21 4.39 -> 5.06 against
+  5.9-6.2; ES42 4.69 -> 5.32 against 6.2); the suckler cows' mean gap 5.0 -> 1.9 points, the grassland split's
+  8.7 -> 3.1.
 - **K180:** the bulls and heifers count CAPRI's census herds of all the activities they hold (bulls BULL + BULH,
   heifers HEIL + HEIH + HEIR), not one activity's (the low-intensity bulls, the fattening heifers): a model head is one
   animal; Slovakia's replacement heifers enter the model. Every per-head table rebuilt, totals unchanged; outside

@@ -34,6 +34,10 @@ def test_mix_tables_cover_the_same_crops_and_carry_capri_factors():
     # T1 gets less of the technology-differentiated premiums (rd_logic.gms: -0.5 / +0.5, N2K -1 / +1)
     assert (tm.prem_diff_share <= 0).all() and (tm.prem_diff_share >= -2).all()
     assert (tm.rest_cost_diff_eur_ha >= 0).all()
+    # the crop residues' N, P2O5, K2O move with the yield (p_technFact MANN, MANP, MANK +-0.2; K181), 0 where CAPRI's
+    # data give the crop no such factor
+    for c in ("mann_diff", "manp_diff", "mank_diff"):
+        assert set(crops[c].round(12)) <= {0.0, 0.4} and (crops[c] == 0.4).mean() > 0.95, c
     assert (pm.g_zz >= 0).all() and (pm.g_xx_extra >= 0).all()
 
 
@@ -64,14 +68,10 @@ def test_mix_pmp_terms_reproduce_the_collapsed_curvature():
     assert n > 50
 
 
-@pytest.mark.slow
-def test_mix_columns_move_to_the_low_yield_technology():
-    """The mix column z of a crop (x_T1 = X/2 + z, x_T2 = X/2 - z) is bounded by its two rows alone, -X/2 <= z <= X/2:
-    z < 0 is the shift to CAPRI's low-yield technology T2, the Green Deal's main lever on the crops' N need (CAPRI's ES42
-    reference -> Green Deal: N need per ha -42% grass, -23% rape, -11% maize). Until 15 November 2026 the regional NLP's
-    default lower bound 0 held every z at or above the calibration point (KNOWN_ISSUES K155); in Castilla-La Mancha
-    the Green Deal then left sunflower and pulses at their 0.1 x base floor (CAPRI +15% and +24%). ES42 alone, the
-    Green Deal 2030 step from CAPRI's 2030 reference."""
+@pytest.fixture(scope="module")
+def es42_greendeal():
+    """ES42 alone, the Green Deal 2030 step from CAPRI's 2030 reference: (the projection's result, the region's
+    supply model after the scenario's solve)."""
     from capri_mod.model import CAPRIModel
     from capri_mod.projection import BaselineTrajectory, ProjectionModule
     from capri_mod.data.inputs import trajectories_dir
@@ -84,9 +84,50 @@ def test_mix_columns_move_to_the_low_yield_technology():
     scen = definition.to_policy_scenario(definition.load("greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00"))
     scen.endotech = effective(scen.endotech)
     res = pmod.run(policy_scenario=scen, years=[2030], regions=[R])
-    rm = (getattr(pmod, "_last_projected_model", None) or m).supply_module._models[R]
+    return res, (getattr(pmod, "_last_projected_model", None) or m).supply_module._models[R]
+
+
+@pytest.mark.slow
+def test_mix_columns_move_to_the_low_yield_technology(es42_greendeal):
+    """The mix column z of a crop (x_T1 = X/2 + z, x_T2 = X/2 - z) is bounded by its two rows alone, -X/2 <= z <= X/2:
+    z < 0 is the shift to CAPRI's low-yield technology T2, the Green Deal's main lever on the crops' N need (CAPRI's ES42
+    reference -> Green Deal: N need per ha -42% grass, -23% rape, -11% maize). Until 15 November 2026 the regional NLP's
+    default lower bound 0 held every z at or above the calibration point (KNOWN_ISSUES K155); in Castilla-La Mancha
+    the Green Deal then left sunflower and pulses at their 0.1 x base floor (CAPRI +15% and +24%). ES42 alone, the
+    Green Deal 2030 step from CAPRI's 2030 reference."""
+    R = "ES420000"
+    res, rm = es42_greendeal
     z = dict(getattr(rm.res, "last_mix_z", None) or {})
     assert z and min(z.values()) < -1.0, z                       # thousand ha moved from T1 to T2
     base, scn = (res.baseline[2030]["supply"][R].activities, res.scenario[2030]["supply"][R].activities)
     for a in ("SUNF", "PULS", "BARL"):                           # CAPRI: +15%, +24%, -1%
         assert float(scn[a]) > 0.6 * float(base[a]), (a, float(base[a]), float(scn[a]))
+
+
+@pytest.mark.slow
+def test_residue_pool_follows_the_technology_mix(es42_greendeal):
+    """CAPRI's residue pool (fertDistCres_, supply_model.gms l. 1049-1085) distributes the residues of every crop and
+    technology, v_actLevl(c, A) x DATA(c, MANN) x (1 + p_technFact(c, MANN, A)), with +-0.2 for T1 and T2 (MANP, MANK
+    for P2O5 and K2O): a crop's mix column z (ha moved from T2 to T1) brings 0.4 x its residues per ha. Until K181
+    (18 November 2026) the model's pool had the crops' columns alone, so under the Green Deal (z < 0) its crops kept
+    the residue N CAPRI's lose with the shift to T2 (ES42 at CAPRI's prices: 2.6 kt N). At the Green Deal's solution
+    the residues the NLP distributes equal the crops' residues at their mean technology, plus the catch crops' N."""
+    R = "ES420000"
+    res, rm = es42_greendeal
+    z = dict(getattr(rm.res, "last_mix_z", None) or {})
+    scn = res.scenario[2030]["supply"][R].activities
+    tm = pd.read_csv(SUP / "techn_mix_2030.csv", float_precision="round_trip")
+    tm = tm[tm.region == R].set_index("activity")
+    co = pd.read_csv(ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment"
+                     / "npk_crop_coefs_2030.csv", float_precision="round_trip")
+    co = co[co.capri_region == R]
+    cover = dict(getattr(rm.res, "cover_solved", None) or {})
+    npk = rm.res.last_npk
+    for nut, col in (("N", "mann_diff"), ("P", "manp_diff"), ("K", "mank_diff")):
+        pool = co[co.nutrient == nut].set_index("model_crop").pool_kg_ha
+        crops = float(sum(float(scn.get(a, 0.0)) * float(v) for a, v in pool.items() if v > 0))        # t
+        mix = float(sum(z[a] * float(tm.at[a, col]) * float(pool[a]) for a in z if a in pool.index and pool[a] > 0))
+        catch = 1000.0 * float(cover["delta"]) * float(cover["biofix"]) if nut == "N" else 0.0
+        dist = sum(v for (g, s), v in npk[nut]["flows"].items() if s == "CRES")
+        assert mix < -0.01 * crops, (nut, mix, crops)        # the shift to T2 takes residues out
+        assert math.isclose(dist, crops + mix + catch, rel_tol=1e-6), (nut, dist, crops, mix, catch)

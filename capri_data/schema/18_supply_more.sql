@@ -460,6 +460,9 @@ CREATE TABLE sup_techn_mix_2030 (
     inpo_diff DOUBLE NOT NULL,
     plap_diff DOUBLE NOT NULL,
     prem_diff_share DOUBLE NOT NULL,
+    mann_diff DOUBLE NOT NULL,
+    manp_diff DOUBLE NOT NULL,
+    mank_diff DOUBLE NOT NULL,
     capri_region VARCHAR NOT NULL,
     PRIMARY KEY (region, activity)
 );
@@ -470,7 +473,10 @@ INSERT INTO value_units VALUES
   ('sup_techn_mix_2030', 'rest_cost_diff_eur_ha', 'U_EuPerHa', 'builder', 'sum over SEED, REPM, REPB, ELEC, EGAS, EFUL, ELUB of the factor T1 - T2 x CAPREG''s 2017 cost per ha (coefficient x UVAG / 1000)'),
   ('sup_techn_mix_2030', 'inpo_diff', 'U_ratio', 'capri', 'p_technFact INPO T1 - T2'),
   ('sup_techn_mix_2030', 'plap_diff', 'U_ratio', 'capri', 'p_technFact PLAP T1 - T2'),
-  ('sup_techn_mix_2030', 'prem_diff_share', 'U_ratio', 'builder', 'sum over the technology-differentiated schemes of PRME(scheme) / PRME(DPTOTAL) x p_technFact T1 - T2, CAPRI''s 2030 reference');
+  ('sup_techn_mix_2030', 'prem_diff_share', 'U_ratio', 'builder', 'sum over the technology-differentiated schemes of PRME(scheme) / PRME(DPTOTAL) x p_technFact T1 - T2, CAPRI''s 2030 reference'),
+  ('sup_techn_mix_2030', 'mann_diff', 'U_ratio', 'capri', 'p_technFact MANN T1 - T2: the crop residues'' N per unit z over the crop''s per ha (fertDistCres_, NUTNED_''s own residues; K181)'),
+  ('sup_techn_mix_2030', 'manp_diff', 'U_ratio', 'capri', 'p_technFact MANP T1 - T2: the crop residues'' P2O5 per unit z over the crop''s per ha (K181)'),
+  ('sup_techn_mix_2030', 'mank_diff', 'U_ratio', 'capri', 'p_technFact MANK T1 - T2: the crop residues'' K2O per unit z over the crop''s per ha (K181)');
 
 -- file: capri_data/baselines/capri_greendeal_ref/1730/supply/price_transmission_2030.csv
 CREATE TABLE sup_price_transmission_2030 (

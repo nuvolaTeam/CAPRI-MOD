@@ -23,6 +23,10 @@ have its LEVL T1 and T2 in p_technFact):
                      z over the crop's premium (CAPRI's 2030 reference, dataOut PRME by scheme; schemes with a factor:
                      DPRD_AE1..8, DPRD_N2K, DPRD_SeBete, DPRD_SeExte, DPRD_SeVall; a factor counts only where the
                      scheme pays, policy.gms l. 420)
+  mann_diff, manp_diff, mank_diff   factor T1 - T2 of the crop residues' N, P2O5 and K2O (p_technFact MANN, MANP,
+                     MANK; 0 where CAPRI gives none): the residues per unit z over the crop's per ha, which CAPRI's
+                     residue pool (fertDistCres_, supply_model.gms l. 1049-1085) and the permanent crops' own residues
+                     in NUTNED_ (l. 1206-1220) carry as DATA(MANN) x (1 + p_technFact(MANN, A)) (K181)
   capri_region
 
 Not carried: irrigation water (factor 0), the fertiliser cost (through the nutrient need), sugar beet's VCOF
@@ -74,7 +78,7 @@ SCHEMES = ("DPRD_AE1", "DPRD_AE2", "DPRD_AE3", "DPRD_AE4", "DPRD_AE5", "DPRD_AE6
 ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'([A-Za-z0-9_]+)'\.'(" + "|".join(INPUTS + ("LEVL",)) + r")'\.'Y'\s+"
                  r"(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
 COLS = ["region", "activity", "yield_diff", "need_diff", "rest_cost_diff_eur_ha", "inpo_diff", "plap_diff",
-        "prem_diff_share", "capri_region"]
+        "prem_diff_share", "mann_diff", "manp_diff", "mank_diff", "capri_region"]
 
 
 def _load(path):
@@ -164,12 +168,13 @@ def main() -> None:
             p = prme.get((cr, act), {})
             tot = p.get("DPTOTAL", 0.0)
             prem = sum(p.get(s, 0.0) / tot * fd(s) for s in SCHEMES if p.get(s, 0.0) > 0) if tot > 0 else 0.0
-            rows.append([reg, mc, fd("Yield"), (g(y1) - g(y2)) / gbar, rest, fd("INPO"), fd("PLAP"), prem, cr])
+            rows.append([reg, mc, fd("Yield"), (g(y1) - g(y2)) / gbar, rest, fd("INPO"), fd("PLAP"), prem,
+                         fd("MANN"), fd("MANP"), fd("MANK"), cr])
     out = pd.DataFrame(rows, columns=COLS)
     out.to_csv(OUT, index=False)
     print(f"{OUT.name}: {len(out)} region x crop, {out.region.nunique()} regions; {miss_cost} without a CAPREG 2017 "
           f"level (their input costs 0)")
-    print(out.groupby("activity")[COLS[2:8]].median().round(3).to_string())
+    print(out.groupby("activity")[COLS[2:11]].median().round(3).to_string())
 
 
 if __name__ == "__main__":

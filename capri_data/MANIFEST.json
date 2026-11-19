@@ -4524,7 +4524,7 @@
    "status": "live",
    "vintage_exception": "CAPRI's technology factors at its 2030 simulation start and 2030 premiums by scheme; the input costs are CAPREG's 2017, as plant_protection_cost.csv",
    "rows": 5417,
-   "columns": 9,
+   "columns": 12,
    "units": "U_EuPerHa, U_ratio",
    "read_by_model": [
     "capri_mod/data/loaders.py"

@@ -349,9 +349,16 @@ class FertilisationBlock:
                     kz = mixc.get(acts[j])
                     if kz is not None and need[j] > 0 and kz < n_cols:
                         needl.append((kz, sh * k * need[j] * sq.get(acts[j], 1.0) * float(tm_.at[acts[j], "need_diff"])))
+                ownl = [(j, sh * k_own * own[j]) for j, sh in crops if perm and own[j] > 0]
+                # the permanent crops' own residues per technology, DATA(MANN) x (1 + p_technFact(MANN, A)) (NUTNED_,
+                # supply_model.gms l. 1206-1220): z ha moved from T2 to T1 leave res_diff x the crop's own residues
+                # per ha more (K181)
+                for j, sh in (crops if perm else ()):
+                    kz = mixc.get(acts[j])
+                    if kz is not None and own[j] > 0 and kz < n_cols:
+                        ownl.append((kz, sh * k_own * own[j] * self._mix_res_diff(tm_, acts[j], nut)))
                 groups.append({"g": gname, "perm": perm, "acc": acc, "modes": modes, "crops": crops,
-                               "need": needl,
-                               "own": [(j, sh * k_own * own[j]) for j, sh in crops if perm and own[j] > 0], "Aref": Aref})
+                               "need": needl, "own": ownl, "Aref": Aref})
             if not groups:
                 continue
             # CAPRI's Green Deal group (set_fert_priors.gms l. 773-781, v_fertDistPartialSlack): in its listed regions
@@ -381,8 +388,19 @@ class FertilisationBlock:
                 pk_ = [int(j_) for j_ in ((getattr(self.ev, "pool_cols_pk", None) or {}).get(nut) or []) if int(j_) < n_cols]
                 if len(pk_) == 2:
                     Ecols += [(pk_[0], -1.0), (pk_[1], 1.0)]
+            # the arable residue pool (fertDistCres_, supply_model.gms l. 1049-1085): every crop and technology,
+            # v_actLevl(c, A) x DATA(c, MANN) x (1 + p_technFact(c, MANN, A)): the crop's column at the mean technology,
+            # its mix column z (ha moved from T2 to T1) res_diff x the crop's residues per ha (K181; MANP, MANK for
+            # P2O5, K2O)
+            Ccols = [(j, float(poolc[j])) for j in range(n) if poolc[j] > 0]
+            for j in range(n):
+                kz = mixc.get(acts[j])
+                if kz is not None and poolc[j] > 0 and kz < n_cols:
+                    rd = self._mix_res_diff(tm_, acts[j], nut)
+                    if rd != 0.0:
+                        Ccols.append((kz, float(poolc[j]) * rd))
             out["nutrients"][nut] = {
-                "groups": groups, "E": Ecols, "C": [(j, float(poolc[j])) for j in range(n) if poolc[j] > 0],
+                "groups": groups, "E": Ecols, "C": Ccols,
                 "E_const": E_const,
                 "eff": eff, "g0": g0, "gc": gc, "slope": endo_slope(g0, m0E, nut), "m0E": m0E,
                 "price": float(R.uvag_eur_t) if R.uvag_eur_t == R.uvag_eur_t else 0.0, "kappa": k,
@@ -392,6 +410,15 @@ class FertilisationBlock:
                 out["nutrients"][nut]["netf"] = self._netf_spec()
         out["dual_bound"] = float(getattr(self.par, "npk_dual_bound", 10.0) or 10.0)
         return out if out["nutrients"] else None
+
+    #: the crop residues' technology factor of each nutrient (p_technFact MANN, MANP, MANK; techn_mix_2030.csv)
+    MIX_RES_DIFF = {"N": "mann_diff", "P": "manp_diff", "K": "mank_diff"}
+
+    @classmethod
+    def _mix_res_diff(cls, tm, activity: str, nut: str) -> float:
+        """The crop residues' technology factor T1 - T2 of a nutrient (CAPRI's p_technFact MANN, MANP or MANK;
+        tools/build/build_techn_mix_2030.py): the residues per unit of the mix column over the crop's per ha."""
+        return float(tm.at[activity, cls.MIX_RES_DIFF[nut]])
 
     @staticmethod
     def _npk_base_alloc(nlp0, npk, yb):

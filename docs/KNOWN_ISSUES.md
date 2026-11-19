@@ -81,6 +81,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K177](#k177) | The NLP calibration put minus the entitlement cut into the overshoot column's linear term where the QP's start held the base's rounding above the trend area: the overshoot was free in BG01, HU32, LV, PL11, PL31, PL41 and RO05 (about 199,000 thousand ha, a zero dual) | fixed (18 November 2026) |
 | [K178](#k178) | The 2030 runs took the young-animal coefficients of 2017 (calves per cow, replacements, piglets per sow): CAPRI's INPANI_ takes the simulation year's, DATA(.., "Y"); Spain's suckler cows 0.83 calves per head against CAPRI's 2030 0.90, the EU's piglet balance 6.6% short at the 2030 base | fixed (18 November 2026) |
 | [K179](#k179) | The 2030 runs took the 2017 manure N, P2O5 and K2O per head (dairy cows' N raised with the milk yield): CAPRI computes them from the simulation year's rations before it solves; the EU's N excretion at the 2030 base 5.4% above CAPRI's 2030 EXCRET (dairy cows +13%) | fixed (18 November 2026) |
+| [K181](#k181) | NUTNED_'s residue pool and the permanent crops' own residues had no technology factor on the mix columns (CAPRI: DATA(MANN) x (1 + p_technFact(MANN, A)), +-0.2), so under the Green Deal the model's crops kept the residue N, P2O5 and K2O CAPRI's lose with the shift to T2 | fixed (18 November 2026) |
 | [K180](#k180) | The model's bulls and heifers were CAPRI's census herds of one of their activities (bulls: the low-intensity BULL, a third of CAPRI's BULF; heifers: the fattening heifers HEIF, 15% of HEIF + HEIR) while their coefficients carry all of them; Slovakia, with replacement heifers but no fattening heifers, had none | fixed (18 November 2026) |
 | [K141](#k141) | CAPRI bug: CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it (the project lead's decision) |
 | [K136](#k136) | CAPRI's endogenous entitlement limit (def_endCut.gms: no area payment beyond the trend area) was not in the model; ported with CAPRI's 2030 ceilings computed from its CAP 2014-2020 tables | fixed (13 November 2026) |
@@ -3816,6 +3817,36 @@ animal_numbers.csv). The 2030 bulls match CAPRI's within 0.3%.
   in CAPRI's units are CAPRI's regional rows of its units (capri_level_ratio.csv, per territory group), 4,972.8
   thousand head in the EU against the member states' 5,552.0: the 10.4%. The 2030 bulls match CAPRI's 2030 levels
   within 0.3%, so the 2030 runs are not affected; a 2017 comparison of bulls takes CAPRI's regional rows.
+
+<a id="k181"></a>
+### K181: The crops' residue pool did not follow the technology mix (found 18 November 2026)
+
+CAPRI's residue pool (fertDistCres_, supply/supply_model.gms l. 1049-1085) distributes the residues of every crop
+and technology, v_actLevl(c, A) x DATA(c, MANN) x (1 + p_technFact(c, MANN, A)), and NUTNED_ credits a permanent
+crop's own residues the same way (l. 1206-1220); p_technFact of MANN, MANP and MANK is +0.2 for T1 and -0.2 for T2,
+as the yield's (sim_ini_21730; 0 where CAPRI gives the crop none). The model's mix columns (S1,
+docs/dev/CROP_TECHNOLOGY_MIX_COLUMNS.md) carried the technologies' need (need_diff) into NUTNED_ and the residues and
+removal into the N-surplus row (the accounts' balance follows the yield), but not the residues into NUTNED_'s pool
+or the own residues (capri_mod/supply/fertilisation.py, "C" and "own" on the crops' columns alone), although the
+design note lists them. Under the Green Deal the crops shift to T2 (z < 0), so the model's crops kept residues
+CAPRI's lose and met their need with less mineral N: a cheaper abatement margin, which kept the N-surplus dual low.
+Found in the N-surplus diagnosis (claude/n_surplus_dual_diagnosis.md, step 5): at CAPRI's Green Deal prices the
+model's residue pool (without catch crops) was above CAPRI's by 1.0 (DE21), 2.1 (ES41), 3.2 (ES42), 1.4 (ES51), 0.1
+(ES62) and 5.2 kt N (FR52); with the term it is CAPRI's within 0.6 kt in the first five.
+
+- **Effect:** the technology shift of any scenario: the crops' residue N, P2O5, K2O in NUTNED_, hence the mineral
+  purchases and the N need and N-surplus duals. None at the base (z = 0 at the calibration point).
+- **In 9t:** -
+- **Status:** fixed 18 November 2026: techn_mix_2030.csv carries CAPRI's factors T1 - T2 of MANN, MANP, MANK
+  (mann_diff, manp_diff, mank_diff; tools/build/build_techn_mix_2030.py), and a crop's mix column z enters the
+  residue pool with res_diff x the crop's residues per ha, a permanent crop's own residues likewise. Measured on the
+  six units of the diagnosis at CAPRI's Green Deal prices (surp30, runs/s5_k181_surp30.pkl against s4_surp30.pkl),
+  the N-surplus dual against CAPRI's implied (from its crops / its animals): DE21 4.39 -> 5.06 (5.85 / 6.22), ES42
+  4.69 -> 5.32 (6.17 / 6.15), FR52 4.52 -> 5.82 (6.26 / 6.13), ES62 10.63 -> 11.04 (12.75 / 13.06), ES51 4.46 -> 4.57
+  (4.85 / 4.84), ES41 5.14 -> 5.16 (6.15 / 5.72); the mean gap of the changes to CAPRI's (points): suckler cows 5.0 ->
+  1.9, sows and fattening pigs 2.9 -> 1.4, dairy cows 0.9 -> 0.4, the grassland intensities 8.7 -> 3.1, durum 22.4
+  -> 13.8; maize 5.2 -> 9.6 (FR52 +12.4 -> -3.6%, CAPRI +10.5). Test:
+  test_techn_mix.py::test_residue_pool_follows_the_technology_mix (and the table test's factors)
 
 <a id="k180"></a>
 ### K180: The bulls' and heifers' heads were one of their CAPRI activities' herds (found 18 November 2026)

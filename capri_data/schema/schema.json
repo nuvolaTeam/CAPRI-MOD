@@ -20968,7 +20968,8 @@
     "checks": [],
     "tests": [
      "capri_mod/tests/test_capri.py",
-     "capri_mod/tests/test_mineral_n_losses.py"
+     "capri_mod/tests/test_mineral_n_losses.py",
+     "capri_mod/tests/test_techn_mix.py"
     ]
    }
   },
@@ -55650,6 +55651,21 @@
      "not_null": true
     },
     {
+     "name": "mann_diff",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "manp_diff",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "mank_diff",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
      "name": "capri_region",
      "type": "VARCHAR",
      "not_null": true
@@ -55687,6 +55703,24 @@
      "unit": "U_ratio",
      "status": "capri",
      "basis": "p_technFact INPO T1 - T2"
+    },
+    {
+     "item": "mank_diff",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_technFact MANK T1 - T2: the crop residues' K2O per unit z over the crop's per ha (K181)"
+    },
+    {
+     "item": "mann_diff",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_technFact MANN T1 - T2: the crop residues' N per unit z over the crop's per ha (fertDistCres_, NUTNED_'s own residues; K181)"
+    },
+    {
+     "item": "manp_diff",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_technFact MANP T1 - T2: the crop residues' P2O5 per unit z over the crop's per ha (K181)"
     },
     {
      "item": "need_diff",
