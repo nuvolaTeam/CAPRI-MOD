@@ -1,16 +1,26 @@
-"""CAPRI's supply/supply_model.gms (star 3.0, 5,631 lines, about 160 equations), one module per block of the file.
+"""CAPRI's supply/supply_model.gms (star 3.0, 5,631 lines), one module per block of the file.
 
-Each module holds the equations of one of CAPRI's blocks, one function per equation named as CAPRI's equation (or as
-the equation's term the function writes, under its equation), with CAPRI's GAMS statement, its file and lines, the
-equation in this project's notation and the departures in the function's docstring. A module is added when its first
-equation is written; the blocks not listed have none yet.
+Each module holds the equations of one of CAPRI's blocks, as the file's own banners divide it, one function per
+equation named as CAPRI's equation (or as the equation's term the function writes, under its equation), with CAPRI's
+GAMS statement, its file and lines, the equation in this project's notation and the departures in the docstrings. The
+232 equations of CAPRI's simulation model m_capModQ, the block each belongs to and whether CAPRI's 2030 Green Deal
+step has it: docs/dev/supply_equations_inventory.csv (planned_module). A module is added when its first equation is
+written.
 
     module          CAPRI block (supply/supply_model.gms)                                           lines
-    nutrients.py    the crops' nutrient balances: fertDistCres_ (the residue pool), NUTNED_           1049-1298
-    n_surplus.py    the soil surface N balance: e_ATMOSD, e_CRESID, e_SURTOTHa                        1389-1483
-    mitigation.py   the cost of the mitigation options: GHG_Mit_Cost_                                 5057-5190
+    nutrients.py    the fertilising block: the pools (fertDistExcr_, fertDistMine_, fertDistCres_,  870-1279
+                    ManureNPK_), NUTNED_
+    n_surplus.py    the nutrient surplus: e_ATMOSD, e_CRESID, e_SURTOTHa; SURTOT_REST_            1280-1497,
+                                                                                                  1791-1886
+    inner_fert.py   the inner fertiliser model: e_fertDistPartial, e_fertDistPartialRegu,          1498-1790
+                    e_fertDistReguMax, e_focFertDist
+    fert_limits.py  the fertiliser application limits: e_synNMax                                  4501-4601
+    mitigation.py   the mitigation options: GHG_Mit_Cost_                                         4130-4392,
+                                                                                                  5057-5357
 
-Blocks to come (the file's own section marks): land use (l. 332-...), feed use balances (l. 794-...), the use of young
-animals (l. 845-...), manure trade and ManureNPK_ (l. 895-...), the inner fertiliser model (l. 1498-1790), the N
-surplus restriction (l. 1864-...), emissions.
+The other blocks, by the inventory: feeding.py (520-840), young_animals.py (841-869), premiums.py (1887-2026),
+set_aside.py (2225-2375), land.py (2376-2534), lulucf.py (2656-3061, 4016-4129), methane.py (3062-3205), n_flow.py
+(3206-3471), air_water.py (3472-3633), n2o.py (3634-3966), gwp.py (3967-4015), markets.py (4602-4674), objective.py
+(4675-5056, 5358-5433), sugar.py (5434-5498); the BFP indicators (2027-2224), the water block (2535-2655) and the
+pesticide block (4393-4500) are off in CAPRI's 2030 Green Deal step.
 """

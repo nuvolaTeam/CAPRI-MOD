@@ -615,8 +615,10 @@ class CapriRegionalNLP:
         self._solver = None
 
     def _fert_block(self, npk, X, y, obj, g_rows, lbg, ubg, lbx, ubx):
-        """CAPRI's fertilisation block, per nutrient n (N, P, K), with ghgAbatement off (losses at CAPRI's fixed
-        shares, supply_model.gms l. 860-1215, 1535-1725):
+        """CAPRI's fertilisation block, per nutrient n (N, P, K), the rows written by CAPRI's equations
+        (capri_mod/supply/equations/supply_model/: nutrients.py NUTNED_, fertDistMine_, fertDistExcr_, fertDistCres_,
+        ManureNPK_; inner_fert.py e_focFertDist, e_fertDistPartialRegu, e_fertDistReguMax; fert_limits.py e_synNMax;
+        n_surplus.py SURTOT_REST_), supply_model.gms l. 870-1220 and 1535-1745:
 
           NUTNED_(g,n)    sum_c share_cg x_c need_cn          (need: CAPRI's per ha x need factor of yield x kappa_n)
                           = eff_n x_g,MINE + avail_n x_g,EXCR + avail_C x (x_g,CRES  [arable groups]
@@ -630,6 +632,14 @@ class CapriRegionalNLP:
                           order conditions use the base factor, as CAPRI's e_focFertDist (v_nutAvailFactExcr)
         Flows in t, scaled by their prior modes; bounds 0.001-1000 x mode, duals within +-10 (set_fert_priors.gms)."""
         import casadi as ca
+        from capri_mod.supply.equations.supply_model.nutrients import (
+            NUTNED_, NUTNED_ownCres, NUTNED_availFact, NUTNED_supply, fertDistMine_, fertDistExcr_, fertDistCres_,
+            ManureNPK_trade, ManureNPK_ammKept, fertDistCres_catc, v_nutAvailFactExcr_endo)
+        from capri_mod.supply.equations.supply_model.inner_fert import (
+            gamma_prior, e_focFertDist_dual, e_focFertDist_term, e_focFertDist_term_slack, e_fertDistPartialRegu_upper,
+            e_fertDistReguMax, e_focFertDist_FB)
+        from capri_mod.supply.equations.supply_model.fert_limits import e_synNMax
+        from capri_mod.supply.equations.supply_model.n_surplus import SURTOT_REST_
         lin = lambda pairs: self._lin(y, pairs)
         pv = self._pv
         self.fert = {}
@@ -665,11 +675,11 @@ class CapriRegionalNLP:
             x = [xv[i] for i in range(nfl)]
             e = {"MINE": pv(float(d["eff"])), "EXCR": pv(float(d["g0"])), "CRES": pv(float(d["gc"]))}
             # NUTNED_'s mineral and residue efficiencies: CAPRI's v_emiLoss of mineral N as functions of the options
-            # (1 - GasRunTot, and 1 - N2O GasTot for the residues; supply_model.gms l. 1143, 1196, 1211), the first-order
-            # conditions keep the base loss (CAPRI's p_emiLoss, l. 1629-1633)
+            # (1 - GasRunTot, and 1 - N2O GasTot for the residues; supply_model.gms l. 1151, 1204, 1219), the first-order
+            # conditions keep the base loss (CAPRI's p_emiLoss, l. 1637-1641)
             eN = self._netf_eff(d) if nut == "N" else None
             effM, effC = (eN if eN is not None else (e["MINE"], e["CRES"]))
-            # the first-order conditions' factors (e_focFertDist, supply_model.gms l. 1625-1634): CAPRI writes the
+            # the first-order conditions' factors (e_focFertDist, supply_model.gms l. 1629-1642): CAPRI writes the
             # residues' with the mineral N's total loss, v_nutAvailFactCRes x (1 - p_emiLoss(NETF, N, GasRunTot)),
             # where NUTNED_ (l. 1196) has their N2O loss alone; taken as CAPRI writes it (14 November 2026; with
             # CAPRI's priors the base allocation moves by less than 0.5 kg/ha, BG02 and RO05 checked)
@@ -683,11 +693,11 @@ class CapriRegionalNLP:
                 # the region's base manure trade as a level (CAPRI's ManureNPK_ with v_manureExports /
                 # v_manureImports at the calibration point; supply.manure_base_trade "capri", K167): base imports - base
                 # exports, t; the columns' manure is their full manure
-                E = E + pv(float(d["E_const"]))
+                E = ManureNPK_trade(E, pv(float(d["E_const"])))
             if nut == "N" and getattr(self, "catc_n", None) is not None:
-                C = C + self.catc_n                                 # catch crops' BioFix N (fertDistCres_)
+                C = fertDistCres_catc(C, self.catc_n)               # catch crops' BioFix N (fertDistCres_)
             if nut == "N" and self.amm_kept is not None:
-                E = E + self.amm_kept                               # N the ammonia options keep (ManureNPK_)
+                E = ManureNPK_ammKept(E, self.amm_kept)             # N the ammonia options keep (ManureNPK_)
             if nut == "N" and getattr(self, "_mni_cost_pending", None) is not None:
                 # CAPRI's GHG_Mit_Cost_ for the inhibitor on manure on its own base, ManureNPK x (1 + incEmiAppl) x
                 # (1 + NMAN s): the manure N pool E, at the tail (K183; until 19 November 2026 on the excreted N)
@@ -699,7 +709,7 @@ class CapriRegionalNLP:
                                   + float(d.get("E_const", 0.0) or 0.0)) / 1000.0      # the pool at the base, kt
                 self._mni_cost_pending = None
             if d.get("slope"):
-                availE = e["EXCR"] + pv(float(d["slope"])) * (E / land - pv(float(d["m0E"])))
+                availE = v_nutAvailFactExcr_endo(e["EXCR"], pv(float(d["slope"])), E, land, pv(float(d["m0E"])))
             else:
                 availE = e["EXCR"]
             # NUTNED_
@@ -707,28 +717,26 @@ class CapriRegionalNLP:
                 sc_ = max(sum(m for (gj, s_, m, acc) in flows if gj == gi), 1.0)
                 need = self._lin(y, g_["need"], scale=sc_)
                 if g_["perm"] and g_["own"]:
-                    need = need - self._lin(y, [(c_, float(v_)) for c_, v_ in g_["own"]], scale=sc_) * effC
-                sup = 0
-                for i, (gj, s_, m, acc) in enumerate(flows):
-                    if gj == gi:
-                        f_ = availE if s_ == "EXCR" else (effM if s_ == "MINE" else effC if s_ == "CRES" else e[s_])
-                        if nut == "N" and s_ == "MINE" and self.fert_eff is not None:
-                            f_ = f_ * (1 + self.fert_eff)            # fertiliser options (1 + sum v_Miti NMIN)
-                        if nut == "N" and s_ == "EXCR" and self.man_eff is not None:
-                            f_ = f_ * (1 + self.man_eff)             # inhibitor on manure (1 + v_Miti NMAN)
-                        sup = sup + f_ * x[i]
-                g_rows.append(need - sup * pv(1.0 / sc_)); lbg.append(0.0); ubg.append(0.0)
+                    need = NUTNED_ownCres(need, self._lin(y, [(c_, float(v_)) for c_, v_ in g_["own"]], scale=sc_),
+                                          effC)
+                # the flows' factors: fertiliser options (1 + sum v_Miti NMIN), inhibitor on manure (1 + v_Miti NMAN)
+                sup = NUTNED_supply([(NUTNED_availFact(s_, availE, effM, effC, e[s_],
+                                                       self.fert_eff if nut == "N" else None,
+                                                       self.man_eff if nut == "N" else None), x[i])
+                                     for i, (gj, s_, m, acc) in enumerate(flows) if gj == gi])
+                g_rows.append(NUTNED_(need, sup, pv(1.0 / sc_))); lbg.append(0.0); ubg.append(0.0)
             # pools
             def pool_sum(s_):
                 return sum(x[i] for i, f in enumerate(flows) if f[1] == s_)
-            g_rows.append((pool_sum("MINE") - P) * pv(1.0 / Pscale)); lbg.append(0.0); ubg.append(0.0)
+            g_rows.append(fertDistMine_(pool_sum("MINE"), P, pv(1.0 / Pscale))); lbg.append(0.0); ubg.append(0.0)
             for s_ in pools:
                 tot = pool_sum(s_)
                 rhs = E if s_ == "EXCR" else C
                 sc_ = max(sum(f[2] for f in flows if f[1] == s_), 1.0)
                 if s_ == "EXCR":
                     self.excr_rows[nut] = (len(g_rows), sc_)
-                g_rows.append((tot - rhs) * pv(1.0 / sc_)); lbg.append(0.0); ubg.append(0.0)
+                g_rows.append((fertDistExcr_ if s_ == "EXCR" else fertDistCres_)(tot, rhs, pv(1.0 / sc_)))
+                lbg.append(0.0); ubg.append(0.0)
             # the regulations (e_fertDistPartialRegu, e_fertDistReguMax): a beta density on a group's flow with its
             # support (0, max per ha x the group's area) - the Green Deal's mineral caps by crop group ("f2f") and the
             # residue limits ("limCres")
@@ -751,40 +759,32 @@ class CapriRegionalNLP:
             sig_of = {i: sig[k] for k, (i, _) in enumerate(sl_i)}
             # first-order conditions of the inner model
             for i, (gi, s_, m, acc) in enumerate(flows):
-                var_k = 1.0 / acc ** 2
-                bm = (1.0 + np.sqrt(1.0 + 4.0 * var_k)) / (2.0 * var_k)      # beta x mode
-                a1 = bm * bm * var_k - 1.0                                  # alpha - 1
-                dual = lam[gi] * eF[s_] - (mu[pools.index(s_)] if s_ in pools else 0)
+                bm, a1 = gamma_prior(acc)                                  # normBeta (beta x mode), alpha - 1
+                dual = e_focFertDist_dual(lam[gi], eF[s_], (mu[pools.index(s_)] if s_ in pools else 0))
+                margin = float(_settings().get("fertiliser.support_margin"))
                 if i in sig_of:
                     # the prior's part with the slack, the regulation's (e_fertDistPartialRegu) without it
                     Y_, b1_, b2_ = regs.get((gi, s_), (None, 1.0, 1.0))
-                    term = pv(a1) / (u[i] + sig_of[i]) + pv(b1_ - 1.0) / u[i] - pv(bm) - pv(m / T) * dual
+                    term = e_focFertDist_term_slack(pv(a1), u[i], sig_of[i], pv(b1_ - 1.0), pv(bm), pv(m / T), dual)
                     if Y_ is not None:
-                        term = term - pv(m * (b2_ - 1.0)) / (Y_ - x[i])
-                        g_rows.append((x[i] - float(_settings().get("fertiliser.support_margin")) * Y_) * pv(1.0 / m)); lbg.append(-np.inf); ubg.append(0.0)
+                        term = e_fertDistPartialRegu_upper(term, pv(m * (b2_ - 1.0)), Y_, x[i])
+                        g_rows.append(e_fertDistReguMax(x[i], Y_, margin, pv(1.0 / m))); lbg.append(-np.inf); ubg.append(0.0)
                 elif (gi, s_) in regs:
                     Y, b1, b2 = regs[(gi, s_)]
-                    term = pv(a1 + b1 - 1.0) / u[i] - pv(bm) - pv(m / T) * dual - pv(m * (b2 - 1.0)) / (Y - x[i])
-                    g_rows.append((x[i] - float(_settings().get("fertiliser.support_margin")) * Y) * pv(1.0 / m)); lbg.append(-np.inf); ubg.append(0.0)
+                    term = e_fertDistPartialRegu_upper(e_focFertDist_term(pv(a1 + b1 - 1.0), u[i], pv(bm), pv(m / T), dual),
+                                                       pv(m * (b2 - 1.0)), Y, x[i])
+                    g_rows.append(e_fertDistReguMax(x[i], Y, margin, pv(1.0 / m))); lbg.append(-np.inf); ubg.append(0.0)
                 else:
-                    term = pv(a1) / u[i] - pv(bm) - pv(m / T) * dual
-                if _fb_on:
-                    # DEPARTURE (K159, the project lead's decision of 15 November 2026): CAPRI's e_focFertDist is an
-                    # equality, the inner model's first-order condition for a flow inside its bounds; a flow at its
-                    # lower bound 0.001 x mode (set_fert_priors.gms) has one more term, the bound's multiplier
-                    # nu >= 0: term + nu = 0, nu (u - lb) = 0. Written as the smoothed Fischer-Burmeister function
-                    # of the pair (u - lb, -term): zero where term = 0 inside the bounds, or u = lb and term <= 0.
-                    # Inside the bounds it is CAPRI's equation (to within the smoothing)
-                    a_ = u[i] - _u_lo
-                    b_ = -term
-                    g_rows.append(a_ + b_ - ca.sqrt(a_ * a_ + b_ * b_ + _fb_eps))
-                else:
-                    g_rows.append(term)
+                    term = e_focFertDist_term(pv(a1), u[i], pv(bm), pv(m / T), dual)
+                # DEPARTURE (K159, the project lead's decision of 15 November 2026): at a flow's lower bound the
+                # first-order condition in the Fischer-Burmeister form (inner_fert.e_focFertDist_FB); CAPRI's equality
+                # otherwise
+                g_rows.append(e_focFertDist_FB(u[i], _u_lo, term, _fb_eps) if _fb_on else term)
                 lbg.append(0.0); ubg.append(0.0)
             # CAPRI's mineral N cap per ha of land (minfert_redu_uaa.gms, e_synNMax): purchases <= cap x land
             if d.get("synNMax") is not None:
                 self.synN_row = (len(g_rows), Pscale)
-                g_rows.append((P - pv(float(d["synNMax"])) * land) * pv(1.0 / Pscale)); lbg.append(-np.inf); ubg.append(0.0)
+                g_rows.append(e_synNMax(P, pv(float(d["synNMax"])), land, pv(1.0 / Pscale))); lbg.append(-np.inf); ubg.append(0.0)
             obj = obj + pv(float(d["price"]) / 1000.0) * P
             if nut == "N" and getattr(self, "_fert_tech_pending", None) is not None:
                 # the fertiliser options' cost on the N purchases (GHG_Mit_Cost_: - cost x v_netPutQuant(NITF) x (1 + sum
@@ -822,7 +822,7 @@ class CapriRegionalNLP:
                     nzA = [(j, float(Ai[j])) for j in np.nonzero(Ai)[0]]
                     _cn = (getattr(self, "catc_n", None) * pv(1.0 / rs)) if getattr(self, "catc_n", None) is not None else 0
                     # the catch crops' BioFix N is an input of the gross balance (e_BIOFIX)
-                    g_rows.append(self._lin(y, nzA, scale=rs) + P * pv(1.0 / rs) + _cn)
+                    g_rows.append(SURTOT_REST_(self._lin(y, nzA, scale=rs), P, pv(1.0 / rs), _cn))
                     _add = float((npk.get("n_rows_rhs_add") or {}).get(lab_, 0.0))
                     lbg.append(-np.inf); ubg.append((float(self._b[i_]) + _add) / rs)
             vars_ = ca.vertcat(u, lam, mu, sig, Pv)
@@ -843,7 +843,7 @@ class CapriRegionalNLP:
 
     def _netf_eff(self, d):
         """(mineral, residue) N efficiencies of NUTNED_ at the options' shares: CAPRI's GASTOTNETF_, RUNTOTNETF_ and
-        GASRUNTOTNETF_ (supply_model.gms l. 3335-3394) with the mineral-N options' othImpact = 1 - (1 - lit)(1 + NMIN)
+        GASRUNTOTNETF_ (supply_model.gms l. 3352-3411) with the mineral-N options' othImpact = 1 - (1 - lit)(1 + NMIN)
         on NH3SYN, NOXSYN, N2OSYN and NO3SRUN and winter cover's runoff reduction, written as the base efficiencies
         plus the change from the base point (the options at 0, winter cover at its base share), so the base is exactly
         CAPRI's reported one: eff = eff0 - (GasRunTot(s) - GasRunTot(s0)), gc = gc0 (1 - N2O(s)) / (1 - N2O(s0)).
