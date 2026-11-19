@@ -84,3 +84,10 @@ def LINEAR_carbonTax_NH3kept(ef, v_NH3kept):
     types, l. 4790-4797): ef x the NH3-N kept (t); the builder subtracts it (the soil N2O of the mineral N it displaces
     follows the purchases, LINEAR_carbonTaxNITF). CAPRI's GAMS: LINEAR_carbonTax_ammOptions's docstring."""
     return ef * v_NH3kept
+
+
+def LINEAR_carbonTax_manInhibitor(W, ef, v_Miti):
+    """The emission tax's value of the inhibitor on manure (the accounts' emission factors): per t of excreted manure N
+    treated, W x ef x s (W the excreted manure N, kt); the builder subtracts it. CAPRI's GAMS:
+    LINEAR_carbonTax_ammOptions's docstring."""
+    return W * ef * v_Miti

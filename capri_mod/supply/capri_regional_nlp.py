@@ -899,9 +899,12 @@ class CapriRegionalNLP:
             manure N treated"""
         import casadi as ca
         # CAPRI's equations of the options (supply/supply_model.gms), one function each
-        from capri_mod.supply.equations.supply_model.mitigation import TotMit_, GHG_Mit_Cost_herd
-        from capri_mod.supply.equations.supply_model.objective import LINEAR_carbonTax_ammOptions, LINEAR_carbonTax_NH3kept
-        from capri_mod.supply.equations.supply_model.nutrients import manExportOrAppl_kept
+        from capri_mod.supply.equations.supply_model.mitigation import (
+            TotMit_, GHG_Mit_Cost_herd, Tot_MitFert_, GHG_Mit_Cost_perShare, GHG_Mit_Cost_targFertSyn_factor,
+            GHG_Mit_Cost_targFertSyn_base, GHG_Mit_Cost_targFertMan_excr)
+        from capri_mod.supply.equations.supply_model.objective import (
+            LINEAR_carbonTax_ammOptions, LINEAR_carbonTax_NH3kept, LINEAR_carbonTax_manInhibitor)
+        from capri_mod.supply.equations.supply_model.nutrients import manExportOrAppl_kept, NUTNED_mitiExcr
         self.amm_kept = None; self.fert_eff = None; self.man_eff = None; self._nitr_phi = None; self._fert_phi = {}
         self.n_rows_g = {}; self.synN_row = None
         self.abat = {}
@@ -1020,25 +1023,31 @@ class CapriRegionalNLP:
         if ft and ft.get("techs") and ft.get("crops"):
             T_ = ft["techs"]
             phi = ca.SX.sym("phi", len(T_))
-            Eff = 0; cost = 0; Ebase = 0
             pv = self._pv
             ec_ = ft.get("emical") or {}
+            # the options' parameters in the order the graph records them (per option: NMIN, NMIN + EmiCalMin, the cost
+            # terms), then CAPRI's sums over the options (mitigation.py)
+            p_nm, p_nmec, p_c1, p_c2, phis = [], [], [], [], []
             for tt, (name, nm, a_, b_, smax) in enumerate(T_):
                 if str(name).upper() == "NITR_INH":
                     self._nitr_phi = (phi[tt], float(nm))
                 self._fert_phi[str(name)] = (phi[tt], float(nm))
-                Eff = Eff + pv(float(nm)) * phi[tt]
-                Ebase = Ebase + pv(float(nm) + float(ec_.get(name, 0.0) or 0.0)) * phi[tt]
+                p_nm.append(pv(float(nm)))
+                p_nmec.append(pv(float(nm) + float(ec_.get(name, 0.0) or 0.0)))
                 a_ = float(a_) + float((spec.get("dabat") or {}).get(("fert", name), 0.0))
-                cost = cost + (pv(a_) * phi[tt] + pv(0.5 * float(b_)) * phi[tt] * phi[tt])
+                p_c1.append(pv(a_)); p_c2.append(pv(0.5 * float(b_))); phis.append(phi[tt])
+            Eff = Tot_MitFert_(p_nm, phis)                       # sum v_Miti NMIN: Tot_MitFert_, NUTNED_'s factor
+            Ebase = GHG_Mit_Cost_targFertSyn_factor(p_nmec, phis)
+            cost = GHG_Mit_Cost_perShare(p_c1, p_c2, phis)
             # CAPRI's GHG_Mit_Cost_ (supply_model.gms l. 4945-4950): the fertiliser options' cost per t of crop N need
             # met by mineral N, - cost x v_netPutQuant(NITF) x (1 + sum (NMIN + EmiCalMin) v_Miti) (KNOWN_ISSUES K175:
             # until 18 November 2026 on the purchases alone, 10-17% too cheap at the Green Deal's shares); the
             # fertilisation block's N purchases take it (_fert_block), else the crops' base mineral N (the build's end).
             # Every option's IniShare is 0, so the base and its calibration are unchanged
-            self._fert_tech_pending = (cost * (1 + Ebase), list(ft["crops"]))
+            self._fert_tech_pending = (GHG_Mit_Cost_targFertSyn_base(cost, Ebase), list(ft["crops"]))
             self.fert_eff = Eff
-            g_rows.append(sum(phi[tt] for tt in range(len(T_)))); lbg.append(-np.inf); ubg.append(1.0)
+            # TotMit_ for the fertiliser options (no control eliminated); Tot_MitFert_ <= its cap less 1
+            g_rows.append(TotMit_([phi[tt] for tt in range(len(T_))])); lbg.append(-np.inf); ubg.append(1.0)
             if ft.get("ecap") is not None:
                 g_rows.append(Eff); lbg.append(-np.inf); ubg.append(float(ft["ecap"]))
             o = nx0 + sum(int(v.shape[0]) for v in new)
@@ -1052,8 +1061,8 @@ class CapriRegionalNLP:
             s_ = sm[0]
             S0m = float(mni["S0"]) + float((spec.get("dabat") or {}).get(("mni",), 0.0))
             # the emission tax's value per t of excreted manure N treated (the accounts' emission factors)
-            obj = obj - W * self._pv(float(mni.get("vtax", 0.0))) * s_
-            self.man_eff = self._pv(float(mni["nman"])) * s_
+            obj = obj - LINEAR_carbonTax_manInhibitor(W, self._pv(float(mni.get("vtax", 0.0))), s_)
+            self.man_eff = NUTNED_mitiExcr(self._pv(float(mni["nman"])), s_)       # NUTNED_'s 1 + v_Miti NMAN
             if "N" in ((spec.get("npk") or {}).get("nutrients") or {}):
                 # CAPRI's GHG_Mit_Cost_ on its base for targFertMan, ManureNPK x (1 + incEmiAppl) x (1 + NMAN s): the
                 # fertilisation block's manure N pool, so the term is added there (_fert_block; KNOWN_ISSUES K183)
@@ -1061,7 +1070,7 @@ class CapriRegionalNLP:
                                           sum(float(m_) * float(self.xb[int(c_)]) for c_, m_ in mni["w"]) / 1000.0)
                 self._mni_base = None                     # set by _fert_block: the pool at the calibration point, kt
             else:
-                obj = obj + W * (self._pv(S0m) * s_ + self._pv(0.5 * float(mni["slope"])) * s_ * s_)
+                obj = obj + GHG_Mit_Cost_targFertMan_excr(W, self._pv(S0m), self._pv(0.5 * float(mni["slope"])), s_)
                 self._mni_base = sum(float(m_) * float(self.xb[int(c_)]) for c_, m_ in mni["w"]) / 1000.0
             o = nx0 + sum(int(v.shape[0]) for v in new)
             new.append(sm)

@@ -300,3 +300,9 @@ def manExportOrAppl_kept(wy, GasRunTot0, GasRunTot1):
                        * 0.001)  ;
     """
     return wy * (GasRunTot0 - GasRunTot1)
+
+
+def NUTNED_mitiExcr(NMAN, v_Miti):
+    """NUTNED_'s term of the inhibitor on manure in the manure's factor (l. 1187-1197, x (1 + v_Miti NMAN)): NMAN x s.
+    CAPRI's GAMS of NUTNED_: NUTNED_'s docstring."""
+    return NMAN * v_Miti

@@ -146,3 +146,63 @@ def GHG_Mit_Cost_herd(stock_w, v_actLevl, c1, c2_half, d):
     c1' s + 0.5 c2 s^2 with c1' = c1 - c2 s0 up to a constant.
     """
     return stock_w * v_actLevl * (c1 * d + c2_half * d * d)
+
+
+def Tot_MitFert_(NMIN, v_Miti):
+    r"""Tot_MitFert_(r) (l. 4162-4169): the fertiliser options' N saving, sum_o v_Miti(o) x NMIN(o), the left-hand side
+    less 1 (the row <= max(v_cropNutNeedMultFact + p_OverFertMarkUp, 1) - 1, the spec's "ecap"). The same sum is
+    NUTNED_'s mineral N factor's term (1 + sum v_Miti NMIN; nutrients.py NUTNED_availFact). NMIN, v_Miti: per option,
+    in the options' order.
+
+    CAPRI's GAMS, Tot_MitFert_ (l. 4162-4169):
+
+       Tot_MitFert_(RUNR) $ (sum((R_RAGG(RUNR,MSACT),gainsTechFert,mitiTech_map(MSACT,"cropMiti",gainsTechFert,"N2OSYN")),1))..
+          Sum((gainsTechFert, R_RAGG(RUNR,MSACT)) $ mitiTech_map(MSACT,"cropMiti",gainsTechFert,"N2OSYN"),
+             v_Miti(RUNR,"cropMiti", gainsTechFert,"N2OSYN")
+          * ( p_ghgMiti(RUNR,"cropMiti",gainsTechFert,"othImpact","NMIN")
+            + p_ghgMiti(MSACT,"cropMiti",gainsTechFert,"othImpact","NMIN")
+            $ (not p_ghgMiti(RUNR,"cropMiti",gainsTechFert,"othImpact","NMIN")))) + 1
+        =L= max(v_cropNutNeedMultFact.l(RUNR,"NITF","T") + p_OverFertMarkUp,1);
+    """
+    eff = 0
+    for nm, s in zip(NMIN, v_Miti):
+        eff = eff + nm * s
+    return eff
+
+
+def GHG_Mit_Cost_perShare(c1, c2_half, v_Miti):
+    """GHG_Mit_Cost_'s cost per unit of the base, summed over options charged on one base (l. 5057-5190): sum_o
+    c1_o s_o + 0.5 c2_o s_o^2 (c1 = costParLin + pmpParLin - subsidy, c2_half = 0.5 (costParSqr + pmpParSqr)); in the
+    options' order.
+
+    CAPRI's GAMS of the parts per share: GHG_Mit_Cost_targFertMan's docstring.
+    """
+    cost = 0
+    for a, b, s in zip(c1, c2_half, v_Miti):
+        cost = cost + (a * s + b * s * s)
+    return cost
+
+
+def GHG_Mit_Cost_targFertSyn_factor(NMIN_EmiCalMin, v_Miti):
+    """The targFertSyn base's factor less 1 (l. 5138-5143): sum_o (NMIN_o + EmiCalMin_o) v_Miti_o, in the options'
+    order.
+
+    CAPRI's GAMS: GHG_Mit_Cost_targFertSyn's docstring.
+    """
+    f = 0
+    for e, s in zip(NMIN_EmiCalMin, v_Miti):
+        f = f + e * s
+    return f
+
+
+def GHG_Mit_Cost_targFertSyn_base(cost_perShare, factor):
+    """The mineral fertiliser options' cost per t of N purchased (l. 5138-5143): the options' cost per share x (1 + the
+    factor); the purchases multiply it in GHG_Mit_Cost_targFertSyn (the fertilisation block)."""
+    return cost_perShare * (1 + factor)
+
+
+def GHG_Mit_Cost_targFertMan_excr(W, c1, c2_half, v_Miti):
+    """The inhibitor on manure's cost where the regional NLP has no N fertilisation block: on the excreted manure N W
+    (kt), W x (c1 s + c2_half s^2). DEPARTURE from CAPRI's targFertMan base (ManureNPK x (1 + incEmiAppl) x (1 + NMAN s),
+    GHG_Mit_Cost_targFertMan), which needs the block's manure N pool."""
+    return W * (c1 * v_Miti + c2_half * v_Miti * v_Miti)
