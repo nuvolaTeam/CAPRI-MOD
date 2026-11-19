@@ -24,6 +24,10 @@ functions. **A move, not a change: results identical to 1e-10**, checked by a ga
 | N2 | CAPRI's N loss cascade (GRAZN_ ... GASRUNTOTNETF_) from capri_mod/supply/n_cascade.py into n_flow.py | gate identical (against a run at 80795e0); the cascade's expressions identical for every region and activity |
 | N3 | the leaching: LEACHN_ (with its first factor LEACHN_B1) and AMMOAGG_ into n_flow.py, from supply/n_leaching.py and the accounts (environmental/nitrogen.py) | gate identical (one run with N4, against the run at N2); the functions' values bitwise equal for every CAPRI region and both signs of FIX-2 |
 | N4 | the fertilisation block's objective terms: LINEAR_'s purchases and carbon tax on mineral N (objective.py), GHG_Mit_Cost_'s targFertSyn base (mitigation.py) | gate identical (one run with N3); the NLPs identical with and without an emission tax |
+| N5a | the options' bounds: CAPRI's TotMitFertMin_, TotMitFertMan_, Tot_soilCov_ (mitigation.py's docstring) | docstrings only |
+| N5b | the ammonia options (CapriRegionalNLP._abatement_block): TotMit_, GHG_Mit_Cost_ on the herd, manExportOrAppl_'s N kept, the emission tax | one gate with N5c; the NLPs identical, also with the taxes, free shares and no N block |
+| N5c | the fertiliser options and the inhibitor on manure: Tot_MitFert_, TotMit_, GHG_Mit_Cost_'s parts, NUTNED_'s NMAN term, the tax | gate at N5c (with N5b); the NLPs identical |
+| N5d | the catch crops: winterCover_, catcMiti_, ecoSetAside_'s term (premiums.py), GHG_Mit_Cost_ on the UAA, the BioFix N, the tax | gate at N5d; the NLPs identical; K186's two porting differences kept and listed (section 6) |
 
 Not on the branch (on purpose):
 - `docs/equations/` (the equation book, page 01 the regional N balance) and its README paragraph: waiting for the
@@ -79,6 +83,10 @@ old expression called them, and build the same left-to-right expression inside t
 against the old one with CasADi SX (`str(expr)` equal) before the gate; for pure-Python code, compare the syntax trees.
 
 ## 5. What comes next
+
+**The plan for everything after N5 is docs/dev/EQUATION_REFACTOR_PLAN_REST.md** (the project lead, 19 November 2026:
+N6-N15, the statuses each equation ends with, the merge of K185, the gate's rules). The list below is the earlier
+plan, kept for its notes on where the code lives.
 
 The inventory (planned_module, in_gd2030_step, model_files_citing; the status columns filled for the blocks done)
 is the list. In CAPRI's 2030 Green Deal step, by module: mitigation 23, lulucf 17, n_surplus 17, n_flow 14, land 12,
@@ -138,12 +146,30 @@ comes, check against CAPRI's _pw feed version and register what differs.
   loss equations (3352-3411). The gamma prior is set_fert_priors.gms l. 230-237 (the code's l. 668-785 is the
   partial derivative's slack).
 - tools/build/build_n_cascade.py imports `write_source` unused (flake8 F401; not in the selected checks).
+- **Porting differences of N5 (KNOWN_ISSUES K186, the main line's fix; kept identical in the move):** (1) CAPRI's
+  catcMiti_ scales the catch crop area with the current land (sum over landTypesNoSlak of v_actLevl), and
+  GHG_Mit_Cost_ charges winter cover on v_actLevl(uaaEqu); the model takes the fixed base UAA (supply/abatement.py
+  l. 84, the base crop levels' sum) in the area of winterCover_, the cost, the ecoSetAside_ term and fertDistCres_'s
+  BioFix N. (2) winterCover_'s right-hand side: CAPRI's DATA(UAAR) plus the fallow floor; the model's
+  max(uaa + floor, cov0 + m0 x uaa) (abatement.py l. 92), whose max() is not in CAPRI.
+- **envConst is off in CAPRI's Green Deal step** (the switch table, docs/dev/supply_equations_gd_switches.csv, had it
+  on): pol_input/greendeal/refpol_endotech_all_sup.gms's `$exit` at l. 398 comes before its `$setglobal envConst on`
+  (l. 408); the default, capmod/set_global_variables.gms l. 244. So the ten envConst rows of the mitigation block and
+  ecoSetAside_ and cropDivGreening_ (supply_model_e_list_linear.gms l. 235-236) are empty in the step; the model
+  writes ecoSetAside_ and cropDivGreening_ in its Green Deal runs and the 2030 reference: KNOWN_ISSUES K187 (the main
+  line). Every other switch set after that `$exit` is to be checked against its default (endoManAvFact: on, l. 52).
+- CAPRI's sugar quota equations (sugar.py's block) are empty in the 2030 step: their condition
+  p_technFact(SUGB, VCOF) is set to 0 where DATA(QUTS, SUGB) <= eps (supply/prep_sim.gms l. 171), and the quotas
+  ended in 2017; to confirm from CAPRI's 2030 DATA (N15).
 - e_nitrBal_ (l. 3464-3466) is not written: the model computes no accumulation (v_nitrBalance(Accumul)).
 - n_leaching.py cited "supply_model.gms l. 3413" for LEACHN_'s "+ v_ammoAppLeaAgg": l. 3430 in star 3.0 (the
   moved text in n_flow.py cites l. 3430).
 - CAPRI's gamma prior is computed twice: inner_fert.gamma_prior (the NLP's normalised form, var = 1 / accuracy^2) and
   fert/inner_fert_dist.gamma_params (var = (mode / accuracy)^2, which can differ in the last digit at mode 1).
-- The full suite after N1 (section 4) had not been run when N2-N4 started; it runs after N4.
+- The full suite after N1 (section 4) had not been run when N2-N4 started. After N4: its first chunk (the first 33 of
+  the 66 slow tests) passed, 33 of 33; the other 33 slow tests and the 376 fast ones run at the next checkpoint, after
+  N8 (the project lead, 19 November 2026: fewer test runs, one gate per batch of blocks with each block's exact
+  expression or value check).
 - The GAMS quotes, gathered in each module's docstring through N4, moved to the functions that write the equations
   (the project lead's decision; the commit after N4, docstrings only).
 
