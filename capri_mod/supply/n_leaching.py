@@ -3,24 +3,12 @@
 Data: tools/build/build_n_leaching.py (n_leaching_region.csv), fertiliser options' NO3 effects in fert_side_effects.csv
 (tools/build/build_fert_side_effects.py), the application options' no3mlea in n_cascade_effects.csv (tools/build/build_n_cascade.py).
 
-Leaching share of the soil surplus (LEACHN_):
-
-  L = leach_base x B1 x B2
-  B1 = 1 - 0.35 wc - nminSh x sum_fert s x e_SLEA - nmanSh x sum_fert s x e_MLEA + agg      (options capri-mod has)
-  B2 = 1 - tillage, buffer strips, biodiversity, biochar terms                               (options it has not)
-  agg = v_ammoAppLeaAgg = sum_a N_a (1 - GasRunTot_a) x sum_{AmmAppLE, AmmAppHE} no3mlea x s / sum_a N_a (1 - GasRunTot_a)
-  e_SLEA = 1 - (1 - lit) (1 + NMIN) (ghgMiti.gms l. 552-563; NMAN for manure)
-
-B2 is held at CAPRI's Green Deal 'ini' reference: L = leach_ini x B1 / B1_ini (B1_ini at CAPRI's initial shares and
-the base winter cover). REGISTERED.
-
-CAPRI-ERROR-FIX (the project lead's decision, 20 October 2026; docs/CAPRI_DEPARTURES_REGISTER.md FIX-2): CAPRI adds agg in LEACHN_ ("+ v_ammoAppLeaAgg",
-supply_model.gms l. 3413) while it subtracts the same options' runoff effect in RUNSURFN_ and the fertiliser options'
-leaching effects in LEACHN_. Its literature table gives reductions (prep_data_LitRev.gms p_reducGains: positive = less
-loss; LNA_low liquid: NH3 0.51, RunSurf -0.24, Leach -0.24), copied without change of sign to no3mlea (ammo_tech.gms
-l. 2293), so with the '+' low-emission application lowers the leaching share where the data say it raises it.
-capri-mod subtracts it (AMMAPP_SIGN = "consistent", default); "capri" reproduces CAPRI's code. The base is calibrated to
-CAPRI's realised share either way (leach_ini), so the sign acts only through changes in the options' adoption.
+CAPRI's LEACHN_ (with its first factor LEACHN_B1) and AMMOAGG_ are in
+capri_mod/supply/equations/supply_model/n_flow.py (until 19 November 2026 here and in the accounts), with their
+departures: B2 held at CAPRI's Green Deal 'ini' reference (REGISTERED) and the sign of the application options'
+leaching effect (CAPRI-ERROR-FIX FIX-2, the setting environment.ammapp_sign). This module keeps the data (load,
+capri_region), the share for a CAPRI region (share), the fertiliser options' effect (fert_effect, ghgMiti.gms) and
+the accounts' allocation to the crops (crop_n, gases.gms).
 
 Indirect N2O of leached and run-off N allocated to crops (gases.gms l. 696-745), t N:
   mineral runoff        MINFER x RunTot_NETF
@@ -35,8 +23,8 @@ part of the manure N2O factors (f_lea).
 """
 from __future__ import annotations
 
-from capri_mod.params import param
 from capri_mod.data.definitions import capri_ms  # noqa: E402  (TUR for Turkey's units)
+from capri_mod.supply.equations.supply_model.n_flow import LEACHN_, LEACHN_B1
 
 # EF5 and winter cover's reduction of the leaching factor (envind/cover_crops.gms l. 402) are the parameters
 # EF5_LEACHING_N2O and WINTERCOV_NO3_REDUCTION (one parameter with n_cascade's runoff effect)
@@ -45,6 +33,7 @@ from capri_mod.data.definitions import capri_ms  # noqa: E402  (TUR for Turkey's
 APPL = ("AmmAppLE", "AmmAppHE")   # APPLN_'s terms, as n_flow.APPL_TECHS (checked against MitiTechAmm)
 
 _REG = {}
+b1 = LEACHN_B1        # the accounts' and the tests' name until 19 November 2026
 
 
 def load(data_dir=None):
@@ -70,24 +59,10 @@ def capri_region(region, data_dir=None):
     return rs
 
 
-def b1(wc=0.0, agg=0.0, nmin_sh=0.0, nman_sh=0.0, fert_min=0.0, fert_man=0.0):
-    """LEACHN_'s first factor. fert_min / fert_man: sum over the fertiliser options of share x effect (mineral N /
-    manure); agg: v_ammoAppLeaAgg."""
-    from capri_mod.settings import current as _settings
-    sign = 1.0 if _settings().get("environment.ammapp_sign") == "capri" else -1.0
-    return 1.0 - param("WINTERCOV_NO3_REDUCTION") * wc - nmin_sh * fert_min - nman_sh * fert_man + sign * agg
-
-
 def share(rs, b1_now, b1_ini, data_dir=None):
-    """The leaching share of the soil surplus: leach_ini x B1 / B1_ini (B2 at CAPRI's ini run), or None without data."""
+    """The leaching share of the soil surplus for CAPRI region rs (LEACHN_, n_flow.py), or None without data."""
     x = load(data_dir).get(rs) or {}
-    li = x.get("leach_ini")
-    if li is None:
-        lb = x.get("leach_base")
-        return None if lb is None else max(0.0, lb * b1_now)
-    if not b1_ini > 0:
-        return li
-    return max(0.0, li * b1_now / b1_ini)
+    return LEACHN_(x.get("leach_ini"), x.get("leach_base"), b1_now, b1_ini)
 
 
 def fert_effect(lit, nmin):

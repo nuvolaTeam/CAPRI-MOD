@@ -43,7 +43,7 @@ unchanged to `no3mlea` (ammo_tech.gms l. 2293). With the "+", low-emission appli
 where CAPRI's data say it raises it.
 
 **What capri-mod does.** It subtracts the effect, consistently with RUNSURFN_. This was the project lead's decision
-of 20 October 2026; details are in capri_mod/supply/n_leaching.py.
+of 20 October 2026; details are in capri_mod/supply/equations/supply_model/n_flow.py (LEACHN_B1).
 
 **Scope of the effect.** The base is calibrated to CAPRI's realised leaching share either way, so the sign acts only
 through changes in the options' adoption.

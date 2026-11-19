@@ -1,9 +1,11 @@
 r"""CAPRI's nitrogen flow (supply/supply_model.gms l. 3206-3471, ghgAbatement on): the loss cascade of the manure N of
 each animal activity (GRAZN_, HOUSN_, STORN_, RUNHOUSN_, RUNSURFN_, APPLN_, RUNTOTN_, GASRUNTOTN_) and of mineral
 fertiliser (GASTOTNETF_, RUNTOTNETF_, GASRUNTOTNETF_), CAPRI's v_emiLoss as fractions of the N excreted or of the
-mineral N bought; docs/N_CASCADE_SPEC.md has the factors (p_Nemidat) with their sources. Written so far: the cascade
-(moved from capri_mod/supply/n_cascade.py on 19 November 2026, unchanged); LEACHN_, AMMOAGG_ and e_nitrBal_ are in
-capri_mod/supply/n_leaching.py.
+mineral N bought; docs/N_CASCADE_SPEC.md has the factors (p_Nemidat) with their sources; and the leaching of the soil
+surplus (LEACHN_ with AMMOAGG_). Written so far: the cascade (moved from capri_mod/supply/n_cascade.py on 19 November
+2026, unchanged); LEACHN_, its first factor LEACHN_B1 and AMMOAGG_ (moved the same day from capri_mod/supply/
+n_leaching.py and the accounts, capri_mod/environmental/nitrogen.py, unchanged). e_nitrBal_ (l. 3464-3466: leaching,
+accumulation and mineralisation add up to the soil surplus) is not written: the model computes no accumulation.
 
 CAPRI's GAMS, GRAZN_ (l. 3209-3213):
 
@@ -177,6 +179,48 @@ CAPRI's GAMS, GASTOTNETF_ (l. 3385-3411):
                                                          *     v_Miti(RUNR,"cropMiti",mitiTechTill,"CO2SEQ")) $ (sameas(emmat_N,"n2o"))
                                                         ));
 
+CAPRI's GAMS, LEACHN_ (l. 3416-3442):
+
+       LEACHN_(RUNR)..
+       v_nitrBalance(RUNR,"Leach") =E= sum(R_RAGG(RUNR,MSACT),p_Nemidat(RUNR,"NITF","N","Leach","Surf")
+                                       * (1 - sum(mitiTechCov,p_ghgMiti(RUNR,"catc",mitiTechCov,"othImpact","no3lea") * v_Miti(RUNR,"CATC",mitiTechCov,"CO2SEQ"))
+                                            - v_nminInputSh(RUNR) * (sum(AllTechFert,(v_Miti(RUNR,"CropMiti",AllTechFert,"N2OSYN") + v_Miti(RUNR,"CropMiti",AllTechFert,"N2OSYN2")
+                                                                                     + p_ghgMiti(RUNR,"cropMiti",AllTechFert,"n2osyn","iniShareAECM"))
+                                            * (p_ghgMiti(RUNR,"cropMiti",AllTechFert,"othImpact","NO3SLEA")
+                                            + p_ghgMiti(MSACT,"cropMiti",AllTechFert,"othImpact","NO3SLEA") $ (not p_ghgMiti(RUNR,"cropMiti",AllTechFert,"othImpact","NO3SLEA")))))
+                                            - v_nmanInputSh(RUNR) * (sum(AllTechFert,(v_Miti(RUNR,"CropMiti",AllTechFert,"N2OMAN") + v_Miti(RUNR,"CropMiti",AllTechFert,"N2OMAN2")
+                                                                                     + p_ghgMiti(RUNR,"cropMiti",AllTechFert,"n2oman","iniShareAECM"))
+                                            * (p_ghgMiti(RUNR,"cropMiti",AllTechFert,"othImpact","NO3MLEA")
+                                            + p_ghgMiti(MSACT,"cropMiti",AllTechFert,"othImpact","NO3MLEA") $ (not p_ghgMiti(RUNR,"cropMiti",AllTechFert,"othImpact","NO3MLEA"))))
+                                            + v_ammoAppLeaAgg(RUNR)))
+                                        * (1 - v_nminInputSh(RUNR)
+                                             * sum(mitiTechTill,p_ghgMiti(RUNR,"cropMiti",mitiTechTill,"othImpact","no3slea") * v_Miti(RUNR,"cropMiti",mitiTechTill,"CO2SEQ"))
+                                            - v_nmanInputSh(RUNR)
+                                             * sum(mitiTechTill,p_ghgMiti(RUNR,"cropMiti",mitiTechTill,"othImpact","no3mlea") * v_Miti(RUNR,"cropMiti",mitiTechTill,"CO2SEQ"))
+                                            - v_nminInputSh(RUNR)
+                                             * sum((mitiTechBuff,targNitr),p_ghgMiti(RUNR,"cropMiti",mitiTechBuff,"othImpact","no3slea") * v_Miti(RUNR,"cropMiti",mitiTechBuff,targNitr))
+                                            - v_nmanInputSh(RUNR)
+                                             * sum((mitiTechBuff,targNitr),p_ghgMiti(RUNR,"cropMiti",mitiTechBuff,"othImpact","no3mlea") * v_Miti(RUNR,"cropMiti",mitiTechBuff,targNitr))
+                                            - sum(mitiTechBiod,p_ghgMiti(RUNR,"cropMiti",mitiTechBiod,"othImpact","no3lea") * v_Miti(RUNR,"cropMiti",mitiTechBiod,"BioDiv"))
+                                            - p_ghgMiti(RUNR,"uaarMiti","biochar","othImpact","no3lea") * v_Miti(RUNR,"uaarMiti","biochar","co2seq")
+                                              ));
+
+CAPRI's GAMS, AMMOAGG_ (l. 3444-3459):
+
+       AMMOAGG_(RUNR)..
+       SUM( MAACT $ p_technFact(RUNR,MAACT,"LEVL","T"),
+                     v_actLevl(RUNR,MAACT,"T") * %data%(RUNR,MAACT,"MANN","Y") * (p_technFact(RUNR,MAACT,"MANN","T")+1.)
+                   * (1 - v_emiLoss(RUNR,MAACT,"N","GasRunTot"))) * v_ammoAppLeaAgg(RUNR)
+       =E=
+       SUM( MAACT $ p_technFact(RUNR,MAACT,"LEVL","T"),
+                     v_actLevl(RUNR,MAACT,"T") * %data%(RUNR,MAACT,"MANN","Y") * (p_technFact(RUNR,MAACT,"MANN","T")+1.)
+                   * (1 - v_emiLoss(RUNR,MAACT,"N","GasRunTot"))
+                   * p_ghgMiti(RUNR,MAACT,"AmmAppHE","othImpact","no3mlea") * v_Miti(RUNR,MAACT,"AmmAppHE","NH3APP")
+                   + v_actLevl(RUNR,MAACT,"T") * %data%(RUNR,MAACT,"MANN","Y") * (p_technFact(RUNR,MAACT,"MANN","T")+1.)
+                   * (1 - v_emiLoss(RUNR,MAACT,"N","GasRunTot"))
+                   * p_ghgMiti(RUNR,MAACT,"AmmAppLE","othImpact","no3mlea") * v_Miti(RUNR,MAACT,"AmmAppLE","NH3APP"))
+;
+
 In this project's notation (one animal activity; g a gas NH3, NOX, N2O, and N2 at storage; tsg the grazing share
 p_Nemidat(N, TypeShare, Graz); s_t the option shares v_Miti, e_t,item their othImpact; ad the anaerobic digestion
 share):
@@ -201,6 +245,20 @@ with left = 1 - tsg - sum L(Hous) - sum L(Stor) - L(N, RunHous); a, b RUNSURFN_'
 tillage - fertiliser options, b = 1 - buffer strips - biodiversity), m_appl APPLN_'s crop factor on the runoff,
 fert_g the fertiliser options' terms (shares + AECM initial shares) x effect.
 
+The leaching share of the region's soil surplus (the accounts compute it after the solve, capri_mod/environmental/
+nitrogen.py leaching):
+
+    LEACHN_    L = leach_base x B1 x B2
+               B1 = 1 - 0.35 wc - nminSh x sum_fert s x e_SLEA - nmanSh x sum_fert s x e_MLEA - agg     (LEACHN_B1)
+               B2 = 1 - the tillage, buffer strip, biodiversity and biochar terms (options the model has not)
+    AMMOAGG_   agg = v_ammoAppLeaAgg = sum_a N_a (1 - GasRunTot_a) x sum_{AmmAppLE, AmmAppHE} no3mlea x s
+                                       / sum_a N_a (1 - GasRunTot_a)
+
+with wc the winter cover share (its effect 0.35: WINTERCOV_NO3_REDUCTION, envind/cover_crops.gms l. 402), nminSh and
+nmanSh the mineral and manure shares of the N input (nminInputSh_, nmanInputSh_: n_surplus.py's block), e_SLEA =
+1 - (1 - lit) (1 + NMIN) the fertiliser options' effect (ghgMiti.gms l. 552-563; NMAN for manure;
+capri_mod/supply/n_leaching.py fert_effect), N_a the N excreted by animal a.
+
 Arguments of the functions
   f       p_Nemidat of the region and animal activity: tsg, graz_<g>, hous_<g>, stor_<g>, appl_<g>, run_hous
           (tools/build/build_n_cascade.py, n_cascade_factors.csv)
@@ -222,6 +280,18 @@ docs/N_CASCADE_SPEC.md section 4):
   * STORN_ takes NH3 + NOX off before N2 only (N2O at storage is 0 by data);
   * APPLN_ takes NH3 + NOX off for N2O inside the bracket multiplied by (1 - runoff).
 The options' terms with a zero effect are left out of the sums (_terms; e x share = 0 exactly).
+
+Departures from CAPRI in the leaching (docs/CAPRI_DEPARTURES_REGISTER.md):
+  * B2 is held at CAPRI's Green Deal 'ini' reference: L = leach_ini x B1 / B1_ini (B1_ini at CAPRI's initial shares
+    and the base winter cover). REGISTERED.
+  * CAPRI-ERROR-FIX (the project lead's decision, 20 October 2026; FIX-2): CAPRI adds agg in LEACHN_ ("+
+    v_ammoAppLeaAgg", l. 3430) while it subtracts the same options' runoff effect in RUNSURFN_ and the fertiliser
+    options' leaching effects in LEACHN_. Its literature table gives reductions (prep_data_LitRev.gms p_reducGains:
+    positive = less loss; LNA_low liquid: NH3 0.51, RunSurf -0.24, Leach -0.24), copied without change of sign to
+    no3mlea (ammo_tech.gms l. 2293), so with the '+' low-emission application lowers the leaching share where the data
+    say it raises it. The model subtracts it (the setting environment.ammapp_sign = "consistent", the default);
+    "capri" reproduces CAPRI's code. The base is calibrated to CAPRI's realised share either way (leach_ini), so the
+    sign acts only through changes in the options' adoption.
 """
 from __future__ import annotations
 
@@ -404,3 +474,35 @@ def netf(fr, run_surf, urea=0.0, urea_eff=0.0, fert_syn=None, till_n2o=0.0, m_ru
     RUNTOTNETF_(L, gas, run_surf, m_run)
     GASRUNTOTNETF_(L, gas)
     return L
+
+
+def LEACHN_B1(wc=0.0, agg=0.0, nmin_sh=0.0, nman_sh=0.0, fert_min=0.0, fert_man=0.0):
+    """LEACHN_'s first factor B1 (l. 3416-3442): 1 - winter cover's effect - nminSh x the fertiliser options' effect
+    on mineral N - nmanSh x theirs on manure -/+ agg. fert_min / fert_man: sum over the fertiliser options of share x
+    effect (mineral N / manure); agg: v_ammoAppLeaAgg (AMMOAGG_), its sign the setting environment.ammapp_sign (FIX-2)."""
+    from capri_mod.params import param
+    from capri_mod.settings import current as _settings
+    sign = 1.0 if _settings().get("environment.ammapp_sign") == "capri" else -1.0
+    return 1.0 - param("WINTERCOV_NO3_REDUCTION") * wc - nmin_sh * fert_min - nman_sh * fert_man + sign * agg
+
+
+def LEACHN_(leach_ini, leach_base, b1_now, b1_ini):
+    """v_nitrBalance(RUNR, "Leach") (LEACHN_, l. 3416-3442), the leaching share of the soil surplus, with B2 held at
+    CAPRI's ini run: leach_ini x B1 / B1_ini (leach_ini where B1_ini is not positive); without CAPRI's ini share,
+    leach_base x B1; None without either (n_leaching_region.csv)."""
+    li = leach_ini
+    if li is None:
+        lb = leach_base
+        return None if lb is None else max(0.0, lb * b1_now)
+    if not b1_ini > 0:
+        return li
+    return max(0.0, li * b1_now / b1_ini)
+
+
+def AMMOAGG_(manure):
+    """v_ammoAppLeaAgg (AMMOAGG_, l. 3444-3459): the application options' effect on leaching (no3mlea x share), the
+    average over the animals weighted by their manure N net of the cascade's losses, N_a (1 - GasRunTot_a). manure:
+    [(N_a, RunSurf_a, GasRunTot_a, sum over AmmAppHE and AmmAppLE of no3mlea x share)] (the accounts'
+    _leach_animals); 0 without manure N."""
+    w = sum(n * (1.0 - gr) for n, _, gr, _ in manure)
+    return sum(n * (1.0 - gr) * ag for n, _, gr, ag in manure) / w if w > 0 else 0.0

@@ -109,8 +109,8 @@ GASRUNTOTN_,GWP: agriculture,n_flow.py,yes,%ghgAbatement%==ON,supply/supply_mode
 RUNTOTNETF_,GWP: agriculture,n_flow.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:3352-3367,capri_mod/supply/n_cascade.py (3); capri_mod/environmental/nitrogen.py (1); capri_mod/supply/capri_regional_nlp.py (1); capri_mod/supply/equations/supply_model/nutrients.py (1); capri_mod/supply/fertilisation.py (1),ported,supply_model/n_flow.py RUNTOTNETF_ (netf); the options' terms: capri_regional_nlp.py _netf_eff,
 GASTOTNETF_,GWP: agriculture,n_flow.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:3385-3411,capri_mod/supply/n_cascade.py (2); capri_mod/environmental/nitrogen.py (1); capri_mod/supply/capri_regional_nlp.py (1); capri_mod/supply/equations/supply_model/nutrients.py (1); capri_mod/supply/fertilisation.py (1),ported,supply_model/n_flow.py GASTOTNETF_ (netf); the options' terms: capri_regional_nlp.py _netf_eff,
 GASRUNTOTNETF_,GWP: agriculture,n_flow.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:3378-3380,capri_mod/supply/n_cascade.py (2); capri_mod/supply/capri_regional_nlp.py (1); capri_mod/supply/equations/supply_model/nutrients.py (1); capri_mod/supply/fertilisation.py (1),ported,supply_model/n_flow.py GASRUNTOTNETF_ (netf); the options' terms: capri_regional_nlp.py _netf_eff,
-LEACHN_,GWP: agriculture,n_flow.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:3416-3442,capri_mod/supply/n_leaching.py (5); capri_mod/environmental/environmental_module.py (1); capri_mod/environmental/nitrogen.py (1),,,
-e_nitrBal_,GWP: agriculture,n_flow.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:3464-3466,,,,
+LEACHN_,GWP: agriculture,n_flow.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:3416-3442,capri_mod/supply/n_leaching.py (5); capri_mod/environmental/environmental_module.py (1); capri_mod/environmental/nitrogen.py (1),ported,"supply_model/n_flow.py LEACHN_, LEACHN_B1 (the accounts: environmental/nitrogen.py leaching; supply/n_leaching.py share)",B2 at CAPRI's ini run (REGISTERED); FIX-2: the sign of agg
+e_nitrBal_,GWP: agriculture,n_flow.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:3464-3466,,,,not written: the model computes no accumulation
 nminInputSh_,fertilising,n_surplus.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:1797-1827,,,,
 nmanInputSh_,fertilising,n_surplus.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:1829-1859,,,,
 NH3MAN_,Other gazeous emissions,air_water.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:3476-3489,,,,
@@ -123,7 +123,7 @@ NOXGRA_,Other gazeous emissions,air_water.py,yes,%ghgAbatement%==ON,supply/suppl
 NOXTOT_,Other gazeous emissions,air_water.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:3594-3598,,,,
 NO3RUN_,NO3 losses from leaching and runoff,air_water.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:3617-3626,,,,
 NO3LEA_,NO3 losses from leaching and runoff,air_water.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:3609-3613,,,,
-AMMOAGG_,GWP: agriculture,n_flow.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:3444-3459,capri_mod/supply/n_leaching.py (1),,,
+AMMOAGG_,GWP: agriculture,n_flow.py,yes,%ghgAbatement%==ON,supply/supply_model.gms:3444-3459,capri_mod/supply/n_leaching.py (1),ported,supply_model/n_flow.py AMMOAGG_ (the accounts: environmental/nitrogen.py leaching),
 GWPCO2HIS_,GWP: LULUCF,lulucf.py,yes,%ghgAbatement%==ON & %Lulucf_supply% == ON,supply/supply_model.gms:2983-3018; supply/supply_model.gms:4032-4041,,,,
 GWPCH4BUR_,GWP: LULUCF,lulucf.py,yes,%ghgAbatement%==ON & %Lulucf_supply% == ON,supply/supply_model.gms:2961-2967,,,,
 GWPN2OBUR_,GWP: LULUCF,lulucf.py,yes,%ghgAbatement%==ON & %Lulucf_supply% == ON,supply/supply_model.gms:2970-2976,,,,

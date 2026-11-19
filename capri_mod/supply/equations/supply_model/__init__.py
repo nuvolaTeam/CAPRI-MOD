@@ -16,7 +16,7 @@ written.
                     e_fertDistReguMax, e_focFertDist
     n_flow.py       the nitrogen flow: the manure N loss cascade (GRAZN_, HOUSN_, STORN_,           3206-3471
                     RUNHOUSN_, RUNSURFN_, APPLN_, RUNTOTN_, GASRUNTOTN_) and mineral N's
-                    (GASTOTNETF_, RUNTOTNETF_, GASRUNTOTNETF_)
+                    (GASTOTNETF_, RUNTOTNETF_, GASRUNTOTNETF_); the leaching (LEACHN_, AMMOAGG_)
     fert_limits.py  the fertiliser application limits: e_synNMax                                  4501-4601
     mitigation.py   the mitigation options: GHG_Mit_Cost_                                         4130-4392,
                                                                                                   5057-5357

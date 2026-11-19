@@ -779,11 +779,9 @@ class NitrogenBlock:
         nmin_sh = M * (1.0 - nf["GasRunTot"]) / den if den > 0 else 0.0
         nman_sh = man_net / den if den > 0 else 0.0
 
-        def _agg(an):
-            w = sum(n * (1.0 - gr) for n, _, gr, _ in an)
-            return sum(n * (1.0 - gr) * ag for n, _, gr, ag in an) / w if w > 0 else 0.0
-        b_now = _nl.b1(wc1, _agg(an1), nmin_sh, nman_sh, s_ni * e_slea, s_nim * e_mlea)
-        b_ini = _nl.b1(wc0, _agg(an0))
+        # LEACHN_'s first factor with AMMOAGG_'s v_ammoAppLeaAgg, now and at CAPRI's initial shares (n_flow.py)
+        b_now = _nf.LEACHN_B1(wc1, _nf.AMMOAGG_(an1), nmin_sh, nman_sh, s_ni * e_slea, s_nim * e_mlea)
+        b_ini = _nf.LEACHN_B1(wc0, _nf.AMMOAGG_(an0))
         L = _nl.share(rs, b_now, b_ini)
         if L is None:
             return None
