@@ -8,8 +8,9 @@ where the work stands, how to set up, and what comes next. The project lead deci
 
 Each CAPRI equation the model ports becomes a named function, CAPRI's name, in
 `capri_mod/supply/equations/supply_model/<block>.py`, one module per block of CAPRI's supply/supply_model.gms (the
-file's own banners). Each module's docstring quotes CAPRI's GAMS statement of its equations (the project lead,
-19 November 2026: GAMS text in the code is no problem), gives CAPRI's file and lines, the equation in this project's
+file's own banners). Each function's docstring quotes CAPRI's GAMS statement of the equation it writes (the project
+lead, 19 November 2026: GAMS text in the code is no problem; in the function, not gathered at the module's top),
+gives CAPRI's file and lines, the equation in this project's
 notation and the departures. The builders (capri_regional_nlp.py, supply_module.py, fertilisation.py, ...) call the
 functions. **A move, not a change: results identical to 1e-10**, checked by a gate run for every block.
 
@@ -143,8 +144,8 @@ comes, check against CAPRI's _pw feed version and register what differs.
 - CAPRI's gamma prior is computed twice: inner_fert.gamma_prior (the NLP's normalised form, var = 1 / accuracy^2) and
   fert/inner_fert_dist.gamma_params (var = (mode / accuracy)^2, which can differ in the last digit at mode 1).
 - The full suite after N1 (section 4) had not been run when N2-N4 started; it runs after N4.
-- The docstrings quote CAPRI's GAMS in each module's docstring; the brief's section 2 has it in each function's
-  (both allowed by the decision of 19 November 2026): to settle with the project lead.
+- The GAMS quotes, gathered in each module's docstring through N4, moved to the functions that write the equations
+  (the project lead's decision; the commit after N4, docstrings only).
 
 ## 7. Rules that carry over (the project's instructions and the project lead's standing rules)
 

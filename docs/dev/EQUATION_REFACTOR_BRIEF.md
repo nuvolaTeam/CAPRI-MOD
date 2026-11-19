@@ -43,7 +43,10 @@ docs/dev/ARCHITECTURE_REFACTOR.md section 2 holds: moves and behaviour changes n
   4. the differences from CAPRI's equation, each with its register entry (DEPARTURES_FROM_CAPRI.md, KNOWN_ISSUES K
      numbers, the settings that switch it).
 - **CAPRI's GAMS statement of the equation** heads its block (decided 19 November 2026): the equation as CAPRI
-  writes it in GAMS, quoted in the module's or the function's docstring, followed by the equation in our notation.
+  writes it in GAMS, quoted in the docstring of the function that writes the equation (the project lead, later on
+  19 November 2026: in the function, not gathered in the module's docstring; a function writing one term of an
+  equation names the function that holds its GAMS), followed by the equation in our notation. The module's
+  docstring keeps the block's overview, the notation its functions share and the departures.
   It is the equation's text for the reader, not GAMS code to run; quote the equation only, not the surrounding code.
 - Most of the code already cites CAPRI's lines in its comments; keep and move every citation and every departure
   note with the code it belongs to. Verify a citation against CAPRI's GAMS sources where they are available; if a
