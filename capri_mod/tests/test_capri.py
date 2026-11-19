@@ -4537,6 +4537,45 @@ def test_idled_histosol_area_is_bounded_by_the_current_land(model):
     assert abs(float(b[i])) < 1e-6 and float(A[i] @ y) < float(b[i]) - 1.0     # slack at the base (F = 0)
 
 
+def test_idled_histosols_keep_their_deposition(model):
+    """KNOWN_ISSUES K184: CAPRI's idled histosols (iHisCr, iHisGr, crops of MCACT in the group idlHis) carry MANN = the
+    region's deposition p_nitrBalance(AtmDep), so an idled hectare keeps its deposition in the residue pool
+    (fertDistCres_) and in the N surplus (e_ATMOSD, e_CRESID). The histosol columns carry it in the NLP's N pool and on
+    the N-surplus row, and the accounts report it (deposition and surplus) with the idled area."""
+    import copy
+    region = "IR010000"
+    r = model.run(scenario="BASELINE", regions=[region], max_outer_iter=1)
+    mo = model.supply_module._models[region]
+    dep = float(model.data["n_deposition_regional"].at[region, "deposition_kg_n_per_ha"])
+    assert dep > 0 and mo.data.n_deposition_kg_ha == dep
+    Q, c, A, b, y = mo.res.last_aug
+    lab = list(mo.ev.aug_labels)
+    hc = dict(mo.ev.hist_cols)
+    assert hc
+    # the residue pool: 1000 ha idled bring dep t N (kg/ha x 1000 ha)
+    C = dict(mo._npk_spec(A.shape[1], y, A, lab)["nutrients"]["N"]["C"])
+    for j in hc.values():
+        assert abs(C[j] - dep) < 1e-12, (j, C.get(j), dep)
+    # the N-surplus row: the columns built with the row present carry dep t N per 1000 ha
+    A2 = np.vstack([A, np.zeros((1, A.shape[1]))])
+    lab2 = lab + ["N_balance"]
+    try:
+        _Q3, _c3, A3, _b3, _y3 = mo._histosol_columns(Q, c, A2, np.concatenate([b, [0.0]]), y, lab2, len(mo.acts))
+        new = dict(mo.ev.hist_cols)
+        assert set(new) == set(hc) and all(new[k] >= A.shape[1] for k in new)
+        for j in new.values():
+            assert abs(A3[lab2.index("N_balance"), j] - dep) < 1e-12
+    finally:
+        mo.ev.hist_cols = hc
+    # the accounts: 10 thousand ha of grassland idled add 10 x dep t to the deposition and the surplus
+    sr = copy.copy(r["supply"][region])
+    e0 = model.env_module.compute_indicators(sr)
+    sr.histosol_fallow = {"grass": 10.0}
+    e1 = model.env_module.compute_indicators(sr)
+    assert abs((e1.n_deposition - e0.n_deposition) - 10.0 * dep) < 1e-9
+    assert abs((e1.n_surplus - e0.n_surplus) - 10.0 * dep) < 1e-9
+
+
 def test_forest_and_other_land_keep_capris_bounds(model):
     """KNOWN_ISSUES K156: CAPRI's bounds on forest and other land (prep_sim_luc.gms l. 589-612, Trustee_land):
     L0 - min(0.9 L0, 0.35 ARTO) <= L <= L0 + min(9 L0, 0.35 ARTO), not binding at the base; with a landscape floor

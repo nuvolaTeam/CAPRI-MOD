@@ -183,6 +183,10 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   excreted N (13-38% more in FR52). The first equation written in the equation style (capri_mod/supply/equations/).
   At CAPRI's Green Deal prices (six units) the share rises where it was below its bound (ES51 0.05 -> 0.80, FR52
   0.72 -> 0.86; CAPRI's 0), the N-surplus dual moves by at most 0.04 EUR/kg.
+- **K184:** the idled histosols keep the region's deposition, as CAPRI's iHisCr and iHisGr (MANN = AtmDep): in the
+  NLP's N residue pool (fertDistCres_) and on the N-surplus row (e_ATMOSD, e_CRESID), and in the accounts.
+  At CAPRI's Green Deal prices DE21's deposition is CAPRI's (9.74 against 9.72 kt; before 9.20), its mineral
+  N cut moves toward CAPRI's (-14.8 against -15.6 kt; before -14.2), the N-surplus dual 5.06 -> 5.09 EUR/kg.
 - **DEP-51 registered (the project lead's decision, 19 November 2026):** one representation of plant protection in the
   base and the scenario (PLAP with CAPRI's technology factors, calibrated at the base). CAPRI's 2030 Green Deal
   reference ran with its pesticide module (pestDisaggStage 5_aggregates: T1 and T2 apply the same pesticides per ha),

@@ -304,6 +304,17 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
                 if f > 0 and hasattr(yields, "get") and yields.get(c) is not None} or None
         nb = self.compute_nitrogen_balance(acts, yields, region, mint, yields_scen=_ysc)
         _nb_raw = dict(nb)
+        # the idled histosols keep their deposition (CAPRI's iHisCr, iHisGr: MANN = AtmDep, in e_ATMOSD / e_CRESID and in
+        # the residue pool fertDistCres_; K184), as the supply model's histosol columns do
+        _idl = sum(float(v or 0.0) for v in (getattr(supply_result, "histosol_fallow", None) or {}).values()) \
+            if supply_result is not None else 0.0
+        _dtab = self.data.get("n_deposition_regional") if hasattr(self, "data") else None
+        if _idl > 0 and _dtab is not None and region in getattr(_dtab, "index", []):
+            from capri_mod.supply.equations.idled_histosols import SURTOT_idlHis, fertDistCres_idlHis
+            _dha = float(_dtab.at[region, "deposition_kg_n_per_ha"])
+            nb["n_deposition"] = float(nb["n_deposition"]) + _idl * _dha
+            nb["n_surplus"] = float(nb["n_surplus"]) + SURTOT_idlHis(_idl, _dha)
+            _nb_raw["n_residue_pool"] = float(_nb_raw.get("n_residue_pool", 0.0) or 0.0) + fertDistCres_idlHis(_idl, _dha)
         # MANURE MARKET (when on): the region's endogenous manure trade and its
         # allocated mineral N (fertiliser allocation) replace the fixed-rule
         # values, so the reported balance is the one the regional model met.

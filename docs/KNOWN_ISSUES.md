@@ -81,6 +81,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K177](#k177) | The NLP calibration put minus the entitlement cut into the overshoot column's linear term where the QP's start held the base's rounding above the trend area: the overshoot was free in BG01, HU32, LV, PL11, PL31, PL41 and RO05 (about 199,000 thousand ha, a zero dual) | fixed (18 November 2026) |
 | [K178](#k178) | The 2030 runs took the young-animal coefficients of 2017 (calves per cow, replacements, piglets per sow): CAPRI's INPANI_ takes the simulation year's, DATA(.., "Y"); Spain's suckler cows 0.83 calves per head against CAPRI's 2030 0.90, the EU's piglet balance 6.6% short at the 2030 base | fixed (18 November 2026) |
 | [K179](#k179) | The 2030 runs took the 2017 manure N, P2O5 and K2O per head (dairy cows' N raised with the milk yield): CAPRI computes them from the simulation year's rations before it solves; the EU's N excretion at the 2030 base 5.4% above CAPRI's 2030 EXCRET (dairy cows +13%) | fixed (18 November 2026) |
+| [K184](#k184) | The idled histosols lost their deposition; CAPRI's iHisCr and iHisGr carry MANN = the region's deposition, in the residue pool (fertDistCres_) and the N surplus (e_ATMOSD, e_CRESID) | fixed (19 November 2026) |
 | [K183](#k183) | The inhibitor on manure was charged on the excreted manure N; CAPRI's GHG_Mit_Cost_ charges its manure options on ManureNPK x (1 + incEmiAppl) x (1 + NMAN x share), the manure N at the tail (FR52: 13-38% less) | fixed (19 November 2026) |
 | [K182](#k182) | The fert_dist report's mineral caps (mine_cap_kg_ha) came from another allocation than the NLP's (the cap spec's inner model at the accounts' base totals): FR52 other cereals 72.3 kg/ha reported against the NLP's 80.5 | fixed (19 November 2026; reporting only) |
 | [K181](#k181) | NUTNED_'s residue pool and the permanent crops' own residues had no technology factor on the mix columns (CAPRI: DATA(MANN) x (1 + p_technFact(MANN, A)), +-0.2), so under the Green Deal the model's crops kept the residue N, P2O5 and K2O CAPRI's lose with the shift to T2 | fixed (18 November 2026) |
@@ -3819,6 +3820,34 @@ animal_numbers.csv). The 2030 bulls match CAPRI's within 0.3%.
   in CAPRI's units are CAPRI's regional rows of its units (capri_level_ratio.csv, per territory group), 4,972.8
   thousand head in the EU against the member states' 5,552.0: the 10.4%. The 2030 bulls match CAPRI's 2030 levels
   within 0.3%, so the 2030 runs are not affected; a 2017 comparison of bulls takes CAPRI's regional rows.
+
+<a id="k184"></a>
+### K184: The idled histosols lost their deposition from the residue pool and the N surplus (found 19 November 2026)
+
+CAPRI's idled histosols, iHisCr and iHisGr, are crop activities of MCACT (sets.gms l. 2175-2177, 2234-2238) in a crop
+group of their own without fertiliser use, idlHis (supply/define_ngrp_sets.gms l. 93-94). Their DATA(MANN), the N
+from residues and deposition per ha, is the region's deposition p_nitrBalance(AtmDep): in CAPRI's Green Deal run within
+0.15 kg N/ha of ATMOSD / UAAR in all 143 units with idled histosols (DE21 12.52 kg/ha). So an idled hectare keeps its
+deposition in the residue pool distributed over the crop groups (fertDistCres_, supply_model.gms l. 1049-1085: CAPRI's
+DE21 pool without the catch crops, 27.74 kt, is the sum of level x MANN over the annual crops including idlHis' 0.54
+kt) and in the N surplus (e_SURTOTHa: e_ATMOSD sums the deposition over MCACT, l. 1381-1389; e_CRESID makes residues
+plus deposition the sum of level x MANN, l. 1393-1414): CAPRI's DE21 ATMOSD rises with its UAAR under the Green Deal,
++0.22 kt. The model's histosol columns (supply.abatement._histosol_columns) took the land from the crops without
+either term, so the idled area lost its deposition: DE21 -0.30 kt.
+
+- **Effect:** the idled area's deposition is kept; on the surplus it nearly offsets (the pool's N displaces mineral N).
+  Measured at CAPRI's Green Deal prices (DE21, ES41, ES42, ES51, ES62, FR52 alone, the surplus cut 30%; runs
+  s7_k184_surp30 against s6_k183_surp30): DE21, 43.0 thousand ha idled (39.4 grassland), deposition 9.20 -> 9.74 kt
+  (CAPRI 9.72), mineral N -14.24 -> -14.76 kt (CAPRI -15.60), the surplus unchanged (-15.5), the N-surplus dual
+  5.06 -> 5.09 EUR/kg (CAPRI's 5.85 from its crops, 6.22 from its animals); FR52, 0.75 thousand ha idled, deposition
+  +0.02 kt, the dual unchanged; the Spanish units idle none
+- **In 9t:** -
+- **Status:** fixed 19 November 2026: CAPRI's terms as functions of their own (capri_mod/supply/equations/
+  idled_histosols.py: MANN_idlHis, fertDistCres_idlHis, SURTOT_idlHis), on the histosol columns' N-surplus row
+  (abatement.py) and the N residue pool (fertilisation.py), and in the accounts (deposition and surplus with the idled
+  area; the residue pool of the fertiliser distribution report). The deposition per ha is the accounts' own source,
+  n_deposition_regional.csv (RegionData.n_deposition_kg_ha). N only: CAPRI's MANP and MANK of the idled histosols are
+  zero. Test: test_capri.py::test_idled_histosols_keep_their_deposition
 
 <a id="k183"></a>
 ### K183: The inhibitor on manure's cost was charged on the excreted manure N (found 18 November 2026)

@@ -267,6 +267,9 @@ class RegionData:
     genetics_effects: Optional[dict] = None
     #: CAPRI's histosols: organic-soil shares, emission factors, fallowing cost terms
     histosol: Optional[pd.Series] = None
+    #: CAPRI's atmospheric deposition per ha, p_nitrBalance(AtmDep) (kg N/ha, n_deposition_regional.csv): the MANN of
+    #: the idled histosols in the residue pool and the N surplus (K184)
+    n_deposition_kg_ha: Optional[float] = None
     #: CAPRI's crop technologies T1/T2: per crop with both, the T1 - T2 differences and CAPRI's 2030 technology
     #: block in the mix columns' variables (techn_mix_2030.csv, pmp_capri_2030_mix.csv); with CAPRI's 2030 PMP terms only
     techn_mix: Optional[pd.DataFrame] = None
@@ -2304,6 +2307,16 @@ class SupplyModule(ModuleStateMixin):
             held |= {a for a in prov.columns if prov.at[region, a] == "NO_CAPRI_VALUE" and (a, a) not in pmp}
         return frozenset(held)
 
+    @staticmethod
+    def _deposition_kg_ha(d, region):
+        """CAPRI's deposition per ha of the region, p_nitrBalance(AtmDep) (n_deposition_regional.csv, the accounts' own
+        source), or None without a row."""
+        t = d.get("n_deposition_regional")
+        if t is None or region not in getattr(t, "index", []):
+            return None
+        v = float(t.at[region, "deposition_kg_n_per_ha"])
+        return v if v == v and v >= 0 else None
+
     def _price_transmission_for(self, d, region):
         """The region's member state's factors on the market's relative price change (CAPRI's absolute transmission,
         arm/set_prices.gms; K169), at the 2030 market year (the factors are CAPRI's 2030 reference's) with
@@ -2408,6 +2421,7 @@ class SupplyModule(ModuleStateMixin):
             winter_cover_share=(d.get("winter_cover_share") or {}).get(region),
             histosol=(d["histosol"].loc[region] if d.get("histosol") is not None
                       and region in d["histosol"].index else None),
+            n_deposition_kg_ha=self._deposition_kg_ha(d, region),
             dairy_intensity=self._intensity_q_at(
                 d, d["dairy_intensity"].loc[region] if d.get("dairy_intensity") is not None
                 and region in d["dairy_intensity"].index else None, ("q_low", "q_high"), "animals"),
