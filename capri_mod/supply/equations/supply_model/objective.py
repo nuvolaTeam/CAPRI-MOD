@@ -91,3 +91,10 @@ def LINEAR_carbonTax_manInhibitor(W, ef, v_Miti):
     treated, W x ef x s (W the excreted manure N, kt); the builder subtracts it. CAPRI's GAMS:
     LINEAR_carbonTax_ammOptions's docstring."""
     return W * ef * v_Miti
+
+
+def LINEAR_carbonTax_N2OCRO(ef, catcBioFix):
+    """The emission tax on the catch crops' crop-residue N2O (N2OCRO: BioFix x CATC x EF1 x 44/28, in GN2O and so in the
+    taxed GGWP; their soil carbon CO2SEQ is not in GGWP): ef x the catch crops' BioFix N (t, from the base share).
+    CAPRI's GAMS: LINEAR_carbonTax_ammOptions's docstring."""
+    return ef * catcBioFix

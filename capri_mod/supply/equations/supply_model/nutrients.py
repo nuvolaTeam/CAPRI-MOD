@@ -306,3 +306,11 @@ def NUTNED_mitiExcr(NMAN, v_Miti):
     """NUTNED_'s term of the inhibitor on manure in the manure's factor (l. 1187-1197, x (1 + v_Miti NMAN)): NMAN x s.
     CAPRI's GAMS of NUTNED_: NUTNED_'s docstring."""
     return NMAN * v_Miti
+
+
+def fertDistCres_catcBioFix(biofix, v_Miti, v_Miti0):
+    """fertDistCres_'s winter cover term (l. 1081-1087), p_ghgMiti(CATC, WinterCov, othImpact, BioFix) x v_actLevl(CATC)
+    x 1000, written from the base share (the base's catch crops are in the residue pool's data): biofix x (m - m0), biofix
+    = BioFix x U x 1000 (t N per unit of share; U the base UAA where CAPRI's catcMiti_ takes the current land: K186:
+    premiums.py). CAPRI's GAMS of fertDistCres_: fertDistCres_'s docstring."""
+    return biofix * (v_Miti - v_Miti0)

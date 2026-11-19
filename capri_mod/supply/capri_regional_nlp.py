@@ -901,10 +901,12 @@ class CapriRegionalNLP:
         # CAPRI's equations of the options (supply/supply_model.gms), one function each
         from capri_mod.supply.equations.supply_model.mitigation import (
             TotMit_, GHG_Mit_Cost_herd, Tot_MitFert_, GHG_Mit_Cost_perShare, GHG_Mit_Cost_targFertSyn_factor,
-            GHG_Mit_Cost_targFertSyn_base, GHG_Mit_Cost_targFertMan_excr)
+            GHG_Mit_Cost_targFertSyn_base, GHG_Mit_Cost_targFertMan_excr, GHG_Mit_Cost_catc)
         from capri_mod.supply.equations.supply_model.objective import (
-            LINEAR_carbonTax_ammOptions, LINEAR_carbonTax_NH3kept, LINEAR_carbonTax_manInhibitor)
-        from capri_mod.supply.equations.supply_model.nutrients import manExportOrAppl_kept, NUTNED_mitiExcr
+            LINEAR_carbonTax_ammOptions, LINEAR_carbonTax_NH3kept, LINEAR_carbonTax_manInhibitor, LINEAR_carbonTax_N2OCRO)
+        from capri_mod.supply.equations.supply_model.nutrients import (
+            manExportOrAppl_kept, NUTNED_mitiExcr, fertDistCres_catcBioFix)
+        from capri_mod.supply.equations.supply_model.premiums import catcMiti_, winterCover_, ecoSetAside_catc
         self.amm_kept = None; self.fert_eff = None; self.man_eff = None; self._nitr_phi = None; self._fert_phi = {}
         self.n_rows_g = {}; self.synN_row = None
         self.abat = {}
@@ -921,10 +923,11 @@ class CapriRegionalNLP:
             m = zc[0]
             uaa, m0 = float(cs["uaa"]), float(cs["m0"])
             dl = 0.0 if cs.get("fixmiti") else float((spec.get("dabat") or {}).get(("catc",), 0.0))
-            obj = obj + self._pv(uaa) * (self._pv(float(cs["k1"]) + float(cs["lin"]) + dl) * m
-                                        + self._pv(0.5 * float(cs["sqr"])) * m * m)
-            g_rows.append((self._lin(y, [(int(j), float(s)) for j, s in cs["row"]]) + self._pv(uaa) * m)
-                          * self._pv(1.0 / uaa))
+            # GHG_Mit_Cost_ on the UAA; winterCover_ with catcMiti_'s area (mitigation.py, premiums.py)
+            obj = obj + GHG_Mit_Cost_catc(self._pv(uaa), self._pv(float(cs["k1"]) + float(cs["lin"]) + dl),
+                                          self._pv(0.5 * float(cs["sqr"])), m)
+            g_rows.append(winterCover_(self._lin(y, [(int(j), float(s)) for j, s in cs["row"]]),
+                                       catcMiti_(self._pv(uaa), m), self._pv(1.0 / uaa)))
             lbg.append(-np.inf); ubg.append(float(cs["rhs"]) / uaa)
             self._catc_m = m
             # ecoSetAside_: catch crops on the eligible side at CAPRI's weight (setaEco includes CATC)
@@ -932,13 +935,14 @@ class CapriRegionalNLP:
             if float(eco.get("catc_w", 0.0) or 0.0) > 0 and "ecoSetAside" in getattr(self, "cap_rows", {}):
                 ie = self.cap_rows["ecoSetAside"]
                 sce = max(float(eco.get("scale", 1.0)), 1e-6)
-                g_rows[ie] = g_rows[ie] - self._pv(float(eco["catc_w"]) * uaa / sce) * m
-            self.catc_n = self._pv(uaa * 1000.0 * float(cs["biofix"])) * (m - self._pv(m0))      # t N
+                g_rows[ie] = ecoSetAside_catc(g_rows[ie], self._pv(float(eco["catc_w"]) * uaa / sce), m)
+            # fertDistCres_'s winter cover term, from the base share (t N; nutrients.py)
+            self.catc_n = fertDistCres_catcBioFix(self._pv(uaa * 1000.0 * float(cs["biofix"])), m, self._pv(m0))
             gt_ = spec.get("ghg_min")
             if gt_:
                 # CAPRI's emission tax on the catch crops' crop-residue N2O (N2OCRO: BioFix x CATC x EF1 x 44/28, in
                 # GN2O and so in the taxed GGWP; their soil carbon CO2SEQ is not in GGWP)
-                obj = obj + self._pv(float(gt_["d"])) * self.catc_n
+                obj = obj + LINEAR_carbonTax_N2OCRO(self._pv(float(gt_["d"])), self.catc_n)
             new.append(zc)
             lbx += [float(cs.get("lb", 0.0))]; ubx += [float(cs["ub"])]
             self.abat["catc"] = {"off": nx0, "uaa": uaa, "m0": m0}

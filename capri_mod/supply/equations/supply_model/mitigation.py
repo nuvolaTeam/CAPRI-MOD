@@ -206,3 +206,19 @@ def GHG_Mit_Cost_targFertMan_excr(W, c1, c2_half, v_Miti):
     (kt), W x (c1 s + c2_half s^2). DEPARTURE from CAPRI's targFertMan base (ManureNPK x (1 + incEmiAppl) x (1 + NMAN s),
     GHG_Mit_Cost_targFertMan), which needs the block's manure N pool."""
     return W * (c1 * v_Miti + c2_half * v_Miti * v_Miti)
+
+
+def GHG_Mit_Cost_catc(uaaEqu, c1, c2_half, v_Miti):
+    r"""GHG_Mit_Cost_ of winter cover (the catch crops), charged on the UAA (l. 5126-5130): U x (c1 m + c2_half m^2),
+    kEUR; c1 = costParLin + pmpParLin (+ the calibration's linear term), c2_half = 0.5 pmpParSqr. U is the base UAA
+    where CAPRI's v_actLevl(uaaEqu) is a variable (K186: premiums.py).
+
+    CAPRI's GAMS, GHG_Mit_Cost_'s UAA base (l. 5126-5130; the parts per share: GHG_Mit_Cost_targFertMan's docstring):
+
+                + v_actLevl(RUNR,"uaaEqu","T") $ (    sameas(PACT,"CATC")
+                                                  or (sameas(PACT,"uaarmiti") and sum(mitiTechNLim $ sameas(allMitiTech,mitiTechNLim),1))
+                                                  or (sameas(PACT,"cropMiti") and sum(mitiTechBuff $ sameas(allMitiTech,mitiTechBuff),1))
+                                                  or (sameas(PACT,"cropMiti") and sum(mitiTechBiod $ sameas(allMitiTech,mitiTechBiod),1))
+                                                  or (sameas(PACT,"uaarmiti") and sum(mitiTechPest $ sameas(allMitiTech,mitiTechPest),1)))
+    """
+    return uaaEqu * (c1 * v_Miti + c2_half * v_Miti * v_Miti)
