@@ -75,6 +75,7 @@ class FertilisationBlock:
         c_ = getattr(self.par, "ef_lea_cache", None)
         if c_ is None:
             from capri_mod.supply import n_cascade as _nc, n_leaching as _nl
+            from capri_mod.supply.equations.supply_model import n_flow as _nf
             from capri_mod.environmental.environmental_module import GWP_N2O
             rs = _nl.capri_region(self.data.region_id)
             d = _nl.load().get(rs) if rs else None
@@ -82,7 +83,7 @@ class FertilisationBlock:
             c_ = 0.0
             if d and d.get("exp_imp") is not None:
                 L = d.get("leach_ini") if d.get("leach_ini") is not None else (d.get("leach_base") or 0.0)
-                nf = _nc.netf(g, float(g.get("run_surf", 0.0)))
+                nf = _nf.netf(g, float(g.get("run_surf", 0.0)))
                 c_ = max(0.0, nf["RunTot"] + (1.0 - nf["GasRunTot"] - float(d["exp_imp"])) * float(L)) \
                     * param("EF5_LEACHING_N2O") * M_N2O / M_N2O_N * GWP_N2O
             self.par.ef_lea_cache = c_

@@ -42,7 +42,7 @@ from capri_mod.data.definitions import capri_ms  # noqa: E402  (TUR for Turkey's
 # EF5_LEACHING_N2O and WINTERCOV_NO3_REDUCTION (one parameter with n_cascade's runoff effect)
 # the sign of the application losses: the setting environment.ammapp_sign, "consistent" (- agg, as RUNSURFN_; default)
 # or "capri" (CAPRI's code: + agg)
-APPL = ("AmmAppLE", "AmmAppHE")   # APPLN_'s terms, as n_cascade.APPL_TECHS (checked against MitiTechAmm)
+APPL = ("AmmAppLE", "AmmAppHE")   # APPLN_'s terms, as n_flow.APPL_TECHS (checked against MitiTechAmm)
 
 _REG = {}
 

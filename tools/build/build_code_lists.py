@@ -246,8 +246,8 @@ def main():
     # the ammonia technologies the N cascade's equations name (HOUSN_, STORN_, RUNHOUSN_, APPLN_: CAPRI writes the
     # lists in the equations, supply_model.gms l. 3200 ff., and so does the model): each one of CAPRI's MitiTechAmm
     amm = set(read_set(a.sets, "MitiTechAmm"))
-    for path, name in (("capri_mod/supply/n_cascade.py", "HOUS_TECHS"), ("capri_mod/supply/n_cascade.py", "STOR_TECHS"),
-                       ("capri_mod/supply/n_cascade.py", "RUNH_TECHS"), ("capri_mod/supply/n_cascade.py", "APPL_TECHS"),
+    n_flow = "capri_mod/supply/equations/supply_model/n_flow.py"
+    for path, name in ((n_flow, "HOUS_TECHS"), (n_flow, "STOR_TECHS"), (n_flow, "RUNH_TECHS"), (n_flow, "APPL_TECHS"),
                        ("capri_mod/supply/n_leaching.py", "APPL")):
         problems += [f"{path} {name}: {t} is not in CAPRI's MitiTechAmm" for t in literal(path, name) if t not in amm]
     # the prices that follow a market's (codes/model_price_follows.csv, declared)

@@ -20,7 +20,7 @@ functions. **A move, not a change: results identical to 1e-10**, checked by a ga
 | 8c4bde1 | the inventory of CAPRI's supply-model equations (docs/dev/supply_equations_inventory.csv, 232 equations of m_capModQ, 173 in CAPRI's 2030 Green Deal step; tools/refactor/supply_equations_inventory.py; the switches of the Green Deal step, docs/dev/supply_equations_gd_switches.csv); the brief updated | docs only |
 | d20b652 | the layout: equations/supply_model/ with nutrients.py, n_surplus.py, mitigation.py (K183's and K184's functions moved, unchanged) | gate identical; tests |
 | N1 | the fertilisation block of the regional NLP (CapriRegionalNLP._fert_block): NUTNED_, the pools, ManureNPK_'s terms, the inner fertiliser model (inner_fert.py), e_synNMax (fert_limits.py), SURTOT_REST_ | gate identical (see the branch's log for the commit) |
-| N2 | CAPRI's N loss cascade (GRAZN_ ... GASRUNTOTNETF_) from capri_mod/supply/n_cascade.py into n_flow.py | not started on the branch: the first block for the new session (section 5, item 1) |
+| N2 | CAPRI's N loss cascade (GRAZN_ ... GASRUNTOTNETF_) from capri_mod/supply/n_cascade.py into n_flow.py | gate identical (against a run at 80795e0); the cascade's expressions identical for every region and activity |
 
 Not on the branch (on purpose):
 - `docs/equations/` (the equation book, page 01 the regional N balance) and its README paragraph: waiting for the

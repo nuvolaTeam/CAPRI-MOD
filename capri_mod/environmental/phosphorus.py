@@ -36,7 +36,8 @@ class PhosphorusBlock:
         (as _leach_animals). CAPRI applies the same share to manure P2O5 (calc_nbalance.gms l. 71, 103-106, RUNANI). RunHous
         and RunSurf are held within CAPRI's bounds of a loss share, [0, 1] (v_emiLoss.lo/up). A sub-activity without
         cascade data runs off nothing (CAPRI reports no RUNANI there)."""
-        from capri_mod.supply import ammonia_techs as _at, n_cascade as _nc
+        from capri_mod.supply import ammonia_techs as _at
+        from capri_mod.supply.equations.supply_model import n_flow as _nf
         self._manure_n2o_tech(region)                 # loads CAPRI's sub-activities (ammonia_tech_model.csv)
         tm = (getattr(self.par, "amm_tm", None) or {}).get(region, {})
         out = {}
@@ -54,7 +55,7 @@ class PhosphorusBlock:
                 if not initial:
                     s_ = {t_: sh.get(t_, v_) for t_, v_ in s_.items()}
                 f, rsurf, eff = cd
-                L = _nc.losses(f, rsurf, s_, eff, m_runsurf=(1.0 - param("WINTERCOV_NO3_REDUCTION") * wc - fert_mrun, 1.0),
+                L = _nf.losses(f, rsurf, s_, eff, m_runsurf=(1.0 - param("WINTERCOV_NO3_REDUCTION") * wc - fert_mrun, 1.0),
                                m_appl_run=1.0 - param("WINTERCOV_NO3_REDUCTION") * wc)
                 # CAPRI bounds every loss share to [0, 1] (supply/set_supply_bounds.gms l. 240-243, v_emiLoss.lo/up), so
                 # options cannot drive the runoff below zero; the cascade evaluated at the solution's shares can

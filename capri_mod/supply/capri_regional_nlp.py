@@ -685,8 +685,8 @@ class CapriRegionalNLP:
             # CAPRI's priors the base allocation moves by less than 0.5 kg/ha, BG02 and RO05 checked)
             eF = dict(e)
             if nut == "N" and d.get("netf"):
-                from capri_mod.supply import n_cascade as _nc
-                _L0 = _nc.netf(d["netf"]["fr"], float(d["netf"]["run_surf"]))
+                from capri_mod.supply.equations.supply_model import n_flow as _nf
+                _L0 = _nf.netf(d["netf"]["fr"], float(d["netf"]["run_surf"]))
                 eF["CRES"] = pv(float(d["gc"]) / (1.0 - float(_L0["N2O"])) * float(d["eff"]))
             E = lin(d["E"]); C = lin(d["C"])
             if float(d.get("E_const", 0.0) or 0.0) != 0.0:
@@ -851,7 +851,7 @@ class CapriRegionalNLP:
         nf = d.get("netf")
         if not nf:
             return None
-        from capri_mod.supply import n_cascade as _nc
+        from capri_mod.supply.equations.supply_model import n_flow as _nf
         pv = self._pv
         syn = {"NH3": 0, "NOX": 0, "N2O": 0}; srun = 0; used = False
         for name, (ph, nm) in (self._fert_phi or {}).items():
@@ -870,8 +870,8 @@ class CapriRegionalNLP:
         if not used:
             return None
         fr, rsurf = nf["fr"], float(nf["run_surf"])
-        L1 = _nc.netf(fr, rsurf, fert_syn=syn, m_run=1 - wr * (m_wc if m_wc is not None else m0) - srun)
-        L0 = _nc.netf(fr, rsurf, m_run=1.0 - wr * m0)
+        L1 = _nf.netf(fr, rsurf, fert_syn=syn, m_run=1 - wr * (m_wc if m_wc is not None else m0) - srun)
+        L0 = _nf.netf(fr, rsurf, m_run=1.0 - wr * m0)
         effM = pv(float(d["eff"])) - (L1["GasRunTot"] - pv(float(L0["GasRunTot"])))
         effC = pv(float(d["gc"]) / (1.0 - float(L0["N2O"]))) * (1 - L1["N2O"])
         self.netf_eff = (effM, effC)

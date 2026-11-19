@@ -169,10 +169,10 @@ def cascade(sub, sh: dict, wc=0.0):
     d = cascade_data(sub)
     if d is None:
         return None
-    from capri_mod.supply import n_cascade as _nc
+    from capri_mod.supply.equations.supply_model import n_flow as _nf
     f, rsurf, eff = d
     m = 1.0 - param("WINTERCOV_NO3_REDUCTION") * wc
-    return _nc.losses(f, rsurf, sh, eff, m_runsurf=(m, 1.0), m_appl_run=m)
+    return _nf.losses(f, rsurf, sh, eff, m_runsurf=(m, 1.0), m_appl_run=m)
 
 
 def loss(sub, sh: dict, wc=0.0):

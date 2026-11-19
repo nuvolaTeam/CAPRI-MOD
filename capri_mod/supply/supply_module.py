@@ -2593,6 +2593,7 @@ class SupplyModule(ModuleStateMixin):
         NO3SRUN), raised to p_fertEffCor with its sign. 0 without side-effect data (CAPRI's literature effects are
         for the nitrification inhibitor)."""
         from capri_mod.supply import n_cascade as _nc
+        from capri_mod.supply.equations.supply_model import n_flow as _nf
         sv = {it: fert_side_value(region, tech, it) for it in ("NH3SYN", "NOXSYN", "N2OSYN", "NO3SRUN")}
         if all(v is None for v in sv.values()):
             return 0.0
@@ -2600,7 +2601,7 @@ class SupplyModule(ModuleStateMixin):
         g = G.get(r8) or G.get(capri_ms(region)) or {}
         if not g:
             return 0.0
-        L = _nc.netf(g, float(g.get("run_surf", 0.0)))
+        L = _nf.netf(g, float(g.get("run_surf", 0.0)))
         v = (L["NH3"] * (sv["NH3SYN"] or 0.0) + L["NOX"] * (sv["NOXSYN"] or 0.0) + L["N2O"] * (sv["N2OSYN"] or 0.0)
              + L["RunTot"] * (sv["NO3SRUN"] or 0.0))
         return (abs(v) ** param("P_FERT_EFF_COR")) * (1.0 if v >= 0 else -1.0) if v else 0.0

@@ -22,14 +22,14 @@ def test_mineral_losses_follow_the_inhibitor_as_capri():
     the nitrification inhibitor's shares on N2OSYN and N2OSYN2 sum to 0.368137 and v_emiLoss(BG020000, NETF, N,
     GasRunTot) is 0.158282 (GASTOT 0.055206, RUNTOT 0.103076; winter cover held at 1e-6 there, tillage's runoff effect
     commented out). The model's data and CAPRI's othImpact = 1 - (1 - lit)(1 + NMIN) give the same."""
-    from capri_mod.supply import n_cascade as _nc
+    from capri_mod.supply.equations.supply_model import n_flow as _nf
     nf = _netf_inputs("BG020000")
     lit, nm = nf["lit"]["NITR_INH"], 0.0794329065172083       # NMIN of the inhibitor (p_ghgMiti othImpact NMIN)
     imp = {k: 1.0 - (1.0 - lit[k]) * (1.0 + nm) for k in lit}
     assert imp["N2OSYN"] == pytest.approx(0.177485, abs=2e-6) and imp["NH3SYN"] == pytest.approx(-0.141992, abs=2e-6)
     assert imp["NOXSYN"] == pytest.approx(0.180056, abs=2e-6) and imp["NO3SRUN"] == pytest.approx(0.471094, abs=2e-5)
     s = 0.350969 + 0.017168
-    L = _nc.netf(nf["fr"], nf["run_surf"], fert_syn={"NH3": s * imp["NH3SYN"], "NOX": s * imp["NOXSYN"],
+    L = _nf.netf(nf["fr"], nf["run_surf"], fert_syn={"NH3": s * imp["NH3SYN"], "NOX": s * imp["NOXSYN"],
                                                    "N2O": s * imp["N2OSYN"]}, m_run=1.0 - s * imp["NO3SRUN"])
     assert L["NH3"] + L["NOX"] + L["N2O"] == pytest.approx(0.055206, abs=2e-6)
     assert L["RunTot"] == pytest.approx(0.103076, abs=2e-6)
@@ -41,7 +41,7 @@ def test_nutned_efficiencies_move_with_the_options_from_the_base():
     (options at 0, winter cover at its base share), the mineral one rising with the inhibitor's share as CAPRI's
     GasRunTot falls, and the residues' following the N2O loss (l. 1196)."""
     import casadi as ca
-    from capri_mod.supply import n_cascade as _nc
+    from capri_mod.supply.equations.supply_model import n_flow as _nf
     from capri_mod.supply.capri_regional_nlp import CapriRegionalNLP
     nf = _netf_inputs("BG020000")
     nlp = CapriRegionalNLP.__new__(CapriRegionalNLP)
@@ -58,7 +58,7 @@ def test_nutned_efficiencies_move_with_the_options_from_the_base():
     # without winter cover (CAPRI's run held it at 1e-6): CAPRI's GasRunTot falls from the no-option value to 0.158282
     nlp.spec = {"catc": {"m0": 0.0}}
     effM0, _ = nlp._netf_eff(d)
-    g0 = _nc.netf(nf["fr"], nf["run_surf"])["GasRunTot"]
+    g0 = _nf.netf(nf["fr"], nf["run_surf"])["GasRunTot"]
     e1 = float(ca.Function("g", [phi, m], [effM0])(0.368137, 0.0))
     assert e1 - d["eff"] == pytest.approx(g0 - 0.158282, abs=5e-6)
     assert float(f(0.368137, 0.05)[1]) > e0[1]

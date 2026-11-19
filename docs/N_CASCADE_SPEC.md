@@ -7,8 +7,10 @@
   `n_cascade_region.csv` (runoff from the surface, leaching, mineral fertiliser; urea substitution's effect and
   maximum) and `n_cascade_effects.csv` (the options' othImpact on every gas and stage, runoff from housing no3runh,
   runoff from application no3mrun).
-* `capri_mod/supply/n_cascade.py` writes GRAZN_, HOUSN_, STORN_, RUNHOUSN_, RUNSURFN_, APPLN_, RUNTOTN_, GASRUNTOTN_,
-  GASTOTNETF_, RUNTOTNETF_ and GASRUNTOTNETF_ as they stand in supply_model.gms (plain arithmetic: floats and CasADi).
+* `capri_mod/supply/equations/supply_model/n_flow.py` writes GRAZN_, HOUSN_, STORN_, RUNHOUSN_, RUNSURFN_, APPLN_,
+  RUNTOTN_, GASRUNTOTN_, GASTOTNETF_, RUNTOTNETF_ and GASRUNTOTNETF_ as they stand in supply_model.gms, one function
+  each with CAPRI's GAMS text (plain arithmetic: floats and CasADi); `capri_mod/supply/n_cascade.py` keeps the data
+  (`load`) and their use for a region and activity (`activity_losses`) and for the accounts (`mineral_n2o_n`).
 * Check (`test_n_cascade_reproduces_capri`, data `capri_data/validation/n_cascade_capri_gd2030.csv` from CAPRI's
   Green Deal reference run with endogenous technologies, `tools/build/build_n_cascade_validation.py`; that run is the "ini"
   calibration run, ghgTechCali ini, with the option shares at their initial values): with CAPRI's own
