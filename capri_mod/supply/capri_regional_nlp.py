@@ -898,6 +898,10 @@ class CapriRegionalNLP:
           nitrification inhibitor on manure: one regional share, manure N x (1 + share NMAN) in NUTNED_, cost per t of
             manure N treated"""
         import casadi as ca
+        # CAPRI's equations of the options (supply/supply_model.gms), one function each
+        from capri_mod.supply.equations.supply_model.mitigation import TotMit_, GHG_Mit_Cost_herd
+        from capri_mod.supply.equations.supply_model.objective import LINEAR_carbonTax_ammOptions, LINEAR_carbonTax_NH3kept
+        from capri_mod.supply.equations.supply_model.nutrients import manExportOrAppl_kept
         self.amm_kept = None; self.fert_eff = None; self.man_eff = None; self._nitr_phi = None; self._fert_phi = {}
         self.n_rows_g = {}; self.synN_row = None
         self.abat = {}
@@ -945,13 +949,14 @@ class CapriRegionalNLP:
                        for t in techs]
                 d = sig - pv([float(t["s0"]) for t in techs])
                 hv = y[[self.act_idx[t["act"]] for t in techs]]
-                obj = obj + ca.sum1(pv([float(t["stock"]) * float(t["w"]) for t in techs]) * hv
-                                    * (pv(th_) * d + pv([0.5 * float(t["slope"]) for t in techs]) * d * d))
+                # GHG_Mit_Cost_ on the herd (mitigation.py)
+                obj = obj + ca.sum1(GHG_Mit_Cost_herd(pv([float(t["stock"]) * float(t["w"]) for t in techs]), hv,
+                                                      pv(th_), pv([0.5 * float(t["slope"]) for t in techs]), d))
                 # CAPRI's emission tax (ghgTax) on the options' manure N2O through the loss cascade, per unit of the
                 # sub-activity and share from the base shares (the activity's own coefficient is taken there)
                 tg = [float(t.get("ghg", 0.0) or 0.0) * float(t["w"]) for t in techs]
                 if any(tg):
-                    obj = obj + ca.sum1(pv(tg) * hv * d)
+                    obj = obj + ca.sum1(LINEAR_carbonTax_ammOptions(pv(tg), hv, d))
             byk = {}
             for kk, t in enumerate(techs):
                 byk.setdefault((t["act"], t["key"]), {})[t["tech"]] = sig[kk]
@@ -984,9 +989,10 @@ class CapriRegionalNLP:
                             continue
                         g_rows.append(L1[k_]); lbg.append(0.0); ubg.append(np.inf)
                     _nh3 = lambda L_: L_[("NH3", "Graz")] + L_[("NH3", "Hous")] + L_[("NH3", "Stor")] + L_[("NH3", "Appl")]
-                    kept = kept + wy * (L0[("N", "GasRunTot")] - L1[("N", "GasRunTot")])
-                    kept_nh3 = kept_nh3 + wy * (_nh3(L0) - _nh3(L1))
+                    kept = kept + manExportOrAppl_kept(wy, L0[("N", "GasRunTot")], L1[("N", "GasRunTot")])
+                    kept_nh3 = kept_nh3 + manExportOrAppl_kept(wy, _nh3(L0), _nh3(L1))
                 else:
+                    # manExportOrAppl_ as above, with the old loss function (one difference for both sums)
                     d_ = _cascade_loss(sub, sh0) - _cascade_loss(sub, sh)
                     kept = kept + wy * d_
                     kept_nh3 = kept_nh3 + wy * d_
@@ -994,12 +1000,13 @@ class CapriRegionalNLP:
             if float(am.get("tax_nh3", 0.0) or 0.0) > 0:
                 # the indirect N2O of the NH3 the options keep (the soil N2O of the mineral N it displaces follows the
                 # purchases in the fertilisation block)
-                obj = obj - self._pv(float(am["tax_nh3"])) * kept_nh3
+                obj = obj - LINEAR_carbonTax_NH3kept(self._pv(float(am["tax_nh3"])), kept_nh3)
             grp = {}
             for kk, t in enumerate(techs):
                 grp.setdefault(t["grp"], []).append(kk)
             for _, ks in grp.items():
-                g_rows.append(sum(sig[kk] for kk in ks)); lbg.append(-np.inf); ubg.append(1.0)
+                # TotMit_ for the options' group (no control eliminated)
+                g_rows.append(TotMit_([sig[kk] for kk in ks])); lbg.append(-np.inf); ubg.append(1.0)
             o_amm = nx0 + sum(int(v.shape[0]) for v in new)
             new.append(sig)
             if am.get("fixed"):

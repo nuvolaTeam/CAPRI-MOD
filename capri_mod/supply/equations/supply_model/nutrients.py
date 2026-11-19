@@ -276,3 +276,27 @@ def fertDistCres_idlHis(v_actLevl, AtmDep: float):
     Departures from CAPRI: none in the term; N only (CAPRI's MANP and MANK of the idled histosols are zero).
     """
     return v_actLevl * MANN_idlHis(AtmDep)
+
+
+def manExportOrAppl_kept(wy, GasRunTot0, GasRunTot1):
+    r"""The manure N the ammonia options keep (manExportOrAppl_(r, FOUT), l. 962-978: the manure N applied or exported
+    is MANN x (1 - v_emiLoss(GasRunTot)) per animal): wy x (the losses at the base shares - the losses at the current
+    shares), t; wy the sub-activity's manure N (the activity's level x its excretion x the sub-activity's weight). The
+    sum over the animals enters ManureNPK_'s pool (ManureNPK_ammKept).
+
+    CAPRI's GAMS, manExportOrAppl_ (l. 962-978):
+
+           manExportOrAppl_(RUNR,FOUT) $ SUM( MAACT $ p_technFact(RUNR,MAACT,"LEVL","T"),1) ..
+                   v_manExportOrAppl(RUNR,FOUT)
+               =E=
+                   SUM( MAACT $ p_technFact(RUNR,MAACT,"LEVL","T"),
+                         v_actLevl(RUNR,MAACT,"T") * %data%(RUNR,MAACT,FOUT,"Y") * (p_technFact(RUNR,MAACT,FOUT,"T")+1.)
+                       * (1-v_emiLoss(RUNR,MAACT,"N","GasRunTot") $ SAMEAS(FOUT,"MANN"))
+    $iftheni.lnf7 %ghgAbatement%==on
+                       * (1 + v_Miti(RUNR,MAACT,"lowNFeed","N2OEXCR")*p_ghgMiti(RUNR,MAACT,"lowNFeed","othImpact","MANN") $ SAMEAS(FOUT,"MANN"))
+                       * (1 + v_Miti(RUNR,MAACT,"genet_eff","rumFedEff")*p_ghgMiti(RUNR,MAACT,"genet_eff","othImpact","MANN") $ SAMEAS(FOUT,"MANN"))
+                       * (1 + v_Miti(RUNR,MAACT,"genet_yld","mlkYld")*p_ghgMiti(RUNR,MAACT,"genet_yld","othImpact",FOUT) $ PACT_TO_Y(MAACT,"COMI"))
+    $endif.lnf7
+                       * 0.001)  ;
+    """
+    return wy * (GasRunTot0 - GasRunTot1)

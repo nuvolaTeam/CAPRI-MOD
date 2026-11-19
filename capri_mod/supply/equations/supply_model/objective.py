@@ -6,7 +6,8 @@ decision of 19 November 2026); this docstring keeps the block's overview, notati
 
 Written so far: the fertilisation block's terms on the mineral N purchases v_netPutQuant(NITF) (the regional NLP's
 fertilisation block, CapriRegionalNLP._fert_block): their value at the unit value (UVAG) and the emission tax on
-mineral N's soil N2O, with the indirect N2O of the purchases' runoff and leaching at the same tax.
+mineral N's soil N2O, with the indirect N2O of the purchases' runoff and leaching at the same tax; and the emission
+tax's terms of the mitigation options (CapriRegionalNLP._abatement_block).
 
 In this project's notation (per nutrient; P = the purchases, t, CAPRI's - v_netPutQuant; the objective in kEUR; uvag
 the unit value per kg, here per t / 1000):
@@ -60,3 +61,26 @@ def LINEAR_carbonTaxN2OLEA(v_netPutQuant, ef_l):
     """The indirect N2O of the purchases' runoff and leaching at the emission tax (CAPRI's GWPN2OLEA_ in LINEAR_'s
     tax on the emission types, l. 4790-4797): ef_l x P."""
     return ef_l * v_netPutQuant
+
+
+def LINEAR_carbonTax_ammOptions(ef, v_actLevl, d):
+    r"""The emission tax on the ammonia options' change of the manure N2O through the loss cascade (LINEAR_'s tax on
+    the emission types, l. 4790-4797, the options' share of v_CO2EquEmis): per option ef x v_actLevl x d, ef the tax's
+    value per unit of the sub-activity and share (the base's own coefficient is in the activity's), d = s - s0.
+    Vectors over the options (the builder sums).
+
+    CAPRI's GAMS, LINEAR_'s tax on the emission types (l. 4790-4797):
+
+            - sum(ghgs,p_carbonTax(RUNR,ghgs,"perton") * (
+    $ifi not %mitiTecPol%==on   (v_CO2EquEmis(RUNR,ghgs) $ (not sameas(ghgs,"GWPA")) + v_CO2EquEmis(RUNR,"GGWP") $ sameas(ghgs,"GWPA"))
+    $ifi     %mitiTecPol%==on   (v_FxActEmis(RUNR,ghgs)  $ (not sameas(ghgs,"GWPA")) + v_FxActEmis(RUNR,"GGWP")  $ sameas(ghgs,"GWPA"))
+            * p_globWarmPot(ghgs) - p_carbonTax(RUNR,ghgs,"refGWP")))
+    """
+    return ef * v_actLevl * d
+
+
+def LINEAR_carbonTax_NH3kept(ef, v_NH3kept):
+    """The emission tax's value of the indirect N2O of the NH3 the ammonia options keep (LINEAR_'s tax on the emission
+    types, l. 4790-4797): ef x the NH3-N kept (t); the builder subtracts it (the soil N2O of the mineral N it displaces
+    follows the purchases, LINEAR_carbonTaxNITF). CAPRI's GAMS: LINEAR_carbonTax_ammOptions's docstring."""
+    return ef * v_NH3kept

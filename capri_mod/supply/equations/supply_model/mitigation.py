@@ -106,3 +106,43 @@ def GHG_Mit_Cost_targFertSyn(v_netPutQuant, inv_1000, cost_base):
     GHG_Mit_Cost_'s parts per share (CAPRI's GAMS): GHG_Mit_Cost_targFertMan's docstring.
     """
     return v_netPutQuant * inv_1000 * cost_base
+
+
+def TotMit_(v_Miti):
+    r"""TotMit_(r, PACT, mitiTarget) (l. 4133-4141) with the option "no control" (NOC) eliminated: the options' shares of
+    one group sum to at most 1 (CAPRI: with NOC's share, to exactly 1; NOC = 1 - the sum >= 0). v_Miti: the group's
+    shares; the row <= 1.
+
+    CAPRI's GAMS, TotMit_ (l. 4133-4141):
+
+        TotMit_(RUNR,PACT,mitiTarget) $ sum((R_RAGG(RUNR,MSACT),mitiTech_map(MSACT,PACT,AllMitiTech,mitiTarget)),1)..
+           sum((R_RAGG(RUNR,MSACT),mitiTech_map(MSACT,PACT,AllMitiTech,mitiTarget))
+                                                         $ ((not sum(SupplTechTot,sameas(SupplTechTot,AllMitiTech)))
+                                                         and (not sum(buffabov1,sameas(buffabov1,AllMitiTech)))),
+            v_Miti(RUNR,PACT,AllMitiTech,mitiTarget))
+        =e= 1;
+    """
+    return sum(v_Miti)
+
+
+def GHG_Mit_Cost_herd(stock_w, v_actLevl, c1, c2_half, d):
+    r"""GHG_Mit_Cost_ of the ammonia options, charged on the herd (l. 5108-5117: v_actLevl x p_animProdDays / 365, the
+    animal stock), per option: stock_w x v_actLevl x (c1 d + c2_half d^2), with d = s - s0 the share's change from its
+    base (initial) share. stock_w: the places per unit of the activity x the sub-activity's weight; c1, c2_half: the
+    calibrated cost terms at the base share (supply.ammonia_techs). Vectors over the options (the builder sums).
+
+    CAPRI's GAMS, GHG_Mit_Cost_'s herd base (l. 5108-5117; the parts per share: GHG_Mit_Cost_targFertMan's docstring):
+
+            * [   sum(A $ (p_technFact(RUNR,PACT,"LEVL",A) $ AACT(PACT)),
+                  v_actLevl(RUNR,PACT,A)
+                  * ( (p_animProdDays(RUNR,PACT,"T")/365)                  $ (not SupplTech(allMitiTech))
+                    + (p_animReq(RUNR,PACT,"T","DRMA" %addtimedim%) * p_animProdDays(RUNR,PACT,"T") / 1000
+                        * p_emisFeed(RUNR,PACT,"T",allMitiTech,"ShrOfDM")) $ ( (sameas(allMitiTech,"Line_Tot") or sameas(allMitiTech,"Nitr_Tot") or sameas(allMitiTech,"3NOP_Tot"))
+                                                                             $ catact(PACT)
+                                                                             $ mitiTech_map(MSACT,PACT,allMitiTech,"CH4ENT")))
+                     )
+
+    Departure in form: the cost is written around the base shares s0, c1 (s - s0) + 0.5 c2 (s - s0)^2, which is CAPRI's
+    c1' s + 0.5 c2 s^2 with c1' = c1 - c2 s0 up to a constant.
+    """
+    return stock_w * v_actLevl * (c1 * d + c2_half * d * d)
