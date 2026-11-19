@@ -399,8 +399,9 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             if _fdm:
                 # the allocation the regional model solved (CAPRI reports v_fertDist of its supply model): the inner
                 # model at the model's own totals, or the coupled NLP where it had no solution there
-                _mc = getattr(supply_result, "mineral_cap", None) or {}
-                _gc = _mc.get("group_caps") or {}
+                # the caps the NLP solved with (K182: not the cap spec's group_caps, which come from another
+                # allocation, the inner model at the accounts' base totals)
+                _gc = _fdm.get("mine_caps") or {}
                 self.ev.fert_dist_now = [
                     dict(region=region, capri_region=_fdm.get("capri_region"), ngrp=g, area_kha=float(A),
                          mine_kg_ha=float(_fdm["flows"].get((g, "MINE"), 0.0)) / A if A > 0 else 0.0,

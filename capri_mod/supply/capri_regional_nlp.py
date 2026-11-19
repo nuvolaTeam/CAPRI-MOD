@@ -583,6 +583,12 @@ class CapriRegionalNLP:
         self.fert = None
         if spec.get("npk"):
             X, obj = self._fert_block(spec["npk"], X, y, obj, g_rows, lbg, ubg, lbx, ubx)
+        if getattr(self, "_mni_cost_pending", None) is not None:
+            # no N manure pool in the fertilisation block: the inhibitor on manure's cost on the excreted manure N
+            s_m, S0m, slope_m, _, W_m, W_b = self._mni_cost_pending
+            obj = obj + W_m * (self._pv(S0m) * s_m + self._pv(0.5 * slope_m) * s_m * s_m)
+            self._mni_base = W_b
+            self._mni_cost_pending = None
         if getattr(self, "_fert_tech_pending", None) is not None:
             # no N purchases in the model: the options' cost on the crops' base mineral N
             cost_, crops_ = self._fert_tech_pending
@@ -682,6 +688,16 @@ class CapriRegionalNLP:
                 C = C + self.catc_n                                 # catch crops' BioFix N (fertDistCres_)
             if nut == "N" and self.amm_kept is not None:
                 E = E + self.amm_kept                               # N the ammonia options keep (ManureNPK_)
+            if nut == "N" and getattr(self, "_mni_cost_pending", None) is not None:
+                # CAPRI's GHG_Mit_Cost_ for the inhibitor on manure on its own base, ManureNPK x (1 + incEmiAppl) x
+                # (1 + NMAN s): the manure N pool E, at the tail (K183; until 19 November 2026 on the excreted N)
+                from capri_mod.supply.equations.ghg_mit_cost import GHG_Mit_Cost_targFertMan
+                s_m, S0m, slope_m, nman_m = self._mni_cost_pending[:4]
+                obj = obj + GHG_Mit_Cost_targFertMan(E, s_m, pv(S0m), pv(slope_m), pv(nman_m))
+                _xb = np.asarray(self.xb, float)
+                self._mni_base = (sum(float(v_) * float(_xb[int(j_)]) for j_, v_ in d["E"] if int(j_) < len(_xb))
+                                  + float(d.get("E_const", 0.0) or 0.0)) / 1000.0      # the pool at the base, kt
+                self._mni_cost_pending = None
             if d.get("slope"):
                 availE = e["EXCR"] + pv(float(d["slope"])) * (E / land - pv(float(d["m0E"])))
             else:
@@ -862,7 +878,7 @@ class CapriRegionalNLP:
         return effM, effC
 
     def _abatement_block(self, spec, X, y, obj, g_rows, lbg, ubg, lbx, ubx):
-        self._fert_tech_pending = None; self._fert_tech_P = None
+        self._fert_tech_pending = None; self._fert_tech_P = None; self._mni_cost_pending = None
         """CAPRI's abatement options inside the regional model (ghgAbatement on; supply_model.gms GHG_Mit_Cost_,
         TotMit_, the v_emiLoss cascade), as far as capri-mod has their data:
           ammonia options per animal and sub-activity (housing/storage MAN group, application APP group): shares
@@ -1018,12 +1034,21 @@ class CapriRegionalNLP:
         mni = spec.get("mni")
         if mni and float(mni.get("smax", 0.0)) > 0 and any(m_ > 0 for _, m_ in mni["w"]):
             sm = ca.SX.sym("mni", 1)
-            W = self._lin(y, [(c_, float(m_) / 1000.0) for c_, m_ in mni["w"]])
+            W = self._lin(y, [(c_, float(m_) / 1000.0) for c_, m_ in mni["w"]])        # excreted manure N, kt
             s_ = sm[0]
             S0m = float(mni["S0"]) + float((spec.get("dabat") or {}).get(("mni",), 0.0))
-            obj = obj + W * (self._pv(S0m - float(mni.get("vtax", 0.0))) * s_ + self._pv(0.5 * float(mni["slope"])) * s_ * s_)
+            # the emission tax's value per t of excreted manure N treated (the accounts' emission factors)
+            obj = obj - W * self._pv(float(mni.get("vtax", 0.0))) * s_
             self.man_eff = self._pv(float(mni["nman"])) * s_
-            self._mni_base = sum(float(m_) * float(self.xb[int(c_)]) for c_, m_ in mni["w"]) / 1000.0
+            if "N" in ((spec.get("npk") or {}).get("nutrients") or {}):
+                # CAPRI's GHG_Mit_Cost_ on its base for targFertMan, ManureNPK x (1 + incEmiAppl) x (1 + NMAN s): the
+                # fertilisation block's manure N pool, so the term is added there (_fert_block; KNOWN_ISSUES K183)
+                self._mni_cost_pending = (s_, S0m, float(mni["slope"]), float(mni["nman"]), W,
+                                          sum(float(m_) * float(self.xb[int(c_)]) for c_, m_ in mni["w"]) / 1000.0)
+                self._mni_base = None                     # set by _fert_block: the pool at the calibration point, kt
+            else:
+                obj = obj + W * (self._pv(S0m) * s_ + self._pv(0.5 * float(mni["slope"])) * s_ * s_)
+                self._mni_base = sum(float(m_) * float(self.xb[int(c_)]) for c_, m_ in mni["w"]) / 1000.0
             o = nx0 + sum(int(v.shape[0]) for v in new)
             new.append(sm)
             lbx += [0.0]; ubx += [float(mni["smax"])]

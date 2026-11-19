@@ -131,3 +131,25 @@ def test_residue_pool_follows_the_technology_mix(es42_greendeal):
         dist = sum(v for (g, s), v in npk[nut]["flows"].items() if s == "CRES")
         assert mix < -0.01 * crops, (nut, mix, crops)        # the shift to T2 takes residues out
         assert math.isclose(dist, crops + mix + catch, rel_tol=1e-6), (nut, dist, crops, mix, catch)
+
+
+@pytest.mark.slow
+def test_fert_dist_report_shows_the_nlp_caps(es42_greendeal):
+    """With the crop-specific mineral reduction (mine13crp) the accounts' fert_dist report carries the caps per ha the
+    regional NLP solved with (its "f2f" regulations), not the cap spec's, which come from another allocation (the inner
+    model at the accounts' base totals: FR52 other cereals 72.3 kg/ha reported against the NLP's 80.5; KNOWN_ISSUES
+    K182). The group's mineral N per ha stays within the support, at most 0.999 x its cap (CAPRI's
+    v_fertDistReguSlack.lo = 0.001 x priMaxPerHa). ES42 alone, the Green Deal 2030 step."""
+    R = "ES420000"
+    res, rm = es42_greendeal
+    caps = (getattr(rm.res, "fd_model", None) or {}).get("mine_caps") or {}
+    assert caps and all(v > 0 for v in caps.values()), caps
+    fd = res.scenario[2030].get("fert_dist")
+    rows = fd[fd.region == R]
+    seen = 0
+    for r in rows.itertuples():
+        if r.ngrp in caps:
+            assert r.mine_cap_kg_ha == pytest.approx(caps[r.ngrp], rel=1e-12), r.ngrp
+            assert r.mine_kg_ha <= caps[r.ngrp] * (1.0 + 1e-6), (r.ngrp, r.mine_kg_ha, caps[r.ngrp])
+            seen += 1
+    assert seen == len(caps), (seen, sorted(caps))

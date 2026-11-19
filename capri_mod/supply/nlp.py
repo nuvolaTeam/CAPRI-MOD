@@ -592,8 +592,12 @@ class NLPBlock:
                 o_["area"] = {g: float(sum(sh * yv[j] for j, sh in gs[g]["crops"])) for g in gs}
             if "N" in self.res.last_npk:
                 # the allocation the regional model solved, for the accounts' report (fert_dist)
+                # with the mineral caps per ha the NLP solved with (its "f2f" regulations, relaxations included):
+                # the report's mine_cap_kg_ha (K182)
+                _rg = (npk["nutrients"].get("N") or {}).get("regs") or {}
                 self.res.fd_model = {"capri_region": npk["capri_region"], "flows": self.res.last_npk["N"]["flows"],
-                                  "area": self.res.last_npk["N"]["area"], "converged": True}
+                                  "area": self.res.last_npk["N"]["area"], "converged": True,
+                                  "mine_caps": {g_: float(v_[0]) for (g_, s_), v_ in _rg.items() if s_ == "MINE"}}
         self.ev.last_duals = zA
         # the columns' reduced costs at the NLP solution (IPOPT's bound multipliers, per unit of the column): the
         # manure pools read the trade columns' from here, as their duals through the A rows miss the fertilisation

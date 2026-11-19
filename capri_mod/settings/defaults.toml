@@ -355,8 +355,8 @@ fert_slope_with_saving = false
 # the inner model's duals widened to +-1000 where CAPRI's +-10 admit no allocation (REGISTERED, CAPRI's own
 # workaround is a slack)
 npk_dual_bound_wide = 1000.0
-# numerical: regulated flows kept strictly inside the beta density's support, at this share of
-# its upper end (CAPRI: an open support)
+# regulated flows kept inside the beta density's support, at this share of its upper end: CAPRI's lower bound on
+# the slack, v_fertDistReguSlack.lo = 0.001 x priMaxPerHa (supply/set_fert_priors.gms l. 578)
 support_margin = 0.999
 # numerical: the mineral caps scaled so the distribution keeps this share of them (0.2% room)
 cap_room = 0.998

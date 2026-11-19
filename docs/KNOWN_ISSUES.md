@@ -81,6 +81,8 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K177](#k177) | The NLP calibration put minus the entitlement cut into the overshoot column's linear term where the QP's start held the base's rounding above the trend area: the overshoot was free in BG01, HU32, LV, PL11, PL31, PL41 and RO05 (about 199,000 thousand ha, a zero dual) | fixed (18 November 2026) |
 | [K178](#k178) | The 2030 runs took the young-animal coefficients of 2017 (calves per cow, replacements, piglets per sow): CAPRI's INPANI_ takes the simulation year's, DATA(.., "Y"); Spain's suckler cows 0.83 calves per head against CAPRI's 2030 0.90, the EU's piglet balance 6.6% short at the 2030 base | fixed (18 November 2026) |
 | [K179](#k179) | The 2030 runs took the 2017 manure N, P2O5 and K2O per head (dairy cows' N raised with the milk yield): CAPRI computes them from the simulation year's rations before it solves; the EU's N excretion at the 2030 base 5.4% above CAPRI's 2030 EXCRET (dairy cows +13%) | fixed (18 November 2026) |
+| [K183](#k183) | The inhibitor on manure was charged on the excreted manure N; CAPRI's GHG_Mit_Cost_ charges its manure options on ManureNPK x (1 + incEmiAppl) x (1 + NMAN x share), the manure N at the tail (FR52: 13-38% less) | fixed (19 November 2026) |
+| [K182](#k182) | The fert_dist report's mineral caps (mine_cap_kg_ha) came from another allocation than the NLP's (the cap spec's inner model at the accounts' base totals): FR52 other cereals 72.3 kg/ha reported against the NLP's 80.5 | fixed (19 November 2026; reporting only) |
 | [K181](#k181) | NUTNED_'s residue pool and the permanent crops' own residues had no technology factor on the mix columns (CAPRI: DATA(MANN) x (1 + p_technFact(MANN, A)), +-0.2), so under the Green Deal the model's crops kept the residue N, P2O5 and K2O CAPRI's lose with the shift to T2 | fixed (18 November 2026) |
 | [K180](#k180) | The model's bulls and heifers were CAPRI's census herds of one of their activities (bulls: the low-intensity BULL, a third of CAPRI's BULF; heifers: the fattening heifers HEIF, 15% of HEIF + HEIR) while their coefficients carry all of them; Slovakia, with replacement heifers but no fattening heifers, had none | fixed (18 November 2026) |
 | [K141](#k141) | CAPRI bug: CAPRI's BPS convergence takes the overshoot left after the 30% rule off the low units in million EUR per thousand ha, without the factor 1000 (implement_bps.gms l. 309) | closed (13 November 2026): a CAPRI bug, kept as CAPRI computes it (the project lead's decision) |
@@ -3817,6 +3819,55 @@ animal_numbers.csv). The 2030 bulls match CAPRI's within 0.3%.
   in CAPRI's units are CAPRI's regional rows of its units (capri_level_ratio.csv, per territory group), 4,972.8
   thousand head in the EU against the member states' 5,552.0: the 10.4%. The 2030 bulls match CAPRI's 2030 levels
   within 0.3%, so the 2030 runs are not affected; a 2017 comparison of bulls takes CAPRI's regional rows.
+
+<a id="k183"></a>
+### K183: The inhibitor on manure's cost was charged on the excreted manure N (found 18 November 2026)
+
+CAPRI's GHG_Mit_Cost_ (supply/supply_model.gms l. 5057-5160, its standard version) charges the fertiliser options
+aimed at applied manure (targFertMan: NITR_INH with the target N2OMAN) on v_ManureNPK(NITF) x (1 + v_incEmiAppl) x
+(1 + sum (NMAN + EmiCalMan) x v_Miti) (l. 5144-5149). InclEmiAppl_ (l. 983-1030) makes ManureNPK x (1 + incEmiAppl)
+the manure N at the tail (excreted less the housing and storage losses and the housing runoff), net of the trade;
+EmiCalMan is 0 (CAPRI computes it inside $ontext, envind/ghgMiti.gms l. 945-962). The regional NLP charged the option
+on the excreted manure N (capri_regional_nlp.py `_abatement_block`), without the factor. In FR52 the tail is 0.76 of the
+excretion for dairy cows, 0.87 for bulls and heifers, 0.62 for sows (the model's N cascade, CAPRI's p_Nemidat), so the
+cost base was 13-38% above CAPRI's (the factor 1 + NMAN x share is about 1.05 at the Green Deal's shares).
+
+- **Effect:** the inhibitor on manure is cheaper, its share higher where it was below its upper bound. Measured at
+  CAPRI's Green Deal prices (DE21, ES41, ES42, ES51, ES62, FR52 alone, the surplus cut 30%): the share ES51 0.047 ->
+  0.796, FR52 0.724 -> 0.862 (CAPRI's 0 in both); unchanged in DE21 (0.917), ES41 (0.571), ES42 (0.681) and ES62
+  (0.680), at their upper bound; the N-surplus dual FR52 5.82 -> 5.78, ES51 4.57 -> 4.53, the others within 0.02 EUR/kg;
+  ES51's mineral N -30.5 -> -31.3% (CAPRI -31.4). So the cost base does not explain why CAPRI's Green Deal uses no
+  inhibitor on manure in FR52 and ES51: open, to be found in CAPRI's restriction of NMAN (restMitFert) or the option's
+  availability there
+- **In 9t:** -
+- **Status:** fixed 19 November 2026: CAPRI's term as its own function, `GHG_Mit_Cost_targFertMan`
+  (capri_mod/supply/equations/ghg_mit_cost.py, the first of the equation style: CAPRI's names, source and lines, the
+  equation, its departures), on the fertilisation block's manure N pool (fertDistExcr_'s right-hand side: the manure N
+  applied, at the tail, with the N the ammonia options keep and the manure trade; the trade at the tail is its
+  departure). The emission tax's value per t treated stays on the excreted N (the accounts' factors). The price-search
+  path without feed rations (`_apply_manure_inhibitor`, not used by default) keeps the excreted base.
+  Test: test_fert_option_cost.py::test_manure_inhibitor_cost_on_capris_base
+
+<a id="k182"></a>
+### K182: The report's mineral caps were not the ones the NLP solved with (found 19 November 2026)
+
+With the crop-specific mineral reduction (mine13crp) the regional NLP takes each crop group's cap from its own base
+allocation, nlp_base_alloc x (1 - r) with CAPRI's exemptions (fertilisation.py `_npk_mineral_cap`: CAPRI's
+p_minfertBaseline x (1 - reduction), minfert_redu_by_crop.gms). The accounts' report (fert_dist, mine_cap_kg_ha;
+environmental_module.py) read the caps of the cap spec instead (supply_module.py `_mineral_cap_spec`: the inner model
+allocated at the accounts' base totals), a different allocation: in FR52 other cereals 72.3 kg/ha reported against the
+NLP's 80.5, wheat 79.4 against 73.1, barley 59.8 / 62.6, maize 72.0 / 67.8 (probe at CAPRI's Green Deal prices,
+claude/n_surplus_dual_diagnosis.md step 6), so the report showed mineral N above caps the NLP did not have. The NLP's
+caps are CAPRI's (its base allocation within about 1% of CAPRI's baseline per ha); the solution was not affected.
+
+- **Effect:** the report's mine_cap_kg_ha column only. With the organic area target the column now also shows the
+  organic target's caps (its "f2f" regulations), which the NLP solves with.
+- **In 9t:** -
+- **Status:** fixed 19 November 2026: the regional model's solved allocation (fd_model) carries the mineral caps per ha
+  of the NLP's regulations, relaxations included (nlp.py), and the report takes them. The comment of the setting
+  fertiliser.support_margin corrected: 0.999 is CAPRI's own bound (v_fertDistReguSlack.lo = 0.001 x priMaxPerHa,
+  set_fert_priors.gms l. 578), not a departure from an open support.
+  Test: test_techn_mix.py::test_fert_dist_report_shows_the_nlp_caps
 
 <a id="k181"></a>
 ### K181: The crops' residue pool did not follow the technology mix (found 18 November 2026)

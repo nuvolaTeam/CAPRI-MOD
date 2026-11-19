@@ -175,6 +175,14 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   N-surplus dual rises toward CAPRI's implied one (FR52 4.52 -> 5.82 against 6.1-6.3; DE21 4.39 -> 5.06 against
   5.9-6.2; ES42 4.69 -> 5.32 against 6.2); the suckler cows' mean gap 5.0 -> 1.9 points, the grassland split's
   8.7 -> 3.1.
+- **K182:** the fert_dist report's mineral caps (mine_cap_kg_ha) are the ones the NLP solved with (its "f2f"
+  regulations), not the cap spec's, which came from another allocation (FR52 other cereals 72.3 reported against 80.5).
+  Reporting only. The support_margin setting's comment now says 0.999 is CAPRI's bound on the slack.
+- **K183:** the inhibitor on manure is charged as CAPRI's GHG_Mit_Cost_ charges its manure options, on ManureNPK x
+  (1 + incEmiAppl) x (1 + NMAN x share), the manure N at the tail (the fertilisation block's manure pool), not on the
+  excreted N (13-38% more in FR52). The first equation written in the equation style (capri_mod/supply/equations/).
+  At CAPRI's Green Deal prices (six units) the share rises where it was below its bound (ES51 0.05 -> 0.80, FR52
+  0.72 -> 0.86; CAPRI's 0), the N-surplus dual moves by at most 0.04 EUR/kg.
 - **DEP-51 registered (the project lead's decision, 19 November 2026):** one representation of plant protection in the
   base and the scenario (PLAP with CAPRI's technology factors, calibrated at the base). CAPRI's 2030 Green Deal
   reference ran with its pesticide module (pestDisaggStage 5_aggregates: T1 and T2 apply the same pesticides per ha),
