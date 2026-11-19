@@ -18,12 +18,14 @@ written.
                     RUNHOUSN_, RUNSURFN_, APPLN_, RUNTOTN_, GASRUNTOTN_) and mineral N's
                     (GASTOTNETF_, RUNTOTNETF_, GASRUNTOTNETF_); the leaching (LEACHN_, AMMOAGG_)
     fert_limits.py  the fertiliser application limits: e_synNMax                                  4501-4601
-    mitigation.py   the mitigation options: GHG_Mit_Cost_                                         4130-4392,
+    objective.py    the objective: LINEAR_'s terms on the mineral N purchases                     4675-5056,
+                                                                                                  5358-5433
+    mitigation.py   the mitigation options: GHG_Mit_Cost_ (the targFertMan and targFertSyn bases)  4130-4392,
                                                                                                   5057-5357
 
 The other blocks, by the inventory: feeding.py (520-840), young_animals.py (841-869), premiums.py (1887-2026),
 set_aside.py (2225-2375), land.py (2376-2534), lulucf.py (2656-3061, 4016-4129), methane.py (3062-3205),
-air_water.py (3472-3633), n2o.py (3634-3966), gwp.py (3967-4015), markets.py (4602-4674), objective.py
-(4675-5056, 5358-5433), sugar.py (5434-5498); the BFP indicators (2027-2224), the water block (2535-2655) and the
+air_water.py (3472-3633), n2o.py (3634-3966), gwp.py (3967-4015), markets.py (4602-4674),
+sugar.py (5434-5498); the BFP indicators (2027-2224), the water block (2535-2655) and the
 pesticide block (4393-4500) are off in CAPRI's 2030 Green Deal step.
 """

@@ -21,6 +21,8 @@ functions. **A move, not a change: results identical to 1e-10**, checked by a ga
 | d20b652 | the layout: equations/supply_model/ with nutrients.py, n_surplus.py, mitigation.py (K183's and K184's functions moved, unchanged) | gate identical; tests |
 | N1 | the fertilisation block of the regional NLP (CapriRegionalNLP._fert_block): NUTNED_, the pools, ManureNPK_'s terms, the inner fertiliser model (inner_fert.py), e_synNMax (fert_limits.py), SURTOT_REST_ | gate identical (see the branch's log for the commit) |
 | N2 | CAPRI's N loss cascade (GRAZN_ ... GASRUNTOTNETF_) from capri_mod/supply/n_cascade.py into n_flow.py | gate identical (against a run at 80795e0); the cascade's expressions identical for every region and activity |
+| N3 | the leaching: LEACHN_ (with its first factor LEACHN_B1) and AMMOAGG_ into n_flow.py, from supply/n_leaching.py and the accounts (environmental/nitrogen.py) | gate identical (one run with N4, against the run at N2); the functions' values bitwise equal for every CAPRI region and both signs of FIX-2 |
+| N4 | the fertilisation block's objective terms: LINEAR_'s purchases and carbon tax on mineral N (objective.py), GHG_Mit_Cost_'s targFertSyn base (mitigation.py) | gate identical (one run with N3); the NLPs identical with and without an emission tax |
 
 Not on the branch (on purpose):
 - `docs/equations/` (the equation book, page 01 the regional N balance) and its README paragraph: waiting for the
@@ -45,8 +47,12 @@ imports).
   repository or on Hugging Face: the project lead provides CAPRI star 3.0's `gams/` folder (the copy used here:
   course_capri_git/gams). Files used so far: supply/supply_model.gms, supply/supply_model_e_list_linear.gms,
   _quatratic.gms, _FOCfert.gms, supply/set_fert_priors.gms, fert/fertned.gms, capmod/def_fert_and_requirements.gms,
-  sets.gms, pol_input/greendeal/*.gms.
-- Machine: a three-unit Green Deal run takes about 1.5 GB and 13-20 minutes on two cores; the full suite about 3
+  sets.gms, pol_input/greendeal/*.gms. The right copy: supply/supply_model.gms has 5,631 lines and names
+  GAEC_soilCover_, and the inventory rebuilt from it reproduces docs/dev/supply_equations_inventory.csv byte for byte
+  (an older copy, 5,557 lines, 228 equations, does not). Keep it outside the repository.
+- Machine: a three-unit Green Deal run takes about 1.5 GB and 13-20 minutes on two cores (22-24 minutes in a cloud
+  session); a run from a separate checkout pinned at the block's commit (git worktree) leaves the main tree free
+  for the next block; the full suite about 3
   hours (test_capri.py alone about 85 minutes).
 
 ## 4. The procedure for a block (the brief, section 4)
@@ -88,11 +94,12 @@ fert_limits 4, gwp 4, feeding 3, markets 1, young_animals 1. Proposed order:
    expressions as the old losses() and netf() (str() equal, the entries in the same order) and the callers import
    cleanly; an import of n_cascade or n_flow belongs only in the scopes that use it (flake8 F401). The drafts are in the
    claude.ai Project CAPRI+ (claude/refactor_n2/n_flow_draft.py, the module with CAPRI's GAMS text; n2_apply_draft.py,
-   the edit script, which expects the module next to it as n2_n_flow.py): not yet through a gate. Then LEACHN_,
-   AMMOAGG_, e_nitrBal_ (capri_mod/supply/n_leaching.py) and
-   CapriRegionalNLP._netf_eff (the options' terms of GASTOTNETF_ / RUNTOTNETF_).
-2. **The fertilisation block's objective terms**, still inline in _fert_block: the purchases' cost (LINEAR_), the
-   fertiliser options' cost on the purchases (GHG_Mit_Cost_, K175), the N2OSYN tax: objective.py, mitigation.py.
+   the edit script, which expects the module next to it as n2_n_flow.py). Done (N2); LEACHN_ and AMMOAGG_ done (N3);
+   left: CapriRegionalNLP._netf_eff (the options' terms of GASTOTNETF_ / RUNTOTNETF_, written as the base efficiencies
+   plus the change from the base point, so the base is CAPRI's reported one: the model's composition around
+   n_flow.netf, with the options' othImpact 1 - (1 - lit)(1 + NMIN) of ghgMiti.gms; a block of its own with the
+   mitigation block).
+2. **The fertilisation block's objective terms**: done (N4).
 3. **mitigation.py**: CapriRegionalNLP._abatement_block (capri_regional_nlp.py, about 180 lines): TotMit_,
    TotMitFertMin_, TotMitFertMan_, Tot_MitFert_ (restMitFert), catcMiti_, the ammonia options' cost and the manure N
    they keep, the inhibitor on manure; with supply/abatement.py (the histosol columns, idleHisto_).
@@ -130,6 +137,14 @@ comes, check against CAPRI's _pw feed version and register what differs.
   loss equations (3352-3411). The gamma prior is set_fert_priors.gms l. 230-237 (the code's l. 668-785 is the
   partial derivative's slack).
 - tools/build/build_n_cascade.py imports `write_source` unused (flake8 F401; not in the selected checks).
+- e_nitrBal_ (l. 3464-3466) is not written: the model computes no accumulation (v_nitrBalance(Accumul)).
+- n_leaching.py cited "supply_model.gms l. 3413" for LEACHN_'s "+ v_ammoAppLeaAgg": l. 3430 in star 3.0 (the
+  moved text in n_flow.py cites l. 3430).
+- CAPRI's gamma prior is computed twice: inner_fert.gamma_prior (the NLP's normalised form, var = 1 / accuracy^2) and
+  fert/inner_fert_dist.gamma_params (var = (mode / accuracy)^2, which can differ in the last digit at mode 1).
+- The full suite after N1 (section 4) had not been run when N2-N4 started; it runs after N4.
+- The docstrings quote CAPRI's GAMS in each module's docstring; the brief's section 2 has it in each function's
+  (both allowed by the decision of 19 November 2026): to settle with the project lead.
 
 ## 7. Rules that carry over (the project's instructions and the project lead's standing rules)
 

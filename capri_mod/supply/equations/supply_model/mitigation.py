@@ -2,7 +2,8 @@ r"""CAPRI's cost of the mitigation options (supply/supply_model.gms l. 5057-5190
 option's cost is charged on.
 
 Written so far: the manure options' part (K183): the fertiliser options aimed at applied manure (mitiTarget in
-targFertMan: the nitrification inhibitor on manure, NITR_INH with target N2OMAN).
+targFertMan: the nitrification inhibitor on manure, NITR_INH with target N2OMAN); and the mineral fertiliser options'
+base (targFertSyn: the purchases, K175), on which the regional NLP's fertilisation block charges their cost.
 
 CAPRI's GAMS, GHG_Mit_Cost_ (the standard version, l. 5057-5190; the parts per share and the targFertMan base,
 l. 5144-5149; the other bases left out here):
@@ -40,6 +41,23 @@ housing and storage losses and the housing runoff) over the manure N net of all 
 ManureNPK x (1 + incEmiAppl) is the manure N at the tail, net of the trade. EmiCalMan = 0: CAPRI computes it inside
 $ontext/$offtext (ghgMiti.gms l. 945-962).
 
+The targFertSyn base (l. 5138-5143), the mineral N purchases scaled by the options' effect on the N need met:
+
+            - (v_netPutQuant(RUNR,"NITF") * (1 + sum(gainsTechFert,
+                                            ((p_ghgMiti(RUNR,"cropMiti",gainsTechFert,"othImpact","NMIN")+p_ghgMiti(RUNR,"cropMiti",gainsTechFert,"othImpact","EmiCalMin"))
+                                            + (p_ghgMiti(MSACT,"cropMiti",gainsTechFert,"othImpact","NMIN")+p_ghgMiti(MSACT,"cropMiti",gainsTechFert,"othImpact","EmiCalMin"))
+                                            $ (not (p_ghgMiti(RUNR,"cropMiti",gainsTechFert,"othImpact","NMIN")+p_ghgMiti(RUNR,"cropMiti",gainsTechFert,"othImpact","EmiCalMin"))))
+                                            * v_Miti(RUNR,"cropmiti",gainsTechFert,"N2OSYN"))))
+                                            $ (sameas(PACT,"cropMiti") and sum(gainsTechFert $ sameas(allMitiTech,gainsTechFert),1) and sum(targFertSyn $ sameas(mitiTarget,targFertSyn),1))
+
+In this project's notation (the options o with a targFertSyn target, N2OSYN; P = - v_netPutQuant(NITF), the
+purchases, t):
+
+    cost_r = P / 1000 x sum_o [ c1_o s_o + 0.5 c2_o s_o^2 ] x (1 + sum_o (NMIN_o + EmiCalMin_o) s_o)
+
+the bracket and the factor composed in CapriRegionalNLP._abatement_block (its pending term), the product with the
+purchases in the fertilisation block (GHG_Mit_Cost_targFertSyn).
+
 Departure: the manure trade enters at the tail (CAPRI scales ManureNPK, net of the trade, by the region's own tail
 factor); equal where the traded manure has the region's own loss ratio. One option (CAPRI's only targFertMan option in
 the Green Deal group is NITR_INH).
@@ -57,3 +75,10 @@ def GHG_Mit_Cost_targFertMan(v_ManureNPK_tail, v_Miti, costPar_lin, costPar_sqr,
     t of manure N (EUR); NMAN the option's othImpact NMAN (after CAPRI's restMitFert)."""
     return (v_ManureNPK_tail / 1000.0) * (1 + (NMAN + EmiCalMan) * v_Miti) \
         * (costPar_lin * v_Miti + 0.5 * costPar_sqr * v_Miti * v_Miti)
+
+
+def GHG_Mit_Cost_targFertSyn(v_netPutQuant, inv_1000, cost_base):
+    """The mineral fertiliser options' part of GHG_Mit_Cost_(r) (l. 5057-5190, the targFertSyn base l. 5138-5143),
+    kEUR: P / 1000 x cost_base, P the N purchases (t), cost_base = sum_o [c1_o s_o + 0.5 c2_o s_o^2] x (1 + sum_o
+    (NMIN_o + EmiCalMin_o) s_o) (CapriRegionalNLP._abatement_block, K175)."""
+    return v_netPutQuant * inv_1000 * cost_base

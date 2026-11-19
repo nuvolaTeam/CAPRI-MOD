@@ -640,6 +640,9 @@ class CapriRegionalNLP:
             e_fertDistReguMax, e_focFertDist_FB)
         from capri_mod.supply.equations.supply_model.fert_limits import e_synNMax
         from capri_mod.supply.equations.supply_model.n_surplus import SURTOT_REST_
+        from capri_mod.supply.equations.supply_model.objective import (
+            LINEAR_netPutQuant, LINEAR_carbonTaxNITF, LINEAR_carbonTaxN2OLEA)
+        from capri_mod.supply.equations.supply_model.mitigation import GHG_Mit_Cost_targFertSyn
         lin = lambda pairs: self._lin(y, pairs)
         pv = self._pv
         self.fert = {}
@@ -785,11 +788,12 @@ class CapriRegionalNLP:
             if d.get("synNMax") is not None:
                 self.synN_row = (len(g_rows), Pscale)
                 g_rows.append(e_synNMax(P, pv(float(d["synNMax"])), land, pv(1.0 / Pscale))); lbg.append(-np.inf); ubg.append(0.0)
-            obj = obj + pv(float(d["price"]) / 1000.0) * P
+            # the purchases at their unit value (LINEAR_; equations/supply_model/objective.py)
+            obj = obj + LINEAR_netPutQuant(P, pv(float(d["price"]) / 1000.0))
             if nut == "N" and getattr(self, "_fert_tech_pending", None) is not None:
-                # the fertiliser options' cost on the N purchases (GHG_Mit_Cost_: - cost x v_netPutQuant(NITF) x (1 + sum
-                # (NMIN + EmiCalMin) v_Miti), kt; the factor is in the pending term, K175)
-                obj = obj + P * pv(1.0 / 1000.0) * self._fert_tech_pending[0]
+                # the fertiliser options' cost on the N purchases (GHG_Mit_Cost_'s targFertSyn base: - cost x
+                # v_netPutQuant(NITF) x (1 + sum (NMIN + EmiCalMin) v_Miti), kt; the factor is in the pending term, K175)
+                obj = obj + GHG_Mit_Cost_targFertSyn(P, pv(1.0 / 1000.0), self._fert_tech_pending[0])
                 self._fert_tech_pending = None
                 self._fert_tech_P = True
             gt = self.spec.get("ghg_min") if nut == "N" else None
@@ -797,18 +801,21 @@ class CapriRegionalNLP:
                 # CAPRI's emission tax on the soil N2O of mineral N (N2OSYN, direct + volatilised x indirect), on the
                 # purchases; with the nitrification inhibitor adopted, the accounts' factor on the share w of mineral N
                 # under it: 1 - w + w (1 - lit) (1 + NMIN) (EnvironmentalModule.fert_side_factors)
-                fac = pv(float(gt["d"]) + float(gt["v"]))
+                # (LINEAR_'s carbon tax on mineral fertiliser; equations/supply_model/objective.py)
+                ef_dv = pv(float(gt["d"]) + float(gt["v"]))
                 if gt.get("nitr") and self._nitr_phi is not None:
                     phi_, nm_ = self._nitr_phi
                     l2, l3 = gt["nitr"]
                     q_ = phi_ / (1.0 + nm_)
                     w_ = q_ / (q_ + 1.0 - phi_)
-                    fac = fac + w_ * (pv(float(gt["d"]) * ((1.0 - l2) * (1.0 + nm_) - 1.0))
-                                      + pv(float(gt["v"]) * ((1.0 - l3) * (1.0 + nm_) - 1.0)))
-                obj = obj + fac * P
+                    ef_d_nitr = pv(float(gt["d"]) * ((1.0 - l2) * (1.0 + nm_) - 1.0))
+                    ef_v_nitr = pv(float(gt["v"]) * ((1.0 - l3) * (1.0 + nm_) - 1.0))
+                    obj = obj + LINEAR_carbonTaxNITF(P, ef_dv, w_, ef_d_nitr, ef_v_nitr)
+                else:
+                    obj = obj + LINEAR_carbonTaxNITF(P, ef_dv)
                 if float(gt.get("l", 0.0) or 0.0) > 0:
                     # the indirect N2O of the purchases' runoff and leaching (GWPN2OLEA_; SupplyModel._ef_mineral_lea)
-                    obj = obj + pv(float(gt["l"])) * P
+                    obj = obj + LINEAR_carbonTaxN2OLEA(P, pv(float(gt["l"])))
             # the N-surplus rows in CAPRI's terms (SURTOT_REST_ with e_SURTOTHa: v_netPutQuant(NITF) + excretion +
             # fixation + deposition + residues - removal - net manure exports): the regional row with its mineral
             # parts replaced by the purchases

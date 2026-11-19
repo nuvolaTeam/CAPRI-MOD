@@ -6,7 +6,8 @@ each module to its CAPRI block and lines). A module is added when its first equa
 
     supply_model/   supply/supply_model.gms: nutrients.py (the pools, NUTNED_), n_surplus.py (e_ATMOSD, e_CRESID,
                     e_SURTOTHa, SURTOT_REST_), inner_fert.py (the inner fertiliser model), n_flow.py (the N loss
-                    cascade), fert_limits.py (e_synNMax), mitigation.py (GHG_Mit_Cost_)
+                    cascade, the leaching), fert_limits.py (e_synNMax), objective.py (LINEAR_'s terms),
+                    mitigation.py (GHG_Mit_Cost_)
 
 Each function's docstring, or its module's, gives CAPRI's GAMS statement and its domain, the CAPRI star 3.0 file and
 lines it follows, the equation in this project's notation, how the model's quantities map to CAPRI's symbols, and the
