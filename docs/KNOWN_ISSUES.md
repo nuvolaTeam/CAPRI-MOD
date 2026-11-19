@@ -3844,7 +3844,8 @@ either term, so the idled area lost its deposition: DE21 -0.30 kt.
   +0.02 kt, the dual unchanged; the Spanish units idle none
 - **In 9t:** -
 - **Status:** fixed 19 November 2026: CAPRI's terms as functions of their own (capri_mod/supply/equations/
-  idled_histosols.py: MANN_idlHis, fertDistCres_idlHis, SURTOT_idlHis), on the histosol columns' N-surplus row
+  supply_model/nutrients.py: MANN_idlHis, fertDistCres_idlHis; supply_model/n_surplus.py: SURTOT_idlHis; until
+  19 November 2026 in equations/idled_histosols.py), on the histosol columns' N-surplus row
   (abatement.py) and the N residue pool (fertilisation.py), and in the accounts (deposition and surplus with the idled
   area; the residue pool of the fertiliser distribution report). The deposition per ha is the accounts' own source,
   n_deposition_regional.csv (RegionData.n_deposition_kg_ha). N only: CAPRI's MANP and MANK of the idled histosols are
@@ -3871,7 +3872,7 @@ cost base was 13-38% above CAPRI's (the factor 1 + NMAN x share is about 1.05 at
   availability there
 - **In 9t:** -
 - **Status:** fixed 19 November 2026: CAPRI's term as its own function, `GHG_Mit_Cost_targFertMan`
-  (capri_mod/supply/equations/ghg_mit_cost.py, the first of the equation style: CAPRI's names, source and lines, the
+  (capri_mod/supply/equations/supply_model/mitigation.py, until 19 November 2026 equations/ghg_mit_cost.py; the first of the equation style: CAPRI's names, source and lines, the
   equation, its departures), on the fertilisation block's manure N pool (fertDistExcr_'s right-hand side: the manure N
   applied, at the tail, with the N the ammonia options keep and the manure trade; the trade at the tail is its
   departure). The emission tax's value per t treated stays on the excreted N (the accounts' factors). The price-search

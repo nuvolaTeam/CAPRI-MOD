@@ -115,8 +115,10 @@ A difference at the gate means the move changed something: find it and undo it; 
   alone), as long as the old ones are untouched.
 - No new hardcoded numbers (parameters belong in capri_data/codes/model_parameters.csv or the settings).
 - Nothing licensed or secret in the repository (no licence files, tokens or third-party solver libraries).
-- No push to `dev` or `main`; work on the branch `refactor/supply-equations` and push only that branch. The branch is
-  rebased on `yani-rounds` after every commit there, so each block starts from the latest results.
+- No push to `dev` or `main`; work on the branch `refactor/supply-equations` and push only that branch to GitHub
+  (the project lead, 19 November 2026, 18:44: CAPRI's GAMS text in the code is no problem). `yani-rounds` is merged
+  into the branch after every commit there (a merge, not a rebase: the branch is pushed and is never force-pushed),
+  so each block starts from the latest results.
 
 ## 6. Commits
 

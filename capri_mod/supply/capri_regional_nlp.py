@@ -691,7 +691,7 @@ class CapriRegionalNLP:
             if nut == "N" and getattr(self, "_mni_cost_pending", None) is not None:
                 # CAPRI's GHG_Mit_Cost_ for the inhibitor on manure on its own base, ManureNPK x (1 + incEmiAppl) x
                 # (1 + NMAN s): the manure N pool E, at the tail (K183; until 19 November 2026 on the excreted N)
-                from capri_mod.supply.equations.ghg_mit_cost import GHG_Mit_Cost_targFertMan
+                from capri_mod.supply.equations.supply_model.mitigation import GHG_Mit_Cost_targFertMan
                 s_m, S0m, slope_m, nman_m = self._mni_cost_pending[:4]
                 obj = obj + GHG_Mit_Cost_targFertMan(E, s_m, pv(S0m), pv(slope_m), pv(nman_m))
                 _xb = np.asarray(self.xb, float)

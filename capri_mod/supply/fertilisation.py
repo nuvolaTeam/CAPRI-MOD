@@ -402,7 +402,7 @@ class FertilisationBlock:
             if nut == "N" and self.data.n_deposition_kg_ha:
                 # the idled histosols (CAPRI's iHisCr, iHisGr: annual crops of the group idlHis, MANN = AtmDep) bring
                 # their deposition into the pool (K184), t N per 1000 ha idled
-                from capri_mod.supply.equations.idled_histosols import fertDistCres_idlHis
+                from capri_mod.supply.equations.supply_model.nutrients import fertDistCres_idlHis
                 for j_ in (getattr(self.ev, "hist_cols", None) or {}).values():
                     if int(j_) < n_cols:
                         Ccols.append((int(j_), float(fertDistCres_idlHis(1.0, self.data.n_deposition_kg_ha))))

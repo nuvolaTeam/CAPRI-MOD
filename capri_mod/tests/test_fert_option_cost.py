@@ -42,7 +42,7 @@ def test_manure_inhibitor_cost_on_capris_base():
     sows' 0.62); without a fertilisation block on the excreted N, as before."""
     import casadi as ca
     from capri_mod.supply.capri_regional_nlp import CapriRegionalNLP
-    from capri_mod.supply.equations.ghg_mit_cost import GHG_Mit_Cost_targFertMan
+    from capri_mod.supply.equations.supply_model.mitigation import GHG_Mit_Cost_targFertMan
     # the equation: 2,500 t of manure N at the tail, share 0.4, cost terms 12 and 30 EUR per t, NMAN 0.11 -> kEUR
     assert GHG_Mit_Cost_targFertMan(2500.0, 0.4, 12.0, 30.0, 0.11) == pytest.approx(
         2.5 * (1.0 + 0.11 * 0.4) * (12.0 * 0.4 + 0.5 * 30.0 * 0.16), rel=1e-12)

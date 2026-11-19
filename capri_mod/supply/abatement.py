@@ -605,7 +605,7 @@ class AbatementBlock:
             if "N_balance" in labels and self.data.n_deposition_kg_ha:
                 # the idled area keeps its deposition in the N surplus (CAPRI's iHisCr / iHisGr are crops of MCACT with
                 # MANN = AtmDep: e_ATMOSD, e_CRESID; K184), t N per 1000 ha idled
-                from capri_mod.supply.equations.idled_histosols import SURTOT_idlHis
+                from capri_mod.supply.equations.supply_model.n_surplus import SURTOT_idlHis
                 col[labels.index("N_balance")] = SURTOT_idlHis(1.0, self.data.n_deposition_kg_ha)
             if cal is None or cls not in cal:
                 pend[cls] = col
