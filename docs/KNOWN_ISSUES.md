@@ -83,7 +83,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K177](#k177) | The NLP calibration put minus the entitlement cut into the overshoot column's linear term where the QP's start held the base's rounding above the trend area: the overshoot was free in BG01, HU32, LV, PL11, PL31, PL41 and RO05 (about 199,000 thousand ha, a zero dual) | fixed (18 November 2026) |
 | [K178](#k178) | The 2030 runs took the young-animal coefficients of 2017 (calves per cow, replacements, piglets per sow): CAPRI's INPANI_ takes the simulation year's, DATA(.., "Y"); Spain's suckler cows 0.83 calves per head against CAPRI's 2030 0.90, the EU's piglet balance 6.6% short at the 2030 base | fixed (18 November 2026) |
 | [K179](#k179) | The 2030 runs took the 2017 manure N, P2O5 and K2O per head (dairy cows' N raised with the milk yield): CAPRI computes them from the simulation year's rations before it solves; the EU's N excretion at the 2030 base 5.4% above CAPRI's 2030 EXCRET (dairy cows +13%) | fixed (18 November 2026) |
-| [K190](#k190) | The grassland need took CAPRI's SQRT(1 +/- 0.2) split twice: the data's need per ha (CAPRI's reported 2030 need per crop) already carries it, and K160 applied it again; ES41's base manure K on grassland 53.6 against CAPRI's 42.0 kt | fixed (20 November 2026); the intensive grassland's Green Deal response now weaker than CAPRI's, to trace (not the grassland's technologies; lead: the N-surplus dual gap) |
+| [K190](#k190) | The grassland need took CAPRI's SQRT(1 +/- 0.2) split twice: the data's need per ha (CAPRI's reported 2030 need per crop) already carries it, and K160 applied it again; ES41's base manure K on grassland 53.6 against CAPRI's 42.0 kt | fixed (20 November 2026); the intensive grassland's Green Deal response now weaker than CAPRI's, to trace (not the grassland's technologies, not a lower N-surplus dual, not the row's coefficients: the row's credit to the intensive grassland is about twice CAPRI's; lead: what else CAPRI's grassland rest holds) |
 | [K188](#k188) | The catch crops were the winter cover option (CAPRI's cost curve, BioFix N in the residue pool) in the calibration and the baseline; CAPRI's 2030 reference has no mitigation options (CATC an activity at its input cost, which sets the ecological set-aside rule's dual), so the model's fallow and set-aside carried no support from the rule and had none to lose in the Green Deal (Alentejo's fallow +13 thousand ha against CAPRI's -2) | fixed (20 November 2026) |
 | [K187](#k187) | CAPRI's July 2026 release lists ecoSetAside_ and cropDivGreening_ only with %envConst% on, which its Green Deal step does not set; CAPRI star 3.0, the code of the project lead's runs, lists both without a condition, and the runs report their marginals | closed (19 November 2026; corrected 20 November): not a gap; supply.env_const = true as CAPRI star 3.0 |
 | [K185](#k185) | Fallow and set-aside carried a nutrient need; CAPRI's fertned.gms leaves a crop without a main-output yield (FALL, VSET) without one, so NUTNED_ has none for them | fixed (19 November 2026) |
@@ -3898,10 +3898,26 @@ CAPRI's (grass 8.20 against 8.14 kg N/ha of manure), its mineral N taking up the
   model's). Open with it: why CAPRI's intensive grassland falls more in the Green Deal (EU -54.8%). The first lead,
   the grassland's technologies, is ruled out (20 November 2026): CAPRI's grassland has the standard technology only,
   in its 2030 calibration (sim_ini_21730 p_technFact: GRAE and GRAI LEVL of T alone) and in its Green Deal step
-  (results/permits v_actLevl: T alone in every region), so the square root has no technology term for grass. Next
-  lead: the N-surplus dual, CAPRI's 1.16-1.28 times the model's in the decomposed units (claude/n_surplus_dual_diagnosis.md;
-  the full-EU run of K184): intensive grassland needs more N per ha than extensive, so a lower N price makes it lose
-  less; consistent in direction, not measured.
+  (results/permits v_actLevl: T alone in every region), so the square root has no technology term for grass. The
+  second lead, a lower N-surplus dual than CAPRI's, does not hold either: with K190 the dual rose (the probe's N_balance
+  duals before / after, EUR per kg N: DE21 4.29 / 7.18, ES41 6.59 / 7.33, ES42 6.90 / 7.64, FR52 4.57 / 5.16, IR01
+  2.97 / 3.81), above CAPRI's implied 5.9-6.2 in DE21, ES41 and ES42 (claude/n_surplus_dual_diagnosis.md; the probe
+  clears its own five-unit markets, so its prices are not CAPRI's), while intensive grassland still falls less. The
+  third lead, the two intensities' coefficients in the N-surplus row, does not hold either (five-unit probe
+  s23_grass_dec, 20 November 2026, the grassland's first-order terms written out for DE21 and ES41 against CAPRI's D_*
+  terms of dataOut; GRAI less GRAE, Green Deal less the 2030 base, EUR per ha in the model's money): the coefficients'
+  difference is close to CAPRI's (DE21 -82.3 kg N/ha against -69.4 to -79.8, ES41 -15.2 against -14.1 to -16.3:
+  CAPRI's e_SURTOTHa terms with its data, MANN less the removal net of fixation, p_nitrFact BioFix 0.05 for grass, the
+  range from reading dataOut's NITF as gross or as net of fixation). What differs is the row's credit to the
+  intensive grassland: DE21 +590 against CAPRI's +268 (CAPRI: its unreported rest, -D_PROV), ES41 +112 against +47,
+  while the N need's term costs more in the model (DE21 -693 against -562, ES41 -191 against -149). Net of the two
+  the N terms push against GRAI by 103 EUR/ha in DE21 (CAPRI 294) and 79 in ES41 (CAPRI 102); the model's GRAI
+  158.5 -> 110.3 thousand ha in DE21 (CAPRI 71.6), 1,080.3 -> 334.9 in ES41 (203.3). CAPRI's grassland rest over its
+  coefficients gives 3.4-3.9 EUR per kg N in DE21 and 2.9-3.3 in ES41, the model's dual 7.18 and 7.33, CAPRI's crops
+  5.9-6.2 (claude/n_surplus_dual_diagnosis.md): CAPRI's grassland rest may hold another term than the surplus row.
+  A difference the other way: CAPRI's grass value (D_O) rises 28-29% in both units, the model's fodder term 1.6% in
+  DE21 and 3.5% in ES41, so in CAPRI it favours GRAI more (+58 EUR/ha in DE21, +12 in ES41; the model +4 and +1.5).
+  Next: which of CAPRI's rows margcr leaves out for GRAE and GRAI; the grass value's rise.
 
 <a id="k189"></a>
 ### K189: The equation refactor's findings for the main line (found 19-20 November 2026)
