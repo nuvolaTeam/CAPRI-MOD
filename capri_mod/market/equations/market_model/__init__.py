@@ -9,8 +9,14 @@ its first equation is written.
 
     module          CAPRI block (arm/market_model.gms)                                              lines
     demand.py       the demand system: GLDemandFS_, GLDemandGS_, GLDemandGis_, XiS_                  816-918
+    feed.py         feed: feedBlkPrice_, feedBlk_, FeedShareEqu_, FeedNQ_, FeedBal_                   919-1064
+    dairy.py        dairy: ProcMargM_, DairyNQ_, FatsProtBal_                                         1065-1114
+    processing.py   oilseed processing and the by-products: ProcMargO_, ProcNQ_, ProcFudge_, ProcO_,  1115-1179,
+                    procYield_, MaprFeed_                                                            1440-1523
+    biofuels.py     biofuels: BiofFeedCost_, BiofFeedCostAgg_, Biof_, ProdBiof_, BiofPriceRel_,       1180-1439
+                    SupplyBiof_, biofDemshare_, biofDem_
     prices.py       PRICES: CPri_                                                                    2842-3130
 
-The other blocks, by the inventory: feed, dairy, processing, biofuels, supply, land, lulucf, fudging, aggregation,
-net_trade, armington, border, intervention, objective (tools/refactor/market_equations_inventory.py BLOCKS).
+The other blocks, by the inventory: supply, land, lulucf, fudging, aggregation, net_trade, armington, border,
+intervention, objective (tools/refactor/market_equations_inventory.py BLOCKS).
 """

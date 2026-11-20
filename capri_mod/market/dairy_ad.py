@@ -1,6 +1,7 @@
 """CAPRI's dairy blocks in CasADi (docs/dev/MARKET_IPOPT_DESIGN.md sections 5-6).
 
-Written once, here, and evaluated from here by DairyMixin (capri_mod/market/dairy.py: dairy_block for the member
+CAPRI's equations are functions of capri_mod/market/equations/market_model/dairy.py, with their GAMS. Written once,
+here, and evaluated from here by DairyMixin (capri_mod/market/dairy.py: dairy_block for the member
 states, _dairy_solve for the non-EU dairy regions): the project lead's choice of one implementation per block (section
 7, 30 October 2026). One block (a member state, or the behavioural regions of a non-EU trade region sharing its price
 ratios; DairyMixin._dairy_algebra), with z the price ratios - 1 of the nine products, raw milk, fat and protein
@@ -27,6 +28,7 @@ from typing import Dict, List
 
 import numpy as np
 
+from capri_mod.market.equations.market_model.dairy import DairyNQ_, DairyNQ_milk, FatsProtBal_
 from capri_mod.market.processing_ad import _fudge
 
 
@@ -80,11 +82,11 @@ def dairy_block_function(name: str, prm: dict, parts: List[dict]):
         rF = rF - ca.dot(ca.DM(p["f"]), d)
         rP = rP - ca.dot(ca.DM(p["r"]), d)
     G = np.asarray(prm["G"], float)
-    resF = ca.dot(ca.DM(np.asarray(prm["rowF"], float)), z) - rF
-    resP = ca.dot(ca.DM(np.asarray(prm["rowP"], float)), z) - rP
-    resM = (1.0 - fix) * (ca.dot(ca.DM(G[iM]), z) - kq * z[iM] - mrhs) + fix * (z[iM] - zfix)
+    resF = FatsProtBal_(ca.DM(np.asarray(prm["rowF"], float)), z, rF)
+    resP = FatsProtBal_(ca.DM(np.asarray(prm["rowP"], float)), z, rP)
+    resM = (1.0 - fix) * DairyNQ_milk(ca.DM(G[iM]), z, kq, z[iM], mrhs) + fix * (z[iM] - zfix)
     res = ca.vertcat(resF, resP, resM)
-    q = ca.DM(np.asarray(prm["Q0"], float)) + ca.mtimes(ca.DM(G), z)
+    q = DairyNQ_(ca.DM(np.asarray(prm["Q0"], float)), ca.DM(G), z)
     return ca.Function(name, [zt, u, kq, mrhs, fix, zfix], [res, ca.jacobian(res, u), z, q, dproc],
                        ["zt", "u", "kq", "mrhs", "fix", "zfix"], ["res", "J", "z", "q", "dproc"])
 

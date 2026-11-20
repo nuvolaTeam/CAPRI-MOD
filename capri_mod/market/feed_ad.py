@@ -1,7 +1,8 @@
 """CAPRI's feed block of the non-EU market regions in CasADi (docs/dev/
 MARKET_IPOPT_DESIGN.md sections 5-6).
 
-Written once, here, and evaluated from here by FeedMixin.noneu_fede and noneu_feed_change (capri_mod/market/feed.py):
+CAPRI's equations are functions of capri_mod/market/equations/market_model/feed.py, with their GAMS. Written once,
+here, and evaluated from here by FeedMixin.noneu_fede and noneu_feed_change (capri_mod/market/feed.py):
 the project lead's choice of one implementation per block (section 7, 30 October 2026). Per non-EU behavioural region s
 (audit M3; CAPRI's arm/market_model.gms FeedNQ_, FeedBal_):
 
@@ -20,6 +21,9 @@ from __future__ import annotations
 from typing import List
 
 import numpy as np
+
+from capri_mod.market.equations.market_model.feed import (FeedBal_, FeedBal_fede, FeedNQ_, FeedShareEqu_, feedBlk_,
+                                                          feedBlkPrice_)
 
 
 def fedebal_arrays(d: dict, cols: List[str], land_types: List[str]) -> dict:
@@ -68,8 +72,8 @@ def fedebal_function(name: str, a: dict, n_cols: int, n_land: int):
     n0 = a["n_const"] + ca.dot(ca.DM(a["kn"]), rp - 1.0) + a["km"] * (m - 1.0) + (ca.dot(ca.DM(a["kl"]), dr)
                                                                                    if n_land else 0)
     den = a["aF"] - a["aN"]
-    star = 1.0 + (n0 - e0) / den if den > 0 else ca.SX(1.0)
-    res = (e0 + a["aF"] * (fede - 1.0)) - (n0 + a["aN"] * (fede - 1.0))
+    star = FeedBal_fede(e0, n0, den) if den > 0 else ca.SX(1.0)
+    res = FeedBal_(e0, a["aF"], n0, a["aN"], fede)
     return ca.Function(name, [ra, rp, m, dr, fede], [star, res], ["ra", "rp", "m", "dr", "fede"], ["fede_star", "res"])
 
 
@@ -93,7 +97,7 @@ def feednq_function(name: str, a: dict, n_cols: int):
     """CasADi Function (ra[n_cols], fede) -> dq[rows]: FeedNQ_'s change of each feed from its base (kt)."""
     import casadi as ca
     ra, fede = ca.SX.sym("ra", n_cols), ca.SX.sym("fede")
-    dq = ca.mtimes(ca.DM(a["H"]), ra - 1.0) + ca.DM(a["hF"]) * (fede - 1.0)
+    dq = FeedNQ_(ca.DM(a["H"]), ra, ca.DM(a["hF"]), fede)
     return ca.Function(name, [ra, fede], [dq], ["ra", "fede"], ["dq"])
 
 
@@ -111,8 +115,8 @@ def feedblk_function(name: str, s: np.ndarray, rho: float, q0: np.ndarray):
     n = len(q0)
     r, k = ca.SX.sym("r", n), ca.SX.sym("k")
     rr = ca.fmax(r, 1e-6)
-    pb = ca.dot(ca.DM(np.asarray(s, float)), rr ** (1.0 - rho)) ** (1.0 / (1.0 - rho))
-    q = ca.DM(np.asarray(q0, float)) * k * (pb / rr) ** rho
+    pb = feedBlkPrice_(ca.DM(np.asarray(s, float)), rr, rho)
+    q = FeedShareEqu_(ca.DM(np.asarray(q0, float)), k, pb, rr, rho)
     return ca.Function(name, [r, k], [pb, q], ["r", "k"], ["pb", "q"])
 
 
@@ -124,5 +128,4 @@ def feedblk_factor_function(name: str, e: np.ndarray):
     import casadi as ca
     n = len(e)
     r, sv, w = ca.SX.sym("r", n), ca.SX.sym("sv", n), ca.SX.sym("w", n)
-    t = ca.DM(np.asarray(e, float)) * ca.log(ca.fmax(r, 1e-300) / ca.fmax(sv, 1e-300))
-    return ca.Function(name, [r, sv, w], [ca.exp(ca.dot(w, t))], ["r", "sv", "w"], ["f"])
+    return ca.Function(name, [r, sv, w], [feedBlk_(w, ca.DM(np.asarray(e, float)), r, sv)], ["r", "sv", "w"], ["f"])

@@ -17,6 +17,7 @@ from capri_mod.data.definitions import (
 from capri_mod.data.definitions import MS_CODE
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
 from capri_mod.market.state import MarketStateMixin
+from capri_mod.market.equations.market_model.dairy import DairyNQ_G, FatsProtBal_row, ProcMargM_
 
 
 class DairyMixin(MarketStateMixin):
@@ -69,9 +70,7 @@ class DairyMixin(MarketStateMixin):
                     continue
                 i = ix[k]
                 f[i], r[i] = float(gi.at[k, "fats_pct"]), float(gi.at[k, "prot_pct"])
-                Mm[i, i] = float(gi.at[k, "price"])
-                Mm[i, iF] = -f[i] * pf0
-                Mm[i, iP] = -r[i] * pp0
+                Mm[i, i], Mm[i, iF], Mm[i, iP] = ProcMargM_(float(gi.at[k, "price"]), f[i], pf0, r[i], pp0)
                 Q0[i] += float(gi.at[k, "q_kt"])
                 PQ[i] += float(gi.at[k, "q_kt"]) * float(gi.at[k, "price"])
                 pc = gi.at[k, "proc_kt"]
@@ -80,7 +79,7 @@ class DairyMixin(MarketStateMixin):
             for (rw, cl), h in Hd.items():
                 if rw in ix and cl in ix:
                     H[ix[rw], ix[cl]] = float(h)
-            Gs = H @ Mm / inpe
+            Gs = DairyNQ_G(H, Mm, inpe)
             G += Gs
             Mms.append(Mm); pMs.append(float(gi.at["MILK", "price"]))
             # the region's fat and protein contents and base processing: the processing change of ProcNQ_ (audit M9)
@@ -89,8 +88,8 @@ class DairyMixin(MarketStateMixin):
                             for k in items])
             parts.append({"rms": rms, "f": f.copy(), "r": r.copy(), "proc0": prc})
             sgn = -np.ones(len(items)); sgn[iM] = 1.0                 # milk in, products out
-            rowF += (sgn * f) @ Gs
-            rowP += (sgn * r) @ Gs
+            rowF += FatsProtBal_row(sgn, f, Gs)
+            rowP += FatsProtBal_row(sgn, r, Gs)
             if msup is not None:
                 SM += float(msup) * float(gi.at["MILK", "price"]) / inpe
         P9 = list(self.DAIRY_PRODUCTS)

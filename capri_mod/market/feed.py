@@ -17,6 +17,7 @@ from capri_mod.data.definitions import (
 from capri_mod.data.definitions import MS_CODE
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
 from capri_mod.market.state import MarketStateMixin
+from capri_mod.market.equations.market_model.processing import MaprFeed_
 
 
 class FeedMixin(MarketStateMixin):
@@ -295,7 +296,7 @@ class FeedMixin(MarketStateMixin):
         for p, d in (fp.get("products") or {}).items():
             dr = (d.get("reg") or {}).get(region, d)
             x = sum(w * float((br if use == "biofuel" else fr).get(c, 1.0)) for c, use, w in dr["parts"])
-            out[p] = dr["prod0"] * x
+            out[p] = MaprFeed_(dr["prod0"], x)                    # CAPRI's MaprFeed_ (equations/market_model)
         return out
 
     def _apply_feed_byproduct_supply(self, S: pd.DataFrame) -> None:
