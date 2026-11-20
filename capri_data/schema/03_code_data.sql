@@ -589,6 +589,8 @@ INSERT INTO code_data VALUES
   ('capri_mod/run_manifest.py', '_sha256', 20.0, 1, '93', 'for b in iter(lambda: fh.read(1 << 20), b""):'),
   ('capri_mod/scenarios/definition.py', 'ROOT', 2.0, 1, '26', 'ROOT = Path(__file__).resolve().parents[2] / "capri_data" / "scenarios"'),
   ('capri_mod/scenarios/scenarios.py', '<module>', 50.0, 2, '65,92', 'def carbon_tax_scenario(carbon_price: float = 50.0) -> PolicyScenario:'),
+  ('capri_mod/supply/equations/fertned.py', 'DATA_FNUT_yield', 15.0, 1, '125', 's = sum(max(15.0, float(O_HP_) * 0.001 * float(n) + float(STRA or 0.0) * 0.001 * float(need_STRA or 0.0))'),
+  ('capri_mod/supply/equations/fertned.py', 'DATA_FOUT_resid', 0.95, 1, '174', 'return min(float(DATA_FOUT or 0.0) + n * float(residRel or 0.0), 0.95 * n)'),
   ('capri_mod/supply/fertilisation.py', 'FertilisationBlock.tiered_surplus_target', 0.25, 1, '711', 'for lo, hi, cut in ((0.0, 50.0, 0.25), (50.0, 100.0, 0.50),'),
   ('capri_mod/supply/fertilisation.py', 'FertilisationBlock.tiered_surplus_target', 0.75, 1, '712', '(100.0, 150.0, 0.75), (150.0, 1e9, 1.0)):'),
   ('capri_mod/supply/fertilisation.py', 'FertilisationBlock.tiered_surplus_target', 50.0, 2, '711,711', 'for lo, hi, cut in ((0.0, 50.0, 0.25), (50.0, 100.0, 0.50),'),

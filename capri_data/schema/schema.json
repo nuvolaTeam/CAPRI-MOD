@@ -17419,7 +17419,7 @@
    "file": "capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_n_coefs_2030.csv",
    "declared_in": "17_environment.sql",
    "layout": [],
-   "comment": "CAPRI's per-crop nitrogen coefficients per region, 2030 reference (for the gross N balance). (tools/build/build_capri_crop_n_coefs.py)",
+   "comment": "CAPRI's per-crop nitrogen coefficients per region, 2030: the reported values of its 2030 reference and its simulation data (fert/fertned.gms, fert/fertpar.gms), the removal and fixation of the gross N balance (KNOWN_ISSUES K191). (tools/build/build_capri_crop_n_coefs.py)",
    "columns": [
     {
      "name": "capri_region",
@@ -17460,6 +17460,21 @@
      "name": "biofix_t",
      "type": "DOUBLE",
      "not_null": false
+    },
+    {
+     "name": "data_nitf",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "biofix_rate",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "data_mann",
+     "type": "DOUBLE",
+     "not_null": false
     }
    ],
    "primary_key": [
@@ -17471,10 +17486,28 @@
    "checks": [],
    "units": [
     {
+     "item": "biofix_rate",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "CAPRI p_nitrFact(crop, BioFix), fert/fertpar.gms l. 259, 295-308: fixed N per unit of DATA(crop, NITF) (share)"
+    },
+    {
      "item": "biofix_t",
      "unit": null,
      "status": "open",
      "basis": "capri_crop_n_coefs_2030.biofix_t: unit to be established"
+    },
+    {
+     "item": "data_mann",
+     "unit": "U_kgperha",
+     "status": "capri",
+     "basis": "CAPRI DATA(crop, MANN, \"Y\") of the simulation year, fert/fertned.gms l. 242-286 (a check on mann)"
+    },
+    {
+     "item": "data_nitf",
+     "unit": "U_kgperha",
+     "status": "capri",
+     "basis": "CAPRI DATA(crop, NITF, \"Y\") of the simulation year, fert/fertned.gms l. 180-193 (e_EXPPRD removal)"
     },
     {
      "item": "levl",
@@ -17511,7 +17544,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_capri_crop_n_coefs",
-    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/def_gascoeff.gms; $SOURCES/gams/fert/fertpar.gms; $SOURCES/gams/sets.gms"
    },
    "notes": [],
    "read_by": {
@@ -20690,7 +20723,9 @@
     "model": [
      "capri_mod/data/loaders.py"
     ],
-    "builders": [],
+    "builders": [
+     "build_capri_crop_n_coefs"
+    ],
     "checks": [],
     "tests": []
    }
@@ -36993,6 +37028,7 @@
      "build_cap_ceilings_2030",
      "build_capri_base",
      "build_capri_baseline_surplus",
+     "build_capri_crop_n_coefs",
      "build_capri_eu27_levels",
      "build_capri_level_ratio",
      "build_capri_supply_elas_market",
@@ -61092,7 +61128,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 502,
+  "capri/keep": 504,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 37,

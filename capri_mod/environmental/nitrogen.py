@@ -152,8 +152,9 @@ class NitrogenBlock:
         return cls._MIN30
 
     def _capri_crop_n(self, region):
-        """{model crop: (removal, residues, fixation) kg N per ha} for this region from CAPRI's 2030
-        reference, each item scaled so the region's totals equal CAPRI's EXPPRD and CRESID."""
+        """{model crop: (removal, residues, fixation) kg N per ha} for this region: removal and fixation CAPRI's 2030
+        simulation data (fertned.gms, fertpar.gms; K191), residues CAPRI's 2030 MANN less deposition (K163), removal and
+        residues scaled so the region's totals equal CAPRI's EXPPRD and CRESID."""
         cls = type(self)
         if cls._CROP_N is None:
             inp = _inputs.current()
@@ -170,15 +171,19 @@ class NitrogenBlock:
                 lv = sum(float(x.levl) for x in d.values())
                 if r8 not in tot.index or lv <= 0:
                     continue
-                # Removal key per crop: the crop's NITF in CAPRI's results is its need NET of
-                # biological fixation (NUTNED_: retention x (1 - fBNF) x over-fertilisation), while
-                # fixation is fBNF of the gross need (JRC96482, eq. 1: Nbiofix = NITF x LEVL x fBNF,
-                # fBNF 75% for soya and pulses, 5-17% for grass). Gross need = NITF + fixation per ha
-                # (pulses: 52 + 149 kg/ha in Saxony-Anhalt, removal 4x the net figure).
-                def _gross(x):
-                    fx = float(x.biofix_t) * 1000.0 / float(x.levl) if (x.biofix_t == x.biofix_t and float(x.levl) > 0) else 0.0
-                    return float(x.nitf) + fx
-                sx = sum(float(x.levl) * _gross(x) for x in d.values())
+                # Removal and fixation per crop: CAPRI's simulation data, e_EXPPRD's DATA(crop, NITF, "Y") and
+                # e_BIOFIX's DATA(crop, NITF, "Y") x p_nitrFact(crop, BioFix) (supply_model.gms l. 1417-1461), as
+                # fert/fertned.gms and fert/fertpar.gms set them in the simulation year (capri_mod/supply/equations
+                # fertned.py, fertpar.py; computed by tools/build/build_capri_crop_n_coefs.py: data_nitf, biofix_rate;
+                # the regions' removal is CAPRI's EXPPRD within 0.1% in every unit). Until 20 November 2026 the removal
+                # was CAPRI's reported NITF plus the reported fixation per ha: the reported NITF is the need net of
+                # fixation, with NUTNED_'s SQRT(1 +/- 0.2) split for intensive and extensive grassland, and the report
+                # gives extensive grassland intensive grassland's fixation, so the two grasslands' removal and fixation
+                # were not CAPRI's (DE21 intensive less extensive in the N-surplus row -80 kg N/ha against CAPRI's -46;
+                # KNOWN_ISSUES K191)
+                _dn = lambda x: float(x.data_nitf) if x.data_nitf == x.data_nitf else 0.0              # noqa: E731
+                _bf = lambda x: float(x.biofix_rate) if x.biofix_rate == x.biofix_rate else 0.0        # noqa: E731
+                sx = sum(float(x.levl) * _dn(x) for x in d.values())
                 # CAPRI's e_CRESID (supply_model.gms): (v_Cresid + v_atmosd) x UAA = sum levl x DATA(crop, MANN)
                 # x (techFact + 1), MANN being FOUT_T_N's output for NITF (global/fromimpact/sets.gms), and
                 # e_ATMOSD the deposition per ha of every crop: a crop's own residues are its MANN - deposition.
@@ -199,9 +204,9 @@ class NitrogenBlock:
                     L = sum(float(x.levl) for x in src)
                     if L <= 0:
                         continue
-                    rem = sum(float(x.levl) * _gross(x) for x in src) / L * ke
+                    rem = sum(float(x.levl) * _dn(x) for x in src) / L * ke
                     res = sum(float(x.levl) * res_ha(x) for x in src) / L * kr
-                    fix = sum((float(x.biofix_t) if x.biofix_t == x.biofix_t else 0.0) for x in src) * 1000.0 / L
+                    fix = sum(float(x.levl) * _dn(x) * _bf(x) for x in src) / L
                     out[mc] = (rem, res, fix)
                 cls._CROP_N[r8] = out
         to8 = getattr(cls, "_CROP_N_MAP", {})

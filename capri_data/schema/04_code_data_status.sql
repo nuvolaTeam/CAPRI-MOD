@@ -13,6 +13,8 @@ CREATE TABLE code_data_status (
 );
 INSERT INTO code_data_status VALUES
   ('capri_mod/coupling/manure.py', '_T_PER_KT', 1000.0, 'physical', 'keep', 'gams/supply/def_supply_model_par.gms l. 501; gams/manuremarket/declare_manure_market.gms l. 496-500', 't per kt: CAPRI''s pool trade in kt, the supply in its excess-supply slope in t (outer_loop.manure_pool_es_slope "capri_doc")'),
+  ('capri_mod/supply/equations/fertned.py', 'DATA_FNUT_yield', 15.0, 'capri', 'keep', 'gams/fert/fertned.gms l. 192', 'CAPRI''s floor of a crop''s nutrient per ha, MAX(15.0, ...), in its rebuild of DATA(crop, FNUT) (K191)'),
+  ('capri_mod/supply/equations/fertned.py', 'DATA_FOUT_resid', 0.95, 'capri', 'keep', 'gams/fert/fertned.gms l. 269', 'CAPRI''s cap of a crop''s deliveries at .95 x its nutrient ("but not more than the total crop need (less x%)") (K191)'),
   ('capri_mod/market/market_bounds.py', 'widen', 0.2, 'capri', 'keep', 'gams/arm/widen_bounds.gms l. 350-360, 428-436', 'CAPRI''s widening of a binding lower price bound (v_marketPrice, v_arm1Price): to 0.2 x the bound (with its other floors), market.bounds = "capri"'),
   ('capri_mod/market/market_chain.py', '_ma28.solve', 96.0, 'numerical', 'keep', NULL, 'the largest multiple of the non-zeros MA28''s arrays are grown to (doubled from 6 where MA28 reports them short), an option of G3''s Newton (market.newton_linear_solver = "ma28")'),
   ('capri_mod/market/market_chain.py', '_newton', 0.25, 'numerical', 'keep', NULL, 'Powell''s dogleg trust region (market.newton_step = "dogleg"): the region shrunk to a quarter of the step where the model''s prediction ratio is below 0.25 (the textbook rule, Nocedal and Wright, Numerical Optimization, algorithm 4.1)'),

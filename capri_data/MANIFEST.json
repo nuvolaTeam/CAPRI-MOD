@@ -3676,11 +3676,11 @@
    }
   },
   "capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_n_coefs_2030.csv": {
-   "description": "CAPRI's per-crop nitrogen coefficients per region, 2030 reference (for the gross N balance). (tools/build/build_capri_crop_n_coefs.py)",
+   "description": "CAPRI's per-crop nitrogen coefficients per region, 2030: the reported values of its 2030 reference and its simulation data (fert/fertned.gms, fert/fertpar.gms), the removal and fixation of the gross N balance (KNOWN_ISSUES K191). (tools/build/build_capri_crop_n_coefs.py)",
    "kind": "coefficients",
-   "rows": 8568,
-   "columns": 8,
-   "units": "U_kgperha",
+   "rows": 8388,
+   "columns": 11,
+   "units": "U_kgperha, U_ratio",
    "read_by_model": [
     "capri_mod/environmental/nitrogen.py"
    ],

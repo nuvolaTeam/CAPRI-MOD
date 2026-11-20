@@ -12,7 +12,10 @@ each module to its CAPRI block and lines). A module is added when its first equa
                     landscape floor, the idled histosols), land.py (the land balances, the land market, the LUC
                     estimation), methane.py, n2o.py, air_water.py and gwp.py (the emission rows, which the accounts
                     call)
-    fertned.py      fert/fertned.gms: DATA_FNUT, the crops' nutrient need (K185, the main line)
+    fertned.py      fert/fertned.gms: DATA_FNUT, the crops' nutrient need (K185); the rebuild of the crops' nutrient
+                    data in the simulation year, DATA(crop, FNUT | FOUT, "Y") (K191)
+    fertpar.py      fert/fertpar.gms: p_nitrFact(crop, BioFix), the fixation rates (K191)
+    def_gascoeff.py envind/def_gascoeff.gms: Resid, the crop residues' nutrient content (K191)
 
 Each function's docstring, or its module's, gives CAPRI's GAMS statement and its domain, the CAPRI star 3.0 file and
 lines it follows, the equation in this project's notation, how the model's quantities map to CAPRI's symbols, and the

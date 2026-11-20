@@ -12,16 +12,22 @@ CREATE TABLE env_capri_crop_n_coefs_2030 (
     ncrd DOUBLE,
     mann DOUBLE,
     biofix_t DOUBLE,
+    data_nitf DOUBLE,
+    biofix_rate DOUBLE,
+    data_mann DOUBLE,
     PRIMARY KEY (capri_region, crop)
 );
-COMMENT ON TABLE env_capri_crop_n_coefs_2030 IS 'CAPRI''s per-crop nitrogen coefficients per region, 2030 reference (for the gross N balance). (tools/build/build_capri_crop_n_coefs.py)';
+COMMENT ON TABLE env_capri_crop_n_coefs_2030 IS 'CAPRI''s per-crop nitrogen coefficients per region, 2030: the reported values of its 2030 reference and its simulation data (fert/fertned.gms, fert/fertpar.gms), the removal and fixation of the gross N balance (KNOWN_ISSUES K191). (tools/build/build_capri_crop_n_coefs.py)';
 INSERT INTO value_units VALUES
   ('env_capri_crop_n_coefs_2030', 'levl', NULL, 'open', 'capri_crop_n_coefs_2030.levl: unit to be established'),
   ('env_capri_crop_n_coefs_2030', 'yild', NULL, 'open', 'capri_crop_n_coefs_2030.yild: unit to be established'),
   ('env_capri_crop_n_coefs_2030', 'nitf', NULL, 'open', 'capri_crop_n_coefs_2030.nitf: unit to be established'),
   ('env_capri_crop_n_coefs_2030', 'ncrd', NULL, 'open', 'capri_crop_n_coefs_2030.ncrd: unit to be established'),
   ('env_capri_crop_n_coefs_2030', 'mann', 'U_kgperha', 'capri', 'CAPRI DATA(crop, MANN), e_CRESID coefficient (supply_model.gms)'),
-  ('env_capri_crop_n_coefs_2030', 'biofix_t', NULL, 'open', 'capri_crop_n_coefs_2030.biofix_t: unit to be established');
+  ('env_capri_crop_n_coefs_2030', 'biofix_t', NULL, 'open', 'capri_crop_n_coefs_2030.biofix_t: unit to be established'),
+  ('env_capri_crop_n_coefs_2030', 'data_nitf', 'U_kgperha', 'capri', 'CAPRI DATA(crop, NITF, "Y") of the simulation year, fert/fertned.gms l. 180-193 (e_EXPPRD removal)'),
+  ('env_capri_crop_n_coefs_2030', 'biofix_rate', 'U_ratio', 'capri', 'CAPRI p_nitrFact(crop, BioFix), fert/fertpar.gms l. 259, 295-308: fixed N per unit of DATA(crop, NITF) (share)'),
+  ('env_capri_crop_n_coefs_2030', 'data_mann', 'U_kgperha', 'capri', 'CAPRI DATA(crop, MANN, "Y") of the simulation year, fert/fertned.gms l. 242-286 (a check on mann)');
 
 -- file: capri_data/baselines/capri_greendeal_ref/1730/environment/capri_gnb_components_2030.csv
 CREATE TABLE env_capri_gnb_components_2030 (

@@ -5833,6 +5833,50 @@ def test_the_crops_residues_in_the_n_balance_are_capris_mann(data):
     assert float(n.at[("DE210000", "OFAR", "N"), "pool_kg_ha"]) == pytest.approx(195.317028, rel=1e-4)
 
 
+def test_the_crops_removal_and_fixation_are_capris_simulation_data(data):
+    """K191: the gross N balance's removal and fixation per crop are CAPRI's simulation data, e_EXPPRD's DATA(crop,
+    NITF, "Y") and e_BIOFIX's DATA(crop, NITF, "Y") x p_nitrFact(crop, BioFix), as fert/fertned.gms and fert/fertpar.gms
+    set them (capri_mod/supply/equations/fertned.py, fertpar.py), not CAPRI's reported NITF (the need net of fixation,
+    with NUTNED_'s SQRT(1 +/- 0.2) split for the two grasslands) plus the reported fixation (which gives extensive
+    grassland intensive grassland's value)."""
+    from capri_mod.environmental.environmental_module import EnvironmentalModule
+    from capri_mod.supply.equations import fertned as FN, fertpar as FP
+    c = pd.read_csv(DATA_DIR / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "capri_crop_n_coefs_2030.csv",
+                    float_precision="round_trip")
+    g = pd.read_csv(DATA_DIR / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "capri_gnb_components_2030.csv",
+                    float_precision="round_trip").pivot_table(index="capri_region", columns="item", values="kg_n_per_ha")
+    # fertned's rebuild, DE21's extensive grassland: yield 28.72 t/ha x (N content 4.0573 + half the residues'
+    # 4.17 / 2.0 kg/t: def_gascoeff.gms) = 146.48 kg N/ha; its deliveries: deposition + the residue share, rr 0.2044, with
+    # the grass losses LOSF / GROF 0.4761 (sim_ini_21730's DATA at "Y")
+    rr0 = FN.p_residRel(4.0573, 4.17 / 2.0, fodder=True)
+    need = FN.p_cropNeed(4.0573, rr0)
+    nitf = FN.DATA_FNUT_yield(FN.O_HP(28723.2645789483, 158.496), 0.0, [need], 0.0, 400.0, True)
+    assert nitf == pytest.approx(146.48, abs=0.01)
+    mann = FN.DATA_FOUT_resid(FN.DATA_FOUT_dep(12.5229921480364), nitf, FN.p_residRel_LOSF(rr0, 7154.2943, 15026.2542))
+    assert mann == pytest.approx(112.21, abs=0.01)
+    # the grassland's fixation rate is the member state's (fertpar.gms p_nfixRate_gras: DE 0.08), other arable fodder
+    # mixes it with the fodder legumes' 0.75 (DE21's legume share 0.4253)
+    assert FP.p_nitrFact_BioFix("GRAE", 0.05, 0.08) == 0.08
+    assert FP.p_nitrFact_BioFix("OFAR", 0.05, 0.08, 0.4253322170298865, 0.75) == pytest.approx(0.36497, abs=1e-5)
+    de = c[c.capri_region == "DE210000"].set_index("crop")
+    assert float(de.at["GRAE", "data_nitf"]) == pytest.approx(nitf, rel=1e-5)        # the inputs above rounded
+    assert float(de.at["GRAE", "data_mann"]) == pytest.approx(float(de.at["GRAE", "mann"]), rel=1e-6)
+    assert float(de.at["GRAI", "biofix_rate"]) == 0.08 and float(de.at["PULS", "biofix_rate"]) == 0.75
+    # each unit's removal is CAPRI's EXPPRD: sum levl x data_nitf over its crops (per ha of its crop land)
+    for r in ("DE210000", "ES410000", "FR520000", "PL410000"):
+        x = c[(c.capri_region == r) & (c.crop != "GRAS")]
+        assert float((x.levl * x.data_nitf.fillna(0.0)).sum() / x.levl.sum()) == pytest.approx(float(g.at[r, "EXPPRD"]),
+                                                                                              rel=2e-3), r
+    # the model's crop terms: removal data_nitf (scaled to EXPPRD: 1 here), fixation data_nitf x rate; intensive less
+    # extensive grassland in the N-surplus row (residues + fixation - removal) -45.6 kg N/ha in DE21 (CAPRI's data;
+    # -79.8 with the reported values)
+    co = EnvironmentalModule(data)._capri_crop_n("DE210000")
+    assert co["GRAE"][0] == pytest.approx(float(de.at["GRAE", "data_nitf"]), rel=1e-4)
+    assert co["GRAI"][2] == pytest.approx(0.08 * float(de.at["GRAI", "data_nitf"]), rel=1e-9)
+    d = lambda a: co[a][1] + co[a][2] - co[a][0]               # noqa: E731
+    assert d("GRAI") - d("GRAE") == pytest.approx(-45.62, abs=0.05)
+
+
 @pytest.mark.slow
 @pytest.mark.no_market_hessian
 def test_land_earns_the_surplus_target_per_ha_with_the_base_trade_a_level(model):

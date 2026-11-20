@@ -189,9 +189,11 @@ def e_EXPPRD(v_actLevl, DATA_FNUT, yldFac):
 
         e_EXPPRD:  EXPPRD_c = x_c x e_c x y_c / y0_c
 
-    Departures from CAPRI: the removal per ha is CAPRI's 2030 reference (environmental/nitrogen.py _capri_crop_n: the
-    need net of fixation plus the fixation, scaled to the region's EXPPRD; PRET for P2O5), moved by the yield ratio
-    where CAPRI multiplies by v_yldMit and v_yldPestFac.
+    The removal per ha is CAPRI's simulation DATA(crop, NITF, "Y"), as fert/fertned.gms rebuilds it in the simulation
+    year (capri_mod/supply/equations/fertned.py DATA_FNUT_yield; environmental/nitrogen.py _capri_crop_n, data_nitf of
+    capri_crop_n_coefs_2030.csv: the regions' removal is CAPRI's EXPPRD within 0.1%; K191; PRET for P2O5).
+
+    Departures from CAPRI: moved by the yield ratio where CAPRI multiplies by v_yldMit and v_yldPestFac.
     """
     return v_actLevl * DATA_FNUT * yldFac
 
@@ -231,9 +233,12 @@ def e_BIOFIX(v_actLevl, BioFix, yldFac):
 
         e_BIOFIX:  BIOFIX_c = x_c x f_c x y_c / y0_c
 
-    Departures from CAPRI: the fixation per ha is CAPRI's 2030 reference (BIOFIX per ha of the crop,
-    capri_crop_n_coefs_2030.csv), moved by the yield ratio where CAPRI multiplies DATA(FNUT) x p_nitrFact(BioFix) by
-    v_yldMit and v_yldPestFac; the LegSh option's factor on OFAR is not in the model.
+    The fixation per ha is CAPRI's DATA(crop, NITF, "Y") x p_nitrFact(crop, BioFix) of the simulation year
+    (capri_mod/supply/equations/fertned.py, fertpar.py p_nitrFact_BioFix: the member state's grassland rate, other arable
+    fodder's legume mix; data_nitf x biofix_rate of capri_crop_n_coefs_2030.csv; K191).
+
+    Departures from CAPRI: moved by the yield ratio where CAPRI multiplies by v_yldMit and v_yldPestFac; the LegSh
+    option's factor on OFAR is not in the model.
     """
     return v_actLevl * BioFix * yldFac
 

@@ -276,6 +276,20 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
 - **K190 followed up:** the grassland's technologies are ruled out as the cause of CAPRI's stronger intensive-grassland
   response (CAPRI's grassland has the standard technology only, in its calibration and its Green Deal step); next lead
   the N-surplus dual gap.
+- **K191, the crops' N removal and fixation from CAPRI's simulation data:** the gross N balance's removal (e_EXPPRD)
+  and fixation (e_BIOFIX), which the Green Deal's N-surplus row takes, were CAPRI's reported NITF plus its reported
+  fixation; CAPRI's simulation rebuilds them in fert/fertned.gms (the year's yield x the output's N content and its
+  residues') with fert/fertpar.gms's fixation rates (the member states' grassland rates, other arable fodder's legume
+  mix). For grassland the reported values were not those: the reported NITF carries NUTNED_'s SQRT(1 +/- 0.2) split and
+  the report gives extensive grassland intensive grassland's fixation, so intensive grassland's relative credit in the
+  row was almost twice CAPRI's (DE21 -79.8 against -45.6 kg N/ha). Ported as named functions
+  (capri_mod/supply/equations/fertned.py, fertpar.py, def_gascoeff.py) and computed by
+  tools/build/build_capri_crop_n_coefs.py on sim_ini_21730's DATA (new columns data_nitf, biofix_rate, data_mann); every
+  unit's removal is CAPRI's EXPPRD within 0.1%. With it the set-aside aggregate SETA no longer counts twice in the
+  removal's and residues' scaling (ES41 6.6%). Six units at CAPRI's Green Deal prices: the 2030 base unchanged; the
+  N-surplus dual DE21 7.98 -> 5.49, ES41 6.37 -> 5.77, ES42 6.32 -> 6.13 EUR/kg (CAPRI's 5.75, 5.53, 5.70); the
+  grassland split at CAPRI's in ES41, ES42 and FR52, DE21 intensive -48.5% (CAPRI -54.8); mean gap to CAPRI's changes
+  crops 17.7 -> 12.1 points, herds 2.40 -> 1.33. Test: test_the_crops_removal_and_fixation_are_capris_simulation_data.
 - **The milk for feeding as CAPRI's balance (K189):** CAPRI's COMF and SGMF are non-tradable outputs of the cows and the
   milk sheep and goats, fed as FCOM and FSGM, in SUPBAL_ with CAPRI's losses (use <= output), valued at the balance's
   dual. In 2030 runs the model writes them as fodder balances (milk_for_feeding_2030.csv from CAPRI's 2030 reference,
