@@ -5,7 +5,7 @@ solves them with IPOPT (CasADi). What capri-mod already builds as data and calib
 regional QP as assembled by RegionalSupplyModel (activity and auxiliary columns, PMP matrix Q and linear terms c,
 land-market columns, land and bound rows, with one label per row) and the calibrated rations. What is CAPRI's here:
 
-* feeding (block "feeding"):
+* feeding (block "feeding"; equations/supply_model/feeding.py REQSE_, FEDUSE_; objective.py QUADRF_):
     REQSE_   per head, an EQUALITY for energy (ENNE) and crude protein (CRPR) only (feed version _pw: REQSN_, MAXSHR_,
              MINSHR_ are not in the simulation model);  sum_f v_feedInpCoeff_f x content_f = requirement, with the
              requirement the base ration's supply (CAPRI simulates with the trimmed p_animReq, p_trimFeed = 0, so the
@@ -319,6 +319,8 @@ class CapriRegionalNLP:
 
     def __init__(self, spec):
         import casadi as ca
+        from capri_mod.supply.equations.supply_model.feeding import FEDUSE_, REQSE_, REQSE_split
+        from capri_mod.supply.equations.supply_model.objective import QUADRF_
         self.spec = spec
         self._psyms, self._pvals = [], []
         Q = np.asarray(spec["Q"], float)
@@ -396,8 +398,8 @@ class CapriRegionalNLP:
                 lin_c[k] = p + ghg + cn
                 half_s[k] = 0.5 * float(r.slope[j])
             herds = y[[act_idx[fe[0]] for fe in feeds]]
-            Fv = herds * fhv                                   # t
-            obj = obj + ca.sum1(Fv * (self._pv(lin_c) + self._pv(half_s) * fhv))
+            Fv = FEDUSE_(herds, fhv)                           # t
+            obj = obj + ca.sum1(QUADRF_(Fv, self._pv(lin_c), self._pv(half_s), fhv))
             F = [Fv[k] for k in range(nf)]
         if spec.get("dq") is not None:
             q0 = q0 + np.asarray(spec["dq"], float)            # the base calibration's linear terms (calibrate())
@@ -523,13 +525,14 @@ class CapriRegionalNLP:
                     continue
                 # supply / requirement - 1 (coefficients as parameters)
                 cf = np.array([float(vec[feeds[k][3]]) / R for k in ks])
-                sup = (ca.dot(self._pv(cf), fhv[ks]) if len(ks) > 1 else (self._pv(cf[0]) * fh[ks[0]] if ks else 0)) \
-                    + self._pv(float(vec[fixed] @ r.x0[fixed]) / R) - 1.0
+                sup = REQSE_(ca.dot(self._pv(cf), fhv[ks]) if len(ks) > 1
+                             else (self._pv(cf[0]) * fh[ks[0]] if ks else 0),
+                             self._pv(float(vec[fixed] @ r.x0[fixed]) / R))
                 dz = [(int(col_), float(d_[nut])) for col_, d_ in (exs or []) if nut in d_ and float(d_[nut]) != 0.0]
                 if dz:
                     # with a split column the requirement of the herd is R x herd + d x z (total form, bilinear)
                     Xa = max(float(xb[act_idx[a]]), 1e-3)
-                    e_ = sup * herd * self._pv(1.0 / Xa) - self._lin(y, dz, scale=R * Xa)
+                    e_ = REQSE_split(sup, herd, self._pv(1.0 / Xa), self._lin(y, dz, scale=R * Xa))
                     req_rows.append((a, nut, len(g_rows), R * Xa, True))
                 else:
                     e_ = sup

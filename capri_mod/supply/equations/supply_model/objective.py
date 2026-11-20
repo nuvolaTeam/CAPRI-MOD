@@ -6,8 +6,9 @@ decision of 19 November 2026); this docstring keeps the block's overview, notati
 
 Written so far: the fertilisation block's terms on the mineral N purchases v_netPutQuant(NITF) (the regional NLP's
 fertilisation block, CapriRegionalNLP._fert_block): their value at the unit value (UVAG) and the emission tax on
-mineral N's soil N2O, with the indirect N2O of the purchases' runoff and leaching at the same tax; and the emission
-tax's terms of the mitigation options (CapriRegionalNLP._abatement_block).
+mineral N's soil N2O, with the indirect N2O of the purchases' runoff and leaching at the same tax; the emission
+tax's terms of the mitigation options (CapriRegionalNLP._abatement_block); and the feeds' PMP terms, QUADRF_ with
+QUADRF1_ (CapriRegionalNLP.__init__'s objective).
 
 In this project's notation (per nutrient; P = the purchases, t, CAPRI's - v_netPutQuant; the objective in kEUR; uvag
 the unit value per kg, here per t / 1000):
@@ -98,3 +99,36 @@ def LINEAR_carbonTax_N2OCRO(ef, catcBioFix):
     taxed GGWP; their soil carbon CO2SEQ is not in GGWP): ef x the catch crops' BioFix N (t, from the base share).
     CAPRI's GAMS: LINEAR_carbonTax_ammOptions's docstring."""
     return ef * catcBioFix
+
+
+def QUADRF_(v_feedUse, lin, half_SLOP, v_feedInpCoeff):
+    r"""QUADRF_(r) (l. 4949-4951) with QUADRF1_(r, a) (l. 4955-4962) substituted, the feeds' PMP terms of the
+    objective, per animal and flexible feed: F x (CNST + 0.5 SLOP x u), F = FEDUSE_'s herd x u (feeding.py), u the
+    per-head feed (CAPRI's v_feedInpCoeff), half_SLOP = 0.5 SLOP. Vectors over the animals' feeds (the builder sums).
+
+    CAPRI's GAMS, QUADRF_ and QUADRF1_ (l. 4949-4962):
+
+        QUADRF_(RUNR) ..
+    *
+            v_sumOfPmpTermsFeed(RUNR) =E= SUM(  (MAACT) $ p_technFact(RUNR,MAACT,"LEVL","T"), v_actLevl(RUNR,MAACT,"T") * v_pmpCostFeedPerAnim(RUNR,MAACT,"T") );
+    *
+    *  --- PMP for feed use per per region, activity and technology
+    *
+        QUADRF1_(RUNR,MAACT %addtimedim%) $ p_technFact(RUNR,MAACT,"LEVL","T") ..
+    *
+          v_pmpCostFeedPerAnim(RUNR,MAACT,"T") =E=
+             SUM(  (FEED) $ p_maxFeedShare(RUNR,MAACT,"T",FEED %addtimedim%),
+                  v_feedInpCoeff(RUNR,MAACT,"T",FEED %addtimedim%)
+                     *    (p_pmpFeedInpCoeff(RUNR,MAACT,"T",FEED,"CNST")
+                              + 0.5 * v_feedInpCoeff(RUNR,MAACT,"T",FEED %addtimedim%)*p_pmpFeedInpCoeff(RUNR,MAACT,"T",FEED,"SLOP")) );
+
+    In this project's notation, for an animal a with herd h_a and a flexible feed f:
+
+        QUADRF_ = sum_a h_a x QUADRF1_a,   QUADRF1_a = sum_f u_f (c_f + 0.5 s_f u_f),   written as sum (h_a u_f)(c_f + 0.5 s_f u_f)
+
+    Departures from CAPRI: the linear coefficient c_f adds to CNST (capri_regional_nlp.calibrate_feed_terms, with
+    CapriRegionalNLP.calibrate's correction dcnst) the tradable feed's price (CAPRI: the feed's
+    use in its product's market balance, valued in LINEAR_ through v_netPutQuant x UVAG) and the emission tax per kg of
+    feed (the spec's feed_ghg); the model minimises the cost, CAPRI maximises v_obje.
+    """
+    return v_feedUse * (lin + half_SLOP * v_feedInpCoeff)

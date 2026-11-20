@@ -38,6 +38,7 @@ functions. **A move, not a change: results identical to 1e-10**, checked by a ga
 | N10 | the entitlement limit (overShotEntl_ with sumEntl_) and the permanent grassland rule (permGrasGreening_) in premiums.py | identical bit for bit to the old code (3,000 random cases); gate at N10 (one run for N9a-N10) |
 | N11a | the N surplus's terms in the accounts and, through them, the QP's N-surplus row (e_EXCRET, e_GASRUNANI, e_ATMOSD, e_CRESID, e_EXPPRD, e_BIOFIX; environmental/nitrogen.py, phosphorus.py) and the leaching's input shares (nminInputSh_, nmanInputSh_) in n_surplus.py; SURTOT_idlHis on e_ATMOSD and e_CRESID | the N and P accounts, every activity's unit balance and the leaching identical bit for bit for the 221 regions (base and scaled yields, with intensity factors); gate with N11b |
 | N11b | the surplus block's and the fertiliser limits' other rows classified (inventory statuses with evidence): SURSOI_REST_, nGrpLevl_, nMax_, lsDensMax_ and e_manureLimit_ empty in the step; e_SURSOIkt, e_SURSOIHa, e_GASRUNMIN and e_GASRES not written (the soil surplus, read by NO3LEA_: N14) | docs only |
+| N12a | the feeding rows of the regional NLP: REQSE_ (with its total form for the split and option columns) and FEDUSE_ in supply_model/feeding.py, QUADRF_ with QUADRF1_ in objective.py; SupplementPerc_ classified (K93) | the NLPs identical (3 regions x 6 variants: expressions and parameter vectors bit for bit); gate with N12b |
 
 Not on the branch (on purpose):
 - `docs/equations/` (the equation book, page 01 the regional N balance) and its README paragraph: waiting for the
@@ -192,6 +193,12 @@ comes, check against CAPRI's _pw feed version and register what differs.
   for nGrpLevl_, nMax_ and lsDensMax_ holds: all three are empty in the step.
 - CAPRI's soil surplus (e_SURSOIkt, e_SURSOIHa, e_GASRUNMIN, e_GASRES) is read by NO3LEA_ (l. 3609-3613): for N14,
   set it against the model's leached N by source (supply/n_leaching.py crop_n, envind/gases.gms l. 696-745).
+- **Feeding (N12a):** the NLP writes REQSE_ alone of the requirement rows, as CAPRI's feed version _pw; REQSN_,
+  MAXSHR_ and MINSHR_ appear only in feed/ration.py's calibration of the base rations (section 5's note settled).
+  Porting differences (kept): the feeds outside ration.py's FEED_ELAS are held at their base amount per head;
+  FEDUSE_'s sum leaves out v_lossQuant's straw and COMF terms; QUADRF_'s linear coefficient adds the tradable feed's
+  price (CAPRI: its market balance, valued through v_netPutQuant x UVAG) and the emission tax per kg of feed to CNST.
+  SupplementPerc_ (the linseed's fat limit) is not written (K93).
 - **A run that loads the market supply Hessian from the cache** (.cache/market_supply_hessian, keyed by the code's
   fingerprint) differs from one that measures it at about 1e-8 relative (46 against 51 products recorded): a
   reference and its comparison run must both measure it (after a restart, clear the cache of a killed run).
