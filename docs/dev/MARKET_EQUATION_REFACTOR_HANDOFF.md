@@ -25,6 +25,7 @@ aa91c1c (the supply phase merged, 19e7679; the checks against star 3.0, aa91c1c)
 | M5 | the border measures: trqSigmoidFunc_ (with its NumPy twin), tarAdVal_, tarSpec_ (with the smaller of the bilateral and the global rate), tarAdValW_, tarSpecW_, prefTriggerPrice_, EntryPriceDriver_, tarSpecIfEntryPrice_ (with its NumPy twin), FlexLevyNotCut_, FlexLevy_ (market_model/border.py); called by bilateral.py (_sig, _trq_rates, border_spec, _TrqCells), import_prices_ad.py, trade_ad.py, trade_system_ad.py. TRQImports_ ported as terms; the 17 rows of the intervention stocks and the subsidised exports (nonDoubleZeroExports_ among them) empty in the step (no INTM, STKS, FEOE_max in CAPRI's 2030 data) and not in the model | the module's 486 CasADi functions and the assembled market system identical to M4's (PYTHONHASHSEED=0); the captured solves replayed bit for bit (2 and 21); the five-unit Green Deal run identical |
 | C0 | the inventory of CAPRI's calibration systems (docs/dev/calibration_equations_inventory.csv; tools/refactor/calibration_equations_inventory.py: the MODEL statements of the fertiliser priors m_fertDist and m_dualFertDist, the land supply estimation, the land-use change estimation and m_calibKVT, nested models and $include files followed, plus the PMP terms and the Armington shares, which CAPRI writes as assignments); 89 rows, each with where CAPRI runs it and what the model does | docs and a tool; the quote and citation checks |
 | C1 | the Armington calibration: v_arm2Price, arm1Price_, p_dpCESTrade_bilateral, p_dpCESTrade_domestic, p_dpCESTrade_RW (capri_mod/market/equations/cal_armington.py, CAPRI's arm/cal_armington.gms l. 39-64 and arm1Price_), called by bilateral.py BilateralCommodity.calibrate | the calibrated arrays of the 57 bilateral commodities (beta, dd, dm, PM0, PA0, S0, D0, X0: 456) identical bit for bit; the captured solves replayed bit for bit (2 and 21); the five-unit Green Deal run identical |
+| P | the manure pool market: e_mPoolSurplus and p_mTradeAddCost (market/equations/manuremarket/declare_manure_market.py), p_mPoolSupConst and p_stepWeights_average (simu_manure_market.py), called by coupling/manure.py (_clear_pool_capri, _clear_pool); the pool balances and the QP's objective ported as terms; m_mPoolMarketCal not needed in the model's form (section 10) | the pool market's clearings on synthetic inputs (N, P, K x 4 seeds x 3 steps: prices, shipments, the kept state) identical bit for bit; the captured solves replayed bit for bit (2 and 21); the five-unit Green Deal run identical (the manure trade on) |
 
 ## 3. The gate's references (at the phase's starting commit 444a47f, worktree outside the repository)
 
@@ -182,3 +183,33 @@ aa91c1c (the supply phase merged, 19e7679; the checks against star 3.0, aa91c1c)
   calibration m_calMarketBas, m_calMarketFin (arm/cal_models.gms), m_calMarketLnd(2) (arm/define_land_params.gms),
   the trimming of the market's elasticities m_trimLU, m_trimElas, m_trimDem (arm/trim_elas_decl.gms), the TRQ and
   intervention trimming (m_fitTrq, m_trimInterv); the model reads their results with CAPRI's market data.
+
+## 10. What P found (the manure pool market; for the main line, nothing fixed)
+
+CAPRI solves both pool models in the Green Deal step (ManureTradeNEW on, the META of the Green Deal result;
+manuremarket/declare_manure_market.gms exits only with BASELINE on, l. 19): m_mPoolMarketCal once at the step's start
+(l. 344-451, the price wedges that make the baseline trade an equilibrium), m_mPoolMarket in every iteration
+(simu_manure_market.gms l. 160, from capmod.gms l. 1496). The model (coupling/manure.py, docs/MANURE_MARKET.md,
+docs/dev/MANURE_POOL_PORT.md; outer_loop.manure_pool_form "capri", the default):
+
+| CAPRI's row | model | status |
+|---|---|---|
+| e_mPoolSurplus (l. 114-127) | declare_manure_market.e_mPoolSurplus: the QP's coefficients of minus the surplus | ported |
+| e_mPoolExcessSupply (l. 99-104), e_mPoolClear (l. 130-140) | one balance row per pool (the excess supply substituted); the pool price its dual | ported (terms) |
+| e_mPoolBenefits (l. 153-157) | the QP's objective: the surplus less the trade costs between the pools (Clarabel) | ported (terms) |
+| e_mPoolPriceCal, e_mPoolPriceEq, e_mPoolCSCal, e_mPoolObjeCal (m_mPoolMarketCal, l. 168-196) | none | not in the model (not needed in its form) |
+| p_mPoolSupConst (simu_manure_market.gms l. 87-89) | simu_manure_market.p_mPoolSupConst | ported |
+| the step-weighted prices (l. 76-78, 222-227; capmod/define_stepWeights.gms l. 40-41) | simu_manure_market.p_stepWeights_average | ported |
+| p_mTradeAddCost (l. 427-431) | declare_manure_market.p_mTradeAddCost | ported (the price gap term zero) |
+
+- **No calibration of the pool market**: the model's net exports and pool prices are the deviations from CAPRI's base
+  trade, zero at the base, which is an equilibrium; CAPRI's calibration wedges (v_mPoolPriceCal) and the fixed
+  third-country exports drop out. Equal to CAPRI's form where CAPRI's calibration reproduces its baseline exactly
+  (its objective, the wedges' squares plus a penalty on the complementarity gap, is zero there).
+- **The trade cost constants are the model's own calibration**: from the reduced costs of each region's trade columns
+  at its solution (CAPRI: calibrated at the base, supply/define_manure_trade_costs.gms), so the market's first-order
+  conditions hold at the regions' solutions.
+- **A QP (Clarabel) for CAPRI's NLP (CONOPT)**: the same problem, convex where the excess-supply slopes are positive or
+  outweighed by the trade cost slopes (the run stops otherwise); one region and nutrient of CAPRI's 2030 data (manure_pool_market_2030.csv) has a negative slope.
+- **The excess supply's slope in two unit conventions** (outer_loop.manure_pool_es_slope: "capri_code", CAPRI's code
+  with trade in kt and supply in t, the default; "capri_doc", one unit): a setting the main line chose, kept.

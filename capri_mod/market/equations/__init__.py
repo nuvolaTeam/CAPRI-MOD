@@ -17,6 +17,8 @@ written.
     cal_armington.py
                     arm/cal_armington.gms: the Armington system's share parameters at the calibration point
                     (the calibration block C1)
+    manuremarket/   manuremarket/: declare_manure_market.py (the pool market's surplus, the autarky buffers),
+                    simu_manure_market.py (the excess supply's refit, the step-weighted prices) (the block P)
 
 Each function's docstring gives CAPRI's GAMS statement, the CAPRI star 3.0 file and lines it follows, the equation in
 this project's notation, how the model's quantities map to CAPRI's symbols, and the departures from CAPRI's equation.
