@@ -320,6 +320,7 @@ class CapriRegionalNLP:
     def __init__(self, spec):
         import casadi as ca
         from capri_mod.supply.equations.supply_model.feeding import FEDUSE_, REQSE_, REQSE_split
+        from capri_mod.supply.equations.supply_model.markets import SUPBAL_fodder_use
         from capri_mod.supply.equations.supply_model.objective import QUADRF_
         self.spec = spec
         self._psyms, self._pvals = [], []
@@ -495,7 +496,7 @@ class CapriRegionalNLP:
             rs = rsv[i]
             ex = rowsK[kk]                                     # the row / rs
             if i in extra:
-                ex = ex + extra[i] * ex_sc[k_ex]
+                ex = SUPBAL_fodder_use(ex, extra[i], ex_sc[k_ex])   # + the flexible feeds' FEDUSE_ / rs
                 k_ex += 1
             if i in fod_rows:
                 # SUPBAL_ for non-tradable fodder: production = use (an equality at the balance's base constant)

@@ -490,6 +490,7 @@ class LivestockBlock:
         """CAPRI-consistent fodder balance rows (non-tradable fodder, SUPBAL_):
         sum_animals use_t_head x heads - sum_crops u_crop x area_crop <= 0, exact at base (grass: GRAE and GRAI).
         Returns [(row, base value EUR/t, rhs, label)]."""
+        from capri_mod.supply.equations.supply_model.markets import SUPBAL_fodder, SUPBAL_fodder_rhs
         fb = getattr(self.data, "fodder_balance", None) or {}
         acts_idx = {a: i for i, a in enumerate(self.acts)}
         x0 = self._base_levels().reindex(self.acts).fillna(0.0).values
@@ -498,25 +499,25 @@ class LivestockBlock:
             crops = {c: u for c, u in (rec.get("crops") or {}).items() if c in acts_idx}
             if not crops:
                 continue
-            row = np.zeros(len(self.acts))
-            row_b = np.zeros(len(self.acts))
+            use, use_b = {}, {}                  # {column: t per head}: now and at the base rations
             _rs = getattr(self.seen, "ration_state", None) or {}
             _fr = getattr(self.seen, "feed_rations", None) or {}
             for a, t in rec.get("use_t_head", {}).items():
                 if a in acts_idx:
                     xr = (_rs.get(a) or {}).get("x", {})
-                    row[acts_idx[a]] = float(xr[feed]) / 1000.0 if feed in xr else float(t)
+                    use[acts_idx[a]] = float(xr[feed]) / 1000.0 if feed in xr else float(t)
                     # the BASE ration's use per head, for the base gap below (CAPRI's baseline fodder balance)
                     r_ = _fr.get(a)
                     if r_ is not None and feed in list(r_.feeds):
-                        row_b[acts_idx[a]] = float(r_.x0[list(r_.feeds).index(feed)]) / 1000.0
+                        use_b[acts_idx[a]] = float(r_.x0[list(r_.feeds).index(feed)]) / 1000.0
                     else:
-                        row_b[acts_idx[a]] = row[acts_idx[a]]
-            if not row.any():
+                        use_b[acts_idx[a]] = use[acts_idx[a]]
+            if not any(v != 0 for v in use.values()):
                 continue
-            for c, u in crops.items():
-                row[acts_idx[c]] = -float(u)
-                row_b[acts_idx[c]] = row[acts_idx[c]]
+            # CAPRI's SUPBAL_ for the fodder (supply_model/markets.py)
+            cols = {acts_idx[c]: u for c, u in crops.items()}
+            row = SUPBAL_fodder(len(self.acts), use, cols)
+            row_b = SUPBAL_fodder(len(self.acts), use_b, cols)
             scale = float(np.abs(row) @ np.abs(x0)) or 1.0
             # exact at base in both directions (K36): where the projected herds' fodder use and the projected fodder
             # output differ (use below output in FI1D, ITF5, ITG1...), the gap at base is carried as a constant, as
@@ -526,6 +527,6 @@ class LivestockBlock:
             # the balance's right-hand side moved with the rations every iteration - with feeding inside the regional
             # models (animal cells of this row replaced by the feed columns) a fodder balance that loosened or tightened
             # with the last solution's feeding; before, with the ration chosen outside the models at current prices.
-            rhs = float(row_b @ x0) + 1e-9 * scale
+            rhs = SUPBAL_fodder_rhs(row_b, x0, scale)
             out.append((row, float(rec.get("value_eur_t", 0.0)), rhs, "fodder_" + feed))
         return out
