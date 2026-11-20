@@ -63,7 +63,7 @@ class PCropCoefs:
 
 
 def nutned_mineral(D, capri_region: str, need, own, own_perm, pool, mine0, xb, x, sq, E0: float,
-                   E: float) -> Optional[float]:
+                   E: float, own_perm_y=None, pool_y=None) -> Optional[float]:
     """Mineral P2O5 bought (t) from CAPRI's NUTNED_ for P summed over the crop groups, the equation of the regional
     model's fertilisation block (capri_regional_nlp._fert_block, data SupplyModel._npk_spec):
 
@@ -77,7 +77,9 @@ def nutned_mineral(D, capri_region: str, need, own, own_perm, pool, mine0, xb, x
     residues scaled together (capri_mod.fert.npk.need_multiplier).
     Arguments are dicts by model crop (kg/ha, 1000 ha) and t (GRAE and GRAI among the crops since 7 November 2026;
     before, a grass argument added the grassland split column). Used where there is no regional solution (the accounts at the base data); at the
-    NLP form's solution the sum of its NUTNED_ rows is this equation exactly. None without CAPRI's data."""
+    NLP form's solution the sum of its NUTNED_ rows is this equation exactly. None without CAPRI's data.
+    own_perm_y, pool_y: the own residues and the pool's coefficients at the current yields (fert/fertned.gms rerun, as
+    the block's: fertilisation.py, K189), on the solution's side; None: the base ones (kappa always takes those)."""
     R = D.region(capri_region, "P")
     if R is None:
         return None
@@ -96,6 +98,7 @@ def nutned_mineral(D, capri_region: str, need, own, own_perm, pool, mine0, xb, x
     kappa, own_scaled = need_multiplier(eff * dot(mine0, xb) + g0 * E0 + gc * dot(pool, xb), need0, dot(own, xb), gc,
                                         perm_g)
     N = sum(float(need.get(k, 0.0)) * float(sq.get(k, 1.0)) * float(v) for k, v in x.items())
-    own_x = gc * dot(own_perm, x)
-    M = ((kappa * (N - own_x) if own_scaled else kappa * N - own_x) - g0 * E - gc * dot(pool, x)) / eff
+    own_x = gc * dot(own_perm if own_perm_y is None else own_perm_y, x)
+    M = ((kappa * (N - own_x) if own_scaled else kappa * N - own_x) - g0 * E
+         - gc * dot(pool if pool_y is None else pool_y, x)) / eff
     return M                          # kg/ha x 1000 ha = t, as E

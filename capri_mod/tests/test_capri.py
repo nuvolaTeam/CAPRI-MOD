@@ -5877,6 +5877,43 @@ def test_the_crops_removal_and_fixation_are_capris_simulation_data(data):
     assert d("GRAI") - d("GRAE") == pytest.approx(-45.62, abs=0.05)
 
 
+def test_the_crops_n_terms_move_with_the_yields_as_capris_data(data):
+    """K189: CAPRI reruns fert/fertned.gms after the scenario's yield shifts and each price-driven yield update
+    (supply/endog_yields.gms l. 139, 148), so the removal and fixation follow the need's factor of the yield
+    (need_yield_factor) and the residues fertned's MANN; a technology variant (the mix columns) puts its yield factor on
+    removal, residues and fixation (e_EXPPRD, e_CRESID, e_BIOFIX x (1 + p_technFact)) and NUTNED_'s factor on the need."""
+    from capri_mod.environmental.environmental_module import EnvironmentalModule
+    from capri_mod.fert.npk import fout_yield_change, need_yield_factor
+    env = EnvironmentalModule(data)
+    r = "DE210000"
+    co = env._capri_crop_n(r)
+    y0 = float(env._cached_row("yields", r)["SWHE"])
+    # a price-driven yield fall of 10%: the straw's part of the need held (ys = y0)
+    rem, res, fix = env._crop_n_at_yields(r, "SWHE", co["SWHE"], y0, 0.9 * y0, y0)
+    nf = need_yield_factor(r, "SWHE", y0, 0.9 * y0, y0, "N")
+    assert 0.9 < nf < 0.95                                     # the straw's part does not move
+    assert rem == pytest.approx(co["SWHE"][0] * nf, rel=1e-12) and fix == pytest.approx(co["SWHE"][2] * nf, rel=1e-12)
+    kr, dep = type(env)._CROP_N_RES[r]
+    assert res == pytest.approx(co["SWHE"][1] + kr * fout_yield_change(r, "SWHE", y0, 0.9 * y0, y0, "N", dep), rel=1e-12)
+    # soft wheat is not a residue crop of fertned (cereals: Resid = 0): its MANN is deposition and straw, so a
+    # price-driven change leaves its residues unchanged
+    assert res == pytest.approx(co["SWHE"][1], rel=1e-9)
+    # rapeseed: the residues move by the residue share of the need's change
+    y0r = float(env._cached_row("yields", r)["RAPE"])
+    _, res_r, _ = env._crop_n_at_yields(r, "RAPE", co["RAPE"], y0r, 1.1 * y0r)
+    assert res_r > co["RAPE"][1]
+    # the technology variants on top, at the current yields
+    a1 = env._crop_n_at_yields(r, "SWHE", co["SWHE"], y0, 0.9 * y0, y0, 0.2)
+    a2 = env._crop_n_at_yields(r, "SWHE", co["SWHE"], y0, 0.9 * y0, y0, -0.2)
+    for k in range(3):
+        assert a1[k] - a2[k] == pytest.approx(0.4 * (rem, res, fix)[k], rel=1e-12)
+    # in the unit balance the variants' need is NUTNED_'s SQRT(1 + y)(1 + y) over the mean technology's
+    yl = env._cached_row("yields", r)
+    u1 = env.unit_nitrogen_balance("SWHE", yl, r, techn_fact=(0.2, 1.295))
+    u0 = env.unit_nitrogen_balance("SWHE", yl, r)
+    assert u1["n_crop_uptake"] == pytest.approx(1.2 * u0["n_crop_uptake"], rel=1e-12)
+
+
 @pytest.mark.slow
 @pytest.mark.no_market_hessian
 def test_land_earns_the_surplus_target_per_ha_with_the_base_trade_a_level(model):

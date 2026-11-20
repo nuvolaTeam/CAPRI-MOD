@@ -27,11 +27,12 @@ Outputs (capri_data/baselines/capri_greendeal_ref/1730/environment/; the two liv
                             the group's total spread by area: GRAE and GRAI had the same value, KNOWN_ISSUES K162),
                             mine_kg_ha (CAPRI's mineral flow), levl_kha; CAPRI crops pooled into
                             the model's crops by area (CORN = MAIZ, WINE = TWIN; GRAE and GRAI the model's own
-                            since 7 November 2026); main_share and straw_share, the parts of the need that follow the
-                            main output's yield and the straw yield (fert/fertned.gms: need = MIN(cap, MAX(15, O_HP x
-                            need per t + STRA x straw content)); 0 for crops at the floor or the cap), with CAPRI's straw
-                            content and caps from envind/gascoeff.gms and fert/fertpar.gms (their statements converted
-                            to CSV in capri_data/sources/raw/capri/gams by tools/build/convert_sources.py)
+                            since 7 November 2026). Until 20 November 2026 also main_share and straw_share, the parts
+                            of the need that follow the main output's yield and the straw yield, from the reported need
+                            (net of fixation, KNOWN_ISSUES K191) and envind/gascoeff.gms's straw content: the need's
+                            yield factor now reruns fertned.gms on CAPRI's simulation data (capri_crop_fertned_parts_
+                            2030.csv, tools/build/build_capri_crop_n_coefs.py; capri_mod/fert/npk.py need_yield_factor;
+                            KNOWN_ISSUES K189)
   npk_region_2030.csv       capri_region, nutrient, mine_eff (1 + loss / mineral), excr_avail (1 + unavailable /
                             manure), cres_avail (1 + (unavailable + loss) / (pooled + own residues)), uvag_eur_t (CAPRI's
                             2030 unit value of NITF/PHOF/POTF over its inflation to 2030: the model's 2017 money,
@@ -94,27 +95,6 @@ def _gms_csv(name):
     return read_source(GMS / name, dtype=str, keep_default_na=False)
 
 
-def straw_content() -> dict:
-    """CAPRI's nutrient content of straw, kg per t (envind/gascoeff.gms, p_nutContCropOutput("STRA", FNUT):
-    gascoeff_p_nutContCropOutput_STRA.parquet); CAPREG copies it to DATA(RS, FNUT, "STRA") and fert/fertned.gms prices
-    straw at it (no residue relation for STRA)."""
-    t = _gms_csv("envind/gascoeff_p_nutContCropOutput_STRA.parquet")
-    return {r.nutrient: float(r.value) for r in t.itertuples(index=False)}
-
-
-def need_bounds() -> tuple:
-    """fert/fertned.gms's bounds on a crop's need per ha: MAX(15, ...) and MIN(MAXF x (1 + 1 $ doubleMaxf), ...) with
-    MAXF and doubleMaxf from fert/fertpar.gms (the last assignments: 200/160/140 x 2.0; GRAE, GRAI, OFAR, MAIF;
-    fertpar_MAXF.parquet, fertpar_doubleMaxf.parquet)."""
-    mx = _gms_csv("fert/fertpar_MAXF.parquet")
-    sc = {float(v) for v in mx["multiplier"]}
-    if len(sc) != 1:
-        raise ValueError(f"fertpar_MAXF.parquet: one multiplier expected, {sc}")
-    sc = sc.pop()
-    dbl = set(_gms_csv("fert/fertpar_doubleMaxf.parquet")["activity"])
-    return 15.0, {r.nutrient: float(r.value) * sc for r in mx.itertuples(index=False)}, dbl
-
-
 def extract(dump: Path) -> pd.DataFrame:
     cr = "|".join(ELEM + ("AGGT",))
     nu = "NITF|PHOF|POTF"
@@ -173,10 +153,6 @@ def main():
     nuts0 = {r for r in regions if r.endswith("000000") and
              any(x.startswith(r[:2]) and not x.endswith("000000") for x in regions)}
     rev = {c: mc for mc, cs in MODEL.items() for c in cs}
-    stra_c = straw_content()
-    floor_, maxf, dbl = need_bounds()
-    print(f"CAPRI straw content {stra_c} kg/t; need bounds {floor_} kg/ha, MAXF {maxf} (x2 for {sorted(dbl)})")
-    n_bound = n_crop = 0
     crow, rrow, prow = [], [], []
     worst_need = worst_man = worst_min = worst_grp = worst_own = 0.0
     grp_err = []
@@ -244,22 +220,8 @@ def main():
             agg = {}
             for c, x in lev.items():
                 mc = rev.get(c, c)
-                d = agg.setdefault(mc, dict(levl=0.0, need=0.0, pool=0.0, own=0.0, mine=0.0, main=0.0, straw=0.0))
+                d = agg.setdefault(mc, dict(levl=0.0, need=0.0, pool=0.0, own=0.0, mine=0.0))
                 d["levl"] += x
-                # the parts of the need that follow yields (fert/fertned.gms, CropResi_IDEAG_NG off as in capmod):
-                # need = MIN(cap, MAX(15, O_HP x need per t of main output + STRA x straw content)); O_HP moves with
-                # the main output's yield (capmod/define_inputs.gms after shift_yields and supply/endog_yields.gms),
-                # STRA with scenario yield shifts only (endog_yields.gms leaves it). At a bound neither moves
-                Dc = v.get((r, "", c, col), 0.0)
-                Sc = v.get((r, "", c, "STRA"), 0.0) / 1000.0 * stra_c[col]
-                cap_ = maxf[col] * (2.0 if c in dbl else 1.0)
-                if Dc > 0:
-                    n_crop += 1
-                    if Dc <= floor_ + 1e-6 or Dc >= cap_ - 1e-6:
-                        n_bound += 1
-                    else:
-                        d["main"] += x * max(Dc - Sc, 0.0) / 1000.0
-                        d["straw"] += x * min(Sc, Dc) / 1000.0
                 # the crop's own need (NITF/PHOF/POTF per ha, net of fixation): CAPRI's nutNed_lhs per crop is its
                 # group's need spread by area (GRAE and GRAI, fallow and the arable crops of its group get the same per
                 # ha); NUTNED_ sums levl x need over the group's crops
@@ -275,9 +237,7 @@ def main():
                 L = d["levl"]
                 crow.append(dict(capri_region=r, model_crop=mc, nutrient=nut, levl_kha=L,
                                  need_kg_ha=1000.0 * d["need"] / L, pool_kg_ha=1000.0 * d["pool"] / L,
-                                 own_kg_ha=1000.0 * d["own"] / L, mine_kg_ha=1000.0 * d["mine"] / L,
-                                 main_share=d["main"] / d["need"] if d["need"] > 0 else 1.0,
-                                 straw_share=d["straw"] / d["need"] if d["need"] > 0 else 0.0))
+                                 own_kg_ha=1000.0 * d["own"] / L, mine_kg_ha=1000.0 * d["mine"] / L))
             # priors per crop group (posterior mode per ha of CAPRI's 2030 run, accuracy 1)
             garea = {}
             for c, x in lev.items():
@@ -294,7 +254,6 @@ def main():
                 prow.append(dict(capri_region=r, level="nuts0" if r in nuts0 else "ru", nutrient=nut, ngrp=g,
                                  perm=int(g in PERM_NGRP), area_kha=A, mine_kg_ha=mi, excr_kg_ha=ex, cres_kg_ha=cr,
                                  accuracy=1.0))
-    print(f"crop need at fertned.gms's floor or cap: {n_bound} of {n_crop} crop x region x nutrient")
     print(f"NUTNED_ identity per crop: worst relative residual {worst_need:.2e}")
     print(f"group need from the crops' own need (sum levl x NITF) against CAPRI's group need: worst {worst_grp:.2e}, "
           f"median {np.median(grp_err) if grp_err else float('nan'):.2e}")

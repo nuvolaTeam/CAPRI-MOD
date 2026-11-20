@@ -17415,6 +17415,170 @@
     "tests": []
    }
   },
+  "env_capri_crop_fertned_parts_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_fertned_parts_2030.csv",
+   "declared_in": "17_environment.sql",
+   "layout": [],
+   "comment": "fert/fertned.gms's arguments per region, crop and nutrient in CAPRI's 2030 simulation data (sim_ini_21730's DATA at \"Y\", fertpar.gms, def_gascoeff.gms), with which the model reruns fertned at its current yields (capri_mod/supply/equations/fertned.py fertned_at_yields: the need, removal and fixation, DATA(crop, FNUT), and the deliveries MANN; KNOWN_ISSUES K189). (tools/build/build_capri_crop_n_coefs.py)",
+   "columns": [
+    {
+     "name": "capri_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "crop",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "nutrient",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "o_hp",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "stra",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "need_main",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "need_stra",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "maxf",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "double_maxf",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "resid_rel",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "resid_pact",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "losf_stra",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "grof_stra",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "capri_region",
+    "crop",
+    "nutrient"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(nutrient IN ('NITF', 'PHOF', 'POTF'))",
+    "(double_maxf IN (0, 1))",
+    "(resid_pact IN (0, 1))"
+   ],
+   "units": [
+    {
+     "item": "double_maxf",
+     "unit": null,
+     "status": "open",
+     "basis": "a 0/1 flag: the crop is in CAPRI's doubleMaxf (fert/fertpar.gms l. 393)"
+    },
+    {
+     "item": "grof_stra",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI DATA(region, \"GROF\", \"STRA\", \"Y\"), the region's straw production"
+    },
+    {
+     "item": "losf_stra",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI DATA(region, \"LOSF\", \"STRA\", \"Y\"), the region's straw losses"
+    },
+    {
+     "item": "maxf",
+     "unit": "U_kgperha",
+     "status": "capri",
+     "basis": "CAPRI MAXF(FNUT) (fert/fertpar.gms l. 384-391), the cap on DATA(crop, FNUT) in kg per ha (fert/fertned.gms l. 180-193)"
+    },
+    {
+     "item": "need_main",
+     "unit": null,
+     "status": "open",
+     "basis": "CAPRI p_cropNeed of the main output (fert/fertned.gms l. 150-151), kg of nutrient per t of output; no unit code for it"
+    },
+    {
+     "item": "need_stra",
+     "unit": null,
+     "status": "open",
+     "basis": "CAPRI p_cropNeed of straw, its nutrient content (DATA(nutrient, \"STRA\", \"Y\")), kg per t of straw; no unit code for it"
+    },
+    {
+     "item": "o_hp",
+     "unit": "U_kgperha",
+     "status": "capri",
+     "basis": "CAPRI DATA(crop, \"O_HP\", \"Y\"), the main output's yield fertned uses (fert/fertned.gms l. 82-96: the year's yield)"
+    },
+    {
+     "item": "resid_pact",
+     "unit": null,
+     "status": "open",
+     "basis": "a 0/1 flag: the crop is in CAPRI's residFnutPact (fert/fertned.gms l. 159)"
+    },
+    {
+     "item": "resid_rel",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "CAPRI p_residRel of the main output (fert/fertned.gms l. 130-140, the fodder's with LOSF / GROF, l. 228)"
+    },
+    {
+     "item": "stra",
+     "unit": "U_kgperha",
+     "status": "capri",
+     "basis": "CAPRI DATA(crop, \"STRA\", \"Y\"), the crop's straw"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_capri_crop_n_coefs",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/def_gascoeff.gms; $SOURCES/gams/fert/fertpar.gms; $SOURCES/gams/sets.gms"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/fert/npk.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_need_yield.py"
+    ]
+   }
+  },
   "env_capri_crop_n_coefs_2030": {
    "file": "capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_n_coefs_2030.csv",
    "declared_in": "17_environment.sql",
@@ -17551,10 +17715,14 @@
     "model": [
      "capri_mod/environmental/nitrogen.py"
     ],
-    "builders": [],
+    "builders": [
+     "build_techn_mix_2030"
+    ],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_capri.py"
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_need_yield.py",
+     "capri_mod/tests/test_techn_mix.py"
     ]
    }
   },
@@ -20724,10 +20892,14 @@
      "capri_mod/data/loaders.py"
     ],
     "builders": [
-     "build_capri_crop_n_coefs"
+     "build_capri_crop_n_coefs",
+     "build_techn_mix_2030"
     ],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_need_yield.py",
+     "capri_mod/tests/test_techn_mix.py"
+    ]
    }
   },
   "env_nh3_factors_capri": {
@@ -20923,16 +21095,6 @@
      "name": "mine_kg_ha",
      "type": "DOUBLE",
      "not_null": true
-    },
-    {
-     "name": "main_share",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "straw_share",
-     "type": "DOUBLE",
-     "not_null": true
     }
    ],
    "primary_key": [
@@ -20949,12 +21111,6 @@
      "unit": null,
      "status": "open",
      "basis": "npk_crop_coefs_2030.levl_kha: unit to be established"
-    },
-    {
-     "item": "main_share",
-     "unit": null,
-     "status": "open",
-     "basis": "npk_crop_coefs_2030.main_share: unit to be established"
     },
     {
      "item": "mine_kg_ha",
@@ -20979,12 +21135,6 @@
      "unit": null,
      "status": "open",
      "basis": "npk_crop_coefs_2030.pool_kg_ha: unit to be established"
-    },
-    {
-     "item": "straw_share",
-     "unit": null,
-     "status": "open",
-     "basis": "npk_crop_coefs_2030.straw_share: unit to be established"
     }
    ],
    "provenance": {
@@ -45486,99 +45636,6 @@
     "tests": []
    }
   },
-  "src_fertpar_doublemaxf": {
-   "file": "capri_data/sources/raw/capri/gams/fert/fertpar_doubleMaxf.parquet",
-   "declared_in": "34_sources_csv.sql",
-   "layout": [],
-   "comment": "CAPRI's set doubleMaxf(PACT) from gams/fert/fertpar.gms l. 393 (\"Activities for which the above maximum loads are doubled\"), extracted by the pattern of tools/build/build_npk_balance_2030.py (moved to tools/build/convert_sources.py), which reads it.",
-   "columns": [
-    {
-     "name": "activity",
-     "type": "VARCHAR",
-     "not_null": true
-    }
-   ],
-   "primary_key": [
-    "activity"
-   ],
-   "unique": [],
-   "foreign_keys": [],
-   "checks": [],
-   "units": [],
-   "provenance": {
-    "nature": "source-extract",
-    "origins": "CAPRI",
-    "builder": "convert_sources",
-    "sources": null
-   },
-   "notes": [],
-   "read_by": {
-    "model": [],
-    "builders": [
-     "build_npk_balance_2030"
-    ],
-    "checks": [],
-    "tests": []
-   }
-  },
-  "src_fertpar_maxf": {
-   "file": "capri_data/sources/raw/capri/gams/fert/fertpar_MAXF.parquet",
-   "declared_in": "34_sources_csv.sql",
-   "layout": [],
-   "comment": "CAPRI's MAXF(FNUT) from gams/fert/fertpar.gms: value the assignments MAXF(\"NITF\"|\"PHOF\"|\"POTF\") = v (l. 387-389), multiplier the following MAXF(FNUT) = MAXF(FNUT) * 2.0 (l. 391) (\"Maximum input of nutrient for activities without yield dependency\", l. 384); extracted by the patterns of tools/build/build_npk_balance_2030.py (moved to tools/build/convert_sources.py), which reads value x multiplier.",
-   "columns": [
-    {
-     "name": "nutrient",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "value",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "multiplier",
-     "type": "DOUBLE",
-     "not_null": true
-    }
-   ],
-   "primary_key": [
-    "nutrient"
-   ],
-   "unique": [],
-   "foreign_keys": [],
-   "checks": [],
-   "units": [
-    {
-     "item": "multiplier",
-     "unit": "U_ratio",
-     "status": "capri",
-     "basis": "a factor (l. 391)"
-    },
-    {
-     "item": "value",
-     "unit": null,
-     "status": "open",
-     "basis": "fertpar.gms states no unit"
-    }
-   ],
-   "provenance": {
-    "nature": "source-extract",
-    "origins": "CAPRI",
-    "builder": "convert_sources",
-    "sources": null
-   },
-   "notes": [],
-   "read_by": {
-    "model": [],
-    "builders": [
-     "build_npk_balance_2030"
-    ],
-    "checks": [],
-    "tests": []
-   }
-  },
   "src_fertpar_p_nfixrate_gras": {
    "file": "capri_data/sources/raw/capri/gams/fert/fertpar_p_nfixRate_gras.parquet",
    "declared_in": "34_sources_csv.sql",
@@ -45750,59 +45807,6 @@
     "model": [],
     "builders": [
      "build_ad_option"
-    ],
-    "checks": [],
-    "tests": []
-   }
-  },
-  "src_gascoeff_p_nutcontcropoutput_stra": {
-   "file": "capri_data/sources/raw/capri/gams/envind/gascoeff_p_nutContCropOutput_STRA.parquet",
-   "declared_in": "34_sources_csv.sql",
-   "layout": [],
-   "comment": "CAPRI's p_nutContCropOutput(\"STRA\", FNUT) from gams/envind/gascoeff.gms l. 359 (TABLE p_nutContCropOutput l. 347: \"retention of pure nutrient in kg per t harvested material\"), the straw row tools/build/build_npk_balance_2030.py read with a pattern (its extraction moved to tools/build/convert_sources.py), the numbers as written (5., 3., 18.); read by tools/build/build_npk_balance_2030.py.",
-   "columns": [
-    {
-     "name": "output",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "nutrient",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "value",
-     "type": "DOUBLE",
-     "not_null": true
-    }
-   ],
-   "primary_key": [
-    "output",
-    "nutrient"
-   ],
-   "unique": [],
-   "foreign_keys": [],
-   "checks": [],
-   "units": [
-    {
-     "item": "value",
-     "unit": null,
-     "status": "open",
-     "basis": "kg per t of straw (the table's text); no unit code for it"
-    }
-   ],
-   "provenance": {
-    "nature": "source-extract",
-    "origins": "CAPRI",
-    "builder": "convert_sources",
-    "sources": null
-   },
-   "notes": [],
-   "read_by": {
-    "model": [],
-    "builders": [
-     "build_npk_balance_2030"
     ],
     "checks": [],
     "tests": []
@@ -48964,7 +48968,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_techn_mix_2030",
-    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/def_gascoeff.gms; $SOURCES/gams/fert/fertpar.gms; $SOURCES/gams/sets.gms; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -56001,7 +56005,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_techn_mix_2030",
-    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/def_gascoeff.gms; $SOURCES/gams/fert/fertpar.gms; $SOURCES/gams/sets.gms; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [
     {

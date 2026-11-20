@@ -20,10 +20,15 @@ Output: capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_n_c
   capri_region, crop, levl, yild, nitf, ncrd, mann, biofix_t (dataOut, as before) and data_nitf (CAPRI's simulation
   DATA(crop, NITF), kg N/ha), biofix_rate (p_nitrFact(crop, BioFix)), data_mann (fertned's MANN, kg N/ha: a check on
   MANN, not used)
+        capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_fertned_parts_2030.csv
+  capri_region, crop, nutrient (NITF, PHOF, POTF) and fertned's arguments (PARTS_COLS), with which the model recomputes
+  DATA(crop, FNUT) and MANN at its current yields as CAPRI's fertned.gms does after a yield change (KNOWN_ISSUES K189)
 Checks printed: the region's removal sum(levl x data_nitf) against CAPRI's EXPPRD; data_mann against MANN.
 
-Use (capri_mod/environmental/nitrogen.py, _capri_crop_n): removal data_nitf, fixation data_nitf x biofix_rate,
-residues MANN less deposition, per ha x the run's yield / the data's yield.
+Use (capri_mod/environmental/nitrogen.py, _capri_crop_n; capri_mod/fert/npk.py, need_yield_factor): removal
+data_nitf, fixation data_nitf x biofix_rate, residues MANN less deposition, at the base yields; at other yields their
+change by fertned's statements on the parts (the need and with it the removal and fixation, the residues by
+DATA_FOUT_resid and DATA_FOUT_straw).
 
 Usage: python tools/build/build_capri_crop_n_coefs.py [<zip>] [--simini-data CSV.GZ] [--gams DIR]
 """
@@ -45,6 +50,12 @@ import gams_sets as G  # noqa: E402
 from capri_mod.supply.equations import fertned as FN, fertpar as FP, def_gascoeff as DG  # noqa: E402
 
 OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "capri_crop_n_coefs_2030.csv"
+OUT_PARTS = OUT.with_name("capri_crop_fertned_parts_2030.csv")
+#: fertned.gms's arguments per region, crop and nutrient (NITF, PHOF, POTF): O_HP (the year's yield, kg/ha), STRA (kg/ha),
+#: p_cropNeed of the main output and of straw (kg per t), MAXF and doubleMaxf (fertpar.gms), p_residRel of the main
+#: output (the fodder's with LOSF / GROF), residFnutPact, the region's straw losses and production (LOSF, GROF of STRA);
+#: in the order of capri_mod/supply/equations/fertned.py fertned_at_yields
+PARTS_COLS = FN.FERTNED_PARTS
 DEPOSITION = ROOT / "capri_data" / "2017" / "environment" / "n_deposition_regional.csv"
 P1 = re.compile(r"'([^']+)'\.''\.'([^']+)'\.'(LEVL|YILD|NITF|NCRD|MANN)'\.'2030'\s+([-0-9.eE+]+)")
 P2 = re.compile(r"'([^']+)'\.'nutNed_biofix'\.'([^']+)'\.'NITF'\.'2030'\s+([-0-9.eE+]+)")
@@ -166,13 +177,16 @@ def simini(path: Path) -> dict:
 
 
 def capri_data_y(region: str, crop: str, D: dict, fleg: dict, T: dict, dep: float) -> dict:
-    """CAPRI's simulation DATA of a region's crop (fertned.gms, fertpar.gms; capri_mod/supply/equations)."""
+    """CAPRI's simulation DATA of a region's crop (fertned.gms, fertpar.gms; capri_mod/supply/equations), and in
+    "parts" the arguments of fertned's statements per nutrient (PARTS_COLS), with which the model recomputes them at
+    other yields."""
     v = lambda a, b: D.get((region, a, b), 0.0)          # noqa: E731
     prods = T["p2y"].get(crop, [])
     lev = v(crop, "LEVL")
     y = sum(v(crop, o) for o in prods)
     ohp = FN.O_HP(y, lev)
-    out, rr = {}, {}
+    out, rr, parts = {}, {}, {}
+    resid_pact = any(T["resid"].get(o, {}).get(n, 0.0) for o in prods for n in FNUT)
     for n in FNUT:
         needs = []
         for o in prods:
@@ -181,7 +195,11 @@ def capri_data_y(region: str, crop: str, D: dict, fleg: dict, T: dict, dep: floa
             rr[n] = rr.get(n, 0.0) + (FN.p_residRel_LOSF(r0, v("LOSF", o), v("GROF", o)) if o in T["fodf"] else r0)
         need_stra = FN.p_cropNeed(v(n, "STRA"), 0.0)
         out[n] = FN.DATA_FNUT_yield(ohp, v(crop, "STRA"), needs, need_stra, T["maxf"][n], crop in T["double"]) if lev > 0 else 0.0
-    resid_pact = any(T["resid"].get(o, {}).get(n, 0.0) for o in prods for n in FNUT)
+        if lev > 0 and len(needs) == 1:       # every crop of PACT_TO_Y has one main output (sets.gms); checked in main()
+            parts[n] = dict(o_hp=ohp, stra=v(crop, "STRA"), need_main=needs[0], need_stra=need_stra, maxf=T["maxf"][n],
+                            double_maxf=int(crop in T["double"]), resid_rel=rr.get(n, 0.0), resid_pact=int(resid_pact),
+                            losf_stra=v("LOSF", "STRA"), grof_stra=v("GROF", "STRA"))
+    out["parts"] = parts
     for f, n in FOUT_T_N.items():
         x = FN.DATA_FOUT_dep(dep) if (f == "MANN" and lev > 0) else 0.0
         if resid_pact and lev > 0:
@@ -211,7 +229,7 @@ def main(src: Path, simini_path: Path, gams: Path):
     D, fleg = simini(simini_path)
     with open(DEPOSITION, newline="") as fh:
         dep = {r["region"]: float(r["deposition_kg_n_per_ha"]) for r in csv.DictReader(fh)}
-    rows, rem, mann_dev, missing = [], defaultdict(float), [], 0
+    rows, rem, mann_dev, missing, parts = [], defaultdict(float), [], 0, []
     for (r, c), d in sorted(v.items()):
         if c in AGG or not d.get("LEVL") or "NITF" not in d:
             continue
@@ -225,11 +243,22 @@ def main(src: Path, simini_path: Path, gams: Path):
         rows.append([r, c, d.get("LEVL"), d.get("YILD", ""), d.get("NITF"), d.get("NCRD", ""), d.get("MANN", ""),
                      d.get("BIOFIX", ""), "" if cd is None else cd["NITF"], "" if cd is None else cd["biofix_rate"],
                      "" if cd is None else cd["MANN"]])
+        if cd is not None:
+            for n, p in cd["parts"].items():
+                parts.append([r, c, n] + [p[k] for k in PARTS_COLS])
     with open(OUT, "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["capri_region", "crop", "levl", "yild", "nitf", "ncrd", "mann", "biofix_t", "data_nitf", "biofix_rate",
                     "data_mann"])
         w.writerows(rows)
+    multi = sorted(a for a, o in T["p2y"].items() if len(o) > 1)
+    if multi:
+        raise ValueError(f"crops with several main outputs in PACT_TO_Y, not written to {OUT_PARTS.name}: {multi}")
+    with open(OUT_PARTS, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["capri_region", "crop", "nutrient"] + list(PARTS_COLS))
+        w.writerows(parts)
+    print(len(parts), "rows ->", OUT_PARTS.name)
     ratios = sorted(rem[r] / exp[r] for r in rem if exp.get(r))
     within = lambda t: sum(abs(x - 1.0) < t for x in ratios)        # noqa: E731
     print(len(rows), "rows,", len({r[0] for r in rows}), "regions ->", OUT.name, f"({missing} crop rows without CAPRI's "

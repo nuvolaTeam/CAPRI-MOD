@@ -20,6 +20,11 @@ DATA_FNUT (the K185 rule for the crops without a main output) stays as it was.
 """
 from __future__ import annotations
 
+#: the arguments of fertned_at_yields that CAPRI's data fix, in its order: the columns of
+#: capri_crop_fertned_parts_2030.csv (tools/build/build_capri_crop_n_coefs.py)
+FERTNED_PARTS = ("o_hp", "stra", "need_main", "need_stra", "maxf", "double_maxf", "resid_rel", "resid_pact", "losf_stra",
+                 "grof_stra")
+
 
 def O_HP(yield_RS: float, LEVL: float, O_HP_MS: float = None, yield_MS: float = None) -> float:
     r"""The crop's main-output yield fertned uses (O_HP, kg per ha of the main output) in the simulation year.
@@ -192,6 +197,102 @@ def DATA_FOUT_straw(DATA_FOUT: float, STRA: float, LOSF_STRA: float, GROF_STRA: 
     if not g:
         return float(DATA_FOUT or 0.0)
     return float(DATA_FOUT or 0.0) + float(STRA or 0.0) * 0.001 * float(LOSF_STRA or 0.0) / g * float(content_STRA or 0.0)
+
+
+def O_HP_yieldGrowth(O_HP_BAS: float, p_yieldGrowth: float) -> float:
+    r"""DATA(RS, crop, "O_HP", "Y") after a change of the crop's yield: the base's O_HP times the yield's growth.
+
+    CAPRI's GAMS (capmod/define_inputs.gms l. 80-82 and 89-92; run after the scenario's yield shifts, capmod.gms l. 772,
+    and by supply/endog_yields.gms l. 139 after each price-driven yield update, before fert/fertned.gms, l. 148):
+
+        p_yieldGrowth(RS,%pacts%) $ p_dataCopy(RS,%pacts%,"LEVL","BAS")
+          = SUM(PACT_TO_Y(%pacts%,curRows) $ p_dataCopy(RS,%pacts%,curRows,"BAS"),
+              p_dataCopy(RS,%pacts%,curRows,"Y")/p_dataCopy(RS,%pacts%,curRows,"BAS") );
+        ...
+        p_dataCopy(RS,%pacts%,"O_HP","BAS")  = DATA(RS,%pacts%,"O_HP","BAS");
+        *
+        DATA(RS,%pacts%,"O_HP","Y") $ p_yieldGrowth(RS,%pacts%)
+             = p_dataCopy(RS,%pacts%,"O_HP","BAS") * p_yieldGrowth(RS,%pacts%);
+
+    In this project's notation O_HP(y) = O_HP_BAS x y / y_BAS. The model applies it to its own base, the simulation
+    year's O_HP at CAPRI's 2030 reference yield y0 (O_HP above: the year's yield), with p_yieldGrowth = y / y0.
+
+    Departure from CAPRI (not ported, small): CAPRI's base here is the base period's O_HP and yield ("BAS"), whose ratio
+    in sim_ini_21730 is 1 within 0.3% (median 1.000, 10th-90th percentile 0.997-1.003, 12,750 crop rows); after the
+    scenario's yield shifts capmod/def_fert_and_requirements.gms l. 126 zeroes O_HP and fertned rebuilds it from the
+    shifted yield itself (O_HP above), so the ratio enters only CAPRI's price-driven yield updates."""
+    return float(O_HP_BAS or 0.0) * float(p_yieldGrowth or 0.0)
+
+
+def fertned_at_yields(o_hp: float, stra: float, need_main: float, need_stra: float, maxf: float, double_maxf,
+                      resid_rel: float, resid_pact, losf_stra: float, grof_stra: float, yldFac: float,
+                      yldFac_STRA: float, AtmDep: float = 0.0, nitrogen: bool = True) -> tuple:
+    r"""(DATA(RS, crop, FNUT, "Y"), DATA(RS, crop, FOUT, "Y")) of one crop and nutrient at other yields than the data's:
+    CAPRI's fert/fertned.gms rerun on them, as supply/endog_yields.gms does after each price-driven yield update (l. 139,
+    148: capmod/define_inputs.gms, then fertned.gms) and as the simulation's first call does after the scenario's yield
+    shifts (capmod.gms l. 757, 772, 1084).
+
+    The statements, in CAPRI's order (each in its own function of this module):
+
+        O_HP      = O_HP_yieldGrowth(o_hp, yldFac)                        define_inputs.gms l. 80-92
+        STRA      = stra x yldFac_STRA                                    capmod/shift_yields.gms l. 45-49 (every output
+                                                                          of PACT_TO_O, straw included, by the scenario's
+                                                                          yield change; endog_yields.gms l. 111-116
+                                                                          updates the main output only)
+        DATA(FNUT) = DATA_FNUT_yield(O_HP, STRA, [need_main], need_stra, maxf, double_maxf)   fertned.gms l. 180-193
+        DATA(FOUT) = DATA_FOUT_dep(AtmDep)  (MANN; 0 for MANP, MANK)                          fertned.gms l. 242-249
+        DATA(FOUT) = DATA_FOUT_resid(DATA(FOUT), DATA(FNUT), resid_rel)   residFnutPact only  fertned.gms l. 252-271
+        DATA(FOUT) = DATA_FOUT_straw(DATA(FOUT), STRA, losf_stra, grof_stra, need_stra)        fertned.gms l. 277-286
+
+    The arguments are fertned's at CAPRI's 2030 reference (tools/build/build_capri_crop_n_coefs.py,
+    capri_crop_fertned_parts_2030.csv): o_hp the year's main-output yield and stra the straw (kg/ha), need_main and
+    need_stra p_cropNeed of the main output and of straw (kg per t; straw has no residue relation, so its need is its
+    content, the content l. 277-286 uses), maxf and double_maxf fertpar.gms's MAXF and doubleMaxf, resid_rel the main
+    output's p_residRel (with the fodder's LOSF / GROF, l. 228), resid_pact residFnutPact (l. 159), losf_stra and
+    grof_stra the region's straw losses and production. yldFac: the main-output yield over the data's; yldFac_STRA: the
+    straw's (the scenario's yield shift, without the price response). AtmDep: the region's deposition (kg N/ha;
+    p_nitrBalance(RS, "Mineralis") is not set in CAPRI's 2030 data, DATA_FOUT_dep). nitrogen: the nutrient is NITF
+    (MANN carries the deposition)."""
+    ohp = O_HP_yieldGrowth(o_hp, yldFac)
+    s = float(stra or 0.0) * float(yldFac_STRA)
+    n = DATA_FNUT_yield(ohp, s, [need_main], need_stra, maxf, bool(double_maxf))
+    f = DATA_FOUT_dep(AtmDep) if nitrogen else 0.0
+    if resid_pact:
+        f = DATA_FOUT_resid(f, n, resid_rel)
+    f = DATA_FOUT_straw(f, s, losf_stra, grof_stra, need_stra)
+    return n, f
+
+
+def p_technFact_MANN(technFact_NITF: float, DATA_MANN: float, AtmDep: float, Mineralis: float = 0.0) -> float:
+    r"""p_technFact(RS, crop, "MANN", A): a technology variant's factor on the crop's N deliveries to the soil, after
+    fertned.gms (the factor sim_ini_21730 carries, +-0.2, is the techf.gms factor of every output, before fertned runs
+    in the simulation year).
+
+    CAPRI's GAMS (fert/fertned.gms l. 324-335):
+
+          p_technFact(RS,%pacts%,"MANN",A) $ (DATA(RS,%pacts%,"MANN",%Y%)
+                                                  $ DATA(RS,%pacts%,"NITF",%Y%)
+                                                  $ p_technFact(RS,%pacts%,"LEVL",A)
+                                                  $ tact(%pacts%))
+
+              = ( (p_technFact(RS,%pacts%,"NITF",A)+1) *
+                      (DATA(RS,%pacts%,"MANN",%Y%) -p_nitrBalance(RS,"AtmDep")
+                                                   -p_nitrBalance(RS,"Mineralis"))
+
+                     + p_nitrBalance(RS,"AtmDep")
+                     + p_nitrBalance(RS,"Mineralis") )
+                           / DATA(RS,%pacts%,"MANN",%Y%) - 1.;
+
+    In this project's notation, with tf the variant's p_technFact(crop, NITF, A) (its yield factor, l. 205-206), M the
+    crop's DATA(MANN) and d the deposition (plus mineralisation, not set in CAPRI's 2030 data: DATA_FOUT_dep):
+    p_technFact(MANN, A) = ((1 + tf)(M - d) + d) / M - 1 = tf (M - d) / M: only the residues move with the variant's
+    yield. (P2O5 and K2O keep the yield factor, l. 314-318.) Without M or DATA(NITF) the statement does not apply:
+    None (the caller keeps the factor it had)."""
+    M = float(DATA_MANN or 0.0)
+    if not M:
+        return None
+    d = float(AtmDep or 0.0) + float(Mineralis or 0.0)
+    return ((float(technFact_NITF) + 1.0) * (M - d) + d) / M - 1.0
 
 
 def DATA_FNUT(need_data: float, O_HP: float) -> float:

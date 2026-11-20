@@ -78,15 +78,18 @@ class PhosphorusBlock:
                 block builds it
         MINFER  the block's P2O5 purchases (v_netPutQuant); without the block, CAPRI's NUTNED_ for P summed over the
                 crop groups with the block's data (p_balance.nutned_mineral; at the base levels the base purchases)
-        CRESID  sum over crops of area x CAPRI's residue output PCRD x yield / base yield
-        EXPPRD  sum over crops of area x CAPRI's retention PRET x yield / base yield (both with the grassland split
-                column's GRAE - GRAI difference)
+        CRESID  sum over crops of area x (CAPRI's residue output PCRD + the change of DATA(crop, MANP) from the base
+                yield to the current one, fert/fertned.gms rerun: capri_mod.fert.npk.fout_yield_change)
+        EXPPRD  sum over crops of area x CAPRI's retention PRET (DATA(crop, PHOF)) x its factor of the yield
+                (fert/fertned.gms rerun: need_yield_factor) (both with the grassland split column's GRAE - GRAI
+                difference)
         RUNANI  sum over animals of manure P2O5 x CAPRI's N runoff share RunTot (_p_runtot)
         IMPORT, SURTOT, SURSOI  CAPRI's sums (p_balance.balance).
-        Removal and residues follow the yield as the N accounts do (CAPRI: e_EXPPRD and e_CRESID scale with the yield
-        factors of its mitigation and pesticide options)."""
+        Removal and residues follow the yield as the N accounts do: as CAPRI's data move with its yields (fertned.gms
+        rerun after the scenario's yield shifts and each price-driven yield update; until 20 November 2026 both moved
+        by yield / base yield, the rule of CAPRI's in-solve yield factors: KNOWN_ISSUES K189)."""
         from capri_mod.environmental import p_balance as _pb
-        from capri_mod.fert.npk import NPKData, PERM_NGRP
+        from capri_mod.fert.npk import NPKData, PERM_NGRP, fout_yield_change
         from capri_mod.supply.equations.supply_model.n_surplus import e_CRESID, e_EXCRET, e_EXPPRD
         if hasattr(acts, "to_dict"):
             acts = acts.to_dict()
@@ -107,9 +110,19 @@ class PhosphorusBlock:
         for a_, k_ in self._split_manure_heads(region, supply_result, "dmanp_rel").items():
             if a_ in h:
                 h[a_] = h[a_] + k_
-        # removal and residues (EXPPRD, CRESID)
-        expprd = sum(e_EXPPRD(x[c], C.coef(cr, c)[0], yr[c]) for c in CROPS)
-        cresid = sum(e_CRESID(x[c], C.coef(cr, c)[1], yr[c]) for c in CROPS)
+        # removal and residues (EXPPRD, CRESID), CAPRI's data at the current yields (fert/fertned.gms rerun), with the
+        # straw's part at the yields before the price response
+        _pf = (getattr(supply_result, "yield_price_factor", None) or {}) if supply_result is not None else {}
+        nfp, dres = {}, {}
+        for c in CROPS:
+            b_ = float(y0.get(c, 0.0) or 0.0)
+            ys_ = b_ * yr[c] / float(_pf[c]) if float(_pf.get(c, 0.0) or 0.0) > 0 else None
+            nfp[c] = (need_yield_factor(region, c, b_, b_ * yr[c], ys_, "P") if (yr[c] > 0 and b_ > 0)
+                      else (1.0 if yr[c] > 0 else 0.0))
+            d_ = fout_yield_change(region, c, b_, b_ * yr[c], ys_, "P") if b_ > 0 else None
+            dres[c] = 0.0 if d_ is None else d_
+        expprd = sum(e_EXPPRD(x[c], C.coef(cr, c)[0], nfp[c]) for c in CROPS)
+        cresid = sum(e_CRESID(x[c], C.coef(cr, c)[1] + dres[c], 1.0) for c in CROPS)
         # excretion (EXCRET)
         manp = {a: D.manure_per_head(region, "P", a) for a in ANIMALS}
         excret = sum(e_EXCRET(h[a], manp[a]) for a in ANIMALS)
@@ -146,14 +159,14 @@ class PhosphorusBlock:
             from capri_mod.supply.equations.fertned import DATA_FNUT
             need = {c: DATA_FNUT(v, float(y0.get(c, 0.0) or 0.0)) for c, v in need.items()}
             own_perm = {c: own[c] * sum(v for g, v in (sh.get(c) or {}).items() if g in PERM_NGRP) for c in CROPS}
-            _pf = (getattr(supply_result, "yield_price_factor", None) or {}) if supply_result is not None else {}
-            sq = {}
-            for c in CROPS:
-                b_ = float(y0.get(c, 0.0) or 0.0)
-                ys_ = b_ * yr[c] / float(_pf[c]) if float(_pf.get(c, 0.0) or 0.0) > 0 else None
-                sq[c] = (need_yield_factor(region, c, b_, b_ * yr[c], None if ys_ is None else float(ys_), "P")
-                         if (yr[c] > 0 and b_ > 0) else (1.0 if yr[c] > 0 else 0.0))
-            m = _pb.nutned_mineral(D, cr, need, own, own_perm, pool, mine0, xb, x, sq, E0, applied)
+            sq = nfp
+            # the own residues and the pool at the current yields, as the block's (fertilisation.py; K189): the change of
+            # DATA(crop, MANP) on the base coefficients, the pool's scaled as its base (npk_region's pool_scale)
+            kp = float(D.region(cr, "P").pool_scale) if D.region(cr, "P") is not None else 1.0
+            pool_y = {c: (v + kp * dres[c]) if v > 0 else v for c, v in pool.items()}
+            own_perm_y = {c: own_perm[c] * ((own[c] + dres[c]) / own[c]) if own[c] > 0 else own_perm[c] for c in CROPS}
+            m = _pb.nutned_mineral(D, cr, need, own, own_perm, pool, mine0, xb, x, sq, E0, applied,
+                                   own_perm_y=own_perm_y, pool_y=pool_y)
             if m is None:
                 raise RuntimeError(f"no CAPRI P need data for {region} ({cr})")
             minfer = max(0.0, m)

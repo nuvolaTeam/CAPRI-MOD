@@ -146,6 +146,7 @@ attribute's getattr did.
 - `last_feed_dm`: the feed used, dry matter
 - `last_feed_t`: the feed used, tonnes
 - `last_npk`: the fertiliser outputs by nutrient
+- `last_npk_cres`: the residue pool's coefficients of the last fertilisation block, {nutrient: [(column, t per unit)]} (the crops' at the solve's yields, KNOWN_ISSUES K189)
 - `n_solves`: solves of the region (a counter)
 - `nlp_fallback_log`: the NLP form's fallbacks of the run (metadata nlp_fallback)
 - `nlp_jump`: the jump check's record (outer history's jump_check)

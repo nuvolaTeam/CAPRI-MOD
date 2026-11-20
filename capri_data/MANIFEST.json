@@ -3675,6 +3675,20 @@
     "builder": "build_ammonia_herd_inputs"
    }
   },
+  "capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_fertned_parts_2030.csv": {
+   "description": "fert/fertned.gms's arguments per region, crop and nutrient in CAPRI's 2030 simulation data (sim_ini_21730's DATA at \"Y\", fertpar.gms, def_gascoeff.gms), with which the model reruns fertned at its current yields (capri_mod/supply/equations/fertned.py fertned_at_yields: the need, removal and fixation, DATA(crop, FNUT), and the deliveries MANN; KNOWN_ISSUES K189). (tools/build/build_capri_crop_n_coefs.py)",
+   "kind": "coefficients",
+   "rows": 22320,
+   "columns": 13,
+   "units": "U_1000t, U_kgperha, U_ratio",
+   "read_by_model": [
+    "capri_mod/fert/npk.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_capri_crop_n_coefs"
+   }
+  },
   "capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_n_coefs_2030.csv": {
    "description": "CAPRI's per-crop nitrogen coefficients per region, 2030: the reported values of its 2030 reference and its simulation data (fert/fertned.gms, fert/fertpar.gms), the removal and fixation of the gross N balance (KNOWN_ISSUES K191). (tools/build/build_capri_crop_n_coefs.py)",
    "kind": "coefficients",
@@ -3923,7 +3937,7 @@
    "description": "CAPRI's crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_, (tools/build/build_npk_balance_2030.py)",
    "kind": "coefficients",
    "rows": 23511,
-   "columns": 10,
+   "columns": 8,
    "units": "to be established (value_units: open)",
    "read_by_model": [
     "capri_mod/environmental/nitrogen.py",
@@ -9947,38 +9961,6 @@
    "rows": 59,
    "columns": 2,
    "units": "to be established (value_units: open)",
-   "origin": {
-    "nature": "source-extract",
-    "builder": "convert_sources"
-   }
-  },
-  "capri_data/sources/raw/capri/gams/envind/gascoeff_p_nutContCropOutput_STRA.parquet": {
-   "description": "CAPRI's p_nutContCropOutput(\"STRA\", FNUT) from gams/envind/gascoeff.gms l. 359 (TABLE p_nutContCropOutput l. 347: \"retention of pure nutrient in kg per t harvested material\"), the straw row tools/build/build_npk_balance_2030.py read with a pattern (its extraction moved to tools/build/convert_sources.py), the numbers as written (5., 3., 18.); read by tools/build/build_npk_balance_2030.py.",
-   "kind": "coefficients",
-   "rows": 3,
-   "columns": 3,
-   "units": "to be established (value_units: open)",
-   "origin": {
-    "nature": "source-extract",
-    "builder": "convert_sources"
-   }
-  },
-  "capri_data/sources/raw/capri/gams/fert/fertpar_MAXF.parquet": {
-   "description": "CAPRI's MAXF(FNUT) from gams/fert/fertpar.gms: value the assignments MAXF(\"NITF\"|\"PHOF\"|\"POTF\") = v (l. 387-389), multiplier the following MAXF(FNUT) = MAXF(FNUT) * 2.0 (l. 391) (\"Maximum input of nutrient for activities without yield dependency\", l. 384); extracted by the patterns of tools/build/build_npk_balance_2030.py (moved to tools/build/convert_sources.py), which reads value x multiplier.",
-   "kind": "coefficients",
-   "rows": 3,
-   "columns": 3,
-   "units": "U_ratio",
-   "origin": {
-    "nature": "source-extract",
-    "builder": "convert_sources"
-   }
-  },
-  "capri_data/sources/raw/capri/gams/fert/fertpar_doubleMaxf.parquet": {
-   "description": "CAPRI's set doubleMaxf(PACT) from gams/fert/fertpar.gms l. 393 (\"Activities for which the above maximum loads are doubled\"), extracted by the pattern of tools/build/build_npk_balance_2030.py (moved to tools/build/convert_sources.py), which reads it.",
-   "kind": "coefficients",
-   "rows": 4,
-   "columns": 1,
    "origin": {
     "nature": "source-extract",
     "builder": "convert_sources"

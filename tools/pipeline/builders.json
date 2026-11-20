@@ -993,6 +993,7 @@
     "$SOURCES/gams/sets.gms"
    ],
    "outputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_fertned_parts_2030.csv",
     "capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_n_coefs_2030.csv"
    ]
   },
@@ -4395,9 +4396,6 @@
     "capri_data/codes/eu_market_blocks.csv",
     "capri_data/codes/regional_units.csv",
     "capri_data/codes/rms_to_rm.csv",
-    "capri_data/sources/raw/capri/gams/envind/gascoeff_p_nutContCropOutput_STRA.parquet",
-    "capri_data/sources/raw/capri/gams/fert/fertpar_MAXF.parquet",
-    "capri_data/sources/raw/capri/gams/fert/fertpar_doubleMaxf.parquet",
     "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_price_ratios_2030.csv",
     "capri_mod/settings/defaults.toml"
    ],
@@ -5515,6 +5513,8 @@
    "builder": "build_techn_mix_2030",
    "args": [],
    "inputs": [
+    "capri_data/2017/environment/n_deposition_regional.csv",
+    "capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_n_coefs_2030.csv",
     "capri_data/codes/model_activities.csv",
     "capri_data/codes/model_activity_classes.csv",
     "capri_data/codes/capri_member_state_codes.csv",
@@ -5524,6 +5524,7 @@
     "capri_data/sources/intermediate/technology/techn_fact_2030.parquet"
    ],
    "code": [
+    "capri_mod/supply/equations/fertned.py",
     "tools/build/build_techn_mix_2030.py",
     "tools/lib/_grep.py",
     "tools/lib/_model_codes.py",
@@ -6181,9 +6182,6 @@
     "capri_data/sources/raw/capri/dat/water/cropwat_p_cropwatReq.parquet",
     "capri_data/sources/raw/capri/dat/water/irrishare_p_irriShare.parquet",
     "capri_data/sources/raw/capri/gams/baseline/labour_ageline_p_minLabourPerAct.parquet",
-    "capri_data/sources/raw/capri/gams/envind/gascoeff_p_nutContCropOutput_STRA.parquet",
-    "capri_data/sources/raw/capri/gams/fert/fertpar_MAXF.parquet",
-    "capri_data/sources/raw/capri/gams/fert/fertpar_doubleMaxf.parquet",
     "capri_data/sources/raw/capri/gams/fert/fertpar_p_nfixRate_gras.parquet",
     "capri_data/sources/raw/capri/gams/fert/fertpar_p_nitrFact_RALL_GRAE_BioFix.parquet",
     "capri_data/sources/raw/capri/gams/inputs/yieldIY_p_inputDemandFactor.parquet",

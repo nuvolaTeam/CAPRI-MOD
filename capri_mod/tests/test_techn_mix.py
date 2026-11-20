@@ -34,10 +34,19 @@ def test_mix_tables_cover_the_same_crops_and_carry_capri_factors():
     # T1 gets less of the technology-differentiated premiums (rd_logic.gms: -0.5 / +0.5, N2K -1 / +1)
     assert (tm.prem_diff_share <= 0).all() and (tm.prem_diff_share >= -2).all()
     assert (tm.rest_cost_diff_eur_ha >= 0).all()
-    # the crop residues' N, P2O5, K2O move with the yield (p_technFact MANN, MANP, MANK +-0.2; K181), 0 where CAPRI's
-    # data give the crop no such factor
-    for c in ("mann_diff", "manp_diff", "mank_diff"):
+    # the crop residues' P2O5 and K2O move with the yield (p_technFact MANP, MANK +-0.2; K181), 0 where CAPRI's data give
+    # the crop no such factor; N only on the part of DATA(MANN) that is not deposition (fert/fertned.gms l. 324-335,
+    # fertned.py p_technFact_MANN; K189): 0.4 x (MANN - deposition) / MANN with CAPRI's simulation MANN
+    for c in ("manp_diff", "mank_diff"):
         assert set(crops[c].round(12)) <= {0.0, 0.4} and (crops[c] == 0.4).mean() > 0.95, c
+    cn = pd.read_csv(ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment"
+                     / "capri_crop_n_coefs_2030.csv", float_precision="round_trip").set_index(["capri_region", "crop"])
+    dep = pd.read_csv(ROOT / "capri_data" / "2017" / "environment" / "n_deposition_regional.csv",
+                      float_precision="round_trip").set_index("region").deposition_kg_n_per_ha
+    de = tm[(tm.region == "DE210000") & (tm.activity == "SWHE")].iloc[0]
+    M, d_ = float(cn.at[("DE210000", "SWHE"), "data_mann"]), float(dep["DE210000"])
+    assert de.mann_diff == pytest.approx(0.4 * (M - d_) / M, rel=1e-12)
+    assert (crops.mann_diff < 0.4 - 1e-9).mean() > 0.95
     assert (pm.g_zz >= 0).all() and (pm.g_xx_extra >= 0).all()
 
 
@@ -111,7 +120,8 @@ def test_residue_pool_follows_the_technology_mix(es42_greendeal):
     for P2O5 and K2O): a crop's mix column z (ha moved from T2 to T1) brings 0.4 x its residues per ha. Until K181
     (18 November 2026) the model's pool had the crops' columns alone, so under the Green Deal (z < 0) its crops kept
     the residue N CAPRI's lose with the shift to T2 (ES42 at CAPRI's prices: 2.6 kt N). At the Green Deal's solution
-    the residues the NLP distributes equal the crops' residues at their mean technology, plus the catch crops' N."""
+    the residues the NLP distributes equal the crops' residues at their mean technology, plus the catch crops' N; the
+    crops' coefficients at the solve's yields (fert/fertned.gms rerun, K189), the mix columns' res_diff x those."""
     R = "ES420000"
     res, rm = es42_greendeal
     z = dict(getattr(rm.res, "last_mix_z", None) or {})
@@ -123,10 +133,24 @@ def test_residue_pool_follows_the_technology_mix(es42_greendeal):
     co = co[co.capri_region == R]
     cover = dict(getattr(rm.res, "cover_solved", None) or {})
     npk = rm.res.last_npk
+    # the pool's coefficients the solve used: the crops' at the solve's yields (fert/fertned.gms rerun, K189), their
+    # change on CAPRI's 2030 coefficients
+    acts = list(rm.acts)
+    zc = {c_: a for a, c_ in (getattr(rm.ev, "mix_cols", None) or {}).items()}
     for nut, col in (("N", "mann_diff"), ("P", "manp_diff"), ("K", "mank_diff")):
         pool = co[co.nutrient == nut].set_index("model_crop").pool_kg_ha
-        crops = float(sum(float(scn.get(a, 0.0)) * float(v) for a, v in pool.items() if v > 0))        # t
-        mix = float(sum(z[a] * float(tm.at[a, col]) * float(pool[a]) for a in z if a in pool.index and pool[a] > 0))
+        C = rm.res.last_npk_cres[nut]
+        cc = {acts[j]: v for j, v in C if j < len(acts)}
+        cz = {zc[j]: v for j, v in C if j in zc}
+        assert set(cc) == {a for a, v in pool.items() if v > 0 and a in acts}, nut
+        # the Green Deal's yields move them, within the change a solve's yields can bring
+        assert any(abs(v - float(pool[a])) > 1e-9 for a, v in cc.items()), nut
+        for a, v in cc.items():
+            assert abs(v - float(pool[a])) <= 0.5 * abs(float(pool[a])) + 1e-9, (nut, a, v, float(pool[a]))
+        for a, v in cz.items():
+            assert v == pytest.approx(cc[a] * float(tm.at[a, col]), rel=1e-12), (nut, a)
+        crops = float(sum(float(scn.get(a, 0.0)) * v for a, v in cc.items()))        # t
+        mix = float(sum(z[a] * v for a, v in cz.items() if a in z))
         catch = 1000.0 * float(cover["delta"]) * float(cover["biofix"]) if nut == "N" else 0.0
         dist = sum(v for (g, s), v in npk[nut]["flows"].items() if s == "CRES")
         assert mix < -0.01 * crops, (nut, mix, crops)        # the shift to T2 takes residues out

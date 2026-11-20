@@ -29,6 +29,36 @@ INSERT INTO value_units VALUES
   ('env_capri_crop_n_coefs_2030', 'biofix_rate', 'U_ratio', 'capri', 'CAPRI p_nitrFact(crop, BioFix), fert/fertpar.gms l. 259, 295-308: fixed N per unit of DATA(crop, NITF) (share)'),
   ('env_capri_crop_n_coefs_2030', 'data_mann', 'U_kgperha', 'capri', 'CAPRI DATA(crop, MANN, "Y") of the simulation year, fert/fertned.gms l. 242-286 (a check on mann)');
 
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_fertned_parts_2030.csv
+CREATE TABLE env_capri_crop_fertned_parts_2030 (
+    capri_region VARCHAR NOT NULL,
+    crop VARCHAR NOT NULL,
+    nutrient VARCHAR NOT NULL CHECK (nutrient IN ('NITF', 'PHOF', 'POTF')),
+    o_hp DOUBLE NOT NULL,
+    stra DOUBLE NOT NULL,
+    need_main DOUBLE NOT NULL,
+    need_stra DOUBLE NOT NULL,
+    maxf DOUBLE NOT NULL,
+    double_maxf BIGINT NOT NULL CHECK (double_maxf IN (0, 1)),
+    resid_rel DOUBLE NOT NULL,
+    resid_pact BIGINT NOT NULL CHECK (resid_pact IN (0, 1)),
+    losf_stra DOUBLE NOT NULL,
+    grof_stra DOUBLE NOT NULL,
+    PRIMARY KEY (capri_region, crop, nutrient)
+);
+COMMENT ON TABLE env_capri_crop_fertned_parts_2030 IS 'fert/fertned.gms''s arguments per region, crop and nutrient in CAPRI''s 2030 simulation data (sim_ini_21730''s DATA at "Y", fertpar.gms, def_gascoeff.gms), with which the model reruns fertned at its current yields (capri_mod/supply/equations/fertned.py fertned_at_yields: the need, removal and fixation, DATA(crop, FNUT), and the deliveries MANN; KNOWN_ISSUES K189). (tools/build/build_capri_crop_n_coefs.py)';
+INSERT INTO value_units VALUES
+  ('env_capri_crop_fertned_parts_2030', 'o_hp', 'U_kgperha', 'capri', 'CAPRI DATA(crop, "O_HP", "Y"), the main output''s yield fertned uses (fert/fertned.gms l. 82-96: the year''s yield)'),
+  ('env_capri_crop_fertned_parts_2030', 'stra', 'U_kgperha', 'capri', 'CAPRI DATA(crop, "STRA", "Y"), the crop''s straw'),
+  ('env_capri_crop_fertned_parts_2030', 'need_main', NULL, 'open', 'CAPRI p_cropNeed of the main output (fert/fertned.gms l. 150-151), kg of nutrient per t of output; no unit code for it'),
+  ('env_capri_crop_fertned_parts_2030', 'need_stra', NULL, 'open', 'CAPRI p_cropNeed of straw, its nutrient content (DATA(nutrient, "STRA", "Y")), kg per t of straw; no unit code for it'),
+  ('env_capri_crop_fertned_parts_2030', 'maxf', 'U_kgperha', 'capri', 'CAPRI MAXF(FNUT) (fert/fertpar.gms l. 384-391), the cap on DATA(crop, FNUT) in kg per ha (fert/fertned.gms l. 180-193)'),
+  ('env_capri_crop_fertned_parts_2030', 'double_maxf', NULL, 'open', 'a 0/1 flag: the crop is in CAPRI''s doubleMaxf (fert/fertpar.gms l. 393)'),
+  ('env_capri_crop_fertned_parts_2030', 'resid_rel', 'U_ratio', 'capri', 'CAPRI p_residRel of the main output (fert/fertned.gms l. 130-140, the fodder''s with LOSF / GROF, l. 228)'),
+  ('env_capri_crop_fertned_parts_2030', 'resid_pact', NULL, 'open', 'a 0/1 flag: the crop is in CAPRI''s residFnutPact (fert/fertned.gms l. 159)'),
+  ('env_capri_crop_fertned_parts_2030', 'losf_stra', 'U_1000t', 'capri', 'CAPRI DATA(region, "LOSF", "STRA", "Y"), the region''s straw losses'),
+  ('env_capri_crop_fertned_parts_2030', 'grof_stra', 'U_1000t', 'capri', 'CAPRI DATA(region, "GROF", "STRA", "Y"), the region''s straw production');
+
 -- file: capri_data/baselines/capri_greendeal_ref/1730/environment/capri_gnb_components_2030.csv
 CREATE TABLE env_capri_gnb_components_2030 (
     capri_region VARCHAR NOT NULL,
@@ -360,8 +390,6 @@ CREATE TABLE env_npk_crop_coefs_2030 (
     pool_kg_ha DOUBLE NOT NULL,
     own_kg_ha DOUBLE NOT NULL,
     mine_kg_ha DOUBLE NOT NULL,
-    main_share DOUBLE NOT NULL,
-    straw_share DOUBLE NOT NULL,
     PRIMARY KEY (capri_region, model_crop, nutrient)
 );
 COMMENT ON TABLE env_npk_crop_coefs_2030 IS 'CAPRI''s crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_, (tools/build/build_npk_balance_2030.py)';
@@ -370,9 +398,7 @@ INSERT INTO value_units VALUES
   ('env_npk_crop_coefs_2030', 'need_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.need_kg_ha: unit to be established'),
   ('env_npk_crop_coefs_2030', 'pool_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.pool_kg_ha: unit to be established'),
   ('env_npk_crop_coefs_2030', 'own_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.own_kg_ha: unit to be established'),
-  ('env_npk_crop_coefs_2030', 'mine_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.mine_kg_ha: unit to be established'),
-  ('env_npk_crop_coefs_2030', 'main_share', NULL, 'open', 'npk_crop_coefs_2030.main_share: unit to be established'),
-  ('env_npk_crop_coefs_2030', 'straw_share', NULL, 'open', 'npk_crop_coefs_2030.straw_share: unit to be established');
+  ('env_npk_crop_coefs_2030', 'mine_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.mine_kg_ha: unit to be established');
 
 -- file: capri_data/baselines/capri_greendeal_ref/1730/environment/npk_region_2030.csv
 CREATE TABLE env_npk_region_2030 (

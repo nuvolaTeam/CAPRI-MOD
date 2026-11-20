@@ -188,6 +188,7 @@ class RegionalResults(_Slots):
         "last_feed_dm",       # the feed used, dry matter
         "last_feed_t",        # the feed used, tonnes
         "last_npk",           # the fertiliser outputs by nutrient
+        "last_npk_cres",      # {nutrient: [(column, t per unit)]}: the residue pool's coefficients of the last block
         "n_solves",           # solves of the region (a counter)
         "nlp_fallback_log",   # the NLP form's fallbacks of the run (metadata nlp_fallback)
         "nlp_jump",           # the jump check's record (outer history's jump_check)
