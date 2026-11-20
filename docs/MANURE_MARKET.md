@@ -80,7 +80,12 @@ nutrient. Each outer iteration the pools clear in the form `outer_loop.manure_po
   of the last solve, with CAPRI's slope b = 0.01 supply / calibration dual
   (`baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv`, `tools/build/build_manure_pool_market.py`);
   its trade costs are the regional NLP's (the constants from its trade columns' reduced costs); the pools' surplus less
-  the trade costs between them is maximised as a convex QP (Clarabel), the pool balances' duals the prices.
+  the trade costs between them is maximised as CAPRI writes and solves it, "using nlp maximizing v_mPoolBenefits"
+  (simu_manure_market.gms l. 160): its variables and four rows (e_mPoolExcessSupply, e_mPoolSurplus, e_mPoolClear,
+  e_mPoolBenefits) with IPOPT for CAPRI's CONOPT, started from the clearing before, the prices the duals of
+  e_mPoolExcessSupply (`outer_loop.manure_pool_solver` "nlp", the default since 20 November 2026; "qp" the same problem
+  as a convex QP with Clarabel, the form before, which needs the problem convex). On convex problems the two give the
+  same clearing (prices within 1e-9, shipments 1e-7; capri_mod/tests/test_manure_pool_nlp.py).
 - "schedules" (capri-mod's own, the default before): each region's exact piecewise-linear schedule from the reduced
   costs of its trade columns at its solution, the primal spatial equilibrium on those schedules (Clarabel), a
   Broyden-type correction of each pool's response.

@@ -20775,7 +20775,8 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_capri.py"
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_manure_pool_nlp.py"
     ]
    }
   },
