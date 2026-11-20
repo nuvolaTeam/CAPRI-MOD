@@ -21,6 +21,11 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 import numpy as np
+from capri_mod.market.equations.market_model.armington import (SupBalM_, arm2QuantShares_, domSalesShares_,
+                                                               importShares_)
+from capri_mod.market.equations.market_model.prices import (MarketPriceAgg_weights, PMrk_, arm1PriceAgg_,
+                                                            arm1PriceAgg_term, arm2PriceAgg_, arm2PriceAgg_term,
+                                                            impPrice_)
 from capri_mod.params import param, param_table
 
 
@@ -66,14 +71,14 @@ class BilateralCommodity:
         """PMrk_ as price ratios: (PA + Pd0 - PA0) / Pd0 at the Armington prices PA (EUR/t), every region (use on
         pmrk_cells only). Floored at 1e-3: CAPRI bounds the market price below at P_lowLimitFactPrice x PMrk
         (set_start_val.gms l. 527) and widens the bound where it binds (market.bounds, in progress)."""
-        return np.maximum((np.asarray(PA, float) + self.Pd0 - self.PA0) / self.Pd0, 1e-3)
+        return np.maximum(PMrk_(np.asarray(PA, float), self.Pd0, self.PA0), 1e-3)
 
     def mpagg_weights(self, S, D):
         """CAPRI's MarketPriceAgg_ weights (arm/market_model.gms l. 3088-3101): 1 + v_Arm1Quant + v_prodQuant where the
         region has no Armington quantity in CAPRI's data (no use at the calibration point), per region; numpy arrays or
         CasADi expressions."""
         nod = (np.asarray(self.D0, float) <= 0) if self.D0 is not None else np.zeros(len(self.regions), bool)
-        return [1.0 + D[i] + (S[i] if nod[i] else 0.0) for i in range(len(self.regions))]
+        return MarketPriceAgg_weights(S, D, nod)
 
     def calibrate(self, S0: np.ndarray) -> None:
         """Closure at the model's own base supply S0: CAPRI's trade flows are kept, domestic sales absorb the
@@ -499,7 +504,7 @@ class BilateralCommodity:
         exporter's market price plus the transport cost; flows between the rows of one importer (the EU's trade
         blocks) carry none. sig = (bilateral, global sigmas): the quotas' rates at these sigmas and at r (the joint
         solve's trial point, _bilateral_inner_trq); without it the stored offsets and the current sigmas."""
-        p = self.a * r[None, :] + self.b
+        p = impPrice_(self.a, r[None, :], self.b)
         if sig is not None and (self.trq_quotas or self.trq_globals):
             p = p + self._trq_off(np.asarray(r, dtype=float), sig[0], sig[1])
         elif (self.trq_quotas or self.trq_globals) and self.trq_offset is not None:
@@ -523,11 +528,11 @@ class BilateralCommodity:
         Pd = self.Pd0 * r
         s1, s2 = self.s1, self.s2
         with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
-            pm = np.where(self.beta > 0, self.beta * np.maximum(p, 1e-9) ** (1.0 - s2), 0.0).sum(axis=1)
-            PM = np.where(self._has_imp, pm ** (1.0 / (1.0 - s2)), self.PM0)
-            pa = (np.where(self._has_dom, self.dd * Pd ** (1.0 - s1), 0.0)
-                  + np.where(self._has_imp, self.dm * PM ** (1.0 - s1), 0.0))
-            PA = np.where(self._has_dom | self._has_imp, pa ** (1.0 / (1.0 - s1)), self.PA0)
+            pm = np.where(self.beta > 0, arm2PriceAgg_term(self.beta, np.maximum(p, 1e-9), s2), 0.0).sum(axis=1)
+            PM = np.where(self._has_imp, arm2PriceAgg_(pm, s2), self.PM0)
+            pa = (np.where(self._has_dom, arm1PriceAgg_term(self.dd, Pd, s1), 0.0)
+                  + np.where(self._has_imp, arm1PriceAgg_term(self.dm, PM, s1), 0.0))
+            PA = np.where(self._has_dom | self._has_imp, arm1PriceAgg_(pa, s1), self.PA0)
         return Pd, PM, PA, p
 
     def flows(self, D: np.ndarray, r: np.ndarray, p: Optional[np.ndarray] = None, pre=None):
@@ -535,9 +540,10 @@ class BilateralCommodity:
         (Pd, PM, PA, p) of prices(r, p) when the caller has them already (same values, computed once)."""
         Pd, PM, PA, p = pre if pre is not None else self.prices(r, p)
         with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
-            DS = np.where(self._has_dom, D * self.dd * (PA / Pd) ** self.s1, 0.0)
-            M = np.where(self._has_imp, D * self.dm * (PA / PM) ** self.s1, 0.0)
-            X = np.where(self.beta > 0, M[:, None] * self.beta * (PM[:, None] / np.maximum(p, 1e-9)) ** self.s2, 0.0)
+            DS = np.where(self._has_dom, domSalesShares_(D, self.dd, PA, Pd, self.s1), 0.0)
+            M = np.where(self._has_imp, arm2QuantShares_(D, self.dm, PA, PM, self.s1), 0.0)
+            X = np.where(self.beta > 0, importShares_(M[:, None], self.beta, PM[:, None], np.maximum(p, 1e-9), self.s2),
+                         0.0)
         X[np.arange(len(D)), np.arange(len(D))] = DS
         return X, PA
 
@@ -545,7 +551,7 @@ class BilateralCommodity:
                  pre=None) -> np.ndarray:
         """Supply balance of every region's own good: S - DS - exports (1000 t)."""
         X, _ = self.flows(D, r, p, pre=pre)
-        return S - X.sum(axis=0)
+        return SupBalM_(S, X.sum(axis=0))
 
 
 class _TrqCells:

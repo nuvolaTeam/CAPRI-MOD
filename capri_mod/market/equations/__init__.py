@@ -10,7 +10,9 @@ written.
                     demand), dairy.py (the dairy processing), processing.py (oilseed crushing and the by-products),
                     biofuels.py (the biofuel processing, supply and demand), supply.py (the market's supply
                     functions and the young-animal markets), land.py (the land market and the land-use change outside
-                    the EU), fudging.py (the smooth max of the supply cells), prices.py (the consumer price)
+                    the EU), fudging.py (the smooth max of the supply cells), armington.py (the supply balance and
+                    the Armington nests' quantities), prices.py (the import prices, the Armington price indexes, the
+                    consumer price, the market prices of the regions without production and of the policy blocks)
 
 Each function's docstring gives CAPRI's GAMS statement, the CAPRI star 3.0 file and lines it follows, the equation in
 this project's notation, how the model's quantities map to CAPRI's symbols, and the departures from CAPRI's equation.

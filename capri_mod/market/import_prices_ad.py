@@ -21,6 +21,8 @@ from typing import List, Tuple
 
 import numpy as np
 
+from capri_mod.market.equations.market_model.prices import impPrice_
+
 _CACHE = {}
 
 
@@ -129,7 +131,7 @@ def import_price_function(sc):
             return grp_expr[gi] if gi is not None else a0[i, j] * r[j] + tc[i, j]
     out = []
     for (i, j) in cl:
-        p = a[i, j] * r[j] + b[i, j]
+        p = impPrice_(a[i, j], r[j], b[i, j])
         if has_trq:
             off = 0
             if (i, j) in ta:

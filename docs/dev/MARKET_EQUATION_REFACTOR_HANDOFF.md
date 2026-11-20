@@ -21,6 +21,7 @@ aa91c1c (the supply phase merged, 19e7679; the checks against star 3.0, aa91c1c)
 | M1 | the demand system: GLDemandFS_, GLDemandGS_, GLDemandGis_, XiS_ (market_model/demand.py) and CPri_ (prices.py), called by capri_mod/market/demand_ad.py; consFudge_ not written (the model's floor at 0) | the GL functions identical bit for bit (15 region sizes and the block's 2,035 cells: serialised algorithms, values, Jacobians); the captured market solves replayed bit for bit (the capture test's 2, the five-unit run's 21); the five-unit Green Deal run identical (15 lines of `$.meta.`, the reference's capture setting among them) |
 | M2 | processing, feed, dairy and biofuels: ProcMargO_, ProcNQ_ (ProcNQ_margin, ProcNQ_price), ProcFudge_, ProcO_, procYield_, MaprFeed_ (market_model/processing.py); feedBlkPrice_, feedBlk_, FeedShareEqu_, FeedNQ_, FeedBal_ (feed.py); ProcMargM_, DairyNQ_, FatsProtBal_ (dairy.py); BiofFeedCost_, BiofFeedCostAgg_, Biof_, ProdBiof_, BiofPriceRel_, SupplyBiof_, biofDemshare_, biofDem_ (biofuels.py); called by processing_ad.py, feed.py, feed_ad.py, use_ad.py, dairy.py, dairy_ad.py, biofuel_ad.py. MaprBiof_ and prodQuantBiofBy_ stay running sums (ported as terms); CSugarPrice_ empty in the step; FeedFudge_ goes with ProdFudge_ to M3 (supply_system_ad.prod_fudge) | the CasADi functions a cold market solve builds (486) serialised and compared, the old code against the new: 484 identical, the other 2 differ between two runs of the same code (section 5); the captured solves replayed bit for bit (2 and 21); the five-unit Green Deal run identical; the full-EU run moved to the phase's end (section 3) |
 | M3 | supply in the market, fudging and land: ProdNQ_ (ProdNQ_hess), yaniMarket_ (market_model/supply.py); ProdFudge_ (fudging.py; FeedFudge_ in its form); rentFromProdpriceLand_, LandSupplyMNL_, LndSupplyEqualsDemand_, LinkLuWithShares_, luClassFinal_ and luClassInitial_, FocLUC_ with derivativeOfGammaLUC_ (land.py); called by supply_ad.py, supply_system_ad.py, luc.py. ProdA_ ported as terms (eu_rows); NumeraireLand_ and LandSupplyRatio_ as LandSupplyMNL_; rmsYaniMarket_, derivativeOfNormalLUC_, derivativeOfSpikeLUC_ empty in the step; Yield_, LandAgrFromYld_, ScaleLandAgr_ and ProdPriceFudge_ not in the model (a recursive block); PPri_ moved to M4 (the price chain) | the module's CasADi functions after a cold solve (486) identical, the hash seed fixed; the assembled market system (plain and lifted with the fudge modes and the lifted use cells; the GD runs do not build it, market.bounds none) identical: its serialised functions, F and its Jacobian at the start for the three fudge modes; the captured solves replayed bit for bit (2 and 21); the five-unit Green Deal run identical |
+| M4 | trade and prices: SupBalM_, arm2QuantShares_, domSalesShares_, importShares_ (market_model/armington.py); impPrice_ (its exporter-price part), arm2PriceAgg_ and arm1PriceAgg_ (with their terms), PMrk_, MarketPriceAgg_'s weights (prices.py); called by the trade blocks' three forms (bilateral.py, trade_ad.py, trade_system_ad.py), import_prices_ad.py and market_system_ad.py. ArmBal1_, expQuant_, TradeFlowsAgg_ and PPri_ ported as terms; tradeFlowFudge_ and HicksNeutral_ empty in the step (modArmington off); FlipFlop_ CAPRI's solver device; nonDoubleZeroExports_ moved to M5 (the export subsidies) | the module's 486 CasADi functions and the assembled market system identical to M3's (PYTHONHASHSEED=0); the captured solves replayed bit for bit (2 and 21), which run the trade blocks' NumPy form; the five-unit Green Deal run identical |
 
 ## 3. The gate's references (at the phase's starting commit 444a47f, worktree outside the repository)
 
@@ -102,3 +103,24 @@ aa91c1c (the supply phase merged, 19e7679; the checks against star 3.0, aa91c1c)
 - **PPri_** moved to M4: the producer price equals the market price ratio times the base (bilateral.py prices, Pd =
   Pd0 r) and the support terms are in ProdNQ_'s parameters; it belongs with PMrk_ and MarketPriceAgg_.
 - Left for M4-M5: 44 rows of the step without a status.
+
+## 7. What M4 found (for the main line; nothing fixed)
+
+- **The trade blocks in three forms**: the Armington nests and the supply balance are written in NumPy (bilateral.py,
+  the default solve), CasADi per region (trade_ad.py, the trade function with its exact Jacobian) and CasADi per cell
+  (trade_system_ad.py, the assembled system). They now call the same elementwise functions; the sums over the flows
+  stay each form's (NumPy's sum, CasADi's sum1, a running sum), so the forms round differently. A single form would
+  need a decision of the main line (the default solve's speed against one code path).
+- **MarketPriceAgg_'s average in two forms** (bilateral.py border_spec, NumPy; import_prices_ad.py, CasADi): the same
+  weights (mpagg_weights, now MarketPriceAgg_weights), two sums.
+- **PMrk_'s floor**: the default solve floors the market price ratio of a region without production at 1e-3
+  (bilateral.py pmrk_ratios); the assembled system's PMrk_ row does not (market_system_ad.py, as its comment says).
+- **PPri_ held in ProdNQ_'s parameters**: with the support per tonne fixed and the margin relative (additivePPriMargin
+  off), the producer price's change is the market price's times the margin; the model folds it into ProdNQ_'s h. A
+  scenario that changes the support (PSEi, PSEd, AREP) would need PPri_ written out.
+- **The modified Armington system is off in the step**: v_gammaCES, v_Hicks and pv_theta fixed at 1 and
+  p_arm2Commit 0 (arm/cal_armington.gms l. 82-89, market_model.gms l. 225), so HicksNeutral_ and tradeFlowFudge_ are
+  empty and importShares_ and arm2PriceAgg_ are the standard CES forms the model writes.
+- **FlipFlop_** (v_dummy =E= 10) is CAPRI's device to solve its square system as an NLP; the model solves the square
+  system (no row).
+- Left for M5: 28 rows of the step without a status (border 11, intervention 17, nonDoubleZeroExports_ among them).

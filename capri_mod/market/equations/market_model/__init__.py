@@ -19,8 +19,10 @@ its first equation is written.
     land.py         land: rentFromProdpriceLand_, LandSupplyMNL_, LndSupplyEqualsDemand_,             1657-1995
                     LinkLuWithShares_, luClassFinal_, luClassInitial_, FocLUC_ (derivativeOfGammaLUC_)
     fudging.py      the fudging functions: ProdFudge_ (FeedFudge_ in its form)                       2376-2434
-    prices.py       PRICES: CPri_                                                                    2842-3130
+    armington.py    the adding up and the Armington system: SupBalM_, arm2QuantShares_,              2595-2841
+                    domSalesShares_, importShares_
+    prices.py       PRICES: impPrice_, arm1PriceAgg_, arm2PriceAgg_, CPri_, PMrk_, MarketPriceAgg_    2842-3130
 
-The other blocks, by the inventory: lulucf, aggregation, net_trade, armington, border, intervention, objective
+The other blocks, by the inventory: lulucf, aggregation, net_trade, border, intervention, objective
 (tools/refactor/market_equations_inventory.py BLOCKS).
 """
