@@ -41,6 +41,7 @@ functions. **A move, not a change: results identical to 1e-10**, checked by a ga
 | N12a | the feeding rows of the regional NLP: REQSE_ (with its total form for the split and option columns) and FEDUSE_ in supply_model/feeding.py, QUADRF_ with QUADRF1_ in objective.py; SupplementPerc_ classified (K93) | the NLPs identical (3 regions x 6 variants: expressions and parameter vectors bit for bit); gate with N12b |
 | N12b | SUPBAL_ for the non-tradable fodder (supply_model/markets.py: the QP's fodder rows, supply/livestock.py _fodder_rows, and the NLP's equalities); INPANI_ classified (its use per head in the net revenues) | 221 x 2 QPs identical bit for bit; the NLPs identical (3 regions x 6 variants); gate at N12b (one run for N11a-N12b) |
 | N13 | the objective: LINEAR_'s activity terms (LINEAR_netRevenue, supply_module._compute_net_revenues), QUADRA_ with GRPLEVL_ (QUADRA_lin, QUADRA_), OBJEQF_ in objective.py; labCap_ not written, fixTechfShares_ empty in the step, e_exogenousLand classified | the NLPs identical (3 regions x 6 variants); the net revenues and linear coefficients identical bit for bit for the 221 regions (base and a price shock); gate with the next batch |
+| N15 | the sugar block's six equations empty in the step (quotas 0 + eps from 2017, so p_technFact(SUGB, VCOF) = 0); e_UaaNoSlak, LandBalSlak_ and e_nitrBal_ classified (N8's and N3's open rows) | docs only |
 
 Not on the branch (on purpose):
 - `docs/equations/` (the equation book, page 01 the regional N balance) and its README paragraph: waiting for the
@@ -212,12 +213,16 @@ comes, check against CAPRI's _pw feed version and register what differs.
   types at their data level (supply/cal_land_nests.gms l. 687-689); the model has no column for them. ARTIF is a market
   land type in CAPRI and held at its level in the model (capri_data/codes/model_land_types.csv): a porting difference
   already recorded there.
+- **The gate of N11a-N12b** (at e09a50c9 against the K185 reference, the Hessian measured): identical, 14 lines of
+  `$.meta.`; the 14th, run_manifest.environment.platform, is the container's kernel after a restart.
 - **A run that loads the market supply Hessian from the cache** (.cache/market_supply_hessian, keyed by the code's
   fingerprint) differs from one that measures it at about 1e-8 relative (46 against 51 products recorded): a
   reference and its comparison run must both measure it (after a restart, clear the cache of a killed run).
-- CAPRI's sugar quota equations (sugar.py's block) are empty in the 2030 step: their condition
-  p_technFact(SUGB, VCOF) is set to 0 where DATA(QUTS, SUGB) <= eps (supply/prep_sim.gms l. 171), and the quotas
-  ended in 2017; to confirm from CAPRI's 2030 DATA (N15).
+- CAPRI's sugar quota equations (sugar.py's block) are empty in the 2030 step (N15): their condition
+  p_technFact(SUGB, VCOF) is set to 0 where DATA(QUTS, SUGB) <= eps (supply/prep_sim.gms l. 171), and CAPMOD sets the
+  quotas to 0 + eps from 2017 for the Aglink versions without them (policy/reformsugarquotas.gms l. 136-142), the 2030
+  baseline's aglink2023dgAgri among them. CAPRI's 2030 QUTS is not in the project's parquets, so the data are not
+  checked directly.
 - e_nitrBal_ (l. 3464-3466) is not written: the model computes no accumulation (v_nitrBalance(Accumul)).
 - n_leaching.py cited "supply_model.gms l. 3413" for LEACHN_'s "+ v_ammoAppLeaAgg": l. 3430 in star 3.0 (the
   moved text in n_flow.py cites l. 3430).
