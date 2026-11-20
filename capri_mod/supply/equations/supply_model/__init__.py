@@ -21,8 +21,8 @@ written.
                     (GASTOTNETF_, RUNTOTNETF_, GASRUNTOTNETF_); the leaching (LEACHN_, AMMOAGG_)
     fert_limits.py  the fertiliser application limits: e_synNMax                                  4501-4601
     markets.py      the market balances: SUPBAL_ (the non-tradable fodder)                         4602-4674
-    objective.py    the objective: LINEAR_'s terms on the mineral N purchases; QUADRF_ (the       4675-5056,
-                    feeds' PMP terms, with QUADRF1_)                                              5358-5433
+    objective.py    the objective: LINEAR_'s terms (the mineral N purchases, the activities' net    4675-5056,
+                    revenues); QUADRF_ with QUADRF1_, QUADRA_ with GRPLEVL_, OBJEQF_              5358-5433
     mitigation.py   the mitigation options: GHG_Mit_Cost_ (the targFertMan and targFertSyn bases)  4130-4392,
                                                                                                   5057-5357
     premiums.py     the premiums: winterCover_, catcMiti_, ecoSetAside_'s catch crops,              1887-2026

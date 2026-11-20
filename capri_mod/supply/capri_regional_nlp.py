@@ -321,7 +321,7 @@ class CapriRegionalNLP:
         import casadi as ca
         from capri_mod.supply.equations.supply_model.feeding import FEDUSE_, REQSE_, REQSE_split
         from capri_mod.supply.equations.supply_model.markets import SUPBAL_fodder_use
-        from capri_mod.supply.equations.supply_model.objective import QUADRF_
+        from capri_mod.supply.equations.supply_model.objective import OBJEQF_, QUADRA_, QUADRF_
         self.spec = spec
         self._psyms, self._pvals = [], []
         Q = np.asarray(spec["Q"], float)
@@ -407,7 +407,7 @@ class CapriRegionalNLP:
         Qs = 0.5 * (Q + Q.T)
         # the PMP quadratic is kept apart: its Hessian is the matrix itself, given to IPOPT directly (_derivatives)
         self._Qsx = self._pmat(Qs)
-        quad = 0.5 * ca.mtimes([y.T, self._Qsx, y])
+        quad = QUADRA_(self._Qsx, y)
         obj = obj + ca.dot(self._pv(q0), y)
         self.q0 = q0
 
@@ -601,7 +601,7 @@ class CapriRegionalNLP:
             self._fert_tech_pending = None
 
         self._obj_rest, self._y = obj, y
-        obj = obj + quad
+        obj = OBJEQF_(obj, quad)
         self.X, self.obj, self.g = X, obj, ca.vertcat(*g_rows)
         self.lbg, self.ubg = np.array(lbg, float), np.array(ubg, float)
         self.lbx, self.ubx = np.array(lbx, float), np.array(ubx, float)

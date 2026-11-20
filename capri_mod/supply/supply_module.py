@@ -799,6 +799,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # values the wrong quantity. That is why gross_margin was dominated by
         # pigs and barely moved under policy.
         rev_coef = getattr(self.data, "livestock_revenue_coef", None)
+        from capri_mod.supply.equations.supply_model.objective import LINEAR_netRevenue   # CAPRI's LINEAR_ per unit
 
         r = {}
         prem = {}
@@ -921,7 +922,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 # feed cost change; the national feed table that stood here as a fallback, feed_requirements.csv, had
                 # no builder and was removed on 29 October 2026, KNOWN_ISSUES K99)
             # Crop gross margin (EUR/ha); animal gross margin (EUR/head)
-            r[act] = revenue - cost + payment
+            r[act] = LINEAR_netRevenue(revenue, cost, payment)
             prem[act] = payment
 
         self.net_revenues = pd.Series(r)
@@ -1789,7 +1790,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # widened bounds and then carries on with the non-optimal solution, recorded (supply/simu_supply.gms,
         # widen_bounds.gms: p_INFES): here JRC121368's relaxed N target is tried, then IPOPT's last point at the region's
         # own problem is kept and recorded (_nlp_last_point); the landscape floor is kept as CAPRI keeps it (K84)
-        c_lin = self.f - self.net_revenues.values
+        from capri_mod.supply.equations.supply_model.objective import QUADRA_lin
+        c_lin = QUADRA_lin(self.f, self.net_revenues.values)          # QUADRA_'s linear part less LINEAR_'s
         aug = self._land_augment(A_ub, b_ub, c_lin, x0) if getattr(self, "use_land_market", False) else None
         if aug is not None:
             # CAPRI LAND MARKET: land-type areas as variables (see _land_augment)

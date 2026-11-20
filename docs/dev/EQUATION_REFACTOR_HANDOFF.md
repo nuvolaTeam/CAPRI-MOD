@@ -40,6 +40,7 @@ functions. **A move, not a change: results identical to 1e-10**, checked by a ga
 | N11b | the surplus block's and the fertiliser limits' other rows classified (inventory statuses with evidence): SURSOI_REST_, nGrpLevl_, nMax_, lsDensMax_ and e_manureLimit_ empty in the step; e_SURSOIkt, e_SURSOIHa, e_GASRUNMIN and e_GASRES not written (the soil surplus, read by NO3LEA_: N14) | docs only |
 | N12a | the feeding rows of the regional NLP: REQSE_ (with its total form for the split and option columns) and FEDUSE_ in supply_model/feeding.py, QUADRF_ with QUADRF1_ in objective.py; SupplementPerc_ classified (K93) | the NLPs identical (3 regions x 6 variants: expressions and parameter vectors bit for bit); gate with N12b |
 | N12b | SUPBAL_ for the non-tradable fodder (supply_model/markets.py: the QP's fodder rows, supply/livestock.py _fodder_rows, and the NLP's equalities); INPANI_ classified (its use per head in the net revenues) | 221 x 2 QPs identical bit for bit; the NLPs identical (3 regions x 6 variants); gate at N12b (one run for N11a-N12b) |
+| N13 | the objective: LINEAR_'s activity terms (LINEAR_netRevenue, supply_module._compute_net_revenues), QUADRA_ with GRPLEVL_ (QUADRA_lin, QUADRA_), OBJEQF_ in objective.py; labCap_ not written, fixTechfShares_ empty in the step, e_exogenousLand classified | the NLPs identical (3 regions x 6 variants); the net revenues and linear coefficients identical bit for bit for the 221 regions (base and a price shock); gate with the next batch |
 
 Not on the branch (on purpose):
 - `docs/equations/` (the equation book, page 01 the regional N balance) and its README paragraph: waiting for the
@@ -205,6 +206,12 @@ comes, check against CAPRI's _pw feed version and register what differs.
   animals at their price change, INPANI_). Porting differences (kept): the usable fodder per ha is CAPRI's base use
   over the base area (docs/FODDER_BALANCE.md), the base gap is held as a constant (K36, K46), a 1e-9 tolerance on the
   QP's row; CAPRI's genet_rep option (its factor on ICOW use in INPANI_ and on BEEF in SUPBAL_) is not in the model.
+- **The objective (N13):** CAPRI's v_labCap is free in the step (p_fixLabCapViaPMP = 0, capmod.gms l. 557) and its
+  scale is 1 (set only in sens/sens.gms), so labCap_ defines an unused variable and OBJEQF_'s PMP terms carry factor
+  1; fixTechfShares_ needs p_fixTechfShares, set only in sens/sens.gms. e_exogenousLand fixes CAPRI's non-market land
+  types at their data level (supply/cal_land_nests.gms l. 687-689); the model has no column for them. ARTIF is a market
+  land type in CAPRI and held at its level in the model (capri_data/codes/model_land_types.csv): a porting difference
+  already recorded there.
 - **A run that loads the market supply Hessian from the cache** (.cache/market_supply_hessian, keyed by the code's
   fingerprint) differs from one that measures it at about 1e-8 relative (46 against 51 products recorded): a
   reference and its comparison run must both measure it (after a restart, clear the cache of a killed run).
