@@ -37,6 +37,7 @@ functions. **A move, not a change: results identical to 1e-10**, checked by a ga
 | N9c | the set-aside block and greenOverShot_ classified (inventory statuses with evidence) | docs only |
 | N10 | the entitlement limit (overShotEntl_ with sumEntl_) and the permanent grassland rule (permGrasGreening_) in premiums.py | identical bit for bit to the old code (3,000 random cases); gate at N10 (one run for N9a-N10) |
 | N11a | the N surplus's terms in the accounts and, through them, the QP's N-surplus row (e_EXCRET, e_GASRUNANI, e_ATMOSD, e_CRESID, e_EXPPRD, e_BIOFIX; environmental/nitrogen.py, phosphorus.py) and the leaching's input shares (nminInputSh_, nmanInputSh_) in n_surplus.py; SURTOT_idlHis on e_ATMOSD and e_CRESID | the N and P accounts, every activity's unit balance and the leaching identical bit for bit for the 221 regions (base and scaled yields, with intensity factors); gate with N11b |
+| N11b | the surplus block's and the fertiliser limits' other rows classified (inventory statuses with evidence): SURSOI_REST_, nGrpLevl_, nMax_, lsDensMax_ and e_manureLimit_ empty in the step; e_SURSOIkt, e_SURSOIHa, e_GASRUNMIN and e_GASRES not written (the soil surplus, read by NO3LEA_: N14) | docs only |
 
 Not on the branch (on purpose):
 - `docs/equations/` (the equation book, page 01 the regional N balance) and its README paragraph: waiting for the
@@ -177,6 +178,20 @@ comes, check against CAPRI's _pw feed version and register what differs.
   requirement is set, also with a zero floor (CAPRI: only where the floor exceeds eps); permGrasGreening_ has a
   (1 - 1e-9) tolerance, is skipped where grass is below supply.absent_level, and is written twice (the cap rule and
   the land market's grassland floor).
+- **Porting differences of N11 (for the main line; kept in the move):** the accounts' e_GASRUNANI share is CAPRI's
+  2030 reference (manure_housing_losses_2030.csv) without the options' factors (lowNFeed, rumFedEff, mlkYld; the NLP's
+  ManureNPK_ has them); e_CRESID, e_EXPPRD and e_BIOFIX move CAPRI's 2030 reference coefficients with the yield ratio
+  (CAPRI: v_yldMit and v_yldPestFac, for e_CRESID on the part above deposition and mineralisation); the LegSh
+  option's factor on OFAR's fixation is not in the model; the input sum of nminInputSh_ and nmanInputSh_ leaves out
+  the catch crops' BioFix (environmental/nitrogen.py leaching).
+- **nMax_ is off in CAPRI's Green Deal step:** pol_input/greendeal/greendeal_scenarios.gms l. 200-204 sets
+  p_nMaxPerHa(MIN) = 0 after the shocks ("do not activate equ nmax_"), so the crop groups' mineral caps are the inner
+  model's f2f regulation alone, as the model's NLP writes them (inner_fert.py e_fertDistReguMax). The comments that
+  name nMax_ for "NNcrp" (supply_module.py l. 1376, policy_module.py l. 136) are to be corrected on the main line; the
+  QP's mineral_N row is the model's own sum over the groups. docs/SUPPLY_MODEL_MAP.md l. 95's "inactive or reporting"
+  for nGrpLevl_, nMax_ and lsDensMax_ holds: all three are empty in the step.
+- CAPRI's soil surplus (e_SURSOIkt, e_SURSOIHa, e_GASRUNMIN, e_GASRES) is read by NO3LEA_ (l. 3609-3613): for N14,
+  set it against the model's leached N by source (supply/n_leaching.py crop_n, envind/gases.gms l. 696-745).
 - **A run that loads the market supply Hessian from the cache** (.cache/market_supply_hessian, keyed by the code's
   fingerprint) differs from one that measures it at about 1e-8 relative (46 against 51 products recorded): a
   reference and its comparison run must both measure it (after a restart, clear the cache of a killed run).
