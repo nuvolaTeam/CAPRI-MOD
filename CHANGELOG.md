@@ -212,6 +212,14 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   thousand ha). Test: test_greening_rows_follow_capris_envconst.
 - **K186 registered (open):** CAPRI's catcMiti_ and the winter cover option's cost scale with the current land, the
   model's with the base crop area; no effect in the Green Deal step (its winter cover share fixed, CATC free).
+- **K188:** the catch crops take CAPRI's reference form at the calibration point and in every run without an
+  emission tax (`supply.reference_winter_cover = "capri"`): the CATC activity at its input cost, without its BioFix N
+  in the residue pool, as CAPRI's 2030 reference has no mitigation options (%ghgAbatement% off; in its 82 EU units
+  with catch crops their input cost is 0.3 x the ecological set-aside rule's dual). Where they fill the rule, its
+  multiplier at the base is now CAPRI's, so fallow and set-aside carry its support and lose it when the Green Deal's
+  catch crops make the rule slack. At CAPRI's Green Deal prices (five units): Alentejo's fallow 18.2 -> 3.1 thousand
+  ha (CAPRI 3.3), set-aside 20.6 -> 11.7 (11.6); IT32 set-aside 62.9 -> 36.8 (34.5); PL61 fallow 60.1 -> 40.8
+  (40.1); the five units' absolute area gap 528 -> 399 thousand ha. Test: test_catch_crops_take_capris_reference_form.
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against

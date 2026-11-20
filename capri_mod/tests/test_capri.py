@@ -4403,6 +4403,42 @@ def test_winter_cover_is_chosen_in_the_nlp_form(model):
     assert abs(w1 - cs["base"] / cs["uaa"]) < 1e-9 and abs(cs["cascade_share"] - w1) < 1e-12 and abs(w0 - w1) < 1e-9
 
 
+def test_catch_crops_take_capris_reference_form(model):
+    """K188: CAPRI's 2030 reference runs without mitigation options (%ghgAbatement% off, its default,
+    capmod/set_global_variables.gms l. 215): its catch crops are the CATC activity at its input cost, and where they
+    fill the ecological set-aside rule the rule's dual is that cost over their weight 0.3 (dataOut D_OBJC =
+    -D_ecoSetAside in its 82 EU units with catch crops; PT18 49.53 EUR/ha, the rule 165). The calibration takes that
+    form (supply.reference_winter_cover "capri"): in PT18, whose base has catch crops, the reference form's calibration
+    term is zero (the rule's multiplier takes the input cost), the option's own term (for the runs with an emission tax)
+    follows from the same residual, and the baseline keeps the base share; with a tax the option is chosen again."""
+    regs = ["PT180000"]
+    model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
+    mo = model.supply_module._models["PT180000"]
+    assert mo._wc_reference() and mo._wc_fixed()
+    cs = mo._catc_spec()
+    assert cs is not None and cs["m0"] > 0 and cs["k1"] > 0
+    eco = mo._cap_rules_spec()["ecoSetAside"]
+    da = mo.par.nlp_cal["dabat"]
+    part = eco["catc_w"] * cs["uaa"] * cs["m0"]
+    if eco["catc_fill"]:
+        # the catch crops fill the rule (CAPRI's 2030 base, the probes of 20 November: PT18, IT32, PL61): the rule's
+        # multiplier takes their input cost, k1 / 0.3, and the reference form needs no calibration term
+        assert eco["base_gap"] > -part and abs(da[("catc_ref",)]) < 1e-6 * cs["k1"], (eco, da)
+    else:
+        # this base (2017's in the test data) meets the rule without them: CAPRI's calibration would leave CATC at
+        # zero and the rule slack; the catch crops are held at the base share, at their input cost in a scenario
+        assert eco["base_gap"] <= -part and da[("catc_ref",)] == 0.0, (eco, da)
+    assert np.isfinite(da[("catc",)])                                          # the option's term, for a tax run
+    cv = mo.res.cover_solved
+    assert abs(cv["share"] - cs["m0"]) < 2e-3 and abs(cv["cascade_share"] - cs["m0"]) < 1e-12
+    _tax = getattr(mo.seen, "ghg_tax", 0.0)
+    mo.seen.ghg_tax = 50.0
+    try:
+        assert not mo._wc_reference() and not mo._wc_fixed()
+    finally:
+        mo.seen.ghg_tax = _tax
+
+
 def test_interface_audit_fixes():
     """KNOWN_ISSUES K52: a base year without data is refused; a trajectory demand factor is refused rather than
     ignored; the proxy registry scenarios are gone."""

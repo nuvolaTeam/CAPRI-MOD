@@ -728,6 +728,8 @@ class CapriRegionalNLP:
                 sc_ = max(sum(f[2] for f in flows if f[1] == s_), 1.0)
                 if s_ == "EXCR":
                     self.excr_rows[nut] = (len(g_rows), sc_)
+                if s_ == "CRES":
+                    self.cres_rows = dict(getattr(self, "cres_rows", None) or {}, **{nut: (len(g_rows), sc_)})
                 g_rows.append((tot - rhs) * pv(1.0 / sc_)); lbg.append(0.0); ubg.append(0.0)
             # the regulations (e_fertDistPartialRegu, e_fertDistReguMax): a beta density on a group's flow with its
             # support (0, max per ha x the group's area) - the Green Deal's mineral caps by crop group ("f2f") and the
@@ -900,13 +902,16 @@ class CapriRegionalNLP:
         # winterCover_, e_minCoverCrops): the share m of UAAR, cost per ha of UAAR (costParLin + pmpParLin) m
         # + 1/2 pmpParSqr m^2 (+ the calibration's linear term), the land not under winter cover as its limit, its
         # BioFix N in the arable residue pool (fertDistCres_), its share in the loss cascade's runoff (RUNSURFN_)
-        self._catc_m = None; self.catc_n = None
+        self._catc_m = None; self.catc_n = None; self._catc_ncoef = 0.0
         cs = spec.get("catc")
         if cs:
             zc = ca.SX.sym("catc", 1)
             m = zc[0]
             uaa, m0 = float(cs["uaa"]), float(cs["m0"])
-            dl = 0.0 if cs.get("fixmiti") else float((spec.get("dabat") or {}).get(("catc",), 0.0))
+            # the calibration term: the option's (its cost curve), or with the share fixed (the CATC activity at its
+            # input cost) the reference form's where the calibration was in that form (K188; zero before, K170)
+            _da = spec.get("dabat") or {}
+            dl = float(_da.get(("catc_ref",), 0.0)) if cs.get("fixmiti") else float(_da.get(("catc",), 0.0))
             obj = obj + self._pv(uaa) * (self._pv(float(cs["k1"]) + float(cs["lin"]) + dl) * m
                                         + self._pv(0.5 * float(cs["sqr"])) * m * m)
             g_rows.append((self._lin(y, [(int(j), float(s)) for j, s in cs["row"]]) + self._pv(uaa) * m)
@@ -919,9 +924,12 @@ class CapriRegionalNLP:
                 ie = self.cap_rows["ecoSetAside"]
                 sce = max(float(eco.get("scale", 1.0)), 1e-6)
                 g_rows[ie] = g_rows[ie] - self._pv(float(eco["catc_w"]) * uaa / sce) * m
-            self.catc_n = self._pv(uaa * 1000.0 * float(cs["biofix"])) * (m - self._pv(m0))      # t N
+            # the catch crops' BioFix N in the arable residue pool (fertDistCres_, supply_model.gms l. 1074-1080) and
+            # the gross balance: only with CAPRI's %ghgAbatement% on, so not in its reference form (K188)
+            self._catc_ncoef = uaa * 1000.0 * float(cs["biofix"])                                  # t N per unit share
+            self.catc_n = None if cs.get("ref_form") else self._pv(self._catc_ncoef) * (m - self._pv(m0))      # t N
             gt_ = spec.get("ghg_min")
-            if gt_:
+            if gt_ and self.catc_n is not None:
                 # CAPRI's emission tax on the catch crops' crop-residue N2O (N2OCRO: BioFix x CATC x EF1 x 44/28, in
                 # GN2O and so in the taxed GGWP; their soil carbon CO2SEQ is not in GGWP)
                 obj = obj + self._pv(float(gt_["d"])) * self.catc_n
@@ -1259,8 +1267,30 @@ class CapriRegionalNLP:
         cc_ = self.abat.get("catc") if getattr(self, "abat", None) else None
         if cc_:
             j = cc_["off"]
-            if not (xb[j] <= lbx[j] + 1e-12 and res[j] >= 0) and cc_["uaa"] > 0:
-                dabat[("catc",)] = -res[j] / cc_["uaa"]
+            cs_ = self.spec.get("catc") or {}
+            if cc_["uaa"] > 0:
+                at0 = xb[j] <= 1e-12                                # at zero (an option not used at the base)
+                fixed = ubx[j] - lbx[j] <= 1e-12                    # held at the base share (K188, no fill)
+                m0_ = float(xb[j])
+                r_ref = float(res[j] - nu[j])                       # the residual before the share's bound
+                # the option's own form (its cost curve) differs from the calibration's by uaa x ((lin_opt + sqr_opt m0)
+                # - (lin + sqr m0)) in this first-order condition (K188: the calibration in CAPRI's reference form, the
+                # CATC activity at its input cost, lin = sqr = 0); its calibration term from that residual
+                r_opt = r_ref + cc_["uaa"] * (
+                    float(cs_.get("lin_opt", cs_.get("lin", 0.0))) + float(cs_.get("sqr_opt", cs_.get("sqr", 0.0))) * m0_
+                    - float(cs_.get("lin", 0.0)) - float(cs_.get("sqr", 0.0)) * m0_)
+                _cr = (getattr(self, "cres_rows", None) or {}).get("N")
+                if cs_.get("ref_form") and _cr is not None and getattr(self, "_catc_ncoef", 0.0):
+                    # the option's form has the BioFix N the reference form leaves out: its term in the residue
+                    # pool's row (tot - C) / sc at that row's multiplier
+                    r_opt += float(lam[_cr[0]]) * (-float(self._catc_ncoef) / float(_cr[1]))
+                if not (at0 and r_opt >= 0):
+                    dabat[("catc",)] = -r_opt / cc_["uaa"]
+                if "lin_opt" in cs_ and not (at0 and r_ref >= 0):
+                    # the reference form's own term: zero where the rule's multiplier takes the input cost (CAPRI's
+                    # calibration point, where its catch crops fill the rule, supply/prep_cal.gms l. 68-99); zero too
+                    # where the share is held (the Green Deal's catch crops then cost their input cost, as CAPRI's)
+                    dabat[("catc_ref",)] = 0.0 if fixed else -r_ref / cc_["uaa"]
             res[j] = 0.0
         ma = self.abat.get("mni") if getattr(self, "abat", None) else None
         if ma:

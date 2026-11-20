@@ -161,8 +161,19 @@ class PolicyBlock:
                 import warnings as _w
                 _w.warn(f"{self.data.region_id}: the ecological set-aside rule is held at the base, which misses it by "
                         f"{v0:.4g} thousand ha (CAPRI's base meets it: supply/prep_cal.gms l. 68-99)")
-            out["ecoSetAside"] = {"row": row, "rhs": max(0.0, v0) + 1e-9 * sc_, "scale": sc_, "base_gap": v0,
-                                  "held": bool(held), "catc_w": wc if cs_ is not None else 0.0}
+            # K188: CAPRI's calibration sizes its catch crops to fill the rule (prep_cal.gms l. 68-99: CATC = the
+            # requirement less the other EFA activities), so where the requirement exceeds the other activities the rule
+            # binds at CAPRI's base and its dual is the catch crops' input cost over their weight. The model's base takes
+            # CAPRI's 2030 catch-crop share; there the rule is held at the base's own value (it misses CAPRI's fill by
+            # the levels' round-off, IT32 0.06 thousand ha), in CAPRI's reference form. Where the other activities alone
+            # meet the requirement (v0 <= -catch crops' part: a base other than CAPRI's 2030, e.g. 2017's PT18) CAPRI's
+            # calibration would leave CATC at zero and the rule slack: no fill
+            _cpart = wc * float(cs_["uaa"]) * float(cs_["m0"]) if cs_ is not None else 0.0
+            fill = (_cpart > 0 and v0 > -_cpart
+                    and str(_settings().get("supply.reference_winter_cover")) == "capri")
+            out["ecoSetAside"] = {"row": row, "rhs": (v0 if fill else max(0.0, v0)) + 1e-9 * sc_, "scale": sc_,
+                                  "base_gap": v0, "held": bool(held), "catc_w": wc if cs_ is not None else 0.0,
+                                  "catc_fill": bool(fill)}
         if env_on and st.get(("active", "cropDiv")):
             grp = {}
             for j, a in enumerate(acts):

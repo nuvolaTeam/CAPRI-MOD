@@ -191,6 +191,18 @@ class NLPBlock:
                         if l_ in labels]
             spec_sim = spec
             spec = dict(spec_sim, drop_labels=list(drop) + pol_rows)
+            if spec.get("catc") and str(_settings().get("supply.reference_winter_cover")) == "capri":
+                # CAPRI calibrates in its reference, which has no winter cover option (K188, abatement._wc_reference):
+                # the catch crops at the CATC activity's input cost, so that the ecological set-aside rule's multiplier
+                # at the base is CAPRI's (the cost over the catch crops' weight where the rule binds). The option's
+                # cost curve is kept (lin_opt, sqr_opt) for the calibration term of the runs that choose it
+                _c0 = spec["catc"]
+                spec["catc"] = dict(_c0, lin=0.0, sqr=0.0, fixmiti=True, ref_form=True,
+                                    lin_opt=float(_c0["lin"]), sqr_opt=float(_c0["sqr"]))
+                if not self._catc_fills_rule(spec):
+                    # where the base's other EFA activities meet the rule, CAPRI's calibration would leave CATC at zero
+                    # and the rule slack: the catch crops are held at the base share (no N credit, the cascade at base)
+                    spec["catc"] = dict(spec["catc"], lb=float(_c0["m0"]), ub=float(_c0["m0"]))
             _fp = None
             if _st.pop(self.seen, "nlp_cal_check", False) or cal is None:
                 _fp = _spec_fingerprint(spec, yb_n=np.asarray(x_start, float), xb=xb[:n])
@@ -260,10 +272,16 @@ class NLPBlock:
                     spec["catc"] = dict(spec["catc"], lb=_lb, ub=max(float(spec["catc"]["ub"]), _lb))
                 if self._wc_fixed():
                     # CAPRI's Green Deal group: the option's share fixed at 1e-6 (FixMiti), so the catch crops are the
-                    # CATC activity at its input cost (no cost curve of the option, no calibration term, no MaxShare;
-                    # winterCover_ limits them) and leave the loss cascade at its base (K170)
-                    spec["catc"] = dict(spec["catc"], lin=0.0, sqr=0.0, fixmiti=True,
+                    # CATC activity at its input cost (no cost curve of the option, no MaxShare; winterCover_ limits
+                    # them) and leave the loss cascade at its base (K170). Outside the group, CAPRI's reference form
+                    # (K188: no mitigation options, so no BioFix N of the catch crops in the residue pool either,
+                    # fertDistCres_ adds it only with %ghgAbatement% on, supply_model.gms l. 1074-1080)
+                    _ref = not bool(getattr(self.ev, "greendeal_group", False))
+                    spec["catc"] = dict(spec["catc"], lin=0.0, sqr=0.0, fixmiti=True, ref_form=_ref,
                                         ub=max(1.0, float(spec["catc"].get("lb", 0.0) or 0.0)))
+                    if _ref and not self._catc_fills_rule(spec) and not getattr(self.ev, "cover", None):
+                        _m0 = float(spec["catc"]["m0"])
+                        spec["catc"] = dict(spec["catc"], lb=_m0, ub=_m0)        # as in the calibration (K188)
                 spec["drop_labels"] = list(spec["drop_labels"]) + ["winter_cover"]
             if npk is not None:
                 import copy as _cp

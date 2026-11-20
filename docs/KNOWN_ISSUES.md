@@ -49,7 +49,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K150](#k150) | The non-EU regions' raw milk at the market's base is FAO_agg's production, not CAPRI's market data (milk delivered to the dairies): Turkey 20,173 kt against CAPRI's 13,145 | fixed (14 November 2026), validated (15 November 2026, the full Green Deal pair) |
 | [K186](#k186) | The catch crops' winter cover option scales with the fixed base crop area; CAPRI's catcMiti_ and GHG_Mit_Cost_ scale it with the current land (landTypesNoSlak, uaaEqu). Not active in CAPRI's Green Deal step (its winter cover share fixed at 1e-6, CATC a free activity) | open: to fix after item 1's open points |
 
-## Resolved (118)
+## Resolved (119)
 
 | # | Issue | Status |
 |---|---|---|
@@ -82,6 +82,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K177](#k177) | The NLP calibration put minus the entitlement cut into the overshoot column's linear term where the QP's start held the base's rounding above the trend area: the overshoot was free in BG01, HU32, LV, PL11, PL31, PL41 and RO05 (about 199,000 thousand ha, a zero dual) | fixed (18 November 2026) |
 | [K178](#k178) | The 2030 runs took the young-animal coefficients of 2017 (calves per cow, replacements, piglets per sow): CAPRI's INPANI_ takes the simulation year's, DATA(.., "Y"); Spain's suckler cows 0.83 calves per head against CAPRI's 2030 0.90, the EU's piglet balance 6.6% short at the 2030 base | fixed (18 November 2026) |
 | [K179](#k179) | The 2030 runs took the 2017 manure N, P2O5 and K2O per head (dairy cows' N raised with the milk yield): CAPRI computes them from the simulation year's rations before it solves; the EU's N excretion at the 2030 base 5.4% above CAPRI's 2030 EXCRET (dairy cows +13%) | fixed (18 November 2026) |
+| [K188](#k188) | The catch crops were the winter cover option (CAPRI's cost curve, BioFix N in the residue pool) in the calibration and the baseline; CAPRI's 2030 reference has no mitigation options (CATC an activity at its input cost, which sets the ecological set-aside rule's dual), so the model's fallow and set-aside carried no support from the rule and had none to lose in the Green Deal (Alentejo's fallow +13 thousand ha against CAPRI's -2) | fixed (20 November 2026) |
 | [K187](#k187) | CAPRI's supply model lists ecoSetAside_ and cropDivGreening_ only with %envConst% on, and its Green Deal policy file as distributed stops before switching it on; CAPRI's runs solve with both rows all the same (their marginals in the results) | closed (19 November 2026): not a gap; supply.env_const = true as CAPRI's runs |
 | [K185](#k185) | Fallow and set-aside carried a nutrient need; CAPRI's fertned.gms leaves a crop without a main-output yield (FALL, VSET) without one, so NUTNED_ has none for them | fixed (19 November 2026) |
 | [K184](#k184) | The idled histosols lost their deposition; CAPRI's iHisCr and iHisGr carry MANN = the region's deposition, in the residue pool (fertDistCres_) and the N surplus (e_ATMOSD, e_CRESID) | fixed (19 November 2026) |
@@ -3858,6 +3859,57 @@ sim_ini's DATA has the need and the margins still show none.
   FALL (247 regions) and VSET (166) have area without a main-output yield, no other crop. Test:
   test_capri.py::test_fallow_and_set_aside_have_no_nutrient_need
 
+<a id="k188"></a>
+### K188: The catch crops in CAPRI's reference form at the calibration point (found 20 November 2026)
+
+Found from Alentejo's fallow in the Bonn comparison run (the breakdowns of runs/full_gd_bonn_dec.pkl against CAPRI's
+dataOut D_* terms). CAPRI's 2030 reference holds PT18's fallow and set-aside with the ecological set-aside rule
+(D_ecoSetAside FALL and VSET +156.4 EUR/ha, PULS +106.9, the cereals -8.7: the rule's dual 165 EUR/ha). The dual is
+the catch crops': CATC 29.6 thousand ha at its input cost 49.53 EUR/ha (TOIN; D_OBJC -49.53) = 0.3 x 165, and the same
+identity, D_OBJC = -D_ecoSetAside for CATC, holds in each of the 82 EU units with catch crops in CAPRI's reference (to
+1.5e-7). CAPRI's reference runs without mitigation options: %ghgAbatement% is off by default
+(capmod/set_global_variables.gms l. 215) and set on only by the endogenous- and exogenous-technology policy files
+(pol_input/greendeal/refpol_endotech_all_sup.gms l. 36, pol_input/ecampa/carbtax50_endotech_set12.gms l. 66,
+pol_input/cap_after_2023/refpol_*.gms); its reference results report no WinterCov entry for CATC. So CATC is an
+activity at its input cost, sized by the calibration to fill the rule (supply/prep_cal.gms l. 68-99), and its BioFix N
+is not in the residue pool:
+
+```gams
+$iftheni.covC1 %ghgAbatement%==on                                    (supply/supply_model.gms l. 1074-1080, fertDistCres_)
+         + [(p_ghgMiti(RUNR,"CATC","WinterCov","othImpact","BioFix") * v_actLevl(RUNR,"CATC","T") * 1000) $ sameas(FNUT,"NITF")]
+$endif.covC1
+```
+
+The model calibrated and ran its baseline with the catch crops as the winter cover option at CAPRI's cost curve, whose
+marginal cost at the initial share is zero (PT18: 38.78 - 40.85 + 146.8 x 0.01411), with their BioFix N in the residue
+pool: the calibration's fit left the rule's multiplier at zero (no ecoSetAside term in the breakdowns of ES41, ES42 and
+PT18, base or Green Deal). Fallow and set-aside thus had no support from the rule in their calibrated terms, and none
+to lose when the Green Deal's catch crops make the rule slack (CAPRI's PT18 catch crops 29.6 -> 239.6 thousand ha): in
+the Bonn run PT18's FALL + VSET went 20.7 -> 46.0 thousand ha, CAPRI's 20.7 -> 14.9 plus 5.8 of idled histosols, at its
+landscape floor (Portugal has no landscape target, so the floor is the base SETF, pol_input/greendeal/landscape.gms).
+
+- **Effect:** in the Bonn run, FALL + VSET in the 65 units where CAPRI's rule binds at its reference +2,493 thousand ha
+  against CAPRI's +2,365 (the other 156 units +4,541 against +4,543); the largest gaps PT18 +31, IT32 +21, PL61 +20,
+  PL51 +10. Measured at CAPRI's Green Deal prices on five units (scratchpad fixed_price_probe_yupd2.py with
+  capri_comparison.toml; runs s16_k188opt, the former form, against s18_k188), thousand ha in the Green Deal (CAPRI):
+  PT18 fallow 18.2 -> 3.1 (3.3), set-aside 20.6 -> 11.7 (11.6), other arable fodder 176.1 -> 192.0 (200.1); IT32
+  set-aside 62.9 -> 36.8 (34.5), fallow 6.5 -> 3.7 (3.6); PL61 fallow 60.1 -> 40.8 (40.1), pulses 27.3 -> 22.2 (20.2);
+  PL51 fallow 60.2 -> 51.4 (50.5); DE21 (no catch crops) unchanged. The sum of the absolute area-change gaps over the
+  five units 528 -> 399 thousand ha.
+- **In 9t:** -
+- **Status:** fixed 20 November 2026 (`supply.reference_winter_cover = "capri"`; "option" the former form). In the
+  calibration and in every run without an emission tax the catch crops are the CATC activity at its input cost,
+  without their BioFix N in the residue pool, the loss cascade at the base share (supply/abatement.py `_wc_reference`,
+  supply/nlp.py, supply/capri_regional_nlp.py). Where the base's catch crops fill the rule (the requirement above the
+  other EFA activities, supply/policy.py `catc_fill`) the rule is held at the base's own value, so its multiplier at
+  the base is the input cost over 0.3 (PT18, IT32, PL61: the reference form needs no calibration term); where the other
+  activities meet it (a base other than CAPRI's 2030, e.g. 2017's PT18) the catch crops are held at the base share, as
+  CAPRI's calibration would leave CATC at zero. The Green Deal group keeps K170's form (CATC at its input cost with its
+  BioFix N), now with the reference form's calibration term. With an emission tax (CAPRI's carbon-tax file:
+  ghgAbatement on, no FixMiti) the option is chosen with its cost curve and its BioFix N, its linear term from the same
+  base (the residual before the share's bound, plus the BioFix N's term in the residue pool's row). Test:
+  test_capri.py::test_catch_crops_take_capris_reference_form
+
 <a id="k187"></a>
 ### K187: The greening rows ecoSetAside_ and cropDivGreening_ against CAPRI's envConst switch (found 19 November 2026)
 
@@ -3917,6 +3969,7 @@ fallow floor, base cover + m0 x UAAR); REGISTERED in `_catc_spec`), which CAPRI'
   CATC is a level of its own (DE21 75.8 thousand ha, the share 1e-6 in dataOut), so there CATC is a free activity
   bounded by winterCover_ and e_minCoverCrops, as the model's fixed-share form (K170). The difference acts only where
   the option is a choice (runs without the Green Deal group, with the land market moving the land); not measured yet.
+  Since K188 (20 November 2026) the option is a choice only in runs with an emission tax.
 - **In 9t:** -
 - **Status:** open: to fix after item 1's open points (catcMiti_ and the cost with the current land in the NLP form,
   sum of the land columns as fertilisation.py's land; the calibration's linear term at the base land); then count the

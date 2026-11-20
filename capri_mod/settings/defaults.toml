@@ -340,6 +340,13 @@ cover_crop_requirement_area = "capri"
 # share; the default since 18 November 2026, K170) or "option" (capri-mod's form until then: the option chosen with its
 # cost curve, its share in the cascade)
 greendeal_winter_cover = "capri"
+# CAPRI's catch crops where its run has no mitigation options (%ghgAbatement% off: its 2030 reference and every run
+# without an endogenous- or exogenous-technology policy file; abatement.py _wc_reference): "capri" (the CATC activity at
+# its input cost in the calibration and in every run without an emission tax, so that the ecological set-aside rule's
+# multiplier at the base is CAPRI's, the cost over the catch crops' weight 0.3 where the rule binds; with a tax the
+# option with its cost curve, calibrated from the same base; the default since 20 November 2026, K188) or "option"
+# (capri-mod's form until then: the option with its cost curve in every run, the rule's multiplier zero at the base)
+reference_winter_cover = "capri"
 # Green Deal organic and pesticide targets: CAPRI's regional input changes (define_inputs.gms l. 66-73).
 # CAPRI-ERROR-FIX. conventional_io.gms l. 361 sets scenAugmentsTechChange off at compile time, after organic_io.gms
 # l. 94 and conventional_io.gms l. 171 set it on, so the scenario's input change REPLACES the 2017-2030 input-saving

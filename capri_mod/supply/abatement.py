@@ -260,9 +260,36 @@ class AbatementBlock:
         l. 86-105, FixMiti with only wintercov fixed; supply/set_miti_bounds.gms l. 556-566: v_Miti(CATC, WinterCov)
         = p_fixMiti = 1e-6; its Green Deal run reports SHARE CATC WinterCov 1e-6 in every unit): the catch crops are
         then the CATC activity at its input cost, steered by the requirement (e_minCoverCrops) and winterCover_ only,
-        and they do not change the loss cascade (supply.greendeal_winter_cover "capri", K170)."""
-        return bool(getattr(self.ev, "greendeal_group", False)) and \
-            str(_settings().get("supply.greendeal_winter_cover")) == "capri"
+        and they do not change the loss cascade (supply.greendeal_winter_cover "capri", K170). Outside the group, the
+        same form where CAPRI's run has no winter cover option (_wc_reference, K188)."""
+        if bool(getattr(self.ev, "greendeal_group", False)) and \
+                str(_settings().get("supply.greendeal_winter_cover")) == "capri":
+            return True
+        return self._wc_reference()
+
+    def _wc_reference(self) -> bool:
+        """CAPRI's catch crops where its run has no mitigation options (K188). The options exist only with
+        %ghgAbatement% on, which only the endogenous- and exogenous-technology policy files set
+        (pol_input/greendeal/refpol_endotech_all_sup.gms l. 36, pol_input/ecampa/carbtax50_endotech_set12.gms l. 66,
+        pol_input/cap_after_2023/refpol_*.gms; off by default, capmod/set_global_variables.gms l. 215). CAPRI's 2030
+        reference (pol_input/greendeal/ref.gms with cap_after_2014/ref.gms) runs without them: its results report no
+        WinterCov entry for CATC, and in each of the 82
+        EU units with catch crops CATC's input cost equals 0.3 x the ecological set-aside rule's dual (dataOut D_OBJC =
+        -D_ecoSetAside: CATC is an activity at its input cost, and the rule binds at cost / 0.3, the dual CAPRI's fallow,
+        set-aside and pulses carry; PT18 49.53 EUR/ha, the rule 165). So the catch crops are the CATC activity at its
+        input cost (no option cost curve) in the calibration and in every run without an emission tax; with a tax
+        (CAPRI's carbon-tax file, ghgAbatement on without FixMiti) the option is chosen with its cost curve
+        (supply.reference_winter_cover "capri"; "option": capri-mod's form until 20 November 2026, the option in every
+        run, which left the rule's multiplier at zero at the base)."""
+        if str(_settings().get("supply.reference_winter_cover")) != "capri":
+            return False
+        return float(getattr(self.seen, "ghg_tax", 0.0) or 0.0) <= 0.0
+
+    @staticmethod
+    def _catc_fills_rule(spec) -> bool:
+        """Whether the base's catch crops fill the ecological set-aside rule (policy.py _cap_rules_spec catc_fill,
+        K188): CAPRI's calibration sizes CATC to the requirement less the other EFA activities (prep_cal.gms l. 68-99)."""
+        return bool(((spec.get("cap_rules") or {}).get("ecoSetAside") or {}).get("catc_fill", False))
 
     def _winter_cover_shares(self):
         """(base, current) winter cover share of the region, CAPRI's v_Miti(CATC, WinterCov): the 2030 catch-crop share
