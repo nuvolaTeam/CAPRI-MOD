@@ -14,6 +14,9 @@ written.
                     the Armington nests' quantities), prices.py (the import prices, the Armington price indexes, the
                     consumer price, the market prices of the regions without production and of the policy blocks),
                     border.py (the tariff-rate quotas, the entry prices, the flexible levies)
+    cal_armington.py
+                    arm/cal_armington.gms: the Armington system's share parameters at the calibration point
+                    (the calibration block C1)
 
 Each function's docstring gives CAPRI's GAMS statement, the CAPRI star 3.0 file and lines it follows, the equation in
 this project's notation, how the model's quantities map to CAPRI's symbols, and the departures from CAPRI's equation.

@@ -21,6 +21,8 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 import numpy as np
+from capri_mod.market.equations.cal_armington import (arm1Price_, p_dpCESTrade_bilateral, p_dpCESTrade_domestic,
+                                                      p_dpCESTrade_RW, v_arm2Price)
 from capri_mod.market.equations.market_model.armington import (SupBalM_, arm2QuantShares_, domSalesShares_,
                                                                importShares_)
 from capri_mod.market.equations.market_model.border import (EntryPriceDriver_, FlexLevy_, FlexLevyNotCut_,
@@ -115,12 +117,15 @@ class BilateralCommodity:
         p0 = self.a + self.b
         P = np.where(off, p0, self.Pd0[None, :] * np.eye(n))
         with np.errstate(divide="ignore", invalid="ignore"):
-            PM0 = np.where(M > 0, (X * off * P).sum(axis=1) / np.where(M > 0, M, 1.0), 1.0)
-            PA0 = np.where(self.D0 > 0, (DS * self.Pd0 + M * PM0) / np.where(self.D0 > 0, self.D0, 1.0), self.Pd0)
-            self.beta = np.where(off & (X > 0), (X / np.where(M > 0, M, 1.0)[:, None])
-                                 * (P / PM0[:, None]) ** self.s2, 0.0)
-            self.dd = np.where(self.D0 > 0, DS / np.where(self.D0 > 0, self.D0, 1.0) * (self.Pd0 / PA0) ** self.s1, 0.0)
-            self.dm = np.where(self.D0 > 0, M / np.where(self.D0 > 0, self.D0, 1.0) * (PM0 / PA0) ** self.s1, 0.0)
+            # CAPRI's Armington calibration at the calibration point (arm/cal_armington.gms l. 39-64)
+            PM0 = np.where(M > 0, v_arm2Price((X * off * P).sum(axis=1), np.where(M > 0, M, 1.0)), 1.0)
+            PA0 = np.where(self.D0 > 0, arm1Price_(DS, self.Pd0, M, PM0, np.where(self.D0 > 0, self.D0, 1.0)), self.Pd0)
+            self.beta = np.where(off & (X > 0), p_dpCESTrade_bilateral(X, np.where(M > 0, M, 1.0)[:, None], P,
+                                                                       PM0[:, None], self.s2), 0.0)
+            self.dd = np.where(self.D0 > 0, p_dpCESTrade_domestic(DS, np.where(self.D0 > 0, self.D0, 1.0), self.Pd0,
+                                                                  PA0, self.s1), 0.0)
+            self.dm = np.where(self.D0 > 0, p_dpCESTrade_RW(M, np.where(self.D0 > 0, self.D0, 1.0), PM0, PA0,
+                                                            self.s1), 0.0)
         self.PM0, self.PA0 = PM0, PA0
         self._off = off
         self._has_imp = M > 0
