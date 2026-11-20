@@ -18,8 +18,18 @@ aa91c1c (the supply phase merged, 19e7679; the checks against star 3.0, aa91c1c)
 | block | what | check |
 |---|---|---|
 | M0 | the inventory of CAPRI's market-model equations (docs/dev/market_equations_inventory.csv; tools/refactor/market_equations_inventory.py, the supply tool's sibling for MODEL statements) and the Green Deal step's switches (docs/dev/market_equations_gd_switches.csv, each with its source); the rows empty in the step classified | docs and a tool; the quote and citation checks |
+| M1 | the demand system: GLDemandFS_, GLDemandGS_, GLDemandGis_, XiS_ (market_model/demand.py) and CPri_ (prices.py), called by capri_mod/market/demand_ad.py; consFudge_ not written (the model's floor at 0) | the GL functions identical bit for bit (15 region sizes and the block's 2,035 cells: serialised algorithms, values, Jacobians); the captured market solves replayed bit for bit (the capture test's 2, the five-unit run's 21); the five-unit Green Deal run identical (15 lines of `$.meta.`, the reference's capture setting among them) |
 
-## 3. What M0 found
+## 3. The gate's references (at the phase's starting commit 444a47f, worktree outside the repository)
+
+- runs/mkt/cap_test_ref: the capture test's two solves (a cold one at CAPRI's base supply rows, a warm one with FR's
+  soft wheat x 1.1; capri_mod/tests/test_market_capture.py), replayed with tools/check/replay_market.py;
+- runs/mkt/gd5_ref.pkl with its market solves (runs/mkt/cap_gd5_ref): the five-unit Green Deal run (DE21, IT32,
+  PL51, PL61, PT18; capri_mod/settings/capri_comparison.toml);
+- the full-EU Green Deal run with the same settings and its captured solves: the reference of M2, M4 and M5 and the
+  captures every block replays.
+
+## 4. What M0 found
 
 - m_globMarket (arm/market_model.gms l. 4243) lists 123 equations, 47 of them in the nested m_bevFunctionsMarket
   (l. 4150); m_netTrade (l. 4218) adds 5 of its own to the nested model (stockChg_, mrkBal_, arm1PNetTrade_, wldMarket_,

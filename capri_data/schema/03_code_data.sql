@@ -56,7 +56,7 @@ INSERT INTO code_data VALUES
   ('capri_mod/market/biofuel_ad.py', '_sigmoid', 500.0, 1, '30', 'return 1.0 / (1.0 + ca.exp(-ca.fmin(ca.fmax(x, -500.0), 500.0)))'),
   ('capri_mod/market/dairy.py', 'DairyMixin.MILK_PRICE_FLOOR', 1e-07, 1, '288', 'MILK_PRICE_FLOOR = 1e-7'),
   ('capri_mod/market/demand.py', 'DemandMixin.demand_response', 0.05, 2, '354,370', '_feed = self.dairy_feed_factor(np.maximum(_rho, 0.05))'),
-  ('capri_mod/market/demand_ad.py', 'gl_block_function', 0.05, 2, '77,78', 'p = ca.vertcat(*[ca.fmax(p0[k] + (PR[i, int(col[k])] - 1.0) * a1[k], 0.05 * p0[k]) if col[k] >= 0'),
+  ('capri_mod/market/demand_ad.py', 'gl_block_function', 0.05, 2, '82,83', 'p = ca.vertcat(*[ca.fmax(CPri_(p0[k], PR[i, int(col[k])], a1[k]), 0.05 * p0[k]) if col[k] >= 0'),
   ('capri_mod/market/import_prices_ad.py', 'import_price_function', 0.95, 1, '150', 'd = (E * 0.95 - c) / (price if price > 0 else 1.0) * float(bd["fac"][i, j])'),
   ('capri_mod/market/import_prices_ad.py', 'import_price_function', 20.0, 1, '151', 'g = ca.exp(ca.fmin(0, d)) / (1.0 + 20.0 * ca.exp(-ca.fabs(d)))'),
   ('capri_mod/market/inputs.py', 'REPO_DATA', 2.0, 1, '23', 'REPO_DATA = Path(__file__).resolve().parents[2] / "capri_data"'),
