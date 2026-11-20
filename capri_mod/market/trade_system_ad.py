@@ -22,6 +22,7 @@ import numpy as np
 
 from capri_mod.market.equations.market_model.armington import (SupBalM_, arm2QuantShares_, domSalesShares_,
                                                                importShares_)
+from capri_mod.market.equations.market_model.border import trqSigmoidFunc_
 from capri_mod.market.equations.market_model.prices import (arm1PriceAgg_, arm1PriceAgg_term, arm2PriceAgg_,
                                                             arm2PriceAgg_term)
 from capri_mod.market.import_prices_ad import _ncpcm, cells, import_price_function
@@ -103,8 +104,7 @@ def trade_system_function(sc, slope_input: bool = False):
     trq = []
     for k in bil:
         q = sc.trq_quotas[k]
-        arg = ca.fmin(ca.fmax(slope * (fill(q) / q["Q"] - mid), -clip), clip)
-        trq.append(sB[k] - 1.0 / (1.0 + ca.exp(-arg)))
+        trq.append(sB[k] - trqSigmoidFunc_(fill(q) / q["Q"], slope, mid, clip))
     for m_ in glo:
         g = sc.trq_globals[m_]
         cov = np.zeros((n, n), dtype=bool)
@@ -113,8 +113,7 @@ def trade_system_function(sc, slope_input: bool = False):
         for k in g["bil"]:
             q = sc.trq_quotas[k]
             tot = tot - _ncpcm(ca, -(fill(q) - q["Q"]), 0.0, 1e-3 * q["Q"])
-        arg = ca.fmin(ca.fmax(slope * (tot / g["Q"] - mid), -clip), clip)
-        trq.append(sW[m_] - 1.0 / (1.0 + ca.exp(-arg)))
+        trq.append(sW[m_] - trqSigmoidFunc_(tot / g["Q"], slope, mid, clip))
     PAr = ca.vertcat(*[PA[i] / float(sc.PA0[i]) for i in range(n)])
     f = ca.Function("trade_system_" + sc.name, [r, sB, sW, S, D] + ([sl] if slope_input else []),
                     [ca.vertcat(*bal), ca.vertcat(*trq) if trq else ca.SX(0, 1),

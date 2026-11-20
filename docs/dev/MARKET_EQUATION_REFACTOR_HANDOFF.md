@@ -22,6 +22,7 @@ aa91c1c (the supply phase merged, 19e7679; the checks against star 3.0, aa91c1c)
 | M2 | processing, feed, dairy and biofuels: ProcMargO_, ProcNQ_ (ProcNQ_margin, ProcNQ_price), ProcFudge_, ProcO_, procYield_, MaprFeed_ (market_model/processing.py); feedBlkPrice_, feedBlk_, FeedShareEqu_, FeedNQ_, FeedBal_ (feed.py); ProcMargM_, DairyNQ_, FatsProtBal_ (dairy.py); BiofFeedCost_, BiofFeedCostAgg_, Biof_, ProdBiof_, BiofPriceRel_, SupplyBiof_, biofDemshare_, biofDem_ (biofuels.py); called by processing_ad.py, feed.py, feed_ad.py, use_ad.py, dairy.py, dairy_ad.py, biofuel_ad.py. MaprBiof_ and prodQuantBiofBy_ stay running sums (ported as terms); CSugarPrice_ empty in the step; FeedFudge_ goes with ProdFudge_ to M3 (supply_system_ad.prod_fudge) | the CasADi functions a cold market solve builds (486) serialised and compared, the old code against the new: 484 identical, the other 2 differ between two runs of the same code (section 5); the captured solves replayed bit for bit (2 and 21); the five-unit Green Deal run identical; the full-EU run moved to the phase's end (section 3) |
 | M3 | supply in the market, fudging and land: ProdNQ_ (ProdNQ_hess), yaniMarket_ (market_model/supply.py); ProdFudge_ (fudging.py; FeedFudge_ in its form); rentFromProdpriceLand_, LandSupplyMNL_, LndSupplyEqualsDemand_, LinkLuWithShares_, luClassFinal_ and luClassInitial_, FocLUC_ with derivativeOfGammaLUC_ (land.py); called by supply_ad.py, supply_system_ad.py, luc.py. ProdA_ ported as terms (eu_rows); NumeraireLand_ and LandSupplyRatio_ as LandSupplyMNL_; rmsYaniMarket_, derivativeOfNormalLUC_, derivativeOfSpikeLUC_ empty in the step; Yield_, LandAgrFromYld_, ScaleLandAgr_ and ProdPriceFudge_ not in the model (a recursive block); PPri_ moved to M4 (the price chain) | the module's CasADi functions after a cold solve (486) identical, the hash seed fixed; the assembled market system (plain and lifted with the fudge modes and the lifted use cells; the GD runs do not build it, market.bounds none) identical: its serialised functions, F and its Jacobian at the start for the three fudge modes; the captured solves replayed bit for bit (2 and 21); the five-unit Green Deal run identical |
 | M4 | trade and prices: SupBalM_, arm2QuantShares_, domSalesShares_, importShares_ (market_model/armington.py); impPrice_ (its exporter-price part), arm2PriceAgg_ and arm1PriceAgg_ (with their terms), PMrk_, MarketPriceAgg_'s weights (prices.py); called by the trade blocks' three forms (bilateral.py, trade_ad.py, trade_system_ad.py), import_prices_ad.py and market_system_ad.py. ArmBal1_, expQuant_, TradeFlowsAgg_ and PPri_ ported as terms; tradeFlowFudge_ and HicksNeutral_ empty in the step (modArmington off); FlipFlop_ CAPRI's solver device; nonDoubleZeroExports_ moved to M5 (the export subsidies) | the module's 486 CasADi functions and the assembled market system identical to M3's (PYTHONHASHSEED=0); the captured solves replayed bit for bit (2 and 21), which run the trade blocks' NumPy form; the five-unit Green Deal run identical |
+| M5 | the border measures: trqSigmoidFunc_ (with its NumPy twin), tarAdVal_, tarSpec_ (with the smaller of the bilateral and the global rate), tarAdValW_, tarSpecW_, prefTriggerPrice_, EntryPriceDriver_, tarSpecIfEntryPrice_ (with its NumPy twin), FlexLevyNotCut_, FlexLevy_ (market_model/border.py); called by bilateral.py (_sig, _trq_rates, border_spec, _TrqCells), import_prices_ad.py, trade_ad.py, trade_system_ad.py. TRQImports_ ported as terms; the 17 rows of the intervention stocks and the subsidised exports (nonDoubleZeroExports_ among them) empty in the step (no INTM, STKS, FEOE_max in CAPRI's 2030 data) and not in the model | the module's 486 CasADi functions and the assembled market system identical to M4's (PYTHONHASHSEED=0); the captured solves replayed bit for bit (2 and 21); the five-unit Green Deal run identical |
 
 ## 3. The gate's references (at the phase's starting commit 444a47f, worktree outside the repository)
 
@@ -124,3 +125,25 @@ aa91c1c (the supply phase merged, 19e7679; the checks against star 3.0, aa91c1c)
 - **FlipFlop_** (v_dummy =E= 10) is CAPRI's device to solve its square system as an NLP; the model solves the square
   system (no row).
 - Left for M5: 28 rows of the step without a status (border 11, intervention 17, nonDoubleZeroExports_ among them).
+
+## 8. What M5 found (for the main line; nothing fixed)
+
+- **Every row of the step classified**: of the 112 rows m_globMarket lists under the step's switches, 57 ported as
+  functions, 8 as terms of their callers, 3 in another row's form (NumeraireLand_ and LandSupplyRatio_ as
+  LandSupplyMNL_, FeedFudge_ as ProdFudge_), 38 empty in the step, 4 not in the model (the recursive yields block), 1
+  CAPRI's solver device (FlipFlop_), 1 not written (consFudge_, M1).
+- **The intervention stocks and subsidised exports are empty in the step** (17 rows): their domains need INTM, STKS or
+  FEOE_max, which CAPRI's 2030 data do not have at the calibration point (MARKET_EQUATIONS_INVENTORY.md, checked
+  1 November 2026 in data_market_1730defaulta.csv and the result's dataOut; the Green Deal policy files set none);
+  capri_mod/policy/policy_module.py l. 264 notes them as to be ported. A scenario with intervention would need them;
+  this session could not check the step's data itself (no copy of sim_ini_21730 here).
+- **The border measures in two forms**: NumPy (bilateral.py; the default solve, with the quotas' trials of
+  _TrqCells) and CasADi (import_prices_ad.py, trade_ad.py, trade_system_ad.py). The rates, the entry prices' driver and
+  the levies are now one function each; the sigmoid and tarSpecIfEntryPrice_ have a NumPy twin (np.exp, np.clip
+  against CasADi's exp, fmin, fmax), and CAPRI's ncpcm has two forms (NumPy's logaddexp, CasADi's fmax and log1p),
+  passed to the functions as an argument. The quotas' diagnostics (trq_arguments, trq_equation_gap) write the sigmoid
+  a third time.
+- **The sigmoid's argument arranged otherwise than CAPRI's**: slope (fill / Q - 0.97) against CAPRI's slope / Q (fill -
+  0.97 Q) (equal in exact arithmetic), clipped at +-60.
+- **The quotas solved by bisection in the default solve** (bilateral.py trq_solve, an outer fixed point with the
+  market); the assembled system has them as equations (trade_system_ad.py). Known (MARKET_TRQ_PORT.md).

@@ -17,10 +17,14 @@ The scenario's tariff additions (trade_scenario) are not in the function yet.
 """
 from __future__ import annotations
 
+from functools import partial
 from typing import List, Tuple
 
 import numpy as np
 
+from capri_mod.market.equations.market_model.border import (EntryPriceDriver_, FlexLevy_, FlexLevyNotCut_,
+                                                            prefTriggerPrice_, tarAdVal_, tarAdVal_min, tarAdValW_,
+                                                            tarSpec_, tarSpec_min, tarSpecIfEntryPrice_, tarSpecW_)
 from capri_mod.market.equations.market_model.prices import impPrice_
 
 _CACHE = {}
@@ -46,21 +50,21 @@ def _rates(ca, sc, sB, sW):
         rows, cols = np.nonzero(_mask(sc, g["cover"]))
         for i, j in zip(rows, cols):
             if g["has_ta"]:
-                ta[int(i), int(j)] = g["ta_pref"] + g["dta"] * sW[m]
+                ta[int(i), int(j)] = tarAdValW_(g["ta_pref"], g["dta"], sW[m])
             if g["has_ts"]:
-                ts[int(i), int(j)] = g["ts_pref"] + g["dts"] * sW[m]
+                ts[int(i), int(j)] = tarSpecW_(g["ts_pref"], g["dts"], sW[m])
     for k, q in enumerate(sc.trq_quotas or ()):
         if q["regime"] == "entry_price":
             continue
-        tb = q["ta_pref"] + q["dta"] * sB[k]
-        sb = q["ts_pref"] + q["dts"] * sB[k]
+        tb = tarAdVal_(q["ta_pref"], q["dta"], sB[k])
+        sb = tarSpec_(q["ts_pref"], q["dts"], sB[k])
         g = sc.trq_globals[q["glob"]] if q.get("glob") is not None else None
         if g is not None and g["has_ta"]:
-            tw = g["ta_pref"] + g["dta"] * sW[q["glob"]]
-            tb = _ncpcm(ca, tw, tb, max(1e-2, 1e-3 * abs(q["dta"])))
+            tw = tarAdValW_(g["ta_pref"], g["dta"], sW[q["glob"]])
+            tb = tarAdVal_min(tw, tb, q["dta"], partial(_ncpcm, ca))
         if g is not None and g["has_ts"]:
-            tw = g["ts_pref"] + g["dts"] * sW[q["glob"]]
-            sb = _ncpcm(ca, tw, sb, max(1e-5, 1e-7 * abs(q["dts"])))
+            tw = tarSpecW_(g["ts_pref"], g["dts"], sW[q["glob"]])
+            sb = tarSpec_min(tw, sb, q["dts"], partial(_ncpcm, ca))
         for i in q["rows"]:
             for j in q["cols"]:
                 if q["dta"] != 0 or (g is not None and g["has_ta"]):
@@ -148,15 +152,14 @@ def import_price_function(sc):
                 E = pref if pref > 0 else price
                 qi = int(bd["quota"][i, j])
                 if qi >= 0:
-                    E = pref + (price - pref) * (sB[qi] if nb else 0.0)
-                d = (E * 0.95 - c) / (price if price > 0 else 1.0) * float(bd["fac"][i, j])
-                g = ca.exp(ca.fmin(0, d)) / (1.0 + 20.0 * ca.exp(-ca.fabs(d)))
-                spec = g * float(bd["tars"][i, j])
+                    E = prefTriggerPrice_(pref, price, (sB[qi] if nb else 0.0))
+                d = EntryPriceDriver_(E, c, (price if price > 0 else 1.0), float(bd["fac"][i, j]))
+                spec = tarSpecIfEntryPrice_(d, float(bd["tars"][i, j]))
             else:
                 tars = ts[i, j] if (i, j) in ts else float(bd["tars"][i, j])
                 z = 1e-3 * (price if price > 0 else 1.0)
-                notcut = -_ncpcm(ca, -(price - c), 0.0, z)
-                spec = _ncpcm(ca, notcut, tars, z)
+                notcut = FlexLevyNotCut_(price, c, z, partial(_ncpcm, ca))
+                spec = FlexLevy_(notcut, tars, z, partial(_ncpcm, ca))
             p = p + (spec - float(bd["S0"][i, j]))
         out.append(p)
     f = ca.Function("import_prices_" + sc.name, [r, sB, sW, S, D], [ca.vertcat(*out) if out else ca.SX(0, 1)],

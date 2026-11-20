@@ -22,6 +22,7 @@ import numpy as np
 
 from capri_mod.market.equations.market_model.armington import (SupBalM_, arm2QuantShares_, domSalesShares_,
                                                                importShares_)
+from capri_mod.market.equations.market_model.border import trqSigmoidFunc_
 from capri_mod.market.equations.market_model.prices import (arm1PriceAgg_, arm1PriceAgg_term, arm2PriceAgg_,
                                                             arm2PriceAgg_term, impPrice_)
 
@@ -168,8 +169,7 @@ def trade_trq_function(sc, act):
     for m, k in enumerate(qk):
         q = sc.trq_quotas[k]
         fill = sum((flow(int(i), int(j)) for i in q["rows"] for j in q["cols"]), 0)
-        arg = ca.fmin(ca.fmax(slope * (fill / q["Q"] - mid), -clip), clip)
-        trq.append(sg[m] - 1.0 / (1.0 + ca.exp(-arg)))
+        trq.append(sg[m] - trqSigmoidFunc_(fill / q["Q"], slope, mid, clip))
     g = ca.vertcat(ca.vertcat(*res) / scale, *trq)
     x = ca.vertcat(z, sg)
     f = ca.Function("trade_trq_" + sc.name, [z, sg, A, B, Sk, Dk, rk, PAk, es, ed, scale], [g, ca.jacobian(g, x)])

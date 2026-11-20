@@ -12,7 +12,8 @@ written.
                     functions and the young-animal markets), land.py (the land market and the land-use change outside
                     the EU), fudging.py (the smooth max of the supply cells), armington.py (the supply balance and
                     the Armington nests' quantities), prices.py (the import prices, the Armington price indexes, the
-                    consumer price, the market prices of the regions without production and of the policy blocks)
+                    consumer price, the market prices of the regions without production and of the policy blocks),
+                    border.py (the tariff-rate quotas, the entry prices, the flexible levies)
 
 Each function's docstring gives CAPRI's GAMS statement, the CAPRI star 3.0 file and lines it follows, the equation in
 this project's notation, how the model's quantities map to CAPRI's symbols, and the departures from CAPRI's equation.

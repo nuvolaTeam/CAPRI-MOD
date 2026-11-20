@@ -22,7 +22,11 @@ its first equation is written.
     armington.py    the adding up and the Armington system: SupBalM_, arm2QuantShares_,              2595-2841
                     domSalesShares_, importShares_
     prices.py       PRICES: impPrice_, arm1PriceAgg_, arm2PriceAgg_, CPri_, PMrk_, MarketPriceAgg_    2842-3130
+    border.py       the policy representation: trqSigmoidFunc_, tarAdVal_, tarSpec_, tarAdValW_,      3131-3488
+                    tarSpecW_, prefTriggerPrice_, EntryPriceDriver_, tarSpecIfEntryPrice_,
+                    FlexLevyNotCut_, FlexLevy_
 
-The other blocks, by the inventory: lulucf, aggregation, net_trade, border, intervention, objective
-(tools/refactor/market_equations_inventory.py BLOCKS).
+The other blocks, by the inventory: lulucf (empty in the step: no LULUCF carbon tax), aggregation (ProdA_ as terms),
+net_trade (m_netTrade, not in the step), intervention (empty in the step: no INTM, STKS, FEOE_max), objective
+(FlipFlop_, CAPRI's solver device) (tools/refactor/market_equations_inventory.py BLOCKS).
 """

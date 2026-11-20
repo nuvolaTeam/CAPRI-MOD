@@ -23,6 +23,10 @@ from typing import List, Optional
 import numpy as np
 from capri_mod.market.equations.market_model.armington import (SupBalM_, arm2QuantShares_, domSalesShares_,
                                                                importShares_)
+from capri_mod.market.equations.market_model.border import (EntryPriceDriver_, FlexLevy_, FlexLevyNotCut_,
+                                                            prefTriggerPrice_, tarAdVal_, tarAdVal_min, tarAdValW_,
+                                                            tarSpec_, tarSpec_min, tarSpecIfEntryPrice_np, tarSpecW_,
+                                                            trqSigmoidFunc_np)
 from capri_mod.market.equations.market_model.prices import (MarketPriceAgg_weights, PMrk_, arm1PriceAgg_,
                                                             arm1PriceAgg_term, arm2PriceAgg_, arm2PriceAgg_term,
                                                             impPrice_)
@@ -168,8 +172,7 @@ class BilateralCommodity:
         return sorted({int(i) for q in (self.trq_quotas or []) + (self.trq_globals or []) for i in q["rows"]})
 
     def _sig(self, f):
-        return 1.0 / (1.0 + np.exp(-np.clip(self.TRQ_SLOPE * (f - self.TRQ_FILL_MID), -self.TRQ_ARG_CLIP,
-                                            self.TRQ_ARG_CLIP)))
+        return trqSigmoidFunc_np(f, self.TRQ_SLOPE, self.TRQ_FILL_MID, self.TRQ_ARG_CLIP)
 
     @staticmethod
     def ncpcm(x, y, z):
@@ -197,22 +200,22 @@ class BilateralCommodity:
         for m, g in enumerate(self.trq_globals or ()):
             ix = g["cover"]
             if g["has_ta"]:
-                ta[ix] = g["ta_pref"] + g["dta"] * sW[m]
+                ta[ix] = tarAdValW_(g["ta_pref"], g["dta"], sW[m])
             if g["has_ts"]:
-                ts[ix] = g["ts_pref"] + g["dts"] * sW[m]
+                ts[ix] = tarSpecW_(g["ts_pref"], g["dts"], sW[m])
         for k, q in enumerate(self.trq_quotas or ()):
             if q["regime"] == "entry_price":
                 continue
             ixq = np.ix_(q["rows"], q["cols"])
-            tb = q["ta_pref"] + q["dta"] * sB[k]
-            sb = q["ts_pref"] + q["dts"] * sB[k]
+            tb = tarAdVal_(q["ta_pref"], q["dta"], sB[k])
+            sb = tarSpec_(q["ts_pref"], q["dts"], sB[k])
             g = self.trq_globals[q["glob"]] if q.get("glob") is not None else None
             if g is not None and g["has_ta"]:
-                tw = g["ta_pref"] + g["dta"] * sW[q["glob"]]
-                tb = self.ncpcm(tw, tb, max(1e-2, 1e-3 * abs(q["dta"])))
+                tw = tarAdValW_(g["ta_pref"], g["dta"], sW[q["glob"]])
+                tb = tarAdVal_min(tw, tb, q["dta"], self.ncpcm)
             if g is not None and g["has_ts"]:
-                tw = g["ts_pref"] + g["dts"] * sW[q["glob"]]
-                sb = self.ncpcm(tw, sb, max(1e-5, 1e-7 * abs(q["dts"])))
+                tw = tarSpecW_(g["ts_pref"], g["dts"], sW[q["glob"]])
+                sb = tarSpec_min(tw, sb, q["dts"], self.ncpcm)
             if q["dta"] != 0 or (g is not None and g["has_ta"]):
                 ta[ixq] = tb
             if q["dts"] != 0 or (g is not None and g["has_ts"]):
@@ -476,11 +479,11 @@ class BilateralCommodity:
             for qi in np.unique(b["quota"][en & (b["quota"] >= 0)]):
                 m = en & (b["quota"] == qi)
                 s_ = float(sB[int(qi)]) if sB is not None else 0.0
-                E = np.where(m, b["pref"] + (b["price"] - b["pref"]) * s_, E)
+                E = np.where(m, prefTriggerPrice_(b["pref"], b["price"], s_), E)
             with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
-                d = (E * 0.95 - cif) / np.where(b["price"] > 0, b["price"], 1.0) * b["fac"]
-                g = np.exp(np.minimum(0.0, d)) / (1.0 + 20.0 * np.exp(-np.abs(d)))
-            out = np.where(en, g * b["tars"], out)
+                d = EntryPriceDriver_(E, cif, np.where(b["price"] > 0, b["price"], 1.0), b["fac"])
+                spec = tarSpecIfEntryPrice_np(d, b["tars"])
+            out = np.where(en, spec, out)
         lv = k == 2
         if lv.any():
             # the levy is cut at the flow's specific tariff: the bound rate, or the quota's current rate (v_tarSpec)
@@ -489,8 +492,8 @@ class BilateralCommodity:
                 _, ts = self._trq_rates(sB, sW)
                 tars = np.where(np.isnan(ts), tars, ts)
             z = 1e-3 * np.where(b["price"] > 0, b["price"], 1.0)
-            notcut = -self.ncpcm(-(b["price"] - cif), 0.0, z)
-            out = np.where(lv, self.ncpcm(notcut, tars, z), out)
+            notcut = FlexLevyNotCut_(b["price"], cif, z, self.ncpcm)
+            out = np.where(lv, FlexLevy_(notcut, tars, z, self.ncpcm), out)
         return out
 
     def border_base(self) -> None:
@@ -596,15 +599,15 @@ class _TrqCells:
     def _bil_rates(self, k: int, sb_k, sw_g):
         """_trq_rates' (tb, sb) of bilateral quota k at its sigma sb_k and its global quota's sigma sw_g."""
         q = self.sc.trq_quotas[k]
-        tb = q["ta_pref"] + q["dta"] * sb_k
-        sb = q["ts_pref"] + q["dts"] * sb_k
+        tb = tarAdVal_(q["ta_pref"], q["dta"], sb_k)
+        sb = tarSpec_(q["ts_pref"], q["dts"], sb_k)
         g = self.sc.trq_globals[q["glob"]] if q.get("glob") is not None else None
         if g is not None and g["has_ta"]:
-            tw = g["ta_pref"] + g["dta"] * sw_g
-            tb = self.sc.ncpcm(tw, tb, max(1e-2, 1e-3 * abs(q["dta"])))
+            tw = tarAdValW_(g["ta_pref"], g["dta"], sw_g)
+            tb = tarAdVal_min(tw, tb, q["dta"], self.sc.ncpcm)
         if g is not None and g["has_ts"]:
-            tw = g["ts_pref"] + g["dts"] * sw_g
-            sb = self.sc.ncpcm(tw, sb, max(1e-5, 1e-7 * abs(q["dts"])))
+            tw = tarSpecW_(g["ts_pref"], g["dts"], sw_g)
+            sb = tarSpec_min(tw, sb, q["dts"], self.sc.ncpcm)
         return tb, sb
 
     def _cells(self, I) -> tuple:
@@ -654,9 +657,9 @@ class _TrqCells:
 
         def rates(s, ta_c, ts_c, own_a, own_s, kid_masks):
             if g["has_ta"]:
-                ta_c = np.where(own_a, g["ta_pref"] + g["dta"] * s, ta_c)
+                ta_c = np.where(own_a, tarAdValW_(g["ta_pref"], g["dta"], s), ta_c)
             if g["has_ts"]:
-                ts_c = np.where(own_s, g["ts_pref"] + g["dts"] * s, ts_c)
+                ts_c = np.where(own_s, tarSpecW_(g["ts_pref"], g["dts"], s), ts_c)
             for k, ma, ms in kid_masks:
                 tb, sb = self._bil_rates(k, self.sB[k], s)
                 ta_c = np.where(ma, tb, ta_c)
