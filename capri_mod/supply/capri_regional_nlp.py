@@ -859,15 +859,17 @@ class CapriRegionalNLP:
         if not nf:
             return None
         from capri_mod.supply.equations.supply_model import n_flow as _nf
+        from capri_mod.supply.equations.supply_model.nutrients import NUTNED_availFactMine_opt, NUTNED_availFactCRes_opt
+        from capri_mod.supply.n_leaching import fert_effect          # ghgMiti.gms's othImpact, 1 - (1 - lit)(1 + NMIN)
         pv = self._pv
         syn = {"NH3": 0, "NOX": 0, "N2O": 0}; srun = 0; used = False
         for name, (ph, nm) in (self._fert_phi or {}).items():
             lit = (nf.get("lit") or {}).get(name) or {}
             for gas, item in (("NH3", "NH3SYN"), ("NOX", "NOXSYN"), ("N2O", "N2OSYN")):
                 if item in lit:
-                    syn[gas] = syn[gas] + pv(1.0 - (1.0 - float(lit[item])) * (1.0 + float(nm))) * ph; used = True
+                    syn[gas] = _nf.GASTOTNETF_fertSyn(syn[gas], pv(fert_effect(lit[item], nm)), ph); used = True
             if "NO3SRUN" in lit:
-                srun = srun + pv(1.0 - (1.0 - float(lit["NO3SRUN"])) * (1.0 + float(nm))) * ph; used = True
+                srun = _nf.RUNTOTNETF_fertRun(srun, pv(fert_effect(lit["NO3SRUN"], nm)), ph); used = True
         m_wc, m0 = getattr(self, "_catc_m", None), float((self.spec.get("catc") or {}).get("m0", 0.0) or 0.0)
         if (self.spec.get("catc") or {}).get("fixmiti"):
             m_wc = None                       # the Green Deal group's fixed winter cover share: the cascade at base (K170)
@@ -877,10 +879,11 @@ class CapriRegionalNLP:
         if not used:
             return None
         fr, rsurf = nf["fr"], float(nf["run_surf"])
-        L1 = _nf.netf(fr, rsurf, fert_syn=syn, m_run=1 - wr * (m_wc if m_wc is not None else m0) - srun)
-        L0 = _nf.netf(fr, rsurf, m_run=1.0 - wr * m0)
-        effM = pv(float(d["eff"])) - (L1["GasRunTot"] - pv(float(L0["GasRunTot"])))
-        effC = pv(float(d["gc"]) / (1.0 - float(L0["N2O"]))) * (1 - L1["N2O"])
+        L1 = _nf.netf(fr, rsurf, fert_syn=syn, m_run=_nf.RUNTOTNETF_cropFactor(wr, m_wc if m_wc is not None else m0, srun))
+        L0 = _nf.netf(fr, rsurf, m_run=_nf.RUNTOTNETF_cropFactor(wr, m0))
+        # NUTNED_'s mineral and residue factors at the options' shares, from the base point (nutrients.py)
+        effM = NUTNED_availFactMine_opt(pv(float(d["eff"])), L1["GasRunTot"], pv(float(L0["GasRunTot"])))
+        effC = NUTNED_availFactCRes_opt(pv(float(d["gc"]) / (1.0 - float(L0["N2O"]))), L1["N2O"])
         self.netf_eff = (effM, effC)
         return effM, effC
 

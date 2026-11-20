@@ -531,3 +531,25 @@ def AMMOAGG_(manure):
     """
     w = sum(n * (1.0 - gr) for n, _, gr, _ in manure)
     return sum(n * (1.0 - gr) * ag for n, _, gr, ag in manure) / w if w > 0 else 0.0
+
+
+def GASTOTNETF_fertSyn(fert_syn, othImpact, v_Miti):
+    """The fertiliser options' term of GASTOTNETF_ (l. 3385-3411: the sum over AllTechFert of the share x othImpact on
+    NH3SYN, NOXSYN or N2OSYN), accumulated over the options: fert_syn + othImpact x v_Miti (netf's fert_syn; othImpact
+    = 1 - (1 - lit)(1 + NMIN), ghgMiti.gms l. 552-563, supply/n_leaching.py fert_effect). CAPRI's GAMS: GASTOTNETF_'s
+    docstring."""
+    return fert_syn + othImpact * v_Miti
+
+
+def RUNTOTNETF_fertRun(srun, othImpact, v_Miti):
+    """The fertiliser options' term of RUNTOTNETF_'s crop factor (l. 3352-3367: the sum over AllTechFert of the share x
+    othImpact NO3SRUN), accumulated over the options: srun + othImpact x v_Miti. CAPRI's GAMS: RUNTOTNETF_'s
+    docstring."""
+    return srun + othImpact * v_Miti
+
+
+def RUNTOTNETF_cropFactor(wc_red, v_Miti_catc, srun=0):
+    """RUNTOTNETF_'s crop factor (l. 3352-3367), netf's m_run: 1 - winter cover's runoff reduction x its share - the
+    fertiliser options' NO3SRUN term (RUNTOTNETF_fertRun); the tillage, buffer strip and biodiversity terms are options
+    the model does not have. CAPRI's GAMS: RUNTOTNETF_'s docstring."""
+    return 1 - wc_red * v_Miti_catc - srun

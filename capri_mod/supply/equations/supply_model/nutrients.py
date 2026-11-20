@@ -314,3 +314,17 @@ def fertDistCres_catcBioFix(biofix, v_Miti, v_Miti0):
     = BioFix x U x 1000 (t N per unit of share; U the base UAA where CAPRI's catcMiti_ takes the current land: K186:
     premiums.py). CAPRI's GAMS of fertDistCres_: fertDistCres_'s docstring."""
     return biofix * (v_Miti - v_Miti0)
+
+
+def NUTNED_availFactMine_opt(eff0, GasRunTot, GasRunTot0):
+    """NUTNED_'s mineral N factor, 1 - v_emiLoss(NETF, N, GasRunTot) (l. 1151), at the options' shares, written as the
+    base factor plus the change from the base point so that the base stays CAPRI's reported one: eff0 - (GasRunTot -
+    GasRunTot0), the losses from n_flow's netf. CAPRI's GAMS of NUTNED_: NUTNED_'s docstring."""
+    return eff0 - (GasRunTot - GasRunTot0)
+
+
+def NUTNED_availFactCRes_opt(availFactCRes, N2O):
+    """NUTNED_'s residue factor, v_nutAvailFactCRes x (1 - v_emiLoss(NETF, N2O, GasTot)) (l. 1204, 1219), at the
+    options' shares: availFactCRes (the base factor over 1 - the base N2O loss) x (1 - N2O). CAPRI's GAMS of NUTNED_:
+    NUTNED_'s docstring."""
+    return availFactCRes * (1 - N2O)
