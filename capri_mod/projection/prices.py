@@ -124,6 +124,23 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
                         rec["value_eur_t"] = v
                         n_30 += 1
             summary["fodder_values_capri_2030"] = n_30
+        # CAPRI's milk for feeding (COMF, SGMF): non-tradable outputs of the cows and the milk sheep and goats, fed to
+        # the calves and the sheep and goats as FCOM and FSGM, in SUPBAL_ with CAPRI's losses (use <= output; supply/
+        # supply_model.gms l. 4551-4611, FEDUSE_ l. 789-803, supply/prep_sim.gms l. 222-223), valued at the balance's
+        # dual, CAPRI's 2030 UVAG in 2017 money (tools/build/build_milk_for_feeding_2030.py; KNOWN_ISSUES K189). The
+        # users are the animals whose ration feeds the milk (livestock.py _fodder_rows)
+        _mfp = Path(traj_dir).parent / "feed" / "milk_for_feeding_2030.csv"
+        mf = read_input(_mfp) if _mfp.exists() else None
+        if mf is not None:
+            n_m = 0
+            for (reg, feed), g in mf.groupby(["region", "feed"]):
+                if reg not in fb:
+                    continue
+                fb[reg] = fb[reg] if fb[reg] is not None else {}
+                fb[reg][feed] = {"crops": {}, "producers": dict(zip(g.animal, g.output_t_head.astype(float))),
+                                 "use_t_head": {}, "value_eur_t": float(g.value_eur_t.iloc[0]), "losses": True}
+                n_m += 1
+            summary["milk_for_feeding_balances"] = n_m
         # the rations price each fodder at its balance's base value (CAPRI: the fodder's price in the feeding problem
         # is the dual of its SUPBAL_, one per region): the projected value, EUR per kg as the ration data
         # (feed/ration.py, ration_model_for). Until 16 November 2026 the rations kept the 2017 value (ES41 grass 20.15

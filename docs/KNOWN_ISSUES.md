@@ -48,7 +48,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K149](#k149) | Norway's raw milk row took the young-animal prices of a clearing without the milk price change, its other rows those of a second clearing with it (CAPRI: one set) | fixed (14 November 2026) |
 | [K150](#k150) | The non-EU regions' raw milk at the market's base is FAO_agg's production, not CAPRI's market data (milk delivered to the dairies): Turkey 20,173 kt against CAPRI's 13,145 | fixed (14 November 2026), validated (15 November 2026, the full Green Deal pair) |
 | [K186](#k186) | The catch crops' winter cover option scales with the fixed base crop area; CAPRI's catcMiti_ and GHG_Mit_Cost_ scale it with the current land (landTypesNoSlak, uaaEqu). Not active in CAPRI's Green Deal step (its winter cover share fixed at 1e-6, CATC a free activity) | open: to fix after item 1's open points |
-| [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences; sorted 20 November 2026: most are in the accounts only or have no effect in the step; ARTIF held fixed had one (small for the EU, a few thousand ha in some Spanish and French units) | open: ARTIF ported 20 November 2026 (a column of the land market, as CAPRI's); next the milk for feeding (FCOM), the yield factors in the N-surplus row |
+| [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences; sorted 20 November 2026: most are in the accounts only or have no effect in the step; ARTIF held fixed had one (small for the EU, a few thousand ha in some Spanish and French units) | open: ARTIF and the milk for feeding ported 20 November 2026 (as CAPRI's; the milk's effect negligible); next the yield factors in the N-surplus row |
 
 ## Resolved (120)
 
@@ -83,7 +83,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K177](#k177) | The NLP calibration put minus the entitlement cut into the overshoot column's linear term where the QP's start held the base's rounding above the trend area: the overshoot was free in BG01, HU32, LV, PL11, PL31, PL41 and RO05 (about 199,000 thousand ha, a zero dual) | fixed (18 November 2026) |
 | [K178](#k178) | The 2030 runs took the young-animal coefficients of 2017 (calves per cow, replacements, piglets per sow): CAPRI's INPANI_ takes the simulation year's, DATA(.., "Y"); Spain's suckler cows 0.83 calves per head against CAPRI's 2030 0.90, the EU's piglet balance 6.6% short at the 2030 base | fixed (18 November 2026) |
 | [K179](#k179) | The 2030 runs took the 2017 manure N, P2O5 and K2O per head (dairy cows' N raised with the milk yield): CAPRI computes them from the simulation year's rations before it solves; the EU's N excretion at the 2030 base 5.4% above CAPRI's 2030 EXCRET (dairy cows +13%) | fixed (18 November 2026) |
-| [K190](#k190) | The grassland need took CAPRI's SQRT(1 +/- 0.2) split twice: the data's need per ha (CAPRI's reported 2030 need per crop) already carries it, and K160 applied it again; ES41's base manure K on grassland 53.6 against CAPRI's 42.0 kt | fixed (20 November 2026); the intensive grassland's Green Deal response now weaker than CAPRI's, to trace |
+| [K190](#k190) | The grassland need took CAPRI's SQRT(1 +/- 0.2) split twice: the data's need per ha (CAPRI's reported 2030 need per crop) already carries it, and K160 applied it again; ES41's base manure K on grassland 53.6 against CAPRI's 42.0 kt | fixed (20 November 2026); the intensive grassland's Green Deal response now weaker than CAPRI's, to trace (not the grassland's technologies; lead: the N-surplus dual gap) |
 | [K188](#k188) | The catch crops were the winter cover option (CAPRI's cost curve, BioFix N in the residue pool) in the calibration and the baseline; CAPRI's 2030 reference has no mitigation options (CATC an activity at its input cost, which sets the ecological set-aside rule's dual), so the model's fallow and set-aside carried no support from the rule and had none to lose in the Green Deal (Alentejo's fallow +13 thousand ha against CAPRI's -2) | fixed (20 November 2026) |
 | [K187](#k187) | CAPRI's July 2026 release lists ecoSetAside_ and cropDivGreening_ only with %envConst% on, which its Green Deal step does not set; CAPRI star 3.0, the code of the project lead's runs, lists both without a condition, and the runs report their marginals | closed (19 November 2026; corrected 20 November): not a gap; supply.env_const = true as CAPRI star 3.0 |
 | [K185](#k185) | Fallow and set-aside carried a nutrient need; CAPRI's fertned.gms leaves a crop without a main-output yield (FALL, VSET) without one, so NUTNED_ has none for them | fixed (19 November 2026) |
@@ -3895,8 +3895,13 @@ CAPRI's (grass 8.20 against 8.14 kg N/ha of manure), its mineral N taking up the
 - **Status:** fixed 20 November 2026 (fertilisation.py and phosphorus.py take the data's need as it is; fert/npk.py
   grass_need_factor and the parameter GRASS_NEED_YIELD_SHIFT removed). Test:
   test_capri.py::test_the_grassland_need_carries_capris_split (the data carry CAPRI's split, and no factor of the
-  model's). Open with it: why CAPRI's intensive grassland falls more in the Green Deal (EU -54.8%); the next lead is
-  the grassland's technologies in the step (the square root holds p_technFact(Yield, A) per technology).
+  model's). Open with it: why CAPRI's intensive grassland falls more in the Green Deal (EU -54.8%). The first lead,
+  the grassland's technologies, is ruled out (20 November 2026): CAPRI's grassland has the standard technology only,
+  in its 2030 calibration (sim_ini_21730 p_technFact: GRAE and GRAI LEVL of T alone) and in its Green Deal step
+  (results/permits v_actLevl: T alone in every region), so the square root has no technology term for grass. Next
+  lead: the N-surplus dual, CAPRI's 1.16-1.28 times the model's in the decomposed units (claude/n_surplus_dual_diagnosis.md;
+  the full-EU run of K184): intensive grassland needs more N per ha than extensive, so a lower N price makes it lose
+  less; consistent in direction, not measured.
 
 <a id="k189"></a>
 ### K189: The equation refactor's findings for the main line (found 19-20 November 2026)
@@ -3962,10 +3967,16 @@ docs/dev/EQUATION_REFACTOR_HANDOFF.md section 8). The refactor fixed none of the
     suckler cows giving 487 kg each). The model writes no such balance: its rations price FCOM (and FSGM) at 0 in
     every region (feed_ration_2017.csv, and the 2030 projection prices only the fodders with a balance,
     projection/prices.py), the calves' milk per head is free within the ration's bounds (feed/ration.py: CALV 10-100%),
-    and the cows' COMF output is not an output of theirs. A porting difference in the calves' and cows' economics,
-    not measured; a candidate for K48 (the calves' prices below CAPRI's). To port: COMF and SGMF as non-tradable
-    fodder balances with the cows' output per head on the supply side and CAPRI's losses (use <= output), at CAPRI's
-    2030 value. Usable fodder per ha and the
+    and the cows' COMF output is not an output of theirs. Ported 20 November 2026: COMF and SGMF as non-tradable
+    fodder balances in the 2030 runs, the producing animals' output per head on the output side (CAPRI's 2030 DCOW,
+    SCOW and SHGM per head), the users read from the base rations, CAPRI's losses (use <= output; an inequality in the
+    NLP form), CAPRI's 2030 UVAG as the base dual and the rations' price (tools/build/build_milk_for_feeding_2030.py,
+    projection/prices.py, livestock.py _fodder_rows, docs/FODDER_BALANCE.md). At ES41's 2030 base the calves' milk is
+    the cows' output (271.56 thousand t, CAPRI's GROF = FEDM) and the dual CAPRI's value (120.4 against 119.8 EUR/t).
+    Effect (five-unit Green Deal probe, ES41, ES42, DE21, FR52, IR01; s21_k190_after against s22_comf): the base
+    unchanged (0.02 thousand); herds and areas within 0.4 thousand (calves ES41 417.3 -> 416.9 thousand head); the
+    young-animal prices of EU_WEST unchanged to the third digit (female calves x1.671 -> x1.669, male x1.832 ->
+    x1.831). So not a cause of K48's calves' prices. Usable fodder per ha and the
     base gap: K36 and K46.
   - *In the regional models, not measured:* the animals' revenue, cost and premium per head from
     regional totals (exact at the base, an aggregation where a model animal holds several of CAPRI's); the yield
@@ -3989,9 +4000,9 @@ docs/dev/EQUATION_REFACTOR_HANDOFF.md section 8). The refactor fixed none of the
   absolute gaps over the five units 148 -> 99 thousand ha: forest in ES41 and FR61 now at CAPRI's change, other land
   in ES11), the activities hardly (730 -> 726). ES12 is not closed: its land hardly moves in the model (arable
   +0.05 thousand ha, CAPRI +8.2; ARTIF +0.04, CAPRI +8.7), a gap of its own, not traced.
-- **Status:** open (registered 20 November 2026; sorted and ARTIF ported 20 November 2026, above): next the milk for
-  feeding (to port: CAPRI's COMF and SGMF balances, above), the yield factors in the N-surplus row, the animals'
-  per-head terms; the accounts' missing rows after Bonn.
+- **Status:** open (registered 20 November 2026; sorted, ARTIF and the milk for feeding ported 20 November 2026,
+  above): next the yield factors in the N-surplus row and the animals' per-head terms (small, not measured); the
+  accounts' missing rows after Bonn.
 
 <a id="k188"></a>
 ### K188: The catch crops in CAPRI's reference form at the calibration point (found 20 November 2026)

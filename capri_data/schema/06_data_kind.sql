@@ -109,6 +109,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/baselines/capri_greendeal_ref/1730/environment/p_balance_crop_coefs_2030.csv', 'coefficients', 'by file: CAPRI''s 2030 coefficients (per ha, per t, shares, factors)'),
   ('capri_data/baselines/capri_greendeal_ref/1730/feed/feed_cereal_mix_2030.csv', 'coefficients', 'by file: feed shares'),
   ('capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_value_2030.csv', 'reference', 'by file: CAPRI''s 2030 unit values of the fed fodders (UVAG)'),
+  ('capri_data/baselines/capri_greendeal_ref/1730/feed/milk_for_feeding_2030.csv', 'reference', 'by file: CAPRI''s 2030 milk for feeding (output per head, UVAG)'),
   ('capri_data/2017/feed/feed_ration_2017.csv', 'coefficients', 'by file: rations, requirements and contents per head (with CAPRI''s 2017 feed prices and its feed-PMP slopes)'),
   ('capri_data/2017/feed/fodder_balance_2017.csv', 'coefficients', 'by file: fodder per ha and its base value'),
   ('capri_data/2017/feed/fodder_balance_2017_use.csv', 'coefficients', 'by file: feed per head'),

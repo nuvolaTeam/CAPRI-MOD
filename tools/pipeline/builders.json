@@ -708,6 +708,31 @@
    ]
   },
   {
+   "task": "build_milk_for_feeding_2030",
+   "builder": "build_milk_for_feeding_2030",
+   "args": [],
+   "inputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_price_ratios_2030.csv",
+    "capri_data/codes/capri_member_state_codes.csv",
+    "capri_data/codes/eu_market_blocks.csv",
+    "capri_data/codes/regional_units.csv",
+    "capri_mod/settings/defaults.toml"
+   ],
+   "code": [
+    "tools/build/build_milk_for_feeding_2030.py",
+    "tools/lib/_grep.py",
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+   ],
+   "outputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/feed/milk_for_feeding_2030.csv"
+   ]
+  },
+  {
    "task": "build_price_transmission_2030",
    "builder": "build_price_transmission_2030",
    "args": [],

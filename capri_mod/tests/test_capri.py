@@ -5687,6 +5687,36 @@ def test_entitlement_limit_in_the_2030_regional_model(model):
     assert float(drift[0]) < 0.002, drift
 
 
+def test_milk_for_feeding_is_capris_balance(model):
+    """KNOWN_ISSUES K189: CAPRI's milk for feeding (COMF; SGMF for sheep and goats) is a non-tradable output of the
+    cows, fed to the calves as FCOM, in SUPBAL_ with CAPRI's losses (use <= output), at the balance's dual. At ES41's
+    2030 base the model's balance holds as CAPRI's (the calves' milk 271.56 thousand t, the dairy and suckler cows'
+    output 271.56, CAPRI's GROF = FEDM), its dual is CAPRI's 2030 UVAG in 2017 money (152.98 / 1.2772 = 119.8 EUR/t),
+    and the rations price the milk at it."""
+    from capri_mod.projection import ProjectionModule, BaselineTrajectory
+
+    root = _repo_root()
+    traj = BaselineTrajectory.from_file(str(root / "capri_data" / "scenarios" / "capri_ref_2030"))
+    pmod = ProjectionModule(model, traj, capri_prices_dir=str(trajectories_dir(root / "capri_data", 2030)))
+    pmod.run(years=[2030], regions=["ES410000"], max_outer_iter=1)
+    pm = getattr(pmod, "_last_projected_model", None) or model
+    mo = pm.supply_module._models["ES410000"]
+    assert mo.res.nlp_ok
+    rec = mo.data.fodder_balance["FCOM"]
+    assert rec["producers"] == pytest.approx({"BCOW": 0.486934867647202, "DCOW": 0.064148785209714}, rel=1e-9)
+    assert rec["value_eur_t"] == pytest.approx(152.975592716429 / 1.2772, rel=1e-3)
+    lab = list(mo.ev.aug_labels)
+    assert {"fodder_FCOM", "fodder_FSGM"} <= set(lab) and {"FCOM", "FSGM"} <= set(mo.ev.fodder_le)
+    Q, c, A, b, y = mo.res.last_aug
+    i = lab.index("fodder_FCOM")
+    use = sum(A[i, j] * y[j] for j in range(len(mo.acts)) if A[i, j] > 0)
+    out = -sum(A[i, j] * y[j] for j in range(len(mo.acts)) if A[i, j] < 0)
+    assert use == pytest.approx(271.56, rel=1e-3) and out == pytest.approx(271.56, rel=1e-3)
+    assert float(mo.ev.last_duals[i]) == pytest.approx(rec["value_eur_t"], rel=0.02)
+    r = mo.seen.feed_rations["CALV"]
+    assert float(r.p0[list(r.feeds).index("FCOM")]) == pytest.approx(rec["value_eur_t"] / 1000.0, rel=1e-9)
+
+
 def test_the_entitlement_overshoot_keeps_its_cut_in_the_nlp_calibration(model):
     """K177: the NLP calibration drops the entitlement row (the crops at their trend levels, as CAPRI's calibration
     point) and takes the overshoot at zero, at its bound, so that its cost stays the cut. Mazowieckie's QP start held

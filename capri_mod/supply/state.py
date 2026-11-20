@@ -98,6 +98,8 @@ class RegionalEvalState(_Slots):
         "dairy_col",          # the low-yield dairy split's column
         "dairy_req_extra",    # the splits' extra requirement entries by animal
         "genet_cols",         # the genetics options' columns
+        "fodder_out",         # {feed: {column: t per head}}: the animals' milk for feeding in the fodder balances
+        "fodder_le",          # the fodder balances with CAPRI's losses (use <= output: COMF, SGMF)
         # fertilisation
         "n_intensity",        # the mineral N intensity factors of the solve, by crop and the manure credit
         "nlp_mine_small",     # the fertiliser groups too small for the mineral-N row

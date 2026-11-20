@@ -103,3 +103,10 @@ price or a balance of the Green Deal step) is reported when found, not at the en
 ## 7. Not in scope
 
 The supply side (done, N1-N15); CAPTRD (after CAPTRD-MOD); CAPREG; changes of results; a newer CAPRI release.
+
+A rule for later (the project lead, 20 November 2026): the CAPRI logic ported as GAMS assignments, not equations (the
+emission accounts of envind/gases.gms, the premium rules, the nutrient-need updates of fert/fertned.gms, the baseline
+projection rules), gets the same treatment: one named function per CAPRI statement block, its GAMS text quoted, with
+CAPRI's names, file and lines, so that tools/refactor/check_gams_quotes.py and check_gams_citations.py check it against
+star 3.0 as they check the equations. New code follows it from now on; the assignments already ported are a phase of
+their own, after this one.

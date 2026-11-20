@@ -42,6 +42,18 @@ Row (`RegionalSupplyModel._fodder_rows`), per region and fodder:
   `capri_ref_fodder_2030.csv`) and `value_eur_t` CAPRI's own 2030 unit value of the fed fodder (UVAG, region and
   fodder, in 2017 money; `fodder_value_2030.csv`, K161); pairs without it take CAPRI's 2030/2017 ratio of the value.
 
+Milk for feeding (since 20 November 2026, KNOWN_ISSUES K189). CAPRI's COMF (cow milk fed to calves) and SGMF (sheep
+and goat milk fed to lambs) are non-tradable outputs too (FODDO): the dairy and suckler cows (DCOW, DCOL, DCOH, SCOW)
+and the milk sheep and goats (SHGM) produce them, the calves (and the other animals whose ration holds it) feed them
+as FCOM and FSGM, and FEDUSE_ adds CAPRI's losses, v_lossQuant between 0 and infinity (supply/prep_sim.gms l. 222-223),
+so the balance is use <= output. In 2030 runs the model writes it the same way: `milk_for_feeding_2030.csv`
+(tools/build/build_milk_for_feeding_2030.py: CAPRI's 2030 output per head and UVAG, in 2017 money) puts each region's
+FCOM and FSGM balance into the fodder balances (`projection/prices.py`), with the producing animals' output per head
+on the output side, the users read from the base rations, and the row an inequality in the NLP form. At ES41's 2030
+base the calves' milk is the cows' output (271.56 thousand t, as CAPRI's GROF = FEDM) and the dual CAPRI's value
+(120.4 against 119.8 EUR/t). Before, the rations priced FCOM and FSGM at 0 and nothing tied the calves' milk to the
+cows. The 2017 base has no such balance (no CAPRI value at hand).
+
 Valuation. Fodder carries no price in the objective; its value is the dual of its balance. The regional calibration
 makes the base a first-order point with the balance binding and its dual at CAPRI's unit value (the feeds' calibration
 takes the fodder's base value as the expected dual, `calibrate_feed_terms`). When herds shrink the dual falls and

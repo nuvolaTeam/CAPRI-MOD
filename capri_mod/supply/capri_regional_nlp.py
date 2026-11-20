@@ -419,6 +419,10 @@ class CapriRegionalNLP:
             fod_rows[ri] = f
             for a in rats:
                 A[ri, act_idx[a]] = 0.0
+            # the animals' milk for feeding (CAPRI's COMF, SGMF; SUPBAL_'s output side): their output per head, which
+            # the line above cleared with the use
+            for j_, t_ in ((spec.get("fodder_out") or {}).get(f) or {}).items():
+                A[ri, int(j_)] -= float(t_)
         for a, r in rats.items():
             for j, f in enumerate(r.feeds):
                 if f in fod and not r.flex[j] and float(r.x0[j]) > 0:
@@ -498,7 +502,12 @@ class CapriRegionalNLP:
             if i in extra:
                 ex = SUPBAL_fodder_use(ex, extra[i], ex_sc[k_ex])   # + the flexible feeds' FEDUSE_ / rs
                 k_ex += 1
-            if i in fod_rows:
+            if i in fod_rows and fod_rows[i] in (spec.get("fodder_le") or ()):
+                # SUPBAL_ with CAPRI's losses (the milk for feeding: v_lossQuant between 0 and infinity in FEDUSE_):
+                # use <= output, at the balance's base constant
+                g_rows.append(ex); lbg.append(-np.inf); ubg.append(float(b[i]) / rs)
+                gmap.append(("le", i, None, rs))
+            elif i in fod_rows:
                 # SUPBAL_ for non-tradable fodder: production = use (an equality at the balance's base constant)
                 g_rows.append(ex); lbg.append(float(b[i]) / rs); ubg.append(float(b[i]) / rs)
                 gmap.append(("eq", i, pairs.get(i), rs))

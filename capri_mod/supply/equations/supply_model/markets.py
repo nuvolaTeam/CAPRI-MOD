@@ -28,8 +28,9 @@ import numpy as np
 
 def SUPBAL_fodder(width, use, crops):
     r"""SUPBAL_(r, FODDO) (l. 4551-4611) as the regional QP's fodder balance row over width columns: the use per head
-    on the animals' columns (use: {column: t per head}), minus the usable fodder per ha on the crops' (crops: {column:
-    t per ha}). The right-hand side: SUPBAL_fodder_rhs.
+    on the animals' columns (use: {column: t per head}), minus the output on the producing columns (crops: {column: t
+    per unit}: the usable fodder per ha of the fodder crops, or the milk for feeding per head of the cows and the milk
+    sheep and goats, CAPRI's COMF and SGMF). The right-hand side: SUPBAL_fodder_rhs.
 
     CAPRI's GAMS, SUPBAL_ (l. 4551-4611):
 
@@ -95,7 +96,7 @@ def SUPBAL_fodder(width, use, crops):
     for j, t in use.items():
         row[j] = t
     for j, u in crops.items():
-        row[j] = -float(u)
+        row[j] -= float(u)              # an animal can produce and use the milk for feeding (SHGM: SGMF and FSGM)
     return row
 
 

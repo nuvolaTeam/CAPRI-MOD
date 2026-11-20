@@ -3997,6 +3997,20 @@
     "builder": "build_fodder_value_2030"
    }
   },
+  "capri_data/baselines/capri_greendeal_ref/1730/feed/milk_for_feeding_2030.csv": {
+   "description": "CAPRI's milk for feeding at its 2030 calibration point (COMF, SGMF: non-tradable outputs fed as FCOM, FSGM; SUPBAL_ with losses): the producing animals' output per head and the milk's value (UVAG, the balance's dual) in 2017 money (KNOWN_ISSUES K189; tools/build/build_milk_for_feeding_2030.py)",
+   "kind": "reference",
+   "rows": 707,
+   "columns": 7,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/projection/prices.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_milk_for_feeding_2030"
+   }
+  },
   "capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_flows_2030.csv": {
    "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
    "kind": "reference",

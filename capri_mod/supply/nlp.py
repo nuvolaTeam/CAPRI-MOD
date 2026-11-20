@@ -152,6 +152,10 @@ class NLPBlock:
         if tax_ > 0 and npk is not None:
             ghg_min, c = self._nlp_tax_terms(tax_, c, abat)
         spec = dict(Q=Q, c=c, A=A, b=b, labels=labels, acts=list(self.acts), rations=rats, fodder=fod, x_base=xb,
+                    # the animals' milk for feeding on the output side of its balances, and the balances with CAPRI's
+                    # losses (use <= output; livestock.py _fodder_rows)
+                    fodder_out=dict(getattr(self.ev, "fodder_out", None) or {}),
+                    fodder_le=set(getattr(self.ev, "fodder_le", None) or ()),
                     prices=getattr(self.seen, "feed_prices", None), req_extra=_rx, feed_ghg=self._ghg_feed_cost(),
                     npk=npk, drop_labels=drop, cap_rules=self._cap_rules_spec(), ghg_min=ghg_min,
                     land_rent_rows=dict(getattr(self.ev, "land_rent_rows", None) or {}),

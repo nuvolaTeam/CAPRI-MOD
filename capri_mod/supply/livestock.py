@@ -495,14 +495,26 @@ class LivestockBlock:
         acts_idx = {a: i for i, a in enumerate(self.acts)}
         x0 = self._base_levels().reindex(self.acts).fillna(0.0).values
         out = []
+        self.ev.fodder_out, self.ev.fodder_le = {}, set()
         for feed, rec in fb.items():
             crops = {c: u for c, u in (rec.get("crops") or {}).items() if c in acts_idx}
-            if not crops:
+            # the milk for feeding (CAPRI's COMF, SGMF): produced by animals, t per head (projection/prices.py)
+            producers = {a: float(t) for a, t in (rec.get("producers") or {}).items()
+                         if a in acts_idx and float(t) > 0}
+            if not crops and not producers:
                 continue
             use, use_b = {}, {}                  # {column: t per head}: now and at the base rations
             _rs = getattr(self.seen, "ration_state", None) or {}
             _fr = getattr(self.seen, "feed_rations", None) or {}
-            for a, t in rec.get("use_t_head", {}).items():
+            users = dict(rec.get("use_t_head", {}))
+            if producers:
+                # the users of the milk: the animals whose base ration feeds it (CAPRI's FEDUSE_ over p_maxFeedShare)
+                for a, r_ in _fr.items():
+                    if a in acts_idx and feed in list(r_.feeds):
+                        x_ = float(r_.x0[list(r_.feeds).index(feed)])
+                        if x_ > 0:
+                            users.setdefault(a, x_ / 1000.0)
+            for a, t in users.items():
                 if a in acts_idx:
                     xr = (_rs.get(a) or {}).get("x", {})
                     use[acts_idx[a]] = float(xr[feed]) / 1000.0 if feed in xr else float(t)
@@ -514,8 +526,16 @@ class LivestockBlock:
                         use_b[acts_idx[a]] = use[acts_idx[a]]
             if not any(v != 0 for v in use.values()):
                 continue
-            # CAPRI's SUPBAL_ for the fodder (supply_model/markets.py)
+            # CAPRI's SUPBAL_ for the fodder (supply_model/markets.py): the crops' usable fodder per ha, or the animals'
+            # milk for feeding per head, on the output side
             cols = {acts_idx[c]: u for c, u in crops.items()}
+            for a, t in producers.items():
+                cols[acts_idx[a]] = cols.get(acts_idx[a], 0.0) + t
+            if producers:
+                self.ev.fodder_out[feed] = {acts_idx[a]: t for a, t in producers.items()}
+            if rec.get("losses"):
+                # CAPRI's losses (v_lossQuant, 0 to infinity) in FEDUSE_: use <= output
+                self.ev.fodder_le.add(feed)
             row = SUPBAL_fodder(len(self.acts), use, cols)
             row_b = SUPBAL_fodder(len(self.acts), use_b, cols)
             scale = float(np.abs(row) @ np.abs(x0)) or 1.0

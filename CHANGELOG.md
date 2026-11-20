@@ -273,6 +273,16 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   unchanged; intensive grassland falls less (DE21 79.7 -> 110.3 thousand ha, CAPRI 71.6; ES41 193.6 -> 331.3, CAPRI
   203.3), so further from CAPRI's: the double count stood in for another cause, now open in K190. Test:
   test_the_grassland_need_carries_capris_split.
+- **K190 followed up:** the grassland's technologies are ruled out as the cause of CAPRI's stronger intensive-grassland
+  response (CAPRI's grassland has the standard technology only, in its calibration and its Green Deal step); next lead
+  the N-surplus dual gap.
+- **The milk for feeding as CAPRI's balance (K189):** CAPRI's COMF and SGMF are non-tradable outputs of the cows and the
+  milk sheep and goats, fed as FCOM and FSGM, in SUPBAL_ with CAPRI's losses (use <= output), valued at the balance's
+  dual. In 2030 runs the model writes them as fodder balances (milk_for_feeding_2030.csv from CAPRI's 2030 reference,
+  tools/build/build_milk_for_feeding_2030.py; projection/prices.py; livestock.py; the NLP's inequality); before, the
+  rations priced the milk at 0 and nothing tied it to the cows. ES41's 2030 base: use = output = 271.56 thousand t,
+  dual 120.4 against CAPRI's 119.8 EUR/t. Five-unit Green Deal probe: herds and young-animal prices unchanged within
+  0.4 thousand and the third digit, so not K48's cause. Test: test_milk_for_feeding_is_capris_balance.
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against
