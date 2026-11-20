@@ -1,10 +1,12 @@
 """CAPRI's human consumption (the Generalised Leontief demand system) in CasADi
 (docs/dev/MARKET_IPOPT_DESIGN.md sections 5-6).
 
-The block is written once, here, and the model evaluates it from here (DemandMixin._gl_eval and gl_food_ratio,
-capri_mod/market/demand.py): the project lead's choice of one implementation per block (section 7, 30 October 2026). The
-assembled market system (market_system_ad.py) composes gl_block_function with the trade systems' Armington prices; until then the
-default solve calls it numerically. CAPRI's equations (arm/market_model.gms l. 826-916, Cpri_ l. 3032-3039):
+CAPRI's equations are functions of capri_mod/market/equations/market_model/ (demand.py GLDemandFS_, GLDemandGS_,
+GLDemandGis_, XiS_; prices.py CPri_), with their GAMS. The block is written once, here, and the model evaluates it from
+here (DemandMixin._gl_eval and gl_food_ratio, capri_mod/market/demand.py): the project lead's choice of one
+implementation per block (section 7, 30 October 2026). The assembled market system (market_system_ad.py) composes
+gl_block_function with the trade systems' Armington prices; until then the default solve calls it numerically. CAPRI's
+equations (arm/market_model.gms l. 826-916, Cpri_ l. 3032-3039):
 
     x_i = [G_i / G (Y ir - F) + d_i] INHA / 1000,   G = sqrt(p)' B sqrt(p),  G_i = (B sqrt(p))_i / sqrt(p_i),
     F = d' p,   p = CPRI0 + (PR - 1) ARM1P0
@@ -23,6 +25,9 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 
+from capri_mod.market.equations.market_model.demand import GLDemandFS_, GLDemandGis_, GLDemandGS_, XiS_
+from capri_mod.market.equations.market_model.prices import CPri_
+
 _ENTRY: Dict[int, object] = {}
 
 
@@ -37,9 +42,9 @@ def gl_entry_function(n: int):
     Y, inha, ir = ca.SX.sym("Y"), ca.SX.sym("inha"), ca.SX.sym("ir")
     sq = ca.sqrt(p)
     Bs = ca.mtimes(B, sq)
-    G = ca.dot(sq, Bs)
-    F = ca.dot(d, p)
-    x = (Bs / sq / G * (Y * ir - F) + d) * inha / 1000.0
+    G = GLDemandGS_(sq, Bs)
+    F = GLDemandFS_(d, p)
+    x = XiS_(GLDemandGis_(Bs, sq), G, Y, ir, F, d, inha)
     f = ca.Function(f"gl_x{n}", [p, d, B, Y, inha, ir], [x], ["p", "d", "B", "Y", "inha", "ir"], ["x"])
     _ENTRY[n] = f
     return f
@@ -74,7 +79,7 @@ def gl_block_function(groups: Dict[str, List[dict]], regions: List[str], n_com: 
         for e in ents:
             n = len(e["p0"])
             col, p0, a1 = e["col"], e["p0"], e["arm1p"]
-            p = ca.vertcat(*[ca.fmax(p0[k] + (PR[i, int(col[k])] - 1.0) * a1[k], 0.05 * p0[k]) if col[k] >= 0
+            p = ca.vertcat(*[ca.fmax(CPri_(p0[k], PR[i, int(col[k])], a1[k]), 0.05 * p0[k]) if col[k] >= 0
                              else ca.fmax(p0[k], 0.05 * p0[k]) for k in range(n)])
             x = gl_entry_function(n)(p, d[o:o + n], ca.DM(e["B"]), float(e["Y"]), float(e["inha"]), ir)
             xs.append(x)

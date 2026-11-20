@@ -8,6 +8,8 @@ from __future__ import annotations
 
 
 from capri_mod import statekit as _cst   # the state objects' helpers
+from capri_mod.market.equations.manuremarket.declare_manure_market import e_mPoolSurplus, p_mTradeAddCost
+from capri_mod.market.equations.manuremarket.simu_manure_market import p_mPoolSupConst, p_stepWeights_average
 #: the clearing's state kept per market between outer iterations, as paths in the model's state objects (the N
 #: market's in the model's own sv and res; the P and K markets' copies in sv.pool_pk, swapped in for their clearing)
 #: t per kt: CAPRI's pool trade is in kt, the supply in its slope in t (outer_loop.manure_pool_es_slope "capri_doc")
@@ -294,7 +296,7 @@ class ManureBlock:
                     h_ = (ph.get(k) or []) + [float(pnew[k])]
                     ph[k] = h_[-n_keep:]
                     use = list(reversed(ph[k]))[:len(wts)]
-                    pnew[k] = sum(w_ * v_ for w_, v_ in zip(wts, use)) / sum(wts[:len(use)])
+                    pnew[k] = p_stepWeights_average(wts, use)
         else:
             om = float(acc.get("_omega", 1.0))
             prev_gap = acc.get("_gap")
@@ -395,9 +397,9 @@ class ManureBlock:
             pshw_h[r_["reg"]] = h_[-max(len(wts), 1):]
             if v <= float(st.get("outer_loop.manure_pool_pshw_floor")) and len(h_) > 1:
                 use = list(reversed(h_))[:len(wts)]
-                v = sum(w_ * x_ for w_, x_ in zip(wts, use)) / sum(wts[:len(use)])
+                v = p_stepWeights_average(wts, use)
             z = r_["e"] - r_["i"]
-            a = z - b * v
+            a = p_mPoolSupConst(z, b, v)
             cs1, cb1 = r_["cs1"], r_["cb1"]
             # the constants: the region's export (import) reduced cost = v + cs0 + cs1 e - P (P + cb0 + cb1 i - v)
             cs0 = r_["rce"] - r_["f"] - cs1 * r_["e"] - v
@@ -407,9 +409,10 @@ class ManureBlock:
                 raise ValueError(f"manure pool {prod}: {r_['reg']} has a negative excess-supply slope ({b:.6g}) its "
                                  f"trade costs do not outweigh: the market model is not convex")
             ie, ii = q, nr + q
-            Qp[ie, ie] += be + cs1; Qp[ii, ii] += be + cb1; Qp[ie, ii] -= be; Qp[ii, ie] -= be
-            cp_[ie] = -a * be + cs0
-            cp_[ii] = a * be + cb0
+            q_ee, q_ii, q_ei, c_e, c_i = e_mPoolSurplus(a, b, cs0, cs1, cb0, cb1)
+            Qp[ie, ie] += q_ee; Qp[ii, ii] += q_ii; Qp[ie, ii] -= q_ei; Qp[ii, ie] -= q_ei
+            cp_[ie] = c_e
+            cp_[ii] = c_i
         # CAPRI's autarky buffers (p_mTradeAddCost, declare_manure_market.gms l. 396-436): a link unused at the
         # calibration point costs (buffer_k + buffer_l) / 2 more, so that new flows need a price gap beyond the trade
         # cost; CAPRI's calibrated links are those from its exporting pools to its importing ones (at the 2030
@@ -421,7 +424,7 @@ class ManureBlock:
         used_ = {(a_, b_) for a_ in exp_ for b_ in imp_} | {(b_, a_) for a_ in exp_ for b_ in imp_}
         bf_ = bc["buffer_greendeal"] if bool(getattr(self.ev, "greendeal_group", False)) else bc["buffer"]
         for t, (a_, b_, cc) in enumerate(arcs):
-            add_ = 0.0 if (a_, b_) in used_ else 0.5 * (bf_.get(a_, 0.0) + bf_.get(b_, 0.0))
+            add_ = 0.0 if (a_, b_) in used_ else p_mTradeAddCost(bf_.get(a_, 0.0), bf_.get(b_, 0.0))
             cp_[2 * nr + t] = cc + add_
         Ap = np.zeros((nr, nv)); bp = np.zeros(nr)
         for q, r_ in enumerate(crec):

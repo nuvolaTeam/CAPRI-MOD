@@ -40,11 +40,15 @@ from typing import Dict, List
 
 import numpy as np
 
+from capri_mod.market.equations.market_model.fudging import ProdFudge_, ProdFudge_Z
+from capri_mod.market.equations.market_model.supply import ProdNQ_hess, yaniMarket_
+
 
 def prod_fudge(qr, m, base):
     """A ProdNQ_ cell's supply from its row qr by its mode m (G3.4, docs/dev/MARKET_BOUNDS_PLAN.md step 4):
       0  the model's floor max(qr, 0) (the default solve's; DEP-39)
-      1  CAPRI's ProdFudge_ (arm/market_model.gms l. 2420-2431): v_prodQuant = -ncpcm(-qr, 0, Z) + 1e-11 with
+      1  CAPRI's ProdFudge_ (arm/market_model.gms l. 2420-2432; equations/market_model/fudging.py):
+         v_prodQuant = -ncpcm(-qr, 0, Z) + 1e-11 with
          Z = 1e-2 min(1000, max(1e-11, base)), base the cell's base production (DATA Prod); GAMS's ncpCM(x, y, Z) =
          x - Z ln(1 + exp((x - y) / Z)), so -ncpcm(-qr, 0, Z) = max(qr, 0) + Z ln(1 + exp(-|qr| / Z)), written so to
          keep exp's argument at or below 0. CAPRI generates it where the cell's lower bound is at or below 0 (after a
@@ -52,8 +56,7 @@ def prod_fudge(qr, m, base):
       2  the row itself (CAPRI's v_prodQuant without ProdFudge_, held by its bounds)
     qr and m CasADi expressions (or numbers), base a number."""
     import casadi as ca
-    z = 1e-2 * min(1000.0, max(1e-11, float(base)))
-    fudge = ca.fmax(qr, 0.0) + z * ca.log1p(ca.exp(-ca.fabs(qr) / z)) + 1e-11
+    fudge = ProdFudge_(qr, ProdFudge_Z(base))
     return ca.if_else(m < 0.5, ca.fmax(qr, 0.0), ca.if_else(m < 1.5, fudge, qr))
 
 
@@ -323,10 +326,10 @@ def supply_system(mm, exogenous_supply):
         def rows_at(dPv):
             """The rows at the price change dPv with the young-animal prices ry, and their markets' residual."""
             if yfn is None:
-                return s0 + ca.mtimes(ca.DM(Hm), dPv), None
+                return ProdNQ_hess(s0, Hm, dPv), None
             H_YP, H_YY, H_PY, net, ref, dy = yfn
-            res = ca.DM(net) + ca.mtimes(ca.DM(H_YP), dPv) + ca.mtimes(ca.DM(H_YY), dy) - ca.DM(ref)
-            return s0 + ca.mtimes(ca.DM(Hm), dPv) + ca.mtimes(ca.DM(H_PY), dy), res
+            res = yaniMarket_(ca.DM(net), H_YP, dPv, H_YY, dy, ca.DM(ref))
+            return ProdNQ_hess(s0, Hm, dPv, ca.mtimes(ca.DM(H_PY), dy)), res
         if mk is not None:
             iM_ = xs.index("MILK")
             dP1 = ca.SX(dP)

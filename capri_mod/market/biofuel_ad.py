@@ -1,7 +1,8 @@
 """CAPRI's biofuel block in CasADi (docs/dev/MARKET_IPOPT_DESIGN.md sections
 5-6).
 
-Written once, here, and evaluated from here by BiofuelMixin (capri_mod/market/biofuel.py): the project lead's choice of
+CAPRI's equations are functions of capri_mod/market/equations/market_model/biofuels.py, with their GAMS. Written
+once, here, and evaluated from here by BiofuelMixin (capri_mod/market/biofuel.py): the project lead's choice of
 one implementation per block (section 7, 30 October 2026). The equations (arm/market_model.gms; CAPRI references in
 biofuel.py's docstrings), with the operations in the order biofuel.py had them before the move:
 
@@ -23,11 +24,11 @@ from __future__ import annotations
 
 import numpy as np
 
+from capri_mod.market.equations.market_model.biofuels import (Biof_, BiofFeedCost_, BiofFeedCostAgg_,
+                                                              BiofPriceRel_, ProdBiof_, SupplyBiof_, biofDem_,
+                                                              biofDemshare_)
+
 _FN = {}
-
-
-def _sigmoid(ca, x):
-    return 1.0 / (1.0 + ca.exp(-ca.fmin(ca.fmax(x, -500.0), 500.0)))
 
 
 def feed_group_function(name: str, g: dict):
@@ -39,14 +40,14 @@ def feed_group_function(name: str, g: dict):
     r, X, dd = ca.SX.sym("r", n), ca.SX.sym("X"), ca.SX.sym("dd")
     ddg = np.asarray(g["ddgs"], bool)
     by = ca.DM(np.asarray(g["by"], float)) * ca.vertcat(*[dd if ddg[i] else ca.SX(1.0) for i in range(n)])
-    mu = ca.fmax(ca.DM(np.asarray(g["p0"], float)) * r - by, 1e-6)
+    mu = BiofFeedCost_(ca.DM(np.asarray(g["p0"], float)), r, by)
     rho = float(g["rho"])
-    mub = ca.dot(ca.DM(np.asarray(g["dp"], float)), mu ** (1.0 - rho)) ** (1.0 / (1.0 - rho))
-    q = ca.DM(np.asarray(g["dp"], float)) * X * (mub / mu) ** rho
+    mub = BiofFeedCostAgg_(ca.DM(np.asarray(g["dp"], float)), mu, rho)
+    q = Biof_(ca.DM(np.asarray(g["dp"], float)), X, mub, mu, rho)
     k = int(g["num"])
     prcb = np.asarray(g["prcb"], float)
     rest = ca.dot(q, ca.DM(prcb)) - q[k] * prcb[k]
-    q[k] = ca.fmax(0.0, (X - rest) / prcb[k])
+    q[k] = ProdBiof_(X, rest, prcb[k])
     return ca.Function(name, [r, X, dd], [q, mub], ["r", "X", "dd"], ["q", "mub"])
 
 
@@ -58,8 +59,8 @@ def supply_function():
         import casadi as ca
         rb, mub, ppri, sc, al, be, sl, tu = (ca.SX.sym(s) for s in ("rb", "mub", "ppri", "scale", "alfa", "beta",
                                                                       "slope", "turn"))
-        PR = ppri * rb / mub
-        x = ca.fmax(0.0, sc * PR + ca.exp(al + be * ca.log(PR + 1e-2)) * _sigmoid(ca, sl * (PR - tu)))
+        PR = BiofPriceRel_(ppri, rb, mub)
+        x = SupplyBiof_(sc, PR, al, be, sl, tu)
         f = _FN["supply"] = ca.Function("biof_supply", [rb, mub, ppri, sc, al, be, sl, tu], [x],
                                         ["rb", "mub", "ppri", "scale", "alfa", "beta", "slope", "turn"], ["X"])
     return f
@@ -74,9 +75,9 @@ def demand_function():
         names = ("ra", "cpri", "arm1p", "quts", "dmax", "slope", "fossil", "turn", "hcon", "oil_fossil", "oil_b")
         ra, cpri, arm1p, quts, dmax, sl, fos, tu, hcon, ofos, ob = (ca.SX.sym(s) for s in names)
         cp = ca.fmax(1e-6, cpri + arm1p * (ra - 1.0))
-        share = quts + dmax * _sigmoid(ca, sl * (cp / fos - tu))
+        share = biofDemshare_(quts, dmax, sl, cp, fos, tu)
         f = _FN["demand"] = ca.Function("biof_demand", [ra, cpri, arm1p, quts, dmax, sl, fos, tu, hcon, ofos, ob],
-                                        [share * hcon * ofos / ob], list(names), ["BIOF"])
+                                        [biofDem_(share, hcon, ofos, ob)], list(names), ["BIOF"])
     return f
 
 

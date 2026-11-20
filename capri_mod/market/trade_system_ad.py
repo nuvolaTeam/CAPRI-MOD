@@ -20,6 +20,11 @@ from __future__ import annotations
 
 import numpy as np
 
+from capri_mod.market.equations.market_model.armington import (SupBalM_, arm2QuantShares_, domSalesShares_,
+                                                               importShares_)
+from capri_mod.market.equations.market_model.border import trqSigmoidFunc_
+from capri_mod.market.equations.market_model.prices import (arm1PriceAgg_, arm1PriceAgg_term, arm2PriceAgg_,
+                                                            arm2PriceAgg_term)
 from capri_mod.market.import_prices_ad import _ncpcm, cells, import_price_function
 
 _CACHE = {}
@@ -63,24 +68,24 @@ def trade_system_function(sc, slope_input: bool = False):
         if sc._has_imp[i] and i in by_imp:
             pm = 0
             for j in by_imp[i]:
-                pm = pm + beta[i, j] * p[i, j] ** (1.0 - s2)
-            PM.append(pm ** (1.0 / (1.0 - s2)))
+                pm = pm + arm2PriceAgg_term(beta[i, j], p[i, j], s2)
+            PM.append(arm2PriceAgg_(pm, s2))
         else:
             PM.append(float(sc.PM0[i]))
         if sc._has_dom[i] or sc._has_imp[i]:
             pa = 0
             if sc._has_dom[i]:
-                pa = pa + float(sc.dd[i]) * Pd[i] ** (1.0 - s1)
+                pa = pa + arm1PriceAgg_term(float(sc.dd[i]), Pd[i], s1)
             if sc._has_imp[i]:
-                pa = pa + float(sc.dm[i]) * PM[i] ** (1.0 - s1)
-            PA.append(pa ** (1.0 / (1.0 - s1)))
+                pa = pa + arm1PriceAgg_term(float(sc.dm[i]), PM[i], s1)
+            PA.append(arm1PriceAgg_(pa, s1))
         else:
             PA.append(float(sc.PA0[i]))
-    DS = [D[i] * float(sc.dd[i]) * (PA[i] / Pd[i]) ** s1 if sc._has_dom[i] else 0 for i in range(n)]
-    M = [D[i] * float(sc.dm[i]) * (PA[i] / PM[i]) ** s1 if sc._has_imp[i] else 0 for i in range(n)]
+    DS = [domSalesShares_(D[i], float(sc.dd[i]), PA[i], Pd[i], s1) if sc._has_dom[i] else 0 for i in range(n)]
+    M = [arm2QuantShares_(D[i], float(sc.dm[i]), PA[i], PM[i], s1) if sc._has_imp[i] else 0 for i in range(n)]
     X = {}
     for (i, j) in cl:
-        X[i, j] = DS[j] if i == j else M[i] * beta[i, j] * (PM[i] / p[i, j]) ** s2
+        X[i, j] = DS[j] if i == j else importShares_(M[i], beta[i, j], PM[i], p[i, j], s2)
     for i in range(n):
         if (i, i) not in X:
             X[i, i] = DS[i]
@@ -90,7 +95,7 @@ def trade_system_function(sc, slope_input: bool = False):
         for i in range(n):
             if i != j and (i, j) in X:
                 sold = sold + X[i, j]
-        bal.append(S[j] - sold)
+        bal.append(SupBalM_(S[j], sold))
 
     def fill(q):
         return sum((X[int(i), int(j)] for i in q["rows"] for j in q["cols"] if (int(i), int(j)) in X), 0)
@@ -99,8 +104,7 @@ def trade_system_function(sc, slope_input: bool = False):
     trq = []
     for k in bil:
         q = sc.trq_quotas[k]
-        arg = ca.fmin(ca.fmax(slope * (fill(q) / q["Q"] - mid), -clip), clip)
-        trq.append(sB[k] - 1.0 / (1.0 + ca.exp(-arg)))
+        trq.append(sB[k] - trqSigmoidFunc_(fill(q) / q["Q"], slope, mid, clip))
     for m_ in glo:
         g = sc.trq_globals[m_]
         cov = np.zeros((n, n), dtype=bool)
@@ -109,8 +113,7 @@ def trade_system_function(sc, slope_input: bool = False):
         for k in g["bil"]:
             q = sc.trq_quotas[k]
             tot = tot - _ncpcm(ca, -(fill(q) - q["Q"]), 0.0, 1e-3 * q["Q"])
-        arg = ca.fmin(ca.fmax(slope * (tot / g["Q"] - mid), -clip), clip)
-        trq.append(sW[m_] - 1.0 / (1.0 + ca.exp(-arg)))
+        trq.append(sW[m_] - trqSigmoidFunc_(tot / g["Q"], slope, mid, clip))
     PAr = ca.vertcat(*[PA[i] / float(sc.PA0[i]) for i in range(n)])
     f = ca.Function("trade_system_" + sc.name, [r, sB, sW, S, D] + ([sl] if slope_input else []),
                     [ca.vertcat(*bal), ca.vertcat(*trq) if trq else ca.SX(0, 1),
