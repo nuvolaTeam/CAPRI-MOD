@@ -23,7 +23,7 @@ In GAMS's order (line numbers of biofuel_trends.gms):
   l. 1297-1318 %constBionergy% (the 2023 Brightspace baseline): the EU28 member states' biofuel positions after 2020 at
               their 2020 values (setting captrd.const_bioenergy: on, CAPRI's default, acting only with that long-run
               selection; the reference run did not apply it, so its parity test sets it off)
-  l. 1323-1413 fossil fuel demand, per inhabitant; excise taxes (Biofuel_data.gms's p_taxData), prices from PRIMES's
+  l. 1323-1413 fossil fuel demand, per inhabitant; excise taxes (biofuel_data.gms's p_taxData), prices from PRIMES's
               change, consumer prices, per ton; EXPD
   l. 1415-1478 trust levels; p_data's nObs of the new series
 

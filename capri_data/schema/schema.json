@@ -10955,7 +10955,7 @@
    "file": "capri_data/pipeline/captrd/dat/biofuel_p_taxdata.csv",
    "declared_in": "38_captrd_biofuel.sql",
    "layout": [],
-   "comment": "The excise taxes p_taxData(region, fuel, CTAX, year) of dat/biofuel/Biofuel_data.gms (EURACTIV); 1200 rows (tools/build/build_captrd_biofuel.py).",
+   "comment": "The excise taxes p_taxData(region, fuel, CTAX, year) of dat/biofuel/biofuel_data.gms (EURACTIV); 1200 rows (tools/build/build_captrd_biofuel.py).",
    "columns": [
     {
      "name": "region",
@@ -10997,7 +10997,7 @@
      "item": "value",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_p_taxdata.value: EUR per 1000 l (Biofuel_data.gms)"
+     "basis": "biofuel_p_taxdata.value: EUR per 1000 l (biofuel_data.gms)"
     }
    ],
    "provenance": {

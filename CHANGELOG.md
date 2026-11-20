@@ -242,6 +242,21 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   l. 231-232), so they are in its 2030 reference and Green Deal step, as the results' marginals show; only the July
   release ties them to %envConst%, which the Green Deal step does not set (its eight envConst rows are empty).
   supply.env_const stays true.
+- **The refactor's checks against star 3.0 as tools:** tools/refactor/check_gams_quotes.py (every quoted CAPRI GAMS
+  block in the refactor's modules is star 3.0's text, at its cited line within 3) and check_gams_citations.py (every
+  line citation next to an equation's name holds that equation in star 3.0), run by
+  capri_mod/tests/test_refactor_checks.py where capri_sources/gams is star 3.0 (skipped otherwise). The plan of the
+  refactor's second phase, CAPRI's market equations: docs/dev/MARKET_EQUATION_REFACTOR_PLAN.md.
+- **The CAPTRD builders and build_rd_inputs on star 3.0:** build_captrd_globiom_sets, build_captrd_aglink_sets,
+  build_captrd_agriprod, build_captrd_national and build_captrd_biofuel read capri_sources/gams (star 3.0) instead of
+  the course copy (course_capri_git, CAPRI's July 2026 release, deleted 20 November 2026); build_rd_inputs and
+  build_captrd_biofuel read their data files from capri_sources/dat_local (the project lead's star 3.0 installation;
+  docs/EXTERNAL_SOURCES.md). The GAMS set reader (tools/lib/gams_sets.py) follows an $include written with Windows
+  separators, as star 3.0's baseline/aglink2023dgAgri_sets.gms l. 32 writes it. Rerun, every output is as committed
+  except one statement's text in the Aglink sets' _unparsed.csv (fao_codes_new.gms l. 24, a path with backslashes in
+  star 3.0); the data are unchanged. The four rural-development GDX files build_rd_inputs reads are in the raw set
+  nuvolaTeam/capri-mod-raw as Parquet (capri/dat/policy/, capri/dat/baseline/; 174 CAPRI files,
+  tools/pipeline/capri_raw_manifest.json).
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against

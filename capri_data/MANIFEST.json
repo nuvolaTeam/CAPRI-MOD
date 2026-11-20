@@ -5461,7 +5461,7 @@
    }
   },
   "capri_data/pipeline/captrd/dat/biofuel_p_taxdata.csv": {
-   "description": "The excise taxes p_taxData(region, fuel, CTAX, year) of dat/biofuel/Biofuel_data.gms (EURACTIV); 1200 rows (tools/build/build_captrd_biofuel.py).",
+   "description": "The excise taxes p_taxData(region, fuel, CTAX, year) of dat/biofuel/biofuel_data.gms (EURACTIV); 1200 rows (tools/build/build_captrd_biofuel.py).",
    "kind": "coefficients",
    "rows": 1200,
    "columns": 5,

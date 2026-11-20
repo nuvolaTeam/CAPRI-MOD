@@ -203,6 +203,6 @@ CREATE TABLE ctrd_biofuel_p_taxdata (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (region, fuel, item, "year")
 );
-COMMENT ON TABLE ctrd_biofuel_p_taxdata IS 'The excise taxes p_taxData(region, fuel, CTAX, year) of dat/biofuel/Biofuel_data.gms (EURACTIV); 1200 rows (tools/build/build_captrd_biofuel.py).';
+COMMENT ON TABLE ctrd_biofuel_p_taxdata IS 'The excise taxes p_taxData(region, fuel, CTAX, year) of dat/biofuel/biofuel_data.gms (EURACTIV); 1200 rows (tools/build/build_captrd_biofuel.py).';
 INSERT INTO value_units VALUES
-  ('ctrd_biofuel_p_taxdata', 'value', NULL, 'open', 'biofuel_p_taxdata.value: EUR per 1000 l (Biofuel_data.gms)');
+  ('ctrd_biofuel_p_taxdata', 'value', NULL, 'open', 'biofuel_p_taxdata.value: EUR per 1000 l (biofuel_data.gms)');

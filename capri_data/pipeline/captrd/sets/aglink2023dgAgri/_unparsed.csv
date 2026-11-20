@@ -24,7 +24,7 @@ aglink2023dgAgri_sets.gms,439,agColsSummable('BF..ET..CONV') = no,transcribed
 aglink2023dgAgri_sets.gms,447,agColsSummable('MBD') = no,transcribed
 aglink2023dgAgri_sets.gms,449,agColsSummable('BD..ADJ') = no,transcribed
 aglink2023dgAgri_sets.gms,857,"Parameter p_oilEquAGL (aglinkROWS) ""oil equivalents in Aglink definition""/ DIE 1.01 GAS 1.05 BD 0.86 ET 0.64 /","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
-fao_codes_new.gms,24,"$GDXIN ""%RESULTS_IN%/fao/faodata.gdx"" $LOAD FAORows = FAO_ROWS $LOAD FAOCols = FAO_COLS $LOAD FAORegionsIni = FAO_REG $LOAD FAOYears = FAO_Years $GDXIN SET FAORegionsNotUpto2021ini ""Regions removed in","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
+fao_codes_new.gms,24,"$GDXIN ""%RESULTS_IN%\fao\faodata.gdx"" $LOAD FAORows = FAO_ROWS $LOAD FAOCols = FAO_COLS $LOAD FAORegionsIni = FAO_REG $LOAD FAOYears = FAO_Years $GDXIN SET FAORegionsNotUpto2021ini ""Regions removed in","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
 fao_codes_new.gms,168,"FAORegionsDel(FAORegions) $ (NOT SUM(RMAll $ SAMEAS(RMAll,FAORegions),1)) = YES","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
 fao_codes_new.gms,534,parameter p_checkRegionMap,"check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"
 fao_codes_new.gms,536,"p_checkRegionMap(""sum>1"",FAORegions,""b"") $ (SUM(FAOregions_map(RMAll,FAORegions) $ (not SUM(SAMEAS(EU27AGGS,RMALL),1)),1) gt 1)=1","check, display, parameter or FAO statement (not a set CAPTRD's Aglink stage reads)"

@@ -86,7 +86,7 @@ def set_literal(text: str, name: str) -> list:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--gams", type=Path, default=SOURCES / "gams")
-    ap.add_argument("--dat", type=Path, default=SOURCES / "course_capri_git" / "dat")
+    ap.add_argument("--dat", type=Path, default=SOURCES / "dat_local")
     ap.add_argument("--budget", type=Path, default=SOURCES / "results" / "policy" / "rd_budget.gdx")
     ap.add_argument("--base-year", default="2017")
     a = ap.parse_args()

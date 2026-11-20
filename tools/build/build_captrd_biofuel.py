@@ -10,7 +10,8 @@ Sources (the project lead's CAPRI installation, docs/EXTERNAL_SOURCES.md):
   dat/biofuel/primes_ref_060722.gdx p_PrimesWithUnits (the reference run's %primesBiofuelFile%), converted to Parquet by
                                     tools/build/convert_capri_gdx.py (dat_parquet/biofuel/primes_ref_060722)
   dat/biofuel/fossilFuel.gdx        p_fossilFuel (dat_parquet/biofuel/fossilFuel)
-  dat/biofuel/Biofuel_data.gms      the table p_taxData (the file's only table biofuel_trends.gms reads)
+  dat/biofuel/biofuel_data.gms      the table p_taxData (the file's only table biofuel_trends.gms reads; its include,
+                                    l. 1344)
 Output: capri_data/pipeline/captrd/sets/biofuel/<set>.csv (d0, d1, ...), capri_data/pipeline/captrd/dat/
 biofuel_p_potentialstocks.csv, biofuel_proc_yields.csv, biofuel_p_primeswithunits.csv, biofuel_p_fossilfuel.csv,
 biofuel_p_taxdata.csv. Records are kept as the sources hold them (labels as written); the port filters them to the
@@ -31,8 +32,8 @@ import gams_sets as G                                      # noqa: E402
 import gams_text as GT                                     # noqa: E402
 from paths import SOURCES                                  # noqa: E402
 
-GAMS = SOURCES / "course_capri_git" / "gams"
-DAT = SOURCES / "course_capri_git" / "dat" / "biofuel"
+GAMS = SOURCES / "gams"
+DAT = SOURCES / "dat_local" / "biofuel"
 PARQ = SOURCES / "dat_parquet" / "biofuel"
 OUT_SETS = ROOT / "capri_data" / "pipeline" / "captrd" / "sets" / "biofuel"
 OUT_DAT = ROOT / "capri_data" / "pipeline" / "captrd" / "dat"
@@ -77,8 +78,8 @@ def main() -> None:
             raise ValueError(f"{sym}: special values")
         _write(OUT_DAT / f"{name}.csv", cols + ["value"],
                [(*k, repr(float(v))) for *k, v in zip(*[d[f"d{i + 1}"] for i in range(len(cols))], d.value)])
-    bt = GT.read_text(DAT / "Biofuel_data.gms")
-    recs = GT.table_records(bt, "p_taxData", 3, str(DAT / "Biofuel_data.gms"))
+    bt = GT.read_text(DAT / "biofuel_data.gms")
+    recs = GT.table_records(bt, "p_taxData", 3, str(DAT / "biofuel_data.gms"))
     _write(OUT_DAT / "biofuel_p_taxdata.csv", ["region", "fuel", "item", "year", "value"],
            [(*k, repr(float(v))) for *k, v in recs])
 

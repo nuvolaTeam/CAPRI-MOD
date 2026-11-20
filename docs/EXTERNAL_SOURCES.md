@@ -73,12 +73,20 @@ copies of the area table are identical in levels: one kept).
 - From: `costsavings_ini_21730_jul15.zip`.
 - Read by: extract_capri_costsavings.
 
-**`gams/`**: CAPRI's GAMS source tree.
-- From: `gams.zip`.
+**`gams/`**: CAPRI's GAMS source tree, CAPRI star 3.0 (the code of the project lead's runs; `supply/supply_model.gms`
+5,557 lines, `arm/market_model.gms` 4,607).
+- From: `gams.zip` of 17 June 2026 (the project lead's archive `gams__3_.zip` is the same code with the solver edits).
 - Read by: build_ad_option, build_ammonia_cost_tables, build_bilateral_market, build_cover_crops,
   build_digestibility_table, build_enteric_feed_factors, build_eu_market_blocks, build_feed_bulks, build_histosol,
   build_manure_pool_costs, build_organic_yield_gap, build_unit_catalogue, build_yield_price_elasticity,
-  build_active_technologies, build_greendeal_targets.
+  build_active_technologies, build_greendeal_targets; the CAPTRD builders build_captrd_globiom_sets,
+  build_captrd_aglink_sets, build_captrd_agriprod, build_captrd_national and build_captrd_biofuel, and
+  build_rd_inputs. Until 20 November 2026 the five CAPTRD builders read the course copy's gams folder
+  (`course_capri_git/gams`, which is CAPRI's July 2026 release, not star 3.0; deleted that day); rerun on star 3.0
+  their outputs are the same, apart from the text of one statement listed in `_unparsed.csv` of the Aglink sets
+  (a path written with backslashes in star 3.0).
+- The equation refactor's checks (tools/refactor/check_gams_quotes.py, check_gams_citations.py and
+  capri_mod/tests/test_refactor_checks.py) read it and skip when it is not star 3.0.
 
 **`dat/`**: CAPRI's `dat` folder as parquet, the project's mirror of it.
 - From: the project lead; and, on 10 November 2026, from the public mirror of CAPRI's dat folder on Hugging Face
@@ -136,6 +144,15 @@ added on 11 November 2026: `baseline/data_SSPV3_update/` (SSP_DATA), `arm/allpop
 - Added on 11 November 2026: `global/GLOBIOM-EU_EUCLIMIT6_S2_50CV.gdx` (GLOBIOM-EU's EUCLIMIT6 file, equal to the
   course mirror's dat/global copy), the input of CAPRI's conversion in GLOBIOM_EU_longrun_defaulta.gdx;
   `capreg_tseries/Capreg_tseries/<CC>_17.gdx` (35, upload Capreg_tseries.zip).
+- Added on 20 November 2026 (the project lead's star 3.0 installation), the inputs of build_rd_inputs (its `--dat`):
+  `policy/rdNewMeasuresRegDist.gdx` (p_rdNewMeasuresRegDist, policy/extend_rd_baseline.gms l. 110),
+  `policy/rd_spend_2007_2013_se.gdx` (p_seLbuData, policy/rd_logic.gms l. 354), `baseline/clueLandPartition.gdx`
+  (p_clueLandPart, policy/rd_static.gms l. 130) and `baseline/ae_lfa_fes.gdx` (p_fes, l. 131). Until then
+  build_rd_inputs read them from the course copy's dat folder (deleted that day); the four files are byte-identical to
+  that copy's, and the builder's outputs are unchanged. Published the same day as Parquet in the raw set below
+  (`capri/dat/policy/<file>/`, `capri/dat/baseline/<file>/`). build_captrd_biofuel reads `biofuel/biofuel_data.gms` (above;
+  the name star 3.0 includes, biofuel/biofuel_trends.gms l. 1344), until then the course copy's `Biofuel_data.gms`,
+  which differs only in path separators and the encoding of two comments; the builder's outputs are unchanged.
 
 **`results_local/capreg/`**: CAPREG's time series `res_time_series_17<CC>.gdx` (35; DATA1, RALL, DB_COLS, DB_ROWS,
 META; upload res_time_series_17ES.zip), read by create_longrun_info.gms l. 66-70 (through dat_parquet/capreg).
