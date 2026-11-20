@@ -150,7 +150,7 @@ def permGrasGreening_land(width, j_gras, L0_gras, allowance):
 def e_landTypes_to_LUclass(final, dl, shG, shW, shR):
     r"""e_landTypes_to_LUclass(r, LUclass) (l. 2430-2432) as the change of the land use classes from CAPRI's 2030 ones
     by the model's land types' change dl (1000 ha): CROP + ARAC + FRUN, GRSLND + GRAS + shG OLND, WETLND + shW OLND,
-    RESLND + shR OLND, FORE + FORE (p_shFstInSec: OLND's shares, luc_2030.csv). Updates final in place (environmental/
+    RESLND + shR OLND, FORE + FORE, ARTIF + ARTIF (p_shFstInSec: OLND's shares, luc_2030.csv; ARTIF's own share 1). Updates final in place (environmental/
     luc.py LUCModel.solve) and returns it.
 
     CAPRI's GAMS, e_landTypes_to_LUclass (l. 2430-2432):
@@ -164,6 +164,7 @@ def e_landTypes_to_LUclass(final, dl, shG, shW, shR):
     final["WETLND"] += shW * dl["OLND"]
     final["RESLND"] += shR * dl["OLND"]
     final["FORE"] += dl["FORE"]
+    final["ARTIF"] += dl.get("ARTIF", 0.0)                 # p_shFstInSec(ARTIF, ARTIF) = 1, prep_sim_luc.gms l. 51
     return final
 
 

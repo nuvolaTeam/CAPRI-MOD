@@ -47,7 +47,7 @@ class LUCModel:
         return cls._inst
 
     def solve(self, capri_region: str, d_land: Dict[str, float]) -> Optional[dict]:
-        """Transitions of the region at land types changed by d_land {ARAC, FRUN, GRAS, FORE, OLND: 1000 ha} from
+        """Transitions of the region at land types changed by d_land {ARAC, FRUN, GRAS, FORE, OLND, ARTIF: 1000 ha} from
         the base. Returns {"transitions": {from+to: 1000 ha per year}, "initial": {...}, "final": {...}, "ok"}."""
         v = self.v.get(capri_region)
         if v is None:

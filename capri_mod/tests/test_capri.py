@@ -4654,21 +4654,26 @@ def test_fallow_and_set_aside_have_no_nutrient_need(model):
 
 
 def test_forest_and_other_land_keep_capris_bounds(model):
-    """KNOWN_ISSUES K156: CAPRI's bounds on forest and other land (prep_sim_luc.gms l. 589-612, Trustee_land):
-    L0 - min(0.9 L0, 0.35 ARTO) <= L <= L0 + min(9 L0, 0.35 ARTO), not binding at the base; with a landscape floor
-    FORE >= 0.99 L0. Without them the Green Deal pair of 15 November 2026 converted 5.4 Mha of the EU's forest (CAPRI
-    1.1 Mha, none of its regions below 0.99), Attiki (EL30) all of it."""
+    """KNOWN_ISSUES K156: CAPRI's bounds on forest, other land and artificial land (prep_sim_luc.gms l. 586-612,
+    Trustee_land): L0 - min(0.9 L0, 0.35 ARTO) <= L <= L0 + min(9 L0, 0.35 ARTO), not binding at the base; with a
+    landscape floor FORE >= 0.99 L0 and ARTIF >= 0.997 L0. Without them the Green Deal pair of 15 November 2026
+    converted 5.4 Mha of the EU's forest (CAPRI 1.1 Mha, none of its regions below 0.99), Attiki (EL30) all of it.
+    ARTIF is a column of the land market, as CAPRI's (K189)."""
     region = "EL300000"
     model.run(scenario="BASELINE", regions=[region], max_outer_iter=1)
     mo = model.supply_module._models[region]
     lab = list(mo.ev.aug_labels)
-    assert {"forest_lo", "forest_up", "other_land_lo", "other_land_up"} <= set(lab) and "forest_floor" not in lab
+    assert {"forest_lo", "forest_up", "other_land_lo", "other_land_up", "artificial_land_lo",
+            "artificial_land_up"} <= set(lab) and "forest_floor" not in lab and "artificial_land_floor" not in lab
+    assert "ARTIF" in mo.ev.land_types_used
     L0 = mo.data.land_market["base_kha"]
     mo.solve(set_aside_requirement=0.10)
     lab = list(mo.ev.aug_labels)
-    assert "forest_floor" in lab
+    assert "forest_floor" in lab and "artificial_land_floor" in lab
     fore = float(mo.res.land_solution["FORE"])
     assert fore >= 0.99 * float(L0["FORE"]) - 1e-4 * max(1.0, float(L0["FORE"])), (fore, L0["FORE"])
+    artif = float(mo.res.land_solution["ARTIF"])
+    assert artif >= 0.997 * float(L0["ARTIF"]) - 1e-4 * max(1.0, float(L0["ARTIF"])), (artif, L0["ARTIF"])
 
 
 @pytest.mark.slow

@@ -33,7 +33,9 @@ base data, when built):
 
 ## capri-mod (`RegionalSupplyModel._land_augment`)
 
-- Land-type areas as variables in each regional model: ARAC, GRAS, FRUN, FORE, OLND; ARTIF fixed (left out).
+- Land-type areas as variables in each regional model: ARAC, GRAS, FRUN, FORE, OLND and ARTIF, CAPRI's landTypesMrk
+  (ARTIF since 20 November 2026, KNOWN_ISSUES K189; before, held at its base), with CAPRI's bounds on FORE, OLND and
+  ARTIF (supply/prep_sim_luc.gms l. 586-612).
 - Cost 1/2 L' Q L with Q = 1000 x CAPRI's p_pmpQuadLandTypes (CAPRI's terms are per ha, the model's land in 1000 ha);
   the constants are not CAPRI's p_pmpCnstLandTypes but set so the base land use is optimal given the land rents:
   at the 2030 market year CAPRI's own rents at its calibration point (D_AREA of ARAC, FRUN and grassland,

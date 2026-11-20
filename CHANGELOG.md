@@ -257,6 +257,15 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   star 3.0); the data are unchanged. The four rural-development GDX files build_rd_inputs reads are in the raw set
   nuvolaTeam/capri-mod-raw as Parquet (capri/dat/policy/, capri/dat/baseline/; 174 CAPRI files,
   tools/pipeline/capri_raw_manifest.json).
+- **K189 sorted; ARTIF in the land market:** the refactor's porting differences sorted from the code and the data
+  (docs/KNOWN_ISSUES.md K189): most are in the reported accounts only or have no effect in the Green Deal step (the
+  2030 base land equals CAPRI's in all 250 regions; CAPRI's step has no genet_rep option; the rations hold CAPRI's 12
+  feeds, all flexible; CAPRI's straw losses are positive in every region). The one with a measured effect, artificial
+  land held at its base, is ported: ARTIF is a column of the land market with CAPRI's bounds and its 0.997 floor under
+  the landscape floor (supply/prep_sim_luc.gms l. 586-612), in the total-land row and in the LUC accounts. Five-unit
+  Green Deal probe: the 2030 base unchanged; ARTIF +2.90 thousand ha in ES11 (CAPRI +2.69), +1.96 in ES24 (+2.11),
+  +2.13 in ES41 (+1.73), +2.48 in FR61 (+2.41); the land types' absolute gap to CAPRI over the five units 148 -> 99
+  thousand ha. Test: test_forest_and_other_land_keep_capris_bounds.
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against

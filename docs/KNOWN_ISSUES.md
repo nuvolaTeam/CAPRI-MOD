@@ -48,7 +48,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K149](#k149) | Norway's raw milk row took the young-animal prices of a clearing without the milk price change, its other rows those of a second clearing with it (CAPRI: one set) | fixed (14 November 2026) |
 | [K150](#k150) | The non-EU regions' raw milk at the market's base is FAO_agg's production, not CAPRI's market data (milk delivered to the dairies): Turkey 20,173 kt against CAPRI's 13,145 | fixed (14 November 2026), validated (15 November 2026, the full Green Deal pair) |
 | [K186](#k186) | The catch crops' winter cover option scales with the fixed base crop area; CAPRI's catcMiti_ and GHG_Mit_Cost_ scale it with the current land (landTypesNoSlak, uaaEqu). Not active in CAPRI's Green Deal step (its winter cover share fixed at 1e-6, CATC a free activity) | open: to fix after item 1's open points |
-| [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences, none measured yet | open (registered 20 November 2026): to measure and rank |
+| [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences; sorted 20 November 2026: most are in the accounts only or have no effect in the step; ARTIF held fixed had one (small for the EU, a few thousand ha in some Spanish and French units) | open: ARTIF ported 20 November 2026 (a column of the land market, as CAPRI's); next the milk for feeding (FCOM), the yield factors in the N-surplus row |
 
 ## Resolved (119)
 
@@ -3312,8 +3312,8 @@ inhibitor, a least-squares split of its mineral and manure parts, rms 0.007), so
 - **In 9t:** -
 - **Status:** fixed 15 November 2026: land.py _land_type_bounds, rows forest_lo, forest_up, other_land_lo,
   other_land_up and, under the landscape floor, forest_floor (a scenario row, kept out of the calibration as the
-  floor's); parameters LUC_* in model_parameters.csv; ARTO from luc_2030.csv; ARTIF is not a column of the model's
-  land market (held at its base). Test: test_capri.py::test_forest_and_other_land_keep_capris_bounds.
+  floor's); parameters LUC_* in model_parameters.csv; ARTO from luc_2030.csv; ARTIF was then not a column of the model's
+  land market (held at its base; a column with CAPRI's bounds since 20 November 2026, K189). Test: test_capri.py::test_forest_and_other_land_keep_capris_bounds.
 - **Validation** (full Green Deal pair with K157, res_2_1730greendeal2030_gdk157, converged in 18 iterations, no
   non-optimal regional solve): EU forest -0.4% (CAPRI -0.6%; before -3.1%), no region below 0.99 x base (min 0.990);
   other land -1.0% (CAPRI -2.4%; before +7.8%). The livestock gap narrowed only a little (EU N excretion -9.9%
@@ -3890,13 +3890,57 @@ docs/dev/EQUATION_REFACTOR_HANDOFF.md section 8). The refactor fixed none of the
 - **Comments to correct:** "NNcrp" is said to use nMax_ (supply_module.py, policy_module.py), while CAPRI zeroes
   p_nMaxPerHa in the step (pol_input/greendeal/greendeal_scenarios.gms l. 200-204); compute_ghg's own soil N2O and
   CO2UREA (on the crops' base mineral rates) are replaced in compute_indicators, dead code in the indicators' path.
-- **Effect:** not measured. The rows not in the model change the reported emissions, not the step's solution (no
-  emission price). Among the porting differences, those that can move results come first: the land rows' max() and
-  e_artoBal's total, the yield factors on removal, residues and fixation, the feeding rows (FEDUSE_, QUADRF_, the
-  fodder balance), the animals' per-head terms.
+- **Effect** (sorted 20 November 2026, from the code and the data, no model runs; CAPRI's results used only to
+  size the differences):
+  - *In the reported accounts only*, not in the regional models, so without an emission price the step's solution
+    does not depend on them: the rows not in the model; e_GASRUNANI's share, nminInputSh_ and nmanInputSh_'s BioFix,
+    the GWP rows' stages, shares and coefficients, e_FocLUC's priors.
+  - *In the regional models, with no effect in the Green Deal step:* the land rows' max() and base gap (the 2030 base
+    land, land_market_2030.csv, equals CAPRI's 2030 reference land types in all 250 regions to 0.0 thousand ha, and
+    with the land market the rows hold at the base use, i.e. CAPRI's equality; that the model's base crop areas add up
+    to them region by region is not checked here); genet_rep's factor in INPANI_ (CAPRI's step has no genet_rep
+    option: its v_Miti holds GENET_EFF only, fixed at 0.002 at most); REQSE_'s fixed feeds (the rations hold
+    CAPRI's 12 feeds, feed_ration_2017.csv, all of them flexible in feed/ration.py, so the fixed term is empty);
+    QUADRF_'s linear coefficient (the same objective terms written in another place: the tradable feed's price, and an
+    emission tax that is zero in the step); LandMarket_'s 1e-9 regularisation, permGrasGreening_'s 1e-9 tolerance and
+    e_setaLandscape at a zero floor (FALL >= 0 holds anyway).
+  - *In the regional models, with an effect:* ARTIF held at its level, and with it e_artoBal over the other five land
+    types. CAPRI's land market moves ARTIF (supply/cal_land_nests.gms l. 60, 720-723: FORE, OLND and ARTIF with their
+    own constants): in its Green Deal step ARTIF changes by 84 thousand ha summed in absolute value over the model's
+    218 EU regions (net -15), against 2,122 thousand ha for the agricultural land (ARAC + GRAS + FRUN, net +2,086); locally
+    more: ES12 +8.7 thousand ha (agricultural land +11.9), ES11 +2.7 (+65.1), FR61 +2.4 (+14.6), ES24 +2.1 (+23.8).
+    Small for the EU, not negligible in a few Spanish and French units. CAPRI's identity ARTO - INLW = the six land
+    types holds in its reference and step (to 0.0), so the model's total of five types with ARTIF fixed is CAPRI's
+    row with ARTIF fixed.
+  - *The fodder balances:* the model writes them for grass, fodder maize, other arable fodder and root crops; straw
+    (FSTR) and milk for feeding (FCOM) have no balance, so FEDUSE_'s losses have no row to enter (CAPRI's straw and
+    COMF losses are free between 0 and infinity, supply/prep_sim.gms l. 217-223). Straw: no effect, CAPRI's straw
+    losses (dataOut LOSF STRA) are positive in all 250 regions in its 2030 reference (208 Mt in all) and its Green
+    Deal step (191 Mt), so its straw balance is slack. Milk for feeding: in CAPRI the calves' use equals the cows'
+    output in every region (GROF = FEDM of COMF, 11.0 Mt at the reference, 9.3 Mt in the step), so that balance
+    holds; how the model values FCOM and ties it to the cows is to check (not measured). Usable fodder per ha and the
+    base gap: K36 and K46.
+  - *In the regional models, not measured:* the animals' revenue, cost and premium per head from
+    regional totals (exact at the base, an aggregation where a model animal holds several of CAPRI's); the yield
+    factors on removal, residues and fixation (e_EXPPRD, e_CRESID, e_BIOFIX): written in the nitrogen and phosphorus
+    accounts, and the regional models' N-surplus row takes each crop's balance from the same function at the solve's
+    yields (supply_module.py, the surplus row: unit_nitrogen_balance), so they enter the step where yields move
+    (the yield price response); CAPRI updates its nutrient coefficients with its endogenous yields through
+    fert/fertned.gms (supply/endog_yields.gms l. 148), so the comparison is between the two updates, not done here.
 - **In 9t:** -
-- **Status:** open (registered 20 November 2026): measure each candidate's effect (a switch or a probe at CAPRI's
-  prices) and rank them with the plan's items; the accounts' missing rows after Bonn.
+- **ARTIF ported (20 November 2026):** ARTIF is a column of the land market (capri_data/codes/model_land_types.csv),
+  with CAPRI's bounds of foreOlndArtif and, under the landscape floor, its 0.997 floor (supply/prep_sim_luc.gms
+  l. 586-612; land.py _land_type_bounds, parameter LUC_ARTIF_FLOOR), e_artoBal over the six land types, and the LUC
+  accounts' artificial class (e_landTypes_to_LUclass). Five-unit Green Deal probe with the comparison settings
+  (ES11, ES12, ES24, ES41, FR61; runs s20_artif_before / s20_artif_after, 46 and 45 iterations): the 2030 base
+  unchanged (activities within 0.001 thousand ha); ARTIF +2.90 thousand ha in ES11 (CAPRI +2.69), +1.96 in ES24
+  (+2.11), +2.13 in ES41 (+1.73), +2.48 in FR61 (+2.41); the land types' changes closer to CAPRI's (sum of the
+  absolute gaps over the five units 148 -> 99 thousand ha: forest in ES41 and FR61 now at CAPRI's change, other land
+  in ES11), the activities hardly (730 -> 726). ES12 is not closed: its land hardly moves in the model (arable
+  +0.05 thousand ha, CAPRI +8.2; ARTIF +0.04, CAPRI +8.7), a gap of its own, not traced.
+- **Status:** open (registered 20 November 2026; sorted and ARTIF ported 20 November 2026, above): next the milk for
+  feeding (how the model ties FCOM to the cows), the yield factors in the N-surplus row, the animals' per-head terms;
+  the accounts' missing rows after Bonn.
 
 <a id="k188"></a>
 ### K188: The catch crops in CAPRI's reference form at the calibration point (found 20 November 2026)

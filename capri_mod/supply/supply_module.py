@@ -3486,7 +3486,7 @@ def _luc_of(model, land_types):
         cr = model.data.region_id              # the model's regions are CAPRI's units
         lm = getattr(model.data, "land_market", None) or {}
         L0 = lm.get("base_kha") or {}
-        d = {t: float(land_types.get(t, L0.get(t, 0.0))) - float(L0.get(t, 0.0)) for t in ("ARAC", "FRUN", "GRAS", "FORE", "OLND")
+        d = {t: float(land_types.get(t, L0.get(t, 0.0))) - float(L0.get(t, 0.0)) for t in LAND_MARKET_TYPES
              if t in (land_types or {})}
         return LUCModel.get().solve(cr, d) if cr else None
     except Exception as _exc:

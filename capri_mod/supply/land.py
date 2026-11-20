@@ -72,14 +72,16 @@ class LandBlock:
         return Aa
 
     def _land_type_bounds(self, Aa, ba, labels, n, li, L0):
-        """CAPRI's bounds on the land types forest and other land (supply/prep_sim_luc.gms l. 589-612, Trustee_land):
-          L0 - min(a x L0, b x ARTO) <= L <= L0 + min(9 x L0, 0.35 x ARTO)  (FORE, OLND; a = 0.9, b = 0.35, Corsica
-          0.98 and 0.75), ARTO the region's total area (luc_2030.csv);
+        """CAPRI's bounds on the land types forest, other land and artificial land, foreOlndArtif (supply/prep_sim_luc.gms
+        l. 586-612, Trustee_land):
+          L0 - min(a x L0, b x ARTO) <= L <= L0 + min(9 x L0, 0.35 x ARTO)  (FORE, OLND, ARTIF; a = 0.9, b = 0.35,
+          Corsica 0.98 and 0.75), ARTO the region's total area (luc_2030.csv);
           and where the landscape floor holds (DATA(FALL, FLOOR) > 0): FORE >= 0.99 x L0 ('usually only a 1% decline
-          is considered plausible'). ARTIF, the third land type of CAPRI's set, is not a column of the model's land
-          market (fixed at its base: inside CAPRI's 0.997 floor and its upper bound). Not binding at the base point.
-        Rows forest_lo, forest_up, other_land_lo, other_land_up, forest_floor; a region without ARTO gets the floor
-        alone (none in the EU's data)."""
+          is considered plausible') and ARTIF >= 0.997 x L0 ('usually only a 0.3% decline is considered plausible').
+          Not binding at the base point. ARTIF is a column of the land market since 20 November 2026 (K189; before,
+          held at its base).
+        Rows forest_lo, forest_up, other_land_lo, other_land_up, artificial_land_lo, artificial_land_up, forest_floor,
+        artificial_land_floor; a region without ARTO gets the floors alone (none in the EU's data)."""
         from capri_mod.environmental.luc import LUCModel
         reg = self.data.region_id
         arto = (LUCModel.get().v.get(reg) or {}).get("ARTO")
@@ -92,7 +94,7 @@ class LandBlock:
         def row(j, sign, rhs, lab):
             r = np.zeros(Aa.shape[1]); r[n + j] = sign
             new_r.append(r); new_b.append(rhs); labels.append(lab)
-        for t, lab in (("FORE", "forest"), ("OLND", "other_land")):
+        for t, lab in (("FORE", "forest"), ("OLND", "other_land"), ("ARTIF", "artificial_land")):
             if t not in li or arto is None:
                 continue
             j = li[t]; l0 = float(L0[j])
@@ -103,6 +105,9 @@ class LandBlock:
         if "FORE" in li and float(getattr(self.ev, "fall_floor", 0.0) or 0.0) > 0 and float(L0[li["FORE"]]) > 0:
             l0 = float(L0[li["FORE"]])
             row(li["FORE"], -1.0, -param("LUC_FORE_FLOOR") * l0 + 1e-9 * max(1.0, l0), "forest_floor")
+        if "ARTIF" in li and float(getattr(self.ev, "fall_floor", 0.0) or 0.0) > 0 and float(L0[li["ARTIF"]]) > 0:
+            l0 = float(L0[li["ARTIF"]])
+            row(li["ARTIF"], -1.0, -param("LUC_ARTIF_FLOOR") * l0 + 1e-9 * max(1.0, l0), "artificial_land_floor")
         if new_r:
             Aa = np.vstack([Aa] + new_r); ba = np.concatenate([ba, new_b])
         return Aa, ba
