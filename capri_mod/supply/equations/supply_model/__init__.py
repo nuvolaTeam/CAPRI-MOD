@@ -28,10 +28,15 @@ written.
     premiums.py     the premiums: winterCover_, catcMiti_, ecoSetAside_'s catch crops,              1887-2026
                     overShotEntl_ (with sumEntl_), permGrasGreening_
     set_aside.py    the set-aside block: e_setaLandscape, idleHisto_                               2225-2375
-    land.py         the land block: LandBalNoSlak_, e_artoBal; LandMarket_ (the objective's       2376-2534,
-                    block, l. 4903-4914)                                                          4903-4914
+    land.py         the land block: LandBalNoSlak_, e_artoBal; the LUC estimation (e_FocLUC,       2376-2534,
+                    e_luClassInitial, e_luClassFinal); LandMarket_ (the objective's block)        4903-4914
+    methane.py      the methane block: GWPCH4ENT_, GWPCH4MAN_ (with their aact rows)              3062-3205
+    air_water.py    NH3, NOx and NO3: NH3MAN_, NH3TOT_, NO3RUN_, NO3LEA_                          3472-3633
+    n2o.py          the N2O block: GWPN2OMAN_, GWPN2OSYN_, GWPN2OCRO_, GWPN2OAMM_, GWPN2OHIS_,    3634-3966
+                    GWPN2OLEA_
+    gwp.py          CO2 and the total: GWPCO2LIM_, GWPCO2UREA_, GWPTOT_                            3966-4015
 
-The other blocks, by the inventory: young_animals.py (841-869), lulucf.py (2656-3061, 4016-4129), methane.py
-(3062-3205), air_water.py (3472-3633), n2o.py (3634-3966), gwp.py (3967-4015), sugar.py (5434-5498); the BFP indicators (2027-2224), the water block (2535-2655) and the
-pesticide block (4393-4500) are off in CAPRI's 2030 Green Deal step.
+The other blocks, by the inventory, have no function: young_animals.py (841-869; INPANI_ in the net revenues),
+lulucf.py (2656-3061, 4016-4129; not in the model), sugar.py (5434-5498; empty in the step); the BFP indicators
+(2027-2224), the water block (2535-2655) and the pesticide block (4393-4500) are off in CAPRI's 2030 Green Deal step.
 """

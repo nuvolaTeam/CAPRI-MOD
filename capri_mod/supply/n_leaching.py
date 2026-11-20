@@ -74,10 +74,7 @@ def crop_n(mineral, run_tot_netf, grt_netf, n2o_netf, manure_terms, mtrade, dep_
     """t N leached or run off allocated to crops (gases.gms l. 696-745). manure_terms: [(N_a, RunSurf_a,
     GasRunTot_a)], N_a t N excreted; mtrade: net manure exports (t N, + = export); dep_res: deposition + residues (t N);
     fixation (t N). Returns {component: t N}."""
-    out = {"min_run": mineral * run_tot_netf,
-           "man_run": sum(n * rs_ for n, rs_, _ in manure_terms),
-           "min_lea": mineral * (1.0 - grt_netf - e) * L,
-           "man_lea": (sum(n * (1.0 - g - e) for n, _, g in manure_terms) - mtrade * (1.0 - e)) * L,
-           "dep_lea": dep_res * (1.0 - n2o_netf - e) * L,
-           "fix_lea": fixation * (1.0 - e) * L}
+    from capri_mod.supply.equations.supply_model.air_water import NO3LEA_, NO3RUN_   # CAPRI's NO3 rows by source
+    out = {**NO3RUN_(mineral, run_tot_netf, manure_terms),
+           **NO3LEA_(mineral, grt_netf, n2o_netf, manure_terms, mtrade, dep_res, fixation, L, e)}
     return out

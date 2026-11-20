@@ -37,14 +37,15 @@ class AmmoniaBlock:
         # grazing, GNH3/MANN) and the share of mineral N lost (NH3MIN/MINFER),
         # from its 2030 reference run (tools/build/build_nh3_factors.py). Responds to
         # herds AND to mineral fertiliser - which the proxy could not see.
+        from capri_mod.supply.equations.supply_model.air_water import NH3MAN_, NH3TOT_, NH3TOT_min
         fac = self._nh3_factors().get(region) if region else None
         if fac:
-            man_n = sum(float(fac["manure_share"].get(a, 0.0))
-                        * self._n_excretion(region, a) * activities.get(a, 0.0) * 1000 / 1e6
+            man_n = sum(NH3MAN_(float(fac["manure_share"].get(a, 0.0)), self._n_excretion(region, a),
+                                activities.get(a, 0.0))
                         for a in ANIMALS)                                   # kt NH3-N
-            min_n = float(fac.get("mineral_share") or 0.0) * float(mineral_n_kt or 0.0)
+            min_n = NH3TOT_min(float(fac.get("mineral_share") or 0.0), float(mineral_n_kt or 0.0))
             return {"nh3_livestock": man_n * M_NH3 / M_NH3_N, "nh3_soils": min_n * M_NH3 / M_NH3_N,
-                    "nh3_total": (man_n + min_n) * M_NH3 / M_NH3_N}
+                    "nh3_total": NH3TOT_(man_n, min_n)}
         # no CAPRI factors: only where there is no farming (Brussels); anything else fails loudly
         if any(activities.get(a, 0.0) > 0 for a in ANIMALS) or float(mineral_n_kt or 0.0) > 0:
             raise RuntimeError(f"no CAPRI ammonia factors for {region} (tools/build/build_nh3_factors.py)")

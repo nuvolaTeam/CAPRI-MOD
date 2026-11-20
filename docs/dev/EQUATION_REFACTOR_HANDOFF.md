@@ -42,6 +42,8 @@ functions. **A move, not a change: results identical to 1e-10**, checked by a ga
 | N12b | SUPBAL_ for the non-tradable fodder (supply_model/markets.py: the QP's fodder rows, supply/livestock.py _fodder_rows, and the NLP's equalities); INPANI_ classified (its use per head in the net revenues) | 221 x 2 QPs identical bit for bit; the NLPs identical (3 regions x 6 variants); gate at N12b (one run for N11a-N12b) |
 | N13 | the objective: LINEAR_'s activity terms (LINEAR_netRevenue, supply_module._compute_net_revenues), QUADRA_ with GRPLEVL_ (QUADRA_lin, QUADRA_), OBJEQF_ in objective.py; labCap_ not written, fixTechfShares_ empty in the step, e_exogenousLand classified | the NLPs identical (3 regions x 6 variants); the net revenues and linear coefficients identical bit for bit for the 221 regions (base and a price shock); gate with the next batch |
 | N15 | the sugar block's six equations empty in the step (quotas 0 + eps from 2017, so p_technFact(SUGB, VCOF) = 0); e_UaaNoSlak, LandBalSlak_ and e_nitrBal_ classified (N8's and N3's open rows) | docs only |
+| N14a | the emission rows the accounts compute, as CAPRI's functions called by the accounts and supply/ghg_tax.py (option A): methane.py (GWPCH4ENT_ and its aact row, GWPCH4MAN_ with the digestion's term), n2o.py (GWPN2OMAN_ with APP and GRA, GWPN2OSYN_, GWPN2OCRO_, GWPN2OAMM_, GWPN2OHIS_, GWPN2OLEA_), air_water.py (NH3MAN_ with APP and GRA, NH3TOT_, NO3RUN_, NO3LEA_), gwp.py (GWPCO2LIM_, GWPCO2UREA_, GWPTOT_) | the GHG and NH3 accounts, the leaching and the tax's enteric factors identical bit for bit for the 221 regions; gate with N14b |
+| N14b | the LUC estimation (environmental/luc.py) as land.py's e_landTypes_to_LUclass, e_luClassInitial, e_luClassFinal, e_FocLUC with p_lucPrior_gamma; the LULUCF block, rice CH4 and NOx classified (not in the model); every equation of the step has a status | the LUC solves identical bit for bit (all CAPRI regions, two land changes); gate at N14b |
 
 Not on the branch (on purpose):
 - `docs/equations/` (the equation book, page 01 the regional N balance) and its README paragraph: waiting for the
@@ -234,6 +236,34 @@ comes, check against CAPRI's _pw feed version and register what differs.
   expression or value check).
 - The GAMS quotes, gathered in each module's docstring through N4, moved to the functions that write the equations
   (the project lead's decision; the commit after N4, docstrings only).
+
+## 8. The list for the main line (the refactor's findings, none fixed on the branch)
+
+Every equation of CAPRI's 2030 Green Deal step (161) has a status in docs/dev/supply_equations_inventory.csv; the
+rows' notes carry the evidence. In one list:
+
+- **Not in the model** (CAPRI's rows are non-empty in the step, the model has no counterpart): CH4 from rice
+  (GWPCH4RIC_; the model has rice, PARI); NOx (NOXMAN_, NOXAPP_, NOXGRA_, NOXTOT_; the cascade's NOx shares only move
+  the N losses and the mineral N's indirect N2O); the LULUCF block (17 rows: GWPCO2SOI_, GWPCO2BIO_ and their lucpos
+  rows, GWPN2OSOI_, GWPLUC_, the burning rows, GWPCO2SEQ_, CARBERO_, LANDSHARE_, bioMassPerHa_, socGrslnd_, SOCFactor_,
+  and the histosols' CO2 and CH4, GWPCO2HIS_ and GWPCH4HIS_, whose factors histosol.csv carries but no code reads).
+  Without a price on these emissions in the step they do not move CAPRI's solution; they are missing from the
+  accounts.
+- **Rows the model writes that CAPRI's step has not**: ecoSetAside_ and cropDivGreening_ (envConst off; K187).
+- **Porting differences** (the inventory's notes, "porting difference"; K186 for catcMiti_ and winterCover_): by
+  block, N5 catcMiti_ on the base UAA, winterCover_'s max(); N8 the land rows' max(), the land market's regularisation
+  and base-use equalities, e_artoBal's total, ARTIF held at its level; N9-N10 e_setaLandscape at a zero floor,
+  permGrasGreening_'s tolerance and duplicate; N11 the yield factors on removal, residues and fixation, e_GASRUNANI's
+  share without the options, the catch crops' BioFix missing in the input shares; N12 the fixed feeds outside
+  FEED_ELAS, FEDUSE_ without the straw and COMF losses, QUADRF_'s coefficient with the feed price and the tax, the
+  fodder balance's base gap, genet_rep missing; N13 the animals' revenue, cost and premium per head from regional
+  totals; N14 the manure N2O and NH3 stages on CAPRI's 2017 and 2030 shares with the options applied afterwards and
+  without the feed options' MANN factors, NH3 only in GWPN2OAMM_'s manure term, the residues of GWPN2OCRO_, one liming
+  coefficient, a fixed urea share, NO3 by source, the manure CH4 without the covers' effect, the LUC spike priors at
+  the smallest transitions kept gamma.
+- **Comments to correct**: "NNcrp" is said to use nMax_ (supply_module.py l. 1376, policy_module.py l. 136): CAPRI
+  zeroes p_nMaxPerHa in the step (greendeal_scenarios.gms l. 200-204). compute_ghg's own soil N2O and CO2UREA (on the
+  crops' base mineral rates) are replaced in compute_indicators: dead code in the indicators' path.
 
 ## 7. Rules that carry over (the project's instructions and the project lead's standing rules)
 

@@ -747,6 +747,7 @@ class NitrogenBlock:
         components (t N), n2o_n (t N2O-N), leached (t N below the root zone)} or None without CAPRI's data."""
         from capri_mod.supply import n_cascade as _nc, n_leaching as _nl
         from capri_mod.supply.equations.supply_model import n_flow as _nf, n_surplus as _ns
+        from capri_mod.supply.equations.supply_model.n2o import GWPN2OLEA_
         from capri_mod.supply.supply_module import fert_side_value as _fsv
         rs = _nl.capri_region(region)
         d = _nl.load().get(rs) if rs else None
@@ -793,4 +794,4 @@ class NitrogenBlock:
                           float(nb.get("n_fixation", 0.0) or 0.0), L, e)
         tot = sum(comp.values())
         return {"share": L, "b1": b_now, "b1_ini": b_ini, "components": comp, "n_runoff_leached": tot,
-                "n2o_n": tot * param("EF5_LEACHING_N2O")}
+                "n2o_n": GWPN2OLEA_(tot, param("EF5_LEACHING_N2O"))}

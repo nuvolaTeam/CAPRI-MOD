@@ -1,4 +1,5 @@
-r"""CAPRI's land block (supply/supply_model.gms l. 2376-2534): the land balances of the land types, the land market.
+r"""CAPRI's land block (supply/supply_model.gms l. 2376-2534): the land balances of the land types, the land market
+and the land use change estimation (LUC, luc_supply on).
 
 CAPRI's GAMS statement of each equation is in the docstring of the function that writes it (the project lead's
 decision of 19 November 2026); this docstring keeps the block's overview and departures.
@@ -20,6 +21,17 @@ e_artoBal's total land (e_artoBal) and the grassland floor (permGrasGreening_lan
 the land market's Q is regularised (1e-9 I); LandBalNoSlak_ holds at the base use, not at the land data (the model's land
 data carry idle land, CAPRI's do not), with tolerances of 1e-7 and 1e-9; the grassland floor duplicates permGrasGreening_
 on the land column.
+
+The land use change estimation (luc_supply on in the Green Deal step: supply_model.gms l. 80-82), solved after the
+regional model (environmental/luc.py LUCModel.solve; without a price on LULUCF the block enters no other equation):
+the classes from the land types (e_landTypes_to_LUclass), the adding-up rows (e_luClassInitial, e_luClassFinal) and
+the posterior mode of the transitions under CAPRI's gamma priors (e_FocLUC with e_derivativeOfGammaLUC, p_lucPrior_gamma).
+CAPRI's bounds are the problem's variable bounds: e_lowerBoundLUC 1e-8 for the gamma transitions, e_upperBoundLUC +inf
+(supply/prep_sim_luc.gms l. 409-410); a transition with mode 0 is a spike at 0, left out of the problem (l. 343-344).
+e_derivativeOfNormalLUC is empty in the step: no transition has a normal prior (prep_sim_luc.gms l. 339-372 assigns
+gamma and spike densities only). A porting difference, kept: CAPRI also renders up to ten of the smallest transitions
+(mode <= 1e-4 kha, keeping two non-spike per row and column) spike at their mode (l. 346-372); the model keeps them
+gamma.
 """
 from __future__ import annotations
 
@@ -134,3 +146,84 @@ def permGrasGreening_land(width, j_gras, L0_gras, allowance):
     grs = np.zeros(width); grs[j_gras] = -1.0
     return grs, -(1.0 - allowance) * L0_gras + 1e-9
 
+
+def e_landTypes_to_LUclass(final, dl, shG, shW, shR):
+    r"""e_landTypes_to_LUclass(r, LUclass) (l. 2448-2450) as the change of the land use classes from CAPRI's 2030 ones
+    by the model's land types' change dl (1000 ha): CROP + ARAC + FRUN, GRSLND + GRAS + shG OLND, WETLND + shW OLND,
+    RESLND + shR OLND, FORE + FORE (p_shFstInSec: OLND's shares, luc_2030.csv). Updates final in place (environmental/
+    luc.py LUCModel.solve) and returns it.
+
+    CAPRI's GAMS, e_landTypes_to_LUclass (l. 2448-2450):
+
+        e_landTypes_to_LUclass(runr,LUclass) ..
+           v_actLevl(runr,LUclass,"T") =E= sum(LandTypesAll, p_shFstInSec(runr,LUclass,LandTypesAll)
+                                                            *v_actLevl(runr,LandTypesAll,"T"));
+    """
+    final["CROP"] += dl["ARAC"] + dl["FRUN"]
+    final["GRSLND"] += dl["GRAS"] + shG * dl["OLND"]
+    final["WETLND"] += shW * dl["OLND"]
+    final["RESLND"] += shR * dl["OLND"]
+    final["FORE"] += dl["FORE"]
+    return final
+
+
+def e_luClassInitial(idx, keys, fac, i):
+    r"""e_luClassInitial(r, LUclass) (l. 2464-2468), the row of the initial class i over the free transitions idx:
+    the transitions from i (keys[k][:3] == i) x p_lucAnnualFac_sup (fac: the step length for changes, 1 for remaining);
+    its right-hand side the initial area (the model's row not divided by it; luc.py scales the rows by max(1, |b|)).
+
+    CAPRI's GAMS, e_luClassInitial (l. 2464-2468):
+
+        e_luClassInitial(runr,LUclass)  $ p_lucPrior("initialLandUse",runr,LUclass,"T")..
+          sum(luc_from_luClass(lucPos,LUclass),v_actLevl(runr,LUCpos,"T")*p_lucAnnualFac_sup(lucPos))
+          / (p_lucPrior("initialLandUse",runr,LUclass,"T"))
+          =E=  1;
+    """
+    return np.array([fac[k] if keys[k][:3] == i else 0.0 for k in idx])
+
+
+def e_luClassFinal(idx, keys, fac, j):
+    r"""e_luClassFinal(r, LUclass1) (l. 2456-2459), the row of the final class j: the transitions to j (keys[k][3:] ==
+    j) x p_lucAnnualFac_sup; its right-hand side the final area (e_landTypes_to_LUclass).
+
+    CAPRI's GAMS, e_luClassFinal (l. 2456-2459):
+
+        e_luClassFinal(runr,LUclass1) ..
+           v_actLevl(runr,LUClass1,"T")
+           =E=  (sum(luc_to_luClass(lucPos,LUclass1),v_actLevl(runr,LUCpos,"T")*p_lucAnnualFac_sup(lucPos)) ) ;
+    """
+    return np.array([fac[k] if keys[k][3:] == j else 0.0 for k in idx])
+
+
+def p_lucPrior_gamma(m):
+    r"""The gamma prior of the transitions with mode m (supply/prep_sim_luc.gms, relative standard error 1: var = m^2):
+    alpha - 1 = temp and beta = temp / m, temp = (sqrt(m^2 (m^2 + 4 var)) + m^2) / (2 var); the parameters of
+    e_derivativeOfGammaLUC (its GAMS: e_FocLUC's docstring). Returns (alpha - 1, beta)."""
+    var = m * m
+    temp = (np.sqrt(m * m * (m * m + 4 * var)) + m * m) / (2 * var)
+    return temp, temp / m
+
+
+def e_FocLUC(a1, beta_m, z):
+    r"""e_FocLUC(r, LUCpos) (l. 2472-2478) with e_derivativeOfGammaLUC (l. 2484-2486), as the problem whose
+    stationarity they are: the negative log posterior density, - sum (alpha - 1) log z - beta m z, z = T / m (CasADi),
+    minimised under e_luClassInitial and e_luClassFinal (their duals CAPRI's v_dualOfLUCfromIniClass and
+    v_dualOfLUCtoCurClass; environmental/luc.py). a1 = alpha - 1, beta_m = beta x m (p_lucPrior_gamma).
+
+    CAPRI's GAMS, e_FocLUC (l. 2472-2478):
+
+        e_FocLUC(runr,LUCpos)..
+        v_derivativeOfLogDensity(runr,LUCpos)
+        + v_derivativeOfLogDensSlak(runr,LUCpos)
+        + SUM(LUC_TO_LUclass(LUCpos,LUclass1),v_dualOfLUCtoCurClass(runr,LUclass1))
+        + SUM(LUC_FROM_LUclass(LUCpos,LUclass),v_dualOfLUCfromIniClass(runr,LUclass))
+        =E= 0;
+
+    e_derivativeOfGammaLUC (l. 2484-2486):
+
+        e_derivativeOfGammaLUC(runr,LUCpos) $ [p_lucPrior("distributionFamily",runr,LUCpos,"T") eq gammaDensity]..
+            v_derivativeOfLogDensity(runr,LUCpos)
+            =E= -p_lucPrior("beta",runr,LUCpos,"T") + (p_lucPrior("alpha",runr,LUCpos,"T")-1) * 1/v_actLevl(runr,LUCpos,"T");
+    """
+    import casadi as ca
+    return -ca.sum1(ca.DM(a1) * ca.log(z) - ca.DM(beta_m) * z)
