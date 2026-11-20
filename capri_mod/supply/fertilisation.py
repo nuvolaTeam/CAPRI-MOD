@@ -220,7 +220,7 @@ class FertilisationBlock:
         x kappa, kappa the region's need
         factor that closes NUTNED_ at base with the base mineral use (CAPRI's v_cropNutNeedMultFact, calibrated in
         the base and fixed in simulation; here one per region and nutrient). None outside CAPRI's EU data."""
-        from capri_mod.fert.npk import NPKData, NUTRIENTS, PERM_NGRP, endo_slope, grass_need_factor, need_multiplier
+        from capri_mod.fert.npk import NPKData, NUTRIENTS, PERM_NGRP, endo_slope, need_multiplier
         from capri_mod.fert.inner_fert_dist import FERT_POST_ACCURACY
         env_ = getattr(self.seen, "env_for_surplus", None)
         if env_ is None:
@@ -286,9 +286,10 @@ class FertilisationBlock:
                 if a not in CROPS:
                     continue
                 # CAPRI's DATA(crop, FNUT) after fertned.gms: no need without a main-output yield (fallow, set-aside;
-                # K185), NUTNED_'s grass term (K160)
+                # K185). The data's need per ha already carries NUTNED_'s grassland term, SQRT(1 + 0.2 $ GRAI - 0.2 $
+                # GRAE) (CAPRI's reported 2030 need per crop; K190: until 20 November 2026 applied a second time, K160)
                 O_HP = float(_yld.get(a, 0.0) or 0.0) if hasattr(_yld, "get") else 0.0
-                need[j] = DATA_FNUT(D.crop_coef(cr, nut, a, "need_kg_ha"), O_HP) * grass_need_factor(a)
+                need[j] = DATA_FNUT(D.crop_coef(cr, nut, a, "need_kg_ha"), O_HP)
                 own[j] = D.crop_coef(cr, nut, a, "own_kg_ha")
                 poolc[j] = D.crop_coef(cr, nut, a, "pool_kg_ha")
                 mine0[j] = float(env_._base_mineral_rate(rid, a)) if nut == "N" else D.crop_coef(cr, nut, a, "mine_kg_ha")

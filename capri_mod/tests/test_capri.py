@@ -5708,13 +5708,24 @@ def test_the_entitlement_overshoot_keeps_its_cut_in_the_nlp_calibration(model):
 
 
 def test_the_grassland_need_carries_capris_split():
-    """KNOWN_ISSUES K160: CAPRI's NUTNED_ multiplies a crop's need by SQRT(1 + p_technFact(Yield, A) + 0.2 $ GRAI - 0.2
-    $ GRAE) (supply_model.gms l. 1131-1135); at the standard technology intensive grassland's need is the data's x
-    SQRT(1.2) and extensive grassland's x SQRT(0.8), the other crops' unchanged."""
-    from capri_mod.fert.npk import grass_need_factor
-    assert abs(grass_need_factor("GRAI") - np.sqrt(1.2)) < 1e-12
-    assert abs(grass_need_factor("GRAE") - np.sqrt(0.8)) < 1e-12
-    assert grass_need_factor("SWHE") == 1.0 and grass_need_factor("MAIF") == 1.0
+    """KNOWN_ISSUES K160, K190: CAPRI's NUTNED_ need per ha is (DATA(crop, FNUT) x v_cropNutNeedMultFact +
+    v_cropNutNeedAddFact) x SQRT(1 + p_technFact(Yield, A) + 0.2 $ GRAI - 0.2 $ GRAE) x ... (supply_model.gms
+    l. 1105-1135). The data's need per ha (npk_crop_coefs_2030.csv, CAPRI's reported 2030 need per crop) already
+    carries the grassland split, so the model applies no factor of its own (until 20 November 2026 it applied the
+    square root a second time). ES41 with CAPRI's 2030 calibration (sim_ini_21730: DATA BAS of GRAE and GRAI,
+    PHOF 15.000 and 25.019, POTF 25.019 and 58.378; the multipliers 0.953747 and 0.579041, the additive terms 2.216567
+    and 3.905253): the data equal CAPRI's need with the square root, not without it."""
+    c = pd.read_csv(DATA_DIR / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "npk_crop_coefs_2030.csv",
+                    float_precision="round_trip").set_index(["capri_region", "model_crop", "nutrient"])
+    need = lambda crop, nut: float(c.at[("ES410000", crop, nut), "need_kg_ha"])
+    for nut, (e, i), k, a in (("P", (15.0, 25.019141), 0.953747, 2.216567), ("K", (25.019141, 58.377996), 0.579041, 3.905253)):
+        for crop, d, sq in (("GRAE", e, np.sqrt(0.8)), ("GRAI", i, np.sqrt(1.2))):
+            capri = (d * k + a) * sq
+            assert need(crop, nut) == pytest.approx(capri, rel=5e-3), (crop, nut, need(crop, nut), capri)
+            assert abs(need(crop, nut) / (capri / sq) - 1.0) > 0.05, (crop, nut)      # not the need without it
+    import inspect
+    from capri_mod.supply import fertilisation
+    assert "grass_need_factor" not in inspect.getsource(fertilisation)
 
 
 def test_the_fodders_2030_base_value_is_capris_regional_unit_value():

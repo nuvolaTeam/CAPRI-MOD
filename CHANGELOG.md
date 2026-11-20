@@ -266,6 +266,13 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   Green Deal probe: the 2030 base unchanged; ARTIF +2.90 thousand ha in ES11 (CAPRI +2.69), +1.96 in ES24 (+2.11),
   +2.13 in ES41 (+1.73), +2.48 in FR61 (+2.41); the land types' absolute gap to CAPRI over the five units 148 -> 99
   thousand ha. Test: test_forest_and_other_land_keep_capris_bounds.
+- **K190, the grassland need took CAPRI's split twice:** the data's need per ha (CAPRI's reported 2030 need per crop)
+  already carries NUTNED_'s SQRT(1 +/- 0.2) for intensive and extensive grassland; K160 applied it a second time. The
+  model takes the data's need as it is (fertilisation.py, phosphorus.py; the factor and GRASS_NEED_YIELD_SHIFT
+  removed). ES41's base manure K on grassland was 53.6 against CAPRI's 42.0 kt. Five-unit Green Deal probe: the base
+  unchanged; intensive grassland falls less (DE21 79.7 -> 110.3 thousand ha, CAPRI 71.6; ES41 193.6 -> 331.3, CAPRI
+  203.3), so further from CAPRI's: the double count stood in for another cause, now open in K190. Test:
+  test_the_grassland_need_carries_capris_split.
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against

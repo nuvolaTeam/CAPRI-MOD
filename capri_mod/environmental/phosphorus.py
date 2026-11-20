@@ -86,7 +86,7 @@ class PhosphorusBlock:
         Removal and residues follow the yield as the N accounts do (CAPRI: e_EXPPRD and e_CRESID scale with the yield
         factors of its mitigation and pesticide options)."""
         from capri_mod.environmental import p_balance as _pb
-        from capri_mod.fert.npk import NPKData, PERM_NGRP, grass_need_factor
+        from capri_mod.fert.npk import NPKData, PERM_NGRP
         from capri_mod.supply.equations.supply_model.n_surplus import e_CRESID, e_EXCRET, e_EXPPRD
         if hasattr(acts, "to_dict"):
             acts = acts.to_dict()
@@ -142,9 +142,9 @@ class PhosphorusBlock:
             col = lambda k: {c: D.crop_coef(cr, "P", c, k) for c in CROPS}
             need, own, pool, mine0 = col("need_kg_ha"), col("own_kg_ha"), col("pool_kg_ha"), col("mine_kg_ha")
             # CAPRI's DATA(crop, FNUT) after fertned.gms: no need without a main-output yield (fallow, set-aside;
-            # K185), NUTNED_'s grass term (K160), as the NLP's need (fertilisation.py)
+            # K185), as the NLP's need (fertilisation.py); NUTNED_'s grassland term is in the data's need (K190)
             from capri_mod.supply.equations.fertned import DATA_FNUT
-            need = {c: DATA_FNUT(v, float(y0.get(c, 0.0) or 0.0)) * grass_need_factor(c) for c, v in need.items()}
+            need = {c: DATA_FNUT(v, float(y0.get(c, 0.0) or 0.0)) for c, v in need.items()}
             own_perm = {c: own[c] * sum(v for g, v in (sh.get(c) or {}).items() if g in PERM_NGRP) for c in CROPS}
             _pf = (getattr(supply_result, "yield_price_factor", None) or {}) if supply_result is not None else {}
             sq = {}
