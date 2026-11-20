@@ -100,7 +100,11 @@ against the old one with CasADi SX (`str(expr)` equal) before the gate; for pure
 
 ## 5. What comes next
 
-**The plan for everything after N5 is docs/dev/EQUATION_REFACTOR_PLAN_REST.md** (the project lead, 19 November 2026:
+**Done (20 November 2026): N1-N15.** Every equation of CAPRI's 2030 Green Deal step (161) has a status in the
+inventory; every block's gate is identical to the K185 reference; the final full suite ran at 8303efee (section 6).
+The findings for the main line are in section 8. Left: merging the branch into dev, the project lead's decision.
+
+**The plan for everything after N5 was docs/dev/EQUATION_REFACTOR_PLAN_REST.md** (the project lead, 19 November 2026:
 N6-N15, the statuses each equation ends with, the merge of K185, the gate's rules). The list below is the earlier
 plan, kept for its notes on where the code lives.
 
@@ -231,9 +235,18 @@ comes, check against CAPRI's _pw feed version and register what differs.
 - CAPRI's gamma prior is computed twice: inner_fert.gamma_prior (the NLP's normalised form, var = 1 / accuracy^2) and
   fert/inner_fert_dist.gamma_params (var = (mode / accuracy)^2, which can differ in the last digit at mode 1).
 - The full suite after N1 (section 4) had not been run when N2-N4 started. After N4: its first chunk (the first 33 of
-  the 66 slow tests) passed, 33 of 33; the other 33 slow tests and the 376 fast ones run at the next checkpoint, after
-  N8 (the project lead, 19 November 2026: fewer test runs, one gate per batch of blocks with each block's exact
-  expression or value check).
+  the 66 slow tests) passed, 33 of 33. The checkpoints after N8 and N10 were folded into one final run (the project
+  lead, 19 November 2026: fewer test runs; a container restart stopped the N10 run at 12 of 34, all passed): **the
+  final full suite at 8303efee**, in three chunks with pytest-xdist (-n 3): the first 34 slow tests 34 passed; the
+  other 32 slow tests 27 passed, 3 skipped, 1 xpassed, 1 failed (the test-order failure below, pre-existing); the 378
+  fast tests 373 passed and 5 skipped, none failed (in two runs: a container restart stopped the first after 220 of the 378, all passed or skipped; the other 158 ran after it).
+- **A test-order failure, pre-existing (for the main line):** test_supply_system_ad.py::
+  test_the_assembled_market_system_holds_at_the_default_solves_equilibrium fails when
+  test_import_prices_ad.py::test_import_prices_in_casadi_equal_the_numeric_ones_2030 ran before it in the same process
+  (an xdist worker of the suite; reproduced with the two alone: CasADi's slice assertion "stop<=len"), the same at the
+  K185 merge b54af5da; alone, and after test_market_capture.py, it passes at both commits. The 2030 test leaves
+  process-wide state (presumably the 2030 inputs) that the next market fixture reads. Neither test nor the market code
+  changed on the branch.
 - The GAMS quotes, gathered in each module's docstring through N4, moved to the functions that write the equations
   (the project lead's decision; the commit after N4, docstrings only).
 
@@ -261,6 +274,7 @@ rows' notes carry the evidence. In one list:
   without the feed options' MANN factors, NH3 only in GWPN2OAMM_'s manure term, the residues of GWPN2OCRO_, one liming
   coefficient, a fixed urea share, NO3 by source, the manure CH4 without the covers' effect, the LUC spike priors at
   the smallest transitions kept gamma.
+- **Tests**: the test-order failure of test_supply_system_ad.py after test_import_prices_ad.py's 2030 test (section 6).
 - **Comments to correct**: "NNcrp" is said to use nMax_ (supply_module.py l. 1376, policy_module.py l. 136): CAPRI
   zeroes p_nMaxPerHa in the step (greendeal_scenarios.gms l. 200-204). compute_ghg's own soil N2O and CO2UREA (on the
   crops' base mineral rates) are replaced in compute_indicators: dead code in the indicators' path.
