@@ -18,7 +18,7 @@ from capri_mod.market.equations.manuremarket.simu_manure_market import p_mPoolSu
 _T_PER_KT = 1000.0
 _POOL_IMBALANCE, _POOL_WORST_KEY = "res.pool_imbalance", "res.pool_worst_key"
 _POOL_STATE = ("sv.pool_state", "sv.pool_accel", _POOL_IMBALANCE, _POOL_WORST_KEY, "res.pool_solver_status",
-               "res.pool_eu_unaccounted")
+               "res.pool_eu_unaccounted", "res.pool_losf")
 
 
 class ManureBlock:
@@ -268,6 +268,17 @@ class ManureBlock:
         # must equal its planned net shipments (zero for a closed pool)
         plan_now = (hist.get("_plan") or {}) if isinstance(hist, dict) else {}
         worst = max(abs(es[k] - plan_now.get(k, 0.0)) / sup[k] for k in keys)
+        self.res.pool_losf = float(worst)
+        if form == "capri" and str(_settings().get("outer_loop.manure_pool_trade_consts")) == "capri":
+            # with CAPRI's fixed trade cost constants the pool market does not see what else moves the regions' trade
+            # (their N-surplus row), so the regions' trade and the market's plan need not meet: CAPRI reports the gap
+            # (losf, simu_manure_market.gms l. 199-204: the supply models' net trade less the market's) and stops on
+            # changes between its steps (capmod.gms l. 1369, p_itemsInIters with the market's EXPT and IMPT and the
+            # supply models' MTRADE): the test is the change of the market's plan and of the regions' trade since
+            # the clearing before, relative to the pool's supply; the gap kept as pool_losf
+            es_prev = (hist.get("_es") or {}) if isinstance(hist, dict) else {}
+            worst = max(max(abs(ship.get(k, 0.0) - plan_now.get(k, 0.0)), abs(es[k] - es_prev.get(k, es[k] + sup[k])))
+                        / sup[k] for k in keys) if ok else 1.0
         if not ok:
             worst = max(worst, 1.0)
         # ADAPTIVE DAMPING of the move to the new equilibrium prices (exact for
@@ -377,6 +388,12 @@ class ManureBlock:
                 buf[k], buf_gd[k] = max(buf.get(k, 0.0), float(b0)), max(buf_gd.get(k, 0.0), float(b1))
             bc = {"es": bc, "net": net, "buffer": buf, "buffer_greendeal": buf_gd}
             self.par.pool_es_cache = bc
+        consts = str(st.get("outer_loop.manure_pool_trade_consts"))
+        if consts not in ("solution", "capri"):
+            raise ValueError(f'outer_loop.manure_pool_trade_consts = "{consts}": "solution" or "capri"')
+        held = getattr(self.par, "pool_trade_consts", None)
+        if held is None:
+            held = self.par.pool_trade_consts = {}
         solver = str(st.get("outer_loop.manure_pool_solver"))
         if solver not in ("nlp", "qp"):
             raise ValueError(f'outer_loop.manure_pool_solver = "{solver}": "nlp" or "qp"')
@@ -416,6 +433,11 @@ class ManureBlock:
             # the constants: the region's export (import) reduced cost = v + cs0 + cs1 e - P (P + cb0 + cb1 i - v)
             cs0 = r_["rce"] - r_["f"] - cs1 * r_["e"] - v
             cb0 = r_["rci"] + r_["f"] - cb1 * r_["i"] + v
+            if consts == "capri":
+                # CAPRI's p_manureSellCostConst and p_manureBuyCostConst, calibrated once at the base (FINALIZE of
+                # supply/define_manure_trade_costs.gms) and held: the constants of the region's first clearing (the
+                # baseline's calibration point), then fixed
+                cs0, cb0 = held.setdefault((r_["reg"], fout), (cs0, cb0))
             be = 1.0 / b
             if solver == "qp" and b < 0 and ((be + cs1) < 0 or (be + cs1) * (be + cb1) < be * be):
                 raise ValueError(f"manure pool {prod}: {r_['reg']} has a negative excess-supply slope ({b:.6g}) its "

@@ -298,8 +298,12 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   convex QP with Clarabel of before, which needed the problem convex). On convex problems the same clearing (prices
   within 1e-9, shipments 1e-7: test_manure_pool_nlp.py). The trade cost constants, which the model recomputes at each
   clearing and CAPRI calibrates once, measured: they hold in the baseline and move in the Green Deal by about the
-  region's N-surplus dual (DE21 5.1 EUR per kg N, PL51 2.0), P and K's not; registered in DEP-17, CAPRI's fixed
-  constants a switch to decide.
+  region's N-surplus dual (DE21 5.1 EUR per kg N, PL51 2.0), P and K's not; registered in DEP-17.
+- **CAPRI's fixed trade cost constants as a switch (DEP-17):** outer_loop.manure_pool_trade_consts "capri" holds the
+  constants of the first clearing (the calibration point), with CAPRI's stop test on the changes between clearings and
+  its losf (the regions' trade less the market's plan) reported. Five units: it does not converge and the regions' net
+  N exports grow to 85 kt (CAPRI's own changes a few kt), so something of CAPRI's form is still missing; the default
+  stays "solution" until it is traced (the project lead's decision: CAPRI's form to become the default).
 - **K189, the crops' N and P terms move with the yields as CAPRI's data do:** CAPRI reruns fert/fertned.gms after the
   scenario's yield shifts and each price-driven yield update (supply/endog_yields.gms l. 139, 148), so the need, the
   removal (e_EXPPRD) and the fixation (e_BIOFIX) follow DATA(crop, FNUT) = min(MAXF, max(15, O_HP x need per t + straw

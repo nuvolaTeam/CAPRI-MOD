@@ -65,3 +65,20 @@ def test_the_nlp_clears_the_pools_as_the_qp(prod, fout, seed):
     with override({"outer_loop.manure_pool_solver": "nlp"}):
         ok, p_w, s_w, status, _ = _Market()._clear_pool_capri(prod, keys, [dict(c) for c in crec], cost, keep)
     assert ok and all(p_w[k] == pytest.approx(p_n[k], abs=1e-8) for k in keys), status
+
+
+def test_capris_trade_constants_are_held_from_the_first_clearing():
+    """outer_loop.manure_pool_trade_consts "capri": CAPRI's p_manureSell/BuyCostConst, calibrated once and held
+    (supply/define_manure_trade_costs.gms): a later clearing at other reduced costs keeps the first clearing's constants
+    (the same clearing for the same other inputs); "solution" recomputes them (another clearing)."""
+    keys, crec, cost = _case(5, "MANN")
+    later = [dict(c, rce=c["rce"] + 0.3, rci=c["rci"] - 0.2) for c in crec]
+    out = {}
+    for mode in ("capri", "solution"):
+        m = _Market()
+        with override({"outer_loop.manure_pool_trade_consts": mode}):
+            ok1, p1, s1, st1, _ = m._clear_pool_capri("N", keys, [dict(c) for c in crec], cost, {})
+            ok2, p2, s2, st2, _ = m._clear_pool_capri("N", keys, [dict(c) for c in later], cost, {})
+        assert ok1 and ok2, (mode, st1, st2)
+        out[mode] = max(abs(p1[k] - p2[k]) for k in keys)
+    assert out["capri"] < 1e-8 and out["solution"] > 1e-3, out

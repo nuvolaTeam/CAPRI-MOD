@@ -141,6 +141,12 @@ manure_pool_qp_tol = 1e-8
 # clearing before) or "qp" (the same problem as a convex QP, Clarabel; until 20 November 2026 the only form); IPOPT's
 # tolerance and iteration limit for "nlp" (not CAPRI parameters)
 manure_pool_solver = "nlp"
+# the "capri" form's trade cost constants of the regions (CAPRI's p_manureSellCostConst, p_manureBuyCostConst):
+# "solution" (recomputed at each clearing from the regions' reduced costs, so the market's first-order conditions hold
+# at the regions' solutions; they carry the regions' N-surplus dual, DEP-17) or "capri" (as CAPRI: those of the first
+# clearing, the baseline's calibration point, held; the pools' stop test then on the changes between clearings, as
+# CAPRI's rule, with the regions' trade less the market's plan reported as CAPRI's losf, pool_losf)
+manure_pool_trade_consts = "solution"
 manure_pool_nlp_tol = 1e-10
 manure_pool_nlp_max_iter = 500
 # the price the manure pools send back to the regional models: "capri" (CAPRI's, manuremarket/simu_manure_market.gms
