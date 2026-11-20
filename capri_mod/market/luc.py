@@ -30,6 +30,8 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas as pd
 
+from capri_mod.market.equations.market_model.land import (FocLUC_, LandSupplyMNL_levels, LinkLuWithShares_,
+                                                          luClassFinal_Initial)
 from capri_mod.settings import current as _settings
 
 #: CAPRI's UNFCCC land classes (luClass), in CAPRI's order
@@ -71,8 +73,8 @@ def final_classes(d: dict, land: dict) -> dict:
     lv = dict(land)
     lv["INLW"] = d["inlw"]
     for k in ("GRAS", "TGRS"):
-        lv[k] = sum(s * float(lv.get(src, 0.0)) for src, s in sh.get(k, {}).items())
-    return {c: sum(s * float(lv.get(src, 0.0)) for src, s in sh.get(c, {}).items()) for c in LU_CLASSES}
+        lv[k] = LinkLuWithShares_(sh, lv, k)
+    return {c: LinkLuWithShares_(sh, lv, c) for c in LU_CLASSES}
 
 
 def solve_region(d: dict, final: dict, max_iter: int | None = None, tol: float | None = None):
@@ -99,8 +101,7 @@ def solve_region(d: dict, final: dict, max_iter: int | None = None, tol: float |
     z[keep] = np.linalg.lstsq(A.T[:, keep], s0, rcond=None)[0]
 
     def x_of(z_):
-        den = be - A.T @ z_
-        return (al - 1.0) / den, den
+        return FocLUC_(al, be, A, z_)
 
     def phi(z_):
         den = be - A.T @ z_
@@ -114,7 +115,7 @@ def solve_region(d: dict, final: dict, max_iter: int | None = None, tol: float |
     it = 0
     for it in range(1, max_iter + 1):
         x, _ = x_of(z)
-        g = A @ (fac * x) - b
+        g = luClassFinal_Initial(A, fac, x, b)
         if np.max(np.abs(g[keep])) < tol * scale:
             break
         W = fac * x * x / (al - 1.0)
@@ -126,7 +127,7 @@ def solve_region(d: dict, final: dict, max_iter: int | None = None, tol: float |
             t *= 0.5
         z = z + t * dz
     x, _ = x_of(z)
-    res = float(np.max(np.abs(A @ (fac * x) - b)))
+    res = float(np.max(np.abs(luClassFinal_Initial(A, fac, x, b))))
     return x, {"iterations": it, "residual": res, "mu": z[:6], "lambda": z[6:]}
 
 
@@ -155,9 +156,7 @@ class LucMixin:
             if dr is not None:
                 for k, i in enumerate(d["free"]):
                     rent[i] += float(dr[k])
-            z = np.asarray(d["alu"], float) + np.asarray(d["B"], float) @ rent
-            e = np.exp(z - z.max())
-            out[rms] = dict(zip(d["lu"], (float(v) for v in d["avail"] * e / e.sum())))
+            out[rms] = dict(zip(d["lu"], (float(v) for v in LandSupplyMNL_levels(d["avail"], d["alu"], d["B"], rent))))
         return out
 
     def noneu_luc(self, land: dict | None) -> dict:

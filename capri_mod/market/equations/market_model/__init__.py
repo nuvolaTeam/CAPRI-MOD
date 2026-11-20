@@ -15,8 +15,12 @@ its first equation is written.
                     procYield_, MaprFeed_                                                            1440-1523
     biofuels.py     biofuels: BiofFeedCost_, BiofFeedCostAgg_, Biof_, ProdBiof_, BiofPriceRel_,       1180-1439
                     SupplyBiof_, biofDemshare_, biofDem_
+    supply.py       supply in the market: ProdNQ_ (ProdNQ_hess), yaniMarket_                          1524-1656
+    land.py         land: rentFromProdpriceLand_, LandSupplyMNL_, LndSupplyEqualsDemand_,             1657-1995
+                    LinkLuWithShares_, luClassFinal_, luClassInitial_, FocLUC_ (derivativeOfGammaLUC_)
+    fudging.py      the fudging functions: ProdFudge_ (FeedFudge_ in its form)                       2376-2434
     prices.py       PRICES: CPri_                                                                    2842-3130
 
-The other blocks, by the inventory: supply, land, lulucf, fudging, aggregation, net_trade, armington, border,
-intervention, objective (tools/refactor/market_equations_inventory.py BLOCKS).
+The other blocks, by the inventory: lulucf, aggregation, net_trade, armington, border, intervention, objective
+(tools/refactor/market_equations_inventory.py BLOCKS).
 """

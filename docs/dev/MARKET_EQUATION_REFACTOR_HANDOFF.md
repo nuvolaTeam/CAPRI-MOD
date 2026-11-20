@@ -20,6 +20,7 @@ aa91c1c (the supply phase merged, 19e7679; the checks against star 3.0, aa91c1c)
 | M0 | the inventory of CAPRI's market-model equations (docs/dev/market_equations_inventory.csv; tools/refactor/market_equations_inventory.py, the supply tool's sibling for MODEL statements) and the Green Deal step's switches (docs/dev/market_equations_gd_switches.csv, each with its source); the rows empty in the step classified | docs and a tool; the quote and citation checks |
 | M1 | the demand system: GLDemandFS_, GLDemandGS_, GLDemandGis_, XiS_ (market_model/demand.py) and CPri_ (prices.py), called by capri_mod/market/demand_ad.py; consFudge_ not written (the model's floor at 0) | the GL functions identical bit for bit (15 region sizes and the block's 2,035 cells: serialised algorithms, values, Jacobians); the captured market solves replayed bit for bit (the capture test's 2, the five-unit run's 21); the five-unit Green Deal run identical (15 lines of `$.meta.`, the reference's capture setting among them) |
 | M2 | processing, feed, dairy and biofuels: ProcMargO_, ProcNQ_ (ProcNQ_margin, ProcNQ_price), ProcFudge_, ProcO_, procYield_, MaprFeed_ (market_model/processing.py); feedBlkPrice_, feedBlk_, FeedShareEqu_, FeedNQ_, FeedBal_ (feed.py); ProcMargM_, DairyNQ_, FatsProtBal_ (dairy.py); BiofFeedCost_, BiofFeedCostAgg_, Biof_, ProdBiof_, BiofPriceRel_, SupplyBiof_, biofDemshare_, biofDem_ (biofuels.py); called by processing_ad.py, feed.py, feed_ad.py, use_ad.py, dairy.py, dairy_ad.py, biofuel_ad.py. MaprBiof_ and prodQuantBiofBy_ stay running sums (ported as terms); CSugarPrice_ empty in the step; FeedFudge_ goes with ProdFudge_ to M3 (supply_system_ad.prod_fudge) | the CasADi functions a cold market solve builds (486) serialised and compared, the old code against the new: 484 identical, the other 2 differ between two runs of the same code (section 5); the captured solves replayed bit for bit (2 and 21); the five-unit Green Deal run identical; the full-EU run moved to the phase's end (section 3) |
+| M3 | supply in the market, fudging and land: ProdNQ_ (ProdNQ_hess), yaniMarket_ (market_model/supply.py); ProdFudge_ (fudging.py; FeedFudge_ in its form); rentFromProdpriceLand_, LandSupplyMNL_, LndSupplyEqualsDemand_, LinkLuWithShares_, luClassFinal_ and luClassInitial_, FocLUC_ with derivativeOfGammaLUC_ (land.py); called by supply_ad.py, supply_system_ad.py, luc.py. ProdA_ ported as terms (eu_rows); NumeraireLand_ and LandSupplyRatio_ as LandSupplyMNL_; rmsYaniMarket_, derivativeOfNormalLUC_, derivativeOfSpikeLUC_ empty in the step; Yield_, LandAgrFromYld_, ScaleLandAgr_ and ProdPriceFudge_ not in the model (a recursive block); PPri_ moved to M4 (the price chain) | the module's CasADi functions after a cold solve (486) identical, the hash seed fixed; the assembled market system (plain and lifted with the fudge modes and the lifted use cells; the GD runs do not build it, market.bounds none) identical: its serialised functions, F and its Jacobian at the start for the three fudge modes; the captured solves replayed bit for bit (2 and 21); the five-unit Green Deal run identical |
 
 ## 3. The gate's references (at the phase's starting commit 444a47f, worktree outside the repository)
 
@@ -76,3 +77,28 @@ aa91c1c (the supply phase merged, 19e7679; the checks against star 3.0, aa91c1c)
 - **CSugarPrice_ is empty**: its domain needs DATA(QUTS, SUGA) > eps; CAPMOD sets the sugar quotas to 0 + eps from 2017
   (policy/reformsugarquotas.gms l. 136-142).
 - Left for M3-M5: 66 rows of the step without a status.
+
+## 6. What M3 found (for the main line; nothing fixed)
+
+- **CAPRI's step solves the asymmetric land supply**: p_useSymmetricMNL = 0 outside the baseline (arm/market_model.gms
+  l. 216-218), so the step has NumeraireLand_ and LandSupplyRatio_ (l. 1758-1790, the numeraire chosen at the start
+  values, arm/set_start_val.gms l. 617-621), not LandSupplyMNL_, which the model writes (with the exponents shifted by
+  their largest at the current rents). Equal in exact arithmetic where the commitment term DATA LEVL_1 is 0: to
+  confirm on the step's data. The inventory's in_gd2030_step follows the $if switches only, so it counts all three
+  rows (a parameter condition, not a switch).
+- **A recursive block not in the model**: Yield_, LandAgrFromYld_, ScaleLandAgr_ (l. 1795-1861) with ProdPriceFudge_
+  (l. 2378-2392) give the yields and land use per product outside the EU; v_yield, v_landAgrTmp, v_landAgr and
+  v_prodPricePos enter no other row of the step. No feedback on the market; a report the model does not have.
+- **The crude oil cost term of ProdNQ_** (p_oilCostShare x DATA UVAG CRDO PercentageChange, l. 1555) is not in the
+  model; the step sets no oil price change (only pol_input/liaise/liaise_scen.gms l. 464-465 and
+  scen/macro_environment/oil_price_50.gms l. 21 do), so it vanishes there; a scenario with an oil price change needs it.
+- **ProdNQ_ at the EU market region's level**: one measured Hessian per EU market region (the sum of its member
+  states'), CAPRI's ProdNQ_ per member state summed by ProdA_; known (the market audit), listed for completeness.
+- **Two forms each** (kept, each where it is): LandSupplyMNL_ in CasADi (the land market) and NumPy (luc.py's report);
+  the land demand's base in supply.py noneu_land_solve (NumPy) and market_system_ad.py (CasADi); ProdNQ_'s milk terms
+  in NumPy in supply.py and the K83 units' rows inline in supply_system_ad.py.
+- **The EU ProdNQ_ rows' order** (section 5) confirmed: with Python's hash seed fixed (PYTHONHASHSEED=0) the 486
+  functions are identical old against new, the EU rows included.
+- **PPri_** moved to M4: the producer price equals the market price ratio times the base (bilateral.py prices, Pd =
+  Pd0 r) and the support terms are in ProdNQ_'s parameters; it belongs with PMrk_ and MarketPriceAgg_.
+- Left for M4-M5: 44 rows of the step without a status.

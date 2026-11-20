@@ -8,7 +8,9 @@ written.
 
     market_model/   arm/market_model.gms: demand.py (the Generalised Leontief demand system), feed.py (the feed
                     demand), dairy.py (the dairy processing), processing.py (oilseed crushing and the by-products),
-                    biofuels.py (the biofuel processing, supply and demand), prices.py (the consumer price)
+                    biofuels.py (the biofuel processing, supply and demand), supply.py (the market's supply
+                    functions and the young-animal markets), land.py (the land market and the land-use change outside
+                    the EU), fudging.py (the smooth max of the supply cells), prices.py (the consumer price)
 
 Each function's docstring gives CAPRI's GAMS statement, the CAPRI star 3.0 file and lines it follows, the equation in
 this project's notation, how the model's quantities map to CAPRI's symbols, and the departures from CAPRI's equation.
