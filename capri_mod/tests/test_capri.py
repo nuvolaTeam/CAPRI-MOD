@@ -5209,9 +5209,9 @@ def test_greendeal_plap_crop_level_capri_step_moves_the_mean_cost_to_capris_step
 
 
 def test_greening_rows_follow_capris_envconst(monkeypatch):
-    """K187: CAPRI's supply model lists ecoSetAside_ and cropDivGreening_ only with %envConst% on
-    (supply_model_e_list_linear.gms l. 235-236), permGrasGreening_ always; its 2030 reference and Green Deal step solve
-    with both (their marginals are in the results). supply.env_const: true (the default, as CAPRI's runs) keeps both;
+    """K187: CAPRI star 3.0 lists ecoSetAside_ and cropDivGreening_ without a condition
+    (supply_model_e_list_linear.gms l. 231-232; the July 2026 release only with %envConst% on), permGrasGreening_
+    always; its 2030 reference and Green Deal step solve with both (their marginals are in the results). supply.env_const: true (the default, as CAPRI's runs) keeps both;
     false leaves them out and keeps the permanent-grassland rule."""
     from capri_mod.data.loaders import load_all_data
     from capri_mod.settings import defaults

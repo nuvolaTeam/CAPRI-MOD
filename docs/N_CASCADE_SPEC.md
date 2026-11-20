@@ -7,8 +7,10 @@
   `n_cascade_region.csv` (runoff from the surface, leaching, mineral fertiliser; urea substitution's effect and
   maximum) and `n_cascade_effects.csv` (the options' othImpact on every gas and stage, runoff from housing no3runh,
   runoff from application no3mrun).
-* `capri_mod/supply/n_cascade.py` writes GRAZN_, HOUSN_, STORN_, RUNHOUSN_, RUNSURFN_, APPLN_, RUNTOTN_, GASRUNTOTN_,
-  GASTOTNETF_, RUNTOTNETF_ and GASRUNTOTNETF_ as they stand in supply_model.gms (plain arithmetic: floats and CasADi).
+* `capri_mod/supply/equations/supply_model/n_flow.py` writes GRAZN_, HOUSN_, STORN_, RUNHOUSN_, RUNSURFN_, APPLN_,
+  RUNTOTN_, GASRUNTOTN_, GASTOTNETF_, RUNTOTNETF_ and GASRUNTOTNETF_ as they stand in supply_model.gms, one function
+  each with CAPRI's GAMS text (plain arithmetic: floats and CasADi); `capri_mod/supply/n_cascade.py` keeps the data
+  (`load`) and their use for a region and activity (`activity_losses`) and for the accounts (`mineral_n2o_n`).
 * Check (`test_n_cascade_reproduces_capri`, data `capri_data/validation/n_cascade_capri_gd2030.csv` from CAPRI's
   Green Deal reference run with endogenous technologies, `tools/build/build_n_cascade_validation.py`; that run is the "ini"
   calibration run, ghgTechCali ini, with the option shares at their initial values): with CAPRI's own
@@ -57,7 +59,8 @@
   reference with endogenous technologies: calc_nbalance.gms l. 290 reports LEACHI = SURSOI x v_nitrBalance.l), exp_imp
   (EXPPRD / IMPORT of CAPRI's 2030 reference). The run's regional N balance items are kept in
   `capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_nbalance.csv`.
-* `capri_mod/supply/n_leaching.py`: LEACHN_ as L = leach_base x B1 x B2, B1 with the options capri-mod has (winter
+* `capri_mod/supply/equations/supply_model/n_flow.py` (LEACHN_, LEACHN_B1, AMMOAGG_; the data and the share for a
+  region in `capri_mod/supply/n_leaching.py`): LEACHN_ as L = leach_base x B1 x B2, B1 with the options capri-mod has (winter
   cover 0.35, nitrification inhibitors on mineral N and on manure through NO3SLEA / NO3MLEA x (1 - (1 - lit)(1 +
   NMIN)), the application options' v_ammoAppLeaAgg), B2 with those it has not (tillage, buffer strips, biodiversity,
   biochar) held at CAPRI's reference: L = leach_ini x B1 / B1_ini (REGISTERED). The fertiliser options' NO3 effects

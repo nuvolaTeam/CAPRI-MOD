@@ -25,7 +25,7 @@ have its LEVL T1 and T2 in p_technFact):
                      scheme pays, policy.gms l. 420)
   mann_diff, manp_diff, mank_diff   factor T1 - T2 of the crop residues' N, P2O5 and K2O (p_technFact MANN, MANP,
                      MANK; 0 where CAPRI gives none): the residues per unit z over the crop's per ha, which CAPRI's
-                     residue pool (fertDistCres_, supply_model.gms l. 1049-1085) and the permanent crops' own residues
+                     residue pool (fertDistCres_, supply_model.gms l. 1041-1077) and the permanent crops' own residues
                      in NUTNED_ (l. 1206-1220) carry as DATA(MANN) x (1 + p_technFact(MANN, A)) (K181)
   capri_region
 

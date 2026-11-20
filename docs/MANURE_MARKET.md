@@ -31,7 +31,7 @@ of the excreted manure N per exporting region and manure N per ha of cropland pe
 between EU regions (113 exporters, 111 importers when built). The base trade counts only where the run trades manure:
 without trade (Farm-to-Fork as JRC121368) the scenario and its baseline keep all manure in its region.
 
-As CAPRI's ManureNPK_ (supply_model.gms l. 935-956: manure applied = manure net of losses - v_manureExports +
+As CAPRI's ManureNPK_ (supply_model.gms l. 927-948: manure applied = manure net of losses - v_manureExports +
 v_manureImports) the base trade is a level of the region, its export share times the excretion at the base herds and
 its imports per ha times the base crop area (EnvironmentalModule.base_manure_trade), held as a constant of the
 region's balance; an animal's manure applied and its N-surplus term are its full manure, and a hectare of crops

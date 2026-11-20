@@ -35,11 +35,8 @@ import copy
 from typing import Dict, Optional
 
 import numpy as np
-from capri_mod.params import param, param_table
+from capri_mod.params import param_table
 from capri_mod.data.definitions import capri_ms
-
-#: MJ per Mcal, MJ per kg CH4 (IPCC 2006 Eq. 10.21, as gases.gms and the accounts)
-from capri_mod.units import MJ_PER_MCAL    # unit conversion (MJ per kg CH4: the parameter MJ_PER_KG_CH4)
 
 
 def _ghg_total(env, res) -> float:
@@ -59,7 +56,8 @@ def _enteric_per_t_dm(env, region: str, animal: str) -> Optional[Dict[str, float
     ge = fac["ge"].get(ctry) or fac["ge"].get("EU")
     if not ge:
         return None
-    k = MJ_PER_MCAL * float(fac["ym"]) / param("MJ_PER_KG_CH4") * GWP_CH4
+    from capri_mod.supply.equations.supply_model.methane import GWPCH4ENTaact_feedCoef
+    k = GWPCH4ENTaact_feedCoef(float(fac["ym"]), GWP_CH4)       # CAPRI's p_emisFeed(CH4ENT) per Mcal, CO2-eq
     return {f: float(v) * k for f, v in ge.items()}
 
 

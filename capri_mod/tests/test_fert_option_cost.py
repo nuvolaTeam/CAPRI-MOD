@@ -4,7 +4,7 @@ import pytest
 
 
 def test_option_cost_on_the_purchases_times_capris_need_factor():
-    """CAPRI's GHG_Mit_Cost_ (supply_model.gms l. 4945-4950) charges the mineral-fertiliser options per t of crop N need
+    """CAPRI's GHG_Mit_Cost_ (supply_model.gms l. 5062-5068) charges the mineral-fertiliser options per t of crop N need
     met by mineral N: cost x (- v_netPutQuant(NITF)) x (1 + sum (NMIN + EmiCalMin) x share). The NLP form's term on the
     purchases is cost x (1 + sum (NMIN + EmiCalMin) x share); at the base (every IniShare 0) it and its derivative are
     the cost's own. ES420000's options: NITR_INH NMIN 0.0892, EmiCalMin 0.0058; PRECFARM 0.5354, 0."""
@@ -36,13 +36,13 @@ def test_option_cost_on_the_purchases_times_capris_need_factor():
 def test_manure_inhibitor_cost_on_capris_base():
     """CAPRI's GHG_Mit_Cost_ charges the fertiliser options aimed at applied manure (targFertMan: the nitrification
     inhibitor on manure, target N2OMAN) on ManureNPK x (1 + incEmiAppl) x (1 + NMAN x share) (supply_model.gms
-    l. 5144-5149, InclEmiAppl_ l. 983-1030): the manure N at the tail (excreted less the housing and storage losses).
+    l. 5144-5149, InclEmiAppl_ l. 975-1022): the manure N at the tail (excreted less the housing and storage losses).
     The NLP form charges it on the fertilisation block's manure N pool through GHG_Mit_Cost_targFertMan (KNOWN_ISSUES
     K183; until 19 November 2026 on the excreted manure N, 13-38% more in FR52: dairy cows' tail 0.76 of excretion,
     sows' 0.62); without a fertilisation block on the excreted N, as before."""
     import casadi as ca
     from capri_mod.supply.capri_regional_nlp import CapriRegionalNLP
-    from capri_mod.supply.equations.ghg_mit_cost import GHG_Mit_Cost_targFertMan
+    from capri_mod.supply.equations.supply_model.mitigation import GHG_Mit_Cost_targFertMan
     # the equation: 2,500 t of manure N at the tail, share 0.4, cost terms 12 and 30 EUR per t, NMAN 0.11 -> kEUR
     assert GHG_Mit_Cost_targFertMan(2500.0, 0.4, 12.0, 30.0, 0.11) == pytest.approx(
         2.5 * (1.0 + 0.11 * 0.4) * (12.0 * 0.4 + 0.5 * 30.0 * 0.16), rel=1e-12)

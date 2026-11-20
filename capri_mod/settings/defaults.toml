@@ -189,11 +189,11 @@ use_land_market = true
 grassland_allowance = 0.0
 # CAPRI's greening rules (permGrasGreening_; ecoSetAside_ and cropDivGreening_ with env_const)
 cap_greening = true
-# CAPRI's %envConst% (KNOWN_ISSUES K187): its supply model lists ecoSetAside_ and cropDivGreening_ only with it on
-# (supply_model_e_list_linear.gms l. 235-236). true: as CAPRI's 2030 reference and Green Deal step solve (both rows'
-# marginals in their results, reports/margcr.gms D_cropDivGreening, reports/greening.gms), although the star 3.0
-# policy file as distributed stops at "$exit" (refpol_endotech_all_sup.gms l. 398) before "$setglobal envConst on"
-# (l. 408) and the default is off (capmod/set_global_variables.gms l. 244); false: without both rows
+# CAPRI's greening rows ecoSetAside_ and cropDivGreening_ (KNOWN_ISSUES K187). true: as CAPRI star 3.0, which lists
+# both without a condition (supply_model_e_list_linear.gms l. 231-232), so its 2030 reference and Green Deal step solve
+# with them (their marginals in the results, reports/margcr.gms D_cropDivGreening, reports/greening.gms); the July 2026
+# release lists them only with %envConst% on (its l. 235-236), which the Green Deal step does not set (the "$exit" of
+# refpol_endotech_all_sup.gms l. 398 before "$setglobal envConst on", l. 408); false: without both rows
 env_const = true
 # CAPRI's endogenous entitlement limit (policy/def_endCut.gms; supply_model.gms sumEntl_, overShotEntl_): a hectare of
 # crops beyond the region's trend area loses the member state's area payments per ha (K136)

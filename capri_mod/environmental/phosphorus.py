@@ -36,7 +36,8 @@ class PhosphorusBlock:
         (as _leach_animals). CAPRI applies the same share to manure P2O5 (calc_nbalance.gms l. 71, 103-106, RUNANI). RunHous
         and RunSurf are held within CAPRI's bounds of a loss share, [0, 1] (v_emiLoss.lo/up). A sub-activity without
         cascade data runs off nothing (CAPRI reports no RUNANI there)."""
-        from capri_mod.supply import ammonia_techs as _at, n_cascade as _nc
+        from capri_mod.supply import ammonia_techs as _at
+        from capri_mod.supply.equations.supply_model import n_flow as _nf
         self._manure_n2o_tech(region)                 # loads CAPRI's sub-activities (ammonia_tech_model.csv)
         tm = (getattr(self.par, "amm_tm", None) or {}).get(region, {})
         out = {}
@@ -54,7 +55,7 @@ class PhosphorusBlock:
                 if not initial:
                     s_ = {t_: sh.get(t_, v_) for t_, v_ in s_.items()}
                 f, rsurf, eff = cd
-                L = _nc.losses(f, rsurf, s_, eff, m_runsurf=(1.0 - param("WINTERCOV_NO3_REDUCTION") * wc - fert_mrun, 1.0),
+                L = _nf.losses(f, rsurf, s_, eff, m_runsurf=(1.0 - param("WINTERCOV_NO3_REDUCTION") * wc - fert_mrun, 1.0),
                                m_appl_run=1.0 - param("WINTERCOV_NO3_REDUCTION") * wc)
                 # CAPRI bounds every loss share to [0, 1] (supply/set_supply_bounds.gms l. 240-243, v_emiLoss.lo/up), so
                 # options cannot drive the runoff below zero; the cascade evaluated at the solution's shares can
@@ -86,6 +87,7 @@ class PhosphorusBlock:
         factors of its mitigation and pesticide options)."""
         from capri_mod.environmental import p_balance as _pb
         from capri_mod.fert.npk import NPKData, PERM_NGRP, grass_need_factor
+        from capri_mod.supply.equations.supply_model.n_surplus import e_CRESID, e_EXCRET, e_EXPPRD
         if hasattr(acts, "to_dict"):
             acts = acts.to_dict()
         if hasattr(yields, "to_dict"):
@@ -106,11 +108,11 @@ class PhosphorusBlock:
             if a_ in h:
                 h[a_] = h[a_] + k_
         # removal and residues (EXPPRD, CRESID)
-        expprd = sum(x[c] * C.coef(cr, c)[0] * yr[c] for c in CROPS)
-        cresid = sum(x[c] * C.coef(cr, c)[1] * yr[c] for c in CROPS)
+        expprd = sum(e_EXPPRD(x[c], C.coef(cr, c)[0], yr[c]) for c in CROPS)
+        cresid = sum(e_CRESID(x[c], C.coef(cr, c)[1], yr[c]) for c in CROPS)
         # excretion (EXCRET)
         manp = {a: D.manure_per_head(region, "P", a) for a in ANIMALS}
-        excret = sum(h[a] * manp[a] for a in ANIMALS)
+        excret = sum(e_EXCRET(h[a], manp[a]) for a in ANIMALS)
         npk = getattr(supply_result, "fert_npk", None) or {}
         blk = npk.get("P") if isinstance(npk, dict) else None
         ratio = self._p_applied_ratio(cr) if bool(getattr(self.seen, "manure_trade_on", True)) else 1.0

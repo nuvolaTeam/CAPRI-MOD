@@ -4,8 +4,8 @@ coefficients the model's manure terms use at the 2030 market year.
 In a simulation CAPRI computes each animal activity's manure output per head from its ration at the simulation year
 (capmod.gms l. 1090: $BATINCLUDE 'feed\\req_or_man_fnc.gms' man '"Y"', when not in baseline mode; MANN from the crude
 protein intake, MANP and MANK from the P and K content of the feed) before it solves; its supply model then multiplies
-that DATA(r, act, MANN/MANP/MANK, "Y") by the activity level (e_EXCRET, ManureNPK_, supply_model.gms l. 961-1022 and
-1305-1338, with the mitigation options' factors). The 2030 Green Deal baseline the model's 2030 base is taken from
+that DATA(r, act, MANN/MANP/MANK, "Y") by the activity level (e_EXCRET, ManureNPK_ with manExportOrAppl_ and InclEmiAppl_,
+supply_model.gms l. 927-1036 and 1305-1338, with the mitigation options' factors). The 2030 Green Deal baseline the model's 2030 base is taken from
 (res_2_1730greendeal_refdefaulta, tools/lib/paths.BASELINE_REF) reports those coefficients in dataOut (MANN, MANP, MANK
 of every animal activity at 2030); over a region's activities LEVL x MANN adds up to the region's EXCRET. They differ
 from the 2017 values (sim_ini_21730 carries the 2017 ones at "Y" too; e.g. FR52's suckler cows 65.16 kg N per head in

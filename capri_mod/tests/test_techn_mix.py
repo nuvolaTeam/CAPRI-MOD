@@ -106,7 +106,7 @@ def test_mix_columns_move_to_the_low_yield_technology(es42_greendeal):
 
 @pytest.mark.slow
 def test_residue_pool_follows_the_technology_mix(es42_greendeal):
-    """CAPRI's residue pool (fertDistCres_, supply_model.gms l. 1049-1085) distributes the residues of every crop and
+    """CAPRI's residue pool (fertDistCres_, supply_model.gms l. 1041-1077) distributes the residues of every crop and
     technology, v_actLevl(c, A) x DATA(c, MANN) x (1 + p_technFact(c, MANN, A)), with +-0.2 for T1 and T2 (MANP, MANK
     for P2O5 and K2O): a crop's mix column z (ha moved from T2 to T1) brings 0.4 x its residues per ha. Until K181
     (18 November 2026) the model's pool had the crops' columns alone, so under the Green Deal (z < 0) its crops kept

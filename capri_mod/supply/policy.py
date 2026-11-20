@@ -38,13 +38,13 @@ class PolicyBlock:
         cut, limit, cols = lim
 
         lev = d["levels"].get(self.data.region_id) or {}
-        row = np.zeros(Aa.shape[1] + 1)
-        row[cols] = 1.0
-        for cls, j in (getattr(self.ev, "hist_cols", None) or {}).items():
-            # iHisCr and iHisGr are CAPRI crop activities (MCACT): the idled histosols keep their entitlements
-            row[int(j)] = 1.0
+        # CAPRI's sumEntl_ and overShotEntl_ (equations/supply_model/premiums.py); iHisCr and iHisGr are CAPRI crop
+        # activities (MCACT): the idled histosols keep their entitlements
+        from capri_mod.supply.equations.supply_model.premiums import overShotEntl_
+        _hc = getattr(self.ev, "hist_cols", None) or {}
+        row = overShotEntl_(Aa.shape[1], cols, [j for _cls, j in _hc.items()])
+        for cls, j in _hc.items():
             limit += float(lev.get(_entl.HISTOSOL_CODES[cls], 0.0))
-        row[-1] = -1.0
 
         Aa = np.hstack([Aa, np.zeros((Aa.shape[0], 1))])
         Aa = np.vstack([Aa, row])
@@ -84,16 +84,17 @@ class PolicyBlock:
           cropDiv      Shannon index of the annual crop groups >= its base value
         Where the base does not meet the ecological set-aside rule (the model's base data, not CAPRI's calibrated
         base), the rule is held at the base's own value (REGISTERED).
-        ecoSetAside and cropDiv only with CAPRI's %envConst% on (setting supply.env_const, K187): CAPRI's supply model
-        lists them only then,
+        ecoSetAside and cropDiv with the setting supply.env_const (true, K187): CAPRI star 3.0 lists both rows without a
+        condition,
 
-            $ifi %envConst%==on  ecoSetAside_                    (supply/supply_model_e_list_linear.gms l. 235-236)
-            $ifi %envConst%==on  cropDivGreening_
+                 ecoSetAside_                                       (supply/supply_model_e_list_linear.gms l. 231-232)
+                 cropDivGreening_
 
-        and CAPRI's 2030 reference and Green Deal step solve with both rows (their marginals are in the results:
-        reports/margcr.gms l. 321-326 D_cropDivGreening, reports/greening.gms), although the policy file as distributed
-        stops at "$exit" (pol_input/greendeal/refpol_endotech_all_sup.gms l. 398) before "$setglobal envConst on"
-        (l. 408) and the default is off (capmod/set_global_variables.gms l. 244). permGrasGreening_ is listed always."""
+        so its 2030 reference and Green Deal step solve with them (their marginals are in the results:
+        reports/margcr.gms l. 321-326 D_cropDivGreening, reports/greening.gms); the July 2026 release lists them only
+        with %envConst% on (its l. 235-236), which the Green Deal step does not set (the "$exit" of
+        pol_input/greendeal/refpol_endotech_all_sup.gms l. 398 before "$setglobal envConst on", l. 408).
+        permGrasGreening_ is listed always."""
         if not getattr(type(self), "cap_greening", False):
             return None
         import pandas as _pd
@@ -118,8 +119,9 @@ class PolicyBlock:
                 # the base limit is GRAE + GRAI (define_greening_limits.gms l. 139-140). Without it the rule held the
                 # productive grass at its base and the idled area took new land (KNOWN_ISSUES K157)
                 _hg = (getattr(self.ev, "hist_cols", None) or {}).get("grass")
-                _row = [(j, -1.0) for j in _gj] + ([(int(_hg), -1.0)] if _hg is not None else [])
-                out["permGras"] = {"row": _row, "rhs": -_xg * (1 - 1e-9), "scale": _xg}
+                # CAPRI's permGrasGreening_ (equations/supply_model/premiums.py)
+                from capri_mod.supply.equations.supply_model.premiums import permGrasGreening_
+                out["permGras"] = permGrasGreening_(_gj, _hg, _xg)
                 # the rule's dual at the calibration point, CAPRI's assumption (supply/prep_cal.gms l. 118-131):
                 # p_dualGreening = -|rent of arable land - rent of grassland|, charged to GRAE and GRAI in the
                 # calibration's linear terms (EUR/ha; CapriRegionalNLP.calibrate fixes the row's multiplier at it)
@@ -500,8 +502,8 @@ class PolicyBlock:
 
         CAPRI's 2030 reference and its PMP calibration ran with the pesticide module's aggregates (pestDisaggStage
         5_aggregates, PEST_DISAGG on: the crop pays its disaggregated pesticides, reported as Plantp_cost;
-        reports/rep_sets.gms l. 398-400), its Green Deal step without them (stage none: the crop pays PLAP,
-        Plantp_cost.PLAP, l. 404-406), the step's coefficient changed by the Green Deal's regional percentage
+        reports/rep_sets.gms l. 378-380), its Green Deal step without them (stage none: the crop pays PLAP,
+        Plantp_cost.PLAP, l. 384-386), the step's coefficient changed by the Green Deal's regional percentage
         (capmod/define_inputs.gms l. 66-73):
 
             reference (calibration):  Plantp_cost(r, a)

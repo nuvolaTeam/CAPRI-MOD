@@ -664,6 +664,10 @@ departures to be switched to CAPRI's setting. Method gaps
 and open differences from CAPRI's results are in [§11](#11-known-limitations) and `docs/KNOWN_ISSUES.md`. The rest
 follows CAPRI's method; how closely the results match CAPRI's own is shown in [§8](#8-validation).
 
+The equation book, `docs/equations/`, sets CAPRI's equations as written in its GAMS code side by side with their
+mathematical form, where CAPRI-mod builds them and their values in both models, block by block (first page: the
+regional nitrogen balance).
+
 ---
 
 ## 6. Baseline & scenarios

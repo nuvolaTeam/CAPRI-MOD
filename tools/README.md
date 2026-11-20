@@ -10,6 +10,7 @@ Scripts around the model, by role. Run every tool from the repository root, e.g.
 | `check/` | Comparisons with CAPRI and diagnostics. They write only reports (`capri_data/validation/`, or paths given on the command line). |
 | `gams/` | GAMS export scripts to run in a CAPRI installation; they produce the extracts the builders read. |
 | `solvers/` | Builds of solver libraries kept outside the repository: `build_ipopt_spral_omp.py` (IPOPT with SPRAL in OpenMP, for `supply.nlp_ipopt_library`). |
+| `refactor/` | Tools of the code refactors: `split_class.py`, `split_regional_model.py` (the block mixins of the supply side), `supply_equations_inventory.py` (CAPRI's supply-model equations against the model's code, `docs/dev/supply_equations_inventory.csv`; docs/dev/EQUATION_REFACTOR_BRIEF.md). |
 | `lib/` | Modules shared by the tools: `_model_regions.py` (model ↔ CAPRI regions), `_capri_costsavings.py`, and `paths.py`. `paths.py` finds the repository root and any tool by name (`tool_file`, `load_tool`). |
 
 `pipeline/builders.json` declares, per builder invocation, the files it reads and writes (generated from a traced run

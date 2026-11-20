@@ -275,7 +275,7 @@ class NLPBlock:
                     # CATC activity at its input cost (no cost curve of the option, no MaxShare; winterCover_ limits
                     # them) and leave the loss cascade at its base (K170). Outside the group, CAPRI's reference form
                     # (K188: no mitigation options, so no BioFix N of the catch crops in the residue pool either,
-                    # fertDistCres_ adds it only with %ghgAbatement% on, supply_model.gms l. 1074-1080)
+                    # fertDistCres_ adds it only with %ghgAbatement% on, supply_model.gms l. 1073-1079)
                     _ref = not bool(getattr(self.ev, "greendeal_group", False))
                     spec["catc"] = dict(spec["catc"], lin=0.0, sqr=0.0, fixmiti=True, ref_form=_ref,
                                         ub=max(1.0, float(spec["catc"].get("lb", 0.0) or 0.0)))

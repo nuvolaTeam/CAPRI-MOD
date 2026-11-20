@@ -16,9 +16,9 @@ main outputs, PACT_TO_Y):
 
     DATA(RS,"FALL",FNUT,%Y%) = 0.0;
 
-NUTNED_ (supply/supply_model.gms l. 1103-1145) then sums v_actLevl x DATA(crop, FNUT, "Y") x ... over the crops of
+NUTNED_ (supply/supply_model.gms l. 1095-1137) then sums v_actLevl x DATA(crop, FNUT, "Y") x ... over the crops of
 each nutrient group, so a crop without a main output (no O_HP: fallow FALL and set-aside VSET, which are not in
-PACT_TO_Y, sets.gms l. 5534-5613) adds nothing to its group's need. CAPRI's own margins confirm it: at the 2030 base the
+PACT_TO_Y, sets.gms l. 5377-5456) adds nothing to its group's need. CAPRI's own margins confirm it: at the 2030 base the
 first-order condition of FALL and VSET holds without a need term (reports/margcr.gms: D_AREA + D_PMPL + D_PREM + D_NUT
 = 0, D_PROV = 0) in every interior case, including the regions where sim_ini's DATA carries an NITF for them (DE B3:
 4.66 kg N/ha), while their group OAFC has positive duals (TEXT, TOBA).

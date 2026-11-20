@@ -219,7 +219,29 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   multiplier at the base is now CAPRI's, so fallow and set-aside carry its support and lose it when the Green Deal's
   catch crops make the rule slack. At CAPRI's Green Deal prices (five units): Alentejo's fallow 18.2 -> 3.1 thousand
   ha (CAPRI 3.3), set-aside 20.6 -> 11.7 (11.6); IT32 set-aside 62.9 -> 36.8 (34.5); PL61 fallow 60.1 -> 40.8
-  (40.1); the five units' absolute area gap 528 -> 399 thousand ha. Test: test_catch_crops_take_capris_reference_form.
+  (40.1); the five units' absolute area gap 528 -> 399 thousand ha. The full-EU Green Deal run with the Bonn settings
+  (runs/full_gd_k188_cmp.pkl, 27 iterations): in the 65 units where CAPRI's rule binds FALL + VSET +2,493 -> +2,356
+  thousand ha (CAPRI +2,365); EU fallow +93.1 -> +91.3% (+90.9), pulses +0.8 -> -0.9% (-0.8); activities' mean gap
+  1.1 -> 1.0 points, member states' median gaps 1.47 -> 1.33 on average; producer prices' mean gap 1.2 -> 1.3 (the
+  cereals' price changes 0.1-0.3 points lower). Test: test_catch_crops_take_capris_reference_form.
+- **The equation refactor merged (branch refactor/supply-equations, blocks N1-N15):** each CAPRI equation the model
+  ports is a named function with CAPRI's name, file and lines, its GAMS statement in the docstring, the project's
+  notation and the departures (capri_mod/supply/equations/supply_model/, one module per block of supply_model.gms);
+  the builders call them. Results unchanged: each block's gate identical, and on the merged code the five-unit probe at
+  CAPRI's Green Deal prices is identical to K188's (tools/check/compare_pickles_exact.py: only the run's metadata
+  differ). docs/dev/supply_equations_inventory.csv gives each equation of CAPRI's simulation model its status; the
+  refactor's findings for the main line are K189 (open).
+- **CAPRI star 3.0, not the July 2026 release, for the citations:** the refactor quoted and cited CAPRI from
+  course_capri_git/gams, which is CAPRI's July 2026 release (Docker image caprithuenen/capri:latest; supply_model.gms
+  5,631 lines), not star 3.0, the code of the project lead's runs (5,557 lines); so did the inventory of 19 November and
+  some main-line entries since 16 November (K184-K186). Corrected: the inventory rebuilt from star 3.0 (228 equations,
+  162 in the Green Deal step), the line citations moved to star 3.0's lines, and the three quoted GAMS blocks whose
+  text differs re-quoted from star 3.0 (GHG_Mit_Cost_'s UAA base, the loss cascade's winter cover terms, the catch
+  crops' bound in place of the release's Tot_soilCov_). The code is the star 3.0 port, so no result changes.
+- **K187 corrected:** star 3.0 lists ecoSetAside_ and cropDivGreening_ without a condition (supply_model_e_list_linear.gms
+  l. 231-232), so they are in its 2030 reference and Green Deal step, as the results' marginals show; only the July
+  release ties them to %envConst%, which the Green Deal step does not set (its eight envConst rows are empty).
+  supply.env_const stays true.
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against

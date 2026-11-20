@@ -653,11 +653,12 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: CAPRI's 2030 reference (pol_input/cap_after_2014/ref.gms); ecoSetAside_ and cropDivGreening_ only with
     #: env_const (K187)
     cap_greening = setting("supply.cap_greening")
-    #: CAPRI's %envConst% (setting supply.env_const; KNOWN_ISSUES K187): its supply model lists ecoSetAside_ and
-    #: cropDivGreening_ only with it on (supply/supply_model_e_list_linear.gms l. 235-236). On: CAPRI's 2030 reference
-    #: and Green Deal step solve with both rows (their marginals are in the results, reports/margcr.gms l. 321-326,
-    #: reports/greening.gms), although the policy file as distributed (pol_input/greendeal/refpol_endotech_all_sup.gms)
-    #: stops at "$exit", l. 398, before "$setglobal envConst on", l. 408. Off: without both rows.
+    #: CAPRI's greening rows ecoSetAside_ and cropDivGreening_ (setting supply.env_const; KNOWN_ISSUES K187): CAPRI star
+    #: 3.0 lists both without a condition (supply/supply_model_e_list_linear.gms l. 231-232). On: as CAPRI's 2030
+    #: reference and Green Deal step solve (their marginals are in the results, reports/margcr.gms l. 321-326,
+    #: reports/greening.gms); the July 2026 release lists them only with %envConst% on (its l. 235-236), which the Green
+    #: Deal step does not set ("$exit" at l. 398 of pol_input/greendeal/refpol_endotech_all_sup.gms, before
+    #: "$setglobal envConst on", l. 408). Off: without both rows.
     env_const = setting("supply.env_const")
     # CAPRI's endogenous entitlement limit (policy/def_endCut.gms, K136)
     entitlement_limit = setting("supply.entitlement_limit")
@@ -811,6 +812,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # values the wrong quantity. That is why gross_margin was dominated by
         # pigs and barely moved under policy.
         rev_coef = getattr(self.data, "livestock_revenue_coef", None)
+        from capri_mod.supply.equations.supply_model.objective import LINEAR_netRevenue   # CAPRI's LINEAR_ per unit
 
         r = {}
         prem = {}
@@ -933,7 +935,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 # feed cost change; the national feed table that stood here as a fallback, feed_requirements.csv, had
                 # no builder and was removed on 29 October 2026, KNOWN_ISSUES K99)
             # Crop gross margin (EUR/ha); animal gross margin (EUR/head)
-            r[act] = revenue - cost + payment
+            r[act] = LINEAR_netRevenue(revenue, cost, payment)
             prem[act] = payment
 
         self.net_revenues = pd.Series(r)
@@ -1130,7 +1132,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         #     arable land, which is where its -9% cereal-area effect under
         #     Farm-to-Fork comes from; here cereals kept their land and fell only
         #     9.8% against CAPRI's 15%, with the cereal price already matching.
-        row_arable = np.zeros(n)
+        # CAPRI's land balances (supply_model.gms LandBalNoSlak_; equations/supply_model/land.py)
+        from capri_mod.supply.equations.supply_model.land import LandBalNoSlak_, LandBal_rhs
         # One classification for both rows, the same one the land data is built
         # with (tools/build/build_capri_base.py PERMANENT_CROPS): tobacco, cotton and
         # other fibre are ANNUAL crops on arable land. They used to sit in the
@@ -1138,9 +1141,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # was measured against land built on a different definition.
         arable_crops = [a for a in CROPS
                         if a not in CROPS_ON_LAND["GRAS"] + self.PERMANENT_LAND_CROPS]
-        for a in arable_crops:
-            if a in acts_idx:
-                row_arable[acts_idx[a]] = 1.0
+        row_arable = LandBalNoSlak_(n, acts_idx, arable_crops)          # ARAC
         A_rows.append(row_arable)
         self.ev.row_labels.append("arable_land")
         # The ARABLE land figure and the crop areas come from different
@@ -1161,8 +1162,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # arable land INCLUDING fallow, now that SETA is in the row
         _land_arable = (float(self._land_of("ARABLE"))
                         + self._land_of("FALLOW"))
-        arable_avail = max(_land_arable, arable_base)
-        b_rows.append(arable_avail)
+        b_rows.append(LandBal_rhs(_land_arable, arable_base))
 
         # 1b. Landscape-elements floor: at least `set_aside_requirement` of UAA
         # held as the non-productive activity. Expressed as -x_SETA <= -target
@@ -1196,19 +1196,16 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             self.ev.fall_floor = float(floor)
             if floor > 0:
                 _fall_up = self.FALL_FLOOR_UP_SHARE * _n_techn("FALL") * uaa_total
-            row_seta = np.zeros(n)
-            for a in _seta_acts:
-                row_seta[acts_idx[a]] = -1.0
+            # CAPRI's e_setaLandscape (equations/supply_model/set_aside.py)
+            from capri_mod.supply.equations.supply_model.set_aside import e_setaLandscape
+            row_seta, b_seta = e_setaLandscape(n, acts_idx, _seta_acts, floor)
             A_rows.append(row_seta)
             self.ev.row_labels.append("landscape_floor")
-            b_rows.append(-floor)
+            b_rows.append(b_seta)
 
         # 2. Permanent crops land constraint
-        row_perm = np.zeros(n)
         perm_crops = list(self.PERMANENT_LAND_CROPS)
-        for a in perm_crops:
-            if a in acts_idx:
-                row_perm[acts_idx[a]] = 1.0
+        row_perm = LandBalNoSlak_(n, acts_idx, perm_crops)              # FRUN
         A_rows.append(row_perm)
         self.ev.row_labels.append("permanent_land")
         # The PERMANENT land figure and the crop areas come from different
@@ -1228,19 +1225,16 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # rewriting the base year where it does not.
         perm_base = sum(float(self._base_levels().get(a, 0.0))
                         for a in perm_crops if a in acts_idx)
-        b_rows.append(max(self._land_of("PERMANENT"), perm_base))
+        b_rows.append(LandBal_rhs(self._land_of("PERMANENT"), perm_base))
 
         # 3. Grassland constraint
-        row_grass = np.zeros(n)
         # CAPRI's land rules (LandBalNoSlak_): the row is CAPRI's grassland balance, the grassland activity (CAPRI's
         # GRAE + GRAI, the model's own activities since 7 November 2026) equals the grassland area. Maize and other fodder are ARABLE crops (CAPRI MAIF, OFAR, ROOF) and
         # are already in the arable row. (The model's earlier row - fodder on grassland plus a fifth of arable land -
         # fixed arable fodder at its base area plus a fifth of any arable change: regions under the N target could not
         # replace fertilised fodder leys.)
         grass_acts = list(CROPS_ON_LAND["GRAS"])
-        for a in grass_acts:
-            if a in acts_idx:
-                row_grass[acts_idx[a]] = 1.0
+        row_grass = LandBalNoSlak_(n, acts_idx, grass_acts)             # GRAS
         A_rows.append(row_grass)
         self.ev.row_labels.append("grassland")
         # RHS must admit the calibrated base fodder area. The land-availability
@@ -1255,7 +1249,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # LandBalNoSlak_. The larger of the land figure and the base area stays, as for the other land rows)
         grass_land_limit = self._land_of("GRASSLAND")
         base_fodder = sum(self._base_levels().get(a, 0.0) for a in grass_acts)
-        b_rows.append(max(grass_land_limit, base_fodder))
+        b_rows.append(LandBal_rhs(grass_land_limit, base_fodder))
 
         # (4. the legacy nitrate-limit row on total applied N, not CAPRI's, was retired on 27 October 2026, K33: nitrogen
         # limits are CAPRI's N-balance target)
@@ -1815,7 +1809,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # widened bounds and then carries on with the non-optimal solution, recorded (supply/simu_supply.gms,
         # widen_bounds.gms: p_INFES): here JRC121368's relaxed N target is tried, then IPOPT's last point at the region's
         # own problem is kept and recorded (_nlp_last_point); the landscape floor is kept as CAPRI keeps it (K84)
-        c_lin = self.f - self.net_revenues.values
+        from capri_mod.supply.equations.supply_model.objective import QUADRA_lin
+        c_lin = QUADRA_lin(self.f, self.net_revenues.values)          # QUADRA_'s linear part less LINEAR_'s
         aug = self._land_augment(A_ub, b_ub, c_lin, x0) if getattr(self, "use_land_market", False) else None
         if aug is not None:
             # CAPRI LAND MARKET: land-type areas as variables (see _land_augment)
@@ -2613,6 +2608,7 @@ class SupplyModule(ModuleStateMixin):
         NO3SRUN), raised to p_fertEffCor with its sign. 0 without side-effect data (CAPRI's literature effects are
         for the nitrification inhibitor)."""
         from capri_mod.supply import n_cascade as _nc
+        from capri_mod.supply.equations.supply_model import n_flow as _nf
         sv = {it: fert_side_value(region, tech, it) for it in ("NH3SYN", "NOXSYN", "N2OSYN", "NO3SRUN")}
         if all(v is None for v in sv.values()):
             return 0.0
@@ -2620,7 +2616,7 @@ class SupplyModule(ModuleStateMixin):
         g = G.get(r8) or G.get(capri_ms(region)) or {}
         if not g:
             return 0.0
-        L = _nc.netf(g, float(g.get("run_surf", 0.0)))
+        L = _nf.netf(g, float(g.get("run_surf", 0.0)))
         v = (L["NH3"] * (sv["NH3SYN"] or 0.0) + L["NOX"] * (sv["NOXSYN"] or 0.0) + L["N2O"] * (sv["N2OSYN"] or 0.0)
              + L["RunTot"] * (sv["NO3SRUN"] or 0.0))
         return (abs(v) ** param("P_FERT_EFF_COR")) * (1.0 if v >= 0 else -1.0) if v else 0.0

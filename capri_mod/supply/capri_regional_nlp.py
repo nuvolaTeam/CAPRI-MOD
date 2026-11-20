@@ -5,7 +5,7 @@ solves them with IPOPT (CasADi). What capri-mod already builds as data and calib
 regional QP as assembled by RegionalSupplyModel (activity and auxiliary columns, PMP matrix Q and linear terms c,
 land-market columns, land and bound rows, with one label per row) and the calibrated rations. What is CAPRI's here:
 
-* feeding (block "feeding"):
+* feeding (block "feeding"; equations/supply_model/feeding.py REQSE_, FEDUSE_; objective.py QUADRF_):
     REQSE_   per head, an EQUALITY for energy (ENNE) and crude protein (CRPR) only (feed version _pw: REQSN_, MAXSHR_,
              MINSHR_ are not in the simulation model);  sum_f v_feedInpCoeff_f x content_f = requirement, with the
              requirement the base ration's supply (CAPRI simulates with the trimmed p_animReq, p_trimFeed = 0, so the
@@ -319,6 +319,9 @@ class CapriRegionalNLP:
 
     def __init__(self, spec):
         import casadi as ca
+        from capri_mod.supply.equations.supply_model.feeding import FEDUSE_, REQSE_, REQSE_split
+        from capri_mod.supply.equations.supply_model.markets import SUPBAL_fodder_use
+        from capri_mod.supply.equations.supply_model.objective import OBJEQF_, QUADRA_, QUADRF_
         self.spec = spec
         self._psyms, self._pvals = [], []
         Q = np.asarray(spec["Q"], float)
@@ -396,15 +399,15 @@ class CapriRegionalNLP:
                 lin_c[k] = p + ghg + cn
                 half_s[k] = 0.5 * float(r.slope[j])
             herds = y[[act_idx[fe[0]] for fe in feeds]]
-            Fv = herds * fhv                                   # t
-            obj = obj + ca.sum1(Fv * (self._pv(lin_c) + self._pv(half_s) * fhv))
+            Fv = FEDUSE_(herds, fhv)                           # t
+            obj = obj + ca.sum1(QUADRF_(Fv, self._pv(lin_c), self._pv(half_s), fhv))
             F = [Fv[k] for k in range(nf)]
         if spec.get("dq") is not None:
             q0 = q0 + np.asarray(spec["dq"], float)            # the base calibration's linear terms (calibrate())
         Qs = 0.5 * (Q + Q.T)
         # the PMP quadratic is kept apart: its Hessian is the matrix itself, given to IPOPT directly (_derivatives)
         self._Qsx = self._pmat(Qs)
-        quad = 0.5 * ca.mtimes([y.T, self._Qsx, y])
+        quad = QUADRA_(self._Qsx, y)
         obj = obj + ca.dot(self._pv(q0), y)
         self.q0 = q0
 
@@ -493,7 +496,7 @@ class CapriRegionalNLP:
             rs = rsv[i]
             ex = rowsK[kk]                                     # the row / rs
             if i in extra:
-                ex = ex + extra[i] * ex_sc[k_ex]
+                ex = SUPBAL_fodder_use(ex, extra[i], ex_sc[k_ex])   # + the flexible feeds' FEDUSE_ / rs
                 k_ex += 1
             if i in fod_rows:
                 # SUPBAL_ for non-tradable fodder: production = use (an equality at the balance's base constant)
@@ -523,13 +526,14 @@ class CapriRegionalNLP:
                     continue
                 # supply / requirement - 1 (coefficients as parameters)
                 cf = np.array([float(vec[feeds[k][3]]) / R for k in ks])
-                sup = (ca.dot(self._pv(cf), fhv[ks]) if len(ks) > 1 else (self._pv(cf[0]) * fh[ks[0]] if ks else 0)) \
-                    + self._pv(float(vec[fixed] @ r.x0[fixed]) / R) - 1.0
+                sup = REQSE_(ca.dot(self._pv(cf), fhv[ks]) if len(ks) > 1
+                             else (self._pv(cf[0]) * fh[ks[0]] if ks else 0),
+                             self._pv(float(vec[fixed] @ r.x0[fixed]) / R))
                 dz = [(int(col_), float(d_[nut])) for col_, d_ in (exs or []) if nut in d_ and float(d_[nut]) != 0.0]
                 if dz:
                     # with a split column the requirement of the herd is R x herd + d x z (total form, bilinear)
                     Xa = max(float(xb[act_idx[a]]), 1e-3)
-                    e_ = sup * herd * self._pv(1.0 / Xa) - self._lin(y, dz, scale=R * Xa)
+                    e_ = REQSE_split(sup, herd, self._pv(1.0 / Xa), self._lin(y, dz, scale=R * Xa))
                     req_rows.append((a, nut, len(g_rows), R * Xa, True))
                 else:
                     e_ = sup
@@ -597,7 +601,7 @@ class CapriRegionalNLP:
             self._fert_tech_pending = None
 
         self._obj_rest, self._y = obj, y
-        obj = obj + quad
+        obj = OBJEQF_(obj, quad)
         self.X, self.obj, self.g = X, obj, ca.vertcat(*g_rows)
         self.lbg, self.ubg = np.array(lbg, float), np.array(ubg, float)
         self.lbx, self.ubx = np.array(lbx, float), np.array(ubx, float)
@@ -615,8 +619,10 @@ class CapriRegionalNLP:
         self._solver = None
 
     def _fert_block(self, npk, X, y, obj, g_rows, lbg, ubg, lbx, ubx):
-        """CAPRI's fertilisation block, per nutrient n (N, P, K), with ghgAbatement off (losses at CAPRI's fixed
-        shares, supply_model.gms l. 860-1215, 1535-1725):
+        """CAPRI's fertilisation block, per nutrient n (N, P, K), the rows written by CAPRI's equations
+        (capri_mod/supply/equations/supply_model/: nutrients.py NUTNED_, fertDistMine_, fertDistExcr_, fertDistCres_,
+        ManureNPK_; inner_fert.py e_focFertDist, e_fertDistPartialRegu, e_fertDistReguMax; fert_limits.py e_synNMax;
+        n_surplus.py SURTOT_REST_), supply_model.gms l. 862-1212 and 1527-1737:
 
           NUTNED_(g,n)    sum_c share_cg x_c need_cn          (need: CAPRI's per ha x need factor of yield x kappa_n)
                           = eff_n x_g,MINE + avail_n x_g,EXCR + avail_C x (x_g,CRES  [arable groups]
@@ -630,6 +636,17 @@ class CapriRegionalNLP:
                           order conditions use the base factor, as CAPRI's e_focFertDist (v_nutAvailFactExcr)
         Flows in t, scaled by their prior modes; bounds 0.001-1000 x mode, duals within +-10 (set_fert_priors.gms)."""
         import casadi as ca
+        from capri_mod.supply.equations.supply_model.nutrients import (
+            NUTNED_, NUTNED_ownCres, NUTNED_availFact, NUTNED_supply, fertDistMine_, fertDistExcr_, fertDistCres_,
+            ManureNPK_trade, ManureNPK_ammKept, fertDistCres_catc, v_nutAvailFactExcr_endo)
+        from capri_mod.supply.equations.supply_model.inner_fert import (
+            gamma_prior, e_focFertDist_dual, e_focFertDist_term, e_focFertDist_term_slack, e_fertDistPartialRegu_upper,
+            e_fertDistReguMax, e_focFertDist_FB)
+        from capri_mod.supply.equations.supply_model.fert_limits import e_synNMax
+        from capri_mod.supply.equations.supply_model.n_surplus import SURTOT_REST_
+        from capri_mod.supply.equations.supply_model.objective import (
+            LINEAR_netPutQuant, LINEAR_carbonTaxNITF, LINEAR_carbonTaxN2OLEA)
+        from capri_mod.supply.equations.supply_model.mitigation import GHG_Mit_Cost_targFertSyn
         lin = lambda pairs: self._lin(y, pairs)
         pv = self._pv
         self.fert = {}
@@ -665,33 +682,33 @@ class CapriRegionalNLP:
             x = [xv[i] for i in range(nfl)]
             e = {"MINE": pv(float(d["eff"])), "EXCR": pv(float(d["g0"])), "CRES": pv(float(d["gc"]))}
             # NUTNED_'s mineral and residue efficiencies: CAPRI's v_emiLoss of mineral N as functions of the options
-            # (1 - GasRunTot, and 1 - N2O GasTot for the residues; supply_model.gms l. 1143, 1196, 1211), the first-order
+            # (1 - GasRunTot, and 1 - N2O GasTot for the residues; supply_model.gms l. 1143, 1204, 1219), the first-order
             # conditions keep the base loss (CAPRI's p_emiLoss, l. 1629-1633)
             eN = self._netf_eff(d) if nut == "N" else None
             effM, effC = (eN if eN is not None else (e["MINE"], e["CRES"]))
-            # the first-order conditions' factors (e_focFertDist, supply_model.gms l. 1625-1634): CAPRI writes the
+            # the first-order conditions' factors (e_focFertDist, supply_model.gms l. 1621-1634): CAPRI writes the
             # residues' with the mineral N's total loss, v_nutAvailFactCRes x (1 - p_emiLoss(NETF, N, GasRunTot)),
             # where NUTNED_ (l. 1196) has their N2O loss alone; taken as CAPRI writes it (14 November 2026; with
             # CAPRI's priors the base allocation moves by less than 0.5 kg/ha, BG02 and RO05 checked)
             eF = dict(e)
             if nut == "N" and d.get("netf"):
-                from capri_mod.supply import n_cascade as _nc
-                _L0 = _nc.netf(d["netf"]["fr"], float(d["netf"]["run_surf"]))
+                from capri_mod.supply.equations.supply_model import n_flow as _nf
+                _L0 = _nf.netf(d["netf"]["fr"], float(d["netf"]["run_surf"]))
                 eF["CRES"] = pv(float(d["gc"]) / (1.0 - float(_L0["N2O"])) * float(d["eff"]))
             E = lin(d["E"]); C = lin(d["C"])
             if float(d.get("E_const", 0.0) or 0.0) != 0.0:
                 # the region's base manure trade as a level (CAPRI's ManureNPK_ with v_manureExports /
                 # v_manureImports at the calibration point; supply.manure_base_trade "capri", K167): base imports - base
                 # exports, t; the columns' manure is their full manure
-                E = E + pv(float(d["E_const"]))
+                E = ManureNPK_trade(E, pv(float(d["E_const"])))
             if nut == "N" and getattr(self, "catc_n", None) is not None:
-                C = C + self.catc_n                                 # catch crops' BioFix N (fertDistCres_)
+                C = fertDistCres_catc(C, self.catc_n)               # catch crops' BioFix N (fertDistCres_)
             if nut == "N" and self.amm_kept is not None:
-                E = E + self.amm_kept                               # N the ammonia options keep (ManureNPK_)
+                E = ManureNPK_ammKept(E, self.amm_kept)             # N the ammonia options keep (ManureNPK_)
             if nut == "N" and getattr(self, "_mni_cost_pending", None) is not None:
                 # CAPRI's GHG_Mit_Cost_ for the inhibitor on manure on its own base, ManureNPK x (1 + incEmiAppl) x
                 # (1 + NMAN s): the manure N pool E, at the tail (K183; until 19 November 2026 on the excreted N)
-                from capri_mod.supply.equations.ghg_mit_cost import GHG_Mit_Cost_targFertMan
+                from capri_mod.supply.equations.supply_model.mitigation import GHG_Mit_Cost_targFertMan
                 s_m, S0m, slope_m, nman_m = self._mni_cost_pending[:4]
                 obj = obj + GHG_Mit_Cost_targFertMan(E, s_m, pv(S0m), pv(slope_m), pv(nman_m))
                 _xb = np.asarray(self.xb, float)
@@ -699,7 +716,7 @@ class CapriRegionalNLP:
                                   + float(d.get("E_const", 0.0) or 0.0)) / 1000.0      # the pool at the base, kt
                 self._mni_cost_pending = None
             if d.get("slope"):
-                availE = e["EXCR"] + pv(float(d["slope"])) * (E / land - pv(float(d["m0E"])))
+                availE = v_nutAvailFactExcr_endo(e["EXCR"], pv(float(d["slope"])), E, land, pv(float(d["m0E"])))
             else:
                 availE = e["EXCR"]
             # NUTNED_
@@ -707,21 +724,18 @@ class CapriRegionalNLP:
                 sc_ = max(sum(m for (gj, s_, m, acc) in flows if gj == gi), 1.0)
                 need = self._lin(y, g_["need"], scale=sc_)
                 if g_["perm"] and g_["own"]:
-                    need = need - self._lin(y, [(c_, float(v_)) for c_, v_ in g_["own"]], scale=sc_) * effC
-                sup = 0
-                for i, (gj, s_, m, acc) in enumerate(flows):
-                    if gj == gi:
-                        f_ = availE if s_ == "EXCR" else (effM if s_ == "MINE" else effC if s_ == "CRES" else e[s_])
-                        if nut == "N" and s_ == "MINE" and self.fert_eff is not None:
-                            f_ = f_ * (1 + self.fert_eff)            # fertiliser options (1 + sum v_Miti NMIN)
-                        if nut == "N" and s_ == "EXCR" and self.man_eff is not None:
-                            f_ = f_ * (1 + self.man_eff)             # inhibitor on manure (1 + v_Miti NMAN)
-                        sup = sup + f_ * x[i]
-                g_rows.append(need - sup * pv(1.0 / sc_)); lbg.append(0.0); ubg.append(0.0)
+                    need = NUTNED_ownCres(need, self._lin(y, [(c_, float(v_)) for c_, v_ in g_["own"]], scale=sc_),
+                                          effC)
+                # the flows' factors: fertiliser options (1 + sum v_Miti NMIN), inhibitor on manure (1 + v_Miti NMAN)
+                sup = NUTNED_supply([(NUTNED_availFact(s_, availE, effM, effC, e[s_],
+                                                       self.fert_eff if nut == "N" else None,
+                                                       self.man_eff if nut == "N" else None), x[i])
+                                     for i, (gj, s_, m, acc) in enumerate(flows) if gj == gi])
+                g_rows.append(NUTNED_(need, sup, pv(1.0 / sc_))); lbg.append(0.0); ubg.append(0.0)
             # pools
             def pool_sum(s_):
                 return sum(x[i] for i, f in enumerate(flows) if f[1] == s_)
-            g_rows.append((pool_sum("MINE") - P) * pv(1.0 / Pscale)); lbg.append(0.0); ubg.append(0.0)
+            g_rows.append(fertDistMine_(pool_sum("MINE"), P, pv(1.0 / Pscale))); lbg.append(0.0); ubg.append(0.0)
             for s_ in pools:
                 tot = pool_sum(s_)
                 rhs = E if s_ == "EXCR" else C
@@ -730,7 +744,8 @@ class CapriRegionalNLP:
                     self.excr_rows[nut] = (len(g_rows), sc_)
                 if s_ == "CRES":
                     self.cres_rows = dict(getattr(self, "cres_rows", None) or {}, **{nut: (len(g_rows), sc_)})
-                g_rows.append((tot - rhs) * pv(1.0 / sc_)); lbg.append(0.0); ubg.append(0.0)
+                g_rows.append((fertDistExcr_ if s_ == "EXCR" else fertDistCres_)(tot, rhs, pv(1.0 / sc_)))
+                lbg.append(0.0); ubg.append(0.0)
             # the regulations (e_fertDistPartialRegu, e_fertDistReguMax): a beta density on a group's flow with its
             # support (0, max per ha x the group's area) - the Green Deal's mineral caps by crop group ("f2f") and the
             # residue limits ("limCres")
@@ -753,45 +768,38 @@ class CapriRegionalNLP:
             sig_of = {i: sig[k] for k, (i, _) in enumerate(sl_i)}
             # first-order conditions of the inner model
             for i, (gi, s_, m, acc) in enumerate(flows):
-                var_k = 1.0 / acc ** 2
-                bm = (1.0 + np.sqrt(1.0 + 4.0 * var_k)) / (2.0 * var_k)      # beta x mode
-                a1 = bm * bm * var_k - 1.0                                  # alpha - 1
-                dual = lam[gi] * eF[s_] - (mu[pools.index(s_)] if s_ in pools else 0)
+                bm, a1 = gamma_prior(acc)                                  # normBeta (beta x mode), alpha - 1
+                dual = e_focFertDist_dual(lam[gi], eF[s_], (mu[pools.index(s_)] if s_ in pools else 0))
+                margin = float(_settings().get("fertiliser.support_margin"))
                 if i in sig_of:
                     # the prior's part with the slack, the regulation's (e_fertDistPartialRegu) without it
                     Y_, b1_, b2_ = regs.get((gi, s_), (None, 1.0, 1.0))
-                    term = pv(a1) / (u[i] + sig_of[i]) + pv(b1_ - 1.0) / u[i] - pv(bm) - pv(m / T) * dual
+                    term = e_focFertDist_term_slack(pv(a1), u[i], sig_of[i], pv(b1_ - 1.0), pv(bm), pv(m / T), dual)
                     if Y_ is not None:
-                        term = term - pv(m * (b2_ - 1.0)) / (Y_ - x[i])
-                        g_rows.append((x[i] - float(_settings().get("fertiliser.support_margin")) * Y_) * pv(1.0 / m)); lbg.append(-np.inf); ubg.append(0.0)
+                        term = e_fertDistPartialRegu_upper(term, pv(m * (b2_ - 1.0)), Y_, x[i])
+                        g_rows.append(e_fertDistReguMax(x[i], Y_, margin, pv(1.0 / m))); lbg.append(-np.inf); ubg.append(0.0)
                 elif (gi, s_) in regs:
                     Y, b1, b2 = regs[(gi, s_)]
-                    term = pv(a1 + b1 - 1.0) / u[i] - pv(bm) - pv(m / T) * dual - pv(m * (b2 - 1.0)) / (Y - x[i])
-                    g_rows.append((x[i] - float(_settings().get("fertiliser.support_margin")) * Y) * pv(1.0 / m)); lbg.append(-np.inf); ubg.append(0.0)
+                    term = e_fertDistPartialRegu_upper(e_focFertDist_term(pv(a1 + b1 - 1.0), u[i], pv(bm), pv(m / T), dual),
+                                                       pv(m * (b2 - 1.0)), Y, x[i])
+                    g_rows.append(e_fertDistReguMax(x[i], Y, margin, pv(1.0 / m))); lbg.append(-np.inf); ubg.append(0.0)
                 else:
-                    term = pv(a1) / u[i] - pv(bm) - pv(m / T) * dual
-                if _fb_on:
-                    # DEPARTURE (K159, the project lead's decision of 15 November 2026): CAPRI's e_focFertDist is an
-                    # equality, the inner model's first-order condition for a flow inside its bounds; a flow at its
-                    # lower bound 0.001 x mode (set_fert_priors.gms) has one more term, the bound's multiplier
-                    # nu >= 0: term + nu = 0, nu (u - lb) = 0. Written as the smoothed Fischer-Burmeister function
-                    # of the pair (u - lb, -term): zero where term = 0 inside the bounds, or u = lb and term <= 0.
-                    # Inside the bounds it is CAPRI's equation (to within the smoothing)
-                    a_ = u[i] - _u_lo
-                    b_ = -term
-                    g_rows.append(a_ + b_ - ca.sqrt(a_ * a_ + b_ * b_ + _fb_eps))
-                else:
-                    g_rows.append(term)
+                    term = e_focFertDist_term(pv(a1), u[i], pv(bm), pv(m / T), dual)
+                # DEPARTURE (K159, the project lead's decision of 15 November 2026): at a flow's lower bound the
+                # first-order condition in the Fischer-Burmeister form (inner_fert.e_focFertDist_FB); CAPRI's equality
+                # otherwise
+                g_rows.append(e_focFertDist_FB(u[i], _u_lo, term, _fb_eps) if _fb_on else term)
                 lbg.append(0.0); ubg.append(0.0)
             # CAPRI's mineral N cap per ha of land (minfert_redu_uaa.gms, e_synNMax): purchases <= cap x land
             if d.get("synNMax") is not None:
                 self.synN_row = (len(g_rows), Pscale)
-                g_rows.append((P - pv(float(d["synNMax"])) * land) * pv(1.0 / Pscale)); lbg.append(-np.inf); ubg.append(0.0)
-            obj = obj + pv(float(d["price"]) / 1000.0) * P
+                g_rows.append(e_synNMax(P, pv(float(d["synNMax"])), land, pv(1.0 / Pscale))); lbg.append(-np.inf); ubg.append(0.0)
+            # the purchases at their unit value (LINEAR_; equations/supply_model/objective.py)
+            obj = obj + LINEAR_netPutQuant(P, pv(float(d["price"]) / 1000.0))
             if nut == "N" and getattr(self, "_fert_tech_pending", None) is not None:
-                # the fertiliser options' cost on the N purchases (GHG_Mit_Cost_: - cost x v_netPutQuant(NITF) x (1 + sum
-                # (NMIN + EmiCalMin) v_Miti), kt; the factor is in the pending term, K175)
-                obj = obj + P * pv(1.0 / 1000.0) * self._fert_tech_pending[0]
+                # the fertiliser options' cost on the N purchases (GHG_Mit_Cost_'s targFertSyn base: - cost x
+                # v_netPutQuant(NITF) x (1 + sum (NMIN + EmiCalMin) v_Miti), kt; the factor is in the pending term, K175)
+                obj = obj + GHG_Mit_Cost_targFertSyn(P, pv(1.0 / 1000.0), self._fert_tech_pending[0])
                 self._fert_tech_pending = None
                 self._fert_tech_P = True
             gt = self.spec.get("ghg_min") if nut == "N" else None
@@ -799,18 +807,21 @@ class CapriRegionalNLP:
                 # CAPRI's emission tax on the soil N2O of mineral N (N2OSYN, direct + volatilised x indirect), on the
                 # purchases; with the nitrification inhibitor adopted, the accounts' factor on the share w of mineral N
                 # under it: 1 - w + w (1 - lit) (1 + NMIN) (EnvironmentalModule.fert_side_factors)
-                fac = pv(float(gt["d"]) + float(gt["v"]))
+                # (LINEAR_'s carbon tax on mineral fertiliser; equations/supply_model/objective.py)
+                ef_dv = pv(float(gt["d"]) + float(gt["v"]))
                 if gt.get("nitr") and self._nitr_phi is not None:
                     phi_, nm_ = self._nitr_phi
                     l2, l3 = gt["nitr"]
                     q_ = phi_ / (1.0 + nm_)
                     w_ = q_ / (q_ + 1.0 - phi_)
-                    fac = fac + w_ * (pv(float(gt["d"]) * ((1.0 - l2) * (1.0 + nm_) - 1.0))
-                                      + pv(float(gt["v"]) * ((1.0 - l3) * (1.0 + nm_) - 1.0)))
-                obj = obj + fac * P
+                    ef_d_nitr = pv(float(gt["d"]) * ((1.0 - l2) * (1.0 + nm_) - 1.0))
+                    ef_v_nitr = pv(float(gt["v"]) * ((1.0 - l3) * (1.0 + nm_) - 1.0))
+                    obj = obj + LINEAR_carbonTaxNITF(P, ef_dv, w_, ef_d_nitr, ef_v_nitr)
+                else:
+                    obj = obj + LINEAR_carbonTaxNITF(P, ef_dv)
                 if float(gt.get("l", 0.0) or 0.0) > 0:
                     # the indirect N2O of the purchases' runoff and leaching (GWPN2OLEA_; SupplyModel._ef_mineral_lea)
-                    obj = obj + pv(float(gt["l"])) * P
+                    obj = obj + LINEAR_carbonTaxN2OLEA(P, pv(float(gt["l"])))
             # the N-surplus rows in CAPRI's terms (SURTOT_REST_ with e_SURTOTHa: v_netPutQuant(NITF) + excretion +
             # fixation + deposition + residues - removal - net manure exports): the regional row with its mineral
             # parts replaced by the purchases
@@ -824,7 +835,7 @@ class CapriRegionalNLP:
                     nzA = [(j, float(Ai[j])) for j in np.nonzero(Ai)[0]]
                     _cn = (getattr(self, "catc_n", None) * pv(1.0 / rs)) if getattr(self, "catc_n", None) is not None else 0
                     # the catch crops' BioFix N is an input of the gross balance (e_BIOFIX)
-                    g_rows.append(self._lin(y, nzA, scale=rs) + P * pv(1.0 / rs) + _cn)
+                    g_rows.append(SURTOT_REST_(self._lin(y, nzA, scale=rs), P, pv(1.0 / rs), _cn))
                     _add = float((npk.get("n_rows_rhs_add") or {}).get(lab_, 0.0))
                     lbg.append(-np.inf); ubg.append((float(self._b[i_]) + _add) / rs)
             vars_ = ca.vertcat(u, lam, mu, sig, Pv)
@@ -853,16 +864,18 @@ class CapriRegionalNLP:
         nf = d.get("netf")
         if not nf:
             return None
-        from capri_mod.supply import n_cascade as _nc
+        from capri_mod.supply.equations.supply_model import n_flow as _nf
+        from capri_mod.supply.equations.supply_model.nutrients import NUTNED_availFactMine_opt, NUTNED_availFactCRes_opt
+        from capri_mod.supply.n_leaching import fert_effect          # ghgMiti.gms's othImpact, 1 - (1 - lit)(1 + NMIN)
         pv = self._pv
         syn = {"NH3": 0, "NOX": 0, "N2O": 0}; srun = 0; used = False
         for name, (ph, nm) in (self._fert_phi or {}).items():
             lit = (nf.get("lit") or {}).get(name) or {}
             for gas, item in (("NH3", "NH3SYN"), ("NOX", "NOXSYN"), ("N2O", "N2OSYN")):
                 if item in lit:
-                    syn[gas] = syn[gas] + pv(1.0 - (1.0 - float(lit[item])) * (1.0 + float(nm))) * ph; used = True
+                    syn[gas] = _nf.GASTOTNETF_fertSyn(syn[gas], pv(fert_effect(lit[item], nm)), ph); used = True
             if "NO3SRUN" in lit:
-                srun = srun + pv(1.0 - (1.0 - float(lit["NO3SRUN"])) * (1.0 + float(nm))) * ph; used = True
+                srun = _nf.RUNTOTNETF_fertRun(srun, pv(fert_effect(lit["NO3SRUN"], nm)), ph); used = True
         m_wc, m0 = getattr(self, "_catc_m", None), float((self.spec.get("catc") or {}).get("m0", 0.0) or 0.0)
         if (self.spec.get("catc") or {}).get("fixmiti"):
             m_wc = None                       # the Green Deal group's fixed winter cover share: the cascade at base (K170)
@@ -872,10 +885,11 @@ class CapriRegionalNLP:
         if not used:
             return None
         fr, rsurf = nf["fr"], float(nf["run_surf"])
-        L1 = _nc.netf(fr, rsurf, fert_syn=syn, m_run=1 - wr * (m_wc if m_wc is not None else m0) - srun)
-        L0 = _nc.netf(fr, rsurf, m_run=1.0 - wr * m0)
-        effM = pv(float(d["eff"])) - (L1["GasRunTot"] - pv(float(L0["GasRunTot"])))
-        effC = pv(float(d["gc"]) / (1.0 - float(L0["N2O"]))) * (1 - L1["N2O"])
+        L1 = _nf.netf(fr, rsurf, fert_syn=syn, m_run=_nf.RUNTOTNETF_cropFactor(wr, m_wc if m_wc is not None else m0, srun))
+        L0 = _nf.netf(fr, rsurf, m_run=_nf.RUNTOTNETF_cropFactor(wr, m0))
+        # NUTNED_'s mineral and residue factors at the options' shares, from the base point (nutrients.py)
+        effM = NUTNED_availFactMine_opt(pv(float(d["eff"])), L1["GasRunTot"], pv(float(L0["GasRunTot"])))
+        effC = NUTNED_availFactCRes_opt(pv(float(d["gc"]) / (1.0 - float(L0["N2O"]))), L1["N2O"])
         self.netf_eff = (effM, effC)
         return effM, effC
 
@@ -893,6 +907,15 @@ class CapriRegionalNLP:
           nitrification inhibitor on manure: one regional share, manure N x (1 + share NMAN) in NUTNED_, cost per t of
             manure N treated"""
         import casadi as ca
+        # CAPRI's equations of the options (supply/supply_model.gms), one function each
+        from capri_mod.supply.equations.supply_model.mitigation import (
+            TotMit_, GHG_Mit_Cost_herd, Tot_MitFert_, GHG_Mit_Cost_perShare, GHG_Mit_Cost_targFertSyn_factor,
+            GHG_Mit_Cost_targFertSyn_base, GHG_Mit_Cost_targFertMan_excr, GHG_Mit_Cost_catc)
+        from capri_mod.supply.equations.supply_model.objective import (
+            LINEAR_carbonTax_ammOptions, LINEAR_carbonTax_NH3kept, LINEAR_carbonTax_manInhibitor, LINEAR_carbonTax_N2OCRO)
+        from capri_mod.supply.equations.supply_model.nutrients import (
+            manExportOrAppl_kept, NUTNED_mitiExcr, fertDistCres_catcBioFix)
+        from capri_mod.supply.equations.supply_model.premiums import catcMiti_, winterCover_, ecoSetAside_catc
         self.amm_kept = None; self.fert_eff = None; self.man_eff = None; self._nitr_phi = None; self._fert_phi = {}
         self.n_rows_g = {}; self.synN_row = None
         self.abat = {}
@@ -912,10 +935,11 @@ class CapriRegionalNLP:
             # input cost) the reference form's where the calibration was in that form (K188; zero before, K170)
             _da = spec.get("dabat") or {}
             dl = float(_da.get(("catc_ref",), 0.0)) if cs.get("fixmiti") else float(_da.get(("catc",), 0.0))
-            obj = obj + self._pv(uaa) * (self._pv(float(cs["k1"]) + float(cs["lin"]) + dl) * m
-                                        + self._pv(0.5 * float(cs["sqr"])) * m * m)
-            g_rows.append((self._lin(y, [(int(j), float(s)) for j, s in cs["row"]]) + self._pv(uaa) * m)
-                          * self._pv(1.0 / uaa))
+            # GHG_Mit_Cost_ on the UAA; winterCover_ with catcMiti_'s area (mitigation.py, premiums.py)
+            obj = obj + GHG_Mit_Cost_catc(self._pv(uaa), self._pv(float(cs["k1"]) + float(cs["lin"]) + dl),
+                                          self._pv(0.5 * float(cs["sqr"])), m)
+            g_rows.append(winterCover_(self._lin(y, [(int(j), float(s)) for j, s in cs["row"]]),
+                                       catcMiti_(self._pv(uaa), m), self._pv(1.0 / uaa)))
             lbg.append(-np.inf); ubg.append(float(cs["rhs"]) / uaa)
             self._catc_m = m
             # ecoSetAside_: catch crops on the eligible side at CAPRI's weight (setaEco includes CATC)
@@ -923,16 +947,18 @@ class CapriRegionalNLP:
             if float(eco.get("catc_w", 0.0) or 0.0) > 0 and "ecoSetAside" in getattr(self, "cap_rows", {}):
                 ie = self.cap_rows["ecoSetAside"]
                 sce = max(float(eco.get("scale", 1.0)), 1e-6)
-                g_rows[ie] = g_rows[ie] - self._pv(float(eco["catc_w"]) * uaa / sce) * m
-            # the catch crops' BioFix N in the arable residue pool (fertDistCres_, supply_model.gms l. 1074-1080) and
-            # the gross balance: only with CAPRI's %ghgAbatement% on, so not in its reference form (K188)
+                g_rows[ie] = ecoSetAside_catc(g_rows[ie], self._pv(float(eco["catc_w"]) * uaa / sce), m)
+            # fertDistCres_'s winter cover term, from the base share (t N; nutrients.py): the catch crops' BioFix N in
+            # the arable residue pool and the gross balance only with CAPRI's %ghgAbatement% on
+            # (supply_model.gms l. 1073-1079), so not in its reference form (K188)
             self._catc_ncoef = uaa * 1000.0 * float(cs["biofix"])                                  # t N per unit share
-            self.catc_n = None if cs.get("ref_form") else self._pv(self._catc_ncoef) * (m - self._pv(m0))      # t N
+            self.catc_n = (None if cs.get("ref_form")
+                           else fertDistCres_catcBioFix(self._pv(self._catc_ncoef), m, self._pv(m0)))
             gt_ = spec.get("ghg_min")
             if gt_ and self.catc_n is not None:
                 # CAPRI's emission tax on the catch crops' crop-residue N2O (N2OCRO: BioFix x CATC x EF1 x 44/28, in
                 # GN2O and so in the taxed GGWP; their soil carbon CO2SEQ is not in GGWP)
-                obj = obj + self._pv(float(gt_["d"])) * self.catc_n
+                obj = obj + LINEAR_carbonTax_N2OCRO(self._pv(float(gt_["d"])), self.catc_n)
             new.append(zc)
             lbx += [float(cs.get("lb", 0.0))]; ubx += [float(cs["ub"])]
             self.abat["catc"] = {"off": nx0, "uaa": uaa, "m0": m0}
@@ -946,13 +972,14 @@ class CapriRegionalNLP:
                        for t in techs]
                 d = sig - pv([float(t["s0"]) for t in techs])
                 hv = y[[self.act_idx[t["act"]] for t in techs]]
-                obj = obj + ca.sum1(pv([float(t["stock"]) * float(t["w"]) for t in techs]) * hv
-                                    * (pv(th_) * d + pv([0.5 * float(t["slope"]) for t in techs]) * d * d))
+                # GHG_Mit_Cost_ on the herd (mitigation.py)
+                obj = obj + ca.sum1(GHG_Mit_Cost_herd(pv([float(t["stock"]) * float(t["w"]) for t in techs]), hv,
+                                                      pv(th_), pv([0.5 * float(t["slope"]) for t in techs]), d))
                 # CAPRI's emission tax (ghgTax) on the options' manure N2O through the loss cascade, per unit of the
                 # sub-activity and share from the base shares (the activity's own coefficient is taken there)
                 tg = [float(t.get("ghg", 0.0) or 0.0) * float(t["w"]) for t in techs]
                 if any(tg):
-                    obj = obj + ca.sum1(pv(tg) * hv * d)
+                    obj = obj + ca.sum1(LINEAR_carbonTax_ammOptions(pv(tg), hv, d))
             byk = {}
             for kk, t in enumerate(techs):
                 byk.setdefault((t["act"], t["key"]), {})[t["tech"]] = sig[kk]
@@ -985,9 +1012,10 @@ class CapriRegionalNLP:
                             continue
                         g_rows.append(L1[k_]); lbg.append(0.0); ubg.append(np.inf)
                     _nh3 = lambda L_: L_[("NH3", "Graz")] + L_[("NH3", "Hous")] + L_[("NH3", "Stor")] + L_[("NH3", "Appl")]
-                    kept = kept + wy * (L0[("N", "GasRunTot")] - L1[("N", "GasRunTot")])
-                    kept_nh3 = kept_nh3 + wy * (_nh3(L0) - _nh3(L1))
+                    kept = kept + manExportOrAppl_kept(wy, L0[("N", "GasRunTot")], L1[("N", "GasRunTot")])
+                    kept_nh3 = kept_nh3 + manExportOrAppl_kept(wy, _nh3(L0), _nh3(L1))
                 else:
+                    # manExportOrAppl_ as above, with the old loss function (one difference for both sums)
                     d_ = _cascade_loss(sub, sh0) - _cascade_loss(sub, sh)
                     kept = kept + wy * d_
                     kept_nh3 = kept_nh3 + wy * d_
@@ -995,12 +1023,13 @@ class CapriRegionalNLP:
             if float(am.get("tax_nh3", 0.0) or 0.0) > 0:
                 # the indirect N2O of the NH3 the options keep (the soil N2O of the mineral N it displaces follows the
                 # purchases in the fertilisation block)
-                obj = obj - self._pv(float(am["tax_nh3"])) * kept_nh3
+                obj = obj - LINEAR_carbonTax_NH3kept(self._pv(float(am["tax_nh3"])), kept_nh3)
             grp = {}
             for kk, t in enumerate(techs):
                 grp.setdefault(t["grp"], []).append(kk)
             for _, ks in grp.items():
-                g_rows.append(sum(sig[kk] for kk in ks)); lbg.append(-np.inf); ubg.append(1.0)
+                # TotMit_ for the options' group (no control eliminated)
+                g_rows.append(TotMit_([sig[kk] for kk in ks])); lbg.append(-np.inf); ubg.append(1.0)
             o_amm = nx0 + sum(int(v.shape[0]) for v in new)
             new.append(sig)
             if am.get("fixed"):
@@ -1014,25 +1043,31 @@ class CapriRegionalNLP:
         if ft and ft.get("techs") and ft.get("crops"):
             T_ = ft["techs"]
             phi = ca.SX.sym("phi", len(T_))
-            Eff = 0; cost = 0; Ebase = 0
             pv = self._pv
             ec_ = ft.get("emical") or {}
+            # the options' parameters in the order the graph records them (per option: NMIN, NMIN + EmiCalMin, the cost
+            # terms), then CAPRI's sums over the options (mitigation.py)
+            p_nm, p_nmec, p_c1, p_c2, phis = [], [], [], [], []
             for tt, (name, nm, a_, b_, smax) in enumerate(T_):
                 if str(name).upper() == "NITR_INH":
                     self._nitr_phi = (phi[tt], float(nm))
                 self._fert_phi[str(name)] = (phi[tt], float(nm))
-                Eff = Eff + pv(float(nm)) * phi[tt]
-                Ebase = Ebase + pv(float(nm) + float(ec_.get(name, 0.0) or 0.0)) * phi[tt]
+                p_nm.append(pv(float(nm)))
+                p_nmec.append(pv(float(nm) + float(ec_.get(name, 0.0) or 0.0)))
                 a_ = float(a_) + float((spec.get("dabat") or {}).get(("fert", name), 0.0))
-                cost = cost + (pv(a_) * phi[tt] + pv(0.5 * float(b_)) * phi[tt] * phi[tt])
-            # CAPRI's GHG_Mit_Cost_ (supply_model.gms l. 4945-4950): the fertiliser options' cost per t of crop N need
+                p_c1.append(pv(a_)); p_c2.append(pv(0.5 * float(b_))); phis.append(phi[tt])
+            Eff = Tot_MitFert_(p_nm, phis)                       # sum v_Miti NMIN: Tot_MitFert_, NUTNED_'s factor
+            Ebase = GHG_Mit_Cost_targFertSyn_factor(p_nmec, phis)
+            cost = GHG_Mit_Cost_perShare(p_c1, p_c2, phis)
+            # CAPRI's GHG_Mit_Cost_ (supply_model.gms l. 5062-5068): the fertiliser options' cost per t of crop N need
             # met by mineral N, - cost x v_netPutQuant(NITF) x (1 + sum (NMIN + EmiCalMin) v_Miti) (KNOWN_ISSUES K175:
             # until 18 November 2026 on the purchases alone, 10-17% too cheap at the Green Deal's shares); the
             # fertilisation block's N purchases take it (_fert_block), else the crops' base mineral N (the build's end).
             # Every option's IniShare is 0, so the base and its calibration are unchanged
-            self._fert_tech_pending = (cost * (1 + Ebase), list(ft["crops"]))
+            self._fert_tech_pending = (GHG_Mit_Cost_targFertSyn_base(cost, Ebase), list(ft["crops"]))
             self.fert_eff = Eff
-            g_rows.append(sum(phi[tt] for tt in range(len(T_)))); lbg.append(-np.inf); ubg.append(1.0)
+            # TotMit_ for the fertiliser options (no control eliminated); Tot_MitFert_ <= its cap less 1
+            g_rows.append(TotMit_([phi[tt] for tt in range(len(T_))])); lbg.append(-np.inf); ubg.append(1.0)
             if ft.get("ecap") is not None:
                 g_rows.append(Eff); lbg.append(-np.inf); ubg.append(float(ft["ecap"]))
             o = nx0 + sum(int(v.shape[0]) for v in new)
@@ -1046,8 +1081,8 @@ class CapriRegionalNLP:
             s_ = sm[0]
             S0m = float(mni["S0"]) + float((spec.get("dabat") or {}).get(("mni",), 0.0))
             # the emission tax's value per t of excreted manure N treated (the accounts' emission factors)
-            obj = obj - W * self._pv(float(mni.get("vtax", 0.0))) * s_
-            self.man_eff = self._pv(float(mni["nman"])) * s_
+            obj = obj - LINEAR_carbonTax_manInhibitor(W, self._pv(float(mni.get("vtax", 0.0))), s_)
+            self.man_eff = NUTNED_mitiExcr(self._pv(float(mni["nman"])), s_)       # NUTNED_'s 1 + v_Miti NMAN
             if "N" in ((spec.get("npk") or {}).get("nutrients") or {}):
                 # CAPRI's GHG_Mit_Cost_ on its base for targFertMan, ManureNPK x (1 + incEmiAppl) x (1 + NMAN s): the
                 # fertilisation block's manure N pool, so the term is added there (_fert_block; KNOWN_ISSUES K183)
@@ -1055,7 +1090,7 @@ class CapriRegionalNLP:
                                           sum(float(m_) * float(self.xb[int(c_)]) for c_, m_ in mni["w"]) / 1000.0)
                 self._mni_base = None                     # set by _fert_block: the pool at the calibration point, kt
             else:
-                obj = obj + W * (self._pv(S0m) * s_ + self._pv(0.5 * float(mni["slope"])) * s_ * s_)
+                obj = obj + GHG_Mit_Cost_targFertMan_excr(W, self._pv(S0m), self._pv(0.5 * float(mni["slope"])), s_)
                 self._mni_base = sum(float(m_) * float(self.xb[int(c_)]) for c_, m_ in mni["w"]) / 1000.0
             o = nx0 + sum(int(v.shape[0]) for v in new)
             new.append(sm)

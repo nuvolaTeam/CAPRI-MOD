@@ -75,6 +75,8 @@ class FertilisationBlock:
         c_ = getattr(self.par, "ef_lea_cache", None)
         if c_ is None:
             from capri_mod.supply import n_cascade as _nc, n_leaching as _nl
+            from capri_mod.supply.equations.supply_model import n_flow as _nf
+            from capri_mod.supply.equations.supply_model.n2o import GWPN2OLEA_
             from capri_mod.environmental.environmental_module import GWP_N2O
             rs = _nl.capri_region(self.data.region_id)
             d = _nl.load().get(rs) if rs else None
@@ -82,9 +84,9 @@ class FertilisationBlock:
             c_ = 0.0
             if d and d.get("exp_imp") is not None:
                 L = d.get("leach_ini") if d.get("leach_ini") is not None else (d.get("leach_base") or 0.0)
-                nf = _nc.netf(g, float(g.get("run_surf", 0.0)))
-                c_ = max(0.0, nf["RunTot"] + (1.0 - nf["GasRunTot"] - float(d["exp_imp"])) * float(L)) \
-                    * param("EF5_LEACHING_N2O") * M_N2O / M_N2O_N * GWP_N2O
+                nf = _nf.netf(g, float(g.get("run_surf", 0.0)))
+                c_ = GWPN2OLEA_(max(0.0, nf["RunTot"] + (1.0 - nf["GasRunTot"] - float(d["exp_imp"])) * float(L)),
+                                param("EF5_LEACHING_N2O")) * M_N2O / M_N2O_N * GWP_N2O
             self.par.ef_lea_cache = c_
         return c_
 
@@ -393,7 +395,7 @@ class FertilisationBlock:
                 pk_ = [int(j_) for j_ in ((getattr(self.ev, "pool_cols_pk", None) or {}).get(nut) or []) if int(j_) < n_cols]
                 if len(pk_) == 2:
                     Ecols += [(pk_[0], -1.0), (pk_[1], 1.0)]
-            # the arable residue pool (fertDistCres_, supply_model.gms l. 1049-1085): every crop and technology,
+            # the arable residue pool (fertDistCres_, supply_model.gms l. 1041-1077): every crop and technology,
             # v_actLevl(c, A) x DATA(c, MANN) x (1 + p_technFact(c, MANN, A)): the crop's column at the mean technology,
             # its mix column z (ha moved from T2 to T1) res_diff x the crop's residues per ha (K181; MANP, MANK for
             # P2O5, K2O)
@@ -407,7 +409,7 @@ class FertilisationBlock:
             if nut == "N" and self.data.n_deposition_kg_ha:
                 # the idled histosols (CAPRI's iHisCr, iHisGr: annual crops of the group idlHis, MANN = AtmDep) bring
                 # their deposition into the pool (K184), t N per 1000 ha idled
-                from capri_mod.supply.equations.idled_histosols import fertDistCres_idlHis
+                from capri_mod.supply.equations.supply_model.nutrients import fertDistCres_idlHis
                 for j_ in (getattr(self.ev, "hist_cols", None) or {}).values():
                     if int(j_) < n_cols:
                         Ccols.append((int(j_), float(fertDistCres_idlHis(1.0, self.data.n_deposition_kg_ha))))
