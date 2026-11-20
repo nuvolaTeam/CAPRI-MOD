@@ -32,6 +32,10 @@ functions. **A move, not a change: results identical to 1e-10**, checked by a ga
 | N7 | the mitigation block's other rows classified (inventory statuses with evidence); the switch table's envConst corrected to OFF, the inventory rebuilt (161 equations in the step) | docs only |
 | N8a | the base QP's land balances (arable_land, permanent_land, grassland) as LandBalNoSlak_ (supply_model/land.py) | 442 QPs identical bit for bit (221 regions, with and without a set-aside floor); gate with N8b |
 | N8b | the land market (supply/land.py _land_augment): LandMarket_, LandBalNoSlak_ on the land columns and at the base use, e_artoBal, the grassland floor | the functions identical bit for bit to the old code (2,000 random cases); gate at N8b (one run for N6-N8b) |
+| N9a | the landscape floor as e_setaLandscape (supply_model/set_aside.py) | 442 QPs identical bit for bit (221 with the floor row); gate with N10 |
+| N9b | the idled histosols' bound as idleHisto_ (set_aside.py) | identical bit for bit to the old code (3,000 random cases); gate with N10 |
+| N9c | the set-aside block and greenOverShot_ classified (inventory statuses with evidence) | docs only |
+| N10 | the entitlement limit (overShotEntl_ with sumEntl_) and the permanent grassland rule (permGrasGreening_) in premiums.py | identical bit for bit to the old code (3,000 random cases); gate at N10 (one run for N9a-N10) |
 
 Not on the branch (on purpose):
 - `docs/equations/` (the equation book, page 01 the regional N balance) and its README paragraph: waiting for the
@@ -168,6 +172,13 @@ comes, check against CAPRI's _pw feed version and register what differs.
   land; the model's land data carry idle land) with tolerances of 1e-7 and 1e-9; e_artoBal's total is the base land
   types' sum (CAPRI: ARTO - INLW); the grassland floor on the GRAS column duplicates permGrasGreening_, which the
   model also writes as its "CAP greening" row (N10).
+- **Porting differences of N9 and N10 (kept in the move):** e_setaLandscape's row is written whenever a set-aside
+  requirement is set, also with a zero floor (CAPRI: only where the floor exceeds eps); permGrasGreening_ has a
+  (1 - 1e-9) tolerance, is skipped where grass is below supply.absent_level, and is written twice (the cap rule and
+  the land market's grassland floor).
+- **A run that loads the market supply Hessian from the cache** (.cache/market_supply_hessian, keyed by the code's
+  fingerprint) differs from one that measures it at about 1e-8 relative (46 against 51 products recorded): a
+  reference and its comparison run must both measure it (after a restart, clear the cache of a killed run).
 - CAPRI's sugar quota equations (sugar.py's block) are empty in the 2030 step: their condition
   p_technFact(SUGB, VCOF) is set to 0 where DATA(QUTS, SUGB) <= eps (supply/prep_sim.gms l. 171), and the quotas
   ended in 2017; to confirm from CAPRI's 2030 DATA (N15).

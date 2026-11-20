@@ -31,6 +31,8 @@ keeps them, the refactor's results staying identical):
 """
 from __future__ import annotations
 
+import numpy as np
+
 
 def catcMiti_(uaaEqu, v_Miti):
     r"""catcMiti_(r) (l. 2016-2021): the catch crop area, v_actLevl(CATC) = v_Miti(CATC, winterCov, co2seq) x the land
@@ -89,3 +91,44 @@ def ecoSetAside_catc(row, weight, v_Miti):
              ;
     """
     return row - weight * v_Miti
+
+
+def overShotEntl_(width, cols, hist_cols):
+    r"""overShotEntl_(r, scheme, DDTarget) (l. 1899-1900) with sumEntl_ (l. 1893-1897) substituted, the endogenous
+    entitlement limit as the QP's row over width + 1 columns (the last the overshoot o >= 0, 1000 ha): the crop columns
+    (CAPRI's MCACT; cols) + the idled histosols (iHisCr, iHisGr are MCACT; hist_cols) - o <= the region's trend area
+    (the builder's right-hand side, policy/def_endCut.gms). CAPRI has one overshoot per cut scheme with the same limit;
+    the model's one column carries their sum (supply/policy.py _entitlement_columns). Returns the row.
+
+    CAPRI's GAMS, sumEntl_ and overShotEntl_ (l. 1893-1900):
+
+       sumEntl_(RUNR,PSDPAY_cutEndog,DDTarget) $ (p_entlLimit(RUNR,PSDPAY_cutEndog,DDTarget,"Limit")) ..
+           v_sumEntl(RUNR,PSDPAY_cutEndog,DDTarget)
+                =E= sum( (DDReg_MPACT(DDTarget,MPACT),A) $ p_technFact(RUNR,mpact,"LEVL",A),
+                                v_actLevl(RUNR,mpact,A));
+       overShotEntl_(RUNR,PSDPAY_cutEndog,DDTarget)   $ p_entlLimit(RUNR,PSDPAY_cutEndog,DDTarget,"Limit") ..
+          v_overShotEntl(RUNR,PSDPAY_cutEndog,DDTarget) =G= v_sumEntl(RUNR,PSDPAY_cutEndog,DDTarget) - p_entlLimit(RUNR,PSDPAY_cutEndog,DDTarget,"Limit");
+    """
+    row = np.zeros(width + 1)
+    row[cols] = 1.0
+    for j in hist_cols:
+        row[int(j)] = 1.0
+    row[-1] = -1.0
+    return row
+
+
+def permGrasGreening_(gras_cols, hist_grass_col, base_grass):
+    r"""permGrasGreening_(r) (l. 1910-1912): the permanent grassland (CAPRI's GRSACT: GRAE, GRAI, IHISGR, FALLGR; the
+    model's grassland columns and its idled grassland histosol column) at least its base area GRAE + GRAI
+    (policy/define_greening_limits.gms l. 139-140), as the NLP's CAP rule in the upper-bound form: coefficients -1, the
+    right-hand side -base x (1 - 1e-9) (a tolerance; not in CAPRI), the row's scale the base. Returns the rule's
+    {"row", "rhs", "scale"} (supply/policy.py; CapriRegionalNLP's "CAP greening" rows write it).
+
+    CAPRI's GAMS, permGrasGreening_ (l. 1910-1912):
+
+       permGrasGreening_(RUNR) $ (p_DPGreeningLimits(runr,"permGras")) ..
+           sum((GRSACT,A) $ [DDREG_MPACT("ddGreen",GRSACT) and p_technFact(runr,GRSACT,"LEVL",A)], v_actLevl(runr,GRSACT,A) ) =G= p_DPGreeningLimits(runr,"permGras");
+    """
+    row = [(j, -1.0) for j in gras_cols] + ([(int(hist_grass_col), -1.0)] if hist_grass_col is not None else [])
+    return {"row": row, "rhs": -base_grass * (1 - 1e-9), "scale": base_grass}
+
