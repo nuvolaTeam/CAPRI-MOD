@@ -187,8 +187,14 @@ pmp_cross_terms = "capri"
 use_land_market = true
 # permanent-grassland decline allowed under the Green Deal (CAPRI default 0)
 grassland_allowance = 0.0
-# CAPRI's greening rules (permGrasGreening_)
+# CAPRI's greening rules (permGrasGreening_; ecoSetAside_ and cropDivGreening_ with env_const)
 cap_greening = true
+# CAPRI's %envConst% (KNOWN_ISSUES K187): its supply model lists ecoSetAside_ and cropDivGreening_ only with it on
+# (supply_model_e_list_linear.gms l. 235-236). true: as CAPRI's 2030 reference and Green Deal step solve (both rows'
+# marginals in their results, reports/margcr.gms D_cropDivGreening, reports/greening.gms), although the star 3.0
+# policy file as distributed stops at "$exit" (refpol_endotech_all_sup.gms l. 398) before "$setglobal envConst on"
+# (l. 408) and the default is off (capmod/set_global_variables.gms l. 244); false: without both rows
+env_const = true
 # CAPRI's endogenous entitlement limit (policy/def_endCut.gms; supply_model.gms sumEntl_, overShotEntl_): a hectare of
 # crops beyond the region's trend area loses the member state's area payments per ha (K136)
 entitlement_limit = true
@@ -344,6 +350,12 @@ greendeal_inputs_keep_tech_change = true
 # ("costs for EFUL+SERI would double") but adds the fuel coefficient to the INPO coefficient, valuing it at INPO's
 # unit value. true: valued at the fuel cost; false: CAPRI's code as written (parity switch)
 organic_topup_at_fuel_cost = true
+# Comparison switch, DEP-51's crop-level part (the project lead's decision of 19 November 2026). CAPRI's 2030
+# reference values each crop's plant protection at its pesticide module's aggregates (Plantp_cost; "Stage of pesticide
+# disaggregation: 5_aggregates"), which its PMP calibration absorbed; its Green Deal step at PLAP x UVAG(PLAP)
+# ("none"). false: the model's one representation in base and scenario (DEP-51); true: the Green Deal step moves each
+# crop's mean plant-protection cost to CAPRI's step (plant_protection_capri_step_2030.csv; capri_comparison.toml)
+greendeal_plap_crop_level_capri_step = false
 # CAPRI's fertiliser-option curvature with the fertiliser saving valued at the member state's NITF price (envind/
 # ghgMiti.gms l. 1016-1035, the supply audit's finding S5, ARCHITECTURE_REFACTOR.md section 5.2); false: without (this model before 24 October 2026). OFF by default (25 October
 # 2026): with it and the cost on the N purchases, the curvature turns negative where NMIN is large and the baseline

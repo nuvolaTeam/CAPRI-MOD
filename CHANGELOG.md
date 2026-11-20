@@ -196,6 +196,32 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   wheat -2.5 -> -7.8% (CAPRI -8.4), barley -3.3 -> -6.3 (-11.9), FR52 barley -6.6 -> -9.2 (-10.1), Spain little (ES41
   barley -5.5 -> -6.5, -10.7); the areas' gap unchanged; the N-surplus dual lower (DE21 5.09 -> 4.80 EUR/kg). The
   register's DE21 wheat cost corrected to capri-mod's money (about 143 EUR/ha). Documentation only.
+- **DEP-51's crop-level part as a comparison switch (the project lead's decision, 19 November 2026):**
+  `supply.greendeal_plap_crop_level_capri_step`, off by default, on in capri_mod/settings/capri_comparison.toml: the
+  Green Deal step changes each crop's mean plant-protection cost by CAPRI's step less its reference, (PLAP x UVAG(PLAP)
+  x (1 + change)[TF_I]/TF_I - Plantp_cost) over the 2030 deflator, instead of the model's own change (supply/policy.py
+  `_plap_crop_level_capri_step`); CAPRI's two values from its 2030 reference
+  (capri_data/baselines/capri_greendeal_ref/1730/supply/plant_protection_capri_step_2030.csv, 6,684 unit x crop rows,
+  tools/build/build_plant_protection_capri_step_2030.py). Test:
+  test_greendeal_plap_crop_level_capri_step_moves_the_mean_cost_to_capris_step.
+- **K187 (closed, not a gap):** CAPRI's supply model lists ecoSetAside_ and cropDivGreening_ only with %envConst% on,
+  and its Green Deal policy file as distributed stops at `$exit` before switching it on; CAPRI's 2030 reference and
+  Green Deal step solve with both rows all the same (their marginals in the results: D_cropDivGreening non-zero in
+  5,114 entries of the Green Deal step). The rows become the setting `supply.env_const`, true as CAPRI's runs (the
+  model unchanged); without them the five units at CAPRI's prices specialise (absolute area gap to CAPRI 786 -> 1,133
+  thousand ha). Test: test_greening_rows_follow_capris_envconst.
+- **K186 registered (open):** CAPRI's catcMiti_ and the winter cover option's cost scale with the current land, the
+  model's with the base crop area; no effect in the Green Deal step (its winter cover share fixed, CATC free).
+- **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
+  capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
+  greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against
+  CAPRI's Green Deal step (tools/check/compare_capri_gd.py): EU activities' mean gap 1.1 points (same sign 89%),
+  member states' 4.45 (median 1.34), EU producer prices' 1.2 (model / CAPRI median 0.89). Against the run of
+  19 November with FIX-5 and FIX-6 as coded but without K185 and the switch (1.0, 4.63, 1.2): barley -3.1 -> -5.0%
+  (CAPRI -3.8), rye -8.6 -> -9.9 (-11.9), other cereals -5.2 -> -6.6 (-7.3), their prices 0.6 points higher, closer to
+  CAPRI's; pulses -0.2 -> +0.8% (-0.8), their price +1.0 -> -0.1% (+2.1); member states' set-aside further from
+  CAPRI's (Portugal's fallow +158 -> +187% against CAPRI's -22%, on 5 thousand ha in Alentejo, where other arable
+  fodder falls -19% against -6%).
 - **K185:** fallow and set-aside have no nutrient need, as CAPRI's fert/fertned.gms sets it for a crop without a
   main-output yield (capri_mod/supply/equations/fertned.py, DATA_FNUT): they no longer pay their group's N need in
   NUTNED_. At CAPRI's Green Deal prices (five units) fallow FI18 +9.8 -> +16.1 thousand ha (CAPRI +52.3), FI19

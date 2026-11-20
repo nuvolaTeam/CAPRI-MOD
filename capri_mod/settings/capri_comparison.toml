@@ -1,7 +1,8 @@
 # Settings of the runs compared with CAPRI's own results (the comparison runs for the CAPRI team in Bonn; the project
-# lead's decision of 19 November 2026). Two of CAPRI's code errors that capri-mod fixes by default are run as CAPRI
-# codes them, so that a comparison with CAPRI's runs shows the port and not the fixes. The defaults (defaults.toml)
-# keep the fixes. Use: tools/run/run_f2f_2030.py OUT.pkl --scenario greendeal2030 --settings
+# lead's decisions of 19 November 2026). Two of CAPRI's code errors that capri-mod fixes by default are run as CAPRI
+# codes them, and its Green Deal step's valuation of each crop's plant protection is CAPRI's (DEP-51's crop-level
+# part), so that a comparison with CAPRI's runs shows the port and not the fixes or the model's one representation.
+# The defaults (defaults.toml) keep the fixes and the one representation. Use: tools/run/run_f2f_2030.py OUT.pkl --scenario greendeal2030 --settings
 # capri_mod/settings/capri_comparison.toml (docs/DEPARTURES_FROM_CAPRI.md; docs/CAPRI_DEPARTURES_REGISTER.md FIX-5, FIX-6).
 #
 # Measured on the full-EU 2030 Green Deal run (19 November 2026, both false against both true): EU producer prices'
@@ -14,3 +15,6 @@ greendeal_inputs_keep_tech_change = false
 # FIX-6: the organic top-up's fuel coefficient added to INPO and valued at INPO's unit value
 # (pol_input/greendeal/organic_io.gms l. 107-115)
 organic_topup_at_fuel_cost = false
+# DEP-51's crop-level part: CAPRI's Green Deal step values each crop's plant protection at PLAP x UVAG(PLAP), its
+# reference and calibration at the pesticide module's Plantp_cost (docs/CAPRI_DEPARTURES_REGISTER.md DEP-51)
+greendeal_plap_crop_level_capri_step = true

@@ -276,6 +276,11 @@ class RegionData:
     #: CAPRI's input costs the Green Deal targets change (build_plant_protection_cost.py): plap, inpo, fert, eful
     #: (EUR/ha by crop) and inpo_toin_share (animals)
     input_costs_ha: Optional[pd.DataFrame] = None
+    #: CAPRI's two valuations of each crop's plant protection at its 2030 reference (EUR/ha in CAPRI's 2030 money):
+    #: plap_uvag_eur_ha (its Green Deal step's, DATA(PLAP) x UVAG(PLAP)) and plantp_cost_eur_ha (its reference's and
+    #: PMP calibration's, the pesticide module's Plantp_cost); plant_protection_capri_step_2030.csv, at the 2030 market
+    #: year only (the comparison switch supply.greendeal_plap_crop_level_capri_step, DEP-51)
+    plap_capri_step: Optional[pd.DataFrame] = None
     #: the simulation year (the projection's market year; None: the base year)
     sim_year: Optional[int] = None
     #: CAPRI's catch crops (catc_share_2030, catc_cost_eur_ha, biofix_t_n_ha) and winter cover shares by crop
@@ -645,8 +650,15 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
 
 
     #: CAPRI's CAP 2014-2020 greening in the NLP form (permGrasGreening_, ecoSetAside_, cropDivGreening_), as in
-    #: CAPRI's 2030 reference (pol_input/cap_after_2014/ref.gms)
+    #: CAPRI's 2030 reference (pol_input/cap_after_2014/ref.gms); ecoSetAside_ and cropDivGreening_ only with
+    #: env_const (K187)
     cap_greening = setting("supply.cap_greening")
+    #: CAPRI's %envConst% (setting supply.env_const; KNOWN_ISSUES K187): its supply model lists ecoSetAside_ and
+    #: cropDivGreening_ only with it on (supply/supply_model_e_list_linear.gms l. 235-236). On: CAPRI's 2030 reference
+    #: and Green Deal step solve with both rows (their marginals are in the results, reports/margcr.gms l. 321-326,
+    #: reports/greening.gms), although the policy file as distributed (pol_input/greendeal/refpol_endotech_all_sup.gms)
+    #: stops at "$exit", l. 398, before "$setglobal envConst on", l. 408. Off: without both rows.
+    env_const = setting("supply.env_const")
     # CAPRI's endogenous entitlement limit (policy/def_endCut.gms, K136)
     entitlement_limit = setting("supply.entitlement_limit")
     #: annual crops (sets.gms annualCrops) of the model and their crop-diversification groups (cropDivGrps: each
@@ -954,6 +966,12 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: double", but adds the fuel coefficient to the INPO coefficient, so it is valued at INPO's unit value instead of
     #: fuel's. true: valued at the fuel cost; false: CAPRI's code as written.
     organic_topup_at_fuel_cost = setting("supply.organic_topup_at_fuel_cost")
+    #: Comparison switch (setting supply.greendeal_plap_crop_level_capri_step; DEP-51, its crop-level part): CAPRI's
+    #: 2030 reference values each crop's plant protection at its pesticide module's aggregates (Plantp_cost, which its
+    #: PMP calibration absorbed), its Green Deal step at PLAP x UVAG(PLAP). true: the Green Deal step moves each crop's
+    #: mean plant-protection cost to CAPRI's step (policy._apply_greendeal_input_changes); false: the model's one
+    #: representation in base and scenario (DEP-51).
+    greendeal_plap_crop_level_capri_step = setting("supply.greendeal_plap_crop_level_capri_step")
 
     #: EU organic area already in place, subtracted from the target to give the
     #: share that actually CONVERTS. CAPRI sets this explicitly:
@@ -2415,6 +2433,8 @@ class SupplyModule(ModuleStateMixin):
                 and region in d["livestock_product_value_coef"].index else None),
             young_value_factor=(d.get("young_animal_value_factor") or {}).get(region),
             input_costs_ha=(d.get("plant_protection_cost") or {}).get(region),
+            plap_capri_step=((d.get("plant_protection_capri_step") or {}).get(region)
+                             if _inputs.market_year(d) == 2030 else None),
             sim_year=(int(d["market_year"]) if d.get("market_year") else None),
             cover_crops=(d["cover_crops"].loc[region] if d.get("cover_crops") is not None
                          and region in d["cover_crops"].index else None),

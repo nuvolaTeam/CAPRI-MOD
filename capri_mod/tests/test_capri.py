@@ -3587,15 +3587,18 @@ def test_settings_layer_is_the_one_source_of_run_settings():
 
 def test_capri_comparison_settings_run_fix5_and_fix6_as_capri_codes_them():
     """The comparison runs with CAPRI's results (the project lead, 19 November 2026) take
-    capri_mod/settings/capri_comparison.toml: FIX-5 and FIX-6 as CAPRI codes them, everything else the defaults; the
-    defaults keep both fixes."""
+    capri_mod/settings/capri_comparison.toml: FIX-5 and FIX-6 as CAPRI codes them and CAPRI's Green Deal step's
+    valuation of each crop's plant protection (DEP-51's crop-level part), everything else the defaults; the defaults
+    keep both fixes and the one representation."""
     import pathlib
     from capri_mod import settings as S
     f = pathlib.Path(S.__file__).parent / "capri_comparison.toml"
     s = S.load([f])
-    assert s.diff() == {"supply.greendeal_inputs_keep_tech_change": False, "supply.organic_topup_at_fuel_cost": False}
+    assert s.diff() == {"supply.greendeal_inputs_keep_tech_change": False, "supply.organic_topup_at_fuel_cost": False,
+                        "supply.greendeal_plap_crop_level_capri_step": True}
     d = S.defaults()
     assert d.get("supply.greendeal_inputs_keep_tech_change") is True and d.get("supply.organic_topup_at_fuel_cost") is True
+    assert d.get("supply.greendeal_plap_crop_level_capri_step") is False
 
 
 
@@ -5125,6 +5128,75 @@ def test_greendeal_input_changes_follow_capri(monkeypatch):
     assert abs((nr0[ani] - mo.net_revenues[ani]) - sh * ((1 + 0.5 - o_R) - tf)) < 1e-6
 
 
+def test_greendeal_plap_crop_level_capri_step_moves_the_mean_cost_to_capris_step(monkeypatch):
+    """DEP-51's crop-level part as a comparison switch (supply.greendeal_plap_crop_level_capri_step, off by default):
+    CAPRI's 2030 reference values each crop's plant protection at the pesticide module's Plantp_cost, its Green Deal
+    step at PLAP x UVAG(PLAP) x (1 + change) [TF_I] / TF_I. With the switch the model's Green Deal step changes the
+    crop's mean cost by CAPRI's step less its reference instead of its own change d_p; the technology mix columns keep
+    d_p; nothing changes with the switch off or for the animals."""
+    import pandas as pd
+    from capri_mod.data.loaders import load_all_data
+    from capri_mod.data.inputs import money_deflator
+    from capri_mod.supply.supply_module import SupplyModule, RegionalSupplyModel
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    d = load_all_data("capri_data")
+    region = "FR810000" if "FR810000" in d["areas"].index else str(d["areas"].index[0])
+    sm = SupplyModule(d, calibrate_supply_elasticities(d["areas"]))
+    sm.run(price_signals=None, regions=[region])
+    mo = sm._models[region]
+    mo.data.sim_year = 2030
+    tf = 1.0 - 0.005 * 13
+    crop = next(c for c in ("SWHE", "BARL") if c in mo.net_revenues.index)
+    ani = next(a for a in ("DCOW", "PIGF") if a in mo.net_revenues.index)
+    cs = pd.read_csv(DATA_DIR / "baselines" / "capri_greendeal_ref" / "1730" / "supply" /
+                     "plant_protection_capri_step_2030.csv")
+    tab = cs[cs.region == region].set_index("activity")[["plap_uvag_eur_ha", "plantp_cost_eur_ha"]]
+    assert crop in tab.index
+    mo.data.plap_capri_step = tab
+    plap = mo._input_row(crop, "plap_eur_ha")
+    nr0 = mo.net_revenues.copy()
+
+    mo._apply_greendeal_input_changes(0.25, 0.50)                   # switch off (the default): the model's change
+    nr_off = mo.net_revenues.copy()
+    d_p = plap * (1 - 0.5) * tf - plap * tf                         # PLAP -50% overall
+    assert mo.ev.greendeal_crop_delta[crop][0] == d_p
+
+    monkeypatch.setattr(RegionalSupplyModel, "greendeal_plap_crop_level_capri_step", True)
+    mo.net_revenues = nr0.copy(); mo.ev.greendeal_crop_delta = None
+    mo._apply_greendeal_input_changes(0.25, 0.50)
+    q_uv, ppc = float(tab.at[crop, "plap_uvag_eur_ha"]), float(tab.at[crop, "plantp_cost_eur_ha"])
+    shift = (q_uv * 0.5 - ppc) / money_deflator(2030) - d_p          # ratio (1 - 0.5) TF_I / TF_I
+    assert abs((nr_off[crop] - mo.net_revenues[crop]) - shift) < 1e-9
+    assert mo.ev.greendeal_crop_delta[crop][0] == d_p, "the mix columns keep the model's change"
+    assert mo.net_revenues[ani] == nr_off[ani]
+
+
+def test_greening_rows_follow_capris_envconst(monkeypatch):
+    """K187: CAPRI's supply model lists ecoSetAside_ and cropDivGreening_ only with %envConst% on
+    (supply_model_e_list_linear.gms l. 235-236), permGrasGreening_ always; its 2030 reference and Green Deal step solve
+    with both (their marginals are in the results). supply.env_const: true (the default, as CAPRI's runs) keeps both;
+    false leaves them out and keeps the permanent-grassland rule."""
+    from capri_mod.data.loaders import load_all_data
+    from capri_mod.settings import defaults
+    from capri_mod.supply.supply_module import SupplyModule, RegionalSupplyModel
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    assert defaults().get("supply.env_const") is True
+    d = load_all_data("capri_data")
+    region = "FR810000" if "FR810000" in d["areas"].index else str(d["areas"].index[0])
+    sm = SupplyModule(d, calibrate_supply_elasticities(d["areas"]))
+    sm.run(price_signals=None, regions=[region])
+    mo = sm._models[region]
+    monkeypatch.setattr(RegionalSupplyModel, "env_const", True)
+    on = mo._cap_rules_spec() or {}
+    assert {"ecoSetAside", "cropDiv"} <= set(on)
+    monkeypatch.setattr(RegionalSupplyModel, "env_const", False)
+    off = mo._cap_rules_spec() or {}
+    assert "ecoSetAside" not in off and "cropDiv" not in off
+    assert ("permGras" in off) == ("permGras" in on)
+
+
 def test_input_costs_follow_yields_as_capri(monkeypatch):
     """CAPRI's yield-dependent inputs (capmod/define_inputs.gms, inputs/yieldIY.gms): a crop's input cost per ha moves
     by sum_i f_i x cost_i x G x TF_I x (rho - 1) with its yield ratio rho against the 2030 reference, PLAP and INPO at
@@ -5285,7 +5357,9 @@ def test_crop_diversification_log_floors_cover_ipopts_bound_relaxation(model, tm
     level above 100 kha reached zero: LV000000, Green Deal 2030, 3000 iterations of NaN)."""
     import pickle
     from capri_mod.supply import capri_regional_nlp as C
+    from capri_mod.supply.supply_module import RegionalSupplyModel
     monkeypatch.setenv("CAPRI_NLP_DUMP", str(tmp_path))
+    monkeypatch.setattr(RegionalSupplyModel, "env_const", True)        # the row is in only with CAPRI's envConst (K187)
     model.run(scenario="BASELINE", regions=["DE110000"], max_outer_iter=1)
     spec = dict(pickle.load(open(tmp_path / "DE110000.pkl", "rb"))["spec"])
     cd = (spec.get("cap_rules") or {}).get("cropDiv")

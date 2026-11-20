@@ -28881,6 +28881,7 @@
      "build_npk_balance_2030",
      "build_nutrient_coefs_regional",
      "build_organic_yield_gap",
+     "build_plant_protection_capri_step_2030",
      "build_plant_protection_cost",
      "build_pmp_capri_2030",
      "build_price_trajectory_2030",
@@ -36260,6 +36261,7 @@
      "build_nutrient_coefs_regional",
      "build_nuts2024_reporting",
      "build_overfert_factors",
+     "build_plant_protection_capri_step_2030",
      "build_plant_protection_cost",
      "build_pmp_capri_2030",
      "build_pmp_recipe",
@@ -54404,6 +54406,106 @@
     "tests": [
      "capri_mod/tests/test_capri.py",
      "capri_mod/tests/test_mineral_n_losses.py"
+    ]
+   }
+  },
+  "sup_plant_protection_capri_step_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/plant_protection_capri_step_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPRI's two valuations of each crop's plant protection at its 2030 reference, per regional unit and model crop: the Green Deal step's (pesticide disaggregation off: DATA(PLAP) x UVAG(PLAP)) and the reference's and PMP calibration's (the pesticide module's aggregates, Plantp_cost). For the comparison switch supply.greendeal_plap_crop_level_capri_step (DEP-51's crop-level part). (tools/build/build_plant_protection_capri_step_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "plap_uvag_eur_ha",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "plantp_cost_eur_ha",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "levl_capri",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(plap_uvag_eur_ha >= 0)",
+    "(plantp_cost_eur_ha >= 0)",
+    "(levl_capri > 0)"
+   ],
+   "units": [
+    {
+     "item": "levl_capri",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "dataOut(R, '', crop, 'LEVL', '2030'), the weights, same run"
+    },
+    {
+     "item": "plantp_cost_eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "dataOut(R, '', crop, 'Plantp_cost', '2030'), EUR per ha in CAPRI's 2030 money, same run"
+    },
+    {
+     "item": "plap_uvag_eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "dataOut(R, '', crop, 'PLAP', '2030') x dataOut(R, '', 'UVAG', 'PLAP', '2030') / 1000, EUR per ha in CAPRI's 2030 money, CAPRI's Green Deal baseline (res_2_1730greendeal_refdefaulta); level-weighted where a model crop sums CAPRI activities"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_plant_protection_capri_step_2030",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_capri.py"
     ]
    }
   },

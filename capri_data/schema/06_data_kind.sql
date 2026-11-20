@@ -292,6 +292,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/2017/supply/supply_elasticities_regional.csv', 'coefficients', 'by file: CAPRI''s elasticities and technical coefficients'),
   ('capri_data/baselines/capri_greendeal_ref/1730/supply/techn_mix_2030.csv', 'coefficients', 'by file: per-unit coefficients (per ha, per head, shares, conversion)'),
   ('capri_data/baselines/capri_greendeal_ref/1730/supply/price_transmission_2030.csv', 'coefficients', 'by file: per-unit coefficients (per ha, per head, shares, conversion)'),
+  ('capri_data/baselines/capri_greendeal_ref/1730/supply/plant_protection_capri_step_2030.csv', 'coefficients', 'by file: per-unit coefficients (per ha, per head, shares, conversion)'),
   ('capri_data/2017/supply/variable_costs.csv', 'coefficients', 'by file: per-unit coefficients (per ha, per head, shares, conversion)'),
   ('capri_data/2017/supply/winter_cover_share.csv', 'coefficients', 'by file: CAPRI''s elasticities and technical coefficients'),
   ('capri_data/2017/supply/yield_price_elasticity.csv', 'coefficients', 'by file: CAPRI''s elasticities and technical coefficients'),

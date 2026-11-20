@@ -4347,6 +4347,25 @@
    },
    "catalogue_note": "tools/build/build_land_rents.py; used at the 2030 market year only (docs/dev/LAND_RENT_CALIBRATION_PLAN.md) (not re-checked)"
   },
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/plant_protection_capri_step_2030.csv": {
+   "description": "CAPRI's two valuations of each crop's plant protection at its 2030 reference, per regional unit and model crop: the Green Deal step's (pesticide disaggregation off: DATA(PLAP) x UVAG(PLAP)) and the reference's and PMP calibration's (the pesticide module's aggregates, Plantp_cost). For the comparison switch supply.greendeal_plap_crop_level_capri_step (DEP-51's crop-level part). (tools/build/build_plant_protection_capri_step_2030.py)",
+   "kind": "coefficients",
+   "vintage": "2030 reference",
+   "domain": "supply",
+   "status": "live",
+   "vintage_exception": "CAPRI's 2030 Green Deal baseline PLAP x UVAG(PLAP) and Plantp_cost per crop",
+   "rows": 6684,
+   "columns": 5,
+   "units": "U_1000ha, U_EuPerHa",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_plant_protection_capri_step_2030"
+   },
+   "catalogue_note": "tools/build/build_plant_protection_capri_step_2030.py: the comparison switch for DEP-51's crop-level part (not re-checked)"
+  },
   "capri_data/baselines/capri_greendeal_ref/1730/supply/pmp_capri_2030.csv": {
    "description": "CAPRI's 2030 PMP terms of the crops (p_pmpQuadTechn, p_pmpQuadPact of the project lead's 2030 baseline calibration) as the Hessian on the model's activities per territory group, g_ij = H_ij sqrt(X_i X_j) (tools/build/build_pmp_capri_2030.py, K61)",
    "kind": "calibrated",

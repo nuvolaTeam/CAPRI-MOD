@@ -730,6 +730,27 @@
    ]
   },
   {
+   "task": "build_plant_protection_capri_step_2030",
+   "builder": "build_plant_protection_capri_step_2030",
+   "args": [],
+   "inputs": [
+    "capri_data/codes/model_activities.csv",
+    "capri_data/codes/regional_units.csv"
+   ],
+   "code": [
+    "tools/build/build_plant_protection_capri_step_2030.py",
+    "tools/lib/_grep.py",
+    "tools/lib/_model_codes.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+   ],
+   "outputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/plant_protection_capri_step_2030.csv"
+   ]
+  },
+  {
    "task": "build_cap_greening",
    "builder": "build_cap_greening",
    "args": [],

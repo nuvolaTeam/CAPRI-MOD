@@ -498,6 +498,21 @@ INSERT INTO value_units VALUES
   ('sup_price_transmission_2030', 'factor', 'U_ratio', 'builder', 'PPRI / UVAG (paddy rice: PPRI(RICE) x MAPR(RICE) / GROF(PARI) / UVAG(PARI)): the relative change of the unit value per relative change of the market price'),
   ('model_price_follows', 'share', 'U_ratio', 'capri', 'the share of the followed commodity''s relative price change: durum 0.5 (arm/set_prices.gms l. 57-61), beet 1 (l. 91-95), Norway''s raw milk 1');
 
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/plant_protection_capri_step_2030.csv
+CREATE TABLE sup_plant_protection_capri_step_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    activity VARCHAR NOT NULL REFERENCES model_activities (code),
+    plap_uvag_eur_ha DOUBLE NOT NULL CHECK (plap_uvag_eur_ha >= 0),
+    plantp_cost_eur_ha DOUBLE NOT NULL CHECK (plantp_cost_eur_ha >= 0),
+    levl_capri DOUBLE NOT NULL CHECK (levl_capri > 0),
+    PRIMARY KEY (region, activity)
+);
+COMMENT ON TABLE sup_plant_protection_capri_step_2030 IS 'CAPRI''s two valuations of each crop''s plant protection at its 2030 reference, per regional unit and model crop: the Green Deal step''s (pesticide disaggregation off: DATA(PLAP) x UVAG(PLAP)) and the reference''s and PMP calibration''s (the pesticide module''s aggregates, Plantp_cost). For the comparison switch supply.greendeal_plap_crop_level_capri_step (DEP-51''s crop-level part). (tools/build/build_plant_protection_capri_step_2030.py)';
+INSERT INTO value_units VALUES
+  ('sup_plant_protection_capri_step_2030', 'plap_uvag_eur_ha', 'U_EuPerHa', 'capri', 'dataOut(R, '''', crop, ''PLAP'', ''2030'') x dataOut(R, '''', ''UVAG'', ''PLAP'', ''2030'') / 1000, EUR per ha in CAPRI''s 2030 money, CAPRI''s Green Deal baseline (res_2_1730greendeal_refdefaulta); level-weighted where a model crop sums CAPRI activities'),
+  ('sup_plant_protection_capri_step_2030', 'plantp_cost_eur_ha', 'U_EuPerHa', 'capri', 'dataOut(R, '''', crop, ''Plantp_cost'', ''2030''), EUR per ha in CAPRI''s 2030 money, same run'),
+  ('sup_plant_protection_capri_step_2030', 'levl_capri', 'U_1000ha', 'capri', 'dataOut(R, '''', crop, ''LEVL'', ''2030''), the weights, same run');
+
 -- file: capri_data/2017/supply/plant_protection_cost.csv
 CREATE TABLE sup_plant_protection_cost (
     region VARCHAR NOT NULL,
