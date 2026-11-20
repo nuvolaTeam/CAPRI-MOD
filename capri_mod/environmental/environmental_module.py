@@ -310,10 +310,10 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             if supply_result is not None else 0.0
         _dtab = self.data.get("n_deposition_regional") if hasattr(self, "data") else None
         if _idl > 0 and _dtab is not None and region in getattr(_dtab, "index", []):
-            from capri_mod.supply.equations.supply_model.n_surplus import SURTOT_idlHis
+            from capri_mod.supply.equations.supply_model.n_surplus import SURTOT_idlHis, e_ATMOSD
             from capri_mod.supply.equations.supply_model.nutrients import fertDistCres_idlHis
             _dha = float(_dtab.at[region, "deposition_kg_n_per_ha"])
-            nb["n_deposition"] = float(nb["n_deposition"]) + _idl * _dha
+            nb["n_deposition"] = float(nb["n_deposition"]) + e_ATMOSD(_idl, _dha)
             nb["n_surplus"] = float(nb["n_surplus"]) + SURTOT_idlHis(_idl, _dha)
             _nb_raw["n_residue_pool"] = float(_nb_raw.get("n_residue_pool", 0.0) or 0.0) + fertDistCres_idlHis(_idl, _dha)
         # MANURE MARKET (when on): the region's endogenous manure trade and its

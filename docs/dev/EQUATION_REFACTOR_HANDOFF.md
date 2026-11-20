@@ -36,6 +36,7 @@ functions. **A move, not a change: results identical to 1e-10**, checked by a ga
 | N9b | the idled histosols' bound as idleHisto_ (set_aside.py) | identical bit for bit to the old code (3,000 random cases); gate with N10 |
 | N9c | the set-aside block and greenOverShot_ classified (inventory statuses with evidence) | docs only |
 | N10 | the entitlement limit (overShotEntl_ with sumEntl_) and the permanent grassland rule (permGrasGreening_) in premiums.py | identical bit for bit to the old code (3,000 random cases); gate at N10 (one run for N9a-N10) |
+| N11a | the N surplus's terms in the accounts and, through them, the QP's N-surplus row (e_EXCRET, e_GASRUNANI, e_ATMOSD, e_CRESID, e_EXPPRD, e_BIOFIX; environmental/nitrogen.py, phosphorus.py) and the leaching's input shares (nminInputSh_, nmanInputSh_) in n_surplus.py; SURTOT_idlHis on e_ATMOSD and e_CRESID | the N and P accounts, every activity's unit balance and the leaching identical bit for bit for the 221 regions (base and scaled yields, with intensity factors); gate with N11b |
 
 Not on the branch (on purpose):
 - `docs/equations/` (the equation book, page 01 the regional N balance) and its README paragraph: waiting for the

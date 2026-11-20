@@ -87,6 +87,7 @@ class PhosphorusBlock:
         factors of its mitigation and pesticide options)."""
         from capri_mod.environmental import p_balance as _pb
         from capri_mod.fert.npk import NPKData, PERM_NGRP, grass_need_factor
+        from capri_mod.supply.equations.supply_model.n_surplus import e_CRESID, e_EXCRET, e_EXPPRD
         if hasattr(acts, "to_dict"):
             acts = acts.to_dict()
         if hasattr(yields, "to_dict"):
@@ -107,11 +108,11 @@ class PhosphorusBlock:
             if a_ in h:
                 h[a_] = h[a_] + k_
         # removal and residues (EXPPRD, CRESID)
-        expprd = sum(x[c] * C.coef(cr, c)[0] * yr[c] for c in CROPS)
-        cresid = sum(x[c] * C.coef(cr, c)[1] * yr[c] for c in CROPS)
+        expprd = sum(e_EXPPRD(x[c], C.coef(cr, c)[0], yr[c]) for c in CROPS)
+        cresid = sum(e_CRESID(x[c], C.coef(cr, c)[1], yr[c]) for c in CROPS)
         # excretion (EXCRET)
         manp = {a: D.manure_per_head(region, "P", a) for a in ANIMALS}
-        excret = sum(h[a] * manp[a] for a in ANIMALS)
+        excret = sum(e_EXCRET(h[a], manp[a]) for a in ANIMALS)
         npk = getattr(supply_result, "fert_npk", None) or {}
         blk = npk.get("P") if isinstance(npk, dict) else None
         ratio = self._p_applied_ratio(cr) if bool(getattr(self.seen, "manure_trade_on", True)) else 1.0

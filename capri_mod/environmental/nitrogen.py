@@ -356,6 +356,7 @@ class NitrogenBlock:
 
         Surplus = Inputs - Outputs (kg N / ha)
         """
+        from capri_mod.supply.equations.supply_model import n_surplus as _ns   # CAPRI's terms (e_EXCRET, e_EXPPRD, ...)
         n = {}
 
         # --- Inputs ---
@@ -430,8 +431,8 @@ class NitrogenBlock:
             # organic input against a real EU average near 55.
             heads_1000 = activities.get(animal, 0.0)
             n_excr = self._n_excretion(region, animal)
-            n_organic += heads_1000 * n_excr
-            n_housing_loss += heads_1000 * n_excr * float(_ls.get(animal, 0.0))
+            n_organic += _ns.e_EXCRET(heads_1000, n_excr)
+            n_housing_loss += _ns.e_GASRUNANI(heads_1000, n_excr, float(_ls.get(animal, 0.0)))
         # MANURE TRADE (CAPRI's manExportOrAppl_): exporting regions keep
         # (1 - export share) of their manure N, importing regions receive
         # manure spread over their cropland. Shares from CAPRI's 2030 reference
@@ -478,15 +479,15 @@ class NitrogenBlock:
                     if _y0 > 0 and _y >= 0:
                         yr = _y / _y0
                         _nf = _nyf(crop, _y0, _y) if _y > 0 else 0.0
-                n_crop_uptake_c += area * co[0] * yr
-                n_residues += area * co[1] * yr
+                n_crop_uptake_c += _ns.e_EXPPRD(area, co[0], yr)
+                n_residues += _ns.e_CRESID(area, co[1], yr)
                 if crop in self.OWN_RESIDUE_CROPS:
                     # own residues cover own need: base credit x intensity x CAPRI's need factor of the
                     # yield on the need side, residues actually left on the credit side
                     _fc_ = float((n_intensity or {}).get("__credit__", 1.0))
                     _own_need += area * co[1] * _fc_ * _nf
-                    _own_res += area * co[1] * yr
-                n_fix_c += area * co[2] * yr
+                    _own_res += _ns.e_CRESID(area, co[1], yr)
+                n_fix_c += _ns.e_BIOFIX(area, co[2], yr)
 
         # Biological N fixation: CAPRI's per crop and region (BIOFIX, _capri_crop_n)
         if not _cn and any(activities.get(c, 0.0) > 0 for c in CROPS):
@@ -506,7 +507,7 @@ class NitrogenBlock:
             _v = float(_dep.at[region, "deposition_kg_n_per_ha"])
             if _v == _v and _v >= 0:
                 _dep_ha = _v
-        n_deposition = total_uaa * _dep_ha
+        n_deposition = _ns.e_ATMOSD(total_uaa, _dep_ha)
 
         n_manure_import = sum(activities.get(a, 0.0) for a in CROPS) * _imp_ha
         if _trade_lvl is not None:
@@ -745,7 +746,7 @@ class NitrogenBlock:
         carries indirect N2O (gases.gms N2OLEA allocated to crops), capri_mod/supply/n_leaching.py. Returns {share,
         components (t N), n2o_n (t N2O-N), leached (t N below the root zone)} or None without CAPRI's data."""
         from capri_mod.supply import n_cascade as _nc, n_leaching as _nl
-        from capri_mod.supply.equations.supply_model import n_flow as _nf
+        from capri_mod.supply.equations.supply_model import n_flow as _nf, n_surplus as _ns
         from capri_mod.supply.supply_module import fert_side_value as _fsv
         rs = _nl.capri_region(region)
         d = _nl.load().get(rs) if rs else None
@@ -773,11 +774,12 @@ class NitrogenBlock:
         an1 = self._leach_animals(region, acts, ms, wc1, fert_mrun=s_nim * e_mrun)
         an0 = self._leach_animals(region, acts, ms, wc0, initial=True)
         man_net = float(nb.get("n_manure_applied", 0.0) or 0.0)
-        oth = (float(nb.get("n_crop_residues", 0.0) or 0.0) + float(nb.get("n_deposition", 0.0) or 0.0)) \
-            * (1.0 - nf["N2O"])
-        den = M * (1.0 - nf["GasRunTot"]) + man_net + oth
-        nmin_sh = M * (1.0 - nf["GasRunTot"]) / den if den > 0 else 0.0
-        nman_sh = man_net / den if den > 0 else 0.0
+        # CAPRI's nminInputSh_ and nmanInputSh_ (n_surplus.py): the mineral N kept and the manure applied over the N input
+        nmin_kept = M * (1.0 - nf["GasRunTot"])
+        den = _ns.nminInputSh_den(nmin_kept, man_net, float(nb.get("n_crop_residues", 0.0) or 0.0)
+                                  + float(nb.get("n_deposition", 0.0) or 0.0), nf["N2O"])
+        nmin_sh = _ns.nminInputSh_(nmin_kept, den)
+        nman_sh = _ns.nmanInputSh_(man_net, den)
 
         # LEACHN_'s first factor with AMMOAGG_'s v_ammoAppLeaAgg, now and at CAPRI's initial shares (n_flow.py)
         b_now = _nf.LEACHN_B1(wc1, _nf.AMMOAGG_(an1), nmin_sh, nman_sh, s_ni * e_slea, s_nim * e_mlea)
