@@ -23,6 +23,7 @@ aa91c1c (the supply phase merged, 19e7679; the checks against star 3.0, aa91c1c)
 | M3 | supply in the market, fudging and land: ProdNQ_ (ProdNQ_hess), yaniMarket_ (market_model/supply.py); ProdFudge_ (fudging.py; FeedFudge_ in its form); rentFromProdpriceLand_, LandSupplyMNL_, LndSupplyEqualsDemand_, LinkLuWithShares_, luClassFinal_ and luClassInitial_, FocLUC_ with derivativeOfGammaLUC_ (land.py); called by supply_ad.py, supply_system_ad.py, luc.py. ProdA_ ported as terms (eu_rows); NumeraireLand_ and LandSupplyRatio_ as LandSupplyMNL_; rmsYaniMarket_, derivativeOfNormalLUC_, derivativeOfSpikeLUC_ empty in the step; Yield_, LandAgrFromYld_, ScaleLandAgr_ and ProdPriceFudge_ not in the model (a recursive block); PPri_ moved to M4 (the price chain) | the module's CasADi functions after a cold solve (486) identical, the hash seed fixed; the assembled market system (plain and lifted with the fudge modes and the lifted use cells; the GD runs do not build it, market.bounds none) identical: its serialised functions, F and its Jacobian at the start for the three fudge modes; the captured solves replayed bit for bit (2 and 21); the five-unit Green Deal run identical |
 | M4 | trade and prices: SupBalM_, arm2QuantShares_, domSalesShares_, importShares_ (market_model/armington.py); impPrice_ (its exporter-price part), arm2PriceAgg_ and arm1PriceAgg_ (with their terms), PMrk_, MarketPriceAgg_'s weights (prices.py); called by the trade blocks' three forms (bilateral.py, trade_ad.py, trade_system_ad.py), import_prices_ad.py and market_system_ad.py. ArmBal1_, expQuant_, TradeFlowsAgg_ and PPri_ ported as terms; tradeFlowFudge_ and HicksNeutral_ empty in the step (modArmington off); FlipFlop_ CAPRI's solver device; nonDoubleZeroExports_ moved to M5 (the export subsidies) | the module's 486 CasADi functions and the assembled market system identical to M3's (PYTHONHASHSEED=0); the captured solves replayed bit for bit (2 and 21), which run the trade blocks' NumPy form; the five-unit Green Deal run identical |
 | M5 | the border measures: trqSigmoidFunc_ (with its NumPy twin), tarAdVal_, tarSpec_ (with the smaller of the bilateral and the global rate), tarAdValW_, tarSpecW_, prefTriggerPrice_, EntryPriceDriver_, tarSpecIfEntryPrice_ (with its NumPy twin), FlexLevyNotCut_, FlexLevy_ (market_model/border.py); called by bilateral.py (_sig, _trq_rates, border_spec, _TrqCells), import_prices_ad.py, trade_ad.py, trade_system_ad.py. TRQImports_ ported as terms; the 17 rows of the intervention stocks and the subsidised exports (nonDoubleZeroExports_ among them) empty in the step (no INTM, STKS, FEOE_max in CAPRI's 2030 data) and not in the model | the module's 486 CasADi functions and the assembled market system identical to M4's (PYTHONHASHSEED=0); the captured solves replayed bit for bit (2 and 21); the five-unit Green Deal run identical |
+| C0 | the inventory of CAPRI's calibration systems (docs/dev/calibration_equations_inventory.csv; tools/refactor/calibration_equations_inventory.py: the MODEL statements of the fertiliser priors m_fertDist and m_dualFertDist, the land supply estimation, the land-use change estimation and m_calibKVT, nested models and $include files followed, plus the PMP terms and the Armington shares, which CAPRI writes as assignments); 89 rows, each with where CAPRI runs it and what the model does | docs and a tool; the quote and citation checks |
 
 ## 3. The gate's references (at the phase's starting commit 444a47f, worktree outside the repository)
 
@@ -147,3 +148,31 @@ aa91c1c (the supply phase merged, 19e7679; the checks against star 3.0, aa91c1c)
   0.97 Q) (equal in exact arithmetic), clipped at +-60.
 - **The quotas solved by bisection in the default solve** (bilateral.py trq_solve, an outer fixed point with the
   market); the assembled system has them as equations (trade_system_ad.py). Known (MARKET_TRQ_PORT.md).
+
+## 9. What C0 found (the calibration systems; for the main line, nothing fixed)
+
+- **None of CAPRI's calibration systems runs in the Green Deal step.** The supply calibration (the PMP terms, the
+  land supply estimation; supply/calibrate_supply.gms) runs with BASELINE on (capmod.gms l. 1416-1424); the
+  fertiliser calibration m_fertDist with BASELINE on too (capmod/def_fert_and_requirements.gms exits for a scenario at
+  l. 173, before l. 903); the Armington shares when the simulation's start point sim_ini is generated
+  (arm/market1.gms l. 625, from capmod/create_sim_ini_gdx.gms l. 266, capmod.gms l. 646, generateSimIni). The step
+  starts from their results.
+- **What the model does with each** (the inventory's status): 47 rows are equations of the simulation model as well
+  (the supply phase's: m_fertDist and m_dualFertDist share the nutrient rows, m_LandSupply the land rows, the LUC
+  estimation N14b's); 32 rows' results are read from CAPRI (the fertiliser priors' posterior modes,
+  tools/build/build_fert_dist_priors.py; the land supply's estimated terms p_pmpQuadLandTypes,
+  tools/build/build_land_market.py); the PMP's quadratic terms are read from the baseline's pmppar files (pmp_source
+  capri2030, the default; build_pmp_recipe.py ports CAPRI's recipe as the option pmp_source recipe) and the linear
+  terms recalibrated by the model's own method (CapriRegionalNLP.calibrate: a least-squares fit of the multipliers
+  at the base, not CAPRI's duals of the baseline LP); the Armington shares are recomputed by the model at the start
+  of every run (BilateralCommodity.calibrate, CAPRI's arm/cal_armington.gms l. 40-50: C1).
+- **m_dualFertDist is not solved in star 3.0**: its includes (fert/solve_only_inner_fertdist_model.gms) are commented
+  out in supply/pmp.gms l. 256 and 273; its inner model's equations are the simulation model's (inner_fert.py).
+- **m_calibKVT is off** in the configuration (modArmington off: arm/cal_armington.gms exits at l. 89).
+- **The LUC estimation in another form**: CAPRI's start maximises the log posterior density (m_estLUCfromMaxDens,
+  supply/prep_sim_luc.gms l. 472-568); the model (environmental/luc.py, N14b) solves its first-order conditions,
+  CAPRI's test model m_estLUCfromFOC: the same optimum where the bounds do not bind (to confirm where they do).
+- **Not in this inventory** (CAPRI's other calibration models, outside the plan's list): the market data's
+  calibration m_calMarketBas, m_calMarketFin (arm/cal_models.gms), m_calMarketLnd(2) (arm/define_land_params.gms),
+  the trimming of the market's elasticities m_trimLU, m_trimElas, m_trimDem (arm/trim_elas_decl.gms), the TRQ and
+  intervention trimming (m_fitTrq, m_trimInterv); the model reads their results with CAPRI's market data.
