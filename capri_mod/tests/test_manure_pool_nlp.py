@@ -60,7 +60,7 @@ def test_the_nlp_clears_the_pools_as_the_qp(prod, fout, seed):
     for k in keys:
         assert p_n[k] == pytest.approx(p_q[k], abs=1e-7)                 # EUR 1000 per t
         assert s_n[k] == pytest.approx(s_q[k], abs=1e-5)                 # kt
-    assert len(keep["_nlp_x"]) > 2 * len(crec)                           # the clearing kept for the next start
+    assert len(keep["_clear_x"]) > 2 * len(crec)                           # the clearing kept for the next start
     # started from it, the same clearing
     with override({"outer_loop.manure_pool_solver": "nlp"}):
         ok, p_w, s_w, status, _ = _Market()._clear_pool_capri(prod, keys, [dict(c) for c in crec], cost, keep)

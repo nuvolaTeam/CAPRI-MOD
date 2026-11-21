@@ -479,7 +479,7 @@ class ManureBlock:
             up = np.array([float(r_["emax"]) for r_ in crec] + [np.inf] * nr)
             x0 = np.array([float(r_["e"]) for r_ in crec] + [float(r_["i"]) for r_ in crec])
             ok, pnew, xs, status, its = self._pool_market_nlp(keys, crec, reg_terms, arcs, cp_[2 * nr:], lo, up, x0,
-                                                               hist.get("_nlp_x"))
+                                                               hist.get("_clear_x"))
             from capri_mod import runlog as _runlog
             _runlog.current().solver(f"--- Manure pool market {fout}: {nv:,} trade variables ({nr} regions, {na} links), "
                                      f"{len(keys)} pools; IPOPT {status}, {its} iterations")
@@ -488,7 +488,7 @@ class ManureBlock:
                 for t, (a_, b_, cc) in enumerate(arcs):
                     ship[a_] += xs[2 * nr + t]; ship[b_] -= xs[2 * nr + t]
             self.res.pool_worst_key = ""
-            return ok, pnew, ship, status, {"_pshw": pshw_h, "_nlp_x": [float(v) for v in xs] if ok else hist.get("_nlp_x")}
+            return ok, pnew, ship, status, {"_pshw": pshw_h, "_clear_x": [float(v) for v in xs] if ok else hist.get("_clear_x")}
         from capri_mod.supply.convex_qp import solve_convex_qp
         # the regions' trade bounded below by minus their gross trade at CAPRI's calibration point (supply.manure_trade_
         # form "capri"; zero under "net"): solved in the shifted variables x' = x + s >= 0 (the solver bounds every
