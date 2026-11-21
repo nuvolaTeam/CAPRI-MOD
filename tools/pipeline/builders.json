@@ -3692,7 +3692,10 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/animReq_SK.zip",
+    "$REFERENCE/simini/simini_21730/DATA.csv.gz",
+    "$REFERENCE/simini/simini_21730/p_animExcrProtCorrFact.csv.gz",
+    "$REFERENCE/simini/simini_21730/p_animReq.csv.gz",
+    "$REFERENCE/simini/simini_21730/p_animReqLit.csv.gz",
     "$SOURCES/capreg/res_17AL.txt",
     "$SOURCES/capreg/res_17AT.txt",
     "$SOURCES/capreg/res_17BA.txt",
@@ -3731,7 +3734,6 @@
    ],
    "outputs": [
     "capri_data/2017/abatement/mitigation/lownfeed_effects.csv",
-    "capri_data/sources/intermediate/envind/anim_req_corr_2017.parquet",
     "capri_data/sources/intermediate/envind/res17_mann_crpr_expt.parquet"
    ]
   },

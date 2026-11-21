@@ -118,6 +118,7 @@ attribute's getattr did.
 - `surplus_row`: the N-surplus row of this solve
 - `yields_solve0`: the yields at the start of the solve (restored at its end)
 - `greendeal_inputs`: the Green Deal's input reductions of this solve
+- `greendeal_animal_inpo`: the Green Deal's other-input cost change per head of each animal in this solve (the split columns carry it by their members' INPO difference, K189)
 - `organic_conv`: the organic conversion shares by crop
 - `yield_price_factor`: the yields' price factors
 

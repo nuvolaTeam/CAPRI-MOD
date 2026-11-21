@@ -653,7 +653,6 @@ INSERT INTO data_kind VALUES
   ('capri_data/sources/intermediate/capri_res/gd2030_ref_pbalance.parquet', 'reference', 'by rule: extract of CAPRI''s 2030 reference'),
   ('capri_data/sources/raw/capri/results/ref2030_welfare.parquet', 'reference', 'by rule: extract of CAPRI''s 2030 reference'),
   ('capri_data/sources/raw/capri/dat/arm/nutrient_cont_usda_p_nutrientCont.parquet', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
-  ('capri_data/sources/intermediate/envind/anim_req_corr_2017.parquet', 'coefficients', 'by file: CAPRI''s coefficients and elasticities'),
   ('capri_data/sources/intermediate/envind/capri_digest_default_prd.parquet', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/sources/intermediate/envind/capri_digestpar.parquet', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/sources/raw/capri/dat/envind/fao_landuse_2000_P.parquet', 'base', 'by file: CAPRI''s data series (quotas, small producers, 2017 results, land use)'),

@@ -39,6 +39,7 @@ CREATE TABLE sup_cattle_intensity (
     q_b_recipe2030 DOUBLE NOT NULL,
     dmanp_rel DOUBLE NOT NULL,
     dmank_rel DOUBLE NOT NULL,
+    dinpo_rel DOUBLE NOT NULL,
     share_low_2030 DOUBLE,
     share_high_2030 DOUBLE,
     days_low_2030 DOUBLE,
@@ -52,6 +53,7 @@ CREATE TABLE sup_cattle_intensity (
     dcrpr_rel_2030 DOUBLE,
     ddrmn_rel_2030 DOUBLE,
     ddrmx_rel_2030 DOUBLE,
+    dinpo_rel_2030 DOUBLE,
     dprod_young_m_rel_2030 DOUBLE,
     dprod_young_f_rel_2030 DOUBLE,
     dprod_cows_rel_2030 DOUBLE,
@@ -109,7 +111,9 @@ INSERT INTO value_units VALUES
   ('sup_cattle_intensity', 'duse_calves_m_rel_2030', NULL, 'open', 'cattle_intensity.duse_calves_m_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
   ('sup_cattle_intensity', 'duse_calves_f_rel_2030', NULL, 'open', 'cattle_intensity.duse_calves_f_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
   ('sup_cattle_intensity', 'duse_young_m_rel_2030', NULL, 'open', 'cattle_intensity.duse_young_m_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
-  ('sup_cattle_intensity', 'duse_young_f_rel_2030', NULL, 'open', 'cattle_intensity.duse_young_f_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)');
+  ('sup_cattle_intensity', 'duse_young_f_rel_2030', NULL, 'open', 'cattle_intensity.duse_young_f_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'dinpo_rel', NULL, 'open', 'cattle_intensity.dinpo_rel: other inputs (INPO) per head (per stall), low - high over the animal''s average (CAPRI INPO; the Green Deal''s input change on the split, K189)'),
+  ('sup_cattle_intensity', 'dinpo_rel_2030', NULL, 'open', 'cattle_intensity.dinpo_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)');
 
 -- file: capri_data/2017/supply/cover_crops.csv
 CREATE TABLE sup_cover_crops (
@@ -243,6 +247,7 @@ CREATE TABLE sup_dairy_intensity (
     q_source_recipe2030 VARCHAR NOT NULL,
     dmanp_rel DOUBLE NOT NULL,
     dmank_rel DOUBLE NOT NULL,
+    dinpo_rel DOUBLE NOT NULL,
     share_low_2030 DOUBLE NOT NULL,
     dcomi_rel_2030 DOUBLE NOT NULL,
     dmann_rel_2030 DOUBLE NOT NULL,
@@ -252,6 +257,7 @@ CREATE TABLE sup_dairy_intensity (
     dcrpr_rel_2030 DOUBLE NOT NULL,
     ddrmn_rel_2030 DOUBLE NOT NULL,
     ddrmx_rel_2030 DOUBLE NOT NULL,
+    dinpo_rel_2030 DOUBLE NOT NULL,
     PRIMARY KEY (region, capri_region, q_source, q_source_capri2030, q_source_recipe2030)
 );
 COMMENT ON TABLE sup_dairy_intensity IS 'CAPRI''s two dairy-cow activities, low-yield DCOL and high-yield DCOH, per model region. (tools/build/build_dairy_intensity.py)';
@@ -281,7 +287,9 @@ INSERT INTO value_units VALUES
   ('sup_dairy_intensity', 'denne_rel_2030', NULL, 'open', 'dairy_intensity.denne_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
   ('sup_dairy_intensity', 'dcrpr_rel_2030', NULL, 'open', 'dairy_intensity.dcrpr_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
   ('sup_dairy_intensity', 'ddrmn_rel_2030', NULL, 'open', 'dairy_intensity.ddrmn_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
-  ('sup_dairy_intensity', 'ddrmx_rel_2030', NULL, 'open', 'dairy_intensity.ddrmx_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)');
+  ('sup_dairy_intensity', 'ddrmx_rel_2030', NULL, 'open', 'dairy_intensity.ddrmx_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_dairy_intensity', 'dinpo_rel', NULL, 'open', 'dairy_intensity.dinpo_rel: other inputs (INPO) per head, low - high over the animal''s average (CAPRI INPO; the Green Deal''s input change on the split, K189)'),
+  ('sup_dairy_intensity', 'dinpo_rel_2030', NULL, 'open', 'dairy_intensity.dinpo_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)');
 
 -- file: capri_data/2017/supply/grass_dm_content.csv
 CREATE TABLE sup_grass_dm_content (

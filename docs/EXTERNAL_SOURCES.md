@@ -251,8 +251,8 @@ Mitigation and ammonia inputs:
   - Read by: build_ammonia_tech_inputs.
 - **`scen.zip`**, **`gd_full.zip`**.
   - Read by: build_ammonia_herd_inputs.
-- **`animReq_SK.zip`**.
-  - Read by: build_lownfeed_effects.
+- **`animReq_SK.zip`** (CAPREG's 2017 requirement correction factors).
+  - Read by: none since 21 November 2026 (build_lownfeed_effects takes the 2030 requirements from sim_ini_21730, K194).
 - **`priFertDist_1730defaulta.zip`**.
   - Read by: build_fert_dist_priors.
 - **`trends_1730.csv`**, **`fedcof.gms`** (with tillageCover.csv, ccEfa.csv, wintercovershare.gms).

@@ -521,7 +521,7 @@
    "vintage": "2017 base / 2030 calibration",
    "domain": "abatement",
    "status": "live",
-   "rows": 1896,
+   "rows": 1915,
    "columns": 17,
    "units": "U_EuPerHd, U_ratio",
    "read_by_model": [
@@ -2972,7 +2972,7 @@
    "domain": "supply",
    "status": "live",
    "rows": 1485,
-   "columns": 56,
+   "columns": 58,
    "units": "to be established (value_units: open)",
    "read_by_model": [
     "capri_mod/data/loaders.py"
@@ -3039,7 +3039,7 @@
    "domain": "supply",
    "status": "live",
    "rows": 250,
-   "columns": 31,
+   "columns": 33,
    "units": "to be established (value_units: open)",
    "read_by_model": [
     "capri_mod/data/loaders.py"
@@ -9311,21 +9311,6 @@
     "nature": "capri",
     "builder": "build_p_balance"
    }
-  },
-  "capri_data/sources/intermediate/envind/anim_req_corr_2017.parquet": {
-   "description": "CAPRI's requirement correction factors p_animReqCorrFac1(region, animal activity, 'T', CRPR or ENNE) from the animReq_* dumps (animReq_SK.zip), used for the low-N feeding option (tools/build/build_lownfeed_effects.py).",
-   "kind": "coefficients",
-   "vintage": "2017",
-   "domain": "environment",
-   "status": "source",
-   "rows": 11220,
-   "columns": 4,
-   "units": "to be established (value_units: open)",
-   "origin": {
-    "nature": "capri",
-    "builder": "build_lownfeed_effects"
-   },
-   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_lownfeed_effects.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/intermediate/envind/capri_digest_default_prd.parquet": {
    "description": "CAPRI's set DEF_PRD: per row, a feed and the default product whose values fill the feed's missing digestibility items, from envind/def_digestibility.gms (tools/build/build_digestibility_table.py).",

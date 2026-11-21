@@ -65,3 +65,6 @@ p_premDataE,par,"the premium declarations per region, year, scheme and item as t
 p_premToDDTarget_E,par,"the decoupled payments' targets per region, year, scheme (DDFRMS, DDRARA, ...; calc_mtr.gms)"
 p_premToDDTargetNuts,par,"the regional level of the regional flat rates (calc_mtr.gms)"
 p_percAffByModulation,par,"the share of farms affected by the modulation per payment group and member state (calc_mtr_top.gms)"
+p_animReq,par,"the animals' 2030 requirements after the baseline's feed calibration (fedtrm, baseline/adjust.gms), as CAPRI's simulation loads them (load_sim_ini_gdx.gms): the low-N feeding option's protein and energy excess (envind/low_n_feed.gms l. 88-96; build_lownfeed_effects, K194)"
+p_animReqLit,par,"the requirement functions' 2030 values before the calibration (capmod/def_requirements.gms l. 36): the denominator of the low-N feeding option's excess (low_n_feed.gms l. 88-96; build_lownfeed_effects, K194)"
+p_animExcrProtCorrFact,par,"the 2030 crude-protein correction of the excretion (def_requirements.gms l. 55-69, baseline/adjust.gms l. 31-32): the low-N feeding option's cost denominator (low_n_feed.gms l. 138; build_lownfeed_effects, K194)"

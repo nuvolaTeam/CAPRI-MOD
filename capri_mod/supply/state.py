@@ -144,6 +144,8 @@ class RegionalEvalState(_Slots):
         "yields_solve0",      # the yields at the start of the solve (restored at its end)
         "greendeal_inputs",   # the Green Deal's input reductions of this solve
         "greendeal_crop_delta",   # {crop: (plant protection, other inputs)} cost changes of this solve, EUR/ha
+        "greendeal_animal_inpo",  # {animal: other inputs' cost change per head} of this solve (the splits' members
+                                  # differ by their base INPO, K189's per-head terms)
         "organic_conv",       # the organic conversion shares by crop
         "organic_group_target",  # CAPRI's organic target per fertiliser crop group (p_organicAreaTargetCrops)
         "fert_partial_slack",    # the Green Deal group's slack on the fertiliser priors' partial derivative

@@ -470,6 +470,11 @@ class PolicyBlock:
                 sh = self._input_row(a, "inpo_toin_share")
                 if sh is not None and pc_inpo != 0.0:
                     d = delta(sh * self._animal_cost_per_head(a), 0.0, pc_inpo)
+                    # the change per head of the animal's average; its split columns move heads between CAPRI
+                    # activities whose INPO differs (livestock.py, dinpo_rel; K189's per-head terms)
+                    if getattr(self.ev, "greendeal_animal_inpo", None) is None:
+                        self.ev.greendeal_animal_inpo = {}
+                    self.ev.greendeal_animal_inpo[a] = d
             else:
                 plap = self._input_row(a, "plap_eur_ha")
                 inpo = self._input_row(a, "inpo_eur_ha")

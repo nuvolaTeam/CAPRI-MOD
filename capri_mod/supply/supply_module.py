@@ -1755,6 +1755,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # _compute_net_revenues() above rebuilds net revenues from scratch under
         # a policy shock and would overwrite an earlier adjustment.
         self.ev.greendeal_crop_delta = {}
+        self.ev.greendeal_animal_inpo = {}
         # CAPRI's Green Deal group (set_fert_priors.gms, %scenarioGroup%==greendeal): the fertiliser priors' partial
         # derivative has a slack in the listed regions
         self.ev.fert_partial_slack = bool(isinstance(policy_shock, dict) and policy_shock.get("greendeal_group"))

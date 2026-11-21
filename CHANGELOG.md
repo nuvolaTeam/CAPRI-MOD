@@ -367,6 +367,18 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   thousand male calves (2.0%) more than its reference balance, with its suckler cows -23.7% against CAPRI's -28.0%
   (416 thousand head, France 236, Spain 113). The female calves' gap of its own is thus the suckler cows' Green Deal
   response in France and Spain, to trace with CAPRI's margin breakdown.
+- **K194, the low-N feeding option on CAPRI's 2030 requirements:** CAPRI's 2030 simulation takes p_animReq (after
+  the 2030 baseline's feed calibration, the fedtrm files), p_animReqLit and p_animExcrProtCorrFact from sim_ini_21730
+  (capmod.gms leaves its own requirement block off in a simulation); build_lownfeed_effects.py took CAPREG's 2017
+  correction factors and res_17's MANN, CRPR_EXPT and levels. Now sim_ini's (low_n_feed.gms's statements as named
+  functions). DE21's dairy cows -0.93% manure N per adopting head (was -3.26%; CAPRI's Green Deal: DCOL -1.91%, DCOH
+  none), FR52's -4.00% (-8.10%). The project lead's fedtrm files (34 countries, outside git) turned out to be already
+  in sim_ini. Removed: anim_req_corr_2017.parquet. Test: test_lownfeed_2030.py. Effect on the dual not yet measured.
+- **K189's per-head terms ported (the project lead's decision):** under the Green Deal's input change every CAPRI
+  activity's INPO coefficient moves by the region's percentage, so the members a cattle or dairy split moves heads
+  between change by their own INPO (CAPRI's RESTI change per head is mitiCost plus exactly that INPO change); the
+  intensity tables carry dinpo_rel (dinpo_rel_2030) and the split columns the animal's INPO change per head times it
+  (livestock.py _split_inpo_change). Test: test_split_inpo.py. Effect not yet measured.
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against

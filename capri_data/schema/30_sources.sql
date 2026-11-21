@@ -1319,18 +1319,6 @@ COMMENT ON TABLE src_ref2030_welfare IS 'CAPRI''s welfare items of the 2030 refe
 INSERT INTO value_units VALUES
   ('src_ref2030_welfare', 'value', NULL, 'open', 'ref2030_welfare.value: unit to be established');
 
--- file: capri_data/sources/intermediate/envind/anim_req_corr_2017.parquet
-CREATE TABLE src_anim_req_corr_2017 (
-    region VARCHAR NOT NULL,
-    activity VARCHAR NOT NULL,
-    "item" VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (region, activity, "item")
-);
-COMMENT ON TABLE src_anim_req_corr_2017 IS 'CAPRI''s requirement correction factors p_animReqCorrFac1(region, animal activity, ''T'', CRPR or ENNE) from the animReq_* dumps (animReq_SK.zip), used for the low-N feeding option (tools/build/build_lownfeed_effects.py).';
-INSERT INTO value_units VALUES
-  ('src_anim_req_corr_2017', 'value', NULL, 'open', 'anim_req_corr_2017.value: unit to be established');
-
 -- file: capri_data/sources/intermediate/envind/capri_digest_default_prd.parquet
 CREATE TABLE src_capri_digest_default_prd (
     "default" VARCHAR NOT NULL,

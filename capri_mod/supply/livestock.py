@@ -156,6 +156,22 @@ class LivestockBlock:
         self.res.last_cattle_z = {a: float(y[c]) for a, c in (getattr(self.ev, "cattle_cols", None) or {}).items() if c < len(y)}
         self.res.last_genet_z = {k: max(0.0, float(y[c])) for k, c in (getattr(self.ev, "genet_cols", None) or {}).items() if c < len(y)}
 
+    def _split_inpo_change(self, a: str, di) -> float:
+        """The Green Deal's change of the other inputs on a split column (EUR per head moved, 1000 EUR per 1000 heads):
+        CAPRI changes every activity's INPO coefficient by one regional percentage (pol_input/greendeal/
+        conventional_io.gms; capmod/define_inputs.gms l. 70-73)
+
+            p_inputCoeff(RU,MPACT,"INPO") x (1 + DATA(RU,"GROF","INPO","percentageChange"))
+
+        so the members a split moves heads between change by their own INPO: the animal's change per head
+        (policy.py, ev.greendeal_animal_inpo) x dinpo_rel, the members' INPO difference over the animal's average
+        (dairy_intensity.csv, cattle_intensity.csv; KNOWN_ISSUES K189's per-head terms). 0 outside the Green Deal."""
+        d = (getattr(self.ev, "greendeal_animal_inpo", None) or {}).get(a, 0.0)
+        if not d:
+            return 0.0
+        rel = di.get("dinpo_rel", 0.0) if hasattr(di, "get") else 0.0
+        return float(d) * float(rel) if rel is not None and rel == rel else 0.0
+
     def _cattle_columns(self, Qa, ca, Aa, ba, start, labels, n):
         """One column z per split of a cattle animal into CAPRI's activities (1000 stalls moved from one CAPRI
         activity to another, CATTLE_SPLIT_MEMBERS): the intensity pairs (BULL: BULL/BULH; HFRS: HEIL/HEIH, the port of CAPRI's bull and heifer splits),
@@ -233,7 +249,8 @@ class LivestockBlock:
                 dp = di.get(f"dprod_{g}_rel")
                 if p_ and dp is not None and dp == dp and float(dp):
                     dv += float(dp) * p_ * chg
-            ca = np.concatenate([ca, [cz_all[key] - dv + self._ghg_cost('cattle', key)]])
+            ca = np.concatenate([ca, [cz_all[key] - dv + self._ghg_cost('cattle', key)
+                                      + self._split_inpo_change(a, di)]])
             start = np.concatenate([start, [0.0]])
             self.ev.cattle_cols[key] = Aa.shape[1] - 1
             rx = dict(getattr(self.ev, "dairy_req_extra", None) or {})
@@ -464,7 +481,7 @@ class LivestockBlock:
             mv = pv.get("DCOW.MILK")
             if mv is not None and pd.notna(mv):
                 dmilk = float(di["dcomi_rel"]) * float(mv) * self._pt("DCOW", "MILK") * float(ps.get("MILK", ps.get("DCOW", 0.0)) or 0.0)
-        ca = np.concatenate([ca, [cz - dmilk + self._ghg_cost('dairy')]])
+        ca = np.concatenate([ca, [cz - dmilk + self._ghg_cost('dairy') + self._split_inpo_change("DCOW", di)]])
         start = np.concatenate([start, [0.0]])
         self.ev.dairy_col = Aa.shape[1] - 1
         self.ev.dairy_req_extra = {"DCOW": [(self.ev.dairy_col, req)]}
