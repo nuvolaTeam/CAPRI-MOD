@@ -303,7 +303,9 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   constants of the first clearing (the calibration point), with CAPRI's stop test on the changes between clearings and
   its losf (the regions' trade less the market's plan) reported. Five units: it does not converge and the regions' net
   N exports grow to 85 kt (CAPRI's own changes a few kt), so something of CAPRI's form is still missing; the default
-  stays "solution" until it is traced (the project lead's decision: CAPRI's form to become the default).
+  stays "solution" until it is traced (the project lead's decision: CAPRI's form to become the default). Traced 21
+  November 2026 without finding it (units, the rows the trade enters, the trade bounds and the slope's documented units
+  checked; CAPRI's form as written implies the same gap): parked, documented in DEP-17.
 - **K189, the crops' N and P terms move with the yields as CAPRI's data do:** CAPRI reruns fert/fertned.gms after the
   scenario's yield shifts and each price-driven yield update (supply/endog_yields.gms l. 139, 148), so the need, the
   removal (e_EXPPRD) and the fixation (e_BIOFIX) follow DATA(crop, FNUT) = min(MAXF, max(15, O_HP x need per t + straw
