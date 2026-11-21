@@ -16,7 +16,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K13](#k13) | Farm-to-Fork milk price | open: waiting for CAPRI's scenario results |
 | [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open: waiting for CAPRI's scenario results |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | closed (17 November 2026): CAPRI's stop rule settles it (young-animal imbalance 0.0004); a 1e-05 price change leaves the beef price unchanged |
-| [K48](#k48) | Young-animal prices against CAPRI's own market run | open: the female calves' chain; at CAPRI's product prices the markets clear close to CAPRI's prices; the replacement cows' gap closed (19 November 2026) |
+| [K48](#k48) | Young-animal prices against CAPRI's own market run | open: the female calves' chain, located 21 November 2026 in the suckler cows' smaller Green Deal fall at CAPRI's prices (EU_WEST -23.7% against -28.0%, France and Spain); the young-animal values, coefficients and base levels are CAPRI's; the replacement cows' gap closed (19 November 2026) |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | fixed (17 November 2026): they converge on the full EU (14 iterations) and are on by default |
 | [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open: waiting for CAPRI's scenario results |
 | [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open: waiting for CAPRI's scenario results |
@@ -665,7 +665,25 @@ Check against CAPRI's cap_after_2014 run without voluntary coupled support (tool
 - **Effect:** young-animal prices: the calves' price rises less than CAPRI's (male -3.0 points, female -7.6), the lambs' more (+2.4). The test's other indicators: 29, mean absolute deviation 0.49 points, correlation +0.97 (first check: 28, 1.24, +0.85); the largest gaps sugar beet area -2.1% (CAPRI -5.1), soya price +0.6 (+3.3), heifers -1.7 (-0.5). The model's durum and sugar beet prices are not compared: they follow the wheat and sugar markets (K168) and are not in the market's price table the runner reads
 - **In 9t:** yes
 - **Traced (19 November 2026):** the whole EU's supply models at CAPRI's Green Deal product prices (manure trade held at CAPRI's change; the young-animal markets cleared by the model's own update over the whole EU): the young-animal markets clear close to CAPRI's prices, EU_WEST male calves x2.02 (full run x1.86, CAPRI x2.07), female calves x2.19 (x1.99, x2.33), young bulls x1.28 (x1.23, x1.30), young heifers x1.30 (x1.25, x1.35), replacement cows x1.28 (x1.23, x1.33); EU_EAST male calves x1.33 (x1.27, x1.37), female calves x1.31 (x1.25, x1.50); the EU herds within about 1 point of CAPRI's (suckler cows -28.0% against -28.8). So most of the Green Deal run's gap in the calves' prices comes with its product prices (beef +17.7% against +20.0); the female calves' chain keeps a part of its own (EU_WEST 41% of the gap, EU_EAST 76%)
-- **Status:** **open** (the female calves' chain; the male calves' and young cattle's prices follow the beef price); the replacement cows' gap closed in the re-run (19 November 2026)
+- **Probed (21 November 2026, dev ec2b1ec):** the whole EU's supply models at CAPRI's Green Deal product prices and,
+  this time, its young-animal prices as well (CAPRI's PMRK ratios of A_EU_WEST and A_EU_EAST, held: female calves
+  2.338 and 1.499, male calves 2.074 and 1.373, young heifers 1.349 and 1.170, young bulls 1.299 and 1.124, cows 1.324
+  and 1.208); capri_comparison.toml; 12 iterations, the outer loop not converged (an indication). Checked first: the
+  young animals' values per head are CAPRI's 2030 unit values (UVAG 2030 over the deflator, capri_price_ratios_2030.csv),
+  and the calves' base production and use by region are CAPRI's GROF within 0.1 thousand head (seven units). At
+  CAPRI's prices EU_WEST has 129.6 thousand female calves more than its reference balance (1.4% of production; male
+  calves +183.1, 2.0%), so its market would clear below CAPRI's price, as the full runs do. The surplus comes with the
+  herds: EU_WEST's suckler cows -23.7% against CAPRI's -28.0% (416 thousand head fewer lost; France 236, Spain 113: FR72,
+  FR51, FR26, FR63, FR62, ES43, ES41 25-33 thousand each), dairy cows -1.3 against -1.7, the calves raised -10.1
+  against -12.0, the heifers -9.3 against -11.0 (CAPRI's % changes on its levels; EU_EAST's suckler cows -30.3 against
+  -31.8). So the female calves' gap of its own (K48's "chain") is the suckler cows' smaller fall at CAPRI's prices, a
+  herd response of the Green Deal step, not the young-animal markets' values, coefficients or clearing. Not traced
+  further here: the suckler cows' margin terms in FR72 and ES43 against CAPRI's dataOut breakdown (D_ terms).
+  A seven-unit run of the same probe (the units with CAPRI's largest female-calf changes) is not representative: its
+  manure pool has seven units, and ES41's suckler cows fell -44.3% there (whole EU -17.3%, CAPRI -22.4%).
+- **Status:** **open** (the female calves' chain, now located in the suckler cows' Green Deal response in France and
+  Spain; the male calves' and young cattle's prices follow the beef price); the replacement cows' gap closed in the
+  re-run (19 November 2026)
 
 <a id="k49"></a>
 ### K49: Diagnosis of the regions where CAPRI's crop-group allocation fails (20 October 2026): not the solver

@@ -361,6 +361,12 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   test_manure_market_and_ammonia_options_in_every_eu_solve.
 - **K193, the emission tax runs' results table:** the run's abatement block (the tax) declared in results_items.csv;
   the carbon tax runs stopped after their pickle, at the table. Test: test_an_emission_tax_runs_table_is_written.
+- **K48 probed at CAPRI's young-animal prices (21 November 2026):** the whole EU's supply models at CAPRI's Green
+  Deal product and young-animal prices (a diagnostic run, nothing changed): the young animals' values per head and
+  the calves' base balances are CAPRI's; at CAPRI's prices EU_WEST has 129.6 thousand female calves (1.4%) and 183.1
+  thousand male calves (2.0%) more than its reference balance, with its suckler cows -23.7% against CAPRI's -28.0%
+  (416 thousand head, France 236, Spain 113). The female calves' gap of its own is thus the suckler cows' Green Deal
+  response in France and Spain, to trace with CAPRI's margin breakdown.
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against
