@@ -390,6 +390,12 @@ greendeal_plap_mix_capri_step = false
 # leaves the base share (FR10 precision farming 0.44 at the 2030 baseline, run r128: EU 9.6%); either part alone
 # keeps the base. Open (KNOWN_ISSUES K77)
 fert_slope_with_saving = false
+# DEP-30's calibration of the fertiliser options and the inhibitor on manure (equations/ghgmiti.py
+# pmpParlin_fertTech_DEP30): true, the first-order condition at the initial share (0) is CAPRI's relSubs0 x costParLin
+# with the saving at the model's own value of N (envind/ghgMiti.gms l. 731: the initial share optimal with that
+# hypothetical subsidy; l. 1048-1071); false, zero where the option would leave it (before 21 November 2026, KNOWN_ISSUES
+# K196)
+fert_option_cal_relsubs0 = true
 
 [fertiliser]
 # the inner model's duals widened to +-1000 where CAPRI's +-10 admit no allocation (REGISTERED, CAPRI's own

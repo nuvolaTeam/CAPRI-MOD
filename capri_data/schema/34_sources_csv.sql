@@ -185,6 +185,17 @@ COMMENT ON TABLE src_orgsoil_share_p_orgsoilori IS 'CAPRI''s p_OrgSoilOri(region
 INSERT INTO value_units VALUES
   ('src_orgsoil_share_p_orgsoilori', 'value', NULL, 'open', 'per item (shares and areas)');
 
+-- file: capri_data/sources/raw/capri/dat/envind/tillageCover.parquet
+CREATE TABLE src_tillagecover (
+    region VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL CHECK ("item" IN ('ARAB', 'UAAR', 'ConsTill', 'ConvTill', 'NoTill', 'BareSoil', 'CoverCrop', 'PlantRes', 'WinterCrop')),
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, "item")
+);
+COMMENT ON TABLE src_tillagecover IS 'CAPRI''s p_tillageCover(region, item) of dat/envind/tillageCover.gdx (the SAPM 2016 survey: arable and agricultural area, the shares of the tillage practices and of soil cover), every record of the project lead''s gdxdump of the gdx (the text uploaded on 7 November 2026, 2008 records), converted one to one to Parquet (values as dumped, checked record by record on 21 November 2026); read by tools/build/build_tillage_options.py (the initial shares of ConsTill and NoTill, envind/tillage.gms l. 314-329).';
+INSERT INTO value_units VALUES
+  ('src_tillagecover', 'value', NULL, 'open', 'per item: ARAB and UAAR in ha, the others shares (the export states no unit)');
+
 -- file: capri_data/sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs_all.parquet
 CREATE TABLE src_litrevferttech_p_litrevferttechs_all (
     region VARCHAR NOT NULL,

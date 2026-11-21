@@ -430,6 +430,29 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   pork +35.7 -> +30.3 (+43.0), poultry +33.6 -> +28.3 (+18.0), milk +29.9 -> +26.6 (+1.1); beef animals -23.4 -> -21.1
   (-17.7), pigs -18.0 -> -16.9 (-14.3), dairy cows -4.3 -> -3.9 (-10.1); N surplus -34.6 -> -34.9 (-33.5). Mean
   absolute deviation from JRC121368, 20 indicators, 7.06 -> 6.45 (with ammonia 7.36 -> 6.60).
+- **K196, the N-surplus dual's port check (21 November 2026):** the options acting on the N-surplus row checked
+  against CAPRI's code; two parts were not CAPRI's form. (1) The fertiliser options' calibration (DEP-30, K77): the
+  first-order condition at the initial share of 0 now leaves CAPRI's relSubs0 x costParLin (the early adopters'
+  subsidy, envind/ghgMiti.gms l. 731, 900-906) with the model's own value of N; the form of 31 October set it to zero
+  (`supply.fert_option_cal_relsubs0`, default true; false the former form; equations/ghgmiti.py). (2) The inhibitor
+  on manure's over-fertilisation restriction (restMitFert, l. 531-543) and the value of the manure N it saves
+  (p_manureShadVal, l. 870-877) on CAPRI's availability of excreted manure N; the restriction binds in no region. In
+  two six-unit Green Deal probes at CAPRI's prices (12 iterations) the dual does not move (median 0.966 of CAPRI's with
+  and without (1)); the inhibitor on mineral N moves towards CAPRI's in four units (ES51 0.257 -> 0.141, CAPRI 0.039;
+  NL22 0.536 -> 0.459, 0.292), away in FR52 (0.575 -> 0.482, 0.575); the inhibitor on manure stays where CAPRI has none
+  (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
+- **K93, conservation and no tillage and the urea substitution built (21 November 2026):** CAPRI's ConsTill, NoTill
+  (envind/tillage.gms; tools/build/build_tillage_options.py, tillage_options.csv from CAPRI's tillage.gms statements,
+  its SAPM survey shares, its tillage regions and crops) and UreaSubst (envind/ammo_tech.gms;
+  tools/build/build_urea_subst_option.py, urea_subst_option.csv) as columns of the regional model with CAPRI's cost
+  curves (equations/tillage.py, equations/ammo_tech.py, GHG_Mit_Cost_), NoTill's N2O of mineral N in GASTOTNETF_ and
+  its leaching in LEACHN_ (LEACHN_B2), the urea substitution's NH3 in GASTOTNETF_; the accounts take the shares (direct
+  N2O, leaching, NH3 of mineral N, CO2 from urea). No yield effect (the Green Deal's NoYieldEffect 1). CAPRI leaves the
+  urea substitution's cost in base-year money (KEPT-9), reproduced. The baseline keeps the base; in a six-unit Green
+  Deal probe at CAPRI's prices the shares are CAPRI's within 0.006 (NoTill ES51 0.120, CAPRI 0.115; 0 in FR52, NL22,
+  IT20, DE21 as CAPRI's; UreaSubst DE21 0.019, 0.017; ES41 0.025, 0.025), the N-surplus dual unchanged. New code list
+  CFACTOR_ARAB, the raw source tillageCover.parquet; the pipeline's build_code_lists entry re-traced (it lacked 16
+  of the code lists the builder already wrote). LegSh and SupplementPerc_ remain (K93).
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against

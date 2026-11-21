@@ -106,6 +106,81 @@ INSERT INTO value_units VALUES
   ('winter_cover_option', 'pmp_lin', 'U_EuPerHa', 'builder', 'pmpParLin per unit of the share, per ha of UAAR'),
   ('winter_cover_option', 'case', NULL, 'open', 'the calibration case of cover_crops.gms (a category, no unit)');
 
+-- file: capri_data/2017/abatement/mitigation/tillage_options.csv
+CREATE TABLE tillage_options (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    technology VARCHAR NOT NULL CHECK (technology IN ('ConsTill', 'NoTill')),
+    till_region VARCHAR NOT NULL CHECK (till_region IN ('North', 'Center', 'South')),
+    tillage_kha DOUBLE NOT NULL CHECK (tillage_kha > 0),
+    tillset_share DOUBLE NOT NULL CHECK (tillset_share > 0 AND tillset_share <= 1),
+    ini_share DOUBLE NOT NULL CHECK (ini_share BETWEEN 0 AND 1),
+    max_share DOUBLE NOT NULL CHECK (max_share >= ini_share AND max_share <= 1),
+    cost_lin_eur_ha DOUBLE NOT NULL,
+    costsaving0_eur_ha DOUBLE NOT NULL,
+    max_increase DOUBLE NOT NULL CHECK (max_increase > 0 AND max_increase <= 1),
+    relsubs0 DOUBLE NOT NULL,
+    relsubs1 DOUBLE NOT NULL,
+    subs0 DOUBLE NOT NULL,
+    subs1 DOUBLE NOT NULL,
+    pmp_sqr DOUBLE NOT NULL CHECK (pmp_sqr > 0),
+    pmp_lin DOUBLE NOT NULL,
+    "case" INTEGER NOT NULL CHECK ("case" IN (1, 2, 3, 4)),
+    n2osyn DOUBLE NOT NULL CHECK (n2osyn <= 0),
+    no3slea DOUBLE NOT NULL CHECK (no3slea <= 0),
+    no3mlea DOUBLE NOT NULL CHECK (no3mlea <= 0),
+    co2ero DOUBLE NOT NULL,
+    PRIMARY KEY (region, technology)
+);
+COMMENT ON TABLE tillage_options IS 'CAPRI''s conservation and no tillage options v_Miti(cropMiti, ConsTill|NoTill, N2OSYN) per model region: the tillage area, the initial share (SAPM survey), costParLin, costsaving0 from CAPRI''s ini run, the calibrated cost curve (case 1-4) and the effects on the N2O of mineral N, the leaching of soil and manure N and erosion (envind/tillage.gms l. 314-849; tools/build/build_tillage_options.py)';
+INSERT INTO value_units VALUES
+  ('tillage_options', 'tillage_kha', 'U_1000ha', 'builder', 'the levels of the tillage crops (CFACTOR_ARAB) at CAPRI''s 2030 baseline'),
+  ('tillage_options', 'tillset_share', 'U_ratio', 'builder', 'DATA(ru, UAAR, TILLSET): the tillage area over the crop area'),
+  ('tillage_options', 'ini_share', 'U_ratio', 'capri', 'IniShare, share of the tillage area'),
+  ('tillage_options', 'max_share', 'U_ratio', 'capri', 'MaxShare, share of the tillage area'),
+  ('tillage_options', 'cost_lin_eur_ha', 'U_EuPerHa', 'capri', 'costParLin per ha of tillage area, the base year''s money (CAPRI''s inflation to 2030 and the model''s deflator cancel)'),
+  ('tillage_options', 'costsaving0_eur_ha', 'U_EuPerHa', 'builder', 'costsaving0: the ini run''s v_Miti.m per ha of tillage area, over the model''s deflator(2030)'),
+  ('tillage_options', 'max_increase', 'U_ratio', 'capri', 'MaxIncrease, share of the tillage area'),
+  ('tillage_options', 'relsubs0', 'U_ratio', 'capri', 'relSubs0, relative to costParLin'),
+  ('tillage_options', 'relsubs1', 'U_ratio', 'capri', 'relSubs1, relative to costParLin'),
+  ('tillage_options', 'subs0', 'U_EuPerHa', 'builder', 'Subs0 per ha of tillage area'),
+  ('tillage_options', 'subs1', 'U_EuPerHa', 'builder', 'Subs1 per ha of tillage area'),
+  ('tillage_options', 'pmp_sqr', 'U_EuPerHa', 'builder', 'pmpParSqr per unit of the share squared, per ha of tillage area'),
+  ('tillage_options', 'pmp_lin', 'U_EuPerHa', 'builder', 'pmpParLin per unit of the share, per ha of tillage area'),
+  ('tillage_options', 'case', NULL, 'open', 'the calibration case of tillage.gms (a category, no unit)'),
+  ('tillage_options', 'n2osyn', 'U_ratio', 'capri', 'othImpact N2OSYN: relative change of the N2O of mineral N at share 1'),
+  ('tillage_options', 'no3slea', 'U_ratio', 'capri', 'othImpact NO3SLEA x tillset_share: relative change of the leaching of soil N at share 1'),
+  ('tillage_options', 'no3mlea', 'U_ratio', 'capri', 'othImpact NO3MLEA x tillset_share: relative change of the leaching of manure N at share 1'),
+  ('tillage_options', 'co2ero', NULL, 'open', 'othImpact CO2ERO: the erosion factor tillage.gms sets (l. 547-549; no unit stated)');
+
+-- file: capri_data/2017/abatement/mitigation/urea_subst_option.csv
+CREATE TABLE urea_subst_option (
+    ms VARCHAR PRIMARY KEY REFERENCES capri_rall (code),
+    frac_urea DOUBLE NOT NULL CHECK (frac_urea > 0 AND frac_urea <= 1),
+    max_share DOUBLE NOT NULL CHECK (max_share > 0 AND max_share <= 1),
+    nh3_othimpact DOUBLE NOT NULL,
+    cost_lin_eur_t DOUBLE NOT NULL,
+    relsubs0 DOUBLE NOT NULL,
+    relsubs1 DOUBLE NOT NULL,
+    subs0 DOUBLE NOT NULL,
+    subs1 DOUBLE NOT NULL,
+    pmp_sqr DOUBLE NOT NULL CHECK (pmp_sqr > 0),
+    pmp_lin DOUBLE NOT NULL,
+    "case" INTEGER NOT NULL CHECK ("case" IN (3, 4))
+);
+COMMENT ON TABLE urea_subst_option IS 'CAPRI''s urea substitution v_Miti(cropMiti, UreaSubst, NH3SYN) per member state: MaxShare the urea share of mineral N, the NH3 factor difference, the cost per t of N switched and the calibrated cost curve (envind/ammo_tech.gms l. 2353-2375, 2840-2977, 3041-3047, 3100-3107; tools/build/build_urea_subst_option.py)';
+INSERT INTO value_units VALUES
+  ('urea_subst_option', 'frac_urea', 'U_ratio', 'capri', 'p_fracUseFert(ms, Ureum)'),
+  ('urea_subst_option', 'max_share', 'U_ratio', 'capri', 'MaxShare, share of the mineral N bought'),
+  ('urea_subst_option', 'nh3_othimpact', 'U_ratio', 'capri', 'othImpact NH3SYN: the NH3 emission factor of urea less the others'''),
+  ('urea_subst_option', 'cost_lin_eur_t', 'U_EuPerTon', 'builder', 'costParLin per t of N switched: CAPRI''s base-year figure (not inflated, ammo_tech.gms) over the model''s deflator(2030)'),
+  ('urea_subst_option', 'relsubs0', 'U_ratio', 'capri', 'relSubs0, relative to costParLin'),
+  ('urea_subst_option', 'relsubs1', 'U_ratio', 'capri', 'relSubs1, relative to costParLin'),
+  ('urea_subst_option', 'subs0', 'U_EuPerTon', 'builder', 'Subs0 per t of N bought'),
+  ('urea_subst_option', 'subs1', 'U_EuPerTon', 'builder', 'Subs1 per t of N bought'),
+  ('urea_subst_option', 'pmp_sqr', 'U_EuPerTon', 'builder', 'pmpParSqr per unit of the share squared, per t of N bought'),
+  ('urea_subst_option', 'pmp_lin', 'U_EuPerTon', 'builder', 'pmpParLin per unit of the share, per t of N bought'),
+  ('urea_subst_option', 'case', NULL, 'open', 'the calibration case of ammo_tech.gms (a category, no unit)');
+
 -- the three animal option tables share their effect columns: relative changes per unit of the option's parameter
 -- file: capri_data/2017/abatement/mitigation/genetics_effects.csv
 CREATE TABLE genetics_effects (

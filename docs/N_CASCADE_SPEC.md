@@ -45,9 +45,12 @@
   manure N2O follows the cascade's N2O by stage against the base shares (`_manure_n2o_full`).
 * Anaerobic digestion: in the cascade and in the manure CH4 account (docs/AD_SPEC.md). Winter cover: in RUNSURFN_,
   APPLN_ and RUNTOTNETF_ (0.35 x share) and in LEACHN_.
-* Not yet in capri-mod: tillage, buffer strips, biodiversity options and biochar (their LEACHN_ terms held at CAPRI's
+* Tillage (21 November 2026, KNOWN_ISSUES K93): NoTill's term in GASTOTNETF_'s N2O of mineral N and its leaching term
+  in LEACHN_'s second factor (equations/supply_model/n_flow.py LEACHN_B2), the accounts' leaching moved by that factor's
+  change from the initial shares; the urea substitution's NH3 term in GASTOTNETF_ (the same date).
+* Not yet in capri-mod: buffer strips, biodiversity options and biochar (their LEACHN_ terms held at CAPRI's
   reference, below), the fertiliser techniques' N2OMAN/N2OSYN terms in APPLN_ and GASTOTNETF_ (the inhibitors' gas
-  effects are applied in the accounts and the solve outside the cascade), urea substitution. Nitrates Directive
+  effects are applied in the accounts and the solve outside the cascade). Nitrates Directive
   minimum shares: not applied (KNOWN_ISSUES K51; CAPRI's NDtech is off in its Green Deal runs); the builder that built
   them from CAPRI's nvz.gdx was removed on 29 October 2026 with its data, read by no code (K102).
 

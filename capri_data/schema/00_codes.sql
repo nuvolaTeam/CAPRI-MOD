@@ -254,6 +254,10 @@ COMMENT ON TABLE capri_rmeu_to_rm IS 'CAPRI RMEU_to_RM: the EU''s market blocks 
 CREATE TABLE capri_perm_ngrp (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_perm_ngrp IS 'CAPRI PERM_NGRP: the permanent crop groups of the fertiliser distribution (supply/define_ngrp_sets.gms)';
 
+-- file: capri_data/codes/capri/CFACTOR_ARAB.csv
+CREATE TABLE capri_cfactor_arab (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_cfactor_arab IS 'CAPRI CFACTOR_ARAB(COLS): "Arable crops for C factor Calculation" (capdis/spat_soillos_sets.gms l. 32), the crops envind/tillage.gms takes as the tillage crops (TILLSET, l. 324-327), as sim_ini_21730 instantiated the set';
+
 -- file: capri_data/codes/capri/CACT_TO_NGRP.csv
 CREATE TABLE capri_cact_to_ngrp (cact VARCHAR PRIMARY KEY, ngrp VARCHAR NOT NULL);
 COMMENT ON TABLE capri_cact_to_ngrp IS 'CAPRI CACT_TO_NGRP: the nutrient group of each crop activity (supply/define_ngrp_sets.gms)';

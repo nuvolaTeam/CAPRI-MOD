@@ -23,8 +23,9 @@ land-market columns, land and bound rows, with one label per row) and the calibr
   area target, the ammonia, fertiliser-technique and inhibitor options through CAPRI's N loss cascade, the emission tax.
 
 Breeding, low-N feed, linseed, nitrate and 3-NOP (and histosol fallowing) are linear columns the supply module adds.
-Not built: legume share, tillage, urea substitution, buffer strips, biodiversity options, biochar, and CAPRI's ration
-fat constraint SupplementPerc_ (KNOWN_ISSUES K93).
+Conservation and no tillage and the urea substitution are the regional model's columns since 21 November 2026
+(_abatement_block). Not built: legume share, buffer strips, biodiversity options, biochar, and CAPRI's ration fat
+constraint SupplementPerc_ (KNOWN_ISSUES K93).
 
 CALIBRATION of the feed terms. The rations were calibrated (feed/ration.py) with CAPRI's fixed feed shares and dry-matter
 limits; CAPRI's simulation model has only REQSE_. As CAPRI's PMP calibration does, the linear terms are set so that the
@@ -811,6 +812,11 @@ class CapriRegionalNLP:
                 obj = obj + GHG_Mit_Cost_targFertSyn(P, pv(1.0 / 1000.0), self._fert_tech_pending[0])
                 self._fert_tech_pending = None
                 self._fert_tech_P = True
+            if nut == "N" and getattr(self, "_urea_pending", None) is not None:
+                # the urea substitution's cost on the N purchases (GHG_Mit_Cost_'s UreaSubst base, l. 5063)
+                from capri_mod.supply.equations.supply_model.mitigation import GHG_Mit_Cost_ureaSubst
+                obj = obj + GHG_Mit_Cost_ureaSubst(P, pv(1.0 / 1000.0), self._urea_pending)
+                self._urea_pending = None
             gt = self.spec.get("ghg_min") if nut == "N" else None
             if gt:
                 # CAPRI's emission tax on the soil N2O of mineral N (N2OSYN, direct + volatilised x indirect), on the
@@ -866,10 +872,14 @@ class CapriRegionalNLP:
     def _netf_eff(self, d):
         """(mineral, residue) N efficiencies of NUTNED_ at the options' shares: CAPRI's GASTOTNETF_, RUNTOTNETF_ and
         GASRUNTOTNETF_ (supply_model.gms l. 3335-3394) with the mineral-N options' othImpact = 1 - (1 - lit)(1 + NMIN)
-        on NH3SYN, NOXSYN, N2OSYN and NO3SRUN and winter cover's runoff reduction, written as the base efficiencies
-        plus the change from the base point (the options at 0, winter cover at its base share), so the base is exactly
+        on NH3SYN, NOXSYN, N2OSYN and NO3SRUN, winter cover's runoff reduction, the tillage options' othImpact on
+        N2OSYN (- sum othImpact x share, l. 3392-3393) and the urea substitution's on NH3SYN (- v x othImpact,
+        l. 3372-3377; initial share 0), written as the base efficiencies plus the change from the base
+        point (the options at 0, winter cover and the tillage options at their base shares), so the base is exactly
         CAPRI's reported one: eff = eff0 - (GasRunTot(s) - GasRunTot(s0)), gc = gc0 (1 - N2O(s)) / (1 - N2O(s0)).
-        None without the region's loss data or without options that move them."""
+        None without the region's loss data or without options that move them. REGISTERED: CAPRI's reference run has
+        no tillage term (its %ghgAbatement% off), its Green Deal step the term at the full shares; the model's base is
+        CAPRI's reference and the term moves from the initial shares."""
         nf = d.get("netf")
         if not nf:
             return None
@@ -891,11 +901,18 @@ class CapriRegionalNLP:
         wr = float(nf.get("wc_red", 0.0))
         if m_wc is not None and wr > 0:
             used = True
+        tn_ = getattr(self, "_till_n2o", None)
+        ur_ = getattr(self, "_urea", None)
+        if tn_ is not None or ur_ is not None:
+            used = True
         if not used:
             return None
         fr, rsurf = nf["fr"], float(nf["run_surf"])
-        L1 = _nf.netf(fr, rsurf, fert_syn=syn, m_run=_nf.RUNTOTNETF_cropFactor(wr, m_wc if m_wc is not None else m0, srun))
-        L0 = _nf.netf(fr, rsurf, m_run=_nf.RUNTOTNETF_cropFactor(wr, m0))
+        L1 = _nf.netf(fr, rsurf, urea=(ur_[0] if ur_ is not None else 0.0), urea_eff=(ur_[1] if ur_ is not None else 0.0),
+                      fert_syn=syn, till_n2o=(tn_[0] if tn_ is not None else 0.0),
+                      m_run=_nf.RUNTOTNETF_cropFactor(wr, m_wc if m_wc is not None else m0, srun))
+        L0 = _nf.netf(fr, rsurf, till_n2o=(float(tn_[1]) if tn_ is not None else 0.0),
+                      m_run=_nf.RUNTOTNETF_cropFactor(wr, m0))
         # NUTNED_'s mineral and residue factors at the options' shares, from the base point (nutrients.py)
         effM = NUTNED_availFactMine_opt(pv(float(d["eff"])), L1["GasRunTot"], pv(float(L0["GasRunTot"])))
         effC = NUTNED_availFactCRes_opt(pv(float(d["gc"]) / (1.0 - float(L0["N2O"]))), L1["N2O"])
@@ -1115,13 +1132,54 @@ class CapriRegionalNLP:
             o = nx0 + sum(int(v.shape[0]) for v in new)
             new.append(sm)
             lbx += [0.0]; ubx += [float(mni["smax"])]
-            self.abat["mni"] = {"off": o}
+            self.abat["mni"] = {"off": o, "S0": float(mni["S0"])}        # relSubs0 x costParLin, the calibration's
+        # conservation and no tillage (envind/tillage.gms; abatement._till_spec): the shares v_Miti(cropMiti, tech,
+        # CO2SEQ) of the tillage area, TotMit_ with no control, GHG_Mit_Cost_ on the tillage area, NoTill's N2O of
+        # mineral N in the loss cascade (GASTOTNETF_, _netf_eff)
+        self._till_n2o = None
+        ts = spec.get("till")
+        if ts and ts.get("techs"):
+            from capri_mod.supply.equations.supply_model.mitigation import GHG_Mit_Cost_till
+            T_ = ts["techs"]
+            zt = ca.SX.sym("till", len(T_))
+            L = self._lin(y, [(int(c_), 1.0) for c_ in ts["cols"]])                       # tillage area, 1000 ha
+            _da = spec.get("dabat") or {}
+            for k_, t in enumerate(T_):
+                c1 = float(t["k1"]) + float(t["lin"]) + float(_da.get(("till", t["name"]), 0.0))
+                obj = obj + GHG_Mit_Cost_till(L, self._pv(c1), self._pv(0.5 * float(t["sqr"])), zt[k_])
+            # TotMit_(cropMiti, CO2SEQ): no control + the options = 1, no control >= 0
+            g_rows.append(TotMit_([zt[k_] for k_ in range(len(T_))])); lbg.append(-np.inf); ubg.append(1.0)
+            # GASTOTNETF_'s tillage term, sum over the options of othImpact N2OSYN x share, and its base value
+            self._till_n2o = (sum(self._pv(float(t["n2osyn"])) * zt[k_] for k_, t in enumerate(T_)),
+                              sum(float(t["n2osyn"]) * float(t["m0"]) for t in T_))
+            o = nx0 + sum(int(v.shape[0]) for v in new)
+            new.append(zt)
+            lbx += [0.0] * len(T_); ubx += [float(t["ub"]) for t in T_]
+            self.abat["till"] = {"off": o, "techs": T_,
+                                 "area0": sum(float(self.xb[int(c_)]) for c_ in ts["cols"] if int(c_) < len(self.xb))}
+        # urea substitution (envind/ammo_tech.gms; abatement._urea_spec): the share v of the mineral N bought switched
+        # from urea, TotMit_ with no control, GHG_Mit_Cost_ on the purchases (the fertilisation block, _fert_block),
+        # its NH3 of mineral N in the loss cascade (GASTOTNETF_, _netf_eff). Only with the N fertilisation block (its
+        # purchases and loss cascade carry the option)
+        self._urea = None; self._urea_pending = None
+        us = spec.get("urea")
+        if us and "N" in ((spec.get("npk") or {}).get("nutrients") or {}) and float(us.get("m1", 0.0)) > 0:
+            zu = ca.SX.sym("urea", 1)
+            c1 = float(us["c1"]) + float((spec.get("dabat") or {}).get(("urea",), 0.0))
+            self._urea_pending = GHG_Mit_Cost_perShare([self._pv(c1)], [self._pv(0.5 * float(us["c2"]))], [zu[0]])
+            self._urea = (zu[0], self._pv(float(us["eff"])))
+            g_rows.append(TotMit_([zu[0]])); lbg.append(-np.inf); ubg.append(1.0)
+            o = nx0 + sum(int(v.shape[0]) for v in new)
+            new.append(zu)
+            lbx += [0.0]; ubx += [float(us["m1"])]
+            self.abat["urea"] = {"off": o, "subs0": float(us["subs0"])}
         if new:
             X = ca.vertcat(X, *new)
         return X, obj
 
     def abatement_outputs(self, x):
-        """Shares of the options at x: {"amm": {(act, key, tech): share}, "fert": {tech: share}, "mni": share}."""
+        """Shares of the options at x: {"amm": {(act, key, tech): share}, "fert": {tech: share}, "mni": share,
+        "catc": share, "catc_area": 1000 ha, "till": {tech: share}, "urea": share}."""
         out = {}
         a = self.abat.get("amm")
         if a:
@@ -1136,6 +1194,12 @@ class CapriRegionalNLP:
         if c_:
             out["catc"] = float(x[c_["off"]])
             out["catc_area"] = self.catc_area(x)
+        t_ = self.abat.get("till")
+        if t_:
+            out["till"] = {t["name"]: float(x[t_["off"] + k]) for k, t in enumerate(t_["techs"])}
+        u_ = self.abat.get("urea")
+        if u_:
+            out["urea"] = float(x[u_["off"]])
         return out
 
     def catc_area(self, x):
@@ -1319,19 +1383,24 @@ class CapriRegionalNLP:
                 if den > 0:
                     dabat[("amm", t["act"], t["key"], t["tech"])] = -res[j] / den
                     res[j] = 0.0
+        # the fertiliser options and the inhibitor on manure (IniShare 0): their linear term beta from the residual at
+        # zero (equations/ghgmiti.py pmpParlin_fertTech_DEP30: CAPRI's relSubs0 x costParLin left at the base with the
+        # setting supply.fert_option_cal_relsubs0, KNOWN_ISSUES K196)
+        from capri_mod.supply.equations.ghgmiti import pmpParlin_fertTech_DEP30
+        from capri_mod.settings import current as _cur_settings
+        _rs0 = bool(_cur_settings().get("supply.fert_option_cal_relsubs0"))
         fa = self.abat.get("fert") if getattr(self, "abat", None) else None
         if fa:
             for k, t in enumerate(fa["techs"]):
                 j = fa["off"] + k
-                if xb[j] <= lbx[j] + 1e-12 and res[j] >= 0:
-                    res[j] = 0.0; continue
                 den = getattr(self, "_fert_tech_base", 0.0)
                 if getattr(self, "_fert_tech_P", None) and self.fert and "N" in self.fert:
                     fbN = self.fert["N"]
                     den = float(xb[fbN["off_P"]]) * fbN["Pscale"] / 1000.0      # base N purchases, kt
-                if den > 0:
-                    dabat[("fert", t[0])] = -res[j] / den
-                    res[j] = 0.0
+                b_ = pmpParlin_fertTech_DEP30(float(t[2]), res[j] / den, _rs0) if den > 0 else None
+                if b_ is not None:
+                    dabat[("fert", t[0])] = b_
+                res[j] = 0.0
         cc_ = self.abat.get("catc") if getattr(self, "abat", None) else None
         if cc_:
             j = cc_["off"]
@@ -1363,10 +1432,36 @@ class CapriRegionalNLP:
         ma = self.abat.get("mni") if getattr(self, "abat", None) else None
         if ma:
             j = ma["off"]
-            if not (xb[j] <= lbx[j] + 1e-12 and res[j] >= 0):
-                den = getattr(self, "_mni_base", 0.0)
+            den = getattr(self, "_mni_base", 0.0)
+            b_ = pmpParlin_fertTech_DEP30(float(ma["S0"]), res[j] / den, _rs0) if den > 0 else None
+            if b_ is not None:
+                dabat[("mni",)] = b_
+            res[j] = 0.0
+        # the tillage options: CAPRI's first-order condition at the initial share, costParLin - costsaving0 - Subs0 +
+        # pmpParLin + pmpParSqr m0 = 0 (envind/tillage.gms l. 834-842), with the model's own marginal value of the
+        # share in place of CAPRI's costsaving0 (DEP-30's rule): the residual per ha of tillage area left at Subs0
+        tl_ = self.abat.get("till") if getattr(self, "abat", None) else None
+        if tl_:
+            for k, t in enumerate(tl_["techs"]):
+                j = tl_["off"] + k
+                den = float(tl_["area0"])
                 if den > 0:
-                    dabat[("mni",)] = -res[j] / den
+                    dabat[("till", t["name"])] = pmpParlin_fertTech_DEP30(float(t.get("subs0", 0.0)), res[j] / den, True)
+                res[j] = 0.0
+        # the urea substitution: CAPRI's calibration has no saving of N in it (ammo_tech.gms l. 3100-3107, no
+        # costsavings0 for it, l. 3366-3379), so its linear term Subs0 is kept; only where the model's own value of the
+        # N it keeps would move the base off zero is the term raised to it (an option at zero with a positive reduced
+        # cost stays as it is)
+        ur_ = self.abat.get("urea") if getattr(self, "abat", None) else None
+        if ur_:
+            j = ur_["off"]
+            den = 0.0
+            if self.fert and "N" in self.fert:
+                fbN = self.fert["N"]
+                den = float(xb[fbN["off_P"]]) * fbN["Pscale"] / 1000.0          # base N purchases, kt
+            b_ = pmpParlin_fertTech_DEP30(float(ur_["subs0"]), res[j] / den, False) if den > 0 else None
+            if b_ is not None:
+                dabat[("urea",)] = b_
             res[j] = 0.0
         rest = np.abs(res[n0 + nf:]).max() if nX > n0 + nf else 0.0
         self.cal_point = xb
@@ -1413,6 +1508,10 @@ class CapriRegionalNLP:
         cc_ = self.abat.get("catc") if getattr(self, "abat", None) else None
         if cc_:
             x[cc_["off"]] = cc_["m0"]                             # winter cover at its base share
+        tl_ = self.abat.get("till") if getattr(self, "abat", None) else None
+        if tl_:
+            for k, t in enumerate(tl_["techs"]):
+                x[tl_["off"] + k] = float(t["m0"])                # the tillage options at their initial shares
         if self.fert:
             for nut, fb in self.fert.items():
                 o = fb["off"]

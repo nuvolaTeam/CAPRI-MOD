@@ -359,6 +359,10 @@ def _load_capri_set(name):
 CAPRI_FEED_TRD = _load_capri_set("FEED_TRD")
 #: CAPRI's permanent crop groups for the fertiliser distribution (supply/define_ngrp_sets.gms PERM_NGRP: GRAS, PERM)
 CAPRI_PERM_NGRP = frozenset(_load_capri_set("PERM_NGRP"))
+#: CAPRI's tillage crops (CFACTOR_ARAB, capri_data/codes/capri/CFACTOR_ARAB.csv; envind/tillage.gms l. 324: DATA(ru, crop,
+#: TILLSET, Y) = 1) and the model's crops among them (a CAPRI supply-model activity of the crop in the set)
+CAPRI_CFACTOR_ARAB = frozenset(_load_capri_set("CFACTOR_ARAB"))
+TILLAGE_CROPS = tuple(a for a in CROPS if any(c in CAPRI_CFACTOR_ARAB for c in CAPMOD_MEMBERS.get(a, ())))
 
 
 def _load_cact_to_ngrp():

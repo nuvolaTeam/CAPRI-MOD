@@ -741,6 +741,41 @@ class NitrogenBlock:
         w = (s / (1.0 + nm)) / (s / (1.0 + nm) + 1.0 - s)
         return {i: 1.0 - w + w * (1.0 - v) * (1.0 + nm) for i, v in lit.items()}
 
+    def urea_effect(self, region, supply_result, frac=False):
+        """(share, othImpact NH3SYN) of CAPRI's urea substitution in the supply result (urea_subst_option.csv, the
+        region's member state), (0, 0) without; with frac, the member state's urea share (p_fracUseFert Ureum) or None."""
+        v = getattr(supply_result, "urea_share", None)
+        if v is None and not frac:
+            return 0.0, 0.0
+        t = _inputs.current().cached(
+            "urea_subst_option", lambda inp: inp.csv("urea_subst_option.csv", "abatement/mitigation").set_index("ms"))
+        from capri_mod.data.definitions import capri_ms
+        ms = capri_ms(region)
+        if ms not in t.index:
+            return None if frac else (0.0, 0.0)
+        if frac:
+            return float(t.at[ms, "frac_urea"])
+        return float(v), float(t.at[ms, "nh3_othimpact"])
+
+    def till_effects(self, region, supply_result):
+        """The tillage options' effects at their initial shares and at the supply result's (envind/tillage.gms;
+        tillage_options.csv): {"n2o": (sum othImpact N2OSYN x share at the initial shares, now), "slea": (... no3slea
+        ...), "mlea": (... no3mlea ...)}, or None where the result has no tillage shares."""
+        sh = getattr(supply_result, "till_shares", None) or {}
+        if not sh:
+            return None
+        t = _inputs.current().cached(
+            "tillage_options", lambda inp: inp.csv("tillage_options.csv", "abatement/mitigation"))
+        rows = t[t["region"] == region]
+        out = {"n2o": [0.0, 0.0], "slea": [0.0, 0.0], "mlea": [0.0, 0.0]}
+        for r in rows.itertuples(index=False):
+            s1 = float(sh.get(str(r.technology), r.ini_share))
+            for k_, c_ in (("n2o", "n2osyn"), ("slea", "no3slea"), ("mlea", "no3mlea")):
+                v = float(getattr(r, c_))
+                out[k_][0] += v * float(r.ini_share)
+                out[k_][1] += v * s1
+        return {k_: tuple(v) for k_, v in out.items()}
+
     def _winter_cover_now(self, region, supply_result):
         """(base, current) winter cover share (CAPRI's v_Miti(CATC, WinterCov)): the 2030 catch-crop share and, under
         the catch-crop requirement, the required area over UAAR (supply result's cover_crops)."""
@@ -846,6 +881,14 @@ class NitrogenBlock:
         L = _nl.share(rs, b_now, b_ini)
         if L is None:
             return None
+        # LEACHN_'s second factor, the tillage options (envind/tillage.gms l. 563-564): at their shares against the
+        # initial shares, CAPRI's ini run having them there (REGISTERED: both with the current input shares)
+        tl_ = self.till_effects(region, supply_result)
+        if tl_ is not None:
+            b2_now = _nf.LEACHN_B2(nmin_sh, nman_sh, tl_["slea"][1], tl_["mlea"][1])
+            b2_ini = _nf.LEACHN_B2(nmin_sh, nman_sh, tl_["slea"][0], tl_["mlea"][0])
+            if b2_ini > 0:
+                L = max(0.0, L * b2_now / b2_ini)
         comp = _nl.crop_n(M, nf["RunTot"], nf["GasRunTot"], nf["N2O"], [(n, r_, gr) for n, r_, gr, _ in an1],
                           -float(nb.get("n_manure_import", 0.0) or 0.0),
                           float(nb.get("n_crop_residues", 0.0) or 0.0) + float(nb.get("n_deposition", 0.0) or 0.0),

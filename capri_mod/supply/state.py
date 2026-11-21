@@ -208,6 +208,8 @@ class RegionalResults(_Slots):
         "last_genet_z",
         # fertilisation
         "fert_tech_shares",   # the fertiliser technologies' shares
+        "till_shares",        # the tillage options' shares (ConsTill, NoTill; envind/tillage.gms)
+        "urea_share",         # the urea substitution's share (UreaSubst; envind/ammo_tech.gms)
         "n_target_relaxed",   # the solve ended at JRC121368's relaxed N target
         # land: the manure pools, read by the manure market (coupling/manure.py)
         "manure_supply0",     # the region's manure N supply at the start

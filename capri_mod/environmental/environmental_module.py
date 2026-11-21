@@ -451,6 +451,13 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         from capri_mod.supply.equations.supply_model.gwp import GWPCO2UREA_, GWPTOT_
         ghg["CO2_UREA"] = GWPCO2UREA_(max(0.0, float(nb.get("n_mineral_input", 0.0))) / 1000.0,
                                       self._co2_coefs(region)[1])
+        # with the urea substitution, CAPRI's NMIN x max(urea share - v, 0) x 44/28 (gases.gms l. 833-835): the urea
+        # share less the share switched, over the urea share (both LitRev's p_fracUseFert since 29 October 2026, K93)
+        _uv = self.urea_effect(region, supply_result)[0] if region else 0.0
+        if _uv > 0 and ghg.get("CO2_UREA"):
+            _fu = self.urea_effect(region, supply_result, frac=True)
+            if _fu and _fu > 0:
+                ghg["CO2_UREA"] = ghg["CO2_UREA"] * max(_fu - _uv, 0.0) / _fu
 
         # CAPRI's N2O from drained organic soils (gases.gms N2OHIS, agriculture): per ha of the land-use
         # class, its organic-soil share x the climate-weighted IPCC 2013 factor (tools/build/build_histosol.py),
@@ -544,6 +551,14 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             _dir = _dn[0] / (_dn[0] + _dn[1]) if (_dn[0] + _dn[1]) > 0 else 1.0
             _old = ghg["N2O_SOIL"]
             ghg["N2O_SOIL"] = _old * (_dir * f_side["N2OSYN"] + (1.0 - _dir) * f_side["NH3SYN"])
+        # the tillage options on the direct N2O of mineral N (GASTOTNETF_, supply_model.gms l. 3392-3393: - sum over
+        # ConsTill and NoTill of othImpact N2OSYN x share; envind/tillage.gms l. 579-582), at their shares against the
+        # initial shares (the base is CAPRI's reference, as the regional model's loss cascade)
+        _tl = self.till_effects(region, supply_result) if region else None
+        if _tl is not None and "N2O_SOIL" in ghg and 1.0 - _tl["n2o"][0] > 0:
+            _dir = _dn[0] / (_dn[0] + _dn[1]) if (_dn[0] + _dn[1]) > 0 else 1.0
+            ghg["N2O_SOIL"] = ghg["N2O_SOIL"] * (
+                _dir * (1.0 - _tl["n2o"][1]) / (1.0 - _tl["n2o"][0]) + (1.0 - _dir))
         # CAPRI's leaching of the soil surplus (LEACHN_) and the indirect N2O of leached and run-off N allocated to
         # crops (gases.gms N2OLEA; capri_mod/supply/n_leaching.py)
         _lea = self.leaching(region, acts, nb, supply_result)
@@ -562,6 +577,14 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         if f_side and nh3.get("nh3_soils"):
             nh3 = dict(nh3)
             _d = float(nh3["nh3_soils"]) * (f_side["NH3SYN"] - 1.0)
+            nh3["nh3_soils"] = float(nh3["nh3_soils"]) + _d
+            nh3["nh3_total"] = float(nh3["nh3_total"]) + _d
+        # CAPRI's urea substitution on the NH3 of mineral N (GASTOTNETF_, supply_model.gms l. 3372-3377: x (1 - v x
+        # othImpact NH3SYN); envind/ammo_tech.gms l. 2358-2361), its initial share 0
+        _uv, _ue = self.urea_effect(region, supply_result) if region else (0.0, 0.0)
+        if _uv > 0 and nh3.get("nh3_soils"):
+            nh3 = dict(nh3)
+            _d = -float(nh3["nh3_soils"]) * _uv * _ue
             nh3["nh3_soils"] = float(nh3["nh3_soils"]) + _d
             nh3["nh3_total"] = float(nh3["nh3_total"]) + _d
         # CAPRI's inhibitors on applied manure raise application NH3 (p_litRevFertTechs NH3APP,

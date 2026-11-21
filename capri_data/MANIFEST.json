@@ -562,6 +562,25 @@
    },
    "catalogue_note": "CAPRI's feed supplements linseed (LINE_Tot) and nitrate (Nitr_Tot) per model region and cattle animal (envind/line_nitr.gms, ghgTechLineNitr a switch): requirement changes, eligible share, cost, CH4ENT change, calibration terms; tools/build/build_supplement_effects.py. dsav: CAPRI's cost-saving drop between its ini and max calibration runs, EUR per model head adopting (per unit of the parameter; tools/lib/_capri_costsavings.py), netted from the PMP slope as CAPRI (K67 F2).; 3-NOP rows (3NOP_Tot) since 29 October 2026 (K93) (not re-checked)"
   },
+  "capri_data/2017/abatement/mitigation/tillage_options.csv": {
+   "description": "CAPRI's conservation and no tillage options v_Miti(cropMiti, ConsTill|NoTill, N2OSYN) per model region: the tillage area, the initial share (SAPM survey), costParLin, costsaving0 from CAPRI's ini run, the calibrated cost curve (case 1-4) and the effects on the N2O of mineral N, the leaching of soil and manure N and erosion (envind/tillage.gms l. 314-849; tools/build/build_tillage_options.py)",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "abatement",
+   "status": "live",
+   "rows": 452,
+   "columns": 21,
+   "units": "U_1000ha, U_EuPerHa, U_ratio",
+   "read_by_model": [
+    "capri_mod/environmental/nitrogen.py",
+    "capri_mod/supply/abatement.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_tillage_options"
+   },
+   "catalogue_note": "CAPRI's ConsTill and NoTill per model region (envind/tillage.gms): initial shares, cost curve and effects; tools/build/build_tillage_options.py (K93) (not re-checked)"
+  },
   "capri_data/2017/abatement/mitigation/trends_milk_yield_1730.csv": {
    "description": "CAPRI's 2030 milk yields of its trend projection per CAPRI region and dairy activity (tools/build/build_mitigation_inputs.py)",
    "kind": "reference",
@@ -572,6 +591,25 @@
     "nature": "capri",
     "builder": "build_mitigation_inputs"
    }
+  },
+  "capri_data/2017/abatement/mitigation/urea_subst_option.csv": {
+   "description": "CAPRI's urea substitution v_Miti(cropMiti, UreaSubst, NH3SYN) per member state: MaxShare the urea share of mineral N, the NH3 factor difference, the cost per t of N switched and the calibrated cost curve (envind/ammo_tech.gms l. 2353-2375, 2840-2977, 3041-3047, 3100-3107; tools/build/build_urea_subst_option.py)",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "abatement",
+   "status": "live",
+   "rows": 32,
+   "columns": 12,
+   "units": "U_EuPerTon, U_ratio",
+   "read_by_model": [
+    "capri_mod/environmental/nitrogen.py",
+    "capri_mod/supply/abatement.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_urea_subst_option"
+   },
+   "catalogue_note": "CAPRI's UreaSubst per member state (envind/ammo_tech.gms): maximum share, NH3 effect, cost curve; tools/build/build_urea_subst_option.py (K93) (not re-checked)"
   },
   "capri_data/2017/abatement/mitigation/winter_cover_option.csv": {
    "description": "CAPRI's winter cover option v_Miti(CATC, WinterCov, CO2SEQ) and its calibrated cost curve (cover_crops.gms l. 550-700; tools/build/build_winter_cover_option.py)",
@@ -4747,6 +4785,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/CFACTOR_ARAB.csv": {
+   "description": "CAPRI CFACTOR_ARAB(COLS): \"Arable crops for C factor Calculation\" (capdis/spat_soillos_sets.gms l. 32), the crops envind/tillage.gms takes as the tillage crops (TILLSET, l. 324-327), as sim_ini_21730 instantiated the set",
+   "kind": "structure",
+   "rows": 24,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
   "capri_data/codes/capri/COLS.csv": {
    "description": "CAPRI COLS, the column items of its data and results arrays DATA and DATAOUT (sets.gms)",
    "kind": "structure",
@@ -4767,7 +4815,7 @@
    ],
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/FEED_TO_O.csv": {
@@ -4824,7 +4872,7 @@
    ],
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/MCACT.csv": {
@@ -4858,7 +4906,7 @@
    "columns": 2,
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/MS_RU.csv": {
@@ -4878,7 +4926,7 @@
    "columns": 2,
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/NUTS1A.csv": {
@@ -4888,7 +4936,7 @@
    "columns": 2,
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/PACT.csv": {
@@ -4918,7 +4966,7 @@
    "columns": 2,
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/PSDPAY_RD.csv": {
@@ -4928,7 +4976,7 @@
    "columns": 2,
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/PSDPAY_cscs.csv": {
@@ -4938,7 +4986,7 @@
    "columns": 2,
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/PSDPAY_vcs.csv": {
@@ -4948,7 +4996,7 @@
    "columns": 2,
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/PSG_TO_A.csv": {
@@ -4962,7 +5010,7 @@
    ],
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/RALL.csv": {
@@ -4982,7 +5030,7 @@
    "columns": 2,
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/REGEU1015.csv": {
@@ -4992,7 +5040,7 @@
    "columns": 2,
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/RM.csv": {
@@ -5061,7 +5109,7 @@
    ],
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/SRNUTS1.csv": {
@@ -5074,7 +5122,7 @@
    ],
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/SRNUTS2.csv": {
@@ -5087,7 +5135,7 @@
    ],
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/SRNUTS2_EXT.csv": {
@@ -5097,7 +5145,7 @@
    "columns": 2,
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/XX.csv": {
@@ -5360,7 +5408,7 @@
   "capri_data/codes/results_items.csv": {
    "description": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
    "kind": "structure",
-   "rows": 183,
+   "rows": 185,
    "columns": 8,
    "read_by_model": [
     "capri_mod/io_results.py"
@@ -9557,6 +9605,16 @@
    "origin": {
     "nature": "source-extract",
     "builder": "convert_sources"
+   }
+  },
+  "capri_data/sources/raw/capri/dat/envind/tillageCover.parquet": {
+   "description": "CAPRI's p_tillageCover(region, item) of dat/envind/tillageCover.gdx (the SAPM 2016 survey: arable and agricultural area, the shares of the tillage practices and of soil cover), every record of the project lead's gdxdump of the gdx (the text uploaded on 7 November 2026, 2008 records), converted one to one to Parquet (values as dumped, checked record by record on 21 November 2026); read by tools/build/build_tillage_options.py (the initial shares of ConsTill and NoTill, envind/tillage.gms l. 314-329).",
+   "kind": "coefficients",
+   "rows": 2008,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "source-extract"
    }
   },
   "capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_EmFracFert.parquet": {

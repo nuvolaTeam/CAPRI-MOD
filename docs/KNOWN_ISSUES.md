@@ -21,7 +21,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open: waiting for CAPRI's scenario results |
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
-| [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
+| [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: tillage and the urea substitution built (21 November 2026); legume share and the ration-fat limit to port; the others not needed for Farm-to-Fork and the Green Deal |
 | [K120](#k120) | CAPRI's market calibration ("capri"): the market supply Hessian measured after the first supply solve had lost most of its response; the baseline calibration's stall rule stopped it uncorrected | fixed: 20 and 37 units, full EU Farm-to-Fork and Green Deal (7 November 2026); open with CAPRI's market calibration: the baseline calibration's first-round drift (9 November 2026: not the ecological set-aside row; the baseline's prices move up to 1.3% from CAPRI's calibration point; at the baseline's end the crop levels are within a median 0.22% of CAPRI's 2030 levels, 7 region pairs above 5%; 9 November 2026, night: most of the remaining gap was the projection rescaling CAPRI's own 2030 levels to the 2017 crop-to-land ratio, fixed) |
 | [K121](#k121) | CAPRI's split activities, other fodder: split into CAPRI's OFAR and ROOF; the fodder roots' feed (FROO) tied to their land for the first time | done on mini-EU (7 November 2026); the full runs and the suite to come |
 | [K122](#k122) | CAPRI's split activities, set-aside: split into CAPRI's VSET and FALL; the winter-cover option's potential counted set-aside CAPRI fills | done on mini-EU (7 November 2026); the full runs and the suite to come |
@@ -1057,6 +1057,12 @@ With CAPRI's pmpParSqr including the fertiliser-saving term (ghgMiti.gms l. 1016
   run. The saving term in the curvature stays off (DEP-2). The structural differences that move the regional value of N
   (activities and technologies, the fertilisation block's scaling, manure P and K trade, the open departures) are to be
   assessed and reduced for their own sake (plan to follow)
+  **Corrected 21 November 2026 (K196):** the form above made the first-order condition zero at an option's initial
+  share of 0, so the option sat exactly at the point of adoption; CAPRI's condition (l. 731, with l. 900-906's
+  "some subsidy (20%) is needed to get a few early adopters to consider adoption") leaves relSubs0 x costParLin there.
+  The model now leaves that term, with its own value of N as decided (`supply.fert_option_cal_relsubs0 = true`;
+  `false` the form above; equations/ghgmiti.py pmpParlin_fertTech_DEP30). The claim above that the form met CAPRI's
+  condition exactly held for no option at zero with a positive cost. Measured in K196.
 
 
 <a id="k78"></a>
@@ -1656,6 +1662,38 @@ recorded only inside the status texts of K50 and K51 (resolved table) and README
   Status of the remaining options: buffer strips, biodiversity options and biochar need nothing for CAPRI's Green Deal
   and Farm-to-Fork runs; conservation tillage none without a soil-carbon price; no-till and LegSh are the two whose
   scenario response could be non-zero, small by the code's terms, unmeasured.
+  **Tillage and the urea substitution built, 21 November 2026** (the project lead's request "build even these"; the
+  parking of 31 October above is lifted: the Green Deal's N-surplus row is the binding N cap under which the urea
+  substitution can move, and CAPRI's Green Deal has it at 0.017 in DE21, 0.025 in ES41). The correction of 31 October
+  on the yield also holds the other way: the Green Deal files set NoYieldEffect 1 (refpol_endotech_all_sup.gms l. 202,
+  the same in _ini and _max), which resets cropyld to 1 (tillage.gms l. 504-526): no yield effect of no-till in these
+  runs.
+  - ConsTill and NoTill (tools/build/build_tillage_options.py, tillage_options.csv; equations/tillage.py): the shares
+    of the tillage area (the levels of CAPRI's CFACTOR_ARAB crops, 24 of the model's), initial shares from the SAPM
+    survey (tillageCover.gdx, the project lead's gdxdump), costParLin -44 and -21 EUR/ha, CAPRI's calibration cases
+    (2 in 441 of 452 rows, 4 in 11), TotMit_ (their sum at most 1), the cost on the tillage area (GHG_Mit_Cost_,
+    supply_model.gms l. 5077-5080); NoTill's effects: the N2O of mineral N in GASTOTNETF_ (othImpact -0.12 North and
+    Center, -0.08 South, that is +12% / +8% at share 1) and the leaching of soil and manure N in LEACHN_ (-0.24 / -0.38
+    x the tillage share of the crop area). EU only (%TillInAllRmssup% off, tillage.gms l. 586-587). The calibration
+    takes DEP-30's rule (the model's own marginal value of the share in place of CAPRI's costsaving0); the N2O term
+    moves from the initial shares on CAPRI's reference efficiency (DEP-52, 0.2% of that N2O at the median). Erosion carbon
+    (CO2ERO, CARBERO_) is in the table but not in the model (no carbon price in these runs).
+  - UreaSubst (tools/build/build_urea_subst_option.py, urea_subst_option.csv; equations/ammo_tech.py): the share of the
+    mineral N bought switched from urea, 0 to the member state's urea share, its NH3 effect in GASTOTNETF_, case 3
+    (case 4 where the cost is negative, 6 of the 32 countries with data, EU and neighbours), the cost on the N purchases (l. 5063); the accounts'
+    NH3 of mineral N and CO2 from urea take the share. CAPRI does not inflate its cost to the simulation year (KEPT-9),
+    reproduced.
+  - **Measured** (21 November 2026): the baseline keeps both tillage options at their initial shares and the urea
+    substitution at 0 (test_capri.py::test_tillage_and_urea_substitution_keep_the_base_in_the_baseline, DE21). In a
+    six-unit Green Deal probe at CAPRI's prices (FR52, ES51, NL22, IT20, DE21, ES41; 12 iterations,
+    capri_comparison.toml) against CAPRI's Green Deal step: ConsTill at its initial share in all six (CAPRI's too);
+    NoTill 0 in FR52, NL22, IT20 and DE21 (CAPRI 0 in all four; initial shares 0.080, 0.008, 0.019, 0.009), ES51 0.182
+    -> 0.120 (CAPRI 0.115), ES41 0.083 -> 0.032 (0.031): its extra N2O loss of mineral N, valued at the N-surplus
+    dual, against its flat cost curve; the urea substitution 0 in FR52, NL22, IT20 (CAPRI 0), DE21 0.019 (0.017), ES51
+    0.016 (0.017), ES41 0.025 (0.025). The N-surplus dual unchanged (median 0.966 of CAPRI's, as without the options).
+    ES51's regional model needed the inner model's duals widened once in the scenario (the registered relaxation,
+    DEP-10), which the probes without the options did not; its dual within 0.001 of theirs.
+  Remaining: LegSh and the ration-fat limit SupplementPerc_.
 
 <a id="k94"></a>
 ### K94: `capri_mod/data/reconcile_base.py` is an orphan, and README's re-basing note points at a removed concordance (found 29 October 2026, registry migration)
@@ -3948,6 +3986,30 @@ bb3b592).
   (2) Ireland's grassland extensifies less (GRAI -36% against -56.5% in a six-unit probe, whose pool has one Irish
   unit). (3) The pool imbalance of the 12-iteration probes at CAPRI's prices (above) lowers their duals; a converged
   probe is needed before a unit-by-unit comparison at CAPRI's prices.
+- **Port check of the dual's terms (21 November 2026, the project lead's question whether everything it needs is
+  ported and coupled).** The N-surplus row itself is CAPRI's (above). In the options that act on it two parts were
+  not CAPRI's form, both corrected:
+  (1) the fertiliser options' calibration (DEP-30, K77): the model made an option's first-order condition zero at its
+  initial share of 0, so the option sat at the point of adoption; CAPRI leaves relSubs0 x costParLin there (the early
+  adopters' subsidy, envind/ghgMiti.gms l. 731, 900-906). The model now does, with its own value of N as the project
+  lead decided (`supply.fert_option_cal_relsubs0 = true`; equations/ghgmiti.py pmpParlin_fertTech_DEP30);
+  (2) the inhibitor on manure: the over-fertilisation restriction (restMitFert, l. 531-543) and the value of the
+  manure N saved (p_manureShadVal, l. 870-877) take CAPRI's availability of excreted manure N
+  (v_nutAvailFactExcr; equations/ghgmiti.py othImpact_NMAN_restMitFert, p_manureShadVal); the model took its own
+  marginal manure substitution in the restriction. With CAPRI's availability the restriction binds in no region
+  (x + 0.1 is at least 1.1, above the availability everywhere); FR52's and ES51's manure shares in the probe below
+  with the setting off (0.862, 0.796) are those of the full run at bb3b592 (0.86, 0.80; different set-ups).
+  Not built among the options on the N terms: LegSh (BioFix of other arable fodder in the need and the surplus row)
+  and the ration-fat limit SupplementPerc_; tillage and urea substitution built the same day (K93).
+  **Measured** in two six-unit Green Deal probes at CAPRI's prices (FR52, ES51, NL22, IT20, DE21, ES41; 12
+  iterations, capri_comparison.toml, the same code, the setting on and off): the dual does not move (FR52 5.101 /
+  5.104 against CAPRI's 6.195; median ratio 0.966 both); the inhibitor on mineral N moves towards CAPRI's in four
+  units (ES51 0.257 -> 0.141, CAPRI 0.039; NL22 0.536 -> 0.459, 0.292; ES41 0.242 -> 0.132, 0.078; IT20 0.072 -> 0,
+  0), away in FR52 (0.575 -> 0.482, 0.575; its dual 0.82 of CAPRI's), DE21 at 0.608 both (0.600); the inhibitor on
+  manure falls in ES51 (0.796 -> 0.729) and NL22 (0.664 -> 0.525) but stays where CAPRI has none (FR52 0.862, IT20
+  0.965); precision farming within 0.02 either way. So the calibration is not the dual's gap; the inhibitor on manure
+  where CAPRI's Green Deal has none (FR52, NL22, IT20, ES51; CAPRI's code gives no reason found yet) stays the first
+  lead.
 - **In 9t:** -
 - **Status:** open (21 November 2026).
 

@@ -8,6 +8,8 @@ throughout may follow later). This builder writes:
                                               products, XX1 the market model's products with the non-agricultural good, income,
                                               land and feed energy, RALL all regional units)
   capri_data/codes/capri/FEED_TO_O.csv  CAPRI's feed bulks and their products: feed, row
+  capri_data/codes/capri/CFACTOR_ARAB.csv CAPRI's tillage crops (capdis/spat_soillos_sets.gms; envind/tillage.gms
+                                       l. 324): code, text
   capri_data/codes/capri/MS_RU.csv     CAPRI's member states and their regional units (MAP_RR x MS x RU)
   capri_data/codes/capri/MAP_RR.csv, R_RAGG.csv, REGAGGP.csv, REGEU1015.csv, MSAGG.csv, NUTS1A.csv, SRNUTS1.csv
                                        the region hierarchy of policy/policy.gms (the premium module)
@@ -309,6 +311,9 @@ def main():
     # and of each activity, crop-diversification groups, fodder crops
     write(OUT / "capri" / "landTypesMrk.csv", ("code", "text"), sorted(read_set(a.sets, "landTypesMrk").items()))
     write(OUT / "capri" / "FODCRP.csv", ("code", "text"), sorted(read_set(a.sets, "FODCRP").items()))
+    # CAPRI's tillage crops, the arable crops of the C factor (capdis/spat_soillos_sets.gms CFACTOR_ARAB): the tillage
+    # options' area, DATA(ru, crop, TILLSET, Y) = 1 (envind/tillage.gms l. 324)
+    write(OUT / "capri" / "CFACTOR_ARAB.csv", ("code", "text"), sorted(read_set(a.sets, "CFACTOR_ARAB").items()))
     # CAPRI's permanent crop groups and the crop -> nutrient group map (fertiliser distribution)
     write(OUT / "capri" / "PERM_NGRP.csv", ("code", "text"), list(read_set(a.sets, "PERM_NGRP").items()))
     write(OUT / "capri" / "CACT_TO_NGRP.csv", ("cact", "ngrp"), pairs("CACT_TO_NGRP"))

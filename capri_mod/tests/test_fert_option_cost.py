@@ -67,3 +67,43 @@ def test_manure_inhibitor_cost_on_capris_base():
     assert nlp2._mni_cost_pending is None and nlp2._mni_base == pytest.approx(80.0 * 50.0 / 1000.0)
     f = ca.Function("c", [X2], [obj2])
     assert float(f([50.0, 0.4])) == pytest.approx(80.0 * 50.0 / 1000.0 * (12.0 * 0.4 + 15.0 * 0.16), rel=1e-12)
+
+
+def test_fertiliser_option_calibration_leaves_capris_relsubs0():
+    """CAPRI calibrates a fertiliser option's linear term so that its initial share (0) is optimal with a hypothetical
+    subsidy relSubs0 x costParLin (envind/ghgMiti.gms l. 731, l. 1048-1071): with the saving at its value, the
+    first-order condition at zero is + relSubs0 x costParLin, the subsidy early adopters need (l. 900-906). DEP-30 values
+    the saving at the regional model's own marginal value of N; the calibration leaves CAPRI's relSubs0 x costParLin at
+    zero (supply.fert_option_cal_relsubs0, KNOWN_ISSUES K196). Before 21 November 2026 it made the condition zero where
+    the option would leave zero, so the options moved at any rise of the value of N."""
+    from capri_mod.supply.equations.ghgmiti import pmpParlin_fertTech_DEP30
+    # NITR_INH: costParLin 86, relSubs0 0.2 -> S0 17.2 EUR/t; the model's value of the saving 71 EUR/t at the base
+    S0, V0 = 17.2, 71.0
+    r = S0 - V0                                    # the residual per t of the option's base at zero, c1 - V0
+    b = pmpParlin_fertTech_DEP30(S0, r, True)
+    assert b == pytest.approx(V0)                  # c1 = S0 + b = relSubs0 costParLin + V0
+    assert (S0 + b) - V0 == pytest.approx(S0)      # the condition at zero: + relSubs0 costParLin
+    # the former form: zero at the base
+    b0 = pmpParlin_fertTech_DEP30(S0, r, False)
+    assert (S0 + b0) - V0 == pytest.approx(0.0)
+    # an option worth less than its subsidy at the base: left alone before, relSubs0 costParLin + V0 now
+    assert pmpParlin_fertTech_DEP30(S0, S0 - 5.0, False) is None
+    assert S0 + pmpParlin_fertTech_DEP30(S0, S0 - 5.0, True) == pytest.approx(S0 + 5.0)
+    # relSubs0 0 (an option already adopted, maxShare < 1: CAPRI's 0.8 / 0): the condition zero at the base, as before
+    assert pmpParlin_fertTech_DEP30(0.0, -40.0, True) == pytest.approx(40.0)
+
+
+def test_manure_inhibitor_nman_restriction_and_shadow_value():
+    """CAPRI's restriction of the inhibitor on manure's efficiency gain (restMitFert, envind/ghgMiti.gms l. 531-543) and
+    p_manureShadVal (l. 871-876) take v_nutAvailFactExcr, the availability of excreted manure N at the calibration point
+    (until 21 November 2026 the model took its marginal manure substitution for the restriction)."""
+    from capri_mod.supply.equations.ghgmiti import othImpact_NMAN_restMitFert, p_manureShadVal
+    nman = (1.0 / 0.9 - 1.0) ** 1.1
+    assert nman == pytest.approx(0.089194, abs=1e-6)
+    # FR520000: x 1.0, mark-up 0.1, availability 0.4229: no restriction
+    assert othImpact_NMAN_restMitFert(nman, 1.0, 0.1, 0.4229, 1.1) == nman
+    # availability above x + mark-up: none
+    assert othImpact_NMAN_restMitFert(nman, 1.0, 0.1, 1.1, 1.1) == 0.0
+    # within the band: ((x + m) / a - 1) ** e
+    assert othImpact_NMAN_restMitFert(nman, 1.0, 0.1, 1.05, 1.1) == pytest.approx((1.1 / 1.05 - 1.0) ** 1.1)
+    assert p_manureShadVal(1161.308188, 0.422861) == pytest.approx(1161.308188 * 0.422861)

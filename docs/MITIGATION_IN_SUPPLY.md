@@ -24,7 +24,9 @@ columns of the regional QP).
 | Linseed (LINE), nitrate (NITR), their combination (AComLN) | envind/line_nitr.gms | in | `tools/build/build_supplement_effects.py` |
 | Winter cover (WinterCov) | envind/cover_crops.gms | a choice of the regional model with CAPRI's cost curve, the Farm-to-Fork requirement as its floor (`capri_regional_nlp.py`, catcMiti_; docs/WINTER_COVER.md); it acts in the cascade and in leaching | `cover_crops.csv`, `p_winterCoverShare0.csv` |
 | Histosol fallowing (FALLOW) | envind/no_histosols.gms | in, as a linear column (approximated) | `histosol.csv` |
-| Legume share (LegSh), tillage (ConsTill, NoTill), urea substitution (UreaSubst), buffer strips, biodiversity options, biochar | various | not built; their LEACHN_/RUNSURFN_ terms held at CAPRI's reference | - |
+| Conservation and no tillage (ConsTill, NoTill) | envind/tillage.gms | shares of the tillage area, choices of the regional model with CAPRI's cost curve (21 November 2026, KNOWN_ISSUES K93); NoTill acts on the N2O of mineral N (GASTOTNETF_) and the leaching of soil and manure N (LEACHN_), no yield effect (the Green Deal's NoYieldEffect 1); erosion carbon (CARBERO_) not in the model | `tillage_options.csv` (`tools/build/build_tillage_options.py`) |
+| Urea substitution (UreaSubst) | envind/ammo_tech.gms | a share of the mineral N bought, a choice of the regional model with CAPRI's cost curve (21 November 2026, K93); acts on the NH3 of mineral N (GASTOTNETF_) and the accounts' CO2 from urea | `urea_subst_option.csv` (`tools/build/build_urea_subst_option.py`) |
+| Legume share (LegSh), buffer strips, biodiversity options, biochar | various | not built; their LEACHN_/RUNSURFN_ terms held at CAPRI's reference | - |
 
 The active set is CAPRI's Green Deal reference (`pol_input/greendeal/refpol_endotech_all_sup.gms`, activeTech;
 `capri_data/2017/abatement/active_technologies.csv`). The copy of the JRC121368-era reference supplied with CAPRI

@@ -170,7 +170,11 @@ class HessianBlock:
                         + ((("linear-solver", str(_settings().get("supply.nlp_linear_solver")).lower()),)
                            if str(_settings().get("supply.nlp_linear_solver")).lower() != "mumps" else ())
                         # 29 October 2026: the shocks' solutions from the KKT conditions (beyond CAPRI)
-                        + (("kkt-step",) if kkt else ()))
+                        + (("kkt-step",) if kkt else ())
+                        # 21 November 2026 (K196): the fertiliser options' calibration leaves CAPRI's relSubs0 x
+                        # costParLin at their initial share (supply.fert_option_cal_relsubs0; off: the key as before)
+                        + (("fert-option-relsubs0",)
+                           if bool(_settings().get("supply.fert_option_cal_relsubs0")) else ()))
                    # at a scenario's state (market.hessian_scenario_iter): its young-animal and member-state milk
                    # prices too (a baseline's key is unchanged)
                    + (repr((sorted((getattr(sm.seen, "yani_price_ratio", None) or {}).items()),

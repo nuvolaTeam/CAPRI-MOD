@@ -4437,6 +4437,24 @@ def test_winter_cover_is_chosen_in_the_nlp_form(model):
     assert abs(w1 - cs["base"] / cs["uaa"]) < 1e-9 and abs(cs["cascade_share"] - w1) < 1e-12 and abs(w0 - w1) < 1e-9
 
 
+@pytest.mark.slow
+@pytest.mark.no_market_hessian
+def test_tillage_and_urea_substitution_keep_the_base_in_the_baseline(model):
+    """CAPRI's tillage options and urea substitution as choices of the regional model (envind/tillage.gms,
+    envind/ammo_tech.gms; KNOWN_ISSUES K93): the calibration makes the base point their first-order point, so the
+    baseline keeps ConsTill and NoTill at their initial shares (case 2, the residual at Subs0 = 0) and the urea
+    substitution at 0 (case 3, Subs0 > 0 above the model's value of the NH3 saved)."""
+    regs = ["DE210000"]
+    b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
+    mo = model.supply_module._models["DE210000"]
+    ts, us = mo._till_spec(), mo._urea_spec()
+    assert ts is not None and {t["name"] for t in ts["techs"]} == {"ConsTill", "NoTill"} and us is not None
+    sr = b["supply"]["DE210000"]                    # the solve's shares (the regional model's own are reset after it)
+    for t in ts["techs"]:
+        assert abs(sr.till_shares[t["name"]] - t["m0"]) < 2e-3, (t, sr.till_shares)
+    assert sr.urea_share is not None and -1e-6 <= sr.urea_share < 1e-3, sr.urea_share
+
+
 def test_catch_crops_take_capris_reference_form(model):
     """K188: CAPRI's 2030 reference runs without mitigation options (%ghgAbatement% off, its default,
     capmod/set_global_variables.gms l. 215): its catch crops are the CATC activity at its input cost, and where they
