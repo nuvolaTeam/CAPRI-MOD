@@ -109,6 +109,17 @@ def NUTNED_(need, supply, inv_sc):
     return need - supply * inv_sc
 
 
+def NUTNED_legSh(need, need_OFAR, needShare, v_Miti):
+    """NUTNED_'s legume share term (l. 1111-1112) on the need of other arable fodder's group: need - need_OFAR x share x
+    v, with need_OFAR OFAR's need columns (its level and technology mix columns, as the group's need writes them),
+    share the part of OFAR's need the option removes at v = 1 (equations/leg_share.py NUTNED_LegSh_needShare), v the
+    option's share of OFAR (CAPRI's v_Miti of OFAR, LegSh, BioFix).
+
+    CAPRI's GAMS of NUTNED_: NUTNED_'s docstring.
+    """
+    return need - need_OFAR * needShare * v_Miti
+
+
 def NUTNED_ownCres(need, own, availFactCres):
     """NUTNED_'s delivery from a permanent group's own harvest residues and deposition (l. 1198-1211), moved to the
     need side: need - own x v_nutAvailFactCRes x (1 - N2O GasTot).

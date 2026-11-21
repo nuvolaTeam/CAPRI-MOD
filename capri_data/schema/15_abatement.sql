@@ -181,6 +181,42 @@ INSERT INTO value_units VALUES
   ('urea_subst_option', 'pmp_lin', 'U_EuPerTon', 'builder', 'pmpParLin per unit of the share, per t of N bought'),
   ('urea_subst_option', 'case', NULL, 'open', 'the calibration case of ammo_tech.gms (a category, no unit)');
 
+-- file: capri_data/2017/abatement/mitigation/legsh_option.csv
+CREATE TABLE legsh_option (
+    region VARCHAR PRIMARY KEY REFERENCES regional_units (region),
+    ms VARCHAR NOT NULL REFERENCES capri_rall (code),
+    fleg_share DOUBLE NOT NULL CHECK (fleg_share BETWEEN 0 AND 1),
+    nfix_rate_gras DOUBLE NOT NULL CHECK (nfix_rate_gras > 0 AND nfix_rate_gras < 0.15),
+    biofix_ofar DOUBLE NOT NULL CHECK (biofix_ofar > 0 AND biofix_ofar < 1),
+    othimpact_biofix DOUBLE NOT NULL CHECK (othimpact_biofix > 0),
+    data_nitf_ofar DOUBLE NOT NULL CHECK (data_nitf_ofar > 0),
+    mult_fact_nitf DOUBLE NOT NULL CHECK (mult_fact_nitf > 0),
+    add_fact_nitf DOUBLE NOT NULL,
+    need_share DOUBLE NOT NULL CHECK (need_share > 0 AND need_share < 1),
+    cost_lin_eur_ha DOUBLE NOT NULL CHECK (cost_lin_eur_ha > 0),
+    pmp_lin DOUBLE NOT NULL,
+    pmp_sqr DOUBLE NOT NULL CHECK (pmp_sqr > 0),
+    subs0 DOUBLE NOT NULL,
+    subs1 DOUBLE NOT NULL,
+    max_share DOUBLE NOT NULL CHECK (max_share > 0 AND max_share <= 1)
+);
+COMMENT ON TABLE legsh_option IS 'CAPRI''s increased legume share in temporary grassland v_Miti(OFAR, LegSh, BioFix) per model region: othImpact BioFix, the share of other arable fodder''s N need it removes, and its cost per ha of OFAR (envind/leg_share.gms l. 33-47, miti_data_jul15; tools/build/build_legsh_option.py)';
+INSERT INTO value_units VALUES
+  ('legsh_option', 'fleg_share', 'U_ratio', 'capri', 'DATA(r, FLEG, LEVL, BAS): the fodder legumes'' share of other arable fodder'),
+  ('legsh_option', 'nfix_rate_gras', 'U_ratio', 'capri', 'p_nfixRate_gras of the member state (fertpar.gms; the GRAE rate where none)'),
+  ('legsh_option', 'biofix_ofar', 'U_ratio', 'capri', 'p_nitrFact(r, OFAR, BioFix)'),
+  ('legsh_option', 'othimpact_biofix', 'U_ratio', 'capri', 'othImpact BioFix of the member state: the relative change of OFAR''s fixation at share 1'),
+  ('legsh_option', 'data_nitf_ofar', 'U_kgperha', 'capri', 'DATA(r, OFAR, NITF, Y), fertned.gms'),
+  ('legsh_option', 'mult_fact_nitf', 'U_ratio', 'capri', 'v_cropNutNeedMultFact(r, NITF, T)'),
+  ('legsh_option', 'add_fact_nitf', 'U_kgperha', 'capri', 'v_cropNutNeedAddFact(r, NITF)'),
+  ('legsh_option', 'need_share', 'U_ratio', 'builder', 'the share of OFAR''s N need in NUTNED_ removed at share 1'),
+  ('legsh_option', 'cost_lin_eur_ha', 'U_EuPerHa', 'builder', 'costParLin per ha of OFAR x (1 - FLEG), the base year''s money'),
+  ('legsh_option', 'pmp_lin', 'U_EuPerHa', 'builder', 'pmpParLin per ha of OFAR x (1 - FLEG), without p_fertCostGains'),
+  ('legsh_option', 'pmp_sqr', 'U_EuPerHa', 'builder', 'pmpParSqr per unit of the share squared, per ha of OFAR x (1 - FLEG)'),
+  ('legsh_option', 'subs0', 'U_EuPerHa', 'builder', 'Subs0 per ha of OFAR x (1 - FLEG)'),
+  ('legsh_option', 'subs1', 'U_EuPerHa', 'builder', 'Subs1 per ha of OFAR x (1 - FLEG)'),
+  ('legsh_option', 'max_share', 'U_ratio', 'capri', 'MaxShare, share of OFAR');
+
 -- the three animal option tables share their effect columns: relative changes per unit of the option's parameter
 -- file: capri_data/2017/abatement/mitigation/genetics_effects.csv
 CREATE TABLE genetics_effects (

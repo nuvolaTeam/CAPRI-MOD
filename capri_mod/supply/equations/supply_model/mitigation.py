@@ -266,3 +266,18 @@ def GHG_Mit_Cost_ureaSubst(v_netPutQuant, inv_1000, cost_perShare):
     Departures from CAPRI: none (the base is the purchases alone, without the fertiliser options' factor of their
     targFertSyn base, l. 5064-5069)."""
     return v_netPutQuant * inv_1000 * cost_perShare
+
+
+def GHG_Mit_Cost_legSh(v_actLevl_OFAR, c1, c2_half, v_Miti):
+    r"""The legume share's part of GHG_Mit_Cost_(r) (l. 4984-5116, its base l. 5058-5059), kEUR: OFAR's level (1000 ha)
+    x (c1 v + c2_half v^2), c1 = costParLin + pmpParLin (+ the calibration's linear term), c2_half = 0.5 pmpParSqr
+    (envind/leg_share.gms; tools/build/build_legsh_option.py), v = v_Miti(OFAR, LegSh, BioFix).
+
+    CAPRI's GAMS, GHG_Mit_Cost_'s OFAR base (l. 5058-5059; the parts per share: GHG_Mit_Cost_targFertMan's docstring):
+
+    *           ... or simply the activity level for increased legume share in temporary grasland or rice measures
+                + sum(A $ p_technFact(RUNR,PACT,"LEVL",A),v_actLevl(RUNR,PACT,A))                   $ (sameas(PACT,"OFAR") or sameas(PACT,"PARI"))
+
+    In this project's notation, X the level of OFAR (its technologies summed; the technology mix column moves area
+    between them, not the level): cost_r = X x [c1 v + 0.5 c2 v^2]. Departures from CAPRI: none."""
+    return v_actLevl_OFAR * (c1 * v_Miti + c2_half * v_Miti * v_Miti)

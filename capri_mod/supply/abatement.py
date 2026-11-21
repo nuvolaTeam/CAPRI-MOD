@@ -146,6 +146,45 @@ class AbatementBlock:
                 "c1": float(r["cost_lin_eur_t"]) + float(r["pmp_lin"]), "c2": float(r["pmp_sqr"]),
                 "subs0": float(r["subs0"])}
 
+    def _legsh_spec(self):
+        """CAPRI's increased legume share in temporary grassland of this region for the NLP form (envind/leg_share.gms;
+        legsh_option.csv, tools/build/build_legsh_option.py), or None: not among the run's active technologies, no data
+        for the region (the option has no effect there), no OFAR column. {"col", "mix", "m1", "oi", "need_share",
+        "fix", "ydiff", "c1", "c2", "subs0", "x0"}: the share v of OFAR (v_Miti(OFAR, LegSh, BioFix)), 0 <= v <=
+        MaxShare; othImpact BioFix (the member state's, l. 33-47); the part of OFAR's N need in NUTNED_ it removes at
+        v = 1; OFAR's fixation per 1000 ha at this solve's yields (e_BIOFIX, t N: the accounts' unit balance, as the
+        N-surplus row's coefficients) and the technology mix column's factor on it (p_technFact(NITF, T1) -
+        p_technFact(NITF, T2), which fertned.gms l. 205-206 sets to the main output's, techn_mix_2030.csv yield_diff);
+        the cost per ha of OFAR, costParLin + pmpParLin (Subs0 at v = 0) and pmpParSqr (l. 40-42); OFAR's base level."""
+        act_ = active_technologies()
+        if act_ is not None and "LEGSH" not in act_:
+            return None
+        if "OFAR" not in self.acts:
+            return None
+        opt = _inputs.current().cached(                                   # a missing file is an error (K74)
+            "legsh_option", lambda inp: inp.csv("legsh_option.csv", "abatement/mitigation").set_index("region"))
+        rid = self.data.region_id
+        if rid not in opt.index:
+            return None
+        r = opt.loc[rid]
+        j = self.acts.index("OFAR")
+        env_ = getattr(self.seen, "env_for_surplus", None)
+        if env_ is None:
+            return None
+        mint = dict(getattr(self.ev, "n_intensity", {}) or {})
+        _mi = {k_: v_ for k_, v_ in mint.items() if k_ in ("OFAR", "__credit__")}
+        fix = float(env_.unit_nitrogen_balance("OFAR", self.data.yields, rid, _mi,
+                                               yields_scen=self._yields_scen_now()).get("n_fixation", 0.0) or 0.0)
+        mixc = dict(getattr(self.ev, "mix_cols", None) or {})
+        tm_ = getattr(self.data, "techn_mix", None)
+        kz = mixc.get("OFAR")
+        ydiff = float(tm_.at["OFAR", "yield_diff"]) if (kz is not None and tm_ is not None and "OFAR" in tm_.index) else 0.0
+        xb = self._base_levels()
+        return {"col": j, "mix": kz, "m1": float(r["max_share"]), "oi": float(r["othimpact_biofix"]),
+                "need_share": float(r["need_share"]), "fix": fix, "ydiff": ydiff,
+                "c1": float(r["cost_lin_eur_ha"]) + float(r["pmp_lin"]), "c2": float(r["pmp_sqr"]),
+                "subs0": float(r["subs0"]), "x0": float(xb.get("OFAR", 0.0) or 0.0)}
+
     def _nlp_abatement_spec(self, labels):
         """CAPRI's abatement options for the NLP form (ghgAbatement; capri-mod: the manure techniques with feeding inside):
         the ammonia options with their loss cascade, the fertiliser options (regional shares) on the crops' mineral N,
@@ -162,6 +201,9 @@ class AbatementBlock:
         _us = self._urea_spec()
         if _us is not None:
             out["urea"] = _us
+        _ls = self._legsh_spec()
+        if _ls is not None:
+            out["legsh"] = _ls
         ctx = self._amm_context()
         techs = self._tech_list()
         if ctx is not None and techs:

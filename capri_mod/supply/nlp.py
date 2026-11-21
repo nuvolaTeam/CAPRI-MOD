@@ -650,6 +650,7 @@ class NLPBlock:
             self.res.fert_tech_shares = {k_: float(v_) for k_, v_ in ab["fert"].items()}
         self.res.till_shares = {k_: float(v_) for k_, v_ in (ab.get("till") or {}).items()}
         self.res.urea_share = float(ab["urea"]) if ab.get("urea") is not None else None
+        self.res.legsh_share = float(ab["legsh"]) if ab.get("legsh") is not None else None
         if ab.get("mni") is not None and getattr(self.ev, "nlp_nip", None):
             _sh = float(ab["mni"]); _nip = self.ev.nlp_nip
             if _sh > 1e-9:

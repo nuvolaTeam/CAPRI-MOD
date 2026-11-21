@@ -26,7 +26,8 @@ columns of the regional QP).
 | Histosol fallowing (FALLOW) | envind/no_histosols.gms | in, as a linear column (approximated) | `histosol.csv` |
 | Conservation and no tillage (ConsTill, NoTill) | envind/tillage.gms | shares of the tillage area, choices of the regional model with CAPRI's cost curve (21 November 2026, KNOWN_ISSUES K93); NoTill acts on the N2O of mineral N (GASTOTNETF_) and the leaching of soil and manure N (LEACHN_), no yield effect (the Green Deal's NoYieldEffect 1); erosion carbon (CARBERO_) not in the model | `tillage_options.csv` (`tools/build/build_tillage_options.py`) |
 | Urea substitution (UreaSubst) | envind/ammo_tech.gms | a share of the mineral N bought, a choice of the regional model with CAPRI's cost curve (21 November 2026, K93); acts on the NH3 of mineral N (GASTOTNETF_) and the accounts' CO2 from urea | `urea_subst_option.csv` (`tools/build/build_urea_subst_option.py`) |
-| Legume share (LegSh), buffer strips, biodiversity options, biochar | various | not built; their LEACHN_/RUNSURFN_ terms held at CAPRI's reference | - |
+| Legume share in temporary grassland (LegSh) | envind/leg_share.gms | a share of other arable fodder, a choice of the regional model with CAPRI's cost curve (21 November 2026, K93); OFAR's fixation x (1 + othImpact x share) in NUTNED_, the N-surplus row and the accounts' fixation; its soil carbon (CO2SEQ into GLUC) and the fixation's N2O not in the model | `legsh_option.csv` (`tools/build/build_legsh_option.py`) |
+| Buffer strips, biodiversity options, biochar | various | not built (not in CAPRI's Green Deal lists); their LEACHN_/RUNSURFN_ terms held at CAPRI's reference | - |
 
 The active set is CAPRI's Green Deal reference (`pol_input/greendeal/refpol_endotech_all_sup.gms`, activeTech;
 `capri_data/2017/abatement/active_technologies.csv`). The copy of the JRC121368-era reference supplied with CAPRI

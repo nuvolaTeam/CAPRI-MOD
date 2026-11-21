@@ -66,6 +66,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/2017/abatement/fert_options_jul15.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/2017/abatement/fert_side_effects.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/2017/abatement/mitigation/genetics_effects.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
+  ('capri_data/2017/abatement/mitigation/legsh_option.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/2017/abatement/mitigation/lownfeed_effects.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/2017/abatement/mitigation/p_nutCont.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/2017/abatement/mitigation/supplement_effects.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),

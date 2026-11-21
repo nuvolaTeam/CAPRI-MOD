@@ -757,6 +757,18 @@ class NitrogenBlock:
             return float(t.at[ms, "frac_urea"])
         return float(v), float(t.at[ms, "nh3_othimpact"])
 
+    def legsh_effect(self, region, supply_result):
+        """(share, othImpact BioFix) of CAPRI's legume share in temporary grassland in the supply result
+        (legsh_option.csv, the region's member state's othImpact; envind/leg_share.gms), (0, 0) without."""
+        v = getattr(supply_result, "legsh_share", None)
+        if v is None:
+            return 0.0, 0.0
+        t = _inputs.current().cached(
+            "legsh_option", lambda inp: inp.csv("legsh_option.csv", "abatement/mitigation").set_index("region"))
+        if region not in t.index:
+            return 0.0, 0.0
+        return float(v), float(t.at[region, "othimpact_biofix"])
+
     def till_effects(self, region, supply_result):
         """The tillage options' effects at their initial shares and at the supply result's (envind/tillage.gms;
         tillage_options.csv): {"n2o": (sum othImpact N2OSYN x share at the initial shares, now), "slea": (... no3slea

@@ -21,7 +21,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open: waiting for CAPRI's scenario results |
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
-| [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: tillage and the urea substitution built (21 November 2026); legume share and the ration-fat limit to port; the others not needed for Farm-to-Fork and the Green Deal |
+| [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: tillage, the urea substitution and the legume share built (21 November 2026); the ration-fat limit to port; the others not needed for Farm-to-Fork and the Green Deal |
 | [K120](#k120) | CAPRI's market calibration ("capri"): the market supply Hessian measured after the first supply solve had lost most of its response; the baseline calibration's stall rule stopped it uncorrected | fixed: 20 and 37 units, full EU Farm-to-Fork and Green Deal (7 November 2026); open with CAPRI's market calibration: the baseline calibration's first-round drift (9 November 2026: not the ecological set-aside row; the baseline's prices move up to 1.3% from CAPRI's calibration point; at the baseline's end the crop levels are within a median 0.22% of CAPRI's 2030 levels, 7 region pairs above 5%; 9 November 2026, night: most of the remaining gap was the projection rescaling CAPRI's own 2030 levels to the 2017 crop-to-land ratio, fixed) |
 | [K121](#k121) | CAPRI's split activities, other fodder: split into CAPRI's OFAR and ROOF; the fodder roots' feed (FROO) tied to their land for the first time | done on mini-EU (7 November 2026); the full runs and the suite to come |
 | [K122](#k122) | CAPRI's split activities, set-aside: split into CAPRI's VSET and FALL; the winter-cover option's potential counted set-aside CAPRI fills | done on mini-EU (7 November 2026); the full runs and the suite to come |
@@ -1693,7 +1693,26 @@ recorded only inside the status texts of K50 and K51 (resolved table) and README
     0.016 (0.017), ES41 0.025 (0.025). The N-surplus dual unchanged (median 0.966 of CAPRI's, as without the options).
     ES51's regional model needed the inner model's duals widened once in the scenario (the registered relaxation,
     DEP-10), which the probes without the options did not; its dual within 0.001 of theirs.
-  Remaining: LegSh and the ration-fat limit SupplementPerc_.
+  - LegSh (tools/build/build_legsh_option.py, legsh_option.csv; equations/leg_share.py), built the same day: the share v
+    of other arable fodder (OFAR) whose temporary grassland part (1 - the fodder legume share) has its legume share
+    raised, 0 <= v <= 1 (MaxShare), IniShare 0; OFAR's fixation x (1 + othImpact v) (othImpact the member state's,
+    leg_share.gms l. 33-47: 0 where its grassland rate is at least 0.15, so no rows for EE, EL, HU, IT) in NUTNED_
+    (the share of OFAR's need removed, D b o k / (D (1 - b) k + a), with v_cropNutNeedAddFact from sim_ini_21730,
+    added to the reference export), in the N-surplus row (e_BIOFIX, the technology mix column's factor included)
+    and in the accounts' fixation; the cost per ha of OFAR (miti_data_jul15's member state parameters on the temporary
+    grassland part, l. 40-42), calibrated with DEP-30's rule in place of p_fertCostGains (l. 53-73). Not in the model:
+    its soil carbon (CO2SEQ into GLUC) and its fixation's N2O (DEP-8). 185 regions of 23 member states.
+    **Measured** (21 November 2026): the baseline keeps it at 0 (DE21, in the baseline test above). Six units at CAPRI's
+    Green Deal prices (ES62, CY, PL52, DE21, FR52, ES41; 12 iterations, capri_comparison.toml) against CAPRI's step:
+    CY 0.121 (CAPRI 0.095), DE21, FR52, ES41 0 (0), PL52 0 (0.011), ES62 0 (0.927). ES62's first-order condition
+    written out: per unit of the share the N need it removes is worth 28.74 kEUR (its group's NUTNED_ multiplier 13.86
+    EUR/kg) and the fixation it adds costs 28.69 in the N-surplus row (dual 13.99), so the option does not pay its
+    Subs0 (OFAR's level 0.071 thousand ha, CAPRI 0.071). In CAPRI's step the need is worth more than the surplus row
+    charges: D_NUTNED / NITF of OFAR 19.48 EUR/kg in CAPRI's money, 15.25 in the model's, against its surplus dual 13.10
+    (1.16 times; the model 0.99). The option is CAPRI's; the value of N need relative to the surplus dual in ES62 is
+    the N block's, with K196 (the model's need multiplier there is about its surplus dual; why CAPRI's is 16% above
+    its own is not traced).
+  Remaining: the ration-fat limit SupplementPerc_.
 
 <a id="k94"></a>
 ### K94: `capri_mod/data/reconcile_base.py` is an orphan, and README's re-basing note points at a removed concordance (found 29 October 2026, registry migration)
@@ -4010,6 +4029,9 @@ bb3b592).
   0.965); precision farming within 0.02 either way. So the calibration is not the dual's gap; the inhibitor on manure
   where CAPRI's Green Deal has none (FR52, NL22, IT20, ES51; CAPRI's code gives no reason found yet) stays the first
   lead.
+  The probe of the legume share (ES62, CY, PL52, DE21, FR52, ES41, the same settings; K93) adds two observations:
+  PL52's dual 0.99 against CAPRI's 2.89 (0.34; not in the six units above), and in ES62 the N need's multiplier about
+  the surplus dual (13.86 / 13.99) where CAPRI's other arable fodder carries 1.16 times its surplus dual.
 - **In 9t:** -
 - **Status:** open (21 November 2026).
 

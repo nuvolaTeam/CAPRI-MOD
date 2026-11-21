@@ -4439,11 +4439,12 @@ def test_winter_cover_is_chosen_in_the_nlp_form(model):
 
 @pytest.mark.slow
 @pytest.mark.no_market_hessian
-def test_tillage_and_urea_substitution_keep_the_base_in_the_baseline(model):
-    """CAPRI's tillage options and urea substitution as choices of the regional model (envind/tillage.gms,
-    envind/ammo_tech.gms; KNOWN_ISSUES K93): the calibration makes the base point their first-order point, so the
-    baseline keeps ConsTill and NoTill at their initial shares (case 2, the residual at Subs0 = 0) and the urea
-    substitution at 0 (case 3, Subs0 > 0 above the model's value of the NH3 saved)."""
+def test_tillage_urea_substitution_and_legume_share_keep_the_base_in_the_baseline(model):
+    """CAPRI's tillage options, urea substitution and legume share in temporary grassland as choices of the regional
+    model (envind/tillage.gms, envind/ammo_tech.gms, envind/leg_share.gms; KNOWN_ISSUES K93): the calibration makes
+    the base point their first-order point, so the baseline keeps ConsTill and NoTill at their initial shares (case 2,
+    the residual at Subs0 = 0), the urea substitution at 0 (case 3, Subs0 > 0 above the model's value of the NH3 saved)
+    and the legume share at 0 (Subs0 left at zero, DEP-30's rule)."""
     regs = ["DE210000"]
     b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
     mo = model.supply_module._models["DE210000"]
@@ -4453,6 +4454,8 @@ def test_tillage_and_urea_substitution_keep_the_base_in_the_baseline(model):
     for t in ts["techs"]:
         assert abs(sr.till_shares[t["name"]] - t["m0"]) < 2e-3, (t, sr.till_shares)
     assert sr.urea_share is not None and -1e-6 <= sr.urea_share < 1e-3, sr.urea_share
+    assert mo._legsh_spec() is not None
+    assert sr.legsh_share is not None and -1e-6 <= sr.legsh_share < 1e-3, sr.legsh_share
 
 
 def test_catch_crops_take_capris_reference_form(model):

@@ -435,6 +435,7 @@ def main():
                               # the tillage options' and the urea substitution's shares (21 November 2026)
                               "till": dict(getattr(v, "till_shares", None) or {}),
                               "urea": getattr(v, "urea_share", None),
+                              "legsh": getattr(v, "legsh_share", None),
                               "amm": {f"{a_}|{t_}": float(x_) for (a_, t_), x_ in (getattr(v, "manure_tech_shares", None) or {}).items()},
                               # every constraint's shadow price, the manure trade and the land types
                               "duals": {k_: float(x_) for k_, x_ in (getattr(v, "shadow_prices", {}) or {}).items()

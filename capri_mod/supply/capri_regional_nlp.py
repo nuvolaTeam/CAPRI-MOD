@@ -23,9 +23,9 @@ land-market columns, land and bound rows, with one label per row) and the calibr
   area target, the ammonia, fertiliser-technique and inhibitor options through CAPRI's N loss cascade, the emission tax.
 
 Breeding, low-N feed, linseed, nitrate and 3-NOP (and histosol fallowing) are linear columns the supply module adds.
-Conservation and no tillage and the urea substitution are the regional model's columns since 21 November 2026
-(_abatement_block). Not built: legume share, buffer strips, biodiversity options, biochar, and CAPRI's ration fat
-constraint SupplementPerc_ (KNOWN_ISSUES K93).
+Conservation and no tillage, the urea substitution and the legume share in temporary grassland are the regional
+model's columns since 21 November 2026 (_abatement_block). Not built: buffer strips, biodiversity options, biochar,
+and CAPRI's ration fat constraint SupplementPerc_ (KNOWN_ISSUES K93).
 
 CALIBRATION of the feed terms. The rations were calibrated (feed/ration.py) with CAPRI's fixed feed shares and dry-matter
 limits; CAPRI's simulation model has only REQSE_. As CAPRI's PMP calibration does, the linear terms are set so that the
@@ -648,12 +648,12 @@ class CapriRegionalNLP:
         import casadi as ca
         from capri_mod.supply.equations.supply_model.nutrients import (
             NUTNED_, NUTNED_ownCres, NUTNED_availFact, NUTNED_supply, fertDistMine_, fertDistExcr_, fertDistCres_,
-            ManureNPK_trade, ManureNPK_ammKept, fertDistCres_catc, v_nutAvailFactExcr_endo)
+            ManureNPK_trade, ManureNPK_ammKept, fertDistCres_catc, v_nutAvailFactExcr_endo, NUTNED_legSh)
         from capri_mod.supply.equations.supply_model.inner_fert import (
             gamma_prior, e_focFertDist_dual, e_focFertDist_term, e_focFertDist_term_slack, e_fertDistPartialRegu_upper,
             e_fertDistReguMax, e_focFertDist_FB)
         from capri_mod.supply.equations.supply_model.fert_limits import e_synNMax
-        from capri_mod.supply.equations.supply_model.n_surplus import SURTOT_REST_
+        from capri_mod.supply.equations.supply_model.n_surplus import SURTOT_REST_, e_BIOFIX_legSh
         from capri_mod.supply.equations.supply_model.objective import (
             LINEAR_netPutQuant, LINEAR_carbonTaxNITF, LINEAR_carbonTaxN2OLEA)
         from capri_mod.supply.equations.supply_model.mitigation import GHG_Mit_Cost_targFertSyn
@@ -733,6 +733,12 @@ class CapriRegionalNLP:
             for gi, g_ in enumerate(G):
                 sc_ = max(sum(m for (gj, s_, m, acc) in flows if gj == gi), 1.0)
                 need = self._lin(y, g_["need"], scale=sc_)
+                ls_ = getattr(self, "_legsh", None) if nut == "N" else None
+                if ls_ is not None:
+                    # the legume share's term (NUTNED_, l. 1111-1112) on OFAR's need columns of the group
+                    _ofar = [(j_, c_) for j_, c_ in g_["need"] if int(j_) in ls_["cols"]]
+                    if _ofar:
+                        need = NUTNED_legSh(need, self._lin(y, _ofar, scale=sc_), pv(ls_["need_share"]), ls_["v"])
                 if g_["perm"] and g_["own"]:
                     need = NUTNED_ownCres(need, self._lin(y, [(c_, float(v_)) for c_, v_ in g_["own"]], scale=sc_),
                                           effC)
@@ -850,6 +856,12 @@ class CapriRegionalNLP:
                     nzA = [(j, float(Ai[j])) for j in np.nonzero(Ai)[0]]
                     _cn = (getattr(self, "catc_n", None) * pv(1.0 / rs)) if getattr(self, "catc_n", None) is not None else 0
                     # the catch crops' BioFix N is an input of the gross balance (e_BIOFIX)
+                    ls_ = getattr(self, "_legsh", None)
+                    if ls_ is not None:
+                        # the legume share's fixation (e_BIOFIX, l. 1456-1457): OFAR's fixation, per technology x (1 +
+                        # p_technFact(NITF, A)) (the mix column z: ydiff x z), x othImpact x v
+                        _bf = y[ls_["col"]] + (pv(ls_["ydiff"]) * y[int(ls_["mix"])] if ls_.get("mix") is not None else 0)
+                        _cn = _cn + e_BIOFIX_legSh(pv(ls_["fix"]) * _bf, pv(ls_["oi"]), ls_["v"]) * pv(1.0 / rs)
                     g_rows.append(SURTOT_REST_(self._lin(y, nzA, scale=rs), P, pv(1.0 / rs), _cn))
                     _add = float((npk.get("n_rows_rhs_add") or {}).get(lab_, 0.0))
                     lbg.append(-np.inf); ubg.append((float(self._b[i_]) + _add) / rs)
@@ -1173,13 +1185,31 @@ class CapriRegionalNLP:
             new.append(zu)
             lbx += [0.0]; ubx += [float(us["m1"])]
             self.abat["urea"] = {"off": o, "subs0": float(us["subs0"])}
+        # the legume share in temporary grassland (envind/leg_share.gms; abatement._legsh_spec): the share v of OFAR,
+        # TotMit_ with no control, GHG_Mit_Cost_ on OFAR's level, OFAR's fixation x (1 + othImpact v) in NUTNED_ and the
+        # N-surplus row (the fertilisation block, _fert_block). Only with the N fertilisation block
+        self._legsh = None
+        ls = spec.get("legsh")
+        if ls and "N" in ((spec.get("npk") or {}).get("nutrients") or {}) and float(ls.get("m1", 0.0)) > 0:
+            from capri_mod.supply.equations.supply_model.mitigation import GHG_Mit_Cost_legSh
+            zl = ca.SX.sym("legsh", 1)
+            c1 = float(ls["c1"]) + float((spec.get("dabat") or {}).get(("legsh",), 0.0))
+            obj = obj + GHG_Mit_Cost_legSh(y[int(ls["col"])], self._pv(c1), self._pv(0.5 * float(ls["c2"])), zl[0])
+            self._legsh = {"v": zl[0], "cols": {int(ls["col"])} | ({int(ls["mix"])} if ls.get("mix") is not None else set()),
+                           "need_share": float(ls["need_share"]), "oi": float(ls["oi"]), "fix": float(ls["fix"]),
+                           "col": int(ls["col"]), "mix": ls.get("mix"), "ydiff": float(ls.get("ydiff", 0.0))}
+            g_rows.append(TotMit_([zl[0]])); lbg.append(-np.inf); ubg.append(1.0)
+            o = nx0 + sum(int(v.shape[0]) for v in new)
+            new.append(zl)
+            lbx += [0.0]; ubx += [float(ls["m1"])]
+            self.abat["legsh"] = {"off": o, "subs0": float(ls["subs0"]), "x0": float(ls["x0"])}
         if new:
             X = ca.vertcat(X, *new)
         return X, obj
 
     def abatement_outputs(self, x):
         """Shares of the options at x: {"amm": {(act, key, tech): share}, "fert": {tech: share}, "mni": share,
-        "catc": share, "catc_area": 1000 ha, "till": {tech: share}, "urea": share}."""
+        "catc": share, "catc_area": 1000 ha, "till": {tech: share}, "urea": share, "legsh": share}."""
         out = {}
         a = self.abat.get("amm")
         if a:
@@ -1200,6 +1230,9 @@ class CapriRegionalNLP:
         u_ = self.abat.get("urea")
         if u_:
             out["urea"] = float(x[u_["off"]])
+        l_ = self.abat.get("legsh")
+        if l_:
+            out["legsh"] = float(x[l_["off"]])
         return out
 
     def catc_area(self, x):
@@ -1462,6 +1495,17 @@ class CapriRegionalNLP:
             b_ = pmpParlin_fertTech_DEP30(float(ur_["subs0"]), res[j] / den, False) if den > 0 else None
             if b_ is not None:
                 dabat[("urea",)] = b_
+            res[j] = 0.0
+        # the legume share: CAPRI's linear term is Subs0 plus p_fertCostGains, the value of the N need it removes at the
+        # member state's mineral N price (envind/leg_share.gms l. 53-73), so its first-order condition at zero is Subs0
+        # at that notional value; the model leaves Subs0 there with its own value of the N need and fixation
+        # (DEP-30's rule): the residual per ha of OFAR
+        lg_ = self.abat.get("legsh") if getattr(self, "abat", None) else None
+        if lg_:
+            j = lg_["off"]
+            den = float(lg_["x0"])
+            if den > 0:
+                dabat[("legsh",)] = pmpParlin_fertTech_DEP30(float(lg_["subs0"]), res[j] / den, True)
             res[j] = 0.0
         rest = np.abs(res[n0 + nf:]).max() if nX > n0 + nf else 0.0
         self.cal_point = xb

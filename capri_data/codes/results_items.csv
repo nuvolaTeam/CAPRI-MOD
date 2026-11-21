@@ -150,6 +150,7 @@ supply,gross_output,rows,GROF,act,SWHE;DWHE;RYEM;BARL;OATS;CORN;OCER;PARI;OCRO;O
 supply,histosol_fallow,rows,,,,,
 supply,iset,rows,,,,,
 supply,land_types,rows,,,,,
+supply,legsh_share,rows,,,,share of other arable fodder,"K93: CAPRI's LegSh share, v_Miti(RU, OFAR, LegSh, BioFix) (envind/leg_share.gms)"
 supply,luc,rows,,,,,
 supply,manure_availability,rows,,,,,
 supply,manure_ni_nh3,rows,,,,,

@@ -1589,6 +1589,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         res.fert_tech_shares = dict(getattr(self.res, "fert_tech_shares", {}) or {})   # before the reset below
         res.till_shares = dict(getattr(self.res, "till_shares", {}) or {})             # the tillage options' shares
         res.urea_share = getattr(self.res, "urea_share", None)                         # the urea substitution's share
+        res.legsh_share = getattr(self.res, "legsh_share", None)                       # the legume share's share
         # IPOPT's last point kept on the last attempt (non-optimal, as CAPRI; _nlp_last_point): IPOPT's status, else None
         res.nlp_nonoptimal = getattr(self.res, "nlp_nonoptimal", None)
         # CAPRI's crop-group allocation as the regional model solved it (inner model at its totals, or the coupled NLP)
@@ -1602,6 +1603,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         self.res.fert_tech_shares = {}
         self.res.till_shares = {}
         self.res.urea_share = None
+        self.res.legsh_share = None
         res.balance_shortfall = float(getattr(self, "balance_shortfall", 0.0))
         self.balance_shortfall = 0.0
         return res

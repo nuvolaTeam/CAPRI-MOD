@@ -515,6 +515,25 @@
    },
    "catalogue_note": "Per unit of tech_param (ghgTechMYld / ghgTechFEff, CAPRI scenario settings, capri_mod/policy/endotech.py); scaled at run time. | 23 October 2026: column max_share, CAPRI's MaxShare of the breeding options with %fixGenet_eff_to_iniValues% on (0.002, breeding.gms l. 65-77, lowered to the max calibration run's level where smaller, l. 375-379), applied with the endotech setting fixGenetToIni. dsav: CAPRI's cost-saving drop between its ini and max calibration runs, EUR per model head adopting (per unit of the parameter; tools/lib/_capri_costsavings.py), netted from the PMP slope as CAPRI (K67 F2). (not re-checked)"
   },
+  "capri_data/2017/abatement/mitigation/legsh_option.csv": {
+   "description": "CAPRI's increased legume share in temporary grassland v_Miti(OFAR, LegSh, BioFix) per model region: othImpact BioFix, the share of other arable fodder's N need it removes, and its cost per ha of OFAR (envind/leg_share.gms l. 33-47, miti_data_jul15; tools/build/build_legsh_option.py)",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "abatement",
+   "status": "live",
+   "rows": 185,
+   "columns": 16,
+   "units": "U_EuPerHa, U_kgperha, U_ratio",
+   "read_by_model": [
+    "capri_mod/environmental/nitrogen.py",
+    "capri_mod/supply/abatement.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_legsh_option"
+   },
+   "catalogue_note": "CAPRI's LegSh per model region (envind/leg_share.gms): fixation effect, share of the N need removed, cost curve; tools/build/build_legsh_option.py (K93) (not re-checked)"
+  },
   "capri_data/2017/abatement/mitigation/lownfeed_effects.csv": {
    "description": "CAPRI's low-protein feeding option LowNFeed (envind/low_n_feed.gms) on the model's animals (tools/build/build_lownfeed_effects.py)",
    "kind": "coefficients",
@@ -5408,7 +5427,7 @@
   "capri_data/codes/results_items.csv": {
    "description": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
    "kind": "structure",
-   "rows": 185,
+   "rows": 186,
    "columns": 8,
    "read_by_model": [
     "capri_mod/io_results.py"

@@ -441,6 +441,14 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   and without (1)); the inhibitor on mineral N moves towards CAPRI's in four units (ES51 0.257 -> 0.141, CAPRI 0.039;
   NL22 0.536 -> 0.459, 0.292), away in FR52 (0.575 -> 0.482, 0.575); the inhibitor on manure stays where CAPRI has none
   (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
+- **K93, the legume share in temporary grassland built (21 November 2026):** CAPRI's LegSh (envind/leg_share.gms;
+  tools/build/build_legsh_option.py, legsh_option.csv from miti_data_jul15 and CAPRI's simulation data; equations/
+  leg_share.py): a share of other arable fodder, OFAR's fixation x (1 + othImpact x share) in NUTNED_ (the share of
+  OFAR's need removed, with v_cropNutNeedAddFact added to the sim_ini export), the N-surplus row and the accounts, the
+  cost per ha of OFAR on its temporary grassland part, calibrated with DEP-30's rule in place of CAPRI's
+  p_fertCostGains. The baseline keeps it at 0; at CAPRI's Green Deal prices CY 0.121 (CAPRI 0.095), 0 where CAPRI has
+  0 (DE21, FR52, ES41), ES62 0 against 0.927 on 0.07 thousand ha (the need's value there about the surplus dual, CAPRI's 1.16 times its own; K196).
+  DEP-8 narrowed; SupplementPerc_ remains (K93).
 - **K93, conservation and no tillage and the urea substitution built (21 November 2026):** CAPRI's ConsTill, NoTill
   (envind/tillage.gms; tools/build/build_tillage_options.py, tillage_options.csv from CAPRI's tillage.gms statements,
   its SAPM survey shares, its tillage regions and crops) and UreaSubst (envind/ammo_tech.gms;

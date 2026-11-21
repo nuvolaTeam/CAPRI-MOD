@@ -3483,6 +3483,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -3545,6 +3546,7 @@
    "read_by": {
     "model": [],
     "builders": [
+     "build_legsh_option",
      "build_tillage_options",
      "build_urea_subst_option"
     ],
@@ -3764,6 +3766,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -4787,6 +4790,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -5245,6 +5249,7 @@
      "build_ghg_coefs_2017",
      "build_gl_demand",
      "build_land_market",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -5447,6 +5452,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -17770,6 +17776,7 @@
      "capri_mod/environmental/nitrogen.py"
     ],
     "builders": [
+     "build_legsh_option",
      "build_techn_mix_2030"
     ],
     "checks": [],
@@ -18009,7 +18016,9 @@
     "model": [
      "capri_mod/supply/supply_module.py"
     ],
-    "builders": [],
+    "builders": [
+     "build_legsh_option"
+    ],
     "checks": [],
     "tests": []
    }
@@ -23846,6 +23855,234 @@
     "tests": []
    }
   },
+  "legsh_option": {
+   "file": "capri_data/2017/abatement/mitigation/legsh_option.csv",
+   "declared_in": "15_abatement.sql",
+   "layout": [],
+   "comment": "CAPRI's increased legume share in temporary grassland v_Miti(OFAR, LegSh, BioFix) per model region: othImpact BioFix, the share of other arable fodder's N need it removes, and its cost per ha of OFAR (envind/leg_share.gms l. 33-47, miti_data_jul15; tools/build/build_legsh_option.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fleg_share",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "nfix_rate_gras",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "biofix_ofar",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "othimpact_biofix",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "data_nitf_ofar",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "mult_fact_nitf",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "add_fact_nitf",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "need_share",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "cost_lin_eur_ha",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "pmp_lin",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "pmp_sqr",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "subs0",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "subs1",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "max_share",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "ms"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(fleg_share BETWEEN 0 AND 1)",
+    "((nfix_rate_gras > 0) AND (nfix_rate_gras < 0.15))",
+    "((biofix_ofar > 0) AND (biofix_ofar < 1))",
+    "(othimpact_biofix > 0)",
+    "(data_nitf_ofar > 0)",
+    "(mult_fact_nitf > 0)",
+    "((need_share > 0) AND (need_share < 1))",
+    "(cost_lin_eur_ha > 0)",
+    "(pmp_sqr > 0)",
+    "((max_share > 0) AND (max_share <= 1))"
+   ],
+   "units": [
+    {
+     "item": "add_fact_nitf",
+     "unit": "U_kgperha",
+     "status": "capri",
+     "basis": "v_cropNutNeedAddFact(r, NITF)"
+    },
+    {
+     "item": "biofix_ofar",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_nitrFact(r, OFAR, BioFix)"
+    },
+    {
+     "item": "cost_lin_eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "builder",
+     "basis": "costParLin per ha of OFAR x (1 - FLEG), the base year's money"
+    },
+    {
+     "item": "data_nitf_ofar",
+     "unit": "U_kgperha",
+     "status": "capri",
+     "basis": "DATA(r, OFAR, NITF, Y), fertned.gms"
+    },
+    {
+     "item": "fleg_share",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "DATA(r, FLEG, LEVL, BAS): the fodder legumes' share of other arable fodder"
+    },
+    {
+     "item": "max_share",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "MaxShare, share of OFAR"
+    },
+    {
+     "item": "mult_fact_nitf",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "v_cropNutNeedMultFact(r, NITF, T)"
+    },
+    {
+     "item": "need_share",
+     "unit": "U_ratio",
+     "status": "builder",
+     "basis": "the share of OFAR's N need in NUTNED_ removed at share 1"
+    },
+    {
+     "item": "nfix_rate_gras",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_nfixRate_gras of the member state (fertpar.gms; the GRAE rate where none)"
+    },
+    {
+     "item": "othimpact_biofix",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "othImpact BioFix of the member state: the relative change of OFAR's fixation at share 1"
+    },
+    {
+     "item": "pmp_lin",
+     "unit": "U_EuPerHa",
+     "status": "builder",
+     "basis": "pmpParLin per ha of OFAR x (1 - FLEG), without p_fertCostGains"
+    },
+    {
+     "item": "pmp_sqr",
+     "unit": "U_EuPerHa",
+     "status": "builder",
+     "basis": "pmpParSqr per unit of the share squared, per ha of OFAR x (1 - FLEG)"
+    },
+    {
+     "item": "subs0",
+     "unit": "U_EuPerHa",
+     "status": "builder",
+     "basis": "Subs0 per ha of OFAR x (1 - FLEG)"
+    },
+    {
+     "item": "subs1",
+     "unit": "U_EuPerHa",
+     "status": "builder",
+     "basis": "Subs1 per ha of OFAR x (1 - FLEG)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_legsh_option",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/CFACTOR_ARAB.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/DACT_TO_PACT.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEDACT_TO_FODDI.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/MSAGG.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/NUTS0.csv; $REFERENCE/sets/simini_21730/NUTS1A.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/PSDPAY_<CC>.csv; $REFERENCE/sets/simini_21730/PSDPAY_cscs.csv; $REFERENCE/sets/simini_21730/PSDPAY_vcs.csv; $REFERENCE/sets/simini_21730/PSG_TO_A.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/REGAGGP.csv; $REFERENCE/sets/simini_21730/REGEU1015.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/R_RAGG.csv; $REFERENCE/sets/simini_21730/SRNUTS1.csv; $REFERENCE/sets/simini_21730/SRNUTS2.csv; $REFERENCE/sets/simini_21730/SRNUTS2_EXT.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/sets/simini_21730/mitiTech_map.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_infl.csv.gz; $REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $REFERENCE/simini/simini_21730/v_cropNutNeedAddFact.csv.gz; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/fert/multfact_1730.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/def_gascoeff.gms; $SOURCES/gams/fert/fertpar.gms; $SOURCES/gams/sets.gms; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/environmental/nitrogen.py",
+     "capri_mod/supply/abatement.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_legsh_option.py"
+    ]
+   }
+  },
   "lownfeed_effects": {
    "file": "capri_data/2017/abatement/mitigation/lownfeed_effects.csv",
    "declared_in": "15_abatement.sql",
@@ -29218,6 +29455,7 @@
      "build_ghg_coefs_2017",
      "build_labour_setaside",
      "build_land_market",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -29424,6 +29662,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -29538,6 +29777,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -29638,6 +29878,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -29743,6 +29984,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -29944,6 +30186,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -30038,6 +30281,7 @@
      "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_land_market",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -36606,6 +36850,7 @@
      "build_labour_setaside",
      "build_land_market",
      "build_land_rents",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -36822,6 +37067,7 @@
      "build_ghg_coefs_2017",
      "build_gl_demand",
      "build_land_market",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -37293,6 +37539,7 @@
      "build_labour_setaside",
      "build_land_market",
      "build_land_rents",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -37513,6 +37760,7 @@
      "build_labour_setaside",
      "build_land_market",
      "build_land_rents",
+     "build_legsh_option",
      "build_livestock_manure_2030",
      "build_livestock_n_export_coef",
      "build_livestock_output_coef",
@@ -47056,7 +47304,8 @@
    "read_by": {
     "model": [],
     "builders": [
-     "build_fert_options_jul15"
+     "build_fert_options_jul15",
+     "build_legsh_option"
     ],
     "checks": [],
     "tests": []
@@ -58929,6 +59178,7 @@
      "build_labour_setaside",
      "build_land_market",
      "build_land_rents",
+     "build_legsh_option",
      "build_lownfeed_effects",
      "build_manure_pool_market",
      "build_milk_for_feeding_2030",
@@ -61713,7 +61963,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 516,
+  "capri/keep": 518,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 37,

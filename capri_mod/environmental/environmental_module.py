@@ -395,6 +395,15 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         # with mineral N allocated in the supply model it is already net of it, else it replaces mineral N here
         _cv = getattr(supply_result, "cover_crops", None) or {}
         _cn = float(_cv.get("delta", 0.0) or 0.0) * float(_cv.get("biofix", 0.0) or 0.0) * 1000.0
+        # CAPRI's legume share in temporary grassland (envind/leg_share.gms): OFAR's fixation x othImpact x v more
+        # (e_BIOFIX, supply_model.gms l. 1456-1457), an input of the balance; its N need is the regional model's (the
+        # mineral N allocated there is net of it)
+        _lv_, _lo_ = self.legsh_effect(region, supply_result) if supply_result is not None else (0.0, 0.0)
+        if _lv_ > 0 and _lo_ > 0 and float(acts.get("OFAR", 0.0) or 0.0) > 0:
+            from capri_mod.supply.equations.supply_model.n_surplus import e_BIOFIX_legSh
+            _fx = float(self.unit_nitrogen_balance("OFAR", yields, region, mint, yields_scen=_ysc).get("n_fixation", 0.0)
+                        or 0.0) * float(acts.get("OFAR", 0.0))
+            _cn = _cn + e_BIOFIX_legSh(_fx, _lo_, _lv_)
         if _cn != 0:
             nb["n_fixation"] = float(nb["n_fixation"]) + _cn
             nb["n_surplus"] = float(nb["n_surplus"]) + _cn
