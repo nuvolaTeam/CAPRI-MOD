@@ -407,6 +407,29 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   the purchase price (0.568 EUR/kg, base and Green Deal; 0.142 in the Green Deal before), PT18's other arable fodder
   -7.7% (CAPRI -5.7; -19.0 in the Bonn-settings run of 20 November). Left: ES42's rye area +17.6% against CAPRI's +0.7% (its shift -8.5 against
   -11.4%), with the N-surplus dual (K196).
+- **The Green Deal standing check at b30fa20 (21 November 2026):** the full-EU Green Deal with capri_comparison.toml
+  (runs/full_gd_b30fa20.pkl, converged in 29 iterations, 5,156 s; the baseline's market supply Hessian read from the
+  cache of the identical baseline), against the run at bb3b592 with the same file (the changes between them that act
+  in the Green Deal: K194, K189's per-head terms, DEP-51's T1 - T2 switch, K195; K192 and K186 do not act there; their
+  shares not separated). Against CAPRI's step:
+  EU producer prices' mean gap 0.8 -> 0.5 points, model / CAPRI median 0.93 -> 0.97 (the cereals within 0.4 points:
+  barley +11.1%, CAPRI +10.8; rye +14.6, +14.7; beef +18.4, +20.0; milk +10.6, +11.2); EU activities' mean gap 0.7 ->
+  1.0 points (closer: soft wheat -2.1%, CAPRI -1.9; barley -3.8, -3.8; rye -11.0, -11.9; sugar beet -0.3, +0.1;
+  further: intensive grassland -49.7, -54.8 (-51.9 before), extensive +46.6, +51.8 (+48.8), set-aside +75.4, +79.5
+  (+76.9), pulses -3.3, -0.8 (-1.7), oats -2.9, -0.9 (-1.3)); herds within 0.3 points of before (suckler cows -28.1,
+  CAPRI -28.8); member states' median gaps 1.10 -> 1.08 points on average. The N-surplus dual 0.889 -> 0.849 of
+  CAPRI's at the median (K196; the changes not separated, the T1 - T2 switch the likeliest part: it lowered the dual
+  in the probe of 19 November); the grassland split's larger gap goes with it.
+- **K192 measured in the full Farm-to-Fork run (21 November 2026):** the full-EU Farm-to-Fork with capri_comparison.toml
+  at 6eff275 (runs/full_f2f_6eff275.pkl, converged in 16 iterations, 4,569 s; 6eff275 is bb3b592 with the K192 fix
+  alone, so the difference is K192's), against the run at bb3b592 and JRC121368. The ammonia options are choices now (JRC121368's ghgTechAmmEndog 1): covered manure
+  storage 8.6 -> 30.0% (Table 17: 34), air purification 0 -> 10.0 (10), low-emission housing 16.4 -> 18.8 (12),
+  low-emission spreading 42.2 -> 89.3. EU ammonia -19.5 -> -42.6% (JRC121368 -33.0: now 9.6 points beyond it), manure
+  N2O -28.6 -> -22.3 (-3.2). The options' N kept lowers the N-surplus dual (median over the 214 units with a binding
+  target 6.63 -> 5.48 EUR per kg N), and the livestock side moves towards JRC121368: beef price +44.5 -> +38.5 (+24.1),
+  pork +35.7 -> +30.3 (+43.0), poultry +33.6 -> +28.3 (+18.0), milk +29.9 -> +26.6 (+1.1); beef animals -23.4 -> -21.1
+  (-17.7), pigs -18.0 -> -16.9 (-14.3), dairy cows -4.3 -> -3.9 (-10.1); N surplus -34.6 -> -34.9 (-33.5). Mean
+  absolute deviation from JRC121368, 20 indicators, 7.06 -> 6.45 (with ammonia 7.36 -> 6.60).
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against
