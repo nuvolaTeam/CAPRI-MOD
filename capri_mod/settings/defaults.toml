@@ -376,6 +376,14 @@ organic_topup_at_fuel_cost = true
 # ("none"). false: the model's one representation in base and scenario (DEP-51); true: the Green Deal step moves each
 # crop's mean plant-protection cost to CAPRI's step (plant_protection_capri_step_2030.csv; capri_comparison.toml)
 greendeal_plap_crop_level_capri_step = false
+# Comparison switch, DEP-51's T1 - T2 part (the project lead's decision of 21 November 2026). CAPRI's 2030 reference and
+# its PMP calibration ran with the pesticide module's aggregates (PLAP out of the crops' objective, the pesticides
+# without a technology factor: no T1 - T2 plant-protection cost), its Green Deal step with "none" (PLAP in the
+# objective, p_technFact PLAP +-0.4: a T1 - T2 cost of 0.8 x DATA(PLAP) x UVAP(PLAP) its calibration did not have).
+# false: the model's one representation (each technology mix column's plap_diff x the crop's cost, calibrated at the
+# base; DEP-51); true: in the Green Deal group's solves each mix column's linear term adds plap_diff x (CAPRI's step's
+# cost less the model's change of the crop's cost) (policy._plap_mix_capri_step; capri_comparison.toml)
+greendeal_plap_mix_capri_step = false
 # CAPRI's fertiliser-option curvature with the fertiliser saving valued at the member state's NITF price (envind/
 # ghgMiti.gms l. 1016-1035, the supply audit's finding S5, ARCHITECTURE_REFACTOR.md section 5.2); false: without (this model before 24 October 2026). OFF by default (25 October
 # 2026): with it and the cost on the N purchases, the curvature turns negative where NMIN is large and the baseline

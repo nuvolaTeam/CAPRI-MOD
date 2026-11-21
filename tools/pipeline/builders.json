@@ -769,7 +769,9 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
+    "$REFERENCE/simini/simini_21730/DATA.csv.gz",
+    "$REFERENCE/simini/simini_21730/p_infl.csv.gz"
    ],
    "outputs": [
     "capri_data/baselines/capri_greendeal_ref/1730/supply/plant_protection_capri_step_2030.csv"

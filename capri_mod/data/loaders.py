@@ -638,10 +638,12 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "price_transmission": (lambda t: {ms: {(r.activity, r.commodity): float(r.factor) for r in g.itertuples()}
                                           for ms, g in t.reset_index().groupby("ms")} if t is not None else None)(
             _load_optional_csv(data_dir, "price_transmission_2030.csv")),
-        # CAPRI's two valuations of each crop's plant protection at its 2030 reference, its PLAP coefficient at PLAP's unit
-        # value and the pesticide module's Plantp_cost (tools/build/build_plant_protection_capri_step_2030.py; the
-        # comparison switch supply.greendeal_plap_crop_level_capri_step, DEP-51): {region: DataFrame by activity}
-        "plant_protection_capri_step": (lambda t: {r: g.set_index("activity")[["plap_uvag_eur_ha", "plantp_cost_eur_ha"]]
+        # CAPRI's two valuations of each crop's plant protection at its 2030 reference, its PLAP coefficient at the member
+        # state's UVAP(PLAP) (p_linObjeCont) and the pesticide module's Plantp_cost
+        # (tools/build/build_plant_protection_capri_step_2030.py; the comparison switches
+        # supply.greendeal_plap_crop_level_capri_step and supply.greendeal_plap_mix_capri_step, DEP-51):
+        # {region: DataFrame by activity}
+        "plant_protection_capri_step": (lambda t: {r: g.set_index("activity")[["plap_uvap_eur_ha", "plantp_cost_eur_ha"]]
                                                    for r, g in t.reset_index().groupby("region")} if t is not None else None)(
             _load_optional_csv(data_dir, "plant_protection_capri_step_2030.csv")),
         # the same by product, columns 'ACT.MARKET' (EUR per head): what each market price moves

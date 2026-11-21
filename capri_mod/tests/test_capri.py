@@ -3619,19 +3619,20 @@ def test_settings_layer_is_the_one_source_of_run_settings():
 
 
 def test_capri_comparison_settings_run_fix5_and_fix6_as_capri_codes_them():
-    """The comparison runs with CAPRI's results (the project lead, 19 November 2026) take
+    """The comparison runs with CAPRI's results (the project lead, 19 and 21 November 2026) take
     capri_mod/settings/capri_comparison.toml: FIX-5 and FIX-6 as CAPRI codes them and CAPRI's Green Deal step's
-    valuation of each crop's plant protection (DEP-51's crop-level part), everything else the defaults; the defaults
-    keep both fixes and the one representation."""
+    valuation of each crop's plant protection (DEP-51's crop-level and T1 - T2 parts), everything else the defaults;
+    the defaults keep both fixes and the one representation."""
     import pathlib
     from capri_mod import settings as S
     f = pathlib.Path(S.__file__).parent / "capri_comparison.toml"
     s = S.load([f])
     assert s.diff() == {"supply.greendeal_inputs_keep_tech_change": False, "supply.organic_topup_at_fuel_cost": False,
-                        "supply.greendeal_plap_crop_level_capri_step": True}
+                        "supply.greendeal_plap_crop_level_capri_step": True, "supply.greendeal_plap_mix_capri_step": True}
     d = S.defaults()
     assert d.get("supply.greendeal_inputs_keep_tech_change") is True and d.get("supply.organic_topup_at_fuel_cost") is True
     assert d.get("supply.greendeal_plap_crop_level_capri_step") is False
+    assert d.get("supply.greendeal_plap_mix_capri_step") is False
 
 
 
@@ -5205,7 +5206,7 @@ def test_greendeal_input_changes_follow_capri(monkeypatch):
 def test_greendeal_plap_crop_level_capri_step_moves_the_mean_cost_to_capris_step(monkeypatch):
     """DEP-51's crop-level part as a comparison switch (supply.greendeal_plap_crop_level_capri_step, off by default):
     CAPRI's 2030 reference values each crop's plant protection at the pesticide module's Plantp_cost, its Green Deal
-    step at PLAP x UVAG(PLAP) x (1 + change) [TF_I] / TF_I. With the switch the model's Green Deal step changes the
+    step at PLAP x UVAP(PLAP) x (1 + change) [TF_I] / TF_I. With the switch the model's Green Deal step changes the
     crop's mean cost by CAPRI's step less its reference instead of its own change d_p; the technology mix columns keep
     d_p; nothing changes with the switch off or for the animals."""
     import pandas as pd
@@ -5225,7 +5226,7 @@ def test_greendeal_plap_crop_level_capri_step_moves_the_mean_cost_to_capris_step
     ani = next(a for a in ("DCOW", "PIGF") if a in mo.net_revenues.index)
     cs = pd.read_csv(DATA_DIR / "baselines" / "capri_greendeal_ref" / "1730" / "supply" /
                      "plant_protection_capri_step_2030.csv")
-    tab = cs[cs.region == region].set_index("activity")[["plap_uvag_eur_ha", "plantp_cost_eur_ha"]]
+    tab = cs[cs.region == region].set_index("activity")[["plap_uvap_eur_ha", "plantp_cost_eur_ha"]]
     assert crop in tab.index
     mo.data.plap_capri_step = tab
     plap = mo._input_row(crop, "plap_eur_ha")
@@ -5239,11 +5240,54 @@ def test_greendeal_plap_crop_level_capri_step_moves_the_mean_cost_to_capris_step
     monkeypatch.setattr(RegionalSupplyModel, "greendeal_plap_crop_level_capri_step", True)
     mo.net_revenues = nr0.copy(); mo.ev.greendeal_crop_delta = None
     mo._apply_greendeal_input_changes(0.25, 0.50)
-    q_uv, ppc = float(tab.at[crop, "plap_uvag_eur_ha"]), float(tab.at[crop, "plantp_cost_eur_ha"])
+    q_uv, ppc = float(tab.at[crop, "plap_uvap_eur_ha"]), float(tab.at[crop, "plantp_cost_eur_ha"])
     shift = (q_uv * 0.5 - ppc) / money_deflator(2030) - d_p          # ratio (1 - 0.5) TF_I / TF_I
     assert abs((nr_off[crop] - mo.net_revenues[crop]) - shift) < 1e-9
     assert mo.ev.greendeal_crop_delta[crop][0] == d_p, "the mix columns keep the model's change"
     assert mo.net_revenues[ani] == nr_off[ani]
+
+
+def test_greendeal_plap_mix_capri_step_adds_capris_t1_t2_cost(monkeypatch):
+    """DEP-51's T1 - T2 part as a comparison switch (supply.greendeal_plap_mix_capri_step, off by default): CAPRI's
+    2030 reference and calibration had no T1 - T2 plant-protection cost (5_aggregates), its Green Deal step has
+    plap_diff x DATA(PLAP) x UVAP(PLAP) x (1 + change)[TF_I]/TF_I. With the switch the Green Deal group's solves add
+    plap_diff x (CAPRI's step's cost less the model's change d_p) to each mix column's linear term; nothing with the
+    switch off, outside the Green Deal group or for a crop without CAPRI's values. The unit value is the member state's
+    UVAP of 2030 (capmod/define_objc.gms l. 40-44): DE21's soft wheat 5440.44 x 37.1262 x 1.019^13 / 1000."""
+    import pandas as pd
+    from capri_mod.data.inputs import money_deflator
+    from capri_mod.supply.supply_module import RegionalSupplyModel
+
+    cs = pd.read_csv(DATA_DIR / "baselines" / "capri_greendeal_ref" / "1730" / "supply" /
+                     "plant_protection_capri_step_2030.csv").set_index(["region", "activity"])
+    q_de = float(cs.at[("DE210000", "SWHE"), "plap_uvap_eur_ha"])
+    assert abs(q_de - 5440.441842 * 37.12616712337457 * 1.019 ** 13 / 1000) < 1e-3
+    assert not cs.index.get_level_values(0).str.startswith("TR").any()
+
+    class _M:
+        _plap_capri_step_cost = RegionalSupplyModel._plap_capri_step_cost
+        _plap_mix_capri_step = RegionalSupplyModel._plap_mix_capri_step
+        _greendeal_tech_progress = RegionalSupplyModel._greendeal_tech_progress
+
+        def __init__(self):
+            self.data = type("D", (), {"plap_capri_step": cs.loc["DE210000"][["plap_uvap_eur_ha", "plantp_cost_eur_ha"]],
+                                       "sim_year": 2030})()
+            self.ev = type("E", (), {"greendeal_group": True, "greendeal_inputs": {}})()
+
+    m = _M()
+    assert m._plap_mix_capri_step("SWHE", 0.8, -10.0) == 0.0                 # the switch off (the default)
+    monkeypatch.setattr(_M, "greendeal_plap_mix_capri_step", True, raising=False)
+    defl = money_deflator(2030)
+    assert abs(m._plap_mix_capri_step("SWHE", 0.8, 0.0) - 0.8 * q_de / defl) < 1e-9    # no input change: ratio 1
+    tf = 1.0 - 0.005 * 13
+    m.ev.greendeal_inputs = {"pc_plap": -0.5, "tf": tf, "keep_tf": False}            # FIX-5 as CAPRI codes it
+    d_p = -40.0
+    want = 0.8 * (q_de * 0.5 / tf / defl - d_p)
+    assert abs(m._plap_mix_capri_step("SWHE", 0.8, d_p) - want) < 1e-9
+    assert m._plap_mix_capri_step("XXXX", 0.8, d_p) == 0.0                   # no CAPRI values for the crop
+    assert m._plap_mix_capri_step("SWHE", 0.0, d_p) == 0.0                   # no plap_diff
+    m.ev.greendeal_group = False
+    assert m._plap_mix_capri_step("SWHE", 0.8, d_p) == 0.0                   # not a Green Deal group solve
 
 
 def test_greening_rows_follow_capris_envconst(monkeypatch):

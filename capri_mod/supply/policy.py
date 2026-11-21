@@ -500,6 +500,26 @@ class PolicyBlock:
                 nr[a] = float(nr.get(a, 0.0)) - d
         self.net_revenues = nr
 
+    def _plap_capri_step_cost(self, a: str, pc_plap: float, tf: float, keep_tf: bool):
+        """CAPRI's Green Deal step's plant-protection cost of crop a per ha at the crop's mean technology, in the model's
+        money (P_s), and its reference's (Plantp_cost), or None without CAPRI's two values for the crop or outside a
+        simulation year. CAPRI's step (pesticide disaggregation off) values the crop's PLAP coefficient at the member
+        state's UVAP (capmod/define_objc.gms l. 40-44, p_linObjeCont), the coefficient changed by the Green Deal's
+        regional percentage (capmod/define_inputs.gms l. 66-73):
+
+            P_s = DATA(r, a, "PLAP") x UVAP(MS, "PLAP") / 1000 x (1 + pc) x [TF_I] / TF_I / deflator(2030)
+
+        ([TF_I] with greendeal_inputs_keep_tech_change, FIX-5; plap_uvap_eur_ha of
+        plant_protection_capri_step_2030.csv the first factors, in CAPRI's 2030 money)."""
+        t = getattr(self.data, "plap_capri_step", None)
+        sim = getattr(self.data, "sim_year", None)
+        if t is None or a not in t.index or sim is None:
+            return None
+        q_uv, ppc = float(t.at[a, "plap_uvap_eur_ha"]), float(t.at[a, "plantp_cost_eur_ha"])
+        ratio = (1.0 + pc_plap) * (tf if keep_tf else 1.0) / tf if pc_plap != 0.0 else 1.0
+        defl = _inputs.money_deflator(int(sim))
+        return q_uv * ratio / defl, ppc / defl
+
     def _plap_crop_level_capri_step(self, a: str, pc_plap: float, tf: float, keep_tf: bool, d_p: float) -> float:
         """Comparison switch supply.greendeal_plap_crop_level_capri_step (DEP-51, its crop-level part; off by default):
         the change of crop a's mean plant-protection cost per ha (model money) that moves the model's Green Deal step to
@@ -508,31 +528,60 @@ class PolicyBlock:
         CAPRI's 2030 reference and its PMP calibration ran with the pesticide module's aggregates (pestDisaggStage
         5_aggregates, PEST_DISAGG on: the crop pays its disaggregated pesticides, reported as Plantp_cost;
         reports/rep_sets.gms l. 378-380), its Green Deal step without them (stage none: the crop pays PLAP,
-        Plantp_cost.PLAP, l. 384-386), the step's coefficient changed by the Green Deal's regional percentage
-        (capmod/define_inputs.gms l. 66-73):
+        Plantp_cost.PLAP, l. 384-386; _plap_capri_step_cost):
 
             reference (calibration):  Plantp_cost(r, a)
-            Green Deal step:          DATA(r, a, "PLAP") x UVAG(r, "PLAP") / 1000 x (1 + pc) x [TF_I] / TF_I
+            Green Deal step:          P_s = DATA(r, a, "PLAP") x UVAP(MS, "PLAP") / 1000 x (1 + pc) x [TF_I] / TF_I
 
-        ([TF_I] with greendeal_inputs_keep_tech_change, FIX-5). The model has one representation in base and scenario
-        and changes its own cost by d_p (delta() above); with the switch on it changes it by CAPRI's step less its
-        reference instead:
+        The model has one representation in base and scenario and changes its own cost by d_p (delta() above); with the
+        switch on it changes it by CAPRI's step less its reference instead:
 
-            shift_a = (plap_uvag_a x ratio - plantp_cost_a) / deflator(2030) - d_p,   ratio = (1 + pc)[TF_I] / TF_I
+            shift_a = P_s - Plantp_cost_a / deflator(2030) - d_p
 
-        The technology mix columns keep the model's d_p (the T1 - T2 part of DEP-51 is not switched here)."""
+        The technology mix columns keep the model's d_p; their T1 - T2 part is _plap_mix_capri_step."""
         if not bool(getattr(type(self), "greendeal_plap_crop_level_capri_step", False)):
             return 0.0
-        t = getattr(self.data, "plap_capri_step", None)
-        if t is None or a not in t.index:
+        c = self._plap_capri_step_cost(a, pc_plap, tf, keep_tf)
+        if c is None:
             return 0.0
-        q_uv, ppc = float(t.at[a, "plap_uvag_eur_ha"]), float(t.at[a, "plantp_cost_eur_ha"])
-        ratio = (1.0 + pc_plap) * (tf if keep_tf else 1.0) / tf if pc_plap != 0.0 else 1.0
-        sim = getattr(self.data, "sim_year", None)
-        if sim is None:
+        P_s, ppc = c
+        return P_s - ppc - float(d_p)
+
+    def _plap_mix_capri_step(self, a: str, plap_diff: float, d_p: float) -> float:
+        """Comparison switch supply.greendeal_plap_mix_capri_step (DEP-51, its T1 - T2 part; off by default): the cost
+        per unit of crop a's technology mix column (T1 less T2 per ha, model money) that its Green Deal step adds to
+        the column's linear term to move it to CAPRI's step; 0 with the switch off, outside the Green Deal group's
+        solves or without CAPRI's values for the crop.
+
+        CAPRI's technology factors of plant protection (intens/techf.gms l. 102-103, in sim_ini_21730 for the step):
+
+            p_technFact(RS,TACT,"PLAP","T1")      $ (PACT_TO_I(TACT,"PLAP") and (NOT FNUT("PLAP"))) = +0.40;
+            p_technFact(RS,TACT,"PLAP","T2")      $ (PACT_TO_I(TACT,"PLAP") and (NOT FNUT("PLAP"))) = -0.40;
+
+        enter p_linObjeCont as DATA x (p_technFact + 1) x UVAP (capmod/define_objc.gms l. 42-44), a T1 - T2 cost of
+        plap_diff (0.8) x the crop's PLAP cost, where PLAP is in the objective. CAPRI's 2030 reference and its PMP
+        calibration ran with 5_aggregates: PLAP is out of PACT_TO_I (sets.gms l. 5365-5368), so techf.gms gives it no
+        factor, and the pesticides that replace it get none (techf.gms sets PLAP's only), so its calibrated T1 - T2
+        terms hold no plant-protection cost; its Green Deal step ran with "none", PLAP in the objective. With k the
+        model's calibrated term of the column and k' CAPRI's,
+        the calibration conditions at the base give k' = k + plap_diff x P_b (P_b the model's base cost of the crop,
+        which the model's calibration held); in the step
+
+            CAPRI:  k' + plap_diff x P_s          = k + plap_diff x (P_b + P_s)
+            model:  k  + plap_diff x (P_b + d_p)
+
+        so the column's cost moves by plap_diff x (P_s - d_p) (P_s _plap_capri_step_cost; d_p the model's change of the
+        crop's cost, greendeal_crop_delta). The other terms of the two calibrations are taken as equal."""
+        if not bool(getattr(type(self), "greendeal_plap_mix_capri_step", False)):
             return 0.0
-        defl = _inputs.money_deflator(int(sim))
-        return (q_uv * ratio - ppc) / defl - float(d_p)
+        if not bool(getattr(self.ev, "greendeal_group", False)) or not plap_diff:
+            return 0.0
+        gi = getattr(self.ev, "greendeal_inputs", None) or {}
+        tf = float(gi.get("tf", self._greendeal_tech_progress()))
+        c = self._plap_capri_step_cost(a, float(gi.get("pc_plap", 0.0) or 0.0), tf, bool(gi.get("keep_tf", True)))
+        if c is None:
+            return 0.0
+        return float(plap_diff) * (c[0] - float(d_p))
 
     def _apply_yield_input_costs(self) -> None:
         """The crops' input costs follow their yields, as CAPRI's define_inputs.gms sets the coefficient of a directly

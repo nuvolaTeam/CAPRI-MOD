@@ -379,6 +379,17 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   between change by their own INPO (CAPRI's RESTI change per head is mitiCost plus exactly that INPO change); the
   intensity tables carry dinpo_rel (dinpo_rel_2030) and the split columns the animal's INPO change per head times it
   (livestock.py _split_inpo_change). Test: test_split_inpo.py. Effect not yet measured.
+- **DEP-51's T1 - T2 part as a comparison switch (the project lead's decision):** CAPRI's 2030 reference and its
+  calibration (5_aggregates) had no T1 - T2 plant-protection cost, its Green Deal step (stage "none", p_technFact PLAP
+  +-0.4) has one. supply.greendeal_plap_mix_capri_step (off by default, on in capri_comparison.toml) adds plap_diff x
+  (CAPRI's step's cost of the crop less the model's change of it) to each mix column's linear term in the Green Deal
+  group's solves (policy.py _plap_mix_capri_step), the form the two calibrations give. Test:
+  test_greendeal_plap_mix_capri_step_adds_capris_t1_t2_cost. Effect not measured (no runs).
+- **K195, CAPRI's step's plant protection at the member state's UVAP:** p_linObjeCont values PLAP at the member state's
+  UVAP of the simulation year (define_objc.gms l. 40-44; UVAP(BAS) x p_infl^13), and
+  plant_protection_capri_step_2030.csv took dataOut's regional UVAG (0.72-1.37 of it over the rows, 4.7% on average
+  by area). Rebuilt from sim_ini_21730 (p_infl added to the export); column plap_uvap_eur_ha; Turkey's regions,
+  without a UVAP of PLAP in sim_ini, dropped. Changes the crop-level switch's values; effect not measured.
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against

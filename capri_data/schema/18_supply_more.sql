@@ -510,14 +510,14 @@ INSERT INTO value_units VALUES
 CREATE TABLE sup_plant_protection_capri_step_2030 (
     region VARCHAR NOT NULL REFERENCES regional_units (region),
     activity VARCHAR NOT NULL REFERENCES model_activities (code),
-    plap_uvag_eur_ha DOUBLE NOT NULL CHECK (plap_uvag_eur_ha >= 0),
+    plap_uvap_eur_ha DOUBLE NOT NULL CHECK (plap_uvap_eur_ha >= 0),
     plantp_cost_eur_ha DOUBLE NOT NULL CHECK (plantp_cost_eur_ha >= 0),
     levl_capri DOUBLE NOT NULL CHECK (levl_capri > 0),
     PRIMARY KEY (region, activity)
 );
-COMMENT ON TABLE sup_plant_protection_capri_step_2030 IS 'CAPRI''s two valuations of each crop''s plant protection at its 2030 reference, per regional unit and model crop: the Green Deal step''s (pesticide disaggregation off: DATA(PLAP) x UVAG(PLAP)) and the reference''s and PMP calibration''s (the pesticide module''s aggregates, Plantp_cost). For the comparison switch supply.greendeal_plap_crop_level_capri_step (DEP-51''s crop-level part). (tools/build/build_plant_protection_capri_step_2030.py)';
+COMMENT ON TABLE sup_plant_protection_capri_step_2030 IS 'CAPRI''s two valuations of each crop''s plant protection at its 2030 reference, per regional unit and model crop: the Green Deal step''s (pesticide disaggregation off: p_linObjeCont, DATA(PLAP) x the member state''s UVAP(PLAP)) and the reference''s and PMP calibration''s (the pesticide module''s aggregates, Plantp_cost). For the comparison switches supply.greendeal_plap_crop_level_capri_step and supply.greendeal_plap_mix_capri_step (DEP-51). (tools/build/build_plant_protection_capri_step_2030.py)';
 INSERT INTO value_units VALUES
-  ('sup_plant_protection_capri_step_2030', 'plap_uvag_eur_ha', 'U_EuPerHa', 'capri', 'dataOut(R, '''', crop, ''PLAP'', ''2030'') x dataOut(R, '''', ''UVAG'', ''PLAP'', ''2030'') / 1000, EUR per ha in CAPRI''s 2030 money, CAPRI''s Green Deal baseline (res_2_1730greendeal_refdefaulta); level-weighted where a model crop sums CAPRI activities'),
+  ('sup_plant_protection_capri_step_2030', 'plap_uvap_eur_ha', 'U_EuPerHa', 'capri', 'dataOut(R, '''', crop, ''PLAP'', ''2030'') x UVAP(PLAP) of the member state at 2030 / 1000 (p_linObjeCont, capmod/define_objc.gms l. 40-44: sim_ini_21730 DATA(MS, ''UVAP'', ''PLAP'', ''BAS'') x p_infl^(2030 - 2017), inflation_and_trend_interpolation.gms l. 23, 69-73), EUR per ha in CAPRI''s 2030 money, CAPRI''s Green Deal baseline (res_2_1730greendeal_refdefaulta); level-weighted where a model crop sums CAPRI activities'),
   ('sup_plant_protection_capri_step_2030', 'plantp_cost_eur_ha', 'U_EuPerHa', 'capri', 'dataOut(R, '''', crop, ''Plantp_cost'', ''2030''), EUR per ha in CAPRI''s 2030 money, same run'),
   ('sup_plant_protection_capri_step_2030', 'levl_capri', 'U_1000ha', 'capri', 'dataOut(R, '''', crop, ''LEVL'', ''2030''), the weights, same run');
 

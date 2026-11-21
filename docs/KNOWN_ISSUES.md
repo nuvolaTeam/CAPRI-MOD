@@ -49,7 +49,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K150](#k150) | The non-EU regions' raw milk at the market's base is FAO_agg's production, not CAPRI's market data (milk delivered to the dairies): Turkey 20,173 kt against CAPRI's 13,145 | fixed (14 November 2026), validated (15 November 2026, the full Green Deal pair) |
 | [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences; sorted 20 November 2026: most are in the accounts only or have no effect in the step; ARTIF held fixed had one (small for the EU, a few thousand ha in some Spanish and French units) | open: ARTIF, the milk for feeding and the yield factors of the crops' N and P terms ported 20 November 2026 (as CAPRI's); the animals' per-head terms ported 21 November 2026 (the members' INPO difference under the Green Deal's input change) |
 
-## Resolved (125)
+## Resolved (126)
 
 | # | Issue | Status |
 |---|---|---|
@@ -84,6 +84,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K179](#k179) | The 2030 runs took the 2017 manure N, P2O5 and K2O per head (dairy cows' N raised with the milk yield): CAPRI computes them from the simulation year's rations before it solves; the EU's N excretion at the 2030 base 5.4% above CAPRI's 2030 EXCRET (dairy cows +13%) | fixed (18 November 2026) |
 | [K190](#k190) | The grassland need took CAPRI's SQRT(1 +/- 0.2) split twice: the data's need per ha (CAPRI's reported 2030 need per crop) already carries it, and K160 applied it again; ES41's base manure K on grassland 53.6 against CAPRI's 42.0 kt | fixed (20 November 2026); the intensive grassland's weaker Green Deal response that followed traced to K191 (the grassland's removal and fixation in the N-surplus row) |
 | [K186](#k186) | The catch crops' winter cover option scales with the fixed base crop area; CAPRI's catcMiti_ and GHG_Mit_Cost_ scale it with the current land (landTypesNoSlak, uaaEqu). Not active in CAPRI's Green Deal step (its winter cover share fixed at 1e-6, CATC a free activity) | fixed (21 November 2026): the option's catch crops and cost on the current land, as CAPRI |
+| [K195](#k195) | The comparison switch's CAPRI step valued each crop's plant protection at dataOut's regional UVAG(PLAP); CAPRI's p_linObjeCont takes the member state's UVAP of the simulation year | fixed (21 November 2026), as CAPRI |
 | [K194](#k194) | The low-N feeding option was built on CAPREG's 2017 requirement correction (and res_17's MANN, CRPR_EXPT and levels), where CAPRI's 2030 simulation uses the 2030 requirements sim_ini_21730 holds | fixed (21 November 2026), as CAPRI |
 | [K193](#k193) | The emission tax runs stopped at the writing of their results table: the run's abatement block (the tax) was not declared in results_items.csv | fixed (21 November 2026) |
 | [K192](#k192) | The scenario's endogenous-technology switches did not reach the regional models: the run sets them before its first solve builds the models, which then took the global settings' values; the Farm-to-Fork run (JRC121368's ghgTechAmmEndog 1) held every ammonia option at its initial share | fixed (21 November 2026); the full-EU Farm-to-Fork effect to measure in the next pair |
@@ -3885,6 +3886,29 @@ sim_ini's DATA has the need and the margins still show none.
   fallow need, as CAPRI's v_cropNutNeedMultFact. In the model's data
   FALL (247 regions) and VSET (166) have area without a main-output yield, no other crop. Test:
   test_capri.py::test_fallow_and_set_aside_have_no_nutrient_need
+
+<a id="k195"></a>
+### K195: CAPRI's Green Deal step's plant protection at the member state's UVAP (found and fixed 21 November 2026)
+
+The comparison switch supply.greendeal_plap_crop_level_capri_step (DEP-51) values CAPRI's Green Deal step's plant
+protection per crop from plant_protection_capri_step_2030.csv, which took the PLAP coefficient times dataOut's regional
+UVAG(PLAP) of 2030. CAPRI's step puts PLAP into p_linObjeCont at the member state's UVAP (capmod/define_objc.gms
+l. 40-44, p_dataCopy(regions, "UVAP") = sum over RU_MS of DATA(MS, "UVAP")), which its simulation sets to the base
+year's times p_inflationFactor = p_infl^(Y - BAS) (capmod/inflation_and_trend_interpolation.gms l. 23, 69-73; PLAP is
+not in IOE). Found while porting the switch's T1 - T2 part: UVAP(Y) over the regional UVAG runs from 0.72 to 1.37 over
+the table's rows (DE21 1.011, AT11 0.900, PT20 1.372), 4.7% on average by CAPRI's crop area; DE80 barley 120.7 ->
+117.8 EUR/ha in CAPRI's 2030 money.
+
+- **Fix (21 November 2026, as CAPRI):** tools/build/build_plant_protection_capri_step_2030.py takes sim_ini_21730's
+  DATA(MS, "UVAP", "PLAP", "BAS") and p_infl (added to the reference export) with the statements as named functions
+  (p_inflationFactor, UVAP_Y, linObjeCont_PLAP); the column is plap_uvap_eur_ha. sim_ini_21730 has no UVAP of PLAP
+  for Turkey's regions: their 12 units are no longer in the table, so neither switch acts there (how CAPRI's step
+  values PLAP there is not checked; the Green Deal's targets act in the EU).
+- **Tests:** test_capri.py::test_greendeal_plap_mix_capri_step_adds_capris_t1_t2_cost (DE21 soft wheat at UVAP),
+  test_greendeal_plap_crop_level_capri_step_moves_the_mean_cost_to_capris_step.
+- **In 9t:** -
+- **Status:** fixed 21 November 2026; the measurements of 19 and 20 November with the crop-level switch were at UVAG,
+  the effect of the change not measured (no runs).
 
 <a id="k194"></a>
 ### K194: The low-N feeding option on CAPRI's 2030 requirements (found 19 November 2026, fixed 21 November 2026)

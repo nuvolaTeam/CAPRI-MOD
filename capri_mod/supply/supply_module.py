@@ -277,9 +277,10 @@ class RegionData:
     #: (EUR/ha by crop) and inpo_toin_share (animals)
     input_costs_ha: Optional[pd.DataFrame] = None
     #: CAPRI's two valuations of each crop's plant protection at its 2030 reference (EUR/ha in CAPRI's 2030 money):
-    #: plap_uvag_eur_ha (its Green Deal step's, DATA(PLAP) x UVAG(PLAP)) and plantp_cost_eur_ha (its reference's and
-    #: PMP calibration's, the pesticide module's Plantp_cost); plant_protection_capri_step_2030.csv, at the 2030 market
-    #: year only (the comparison switch supply.greendeal_plap_crop_level_capri_step, DEP-51)
+    #: plap_uvap_eur_ha (its Green Deal step's p_linObjeCont, DATA(PLAP) x the member state's UVAP(PLAP)) and
+    #: plantp_cost_eur_ha (its reference's and PMP calibration's, the pesticide module's Plantp_cost);
+    #: plant_protection_capri_step_2030.csv, at the 2030 market year only (the comparison switches
+    #: supply.greendeal_plap_crop_level_capri_step and supply.greendeal_plap_mix_capri_step, DEP-51)
     plap_capri_step: Optional[pd.DataFrame] = None
     #: the simulation year (the projection's market year; None: the base year)
     sim_year: Optional[int] = None
@@ -974,6 +975,11 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: mean plant-protection cost to CAPRI's step (policy._apply_greendeal_input_changes); false: the model's one
     #: representation in base and scenario (DEP-51).
     greendeal_plap_crop_level_capri_step = setting("supply.greendeal_plap_crop_level_capri_step")
+    #: Comparison switch (setting supply.greendeal_plap_mix_capri_step; DEP-51, its T1 - T2 part): CAPRI's 2030
+    #: reference and calibration had no T1 - T2 plant-protection cost, its Green Deal step has one (p_technFact PLAP
+    #: +-0.4). true: in the Green Deal group's solves each technology mix column carries the difference
+    #: (policy._plap_mix_capri_step, techn_mix._mix_linear); false: the model's one representation (DEP-51).
+    greendeal_plap_mix_capri_step = setting("supply.greendeal_plap_mix_capri_step")
 
     #: EU organic area already in place, subtracted from the target to give the
     #: share that actually CONVERTS. CAPRI sets this explicitly:

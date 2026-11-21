@@ -51,7 +51,8 @@ class TechnMixBlock:
         """The column's linear objective coefficient: minus the net revenue of T1 less T2 per ha, at this solve's prices,
         yields and Green Deal input costs, as the crop's own (the revenue p x y, the factored inputs, plant protection
         and other inputs with their Green Deal changes, the fertiliser cost x need_diff, the premium x
-        prem_diff_share)."""
+        prem_diff_share). With the comparison switch supply.greendeal_plap_mix_capri_step, the Green Deal group's solves
+        add CAPRI's step's T1 - T2 plant-protection cost less the model's (policy._plap_mix_capri_step, DEP-51)."""
         ps = getattr(self.ev, "price_shock_now", None)
         p = float(self.data.producer_prices.get(a, 0.0) or 0.0)
         if ps is not None and hasattr(ps, "get"):
@@ -65,7 +66,7 @@ class TechnMixBlock:
         prem = float(self.premiums.get(a, 0.0) or 0.0) if getattr(self, "premiums", None) is not None else 0.0
         dnr = (float(r["yield_diff"]) * p * y - float(r["rest_cost_diff_eur_ha"]) - float(r["inpo_diff"]) * inpo
                - float(r["plap_diff"]) * plap - float(r["need_diff"]) * fert + float(r["prem_diff_share"]) * prem)
-        return -dnr
+        return -dnr + self._plap_mix_capri_step(a, float(r["plap_diff"]), d_p)
 
     def _mix_fert_cost(self, a, r) -> float:
         """The column's fertiliser cost per unit (need_diff x the crop's), which the NLP form takes out of the linear
