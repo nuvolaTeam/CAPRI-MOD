@@ -351,6 +351,16 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   0, the global value). Three-unit Farm-to-Fork probe (4 iterations, not converged): the options move (DE21 pig
   fattening's high-efficiency spreading 0.15 -> 0.80), the N-surplus dual DE21 7.95 -> 3.84 EUR per kg N, FR52 21.95
   -> 14.49, NL22 16.97 -> 9.86. Test: test_the_runs_endotech_switches_reach_the_models_built_later.
+- **K186, the catch crops on the current land:** with the winter cover option a choice (the emission tax runs) the
+  catch crops are catcMiti_'s share times the current land and GHG_Mit_Cost_ charges the option on that land, as
+  CAPRI; the land is the fertilisation block's land columns, written U + (L - L0) so that the base stays the
+  calibration's (U and L0 within 7.4e-5 of U in DE21, 2e-15 in FR52 and PT18); winterCover_, ecoSetAside_ and the
+  BioFix N in fertDistCres_ take that area. The Green Deal group and the reference form (CATC CAPRI's free activity)
+  are unchanged. Three units at the carbon tax of 50 EUR per t CO2-eq: the base identical, the catch crops 57.910 ->
+  57.888 thousand ha, activities within 0.006 thousand. Test: the carbon tax run of
+  test_manure_market_and_ammonia_options_in_every_eu_solve.
+- **K193, the emission tax runs' results table:** the run's abatement block (the tax) declared in results_items.csv;
+  the carbon tax runs stopped after their pickle, at the table. Test: test_an_emission_tax_runs_table_is_written.
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against

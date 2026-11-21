@@ -215,9 +215,9 @@ def GHG_Mit_Cost_targFertMan_excr(W, c1, c2_half, v_Miti):
 
 
 def GHG_Mit_Cost_catc(uaaEqu, c1, c2_half, v_Miti):
-    r"""GHG_Mit_Cost_ of winter cover (the catch crops), charged on the UAA (l. 5053-5056): U x (c1 m + c2_half m^2),
-    kEUR; c1 = costParLin + pmpParLin (+ the calibration's linear term), c2_half = 0.5 pmpParSqr. U is the base UAA
-    where CAPRI's v_actLevl(uaaEqu) is a variable (K186: premiums.py).
+    r"""GHG_Mit_Cost_ of winter cover (the catch crops), charged on the UAA (l. 5053-5056): uaaEqu x (c1 m + c2_half m^2),
+    kEUR; c1 = costParLin + pmpParLin (+ the calibration's linear term), c2_half = 0.5 pmpParSqr. uaaEqu is the current
+    land with the option a choice, CAPRI's v_actLevl(uaaEqu) (K186, premiums.py).
 
     CAPRI's GAMS, GHG_Mit_Cost_'s UAA base (l. 5053-5056; the parts per share: GHG_Mit_Cost_targFertMan's docstring):
 

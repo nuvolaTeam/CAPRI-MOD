@@ -1,4 +1,5 @@
 block,item,item_dim,capri_cols,capri_rows,applies_to,unit,capri_source
+abatement,carbon_tax,rows,,,,EUR per t CO2-eq,"the run's emission tax, CAPRI's p_carbonTax(ru, GGWP) = p_ghgEmisTax x p_ghgEmisTaxShift (pol_input/ecampa/carbtax50_endotech_set12.gms l. 224-226), a scenario setting, not a dataOut item"
 environmental,arable_land,rows,,,,,
 environmental,ghg_enteric,rows,ImpactGwp,CH4ENT,,kt CO2-eq,"reports/def_indic.gms l. 68: DATA(R,'ImpactGwp',GHGS) = DATA(R,'Impact',GHGS) x p_globWarmPot (the model's GWP_CH4 25, GWP_N2O 298 are CAPRI's: model_parameters.csv); the model's CH4_ENT, CAPRI's GWPCH4ENT_ from the feed mix (environmental/ghg.py)"
 environmental,ghg_ggwp,rows,,,,,

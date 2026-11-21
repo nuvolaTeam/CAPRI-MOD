@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](dev/KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (36)
+## Open (35)
 
 | # | Issue | Status |
 |---|---|---|
@@ -47,10 +47,9 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K148](#k148) | The young-animal markets and the member states' raw milk were cleared in at most 4 alternating rounds inside each market evaluation (CAPRI: one system): up to 8.0e-7 of net supply left | fixed (14 November 2026) |
 | [K149](#k149) | Norway's raw milk row took the young-animal prices of a clearing without the milk price change, its other rows those of a second clearing with it (CAPRI: one set) | fixed (14 November 2026) |
 | [K150](#k150) | The non-EU regions' raw milk at the market's base is FAO_agg's production, not CAPRI's market data (milk delivered to the dairies): Turkey 20,173 kt against CAPRI's 13,145 | fixed (14 November 2026), validated (15 November 2026, the full Green Deal pair) |
-| [K186](#k186) | The catch crops' winter cover option scales with the fixed base crop area; CAPRI's catcMiti_ and GHG_Mit_Cost_ scale it with the current land (landTypesNoSlak, uaaEqu). Not active in CAPRI's Green Deal step (its winter cover share fixed at 1e-6, CATC a free activity) | open: to fix after item 1's open points |
 | [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences; sorted 20 November 2026: most are in the accounts only or have no effect in the step; ARTIF held fixed had one (small for the EU, a few thousand ha in some Spanish and French units) | open: ARTIF, the milk for feeding and the yield factors of the crops' N and P terms ported 20 November 2026 (as CAPRI's); the animals' per-head terms measured (1% at the median), their port to decide |
 
-## Resolved (122)
+## Resolved (124)
 
 | # | Issue | Status |
 |---|---|---|
@@ -84,6 +83,8 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K178](#k178) | The 2030 runs took the young-animal coefficients of 2017 (calves per cow, replacements, piglets per sow): CAPRI's INPANI_ takes the simulation year's, DATA(.., "Y"); Spain's suckler cows 0.83 calves per head against CAPRI's 2030 0.90, the EU's piglet balance 6.6% short at the 2030 base | fixed (18 November 2026) |
 | [K179](#k179) | The 2030 runs took the 2017 manure N, P2O5 and K2O per head (dairy cows' N raised with the milk yield): CAPRI computes them from the simulation year's rations before it solves; the EU's N excretion at the 2030 base 5.4% above CAPRI's 2030 EXCRET (dairy cows +13%) | fixed (18 November 2026) |
 | [K190](#k190) | The grassland need took CAPRI's SQRT(1 +/- 0.2) split twice: the data's need per ha (CAPRI's reported 2030 need per crop) already carries it, and K160 applied it again; ES41's base manure K on grassland 53.6 against CAPRI's 42.0 kt | fixed (20 November 2026); the intensive grassland's weaker Green Deal response that followed traced to K191 (the grassland's removal and fixation in the N-surplus row) |
+| [K186](#k186) | The catch crops' winter cover option scales with the fixed base crop area; CAPRI's catcMiti_ and GHG_Mit_Cost_ scale it with the current land (landTypesNoSlak, uaaEqu). Not active in CAPRI's Green Deal step (its winter cover share fixed at 1e-6, CATC a free activity) | fixed (21 November 2026): the option's catch crops and cost on the current land, as CAPRI |
+| [K193](#k193) | The emission tax runs stopped at the writing of their results table: the run's abatement block (the tax) was not declared in results_items.csv | fixed (21 November 2026) |
 | [K192](#k192) | The scenario's endogenous-technology switches did not reach the regional models: the run sets them before its first solve builds the models, which then took the global settings' values; the Farm-to-Fork run (JRC121368's ghgTechAmmEndog 1) held every ammonia option at its initial share | fixed (21 November 2026); the full-EU Farm-to-Fork effect to measure in the next pair |
 | [K191](#k191) | The crops' N removal and fixation in the gross N balance (the Green Deal's N-surplus row) were CAPRI's reported NITF plus its reported fixation, not its simulation data (fert/fertned.gms, fert/fertpar.gms): for grassland the reported NITF carries NUTNED_'s SQRT(1 +/- 0.2) split and the report gives extensive grassland intensive grassland's fixation, so intensive grassland's relative credit in the row was almost twice CAPRI's (DE21 -79.8 against -45.6 kg N/ha); the set-aside aggregate SETA counted twice in the scaling | fixed (20 November 2026): fertned's rebuild and fertpar's rates ported; the six units at CAPRI's prices: the N-surplus dual and the grassland split close to CAPRI's (ES41 at CAPRI's), crops' gap 17.7 -> 12.1 points, herds' 2.40 -> 1.33 |
 | [K188](#k188) | The catch crops were the winter cover option (CAPRI's cost curve, BioFix N in the residue pool) in the calibration and the baseline; CAPRI's 2030 reference has no mitigation options (CATC an activity at its input cost, which sets the ecological set-aside rule's dual), so the model's fallow and set-aside carried no support from the rule and had none to lose in the Green Deal (Alentejo's fallow +13 thousand ha against CAPRI's -2) | fixed (20 November 2026) |
@@ -3866,6 +3867,21 @@ sim_ini's DATA has the need and the margins still show none.
   FALL (247 regions) and VSET (166) have area without a main-output yield, no other crop. Test:
   test_capri.py::test_fallow_and_set_aside_have_no_nutrient_need
 
+<a id="k193"></a>
+### K193: The emission tax runs stopped at the writing of their results table (found 21 November 2026)
+
+CAPRIModel.run returns an "abatement" block, {"carbon_tax": the run's tax}, when the run has an emission tax
+(capri_mod/model.py). The long results table (capri_mod/io_results.py with_capri_codes) raises on an item that
+capri_data/codes/results_items.csv does not declare, and ("abatement", "carbon_tax") was not declared, so
+tools/run/run_f2f_2030.py saved the run's pickle and then stopped before its table (found in the three-unit carbon tax
+probes of K186).
+
+- **Fix (21 November 2026):** the item declared (EUR per t CO2-eq; CAPRI's p_carbonTax(ru, GGWP), a scenario setting
+  of pol_input/ecampa/carbtax50_endotech_set12.gms l. 224-226, not a dataOut item). Test:
+  test_results_long.py::test_an_emission_tax_runs_table_is_written.
+- **In 9t:** -
+- **Status:** fixed 21 November 2026.
+
 <a id="k192"></a>
 ### K192: The scenario's endogenous-technology switches did not reach the regional models (found 21 November 2026)
 
@@ -4297,9 +4313,24 @@ fallow floor, base cover + m0 x UAAR); REGISTERED in `_catc_spec`), which CAPRI'
   the option is a choice (runs without the Green Deal group, with the land market moving the land); not measured yet.
   Since K188 (20 November 2026) the option is a choice only in runs with an emission tax.
 - **In 9t:** -
-- **Status:** open: to fix after item 1's open points (catcMiti_ and the cost with the current land in the NLP form,
-  sum of the land columns as fertilisation.py's land; the calibration's linear term at the base land); then count the
-  regions where the winter-cover row's max() guard binds.
+- **Fix (21 November 2026, as CAPRI):** with the option a choice (the emission tax runs) the NLP's catch crop area is
+  catcMiti_'s, the share times the current land, and GHG_Mit_Cost_ charges the option on that land; the land is the
+  fertilisation block's land columns (the land market's ARAC, GRAS and FRUN; the crops without a land market), written
+  U + (L - L0) with L0 their base sum, so that the base is the calibration's. U and L0 agree: DE21 within 7.4e-5 of U,
+  FR52 and PT18 within 2e-15. winterCover_, the ecoSetAside_ term and the BioFix N in fertDistCres_ take that area
+  (fertDistCres_catcBioFix now on the CATC level). With the share held (the Green Deal group's FixMiti, CAPRI's
+  reference form) nothing changes: CATC is CAPRI's free activity, m its level over U. The land columns' first-order
+  conditions at the base gain -0.5 pmpParSqr m0^2 per ha (the share times the option's average less its marginal
+  cost at the calibrated share: at most 1.97 EUR per ha, BL31, median 0, from winter_cover_option.csv), not calibrated
+  away: the calibration point is the reference form (K188), and whether CAPRI's emission tax runs start from a
+  calibration with the options is not checked. capri_regional_nlp.py _abatement_block, catc_area; nlp.py's cover
+  result; premiums.py, mitigation.py, nutrients.py. Test: the carbon tax run of
+  test_capri.py::test_manure_market_and_ammonia_options_in_every_eu_solve (the catch crops are the share times U plus
+  the land market's change).
+- **Measured** (three units at CAPRI's carbon tax of 50 EUR per t CO2-eq, DE21, FR52, PT18, 4 iterations): the base
+  identical; the catch crops 57.910 -> 57.888 thousand ha, activities within 0.006 thousand (FR52's set-aside), the
+  land types within 0.004 thousand ha: the land market hardly moves under the tax.
+- **Status:** fixed 21 November 2026. The regions where the winter-cover row's max() guard binds are not counted yet.
 
 <a id="k184"></a>
 ### K184: The idled histosols lost their deposition from the residue pool and the N surplus (found 19 November 2026)

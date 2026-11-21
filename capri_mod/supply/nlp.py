@@ -602,8 +602,10 @@ class NLPBlock:
             # the winter cover share chosen, for the cascade's accounts and the supply result (cover_crops)
             _c = spec["catc"]
             self.sv.wc_solved = float(ab["catc"])
-            self.res.cover_solved = {"req": self.sv.wc_solved * _c["uaa"], "uaa": _c["uaa"], "base": _c["m0"] * _c["uaa"],
-                                  "delta": (self.sv.wc_solved - _c["m0"]) * _c["uaa"], "biofix": _c["biofix"],
+            # the catch crop area, catcMiti_ (with the option a choice on the current land, K186)
+            _area = float(ab.get("catc_area", self.sv.wc_solved * _c["uaa"]))
+            self.res.cover_solved = {"req": _area, "uaa": _c["uaa"], "base": _c["m0"] * _c["uaa"],
+                                  "delta": _area - _c["m0"] * _c["uaa"], "biofix": _c["biofix"],
                                   "share": self.sv.wc_solved, "lb_share": float(_c.get("lb", 0.0)),
                                   "max_share": float(_c["ub"]), "endogenous": True,
                                   "cascade_share": float(_c["m0"]) if _c.get("fixmiti") else self.sv.wc_solved,

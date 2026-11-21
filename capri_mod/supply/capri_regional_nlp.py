@@ -944,11 +944,21 @@ class CapriRegionalNLP:
             # input cost) the reference form's where the calibration was in that form (K188; zero before, K170)
             _da = spec.get("dabat") or {}
             dl = float(_da.get(("catc_ref",), 0.0)) if cs.get("fixmiti") else float(_da.get(("catc",), 0.0))
+            # the land of catcMiti_ and GHG_Mit_Cost_ (K186): with the option a choice the current land,
+            # sum(landTypesNoSlak, v_actLevl), the fertilisation block's land columns, as U + (L - L0) so that the base
+            # is the calibration's; with the share held (FixMiti, the reference form) U (m the CATC level over U)
+            uaaEqu, lc_ = self._pv(uaa), []
+            if not cs.get("fixmiti") and not cs.get("ref_form"):
+                npk_ = spec.get("npk") or {}
+                lc_ = [int(j) for j in (npk_.get("land_cols") or npk_.get("crop_cols") or []) if int(j) < self.n0]
+                if lc_:
+                    uaaEqu = self._pv(uaa - float(sum(self.xb[j] for j in lc_))) + ca.sum1(y[lc_])
+            catc_lev = catcMiti_(uaaEqu, m)
             # GHG_Mit_Cost_ on the UAA; winterCover_ with catcMiti_'s area (mitigation.py, premiums.py)
-            obj = obj + GHG_Mit_Cost_catc(self._pv(uaa), self._pv(float(cs["k1"]) + float(cs["lin"]) + dl),
+            obj = obj + GHG_Mit_Cost_catc(uaaEqu, self._pv(float(cs["k1"]) + float(cs["lin"]) + dl),
                                           self._pv(0.5 * float(cs["sqr"])), m)
             g_rows.append(winterCover_(self._lin(y, [(int(j), float(s)) for j, s in cs["row"]]),
-                                       catcMiti_(self._pv(uaa), m), self._pv(1.0 / uaa)))
+                                       catc_lev, self._pv(1.0 / uaa)))
             lbg.append(-np.inf); ubg.append(float(cs["rhs"]) / uaa)
             self._catc_m = m
             # ecoSetAside_: catch crops on the eligible side at CAPRI's weight (setaEco includes CATC)
@@ -956,13 +966,14 @@ class CapriRegionalNLP:
             if float(eco.get("catc_w", 0.0) or 0.0) > 0 and "ecoSetAside" in getattr(self, "cap_rows", {}):
                 ie = self.cap_rows["ecoSetAside"]
                 sce = max(float(eco.get("scale", 1.0)), 1e-6)
-                g_rows[ie] = ecoSetAside_catc(g_rows[ie], self._pv(float(eco["catc_w"]) * uaa / sce), m)
+                g_rows[ie] = ecoSetAside_catc(g_rows[ie], self._pv(float(eco["catc_w"]) / sce) * uaaEqu, m)
             # fertDistCres_'s winter cover term, from the base share (t N; nutrients.py): the catch crops' BioFix N in
             # the arable residue pool and the gross balance only with CAPRI's %ghgAbatement% on
             # (supply_model.gms l. 1073-1079), so not in its reference form (K188)
-            self._catc_ncoef = uaa * 1000.0 * float(cs["biofix"])                                  # t N per unit share
+            self._catc_ncoef = uaa * 1000.0 * float(cs["biofix"])                        # t N per unit share at base
             self.catc_n = (None if cs.get("ref_form")
-                           else fertDistCres_catcBioFix(self._pv(self._catc_ncoef), m, self._pv(m0)))
+                           else fertDistCres_catcBioFix(self._pv(1000.0 * float(cs["biofix"])), catc_lev,
+                                                        self._pv(m0 * uaa)))
             gt_ = spec.get("ghg_min")
             if gt_ and self.catc_n is not None:
                 # CAPRI's emission tax on the catch crops' crop-residue N2O (N2OCRO: BioFix x CATC x EF1 x 44/28, in
@@ -970,7 +981,7 @@ class CapriRegionalNLP:
                 obj = obj + LINEAR_carbonTax_N2OCRO(self._pv(float(gt_["d"])), self.catc_n)
             new.append(zc)
             lbx += [float(cs.get("lb", 0.0))]; ubx += [float(cs["ub"])]
-            self.abat["catc"] = {"off": nx0, "uaa": uaa, "m0": m0}
+            self.abat["catc"] = {"off": nx0, "uaa": uaa, "m0": m0, "land_cols": lc_}
         am = spec.get("amm")
         if am and am.get("techs"):
             techs = [t for t in am["techs"] if t["act"] in self.act_idx and t["smax"] > 0]
@@ -1124,7 +1135,20 @@ class CapriRegionalNLP:
         c_ = self.abat.get("catc")
         if c_:
             out["catc"] = float(x[c_["off"]])
+            out["catc_area"] = self.catc_area(x)
         return out
+
+    def catc_area(self, x):
+        """The catch crop area of the solution x (1000 ha), catcMiti_: the share times U, with the option a choice
+        times U + (L - L0), the current land (K186; _abatement_block)."""
+        c_ = self.abat.get("catc")
+        if not c_:
+            return 0.0
+        land = float(c_["uaa"])
+        if c_.get("land_cols"):
+            yv = np.asarray(self.f_y(x)).ravel()
+            land += float(sum(yv[j] - self.xb[j] for j in c_["land_cols"]))
+        return float(x[c_["off"]]) * land
 
     def fert_outputs(self, x):
         """{nutrient: {"purchase": t, "flows": {(group, source): t}, "availE": manure availability}}."""

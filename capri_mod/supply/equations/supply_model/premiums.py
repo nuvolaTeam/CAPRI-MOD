@@ -21,15 +21,17 @@ setglobal envConst on at l. 408).
 In this project's notation: m the catch crops' share of the UAA (v_Miti(CATC, winterCov, co2seq)), U the region's UAA
 (spec catc "uaa"), y the activity levels.
 
-Two porting differences from CAPRI's equations (not departures; KNOWN_ISSUES K186, fixed on the main line; this move
-keeps them, the refactor's results staying identical):
-1. The catch crop area on the base area: CAPRI's catcMiti_ scales it with the current land (sum over landTypesNoSlak
-   of v_actLevl, a variable), and GHG_Mit_Cost_ charges winter cover on v_actLevl(uaaEqu); the model takes the base
-   UAA, U, a fixed number (the base crop levels' sum, supply/abatement.py), for the area in winterCover_, the cost, the
-   ecoSetAside_ term and the BioFix N in fertDistCres_.
-2. winterCover_'s limit: CAPRI's is DATA(UAAR) plus the fallow floor; the model's is max(U + the fallow floor, the base
-   cover + m0 U), whose max() is not in CAPRI (it keeps the base point feasible where the data would break the
-   inequality).
+The land of the catch crops (KNOWN_ISSUES K186, ported 21 November 2026): with the option a choice (CAPRI's
+%ghgAbatement% on without FixMiti: the emission tax runs) catcMiti_ and GHG_Mit_Cost_ take the current land, sum over
+landTypesNoSlak of v_actLevl, in the NLP the land market's columns (the fertilisation block's land) written as U +
+(L - L0), L0 their base sum, so that the base is the calibration's (U and L0 measured within 7.4e-5 of U, K186);
+the winterCover_ row, the ecoSetAside_ term and the BioFix N in fertDistCres_ take the catch crop area that gives.
+With the share held (the Green Deal group's FixMiti, CAPRI's reference form, K170 and K188) CATC is CAPRI's free
+activity and m its level over U, a fixed scaling.
+
+One porting difference from CAPRI's equations: winterCover_'s limit. CAPRI's is DATA(UAAR) plus the fallow floor; the
+model's is max(U + the fallow floor, the base cover + m0 U), whose max() is not in CAPRI (it keeps the base point
+feasible where the data would break the inequality).
 """
 from __future__ import annotations
 
@@ -38,7 +40,7 @@ import numpy as np
 
 def catcMiti_(uaaEqu, v_Miti):
     r"""catcMiti_(r) (l. 2005-2010): the catch crop area, v_actLevl(CATC) = v_Miti(CATC, winterCov, co2seq) x the land
-    (1000 ha); the model's land is the base UAA (the departure above).
+    (1000 ha); uaaEqu the current land with the option a choice, U with the share held (the module's docstring).
 
     CAPRI's GAMS, catcMiti_ (l. 2005-2010):
 

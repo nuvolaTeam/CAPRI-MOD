@@ -308,12 +308,12 @@ def NUTNED_mitiExcr(NMAN, v_Miti):
     return NMAN * v_Miti
 
 
-def fertDistCres_catcBioFix(biofix, v_Miti, v_Miti0):
+def fertDistCres_catcBioFix(biofix, v_actLevl_CATC, v_actLevl_CATC0):
     """fertDistCres_'s winter cover term (l. 1073-1079), p_ghgMiti(CATC, WinterCov, othImpact, BioFix) x v_actLevl(CATC)
-    x 1000, written from the base share (the base's catch crops are in the residue pool's data): biofix x (m - m0), biofix
-    = BioFix x U x 1000 (t N per unit of share; U the base UAA where CAPRI's catcMiti_ takes the current land: K186:
-    premiums.py). CAPRI's GAMS of fertDistCres_: fertDistCres_'s docstring."""
-    return biofix * (v_Miti - v_Miti0)
+    x 1000, written from the base level (the base's catch crops are in the residue pool's data): biofix x (CATC - CATC0),
+    biofix = BioFix x 1000 (t N per 1000 ha of catch crops), CATC the catch crop area (catcMiti_, premiums.py: the share
+    times the land; with the share held, the CATC level). CAPRI's GAMS of fertDistCres_: fertDistCres_'s docstring."""
+    return biofix * (v_actLevl_CATC - v_actLevl_CATC0)
 
 
 def NUTNED_availFactMine_opt(eff0, GasRunTot, GasRunTot0):

@@ -554,6 +554,15 @@ def _manure_and_ammonia_checks(model, carbon_tax_scenario):
     e0, e1 = b["environmental"].loc["BL210000"], s["environmental"].loc["BL210000"]
     assert float(e1["ghg_manure_n2o"]) < float(e0["ghg_manure_n2o"])
     assert s["supply"]["BL210000"].animal_nh3_saved
+    # K186: under the tax the winter cover option is a choice and its catch crops are the share times the current land
+    # (catcMiti_: U + the land market's change from its base)
+    cv = s["supply"]["BL210000"].cover_crops
+    ls = mo.res.land_solution or {}
+    L0 = (getattr(mo.data, "land_market", None) or {}).get("base_kha") or {}
+    assert cv.get("endogenous") and ls
+    dL = sum(float(ls[t]) - float(L0.get(t, 0.0)) for t in ("ARAC", "GRAS", "FRUN") if t in ls)
+    assert abs(dL) > 1e-6
+    assert cv["req"] == pytest.approx(cv["share"] * (cv["uaa"] + dL), rel=1e-6)
 
 
 def test_ammonia_options_held_at_initial_shares_by_default():
