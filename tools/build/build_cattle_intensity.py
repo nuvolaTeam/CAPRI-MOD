@@ -12,6 +12,8 @@ from the high to the low activity, z (1000 model heads), as for the dairy split:
     flow items (MANN, MANP, MANK manure N, P2O5, K2O, BEEF, the young animal IBUL/IHEI) per stall
                                                                                         = per animal x 365 / D
     daily items (ENNE energy, CRPR protein, DRMN / DRMX dry-matter limits) per stall = per day
+    the other inputs INPO per stall = per animal x 365 / D (dinpo_rel: the Green Deal's input change on the split,
+    K189; 0 without data)
   d<item>_rel = (low - high) per stall / the model animal's average per stall (all its CAPRI
                activities: for HFRS including the replacement heifers HEIR)
   share_low, share_high   stall shares of the two activities in the model animal (HFRS: < 1 together)
@@ -52,7 +54,7 @@ Q_SOURCES = (("", ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / 
              ("_capri2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_capri2030.parquet"),
              ("_recipe2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_recipe2030.parquet"))
 ITEMS = ("LEVL", "DAYS", "MANN", "MANP", "MANK", "BEEF", "IBUL", "IHEI", "ICAM", "ICAF", "YBUL", "YHEI", "YCOW",
-         "ENNE", "CRPR", "DRMN", "DRMX")
+         "ENNE", "CRPR", "DRMN", "DRMX", "INPO")
 ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'(BULL|BULH|HEIL|HEIH|HEIR|CAMF|CAFF|CAMR|CAFR)'\.'(" + "|".join(ITEMS)
                  + r")'\.'Y'\s+(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
 #: (model animal, split, member a (+z), member b (-z), the model animal's CAPRI members, young items it buys).
@@ -106,7 +108,7 @@ def main():
             return None
         t = 365.0 / D
         rec = {"stalls": L * D / 365.0, "days": D}
-        for it in ("MANN", "MANP", "MANK", "BEEF"):
+        for it in ("MANN", "MANP", "MANK", "BEEF", "INPO"):
             rec[it] = d.get((act, it), 0.0) * t
         rec["YOUNG"] = sum(d.get((act, y), 0.0) for y in young) / 1000.0 * t    # young animals per stall-year
         for g, its in GOODS_PROD.items():
@@ -134,7 +136,7 @@ def main():
             recs = {x: stall(d, x, young) for x in members}
             recs = {x: r for x, r in recs.items() if r}
             S = sum(r["stalls"] for r in recs.values())
-            extra = tuple("P_" + g for g in GOODS_PROD) + tuple("U_" + g for g in GOODS_USE)
+            extra = tuple("P_" + g for g in GOODS_PROD) + tuple("U_" + g for g in GOODS_USE) + ("INPO",)
             avg = {it: sum(r[it] * r["stalls"] for r in recs.values()) / S for it in FLOW + DAILY + extra}
             rec = {"region": reg, "animal": animal, "capri_region": src,
                    "share_low": recs[lo]["stalls"] / S, "share_high": recs[hi]["stalls"] / S,
@@ -147,6 +149,10 @@ def main():
                 rec[f"d{it.lower()}_rel"] = (recs[lo][it] - recs[hi][it]) / avg[it]
             if not ok:
                 continue
+            # the other inputs per stall (INPO), whose Green Deal change (one percentage per region on every
+            # activity's coefficient, pol_input/greendeal/conventional_io.gms; capmod/define_inputs.gms l. 70-73)
+            # differs between the members by their base difference (K189's per-head terms); 0 without data
+            rec["dinpo_rel"] = (recs[lo]["INPO"] - recs[hi]["INPO"]) / avg["INPO"] if avg["INPO"] > 0 else 0.0
             rho = H / S                                              # model heads per CAPRI stall
             for sfx, q in Q.items():
                 ql = q.at[reg, lo] if reg in q.index and lo in q.columns else float("nan")
@@ -175,6 +181,8 @@ def main():
                                 "days_low_2030": r30[lo]["days"], "days_high_2030": r30[hi]["days"]})
                     for it in FLOW + DAILY:
                         rec[f"d{it.lower()}_rel_2030"] = (r30[lo][it] - r30[hi][it]) / a30[it]
+                    rec["dinpo_rel_2030"] = ((r30[lo]["INPO"] - r30[hi]["INPO"]) / a30["INPO"]
+                                             if a30["INPO"] > 0 else 0.0)
                     for g in GOODS_PROD:
                         k = "P_" + g
                         rec[f"dprod_{g}_rel_2030"] = (r30[lo][k] - r30[hi][k]) / a30[k] if a30[k] > 0 else 0.0
@@ -220,7 +228,7 @@ def main():
     base_cols = ["region", "animal", "capri_region", "share_low", "share_high", "days_low", "days_high"] + \
         [f"d{it.lower()}_rel" for it in FLOW + DAILY if it not in ("MANP", "MANK")] + ["q_z", "q_source", "heads"]
     # then the columns added before 9 November 2026, then manure P2O5 and K2O, then CAPRI's 2030 point
-    new = ["dmanp_rel", "dmank_rel"] + [c for c in out.columns if c.endswith("_2030") and not c.endswith(("_capri2030",
+    new = ["dmanp_rel", "dmank_rel", "dinpo_rel"] + [c for c in out.columns if c.endswith("_2030") and not c.endswith(("_capri2030",
                                                                                                          "_recipe2030"))]
     first = base_cols + [c for c in out.columns if c not in base_cols and c not in new
                          and not (c.endswith("_capri2030") or c.endswith("_recipe2030"))]

@@ -94,36 +94,6 @@ COMMENT ON TABLE src_labour_ageline_p_minlabourperact IS 'CAPRI''s p_minLabourPe
 INSERT INTO value_units VALUES
   ('src_labour_ageline_p_minlabourperact', 'value', NULL, 'open', 'hours per activity unit (ha or head) (the file''s comment); no single unit code');
 
--- file: capri_data/sources/raw/capri/gams/envind/gascoeff_p_nutContCropOutput_STRA.parquet
-CREATE TABLE src_gascoeff_p_nutcontcropoutput_stra (
-    output VARCHAR NOT NULL,
-    nutrient VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (output, nutrient)
-);
-COMMENT ON TABLE src_gascoeff_p_nutcontcropoutput_stra IS 'CAPRI''s p_nutContCropOutput("STRA", FNUT) from gams/envind/gascoeff.gms l. 359 (TABLE p_nutContCropOutput l. 347: "retention of pure nutrient in kg per t harvested material"), the straw row tools/build/build_npk_balance_2030.py read with a pattern (its extraction moved to tools/build/convert_sources.py), the numbers as written (5., 3., 18.); read by tools/build/build_npk_balance_2030.py.';
-INSERT INTO value_units VALUES
-  ('src_gascoeff_p_nutcontcropoutput_stra', 'value', NULL, 'open', 'kg per t of straw (the table''s text); no unit code for it');
-
--- file: capri_data/sources/raw/capri/gams/fert/fertpar_MAXF.parquet
-CREATE TABLE src_fertpar_maxf (
-    nutrient VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    multiplier DOUBLE NOT NULL,
-    PRIMARY KEY (nutrient)
-);
-COMMENT ON TABLE src_fertpar_maxf IS 'CAPRI''s MAXF(FNUT) from gams/fert/fertpar.gms: value the assignments MAXF("NITF"|"PHOF"|"POTF") = v (l. 387-389), multiplier the following MAXF(FNUT) = MAXF(FNUT) * 2.0 (l. 391) ("Maximum input of nutrient for activities without yield dependency", l. 384); extracted by the patterns of tools/build/build_npk_balance_2030.py (moved to tools/build/convert_sources.py), which reads value x multiplier.';
-INSERT INTO value_units VALUES
-  ('src_fertpar_maxf', 'value', NULL, 'open', 'fertpar.gms states no unit'),
-  ('src_fertpar_maxf', 'multiplier', 'U_ratio', 'capri', 'a factor (l. 391)');
-
--- file: capri_data/sources/raw/capri/gams/fert/fertpar_doubleMaxf.parquet
-CREATE TABLE src_fertpar_doublemaxf (
-    activity VARCHAR NOT NULL,
-    PRIMARY KEY (activity)
-);
-COMMENT ON TABLE src_fertpar_doublemaxf IS 'CAPRI''s set doubleMaxf(PACT) from gams/fert/fertpar.gms l. 393 ("Activities for which the above maximum loads are doubled"), extracted by the pattern of tools/build/build_npk_balance_2030.py (moved to tools/build/convert_sources.py), which reads it.';
-
 -- file: capri_data/sources/raw/capri/gams/fert/fertpar_p_nfixRate_gras.parquet
 CREATE TABLE src_fertpar_p_nfixrate_gras (
     region VARCHAR NOT NULL,

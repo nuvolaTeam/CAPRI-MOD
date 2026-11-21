@@ -120,7 +120,8 @@ class AbatementBlock:
             mr = self._crop_mineral_now()
             cr = [(list(self.acts).index(c_), v_) for c_, v_ in mr.items() if c_ in self.acts and v_ > 0]
             if ft and cr:
-                out["fert_tech"] = {"crops": cr, "techs": ft, "ecap": fert_efficiency_cap(self.data.region_id)}
+                out["fert_tech"] = {"crops": cr, "techs": ft, "ecap": fert_efficiency_cap(self.data.region_id),
+                                    "emical": dict(getattr(self.seen, "fert_techs_emical", None) or {})}
         if self._ni_inside():
             nip = self._manure_inhibitor_params()
             if nip is not None:
@@ -190,12 +191,14 @@ class AbatementBlock:
             minimum CATC = [0.5 o + 0.5 max(0, r - o)] x (UAAR - sum_c crop_c x winter cover share_c)
                            + baseline CATC
         CAPRI subtracts the area under winter cover with p_winterCoverShare0, the shares as given
-        (NUTS2 entries for Austria and a few German regions only); elsewhere nothing is subtracted
-        and the requirement exceeds the area that can carry a catch crop (its own winterCover_ row,
-        with the filled shares) in 100 regions, an infeasible pair. REGISTERED: the filled shares
-        (NUTS2 <- member state <- EU, define_greening_limits.gms) in both, and the requirement capped
-        at that potential area at base. Sets self.ev.cover: requirement and increment (1000 ha),
-        UAAR, catch-crop N per ha and cost per ha."""
+        (NUTS2 entries for Austria and a few German regions only), so elsewhere the requirement is on
+        the whole UAAR: in CAPRI's Green Deal run (lnds8_org18_pest20) the catch crops rise by 9.5-10.5%
+        of UAAR in 182 of 207 EU units. Its own winterCover_ row uses the filled shares (NUTS2 <-
+        member state <- EU, define_greening_limits.gms); where the requirement exceeds the land that
+        row leaves at the base point it is capped there (REGISTERED, KNOWN_ISSUES K170: CAPRI's
+        Farm-to-Fork targets exceed it in about 100 units; until 18 November 2026 the filled shares
+        were used for the requirement too, supply.cover_crop_requirement_area "filled"). Sets
+        self.ev.cover: requirement and increment (1000 ha), UAAR, catch-crop N per ha and cost per ha."""
         cc = getattr(self.data, "cover_crops", None)
         wcs = getattr(self.data, "winter_cover_share", None)
         if cc is None or wcs is None or reduction <= 0:
@@ -206,6 +209,14 @@ class AbatementBlock:
             return
         covered = sum(float(base.get(c, 0.0) or 0.0) * float(wcs.at[c, "share"])
                       for c in wcs.index if c in base.index)
+        # the area the requirement applies to: CAPRI's, UAAR less the crops under winter cover by the shares as given
+        # (p_winterCoverShare0; supply.cover_crop_requirement_area "capri", the default since 18 November 2026), or
+        # by the filled shares ("filled", capri-mod's form until then)
+        if str(_settings().get("supply.cover_crop_requirement_area")) == "capri" and "share0" in wcs.columns:
+            covered_req = sum(float(base.get(c, 0.0) or 0.0) * float(wcs.at[c, "share0"] or 0.0)
+                              for c in wcs.index if c in base.index)
+        else:
+            covered_req = covered
         targets = getattr(self.data, "organic_targets_pp", None)
         o = 0.0
         if organic_share:
@@ -214,10 +225,11 @@ class AbatementBlock:
                  else max(0.0, float(organic_share) - self._organic_baseline()))
         f = 0.5 * o + 0.5 * max(0.0, reduction - o)
         c0 = float(cc.get("catc_share_2030", 0.0) or 0.0) * uaa
-        pot = max(0.0, uaa - covered)
-        req = min(f * pot + c0, max(pot, c0))
+        pot = max(0.0, uaa - covered)                  # the land the winterCover_ row leaves at the base point
+        req = min(f * max(0.0, uaa - covered_req) + c0, max(pot, c0))
         bf = cc.get("biofix_t_n_ha")
         self.ev.cover = {"req": req, "delta": max(0.0, req - c0), "base": c0, "uaa": uaa, "potential": pot,
+                       "req_area": max(0.0, uaa - covered_req),
                        "biofix": float(bf) if bf is not None and not pd.isna(bf) else 0.0,
                        "cost": float(cc.get("catc_cost_eur_ha", 0.0) or 0.0)}
 
@@ -243,6 +255,42 @@ class AbatementBlock:
             return out
         return techs
 
+    def _wc_fixed(self) -> bool:
+        """CAPRI's Green Deal group fixes the winter cover option's share (pol_input/greendeal/greendeal_scenarios.gms
+        l. 86-105, FixMiti with only wintercov fixed; supply/set_miti_bounds.gms l. 556-566: v_Miti(CATC, WinterCov)
+        = p_fixMiti = 1e-6; its Green Deal run reports SHARE CATC WinterCov 1e-6 in every unit): the catch crops are
+        then the CATC activity at its input cost, steered by the requirement (e_minCoverCrops) and winterCover_ only,
+        and they do not change the loss cascade (supply.greendeal_winter_cover "capri", K170). Outside the group, the
+        same form where CAPRI's run has no winter cover option (_wc_reference, K188)."""
+        if bool(getattr(self.ev, "greendeal_group", False)) and \
+                str(_settings().get("supply.greendeal_winter_cover")) == "capri":
+            return True
+        return self._wc_reference()
+
+    def _wc_reference(self) -> bool:
+        """CAPRI's catch crops where its run has no mitigation options (K188). The options exist only with
+        %ghgAbatement% on, which only the endogenous- and exogenous-technology policy files set
+        (pol_input/greendeal/refpol_endotech_all_sup.gms l. 36, pol_input/ecampa/carbtax50_endotech_set12.gms l. 66,
+        pol_input/cap_after_2023/refpol_*.gms; off by default, capmod/set_global_variables.gms l. 215). CAPRI's 2030
+        reference (pol_input/greendeal/ref.gms with cap_after_2014/ref.gms) runs without them: its results report no
+        WinterCov entry for CATC, and in each of the 82
+        EU units with catch crops CATC's input cost equals 0.3 x the ecological set-aside rule's dual (dataOut D_OBJC =
+        -D_ecoSetAside: CATC is an activity at its input cost, and the rule binds at cost / 0.3, the dual CAPRI's fallow,
+        set-aside and pulses carry; PT18 49.53 EUR/ha, the rule 165). So the catch crops are the CATC activity at its
+        input cost (no option cost curve) in the calibration and in every run without an emission tax; with a tax
+        (CAPRI's carbon-tax file, ghgAbatement on without FixMiti) the option is chosen with its cost curve
+        (supply.reference_winter_cover "capri"; "option": capri-mod's form until 20 November 2026, the option in every
+        run, which left the rule's multiplier at zero at the base)."""
+        if str(_settings().get("supply.reference_winter_cover")) != "capri":
+            return False
+        return float(getattr(self.seen, "ghg_tax", 0.0) or 0.0) <= 0.0
+
+    @staticmethod
+    def _catc_fills_rule(spec) -> bool:
+        """Whether the base's catch crops fill the ecological set-aside rule (policy.py _cap_rules_spec catc_fill,
+        K188): CAPRI's calibration sizes CATC to the requirement less the other EFA activities (prep_cal.gms l. 68-99)."""
+        return bool(((spec.get("cap_rules") or {}).get("ecoSetAside") or {}).get("catc_fill", False))
+
     def _winter_cover_shares(self):
         """(base, current) winter cover share of the region, CAPRI's v_Miti(CATC, WinterCov): the 2030 catch-crop share
         (cover_crops.csv catc_share_2030, CAPRI's value) and, under the Farm-to-Fork catch-crop requirement, the required
@@ -252,6 +300,8 @@ class AbatementBlock:
         if cc is not None and hasattr(cc, "get"):
             v = cc.get("catc_share_2030")
             w0 = float(v) if v is not None and not pd.isna(v) else 0.0
+        if self._wc_fixed():
+            return w0, w0                                           # the Green Deal group's fixed share (K170)
         if getattr(self.sv, "wc_solved", None) is not None:
             return w0, float(self.sv.wc_solved)                     # chosen in the NLP form
         cv = getattr(self.ev, "cover", None)
@@ -579,19 +629,22 @@ class AbatementBlock:
                 # idled histosols count towards the Biodiversity Strategy's set-aside and landscape target
                 # (supply_model.gms e_setaLandscape_: setaFallow includes iHisCr and iHisGr)
                 col[labels.index("landscape_floor")] = -1.0
+            if "N_balance" in labels and self.data.n_deposition_kg_ha:
+                # the idled area keeps its deposition in the N surplus (CAPRI's iHisCr / iHisGr are crops of MCACT with
+                # MANN = AtmDep: e_ATMOSD, e_CRESID; K184), t N per 1000 ha idled
+                from capri_mod.supply.equations.supply_model.n_surplus import SURTOT_idlHis
+                col[labels.index("N_balance")] = SURTOT_idlHis(1.0, self.data.n_deposition_kg_ha)
             if cal is None or cls not in cal:
                 pend[cls] = col
                 continue
             Aa = np.hstack([Aa, col[:, None]])
-            up = np.zeros(Aa.shape[1]); up[-1] = 1.0
             _lt = self.HISTOSOL_LAND.get(cls, ())
-            if land_cols and _lt and all(t in land_cols for t in _lt):
-                # F <= MaxShare x share x current land (K158): F - MaxShare x share x L <= 0
-                for t in _lt:
-                    up[land_cols[t]] = -float(mx) * sh
-                Aa = np.vstack([Aa, up]); ba = np.concatenate([ba, [1e-9 * max(1.0, H)]])
-            else:
-                Aa = np.vstack([Aa, up]); ba = np.concatenate([ba, [float(mx) * H]])
+            # CAPRI's idleHisto_ as the area's bound (equations/supply_model/set_aside.py): F <= MaxShare x share x
+            # current land with the land market (K158), else x the base area
+            from capri_mod.supply.equations.supply_model.set_aside import idleHisto_
+            _lc = [land_cols[t] for t in _lt] if (land_cols and _lt and all(t in land_cols for t in _lt)) else None
+            up, b_up = idleHisto_(Aa.shape[1], _lc, mx, sh, H)
+            Aa = np.vstack([Aa, up]); ba = np.concatenate([ba, [b_up]])
             labels.append(f"hist_{cls}_up")
             Qa = np.pad(Qa, ((0, 1), (0, 1))); Qa[-1, -1] = float(sqr) / H
             ca = np.concatenate([ca, [cal[cls] + self._ghg_cost('hist', cls)]])

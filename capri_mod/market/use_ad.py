@@ -32,6 +32,8 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 
+from capri_mod.market.equations.market_model.processing import MaprFeed_
+
 
 def _sx_matrix(ca, cells: Dict[Tuple[int, int], object], base: np.ndarray):
     """An SX matrix with the numbers of base and the expressions of cells."""
@@ -405,7 +407,7 @@ def use_function(mm, lift: bool = False):
         for p_, d in (fp.get("products") or {}).items():
             dr_ = (d.get("reg") or {}).get(reg, d)
             x = sum(w * ((br.get(reg, {}) if use == "biofuel" else fr).get(c, 1.0)) for c, use, w in dr_["parts"])
-            byp.append(ca.fmax(0.0, dr_["prod0"] * x))
+            byp.append(ca.fmax(0.0, MaprFeed_(dr_["prod0"], x)))
             byp_cells.append((reg, p_))
     byp_v = ca.vertcat(*byp) if byp else ca.SX(0, 1)
     if lift:

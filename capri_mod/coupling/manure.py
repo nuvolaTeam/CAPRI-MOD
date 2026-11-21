@@ -8,13 +8,17 @@ from __future__ import annotations
 
 
 from capri_mod import statekit as _cst   # the state objects' helpers
+from capri_mod.market.equations.manuremarket.declare_manure_market import (e_mPoolBenefits, e_mPoolClear,
+                                                                           e_mPoolExcessSupply, e_mPoolSurplus,
+                                                                           e_mPoolSurplus_row, p_mTradeAddCost)
+from capri_mod.market.equations.manuremarket.simu_manure_market import p_mPoolSupConst, p_stepWeights_average
 #: the clearing's state kept per market between outer iterations, as paths in the model's state objects (the N
 #: market's in the model's own sv and res; the P and K markets' copies in sv.pool_pk, swapped in for their clearing)
 #: t per kt: CAPRI's pool trade is in kt, the supply in its slope in t (outer_loop.manure_pool_es_slope "capri_doc")
 _T_PER_KT = 1000.0
 _POOL_IMBALANCE, _POOL_WORST_KEY = "res.pool_imbalance", "res.pool_worst_key"
 _POOL_STATE = ("sv.pool_state", "sv.pool_accel", _POOL_IMBALANCE, _POOL_WORST_KEY, "res.pool_solver_status",
-               "res.pool_eu_unaccounted")
+               "res.pool_eu_unaccounted", "res.pool_losf")
 
 
 class ManureBlock:
@@ -145,6 +149,10 @@ class ManureBlock:
             ev = getattr(mo.res, "pool_manure_vec", None) if prod == "N" else \
                 (getattr(mo.res, "pool_manure_vec_pk", None) or {}).get(prod)
             emax = float(ev @ y[:len(ev)]) if ev is not None else 0.0
+            if prod == "N":
+                # the base exports a constant of the region (supply.manure_base_trade "capri", K167): what the change
+                # of exports can take is the manure produced less them, as the region's own cap row
+                emax -= float(getattr(mo.res, "pool_manure_x0", 0.0) or 0.0)
             k = self.POOL_OF_PREFIX.get(reg[:2], reg[:2])
             sched.setdefault(k, []).append((th_e, th_i, sl, max(emax, 0.0)))
             # the trade columns' lower bounds (supply.manure_trade_form "capri": minus the gross trade at CAPRI's
@@ -260,6 +268,17 @@ class ManureBlock:
         # must equal its planned net shipments (zero for a closed pool)
         plan_now = (hist.get("_plan") or {}) if isinstance(hist, dict) else {}
         worst = max(abs(es[k] - plan_now.get(k, 0.0)) / sup[k] for k in keys)
+        self.res.pool_losf = float(worst)
+        if form == "capri" and str(_settings().get("outer_loop.manure_pool_trade_consts")) == "capri":
+            # with CAPRI's fixed trade cost constants the pool market does not see what else moves the regions' trade
+            # (their N-surplus row), so the regions' trade and the market's plan need not meet: CAPRI reports the gap
+            # (losf, simu_manure_market.gms l. 199-204: the supply models' net trade less the market's) and stops on
+            # changes between its steps (capmod.gms l. 1369, p_itemsInIters with the market's EXPT and IMPT and the
+            # supply models' MTRADE): the test is the change of the market's plan and of the regions' trade since
+            # the clearing before, relative to the pool's supply; the gap kept as pool_losf
+            es_prev = (hist.get("_es") or {}) if isinstance(hist, dict) else {}
+            worst = max(max(abs(ship.get(k, 0.0) - plan_now.get(k, 0.0)), abs(es[k] - es_prev.get(k, es[k] + sup[k])))
+                        / sup[k] for k in keys) if ok else 1.0
         if not ok:
             worst = max(worst, 1.0)
         # ADAPTIVE DAMPING of the move to the new equilibrium prices (exact for
@@ -290,7 +309,7 @@ class ManureBlock:
                     h_ = (ph.get(k) or []) + [float(pnew[k])]
                     ph[k] = h_[-n_keep:]
                     use = list(reversed(ph[k]))[:len(wts)]
-                    pnew[k] = sum(w_ * v_ for w_, v_ in zip(wts, use)) / sum(wts[:len(use)])
+                    pnew[k] = p_stepWeights_average(wts, use)
         else:
             om = float(acc.get("_omega", 1.0))
             prev_gap = acc.get("_gap")
@@ -341,10 +360,16 @@ class ManureBlock:
                 at the region's solution
         max sum_r [a_r/b_r z_r - z_r^2/(2 b_r) - e_r (cs0 + cs1 e_r/2) - i_r (cb0 + cb1 i_r/2)] - sum_kl c_kl T_kl,
         z_r = e_r - i_r, s.t. per pool k: sum_{r in k} z_r = sum_l (T_kl - T_lk); e_r at most the manure produced.
-        Solved as a convex QP (Clarabel); where a b_r is negative (a negative calibration dual) the problem stays convex
-        if the region's trade cost slopes outweigh it ((1/b + cs1)(1/b + cb1) >= 1/b^2), else the run stops.
-        The pool price is the balance's dual (CAPRI's PMRK, the dual of e_mPoolExcessSupply; no calibration wedge:
-        at the model's base the pools' trade deviations and prices are zero, an equilibrium).
+        outer_loop.manure_pool_solver "nlp" (the default): as CAPRI solves it, "using nlp maximizing v_mPoolBenefits"
+        (simu_manure_market.gms l. 160), in CAPRI's variables (v_manureExports, v_manureImports, v_mPoolExports,
+        v_mPoolExcessSupply, v_mPoolSurplus, v_mPoolBenefits) and its four rows (e_mPoolExcessSupply, e_mPoolSurplus,
+        e_mPoolClear, e_mPoolBenefits), with IPOPT for CAPRI's CONOPT, started from the clearing before
+        (_pool_market_nlp); the pool price the dual of e_mPoolExcessSupply (l. 217, PMRK). Where a b_r is negative (a
+        negative calibration dual) the problem need not be convex: IPOPT returns a local optimum, as CONOPT does.
+        "qp": the same problem as a convex QP (Clarabel), with one balance row per pool (the excess supply and the
+        surplus substituted); there a negative b_r must be outweighed by the region's trade cost slopes ((1/b +
+        cs1)(1/b + cb1) >= 1/b^2), else the run stops. No calibration wedge in either: at the model's base the pools'
+        trade deviations and prices are zero, an equilibrium.
         Returns (ok, prices in the model's convention, planned net shipments by pool, solver status, state to keep)."""
         st = _settings()
         fout = {"N": "MANN", "P": "MANP", "K": "MANK"}[prod]
@@ -363,6 +388,16 @@ class ManureBlock:
                 buf[k], buf_gd[k] = max(buf.get(k, 0.0), float(b0)), max(buf_gd.get(k, 0.0), float(b1))
             bc = {"es": bc, "net": net, "buffer": buf, "buffer_greendeal": buf_gd}
             self.par.pool_es_cache = bc
+        consts = str(st.get("outer_loop.manure_pool_trade_consts"))
+        if consts not in ("solution", "capri"):
+            raise ValueError(f'outer_loop.manure_pool_trade_consts = "{consts}": "solution" or "capri"')
+        held = getattr(self.par, "pool_trade_consts", None)
+        if held is None:
+            held = self.par.pool_trade_consts = {}
+        solver = str(st.get("outer_loop.manure_pool_solver"))
+        if solver not in ("nlp", "qp"):
+            raise ValueError(f'outer_loop.manure_pool_solver = "{solver}": "nlp" or "qp"')
+        reg_terms = []
         mode = str(st.get("outer_loop.manure_pool_es_slope"))
         if mode not in ("capri_code", "capri_doc"):
             raise ValueError(f'outer_loop.manure_pool_es_slope = "{mode}": "capri_code" or "capri_doc"')
@@ -391,21 +426,28 @@ class ManureBlock:
             pshw_h[r_["reg"]] = h_[-max(len(wts), 1):]
             if v <= float(st.get("outer_loop.manure_pool_pshw_floor")) and len(h_) > 1:
                 use = list(reversed(h_))[:len(wts)]
-                v = sum(w_ * x_ for w_, x_ in zip(wts, use)) / sum(wts[:len(use)])
+                v = p_stepWeights_average(wts, use)
             z = r_["e"] - r_["i"]
-            a = z - b * v
+            a = p_mPoolSupConst(z, b, v)
             cs1, cb1 = r_["cs1"], r_["cb1"]
             # the constants: the region's export (import) reduced cost = v + cs0 + cs1 e - P (P + cb0 + cb1 i - v)
             cs0 = r_["rce"] - r_["f"] - cs1 * r_["e"] - v
             cb0 = r_["rci"] + r_["f"] - cb1 * r_["i"] + v
+            if consts == "capri":
+                # CAPRI's p_manureSellCostConst and p_manureBuyCostConst, calibrated once at the base (FINALIZE of
+                # supply/define_manure_trade_costs.gms) and held: the constants of the region's first clearing (the
+                # baseline's calibration point), then fixed
+                cs0, cb0 = held.setdefault((r_["reg"], fout), (cs0, cb0))
             be = 1.0 / b
-            if b < 0 and ((be + cs1) < 0 or (be + cs1) * (be + cb1) < be * be):
+            if solver == "qp" and b < 0 and ((be + cs1) < 0 or (be + cs1) * (be + cb1) < be * be):
                 raise ValueError(f"manure pool {prod}: {r_['reg']} has a negative excess-supply slope ({b:.6g}) its "
                                  f"trade costs do not outweigh: the market model is not convex")
             ie, ii = q, nr + q
-            Qp[ie, ie] += be + cs1; Qp[ii, ii] += be + cb1; Qp[ie, ii] -= be; Qp[ii, ie] -= be
-            cp_[ie] = -a * be + cs0
-            cp_[ii] = a * be + cb0
+            reg_terms.append((a, b, cs0, cs1, cb0, cb1))
+            q_ee, q_ii, q_ei, c_e, c_i = e_mPoolSurplus(a, b, cs0, cs1, cb0, cb1)
+            Qp[ie, ie] += q_ee; Qp[ii, ii] += q_ii; Qp[ie, ii] -= q_ei; Qp[ii, ie] -= q_ei
+            cp_[ie] = c_e
+            cp_[ii] = c_i
         # CAPRI's autarky buffers (p_mTradeAddCost, declare_manure_market.gms l. 396-436): a link unused at the
         # calibration point costs (buffer_k + buffer_l) / 2 more, so that new flows need a price gap beyond the trade
         # cost; CAPRI's calibrated links are those from its exporting pools to its importing ones (at the 2030
@@ -417,7 +459,7 @@ class ManureBlock:
         used_ = {(a_, b_) for a_ in exp_ for b_ in imp_} | {(b_, a_) for a_ in exp_ for b_ in imp_}
         bf_ = bc["buffer_greendeal"] if bool(getattr(self.ev, "greendeal_group", False)) else bc["buffer"]
         for t, (a_, b_, cc) in enumerate(arcs):
-            add_ = 0.0 if (a_, b_) in used_ else 0.5 * (bf_.get(a_, 0.0) + bf_.get(b_, 0.0))
+            add_ = 0.0 if (a_, b_) in used_ else p_mTradeAddCost(bf_.get(a_, 0.0), bf_.get(b_, 0.0))
             cp_[2 * nr + t] = cc + add_
         Ap = np.zeros((nr, nv)); bp = np.zeros(nr)
         for q, r_ in enumerate(crec):
@@ -430,6 +472,23 @@ class ManureBlock:
             for t, (a_, b_, cc) in enumerate(arcs):
                 if a_ == k: Aeq[j, 2 * nr + t] -= 1.0
                 if b_ == k: Aeq[j, 2 * nr + t] += 1.0
+        if solver == "nlp":
+            # the trade columns' lower bounds (minus the gross trade at CAPRI's calibration point under supply.
+            # manure_trade_form "capri", zero under "net"), as the QP's shift below
+            lo = np.array([float(r_.get("elo", 0.0)) for r_ in crec] + [float(r_.get("ilo", 0.0)) for r_ in crec])
+            up = np.array([float(r_["emax"]) for r_ in crec] + [np.inf] * nr)
+            x0 = np.array([float(r_["e"]) for r_ in crec] + [float(r_["i"]) for r_ in crec])
+            ok, pnew, xs, status, its = self._pool_market_nlp(keys, crec, reg_terms, arcs, cp_[2 * nr:], lo, up, x0,
+                                                               hist.get("_clear_x"))
+            from capri_mod import runlog as _runlog
+            _runlog.current().solver(f"--- Manure pool market {fout}: {nv:,} trade variables ({nr} regions, {na} links), "
+                                     f"{len(keys)} pools; IPOPT {status}, {its} iterations")
+            ship = {k: 0.0 for k in keys}
+            if ok:
+                for t, (a_, b_, cc) in enumerate(arcs):
+                    ship[a_] += xs[2 * nr + t]; ship[b_] -= xs[2 * nr + t]
+            self.res.pool_worst_key = ""
+            return ok, pnew, ship, status, {"_pshw": pshw_h, "_clear_x": [float(v) for v in xs] if ok else hist.get("_clear_x")}
         from capri_mod.supply.convex_qp import solve_convex_qp
         # the regions' trade bounded below by minus their gross trade at CAPRI's calibration point (supply.manure_trade_
         # form "capri"; zero under "net"): solved in the shifted variables x' = x + s >= 0 (the solver bounds every
@@ -459,3 +518,75 @@ class ManureBlock:
                 ship[a_] += sol[2 * nr + t]; ship[b_] -= sol[2 * nr + t]
         self.res.pool_worst_key = ""
         return ok, pnew, ship, status, {"_pshw": pshw_h}
+
+    def _pool_market_nlp(self, keys, crec, reg_terms, arcs, arc_cost, lo, up, x0, x_prev=None):
+        """CAPRI's m_mPoolMarket for one nutrient as CAPRI solves it, "using nlp maximizing v_mPoolBenefits"
+        (manuremarket/simu_manure_market.gms l. 160; the model: declare_manure_market.gms l. 99-157, its four rows
+        e_mPoolExcessSupply, e_mPoolSurplus, e_mPoolClear, e_mPoolBenefits, capri_mod/market/equations/manuremarket/
+        declare_manure_market.py), with IPOPT for CAPRI's CONOPT.
+
+        Variables: v_manureExports and v_manureImports per region (e, i; between lo and up: the exports at most the
+        manure produced, both at least minus the gross trade at CAPRI's calibration point), v_mPoolExports per link (T >=
+        0; the links with a trade cost, as simu_manure_market.gms l. 94-95 fixes the others), v_mPoolExcessSupply and
+        v_mPoolSurplus per pool, v_mPoolBenefits. reg_terms: (a, b, cs0, cs1, cb0, cb1) per region (crec's order),
+        arc_cost the links' p_mPoolTradeCost (with the autarky buffer). Start: x_prev, the clearing before when it has
+        the same variables, else the regions' trade of their last solves (x0), no links' trade. Returns (ok, the pools'
+        prices in the model's convention: minus CAPRI's PMRK, the dual of e_mPoolExcessSupply; the solution's e, i, T;
+        IPOPT's status; its iterations)."""
+        import casadi as ca
+        from capri_mod.supply.capri_regional_nlp import linear_solver_options as _linear_solver_options
+        st = _settings()
+        nr, na, nk = len(crec), len(arcs), len(keys)
+        e = ca.SX.sym("v_manureExports", nr); i = ca.SX.sym("v_manureImports", nr)
+        T = ca.SX.sym("v_mPoolExports", na)
+        ES = ca.SX.sym("v_mPoolExcessSupply", nk); S = ca.SX.sym("v_mPoolSurplus", nk)
+        B = ca.SX.sym("v_mPoolBenefits")
+        kix = {k: j for j, k in enumerate(keys)}
+        g = []
+        for j, k in enumerate(keys):                                  # e_mPoolExcessSupply(rManPool)
+            m = [q for q, r_ in enumerate(crec) if r_["k"] == k]
+            g.append(e_mPoolExcessSupply(ES[j], [e[q] for q in m], [i[q] for q in m]))
+        for j, k in enumerate(keys):                                  # e_mPoolSurplus(rManPool)
+            m = [q for q, r_ in enumerate(crec) if r_["k"] == k]
+            g.append(e_mPoolSurplus_row(S[j], [(e[q], i[q]) + tuple(reg_terms[q]) for q in m]))
+        for j, k in enumerate(keys):                                  # e_mPoolClear(rManPool)
+            out_ = [T[t] for t, (a_, b_, _) in enumerate(arcs) if a_ == k]
+            in_ = [T[t] for t, (a_, b_, _) in enumerate(arcs) if b_ == k]
+            g.append(e_mPoolClear(out_, in_, ES[j]))
+        g.append(e_mPoolBenefits(B, [S[j] for j in range(nk)], [T[t] for t in range(na)], list(arc_cost)))
+        x = ca.vertcat(e, i, T, ES, S, B)
+        nx = 2 * nr + na + 2 * nk + 1
+        lbx = np.concatenate([lo, np.zeros(na), np.full(2 * nk + 1, -np.inf)])
+        ubx = np.concatenate([up, np.full(na, np.inf), np.full(2 * nk + 1, np.inf)])
+        # the start: the clearing before, else the regions' last trade and the rows' values at it
+        if x_prev is not None and len(x_prev) == 2 * nr + na:
+            et = np.asarray(x_prev, float)
+        else:
+            et = np.concatenate([x0, np.zeros(na)])
+        et = np.minimum(np.maximum(et, np.concatenate([lo, np.zeros(na)])), np.concatenate([up, np.full(na, np.inf)]))
+        z_ = et[:nr] - et[nr:2 * nr]
+        es0 = np.array([sum(z_[q] for q, r_ in enumerate(crec) if r_["k"] == k) for k in keys])
+        sur = np.zeros(nk)
+        for q, r_ in enumerate(crec):
+            a, b, cs0, cs1, cb0, cb1 = reg_terms[q]
+            eq, iq = et[q], et[nr + q]
+            sur[kix[r_["k"]]] += (a / b * (eq - iq) - (eq - iq) ** 2 / (2 * b) - eq * (cs0 + 0.5 * cs1 * eq)
+                                  - iq * (cb0 + 0.5 * cb1 * iq))
+        b0 = float(sur.sum() - np.dot(et[2 * nr:], arc_cost))
+        xstart = np.concatenate([et, es0, sur, [b0]])
+        sc = max(1.0, abs(b0), float(np.abs(sur).max()) if nk else 1.0)
+        solver = ca.nlpsol("m_mPoolMarket", "ipopt", {"x": x, "f": -B / sc, "g": ca.vertcat(*g)},
+                           {"ipopt.print_level": int(st.get("diagnostics.ipopt_print_level")), "print_time": 0,
+                            "ipopt.tol": float(st.get("outer_loop.manure_pool_nlp_tol")),
+                            "ipopt.max_iter": int(st.get("outer_loop.manure_pool_nlp_max_iter")),
+                            **_linear_solver_options()})
+        sol = solver(x0=xstart, lbx=lbx, ubx=ubx, lbg=0.0, ubg=0.0)
+        stats = solver.stats()
+        status = str(stats.get("return_status", "?"))
+        ok = bool(stats.get("success")) or status in ("Solve_Succeeded", "Solved_To_Acceptable_Level")
+        xs = np.asarray(sol["x"], float).ravel()
+        lam = np.asarray(sol["lam_g"], float).ravel() * sc
+        # e_mPoolExcessSupply's dual, GAMS's marginal of the maximisation (CAPRI's PMRK, the nutrient's value): with
+        # f = -v_mPoolBenefits / sc and the rows g = 0, d v_mPoolBenefits / d (the row's right-hand side) = lam_g x sc
+        pnew = {k: -float(lam[j]) for j, k in enumerate(keys)} if ok else {}
+        return ok, pnew, xs[:2 * nr + na], status, int(stats.get("iter_count", 0) or 0)

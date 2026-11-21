@@ -98,6 +98,8 @@ class RegionalEvalState(_Slots):
         "dairy_col",          # the low-yield dairy split's column
         "dairy_req_extra",    # the splits' extra requirement entries by animal
         "genet_cols",         # the genetics options' columns
+        "fodder_out",         # {feed: {column: t per head}}: the animals' milk for feeding in the fodder balances
+        "fodder_le",          # the fodder balances with CAPRI's losses (use <= output: COMF, SGMF)
         # fertilisation
         "n_intensity",        # the mineral N intensity factors of the solve, by crop and the manure credit
         "nlp_mine_small",     # the fertiliser groups too small for the mineral-N row
@@ -111,6 +113,7 @@ class RegionalEvalState(_Slots):
         "land_types_used",    # the land types of the problem
         "need_row",           # the feed need row
         "nrow_land",          # the land rows of the N row (columns, base land, target)
+        "nb_const",           # the N row's constants (surplus, mineral N) no column carries: the base manure trade (K167)
         "pool_avail",         # the manure available to the pool
         "pool_cols",          # the manure pool's export and import columns (N)
         "pool_cols_pk",       # idem for P and K
@@ -141,9 +144,12 @@ class RegionalEvalState(_Slots):
         "yields_solve0",      # the yields at the start of the solve (restored at its end)
         "greendeal_inputs",   # the Green Deal's input reductions of this solve
         "greendeal_crop_delta",   # {crop: (plant protection, other inputs)} cost changes of this solve, EUR/ha
+        "greendeal_animal_inpo",  # {animal: other inputs' cost change per head} of this solve (the splits' members
+                                  # differ by their base INPO, K189's per-head terms)
         "organic_conv",       # the organic conversion shares by crop
         "organic_group_target",  # CAPRI's organic target per fertiliser crop group (p_organicAreaTargetCrops)
         "fert_partial_slack",    # the Green Deal group's slack on the fertiliser priors' partial derivative
+        "greendeal_group",       # the scenario is CAPRI's Green Deal group (greendeal_scenarios.gms)
         "set_aside_rates",       # CAPRI's obligatory set-aside rates of the region's arable activities (SETA_)
         "seta_obl_vec",          # the obligatory set-aside per unit of each activity, r / (1 - r) (SETA_; land.py)
         "yield_price_factor", # the yields' price factors
@@ -166,6 +172,7 @@ class RegionalSeen(_Slots):
         "env_for_surplus",    # the supply module's shared EnvironmentalModule (removed before pickling, re-attached)
         "manure_ctx",         # CAPRI's crop nutrient balance terms (the manure and ammonia accounts in every EU solve; None outside the EU)
         "fert_techs_all",     # CAPRI's fertiliser options (NLP form)
+        "fert_techs_emical",  # their EmiCalMin {option: value} (GHG_Mit_Cost_'s cost base, K175)
         "nlp_cal_check",      # set by CAPRIModel at a baseline: check the NLP calibration at the next solve
         "fallow_in_all_rmssup",  # CAPRI's %fallowInAllRmssup%: histosol fallowing outside the EU (endotech settings)
         "wintercov_in_all_rmssup",  # CAPRI's %winterCovInAllRmssup%: the winter cover outside the EU (endotech settings)
@@ -183,6 +190,7 @@ class RegionalResults(_Slots):
         "last_feed_dm",       # the feed used, dry matter
         "last_feed_t",        # the feed used, tonnes
         "last_npk",           # the fertiliser outputs by nutrient
+        "last_npk_cres",      # {nutrient: [(column, t per unit)]}: the residue pool's coefficients of the last block
         "n_solves",           # solves of the region (a counter)
         "nlp_fallback_log",   # the NLP form's fallbacks of the run (metadata nlp_fallback)
         "nlp_jump",           # the jump check's record (outer history's jump_check)
@@ -206,6 +214,7 @@ class RegionalResults(_Slots):
         "manure_supply0_pk",  # idem for P and K
         "manure_value",       # the manure nutrients' value at the solution (PSHW, CAPRI's ManureNPK_.M), by nutrient
         "pool_manure_vec",    # the manure N by column
+        "pool_manure_x0",     # the base manure N exports a constant of the region (supply.manure_base_trade "capri", K167)
         "pool_manure_vec_pk", # idem for P and K
         # abatement
         "animal_n_kept",      # the manure N kept by the ammonia options, by animal
@@ -234,6 +243,8 @@ class ModuleParameters(_Slots):
         "mcap_cache",         # the mineral caps by region
         "mctx_cache",         # CAPRI's crop nutrient balance terms by region
         "genetics_key",       # the settings key of the genomics calibration
+        "mitigation_scope",   # the run's endotech switches (fallowInAllRmssup, winterCovInAllRmssup, ghgTechAmmEndog)
+                              # set on each regional model, also on the ones built after the switches were set
     )
 
 

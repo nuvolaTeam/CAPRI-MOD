@@ -118,6 +118,7 @@ attribute's getattr did.
 - `surplus_row`: the N-surplus row of this solve
 - `yields_solve0`: the yields at the start of the solve (restored at its end)
 - `greendeal_inputs`: the Green Deal's input reductions of this solve
+- `greendeal_animal_inpo`: the Green Deal's other-input cost change per head of each animal in this solve (the split columns carry it by their members' INPO difference, K189)
 - `organic_conv`: the organic conversion shares by crop
 - `yield_price_factor`: the yields' price factors
 
@@ -146,6 +147,7 @@ attribute's getattr did.
 - `last_feed_dm`: the feed used, dry matter
 - `last_feed_t`: the feed used, tonnes
 - `last_npk`: the fertiliser outputs by nutrient
+- `last_npk_cres`: the residue pool's coefficients of the last fertilisation block, {nutrient: [(column, t per unit)]} (the crops' at the solve's yields, KNOWN_ISSUES K189)
 - `n_solves`: solves of the region (a counter)
 - `nlp_fallback_log`: the NLP form's fallbacks of the run (metadata nlp_fallback)
 - `nlp_jump`: the jump check's record (outer history's jump_check)
@@ -191,6 +193,7 @@ attribute's getattr did.
 - `mcap_cache`: the mineral caps by region
 - `mctx_cache`: CAPRI's crop nutrient balance terms by region
 - `genetics_key`: the settings key of the genomics calibration
+- `mitigation_scope`: the run's endotech switches (fallowInAllRmssup, winterCovInAllRmssup, ghgTechAmmEndog), set on each regional model, also on the ones built after the switches were set (K192)
 
 ## Supply module: sv (ModuleSolveState)
 

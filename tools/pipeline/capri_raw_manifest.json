@@ -1,7 +1,7 @@
 {
  "repo": "nuvolaTeam/capri-mod-raw",
  "repo_type": "dataset",
- "revision": "1bb465fbce9990a80ec489c93695f4c08056fb1e",
+ "revision": "d6e5a441b59255ab68fa3ecee098f00ff5e47e9a",
  "revision_note": "the dataset commit these files are at; uploads are no longer tagged, each file is pinned by its SHA-256 (the project lead, 12 November 2026)",
  "history": [
   {
@@ -24,6 +24,11 @@
    "date": "2026-11-11",
    "note": "priFertDist_<MS>1730defaulta: CAPRI's fertiliser distribution results per country (results/fert), the project lead's upload of 11 November 2026 (26 EU files, NO000000; the non-EU 8 again)",
    "files_added": 621
+  },
+  {
+   "date": "2026-11-20",
+   "note": "the four rural-development GDX files build_rd_inputs reads (dat/policy: rdNewMeasuresRegDist, rd_spend_2007_2013_se; dat/baseline: clueLandPartition, ae_lfa_fes), from the project lead's CAPRI star 3.0 installation (upload of 20 November 2026), as Parquet, each checked record by record",
+   "files_added": 12
   }
  ],
  "layout": "capri/<CAPRI folder: dat/<subfolder>, results/<module>>/<file name>/<symbol>.parquet and _symbols.csv; no originals (11 November 2026)",
@@ -75,6 +80,14 @@
   "capri/dat/baseline/AGLINK2019dgagri_oridata/p_aglinkOri.parquet": {
    "sha256": "6a38d9bd58477f2e77cce888cbefc740276e6c726f00e6b4fdc5e2eaa3f2a19e",
    "size": 36528278
+  },
+  "capri/dat/baseline/ae_lfa_fes/_symbols.csv": {
+   "sha256": "eeaf673006deacc6d04a056f8d35c78177f30389a8d4b3cdcf48cb6364e20123",
+   "size": 69
+  },
+  "capri/dat/baseline/ae_lfa_fes/p_fes.parquet": {
+   "sha256": "87c5b13f58bc1834c2fa58a2f8b8982d95b47566e3d87c84ed072a7019b3f9bc",
+   "size": 10050
   },
   "capri/dat/baseline/aglink2019OECD_oriData/_symbols.csv": {
    "sha256": "a438a3f4e4f2ea6013e2b898184c3db462ccc5ed0974ef88e9ef37c280cb21e3",
@@ -211,6 +224,14 @@
   "capri/dat/baseline/aglink2023dgAgri_oriEUdata/variableType.parquet": {
    "sha256": "0e582358f264a86fff1df4ab0be3cce2fe72f46007f7daa046156e9a62b7d85a",
    "size": 196325
+  },
+  "capri/dat/baseline/clueLandPartition/_symbols.csv": {
+   "sha256": "21daf27d4f40725ce7461a74c17aaabf7d5d98b53f53083bab20ec820457f691",
+   "size": 79
+  },
+  "capri/dat/baseline/clueLandPartition/p_clueLandPart.parquet": {
+   "sha256": "f9dec693bd64dac392bc3077d79c0ec089cdc173a4544dbcdbe6eb078a90a4e4",
+   "size": 25129
   },
   "capri/dat/baseline/data_SSPV3_update/Note_SSP_data_version.parquet": {
    "sha256": "4a7df1d6e5daa64ffba3237e8cde81357323e7c2fd6fab7f956aae6a491b03e1",
@@ -911,6 +932,38 @@
   "capri/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet": {
    "sha256": "9eb311234956ae49760d7b291ccf93bae69118305e02c6295916265b44898f4f",
    "size": 2317
+  },
+  "capri/dat/policy/rdNewMeasuresRegDist/_symbols.csv": {
+   "sha256": "adf2b230732f285b8c9c3957dac9ca8685fbebac1bb1e5cd3d15afb0a6bf833f",
+   "size": 132
+  },
+  "capri/dat/policy/rdNewMeasuresRegDist/p_rdNewMeasuresRegDist.parquet": {
+   "sha256": "fe43547324bf9e819e1c63c89efc78d8247229e2acfee49cdfb182ee691bb0bb",
+   "size": 23792
+  },
+  "capri/dat/policy/rd_spend_2007_2013_se/_symbols.csv": {
+   "sha256": "27e27ef0e81b1c36349fe86e28fa2e44100518fa264d9c6a85e27039af74c7b5",
+   "size": 181
+  },
+  "capri/dat/policy/rd_spend_2007_2013_se/p_seLbuData.parquet": {
+   "sha256": "b84c6fb7d88336baf25633def39bfb8dfb9aacd72e24ba3f42ff0acbd9306be8",
+   "size": 5236
+  },
+  "capri/dat/policy/rd_spend_2007_2013_se/psdpay.parquet": {
+   "sha256": "9ed45b703ff879e09b26ec523f7391d0dba96db31e63371b59281c9dd0b384df",
+   "size": 1538
+  },
+  "capri/dat/policy/rd_spend_2007_2013_se/pspos_grp.parquet": {
+   "sha256": "35a0a4ce0dfa4d4520fbe9ff0a2ed848cf679ea296df4be594dbd6b7cb32e13c",
+   "size": 1499
+  },
+  "capri/dat/policy/rd_spend_2007_2013_se/reg.parquet": {
+   "sha256": "8306b2ac84db644627717a1358f22e4095f5363513271f0f24bf107afc156e8d",
+   "size": 1533
+  },
+  "capri/dat/policy/rd_spend_2007_2013_se/year.parquet": {
+   "sha256": "9c2612403f6d8c45a77f58c8d7315709152a5764419df6c270833bcacebb2424",
+   "size": 1530
   },
   "capri/dat/scen/ghgtech/AD_basedata/AD_Activity.parquet": {
    "sha256": "39cdc51432811ac364a911a6cd1ab2003f1e57fc77c91db6fa991e00b00b8524",
@@ -44371,6 +44424,13 @@
    "location": "code: ../dat/baseline/<file>.gdx",
    "trusted": true
   },
+  "capri/dat/baseline/ae_lfa_fes": {
+   "file": "ae_lfa_fes.gdx",
+   "sha256": "3b101606d3dcbc67aafbaf2ba0c4c2b672fc6284c65f13bc1f2a6352ea34965a",
+   "size": 7485,
+   "location": "code: %datDir%\\baseline\\<file>.gdx (policy/rd_static.gms l. 131)",
+   "trusted": true
+  },
   "capri/dat/baseline/aglink2019OECD_oriData": {
    "file": "aglink2019OECD_oriData.gdx",
    "sha256": "36278659fbd3849807e70ea6b41b7fdf2d143e29a25014ea2cbaa904c6e740be",
@@ -44383,6 +44443,13 @@
    "sha256": "df6d19d34868dfa88161bb7d2c61ef733b447fa440a221bf2e446137415cd57e",
    "size": 35608786,
    "location": "code: ../dat/baseline/<file>.gdx",
+   "trusted": true
+  },
+  "capri/dat/baseline/clueLandPartition": {
+   "file": "clueLandPartition.gdx",
+   "sha256": "661712e6e9b0547ddd6bf000262f350247a5752d9aa8d2e1b6f3c19ac7b62388",
+   "size": 20618,
+   "location": "code: %datDir%\\baseline\\clueLandPartition.GDX (policy/rd_static.gms l. 130)",
    "trusted": true
   },
   "capri/dat/baseline/data_SSPV3_update": {
@@ -44502,6 +44569,20 @@
    "sha256": "bd47a80172a4ed71dea2819c7ee6940f5b158e1a85bb71283e60c6eea2946481",
    "size": 4688,
    "location": "code: %datdir%/miterra/<file>.gdx",
+   "trusted": true
+  },
+  "capri/dat/policy/rdNewMeasuresRegDist": {
+   "file": "rdNewMeasuresRegDist.gdx",
+   "sha256": "dc790517716e89aa43f8d882134d3b1564e6bbbffd2db9e745259bc526f89212",
+   "size": 54209,
+   "location": "code: %datdir%\\policy\\<file>.gdx (policy/extend_rd_baseline.gms l. 110)",
+   "trusted": true
+  },
+  "capri/dat/policy/rd_spend_2007_2013_se": {
+   "file": "rd_spend_2007_2013_se.gdx",
+   "sha256": "7e55999ebcf38a7c791ab0ed79c964279330bd9c00830022e9d88fbe0b77b5e6",
+   "size": 57429,
+   "location": "code: %datdir%\\policy\\<file>.gdx (policy/rd_logic.gms l. 354)",
    "trusted": true
   },
   "capri/dat/scen/ghgtech/AD_basedata": {

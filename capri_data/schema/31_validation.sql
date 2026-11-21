@@ -6,7 +6,7 @@ CREATE TABLE val_capri_eu27_levels_2017_capreg (
     val DOUBLE NOT NULL,
     PRIMARY KEY (act)
 );
-COMMENT ON TABLE val_capri_eu27_levels_2017_capreg IS 'EU27 level per animal activity (BULF, HEIF, HEIR, PIGF, POUF, SOWS, HENS; 7 rows), read by tools/check/compare_baseline_capri.py for the growth 2017-2030; no builder, origin not documented (KNOWN_ISSUES K103).';
+COMMENT ON TABLE val_capri_eu27_levels_2017_capreg IS 'EU27 level per animal activity (BULF, HEIF, HEIR, PIGF, POUF, SOWS, HENS; 7 rows): the sum over the member states of CAPREG''s 2017 LEVL (tools/build/build_capri_eu27_levels.py), read by tools/check/compare_baseline_capri.py for the model''s 2017 herds in CAPRI''s units (the growth 2017-2030 until 18 November 2026, KNOWN_ISSUES K171).';
 INSERT INTO value_units VALUES
   ('val_capri_eu27_levels_2017_capreg', 'val', NULL, 'open', 'capri_eu27_levels_2017_capreg.val: unit to be established');
 
@@ -19,6 +19,21 @@ CREATE TABLE val_capri_eu27_levels_2030_ref (
 COMMENT ON TABLE val_capri_eu27_levels_2030_ref IS 'CAPRI''s EU27 activity levels in 2030 (act, val; 1000 ha or 1000 heads); no builder: its reader tools/check/compare_baseline_capri.py describes it as EU27yr19 LEVL extracted from markmarket_greendeal_1730et_base_1717.';
 INSERT INTO value_units VALUES
   ('val_capri_eu27_levels_2030_ref', 'val', NULL, 'open', 'capri_eu27_levels_2030_ref.val: unit to be established');
+
+-- file: capri_data/validation/capri_ms_market_prices_2030_ref.csv
+CREATE TABLE val_capri_ms_market_prices_2030_ref (
+    ms VARCHAR NOT NULL REFERENCES capri_rall (code),
+    product VARCHAR NOT NULL,
+    pmrk_eur_t DOUBLE NOT NULL CHECK (pmrk_eur_t > 0),
+    grof_kt DOUBLE NOT NULL,
+    domm_kt DOUBLE NOT NULL,
+    PRIMARY KEY (ms, product)
+);
+COMMENT ON TABLE val_capri_ms_market_prices_2030_ref IS 'CAPRI''s 2030 market prices PMRK of the EU member states with their gross production GROF and market use DOMM, CAPRI''s Green Deal baseline (res_2_1730greendeal_refdefaulta), for the baseline check''s market prices (tools/check/compare_baseline_capri.py; tools/build/build_capri_ms_market_prices_2030.py; KNOWN_ISSUES K171)';
+INSERT INTO value_units VALUES
+  ('val_capri_ms_market_prices_2030_ref', 'pmrk_eur_t', 'U_EuPerTon', 'capri', 'PMRK, member state, 2030, CAPRI''s 2030 money'),
+  ('val_capri_ms_market_prices_2030_ref', 'grof_kt', 'U_Ton', 'capri', 'GROF, member state, 2030, 1000 t'),
+  ('val_capri_ms_market_prices_2030_ref', 'domm_kt', 'U_Ton', 'capri', 'DOMM, member state, 2030, 1000 t');
 
 -- file: capri_data/validation/eu_outlook_2020_2030.csv
 CREATE TABLE val_eu_outlook_2020_2030 (

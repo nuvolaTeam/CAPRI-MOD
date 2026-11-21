@@ -193,3 +193,50 @@ def test_the_page_opens_on_results_with_the_other_tabs_disabled_unless_asked_for
         # every button as wide as its label (no growth in its row; the page's CSS for columns)
         btns = [b for b in app.blocks.values() if isinstance(b, gr.Button)]
         assert btns and all(b.scale == 0 and "capri-btn" in (b.elem_classes or []) for b in btns)
+
+
+def test_the_page_title_carries_the_logo_on_its_line(store, tmp_path):
+    """18 November 2026 (the project lead): capri-mod's logo beside the page's title, on the same line; the vector
+    logo (capri_gradio/assets/capri_mod_logo.svg, no embedded image) inline, with the title line's style in the page's
+    CSS (a light ground under the logo in the dark theme)."""
+    gr = pytest.importorskip("gradio")
+    import base64
+    import sys
+    sys.path.insert(0, str(ROOT / "capri_gradio"))
+    import capri_gui as G
+    import assistant_llm as L
+    svg = G.LOGO.read_text()
+    assert svg.startswith("<svg") and "<image" not in svg and "<path" in svg
+    for all_tabs, title in ((False, "capri-mod results"), (True, "capri-mod")):
+        app = G.build(L.make_backend("none", "", "", ""), tmp_path / "scen", [store], all_tabs=all_tabs)
+        heads = [b.value for b in app.blocks.values() if isinstance(b, gr.HTML) and "capri-head" in str(b.value)]
+        assert len(heads) == 1, heads
+        h = heads[0]
+        assert f'<h2 style="margin:0">{title}</h2>' in h and 'class="capri-logo"' in h
+        # the size inline, so the logo is drawn at it before the page's CSS arrives
+        assert f'height="{G.LOGO_H}"' in h and f"height:{G.LOGO_H}px" in h and "display:flex" in h
+        b64 = h.split("data:image/svg+xml;base64,")[1].split('"')[0]
+        assert base64.b64decode(b64).decode() == svg
+    assert ".capri-head" in G.PAGE_CSS and ".dark .capri-logo" in G.PAGE_CSS and ".capri-btn" in G.PAGE_CSS
+
+
+def test_the_tabs_read_as_a_menu(store, tmp_path):
+    """18 November 2026 (the project lead: the tabs looked like plain text): the page's top tabs carry capri-tabs-top,
+    the results' tabs capri-tabs-sub, and the page's CSS gives both bold labels on a framed, tinted ground, the open tab
+    in the accent colour; the tabs nested in them (the comparison with CAPRI's) take the sub style."""
+    gr = pytest.importorskip("gradio")
+    import sys
+    sys.path.insert(0, str(ROOT / "capri_gradio"))
+    import capri_gui as G
+    import results_browser as RB
+    import assistant_llm as L
+    app = G.build(L.make_backend("none", "", "", ""), tmp_path / "scen", [store])
+    tabs = [b for b in app.blocks.values() if isinstance(b, gr.Tabs)]
+    top = [b for b in tabs if "capri-tabs-top" in (b.elem_classes or [])]
+    sub = [b for b in tabs if "capri-tabs-sub" in (b.elem_classes or [])]
+    assert len(top) == 1 and top[0].selected == "results"
+    assert len(sub) == 1 and sub[0].selected == "capri"
+    for part in ('.capri-tabs-top > .tab-wrapper button[role="tab"]', '.capri-tabs-sub .tabs > .tab-wrapper',
+                 "font-weight: 700", "font-weight: 600", ".selected", "var(--color-accent)", ":disabled"):
+        assert part in RB.TAB_CSS, part
+    assert RB.TAB_CSS in G.PAGE_CSS and RB.TAB_CSS in RB.PAGE_STYLE

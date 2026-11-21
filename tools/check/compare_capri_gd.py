@@ -7,7 +7,11 @@ bulls, heifers, fattening sheep, poultry: capri_level_ratio.csv, KNOWN_ISSUES K6
 definition; where the units are the same (dairy cows, sows, breeding sheep) the model's 2030 base equals CAPRI's.
 
   activities   the model's activity <- the CAPRI activities summed (DATAOUT's DCOW is CAPRI's total of DCOL and DCOH)
-  prices       the model's EU market price change (the run's "prices": scen / base - 1) against CAPRI's EU27yr19 UVAP
+  prices       the model's EU market price change (the run's "prices": scen / base - 1) against CAPRI's member states'
+               market prices PMRK, each year weighted by its gross production GROF (by human consumption where the EU
+               produces none), as the model's EU row weights its blocks; raw milk against CAPRI's EU27yr19 UVAP
+               (CAPRI's PMRK of MILK is a constant of its market data). Until 18 November 2026 every product against
+               CAPRI's EU27yr19 UVAP, another price (K171: pulses PMRK +3.1% against UVAP +0.1% in CAPRI's Green Deal)
 EU27 = CAPRI's EU27yr19; the model's EU: its regions outside Norway (NO..), as the run script sums them.
 
     python tools/check/compare_capri_gd.py RUN.pkl [--ms] [--csv OUT.csv]
@@ -75,12 +79,42 @@ def activity_table(run: dict, capri: pd.DataFrame, by_ms: bool = False) -> pd.Da
     return t
 
 
+#: CAPRI's market product of PMRK where it is not the UVAP code
+PMRK_CODE = {"SWHE": "WHEA", "OLIV": "OLIO"}
+
+
+def _capri_market_price_change(capri: pd.DataFrame, c: str):
+    """% change of CAPRI's member states' PMRK of c, each year weighted by its GROF (by HCON where the EU produces
+    none); None without PMRK rows."""
+    ms = capri[capri["region"].str.endswith("000000") & (capri["activity"] == c)]
+    pm = ms[ms["item"] == "PMRK"].set_index("region")
+    if pm.empty:
+        return None
+    out = {}
+    for col in ("ref", "scen"):
+        w = ms[ms["item"] == "GROF"].set_index("region")[col].reindex(pm.index).fillna(0.0)
+        if not w.sum() > 0:
+            w = ms[ms["item"] == "HCON"].set_index("region")[col].reindex(pm.index).fillna(0.0)
+        if not w.sum() > 0:
+            return None
+        out[col] = float((pm[col] * w).sum() / w.sum())
+    return 100 * (out["scen"] / out["ref"] - 1)
+
+
 def price_table(run: dict, capri: pd.DataFrame) -> pd.DataFrame:
-    """EU price % changes: CAPRI's EU27yr19 UVAP and the model's market price."""
+    """EU price % changes: CAPRI's member states' market prices (raw milk: EU27yr19 UVAP) and the model's market
+    price."""
     u = capri[(capri["region"] == "EU27yr19") & (capri["item"] == "UVAP")].set_index("activity")
     p = run["prices"]
-    rows = [(m, 100 * (u.at[c, "scen"] / u.at[c, "ref"] - 1), 100 * float(p[m])) for m, c in PRICES.items()
-            if c in u.index and m in p and u.at[c, "ref"]]
+    rows = []
+    for m, c in PRICES.items():
+        if m not in p:
+            continue
+        v = None if m == "MILK" else _capri_market_price_change(capri, PMRK_CODE.get(m, c))
+        if v is None and c in u.index and u.at[c, "ref"]:
+            v = 100 * (u.at[c, "scen"] / u.at[c, "ref"] - 1)
+        if v is not None:
+            rows.append((m, v, 100 * float(p[m])))
     t = pd.DataFrame(rows, columns=["product", "capri_pct", "model_pct"])
     t["gap_pts"] = t["model_pct"] - t["capri_pct"]
     return t

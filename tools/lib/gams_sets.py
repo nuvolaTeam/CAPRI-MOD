@@ -96,7 +96,7 @@ class _Text:
             if parts:
                 self.g[parts[0].lower()] = parts[1].strip() if len(parts) > 1 else ""
         elif cmd in ("include", "batinclude"):
-            f = rest.split()[0].strip("'\"")
+            f = rest.split()[0].strip("'\"").replace("\\", "/")      # CAPRI's Windows separators
             p = (self.root / f) if not Path(f).is_absolute() else Path(f)
             if p.exists():
                 yield from self.lines(p)

@@ -39,6 +39,7 @@ class ModelParameters(_Slots):
         "sugar_rate_cache",   # sugar per t beet by member state
         "pool_cost_cache",    # the manure pools' trade costs
         "pool_es_cache",      # the "capri" pool market's excess-supply slopes and calibration duals by region and FOUT
+        "pool_trade_consts",  # the pool market's trade cost constants held as CAPRI's ({(region, FOUT): (cs0, cb0)})
         "ration_model",       # CAPRI's ration model
         "feed_rations_stable",  # rations by region, built once per ration model (its identity keys the feed cache)
         "feed_rations_for",   # the ration model feed_rations_stable was built for (identity)
@@ -127,6 +128,7 @@ class ModelResults(_Slots):
         "pool_gaps",          # the gaps by nutrient market
         "pool_solver_status", # the last pool clearing's solver status
         "pool_eu_unaccounted", # the EU manure not accounted for
+        "pool_losf",          # the regions' trade less the pool market's plan, worst pool (CAPRI's losf; trade constants "capri")
         "market_supply_hessian_info", # the market supply Hessian's record (source, file, time)
         "market_supply_hessian_log", # its records of the run
     )

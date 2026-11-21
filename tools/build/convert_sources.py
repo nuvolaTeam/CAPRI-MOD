@@ -32,9 +32,10 @@ unchanged); the CSV declarations (capri_data/schema/34_sources_csv.sql) cite the
   CAPRI's GAMS code, the statements the builders read
     capri_gams/baseline/labour_ageline.gms             -> labour_ageline_p_minLabourPerAct.parquet
     capri_gams/pol_input/mquota_update.gms             -> mquota_update_PMQuotaReg.parquet
-    capri_gams/envind/gascoeff.gms                     -> gascoeff_p_nutContCropOutput_STRA.parquet
-    capri_gams/fert/fertpar.gms                        -> fertpar_{MAXF, doubleMaxf, p_nfixRate_gras,
-                                                          p_nitrFact_RALL_GRAE_BioFix}.csv
+    capri_gams/fert/fertpar.gms                        -> fertpar_{p_nfixRate_gras, p_nitrFact_RALL_GRAE_BioFix}.csv
+                                                          (until 20 November 2026 also gascoeff.gms's straw content and
+                                                          fertpar.gms's MAXF and doubleMaxf, for the need's yield shares of
+                                                          tools/build/build_npk_balance_2030.py, removed: KNOWN_ISSUES K189)
     capri_gams/inputs/yieldIY.gms                      -> yieldIY_p_inputDemandFactor.parquet
     policy/minfert_redu_by_crop.gms                    -> minfert_redu_by_crop_{p_checkSmallMine, limCres}.csv
   Excel
@@ -192,23 +193,6 @@ def convert_gams_data() -> None:
 
 # --- CAPRI's GAMS code: the statements the builders read -----------------------------------------------------------
 
-def straw_content(txt: str):
-    """envind/gascoeff.gms, TABLE p_nutContCropOutput, row STRA: (nutrient, value text) for NITF, PHOF, POTF (the
-    extraction of tools/build/build_npk_balance_2030.py)."""
-    blk = txt[txt.index("TABLE p_nutContCropOutput"):]
-    m = re.search(r"^\s*STRA\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)", blk, re.M)
-    return list(zip(("NITF", "PHOF", "POTF"), m.groups()))
-
-
-def need_bounds(txt: str):
-    """fert/fertpar.gms: MAXF("NITF"|"PHOF"|"POTF") = v; MAXF(FNUT) = MAXF(FNUT) * s; set doubleMaxf(PACT) / ... /
-    (the extraction of tools/build/build_npk_balance_2030.py): ([(nutrient, v, s)], [activity])."""
-    mx = re.findall(r'^\s*MAXF\("(NITF|PHOF|POTF)"\)\s*=\s*([\d.]+)\s*;', txt, re.M)
-    sc = re.search(r"^\s*MAXF\(FNUT\)\s*=\s*MAXF\(FNUT\)\s*\*\s*([\d.]+)\s*;", txt, re.M).group(1)
-    dbl = re.search(r"set doubleMaxf\(PACT\)[^/]*/([^/]*)/", txt).group(1)
-    return [(k, v, sc) for k, v in mx], [c.strip() for c in dbl.split(",") if c.strip()]
-
-
 def nfix_rates(txt: str):
     """fert/fertpar.gms p_nfixRate_gras(RALL) and p_nitrFact("RALL", "GRAE", "BioFix") (the extraction of
     tools/lib/_capri_digest.py): ([(region, value text)], value text)."""
@@ -308,13 +292,7 @@ def _write_frame(rel: str, df: pd.DataFrame) -> None:
 
 
 def convert_gams_code() -> None:
-    txt = read_text(original("capri_gams/envind/gascoeff.gms"), "utf-8")
-    write("raw/capri/gams/envind/gascoeff_p_nutContCropOutput_STRA.parquet", ["output", "nutrient", "value"],
-          [("STRA", k, v) for k, v in straw_content(txt)])
     txt = read_text(original("capri_gams/fert/fertpar.gms"), "utf-8")
-    maxf, dbl = need_bounds(txt)
-    write("raw/capri/gams/fert/fertpar_MAXF.parquet", ["nutrient", "value", "multiplier"], maxf)
-    write("raw/capri/gams/fert/fertpar_doubleMaxf.parquet", ["activity"], [(a,) for a in dbl])
     rates, grae = nfix_rates(txt)
     write("raw/capri/gams/fert/fertpar_p_nfixRate_gras.parquet", ["region", "value"], rates)
     write("raw/capri/gams/fert/fertpar_p_nitrFact_RALL_GRAE_BioFix.parquet", ["region", "activity", "factor", "value"],

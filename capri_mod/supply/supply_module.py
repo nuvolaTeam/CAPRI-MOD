@@ -153,15 +153,20 @@ def _spec_fingerprint(spec, **extra) -> str:
     return h.hexdigest()
 
 
-def young_animal_table() -> dict:
-    """CAPRI's young-animal coefficients per model region (calves, young cattle, cows, piglets, lambs): pooled across the
-    sexes (young_animals_<base year>.csv, the default) or per sex as CAPRI's balances (young_animals_by_sex_<base
-    year>.csv) with
-    the cattle member splits (RegionalSupplyModel.use_cattle_member_splits; tools/build/build_young_animals.py;
-    capri_mod/data/nested_tables.py)."""
+def young_animal_table(year=None) -> dict:
+    """CAPRI's young-animal coefficients per model region (calves, young cattle, cows, piglets, lambs): per sex as
+    CAPRI's balances (young_animals_by_sex_<year>.csv) with the cattle member splits (the default since
+    17 November 2026, K65), or pooled across the sexes (young_animals_<year>.csv) with
+    RegionalSupplyModel.use_cattle_member_splits off (capri_mod/data/nested_tables.py). year: the data set's
+    calibration year, by default the run's (RunInputs.market_year, set by SupplyModule; the base year where unset): the
+    base year's tables (tools/build/build_young_animals.py) or, at the 2030 market year, CAPRI's 2030 coefficients in
+    the baseline's folder (tools/build/build_young_animals_2030.py; CAPRI's INPANI_ takes the simulation year's
+    DATA(.., "Y"), KNOWN_ISSUES K178). A year without its tables is an error (no fall back to the base year's)."""
     by_sex = bool(getattr(RegionalSupplyModel, "use_cattle_member_splits", False))
     by = _inputs.base_year()                                          # the base year's tables (K52f)
-    name = f"young_animals_by_sex_{by}.csv" if by_sex else f"young_animals_{by}.csv"
+    yr = year if year is not None else getattr(_inputs.current(), "market_year", None)
+    yr = str(yr) if yr is not None else str(by)
+    name = f"young_animals_by_sex_{yr}.csv" if by_sex else f"young_animals_{yr}.csv"
 
     def load(inp):
         from capri_mod.data.nested_tables import read_young_animals
@@ -249,6 +254,10 @@ class RegionData:
     #: CAPRI's MREV counts young-animal sales (sows: MREV = piglets)
     livestock_product_value_coef: Optional[pd.Series] = None
     livestock_product_value_by_market_coef: Optional[pd.Series] = None
+    #: CAPRI's transmission of a market's producer price change to the outputs' unit values (arm/set_prices.gms: the
+    #: absolute change; K169): {(activity, commodity): PPRI0 / UVAG0} of the region's member state, the factor on the
+    #: market's relative change; 1 where absent (price_transmission_2030.csv; at the 2030 market year)
+    price_transmission: Optional[dict] = None
     #: young-animal value factors {good: factor} (CAPRI's 2030 prices in the projected baseline)
     young_value_factor: Optional[dict] = None
     #: CAPRI's dairy split DCOL/DCOH (share_low, d<item>_rel, q_low, q_high), the port of CAPRI's two dairy activities
@@ -258,12 +267,21 @@ class RegionData:
     genetics_effects: Optional[dict] = None
     #: CAPRI's histosols: organic-soil shares, emission factors, fallowing cost terms
     histosol: Optional[pd.Series] = None
+    #: CAPRI's atmospheric deposition per ha, p_nitrBalance(AtmDep) (kg N/ha, n_deposition_regional.csv): the MANN of
+    #: the idled histosols in the residue pool and the N surplus (K184)
+    n_deposition_kg_ha: Optional[float] = None
     #: CAPRI's crop technologies T1/T2: per crop with both, the T1 - T2 differences and CAPRI's 2030 technology
     #: block in the mix columns' variables (techn_mix_2030.csv, pmp_capri_2030_mix.csv); with CAPRI's 2030 PMP terms only
     techn_mix: Optional[pd.DataFrame] = None
     #: CAPRI's input costs the Green Deal targets change (build_plant_protection_cost.py): plap, inpo, fert, eful
     #: (EUR/ha by crop) and inpo_toin_share (animals)
     input_costs_ha: Optional[pd.DataFrame] = None
+    #: CAPRI's two valuations of each crop's plant protection at its 2030 reference (EUR/ha in CAPRI's 2030 money):
+    #: plap_uvap_eur_ha (its Green Deal step's p_linObjeCont, DATA(PLAP) x the member state's UVAP(PLAP)) and
+    #: plantp_cost_eur_ha (its reference's and PMP calibration's, the pesticide module's Plantp_cost);
+    #: plant_protection_capri_step_2030.csv, at the 2030 market year only (the comparison switches
+    #: supply.greendeal_plap_crop_level_capri_step and supply.greendeal_plap_mix_capri_step, DEP-51)
+    plap_capri_step: Optional[pd.DataFrame] = None
     #: the simulation year (the projection's market year; None: the base year)
     sim_year: Optional[int] = None
     #: CAPRI's catch crops (catc_share_2030, catc_cost_eur_ha, biofix_t_n_ha) and winter cover shares by crop
@@ -587,6 +605,23 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     grassland_allowance = setting("supply.grassland_allowance")
 
 
+    def _pt(self, act, comm) -> float:
+        """CAPRI's factor on the market's relative price change for this output (price_transmission; 1 where none):
+        its unit value moves by the market price's absolute change (arm/set_prices.gms l. 43-89; K169)."""
+        t = getattr(self.data, "price_transmission", None)
+        return float(t.get((act, comm), 1.0)) if t else 1.0
+
+    def _transmit_crops(self, price_shock):
+        """The price shock with each crop's relative change on its unit value: the market's x CAPRI's factor (K169)."""
+        t = getattr(self.data, "price_transmission", None)
+        if price_shock is None or not t:
+            return price_shock
+        ps = price_shock.copy()
+        for (a, c), f in t.items():
+            if a == c and a in ps.index and a in CROPS:
+                ps[a] = float(ps[a]) * float(f)
+        return ps
+
     def _market_revenue_change(self, act, mrev, price_shock) -> float:
         """Revenue change of one head from market price changes: quantity x price change, product
         by product, from the value of the animal's final products (CAPRI quantities x UVAG; a dairy
@@ -601,9 +636,9 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             parts = {k.split(".", 1)[1]: float(v) for k, v in pv.items()
                      if k.startswith(act + ".") and pd.notna(v) and float(v) != 0.0}
             if parts:
-                return sum(v * float(price_shock.get(m, price_shock.get(act, 0.0) if m == own else 0.0))
+                return sum(v * self._pt(act, m) * float(price_shock.get(m, price_shock.get(act, 0.0) if m == own else 0.0))
                            for m, v in parts.items())
-        return mrev * float(price_shock.get(act, 0.0))
+        return mrev * self._pt(act, own) * float(price_shock.get(act, 0.0))
 
 
     #: compute each region's response to the young-animal prices from its solved NLP (K65): None (default) with the
@@ -616,8 +651,16 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
 
 
     #: CAPRI's CAP 2014-2020 greening in the NLP form (permGrasGreening_, ecoSetAside_, cropDivGreening_), as in
-    #: CAPRI's 2030 reference (pol_input/cap_after_2014/ref.gms)
+    #: CAPRI's 2030 reference (pol_input/cap_after_2014/ref.gms); ecoSetAside_ and cropDivGreening_ only with
+    #: env_const (K187)
     cap_greening = setting("supply.cap_greening")
+    #: CAPRI's greening rows ecoSetAside_ and cropDivGreening_ (setting supply.env_const; KNOWN_ISSUES K187): CAPRI star
+    #: 3.0 lists both without a condition (supply/supply_model_e_list_linear.gms l. 231-232). On: as CAPRI's 2030
+    #: reference and Green Deal step solve (their marginals are in the results, reports/margcr.gms l. 321-326,
+    #: reports/greening.gms); the July 2026 release lists them only with %envConst% on (its l. 235-236), which the Green
+    #: Deal step does not set ("$exit" at l. 398 of pol_input/greendeal/refpol_endotech_all_sup.gms, before
+    #: "$setglobal envConst on", l. 408). Off: without both rows.
+    env_const = setting("supply.env_const")
     # CAPRI's endogenous entitlement limit (policy/def_endCut.gms, K136)
     entitlement_limit = setting("supply.entitlement_limit")
     #: annual crops (sets.gms annualCrops) of the model and their crop-diversification groups (cropDivGrps: each
@@ -743,10 +786,14 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
           r_i = price_i × yield_i - variable_cost_i + cap_payment_i  (crops)
           r_i = price_i × yield_i - variable_cost_i                   (animals)
         """
-        self.ev.price_shock_now = price_shock
+        # the crops' unit values move by the market price's absolute change, as CAPRI's (K169): the scaled shock is the
+        # solve's price shock for the crops' revenue, their yield response and the technology mix; the feed costs below
+        # keep the market's own change
+        _ps_c = self._transmit_crops(price_shock)
+        self.ev.price_shock_now = _ps_c
         prices = self.data.producer_prices.copy()
-        if price_shock is not None:
-            prices = prices * (1 + price_shock.reindex(prices.index).fillna(0))
+        if _ps_c is not None:
+            prices = prices * (1 + _ps_c.reindex(prices.index).fillna(0))
 
         # GRAS is already on a dry-matter tonnage basis: the conversion from
         # CAPRI's fresh-matter kg/ha happens once at load time, in
@@ -766,6 +813,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # values the wrong quantity. That is why gross_margin was dominated by
         # pigs and barely moved under policy.
         rev_coef = getattr(self.data, "livestock_revenue_coef", None)
+        from capri_mod.supply.equations.supply_model.objective import LINEAR_netRevenue   # CAPRI's LINEAR_ per unit
 
         r = {}
         prem = {}
@@ -819,7 +867,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                     if price_shock is not None and _mrev > 0:
                         revenue += self._market_revenue_change(act, _mrev, price_shock)
                 elif price_shock is not None:
-                    revenue *= 1.0 + float(price_shock.get(act, 0.0))
+                    revenue *= 1.0 + self._pt(act, SupplyModule.ACTIVITY_PRICE_SOURCE.get(act)) * float(price_shock.get(act, 0.0))
 
             _pc = getattr(self.data, "livestock_premium_coef", None)
             if act in ANIMALS and _pc is not None \
@@ -888,7 +936,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 # feed cost change; the national feed table that stood here as a fallback, feed_requirements.csv, had
                 # no builder and was removed on 29 October 2026, KNOWN_ISSUES K99)
             # Crop gross margin (EUR/ha); animal gross margin (EUR/head)
-            r[act] = revenue - cost + payment
+            r[act] = LINEAR_netRevenue(revenue, cost, payment)
             prem[act] = payment
 
         self.net_revenues = pd.Series(r)
@@ -921,6 +969,17 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: double", but adds the fuel coefficient to the INPO coefficient, so it is valued at INPO's unit value instead of
     #: fuel's. true: valued at the fuel cost; false: CAPRI's code as written.
     organic_topup_at_fuel_cost = setting("supply.organic_topup_at_fuel_cost")
+    #: Comparison switch (setting supply.greendeal_plap_crop_level_capri_step; DEP-51, its crop-level part): CAPRI's
+    #: 2030 reference values each crop's plant protection at its pesticide module's aggregates (Plantp_cost, which its
+    #: PMP calibration absorbed), its Green Deal step at PLAP x UVAG(PLAP). true: the Green Deal step moves each crop's
+    #: mean plant-protection cost to CAPRI's step (policy._apply_greendeal_input_changes); false: the model's one
+    #: representation in base and scenario (DEP-51).
+    greendeal_plap_crop_level_capri_step = setting("supply.greendeal_plap_crop_level_capri_step")
+    #: Comparison switch (setting supply.greendeal_plap_mix_capri_step; DEP-51, its T1 - T2 part): CAPRI's 2030
+    #: reference and calibration had no T1 - T2 plant-protection cost, its Green Deal step has one (p_technFact PLAP
+    #: +-0.4). true: in the Green Deal group's solves each technology mix column carries the difference
+    #: (policy._plap_mix_capri_step, techn_mix._mix_linear); false: the model's one representation (DEP-51).
+    greendeal_plap_mix_capri_step = setting("supply.greendeal_plap_mix_capri_step")
 
     #: EU organic area already in place, subtracted from the target to give the
     #: share that actually CONVERTS. CAPRI sets this explicitly:
@@ -1079,7 +1138,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         #     arable land, which is where its -9% cereal-area effect under
         #     Farm-to-Fork comes from; here cereals kept their land and fell only
         #     9.8% against CAPRI's 15%, with the cereal price already matching.
-        row_arable = np.zeros(n)
+        # CAPRI's land balances (supply_model.gms LandBalNoSlak_; equations/supply_model/land.py)
+        from capri_mod.supply.equations.supply_model.land import LandBalNoSlak_, LandBal_rhs
         # One classification for both rows, the same one the land data is built
         # with (tools/build/build_capri_base.py PERMANENT_CROPS): tobacco, cotton and
         # other fibre are ANNUAL crops on arable land. They used to sit in the
@@ -1087,9 +1147,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # was measured against land built on a different definition.
         arable_crops = [a for a in CROPS
                         if a not in CROPS_ON_LAND["GRAS"] + self.PERMANENT_LAND_CROPS]
-        for a in arable_crops:
-            if a in acts_idx:
-                row_arable[acts_idx[a]] = 1.0
+        row_arable = LandBalNoSlak_(n, acts_idx, arable_crops)          # ARAC
         A_rows.append(row_arable)
         self.ev.row_labels.append("arable_land")
         # The ARABLE land figure and the crop areas come from different
@@ -1110,8 +1168,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # arable land INCLUDING fallow, now that SETA is in the row
         _land_arable = (float(self._land_of("ARABLE"))
                         + self._land_of("FALLOW"))
-        arable_avail = max(_land_arable, arable_base)
-        b_rows.append(arable_avail)
+        b_rows.append(LandBal_rhs(_land_arable, arable_base))
 
         # 1b. Landscape-elements floor: at least `set_aside_requirement` of UAA
         # held as the non-productive activity. Expressed as -x_SETA <= -target
@@ -1145,19 +1202,16 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             self.ev.fall_floor = float(floor)
             if floor > 0:
                 _fall_up = self.FALL_FLOOR_UP_SHARE * _n_techn("FALL") * uaa_total
-            row_seta = np.zeros(n)
-            for a in _seta_acts:
-                row_seta[acts_idx[a]] = -1.0
+            # CAPRI's e_setaLandscape (equations/supply_model/set_aside.py)
+            from capri_mod.supply.equations.supply_model.set_aside import e_setaLandscape
+            row_seta, b_seta = e_setaLandscape(n, acts_idx, _seta_acts, floor)
             A_rows.append(row_seta)
             self.ev.row_labels.append("landscape_floor")
-            b_rows.append(-floor)
+            b_rows.append(b_seta)
 
         # 2. Permanent crops land constraint
-        row_perm = np.zeros(n)
         perm_crops = list(self.PERMANENT_LAND_CROPS)
-        for a in perm_crops:
-            if a in acts_idx:
-                row_perm[acts_idx[a]] = 1.0
+        row_perm = LandBalNoSlak_(n, acts_idx, perm_crops)              # FRUN
         A_rows.append(row_perm)
         self.ev.row_labels.append("permanent_land")
         # The PERMANENT land figure and the crop areas come from different
@@ -1177,19 +1231,16 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # rewriting the base year where it does not.
         perm_base = sum(float(self._base_levels().get(a, 0.0))
                         for a in perm_crops if a in acts_idx)
-        b_rows.append(max(self._land_of("PERMANENT"), perm_base))
+        b_rows.append(LandBal_rhs(self._land_of("PERMANENT"), perm_base))
 
         # 3. Grassland constraint
-        row_grass = np.zeros(n)
         # CAPRI's land rules (LandBalNoSlak_): the row is CAPRI's grassland balance, the grassland activity (CAPRI's
         # GRAE + GRAI, the model's own activities since 7 November 2026) equals the grassland area. Maize and other fodder are ARABLE crops (CAPRI MAIF, OFAR, ROOF) and
         # are already in the arable row. (The model's earlier row - fodder on grassland plus a fifth of arable land -
         # fixed arable fodder at its base area plus a fifth of any arable change: regions under the N target could not
         # replace fertilised fodder leys.)
         grass_acts = list(CROPS_ON_LAND["GRAS"])
-        for a in grass_acts:
-            if a in acts_idx:
-                row_grass[acts_idx[a]] = 1.0
+        row_grass = LandBalNoSlak_(n, acts_idx, grass_acts)             # GRAS
         A_rows.append(row_grass)
         self.ev.row_labels.append("grassland")
         # RHS must admit the calibrated base fodder area. The land-availability
@@ -1204,7 +1255,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # LandBalNoSlak_. The larger of the land figure and the base area stays, as for the other land rows)
         grass_land_limit = self._land_of("GRASSLAND")
         base_fodder = sum(self._base_levels().get(a, 0.0) for a in grass_acts)
-        b_rows.append(max(grass_land_limit, base_fodder))
+        b_rows.append(LandBal_rhs(grass_land_limit, base_fodder))
 
         # (4. the legacy nitrate-limit row on total applied N, not CAPRI's, was retired on 27 October 2026, K33: nitrogen
         # limits are CAPRI's N-balance target)
@@ -1329,8 +1380,17 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             # (With the land market, land.py rewrites this row to CAPRI's form, the target per ha x the current land
             # ARAC + GRAS + FRUN: e_SURTOTHa / SURTOT_REST_, "SURPLUS PER HECTARE OF CURRENT LAND"; identical at base.)
             base_area = float(sum(v for a, v in self._base_levels().items() if a in CROPS))
+            # the balance's part no activity carries (supply.manure_base_trade "capri": the region's base manure trade,
+            # CAPRI's v_manureExports / v_manureImports at the calibration point, with the mineral N it displaces):
+            # on the right-hand side; the NLP form takes the mineral part back (nlp.py, K167)
+            _cst = {}
+            if _env_now is not None:
+                _cst = _env_now.nitrogen_balance_constants(self.data.region_id, ycur,
+                                                           {"__credit__": float(mint.get("__credit__", 1.0))},
+                                                           yields_scen=self._yields_scen_now())
+            self.ev.nb_const = (float(_cst.get("n_surplus", 0.0) or 0.0), float(_cst.get("n_mineral_input", 0.0) or 0.0))
             A_rows.append(row_B)
-            b_rows.append(float(target) * base_area)
+            b_rows.append(float(target) * base_area - self.ev.nb_const[0])
             self.ev.row_labels.append("N_balance")
             # (a row "manure_application", manure N <= 170 kg N/ha x crop land, stood here until 29 October 2026:
             # capri-mod's, not CAPRI's - CAPRI's default runs tie manure to land through the crop nutrient balance
@@ -1375,8 +1435,13 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                             * float(mcap["capped_share"].get(a, 0.0))
                 else:
                     row_m[i] = m_a
+            # the mineral N the base manure trade displaces, a constant of the region (supply.manure_base_trade
+            # "capri", K167; the NLP form replaces this row by the inner model's regulations)
+            _cm = float(_env_m.nitrogen_balance_constants(self.data.region_id, ycur, {"__credit__": _fcr},
+                                                          yields_scen=self._yields_scen_now())
+                        .get("n_mineral_input", 0.0) or 0.0)
             A_rows.append(row_m)
-            b_rows.append(float(self._cover_n_increment()))
+            b_rows.append(float(self._cover_n_increment()) - _cm)
             self.ev.row_labels.append("mineral_N")
 
         # CAPRI winterCover_: the catch crops need land not already under winter cover,
@@ -1672,7 +1737,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             # against the baseline, not just area. Applied after the net-revenue
             # rebuild so it is not overwritten by it.
             if price_shock is not None:
-                self.apply_yield_price_response(price_shock)
+                self.apply_yield_price_response(self.ev.price_shock_now)
 
         # Initial guess = base levels
         x0 = self._base_levels().values
@@ -1696,9 +1761,11 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # _compute_net_revenues() above rebuilds net revenues from scratch under
         # a policy shock and would overwrite an earlier adjustment.
         self.ev.greendeal_crop_delta = {}
+        self.ev.greendeal_animal_inpo = {}
         # CAPRI's Green Deal group (set_fert_priors.gms, %scenarioGroup%==greendeal): the fertiliser priors' partial
         # derivative has a slack in the listed regions
         self.ev.fert_partial_slack = bool(isinstance(policy_shock, dict) and policy_shock.get("greendeal_group"))
+        self.ev.greendeal_group = self.ev.fert_partial_slack
         # CAPRI's obligatory set-aside rates of this region's arable activities (percent; SETA_, land.py)
         self.ev.set_aside_rates = dict(((policy_shock.get("set_aside_rates") or {}) if isinstance(policy_shock, dict)
                                         else {}).get(self.data.region_id) or {})
@@ -1749,7 +1816,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # widened bounds and then carries on with the non-optimal solution, recorded (supply/simu_supply.gms,
         # widen_bounds.gms: p_INFES): here JRC121368's relaxed N target is tried, then IPOPT's last point at the region's
         # own problem is kept and recorded (_nlp_last_point); the landscape floor is kept as CAPRI keeps it (K84)
-        c_lin = self.f - self.net_revenues.values
+        from capri_mod.supply.equations.supply_model.objective import QUADRA_lin
+        c_lin = QUADRA_lin(self.f, self.net_revenues.values)          # QUADRA_'s linear part less LINEAR_'s
         aug = self._land_augment(A_ub, b_ub, c_lin, x0) if getattr(self, "use_land_market", False) else None
         if aug is not None:
             # CAPRI LAND MARKET: land-type areas as variables (see _land_augment)
@@ -2134,6 +2202,9 @@ class SupplyModule(ModuleStateMixin):
         year (capri_mod/supply/inputs.py; the repository's data and 2017 by default), made the supply code's inputs."""
         self.data = data
         self.inputs = _inputs.use(inputs if inputs is not None else _inputs.SupplyInputs())
+        # the calibration year of the data set (2030 for a projected one): the young-animal coefficients of that year
+        # (young_animal_table, K178)
+        self.inputs.market_year = _inputs.market_year(data)
         self.regions = list(data["areas"].index)
 
         if supply_elasticities is None:
@@ -2168,10 +2239,19 @@ class SupplyModule(ModuleStateMixin):
         initial shares (0; set_miti_bounds.gms l. 209-211)."""
         fal, wc = float(settings["fallowInAllRmssup"]) > 0, float(settings["winterCovInAllRmssup"]) > 0
         amm = float(settings.get("ghgTechAmmEndog", 0.0)) > 0
+        # kept for the regional models built later (_get_or_build_model): a run's first call comes before its
+        # models exist, and they then took the global settings' values (found 21 November 2026: the Farm-to-Fork
+        # run's ammonia options at their initial shares, its ghgTechAmmEndog 1 not applied; KNOWN_ISSUES K192)
+        self.par.mitigation_scope = (fal, wc, amm)
         for m in self._models.values():
-            m.seen.fallow_in_all_rmssup = fal
-            m.seen.wintercov_in_all_rmssup = wc
-            m.seen.amm_endog = amm
+            self._set_mitigation_scope_of(m)
+
+    def _set_mitigation_scope_of(self, m) -> None:
+        """The run's endotech switches (set_mitigation_scope) on one regional model; nothing before they are set."""
+        scope = getattr(self.par, "mitigation_scope", None)
+        if scope is None:
+            return
+        m.seen.fallow_in_all_rmssup, m.seen.wintercov_in_all_rmssup, m.seen.amm_endog = scope
 
     def set_genetics_effects(self, table: Optional[dict], settings_key: tuple) -> None:
         """Cattle genomics at the run's technology settings (capri_mod/policy/endotech.py). Each regional model
@@ -2256,6 +2336,24 @@ class SupplyModule(ModuleStateMixin):
             held |= {a for a in prov.columns if prov.at[region, a] == "NO_CAPRI_VALUE" and (a, a) not in pmp}
         return frozenset(held)
 
+    @staticmethod
+    def _deposition_kg_ha(d, region):
+        """CAPRI's deposition per ha of the region, p_nitrBalance(AtmDep) (n_deposition_regional.csv, the accounts' own
+        source), or None without a row."""
+        t = d.get("n_deposition_regional")
+        if t is None or region not in getattr(t, "index", []):
+            return None
+        v = float(t.at[region, "deposition_kg_n_per_ha"])
+        return v if v == v and v >= 0 else None
+
+    def _price_transmission_for(self, d, region):
+        """The region's member state's factors on the market's relative price change (CAPRI's absolute transmission,
+        arm/set_prices.gms; K169), at the 2030 market year (the factors are CAPRI's 2030 reference's) with
+        supply.price_transmission "capri"; None otherwise (the market's relative change)."""
+        if str(_settings().get("supply.price_transmission")) != "capri" or _inputs.market_year(d) != 2030:
+            return None
+        return (d.get("price_transmission") or {}).get(capri_ms(region))
+
     def _techn_mix_for(self, d, region):
         """The region's crop technologies where its crops take CAPRI's 2030 PMP terms (pmp_source "capri2030" at the
         2030 market year, "crops" among pmp_capri_parts): the mix terms are that calibration's; None otherwise."""
@@ -2286,6 +2384,7 @@ class SupplyModule(ModuleStateMixin):
                 eps = row.reindex(ALL_ACTIVITIES).fillna(eps)
             self._models[region] = RegionalSupplyModel(rd, eps, use_share_term=True)
             self._models[region].par.genet_key = getattr(self.par, "genetics_key", None)
+            self._set_mitigation_scope_of(self._models[region])
         return self._models[region]
 
     def _build_region_data(self, region: str) -> RegionData:
@@ -2346,18 +2445,22 @@ class SupplyModule(ModuleStateMixin):
                 and region in d["livestock_product_value_coef"].index else None),
             young_value_factor=(d.get("young_animal_value_factor") or {}).get(region),
             input_costs_ha=(d.get("plant_protection_cost") or {}).get(region),
+            plap_capri_step=((d.get("plant_protection_capri_step") or {}).get(region)
+                             if _inputs.market_year(d) == 2030 else None),
             sim_year=(int(d["market_year"]) if d.get("market_year") else None),
             cover_crops=(d["cover_crops"].loc[region] if d.get("cover_crops") is not None
                          and region in d["cover_crops"].index else None),
             winter_cover_share=(d.get("winter_cover_share") or {}).get(region),
             histosol=(d["histosol"].loc[region] if d.get("histosol") is not None
                       and region in d["histosol"].index else None),
+            n_deposition_kg_ha=self._deposition_kg_ha(d, region),
             dairy_intensity=self._intensity_q_at(
                 d, d["dairy_intensity"].loc[region] if d.get("dairy_intensity") is not None
                 and region in d["dairy_intensity"].index else None, ("q_low", "q_high"), "animals"),
             cattle_intensity=(lambda ci: {a: self._intensity_q_at(d, s_, ("q_z", "q_b"), "animals") for a, s_ in ci.items()}
                               if ci else ci)((d.get("cattle_intensity") or {}).get(region)),
             genetics_effects=(d.get("genetics_effects") or {}).get(region),
+            price_transmission=self._price_transmission_for(d, region),
             livestock_product_value_by_market_coef=(
                 d["livestock_product_value_by_market_coef"].loc[region]
                 if d.get("livestock_product_value_by_market_coef") is not None
@@ -2522,6 +2625,7 @@ class SupplyModule(ModuleStateMixin):
         NO3SRUN), raised to p_fertEffCor with its sign. 0 without side-effect data (CAPRI's literature effects are
         for the nitrification inhibitor)."""
         from capri_mod.supply import n_cascade as _nc
+        from capri_mod.supply.equations.supply_model import n_flow as _nf
         sv = {it: fert_side_value(region, tech, it) for it in ("NH3SYN", "NOXSYN", "N2OSYN", "NO3SRUN")}
         if all(v is None for v in sv.values()):
             return 0.0
@@ -2529,7 +2633,7 @@ class SupplyModule(ModuleStateMixin):
         g = G.get(r8) or G.get(capri_ms(region)) or {}
         if not g:
             return 0.0
-        L = _nc.netf(g, float(g.get("run_surf", 0.0)))
+        L = _nf.netf(g, float(g.get("run_surf", 0.0)))
         v = (L["NH3"] * (sv["NH3SYN"] or 0.0) + L["NOX"] * (sv["NOXSYN"] or 0.0) + L["N2O"] * (sv["N2OSYN"] or 0.0)
              + L["RunTot"] * (sv["NO3SRUN"] or 0.0))
         return (abs(v) ** param("P_FERT_EFF_COR")) * (1.0 if v >= 0 else -1.0) if v else 0.0
@@ -3102,6 +3206,9 @@ class SupplyModule(ModuleStateMixin):
                 model.seen.fert_techs_all = self._fert_techs(region)      # CAPRI's fertiliser options (NLP form)
             except Exception:
                 model.seen.fert_techs_all = []
+            # their EmiCalMin (envind/ghgMiti.gms l. 936-944), which GHG_Mit_Cost_'s cost base adds to NMIN (K175)
+            model.seen.fert_techs_emical = {o_[0]: float(self._emi_cal_min(region, region, o_[0]))
+                                            for o_ in model.seen.fert_techs_all}
             result = model.solve(n_balance_price=nb_used, **solve_kw)
             # manure market: hand the region's endogenous manure trade and allocated
             # mineral N to the environmental accounting (else the reported N balance
@@ -3396,7 +3503,7 @@ def _luc_of(model, land_types):
         cr = model.data.region_id              # the model's regions are CAPRI's units
         lm = getattr(model.data, "land_market", None) or {}
         L0 = lm.get("base_kha") or {}
-        d = {t: float(land_types.get(t, L0.get(t, 0.0))) - float(L0.get(t, 0.0)) for t in ("ARAC", "FRUN", "GRAS", "FORE", "OLND")
+        d = {t: float(land_types.get(t, L0.get(t, 0.0))) - float(L0.get(t, 0.0)) for t in LAND_MARKET_TYPES
              if t in (land_types or {})}
         return LUCModel.get().solve(cr, d) if cr else None
     except Exception as _exc:

@@ -1,5 +1,5 @@
 symbol,kind,used_for
-DATA,par,"the market's quantities and prices per RM and RMS at CAL (PROD, PMRK, HCON, FEED, PROC, BIOF, PRCY, TARV, Arm1P, LEVL, YILD); MARKET_REGIONS_INVENTORY 2.1, 7 items 4 and 6"
+DATA,par,"the market's quantities and prices per RM and RMS at CAL (PROD, PMRK, HCON, FEED, PROC, BIOF, PRCY, TARV, Arm1P, LEVL, YILD); MARKET_REGIONS_INVENTORY 2.1, 7 items 4 and 6; the crops' nutrient data inputs at Y (fertned.gms: yields, STRA, FNUT contents, LOSF, GROF, FLEG; build_capri_crop_n_coefs, K191)"
 p_tradeFlows,par,"bilateral flows per RM pair at CAL (the market data's check: tools/check/check_market_base.py); MARKET_REGIONS_INVENTORY 2.1"
 p_impPrice,par,"import prices per RM pair; the ports' base check (MARKET_EQUATIONS_INVENTORY, Armington)"
 p_transpCost,par,"transport costs per RM pair; MARKET_REGIONS_INVENTORY 2.1"
@@ -65,3 +65,7 @@ p_premDataE,par,"the premium declarations per region, year, scheme and item as t
 p_premToDDTarget_E,par,"the decoupled payments' targets per region, year, scheme (DDFRMS, DDRARA, ...; calc_mtr.gms)"
 p_premToDDTargetNuts,par,"the regional level of the regional flat rates (calc_mtr.gms)"
 p_percAffByModulation,par,"the share of farms affected by the modulation per payment group and member state (calc_mtr_top.gms)"
+p_animReq,par,"the animals' 2030 requirements after the baseline's feed calibration (fedtrm, baseline/adjust.gms), as CAPRI's simulation loads them (load_sim_ini_gdx.gms): the low-N feeding option's protein and energy excess (envind/low_n_feed.gms l. 88-96; build_lownfeed_effects, K194)"
+p_animReqLit,par,"the requirement functions' 2030 values before the calibration (capmod/def_requirements.gms l. 36): the denominator of the low-N feeding option's excess (low_n_feed.gms l. 88-96; build_lownfeed_effects, K194)"
+p_animExcrProtCorrFact,par,"the 2030 crude-protein correction of the excretion (def_requirements.gms l. 55-69, baseline/adjust.gms l. 31-32): the low-N feeding option's cost denominator (low_n_feed.gms l. 138; build_lownfeed_effects, K194)"
+p_infl,par,"CAPRI's inflation index (1.019): the simulation year's unit values of the inputs outside the market, UVAP(Y) = UVAP(BAS) x p_infl^(Y - BAS) (capmod/inflation_and_trend_interpolation.gms l. 23, 69-73), at which p_linObjeCont values the crops' plant protection (capmod/define_objc.gms l. 40-44; build_plant_protection_capri_step_2030, DEP-51)"

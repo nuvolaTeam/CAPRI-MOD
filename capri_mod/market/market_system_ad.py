@@ -35,6 +35,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from capri_mod.market.equations.market_model.prices import PMrk_
+
 
 def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = False, slope=None, fudge: bool = False,
                   lift_use: bool = False):
@@ -188,7 +190,7 @@ def market_system(mm, exogenous_supply, trade_scenario=None, lifted: bool = Fals
             # production: market price = Armington price + the calibrated margin Pd0 - PA0 (BilateralCommodity.
             # pmrk_cells; the default solve sets these prices in _bilateral_eval, with a floor at 1e-3 not written here)
             pa0, pd0 = np.asarray(sc.PA0, float), np.asarray(sc.Pd0, float)
-            b_ = ca.vertcat(*[(rB[c][i] - (PA[i, ci[c]] * pa0[i] + pd0[i] - pa0[i]) / pd0[i]) if m[i] else b_[i]
+            b_ = ca.vertcat(*[(rB[c][i] - PMrk_(PA[i, ci[c]] * pa0[i], pd0[i], pa0[i])) if m[i] else b_[i]
                               for i in range(len(sc.regions))])
         bal.append(b_)
         if bil or glo:

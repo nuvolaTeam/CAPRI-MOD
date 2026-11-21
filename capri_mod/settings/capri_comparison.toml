@@ -1,0 +1,32 @@
+# Settings of the runs compared with CAPRI's own results (the comparison runs for the CAPRI team in Bonn; the project
+# lead's decisions of 19 and 21 November 2026). Two of CAPRI's code errors that capri-mod fixes by default are run as
+# CAPRI codes them, and its Green Deal step's valuation of each crop's plant protection is CAPRI's (DEP-51's crop-level
+# and T1 - T2 parts), so that a comparison with CAPRI's runs shows the port and not the fixes or the model's one
+# representation.
+# The defaults (defaults.toml) keep the fixes and the one representation. Use: tools/run/run_f2f_2030.py OUT.pkl --scenario greendeal2030 --settings
+# capri_mod/settings/capri_comparison.toml (docs/DEPARTURES_FROM_CAPRI.md; docs/CAPRI_DEPARTURES_REGISTER.md FIX-5, FIX-6).
+#
+# Measured on the full-EU 2030 Green Deal run (19 November 2026, both false against both true): EU producer prices'
+# mean gap to CAPRI 1.6 -> 1.2 points, member states' activities 5.2 -> 4.6.
+#
+# Not for the Farm-to-Fork comparison with JRC121368 (the project lead, 21 November 2026): JRC121368 was produced
+# with the CAPRI of 2020-21 and its own baseline, and whether that version had the two code errors cannot be checked,
+# so those runs are compared at the defaults. The pair after K192 (21 November 2026) still takes this file for its
+# Farm-to-Fork run, like the run at dev bb3b592, so that the change from that run is the code's only: it runs at
+# 6eff275 (K192), with the file as it was there; the later commits change the Green Deal solves too (K194, K189's
+# per-head terms, the T1 - T2 switch below and the crop-level switch's unit value).
+
+[supply]
+# FIX-5: the Green Deal input changes replace the 2017-2030 input-saving factor TF_I (capmod/define_inputs.gms l. 66-73,
+# pol_input/greendeal/conventional_io.gms l. 361)
+greendeal_inputs_keep_tech_change = false
+# FIX-6: the organic top-up's fuel coefficient added to INPO and valued at INPO's unit value
+# (pol_input/greendeal/organic_io.gms l. 107-115)
+organic_topup_at_fuel_cost = false
+# DEP-51's crop-level part: CAPRI's Green Deal step values each crop's plant protection at DATA(PLAP) x the member
+# state's UVAP(PLAP), its reference and calibration at the pesticide module's Plantp_cost
+# (docs/CAPRI_DEPARTURES_REGISTER.md DEP-51)
+greendeal_plap_crop_level_capri_step = true
+# DEP-51's T1 - T2 part: CAPRI's Green Deal step adds a T1 - T2 plant-protection cost (p_technFact PLAP +-0.4) its
+# reference and calibration did not have (DEP-51)
+greendeal_plap_mix_capri_step = true

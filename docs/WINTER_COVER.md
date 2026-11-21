@@ -1,6 +1,6 @@
 # Winter cover (catch crops) as a choice of the regional model
 
-*Status: 20 October 2026. NLP form only. In the conic form the share stays CAPRI's 2030 catch-crop share, or the
+*Status: 20 October 2026; the reference form of 20 November 2026 (K188). NLP form only. In the conic form the share stays CAPRI's 2030 catch-crop share, or the
 Farm-to-Fork requirement.*
 
 ## What CAPRI does
@@ -15,11 +15,13 @@ envind/cover_crops.gms and supply/supply_model.gms.
 | Maximum share | MaxShare = min(1, Σ_c p_coverMax_c × LEVL_c / UAAR), where p_coverMax = 1 − p_winterCoverShare0 (cover_crops.gms 336-345) | the same, at CAPRI's 2030 crop levels (`tools/build/build_winter_cover_option.py`) |
 | Initial share | IniShare (cover_crops.gms 348, 382) | CAPRI's 2030 reference share CATC / UAAR (`cover_crops.csv` catc_share_2030): the share the model's base already uses |
 | Cost | the CATC activity's input cost (TOIN, costParLin), plus pmpParLin × m + ½ pmpParSqr × m², from the relSubs cases (cover_crops.gms 550-700; sensFac 1; premCapMitTech off in CAPRI's Green Deal settings) | the same; case 1 applies in every region (positive cost, positive initial share) |
-| Requirement | e_minCoverCrops: CATC ≥ p_minCoverCrops (supply_model.gms 2352) | the option's lower bound (the Farm-to-Fork requirement, `_cover_crop_requirement`) |
+| Requirement | e_minCoverCrops: CATC ≥ p_minCoverCrops (supply_model.gms 2352); p_minCoverCrops on UAAR less the crops under winter cover by p_winterCoverShare0, the shares as given (organic_io.gms, conventional_io.gms) | the option's lower bound (`_cover_crop_requirement`), on the same area. **REGISTERED (K170):** capped at the land the winterCover_ row leaves at the base point where it exceeds it |
+| Green Deal group | greendeal_scenarios.gms (FixMiti, only wintercov fixed) with set_miti_bounds.gms 556-566: v_Miti(CATC, WinterCov) = 1e-6 in every scenario of the group; CATC is then an activity at its input cost, held by e_minCoverCrops and winterCover_ | the same in the group's scenarios (Green Deal, Farm-to-Fork): no cost curve, no calibration term, no MaxShare; the cascade keeps the base share (`supply.greendeal_winter_cover`, K170) |
+| Reference and runs without mitigation options | %ghgAbatement% off (its default, capmod/set_global_variables.gms l. 215; only the endogenous- and exogenous-technology policy files set it on): no winter cover option, CATC an activity at its input cost, held by ecoSetAside_ (the 2030 reference: CATC's input cost = 0.3 x the rule's dual, D_OBJC = -D_ecoSetAside, in all 82 EU units with catch crops) | the same in the calibration and in every run without an emission tax (`supply.reference_winter_cover`, K188); with a tax (CAPRI's carbon-tax file: ghgAbatement on, no FixMiti) the option with its cost curve, its linear term from the same base |
 | Nitrogen | BioFix × CATC goes into the arable residue pool (fertDistCres_, l. 1076) and into the gross balance (e_BIOFIX) | the change from the base share goes into the residue pool of the NLP's fertilisation block and into the N-surplus row |
 | Runoff and leaching | 0.35 × v_Miti in RUNSURFN_, APPLN_ and LEACHN_ | the share in the loss cascade (manure N kept) and in the accounts' leaching share |
 | Emission tax | the crop-residue N2O of CATC (N2OCRO) is in GN2O and so in the taxed GGWP; the soil carbon (CO2SEQ) is not in GGWP | N2OCRO taxed. **REGISTERED:** the purchases' leaching stays at the reference leaching share under the tax, so the share's effect on it is not priced. |
-| Calibration | CAPRI's cost curve, calibrated in its reference run | linear term set so that the base share is a first-order point of the model (as for the other options) |
+| Calibration | in the reference, without the option, the catch crops' input cost sets the ecological set-aside rule's dual (supply/prep_cal.gms l. 68-99 sizes CATC to fill the rule); the option's cost curve is calibrated in CAPRI's endogenous-technology runs (envind/cover_crops.gms l. 695-748, with costsavings_ini) | the calibration in the reference form (K188), so the rule's multiplier at the base is the input cost over the weight 0.3 where it binds; the option's linear term from the same base, for the runs that choose it |
 
 ## Behaviour
 

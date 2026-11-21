@@ -37,6 +37,17 @@ import results_browser as RB  # noqa: E402
 import results_data as RD     # noqa: E402
 import scenario_tools as T    # noqa: E402
 
+#: capri-mod's logo (the project lead's vector logo, cropped to its drawn area), shown beside the page's title
+LOGO = HERE / "assets" / "capri_mod_logo.svg"
+#: the logo keeps a light ground in Gradio's dark theme (its land masses are drawn in the page's colour)
+LOGO_CSS = """
+.capri-head { display: flex; align-items: center; gap: 0.9em; flex-wrap: wrap; }
+.capri-head h2 { margin: 0 !important; }
+.capri-logo { height: 50px; width: auto; }
+.dark .capri-logo { background: #ffffff; border-radius: 8px; padding: 2px 6px; }
+"""
+#: the page's style: the results browser's buttons and tabs, and the title line
+PAGE_CSS = RB.PAGE_STYLE + LOGO_CSS
 MINI_EU = "mini-EU (20 units, about 10 minutes)"
 FULL_EU = "full EU (1-2 hours)"
 
@@ -45,6 +56,26 @@ def _mini_units() -> str:
     sys.path.insert(0, str(T.ROOT / "tools" / "run"))
     from run_mini_eu import UNITS
     return ",".join(UNITS)
+
+
+#: the logo's height on the title line (px) and its width at the logo's aspect (684 x 540)
+LOGO_H = 50
+LOGO_W = round(LOGO_H * 684 / 540)
+
+
+def _title_html(title: str) -> str:
+    """The page's title line: the logo (an inline image, so the page needs no static files) beside the title. Its size
+    and the line's layout are inline, not only in the page's CSS: Gradio applies the CSS after the page is drawn, and
+    the image showed at its own size (684 x 540) until then (the project lead, 18 November 2026)."""
+    import base64
+    import html
+    logo = ""
+    if LOGO.exists():
+        b64 = base64.b64encode(LOGO.read_bytes()).decode()
+        logo = (f'<img class="capri-logo" src="data:image/svg+xml;base64,{b64}" alt="CAPRI-MOD logo" '
+                f'width="{LOGO_W}" height="{LOGO_H}" style="height:{LOGO_H}px;width:{LOGO_W}px;flex:none">')
+    return (f'<div class="capri-head" style="display:flex;align-items:center;gap:0.9em;flex-wrap:wrap">{logo}'
+            f'<h2 style="margin:0">{html.escape(title)}</h2></div>')
 
 
 def _scenario_choices(sdir):
@@ -97,20 +128,22 @@ def build(backend: L.Backend, sdir: Path, stores: list, shared: bool = False, al
     def _who(request) -> str:
         return str(getattr(request, "session_hash", "") or "")
 
-    with gr.Blocks(title="capri-mod", **RB.blocks_args(RB.BUTTON_CSS)) as app:
+    with gr.Blocks(title="capri-mod", **RB.blocks_args(PAGE_CSS)) as app:
         where = "your session's folder" if shared else f"`{sdir}`"
         if all_tabs:
-            gr.Markdown(f"## capri-mod\nScenarios in {where} · results in `{stores[0].name}` · "
+            gr.HTML(_title_html("capri-mod"))
+            gr.Markdown(f"Scenarios in {where} · results in `{stores[0].name}` · "
                         f"assistant: **{backend.name}**" + (" · shared page: mini-EU runs only, one run at a time"
                                                             if shared else ""))
         else:
-            gr.Markdown("## capri-mod results\nThe stored runs of capri-mod, a Python re-implementation of the CAPRI "
+            gr.HTML(_title_html("capri-mod results"))
+            gr.Markdown("The stored runs of capri-mod, a Python re-implementation of the CAPRI "
                         "agricultural model: browse a run's results, compare a scenario with its baseline or two runs "
                         "with each other, map them, and compare them with CAPRI. Each tab says what it shows.")
         hist_state = gr.State([])
 
         # the top tabs: all shown; without all_tabs only Results is enabled, and the page opens on it
-        with gr.Tabs(selected="results"):
+        with gr.Tabs(selected="results", elem_classes=["capri-tabs-top"]):
             # ------------------------------------------------------------------ assistant
             with gr.Tab("Assistant", interactive=all_tabs):
                 gr.Markdown("Describe a scenario; the assistant writes it with checked tool calls. It cannot run the "
@@ -299,7 +332,7 @@ def main():
     if missing:
         raise SystemExit(f"not a results store (no runs table): {', '.join(map(str, missing))}")
     build(backend, sdir, stores, all_tabs=a.all_tabs).launch(server_name=a.host, server_port=a.port,
-                                                              **RB.launch_args(RB.BUTTON_CSS))
+                                                              **RB.launch_args(PAGE_CSS))
 
 
 if __name__ == "__main__":

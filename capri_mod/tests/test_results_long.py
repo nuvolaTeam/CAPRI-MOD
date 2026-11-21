@@ -84,6 +84,16 @@ def test_an_undeclared_item_stops_the_table():
         IO.with_capri_codes(IO.to_long(r, "base"))
 
 
+def test_an_emission_tax_runs_table_is_written():
+    """CAPRIModel.run's abatement block (the run's emission tax, set only with a tax) is a declared item: the carbon
+    tax runs stopped at the writing of their table until 21 November 2026 ('abatement', 'carbon_tax' undeclared)."""
+    r = _results()
+    r["abatement"] = {"carbon_tax": 50.0}
+    t = IO.with_capri_codes(IO.to_long(r, "scen"))
+    row = t[(t.block == "abatement") & (t["rows"] == "carbon_tax")]
+    assert len(row) == 1 and float(row["value"].iloc[0]) == 50.0 and row["unit"].iloc[0] == "EUR per t CO2-eq"
+
+
 def test_every_item_the_supply_module_writes_is_declared():
     """Every field of SupplyResult and every attribute the supply module sets on a regional result is declared in
     results_items.csv, whatever the scenario's options: an item filled only under an option (manure trade's P and K,

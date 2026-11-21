@@ -152,6 +152,10 @@ class NLPBlock:
         if tax_ > 0 and npk is not None:
             ghg_min, c = self._nlp_tax_terms(tax_, c, abat)
         spec = dict(Q=Q, c=c, A=A, b=b, labels=labels, acts=list(self.acts), rations=rats, fodder=fod, x_base=xb,
+                    # the animals' milk for feeding on the output side of its balances, and the balances with CAPRI's
+                    # losses (use <= output; livestock.py _fodder_rows)
+                    fodder_out=dict(getattr(self.ev, "fodder_out", None) or {}),
+                    fodder_le=set(getattr(self.ev, "fodder_le", None) or ()),
                     prices=getattr(self.seen, "feed_prices", None), req_extra=_rx, feed_ghg=self._ghg_feed_cost(),
                     npk=npk, drop_labels=drop, cap_rules=self._cap_rules_spec(), ghg_min=ghg_min,
                     land_rent_rows=dict(getattr(self.ev, "land_rent_rows", None) or {}),
@@ -187,10 +191,23 @@ class NLPBlock:
             # baseline)
             # (and the entitlement limit: at the base the crops are at their trend levels, the overshoot zero and the
             # row's multiplier zero, as in CAPRI's PMP terms, prep_sim_pmp_terms.gms l. 166)
-            pol_rows = [l_ for l_ in ("N_balance", "mineral_N", "landscape_floor", "forest_floor", "winter_cover", "entitlements")
+            pol_rows = [l_ for l_ in ("N_balance", "mineral_N", "landscape_floor", "forest_floor", "artificial_land_floor",
+                                    "winter_cover", "entitlements")
                         if l_ in labels]
             spec_sim = spec
             spec = dict(spec_sim, drop_labels=list(drop) + pol_rows)
+            if spec.get("catc") and str(_settings().get("supply.reference_winter_cover")) == "capri":
+                # CAPRI calibrates in its reference, which has no winter cover option (K188, abatement._wc_reference):
+                # the catch crops at the CATC activity's input cost, so that the ecological set-aside rule's multiplier
+                # at the base is CAPRI's (the cost over the catch crops' weight where the rule binds). The option's
+                # cost curve is kept (lin_opt, sqr_opt) for the calibration term of the runs that choose it
+                _c0 = spec["catc"]
+                spec["catc"] = dict(_c0, lin=0.0, sqr=0.0, fixmiti=True, ref_form=True,
+                                    lin_opt=float(_c0["lin"]), sqr_opt=float(_c0["sqr"]))
+                if not self._catc_fills_rule(spec):
+                    # where the base's other EFA activities meet the rule, CAPRI's calibration would leave CATC at zero
+                    # and the rule slack: the catch crops are held at the base share (no N credit, the cascade at base)
+                    spec["catc"] = dict(spec["catc"], lb=float(_c0["m0"]), ub=float(_c0["m0"]))
             _fp = None
             if _st.pop(self.seen, "nlp_cal_check", False) or cal is None:
                 _fp = _spec_fingerprint(spec, yb_n=np.asarray(x_start, float), xb=xb[:n])
@@ -200,6 +217,15 @@ class NLPBlock:
                 nlp0 = CapriRegionalNLP(spec)
                 yb = np.asarray(x_start, float).copy()
                 yb[:n] = xb[:n]
+                # the entitlement overshoot at the calibration point: zero, as in CAPRI (the crops at their trend
+                # levels; the row is dropped above), so that the column sits at its bound and its cost, the cut, stays
+                # its own linear term. The QP's start holds the base's rounding above the trend area (PL110000 4.3e-5
+                # thousand ha): above the calibration's bound tolerance (supply.nlp_cal_tol) the column counted as
+                # interior, its residual, the cut, went into its linear term, and the overshoot was free (KNOWN_ISSUES
+                # K177: about 199,000 thousand ha in BG01, HU32, LV, PL11, PL31, PL41 and RO05)
+                _ej = getattr(self.ev, "entl_col", None)
+                if _ej is not None and int(_ej) < len(yb):
+                    yb[int(_ej)] = 0.0
                 out = nlp0.calibrate(yb)
                 if not out.get("ok") and out.get("fert_failed") and npk is not None:
                     # CAPRI's priors (its 2030 posterior per ha) admit no allocation at this model's base: CAPRI's
@@ -249,6 +275,18 @@ class NLPBlock:
                 if _cv and float(_cv.get("uaa", 0.0) or 0.0) > 0:
                     _lb = float(_cv["req"]) / float(spec["catc"]["uaa"])
                     spec["catc"] = dict(spec["catc"], lb=_lb, ub=max(float(spec["catc"]["ub"]), _lb))
+                if self._wc_fixed():
+                    # CAPRI's Green Deal group: the option's share fixed at 1e-6 (FixMiti), so the catch crops are the
+                    # CATC activity at its input cost (no cost curve of the option, no MaxShare; winterCover_ limits
+                    # them) and leave the loss cascade at its base (K170). Outside the group, CAPRI's reference form
+                    # (K188: no mitigation options, so no BioFix N of the catch crops in the residue pool either,
+                    # fertDistCres_ adds it only with %ghgAbatement% on, supply_model.gms l. 1073-1079)
+                    _ref = not bool(getattr(self.ev, "greendeal_group", False))
+                    spec["catc"] = dict(spec["catc"], lin=0.0, sqr=0.0, fixmiti=True, ref_form=_ref,
+                                        ub=max(1.0, float(spec["catc"].get("lb", 0.0) or 0.0)))
+                    if _ref and not self._catc_fills_rule(spec) and not getattr(self.ev, "cover", None):
+                        _m0 = float(spec["catc"]["m0"])
+                        spec["catc"] = dict(spec["catc"], lb=_m0, ub=_m0)        # as in the calibration (K188)
                 spec["drop_labels"] = list(spec["drop_labels"]) + ["winter_cover"]
             if npk is not None:
                 import copy as _cp
@@ -274,10 +312,15 @@ class NLPBlock:
                     # the N-surplus target with the mineral N of the fertilisation block (CAPRI SURTOT_REST_ /
                     # e_SURTOTHa): the row's linear mineral parts out, the purchases in
                     npk["n_rows"] = [("N_balance", self._n_row_mineral_parts(A, labels))]
+                    # the row's constant without its mineral part (the base manure trade's displacement of mineral N,
+                    # supply.manure_base_trade "capri"): the purchases carry the mineral N here (K167)
+                    _nbc = getattr(self.ev, "nb_const", None)
+                    _add_min = float(_nbc[1]) if _nbc else 0.0
+                    npk["n_rows_rhs_add"] = {"N_balance": _add_min}
                     if spec.get("catc"):
                         # the requirement's catch-crop N was put on the row as a constant; the
                         # NLP form's catch-crop share carries it (catc_n), so the constant is taken back out
-                        npk["n_rows_rhs_add"] = {"N_balance": float(getattr(self.ev, "cover_dbf_nb", 0.0) or 0.0)}
+                        npk["n_rows_rhs_add"] = {"N_balance": _add_min + float(getattr(self.ev, "cover_dbf_nb", 0.0) or 0.0)}
                     spec["drop_labels"] = list(spec["drop_labels"]) + ["N_balance"]
             if cal is not None:
                 spec["dq"] = np.array([cal["dq"].get(l_, 0.0) for l_ in cols])
@@ -559,10 +602,13 @@ class NLPBlock:
             # the winter cover share chosen, for the cascade's accounts and the supply result (cover_crops)
             _c = spec["catc"]
             self.sv.wc_solved = float(ab["catc"])
-            self.res.cover_solved = {"req": self.sv.wc_solved * _c["uaa"], "uaa": _c["uaa"], "base": _c["m0"] * _c["uaa"],
-                                  "delta": (self.sv.wc_solved - _c["m0"]) * _c["uaa"], "biofix": _c["biofix"],
+            # the catch crop area, catcMiti_ (with the option a choice on the current land, K186)
+            _area = float(ab.get("catc_area", self.sv.wc_solved * _c["uaa"]))
+            self.res.cover_solved = {"req": _area, "uaa": _c["uaa"], "base": _c["m0"] * _c["uaa"],
+                                  "delta": _area - _c["m0"] * _c["uaa"], "biofix": _c["biofix"],
                                   "share": self.sv.wc_solved, "lb_share": float(_c.get("lb", 0.0)),
                                   "max_share": float(_c["ub"]), "endogenous": True,
+                                  "cascade_share": float(_c["m0"]) if _c.get("fixmiti") else self.sv.wc_solved,
                                   "potential": float(_c.get("potential", 0.0))}
         if self.res.last_npk:
             for nut, o_ in self.res.last_npk.items():
@@ -571,8 +617,12 @@ class NLPBlock:
                 o_["area"] = {g: float(sum(sh * yv[j] for j, sh in gs[g]["crops"])) for g in gs}
             if "N" in self.res.last_npk:
                 # the allocation the regional model solved, for the accounts' report (fert_dist)
+                # with the mineral caps per ha the NLP solved with (its "f2f" regulations, relaxations included):
+                # the report's mine_cap_kg_ha (K182)
+                _rg = (npk["nutrients"].get("N") or {}).get("regs") or {}
                 self.res.fd_model = {"capri_region": npk["capri_region"], "flows": self.res.last_npk["N"]["flows"],
-                                  "area": self.res.last_npk["N"]["area"], "converged": True}
+                                  "area": self.res.last_npk["N"]["area"], "converged": True,
+                                  "mine_caps": {g_: float(v_[0]) for (g_, s_), v_ in _rg.items() if s_ == "MINE"}}
         self.ev.last_duals = zA
         # the columns' reduced costs at the NLP solution (IPOPT's bound multipliers, per unit of the column): the
         # manure pools read the trade columns' from here, as their duals through the A rows miss the fertilisation

@@ -27,7 +27,7 @@ from capri_mod.params import param, param_table
 from capri_mod.data.definitions import CROPS_ON_LAND as _CROPS_ON_LAND
 from capri_mod.settings import setting
 from capri_mod.settings import current as _settings
-from capri_mod.units import M_N2O, M_N2O_N, M_NH3, M_NH3_N, M_CO2, M_UREA_N
+from capri_mod.units import M_N2O, M_N2O_N, M_NH3, M_NH3_N
 from capri_mod.data.definitions import CAPRI_MEMBERS, CAPMOD_MEMBERS, CAPRI_CACT_TO_NGRP, CAPRI_PERM_NGRP
 from capri_mod.fert.npk import need_yield_factor
 from capri_mod.data.definitions import (
@@ -304,6 +304,18 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
                 if f > 0 and hasattr(yields, "get") and yields.get(c) is not None} or None
         nb = self.compute_nitrogen_balance(acts, yields, region, mint, yields_scen=_ysc)
         _nb_raw = dict(nb)
+        # the idled histosols keep their deposition (CAPRI's iHisCr, iHisGr: MANN = AtmDep, in e_ATMOSD / e_CRESID and in
+        # the residue pool fertDistCres_; K184), as the supply model's histosol columns do
+        _idl = sum(float(v or 0.0) for v in (getattr(supply_result, "histosol_fallow", None) or {}).values()) \
+            if supply_result is not None else 0.0
+        _dtab = self.data.get("n_deposition_regional") if hasattr(self, "data") else None
+        if _idl > 0 and _dtab is not None and region in getattr(_dtab, "index", []):
+            from capri_mod.supply.equations.supply_model.n_surplus import SURTOT_idlHis, e_ATMOSD
+            from capri_mod.supply.equations.supply_model.nutrients import fertDistCres_idlHis
+            _dha = float(_dtab.at[region, "deposition_kg_n_per_ha"])
+            nb["n_deposition"] = float(nb["n_deposition"]) + e_ATMOSD(_idl, _dha)
+            nb["n_surplus"] = float(nb["n_surplus"]) + SURTOT_idlHis(_idl, _dha)
+            _nb_raw["n_residue_pool"] = float(_nb_raw.get("n_residue_pool", 0.0) or 0.0) + fertDistCres_idlHis(_idl, _dha)
         # MANURE MARKET (when on): the region's endogenous manure trade and its
         # allocated mineral N (fertiliser allocation) replace the fixed-rule
         # values, so the reported balance is the one the regional model met.
@@ -399,8 +411,9 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             if _fdm:
                 # the allocation the regional model solved (CAPRI reports v_fertDist of its supply model): the inner
                 # model at the model's own totals, or the coupled NLP where it had no solution there
-                _mc = getattr(supply_result, "mineral_cap", None) or {}
-                _gc = _mc.get("group_caps") or {}
+                # the caps the NLP solved with (K182: not the cap spec's group_caps, which come from another
+                # allocation, the inner model at the accounts' base totals)
+                _gc = _fdm.get("mine_caps") or {}
                 self.ev.fert_dist_now = [
                     dict(region=region, capri_region=_fdm.get("capri_region"), ngrp=g, area_kha=float(A),
                          mine_kg_ha=float(_fdm["flows"].get((g, "MINE"), 0.0)) / A if A > 0 else 0.0,
@@ -427,15 +440,17 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         # The factors are CAPRI's (gases.gms (7) N2OSYN = NMIN x emiLoss(NETF, N2O) and the mineral part of (9) N2OAMM =
         # NMIN x (emiLoss(NETF, NH3) + emiLoss(NETF, NOx)) x EF4), from the region's MITERRA loss fractions (K74, the supply audit's finding S12 of ARCHITECTURE_REFACTOR.md section 5.2,
         # 27 October 2026; before, IPCC's EF1 + 10% x EF4 everywhere); IPCC's where CAPRI's fractions are missing
+        from capri_mod.supply.equations.supply_model import n2o as _n2o   # CAPRI's N2O block
         _dn = self._mineral_n2o_n(region)
         if "N2O_SOIL" in ghg:
-            ghg["N2O_SOIL"] = (max(0.0, float(nb.get("n_mineral_input", 0.0))) / 1000.0
-                               * (_dn[0] + _dn[1]) * M_N2O / M_N2O_N * GWP_N2O)
-        ghg["N2O_CRO"] = (max(0.0, float(nb.get("n_crop_residues", 0.0) or 0.0)) / 1000.0
-                          * EF_SOIL_N2O_DIRECT * M_N2O / M_N2O_N * GWP_N2O)
+            ghg["N2O_SOIL"] = _n2o.GWPN2OSYN_(max(0.0, float(nb.get("n_mineral_input", 0.0))) / 1000.0,
+                                              _dn[0], _dn[1], GWP_N2O)
+        ghg["N2O_CRO"] = _n2o.GWPN2OCRO_(max(0.0, float(nb.get("n_crop_residues", 0.0) or 0.0)) / 1000.0,
+                                         EF_SOIL_N2O_DIRECT, GWP_N2O)
         # CO2 from urea on the same mineral N (CAPRI gases.gms (17): NMIN x urea share x 44/28)
-        ghg["CO2_UREA"] = (max(0.0, float(nb.get("n_mineral_input", 0.0))) / 1000.0
-                           * self._co2_coefs(region)[1] * M_CO2 / M_UREA_N)
+        from capri_mod.supply.equations.supply_model.gwp import GWPCO2UREA_, GWPTOT_
+        ghg["CO2_UREA"] = GWPCO2UREA_(max(0.0, float(nb.get("n_mineral_input", 0.0))) / 1000.0,
+                                      self._co2_coefs(region)[1])
 
         # CAPRI's N2O from drained organic soils (gases.gms N2OHIS, agriculture): per ha of the land-use
         # class, its organic-soil share x the climate-weighted IPCC 2013 factor (tools/build/build_histosol.py),
@@ -446,16 +461,17 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             _fa = getattr(supply_result, "histosol_fallow", None) or {}
             _gr = _CROPS_ON_LAND["GRAS"]     # GRAE, GRAI (GRAS until 7 November 2026)
             _crop_area = sum(float(acts.get(c, 0.0) or 0.0) for c in CROPS if c not in _gr)
-            _n2o_t = (_crop_area * float(_h.get("n2o_t_ha_crop", 0.0) or 0.0)
-                      + sum(float(acts.get(g, 0.0) or 0.0) for g in _gr) * float(_h.get("n2o_t_ha_grass", 0.0) or 0.0))
+            _n2o_t = _n2o.GWPN2OHIS_(_crop_area, float(_h.get("n2o_t_ha_crop", 0.0) or 0.0),
+                                     sum(float(acts.get(g, 0.0) or 0.0) for g in _gr),
+                                     float(_h.get("n2o_t_ha_grass", 0.0) or 0.0))
             for _c in ("crop", "grass"):
                 _f = float(_fa.get(_c, 0.0) or 0.0)
                 if _f > 0:
-                    _n2o_t -= _f * float(_h.get(f"ef_n2o_{_c}", 0.0) or 0.0) * 0.001 * M_N2O / M_N2O_N
+                    _n2o_t -= _n2o.GWPN2OHIS_idle(_f, float(_h.get(f"ef_n2o_{_c}", 0.0) or 0.0))
             ghg["N2O_HIS"] = max(0.0, _n2o_t) * GWP_N2O      # 1000 ha x t N2O/ha = kt N2O -> kt CO2-eq
         # crop-residue N2O of the added catch crops (CAPRI gases.gms N2OCRO: BioFix x area x EF1)
         if _cn != 0:
-            ghg["N2O_CRO"] = ghg.get("N2O_CRO", 0.0) + _cn / 1e3 * EF_SOIL_N2O_DIRECT * M_N2O / M_N2O_N * GWP_N2O   # t N -> kt
+            ghg["N2O_CRO"] = ghg.get("N2O_CRO", 0.0) + _n2o.GWPN2OCRO_(_cn / 1e3, EF_SOIL_N2O_DIRECT, GWP_N2O)   # t N -> kt
         # CAPRI's technology effects on manure N2O (v_emiLoss in gases.gms; manure_n2o_tech.csv):
         # per animal, housing/storage N2O x (1 - sum_t s_t r_hou_t) / (1 - sum_t s0_t r_hou_t) and
         # application N2O likewise with r_app (low-emission spreading raises it), at the regional
@@ -506,13 +522,14 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             _n2o_tech = _dm * M_N2O / M_N2O_N * GWP_N2O
             # CAPRI's anaerobic digestion on manure CH4 (supply_model.gms GWPCH4MAN_, MC_GHG_Miti_Factor): per sub-activity
             # 1 - v (1 - QE_AD / QE_NOC), v = s / (L (1 - G)), at the shares s against the base shares
+            from capri_mod.supply.equations.supply_model.methane import GWPCH4MAN_miti
             _dch4 = 0.0
             for a_ in ANIMALS:
                 x_ = float(acts.get(a_, 0.0) or 0.0)
                 f_ = self._ad_ch4_factor(region, a_, _ms, _s0.get(a_, {}))
                 if f_ is None or x_ <= 0:
                     continue
-                _dch4 += x_ * 1000.0 * self._ch4_per_head("man", region, a_) / 1e6 * GWP_CH4 * (f_ - 1.0)
+                _dch4 += GWPCH4MAN_miti(x_, self._ch4_per_head("man", region, a_), GWP_CH4, f_)
             if _dch4:
                 ghg["CH4_MAN"] = ghg.get("CH4_MAN", 0.0) + _dch4
         # CAPRI's emission side effects of nitrification inhibitors on mineral N
@@ -531,7 +548,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         # crops (gases.gms N2OLEA; capri_mod/supply/n_leaching.py)
         _lea = self.leaching(region, acts, nb, supply_result)
         if _lea is not None:
-            ghg["N2O_LEA"] = _lea["n2o_n"] / 1000.0 * M_N2O / M_N2O_N * GWP_N2O       # t N2O-N -> kt CO2-eq
+            ghg["N2O_LEA"] = _n2o.GWPN2OLEA_co2(_lea["n2o_n"], GWP_N2O)       # t N2O-N -> kt CO2-eq
         # total after every adjustment of soil N2O (it was summed before the mineral-input
         # rescaling above, so GHG total missed the substitution and yield effects on soil N2O)
         ghg_total = sum(ghg.values())
@@ -569,7 +586,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         # indirect N2O from volatilised manure NH3 (CAPRI N2OAMM: NH3-N x EF4), after every NH3
         # adjustment; the GHG total is summed again with it
         if nh3.get("nh3_livestock"):
-            ghg["N2O_IND"] = float(nh3["nh3_livestock"]) * M_NH3_N / M_NH3 * EF_SOIL_N2O_INDIRECT * M_N2O / M_N2O_N * GWP_N2O
+            ghg["N2O_IND"] = _n2o.GWPN2OAMM_(float(nh3["nh3_livestock"]), EF_SOIL_N2O_INDIRECT, GWP_N2O)
             ghg_total = sum(ghg.values())
 
         # Land use, CAPRI's aggregates (sets.gms landUse_TO_landUseAgg): arable crops ARAC (paddy, fallow and set-aside,
@@ -615,7 +632,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             ghg_urea=float(ghg.get("CO2_UREA", 0.0)),
             ghg_total=ghg_total,
             ghg_non_co2=ghg_total - float(ghg.get("CO2_LIME", 0.0)) - float(ghg.get("CO2_UREA", 0.0)),
-            ghg_ggwp=ghg_total - float(ghg.get("CO2_UREA", 0.0)),
+            ghg_ggwp=GWPTOT_(ghg_total, float(ghg.get("CO2_UREA", 0.0))),
             # Nitrogen
             n_mineral_input=nb["n_mineral_input"],
             n_organic_input=nb["n_organic_input"],

@@ -708,6 +708,76 @@
    ]
   },
   {
+   "task": "build_milk_for_feeding_2030",
+   "builder": "build_milk_for_feeding_2030",
+   "args": [],
+   "inputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_price_ratios_2030.csv",
+    "capri_data/codes/capri_member_state_codes.csv",
+    "capri_data/codes/eu_market_blocks.csv",
+    "capri_data/codes/regional_units.csv",
+    "capri_mod/settings/defaults.toml"
+   ],
+   "code": [
+    "tools/build/build_milk_for_feeding_2030.py",
+    "tools/lib/_grep.py",
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+   ],
+   "outputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/feed/milk_for_feeding_2030.csv"
+   ]
+  },
+  {
+   "task": "build_price_transmission_2030",
+   "builder": "build_price_transmission_2030",
+   "args": [],
+   "inputs": [
+    "capri_data/2017/supply/livestock_product_value_by_market_coef.csv",
+    "capri_data/codes/model_activities.csv",
+    "capri_data/codes/model_activity_classes.csv",
+    "capri_data/codes/model_commodities.csv"
+   ],
+   "code": [
+    "tools/build/build_price_transmission_2030.py",
+    "tools/lib/_grep.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+   ],
+   "outputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/price_transmission_2030.csv"
+   ]
+  },
+  {
+   "task": "build_plant_protection_capri_step_2030",
+   "builder": "build_plant_protection_capri_step_2030",
+   "args": [],
+   "inputs": [
+    "capri_data/codes/model_activities.csv",
+    "capri_data/codes/regional_units.csv"
+   ],
+   "code": [
+    "tools/build/build_plant_protection_capri_step_2030.py",
+    "tools/lib/_grep.py",
+    "tools/lib/_model_codes.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
+    "$REFERENCE/simini/simini_21730/DATA.csv.gz",
+    "$REFERENCE/simini/simini_21730/p_infl.csv.gz"
+   ],
+   "outputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/plant_protection_capri_step_2030.csv"
+   ]
+  },
+  {
    "task": "build_cap_greening",
    "builder": "build_cap_greening",
    "args": [],
@@ -905,14 +975,27 @@
    "args": [
     "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
-   "inputs": [],
+   "inputs": [
+    "capri_data/2017/environment/n_deposition_regional.csv",
+    "capri_data/codes/capri_member_state_codes.csv"
+   ],
    "code": [
-    "tools/build/build_capri_crop_n_coefs.py"
+    "tools/build/build_capri_crop_n_coefs.py",
+    "tools/lib/gams_sets.py",
+    "tools/lib/_model_regions.py",
+    "capri_mod/supply/equations/fertned.py",
+    "capri_mod/supply/equations/fertpar.py",
+    "capri_mod/supply/equations/def_gascoeff.py"
    ],
    "external": [
-    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
+    "$REFERENCE/simini/simini_21730/DATA.csv.gz",
+    "$SOURCES/gams/fert/fertpar.gms",
+    "$SOURCES/gams/envind/def_gascoeff.gms",
+    "$SOURCES/gams/sets.gms"
    ],
    "outputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_fertned_parts_2030.csv",
     "capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_n_coefs_2030.csv"
    ]
   },
@@ -965,6 +1048,23 @@
    "outputs": [
     "capri_data/validation/capri_eu27_levels_2017_capreg.csv",
     "capri_data/validation/capri_eu27_levels_2030_ref.csv"
+   ]
+  },
+  {
+   "task": "build_capri_ms_market_prices_2030",
+   "builder": "build_capri_ms_market_prices_2030",
+   "args": [],
+   "inputs": [],
+   "code": [
+    "tools/build/build_capri_ms_market_prices_2030.py",
+    "tools/lib/_grep.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+   ],
+   "outputs": [
+    "capri_data/validation/capri_ms_market_prices_2030_ref.csv"
    ]
   },
   {
@@ -3594,7 +3694,10 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$EXPORTS/animReq_SK.zip",
+    "$REFERENCE/simini/simini_21730/DATA.csv.gz",
+    "$REFERENCE/simini/simini_21730/p_animExcrProtCorrFact.csv.gz",
+    "$REFERENCE/simini/simini_21730/p_animReq.csv.gz",
+    "$REFERENCE/simini/simini_21730/p_animReqLit.csv.gz",
     "$SOURCES/capreg/res_17AL.txt",
     "$SOURCES/capreg/res_17AT.txt",
     "$SOURCES/capreg/res_17BA.txt",
@@ -3633,7 +3736,6 @@
    ],
    "outputs": [
     "capri_data/2017/abatement/mitigation/lownfeed_effects.csv",
-    "capri_data/sources/intermediate/envind/anim_req_corr_2017.parquet",
     "capri_data/sources/intermediate/envind/res17_mann_crpr_expt.parquet"
    ]
   },
@@ -4298,9 +4400,6 @@
     "capri_data/codes/eu_market_blocks.csv",
     "capri_data/codes/regional_units.csv",
     "capri_data/codes/rms_to_rm.csv",
-    "capri_data/sources/raw/capri/gams/envind/gascoeff_p_nutContCropOutput_STRA.parquet",
-    "capri_data/sources/raw/capri/gams/fert/fertpar_MAXF.parquet",
-    "capri_data/sources/raw/capri/gams/fert/fertpar_doubleMaxf.parquet",
     "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_price_ratios_2030.csv",
     "capri_mod/settings/defaults.toml"
    ],
@@ -5418,6 +5517,8 @@
    "builder": "build_techn_mix_2030",
    "args": [],
    "inputs": [
+    "capri_data/2017/environment/n_deposition_regional.csv",
+    "capri_data/baselines/capri_greendeal_ref/1730/environment/capri_crop_n_coefs_2030.csv",
     "capri_data/codes/model_activities.csv",
     "capri_data/codes/model_activity_classes.csv",
     "capri_data/codes/capri_member_state_codes.csv",
@@ -5427,6 +5528,7 @@
     "capri_data/sources/intermediate/technology/techn_fact_2030.parquet"
    ],
    "code": [
+    "capri_mod/supply/equations/fertned.py",
     "tools/build/build_techn_mix_2030.py",
     "tools/lib/_grep.py",
     "tools/lib/_model_codes.py",
@@ -5929,6 +6031,132 @@
    ]
   },
   {
+   "task": "build_young_animals_2030",
+   "builder": "build_young_animals_2030",
+   "args": [],
+   "inputs": [
+    "capri_data/2017/supply/animal_numbers.csv",
+    "capri_data/2017/supply/young_animals_2017.csv",
+    "capri_data/2017/supply/young_animals_2017_coef.csv",
+    "capri_data/2017/supply/young_animals_by_sex_2017.csv",
+    "capri_data/2017/supply/young_animals_by_sex_2017_coef.csv",
+    "capri_data/codes/capri/CACT_TO_NGRP.csv",
+    "capri_data/codes/capri/FEED_TRD.csv",
+    "capri_data/codes/capri/PERM_NGRP.csv",
+    "capri_data/codes/capri/RM.csv",
+    "capri_data/codes/capri/RMTP.csv",
+    "capri_data/codes/capri_member_state_codes.csv",
+    "capri_data/codes/eu_market_blocks.csv",
+    "capri_data/codes/model_activities.csv",
+    "capri_data/codes/model_activity_classes.csv",
+    "capri_data/codes/model_cattle_splits.csv",
+    "capri_data/codes/model_commodities.csv",
+    "capri_data/codes/model_land_types.csv",
+    "capri_data/codes/model_parameters.csv",
+    "capri_data/codes/model_price_follows.csv",
+    "capri_data/codes/model_trade_regions.csv",
+    "capri_data/codes/regional_units.csv",
+    "capri_data/codes/rms_to_rm.csv",
+    "capri_data/scenarios/capri_ref_2030/growth.csv",
+    "capri_data/scenarios/capri_ref_2030/regional.csv",
+    "capri_data/scenarios/capri_ref_2030/settings.toml",
+    "capri_mod/settings/defaults.toml"
+   ],
+   "code": [
+    "capri_mod/__init__.py",
+    "capri_mod/csvio.py",
+    "capri_mod/data/__init__.py",
+    "capri_mod/data/definitions.py",
+    "capri_mod/data/inputs.py",
+    "capri_mod/data/land_market_io.py",
+    "capri_mod/data/loaders.py",
+    "capri_mod/data/nested_tables.py",
+    "capri_mod/params.py",
+    "capri_mod/projection/__init__.py",
+    "capri_mod/projection/captrd_import.py",
+    "capri_mod/projection/projection_module.py",
+    "capri_mod/projection/reconcile.py",
+    "capri_mod/projection/scenario_io.py",
+    "capri_mod/projection/trajectory.py",
+    "capri_mod/settings/__init__.py",
+    "capri_mod/tableio.py",
+    "tools/build/build_young_animals_2030.py",
+    "tools/lib/_model_regions.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$REFERENCE/simini/simini_21730/DATA.csv.gz"
+   ],
+   "outputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_2030.csv",
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_2030_coef.csv",
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_by_sex_2030.csv",
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_by_sex_2030_coef.csv"
+   ]
+  },
+  {
+   "task": "build_livestock_manure_2030",
+   "builder": "build_livestock_manure_2030",
+   "args": [],
+   "inputs": [
+    "capri_data/2017/supply/animal_numbers.csv",
+    "capri_data/codes/capri/CACT_TO_NGRP.csv",
+    "capri_data/codes/capri/FEED_TRD.csv",
+    "capri_data/codes/capri/PERM_NGRP.csv",
+    "capri_data/codes/capri/RM.csv",
+    "capri_data/codes/capri/RMTP.csv",
+    "capri_data/codes/capri_member_state_codes.csv",
+    "capri_data/codes/eu_market_blocks.csv",
+    "capri_data/codes/model_activities.csv",
+    "capri_data/codes/model_activity_classes.csv",
+    "capri_data/codes/model_cattle_splits.csv",
+    "capri_data/codes/model_commodities.csv",
+    "capri_data/codes/model_land_types.csv",
+    "capri_data/codes/model_parameters.csv",
+    "capri_data/codes/model_price_follows.csv",
+    "capri_data/codes/model_trade_regions.csv",
+    "capri_data/codes/regional_units.csv",
+    "capri_data/codes/rms_to_rm.csv",
+    "capri_data/scenarios/capri_ref_2030/growth.csv",
+    "capri_data/scenarios/capri_ref_2030/regional.csv",
+    "capri_data/scenarios/capri_ref_2030/settings.toml",
+    "capri_mod/settings/defaults.toml"
+   ],
+   "code": [
+    "capri_mod/__init__.py",
+    "capri_mod/csvio.py",
+    "capri_mod/data/__init__.py",
+    "capri_mod/data/definitions.py",
+    "capri_mod/data/inputs.py",
+    "capri_mod/data/land_market_io.py",
+    "capri_mod/data/loaders.py",
+    "capri_mod/data/nested_tables.py",
+    "capri_mod/params.py",
+    "capri_mod/projection/__init__.py",
+    "capri_mod/projection/captrd_import.py",
+    "capri_mod/projection/projection_module.py",
+    "capri_mod/projection/reconcile.py",
+    "capri_mod/projection/scenario_io.py",
+    "capri_mod/projection/trajectory.py",
+    "capri_mod/settings/__init__.py",
+    "capri_mod/tableio.py",
+    "tools/build/build_livestock_manure_2030.py",
+    "tools/build/build_livestock_output_coef.py",
+    "tools/build/build_young_animals_2030.py",
+    "tools/lib/_grep.py",
+    "tools/lib/_model_regions.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
+   ],
+   "outputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_manure_k_coef_2030.csv",
+    "capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_manure_n_coef_2030.csv",
+    "capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_manure_p_coef_2030.csv"
+   ]
+  },
+  {
    "task": "convert_sources",
    "builder": "convert_sources",
    "args": [],
@@ -5958,9 +6186,6 @@
     "capri_data/sources/raw/capri/dat/water/cropwat_p_cropwatReq.parquet",
     "capri_data/sources/raw/capri/dat/water/irrishare_p_irriShare.parquet",
     "capri_data/sources/raw/capri/gams/baseline/labour_ageline_p_minLabourPerAct.parquet",
-    "capri_data/sources/raw/capri/gams/envind/gascoeff_p_nutContCropOutput_STRA.parquet",
-    "capri_data/sources/raw/capri/gams/fert/fertpar_MAXF.parquet",
-    "capri_data/sources/raw/capri/gams/fert/fertpar_doubleMaxf.parquet",
     "capri_data/sources/raw/capri/gams/fert/fertpar_p_nfixRate_gras.parquet",
     "capri_data/sources/raw/capri/gams/fert/fertpar_p_nitrFact_RALL_GRAE_BioFix.parquet",
     "capri_data/sources/raw/capri/gams/inputs/yieldIY_p_inputDemandFactor.parquet",

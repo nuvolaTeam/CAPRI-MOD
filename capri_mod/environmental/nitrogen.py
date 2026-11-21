@@ -52,6 +52,28 @@ class NitrogenBlock:
         cache[region] = out
         return out
 
+    def base_manure_trade(self, region):
+        """(base exports, base imports) of manure N in t, or (0, 0) without trade: CAPRI's 2030 reference shares
+        (manure_trade_2030.csv) at the region's base herds and crop area, the same base as _substitution's. With
+        supply.manure_base_trade "capri" these are levels of the region (CAPRI's v_manureExports / v_manureImports at
+        the calibration point): the totals carry them as constants and a unit's balance does not (K167)."""
+        if not getattr(self.seen, "manure_trade_on", True):
+            return 0.0, 0.0
+        mt = self.data.get("manure_trade")
+        if mt is None or region not in mt.index:
+            return 0.0, 0.0
+        A = self.data["areas"]; H = self.data.get("animal_numbers")
+        cache = _est.setdefault(self.par, "base_trade_cache", {})
+        key = (region, id(A), id(H))
+        if key not in cache:
+            area0 = float(sum(float(A.at[region, c]) for c in A.columns if c in CROPS)) if region in A.index else 0.0
+            man0 = 0.0
+            if H is not None and region in H.index:
+                man0 = sum(float(H.at[region, a]) * self._n_excretion(region, a) for a in H.columns if a in ANIMALS)
+            cache[key] = (max(0.0, float(mt.at[region, "export_share"])) * man0,
+                          float(mt.at[region, "import_kg_n_per_ha"]) * area0)
+        return cache[key]
+
     def _gnb_row(self, region):
         """CAPRI's 2030 balance items for the CAPRI region of a model region (national where the
         region is not separate in CAPRI), from capri_gnb_components_2030.csv, or {}."""
@@ -130,12 +152,14 @@ class NitrogenBlock:
         return cls._MIN30
 
     def _capri_crop_n(self, region):
-        """{model crop: (removal, residues, fixation) kg N per ha} for this region from CAPRI's 2030
-        reference, each item scaled so the region's totals equal CAPRI's EXPPRD and CRESID."""
+        """{model crop: (removal, residues, fixation) kg N per ha} for this region: removal and fixation CAPRI's 2030
+        simulation data (fertned.gms, fertpar.gms; K191), residues CAPRI's 2030 MANN less deposition (K163), removal and
+        residues scaled so the region's totals equal CAPRI's EXPPRD and CRESID."""
         cls = type(self)
         if cls._CROP_N is None:
             inp = _inputs.current()
             cls._CROP_N = {}
+            cls._CROP_N_RES = {}
             t = inp.csv("capri_crop_n_coefs_2030.csv", "environment")
             tot = inp.csv("capri_gnb_components_2030.csv", "environment").pivot_table(
                 index="capri_region", columns="item", values="kg_n_per_ha")
@@ -148,15 +172,19 @@ class NitrogenBlock:
                 lv = sum(float(x.levl) for x in d.values())
                 if r8 not in tot.index or lv <= 0:
                     continue
-                # Removal key per crop: the crop's NITF in CAPRI's results is its need NET of
-                # biological fixation (NUTNED_: retention x (1 - fBNF) x over-fertilisation), while
-                # fixation is fBNF of the gross need (JRC96482, eq. 1: Nbiofix = NITF x LEVL x fBNF,
-                # fBNF 75% for soya and pulses, 5-17% for grass). Gross need = NITF + fixation per ha
-                # (pulses: 52 + 149 kg/ha in Saxony-Anhalt, removal 4x the net figure).
-                def _gross(x):
-                    fx = float(x.biofix_t) * 1000.0 / float(x.levl) if (x.biofix_t == x.biofix_t and float(x.levl) > 0) else 0.0
-                    return float(x.nitf) + fx
-                sx = sum(float(x.levl) * _gross(x) for x in d.values())
+                # Removal and fixation per crop: CAPRI's simulation data, e_EXPPRD's DATA(crop, NITF, "Y") and
+                # e_BIOFIX's DATA(crop, NITF, "Y") x p_nitrFact(crop, BioFix) (supply_model.gms l. 1417-1461), as
+                # fert/fertned.gms and fert/fertpar.gms set them in the simulation year (capri_mod/supply/equations
+                # fertned.py, fertpar.py; computed by tools/build/build_capri_crop_n_coefs.py: data_nitf, biofix_rate;
+                # the regions' removal is CAPRI's EXPPRD within 0.1% in every unit). Until 20 November 2026 the removal
+                # was CAPRI's reported NITF plus the reported fixation per ha: the reported NITF is the need net of
+                # fixation, with NUTNED_'s SQRT(1 +/- 0.2) split for intensive and extensive grassland, and the report
+                # gives extensive grassland intensive grassland's fixation, so the two grasslands' removal and fixation
+                # were not CAPRI's (DE21 intensive less extensive in the N-surplus row -80 kg N/ha against CAPRI's -46;
+                # KNOWN_ISSUES K191)
+                _dn = lambda x: float(x.data_nitf) if x.data_nitf == x.data_nitf else 0.0              # noqa: E731
+                _bf = lambda x: float(x.biofix_rate) if x.biofix_rate == x.biofix_rate else 0.0        # noqa: E731
+                sx = sum(float(x.levl) * _dn(x) for x in d.values())
                 # CAPRI's e_CRESID (supply_model.gms): (v_Cresid + v_atmosd) x UAA = sum levl x DATA(crop, MANN)
                 # x (techFact + 1), MANN being FOUT_T_N's output for NITF (global/fromimpact/sets.gms), and
                 # e_ATMOSD the deposition per ha of every crop: a crop's own residues are its MANN - deposition.
@@ -177,17 +205,55 @@ class NitrogenBlock:
                     L = sum(float(x.levl) for x in src)
                     if L <= 0:
                         continue
-                    rem = sum(float(x.levl) * _gross(x) for x in src) / L * ke
+                    rem = sum(float(x.levl) * _dn(x) for x in src) / L * ke
                     res = sum(float(x.levl) * res_ha(x) for x in src) / L * kr
-                    fix = sum((float(x.biofix_t) if x.biofix_t == x.biofix_t else 0.0) for x in src) * 1000.0 / L
+                    fix = sum(float(x.levl) * _dn(x) * _bf(x) for x in src) / L
                     out[mc] = (rem, res, fix)
                 cls._CROP_N[r8] = out
-        to8 = getattr(cls, "_CROP_N_MAP", {})
-        r8 = to8.get(region)
+                cls._CROP_N_RES[r8] = (kr, dep)       # residues' scale and deposition (_crop_n_at_yields)
+        return cls._CROP_N.get(self._crop_n_region(region))
+
+    def _crop_n_region(self, region):
+        """The CAPRI region whose crop N coefficients a model region takes (_capri_crop_n): its own, else its member
+        state's."""
+        cls = type(self)
+        r8 = getattr(cls, "_CROP_N_MAP", {}).get(region)
         if r8 is None or r8 not in cls._CROP_N:
-            nc = capri_ms(region)
-            r8 = nc
-        return cls._CROP_N.get(r8)
+            r8 = capri_ms(region)
+        return r8
+
+    def _crop_n_at_yields(self, region, crop, co, y0, y, ys=None, techn_fact=0.0):
+        """(removal, residues, fixation) kg N per ha of one crop at yield y (y_scen ys before the price response;
+        None: y) and technology factor techn_fact, from its base coefficients co (_capri_crop_n), as CAPRI's data move:
+
+        - with the yields, fert/fertned.gms rerun on them (CAPRI reruns it after the scenario's yield shifts and after
+          each price-driven yield update, supply/endog_yields.gms l. 139, 148): the removal DATA(crop, NITF) and with it
+          the fixation DATA(crop, NITF) x p_nitrFact(crop, BioFix) by the need's factor (capri_mod.fert.npk
+          need_yield_factor), the residues DATA(crop, MANN) less deposition by fertned's statements on the crop's
+          arguments (capri_mod/supply/equations/fertned.py fertned_at_yields: the residue share of the new DATA(crop,
+          NITF), at most 95% of it, plus the straw left, which only the scenario's shifts move), as a change on the
+          base coefficient, scaled as the base's (CAPRI's CRESID);
+        - with a technology variant's yield factor tf (p_technFact(crop, yield, A), the mix columns'), CAPRI's rows on
+          top: e_EXPPRD and e_BIOFIX x (1 + tf) (p_technFact(crop, NITF, A), fert/fertned.gms l. 205-206), e_CRESID
+          the residues x (1 + tf) (p_technFact(crop, MANN, A): the part that is not deposition or mineralisation,
+          l. 326-335; mineralisation not set in CAPRI's 2030 data: fertned.py DATA_FOUT_dep).
+
+        Until 20 November 2026 all three moved by y / y0 (KNOWN_ISSUES K189): CAPRI's rule for the in-solve yield
+        factors (v_yldMit, v_yldPestFac, the technology variants), not for its data's yield updates."""
+        from capri_mod.fert.npk import fout_yield_change
+        rem, res, fix = float(co[0]), float(co[1]), float(co[2])
+        ys_ = y if (ys is None or not ys > 0) else float(ys)
+        if y0 > 0 and (y != y0 or ys_ != y0):
+            nf = need_yield_factor(region, crop, y0, y, ys_, "N") if y > 0 else 0.0
+            rem *= nf
+            fix *= nf
+            kr, dep = type(self)._CROP_N_RES[self._crop_n_region(region)]
+            d = fout_yield_change(region, crop, y0, y, ys_, "N", AtmDep=dep)
+            if d is None:
+                raise RuntimeError(f"no fertned arguments for {crop} in {region} (capri_crop_fertned_parts_2030.csv)")
+            res = res + kr * d
+        tf = 1.0 + float(techn_fact or 0.0)
+        return rem * tf, res * tf, fix * tf
 
     def _base_mineral_rate(self, region, crop):
         """Base mineral N per ha of a crop. environment.base_mineral_n "capri2030": CAPRI's 2030 reference, its inner
@@ -276,22 +342,38 @@ class NitrogenBlock:
         return av, r0
 
     def unit_nitrogen_balance(self, activity: str, yields, region: str,
-                              n_intensity: Optional[Dict[str, float]] = None, yields_scen=None) -> Dict[str, float]:
+                              n_intensity: Optional[Dict[str, float]] = None, yields_scen=None,
+                              techn_fact: Optional[tuple] = None) -> Dict[str, float]:
         """compute_nitrogen_balance for ONE unit of one activity, memoised. The balance of {a: 1} reads only the
         activity's own yield (and its yield before the price response, yields_scen), its own intensity factor and the
         "__credit__" factor (plus static data and the manure trade setting), so those form the key; the supply models
-        ask for it hundreds of thousands of times per run."""
+        ask for it hundreds of thousands of times per run. techn_fact: (tf, ned) of a technology variant of the
+        activity (compute_nitrogen_balance), None: the mean technology."""
         y = yields.get(activity) if hasattr(yields, "get") else None
         ys = yields_scen.get(activity) if hasattr(yields_scen, "get") else None
         mi = n_intensity or {}
+        tfk = None if techn_fact is None else (float(techn_fact[0]), float(techn_fact[1]))
         key = (region, activity, None if y is None else float(y), None if ys is None else float(ys),
-               mi.get(activity), mi.get("__credit__"), bool(getattr(self.seen, "manure_trade_on", True)))
+               mi.get(activity), mi.get("__credit__"), bool(getattr(self.seen, "manure_trade_on", True)),
+               str(_settings().get("supply.manure_base_trade")), tfk)
         memo = _est.setdefault(self.par, "unit_nb_memo", {})
         r = memo.get(key)
         if r is None:
-            r = self.compute_nitrogen_balance({activity: 1.0}, yields, region, n_intensity, yields_scen=yields_scen)
+            r = self.compute_nitrogen_balance({activity: 1.0}, yields, region, n_intensity, yields_scen=yields_scen,
+                                              unit=True, techn_fact=None if tfk is None else {activity: tfk})
             memo[key] = r
         return dict(r)
+
+    def nitrogen_balance_constants(self, region: str, yields=None, n_intensity: Optional[Dict[str, float]] = None,
+                                   yields_scen=None) -> Dict[str, float]:
+        """The part of the region's balance that no activity carries: with supply.manure_base_trade "capri" the base
+        manure trade (CAPRI's trade variables at the calibration point; base imports - base exports in the organic
+        input and manure applied, the mineral N they displace, the surplus), the balance of no activity at all; zero
+        with "shares", where the units carry the trade. A region's total is the units' sum plus these (K167)."""
+        if str(_settings().get("supply.manure_base_trade")) != "capri":
+            return {}
+        return self.compute_nitrogen_balance({}, yields if yields is not None else {}, region, n_intensity,
+                                             yields_scen=yields_scen)
 
     def compute_nitrogen_balance(
         self,
@@ -300,12 +382,18 @@ class NitrogenBlock:
         region: str,
         n_intensity: Optional[Dict[str, float]] = None,
         yields_scen=None,
+        unit: bool = False,
+        techn_fact: Optional[Dict[str, tuple]] = None,
     ) -> Dict[str, float]:
         """
         Compute soil nitrogen balance (OECD/Eurostat methodology).
 
         Crop need per ha follows the yield by CAPRI's rule (capri_mod.fert.npk.need_yield_factor); yields_scen: the
         crops' yields before the price response (the straw part of the need follows those), None: the yields.
+        techn_fact: {crop: (tf, ned)} for a technology variant A of the crop (the mix columns): tf its yield factor
+        p_technFact(crop, yield, A) (T1 +0.2, T2 -0.2), on the removal, residues and fixation as CAPRI's rows put it
+        (_crop_n_at_yields), and ned its need over the mean technology's (NUTNED_'s SQRT(1 + tf) x (1 + tf) over the
+        LEVL-weighted mean: 1 +- need_diff / 2 of techn_mix_2030.csv); None: the crops' mean technology.
 
         N inputs:
           - Mineral fertilizer
@@ -320,6 +408,7 @@ class NitrogenBlock:
 
         Surplus = Inputs - Outputs (kg N / ha)
         """
+        from capri_mod.supply.equations.supply_model import n_surplus as _ns   # CAPRI's terms (e_EXCRET, e_EXPPRD, ...)
         n = {}
 
         # --- Inputs ---
@@ -368,6 +457,9 @@ class NitrogenBlock:
                 _y0 = float(_ybase.get(crop, 0.0)); _y = float(yields.get(crop, _y0)) if hasattr(yields, "get") else _y0
                 if _y0 > 0 and _y > 0:
                     _sq = _nyf(crop, _y0, _y)
+            # a technology variant's need over the mean technology's: NUTNED_'s SQRT(1 + tf) x (1 + tf) over its
+            # LEVL-weighted mean (supply_model.gms l. 1129-1137; techn_mix_2030.csv need_diff)
+            _sq *= float((techn_fact or {}).get(crop, (0.0, 1.0))[1])
             rate = self._base_mineral_rate(region, crop) if area > 0 else 0.0
             n_mineral_plain += area * rate * _m
             n_mineral += area * rate * _m * _sq
@@ -394,8 +486,8 @@ class NitrogenBlock:
             # organic input against a real EU average near 55.
             heads_1000 = activities.get(animal, 0.0)
             n_excr = self._n_excretion(region, animal)
-            n_organic += heads_1000 * n_excr
-            n_housing_loss += heads_1000 * n_excr * float(_ls.get(animal, 0.0))
+            n_organic += _ns.e_EXCRET(heads_1000, n_excr)
+            n_housing_loss += _ns.e_GASRUNANI(heads_1000, n_excr, float(_ls.get(animal, 0.0)))
         # MANURE TRADE (CAPRI's manExportOrAppl_): exporting regions keep
         # (1 - export share) of their manure N, importing regions receive
         # manure spread over their cropland. Shares from CAPRI's 2030 reference
@@ -404,15 +496,24 @@ class NitrogenBlock:
         # it, as JRC121368's CAPRI, every region keeps all its manure, the manure trade at CAPRI's reference)
         _mt = self.data.get("manure_trade") if (hasattr(self, "data") and getattr(self.seen, "manure_trade_on", True)) else None
         _exp_sh, _imp_ha = 0.0, 0.0
+        _trade_lvl = None
         if _mt is not None and region in getattr(_mt, "index", []):
-            _exp_sh = float(_mt.at[region, "export_share"])
-            _imp_ha = float(_mt.at[region, "import_kg_n_per_ha"])
+            if str(_settings().get("supply.manure_base_trade")) == "capri":
+                # CAPRI's ManureNPK_ / SURTOT: exports and imports are levels of the region (v_manureExports,
+                # v_manureImports; at the calibration point CAPRI's 2030 reference trade), not shares of the current
+                # herd or crop area: the totals carry them, a unit's balance (unit=True) does not (K167)
+                _trade_lvl = (0.0, 0.0) if unit else self.base_manure_trade(region)
+            else:
+                _exp_sh = float(_mt.at[region, "export_share"])
+                _imp_ha = float(_mt.at[region, "import_kg_n_per_ha"])
         n_organic *= max(0.0, 1.0 - _exp_sh)
+        if _trade_lvl is not None:
+            n_organic -= _trade_lvl[0]
 
         # CAPRI's crop removal, crop residues and biological fixation per crop and region
         # (supply_model.gms e_EXPPRD, e_CRESID, e_BIOFIX; 2030 reference coefficients,
-        # capri_crop_n_coefs_2030.csv), scaled with the current yield over the model's own
-        # base yield (CAPRI multiplies by its yield factors). Replaces the hard-coded N
+        # capri_crop_n_coefs_2030.csv), at the current yields as CAPRI's data move with them
+        # (fert/fertned.gms rerun: _crop_n_at_yields; K189). Replaces the hard-coded N
         # contents per tonne (wheat 20 kg/t, default 10) and fixation rates, which removed
         # 40% more N than CAPRI's net removal and left out the residue input.
         _cn = self._capri_crop_n(region)
@@ -425,23 +526,26 @@ class NitrogenBlock:
                 co = _cn.get(crop)
                 if area <= 0 or co is None:
                     continue
-                yr = 1.0
                 _nf = 1.0
+                _y0 = _y = 0.0
                 if _ybase is not None:
                     _y0 = float(_ybase.get(crop, 0.0) or 0.0)
                     _y = float(yields.get(crop, _y0) or 0.0) if hasattr(yields, "get") else _y0
                     if _y0 > 0 and _y >= 0:
-                        yr = _y / _y0
                         _nf = _nyf(crop, _y0, _y) if _y > 0 else 0.0
-                n_crop_uptake_c += area * co[0] * yr
-                n_residues += area * co[1] * yr
+                _ysc_c = _ysc.get(crop)
+                _tf, _ned = (techn_fact or {}).get(crop, (0.0, 1.0))
+                rem_, res_, fix_ = self._crop_n_at_yields(region, crop, co, _y0, _y,
+                                                          None if _ysc_c is None else float(_ysc_c), _tf)
+                n_crop_uptake_c += _ns.e_EXPPRD(area, rem_, 1.0)
+                n_residues += _ns.e_CRESID(area, res_, 1.0)
                 if crop in self.OWN_RESIDUE_CROPS:
                     # own residues cover own need: base credit x intensity x CAPRI's need factor of the
-                    # yield on the need side, residues actually left on the credit side
+                    # yield (x NUTNED_'s technology terms) on the need side, residues actually left on the credit side
                     _fc_ = float((n_intensity or {}).get("__credit__", 1.0))
-                    _own_need += area * co[1] * _fc_ * _nf
-                    _own_res += area * co[1] * yr
-                n_fix_c += area * co[2] * yr
+                    _own_need += area * co[1] * _fc_ * _nf * float(_ned)
+                    _own_res += _ns.e_CRESID(area, res_, 1.0)
+                n_fix_c += _ns.e_BIOFIX(area, fix_, 1.0)
 
         # Biological N fixation: CAPRI's per crop and region (BIOFIX, _capri_crop_n)
         if not _cn and any(activities.get(c, 0.0) > 0 for c in CROPS):
@@ -461,9 +565,11 @@ class NitrogenBlock:
             _v = float(_dep.at[region, "deposition_kg_n_per_ha"])
             if _v == _v and _v >= 0:
                 _dep_ha = _v
-        n_deposition = total_uaa * _dep_ha
+        n_deposition = _ns.e_ATMOSD(total_uaa, _dep_ha)
 
         n_manure_import = sum(activities.get(a, 0.0) for a in CROPS) * _imp_ha
+        if _trade_lvl is not None:
+            n_manure_import = _trade_lvl[1]
         # MINERAL FERTILISER FOLLOWS CROP NEED (CAPRI supply_model.gms NUTNED_):
         # mineral N covers what manure, residues and deposition leave of the
         # crops' need, each net of losses. Linearised around the base: crops
@@ -645,13 +751,16 @@ class NitrogenBlock:
             w0 = float(v) if v == v else 0.0
         cv = getattr(supply_result, "cover_crops", None) or {}
         w1 = float(cv["req"]) / float(cv["uaa"]) if cv.get("req") is not None and float(cv.get("uaa", 0.0) or 0.0) > 0 else w0
+        if cv.get("cascade_share") is not None:
+            w1 = float(cv["cascade_share"])         # the share the loss cascade takes (fixed in the Green Deal group, K170)
         return w0, w1
 
     def _leach_animals(self, region, acts, ms, wc, initial=False, fert_mrun=0.0):
         """Per animal (t N excreted, RunSurf, GasRunTot, sum over the application options of no3mlea x share) through
         CAPRI's cascade at the current option shares ms (or the initial shares), the sub-activities weighted by their
         manure N; animals without cascade data are left out."""
-        from capri_mod.supply import ammonia_techs as _at, n_cascade as _nc
+        from capri_mod.supply import ammonia_techs as _at
+        from capri_mod.supply.equations.supply_model import n_flow as _nf
         from capri_mod.supply.n_leaching import APPL
         out = []
         tm = (getattr(self.par, "amm_tm", None) or {}).get(region, {})
@@ -670,7 +779,7 @@ class NitrogenBlock:
                     s_ = {t_: sh.get(t_, v_) for t_, v_ in s_.items()}
                 f, rsurf, eff = _at.cascade_data(sb)
                 m = 1.0 - param("WINTERCOV_NO3_REDUCTION") * wc - fert_mrun
-                L = _nc.losses(f, rsurf, s_, eff, m_runsurf=(m, 1.0), m_appl_run=1.0 - param("WINTERCOV_NO3_REDUCTION") * wc)
+                L = _nf.losses(f, rsurf, s_, eff, m_runsurf=(m, 1.0), m_appl_run=1.0 - param("WINTERCOV_NO3_REDUCTION") * wc)
                 W += w
                 RS += w * L[("N", "RunSurf")]
                 GR += w * L[("N", "GasRunTot")]
@@ -695,6 +804,8 @@ class NitrogenBlock:
         carries indirect N2O (gases.gms N2OLEA allocated to crops), capri_mod/supply/n_leaching.py. Returns {share,
         components (t N), n2o_n (t N2O-N), leached (t N below the root zone)} or None without CAPRI's data."""
         from capri_mod.supply import n_cascade as _nc, n_leaching as _nl
+        from capri_mod.supply.equations.supply_model import n_flow as _nf, n_surplus as _ns
+        from capri_mod.supply.equations.supply_model.n2o import GWPN2OLEA_
         from capri_mod.supply.supply_module import fert_side_value as _fsv
         rs = _nl.capri_region(region)
         d = _nl.load().get(rs) if rs else None
@@ -717,22 +828,21 @@ class NitrogenBlock:
         e_mrun = _eff("NITR_INH_MAN", "NO3MRUN", nmin.get("NITR_INH_MAN", 0.0))
         # mineral N: CAPRI's NETF losses (GASTOTNETF_, RUNTOTNETF_ with winter cover and the inhibitor's NO3SRUN)
         M = float(nb.get("n_mineral_input", 0.0) or 0.0)
-        nf = _nc.netf(g, float(g.get("run_surf", 0.0)), m_run=1.0 - param("WINTERCOV_NO3_REDUCTION") * wc1 - s_ni * e_srun)
+        nf = _nf.netf(g, float(g.get("run_surf", 0.0)), m_run=1.0 - param("WINTERCOV_NO3_REDUCTION") * wc1 - s_ni * e_srun)
         ms = getattr(supply_result, "manure_tech_shares", None) or {}
         an1 = self._leach_animals(region, acts, ms, wc1, fert_mrun=s_nim * e_mrun)
         an0 = self._leach_animals(region, acts, ms, wc0, initial=True)
         man_net = float(nb.get("n_manure_applied", 0.0) or 0.0)
-        oth = (float(nb.get("n_crop_residues", 0.0) or 0.0) + float(nb.get("n_deposition", 0.0) or 0.0)) \
-            * (1.0 - nf["N2O"])
-        den = M * (1.0 - nf["GasRunTot"]) + man_net + oth
-        nmin_sh = M * (1.0 - nf["GasRunTot"]) / den if den > 0 else 0.0
-        nman_sh = man_net / den if den > 0 else 0.0
+        # CAPRI's nminInputSh_ and nmanInputSh_ (n_surplus.py): the mineral N kept and the manure applied over the N input
+        nmin_kept = M * (1.0 - nf["GasRunTot"])
+        den = _ns.nminInputSh_den(nmin_kept, man_net, float(nb.get("n_crop_residues", 0.0) or 0.0)
+                                  + float(nb.get("n_deposition", 0.0) or 0.0), nf["N2O"])
+        nmin_sh = _ns.nminInputSh_(nmin_kept, den)
+        nman_sh = _ns.nmanInputSh_(man_net, den)
 
-        def _agg(an):
-            w = sum(n * (1.0 - gr) for n, _, gr, _ in an)
-            return sum(n * (1.0 - gr) * ag for n, _, gr, ag in an) / w if w > 0 else 0.0
-        b_now = _nl.b1(wc1, _agg(an1), nmin_sh, nman_sh, s_ni * e_slea, s_nim * e_mlea)
-        b_ini = _nl.b1(wc0, _agg(an0))
+        # LEACHN_'s first factor with AMMOAGG_'s v_ammoAppLeaAgg, now and at CAPRI's initial shares (n_flow.py)
+        b_now = _nf.LEACHN_B1(wc1, _nf.AMMOAGG_(an1), nmin_sh, nman_sh, s_ni * e_slea, s_nim * e_mlea)
+        b_ini = _nf.LEACHN_B1(wc0, _nf.AMMOAGG_(an0))
         L = _nl.share(rs, b_now, b_ini)
         if L is None:
             return None
@@ -742,4 +852,4 @@ class NitrogenBlock:
                           float(nb.get("n_fixation", 0.0) or 0.0), L, e)
         tot = sum(comp.values())
         return {"share": L, "b1": b_now, "b1_ini": b_ini, "components": comp, "n_runoff_leached": tot,
-                "n2o_n": tot * param("EF5_LEACHING_N2O")}
+                "n2o_n": GWPN2OLEA_(tot, param("EF5_LEACHING_N2O"))}

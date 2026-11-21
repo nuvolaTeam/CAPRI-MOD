@@ -95,7 +95,10 @@ def main():
     # (The model's other fodder OFOD was CAPRI's OFAR plus its fodder roots ROOF until 7 November 2026; OFAR and
     # ROOF are the model's own activities since, with CAPRI's own trajectories.)
     # (and SETA = FALL + VSET until 7 November 2026: VSET and FALL the model's own since)
-    for comp, parts in (("SHGT", ("SHGM", "SHGF")), ("CACR", ("CAMF", "CAFF", "CAMR", "CAFR"))):
+    # HEIT: the model's heifers HFRS are CAPRI's fattening heifers HEIF (HEIL + HEIH) and its replacement heifers HEIR
+    # (codes/model_activities.csv; capri_level_ratio.csv over HEIF + HEIR); until 18 November 2026 HFRS took HEIF's growth
+    # alone (KNOWN_ISSUES K172: the 2030 base heifers 4.8% above CAPRI's HEIF + HEIR in CAPRI's units)
+    for comp, parts in (("SHGT", ("SHGM", "SHGF")), ("CACR", ("CAMF", "CAFF", "CAMR", "CAFR")), ("HEIT", ("HEIF", "HEIR"))):
         for reg in {k[0] for k in v}:
             for yr in ("2017", "2030"):
                 xs = [v.get((reg, p_, "LEVL", yr)) for p_ in parts]
@@ -162,11 +165,11 @@ def main():
     # land types (the model's land table) from CAPRI's land aggregates: arable crops ARAC, fruit and nurseries FRUN,
     # grassland GRAS, fallow FALL (CAPRI's 2030 reference has 2.1% less UAA than 2017; without it the projection kept
     # 2017 land and the reconciliation put every crop ~2% above CAPRI's 2030 level)
-    for key, acts in regional["herds"].items():          # the model's names for the two totals
-        for m_, c_ in (("CALV", "CACR"),):
+    for key, acts in regional["herds"].items():          # the model's names for the totals
+        for m_, c_ in (("CALV", "CACR"), ("HFRS", "HEIT")):
             if c_ in acts:
                 acts[m_] = dict(acts[c_])
-    for m_, c_ in (("CALV", "CACR"),):
+    for m_, c_ in (("CALV", "CACR"), ("HFRS", "HEIT")):
         cells["herds"][m_] = list(cells["herds"].get(c_, []))
     land_map = {"ARABLE": "ARAC", "PERMANENT": "FRUN", "GRASSLAND": "GRAS", "FALLOW": "FALL"}
     regional["land"] = defaultdict(dict)

@@ -23,6 +23,14 @@ have its LEVL T1 and T2 in p_technFact):
                      z over the crop's premium (CAPRI's 2030 reference, dataOut PRME by scheme; schemes with a factor:
                      DPRD_AE1..8, DPRD_N2K, DPRD_SeBete, DPRD_SeExte, DPRD_SeVall; a factor counts only where the
                      scheme pays, policy.gms l. 420)
+  mann_diff, manp_diff, mank_diff   factor T1 - T2 of the crop residues' N, P2O5 and K2O (p_technFact MANN, MANP,
+                     MANK; 0 where CAPRI gives none): the residues per unit z over the crop's per ha, which CAPRI's
+                     residue pool (fertDistCres_, supply_model.gms l. 1041-1077) and the permanent crops' own residues
+                     in NUTNED_ (l. 1206-1220) carry as DATA(MANN) x (1 + p_technFact(MANN, A)) (K181); for N as
+                     fert/fertned.gms sets it in the simulation year (l. 324-335: the deposition's part does not move,
+                     p_technFact_MANN; CAPRI's simulation DATA(MANN) and DATA(NITF) from capri_crop_n_coefs_2030.csv,
+                     the deposition from n_deposition_regional.csv); until 20 November 2026 sim_ini's +-0.2, the factor
+                     before fertned (KNOWN_ISSUES K189)
   capri_region
 
 Not carried: irrigation water (factor 0), the fertiliser cost (through the nutrient need), sugar beet's VCOF
@@ -58,6 +66,8 @@ from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import SOURCES, BASELINE_REF  # noqa: E402  (CAPRI's material outside the repository)
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
+sys.path.insert(0, str(ROOT))
+from capri_mod.supply.equations.fertned import p_technFact_MANN  # noqa: E402  (fert/fertned.gms l. 324-335)
 
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 FACT = ROOT / "capri_data" / "sources" / "intermediate" / "technology" / "techn_fact_2030.parquet"
@@ -66,6 +76,10 @@ REF = BASELINE_REF
 PRME = (ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta"
         / "prme_schemes_2030.parquet")
 OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "supply" / "techn_mix_2030.csv"
+#: CAPRI's simulation DATA(crop, NITF) and DATA(crop, MANN) (tools/build/build_capri_crop_n_coefs.py) and the deposition,
+#: for the residues' factor p_technFact(MANN, A) after fertned.gms
+CROP_N = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment" / "capri_crop_n_coefs_2030.csv"
+DEPOSITION = ROOT / "capri_data" / "2017" / "environment" / "n_deposition_regional.csv"
 #: the inputs with a technology factor (techf.gms l. 92-96, 104-105), the Green Deal's two apart
 REST = ("SEED", "REPM", "REPB", "ELEC", "EGAS", "EFUL", "ELUB")
 INPUTS = REST + ("INPO", "PLAP")
@@ -74,7 +88,7 @@ SCHEMES = ("DPRD_AE1", "DPRD_AE2", "DPRD_AE3", "DPRD_AE4", "DPRD_AE5", "DPRD_AE6
 ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'([A-Za-z0-9_]+)'\.'(" + "|".join(INPUTS + ("LEVL",)) + r")'\.'Y'\s+"
                  r"(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
 COLS = ["region", "activity", "yield_diff", "need_diff", "rest_cost_diff_eur_ha", "inpo_diff", "plap_diff",
-        "prem_diff_share", "capri_region"]
+        "prem_diff_share", "mann_diff", "manp_diff", "mank_diff", "capri_region"]
 
 
 def _load(path):
@@ -130,6 +144,23 @@ def main() -> None:
             if m:
                 cost[m.group(1)][(m.group(2), m.group(3))] = float(m.group(4))
     prme = prme_schemes(a.ref)
+    cn = _read_csv(CROP_N).set_index(["capri_region", "crop"])
+    dep = _read_csv(DEPOSITION).set_index("region").deposition_kg_n_per_ha
+    n_mann = 0
+
+    def mann_factor(cr, act, tech, d):
+        """p_technFact(cr, act, MANN, tech) as fertned.gms sets it in the simulation year (p_technFact_MANN: the
+        residues' part of DATA(MANN) moves with the variant's yield factor, the deposition does not), the factor
+        sim_ini carries where the statement does not apply (no DATA(MANN) or DATA(NITF))."""
+        f0 = d.get(("MANN", tech), 0.0)
+        if (cr, act) not in cn.index or not d.get(("LEVL", tech)):
+            return f0
+        r = cn.loc[(cr, act)]
+        if not (r.data_nitf > 0 and r.data_mann > 0):
+            return f0
+        # p_technFact(crop, NITF, A): the main outputs' factor (fertned.gms l. 205-206), the "Yield" row (techf.gms
+        # l. 87: their sum over the main outputs)
+        return p_technFact_MANN(d.get(("Yield", tech), 0.0), float(r.data_mann), float(dep.get(cr, 0.0)))
 
     mr = _load(ROOT / "tools" / "lib" / "_model_regions.py")
     to_c8 = mr.region_to_capri()
@@ -164,12 +195,15 @@ def main() -> None:
             p = prme.get((cr, act), {})
             tot = p.get("DPTOTAL", 0.0)
             prem = sum(p.get(s, 0.0) / tot * fd(s) for s in SCHEMES if p.get(s, 0.0) > 0) if tot > 0 else 0.0
-            rows.append([reg, mc, fd("Yield"), (g(y1) - g(y2)) / gbar, rest, fd("INPO"), fd("PLAP"), prem, cr])
+            mann = mann_factor(cr, act, "T1", d) - mann_factor(cr, act, "T2", d)
+            n_mann += mann != fd("MANN")
+            rows.append([reg, mc, fd("Yield"), (g(y1) - g(y2)) / gbar, rest, fd("INPO"), fd("PLAP"), prem,
+                         mann, fd("MANP"), fd("MANK"), cr])
     out = pd.DataFrame(rows, columns=COLS)
     out.to_csv(OUT, index=False)
     print(f"{OUT.name}: {len(out)} region x crop, {out.region.nunique()} regions; {miss_cost} without a CAPREG 2017 "
-          f"level (their input costs 0)")
-    print(out.groupby("activity")[COLS[2:8]].median().round(3).to_string())
+          f"level (their input costs 0); mann_diff after fertned.gms in {n_mann}")
+    print(out.groupby("activity")[COLS[2:11]].median().round(3).to_string())
 
 
 if __name__ == "__main__":

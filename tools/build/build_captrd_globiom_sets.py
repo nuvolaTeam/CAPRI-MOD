@@ -34,7 +34,7 @@ import gams_preproc as GP                                  # noqa: E402
 import gams_sets as G                                      # noqa: E402
 from paths import REFERENCE, SOURCES                       # noqa: E402
 
-GAMS = SOURCES / "course_capri_git" / "gams"
+GAMS = SOURCES / "gams"
 SIMINI = REFERENCE / "sets" / "simini_21730"
 OUT = ROOT / "capri_data" / "pipeline" / "captrd" / "sets" / "globiom"
 CONTROL = {"GlobiomVersion": "Globiom_EU", "BAS": "17", "BaseYear_lst2": "17"}

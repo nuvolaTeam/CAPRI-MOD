@@ -156,6 +156,22 @@ class LivestockBlock:
         self.res.last_cattle_z = {a: float(y[c]) for a, c in (getattr(self.ev, "cattle_cols", None) or {}).items() if c < len(y)}
         self.res.last_genet_z = {k: max(0.0, float(y[c])) for k, c in (getattr(self.ev, "genet_cols", None) or {}).items() if c < len(y)}
 
+    def _split_inpo_change(self, a: str, di) -> float:
+        """The Green Deal's change of the other inputs on a split column (EUR per head moved, 1000 EUR per 1000 heads):
+        CAPRI changes every activity's INPO coefficient by one regional percentage (pol_input/greendeal/
+        conventional_io.gms; capmod/define_inputs.gms l. 70-73)
+
+            p_inputCoeff(RU,MPACT,"INPO") x (1 + DATA(RU,"GROF","INPO","percentageChange"))
+
+        so the members a split moves heads between change by their own INPO: the animal's change per head
+        (policy.py, ev.greendeal_animal_inpo) x dinpo_rel, the members' INPO difference over the animal's average
+        (dairy_intensity.csv, cattle_intensity.csv; KNOWN_ISSUES K189's per-head terms). 0 outside the Green Deal."""
+        d = (getattr(self.ev, "greendeal_animal_inpo", None) or {}).get(a, 0.0)
+        if not d:
+            return 0.0
+        rel = di.get("dinpo_rel", 0.0) if hasattr(di, "get") else 0.0
+        return float(d) * float(rel) if rel is not None and rel == rel else 0.0
+
     def _cattle_columns(self, Qa, ca, Aa, ba, start, labels, n):
         """One column z per split of a cattle animal into CAPRI's activities (1000 stalls moved from one CAPRI
         activity to another, CATTLE_SPLIT_MEMBERS): the intensity pairs (BULL: BULL/BULH; HFRS: HEIL/HEIH, the port of CAPRI's bull and heifer splits),
@@ -218,7 +234,7 @@ class LivestockBlock:
             if ps is not None and pv is not None and hasattr(pv, "get"):
                 bv = pv.get(f"{a}.BEEF")
                 if bv is not None and pd.notna(bv):
-                    dv += float(di["dbeef_rel"]) * float(bv) * float(ps.get("BEEF", ps.get(a, 0.0)) or 0.0)
+                    dv += float(di["dbeef_rel"]) * float(bv) * self._pt(a, "BEEF") * float(ps.get("BEEF", ps.get(a, 0.0)) or 0.0)
             for g, rec in ycoef.items():                          # young animals bought and sold per stall
                 chg = float(rec.get("value_eur_head", 0.0) or 0.0) * (float(yr.get(g, 1.0)) - 1.0)
                 if not chg:
@@ -233,7 +249,8 @@ class LivestockBlock:
                 dp = di.get(f"dprod_{g}_rel")
                 if p_ and dp is not None and dp == dp and float(dp):
                     dv += float(dp) * p_ * chg
-            ca = np.concatenate([ca, [cz_all[key] - dv + self._ghg_cost('cattle', key)]])
+            ca = np.concatenate([ca, [cz_all[key] - dv + self._ghg_cost('cattle', key)
+                                      + self._split_inpo_change(a, di)]])
             start = np.concatenate([start, [0.0]])
             self.ev.cattle_cols[key] = Aa.shape[1] - 1
             rx = dict(getattr(self.ev, "dairy_req_extra", None) or {})
@@ -386,7 +403,7 @@ class LivestockBlock:
             if dmr and ps is not None and pv is not None and hasattr(pv, "get"):
                 mv = pv.get(f"{a}.MILK")
                 if mv is not None and pd.notna(mv):
-                    dv = dmr * float(mv) * float(ps.get("MILK", ps.get(a, 0.0)) or 0.0)
+                    dv = dmr * float(mv) * self._pt(a, "MILK") * float(ps.get("MILK", ps.get(a, 0.0)) or 0.0)
             ca = np.concatenate([ca, [cal[(a, opt)] + r0 * c - dv + self._ghg_cost('genet', (a, opt))]])
             start = np.concatenate([start, [0.0]])
             self.ev.genet_cols[(a, opt)] = Aa.shape[1] - 1
@@ -463,8 +480,8 @@ class LivestockBlock:
         if ps is not None and pv is not None and hasattr(pv, "get"):
             mv = pv.get("DCOW.MILK")
             if mv is not None and pd.notna(mv):
-                dmilk = float(di["dcomi_rel"]) * float(mv) * float(ps.get("MILK", ps.get("DCOW", 0.0)) or 0.0)
-        ca = np.concatenate([ca, [cz - dmilk + self._ghg_cost('dairy')]])
+                dmilk = float(di["dcomi_rel"]) * float(mv) * self._pt("DCOW", "MILK") * float(ps.get("MILK", ps.get("DCOW", 0.0)) or 0.0)
+        ca = np.concatenate([ca, [cz - dmilk + self._ghg_cost('dairy') + self._split_inpo_change("DCOW", di)]])
         start = np.concatenate([start, [0.0]])
         self.ev.dairy_col = Aa.shape[1] - 1
         self.ev.dairy_req_extra = {"DCOW": [(self.ev.dairy_col, req)]}
@@ -490,33 +507,54 @@ class LivestockBlock:
         """CAPRI-consistent fodder balance rows (non-tradable fodder, SUPBAL_):
         sum_animals use_t_head x heads - sum_crops u_crop x area_crop <= 0, exact at base (grass: GRAE and GRAI).
         Returns [(row, base value EUR/t, rhs, label)]."""
+        from capri_mod.supply.equations.supply_model.markets import SUPBAL_fodder, SUPBAL_fodder_rhs
         fb = getattr(self.data, "fodder_balance", None) or {}
         acts_idx = {a: i for i, a in enumerate(self.acts)}
         x0 = self._base_levels().reindex(self.acts).fillna(0.0).values
         out = []
+        self.ev.fodder_out, self.ev.fodder_le = {}, set()
         for feed, rec in fb.items():
             crops = {c: u for c, u in (rec.get("crops") or {}).items() if c in acts_idx}
-            if not crops:
+            # the milk for feeding (CAPRI's COMF, SGMF): produced by animals, t per head (projection/prices.py)
+            producers = {a: float(t) for a, t in (rec.get("producers") or {}).items()
+                         if a in acts_idx and float(t) > 0}
+            if not crops and not producers:
                 continue
-            row = np.zeros(len(self.acts))
-            row_b = np.zeros(len(self.acts))
+            use, use_b = {}, {}                  # {column: t per head}: now and at the base rations
             _rs = getattr(self.seen, "ration_state", None) or {}
             _fr = getattr(self.seen, "feed_rations", None) or {}
-            for a, t in rec.get("use_t_head", {}).items():
+            users = dict(rec.get("use_t_head", {}))
+            if producers:
+                # the users of the milk: the animals whose base ration feeds it (CAPRI's FEDUSE_ over p_maxFeedShare)
+                for a, r_ in _fr.items():
+                    if a in acts_idx and feed in list(r_.feeds):
+                        x_ = float(r_.x0[list(r_.feeds).index(feed)])
+                        if x_ > 0:
+                            users.setdefault(a, x_ / 1000.0)
+            for a, t in users.items():
                 if a in acts_idx:
                     xr = (_rs.get(a) or {}).get("x", {})
-                    row[acts_idx[a]] = float(xr[feed]) / 1000.0 if feed in xr else float(t)
+                    use[acts_idx[a]] = float(xr[feed]) / 1000.0 if feed in xr else float(t)
                     # the BASE ration's use per head, for the base gap below (CAPRI's baseline fodder balance)
                     r_ = _fr.get(a)
                     if r_ is not None and feed in list(r_.feeds):
-                        row_b[acts_idx[a]] = float(r_.x0[list(r_.feeds).index(feed)]) / 1000.0
+                        use_b[acts_idx[a]] = float(r_.x0[list(r_.feeds).index(feed)]) / 1000.0
                     else:
-                        row_b[acts_idx[a]] = row[acts_idx[a]]
-            if not row.any():
+                        use_b[acts_idx[a]] = use[acts_idx[a]]
+            if not any(v != 0 for v in use.values()):
                 continue
-            for c, u in crops.items():
-                row[acts_idx[c]] = -float(u)
-                row_b[acts_idx[c]] = row[acts_idx[c]]
+            # CAPRI's SUPBAL_ for the fodder (supply_model/markets.py): the crops' usable fodder per ha, or the animals'
+            # milk for feeding per head, on the output side
+            cols = {acts_idx[c]: u for c, u in crops.items()}
+            for a, t in producers.items():
+                cols[acts_idx[a]] = cols.get(acts_idx[a], 0.0) + t
+            if producers:
+                self.ev.fodder_out[feed] = {acts_idx[a]: t for a, t in producers.items()}
+            if rec.get("losses"):
+                # CAPRI's losses (v_lossQuant, 0 to infinity) in FEDUSE_: use <= output
+                self.ev.fodder_le.add(feed)
+            row = SUPBAL_fodder(len(self.acts), use, cols)
+            row_b = SUPBAL_fodder(len(self.acts), use_b, cols)
             scale = float(np.abs(row) @ np.abs(x0)) or 1.0
             # exact at base in both directions (K36): where the projected herds' fodder use and the projected fodder
             # output differ (use below output in FI1D, ITF5, ITG1...), the gap at base is carried as a constant, as
@@ -526,6 +564,6 @@ class LivestockBlock:
             # the balance's right-hand side moved with the rations every iteration - with feeding inside the regional
             # models (animal cells of this row replaced by the feed columns) a fodder balance that loosened or tightened
             # with the last solution's feeding; before, with the ration chosen outside the models at current prices.
-            rhs = float(row_b @ x0) + 1e-9 * scale
+            rhs = SUPBAL_fodder_rhs(row_b, x0, scale)
             out.append((row, float(rec.get("value_eur_t", 0.0)), rhs, "fodder_" + feed))
         return out

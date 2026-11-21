@@ -27,7 +27,6 @@ REQ_CRPR_KG,,0.084,kg CP per kg milk,capri,CAPRI breeding.gms requirement functi
 REQ_CRPR_FIX,,228.70499999999998,kg CP per year,capri,CAPRI breeding.gms requirement function,projection_module
 REQ_DRMN_KG,,0.305,kg DM per kg milk,capri,CAPRI breeding.gms requirement function,projection_module
 REQ_DRMN_FIX,,4051.5,kg DM per year,capri,CAPRI breeding.gms requirement function,projection_module
-REQ_N_KG_MILK,,0.0086,kg N per kg milk,capri,CAPRI breeding.gms: manure N per kg of extra milk,projection_module
 ORGANIC_BASELINE_SHARE,,0.1,share of UAA,capri,CAPRI load_organic_targets.gms: p_organicAreaTarget(EU) = 0.25 - 0.10 (fallback where no member-state breakdown),supply_module
 PESTICIDE_YIELD_LOSS_AT_50PCT,,0.1,share,jrc121368,JRC121368 (Sanchez et al. 2019): yield loss for a 50% pesticide cut,supply_module
 JRC_CAPPED_N_REGIONS,,9.0,regions,jrc121368,JRC121368 sect. 4.3.4: nine regions with the highest baseline surplus,supply_module
@@ -66,4 +65,4 @@ LUC_LO_ARTO_SHARE,FR830000,0.75,share of the region's total area,capri,CAPRI sup
 LUC_UP_OWN_FACTOR,,9.0,multiple of the land type's level,capri,"CAPRI supply/prep_sim_luc.gms l. 593-595: v_actLevl.up(FORE, OLND, ARTIF) = L + min(9 x L, 0.35 x ARTO)",supply_module
 LUC_UP_ARTO_SHARE,,0.35,share of the region's total area,capri,"CAPRI supply/prep_sim_luc.gms l. 593-595: L + min(9 x L, 0.35 x ARTO)",supply_module
 LUC_FORE_FLOOR,,0.99,share of the base forest area,capri,"CAPRI supply/prep_sim_luc.gms l. 597-606 (Trustee_land): with a landscape floor DATA(FALL,FLOOR), v_actLevl.lo(FORE) = 0.99 x data(FORE,LEVL) ('usually only a 1% decline is considered plausible')",supply_module
-GRASS_NEED_YIELD_SHIFT,,0.2,share,capri,"CAPRI supply/supply_model.gms NUTNED_ l. 1131-1135: SQRT(1 + p_technFact(Yield, A) + 0.2 $ GRAI - 0.2 $ GRAE), the grassland split of the need",npk
+LUC_ARTIF_FLOOR,,0.997,share of the base artificial land area,capri,"CAPRI supply/prep_sim_luc.gms l. 607-610 (Trustee_land): with a landscape floor DATA(FALL,FLOOR), v_actLevl.lo(ARTIF) = 0.997 x data(ARTIF,LEVL) ('usually only a 0.3% decline is considered plausible')",supply_module

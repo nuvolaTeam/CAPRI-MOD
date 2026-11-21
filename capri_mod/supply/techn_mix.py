@@ -51,7 +51,8 @@ class TechnMixBlock:
         """The column's linear objective coefficient: minus the net revenue of T1 less T2 per ha, at this solve's prices,
         yields and Green Deal input costs, as the crop's own (the revenue p x y, the factored inputs, plant protection
         and other inputs with their Green Deal changes, the fertiliser cost x need_diff, the premium x
-        prem_diff_share)."""
+        prem_diff_share). With the comparison switch supply.greendeal_plap_mix_capri_step, the Green Deal group's solves
+        add CAPRI's step's T1 - T2 plant-protection cost less the model's (policy._plap_mix_capri_step, DEP-51)."""
         ps = getattr(self.ev, "price_shock_now", None)
         p = float(self.data.producer_prices.get(a, 0.0) or 0.0)
         if ps is not None and hasattr(ps, "get"):
@@ -65,7 +66,7 @@ class TechnMixBlock:
         prem = float(self.premiums.get(a, 0.0) or 0.0) if getattr(self, "premiums", None) is not None else 0.0
         dnr = (float(r["yield_diff"]) * p * y - float(r["rest_cost_diff_eur_ha"]) - float(r["inpo_diff"]) * inpo
                - float(r["plap_diff"]) * plap - float(r["need_diff"]) * fert + float(r["prem_diff_share"]) * prem)
-        return -dnr
+        return -dnr + self._plap_mix_capri_step(a, float(r["plap_diff"]), d_p)
 
     def _mix_fert_cost(self, a, r) -> float:
         """The column's fertiliser cost per unit (need_diff x the crop's), which the NLP form takes out of the linear
@@ -75,8 +76,11 @@ class TechnMixBlock:
 
     def _mix_n_terms(self, a, r):
         """(N surplus, mineral N input) of T1 less T2 per ha, from the environmental accounts' unit balance (the
-        function the N_balance and mineral_N rows are built from) at the technologies' yields, y (1 +- yield_diff / 2);
-        (0, 0) without the accounts."""
+        function the N_balance and mineral_N rows are built from) at the crop's current yields with each technology's
+        factors, CAPRI's p_technFact: the yield factor +- yield_diff / 2 on the removal, residues and fixation (e_EXPPRD,
+        e_CRESID, e_BIOFIX x (p_technFact + 1)) and the need over the mean technology's, 1 +- need_diff / 2 (NUTNED_'s
+        SQRT(1 + y) (1 + y)); (0, 0) without the accounts. Until 20 November 2026 the balance was taken at the yields
+        y (1 +- yield_diff / 2), which moved the need linearly with the yield (KNOWN_ISSUES K189)."""
         env_ = getattr(self.seen, "env_for_surplus", None)
         yc = self.data.yields
         if env_ is None or not hasattr(yc, "copy") or a not in yc:
@@ -85,15 +89,10 @@ class TechnMixBlock:
         mi = {k_: v_ for k_, v_ in mint.items() if k_ in (a, "__credit__")}
         ys0 = self._yields_scen_now()
         h = 0.5 * float(r["yield_diff"])
+        g = 0.5 * float(r["need_diff"])
         out = []
-        for f in (h, -h):
-            y_ = yc.copy(); y_[a] = float(yc[a]) * (1.0 + f)
-            ys_ = None
-            if ys0 is not None:
-                ys_ = dict(ys0) if isinstance(ys0, dict) else ys0.copy()     # a dict or a Series of yields
-                if a in ys_:
-                    ys_[a] = float(ys_[a]) * (1.0 + f)
-            u = env_.unit_nitrogen_balance(a, y_, self.data.region_id, mi, yields_scen=ys_)
+        for f, e in ((h, g), (-h, -g)):
+            u = env_.unit_nitrogen_balance(a, yc, self.data.region_id, mi, yields_scen=ys0, techn_fact=(f, 1.0 + e))
             out.append((float(u.get("n_surplus", 0.0)), float(u.get("n_mineral_input", 0.0))))
         return out[0][0] - out[1][0], out[0][1] - out[1][1]
 

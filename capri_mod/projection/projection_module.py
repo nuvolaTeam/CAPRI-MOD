@@ -153,6 +153,13 @@ class ProjectionModule:
         # "<column>_<year>" (CAPRI's own terms of that year, tools/build/build_dairy_intensity.py) replace the base
         # year's (9 November 2026)
         _split_terms_at_year(data, int(year))
+        # manure N per head: CAPRI's coefficients of the year, which CAPRI computes from the year's rations before it
+        # solves (capmod.gms l. 1090; tools/build/build_livestock_manure_2030.py, KNOWN_ISSUES K179); the base year's at
+        # the base year (manure P2O5 and K2O: capri_mod/fert/npk.manure_coef_table at the run's market year). Until
+        # 18 November 2026 the 2017 coefficients at 2030, the dairy cows' raised by 0.0086 kg N per kg of extra milk
+        # (breeding.gms; CAPRI's own 2030 dairy coefficient is 6% below its 2017 one in the EU)
+        from capri_mod.fert.npk import manure_coef_table
+        data["livestock_manure_n_coef"] = manure_coef_table("N", year=int(year)).copy()
         # CAPRI's baseline calibration applies where the trajectory moves the data (a null trajectory must return the
         # comparative-static result exactly: the projection layer's correctness gate)
         data["calibrate_baseline"] = any(
@@ -239,9 +246,12 @@ class ProjectionModule:
             from pathlib import Path
             from .prices import apply_capri_prices_2030
             from capri_mod.supply.supply_module import young_animal_table, RegionalSupplyModel
+            from capri_mod.data.inputs import base_year as _base_year
+            # the year's young-animal coefficients (CAPRI's 2030 ones, K178), the base year's for its output values
             self.price_summary = apply_capri_prices_2030(
-                data, Path(self.capri_prices_dir), young_animal_table(), RegionalSupplyModel.FEED_CEREAL_MIX,
-                cake_index=RegionalSupplyModel._cake_index())
+                data, Path(self.capri_prices_dir), young_animal_table(year=int(year)),
+                RegionalSupplyModel.FEED_CEREAL_MIX, cake_index=RegionalSupplyModel._cake_index(),
+                young_table_base=young_animal_table(year=getattr(self.model, "base_year", None) or _base_year()))
 
         self._project_livestock(data, self.model.data, year)
         # CAPRI's own 2030 rations and requirements with its 2030 reference (the port of CAPRI's 2030 rations and fodder): factors per region, animal and
@@ -297,7 +307,6 @@ class ProjectionModule:
     _NEM, _NEL_KG = param("REQ_NEM"), param("REQ_NEL_KG")
     _CRPR_KG, _CRPR_FIX = param("REQ_CRPR_KG"), param("REQ_CRPR_FIX")
     _DRMN_KG, _DRMN_FIX = param("REQ_DRMN_KG"), param("REQ_DRMN_FIX")
-    _N_KG_MILK = param("REQ_N_KG_MILK")
 
     @staticmethod
     def _nea_share(data: Dict, region: str) -> float:
@@ -319,8 +328,8 @@ class ProjectionModule:
         gave 2017 milk (EU farm milk 10% below CAPRI's 2030 reference with cows 3% above). Per region and
         animal f = projected / base yield scales the output and revenue coefficients per head (dairy cows:
         the milk part only, cull-cow beef unchanged); the ration's requirements scale with f (feed per unit
-        of output constant) except for dairy cows, whose energy, protein and dry-matter requirements and manure
-        N follow breeding.gms's functions of the milk yield. Stored for the ration model as
+        of output constant) except for dairy cows, whose energy, protein and dry-matter requirements follow
+        breeding.gms's functions of the milk yield (manure N per head: CAPRI's of the year, project_data). Stored for the ration model as
         data["ration_scale"] = {(region, animal): (f_energy, f_protein, f_dry_matter)}."""
         Y1, Y0 = data.get("yields"), base.get("yields")
         if not isinstance(Y1, pd.DataFrame) or not isinstance(Y0, pd.DataFrame):
@@ -393,7 +402,6 @@ class ProjectionModule:
                     continue
                 tab.loc[idx, col] = tab.loc[idx, col] * F.loc[idx, a]
         scale = {}
-        mann = data.get("livestock_manure_n_coef")
         nexp = data.get("livestock_n_export_coef")
         for r in F.index:
             for a in acts:
@@ -414,9 +422,6 @@ class ProjectionModule:
                     fp = (self._CRPR_KG * y1 + self._CRPR_FIX) / (self._CRPR_KG * y0 + self._CRPR_FIX)
                     fd = (self._DRMN_KG * y1 + self._DRMN_FIX) / (self._DRMN_KG * y0 + self._DRMN_FIX)
                     scale[(r, a)] = (fe, fp, fd)
-                    if isinstance(mann, pd.DataFrame) and r in mann.index and a in mann.columns \
-                            and pd.notna(mann.at[r, a]) and float(mann.at[r, a]) > 0:
-                        mann.at[r, a] = float(mann.at[r, a]) + self._N_KG_MILK * g
                     # N in products: CAPRI fert/calc_nexport.gms, 0.0054 kg N per kg of cow milk (COMI)
                     if isinstance(nexp, pd.DataFrame) and r in nexp.index and a in nexp.columns \
                             and pd.notna(nexp.at[r, a]):

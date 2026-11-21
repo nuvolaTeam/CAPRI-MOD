@@ -165,8 +165,8 @@ def build(gams: Path, gdx: Path, ref: Path) -> G.GamsSets:
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--gams", type=Path, default=SOURCES.parent / "capri_sources" / "course_capri_git" / "gams")
-    ap.add_argument("--gdx", type=Path, default=SOURCES.parent / "capri_sources" / "dat_parquet" / "baseline"
+    ap.add_argument("--gams", type=Path, default=SOURCES / "gams")
+    ap.add_argument("--gdx", type=Path, default=SOURCES / "dat_parquet" / "baseline"
                     / f"{AGLINK}_oriEUdata")
     ap.add_argument("--ref", type=Path, default=REFERENCE / "sets" / "simini_21730")
     a = ap.parse_args()

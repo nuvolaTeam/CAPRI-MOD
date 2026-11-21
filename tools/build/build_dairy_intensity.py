@@ -9,7 +9,7 @@ DCOL = s0 x DCOW + z), with per-head changes relative to the average cow (DCOW):
   d<item>_rel        (item of DCOL - item of DCOH) / item of DCOW, for COMI (milk), MANN, MANP, MANK (manure
                      N, P2O5, K2O: CAPRI's ManureNPK_ per activity), ENNE (net energy need), CRPR (crude
                      protein need), DRMN, DRMX (dry matter intake limits; DRMX is stored negative by CAPRI,
-                     magnitudes used)
+                     magnitudes used), INPO (other inputs: the Green Deal's input change, K189; 0 without data)
   <column>_2030      the same at CAPRI's 2030 calibration point (share_low and the d<item>_rel), from CAPRI's
                      2030 Green Deal baseline the model's 2030 base is taken from (res_2_1730greendeal_refdefaulta,
                      dataOut LEVL at 2030; tools/lib/paths.BASELINE_REF); the model uses them at the 2030 market year (9 November 2026:
@@ -48,7 +48,7 @@ ROOT = Path(__file__).resolve().parents[2]
 Q_SOURCES = (("", ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "pmp_quad_techn.parquet"),
              ("_capri2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_capri2030.parquet"),
              ("_recipe2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_recipe2030.parquet"))
-ITEMS = ("LEVL", "COMI", "MANN", "MANP", "MANK", "ENNE", "CRPR", "DRMN", "DRMX")
+ITEMS = ("LEVL", "COMI", "MANN", "MANP", "MANK", "ENNE", "CRPR", "DRMN", "DRMX", "INPO")
 #: the per-head items whose low-minus-high difference the split carries
 REL_ITEMS = ("COMI", "MANN", "MANP", "MANK", "ENNE", "CRPR", "DRMN", "DRMX")
 ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'(DCOL|DCOH|DCOW)'\.'(" + "|".join(ITEMS)
@@ -81,6 +81,11 @@ def split_terms(d: dict):
         if av <= 0:
             return None
         rel[it] = (lo - hi) / av
+    # the other inputs per head (INPO), whose Green Deal change (one percentage per region on every activity's
+    # coefficient, pol_input/greendeal/conventional_io.gms; capmod/define_inputs.gms l. 70-73) differs between the
+    # members by their base difference (K189's per-head terms); 0 where CAPRI has none
+    lo, hi, av = (abs(d.get((x, "INPO"), 0.0)) for x in ("DCOL", "DCOH", "DCOW"))
+    rel["INPO"] = (lo - hi) / av if av > 0 else 0.0
     return L / (L + Hh), rel
 
 
@@ -148,7 +153,7 @@ def main():
                 out.at[r, "q_source" + sfx] = "country median of q x heads (REGISTERED fallback)"
     out = out.drop(columns=["ms"])
     # the columns as before 9 November 2026 first, then manure P2O5 and K2O, then CAPRI's 2030 point
-    new = ["dmanp_rel", "dmank_rel"] + [c for c in out.columns if c.endswith("_2030")]
+    new = ["dmanp_rel", "dmank_rel", "dinpo_rel"] + [c for c in out.columns if c.endswith("_2030")]
     out = out[[c for c in out.columns if c not in new] + new]
     dest = ROOT / "capri_data" / "2017" / "supply" / "dairy_intensity.csv"
     out.to_csv(dest)

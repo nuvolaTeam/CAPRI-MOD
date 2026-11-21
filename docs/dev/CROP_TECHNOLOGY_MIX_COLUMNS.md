@@ -65,7 +65,9 @@ Per unit of z (1000 ha moved from T2 to T1), at the current prices, yields and c
 - premiums: (f_T1 - f_T2) x each rural-development scheme's premium per ha (-1 x AE, -2 x N2K, ...);
 - nutrient need: (g_T1 - g_T2) / gbar x the crop's need per ha, g_t = SQRT(1 + y_t) x (1 + y_t), gbar the 50-50
   mean (1.015 at +-0.2): +0.590 x need;
-- crop residues and nutrient removal in the balances: +0.4 x the crop's (yield-dependent) part;
+- crop residues and nutrient removal in the balances: +0.4 x the crop's (yield-dependent) part; the residues also in
+  NUTNED_'s residue pool and the permanent crops' own residues (CAPRI's p_technFact MANN, MANP, MANK; K181, 18
+  November 2026: until then the pool had the crops' columns alone);
 - fodder crops (MAIF, ROOF, OFAR): +0.4 x the fodder output u per ha in the fodder rows;
 - production: gross output = yield x (X + 0.4 z), the realised yield per ha follows.
 

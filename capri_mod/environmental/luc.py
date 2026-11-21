@@ -47,19 +47,17 @@ class LUCModel:
         return cls._inst
 
     def solve(self, capri_region: str, d_land: Dict[str, float]) -> Optional[dict]:
-        """Transitions of the region at land types changed by d_land {ARAC, FRUN, GRAS, FORE, OLND: 1000 ha} from
+        """Transitions of the region at land types changed by d_land {ARAC, FRUN, GRAS, FORE, OLND, ARTIF: 1000 ha} from
         the base. Returns {"transitions": {from+to: 1000 ha per year}, "initial": {...}, "final": {...}, "ok"}."""
         v = self.v.get(capri_region)
         if v is None:
             return None
+        from capri_mod.supply.equations.supply_model.land import (e_FocLUC, e_landTypes_to_LUclass, e_luClassFinal,
+                                                                   e_luClassInitial, p_lucPrior_gamma)
         f = float(v.get("step", 1.0))
         final = {c: float(v.get(c, 0.0)) for c in CLS.values()}
         dl = {k: float(d_land.get(k, 0.0) or 0.0) for k in LAND_MARKET_TYPES}   # codes/model_land_types.csv
-        final["CROP"] += dl["ARAC"] + dl["FRUN"]
-        final["GRSLND"] += dl["GRAS"] + float(v["shG"]) * dl["OLND"]
-        final["WETLND"] += float(v["shW"]) * dl["OLND"]
-        final["RESLND"] += float(v["shR"]) * dl["OLND"]
-        final["FORE"] += dl["FORE"]
+        e_landTypes_to_LUclass(final, dl, float(v["shG"]), float(v["shW"]), float(v["shR"]))
         ini = {CLS[i]: float(v.get("INI" + i, 0.0)) for i in CLS}
         if any(x < 0 for x in final.values()):
             return {"transitions": {}, "initial": ini, "final": final, "step": f, "ok": False, "violation": float("nan")}
@@ -74,22 +72,20 @@ class LUCModel:
         # gamma prior with relative standard error 1 (prep_sim_luc.gms): var = mode^2,
         # temp = (sqrt(m^2 (m^2 + 4 var)) + m^2) / (2 var), alpha = temp + 1, beta = temp / mode
         m = mode[free]
-        var = m * m
-        temp = (np.sqrt(m * m * (m * m + 4 * var)) + m * m) / (2 * var)
-        a1, beta = temp, temp / m
+        a1, beta = p_lucPrior_gamma(m)
         A, b = [], []
         idx = np.where(free)[0]
         cl = list(CLS)
         for i in cl:                                                # initial classes
-            row = np.array([fac[k] if keys[k][:3] == i else 0.0 for k in idx])
+            row = e_luClassInitial(idx, keys, fac, i)
             A.append(row); b.append(ini[CLS[i]])
         for j in cl:                                                # final classes
-            row = np.array([fac[k] if keys[k][3:] == j else 0.0 for k in idx])
+            row = e_luClassFinal(idx, keys, fac, j)
             A.append(row); b.append(final[CLS[j]])
         A, b = np.array(A), np.array(b)
         import casadi as ca
         z = ca.SX.sym("z", len(m))                                 # T / mode
-        obj = -ca.sum1(ca.DM(a1) * ca.log(z) - ca.DM(beta * m) * z)
+        obj = e_FocLUC(a1, beta * m, z)
         g = ca.mtimes(ca.DM(A * m[None, :]), z) / ca.DM(np.maximum(1.0, np.abs(b)))
         rhs = b / np.maximum(1.0, np.abs(b))
         from capri_mod.settings import current as _settings

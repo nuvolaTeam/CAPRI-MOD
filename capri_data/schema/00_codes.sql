@@ -158,9 +158,10 @@ CREATE TABLE model_price_follows (
     activity VARCHAR PRIMARY KEY REFERENCES model_activities (code),
     commodity VARCHAR NOT NULL,            -- the market commodity whose price the activity's follows
     eu_market INTEGER NOT NULL CHECK (eu_market IN (0, 1)),   -- 1: in the EU's markets' price step too
+    share DOUBLE NOT NULL CHECK (share > 0 AND share <= 1),    -- the share of the commodity's relative price change taken (CAPRI's 0.5 for durum wheat, arm/set_prices.gms l. 57-61; K168)
     source VARCHAR NOT NULL
 );
-COMMENT ON TABLE model_price_follows IS 'the activities whose price follows a market commodity''s (refactor stage 4: beet follows sugar, durum wheat the wheat market, Norway''s raw milk the MILK market); a declared table';
+COMMENT ON TABLE model_price_follows IS 'the activities whose price follows a market commodity''s (refactor stage 4: beet follows sugar, durum wheat half of the wheat market''s relative change, Norway''s raw milk the MILK market); a declared table';
 
 -- file: capri_data/codes/model_land_types.csv
 CREATE TABLE model_land_types (

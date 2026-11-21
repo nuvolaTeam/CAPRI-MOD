@@ -7,7 +7,7 @@ module once environmental_module is loaded (capri_mod.utils.mixins.inject_names)
 from __future__ import annotations
 from capri_mod import statekit as _est
 from capri_mod.params import param
-from capri_mod.units import M_N2O, M_N2O_N, M_CO2, M_UREA_N, MJ_PER_MCAL   # the state objects' helpers
+from capri_mod.units import M_N2O, M_N2O_N, M_CO2, M_UREA_N   # the state objects' helpers
 
 
 class GHGBlock:
@@ -36,9 +36,11 @@ class GHGBlock:
     def _n_excretion_uncached(self, region: str, animal: str) -> float:
         """Manure N per head (kg), consistent with this model's herd units.
 
-        First choice: CAPRI's 2017 regional manure N TOTAL for the activity
-        divided by this model's herd (livestock_manure_n_coef.csv), built the
-        same way as revenue per head. The previous source gave manure per CAPRI
+        First choice: CAPRI's regional manure N TOTAL for the activity divided
+        by this model's herd (data["livestock_manure_n_coef"]: the base year's,
+        livestock_manure_n_coef.csv, built the same way as revenue per head; at
+        the 2030 market year CAPRI's 2030 one, livestock_manure_n_coef_2030.csv,
+        which the projection puts there, KNOWN_ISSUES K179). The previous source gave manure per CAPRI
         UNIT (animals fattened per year, 1,000 birds ...), while herds here are
         census stock, so EU totals were off by animal: bulls 0.17, heifers 0.10,
         calves 0.35, broilers 0.08, pigs 1.28, sheep and goats 1.49 of CAPRI's
@@ -99,6 +101,8 @@ class GHGBlock:
 
         Uses IPCC Tier 1 emission factors with EU-specific adjustments.
         """
+        from capri_mod.supply.equations.supply_model import methane as _ch4m   # CAPRI's GWPCH4ENT_, GWPCH4MAN_
+        from capri_mod.supply.equations.supply_model.n2o import GWPN2OMAN_
         ghg = {g: 0.0 for g in GHG_TYPES}
 
         # 1. Enteric fermentation (CH4); nitrate in the ration: -10% per point of DM
@@ -106,8 +110,9 @@ class GHGBlock:
         for animal in ANIMALS:
             heads = activities.get(animal, 0.0) * 1000  # convert 1000→heads
             _sf = float(((getattr(self.ev, "supp_ch4", None) or {}).get(region) or {}).get(animal, 1.0))
-            ef    = self._ch4_per_head("ent", region, animal) * max(0.0, 1.0 - param("NITRATE_CH4_REDUCTION") * float(_ns.get(animal, 0.0))) * _sf
-            ch4   = heads * ef / 1e6   # kt CH4
+            _nf   = max(0.0, 1.0 - param("NITRATE_CH4_REDUCTION") * float(_ns.get(animal, 0.0)))
+            ef    = _ch4m.GWPCH4ENTaact_(self._ch4_per_head("ent", region, animal), _nf, _sf)
+            ch4   = _ch4m.GWPCH4ENT_(heads, ef)   # kt CH4
             # CATTLE FROM THE FEED MIX (CAPRI GWPCH4ENT_, envind/gases.gms): sum over feeds of
             # DM (t) x 1000 x GE (Mcal/kg DM) x 4.1868 x Ym / 55.65, in kt (/1e6)
             _fd = (getattr(self.ev, "feed_dm_now", None) or {}).get(animal)
@@ -118,7 +123,7 @@ class GHGBlock:
                 _ge = _fac["ge"].get(_ctry) or _fac["ge"].get("EU")
                 if _ge:
                     _kg = sum(float(dm_t) * 1000.0 * float(_ge.get(f, _ge.get("_mean", 0.0))) for f, dm_t in _fd.items())
-                    ch4 = _kg * MJ_PER_MCAL * _fac["ym"] / param("MJ_PER_KG_CH4") / 1e6 * max(0.0, 1.0 - param("NITRATE_CH4_REDUCTION") * float(_ns.get(animal, 0.0))) * _sf
+                    ch4 = _ch4m.GWPCH4ENTaact_feed(_kg, _fac["ym"], _nf, _sf)
             ghg["CH4_ENT"] += ch4 * GWP_CH4   # kt CO2-eq
 
         # 2. Manure management (CH4 + N2O)
@@ -128,7 +133,7 @@ class GHGBlock:
 
             # CH4 from manure
             ef_ch4 = self._ch4_per_head("man", region, animal)
-            ghg["CH4_MAN"] += (heads * ef_ch4 / 1e6) * GWP_CH4
+            ghg["CH4_MAN"] += _ch4m.GWPCH4MAN_(heads, ef_ch4) * GWP_CH4
 
             # N2O from manure: CAPRI's shares of manure N lost as N2O-N by stage - housing and
             # storage, application, grazing, leaching (gases.gms N2OMAN, N2OAPP, N2OGRA, N2OLEA;
@@ -136,7 +141,7 @@ class GHGBlock:
             # Indirect N2O from volatilised NH3 is its own item (N2O_IND). Without CAPRI's factors
             # for the region and animal: none (no herd; tests check every herd has them).
             _mf = self._manure_n2o_factor(region, animal)
-            n2o_n = n_excr * (sum(_mf) if _mf is not None else 0.0)    # kt N2O-N
+            n2o_n = GWPN2OMAN_(n_excr, _mf) if _mf is not None else n_excr * 0.0    # kt N2O-N
             n2o   = n2o_n * M_N2O / M_N2O_N    # kt N2O
             ghg["N2O_MAN"] += n2o * GWP_N2O
 
@@ -163,7 +168,8 @@ class GHGBlock:
         # 4. Liming (CO2): CAPRI's coefficient per ha of every crop activity, grassland and fallow included
         # (gases.gms (16): the region's UAAR CO2LIM, kg CO2/ha; tools/build/build_ghg_coefs_2017.py)
         lim, urea_share = self._co2_coefs(region)
-        ghg["CO2_LIME"] = sum(activities.get(c, 0.0) for c in CROPS) * lim / 1e3     # 1000 ha x kg/ha -> kt CO2
+        from capri_mod.supply.equations.supply_model.gwp import GWPCO2LIM_
+        ghg["CO2_LIME"] = GWPCO2LIM_(sum(activities.get(c, 0.0) for c in CROPS), lim)     # 1000 ha x kg/ha -> kt CO2
 
         # 5. Urea (CO2): mineral N x the member state's urea share x 44/28 (gases.gms (17)); compute_indicators
         # applies it to the balance's mineral N, as soil N2O

@@ -38,13 +38,13 @@ class PolicyBlock:
         cut, limit, cols = lim
 
         lev = d["levels"].get(self.data.region_id) or {}
-        row = np.zeros(Aa.shape[1] + 1)
-        row[cols] = 1.0
-        for cls, j in (getattr(self.ev, "hist_cols", None) or {}).items():
-            # iHisCr and iHisGr are CAPRI crop activities (MCACT): the idled histosols keep their entitlements
-            row[int(j)] = 1.0
+        # CAPRI's sumEntl_ and overShotEntl_ (equations/supply_model/premiums.py); iHisCr and iHisGr are CAPRI crop
+        # activities (MCACT): the idled histosols keep their entitlements
+        from capri_mod.supply.equations.supply_model.premiums import overShotEntl_
+        _hc = getattr(self.ev, "hist_cols", None) or {}
+        row = overShotEntl_(Aa.shape[1], cols, [j for _cls, j in _hc.items()])
+        for cls, j in _hc.items():
             limit += float(lev.get(_entl.HISTOSOL_CODES[cls], 0.0))
-        row[-1] = -1.0
 
         Aa = np.hstack([Aa, np.zeros((Aa.shape[0], 1))])
         Aa = np.vstack([Aa, row])
@@ -83,7 +83,18 @@ class PolicyBlock:
                        area under them; VSET and FALL each at its own weight, 1, since 7 November 2026: before, SETA = FALL + VSET)
           cropDiv      Shannon index of the annual crop groups >= its base value
         Where the base does not meet the ecological set-aside rule (the model's base data, not CAPRI's calibrated
-        base), the rule is held at the base's own value (REGISTERED)."""
+        base), the rule is held at the base's own value (REGISTERED).
+        ecoSetAside and cropDiv with the setting supply.env_const (true, K187): CAPRI star 3.0 lists both rows without a
+        condition,
+
+                 ecoSetAside_                                       (supply/supply_model_e_list_linear.gms l. 231-232)
+                 cropDivGreening_
+
+        so its 2030 reference and Green Deal step solve with them (their marginals are in the results:
+        reports/margcr.gms l. 321-326 D_cropDivGreening, reports/greening.gms); the July 2026 release lists them only
+        with %envConst% on (its l. 235-236), which the Green Deal step does not set (the "$exit" of
+        pol_input/greendeal/refpol_endotech_all_sup.gms l. 398 before "$setglobal envConst on", l. 408).
+        permGrasGreening_ is listed always."""
         if not getattr(type(self), "cap_greening", False):
             return None
         import pandas as _pd
@@ -108,8 +119,9 @@ class PolicyBlock:
                 # the base limit is GRAE + GRAI (define_greening_limits.gms l. 139-140). Without it the rule held the
                 # productive grass at its base and the idled area took new land (KNOWN_ISSUES K157)
                 _hg = (getattr(self.ev, "hist_cols", None) or {}).get("grass")
-                _row = [(j, -1.0) for j in _gj] + ([(int(_hg), -1.0)] if _hg is not None else [])
-                out["permGras"] = {"row": _row, "rhs": -_xg * (1 - 1e-9), "scale": _xg}
+                # CAPRI's permGrasGreening_ (equations/supply_model/premiums.py)
+                from capri_mod.supply.equations.supply_model.premiums import permGrasGreening_
+                out["permGras"] = permGrasGreening_(_gj, _hg, _xg)
                 # the rule's dual at the calibration point, CAPRI's assumption (supply/prep_cal.gms l. 118-131):
                 # p_dualGreening = -|rent of arable land - rent of grassland|, charged to GRAE and GRAI in the
                 # calibration's linear terms (EUR/ha; CapriRegionalNLP.calibrate fixes the row's multiplier at it)
@@ -118,7 +130,8 @@ class PolicyBlock:
                     ra, rg = _r.get("ARAC"), _r.get("GRAS")
                     if ra is not None and rg is not None and ra == ra and rg == rg:
                         out["permGras"]["cal_dual"] = abs(float(ra) - float(rg))
-        if st.get(("active", "ecoSetAside")):
+        env_on = bool(getattr(type(self), "env_const", False))
+        if env_on and st.get(("active", "ecoSetAside")):
             r = st.get(("setaside_rate_pct", "ARAB"), 0.0) / 100.0
             ms = self.data.region_id[:2]
             ms = MS_CODE.get(ms, ms)
@@ -150,9 +163,20 @@ class PolicyBlock:
                 import warnings as _w
                 _w.warn(f"{self.data.region_id}: the ecological set-aside rule is held at the base, which misses it by "
                         f"{v0:.4g} thousand ha (CAPRI's base meets it: supply/prep_cal.gms l. 68-99)")
-            out["ecoSetAside"] = {"row": row, "rhs": max(0.0, v0) + 1e-9 * sc_, "scale": sc_, "base_gap": v0,
-                                  "held": bool(held), "catc_w": wc if cs_ is not None else 0.0}
-        if st.get(("active", "cropDiv")):
+            # K188: CAPRI's calibration sizes its catch crops to fill the rule (prep_cal.gms l. 68-99: CATC = the
+            # requirement less the other EFA activities), so where the requirement exceeds the other activities the rule
+            # binds at CAPRI's base and its dual is the catch crops' input cost over their weight. The model's base takes
+            # CAPRI's 2030 catch-crop share; there the rule is held at the base's own value (it misses CAPRI's fill by
+            # the levels' round-off, IT32 0.06 thousand ha), in CAPRI's reference form. Where the other activities alone
+            # meet the requirement (v0 <= -catch crops' part: a base other than CAPRI's 2030, e.g. 2017's PT18) CAPRI's
+            # calibration would leave CATC at zero and the rule slack: no fill
+            _cpart = wc * float(cs_["uaa"]) * float(cs_["m0"]) if cs_ is not None else 0.0
+            fill = (_cpart > 0 and v0 > -_cpart
+                    and str(_settings().get("supply.reference_winter_cover")) == "capri")
+            out["ecoSetAside"] = {"row": row, "rhs": (v0 if fill else max(0.0, v0)) + 1e-9 * sc_, "scale": sc_,
+                                  "base_gap": v0, "held": bool(held), "catc_w": wc if cs_ is not None else 0.0,
+                                  "catc_fill": bool(fill)}
+        if env_on and st.get(("active", "cropDiv")):
             grp = {}
             for j, a in enumerate(acts):
                 g = self.CROPDIV_GROUPS.get(a)
@@ -446,6 +470,11 @@ class PolicyBlock:
                 sh = self._input_row(a, "inpo_toin_share")
                 if sh is not None and pc_inpo != 0.0:
                     d = delta(sh * self._animal_cost_per_head(a), 0.0, pc_inpo)
+                    # the change per head of the animal's average; its split columns move heads between CAPRI
+                    # activities whose INPO differs (livestock.py, dinpo_rel; K189's per-head terms)
+                    if getattr(self.ev, "greendeal_animal_inpo", None) is None:
+                        self.ev.greendeal_animal_inpo = {}
+                    self.ev.greendeal_animal_inpo[a] = d
             else:
                 plap = self._input_row(a, "plap_eur_ha")
                 inpo = self._input_row(a, "inpo_eur_ha")
@@ -460,6 +489,7 @@ class PolicyBlock:
                         d_i = delta(inpo, topup, pc_inpo)
                 d += d_p
                 d += d_i
+                d += self._plap_crop_level_capri_step(a, pc_plap, tf, keep_tf, d_p)
                 if d_p or d_i:
                     # the crop's plant-protection and other-input costs of this solve (the mix columns' technology
                     # factors act on them, supply/techn_mix.py)
@@ -469,6 +499,89 @@ class PolicyBlock:
             if d:
                 nr[a] = float(nr.get(a, 0.0)) - d
         self.net_revenues = nr
+
+    def _plap_capri_step_cost(self, a: str, pc_plap: float, tf: float, keep_tf: bool):
+        """CAPRI's Green Deal step's plant-protection cost of crop a per ha at the crop's mean technology, in the model's
+        money (P_s), and its reference's (Plantp_cost), or None without CAPRI's two values for the crop or outside a
+        simulation year. CAPRI's step (pesticide disaggregation off) values the crop's PLAP coefficient at the member
+        state's UVAP (capmod/define_objc.gms l. 40-44, p_linObjeCont), the coefficient changed by the Green Deal's
+        regional percentage (capmod/define_inputs.gms l. 66-73):
+
+            P_s = DATA(r, a, "PLAP") x UVAP(MS, "PLAP") / 1000 x (1 + pc) x [TF_I] / TF_I / deflator(2030)
+
+        ([TF_I] with greendeal_inputs_keep_tech_change, FIX-5; plap_uvap_eur_ha of
+        plant_protection_capri_step_2030.csv the first factors, in CAPRI's 2030 money)."""
+        t = getattr(self.data, "plap_capri_step", None)
+        sim = getattr(self.data, "sim_year", None)
+        if t is None or a not in t.index or sim is None:
+            return None
+        q_uv, ppc = float(t.at[a, "plap_uvap_eur_ha"]), float(t.at[a, "plantp_cost_eur_ha"])
+        ratio = (1.0 + pc_plap) * (tf if keep_tf else 1.0) / tf if pc_plap != 0.0 else 1.0
+        defl = _inputs.money_deflator(int(sim))
+        return q_uv * ratio / defl, ppc / defl
+
+    def _plap_crop_level_capri_step(self, a: str, pc_plap: float, tf: float, keep_tf: bool, d_p: float) -> float:
+        """Comparison switch supply.greendeal_plap_crop_level_capri_step (DEP-51, its crop-level part; off by default):
+        the change of crop a's mean plant-protection cost per ha (model money) that moves the model's Green Deal step to
+        CAPRI's valuation, 0 with the switch off or without CAPRI's two values for the crop.
+
+        CAPRI's 2030 reference and its PMP calibration ran with the pesticide module's aggregates (pestDisaggStage
+        5_aggregates, PEST_DISAGG on: the crop pays its disaggregated pesticides, reported as Plantp_cost;
+        reports/rep_sets.gms l. 378-380), its Green Deal step without them (stage none: the crop pays PLAP,
+        Plantp_cost.PLAP, l. 384-386; _plap_capri_step_cost):
+
+            reference (calibration):  Plantp_cost(r, a)
+            Green Deal step:          P_s = DATA(r, a, "PLAP") x UVAP(MS, "PLAP") / 1000 x (1 + pc) x [TF_I] / TF_I
+
+        The model has one representation in base and scenario and changes its own cost by d_p (delta() above); with the
+        switch on it changes it by CAPRI's step less its reference instead:
+
+            shift_a = P_s - Plantp_cost_a / deflator(2030) - d_p
+
+        The technology mix columns keep the model's d_p; their T1 - T2 part is _plap_mix_capri_step."""
+        if not bool(getattr(type(self), "greendeal_plap_crop_level_capri_step", False)):
+            return 0.0
+        c = self._plap_capri_step_cost(a, pc_plap, tf, keep_tf)
+        if c is None:
+            return 0.0
+        P_s, ppc = c
+        return P_s - ppc - float(d_p)
+
+    def _plap_mix_capri_step(self, a: str, plap_diff: float, d_p: float) -> float:
+        """Comparison switch supply.greendeal_plap_mix_capri_step (DEP-51, its T1 - T2 part; off by default): the cost
+        per unit of crop a's technology mix column (T1 less T2 per ha, model money) that its Green Deal step adds to
+        the column's linear term to move it to CAPRI's step; 0 with the switch off, outside the Green Deal group's
+        solves or without CAPRI's values for the crop.
+
+        CAPRI's technology factors of plant protection (intens/techf.gms l. 102-103, in sim_ini_21730 for the step):
+
+            p_technFact(RS,TACT,"PLAP","T1")      $ (PACT_TO_I(TACT,"PLAP") and (NOT FNUT("PLAP"))) = +0.40;
+            p_technFact(RS,TACT,"PLAP","T2")      $ (PACT_TO_I(TACT,"PLAP") and (NOT FNUT("PLAP"))) = -0.40;
+
+        enter p_linObjeCont as DATA x (p_technFact + 1) x UVAP (capmod/define_objc.gms l. 42-44), a T1 - T2 cost of
+        plap_diff (0.8) x the crop's PLAP cost, where PLAP is in the objective. CAPRI's 2030 reference and its PMP
+        calibration ran with 5_aggregates: PLAP is out of PACT_TO_I (sets.gms l. 5365-5368), so techf.gms gives it no
+        factor, and the pesticides that replace it get none (techf.gms sets PLAP's only), so its calibrated T1 - T2
+        terms hold no plant-protection cost; its Green Deal step ran with "none", PLAP in the objective. With k the
+        model's calibrated term of the column and k' CAPRI's,
+        the calibration conditions at the base give k' = k + plap_diff x P_b (P_b the model's base cost of the crop,
+        which the model's calibration held); in the step
+
+            CAPRI:  k' + plap_diff x P_s          = k + plap_diff x (P_b + P_s)
+            model:  k  + plap_diff x (P_b + d_p)
+
+        so the column's cost moves by plap_diff x (P_s - d_p) (P_s _plap_capri_step_cost; d_p the model's change of the
+        crop's cost, greendeal_crop_delta). The other terms of the two calibrations are taken as equal."""
+        if not bool(getattr(type(self), "greendeal_plap_mix_capri_step", False)):
+            return 0.0
+        if not bool(getattr(self.ev, "greendeal_group", False)) or not plap_diff:
+            return 0.0
+        gi = getattr(self.ev, "greendeal_inputs", None) or {}
+        tf = float(gi.get("tf", self._greendeal_tech_progress()))
+        c = self._plap_capri_step_cost(a, float(gi.get("pc_plap", 0.0) or 0.0), tf, bool(gi.get("keep_tf", True)))
+        if c is None:
+            return 0.0
+        return float(plap_diff) * (c[0] - float(d_p))
 
     def _apply_yield_input_costs(self) -> None:
         """The crops' input costs follow their yields, as CAPRI's define_inputs.gms sets the coefficient of a directly

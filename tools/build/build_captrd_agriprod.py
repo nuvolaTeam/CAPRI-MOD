@@ -25,7 +25,7 @@ import gams_sets as G                                      # noqa: E402
 import gams_text as GT                                     # noqa: E402
 from paths import SOURCES                                  # noqa: E402
 
-GAMS = SOURCES / "course_capri_git" / "gams"
+GAMS = SOURCES / "gams"
 PARQ = SOURCES / "dat_parquet" / "coco" / "Agri_Prod" / "p_AgriProd.parquet"
 OUT_SETS = ROOT / "capri_data" / "pipeline" / "captrd" / "sets" / "agriprod"
 OUT_DAT = ROOT / "capri_data" / "pipeline" / "captrd" / "dat"

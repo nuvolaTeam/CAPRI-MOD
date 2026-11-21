@@ -43,7 +43,7 @@ unchanged to `no3mlea` (ammo_tech.gms l. 2293). With the "+", low-emission appli
 where CAPRI's data say it raises it.
 
 **What capri-mod does.** It subtracts the effect, consistently with RUNSURFN_. This was the project lead's decision
-of 20 October 2026; details are in capri_mod/supply/n_leaching.py.
+of 20 October 2026; details are in capri_mod/supply/equations/supply_model/n_flow.py (LEACHN_B1).
 
 **Scope of the effect.** The base is calibrated to CAPRI's realised leaching share either way, so the sign acts only
 through changes in the options' adoption.
@@ -162,6 +162,15 @@ change: in 2030 their coefficients are 1/0.935 = 7% higher than intended, on top
 **Scope.** Farm-to-Fork runs with the organic or pesticide target. Decided on 24 October 2026 under the rule for CAPRI
 code errors (findings S3 and S4 of the supply audit, ARCHITECTURE_REFACTOR.md section 5.2).
 
+**Comparison runs.** The runs compared with CAPRI's own results take `false` (the project lead, 19 November 2026),
+with FIX-6's setting: `--settings capri_mod/settings/capri_comparison.toml`. Measured on the full-EU 2030 Green Deal
+run, both false against both true: EU producer prices' mean gap to CAPRI 1.6 -> 1.2 points, member states'
+activities 5.2 -> 4.6 (Lithuania's and Finland's cereal areas close to CAPRI's).
+The Farm-to-Fork runs compared with JRC121368 take the defaults (the project lead, 21 November 2026): JRC121368 was
+produced with the CAPRI of 2020-21 and its own baseline, and whether that version had this error and FIX-6's cannot be
+checked. The pair run after K192 still takes the comparison file for its Farm-to-Fork run, as the run at dev bb3b592
+did, so that the change between the two is the code's only.
+
 ### `supply.organic_topup_at_fuel_cost = true` (CAPRI as coded: `false`) — organic other-input top-up
 
 **What CAPRI's code does.** For each organic crop, `organic_io.gms` l. 111-115 adds EFUL x 2 x the crop's organic
@@ -178,6 +187,9 @@ wheat's fuel costs 331 EUR/ha but its top-up as coded is 2 x 848 EUR/ha per unit
 kept. `false` reproduces CAPRI's code (plant_protection_cost.csv carries both values).
 
 **Scope.** Farm-to-Fork runs with the organic target. Decided on 24 October 2026 under the rule for CAPRI code errors.
+
+**Comparison runs.** `false`, with FIX-5's setting (the project lead, 19 November 2026;
+`capri_mod/settings/capri_comparison.toml`, above).
 
 ## Switched to CAPRI's setting
 
@@ -294,6 +306,14 @@ solve.
 - The 2030 base mineral N per crop from CAPRI's 2030 reference: `environment.base_mineral_n = "capri2030"`
   ("capri2017", CAPRI's 2017 NMIN on the 2030 levels, the former base).
 
+### `supply.use_cattle_member_splits = true` (17 November 2026; K65, register DEP-4)
+
+CAPRI optimises the replacement heifers (HEIR) and the four calf activities (CAMF, CAFF, CAMR, CAFR) on their own and
+clears young animals per sex (INPANI_). The model had them off since 22 October 2026 because the Farm-to-Fork run
+did not converge with them. On 17 November 2026 the full-EU Farm-to-Fork run with them converged in 14 iterations,
+every regional solve optimal; the mini-EU Farm-to-Fork at the same commit gives every compare_runs.py indicator within
+0.1 point of the pooled form. `false` keeps the pooled young-animal markets, to compare.
+
 ## Switches of CAPRI's policy files (28 October 2026)
 
 CAPRI's scenario files set a few market-loop switches of their own. Two were found in its Green Deal scenarios
@@ -401,7 +421,6 @@ any change of the default.
 |---|---|---|---|---|
 | `outer_loop.max_outer_iter` | 99 (the GUI's number of iterations for a scenario run, %STEPS%) | 60 | the project lead's choice (28 October 2026): CAPRI's stop rule needs 30 iterations in the Green Deal 2030 scenario (r168), 12 in Farm-to-Fork; 60 keeps a run within the run time | none; a run that does not converge in 60 is reported as such |
 | `supply.fert_slope_with_saving` | the fertiliser options' pmpParSqr with the fertiliser-saving term (envind/ghgMiti.gms l. 1016-1035), and the inhibitor on manure's with the manure-saving term at p_manureShadVal (l. 1036-1050; with this switch since 28 October 2026) | false (the curvature without it) | K77, 25 October 2026: with it and the cost on the N purchases, the 2030 baseline leaves the options' initial shares (FR10 precision farming 0.44; EU 9.6%, run r128); the saving runs through the NLP's fertilisation block, so the base becomes a saddle | kept: the project lead's decision of 31 October 2026 (K77; CAPRI_DEPARTURES_REGISTER DEP-30) keeps the model's calibration of the fertiliser options, each initial share exactly optimal with the model's own value of N, so this entry is no longer to be removed |
-| `supply.use_cattle_member_splits` | replacement heifers (HEIR) and the four calf activities with their own levels; young animals cleared per sex (INPANI_) | false (the model's animals with CAPRI's intensity pairs; pooled young-animal markets) | K65: with them on, the Farm-to-Fork run does not converge (male calves' price above 6 x base, female below zero, r96); no CAPRI per-sex Farm-to-Fork result exists to check against | find why the per-sex prices diverge (calf activities at their zero bounds) |
 | (no setting) the market's demand at the baseline | the market model and the supply models calibrated to the same baseline before the run (the market model in the baseline calibration, arm/market1.gms; the supply models to the same CAPTRD baseline); during a run only the market supply functions are recalibrated to the supply models (simu_calibration_to_supply.gms), the demand functions are not | in the baseline run, every iteration recalibrates the market's demand at the supply models' supply, prices at the reference (market/bilateral_solve.py _bilateral_calibrate: the EU's use rescaled to the supply models' herds and crush, the non-EU use of pooled products scaled within [0.2, 5]); scenarios inherit the calibration frozen at the converged baseline | the model's supply models do not reproduce CAPRI's market baseline exactly (their data and calibration differ from CAPRI's CAPTRD baseline), so without it the reference prices would not clear the baseline market; recorded 29 October 2026 (step F; the code comment had called it CAPRI's) | supply models that reproduce CAPRI's 2030 market baseline quantities at its prices, then the recalibration can be dropped and the baseline run checked against CAPRI's prices. **Done**: the recalibration removed 8 November 2026 (KNOWN_ISSUES K120), the raw milk pool's non-EU use factor 17 November 2026 (K165) |
 | (no setting) irrigated shares of the water indicator (capri_mod/water, tools/build/build_irrigation_2017.py) | crop-specific irrigated areas per EU region from a highest-posterior-density fit to the FSS crop data (p_wdata_fss) and the regional irrigated area IRR2, survey gaps filled by trend estimates (water_database.gms l. 325-640) | the region's IRR2 irrigated area (latest survey up to 2017, the member state's where no regional value) on its irrigable crops: rice entirely, one share for the others; Ireland none (no share in CAPRI's data) | the FSS crop-specific irrigated areas and the CAPREG time series for the trends are not among our sources; 27 October 2026. The adding-up to IRR2 is kept from CAPRI's fit; CAPRI's own rule where crop data are missing (Turkey, Western Balkans) puts the IRR2 share on every crop without it, which leaves about a third of the FSS irrigated area out (7.0 against 11.2 Mha) | the FSS irrigated areas by crop (Eurostat ef_poirrig / ef_mp_irri, as CSV) and CAPRI's HPD fit; CAPRI's water module in supply (irrigated and rainfed activities) is a further step |
 | (no setting) the UK, Turkey and the Western Balkans in the non-EU market supply functions | ProdNQ_'s land columns (the rents of TCRP, FRUN, FODFAL, CAPRI's market land use: p_aLU, p_bLu); for the UK, Turkey and the Western Balkans supply models (RMSSUP) to which the function is recalibrated every iteration | the function at CAPRI's 2030 calibration point (`market.noneu_supply_nq`, 29 October 2026) with no recalibration (no supply models there); the land rents clear CAPRI's market land block since 4 November 2026 (`market.noneu_land_market`: LandSupplyMNL_ with p_aLU, p_bLu against ProdNQ_'s land rows; MARKET_TRQ_PORT.md, the market land block), before held; the FEDE column moves with CAPRI's FeedBal_ since 29 October 2026 (`market.noneu_feed_nq`, audit M3) | the supply models of the 29 non-EU units are not built (scoping note of 27 October 2026) | the 29 units' supply models |

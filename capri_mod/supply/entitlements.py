@@ -8,7 +8,8 @@ sumEntl_ and overShotEntl_ put in the regional model (l. 1885-1892; objective l.
 
 Limit is the sum of the region's trend levels (DATA "LEVL" "TRD"), Cut the member state's ceilings of the cut
 schemes (dp_bps or DPBPS_SAPS, DPYOUNG, DPFIRHA, DPNATCO: dpEndCut) x 1000 / the sum of its regions' limits, EUR per
-ha: a hectare beyond the trend area earns no area payment.
+ha: a hectare beyond the trend area earns no area payment. ms_cuts gives it in CAPRI's money of the simulation year,
+region_limit in the model's (over the year's money deflator, K174).
 
 The ceilings, as CAPRI's chain computes them (data: tools/build/build_cap14_entitlements.py):
   1. the national ceiling of Regulation 1307/2013 Annex II, each BPS year without a value taking the year before's
@@ -161,16 +162,21 @@ def ms_cuts(year: int, d=None) -> dict:
 
 
 def region_limit(region: str, acts, year: int):
-    """CAPRI's entitlement limit of a regional unit in the model's columns: (Cut EUR/ha, limit kha, columns), the
-    columns the model activities that are CAPRI crop activities (MCACT, through their CAPRI codes). The limit is the
-    sum of those activities' trend levels: CAPRI's crop activities the model does not have (NECR, ISET, GSET, TSET,
-    FallGr) are held at their trend levels, which leave both sides of sumEntl_ (the idled histosols, iHisCr and
-    iHisGr, the caller adds as its histosol columns). None where the member state has no cut."""
+    """CAPRI's entitlement limit of a regional unit in the model's columns: (Cut EUR/ha in the model's money, limit
+    kha, columns), the columns the model activities that are CAPRI crop activities (MCACT, through their CAPRI codes).
+    The limit is the sum of those activities' trend levels: CAPRI's crop activities the model does not have (NECR,
+    ISET, GSET, TSET, FallGr) are held at their trend levels, which leave both sides of sumEntl_ (the idled histosols,
+    iHisCr and iHisGr, the caller adds as its histosol columns). None where the member state has no cut.
+    The cut is CAPRI's (ms_cuts, in its money of the simulation year, the ceilings' nominal amounts as its objective
+    takes them) over the year's money deflator (KNOWN_ISSUES K174): the model's objective is in base-year money, its
+    premiums CAPRI's over the same deflator (K108; ES420000 2030 soft wheat: CAPRI's PRME 182.93 EUR/ha, the model's
+    143.23), so that a hectare beyond the limit loses its area payment, as in CAPRI, and not 1.28 times it."""
     inp = _inputs.current()
     lev = data()["levels"].get(region)
     cut = inp.cached(f"cap14_cuts_{year}", lambda _i: ms_cuts(year)).get(capri_ms(region))
     if not lev or cut is None:
         return None
+    cut = cut / _inputs.money_deflator(year, inp)
     cols, limit = [], 0.0
     for j, a in enumerate(acts):
         codes = [c for c in CAPRI_MEMBERS.get(a, (a,)) if c in lev]

@@ -63,8 +63,10 @@ CAPRI's step weights (capmod/define_stepWeights.gms) = outer_loop.manure_pool_pr
    with ManureNPK_ merged: the manure applied = excreted less losses less net exports), per nutrient, recorded with
    each solve (capri_regional_nlp.py `manure_values`, res.manure_value). Positive (a value) in every region of the
    four-country test.
-3. The market model as a convex QP (Clarabel), its pool balance's dual the price. Differences from CAPRI, each needed
-   by the model's form:
+3. The market model as CAPRI solves it since 20 November 2026 (outer_loop.manure_pool_solver "nlp": CAPRI's
+   variables and four rows, IPOPT for its CONOPT, the price the dual of e_mPoolExcessSupply; until then, and with
+   "qp", as a convex QP with Clarabel, its pool balance's dual the price). Differences from CAPRI, each needed by the
+   model's form:
    - the trade quantities are the deviations from CAPRI's base trade (which the accounts hold, supply/land.py), so the
      base is an equilibrium at zero deviations and zero pool prices: no calibration wedges (PriceCal) and no fixed
      third-country exports in the balance (they are in the base trade; the files give none by region);

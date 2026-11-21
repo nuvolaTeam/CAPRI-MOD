@@ -18,11 +18,18 @@ Herd curvature in CAPRI's level units, per CAPRI region:
     s_j = the member's share of the animal's CAPRI level (a pair counts as one member with its c).
 Territories with several CAPRI regions (tools/lib/_model_regions.capri_groups, Norway as tools/build/build_capri_base): the herd
 responses add up, h = 1 / sum_c (1 / h_c) on the summed levels X.
-Written as g = h X / r (X the territory's CAPRI 2030 level of the animal's activities, r = capri_level_ratio, the model's
-heads per CAPRI level unit), in the model's 2017 money (over tools/lib/_money.deflator of the year, KNOWN_ISSUES K108,
+Written as g = h X / (r f) (X the territory's CAPRI 2030 level of the animal's activities, r = capri_level_ratio, the
+model's heads per unit of the CAPRI level the ratio is taken on, f = that level over X, the territory's, 2030), in the
+model's 2017 money (over tools/lib/_money.deflator of the year, KNOWN_ISSUES K108,
 31 October 2026; before, CAPRI's 2030 money); at runtime Q = g / x with the model region's base herd x, as for the crops
-(PMPCalibrator: Q_ij = g_ij / sqrt(x_i x_j)). For a region holding the share w of its territory, x = w r X and
-Q = h / (w r^2): the elasticity of CAPRI's territory, with the model's revenue per head (CAPRI's per level unit / r).
+(PMPCalibrator: Q_ij = g_ij / sqrt(x_i x_j)). For a region holding the share w of its territory, x = w r f X and
+Q = h / (w (r f)^2): the elasticity of CAPRI's territory, with the model's revenue per head (CAPRI's per level unit / r).
+f is 1 where the ratio's CAPRI activities are the animal's (dairy cows DCOW = DCOL + DCOH, the calves, pigs, poultry,
+sheep and goats); it is not for the bulls and the heifers: capri_level_ratio.csv takes the model's herd over CAPRI's
+database activities BULF and HEIF + HEIR (tools/build/build_capri_level_ratio.py), whose levels are not the sum of the
+model activities' that carry the PMP terms (BULL + BULH, HEIL + HEIH + HEIR; in CAPRI's 2030 reference BULF 4,630
+against BULL + BULH 7,571 thousand, the same beef: 536 against 328 kg each). Until 18 November 2026 f was taken as 1,
+so the bulls' curvature was about 0.61 and the heifers' 0.87 of CAPRI's (KNOWN_ISSUES K173).
 (The first version wrote g = h X^2, which made the herds 100-25000 times too steep: corrected the same night.)
 
 The splits' own curvature (q_low, q_high, q_z in dairy_intensity.csv, cattle_intensity.csv) takes the 2030 terms at the
@@ -55,11 +62,12 @@ REF = BASELINE_REF
 #: model animal -> members; a tuple is an intensity pair whose split the model carries
 #: tuples: activities the model gives their own levels inside the animal (split columns), whose herd curvature is the
 #: harmonic 1 / sum(1 / q_j) of their terms (the Schur complement for a pair).
-#: MEMBERS (default, the model's default): the intensity pairs only (DCOL/DCOH, BULL/BULH, HEIL/HEIH); HEIR and the
-#: calves enter as single activities. MEMBERS_SPLITS (--splits, written to <stem>_animals_members.csv): the heifers'
+#: MEMBERS (the builder's default; the model's with its cattle member splits off): the intensity pairs only
+#: (DCOL/DCOH, BULL/BULH, HEIL/HEIH); HEIR and the calves enter as single activities. MEMBERS_SPLITS (--splits,
+#: written to <stem>_animals_members.csv): the heifers'
 #: three (HEIL, HEIH and the replacement heifers HEIR) and the calves per sex (fattening against raising), for the
-#: model's cattle member splits (RegionalSupplyModel.use_cattle_member_splits, off by default since 22 October 2026:
-#: the young-animal markets per sex did not converge yet, KNOWN_ISSUES K65)
+#: model's cattle member splits (RegionalSupplyModel.use_cattle_member_splits, on by default since 17 November 2026;
+#: off from 22 October to 17 November 2026 while the young-animal markets per sex did not converge, KNOWN_ISSUES K65)
 MEMBERS = {"DCOW": [("DCOL", "DCOH")], "BULL": [("BULL", "BULH")], "HFRS": [("HEIL", "HEIH"), "HEIR"],
            "BCOW": ["SCOW"], "CALV": ["CAMF", "CAFF", "CAMR", "CAFR"], "PIGS": ["SOWS"], "PIGF": ["PIGF"],
            "LAYS": ["HENS"], "BROI": ["POUF"], "SHGM": ["SHGM"], "SHGF": ["SHGF"]}
@@ -68,6 +76,10 @@ MEMBERS_SPLITS = {"DCOW": [("DCOL", "DCOH")], "BULL": [("BULL", "BULH")], "HFRS"
            "LAYS": ["HENS"], "BROI": ["POUF"], "SHGM": ["SHGM"], "SHGF": ["SHGF"]}
 ACTS = sorted({a for M in (MEMBERS, MEMBERS_SPLITS) for ms in M.values() for m in ms
                for a in (m if isinstance(m, tuple) else (m,))})
+#: the CAPRI activities capri_level_ratio.csv is taken on, where they are not the animal's members (BULF: CAPRI's
+#: database activity of fattened bulls, DACT_TO_PACT BULF.(BULL, BULH); HEIF likewise of HEIL, HEIH)
+BASIS = {"BULL": ("BULF",), "HFRS": ("HEIF", "HEIR")}
+LEVEL_ACTS = sorted(set(ACTS) | {b for bs in BASIS.values() for b in bs})
 
 
 
@@ -84,7 +96,7 @@ def levels_2017_dumps(acts) -> dict:
     return out
 
 def ref_levels(ref: Path) -> dict:
-    pat = rf"^'[A-Z]{{2}}[0-9A-Z]{{6}}'\.''\.'({'|'.join(ACTS)})'\.'LEVL'\.'2030'"
+    pat = rf"^'[A-Z]{{2}}[0-9A-Z]{{6}}'\.''\.'({'|'.join(LEVEL_ACTS)})'\.'LEVL'\.'2030'"
     txt = grep(pat, str(ref))
     rx = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'([A-Z]+)'\.'LEVL'\.'2030'\s+([-\d.Ee+]+)")
     out = defaultdict(dict)
@@ -145,7 +157,7 @@ def main() -> None:
     Q = defaultdict(dict)
     for r in t.itertuples():
         Q[r.region][r.activity] = float(r.value)
-    lev = ref_levels(a.ref) if a.year == 2030 else levels_2017_dumps(set(ACTS))
+    lev = ref_levels(a.ref) if a.year == 2030 else levels_2017_dumps(set(LEVEL_ACTS))
     OUT = a.out or (ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "supply" / "pmp_capri_2030_animals.csv")
     if a.splits and a.out is None:
         OUT = OUT.with_name(OUT.stem + "_members.csv")
@@ -180,12 +192,15 @@ def main() -> None:
                     missing[animal].append(",".join(rs))
                 continue
             h = 1.0 / inv
+            # f: the ratio's CAPRI level over the members' (1 where they are the same activities)
+            Xb = sum(lev.get(c, {}).get(b, 0.0) for c in used for b in BASIS.get(animal, ()))
+            f = Xb / X if (animal in BASIS and Xb > 0) else 1.0
             for r in rs:
                 rr = float(ratio.at[r, animal]) if r in ratio.index and animal in ratio.columns else float("nan")
                 if not (rr == rr and rr > 0):
                     missing[animal].append(r)
                     continue
-                rows.append((r, animal, h * X / rr / money, X, rr, " ".join(used)))
+                rows.append((r, animal, h * X / (rr * f) / money, X, rr, " ".join(used)))
     df = pd.DataFrame(rows, columns=["region", "animal", "g", "x_capri", "level_ratio", "capri_regions"])
     df.to_csv(OUT, index=False)
     print(f"{OUT.name}: {len(df)} region x animal entries, {df.region.nunique()} regions; "

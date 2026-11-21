@@ -26,7 +26,7 @@ import gams_sets as G                                      # noqa: E402
 import gams_text as GT                                     # noqa: E402
 from paths import SOURCES                                  # noqa: E402
 
-GAMS = SOURCES / "course_capri_git" / "gams"
+GAMS = SOURCES / "gams"
 NECP = SOURCES / "dat_local" / "baseline" / "necp_expert.gms"
 OUT_SETS = ROOT / "capri_data" / "pipeline" / "captrd" / "sets" / "national"
 OUT_DAT = ROOT / "capri_data" / "pipeline" / "captrd" / "dat"

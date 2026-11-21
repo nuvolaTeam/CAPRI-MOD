@@ -28,7 +28,7 @@ Which equations are live depends on switches. Two configurations matter:
 | `lulucf_supply` | off | on (follows ghgAbatement) |
 | LUC equations (land transitions) | on (task with market model and environmental reports) | on |
 | Feed version | `_pw`: only REQSE_ (energy, protein) as requirement constraints | same |
-| `PEST_DISAGG` (pesticide yield response) | off | off |
+| `PEST_DISAGG` (pesticide yield response) | off | off (the Green Deal step; its 2030 reference run, res_2_1730greendeal_refdefaulta, and the baseline calibration ran with `pestDisaggStage` 5_aggregates: DEP-51) |
 | `envConst`, `NMINREST`, BFP, water | off | off |
 | CAP policy chain | the policy file decides (GUI default `mtr_rd_ref` looks legacy; CAP 2023-27 reference turns on the GAECs) | cap_after_2014 greening chain (permanent grassland, 5% ecological set-aside, crop diversification) |
 
@@ -51,7 +51,7 @@ missing / not needed (inactive in both configurations, or reporting only). GD = 
 | INPANI_ (young-animal use) | yes | linear; GD bilinear with v_Miti | approximated: young animals valued per head at the young-animal market prices; no regional balance |
 | GRPLEVL_, QUADRA_ (PMP cost) | yes | convex quadratic (technology matrix forced PD; group matrix PSD unsure) | approximated: capri-mod's PMPCalibrator (decision 5a.5): diagonal from CAPRI's elasticities with CAPRI's dampening and share term, off-diagonals from CAPRI's PELA cross-price elasticities or p_pmpQuadPact group terms (capped), a small uniform term elsewhere, clamps and diagonal dominance (`docs/dev/PMP_ELASTICITY_WIRING.md`). Note of 8 November 2026: the default pmp_source is "capri2030", CAPRI's 2030 terms (pmp_capri_2030.csv), the crop term being CAPRI's T1/T2 technology block collapsed exactly per crop; with supply.crop_technologies (CAPRI's setting, the default since 8 November 2026) each crop with both technologies also has a mix column z, x_T1 = X/2 + z, x_T2 = X/2 - z, with CAPRI's block in (X, z) (`capri_mod/supply/techn_mix.py`, KNOWN_ISSUES K124) |
 | QUADRF_, QUADRF1_ (feed PMP) | yes | herd x per-head cost (bilinear) | same form; SLOP CAPRI's p_pmpFeedInpCoeff where available, CNST recalibrated so the base ration is optimal under REQSE_ (`calibrate_feed_terms`). Conic form: rotated cone in total feed |
-| LandMarket_ (trustee land owner cost) | yes | convex quadratic | CAPRI's p_pmpQuadLandTypes, constants from the model's base; ARTIF fixed (`docs/LAND_USE_FLEXIBILITY.md`) |
+| LandMarket_ (trustee land owner cost) | yes | convex quadratic | CAPRI's p_pmpQuadLandTypes, constants from the model's base; ARTIF a column since 20 November 2026 (`docs/LAND_USE_FLEXIBILITY.md`, K189) |
 | LandBalNoSlak_, e_artoBal, e_exogenousLand | yes | linear | same in substance: equality on changes from the base use, because the model's land data carry idle land |
 | LandBalSlak_ (annual crops, ANNC) | yes | linear | not written: cropDivGreening_ takes the annual crops' sum directly |
 | LUC block: e_landTypes_to_LUclass, e_FocLUC, e_derivativeOfGammaLUC, bounds, e_luClassInitial/Final | yes | non-convex (FOC system of the land-transition model, (alpha-1)/x terms) | CAPRI's transition model with its gamma priors, solved after each regional solve (`capri_mod/environmental/luc.py`); without a LULUCF price the block enters no other equation, so the result is the same (REGISTERED) |
@@ -98,10 +98,10 @@ Feed bounds: 0 <= per-head feed <= 10 x DRMX / dry-matter content (set_supply_bo
 
 | Group | Decision-relevant? | Form | capri-mod (NLP form) |
 |---|---|---|---|
-| Loss cascade: GRAZN_, HOUSN_, STORN_, APPLN_, RUNHOUSN_, RUNSURFN_, RUNTOTN_, GASRUNTOTN_ (manure); RUNTOTNETF_, GASTOTNETF_, GASRUNTOTNETF_ (mineral) | yes: feeds ManureNPK_ and NUTNED_ | non-convex (v_emiLoss x v_Miti x v_Miti) | same (`capri_mod/supply/n_cascade.py`, p_Nemidat from the MITERRA tables; `docs/N_CASCADE_SPEC.md`), in both forms (the conic form takes its tangent at the previous solve); the N kept enters ManureNPK_. The fertiliser options' N2OSYN/N2OMAN terms of APPLN_ and GASTOTNETF_ act outside the cascade (REGISTERED) |
+| Loss cascade: GRAZN_, HOUSN_, STORN_, APPLN_, RUNHOUSN_, RUNSURFN_, RUNTOTN_, GASRUNTOTN_ (manure); RUNTOTNETF_, GASTOTNETF_, GASRUNTOTNETF_ (mineral) | yes: feeds ManureNPK_ and NUTNED_ | non-convex (v_emiLoss x v_Miti x v_Miti) | same (`capri_mod/supply/equations/supply_model/n_flow.py`, p_Nemidat from the MITERRA tables via `supply/n_cascade.py`; `docs/N_CASCADE_SPEC.md`), in both forms (the conic form takes its tangent at the previous solve); the N kept enters ManureNPK_. The fertiliser options' N2OSYN/N2OMAN terms of APPLN_ and GASTOTNETF_ act outside the cascade (REGISTERED) |
 | GHG_Mit_Cost_, TotMit_, TotMitFertMin_/Man_, Tot_MitFert_, Tot_LineNitr_ | yes (objective, share limits) | non-convex (v_Miti x levels, squares) | same for the options built: ammonia options (housing and storage group, application group), anaerobic digestion, fertiliser options PRECFARM, VRT_SRUC, FERTTIME, NITR_INH (one regional share each; the conic form: one share per crop, REGISTERED), inhibitor on manure, breeding, low-N feed, linseed and nitrate. Missing: legume share, tillage (ConsTill, NoTill), urea substitution, 3-NOP, buffer strips, biodiversity options, biochar |
 | catcMiti_, idleHisto_, ADMax_, SupplementPerc_, LANDSHARE_ | yes | non-convex (shares x levels, ratios) | winter cover: the share is the catch-crop share (CAPRI's 2030 value, or the requirement's), not a choice; histosol fallowing: a linear column bounded by MaxShare x share x the current land (K158), its curvature at the base area (approximated); AD: CAPRI's maximum shares; SupplementPerc_ and LANDSHARE_ missing |
-| Emission totals (GWP*, NH3*, NOX*, NO3*, LEACHN_, nmin/nmanInputSh_, AMMOAGG_, CO2SEQ, CARBERO_, LULUCF) | accounting only (no tax in GD) | non-convex products | computed after the solve. LEACHN_ in CAPRI's form in the accounts (`n_leaching.py`), with the sign of the application options changed (the user's decision, README 5.2); tillage, buffer-strip, biodiversity and biochar terms held at CAPRI's reference. Under an emission tax the purchases carry the indirect N2O of their runoff and leaching at the reference leaching share |
+| Emission totals (GWP*, NH3*, NOX*, NO3*, LEACHN_, nmin/nmanInputSh_, AMMOAGG_, CO2SEQ, CARBERO_, LULUCF) | accounting only (no tax in GD) | non-convex products | computed after the solve. LEACHN_ in CAPRI's form in the accounts (`equations/supply_model/n_flow.py` LEACHN_, AMMOAGG_), with the sign of the application options changed (the user's decision, README 5.2); tillage, buffer-strip, biodiversity and biochar terms held at CAPRI's reference. Under an emission tax the purchases carry the indirect N2O of their runoff and leaching at the reference leaching share |
 | envConst, FxAct*, CAP-linked technologies, pesticide disaggregation | off | - | not needed. The Nitrates Directive minimum shares are built from CAPRI's nvz.gdx but not applied (K51) |
 
 ## 3. Non-convex terms in CAPRI's model
@@ -160,5 +160,6 @@ abatement block's inputs) were supplied from the CAPRI installation; each builde
 
 Policy file of a "default" star 3.0 scenario; whether set-aside, sugar quota and entitlement data are zero in 2030;
 whether the LUC FOC system binds land without a carbon price; PSD of CAPRI's group PMP matrix; whether the fertiliser
-prior modes are reset each market iteration; how far the Green Deal fixings (FixMiti, set_miti_bounds) leave the
-non-convex abatement terms live; whether CAPRI fixes FRMI/FPRI/FENI and how it treats straw and COMF feed losses.
+prior modes are reset each market iteration; whether CAPRI fixes FRMI/FPRI/FENI and how it treats straw and COMF feed
+losses. Determined 18 November 2026 (was listed here): the Green Deal group's FixMiti fixes only the winter cover
+option (v_Miti(CATC, WinterCov) = 1e-6; its run reports that share in every unit); the other options stay free (K170).

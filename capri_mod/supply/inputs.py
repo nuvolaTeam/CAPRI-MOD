@@ -1,4 +1,4 @@
 """The supply package's data adapter (the refactor's data adapter): the run's inputs, capri_mod/data/inputs.py (RunInputs, use,
 current), under the supply package's names. The supply code reads files only through it."""
 from capri_mod.data.inputs import (AREAS, REPO_DATA, RunInputs as SupplyInputs, base_year, current,  # noqa: F401
-                                   market_year, use)
+                                   market_year, money_deflator, use)

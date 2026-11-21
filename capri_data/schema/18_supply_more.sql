@@ -39,6 +39,7 @@ CREATE TABLE sup_cattle_intensity (
     q_b_recipe2030 DOUBLE NOT NULL,
     dmanp_rel DOUBLE NOT NULL,
     dmank_rel DOUBLE NOT NULL,
+    dinpo_rel DOUBLE NOT NULL,
     share_low_2030 DOUBLE,
     share_high_2030 DOUBLE,
     days_low_2030 DOUBLE,
@@ -52,6 +53,7 @@ CREATE TABLE sup_cattle_intensity (
     dcrpr_rel_2030 DOUBLE,
     ddrmn_rel_2030 DOUBLE,
     ddrmx_rel_2030 DOUBLE,
+    dinpo_rel_2030 DOUBLE,
     dprod_young_m_rel_2030 DOUBLE,
     dprod_young_f_rel_2030 DOUBLE,
     dprod_cows_rel_2030 DOUBLE,
@@ -109,7 +111,9 @@ INSERT INTO value_units VALUES
   ('sup_cattle_intensity', 'duse_calves_m_rel_2030', NULL, 'open', 'cattle_intensity.duse_calves_m_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
   ('sup_cattle_intensity', 'duse_calves_f_rel_2030', NULL, 'open', 'cattle_intensity.duse_calves_f_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
   ('sup_cattle_intensity', 'duse_young_m_rel_2030', NULL, 'open', 'cattle_intensity.duse_young_m_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
-  ('sup_cattle_intensity', 'duse_young_f_rel_2030', NULL, 'open', 'cattle_intensity.duse_young_f_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)');
+  ('sup_cattle_intensity', 'duse_young_f_rel_2030', NULL, 'open', 'cattle_intensity.duse_young_f_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_cattle_intensity', 'dinpo_rel', NULL, 'open', 'cattle_intensity.dinpo_rel: other inputs (INPO) per head (per stall), low - high over the animal''s average (CAPRI INPO; the Green Deal''s input change on the split, K189)'),
+  ('sup_cattle_intensity', 'dinpo_rel_2030', NULL, 'open', 'cattle_intensity.dinpo_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)');
 
 -- file: capri_data/2017/supply/cover_crops.csv
 CREATE TABLE sup_cover_crops (
@@ -243,6 +247,7 @@ CREATE TABLE sup_dairy_intensity (
     q_source_recipe2030 VARCHAR NOT NULL,
     dmanp_rel DOUBLE NOT NULL,
     dmank_rel DOUBLE NOT NULL,
+    dinpo_rel DOUBLE NOT NULL,
     share_low_2030 DOUBLE NOT NULL,
     dcomi_rel_2030 DOUBLE NOT NULL,
     dmann_rel_2030 DOUBLE NOT NULL,
@@ -252,6 +257,7 @@ CREATE TABLE sup_dairy_intensity (
     dcrpr_rel_2030 DOUBLE NOT NULL,
     ddrmn_rel_2030 DOUBLE NOT NULL,
     ddrmx_rel_2030 DOUBLE NOT NULL,
+    dinpo_rel_2030 DOUBLE NOT NULL,
     PRIMARY KEY (region, capri_region, q_source, q_source_capri2030, q_source_recipe2030)
 );
 COMMENT ON TABLE sup_dairy_intensity IS 'CAPRI''s two dairy-cow activities, low-yield DCOL and high-yield DCOH, per model region. (tools/build/build_dairy_intensity.py)';
@@ -281,7 +287,9 @@ INSERT INTO value_units VALUES
   ('sup_dairy_intensity', 'denne_rel_2030', NULL, 'open', 'dairy_intensity.denne_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
   ('sup_dairy_intensity', 'dcrpr_rel_2030', NULL, 'open', 'dairy_intensity.dcrpr_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
   ('sup_dairy_intensity', 'ddrmn_rel_2030', NULL, 'open', 'dairy_intensity.ddrmn_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
-  ('sup_dairy_intensity', 'ddrmx_rel_2030', NULL, 'open', 'dairy_intensity.ddrmx_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)');
+  ('sup_dairy_intensity', 'ddrmx_rel_2030', NULL, 'open', 'dairy_intensity.ddrmx_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_dairy_intensity', 'dinpo_rel', NULL, 'open', 'dairy_intensity.dinpo_rel: other inputs (INPO) per head, low - high over the animal''s average (CAPRI INPO; the Green Deal''s input change on the split, K189)'),
+  ('sup_dairy_intensity', 'dinpo_rel_2030', NULL, 'open', 'dairy_intensity.dinpo_rel_2030: the column at CAPRI''s 2030 Green Deal baseline (res_2_1730greendeal_refdefaulta)');
 
 -- file: capri_data/2017/supply/grass_dm_content.csv
 CREATE TABLE sup_grass_dm_content (
@@ -460,6 +468,9 @@ CREATE TABLE sup_techn_mix_2030 (
     inpo_diff DOUBLE NOT NULL,
     plap_diff DOUBLE NOT NULL,
     prem_diff_share DOUBLE NOT NULL,
+    mann_diff DOUBLE NOT NULL,
+    manp_diff DOUBLE NOT NULL,
+    mank_diff DOUBLE NOT NULL,
     capri_region VARCHAR NOT NULL,
     PRIMARY KEY (region, activity)
 );
@@ -470,7 +481,45 @@ INSERT INTO value_units VALUES
   ('sup_techn_mix_2030', 'rest_cost_diff_eur_ha', 'U_EuPerHa', 'builder', 'sum over SEED, REPM, REPB, ELEC, EGAS, EFUL, ELUB of the factor T1 - T2 x CAPREG''s 2017 cost per ha (coefficient x UVAG / 1000)'),
   ('sup_techn_mix_2030', 'inpo_diff', 'U_ratio', 'capri', 'p_technFact INPO T1 - T2'),
   ('sup_techn_mix_2030', 'plap_diff', 'U_ratio', 'capri', 'p_technFact PLAP T1 - T2'),
-  ('sup_techn_mix_2030', 'prem_diff_share', 'U_ratio', 'builder', 'sum over the technology-differentiated schemes of PRME(scheme) / PRME(DPTOTAL) x p_technFact T1 - T2, CAPRI''s 2030 reference');
+  ('sup_techn_mix_2030', 'prem_diff_share', 'U_ratio', 'builder', 'sum over the technology-differentiated schemes of PRME(scheme) / PRME(DPTOTAL) x p_technFact T1 - T2, CAPRI''s 2030 reference'),
+  ('sup_techn_mix_2030', 'mann_diff', 'U_ratio', 'capri', 'p_technFact MANN T1 - T2: the crop residues'' N per unit z over the crop''s per ha (fertDistCres_, NUTNED_''s own residues; K181)'),
+  ('sup_techn_mix_2030', 'manp_diff', 'U_ratio', 'capri', 'p_technFact MANP T1 - T2: the crop residues'' P2O5 per unit z over the crop''s per ha (K181)'),
+  ('sup_techn_mix_2030', 'mank_diff', 'U_ratio', 'capri', 'p_technFact MANK T1 - T2: the crop residues'' K2O per unit z over the crop''s per ha (K181)');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/price_transmission_2030.csv
+CREATE TABLE sup_price_transmission_2030 (
+    ms VARCHAR NOT NULL REFERENCES capri_rall (code),
+    activity VARCHAR NOT NULL REFERENCES model_activities (code),
+    commodity VARCHAR NOT NULL REFERENCES model_commodities (code),
+    capri_item VARCHAR NOT NULL,
+    capri_market VARCHAR NOT NULL,
+    uvag_2030 DOUBLE NOT NULL CHECK (uvag_2030 > 0),
+    ppri_2030 DOUBLE NOT NULL CHECK (ppri_2030 > 0),
+    factor DOUBLE NOT NULL CHECK (factor > 0),
+    rule VARCHAR NOT NULL,
+    PRIMARY KEY (ms, activity, commodity)
+);
+COMMENT ON TABLE sup_price_transmission_2030 IS 'CAPRI''s transmission of the market''s producer price to the unit value its supply models are paid (arm/set_prices.gms: UVAG moves by the ABSOLUTE change of PPRI), per member state, as the factor on the market price''s relative change (PPRI0 / UVAG0; paddy rice x MAPR / GROF). Only factors other than 1; durum and sugar beet keep CAPRI''s relative rules (model_price_follows.csv). KNOWN_ISSUES K169 (tools/build/build_price_transmission_2030.py)';
+INSERT INTO value_units VALUES
+  ('sup_price_transmission_2030', 'uvag_2030', 'U_EuPerTon', 'capri', 'UVAG of the CAPRI output, member state, 2030, CAPRI''s Green Deal baseline (res_2_1730greendeal_refdefaulta)'),
+  ('sup_price_transmission_2030', 'ppri_2030', 'U_EuPerTon', 'capri', 'PPRI of the CAPRI market product, member state, 2030, same run'),
+  ('sup_price_transmission_2030', 'factor', 'U_ratio', 'builder', 'PPRI / UVAG (paddy rice: PPRI(RICE) x MAPR(RICE) / GROF(PARI) / UVAG(PARI)): the relative change of the unit value per relative change of the market price'),
+  ('model_price_follows', 'share', 'U_ratio', 'capri', 'the share of the followed commodity''s relative price change: durum 0.5 (arm/set_prices.gms l. 57-61), beet 1 (l. 91-95), Norway''s raw milk 1');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/plant_protection_capri_step_2030.csv
+CREATE TABLE sup_plant_protection_capri_step_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    activity VARCHAR NOT NULL REFERENCES model_activities (code),
+    plap_uvap_eur_ha DOUBLE NOT NULL CHECK (plap_uvap_eur_ha >= 0),
+    plantp_cost_eur_ha DOUBLE NOT NULL CHECK (plantp_cost_eur_ha >= 0),
+    levl_capri DOUBLE NOT NULL CHECK (levl_capri > 0),
+    PRIMARY KEY (region, activity)
+);
+COMMENT ON TABLE sup_plant_protection_capri_step_2030 IS 'CAPRI''s two valuations of each crop''s plant protection at its 2030 reference, per regional unit and model crop: the Green Deal step''s (pesticide disaggregation off: p_linObjeCont, DATA(PLAP) x the member state''s UVAP(PLAP)) and the reference''s and PMP calibration''s (the pesticide module''s aggregates, Plantp_cost). For the comparison switches supply.greendeal_plap_crop_level_capri_step and supply.greendeal_plap_mix_capri_step (DEP-51). (tools/build/build_plant_protection_capri_step_2030.py)';
+INSERT INTO value_units VALUES
+  ('sup_plant_protection_capri_step_2030', 'plap_uvap_eur_ha', 'U_EuPerHa', 'capri', 'dataOut(R, '''', crop, ''PLAP'', ''2030'') x UVAP(PLAP) of the member state at 2030 / 1000 (p_linObjeCont, capmod/define_objc.gms l. 40-44: sim_ini_21730 DATA(MS, ''UVAP'', ''PLAP'', ''BAS'') x p_infl^(2030 - 2017), inflation_and_trend_interpolation.gms l. 23, 69-73), EUR per ha in CAPRI''s 2030 money, CAPRI''s Green Deal baseline (res_2_1730greendeal_refdefaulta); level-weighted where a model crop sums CAPRI activities'),
+  ('sup_plant_protection_capri_step_2030', 'plantp_cost_eur_ha', 'U_EuPerHa', 'capri', 'dataOut(R, '''', crop, ''Plantp_cost'', ''2030''), EUR per ha in CAPRI''s 2030 money, same run'),
+  ('sup_plant_protection_capri_step_2030', 'levl_capri', 'U_1000ha', 'capri', 'dataOut(R, '''', crop, ''LEVL'', ''2030''), the weights, same run');
 
 -- file: capri_data/2017/supply/plant_protection_cost.csv
 CREATE TABLE sup_plant_protection_cost (
@@ -999,3 +1048,55 @@ CREATE TABLE sup_young_animals_by_sex_2017_coef (
 COMMENT ON TABLE sup_young_animals_by_sex_2017_coef IS 'young animals produced or used per model head of an activity in the per-sex balances of young_animals_by_sex_2017.csv (tools/build/build_young_animals.py)';
 INSERT INTO value_units VALUES
   ('sup_young_animals_by_sex_2017_coef', 'coefficient', 'U_HdPerHd', 'builder', 'young_animals_by_sex_2017_coef.coefficient: head per head (the builder)');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_2030.csv
+CREATE TABLE sup_young_animals_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    category VARCHAR NOT NULL CHECK (category IN ('calves', 'young', 'cows', 'piglets', 'lambs')),
+    base_net_export DOUBLE NOT NULL,
+    value_eur_head DOUBLE NOT NULL,
+    PRIMARY KEY (region, category)
+);
+COMMENT ON TABLE sup_young_animals_2030 IS 'CAPRI''s young-animal balances per model region at its 2030 calibration point, calves and young cattle pooled across the sexes (the cattle member splits off): the base net export at the model''s 2030 base heads (CAPRI''s 2030 flows) and the 2017 unit value (the projection layer applies the 2030 / 2017 ratio); the coefficients in young_animals_2030_coef.csv. Read at the 2030 market year (supply_module.young_animal_table; CAPRI''s INPANI_ takes DATA(.., "Y"), KNOWN_ISSUES K178; tools/build/build_young_animals_2030.py)';
+INSERT INTO value_units VALUES
+  ('sup_young_animals_2030', 'base_net_export', NULL, 'open', 'young_animals_2030.base_net_export: 1000 head (the builder; no unit code in the catalogue)'),
+  ('sup_young_animals_2030', 'value_eur_head', NULL, 'open', 'young_animals_2030.value_eur_head: EUR per head, 2017 (the builder; no unit code in the catalogue)');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_2030_coef.csv
+CREATE TABLE sup_young_animals_2030_coef (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    category VARCHAR NOT NULL CHECK (category IN ('calves', 'young', 'cows', 'piglets', 'lambs')),
+    side VARCHAR NOT NULL CHECK (side IN ('produce', 'use')),
+    activity VARCHAR NOT NULL REFERENCES model_activities (code),
+    coefficient DOUBLE NOT NULL,
+    PRIMARY KEY (region, category, side, activity)
+);
+COMMENT ON TABLE sup_young_animals_2030_coef IS 'young animals produced or used per model head of an activity at CAPRI''s 2030 calibration point (sim_ini_21730''s DATA at "Y", LEVL x coefficient / 1000 over the model''s 2030 base heads), the balances of young_animals_2030.csv (tools/build/build_young_animals_2030.py, KNOWN_ISSUES K178)';
+INSERT INTO value_units VALUES
+  ('sup_young_animals_2030_coef', 'coefficient', 'U_HdPerHd', 'builder', 'young_animals_2030_coef.coefficient: head per head (the builder)');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_by_sex_2030.csv
+CREATE TABLE sup_young_animals_by_sex_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    category VARCHAR NOT NULL CHECK (category IN ('calves_m', 'calves_f', 'young_m', 'young_f', 'cows', 'piglets', 'lambs')),
+    base_net_export DOUBLE NOT NULL,
+    value_eur_head DOUBLE NOT NULL,
+    PRIMARY KEY (region, category)
+);
+COMMENT ON TABLE sup_young_animals_by_sex_2030 IS 'CAPRI''s young-animal balances per model region at its 2030 calibration point, per sex (the default, the cattle member splits on): the base net export at the model''s 2030 base heads (CAPRI''s 2030 flows) and the 2017 unit value (the projection layer applies the 2030 / 2017 ratio); the coefficients in young_animals_by_sex_2030_coef.csv. Read at the 2030 market year (supply_module.young_animal_table; CAPRI''s INPANI_ takes DATA(.., "Y"), KNOWN_ISSUES K178; tools/build/build_young_animals_2030.py)';
+INSERT INTO value_units VALUES
+  ('sup_young_animals_by_sex_2030', 'base_net_export', NULL, 'open', 'young_animals_by_sex_2030.base_net_export: 1000 head (the builder; no unit code in the catalogue)'),
+  ('sup_young_animals_by_sex_2030', 'value_eur_head', NULL, 'open', 'young_animals_by_sex_2030.value_eur_head: EUR per head, 2017 (the builder; no unit code in the catalogue)');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/young_animals_by_sex_2030_coef.csv
+CREATE TABLE sup_young_animals_by_sex_2030_coef (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    category VARCHAR NOT NULL CHECK (category IN ('calves_m', 'calves_f', 'young_m', 'young_f', 'cows', 'piglets', 'lambs')),
+    side VARCHAR NOT NULL CHECK (side IN ('produce', 'use')),
+    activity VARCHAR NOT NULL REFERENCES model_activities (code),
+    coefficient DOUBLE NOT NULL,
+    PRIMARY KEY (region, category, side, activity)
+);
+COMMENT ON TABLE sup_young_animals_by_sex_2030_coef IS 'young animals produced or used per model head of an activity at CAPRI''s 2030 calibration point (sim_ini_21730''s DATA at "Y", LEVL x coefficient / 1000 over the model''s 2030 base heads), the balances of young_animals_by_sex_2030.csv (tools/build/build_young_animals_2030.py, KNOWN_ISSUES K178)';
+INSERT INTO value_units VALUES
+  ('sup_young_animals_by_sex_2030_coef', 'coefficient', 'U_HdPerHd', 'builder', 'young_animals_by_sex_2030_coef.coefficient: head per head (the builder)');

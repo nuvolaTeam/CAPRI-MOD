@@ -24,6 +24,10 @@ from typing import Dict, List, Sequence
 
 import numpy as np
 
+from capri_mod.market.equations.market_model.land import (LandSupplyMNL_, LndSupplyEqualsDemand_,
+                                                          rentFromProdpriceLand_)
+from capri_mod.market.equations.market_model.supply import ProdNQ_, ProdNQ_hess, yaniMarket_
+
 
 def nq_rows_function(name: str, n_cols: int, H: np.ndarray, hm: Sequence[float], HF: np.ndarray):
     """CasADi Function (q0[n_x], r[n_cols], m, fede[n_s], lsh[n_x]) -> (q[n_x], dq[n_x]) for the n_x products of one
@@ -34,8 +38,7 @@ def nq_rows_function(name: str, n_cols: int, H: np.ndarray, hm: Sequence[float],
     nx, ns = H.shape[0], HF.shape[1]
     q0, r, m = ca.SX.sym("q0", nx), ca.SX.sym("r", n_cols), ca.SX.sym("m")
     fede, lsh = ca.SX.sym("fede", ns), ca.SX.sym("lsh", nx)
-    dq = (ca.mtimes(ca.DM(H), r - 1.0) + ca.DM(np.asarray(hm, float)) * (m - 1.0)
-          + (ca.mtimes(ca.DM(HF), fede - 1.0) if ns else 0) + lsh)
+    dq = ProdNQ_(H, r, hm, m, HF, fede, lsh)
     q = ca.fmax(q0 + dq, 0.0)
     return ca.Function(name, [q0, r, m, fede, lsh], [q, dq], ["q0", "r", "m", "fede", "lsh"], ["q", "dq"])
 
@@ -72,7 +75,7 @@ def hess_rows_function(name: str, Hm: np.ndarray):
     import casadi as ca
     nx, nc = Hm.shape
     s0, dP, extra = ca.SX.sym("s0", nx), ca.SX.sym("dP", nc), ca.SX.sym("extra", nx)
-    qr = s0 + ca.mtimes(ca.DM(Hm), dP) + extra
+    qr = ProdNQ_hess(s0, Hm, dP, extra)
     return ca.Function(name, [s0, dP, extra], [ca.fmax(qr, 0.0), qr], ["s0", "dP", "extra"], ["q", "q_raw"])
 
 
@@ -105,14 +108,9 @@ def land_residual_function(name: str, d: dict):
     fr = list(d["free"])
     nf = len(fr)
     dr, base = ca.SX.sym("dr", nf), ca.SX.sym("base", nf)
-    rent = ca.SX(ca.DM(np.asarray(d["rent0"], float)))
-    for k, i in enumerate(fr):
-        rent[i] = rent[i] + dr[k]
-    z = ca.DM(np.asarray(d["alu"], float)) + ca.mtimes(ca.DM(np.asarray(d["B"], float)), rent)
-    e = ca.exp(z - ca.mmax(z))
-    sh = e / ca.sum1(e)
-    S = float(d["avail"]) * sh
-    F = base + ca.mtimes(ca.DM(np.asarray(d["H"], float)), dr) - ca.vertcat(*[S[i] for i in fr])
+    rent = rentFromProdpriceLand_(d["rent0"], fr, dr)
+    S = LandSupplyMNL_(d["avail"], d["alu"], d["B"], rent)
+    F = LndSupplyEqualsDemand_(base, d["H"], dr, S, fr)
     return ca.Function(name, [dr, base], [F, ca.jacobian(F, dr)], ["dr", "base"], ["F", "J"])
 
 
@@ -128,7 +126,7 @@ def yani_function(name: str, H_YP: np.ndarray, H_YY: np.ndarray, H_PY: np.ndarra
     ny, nc = H_YP.shape
     dr, net, ref = ca.SX.sym("dr", ny), ca.SX.sym("net", ny), ca.SX.sym("ref", ny)
     dP, extra, dlev = ca.SX.sym("dP", nc), ca.SX.sym("extra", ny), ca.SX.sym("dlev", ny)
-    res = net + ca.mtimes(ca.DM(H_YP), dP) + ca.mtimes(ca.DM(H_YY), dr) + extra - ref
+    res = yaniMarket_(net, H_YP, dP, H_YY, dr, ref, extra)
     eff = ca.mtimes(ca.DM(H_PY), dlev)
     return ca.Function(name, [dr, net, ref, dP, extra, dlev], [res, ca.jacobian(res, dr), eff],
                        ["dr", "net", "ref", "dP", "extra", "dlev"], ["res", "J", "eff"])

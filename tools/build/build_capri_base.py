@@ -83,12 +83,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
 CROP_MAP = dict(_MC.CROP_MAP)
 
-#: animal_numbers column -> CAPRI HERD item
-HERD_MAP = {"DCOW": "DCOW", "SCOW": "SCOW", "BULL": "BULL", "HEIF": "HEIF",
-            "CALV": "CALV", "HENS": "HENS",
-            "POUL": "POUL", "SHGM": "SHGM", "SHGF": "SHGF"}   # CAPRI's two sheep and goat activities' herds
-#                                                        (until 27 October 2026 the census SHGT, split afterwards by
-#                                                        build_shg_split.py at CAPRI's HERD shares of the region group)
+#: animal_numbers column -> CAPRI's activities whose census herds (HERD) it sums: every activity the model's animal
+#: holds (its coefficients carry their totals). Sheep and goats: CAPRI's two activities' herds (until 27 October 2026
+#: the census SHGT, split afterwards by build_shg_split.py at CAPRI's HERD shares of the region group). Bulls: both
+#: fattening intensities BULL and BULH (= CAPRI's BULF herd); heifers: the fattening heifers HEIL and HEIH (= HEIF) and
+#: the replacement heifers HEIR, the model's HFRS (column name HEIF kept; HERD_ALIASES maps it). Until 18 November 2026
+#: the bulls were CAPRI's low-intensity BULL herd alone (a third of BULF) and the heifers the fattening heifers' HEIF
+#: alone (15% of HEIF + HEIR), the coefficients dividing all the activities' totals by those heads; Slovakia, Albania,
+#: Bosnia and Montenegro, with replacement heifers but no fattening heifers, had no heifers (KNOWN_ISSUES K180).
+HERD_MAP = {"DCOW": ("DCOW",), "SCOW": ("SCOW",), "BULL": ("BULL", "BULH"), "HEIF": ("HEIL", "HEIH", "HEIR"),
+            "CALV": ("CALV",), "HENS": ("HENS",), "POUL": ("POUL",), "SHGM": ("SHGM",), "SHGF": ("SHGF",)}
 
 #: cost columns verified equal to CAPRI TOIN on DE11, FR10 and ES61
 COST_ANIMALS = ("DCOW", "BULL", "PIGF", "OANI")
@@ -183,9 +187,9 @@ def main(dump_dir: Path):
                 areas.at[reg, col] = sum(
                     w * sum(items(c, "LEVL").get(a, 0.0) for a in capri_cols)
                     for c, w in sources)
-        for col, item in HERD_MAP.items():
+        for col, acts in HERD_MAP.items():
             if col in herds.columns:
-                herds.at[reg, col] = sum(w * items(c, "HERD").get(item, 0.0)
+                herds.at[reg, col] = sum(w * sum(items(c, "HERD").get(a, 0.0) for a in acts)
                                          for c, w in sources)
         if "COWS" in herds.columns:
             herds.at[reg, "COWS"] = herds.at[reg, "DCOW"] + herds.at[reg, "SCOW"]

@@ -23,9 +23,23 @@ Compared, EU27, model baseline of a run saved by tools/run/run_f2f_2030.py again
                                             DOMM + SEDF + LOSF = GROF + IMPT - EXPT, checked on barley). Until
                                             5 November 2026 the sum HCOM + FEDM + INDM + BIOF + LOSM + PRCM, which
                                             leaves out seed and on-farm use (cereals 8-10% short of the balance)
-  producer prices (EUR/t)                   UVAP; the model's prices are CAPRI's 2030 prices in 2017 money, so
-                                            the price block reports each ratio against the median ratio
-                                            (the deflator), i.e. the RELATIVE price structure
+  animals in CAPRI's units                  the model's heads in each EU unit over capri_level_ratio.csv (model
+                                            heads per unit of CAPRI's level) against CAPRI's EU27 level: bulls,
+                                            heifers, fattened pigs and broilers (CAPRI counts animals fattened a
+                                            year, the model places), calves and fattened sheep and goats; and the
+                                            model's 2017 herds of the EU units the same way against CAPREG's 2017
+                                            EU27 levels (capri_eu27_levels_2017_capreg.csv). Until 18 November 2026
+                                            a 2017-2030 growth compared the model's EU 2030 level with its 2017 herd
+                                            of all 250 units (the UK, Turkey and the Western Balkans included), and
+                                            calves and fattened sheep and goats in heads
+  market prices (EUR/t)                     the model's EU27 price (its two EU blocks weighted by production, by
+                                            use where the EU produces none) against CAPRI's member states' market
+                                            prices PMRK weighted the same way (capri_ms_market_prices_2030_ref.csv),
+                                            the same money: the market works in CAPRI's 2030 prices. Until 18
+                                            November 2026 against CAPRI's EU27yr19 producer unit value UVAP after a
+                                            median deflator: another price (tomatoes PMRK 820, UVAP 465 EUR/t) and
+                                            an aggregate that is not the member states' average (maize EU27yr19
+                                            PMRK 163, every member state 214-220)
 
 Usage: python tools/check/compare_baseline_capri.py RUN.pkl [--csv OUT.csv]
 """
@@ -45,8 +59,13 @@ ACT = {"SWHE": "SWHE", "DWHE": "DWHE", "RYEM": "RYEM", "BARL": "BARL", "OATS": "
        "OFRU": "OFRU", "CITR": "CITR", "OLIV": "OLIV", "WINE": "TWIN", "TAGR": "TAGR", "TOBA": "TOBA", "TABO": "TABO",
        "TEXT": "TEXT", "OIND": "OIND", "OCRO": "OCRO", "NURS": "NURS", "FLOW": "FLOW", "GRAE": "GRAE",
        "GRAI": "GRAI", "MAIF": "MAIF", "OFAR": "OFAR", "ROOF": "ROOF", "FALL": "FALL", "VSET": "VSET",
-       "DCOW": "DCOW", "BCOW": "SCOW", "CALV": "CAMF+CAFF+CAMR+CAFR",
-       "PIGS": "SOWS", "SHGM": "SHGM", "SHGF": "SHGF", "LAYS": "HENS"}
+       "DCOW": "DCOW", "BCOW": "SCOW", "PIGS": "SOWS", "SHGM": "SHGM", "LAYS": "HENS"}
+#: animals whose model heads are not CAPRI's level unit: compared in CAPRI's units (capri_level_ratio.csv)
+ACT_RATIO = {"BULL": "BULF", "HFRS": "HEIF+HEIR", "PIGF": "PIGF", "BROI": "POUF", "CALV": "CAMF+CAFF+CAMR+CAFR",
+             "SHGF": "SHGF"}
+#: the model's market commodities -> CAPRI's market product of PMRK
+PRICE_CODE = {"SWHE": "WHEA", "PARI": "RICE", "OLIV": "OLIO", "POUL": "POUM", "WINE": "TWIN", "MILK": "MILK",
+              "CORN": "MAIZ", "SUGR": "SUGA", "BUTR": "BUTT", "SKIM": "SMIP", "WHEY": "WHEP"}
 UNIT = {"LAYS": 1000.0}
 MKT = {"SWHE": "SWHE+DWHE", "BARL": "BARL", "CORN": "MAIZ", "RYEM": "RYEM", "OATS": "OATS", "OCER": "OCER", "PARI": "RICE",
        "RAPE": "RAPE", "SUNF": "SUNF", "SOYA": "SOYA", "OOIL": "OOIL", "SUGR": "SUGA", "POTA": "POTA",
@@ -100,25 +119,48 @@ def rows(o):
         r = _sum(ref_lv, c, lambda d, k: d.get(k))
         if r and m in ab and r > 1:
             out.append(("activity", m, c, float(ab[m]) / UNIT.get(m, 1.0), r))
-    # growth 2017 -> 2030 where the units differ: the model counts census heads (CAPREG HERD; its BULL is CAPRI's
-    # low-intensity bull herd, its HFRS the fattening heifers, PIGF and BROI places), CAPRI's levels are
-    # activity levels (animals fattened a year); the growth rates are comparable
+    # animals whose heads are not CAPRI's level unit, in CAPRI's units: each EU unit's baseline heads over its model
+    # heads per unit of CAPRI's level (capri_level_ratio.csv, CAPRI's 2017 levels; bulls and heifers are census
+    # stocks, fattened pigs and broilers places, against CAPRI's animals fattened a year)
     try:
         import pandas as _pd
+        from capri_mod.data.definitions import is_eu
+        rat = _pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0,
+                           float_precision="round_trip")
+        reg = (o.get("act_regional") or (None,))[0] or {}
+        for m, c in ACT_RATIO.items():
+            r30 = _sum(ref_lv, c, lambda d, k: d.get(k))
+            if not r30 or m not in rat.columns:
+                continue
+            tot, seen = 0.0, 0
+            for rg, lv in reg.items():
+                if not is_eu(rg) or m not in (lv or {}):
+                    continue
+                q = rat.at[rg, m] if rg in rat.index else float("nan")
+                if float(lv[m] or 0.0) > 0 and q == q and q > 0:
+                    tot += float(lv[m]) / float(q)
+                    seen += 1
+            if seen:
+                out.append(("activity (CAPRI units)", m, c, tot, r30))
+        # the 2017 base the same way: the model's 2017 herds of the EU units (animal_numbers.csv) over the same ratio
+        # against CAPREG's EU27 2017 levels (the sum over the member states of res_17<CC>'s LEVL)
         an = _pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "animal_numbers.csv", index_col=0,
-                         float_precision="round_trip")
-        an = an[[not str(r).startswith("NO") for r in an.index]].sum()
+                          float_precision="round_trip")
         l17 = {}
         for line in open(ROOT / "capri_data" / "validation" / "capri_eu27_levels_2017_capreg.csv").read().splitlines()[1:]:
             k, v = line.split(",")
             l17[k] = float(v)
-        for m, col, c in (("BULL", "BULL", "BULF"), ("HFRS", "HEIF", "HEIF+HEIR"), ("PIGF", "PIGF", "PIGF"),
-                          ("BROI", "POUL", "POUF")):
-            r30 = _sum(ref_lv, c, lambda d, k: d.get(k))
+        for m, col, c, u in (("BULL", "BULL", "BULF", 1.0), ("HFRS", "HEIF", "HEIF+HEIR", 1.0), ("PIGF", "PIGF", "PIGF", 1.0),
+                             ("BROI", "POUL", "POUF", 1000.0), ("PIGS", "PIGS", "SOWS", 1.0)):
             r17 = _sum(l17, c, lambda d, k: d.get(k))
-            if m in ab and col in an.index and r30 and r17 and an[col] > 0:
-                u = 1000.0 if m == "BROI" else 1.0   # broilers: animal_numbers in 1000s of the activity unit
-                out.append(("growth 2017-2030", m, c, float(ab[m]) / (float(an[col]) * u) * 100, r30 / r17 * 100))
+            if not r17 or col not in an.columns or m not in rat.columns:
+                continue
+            tot = 0.0
+            for rg in an.index:
+                q = rat.at[rg, m] if rg in rat.index else float("nan")
+                if is_eu(rg) and q == q and q > 0:
+                    tot += float(an.at[rg, col]) * u / float(q)   # broilers: animal_numbers in 1000s of the unit
+            out.append(("2017 herd (CAPRI units)", m, c, tot, r17))
     except FileNotFoundError:
         pass
     bm = o.get("base_market") or {}
@@ -148,16 +190,26 @@ def rows(o):
             continue
         if ru and m in cons:
             out.append(("domestic use", m, c, float(cons[m]), ru))
-    pr = []
-    for m, c in MKT.items():
-        if "+" in c:
-            continue
-        rv = (bal.get(c) or {}).get("UVAP")
-        if rv and price.get(m):
-            pr.append((m, c, float(price[m]), float(rv)))
-    if pr:
-        defl = float(np.median([p / r for _, _, p, r in pr]))
-        out += [("price (relative)", m, c, p / defl, r) for m, c, p, r in pr]
+    # market prices: CAPRI's member states' PMRK weighted by their production (by market use where the EU produces
+    # none), as the model's EU27 row weights its blocks; the same money (the market works in CAPRI's 2030 prices)
+    fp = ROOT / "capri_data" / "validation" / "capri_ms_market_prices_2030_ref.csv"
+    if fp.exists():
+        import csv as _csv
+        pm = {}
+        with open(fp, newline="") as fh:
+            for r_ in _csv.DictReader(fh):
+                pm.setdefault(r_["product"], []).append((float(r_["pmrk_eur_t"]), float(r_["grof_kt"]),
+                                                         float(r_["domm_kt"])))
+        for m in MKT:
+            c = PRICE_CODE.get(m, m)
+            v = pm.get(c)
+            if not v or not price.get(m):
+                continue
+            wp = sum(g for _, g, _ in v)
+            w = [(p_, g if wp > 0 else d) for p_, g, d in v]
+            sw = sum(x for _, x in w)
+            if sw > 0:
+                out.append(("market price", m, c, float(price[m]), sum(p_ * x for p_, x in w) / sw))
     return out
 
 

@@ -24,6 +24,23 @@ INSERT INTO value_units VALUES
   ('feed_fodder_value_2030', 'value_eur_t', NULL, 'open', 'EUR of 2017 per t fed (CAPRI''s UVAG over its 2030 deflator; the builder; no unit code in the catalogue)'),
   ('feed_fodder_value_2030', 'uvag_capri_2030', NULL, 'open', 'CAPRI''s UVAG, EUR of 2030 per t fed (the builder; no unit code in the catalogue)');
 
+-- file: capri_data/baselines/capri_greendeal_ref/1730/feed/milk_for_feeding_2030.csv
+CREATE TABLE feed_milk_for_feeding_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    product VARCHAR NOT NULL CHECK (product IN ('COMF', 'SGMF')),
+    feed VARCHAR NOT NULL CHECK (feed IN ('FCOM', 'FSGM')),
+    animal VARCHAR NOT NULL CHECK (animal IN ('DCOW', 'BCOW', 'SHGM')),
+    output_t_head DOUBLE NOT NULL CHECK (output_t_head > 0),
+    value_eur_t DOUBLE NOT NULL CHECK (value_eur_t > 0),
+    uvag_capri_2030 DOUBLE NOT NULL CHECK (uvag_capri_2030 > 0),
+    PRIMARY KEY (region, product, animal)
+);
+COMMENT ON TABLE feed_milk_for_feeding_2030 IS 'CAPRI''s milk for feeding at its 2030 calibration point (COMF, SGMF: non-tradable outputs fed as FCOM, FSGM; SUPBAL_ with losses): the producing animals'' output per head and the milk''s value (UVAG, the balance''s dual) in 2017 money (KNOWN_ISSUES K189; tools/build/build_milk_for_feeding_2030.py)';
+INSERT INTO value_units VALUES
+  ('feed_milk_for_feeding_2030', 'output_t_head', NULL, 'open', 't of milk for feeding per head (CAPRI''s dataOut output per head over 1000; the builder; no unit code in the catalogue)'),
+  ('feed_milk_for_feeding_2030', 'value_eur_t', NULL, 'open', 'EUR of 2017 per t (CAPRI''s UVAG over its 2030 deflator; the builder; no unit code in the catalogue)'),
+  ('feed_milk_for_feeding_2030', 'uvag_capri_2030', NULL, 'open', 'CAPRI''s UVAG, EUR of 2030 per t (the builder; no unit code in the catalogue)');
+
 -- file: capri_data/2017/feed/livestock_feed_coef.csv
 -- layout: wide, unnamed
 CREATE TABLE feed_livestock_feed_coef (

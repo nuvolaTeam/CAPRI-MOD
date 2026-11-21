@@ -48,6 +48,40 @@ BUTTON_CSS = """
 """
 BTN = dict(scale=0, min_width=0, elem_classes=["capri-btn"])
 
+#: the tabs as a menu (the project lead, 18 November 2026: Gradio's tabs read as plain text): bold labels on a tinted
+#: ground with a frame, the open tab in the accent colour with a bar under it, the disabled ones dimmed. The page's top
+#: tabs carry the class capri-tabs-top, the results' tabs capri-tabs-sub; the tabs nested in either take the sub style.
+#: Gradio's theme variables, so the dark theme follows
+_TAB = 'button[role="tab"]'
+_TABS_TOP = f".capri-tabs-top > .tab-wrapper {_TAB}"
+_TABS_SUB = (f".capri-tabs-sub > .tab-wrapper {_TAB}, .capri-tabs-sub .tabs > .tab-wrapper {_TAB}, "
+             f".capri-tabs-top .tabs > .tab-wrapper {_TAB}")
+
+
+def _sel(group: str, suffix: str) -> str:
+    return ", ".join(x.strip() + suffix for x in group.split(","))
+
+
+TAB_CSS = f"""
+{_TABS_TOP}, {_TABS_SUB} {{
+  font-weight: 600 !important; color: var(--body-text-color) !important;
+  background: var(--background-fill-secondary) !important;
+  border: 1px solid var(--border-color-primary) !important; border-bottom: none !important;
+  border-radius: 8px 8px 0 0 !important; margin-right: 4px !important; padding: 0.45em 1em !important;
+}}
+{_TABS_TOP} {{ font-weight: 700 !important; font-size: 1.05rem !important; padding: 0.55em 1.25em !important; }}
+{_sel(_TABS_TOP, ".selected")}, {_sel(_TABS_SUB, ".selected")} {{
+  background: var(--color-accent-soft) !important; color: var(--color-accent) !important;
+  box-shadow: inset 0 -3px 0 var(--color-accent) !important;
+}}
+{_sel(_TABS_TOP, ":hover:not(:disabled):not(.selected)")}, {_sel(_TABS_SUB, ":hover:not(:disabled):not(.selected)")} {{
+  background: var(--background-fill-primary) !important; color: var(--color-accent) !important;
+}}
+{_sel(_TABS_TOP, ":disabled")} {{ opacity: 0.45 !important; cursor: not-allowed !important; }}
+"""
+#: the results page's style: the buttons and the tabs
+PAGE_STYLE = BUTTON_CSS + TAB_CSS
+
 
 # Gradio 5 and 6 both: Gradio 6.0 moved css from the Blocks constructor to launch(), replaced launch(show_api) by
 # footer_links and dropped Chatbot(type=...) (messages are its only format). The keyword arguments for the version
@@ -273,7 +307,7 @@ def _named(table: pd.DataFrame, down: str, across, block=None) -> pd.DataFrame:
 def build(stores: list):
     """The results browser as a page of its own."""
     import gradio as gr
-    with gr.Blocks(title="capri-mod results", **blocks_args(BUTTON_CSS)) as app:
+    with gr.Blocks(title="capri-mod results", **blocks_args(PAGE_STYLE)) as app:
         gr.Markdown("## capri-mod results browser\nRead-only view of stored runs (`results_dir`). "
                     "Pick a store and a run; the filters narrow the rows, the pivot puts one dimension down and one "
                     "across.")
@@ -294,7 +328,7 @@ def add_results(stores: list, app):
         store = gr.Dropdown(store_names, value=store_names[0], label="results store", allow_custom_value=True)
 
         # the result tabs; the page opens on the comparison with CAPRI
-        with gr.Tabs(selected="capri"):
+        with gr.Tabs(selected="capri", elem_classes=["capri-tabs-sub"]):
             # ------------------------------------------------------------------ runs
             with gr.Tab("Runs"):
                 gr.Markdown("The runs in the store, newest first. Pick one to see how it converged, its metadata and "
@@ -779,7 +813,7 @@ def main():
     missing = [s for s in stores if not (s / "runs").exists()]
     if missing:
         raise SystemExit(f"not a results store (no runs table): {', '.join(map(str, missing))}")
-    build(stores).launch(server_name=a.host, server_port=a.port, **launch_args(BUTTON_CSS))
+    build(stores).launch(server_name=a.host, server_port=a.port, **launch_args(PAGE_STYLE))
 
 
 if __name__ == "__main__":

@@ -20,6 +20,12 @@ from typing import Dict, Tuple
 
 import numpy as np
 
+from capri_mod.market.equations.market_model.armington import (SupBalM_, arm2QuantShares_, domSalesShares_,
+                                                               importShares_)
+from capri_mod.market.equations.market_model.border import trqSigmoidFunc_
+from capri_mod.market.equations.market_model.prices import (arm1PriceAgg_, arm1PriceAgg_term, arm2PriceAgg_,
+                                                            arm2PriceAgg_term, impPrice_)
+
 _CACHE: Dict[tuple, object] = {}
 
 
@@ -46,38 +52,38 @@ def _system(sc, act, ca, z, A, B, Sk, Dk, rk, PAk, es, ed, offsets=None):
     for i in range(n):
         for j in range(n):
             if beta[i, j] > 0:
-                pij = A[i, j] * r[j] + B[i, j]
+                pij = impPrice_(A[i, j], r[j], B[i, j])
                 if (i, j) in off:
                     pij = pij + off[i, j]
                 p[i, j] = ca.fmax(pij, 1e-9)
     PM, PA = [], []
     for i in range(n):
-        terms = [beta[i, j] * p[i, j] ** (1.0 - s2) for j in range(n) if beta[i, j] > 0]
-        PM.append(ca.sum1(ca.vertcat(*terms)) ** (1.0 / (1.0 - s2)) if (sc._has_imp[i] and terms)
+        terms = [arm2PriceAgg_term(beta[i, j], p[i, j], s2) for j in range(n) if beta[i, j] > 0]
+        PM.append(arm2PriceAgg_(ca.sum1(ca.vertcat(*terms)), s2) if (sc._has_imp[i] and terms)
                   else float(sc.PM0[i]))
         pa = 0
         if sc._has_dom[i]:
-            pa = pa + float(sc.dd[i]) * Pd[i] ** (1.0 - s1)
+            pa = pa + arm1PriceAgg_term(float(sc.dd[i]), Pd[i], s1)
         if sc._has_imp[i]:
-            pa = pa + float(sc.dm[i]) * PM[i] ** (1.0 - s1)
-        PA.append(pa ** (1.0 / (1.0 - s1)) if (sc._has_dom[i] or sc._has_imp[i]) else float(sc.PA0[i]))
+            pa = pa + arm1PriceAgg_term(float(sc.dm[i]), PM[i], s1)
+        PA.append(arm1PriceAgg_(pa, s1) if (sc._has_dom[i] or sc._has_imp[i]) else float(sc.PA0[i]))
     S = [Sk[i] * (r[i] / rk[i]) ** es[i] for i in range(n)]
     D = [Dk[i] * (PA[i] / PAk[i]) ** ed[i] for i in range(n)]
-    DS = [D[i] * float(sc.dd[i]) * (PA[i] / Pd[i]) ** s1 if sc._has_dom[i] else 0 for i in range(n)]
-    M = [D[i] * float(sc.dm[i]) * (PA[i] / PM[i]) ** s1 if sc._has_imp[i] else 0 for i in range(n)]
+    DS = [domSalesShares_(D[i], float(sc.dd[i]), PA[i], Pd[i], s1) if sc._has_dom[i] else 0 for i in range(n)]
+    M = [arm2QuantShares_(D[i], float(sc.dm[i]), PA[i], PM[i], s1) if sc._has_imp[i] else 0 for i in range(n)]
 
     def flow(i, j):
         if i == j:
             return DS[j]
-        return M[i] * beta[i, j] * (PM[i] / p[i, j]) ** s2 if beta[i, j] > 0 else 0
+        return importShares_(M[i], beta[i, j], PM[i], p[i, j], s2) if beta[i, j] > 0 else 0
 
     res = []
     for j in act:
         sold = DS[j]
         for i in range(n):
             if i != j and beta[i, j] > 0:
-                sold = sold + M[i] * beta[i, j] * (PM[i] / p[i, j]) ** s2
-        res.append(S[j] - sold)
+                sold = sold + importShares_(M[i], beta[i, j], PM[i], p[i, j], s2)
+        res.append(SupBalM_(S[j], sold))
     return res, flow
 
 
@@ -163,8 +169,7 @@ def trade_trq_function(sc, act):
     for m, k in enumerate(qk):
         q = sc.trq_quotas[k]
         fill = sum((flow(int(i), int(j)) for i in q["rows"] for j in q["cols"]), 0)
-        arg = ca.fmin(ca.fmax(slope * (fill / q["Q"] - mid), -clip), clip)
-        trq.append(sg[m] - 1.0 / (1.0 + ca.exp(-arg)))
+        trq.append(sg[m] - trqSigmoidFunc_(fill / q["Q"], slope, mid, clip))
     g = ca.vertcat(ca.vertcat(*res) / scale, *trq)
     x = ca.vertcat(z, sg)
     f = ca.Function("trade_trq_" + sc.name, [z, sg, A, B, Sk, Dk, rk, PAk, es, ed, scale], [g, ca.jacobian(g, x)])
