@@ -166,6 +166,10 @@ code errors (findings S3 and S4 of the supply audit, ARCHITECTURE_REFACTOR.md se
 with FIX-6's setting: `--settings capri_mod/settings/capri_comparison.toml`. Measured on the full-EU 2030 Green Deal
 run, both false against both true: EU producer prices' mean gap to CAPRI 1.6 -> 1.2 points, member states'
 activities 5.2 -> 4.6 (Lithuania's and Finland's cereal areas close to CAPRI's).
+The Farm-to-Fork runs compared with JRC121368 take the defaults (the project lead, 21 November 2026): JRC121368 was
+produced with the CAPRI of 2020-21 and its own baseline, and whether that version had this error and FIX-6's cannot be
+checked. The pair run after K192 still takes the comparison file for its Farm-to-Fork run, as the run at dev bb3b592
+did, so that the change between the two is the code's only.
 
 ### `supply.organic_topup_at_fuel_cost = true` (CAPRI as coded: `false`) — organic other-input top-up
 

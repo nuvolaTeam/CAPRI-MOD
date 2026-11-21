@@ -7,6 +7,11 @@
 #
 # Measured on the full-EU 2030 Green Deal run (19 November 2026, both false against both true): EU producer prices'
 # mean gap to CAPRI 1.6 -> 1.2 points, member states' activities 5.2 -> 4.6.
+#
+# Not for the Farm-to-Fork comparison with JRC121368 (the project lead, 21 November 2026): JRC121368 was produced
+# with the CAPRI of 2020-21 and its own baseline, and whether that version had the two code errors cannot be checked,
+# so those runs are compared at the defaults. The pair after K192 (21 November 2026) still takes this file for its
+# Farm-to-Fork run, like the run at dev bb3b592, so that the change from that run is the code's only.
 
 [supply]
 # FIX-5: the Green Deal input changes replace the 2017-2030 input-saving factor TF_I (capmod/define_inputs.gms l. 66-73,
