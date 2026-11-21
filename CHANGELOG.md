@@ -390,6 +390,23 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   plant_protection_capri_step_2030.csv took dataOut's regional UVAG (0.72-1.37 of it over the rows, 4.7% on average
   by area). Rebuilt from sim_ini_21730 (p_infl added to the export); column plap_uvap_eur_ha; Turkey's regions,
   without a UVAP of PLAP in sim_ini, dropped. Changes the crop-level switch's values; effect not measured.
+- **K48 concluded, K196 registered (21 November 2026; documentation):** the whole EU at CAPRI's Green Deal product
+  and young-animal prices at 8859b15 (capri_comparison.toml, 12 iterations), the suckler cows' first-order conditions
+  set against CAPRI's breakdown (dataOut D_*) in nine units. Per head the market and premium terms are within 6-20 EUR
+  of CAPRI's, the manure's nutrient value 4-35 lower, and the N-surplus row 26-108 EUR less costly: its coefficient is
+  CAPRI's (MANN), its dual lower. CAPRI's dual, recovered from its results (an animal's D_PROV change over its MANN, the
+  same for its twelve animal activities within 1.7% at the median), is 1.11-1.32 times the model's in these units; over
+  the EU the suckler cows' gap follows the ratio (correlation -0.72 at CAPRI's prices, -0.66 in the converged full run
+  at bb3b592, where the median ratio is 0.89). K48 closed (the young-animal block is CAPRI's); K196, the N-surplus dual
+  below CAPRI's, open. Found with it: the 12-iteration probes at CAPRI's prices end with the manure pools out of
+  balance (export changes above import changes by 192-204 kt N; the converged full run 29 kt), which lowers their
+  duals.
+- **The Spanish technology shift concluded (21 November 2026):** in the same run (both DEP-51 comparison switches,
+  K191, K189's yield factors, K195) the shift's yield effect is 0.975 of CAPRI's over nine units, area-weighted (ES41
+  0.94, ES42 0.94, PT18 0.91, DE21 1.13; mean gap 1.2 points; 2.47 over six units on 19 November); ES41's potassium need dual stays at
+  the purchase price (0.568 EUR/kg, base and Green Deal; 0.142 in the Green Deal before), PT18's other arable fodder
+  -7.7% (CAPRI -5.7; -19.0 in the Bonn-settings run of 20 November). Left: ES42's rye area +17.6% against CAPRI's +0.7% (its shift -8.5 against
+  -11.4%), with the N-surplus dual (K196).
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against

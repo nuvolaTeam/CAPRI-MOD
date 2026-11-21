@@ -16,7 +16,6 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K13](#k13) | Farm-to-Fork milk price | open: waiting for CAPRI's scenario results |
 | [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open: waiting for CAPRI's scenario results |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | closed (17 November 2026): CAPRI's stop rule settles it (young-animal imbalance 0.0004); a 1e-05 price change leaves the beef price unchanged |
-| [K48](#k48) | Young-animal prices against CAPRI's own market run | open: the female calves' chain, located 21 November 2026 in the suckler cows' smaller Green Deal fall at CAPRI's prices (EU_WEST -23.7% against -28.0%, France and Spain); the young-animal values, coefficients and base levels are CAPRI's; the replacement cows' gap closed (19 November 2026) |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | fixed (17 November 2026): they converge on the full EU (14 iterations) and are on by default |
 | [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open: waiting for CAPRI's scenario results |
 | [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open: waiting for CAPRI's scenario results |
@@ -48,8 +47,9 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K149](#k149) | Norway's raw milk row took the young-animal prices of a clearing without the milk price change, its other rows those of a second clearing with it (CAPRI: one set) | fixed (14 November 2026) |
 | [K150](#k150) | The non-EU regions' raw milk at the market's base is FAO_agg's production, not CAPRI's market data (milk delivered to the dairies): Turkey 20,173 kt against CAPRI's 13,145 | fixed (14 November 2026), validated (15 November 2026, the full Green Deal pair) |
 | [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences; sorted 20 November 2026: most are in the accounts only or have no effect in the step; ARTIF held fixed had one (small for the EU, a few thousand ha in some Spanish and French units) | open: ARTIF, the milk for feeding and the yield factors of the crops' N and P terms ported 20 November 2026 (as CAPRI's); the animals' per-head terms ported 21 November 2026 (the members' INPO difference under the Green Deal's input change) |
+| [K196](#k196) | The Green Deal's N-surplus dual is below CAPRI's (CAPRI's recovered from its own results): median 0.89 of CAPRI's in the converged full run, 0.83 at CAPRI's prices; the suckler cows' and the technology shift's remaining gaps follow it | open (21 November 2026) |
 
-## Resolved (126)
+## Resolved (127)
 
 | # | Issue | Status |
 |---|---|---|
@@ -84,6 +84,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K179](#k179) | The 2030 runs took the 2017 manure N, P2O5 and K2O per head (dairy cows' N raised with the milk yield): CAPRI computes them from the simulation year's rations before it solves; the EU's N excretion at the 2030 base 5.4% above CAPRI's 2030 EXCRET (dairy cows +13%) | fixed (18 November 2026) |
 | [K190](#k190) | The grassland need took CAPRI's SQRT(1 +/- 0.2) split twice: the data's need per ha (CAPRI's reported 2030 need per crop) already carries it, and K160 applied it again; ES41's base manure K on grassland 53.6 against CAPRI's 42.0 kt | fixed (20 November 2026); the intensive grassland's weaker Green Deal response that followed traced to K191 (the grassland's removal and fixation in the N-surplus row) |
 | [K186](#k186) | The catch crops' winter cover option scales with the fixed base crop area; CAPRI's catcMiti_ and GHG_Mit_Cost_ scale it with the current land (landTypesNoSlak, uaaEqu). Not active in CAPRI's Green Deal step (its winter cover share fixed at 1e-6, CATC a free activity) | fixed (21 November 2026): the option's catch crops and cost on the current land, as CAPRI |
+| [K48](#k48) | Young-animal prices against CAPRI's own market run | closed (21 November 2026), explained: the young-animal block is CAPRI's (values, coefficients, premiums' response, clearing); the female calves' gap is the suckler cows' smaller Green Deal fall, which follows the N-surplus dual below CAPRI's (K196) |
 | [K195](#k195) | The comparison switch's CAPRI step valued each crop's plant protection at dataOut's regional UVAG(PLAP); CAPRI's p_linObjeCont takes the member state's UVAP of the simulation year | fixed (21 November 2026), as CAPRI |
 | [K194](#k194) | The low-N feeding option was built on CAPREG's 2017 requirement correction (and res_17's MANN, CRPR_EXPT and levels), where CAPRI's 2030 simulation uses the 2030 requirements sim_ini_21730 holds | fixed (21 November 2026), as CAPRI |
 | [K193](#k193) | The emission tax runs stopped at the writing of their results table: the run's abatement block (the tax) was not declared in results_items.csv | fixed (21 November 2026) |
@@ -683,9 +684,38 @@ Check against CAPRI's cap_after_2014 run without voluntary coupled support (tool
   further here: the suckler cows' margin terms in FR72 and ES43 against CAPRI's dataOut breakdown (D_ terms).
   A seven-unit run of the same probe (the units with CAPRI's largest female-calf changes) is not representative: its
   manure pool has seven units, and ES41's suckler cows fell -44.3% there (whole EU -17.3%, CAPRI -22.4%).
-- **Status:** **open** (the female calves' chain, now located in the suckler cows' Green Deal response in France and
-  Spain; the male calves' and young cattle's prices follow the beef price); the replacement cows' gap closed in the
-  re-run (19 November 2026)
+- **Concluded (21 November 2026, dev 8859b15):** the same probe on the whole EU with the regional NLP's first-order
+  conditions written out for nine units (runs/k48_eu_dec.pkl; capri_comparison.toml, 12 iterations; scratchpad
+  k48_dec_probe.py, k48_scow_cmp.py, dual_eu.py), set against CAPRI's own breakdown of its suckler cows (dataOut D_*
+  of SCOW, which sum to zero as D_O + D_PREM + D_NUT + D_YANI + D_FEED + D_OBJC + D_PMPL + D_PMPF - D_PROV, D_PROV the
+  rows margcr.gms does not report). Per suckler cow, Green Deal less reference, EUR per head in the model's money, model
+  against CAPRI (FR72, FR51, FR26, ES43, ES41, ES42, DE21, PT18, IR01):
+  - market and premiums +54 to +142 against +60 to +151, 6-20 lower in every unit; in France and Spain 3-5 EUR of it
+    is the probe's replacement cows at the block's PMRK ratio (1.324) where CAPRI's suckler cows pay its regional UVAG
+    (1.316 and 1.304), the rest, by elimination, the feed (not traced); the premium cut's response is CAPRI's (the
+    suckler cows' factor in France 1.104-1.108 against CAPRI's PRME 194.02 / 176.05 = 1.102, in Spain 1.009 against
+    1.009);
+  - the manure's nutrient value (NUTNED_) +17 to +217 against +22 to +250, 4-35 lower (it follows the N duals);
+  - the rows CAPRI's report leaves out (D_PROV; in the model the N-surplus row): -254 to -484 against -310 to -592,
+    26-108 EUR less costly in the model. The row's coefficient is CAPRI's (MANN per head, FR72 77.37 kg N); its dual
+    is lower. CAPRI's surplus dual is recovered from its own results as the D_PROV change over MANN: the same for its
+    twelve animal activities within 1.7% at the median over 238 units (p90 9.2%), so D_PROV is that row. Model /
+    CAPRI (EUR per kg N, model money): FR72 3.26 / 4.01, FR51 6.13 / 7.92, FR26 4.90 / 6.19, ES43 4.85 / 6.33, ES41
+    4.99 / 5.75, ES42 5.27 / 6.17, DE21 4.74 / 6.25, PT18 3.80 / 4.23, IR01 3.47 / 4.07.
+  Over the EU (214 units with a binding target) the dual is 0.83 of CAPRI's at the median, and the suckler cows' gap
+  follows it: herd-weighted correlation -0.72 between a unit's dual ratio and its suckler-cow gap (163 units); by member
+  state France 0.78 (-21.9% against -28.5%), Germany 0.75 (-15.2 / -20.4), Spain 0.82 (-13.1 / -19.3), Poland 0.77
+  (-26.4 / -33.2); Italy 1.00 (-36.7 / -36.4), Finland 0.98 (-17.9 / -19.0).
+  Caveat on the probes at CAPRI's prices (this one and that of the morning): after 12 iterations the manure pools
+  are out of balance, the EU units' export changes above their import changes by 192 kt N (the
+  morning probe 204 kt; the converged full Green Deal run at bb3b592 29 kt), which lowers the duals; the probes'
+  herd-weighted suckler-cow gap of 4.8 points is partly that. In the converged full run (bb3b592, the model's prices)
+  the dual is 0.89 of CAPRI's at the median, the suckler cows' herd-weighted gap 0.4 points (the beef price's smaller
+  rise, +18.6% against +20.0%, works the other way), the correlation -0.66; France -25.1% against -28.5% at a dual
+  of 0.82.
+- **Status:** **closed** (21 November 2026), explained: the young-animal values, coefficients, the premiums' response
+  and the markets' clearing are CAPRI's; the female calves' remaining gap is the herds' response to the N-surplus dual
+  below CAPRI's, registered as [K196](#k196). The replacement cows' gap closed in the re-run (19 November 2026)
 
 <a id="k49"></a>
 ### K49: Diagnosis of the regions where CAPRI's crop-group allocation fails (20 October 2026): not the solver
@@ -3886,6 +3916,34 @@ sim_ini's DATA has the need and the margins still show none.
   fallow need, as CAPRI's v_cropNutNeedMultFact. In the model's data
   FALL (247 regions) and VSET (166) have area without a main-output yield, no other crop. Test:
   test_capri.py::test_fallow_and_set_aside_have_no_nutrient_need
+
+<a id="k196"></a>
+### K196: The Green Deal's N-surplus dual is below CAPRI's (found 18 November 2026, registered 21 November 2026)
+
+CAPRI's dual of its N-surplus row (SURTOT_REST_) is recovered from its own Green Deal results as the change of an
+animal's D_PROV (the rows margcr.gms does not report) over its MANN per head: the same for its twelve animal
+activities within 1.7% at the median over 238 units (p90 9.2%), and the line through its crops gives the same within a
+few % (claude/n_surplus_dual_diagnosis.md). The model's dual (the NLP's N_balance row) is lower: in the converged full
+Green Deal run at bb3b592 (capri_comparison.toml) 0.889 of CAPRI's at the median over the 214 units with a binding
+target (IQR 0.835-0.973; by member state, weighted by the suckler cows, France 0.82, Germany 0.86, Netherlands 0.85,
+Spain 0.87; Italy, Lithuania, Finland, Croatia about 1); at CAPRI's prices (the probes of K48, 12 iterations, pools out of balance by 192-204 kt N) 0.83-0.87.
+
+- **Effect:** the herds' Green Deal response (the suckler cows' gap follows the dual ratio, correlation -0.66 in the
+  full run; K48), the manure's nutrient value, the crops' technology shift and mineral N (the N terms dominate the mix
+  columns; the shift at CAPRI's prices 0.94 of CAPRI's in ES41 and ES42 with DEP-51's comparison switches on).
+- **What is CAPRI's:** the cut and its make-up (EU surplus -29.1% against -28.6%, mineral N -34.2 against -33.9,
+  claude/n_surplus_dual_diagnosis.md step 2), the row's coefficients (MANN per head, the crops' removal, residues and
+  fixation since K191), the per-crop mineral caps (step 6).
+- **Leads:** (1) the inhibitor on manure: adopted by the model where CAPRI's Green Deal has none (FR52 0.86, ES51
+  0.80 after K183) or less (ES41, ES42); switching it off in FR52 moved its dual 5.82 -> 6.05 (19 November 2026, a
+  diagnostic). The parameters asked of the project lead for France are in sim_ini_21730 itself (p_ghgMiti, 12,458
+  records; NITR_INH at the member states, cropMiti N2OSYN; the manure entries are derived in the simulation,
+  envind/ghgMiti.gms l. 115-117 and 301-302); the options' calibration is a registered departure (DEP-30, K77).
+  (2) Ireland's grassland extensifies less (GRAI -36% against -56.5% in a six-unit probe, whose pool has one Irish
+  unit). (3) The pool imbalance of the 12-iteration probes at CAPRI's prices (above) lowers their duals; a converged
+  probe is needed before a unit-by-unit comparison at CAPRI's prices.
+- **In 9t:** -
+- **Status:** open (21 November 2026).
 
 <a id="k195"></a>
 ### K195: CAPRI's Green Deal step's plant protection at the member state's UVAP (found and fixed 21 November 2026)
