@@ -192,6 +192,7 @@ attribute's getattr did.
 - `mcap_cache`: the mineral caps by region
 - `mctx_cache`: CAPRI's crop nutrient balance terms by region
 - `genetics_key`: the settings key of the genomics calibration
+- `mitigation_scope`: the run's endotech switches (fallowInAllRmssup, winterCovInAllRmssup, ghgTechAmmEndog), set on each regional model, also on the ones built after the switches were set (K192)
 
 ## Supply module: sv (ModuleSolveState)
 

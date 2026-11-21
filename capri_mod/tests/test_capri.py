@@ -587,6 +587,30 @@ def test_ammonia_options_held_at_initial_shares_by_default():
         assert blk._amm_incentive(["N_balance"])
 
 
+def test_the_runs_endotech_switches_reach_the_models_built_later(model):
+    """K192: CAPRIModel._apply_endotech sets the scenario's switches before a run's first solve builds its regional
+    models; a model built afterwards takes them (it took the global settings' values: the Farm-to-Fork run of 21
+    November 2026 held its ammonia options at their initial shares with JRC121368's ghgTechAmmEndog 1)."""
+    sm = model.supply_module
+    r = "BL210000"
+    names = ("fallow_in_all_rmssup", "wintercov_in_all_rmssup", "amm_endog")
+    seen0 = {k: tuple(getattr(m.seen, n, None) for n in names) for k, m in sm._models.items()}
+    keep_model, keep_scope = sm._models.pop(r, None), getattr(sm.par, "mitigation_scope", None)
+    try:
+        sm.set_mitigation_scope({"fallowInAllRmssup": 0.0, "winterCovInAllRmssup": 1.0, "ghgTechAmmEndog": 1.0})
+        m = sm._get_or_build_model(r)
+        assert tuple(getattr(m.seen, n) for n in names) == (False, True, True)
+        assert m._amm_incentive(["N_balance"]) and not m._amm_incentive([])
+    finally:
+        sm._models.pop(r, None)
+        if keep_model is not None:
+            sm._models[r] = keep_model
+        sm.par.mitigation_scope = keep_scope
+        for k, vals in seen0.items():
+            for n, v in zip(names, vals):
+                setattr(sm._models[k].seen, n, v)
+
+
 def test_feed_supplements_follow_capri(model):
     """CAPRI's feed supplements (envind/line_nitr.gms, star 3.0 ghgTechLineNitr = 1, a switch): cattle only;
     nitrate replaces crude protein (1.54 x dosage of DM), linseed supplies the OOIL nutrients per kg of fat / rapeseed

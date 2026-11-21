@@ -336,6 +336,21 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   rations priced the milk at 0 and nothing tied it to the cows. ES41's 2030 base: use = output = 271.56 thousand t,
   dual 120.4 against CAPRI's 119.8 EUR/t. Five-unit Green Deal probe: herds and young-animal prices unchanged within
   0.4 thousand and the third digit, so not K48's cause. Test: test_milk_for_feeding_is_capris_balance.
+- **The full-EU pair at dev bb3b592 (21 November 2026, capri_comparison.toml):** the Green Deal converged in 30
+  iterations (6,845 s); against CAPRI's Green Deal step, beside full_gd_k188_cmp: the crops' mean gap 1.08 -> 0.85
+  points, the herds' 1.0 -> 0.7, the EU producer prices' 1.3 -> 0.8, the model / CAPRI median 0.87 -> 0.93. The
+  Farm-to-Fork converged in 16 iterations (4,759 s); its mean deviation from JRC121368 over the 20 indicators 7.06
+  points (the 14 November run at the default settings, before K152, 4.77): prices higher (cereals +17.8%, beef +44.5,
+  milk +29.9; JRC121368 +8.2, +24.1, +1.1), ammonia -19.5% (-33.0). The runs differ in their settings and in 59 inputs; found there: K192, the run held every
+  ammonia option at its initial share (how much of the gap it explains is to be measured in the next run).
+- **K192, the scenario's endogenous-technology switches reach every regional model:** the run set them
+  (set_mitigation_scope) on the models that existed, and a run's first call comes before its models are built, so the
+  models took the global [endotech] values; the Farm-to-Fork run's ghgTechAmmEndog 1 (JRC121368's, K152) was not
+  applied and its 19,303 ammonia option cells stayed at their initial shares. The switches are now kept and set on
+  each model built (supply_module.py _set_mitigation_scope_of). The Green Deal runs are not affected (ghgTechAmmEndog
+  0, the global value). Three-unit Farm-to-Fork probe (4 iterations, not converged): the options move (DE21 pig
+  fattening's high-efficiency spreading 0.15 -> 0.80), the N-surplus dual DE21 7.95 -> 3.84 EUR per kg N, FR52 21.95
+  -> 14.49, NL22 16.97 -> 9.86. Test: test_the_runs_endotech_switches_reach_the_models_built_later.
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against

@@ -2232,10 +2232,19 @@ class SupplyModule(ModuleStateMixin):
         initial shares (0; set_miti_bounds.gms l. 209-211)."""
         fal, wc = float(settings["fallowInAllRmssup"]) > 0, float(settings["winterCovInAllRmssup"]) > 0
         amm = float(settings.get("ghgTechAmmEndog", 0.0)) > 0
+        # kept for the regional models built later (_get_or_build_model): a run's first call comes before its
+        # models exist, and they then took the global settings' values (found 21 November 2026: the Farm-to-Fork
+        # run's ammonia options at their initial shares, its ghgTechAmmEndog 1 not applied; KNOWN_ISSUES K192)
+        self.par.mitigation_scope = (fal, wc, amm)
         for m in self._models.values():
-            m.seen.fallow_in_all_rmssup = fal
-            m.seen.wintercov_in_all_rmssup = wc
-            m.seen.amm_endog = amm
+            self._set_mitigation_scope_of(m)
+
+    def _set_mitigation_scope_of(self, m) -> None:
+        """The run's endotech switches (set_mitigation_scope) on one regional model; nothing before they are set."""
+        scope = getattr(self.par, "mitigation_scope", None)
+        if scope is None:
+            return
+        m.seen.fallow_in_all_rmssup, m.seen.wintercov_in_all_rmssup, m.seen.amm_endog = scope
 
     def set_genetics_effects(self, table: Optional[dict], settings_key: tuple) -> None:
         """Cattle genomics at the run's technology settings (capri_mod/policy/endotech.py). Each regional model
@@ -2368,6 +2377,7 @@ class SupplyModule(ModuleStateMixin):
                 eps = row.reindex(ALL_ACTIVITIES).fillna(eps)
             self._models[region] = RegionalSupplyModel(rd, eps, use_share_term=True)
             self._models[region].par.genet_key = getattr(self.par, "genetics_key", None)
+            self._set_mitigation_scope_of(self._models[region])
         return self._models[region]
 
     def _build_region_data(self, region: str) -> RegionData:
