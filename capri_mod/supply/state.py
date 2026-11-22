@@ -211,6 +211,7 @@ class RegionalResults(_Slots):
         "till_shares",        # the tillage options' shares (ConsTill, NoTill; envind/tillage.gms)
         "urea_share",         # the urea substitution's share (UreaSubst; envind/ammo_tech.gms)
         "legsh_share",        # the legume share's share of other arable fodder (LegSh; envind/leg_share.gms)
+        "supp_fat",           # the ration fat limit with linseed per animal (SupplementPerc_): percentage, slack, share
         "n_target_relaxed",   # the solve ended at JRC121368's relaxed N target
         # land: the manure pools, read by the manure market (coupling/manure.py)
         "manure_supply0",     # the region's manure N supply at the start

@@ -293,6 +293,22 @@ INSERT INTO value_units VALUES
   ('supplement_effects', 'shr_of_dm', 'U_ratio', 'capri', 'ShrOfDM, the supplement''s share of dry matter'),
   ('supplement_effects', 'param_switch', NULL, 'open', 'a switch (1 on)');
 
+-- file: capri_data/2017/abatement/mitigation/supplement_fat.csv
+CREATE TABLE supplement_fat (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    animal VARCHAR NOT NULL REFERENCES model_activities (code),
+    feed VARCHAR NOT NULL,
+    ee DOUBLE NOT NULL CHECK (ee >= 0 AND ee < 100),
+    dm_content DOUBLE NOT NULL CHECK (dm_content >= 0 AND dm_content <= 1),
+    tot_fat DOUBLE NOT NULL CHECK (tot_fat >= 0 AND tot_fat < 1),
+    PRIMARY KEY (region, animal, feed)
+);
+COMMENT ON TABLE supplement_fat IS 'The fat of the feed bulks per model region and cattle animal with linseed, the data of CAPRI''s ration fat limit SupplementPerc_ (supply_model.gms l. 608-633): ether extract (envind/digestibility.gms), dry-matter content and p_emisFeed TotFAT (envind/line_nitr.gms l. 175-176; tools/build/build_supplement_fat.py)';
+INSERT INTO value_units VALUES
+  ('supplement_fat', 'ee', 'U_percent', 'capri', 'p_digestPar(RU, CATACT, FEED, EE): the feed bulk''s ether extract, % of dry matter'),
+  ('supplement_fat', 'dm_content', 'U_ratio', 'capri', 'p_DryMatterContent(RU, FEED): dry matter per kg as fed'),
+  ('supplement_fat', 'tot_fat', 'U_ratio', 'builder', 'p_emisFeed(RU, CATACT, T, FEED, TotFAT): kg of fat per kg as fed');
+
 -- rule: the active technologies' options the model builds are in CAPRI's file
 SELECT option FROM (SELECT DISTINCT upper(option) AS option FROM fert_options_jul15) f
 WHERE option NOT IN (SELECT upper(technology) FROM active_technologies)

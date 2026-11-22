@@ -77,78 +77,114 @@ def read_dump(path, regions):
     return out
 
 
+def row_comp(T: dict, D: dict, ms: str, ru: str, GRAZ: float, nfix: float) -> dict:
+    """digestPar(ru, act, row, item) of the products, steps 1-4 (digestibility.gms l. 41-100), for an activity with
+    grazing share GRAZ; nfix the member state's rate after l. 44-45 (equations/digestibility.py
+    p_nfixRate_gras_digest). The statements of l. 31-60: capri_mod/supply/equations/digestibility.py."""
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT))
+    from capri_mod.supply.equations.digestibility import (
+        p_DryMatterContent, p_digestPar_GRAS, p_digestPar_OFAR, p_digestPar_FAT)
+    P = {row: dict(v) for row, v in T.items()}
+    P["GRAS"] = {it: p_digestPar_GRAS(GRAZ, nfix, *(T[r].get(it, 0.0) for r in ("GRPS", "LGPS", "GRSI", "LGSI", "GRHA",
+                                                                                "LGHA")))
+                 for it in set(T["GRPS"]) | set(T["GRSI"]) | set(T["GRHA"])}
+    gras = P["GRAS"]
+    fleg = D.get((ru, "FLEG", "LEVL"), 0.0)
+    if fleg:
+        P["OFAR"] = {it: p_digestPar_OFAR(gras.get(it, 0.0), T["LGSI"].get(it, 0.0), T["LGHA"].get(it, 0.0), fleg)
+                     for it in set(gras) | set(T["LGSI"]) | set(T["LGHA"])}
+    for row, p in P.items():
+        if p.get("EE", 0.0) >= 1:
+            p["FAT"] = p_digestPar_FAT(p["EE"], p.get("FAT"))
+        d_ = p_DryMatterContent(D.get((ru, "DRMA", row)), D.get((ms, "DRMA", row), 0.0))
+        fidi, crpr = D.get((ru, "FIDI", row), 0.0), D.get((ru, "CRPR", row), 0.0)
+        nf = fidi / d_ * 100 if (d_ and fidi) else 0.0
+        nc = crpr / d_ * 100 if (d_ and crpr) else 0.0
+        ndf, cp = p.get("NDF", 0.0), p.get("CP", 0.0)
+        out = (nf > ndf + max(ndf * 0.2, 5) or nf < ndf - max(ndf * 0.2, 5)
+               or nc > cp + max(cp * 0.2, 5) or nc < cp - max(cp * 0.2, 5))
+        if out:
+            nf = nc = 0.0
+        tot = nc + nf + p.get("FAT", 0.0) + p.get("ASH", 0.0) + p.get("NDICP", 0.0)
+        ok = tot <= 100 and nf > p.get("NDICP", 0.0)
+        if nc and ok:
+            p["CP"] = nc
+        if nf and ok:
+            p["NDF"] = nf
+        if p.get("CAT"):
+            p["NDF"] = max(p.get("NDF", 0.0), p.get("NDICP", 0.0) + 0.1)
+    return P
+
+
+def bulk_values(P: dict, D: dict, ms: str, ru: str, rows: list, items) -> dict:
+    """{item: digestPar(ru, act, FEED, item)} of a feed bulk with the products `rows` (step 5, digestibility.gms
+    l. 200-232: equations/digestibility.py p_digestPar_shFEED, p_digestPar_FEED)."""
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT))
+    from capri_mod.supply.equations.digestibility import p_DryMatterContent, p_digestPar_shFEED, p_digestPar_FEED
+    w = {r: (D.get((ms, "FEDM", r), 0.0) + D.get((ms, "INTF", r), 0.0))
+         * p_DryMatterContent(D.get((ru, "DRMA", r)), D.get((ms, "DRMA", r), 0.0)) for r in rows}
+    W = sum(w.values())
+    sh = [p_digestPar_shFEED(w[r], W) for r in rows]
+    return {it: p_digestPar_FEED([P.get(r, {}).get(it, 0.0) for r in rows], sh) for it in items}
+
+
 def ration_ndf_fat(dump: Path, ms: str, rus, feed_to_o, catacts, graz) -> dict:
     """{catact: (NDF %, FAT %)} of the member state's ration (line_nitr.gms l. 124-134); graz(catact) -> GRAZ."""
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT))
+    from capri_mod.supply.equations.digestibility import p_DryMatterContent, p_nfixRate_gras_digest
     T = table()
     rates, default_fix = nfix_rates()
-    nfix = min(rates.get(ms, default_fix) or 0.05, 0.75)
+    nfix = p_nfixRate_gras_digest(rates.get(ms, default_fix))
     D = read_dump(dump, set(rus) | {ms})
     rows_of = defaultdict(list)
     for f, r in feed_to_o:
         rows_of[f].append(r)
 
-    def dm(ru, row):
-        return D.get((ru, "DRMA", row)) or D.get((ms, "DRMA", row), 0.0)
-
-    def use(row):
-        return D.get((ms, "FEDM", row), 0.0) + D.get((ms, "INTF", row), 0.0)
-
-    def comp(ru, act):
-        """digestPar(ru, act, row, item) for NDF, FAT (and what step 4 needs), steps 1-4."""
-        g = graz(act)
-        mix = lambda a, b: (1 - nfix / 0.75) * T[a].get(it, 0.0) + nfix / 0.75 * T[b].get(it, 0.0)
-        P = {row: dict(v) for row, v in T.items()}
-        gras = {}
-        for it in set(T["GRPS"]) | set(T["GRSI"]) | set(T["GRHA"]):
-            gras[it] = g * mix("GRPS", "LGPS") + (1 - g) * (mix("GRSI", "LGSI") * 0.5 + mix("GRHA", "LGHA") * 0.5)
-        P["GRAS"] = gras
-        fleg = D.get((ru, "FLEG", "LEVL"), 0.0)
-        if fleg:
-            P["OFAR"] = {it: gras.get(it, 0.0) * (1 - fleg)
-                         + (0.5 * T["LGSI"].get(it, 0.0) + 0.5 * T["LGHA"].get(it, 0.0)) * fleg
-                         for it in set(gras) | set(T["LGSI"]) | set(T["LGHA"])}
-        for row, p in P.items():
-            if p.get("EE", 0.0) >= 1:
-                p["FAT"] = p["EE"] - 1
-            d_ = dm(ru, row)
-            fidi, crpr = D.get((ru, "FIDI", row), 0.0), D.get((ru, "CRPR", row), 0.0)
-            nf = fidi / d_ * 100 if (d_ and fidi) else 0.0
-            nc = crpr / d_ * 100 if (d_ and crpr) else 0.0
-            ndf, cp = p.get("NDF", 0.0), p.get("CP", 0.0)
-            out = (nf > ndf + max(ndf * 0.2, 5) or nf < ndf - max(ndf * 0.2, 5)
-                   or nc > cp + max(cp * 0.2, 5) or nc < cp - max(cp * 0.2, 5))
-            if out:
-                nf = nc = 0.0
-            tot = nc + nf + p.get("FAT", 0.0) + p.get("ASH", 0.0) + p.get("NDICP", 0.0)
-            ok = tot <= 100 and nf > p.get("NDICP", 0.0)
-            if nc and ok:
-                p["CP"] = nc
-            if nf and ok:
-                p["NDF"] = nf
-            if p.get("CAT"):
-                p["NDF"] = max(p.get("NDF", 0.0), p.get("NDICP", 0.0) + 0.1)
-        return P
-
     res = {}
     for act in catacts:
         num_n = num_f = den = 0.0
         for ru in rus:
-            P = comp(ru, act)
+            P = row_comp(T, D, ms, ru, graz(act), nfix)
             for feed, rows in rows_of.items():
                 q = D.get((ru, act, feed), 0.0)
                 if not q:
                     continue
-                w = {r: use(r) * dm(ru, r) for r in rows}
-                W = sum(w.values())
-                ndf = sum(P.get(r, {}).get("NDF", 0.0) * w[r] / W for r in rows) if W else 0.0
-                fat = sum(P.get(r, {}).get("FAT", 0.0) * w[r] / W for r in rows) if W else 0.0
-                x = q * dm(ru, feed)
-                num_n += ndf * x
-                num_f += fat * x
+                b = bulk_values(P, D, ms, ru, rows, ("NDF", "FAT"))
+                x = q * p_DryMatterContent(D.get((ru, "DRMA", feed)), D.get((ms, "DRMA", feed), 0.0))
+                num_n += b["NDF"] * x
+                num_f += b["FAT"] * x
                 den += x
         if den > 0:
             res[act] = (num_n / den, num_f / den)
     return res
+
+
+def feed_ee(D: dict, ms: str, rus, feed_to_o, graz_of: dict) -> dict:
+    """{(ru, key): {FEED: (EE %, dry-matter content)}} of the feed bulks per regional unit and grazing class, the ether
+    extract of digestibility.gms l. 223-225 (steps 1-5) and p_DryMatterContent(ru, FEED) (l. 31-33), from the data D
+    {(region, row, col): value} of the year digestibility.gms runs with: the inputs of the feed bulks' fat,
+    line_nitr.gms l. 175-176 (equations/line_nitr.py p_emisFeed_TotFAT_FEED). graz_of {key: GRAZ}: the bulks differ
+    between activities only by the grazing share (GRAS, and OFAR through it)."""
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT))
+    from capri_mod.supply.equations.digestibility import p_DryMatterContent, p_nfixRate_gras_digest
+    T = table()
+    rates, default_fix = nfix_rates()
+    nfix = p_nfixRate_gras_digest(rates.get(ms, default_fix))
+    rows_of = defaultdict(list)
+    for f, r in feed_to_o:
+        rows_of[f].append(r)
+    out = {}
+    for ru in rus:
+        for key, g in graz_of.items():
+            P = row_comp(T, D, ms, ru, g, nfix)
+            out[(ru, key)] = {feed: (bulk_values(P, D, ms, ru, rows, ("EE",))["EE"],
+                                     p_DryMatterContent(D.get((ru, "DRMA", feed)), D.get((ms, "DRMA", feed), 0.0)))
+                              for feed, rows in rows_of.items()}
+    return out
 
 
 def nop_ch4_rel(ndf: float, fat: float, shr_of_dm: float = 0.0009) -> float:

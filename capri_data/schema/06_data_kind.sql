@@ -70,6 +70,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/2017/abatement/mitigation/lownfeed_effects.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/2017/abatement/mitigation/p_nutCont.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/2017/abatement/mitigation/supplement_effects.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
+  ('capri_data/2017/abatement/mitigation/supplement_fat.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/2017/abatement/mitigation/trends_milk_yield_1730.csv', 'reference', 'by rule: extract of CAPRI''s 2030 reference'),
   ('capri_data/2017/abatement/mitigation/tillage_options.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/2017/abatement/mitigation/urea_subst_option.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),

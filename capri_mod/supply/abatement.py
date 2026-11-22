@@ -185,6 +185,36 @@ class AbatementBlock:
                 "c1": float(r["cost_lin_eur_ha"]) + float(r["pmp_lin"]), "c2": float(r["pmp_sqr"]),
                 "subs0": float(r["subs0"]), "x0": float(xb.get("OFAR", 0.0) or 0.0)}
 
+    def _supp_fat_spec(self):
+        """CAPRI's ration fat limit with linseed for the NLP form (SupplementPerc_, supply/supply_model.gms l. 608-633;
+        capri_regional_nlp._supplement_fat_block): per cattle animal with the linseed column (LINE_Tot,
+        supplement_effects.csv; supply/livestock.py _genetics_columns), {"col": the column, "shr": ShrOfDM (linseed's fat
+        as a share of the dry matter), "D": the dry-matter intake per head and year at the run's requirements
+        (equations/breeding.py p_animReqCopy_DRMA, the basis of the column's dosage and cost), "fat": {feed: kg of fat per
+        kg as fed} (supplement_fat.csv, tools/build/build_supplement_fat.py)}; {} without a linseed column."""
+        from capri_mod.supply.equations.breeding import p_animReqCopy_DRMA
+        gc = {a: j for (a, o), j in (getattr(self.ev, "genet_cols", None) or {}).items() if o == "LINE_Tot"}
+        if not gc:
+            return {}
+        tab = getattr(self.data, "genetics_effects", None) or {}
+        rats = getattr(self.seen, "feed_rations", None) or {}
+        fat = _inputs.current().cached(                                   # a missing file is an error (K74)
+            "supplement_fat", lambda inp: {k: dict(zip(g["feed"], g["tot_fat"].astype(float)))
+                                           for k, g in inp.csv("supplement_fat.csv", "abatement/mitigation")
+                                           .groupby(["region", "animal"])})
+        rid = self.data.region_id
+        out = {}
+        for a, j in gc.items():
+            e, r = tab.get((a, "LINE_Tot")), rats.get(a)
+            f_ = fat.get((rid, a))
+            if e is None or r is None or f_ is None:
+                continue
+            D = p_animReqCopy_DRMA(getattr(r, "req_DMIN", 0.0), getattr(r, "req_DMAX", 0.0))
+            if not D > 0:
+                continue
+            out[a] = {"col": int(j), "shr": float(e["shr_of_dm"]), "D": D, "fat": f_}
+        return out
+
     def _nlp_abatement_spec(self, labels):
         """CAPRI's abatement options for the NLP form (ghgAbatement; capri-mod: the manure techniques with feeding inside):
         the ammonia options with their loss cascade, the fertiliser options (regional shares) on the crops' mineral N,

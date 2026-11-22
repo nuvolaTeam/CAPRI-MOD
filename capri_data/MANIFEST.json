@@ -581,6 +581,24 @@
    },
    "catalogue_note": "CAPRI's feed supplements linseed (LINE_Tot) and nitrate (Nitr_Tot) per model region and cattle animal (envind/line_nitr.gms, ghgTechLineNitr a switch): requirement changes, eligible share, cost, CH4ENT change, calibration terms; tools/build/build_supplement_effects.py. dsav: CAPRI's cost-saving drop between its ini and max calibration runs, EUR per model head adopting (per unit of the parameter; tools/lib/_capri_costsavings.py), netted from the PMP slope as CAPRI (K67 F2).; 3-NOP rows (3NOP_Tot) since 29 October 2026 (K93) (not re-checked)"
   },
+  "capri_data/2017/abatement/mitigation/supplement_fat.csv": {
+   "description": "The fat of the feed bulks per model region and cattle animal with linseed, the data of CAPRI's ration fat limit SupplementPerc_ (supply_model.gms l. 608-633): ether extract (envind/digestibility.gms), dry-matter content and p_emisFeed TotFAT (envind/line_nitr.gms l. 175-176; tools/build/build_supplement_fat.py)",
+   "kind": "coefficients",
+   "vintage": "2017 base",
+   "domain": "abatement",
+   "status": "live",
+   "rows": 9966,
+   "columns": 6,
+   "units": "U_percent, U_ratio",
+   "read_by_model": [
+    "capri_mod/supply/abatement.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_supplement_fat"
+   },
+   "catalogue_note": "The feed bulks' fat per model region and cattle animal with linseed (envind/digestibility.gms, envind/line_nitr.gms TotFAT), the data of CAPRI's ration fat limit SupplementPerc_; tools/build/build_supplement_fat.py (K93) (not re-checked)"
+  },
   "capri_data/2017/abatement/mitigation/tillage_options.csv": {
    "description": "CAPRI's conservation and no tillage options v_Miti(cropMiti, ConsTill|NoTill, N2OSYN) per model region: the tillage area, the initial share (SAPM survey), costParLin, costsaving0 from CAPRI's ini run, the calibrated cost curve (case 1-4) and the effects on the N2O of mineral N, the leaching of soil and manure N and erosion (envind/tillage.gms l. 314-849; tools/build/build_tillage_options.py)",
    "kind": "coefficients",

@@ -176,9 +176,15 @@ animal and total (CAPRI's `LINE_Tot`, `Nitr_Tot`, `3NOP_Tot`) (`tools/build/buil
 - `ghgTechLineNitr` is a switch (0 off, anything else on), not a scale. The older path with nitrate as an
   ingredient of the EU ration (`CAPRIModel.use_nitrate`, off) was removed on 27 October 2026.
 
-REGISTERED: DRMA is CAPRI's own estimate from breeding.gms, DRMN + (|DRMX| - DRMN) / 4; CAPRI's soft constraint on
-total ration fat (SupplementPerc_, 5% of DM) needs every feed's fat in the ration as it changes and is not carried,
-its effect on the maximum shares being in the max-run caps. 3-NOP has no cost saving in CAPRI's calibration runs, so
+REGISTERED (DEP-53): DRMA is CAPRI's own estimate from breeding.gms, DRMN + (|DRMX| - DRMN) / 4 (CAPRI's supply model
+reads p_animReq(DRMA) of its requirement functions). CAPRI's soft constraint on total ration fat (SupplementPerc_,
+supply_model.gms l. 608-633) is in the regional model since 21 November 2026: per cattle animal with linseed, the
+ration's fat (its feed bulks' per kg as fed, supplement_fat.csv from digestibility.gms and line_nitr.gms TotFAT at the
+simulation's data, and the linseed's D x ShrOfDM per head adopting) over the intake D equals a percentage of at most
+5% plus a slack, the slack penalised in GHG_Mit_Cost_ by 999999 x share^2 x herd x D / 1000 (l. 5103-5112); one row
+per model animal, the penalty's share^2 x herd at the herd's base level. CAPRI's maximum shares already carry its
+correction for the fat balance (line_nitr.gms l. 242-267, in the max-run levels), so the row binds only where the
+ration's own fat rises or the model's fat share at base is above CAPRI's. 3-NOP has no cost saving in CAPRI's calibration runs, so
 without an emission price its share stays zero; it acts under the emission tax. Its CH4 effect takes the 2017 rations
 (CAPRI's data(ru, act, feed, "Y")), summed per head over the member state's units as line_nitr.gms writes it.
 

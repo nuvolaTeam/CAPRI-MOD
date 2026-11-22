@@ -281,3 +281,32 @@ def GHG_Mit_Cost_legSh(v_actLevl_OFAR, c1, c2_half, v_Miti):
     In this project's notation, X the level of OFAR (its technologies summed; the technology mix column moves area
     between them, not the level): cost_r = X x [c1 v + 0.5 c2 v^2]. Departures from CAPRI: none."""
     return v_actLevl_OFAR * (c1 * v_Miti + c2_half * v_Miti * v_Miti)
+
+
+def GHG_Mit_Cost_supplementSlack(v_Miti_heads_sq_over_X, DRMA_days, v_supplementSlack):
+    r"""The penalty on the ration fat limit's slack in GHG_Mit_Cost_(r) (l. 5103-5112), kEUR: 999999 x the linseed's
+    share squared x the herd x the dry-matter intake per head (t) x the slack (SupplementPerc_, equations/supply_model/
+    feeding.py; only where linseed is used: 0 at v = 0).
+
+    CAPRI's GAMS, GHG_Mit_Cost_ (l. 5103-5112):
+
+    *         - special penalty part to control total fat content of feed intake
+    *
+       + sum{(R_RAGG(RUNR,MSACT),mitiTech_map(MSACT,AACT,"Line_Tot",mitiTarget),A) $ p_technFact(RUNR,AACT,"LEVL",A),
+    *                   soft constraint shall only be active if Line_Tot is used (e.g. not in reference scenario):
+                        sqr(v_Miti(RUNR,AACT,"Line_Tot",mitiTarget))
+                       * v_actLevl(RUNR,AACT,A)
+                       * p_animReq(RUNR,AACT,"T","DRMA" %addtimedim%) * p_animProdDays(RUNR,AACT,"T") / 1000
+                       * v_supplementSlack(RUNR,AACT,"Line_Tot")
+                       * 999999}
+
+    In this project's notation, z the heads adopting linseed (1000 head; the model's linseed column, supply/livestock.py
+    _genetics_columns), X the herd, D the dry-matter intake per head and year (kg; CAPRI's p_animReq(DRMA) x
+    p_animProdDays), s the slack: CAPRI's v_Miti^2 v_actLevl = (z / X)^2 X = z^2 / X. The caller passes z^2 / X0, X0
+    the herd's base level, as the linseed column's own quadratic term does (its PMP curvature per head adopting,
+    gamma / (X0 x eligible share)): penalty = 999999 z^2 / X0 x D / 1000 x s.
+
+    Departures from CAPRI: v_Miti^2 v_actLevl at the herd's base level (z^2 / X0 for z^2 / X): no division by the herd,
+    which may approach zero within IPOPT's bounds; the penalty only keeps the slack at zero wherever linseed is used, so
+    its strength, not its zero, moves with the herd (DEPARTURES_FROM_CAPRI, the ration fat limit)."""
+    return 999999.0 * v_Miti_heads_sq_over_X * DRMA_days / 1000.0 * v_supplementSlack

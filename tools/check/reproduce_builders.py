@@ -174,6 +174,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_fert_partial_slack", [str(GAMS)], [GAMS / "supply" / "set_fert_priors.gms"]),
     ("build_set_aside_scenario", [str(GAMS)], [GAMS / "scen" / "set_aside" / "set_aside_10.gms", GAMS / "sets.gms"]),
     ("build_supplement_effects", [], [SOURCES / "capreg"]),
+    ("build_supplement_fat", [], [REFERENCE]),
     ("build_genetics_effects", [], [D17]),
     # not region-keyed, or member-state / market / CAPRI-coded
     ("build_active_technologies", [str(GAMS / "pol_input/greendeal/refpol_endotech_all_sup.gms")],

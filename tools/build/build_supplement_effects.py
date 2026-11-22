@@ -61,6 +61,8 @@ LEV = ROOT / "capri_data" / "sources" / "intermediate" / "envind" / "res17_mann_
 DUMPS = SOURCES / "capreg"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
+sys.path.insert(0, str(ROOT))
+from capri_mod.supply.equations.breeding import p_animReqCopy_DRMA  # noqa: E402
 MAP = {a: _MC.ANIMALS[a] for a in ("DCOW", "BCOW", "BULL", "HFRS", "CALV")}
 #: line_nitr.gms: ShrOfDM, CH4ENT change per unit of ShrOfDM (x100 points), halved costParLin (EUR per t)
 OPT = {"LINE_Tot": dict(shr=0.05, ch4=-0.05 * 100, cost=0.5 * 674 * 89.9 / 40.5),
@@ -127,7 +129,7 @@ def nop_rows(mr, to_c8, L, rations):
             DMIN, DMAX = float(req.get("DMIN", 0)), float(req.get("DMAX", 0) or 0)
             if DMIN <= 0:
                 continue
-            drma = DMIN + (max(DMAX, DMIN) - DMIN) / 4.0
+            drma = p_animReqCopy_DRMA(DMIN, DMAX)                  # breeding.gms l. 234-236
             wall = wsum = ch4 = 0.0
             for x in mem:
                 lvl = L.get((c8, x)) or L.get((ms, x)) or 0.0
@@ -180,7 +182,7 @@ def main():
             DMAX = float(req.get("DMAX", 0) or 0)
             if E <= 0 or P <= 0 or DMIN <= 0:
                 continue
-            drma = DMIN + (max(DMAX, DMIN) - DMIN) / 4.0          # breeding.gms: kg DM per head and year
+            drma = p_animReqCopy_DRMA(DMIN, DMAX)    # breeding.gms l. 234-236: kg DM per head and year
             for opt, o in OPT.items():
                 wall = wsum = 0.0
                 shr = 0.0

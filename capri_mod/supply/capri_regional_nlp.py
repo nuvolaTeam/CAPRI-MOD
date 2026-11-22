@@ -24,8 +24,9 @@ land-market columns, land and bound rows, with one label per row) and the calibr
 
 Breeding, low-N feed, linseed, nitrate and 3-NOP (and histosol fallowing) are linear columns the supply module adds.
 Conservation and no tillage, the urea substitution and the legume share in temporary grassland are the regional
-model's columns since 21 November 2026 (_abatement_block). Not built: buffer strips, biodiversity options, biochar,
-and CAPRI's ration fat constraint SupplementPerc_ (KNOWN_ISSUES K93).
+model's columns since 21 November 2026 (_abatement_block), and CAPRI's limit of the ration's fat with linseed
+(SupplementPerc_, its slack's penalty in GHG_Mit_Cost_) its rows the same day (_supplement_fat_block). Not built: buffer
+strips, biodiversity options and biochar (KNOWN_ISSUES K93).
 
 CALIBRATION of the feed terms. The rations were calibrated (feed/ration.py) with CAPRI's fixed feed shares and dry-matter
 limits; CAPRI's simulation model has only REQSE_. As CAPRI's PMP calibration does, the linear terms are set so that the
@@ -371,6 +372,7 @@ class CapriRegionalNLP:
         fh = [fhv[k] for k in range(nf)]
         X = ca.vertcat(z, u)
         self.feeds, self.nf = feeds, nf
+        self._fhv = fhv
 
         # ---------------- feed calibration (REQSE_ only) ----------------
         cal = {a: calibrate_feed_terms(r, fod) for a, r in rats.items()}
@@ -592,6 +594,8 @@ class CapriRegionalNLP:
         lbx, ubx = list(lbx), list(ubx)
         # ---------------- abatement options (ghgAbatement: v_Miti) ----------------
         X, obj = self._abatement_block(spec, X, y, obj, g_rows, lbg, ubg, lbx, ubx)
+        # ---------------- the ration fat limit with linseed (SupplementPerc_) ----------------
+        X, obj = self._supplement_fat_block(spec, X, y, obj, g_rows, lbg, ubg, lbx, ubx)
 
         # ---------------- fertilisation (NUTNED_, pools, inner model) ----------------
         self.fert = None
@@ -1207,6 +1211,65 @@ class CapriRegionalNLP:
             X = ca.vertcat(X, *new)
         return X, obj
 
+    def _supplement_fat_block(self, spec, X, y, obj, g_rows, lbg, ubg, lbx, ubx):
+        """CAPRI's limit of the ration's fat with linseed (SupplementPerc_, supply/supply_model.gms l. 608-633; ghgAbatement
+        on, where the member state has Line_tot): per cattle animal with the linseed column (supply/livestock.py
+        _genetics_columns, LINE_Tot), the fat percentage p, 0 <= p <= 0.05, and its slack s >= 0 (supply/
+        set_miti_bounds.gms l. 471-476), the row in its total form (equations/supply_model/feeding.py SupplementPerc_:
+        the feed bulks' fat per head, the flexible feeds' and the fixed ones' at their base amounts, and the linseed's
+        sh z / X0), and the slack's penalty in the objective (GHG_Mit_Cost_, equations/supply_model/mitigation.py
+        GHG_Mit_Cost_supplementSlack). spec["supp_fat"]: {animal: {"col", "shr", "D", "fat": {feed: kg of fat per kg}}}
+        (abatement._supp_fat_spec)."""
+        import casadi as ca
+        from capri_mod.supply.equations.supply_model.feeding import SupplementPerc_
+        from capri_mod.supply.equations.supply_model.mitigation import GHG_Mit_Cost_supplementSlack
+        self.supp_fat = {}
+        sf = spec.get("supp_fat") or {}
+        rats = spec.get("rations") or {}
+        new = []
+        nx0 = int(X.shape[0])
+        for a, d in sorted(sf.items()):
+            r = rats.get(a)
+            if r is None or a not in self.act_idx or not float(d.get("D", 0.0)) > 0:
+                continue
+            ia = self.act_idx[a]
+            tf = {f: float((d.get("fat") or {}).get(f, 0.0)) for f in r.feeds}
+            ks = [k for k, fe in enumerate(self.feeds) if fe[0] == a]
+            fixed = ~np.asarray(r.flex, bool)
+            fat_fix = float(sum(float(r.x0[j]) * tf[f] for j, f in enumerate(r.feeds) if fixed[j]))
+            cf = [tf[self.feeds[k][1]] for k in ks]
+            fat_h = (ca.dot(self._pv(cf), self._fhv[ks]) if len(ks) > 1
+                     else (self._pv(cf[0]) * self._fhv[ks[0]] if ks else 0)) + self._pv(fat_fix)
+            D, sh, col = float(d["D"]), float(d["shr"]), int(d["col"])
+            X0 = max(float(self.xb[ia]), 1e-3)
+            ps = ca.SX.sym("suppFat_" + a, 2)                    # v_supplementPerc, v_supplementSlack
+            zc = y[col]
+            g_rows.append(SupplementPerc_(fat_h, self._pv(1.0 / D), self._pv(sh), zc, y[ia], self._pv(1.0 / X0),
+                                          ps[0], ps[1]))
+            lbg.append(0.0); ubg.append(0.0)
+            obj = obj + GHG_Mit_Cost_supplementSlack(zc * zc * self._pv(1.0 / X0), self._pv(D), ps[1])
+            o = nx0 + 2 * len(new)
+            new.append(ps)
+            lbx += [0.0, 0.0]; ubx += [0.05, np.inf]
+            self.supp_fat[a] = {"off": o, "ia": ia, "col": col, "D": D, "shr": sh, "ks": ks, "cf": cf,
+                                "fat_fix": fat_fix}
+        if new:
+            X = ca.vertcat(X, *new)
+        return X, obj
+
+    def supplement_fat_share(self, x, a):
+        """The ration's fat share of animal a at x (SupplementPerc_'s left side: the feed bulks' fat per head and the
+        linseed's, over the intake D), or None without the row."""
+        d = (getattr(self, "supp_fat", None) or {}).get(a)
+        if d is None:
+            return None
+        x = np.asarray(x, float)
+        u = [float(x[self.n0 + k]) * self.feeds[k][4] for k in d["ks"]]
+        Xa = float(x[d["ia"]]) * float(self.sc[d["ia"]])
+        z = float(x[d["col"]]) * float(self.sc[d["col"]])
+        fat = float(np.dot(d["cf"], u)) + d["fat_fix"]
+        return fat / d["D"] + (d["shr"] * z / Xa if Xa > 0 else 0.0)
+
     def abatement_outputs(self, x):
         """Shares of the options at x: {"amm": {(act, key, tech): share}, "fert": {tech: share}, "mni": share,
         "catc": share, "catc_area": 1000 ha, "till": {tech: share}, "urea": share, "legsh": share}."""
@@ -1233,6 +1296,9 @@ class CapriRegionalNLP:
         l_ = self.abat.get("legsh")
         if l_:
             out["legsh"] = float(x[l_["off"]])
+        sf_ = getattr(self, "supp_fat", None)
+        if sf_:
+            out["supp_fat"] = {a: (float(x[d["off"]]), float(x[d["off"] + 1])) for a, d in sf_.items()}
         return out
 
     def catc_area(self, x):
@@ -1556,6 +1622,11 @@ class CapriRegionalNLP:
         if tl_:
             for k, t in enumerate(tl_["techs"]):
                 x[tl_["off"] + k] = float(t["m0"])                # the tillage options at their initial shares
+        for a, d in (getattr(self, "supp_fat", None) or {}).items():
+            # the fat percentage and its slack where SupplementPerc_ holds at the start's ration and linseed
+            F = self.supplement_fat_share(x, a)
+            x[d["off"]] = min(max(F, 0.0), 0.05)
+            x[d["off"] + 1] = max(F - 0.05, 0.0)
         if self.fert:
             for nut, fb in self.fert.items():
                 o = fb["off"]

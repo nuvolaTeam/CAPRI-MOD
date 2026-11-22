@@ -1712,7 +1712,34 @@ recorded only inside the status texts of K50 and K51 (resolved table) and README
     (1.16 times; the model 0.99). The option is CAPRI's; the value of N need relative to the surplus dual in ES62 is
     the N block's, with K196 (the model's need multiplier there is about its surplus dual; why CAPRI's is 16% above
     its own is not traced).
-  Remaining: the ration-fat limit SupplementPerc_.
+  **The ration-fat limit SupplementPerc_ built** (21 November 2026; supply/supply_model.gms l. 608-633, its slack's
+    penalty in GHG_Mit_Cost_ l. 5103-5112, the bounds set_miti_bounds.gms l. 471-476): per cattle animal with the
+    linseed column, the ration's fat over the dry-matter intake D equals a percentage of at most 5% plus a slack, the
+    slack penalised by 999999 x share^2 x herd x D / 1000 (CapriRegionalNLP._supplement_fat_block; equations/
+    supply_model/feeding.py SupplementPerc_ in the total form, the row times X / X0, so the share z / X enters as the
+    heads z; mitigation.py GHG_Mit_Cost_supplementSlack). The feed bulks' fat per kg as fed (supplement_fat.csv,
+    tools/build/build_supplement_fat.py) is CAPRI's p_emisFeed TotFAT (line_nitr.gms l. 175-176) from the ether
+    extract of digestibility.gms (l. 31-60, 200-232; its statements: equations/digestibility.py, shared with 3-NOP's
+    fibre and fat in tools/lib/_capri_digest.py) at the simulation's data (capmod.gms runs it with "Y", sim_ini_21730's
+    2030 point: the member state's FEDM, INTF none, the DRMA contents, the unit's FLEG). D is breeding.gms's estimate
+    at the run's requirements, the basis of the linseed column's dosage and cost (equations/breeding.py); departures:
+    register DEP-53. The model's base fat share over D: median 2.3-3.8% by animal (DCOW 3.6%, BULL 3.75%), above 5%
+    in 93 of the 1,074 region-animals (BULL 35, DCOW 28), where the feeds alone exceed CAPRI's limit and any linseed
+    takes the penalised slack unless the ration's fat falls (CAPRI's maximum shares carry its own fat correction,
+    l. 242-267, from its fat shares, not the model's). Check against CAPRI's ini run (v_SupplementPerc +
+    v_supplementSlack of costsavings_ini_21730_jul15, the project lead's export; the mean over the model animal's
+    activities): the model's share over CAPRI's has a median of 1.04 (quartiles 0.97 and 1.11; DCOW 1.06, BULL 1.11,
+    HFRS 0.92), correlation 0.36-0.76 by animal; NL22 is 1.17-1.22 times CAPRI's for the cows and bulls; CAPRI has 19
+    activities above 5% at ini. Not traced: the comparison takes the model's 2017 rations (CAPRI's are its 2030
+    calibration point's) and D the estimate.
+    **Measured** (21-22 November 2026; DE21, ES51, FR52, IR01, IT20, NL22; the row on and off, the off case with
+    abatement._supp_fat_spec emptied): the baseline is unchanged (no linseed, so no penalty; the split between the
+    percentage and the slack is then free, in CAPRI too). At an emission tax of 100 (two iterations) linseed takes
+    3-22% of the herds and the fat share stays below 5% in all but NL22's bulls (5.02% from the feeds at base): there
+    the share is at 5.00%, linseed 5.2% of the herd against 6.3% without the row, the feeds' fat 4.74%; elsewhere the
+    shares move by less than 5e-5. At a tax of 300 at the same prices (one iteration) the row binds for FR52's dairy cows
+    (linseed 27.2% against 29.5%; FR52's GHG total 0.5% higher) and NL22's cows and bulls (the same linseed share, the
+    ration's fat lower); the other animals stay below the limit, many at their maximum shares.
 
 <a id="k94"></a>
 ### K94: `capri_mod/data/reconcile_base.py` is an orphan, and README's re-basing note points at a removed concordance (found 29 October 2026, registry migration)

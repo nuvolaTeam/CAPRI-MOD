@@ -441,6 +441,21 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   and without (1)); the inhibitor on mineral N moves towards CAPRI's in four units (ES51 0.257 -> 0.141, CAPRI 0.039;
   NL22 0.536 -> 0.459, 0.292), away in FR52 (0.575 -> 0.482, 0.575); the inhibitor on manure stays where CAPRI has none
   (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
+- **K93, the ration-fat limit with linseed built (SupplementPerc_; 21-22 November 2026):** CAPRI's SupplementPerc_
+  (supply_model.gms l. 608-633) as rows of the regional model, per cattle animal with the linseed column: the ration's
+  fat (its feed bulks' per kg as fed and the linseed's) over the dry-matter intake equals a percentage of at most 5% plus
+  a slack (set_miti_bounds.gms l. 471-476), the slack penalised in GHG_Mit_Cost_ by 999999 x share^2 x herd x intake /
+  1000 (l. 5103-5112); written in the total form (the row times the herd over its base level, equations/supply_model/
+  feeding.py SupplementPerc_; mitigation.py GHG_Mit_Cost_supplementSlack). The feed bulks' fat: tools/build/
+  build_supplement_fat.py, supplement_fat.csv, CAPRI's TotFAT (line_nitr.gms l. 175-176) from digestibility.gms's ether
+  extract at the simulation's data (sim_ini_21730 at Y); digestibility.gms's statements as named functions
+  (equations/digestibility.py, now also under 3-NOP's fibre and fat: 26 values of supplement_effects.csv change in the
+  sixteenth digit) and breeding.gms's intake estimate (equations/breeding.py). Departures: register DEP-53 (the intake
+  estimate, one row per model animal, the penalty at the herd's base level); DEP-8 narrowed. The baseline is
+  unchanged; with an emission tax the row binds where the ration is already fatty (six units: at 100, NL22's bulls,
+  linseed 5.2% of the herd against 6.3% without it; at 300 and the same prices, FR52's dairy cows, 27.2% against 29.5%,
+  and NL22's cows and bulls through their rations). The model's base fat share is 1.04 times CAPRI's ini value at the
+  median (K93).
 - **K93, the legume share in temporary grassland built (21 November 2026):** CAPRI's LegSh (envind/leg_share.gms;
   tools/build/build_legsh_option.py, legsh_option.csv from miti_data_jul15 and CAPRI's simulation data; equations/
   leg_share.py): a share of other arable fodder, OFAR's fixation x (1 + othImpact x share) in NUTNED_ (the share of

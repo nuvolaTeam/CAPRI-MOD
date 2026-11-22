@@ -12,8 +12,9 @@ REQSN_ (dry matter, fibre; l. 521-556), MAXSHR_ (l. 640-662) and MINSHR_ (l. 667
 writes REQSE_ only; feed/ration.py's calibration of the base rations uses them (CAPRI's feed PMP,
 pmp_terms/define_const_pmp_param.gms), before the simulation.
 
-Not written: SupplementPerc_ (l. 608-633; ghgAbatement), the linseed supplement's limit on the ration's fat
-(KNOWN_ISSUES K93: linseed is a column of the regional model, supplement_effects.csv).
+Written since 21 November 2026 (KNOWN_ISSUES K93): SupplementPerc_ (l. 608-633; ghgAbatement), the limit of the ration's
+fat with linseed (a column of the regional model, supplement_effects.csv), in the total form below; its slack's penalty in
+GHG_Mit_Cost_ is mitigation.py GHG_Mit_Cost_supplementSlack.
 
 In this project's notation, for an animal a with herd h_a (1000 head) and per-head feed u_f (kg per head and year;
 CAPRI's v_feedInpCoeff), the feeds' contents e_f (energy) and cp_f (crude protein) and the requirement R per head
@@ -111,3 +112,69 @@ def FEDUSE_(v_actLevl, v_feedInpCoeff):
                       =E= v_feedQuantReg(RUNR,FEED %addtimedim%);
     """
     return v_actLevl * v_feedInpCoeff
+
+
+def SupplementPerc_(fat_feeds_per_head, inv_DRMA_days, ShrOfDM, v_Miti_heads, v_actLevl, inv_X0, v_supplementPerc,
+                    v_supplementSlack):
+    r"""SupplementPerc_(r, a, Line_tot) (l. 608-633) as the NLP's row, in the total form: CAPRI's row (the ration's fat as
+    a share of the dry-matter intake = v_supplementPerc + v_supplementSlack) times the herd over its base level, so that
+    the share of linseed v = z / X enters as the heads adopting z, = 0.
+
+    CAPRI's GAMS, SupplementPerc_ (l. 606-633):
+
+        *        --- for the mitigation technology of feeding additional lipids from Linseed (OFLA) the maximum
+        *            of total fat must be below 5% of DM intake
+             SupplementPerc_(RUNR,MAACT,SupplTechTot)
+                                      $ (CATACT(MAACT)
+                                      $ (p_animReq(RUNR,MAACT,"T","DRMA")*p_animProdDays(RUNR,MAACT,"T"))
+                                      $ p_technFact(RUNR,MAACT,"LEVL","T")
+                                      $ (sameas(SupplTechTot,"line_tot"))
+                                      $ sum((R_RAGG(RUNR,MSACT)), mitiTech_map(MSACT,MAACT,SupplTechTot,"CH4ENT")))..
+
+        *     fat in the feed bulks
+                  [ SUM(FEED $ (sameas(SupplTechTot,"Line_tot") $ p_maxFeedShare(RUNR,MAACT,"T",FEED)),
+                        v_feedInpCoeff(RUNR,MAACT,"T",FEED)
+                          * sum(R_RAGG(RUNR,MSACT),p_emisFeed(RUNR,MAACT,"T",FEED,"TotFAT")))
+
+        *     fat in the feed additive lineseed added
+                  + p_animReq(RUNR,MAACT,"T","DRMA") * p_animProdDays(RUNR,MAACT,"T")
+        *           ... from max capacity
+                  * sum(R_RAGG(RUNR,MSACT),p_emisFeed(RUNR,MAACT,"T",SupplTechTot,"ShrOfDM"))
+        *          ... times actual use of this capacity (=> gives actual intake of fat from line seed)
+                  * v_miti(RUNR,MAACT,SupplTechTot,"CH4ENT")]
+
+        *     as a share of DM intake
+              / [p_animReq(RUNR,MAACT,"T","DRMA") * p_animProdDays(RUNR,MAACT,"T")]
+
+                     =E=
+
+        *                                                 Slack = excess beyond 5% (heavily penalised)
+              v_supplementPerc(RUNR,MAACT,SupplTechTot) + v_supplementSlack(RUNR,MAACT,SupplTechTot);
+
+    Bounds (supply/set_miti_bounds.gms l. 471-476), the NLP's variable bounds: 0 <= v_supplementPerc <= 0.05,
+    v_supplementSlack >= 0.
+
+        v_supplementPerc.up(%REGIONS%,PACT,"line_tot") $ sum(R_RAGG(%REGIONS%,NUTS0),mitiTech_map(NUTS0,PACT,"line_tot","CH4ENT"))
+         = .05;
+        v_supplementPerc.lo(%REGIONS%,PACT,"line_tot") $ sum(R_RAGG(%REGIONS%,NUTS0),mitiTech_map(NUTS0,PACT,"line_tot","CH4ENT"))
+         = 0;
+        v_supplementSlack.lo(%REGIONS%,PACT,"line_tot") $ sum(R_RAGG(%REGIONS%,NUTS0),mitiTech_map(NUTS0,PACT,"line_tot","CH4ENT"))
+         = 0;
+
+    In this project's notation, for a cattle animal a with herd X (1000 head; X0 at base), per-head feeds u_f (kg as fed;
+    the fixed feeds at their base amounts), TotFAT_f the feed bulks' fat per kg (supplement_fat.csv; envind/
+    line_nitr.gms l. 175-176), D the dry-matter intake per head and year (CAPRI's p_animReq(DRMA) x p_animProdDays), sh
+    = ShrOfDM (linseed's fat as a share of the dry matter, 5%), z the heads adopting (CAPRI's v_Miti x v_actLevl), p and
+    s the percentage and its slack:
+
+        CAPRI:  (sum_f u_f TotFAT_f + D sh z / X) / D = p + s
+        here:   (sum_f u_f TotFAT_f / D - p - s) X / X0 + sh z / X0 = 0
+
+    the same row times X / X0 (X > 0). The caller passes the feeds' fat per head (fat_feeds_per_head), 1 / D, X and
+    1 / X0. Departures from CAPRI: D is the model's dry-matter intake per head of supplement_effects.csv (tools/build/
+    build_supplement_effects.py: breeding.gms's estimate DRMN + (|DRMX| - DRMN) / 4, the basis of the linseed column's
+    dosage and cost), at the run's requirements; the model's animals each carry one row where CAPRI has one per activity
+    (DCOW for DCOL and DCOH, ...), with the feed bulks' fat of its activities (they differ only by the grazing share,
+    which its activities share)."""
+    return ((fat_feeds_per_head * inv_DRMA_days - v_supplementPerc - v_supplementSlack) * v_actLevl * inv_X0
+            + ShrOfDM * v_Miti_heads * inv_X0)

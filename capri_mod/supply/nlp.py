@@ -167,7 +167,9 @@ class NLPBlock:
                     # the manure trade columns' lower bounds (supply.manure_trade_form "capri": minus the gross trade
                     # at CAPRI's calibration point; a region can cut its exports or imports to zero)
                     col_lb={int(j_): float(v_) for d_ in (getattr(self.ev, "pool_lb", None) or {}).values()
-                            for j_, v_ in d_.items()}, **abat)
+                            for j_, v_ in d_.items()},
+                    # CAPRI's ration fat limit with linseed (SupplementPerc_; abatement._supp_fat_spec)
+                    supp_fat={a_: d_ for a_, d_ in self._supp_fat_spec().items() if d_["col"] < Q.shape[0]}, **abat)
         if npk is not None and getattr(self.ev, "alloc_cols", 0):
             spec["fix_cols"] = {n + len(getattr(self.ev, "land_types_used", [])): 0.0}
         self.res.last_feed_dm = None
@@ -597,7 +599,8 @@ class NLPBlock:
                     print("YANI response failed", self.data.region_id, repr(_exc), flush=True)
                 self.res.yani_dnet = None
         self.res.last_npk = nlp.fert_outputs(res["x"]) if nlp.fert else None
-        ab = nlp.abatement_outputs(res["x"]) if getattr(nlp, "abat", None) else {}
+        ab = (nlp.abatement_outputs(res["x"]) if (getattr(nlp, "abat", None) or getattr(nlp, "supp_fat", None))
+              else {})
         if "catc" in ab:
             # the winter cover share chosen, for the cascade's accounts and the supply result (cover_crops)
             _c = spec["catc"]
@@ -651,6 +654,9 @@ class NLPBlock:
         self.res.till_shares = {k_: float(v_) for k_, v_ in (ab.get("till") or {}).items()}
         self.res.urea_share = float(ab["urea"]) if ab.get("urea") is not None else None
         self.res.legsh_share = float(ab["legsh"]) if ab.get("legsh") is not None else None
+        # the ration fat limit with linseed (SupplementPerc_): {animal: (v_supplementPerc, v_supplementSlack, fat share)}
+        self.res.supp_fat = ({a_: (float(p_), float(s_), float(nlp.supplement_fat_share(res["x"], a_)))
+                              for a_, (p_, s_) in ab["supp_fat"].items()} if ab.get("supp_fat") else None)
         if ab.get("mni") is not None and getattr(self.ev, "nlp_nip", None):
             _sh = float(ab["mni"]); _nip = self.ev.nlp_nip
             if _sh > 1e-9:

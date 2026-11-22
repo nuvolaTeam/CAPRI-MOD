@@ -136,7 +136,8 @@ digestion, winter cover in the cascade, leaching (LEACHN_) and the indirect N2O 
 Not yet in CAPRI's form (Green Deal block, decision 5a.1): legume share, tillage, buffer strips, biodiversity options,
 biochar, urea substitution, 3-NOP cost, linseed fat penalty, SupplementPerc_.
 Since: 3-NOP (29 October 2026); tillage (ConsTill, NoTill), the urea substitution and the legume share as columns of
-the regional model (21 November 2026, KNOWN_ISSUES K93).
+the regional model, and SupplementPerc_ with its slack's penalty (the linseed fat penalty) as its rows (21 November
+2026, KNOWN_ISSUES K93).
 
 
 ## Scenario results (20 October 2026)

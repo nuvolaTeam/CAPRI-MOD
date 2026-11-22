@@ -2608,7 +2608,8 @@
      "build_enteric_feed_factors",
      "build_genetics_effects",
      "build_n_cascade",
-     "build_supplement_effects"
+     "build_supplement_effects",
+     "build_supplement_fat"
     ],
     "checks": [],
     "tests": [
@@ -3498,6 +3499,7 @@
      "build_npk_balance_2030",
      "build_price_trajectory_2030",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_tillage_options",
@@ -3547,6 +3549,8 @@
     "model": [],
     "builders": [
      "build_legsh_option",
+     "build_supplement_effects",
+     "build_supplement_fat",
      "build_tillage_options",
      "build_urea_subst_option"
     ],
@@ -3713,7 +3717,8 @@
    "read_by": {
     "model": [],
     "builders": [
-     "build_supplement_effects"
+     "build_supplement_effects",
+     "build_supplement_fat"
     ],
     "checks": [],
     "tests": []
@@ -3781,6 +3786,7 @@
      "build_npk_balance_2030",
      "build_price_trajectory_2030",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_tillage_options",
@@ -4805,6 +4811,7 @@
      "build_npk_balance_2030",
      "build_price_trajectory_2030",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_tillage_options",
@@ -5268,6 +5275,7 @@
      "build_processing_nq",
      "build_processing_seeds",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_tillage_options",
@@ -5467,6 +5475,7 @@
      "build_npk_balance_2030",
      "build_price_trajectory_2030",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_tillage_options",
@@ -22307,11 +22316,13 @@
      "build_fodder_balance",
      "build_genetics_effects",
      "build_lownfeed_effects",
-     "build_supplement_effects"
+     "build_supplement_effects",
+     "build_supplement_fat"
     ],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_capri.py"
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_supplement_fat.py"
     ]
    }
   },
@@ -29477,6 +29488,7 @@
      "build_price_trajectory_2030",
      "build_price_transmission_2030",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_techn_mix_2030",
@@ -29680,6 +29692,7 @@
      "build_price_trajectory_2030",
      "build_price_transmission_2030",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_techn_mix_2030",
@@ -29792,6 +29805,7 @@
      "build_npk_balance_2030",
      "build_price_trajectory_2030",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_tillage_options",
@@ -29894,6 +29908,7 @@
      "build_price_trajectory_2030",
      "build_price_transmission_2030",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_tillage_options",
@@ -29999,6 +30014,7 @@
      "build_npk_balance_2030",
      "build_price_trajectory_2030",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_tillage_options",
@@ -30201,6 +30217,7 @@
      "build_npk_balance_2030",
      "build_price_trajectory_2030",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_tillage_options",
@@ -30296,6 +30313,7 @@
      "build_npk_balance_2030",
      "build_price_trajectory_2030",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_tillage_options",
@@ -36884,6 +36902,7 @@
      "build_ration_trajectory_2030",
      "build_set_aside_scenario",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_techn_mix_2030",
@@ -37086,6 +37105,7 @@
      "build_processing_nq",
      "build_processing_seeds",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_tillage_options",
@@ -37573,6 +37593,7 @@
      "build_ration_trajectory_2030",
      "build_regional_units",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_techn_mix_2030",
@@ -37794,6 +37815,7 @@
      "build_regional_units",
      "build_set_aside_scenario",
      "build_supplement_effects",
+     "build_supplement_fat",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_techn_mix_2030",
@@ -44576,7 +44598,8 @@
    "read_by": {
     "model": [],
     "builders": [
-     "build_supplement_effects"
+     "build_supplement_effects",
+     "build_supplement_fat"
     ],
     "checks": [],
     "tests": []
@@ -44629,7 +44652,8 @@
    "read_by": {
     "model": [],
     "builders": [
-     "build_supplement_effects"
+     "build_supplement_effects",
+     "build_supplement_fat"
     ],
     "checks": [],
     "tests": []
@@ -45955,7 +45979,8 @@
    "read_by": {
     "model": [],
     "builders": [
-     "build_supplement_effects"
+     "build_supplement_effects",
+     "build_supplement_fat"
     ],
     "checks": [],
     "tests": []
@@ -46014,7 +46039,8 @@
    "read_by": {
     "model": [],
     "builders": [
-     "build_supplement_effects"
+     "build_supplement_effects",
+     "build_supplement_fat"
     ],
     "checks": [],
     "tests": []
@@ -57409,10 +57435,119 @@
     "model": [
      "capri_mod/data/loaders.py"
     ],
+    "builders": [
+     "build_supplement_fat"
+    ],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_supplement_fat.py"
+    ]
+   }
+  },
+  "supplement_fat": {
+   "file": "capri_data/2017/abatement/mitigation/supplement_fat.csv",
+   "declared_in": "15_abatement.sql",
+   "layout": [],
+   "comment": "The fat of the feed bulks per model region and cattle animal with linseed, the data of CAPRI's ration fat limit SupplementPerc_ (supply_model.gms l. 608-633): ether extract (envind/digestibility.gms), dry-matter content and p_emisFeed TotFAT (envind/line_nitr.gms l. 175-176; tools/build/build_supplement_fat.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "feed",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "ee",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "dm_content",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "tot_fat",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "animal",
+    "feed"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "((ee >= 0) AND (ee < 100))",
+    "((dm_content >= 0) AND (dm_content <= 1))",
+    "((tot_fat >= 0) AND (tot_fat < 1))"
+   ],
+   "units": [
+    {
+     "item": "dm_content",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_DryMatterContent(RU, FEED): dry matter per kg as fed"
+    },
+    {
+     "item": "ee",
+     "unit": "U_percent",
+     "status": "capri",
+     "basis": "p_digestPar(RU, CATACT, FEED, EE): the feed bulk's ether extract, % of dry matter"
+    },
+    {
+     "item": "tot_fat",
+     "unit": "U_ratio",
+     "status": "builder",
+     "basis": "p_emisFeed(RU, CATACT, T, FEED, TotFAT): kg of fat per kg as fed"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_supplement_fat",
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/fedcof.gms; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $EXPORTS/trends_1730.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/CFACTOR_ARAB.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/DACT_TO_PACT.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEDACT_TO_FODDI.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/MSAGG.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/NUTS0.csv; $REFERENCE/sets/simini_21730/NUTS1A.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/PSDPAY_<CC>.csv; $REFERENCE/sets/simini_21730/PSDPAY_cscs.csv; $REFERENCE/sets/simini_21730/PSDPAY_vcs.csv; $REFERENCE/sets/simini_21730/PSG_TO_A.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/REGAGGP.csv; $REFERENCE/sets/simini_21730/REGEU1015.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/R_RAGG.csv; $REFERENCE/sets/simini_21730/SRNUTS1.csv; $REFERENCE/sets/simini_21730/SRNUTS2.csv; $REFERENCE/sets/simini_21730/SRNUTS2_EXT.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_animExcrProtCorrFact.csv.gz; $REFERENCE/simini/simini_21730/p_animReq.csv.gz; $REFERENCE/simini/simini_21730/p_animReqLit.csv.gz; $REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/costsavings/costsavings_ini_21730_jul15.csv; $SOURCES/costsavings/costsavings_max_21730_jul15.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/feed_export/pmppar_17<CC>_feedpmp.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/def_digestibility.gms; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/supply/abatement.py"
+    ],
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_capri.py"
+     "capri_mod/tests/test_supplement_fat.py"
     ]
    }
   },
@@ -61963,7 +62098,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 518,
+  "capri/keep": 524,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 37,
