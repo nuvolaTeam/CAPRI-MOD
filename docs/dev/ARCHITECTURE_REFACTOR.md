@@ -182,10 +182,12 @@ and the organic yield gap only on the grouped organic crops with a gap estimate.
 cost per ha was CAPRI's bare coefficient without its unit value (about 20% low; builder fixed), and two CAPRI code
 errors, both corrected by default with a parity switch (DEPARTURES_FROM_CAPRI): the compile-time
 scenAugmentsTechChange off (the change replaces the 2017-2030 input-saving progress) and the top-up valued at INPO's
-unit value instead of fuel's. Registered: the changes act on CAPRI's 2017 coefficients (CAPRI's simulation-year
+unit value instead of fuel's. Registered then: the changes act on CAPRI's 2017 coefficients (CAPRI's simulation-year
 coefficients also carry the yield-dependent input adjustment, not held); the fertiliser part of the organic target
 keeps the model's own crop mapping (_organic_converted; CAPRI uses the NGRP groups, with the vegetables at the UAA
-target and Portugal's missing entries at 0) - not changed here.
+target and Portugal's missing entries at 0) - not changed here. Both ported since (register DEP-21, closed 23 November
+2026): the fertiliser part on CAPRI's group targets (organic_ngrp_class.csv, policy.py organic_group_target), the
+changes on CAPRI's simulation-year coefficients (input_coefs_2030.csv, supply/equations/define_inputs.py).
 
 Unsourced: the inhibitor's maximum share (1 - grazing share), accepting IPOPT's "acceptable" solutions (tol 1e-6),
 land rows at max(land data, base area), the PMP diagonal clamp, and fallbacks reached only when data are missing.

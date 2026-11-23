@@ -114,8 +114,8 @@ class PolicyBlock:
             # 3.5e-11 kha (EL63, 2030) the rule asked for grass the bounds forbid and the NLP was infeasible (K69)
             _xg = float(sum(xb[j] for j in _gj))
             if _xg > float(_settings().get("supply.absent_level")):
-                # CAPRI's GRSACT is GRAE, GRAI, IHISGR, FALLGR (sets.gms l. 2958): the idled histosol grassland counts
-                # towards the rule (permGrasGreening_ sums GRSACT; ddGreen maps every MCACT, policy_sets.gms l. 2055),
+                # CAPRI's GRSACT is GRAE, GRAI, IHISGR, FALLGR (sets.gms l. 2940): the idled histosol grassland counts
+                # towards the rule (permGrasGreening_ sums GRSACT; ddGreen maps every MCACT, policy_sets.gms l. 2045),
                 # the base limit is GRAE + GRAI (define_greening_limits.gms l. 139-140). Without it the rule held the
                 # productive grass at its base and the idled area took new land (KNOWN_ISSUES K157)
                 _hg = (getattr(self.ev, "hist_cols", None) or {}).get("grass")
@@ -419,6 +419,29 @@ class PolicyBlock:
         v = t.at[activity, col]
         return float(v) if pd.notna(v) else None
 
+    def _input_row_2030(self, activity: str, col: str) -> Optional[float]:
+        """CAPRI's simulation-year coefficient of this region and activity at the 2030 market year
+        (data.input_coefs_2030, tools/build/build_input_coefs_2030.py: DATA(BAS) x (1 - f + f G) before TF_I, at the
+        member state's UVAP(2030)), in the model's money; the factor columns (yield_growth, inpo_yield_factor) as they
+        are. None outside the 2030 market year or where CAPRI has none (the caller takes the 2017 row)."""
+        t = getattr(self.data, "input_coefs_2030", None)
+        sim = getattr(self.data, "sim_year", None)
+        if t is None or sim is None or activity not in t.index or col not in t.columns:
+            return None
+        v = t.at[activity, col]
+        if not pd.notna(v):
+            return None
+        if col in ("yield_growth", "inpo_yield_factor"):
+            return float(v)
+        return float(v) / _inputs.money_deflator(int(sim))
+
+    def _sim_input_cost(self, activity: str, col: str) -> Optional[float]:
+        """The cost row the Green Deal's input changes and the yields' input update act on: CAPRI's simulation-year
+        coefficient at the 2030 market year (_input_row_2030, register DEP-21), else CAPRI's 2017 coefficient at the
+        region's 2017 unit value (_input_row)."""
+        v = self._input_row_2030(activity, col)
+        return v if v is not None else self._input_row(activity, col)
+
     def _greendeal_tech_progress(self) -> float:
         """CAPRI's input-saving progress of the simulation year, TF_I = 1 - 0.005 x (Y - BAS)
         (capmod/define_inputs.gms l. 66)."""
@@ -439,12 +462,17 @@ class PolicyBlock:
                                     PLAP: -r overall (the remaining target on the conventional area plus the organic
                                     part); INPO: +otherCostChange x remaining / r = +(r - o_R), pesticides.gms passing
                                     otherCostChange = r
-        r is the pesticide reduction. The scenario coefficient is (base + top-up) x (1 + change) x TF_I with
-        CAPRI-ERROR-FIX greendeal_inputs_keep_tech_change, or (base + top-up) x (1 + change) without TF_I as CAPRI's
-        code runs (see the setting); the baseline's is base x TF_I. The model's costs are CAPRI's 2017 coefficients
-        valued at 2017 unit values (REGISTERED: CAPRI changes its simulation-year coefficients; their yield-dependent
-        part follows the yields in _apply_yield_input_costs, at these changes' TF_I).
+        r is the pesticide reduction. The scenario coefficient is (base + top-up) x TF_I with the change
+        (equations/define_inputs.py TF_I: (1 + change) x TF_I with CAPRI-ERROR-FIX greendeal_inputs_keep_tech_change,
+        (1 + change) alone as CAPRI's code runs, see the setting); the baseline's is base x TF_I. At the 2030 market year
+        the base is CAPRI's simulation-year coefficient before TF_I, DATA(BAS) x (1 - f + f G) (define_inputs.gms
+        l. 107-112, DATA_IY_Y; the top-up follows INPO's), valued at the member state's UVAP of 2030 (define_objc.gms
+        l. 40-44), and an animal's INPO cost per head carries its INPO's (1 - f + f G) (input_coefs_2030.csv,
+        _sim_input_cost; until 23 November 2026 CAPRI's 2017 coefficients at the regions' 2017 unit values, DEP-21: the
+        change's base 3.6% (INPO) and 5.2% (PLAP) lower at the median). Their yield-dependent part follows the yields
+        in _apply_yield_input_costs, at these changes' TF_I.
         """
+        from capri_mod.supply.equations.define_inputs import TF_I
         r = max(0.0, float(pesticide_reduction or 0.0))
         o_R = self._organic_region_target(organic_share) if organic_share else 0.0
         pc_plap = -o_R if o_R > 0 else 0.0
@@ -456,10 +484,8 @@ class PolicyBlock:
         keep_tf = bool(getattr(type(self), "greendeal_inputs_keep_tech_change", True))
 
         def delta(base: float, topup: float, pc: float) -> float:
-            # change of the cost against the baseline (base x TF_I); TF_I is replaced only where CAPRI sets a change
-            if pc == 0.0:
-                return tf * topup
-            return (base + topup) * (1.0 + pc) * (tf if keep_tf else 1.0) - base * tf
+            # change of the cost against the baseline (base x TF_I); TF_I changes only where CAPRI sets a change
+            return (base + topup) * TF_I(tf, pc, keep_tf) - base * tf
 
         topup_col = "eful_eur_ha" if getattr(type(self), "organic_topup_at_fuel_cost", True) else "eful_inpo_eur_ha"
         nr = self.net_revenues.copy()
@@ -469,21 +495,24 @@ class PolicyBlock:
             if a in ANIMALS:
                 sh = self._input_row(a, "inpo_toin_share")
                 if sh is not None and pc_inpo != 0.0:
-                    d = delta(sh * self._animal_cost_per_head(a), 0.0, pc_inpo)
+                    # the INPO coefficient's yield-growth part at the 2030 market year (define_inputs.gms l. 107-112;
+                    # the per-head basis is the model's, DEP-13)
+                    yf = self._input_row_2030(a, "inpo_yield_factor") or 1.0
+                    d = delta(sh * self._animal_cost_per_head(a) * yf, 0.0, pc_inpo)
                     # the change per head of the animal's average; its split columns move heads between CAPRI
                     # activities whose INPO differs (livestock.py, dinpo_rel; K189's per-head terms)
                     if getattr(self.ev, "greendeal_animal_inpo", None) is None:
                         self.ev.greendeal_animal_inpo = {}
                     self.ev.greendeal_animal_inpo[a] = d
             else:
-                plap = self._input_row(a, "plap_eur_ha")
-                inpo = self._input_row(a, "inpo_eur_ha")
+                plap = self._sim_input_cost(a, "plap_eur_ha")
+                inpo = self._sim_input_cost(a, "inpo_eur_ha")
                 d_p = d_i = 0.0
                 if plap is not None and pc_plap != 0.0:
                     d_p = delta(plap, 0.0, pc_plap)
                 if inpo is not None:
                     o_a = self._organic_crop_target(a, organic_share) if organic_share else 0.0
-                    eful = self._input_row(a, topup_col) or 0.0
+                    eful = self._sim_input_cost(a, topup_col) or 0.0
                     topup = 2.0 * o_a * eful
                     if topup or pc_inpo:
                         d_i = delta(inpo, topup, pc_inpo)
@@ -593,16 +622,20 @@ class PolicyBlock:
             sum_i f_i x cost_i x G x TF_I x (rho - 1),   rho = yield now / reference yield
         (build_plant_protection_cost.py: yd_rest, yd_plap, yd_inpo per ha; TF_I with the Green Deal changes of PLAP
         and INPO, _apply_greendeal_input_changes). Fertiliser is not in IY: it follows the crops' need
-        (need_yield_factor). REGISTERED: the model's costs are CAPRI's 2017 coefficients (no yield-growth or TF_I term
-        in the baseline cost); the change above is CAPRI's derivative at its 2030 reference."""
+        (need_yield_factor). The change above is CAPRI's derivative at its 2030 reference; at the 2030 market year its
+        costs are CAPRI's base coefficients at the member state's UVAP of 2030 (input_coefs_2030.csv, _sim_input_cost; the
+        same as the 2017 rows' but for plant protection, whose regional UVAG differs: register DEP-21), else CAPRI's
+        2017 coefficients at the regions' 2017 unit values. REGISTERED: the baseline's own cost carries no yield-growth or
+        TF_I term (the calibration absorbs the level)."""
         y0s, yc = getattr(self.ev, "yields_solve0", None), self.data.yields
         if y0s is None or not hasattr(yc, "get") or not hasattr(y0s, "get"):
             return
         tf = self._greendeal_tech_progress()
         gi = getattr(self.ev, "greendeal_inputs", None) or {}
         keep = bool(gi.get("keep_tf", True))
-        tf_of = lambda pc: tf if not pc else (1.0 + pc) * (tf if keep else 1.0)
-        tf_p, tf_i = tf_of(float(gi.get("pc_plap", 0.0) or 0.0)), tf_of(float(gi.get("pc_inpo", 0.0) or 0.0))
+        from capri_mod.supply.equations.define_inputs import TF_I
+        tf_p = TF_I(tf, float(gi.get("pc_plap", 0.0) or 0.0), keep)
+        tf_i = TF_I(tf, float(gi.get("pc_inpo", 0.0) or 0.0), keep)
         nr = None
         for a in self.acts:
             if a not in CROPS:
@@ -610,10 +643,11 @@ class PolicyBlock:
             y0, y = float(y0s.get(a, 0.0) or 0.0), float(yc.get(a, 0.0) or 0.0)
             if not (y0 > 0 and y > 0) or y == y0:
                 continue
-            k = ((self._input_row(a, "yd_rest_eur_ha") or 0.0) * tf + (self._input_row(a, "yd_plap_eur_ha") or 0.0) * tf_p
-                 + (self._input_row(a, "yd_inpo_eur_ha") or 0.0) * tf_i)
+            k = ((self._sim_input_cost(a, "yd_rest_eur_ha") or 0.0) * tf
+                 + (self._sim_input_cost(a, "yd_plap_eur_ha") or 0.0) * tf_p
+                 + (self._sim_input_cost(a, "yd_inpo_eur_ha") or 0.0) * tf_i)
             if k:
-                g = self._input_row(a, "yield_growth") or 1.0
+                g = self._sim_input_cost(a, "yield_growth") or 1.0
                 # CAPRI's bounds on the yield growth: G x rho within 0.5-1.5
                 d = (min(param("YIELD_GROWTH_MAX"), max(param("YIELD_GROWTH_MIN"), g * y / y0)) - g) / g if g > 0 else (y / y0 - 1.0)
                 if nr is None:

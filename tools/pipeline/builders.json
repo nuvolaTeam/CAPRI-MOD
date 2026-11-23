@@ -755,6 +755,36 @@
    ]
   },
   {
+   "task": "build_input_coefs_2030",
+   "builder": "build_input_coefs_2030",
+   "args": [],
+   "inputs": [
+    "capri_data/codes/model_activities.csv",
+    "capri_data/codes/regional_units.csv",
+    "capri_data/sources/raw/capri/gams/inputs/yieldIY_p_inputDemandFactor.parquet"
+   ],
+   "code": [
+    "tools/build/build_input_coefs_2030.py",
+    "tools/build/build_plant_protection_capri_step_2030.py",
+    "capri_mod/supply/equations/define_inputs.py",
+    "tools/lib/_grep.py",
+    "tools/lib/_model_codes.py",
+    "tools/lib/_model_regions.py",
+    "tools/lib/_sources_io.py",
+    "tools/lib/gams_sets.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
+    "$REFERENCE/simini/simini_21730/DATA.csv.gz",
+    "$REFERENCE/simini/simini_21730/p_infl.csv.gz",
+    "$SOURCES/gams/sets.gms"
+   ],
+   "outputs": [
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/input_coefs_2030.csv"
+   ]
+  },
+  {
    "task": "build_plant_protection_capri_step_2030",
    "builder": "build_plant_protection_capri_step_2030",
    "args": [],

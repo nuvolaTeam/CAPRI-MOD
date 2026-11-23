@@ -50,6 +50,40 @@ def test_mix_tables_cover_the_same_crops_and_carry_capri_factors():
     assert (pm.g_zz >= 0).all() and (pm.g_xx_extra >= 0).all()
 
 
+def test_the_residues_n_factor_is_fertneds_at_the_moved_mann():
+    """fert/fertned.gms l. 324-335 runs in the simulation year after each yield change: p_technFact(MANN, A) =
+    tf (M - d) / M at the crop's moved DATA(MANN) (K189). FertilisationBlock._mix_res_diff gives the table's mann_diff
+    at the base yields (every row with fertned's arguments) and the statement at a moved MANN; P2O5 and K2O keep the
+    yield factor."""
+    from capri_mod.fert import npk
+    from capri_mod.supply.fertilisation import FertilisationBlock as FB
+    from capri_mod.supply.equations.fertned import fertned_at_yields
+    tm = _read("techn_mix_2030.csv")
+    dep = pd.read_csv(ROOT / "capri_data" / "2017" / "environment" / "n_deposition_regional.csv",
+                      float_precision="round_trip").set_index("region").deposition_kg_n_per_ha
+    D = npk.NPKData.get()
+    n_ = 0
+    for r in tm.itertuples():
+        p = D.parts(r.capri_region, "N", r.activity)
+        if p is None:
+            continue
+        t = tm.iloc[[r.Index]].set_index("activity")
+        d = float(dep[r.region])
+        f0 = fertned_at_yields(*p, 1.0, 1.0, AtmDep=d)
+        assert FB._mix_res_diff(t, r.activity, "N", f0, d) == pytest.approx(r.mann_diff, rel=1e-12, abs=1e-15)
+        n_ += 1
+    assert n_ == 5228
+    t = tm[(tm.region == "DE210000")].set_index("activity")
+    d = float(dep["DE210000"])
+    p = D.parts("DE210000", "N", "SWHE")
+    f1 = fertned_at_yields(*p, 1.2, 1.2, AtmDep=d)          # a scenario yield shift: the straw moves too
+    M1 = f1[1]
+    assert M1 > fertned_at_yields(*p, 1.0, 1.0, AtmDep=d)[1]
+    got = FB._mix_res_diff(t, "SWHE", "N", f1, d)
+    assert got == pytest.approx(0.4 * (M1 - d) / M1, rel=1e-12) and got > float(t.at["SWHE", "mann_diff"])
+    assert FB._mix_res_diff(t, "SWHE", "P", f1, d) == float(t.at["SWHE", "manp_diff"])
+
+
 def test_mix_pmp_terms_reproduce_the_collapsed_curvature():
     """The mix columns' PMP block is CAPRI's technology block in (X, z): X's curvature with z optimised out (the
     Schur complement) is the collapsed curvature the model uses without the columns."""
@@ -137,6 +171,13 @@ def test_residue_pool_follows_the_technology_mix(es42_greendeal):
     # change on CAPRI's 2030 coefficients
     acts = list(rm.acts)
     zc = {c_: a for a, c_ in (getattr(rm.ev, "mix_cols", None) or {}).items()}
+    from capri_mod.fert import npk as npk_mod
+    from capri_mod.supply.fertilisation import FertilisationBlock
+    # the yields the solve's N factors were taken at (base, current, scenario; the region's yields after the run are
+    # not the last solve's)
+    ylds = dict(getattr(rm.res, "last_npk_cres_yields", None) or {})
+    dep = float(rm.data.n_deposition_kg_ha or 0.0)
+    moved = 0
     for nut, col in (("N", "mann_diff"), ("P", "manp_diff"), ("K", "mank_diff")):
         pool = co[co.nutrient == nut].set_index("model_crop").pool_kg_ha
         C = rm.res.last_npk_cres[nut]
@@ -148,13 +189,22 @@ def test_residue_pool_follows_the_technology_mix(es42_greendeal):
         for a, v in cc.items():
             assert abs(v - float(pool[a])) <= 0.5 * abs(float(pool[a])) + 1e-9, (nut, a, v, float(pool[a]))
         for a, v in cz.items():
-            assert v == pytest.approx(cc[a] * float(tm.at[a, col]), rel=1e-12), (nut, a)
+            if nut == "N":
+                # the residues' factor at the solve's MANN (fertned.gms l. 324-335 after the yield change, K189)
+                yl = ylds.get(a)
+                fy = None if yl is None else npk_mod.fout_at_yields(R, a, *yl, "N", AtmDep=dep)
+                f = FertilisationBlock._mix_res_diff(tm, a, "N", None if fy is None else fy[1], dep)
+                moved += abs(f - float(tm.at[a, col])) > 1e-9
+            else:
+                f = float(tm.at[a, col])
+            assert v == pytest.approx(cc[a] * f, rel=1e-12), (nut, a)
         crops = float(sum(float(scn.get(a, 0.0)) * v for a, v in cc.items()))        # t
         mix = float(sum(z[a] * v for a, v in cz.items() if a in z))
         catch = 1000.0 * float(cover["delta"]) * float(cover["biofix"]) if nut == "N" else 0.0
         dist = sum(v for (g, s), v in npk[nut]["flows"].items() if s == "CRES")
         assert mix < -0.01 * crops, (nut, mix, crops)        # the shift to T2 takes residues out
         assert math.isclose(dist, crops + mix + catch, rel_tol=1e-6), (nut, dist, crops, mix, catch)
+    assert moved > 0                                          # the N factor moved with the Green Deal's yields
 
 
 @pytest.mark.slow

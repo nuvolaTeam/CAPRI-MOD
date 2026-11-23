@@ -251,13 +251,22 @@ def fout_yield_change(region: Optional[str], crop: str, y0: float, y: float, y_s
     the straw left, which the scenario's yield shifts move and the price-driven updates do not; as need_yield_factor).
     AtmDep: the region's deposition (kg N/ha; N only, as in CAPRI's MANN). None where CAPRI's data have no arguments
     for the crop (fallow and set-aside, without a main output)."""
+    fy = fout_at_yields(region, crop, y0, y, y_scen, nut, AtmDep)
+    return None if fy is None else fy[1][1] - fy[0][1]
+
+
+def fout_at_yields(region: Optional[str], crop: str, y0: float, y: float, y_scen: Optional[float] = None,
+                   nut: str = "N", AtmDep: float = 0.0) -> Optional[tuple]:
+    """((DATA(crop, FNUT), DATA(crop, FOUT)) at the base yield y0, the same at yield y): fert/fertned.gms rerun at
+    the yields (fertned_at_yields), kg/ha. y_scen, AtmDep: as fout_yield_change. None where CAPRI's data have no
+    arguments for the crop."""
     parts = _fertned_parts(region, nut, crop)
     if parts is None or not y0 > 0:
         return None
     ys = y if (y_scen is None or not y_scen > 0) else float(y_scen)
     n_ = nut == "N"
-    return (fertned_at_yields(*parts, max(y, 0.0) / y0, ys / y0, AtmDep=AtmDep, nitrogen=n_)[1]
-            - fertned_at_yields(*parts, 1.0, 1.0, AtmDep=AtmDep, nitrogen=n_)[1])
+    return (fertned_at_yields(*parts, 1.0, 1.0, AtmDep=AtmDep, nitrogen=n_),
+            fertned_at_yields(*parts, max(y, 0.0) / y0, ys / y0, AtmDep=AtmDep, nitrogen=n_))
 
 
 def _fertned_parts(region: Optional[str], nut: str, crop: str) -> Optional[tuple]:

@@ -217,10 +217,13 @@ def O_HP_yieldGrowth(O_HP_BAS: float, p_yieldGrowth: float) -> float:
     In this project's notation O_HP(y) = O_HP_BAS x y / y_BAS. The model applies it to its own base, the simulation
     year's O_HP at CAPRI's 2030 reference yield y0 (O_HP above: the year's yield), with p_yieldGrowth = y / y0.
 
-    Departure from CAPRI (not ported, small): CAPRI's base here is the base period's O_HP and yield ("BAS"), whose ratio
-    in sim_ini_21730 is 1 within 0.3% (median 1.000, 10th-90th percentile 0.997-1.003, 12,750 crop rows); after the
-    scenario's yield shifts capmod/def_fert_and_requirements.gms l. 126 zeroes O_HP and fertned rebuilds it from the
-    shifted yield itself (O_HP above), so the ratio enters only CAPRI's price-driven yield updates."""
+    CAPRI's base here is the base period's O_HP and yield ("BAS"); after the scenario's yield shifts
+    capmod/def_fert_and_requirements.gms l. 126 zeroes O_HP and fertned rebuilds it from the shifted yield itself (O_HP
+    above), so the base enters only CAPRI's price-driven yield updates. There it is the same: in sim_ini_21730's DATA at
+    "BAS" O_HP equals the main output's yield exactly in all 7,312 region x crop rows of capri_crop_fertned_parts_2030.csv
+    with a base level (checked 23 November 2026, KNOWN_ISSUES K189; the rows off 1 are animals' O_HP). The other 128
+    rows, new energy crops (NECR) without a base level, have no price-driven yield in CAPRI (supply/yield_elas.gms
+    l. 30-37: cereals, oilseeds and potatoes) nor in the model. So O_HP(BAS) x y / y(BAS) = y, the model's O_HP."""
     return float(O_HP_BAS or 0.0) * float(p_yieldGrowth or 0.0)
 
 

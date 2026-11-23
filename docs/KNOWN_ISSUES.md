@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](dev/KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (35)
+## Open (36)
 
 | # | Issue | Status |
 |---|---|---|
@@ -46,8 +46,9 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K148](#k148) | The young-animal markets and the member states' raw milk were cleared in at most 4 alternating rounds inside each market evaluation (CAPRI: one system): up to 8.0e-7 of net supply left | fixed (14 November 2026) |
 | [K149](#k149) | Norway's raw milk row took the young-animal prices of a clearing without the milk price change, its other rows those of a second clearing with it (CAPRI: one set) | fixed (14 November 2026) |
 | [K150](#k150) | The non-EU regions' raw milk at the market's base is FAO_agg's production, not CAPRI's market data (milk delivered to the dairies): Turkey 20,173 kt against CAPRI's 13,145 | fixed (14 November 2026), validated (15 November 2026, the full Green Deal pair) |
-| [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences; sorted 20 November 2026: most are in the accounts only or have no effect in the step; ARTIF held fixed had one (small for the EU, a few thousand ha in some Spanish and French units) | open: ARTIF, the milk for feeding and the yield factors of the crops' N and P terms ported 20 November 2026 (as CAPRI's); the animals' per-head terms ported 21 November 2026 (the members' INPO difference under the Green Deal's input change) |
-| [K196](#k196) | The Green Deal's N-surplus dual is below CAPRI's (CAPRI's recovered from its own results): median 0.89 of CAPRI's in the converged full run, 0.83 at CAPRI's prices; the suckler cows' and the technology shift's remaining gaps follow it | open (21 November 2026) |
+| [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences; sorted 20 November 2026: most are in the accounts only or have no effect in the step; ARTIF held fixed had one (small for the EU, a few thousand ha in some Spanish and French units) | open: ARTIF, the milk for feeding and the yield factors of the crops' N and P terms ported 20 November 2026 (as CAPRI's); the animals' per-head terms ported 21 November 2026 (the members' INPO difference under the Green Deal's input change); fertned's two items left closed 23 November 2026 (the price-driven O_HP needs no port; the residues' variant factor at the moved MANN ported) |
+| [K196](#k196) | The Green Deal's N-surplus dual is below CAPRI's (CAPRI's recovered from its own results): median 0.856 of CAPRI's in the standing check at 9867411 (0.89 at bb3b592), 0.83 at CAPRI's prices; the suckler cows' and the technology shift's remaining gaps follow it | open (21 November 2026) |
+| [K198](#k198) | The assignments refactor's findings for the main line (its inventory of the CAPRI statements the model ports or cites, block A0): porting differences in the market supply Hessian, the price transmission, the stop rule, the welfare, the premiums and the accounts, and 14 wrong line citations; sorted 23 November 2026 by where they act, not measured | open (23 November 2026) |
 
 ## Resolved (128)
 
@@ -4021,7 +4022,9 @@ switch, K194, K189's per-head terms and K195; converged in 29 iterations, pools 
 the changes are not separated; the T1 - T2 switch, CAPRI's own step representation, lowered the dual in the probe of
 19 November (DE21 5.09 -> 4.80 at CAPRI's prices) and is the likeliest part, so with CAPRI's representation the gap
 looks wider; the grassland split moved away with it (intensive grassland -49.7% against CAPRI's -54.8%; -51.9 at
-bb3b592).
+bb3b592). In the standing check at 9867411 (23 November 2026, the same file; since b30fa20 DEP-14, DEP-53 and the
+options of K93) 0.856 (IQR 0.783-0.941; FR52 4.90 against CAPRI's 6.20, PL52 2.03 against 2.89); the inhibitor on
+manure still 0.862 in FR52.
 
 - **Effect:** the herds' Green Deal response (the suckler cows' gap follows the dual ratio, correlation -0.66 in the
   full run; K48), the manure's nutrient value, the crops' technology shift and mineral N (the N terms dominate the mix
@@ -4106,6 +4109,48 @@ Found while looking for the FENE and FMIL unit values DEP-14 lacked.
   costs: low_n_feed.gms l. 132, breeding.gms l. 337); the model's options take their own base ration's costs (K194).
 - **In 9t:** -
 - **Status:** fixed (23 November 2026).
+
+<a id="k198"></a>
+### K198: The assignments refactor's findings for the main line (found 23 November 2026)
+
+Found by the inventory of the refactor's third phase (block A0, branch refactor/assignments at 22ff3d3,
+docs/dev/assignments_inventory.csv and docs/dev/ASSIGNMENTS_REFACTOR_HANDOFF.md section 5): every citation of a CAPRI
+GAMS file in the model's code (860 in 85 modules) resolved against star 3.0 and reviewed. The refactor fixes nothing;
+the main line measures and ranks. Where each acts, from the code (no runs):
+
+- **In the market and its coupling, with a possible effect on prices:** the market supply Hessian is measured per
+  unit of price ratio (CAPRI per EUR/t of UVAG), without the inflation factor and without the yield elasticity's
+  diagonal term, its feed columns at the products' prices (CAPRI the feed bulks'); CAPRI's two abort checks and the
+  raw milk column of the feed bulk elasticities not ported. The price transmission (arm/set_prices.gms) moves UVAG
+  only, not UVAP nor the chicks' and young animals' input prices. The start bounds without CAPRI's fixing of
+  processing cells of 0.1 kt or less and of the biofuel and DDGS processing, and without the milk products' negative
+  price floor (set_start_val.gms l. 533). The elasticity dampening on the elasticities (CAPRI inflates the PMP term).
+- **In the stop rule:** without step 1's comparison with the trend, the filter on production above 10 x the feed
+  threshold, and the GWPA, manure trade and land class items (capmod/price_forecast.gms).
+- **In the premiums:** a member state without an MTR key takes its entitlements as key (K142, Croatia); the
+  set_from_year rule and the DCOW ceiling set the simulation year only (CAPRI every year of its range); DPCN,
+  DPADDSHGM, DPENERCRP, DPNONCAP not ported, DPSILA missing from mtr_declarations.csv; the non-CAP payments and
+  greening shares, the farm types, the Agenda 2000 set-aside (SETR, OSET) and prmcut.gms's per-technology premiums not
+  ported.
+- **In the regional models (the main line's files):** the pesticide crops without fodder and set-aside (CAPRI every
+  main crop but the idled histosols; registered) and the pesticide yield loss linear in the conventional share
+  (CAPRI's step runs with the yield shock off); the young-animal price bounds a fixed guard never widened; the
+  baseline mineral N per ha the model's calibration point (CAPRI's p_baselineDataout); p_mitiEffFac not applied;
+  p_fertCostGains replaced by the model's value of N (DEP-30); the catch crops at CAPRI's 2030 share with the rule
+  held at the base.
+- **In the accounts and reports only:** the volatilised mineral part added to GWPN2OSYN_; the residues' N2O without
+  CAPRI's (1 - CRBU - CRFU - CRFE) factor at the citing code (gases.gms l. 545-548); the linseed-nitrate overlap as a
+  product; the income's MGVA without FEED for animals and without the unassigned outputs and inputs; the welfare's
+  consumer price floored, the processing and feed profits as a one-step integral, RENT as the land duals times the
+  areas, the non-agricultural ProfitLandUse not ported.
+- **Wrong line citations (comments; 14):** runlog.py (capmod.gms, report_supply_model.gms, simu_market.gms),
+  coupling/reporting.py and market/welfare.py (reports/welfare.gms), policy/mtr.py (aggreg_ppepay.gms),
+  supply/policy.py (sets.gms GRSACT l. 2940, policy_sets.gms l. 2045), coupling/young_animals.py and market/supply.py
+  (simu_calibration_to_supply.gms: the grofNEprod-off branch cited, the on branch holds the same statements),
+  supply/ghg_tax.py (GWPCH4ENT_ is supply_model.gms l. 3074). The refactor corrects those in the files it moves; the
+  main line those in its own.
+- **In 9t:** -
+- **Status:** open (23 November 2026).
 
 <a id="k195"></a>
 ### K195: CAPRI's Green Deal step's plant protection at the member state's UVAP (found and fixed 21 November 2026)
@@ -4436,10 +4481,21 @@ docs/dev/EQUATION_REFACTOR_HANDOFF.md section 8). The refactor fixed none of the
     need x NUTNED_'s SQRT(1 + y)(1 + y) over its mean, 1 +- need_diff / 2, instead of the balance at y (1 +- 0.2));
     and mann_diff of techn_mix_2030.csv as fertned sets p_technFact(MANN, A) (p_technFact_MANN: 0.4 x (MANN -
     deposition) / MANN, cereals about 0.25; it was sim_ini's 0.4, the factor before fertned runs, K181's port). The
-    need multiplier is still calibrated on the base coefficients. Not ported (small): CAPRI's price-driven O_HP is the
-    base period's O_HP x the yield growth (define_inputs.gms), whose O_HP / yield ratio in sim_ini_21730 is 1 within
-    0.3%; the residues' variant factor is held at its base value when the yields move (CAPRI reruns l. 324-335 on the
-    new MANN). Removed with it: npk_crop_coefs_2030.csv's main_share and straw_share, and the three converted CAPRI
+    need multiplier is still calibrated on the base coefficients. The two items left on 20 November 2026, closed on
+    23 November 2026: (1) CAPRI's price-driven O_HP is the base period's O_HP x the yield growth (define_inputs.gms
+    l. 80-92): no change, as in sim_ini_21730's DATA at "BAS" O_HP equals the main output's yield exactly in all
+    7,312 region x crop rows of the fertned parts with a base level (the "within 0.3%" written here before was over
+    every activity, the rows off 1 being animals'); the other 128 rows, NECR without a base level, have no
+    price-driven yield in CAPRI (supply/yield_elas.gms l. 30-37) nor in the model, so O_HP = y is CAPRI's;
+    (2) the residues' variant factor at the moved MANN (ported): fertned.gms runs l. 324-335 in the simulation year
+    after each yield change, so p_technFact(MANN, A) = tf (M - d) / M at the crop's new DATA(MANN); the mix columns'
+    residue coefficients in the pool and in the permanent crops' own residues took the base mann_diff at every yield
+    and now take the statement at the solve's MANN (fertilisation.py FertilisationBlock._mix_res_diff with
+    npk.fout_at_yields; the table's mann_diff at the base yields, 5,228 rows within 5e-16; P2O5 and K2O keep the
+    yield factor). Test: test_techn_mix.py::test_the_residues_n_factor_is_fertneds_at_the_moved_mann. Effect (the
+    six-unit Green Deal probe at CAPRI's prices, ES62, CY, PL52, DE21, FR52, ES41, 12 iterations; p_dep14_after against
+    p_k189): the base unchanged (2e-8); every activity total within 0.03 points, the N-surplus duals within 0.03%: in the
+    Green Deal step the yields move by the price-driven updates, which leave the straw, so MANN hardly moves. Removed with it: npk_crop_coefs_2030.csv's main_share and straw_share, and the three converted CAPRI
     statements only they used (gascoeff.gms's straw content, fertpar.gms's MAXF and doubleMaxf; convert_sources.py).
     Tests: test_need_yield.py, test_capri.py::test_the_crops_n_terms_move_with_the_yields_as_capris_data,
     test_techn_mix.py.

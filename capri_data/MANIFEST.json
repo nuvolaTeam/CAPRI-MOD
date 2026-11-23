@@ -4416,6 +4416,25 @@
    },
    "catalogue_note": "tools/build/build_cap_ceilings_2030.py; Pillar II budget changes (PolicyScenario.lfa_/ae_/n2k_budget_change) and the payments report's split by scheme (not re-checked)"
   },
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/input_coefs_2030.csv": {
+   "description": "CAPRI's simulation-year input coefficients of 2030 that its Green Deal input changes and its yield updates act on, per regional unit and model activity: capmod/define_inputs.gms's DATA(BAS) x (1 - f + f G) before TF_I (DATA_IY_Y), the crops' at the member state's UVAP(2030) (capmod/define_objc.gms l. 40-44), the animals' INPO as its yield factor on the model's cost per head. Crops' columns empty for animals and the animals' for crops (register DEP-21; tools/build/build_input_coefs_2030.py)",
+   "kind": "coefficients",
+   "vintage": "2030 reference",
+   "domain": "supply",
+   "status": "live",
+   "vintage_exception": "CAPRI's simulation-year input coefficients of 2030 (define_inputs.gms) at the member state's UVAP: what the Green Deal input changes and the yield updates act on",
+   "rows": 9673,
+   "columns": 12,
+   "units": "U_1000ha, U_EuPerHa, U_ratio",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_input_coefs_2030"
+   },
+   "catalogue_note": "tools/build/build_input_coefs_2030.py: register DEP-21 (not re-checked)"
+  },
   "capri_data/baselines/capri_greendeal_ref/1730/supply/land_market_2030.csv": {
    "description": "Build CAPRI's land-market data per model region (docs/LAND_USE_FLEXIBILITY.md). (tools/build/build_land_market.py)",
    "kind": "calibrated",

@@ -220,7 +220,7 @@ class FertilisationBlock:
         x kappa, kappa the region's need
         factor that closes NUTNED_ at base with the base mineral use (CAPRI's v_cropNutNeedMultFact, calibrated in
         the base and fixed in simulation; here one per region and nutrient). None outside CAPRI's EU data."""
-        from capri_mod.fert.npk import NPKData, NUTRIENTS, PERM_NGRP, endo_slope, fout_yield_change, need_multiplier
+        from capri_mod.fert.npk import NPKData, NUTRIENTS, PERM_NGRP, endo_slope, fout_at_yields, need_multiplier
         from capri_mod.fert.inner_fert_dist import FERT_POST_ACCURACY
         env_ = getattr(self.seen, "env_for_surplus", None)
         if env_ is None:
@@ -295,12 +295,16 @@ class FertilisationBlock:
                 mine0[j] = float(env_._base_mineral_rate(rid, a)) if nut == "N" else D.crop_coef(cr, nut, a, "mine_kg_ha")
             # the deliveries DATA(crop, MANN | MANP | MANK) at this solve's yields: fert/fertned.gms rerun on them, as
             # CAPRI after the scenario's yield shifts and each price-driven yield update (capri_mod.fert.npk
-            # fout_yield_change), a change on the base coefficients (the pool's scaled as the base's, npk_region's
+            # fout_at_yields), a change on the base coefficients (the pool's scaled as the base's, npk_region's
             # pool_scale); the base ones calibrate the need multiplier below. Until 20 November 2026 the residue pool
             # and the permanent crops' own residues did not move with the yields (KNOWN_ISSUES K189)
             own_y, poolc_y = own.copy(), poolc.copy()
             _ys_now = self._yields_scen_now() or {}
             _kpool = float(R.pool_scale) if R.pool_scale == R.pool_scale else 1.0
+            _dep = float(self.data.n_deposition_kg_ha or 0.0) if nut == "N" else 0.0
+            # the crops' (DATA(NITF), DATA(MANN)) at this solve's yields where they moved: the residues' technology
+            # factor p_technFact(MANN, A) is fertned's at the moved MANN (K189; N only)
+            fout_y, _cres_y = {}, {}
             for j, a in enumerate(acts):
                 if a not in CROPS or not (own[j] > 0 or poolc[j] > 0):
                     continue
@@ -309,8 +313,11 @@ class FertilisationBlock:
                 ys_ = _ys_now.get(a)
                 if not y0_ > 0 or (yc_ == y0_ and (ys_ is None or float(ys_) == y0_)):
                     continue
-                d_ = fout_yield_change(rid, a, y0_, yc_, ys_, nut,
-                                       AtmDep=float(self.data.n_deposition_kg_ha or 0.0) if nut == "N" else 0.0)
+                fy_ = fout_at_yields(rid, a, y0_, yc_, ys_, nut, AtmDep=_dep)
+                d_ = None if fy_ is None else fy_[1][1] - fy_[0][1]
+                if fy_ is not None and nut == "N":
+                    fout_y[j] = fy_[1]
+                    _cres_y[a] = (y0_, yc_, ys_)
                 if d_:
                     if own[j] > 0:
                         own_y[j] = own[j] + d_
@@ -387,7 +394,7 @@ class FertilisationBlock:
                 for j, sh in (crops if perm else ()):
                     kz = mixc.get(acts[j])
                     if kz is not None and own[j] > 0 and kz < n_cols:
-                        ownl.append((kz, sh * k_own * own_y[j] * self._mix_res_diff(tm_, acts[j], nut)))
+                        ownl.append((kz, sh * k_own * own_y[j] * self._mix_res_diff(tm_, acts[j], nut, fout_y.get(j), _dep)))
                 groups.append({"g": gname, "perm": perm, "acc": acc, "modes": modes, "crops": crops,
                                "need": needl, "own": ownl, "Aref": Aref})
             if not groups:
@@ -427,7 +434,7 @@ class FertilisationBlock:
             for j in range(n):
                 kz = mixc.get(acts[j])
                 if kz is not None and poolc[j] > 0 and kz < n_cols:
-                    rd = self._mix_res_diff(tm_, acts[j], nut)
+                    rd = self._mix_res_diff(tm_, acts[j], nut, fout_y.get(j), _dep)
                     if rd != 0.0:
                         Ccols.append((kz, float(poolc_y[j]) * rd))
             if nut == "N" and self.data.n_deposition_kg_ha:
@@ -440,6 +447,9 @@ class FertilisationBlock:
             # the pool's coefficients this solve uses, per column (t per unit; the crops' at the solve's yields, K189)
             self.res.last_npk_cres = dict(getattr(self.res, "last_npk_cres", None) or {})
             self.res.last_npk_cres[nut] = list(Ccols)
+            if nut == "N":
+                # the crops' yields the N factors above were taken at (base, current, scenario), where they moved
+                self.res.last_npk_cres_yields = dict(_cres_y)
             out["nutrients"][nut] = {
                 "groups": groups, "E": Ecols, "C": Ccols,
                 "E_const": E_const,
@@ -456,9 +466,22 @@ class FertilisationBlock:
     MIX_RES_DIFF = {"N": "mann_diff", "P": "manp_diff", "K": "mank_diff"}
 
     @classmethod
-    def _mix_res_diff(cls, tm, activity: str, nut: str) -> float:
+    def _mix_res_diff(cls, tm, activity: str, nut: str, fout_y=None, AtmDep: float = 0.0) -> float:
         """The crop residues' technology factor T1 - T2 of a nutrient (CAPRI's p_technFact MANN, MANP or MANK;
-        tools/build/build_techn_mix_2030.py): the residues per unit of the mix column over the crop's per ha."""
+        tools/build/build_techn_mix_2030.py): the residues per unit of the mix column over the crop's per ha.
+
+        For N at moved yields (fout_y: the crop's (DATA(NITF), DATA(MANN)) at the solve's yields, fertned.gms rerun),
+        fertned.gms's statement at the moved MANN (l. 324-335, p_technFact_MANN: tf (M - d) / M, run in the simulation
+        year, %Y% = "Y", after each yield change): the deposition's part of the deliveries does not move with the
+        variant's yield, so its share changes with M. The statement is linear in tf, so the difference of the two
+        variants' factors is the statement on the difference of their yield factors (yield_diff); at the base yields
+        it gives the table's mann_diff (5,228 region x crop rows, within 5e-16). Until 23 November 2026 the base
+        mann_diff at every yield (KNOWN_ISSUES K189). P2O5 and K2O keep the yield factor (l. 314-318)."""
+        if nut == "N" and fout_y is not None and fout_y[0] and fout_y[1]:
+            from capri_mod.supply.equations.fertned import p_technFact_MANN
+            v = p_technFact_MANN(float(tm.at[activity, "yield_diff"]), float(fout_y[1]), AtmDep)
+            if v is not None:
+                return float(v)
         return float(tm.at[activity, cls.MIX_RES_DIFF[nut]])
 
     @staticmethod
