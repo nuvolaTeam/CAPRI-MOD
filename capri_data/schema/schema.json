@@ -3027,7 +3027,8 @@
     ],
     "tests": [
      "capri_mod/tests/test_capri.py",
-     "capri_mod/tests/test_norway_market.py"
+     "capri_mod/tests/test_norway_market.py",
+     "capri_mod/tests/test_pmp_held_cells.py"
     ]
    }
   },
@@ -3431,7 +3432,8 @@
     ],
     "tests": [
      "capri_mod/tests/test_capri.py",
-     "capri_mod/tests/test_nuts_reporting.py"
+     "capri_mod/tests/test_nuts_reporting.py",
+     "capri_mod/tests/test_pmp_held_cells.py"
     ]
    }
   },
@@ -32143,7 +32145,9 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_pmp_held_cells.py"
+    ]
    }
   },
   "pmp_capri_2030_animals": {
@@ -32254,7 +32258,8 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_base_year.py"
+     "capri_mod/tests/test_base_year.py",
+     "capri_mod/tests/test_pmp_held_cells.py"
     ]
    }
   },
@@ -37463,7 +37468,8 @@
     ],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_capri.py"
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_pmp_held_cells.py"
     ]
    }
   },
@@ -37607,7 +37613,8 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_capri.py"
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_pmp_held_cells.py"
     ]
    }
   },

@@ -441,6 +441,13 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   and without (1)); the inhibitor on mineral N moves towards CAPRI's in four units (ES51 0.257 -> 0.141, CAPRI 0.039;
   NL22 0.536 -> 0.459, 0.292), away in FR52 (0.575 -> 0.482, 0.575); the inhibitor on manure stays where CAPRI has none
   (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
+- **DEP-23 closed, no departure (23 November 2026):** the activities held at their level for lack of a positive CAPRI
+  own PMP term (SupplyModule._uncalibrated) are all at 0 at the 2030 market year: the 388 crop and 3 animal cells with a
+  base-year level and no own term have a 2030 trajectory factor of 0, and in CAPRI's 2030 data they have no level and no
+  main-output yield at "Y" (sim_ini_21730 DATA), are not bounded (set_supply_bounds.gms l. 27-37, levels above 1e-8
+  only) and are 0 in CAPRI's 2030 reference and Green Deal step. The register's "71 cells, at most 2% of an activity's EU
+  level" was the run of 28 October (r166), before the 2030 trajectory took those levels to 0. A data test guards it
+  (capri_mod/tests/test_pmp_held_cells.py); the row moved to the register's history.
 - **DEP-10 item 1b, NUTNED_'s additive need factor held when the yields move (23 November 2026):** CAPRI fixes
   v_cropNutNeedMultFact and v_cropNutNeedAddFact in simulation (supply/prep_sim.gms l. 30-31), and fert/fertned.gms moves
   DATA(crop, FNUT) alone, so the part of NUTNED_'s need that the additive factor carries does not follow the yields.
