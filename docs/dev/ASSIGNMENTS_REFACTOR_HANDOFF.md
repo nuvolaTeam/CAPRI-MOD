@@ -21,8 +21,13 @@ docs/dev/MARKET_EQUATION_REFACTOR_PLAN.md sections 2 and 4 with the plan's chang
 |---|---|---|
 | A0 | the inventory (docs/dev/assignments_inventory.csv; tools/refactor/assignments_inventory.py), each row reviewed; the five units of each block (section 3) | docs and a tool; the quote and citation checks; the pre-commit checks |
 
-A1 waits for the project lead's review of A0 (the plan). The files of the plan's section 3 that the main line is
-changing are left alone until the main session says A5 can start; the inventory's `locked` column names them.
+A0 approved by the project lead (23 November 2026; the plan's section 8): A1 and A3 one block with A1's five units;
+in A2 only the rules become functions, the literal values "data read: <the CSV and its builder>" (3 rows of
+pol_input/mtr_until2013.gms; 8 blocks mixing rules and literals move their rules only); the wrong line citations
+fixed in the files each block moves (comments only), the two in supply/policy.py left to the main session; the
+porting differences collected here (section 5), for the main session's one KNOWN_ISSUES entry. The files of the
+plan's section 3 that the main line is changing are left alone until the main session says A5 can start; the
+inventory's `locked` column names them.
 
 ## 3. The inventory: how it is built
 
@@ -70,7 +75,7 @@ trade) and CAPRI's data, so that between them they take the paths of the block's
 |---|---|---|
 | A1 | FI1A0000, NL230000, BL340000, IT110000, NO020000 | organic soils (FI1A: 16% of cropland, 30% of grassland) and Nordic; a manure importer (NL23: 123 kg N/ha imported) and an exporter (BL34: 51% of its manure); rice (Piemonte); Norway's accounts |
 | A2 | NO060000, FI130000, FR720000, PL510000, DE210000 | Norway's premiums (norw_pol); Nordic aid (FI13); coupled support (France's ceiling the largest, 1,116 MEUR; Auvergne's suckler cows); a SAPS member state; BPS with convergence. Also tools/run/run_vcs_2030.py on the same five (its premium paths) |
-| A3 | DE210000, IT320000, PL510000, PL610000, PT180000 | the second phase's five (its references exist); which projection rules a 2030 comparative-static step takes is to be checked at A3's start |
+| A3 | (with A1: A1's five) | A3's statements are moved with A1's (the project lead, 23 November 2026) |
 | A4 | NL230000, RO020000, NO060000, DE210000, ES420000 | the manure pools (an importer, the largest exporter, RO02 66%); Norway's supply models in the market; the outer loop's price step and stop rule (any unit); a unit without a binding landscape floor |
 | A5 | DE210000, ES420000, FR520000, NL230000, IT120000 | the landscape floor binding (DE21, IT12; 164 of the 221 units) and not (ES42; 57 units); the N surplus target (FR52, the first phase's units); manure and the N target (NL23) |
 
@@ -101,12 +106,12 @@ units): their paths cannot be taken by a choice of units; the moved functions' o
    (environmental_module.compute_indicators), the fertiliser options' leaching effect (n_leaching.fert_effect), the
    crop N at yields (nitrogen._crop_n_at_yields), the phosphate runoff and balance (phosphorus.py, p_balance.balance),
    the income parts (income_module._income_parts). A3 has 5 rows (breeding.gms NEM/NEA/NEP/ENNE in
-   projection_module, calc_nexport.gms's milk N). A proposal: A1 and A3 as one block.
+   projection_module, calc_nexport.gms's milk N). Decided: A1 and A3 one block.
 2. **A2's literal values**: of A2's 124 rows, the pol_input/mtr_until2013.gms blocks mix rules (mtr.py _rules,
    declarations_of_year, set_from_year...) with literal values (p_premDataE(...) = 123) that reach the model as data
    (mtr_declarations.csv, tools/build/build_mtr_inputs.py, applied by mtr.py mtr_series at their line). The review
    marked both "to move"; the notes say which is which. To decide: literals as functions returning their value, or
-   classified as data read (out of scope with the builders).
+   classified as data read (out of scope with the builders). Decided: the rules only; the literals "data read".
 3. **Not ported, 276 rows**, mostly results the model reads as data built by tools/build (out of scope: the
    builders): the market's LUC priors and shares (arm/define_land_params.gms, prep_market.gms; build_luc_market.py),
    the non-EU Hessian's completion (arm/market1.gms; tools/lib/_capri_nq.py), the irrigation shares

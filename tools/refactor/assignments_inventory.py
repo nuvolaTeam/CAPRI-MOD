@@ -19,7 +19,9 @@ One row per statement block cited, and one per file cited without a block (its c
 - status, takes, function, notes: written by hand (kept when the inventory is rebuilt; takes: the block that moves
   a row to move); the tool proposes a status in
   status_proposed: "equation (phases 1-2)", "already in the style", "to move", "citation for context only", "lines
-  hold no statement", "file not in star 3.0".
+  hold no statement", "file not in star 3.0". The reviewed statuses add "not ported: <reason>", "citation wrong:
+  <what>" and "data read: <the CSV and its builder>" (a CAPRI literal value or table the model reads as data, out of
+  scope with the builders' rework; the project lead, 23 November 2026).
 
     python tools/refactor/assignments_inventory.py GAMS_DIR [--out docs/dev/assignments_inventory.csv]
 

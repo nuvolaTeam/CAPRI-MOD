@@ -48,7 +48,7 @@ of results; a newer CAPRI release.
 | Block | What | The model's code now | CAPRI's files (the main ones) |
 |---|---|---|---|
 | A0 | The inventory: docs/dev/assignments_inventory.csv, one row per CAPRI statement block the model's code ports or cites, with its file and star 3.0 lines, the module and function that holds it, a status (to move / already in the style / a citation for context only / not ported, with the reason) and the block below that takes it. A tool of its own beside tools/refactor/supply_equations_inventory.py, so the inventory can be rebuilt. Docs and tools only | the citations in the 85 modules | all |
-| A1 | The emission and nutrient accounts | environmental/ghg.py, environmental_module.py, nitrogen.py (its accounts; the coefficients' yield rules are already in supply/equations/fertned.py), phosphorus.py, p_balance.py, luc.py, ammonia.py, biodiversity.py; supply/n_leaching.py | envind/gases.gms, reports/calc_nbalance.gms, envind/ghgMiti.gms and cover_crops.gms (the leaching's option terms), supply/prep_sim_luc.gms |
+| A1 | The emission and nutrient accounts (with A3: one block, section 8) | environmental/ghg.py, environmental_module.py, nitrogen.py (its accounts; the coefficients' yield rules are already in supply/equations/fertned.py), phosphorus.py, p_balance.py, luc.py, ammonia.py, biodiversity.py; supply/n_leaching.py | envind/gases.gms, reports/calc_nbalance.gms, envind/ghgMiti.gms and cover_crops.gms (the leaching's option terms), supply/prep_sim_luc.gms |
 | A2 | The premium rules | policy/mtr.py, bps.py, cap14_premiums.py, declared.py, premium_cut.py, premium_response.py, premiums.py, rd.py, nordic_aid.py, norway.py, policy_module.py; supply/entitlements.py | policy/policy.gms, calc_mtr*.gms, prmcut.gms, implement_bps.gms, bps_convergence.gms, rd_logic.gms, extend_rd_baseline.gms, def_policy.gms, nordicaid.gms, norw_pol.gms, capmod/calculate_premiums.gms |
 | A3 | The baseline projection rules | projection/prices.py, projection_module.py, trajectory.py, reconcile.py, captrd_import.py | those A0 finds; the modules cite capmod/load_base_data_and_trends.gms, supply/prep_sim.gms, envind/breeding.gms, fert/calc_nexport.gms (the yield and input rules of capmod/define_inputs.gms and shift_yields.gms are partly in supply/equations/fertned.py already) |
 | A4 | The coupling's and the market's assignments | coupling/price_step.py, hessian.py, bridge.py, young_animals.py, feed.py, manure.py (what the P block left), reporting.py; market/welfare.py, market_bounds.py, the assignments of market/supply.py, demand.py, feed.py, bilateral.py not moved in M1-M5 | capmod/define_stepWeights.gms, price_forecast.gms, supply/calibrate_supply.gms, arm/simu_calibration_to_supply.gms, arm/set_start_val.gms, widen_bounds.gms, reports/welfare.gms, reports/sol_simy.gms |
@@ -106,3 +106,18 @@ the phase's gate and the full suite, with the project lead's go.
 
 The supply side's and the market's equations (done); CAPTRD's estimation (after CAPTRD-MOD); the builders (their
 rework at the end); CAPREG; changes of results; a newer CAPRI release.
+
+## 8. The project lead's review of A0 (23 November 2026)
+
+A0 approved (docs/dev/assignments_inventory.csv, docs/dev/ASSIGNMENTS_REFACTOR_HANDOFF.md), with these decisions:
+
+1. **A1 and A3 are one block** (A1+A3), gated with A1's five units: the emission accounts were mostly written as
+   functions in the first phase (N14a), so A1 has 8 statements to move and A3 5.
+2. **In A2 only the rules become functions.** The literal values of pol_input/mtr_until2013.gms, and any other
+   literal table, get the inventory's status "data read: <the CSV and its builder>": out of scope with the builders'
+   rework, which will keep each value's CAPRI file and line. A statement block mixing rules and literals moves its
+   rules only.
+3. **The wrong line citations** the inventory lists are fixed in the files each block moves, as part of the block
+   (comments only; results identical). The two in supply/policy.py are left to the main session.
+4. **The porting differences** found are collected in the handoff (docs/dev/ASSIGNMENTS_REFACTOR_HANDOFF.md); the
+   main session registers them as one KNOWN_ISSUES entry and ranks them.
