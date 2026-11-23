@@ -4706,6 +4706,47 @@ def test_fallow_and_set_aside_have_no_nutrient_need(model):
         assert acts.index("BARL") in cols, nut
 
 
+def test_the_blocks_need_columns_hold_the_additive_part(model):
+    """Register DEP-10 item 1b (capri_mod/tests/test_nutned_add_factor.py has the factor and its data): the fertilisation
+    block's NUTNED_ need columns (SupplyModel._npk_spec): at the base yields the data's need, at
+    other yields the need x (1 - s) r + s with r = DATA's factor of the yields (_need_yf) and s the crop's add_share; the
+    groups' need_yf (r over the column's factor) for the legume share's term, which acts on DATA alone."""
+    from capri_mod.fert.npk import NPKData
+    from capri_mod.supply.equations.supply_model.nutrients import NUTNED_needYieldFactor
+    region = "FI190000"
+    model.run(scenario="BASELINE", regions=[region], max_outer_iter=1)
+    mo = model.supply_module._models[region]
+    acts = list(mo.acts)
+    D = NPKData.get()
+    cr = D.capri_region(region)
+    Q, c, A, b, y = mo.res.last_aug
+    lab = list(mo.ev.aug_labels)
+    j = acts.index("BARL")
+
+    def barl(spec):
+        out = {}
+        for nut, d in spec["nutrients"].items():
+            out[nut] = (sum(v for g in d["groups"] for jj, v in g["need"] if jj == j),
+                        [g["need_yf"][j] for g in d["groups"] if j in g.get("need_yf", {})])
+        return out
+    b0 = barl(mo._npk_spec(A.shape[1], y, A, lab))
+    yl = mo.data.yields
+    y0 = float(yl["BARL"])
+    try:
+        yl["BARL"] = 0.9 * y0
+        b1 = barl(mo._npk_spec(A.shape[1], y, A, lab))
+        for nut in b0:
+            r = mo._need_yf("BARL", y0, 0.9 * y0, nut)
+            s = D.crop_coef(cr, nut, "BARL", "add_share")
+            assert 0.0 < s < 0.2 and r < 0.97, nut
+            F = NUTNED_needYieldFactor(r, s)
+            assert b1[nut][0] == pytest.approx(b0[nut][0] * F, rel=1e-12), nut
+            assert b1[nut][1] and all(v == pytest.approx(r / F, rel=1e-12) for v in b1[nut][1]), nut
+            assert all(v == pytest.approx(1.0, rel=1e-12) for v in b0[nut][1]), nut
+    finally:
+        yl["BARL"] = y0
+
+
 def test_forest_and_other_land_keep_capris_bounds(model):
     """KNOWN_ISSUES K156: CAPRI's bounds on forest, other land and artificial land (prep_sim_luc.gms l. 586-612,
     Trustee_land): L0 - min(0.9 L0, 0.35 ARTO) <= L <= L0 + min(9 L0, 0.35 ARTO), not binding at the base; with a

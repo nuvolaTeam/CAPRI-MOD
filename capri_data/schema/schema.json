@@ -21168,6 +21168,11 @@
      "name": "mine_kg_ha",
      "type": "DOUBLE",
      "not_null": true
+    },
+    {
+     "name": "add_share",
+     "type": "DOUBLE",
+     "not_null": true
     }
    ],
    "primary_key": [
@@ -21179,6 +21184,12 @@
    "foreign_keys": [],
    "checks": [],
    "units": [
+    {
+     "item": "add_share",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "the additive need factor's share of the crop's NUTNED_ need at CAPRI's 2030 solution: v_cropNutNeedAddFact x DEFR x SQRT(...) x (1 + p_technFact) / need_kg_ha (supply/supply_model.gms l. 1095-1125; sim_ini_21730, supply/prep_sim.gms l. 30-31), at most 1"
+    },
     {
      "item": "levl_kha",
      "unit": null,
@@ -21227,6 +21238,7 @@
     "tests": [
      "capri_mod/tests/test_capri.py",
      "capri_mod/tests/test_mineral_n_losses.py",
+     "capri_mod/tests/test_nutned_add_factor.py",
      "capri_mod/tests/test_techn_mix.py"
     ]
    }
@@ -24267,7 +24279,8 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_legsh_option.py"
+     "capri_mod/tests/test_legsh_option.py",
+     "capri_mod/tests/test_nutned_add_factor.py"
     ]
    }
   },
@@ -45127,6 +45140,68 @@
     "builders": [
      "build_captrd_estimation_params"
     ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_crop_nut_need_factors_2030": {
+   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_factors_2030.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's NUTNED_ need factors, fixed in simulation (supply/prep_sim.gms l. 30-31): the levels of v_cropNutNeedMultFact(region, FNUT, \"T\") (the same for T1 and T2) and v_cropNutNeedAddFact(region, FNUT) in sim_ini_21730.gdx, for the 250 units (tools/build/build_npk_balance_2030.py need_factors).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fnut",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "mult",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "add",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "fnut"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "add",
+     "unit": "U_kgperha",
+     "status": "capri",
+     "basis": "CAPRI v_cropNutNeedAddFact: the additive need per ha in NUTNED_"
+    },
+    {
+     "item": "mult",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "CAPRI v_cropNutNeedMultFact: the multiplier on DATA(crop, FNUT) x (1 - BioFix) in NUTNED_"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": "build_npk_balance_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
     "checks": [],
     "tests": []
    }

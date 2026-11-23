@@ -66,6 +66,8 @@ EXTERNAL_ORIGIN = "CAPRI"
 #: files written by builders that the trace has not run yet (added after the last retrace), by file or folder prefix:
 #: builder, origins (from the builder's docstring); a retrace moves them into builders.json
 UNTRACED = {
+    # sim_ini_21730's NUTNED_ need factors, kept by the nutrient balance builder (register DEP-10 item 1b)
+    "capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_factors_2030.parquet": ("build_npk_balance_2030", "CAPRI"),
     "capri_data/pipeline/captrd/sets/biofuel/": ("build_captrd_biofuel", "CAPRI"),     # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/agriprod/": ("build_captrd_agriprod", "CAPRI"),   # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/national/": ("build_captrd_national", "CAPRI"),   # before sets/ (first match)

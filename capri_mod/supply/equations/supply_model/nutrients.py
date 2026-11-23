@@ -109,6 +109,53 @@ def NUTNED_(need, supply, inv_sc):
     return need - supply * inv_sc
 
 
+def NUTNED_needYieldFactor(needYieldFact, addShare):
+    """NUTNED_'s need per ha of a crop at the current yields relative to the base (l. 1095-1125): the additive need
+    factor v_cropNutNeedAddFact is outside the yields' reach, so only the part that follows DATA(crop, FNUT) moves,
+
+        (1 - addShare) x needYieldFact + addShare,
+
+    with needYieldFact = DATA(crop, FNUT) at the current yields / at the base (fert/fertned.gms rerun:
+    capri_mod.fert.npk.need_yield_factor) and addShare = v_cropNutNeedAddFact x DEFR x SQRT(...) x (1 + p_technFact)
+    / the crop's need per ha at CAPRI's 2030 solution (npk_crop_coefs_2030.csv add_share,
+    tools/build/build_npk_balance_2030.py add_share_parts). The multiplier v_cropNutNeedMultFact, DEFR and the
+    technology terms are fixed in simulation (supply/prep_sim.gms l. 30-31), so they cancel in the ratio. The other
+    factors inside the bracket multiply DATA's part alone and are not in this factor: v_yldMit and v_yldPestFac, and
+    the legume share's (NUTNED_legSh, on the part that follows DATA: fertilisation.py's need_yf). Without
+    DATA(crop, FNUT) (needYieldFact 0: no main-output yield, K185) the SQRT term's $ %data%(RUNR,MCACT,FNUT,"Y") takes
+    the additive part too: 0. Until 23 November 2026 the whole need moved with DATA(crop, FNUT) (register DEP-10 item
+    1b).
+
+    CAPRI's GAMS, NUTNED_'s left-hand side (l. 1097-1122; the whole equation: NUTNED_'s docstring):
+
+             SUM( (CACT_TO_NGRP(MCACT,NGRP),A) $ p_technFact(RUNR,MCACT,"LEVL",A), v_actLevl(RUNR,MCACT,A)
+                * (%data%(RUNR,MCACT,FNUT,"Y")
+        $iftheni.till1 %ghgAbatement%==on
+                * v_yldMit(RUNR,MCACT)
+        $endif.till1
+        $iftheni.Pes5 %PEST_DISAGG%==ON
+                * (1 +(v_yldPestFac(RUNR,mCact,A)-1) $ v_yldPestFac.range(RUNR,mCact,A))
+        $endif.Pes5
+                   * (1-p_nitrFact(RUNR,MCACT,"BioFix") $ SAMEAS(FNUT,"NITF")
+        $iftheni.fertn1 %ghgAbatement%==on
+                   * sum(R_RAGG(RUNR,MSACT),1. + (  p_ghgMiti(MSACT,MCACT,"LegSh","othImpact","BioFix")
+                                                  * v_Miti(RUNR,MCACT,"LegSh","BioFix")) $ SAMEAS(MCACT,"OFAR"))
+        $endif.fertn1
+                   )
+                    * v_cropNutNeedMultFact(RUNR,FNUT,A)
+                    + v_cropNutNeedAddFact(RUNR,FNUT))
+                   * (p_nitrFact(RUNR,"ALL","DEFR") $ SAMEAS(FNUT,"NITF") + 1 $ (NOT SAMEAS(FNUT,"NITF")))
+                                     * SQRT(
+                                            [1.+p_technFact(RUNR,MCACT,"Yield",A)
+                                                + 0.2 $ SAMEAS(MCACT,"GRAI") - 0.2 $ SAMEAS(MCACT,"GRAE")
+                                            ] $ %data%(RUNR,MCACT,FNUT,"Y")
+                                           )
+                                    *(p_technFact(RUNR,MCACT,FNUT,A)+1.)
+               ) =E=
+    """
+    return (1.0 - addShare) * needYieldFact + addShare if needYieldFact > 0 else 0.0
+
+
 def NUTNED_legSh(need, need_OFAR, needShare, v_Miti):
     """NUTNED_'s legume share term (l. 1111-1112) on the need of other arable fodder's group: need - need_OFAR x share x
     v, with need_OFAR OFAR's need columns (its level and technology mix columns, as the group's need writes them),

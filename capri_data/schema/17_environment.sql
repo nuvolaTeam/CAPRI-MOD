@@ -390,6 +390,7 @@ CREATE TABLE env_npk_crop_coefs_2030 (
     pool_kg_ha DOUBLE NOT NULL,
     own_kg_ha DOUBLE NOT NULL,
     mine_kg_ha DOUBLE NOT NULL,
+    add_share DOUBLE NOT NULL,
     PRIMARY KEY (capri_region, model_crop, nutrient)
 );
 COMMENT ON TABLE env_npk_crop_coefs_2030 IS 'CAPRI''s crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_, (tools/build/build_npk_balance_2030.py)';
@@ -398,7 +399,8 @@ INSERT INTO value_units VALUES
   ('env_npk_crop_coefs_2030', 'need_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.need_kg_ha: unit to be established'),
   ('env_npk_crop_coefs_2030', 'pool_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.pool_kg_ha: unit to be established'),
   ('env_npk_crop_coefs_2030', 'own_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.own_kg_ha: unit to be established'),
-  ('env_npk_crop_coefs_2030', 'mine_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.mine_kg_ha: unit to be established');
+  ('env_npk_crop_coefs_2030', 'mine_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.mine_kg_ha: unit to be established'),
+  ('env_npk_crop_coefs_2030', 'add_share', 'U_ratio', 'capri', 'the additive need factor''s share of the crop''s NUTNED_ need at CAPRI''s 2030 solution: v_cropNutNeedAddFact x DEFR x SQRT(...) x (1 + p_technFact) / need_kg_ha (supply/supply_model.gms l. 1095-1125; sim_ini_21730, supply/prep_sim.gms l. 30-31), at most 1');
 
 -- file: capri_data/baselines/capri_greendeal_ref/1730/environment/npk_region_2030.csv
 CREATE TABLE env_npk_region_2030 (

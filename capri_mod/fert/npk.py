@@ -4,7 +4,8 @@ distribution model; capri_mod/supply/capri_regional_nlp.py).
 
 Data (tools/build/build_npk_balance_2030.py, from CAPRI's 2030 reference results):
   npk_crop_coefs_2030.csv        per CAPRI region, model crop and nutrient: need, contribution to the arable residue
-                                 pool, permanent crops' own residues, CAPRI's mineral flow (kg/ha)
+                                 pool, permanent crops' own residues, CAPRI's mineral flow (kg/ha), and the need's
+                                 additive part's share (add_share: v_cropNutNeedAddFact's, which the yields do not move)
   capri_crop_fertned_parts_2030.csv  fert/fertned.gms's arguments per CAPRI region, crop and nutrient in CAPRI's 2030
                                  simulation data (tools/build/build_capri_crop_n_coefs.py), for the need's yield factor
                                  (need_yield_factor)

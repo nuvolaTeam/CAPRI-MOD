@@ -159,7 +159,10 @@ class PhosphorusBlock:
             from capri_mod.supply.equations.fertned import DATA_FNUT
             need = {c: DATA_FNUT(v, float(y0.get(c, 0.0) or 0.0)) for c, v in need.items()}
             own_perm = {c: own[c] * sum(v for g, v in (sh.get(c) or {}).items() if g in PERM_NGRP) for c in CROPS}
-            sq = nfp
+            # NUTNED_'s need factor of the yields: the additive need factor held (NUTNED_needYieldFactor; DEP-10 item 1b),
+            # as the block's need (fertilisation.py); EXPPRD's removal keeps DATA(crop, PHOF)'s own factor nfp
+            from capri_mod.supply.equations.supply_model.nutrients import NUTNED_needYieldFactor
+            sq = {c: NUTNED_needYieldFactor(nfp[c], D.crop_coef(cr, "P", c, "add_share")) for c in CROPS}
             # the own residues and the pool at the current yields, as the block's (fertilisation.py; K189): the change of
             # DATA(crop, MANP) on the base coefficients, the pool's scaled as its base (npk_region's pool_scale)
             kp = float(D.region(cr, "P").pool_scale) if D.region(cr, "P") is not None else 1.0

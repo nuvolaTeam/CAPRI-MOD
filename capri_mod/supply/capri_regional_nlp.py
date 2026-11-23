@@ -739,8 +739,10 @@ class CapriRegionalNLP:
                 need = self._lin(y, g_["need"], scale=sc_)
                 ls_ = getattr(self, "_legsh", None) if nut == "N" else None
                 if ls_ is not None:
-                    # the legume share's term (NUTNED_, l. 1111-1112) on OFAR's need columns of the group
-                    _ofar = [(j_, c_) for j_, c_ in g_["need"] if int(j_) in ls_["cols"]]
+                    # the legume share's term (NUTNED_, l. 1111-1112) on OFAR's need columns of the group, the part
+                    # that follows DATA(OFAR, NITF) (need_yf: v_cropNutNeedAddFact's part held, DEP-10 item 1b)
+                    _nyf = g_.get("need_yf") or {}
+                    _ofar = [(j_, c_ * float(_nyf.get(j_, 1.0))) for j_, c_ in g_["need"] if int(j_) in ls_["cols"]]
                     if _ofar:
                         need = NUTNED_legSh(need, self._lin(y, _ofar, scale=sc_), pv(ls_["need_share"]), ls_["v"])
                 if g_["perm"] and g_["own"]:

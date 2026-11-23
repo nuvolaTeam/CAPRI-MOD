@@ -695,6 +695,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/sources/raw/capri/results/data_market_1730defaulta/feed_demand_nonEU_use_2030.parquet', 'reference', 'by rule: extract of CAPRI''s 2030 reference'),
   ('capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/processing_yields_dataout_2030.parquet', 'coefficients', 'by file: CAPRI''s coefficients and elasticities'),
   ('capri_data/sources/raw/capri/results/sim_ini_21730/data_prod_grof_rmssup.parquet', 'coefficients', 'by file: CAPRI''s coefficients and elasticities'),
+  ('capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_factors_2030.parquet', 'coefficients', 'by file: CAPRI''s coefficients and elasticities'),
   ('capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/sugar_processing_dataout_2030.parquet', 'reference', 'by rule: extract of CAPRI''s 2030 reference'),
   ('capri_data/sources/raw/nuts/nuts2013_2016.parquet', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/sources/raw/nuts/nuts2016_2021.parquet', 'structure', 'by rule: codes, sets, correspondences'),

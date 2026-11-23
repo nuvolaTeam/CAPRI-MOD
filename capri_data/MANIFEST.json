@@ -4030,8 +4030,8 @@
    "description": "CAPRI's crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_, (tools/build/build_npk_balance_2030.py)",
    "kind": "coefficients",
    "rows": 23511,
-   "columns": 8,
-   "units": "to be established (value_units: open)",
+   "columns": 9,
+   "units": "U_ratio",
    "read_by_model": [
     "capri_mod/environmental/nitrogen.py",
     "capri_mod/fert/npk.py"
@@ -10511,7 +10511,7 @@
    "vintage": "2030",
    "domain": "environment",
    "status": "source",
-   "rows": 238038,
+   "rows": 263911,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -10549,6 +10549,21 @@
     "builder": "build_plant_protection_cost"
    },
    "catalogue_note": "extract of CAPRI's raw file written and read back by its builder (not re-checked)"
+  },
+  "capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_factors_2030.parquet": {
+   "description": "CAPRI's NUTNED_ need factors, fixed in simulation (supply/prep_sim.gms l. 30-31): the levels of v_cropNutNeedMultFact(region, FNUT, \"T\") (the same for T1 and T2) and v_cropNutNeedAddFact(region, FNUT) in sim_ini_21730.gdx, for the 250 units (tools/build/build_npk_balance_2030.py need_factors).",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "environment",
+   "status": "source",
+   "rows": 750,
+   "columns": 4,
+   "units": "U_kgperha, U_ratio",
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_npk_balance_2030 (not in the trace yet)"
+   },
+   "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx v_cropNutNeedMultFact and v_cropNutNeedAddFact (the reference export) written and read back by tools/build/build_npk_balance_2030.py, kept so its input can be rebuilt without the reference export (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/raw/capri/results/sim_ini_21730/data_prod_grof_rmssup.parquet": {
    "description": "CAPRI's DATA(RMSSUP, \"PROD\", row, \"CAL\") and DATA(RMSSUP, \"GROF\", row, \"TRD\") of the market products of the supply models and their gross rows, from sim_ini_21730.gdx (tools/build/build_market_prod_grof_2030.py).",

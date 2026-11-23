@@ -652,7 +652,8 @@ class NitrogenBlock:
         """CAPRI's inner fertiliser distribution model for one region (capri_mod.fert.inner_fert_dist): mineral N
         (the balance's), manure N applied (the balance's own manure plus imports, after endogenous trade and the
         herd adjustments) and the arable residue pool, distributed over CAPRI's crop groups; needs at CAPRI's base
-        per ha x area x CAPRI's need factor of the yield (NUTNED_, fert/fertned.gms; need_yield_factor). With the crop-specific mineral fertiliser reduction the
+        per ha x area x NUTNED_'s need factor of the yield (fert/fertned.gms's on DATA, need_yield_factor, the additive
+        part held: NUTNED_needYieldFactor). With the crop-specific mineral fertiliser reduction the
         "f2f" (mineral N) and "limCres" (residues) regulations apply. Rows: region, capri_region, ngrp, area_kha,
         mine/excr/cres kg_ha, mine_cap_kg_ha, cap_scale (> 1 where the accounts' mineral N exceeds the caps'
         capacity and the caps were scaled to report an allocation), converged. mode_crops: the crop areas CAPRI's
@@ -670,12 +671,19 @@ class NitrogenBlock:
             acts = acts.to_dict()
         crops = {c: float(acts.get(c, 0.0) or 0.0) for c in CROPS if float(acts.get(c, 0.0) or 0.0) > 0}
         _yb = self._cached_row("yields", region) or {}
+        # NUTNED_'s need factor of the yields: DATA(crop, NITF)'s, with v_cropNutNeedAddFact's part held (register
+        # DEP-10 item 1b; the regional model's block, fertilisation.py)
+        from capri_mod.fert.npk import NPKData
+        from capri_mod.supply.equations.supply_model.nutrients import NUTNED_needYieldFactor
+        _D = NPKData.get()
+        _cr = _D.capri_region(region)
         fac = {}
         for c in crops:
             y0 = float(_yb.get(c, 0.0) or 0.0)
             y = float(yields.get(c, y0) or 0.0) if hasattr(yields, "get") else y0
             ys = yields_scen.get(c) if hasattr(yields_scen, "get") else None
-            fac[c] = need_yield_factor(region, c, y0, y, None if ys is None else float(ys), "N") \
+            fac[c] = NUTNED_needYieldFactor(need_yield_factor(region, c, y0, y, None if ys is None else float(ys), "N"),
+                                            _D.crop_coef(_cr, "N", c, "add_share") if _cr is not None else 0.0) \
                 if (y0 > 0 and y > 0) else 1.0
         M = float(nb.get("n_mineral_input", 0.0))
         E = float(nb_raw.get("n_manure_applied", 0.0)) + float(nb.get("n_organic_input", 0.0)) \

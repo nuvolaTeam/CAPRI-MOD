@@ -441,6 +441,22 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   and without (1)); the inhibitor on mineral N moves towards CAPRI's in four units (ES51 0.257 -> 0.141, CAPRI 0.039;
   NL22 0.536 -> 0.459, 0.292), away in FR52 (0.575 -> 0.482, 0.575); the inhibitor on manure stays where CAPRI has none
   (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
+- **DEP-10 item 1b, NUTNED_'s additive need factor held when the yields move (23 November 2026):** CAPRI fixes
+  v_cropNutNeedMultFact and v_cropNutNeedAddFact in simulation (supply/prep_sim.gms l. 30-31), and fert/fertned.gms moves
+  DATA(crop, FNUT) alone, so the part of NUTNED_'s need that the additive factor carries does not follow the yields.
+  The model's need per crop moved as a whole with DATA's factor r; it now moves as (1 - s) r + s
+  (equations/supply_model/nutrients.py NUTNED_needYieldFactor), in the fertilisation block's need columns, the P
+  accounts' NUTNED_ and the accounts' fertiliser distribution; the legume share's term keeps acting on the part that
+  follows DATA (the groups' need_yf). s, npk_crop_coefs_2030.csv's new add_share, comes from CAPRI's 2030 report
+  (nutNed_lhs, nutNed_retention, nutNed_biofix, now extracted too) and sim_ini_21730's two factors (kept as
+  crop_nut_need_factors_2030.parquet; v_cropNutNeedMultFact added to the sim_ini reference export): median N 0.033,
+  P 0.057, K 0.049; 0 for fallow and set-aside, which have no DATA. The decomposition reproduces CAPRI's need per crop:
+  the factor left is DEFR x 1.015038 for every arable and permanent crop and DEFR x 1 for grassland (besides its
+  SQRT(1 +- 0.2)) in every unit, exact for P and K; where a group mixes crops with and without the 1.015038 (vegetables,
+  industrial crops) the group's factor is used, within 1.5% of a crop's additive part. Six-unit Green Deal probe at
+  CAPRI's prices (12 iterations, FR52, IT20, NL22, ES51, DE21, ES41): the baseline unchanged; in the Green Deal the units'
+  mineral N +0.02%, mineral P2O5 +0.06%, N surplus and its duals unchanged (within 0.2%), the six units' activity totals within 0.09%; ES51 now needs its potato
+  cap exempted by solving (DEP-10 item 11), where the probe before did not.
 - **The departures register brought up to date (23 November 2026):** DEP-14, DEP-20 and DEP-21, closed today, moved to
   its history as the register's rule says (they had been marked closed in section 3.2); DEP-10's row rewritten with its 14
   items measured at the 2030 base (all 221 units) and in the Green Deal at 9867411: items 1-3 and 7 act in no unit at the

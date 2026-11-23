@@ -102,9 +102,11 @@ def NUTNED_LegSh_needShare(DATA_OFAR_NITF, BioFix_OFAR, othImpact_BioFix, multFa
         need(v) = (D (1 - b (1 + o v)) k + a) Q = need(0) (1 - share v),   share = D b o k / (D (1 - b) k + a)
 
     The same share holds for each technology (CAPRI's k is the same for T, T1 and T2 in sim_ini_21730), so the term is
-    the share times OFAR's need columns, the technology mix column's included. Departures from CAPRI: none at the yields
-    of the calibration point; at other yields the model's need of OFAR moves as one (its need factor of the yield on
-    D (1 - b) k + a, capri_mod/supply/fertilisation.py), where CAPRI's fertned.gms moves D alone."""
+    the share times OFAR's need columns, the technology mix column's included. At other yields fertned.gms moves D
+    alone: the model's need of OFAR moves as (1 - s) r + s, s the additive part's share (NUTNED_needYieldFactor,
+    capri_mod/supply/fertilisation.py), and the term takes the columns' part that follows D, r / ((1 - s) r + s) of
+    them (the groups' need_yf; capri_regional_nlp's NUTNED_), so it is D(y) b o k Q v as CAPRI's. Until 23 November
+    2026 the whole need of OFAR moved as one (register DEP-10 item 1b). Departures from CAPRI: none."""
     D, b, o, k, a = (float(DATA_OFAR_NITF), float(BioFix_OFAR), float(othImpact_BioFix), float(multFact_NITF),
                      float(addFact_NITF))
     den = D * (1.0 - b) * k + a
