@@ -324,3 +324,18 @@ def DATA_FNUT(need_data: float, O_HP: float) -> float:
     Departures from CAPRI: none in the rule; the need itself is CAPRI's reported 2030 value (its yield response is the
     NLP's: capri_mod/fert/npk.py, yield_shares)."""
     return float(need_data) if float(O_HP or 0.0) > 0.0 else 0.0
+
+
+def p_technFact_FNUT(techn_fact):
+    r"""p_technFact(RS, crop, FNUT, A): a technology variant's factor on the crop's nutrient rows (removal, fixation,
+    residues: e_EXPPRD, e_BIOFIX, e_CRESID), its yield factor's p_technFact(crop, yield, A) as 1 + tf, tf the variant's
+    relative change of the yield (the technology mix columns', 0 for the default variant).
+
+    CAPRI's GAMS (fert/fertned.gms l. 206-207):
+
+           p_technFact(RS,%pacts%,FNUT,A) $ p_technFact(RS,%pacts%,"LEVL",A)
+                = SUM(PACT_TO_Y(%pacts%,curRows), p_technFact(RS,%pacts%,curRows,A));
+
+    In this project's notation: the rows of variant A x (1 + tf_A). Departures from CAPRI: the SRNUTS1 fill of l. 213-214
+    (the NUTS1 regions without the factor) is not ported (the model's units carry their own)."""
+    return 1.0 + float(techn_fact or 0.0)

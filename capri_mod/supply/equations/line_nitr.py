@@ -5,7 +5,8 @@ Deal runs, pol_input/greendeal/refpol_endotech_all_sup.gms): the statements of t
 The other statements of line_nitr.gms (the dosages, the effects on enteric CH4 and the requirements, the costs and their
 calibration) are in tools/build/build_supplement_effects.py, which predates the equation style.
 
-Used by tools/build/build_supplement_fat.py.
+Used by tools/build/build_supplement_fat.py; p_ghgMiti_AComLN by capri_mod/environmental/environmental_module.py
+(EnvironmentalModule.compute_indicators).
 """
 from __future__ import annotations
 
@@ -25,3 +26,30 @@ def p_emisFeed_TotFAT_FEED(EE_FEED, p_DryMatterContent_FEED):
     rations, v_feedInpCoeff). Departures from CAPRI: none."""
     dm = float(p_DryMatterContent_FEED or 0.0)
     return float(EE_FEED) * dm / 100.0 if dm else 0.0
+
+
+def p_ghgMiti_AComLN(rL, rN, sL, sN):
+    r"""p_ghgMiti(ms_LiNi, CATACT, "AComLN", "CH4ENT", "QEmitt") in the model's form: the change of an animal's enteric
+    CH4 factor where linseed and nitrate are fed to the same animals, rL rN min(sL, sN), rL and rN the options' relative
+    changes of the factor (QEmitt / NOC - 1), sL and sN their shares of the herd; the caller adds it to 1 + sL rL + sN rN.
+
+    CAPRI's GAMS (envind/line_nitr.gms l. 110-122):
+
+           p_ghgMiti(ms_LiNi,CATACT,"AComLN","CH4ENT","QEmitt")
+            $ (p_ghgMiti(ms_LiNi,CATACT,"NOC","CH4ENT","QEmitt") $ p_ghgMiti(ms_LiNi,CATACT,"AComLN","CH4ENT","MaxShare"))
+            = p_ghgMiti(ms_LiNi,CATACT,"NOC","CH4ENT","QEmitt")
+            * p_ghgMiti(ms_LiNi,CATACT,"LINE","CH4ENT","QEmitt")/p_ghgMiti(ms_LiNi,CATACT,"NOC","CH4ENT","QEmitt")
+            * p_ghgMiti(ms_LiNi,CATACT,"Nitr","CH4ENT","QEmitt")/p_ghgMiti(ms_LiNi,CATACT,"NOC","CH4ENT","QEmitt")
+            ;
+           p_ghgMiti(ms_LiNi,CATACT,"AComLN","CH4ENT_3k","QEmitt")
+            $ (p_ghgMiti(ms_LiNi,CATACT,"NOC","CH4ENT_3k","QEmitt") $ p_ghgMiti(ms_LiNi,CATACT,"AComLN","CH4ENT","MaxShare"))
+            = p_ghgMiti(ms_LiNi,CATACT,"NOC","CH4ENT_3k","QEmitt")
+            * p_ghgMiti(ms_LiNi,CATACT,"LINE","CH4ENT_3k","QEmitt")/p_ghgMiti(ms_LiNi,CATACT,"NOC","CH4ENT_3k","QEmitt")
+            * p_ghgMiti(ms_LiNi,CATACT,"Nitr","CH4ENT_3k","QEmitt")/p_ghgMiti(ms_LiNi,CATACT,"NOC","CH4ENT_3k","QEmitt")
+            ;
+
+    In this project's notation: f = 1 + sL rL + sN rN + rL rN min(sL, sN). Departures from CAPRI: CAPRI's AComLN is an
+    option of its own (its factor QEmitt(NOC) x QEmitt(LINE) / QEmitt(NOC) x QEmitt(Nitr) / QEmitt(NOC), the product of
+    the two options' relative factors, adopted with its own share); the model applies that product on the overlap of the
+    two options' shares, without a share of its own (the A0 inventory's porting differences)."""
+    return rL * rN * min(sL, sN)

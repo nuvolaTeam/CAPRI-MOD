@@ -17,7 +17,7 @@ Two checks:
     python tools/refactor/check_gams_quotes.py GAMS_DIR [FILES...] [--expect supply/supply_model.gms=5557]
 
 GAMS_DIR is CAPRI's gams folder. Without FILES the refactor's modules are checked (capri_mod/supply/equations/,
-capri_mod/market/equations/ when it exists). Exit status 1 if a check fails.
+capri_mod/market/equations/ and every other equations/ package of capri_mod). Exit status 1 if a check fails.
 """
 from __future__ import annotations
 
@@ -196,8 +196,9 @@ def main() -> int:
         if got != int(n):
             print(f"the CAPRI copy's {f} has {got} lines, not {n}: not the copy expected", file=sys.stderr)
             return 2
-    files = a.files or sorted(p for d in ("capri_mod/supply/equations", "capri_mod/market/equations")
-                              for p in (ROOT / d).rglob("*.py") if (ROOT / d).exists())
+    # every equations/ package of the model (the third phase adds environmental/, projection/ ...)
+    files = a.files or sorted(p for d in sorted((ROOT / "capri_mod").rglob("equations")) if d.is_dir()
+                              for p in d.rglob("*.py"))
     problems = []
     for f in files:
         problems += check_file(f if f.is_absolute() else (ROOT / f), copy)

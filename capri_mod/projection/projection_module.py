@@ -41,6 +41,8 @@ import numpy as np
 import pandas as pd
 
 from .trajectory import BaselineTrajectory
+from .equations.breeding import p_animReqCopy_ENNE_nonlact, p_animReqCopy_NEA_share
+from .equations.calc_nexport import CRPR_EXPT_COMI
 from .reconcile import reconcile_projected_data, ReconciliationReport
 from capri_mod.params import param, param_table
 from capri_mod.tableio import read_input
@@ -310,7 +312,8 @@ class ProjectionModule:
 
     @staticmethod
     def _nea_share(data: Dict, region: str) -> float:
-        """NEA / NEM of the region's dairy cows: 0.17 (365 - HD)(1 - Et/100) / 365 (envind/breeding.gms l. 188-191)."""
+        """NEA / NEM of the region's dairy cows: 0.17 (365 - HD)(1 - Et/100) / 365 (envind/breeding.gms l. 190-192:
+        projection/equations/breeding.py p_animReqCopy_NEA_share)."""
         from capri_mod.data.definitions import capri_ms
         t = data.get("dairy_grazing_days")
         if t is None:
@@ -318,7 +321,7 @@ class ProjectionModule:
         ms = capri_ms(region)
         hd = float(t.at[ms, "HD"]) if ms in t.index and "HD" in t.columns and pd.notna(t.at[ms, "HD"]) else 0.0
         et = float(t.at[ms, "Et"]) if ms in t.index and "Et" in t.columns and pd.notna(t.at[ms, "Et"]) else 0.0
-        return 0.17 * (365.0 - hd) * (1.0 - et / 100.0) / 365.0
+        return p_animReqCopy_NEA_share(hd, et)
 
     def _project_livestock(self, data: Dict, base: Dict, year: Optional[int] = None) -> None:
         """Livestock output per head, and what it takes, follow the projected yields (CAPRI: the trend
@@ -417,15 +420,17 @@ class ProjectionModule:
                     # NEP = 0.10 NEM, activity NEA = 0.17 NEM (365 - HD)(1 - Et/100) / 365 with the member state's
                     # housing days HD and stable share of grazing time Et (p_rcEmissions); where CAPRI has no row the
                     # GAMS zeros give HD = Et = 0 (NEA = 0.17 NEM), as here. Until 23 October 2026: 1.1 NEM (no NEA).
-                    nem = self._NEM * (1.1 + self._nea_share(data, r))
+                    # (projection/equations/breeding.py p_animReqCopy_ENNE_nonlact)
+                    nem = p_animReqCopy_ENNE_nonlact(self._NEM, self._nea_share(data, r))
                     fe = (self._NEL_KG * y1 + nem) / (self._NEL_KG * y0 + nem)
                     fp = (self._CRPR_KG * y1 + self._CRPR_FIX) / (self._CRPR_KG * y0 + self._CRPR_FIX)
                     fd = (self._DRMN_KG * y1 + self._DRMN_FIX) / (self._DRMN_KG * y0 + self._DRMN_FIX)
                     scale[(r, a)] = (fe, fp, fd)
-                    # N in products: CAPRI fert/calc_nexport.gms, 0.0054 kg N per kg of cow milk (COMI)
+                    # N in products: CAPRI fert/calc_nexport.gms l. 44, 0.0054 kg N per kg of cow milk (COMI;
+                    # projection/equations/calc_nexport.py CRPR_EXPT_COMI)
                     if isinstance(nexp, pd.DataFrame) and r in nexp.index and a in nexp.columns \
                             and pd.notna(nexp.at[r, a]):
-                        nexp.at[r, a] = float(nexp.at[r, a]) + 0.0054 * g
+                        nexp.at[r, a] = float(nexp.at[r, a]) + CRPR_EXPT_COMI(g)
                 else:
                     scale[(r, a)] = (f, f, f)
                     # meat, eggs and young animals per head follow the projected yield (calc_nexport.gms: linear in

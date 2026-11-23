@@ -20,6 +20,7 @@ docs/dev/MARKET_EQUATION_REFACTOR_PLAN.md sections 2 and 4 with the plan's chang
 | block | what | check |
 |---|---|---|
 | A0 | the inventory (docs/dev/assignments_inventory.csv; tools/refactor/assignments_inventory.py), each row reviewed; the five units of each block (section 3) | docs and a tool; the quote and citation checks; the pre-commit checks |
+| A1+A3 | the emission and nutrient accounts and the projection's livestock rules: environmental/equations/gases.py (EMISCALC_CO2UREA), calc_nbalance.py (DATA_RUNANI, DATA_IMPORT, DATA_SURTOT, DATA_SURSOI); projection/equations/breeding.py (p_animReqCopy_NEA_share, p_animReqCopy_ENNE_nonlact), calc_nexport.py (CRPR_EXPT_COMI); supply/equations/line_nitr.py (p_ghgMiti_AComLN), fertned.py (p_technFact_FNUT), set_supply_bounds.py (v_emiLoss_bounds); market/equations/welfare.py (p_welfareRes_ProfitAgr); called by environmental_module.py, nitrogen.py, phosphorus.py, p_balance.py, income/income_module.py, projection/projection_module.py. ghgMiti.gms l. 552-565 (n_leaching.fert_effect) left to A5 (its module supply/equations/ghgmiti.py is locked) | the functions' tests (capri_mod/tests/test_assignments_a1.py) and the moved modules' (test_p_balance.py, test_supplement_fat.py, test_urea_subst.py, test_water_income.py: 19 passed); the five-unit Green Deal run (FI1A0000, NL230000, BL340000, IT110000, NO020000) identical |
 
 A0 approved by the project lead (23 November 2026; the plan's section 8): A1 and A3 one block with A1's five units;
 in A2 only the rules become functions, the literal values "data read: <the CSV and its builder>" (3 rows of
@@ -172,3 +173,22 @@ name or lines run across a line break is read as the file only or its first line
 cited counts as "lines hold no statement"; a file name that is in several folders resolves to the first
 (endotech.py's refpol_endotech, greendeal.py's landscape.gms, policy.py's techf.gms: the review names the right
 file); a CAPRI name on a citing line can match a statement the code does not port (the review says so).
+
+## 6. What A1+A3 found (for the main line; nothing fixed)
+
+- **Moved**: 12 statement blocks (the inventory's status "moved in A1", with the function); ghgMiti.gms l. 552-565
+  (the fertiliser options' leaching effect, n_leaching.fert_effect) waits for A5 with supply/equations/ghgmiti.py.
+- **Porting differences** (in the functions' docstrings): NEM the parameter REQ_NEM of a fixed 600 kg cow (CAPRI
+  p_meanLiveWgt per region and technology); the milk's N export added as 0.0054 x the yield's change to the base N
+  export per head (the other outputs scaled linearly); p_technFact's SRNUTS1 fill (fertned.gms l. 213-214) not ported;
+  RUNANI without CAPRI's p_emiLoss fallback (the cascade gives the share); ProfitAgr without the outputs and inputs no
+  activity is assigned (welfare.gms l. 451-456); AComLN as a product on the two options' overlap (CAPRI an option of
+  its own); the loss shares clipped at the solution (CAPRI bounds its NLP's variables).
+- **Citations corrected in the moved code** (comments only): line_nitr.gms l. 107-121 to l. 110-122, fertned.gms
+  l. 205-206 to l. 206-207, breeding.gms l. 188-191 to l. 190-192; calc_nexport.gms now cites l. 44. None of A0's 14
+  wrong citations is in A1+A3's files.
+- **The tools**: the inventory's parser reads a statement after an inline condition ($ifi %x% == y p(...) = ...;): 36
+  rows re-keyed, their statuses carried over (20 classified anew by hand, the notes say so); check_gams_quotes.py
+  checks every equations/ package by default; check_gams_citations.py checks a statement function's "CAPRI's GAMS
+  (file l. a-b)" header against an assignment to its symbol (the longest prefix of the function's name the file
+  assigns).

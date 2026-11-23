@@ -24,6 +24,8 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional
 
 from capri_mod.params import param, param_table
+from capri_mod.environmental.equations.gases import EMISCALC_CO2UREA
+from capri_mod.supply.equations.line_nitr import p_ghgMiti_AComLN
 from capri_mod.data.definitions import CROPS_ON_LAND as _CROPS_ON_LAND
 from capri_mod.settings import setting
 from capri_mod.settings import current as _settings
@@ -255,10 +257,11 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             for _ga, _l in _sh.items():
                 _f = 1.0 + sum(s_ * r_ for s_, r_ in _l.values())
                 # linseed and nitrate on the same animals (CAPRI's AComLN): their effects multiply; 3-NOP adds
-                # (line_nitr.gms l. 107-121, 124-134; ghgMiti.gms sums the options' QEmitt changes)
+                # (line_nitr.gms l. 110-122, 124-134: supply/equations/line_nitr.py p_ghgMiti_AComLN; ghgMiti.gms sums
+                # the options' QEmitt changes)
                 if "LINE_Tot" in _l and "Nitr_Tot" in _l:
                     (sL, rL), (sN, rN) = _l["LINE_Tot"], _l["Nitr_Tot"]
-                    _f += rL * rN * min(sL, sN)
+                    _f += p_ghgMiti_AComLN(rL, rN, sL, sN)
                 _supp[_ga] = max(0.0, _f)
         if not hasattr(self.ev, "supp_ch4"):
             self.ev.supp_ch4 = {}
@@ -460,13 +463,14 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         from capri_mod.supply.equations.supply_model.gwp import GWPCO2UREA_, GWPTOT_
         ghg["CO2_UREA"] = GWPCO2UREA_(max(0.0, float(nb.get("n_mineral_input", 0.0))) / 1000.0,
                                       self._co2_coefs(region)[1])
-        # with the urea substitution, CAPRI's NMIN x max(urea share - v, 0) x 44/28 (gases.gms l. 833-835): the urea
-        # share less the share switched, over the urea share (both LitRev's p_fracUseFert since 29 October 2026, K93)
+        # with the urea substitution, CAPRI's NMIN x max(urea share - v, 0) x 44/28 (gases.gms l. 833-835:
+        # environmental/equations/gases.py EMISCALC_CO2UREA): the urea share less the share switched, over the urea
+        # share (both LitRev's p_fracUseFert since 29 October 2026, K93)
         _uv = self.urea_effect(region, supply_result)[0] if region else 0.0
         if _uv > 0 and ghg.get("CO2_UREA"):
             _fu = self.urea_effect(region, supply_result, frac=True)
             if _fu and _fu > 0:
-                ghg["CO2_UREA"] = ghg["CO2_UREA"] * max(_fu - _uv, 0.0) / _fu
+                ghg["CO2_UREA"] = EMISCALC_CO2UREA(ghg["CO2_UREA"], _fu, _uv)
 
         # CAPRI's N2O from drained organic soils (gases.gms N2OHIS, agriculture): per ha of the land-use
         # class, its organic-soil share x the climate-weighted IPCC 2013 factor (tools/build/build_histosol.py),

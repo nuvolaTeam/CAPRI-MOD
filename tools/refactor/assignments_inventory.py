@@ -153,8 +153,12 @@ def statements(G: Path, rel: str) -> list:
     for ln, s in _strip_gms((G / rel).read_text(errors="replace")):
         st = s.strip()
         if st.startswith("$") and not cur:
-            out.append((ln, ln, "control", st.split()[0]))
-            continue
+            # an inline condition with its statement ($ifi %x% == y  p(...) = ...;): the statement after the condition
+            m = re.match(r"\$\s*if[ie]?\s+(?:not\s+)?(?:%[\w.]+%|\S+)\s*==\s*\S+\s+(\S.*)$", st, re.I)
+            if not m:
+                out.append((ln, ln, "control", st.split()[0]))
+                continue
+            s = m.group(1)
         parts = re.split(r";", s)
         for j, part in enumerate(parts):
             if part.strip():

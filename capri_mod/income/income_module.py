@@ -115,7 +115,9 @@ class IncomeDistributionModule:
         inc_z = sum(float(dnr.get(a, 0.0)) * z for a, z in mz.items())
         prem_z = sum(float(tm.at[a, "prem_diff_share"]) * float(pr.get(a, 0.0)) * z
                      for a, z in mz.items() if tm is not None and a in tm.index)
-        return (float(sum(float(nr[a]) * lev[a] for a in nr.index)) + inc_z,
+        # CAPRI's ProfitAgr (reports/welfare.gms l. 448-449: market/equations/welfare.py p_welfareRes_ProfitAgr)
+        from capri_mod.market.equations.welfare import p_welfareRes_ProfitAgr
+        return (p_welfareRes_ProfitAgr([float(nr[a]) for a in nr.index], [lev[a] for a in nr.index]) + inc_z,
                 float(sum(float(pr.get(a, 0.0)) * lev[a] for a in nr.index)) + prem_z)
 
     def compute(self,

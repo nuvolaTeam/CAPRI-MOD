@@ -234,7 +234,8 @@ class NitrogenBlock:
           NITF), at most 95% of it, plus the straw left, which only the scenario's shifts move), as a change on the
           base coefficient, scaled as the base's (CAPRI's CRESID);
         - with a technology variant's yield factor tf (p_technFact(crop, yield, A), the mix columns'), CAPRI's rows on
-          top: e_EXPPRD and e_BIOFIX x (1 + tf) (p_technFact(crop, NITF, A), fert/fertned.gms l. 205-206), e_CRESID
+          top: e_EXPPRD and e_BIOFIX x (1 + tf) (p_technFact(crop, NITF, A), fert/fertned.gms l. 206-207:
+          supply/equations/fertned.py p_technFact_FNUT), e_CRESID
           the residues x (1 + tf) (p_technFact(crop, MANN, A): the part that is not deposition or mineralisation,
           l. 326-335; mineralisation not set in CAPRI's 2030 data: fertned.py DATA_FOUT_dep).
 
@@ -252,7 +253,8 @@ class NitrogenBlock:
             if d is None:
                 raise RuntimeError(f"no fertned arguments for {crop} in {region} (capri_crop_fertned_parts_2030.csv)")
             res = res + kr * d
-        tf = 1.0 + float(techn_fact or 0.0)
+        from capri_mod.supply.equations.fertned import p_technFact_FNUT
+        tf = p_technFact_FNUT(techn_fact)
         return rem * tf, res * tf, fix * tf
 
     def _base_mineral_rate(self, region, crop):
