@@ -187,8 +187,8 @@ file); a CAPRI name on a citing line can match a statement the code does not por
 - **Citations corrected in the moved code** (comments only): line_nitr.gms l. 107-121 to l. 110-122, fertned.gms
   l. 205-206 to l. 206-207, breeding.gms l. 188-191 to l. 190-192; calc_nexport.gms now cites l. 44. None of A0's 14
   wrong citations is in A1+A3's files.
-- **The tools**: the inventory's parser reads a statement after an inline condition ($ifi %x% == y p(...) = ...;): 36
-  rows re-keyed, their statuses carried over (20 classified anew by hand, the notes say so); check_gams_quotes.py
+- **The tools**: the inventory's parser reads a statement after an inline condition ($ifi %x% == y p(...) = ...;): 28
+  rows re-keyed as 36 (8 statements more), their statuses carried over (20 classified anew by hand, the notes say so); check_gams_quotes.py
   checks every equations/ package by default; check_gams_citations.py checks a statement function's "CAPRI's GAMS
   (file l. a-b)" header against an assignment to its symbol (the longest prefix of the function's name the file
   assigns).
