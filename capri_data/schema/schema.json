@@ -21884,10 +21884,11 @@
     "model": [
      "capri_mod/data/loaders.py",
      "capri_mod/market/feed.py",
-     "capri_mod/market/inputs.py",
-     "capri_mod/projection/prices.py"
+     "capri_mod/market/inputs.py"
     ],
-    "builders": [],
+    "builders": [
+     "build_feed_bulk_grof"
+    ],
     "checks": [],
     "tests": []
    }
@@ -21970,6 +21971,73 @@
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py",
+     "capri_mod/market/feed.py",
+     "capri_mod/market/inputs.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "feed_bulks_grof": {
+   "file": "capri_data/2017/market/feed_bulks_grof.csv",
+   "declared_in": "21_market_inputs.sql",
+   "layout": [],
+   "comment": "CAPRI's 2030 total feed use of each purchased feed bulk per member state, DATA(MS, \"GROF\", bulk, \"TRD\") of sim_ini_21730 (every row of the bulk, the market's products and the others), the denominator of the covered share in CAPRI's supply-side bulk price (arm/set_prices.gms l. 412; tools/build/build_feed_bulk_grof.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "bulk",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "grof_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "bulk"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "ms"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(bulk IN ('FCER', 'FPRO', 'FENE', 'FOTH', 'FMIL'))",
+    "(grof_kt > 0)"
+   ],
+   "units": [
+    {
+     "item": "grof_kt",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI's GROF of the bulk at TRD (1000 t)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_feed_bulk_grof",
+    "sources": "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/CFACTOR_ARAB.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/DACT_TO_PACT.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEDACT_TO_FODDI.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/MSAGG.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/NUTS0.csv; $REFERENCE/sets/simini_21730/NUTS1A.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/PSDPAY_<CC>.csv; $REFERENCE/sets/simini_21730/PSDPAY_cscs.csv; $REFERENCE/sets/simini_21730/PSDPAY_vcs.csv; $REFERENCE/sets/simini_21730/PSG_TO_A.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/REGAGGP.csv; $REFERENCE/sets/simini_21730/REGEU1015.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/R_RAGG.csv; $REFERENCE/sets/simini_21730/SRNUTS1.csv; $REFERENCE/sets/simini_21730/SRNUTS2.csv; $REFERENCE/sets/simini_21730/SRNUTS2_EXT.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/arm/market1.gms; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
      "capri_mod/market/feed.py",
      "capri_mod/market/inputs.py"
     ],
@@ -22103,7 +22171,9 @@
     "model": [
      "capri_mod/market/feed.py"
     ],
-    "builders": [],
+    "builders": [
+     "build_feed_bulk_grof"
+    ],
     "checks": [],
     "tests": []
    }
@@ -57291,7 +57361,7 @@
    "file": "capri_data/2017/abatement/mitigation/supplement_effects.csv",
    "declared_in": "15_abatement.sql",
    "layout": [],
-   "comment": "CAPRI's feed supplements linseed, nitrate and 3-NOP (envind/line_nitr.gms) on the model's animals (tools/build/build_supplement_effects.py)",
+   "comment": "CAPRI's feed supplements linseed, nitrate and 3-NOP (envind/line_nitr.gms) on the model's animals, on CAPRI's 2030 requirements per activity (sim_ini_21730 p_animReq; tools/build/build_supplement_effects.py)",
    "columns": [
     {
      "name": "region",
@@ -57389,6 +57459,11 @@
      "not_null": true
     },
     {
+     "name": "dm_intake",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
      "name": "dsav",
      "type": "DOUBLE",
      "not_null": true
@@ -57431,7 +57506,8 @@
     "(relsubs1 > relsubs0)",
     "(gamma_floor > 0)",
     "((ch4ent_rel > -1) AND (ch4ent_rel <= 0))",
-    "((shr_of_dm > 0) AND (shr_of_dm < 1))"
+    "((shr_of_dm > 0) AND (shr_of_dm < 1))",
+    "(dm_intake > 0)"
    ],
    "units": [
     {
@@ -57487,6 +57563,12 @@
      "unit": "U_ratio",
      "status": "builder",
      "basis": "relative change per unit of the option's parameter"
+    },
+    {
+     "item": "dm_intake",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "dry-matter intake per head and year: 365 x CAPRI's 2030 p_animReq(DRMA) of the animal's activities, weighted by their places (LEVL x DAYS / 365)"
     },
     {
      "item": "dsav",
@@ -59432,6 +59514,7 @@
     ],
     "checks": [],
     "tests": [
+     "capri_mod/tests/test_bulk_prices.py",
      "capri_mod/tests/test_premium_baseline_2030.py"
     ]
    }

@@ -302,11 +302,7 @@ def GHG_Mit_Cost_supplementSlack(v_Miti_heads_sq_over_X, DRMA_days, v_supplement
 
     In this project's notation, z the heads adopting linseed (1000 head; the model's linseed column, supply/livestock.py
     _genetics_columns), X the herd, D the dry-matter intake per head and year (kg; CAPRI's p_animReq(DRMA) x
-    p_animProdDays), s the slack: CAPRI's v_Miti^2 v_actLevl = (z / X)^2 X = z^2 / X. The caller passes z^2 / X0, X0
-    the herd's base level, as the linseed column's own quadratic term does (its PMP curvature per head adopting,
-    gamma / (X0 x eligible share)): penalty = 999999 z^2 / X0 x D / 1000 x s.
-
-    Departures from CAPRI: v_Miti^2 v_actLevl at the herd's base level (z^2 / X0 for z^2 / X): no division by the herd,
-    which may approach zero within IPOPT's bounds; the penalty only keeps the slack at zero wherever linseed is used, so
-    its strength, not its zero, moves with the herd (DEPARTURES_FROM_CAPRI, the ration fat limit)."""
+    p_animProdDays), s the slack: CAPRI's v_Miti^2 v_actLevl = (z / X)^2 X = z^2 / X, which the caller passes (at the
+    current herd since 23 November 2026; before, z^2 / X0 at the herd's base level, register DEP-53):
+    penalty = 999999 z^2 / X x D / 1000 x s."""
     return 999999.0 * v_Miti_heads_sq_over_X * DRMA_days / 1000.0 * v_supplementSlack

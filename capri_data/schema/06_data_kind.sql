@@ -156,6 +156,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/2017/market/feed_bulks_eu.csv', 'base', 'by file: 2017 market data'),
   ('capri_data/2017/market/feed_bulks_eu_share.csv', 'coefficients', 'by file: shares and per-unit coefficients'),
   ('capri_data/2017/market/feed_bulks_noneu.csv', 'base', 'by file: 2017 market data'),
+  ('capri_data/2017/market/feed_bulks_grof.csv', 'base', 'by file: 2017 market data'),
   ('capri_data/2017/market/feed_byproducts.csv', 'coefficients', 'by file: CAPRI''s market parameters'),
   ('capri_data/2017/market/feed_cal_content.csv', 'coefficients', 'by file: CAPRI''s market parameters'),
   ('capri_data/2017/market/feed_demand_nonEU.csv', 'coefficients', 'by file: CAPRI''s market parameters'),

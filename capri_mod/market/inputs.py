@@ -42,6 +42,7 @@ BUILDERS = {
     "gl_demand_regions.csv": "build_gl_demand.py",
     "feed_bulks_eu.csv": "build_feed_bulks.py",
     "feed_bulks_eu_share.csv": "build_feed_bulks.py",
+    "feed_bulks_grof.csv": "build_feed_bulk_grof.py",
     "feed_byproducts.csv": "build_feed_byproducts.py",
     "feed_demand_nonEU.csv": "build_feed_demand_nonEU.py",
     "feed_demand_nonEU_elasticities.csv": "build_feed_demand_nonEU.py",

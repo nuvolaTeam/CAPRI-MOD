@@ -173,7 +173,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_digestibility_table", [str(GAMS)], [GAMS / "envind" / "def_digestibility.gms"]),
     ("build_fert_partial_slack", [str(GAMS)], [GAMS / "supply" / "set_fert_priors.gms"]),
     ("build_set_aside_scenario", [str(GAMS)], [GAMS / "scen" / "set_aside" / "set_aside_10.gms", GAMS / "sets.gms"]),
-    ("build_supplement_effects", [], [SOURCES / "capreg"]),
+    ("build_supplement_effects", [], [SOURCES / "capreg", REFERENCE]),
     ("build_supplement_fat", [], [REFERENCE]),
     ("build_genetics_effects", [], [D17]),
     # not region-keyed, or member-state / market / CAPRI-coded
@@ -206,6 +206,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_enteric_feed_factors", [str(GAMS), str(D17)], [GAMS, D17]),
     ("build_eu_ms_balance", [], []),
     ("build_feed_bulks", [], []),
+    ("build_feed_bulk_grof", [], [REFERENCE]),
     ("build_feed_byproducts", [], []),
     ("build_world_prices", [], [EXPORTS / "fao_agg_17_datamarket.txt", D17]),
     ("build_eu_cake_feed", [], [EXPORTS / "fao_agg_17_datamarket.txt"]),

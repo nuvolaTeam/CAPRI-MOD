@@ -306,6 +306,30 @@ solve.
 - The 2030 base mineral N per crop from CAPRI's 2030 reference (the setting `environment.base_mineral_n`, whose
   "capri2017" kept CAPRI's 2017 NMIN on the 2030 levels, the former base, retired 23 November 2026).
 
+### The purchased feed bulks' prices as CAPRI's, with our view that its 2030 level is an artefact (23 November 2026; DEP-14, KNOWN_ISSUES K197)
+
+The project lead's decision: follow CAPRI, and record where we think CAPRI is wrong. No setting: CAPRI's form only.
+
+- **What CAPRI does.** Its supply models price the five purchased bulks at the member state's unit value (supply_model.gms
+  LINEAR_ l. 4641-4643). Its trend has no bulk prices, so the 2030 baseline keeps the base year's
+  (capmod/load_base_data_and_trends.gms l. 693). In a simulation, arm/set_prices.gms (l. 376-412) moves that price by
+  the Laspeyres index of the bulk's market ingredients' Armington prices, times the share of the bulk's feed they cover.
+- **What the model does now.** The same: the 2030 baseline's bulk prices are CAPRI's 2030 unit values (in every EU
+  member state its 2017 ones, 0.783 in the model's 2017 money), and a scenario moves them with that Laspeyres index
+  (projection/prices.py ration_bulk_price_index; market/equations/set_prices.py; MarketModule.feed_bulk_uvag_ratio).
+  Until then the baseline took a CES of the products' 2030 member-state unit values, and a scenario the market's
+  feedBlkPrice_ CES.
+- **Why we think CAPRI's 2030 level is wrong.** Between 2017 and 2030 the bulks' ingredients' prices rise with CAPRI's
+  projections (cereals, oilcakes, dairy products: about 28% in nominal terms, near 0% in real terms), while the bulks'
+  own prices stay at their nominal 2017 value. So in CAPRI's 2030 baseline a bulk of cereals costs 22% less in real
+  terms than in 2017, while each cereal in it costs about the same. CAPRI's own comment at set_prices.gms l. 382-387
+  treats the bulk price as following its ingredients. In our reading the frozen level comes from the trend step having
+  no bulk prices, not from an intended projection.
+- **What would change it.** A trend for the bulks' prices (CAPTRD), or the 2030 level from the ingredients as the model
+  had it. That would be a CAPRI-ERROR-FIX setting; it is not built.
+- **A report difference.** CAPRI's results report FENE's price as moving with FCER's (reports/sol_simy.gms l. 764-768,
+  after the solve). The supply models solved with set_prices.gms's FENE, which the model ports.
+
 ### Settings of older forms retired (23 November 2026; the project lead's decision)
 
 Nine settings whose other value only reproduced an earlier form of the model were removed with that form's code; the

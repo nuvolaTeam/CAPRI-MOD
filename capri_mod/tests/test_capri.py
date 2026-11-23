@@ -2239,7 +2239,7 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
     2017 results, levels, yields and land types per region: capri_data/scenarios/capri_ref_2030), not its trend projection, and the
     baseline is calibrated as CAPRI calibrates its supply models: the linear cost terms move until each region's
     solution is its projected levels (fodder crops excepted: the fodder balances hold them). The purchased feed bulks
-    in the rations take CAPRI's 2030 bulk prices (feedBlkPrice_ CES of the products' 2030 prices)."""
+    in the rations take CAPRI's 2030 bulk prices (its 2030 UVAG of the bulk; DEP-14)."""
     import os, json
     import pandas as pd
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
@@ -2261,7 +2261,9 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
         cols = ["GRAE", "GRAI"] if a == "GRAS" else [a]         # CAPRI's GRAS row = GRAE + GRAI (the model's own)
         assert abs(float(data["areas"].loc[eu, cols].sum().sum()) / float(cap[a]) - 1.0) < 0.015, a
     rb = data["ration_bulk_price"]
-    assert rb[("DE000000", "FCER")] < 1.0 < rb[("DE000000", "FPRO")]
+    # CAPRI's 2030 bulk prices: its 2017 ones in 2030 money in every EU member state (DEP-14, K197)
+    assert all(rb[("DE000000", b_)] == pytest.approx(1.0 / 1.2772161, rel=1e-5)
+               for b_ in ("FCER", "FPRO", "FENE", "FMIL", "FOTH"))
     # the port of CAPRI's 2030 rations and fodder: CAPRI's 2030 rations (Upper Bavaria's dairy cows: more other fodder, less silage maize) and usable
     # fodder per ha (silage maize for biogas in Germany)
     rf = data["ration_factor"][("DE210000", "DCOW")]

@@ -11,7 +11,6 @@ from capri_mod.supply.equations.digestibility import (
     p_DryMatterContent, p_nfixRate_gras_digest, p_digestPar_GRAS, p_digestPar_OFAR, p_digestPar_FAT, p_digestPar_shFEED,
     p_digestPar_FEED)
 from capri_mod.supply.equations.line_nitr import p_emisFeed_TotFAT_FEED
-from capri_mod.supply.equations.breeding import p_animReqCopy_DRMA
 from capri_mod.supply.equations.supply_model.feeding import SupplementPerc_
 from capri_mod.supply.equations.supply_model.mitigation import GHG_Mit_Cost_supplementSlack
 
@@ -20,7 +19,7 @@ M = ROOT / "capri_data" / "2017" / "abatement" / "mitigation"
 
 
 def test_digestibility_and_fat_statements_are_capris():
-    """digestibility.gms l. 31-33, 44-45, 49-60, 200-232; line_nitr.gms l. 175-176; breeding.gms l. 234-236."""
+    """digestibility.gms l. 31-33, 44-45, 49-60, 200-232; line_nitr.gms l. 175-176."""
     assert p_DryMatterContent(0.0, 0.88) == 0.88 and p_DryMatterContent(0.22, 0.88) == 0.22
     assert p_nfixRate_gras_digest(0.0) == 0.05 and p_nfixRate_gras_digest(0.9) == 0.75
     n, g = 0.06, 0.3
@@ -34,8 +33,6 @@ def test_digestibility_and_fat_statements_are_capris():
     assert sh == [pytest.approx(1 / 3), pytest.approx(2 / 3)] and p_digestPar_shFEED(1.0, 0.0) == 0.0
     assert p_digestPar_FEED([2.2, 3.2], sh) == pytest.approx(2.2 / 3 + 3.2 * 2 / 3)
     assert p_emisFeed_TotFAT_FEED(3.2, 0.28) == pytest.approx(0.032 * 0.28) and p_emisFeed_TotFAT_FEED(3.2, 0.0) == 0.0
-    assert p_animReqCopy_DRMA(15.163, 19.750) == pytest.approx(15.163 + (19.750 - 15.163) / 4)
-    assert p_animReqCopy_DRMA(15.0, 0.0) == 0.0
 
 
 def test_supplement_fat_table():
@@ -60,12 +57,12 @@ def test_supplement_fat_table():
 
 
 def test_supplement_perc_row_and_penalty():
-    """The total form is CAPRI's row times X / X0 with v = z / X; the penalty 999999 v^2 X D / 1000 s with X at its
-    base level."""
+    """The total form is CAPRI's row times X / X0 with v = z / X; the penalty 999999 v^2 X D / 1000 s = 999999 z^2 / X
+    D / 1000 s."""
     fat, D, sh, z, X, X0, p, s = 230.0, 6500.0, 0.05, 30.0, 110.0, 100.0, 0.05, 0.004
     capri = (fat + D * sh * z / X) / D - (p + s)
     assert SupplementPerc_(fat, 1.0 / D, sh, z, X, 1.0 / X0, p, s) == pytest.approx(capri * X / X0)
-    assert GHG_Mit_Cost_supplementSlack(z * z / X0, D, s) == pytest.approx(999999.0 * (z / X0) ** 2 * X0 * D / 1000.0 * s)
+    assert GHG_Mit_Cost_supplementSlack(z * z / X, D, s) == pytest.approx(999999.0 * (z / X) ** 2 * X * D / 1000.0 * s)
 
 
 def test_supplement_fat_block_in_the_regional_nlp():

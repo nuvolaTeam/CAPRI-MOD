@@ -441,6 +441,29 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   and without (1)); the inhibitor on mineral N moves towards CAPRI's in four units (ES51 0.257 -> 0.141, CAPRI 0.039;
   NL22 0.536 -> 0.459, 0.292), away in FR52 (0.575 -> 0.482, 0.575); the inhibitor on manure stays where CAPRI has none
   (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
+- **DEP-14 closed, the purchased feed bulks' prices as CAPRI's (K197; 23 November 2026, the project lead's
+  decision):** the 2030 baseline's five bulks take CAPRI's 2030 unit value of the bulk over its 2017 one over the
+  deflator (its 2030 reference holds them at their 2017 values in every EU member state: 0.783 in the model's money;
+  before, a CES of the products' 2030 prices with FENE and FMIL at 1); a scenario moves them by CAPRI's
+  arm/set_prices.gms Laspeyres (market/equations/set_prices.py DATA_UVAG_FEED_TRD_Y, MarketModule.feed_bulk_uvag_ratio,
+  CAPRI's GROF from sim_ini_21730 in feed_bulks_grof.csv, tools/build/build_feed_bulk_grof.py) in place of the
+  market's feedBlkPrice_ CES. Applied to CAPRI's own step prices the statement reproduces its step's FCER, FOTH and
+  FMIL prices to the fourth digit and FPRO within 0.9%. Six-unit Green Deal probe at CAPRI's prices: the baseline
+  unchanged (0.002%), the scenario's changes 0.26 points apart on average, the mean gap to CAPRI 2.36 -> 2.39 points.
+  Our view that CAPRI's frozen 2030 level is an artefact of its trend step: DEPARTURES_FROM_CAPRI.md.
+- **DEP-53 narrowed, the ration fat limit and the supplements on CAPRI's 2030 intake (23 November 2026, the project
+  lead's decision):** linseed's, nitrate's and 3-NOP's dosage, cost and effects per activity on CAPRI's 2030
+  p_animReq of sim_ini_21730 (DRMA, ENNE, CRPR, DRMN, DRMX per head and day; tools/build/build_supplement_effects.py;
+  before breeding.gms's estimate from the model's 2017 requirements: the requirement effects 0.97-1.07 times
+  the former at the median, the costs the same at the median), the fat row's intake 365 x CAPRI's DRMA by the activities' places (supplement_effects.csv
+  dm_intake), and the slack's penalty at the current herd (CAPRI's v^2 X = z^2 / X; it was at the base level).
+  equations/breeding.py and the ration's req_DMIN, req_DMAX removed (no user left). The base fat share against
+  CAPRI's ini run: median 1.015 (quartiles 0.95-1.07), above 5% in 82 of 1,074 region-animals (93 before). At a tax
+  of 300 (six units, one iteration at the same prices) the row binds in none (FR52's dairy cows: fat 4.99% at 29.5%
+  linseed, before 27.2%).
+- **A run's results were not written since the fat limit (a32d763):** the regional result's supp_fat was not
+  declared in results_items.csv, so writing a run with linseed stopped (found by the probe above). Declared, with named
+  fields (perc, slack, share); test_results_long.py's check now reads `res.x =` as well as `result.x =`.
 - **DEP-20 closed, the Green Deal targets by year as CAPRI's data (23 November 2026):** the batch of CAPRI's Green
   Deal production runs (GUI/batchfiles/greendeal_scen2.txt, P. Witzke; from the project lead's GUI.zip, now in
   capri_sources/gui with the GUI definition) is read by tools/build/build_greendeal_batch_targets.py: its section

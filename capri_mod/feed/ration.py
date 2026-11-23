@@ -156,10 +156,6 @@ class Ration:
         self.x0, self.p0, self.flex = x0, p0, flex
         E0, P0, D0 = e @ x0, cp @ x0, dm @ x0
         req = rec["req"]
-        # the dry-matter requirements before the trim (the run's: projected where the ration is): the basis of the
-        # intake estimate of the feed supplements (equations/breeding.py p_animReqCopy_DRMA; the ration fat limit)
-        self.req_DMIN = float(req.get("DMIN", 0.0) or 0.0)
-        self.req_DMAX = float(req.get("DMAX", 0.0) or 0.0)
         # trimmed requirements (CAPRI p_trimFeed): the base ration is feasible
         self.E = min(req["ENNE"], E0)
         self.P = min(req["CRPR"], P0)

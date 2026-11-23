@@ -49,7 +49,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences; sorted 20 November 2026: most are in the accounts only or have no effect in the step; ARTIF held fixed had one (small for the EU, a few thousand ha in some Spanish and French units) | open: ARTIF, the milk for feeding and the yield factors of the crops' N and P terms ported 20 November 2026 (as CAPRI's); the animals' per-head terms ported 21 November 2026 (the members' INPO difference under the Green Deal's input change) |
 | [K196](#k196) | The Green Deal's N-surplus dual is below CAPRI's (CAPRI's recovered from its own results): median 0.89 of CAPRI's in the converged full run, 0.83 at CAPRI's prices; the suckler cows' and the technology shift's remaining gaps follow it | open (21 November 2026) |
 
-## Resolved (127)
+## Resolved (128)
 
 | # | Issue | Status |
 |---|---|---|
@@ -85,6 +85,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K190](#k190) | The grassland need took CAPRI's SQRT(1 +/- 0.2) split twice: the data's need per ha (CAPRI's reported 2030 need per crop) already carries it, and K160 applied it again; ES41's base manure K on grassland 53.6 against CAPRI's 42.0 kt | fixed (20 November 2026); the intensive grassland's weaker Green Deal response that followed traced to K191 (the grassland's removal and fixation in the N-surplus row) |
 | [K186](#k186) | The catch crops' winter cover option scales with the fixed base crop area; CAPRI's catcMiti_ and GHG_Mit_Cost_ scale it with the current land (landTypesNoSlak, uaaEqu). Not active in CAPRI's Green Deal step (its winter cover share fixed at 1e-6, CATC a free activity) | fixed (21 November 2026): the option's catch crops and cost on the current land, as CAPRI |
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | closed (21 November 2026), explained: the young-animal block is CAPRI's (values, coefficients, premiums' response, clearing); the female calves' gap is the suckler cows' smaller Green Deal fall, which follows the N-surplus dual below CAPRI's (K196) |
+| [K197](#k197) | The purchased feed bulks' prices were not CAPRI's: the 2030 baseline took a CES of the products' 2030 prices (FENE and FMIL at 1), where CAPRI's 2030 bulk prices are its 2017 ones; a scenario took the market's feedBlkPrice_ CES, where CAPRI's supply models read set_prices.gms's Laspeyres | fixed (23 November 2026), as CAPRI (the project lead's decision; our view of CAPRI's 2030 level in DEPARTURES_FROM_CAPRI.md) |
 | [K195](#k195) | The comparison switch's CAPRI step valued each crop's plant protection at dataOut's regional UVAG(PLAP); CAPRI's p_linObjeCont takes the member state's UVAP of the simulation year | fixed (21 November 2026), as CAPRI |
 | [K194](#k194) | The low-N feeding option was built on CAPREG's 2017 requirement correction (and res_17's MANN, CRPR_EXPT and levels), where CAPRI's 2030 simulation uses the 2030 requirements sim_ini_21730 holds | fixed (21 November 2026), as CAPRI |
 | [K193](#k193) | The emission tax runs stopped at the writing of their results table: the run's abatement block (the tax) was not declared in results_items.csv | fixed (21 November 2026) |
@@ -1721,9 +1722,10 @@ recorded only inside the status texts of K50 and K51 (resolved table) and README
     tools/build/build_supplement_fat.py) is CAPRI's p_emisFeed TotFAT (line_nitr.gms l. 175-176) from the ether
     extract of digestibility.gms (l. 31-60, 200-232; its statements: equations/digestibility.py, shared with 3-NOP's
     fibre and fat in tools/lib/_capri_digest.py) at the simulation's data (capmod.gms runs it with "Y", sim_ini_21730's
-    2030 point: the member state's FEDM, INTF none, the DRMA contents, the unit's FLEG). D is breeding.gms's estimate
-    at the run's requirements, the basis of the linseed column's dosage and cost (equations/breeding.py); departures:
-    register DEP-53. The model's base fat share over D: median 2.3-3.8% by animal (DCOW 3.6%, BULL 3.75%), above 5%
+    2030 point: the member state's FEDM, INTF none, the DRMA contents, the unit's FLEG). D is CAPRI's 2030 intake,
+    365 x its p_animReq(DRMA) (sim_ini_21730) of the animal's activities weighted by their places, also the basis of
+    the supplements' dosage and cost (supplement_effects.csv dm_intake; since 23 November 2026, before breeding.gms's
+    estimate at the run's requirements); departures: register DEP-53. The model's base fat share over D: median 2.3-3.8% by animal (DCOW 3.6%, BULL 3.75%), above 5%
     in 93 of the 1,074 region-animals (BULL 35, DCOW 28), where the feeds alone exceed CAPRI's limit and any linseed
     takes the penalised slack unless the ration's fat falls (CAPRI's maximum shares carry its own fat correction,
     l. 242-267, from its fat shares, not the model's). Check against CAPRI's ini run (v_SupplementPerc +
@@ -1731,7 +1733,9 @@ recorded only inside the status texts of K50 and K51 (resolved table) and README
     activities): the model's share over CAPRI's has a median of 1.04 (quartiles 0.97 and 1.11; DCOW 1.06, BULL 1.11,
     HFRS 0.92), correlation 0.36-0.76 by animal; NL22 is 1.17-1.22 times CAPRI's for the cows and bulls; CAPRI has 19
     activities above 5% at ini. Not traced: the comparison takes the model's 2017 rations (CAPRI's are its 2030
-    calibration point's) and D the estimate.
+    calibration point's) and D the estimate. With CAPRI's 2030 intake (23 November 2026; the 2017 rations): median
+    1.015 of CAPRI's (quartiles 0.95 and 1.07; DCOW 1.00, BULL 1.07, HFRS 0.91), above 5% in 82 of the 1,074 (93 with
+    the estimate on the same rations).
     **Measured** (21-22 November 2026; DE21, ES51, FR52, IR01, IT20, NL22; the row on and off, the off case with
     abatement._supp_fat_spec emptied): the baseline is unchanged (no linseed, so no penalty; the split between the
     percentage and the slack is then free, in CAPRI too). At an emission tax of 100 (two iterations) linseed takes
@@ -4062,6 +4066,46 @@ bb3b592).
   the surplus dual (13.86 / 13.99) where CAPRI's other arable fodder carries 1.16 times its surplus dual.
 - **In 9t:** -
 - **Status:** open (21 November 2026).
+
+<a id="k197"></a>
+### K197: The purchased feed bulks' prices as CAPRI's (found 23 November 2026, fixed the same day; register DEP-14)
+
+Found while looking for the FENE and FMIL unit values DEP-14 lacked.
+
+- **CAPRI.** The supply models price the five bulks (FCER, FPRO, FENE, FMIL, FOTH) at the member state's unit value
+  (sets.gms OM_OBJE l. 5135-5136; supply_model.gms LINEAR_ l. 4641-4643). The trend has no bulk prices, so the 2030
+  baseline keeps the base year's (capmod/load_base_data_and_trends.gms l. 693). CAPRI's 2030 Green Deal reference
+  (dataOut UVAG, 2030 against BAS) and its baseline price store (p_uvagStore, data_uvag1730defaulta) hold every EU
+  member state's five bulk prices at their 2017 values (ratio 1.0000; Norway 1.0-1.4, its trend has them). In a
+  simulation, arm/set_prices.gms (l. 376-412, the Laspeyres version, called with 'TRD') moves the price by the
+  Laspeyres index of the bulk's market ingredients' Armington prices (trend-point values as weights), times
+  MIN(1, FOOD / GROF), the share of the bulk's feed they cover. The market keeps its own bulk price, feedBlkPrice_.
+- **The model before.** The 2030 baseline took a CES of the products' 2030 member-state unit values over the deflator,
+  1 for a product without one (all of FENE and FMIL, 28% of FPRO's value): median 0.99-1.06 by bulk. A scenario took
+  the market's feedBlkPrice_ CES of the block's prices.
+- **Fix (as CAPRI).** The 2030 baseline: CAPRI's 2030 unit value of the bulk over its 2017 one over the deflator
+  (capri_unit_values_ref_2030.csv now with the bulks, extract_capri_marginal_terms.py; capri_price_ratios_2030.csv;
+  projection/prices.py ration_bulk_price_index): 0.783 in every EU member state. A scenario: set_prices.gms's
+  statement (market/equations/set_prices.py DATA_UVAG_FEED_TRD_Y; MarketModule.feed_bulk_uvag_ratio; CAPRI's GROF at
+  TRD of each bulk from sim_ini_21730, feed_bulks_grof.csv, tools/build/build_feed_bulk_grof.py). FENI covers 72% of
+  Germany's FENE (MOLA has no market), the market's products 87% of its FOTH (OOIL is not a market row, set_prices.gms
+  l. 374); FPRO and FMIL are covered in full, FCER at 99.4% or more.
+- **Check against CAPRI (its own prices).** The statement applied to CAPRI's Green Deal step's Armington prices and
+  its reference's feed reproduces the step's bulk prices against the reference in the 26 EU member states: FCER,
+  FOTH and FMIL to the fourth digit (median +10.0%, +4.4%, +2.3%; CY's FMIL, under the 0.1 kt threshold, unchanged as
+  CAPRI's), FPRO within 0.9% (median -1.2%). FENE: CAPRI's results report it moving with FCER (reports/sol_simy.gms
+  l. 764-768, a statement after the solve); the supply models solved with set_prices.gms's (median -1.1%).
+- **Effect** (the six-unit Green Deal probe at CAPRI's prices, ES62, CY, PL52, DE21, FR52, ES41, 12 iterations, before
+  at 432cac4 and after): the 2030 baseline unchanged (0.002% at most: the calibration absorbs the prices); the
+  scenario's changes move by 0.26 points on average (suckler cows -31.4 -> -30.8%, CAPRI -22.9; pulses +37.7 ->
+  +39.5%, CAPRI +32.7; fodder maize +27.3 -> +25.1%, CAPRI +25.3); the mean gap to CAPRI over 17 activity totals 2.36
+  -> 2.39 points; the N-surplus duals 0.3-4% higher (PL52 0.99 -> 1.03).
+- **Our view.** CAPRI's 2030 level is in our reading an artefact of its trend step: the ingredients' prices rise, the
+  bulks' do not (docs/DEPARTURES_FROM_CAPRI.md). Followed as CAPRI's form.
+- **Not checked.** CAPRI's envind files read the feeds' UVAG before the simulation's iterations (the options' feed
+  costs: low_n_feed.gms l. 132, breeding.gms l. 337); the model's options take their own base ration's costs (K194).
+- **In 9t:** -
+- **Status:** fixed (23 November 2026).
 
 <a id="k195"></a>
 ### K195: CAPRI's Green Deal step's plant protection at the member state's UVAP (found and fixed 21 November 2026)

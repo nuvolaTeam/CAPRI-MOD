@@ -15,7 +15,12 @@ The supply models buy feed as bulks; the market splits each member state's bulk 
 | FOTH other | POTA, whole oilseeds (RAPE, SUNF, SOYA), OLIV, OOIL, TEXT, TOMA, OVEG, APPL, OFRU, CITR, TAGR, TABO, TWIN, SUGA, EGGS, PORK, BEEF | 0.5 |
 | FMIL milk products | SMIP, WMIO, CASE, WHEP, BUTT, CREM, COCM, CHES, FRMI | 0.5 |
 
-- `feedBlkPrice_` (l. 951): bulk price = CES index of the products' Arm1 prices → the supply models' feed prices.
+- `feedBlkPrice_` (l. 951): the market's bulk price = CES index of the products' Arm1 prices (in the market's feed
+  demand). The supply models read another price, the bulk's unit value: in a simulation arm/set_prices.gms
+  (l. 376-412) moves it from the trend point's by the Laspeyres index of the bulk's market ingredients' Arm1 prices
+  (trend-point values as weights), times the share of the bulk's feed they cover (MIN(1, FOOD / GROF)); the trend
+  point's is the base year's where the trend has none (capmod/load_base_data_and_trends.gms l. 693), so in every EU
+  member state CAPRI's 2030 bulk prices are its 2017 ones (KNOWN_ISSUES K197).
 - `feedShareEqu_` (l. 999): product feed use = bulk use × (bulk price / product price)^rho, calibrated to the
   reference.
 - The residual feeds FENI (sugar-beet by-products, manioc, roots) and FPRI (milling by-products) are traded products
@@ -31,9 +36,14 @@ The supply models buy feed as bulks; the market splits each member state's bulk 
   FPRO: 13 including DDGS, FPRI, other vegetable oils and the fish products, FENE: FENI, FOTH: 11, FMIL: 8). Products in
   CAPRI's lists without a model market (OLIC, OTHC, MOLA, STAR) would stay at their reference price; none appears in
   the shipped table.
-- Bulk prices to the supply models: `MarketModule.feed_bulk_price_ratio` per member state and bulk at the EU price
-  signal (per trade block with `eu_blocks`), passed by `CAPRIModel.feed_bulk_price_ratios` as the supply models'
-  `feed_bulk_ratio`.
+- Bulk prices to the supply models: the 2030 baseline's are CAPRI's 2030 unit values of the bulks over the deflator
+  (projection/prices.py `ration_bulk_price_index`: 0.783 of the 2017 price in every EU member state); a scenario's
+  change from them is CAPRI's set_prices.gms Laspeyres (`MarketModule.feed_bulk_uvag_ratio`, market/equations/
+  set_prices.py `DATA_UVAG_FEED_TRD_Y`; CAPRI's GROF of each bulk in `feed_bulks_grof.csv`) per member state and bulk
+  at the EU price signal (per trade block with `eu_blocks`), passed by `CAPRIModel.feed_bulk_price_ratios` as the
+  supply models' `feed_bulk_ratio`. Until 23 November 2026 the baseline took a CES of the products' 2030 member-state
+  unit values (FENE and FMIL at 1) and the scenario the market's `feedBlkPrice_` CES (`feed_bulk_price_ratio`, still
+  the market's own bulk price); register DEP-14.
 - Bulk use from the supply models: `CAPRIModel._set_feed_demand` sums each member state's feed per bulk from the
   regional solutions (feeding inside the supply models, `feed_t`) against the base ration × base herds, and passes
   the ratio (`_feed_bulk_index`) to the market; the FMIL index likewise (`_fmil_index`).
@@ -48,10 +58,10 @@ The supply models buy feed as bulks; the market splits each member state's bulk 
   (`feed_bulks_eu_share.csv`, including processing in the use, so the oilseeds fed whole get their feed share of total
   use, crushing included); it is applied as a correction of the row, so crushing demand already in the row is kept.
   The dairy products' feed use comes from the FMIL bulks ([DAIRY_PROCESSING.md](DAIRY_PROCESSING.md)).
-- Norway (its own market region NO000000 since 21 October 2026, KNOWN_ISSUES K56; CAPRI's RMSSUP, so `feedBlkPrice_` and
-  `feedShareEqu_` hold for it, `FeedBal_` does not): its bulks (`feed_bulks_noneu.csv`: CAPRI's 2030 FEED and ARM1P of
-  NO000000, and its use HCOM + FEDM + INDM + BIOF + LOSM + PRCM per product) give its supply models' bulk price
-  indices at Norway's prices and its feed use per product at Norway's Arm1 price ratios (`MarketModule.sup_feed_use`),
+- Norway (its own market region NO000000 since 21 October 2026, KNOWN_ISSUES K56; CAPRI's RMSSUP, so `feedBlkPrice_`,
+  `feedShareEqu_` and set_prices.gms's bulk prices hold for it, `FeedBal_` does not): its bulks (`feed_bulks_noneu.csv`:
+  CAPRI's 2030 FEED and ARM1P of NO000000, and its use HCOM + FEDM + INDM + BIOF + LOSM + PRCM per product) give its
+  supply models' bulk prices at Norway's prices and its feed use per product at Norway's Arm1 price ratios (`MarketModule.sup_feed_use`),
   following its herds (`_feed_bulk_index` of NO000000, its own FMIL index `_fmil_index_sup`), on CAPRI's feed share of
   Norway's use; none of it is in the EU's feed demand.
 - FENI and FPRI markets (`tools/build/build_bilateral_market.py`, `tools/build/build_feed_byproducts.py`): CAPRI's bilateral flows,

@@ -174,7 +174,10 @@ class HessianBlock:
                         # 21 November 2026 (K196): the fertiliser options' calibration leaves CAPRI's relSubs0 x
                         # costParLin at their initial share (the only form since its setting was retired on
                         # 23 November 2026; the key part kept, so the Hessians measured since 21 November stay valid)
-                        + ("fert-option-relsubs0",))
+                        + ("fert-option-relsubs0",)
+                        # 23 November 2026 (DEP-14): the supply models' bulk prices as CAPRI's arm/set_prices.gms (the
+                        # Laspeyres index; the code sits partly in the market package, outside supply_code_fingerprint)
+                        + ("bulk-uvag-laspeyres",))
                    # at a scenario's state (market.hessian_scenario_iter): its young-animal and member-state milk
                    # prices too (a baseline's key is unchanged)
                    + (repr((sorted((getattr(sm.seen, "yani_price_ratio", None) or {}).items()),

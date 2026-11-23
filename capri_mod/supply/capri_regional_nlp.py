@@ -1218,7 +1218,8 @@ class CapriRegionalNLP:
         set_miti_bounds.gms l. 471-476), the row in its total form (equations/supply_model/feeding.py SupplementPerc_:
         the feed bulks' fat per head, the flexible feeds' and the fixed ones' at their base amounts, and the linseed's
         sh z / X0), and the slack's penalty in the objective (GHG_Mit_Cost_, equations/supply_model/mitigation.py
-        GHG_Mit_Cost_supplementSlack). spec["supp_fat"]: {animal: {"col", "shr", "D", "fat": {feed: kg of fat per kg}}}
+        GHG_Mit_Cost_supplementSlack: CAPRI's v_Miti^2 v_actLevl = z^2 / X at the current herd, since 23 November 2026;
+        the herd floored at 1e-6 of its base level, a guard against a division by zero that no solution reaches). spec["supp_fat"]: {animal: {"col", "shr", "D", "fat": {feed: kg of fat per kg}}}
         (abatement._supp_fat_spec)."""
         import casadi as ca
         from capri_mod.supply.equations.supply_model.feeding import SupplementPerc_
@@ -1247,7 +1248,8 @@ class CapriRegionalNLP:
             g_rows.append(SupplementPerc_(fat_h, self._pv(1.0 / D), self._pv(sh), zc, y[ia], self._pv(1.0 / X0),
                                           ps[0], ps[1]))
             lbg.append(0.0); ubg.append(0.0)
-            obj = obj + GHG_Mit_Cost_supplementSlack(zc * zc * self._pv(1.0 / X0), self._pv(D), ps[1])
+            obj = obj + GHG_Mit_Cost_supplementSlack(zc * zc / ca.fmax(y[ia], self._pv(1e-6 * X0)), self._pv(D),
+                                                     ps[1])
             o = nx0 + 2 * len(new)
             new.append(ps)
             lbx += [0.0, 0.0]; ubx += [0.05, np.inf]

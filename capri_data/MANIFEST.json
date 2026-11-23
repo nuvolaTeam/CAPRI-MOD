@@ -564,14 +564,14 @@
    }
   },
   "capri_data/2017/abatement/mitigation/supplement_effects.csv": {
-   "description": "CAPRI's feed supplements linseed, nitrate and 3-NOP (envind/line_nitr.gms) on the model's animals (tools/build/build_supplement_effects.py)",
+   "description": "CAPRI's feed supplements linseed, nitrate and 3-NOP (envind/line_nitr.gms) on the model's animals, on CAPRI's 2030 requirements per activity (sim_ini_21730 p_animReq; tools/build/build_supplement_effects.py)",
    "kind": "coefficients",
    "vintage": "2017 base / 2030 calibration",
    "domain": "abatement",
    "status": "live",
    "rows": 2363,
-   "columns": 20,
-   "units": "U_EuPerHd, U_ratio",
+   "columns": 21,
+   "units": "U_EuPerHd, U_kgperhd, U_ratio",
    "read_by_model": [
     "capri_mod/data/loaders.py"
    ],
@@ -1422,8 +1422,7 @@
    "read_by_model": [
     "capri_mod/data/loaders.py",
     "capri_mod/market/feed.py",
-    "capri_mod/market/inputs.py",
-    "capri_mod/projection/prices.py"
+    "capri_mod/market/inputs.py"
    ],
    "origin": {
     "nature": "capri",
@@ -1450,6 +1449,25 @@
     "builder": "build_feed_bulks"
    },
    "catalogue_note": "Feed share of EU use per model commodity in the bulks (CAPRI 2030 reference FEED / (HCOM+FEDM+INDM+BIOF+LOSM)); tools/build/build_feed_bulks.py. (not re-checked)"
+  },
+  "capri_data/2017/market/feed_bulks_grof.csv": {
+   "description": "CAPRI's 2030 total feed use of each purchased feed bulk per member state, DATA(MS, \"GROF\", bulk, \"TRD\") of sim_ini_21730 (every row of the bulk, the market's products and the others), the denominator of the covered share in CAPRI's supply-side bulk price (arm/set_prices.gms l. 412; tools/build/build_feed_bulk_grof.py)",
+   "kind": "base",
+   "vintage": "2030",
+   "domain": "market",
+   "status": "live",
+   "rows": 166,
+   "columns": 3,
+   "units": "U_1000t",
+   "read_by_model": [
+    "capri_mod/market/feed.py",
+    "capri_mod/market/inputs.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_feed_bulk_grof"
+   },
+   "catalogue_note": "tools/build/build_feed_bulk_grof.py. CAPRI's 2030 total feed of each bulk per member state (sim_ini_21730 GROF at TRD), the denominator of the covered share in its supply-side bulk price (arm/set_prices.gms). (not re-checked)"
   },
   "capri_data/2017/market/feed_bulks_noneu.csv": {
    "description": "Norway's feed bulks (KNOWN_ISSUES K56): CAPRI's 2030 FEED and ARM1P of NO000000 and its use HCOM + FEDM + INDM + BIOF + LOSM + PRCM per product (tools/build/build_feed_bulks.py)",
@@ -4769,7 +4787,7 @@
   "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_price_ratios_2030.csv": {
    "description": "CAPRI's 2030 prices and premiums for the model's 2030 baseline, in 2017 money. (tools/build/build_price_trajectory_2030.py)",
    "kind": "reference",
-   "rows": 1983,
+   "rows": 2156,
    "columns": 6,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -5445,7 +5463,7 @@
   "capri_data/codes/results_items.csv": {
    "description": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
    "kind": "structure",
-   "rows": 186,
+   "rows": 187,
    "columns": 8,
    "read_by_model": [
     "capri_mod/io_results.py"
@@ -10730,7 +10748,7 @@
   "capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv": {
    "description": "CAPRI's 2030 unit values UVAG per region and product from the dataOut of res_2_1730greendeal_refdefaulta (CAPRI's 2030 Green Deal baseline) (tools/build/extract_capri_marginal_terms.py, tag ini).",
    "kind": "validation",
-   "rows": 2131,
+   "rows": 2304,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "origin": {

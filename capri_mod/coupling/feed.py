@@ -9,8 +9,10 @@ from __future__ import annotations
 
 class FeedBlock:
     def feed_bulk_price_ratios(self, price_signal) -> dict:
-        """{(member state, bulk): price relative to the base} of CAPRI's feed bulks (feedBlkPrice_) at the EU
-        price changes of the price signal (MarketModule.feed_bulk_price_ratio)."""
+        """{(member state, bulk): the supply models' price of CAPRI's feed bulks relative to the baseline, at the
+        price changes of the price signal: CAPRI's arm/set_prices.gms (the Laspeyres index of the bulk's market
+        ingredients times their share of the bulk's feed; MarketModule.feed_bulk_uvag_ratio). Until 23 November 2026
+        the market's feedBlkPrice_ CES (MarketModule.feed_bulk_price_ratio), which CAPRI keeps inside the market."""
         mm = self.market_module
         sig = price_signal if price_signal is not None else {}
         ratio = {c: 1.0 + float(sig.get(c, 0.0)) for c in mm.commodities} if hasattr(sig, "get") else {}
@@ -18,7 +20,7 @@ class FeedBlock:
         _dev = (getattr(self.sv, "eu_dev", None) or {}) if price_signal is not None else {}
         rr = {rg: {c: v + float(d.get(c, 0.0)) for c, v in ratio.items()} for rg, d in _dev.items()}
         _fb = mm._feed_bulk_params()
-        out = {k: mm.feed_bulk_price_ratio(k[0], k[1], rr.get(mm.eu_region_of_ms(k[0]), ratio))
+        out = {k: mm.feed_bulk_uvag_ratio(k[0], k[1], rr.get(mm.eu_region_of_ms(k[0]), ratio))
                for k in (_fb.get("bulks") or {})}
         # Norway's supply models: its own bulks at its own market's prices (the EU signal plus Norway's departure;
         # K56)
@@ -27,14 +29,14 @@ class FeedBlock:
         for k in (_fb.get("bulks_sup") or {}):
             d_ = _sd.get(_ms_reg.get(k[0]))
             rs = {c: v + float(d_.get(c, 0.0)) for c, v in ratio.items()} if d_ is not None else ratio
-            out[k] = mm.feed_bulk_price_ratio(k[0], k[1], rs)
+            out[k] = mm.feed_bulk_uvag_ratio(k[0], k[1], rs)
         return out
 
     def _update_rations(self, price_signal) -> None:
         """CAPRI's rations and the current feed prices for the feeding block inside the regional models (the ration is
         chosen there), and the ration state (feed per head of the last regional solution) for the market's feed
-        index. Cereals and protein-rich feed: the member state's CAPRI bulk price indices (feedBlkPrice_); home-grown
-        fodder through its balance; feeds without a market at base value."""
+        index. The purchased feed bulks: the member state's CAPRI bulk prices (arm/set_prices.gms, feed_bulk_price_ratios);
+        home-grown fodder through its balance; feeds without a market at base value."""
         from capri_mod.feed.ration import ration_model_for, rations_by_region, feed_prices_by_region
         rm = getattr(self.par, "ration_model", None)
         if rm is None:
@@ -42,8 +44,8 @@ class FeedBlock:
                                   getattr(self.supply_module, "pmp_source", "capri2030"),
                                   getattr(self.supply_module, "pmp_capri_parts", ()))
             self.par.ration_model = rm
-        # FEED BULK PRICES per member state (CAPRI feedBlkPrice_): the CES price index of the member state's
-        # cereals (FCER) and protein-rich feed (FPRO, with cakes, DDGS, pulses, oils, milling by-products)
+        # FEED BULK PRICES per member state: CAPRI's supply-side unit values of the five bulks (arm/set_prices.gms:
+        # the trend point's price times the Laspeyres index of the bulk's market ingredients)
         bix = self.feed_bulk_price_ratios(price_signal)
         self.supply_module.seen.feed_bulk_ratio = bix
         state = {}

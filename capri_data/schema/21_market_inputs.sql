@@ -65,6 +65,17 @@ INSERT INTO value_units VALUES
   ('feed_bulks_noneu', 'rho', 'U_Elasticity', 'capri', 'CAPRI''s p_rhoFeed'),
   ('feed_bulks_noneu', 'use_kt', 'U_1000t', 'capri', 'CAPRI''s HCOM + FEDM + INDM + BIOF + LOSM + PRCM (1000 t)');
 
+-- file: capri_data/2017/market/feed_bulks_grof.csv
+CREATE TABLE feed_bulks_grof (
+    ms VARCHAR NOT NULL REFERENCES capri_rall (code),
+    bulk VARCHAR NOT NULL CHECK (bulk IN ('FCER', 'FPRO', 'FENE', 'FOTH', 'FMIL')),
+    grof_kt DOUBLE NOT NULL CHECK (grof_kt > 0),
+    PRIMARY KEY (ms, bulk)
+);
+COMMENT ON TABLE feed_bulks_grof IS 'CAPRI''s 2030 total feed use of each purchased feed bulk per member state, DATA(MS, "GROF", bulk, "TRD") of sim_ini_21730 (every row of the bulk, the market''s products and the others), the denominator of the covered share in CAPRI''s supply-side bulk price (arm/set_prices.gms l. 412; tools/build/build_feed_bulk_grof.py)';
+INSERT INTO value_units VALUES
+  ('feed_bulks_grof', 'grof_kt', 'U_1000t', 'capri', 'CAPRI''s GROF of the bulk at TRD (1000 t)');
+
 -- file: capri_data/2017/market/feed_bulks_eu_share.csv
 CREATE TABLE feed_bulks_eu_share (
     commodity VARCHAR PRIMARY KEY REFERENCES model_commodities (code),

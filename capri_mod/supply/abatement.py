@@ -189,10 +189,10 @@ class AbatementBlock:
         """CAPRI's ration fat limit with linseed for the NLP form (SupplementPerc_, supply/supply_model.gms l. 608-633;
         capri_regional_nlp._supplement_fat_block): per cattle animal with the linseed column (LINE_Tot,
         supplement_effects.csv; supply/livestock.py _genetics_columns), {"col": the column, "shr": ShrOfDM (linseed's fat
-        as a share of the dry matter), "D": the dry-matter intake per head and year at the run's requirements
-        (equations/breeding.py p_animReqCopy_DRMA, the basis of the column's dosage and cost), "fat": {feed: kg of fat per
-        kg as fed} (supplement_fat.csv, tools/build/build_supplement_fat.py)}; {} without a linseed column."""
-        from capri_mod.supply.equations.breeding import p_animReqCopy_DRMA
+        as a share of the dry matter), "D": the dry-matter intake per head and year, CAPRI's 2030 p_animReq(DRMA) x 365
+        of the animal's activities (supplement_effects.csv dm_intake, the basis of the column's dosage and cost too;
+        until 23 November 2026 breeding.gms's estimate at the run's requirements, register DEP-53), "fat": {feed: kg of
+        fat per kg as fed} (supplement_fat.csv, tools/build/build_supplement_fat.py)}; {} without a linseed column."""
         gc = {a: j for (a, o), j in (getattr(self.ev, "genet_cols", None) or {}).items() if o == "LINE_Tot"}
         if not gc:
             return {}
@@ -209,9 +209,10 @@ class AbatementBlock:
             f_ = fat.get((rid, a))
             if e is None or r is None or f_ is None:
                 continue
-            D = p_animReqCopy_DRMA(getattr(r, "req_DMIN", 0.0), getattr(r, "req_DMAX", 0.0))
+            D = float(e.get("dm_intake", float("nan")))
             if not D > 0:
-                continue
+                raise ValueError(f"{rid} {a}: no dry-matter intake (dm_intake) in supplement_effects.csv for the linseed "
+                                 "column (tools/build/build_supplement_effects.py)")
             out[a] = {"col": int(j), "shr": float(e["shr_of_dm"]), "D": D, "fat": f_}
         return out
 

@@ -273,10 +273,11 @@ CREATE TABLE supplement_effects (
     gamma_floor DOUBLE NOT NULL CHECK (gamma_floor > 0),
     ch4ent_rel DOUBLE NOT NULL CHECK (ch4ent_rel > -1 AND ch4ent_rel <= 0),
     shr_of_dm DOUBLE NOT NULL CHECK (shr_of_dm > 0 AND shr_of_dm < 1),
+    dm_intake DOUBLE NOT NULL CHECK (dm_intake > 0),
     dsav DOUBLE NOT NULL,
     PRIMARY KEY (region, animal, option)
 );
-COMMENT ON TABLE supplement_effects IS 'CAPRI''s feed supplements linseed, nitrate and 3-NOP (envind/line_nitr.gms) on the model''s animals (tools/build/build_supplement_effects.py)';
+COMMENT ON TABLE supplement_effects IS 'CAPRI''s feed supplements linseed, nitrate and 3-NOP (envind/line_nitr.gms) on the model''s animals, on CAPRI''s 2030 requirements per activity (sim_ini_21730 p_animReq; tools/build/build_supplement_effects.py)';
 
 INSERT INTO value_units SELECT t, c, 'U_ratio', 'builder', 'relative change per unit of the option''s parameter'
 FROM (VALUES ('genetics_effects'), ('lownfeed_effects'), ('supplement_effects')) a(t),
@@ -291,6 +292,7 @@ INSERT INTO value_units VALUES
   ('supplement_effects', 'gamma_floor', 'U_ratio', 'builder', 'floor of the curvature relative to costParLin'),
   ('supplement_effects', 'ch4ent_rel', 'U_ratio', 'builder', 'relative change of enteric CH4 of the adopting animals'),
   ('supplement_effects', 'shr_of_dm', 'U_ratio', 'capri', 'ShrOfDM, the supplement''s share of dry matter'),
+  ('supplement_effects', 'dm_intake', 'U_kgperhd', 'builder', 'dry-matter intake per head and year: 365 x CAPRI''s 2030 p_animReq(DRMA) of the animal''s activities, weighted by their places (LEVL x DAYS / 365)'),
   ('supplement_effects', 'param_switch', NULL, 'open', 'a switch (1 on)');
 
 -- file: capri_data/2017/abatement/mitigation/supplement_fat.csv

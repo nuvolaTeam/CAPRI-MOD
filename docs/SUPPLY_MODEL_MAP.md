@@ -70,7 +70,7 @@ every regional model (always on; K27); CAPRI's fixed activities are fixed.
 | REQSE_ (energy and protein need = feed x content) | yes, equality | linear; GD: products of two v_Miti (low-N feed x feed efficiency) | same: equality per head for energy and crude protein, requirement = the base ration's supply (CAPRI's trimmed p_animReq); split and option columns change the requirement in total form. Conic form: inequality (need <= supply) |
 | REQSN_, MAXSHR_, MINSHR_ (dry matter, fibre, feed shares) | no under `_pw` | - | NLP form: none. The conic form keeps dry-matter and share rows (`feed_conic.py`), which CAPRI's simulation does not have; `feed/ration.py` uses them to calibrate the rations |
 | FEDUSE_ (feed use = per-head x herd) | yes | non-convex (bilinear) | same (per-head feed x herd, entering the fodder balances). Conic form: total feed as the variable (same set) |
-| SupplementPerc_ (fat share with linseed) | GD | bilinear (total form) | ported 21 November 2026: CapriRegionalNLP._supplement_fat_block, its slack's penalty in GHG_Mit_Cost_ (DEP-53) |
+| SupplementPerc_ (fat share with linseed) | GD | bilinear (total form) | ported 21 November 2026: CapriRegionalNLP._supplement_fat_block, its slack's penalty in GHG_Mit_Cost_ at the current herd and CAPRI's 2030 intake since 23 November 2026 (DEP-53: one row per model animal) |
 | FRMI, FPRI, FENI held at base per head | capri-mod only (no feed elasticity for them in pmp_elas.gms) | - | held at base per head; whether CAPRI fixes them is unsure |
 
 Feed bounds: 0 <= per-head feed <= 10 x DRMX / dry-matter content (set_supply_bounds.gms), in the NLP form.

@@ -12,6 +12,12 @@ so a product's 2030 price in 2017 money is its CAPRI unit value ratio over that 
 Premiums the same way: CAPRI's 2030 PRME per activity unit over the deflator (CAP payments are
 nominal and fall in 2030 in CAPRI's reference: soft wheat in Brittany EUR 288 -> 226 per ha).
 
+The purchased feed bulks (FCER, FPRO, FENE, FMIL, FOTH; since 23 November 2026, register DEP-14) like the products:
+CAPRI's supply model prices them at the member state's UVAG (sets.gms OM_OBJE l. 5135-5136, supply_model.gms LINEAR_
+l. 4641-4643), and its 2030 baseline holds that UVAG at the trend's value, the base year's where CAPTRD gives none
+(capmod/load_base_data_and_trends.gms l. 693): in every EU member state the 2030 UVAG equals the 2017 one, so the real
+ratio is 1 / deflator (0.783); Norway's moves (its trend has the bulks' prices).
+
 Oilcakes (no UVAG in CAPRI's 2017 results): producer prices PPRI at the market baseline's base (2017)
 and 2030 calibration points, capri_data/sources/raw/capri/capri_baseline/capri_market_prices_1730.parquet.
 The reference run's 2030 output prices equal CAPRI's own calibrated 2030 baseline (p_uvagStore,

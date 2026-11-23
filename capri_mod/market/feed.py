@@ -164,6 +164,12 @@ class FeedMixin(MarketStateMixin):
                         share_reg[reg][c] = min(1.0, f / u)
             out = {"bulks": bulks, "feed0": feed0, "share": share, "feed0_reg": feed0_reg,
                    "share_reg": share_reg} if bulks else {}
+            # CAPRI's 2030 total feed of each bulk, the denominator of the share its market ingredients cover in the
+            # supply side's bulk price (arm/set_prices.gms l. 412; feed_bulks_grof.csv, sim_ini_21730's GROF at TRD)
+            grof = {(r.ms, r.bulk): float(r.grof_kt) for r in inp.csv("feed_bulks_grof.csv").itertuples()} \
+                if bulks else {}
+            for k_, d_ in bulks.items():
+                d_["grof"] = grof.get(k_)
             # Norway's bulks (CAPRI's feedBlkPrice_, feedShareEqu_ hold for every NUTS0 with supply models, RMSSUP):
             # its supply models' bulk price indices at its own market's prices, and its feed demand per product
             # following its herds, in its own market region NO000000 (KNOWN_ISSUES K56; not part of the EU's feed demand).
@@ -178,7 +184,8 @@ class FeedMixin(MarketStateMixin):
                     q0 = g["feed_kt"].astype(float).values
                     v0 = q0 * g["arm1p"].astype(float).values
                     comm = [c if c in self.commodities else "" for c in g["commodity"].astype(str)]
-                    pno[(ms, b)] = dict(comm=comm, q0=q0, s=v0 / v0.sum(), rho=float(g["rho"].iloc[0]))
+                    pno[(ms, b)] = dict(comm=comm, q0=q0, s=v0 / v0.sum(), rho=float(g["rho"].iloc[0]),
+                                        grof=grof.get((ms, b)))
                     rg = ms_reg.get(ms)
                     uk = g["use_kt"].astype(float).values if "use_kt" in g.columns else np.zeros(len(g))
                     for c, q, u in zip(comm, q0, uk):
@@ -203,6 +210,27 @@ class FeedMixin(MarketStateMixin):
         if d is None:
             return 1.0
         return float(self._feedblk_fn(d)(self._blk_ratios(d, price_ratio), 1.0)[0])
+
+    def feed_bulk_uvag_ratio(self, ms: str, bulk: str, price_ratio: Dict[str, float]) -> float:
+        """CAPRI's supply-side price of a member state's feed bulk relative to its trend point (arm/set_prices.gms
+        l. 394-412, the Laspeyres version; equations/set_prices.py DATA_UVAG_FEED_TRD_Y): the ingredients' Armington
+        price ratios weighted by their trend point's values (ARM1P x FEDM, the bulk's value shares s), the change
+        times the share of the bulk's feed its market ingredients cover (their feed over CAPRI's GROF at TRD). The
+        ingredients' feed in the simulation (FOOD at Y, for CAPRI's 0.1 threshold) is the market's split of the bulk
+        at these prices (feedShareEqu_, the supply models' bulk change seen.feed_bulk_index). 1 where the member state
+        has no such bulk. The market's own bulk price, feedBlkPrice_ (the CES, feed_bulk_price_ratio), stays the
+        market's: CAPRI's supply models read the unit value."""
+        from capri_mod.market.equations.set_prices import DATA_UVAG_FEED_TRD_Y
+        fb = self._feed_bulk_params()
+        d = (fb.get("bulks") or {}).get((ms, bulk)) or (fb.get("bulks_sup") or {}).get((ms, bulk))
+        if d is None:
+            return 1.0
+        if d.get("grof") is None:
+            raise ValueError(f"{ms} {bulk}: no GROF at TRD in feed_bulks_grof.csv (tools/build/build_feed_bulk_grof.py)")
+        rr = self._blk_ratios(d, price_ratio)
+        k = float((self.seen.feed_bulk_index or {}).get((ms, bulk), 1.0))
+        q_y = np.asarray(self._feedblk_fn(d)(rr, k)[1]).ravel()
+        return DATA_UVAG_FEED_TRD_Y(1.0, d["s"], rr, float(np.sum(d["q0"])), float(np.sum(q_y)), float(d["grof"]))
 
     def eu_feed_use(self, price_ratio: Dict[str, float], region: Optional[str] = None,
                     bulk_factor: Optional[Dict[tuple, float]] = None) -> Dict[str, float]:

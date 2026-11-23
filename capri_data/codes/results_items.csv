@@ -148,6 +148,7 @@ supply,ghg_emissions,rows,,,,,
 supply,gross_margin,rows,,,,EUR 1000,
 supply,gross_output,rows,GROF,act,SWHE;DWHE;RYEM;BARL;OATS;CORN;OCER;PARI;OCRO;OIND;NURS;FLOW;POTA;SUGB;SUNF;RAPE;SOYA;OOIL;PULS;TOMA;OVEG;APPL;OFRU;CITR;TAGR;WINE;OLIV;TABO;TOBA;TEXT;MAIF,1000 t,"DATA(RU,'GROF',product): the region's gross production (simini_21730 DATA DE110000.GROF.SWHE); the model's gross output of a crop activity is its product's (CAPRI's 2030 GD reference, DE110000: SWHE 545.4 vs the model's 544.9). Not GRAS (another measure: 4356 vs 970) nor the animals (their products are other codes)"
 supply,histosol_fallow,rows,,,,,
+supply,supp_fat,rows,,,,,
 supply,iset,rows,,,,,
 supply,land_types,rows,,,,,
 supply,legsh_share,rows,,,,share of other arable fodder,"K93: CAPRI's LegSh share, v_Miti(RU, OFAR, LegSh, BioFix) (envind/leg_share.gms)"

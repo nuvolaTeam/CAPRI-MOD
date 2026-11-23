@@ -2291,6 +2291,25 @@
    ]
   },
   {
+   "task": "build_feed_bulk_grof",
+   "builder": "build_feed_bulk_grof",
+   "args": [],
+   "inputs": [
+    "capri_data/2017/market/feed_bulks_eu.csv",
+    "capri_data/2017/market/feed_bulks_noneu.csv"
+   ],
+   "code": [
+    "tools/build/build_feed_bulk_grof.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$REFERENCE/simini/simini_21730/DATA.csv.gz"
+   ],
+   "outputs": [
+    "capri_data/2017/market/feed_bulks_grof.csv"
+   ]
+  },
+  {
    "task": "build_feed_byproducts",
    "builder": "build_feed_byproducts",
    "args": [],
@@ -5412,7 +5431,6 @@
     "capri_mod/supply/capri_pmp.py",
     "capri_mod/supply/entitlements.py",
     "capri_mod/supply/equations/__init__.py",
-    "capri_mod/supply/equations/breeding.py",
     "capri_mod/supply/equations/digestibility.py",
     "capri_mod/supply/fertilisation.py",
     "capri_mod/supply/inputs.py",
@@ -5440,6 +5458,8 @@
     "tools/lib/paths.py"
    ],
    "external": [
+    "$REFERENCE/simini/simini_21730/DATA.csv.gz",
+    "$REFERENCE/simini/simini_21730/p_animReq.csv.gz",
     "$SOURCES/capreg/res_17AT.txt",
     "$SOURCES/capreg/res_17BG.txt",
     "$SOURCES/capreg/res_17BL.txt",

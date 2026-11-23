@@ -34,7 +34,10 @@ UV_PRODUCTS = {"PORK", "BEEF", "COMI", "POUM", "EGGS", "SGMT", "SGMI", "SWHE", "
                "YHEI", "YCOW", "SGMF", "SOYC", "RAPC", "SUNC", "GRAS", "MAIF", "OFAR", "ROOF", "TEXT", "TOBA", "PARI",
                "OCRO", "OIND", "NURS", "FLOW", "OOIL", "TABO",
                # inputs (CAPRI moves them with its general price index)
-               "EFUL", "ELEC", "EGAS", "ELUB", "SEED", "PLAP", "REPM", "REPB", "INPO", "IPHA"}
+               "EFUL", "ELEC", "EGAS", "ELUB", "SEED", "PLAP", "REPM", "REPB", "INPO", "IPHA",
+               # the purchased feed bulks, priced in the supply model at the member state's UVAG (sets.gms OM_OBJE
+               # l. 5135-5136; supply_model.gms LINEAR_ l. 4641-4643; KNOWN_ISSUES DEP-14)
+               "FCER", "FPRO", "FENE", "FMIL", "FOTH"}
 #: region . [qualifier .] activity . item . 2030 ; only the per-unit rows (empty qualifier), not CUR (a near-duplicate),
 #: 'total', 'perUAA', 'perAWU' variants
 RX = re.compile(r"^'([^']*)'\.(?:'([^']*)'\.)?'([^']*)'\.'([^']*)'\.'2030'\s+(\S+?),?\s*$")

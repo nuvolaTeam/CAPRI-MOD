@@ -654,8 +654,10 @@ class NLPBlock:
         self.res.till_shares = {k_: float(v_) for k_, v_ in (ab.get("till") or {}).items()}
         self.res.urea_share = float(ab["urea"]) if ab.get("urea") is not None else None
         self.res.legsh_share = float(ab["legsh"]) if ab.get("legsh") is not None else None
-        # the ration fat limit with linseed (SupplementPerc_): {animal: (v_supplementPerc, v_supplementSlack, fat share)}
-        self.res.supp_fat = ({a_: (float(p_), float(s_), float(nlp.supplement_fat_share(res["x"], a_)))
+        # the ration fat limit with linseed (SupplementPerc_): {animal: {"perc": v_supplementPerc, "slack":
+        # v_supplementSlack, "share": the ration's fat share}}
+        self.res.supp_fat = ({a_: {"perc": float(p_), "slack": float(s_),
+                                   "share": float(nlp.supplement_fat_share(res["x"], a_))}
                               for a_, (p_, s_) in ab["supp_fat"].items()} if ab.get("supp_fat") else None)
         if ab.get("mni") is not None and getattr(self.ev, "nlp_nip", None):
             _sh = float(ab["mni"]); _nip = self.ev.nlp_nip

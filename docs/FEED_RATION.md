@@ -70,8 +70,8 @@ ration is chosen only there (as CAPRI):
 - Conic form (removed 26 October 2026): requirements as inequalities, plus the dry-matter and share rows below, with
   total feed as the variable.
 
-Feed prices: tradable bulks (FCER, FPRO, FENE, FOTH, FMIL) at the member state's bulk price index (CAPRI's
-`feedBlkPrice_`, `docs/FEED_MARKETS.md`); home-grown fodder is not priced but valued through its balance
+Feed prices: tradable bulks (FCER, FPRO, FENE, FOTH, FMIL) at the member state's bulk price (CAPRI's unit value of the
+bulk: its 2030 baseline's, moved in a scenario by arm/set_prices.gms; `docs/FEED_MARKETS.md`); home-grown fodder is not priced but valued through its balance
 (`docs/FODDER_BALANCE.md`).
 
 The older path without feeding inside (an EU ration chosen outside the supply models at current feed prices, with the
