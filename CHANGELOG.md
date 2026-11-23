@@ -443,10 +443,10 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
 - **The departures register brought up to date (23 November 2026):** DEP-14, DEP-20 and DEP-21, closed today, moved to
   its history as the register's rule says (they had been marked closed in section 3.2); DEP-10's row rewritten with its 14
-  items measured at the 2030 base (all 221 units) and in the Green Deal at 9867411: items 1-3 act in no unit at the base,
-  item 7 in three (PL22 by 1.43 thousand ha, the row said round-off only), item 5 makes no difference, 4 and 9 were
-  removed; the need multiplier read again (CAPRI's two fixed factors are inside the reported need; kappa a residual, median
-  1.006 for N). KNOWN_ISSUES K50 notes it.
+  items measured at the 2030 base (all 221 units) and in the Green Deal at 9867411: items 1-3 and 7 act in no unit at the
+  base, item 5 makes no difference, 4 and 9 were removed; the need multiplier read again (CAPRI's two fixed factors are
+  inside the reported need; kappa a residual, 0.988-1.005). KNOWN_ISSUES K50 notes it. (8e54ffd had counted items 7 and
+  kappa on a supply module built at the 2017 levels; corrected the same evening from the projected 2030 model.)
 - **DEP-21 closed, the Green Deal's input changes on CAPRI's simulation-year coefficients (23 November 2026):** CAPRI
   rebuilds its yield-dependent input coefficients from the base year's in the simulation, DATA(BAS) x (1 - f + f G) x
   TF_I (capmod/define_inputs.gms; capri_mod/supply/equations/define_inputs.py TF_I, p_yieldGrowth, DATA_IY_Y; its 2030
