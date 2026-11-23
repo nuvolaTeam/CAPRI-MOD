@@ -6,7 +6,7 @@ sigmas included); the trade system is then evaluated at the solve's price ratios
 use (the equilibrium's production and consumption) and the quotas' sigmas. Reported per solve: the largest balance
 residual relative to the market's scale (S0 + D0, as the default solve's convergence test), and the largest quota
 equation residual. The default solve stops at market.tol (1e-7) on the balances; its quotas are solved with the
-prices (market.trq_joint).
+prices (MarketModule._bilateral_inner_trq).
 
     python tools/check/market_system_trade_residuals.py runs/capture [--files market_000.pkl,...]
 """

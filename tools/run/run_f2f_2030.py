@@ -54,9 +54,9 @@ def main():
                          "36%% cap, no manure trade, milk-yield genomics 0.2: policy.greendeal.farm_to_fork_scenario); "
                          "'greendeal': CAPRI star 3.0's Green Deal group as its files set it (surptot.gms: every "
                          "region's surplus/ha cut by surpRedu%%, manure trade on, genomics 0), with --targets values "
-                         "(default: the series' full targets lnds10 org25 pest50 surp50 applied in 2030); "
+                         "(default: greendeal_scenario's defaults lnds10 org25 pest50 mine00 surp50 applied in 2030); "
                          "'greendeal2030': CAPRI's own 2030 step of its Green Deal series (lnds8 org18 pest20 "
-                         "mine13crp surp30, policy.greendeal.GREENDEAL_2030_TARGETS); or a scenario folder's name "
+                         "mine13crp surp30, CAPRI's batch: policy.greendeal.greendeal_targets(2030)); or a scenario folder's name "
                          "(capri_data/scenarios/<name>/; f2f, greendeal2030 and carbontax without --targets are "
                          "read from their folders)")
     ap.add_argument("--pesticide-rule", default="", choices=("", "jrc121368", "star3"),

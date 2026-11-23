@@ -177,9 +177,7 @@ def test_feed_bulk_market_factor_equals_the_loop(market, monkeypatch):
     monkeypatch.setattr(mm.seen, "eu_price_seen", seen)
     prices = {c: float(np.exp(0.3 * rng.standard_normal())) for c in comm[3:]}   # some prices not given
     prices[comm[4]] = -1.0                                 # a negative price: its term left out
-    from capri_mod import settings
-    with settings.override({"market.feed_bulk_in_market": True}):
-        new = mm.feed_bulk_market_factor(prices)
+    new = mm.feed_bulk_market_factor(prices)
     assert new.keys() == E.keys()
     for k, el in E.items():
         s = 0.0

@@ -27,14 +27,14 @@ class FeedMixin(MarketStateMixin):
     #: state's bulks respond to the prices within a market solve, log-linear from the supply models' bulks at the
     #: prices they saw (the constant re-anchored every iteration, simu_calibration_to_supply.gms l. 259-275), with the
     #: elasticities measured on the supply models with the market supply Hessian (calibrate_supply.gms l. 521-560).
-    #: false: the bulks fixed at the supply models' within a solve (until 29 October 2026)
-    feed_bulk_in_market = setting("market.feed_bulk_in_market")
+    #: The setting that fixed the bulks at the supply models' within a solve instead (market.feed_bulk_in_market, until
+    #: 29 October 2026) was retired on 23 November 2026.
     #: CAPRI's non-EU feed demand (arm/market_model.gms FeedNQ_ and FeedBal_, l. 1018-1047; audit M3): outside the regions
     #: with supply models each behavioural region's feed is its normalised-quadratic feed function of the Arm1 prices and
     #: its feed energy price FEDE, which clears its feed energy balance against its animal output (the market supply
-    #: functions, whose FEDE column moves with it). false: one constant-elasticity function per trade region and
-    #: product (p_ElasFeed, feed_demand_nonEU*.csv) and FEDE held (until 29 October 2026)
-    noneu_feed_nq = setting("market.noneu_feed_nq")
+    #: functions, whose FEDE column moves with it). The setting that chose one constant-elasticity function per trade
+    #: region and product with FEDE held instead (market.noneu_feed_nq, until 29 October 2026) was retired on
+    #: 23 November 2026; p_ElasFeed remains where FeedNQ_ has no row.
     #: arm/arm_sets.gms XX_ANIM_FEED: the animal products whose output needs feed energy (CAPRI's codes)
     ANIM_FEED = ("BEEF", "PORK", "SGMT", "POUM", "EGGS", "MILK")
 
@@ -72,9 +72,7 @@ class FeedMixin(MarketStateMixin):
     def feed_bulk_market_factor(self, prices: Dict[str, float], region: Optional[str] = None) -> Dict[tuple, float]:
         """{(member state, bulk): the bulk's change within the market solve}: exp(sum_y e_y log(r_y / r_seen_y)), r the
         region's price ratios, r_seen those its supply models saw (CAPRI's feedBlk_ with its constant at the supply
-        models' bulk, audit M4); empty with market.feed_bulk_in_market off or without the measured responses."""
-        if not self.feed_bulk_in_market:
-            return {}
+        models' bulk, audit M4); empty without the measured responses."""
         E = self._feed_bulk_elas()
         if not E:
             return {}

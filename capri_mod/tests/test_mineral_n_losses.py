@@ -67,16 +67,15 @@ def test_nutned_efficiencies_move_with_the_options_from_the_base():
 
 
 def test_base_mineral_n_from_capris_2030_reference():
-    """environment.base_mineral_n = "capri2030" (default): the base mineral N per ha of a crop is CAPRI's 2030
-    reference flow (npk_crop_coefs_2030.csv, N mine_kg_ha), whose sum over the region's crops is CAPRI's purchases
-    (npk_region_2030.csv mine_kt; RO05 78.7 kt where CAPRI's 2017 rates on the 2030 levels gave 61 kt); "capri2017" the
-    2017 NMIN table."""
+    """The base mineral N per ha of a crop is CAPRI's 2030 reference flow (npk_crop_coefs_2030.csv, N mine_kg_ha), whose
+    sum over the region's crops is CAPRI's purchases (npk_region_2030.csv mine_kt; RO05 78.7 kt where CAPRI's 2017
+    rates on the 2030 levels gave 61 kt); the setting that chose the 2017 NMIN table is retired."""
     import pandas as pd
     from pathlib import Path
     DATA_DIR = Path(__file__).resolve().parents[2] / "capri_data"
     from capri_mod.environmental.environmental_module import EnvironmentalModule
-    from capri_mod.settings import current, override
-    assert current().get("environment.base_mineral_n") == "capri2030"
+    from capri_mod.settings import current
+    assert "environment.base_mineral_n" not in current()
     B = DATA_DIR / "baselines" / "capri_greendeal_ref" / "1730" / "environment"
     c = pd.read_csv(B / "npk_crop_coefs_2030.csv")
     c = c[(c.nutrient == "N") & (c.capri_region == "RO050000")]
@@ -87,5 +86,3 @@ def test_base_mineral_n_from_capris_2030_reference():
     em = EnvironmentalModule({"mineral_n_regional": pd.read_csv(DATA_DIR / "2017" / "supply" / "nutrients_regional.csv",
                                                                 index_col=0)})
     assert em._base_mineral_rate("RO050000", "SWHE") == pytest.approx(float(c[c.model_crop == "SWHE"].mine_kg_ha.iloc[0]))
-    with override({"environment.base_mineral_n": "capri2017"}):
-        assert em._base_mineral_rate("RO050000", "SWHE") == pytest.approx(133.948557404226)

@@ -1060,8 +1060,8 @@ With CAPRI's pmpParSqr including the fertiliser-saving term (ghgMiti.gms l. 1016
   **Corrected 21 November 2026 (K196):** the form above made the first-order condition zero at an option's initial
   share of 0, so the option sat exactly at the point of adoption; CAPRI's condition (l. 731, with l. 900-906's
   "some subsidy (20%) is needed to get a few early adopters to consider adoption") leaves relSubs0 x costParLin there.
-  The model now leaves that term, with its own value of N as decided (`supply.fert_option_cal_relsubs0 = true`;
-  `false` the form above; equations/ghgmiti.py pmpParlin_fertTech_DEP30). The claim above that the form met CAPRI's
+  The model now leaves that term, with its own value of N as decided (equations/ghgmiti.py pmpParlin_fertTech_DEP30;
+  the setting `supply.fert_option_cal_relsubs0`, whose `false` kept the form above, retired on 23 November 2026). The claim above that the form met CAPRI's
   condition exactly held for no option at zero with a positive cost. Measured in K196.
 
 
@@ -2434,8 +2434,9 @@ that the next step's fixed point was on the other side. CAPRI solves the quotas 
   relative (a Croatian grassland dual; DDGS net exports and the CASE price about 1e-5), deviation from JRC121368 7.82 in
   both; scenario market time 287 s against 712 s. Full Farm-to-Fork against full_k116c: the same 12 iterations and rows,
   prices within 6.4e-7 in log, deviation 4.56 in both; scenario market time 576 s against 2,421 s, the run 45 minutes
-  against 89 (part of the difference is the machine's speed on the day). `market.trq_joint = false` keeps the lagged
-  sigmas (trq_solve's bracketing). Tests: test_joint_trade_solve_meets_the_market_and_the_quota_equations,
+  against 89 (part of the difference is the machine's speed on the day). `market.trq_joint = false` kept the lagged
+  sigmas (trq_solve's bracketing) until the setting was retired on 23 November 2026; the Newton-Krylov solve keeps
+  them. Tests: test_joint_trade_solve_meets_the_market_and_the_quota_equations,
   test_import_prices_at_trial_sigmas_equal_the_stored_offsets.
 
 <a id="k118"></a>
@@ -3399,7 +3400,7 @@ Deal caps by crop sat below CAPRI's (wheat 123.5 against 143.5 kg N per ha).
 - **In 9t:** -
 - **Status:** fixed 14 November 2026: environment.base_mineral_n, default "capri2030": CAPRI's 2030 reference flow of
   mineral N per crop (fertDist_mine, npk_crop_coefs_2030.csv), which sums to CAPRI's purchases by region; "capri2017"
-  keeps the 2017 NMIN. Validated 15 November 2026 on the full Green Deal pair (run res_2_1730greendeal2030_gdk155: 17 iterations, every regional solve optimal; EU27 activity gap to CAPRI 3.5 points, 89% the same sign, member states 9.3 points; CHANGELOG, 15 November 2026)
+  kept the 2017 NMIN (the setting retired on 23 November 2026, the 2030 reference the only form). Validated 15 November 2026 on the full Green Deal pair (run res_2_1730greendeal2030_gdk155: 17 iterations, every regional solve optimal; EU27 activity gap to CAPRI 3.5 points, 89% the same sign, member states 9.3 points; CHANGELOG, 15 November 2026)
 
 ### K155: The technology mix columns could not move to the low-yield technology (found 15 November 2026)
 
@@ -4038,7 +4039,7 @@ bb3b592).
   (1) the fertiliser options' calibration (DEP-30, K77): the model made an option's first-order condition zero at its
   initial share of 0, so the option sat at the point of adoption; CAPRI leaves relSubs0 x costParLin there (the early
   adopters' subsidy, envind/ghgMiti.gms l. 731, 900-906). The model now does, with its own value of N as the project
-  lead decided (`supply.fert_option_cal_relsubs0 = true`; equations/ghgmiti.py pmpParlin_fertTech_DEP30);
+  lead decided (equations/ghgmiti.py pmpParlin_fertTech_DEP30; its setting retired 23 November 2026);
   (2) the inhibitor on manure: the over-fertilisation restriction (restMitFert, l. 531-543) and the value of the
   manure N saved (p_manureShadVal, l. 870-877) take CAPRI's availability of excreted manure N
   (v_nutAvailFactExcr; equations/ghgmiti.py othImpact_NMAN_restMitFert, p_manureShadVal); the model took its own

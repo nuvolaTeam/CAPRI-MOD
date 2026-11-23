@@ -1483,11 +1483,9 @@ class CapriRegionalNLP:
                     dabat[("amm", t["act"], t["key"], t["tech"])] = -res[j] / den
                     res[j] = 0.0
         # the fertiliser options and the inhibitor on manure (IniShare 0): their linear term beta from the residual at
-        # zero (equations/ghgmiti.py pmpParlin_fertTech_DEP30: CAPRI's relSubs0 x costParLin left at the base with the
-        # setting supply.fert_option_cal_relsubs0, KNOWN_ISSUES K196)
+        # zero (equations/ghgmiti.py pmpParlin_fertTech_DEP30: CAPRI's relSubs0 x costParLin left at the base,
+        # KNOWN_ISSUES K196)
         from capri_mod.supply.equations.ghgmiti import pmpParlin_fertTech_DEP30
-        from capri_mod.settings import current as _cur_settings
-        _rs0 = bool(_cur_settings().get("supply.fert_option_cal_relsubs0"))
         fa = self.abat.get("fert") if getattr(self, "abat", None) else None
         if fa:
             for k, t in enumerate(fa["techs"]):
@@ -1496,7 +1494,7 @@ class CapriRegionalNLP:
                 if getattr(self, "_fert_tech_P", None) and self.fert and "N" in self.fert:
                     fbN = self.fert["N"]
                     den = float(xb[fbN["off_P"]]) * fbN["Pscale"] / 1000.0      # base N purchases, kt
-                b_ = pmpParlin_fertTech_DEP30(float(t[2]), res[j] / den, _rs0) if den > 0 else None
+                b_ = pmpParlin_fertTech_DEP30(float(t[2]), res[j] / den, True) if den > 0 else None
                 if b_ is not None:
                     dabat[("fert", t[0])] = b_
                 res[j] = 0.0
@@ -1532,7 +1530,7 @@ class CapriRegionalNLP:
         if ma:
             j = ma["off"]
             den = getattr(self, "_mni_base", 0.0)
-            b_ = pmpParlin_fertTech_DEP30(float(ma["S0"]), res[j] / den, _rs0) if den > 0 else None
+            b_ = pmpParlin_fertTech_DEP30(float(ma["S0"]), res[j] / den, True) if den > 0 else None
             if b_ is not None:
                 dabat[("mni",)] = b_
             res[j] = 0.0

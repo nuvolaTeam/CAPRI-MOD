@@ -23543,6 +23543,113 @@
     "tests": []
    }
   },
+  "greendeal_targets_by_year": {
+   "file": "capri_data/scenarios/greendeal_group/greendeal_targets_by_year.csv",
+   "declared_in": "14_policy_targets.sql",
+   "layout": [],
+   "comment": "CAPRI's Green Deal targets by simulation year of its production series: section f2f of the batch of CAPRI's Green Deal production runs (GUI/batchfiles/greendeal_scen2.txt, P. Witzke), the GUI settings by their GAMS names (GUI/capri_gui_definition.xml; the settings of pol_input/greendeal/greendeal_scenarios.gms l. 192), the values as the batch writes them (tools/build/build_greendeal_batch_targets.py; register DEP-20)",
+   "columns": [
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "lndscpTarg",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "orgTarg",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "pestRedu",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "mineRedu",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "surpRedu",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "dietShift",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "othPol",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(lndscpTarg IN (0, 7, 8, 9, 10))",
+    "(orgTarg IN (0, 15, 18, 22, 25))",
+    "(pestRedu IN (0, 5, 13, 15, 20, 26, 30, 32, 35, 40, 50))",
+    "(mineRedu IN ('00', '20', '10crp', '13crp', '17crp', '20crp'))",
+    "(surpRedu IN (0, 20, 30, 35, 40, 50))"
+   ],
+   "units": [
+    {
+     "item": "lndscpTarg",
+     "unit": null,
+     "status": "open",
+     "basis": "%lndscpTarg%: tenths of the member state's landscape target p_setAsideTarget (pol_input/greendeal/landscape.gms l. 56: %lndscpTarg%/10*p_setAsideTarget(ru)); 10 the full target"
+    },
+    {
+     "item": "orgTarg",
+     "unit": "U_percent",
+     "status": "capri",
+     "basis": "%orgTarg%: the EU's organic share target, percent (the GUI's Target for organic share in EU; load_organic_targets.gms l. 175, 183 scale the member states' targets by (orgTarg - 12)/(25 - 12))"
+    },
+    {
+     "item": "pestRedu",
+     "unit": "U_percent",
+     "status": "capri",
+     "basis": "%pestRedu%: the pesticides reduction"
+    },
+    {
+     "item": "surpRedu",
+     "unit": "U_percent",
+     "status": "capri",
+     "basis": "%surpRedu%: the per ha nitrogen surplus reduction"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "greendeal_targets_by_year.year: a calendar year"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_greendeal_batch_targets",
+    "sources": "$SOURCES/gams/pol_input/greendeal/greendeal_scenarios.gms; $SOURCES/gui/batchfiles/greendeal_scen2.txt; $SOURCES/gui/capri_gui_definition.xml"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/policy/greendeal.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "land_availability": {
    "file": "capri_data/2017/supply/land_availability.csv",
    "declared_in": "10_supply_2017.sql",
@@ -62098,13 +62205,12 @@
   }
  ],
  "code_data": {
-  "capri/keep": 524,
+  "capri/keep": 525,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 37,
-  "open/keep": 4,
   "physical/keep": 15,
-  "technical/keep": 36
+  "technical/keep": 37
  },
  "other_notes": {}
 }

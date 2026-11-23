@@ -149,8 +149,7 @@ def test_land_residual_function_equals_the_numpy_form(market):
     H - avail sh (B - sh B)), at random rent changes."""
     from capri_mod.market.supply_ad import land_residual_function
     P = market._noneu_land_params()
-    if not P:
-        pytest.skip("market.noneu_land_market off")
+    assert P
     rng = np.random.default_rng(5)
     n = 0
     for rms, d in list(P.items())[:25]:

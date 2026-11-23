@@ -172,9 +172,9 @@ class HessianBlock:
                         # 29 October 2026: the shocks' solutions from the KKT conditions (beyond CAPRI)
                         + (("kkt-step",) if kkt else ())
                         # 21 November 2026 (K196): the fertiliser options' calibration leaves CAPRI's relSubs0 x
-                        # costParLin at their initial share (supply.fert_option_cal_relsubs0; off: the key as before)
-                        + (("fert-option-relsubs0",)
-                           if bool(_settings().get("supply.fert_option_cal_relsubs0")) else ()))
+                        # costParLin at their initial share (the only form since its setting was retired on
+                        # 23 November 2026; the key part kept, so the Hessians measured since 21 November stay valid)
+                        + ("fert-option-relsubs0",))
                    # at a scenario's state (market.hessian_scenario_iter): its young-animal and member-state milk
                    # prices too (a baseline's key is unchanged)
                    + (repr((sorted((getattr(sm.seen, "yani_price_ratio", None) or {}).items()),

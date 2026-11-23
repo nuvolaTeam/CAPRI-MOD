@@ -281,7 +281,8 @@ After the market Newton-Krylov solve's review (KNOWN_ISSUES K110):
 2. Then the quotas' sigmas and the dairy blocks' raw milk price inside each market evaluation, solved with the prices
    (CAPRI: trqSigmoidFunc_ and the dairy equations in the same system). This shortens the default solve's end, which
    on K110's shock is mostly the quotas settling (40 iterations), and G3 needs these pieces as equations anyway.
-   Done for the quotas on 5 November 2026 (market.trq_joint, the default; KNOWN_ISSUES K117). The non-EU dairy blocks'
+   Done for the quotas on 5 November 2026 (market.trq_joint, the default, then the only form when the setting was
+   retired on 23 November 2026; KNOWN_ISSUES K117). The non-EU dairy blocks'
    raw milk price (used by the feed energy balances and the land markets one evaluation behind) was tried inside each
    evaluation on 6 November 2026 (inner rounds until the price settled, 1e-10): the same equilibrium (mini-EU
    Farm-to-Fork deviation from JRC121368 7.82 in both, values within 4e-5 relative) at twice the run time (928 s

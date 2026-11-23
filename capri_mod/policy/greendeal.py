@@ -38,6 +38,9 @@ worse than no result.
 """
 from __future__ import annotations
 
+import csv
+from pathlib import Path
+
 from capri_mod.policy.policy_module import PolicyScenario
 
 #: settings capri-mod implements, with the values CAPRI's file allows
@@ -138,17 +141,34 @@ def farm_to_fork_scenario() -> PolicyScenario:
     return sc
 
 
-#: CAPRI's own 2030 step of its Green Deal production series (P. Witzke's batch for the Green Deal scenarios,
-#: section "f2f": targets phased in 2025 / 2030 / 2035 / 2040; 2030: N surplus -30%, mineral fertiliser 13crp,
-#: organic 18%, pesticides -20%, landscape elements 8%; result res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30
-#: _diet00_oth00defaultA, named in the batch as the reference of the 2035 step). Settings of that batch not in the
-#: GUI group: manure trade on, inner fertiliser model on.
-GREENDEAL_2030_TARGETS = dict(lndscpTarg=8, orgTarg=18, pestRedu=20, mineRedu="13crp", surpRedu=30)
+#: CAPRI's Green Deal targets by simulation year of its production series: section "f2f" of the batch of CAPRI's
+#: Green Deal production runs (GUI/batchfiles/greendeal_scen2.txt, P. Witzke), the targets phased in 2025 / 2030 /
+#: 2035 / 2040 / 2050 (tools/build/build_greendeal_batch_targets.py; register DEP-20)
+TARGETS_BY_YEAR = (Path(__file__).resolve().parents[2] / "capri_data" / "scenarios" / "greendeal_group"
+                   / "greendeal_targets_by_year.csv")
+
+
+def greendeal_targets(year) -> dict:
+    """The Green Deal group's settings of CAPRI's production series in a simulation year (TARGETS_BY_YEAR), as
+    greendeal_scenario takes them: the percentages as integers, mineRedu as CAPRI's string ("13crp")."""
+    with open(TARGETS_BY_YEAR, newline="") as f:
+        rows = {int(r["year"]): r for r in csv.DictReader(f)}
+    if int(year) not in rows:
+        raise ValueError(f"{year}: not a year of CAPRI's Green Deal production series (years {sorted(rows)})")
+    return {k: (str(v) if k == "mineRedu" else int(v)) for k, v in rows[int(year)].items() if k != "year"}
+
+
+def greendeal_series_scenario(year, **kw) -> PolicyScenario:
+    """A year's Green Deal settings of CAPRI's production series (greendeal_targets), with star 3.0's rules
+    (surptot.gms surplus rule, pesticides without a yield shock) and manure trade on, as the batch sets it
+    (MACRO = New_Manure_Trade_Module On; its other switches outside the GUI group: the inner fertiliser model, the
+    Trustee land supply)."""
+    args = dict(greendeal_targets(year), manure_trade=True)
+    args.update(kw)
+    return greendeal_scenario(**args)
 
 
 def greendeal_2030_scenario(**kw) -> PolicyScenario:
-    """CAPRI's 2030 Green Deal settings of its production series (GREENDEAL_2030_TARGETS), with star 3.0's rules
-    (surptot.gms surplus rule, pesticides without a yield shock, manure trade on)."""
-    args = dict(GREENDEAL_2030_TARGETS, manure_trade=True)
-    args.update(kw)
-    return greendeal_scenario(**args)
+    """CAPRI's 2030 Green Deal settings of its production series (greendeal_series_scenario(2030): lnds8 org18
+    pest20 mine13crp surp30; result res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA)."""
+    return greendeal_series_scenario(2030, **kw)

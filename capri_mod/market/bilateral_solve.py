@@ -351,14 +351,13 @@ class BilateralSolveMixin(MarketStateMixin):
             d0r = dom0.reindex(index=r.index, columns=_oc)
             cpd[_oc] = d0r * r[_oc]
         self.ev.crush_prices_now = cpd
-        if self.noneu_feed_nq and self.noneu_supply_nq:
-            # CAPRI's FeedBal_ (audit M3): each non-EU region's feed energy price at these prices, used by its feed
-            # functions (demand_response) and its market supply functions (supply_response); the dairy blocks' raw milk
-            # price of the latest evaluation (the block is solved inside supply_response)
-            _wl = self.ev.dairy_world_last or {}
-            _wp = self._dairy_world_params() or {}
-            _mr = {g: 1.0 + float(v["z"][_wp[g]["iM"]]) for g, v in _wl.items() if g in _wp and "z" in v}
-            self.ev.fede_now = self.noneu_fede(PAr, r, _mr, self.land_by_type(self.ev.land_now))
+        # CAPRI's FeedBal_ (audit M3): each non-EU region's feed energy price at these prices, used by its feed
+        # functions (demand_response) and its market supply functions (supply_response); the dairy blocks' raw milk
+        # price of the latest evaluation (the block is solved inside supply_response)
+        _wl = self.ev.dairy_world_last or {}
+        _wp = self._dairy_world_params() or {}
+        _mr = {g: 1.0 + float(v["z"][_wp[g]["iM"]]) for g, v in _wl.items() if g in _wp and "z" in v}
+        self.ev.fede_now = self.noneu_fede(PAr, r, _mr, self.land_by_type(self.ev.land_now))
         if self._noneu_land_params():
             # CAPRI's market land block: the rents that clear each non-EU region's land market at these
             # prices, simultaneous with FeedBal_ (FEDE moves the land demand, the rents the animal output): solved in
@@ -366,14 +365,11 @@ class BilateralSolveMixin(MarketStateMixin):
             _wl = self.ev.dairy_world_last or {}
             _wp = self._dairy_world_params() or {}
             _mr = {g: 1.0 + float(v["z"][_wp[g]["iM"]]) for g, v in _wl.items() if g in _wp and "z" in v}
-            fed = self.noneu_feed_nq and self.noneu_supply_nq
             land = self.ev.land_now
             for _ in range(50):
                 new = self.noneu_land_solve(r, _mr, self.ev.fede_now, start=land)
                 gap = max((float(np.max(np.abs(v - (land or {}).get(k, 0.0)))) for k, v in new.items()), default=0.0)
                 land = new
-                if not fed:
-                    break
                 fe = self.noneu_fede(PAr, r, _mr, self.land_by_type(land))
                 fgap = max((abs(v - (self.ev.fede_now or {}).get(k, 1.0)) for k, v in fe.items()), default=0.0)
                 self.ev.fede_now = fe
@@ -525,8 +521,9 @@ class BilateralSolveMixin(MarketStateMixin):
         return out
 
     def _bilateral_inner_trq(self, sc, Sk, Dk, rk, PAk, es, ed, tadd):
-        """One commodity's trade system solved together with its tariff-rate quotas (market.trq_joint; MARKET_IPOPT_DESIGN
-        §7.1 step 2), as CAPRI's m_globMarket holds trqSigmoidFunc_ and TRQImports_ with the prices: the unknowns are
+        """One commodity's trade system solved together with its tariff-rate quotas (MARKET_IPOPT_DESIGN §7.1 step 2;
+        the only form of the default solve since the setting market.trq_joint was retired on 23 November 2026), as
+        CAPRI's m_globMarket holds trqSigmoidFunc_ and TRQImports_ with the prices: the unknowns are
         the supplying regions' log price ratios and, for each quota with a volume, u = the sigmoid's argument
         (sigma = 1 / (1 + exp(-u))); the equations are the market balances (supply and use log-linear around the current
         point, as _bilateral_inner) and u = clip(slope (fill / Q - 0.97)), fill from the flows' full Armington response
@@ -681,7 +678,6 @@ class BilateralSolveMixin(MarketStateMixin):
         from capri_mod import runlog as _runlog
         _rl_s = _runlog.current()
         aa = getattr(self, "market_acceleration", None) == "anderson"
-        trq_joint = bool(_st.get("market.trq_joint"))
         aa_z, aa_g = [], []                                  # history: log r and log new (the map's value)
         for it in range(max_outer):
             S, D, PAr, F, pc = self._bilateral_eval(r, exogenous_supply, trade_scenario)
@@ -696,21 +692,15 @@ class BilateralSolveMixin(MarketStateMixin):
                                  float(D.at[_wr, _wc]) if _wr in D.index else float(D[_wc].sum()))
             if getattr(self, "_debug_trace", None) is not None:
                 self._debug_trace.append((it, err, max(errs, key=errs.get), damp))
-            # EU tariff-rate quotas: the out-of-quota tariff follows the fill of each quota at the current
-            # flows (lagged by one step, damped)
+            # EU tariff-rate quotas: solved with the prices (_bilateral_inner_trq), CAPRI's trqSigmoidFunc_ residual
+            # at this step's flows is the convergence measure (the sequential form, the quotas one step behind the
+            # prices, is the Newton-Krylov solve's alone: market_nk.py)
             trq_moved = 0.0
             for c, sc in sysd.items():
                 if sc.trq_row is None:
                     continue
                 X, _ = sc.flows(D[c].values, r[c].values, pc[c])
-                if trq_joint:
-                    # the quotas are solved with the prices (_bilateral_inner_trq): CAPRI's trqSigmoidFunc_ residual at
-                    # this step's flows is the convergence measure
-                    trq_moved = max(trq_moved, sc.trq_equation_gap(X))
-                    continue
-                old_s = sc.trq_sigmas()
-                sc.trq_solve(X, pc[c], r[c].values)
-                trq_moved = max(trq_moved, sc.trq_sigma_change(old_s))
+                trq_moved = max(trq_moved, sc.trq_equation_gap(X))
             if verbose:
                 print(f"  bilateral market iter {it}: max rel residual {err:.2e}, quota rates moved {trq_moved:.2e}")
             if _rl_s.at("solver"):
@@ -734,7 +724,7 @@ class BilateralSolveMixin(MarketStateMixin):
             for c in r.columns:
                 if c in sysd:
                     rk = r[c].values
-                    inner = (self._bilateral_inner_trq if trq_joint and sysd[c].trq_row is not None
+                    inner = (self._bilateral_inner_trq if sysd[c].trq_row is not None
                              else self._bilateral_inner)
                     new[c] = inner(sysd[c], S[c].values, D[c].values, rk, PAr[c].values * sysd[c].PA0,
                                    es[c].values, ed[c].values, tadd.get(c))
@@ -874,7 +864,7 @@ class BilateralSolveMixin(MarketStateMixin):
                         if fuel in reported.columns else 1.0
         return MarketEquilibrium(
             dairy=self.ev.dairy_last if self._dairy_params() else None,
-            luc=(self.noneu_luc(self.ev.land_now) if self.luc_market and self.noneu_land_market else None),
+            luc=(self.noneu_luc(self.ev.land_now) if self.luc_market else None),
             biofuel=biof, world_prices=world, domestic_prices=reported, wedge_prices=wedge,
             production=S, consumption=D, trade_flows=flows, net_exports=S.subtract(D, fill_value=0),
             welfare=welfare, excess_demand=(D.drop(index="EU27", errors="ignore").sum()

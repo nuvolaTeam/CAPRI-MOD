@@ -8906,6 +8906,24 @@
    },
    "catalogue_note": "CAPRI's maps from the Green Deal targets' Eurostat codes to its member states (geo_to_ms_landscape, geo_to_ms). (not re-checked)"
   },
+  "capri_data/scenarios/greendeal_group/greendeal_targets_by_year.csv": {
+   "description": "CAPRI's Green Deal targets by simulation year of its production series: section f2f of the batch of CAPRI's Green Deal production runs (GUI/batchfiles/greendeal_scen2.txt, P. Witzke), the GUI settings by their GAMS names (GUI/capri_gui_definition.xml; the settings of pol_input/greendeal/greendeal_scenarios.gms l. 192), the values as the batch writes them (tools/build/build_greendeal_batch_targets.py; register DEP-20)",
+   "kind": "coefficients",
+   "vintage": "star 3.0",
+   "domain": "policy",
+   "status": "live",
+   "rows": 5,
+   "columns": 8,
+   "units": "U_percent",
+   "read_by_model": [
+    "capri_mod/policy/greendeal.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_greendeal_batch_targets"
+   },
+   "catalogue_note": "CAPRI's Green Deal targets by simulation year of its production series (section f2f of the batch GUI/batchfiles/greendeal_scen2.txt); tools/build/build_greendeal_batch_targets.py (not re-checked)"
+  },
   "capri_data/scenarios/greendeal_group/landscape_targets_ms.csv": {
    "description": "CAPRI's p_landscapeTargets: share of UAA in non-productive landscape elements to reach (gams/pol_input/greendeal/landscape_targets.gdx; tools/build/build_greendeal_targets.py)",
    "kind": "coefficients",

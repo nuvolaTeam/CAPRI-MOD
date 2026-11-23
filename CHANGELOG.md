@@ -441,6 +441,28 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   and without (1)); the inhibitor on mineral N moves towards CAPRI's in four units (ES51 0.257 -> 0.141, CAPRI 0.039;
   NL22 0.536 -> 0.459, 0.292), away in FR52 (0.575 -> 0.482, 0.575); the inhibitor on manure stays where CAPRI has none
   (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
+- **DEP-20 closed, the Green Deal targets by year as CAPRI's data (23 November 2026):** the batch of CAPRI's Green
+  Deal production runs (GUI/batchfiles/greendeal_scen2.txt, P. Witzke; from the project lead's GUI.zip, now in
+  capri_sources/gui with the GUI definition) is read by tools/build/build_greendeal_batch_targets.py: its section
+  "f2f", the GUI settings by their GAMS names (capri_gui_definition.xml) and the settings of CAPRI's scenario name
+  (greendeal_scenarios.gms l. 192), the section's values and each year's block, each block's reference for carbon
+  accounting checked to be the year before's scenario name (5 checked). Output capri_data/scenarios/greendeal_group/
+  greendeal_targets_by_year.csv: 2025 lnds7 org15 pest13 mine10crp surp20, 2030 lnds8 org18 pest20 mine13crp surp30,
+  2035 lnds9 org22 pest26 mine17crp surp40, 2040 and 2050 lnds10 org25 pest32 mine20crp surp50 (diet00 oth00). The
+  constant GREENDEAL_2030_TARGETS is replaced by policy.greendeal.greendeal_targets(year) and
+  greendeal_series_scenario(year); greendeal_2030_scenario() is the 2030 row, unchanged. Test:
+  test_greendeal_series.py.
+- **Settings of older forms retired (23 November 2026; the project lead's decision):** nine settings whose other
+  value only reproduced an earlier form of the model are removed with that form's code, the model keeping the CAPRI
+  form each chose: `market.noneu_supply_nq`, `market.noneu_land_market`, `market.feed_bulk_in_market`,
+  `market.noneu_feed_nq`, `market.sup_milk_in_market`, `market.trq_joint` (the Newton-Krylov solve keeps its own
+  sequential quotas), `outer_loop.manure_pool_solver` (the pool market's convex QP form now only the tests'
+  cross-check of CAPRI's NLP, test_manure_pool_nlp.py), `supply.fert_option_cal_relsubs0` (the fertiliser options and
+  the mineral N inhibitor calibrated with CAPRI's relSubs0 x costParLin; urea substitution keeps its own form) and
+  `environment.base_mineral_n` (CAPRI's 2030 reference mineral N; the 2017 table only for a region outside it). A
+  settings file naming one stops the run (unknown setting). The defaults' results are unchanged (the removed branches
+  were the non-default ones). docs/DEPARTURES_FROM_CAPRI.md, docs/dev/SETTINGS_INVENTORY.csv. tools/run/
+  copy_store_runs.py: copies scenario runs with their references between results stores and recomputes their ids.
 - **K93, the ration-fat limit with linseed built (SupplementPerc_; 21-22 November 2026):** CAPRI's SupplementPerc_
   (supply_model.gms l. 608-633) as rows of the regional model, per cattle animal with the linseed column: the ration's
   fat (its feed bulks' per kg as fed and the linseed's) over the dry-matter intake equals a percentage of at most 5% plus

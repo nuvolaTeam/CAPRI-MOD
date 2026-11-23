@@ -23,11 +23,11 @@ class MarketEvalState:
     #: crushing prices of the evaluation (supply and demand of the crushing block); None outside an evaluation
     crush_prices_now: Any = None
     #: the non-EU behavioural regions' feed energy price ratios of the evaluation (CAPRI's FeedBal_, audit M3:
-    #: {CAPRI region: FEDE / FEDE at calibration}); None outside an evaluation or with market.noneu_feed_nq off
+    #: {CAPRI region: FEDE / FEDE at calibration}); None outside an evaluation
     fede_now: Any = None
     #: the non-EU land markets' rents of the evaluation (CAPRI's LandSupplyMNL_ = LndSupplyEqualsDemand_:
-    #: {CAPRI region: change of the free rents TCRP, FODFAL, FRUN from calibration, EUR/ha}); None with
-    #: market.noneu_land_market off
+    #: {CAPRI region: change of the free rents TCRP, FODFAL, FRUN from calibration, EUR/ha}); None outside an
+    #: evaluation
     land_now: Any = None
     #: the non-EU market regions whose supply is the supply models' in this solve
     sup_active: Any = None
@@ -42,7 +42,7 @@ class MarketEvalState:
     #: raw milk of the non-EU regions with supply models, and of the other non-EU regions, at the evaluation
     sup_milk_now: Any = None
     world_milk_now: Any = None
-    #: Norway's raw milk supply function in the market (market.sup_milk_in_market): {region: {"k", "L", "dL"}} and
+    #: Norway's raw milk supply function in the market (SupplyMixin._sup_milk_terms): {region: {"k", "L", "dL"}} and
     #: the MILK row's response to the other prices (kt) of the evaluation
     sup_milk_terms: Any = None
     sup_milk_cross: Any = None

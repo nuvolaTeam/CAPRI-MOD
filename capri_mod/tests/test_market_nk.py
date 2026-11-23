@@ -36,7 +36,7 @@ def test_newton_krylov_reaches_the_default_solves_equilibrium():
     # Both solves stop when every relative residual (excess supply / max(S0 + D0, 1)) is below market.tol = 1e-7; in a
     # thin, inelastic market that leaves room for a larger price gap: Switzerland's casein (S0 + D0 about 1.8 kt, its
     # supply from the dairy block) differs by 8.4e-6 between the two stops (4 November 2026, KNOWN_ISSUES K110), and by
-    # 1.37e-5 since the default solve takes the quotas with the prices (market.trq_joint, 5 November 2026) while the
+    # 1.37e-5 since the default solve takes the quotas with the prices (5 November 2026) while the
     # Newton-Krylov solve keeps them one step behind. A stop-point gap, not two equilibria: at market.tol = 1e-9 the same
     # comparison gives 4.8e-6 (the Newton-Krylov solve at its iteration cap, the default solve converged), every other
     # price below 1e-6. So the bound is 3e-5 for every price, and 1e-6 for all but a handful of the 46 x 58 prices.

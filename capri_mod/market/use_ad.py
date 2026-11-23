@@ -98,13 +98,13 @@ def use_function(mm, lift: bool = False):
     # FEED: non-EU FeedNQ_ (with FEDE), p_ElasFeed elsewhere, the EU's and Norway's bulks, the FMIL block
     fb = mm._feed_bulk_params()
     fdp = mm._feed_demand_params()
-    nfp = mm._noneu_feed_params() if mm.noneu_feed_nq else {"rms": {}, "totals": {}}
+    nfp = mm._noneu_feed_params()
     rms = [s for s, d in nfp["rms"].items() if d.get("tr") in R]
     fede = ca.SX.sym("fede", len(rms))
     dairy_fed = set(mm.DAIRY_TRADED.values())
     fnq_regs = set()
     lcells: List[tuple] = []                       # lift: (kind, i, j, base, value in the model's form, CAPRI's row)
-    if mm.noneu_feed_nq and nfp["rms"] and mm.ev.fede_now is not None:
+    if nfp["rms"] and mm.ev.fede_now is not None:
         from capri_mod.market.feed_ad import feednq_arrays, feednq_function
         fnq_regs = {d.get("tr") for d in nfp["rms"].values()}
         dF: Dict[tuple, object] = {}
@@ -138,7 +138,7 @@ def use_function(mm, lift: bool = False):
     seen = mm.seen.eu_price_seen
     bix = mm.seen.feed_bulk_index or {}
     eu_feed: Dict[str, Dict[str, object]] = {}
-    E = mm._feed_bulk_elas() if (fb and mm.feed_bulk_in_market) else {}
+    E = mm._feed_bulk_elas() if fb else {}
     for reg in mm.EU:
         ie = R.get(reg)
         if ie is None or not fb:

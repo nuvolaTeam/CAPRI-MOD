@@ -39,7 +39,7 @@ The supply models buy feed as bulks; the market splits each member state's bulk 
   the ratio (`_feed_bulk_index`) to the market; the FMIL index likewise (`_fmil_index`).
 - EU feed use of each product (`MarketModule.eu_feed_use`): q_i = q_i0 × (bulk / bulk0) × (P_B / p_i)^rho at the EU
   Arm1 price ratios. The bulk responds within the market solve as CAPRI's `feedBlk_` (l. 972-995; audit M4, since 29
-  October 2026, `market.feed_bulk_in_market`): bulk = the supply models' bulk × exp(Σ_y e_y log(r_y / r_seen_y)), r
+  October 2026; its setting `market.feed_bulk_in_market` retired 23 November 2026): bulk = the supply models' bulk × exp(Σ_y e_y log(r_y / r_seen_y)), r
   the region's market price ratios and r_seen those the supply models saw (CAPRI's constant re-anchored to the supply
   models every iteration), e_y the supply models' bulk response measured with the market supply Hessian (its
   `FEEDBLK:<bulk>` rows per country, CAPRI's `p_feedBlkElas` from `calibrate_supply.gms` l. 521-560) over the bulk at
@@ -60,7 +60,7 @@ The supply models buy feed as bulks; the market splits each member state's bulk 
   CAPRI's 2017 market, export-weighted market prices; 252.66 before Norway's exports counted as such, K56). Non-EU supply: each region's own-price
   elasticity, CAPRI's p_elasSupp of its CAPRI regions (`supply_elas_region.csv`; until 23 October 2026 one value per
   product from `armington_params.csv`, removed on 29 October 2026, KNOWN_ISSUES K72). Non-EU feed demand (the trade
-  regions without CAPRI's FeedNQ_ regions, `market.noneu_feed_nq` off, and the dairy products fed): CAPRI's
+  regions without CAPRI's FeedNQ_ regions, outside a market evaluation, and the dairy products fed): CAPRI's
   p_ElasFeed (`feed_demand_nonEU.csv`; the generic response of `armington_params.csv`'s eta column was removed on 24
   October 2026).
 - EU output, `MaprFeed_` (`MarketModule.eu_feed_byproduct_output`, `feed_byproducts.csv`): prod0 × Σ weight × the

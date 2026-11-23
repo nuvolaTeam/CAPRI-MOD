@@ -188,10 +188,10 @@ def test_norway_market_supply_is_its_models_and_the_base_is_reproduced(data):
 
 def test_norway_raw_milk_responds_inside_the_market(data):
     """CAPRI keeps ProdNQ_ MILK of the regions with supply models in the market, re-anchored to their models' milk
-    (arm/simu_calibration_to_supply.gms l. 198-201, 423-427; market.sup_milk_in_market, step F): Norway's milk delivered
+    (arm/simu_calibration_to_supply.gms l. 198-201, 423-427; step F): Norway's milk delivered
     = its models' milk + the Hessian's MILK row x (its dairy-block milk price and the other prices against those its
     models saw), and its products move with the milk price by the MILK column (the block's price of the previous
-    evaluation); with the switch off the milk is its models'."""
+    evaluation)."""
     from capri_mod.market.market_module import MarketModule
     mm = MarketModule(data)
     mm._bilateral_calibrate()
@@ -216,10 +216,6 @@ def test_norway_raw_milk_responds_inside_the_market(data):
         # the next evaluation: barley responds to the block's milk price by the MILK column
         S2 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
         assert abs(float(S2.at["NO000000", "BARL"]) - (b_now + 5.0 - 10.0 * (pm - 1.0))) < 1e-6
-        from capri_mod.settings import override
-        with override({"market.sup_milk_in_market": False}):
-            S3 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
-        assert abs(float(S3.at["NO000000", "MILK"]) - m_now) < 1e-9 * m_now
     finally:
         mm.par.supply_hessian = None
 
@@ -401,7 +397,7 @@ def test_norway_prices_follow_its_own_market_in_a_scenario():
     _xs = m.par.excluded_sup_base                                # Norway's units outside the run, at base (CAPRI's market calibration)
     if _xs is not None:
         ex = ex.add(_xs.reindex(columns=ex.columns).fillna(0.0), fill_value=0.0)
-    # Norway's raw milk in the market (market.sup_milk_in_market, step F; simu_calibration_to_supply.gms l. 423-427):
+    # Norway's raw milk in the market (step F; simu_calibration_to_supply.gms l. 423-427):
     # its supply models' milk moved by its raw milk supply function, k x (its dairy block's milk price level - the
     # level the models saw) + the MILK row's response to the other prices; equal to the models' milk at convergence
     assert "NO" in ex.index

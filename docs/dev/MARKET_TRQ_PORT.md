@@ -121,7 +121,7 @@ free rents), noneu_land_mnl.csv (p_bLu), and the land rows and rent columns in n
 the builder: the land rows give CAPRI's p_elasSupp (with all other terms, worst 1.35e-14), the MNL at v_rentPerHa
 gives v_land (4.7e-10), the agricultural land equals PROD at CAL (4e-15), the rents PPRI + PSEd at CAL (4e-15).
 
-Model (capri_mod/market/supply.py, `noneu_land_solve`; setting market.noneu_land_market): per CAPRI region the three
+Model (capri_mod/market/supply.py, `noneu_land_solve`; the setting market.noneu_land_market retired 23 November 2026): per CAPRI region the three
 rents solve MNL supply = ProdNQ_ land demand by Newton's method at the evaluation's prices, raw milk prices (the
 latest dairy blocks') and FEDE; the land solve and FeedBal_ (noneu_fede, whose animal output now moves with the rents)
 are solved in turn until both settle. The products' and raw milk's supply then add their terms in the rents. Regions

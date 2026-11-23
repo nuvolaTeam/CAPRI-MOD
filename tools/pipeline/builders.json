@@ -2893,6 +2893,24 @@
    ]
   },
   {
+   "task": "build_greendeal_batch_targets",
+   "builder": "build_greendeal_batch_targets",
+   "args": [],
+   "inputs": [],
+   "code": [
+    "tools/build/build_greendeal_batch_targets.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$SOURCES/gams/pol_input/greendeal/greendeal_scenarios.gms",
+    "$SOURCES/gui/batchfiles/greendeal_scen2.txt",
+    "$SOURCES/gui/capri_gui_definition.xml"
+   ],
+   "outputs": [
+    "capri_data/scenarios/greendeal_group/greendeal_targets_by_year.csv"
+   ]
+  },
+  {
    "task": "build_histosol",
    "builder": "build_histosol",
    "args": [],

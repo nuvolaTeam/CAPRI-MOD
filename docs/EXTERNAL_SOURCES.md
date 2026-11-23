@@ -89,6 +89,13 @@ copies of the area table are identical in levels: one kept).
 - The equation refactor's checks (tools/refactor/check_gams_quotes.py, check_gams_citations.py and
   capri_mod/tests/test_refactor_checks.py) read it and skip when it is not star 3.0.
 
+**`gui/`**: files of CAPRI's GUI folder (the project lead's copy): `capri_gui_definition.xml` (the GUI's controls, their
+titles, GAMS names and options) and `batchfiles/greendeal_scen2.txt` (the batch of CAPRI's Green Deal production runs,
+author P. Witzke; its section "f2f" phases the Green Deal group's targets in by simulation year).
+- From: `GUI.zip`, the project lead's copy of CAPRI's GUI folder (uploaded 7 November 2026); the two files unpacked
+  as they are (the batch with its Windows line ends).
+- Read by: build_greendeal_batch_targets (with `gams/pol_input/greendeal/greendeal_scenarios.gms`).
+
 **`dat/`**: CAPRI's `dat` folder as parquet, the project's mirror of it.
 - From: the project lead; and, on 10 November 2026, from the public mirror of CAPRI's dat folder on Hugging Face
   (dataset jrc-ai/capri, an older dat vintage): `arm/allpop/worldPop.parquet`, `arm/nutrient_cont_usda/

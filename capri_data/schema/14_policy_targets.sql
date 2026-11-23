@@ -47,6 +47,25 @@ CREATE TABLE fert_partial_slack (
 );
 COMMENT ON TABLE fert_partial_slack IS 'CAPRI''s Green Deal group: the NUTS 2 regions (curNuts2) whose fertiliser priors'' partial derivative has a slack (v_fertDistPartialSlack: flows with a prior mode below 5e-3 x 1000 t within +-mode) and the listed (region, group) pairs (extraSlackRegion_to_ngrp: every flow of the group within +-(mode + 0.1 x 1000 t)); ngrp empty: the region''s tiny-prior rule only (supply/set_fert_priors.gms l. 664-785, %scenarioGroup%==greendeal); tools/build/build_fert_partial_slack.py';
 
+-- file: capri_data/scenarios/greendeal_group/greendeal_targets_by_year.csv
+CREATE TABLE greendeal_targets_by_year (
+    year BIGINT PRIMARY KEY,                                                    -- the simulation year (curYear)
+    lndscpTarg BIGINT NOT NULL CHECK (lndscpTarg IN (0, 7, 8, 9, 10)),
+    orgTarg BIGINT NOT NULL CHECK (orgTarg IN (0, 15, 18, 22, 25)),
+    pestRedu BIGINT NOT NULL CHECK (pestRedu IN (0, 5, 13, 15, 20, 26, 30, 32, 35, 40, 50)),
+    mineRedu VARCHAR NOT NULL CHECK (mineRedu IN ('00', '20', '10crp', '13crp', '17crp', '20crp')),
+    surpRedu BIGINT NOT NULL CHECK (surpRedu IN (0, 20, 30, 35, 40, 50)),
+    dietShift VARCHAR NOT NULL,                                                 -- a GUI option string ('00' none)
+    othPol VARCHAR NOT NULL                                                     -- a GUI option string ('00' none)
+);
+COMMENT ON TABLE greendeal_targets_by_year IS 'CAPRI''s Green Deal targets by simulation year of its production series: section f2f of the batch of CAPRI''s Green Deal production runs (GUI/batchfiles/greendeal_scen2.txt, P. Witzke), the GUI settings by their GAMS names (GUI/capri_gui_definition.xml; the settings of pol_input/greendeal/greendeal_scenarios.gms l. 192), the values as the batch writes them (tools/build/build_greendeal_batch_targets.py; register DEP-20)';
+INSERT INTO value_units VALUES
+  ('greendeal_targets_by_year', 'year', NULL, 'open', 'greendeal_targets_by_year.year: a calendar year'),
+  ('greendeal_targets_by_year', 'lndscpTarg', NULL, 'open', '%lndscpTarg%: tenths of the member state''s landscape target p_setAsideTarget (pol_input/greendeal/landscape.gms l. 56: %lndscpTarg%/10*p_setAsideTarget(ru)); 10 the full target'),
+  ('greendeal_targets_by_year', 'orgTarg', 'U_percent', 'capri', '%orgTarg%: the EU''s organic share target, percent (the GUI''s Target for organic share in EU; load_organic_targets.gms l. 175, 183 scale the member states'' targets by (orgTarg - 12)/(25 - 12))'),
+  ('greendeal_targets_by_year', 'pestRedu', 'U_percent', 'capri', '%pestRedu%: the pesticides reduction'),
+  ('greendeal_targets_by_year', 'surpRedu', 'U_percent', 'capri', '%surpRedu%: the per ha nitrogen surplus reduction');
+
 -- file: capri_data/scenarios/set_aside_10/set_aside_rates.csv
 CREATE TABLE set_aside_rates (
     region VARCHAR NOT NULL,

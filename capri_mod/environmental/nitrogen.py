@@ -256,14 +256,15 @@ class NitrogenBlock:
         return rem * tf, res * tf, fix * tf
 
     def _base_mineral_rate(self, region, crop):
-        """Base mineral N per ha of a crop. environment.base_mineral_n "capri2030": CAPRI's 2030 reference, its inner
-        model's mineral flow per ha of the crop (fertDist_mine, npk_crop_coefs_2030.csv; the region's sum is CAPRI's
-        purchases), 0 where CAPRI's reference has no flow; "capri2017": CAPRI's regional 2017 NMIN, none where CAPRI has
-        none (fallow, set-aside: CAPRI's 2017 results carry no NMIN for FALL, VSET, SETA; K100)."""
-        if str(_settings().get("environment.base_mineral_n")) == "capri2030":
-            t30 = self._mineral_2030()
-            if region in t30:
-                return float(t30[region].get(crop, 0.0))
+        """Base mineral N per ha of a crop: CAPRI's 2030 reference, its inner model's mineral flow per ha of the crop
+        (fertDist_mine, npk_crop_coefs_2030.csv; the region's sum is CAPRI's purchases), 0 where CAPRI's reference has
+        no flow; a region outside that table takes CAPRI's regional 2017 NMIN, none where CAPRI has none (fallow,
+        set-aside: CAPRI's 2017 results carry no NMIN for FALL, VSET, SETA; K100). The setting that chose the 2017 NMIN
+        for every region (environment.base_mineral_n "capri2017", the base until 14 November 2026) was retired on
+        23 November 2026."""
+        t30 = self._mineral_2030()
+        if region in t30:
+            return float(t30[region].get(crop, 0.0))
         _regn = self._cached_row("mineral_n_regional", region)
         rate = None
         if _regn is not None and crop in _regn:

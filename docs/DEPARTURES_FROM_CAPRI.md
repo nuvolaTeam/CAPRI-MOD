@@ -259,19 +259,19 @@ CAPRI's form, home-grown fodder carries no purchase price and enters through its
 feed use (capri_regional_nlp.py QUADRF_ and the fodder rows), so its value is that equality's dual, as in CAPRI. The
 setting, its ratio bounds and damping, and the outside ration solve were removed with the conic form.
 
-### `market.noneu_supply_nq = true` (29 October 2026; K54-3, step D)
+### The non-EU market supply functions (29 October 2026; K54-3, step D; setting `market.noneu_supply_nq`, retired 23 November 2026)
 
 The non-EU market regions' supply as CAPRI's market supply functions (arm/market_model.gms ProdNQ_: p_hessNQSupp at
 the 2030 calibration point with its cross-price terms and raw milk's, tools/build/build_noneu_market_supply_nq.py);
 before, one own-price constant elasticity per region and product (CAPRI's p_elasSupp of 2017).
 
-### `market.feed_bulk_in_market = true` (29 October 2026; audit M4, batch 6)
+### The feed bulks inside the market (29 October 2026; audit M4, batch 6; setting `market.feed_bulk_in_market`, retired 23 November 2026)
 
 CAPRI's feed bulk demand inside the market (feedBlk_): the member states' bulks respond to the prices within a market
 solve, from the supply models' bulks at the prices they saw, with the elasticities measured on the supply models (the
 market supply Hessian's FEEDBLK rows); before, fixed within a solve. Same fixed point, another path.
 
-### `market.noneu_feed_nq = true` (29 October 2026; audit M3, batch 6)
+### The non-EU feed demand (29 October 2026; audit M3, batch 6; setting `market.noneu_feed_nq`, retired 23 November 2026)
 
 CAPRI's non-EU feed demand FeedNQ_ with the feed energy balance FeedBal_ (arm/market_model.gms l. 1018-1048), the
 feed conversion factors of arm/feed_conv.gms and the calorie contents of nutrient_cont_usda; before, constant
@@ -285,7 +285,7 @@ October 2026 (Farm-to-Fork deviation 4.22 -> 4.65 when first tried); the market 
 young-animal markets inside the market per block since 29 October 2026. Mini-EU Farm-to-Fork, two blocks against one
 EU on the same code: both converged in 6 iterations, EU indicators within 0.4 points.
 
-### `market.sup_milk_in_market = true` (29 October 2026; step F, batch 8)
+### Norway's raw milk in the market (29 October 2026; step F, batch 8; setting `market.sup_milk_in_market`, retired 23 November 2026)
 
 Norway's raw milk (RMSSUP) stays in the market as CAPRI's ProdNQ_ MILK, re-anchored to its supply models' milk
 (arm/simu_calibration_to_supply.gms l. 198-201, 423-427: v_prodQuant MILK at the models' level with bounds 0.1 to
@@ -303,8 +303,19 @@ solve.
 - The mineral N's losses in NUTNED_ as CAPRI's variables (GASTOTNETF_, RUNTOTNETF_, GASRUNTOTNETF_ with the fertiliser
   options and winter cover); the inner model's residue factor in its first-order conditions as CAPRI writes it.
   Until then the base efficiency was kept. No setting: CAPRI's form only.
-- The 2030 base mineral N per crop from CAPRI's 2030 reference: `environment.base_mineral_n = "capri2030"`
-  ("capri2017", CAPRI's 2017 NMIN on the 2030 levels, the former base).
+- The 2030 base mineral N per crop from CAPRI's 2030 reference (the setting `environment.base_mineral_n`, whose
+  "capri2017" kept CAPRI's 2017 NMIN on the 2030 levels, the former base, retired 23 November 2026).
+
+### Settings of older forms retired (23 November 2026; the project lead's decision)
+
+Nine settings whose other value only reproduced an earlier form of the model were removed with that form's code; the
+model keeps CAPRI's form each chose: `market.noneu_supply_nq`, `market.noneu_land_market` (CAPRI's land block outside
+the EU, since 4 November 2026), `market.feed_bulk_in_market`, `market.noneu_feed_nq`, `market.sup_milk_in_market`,
+`market.trq_joint` (the tariff-rate quotas solved with the prices in the default solve, since 5 November 2026; the
+Newton-Krylov solve keeps its own sequential form), `outer_loop.manure_pool_solver` (the pool market as CAPRI's NLP,
+its convex QP form now the tests' cross-check), `supply.fert_option_cal_relsubs0` (DEP-30's calibration with CAPRI's
+relSubs0 x costParLin, K196) and `environment.base_mineral_n`. A settings file that still names one stops the run
+(unknown setting).
 
 ### `supply.use_cattle_member_splits = true` (17 November 2026; K65, register DEP-4)
 

@@ -282,10 +282,10 @@ class DemandMixin(MarketStateMixin):
         fb = self._feed_bulk_params()
         fdp = self._feed_demand_params()
         # other regions: CAPRI's FeedNQ_ with the feed energy price of FeedBal_ (audit M3), each trade region's feed
-        # changing by its behavioural regions' feed changes over its CAPRI base feed; else (market.noneu_feed_nq off, or
-        # outside a bilateral evaluation) one constant-elasticity function per region and product (p_ElasFeed)
+        # changing by its behavioural regions' feed changes over its CAPRI base feed; else (outside a bilateral
+        # evaluation) one constant-elasticity function per region and product (p_ElasFeed)
         fnq, fnq_regs = None, set()
-        if self.noneu_feed_nq and self.ev.fede_now is not None:
+        if self.ev.fede_now is not None:
             fnq = self.noneu_feed_change(pd.DataFrame(PR, index=self.regions, columns=self.commodities), self.ev.fede_now)
             fnq_regs = {d.get("tr") for d in self._noneu_feed_params()["rms"].values()}
         _dairy_fed = set(self.DAIRY_TRADED.values())

@@ -110,10 +110,11 @@ def pmpParlin_fertTech_DEP30(relSubs0_costParLin, foc_residual_per_unit, cal_rel
     nmE p with the model's own value of the saving.
 
     Departures from CAPRI: DEP-30 (the project lead's decision of 31 October 2026), the saving at the model's own
-    marginal value of N, not CAPRI's notional nmE p. cal_relsubs0 False is the form before 21 November 2026 (setting
-    supply.fert_option_cal_relsubs0): the first-order condition made zero at the initial share, without CAPRI's
-    relSubs0 costParLin, so the options moved off zero at any rise of the value of N where CAPRI's need it to exceed
-    that subsidy (KNOWN_ISSUES K196).
+    marginal value of N, not CAPRI's notional nmE p. cal_relsubs0 False makes the first-order condition zero where the
+    option would leave zero, without relSubs0 costParLin: the fertiliser options' form before 21 November 2026 (its
+    setting supply.fert_option_cal_relsubs0 retired on 23 November 2026; the options moved off zero at any rise of the
+    value of N where CAPRI's need it to exceed that subsidy, KNOWN_ISSUES K196), kept for the urea substitution, whose
+    calibration in CAPRI has no saving of N (CapriRegionalNLP.calibrate).
     Returns the increment, or None where the option is left as it is."""
     if cal_relsubs0:
         return relSubs0_costParLin - foc_residual_per_unit

@@ -1268,8 +1268,8 @@ def test_import_prices_at_trial_sigmas_equal_the_stored_offsets():
 
 
 def test_joint_trade_solve_meets_the_market_and_the_quota_equations():
-    """market.trq_joint: one commodity's trade system solved with its quotas (MarketModule._bilateral_inner_trq) after a
-    supply shock: every supplying region's balance and every quota's trqSigmoidFunc_ / TRQImports_ equation hold at the
+    """The default solve's quotas: one commodity's trade system solved with its quotas
+    (MarketModule._bilateral_inner_trq) after a supply shock: every supplying region's balance and every quota's trqSigmoidFunc_ / TRQImports_ equation hold at the
     solution (supply and use log-linear around the start, as the step's linearisation), with the stored offsets."""
     import numpy as np
     from capri_mod.market.market_module import MarketModule
@@ -3836,7 +3836,6 @@ def test_noneu_supply_is_capris_market_supply_function(model):
     dearer US maize raises US maize and lowers US wheat and soya (CAPRI's cross terms; the constant elasticity of
     before moved maize only). The terms reproduce CAPRI's p_elasSupp at the calibration point (the builder's check)."""
     import numpy as np
-    from capri_mod import settings
     mm = model.market_module
     cols = list(mm.commodities)
     b = mm.par.base_production
@@ -3854,9 +3853,6 @@ def test_noneu_supply_is_capris_market_supply_function(model):
         assert abs(float(s.at["USA", x]) - exp) < 1e-3 * abs(P["rows"][x]["CORN"] * 0.10) + 1.0, x
     assert float(s.at["USA", "SWHE"]) < float(b.at["USA", "SWHE"])
     assert mm._noneu_milk_shift("USA", cols, rr.loc["USA", cols].to_numpy())["USA"] != 0.0
-    with settings.override({"market.noneu_supply_nq": False}):
-        s0 = mm.supply_response(mm.world_prices_base, None, region_ratio=rr)
-    assert float(s0.at["USA", "SWHE"]) == float(b.at["USA", "SWHE"])
 
 
 def test_noneu_feed_energy_balance_is_capris(model):

@@ -74,8 +74,9 @@ def test_fertiliser_option_calibration_leaves_capris_relsubs0():
     subsidy relSubs0 x costParLin (envind/ghgMiti.gms l. 731, l. 1048-1071): with the saving at its value, the
     first-order condition at zero is + relSubs0 x costParLin, the subsidy early adopters need (l. 900-906). DEP-30 values
     the saving at the regional model's own marginal value of N; the calibration leaves CAPRI's relSubs0 x costParLin at
-    zero (supply.fert_option_cal_relsubs0, KNOWN_ISSUES K196). Before 21 November 2026 it made the condition zero where
-    the option would leave zero, so the options moved at any rise of the value of N."""
+    zero (KNOWN_ISSUES K196). Before 21 November 2026 it made the condition zero where the option would leave zero, so
+    the options moved at any rise of the value of N; that form (cal_relsubs0 False) remains for the urea
+    substitution."""
     from capri_mod.supply.equations.ghgmiti import pmpParlin_fertTech_DEP30
     # NITR_INH: costParLin 86, relSubs0 0.2 -> S0 17.2 EUR/t; the model's value of the saving 71 EUR/t at the base
     S0, V0 = 17.2, 71.0

@@ -54,8 +54,9 @@ step clip market.step_clip. One outer step:
    - feed by-products (MaprFeed_, `_apply_feed_byproduct_supply`);
    - residuals: per bilateral commodity `sc.residual` (SupBalM_, ArmBal1_ and the trade system); raw milk has none
      here, each region's dairy block clears it (K165; until 17 November 2026 a world balance, DEP-31).
-2. **TRQs:** with market.trq_joint (default) the quotas' sigmoid is solved with each commodity's prices
-   (`_bilateral_inner_trq`) and its residual is a convergence measure; without it, a lagged, damped update.
+2. **TRQs:** the quotas' sigmoid is solved with each commodity's prices (`_bilateral_inner_trq`) and its residual is
+   a convergence measure (the lagged, damped update, the setting market.trq_joint off, retired 23 November 2026;
+   the Newton-Krylov solve keeps it).
 3. **Per commodity, the trade solve** around the current point (`_bilateral_inner`, `_bilateral_inner_trq`): supply
    and use log-linear in the commodity's own price (`_bilateral_local_el`: elasticities measured once per run by a 1%
    price change, clipped to [-0.5, 5] and [-5, 0.5]), the trade system solved exactly by Newton (finite-difference or
@@ -65,7 +66,7 @@ step clip market.step_clip. One outer step:
 Inner fixed points and lags the whole-market system replaces by one simultaneous system: (a) the commodity-by-commodity trade solves on
 local elasticities (cross-commodity effects only through the outer step); (b) the land-FEDE rounds; (c) FeedBal_ on
 the previous evaluation's milk price (also DEP-29 for Norway); (d) the young-animal / raw-milk rounds; (e) the dairy
-blocks' Newton step; (f) the TRQ sigmoid when trq_joint is off. At the default solve's equilibria (MARKET_SYSTEM.md, the supply side's checks): (b) and (c) leave at most 5.4e-7 EUR/ha and 5.3e-10; (d) leaves the
+blocks' Newton step; (f) the TRQ sigmoid in the Newton-Krylov solve (its sequential form). At the default solve's equilibria (MARKET_SYSTEM.md, the supply side's checks): (b) and (c) leave at most 5.4e-7 EUR/ha and 5.3e-10; (d) leaves the
 young-animal markets within 8.0e-7 of their net supply (the 4-round cap). luc_market is solved after the market solve (DEP-44,
 equivalent without lulucf_market).
 
