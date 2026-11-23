@@ -282,6 +282,10 @@ class RegionData:
     #: plant_protection_capri_step_2030.csv, at the 2030 market year only (the comparison switches
     #: supply.greendeal_plap_crop_level_capri_step and supply.greendeal_plap_mix_capri_step, DEP-51)
     plap_capri_step: Optional[pd.DataFrame] = None
+    #: CAPRI's simulation-year input coefficients of 2030 (input_coefs_2030.csv, CAPRI's 2030 money; the 2030 market
+    #: year only): the crops' PLAP, INPO and top-up bases and yield-dependent parts at the member state's UVAP, the
+    #: animals' INPO yield factor (register DEP-21)
+    input_coefs_2030: Optional[pd.DataFrame] = None
     #: the simulation year (the projection's market year; None: the base year)
     sim_year: Optional[int] = None
     #: CAPRI's catch crops (catc_share_2030, catc_cost_eur_ha, biofix_t_n_ha) and winter cover shares by crop
@@ -2455,6 +2459,8 @@ class SupplyModule(ModuleStateMixin):
             input_costs_ha=(d.get("plant_protection_cost") or {}).get(region),
             plap_capri_step=((d.get("plant_protection_capri_step") or {}).get(region)
                              if _inputs.market_year(d) == 2030 else None),
+            input_coefs_2030=((d.get("input_coefs_2030") or {}).get(region)
+                              if _inputs.market_year(d) == 2030 else None),
             sim_year=(int(d["market_year"]) if d.get("market_year") else None),
             cover_crops=(d["cover_crops"].loc[region] if d.get("cover_crops") is not None
                          and region in d["cover_crops"].index else None),

@@ -13,6 +13,8 @@ Source: res_2_1730greendeal_refdefaulta (dataOut, 2030), the same dump the nitro
   nutNed_mine_loss_gasRunTot    mineral N lost (N only)
   nutNed_excr_unavailable       manure nutrient not available to the crop
   nutNed_cres_unavailable, nutNed_cres_loss_gasRunTot   residue N not available / lost (N only)
+  nutNed_retention, nutNed_biofix   the crop's DATA(crop, FNUT) x levl (reported negative) and its fixation, spread over
+                                the group's crops by area as nutNed_lhs (the additive need factor's share, add_share)
 with need = mineral - loss + manure - unavailable + residues (pooled or own) - unavailable - loss, exact per crop
 (nutNed_rest ~ 1e-15). This builder checks that identity, and the pools: sum of manure flows = EXCRET - GASANI -
 RUNANI - MTRADE (ManureNPK_, manExportOrAppl_), sum of mineral flows = NETF (fertDistMine_).
@@ -25,7 +27,11 @@ Outputs (capri_data/baselines/capri_greendeal_ref/1730/environment/; the two liv
                             residues: CAPRI's DATA(R, crop, MANN/MANP/MANK, "Y") of each crop, the term NUTNED_ adds for
                             PERM_NGRP, supply_model.gms; until 16 November 2026 the dump's perm_cres per crop, which is
                             the group's total spread by area: GRAE and GRAI had the same value, KNOWN_ISSUES K162),
-                            mine_kg_ha (CAPRI's mineral flow), levl_kha; CAPRI crops pooled into
+                            mine_kg_ha (CAPRI's mineral flow), add_share (the additive need factor's part of
+                            need_kg_ha, v_cropNutNeedAddFact x DEFR x SQRT(...) x (1 + techn) per ha over the crop's
+                            need, at most 1: add_share_parts, from the report's nutNed_retention and nutNed_biofix and
+                            sim_ini_21730's two need factors; the part of NUTNED_'s need the yields do not move, register
+                            DEP-10 item 1b), levl_kha; CAPRI crops pooled into
                             the model's crops by area (CORN = MAIZ, WINE = TWIN; GRAE and GRAI the model's own
                             since 7 November 2026). Until 20 November 2026 also main_share and straw_share, the parts
                             of the need that follow the main output's yield and the straw yield, from the reported need
@@ -60,7 +66,7 @@ import pandas as pd
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
-from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import EXPORTS, REFERENCE, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
@@ -84,7 +90,13 @@ MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",)}   # (GRAS = GRAE + GRAI until 7 N
 #  (VSET and FALL the model's own since 7 November 2026; before SETA = FALL + VSET + ISET + GSET + TSET; ISET, GSET
 #  and TSET have no area in CAPRI's 2017 and 2030 data)
 FLOWS = ("fertDist_mine", "fertDist_excr", "fertDist_cres", "perm_cres", "nutNed_mine_loss_gasRunTot",
-         "nutNed_cres_loss_gasRunTot", "nutNed_excr_unavailable", "nutNed_cres_unavailable", "nutNed_lhs")
+         "nutNed_cres_loss_gasRunTot", "nutNed_excr_unavailable", "nutNed_cres_unavailable", "nutNed_lhs",
+         "nutNed_retention", "nutNed_biofix")
+#: CAPRI's need factors of NUTNED_, fixed in simulation (supply/prep_sim.gms l. 30-31): sim_ini_21730's
+#: v_cropNutNeedMultFact(r, FNUT, "T") (the same for T1 and T2) and v_cropNutNeedAddFact(r, FNUT); the kept extract
+#: below where the reference export is not at hand
+SIMINI_DIR = REFERENCE / "simini" / "simini_21730"
+NEED_FACTORS = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "sim_ini_21730" / "crop_nut_need_factors_2030.parquet"
 BAL = ("EXCRET", "MTRADE", "GASANI", "RUNANI", "NETF", "UVAG")
 GMS = ROOT / "capri_data" / "sources" / "raw" / "capri" / "gams"
 
@@ -111,6 +123,63 @@ def extract(dump: Path) -> pd.DataFrame:
             r, item, row, col, v = m.groups()
             rows.append(dict(region=r, item=item, row=row, col=col, value=float(v)))
     return pd.DataFrame(rows)
+
+
+def need_factors() -> dict:
+    """{(region, FNUT): (mult, add)}: CAPRI's NUTNED_ need factors of sim_ini_21730 (levels of v_cropNutNeedMultFact at
+    "T" and v_cropNutNeedAddFact), from the reference export (tools/build/build_simini_reference.py), kept as
+    NEED_FACTORS for a build without it."""
+    if (SIMINI_DIR / "v_cropNutNeedMultFact.csv.gz").exists():
+        m = pd.read_csv(SIMINI_DIR / "v_cropNutNeedMultFact.csv.gz", keep_default_na=False, float_precision="round_trip")
+        m = m[m.d2 == "T"][["d0", "d1", "level"]].rename(columns={"d0": "region", "d1": "fnut", "level": "mult"})
+        a_ = pd.read_csv(SIMINI_DIR / "v_cropNutNeedAddFact.csv.gz", keep_default_na=False, float_precision="round_trip")
+        a_ = a_[["d0", "d1", "level"]].rename(columns={"d0": "region", "d1": "fnut", "level": "add"})
+        t = m.merge(a_, on=["region", "fnut"], how="outer").sort_values(["region", "fnut"])
+        NEED_FACTORS.parent.mkdir(parents=True, exist_ok=True)
+        write_source(t, NEED_FACTORS, index=False)
+    t = read_source(NEED_FACTORS)
+    return {(r, f): (float(m_), float(a_)) for r, f, m_, a_ in zip(t.region, t.fnut, t["mult"], t["add"])}
+
+
+def NUTNED_sqrtTerm(crop: str) -> float:
+    """NUTNED_'s square-root term of a crop at the mean technology (supply/supply_model.gms l. 1116-1120), the part this
+    builder can give: the grassland split's +-0.2 (p_technFact(Yield, A) of the mean technology is in the factor K
+    left, add_share_parts):
+
+                                     * SQRT(
+                                            [1.+p_technFact(RUNR,MCACT,"Yield",A)
+                                                + 0.2 $ SAMEAS(MCACT,"GRAI") - 0.2 $ SAMEAS(MCACT,"GRAE")
+                                            ] $ %data%(RUNR,MCACT,FNUT,"Y")
+                                           )"""
+    return float(np.sqrt(1.0 + 0.2 * (crop == "GRAI") - 0.2 * (crop == "GRAE")))
+
+
+def add_share_parts(lhs: float, retention: float, biofix: float, need_over_sqrt: float, need: float,
+                    area_need_kha: float, mult: float, add: float):
+    """CAPRI's NUTNED_ need of a crop group (supply/supply_model.gms l. 1095-1125),
+
+        sum_c levl_c x (DATA(c, FNUT) x (1 - BioFix) x v_cropNutNeedMultFact + v_cropNutNeedAddFact) x DEFR
+                     x SQRT(1 + p_technFact(Yield, A) + 0.2 $ GRAI - 0.2 $ GRAE) x (1 + p_technFact(FNUT, A)),
+
+    the sum over the group's crops with DATA(c, FNUT) (the SQRT term's $ %data%(RUNR,MCACT,FNUT,"Y") takes the additive
+    factor of a crop without one: fallow and set-aside, fert/fertned.gms l. 98-99, 233, K185), split into its additive
+    part, which the yields do not move, and the rest, which follows DATA(c, FNUT) (fert/fertned.gms rerun at the yields).
+    From CAPRI's report of the 2030 reference (kt), summed over the group's crops: lhs = nutNed_lhs, the retention
+    DATA(c, FNUT) x levl (reported negative) and the fixation (positive), so net = - retention - biofix = sum DATA x
+    (1 - BioFix) x levl; area_need_kha the area of the group's crops with DATA(c, FNUT). With the grassland split's
+    term g_c = NUTNED_sqrtTerm(c) apart, K = DEFR x SQRT(1 + p_technFact(Yield, A)) x (1 + p_technFact(FNUT, A)), the
+    group's at CAPRI's solution (the report spreads these items over the group's crops by area, fallow included):
+
+        K = lhs x [sum_c levl_c need_c / g_c] / [sum_c levl_c need_c] / (net x mult + add x area_need / 1000)
+
+    with need_c the crop's own need per ha (CAPRI's reported DATA(c, FNUT) row: the crop's own lhs, whose sum is the
+    group's lhs in the grassland group; the bracket is 1 in the groups without GRAE or GRAI). The additive part per ha
+    of crop c is add x K x g_c. Returns (K, add x K, kg/ha), or None where the group has no need."""
+    den = (-retention - biofix) * mult + add * area_need_kha / 1000.0
+    if not (lhs > 0 and den > 0 and need > 0):
+        return None
+    K = lhs * need_over_sqrt / need / den
+    return K, add * K
 
 
 def applied_share(src: pd.DataFrame) -> pd.DataFrame:
@@ -153,6 +222,11 @@ def main():
     nuts0 = {r for r in regions if r.endswith("000000") and
              any(x.startswith(r[:2]) and not x.endswith("000000") for x in regions)}
     rev = {c: mc for mc, cs in MODEL.items() for c in cs}
+    nf = need_factors()
+    # the crops with DATA(c, FNUT) at CAPRI's 2030 solution: fertned's crops with a main-output yield
+    fp_ = _read_csv(ENV / "capri_crop_fertned_parts_2030.csv", usecols=["capri_region", "crop", "o_hp"])
+    with_data = {(r_, c_) for r_, c_, o_ in zip(fp_.capri_region, fp_.crop, fp_.o_hp) if o_ > 0}
+    k_rng = []
     crow, rrow, prow = [], [], []
     worst_need = worst_man = worst_min = worst_grp = worst_own = 0.0
     grp_err = []
@@ -216,12 +290,31 @@ def main():
                              excr_avail=eav, cres_avail=cav, uvag_eur_t=v.get((r, "", "UVAG", col), float("nan")) / money,
                              mine_kt=mine, excr_kt=excr, pool_kt=cres, own_kt=own, need_kt=tot["nutNed_lhs"],
                              land_kha=land, pool_scale=kpool))
+            # the additive need factor's part per ha in each group (add_share_parts; register DEP-10 item 1b): the
+            # group's crops with DATA(c, FNUT) at CAPRI's solution, those fertned gives a main-output yield
+            # (capri_crop_fertned_parts_2030.csv)
+            addph = {}
+            if (r, col) in nf:
+                for g_ in {ngrp(c) for c in lev}:
+                    cs_ = [c for c in lev if ngrp(c) == g_]
+                    own_ = {c: lev[c] * v.get((r, "", c, col), 0.0) for c in cs_ if (r, c) in with_data}
+                    ap_ = add_share_parts(sum(f("nutNed_lhs", c) for c in cs_), sum(f("nutNed_retention", c) for c in cs_),
+                                          sum(f("nutNed_biofix", c) for c in cs_),
+                                          sum(w_ / NUTNED_sqrtTerm(c) for c, w_ in own_.items()), sum(own_.values()),
+                                          sum(lev[c] for c in own_), *nf[(r, col)])
+                    if ap_ is not None:
+                        addph[g_] = ap_[1]
+                        k_rng.append(ap_[0])
             # model crops
             agg = {}
             for c, x in lev.items():
                 mc = rev.get(c, c)
-                d = agg.setdefault(mc, dict(levl=0.0, need=0.0, pool=0.0, own=0.0, mine=0.0))
+                d = agg.setdefault(mc, dict(levl=0.0, need=0.0, pool=0.0, own=0.0, mine=0.0, add=0.0))
                 d["levl"] += x
+                # the need's additive part, CAPRI's v_cropNutNeedAddFact x DEFR x SQRT(...) x (1 + techn) per ha of a
+                # crop with DATA(c, FNUT) (add_share_parts; register DEP-10 item 1b)
+                if (r, c) in with_data:
+                    d["add"] += x * addph.get(ngrp(c), 0.0) * NUTNED_sqrtTerm(c) / 1000.0
                 # the crop's own need (NITF/PHOF/POTF per ha, net of fixation): CAPRI's nutNed_lhs per crop is its
                 # group's need spread by area (GRAE and GRAI, fallow and the arable crops of its group get the same per
                 # ha); NUTNED_ sums levl x need over the group's crops
@@ -237,7 +330,8 @@ def main():
                 L = d["levl"]
                 crow.append(dict(capri_region=r, model_crop=mc, nutrient=nut, levl_kha=L,
                                  need_kg_ha=1000.0 * d["need"] / L, pool_kg_ha=1000.0 * d["pool"] / L,
-                                 own_kg_ha=1000.0 * d["own"] / L, mine_kg_ha=1000.0 * d["mine"] / L))
+                                 own_kg_ha=1000.0 * d["own"] / L, mine_kg_ha=1000.0 * d["mine"] / L,
+                                 add_share=(d["add"] / d["need"] if d["need"] > 0 else 0.0)))
             # priors per crop group (posterior mode per ha of CAPRI's 2030 run, accuracy 1)
             garea = {}
             for c, x in lev.items():
@@ -255,6 +349,9 @@ def main():
                                  perm=int(g in PERM_NGRP), area_kha=A, mine_kg_ha=mi, excr_kg_ha=ex, cres_kg_ha=cr,
                                  accuracy=1.0))
     print(f"NUTNED_ identity per crop: worst relative residual {worst_need:.2e}")
+    if k_rng:
+        kq = np.quantile(k_rng, [0.05, 0.5, 0.95])
+        print(f"NUTNED_'s factor DEFR x SQRT(...) x (1 + techn) at CAPRI's solution: 5-50-95% {kq[0]:.3f} {kq[1]:.3f} {kq[2]:.3f}")
     print(f"group need from the crops' own need (sum levl x NITF) against CAPRI's group need: worst {worst_grp:.2e}, "
           f"median {np.median(grp_err) if grp_err else float('nan'):.2e}")
     print(f"ManureNPK_ (EXCRET - GASANI - RUNANI - MTRADE = sum of manure flows): worst {worst_man:.2e}")

@@ -220,15 +220,18 @@ def main():
     _pmm = (getattr(pmod, "_last_projected_model", None) or m).market_module
     db, ds = b["market"].domestic_prices.loc["EU27"], s["market"].domestic_prices.loc["EU27"]
 
-    # the adoption shares below are EU27 shares: Norway's regions (no EU mitigation options, msNoEU) left out (K56)
-    sEU = {r_: v_ for r_, v_ in s["supply"].items() if not str(r_).startswith("NO")}
-    bEU = {r_: v_ for r_, v_ in b["supply"].items() if not str(r_).startswith("NO")}
+    # the adoption shares below are EU27 shares: the regions outside the EU (Norway's, no EU mitigation options, msNoEU;
+    # the UK's, Turkey's and the Western Balkans' where run.supply_countries_outside_eu selects them) left out (K56)
+    from capri_mod.data.definitions import is_eu as _is_eu
+    sEU = {r_: v_ for r_, v_ in s["supply"].items() if _is_eu(str(r_))}
+    bEU = {r_: v_ for r_, v_ in b["supply"].items() if _is_eu(str(r_))}
     def agg(r, f):
-        """EU27 totals of the regional results: Norway's regions (NO..) left out, as in CAPRI's EU27 figures
-        (KNOWN_ISSUES K56)."""
+        """EU27 totals of the regional results: the regions outside the EU left out (CAPRI's EU27 figures, KNOWN_ISSUES
+        K56; until 23 November 2026 Norway's alone, which put the other countries' units into the EU's totals when
+        their supply models were in the run)."""
         o = {}
         for reg_, v in r["supply"].items():
-            if str(reg_).startswith("NO"):
+            if not _is_eu(str(reg_)):
                 continue
             for k, x in getattr(v, f).items():
                 if np.isfinite(x):
@@ -420,9 +423,9 @@ def main():
                             for k in ("BULL", "HFRS", "HFRS:rep", "CALV:male", "CALV:female")},
            # CAPRI's labour accounts (million hours: LABT, LABF, LABP) and set-aside split (1000 ha; premiums million
            # EUR), EU27 sums (Norway out), baseline and scenario
-           "labour": tuple((lambda t: {k: float(t.loc[[r_ for r_ in t.index if not str(r_).startswith("NO")], k].sum())
+           "labour": tuple((lambda t: {k: float(t.loc[[r_ for r_ in t.index if _is_eu(str(r_))], k].sum())
                                        for k in t.columns} if t is not None else None)(x.get("labour")) for x in (b, s)),
-           "set_aside": tuple((lambda t: {k: float(t.loc[[r_ for r_ in t.index if not str(r_).startswith("NO")], k].sum())
+           "set_aside": tuple((lambda t: {k: float(t.loc[[r_ for r_ in t.index if _is_eu(str(r_))], k].sum())
                                           for k in t.columns} if t is not None else None)(x.get("set_aside")) for x in (b, s)),
            "cover_crops": {k: sum(float((getattr(v, "cover_crops", None) or {}).get(f, 0.0) or 0.0)
                                   for v in sEU.values())

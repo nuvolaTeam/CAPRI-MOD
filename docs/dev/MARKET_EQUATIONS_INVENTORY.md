@@ -31,8 +31,9 @@ Status: **ported** the same equation; **ported, other form** the same relation w
   CAPRI's bound policy (the port of CAPRI's bounds, their widening and the fudge equations; the bounds below).
 - **Scaling:** every CAPRI equation is divided by its base value (e.g. ArmBal1_ by DATA(RM,'arm1',XXX) + 0.1): the whole-market system takes
   CAPRI's scaling.
-- **The Armington commitments** (p_arm2Commit, the augmented CES) remain a registered departure; with them would come
-  tradeFlowFudge_ and the Hicks-neutral shift (no p_arm2Commit in the sim_ini_21730 export).
+- **The Armington commitments** (p_arm2Commit, the augmented CES) are 0 in CAPRI's runs (%modArmington% off, the
+  META of the 2030 reference and the Green Deal step; market_model.gms l. 225; empty in sim_ini_21730): no departure
+  (23 November 2026, register history DEP-12); tradeFlowFudge_ and the Hicks-neutral shift are empty with them.
 
 ## The default solve today: the fixed points the whole-market system removes and the glue (13 November 2026)
 
@@ -260,14 +261,14 @@ CAPRI's 2030 market and are to be ported (DEP-33, DEP-34 are active departures).
 
 | Equation | Domain | Line | Status | capri-mod | Note |
 |---|---|---|---|---|---|
-| arm2QuantShares_ | (RM,XXX) | 2706 | ported, other form | market/bilateral.py, trade_ad.py | plain CES (CAPRI with p_arm2Commit = 0, a registered departure); one Armington elasticity per commodity, CAPRI's per market region (DEP-40) |
-| domSalesShares_ | (RM,XXX) | 2721 | ported, other form | market/bilateral.py, trade_ad.py | plain CES (CAPRI with p_arm2Commit = 0, a registered departure); one Armington elasticity per commodity, CAPRI's per market region (DEP-40) |
-| importShares_ | (RM,RM1,XXX) | 2749 | ported, other form | market/bilateral.py, trade_ad.py | plain CES (CAPRI with p_arm2Commit = 0, a registered departure); one Armington elasticity per commodity, CAPRI's per market region (DEP-40) |
-| tradeFlowFudge_ | (RM,RM1,XXX) | 2784 | not ported | - | negative flows under commitment terms (with the departure above) |
+| arm2QuantShares_ | (RM,XXX) | 2706 | ported, other form | market/bilateral.py, trade_ad.py | plain CES (CAPRI's runs: p_arm2Commit = 0, %modArmington% off); one Armington elasticity per commodity, CAPRI's per market region (DEP-40) |
+| domSalesShares_ | (RM,XXX) | 2721 | ported, other form | market/bilateral.py, trade_ad.py | plain CES (CAPRI's runs: p_arm2Commit = 0, %modArmington% off); one Armington elasticity per commodity, CAPRI's per market region (DEP-40) |
+| importShares_ | (RM,RM1,XXX) | 2749 | ported, other form | market/bilateral.py, trade_ad.py | plain CES (CAPRI's runs: p_arm2Commit = 0, %modArmington% off); one Armington elasticity per commodity, CAPRI's per market region (DEP-40) |
+| tradeFlowFudge_ | (RM,RM1,XXX) | 2784 | not ported | - | negative flows under commitment terms (empty in CAPRI's runs) |
 | HicksNeutral_ | (rm, xxx) | 2799 | off | - | modArmington off by default: cal_armington.gms l. 82-83 fixes v_gammaCES and v_Hicks at 1, so the equation drops out (its $-condition needs v_gammaCES.range) |
 | transition_ | (rm, rm1, xxx) | 2809 | off | - | modArmington off by default (extended KVT) |
-| arm1PriceAgg_ | (RM,XXX) | 2950 | ported, other form | market/bilateral.py, trade_ad.py | plain CES (CAPRI with p_arm2Commit = 0, a registered departure); one Armington elasticity per commodity, CAPRI's per market region (DEP-40) |
-| arm2PriceAgg_ | (RM,XXX) | 3004 | ported, other form | market/bilateral.py, trade_ad.py | plain CES (CAPRI with p_arm2Commit = 0, a registered departure); one Armington elasticity per commodity, CAPRI's per market region (DEP-40) |
+| arm1PriceAgg_ | (RM,XXX) | 2950 | ported, other form | market/bilateral.py, trade_ad.py | plain CES (CAPRI's runs: p_arm2Commit = 0, %modArmington% off); one Armington elasticity per commodity, CAPRI's per market region (DEP-40) |
+| arm2PriceAgg_ | (RM,XXX) | 3004 | ported, other form | market/bilateral.py, trade_ad.py | plain CES (CAPRI's runs: p_arm2Commit = 0, %modArmington% off); one Armington elasticity per commodity, CAPRI's per market region (DEP-40) |
 | impPrice_ | (RM,RM1,XXX) | 2849 | ported, other form | market/bilateral.py, trade_ad.py (the quotas and border measures) | (Pd0_j r_j + TC_ij)(1 + tav/100) + ts with the quotas', levies' and entry prices' rates; export subsidies not ported (inactive in 2030) |
 
 ## Prices

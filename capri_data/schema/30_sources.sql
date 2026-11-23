@@ -1755,6 +1755,19 @@ COMMENT ON TABLE src_data_prod_grof_rmssup IS 'CAPRI''s DATA(RMSSUP, "PROD", row
 INSERT INTO value_units VALUES
   ('src_data_prod_grof_rmssup', 'value', 'U_1000t', 'capri', 'CAPRI''s production (1000 t)');
 
+-- file: capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_factors_2030.parquet
+CREATE TABLE src_crop_nut_need_factors_2030 (
+    region VARCHAR NOT NULL,
+    fnut VARCHAR NOT NULL,
+    mult DOUBLE NOT NULL,
+    "add" DOUBLE NOT NULL,
+    PRIMARY KEY (region, fnut)
+);
+COMMENT ON TABLE src_crop_nut_need_factors_2030 IS 'CAPRI''s NUTNED_ need factors, fixed in simulation (supply/prep_sim.gms l. 30-31): the levels of v_cropNutNeedMultFact(region, FNUT, "T") (the same for T1 and T2) and v_cropNutNeedAddFact(region, FNUT) in sim_ini_21730.gdx, for the 250 units (tools/build/build_npk_balance_2030.py need_factors).';
+INSERT INTO value_units VALUES
+  ('src_crop_nut_need_factors_2030', 'mult', 'U_ratio', 'capri', 'CAPRI v_cropNutNeedMultFact: the multiplier on DATA(crop, FNUT) x (1 - BioFix) in NUTNED_'),
+  ('src_crop_nut_need_factors_2030', 'add', 'U_kgperha', 'capri', 'CAPRI v_cropNutNeedAddFact: the additive need per ha in NUTNED_');
+
 -- file: capri_data/sources/intermediate/ammonia/ammonia_cost_curves.parquet
 CREATE TABLE src_ammonia_cost_curves (
     region VARCHAR NOT NULL,

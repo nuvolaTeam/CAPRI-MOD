@@ -21168,6 +21168,11 @@
      "name": "mine_kg_ha",
      "type": "DOUBLE",
      "not_null": true
+    },
+    {
+     "name": "add_share",
+     "type": "DOUBLE",
+     "not_null": true
     }
    ],
    "primary_key": [
@@ -21179,6 +21184,12 @@
    "foreign_keys": [],
    "checks": [],
    "units": [
+    {
+     "item": "add_share",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "the additive need factor's share of the crop's NUTNED_ need at CAPRI's 2030 solution: v_cropNutNeedAddFact x DEFR x SQRT(...) x (1 + p_technFact) / need_kg_ha (supply/supply_model.gms l. 1095-1125; sim_ini_21730, supply/prep_sim.gms l. 30-31), at most 1"
+    },
     {
      "item": "levl_kha",
      "unit": null,
@@ -21227,6 +21238,7 @@
     "tests": [
      "capri_mod/tests/test_capri.py",
      "capri_mod/tests/test_mineral_n_losses.py",
+     "capri_mod/tests/test_nutned_add_factor.py",
      "capri_mod/tests/test_techn_mix.py"
     ]
    }
@@ -24267,7 +24279,8 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_legsh_option.py"
+     "capri_mod/tests/test_legsh_option.py",
+     "capri_mod/tests/test_nutned_add_factor.py"
     ]
    }
   },
@@ -29641,6 +29654,7 @@
      "build_fodder_balance",
      "build_genetics_effects",
      "build_ghg_coefs_2017",
+     "build_input_coefs_2030",
      "build_labour_setaside",
      "build_land_market",
      "build_legsh_option",
@@ -37040,6 +37054,7 @@
      "build_ghg_coefs_2017",
      "build_gl_demand",
      "build_histosol",
+     "build_input_coefs_2030",
      "build_intensity_q_2030",
      "build_irrigation_2017",
      "build_labour_setaside",
@@ -45129,6 +45144,68 @@
     "tests": []
    }
   },
+  "src_crop_nut_need_factors_2030": {
+   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_factors_2030.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's NUTNED_ need factors, fixed in simulation (supply/prep_sim.gms l. 30-31): the levels of v_cropNutNeedMultFact(region, FNUT, \"T\") (the same for T1 and T2) and v_cropNutNeedAddFact(region, FNUT) in sim_ini_21730.gdx, for the 250 units (tools/build/build_npk_balance_2030.py need_factors).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fnut",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "mult",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "add",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "fnut"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "add",
+     "unit": "U_kgperha",
+     "status": "capri",
+     "basis": "CAPRI v_cropNutNeedAddFact: the additive need per ha in NUTNED_"
+    },
+    {
+     "item": "mult",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "CAPRI v_cropNutNeedMultFact: the multiplier on DATA(crop, FNUT) x (1 - BioFix) in NUTNED_"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": "build_npk_balance_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "src_cropwat_p_cropwatreq": {
    "file": "capri_data/sources/raw/capri/dat/water/cropwat_p_cropwatReq.parquet",
    "declared_in": "34_sources_csv.sql",
@@ -50348,6 +50425,7 @@
    "read_by": {
     "model": [],
     "builders": [
+     "build_input_coefs_2030",
      "build_plant_protection_cost"
     ],
     "checks": [],
@@ -53067,6 +53145,190 @@
     "tests": []
    }
   },
+  "sup_input_coefs_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/input_coefs_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPRI's simulation-year input coefficients of 2030 that its Green Deal input changes and its yield updates act on, per regional unit and model activity: capmod/define_inputs.gms's DATA(BAS) x (1 - f + f G) before TF_I (DATA_IY_Y), the crops' at the member state's UVAP(2030) (capmod/define_objc.gms l. 40-44), the animals' INPO as its yield factor on the model's cost per head. Crops' columns empty for animals and the animals' for crops (register DEP-21; tools/build/build_input_coefs_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "plap_eur_ha",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "inpo_eur_ha",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "eful_eur_ha",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "eful_inpo_eur_ha",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "yd_rest_eur_ha",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "yd_plap_eur_ha",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "yd_inpo_eur_ha",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "yield_growth",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "inpo_yield_factor",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "levl_capri",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(plap_eur_ha >= 0)",
+    "(inpo_eur_ha >= 0)",
+    "(eful_eur_ha >= 0)",
+    "(eful_inpo_eur_ha >= 0)",
+    "(yd_rest_eur_ha >= 0)",
+    "(yd_plap_eur_ha >= 0)",
+    "(yd_inpo_eur_ha >= 0)",
+    "(yield_growth > 0)",
+    "(inpo_yield_factor > 0)",
+    "(levl_capri > 0)"
+   ],
+   "units": [
+    {
+     "item": "eful_eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "(EFUL + SERI) at BAS x (1 - f_INPO + f_INPO G) at their own UVAP(2030) / 1000: the organic top-up's base valued at the fuel's and services' price (FIX-6's fix, the default)"
+    },
+    {
+     "item": "eful_inpo_eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "the same quantity at UVAP(MS, 'INPO', 2030): the top-up as pol_input/greendeal/organic_io.gms l. 111-115 codes it (added to INPO's base coefficient)"
+    },
+    {
+     "item": "inpo_eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "the same for INPO"
+    },
+    {
+     "item": "inpo_yield_factor",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "sum LEVL(2030) DATA(BAS, INPO) (1 - f + f G) / sum LEVL(2030) DATA(BAS, INPO) over the model animal's CAPRI activities, G its main output's yield growth"
+    },
+    {
+     "item": "levl_capri",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "sim_ini_21730 DATA(R, act, 'LEVL', 'Y'): CAPRI's 2030 level, the weights (1000 ha or 1000 head)"
+    },
+    {
+     "item": "plap_eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "sim_ini_21730 DATA(R, crop, 'PLAP', 'BAS') x (1 - f + f G) x UVAP(MS, 'PLAP', 2030) / 1000, f p_inputDemandFactor (inputs/yieldIY.gms), G p_yieldGrowth (define_inputs.gms l. 80-82, 96-97, 101-102), UVAP(2030) = UVAP(BAS) x p_infl^(2030 - 2017) (inflation_and_trend_interpolation.gms l. 69, 73); EUR per ha in CAPRI's 2030 money, CAPRI's 2030 level-weighted where a model crop sums CAPRI activities; 0 without a base coefficient (grassland)"
+    },
+    {
+     "item": "yd_inpo_eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "the same for INPO"
+    },
+    {
+     "item": "yd_plap_eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "the same for PLAP"
+    },
+    {
+     "item": "yd_rest_eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "sum over the directly yield-dependent inputs other than PLAP and INPO of f x DATA(BAS) x G x UVAP(2030) / 1000: the coefficients' derivative in the yield ratio at CAPRI's 2030 reference, before TF_I; 0 for an activity whose G before the bounds is outside 0.5-1.5"
+    },
+    {
+     "item": "yield_growth",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "G of the model crop, weighted by CAPRI's 2030 level x base yield"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_input_coefs_2030",
+    "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_infl.csv.gz; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/sets.gms"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_input_coefs_2030.py"
+    ]
+   }
+  },
   "sup_labour_coef": {
    "file": "capri_data/2017/supply/labour_coef.csv",
    "declared_in": "18_supply_more.sql",
@@ -55235,7 +55497,8 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_capri.py"
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_input_coefs_2030.py"
     ]
    }
   },
@@ -62288,7 +62551,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 525,
+  "capri/keep": 526,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 37,
