@@ -13,8 +13,11 @@ Per market region i (the model's trade regions) and product:
   ArmBal1_          D_i = total use at the consumer (Armington) price PA_i
 
 with Pd_i = Pd0_i r_i the region's market price. Share parameters are calibrated so that base flows and base
-prices are reproduced exactly (the price indices equal the value-weighted base prices). CAPRI's second nest
-carries "commitment" terms (p_arm2Commit, augmented CES); the plain CES is used here (REGISTERED).
+prices are reproduced exactly (the price indices equal the value-weighted base prices). The plain CES is CAPRI's
+form in its runs: the "commitment" terms of the augmented CES (p_arm2Commit) are set to 0 (arm/market_model.gms
+l. 225) and are empty in sim_ini_21730, and with %modArmington% off (the 2030 reference and the Green Deal step:
+"Calibrate non-homothetic Armington-system: off [default]" in their META) arm/cal_armington.gms l. 82-90 fixes
+v_gammaCES, v_Hicks and pv_theta at 1, which gives back the standard CES (register history, DEP-12).
 """
 from __future__ import annotations
 from dataclasses import dataclass

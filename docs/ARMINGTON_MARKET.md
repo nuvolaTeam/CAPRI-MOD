@@ -151,7 +151,8 @@ price response (`trq_solve`), with a guarded Aitken step where a sigma converges
 the residuals and the sigmas have stopped moving. Quota rents as CAPRI's (reports/sol_market.gms l. 1127). G2a's CasADi
 trade function (`trade_trq_function`) has the bilateral quotas only.
 
-REGISTERED: CAPRI's augmented-CES commitment terms of the second nest (p_arm2Commit) are not represented; p_doubleZero
+CAPRI's augmented-CES commitment terms of the second nest (p_arm2Commit) are 0 in its runs (%modArmington% off;
+arm/market_model.gms l. 225; empty in sim_ini_21730), so the plain CES is CAPRI's form (register history, DEP-12); p_doubleZero
 for the 2017 market year is the 2030 agreements (sim_ini_21730; no 2017 listing carries it).
 
 ## Reported prices and the price signal
@@ -172,7 +173,7 @@ world ratio × premium, i.e. the EU market price ratio. "Premium" is only this b
   function to them every iteration, the model has none there, so the function stays at the calibration point.
 - EU market supply between iterations: CAPRI's market supply elasticities as given; CAPRI recalibrates its supply
   approximation to the supply models (available as `market_supply_nq`, off).
-- No p_arm2Commit, no global TRQs (above).
+- No global TRQs (above); p_arm2Commit is 0 in CAPRI's runs as well.
 - Solver: Newton per product with Anderson acceleration instead of CONOPT ([MARKET_SOLVE_CHECK.md](dev/MARKET_SOLVE_CHECK.md)).
 
 ## Before the bilateral market (historical)
