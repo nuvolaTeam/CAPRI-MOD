@@ -18,6 +18,13 @@ each module to its CAPRI block and lines). A module is added when its first equa
     def_gascoeff.py envind/def_gascoeff.gms: Resid, the crop residues' nutrient content (K191)
     impose_upper_bound_on_elasticity.py
                     supply/pmp_terms/impose_upper_bound_on_elasticity.gms: the dampened supply elasticities (block A4)
+    greendeal/      pol_input/greendeal/: the Green Deal's pesticide, organic, landscape, mineral fertiliser and surplus
+                    targets (block A5; its __init__ lists the modules)
+    set_fert_priors.py, define_objc.py, define_greening_limits.py, define_manure_trade_costs.py,
+    define_const_pmp_param.py, prep_cal.py, prep_sim_luc.py
+                    the fertiliser priors, the plant protection's linear term, the permanent grassland limit, the manure
+                    trade cost slope, the feeds' PMP slope, the greening dual at calibration and the land types' bounds
+                    (block A5); ghgmiti.py, define_inputs.py and set_supply_bounds.py extended in A5
 
 Each function's docstring, or its module's, gives CAPRI's GAMS statement and its domain, the CAPRI star 3.0 file and
 lines it follows, the equation in this project's notation, how the model's quantities map to CAPRI's symbols, and the

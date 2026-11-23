@@ -7,6 +7,9 @@ this module once supply_module is loaded (capri_mod.utils.mixins.inject_names); 
 """
 from __future__ import annotations
 
+from capri_mod.supply.equations.ghgmiti import (
+    p_ghgMiti_maxShare_N2OMAN, p_ghgMiti_pmpParsqr, p_ghgMiti_pmpParsqr_saving, p_ghgMiti_QEmitt_NITR_INH)
+
 
 class AbatementBlock:
     def _techs_inside(self) -> bool:
@@ -572,7 +575,7 @@ class AbatementBlock:
         if sub <= 0:
             return
         q0, k1 = float(ni.QEmitt_noc), float(ni.costParLin)
-        q = param("NITR_INH_EMISSION_FACTOR") * q0    # ghgMiti.gms l. 110: 0.9 x QEmitt(NOC), also for N2OMAN
+        q = p_ghgMiti_QEmitt_NITR_INH(q0, param("NITR_INH_EMISSION_FACTOR"))   # ghgMiti.gms l. 110: also for N2OMAN
         if not (q > 0 and q0 > q and k1 > 0):
             return
         nman = (q0 / q - 1.0) ** param("P_FERT_EFF_COR")
@@ -598,11 +601,11 @@ class AbatementBlock:
             mn = float(man_d.get(a, 0.0) or 0.0) * float(base.get(a, 0.0) or 0.0)
             g = sum(s_["w"] * s_["g"] for s_ in subs)
             tot += mn; graz += mn * g
-        smax = 1.0 - graz / tot if tot > 0 else 0.0
+        smax = p_ghgMiti_maxShare_N2OMAN(graz, tot)
         if smax <= 0:
             return
         r0, r1 = param("MITI_RELSUBS0"), param("MITI_RELSUBS1")              # ghgMiti.gms l. 885-887, 904-906
-        S0, slope = r0 * k1, k1 * (r1 - r0) / smax
+        S0, slope = r0 * k1, p_ghgMiti_pmpParsqr(k1, r1, r0, smax, 0.0)
         if SupplyModule.fert_slope_with_saving:
             # CAPRI's pmpParSqr of the inhibitor on manure (envind/ghgMiti.gms l. 1036-1050), as the mineral options'
             # (_fert_techs, the same switch): + nmE x p_manureShadVal x ((1 + nmE m1)^-2 - (1 + nmE m0)^-2) / (m1 - m0),
@@ -611,7 +614,7 @@ class AbatementBlock:
             # manure N (v_nutAvailFactExcr, l. 871; npk_region_2030.csv excr_avail)
             _pf = SupplyModule._nitf_price_ms(_ms)
             if _pf and _av is not None:
-                slope += saving_slope(nman, p_manureShadVal(_pf, _av), 0.0, smax)
+                slope += p_ghgMiti_pmpParsqr_saving(nman, p_manureShadVal(_pf, _av), 0.0, smax)
         # application NH3 side effect (ghgMiti.gms l. 557-563, p_litRevFertTechs NH3APP): on
         # treated manure the application emission factor is (1 - lit) x (1 + NMAN) times
         # NOC's; base = the cascade's application loss at the ammonia options' latest shares

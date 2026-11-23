@@ -4,8 +4,8 @@ set_prices.gms sets on at l. 388). Called in a simulation with the trend point (
 set_prices.gms 'TRD'), so %1 is "TRD" there: the bulk's price moves from CAPRI's 2030 baseline price by the
 Laspeyres index of its market ingredients' Armington prices, times the share of the bulk they cover.
 
-The rest of the file is written elsewhere: the outputs' unit values (l. 43-89: capri_mod/supply/supply_module.py,
-K169), durum wheat's and sugar beet's (K168). The non-tradable fodders' UVAG scaled with FCER's (l. 435-458) are not
+The outputs' unit values as relative changes (l. 43-96: DATA_UVAG_Y, DATA_UVAG_DWHE, block A5; called by
+capri_mod/supply/supply_module.py and capri_mod/model.py, K168, K169). The non-tradable fodders' UVAG scaled with FCER's (l. 435-458) are not
 written: the supply model's objective has them only in its calibration step (supply_model.gms l. 4664-4668,
 p_PMPStep1), and the envind files that read the feeds' UVAG run before the simulation's iterations (capmod.gms
 l. 1097-1139, the loop from l. 1353).
@@ -52,3 +52,37 @@ def DATA_UVAG_FEED_TRD_Y(uvag_trd, w, r, food_trd, food_y, grof_trd):
         return float(uvag_trd)
     las = sum(float(a) * float(b) for a, b in zip(r, w)) / sw
     return float(uvag_trd) * (1.0 + (las - 1.0) * min(1.0, float(food_trd) / float(grof_trd)))
+
+
+def DATA_UVAG_Y(price_change, factor):
+    r"""DATA(RMSSUP, "UVAG", MARR, "Y") as a relative change: an output's unit value moves by its market price's
+    absolute change (UVAG + v_prodPrice - PPri), i.e. by the market's relative price change times PPri / UVAG at the
+    trend point (factor; price_transmission_2030.csv, tools/build/build_price_transmission_2030.py); the paddy's and
+    olives' the same through their factors (l. 81-89), the milks' with the PSEI (l. 66-74).
+
+    CAPRI's GAMS (arm/set_prices.gms l. 44-47):
+
+          DATA(RMSSUP,"UVAG",MARR,"Y") $ SUM(CAP_TO_TRD(MARR,XX), DATA(RMSSUP,"Ppri",XX,%1))
+            = DATA(RMSSUP,"UVAG",MARR,%1) +
+                  SUM(CAP_TO_TRD(MARR,XX),
+                          v_prodPrice.L(RMSSUP,XX)-DATA(RMSSUP,"PPri",XX,%1) $ DATA(RMSSUP,"UVAG",MARR,%1));
+
+    In this project's notation: dUVAG / UVAG0 = (dP / P0) (P0 / UVAG0). Departures from CAPRI: in relative changes with
+    the factor at the trend point (the same change); the chickens' and the young animals' inputs (l. 101-109) not
+    covered (the young animals have their own markets)."""
+    return price_change * factor
+
+
+def DATA_UVAG_DWHE(share, price_change):
+    r"""DATA(RMSSUP, "UVAG", "DWHE", "Y") as a relative change: durum wheat's unit value moves by half of the wheat
+    aggregate's relative price change (share 0.5); sugar beet's by sugar's (share 1, l. 93-96).
+
+    CAPRI's GAMS (arm/set_prices.gms l. 59-61):
+
+          DATA(RMSSUP,"UVAG","DWHE","Y") $ SUM(CAP_TO_TRD("DWHE",XX), DATA(RMSSUP,"Ppri",XX,%1))
+            = DATA(RMSSUP,"UVAG","DWHE",%1) * (1. + 0.5 *
+                 SUM(CAP_TO_TRD("DWHE",XX), (v_prodPrice.L(RMSSUP,XX)/DATA(RMSSUP,"PPri",XX,%1) -1.) ));
+
+    In this project's notation: dUVAG / UVAG0 = s (P / P0 - 1). Departures from CAPRI: none (the shares,
+    model_price_follows.csv, data read: capri_mod/data/definitions.py PRICE_FOLLOWS_SHARE)."""
+    return share * price_change

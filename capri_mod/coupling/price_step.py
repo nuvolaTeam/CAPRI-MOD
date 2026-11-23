@@ -6,6 +6,7 @@ module once model is loaded (capri_mod.coupling.inject); the annotations are not
 """
 from __future__ import annotations
 from capri_mod.coupling.equations.define_stepweights import p_stepWgtSpecial
+from capri_mod.coupling.equations.price_forecast import DATA_UVAG_forecast
 
 
 class PriceStepBlock:
@@ -112,12 +113,7 @@ class PriceStepBlock:
         w = tuple(st.get("outer_loop.capri_step_weights")
                   if outer_iter + 1 < int(st.get("outer_loop.capri_step_weights_late_from"))
                   else st.get("outer_loop.capri_step_weights_late"))
-        use = list(reversed(hist))[:len(w)]
-        tot = sum(w[:len(use)])
-        out = None
-        for w_, v_ in zip(w, use):
-            out = w_ * v_ if out is None else out + w_ * v_
-        return out / tot
+        return DATA_UVAG_forecast(w, reversed(hist))          # price_forecast.gms l. 376-383
 
     @staticmethod
     def _capri_special_forecast(hist, srt):

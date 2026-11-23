@@ -7,6 +7,10 @@ this module once supply_module is loaded (capri_mod.utils.mixins.inject_names); 
 """
 from __future__ import annotations
 
+from capri_mod.supply.equations.greendeal.minfert_redu_by_crop import p_priFertDistRegu_limCres
+from capri_mod.supply.equations.set_fert_priors import (
+    p_priFertDistRegu_beta1, p_priFertDistRegu_beta2, v_fertDistPartialSlack_bound)
+
 
 class FertilisationBlock:
     def _mctx(self):
@@ -420,7 +424,7 @@ class FertilisationBlock:
                     for s_, m_ in g_["modes"].items():
                         lst_ = g_["g"] in _lst
                         if lst_ or float(m_) < _tiny:
-                            ps_[(g_["g"], s_)] = float(m_) + (_add if lst_ else 0.0)
+                            ps_[(g_["g"], s_)] = v_fertDistPartialSlack_bound(m_, lst_, _add)
             Ecols = [(j, float(man[j])) for j in range(n) if man[j] != 0.0]
             # the split columns move their animal's manure of this nutrient (CAPRI's MANN, MANP, MANK per activity;
             # P and K since 9 November 2026)
@@ -556,8 +560,8 @@ class FertilisationBlock:
             r_ = out.setdefault(nut, {})
             for (g, s_), v in per.items():
                 if s_ == "CRES" and v > 0:
-                    c1 = (1.0 / f) * 10.0 + 1.0
-                    r_[(g, "CRES")] = (v * f, c1, 10.0 + 2.0 - c1)
+                    c1 = p_priFertDistRegu_beta1(1.0 / f, 10.0)          # organic_minfert_redu.gms l. 115-116
+                    r_[(g, "CRES")] = (p_priFertDistRegu_limCres(v, f), c1, p_priFertDistRegu_beta2(10.0, c1))
         return out
 
     @staticmethod
@@ -601,8 +605,8 @@ class FertilisationBlock:
             b1, b2 = beta_regulation(param("FERT_REGU_ACCURACY"), param("FERT_REGU_MODE_SHARE"))
             regs = {(g, "MINE"): (float(v), b1, b2) for g, v in caps.items() if v > 0}
             for g, (mx, racc, msh) in lim.items():
-                c1 = float(msh) * float(racc) + 1.0
-                regs[(g, "CRES")] = (float(mx), c1, float(racc) + 2.0 - c1)
+                c1 = p_priFertDistRegu_beta1(float(msh), float(racc))
+                regs[(g, "CRES")] = (float(mx), c1, p_priFertDistRegu_beta2(float(racc), c1))
             d["regs"] = regs
             # limCres for every nutrient (minfert_redu_by_crop.gms sets it over FNUT)
             for nut_, per_ in (base.get("per_ha_nut") or {}).items():
@@ -612,8 +616,8 @@ class FertilisationBlock:
                 rg_ = dict(d_.get("regs") or {})
                 for g, (mx, racc, msh) in inner.limcres_caps(self.data.region_id, dict(base, per_ha=per_),
                                                                nutrient=nut_).items():
-                    c1 = float(msh) * float(racc) + 1.0
-                    rg_[(g, "CRES")] = (float(mx), c1, float(racc) + 2.0 - c1)
+                    c1 = p_priFertDistRegu_beta1(float(msh), float(racc))
+                    rg_[(g, "CRES")] = (float(mx), c1, p_priFertDistRegu_beta2(float(racc), c1))
                 d_["regs"] = rg_
         else:
             land0 = float(base.get("land", 0.0) or 0.0)

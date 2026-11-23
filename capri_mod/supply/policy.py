@@ -8,6 +8,15 @@ this module once supply_module is loaded (capri_mod.utils.mixins.inject_names); 
 from __future__ import annotations
 
 from capri_mod.supply import entitlements as _entl
+from capri_mod.supply.equations.define_greening_limits import p_DPGreeningLimits_permGras
+from capri_mod.supply.equations.define_objc import p_linObjeCont_PLAP
+from capri_mod.supply.equations.greendeal.conventional_io import DATA_GROF_percentageChange, DATA_Yild, p_yildReduction
+from capri_mod.supply.equations.greendeal.landscape import p_DPGreeningLimits_cropDiv
+from capri_mod.supply.equations.greendeal.load_organic_targets import p_organicAreaTarget, p_organicTargetScale
+from capri_mod.supply.equations.greendeal.organic_area import DATA_Yild_percentageChange
+from capri_mod.supply.equations.greendeal.organic_io import DATA_INPO_BAS_topup
+from capri_mod.supply.equations.define_inputs import TF_I_trend
+from capri_mod.supply.equations.prep_cal import p_dualGreening
 
 
 class PolicyBlock:
@@ -112,7 +121,7 @@ class PolicyBlock:
             # only where grassland has a level: below the threshold of the activity bounds (an activity without a
             # level, held at zero, _build_constraints) CAPRI has no grassland variable and no rule; with a base of
             # 3.5e-11 kha (EL63, 2030) the rule asked for grass the bounds forbid and the NLP was infeasible (K69)
-            _xg = float(sum(xb[j] for j in _gj))
+            _xg = p_DPGreeningLimits_permGras(xb[j] for j in _gj)
             if _xg > float(_settings().get("supply.absent_level")):
                 # CAPRI's GRSACT is GRAE, GRAI, IHISGR, FALLGR (sets.gms l. 2940): the idled histosol grassland counts
                 # towards the rule (permGrasGreening_ sums GRSACT; ddGreen maps every MCACT, policy_sets.gms l. 2045),
@@ -129,7 +138,7 @@ class PolicyBlock:
                 if _r is not None and hasattr(_r, "get"):
                     ra, rg = _r.get("ARAC"), _r.get("GRAS")
                     if ra is not None and rg is not None and ra == ra and rg == rg:
-                        out["permGras"]["cal_dual"] = abs(float(ra) - float(rg))
+                        out["permGras"]["cal_dual"] = -p_dualGreening(float(ra), float(rg))   # prep_cal.gms l. 118-119
         env_on = bool(getattr(type(self), "env_const", False))
         if env_on and st.get(("active", "ecoSetAside")):
             r = st.get(("setaside_rate_pct", "ARAB"), 0.0) / 100.0
@@ -195,7 +204,7 @@ class PolicyBlock:
                 # annual area): H0 = min(H0, - sum_g (X_g + F)/(T + F) log((X_g + F)/(T + F)))
                 F = float(getattr(self.ev, "fall_floor", 0.0) or 0.0)
                 if F > 0:
-                    H0 = min(H0, -sum((x + F) / (T + F) * np.log((x + F) / (T + F)) for x in X))
+                    H0 = p_DPGreeningLimits_cropDiv(H0, X, T, F)
                 out["cropDiv"] = {"groups": list(grp.values()), "H0": H0 * (1 - 1e-9), "floors": fl}
         return out or None
 
@@ -244,7 +253,7 @@ class PolicyBlock:
         if reduction <= 0:
             return
         # yield_loss False: CAPRI star 3.0's Green Deal group (pesticides.gms: the yield shock 'off')
-        loss = param("PESTICIDE_YIELD_LOSS_AT_50PCT") * (reduction / 0.50) if yield_loss else 0.0
+        loss = p_yildReduction(param("PESTICIDE_YIELD_LOSS_AT_50PCT"), reduction) if yield_loss else 0.0
         # (a cap of the loss at 0.90 was removed 23 October 2026: unsourced and never reached - the loss is at most
         # 0.20, at a 100% cut)
 
@@ -282,7 +291,7 @@ class PolicyBlock:
             # our cereal AREA fell 5.9% against CAPRI's 4%. The area response
             # was never the problem; the yield effect was missing from the
             # output. CAPRI reports production, so this is what is compared.
-            new_ylds[a] = y * (1.0 - loss * conv)
+            new_ylds[a] = DATA_Yild(y, loss, conv)
             nr[a] = float(nr.get(a, 0.0)) - p * y * loss * conv
         # plant protection and other inputs: CAPRI's regional input changes, set with the organic target's in
         # _apply_greendeal_input_changes (24 October 2026; before, per crop on the conventional share: KNOWN_ISSUES K74; the supply audit's findings S3 and S4, ARCHITECTURE_REFACTOR.md section 5.2)
@@ -371,18 +380,14 @@ class PolicyBlock:
         region = (getattr(self.data, "organic_yield_gap_regions", None) or {}).get(capri_ms(reg_id))
         if table is None or not group or region is None:
             return 0.0
-        for reg_ in (region, "CEN"):
-            v = table.at[reg_, group] if (reg_ in table.index and group in table.columns) else None
-            if v is not None and pd.notna(v):
-                return abs(float(v)) / 100.0
-        return 0.0
+        return DATA_Yild_percentageChange(*(table.at[reg_, group] if (reg_ in table.index and group in table.columns)
+                                            else None for reg_ in (region, "CEN")))
 
     @staticmethod
     def _organic_target_scale(share: float) -> float:
         """CAPRI's scaling of its targets to the requested ambition, (orgTarg - 12) / (25 - 12)
         (load_organic_targets.gms l. 175, 183; orgTarg in %): exactly 1 at the 25% target."""
-        o, t = param("ORGANIC_OUTLOOK_PCT"), param("ORGANIC_TARGET_REF_PCT")
-        return max(0.0, (100.0 * float(share) - o) / (t - o))
+        return p_organicTargetScale(share, param("ORGANIC_OUTLOOK_PCT"), param("ORGANIC_TARGET_REF_PCT"))
 
     def _organic_region_target(self, share: float) -> float:
         """p_organicAreaTarget(ru): the member state's UAA target (organic_targets_uaa.gdx) scaled to the ambition; 0
@@ -392,7 +397,7 @@ class PolicyBlock:
         v = t.get("uaa_pp") if (t is not None and hasattr(t, "get")) else None
         if v is None or pd.isna(v):
             return max(0.0, float(share) - self._organic_baseline())
-        return max(0.0, min(1.0, float(v) / 100.0 * self._organic_target_scale(share)))
+        return p_organicAreaTarget(v, self._organic_target_scale(share))
 
     def _organic_crop_target(self, activity: str, share: float) -> float:
         """p_organicAreaTargetCrops(ru, crop) of CAPRI's organic crops (0 for the other crops): the target of the
@@ -408,7 +413,7 @@ class PolicyBlock:
         v = t.get(col)
         if v is None or pd.isna(v):
             return 0.0
-        return max(0.0, min(1.0, float(v) / 100.0 * self._organic_target_scale(share)))
+        return p_organicAreaTarget(v, self._organic_target_scale(share))
 
     def _input_row(self, activity: str, col: str) -> Optional[float]:
         """CAPRI's cost row of this region and activity (data.input_costs_ha, build_plant_protection_cost.py), or
@@ -447,7 +452,7 @@ class PolicyBlock:
         (capmod/define_inputs.gms l. 66)."""
         base = int(_inputs.base_year())                          # the run's base year (K52f)
         sim = int(getattr(self.data, "sim_year", None) or base)
-        return 1.0 - param("INPUT_SAVING_PROGRESS") * (sim - base)
+        return TF_I_trend(param("INPUT_SAVING_PROGRESS"), sim, base)
 
     def _apply_greendeal_input_changes(self, organic_share: float, pesticide_reduction: float) -> None:
         """CAPRI's plant-protection (PLAP) and other-input (INPO) changes of the Green Deal organic and pesticide
@@ -475,11 +480,7 @@ class PolicyBlock:
         from capri_mod.supply.equations.define_inputs import TF_I
         r = max(0.0, float(pesticide_reduction or 0.0))
         o_R = self._organic_region_target(organic_share) if organic_share else 0.0
-        pc_plap = -o_R if o_R > 0 else 0.0
-        pc_inpo = 0.0
-        if r > 0 and o_R < r:
-            pc_plap = -r
-            pc_inpo = r - o_R
+        pc_plap, pc_inpo = DATA_GROF_percentageChange(r, o_R)      # conventional_io.gms, organic_io.gms l. 74
         tf = self._greendeal_tech_progress()
         keep_tf = bool(getattr(type(self), "greendeal_inputs_keep_tech_change", True))
 
@@ -513,7 +514,7 @@ class PolicyBlock:
                 if inpo is not None:
                     o_a = self._organic_crop_target(a, organic_share) if organic_share else 0.0
                     eful = self._sim_input_cost(a, topup_col) or 0.0
-                    topup = 2.0 * o_a * eful
+                    topup = DATA_INPO_BAS_topup(o_a, eful)
                     if topup or pc_inpo:
                         d_i = delta(inpo, topup, pc_inpo)
                 d += d_p
@@ -545,9 +546,8 @@ class PolicyBlock:
         if t is None or a not in t.index or sim is None:
             return None
         q_uv, ppc = float(t.at[a, "plap_uvap_eur_ha"]), float(t.at[a, "plantp_cost_eur_ha"])
-        ratio = (1.0 + pc_plap) * (tf if keep_tf else 1.0) / tf if pc_plap != 0.0 else 1.0
         defl = _inputs.money_deflator(int(sim))
-        return q_uv * ratio / defl, ppc / defl
+        return p_linObjeCont_PLAP(q_uv, pc_plap, tf, keep_tf, defl), ppc / defl
 
     def _plap_crop_level_capri_step(self, a: str, pc_plap: float, tf: float, keep_tf: bool, d_p: float) -> float:
         """Comparison switch supply.greendeal_plap_crop_level_capri_step (DEP-51, its crop-level part; off by default):

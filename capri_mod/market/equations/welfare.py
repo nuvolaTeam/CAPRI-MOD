@@ -170,3 +170,29 @@ def p_welfareRes_ProfitFeed(p0, price_ratio, q0, dq):
     Departures from CAPRI: the straight-path integral (all prices at once; CAPRI's good by good, the same value for
     its symmetric Hessian); the energy's term from the energy fed (REGISTERED: it stands for CAPRI's FEDE row)."""
     return p0 * (price_ratio - 1.0) * (q0 + 0.5 * dq)
+
+
+def p_welfareRes_Welfare(components):
+    r"""p_welfareRes(RMAll, "Welfare", ROWS1, SIMY): the total welfare, the sum of its components per region (a
+    DataFrame of the components by region; pandas' sum over the columns).
+
+    CAPRI's GAMS (reports/welfare.gms l. 872-885):
+
+           p_welfareRes(RMAll,"Welfare",ROWS1,"%SIMY%")
+              =  p_welfareRes(RMAll,"CSSP",ROWS1,"%SIMY%")
+               + p_welfareRes(RMAll,"ProfitProc",ROWS1,"%SIMY%")
+               + p_welfareRes(RMAll,"ProfitDairy",ROWS1,"%SIMY%")
+               + p_welfareRes(RMAll,"ProfitAgr",ROWS1,"%SIMY%")
+               + p_welfareRes(RMAll,"ProfitFeed",ROWS1,"%SIMY%")
+               + p_welfareRes(RMAll,"TariffRev",ROWS1,"%SIMY%")
+               + p_welfareRes(RMAll,"ProfitLandUse",ROWS1,"%SIMY%")
+               + p_welfareRes(RMAll,"TRQRents",ROWS1,"%SIMY%")
+        *        need to include emission tax levied on agriculture in RMSSUP if this emission tax is deducted from ag income
+        *       + p_welfareRes(RMAll,"EmiNetTaxAgr",ROWS1,"%SIMY%")
+        *        need to include emission tax levied on processing or input supply industry if these have decreased PRIC and increased CPRI
+        *       + p_welfareRes(RMAll,"EmiNetTaxOth",ROWS1,"%SIMY%")
+               + p_welfareRes(RMAll,"PSES",ROWS1,"%SIMY%");
+
+    Departures from CAPRI: the market's agents' components (CSSP, ProfitProc, ProfitDairy, ProfitAgr, ProfitFeed,
+    TariffRev, TRQRents); the supply models' ProfitLandUse and PSES are coupling/reporting.py's, added in its totals."""
+    return components.sum(axis=1)

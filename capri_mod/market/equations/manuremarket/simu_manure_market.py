@@ -104,3 +104,16 @@ def p_mTradeReport_losf(v_netPutQuant, netf):
 
     Departures from CAPRI: per pool (CAPRI's per region, summed to the member states and TOP, l. 202-204)."""
     return v_netPutQuant - netf
+
+
+def p_excessSupplyFromSupMod(EXPT, IMPT):
+    r"""p_excessSupplyFromSupMod(ru, fout): a region's net export of manure at its last solve (the model's trade columns:
+    the deviation from CAPRI's base trade, which the accounts hold).
+
+    CAPRI's GAMS (manuremarket/simu_manure_market.gms l. 85):
+
+    p_excessSupplyFromSupMod(fout,ru) = v_netPutQuant.l(ru,fout);
+
+    In this project's notation: z = e - i (the export and import columns). Departures from CAPRI: the deviation from
+    the base trade (the model's columns)."""
+    return EXPT - IMPT

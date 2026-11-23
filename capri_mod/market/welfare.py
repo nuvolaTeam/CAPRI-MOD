@@ -51,7 +51,7 @@ import pandas as pd
 from capri_mod.market.equations.sol_market import DATA_ProcMarg_XXBIOF, p_trqBilat_Rent
 from capri_mod.market.equations.welfare import (
     PS_Y, p_welfareRes_CSSP, p_welfareRes_ProfitFeed, p_welfareRes_ProfitProc, p_welfareRes_ProfitProc_RESIMPX,
-    p_welfareRes_ProfitProc_XXBIOF)
+    p_welfareRes_ProfitProc_XXBIOF, p_welfareRes_Welfare)
 
 
 class WelfareMixin:
@@ -508,6 +508,6 @@ class WelfareMixin:
                     if comp in rows[reg]:
                         rows[reg][comp] += float(v)
         df = pd.DataFrame.from_dict(rows, orient="index")
-        df["Welfare"] = df[list(self.WELFARE_COMPONENTS)].sum(axis=1)
+        df["Welfare"] = p_welfareRes_Welfare(df[list(self.WELFARE_COMPONENTS)])
         df.index.name = "region"
         return df

@@ -193,3 +193,31 @@ def p_iterChg_TOT_MAX_CUR(iterChg_TOT_MAX, iterChg_TOT, min_iter_chg, step):
     on)."""
     count = sum(1 for v in iterChg_TOT if v > min_iter_chg)
     return (iterChg_TOT_MAX if (step == 1 or count > 2) else 0.0), count
+
+
+def DATA_UVAG_forecast(weights, values):
+    r"""DATA(RMSSUP, "UVAG", XX, "Y") of CAPRI's price forecast: the weighted average of the market's prices of the last
+    steps (values, the latest first; floats or pandas Series), the weights 0.55 / 0.30 / 0.15, from the 20th step 0.4 /
+    0.3 / 0.2 / 0.1 (define_stepWeights.gms, the latest first), normalised over the steps available.
+
+    CAPRI's GAMS (capmod/price_forecast.gms l. 376-383):
+
+            if( card(stepsWithWeights) and p_iterChg("TOT","MAX","CUR"),
+        *
+        *    --- the price for the next iteration is a weigthed average of the prices simulated for the
+        *        same year in previous iterations
+        *
+              DATA(MS,"UVAG",UVAN_P,"Y") $ (DATA(MS,"UVAG",UVAN_P,"Y") or p_itemsInIters(MS,"UVAG",uvan_p,"TRD"))
+                     = SUM(stepsWithWeights,
+                                    p_itemsInIters(MS,"UVAG",UVAN_P,stepsWithWeights) * p_stepWeights(stepsWithWeights));
+
+    (the problem products' slower smoothing, l. 386-388, define_stepweights.py p_stepWgtSpecial).
+
+    Departures from CAPRI: the weighted sum divided by the weights available (CAPRI's weights normalised first,
+    define_stepWeights.gms l. 40-41: the same value up to rounding)."""
+    use = list(values)[:len(weights)]
+    tot = sum(weights[:len(use)])
+    out = None
+    for w_, v_ in zip(weights, use):
+        out = w_ * v_ if out is None else out + w_ * v_
+    return out / tot

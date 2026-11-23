@@ -45,6 +45,12 @@ from capri_mod.data.definitions import (
 from capri_mod.data.definitions import MS_CODE, capri_ms, IdentityMap, is_eu
 from capri_mod.tableio import read_input
 from capri_mod.supply import inputs as _inputs
+from capri_mod.market.equations.set_prices import DATA_UVAG_Y
+from capri_mod.supply.equations.greendeal.landscape import DATA_FALL_FLOOR
+from capri_mod.supply.equations.greendeal.surptot import data_SURTOT_MAXS
+from capri_mod.supply.equations.set_supply_bounds import v_actLevl_up_FALL
+from capri_mod.supply.equations.ghgmiti import (
+    p_ghgMiti_othImpact_EmiCalmin, p_ghgMiti_pmpParsqr, p_ghgMiti_pmpParsqr_saving, p_ghgMiti_relSubs)
 
 
 # ---------------------------------------------------------------------------
@@ -347,13 +353,9 @@ class SupplyResult:
 # PMP CALIBRATION
 # ---------------------------------------------------------------------------
 
-def saving_slope(nme: float, value: float, m0: float, m1: float) -> float:
-    """CAPRI's saving term of a fertiliser option's curvature (envind/ghgMiti.gms l. 1016-1050): nmE x value x ((1 + nmE
-    m1)^-2 - (1 + nmE m0)^-2) / (m1 - m0), the N saved valued at its price (mineral N: the member state's unit value;
-    manure N: p_manureShadVal); 0 where it is not defined (m1 <= m0, or 1 + nmE m <= 0)."""
-    if not m1 > m0 or 1.0 + nme * m0 <= 0 or 1.0 + nme * m1 <= 0:
-        return 0.0
-    return nme * value * ((1.0 + nme * m1) ** -2 - (1.0 + nme * m0) ** -2) / (m1 - m0)
+#: CAPRI's saving term of a fertiliser option's curvature, (nmE, value, m0, m1) (envind/ghgMiti.gms l. 1029-1045;
+#: capri_mod/supply/equations/ghgmiti.py p_ghgMiti_pmpParsqr_saving; the mixins call it by this name)
+saving_slope = p_ghgMiti_pmpParsqr_saving
 
 
 class PMPCalibrator:
@@ -623,7 +625,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         ps = price_shock.copy()
         for (a, c), f in t.items():
             if a == c and a in ps.index and a in CROPS:
-                ps[a] = float(ps[a]) * float(f)
+                ps[a] = DATA_UVAG_Y(float(ps[a]), float(f))           # set_prices.gms l. 44-47
         return ps
 
     def _market_revenue_change(self, act, mrev, price_shock) -> float:
@@ -1200,12 +1202,12 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 # has none (_capri_ms_targets). The requested share scales the
                 # ambition exactly as CAPRI's lndscpTarg does (10% = full).
                 _seta0 = sum(float(self._base_levels().get(a, 0.0)) for a in _seta_acts)   # CAPRI's SETF
-                floor = (set_aside_requirement / 0.10) * (_pp / 100.0) * uaa_total + _seta0
+                floor = DATA_FALL_FLOOR(set_aside_requirement, _pp, uaa_total, _seta0)   # pol_input/greendeal/landscape.gms
             else:
                 floor = set_aside_requirement * uaa_total
             self.ev.fall_floor = float(floor)
             if floor > 0:
-                _fall_up = self.FALL_FLOOR_UP_SHARE * _n_techn("FALL") * uaa_total
+                _fall_up = v_actLevl_up_FALL(self.FALL_FLOOR_UP_SHARE, _n_techn("FALL"), uaa_total)
             # CAPRI's e_setaLandscape (equations/supply_model/set_aside.py)
             from capri_mod.supply.equations.supply_model.set_aside import e_setaLandscape
             row_seta, b_seta = e_setaLandscape(n, acts_idx, _seta_acts, floor)
@@ -2603,9 +2605,9 @@ class SupplyModule(ModuleStateMixin):
                     continue
                 out.append((name, nmin, rs0 * k1, slope, s0, smax))
             else:
-                rs1, rs0 = ((param("MITI_RELSUBS1_ADOPTED"), 0.0) if (smax < 1.0 and name != "NITR_INH")
-                            else (param("MITI_RELSUBS1"), param("MITI_RELSUBS0")))
-                slope = k1 * (rs1 - rs0) / (smax - s0)
+                rs1, rs0 = p_ghgMiti_relSubs(smax, name == "NITR_INH", param("MITI_RELSUBS1"), param("MITI_RELSUBS0"),
+                                             param("MITI_RELSUBS1_ADOPTED"))
+                slope = p_ghgMiti_pmpParsqr(k1, rs1, rs0, smax, s0)
                 if getattr(type(self), "fert_slope_with_saving", True):
                     # CAPRI's pmpParSqr (envind/ghgMiti.gms l. 1016-1035, the 'alternative approach'): the FOC is zero
                     # at the initial and the maximum share with the fertiliser saving valued at the member state's
@@ -2648,9 +2650,9 @@ class SupplyModule(ModuleStateMixin):
         if not g:
             return 0.0
         L = _nf.netf(g, float(g.get("run_surf", 0.0)))
-        v = (L["NH3"] * (sv["NH3SYN"] or 0.0) + L["NOX"] * (sv["NOXSYN"] or 0.0) + L["N2O"] * (sv["N2OSYN"] or 0.0)
-             + L["RunTot"] * (sv["NO3SRUN"] or 0.0))
-        return (abs(v) ** param("P_FERT_EFF_COR")) * (1.0 if v >= 0 else -1.0) if v else 0.0
+        return p_ghgMiti_othImpact_EmiCalmin([L["NH3"], L["NOX"], L["N2O"], L["RunTot"]],
+                                             [sv["NH3SYN"], sv["NOXSYN"], sv["N2OSYN"], sv["NO3SRUN"]],
+                                             param("P_FERT_EFF_COR"))
 
     def _manure_per_head(self, region, model):
         """Manure N per activity unit of the region's animals ({animal: the environmental module's organic N input
@@ -3103,7 +3105,8 @@ class SupplyModule(ModuleStateMixin):
                     if bc is not None and sp is not None and sp > 0 and _rule == "star3":
                         # CAPRI star 3.0 surptot.gms: data(srnuts2,"SURTOT","MAXS") = baseline surplus per ha
                         # x (1 - surpRedu/100), every EU NUTS2 region alike (relaxations only from 2090)
-                        target = sp * (1.0 - float(0.5 if policy_scenario.get("surplus_cut") is None else policy_scenario["surplus_cut"]))
+                        target = data_SURTOT_MAXS(sp, float(0.5 if policy_scenario.get("surplus_cut") is None
+                                                            else policy_scenario["surplus_cut"]))
                         surplus_row = (bc[0], target, bc[1], bc[2],
                                        self.data["yields"].loc[region],
                                        self._fert_techs(region),

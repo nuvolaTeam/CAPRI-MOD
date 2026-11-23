@@ -36,7 +36,7 @@ from capri_mod.policy.equations.cap_2013_2020_transfers import (
 from capri_mod.policy.equations.cap_2013_2020_vcs import p_premDataE_CEILVAL
 from capri_mod.policy.equations.cap_2014_2020 import (
     p_2013_1307_AnnexII, p_premDataE_DPGREEN_CEILVAL, p_premDataE_dp_bps_CEILVAL, p_premDataE_share_CEILVAL)
-from capri_mod.policy.equations.def_endcut import p_entlLimit_cut
+from capri_mod.policy.equations.def_endcut import p_entlLimit_cut, p_entlLimit_Limit
 from capri_mod.supply import inputs as _inputs
 
 #: the shares' payment schemes of the national ceiling (cap14_ceiling_shares.csv)
@@ -158,7 +158,7 @@ def ms_cuts(year: int, d=None) -> dict:
     cut_schemes = {s.lower() for s in d["settings"].get("cut_scheme", {})}
     limits = defaultdict(float)
     for r, v in d["levels"].items():
-        limits[capri_ms(r)] += sum(v.values())
+        limits[capri_ms(r)] += p_entlLimit_Limit(v.values())
     out = {}
     for ms, ceil in ms_ceilings(year, d).items():
         total = sum(v for s, v in ceil.items() if s.lower() in cut_schemes)
@@ -188,5 +188,5 @@ def region_limit(region: str, acts, year: int):
         codes = [c for c in CAPRI_MEMBERS.get(a, (a,)) if c in lev]
         if codes:
             cols.append(j)
-            limit += sum(lev[c] for c in codes)
+            limit += p_entlLimit_Limit(lev[c] for c in codes)
     return cut, limit, cols

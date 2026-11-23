@@ -20,3 +20,16 @@ def p_entlLimit_cut(CEILVAL, Limit):
     Departures from CAPRI: the schemes' ceilings summed first (CEILVAL their sum: the schemes share the limit, so the
     region's objective loses the sum of their cuts; the same value up to rounding)."""
     return CEILVAL * 1000.0 / Limit
+
+
+def p_entlLimit_Limit(LEVL):
+    r"""p_entlLimit(RU, dpEndCut, ddEndCut, "Limit"): a region's entitlement limit, the sum of its crops' (MCACT) trend
+    levels (the caller's sequence).
+
+    CAPRI's GAMS (policy/def_endCut.gms l. 78-79):
+
+     p_entlLimit(RU,dpEndCut,ddEndCut,"Limit") $ [PSDPAY_cutEndog(dpEndCut) and dpEndCut_to_ddEndCut( dpEndCut,ddEndCut)]=
+                         SUM(mcact$(DDREG_MPACT(ddEndCut,MCACT)), DATA(ru,mcact,"levl","trd"));
+
+    Departures from CAPRI: the trend levels CAPRI's (cap14_entitlement_levels.csv, data read)."""
+    return sum(LEVL)

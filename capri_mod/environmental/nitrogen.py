@@ -750,7 +750,8 @@ class NitrogenBlock:
         nm = float((nmin or {}).get("NITR_INH", 0.0) or 0.0)
         s = min(s, 1.0)
         w = (s / (1.0 + nm)) / (s / (1.0 + nm) + 1.0 - s)
-        return {i: 1.0 - w + w * (1.0 - v) * (1.0 + nm) for i, v in lit.items()}
+        from capri_mod.supply.equations.ghgmiti import p_ghgMiti_othImpact_mitisyn       # ghgMiti.gms l. 552-555
+        return {i: p_ghgMiti_othImpact_mitisyn(v, nm, w) for i, v in lit.items()}
 
     def urea_effect(self, region, supply_result, frac=False):
         """(share, othImpact NH3SYN) of CAPRI's urea substitution in the supply result (urea_subst_option.csv, the

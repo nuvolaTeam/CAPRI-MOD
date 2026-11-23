@@ -23,6 +23,7 @@ docs/dev/MARKET_EQUATION_REFACTOR_PLAN.md sections 2 and 4 with the plan's chang
 | A1+A3 | the emission and nutrient accounts and the projection's livestock rules: environmental/equations/gases.py (EMISCALC_CO2UREA), calc_nbalance.py (DATA_RUNANI, DATA_IMPORT, DATA_SURTOT, DATA_SURSOI); projection/equations/breeding.py (p_animReqCopy_NEA_share, p_animReqCopy_ENNE_nonlact), calc_nexport.py (CRPR_EXPT_COMI); supply/equations/line_nitr.py (p_ghgMiti_AComLN), fertned.py (p_technFact_FNUT), set_supply_bounds.py (v_emiLoss_bounds); market/equations/welfare.py (p_welfareRes_ProfitAgr); called by environmental_module.py, nitrogen.py, phosphorus.py, p_balance.py, income/income_module.py, projection/projection_module.py. ghgMiti.gms l. 552-565 (n_leaching.fert_effect) left to A5 (its module supply/equations/ghgmiti.py is locked) | the functions' tests (capri_mod/tests/test_assignments_a1.py) and the moved modules' (test_p_balance.py, test_supplement_fat.py, test_urea_subst.py, test_water_income.py: 19 passed); the five-unit Green Deal run (FI1A0000, NL230000, BL340000, IT110000, NO020000) identical |
 | A2 | the premium rules: capri_mod/policy/equations/, one module per CAPRI file (policy.py, prmcut.py, aggreg_ppepay.py, implement_bps.py, mtr_until2013.py, calc_mtr_top.py, calc_mtr.py, extend_rd_baseline.py, cap_2014_2020.py, cap_2013_2020_transfers.py, cap_2013_2020_vcs.py, cap_2013_2020_cndp.py, def_policy.py, def_endcut.py, def_no_policy.py, nordicaid.py; _gams.py: GAMS's EPS, NA, $-conditions), 104 functions; called by policy/declared.py, premium_cut.py, premiums.py, mtr.py, bps.py, rd.py, cap14_premiums.py, nordic_aid.py, norway.py and supply/entitlements.py. The literal values data read (section 8 of the plan); the 120 inventory rows "moved in A2" | the functions' tests (capri_mod/tests/test_assignments_a2.py) and the moved modules' (test_bps, test_declared, test_mtr, test_premiums, test_premium_cut, test_premium_baseline_2030, test_rd, test_nordic_aid, test_norway, test_entitlement_money); the premium chain's outputs for every EU unit identical, bit for bit and in order (section 7); the five-unit Green Deal run (NO060000, FI130000, FR720000, PL510000, DE210000) and the coupled-support check (tools/run/run_vcs_2030.py --regions, the same five) identical; the full suite at 24a69fd8 (section 7) |
 | A4 | the coupling's and the market's assignments: capri_mod/coupling/equations/ (new: price_forecast.py, the stop rule; define_stepweights.py; simu_calibration_to_supply.py; sol_simy.py), capri_mod/market/equations/ (welfare.py extended: the GL money metric, the processing's and the feed industry's profits; new: sol_market.py, set_start_val.py, def_biofuel_params.py; manuremarket/simu_manure_market.py extended), capri_mod/supply/equations/impose_upper_bound_on_elasticity.py; called by utils/capri_stop.py, coupling/price_step.py, bridge.py, young_animals.py, manure.py, reporting.py, market/welfare.py, demand.py, market_bounds.py, biofuel.py and supply/capri_pmp.py. 35 inventory rows "moved in A4" | the functions' tests (capri_mod/tests/test_assignments_a4.py) and the moved modules' (test_capri_stop, test_welfare, test_manure_pool_nlp, test_norway_market, test_biofuel_ad, test_demand_ad, test_trade_ad, test_market_layers, test_capri.py's PMP tests); the stop rule old and new on random tables (300 runs of 20 steps: identical verdicts, changes and drift); the five-unit Green Deal run (NL230000, RO020000, NO060000, DE210000, ES420000) identical. No full suite (the project lead, 23 November 2026) |
+| A5 | the supply side's assignments, after merging dev at 565669aa (K196, DEP-21 closed; DEP-10 item 1b): capri_mod/supply/equations/greendeal/ (new: conventional_io.py, organic_io.py, organic_area.py, load_organic_targets.py, landscape.py, minfert_redu_by_crop.py, surptot.py), supply/equations/ (new: set_fert_priors.py, define_objc.py, define_greening_limits.py, define_manure_trade_costs.py, define_const_pmp_param.py, prep_cal.py, prep_sim_luc.py; extended: ghgmiti.py, define_inputs.py, set_supply_bounds.py), projection/equations/breeding.py, market/equations/set_prices.py and welfare.py, coupling/equations/price_forecast.py, policy/equations/def_endcut.py and market/equations/manuremarket/simu_manure_market.py (the rows of two blocks); called by supply/policy.py, supply_module.py, fertilisation.py, abatement.py, livestock.py, land.py, entitlements.py, fert/inner_fert_dist.py, feed/ration.py, policy/endotech.py, environmental/nitrogen.py, coupling/price_step.py, manure.py, market/welfare.py and model.py. 92 rows "moved in A5"; rd_logic.gms left (section 9) | the functions' tests (capri_mod/tests/test_assignments_a5.py); the five-unit Green Deal run (DE210000, ES420000, FR520000, NL230000, IT120000) identical to the run at A5's start (8d5d2818, dev merged); the full-EU Green Deal run identical to dev's 565669aa (the phase's start with the main line's changes); the full suite (section 9) |
 
 A0 approved by the project lead (23 November 2026; the plan's section 8): A1 and A3 one block with A1's five units;
 in A2 only the rules become functions, the literal values "data read: <the CSV and its builder>" (3 rows of
@@ -292,3 +293,50 @@ file); a CAPRI name on a citing line can match a statement the code does not por
   market/welfare.py _welfare_trade cited l. 614-620 (tariffs on bilateral-TRQ flows) for the rents' 50/50 split: now
   l. 646-659.
 - **No full suite** in A4 (the project lead, 23 November 2026): it runs once, before the phase's merge.
+
+## 9. What A5 found (for the main line; nothing fixed)
+
+- **dev merged** at A5's start (565669aa: DEP-10 item 1b, DEP-12, DEP-21 and K189 closed, K196's lead closed): a
+  merge, no conflict; its 14 new inventory rows classified (capmod/define_inputs.gms "data read": the main line's
+  input_coefs_2030.csv, its TF_I already in the style in supply/equations/define_inputs.py). A5's reference run is at
+  the merge (8d5d2818); the full-EU run's reference is dev's 565669aa itself (the phase's start plus the main line's
+  changes, without the refactor). DEP-13 (the livestock tables) had not landed on dev: A5 touched livestock.py at one
+  line (the breeding options' curvature).
+- **Moved**: 92 rows ("moved in A5"), 15 of them of two blocks ("A4; A5", "A2; A5", "A1; A5": the selection by
+  one block left them out, so A5 took them: the price forecast, the manure market's fall-back and excess supply, the
+  welfare total, the entitlement limit, the fertiliser slack's bounds, ghgMiti.gms l. 552-565 A1 deferred). 28 of them
+  are copies, constant bounds, flags or sets kept where they are with the status saying so.
+- **Left to move**: policy/rd_logic.gms (file row, "A2; context"): rd.py's rd_declarations ports its steps 5-10 in
+  about 330 lines without line citations, so its statements need the file read against the code; for the main session
+  to schedule (a block of its own).
+- **Reclassified**: supply/prep_sim.gms l. 253-255 (ISET's technology factor) "not ported" (the ISET column is
+  substituted by SETA_'s r / (1 - r)); supply/calibrate_supply.gms l. 446-478 (the market supply Hessian's rows)
+  "not ported" (measured by finite differences); fert/ferttrm_years.gms l. 284-295 and set_fert_priors.gms l. 297-306
+  "data read" (the accuracies and the mode share, parameters).
+- **Porting differences** (in the functions' docstrings):
+  - set_prices.gms: the unit values as relative changes with the trend point's factor; the chickens' and young
+    animals' inputs not covered.
+  - conventional_io.gms / organic_io.gms: the closed forms of the percentage changes (as shares); the yield loss scaled
+    with the cut (the jrc121368 rule) without CAPRI's remainingTarget factor; the organic top-up without SERI, valued
+    at the fuel cost (CAPRI-ERROR-FIX organic_topup_at_fuel_cost).
+  - organic_area.gms: the gap's absolute value / 100; no 0.45 factor (pest_disagg off).
+  - load_organic_targets.gms: the scale at least 0; the targets within 0 and 1; VEGE always the UAA target.
+  - landscape.gms: UAAR and SETF the model's base; the Shannon floors the model's.
+  - minfert_redu_by_crop.gms / organic_minfert_redu.gms: kg per ha; the baselines the model's own calibration point's.
+  - surptot.gms: kg per ha, the model's own surplus, no 2090 relaxations.
+  - define_objc.gms: PLAP only at the mean technology, a cost per ha.
+  - set_fert_priors.gms: the gamma's beta as (m + sqrt) / (2 var) (CAPRI's 1 / (2 var) x (m + sqrt)); the
+    regulations' mode / max given.
+  - ghgMiti.gms: pmpParsqr's two terms each divided by (m1 - m0); the inhibitor's side effect as the accounts'
+    multiplier 1 - w + w (1 - lit)(1 + NMIN); EmiCalmin with the cascade's losses.
+  - breeding.gms: the breeding options' shares per eligible head; the effects linear in the parameter; the curvature's
+    floor without abs, divided by the eligible heads.
+  - prep_cal.gms: the greening dual's multiplier fixed in the calibration's fit.
+  - prep_sim_luc.gms: the land classes' bounds (l. 578-584) not ported.
+  - define_manure_trade_costs.gms: the supply net of the base trade where it is the region's (K167).
+  - define_const_pmp_param.gms: the feeds' slope divided by the feeding itself; a fallback only.
+  - price_forecast.gms l. 376-383: the weighted sum divided by the weights available.
+  - welfare.gms l. 872-885: the market's agents' components (the supply models' added by coupling/reporting.py).
+- **Citations**: the two A0 listed in supply/policy.py were corrected by the main line (merged); two stale "citation
+  wrong" rows updated; the two in runlog.py (capmod.gms l. 81, 1425-1428) are in no block's files, left to the main
+  session.

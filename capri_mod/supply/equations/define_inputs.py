@@ -10,6 +10,21 @@ O_HP's update from the same file (l. 89-92) is fertned.py O_HP_yieldGrowth.
 from __future__ import annotations
 
 
+def TF_I_trend(progress: float, year: int, base_year: int) -> float:
+    r"""TF_I(RS, IY, "T") before a scenario's change: the input-saving progress, 0.5% a year (progress:
+    INPUT_SAVING_PROGRESS) from the base year to the simulation year.
+
+    CAPRI's GAMS (capmod/define_inputs.gms l. 64-66):
+
+        *       --- 0.5 % input saving technical progress per year
+        *
+                TF_I(RS,IY,"T") = 1. -0.005 * (CALYEA("Y")-CALYEA("BAS"));
+
+    In this project's notation: TF_I = 1 - 0.005 (Y - BAS). Departures from CAPRI: none (block A5; the caller passed
+    it to TF_I before)."""
+    return 1.0 - progress * (year - base_year)
+
+
 def TF_I(TF_I_trend: float, percentageChange: float = 0.0, scenAugmentsTechChange: bool = True) -> float:
     r"""TF_I(RS, IY, "T"): the factor on a yield-dependent input's coefficient for the simulation year.
 

@@ -12,7 +12,7 @@ from capri_mod.market.equations.manuremarket.declare_manure_market import (e_mPo
                                                                            e_mPoolExcessSupply,
                                                                            e_mPoolSurplus_row, p_mTradeAddCost)
 from capri_mod.market.equations.manuremarket.simu_manure_market import (
-    p_itemsInIters_PSHW, p_mPoolSupConst, p_mTradeReport_losf, p_stepWeights_average)
+    p_excessSupplyFromSupMod, p_itemsInIters_PSHW, p_mPoolSupConst, p_mTradeReport_losf, p_stepWeights_average)
 #: the clearing's state kept per market between outer iterations, as paths in the model's state objects (the N
 #: market's in the model's own sv and res; the P and K markets' copies in sv.pool_pk, swapped in for their clearing)
 #: t per kt: CAPRI's pool trade is in kt, the supply in its slope in t (outer_loop.manure_pool_es_slope "capri_doc")
@@ -422,7 +422,7 @@ class ManureBlock:
             if v <= float(st.get("outer_loop.manure_pool_pshw_floor")) and len(h_) > 1:
                 use = list(reversed(h_))[:len(wts)]
                 v = p_stepWeights_average(wts, use)
-            z = r_["e"] - r_["i"]
+            z = p_excessSupplyFromSupMod(r_["e"], r_["i"])
             a = p_mPoolSupConst(z, b, v)
             cs1, cb1 = r_["cs1"], r_["cb1"]
             # the constants: the region's export (import) reduced cost = v + cs0 + cs1 e - P (P + cb0 + cb1 i - v)
