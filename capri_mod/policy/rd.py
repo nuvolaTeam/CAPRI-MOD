@@ -42,6 +42,10 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from capri_mod.policy.equations.extend_rd_baseline import (  # noqa: F401 (_nz, _num, _div, _gsum: GAMS's EPS arithmetic)
+    _div, _gsum, _num, _nz, p_rdBudget_plan, p_rdBudget_spend, p_rdBudget_spend_from_above, p_rdSpendingPeriod_abs,
+    p_rdSpendingPeriod_ave, p_rdSpendingPeriod_nobs, p_rdSpendingPeriod_rest, p_rdSpendingPeriod_weight,
+    p_rdSpendingPeriod_weight_scaled, p_rdSpendingPeriod_weight_shock, p_rdSpendingPeriod_weight_sum)
 from capri_mod.policy.premium_cut import EPS
 from capri_mod.supply import inputs as _inputs
 
@@ -59,10 +63,6 @@ def _mul(x, f):
     if x == EPS:
         return EPS
     return x * f
-
-
-def _nz(x) -> bool:
-    return x == EPS or bool(x)
 
 
 def _load(inp):
@@ -102,18 +102,6 @@ def data(inp=None) -> dict:
 # extend_rd_baseline.gms
 # ------------------------------------------------------------------------------------------------------------------
 
-def _num(x) -> float:
-    """A value in GAMS's arithmetic and comparisons: EPS is zero."""
-    return 0.0 if x == EPS or x is None else x
-
-
-def _div(a, b):
-    """GAMS's a / b with EPS (EPS / b stays EPS)."""
-    if a == EPS:
-        return EPS
-    return a / b if a else None
-
-
 def extend_budget(d: dict, target_year: int) -> dict:
     """The public RD money per (region, year, measure, "plan" or "spend") after extend_rd_baseline.gms (steps 1-4 of
     the module docstring), in million EUR; EPS where CAPRI's data or arithmetic gives EPS (a spend recorded as
@@ -136,8 +124,9 @@ def extend_budget(d: dict, target_year: int) -> dict:
     for y in range(max(2006, min(years_all) + 1), target_year + 2):
         for r in runr:
             for m in measures:
-                if not _nz(B.get((r, y, m, "plan"))) and _nz(B.get((r, y - 1, m, "plan"))):
-                    B[(r, y, m, "plan")] = B[(r, y - 1, m, "plan")]
+                v = p_rdBudget_plan(B.get((r, y, m, "plan")), B.get((r, y - 1, m, "plan")))
+                if v is not None:
+                    B[(r, y, m, "plan")] = v
 
     # the sums and counts per programme
     Sp, nobs = {}, {}
@@ -145,10 +134,10 @@ def extend_budget(d: dict, target_year: int) -> dict:
         for p, ys in rdp_years.items():
             for m in measures:
                 for ps in ("plan", "spend"):
-                    v = _gsum(B.get((r, y, m, ps)) for y in ys)
+                    v = p_rdSpendingPeriod_abs(B.get((r, y, m, ps)) for y in ys)
                     if v is not None:
                         Sp[(r, p, m, ps)] = v
-                n = sum(1 for y in ys if _num(B.get((r, y, m, "spend"))) > 0)
+                n = p_rdSpendingPeriod_nobs(B.get((r, y, m, "spend")) for y in ys)
                 if n:
                     nobs[(r, p, m)] = n
 
@@ -160,7 +149,7 @@ def extend_budget(d: dict, target_year: int) -> dict:
     for n in nuts0:
         for p in rdp_years:
             for m in measures:
-                v = _gsum(Sp.get((s, p, m, "spend")) for s in below[n])
+                v = p_rdSpendingPeriod_abs(Sp.get((s, p, m, "spend")) for s in below[n])
                 if v is not None:
                     Sp[(n, p, m, "spend")] = v
                 else:
@@ -171,7 +160,7 @@ def extend_budget(d: dict, target_year: int) -> dict:
             tot = _num(Sp.get((n, p07, m, "spend")))
             if tot > 0:
                 for s in below[n]:
-                    v = _div(Sp.get((s, p07, m, "spend")), tot) if _nz(Sp.get((s, p07, m, "spend"))) else None
+                    v = p_rdSpendingPeriod_weight(Sp.get((s, p07, m, "spend")), tot)
                     if v is not None:
                         W[(s, m)] = v
     # rules 3 and 4, by member state and policy shock, where a region has no weight (EPS is one)
@@ -187,38 +176,29 @@ def extend_budget(d: dict, target_year: int) -> dict:
                 for m in old & set(measures):
                     if _nz(W.get((s, m))):
                         continue
-                    if _nz(tot):
-                        num = _gsum(Sp.get((s, p00, m1, "spend")) for m1 in old)
-                        if tot == EPS:
-                            if num not in (None, EPS):
-                                raise ValueError(f"extend_rd_baseline rule 3: {n} {sh} a share over EPS")
-                            v = EPS if num == EPS else None
-                        else:
-                            v = _div(num, tot) if num is not None else None
-                        if v is not None:
-                            W[(s, m)] = v
-                            continue
-                    if key.get((s, sh)):
-                        W[(s, m)] = key[(s, sh)]
+                    num = _gsum(Sp.get((s, p00, m1, "spend")) for m1 in old) if _nz(tot) else None
+                    v = p_rdSpendingPeriod_weight_shock(num, tot, key.get((s, sh)), f"{n} {sh}")
+                    if v is not None:
+                        W[(s, m)] = v
     # rescaled by member state; the member state keeps the sum before the rescaling (CAPRI's p_rdSpendingPeriod)
     Wsum = {}
     for n in nuts0:
         for m in measures:
-            t = _gsum(W.get((s, m)) for s in below[n])
+            t = p_rdSpendingPeriod_weight_sum(W.get((s, m)) for s in below[n])
             if t is None:
                 continue
             Wsum[(n, m)] = t
             if t != EPS:
                 for s in below[n]:
                     if (s, m) in W:
-                        W[(s, m)] = _div(W[(s, m)], t)
+                        W[(s, m)] = p_rdSpendingPeriod_weight_scaled(W[(s, m)], t)
 
     # 3. the money not spent in 2007-2013, spread over its years without spend (CAPRI writes their number "7 - nobs")
     y07 = rdp_years[p07]
     YEARS_OF_RDP = len(y07)
 
     def rest(r, m):
-        return max(0.0, _num(Sp.get((r, p07, m, "plan"))) - _num(Sp.get((r, p07, m, "spend"))))
+        return p_rdSpendingPeriod_rest(Sp.get((r, p07, m, "plan")), Sp.get((r, p07, m, "spend")))
 
     def nob(r, m):
         return nobs.get((r, p07, m), 0)
@@ -229,7 +209,7 @@ def extend_budget(d: dict, target_year: int) -> dict:
             if _nz(W.get((s, m))) and rs and nob(s, m) < YEARS_OF_RDP:
                 for y in y07:
                     if _num(B.get((s, y, m, "spend"))) == 0:
-                        B[(s, y, m, "spend")] = rs / (YEARS_OF_RDP - nob(s, m))
+                        B[(s, y, m, "spend")] = p_rdBudget_spend(rs, nob(s, m), YEARS_OF_RDP)
     n1s = sorted(r for r in d["srnuts1"] if any(r in in0[n] for n in nuts0)
                  and _num(_gsum(Sp.get((r, p07, m, "plan")) for m in measures)))
     ms_with_plan = [n for n in nuts0 if _num(_gsum(Sp.get((n, p07, m, "plan")) for m in measures))]
@@ -238,12 +218,12 @@ def extend_budget(d: dict, target_year: int) -> dict:
             sub = [s for s in members.get(r, []) if s in ext]
             for m in measures:
                 if not _nz(Sp.get((r, p07, m, "spend"))):
-                    v = _gsum(Sp.get((s, p07, m, "spend")) for s in sub)
+                    v = p_rdSpendingPeriod_abs(Sp.get((s, p07, m, "spend")) for s in sub)
                     if v is not None:
                         Sp[(r, p07, m, "spend")] = v
                 rs = rest(r, m)
                 if not _nz(Wsum.get((r, m))):
-                    v = _gsum(W.get((s, m)) for s in sub)
+                    v = p_rdSpendingPeriod_weight_sum(W.get((s, m)) for s in sub)
                     if v is not None:
                         Wsum[(r, m)] = v
                 wr = _num(Wsum.get((r, m)))
@@ -255,14 +235,14 @@ def extend_budget(d: dict, target_year: int) -> dict:
                         continue
                     for y in y07:
                         if _num(B.get((s, y, m, "spend"))) == 0:
-                            B[(s, y, m, "spend")] = rs * ws / wr / (YEARS_OF_RDP - nob(s, m))
+                            B[(s, y, m, "spend")] = p_rdBudget_spend_from_above(rs, ws, wr, nob(s, m), YEARS_OF_RDP)
 
     # 4. after 2013: the NUTS 2 regions' average spend of 2007-2013
     s2 = [s for n in nuts0 for s in in0[n] if s in d["srnuts2"]]
     for s in s2:
         for m in measures:
-            tot = _gsum(B.get((s, y, m, "spend")) for y in y07)
-            ave = EPS if tot == EPS else (tot / len(y07) if tot else None)
+            tot = p_rdSpendingPeriod_abs(B.get((s, y, m, "spend")) for y in y07)
+            ave = p_rdSpendingPeriod_ave(tot, len(y07))
             for y in range(2014, target_year + 2):
                 if ave is not None:
                     B[(s, y, m, "spend")] = ave
@@ -274,17 +254,6 @@ def extend_budget(d: dict, target_year: int) -> dict:
 # ------------------------------------------------------------------------------------------------------------------
 # rd_logic.gms
 # ------------------------------------------------------------------------------------------------------------------
-
-def _gsum(values):
-    """GAMS's sum with EPS terms: the sum of the numbers, EPS where only EPS and zeros, None for nothing."""
-    tot, eps = 0.0, False
-    for v in values:
-        if v == EPS:
-            eps = True
-        elif v:
-            tot += v
-    return tot if tot else (EPS if eps else None)
-
 
 def rd_declarations(levels: dict, year: int, groups: dict, d: dict = None, budget: dict = None,
                     base_weights: dict = None) -> dict:

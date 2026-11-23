@@ -21,6 +21,7 @@ docs/dev/MARKET_EQUATION_REFACTOR_PLAN.md sections 2 and 4 with the plan's chang
 |---|---|---|
 | A0 | the inventory (docs/dev/assignments_inventory.csv; tools/refactor/assignments_inventory.py), each row reviewed; the five units of each block (section 3) | docs and a tool; the quote and citation checks; the pre-commit checks |
 | A1+A3 | the emission and nutrient accounts and the projection's livestock rules: environmental/equations/gases.py (EMISCALC_CO2UREA), calc_nbalance.py (DATA_RUNANI, DATA_IMPORT, DATA_SURTOT, DATA_SURSOI); projection/equations/breeding.py (p_animReqCopy_NEA_share, p_animReqCopy_ENNE_nonlact), calc_nexport.py (CRPR_EXPT_COMI); supply/equations/line_nitr.py (p_ghgMiti_AComLN), fertned.py (p_technFact_FNUT), set_supply_bounds.py (v_emiLoss_bounds); market/equations/welfare.py (p_welfareRes_ProfitAgr); called by environmental_module.py, nitrogen.py, phosphorus.py, p_balance.py, income/income_module.py, projection/projection_module.py. ghgMiti.gms l. 552-565 (n_leaching.fert_effect) left to A5 (its module supply/equations/ghgmiti.py is locked) | the functions' tests (capri_mod/tests/test_assignments_a1.py) and the moved modules' (test_p_balance.py, test_supplement_fat.py, test_urea_subst.py, test_water_income.py: 19 passed); the five-unit Green Deal run (FI1A0000, NL230000, BL340000, IT110000, NO020000) identical |
+| A2 | the premium rules: capri_mod/policy/equations/, one module per CAPRI file (policy.py, prmcut.py, aggreg_ppepay.py, implement_bps.py, mtr_until2013.py, calc_mtr_top.py, calc_mtr.py, extend_rd_baseline.py, cap_2014_2020.py, cap_2013_2020_transfers.py, cap_2013_2020_vcs.py, cap_2013_2020_cndp.py, def_policy.py, def_endcut.py, def_no_policy.py, nordicaid.py; _gams.py: GAMS's EPS, NA, $-conditions), 104 functions; called by policy/declared.py, premium_cut.py, premiums.py, mtr.py, bps.py, rd.py, cap14_premiums.py, nordic_aid.py, norway.py and supply/entitlements.py. The literal values data read (section 8 of the plan); the 120 inventory rows "moved in A2" | the functions' tests (capri_mod/tests/test_assignments_a2.py) and the moved modules' (test_bps, test_declared, test_mtr, test_premiums, test_premium_cut, test_premium_baseline_2030, test_rd, test_nordic_aid, test_norway, test_entitlement_money); the premium chain's outputs for every EU unit identical, bit for bit and in order (section 7); the five-unit Green Deal run (NO060000, FI130000, FR720000, PL510000, DE210000) and the coupled-support check (tools/run/run_vcs_2030.py --regions, the same five) identical; the full suite |
 
 A0 approved by the project lead (23 November 2026; the plan's section 8): A1 and A3 one block with A1's five units;
 in A2 only the rules become functions, the literal values "data read: <the CSV and its builder>" (3 rows of
@@ -192,3 +193,51 @@ file); a CAPRI name on a citing line can match a statement the code does not por
   checks every equations/ package by default; check_gams_citations.py checks a statement function's "CAPRI's GAMS
   (file l. a-b)" header against an assignment to its symbol (the longest prefix of the function's name the file
   assigns).
+
+## 7. What A2 found (for the main line; nothing fixed)
+
+- **Moved**: 120 inventory rows ("moved in A2", with their functions). Three of mtr_until2013.gms's rules are
+  selections of records with no value to compute and stay in mtr.py's _rules: eps_in_year (l. 589-590, 635-636,
+  677-678), delete_year (l. 594) and rdel (l. 741). The mixed block l. 607-628 (Greece) holds literal values only:
+  "data read". Also moved, though the inventory had no row (premium_cut.py cited prmcut.gms as a file): the cut's
+  CEILACL, CEILACV, CEILCUT and CUTT (prmcut.gms l. 66-269), the BPS's envelope, entitlements, average IUV and tunnel
+  ordinal (implement_bps.gms l. 113-178).
+- **The exact check**: besides the gate's runs, the premium chain's outputs for all 215 EU units (the MTR key with
+  its series, year declarations, payments, budgets, decoupled declarations; the BPS rates and ceilings; PRMD, weights
+  and ceilings of the year; PRME; the RD budget and declarations; the CAP 2014 ceilings of 2015, 2018, 2020 and 2030
+  and the cuts; the coupled, area, Nordic and Norwegian declarations; the coupling degree of 2005-2018, the decoupling
+  targets of 2008 and 2012, the series and declarations of 2012) were dumped at the block's starting commit and at its
+  end and compared value by value and key order by key order: 0 differences. A first comparison found the BPS rates
+  differing in the last digits: two functions had replaced a `+=` loop by `sum()`, which since Python 3.12 sums floats
+  with compensation (a different last digit). The functions keep the caller's form: `sum()` where the code summed, a
+  loop where it accumulated. A rule for A4 and A5.
+- **Porting differences** (in the functions' docstrings, "Departures from CAPRI"):
+  - prmcut.gms: CEILACV's x 0.001 on each term (CAPRI's on the sum); CEILACL and CEILACV computed for every region
+    with a ceiling (CAPRI's only where the ceiling is above EPS); a unit's cut factor taken from the nearest level
+    with one (CAPRI passes it down level by level, a sum over one parent each); the per-technology premiums (l.
+    300-312) not ported.
+  - aggreg_ppepay.gms: a member state's PRME its units' level-weighted average directly (CAPRI's through NUTS 1);
+    the payments' x 0.001 on each term.
+  - policy.gms: Norway's application types (noDirPay 6, noPriceSup 7) not in the numbers (norway.py pays Norway).
+  - implement_bps.gms: the key summed over the schemes at once and DPSAPS's not computed (no BPS); rcur without the
+    units without entitlements (they add nothing); the overshoot's unit bug kept (K141), Croatia's key fallback (K142).
+  - calc_mtr.gms: the greening share's factor left out of the decoupled budget (p_dpGreeningShare killed, 0).
+  - calc_mtr_top.gms: the modulated money with the payments factored out of the sum over the producer groups; the base
+    data's columns from mtr_base_data.csv.
+  - extend_rd_baseline.gms: the member state's rest to NUTS 2 (l. 254-257, R / (7 - n) x w / W) computed in the NUTS
+    1 order (R w / W / (7 - n)); rule 3 with a member state's spend written EPS and a region's above it stops (CAPRI's
+    EPS / EPS; not in the data).
+  - CAP_2014_2020.gms: the area schemes' type where the ceiling is above 0 (CAPRI's nonzero), dpbps_SAPS's likewise
+    (CAPRI's in every SAPS member state); the BPS ceiling with the three shares' ceilings summed first.
+  - cap_2013_2020_transfers.gms: the fill from the first year of the transfers' table (CAPRI's from 2006); the
+    transfer from pillar 2 left out (0).
+  - def_endCut.gms: the cut schemes' ceilings summed before the division (the region's objective loses their sum).
+  - nordicaid.gms: a ceiling's presence, not its value, in the type's condition; the amounts per LU and per ha summed
+    by the caller.
+  - def_policy.gms: the year's value taken directly (CAPRI's loop over the pairs of edited years); mtr.py and
+    norway.py apply the rule in their own loops over the records.
+- **Citations corrected** (comments only): aggreg_ppepay.gms l. 61 (a blank line, A0's list) to l. 109-110 in mtr.py
+  base_payments. A0's other wrong citations are outside A2's files.
+- **The tools**: tools/run/run_vcs_2030.py takes --regions (a subset solved on the whole data set, as
+  run_f2f_2030.py does) and writes the regional levels to its pickle, for the gate (commit 4be78b88, the model
+  unchanged).

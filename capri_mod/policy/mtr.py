@@ -32,14 +32,28 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-import numpy as np
-
-from capri_mod.policy.declared import PolicyRegions, declared_premiums, nonzero
-from capri_mod.policy.premium_cut import EPS, CeilingRegions, premiums
+from capri_mod.policy.declared import PolicyRegions, declared_premiums
+from capri_mod.policy.equations._gams import EPS, NA, as_number, nonzero
+from capri_mod.policy.equations.aggreg_ppepay import p_premPaym_Total_PRME
+from capri_mod.policy.equations.calc_mtr import (
+    p_DDPartialBudget, p_nationalCeilCut, p_nationalCeilCut_noModu, p_premDataE_DPFRMF_PGARAB, p_premDataE_DPFRMS_PGFRM,
+    p_premDataE_MODU_cut, p_premPaym_TOTAL_DPMTR)
+from capri_mod.policy.equations.calc_mtr_top import (
+    DATA_column, p_premDataE_APPTYPE, p_premDataE_DpAgEU10, p_premDataE_MODU, p_premDataE_PSGROUP, p_totalBudget,
+    p_totalBudget_factor)
+from capri_mod.policy.equations.calc_mtr_top import p_premToDDTarget as p_premToDDTarget_inherit
+from capri_mod.policy.equations.implement_bps import p_premData_ceilacv
+from capri_mod.policy.equations.mtr_until2013 import (
+    p_couplPercent, p_couplPercent_fill, p_percAffByModulation_Tot, p_premDataE_AT_DPSCOW_CEILLEV,
+    p_premDataE_CEILVAL_fill, p_premDataE_DPDCOW_CEILVAL, p_premDataE_DPDCOW_PGDCOW, p_premDataE_DPDWHETR_PGDWHE,
+    p_premDataE_DPMTR_CEILVAL, p_premDataE_DPMTR_CEILVAL_net, p_premDataE_DPNE_DCOW_CEILVAL, p_premDataE_DPPULS_PGPROT,
+    p_premDataE_dpSaps_ceilLev, p_premDataE_dpSaps_ceilLev_UAAR, p_premDataE_dpSaps_ceilVal,
+    p_premDataE_dpSaps_ceilVal_net, p_premDataE_dpSaps_pgSaps, p_premDataE_where, p_premToDDTarget,
+    p_premToDDTarget_E_fill, p_premToDDTarget_rule)
+from capri_mod.policy.equations.policy import p_premData
+from capri_mod.policy.equations.prmcut import p_premModifFact_Y
+from capri_mod.policy.premium_cut import CeilingRegions, premiums
 from capri_mod.supply import inputs as _inputs
-
-#: GAMS's NA in p_premDataE (agenda.gms l. 1225: "treated as a missing value" by policy.gms l. 25)
-NA = "NA"
 
 
 def _load(inp):
@@ -85,13 +99,8 @@ def _value(v, special):
     return float(v)
 
 
-def _num(v) -> float:
-    """A value in GAMS arithmetic: EPS 0, no record 0 (NA, which propagates, does not reach the rules that compute)."""
-    if v is None or v == EPS:
-        return 0.0
-    if v == NA:
-        raise ValueError("mtr: NA in arithmetic")
-    return float(v)
+#: a value in GAMS arithmetic (capri_mod/policy/equations/_gams.py)
+_num = as_number
 
 
 class _Series:
@@ -164,77 +173,88 @@ def _rules(P: _Series, d: dict, sim_year: int, base_year: int) -> dict:
     def ceiling_from_viii_eu_west(lab, rhs, num):
         for m in _ms_members(d, lab[2]):
             for y in years:
-                P.set(m, y, lab[0], lab[1], viii.get((m, y), 0.0))
+                P.set(m, y, lab[0], lab[1], p_premDataE_DPMTR_CEILVAL(viii.get((m, y), 0.0)))
 
     def ceiling_from_viii(lab, rhs, num):
         for y in years:
-            P.set(lab[0], y, lab[1], lab[2], viii.get((lab[3], y), 0.0))
+            P.set(lab[0], y, lab[1], lab[2], p_premDataE_DPMTR_CEILVAL(viii.get((lab[3], y), 0.0)))
 
     def ceiling_from_viiia(lab, rhs, num):
         for y in years:
-            P.set(lab[0], y, lab[1], lab[2], viiia.get((lab[3], y), 0.0))
+            P.set(lab[0], y, lab[1], lab[2], p_premDataE_DPMTR_CEILVAL(viiia.get((lab[3], y), 0.0)))
 
     def net_ceiling(lab, rhs, num):
         for m in d["ms"]:
-            if sum(_num(P.get(m, y, lab[0], lab[1])) for y in years):
-                for y in years:
-                    if iv.get((m, y)):
-                        P.set(m, y, lab[0], lab[1], iv[(m, y)])
+            cv = [P.get(m, y, lab[0], lab[1]) for y in years]
+            for y in years:
+                v = p_premDataE_DPMTR_CEILVAL_net(cv, iv.get((m, y)))
+                if v is not None:
+                    P.set(m, y, lab[0], lab[1], v)
 
     def saps_ceiling(lab, rhs, num):
         for m in runr:
             for y in years:
-                if viiia.get((m, y)):
-                    P.set(m, y, lab[0], lab[1], viiia[(m, y)])
+                v = p_premDataE_dpSaps_ceilVal(viiia.get((m, y)))
+                if v is not None:
+                    P.set(m, y, lab[0], lab[1], v)
 
     def saps_net_ceiling(lab, rhs, num):
         for m in runr:
             for y in years:
-                if nonzero(P.get(m, y, lab[2], lab[3])) and iv.get((m, y)):
-                    P.set(m, y, lab[0], lab[1], iv[(m, y)])
+                v = p_premDataE_dpSaps_ceilVal_net(P.get(m, y, lab[2], lab[3]), iv.get((m, y)))
+                if v is not None:
+                    P.set(m, y, lab[0], lab[1], v)
 
     def fill_ceiling(lab, rhs, num):
         # the loop of l. 264-269 over the base year to %endofMTR%: a missing value from the year before
         for y in range(base_year, int(st["end_of_mtr"]) + 1):
             for m in d["ms"]:
-                if not nonzero(P.get(m, y, lab[0], lab[1])):
-                    P.set(m, y, lab[0], lab[1], P.get(m, y - 1, lab[4], lab[5]))
+                v = p_premDataE_CEILVAL_fill(P.get(m, y, lab[0], lab[1]), P.get(m, y - 1, lab[4], lab[5]))
+                if v is not None:
+                    P.set(m, y, lab[0], lab[1], v)
 
     def saps_level(lab, rhs, num):
         for m in runr:
             for y in years:
-                if nonzero(P.get(m, y, lab[2], lab[3])):
-                    P.set(m, y, lab[0], lab[1], saps_area.get(m, 0.0))
+                v = p_premDataE_dpSaps_ceilLev(P.get(m, y, lab[2], lab[3]), saps_area.get(m, 0.0))
+                if v is not None:
+                    P.set(m, y, lab[0], lab[1], v)
 
     def saps_level_from_uaar(lab, rhs, num):
         for m in runr:
             for y in years:
-                if nonzero(P.get(m, y, lab[2], lab[3])) and not nonzero(P.get(m, y, lab[4], lab[5])):
-                    P.set(m, y, lab[0], lab[1], base.get((m, lab[6], lab[7], lab[8]), 0.0))
+                v = p_premDataE_dpSaps_ceilLev_UAAR(P.get(m, y, lab[2], lab[3]), P.get(m, y, lab[4], lab[5]),
+                                                    base.get((m, lab[6], lab[7], lab[8]), 0.0))
+                if v is not None:
+                    P.set(m, y, lab[0], lab[1], v)
 
     def saps_rate(lab, rhs, num):
         for m in runr:
             for y in years:
-                if nonzero(P.get(m, y, lab[2], lab[3])):
-                    P.set(m, y, lab[0], lab[1],
-                          _num(P.get(m, y, lab[4], lab[5])) / _num(P.get(m, y, lab[6], lab[7])) * float(num[0]))
+                v = p_premDataE_dpSaps_pgSaps(P.get(m, y, lab[2], lab[3]), P.get(m, y, lab[4], lab[5]),
+                                              P.get(m, y, lab[6], lab[7]), float(num[0]))
+                if v is not None:
+                    P.set(m, y, lab[0], lab[1], v)
 
     def saps_type(lab, rhs, num):
         for m in runr:
             for y in years:
-                if nonzero(P.get(m, y, lab[2], lab[3])):
-                    P.set(m, y, lab[0], lab[1], rhs)
+                v = p_premDataE_where(P.get(m, y, lab[2], lab[3]), rhs)
+                if v is not None:
+                    P.set(m, y, lab[0], lab[1], v)
 
     def set_where_ceiling(lab, rhs, num):
         v = float(num[0]) if num else rhs
         for y in years:
-            if nonzero(P.get(lab[3], y, lab[4], lab[5])):
-                P.set(lab[0], y, lab[1], lab[2], v)
+            w = p_premDataE_where(P.get(lab[3], y, lab[4], lab[5]), v)
+            if w is not None:
+                P.set(lab[0], y, lab[1], lab[2], w)
 
     def eps_where_no_level(lab, rhs, num):
         for m in _ms_members(d, lab[3]):
-            if not nonzero(P.get(m, int(lab[4]), lab[5], lab[6])):
-                P.set(m, int(lab[0]), lab[1], lab[2], EPS)
+            v = p_premDataE_DPPULS_PGPROT(P.get(m, int(lab[4]), lab[5], lab[6]))
+            if v is not None:
+                P.set(m, int(lab[0]), lab[1], lab[2], v)
 
     def eps_in_year(lab, rhs, num):
         # the Health Check: each item the region has in some year EPS in the year (the member states, or EU025000)
@@ -250,12 +270,13 @@ def _rules(P: _Series, d: dict, sim_year: int, base_year: int) -> dict:
 
     def set_in_regions(lab, rhs, num):
         for r in d["sets"].get("TRDWHE_REG", []):
-            P.set(r, int(lab[0]), lab[1], lab[2], sum(float(x) for x in num))
+            P.set(r, int(lab[0]), lab[1], lab[2], p_premDataE_DPDWHETR_PGDWHE(num))
 
     def set_from_year(lab, rhs, num):
         # from the year after lab[3] to CALYEA("Y"), the simulation year itself
-        if sim_year > int(lab[3]):
-            P.set(lab[0], sim_year, lab[1], lab[2], float(num[0]))
+        v = p_premDataE_DPDCOW_PGDCOW(sim_year, int(lab[3]), float(num[0]))
+        if v is not None:
+            P.set(lab[0], sim_year, lab[1], lab[2], v)
 
     def dcow_ceiling(lab, rhs, num):
         # the regions of the aggregate's member states (MAP_RR, the member state itself included) at the simulation
@@ -264,23 +285,28 @@ def _rules(P: _Series, d: dict, sim_year: int, base_year: int) -> dict:
         for m in _ms_members(d, lab[2]):
             for r in d["members"].get(m, set()) | {m}:
                 if r not in aggs:
-                    P.set(r, sim_year, lab[0], lab[1], rate * base.get((r, lab[6], lab[7], str(sim_year)), 0.0))
+                    P.set(r, sim_year, lab[0], lab[1],
+                          p_premDataE_DPDCOW_CEILVAL(rate, base.get((r, lab[6], lab[7], str(sim_year)), 0.0)))
 
     def scale_year(lab, rhs, num):
         for k in rs_keys(lab[1], i=lab[2], year=int(lab[0])):
-            if P.v[k] not in (EPS, NA):
-                P.set(*k, float(P.v[k]) * float(num[0]))
+            v = p_premDataE_DPNE_DCOW_CEILVAL(P.v[k], num[0])
+            if v is not None:
+                P.set(*k, v)
 
     def add_to_item(lab, rhs, num):
-        P.set(lab[0], int(lab[1]), lab[2], lab[3], _num(P.get(lab[4], int(lab[5]), lab[6], lab[7])) + float(num[0]))
+        P.set(lab[0], int(lab[1]), lab[2], lab[3],
+              p_premDataE_AT_DPSCOW_CEILLEV(P.get(lab[4], int(lab[5]), lab[6], lab[7]), num[0], add=True))
 
     def item_from_other(lab, rhs, num):
-        P.set(lab[0], int(lab[1]), lab[2], lab[3], _num(P.get(lab[4], int(lab[5]), lab[6], lab[7])) - float(num[0]))
+        P.set(lab[0], int(lab[1]), lab[2], lab[3],
+              p_premDataE_AT_DPSCOW_CEILLEV(P.get(lab[4], int(lab[5]), lab[6], lab[7]), num[0], add=False))
 
     def eps_where_saps(lab, rhs, num):
         for k in rs_keys(lab[2], i=lab[3]):
-            if nonzero(P.v[k]):
-                P.set(k[0], k[1], lab[0], lab[1], EPS)
+            v = p_premDataE_where(P.v[k], EPS)
+            if v is not None:
+                P.set(k[0], k[1], lab[0], lab[1], v)
 
     def rdel(lab, rhs, num):
         """l. 726-742 delete the regions outside the run: none of the run's regions."""
@@ -360,8 +386,10 @@ def declarations_of_year(P: _Series, sim_year: int, d: dict = None) -> dict:
     def fill(m, src, items):
         for s in schemes:
             for i, v in Y.get((src, s), {}).items():
-                if i in items and not nonzero(Y.get((m, s), {}).get(i)):
-                    Y[(m, s)][i] = v
+                if i in items:
+                    w = p_premDataE_PSGROUP(Y.get((m, s), {}).get(i), v)
+                    if w is not None:
+                        Y[(m, s)][i] = w
 
     st = _settings(d)
     for m in d["ms"]:
@@ -375,15 +403,16 @@ def declarations_of_year(P: _Series, sim_year: int, d: dict = None) -> dict:
         for src in ("EU015000", "EU025000", "EU028000"):
             for s in schemes:
                 x = Y.get((m, s), {})
-                if not nonzero(x.get("APPTYPE")) and any(
-                        g in groups and v not in (EPS, NA) and not isinstance(v, str) and v > 0 for g, v in x.items()):
-                    a = Y.get((src, s), {}).get("APPTYPE")
-                    if a is not None:
-                        Y[(m, s)]["APPTYPE"] = a
+                a = p_premDataE_APPTYPE(x.get("APPTYPE"), [v for g, v in x.items() if g in groups],
+                                        Y.get((src, s), {}).get("APPTYPE"))
+                if a is not None:
+                    Y[(m, s)]["APPTYPE"] = a
     for s in schemes:
         for i, v in Y.get(("BL000000", s), {}).items():
-            if i in groups and not nonzero(Y.get(("BL400000", s), {}).get(i)):
-                Y[("BL400000", s)][i] = v
+            if i in groups:
+                w = p_premDataE_PSGROUP(Y.get(("BL400000", s), {}).get(i), v)
+                if w is not None:
+                    Y[("BL400000", s)][i] = w
 
     # l. 159-186: the EU-10's and BUR's Agenda 2000 schemes scaled to the SAPS budget (DPMTR's ceiling)
     base = _base(d)
@@ -406,22 +435,23 @@ def declarations_of_year(P: _Series, sim_year: int, d: dict = None) -> dict:
             # policy.gms then reads as missing
             f = NA
         else:
-            total = sum(float(np.prod(x)) if len(x) > 1 else x[0] for x in terms)
+            total = p_totalBudget(terms)
             if total < 0:
                 raise ValueError(f"mtr: {m}'s Agenda 2000 budget is negative")
             if not total:
                 continue
-            f = c / (total * 0.001)
+            f = p_totalBudget_factor(c, total)
         for s in d["sets"].get("DPAgEu10", []):
             x = Y.get((m, s))
             if not x:
                 continue
             if nonzero(x.get("CEILVAL")):
-                x["CEILVAL"] = x["CEILVAL"] if x["CEILVAL"] in (EPS, NA) else (NA if f == NA else x["CEILVAL"] * f)
+                x["CEILVAL"] = x["CEILVAL"] if x["CEILVAL"] in (EPS, NA) else (
+                    NA if f == NA else p_premDataE_DpAgEU10(x["CEILVAL"], f))
             else:
                 for i, v in list(x.items()):
                     if i in groups and v not in (EPS, NA) and not isinstance(v, str) and v > 0:
-                        x[i] = NA if f == NA else v * f
+                        x[i] = NA if f == NA else p_premDataE_DpAgEU10(v, f)
     return dict(Y)
 
 
@@ -435,12 +465,12 @@ def policy_inputs(Y: dict, schemes, d: dict = None):
     for (r, s), x in Y.items():
         if s not in schemes:
             continue
-        rates = {g.upper(): v for g, v in x.items() if g in groups and v != NA}
+        rates = {g.upper(): v for g, v in x.items() if g in groups and p_premData(v) is not None}
         if rates or x.get("APPTYPE") not in (None, NA):
             decl[(r, s)] = {"rates": rates}
             if x.get("APPTYPE") not in (None, NA, EPS):
                 decl[(r, s)]["APPTYPE"] = x["APPTYPE"]
-        c = {i: x[i] for i in ("CEILLEV", "CEILVAL") if i in x and x[i] != NA}
+        c = {i: x[i] for i in ("CEILLEV", "CEILVAL") if i in x and p_premData(x[i]) is not None}
         if c:
             ceil[(r, s)] = c
     return decl, ceil
@@ -457,13 +487,14 @@ def _unit_data(d, units, ms_of, col_levels: dict):
         if r not in regions:
             continue
         m = ms_of.get(r, r)
-        if i == "LEVL" and a != "UAAR" and c == ("TRD" if m in eu10 else "BAS") and r in units:
+        col = DATA_column(i, m in eu10)
+        if i == "LEVL" and a != "UAAR" and c == col and r in units:
             lev[(r, a)] = v
-        elif i == "YILD" and c == "BAS":
+        elif i == "YILD" and c == col:
             yl[(r, a)] = v
-        elif i == "SLGT" and c == "BAS":
+        elif i == "SLGT" and c == col:
             sl[(r, a)] = v
-        elif i == "HSTY" and c == "Y":
+        elif i == "HSTY" and c == col:
             hs[(r, a)] = v
     return lev, yl, hs, sl
 
@@ -488,7 +519,7 @@ def _rescaled_modif(d, prmd, levels, weight):
     for (u, a, s), p in prmd.items():
         f = m.get((u, a, s))
         if f and p and p != EPS and p * levels.get((u, a), 0.0) * f > 0 and den[(u, s)]:
-            out[(u, a, s)] = f * num[(u, s)] / den[(u, s)]
+            out[(u, a, s)] = p_premModifFact_Y(f, num[(u, s)], den[(u, s)])
     return out
 
 
@@ -515,7 +546,7 @@ def _pass(d, units, decl, ceil, levels, *, yields=None, hist=None, slaughter=Non
 
 
 def base_payments(Y: dict, units, d: dict = None) -> dict:
-    """{(unit, scheme): million EUR} of PSDPAY_MTR_EL at the base year's data (step 3; aggreg_ppepay.gms l. 61)."""
+    """{(unit, scheme): million EUR} of PSDPAY_MTR_EL at the base year's data (step 3; aggreg_ppepay.gms l. 109-110)."""
     d = d or data()
     from capri_mod.data.definitions import capri_ms
     mtr_el = set(d["sets"]["PSDPAY_MTR_EL"])
@@ -529,9 +560,13 @@ def base_payments(Y: dict, units, d: dict = None) -> dict:
         ms_of = {u: m for u in us}
         lev, yl, hs, sl = _unit_data(d, us, ms_of, None)
         prme, _ = _pass(d, us, decl, ceil, lev, yields=yl, hist=hs, slaughter=sl, lu=lu)
+        terms = defaultdict(lambda: ([], []))
         for (u, a, s), p in prme.items():
             if s in mtr_el and p and p != EPS:
-                out[(u, s)] = out.get((u, s), 0.0) + p * lev.get((u, a), 0.0) * 0.001
+                terms[(u, s)][0].append(p)
+                terms[(u, s)][1].append(lev.get((u, a), 0.0))
+        for k, (ps, ls) in terms.items():
+            out[k] = p_premPaym_Total_PRME(ps, ls)
     return out
 
 
@@ -558,11 +593,12 @@ def coupling(sim_year: int, d: dict = None) -> dict:
     for y in range(first, end + 1):
         for s in schemes:
             for m in ms:
-                if not nonzero(p.get((s, y, m))) and nonzero(p.get((s, y - 1, m))):
-                    p[(s, y, m)] = p[(s, y - 1, m)]
+                v = p_couplPercent_fill(p.get((s, y, m)), p.get((s, y - 1, m)))
+                if v is not None:
+                    p[(s, y, m)] = v
         for m in eu11 | bur:
             p[("DPSAPS", y, m)] = 100.0
-    return {(s, m): (0.0 if v == EPS else v) for (s, y, m), v in p.items() if y == sim_year and v != 0.0}
+    return {(s, m): p_couplPercent(v) for (s, y, m), v in p.items() if y == sim_year and v != 0.0}
 
 
 def dd_targets(sim_year: int, units, d: dict = None) -> dict:
@@ -580,27 +616,30 @@ def dd_targets(sim_year: int, units, d: dict = None) -> dict:
     st = _settings(d)
     for y in range(int(st["targets_from"]), max(int(st["end_of_mtr"]), sim_year) + 1):
         for (r, s, g) in keys:
-            if not nonzero(E.get((r, y, s, g))) and nonzero(E.get((r, y - 1, s, g))):
-                E[(r, y, s, g)] = E[(r, y - 1, s, g)]
+            v = p_premToDDTarget_E_fill(E.get((r, y, s, g)), E.get((r, y - 1, s, g)))
+            if v is not None:
+                E[(r, y, s, g)] = v
     T = {(r, s, g): v for (r, y, s, g), v in E.items() if y == sim_year and r in ms and s in mtr_el
-         and v != EPS and v > 0}
+         and p_premToDDTarget(v) is not None}
     for _, r, s, g, v, y0 in d["target_rules"].sort_values("line").itertuples(index=False):
-        if sim_year < int(y0):
+        val = p_premToDDTarget_rule(float(v), sim_year, int(y0))
+        if val is None:
             continue
         for sc in (mtr_el if s == "ALL" else [s]):
             for tg in (targets if g == "ALL" else [g]):
-                if float(v):
-                    T[(str(r), sc, tg)] = float(v)
+                if val:
+                    T[(str(r), sc, tg)] = val
                 else:
                     T.pop((str(r), sc, tg), None)
 
     def inherit(regions, src):
         for r in regions:
             for s in mtr_el:
-                if not any(T.get((r, s, g)) for g in targets):
-                    for g in targets:
-                        if T.get((src, s, g)):
-                            T[(r, s, g)] = T[(src, s, g)]
+                own = [T.get((r, s, g)) for g in targets]
+                for g in targets:
+                    v = p_premToDDTarget_inherit(own, T.get((src, s, g)))
+                    if v is not None:
+                        T[(r, s, g)] = v
 
     inherit(_ms_members(d, "EU011000"), "EU011000")
     inherit([m for m in ("RO000000", "BG000000")], "BUR")
@@ -609,10 +648,11 @@ def dd_targets(sim_year: int, units, d: dict = None) -> dict:
     for u in units:
         m = capri_ms(u)
         for s in mtr_el:
-            if not any(T.get((u, s, g)) for g in targets):
-                for g in targets:
-                    if T.get((m, s, g)):
-                        T[(u, s, g)] = T[(m, s, g)]
+            own = [T.get((u, s, g)) for g in targets]
+            for g in targets:
+                v = p_premToDDTarget_inherit(own, T.get((m, s, g)))
+                if v is not None:
+                    T[(u, s, g)] = v
     return {k: v for k, v in T.items() if k[0] in ms or k[0] in set(units)}
 
 
@@ -621,11 +661,12 @@ def modulation_total(d: dict = None) -> dict:
     Prem_Mod."""
     d = d or data()
     share = dict(zip(d["classes"]["class"], d["classes"].share.astype(float)))
-    out = defaultdict(float)
+    terms = defaultdict(lambda: ([], []))
     for g, c, r, v in zip(d["modulation"].group, d["modulation"]["class"], d["modulation"].region,
                           d["modulation"].pct):
-        out[(str(g), str(r))] += float(v) * share.get(str(c), 0.0)
-    return dict(out)
+        terms[(str(g), str(r))][0].append(float(v))
+        terms[(str(g), str(r))][1].append(share.get(str(c), 0.0))
+    return {k: p_percAffByModulation_Tot(p, m) for k, (p, m) in terms.items()}
 
 
 def decoupled_budgets(pay: dict, Y: dict, sim_year: int, units, d: dict = None) -> dict:
@@ -649,27 +690,21 @@ def decoupled_budgets(pay: dict, Y: dict, sim_year: int, units, d: dict = None) 
         for (u, s), v in pay.items():
             if u in us:
                 prme[s] += v
-        modu = {s: prme[s] * sum(tot.get((g, m), 0.0) for g in psgg.get(s, [])) * 0.01 for s in mtr_el}
-        p_tot = sum(prme[s] for s in mtr_el)
-        m_tot = sum(modu.values())
+        modu = {s: p_premDataE_MODU(prme[s], [tot.get((g, m), 0.0) for g in psgg.get(s, [])]) for s in mtr_el}
+        p_tot = p_premPaym_TOTAL_DPMTR(prme[s] for s in mtr_el)
+        m_tot = p_premPaym_TOTAL_DPMTR(modu.values())
         c = Y.get((m, "DPMTR"), {}).get("CEILVAL")
         c = 0.0 if c in (None, EPS, NA) else float(c)
-        cut = 0.0
-        if c and p_tot and m_tot:
-            cut = ((p_tot - m_tot) - c) / m_tot
-        modu = {s: v * max(0.0, cut + 1) for s, v in modu.items()}
-        m_tot = sum(modu.values())
-        cut = c / p_tot - 1 if (c and p_tot and not m_tot) else 0.0
+        cut = p_nationalCeilCut(c, p_tot, m_tot)
+        modu = {s: p_premDataE_MODU_cut(v, cut) for s, v in modu.items()}
+        m_tot = p_premPaym_TOTAL_DPMTR(modu.values())
+        cut = p_nationalCeilCut_noModu(c, p_tot, m_tot)
         for u in us:
             for g in d["sets"]["DDTarget"]:
-                b = 0.0
-                for s in mtr_el:
-                    v = pay.get((u, s), 0.0)
-                    if v <= 0 or not prme[s]:
-                        continue
-                    b += (v * (prme[s] - modu[s]) / prme[s] * (1 - cp.get((s, m), 0.0) / 100) * (1 + cut)
-                          * T.get((u, s, g), 0.0) / 100)
-                if b > 0:
+                b = p_DDPartialBudget([pay.get((u, s), 0.0) for s in mtr_el], [prme[s] for s in mtr_el],
+                                      [modu[s] for s in mtr_el], [cp.get((s, m), 0.0) for s in mtr_el], cut,
+                                      [T.get((u, s, g), 0.0) for s in mtr_el])
+                if b is not None:
                     out[(u, g)] = b
     return dict(out)
 
@@ -695,15 +730,15 @@ def decoupled_declarations(budget: dict, Y: dict, units, d: dict = None, ntslvl:
             L = lev(u, ref)
             ceil[(u, "DPFRMS")] = {"CEILVAL": c}
             if L:
-                decl[(u, "DPFRMS")] = {"rates": {"PGFRM": c * 1000 / L}, "APPTYPE": "perLevl"}
+                decl[(u, "DPFRMS")] = {"rates": {"PGFRM": p_premDataE_DPFRMS_PGFRM(c, L)}, "APPTYPE": "perLevl"}
                 ceil[(u, "DPFRMS")]["CEILLEV"] = L
         c = budget.get((u, "DDFRMF"), 0.0)
         if c:
             L = lev(u, land)
             ceil[(u, "DPFRMF")] = {"CEILVAL": c}
             if L:
-                decl[(u, "DPFRMF")] = {"rates": {"PGARAB": c * 1000 / L, "PGGRAS": c * 1000 / L},
-                                       "APPTYPE": "perLevl"}
+                rate = p_premDataE_DPFRMF_PGARAB(c, L)
+                decl[(u, "DPFRMF")] = {"rates": {"PGARAB": rate, "PGGRAS": rate}, "APPTYPE": "perLevl"}
     nuts = d["nuts"]
     level = {str(r): float(v) for r, v in zip(nuts.sort_values("line").region, nuts.sort_values("line").level)}
     by_ms = defaultdict(list)
@@ -769,16 +804,22 @@ def mtr_key(units, levels: dict, sim_year: int, base_year: int, d: dict = None, 
     by_ms = defaultdict(list)
     for u in units:
         by_ms[capri_ms(u)].append(u)
-    key = defaultdict(float)
+    key = {}
     for m, us in by_ms.items():
         lev = {k: v for k, v in levels.items() if k[0] in us}
         dm = {k: v for k, v in decl.items() if k[0] in us or k[0] == m or k[0] in _srnuts1(d)}
         if not dm:
             continue
         prme, w = _pass(d, us, dm, ceil, lev, modif=False)
+        terms = defaultdict(lambda: ([], [], []))
         for (u, a, s), p in prme.items():
             if s in ("DPFRMS", "DPFRMF", "DPREG") and p and p != EPS:
-                key[u] += p * lev.get((u, a), 0.0) * (w.get((u, a, s), 1.0)) / 1000.0
+                t = terms[u]
+                t[0].append(p)
+                t[1].append(lev.get((u, a), 0.0))
+                t[2].append(w.get((u, a, s), 1.0))
+        for u, (ps, ls, ws) in terms.items():
+            key[u] = p_premData_ceilacv(ps, ls, ws)
     if detail:
         return dict(key), {"series": P, "year": Y, "pay": pay, "budget": budget, "decl": decl, "ceil": ceil}
     return dict(key)

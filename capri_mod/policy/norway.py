@@ -20,6 +20,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from capri_mod.policy.equations.def_no_policy import p_norwPremPact
 from capri_mod.supply import inputs as _inputs
 
 NATIONAL = "NO000000"
@@ -63,7 +64,7 @@ def norway_premiums(year: int, d: dict = None) -> dict:
             continue
         for u in units:
             f = rec.get((u, s, c))
-            v = nat * f if f is not None else nat
+            v = p_norwPremPact(nat, f)
             for a in d["variants"].get(c, [c]):
                 out[(u, a, s)] = v
     return out

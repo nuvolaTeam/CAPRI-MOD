@@ -28,8 +28,9 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass, field
 
-#: CAPRI's EPS as a value (a ceiling written EPS: the scheme pays nothing in the region)
-EPS = "EPS"
+from capri_mod.policy.equations._gams import EPS  # noqa: F401 (re-exported: the policy modules import it from here)
+from capri_mod.policy.equations.prmcut import (
+    p_premData_CEILACL, p_premData_CEILACV, p_premData_CEILCUT, p_premPaym_CUTT, p_premPaym_Entl, p_premPaym_PRME)
 
 
 @dataclass
@@ -49,18 +50,11 @@ class CeilingRegions:
         return out
 
 
-def _ratio(used: float, ceiling) -> float:
-    return used / ceiling if isinstance(ceiling, (int, float)) and ceiling > 0 else 0.0
-
-
 def ceiling_cut(used_levels: float, used_value: float, ceil_lev=None, ceil_val=None):
-    """CEILCUT of one region and scheme: 1 / max(1, used / ceiling) over the ceilings that are set; EPS where a
-    ceiling is EPS; None where the region has no ceiling of the scheme."""
-    if ceil_lev == EPS or ceil_val == EPS:
-        return EPS
-    if ceil_lev is None and ceil_val is None:
-        return None
-    return 1.0 / max(1.0, _ratio(used_levels, ceil_lev), _ratio(used_value, ceil_val))
+    """CEILCUT of one region and scheme (prmcut.gms l. 203-211, capri_mod/policy/equations/prmcut.py): 1 / max(1, used
+    / ceiling) over the ceilings that are set; EPS where a ceiling is EPS; None where the region has no ceiling of the
+    scheme."""
+    return p_premData_CEILCUT(used_levels, used_value, ceil_lev, ceil_val)
 
 
 def premiums(levels: dict, prmd: dict, weight: dict, ceilings: dict, regions: CeilingRegions, modif: dict = None,
@@ -78,19 +72,20 @@ def premiums(levels: dict, prmd: dict, weight: dict, ceilings: dict, regions: Ce
     modif = modif or {}
     techn = techn or {}
 
-    entl = {(u, a, s): levels.get((u, a), 0.0) * w for (u, a, s), w in weight.items() if w > 0}
+    entl = {(u, a, s): p_premPaym_Entl(levels.get((u, a), 0.0), w) for (u, a, s), w in weight.items() if w > 0}
 
     def used(units, scheme, prmd_region=None):
-        q = v = 0.0
+        e_, p_, t_ = [], [], []
         for (u, a, s), e in entl.items():
             if s != scheme or u not in units:
                 continue
             p = prmd.get((prmd_region or u, a, s))
             if p is None:
                 continue
-            q += e
-            v += e * p * (1.0 + techn.get((prmd_region or u, a, s), 0.0)) * 0.001
-        return q, v
+            e_.append(e)
+            p_.append(p)
+            t_.append(techn.get((prmd_region or u, a, s), 0.0))
+        return p_premData_CEILACL(e_), p_premData_CEILACV(e_, p_, t_)
 
     members = {**{r: m for r, m in regions.member_states.items()}, **{r: m for r, m in regions.nuts1.items()}}
     cut, use = {}, {}
@@ -117,14 +112,12 @@ def premiums(levels: dict, prmd: dict, weight: dict, ceilings: dict, regions: Ce
     for u in units:
         for s in schemes:
             k = cut.get((u, s))
-            if k is None:
-                k = next((cut[(p, s)] for p in regions.parents(u) if (p, s) in cut), 1.0)
-            cutt[(u, s)] = 0.0 if k == EPS else k
+            above = (cut.get((p, s)) for p in regions.parents(u)) if k is None else ()
+            cutt[(u, s)] = p_premPaym_CUTT(k, above)
 
     prme = {}
     for (u, a, s), p in prmd.items():
         if u not in units or levels.get((u, a), 0.0) <= 0.0:
             continue
-        f = modif.get((u, a, s)) or weight.get((u, a, s), 0.0)
-        prme[(u, a, s)] = p * cutt[(u, s)] * f
+        prme[(u, a, s)] = p_premPaym_PRME(p, cutt[(u, s)], weight.get((u, a, s), 0.0), modif.get((u, a, s)))
     return {"cut": cut, "cutt": cutt, "prme": prme, "used": use}

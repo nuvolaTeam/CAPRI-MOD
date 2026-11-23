@@ -14,6 +14,10 @@ from __future__ import annotations
 from collections import defaultdict
 
 from capri_mod.data.definitions import capri_ms
+from capri_mod.policy.equations.cap_2013_2020_cndp import p_premDataE_PSGROUP
+from capri_mod.policy.equations.cap_2013_2020_vcs import p_premDataE_apptype
+from capri_mod.policy.equations.cap_2014_2020 import p_premDataE_AppType
+from capri_mod.policy.equations.def_policy import p_premDataE_last
 from capri_mod.policy.premium_cut import EPS
 from capri_mod.supply import entitlements as _entl
 from capri_mod.supply import inputs as _inputs
@@ -46,8 +50,7 @@ def data():
 
 
 def _last(years_values, year: int):
-    ys = [y for y in years_values if y <= year]
-    return years_values[max(ys)] if ys else None
+    return p_premDataE_last(years_values, year)
 
 
 def coupled_premium_data(year: int, d=None) -> dict:
@@ -99,13 +102,14 @@ def coupled_declarations(year: int, d=None, levels: dict = None):
                     continue
                 tot = sum(ms_level.get((r, a), 0.0) for a in d["groups"].get(g, []))
                 if tot:
-                    item["rates"][g] = item["CEILVAL"] * 1000.0 / tot
+                    item["rates"][g] = p_premDataE_PSGROUP(item["CEILVAL"], tot)
     for (r, s), item in item_data.items():
         decl[(r, s)] = {"rates": dict(item["rates"])}
         if "CEILVAL" in item:
             ceilings[(r, s)] = {"CEILVAL": item["CEILVAL"]}
-            if item["CEILVAL"]:
-                decl[(r, s)]["APPTYPE"] = "perLevl"
+            t = p_premDataE_apptype(item["CEILVAL"])
+            if t:
+                decl[(r, s)]["APPTYPE"] = t
     return decl, ceilings
 
 
@@ -123,8 +127,9 @@ def area_declarations(year: int):
             for s, rate in by_scheme.items():
                 decl.setdefault((ms, s), {"rates": {}})["rates"][g] = rate
                 v = c.get(s, 0.0)
-                if v > 0.0:
-                    decl[(ms, s)]["APPTYPE"] = "perLevl"
+                t = p_premDataE_AppType(v)
+                if t is not None:
+                    decl[(ms, s)]["APPTYPE"] = t
                     ceilings[(ms, s)] = {"CEILVAL": v}
     return decl, ceilings
 
