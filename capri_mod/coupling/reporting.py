@@ -5,6 +5,7 @@ docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's,
 module once model is loaded (capri_mod.coupling.inject); the annotations are not evaluated.
 """
 from __future__ import annotations
+from capri_mod.coupling.equations.sol_simy import DATA_ProfitLandUse
 
 
 class ReportingBlock:
@@ -43,7 +44,7 @@ class ReportingBlock:
 
     def _welfare_supply(self, supply_results) -> Optional[pd.DataFrame]:
         """The welfare components CAPRI takes from the supply models for the regions that have them (RMSSUP: the EU,
-        Norway; reports/welfare.gms l. 360-380, 690-700, 800-806), per supply-model region, EUR million (levels):
+        Norway; reports/welfare.gms l. 416-467), per supply-model region, EUR million (levels):
           MGVA      market gross value added including premiums, sum over activities of (revenue - input cost +
                     premium) x level (CAPRI EAAG MGVA; capri_mod/income)
           RENT      the land rents: each land type's area x its rent at the solution, the dual of its land row
@@ -67,8 +68,9 @@ class ReportingBlock:
                 sp = getattr(res, "shadow_prices", None) or {}
                 lt = getattr(res, "land_types", None) or {}
                 # EUR/ha x 1000 ha = EUR 1000
-                rent = sum((float(sp.get(lab, 0.0)) - float(sp.get(lab + "_lo", 0.0))) * float(lt.get(t, 0.0))
-                           for lab, t in rlab.items())
+                rent = DATA_ProfitLandUse([float(sp.get(lab, 0.0)) for lab in rlab],
+                                          [float(sp.get(lab + "_lo", 0.0)) for lab in rlab],
+                                          [float(lt.get(t, 0.0)) for t in rlab.values()])
                 rows[reg] = {"MGVA": inc / 1000.0, "RENT": rent / 1000.0, "ProfitAgr": (inc - rent) / 1000.0,
                              "ProfitLandUse": rent / 1000.0, "PSEs": -prem / 1000.0}
             return pd.DataFrame.from_dict(rows, orient="index")

@@ -48,6 +48,10 @@ from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
+from capri_mod.market.equations.sol_market import DATA_ProcMarg_XXBIOF, p_trqBilat_Rent
+from capri_mod.market.equations.welfare import (
+    PS_Y, p_welfareRes_CSSP, p_welfareRes_ProfitFeed, p_welfareRes_ProfitProc, p_welfareRes_ProfitProc_RESIMPX,
+    p_welfareRes_ProfitProc_XXBIOF)
 
 
 class WelfareMixin:
@@ -70,12 +74,11 @@ class WelfareMixin:
         B, d, Y = e["B"], e["d"], e["Y"]
         ps_cal = e["p0"].astype(float).copy()
         ps_y = ps_cal.copy()
-        G = lambda p: float(np.sqrt(p) @ B @ np.sqrt(p))
         ev = np.zeros(len(ps_cal))
         for k in range(len(ps_cal)):
             ps_y[k] = p_sim[k]
             if B[k, k] != 0.0:
-                ev[k] = G(ps_cal) / G(ps_y) * (Y - float(d @ ps_y)) - (Y - float(d @ ps_cal))
+                ev[k] = p_welfareRes_CSSP(B, d, Y, ps_cal, ps_y)
             ps_cal[k] = ps_y[k]
         return ev
 
@@ -89,10 +92,8 @@ class WelfareMixin:
             i = Rr[mr]
             for e in ents:
                 col = e["col"]
-                p = e["p0"].copy()
                 m = col >= 0
-                p[m] = p[m] + (PR[i, col[m]] - 1.0) * e["arm1p"][m]
-                p = np.maximum(p, 0.05 * e["p0"])
+                p = PS_Y(e["p0"], PR[i, col[m]], e["arm1p"], m)
                 ev = self._gl_money_metric(e, p)
                 out[mr] = out.get(mr, 0.0) + float(ev.sum()) * e["inha"] / 1000.0
         return out
@@ -176,7 +177,7 @@ class WelfareMixin:
                 else:
                     q0 = P0[i, Cc[x]] * tb["q"].get((rms, x), 0.0) / tot[(R, x)]
                 dq = -sum(h * dp.get(y, 0.0) for (x_, y), h in Hr.items() if x_ == x)
-                val -= (q0 + 0.5 * dq) * dp.get(x, 0.0)
+                val -= p_welfareRes_ProfitProc(q0, dq, dp.get(x, 0.0))
             out[R] = out.get(R, 0.0) + val / 1000.0
         return out
 
@@ -213,9 +214,9 @@ class WelfareMixin:
                     continue
                 mub0 = self._biofuel_feed_group(g, {}, 1.0, 1.0)[1]
                 x0 = g["X0"] * float(scale.get(g["fuel"], 1.0))
-                m1 = float(d["ppri"]) * float(r.at[reg, g["fuel"]]) - float(st["mub"][key])
-                m0 = float(d["ppri"]) - mub0
-                out[reg] = out.get(reg, 0.0) + (m1 * float(st["X"][key]) - m0 * x0) / 1000.0
+                m1 = DATA_ProcMarg_XXBIOF(float(d["ppri"]), float(r.at[reg, g["fuel"]]), float(st["mub"][key]))
+                m0 = DATA_ProcMarg_XXBIOF(float(d["ppri"]), 1.0, mub0)
+                out[reg] = out.get(reg, 0.0) + p_welfareRes_ProfitProc_XXBIOF(m1, float(st["X"][key]), m0, x0)
         fp = self._feed_byproduct_params() or {}
         dom0 = self._dom0()
         for reg in self.EU:
@@ -226,7 +227,8 @@ class WelfareMixin:
                     continue
                 p0 = float(dom0.at[reg, p])
                 q0 = float(self.par.base_production.at[reg, p])
-                out[reg] = out.get(reg, 0.0) + (float(S.at[reg, p]) * p0 * float(r.at[reg, p]) - q0 * p0) / 1000.0
+                out[reg] = out.get(reg, 0.0) + p_welfareRes_ProfitProc_RESIMPX(float(S.at[reg, p]), p0,
+                                                                                float(r.at[reg, p]), q0)
         return out
 
     # ------------------------------------------------------------------
@@ -351,7 +353,7 @@ class WelfareMixin:
                 if c in dairy_fed or not (F0[i, j] > 0 and REF[i, j] > 0):
                     continue
                 dF = F0[i, j] * g.get((reg, c), 0.0)
-                v -= REF[i, j] * (PR[i, j] - 1.0) * (F0[i, j] + 0.5 * dF)
+                v -= p_welfareRes_ProfitFeed(REF[i, j], PR[i, j], F0[i, j], dF)
             for rms, d in P_["rms"].items():
                 if d.get("tr") != reg or rms not in en:
                     continue
@@ -360,7 +362,7 @@ class WelfareMixin:
                                                       for y, h in d["terms"].get(x, {}).items()
                                                       if y == "FEDE" or y in PRd.columns)
                          for x in d["feed0"])
-                v += en[rms][1] * (ph - 1.0) * (en[rms][0] + 0.5 * dE)
+                v += p_welfareRes_ProfitFeed(en[rms][1], ph, en[rms][0], dE)
             out["feed"][reg] = v / 1000.0
         by_reg: Dict[str, list] = {}
         _dairy = set(self.DAIRY_TRADED.values())
@@ -401,7 +403,7 @@ class WelfareMixin:
         plus, under an EU quota, the quota rent: CAPRI's rent = (import price - in-quota price) x min(imports under
         the quota, quota) (reports/sol_market.gms l. 1127), here gap x sigmoid(fill) x min(share x imports, quota),
         the import price under the sigmoid regime being the in-quota price plus sigmoid x gap. The rent goes half to
-        the importer, half to the exporter (welfare.gms l. 614-620); tariffs to the importer."""
+        the importer, half to the exporter (welfare.gms l. 646-659); tariffs to the importer."""
         tar: Dict[str, float] = {}
         rent: Dict[str, float] = {}
         R = list(self.regions)
@@ -428,15 +430,14 @@ class WelfareMixin:
                     fill = float(X[ixq].sum())
                     if fill <= 0 or q["Q"] <= 0:
                         continue
-                    u = (np.nan_to_num(base[ixq] * (ta[ixq] - q["ta_pref"]) / 100.0)
-                         + np.nan_to_num(ts[ixq] - q["ts_pref"]))
-                    rent_ij[ixq] = np.maximum(u, 0.0) * X[ixq] * min(1.0, q["Q"] / fill)
+                    rent_ij[ixq] = p_trqBilat_Rent(base[ixq], ta[ixq], q["ta_pref"], ts[ixq], q["ts_pref"], X[ixq],
+                                                   q["Q"], fill)
                 for g in sc.trq_globals or ():
                     imp = float(X[g["cover"]].sum())
                     if imp <= 0 or g["Q"] <= 0:
                         continue
-                    u = (np.nan_to_num(base * (ta - g["ta_pref"]) / 100.0) + np.nan_to_num(ts - g["ts_pref"]))
-                    rent_ij[g["cover"]] = (np.maximum(u, 0.0) * X * min(1.0, g["Q"] / imp))[g["cover"]]
+                    rent_ij[g["cover"]] = p_trqBilat_Rent(base, ta, g["ta_pref"], ts, g["ts_pref"], X, g["Q"],
+                                                          imp)[g["cover"]]
             for i, imp in enumerate(R):
                 for j, exp in enumerate(R):
                     if i == j or X[i, j] <= 0 or (imp in eu and exp in eu):

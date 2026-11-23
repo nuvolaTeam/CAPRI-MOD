@@ -17,6 +17,7 @@ from capri_mod.data.definitions import (
 from capri_mod.data.definitions import MS_CODE
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
 from capri_mod.market.state import MarketStateMixin
+from capri_mod.market.equations.def_biofuel_params import p_dpCESBiof
 
 
 class BiofuelMixin(MarketStateMixin):
@@ -74,7 +75,7 @@ class BiofuelMixin(MarketStateMixin):
                 X0 = float((q0 * prcb).sum())
                 mub0 = float((q0 * mu0).sum()) / X0                  # = CAPRI BiofFeedCost (checked by the builder)
                 rho = float(g["rho"].iloc[0])
-                dp = q0 / X0 * (mu0 / mub0) ** rho                   # def_biofuel_params.gms p_dpCESBiof
+                dp = p_dpCESBiof(q0, X0, mu0, mub0, rho)            # def_biofuel_params.gms l. 419-436
                 ddgs = np.array([b_ == "DDGS" for b_ in g["byproduct"].astype(str)])
                 groups.append(dict(ms=ms, fuel=fuel, region=reg, comm=list(g["commodity"].astype(str)),
                                    feed=list(g["feedstock"].astype(str)), q0=q0, prcb=prcb, p0=p0, by=by,

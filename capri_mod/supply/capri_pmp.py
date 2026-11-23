@@ -42,6 +42,7 @@ import numpy as np
 import pandas as pd
 from capri_mod.params import param, param_table
 from capri_mod.data.definitions import MS_CODE, ACTIVITY_CLASSES, CAPRI_TO_MODEL_ACTIVITY, COMMODITY_CAPRI_CODE
+from capri_mod.supply.equations.impose_upper_bound_on_elasticity import p_pmpQuadTechn_dampening
 
 # --- 1. dampening ----------------------------------------------------------
 
@@ -49,10 +50,7 @@ def dampen_elasticity(eps):
     """CAPRI's heuristic upper bound. Values at or below p_elasHigh (the parameter ELAS_HIGH) pass through; the
     bound is MIN(8, ...) (ELAS_CAP). Both read through the run's inputs."""
     elas_high, elas_cap = param("ELAS_HIGH"), param("ELAS_CAP")
-    e = np.asarray(eps, dtype=float)
-    damped = np.minimum(elas_cap, np.sqrt(np.maximum(e, 0.0))
-                        + elas_high - np.sqrt(elas_high))
-    return np.where(e > elas_high, damped, e)
+    return p_pmpQuadTechn_dampening(eps, elas_high, elas_cap)
 
 
 # --- 2. share term ---------------------------------------------------------

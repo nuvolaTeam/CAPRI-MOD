@@ -5,6 +5,7 @@ docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's,
 module once model is loaded (capri_mod.coupling.inject); the annotations are not evaluated.
 """
 from __future__ import annotations
+from capri_mod.coupling.equations.define_stepweights import p_stepWgtSpecial
 
 
 class PriceStepBlock:
@@ -125,7 +126,7 @@ class PriceStepBlock:
         0) to k, normalised; hist holds the market's prices of steps 1..k, newest last (floats or Series)."""
         k = len(hist)
         vals = [0.0 * hist[0]] + list(hist)
-        w = [max(0.0, 1.0 - float(srt) * (k + 1 - j)) for j in range(k + 1)]
+        w = p_stepWgtSpecial(srt, k)                    # capri_mod/coupling/equations/define_stepweights.py
         tot = sum(w)
         out = None
         for w_, v_ in zip(w, vals):

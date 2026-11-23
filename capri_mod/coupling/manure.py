@@ -11,7 +11,8 @@ from capri_mod import statekit as _cst   # the state objects' helpers
 from capri_mod.market.equations.manuremarket.declare_manure_market import (e_mPoolBenefits, e_mPoolClear,
                                                                            e_mPoolExcessSupply,
                                                                            e_mPoolSurplus_row, p_mTradeAddCost)
-from capri_mod.market.equations.manuremarket.simu_manure_market import p_mPoolSupConst, p_stepWeights_average
+from capri_mod.market.equations.manuremarket.simu_manure_market import (
+    p_itemsInIters_PSHW, p_mPoolSupConst, p_mTradeReport_losf, p_stepWeights_average)
 #: the clearing's state kept per market between outer iterations, as paths in the model's state objects (the N
 #: market's in the model's own sv and res; the P and K markets' copies in sv.pool_pk, swapped in for their clearing)
 #: t per kt: CAPRI's pool trade is in kt, the supply in its slope in t (outer_loop.manure_pool_es_slope "capri_doc")
@@ -267,7 +268,7 @@ class ManureBlock:
         # CLEARING test on the REALISED regional trade: net exports of each pool
         # must equal its planned net shipments (zero for a closed pool)
         plan_now = (hist.get("_plan") or {}) if isinstance(hist, dict) else {}
-        worst = max(abs(es[k] - plan_now.get(k, 0.0)) / sup[k] for k in keys)
+        worst = max(abs(p_mTradeReport_losf(es[k], plan_now.get(k, 0.0))) / sup[k] for k in keys)
         self.res.pool_losf = float(worst)
         if form == "capri" and str(_settings().get("outer_loop.manure_pool_trade_consts")) == "capri":
             # with CAPRI's fixed trade cost constants the pool market does not see what else moves the regions' trade
@@ -413,11 +414,9 @@ class ManureBlock:
             if key not in bc["es"]:
                 raise KeyError(f"manure_pool_market_2030.csv: no slope for {key}")
             b, dual = bc["es"][key][0] / b_div, bc["es"][key][1]
-            v = r_["v"]
-            if v is None:
-                # CAPRI's fall-back (simu_manure_market.gms l. 50-66): last step's price sent (the value, - the fee),
-                # at the first step the calibration dual (in the model's money, EUR 1000 per t)
-                v = -r_["f"] if pshw_h.get(r_["reg"]) else dual
+            # CAPRI's fall-back (simu_manure_market.gms l. 50-66) where the value is missing: last step's price sent
+            # (the value, - the fee), at the first step the calibration dual (in the model's money, EUR 1000 per t)
+            v = p_itemsInIters_PSHW(r_["v"], bool(pshw_h.get(r_["reg"])), -r_["f"], dual)
             h_ = (pshw_h.get(r_["reg"]) or []) + [float(v)]
             pshw_h[r_["reg"]] = h_[-max(len(wts), 1):]
             if v <= float(st.get("outer_loop.manure_pool_pshw_floor")) and len(h_) > 1:

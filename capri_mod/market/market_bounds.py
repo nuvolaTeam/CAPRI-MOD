@@ -47,6 +47,7 @@ from __future__ import annotations
 import numpy as np
 
 from capri_mod.settings import current as _settings
+from capri_mod.market.equations.set_start_val import v_marketPrice_bounds, v_procQuant_bounds
 
 #: CAPRI's factors, arm/market_model.gms l. 322-326
 LOW_QUANT, UPP_QUANT = 1e-5, 1e3
@@ -71,8 +72,7 @@ def capri_start_bounds(mm, lay, x0) -> tuple:
         if name.startswith("r_"):
             sc = sysd[name[2:]]
             has = np.asarray(sc.pmrk_data, bool) if sc.pmrk_data is not None else np.ones(n, bool)
-            lb[sl] = np.where(has, LOW_PRICE, v)
-            ub[sl] = np.where(has, UPP_PRICE, v)
+            lb[sl], ub[sl] = v_marketPrice_bounds(has, v, LOW_PRICE, UPP_PRICE)
         elif name.startswith("sB_") or name.startswith("sW_"):
             # the quotas' sigmas: 0 to 1, the sigmoid's range; market.sigma_bounds = "free" leaves them unbounded (the
             # solver battery's variant, G3.4 point 2: the bound sits where the sigmoid saturates)
@@ -111,8 +111,8 @@ def capri_start_bounds(mm, lay, x0) -> tuple:
         elif name == "L":
             kind, b = _lift_kinds(lay)
             proc = kind == "proc"
-            lo = np.where(proc, b * LOW_QUANT, np.maximum(1e-10, np.minimum(1e-8, b * LOW_QUANT)))
-            hi = np.maximum(1.0, b) * UPP_QUANT
+            lo_p, hi = v_procQuant_bounds(b, LOW_QUANT, UPP_QUANT)   # the feed cells: the same upper bound (l. 182)
+            lo = np.where(proc, lo_p, np.maximum(1e-10, np.minimum(1e-8, b * LOW_QUANT)))
             # CAPRI fixes small processing cells (v_procQuant at most 0.1 kt, set_start_val.gms) where it generates no
             # ProcNQ_ for them; the lifted system keeps the cell's defining row, so the cell keeps its range (fixed,
             # 4 such cells moved under wheat+5, 15 November 2026)

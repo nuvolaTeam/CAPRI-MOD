@@ -18,7 +18,18 @@ written.
                     arm/cal_armington.gms: the Armington system's share parameters at the calibration point
                     (the calibration block C1)
     manuremarket/   manuremarket/: declare_manure_market.py (the pool market's surplus, the autarky buffers),
-                    simu_manure_market.py (the excess supply's refit, the step-weighted prices) (the block P)
+                    simu_manure_market.py (the excess supply's refit, the step-weighted prices; the fall-back manure
+                    value and the trade gap, block A4) (the block P)
+
+The third phase's statements (assignments; docs/dev/ASSIGNMENTS_REFACTOR_PLAN.md, blocks A1 and A4):
+
+    welfare.py      reports/welfare.gms: ProfitAgr of the supply models' regions; the GL money metric (CSSP), the
+                    processing's and the feed industry's profits
+    sol_market.py   reports/sol_market.gms: the biofuel margin, the tariff-rate quotas' rents
+    set_start_val.py
+                    arm/set_start_val.gms: the processing quantities' and market prices' bounds
+    def_biofuel_params.py
+                    biofuel/def_biofuel_params.gms: the feedstocks' CES share parameters
 
 Each function's docstring gives CAPRI's GAMS statement, the CAPRI star 3.0 file and lines it follows, the equation in
 this project's notation, how the model's quantities map to CAPRI's symbols, and the departures from CAPRI's equation.

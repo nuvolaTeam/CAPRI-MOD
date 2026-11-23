@@ -16,6 +16,8 @@ each module to its CAPRI block and lines). A module is added when its first equa
                     data in the simulation year, DATA(crop, FNUT | FOUT, "Y") (K191)
     fertpar.py      fert/fertpar.gms: p_nitrFact(crop, BioFix), the fixation rates (K191)
     def_gascoeff.py envind/def_gascoeff.gms: Resid, the crop residues' nutrient content (K191)
+    impose_upper_bound_on_elasticity.py
+                    supply/pmp_terms/impose_upper_bound_on_elasticity.gms: the dampened supply elasticities (block A4)
 
 Each function's docstring, or its module's, gives CAPRI's GAMS statement and its domain, the CAPRI star 3.0 file and
 lines it follows, the equation in this project's notation, how the model's quantities map to CAPRI's symbols, and the

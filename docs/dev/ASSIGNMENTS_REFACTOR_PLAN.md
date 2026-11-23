@@ -83,7 +83,8 @@ At every block, as in the second phase (docs/dev/MARKET_EQUATION_REFACTOR_PLAN.m
    module to its CAPRI file) and `--expect supply/supply_model.gms=5557 --expect arm/market_model.gms=4607`.
 3. The citations: tools/refactor/check_gams_citations.py extended to statement blocks: a line citation next to a
    statement function's name holds that statement (the assigned symbol on the cited lines) in star 3.0.
-4. The full suite after A2, after A4 and before the phase's merge; the main line's pre-commit checks at every commit.
+4. The full suite after A2 and before the phase's merge (not after A4: the project lead, 23 November 2026); the
+   main line's pre-commit checks at every commit.
 
 The CAPRI copy is star 3.0 only, checked as the second phase did (docs/dev/MARKET_EQUATION_REFACTOR_PLAN.md
 section 2), before anything else.
@@ -121,3 +122,8 @@ A0 approved (docs/dev/assignments_inventory.csv, docs/dev/ASSIGNMENTS_REFACTOR_H
    (comments only; results identical). The two in supply/policy.py are left to the main session.
 4. **The porting differences** found are collected in the handoff (docs/dev/ASSIGNMENTS_REFACTOR_HANDOFF.md); the
    main session registers them as one KNOWN_ISSUES entry and ranks them.
+
+## 9. The project lead, 23 November 2026 (after A2)
+
+No full suite after A4: it runs once at the end, before the phase's merge (with the full-EU run after A5). A4's gate is
+its functions' and moved modules' tests and the five-unit Green Deal run.

@@ -19,6 +19,7 @@ from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
 from capri_mod.market.state import MarketStateMixin
 from capri_mod.market.demand_ad import gl_eval, gl_block_function
 from capri_mod.market.processing_ad import proc_nq_function
+from capri_mod.market.equations.welfare import p_pbGL
 
 
 class DemandMixin(MarketStateMixin):
@@ -63,6 +64,7 @@ class DemandMixin(MarketStateMixin):
                     if i_ in idx and j_ in idx:
                         B[idx[i_], idx[j_]] = v
                         B[idx[j_], idx[i_]] = v
+                B = p_pbGL(B)                    # welfare.gms l. 100 (the reading has set both halves already)
                 p0 = g["cpri"].to_numpy(dtype=float) / 1000.0
                 if not np.all(p0 > 0):
                     continue

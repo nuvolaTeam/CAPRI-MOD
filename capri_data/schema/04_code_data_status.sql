@@ -343,7 +343,7 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/market/supply.py', 'SupplyMixin.supply_response', 0.2, 'numerical', 'keep', NULL, 'floor of the last-seen price ratio in the supply anticipation'),
   ('capri_mod/market/supply_system_ad.py', 'supply_system', 0.2, 'numerical', 'keep', NULL, 'floor of the last-seen price ratio in the supply anticipation, as SupplyMixin.supply_response (the market system''s supply side)'),
   ('capri_mod/market/supply_system_ad.py', 'prod_fudge', 1.5, 'technical', 'keep', NULL, 'threshold between the integer mode codes 1 and 2 of a market supply cell (CAPRI''s ProdFudge_ or the raw row)'),
-  ('capri_mod/market/welfare.py', 'WelfareMixin._welfare_cssp', 0.05, 'numerical', 'keep', NULL, 'consumer price floor at 5% of base, as in gl_food_ratio'),
+  ('capri_mod/market/equations/welfare.py', 'PS_Y', 0.05, 'numerical', 'keep', NULL, 'consumer price floor at 5% of base, as in gl_food_ratio'),
   ('capri_mod/model.py', '_labour_table', 2030.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 labour columns'),
   ('capri_mod/model.py', '_set_aside_table', 2030.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 set-aside columns'),
   ('capri_mod/pipeline/captrd/coco.py', 'DEFAULTS_FROM', 2000.0, 'capri', 'keep', 'gams/captrd/load_coco1_data.gms l. 493-538', 'near-zero biofuel defaults from 2000 on (and BASM)'),
@@ -634,7 +634,7 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/utils/capri_stop.py', 'CapriStopRule', 2.5, 'capri', 'keep', 'gams/capmod.gms l. 385', 'p_minAbsFeedIterChg (1000 t)'),
   ('capri_mod/utils/capri_stop.py', 'CapriStopRule', 15.0, 'capri', 'keep', 'gams/capmod/price_forecast.gms l. 317', 'Norway leaves the stop rule from step 15'),
   ('capri_mod/utils/capri_stop.py', 'CapriStopRule.__init__', 15.0, 'capri', 'keep', 'gams/capmod/price_forecast.gms l. 316-318', 'Turkey (TUR) leaves the stop rule from step 15, as Norway'),
-  ('capri_mod/utils/capri_stop.py', '_chg', 200.0, 'capri', 'keep', 'gams/capmod/price_forecast.gms l. 136-141', '2 |x1 - x0| / (x1 + x0) x 100'),
+  ('capri_mod/coupling/equations/price_forecast.py', 'p_iterChg', 200.0, 'capri', 'keep', 'gams/capmod/price_forecast.gms l. 136-141', '2 |x1 - x0| / (x1 + x0) x 100'),
   ('capri_mod/utils/capri_stop.py', '_schg', 200.0, 'capri', 'keep', 'gams/capmod/price_forecast.gms l. 136-141', 'signed form of CAPRI''s change measure (drift report)'),
   ('capri_mod/utils/utils.py', 'ConvergenceTracker', 50.0, 'numerical', 'keep', NULL, 'default iteration limit; the model passes outer_loop.max_outer_iter'),
   ('capri_mod/water/water_module.py', 'MM_HA_TO_M3', 10.0, 'physical', 'keep', NULL, '1 mm over 1 ha = 10 m3');
