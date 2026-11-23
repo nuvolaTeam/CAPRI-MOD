@@ -12,7 +12,11 @@ EU response with CAPRI's. Model activities aggregate CAPRI's with their referenc
 factor = sum L PRME_novcs / sum L PRME_ref. Model regions take their CAPRI region, else the
 national row (as in the other builders).
 
-    python tools/run/run_vcs_2030.py OUT.pkl [--verbose]
+    python tools/run/run_vcs_2030.py OUT.pkl [--regions R1,R2,...] [--verbose]
+
+--regions solves a subset of the units on the whole data set (as tools/run/run_f2f_2030.py does: the other units stay
+in the data and supply the market through their member states' market supply functions); the refactor's gates use
+it (docs/dev/ASSIGNMENTS_REFACTOR_PLAN.md section 4).
 
 A validation test, not a scenario: the premium change it applies is CAPRI's own result for this pair of runs. A
 "without VCS" scenario as CAPRI defines it (the coupled premium types at zero, the envelope moved into the decoupled
@@ -110,6 +114,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("out")
     ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--regions", default="", help="a comma-separated subset of units (the refactor's gates)")
     a = ap.parse_args()
     warnings.filterwarnings("ignore")
     sys.path.insert(0, str(ROOT))
@@ -127,7 +132,8 @@ def main():
     traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "scenarios" / "captrd_2030"))
     from capri_mod.data.inputs import trajectories_dir
     pmod = ProjectionModule(m, traj, capri_prices_dir=str(trajectories_dir(ROOT / "capri_data", 2030)))
-    res = pmod.run(policy_scenario=scen, years=[2030])
+    _subset = [x for x in a.regions.split(",") if x] or None
+    res = pmod.run(policy_scenario=scen, years=[2030], **({"regions": _subset} if _subset else {}))
     b, s = res.baseline[2030], res.scenario[2030]
 
     def agg(r):
@@ -172,7 +178,9 @@ def main():
     ok = tab[tab["kind"] != "young animal price"].dropna()
     print(f"mean absolute deviation from CAPRI ({len(ok)} indicators, young-animal prices aside): {ok['diff'].abs().mean():.2f} points; "
           f"correlation {np.corrcoef(ok['model'], ok['capri'])[0, 1]:+.2f}")
-    pickle.dump({"table": tab, "act": (ab, as_), "factors": fac, "young_animal_markets": (yb, ys),
+    regional = {lab: {rg: {k: float(x) for k, x in v.activities.items()} for rg, v in r["supply"].items()}
+                for lab, r in (("base", b), ("scenario", s))}
+    pickle.dump({"table": tab, "act": (ab, as_), "regional": regional, "factors": fac, "young_animal_markets": (yb, ys),
                  "meta": {"conv": md.get("outer_converged"), "it": md.get("n_outer_iterations"),
                           "seconds": round(time.time() - t0)}}, open(a.out, "wb"))
     print(f"saved {a.out} | converged {md.get('outer_converged')} in {md.get('n_outer_iterations')} iterations, "
