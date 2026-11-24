@@ -27,6 +27,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
+from capri_mod.pipeline.captrd.equations import national_supports as NE
+
 K4 = Tuple[str, str, str, int]
 K3 = Tuple[str, str, str]
 
@@ -34,8 +36,6 @@ K3 = Tuple[str, str, str]
 TRUST_NAT = 7.01
 #: l. 231-234: crop activities whose yield supports follow a national GROF support
 TRUST_YIELD = 3.01
-#: l. 224-225: the tiny growth that keeps a zero change from emptying PercentChange
-TINY = 1.e-6
 #: l. 162-163: the years completed and used by the interpolation (2000 to %lastSimulationYear%)
 NEED_FROM = 2000
 #: %lst_daitar% (captrd.gms l. 260): the last year of DG AGRI's dairy targets
@@ -203,14 +203,14 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
         return [k for k in list(d) if (r is None or k[0] == r) and (pred is None or pred(k))]
 
     # ---- l. 28-45: dairy absolutes also as PercentChange; PRCM, DOMM .MILK from MAPR
-    S.apply(pc, {k: ab[k] / bm(*k[:3]) * 100. - 100. for k in keys(ab)
+    S.apply(pc, {k: NE.p_ExpertSupprt_PercentChange_dairy(ab[k], bm(*k[:3])) for k in keys(ab)
                  if k[0] in runr and k[3] in exantet and (k[1], k[2]) in emap and bm(*k[:3])})
     new = {}
     for (r, c, w, y) in keys(pc, pred=lambda k: k[1] == "MAPR" and k[2] == "MILK" and k[3] in exantet and k[0] in runr):
         for cc in ("PRCM", "DOMM"):
-            new[(r, cc, "MILK", y)] = pc[(r, c, w, y)]
+            new[(r, cc, "MILK", y)] = NE.p_ExpertSupprt_MILK_from_MAPR(pc[(r, c, w, y)])
     S.apply(pc, new)
-    S.apply(tr, {(r, cc, "MILK", y): g(tr, r, "MAPR", "MILK", y) for (r, cc, w, y) in new
+    S.apply(tr, {(r, cc, "MILK", y): NE.p_ExpertSupprt_MILK_from_MAPR(g(tr, r, "MAPR", "MILK", y)) for (r, cc, w, y) in new
                  if g(pc, r, cc, "MILK", y) and g(pc, r, "MAPR", "MILK", y)})
 
     # ---- l. 144-152: NECP's herds as p_natExpert(nuts0, xpCol, "LEV1", year), the columns that map to COLS
@@ -224,7 +224,7 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
     nat: Dict[Tuple[str, str, str, int], float] = {}
     for (r, xc, y), v in I.necp.items():
         if r in nuts0 and xc in x2c and v:
-            nat[(r, xc, "LEV1", y)] = v
+            nat[(r, xc, "LEV1", y)] = NE.p_natExpert_NECP(v)
 
     # ---- l. 154-194: gap years filled (time_avg), BASYRSM from p_AVGDAT or p_data x factor
     need = [y for y in X.years if NEED_FROM <= y]
@@ -234,7 +234,7 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
     bym = set(X.basyrsm)
     for k, v in avg.items():                                                   # l. 168-169
         if k[3] not in bym and not nat.get(k):
-            nat[k] = v
+            nat[k] = NE.p_NatExpert_AVGDAT(v)
     exp = list(X.expostt)
     trip = {k[:3] for k in nat if k[0] in msset}
     newn = {}
@@ -244,7 +244,7 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
                 and any(nat.get((*t3, y)) for y in need if y > X.lst_expost)):
             for y in bym:
                 if not nat.get((*t3, y)) and (*t3, y) in avg:
-                    newn[(*t3, y)] = avg[(*t3, y)]
+                    newn[(*t3, y)] = NE.p_NatExpert_AVGDAT(avg[(*t3, y)])
     nat.update(newn)
 
     def pd_(r, c, w, y):
@@ -259,17 +259,18 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
         b = any(nat.get((*t3, y)) for y in exp if y > X.base_year)
         both = [y for y in exp if nat.get((*t3, y)) and mapped(r, xc, xr, y)]
         if (not (a and b)) and both and any(nat.get((*t3, y)) for y in need if y > X.lst_expost):
-            num = sum(nat[(*t3, y)] for y in both)
-            den = sum(mapped(r, xc, xr, y) for y in both)
+            nat_both = [nat[(*t3, y)] for y in both]
+            mapped_both = [mapped(r, xc, xr, y) for y in both]
+            den = sum(mapped_both)
             for y in bym:
                 if not nat.get((*t3, y)) and den:
-                    newn[(*t3, y)] = mapped(r, xc, xr, y) * num / den
+                    newn[(*t3, y)] = NE.p_NatExpert_from_pdata(mapped(r, xc, xr, y), nat_both, mapped_both)
     nat.update({k: v for k, v in newn.items() if v})
     msest = ms + ["ISR"]
     base = X.base_year
     for t3 in {k[:3] for k in nat if k[0] in set(msest)}:                      # l. 197-198
         if all(nat.get((*t3, y)) for y in bym):
-            nat[(*t3, base)] = sum(nat[(*t3, y)] for y in bym) / len(bym)
+            nat[(*t3, base)] = NE.p_NatExpert_BAS([nat[(*t3, y)] for y in bym])
 
     def n_(r, xc, xr, y):
         return nat.get((r, xc, xr, y), 0.0)
@@ -289,46 +290,44 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
         for y in exantet:
             if (sum(n_(r, xc, xr, y) * n_(r, xc, xr, base) for xc, xr in pairs(c, w))
                     and not (g(ab, r, c, w, y) or g(pc, r, c, w, y))):
-                new[(r, c, w, y)] = TRUST_NAT
+                new[(r, c, w, y)] = NE.p_ExpertSupprt_Trustlevl_nat(TRUST_NAT)
     S.apply(tr, new)
     for k in keys(tr, pred=lambda k: k[0] in set(msest) and k[1] in set(X.cact) and k[2] == "HERD"
                   and k[3] in exantet):
-        put(tr, k, 0.0)
+        put(tr, k, NE.p_ExpertSupprt_Trustlevl_CACT_HERD())
     new = {}
     for k in keys(tr, pred=lambda k: k[0] in set(msest) and k[3] in exantet and tr[k] == TRUST_NAT):
         r, c, w, y = k
         pp = [(xc, xr) for xc, xr in pairs(c, w) if n_(r, xc, xr, base) and n_(r, xc, xr, y)]
         den = sum(n_(r, xc, xr, base) for xc, xr in pp)
         if den:
-            num = sum(n_(r, xc, xr, y) + TINY * n_(r, xc, xr, base) * (n_(r, xc, xr, base) == n_(r, xc, xr, y))
-                      for xc, xr in pp)
-            new[k] = num / den * 100. - 100.
+            new[k] = NE.p_ExpertSupprt_PercentChange_nat([(n_(r, xc, xr, y), n_(r, xc, xr, base)) for xc, xr in pp])
         else:
             raise ZeroDivisionError(f"national_supports.gms l. 218: {k} has no base value")
     S.apply(pc, new)
     cact = set(X.cact)
-    new = {(r, a, w, y): TRUST_YIELD for (r, c, w, y) in keys(tr) if r in msset and c == "GROF"
-           and y in exantet and tr[(r, c, w, y)] == TRUST_NAT for a in cact if (a, w) in pty}     # l. 231-234
+    new = {(r, a, w, y): NE.p_ExpertSupprt_Trustlevl_CACT_yield() for (r, c, w, y) in keys(tr) if r in msset
+           and c == "GROF" and y in exantet and tr[(r, c, w, y)] == TRUST_NAT for a in cact if (a, w) in pty}   # l. 232-235
     S.apply(tr, new)
-    S.apply(ab, {k: sp(*k) for k in keys(tr) if k[0] in msset and k[1] in cact and k[3] in exantet
-                 and tr[k] == TRUST_YIELD})                                                     # l. 236-238
+    S.apply(ab, {k: NE.p_ExpertSupprt_Absolute_CACT(sp(*k)) for k in keys(tr) if k[0] in msset and k[1] in cact
+                 and k[3] in exantet and tr[k] == TRUST_YIELD})                                 # l. 237-239
     new_pc, new_tr = {}, {}
     for r in ms:                                                                                # l. 244-253
         for y in exantet:
             if g(tr, r, "SHGM", "LEVL", y) == TRUST_NAT:
                 for w in ("YLAM", "ILAM"):
-                    new_pc[(r, "GROF", w, y)] = g(pc, r, "SHGM", "LEVL", y)
+                    new_pc[(r, "GROF", w, y)] = NE.p_ExpertSupprt_Percentchange_lambs(g(pc, r, "SHGM", "LEVL", y))
     S.apply(pc, new_pc)
     for (r, c, w, y) in new_pc:
         if g(pc, r, c, w, y):
-            new_tr[(r, c, w, y)] = TRUST_NAT - 1
+            new_tr[(r, c, w, y)] = NE.p_ExpertSupprt_TRustlevl_nat_less(TRUST_NAT)
     S.apply(tr, new_tr)
     dis = set(one("xpdisagg"))
     new = {}
-    for k in keys(pc, pred=lambda k: k[0] in msset and k[3] in exantet and k[2] in HL):          # l. 259-268
+    for k in keys(pc, pred=lambda k: k[0] in msset and k[3] in exantet and k[2] in HL):          # l. 259-264
         r, c, w, y = k
         if g(tr, *k) == TRUST_NAT and not sum(n_(r, xd, "LEV1", y) for xd in c2x.get(c, []) if xd in dis):
-            new[k] = TRUST_NAT - 1
+            new[k] = NE.p_ExpertSupprt_TRustlevl_nat_less(TRUST_NAT)
     S.apply(tr, new)
 
     # ---- helpers for the country rules
@@ -685,12 +684,14 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
     n02 = set(X.nuts0_and_2)
     absd = set(one("absdairyrunr"))
     inmap = lambda k: (k[1], k[2]) in emap and k[1] in s_cols and k[2] in s_rows  # noqa: E731
-    S.apply(pc, {k: 0.0 for k in keys(ab, pred=lambda k: k[0] in n02 and k[3] in exantet and k[3] <= AFTER
-                                       and inmap(k))})
-    S.apply(ab, {k: (100 + pc[k]) / 100 * bm(*k[:3]) for k in keys(pc, pred=lambda k: k[0] in n02 and k[0] in absd
-                                                                 and k[3] in exantet and k[3] > AFTER and inmap(k))})
-    S.apply(pc, {k: 0.0 for k in keys(ab, pred=lambda k: k[0] in n02 and k[0] in absd and k[3] in exantet
-                                       and k[3] > AFTER and inmap(k))})
-    S.apply(ab, {k: 0.0 for k in keys(pc, pred=lambda k: k[0] in set(runr) and k[3] in exantet
-                                       and (k[1], k[2]) in emap)})
+    S.apply(pc, {k: NE.p_ExpertSupprt_dairy_PercentChange_removed()
+                 for k in keys(ab, pred=lambda k: k[0] in n02 and k[3] in exantet and k[3] <= AFTER and inmap(k))})
+    S.apply(ab, {k: NE.p_ExpertSupprt_dairy_Absolute(pc[k], bm(*k[:3]))
+                 for k in keys(pc, pred=lambda k: k[0] in n02 and k[0] in absd and k[3] in exantet and k[3] > AFTER
+                               and inmap(k))})
+    S.apply(pc, {k: NE.p_ExpertSupprt_dairy_PercentChange_removed()
+                 for k in keys(ab, pred=lambda k: k[0] in n02 and k[0] in absd and k[3] in exantet and k[3] > AFTER
+                               and inmap(k))})
+    S.apply(ab, {k: NE.p_ExpertSupprt_dairy_absolute_removed()
+                 for k in keys(pc, pred=lambda k: k[0] in set(runr) and k[3] in exantet and (k[1], k[2]) in emap)})
     return nat

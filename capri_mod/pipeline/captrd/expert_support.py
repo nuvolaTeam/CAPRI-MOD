@@ -4,9 +4,9 @@
     l. 794-807   the herds' and levels' support of the member states' animal activities floored: at least 90% of the
                  year before compounded from BAS (and from BAST, the smaller), or a linear decline to 20% of them by
                  Lst_exAnte (herd_floor; the same formula national_supports.gms applies to CS000000)
-    l. 814-834   TOOU: the support made an expert support, with a low trust level, where the output's price has expert
+    expert_support.gms l. 814-834   TOOU: the support made an expert support, with a low trust level, where the output's price has expert
                  information (Absolute, PercentChange or Longrun1) and TOOU has no trust level yet (toou)
-    l. 841-848   no position may have both an Absolute and a PercentChange support (check_duplicates)
+    expert_support.gms l. 841-848   no position may have both an Absolute and a PercentChange support (check_duplicates)
     (the statements' arithmetic: capri_mod/pipeline/captrd/equations/expert_support.py)
   captrd/define_stats_and_supports.gms
     l. 485-500   Expert: the Absolute, else (1 + PercentChange/100) x BASM, on S_ColsEst x S_RowsEst (expert)

@@ -38,7 +38,7 @@ NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), (
 #: the light ones (no reference data read, or one or two tables): step1, scale_dgagri
 PARTS = None
 LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod", "longrun", "eu_supports",
-         "expert_support"}
+         "expert_support", "national"}
 
 
 def step1_cases():
@@ -475,9 +475,89 @@ def expert_support_cases():
     return out
 
 
+def national_cases():
+    """national_supports.supports (national_supports.gms) on seeded random expert supports (Absolute, PercentChange,
+    TrustLevl, bounds), supports, BASM, BAST, BAS, p_data and DGAgri1 over the positions its rules name, for every
+    member state, BL400000, NO000000 and TUR, with CAPTRD's sets and NECP's herds, for two densities of zeros. SHA-256
+    of the expert supports, the bounds, the supports (CS000000's rewritten) and p_natExpert."""
+    import random
+    import pandas as pd
+    from capri_mod.external_paths import REFERENCE
+    from capri_mod.pipeline.captrd import national_supports as NS
+    from capri_mod.pipeline.captrd import prepare as P
+    from capri_mod.pipeline.captrd import timesets as TS
+    G = REFERENCE / "sets" / "simini_21730"
+    g_ = lambda n: pd.read_csv(G / f"{n}.csv", keep_default_na=False).d0.str.upper().tolist()   # noqa: E731
+    s = P.read_sets()
+    I0 = NS.read_inputs(P.SETS_DIR, P.SETS_DIR.parent / "dat")
+    I = NS.read_inputs(P.SETS_DIR, P.SETS_DIR.parent / "dat")
+    exante = [2018, 2020, 2025, 2030, 2035, 2040, 2045, 2050, 2060, 2070]
+    T = TS.build(1984, 2070, exante, 2017, TS.lst_dgagri_for("aglink2023dgAgri"), uaar_years_any=range(1984, 2019),
+                 uaar_years_all=range(1995, 2019), expostt_extra=[2019])
+    ms = list(s.ms)
+    runr = ms + ["BL400000"]
+    nt2est = sorted({b for a, b in s.map_rr if a in set(s.ms) and b in set(s.nt2ext)})
+    cols = ["DCOL", "DCOH", "SCOW", "GROF", "DOMM", "EAAG", "PRCM", "EXPE", "MAPR", "HCOM", "PIGF", "SOWS", "POUF",
+            "HENS", "SHGM", "SHGF", "INDM", "VSET", "MAIF", "SWHE", "BARL", "BULL"]
+    rows = ["LEVL", "HERD", "COMI", "MILK", "PORK", "DAYS", "YPIG", "IPIG", "SGMI", "SGMT", "MAIF", "POUM", "EGGS",
+            "ICOW", "YCAM", "YCAF", "YCOW", "ICAM", "ICAF", "YLAM", "ILAM", "SWHE", "BARL"]
+    years = sorted(set(range(1995, 2071)))
+    out = {}
+    for seed, z in ((1, 0.3), (2, 0.7)):
+        rng = random.Random(seed)
+        val = lambda lo=0.1, hi=100.0: 0.0 if rng.random() < z else rng.uniform(lo, hi)   # noqa: E731
+
+        def pos(regs, ys, share=0.5, lo=0.1, hi=100.0):
+            d = {}
+            for r in regs:
+                for c in cols:
+                    for w in rows:
+                        for y in ys:
+                            if rng.random() < share:
+                                v = val(lo, hi)
+                                if v:
+                                    d[(r, c, w, y)] = v
+            return d
+        regs = runr + ["NO000000", "TUR"]
+        S = NS.Expert(ab=pos(regs, exante, 0.2), pc=pos(regs, exante, 0.15, -20.0, 20.0),
+                      tr=pos(regs, exante, 0.2, 1.0, 10.0), lo=pos(regs, exante, 0.05), up=pos(regs, exante, 0.05))
+        for k in [k for k in S.pc if k in S.ab]:
+            del S.pc[k]
+        k3 = lambda d: {k[:3]: v for k, v in d.items()}          # noqa: E731
+        X = NS.Context(
+            ms=ms, runr=runr, nuts0=g_("NUTS0"), nuts0_and_2=g_("NUTS0_and_2"), nt2est=nt2est, nt2=s.srnuts2,
+            map_rr=s.map_rr, s_colsest=s.s_colsest, s_rowsest=s.s_rowsest, cact=s.cact, maact=s.maact,
+            oiyani=g_("OIYANI"), pact_to_y=list(s.pact_to_y), p_t_actagg=s.p_t_actagg, exante=exante,
+            exantet=T.exantet, expostt=T.expostt, basyrsm=T.basyrsm, base_year=2017, bast_year=T.lst_expostt - 1,
+            lst_expost=T.lst_expost, lst_expostt=T.lst_expostt, lst_exante=2070, lst_dgagri=T.lst_dgagri,
+            support=pos(regs, exante, 0.6), basm=k3(pos(regs, [0], 0.8)), bast=k3(pos(regs, [0], 0.6)),
+            bas=k3(pos(regs, [0], 0.7)),
+            pdata={**pos(regs + nt2est, [T.lst_expost, T.lst_expostt] + list(T.basyrsm), 0.3),
+                   **{(r, c, w, y): v for (r, c, w, y), v in pos(regs, years, 0.02).items()}},
+            dgagri1=pos(["NO000000", "TUR"], sorted(set(exante) | {T.lst_dgagri}), 0.8), years=list(range(1984, 2071)))
+        for r in regs:                                          # the dairy positions' BASM: always given (divisors)
+            for c in ("DCOL", "DCOH", "GROF", "DOMM", "EAAG", "PRCM", "EXPE", "HCOM"):
+                X.basm[(r, c, "COMI")] = rng.uniform(50.0, 100.0)
+            for c in ("DCOL", "DCOH"):
+                for w in ("LEVL", "HERD"):
+                    X.basm[(r, c, w)] = rng.uniform(50.0, 100.0)
+            X.basm[(r, "SOWS", "YPIG")] = rng.uniform(10.0, 30.0)
+        I.necp = dict(I0.necp)                                  # NECP's herds plus random series (IT, PT have none)
+        for r in ms:
+            for xc in I.one("xpcols"):
+                if rng.random() < 0.3:
+                    f = rng.uniform(50.0, 100.0)
+                    for y in range(2000, 2071):
+                        I.necp[(r, xc, y)] = f * (1.0 + 0.01 * (y - 2017)) * rng.uniform(0.99, 1.01)
+        nat = NS.supports(S, I, X)
+        dig = lambda q: _digest(sorted((k, float(v).hex()) for k, v in q.items()))      # noqa: E731
+        out[seed] = [dig(S.ab), dig(S.pc), dig(S.tr), dig(S.lo), dig(S.up), dig(X.support), dig(nat)]
+    return out
+
+
 LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases, "final_supports": final_supports_cases,
                "agriprod": agriprod_cases, "longrun": longrun_cases, "eu_supports": eu_supports_cases,
-               "expert_support": expert_support_cases}
+               "expert_support": expert_support_cases, "national": national_cases}
 
 
 def want(part):
