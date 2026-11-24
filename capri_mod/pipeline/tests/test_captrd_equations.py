@@ -37,3 +37,15 @@ def test_symbols_give_expressions():
     x, y = ca.SX.sym("x"), ca.SX.sym("y")
     e = EQ.PosUp_(x, y, 2.0, 4.0)
     assert float(ca.Function("f", [x, y], [e])(1.0, 8.0)) == 1.0 - (8.0 * 2.0 / 4.0 * 0.8 - 0.1)
+
+
+def test_the_objective():
+    # a deviation: ((v - support) / (max(sqrt(wVarErr), 0.005 x support) + 1e-5))^2 x 1000, over
+    # (0.10 x support / the same)^2 + 1; a weight multiplies both; the STCM pull adds (s / max(0.05 x sg, 1e-5))^2 x 1000
+    sig = max(4.0 ** 0.5, 0.005 * 100.0) + 1.0e-5
+    one = ((110.0 - 100.0) / sig) ** 2 * 1000.0 / ((0.10 * 100.0 / sig) ** 2 + 1.0)
+    assert EQ.SSQS_([(110.0, 100.0, 4.0, None)]) == one
+    assert EQ.SSQS_([(110.0, 100.0, 4.0, 0.5)]) == ((110.0 - 100.0) / sig) ** 2 * 0.5 * 1000.0 / ((0.10 * 100.0 / sig) ** 2 * 0.5 + 1.0)
+    pull = (2.0 / max(0.05 * 20.0, 1.0e-5)) ** 2 * 1000.0
+    assert EQ.SSQS_(iter([(110.0, 100.0, 4.0, None), (2.0, 20.0)])) == (((110.0 - 100.0) / sig) ** 2 * 1000.0 + pull) / ((0.10 * 100.0 / sig) ** 2 + 1.0)
+    assert EQ.SSQS_([]) == 0.0

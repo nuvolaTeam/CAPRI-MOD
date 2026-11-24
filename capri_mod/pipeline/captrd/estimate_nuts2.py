@@ -33,6 +33,7 @@ import numpy as np
 from capri_mod.pipeline.captrd import estimate_bounds as EB
 from capri_mod.pipeline.captrd import estimate_ms as E
 from capri_mod.pipeline.captrd import estimate_nlp as NLP
+from capri_mod.pipeline.captrd.equations import equations as EQ
 from capri_mod.settings import current as current_settings
 
 K2 = Tuple[str, str]
@@ -126,7 +127,7 @@ def residuals(points: Dict[str, E.Point], ms_nobs: set, ms_V: Dict[K2, float], S
 
 def objective(points: Dict[str, E.Point], S: E.Sets, var: Callable, wvar: Dict[str, Dict[K2, float]],
               basm_levl: Dict[str, Dict[str, float]]):
-    """SSQS_ (l. 803-878) for CARD(Rest) > 1: each region's squared deviations from its supports over their standard
+    """SSQS_ (l. 801-875; equations.SSQS_) for CARD(Rest) > 1: each region's squared deviations from its supports over their standard
     errors, as estimate_ms.objective, weighted by the region's share: for an activity column its LEVL BASM over the
     regions' (each + 1e-5), for any other column the summed LEVL BASM of the activities producing or using the row
     (PACT_TO_IO) over the regions'; at least 0.001; over the same sum at 10% of the supports, plus 1. basm_levl:
@@ -145,25 +146,22 @@ def objective(points: Dict[str, E.Point], S: E.Sets, var: Callable, wvar: Dict[s
             return max(WEIGHT_FLOOR, (basm_levl.get(r, {}).get(c, 0.0) + WEIGHT_EPS) / act_tot[c])
         return max(WEIGHT_FLOOR, (row_b(r, w) + WEIGHT_EPS) / sum(row_b(q, w) + WEIGHT_EPS for q in regs))
 
-    num, den = 0.0, 1.0
-    for r in regs:
-        p, wv = points[r], wvar.get(r, {})
-        for k, sv in sorted(p.support.items()):
-            if not sv or not wv.get(k, 0.0) or k[0] not in S.cols_est or k[1] not in S.rows_est:
-                continue
-            if p.lo.get(k, -INF) == p.up.get(k, INF):
-                continue
-            sig = max(wv[k] ** 0.5, E.WEIGHT_STD_ERR * sv) + E.SSQ_EPS
-            g = weight(r, *k)
-            num = num + ((var(r, *k) - sv) / sig) ** 2 * g * E.SSQ_WEIGHT
-            den += (E.SSQ_SCALE_DEV * sv / sig) ** 2 * g
-        # l. 838-842: STCM of the young animals pulled to zero in the years without data (unweighted)
-        if not p.exante_d:
-            for o in sorted(S.oyani):
-                sg = p.support.get(("GROF", o), 0.0)
-                if ("STCM", o) in p.nobs and sg:
-                    num = num + (var(r, "STCM", o) / max(E.STCM_SCALE * sg, E.SSQ_EPS)) ** 2 * E.SSQ_WEIGHT
-    return num / den
+    def terms():
+        for r in regs:
+            p, wv = points[r], wvar.get(r, {})
+            for k, sv in sorted(p.support.items()):
+                if not sv or not wv.get(k, 0.0) or k[0] not in S.cols_est or k[1] not in S.rows_est:
+                    continue
+                if p.lo.get(k, -INF) == p.up.get(k, INF):
+                    continue
+                yield var(r, *k), sv, wv[k], weight(r, *k)
+            # l. 838-841: STCM of the young animals pulled to zero in the years without data (unweighted)
+            if not p.exante_d:
+                for o in sorted(S.oyani):
+                    sg = p.support.get(("GROF", o), 0.0)
+                    if ("STCM", o) in p.nobs and sg:
+                        yield var(r, "STCM", o), sg
+    return EQ.SSQS_(terms())
 
 
 # --- the bounds (estimate_nuts2.gms l. 86-380) --------------------------------------------------------------------------

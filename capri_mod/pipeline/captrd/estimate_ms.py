@@ -36,13 +36,6 @@ K2 = Tuple[str, str]
 #: the same factor as the requirement functions' (requirements.py)
 REQS_EFF = _RQ.EFFICIENCY
 REQS_YEAR0 = _RQ.EFFICIENCY_FROM
-#: SSQS_ (l. 801-878): the standard error's floor relative to the support, the objective's weight, the deviation
-#: (10% of the support) of the scaling term, the STCM pull's scale (5% of GROF's support) and the floors
-WEIGHT_STD_ERR = 0.005
-SSQ_WEIGHT = 1000.0
-SSQ_SCALE_DEV = 0.10
-STCM_SCALE = 0.05
-SSQ_EPS = 1.0e-5
 
 
 @dataclass
@@ -458,26 +451,22 @@ def checkable(name: str, idx: tuple, oagg: Set[str], stored: bool = True, nobs: 
 
 def objective(p: Point, S: Sets, var, wvar: Dict[K2, float], lo: Dict[K2, float], up: Dict[K2, float],
               exante_t: bool):
-    """SSQS_ (equations.gms l. 803-878) for one member state (CARD(Rest) = 1, so every weight is 1): the squared
-    deviations from the supports over their standard errors, max(sqrt(wVarErr), 0.005 x support) + 1e-5, times 1000,
-    plus STCM of the young animals pulled to zero in the years without data (ExAnteT), over the same sum at 10% of
-    the supports plus 1. The terms: the positions with a support, a wVarErr and lo != up. lo, up: the bounds (INF
-    where none)."""
-    num, den = 0.0, 1.0
-    for k, sv in sorted(p.support.items()):
-        if not sv or not wvar.get(k, 0.0) or k[0] not in S.cols_est or k[1] not in S.rows_est:
-            continue
-        if lo.get(k, -INF) == up.get(k, INF):
-            continue
-        sig = max(wvar[k] ** 0.5, WEIGHT_STD_ERR * sv) + SSQ_EPS
-        num = num + ((var(*k) - sv) / sig) ** 2 * SSQ_WEIGHT
-        den += (SSQ_SCALE_DEV * sv / sig) ** 2
-    if exante_t:
-        for o in sorted(S.oyani):
-            sg = p.support.get(("GROF", o), 0.0)
-            if ("STCM", o) in p.nobs and sg:
-                num = num + (var("STCM", o) / max(STCM_SCALE * sg, SSQ_EPS)) ** 2 * SSQ_WEIGHT
-    return num / den
+    """SSQS_ (equations.gms l. 801-875; equations.SSQS_) for one member state (CARD(Rest) = 1, so every weight is 1).
+    The terms: the positions with a support, a wVarErr and lo != up, then STCM of the young animals with data and
+    GROF's support in the years without data (ExAnteT). lo, up: the bounds (INF where none)."""
+    def terms():
+        for k, sv in sorted(p.support.items()):
+            if not sv or not wvar.get(k, 0.0) or k[0] not in S.cols_est or k[1] not in S.rows_est:
+                continue
+            if lo.get(k, -INF) == up.get(k, INF):
+                continue
+            yield var(*k), sv, wvar[k], None
+        if exante_t:
+            for o in sorted(S.oyani):
+                sg = p.support.get(("GROF", o), 0.0)
+                if ("STCM", o) in p.nobs and sg:
+                    yield var("STCM", o), sg
+    return EQ.SSQS_(terms())
 
 
 def violations(res: Iterable[Tuple[str, tuple, str, float]], tol: float, scale: Dict = None):

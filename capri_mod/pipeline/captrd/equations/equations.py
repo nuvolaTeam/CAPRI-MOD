@@ -11,7 +11,9 @@ only, in the order of operations the port had, so both give the same residuals a
 
 In this project's notation: V(c, w) is V_EstV(Rest, c, w, exAnteY) (zero where not given, as a GAMS level), n(c, w)
 p_data(Rest, c, w, "nObs") nonzero, bas(c, w) p_data(Rest, c, w, "BAS"). CAPTRD's Rest and MSEst are the member state
-alone in estimate_ms.gms l. 41-46, so CARD(Rest) = 1 and the EU000000 exclusions do not apply.
+alone in estimate_ms.gms l. 41-46, so CARD(Rest) = 1 and the EU000000 exclusions do not apply. SSQS_, the
+objective, also serves the NUTS 2 estimation m_trendNT2 (estimate_nuts2.objective, CARD(Rest) > 1, with the
+regions' weights).
 """
 from __future__ import annotations
 
@@ -914,3 +916,114 @@ def GRPLVL_(total, parts):
 
     Departures from CAPRI: none; the domain condition and the sums' sets in the caller (estimate_ms.residuals)."""
     return total - sum(parts)
+
+
+def SSQS_(terms):
+    r"""The estimation's objective: the weighted squared deviations of the estimates from their supports, over their
+    standard errors, times 1000, plus STCM of the young animals pulled to zero; over the same sum at 10% of the
+    supports, plus 1.
+
+    terms: in the sum's order, (v, support, wVarErr, g) for a deviation of V(c, w) = v from p_result(.., "Support"),
+    g the region's weight or None for CARD(Rest) = 1 (estimate_ms.objective: the weight 1, so no factor), and (s, sg)
+    for the pull of s = V(STCM, o) with sg = p_result(.., "GROF", o, .., "support"). A deviation's standard error is
+    max(sqrt(wVarErr), p_weightStdErr x support) + 1e-5, p_weightStdErr = 0.005; the pull's scale max(0.05 x sg, 1e-5).
+
+    CAPRI's GAMS, SSQS_ (captrd/equations.gms l. 801-875):
+
+           SCALAR p_weightStdErr /0.005 /;
+
+           SSQS_ ..
+        *
+              SSQ
+        *
+              =E= 10 $ TestFeasible
+        *
+              + (SUM( (rest,S_ColsEst,S_RowsEst,exAnteY)
+                              $ ( (V_EstV.lo(rest,S_ColsEst,S_RowsEst,exAnteY) ne V_EstV.up(rest,S_ColsEst,S_RowsEst,exAnteY))
+                                 $ p_result(rest,S_ColsEst,S_RowsEst,exAnteY,"wVarErr")
+                                 $ p_result(rest,S_ColsEst,S_RowsEst,exAnteY,"Support")),
+        *
+                 SQR( (V_EstV(rest,S_ColsEst,S_RowsEst,exAnteY) - p_result(rest,S_ColsEst,S_RowsEst,exAnteY,"Support"))
+
+                 / ( MAX( SQRT( p_result(Rest,S_ColsEst,S_RowsEst,exAnteY,"wVarErr")),
+                   p_weightStdErr * p_result(rest,S_ColsEst,S_RowsEst,exAnteY,"Support")) + 1.E-5))
+
+                 * (
+        *
+        *  --- weight for gross production: share of regional activity levels on total activity level
+        *
+              MAX(0.001,(              SUM(PACT_TO_IO(MPACT,S_RowsEst), p_data(rest,MPACT,"LEVL","BASM"))+1.E-5)
+                           /SUM(rest1, SUM(PACT_TO_IO(MPACT,S_RowsEst), p_data(Rest1,MPACT,"LEVL","BASM"))+1.E-5))
+               $ (  (NOT SUM(SAMEAS(S_ColsEst,MPACT),1)) $ (CARD(Rest) GT 1))
+        *
+        *  --- weight of deviations for activity, I/O-coefficients and other activity specific coefficients increases
+        *  --- with weight of activity on aggregate
+        *
+              + MAX(0.001,(p_data(rest,S_ColsEst,"LEVL","BASM")+1.E-5)/SUM(rest1,(p_data(Rest1,S_ColsEst,"LEVL","BASM")+1.E-5)))
+                      $ ( SUM(SAMEAS(S_ColsEst,MPACT),1)  $ (CARD(Rest) GT 1))
+
+              + 1 $ (CARD(Rest) EQ 1)
+
+              )) * 1000
+        *
+        *  --- pull stcm of oyani to zero
+        *
+              + SUM( (rest,oyani,exAnteY) $ (p_data(Rest,"STCM",OYANI,"nObs") $ exanteT(exAnteY)
+                                            $ p_result(Rest,"GROF",OYANI,exAnteY,"support")),
+                                 SQR( V_EstV(Rest,"STCM",OYANI,exAnteY)
+                                    / MAX( .05* p_result(Rest,"GROF",OYANI,exAnteY,"support"),1.E-5))) *1000
+
+              ) $ (Not TestFeasible)
+        *
+        *           --------- scaling of objective
+        *
+
+              / (SUM( (rest,S_ColsEst,S_RowsEst,exAnteY)
+                             $ (  (V_EstV.lo(rest,S_ColsEst,S_RowsEst,exAnteY) ne V_EstV.up(rest,S_ColsEst,S_RowsEst,exAnteY))
+                                $ p_result(rest,S_ColsEst,S_RowsEst,exAnteY,"wVarErr")
+                                $ p_result(rest,S_ColsEst,S_RowsEst,exAnteY,"Support")),
+
+                 SQR( (0.10*p_result(rest,S_ColsEst,S_RowsEst,exAnteY,"Support"))
+
+                         / ( MAX( SQRT( p_result(Rest,S_ColsEst,S_RowsEst,exAnteY,"wVarErr")),
+                                     p_weightStdErr * p_result(rest,S_ColsEst,S_RowsEst,exAnteY,"Support")) + 1.E-5))
+        *
+                 * (
+        *
+        *  --- weight for gross production: share of regional activity levels on total activity level
+                 MAX(0.001,(           SUM(PACT_TO_IO(MPACT,S_RowsEst), p_data(rest,MPACT,"LEVL","BASM"))+1.E-5)
+                    /SUM(rest1, SUM(PACT_TO_IO(MPACT,S_RowsEst), p_data(Rest1,MPACT,"LEVL","BASM"))+1.E-5))
+        *
+                    $ ( (NOT SUM(SAMEAS(S_ColsEst,MPACT),1)) $ (CARD(Rest) GT 1))
+        *
+        *  --- weight of deviations for I/O-coefficients and other activity specific coefficients increases
+        *  --- with crop share/stocking density, to avoid larger corrections for more important activities
+        *
+                 + MAX(0.001,(p_data(rest,S_ColsEst,"LEVL","BASM")+1.E-5)/SUM(rest1,(p_data(Rest1,S_ColsEst,"LEVL","BASM")+1.E-5)))
+                         $ ( SUM(SAMEAS(S_ColsEst,MPACT),1)  $ (CARD(Rest) GT 1))
+
+                 + 1 $ (CARD(Rest) EQ 1)
+
+                 )) +1);
+
+    Departures from CAPRI: the TestFeasible branch (10 $ TestFeasible, the sums $ (NOT TestFeasible)) is not ported
+    (CAPTRD-MOD has no TestFeasible mode). The domain conditions (lo ne up, wVarErr and Support nonzero;
+    nObs, exanteT and GROF's support for the pull), the sums over the regions and the weights g (PACT_TO_IO's
+    activities or the column's own LEVL BASM share, at least 0.001) in the callers (estimate_ms.objective,
+    estimate_nuts2.objective). The terms may be a generator: each is added as it comes, so V's symbols are taken in
+    the callers' order."""
+    num, den = 0.0, 1.0
+    for t in terms:
+        if len(t) == 2:
+            s, sg = t
+            num = num + (s / max(0.05 * sg, 1.0e-5)) ** 2 * 1000.0
+            continue
+        v, sv, wv, g = t
+        sig = max(wv ** 0.5, 0.005 * sv) + 1.0e-5
+        if g is None:
+            num = num + ((v - sv) / sig) ** 2 * 1000.0
+            den += (0.10 * sv / sig) ** 2
+        else:
+            num = num + ((v - sv) / sig) ** 2 * g * 1000.0
+            den += (0.10 * sv / sig) ** 2 * g
+    return num / den
