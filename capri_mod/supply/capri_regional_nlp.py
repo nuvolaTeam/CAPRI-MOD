@@ -1248,6 +1248,7 @@ class CapriRegionalNLP:
             X0 = max(float(self.xb[ia]), 1e-3)
             ps = ca.SX.sym("suppFat_" + a, 2)                    # v_supplementPerc, v_supplementSlack
             zc = y[col]
+            row_ = len(g_rows)                                   # the row's place in g (calibrate fixes its multiplier)
             g_rows.append(SupplementPerc_(fat_h, self._pv(1.0 / D), self._pv(sh), zc, y[ia], self._pv(1.0 / X0),
                                           ps[0], ps[1]))
             lbg.append(0.0); ubg.append(0.0)
@@ -1257,7 +1258,7 @@ class CapriRegionalNLP:
             new.append(ps)
             lbx += [0.0, 0.0]; ubx += [0.05, np.inf]
             self.supp_fat[a] = {"off": o, "ia": ia, "col": col, "D": D, "shr": sh, "ks": ks, "cf": cf,
-                                "fat_fix": fat_fix}
+                                "fat_fix": fat_fix, "row": row_}
         if new:
             X = ca.vertcat(X, *new)
         return X, obj
@@ -1418,7 +1419,30 @@ class CapriRegionalNLP:
             land_rows = land_rows + [gi_pg]
             keep_act = ~np.isin(act, np.array([gi_pg]))
             act, lo_l, hi_l = act[keep_act], lo_l[keep_act], hi_l[keep_act]
-        grad_fit = grad + J.T @ lam_fix if (blk_rows or land_rows) else grad
+        # CAPRI's limit of the ration's fat (SupplementPerc_): the fat share enters its own row only and has no cost, so
+        # where it is interior at the base the row's multiplier is its first-order condition's, -grad / J (0 at a base
+        # without linseed), as the fertilisation block's above; the slack at its lower bound takes the rest where that
+        # has the bound's sign (else it stays in the fit, and its residual shows). Until 24 November 2026 these rows were
+        # fitted with the rest: the fit, whose cost the feeds' residuals dominate (they go into CNST), stopped at its
+        # tolerance with multipliers of about 1e-4 where 0 is exact (IR01's calibration residual 4.7e-4, KNOWN_ISSUES K198)
+        sf_rows, nu_fix = [], {}
+        for _a, d_ in sorted((getattr(self, "supp_fat", None) or {}).items()):
+            r_, ip, is_ = d_.get("row"), d_["off"], d_["off"] + 1
+            if r_ is None or J[r_, ip] == 0:
+                continue
+            if not (lbx[ip] + tol * max(1.0, abs(lbx[ip])) < xb[ip] < ubx[ip] - tol * max(1.0, abs(ubx[ip]))):
+                continue                                            # the share at a bound: fitted with the rest
+            lam_fix[r_] = -float(grad[ip]) / float(J[r_, ip])
+            free[ip] = False
+            sf_rows.append(r_)
+            r_s = float(grad[is_]) + float(J[r_, is_]) * lam_fix[r_]
+            if xb[is_] <= lbx[is_] + tol * max(1.0, abs(lbx[is_])) and r_s >= 0:
+                nu_fix[is_] = -r_s                                  # the slack's lower bound (its multiplier <= 0)
+                free[is_] = False
+        if sf_rows:
+            keep_act = ~np.isin(act, np.array(sf_rows))
+            act, lo_l, hi_l = act[keep_act], lo_l[keep_act], hi_l[keep_act]
+        grad_fit = grad + J.T @ lam_fix if (blk_rows or land_rows or sf_rows) else grad
         ib = np.array([i for i in ib if free[i]], int)
         # least squares on the free variables: grad + J' lam + nu = 0
         W = np.where(free)[0]
@@ -1453,6 +1477,8 @@ class CapriRegionalNLP:
             sol = type("S", (), {"status": 0})()
         lam = lam_fix.copy(); lam[act] = mult[:len(act)]
         nu = np.zeros(nX); nu[ib] = mult[len(act):]
+        for k_, v_ in nu_fix.items():
+            nu[k_] = v_
         res = grad + J.T @ lam + nu
         # feeds -> CNST; then the herds' linear terms take their ration's cost change
         dcnst = {}

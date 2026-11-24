@@ -4228,11 +4228,21 @@ the main line measures and ranks. Where each acts, from the code (no runs):
     an estimated end with the regional solves skipped, and at its end the columns with a response, the entries kept,
     the base's deviation, the skipped and verified solves and the cache file written.
   - *Tests:* test_capri.py::test_capri_land_rents_at_the_2030_calibration_point (the calibration NLP's residual
-    4.7279502897182036e-4, the test wants 1e-6) and test_exact_io.py::test_csv_float_reads_are_exact
+    4.7279502897182036e-4, the test wants 1e-6; fixed on 24 November 2026, below) and test_exact_io.py::test_csv_float_reads_are_exact
     (tools/build/build_feed_bulk_grof.py:45, DEP-14) fail at the phase's start 259edec too. The second fixed on 24
     November 2026: the builder read feed_bulks_*.csv with pandas' default float parser for their (ms, bulk) code
     pairs only; it reads them as text now (the same 166 pairs, so the same feed_bulks_grof.csv; its --check needs
-    sim_ini_21730's DATA, not in the refactor's container). A full suite and a
+    sim_ini_21730's DATA, not in the refactor's container). The first fixed the same day: IR01's residual was the
+    ration-fat limit's (SupplementPerc_, the supp_fat block of capri_regional_nlp.py: the fat share p, interior at
+    the base, and its slack s, at 0, in one equality row with -1 on each), BULL's slack 4.728e-4. With p's and s's
+    gradients 0 at the base (no linseed), the row's exact multiplier is 0; the calibration fitted it by least squares
+    with the rest, and the fit, whose cost the feeds' residuals dominate (they go into CNST), stopped at its
+    tolerance with multipliers of about 1e-4. The row's multiplier now comes from the interior fat share's own
+    condition (-grad / J), as the fertilisation block's do, and the slack at its bound takes the rest with its
+    sign; the test passes, test_supplement_fat.py and the calibration tests of test_capri.py too. Results change
+    in the regions with the fat block (the member states with the linseed option): the five-unit Green Deal run
+    (NO06, FI13, FR72, PL51, DE21) against the same code before, prices at most 8e-6 apart (relative), FI13's root
+    fodder dual 44.99 -> 39.29 EUR/t, the nitrate and linseed options' base shares in the fourth digit. A full suite and a
     full-EU run do not fit in a container's memory together (a pytest worker killed; the test passed alone).
   - *Exactness:* Python 3.12's sum() of floats is compensated, so it differs from a += loop in the last digit; the
     refactor kept each caller's form. tools/check/compare_pickles_exact.py reports a DataFrame with NaN cells as

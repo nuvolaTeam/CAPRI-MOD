@@ -462,4 +462,10 @@ file); a CAPRI name on a citing line can match a statement the code does not por
   measured and cached 1,172 values apart before, equal after (and equal to the old code's cached run); the Hessian
   unchanged. Section 9's "two runs compare exactly only with the Hessian from the same source" no longer holds:
   they compare exactly whatever its source. A run that measures its Hessian moves in its last digits with this fix.
+- **The land rents test's residual, fixed** (24 November 2026; the project lead: "go on with the land rent residual";
+  K198): the ration-fat limit's row (SupplementPerc_) was fitted with the calibration's least squares, which stopped
+  at its tolerance with multipliers of 1e-4 where 0 is exact; the row's multiplier now comes from the interior fat
+  share's condition, as the fertilisation block's. A change of results (not a move): in the regions with the fat
+  block, prices at most 8e-6 apart on the five units, FI13's root fodder dual 44.99 -> 39.29 EUR/t. Found by a dump of
+  the calibration's residuals and the fit's numbers in a scratch worktree (not in the repository).
 
