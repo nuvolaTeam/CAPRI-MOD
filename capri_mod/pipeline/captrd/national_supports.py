@@ -1,4 +1,4 @@
-"""CAPTRD's national expert supports (captrd/national_supports.gms, included by captrd/expert_support.gms l. 779;
+"""CAPTRD's national expert supports (included by captrd/expert_support.gms l. 779: captrd/national_supports.gms;
 CAPRI star 3.0), with the reference run's switches: %aglinkTightLink% off (the blocks .ti31, .nt1, .ti31a run),
 %useAgriInfo% on (the $else.nt3 branch for Luxembourg), %lst_daitar% 2020 (captrd.gms l. 260).
 
@@ -181,6 +181,7 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
     emap = {(c, w) for c in dcow for w in ("LEVL", "HERD", "COMI")} | {
         (c, "COMI") for c in ("GROF", "DOMM", "EAAG", "PRCM", "EXPE")} | {
         ("MAPR", "MILK")}                                  # expert_support.gms l. 433-435, 686
+    # the lines cited below are national_supports.gms's
     pty = set(X.pact_to_y)
     sup, basm, bast, bas = X.support, X.basm, X.bast, X.bas
     ab, pc, tr, lo, up = S.ab, S.pc, S.tr, S.lo, S.up

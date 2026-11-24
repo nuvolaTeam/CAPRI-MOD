@@ -37,7 +37,8 @@ NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), (
 #: clean_tiny, and
 #: the light ones (no reference data read, or one or two tables): step1, scale_dgagri
 PARTS = None
-LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod", "longrun", "eu_supports"}
+LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod", "longrun", "eu_supports",
+         "expert_support"}
 
 
 def step1_cases():
@@ -365,8 +366,118 @@ def eu_supports_cases():
     return out
 
 
+def expert_support_cases():
+    """expert_support.gms's own statements: expert_rules.rules, dairy_supports.dairy (and hcom_expert),
+    expert_support.herd_floor and toou on seeded random supports, BASM, BAST, BAS, p_data, DG AGRI positions, dairy
+    tables and expert supports over CAPTRD's member states, sets and time sets, for two densities of zeros. SHA-256 of
+    the exact results."""
+    import random
+    import pandas as pd
+    from capri_mod.pipeline.captrd import dairy_supports as D
+    from capri_mod.pipeline.captrd import expert_rules as ER
+    from capri_mod.pipeline.captrd import expert_support as XS
+    from capri_mod.pipeline.captrd import national_supports as NS
+    from capri_mod.pipeline.captrd import prepare as P
+    from capri_mod.pipeline.captrd import timesets as TS
+    s = P.read_sets()
+    DAT = P.SETS_DIR.parent / "dat"
+    exante = [2018, 2020, 2025, 2030, 2035, 2040, 2045, 2050, 2060, 2070]
+    T = TS.build(1984, 2070, exante, 2017, TS.lst_dgagri_for("aglink2023dgAgri"), uaar_years_any=range(1984, 2019),
+                 uaar_years_all=range(1995, 2019), expostt_extra=[2019])
+    ms = list(s.ms)
+    runr = ms + ["BL400000"]
+    europ = ["EU014000", "EU013000", "EU27yr19"]
+    breed = pd.read_csv(P.SETS_DIR / "breedact.csv", keep_default_na=False, dtype=str).d0.tolist()
+    ncnc = sorted(s.ncnc)[:6]
+    m2 = pd.read_csv(DAT / "dairy_ms_agri_to_ms.csv", keep_default_na=False)
+    agri = sorted(set(m2.ms_agri))
+    cols = ["GROF", "DOMM", "EAAG", "PRCM", "EXPE", "UVAG", "HCOM", "IMPT", "EXPT", "FEDM", "LOSM", "PRCY", "INDM",
+            "PRCI", "UAAR", "SHGM", "DCOL", "DCOH", "HCOS", "S1COM", "MAPR"] + breed[:3] + ncnc
+    rows = ["COMI", "LEVL", "HERD", "SUGB", "SUGA", "MOLA", "MAIZ", "HFCS", "SLGW", "SGMI", "INCE", "MILK", "TOOU"]
+    years = sorted(set(range(1999, 2021)) | set(T.years_cur) | set(exante))
+    out = {}
+    for seed, z in ((1, 0.3), (2, 0.7)):
+        rng = random.Random(seed)
+        val = lambda lo=0.1, hi=100.0: 0.0 if rng.random() < z else rng.uniform(lo, hi)   # noqa: E731
+        regs = runr + europ + ["A_EU_WEST", "A_EU_EAST"]
+
+        def pos(ys, share=0.6, lo=0.1):
+            d = {}
+            for r in regs:
+                for c in cols:
+                    for w in rows:
+                        for y in ys:
+                            if rng.random() < share:
+                                v = val(lo)
+                                if v:
+                                    d[(r, c, w, str(y))] = v
+            return d
+        support = pos(exante + [2015, 2020])
+        pdata = pos(years, 0.3)
+        dg = pos(sorted(set(T.years_cur) | {2015}), 0.4)
+        dg.update({(r, "HCOS", "HFCS", str(y)): rng.uniform(0.05, 0.4) for r in ms + europ for y in exante})
+        dg.update({(r, c, "COMI", str(y)): rng.uniform(100.0, 1000.0) for r in europ for c in ("GROF", "HCOM")
+                   for y in T.years_cur})                              # the aggregates' outlook: always given
+        basm3 = {(r, c, w): v for (r, c, w, y), v in pos([2070], 0.8).items()}
+        bast3 = {(r, c, w): v for (r, c, w, y), v in pos([2070], 0.5).items()}
+        E = ER.rules(ms=ms, ms_no_eu=list(s.msnoeu28), exante=exante, bas_year=2017, support=support, basm=basm3,
+                     bast=bast3, pdata_years=pdata, dgagri=dg, dgagri1=pos(exante, 0.4),
+                     ms_to_agg=[(b, a) for a, b in s.map_rr], europ_aggs=europ, breed_act=breed[:3], ncnc=ncnc,
+                     coef_hfcs={"SUGA": 0.9, "MAIZ": 0.6})
+        dig = lambda q: _digest(sorted((k, repr(v)) for k, v in q.items()))      # noqa: E731
+        out[(seed, "rules")] = dig(E)
+        tables = {n: {(a, y): rng.uniform(990.0, 1010.0) * 1.01 ** (y - 2010) for a in agri for y in range(2010, 2021)}
+                  for n in D.TABLES}
+
+        dpos = [(c, w) for c in ("DCOL", "DCOH") for w in ("LEVL", "HERD", "COMI")] + [
+            (c, "COMI") for c in ("GROF", "HCOM", "DOMM", "EAAG", "PRCM", "UVAG", "EXPE")] + [("PRCM", "SGMI")]
+
+        def series(ys):
+            """complete series growing about 1% a year, the cows' milk yields near 7000 kg, a twentieth of the series
+            left out whole (random years make the dairy logistic overflow: real series are complete)"""
+            d = {}
+            for r in regs:
+                for c, w in dpos:
+                    if rng.random() < 0.05:
+                        continue
+                    f = rng.uniform(50.0, 50.5) * (140.0 if c in ("DCOL", "DCOH") and w == "COMI" else 1.0)
+                    for y in ys:
+                        d[(r, c, w, str(y))] = f * 1.01 ** (y - 2015) * rng.uniform(0.999, 1.001)
+            return d
+        dbasm = {k[:3]: v for k, v in series([2070]).items()}
+        Ed, share = D.dairy(runr=runr, ms=ms, ms_no_eu28=list(s.msnoeu28), dcow=["DCOL", "DCOH"], base_year=2017,
+                            exante_t=T.exantet, expost=T.expost, expostt=T.expostt, years_cur=T.years_cur,
+                            sim_years=exante, fst_exante=T.fst_exante, lst_exante=2070, lst_dgagri=T.lst_dgagri,
+                            tables=tables, ms_agri_to_ms=list(zip(m2.ms_agri, m2.region)),
+                            recent={r: rng.uniform(-0.01, 0.03) for r in runr}, basm=dbasm,
+                            support=series(sorted(set(exante) | {2015, 2020})), pdata=series(years),
+                            dgagri=series(sorted(set(T.years_cur) | {2015})),
+                            map_rr=list(s.map_rr) + [(r, r) for r in runr],
+                            europ_aggs=europ, sub_aggs=["EU014000", "EU013000"], eu13="EU013000", eu14="EU014000",
+                            west="A_EU_WEST", east="A_EU_EAST")
+        out[(seed, "dairy")] = [dig(Ed), dig(share)]
+        Ex = {k: v for k, v in support.items() if rng.random() < 0.3}
+        out[(seed, "hcom")] = dig(D.hcom_expert(share, Ex, support, ms, T.exantet))
+        i4 = lambda d: {(r, c, w, int(y)): v for (r, c, w, y), v in d.items()}   # noqa: E731
+        sup4 = i4(support)
+        bas3 = {(r, c, w): v for (r, c, w, y), v in pos([2070], 0.7).items()}
+        XS.herd_floor(sup4, ms=ms, maact=["DCOL", "DCOH", "SHGM"] + breed[:3], bas=bas3, bast=bast3,
+                      exantet=T.exantet, base_year=2017, bast_year=2018, lst_exante=2070)
+        S = NS.Expert(ab=i4({k: v for k, v in pos(exante, 0.1).items()}),
+                      pc=i4({k: v for k, v in pos(exante, 0.1, -20.0).items()}),
+                      tr=i4({k: v for k, v in pos(exante, 0.05).items()}))
+        pty = [("DCOL", "COMI"), ("DCOH", "COMI"), ("SHGM", "SGMI"), ("UAAR", "MAIZ"), ("GROF", "SUGB")]
+        for (r, c, w, y), v in pos(exante, 0.3).items():
+            sup4[(r, c, "TOOU", int(y))] = v
+        XS.toou(S, support=sup4, basm={**basm3, **{(r, c, "TOOU"): val() for r in ms for c in cols}}, ms=ms,
+                s_colsest=cols, exante=exante, pact_to_y=pty, longrun1=i4(pos(exante, 0.1)))
+        out[(seed, "floor_toou")] = [dig(sup4), dig(S.ab), dig(S.tr)]
+    return out
+
+
 LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases, "final_supports": final_supports_cases,
-               "agriprod": agriprod_cases, "longrun": longrun_cases, "eu_supports": eu_supports_cases}
+               "agriprod": agriprod_cases, "longrun": longrun_cases, "eu_supports": eu_supports_cases,
+               "expert_support": expert_support_cases}
 
 
 def want(part):

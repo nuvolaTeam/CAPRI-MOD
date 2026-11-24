@@ -7,6 +7,7 @@
     l. 814-834   TOOU: the support made an expert support, with a low trust level, where the output's price has expert
                  information (Absolute, PercentChange or Longrun1) and TOOU has no trust level yet (toou)
     l. 841-848   no position may have both an Absolute and a PercentChange support (check_duplicates)
+    (the statements' arithmetic: capri_mod/pipeline/captrd/equations/expert_support.py)
   captrd/define_stats_and_supports.gms
     l. 485-500   Expert: the Absolute, else (1 + PercentChange/100) x BASM, on S_ColsEst x S_RowsEst (expert)
     l. 589-598   (adjust_to_biof_supports.gms, with BIOF.SUGA's Expert deleted without MAPR.SUGA observations:
@@ -19,29 +20,13 @@ from __future__ import annotations
 
 from typing import Dict, Iterable, Sequence, Set, Tuple
 
+from capri_mod.pipeline.captrd.equations import expert_support as XE
+
 K3 = Tuple[str, str, str]
 K4 = Tuple[str, str, str, int]
 
-#: expert_support.gms l. 795-806: the yearly decline and the share of the base kept by Lst_exAnte
-YEARLY = 0.9
-DECLINE = 0.8
-#: l. 828-833: TOOU's trust level, half the support's ratio to BASM (at most 1, at least 1e-10)
-TOOU_TRUST = 0.5
-TOOU_MIN = 1.e-10
 #: define_stats_and_supports.gms l. 643: the trust level of an expert support without one
 DEFAULT_TRUST = 10.0
-
-
-def floor_value(s: float, bas: float, bast: float, y: int, base_year: int, bast_year: int, lst_exante: int) -> float:
-    """expert_support.gms l. 794-807 for one position and year (GAMS's $ conditions as written)."""
-    if bast:
-        f1 = min(bast * YEARLY ** (y - bast_year), bas * YEARLY ** (y - base_year))
-        f2 = min(bast * (1 - DECLINE * (y - bast_year) / (lst_exante - bast_year)),
-                 bas * (1 - DECLINE * (y - base_year) / (lst_exante - base_year)))
-    else:
-        f1 = bas * YEARLY ** (y - base_year)
-        f2 = bas * (1 - DECLINE * (y - base_year) / (lst_exante - base_year))
-    return max(s, f1, f2)
 
 
 def herd_floor(support: Dict[K4, float], *, ms: Iterable[str], maact: Iterable[str], bas: Dict[K3, float],
@@ -53,8 +38,8 @@ def herd_floor(support: Dict[K4, float], *, ms: Iterable[str], maact: Iterable[s
             for w in ("HERD", "LEVL"):
                 b, t = bas.get((r, c, w), 0.0), bast.get((r, c, w), 0.0)
                 for y in exantet:
-                    new[(r, c, w, y)] = floor_value(support.get((r, c, w, y), 0.0), b, t, y, base_year, bast_year,
-                                                    lst_exante)
+                    new[(r, c, w, y)] = XE.P_Result_support_herd_floor(support.get((r, c, w, y), 0.0), b, t, y,
+                                                                       base_year, bast_year, lst_exante)
     for k, v in new.items():
         if v:
             support[k] = v
@@ -80,9 +65,8 @@ def toou(S, *, support: Dict[K4, float], basm: Dict[K3, float], ms: Iterable[str
                 if not any(S.pc.get((r, "UVAG", o, y)) or S.ab.get((r, "UVAG", o, y)) or longrun1.get((r, "UVAG", o, y))
                            for o in outs.get(c, ())):
                     continue
-                new_ab[k] = s
-                b = basm.get((r, c, "TOOU"), 0.0)
-                new_tr[k] = TOOU_TRUST * max(TOOU_MIN, min(1.0, s / b) if b else 0.0)
+                new_ab[k] = XE.p_ExpertSupprt_TOOU(s)
+                new_tr[k] = XE.p_ExpertSupprt_TOOU_trustLevl(s, basm.get((r, c, "TOOU"), 0.0))
     for k, v in new_ab.items():
         S.put(S.ab, k, v)
     for k, v in new_tr.items():
