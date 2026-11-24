@@ -46,9 +46,29 @@ CHANGELOG). The list of the places with the code: section 5 below (the scan's fi
 
 ### The mini-EU runs under two seeds
 
-PENDING (running): tools/run/run_mini_eu.py's 20 units, the Farm-to-Fork scenario, on dev at 3dad0e7 under PYTHONHASHSEED 0
-and 1 (run_f2f_2030.py re-starts itself with seed 0 unless the variable reads "0", so the run is started by a wrapper
-that keeps the interpreter's seed and sets the variable to "0" in the process).
+tools/run/run_mini_eu.py's 20 units, the Farm-to-Fork scenario, on dev at 3dad0e7, under PYTHONHASHSEED 0 and 1, one
+after the other and alone on the machine (run_f2f_2030.py re-starts itself with seed 0 unless the variable reads "0",
+so the runs were started by a wrapper that keeps the interpreter's seed and sets the variable to "0" in the process;
+the wrapper is not in the repository). Both converged in 8 iterations (the baseline in 2).
+
+- **Not identical:** 2,974 values differ at `--rtol 0` (compare_pickles_exact.py), 669 at 1e-12. Small here: at most
+  about 2e-7 relative in the results (PT18's manure options' shares, NO08's duals, the young-animal imbalance), prices
+  in the 14th digit; the largest relative figure, 2.9% in the scenario's environmental table, is a manure net export
+  of +-1.5e-11 (zero). The full EU's 0.2% (CHANGELOG) comes from regions that turn a last digit into another local
+  optimum, which these 20 units do not.
+- **The baseline's results are identical** (activity levels, the environmental table): only four adoption shares of
+  its report differ (NITR_INH, PRECFARM, NITR_INH_MAN, VRT_SRUC), a report's sum in a set's order.
+- **The scenario's first iteration is identical**, its market result too. **The first difference is in the second
+  iteration's regional supply solves**: their inputs as recorded (the price signal, the first iteration's market
+  result) are equal to the bit, their results are not (the EU herds of outer_history, 1e-15 relative; the regional
+  herds there are rounded to 4 decimals, model.py, so they cannot name the region). The place therefore acts inside
+  the regional solves from the second iteration on. Of the scan's places, those that act from then: the young
+  animals' price ratios (supply/livestock.py l. 79, a loop over a union of sets), CAPRI's premium response
+  (policy/premium_cut.py l. 117-118, policy/premium_response.py l. 112 and 151, sets of units and schemes) and the
+  member states' milk signal.
+- **Next (batch A, a code change):** the second iteration's regional results compared exactly, region by region (an
+  unrounded record), to name the region and the step; then the fix in the plan's form (a fixed order) and the three
+  seeds.
 
 ## 2. Step 4: the former-form settings
 
