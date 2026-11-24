@@ -14635,7 +14635,9 @@
    "read_by": {
     "model": [],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/captrd_parity_dump.py"
+    ],
     "tests": [
      "capri_mod/pipeline/tests/test_captrd_agriprod_supports.py",
      "capri_mod/pipeline/tests/test_captrd_national_supports.py"
@@ -62940,7 +62942,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 1014,
+  "capri/keep": 1015,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 37,

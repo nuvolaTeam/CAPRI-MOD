@@ -37,7 +37,7 @@ NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), (
 #: clean_tiny, and
 #: the light ones (no reference data read, or one or two tables): step1, scale_dgagri
 PARTS = None
-LIGHT = {"step1", "scale_dgagri", "final_supports"}
+LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod"}
 
 
 def step1_cases():
@@ -157,7 +157,47 @@ def final_supports_cases():
     return out
 
 
-LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases, "final_supports": final_supports_cases}
+def agriprod_cases():
+    """agriprod_supports.supports (agriprod_supports.gms) on the inputs of test_captrd_agriprod_supports.py (CAPTRD's
+    stored P_Data, BAST and BASM, the member states). SHA-256 of the exact absolute supports, trust levels, bounds and
+    the positions whose PercentChange it deletes."""
+    import pandas as pd
+    from capri_mod.external_paths import REFERENCE
+    from capri_mod.pipeline.captrd import agriprod_supports as A
+    from capri_mod.pipeline.captrd import prepare as P
+    from capri_mod.pipeline.captrd import timesets as TS
+    R = REFERENCE / "captrd_results" / "1770"
+    ref = lambda n: pd.read_csv(R / f"{n}.csv.gz", dtype={"t": str})            # noqa: E731
+    s = P.read_sets()
+    T = TS.build(1984, 2070, [2018, 2020, 2025, 2030, 2035, 2040, 2045, 2050, 2060, 2070], 2017,
+                 TS.lst_dgagri_for("aglink2023dgAgri"), uaar_years_any=range(1984, 2019),
+                 uaar_years_all=range(1995, 2019), expostt_extra=[2019])
+    I = A.read_inputs(P.SETS_DIR, P.SETS_DIR.parent / "dat")
+    meat = set(pd.read_csv(P.SETS_DIR / "meat.csv", dtype=str).d0)
+    pty = list(s.pact_to_y)
+    meat_act = sorted({a for a, m in pty if m in meat and a in set(s.maact)})
+    cols = set(I.one("agriprodaact")) | {"DCOL", "DCOH", "GROF"} | set(meat_act)
+    pdd = ref("P_Data")
+    pdd = pdd[pdd.t.str.isdigit() & pdd.col.isin(cols)]
+    pdata = {(r, c, w, int(t)): v for r, c, w, t, v in zip(pdd.region, pdd.col, pdd.row, pdd.t, pdd.value)}
+    d = ref("data")
+    d = d[(d.t == "BAST") & d.col.isin(cols)]
+    bm = ref("BASM")
+    bm = bm[bm.t == "2070"]
+    runr = list(s.ms) + (["BL400000"] if "BL000000" in s.ms else [])
+    res = A.supports(I, runr=runr, s_colsest=s.s_colsest, s_rowsest=s.s_rowsest, exante=T.exante, exantet=T.exantet,
+                     base_year=2017, lst_expostt=T.lst_expostt,
+                     basm={(r, c, w): v for r, c, w, v in zip(bm.region, bm.col, bm.row, bm.value)}, pdata=pdata,
+                     bast={(r, c, w): v for r, c, w, v in zip(d.region, d.col, d.row, d.value)}, dcow=["DCOL", "DCOH"],
+                     meat_act=meat_act, pact_to_y=pty, prior={})
+    dig = lambda q: _digest(sorted((k, float(v).hex()) for k, v in q.items()))      # noqa: E731
+    return {"absolute": dig(res.absolute), "trust": dig(res.trust),
+            "bounds": _digest(sorted((k, tuple(float(x).hex() for x in v)) for k, v in res.bounds.items())),
+            "no_percent": _digest(sorted(res.no_percent))}
+
+
+LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases, "final_supports": final_supports_cases,
+               "agriprod": agriprod_cases}
 
 
 def want(part):
