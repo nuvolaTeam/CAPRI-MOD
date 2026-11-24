@@ -1090,7 +1090,7 @@ class SupplyMixin(MarketStateMixin):
     def _sup_milk_terms(self, reg, Hs, cols, xs, sv):
         """Norway's raw milk in the market (step F, 29 October 2026): CAPRI keeps ProdNQ_ MILK of the
         regions with supply models in the market, its constant re-anchored to the models' milk
-        (arm/simu_calibration_to_supply.gms l. 198-201, 423-427: v_prodQuant MILK not fixed, bounds 0.1 to 10 x the
+        (arm/simu_calibration_to_supply.gms l. 240-243, 248, 423-427: v_prodQuant MILK not fixed, bounds 0.1 to 10 x the
         level). Returns {"k": the Hessian's own milk term (kt per unit of price level), "L": the milk price level the
         region's models saw, "dL": the milk price change the products respond to (the region's dairy-block price of
         the latest evaluation against L)}, or None (no MILK row and column, no milk in the models)."""

@@ -33,20 +33,26 @@ def DATA_Prod_OMYANI(balance, grof, youngAnimUse):
     use of young animals; the caller adds unit by unit (balance, the sum of the units before, CAPRI's sum over
     MAP_RR(RMSSUP, RU)).
 
-    CAPRI's GAMS (arm/simu_calibration_to_supply.gms l. 166-175):
+    CAPRI's GAMS (arm/simu_calibration_to_supply.gms l. 254-255, the grofNEprod-on branch of star 3.0's runs,
+    capmod/set_global_variables.gms l. 148):
 
-          DATA(RMSSUP,"Prod",OMS,"CUR") $ (DATA(RMSSUP,"Prod",OMS,"CUR") or (DATA(RMSSUP,"Prod",OMS,"TRD") $ omYAni(OMS)))
-             = p_itemsInIters(RMSSUP,"grof",OMS,STEP)
+          DATA(RMSSUP,"Prod",XX_SUPPLY,"CUR") $ (DATA(RMSSUP,"Prod",XX_SUPPLY,"CUR") or (DATA(RMSSUP,"Prod",XX_SUPPLY,"TRD") ))
+             = p_itemsInIters(RMSSUP,"prod",XX_SUPPLY,STEP);
+
+    with the young animals' p_itemsInIters "prod" of the same branch (arm/simu_calibration_to_supply.gms l. 208-217):
+
+          p_itemsInIters(RMSSUP,"prod",OMS,STEP) $ ((DATA(RMSSUP,"Prod",OMS,"TRD") $ omYAni(OMS)))
+             = (p_itemsInIters(RMSSUP,"grof",OMS,STEP)
         *
-        *    --- beware: "prod" for OMYANI is production, and not net put as used in market model
+        *        -- beware: "prod" for OMYANI is production, and not net put as used in market model
         *                 therefore, we have to subtract the young animal use
         *
               - sum(MAP_RR(RMSSUP,RU), v_youngAnimUse.L(RU,OMS)) $ omYAni(OMS)
 
         *                 (ensure that at least +eps is assigned for yanimarket_)
-              + eps $ omYani(OMS);
+              + eps $ omYani(OMS));
 
     In this project's notation: N = sum_r (P_r - U_r). Departures from CAPRI: per young-animal market (the EU or each
     of its trade blocks), the units' production and use summed in turn (the same value up to rounding); no EPS added
-    (0 is a value here)."""
+    (0 is a value here). The grofNEprod-off branch (l. 166-175) assigns the same value to DATA directly."""
     return balance + grof - youngAnimUse

@@ -437,4 +437,15 @@ file); a CAPRI name on a citing line can match a statement the code does not por
   container's memory, the exactness rules, A6's error path) and the citations' state (A0's 14 all corrected; three
   left as they are, named). Not ranked by measurement: the main line's to do. At the merge: dev has edited
   KNOWN_ISSUES.md since 565669aa (K199-K202), so its Open table may conflict next to K198's row.
+- **The three citations K198 named besides A0's rows** (24 November 2026; the project lead: "go on with the three
+  remaining citations"), comments and one docstring only: the grofNEprod-off branch of
+  arm/simu_calibration_to_supply.gms (l. 166-175, 198-201) replaced by the on branch star 3.0 runs with
+  (capmod/set_global_variables.gms l. 148: l. 208-217 and 254-255, l. 240-243 and 248) in coupling/young_animals.py,
+  market/supply.py, tests/test_norway_market.py and A4's DATA_Prod_OMYANI (its quote now l. 254-255 with l. 208-217;
+  the same values); GWPCH4ENT_ in supply/ghg_tax.py and environmental/ghg.py: the coefficient gases.gms's p_emisFeed
+  CH4ENT (l. 367-376), the equation supply_model.gms l. 3051-3069 (the standard form, debugCO2Equ off). Phase 1's
+  methane.py quotes the checking form l. 3074-3076: left, it is the per-head form the model ports. The inventory:
+  the off-branch row (A4's) merged into the on branch's rows (l. 208-243, 245-255, both "moved in A4"), so A4 has 34
+  rows and the phase 302; 1,159 rows; a new row for GWPCH4ENT_'s standard form ("equation (phases 1-2)"); the four
+  EMISCALC and DATA CH4ENT rows ghg_tax.py's symbol citation had matched are gone (no longer cited).
 

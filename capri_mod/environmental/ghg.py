@@ -113,7 +113,8 @@ class GHGBlock:
             _nf   = max(0.0, 1.0 - param("NITRATE_CH4_REDUCTION") * float(_ns.get(animal, 0.0)))
             ef    = _ch4m.GWPCH4ENTaact_(self._ch4_per_head("ent", region, animal), _nf, _sf)
             ch4   = _ch4m.GWPCH4ENT_(heads, ef)   # kt CH4
-            # CATTLE FROM THE FEED MIX (CAPRI GWPCH4ENT_, envind/gases.gms): sum over feeds of
+            # CATTLE FROM THE FEED MIX (CAPRI GWPCH4ENT_, supply/supply_model.gms l. 3051-3069, with p_emisFeed of
+            # envind/gases.gms l. 367-376): sum over feeds of
             # DM (t) x 1000 x GE (Mcal/kg DM) x 4.1868 x Ym / 55.65, in kt (/1e6)
             _fd = (getattr(self.ev, "feed_dm_now", None) or {}).get(animal)
             _fac = self._enteric_factors().get(animal) if _fd else None

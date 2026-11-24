@@ -188,7 +188,7 @@ def test_norway_market_supply_is_its_models_and_the_base_is_reproduced(data):
 
 def test_norway_raw_milk_responds_inside_the_market(data):
     """CAPRI keeps ProdNQ_ MILK of the regions with supply models in the market, re-anchored to their models' milk
-    (arm/simu_calibration_to_supply.gms l. 198-201, 423-427; step F): Norway's milk delivered
+    (arm/simu_calibration_to_supply.gms l. 240-243, 248, 423-427; step F): Norway's milk delivered
     = its models' milk + the Hessian's MILK row x (its dairy-block milk price and the other prices against those its
     models saw), and its products move with the milk price by the MILK column (the block's price of the previous
     evaluation)."""

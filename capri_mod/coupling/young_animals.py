@@ -203,7 +203,7 @@ class YoungAnimalBlock:
 
     def _young_animal_state_to_market(self, supply_results, ref) -> None:
         """The supply models' young-animal state for the market's clearing (CAPRI simu_calibration_to_supply.gms
-        l. 166-175, 360-368: the market's young-animal net supply recalibrated to the supply models' latest solution):
+        l. 208-217, 254-255, 360-368: the market's young-animal net supply recalibrated to the supply models' latest solution):
         per market, each good's net balance now, its reference (the baseline's) and the price ratio those models saw;
         also the imbalance reported by the outer loop (net - reference over the market's production)."""
         net, prod = self._young_animal_balance(supply_results)

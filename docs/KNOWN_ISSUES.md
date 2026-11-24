@@ -4152,9 +4152,9 @@ the main line measures and ranks. Where each acts, from the code (no runs):
   (simu_calibration_to_supply.gms: the grofNEprod-off branch cited, the on branch holds the same statements),
   supply/ghg_tax.py (GWPCH4ENT_ is supply_model.gms l. 3074). The refactor corrects those in the files it moves; the
   main line those in its own.
-- **The blocks A1-A6** (24 November 2026; the handoff's sections 6-10, each function's "Departures from CAPRI"): 303
-  inventory rows moved into named functions (A1+A3 14, A2 120, A4 35, A5 92, A6 42: policy/rd_logic.gms, which A0
-  had left unscheduled), none left to move, the 1,164 rows all reviewed. The results stayed identical: each block's
+- **The blocks A1-A6** (24 November 2026; the handoff's sections 6-10, each function's "Departures from CAPRI"): 302
+  inventory rows moved into named functions (A1+A3 14, A2 120, A4 34, A5 92, A6 42: policy/rd_logic.gms, which A0
+  had left unscheduled), none left to move, the 1,159 rows all reviewed. The results stayed identical: each block's
   five-unit Green Deal run at `--rtol 0`; A2's whole premium chain for the 215 EU units and A6's RD declarations at
   eight years, value by value and key order by key order; the full-EU Green Deal run after A5 (with the Hessian from
   the same source in both runs, below). Found in the moves, besides A0's list:
@@ -4220,10 +4220,15 @@ the main line measures and ranks. Where each acts, from the code (no runs):
 - **The wrong line citations:** A0's 14 rows are all corrected: runlog.py's (with four more of the same drift and
   one in model.py, 24 November 2026), coupling/reporting.py's and market/welfare.py's (A4), policy/mtr.py's (A2),
   supply/policy.py's (the main line). More were corrected in the moved code (A1: line_nitr.gms, fertned.gms,
-  breeding.gms; A6: rd.py's technology factors, l. 237-244, 330-334, 392-393). Left as they are: young_animals.py
-  and market/supply.py cite simu_calibration_to_supply.gms's grofNEprod-off branch (the on branch holds the same
-  statements); supply/ghg_tax.py and environmental/ghg.py name GWPCH4ENT_ with envind/gases.gms, which holds the
-  coefficient it uses (the equation is supply_model.gms l. 3074).
+  breeding.gms; A6: rd.py's technology factors, l. 237-244, 330-334, 392-393). The three A0 described besides its
+  rows, corrected on 24 November 2026: young_animals.py, market/supply.py (and test_norway_market.py) and A4's
+  DATA_Prod_OMYANI cited or quoted simu_calibration_to_supply.gms's grofNEprod-off branch (l. 166-175, 198-201); star
+  3.0 runs with grofNEprod on (capmod/set_global_variables.gms l. 148), whose branch assigns the same values (l.
+  208-217 and 254-255 for the young animals, l. 240-243 and 248 for the raw milk); supply/ghg_tax.py and
+  environmental/ghg.py named GWPCH4ENT_ with envind/gases.gms: the feed-based coefficient is gases.gms's p_emisFeed
+  CH4ENT (l. 367-376), the equation supply_model.gms's standard form l. 3051-3069 (debugCO2Equ off in star 3.0;
+  l. 3074 is CAPRI's checking form, which phase 1's supply/equations/supply_model/methane.py quotes for the per-head
+  split it ports). No wrong citation of A0's list is left.
 - **In 9t:** -
 - **Status:** open (23 November 2026; updated 24 November 2026 with the blocks A1-A6, the phase not merged yet).
 

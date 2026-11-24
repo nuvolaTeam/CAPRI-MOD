@@ -15,7 +15,8 @@ enters the regional problem as each column's emission per unit, taken at the bas
       options, histosol fallowing: the change of the region's GHG total per unit of the column, by finite
       differences of the accounts at the baseline (one unit = 1000 ha or 1000 heads, so kt per unit = t per ha or
       head);
-  feeding (cattle, CAPRI's feed-based CH4ENT, gases.gms GWPCH4ENT_): per t of each flexible feed fed, its dry
+  feeding (cattle, CAPRI's feed-based CH4ENT: p_emisFeed of envind/gases.gms l. 367-376 in GWPCH4ENT_,
+      supply/supply_model.gms l. 3051-3069): per t of each flexible feed fed, its dry
       matter x GE x 4.1868 x Ym / 55.65 x GWP(CH4); the fixed feeds' CH4 per head goes with the animal (the
       accounts' finite difference holds the animals' feed, so their enteric CH4 is not counted twice).
 
