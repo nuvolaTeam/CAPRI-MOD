@@ -97,3 +97,27 @@ def test_the_bounds_of_milk_biofuels_and_the_member_state():
     assert EM.V_EstV_lo_std("CSSP", "WHEA", 10.0, -3.0, 0.0, 0.0, 0.0, 0.0) == max(0.1, -3.0)
     assert EM.V_EstV_MPACT_LEVL(0.0, 1.0, 3) == (None, 1.0)
     assert EM.V_EstV_MPACT_LEVL(1e-9, 0.0, 3) == (1.0e-5 * 3, 1.0e-5 * 3 * 1.1)
+
+
+def test_the_nuts2_bounds():
+    from capri_mod.pipeline.captrd.equations import estimate_nuts2 as NB
+    # the national change applied to the region's base: Step3(MS) / BASM(MS) x BASM(region)
+    assert NB.V_EstV_up_LEVL(120.0, 100.0, 10.0, 13) == max(120.0 / 100.0 * 10.0 * 1.015 ** 13, 10.01)
+    assert NB.V_EstV_lo_LEVL(120.0, 0.0, 10.0, 13) == 0.0          # no member-state base: the ratio is zero
+    assert NB.V_EstV_MEAT_EGGS(2.0, 1.0, 3.0) == (6.0 * 0.999 - 0.1, 6.0 * 1.001 + 0.1)
+    # production from the levels' and coefficients' bounds: GAMS's products (zero against an infinite bound)
+    assert NB.V_EstV_GROF([(10.0, 20.0, 5.0, 6.0), (0.0, float("inf"), 0.0, 1.0)]) == (
+        10.0 * 5.0 * 0.99 * 0.001, 20.0 * 6.0 * 1.01 * 0.001 + 1.0)
+    assert NB.V_EstV_GROF_SUGB(10.0, 500.0, 100.0, 80.0, 5.0) == (min(47.5, 72.0), max(52.5, 88.0))
+    assert NB.V_EstV_lo_ARTIF(2.0, 3.0, 4.0, 10.0, 1.0, 8.0) == (1.5, 0.99 * min(1.5, 1.0))
+
+
+def test_the_nuts2_retries():
+    from capri_mod.pipeline.captrd.equations import est_nuts2_grid as GR
+    from capri_mod.pipeline.captrd.equations import est_nuts2_grid_openbound as OB
+    assert OB.V_EstV_lo_coef(1.0, 5.0, False, True, False) == max(0.0, 1.0 - max(0.1, 0.05))
+    assert OB.V_EstV_lo_coef(1.0, -5.0, False, False, False) == 1.0 - max(0.1, 0.25)
+    assert OB.V_EstV_REQST(20.0, 0.05) == (10.0, 0.05)
+    assert OB.V_EstV_lo_LEVL_open(1.0, True) == 0.9 and OB.V_EstV_lo_LEVL_open(5.0e-6, False) == 0.0
+    assert GR.V_EstV_up_GROF_tries(100.0, 5) == 100.0 * 1.05 ** 5
+    assert GR.V_EstV_SUGB_LEVL(50.0, 60.0, 55.0, 70000.0) == (50.0 / 70.0, 60.0 / 70.0, 55.0 / 70.0)

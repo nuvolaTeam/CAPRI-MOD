@@ -248,6 +248,91 @@ def bounds_cases(E, EB, S, data_all, read_csv, res_dir, _P):
                 D = dataclasses.replace(case(r, y, ms), region_of=ms, ms_pd=Dm.pd, ms_res=Dm.res)
                 lo, up = EB.bounds(D, B, E.REQS_EFF ** (y - E.REQS_YEAR0), artif_as_coded=False)
                 out["regions"][(r, y)] = (hexd(lo), hexd(up))
+    out.update(nuts2_bounds_cases(E, EB, S, B, case, mp, by_reg, tab_reg, year_tab, read_csv, _P, hexd))
+    return out
+
+
+def _digest(*parts):
+    """The SHA-256 of the parts' exact text (hex floats, in order) and their sizes: the NUTS 2 parts are too large to
+    keep whole (a difference changes the digest; rerun the case to see it)."""
+    import hashlib
+    return hashlib.sha256(repr(parts).encode()).hexdigest(), tuple(len(p) for p in parts)
+
+
+NT2_TRIES = (5, 15, 26, 35, 65)          # nRepeatedSolves: below and above the openings' thresholds (10, 20, 25, 30, 60)
+
+
+def nuts2_bounds_cases(E, EB, S, B, case, mp, by_reg, tab_reg, year_tab, read_csv, _P, hexd):
+    """estimate_nuts2.bounds (estimate_nuts2.gms l. 86-402) for the regions of BOUND_REGIONS_OF at BOUND_REGION_YEARS,
+    the member state's result its stored step3 (synthetic: absolute requirements), with and without a sugar quota and
+    the regions' expert sugar beet production, expert bounds and a milk quota (the branches the reference does not
+    reach); then, from those bounds, _open_bounds and _grid_again (est_Nuts2_grid_openbound.gms, est_nuts2_grid.gms) at a synthetic solve state for each
+    try count of NT2_TRIES: the levels the bounds' midpoints, every third bounded position at its lower bound and the
+    next at its upper, every fifth with a multiplier, half the requirements and the feeds blocking."""
+    import dataclasses as _dc
+    from capri_mod.pipeline.captrd import estimate_nuts2 as N
+    sets = lambda n: read_csv(_P.SETS_DIR / f"{n}.csv", keep_default_na=False, dtype=str)      # noqa: E731
+    one = lambda n: set(sets(n).d0)                                                          # noqa: E731
+    cor = one("corfeedlosf")
+    losf = {o for i, o in B.feed_to_o if i in cor} & one("cropo")
+    fodf = {(i, o) for i, o in B.feed_to_o if i in B.foddi}
+    c2g = set(zip(sets("cropc_to_g").d0, sets("cropc_to_g").d1))
+    out = {"nt2_bounds": {}, "nt2_retries": {}}
+    for ms in BOUND_REGIONS_OF:
+        B2 = N.nuts2_bound_sets(B, ms, one("landusearto"))
+        regs = sorted(q for a, q in mp if a == ms and q != ms and q in by_reg and q in tab_reg["Support"])
+        for y in BOUND_REGION_YEARS:
+            for variant in ("", "quota"):
+                Dm = case(ms, y, ms)
+                ms_V = year_tab("step3", ms, y)
+                expert = trust = None
+                if variant:
+                    Dm.res["p_data"][("QUTS", "SUGB")] = 1000.0
+                    expert = {r: {("GROF", "SUGB"): 50.0 + i} for i, r in enumerate(regs)}
+                    trust = {r: {("GROF", "SUGB"): 5.0 if i % 2 else 1.0} for i, r in enumerate(regs)}
+                D = {}
+                for i, r in enumerate(regs):
+                    D[r] = _dc.replace(case(r, y, ms), region_of=ms, ms_pd=Dm.pd, ms_res=Dm.res, nuts2_with_data={})
+                    if variant:
+                        D[r].res["p_data"][("QUTS", "SUGB")] = 100.0 + i
+                        D[r].res["p_data"][("QUTA", "COMI")] = 10.0 + i
+                        a0 = sorted(B2.mpact)[i % len(B2.mpact)]
+                        D[r].res["expertlo"][(a0, "LEVL")] = 0.5
+                        D[r].res["expertup"][(a0, "LEVL")] = 2.0
+                eff = E.REQS_EFF ** (y - E.REQS_YEAR0)
+                lo, up, addn = N.bounds(D, B2, eff, ms_V, Dm.pd, ms_V, losf, fodf, c2g, expert, trust)
+                out["nt2_bounds"][(ms, y, variant)] = {r: _digest(hexd(lo[r]), hexd(up[r]), sorted(addn[r]))
+                                                       for r in regs}
+                nobs = {}
+                for r in regs:
+                    g = by_reg[r]
+                    g = g[(g.t == "nObs") & (g.value.astype(float) != 0)]
+                    nobs[r] = set(zip(g.col, g.row)) | addn[r]
+                for n in (NT2_TRIES if not variant else NT2_TRIES[::3]):
+                    lo_r = {r: dict(lo[r]) for r in regs}
+                    up_r = {r: dict(up[r]) for r in regs}
+                    lo_prev = {r: dict(lo[r]) for r in regs}
+                    up_prev = {r: dict(up[r]) for r in regs}
+                    res = {}
+                    for r in regs:
+                        keys = sorted(set(lo_r[r]) | set(up_r[r]))
+                        x = {}
+                        for k in keys:
+                            a_, b_ = lo_r[r].get(k, -float("inf")), up_r[r].get(k, float("inf"))
+                            x[k] = 0.5 * a_ + 0.5 * b_ if abs(a_) < float("inf") and abs(b_) < float("inf") else 0.0
+                        at_lo = {k: 1.0 for i, k in enumerate(keys) if i % 3 == 0}
+                        at_up = {k: -1.0 for i, k in enumerate(keys) if i % 3 == 1}
+                        mx = set(at_lo) | set(at_up) | {k for i, k in enumerate(keys) if i % 5 == 0}
+                        reqs_m = {(a, q) for i, (a, q) in enumerate(sorted((a, q) for a in B2.mpact for q in B2.reqst))
+                                  if i % 2 == 0}
+                        feed_m = {(a, f) for i, (a, f) in enumerate(sorted((a, f) for a in B2.mpact for f in B2.feed))
+                                  if i % 2 == 0}
+                        N._open_bounds(n, r, D[r], B2, lo_r[r], up_r[r], x, at_lo, at_up, mx, reqs_m, feed_m, ms_V,
+                                       nobs[r], D[r].res["Support"], losf | set(N.LOSF_EXTRA), lo_prev, up_prev, regs)
+                        N._grid_again(n, r, D[r], B2, lo_r[r], up_r[r], x, at_lo, at_up, mx, nobs[r],
+                                      D[r].res["Support"], ms_V)
+                        res[r] = _digest(hexd(lo_r[r]), hexd(up_r[r]), hexd(x))
+                    out["nt2_retries"][(ms, y, variant, n)] = res
     return out
 
 
