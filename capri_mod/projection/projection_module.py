@@ -260,6 +260,7 @@ class ProjectionModule:
         if str(getattr(traj, "name", "")).startswith("capri_ref"):
             self.SUPBAL_outputsPerHead_Y(data, year, data.get("livestock_output_by_product_coef"),
                                          data.get("livestock_product_value_by_market_coef"))
+            self.req_or_man_fnc_CRPR_EXPT_Y(data, year)
         # CAPRI's own 2030 rations and requirements with its 2030 reference (the port of CAPRI's 2030 rations and fodder): factors per region, animal and
         # feed on the 2017 rations (tools/build/build_ration_trajectory_2030.py); where present they replace the uniform
         # requirement scaling of _project_livestock for that ration
@@ -504,6 +505,34 @@ class ProjectionModule:
             for (r, a), x in dv.items():
                 if r in tab.index and a in tab.columns and pd.notna(tab.at[r, a]):
                     tab.at[r, a] = float(tab.at[r, a]) + x
+
+    @staticmethod
+    def req_or_man_fnc_CRPR_EXPT_Y(data: Dict, year: Optional[int]) -> None:
+        r"""CAPRI's N in products per head of the simulation year (data["livestock_n_export_coef"], the report item
+        n_animal_products): at the 2030 market year CAPRI's 2030 values, calc_nexport.gms on its 2030 items over the
+        model's 2030 base heads (livestock_n_export_coef_2030.csv, tools/build/build_livestock_n_export_2030.py), in
+        place of the 2017 per head x the projected yield factor of _project_livestock. CAPRI's simulation recomputes
+        them before it solves: capmod.gms l. 1090 includes feed/req_or_man_fnc.gms in its manure mode, which runs
+        calc_nexport.gms for "Y" before the manure N (sim_ini_21730's "Y" values are the 2017 ones). A cell without a
+        2030 value keeps the projected one. KNOWN_ISSUES K202 (24 November 2026).
+
+        CAPRI's GAMS, feed/req_or_man_fnc.gms (l. 1814-1817 and 1824-1825), the manure mode:
+
+            $iftheni.req12 not %req% ==on
+            $batinclude 'util\title.gms' "'Calculating N content in outputs for animal activities'"
+            $batinclude 'fert\calc_nexport.gms' '%yr%'
+              p_MANN_A(RS,AACT,A,%yr%) $ (DATA(RS,AACT,"LEVL",%yr%)*p_technFact(RS,AACT,"LEVL",A) $ p_crprReq(RS,AACT,A,%yr%))
+                = MAX(0,p_crprReq(RS,AACT,A,%yr%) * p_animExcrProtCorrFact(RS,AACT,A,%yr%) / 6.0 - DATA(RS,AACT,"CRPR_EXPT",%yr%));
+        """
+        t = data.get(f"livestock_n_export_coef_{year}") if year is not None else None
+        tab = data.get("livestock_n_export_coef")
+        if not isinstance(t, pd.DataFrame) or not isinstance(tab, pd.DataFrame):
+            return
+        for a in tab.columns.intersection(t.columns):
+            for r in tab.index.intersection(t.index):
+                v = t.at[r, a]
+                if pd.notna(v):
+                    tab.at[r, a] = float(v)
 
     @staticmethod
     def SUPBAL_animalOutputSum(data: Dict, bp, cells) -> None:

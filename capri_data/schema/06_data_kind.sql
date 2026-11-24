@@ -102,6 +102,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/2017/environment/manure_pool_costs.csv', 'coefficients', 'by file: CAPRI''s manure trade costs between pools'),
   ('capri_data/baselines/capri_greendeal_ref/1730/environment/manure_pool_market_2030.csv', 'coefficients', 'by file: CAPRI''s 2030 coefficients (per ha, per t, shares, factors)'),
   ('capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_manure_n_coef_2030.csv', 'coefficients', 'by file: CAPRI''s 2030 coefficients (per ha, per t, shares, factors)'),
+  ('capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_n_export_coef_2030.csv', 'coefficients', 'by file: CAPRI''s 2030 coefficients (per ha, per t, shares, factors)'),
   ('capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_manure_p_coef_2030.csv', 'coefficients', 'by file: CAPRI''s 2030 coefficients (per ha, per t, shares, factors)'),
   ('capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_manure_k_coef_2030.csv', 'coefficients', 'by file: CAPRI''s 2030 coefficients (per ha, per t, shares, factors)'),
   ('capri_data/baselines/capri_greendeal_ref/1730/environment/manure_trade_2030.csv', 'coefficients', 'by file: CAPRI''s 2030 coefficients (per ha, per t, shares, factors)'),

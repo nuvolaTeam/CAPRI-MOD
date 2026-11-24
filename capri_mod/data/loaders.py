@@ -74,6 +74,7 @@ _FILE_CATEGORY = {
     "fertiliser_substitution_2030.csv": "environment",
     "livestock_manure_n_coef.csv": "environment", "livestock_manure_n_coef_2030.csv": "environment",
     "livestock_n_export_coef.csv": "environment",
+    "livestock_n_export_coef_2030.csv": "environment",
     "livestock_ch4man_coef.csv": "environment", "livestock_ch4ent_coef.csv": "environment",
     "crop_co2_coef.csv": "environment",
     # CAPRI's inner fertiliser distribution model and mineRedu (read by capri_mod.fert.inner_fert_dist)
@@ -725,6 +726,9 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "livestock_manure_n_coef": _load_optional_csv(data_dir, "livestock_manure_n_coef.csv"),
         # CAPRI's N exported in animal products per model head (CRPR_EXPT, tools/build/build_livestock_n_export_coef.py)
         "livestock_n_export_coef": _load_optional_csv(data_dir, "livestock_n_export_coef.csv"),
+        # CAPRI's 2030 N in products per model head: calc_nexport.gms on its 2030 items, as its simulation recomputes it
+        # (tools/build/build_livestock_n_export_2030.py, KNOWN_ISSUES K202), for the 2030 market year
+        "livestock_n_export_coef_2030": _load_optional_csv(data_dir, "livestock_n_export_coef_2030.csv"),
         # CAPRI's manure and enteric CH4 per head, CO2 from liming and urea (tools/build/build_ghg_coefs_2017.py)
         "livestock_ch4man_coef": _load_optional_csv(data_dir, "livestock_ch4man_coef.csv"),
         "livestock_ch4ent_coef": _load_optional_csv(data_dir, "livestock_ch4ent_coef.csv"),

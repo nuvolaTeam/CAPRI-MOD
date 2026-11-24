@@ -441,6 +441,16 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   and without (1)); the inhibitor on mineral N moves towards CAPRI's in four units (ES51 0.257 -> 0.141, CAPRI 0.039;
   NL22 0.536 -> 0.459, 0.292), away in FR52 (0.575 -> 0.482, 0.575); the inhibitor on manure stays where CAPRI has none
   (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
+- **K202, the N in livestock products (24 November 2026; register DEP-13):** the report item n_animal_products at
+  2030 takes CAPRI's 2030 values: CAPRI's simulation recomputes the N in products before it solves (capmod.gms l. 1090,
+  feed/req_or_man_fnc.gms in its manure mode runs fert/calc_nexport.gms for "Y"), so tools/build/
+  build_livestock_n_export_2030.py ports calc_nexport.gms (calc_nexport_CRPR_EXPT, which gives sim_ini_21730's 2017
+  CRPR_EXPT from its 2017 items in all 4,232 regional cells) and applies it to the 2030 reference's items, over the
+  model's 2030 heads (ProjectionModule.req_or_man_fnc_CRPR_EXPT_Y), in place of 2017 x the yield factor. The 2017
+  value of the bulls and fattening heifers from CAPRI's elementary activities: res_17's aggregates BULF and HEIF carry a
+  CRPR_EXPT that does not add up (0.606 and 0.617 of their members' sum). EU N in products 2017 2,598 -> 2,628 kt
+  (bulls 41.0 -> 62.6), 2030 base 2,626 -> 2,650 kt. Reporting only (the N in products enters no row of the regional
+  model). Test: capri_mod/tests/test_livestock_n_export_2030.py.
 - **K201, the bulls' and heifers' 2030 rations (24 November 2026; register DEP-13):** the 2030 ration factors
   (tools/build/build_ration_trajectory_2030.py, CAPRI's 2030 over 2017 per feed and requirement) took the 2017 ration
   builder's CAPRI aggregates BULF and HEIF, which have no DAYS in CAPRI's 2030 reference: the bulls had no 2030 factor

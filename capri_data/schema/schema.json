@@ -20163,6 +20163,153 @@
     "tests": []
    }
   },
+  "env_livestock_n_export_coef_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_n_export_coef_2030.csv",
+   "declared_in": "17_environment.sql",
+   "layout": [
+    "unnamed",
+    "wide"
+   ],
+   "comment": "CAPRI's 2030 N exported in animal products per model head: fert/calc_nexport.gms on the 2030 reference's items of each activity (CAPRI's simulation recomputes CRPR_EXPT at \"Y\" before it solves, feed/req_or_man_fnc.gms l. 1814-1817), LEVL x CRPR_EXPT over the model's 2030 base heads, read at the 2030 market year (KNOWN_ISSUES K202; tools/build/build_livestock_n_export_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "animal"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(\"value\" >= 0)"
+   ],
+   "units": [
+    {
+     "item": "BCOW",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "BROI",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "BULL",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "CALV",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "DCOW",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "HFRS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "LAYS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "OANI",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "PIGF",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "PIGS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "SHGF",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "SHGM",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_livestock_n_export_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_livestock_n_export_2030.py"
+    ]
+   }
+  },
   "env_luc_2030": {
    "file": "capri_data/baselines/capri_greendeal_ref/1730/environment/luc_2030.csv",
    "declared_in": "17_environment.sql",
