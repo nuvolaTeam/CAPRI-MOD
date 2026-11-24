@@ -34,6 +34,7 @@ from capri_mod.pipeline.captrd import estimate_bounds as EB
 from capri_mod.pipeline.captrd import estimate_ms as E
 from capri_mod.pipeline.captrd import estimate_nlp as NLP
 from capri_mod.pipeline.captrd.equations import equations as EQ
+from capri_mod.pipeline.captrd.equations import nuts2 as NT
 from capri_mod.settings import current as current_settings
 
 K2 = Tuple[str, str]
@@ -41,8 +42,8 @@ K3 = Tuple[str, str, str]
 INF = float("inf")
 #: equations.gms l. 909-912: m_trendNT2's blocks that estimate_ms.residuals has
 SHARED_BLOCKS = ("AREAB_", "LANDUSEB_", "OSET_", "GROF_", "REQS_", "GRPLVL_", "STRA_", "LU_", "SplitFix_")
-#: l. 230-240: MSFEEDI_'s scaling (10 kg per head, in t)
-FEED_SCALE, PER_1000 = 10.0, 0.001
+#: kg to t (the bounds' GROF sums)
+PER_1000 = 0.001
 #: l. 820-833: the regional weight's floor and its regularisation
 WEIGHT_FLOOR, WEIGHT_EPS = 0.001, 1.0e-5
 #: MSLANDUSE_'s land uses (l. 219)
@@ -87,15 +88,16 @@ def residuals(points: Dict[str, E.Point], ms_nobs: set, ms_V: Dict[K2, float], S
         if not any(n(r, a, "LEVL") and lo(r, (a, w)) != up(r, (a, w)) for r in regs
                    for a, o in S.pact_to_io if o == w and a in S.mpact):
             continue
-        add("MSGROF_", (w,), "E", sum(V(r, "GROF", w) for r in regs if n(r, "GROF", w)) - M("GROF", w))
+        add("MSGROF_", (w,), "E", NT.MSGROF_((V(r, "GROF", w) for r in regs if n(r, "GROF", w)), M("GROF", w)))
     # MSLEVL_ (l. 199-210)
     for a in sorted(S.mpact):
         if nm(a, "LEVL") and a not in rset and a in S.cols_est and a not in sal and regs:
-            add("MSLEVL_", (a,), "E", sum(V(r, a, "LEVL") for r in regs if n(r, a, "LEVL")) - M(a, "LEVL"))
+            add("MSLEVL_", (a,), "E", NT.MSLEVL_((V(r, a, "LEVL") for r in regs if n(r, a, "LEVL")), M(a, "LEVL")))
     # MSLANDUSE_ (l. 218-224)
     for c in MS_LANDUSE:
         if c in S.cols_est and nm(c, "LEVL") and regs:
-            add("MSLANDUSE_", (c,), "E", sum(V(r, c, "LEVL") for r in regs if n(r, c, "LEVL")) - M(c, "LEVL"))
+            add("MSLANDUSE_", (c,), "E", NT.MSLANDUSE_((V(r, c, "LEVL") for r in regs if n(r, c, "LEVL")),
+                                                       M(c, "LEVL")))
     # MSFEEDI_ (l. 230-240)
     for a in sorted(S.mpact):
         for f in sorted(feed - foddi):
@@ -104,24 +106,25 @@ def residuals(points: Dict[str, E.Point], ms_nobs: set, ms_V: Dict[K2, float], S
             rr = [r for r in regs if n(r, a, "LEVL") and n(r, a, f)]
             if not rr:
                 continue
-            lhs = sum(V(r, a, "LEVL") * V(r, a, f) * PER_1000 for r in rr) \
-                + sum(V(r, a, "LEVL") * FEED_SCALE * PER_1000 for r in regs if n(r, a, "LEVL"))
-            add("MSFEEDI_", (a, f), "E", lhs - M(a, "LEVL") * (M(a, f) + FEED_SCALE) * PER_1000)
+            add("MSFEEDI_", (a, f), "E", NT.MSFEEDI_(((V(r, a, "LEVL"), V(r, a, f)) for r in rr),
+                                                     (V(r, a, "LEVL") for r in regs if n(r, a, "LEVL")),
+                                                     M(a, "LEVL"), M(a, f)))
     foddo = sorted({o for f, o in S.feed_to_o if f in foddi})
     for r in regs:
         for o in foddo:
             # MSlosfFoddo_ (l. 474-485): the member state's loss rate (its estP)
             if n(r, "GROF", o) and o != "STRA":
-                rate = M("LOSF", o) / M("GROF", o) if M("GROF", o) else 0.0
-                add("MSlosfFoddo_", (r, o), "E", V(r, "LOSF", o) - V(r, "GROF", o) * rate)
-            # EFED_ (l. 500-507; ex_endofodderUse is empty outside the farm types)
+                add("MSlosfFoddo_", (r, o), "E", NT.MSlosfFoddo_(V(r, "LOSF", o), V(r, "GROF", o), M("LOSF", o),
+                                                                 M("GROF", o)))
+            # EFED_ (l. 500-508; ex_endofodderUse is empty outside the farm types)
             fs = [f for f, oo in S.feed_to_o if oo == o]
             if any(n(r, "GROF", f) for f in fs) and n(r, "GROF", o):
-                lhs = V(r, "GROF", o) - V(r, "LOSF", o) * n(r, "LOSF", o) - V(r, "INDM", o) * n(r, "INDM", o)
-                add("EFED_", (r, o), "E", lhs - sum(V(r, "GROF", f) for f in fs if n(r, "GROF", f)))
+                add("EFED_", (r, o), "E", NT.EFED_(V(r, "GROF", o), V(r, "LOSF", o), n(r, "LOSF", o), V(r, "INDM", o),
+                                                   n(r, "INDM", o), (V(r, "GROF", f) for f in fs if n(r, "GROF", f))))
     # MSindmMaif_ (l. 490-495)
     if nm("INDM", "MAIF") and any(n(r, "INDM", "MAIF") for r in regs):
-        add("MSindmMaif_", (), "E", sum(V(r, "INDM", "MAIF") for r in regs if n(r, "INDM", "MAIF")) - M("INDM", "MAIF"))
+        add("MSindmMaif_", (), "E", NT.MSindmMaif_((V(r, "INDM", "MAIF") for r in regs if n(r, "INDM", "MAIF")),
+                                                   M("INDM", "MAIF")))
     return out
 
 

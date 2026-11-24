@@ -600,6 +600,7 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/pipeline/captrd/estimate_nuts2.py', 'ARTIF_SHRINK', 0.99, 'capri', 'keep', 'gams/captrd/estimate_nuts2.gms l. 356-363', 'ARTIF''s lower bound x 0.99 of the scaled base'),
   ('capri_mod/pipeline/captrd/estimate_nuts2.py', 'FEED_FIX_TRIES', 60.0, 'capri', 'keep', 'gams/captrd/est_Nuts2_grid_openbound.gms l. 40-44', 'after 60 tries the blocking feed coefficients fixed at the support'),
   ('capri_mod/pipeline/captrd/estimate_nuts2.py', 'NYD_OPEN_TRIES', 30.0, 'capri', 'keep', 'gams/captrd/est_Nuts2_grid_openbound.gms l. 64', 'from 30 tries the NoYieldDrop yields'' lower bounds opened too'),
+  ('capri_mod/pipeline/captrd/estimate_nuts2.py', 'PER_1000', 0.001, 'physical', 'keep', 'gams/captrd/estimate_nuts2.gms l. 235-254', 'kg to t: production from the levels'' and yields'' bounds'),
   ('capri_mod/pipeline/captrd/estimate_nuts2.py', 'RSET_LO_MIN', 0.01, 'capri', 'keep', 'gams/captrd/est_nuts2_grid.gms l. 120-121', 'the set-aside levels'' lower bounds below 0.01 to zero'),
   ('capri_mod/pipeline/captrd/estimate_nuts2.py', 'TINY_LEVL', 1e-06, 'capri', 'keep', 'gams/captrd/rem_tiny.gms l. 19-20', 'rem_tiny: activity levels at or below 1e-6 removed'),
   ('capri_mod/pipeline/captrd/estimate_nuts2.py', 'YOUNG_PER_1000', 1000.0, 'capri', 'keep', 'gams/captrd/est_Nuts2_grid_openbound.gms l. 255-258', 'the young animals'' coefficients fixed at 1000 per 1000 heads'),
