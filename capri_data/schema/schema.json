@@ -14514,7 +14514,9 @@
    "read_by": {
     "model": [],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/captrd_parity_dump.py"
+    ],
     "tests": [
      "capri_mod/pipeline/tests/test_captrd_estimate_bounds.py"
     ]
@@ -62934,7 +62936,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 956,
+  "capri/keep": 1000,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 37,

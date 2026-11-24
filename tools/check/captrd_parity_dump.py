@@ -9,12 +9,14 @@ supports, Lo, up, BASM, wVarErr):
 - nt2_obj: estimate_nuts2.objective with AT, DK and NL standing in as one member state's regions, three years;
 - stcm: both objectives again with STCM data added for the young animals (the reference points have none, so the
   STCM pull is otherwise not reached);
+- bounds: estimate_bounds.bounds at every member state and year (both readings of ARTIF's bound) and at the NUTS 2
+  regions of four member states, the BoundData synthetic where the reference lacks a statistic (bounds_cases);
 - nt2_res: estimate_nuts2.residuals (m_trendNT2) with AT, DE, DK and NL as the regions (the member state's observed
   positions the union of theirs, its fixed values a weighted sum), six years, with and without EX_FEED, and the
   expressions at two years. The inputs are synthetic; every block of m_trendNT2 is reached.
 
 The values are read in the order the code evaluates them, so the hash seed does not matter (the estimation sorts its
-sets). About a minute and 2 GB.
+sets). About two minutes and 2 GB.
     PYTHONPATH=CHECKOUT python tools/check/captrd_parity_dump.py OUT.pkl      # run in each checkout (git worktree)
     python tools/check/captrd_parity_dump.py --compare REF.pkl NEW.pkl
 """
@@ -122,13 +124,131 @@ def dump(path):
         if y in NT2_RES_SYM:
             res = N.residuals(points, ms_nobs, ms_V, S, B.foddi, rset, sal, var=sym2())
             out["nt2_res"]["sym"][y] = [(a, b, c, str(r)) for a, b, c, r in res]
+    out["bounds"] = bounds_cases(E, EB, S, data_all, read_csv, res_dir, _P)
     with open(path, "wb") as fh:
         pickle.dump(out, fh)
     nt2_blocks = Counter(x[0] for x in out["nt2_res"]["num"][("2030", "")] if x[0] not in N.SHARED_BLOCKS)
     print(f"{len(pts)} points: {sum(len(v) for v in out['ms_res']['num'].values())} m_trendMS residuals, "
           f"{sum(len(v) for v in out['ms_res']['sym'].values())} expressions; {len(out['obj']['ms'])} objectives; "
           f"m_trendNT2 {sum(len(v) for v in out['nt2_res']['num'].values())} residuals, its own blocks at 2030 "
-          f"{dict(nt2_blocks)} -> {path}")
+          f"{dict(nt2_blocks)}; bounds at {len(out['bounds']['ms'])} member-state and {len(out['bounds']['regions'])} "
+          f"regional cases, {sum(len(a) + len(b) for a, b in out['bounds']['ms'].values())} member-state bounds -> {path}")
+
+
+BOUND_YEARS = (2018, 2020, 2025, 2030, 2035, 2040, 2045, 2050, 2060, 2070)      # the reference run's RESY
+BOUND_REGIONS_OF = ("AT000000", "DE000000", "ES000000", "IR000000")             # NUTS 2 regions' bounds (region_of)
+BOUND_REGION_YEARS = (2018, 2030, 2050)
+ORD = dict(ord_bas=2017, ord_bast=2018, lst_exante=2070, fst_exante=2018, lst_expostt=2019, lst_dgagri=2040)
+WBA7 = {"AL000000", "MK000000", "CS000000", "MO000000", "HR000000", "BA000000", "KO000000"}
+
+
+#: the extra cases' data, (col, row, statistic): negative OCRO and OANI bases, data for POUF, INTP and the quota of
+#: sugar beet, the COMI losses' BAST absent, no land left beside grassland in one country
+EXTRA_STATES = ("BG000000", "DK000000", "PL000000")
+EXTRA_DATA = {("GROF", "OCRO", "BASM"): -5.0, ("GROF", "OANI", "BASM"): -3.0, ("OCRO", "OCRO", "BASM"): -2.0,
+              ("GROF", "POUF", "nObs"): 1.0, ("INTP", "WHEA", "nObs"): 1.0, ("INTP", "BARL", "nObs"): 1.0,
+              ("QUTS", "SUGB", "BASM"): 100.0, ("LOSF", "COMI", "BAST"): 0.0, ("FEDM", "COMI", "BAST"): 0.0,
+              ("LOSF", "COMI", "BASM"): 3.0, ("FEDM", "COMI", "BASM"): 2.0, ("PRCM", "COMI", "nObs"): 1.0,
+              ("OANI", "OANI", "BASM"): -1.0, ("OANI", "OANI", "nObs"): 1.0}
+EXTRA_DATA_OF = {"PL000000": {("UAAR", "LEVL", "BASM"): 0.0}}
+EXTRA_RES_NOT_OF = {"BG000000": {("p_data", "QUTA", "COMI"), ("p_data", "QUTB", "COMI")}}   # BG: comi_bounds' fallback
+EXTRA_RES = {("p_data", "QUTA", "COMI"): 500.0, ("p_data", "QUTB", "COMI"): 40.0, ("p_data", "QUTS", "SUGB"): 90.0,
+             ("Support", "INTP", "WHEA"): -12.0, ("Support", "INTP", "BARL"): 7.0}
+
+
+def bounds_cases(E, EB, S, data_all, read_csv, res_dir, _P):
+    """estimate_bounds.bounds (estimate_ms.gms l. 53-151, fix_est.gms, comi_bounds.gms, biofuel_bounds.gms) at every
+    member state and year of the reference run, with both readings of ARTIF's bound (FIX-7), and at the NUTS 2 regions
+    of four member states (region_of). The BoundData is synthetic where the reference has no statistic (it needs
+    capreg_base for BASM and BSY): BASM data's BASM, else its BAS; BSY BAS x 1.05; BAST data's BAST. lo, up as their
+    items in order (hex floats)."""
+    B = EB.read_bound_sets()
+    names = [("Support", "support"), ("coco", "COCO"), ("Expert", "Expert"), ("expertlo", "expertLo"),
+             ("expertup", "expertUp"), ("p_data", "P_Data"), ("BASM", "BASM"), ("step3", "step3")]
+    tabs = {k: read_csv(res_dir / f"{f}.csv.gz", dtype={"t": str}, keep_default_na=False) for k, f in names}
+    mp = set(zip(*[read_csv(_P.SETS_DIR / "map_rr.csv", dtype=str).get(c) for c in ("d0", "d1")]))
+    by_reg = {r: g for r, g in data_all.groupby("region")}
+    tab_reg = {k: {r: g for r, g in t.groupby("region")} for k, t in tabs.items()}
+    prev_of = {BOUND_YEARS[i]: BOUND_YEARS[i - 1] for i in range(1, len(BOUND_YEARS))}
+
+    def year_tab(k, r, y):
+        g = tab_reg[k].get(r)
+        if g is None:
+            return {}
+        g = g[g.t == str(y)]
+        return dict(zip(zip(g.col, g.row), g.value.astype(float)))
+
+    def case(r, y, ms, extra=False):
+        d = by_reg[r]
+        data = {t: dict(zip(zip(g.col, g.row), g.value.astype(float))) for t, g in d.groupby("t")}
+        if extra:                                  # branches the reference's data does not reach
+            for k, v in {**EXTRA_DATA, **EXTRA_DATA_OF.get(ms, {})}.items():
+                data.setdefault(k[2], {})[k[:2]] = v
+            for s_ in sorted(S.seco_biof):
+                data["nObs"][("INHA", s_)] = 1.0
+
+        def pd_(c, w, st, data=data):
+            if st == "BASM":
+                return data.get("BASM", {}).get((c, w), data.get("BAS", {}).get((c, w), 0.0))
+            if st == "BSY":
+                return data.get("BAS", {}).get((c, w), 0.0) * 1.05
+            return data.get(st, {}).get((c, w), 0.0)
+        res = {k: year_tab(k, r, y) for k, _ in names if k != "step3"}
+        if extra:
+            for (rp, c, w), v in EXTRA_RES.items():
+                if (rp, c, w) not in EXTRA_RES_NOT_OF.get(ms, ()):
+                    res[rp][(c, w)] = v
+        nobs = {k for k, v in data.get("nObs", {}).items() if v}
+        kw = dict(nobs=nobs, bas=data.get("BAS", {}), basm=dict(data.get("BASM", {})), const=data.get("Const", {}),
+                  slope=data.get("Slope", {}), pdata=res["p_data"], coco=set(res["coco"]), lo={}, up={}, year=y,
+                  exante_d=y <= ORD["lst_expostt"])
+        for a in S.maact:
+            for q in S.reqst:
+                kw["basm"][(a, q)] = pd_(a, q, "BASM")
+        sup = res["Support"]
+        res["Support"] = E.requirements_relative(E.Point(V=sup, support=sup, **kw), S, sup)
+        cs = {(a, q): data.get("Const", {}).get((a, q), 0.0) + data.get("Slope", {}).get((a, q), 0.0)
+              for a in S.maact for q in S.reqst}
+        prev = prev_of.get(y)
+        st3 = year_tab("step3", r, prev) if prev else {}
+        n2 = {q for a, q in mp if a == r and q != r and q in by_reg}
+        nuts2 = {}
+        for q in sorted(n2):
+            g = by_reg[q]
+            g = g[(g.t == "nObs") & (g.row == "LEVL") & (g.value != 0)]
+            for c in set(g.col):
+                nuts2[c] = nuts2.get(c, 0) + 1
+        west = ("EU014000", r) in mp                # a region's own code, as the tests pass it
+        return EB.BoundData(ms=r, year=y, pd=pd_, res=res, exante_d=y <= ORD["lst_expostt"], west=west,
+                            east=("EU013000", r) in mp, wba7=r in WBA7, bur=r in {"BG000000", "RO000000"},
+                            setr_west=1.0 if west else 0.0, prev=prev, prev_exante_d=prev is not None and prev <= 2019,
+                            estp_prev=st3, step3_prev=st3, const_slope={k: v for k, v in cs.items() if v},
+                            nuts2_with_data=nuts2 if r == ms else {}, **ORD)
+
+    hexd = lambda m: [(k, float(v).hex()) for k, v in m.items()]          # noqa: E731
+    out = {"ms": {}, "regions": {}}
+    states = sorted(r for r in by_reg if r.endswith("000000") and not r.startswith(("EU", "A_")) and r in tab_reg["Support"])
+    for ms in states:
+        for y in BOUND_YEARS:
+            D = case(ms, y, ms)
+            eff = E.REQS_EFF ** (y - E.REQS_YEAR0)
+            for coded in (False, True):
+                lo, up = EB.bounds(D, B, eff, artif_as_coded=coded)
+                out["ms"][(ms, y, coded)] = (hexd(lo), hexd(up))
+    for ms in EXTRA_STATES:
+        for y in (2018, 2030):
+            D = case(ms, y, ms, extra=True)
+            lo, up = EB.bounds(D, B, E.REQS_EFF ** (y - E.REQS_YEAR0), artif_as_coded=False)
+            out["ms"][(ms, y, "extra")] = (hexd(lo), hexd(up))
+    for ms in BOUND_REGIONS_OF:
+        regs = sorted(q for a, q in mp if a == ms and q != ms and q in by_reg and q in tab_reg["Support"])
+        for y in BOUND_REGION_YEARS:
+            Dm = case(ms, y, ms)
+            for r in regs:
+                D = dataclasses.replace(case(r, y, ms), region_of=ms, ms_pd=Dm.pd, ms_res=Dm.res)
+                lo, up = EB.bounds(D, B, E.REQS_EFF ** (y - E.REQS_YEAR0), artif_as_coded=False)
+                out["regions"][(r, y)] = (hexd(lo), hexd(up))
+    return out
 
 
 def compare(a, b):

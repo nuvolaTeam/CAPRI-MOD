@@ -66,3 +66,34 @@ def test_the_nuts2_fodder():
     assert NT.MSlosfFoddo_(3.0, 100.0, 5.0, 200.0) == 3.0 - 100.0 * 0.025
     assert NT.MSlosfFoddo_(3.0, 100.0, 5.0, 0.0) == 3.0          # no member-state GROF: rate zero
     assert NT.EFED_(100.0, 5.0, True, 7.0, False, [60.0, 35.0]) == 100.0 - 5.0 - 95.0
+
+
+def test_the_bounds_of_fix_est():
+    from capri_mod.pipeline.captrd.equations import fix_est as FE
+    lo, up = FE.V_EstV_IO(100.0, 13, 53, "WHEA", True)
+    assert lo == 100.0 * max(0.975 ** 13, 1 - 0.3 * 13 / 53) and up == 100.0 * min(1.025 ** 13, 1 + 0.3 * 13 / 53 + 10.0)
+    assert FE.V_EstV_IO(100.0, 13, 53, "YCHI", False)[0] == 100.0 * max(0.975 ** 13, 1 - 0.3 * 13 / 53 - 1.0)
+    assert FE.V_EstV_OYANI_expert(2.0, None) == (1.0, None)
+    # food intake as GAMS reads it: BAST x 0.98^n + BASM (CAPRI-ERROR, kept)
+    assert FE.V_EstV_INHA(10.0, 4.0, 12, 13) == (10.0 * 0.98 ** 12 + 4.0, 10.0 * 1.02 ** 12 + 4.0)
+    assert FE.V_EstV_up_TWIN("ES000000", 100.0) == 117.355 and FE.V_EstV_up_TWIN("DK000000", 1.0) is None
+    assert FE.V_EstV_up_physical(("TOBA", "TOBA"), 3000.0, 9000.0) == 4500.0
+    assert FE.V_EstV_up_GRAS("GRAI", True, 1000.0, 1.0e9) == 160000.0
+    # ARTIF: l. 810 as coded, the year as the exponent, or as its comment states it (FIX-7)
+    assert FE.V_EstV_ARTIF(5.0, True, 1.0e9, 2030, 2017, False) == (5.0, max(5.0 * 1.02 ** 13, 1.0e9))
+    assert FE.V_EstV_ARTIF(5.0, True, 6.0, 2030, 2017, True) == (5.0, max(5.0 * 1.02 ** 2030 - 2017, 6.0))
+
+
+def test_the_bounds_of_milk_biofuels_and_the_member_state():
+    from capri_mod.pipeline.captrd.equations import biofuel_bounds as BF
+    from capri_mod.pipeline.captrd.equations import comi_bounds as CB
+    from capri_mod.pipeline.captrd.equations import estimate_ms as EM
+    assert CB.P_DATA_DCOW_COMI(6000.0, 1.0, 9000.0, 3.0, 5.0) == (6000.0 + 27000.0) / 4.0
+    assert CB.P_DATA_DCOW_COMI(6000.0, 0.0, 9000.0, 0.0, 5.0) == 5.0
+    assert CB.V_EstV_COMI(1.0, 1.0, 1.0, 7000.0, 7000.0, 0.0, 10, 0.0, 9.0) == (1.0125 ** 10, 9.0)
+    assert CB.V_EstV_COMI_prev(5.0, 6.0, None, True, 5) == (5.0, 6.0)
+    assert CB.V_EstV_COMI_prev(5.0, 5.5, 5.0, True, 4) == (5.0 * 1.0025 ** 4, 5.0 * 1.0025 ** 4 * 1.1)
+    assert BF.V_EstV_SECO_BIOF("BIOF", 100.0) == (100.0 * 0.9999, 100.0 * 1.05)
+    assert EM.V_EstV_lo_std("CSSP", "WHEA", 10.0, -3.0, 0.0, 0.0, 0.0, 0.0) == max(0.1, -3.0)
+    assert EM.V_EstV_MPACT_LEVL(0.0, 1.0, 3) == (None, 1.0)
+    assert EM.V_EstV_MPACT_LEVL(1e-9, 0.0, 3) == (1.0e-5 * 3, 1.0e-5 * 3 * 1.1)

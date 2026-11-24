@@ -11,15 +11,18 @@ Nothing is merged into dev; the main session decides the merge.
 - **Done, pushed:** C1, C2, C3: all of captrd/equations.gms that CAPTRD-MOD ports (m_trendMS's 39 equations,
   m_trendNT2's own 7, the objective SSQS_) are named functions with their GAMS statements quoted, in
   capri_mod/pipeline/captrd/equations/ (equations.py, nuts2.py). The callers (estimate_ms, estimate_nuts2) keep the
-  domain conditions and the loops.
+  domain conditions and the loops. C4: the member-state estimation's bounds (estimate_bounds.bounds: estimate_ms.gms,
+  fix_est.gms, comi_bounds.gms, biofuel_bounds.gms), 81 functions in equations/fix_est.py, comi_bounds.py,
+  biofuel_bounds.py, estimate_ms.py.
 - **Checked:** exactly (hex floats and CasADi text) against the starting commit 9c69ab7b, with
   tools/check/captrd_parity_dump.py on CAPTRD's own Step 2 points; the pipeline tests unchanged; the static checks.
 - **Not checked here, and why:** a full CAPTRD run's outputs. The published raw set has no capreg_base (CAPREG's base
   year for the EU's countries), which the estimation's bounds, the NLP and the NUTS 2 solves read: those 14 pipeline
   tests fail or error here, before and after the refactor alike. The main session's environment has it: run the
   pipeline's outputs bit for bit there against 9c69ab7b before the merge (section 4).
-- **Next:** C4 the bounds (fix_est.gms and the other bound files), C5 the supports and trends modules (an inventory
-  first), then C6, the sort of the 81 hash-order places, **a commit of its own** (it changes last digits).
+- **Next:** C4b the NUTS 2 estimation's own bounds (estimate_nuts2.bounds, _open_bounds, _grid_again), C5 the
+  supports and trends modules (an inventory first), then C6, the sort of the 81 hash-order places, **a commit of its
+  own** (it changes last digits).
 - **The main session's notes (24 November):** moves must leave results identical, and the pipeline's outputs are to be
   compared bit for bit against the starting commit; the 81 places' sort is a separate commit, not mixed with moves; the
   heavy pipeline tests reach about 5.4 GB each, run them one at a time on a small container; the CAPTRD-MOD stage 2e
@@ -32,11 +35,13 @@ Nothing is merged into dev; the main session decides the merge.
 | 1d6172ed | C1 | m_trendMS's equations (equations.gms l. 107-795): AREAB_ ... GRPLVL_, 39 functions in equations/equations.py; estimate_ms.residuals calls them. Its constants SEED_SHARE, POS_*, DAILY_*, MOLA_VINASSE, DAYS_YEAR became the functions' literals; REQS_EFF and REQS_YEAR0 stay (estimate_bounds and tests use them) | 282,007 residuals at 340 points, 3,444 expressions: identical |
 | 3da68403 | C2 | SSQS_ (l. 801-875) in equations.py for both objectives: estimate_ms.objective (CARD(Rest) = 1, no weight factor, so the graph has no `* 1`) and estimate_nuts2.objective (the regions' weights). The five SSQS_ constants became its literals | 340 objectives, 3 NUTS 2 ones, their expressions, and the same with STCM data added (the pull is otherwise not reached): identical |
 | edb882ca | C3 | m_trendNT2's own equations: MSGROF_, MSLEVL_, MSLANDUSE_, MSFEEDI_, MSlosfFoddo_, MSindmMaif_, EFED_ in equations/nuts2.py; estimate_nuts2.residuals calls them. FEED_SCALE became MSFEEDI_'s literal; PER_1000 stays (the bounds) | 8,964 residuals (AT, DE, DK, NL as regions, six years, with and without EX_FEED, every block reached), 1,496 expressions: identical |
-| (this commit) | tools | tools/check/captrd_parity_dump.py (the check), tools/build/build_reference_from_raw.py (the reference from the published Parquet), tools/check/scan_set_order.py (step 1's scan) and docs/dev/captrd_set_order_places.csv (its 81 CAPTRD places), this handoff | the parity tool reproduces the dumps of C1-C3; the builder reproduces the reference built for them (section 3) |
+| 0132882e | tools | tools/check/captrd_parity_dump.py (the check), tools/build/build_reference_from_raw.py (the reference from the published Parquet), tools/check/scan_set_order.py (step 1's scan) and docs/dev/captrd_set_order_places.csv (its 81 CAPTRD places), this handoff | the parity tool reproduces the dumps of C1-C3; the builder reproduces the reference built for them (section 3) |
+| (C4 commit) | C4 | estimate_bounds.bounds, _comi, _biofuel: every statement's arithmetic a function named after the bounded symbol (V_EstV_IO, V_EstV_NoYieldDrop, p_data_LEVL_facs, V_EstV_COMI, ...) quoting its lines; bounds() keeps the domains, the loops and the statements' order. The constants STD_UP, LO_SUPPORT_SHARE, WINE_PLANTING, MAX_YIELDS, CERE_MAX_YIELD, GRAS_MAX(_NL), STRA_MAX and _phys went into the functions; REF_MILK_YIELD and PROC_YIELDS (captrd.gms's parameters) stay. The expert bounds' citation corrected: estimate_ms.gms l. 159-162 (the port's l. 146-151 is the aglinkTightLink block, off); the member state's own bounds l. 78-162 | the bounds at every member state and year with both readings of ARTIF's bound (680 cases), at three member states with synthetic data reaching the branches the reference does not (6), and at the NUTS 2 regions of AT, DE, ES, IR (198): 2.2 million bounds, identical in value and order; 99% of the bound code reached |
 
 The pipeline tests (`python -m pytest -q -p no:randomly -n 0 capri_mod/pipeline/tests`, about 4.5 minutes here):
-at edb882ca **51 passed, 21 skipped, 7 failed, 7 errors**; at 9c69ab7b 43 passed of 78, the same skips, failures and
-errors (C1 added 5 tests, C2 1, C3 2, in capri_mod/pipeline/tests/test_captrd_equations.py). Every failure and error is
+at edb882ca **51 passed, 21 skipped, 7 failed, 7 errors**, at C4 **53 passed** and the rest the same; at 9c69ab7b 43
+passed of 78, the same skips, failures and errors (C1 added 5 tests, C2 1, C3 2, C4 2, in
+capri_mod/pipeline/tests/test_captrd_equations.py). Every failure and error is
 `capreg_base/17/<CC>.csv.gz missing` (test_captrd_estimate_ms's step2 checks for DK, AT, ES, IT, NL, PL, NO;
 estimate_bounds, estimate_nlp and estimate_nuts2's solves).
 
@@ -75,7 +80,7 @@ estimate_bounds, estimate_nlp and estimate_nuts2's solves).
    capri_sources/reference to the checkout's (the package finds its reference next to itself).
 3. `PYTHONPATH=../captrd_ref python tools/check/captrd_parity_dump.py ref.pkl` (the checkout's tool, the worktree's
    package: the tool is not in 9c69ab7b), `PYTHONPATH=. python tools/check/captrd_parity_dump.py new.pkl`, then
-   `python tools/check/captrd_parity_dump.py --compare ref.pkl new.pkl`: IDENTICAL, 12 parts. About a minute and 2 GB
+   `python tools/check/captrd_parity_dump.py --compare ref.pkl new.pkl`: IDENTICAL, 14 parts. About two minutes and 2 GB
    each.
 4. The pipeline tests one at a time (`-n 0`), the counts of section 1 plus the block's new tests.
 5. The static checks: tools/check/check_gams_quotes.py with `--expect supply/supply_model.gms=5557 --expect
@@ -83,26 +88,29 @@ estimate_bounds, estimate_nlp and estimate_nuts2's solves).
    make_code_data.py --check, validate_data.py, make_provenance.py / make_schema_json.py / make_manifest_json.py
    --check, check_doc_coverage.py, flake8 --select=E9,F63,F7,F82.
 
-For a block outside the estimation (C4, C5) the parity tool must first be extended with that block's functions at
-the reference's points (estimate_bounds.bounds needs capreg_base: see section 4).
+The bounds part (bounds_cases) builds each BoundData from data.csv and the stored result positions; where the
+reference has no statistic (BASM and BSY come from capreg_base, section 4) it is synthetic: BASM data's BASM, else
+its BAS; BSY BAS x 1.05; EXTRA_DATA / EXTRA_RES add, at three member states, the inputs the reference does not reach
+(negative OCRO and OANI bases, POUF, INTP, the quotas). A NUTS 2 region's BoundData carries the region's own code, as
+the tests pass it. For a block outside these (C4b, C5) the tool is extended first with that block's functions at
+given points; coverage (`python -m coverage run ...`) shows what the inputs reach.
 
 ## 4. What this container cannot check
 
 - **The pipeline's outputs bit for bit** (the main session's first note). A CAPTRD-MOD run needs CAPREG's base data
   for the EU's countries (capreg_base/17), which the published set does not hold. Before the merge, in an environment
   with it: run the pipeline at 9c69ab7b and at the branch's head with the same PYTHONHASHSEED and compare the outputs
-  with tools/check/compare_pickles_exact.py (`--rtol 0`) or byte for byte. C1-C3 change no arithmetic and no order of
+  with tools/check/compare_pickles_exact.py (`--rtol 0`) or byte for byte. C1-C4 change no arithmetic and no order of
   evaluation, so the outputs should be identical under any one seed.
 - The 14 pipeline tests of section 1 (the same reason), and the FAO aggregates' parts (FAO_agg not published).
 
 ## 5. Next blocks
 
-- **C4: the bounds.** estimate_bounds.py (770 lines; fix_est.gms 9 citations, estimate_ms.gms, comi_bounds.gms) and
-  estimate_nuts2.bounds / _open_bounds / _grid_again (estimate_nuts2.gms, est_nuts2_grid.gms,
-  est_Nuts2_grid_openbound.gms): assignments, so the assignments refactor's style (one function per GAMS statement,
-  named after the symbol assigned). Its check needs the bounds at given points: the tests that compare them with
-  CAPTRD's (test_captrd_estimate_bounds) need capreg_base, so in this container the check is the parity tool extended
-  with synthetic BoundData built from the stored points.
+- **C4b: the NUTS 2 bounds.** estimate_nuts2.bounds / _open_bounds / _grid_again (estimate_nuts2.gms l. 86-380,
+  est_nuts2_grid.gms, est_Nuts2_grid_openbound.gms), as C4: one function per statement block in
+  equations/estimate_nuts2.py and est_nuts2_grid.py; the check the parity tool extended with estimate_nuts2.bounds
+  at the regions of bounds_cases (their BoundData is there) and, for the retries, at given bound states. C4's
+  functions name the pattern: V_EstV_<what> returning (lo, up), None where a statement leaves a bound as it is.
 - **C5: the supports and trends.** biofuel_trends (778 lines), national_supports (695), globiom (696), aglink (845),
   eu_supports (539), prepare (679), longrun_supports, dairy_supports, final_supports and the rest (the GAMS file each
   cites is in its docstring). Start with an inventory of their GAMS statements (as docs/dev/assignments_inventory.csv),
