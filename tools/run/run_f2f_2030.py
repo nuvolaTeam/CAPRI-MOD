@@ -430,6 +430,12 @@ def main():
            "cover_crops": {k: sum(float((getattr(v, "cover_crops", None) or {}).get(f, 0.0) or 0.0)
                                   for v in sEU.values())
                            for k, f in (("base", "base"), ("scenario", "req"), ("eligible", "potential"))},
+           # per region (1000 ha; t N; shares of UAAR): the base share's area, the run's area, the BioFix N the regional
+           # model counts (K204), UAAR and the requirement's share (e_minCoverCrops), baseline and scenario
+           "cover_crops_regional": tuple({reg: {k: float((getattr(v, "cover_crops", None) or {}).get(f, 0.0) or 0.0)
+                                                for k, f in (("base", "base"), ("area", "req"), ("biofix_n", "biofix_n"),
+                                                             ("uaa", "uaa"), ("lb_share", "lb_share"))}
+                                          for reg, v in x["supply"].items()} for x in (b, s)),
            # per region: N-balance price (EUR/kg N), technology shares (diagnostics)
            "act_regional": tuple({reg: {k: float(x_) for k, x_ in v.activities.items() if np.isfinite(x_)}
                                   for reg, v in x["supply"].items()} for x in (b, s)),

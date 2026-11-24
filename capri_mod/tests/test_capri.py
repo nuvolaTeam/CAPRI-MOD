@@ -2256,7 +2256,10 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
     pm = ProjectionModule(model, traj, capri_prices_dir=str(trajectories_dir(DATA_DIR, 2030)))
     data, _ = pm.project_data(2030)
     cap = pd.read_csv(os.path.join(str(DATA_DIR), "validation", "capri_eu27_levels_2030_ref.csv"), index_col=0).iloc[:, 0]
-    eu = [r for r in data["areas"].index if not r.startswith("NO")]
+    # the EU's units: since 24 November 2026 (e95681c) the data also hold CAPRI's non-EU supply countries (the UK,
+    # Turkey, the Western Balkans, Norway: run.supply_countries_outside_eu)
+    from capri_mod.data.definitions import is_eu
+    eu = [r for r in data["areas"].index if is_eu(str(r))]
     for a in ("SWHE", "BARL", "RAPE", "GRAS"):
         cols = ["GRAE", "GRAI"] if a == "GRAS" else [a]         # CAPRI's GRAS row = GRAE + GRAI (the model's own)
         assert abs(float(data["areas"].loc[eu, cols].sum().sum()) / float(cap[a]) - 1.0) < 0.015, a
@@ -4436,12 +4439,22 @@ def test_winter_cover_is_chosen_in_the_nlp_form(model):
     mo = model.supply_module._models["DE110000"]
     cs = mo.res.cover_solved
     assert cs and cs["endogenous"] and abs(cs["share"] - cs["base"] / cs["uaa"]) < 2e-3
+    # K188: no catch crops' BioFix in CAPRI's reference form (%ghgAbatement% off)
+    assert cs["biofix_n"] == 0.0 and float(b["environmental"].loc["DE110000", "n_fixation_catch_crops"]) == 0.0
     s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=1)
     cs = model.supply_module._models["DE110000"].res.cover_solved
     assert cs["lb_share"] > cs["base"] / cs["uaa"] + 0.01          # the requirement raises the floor
     assert cs["share"] >= cs["lb_share"] - 1e-6 and cs["share"] <= cs["max_share"] + 1e-6
     w0, w1 = model.env_module._winter_cover_now("DE110000", s["supply"]["DE110000"])
     assert abs(w1 - cs["base"] / cs["uaa"]) < 1e-9 and abs(cs["cascade_share"] - w1) < 1e-12 and abs(w0 - w1) < 1e-9
+    # K204: with it on, BioFix x the whole catch-crop area, the base's catch crops too (CAPRI's e_BIOFIX, l. 1442), in
+    # the reported fixation as its catch crops' part (DE11 has no catch crops at this base, so the former form, the
+    # area above the base share, would give the same here)
+    bfn = cs["biofix"] * 1000.0 * cs["req"]
+    assert bfn > 0 and abs(cs["biofix_n"] - bfn) <= 1e-9 * bfn, (cs["biofix_n"], bfn)
+    e1 = s["environmental"].loc["DE110000"]
+    assert abs(float(e1["n_fixation_catch_crops"]) - bfn) <= 1e-9 * bfn
+    assert float(e1["n_fixation"]) >= float(e1["n_fixation_catch_crops"])
 
 
 @pytest.mark.slow

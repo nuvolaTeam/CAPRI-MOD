@@ -477,9 +477,27 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   baseline calibration's corrections (DE21's dairy cows: FILG x 2.961, FICO x 0.726, DRMX x 0.991); the feeds' rows of
   p_animReq, 1 from the requirement function times 1.005 a year (about 1.067 at 2030), turn CAPRI's minimum feed
   shares slightly negative and double its maximum shares at the start (sim_ini_21730: DE21's dairy cows' cereals
-  minimum -0.0106), ported as CAPRI has it. The raw set: CAPREG's reqrel_17<CC> of all 35 countries (27 added) and the
+  minimum -0.0106), ported as CAPRI has it (kept: the project lead, 24 November 2026). The raw set: CAPREG's reqrel_17<CC> of all 35 countries (27 added) and the
   baseline calibration's fedtrm_21730<CC>defaulta of 34 countries (added; CAPRI results, for the checks). Not yet the
   calibration itself (baseline/fedtrm_*, S3) nor the projection's use (S4).
+- **K204, the catch crops' BioFix N on their whole area (24 November 2026; from the project lead's comparison of the
+  N fixation with CAPRI):** in the runs where the catch crops' BioFix is on (the Green Deal group, an emission tax) the
+  regional model counted it on the area above the base share; CAPRI's e_BIOFIX (supply_model.gms l. 1442) and
+  fertDistCres_ (l. 1073-1079) count the whole CATC area, and its 2030 reference has none of it (K188), so the base's
+  2.0 Mha (about 61 kt N in the EU) were missing from the Green Deal's N inputs, residue pool and N2OCRO. Now CAPRI's
+  term (`supply.catch_crop_biofix_area = "capri"`; "increment" the former form). The reported fixation takes the N the
+  regional model counts and splits it (n_fixation_catch_crops); the runs' results hold the regional catch crops
+  (cover_crops_regional). On the comparison itself: CAPRI's per-crop dataOut BIOFIX leaves the catch crops out (EU
+  -28.5% in the Green Deal); with them, as e_BIOFIX has them, CAPRI's fixation moves -0.1%, as the model's did. The
+  regional spread of the catch crops is open. A five-region Green Deal probe (PL41, RO04, BG03, ES41, IR02): the
+  baseline unchanged; IR02, at its requirement, +2,079 t BioFix N and -1,968 t mineral N; PL41's catch crops 642 ->
+  494 thousand ha (CAPRI 318); the requirement is CAPRI's in all five, and the model takes catch crops above it in
+  PL41, RO04 and BG03 where CAPRI does in BG03 and IR02 (K204, item 2: the value of the residue N per region). The
+  results' item list declares n_fixation_catch_crops (capri_data/codes/results_items.csv).
+- **The projection test's EU units (24 November 2026):** test_projection_starts_from_capri_reference_and_calibrates
+  summed the EU's 2030 areas over every unit but Norway's; since CAPRI's non-EU supply countries became the default
+  the same day (e95681c: the UK, Turkey, the Western Balkans), its soft wheat was 30,462 thousand ha against CAPRI's
+  EU27 21,476. The EU's units now by capri_mod.data.definitions.is_eu; the test passes. The model was not affected.
 - **The baseline feed calibration's corrections from its solution ported (24 November 2026; the feed calibration
   plan's S3a):** the statements after CAPRI's m_hpdFeed solve (feed/fedtrm_cal_pw.gms l. 762-812: the energy and
   protein requirements recomputed from the solution's ration, the inequality requirements at the lower of the

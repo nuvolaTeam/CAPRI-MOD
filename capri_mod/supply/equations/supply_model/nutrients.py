@@ -368,9 +368,11 @@ def NUTNED_mitiExcr(NMAN, v_Miti):
 
 def fertDistCres_catcBioFix(biofix, v_actLevl_CATC, v_actLevl_CATC0):
     """fertDistCres_'s winter cover term (l. 1073-1079), p_ghgMiti(CATC, WinterCov, othImpact, BioFix) x v_actLevl(CATC)
-    x 1000, written from the base level (the base's catch crops are in the residue pool's data): biofix x (CATC - CATC0),
-    biofix = BioFix x 1000 (t N per 1000 ha of catch crops), CATC the catch crop area (catcMiti_, premiums.py: the share
-    times the land; with the share held, the CATC level). CAPRI's GAMS of fertDistCres_: fertDistCres_'s docstring."""
+    x 1000: biofix x (CATC - CATC0), biofix = BioFix x 1000 (t N per 1000 ha of catch crops), CATC the catch crop area
+    (catcMiti_, premiums.py: the share times the land; with the share held, the CATC level). CATC0 = 0 is CAPRI's term
+    (supply.catch_crop_biofix_area "capri", K204: CAPRI's 2030 reference, %ghgAbatement% off, has no catch crops' BioFix
+    in its residue pool, so a run that switches it on adds the base's catch crops too); CATC0 the base's catch crops is
+    the form until 24 November 2026 ("increment"). CAPRI's GAMS of fertDistCres_: fertDistCres_'s docstring."""
     return biofix * (v_actLevl_CATC - v_actLevl_CATC0)
 
 

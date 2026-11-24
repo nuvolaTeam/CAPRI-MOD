@@ -21,6 +21,7 @@ environmental,n_animal_products,rows,,,,,
 environmental,n_crop_uptake,rows,,,,,
 environmental,n_deposition,rows,,,,,
 environmental,n_fixation,rows,,,,,
+environmental,n_fixation_catch_crops,rows,,,,t N,"of n_fixation, the catch crops' BioFix N: the CATC term of CAPRI's e_BIOFIX (supply/supply_model.gms l. 1442), BioFix x the catch-crop area where %ghgAbatement% is on (K204); dataOut has no BIOFIX row of CATC"
 environmental,n_mineral_input,rows,,,,,
 environmental,n_organic_input,rows,,,,,
 environmental,n_runoff_leached,rows,,,,,
