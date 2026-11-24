@@ -1,10 +1,64 @@
 # Handoff: CAPRI's ported assignments as named functions (branch `refactor/assignments`)
 
-Written 23 November 2026 for the session that continues the third phase (Claude Code in the cloud). The plan is
+Written 23 November 2026 for the session that continues the third phase (Claude Code in the cloud); section 0
+updated 24 November 2026 for the main session (the merge). The plan is
 docs/dev/ASSIGNMENTS_REFACTOR_PLAN.md (the project lead's, 23 November 2026); the rules are those of
 docs/dev/EQUATION_REFACTOR_BRIEF.md and docs/dev/EQUATION_REFACTOR_HANDOFF.md section 7, the checks those of
 docs/dev/MARKET_EQUATION_REFACTOR_PLAN.md sections 2 and 4 with the plan's changes. The branch started from dev at
 259edec (the plan's commit).
+
+## 0. Hand-over to the main session (24 November 2026)
+
+**The phase's state.** Blocks A0-A6 done: 302 inventory rows moved into named functions (A1+A3 14, A2 120, A4 34, A5
+92, A6 42), none left to move; the inventory's 1,159 rows all have a status; no wrong citation of A0's list is left;
+KNOWN_ISSUES K198 holds the porting differences by where they act and the phase's findings. Not merged into dev (the
+plan's section 6: the main session merges, after the gate and the full suite, with the project lead's go). The
+branch is pushed (9d370b5f).
+
+**The commits after A5, and whether they change results:**
+
+| commit | what | results |
+|---|---|---|
+| d1fde38b, a068febd | A6: policy/rd_logic.gms as functions | identical (rd_declarations' whole output to the bit; five-unit run) |
+| 962257e0, 384e5eca, 8e6a5dc3 | the wrong citations (runlog.py, model.py, young_animals.py, market/supply.py, ghg_tax.py, ghg.py, A4's DATA_Prod_OMYANI) | comments and docstrings only |
+| 05a66649 | K198 updated with A1-A6 | docs |
+| 2d8d0fcd, fa32fdec, d8974e5b | the BLAS / OpenMP thread limits (capri_mod/__init__.py, tools/run/, conftest; the warning where the workers fork) | identical (five-unit run with and without); about 2x faster on the full EU |
+| 65d6b724 | build_feed_bulk_grof.py reads its code pairs as text (test_exact_io) | its output unchanged (the same pairs) |
+| 2674ffbc | the market supply Hessian step's log at the default level | identical (five-unit run) |
+| 113df867, ec514e9d | the Hessian restores the outputs the coupling reads (the manure value) | **changed, last digits**: a run that measures its Hessian now ends where one that reads it from the cache ends (cached runs unchanged) |
+| 9d370b5f | the ration-fat limit's multiplier from the fat share's condition (the land rents test) | **changed**, in the regions with the fat block: on five units prices at most 8e-6 apart, FI13's root fodder dual 44.99 -> 39.29 EUR/t |
+
+**The checks run, and those not run since:**
+- the full suite: last at 27789968 (A5's end; section 9): two failures, both fixed since (9d370b5f, 65d6b724), and one
+  test killed for memory that passed alone. **Not run since** A6 and the fixes: their own tests and the tests of the
+  code they touch passed (test_rd, test_assignments_a6, test_thread_limits, test_supplement_fat, test_supply_state,
+  test_exact_io, the calibration tests of test_capri.py, test_assignments_a4, test_norway_market, test_refactor_checks,
+  test_run_manifest, test_portable_paths).
+- the full-EU Green Deal run: last after A5 (identical to dev's 565669aa with the Hessian from the same source).
+  **Not run since**: A6, the manure value's restore and the fat limit's fix.
+- each change after A5 has its five-unit run (NO06, FI13, FR72, PL51, DE21), runs/asg/ (in the container only).
+
+**Before the merge into dev (for the main session):**
+1. Merge dev into the branch (a merge, not a rebase): dev has 11 commits since 565669aa (DEP-23, DEP-54, D2 the
+   default, DEP-13 step 2 and K200-K203, CAPRI's manure output functions). A dry run (24 November 2026, aborted)
+   found two conflicts: capri_data/schema/03_code_data.sql (generated: regenerate with tools/check/make_code_data.py
+   after the merge) and tools/build/build_feed_bulk_grof.py l. 45, where dev made the same fix another way
+   (float_precision="round_trip"): take dev's line and adjust K198's sentence on it ("reads them as text"). The rest,
+   docs/KNOWN_ISSUES.md included, merged cleanly. Then rebuild the inventory (the cited lines move) and review its new
+   rows.
+2. The full suite on its own (not beside a full-EU run: the container's memory killed a worker, section 9).
+3. A full-EU Green Deal run against dev's: the moves are identical, the two fixes are not (9d370b5f changes results;
+   113df867 only a run that measures its Hessian). For a clean gate of the moves: the merged branch with 9d370b5f
+   reverted in a scratch worktree, both runs reading the Hessian from the cache or both measuring; the fix's own effect
+   then from the merged branch against that run.
+
+**Open for the main line:** ranking K198's differences by a measured effect (the plan leaves it to the main line);
+phase 1's methane.py quotes GWPCH4ENT_'s checking form (supply_model.gms l. 3074-3076; the standard form star 3.0
+runs is l. 3051-3069, the same value: left, it is the per-head form the model ports).
+
+**Not in the repository:** the state probe (hess_state_probe.py), the calibration's debug dumps and the runs' pickles
+were in the session's scratchpad and runs/asg/, lost with the container; the findings and their numbers are in
+sections 9-10 and K198.
 
 ## 1. Setting up
 
@@ -25,6 +79,7 @@ docs/dev/MARKET_EQUATION_REFACTOR_PLAN.md sections 2 and 4 with the plan's chang
 | A4 | the coupling's and the market's assignments: capri_mod/coupling/equations/ (new: price_forecast.py, the stop rule; define_stepweights.py; simu_calibration_to_supply.py; sol_simy.py), capri_mod/market/equations/ (welfare.py extended: the GL money metric, the processing's and the feed industry's profits; new: sol_market.py, set_start_val.py, def_biofuel_params.py; manuremarket/simu_manure_market.py extended), capri_mod/supply/equations/impose_upper_bound_on_elasticity.py; called by utils/capri_stop.py, coupling/price_step.py, bridge.py, young_animals.py, manure.py, reporting.py, market/welfare.py, demand.py, market_bounds.py, biofuel.py and supply/capri_pmp.py. 35 inventory rows "moved in A4" | the functions' tests (capri_mod/tests/test_assignments_a4.py) and the moved modules' (test_capri_stop, test_welfare, test_manure_pool_nlp, test_norway_market, test_biofuel_ad, test_demand_ad, test_trade_ad, test_market_layers, test_capri.py's PMP tests); the stop rule old and new on random tables (300 runs of 20 steps: identical verdicts, changes and drift); the five-unit Green Deal run (NL230000, RO020000, NO060000, DE210000, ES420000) identical. No full suite (the project lead, 23 November 2026) |
 | A5 | the supply side's assignments, after merging dev at 565669aa (K196, DEP-21 closed; DEP-10 item 1b): capri_mod/supply/equations/greendeal/ (new: conventional_io.py, organic_io.py, organic_area.py, load_organic_targets.py, landscape.py, minfert_redu_by_crop.py, surptot.py), supply/equations/ (new: set_fert_priors.py, define_objc.py, define_greening_limits.py, define_manure_trade_costs.py, define_const_pmp_param.py, prep_cal.py, prep_sim_luc.py; extended: ghgmiti.py, define_inputs.py, set_supply_bounds.py), projection/equations/breeding.py, market/equations/set_prices.py and welfare.py, coupling/equations/price_forecast.py, policy/equations/def_endcut.py and market/equations/manuremarket/simu_manure_market.py (the rows of two blocks); called by supply/policy.py, supply_module.py, fertilisation.py, abatement.py, livestock.py, land.py, entitlements.py, fert/inner_fert_dist.py, feed/ration.py, policy/endotech.py, environmental/nitrogen.py, coupling/price_step.py, manure.py, market/welfare.py and model.py. 92 rows "moved in A5"; rd_logic.gms left (section 9) | the functions' tests (capri_mod/tests/test_assignments_a5.py); the five-unit Green Deal run (DE210000, ES420000, FR520000, NL230000, IT120000) identical to the run at A5's start (8d5d2818, dev merged); the full-EU Green Deal run identical to dev's 565669aa (the phase's start with the main line's changes) at `--rtol 0` with the Hessian read from the cache in both (a measured Hessian moves the run's last digits: section 9); the full suite (section 9) |
 | A6 | policy/rd_logic.gms (the project lead, 24 November 2026): capri_mod/policy/equations/rd_logic.py (new, 22 functions: the money summed up, the land partition and its shares, FADN completed, the ceilings and their split by farm type, the LFA, Natura 2000 and agri-environment rates, the heavy animals' weights, the scaling); called by policy/rd.py's rd_declarations, its comments citing rd_logic.gms by line. 42 rows "moved in A6" (section 10) | the functions' tests (capri_mod/tests/test_assignments_a6.py) and test_rd.py; rd_declarations' whole output equal to the unchanged code's at `--rtol 0`, in the same order and to the bit (section 10); the five-unit Green Deal run (NO060000, FI130000, FR720000, PL510000, DE210000) identical to the run at A6's start (aa274e10) at `--rtol 0` but for the run's metadata, both converged in 21 iterations, each measuring its Hessian |
+| after A6 | the citations, K198, the thread limits, the Hessian step's log, the manure value's restore, the fat limit's calibration (section 0) | section 0's table |
 
 A0 approved by the project lead (23 November 2026; the plan's section 8): A1 and A3 one block with A1's five units;
 in A2 only the rules become functions, the literal values "data read: <the CSV and its builder>" (3 rows of
