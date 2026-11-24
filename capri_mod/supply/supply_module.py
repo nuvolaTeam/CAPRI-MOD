@@ -3414,6 +3414,8 @@ class SupplyModule(ModuleStateMixin):
         from concurrent.futures import ProcessPoolExecutor
         from concurrent.futures.process import BrokenProcessPool
         done = set()
+        import capri_mod as _cm
+        _cm.warn_if_threads_late()           # NumPy loaded before the thread limits (capri_mod/__init__.py)
         pool = ProcessPoolExecutor(nw, mp_context=multiprocessing.get_context("fork"))
         broken = False
         try:

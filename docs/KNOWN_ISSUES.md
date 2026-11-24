@@ -4204,7 +4204,7 @@ the main line measures and ranks. Where each acts, from the code (no runs):
     threads each; with OPENBLAS_NUM_THREADS, OMP_NUM_THREADS and MKL_NUM_THREADS at 1 before the run, the first
     supply solve took 38 s instead of 123 s (the run reached the Hessian after 82 s instead of 257 s) and the Hessian
     1,351 s instead of 2,518 s. Fixed on 24 November 2026: capri_mod/__init__.py sets the three to 1 on import (a
-    value the environment sets is kept; a warning when NumPy came first), tools/run/'s model scripts before their
+    value the environment sets is kept; where the regional solves fork, a warning when NumPy came first), tools/run/'s model scripts before their
     imports, the tests' conftest imports capri_mod first, the run manifest records them
     (tests/test_thread_limits.py: one thread in a forked worker, 7 before). The results do not depend on it: the
     five-unit Green Deal run (NO06, FI13, FR72, PL51, DE21) without the limits (8e6a5dc3) and with them (2d8d0fcd)

@@ -27,10 +27,12 @@ def test_importing_capri_mod_sets_one_thread_and_keeps_the_users_setting():
     assert r.stdout.strip() == "3", r.stderr
 
 
-def test_numpy_imported_first_is_warned():
-    r = _py("import numpy, capri_mod")
-    assert "NumPy was imported before capri_mod" in r.stderr
-    assert "NumPy was imported before" not in _py("import capri_mod, numpy").stderr
+def test_numpy_imported_first_is_warned_where_the_workers_fork():
+    # at the import nothing (a script that only reads results is not warned); where the regional solves fork, once
+    assert "NumPy was imported before" not in _py("import numpy, capri_mod").stderr
+    r = _py("import numpy, capri_mod; capri_mod.warn_if_threads_late(); capri_mod.warn_if_threads_late()")
+    assert r.stderr.count("NumPy was imported before capri_mod") == 1, r.stderr
+    assert "NumPy was imported before" not in _py("import capri_mod, numpy; capri_mod.warn_if_threads_late()").stderr
 
 
 def test_a_forked_worker_runs_its_blas_on_one_thread():

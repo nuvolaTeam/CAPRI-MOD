@@ -26,16 +26,28 @@ import sys as _sys
 THREAD_LIMITS = ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS")
 
 
+_THREADS_LATE = False      # NumPy was loaded before the limits: warned once where the regional solves fork
+
+
 def _limit_threads():
-    late = "numpy" in _sys.modules and "OPENBLAS_NUM_THREADS" not in _os.environ
+    global _THREADS_LATE
+    _THREADS_LATE = "numpy" in _sys.modules and "OPENBLAS_NUM_THREADS" not in _os.environ
     for _v in THREAD_LIMITS:
         _os.environ.setdefault(_v, "1")
-    if late:
+
+
+def warn_if_threads_late() -> None:
+    """Called where the regional solves fork their workers (supply_module.py): a process that imported NumPy before
+    capri_mod without the limits runs its BLAS on one thread per core in every worker. Once per process; a process
+    that forks no workers (a comparison script, a notebook reading results) is not warned."""
+    global _THREADS_LATE
+    if _THREADS_LATE:
+        _THREADS_LATE = False
         import warnings
         warnings.warn("NumPy was imported before capri_mod without OPENBLAS_NUM_THREADS: its BLAS keeps one thread per "
                       "core in every regional-solve worker (slower runs). Set OPENBLAS_NUM_THREADS=1, "
                       "OMP_NUM_THREADS=1 and MKL_NUM_THREADS=1 before starting Python, or import capri_mod first.",
-                      RuntimeWarning, stacklevel=3)
+                      RuntimeWarning, stacklevel=2)
 
 
 _limit_threads()
