@@ -23,7 +23,7 @@ docs/dev/MARKET_EQUATION_REFACTOR_PLAN.md sections 2 and 4 with the plan's chang
 | A1+A3 | the emission and nutrient accounts and the projection's livestock rules: environmental/equations/gases.py (EMISCALC_CO2UREA), calc_nbalance.py (DATA_RUNANI, DATA_IMPORT, DATA_SURTOT, DATA_SURSOI); projection/equations/breeding.py (p_animReqCopy_NEA_share, p_animReqCopy_ENNE_nonlact), calc_nexport.py (CRPR_EXPT_COMI); supply/equations/line_nitr.py (p_ghgMiti_AComLN), fertned.py (p_technFact_FNUT), set_supply_bounds.py (v_emiLoss_bounds); market/equations/welfare.py (p_welfareRes_ProfitAgr); called by environmental_module.py, nitrogen.py, phosphorus.py, p_balance.py, income/income_module.py, projection/projection_module.py. ghgMiti.gms l. 552-565 (n_leaching.fert_effect) left to A5 (its module supply/equations/ghgmiti.py is locked) | the functions' tests (capri_mod/tests/test_assignments_a1.py) and the moved modules' (test_p_balance.py, test_supplement_fat.py, test_urea_subst.py, test_water_income.py: 19 passed); the five-unit Green Deal run (FI1A0000, NL230000, BL340000, IT110000, NO020000) identical |
 | A2 | the premium rules: capri_mod/policy/equations/, one module per CAPRI file (policy.py, prmcut.py, aggreg_ppepay.py, implement_bps.py, mtr_until2013.py, calc_mtr_top.py, calc_mtr.py, extend_rd_baseline.py, cap_2014_2020.py, cap_2013_2020_transfers.py, cap_2013_2020_vcs.py, cap_2013_2020_cndp.py, def_policy.py, def_endcut.py, def_no_policy.py, nordicaid.py; _gams.py: GAMS's EPS, NA, $-conditions), 104 functions; called by policy/declared.py, premium_cut.py, premiums.py, mtr.py, bps.py, rd.py, cap14_premiums.py, nordic_aid.py, norway.py and supply/entitlements.py. The literal values data read (section 8 of the plan); the 120 inventory rows "moved in A2" | the functions' tests (capri_mod/tests/test_assignments_a2.py) and the moved modules' (test_bps, test_declared, test_mtr, test_premiums, test_premium_cut, test_premium_baseline_2030, test_rd, test_nordic_aid, test_norway, test_entitlement_money); the premium chain's outputs for every EU unit identical, bit for bit and in order (section 7); the five-unit Green Deal run (NO060000, FI130000, FR720000, PL510000, DE210000) and the coupled-support check (tools/run/run_vcs_2030.py --regions, the same five) identical; the full suite at 24a69fd8 (section 7) |
 | A4 | the coupling's and the market's assignments: capri_mod/coupling/equations/ (new: price_forecast.py, the stop rule; define_stepweights.py; simu_calibration_to_supply.py; sol_simy.py), capri_mod/market/equations/ (welfare.py extended: the GL money metric, the processing's and the feed industry's profits; new: sol_market.py, set_start_val.py, def_biofuel_params.py; manuremarket/simu_manure_market.py extended), capri_mod/supply/equations/impose_upper_bound_on_elasticity.py; called by utils/capri_stop.py, coupling/price_step.py, bridge.py, young_animals.py, manure.py, reporting.py, market/welfare.py, demand.py, market_bounds.py, biofuel.py and supply/capri_pmp.py. 35 inventory rows "moved in A4" | the functions' tests (capri_mod/tests/test_assignments_a4.py) and the moved modules' (test_capri_stop, test_welfare, test_manure_pool_nlp, test_norway_market, test_biofuel_ad, test_demand_ad, test_trade_ad, test_market_layers, test_capri.py's PMP tests); the stop rule old and new on random tables (300 runs of 20 steps: identical verdicts, changes and drift); the five-unit Green Deal run (NL230000, RO020000, NO060000, DE210000, ES420000) identical. No full suite (the project lead, 23 November 2026) |
-| A5 | the supply side's assignments, after merging dev at 565669aa (K196, DEP-21 closed; DEP-10 item 1b): capri_mod/supply/equations/greendeal/ (new: conventional_io.py, organic_io.py, organic_area.py, load_organic_targets.py, landscape.py, minfert_redu_by_crop.py, surptot.py), supply/equations/ (new: set_fert_priors.py, define_objc.py, define_greening_limits.py, define_manure_trade_costs.py, define_const_pmp_param.py, prep_cal.py, prep_sim_luc.py; extended: ghgmiti.py, define_inputs.py, set_supply_bounds.py), projection/equations/breeding.py, market/equations/set_prices.py and welfare.py, coupling/equations/price_forecast.py, policy/equations/def_endcut.py and market/equations/manuremarket/simu_manure_market.py (the rows of two blocks); called by supply/policy.py, supply_module.py, fertilisation.py, abatement.py, livestock.py, land.py, entitlements.py, fert/inner_fert_dist.py, feed/ration.py, policy/endotech.py, environmental/nitrogen.py, coupling/price_step.py, manure.py, market/welfare.py and model.py. 92 rows "moved in A5"; rd_logic.gms left (section 9) | the functions' tests (capri_mod/tests/test_assignments_a5.py); the five-unit Green Deal run (DE210000, ES420000, FR520000, NL230000, IT120000) identical to the run at A5's start (8d5d2818, dev merged); the full-EU Green Deal run identical to dev's 565669aa (the phase's start with the main line's changes); the full suite (section 9) |
+| A5 | the supply side's assignments, after merging dev at 565669aa (K196, DEP-21 closed; DEP-10 item 1b): capri_mod/supply/equations/greendeal/ (new: conventional_io.py, organic_io.py, organic_area.py, load_organic_targets.py, landscape.py, minfert_redu_by_crop.py, surptot.py), supply/equations/ (new: set_fert_priors.py, define_objc.py, define_greening_limits.py, define_manure_trade_costs.py, define_const_pmp_param.py, prep_cal.py, prep_sim_luc.py; extended: ghgmiti.py, define_inputs.py, set_supply_bounds.py), projection/equations/breeding.py, market/equations/set_prices.py and welfare.py, coupling/equations/price_forecast.py, policy/equations/def_endcut.py and market/equations/manuremarket/simu_manure_market.py (the rows of two blocks); called by supply/policy.py, supply_module.py, fertilisation.py, abatement.py, livestock.py, land.py, entitlements.py, fert/inner_fert_dist.py, feed/ration.py, policy/endotech.py, environmental/nitrogen.py, coupling/price_step.py, manure.py, market/welfare.py and model.py. 92 rows "moved in A5"; rd_logic.gms left (section 9) | the functions' tests (capri_mod/tests/test_assignments_a5.py); the five-unit Green Deal run (DE210000, ES420000, FR520000, NL230000, IT120000) identical to the run at A5's start (8d5d2818, dev merged); the full-EU Green Deal run identical to dev's 565669aa (the phase's start with the main line's changes) at `--rtol 0` with the Hessian read from the cache in both (a measured Hessian moves the run's last digits: section 9); the full suite (section 9) |
 
 A0 approved by the project lead (23 November 2026; the plan's section 8): A1 and A3 one block with A1's five units;
 in A2 only the rules become functions, the literal values "data read: <the CSV and its builder>" (3 rows of
@@ -340,3 +340,55 @@ file); a CAPRI name on a citing line can match a statement the code does not por
 - **Citations**: the two A0 listed in supply/policy.py were corrected by the main line (merged); two stale "citation
   wrong" rows updated; the two in runlog.py (capmod.gms l. 81, 1425-1428) are in no block's files, left to the main
   session.
+- **The full-EU Green Deal run** (the thread limits below; runs/asg/): dev's 565669aa (eu_ref, its Hessian read from
+  the cache the run before the container's restart measured) against A5's head 27789968 (eu_new, its Hessian
+  measured: the cache key holds the supply code, below) differed in 78,105 values at `--rtol 0` (75,608 at 1e-10;
+  relative up to about 1e-5, e.g. OFAR 208,393.57 vs 208,395.31), both converged in 29 iterations. The iterations'
+  change records (eu_*_iterchg.csv) differ from the baseline's iteration 2 on, by at most 2e-12 points, amplified in
+  the scenario's iterations 2-3 (2.6 points) and back near 2e-5 at the end. The head's code again with its own
+  measured Hessian read from the cache (eu_newc): the baseline's records equal the reference's (0.0), and the pickle
+  equals eu_ref.pkl at `--rtol 0` but for the run's metadata (13: paths, label, times, commit, the cache file's name,
+  the data tree's hash, which the re-keyed code-data status rows change). A5 is identical; the difference is the
+  Hessian's source. **For the main line (pre-existing, nothing fixed):** a run that measures the market supply
+  Hessian ends its baseline in the last digits away from a run that reads the same Hessian (byte-identical) from the
+  cache: K76's restore of the regional models' state after the measurement leaves a trace (the regional NLPs' warm
+  starts or another state the restore does not cover); the non-convex scenario amplifies it to 1e-5. So two runs
+  compare exactly only with the Hessian from the same source; the plan's gates (section 4) should say so.
+- **The full suite at 27789968** (capri_mod/tests and capri_mod/pipeline/tests, pytest-xdist -n 3, 2 h 21 min with
+  a full-EU run alongside; runs/asg/a5_suite.log): 548 passed, 56 skipped, 1 xpassed, 3 failed. Two are A2's
+  pre-existing failures (section 7: the land rents' residual 4.7279502897182036e-4, the same number;
+  build_feed_bulk_grof.py:45). The third, test_supply_system_ad.py::
+  test_the_market_solved_by_the_chain_is_the_fixed_points_equilibrium[ipopt-mumps], was no result: its worker was
+  killed by the container's memory limit (the kernel's OOM log: a 3.2 GB Python process), with the full-EU run
+  alongside; run alone it passed (5 min 40 s; runs/asg/a5_ad_alone.log). A suite and a full-EU run do not fit
+  together in the container's memory, though `free` shows 16 GB.
+- **To do: a more verbose market supply Hessian step** (coupling/hessian.py, HessianBlock; for the main session;
+  nothing changed here). The step is the full-EU run's longest single step (1,351 s in A5's reference run with the
+  thread limits below; 2,518 s in the market phase's, 4,689 s with the container shared), yet at the default log
+  level it writes two lines: the title at its start and "measured: N s" at its end (runs/asg/eu_ref.log l. 19-20).
+  The progress line every `diagnostics.hessian_progress_every` (5) shocks is the run log's level "detailed" and only
+  with the model's `progress` on (model.py `_progress`), so a standard run shows nothing for 22 minutes and a stuck
+  step cannot be told from a slow one. What the step should report, at the default level:
+  - at its start: the cache key and whether the cache hit (the file read, or "measuring"); the products to shock
+    (52 in the Green Deal run), the regional models (221) and the threads the BLAS and OpenMP libraries run with;
+  - the base re-solve: its time and its largest deviation from the baseline's state (0.00625 kt in the market phase's
+    run);
+  - every few shocks: the shocks done of the total, the product shocked, the elapsed time and an estimated end, the
+    regional solves done and skipped (11,492 shocked, 2,063 skipped in the market phase's run);
+  - at its end: the columns with a response (51 of 52), the entries dropped below `market.hessian_entry_floor`, the
+    warnings' counts (region solves with the base's inputs differing from the base), the time and the cache file
+    written. Most of these figures are already in `market_supply_hessian_info` (the pickle's meta) but reach the log
+    only after the run.
+  The cache's key holds `supply_code_fingerprint()` (every .py file of capri_mod but the market's, the tests' and the
+  pipeline's), so a block that edits the supply code cannot reuse the reference's Hessian: A5's head run measured its
+  own (1,909 s; the reference read the one measured before the container's restart, 3 s). The plan's "measured once
+  and reused" (section 4) holds only for blocks outside those files. The two Hessians are byte-identical
+  (29f3a51fd796d345.parquet and 0975341680d48d0f.parquet, 49,370 entries): A5 left the price response unchanged.
+- **Threads** (found during A5's full-EU run): OpenBLAS and OpenMP start one thread per core in each worker process;
+  only OMP_NUM_THREADS is set, in capri_regional_nlp.py l. 173 (`os.environ.setdefault`), after NumPy is imported
+  (too late for OpenBLAS), and OPENBLAS_NUM_THREADS is never set. On the 4-core container the workers ran 7-10 threads
+  each (load 9.5-10, a worker's main thread at 37% CPU). With `OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
+  MKL_NUM_THREADS=1` exported before the run, the workers ran one thread at about 98% (load about 4): the first
+  supply solve 82 s instead of 257 s (the market phase's run) and the Hessian 1,351 s instead of 2,518 s. Whether the
+  results depend on the thread count is not checked here: both runs of A5's full-EU comparison ran with the limits. For the main session: set the three limits before NumPy
+  is first imported (the entry points or capri_mod/__init__.py) and log them in the Hessian step's start line.
