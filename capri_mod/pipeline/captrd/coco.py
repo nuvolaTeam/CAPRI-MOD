@@ -21,7 +21,8 @@ The default biostocks (l. 524-537) and DDGS (l. 545-548) use CAPRI's extraction 
 coefficients p_ByProduct (dat/biofuel/biofuel_technology_params.gms, captrd.gms l. 340-341; prepare.read_dat()):
 without them (extr=None) these three statements are skipped and reported in the returned list.
 
-GAMS semantics as in prepare.py: a zero is no record; assignments are parallel; EPS is not loaded.
+GAMS semantics as in prepare.py: a zero is no record; assignments are parallel; EPS is not loaded. Each statement's
+arithmetic is a named function quoting its GAMS in capri_mod/pipeline/captrd/equations/load_coco1_data.py.
 """
 from __future__ import annotations
 
@@ -30,7 +31,8 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 import numpy as np
 import pandas as pd
 
-from capri_mod.pipeline.captrd.prepare import KEYS, CaptrdSets, Wide, _year
+from capri_mod.pipeline.captrd.equations import load_coco1_data as LC
+from capri_mod.pipeline.captrd.prepare import CaptrdSets, Wide, _year
 
 # load_coco1_data.gms, transcribed
 COLS_NO_COCO = {"LOSF", "LOSM", "SEDM", "SEDF"}                                         # l. 29
@@ -109,12 +111,12 @@ def prepare_country(coco: pd.DataFrame, p: pd.DataFrame, ms: str, sets: CaptrdSe
 
     # l. 43: UVAD of COCO removed
     for k in d.keys(cols=DEL_COCO_COLS):
-        d.put(*k, d.zero, where=is_y)
+        d.put(*k, d.zero + LC.dataMS_removed(), where=is_y)
     # l. 57-63: usable years have COCO UAAR; the others emptied
     usable = {tt for tt in yrs if d("UAAR", "LEVL").get(tt, 0.0) != 0}
     us = t.isin(usable)
     for k in d.keys():
-        d.put(*k, d.zero, where=is_y & ~us)
+        d.put(*k, d.zero + LC.dataMS_removed(), where=is_y & ~us)
     # l. 66-67: no MAPR where a raw product has no PRCM (milk excepted)
     raws: Dict[str, List[str]] = {}
     for out, raw in sets.prcd:
@@ -124,11 +126,11 @@ def prepare_country(coco: pd.DataFrame, p: pd.DataFrame, ms: str, sets: CaptrdSe
         if r == "MILK" or r not in raws:
             continue
         miss = sum(((d("PRCM", r1) == 0).astype(float) for r1 in raws[r]), d.zero)
-        d.put(*k, d.zero, where=is_y & (miss > 0))
+        d.put(*k, d.zero + LC.dataMS_removed(), where=is_y & (miss > 0))
     # l. 70-74: HERD from LEVL and DAYS
     for a in sorted(sets.aact):
         h, dy, lv = d(a, "HERD"), d(a, "DAYS"), d(a, "LEVL")
-        d.put(a, "HERD", lv * dy / 365.0, where=is_y & (h == 0) & (dy != 0) & (lv != 0))
+        d.put(a, "HERD", LC.dataMS_HERD(lv, dy), where=is_y & (h == 0) & (dy != 0) & (lv != 0))
     # l. 79-108: losses, feed, net feed and domestic use of the fodder and cereals COCO2 modifies
     lf = sorted({o for f, o in sets.feed_to_o if f in sets.corfeedlosf and o in sets.cropo})
     in_expt = t.isin(expt)
@@ -136,29 +138,29 @@ def prepare_country(coco: pd.DataFrame, p: pd.DataFrame, ms: str, sets: CaptrdSe
         g = d("GROF", o)
         gb, lb = pb("GROF", o), pb("LOSF", o)
         if gb != 0:
-            d.put("LOSF", o, g * lb / gb, where=in_expt & (g != 0))
+            d.put("LOSF", o, LC.dataMS_LOSF(g, lb, gb), where=in_expt & (g != 0))
         neg = ["SEDM", "SEDF", "INDM", "PRCM", "BIOF", "HCOM", "LOSM", "LOSF", "EXPT", "STCM"]
-        fedm = (g + d("IMPT", o) - sum((d(x, o) for x in neg), d.zero)).clip(lower=0.0)
+        fedm = LC.dataMS_FEDM(g, d("IMPT", o), [d(x, o) for x in neg], d.zero)
         d.put("FEDM", o, fedm, where=in_expt & (g != 0))
-        netf = (g - d("SEDF", o) - d("LOSF", o)).clip(lower=0.0)
+        netf = LC.dataMS_NETF(g, d("SEDF", o), d("LOSF", o))
         d.put("NETF", o, netf, where=in_expt & (g != 0))
-        domm = sum((d(x, o) for x in sets.domm_set), d.zero).clip(lower=0.0)
+        domm = LC.dataMS_DOMM([d(x, o) for x in sets.domm_set], d.zero)
         d.put("DOMM", o, domm, where=in_expt & (g != 0))
     # l. 112-120: MAPR from NETF where p_data has MAPR around the base year
     for (cc, r) in d.keys(cols={"NETF"}, rows=rows_load):
         if sum(pv("MAPR", r, tt) for tt in b5) == 0:
             continue
-        d.put("MAPR", r, d("NETF", r), where=in_expt & (d("MAPR", r) == 0) & (d("NETF", r) != 0))
+        d.put("MAPR", r, LC.dataMS_MAPR(d("NETF", r)), where=in_expt & (d("MAPR", r) == 0) & (d("NETF", r) != 0))
     # l. 124-140: near-zero flags in ExAnteD
     in_exd = t.isin(exd) & us
     total = {k: float(v[is_y].sum()) for k, v in d.s.items()}
     for cc in sorted(sets.mrkbalee - COLS_NO_COCO):
         for r in sorted({k[1] for k in d.keys(cols={cc})} & rows_load - {"OANI", "OCRO"}):
             if total.get((cc, r), 0.0) != 0:
-                d.put(cc, r, pd.Series(1e-13, index=d.idx), where=in_exd & (d(cc, r) == 0))
+                d.put(cc, r, pd.Series(LC.dataMS_flag(), index=d.idx), where=in_exd & (d(cc, r) == 0))
     for cc in sorted({k[0] for k in d.keys(rows={"LEVL"})} & sets.cols_load - {"OANI", "OCRO"}):
         if total.get((cc, "LEVL"), 0.0) != 0:
-            d.put(cc, "LEVL", pd.Series(1e-13, index=d.idx), where=in_exd & (d(cc, "LEVL") == 0))
+            d.put(cc, "LEVL", pd.Series(LC.dataMS_flag(), index=d.idx), where=in_exd & (d(cc, "LEVL") == 0))
     # l. 144-148: BASM as the mean of the nonzero BASYRSM years
 
     def _basm(keys):
@@ -166,7 +168,7 @@ def prepare_country(coco: pd.DataFrame, p: pd.DataFrame, ms: str, sets: CaptrdSe
             v = d(*k)
             nz = v[v.index.isin(bm) & (v != 0)]
             if len(nz):
-                d.put(*k, pd.Series(float(nz.sum()) / len(nz), index=d.idx), where=(t == "BASM"))
+                d.put(*k, pd.Series(LC.BASM_mean(nz), index=d.idx), where=(t == "BASM"))
     _basm([k for k in d.keys(cols=sets.cols_load, rows=rows_load)])
     # l. 157-175: the split activities from their aggregate (DACT)
     parts: Dict[str, List[str]] = {}
@@ -181,12 +183,7 @@ def prepare_country(coco: pd.DataFrame, p: pd.DataFrame, ms: str, sets: CaptrdSe
             pB = pb(sa, r)
             if db == 0 or pB == 0:
                 continue
-            safe = (pB < 2 * db) and (pB > 0)
-            if safe:
-                val = dsum * (pB / db)
-            else:
-                val = (dsum + pB - db).clip(lower=1e-12) if (db + pB) > 1e-12 else d.zero
-            d.put(sa, r, val, where=is_y & (d(sa, r) == 0) & us)
+            d.put(sa, r, LC.dataMS_Splitacts(dsum, pB, db, d.zero), where=is_y & (d(sa, r) == 0) & us)
     # l. 179-183: the set-aside components from FALL
     setf = sorted(a for a, g in sets.p_t_actagg if g == "SETF")
     fall_rows = {k[1] for k in d.keys(cols={"FALL"})} & rows_load
@@ -197,21 +194,21 @@ def prepare_country(coco: pd.DataFrame, p: pd.DataFrame, ms: str, sets: CaptrdSe
             pB = pb(cc, r)
             if fb == 0 or pB == 0:
                 continue
-            new[(cc, r)] = d("FALL", r) / fb * pB
+            new[(cc, r)] = LC.dataMS_SETF(d("FALL", r), fb, pB)
     for (cc, r), v in new.items():                                       # parallel: FALL itself is a component
         d.put(cc, r, v, where=is_y & us)
     # l. 190-193: VSET not above its base in ExAnteD
     vb = pb("VSET", "LEVL")
     if vb != 0:
         v = d("VSET", "LEVL")
-        d.put("VSET", "LEVL", v.clip(upper=vb), where=is_y & us & t.isin(exd) & (v != 0))
+        d.put("VSET", "LEVL", LC.dataMS_VSET(v, vb), where=is_y & us & t.isin(exd) & (v != 0))
     # l. 198-203: UVAG from the change of UVAP
     for (cc, r) in d.keys(cols={"UVAP"}, rows=rows_load):
         ub = float(d("UVAP", r).get("BASM", 0.0))
         pB = pb("UVAG", r)
         if ub == 0 or pB == 0 or sum(pv("UVAG", r, tt) for tt in b5) == 0:
             continue
-        d.put("UVAG", r, d("UVAP", r) / ub * pB, where=is_y & us)
+        d.put("UVAG", r, LC.dataMS_UVAG(d("UVAP", r), ub, pB), where=is_y & us)
     # l. 208-217: BASM again for the split and set-aside activities and UVAG
     _basm([k for k in d.keys(cols=sets.mpact & (sets.dmpact | set(setf)), rows=rows_load)])
     _basm([k for k in d.keys(cols={"UVAG"}, rows=rows_load)])
@@ -221,10 +218,10 @@ def prepare_country(coco: pd.DataFrame, p: pd.DataFrame, ms: str, sets: CaptrdSe
         late = is_y & us & ~t.isin(exp)
         for (cc, o) in d.keys(cols={"GROF"}, rows=sets.o):
             if not any(pv("GROF", o, tt, r) for r in subs for tt in bm):
-                d.put(cc, o, d.zero, where=late)
+                d.put(cc, o, d.zero + LC.dataMS_removed(), where=late)
         for (a, r_) in d.keys(cols=sets.mpact, rows={"LEVL"}):
             if not any(pv(a, "LEVL", tt, r) for r in subs for tt in bm):
-                d.put(a, r_, d.zero, where=late)
+                d.put(a, r_, d.zero + LC.dataMS_removed(), where=late)
     # l. 239-247: the flags of positions other than GROF removed where GROF is given (as coded: the inner sum tests the
     # position itself, so every position at most 1e-12 goes)
     g_all = {r: d("GROF", r) for r in {k[1] for k in d.keys(cols={"GROF"})}}
@@ -232,13 +229,13 @@ def prepare_country(coco: pd.DataFrame, p: pd.DataFrame, ms: str, sets: CaptrdSe
         if total.get((cc, r), 0.0) == 0 or r not in g_all:
             continue
         v = d(cc, r)
-        d.put(cc, r, d.zero, where=t.isin(exd) & us & (v <= 1e-12) & (g_all[r] > 1e-12))
+        d.put(cc, r, d.zero + LC.dataMS_removed(), where=t.isin(exd) & us & (v <= 1e-12) & (g_all[r] > 1e-12))
     # l. 330-334: HCOM of the biofuels rebooked to BIOF (on the ExPostT years and BASM)
     etb = t.isin(expt) | (t == "BASM")
     for b in sorted(sets.biofuels):
         hc = d("HCOM", b)
-        d.put("BIOF", b, d("BIOF", b) + hc, where=etb & (hc != 0))
-        d.put("HCOM", b, d.zero, where=etb)
+        d.put("BIOF", b, LC.dataMS_BIOF(d("BIOF", b), hc), where=etb & (hc != 0))
+        d.put("HCOM", b, d.zero + LC.dataMS_removed(), where=etb)
     return d, usable
 
 
@@ -292,13 +289,7 @@ def apply_country(p: pd.DataFrame, d: Series, usable: Set[str], ms: str, sets: C
         pB = float(w(c, r).get((ms, "BASM"), 0.0))
         if not (db != 0 or pB == 0):
             continue
-        if pB > 0 and pB < 2 * db:
-            val = dd * (pB / db)
-        else:
-            s_ = dd + pB
-            diff = dd + pB - db
-            val = pd.Series(np.where(s_ < 0, diff, np.where(s_ < 1e-13, 0.0, np.maximum(1e-13, diff))), index=w.idx)
-        w.put(c, r, val, where=late & (dd != 0))
+        w.put(c, r, LC.p_data_from_COCO(dd, pB, db), where=late & (dd != 0))
     # l. 290-295: GROF only with some producing activity; l. 299-302: EAAG with GROF's 1e-13
     acts_of: Dict[str, List[str]] = {}
     for a, o in sets.pact_to_o:
@@ -309,9 +300,9 @@ def apply_country(p: pd.DataFrame, d: Series, usable: Set[str], ms: str, sets: C
         acts = acts_of.get(o, [])
         some = sum(((w(a, "LEVL") > 2e-13).astype(float) for a in acts), w.zero)
         anyl = sum(((w(a, "LEVL") != 0).astype(float) for a in acts), w.zero)
-        w.put("GROF", o, pd.Series(np.where(anyl > 0, 1e-13, 0.0), index=w.idx), where=late & (some == 0) & (g > 1e-13))
+        w.put("GROF", o, LC.p_data_GROF_flag(anyl), where=late & (some == 0) & (g > 1e-13))
     for o in sorted(sets.o):
-        w.put("EAAG", o, pd.Series(1e-13, index=w.idx), where=late & (w("GROF", o) == 1e-13))
+        w.put("EAAG", o, pd.Series(LC.p_data_EAAG_flag(), index=w.idx), where=late & (w("GROF", o) == 1e-13))
     # l. 304-310: LEVL only with some output (set-aside excepted)
     setf = {a for a, g in sets.p_t_actagg if g == "SETF"}
     outs_of: Dict[str, List[str]] = {}
@@ -322,7 +313,7 @@ def apply_country(p: pd.DataFrame, d: Series, usable: Set[str], ms: str, sets: C
         outs = outs_of.get(a, [])
         some = sum(((w("GROF", o) > 2e-13).astype(float) for o in outs), w.zero)
         anyg = sum(((w("GROF", o) != 0).astype(float) for o in outs), w.zero)
-        w.put(a, "LEVL", pd.Series(np.where(anyg > 0, 1e-13, 0.0), index=w.idx), where=late & (some == 0) & (lv > 1e-13))
+        w.put(a, "LEVL", LC.p_data_LEVL_flag(anyg), where=late & (some == 0) & (lv > 1e-13))
     # l. 335-352: the biofuel positions from COCO, on ExPostT and BASM (over every year: the ex-post data replaced)
     etb = reg_ms & (tt_.isin(expt) | (tt_ == "BASM"))
     bio_y = etb & (_year(tt_) > EXPOST_BIO_FROM)
@@ -333,18 +324,16 @@ def apply_country(p: pd.DataFrame, d: Series, usable: Set[str], ms: str, sets: C
             flag = (c, r) in flags and c not in {"PRCB", "PRCBY"}
             if not (dd != 0).any() and not flag and (c, r) not in w.s:
                 continue
-            add = pd.Series(np.where((dd == 0) & bio_y & uaar & flag, 1e-13, 0.0), index=w.idx)
-            w.put(c, r, dd + add, where=etb)
+            w.put(c, r, LC.p_data_bio(dd, (dd == 0) & bio_y & uaar & flag), where=etb)
     for c in sorted(sets.cols_load - {"UVAD"}):
         for r in sorted(BIO_ROWS_COCO):
             dd = dv(c, r)
             flag = (c, r) in flags
             if not (dd != 0).any() and not flag and (c, r) not in w.s:
                 continue
-            add = pd.Series(np.where((dd == 0) & bio_y & uaar & flag, 1e-13, 0.0), index=w.idx)
-            w.put(c, r, dd + add, where=etb)
+            w.put(c, r, LC.p_data_bio(dd, (dd == 0) & bio_y & uaar & flag), where=etb)
     for r in sorted(sets.fuels):
-        w.put("UVAG", r, dv("UVAP", r), where=etb)
+        w.put("UVAG", r, LC.p_data_copy(dv("UVAP", r)), where=etb)
     # l. 356-420: fao_agg's biofuel data (%NewBiofuelModule% = ON)
     if biofuel is not None:
         bf = biofuel[biofuel["d0"] == ms]
@@ -359,7 +348,7 @@ def apply_country(p: pd.DataFrame, d: Series, usable: Set[str], ms: str, sets: C
                 if ex:
                     na = bfs.setdefault(("NAGR", b), {})
                     for t_, v in ex.items():
-                        na[t_] = na.get(t_, 0.0) + v
+                        na[t_] = LC.p_biofuelData_NAGR(na.get(t_, 0.0), v)
 
         def bv(c, r):
             m = bfs.get((c, r), {})
@@ -368,41 +357,41 @@ def apply_country(p: pd.DataFrame, d: Series, usable: Set[str], ms: str, sets: C
             keys = {k for k in bfs if k[0] in BIO_COLS_COCO or k[1] in BIO_ROWS_COCO} | \
                    {k for k in w.s if k[0] in BIO_COLS_COCO or k[1] in BIO_ROWS_COCO}
             for k in sorted(keys):
-                w.put(*k, bv(*k), where=etb & (w(*k).abs() <= 1e-13))
+                w.put(*k, LC.p_data_copy(bv(*k)), where=etb & (w(*k).abs() <= 1e-13))
             for r in sorted(sets.fosfuels):
-                w.put("UVAD", r, w("CPRI", r), where=etb & (w("UVAD", r).abs() <= 1e-13))
+                w.put("UVAD", r, LC.p_data_copy(w("CPRI", r)), where=etb & (w("UVAD", r).abs() <= 1e-13))
             basm = reg_ms & (tt_ == "BASM")
             inbm = tt_.isin(bm)
             for k in sorted(k for k in w.s if k[0] in BIO_COLS_COCO or k[1] in BIO_ROWS_COCO):
                 v = w(*k)
                 nz = v[(reg_ms & inbm & (v != 0)).values]
                 if len(nz):
-                    w.put(*k, pd.Series(float(nz.sum()) / len(nz), index=w.idx), where=basm & (v.abs() <= 1e-13))
+                    w.put(*k, pd.Series(LC.BASM_mean(nz), index=w.idx), where=basm & (v.abs() <= 1e-13))
         for b in sorted(sets.biofuels):
             pp = bv("PPRI", b)
-            w.put("UVAG", b, pp, where=etb & (w("UVAG", b).abs() <= 1e-13) & (pp != 0))
+            w.put("UVAG", b, LC.p_data_copy(pp), where=etb & (w("UVAG", b).abs() <= 1e-13) & (pp != 0))
             pm = bv("PMRK", b)
-            w.put("UVAP", b, pm, where=etb & (w("UVAP", b).abs() <= 1e-13) & (pm != 0))
+            w.put("UVAP", b, LC.p_data_copy(pm), where=etb & (w("UVAP", b).abs() <= 1e-13) & (pm != 0))
             up = w("UVAP", b)
-            w.put("UVAD", b, up + w("CTAX", b), where=etb & (w("UVAD", b) == 0) & (up != 0))
+            w.put("UVAD", b, LC.p_data_UVAD_biofuels(up, w("CTAX", b)), where=etb & (w("UVAD", b) == 0) & (up != 0))
         for s_ in sorted(sets.biostock):
             for c in ("PRCB", "PRCBY"):
                 v = bv(c, s_)
-                w.put(c, s_, v, where=etb & (w(c, s_) <= 1e-13) & (v != 0))
+                w.put(c, s_, LC.p_data_copy(v), where=etb & (w(c, s_) <= 1e-13) & (v != 0))
         for c in ("UVAG", "UVAP"):
-            w.put(c, "GLYC", bv(c, "GLYC"), where=etb & (w(c, "GLYC") <= 1e-13))
+            w.put(c, "GLYC", LC.p_data_copy(bv(c, "GLYC")), where=etb & (w(c, "GLYC") <= 1e-13))
     else:
         skipped.append("l. 356-420 (fao_agg p_biofuelData not given)")
     # l. 501-521: minimum biofuel positions from 2000 and in BASM
     dflt = reg_ms & ((_year(tt_) >= DEFAULTS_FROM) | (tt_ == "BASM")) & (tt_.isin(expt) | (tt_ == "BASM"))
     for r in sorted(sets.seco_biof):
-        w.put("NAGR", r, pd.Series(1e-15, index=w.idx), where=dflt & (w("NAGR", r) == 0))
+        w.put("NAGR", r, pd.Series(LC.p_data_NAGR_default(), index=w.idx), where=dflt & (w("NAGR", r) == 0))
     for r in sorted(sets.seco_biof):
-        w.put("MAPR", r, pd.Series(1e-14, index=w.idx), where=dflt & (w("MAPR", r) == 0))
+        w.put("MAPR", r, pd.Series(LC.p_data_default(), index=w.idx), where=dflt & (w("MAPR", r) == 0))
     for r in sorted(sets.seco_biof):
         cond = dflt & (w("MAPR", r) < 1e-13) & (w("IMPT", r) < 1e-13)
-        w.put("DOMM", r, pd.Series(1e-14, index=w.idx), where=cond & (w("DOMM", r) == 0))
-        w.put("BIOF", r, pd.Series(1e-14, index=w.idx), where=cond & (w("BIOF", r) == 0))
+        w.put("DOMM", r, pd.Series(LC.p_data_default(), index=w.idx), where=cond & (w("DOMM", r) == 0))
+        w.put("BIOF", r, pd.Series(LC.p_data_default(), index=w.idx), where=cond & (w("BIOF", r) == 0))
     # l. 524-537: default biostocks; l. 545-548: DDGS (need P_ExtrRates and p_ByProduct)
     stocks_of = {f: [s_ for s_, f2 in sets.stock_to_fuel if f2 == f and s_ in POTENTIAL_STOCKS] for f in ("BIOE", "BIOD")}
     if extr is not None:
@@ -411,17 +400,17 @@ def apply_country(p: pd.DataFrame, d: Series, usable: Set[str], ms: str, sets: C
             used = sum((w("BIOF", x) for x in stocks_of[f]), w.zero)
             rate = float(er.get((f, s_), 0.0))
             cond = dflt & (used < 1e-12) & (w("MAPR", f) < 1e-12) & (w("DOMM", s_) != 0)
-            w.put("BIOF", s_, w("MAPR", f) / rate, where=cond)
+            w.put("BIOF", s_, LC.p_data_BIOF_stock(w("MAPR", f), rate), where=cond)
     else:
         skipped.append("l. 524-537 default biostocks SWHE and RAPO (P_ExtrRates not given)")
     for s_ in POTENTIAL_STOCKS:
-        w.put("BIOF", s_, pd.Series(1e-14, index=w.idx),
+        w.put("BIOF", s_, pd.Series(LC.p_data_default(), index=w.idx),
               where=dflt & (w("BIOF", s_) == 0) & (w("DOMM", s_) != 0))
     if extr is not None:
         byp = extr["byproduct"]
         used = sum((w("BIOF", x) for x in stocks_of["BIOE"]), w.zero)
-        ddgs = sum((w("BIOF", s_) * float(byp.get(("DDGS", s_), 0.0))
-                    for s_, b in sets.stock_to_by if b == "DDGS" and s_ in POTENTIAL_STOCKS), w.zero)
+        ddgs = LC.p_data_MAPR_DDGS([(w("BIOF", s_), byp.get(("DDGS", s_), 0.0))
+                                    for s_, b in sets.stock_to_by if b == "DDGS" and s_ in POTENTIAL_STOCKS], w.zero)
         w.put("MAPR", "DDGS", ddgs, where=dflt & (used < 1e-12) & (w("MAPR", "DDGS") == 0))
     else:
         skipped.append("l. 545-548 DDGS from the default biostocks (p_ByProduct not given)")
@@ -429,12 +418,12 @@ def apply_country(p: pd.DataFrame, d: Series, usable: Set[str], ms: str, sets: C
     gone = reg_ms & is_y & ~tt_.isin(usable)
     for k in list(w.s):
         if k != ("INHA", "LEVL"):
-            w.put(*k, w.zero, where=gone)
-    # l. 555: GROF of the secondary products; l. 558: HCOM of the fuels = DOMM (every region in estimation)
+            w.put(*k, w.zero + LC.p_data_removed(), where=gone)
+    # l. 548: GROF of the secondary products; l. 551: HCOM of the fuels = DOMM (every region in estimation)
     for r in sorted(sets.secom):
-        w.put("GROF", r, w.zero, where=is_y)
+        w.put("GROF", r, w.zero + LC.p_data_removed(), where=is_y)
     for r in sorted(sets.fuel_rows):
-        w.put("HCOM", r, w("DOMM", r), where=is_y)
+        w.put("HCOM", r, LC.p_data_copy(w("DOMM", r)), where=is_y)
     return w.long(), skipped
 
 

@@ -203,7 +203,8 @@ def bounds(regions: Dict[str, EB.BoundData], B: EB.BoundSets, eff: float, ms_ste
     CROPC_TO_G pairs (crop, crop group);
     regional_expert / regional_trust: the regions' Expert supports and trust levels (P_Result "Expert",
     p_ExpertSupprt "TrustLevl"). The statements' arithmetic is in capri_mod/pipeline/captrd/equations/estimate_nuts2.py,
-    each function quoting its GAMS; this function holds their domains and their order."""
+    each function quoting its GAMS; this function holds their domains and their order. The lines cited below are
+    estimate_nuts2.gms's."""
     out_lo, out_up, add_nobs = {}, {}, {}
     fodf_map = sorted(set(fodf_map))
     c2g = sorted((c, g) for c, g in set(cropc_to_g) if c in B.mcact)

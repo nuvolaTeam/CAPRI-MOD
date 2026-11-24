@@ -38,7 +38,7 @@ NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), (
 #: the light ones (no reference data read, or one or two tables): step1, scale_dgagri
 PARTS = None
 LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod", "longrun", "eu_supports",
-         "expert_support", "national", "stats", "prep"}
+         "expert_support", "national", "stats", "prep", "coco"}
 
 
 def step1_cases():
@@ -682,10 +682,79 @@ def prep_cases():
     return out
 
 
+def coco_cases():
+    """load_coco1_data.gms: coco.exante_d, prepare_country, bio_flags and apply_country chained as prepare_run does,
+    on seeded random COCO1 data, p_data, fao_agg biofuel data and conversion factors, for two member states with NUTS 2
+    regions and a non-EU country over the positions the statements name, with CAPTRD's sets, for two densities of
+    zeros. SHA-256 of the exact p_data returned."""
+    import random
+    import pandas as pd
+    from capri_mod.pipeline.captrd import coco as CO
+    from capri_mod.pipeline.captrd import prepare as P
+    s = P.read_sets()
+    ms_list = ["AT000000", "PL000000", "NO000000"]
+    nt2 = {"AT000000": ["AT310000", "AT120000"], "PL000000": ["PL210000", "PL220000"], "NO000000": []}
+    cols = ["UAAR", "GROF", "IMPT", "MAPR", "PRCM", "NETF", "SEDF", "SEDM", "INDM", "BIOF", "HCOM", "LOSM", "LOSF",
+            "EXPT", "STCM", "FEDM", "DOMM", "UVAD", "UVAP", "UVAG", "FALL", "VSET", "PRCB", "PRCBY", "NAGR", "CTAX",
+            "EAAG", "SWHE", "MAIZ", "DCOL", "DCOH", "DCOW", "BULL", "BULF", "GSET", "NONF", "SETA", "CPRI", "HEIL"]
+    rows = ["SWHE", "MAIZ", "OCER", "RAPO", "SUGA", "MILK", "LEVL", "DAYS", "HERD", "BIOD", "BIOE", "DDGS", "DISL",
+            "GASL", "CRDO", "GLYC", "BEEF", "GRAS", "COMI", "RYEM", "BARL", "SUNO", "OTHO"]
+    years = list(range(2000, 2020))
+    expost = list(range(2000, 2019))
+    basyrs5, basyrsm = [2015, 2016, 2017, 2018, 2019], [2016, 2017, 2018]
+    out = {}
+    for seed, z in ((1, 0.3), (2, 0.6)):
+        rng = random.Random(seed)
+        val = lambda lo=0.0, hi=100.0: 0.0 if rng.random() < z else rng.uniform(lo, hi)   # noqa: E731
+        crec, prec = [], []
+        for m in ms_list:
+            for c in cols:
+                for w in rows:
+                    if rng.random() < 0.4:
+                        continue
+                    f = rng.uniform(-10.0 if c in ("DOMM", "FEDM") else 0.0, 100.0)
+                    for t in [str(y) for y in years]:
+                        v = val() if (c, w) != ("UAAR", "LEVL") else rng.uniform(50.0, 100.0)
+                        if v:
+                            crec.append((m, "COCO1", c, w, t, f * v / 50.0))
+                    for reg in [m] + nt2[m]:
+                        for t in [str(y) for y in expost] + ["BASM"]:
+                            v = val()
+                            if v:
+                                prec.append((reg, c, w, t, f * v / 50.0 if rng.random() > 0.05 else 1e-14))
+        coco = pd.DataFrame(crec, columns=["region", "item", "col", "row", "t", "value"])
+        coco["eps"] = 0
+        p0 = pd.DataFrame(prec, columns=["region", "col", "row", "t", "value"])
+        p0["eps"] = 0
+        bf = pd.DataFrame([(m, c, w, str(y), rng.uniform(0.0, 10.0), 0) for m in ms_list
+                           for c in ("NAGR", "EXOG", "PPRI", "PMRK", "PRCB", "PRCBY", "UVAG", "UVAP", "BIOF")
+                           for w in ("BIOD", "BIOE", "RAPO", "MAIZ", "GLYC") for y in years if rng.random() > z],
+                          columns=["d0", "d1", "d2", "d3", "value", "eps"])
+        extr = {"extr_rates": {("BIOE", "SWHE"): 0.3, ("BIOD", "RAPO"): 0.4},
+                "byproduct": {("DDGS", "MAIZ"): 0.3, ("DDGS", "OCER"): 0.32}}
+        exd = CO.exante_d(coco, s.ms, expost, years)
+        prepared, usable = {}, {}
+        for m in ms_list:
+            pm = p0[p0["region"].isin([m] + nt2[m])]
+            prepared[m], usable[m] = CO.prepare_country(coco[coco["region"] == m], pm, m, s, expost, exd, years,
+                                                        basyrs5, basyrsm)
+        flags = CO.bio_flags(prepared, sorted(set(expost) | set(exd)))
+        res = {"exd": tuple(exd), "flags": tuple(sorted(flags))}
+        for m in ms_list:
+            pm = p0[p0["region"].isin([m] + nt2[m])]
+            q, sk = CO.apply_country(pm, prepared[m], usable[m], m, s, expost, exd, years, basyrsm, flags, bf, extr)
+            res[m] = (_digest(sorted((a, b, c, t, float(v).hex()) for a, b, c, t, v in
+                                     q[["region", "col", "row", "t", "value"]].itertuples(index=False))), tuple(sk))
+            res[m + "_coco"] = _digest(sorted((k, tuple(float(x).hex() for x in v.values))
+                                              for k, v in prepared[m].s.items()))
+        out[seed] = res
+    return out
+
+
 LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases, "final_supports": final_supports_cases,
                "agriprod": agriprod_cases, "longrun": longrun_cases, "eu_supports": eu_supports_cases,
                "expert_support": expert_support_cases, "national": national_cases, "stats": stats_cases,
-               "prep": prep_cases}
+               "prep": prep_cases, "coco": coco_cases}
 
 
 def want(part):

@@ -24,7 +24,7 @@ Stages (each a function, with the GAMS lines it ports):
   clean_regions      captrd.gms l. 862-888        regions never estimated; the NUTS 2 rows reduced
   labour_household   captrd.gms l. 897-898        LABH = LABO - LABN
   prep_for_estimation prep_data_for_estimation.gms l. 15-162
-The COCO nowcasts (load_coco1_data.gms, l. 715), the policy data (captrd_policy.gms) and the labour agelines follow as
+The COCO nowcasts (load_coco1_data.gms, at captrd.gms l. 715), the policy data (captrd_policy.gms) and the labour agelines follow as
 they are ported (docs/dev/CAPTRD_MOD.md section 12.2).
 The COCO stage is in coco.py; prepare_run.py runs every stage over the country files in CAPTRD's order (fill_uvad and the
 COCO flags need every country).

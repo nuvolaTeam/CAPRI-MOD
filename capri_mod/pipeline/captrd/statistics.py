@@ -5,7 +5,7 @@ For every estimated series (S_ColsEst x S_RowsEst) of every region (Rest; CAPTRD
 so their statements are left out):
   nObs, nW       the ex-post years ExPostT with an observation, and the sum of their trend values p_trend (l. 209-210);
                  0 where the series has no base-period value BASM, unless it is a COCO biofuel column or row
-                 (bioColsCoco, bioRowsCoco, load_coco1_data.gms l. 316-317; l. 214-218), and for INHA.LEVL and DOMM of
+                 (bioColsCoco, bioRowsCoco of load_coco1_data.gms l. 316-317; prep_data_for_estimation.gms l. 214-218), and for INHA.LEVL and DOMM of
                  the young animals (l. 221-227)
   WAve, wVar     the weighted mean (l. 233-234) and variance (l. 241-246; step1.prestats)
   BAS            the mean of the nonzero values of the base years BASYRS5 (l. 254-258); for an activity's
