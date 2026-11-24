@@ -37,7 +37,7 @@ NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), (
 #: clean_tiny, and
 #: the light ones (no reference data read, or one or two tables): step1, scale_dgagri
 PARTS = None
-LIGHT = {"step1", "scale_dgagri"}
+LIGHT = {"step1", "scale_dgagri", "final_supports"}
 
 
 def step1_cases():
@@ -97,7 +97,67 @@ def scale_dgagri_cases():
     return {"DGAgri1": dig(D1), "DGAgri": dig(D), "p_data": dig(Pd)}
 
 
-LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases}
+def final_supports_cases():
+    """final_supports.biof_adjust (adjust_to_biof_supports.gms, every ex-ante year in turn, its parameters kept between
+    the calls) then final_supports.adjust_trade (adjust_trade_supports.gms) on seeded random supports, experts, BASM,
+    BAST, BAS, nObs and quotas over CAPTRD's sets, for five member states and three densities of zeros (negative trade
+    included): a move must leave any input's result unchanged, and the zeros reach the statements' conditions. SHA-256 of
+    the exact supports, experts and parameters after each."""
+    import random
+    import pandas as pd
+    from capri_mod.pipeline.captrd import final_supports as F
+    from capri_mod.pipeline.captrd import prepare as P
+    rd = lambda n: pd.read_csv(P.SETS_DIR / f"{n}.csv", keep_default_na=False, dtype=str)   # noqa: E731
+    one = lambda n: rd(n).d0.tolist()                                                       # noqa: E731
+    two = lambda n: list(zip(rd(n).d0, rd(n).d1))                                           # noqa: E731
+    FS = F.Sets(biostock=one("biostock"), biostock_oilp=one("biostockoilp"), oseeds=one("oseeds"), seco=one("seco"),
+                grcu=one("grcu"), cropo=one("cropo"), prcd=two("prcd"), sed_to_oil=two("sed_to_oil"),
+                oil_to_cak=two("oil_to_cak"), bio_prcd=two("bio_prcd"), pact_to_y=two("pact_to_y"),
+                shift_sugb=one("shiftsugbpos"), dompos=one("dompos"), mcact=one("mcact"), s_colsest=one("s_colsest"),
+                s_rowsest=one("s_rowsest"))
+    ms = ["AT000000", "DE000000", "FR000000", "IT000000", "PL000000"]
+    exante = list(range(2019, 2031))
+    rows = sorted(set(FS.biostock) | set(FS.oseeds) | set(FS.seco) | set(FS.cropo) | {"SUGB", "SUGA", "MAIZ"})
+    cols = sorted({"GROF", "MAPR", "IMPT", "EXPT", "DOMM", "BIOF", "PRCM", "INDM", "NTRD", "LOSM"} | set(FS.dompos)
+                  | set(FS.shift_sugb))
+    acts = sorted(set(FS.grcu) | {"SUGB"})
+    out = {}
+    for seed, z in ((1, 0.2), (2, 0.5), (3, 0.8)):
+        rng = random.Random(seed)
+        val = lambda lo=0.1, hi=1000.0: 0.0 if rng.random() < z else rng.uniform(lo, hi)   # noqa: E731
+        FS.proc_yields = {x: rng.uniform(0.2, 0.8) for x in rows}
+        R, E, basm, bast, bas, quts = {}, {}, {}, {}, {}, {}
+        for r in ms:
+            for w in rows:
+                for c in cols:
+                    lo = -50.0 if c in ("IMPT", "EXPT") else 0.1
+                    basm[(r, c, w)], bast[(r, c, w)], bas[(r, c, w)] = val(lo), val(lo), val(lo)
+                    for y in exante:
+                        R[(r, c, w, y)] = val(lo)
+                        if rng.random() < 0.3:
+                            E[(r, c, w, y)] = val(lo)
+            for a in acts:
+                for y in exante:
+                    R[(r, a, "LEVL", y)] = val()
+            for y in exante:
+                quts[(r, "QUTS", "SUGA", y)] = val()
+                R[(r, "PRCY", "SUGA", y)] = val(0.05, 0.3)
+        R = {k: v for k, v in R.items() if v}
+        E = {k: v for k, v in E.items() if v}
+        nobs = {(r, c, w) for r in ms for c in cols for w in rows if rng.random() > z}
+        pa, ll, ul = {}, {}, {}
+        for y in exante:
+            F.biof_adjust(R, E, y=y, ms=ms, S=FS, basm=basm, bast=bast, bas=bas, nobs=nobs, quts=quts, prcy=R,
+                          lst_dgagri=2017, fst_exante=exante[0], bas_year=2017, bast_year=2018, prd_adj=pa, low_lim=ll,
+                          upp_lim=ul)
+        dig = lambda q: _digest(sorted((k, float(v).hex()) for k, v in q.items()))      # noqa: E731
+        out[(seed, "biof")] = [dig(R), dig(E), dig(pa), dig(ll), dig(ul)]
+        F.adjust_trade(R, E, ms=ms, s_rowsest=FS.s_rowsest, exante=exante, basm=basm, dompos=FS.dompos)
+        out[(seed, "trade")] = [dig(R), dig(E)]
+    return out
+
+
+LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases, "final_supports": final_supports_cases}
 
 
 def want(part):
