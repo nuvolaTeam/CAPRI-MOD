@@ -14482,6 +14482,7 @@
     "model": [],
     "builders": [],
     "checks": [
+     "tools/check/captrd_parity_dump.py",
      "tools/check/make_provenance.py"
     ],
     "tests": [
@@ -62950,7 +62951,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 979,
+  "capri/keep": 978,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 37,

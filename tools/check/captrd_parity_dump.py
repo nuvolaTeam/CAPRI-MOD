@@ -38,7 +38,7 @@ NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), (
 #: the light ones (no reference data read, or one or two tables): step1, scale_dgagri
 PARTS = None
 LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod", "longrun", "eu_supports",
-         "expert_support", "national", "stats", "prep", "coco", "captrd_gms", "biofuel", "globiom"}
+         "expert_support", "national", "stats", "prep", "coco", "captrd_gms", "biofuel", "globiom", "aglink"}
 
 
 def step1_cases():
@@ -906,6 +906,102 @@ def globiom_cases():
     return out
 
 
+def aglink_cases():
+    """aglink.py (load_aglink2023dgAgri.gms: read_aglink, eu_data, to_capri, dgagri) on a seeded random Aglink cube
+    (p_dbvar, 12% of the European regions' measures by product, every year, NA entries, the 2022 booking's biofuel
+    production by feedstock, the exchange rates, population and GDP; Aglink 2019's fish) and CAPTRD p_data (UAAR's
+    years, the biofuels' NAGR and DOMM, BASM) over the load's sets, two seeds; and macro.py (l. 905-1068 and
+    longrun_supports.gms l. 368-389) on its inputs with a random Aglink population. SHA-256 of each stage's exact
+    results."""
+    import tempfile
+    from pathlib import Path
+    import numpy as np
+    import pandas as pd
+    from capri_mod.external_paths import REFERENCE
+    from capri_mod.pipeline.captrd import aglink as A
+    from capri_mod.pipeline.captrd import macro as M
+    from capri_mod.pipeline.captrd import prepare as P
+    G = REFERENCE / "sets" / "simini_21730"
+    S = A.Sets(G)
+    src = A.ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "biofuel" / "biofuel_technology_params_"
+    dens = pd.read_parquet(f"{src}p_density.parquet").set_index("fuel").value.astype(float).to_dict()
+    oil = pd.read_parquet(f"{src}p_oilEqu.parquet").set_index("fuel").value.astype(float).to_dict()
+    dens, oil = {k.upper(): v for k, v in dens.items()}, {k.upper(): v for k, v in oil.items()}
+    digest = lambda q: _digest(sorted((k, float(v).hex()) for k, v in q.items()))      # noqa: E731
+    out = {}
+    regs = list(S.agEurop) + ["WLD"]
+    for seed in (1, 2):
+        rng = np.random.default_rng(20261124 + seed)
+        recs = []
+        for r in regs:
+            for w in S.agRows:
+                for c in S.agCols:
+                    if rng.random() < 0.12:
+                        for y in S.agYears:
+                            recs.append((r, w, c, y))
+            for c, w in (("XR", "ME"), ("POP", "ME"), ("GDPI", "ME")):
+                for y in S.aglinkYears:
+                    recs.append((r, w, c, y))
+            for b in list(S.agBioF) + ["OIL"]:
+                for y in S.agYears:
+                    recs.append((r, b, "XP", y))
+            for pr in A.BOOKING_2022_ET + A.BOOKING_2022_BD:
+                if rng.random() < 0.5:
+                    for y in S.agYears:
+                        recs.append((r, pr, "QP..ET" if pr in A.BOOKING_2022_ET else "QP..BD", y))
+        recs = list(dict.fromkeys(recs))
+        d = pd.DataFrame(recs, columns=["d1", "d2", "d3", "d4"])
+        d["value"] = rng.lognormal(3.0, 1.0, len(d)) * np.where(rng.random(len(d)) < 0.1, -1.0, 1.0)
+        d.loc[rng.random(len(d)) < 0.08, "value"] = 0.0
+        d["special"] = np.where(rng.random(len(d)) < 0.002, "NA", "")
+        fish = pd.DataFrame([(r, c, "FH", y) for r in S.aglinkRegions[:20] for c in ("QP", "QC", "EX", "IM", "PP")
+                             for y in S.aglinkYears[-30:]], columns=["d1", "d2", "d3", "d4"])
+        fish["value"] = rng.lognormal(3.0, 1.0, len(fish))
+        fish["special"] = ""
+        pdr = []
+        for m in S.ms:
+            for y in range(1984, 2018):
+                pdr.append((m, "UAAR", "LEVL", str(y), float(rng.lognormal(6.0, 1.0))))
+            for c in ("NAGR", "DOMM"):
+                for w in S.seco_biof:
+                    for y in range(2012, 2020):
+                        pdr.append((m, c, w, str(y), float(rng.lognormal(2.0, 1.0)) if rng.random() < 0.8 else 0.0))
+            for c in ["GROF", "SEDF", "LOSF", "PRCM", "INDM", "HCOM", "SEDM", "LOSM", "DOMM"]:
+                for w in sorted(S.rowsMappedAglink) + ["DISL", "GASL"]:
+                    if rng.random() < 0.7 or (c == "DOMM" and w in ("DISL", "GASL")):
+                        pdr.append((m, c, w, "BASM", float(rng.lognormal(4.0, 1.0))))
+        pdata = pd.DataFrame(pdr, columns=["region", "col", "row", "t", "value"])
+        with tempfile.TemporaryDirectory() as td:
+            gd, fd = Path(td) / "g", Path(td) / "f"
+            gd.mkdir()
+            fd.mkdir()
+            d.to_parquet(gd / "p_dbvar.parquet")
+            fish.to_parquet(fd / "p_aglinkOri.parquet")
+            ori = A.read_aglink(gd, fd, S)
+        out[(seed, "ori")] = digest(ori)
+        p, bast = A.eu_data(ori, S, pdata, dens, oil)
+        out[(seed, "eu_data")] = (digest(p), digest(p.bfyld), digest(bast))
+        T = A.to_capri(p, ori, S, pdata)
+        out[(seed, "to_capri")] = (digest(T), digest(p))
+        dg = A.dgagri(T, S)
+        out[(seed, "dgagri")] = _digest(sorted((r, c, w, y, float(v).hex()) for r, c, w, y, v in dg.itertuples(index=False)))
+        sets, mac, ssp = M.read_inputs(P.SETS_DIR, P.SETS_DIR.parent / "dat")
+        ags = sorted({a for _, a in sets["faoreg_aglinkregions"]})
+        pop = {(a, y): float(rng.lognormal(8.0, 1.0)) for a in ags for y in range(2000, 2036) if rng.random() < 0.95}
+        fao = pd.read_csv(G / "FAORegions_map.csv", dtype=str, keep_default_na=False)
+        years = list(range(1984, 2071))
+        m = M.inha(sets, mac, ssp, aglink_pop=pop, ag_eu_regs=S.agEUreg, ag_years=[int(y) for y in S.agYears],
+                   years=years, lst_dgagri=2035, last_sim_year=2070, fao_map=list(zip(fao.d0, fao.d1)), base_year=2017)
+        out[(seed, "macro")] = _digest(sorted(((k, float(v).hex()) for k, v in m.items()), key=repr))
+        wp = pd.read_csv(P.SETS_DIR.parent / "dat" / "macro_worldpop.csv")
+        basm = {r: float(rng.lognormal(8.0, 1.0)) for r in S.ms}
+        ip = M.inha_pdata(m, ms=S.ms, basm=basm, years_cur=range(1984, 2071), bast_year=2017,
+                          exante=[2018, 2020, 2025, 2030, 2040, 2050, 2070],
+                          world_pop={(y, r): v for y, r, v in zip(wp.year, wp.region, wp.value)}, basy=2017)
+        out[(seed, "inha_pdata")] = digest(ip)
+    return out
+
+
 def captrd_gms_cases():
     """captrd.gms's data statements: prepare.load_fixes, load_basm and labour_household on seeded random CAPREG series
     and base-year data over CAPTRD's sets, for two densities of zeros. SHA-256 of the exact p_data returned."""
@@ -944,7 +1040,8 @@ LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases, "final_
                "agriprod": agriprod_cases, "longrun": longrun_cases, "eu_supports": eu_supports_cases,
                "expert_support": expert_support_cases, "national": national_cases, "stats": stats_cases,
                "prep": prep_cases, "coco": coco_cases, "captrd_gms": captrd_gms_cases,
-               "biofuel": biofuel_cases, "globiom": globiom_cases}
+               "biofuel": biofuel_cases, "globiom": globiom_cases,
+               "aglink": aglink_cases}
 
 
 def want(part):
