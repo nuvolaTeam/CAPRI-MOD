@@ -4209,7 +4209,10 @@ the main line measures and ranks. Where each acts, from the code (no runs):
     end, the regional solves done and skipped, the base re-solve's deviation and the columns with a response.
   - *Tests:* test_capri.py::test_capri_land_rents_at_the_2030_calibration_point (the calibration NLP's residual
     4.7279502897182036e-4, the test wants 1e-6) and test_exact_io.py::test_csv_float_reads_are_exact
-    (tools/build/build_feed_bulk_grof.py:45, DEP-14) fail at the phase's start 259edec too. A full suite and a
+    (tools/build/build_feed_bulk_grof.py:45, DEP-14) fail at the phase's start 259edec too. The second fixed on 24
+    November 2026: the builder read feed_bulks_*.csv with pandas' default float parser for their (ms, bulk) code
+    pairs only; it reads them as text now (the same 166 pairs, so the same feed_bulks_grof.csv; its --check needs
+    sim_ini_21730's DATA, not in the refactor's container). A full suite and a
     full-EU run do not fit in a container's memory together (a pytest worker killed; the test passed alone).
   - *Exactness:* Python 3.12's sum() of floats is compensated, so it differs from a += loop in the last digit; the
     refactor kept each caller's form. tools/check/compare_pickles_exact.py reports a DataFrame with NaN cells as
