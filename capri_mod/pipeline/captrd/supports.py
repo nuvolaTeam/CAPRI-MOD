@@ -65,7 +65,8 @@ def supports(st: pd.DataFrame, step1: pd.DataFrame, years: Sequence[int], bas_ye
     (0.05 x |wAve|)^2, a variance, where CAPRI's code takes 0.05 x |wAve|, a level (l. 327-329). wVarErr is a variance
     in CAPRI's own code (a sum of squared residuals, l. 118-123; the fall-back for 1-2 observations is
     SQR(wAve) x 0.25, l. 130) and is used as one later (sqrt(wVarErr) as a standard deviation,
-    define_eu_supports.gms l. 693, 705). False reproduces CAPRI as coded."""
+    define_eu_supports.gms l. 693, 705). False reproduces CAPRI as coded. The lines cited below are
+    define_stats_and_supports.gms's."""
     if floor_squared is None:
         from capri_mod.settings import current as _settings
         floor_squared = bool(_settings().get("captrd.variance_floor_squared"))

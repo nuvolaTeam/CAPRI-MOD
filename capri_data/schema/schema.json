@@ -11139,6 +11139,7 @@
     ],
     "builders": [],
     "checks": [
+     "tools/check/captrd_parity_dump.py",
      "tools/check/make_provenance.py"
     ],
     "tests": [
@@ -12683,7 +12684,9 @@
    "read_by": {
     "model": [],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/captrd_parity_dump.py"
+    ],
     "tests": [
      "capri_mod/pipeline/tests/test_captrd_eu_supports.py"
     ]
@@ -62942,7 +62945,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 1013,
+  "capri/keep": 999,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 37,

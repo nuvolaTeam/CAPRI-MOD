@@ -37,7 +37,7 @@ NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), (
 #: clean_tiny, and
 #: the light ones (no reference data read, or one or two tables): step1, scale_dgagri
 PARTS = None
-LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod", "longrun"}
+LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod", "longrun", "eu_supports"}
 
 
 def step1_cases():
@@ -277,8 +277,96 @@ def longrun_cases():
     return out
 
 
+def eu_supports_cases():
+    """eu_supports.eu_supports (define_eu_supports.gms, every ex-ante year in turn) on seeded random Step2, Step3,
+    DGAgri, DGAgri1, supports, experts, trust levels, wVarErr, Longrun, Longrun1, quotas, BASM, BAST, BAS and nObs, with
+    test_captrd_eu_supports.py's sets restricted to the positions its statements name (and those of
+    adjust_to_biof_supports.gms) and four member states of the two EU parts, for two densities of zeros. SHA-256 of
+    every position it changes. Run both sides with the same PYTHONHASHSEED (e.g. 0): some of the module's sums run
+    over sets in hash order (the refactor's C6), so their last digits differ between interpreter runs otherwise."""
+    import random
+    import pandas as pd
+    from capri_mod.external_paths import REFERENCE
+    from capri_mod.pipeline.captrd import eu_supports as EU
+    from capri_mod.pipeline.captrd import final_supports as F
+    from capri_mod.pipeline.captrd import prepare as P
+    from capri_mod.pipeline.captrd import timesets as TS
+    G = REFERENCE / "sets" / "simini_21730"
+    s = P.read_sets()
+    rd = lambda n: pd.read_csv(P.SETS_DIR / f"{n}.csv", keep_default_na=False)    # noqa: E731
+    one = lambda n: rd(n).d0.tolist()                                            # noqa: E731
+    two = lambda n: list(zip(rd(n).d0, rd(n).d1))                                # noqa: E731
+    simg = lambda n: pd.read_csv(G / f"{n}.csv", keep_default_na=False)          # noqa: E731
+    gl = pd.read_csv(P.SETS_DIR / "globiom" / "euallagg.csv").d0.tolist()
+    cols1, rows1 = EU.est_sets(s.s_colsest, s.s_rowsest)
+    want_c = {"GROF", "MAPR", "IMPT", "EXPT", "NTRD", "DOMM", "FEDM", "HCOM", "PRCM", "INDM", "PRCI", "BIOF", "UVAG",
+              "UVAD", "EAAG", "EXPE", "LOSM", "SEDM", "UAAR", "SWHE", "MAIZ", "RAPE", "SUGB", "SOWS", "PIGF", "HENS",
+              "POUF", "SHGM", "SHGF", "DCOL", "DCOH", "CERE", "OILS", "BULL", "INDU"}
+    want_r = {"LEVL", "HERD", "TOOU", "SWHE", "MAIZ", "RAPE", "SUGB", "SUGA", "DDGS", "FPRO", "COMI", "IPIG", "YPIG",
+              "ICHI", "YCHI", "ILAM", "YLAM", "PORK", "BEEF", "SGMI", "CERE", "OILS", "RAPO", "RAPC", "MILK", "OILS"}
+    cols = [c for c in cols1 if c in want_c]
+    rows = [w for w in rows1 if w in want_r]
+    py = pd.read_csv(P.SETS_DIR.parent / "dat" / "biofuel_proc_yields.csv")
+    FS = F.Sets(biostock=one("biostock"), biostock_oilp=one("biostockoilp"), oseeds=one("oseeds"), seco=one("seco"),
+                grcu=one("grcu"), cropo=one("cropo"), prcd=two("prcd"), sed_to_oil=two("sed_to_oil"),
+                oil_to_cak=two("oil_to_cak"), bio_prcd=two("bio_prcd"), pact_to_y=list(s.pact_to_y),
+                shift_sugb=one("shiftsugbpos"), dompos=one("dompos"), mcact=one("mcact"), s_colsest=cols,
+                s_rowsest=rows, proc_yields=dict(zip(py.row, py.value)))
+    ms = ["AT000000", "DE000000", "PL000000", "BG000000"]
+    rto = simg("R_T_OAGG")
+    S = EU.Sets(ms=ms, rmaggsup=sorted(set(one("rmaggsup")) | {"EU013000", "EU014000"}),
+                ms_to_agg=[(b, a) for a, b in s.map_rr if a in set(gl)], euparts=["EU014000", "EU013000"],
+                cur_europ_agg=["EU014000", "EU013000", "EU27yr19"], s_colsest=cols, s_rowsest=rows,
+                mrkbalee=one("mrkbalee"), dompos=one("dompos"), pric=["UVAG"], pact_to_y=list(s.pact_to_y),
+                pact_to_io=two("pact_to_io"), maact=list(s.maact), mcact=one("mcact"), cact=list(s.cact),
+                grpc=one("grpc"), grpr=one("grpr"), cropc_to_g=[(b, a) for a, b in two("cropc_to_g")],
+                rows_to_g=[(b, a) for a, b in two("rows_to_g")],
+                aact_365=["DCOW", "DCOL", "DCOH", "SCOW", "SOWS", "SHGM", "HENS"],
+                meas=rto[rto.d0 == "MEAS"].d1.tolist(), tradeest=one("tradeest"), secod=simg("SECOD").d0.tolist(),
+                prcd=two("prcd"), dcow=["DCOL", "DCOH"], biof=FS)
+    exante = [2018, 2020, 2025, 2030, 2035, 2040, 2045, 2050, 2060, 2070]
+    L = TS.lst_dgagri_for("aglink2023dgAgri")
+    T0 = TS.build(1984, 2070, exante, 2017, L, uaar_years_any=range(1984, 2019), uaar_years_all=range(1995, 2019),
+                  expostt_extra=[2019])
+    Y = EU.Years(lst_dgagri=L, lst_exante=max(exante), phase_in=2025, fst_exante=T0.fst_exante,
+                 sec_exante=T0.sec_exante, lst_expostt=T0.lst_expostt, before=dict(T0.before), bas_year=2017,
+                 bast_year=2018, bast_ord=T0.bast, fst_for_biof=min(exante))
+    regs = ms + ["EU013000", "EU014000"]
+    years = sorted(set(exante) | {L})
+    out = {}
+    for seed, z in ((1, 0.3), (2, 0.7)):
+        rng = random.Random(seed)
+        val = lambda lo=0.1, hi=100.0: 0.0 if rng.random() < z else rng.uniform(lo, hi)   # noqa: E731
+
+        def pos(lo=0.1, share=1.0):
+            d = {}
+            for r in regs:
+                for c in cols:
+                    for w in rows:
+                        for y in years:
+                            if rng.random() < share:
+                                v = val(lo)
+                                if v:
+                                    d[(r, c, w, y)] = v
+            return d
+        basm, bast, bas = ({(r, c, w): v for (r, c, w, y), v in pos(-20.0).items() if y == L} for _ in range(3))
+        nobs = {(r, c, w) for r in ms for c in cols for w in rows if rng.random() > z}
+        Pp = EU.Pos(step2=pos(-20.0), step3=pos(), dgagri=pos(), dgagri1=pos(-20.0), support=pos(-20.0),
+                    support1=pos(), expert=pos(0.1, 0.2), trust=pos(1.0, 0.5), wvar=pos(), longrun=pos(),
+                    longrun1=pos(0.1, 0.5), extrap=pos(0.1, 0.3),
+                    quts={(r, "QUTS", w, y): v for (r, c, w, y), v in pos(0.1, 0.1).items()})
+        pa, ll, ul = {}, {}, {}
+        for y in exante:
+            EU.eu_supports(Pp, y, S, Y, bast=bast, basm=basm, bas=bas, nobs=nobs, prd_adj=pa, low_lim=ll, upp_lim=ul)
+        dig = lambda q: _digest(sorted((k, float(v).hex()) for k, v in q.items()))      # noqa: E731
+        out[seed] = {n: dig(getattr(Pp, n)) for n in ("step2", "dgagri", "dgagri1", "support", "trust", "wvar",
+                                                      "longrun1", "extrap", "expert")}
+        out[seed]["biof"] = [dig(pa), dig(ll), dig(ul)]
+    return out
+
+
 LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases, "final_supports": final_supports_cases,
-               "agriprod": agriprod_cases, "longrun": longrun_cases}
+               "agriprod": agriprod_cases, "longrun": longrun_cases, "eu_supports": eu_supports_cases}
 
 
 def want(part):

@@ -91,7 +91,7 @@ def biof_adjust(R: Dict[K4, float], expert: Dict[K4, float], *, y: int, ms: Iter
     """adjust_to_biof_supports.gms for the ex-ante year y, in place on R (the supports adjusted: "support" here,
     "DGAgri1" in define_eu_supports.gms) and expert (BIOF.SUGA, l. 175). quts: QUTS.SUGA's p_data per (region, col, row,
     year); prcy: the supports holding PRCY.SUGA ("support"). prd_adj, low_lim, upp_lim: P_PrdAdj, P_LowLim, P_UppLim per
-    (region, row), kept between calls as GAMS keeps the parameters."""
+    (region, row), kept between calls as GAMS keeps the parameters. The lines cited below are adjust_to_biof_supports.gms's."""
     bstock = list(S.biostock)
     msest = [r for r in ms if AB.MSest([expert.get((r, "BIOF", b, y), 0.0) for b in bstock])]       # l. 20-21
     if not msest:
