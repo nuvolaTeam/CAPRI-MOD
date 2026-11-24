@@ -441,6 +441,13 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   and without (1)); the inhibitor on mineral N moves towards CAPRI's in four units (ES51 0.257 -> 0.141, CAPRI 0.039;
   NL22 0.536 -> 0.459, 0.292), away in FR52 (0.575 -> 0.482, 0.575); the inhibitor on manure stays where CAPRI has none
   (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
+- **K203, the low-N feeding option's manure N effect at 2030 (24 November 2026; K194):** CAPRI's low_n_feed.gms
+  scales the option's manure N effect by (MANN + CRPR_EXPT) / MANN of the simulation year, which its simulation has
+  just recomputed for 2030 (feed/req_or_man_fnc.gms in its manure mode, capmod.gms l. 1090); the builder
+  (tools/build/build_lownfeed_effects.py) took sim_ini_21730's 2017 values of both. It now takes the 2030 reference's
+  MANN and CRPR_EXPT by calc_nexport.gms on its 2030 items (K202). The dairy cows' manure N effect 2.8% larger at the
+  median, the other animals' within 1%. Six-unit Green Deal probe at CAPRI's prices, with K202, against 08330ab: the
+  baseline unchanged, the Green Deal changes 0.03-0.04 points on average, the N-surplus dual 0.882 -> 0.880 of CAPRI's.
 - **K202, the N in livestock products (24 November 2026; register DEP-13):** the report item n_animal_products at
   2030 takes CAPRI's 2030 values: CAPRI's simulation recomputes the N in products before it solves (capmod.gms l. 1090,
   feed/req_or_man_fnc.gms in its manure mode runs fert/calc_nexport.gms for "Y"), so tools/build/

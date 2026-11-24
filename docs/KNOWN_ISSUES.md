@@ -50,7 +50,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K196](#k196) | The Green Deal's N-surplus dual is below CAPRI's (CAPRI's recovered from its own results): median 0.856 of CAPRI's in the standing check at 9867411 (0.89 at bb3b592), 0.83 at CAPRI's prices; the suckler cows' and the technology shift's remaining gaps follow it | open (21 November 2026) |
 | [K198](#k198) | The assignments refactor's findings for the main line (its inventory of the CAPRI statements the model ports or cites, block A0): porting differences in the market supply Hessian, the price transmission, the stop rule, the welfare, the premiums and the accounts, and 14 wrong line citations; sorted 23 November 2026 by where they act, not measured | open (23 November 2026) |
 
-## Resolved (132)
+## Resolved (133)
 
 | # | Issue | Status |
 |---|---|---|
@@ -86,6 +86,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K190](#k190) | The grassland need took CAPRI's SQRT(1 +/- 0.2) split twice: the data's need per ha (CAPRI's reported 2030 need per crop) already carries it, and K160 applied it again; ES41's base manure K on grassland 53.6 against CAPRI's 42.0 kt | fixed (20 November 2026); the intensive grassland's weaker Green Deal response that followed traced to K191 (the grassland's removal and fixation in the N-surplus row) |
 | [K186](#k186) | The catch crops' winter cover option scales with the fixed base crop area; CAPRI's catcMiti_ and GHG_Mit_Cost_ scale it with the current land (landTypesNoSlak, uaaEqu). Not active in CAPRI's Green Deal step (its winter cover share fixed at 1e-6, CATC a free activity) | fixed (21 November 2026): the option's catch crops and cost on the current land, as CAPRI |
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | closed (21 November 2026), explained: the young-animal block is CAPRI's (values, coefficients, premiums' response, clearing); the female calves' gap is the suckler cows' smaller Green Deal fall, which follows the N-surplus dual below CAPRI's (K196) |
+| [K203](#k203) | The low-N feeding option's manure N effect took CAPRI's 2017 manure N and N in products (sim_ini_21730's MANN at BAS and CRPR_EXPT at Y, both 2017 values), where CAPRI's low_n_feed.gms runs on the values its simulation has just recomputed for 2030 (req_or_man_fnc.gms in its manure mode) | fixed (24 November 2026): the 2030 reference's MANN and calc_nexport.gms's CRPR_EXPT on its 2030 items |
 | [K202](#k202) | The N in livestock products (the report item n_animal_products) at 2030 was the 2017 value per head x the yield factor, where CAPRI's simulation recomputes it with calc_nexport.gms on its 2030 items; and the 2017 value of the bulls and the fattening heifers came from CAPRI's aggregates BULF and HEIF, whose CRPR_EXPT in res_17 does not add up (LEVL x CRPR_EXPT 0.606 and 0.617 of their members' sum at the median) | fixed (24 November 2026): calc_nexport.gms on CAPRI's 2030 items at 2030; the elementary activities in 2017 |
 | [K201](#k201) | The 2030 rations of the bulls and heifers were not CAPRI's 2030: the 2030 ration builder takes the 2017 aggregates BULF and HEIF, which have no DAYS in CAPRI's 2030 reference, so the bulls got no 2030 factor (their requirements and feeds 2017 x the yield factor f; their energy requirement's 2030/2017 factor 5.8% above CAPRI's at the median) and the heifers' 2030 total is the replacement heifers' (HEIR) alone | fixed (24 November 2026): the factors from CAPRI's elementary activities in both years (BULL, BULH; HEIL, HEIH, HEIR) |
 | [K200](#k200) | The milk sheep and goats' (SHGM) output per head at 2030 was not the sum of its products: the projection scaled it by the value-weighted mix of its milk and meat factors (right for its revenue, not for a quantity), and the market bridge splits an animal's output at its products' shares, so SHGM's milk and meat passed to the market were 0.979 of their projected sum in the EU at the 2030 base (Spain 0.937; the member states 0.872-1.178) | fixed (24 November 2026): the output is the sum of its products, as SUPBAL_'s |
@@ -4193,6 +4194,30 @@ the Western Balkans besides Norway) did not converge.
   Norway's final baseline levels differ by up to 0.7% (bulls) and its Green Deal levels by up to 0.9% (suckler cows in
   NO08). Neither probe met the stop rule in the Green Deal (Spain's maize still moving by 0.60% at the 30th iteration,
   in both).
+- **Status:** fixed (24 November 2026).
+
+<a id="k203"></a>
+### K203: The low-N feeding option's manure N effect at 2030 (found and fixed 24 November 2026; KNOWN_ISSUES K194, K202)
+
+Found with K202.
+
+- **CAPRI.** low_n_feed.gms sets the option's manure N effect p_ghgMiti(RU, MAACT, "lowNFeed", "othImpact", "MANN") =
+  its crude protein effect x (DATA(MANN, "Y") + DATA(CRPR_EXPT, "Y")) / DATA(MANN, "Y") (l. 117-120). capmod.gms
+  includes it after feed/req_or_man_fnc.gms in its manure mode (l. 1090 and after: "low protein feeding presuppose[s]
+  that req_or_man_fnc.gms has been called before"), which has just recomputed both for "Y": MANN from the 2030 rations,
+  CRPR_EXPT by calc_nexport.gms on the 2030 items (K202).
+- **The model before.** tools/build/build_lownfeed_effects.py (K194) took sim_ini_21730's MANN at BAS and CRPR_EXPT at
+  Y: both CAPRI's 2017 values (sim_ini's "Y" values of these are its 2017 ones; DE21's low-yield dairy cows 104.7 kg
+  manure N per head against 101.9 in the 2030 reference, FR52's 126.4 against 107.6). Its docstring said the 2017 MANN
+  equals CAPRI's 2030 one; K179 had shown it does not.
+- **Fix (as CAPRI).** build_lownfeed_effects.mann_crpr_expt_2030: the 2030 reference's MANN per activity unit (dataOut,
+  as the 2030 manure coefficients of K179) and CRPR_EXPT by build_livestock_n_export_2030.calc_nexport_CRPR_EXPT on
+  its 2030 items. The cut, the cost, the shares and the calibration are unchanged.
+- **Effect.** d_mann_rel, the option's relative change of manure N per head adopting: the dairy cows' 2.8% larger
+  at the median, the other animals' within 1%; the largest change 0.0049 (0.5 points of manure N per head adopting).
+  In the six-unit Green Deal probe at CAPRI's prices (FR52, DE21, IR01, NL22, ES41, PL52; 12 iterations), with K202,
+  against 08330ab: the baseline unchanged; the Green Deal changes 0.03 points on average for the animals, 0.04 for the
+  crops; the N-surplus dual 0.882 -> 0.880 of CAPRI's at the median; the manure N of the heads adopting low-N feeding +0.7%.
 - **Status:** fixed (24 November 2026).
 
 <a id="k202"></a>
