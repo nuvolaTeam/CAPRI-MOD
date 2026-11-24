@@ -1,0 +1,82 @@
+module,line,function,kind,code
+capri_mod/pipeline/captrd/aglink.py,241,eu_data,for/comprehension over a set,"for (r, c, w, y) in {((""EUN"",) + k[1:]) for k in keys_of(S.agEUparts, summ, S.agRows)}:"
+capri_mod/pipeline/captrd/aglink.py,283,eu_data,for/comprehension over a set,"for (r, c, w, y) in {((""EUN"",) + k[1:]) for k in keys_of(S.agEUparts, summ, WT)}:"
+capri_mod/pipeline/captrd/aglink.py,314,eu_data,for/comprehension over a set,"for (r, c, w, y) in {((""EUN"",) + k[1:]) for k in keys_of(S.agEUparts, summ, [""MK""])}:   # l. 343-344"
+capri_mod/pipeline/captrd/aglink.py,665,eu27_sum,for/comprehension over a set,"for c, w, y in keys:"
+capri_mod/pipeline/captrd/aglink.py,665,to_capri,for/comprehension over a set,"for c, w, y in keys:"
+capri_mod/pipeline/captrd/aglink.py,721,to_capri,for/comprehension over a set,for w in cakes:
+capri_mod/pipeline/captrd/aglink.py,723,to_capri,for/comprehension over a set,for w in oils:
+capri_mod/pipeline/captrd/biofuel_trends.py,496,trends,update(set),"out.nobs.update({(r, ""NECR"", ""LEVL""), (r, ""NECR"", ""OCRO"")})"
+capri_mod/pipeline/captrd/biofuel_trends.py,736,trends,for/comprehension over a set,for c in cols_seen:
+capri_mod/pipeline/captrd/biofuel_trends.py,744,trends,for/comprehension over a set,for c in cols_seen:
+capri_mod/pipeline/captrd/biofuel_trends.py,776,trends,for/comprehension over a set,"out.expert = {k: (E.g(*k), T.g(*k)) for k in keys}"
+capri_mod/pipeline/captrd/coco.py,149,prepare_country,for/comprehension over a set,"if sum(pv(""MAPR"", r, tt) for tt in b5) == 0:"
+capri_mod/pipeline/captrd/coco.py,212,prepare_country,for/comprehension over a set,"if ub == 0 or pB == 0 or sum(pv(""UVAG"", r, tt) for tt in b5) == 0:"
+capri_mod/pipeline/captrd/coco.py,230,prepare_country,for/comprehension over a set,"g_all = {r: d(""GROF"", r) for r in {k[1] for k in d.keys(cols={""GROF""})}}"
+capri_mod/pipeline/captrd/dairy_supports.py,146,dairy,for/comprehension over a set,"bas_of = {n: {a: sum(t.get((a, y), 0.0) for y in yrbas) / len(yrbas) for a in {k[0] for k in t}}"
+capri_mod/pipeline/captrd/estimate_nuts2.py,327,bounds,for/comprehension over a set,"acts = [a for a, ww in io if ww == w and nob(a, w) and nob(a, ""LEVL"")]"
+capri_mod/pipeline/captrd/eu_supports.py,232,eu_supports,for/comprehension over a set,"for (r, c, w) in cand:"
+capri_mod/pipeline/captrd/expert_support.py,74,toou,for/comprehension over a set,for c in cols:
+capri_mod/pipeline/captrd/expert_support.py,108,expert,for/comprehension over a set,for k in set(S.ab) | set(S.pc):                                            # l. 489-500 (Rest)
+capri_mod/pipeline/captrd/globiom.py,181,region_map,for/comprehension over a set,"for r, f in fmap:"
+capri_mod/pipeline/captrd/globiom.py,189,region_map,for/comprehension over a set,"for r, f in fmap:"
+capri_mod/pipeline/captrd/globiom.py,200,region_map,for/comprehension over a set,"for r in [r for r, cc in out if cc == c]:"
+capri_mod/pipeline/captrd/globiom.py,284,collect,for/comprehension over a set,for k in set(any_) | set(notany):
+capri_mod/pipeline/captrd/globiom.py,360,collect,for/comprehension over a set,for y in years:                                                            # l. 1599-1606
+capri_mod/pipeline/captrd/globiom.py,369,collect,for/comprehension over a set,for y in years:
+capri_mod/pipeline/captrd/globiom.py,418,mapped,for/comprehension over a set,for w in grm:
+capri_mod/pipeline/captrd/globiom.py,456,factors,for/comprehension over a set,for r in regs:
+capri_mod/pipeline/captrd/globiom.py,463,factors,for/comprehension over a set,for w in rows_m:                                                       # l. 1894-1903
+capri_mod/pipeline/captrd/globiom.py,466,factors,for/comprehension over a set,for w in DOMM_IS_PROD:
+capri_mod/pipeline/captrd/globiom.py,478,factors,for/comprehension over a set,for w in rows_m:                                                               # l. 1919-1927
+capri_mod/pipeline/captrd/globiom.py,486,factors,for/comprehension over a set,"for (c, w) in nonempty:"
+capri_mod/pipeline/captrd/globiom.py,518,factors,for/comprehension over a set,for r in regs:
+capri_mod/pipeline/captrd/globiom.py,519,factors,for/comprehension over a set,for w in {k[2] for k in M if k[0] == r}:
+capri_mod/pipeline/captrd/globiom.py,574,base_factors,for/comprehension over a set,for r in nuts0:
+capri_mod/pipeline/captrd/globiom.py,575,base_factors,for/comprehension over a set,"for (c, w) in proj_cr:"
+capri_mod/pipeline/captrd/globiom.py,580,base_factors,for/comprehension over a set,for c in proj_cols:                                                    # l. 2058-2061
+capri_mod/pipeline/captrd/globiom.py,586,base_factors,for/comprehension over a set,for w in proj_rows:                                                    # l. 2064-2067
+capri_mod/pipeline/captrd/globiom.py,634,base_factors,for/comprehension over a set,"for (r, c, w) in has:                                                          # l. 2131-2140"
+capri_mod/pipeline/captrd/longrun_supports.py,188,supports,for/comprehension over a set,"for (r, c, w) in {(k[0], k[1], k[2]) for k in info if k[3] == ""factorB2000""}:"
+capri_mod/pipeline/captrd/longrun_supports.py,190,supports,for/comprehension over a set,"world = [r for r in {k[0] for k in info} if r.upper() == ""WORLD""]"
+capri_mod/pipeline/captrd/longrun_supports.py,257,supports,for/comprehension over a set,"for (c, w) in pty:"
+capri_mod/pipeline/captrd/longrun_supports.py,279,supports,for/comprehension over a set,"for w in {k[2] for k in info if k[0] == r and k[1] == ""HCOM"" and k[3] == ""share"" and k[4] == ""B2000""}:"
+capri_mod/pipeline/captrd/longrun_supports.py,292,supports,for/comprehension over a set,fill = [y for y in fill_base if ly < y < nx]
+capri_mod/pipeline/captrd/longrun_supports.py,293,supports,for/comprehension over a set,for s3 in series:
+capri_mod/pipeline/captrd/longrun_supports.py,304,supports,for/comprehension over a set,for s3 in {k[:3] for k in L}:
+capri_mod/pipeline/captrd/macro.py,131,inha,for/comprehension over a set,for r in regs:                                                                  # l. 1064-1067
+capri_mod/pipeline/captrd/macro.py,147,inha_pdata,for/comprehension over a set,for y in cur:
+capri_mod/pipeline/captrd/national_supports.py,240,supports,for/comprehension over a set,for t3 in trip:                                                             # l. 171-176
+capri_mod/pipeline/captrd/national_supports.py,244,supports,for/comprehension over a set,for y in bym:
+capri_mod/pipeline/captrd/national_supports.py,255,supports,for/comprehension over a set,for t3 in trip:                                                             # l. 180-194
+capri_mod/pipeline/captrd/national_supports.py,263,supports,for/comprehension over a set,for y in bym:
+capri_mod/pipeline/captrd/national_supports.py,269,supports,for/comprehension over a set,for t3 in {k[:3] for k in nat if k[0] in set(msest)}:                      # l. 197-198
+capri_mod/pipeline/captrd/national_supports.py,271,supports,for/comprehension over a set,"nat[(*t3, base)] = sum(nat[(*t3, y)] for y in bym) / len(bym)"
+capri_mod/pipeline/captrd/national_supports.py,287,supports,for/comprehension over a set,"for (r, c, w) in cand:"
+capri_mod/pipeline/captrd/national_supports.py,310,supports,for/comprehension over a set,"and y in exantet and tr[(r, c, w, y)] == TRUST_NAT for a in cact if (a, w) in pty}     # l. 231-234"
+capri_mod/pipeline/captrd/national_supports.py,353,supports,for/comprehension over a set,"cols = [c for (c, w) in emap if w == ""COMI"" and not is_(c, ""DCOW"")]"
+capri_mod/pipeline/captrd/national_supports.py,409,supports,for/comprehension over a set,"bounds(lu, dcow, [w for (c, w) in emap if c == dcow[0]], exantet, .99, 1.01, src=""pc"")"
+capri_mod/pipeline/captrd/national_supports.py,566,supports,for/comprehension over a set,"for (c, w) in emap for y in exantet if y > 2040 and sp(cs, c, w, y) and bm(cs, c, w)})"
+capri_mod/pipeline/captrd/national_supports.py,649,supports,for/comprehension over a set,"cols = [c for (c, w) in emap if w == ""COMI"" and not is_(c, ""DCOW"")]"
+capri_mod/pipeline/captrd/national_supports.py,659,supports,for/comprehension over a set,"S.apply(tr, {(no, c, ""COMI"", y): TRUST_NAT + 1 for (c, w) in emap if w == ""COMI"" for y in after_t"
+capri_mod/pipeline/captrd/policy.py,58,milk_quotas,for/comprehension over a set,for i in {k[1] for k in q}:                       # l. 31: BL000000 = BE + LU
+capri_mod/pipeline/captrd/policy.py,59,milk_quotas,for/comprehension over a set,for y in {k[2] for k in q}:
+capri_mod/pipeline/captrd/policy.py,235,sugar_beet,for/comprehension over a set,"rb = {r: float(cur.get((r, ""BASM""), 0.0)) for r in runr}"
+capri_mod/pipeline/captrd/policy.py,242,sugar_beet,for/comprehension over a set,for r in runr:
+capri_mod/pipeline/captrd/policy.py,302,_region_value,for/comprehension over a set,"m = {reg: float(v.get((reg, t), 0.0)) for reg in set(w.region)}"
+capri_mod/pipeline/captrd/prepare.py,269,check_and_cor,for/comprehension over a set,"new.append((c, ""ARTIF"", ""LEVL"", ""BASM"", float(sum(art.get(r, 0.0) for a, r in sub if a == c))))"
+capri_mod/pipeline/captrd/prepare.py,309,fill_uvad,for/comprehension over a set,"aggs = [a for a, r in pairs if r == m]"
+capri_mod/pipeline/captrd/prepare.py,310,fill_uvad,for/comprehension over a set,"peers[m] = [r for a in aggs for (a2, r) in pairs if a2 == a and r in msset]"
+capri_mod/pipeline/captrd/prepare.py,316,fill_uvad,for/comprehension over a set,"for rw, t in keys:"
+capri_mod/pipeline/captrd/prepare.py,329,fill_uvad,for/comprehension over a set,"for rw, t in keys:"
+capri_mod/pipeline/captrd/prepare.py,371,clean_regions,for/comprehension over a set,if not as_coded or sum(1 for m in ms if m in sets.srnuts2) == 0:
+capri_mod/pipeline/captrd/prepare.py,507,prep_for_estimation,for/comprehension over a set,"prev = {(r, str(y - 1)): (uv.get((r, str(y - 1)), 0.0), pa.get((r, str(y - 1)), 0.0)) for r in ms}"
+capri_mod/pipeline/captrd/prepare.py,509,prep_for_estimation,for/comprehension over a set,for r in ms:
+capri_mod/pipeline/captrd/requirements.py,91,coefficients,for/comprehension over a set,for q in reqst:
+capri_mod/pipeline/captrd/requirements.py,113,coefficients,for/comprehension over a set,for q in reqst:
+capri_mod/pipeline/captrd/scale_dgagri.py,85,scale,for/comprehension over a set,"for (r, c, w) in {k[:3] for k in keys(P, rest, cols_est, rows_est, set(bas))}:"
+capri_mod/pipeline/captrd/scale_dgagri.py,99,dg_bast,for/comprehension over a set,"for (r, c, w) in {k[:3] for k in keys(D, regs, cs, ws, set(bas))}:"
+capri_mod/pipeline/captrd/scale_dgagri.py,99,scale,for/comprehension over a set,"for (r, c, w) in {k[:3] for k in keys(D, regs, cs, ws, set(bas))}:"
+capri_mod/pipeline/captrd/scale_dgagri.py,112,scale,for/comprehension over a set,"for (r, c, w) in {k[:3] for k in keys(D, rest, {""UVAG""}, rows_est) if k[3] == ""BAST""}:"
+capri_mod/pipeline/captrd/statistics.py,74,statistics,for/comprehension over a set,"for c in set(ex) | set(b5) | set(e8) | {""BASM""}:"
+capri_mod/pipeline/captrd/timesets.py,84,build,for/comprehension over a set,cand = [y for y in exante if y != fst_exante and (y in expostt or y <= fst_exante + 2)]
