@@ -959,6 +959,20 @@
    },
    "catalogue_note": "Ammonia share of mineral N (NH3MIN/MINFER) per region, the factors' source (regional or national) and CAPRI's NH3 total; converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
   },
+  "capri_data/2017/feed/fedtrm_params.csv": {
+   "description": "CAPRI's literal table of the baseline feed calibration's priors, star 3.0: feed/fedtrm_prior_pw.gms's p_FeedAggrPrior (l. 39-59: the expected shares of FeedCons and FeedOth in an animal's dry matter intake, shInAact, and the bounds of the corrections in the priors' rounds, maxCorrUp and maxCorrDown); tools/build/build_fedtrm_params.py; read by capri_mod/feed/equations/fedtrm_prior_pw.py",
+   "kind": "coefficients",
+   "rows": 140,
+   "columns": 5,
+   "units": "U_ratio",
+   "read_by_model": [
+    "capri_mod/feed/equations/fedtrm_prior_pw.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_fedtrm_params (not in the trace yet)"
+   }
+  },
   "capri_data/2017/feed/feed_ration_2017.csv": {
    "description": "the EU feed rations per model region and animal from CAPRI's 2017 regional results (res_17*, dataOut; per head = CAPRI total / the model's herd): ration (kg per head and year, by feed), req (per head and year, by nutrient: ENNE energy units, CRPR kg, DMIN/DMAX kg dry matter), content (per kg fresh feed, by feed and nutrient), price (EUR/kg, by feed), capri_slope and capri_slope_2030 (CAPRI's feed-PMP slopes of pmppar_17* and of the 2030 calibration pmppar_21730, by feed); tools/build/build_feed_ration.py; feed_ration_2017.json until 31 October 2026 (capri_mod/data/nested_tables.py)",
    "kind": "coefficients",
@@ -4899,6 +4913,56 @@
     "builder": "build_ration_trajectory_2030"
    }
   },
+  "capri_data/codes/capri/A.csv": {
+   "description": "CAPRI A: the technologies: the mean T and the high- and low-yield variants T1, T2 (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/AACT.csv": {
+   "description": "CAPRI AACT: the animal activities, the data base's included (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 22,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/ACATTLE.csv": {
+   "description": "CAPRI ACATTLE: the adult cattle activities (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 7,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/BULF.csv": {
+   "description": "CAPRI BULF: the fattened bulls (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/CACT.csv": {
+   "description": "CAPRI CACT: the crop activities, the data base's included (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 48,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/CACT_TO_NGRP.csv": {
    "description": "CAPRI CACT_TO_NGRP: the nutrient group of each crop activity (supply/define_ngrp_sets.gms)",
    "kind": "structure",
@@ -4910,6 +4974,26 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/CALF.csv": {
+   "description": "CAPRI CALF: the calves fattened (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/CALR.csv": {
+   "description": "CAPRI CALR: the calves raised (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/CFACTOR_ARAB.csv": {
@@ -4945,6 +5029,26 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/DCOW.csv": {
+   "description": "CAPRI DCOW: the dairy cows (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/FEED.csv": {
+   "description": "CAPRI FEED: the feeds (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 12,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/FEED_TO_O.csv": {
    "description": "CAPRI's FEED_TO_O: the feed bulks and their products (sets.gms)",
    "kind": "structure",
@@ -4975,6 +5079,86 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/FODDI.csv": {
+   "description": "CAPRI FODDI: the fodder feeds, straw included (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 7,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/FODDIS.csv": {
+   "description": "CAPRI FODDIS: the fodder feeds without straw (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 6,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/FODDO.csv": {
+   "description": "CAPRI FODDO: the fodder outputs (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 7,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/FOUT.csv": {
+   "description": "CAPRI FOUT: the manure outputs (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/FeedAggr.csv": {
+   "description": "CAPRI FeedAggr: the feed aggregates FeedRough, FeedCons, FeedOth, FeedTotal (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 4,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/Feed_FeedAggr.csv": {
+   "description": "CAPRI Feed_FeedAggr: the feeds of each feed aggregate (sets.gms)",
+   "kind": "structure",
+   "rows": 24,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/HEIF.csv": {
+   "description": "CAPRI HEIF: the fattened heifers (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/IO.csv": {
+   "description": "CAPRI IO: the inputs and outputs (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 124,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/MAACT.csv": {
    "description": "CAPRI MAACT(PACT), animal activities in the supply model",
    "kind": "structure",
@@ -4983,6 +5167,16 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/MAACT_TO_REQM.csv": {
+   "description": "CAPRI MAACT_TO_REQM: the requirements of each animal activity (sets.gms)",
+   "kind": "structure",
+   "rows": 72,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/MAP_RR.csv": {
@@ -5016,6 +5210,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/MNRUMI.csv": {
+   "description": "CAPRI MNRUMI: the non-ruminants of the feed calibration (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 4,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/MPACT.csv": {
    "description": "CAPRI MPACT(PACT), production activities in the supply model",
    "kind": "structure",
@@ -5046,6 +5250,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/NRUMI.csv": {
+   "description": "CAPRI NRUMI: the non-ruminants of the requirement functions (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 4,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/NUTS0.csv": {
    "description": "CAPRI NUTS0: the countries (extend_rd_baseline.gms runs the RD money by them)",
    "kind": "structure",
@@ -5074,6 +5288,26 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/PACT_TO_IO.csv": {
+   "description": "CAPRI PACT_TO_IO: the inputs and outputs of each production activity (sets.gms)",
+   "kind": "structure",
+   "rows": 1424,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/PACT_TO_O.csv": {
+   "description": "CAPRI PACT_TO_O: the outputs of each production activity (sets.gms)",
+   "kind": "structure",
+   "rows": 280,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/PERM_NGRP.csv": {
@@ -5170,6 +5404,86 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/REQC.csv": {
+   "description": "CAPRI REQC: the requirements of the feed calibration's deliveries ratio (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/REQMSE.csv": {
+   "description": "CAPRI REQMSE: the equality requirements, energy and protein (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/REQMSN.csv": {
+   "description": "CAPRI REQMSN: the inequality requirements (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 9,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/REQSC.csv": {
+   "description": "CAPRI REQSC: the requirements with a nutrient content per feed (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 17,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/REQSE.csv": {
+   "description": "CAPRI REQSE: the energy requirements (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 5,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/REQSR.csv": {
+   "description": "CAPRI REQSR: the requirements of the requirement functions, the feeds' rows included (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 26,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/REQSR_M.csv": {
+   "description": "CAPRI REQSR_M: the requirements aggregated by supply/aggreg.gms (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 12,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/REQ_FEED.csv": {
+   "description": "CAPRI REQ_FEED: the feeds' rows of p_animReq (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 12,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/RM.csv": {
    "description": "CAPRI RM: the market regions of the global market model, in CAPRI's set order (sets.gms; the market's move onto CAPRI's regions, MARKET_REGIONS_INVENTORY.md stage 1)",
    "kind": "structure",
@@ -5226,6 +5540,26 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/RSEU.csv": {
+   "description": "CAPRI RSEU: the European regions of the regional hierarchy (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 323,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/R_LEVL.csv": {
+   "description": "CAPRI R_LEVL: the regional levels of the baseline feed calibration (feed/fedtrm_cal_pw.gms), in the set's order",
+   "kind": "structure",
+   "rows": 4,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/R_RAGG.csv": {
    "description": "CAPRI R_RAGG: the regions each region belongs to, itself included (policy.gms breaks the premium declarations down along it)",
    "kind": "structure",
@@ -5275,6 +5609,26 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/SUBENE.csv": {
+   "description": "CAPRI SUBENE: the energy requirement's components (feed/feed_decl.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 5,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/S_TACT.csv": {
+   "description": "CAPRI S_TACT: the single, standard technology T (capmod.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 1,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/XX.csv": {
    "description": "CAPRI XX, the market model's products (arm/arm_sets.gms)",
    "kind": "structure",
@@ -5303,6 +5657,16 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/fibreRichFeed.csv": {
+   "description": "CAPRI fibreRichFeed: the fibre-rich feeds (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/landTypesMrk.csv": {

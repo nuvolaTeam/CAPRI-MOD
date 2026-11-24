@@ -8,7 +8,8 @@ step has it: docs/dev/supply_equations_inventory.csv (planned_module). A module 
 written.
 
     module          CAPRI block (supply/supply_model.gms)                                           lines
-    feeding.py      the feeding block: REQSE_, FEDUSE_                                              520-840
+    feeding.py      the feeding block: REQSE_, FEDUSE_; the rows of the feed calibration's model     520-840
+                    m_hpdFeed (NutContFeed_, FeedAggrShare_, FEDUSEA_, FEDUSES_, FEDAGGR_)
     nutrients.py    the fertilising block: the pools (fertDistExcr_, fertDistMine_, fertDistCres_,  870-1279
                     ManureNPK_), NUTNED_
     n_surplus.py    the nutrient surplus: e_EXCRET, e_GASRUNANI, e_ATMOSD, e_CRESID, e_EXPPRD,      1280-1497,

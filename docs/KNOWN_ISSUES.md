@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](dev/KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (36)
+## Open (37)
 
 | # | Issue | Status |
 |---|---|---|
@@ -49,6 +49,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences; sorted 20 November 2026: most are in the accounts only or have no effect in the step; ARTIF held fixed had one (small for the EU, a few thousand ha in some Spanish and French units) | open: ARTIF, the milk for feeding and the yield factors of the crops' N and P terms ported 20 November 2026 (as CAPRI's); the animals' per-head terms ported 21 November 2026 (the members' INPO difference under the Green Deal's input change); fertned's two items left closed 23 November 2026 (the price-driven O_HP needs no port; the residues' variant factor at the moved MANN ported) |
 | [K196](#k196) | The Green Deal's N-surplus dual is below CAPRI's (CAPRI's recovered from its own results): median 0.856 of CAPRI's in the standing check at 9867411 (0.89 at bb3b592), 0.83 at CAPRI's prices; the suckler cows' and the technology shift's remaining gaps follow it | open (21 November 2026) |
 | [K198](#k198) | The assignments refactor's findings for the main line (its inventory of the CAPRI statements the model ports or cites, blocks A0-A6): porting differences in the market supply Hessian, the price transmission, the stop rule, the welfare, the premiums, the Green Deal's regional rules and the accounts, sorted by where they act, not measured; A0's 14 wrong line citations corrected; from the phase's runs, a measured and a cached Hessian moving a run's last digits (1e-5 after the scenario; diagnosed and fixed: the manure value left by the last shock), the thread oversubscription (fixed) and the Hessian step's log (done) | open (updated 24 November 2026) |
+| [K206](#k206) | The ported baseline feed calibration (S3b) ends at a slightly worse local optimum than CAPRI's in five countries (PT, TUR, BG, ES, CZ); every coefficient within 1% of CAPRI's | open (25 November 2026) |
 
 ## Resolved (133)
 
@@ -4307,6 +4308,29 @@ the Western Balkans besides Norway) did not converge.
   NO08). Neither probe met the stop rule in the Green Deal (Spain's maize still moving by 0.60% at the 30th iteration,
   in both).
 - **Status:** fixed (24 November 2026).
+
+<a id="k206"></a>
+### K206: The ported baseline feed calibration at a slightly worse local optimum in five countries (found 25 November 2026)
+
+The port of CAPRI's baseline feed calibration (m_hpdFeed and its driver, capri_mod/feed/equations/fedtrm_mod_pw.py,
+fedtrm_cal_pw.py) was checked on CAPRI's 34 member states and non-EU countries with a calibration file
+(tools/check/check_fedtrm_cal_2030.py, against sim_ini_21730's v_feedInpCoeff). Every feed input coefficient is within
+1% of CAPRI's; within 1e-4 are at least 95% of the cells in 29 of them, and 69% in Portugal, 76% in Turkey, 83% in
+Bulgaria, 91% in Spain and 95% in the Czech Republic (the largest deviation 0.85%, a Greek unit).
+
+The estimation is not convex. Portugal from two starts:
+- from the priors (CAPRI's start without a restart point, fedtrm_cal_pw.gms l. 398-420): objectives PT000000 -5.21868,
+  PT100000 -5.78628;
+- from CAPRI's own solution (as CAPRI's restart from an earlier baseline would start, l. 635-636): -5.21824 and
+  -5.78565, higher, with 77% of the cells within 1e-4 of CAPRI's.
+So the start from the priors ends at a slightly worse local optimum, and CAPRI's point is not exactly a stationary point
+of the port either (IPOPT moves from it). Whether CAPRI's own baseline started from a restart point (a mefed file of an
+earlier baseline, p_fedtrmHasIniPoint) is not known; the material has none.
+
+- **Effect:** the 2030 rations that S4 builds from the port, by at most about 1% per coefficient
+- **In 9t:** -
+- **Status:** **open**. Not a porting error found; IPOPT's local optimum against CONOPT's on a non-convex estimation
+  (the module's departure). A multi-start, as the regional models' warm and jump checks (DEP-18), would be beyond CAPRI.
 
 <a id="k204"></a>
 ### K204: The catch crops' BioFix N on the area above the base share (found 24 November 2026)

@@ -1,0 +1,27 @@
+code,text
+FGRA,Gras
+FMAI,Fodder maize
+FOFA,Fodder other on arable land
+FROO,Fodder root crops
+FCOM,Milk for feeding
+FSGM,Sheep and Goat Milk for feeding
+FSTR,Straw
+FCER,Feed cereals
+FPRO,Feed rich protein
+FENE,Feed rich energy
+FMIL,Feed from milk product
+FOTH,Feed other
+ENNE,Net energy lactation
+CRPR,Crude protein
+LISI,Lysine
+DRMN,Dry matter min
+DRMX,Dry matter max
+FIDI,Fiber digestible
+FILG,Fiber long
+FICO,Fiber dairy cows
+FICT,Fiber cattle
+FISM,Fiber sheep and goat milk
+FISF,Fiber sheep and goat fattening
+TotFAT,maximum of total fat consumption
+WADR,Livestock drinking water
+WASE,Livestock service water

@@ -266,6 +266,146 @@ COMMENT ON TABLE capri_cact_to_ngrp IS 'CAPRI CACT_TO_NGRP: the nutrient group o
 CREATE TABLE capri_feed_trd (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_feed_trd IS 'CAPRI FEED_TRD: the traded feed bulks, in CAPRI''s set order (global/fromimpact/sets.gms)';
 
+-- file: capri_data/codes/capri/FEED.csv
+CREATE TABLE capri_feed (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_feed IS 'CAPRI FEED: the feeds (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/FODDI.csv
+CREATE TABLE capri_foddi (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_foddi IS 'CAPRI FODDI: the fodder feeds, straw included (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/FODDIS.csv
+CREATE TABLE capri_foddis (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_foddis IS 'CAPRI FODDIS: the fodder feeds without straw (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/FeedAggr.csv
+CREATE TABLE capri_feedaggr (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_feedaggr IS 'CAPRI FeedAggr: the feed aggregates FeedRough, FeedCons, FeedOth, FeedTotal (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/MNRUMI.csv
+CREATE TABLE capri_mnrumi (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_mnrumi IS 'CAPRI MNRUMI: the non-ruminants of the feed calibration (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/REQC.csv
+CREATE TABLE capri_reqc (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_reqc IS 'CAPRI REQC: the requirements of the feed calibration''s deliveries ratio (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/REQSC.csv
+CREATE TABLE capri_reqsc (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_reqsc IS 'CAPRI REQSC: the requirements with a nutrient content per feed (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/REQMSE.csv
+CREATE TABLE capri_reqmse (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_reqmse IS 'CAPRI REQMSE: the equality requirements, energy and protein (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/REQMSN.csv
+CREATE TABLE capri_reqmsn (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_reqmsn IS 'CAPRI REQMSN: the inequality requirements (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/REQSR.csv
+CREATE TABLE capri_reqsr (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_reqsr IS 'CAPRI REQSR: the requirements of the requirement functions, the feeds'' rows included (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/REQSR_M.csv
+CREATE TABLE capri_reqsr_m (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_reqsr_m IS 'CAPRI REQSR_M: the requirements aggregated by supply/aggreg.gms (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/REQ_FEED.csv
+CREATE TABLE capri_req_feed (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_req_feed IS 'CAPRI REQ_FEED: the feeds'' rows of p_animReq (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/S_TACT.csv
+CREATE TABLE capri_s_tact (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_s_tact IS 'CAPRI S_TACT: the single, standard technology T (capmod.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/A.csv
+CREATE TABLE capri_a (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_a IS 'CAPRI A: the technologies: the mean T and the high- and low-yield variants T1, T2 (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/ACATTLE.csv
+CREATE TABLE capri_acattle (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_acattle IS 'CAPRI ACATTLE: the adult cattle activities (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/BULF.csv
+CREATE TABLE capri_bulf (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_bulf IS 'CAPRI BULF: the fattened bulls (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/CALF.csv
+CREATE TABLE capri_calf (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_calf IS 'CAPRI CALF: the calves fattened (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/CALR.csv
+CREATE TABLE capri_calr (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_calr IS 'CAPRI CALR: the calves raised (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/DCOW.csv
+CREATE TABLE capri_dcow (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_dcow IS 'CAPRI DCOW: the dairy cows (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/HEIF.csv
+CREATE TABLE capri_heif (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_heif IS 'CAPRI HEIF: the fattened heifers (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/NRUMI.csv
+CREATE TABLE capri_nrumi (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_nrumi IS 'CAPRI NRUMI: the non-ruminants of the requirement functions (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/SUBENE.csv
+CREATE TABLE capri_subene (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_subene IS 'CAPRI SUBENE: the energy requirement''s components (feed/feed_decl.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/REQSE.csv
+CREATE TABLE capri_reqse (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_reqse IS 'CAPRI REQSE: the energy requirements (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/fibreRichFeed.csv
+CREATE TABLE capri_fibrerichfeed (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_fibrerichfeed IS 'CAPRI fibreRichFeed: the fibre-rich feeds (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/FOUT.csv
+CREATE TABLE capri_fout (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_fout IS 'CAPRI FOUT: the manure outputs (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/IO.csv
+CREATE TABLE capri_io (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_io IS 'CAPRI IO: the inputs and outputs (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/FODDO.csv
+CREATE TABLE capri_foddo (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_foddo IS 'CAPRI FODDO: the fodder outputs (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/CACT.csv
+CREATE TABLE capri_cact (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_cact IS 'CAPRI CACT: the crop activities, the data base''s included (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/AACT.csv
+CREATE TABLE capri_aact (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_aact IS 'CAPRI AACT: the animal activities, the data base''s included (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/RSEU.csv
+CREATE TABLE capri_rseu (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_rseu IS 'CAPRI RSEU: the European regions of the regional hierarchy (sets.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/R_LEVL.csv
+CREATE TABLE capri_r_levl (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_r_levl IS 'CAPRI R_LEVL: the regional levels of the baseline feed calibration (feed/fedtrm_cal_pw.gms), in the set''s order';
+
+-- file: capri_data/codes/capri/Feed_FeedAggr.csv
+CREATE TABLE capri_feed_feedaggr (feed VARCHAR NOT NULL, feedaggr VARCHAR NOT NULL, PRIMARY KEY (feed, feedaggr));
+COMMENT ON TABLE capri_feed_feedaggr IS 'CAPRI Feed_FeedAggr: the feeds of each feed aggregate (sets.gms)';
+
+-- file: capri_data/codes/capri/MAACT_TO_REQM.csv
+CREATE TABLE capri_maact_to_reqm (maact VARCHAR NOT NULL, reqm VARCHAR NOT NULL, PRIMARY KEY (maact, reqm));
+COMMENT ON TABLE capri_maact_to_reqm IS 'CAPRI MAACT_TO_REQM: the requirements of each animal activity (sets.gms)';
+
+-- file: capri_data/codes/capri/PACT_TO_IO.csv
+CREATE TABLE capri_pact_to_io (pact VARCHAR NOT NULL, io VARCHAR NOT NULL, PRIMARY KEY (pact, io));
+COMMENT ON TABLE capri_pact_to_io IS 'CAPRI PACT_TO_IO: the inputs and outputs of each production activity (sets.gms)';
+
+-- file: capri_data/codes/capri/PACT_TO_O.csv
+CREATE TABLE capri_pact_to_o (pact VARCHAR NOT NULL, o VARCHAR NOT NULL, PRIMARY KEY (pact, o));
+COMMENT ON TABLE capri_pact_to_o IS 'CAPRI PACT_TO_O: the outputs of each production activity (sets.gms)';
+
 -- file: capri_data/codes/capri/MS_RU.csv
 CREATE TABLE capri_ms_ru (
     ms VARCHAR NOT NULL REFERENCES capri_rall (code),

@@ -1,0 +1,23 @@
+code,text
+DCOL,Dairy cows production activity low yield
+DCOH,Dairy cows  production activityhigh yield
+BULL,Male adult fattening activity low final weight
+BULH,Male adult fattening activity high final weight
+HEIL,Heifers fattening activity low final weight
+HEIH,Heifers fattening activity high final weight
+SCOW,Suckler cows production activity
+HEIR,Heifers raising activity
+CAMF,Calves male fattening activity
+CAFF,Calves female fattening activity
+CAMR,Calves male raising activity
+CAFR,Calves female raising activity
+PIGF,Pig fattening activity
+SOWS,Sows for piglet production
+SHGM,Sheep and goats activity for milk production
+SHGF,Sheep and goats activity for fattening
+HENS,Laying hens production activity
+POUF,Poultry fattening activity
+DCOW,Dairy cows production activity
+BULF,Male adult fattening activity
+HEIF,Heifers fattening activity
+OANI,Other animals activity

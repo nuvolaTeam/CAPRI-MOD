@@ -57,6 +57,18 @@ SELECT DISTINCT animal_bulk FROM feed_livestock_feed_coef
 WHERE split_part(animal_bulk, '_', 1) NOT IN (SELECT code FROM model_activities WHERE kind = 'animal')
    OR split_part(animal_bulk, '_', 2) NOT IN ('cereals', 'protein', 'energy');
 
+-- file: capri_data/2017/feed/fedtrm_params.csv
+CREATE TABLE feed_fedtrm_params (
+    symbol VARCHAR NOT NULL CHECK (symbol IN ('p_FeedAggrPrior')),
+    key1 VARCHAR NOT NULL REFERENCES capri_maact (code),   -- the animal activity
+    key2 VARCHAR NOT NULL REFERENCES capri_feedaggr (code), -- the feed aggregate
+    key3 VARCHAR NOT NULL CHECK (key3 IN ('shInAact', 'maxCorrUp', 'maxCorrDown')),
+    value DOUBLE NOT NULL CHECK (value >= 0),
+    PRIMARY KEY (symbol, key1, key2, key3)
+);
+COMMENT ON TABLE feed_fedtrm_params IS 'CAPRI''s literal table of the baseline feed calibration''s priors, star 3.0: feed/fedtrm_prior_pw.gms''s p_FeedAggrPrior (l. 39-59: the expected shares of FeedCons and FeedOth in an animal''s dry matter intake, shInAact, and the bounds of the corrections in the priors'' rounds, maxCorrUp and maxCorrDown); tools/build/build_fedtrm_params.py; read by capri_mod/feed/equations/fedtrm_prior_pw.py';
+INSERT INTO value_units VALUES ('feed_fedtrm_params', 'value', 'U_ratio', 'capri', 'shares of the dry matter intake and correction factors, CAPRI''s table as written (feed/fedtrm_prior_pw.gms l. 39-59)');
+
 -- file: capri_data/2017/feed/req_or_man_params.csv
 CREATE TABLE feed_req_or_man_params (
     symbol VARCHAR NOT NULL CHECK (symbol IN ('p_NutContManureKgM3', 'p_addExcrPerkgMilk', 'p_carcassShare', 'p_startWgt', 'p_reqfcnlim', 'p_LUUnits', 'p_pigsReqHighWgt', 'p_pigsReqLowWgt', 'p_NutContFeedRef', 'p_convFactEnergyUnitsToEnne', 'p_coeffEnergyForGrowth')),

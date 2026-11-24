@@ -12,6 +12,10 @@ REQSN_ (dry matter, fibre; l. 521-556), MAXSHR_ (l. 640-662) and MINSHR_ (l. 667
 writes REQSE_ only; feed/ration.py's calibration of the base rations uses them (CAPRI's feed PMP,
 pmp_terms/define_const_pmp_param.gms), before the simulation.
 
+Written since 24 November 2026: the rows of the baseline feed calibration's model m_hpdFeed (feed/fedtrm_mod_pw.gms
+l. 294-300, capri_mod/feed/equations/fedtrm_mod_pw.py) in CAPRI's form, unscaled: REQSE_trim, NutContFeed_ (l. 693-705),
+FeedAggrShare_ (l. 751-755), FEDUSE_row, FEDUSEA_ (l. 807-811), FEDUSES_ (l. 815-819) and FEDAGGR_ (l. 823-827).
+
 Written since 21 November 2026 (KNOWN_ISSUES K93): SupplementPerc_ (l. 608-633; ghgAbatement), the limit of the ration's
 fat with linseed (a column of the regional model, supplement_effects.csv), in the total form below; its slack's penalty in
 GHG_Mit_Cost_ is mitigation.py GHG_Mit_Cost_supplementSlack.
@@ -178,3 +182,129 @@ def SupplementPerc_(fat_feeds_per_head, inv_DRMA_days, ShrOfDM, v_Miti_heads, v_
     which its activities share)."""
     return ((fat_feeds_per_head * inv_DRMA_days - v_supplementPerc - v_supplementSlack) * v_actLevl * inv_X0
             + ShrOfDM * v_Miti_heads * inv_X0)
+
+
+# --- the rows of the baseline feed calibration's model m_hpdFeed (feed/fedtrm_mod_pw.gms l. 294-300;
+#     capri_mod/feed/equations/fedtrm_mod_pw.py), in CAPRI's form: unscaled, with p_trimFeed = 1
+
+def REQSE_trim(v_animReq, p_animProdDays, ration):
+    r"""REQSE_(r, a, A, REQMSE) (l. 561-602) as m_hpdFeed has it: the requirement a variable (p_trimFeed = 1,
+    feed/fedtrm_cal_pw.gms l. 32) times the days, minus the ration's supply (the caller's SUM over the feeds with a
+    maximum share of v_feedInpCoeff x the member state's content, DATA(MSACT, REQMSE, FEED)), = 0. CAPRI's GAMS:
+    REQSE_'s docstring.
+
+    Departures from CAPRI: none. The terms of %ghgAbatement% are not in the row: CAPRI's baseline runs with it off
+    (capmod/set_global_variables.gms l. 215; the policy files of the GHG scenarios set it on)."""
+    return v_animReq * p_animProdDays - ration
+
+
+def NutContFeed_(v_NutContFeed, nut, drma):
+    r"""NutContFeed_(r, a, A, REQMSE, FeedAggr) (l. 693-705): the aggregate's content of the requirement per kg dry
+    matter, v_NutContFeed = nut / (drma + 0.0001), with nut the SUM over the aggregate's feeds of v_feedInpCoeff x the
+    member state's content of the requirement and drma the same with its dry matter (the caller's sums), as
+    v_NutContFeed - nut / (drma + 0.0001) = 0.
+
+    CAPRI's GAMS, NutContFeed_ (l. 690-705):
+
+        *
+        *   --- nutrition content in total feed of animal category (energy and protein per kg dry matter: for calibration)
+        *
+             NutContFeed_(RUNR,MAACT,A,REQMSE,FeedAggr %addtimedim%) $ (   p_NutContFeed(RUNR,MAACT,A,REQMSE,FeedAggr,"MIN" %addtimedim%)
+                                                          or  p_NutContFeed(RUNR,MAACT,A,REQMSE,FeedAggr,"MAX" %addtimedim%)
+                                                          or  p_nutContFeed(RUNR,MAACT,A,REQMSE,FeedAggr,"MEAN" %addtimedim%)) ..
+        *
+             v_NutContFeed(RUNR,MAACT,A,REQMSE,FeedAggr %addtimedim%) =E=
+        *           nutrition in feed diveded by dry matter of feed
+                    SUM((Feed_FeedAggr(FEED,FeedAggr)),
+                             v_feedInpCoeff(RUNR,MAACT,A,FEED  %addtimedim%)
+                                 * SUM(R_RAGG(RUNR,MSACT),%data%(MSACT,REQMSE,FEED,%timedim%)))
+
+                    / (SUM((Feed_FeedAggr(FEED,FeedAggr)),
+                             v_feedInpCoeff(RUNR,MAACT,A,FEED  %addtimedim%)
+                                 * SUM(R_RAGG(RUNR,MSACT),%data%(MSACT,"DRMA",FEED,%timedim%))) + 0.0001);
+
+    Departures from CAPRI: none."""
+    return v_NutContFeed - nut / (drma + 0.0001)
+
+
+def FeedAggrShare_(v_feedInpCoeff_aggr, v_feedInpCoeff_FeedTotal, v_FeedAggrShare):
+    r"""FeedAggrShare_(r, a, A, FeedAggr) (l. 751-755): the aggregate's share of the dry matter intake (both
+    v_feedInpCoeff of the aggregates, in dry matter by FEDAGGR_), as v_feedInpCoeff(FeedAggr) / (v_feedInpCoeff(
+    "FeedTotal") + 1E-12) - v_FeedAggrShare = 0.
+
+    CAPRI's GAMS, FeedAggrShare_ (l. 749-755):
+
+        *        --- calculate share of concentrate and roughage (for calibration)
+        *
+             FeedAggrShare_(RUNR,MAACT,A,FeedAggr %addtimedim%) $ (  p_animReq(RUNR,MAACT,A,"DRMA" %addtimedim%)) ..
+        *
+                      v_feedInpCoeff(RUNR,MAACT,A,FeedAggr %addtimedim%) / (v_feedInpCoeff(RUNR,MAACT,A,"FeedTotal" %addtimedim%) + 1E-12)
+
+                                         =E= v_FeedAggrShare(RUNR,MAACT,A,FeedAggr %addtimedim%) ;
+
+    Departures from CAPRI: none."""
+    return v_feedInpCoeff_aggr / (v_feedInpCoeff_FeedTotal + 1E-12) - v_FeedAggrShare
+
+
+def FEDUSE_row(use_t, v_lossQuant_STRA, v_lossQuant_COMF, v_feedQuantReg):
+    r"""FEDUSE_(r, FEED) (l. 789-803) as m_hpdFeed has it: the feed use of the animals (the caller's SUM of FEDUSE_'s
+    terms, v_feedInpCoeff x v_actLevl in t) / 1000, plus the straw's losses for FSTR and COMF's for FCOM (the caller
+    passes 0 for the other feeds), minus v_feedQuantReg (1000 t), = 0. CAPRI's GAMS: FEDUSE_'s docstring.
+
+    Departures from CAPRI: none."""
+    return use_t / 1000. + v_lossQuant_STRA + v_lossQuant_COMF - v_feedQuantReg
+
+
+def FEDUSEA_(use_units, v_feedInpCoeff_RUNAGG, v_actLevl_RUNAGG):
+    r"""FEDUSEA_(RUNAGG, a, A, FEED) (l. 807-811): the units' feed use of the animal (the caller's SUM over RUNR with a
+    maximum share of v_feedInpCoeff x v_actLevl) equals the aggregate's, as use_units minus the aggregate's
+    coefficient times its herd = 0.
+
+    CAPRI's GAMS, FEDUSEA_ (l. 805-811):
+
+        * ---------- recover average coefficient (needed in calibration step) ------------------------
+        *                                                                                                 $ (v_feedInpCoeff.UP(RUNAGG,MAACT,A,FEED) NE 0)   $ capreg
+            FEDUSEA_(RUNAGG,MAACT,A,FEED %addtimedim%) $ (p_maxFeedShare(RUNAGG,MAACT,A,FEED %addtimedim%)
+                                             $ (SUM(RUNR, 1.) NE 1.)  $ ((not FODDI(FEED)) or (SAMEAS(FEED,"FSTR")) )) ..
+        *
+              SUM( RUNR $ p_maxFeedShare(RUNR,MAACT,A,FEED %addtimedim%), v_feedInpCoeff(RUNR,MAACT,A,FEED %addtimedim%)*v_actLevl%over_time%(RUNR,MAACT,A %addtimedim%))
+                 =E= v_feedInpCoeff(RUNAGG,MAACT,A,FEED %addtimedim%)*v_actLevl%over_time%(RUNAGG,MAACT,A %addtimedim%);
+
+    Departures from CAPRI: none."""
+    return use_units - v_feedInpCoeff_RUNAGG * v_actLevl_RUNAGG
+
+
+def FEDUSES_(v_feedQuantReg, p_feedQuant):
+    r"""FEDUSES_(r, FEED) (l. 815-819): the regional feed use fixed at the given quantity, as v_feedQuantReg -
+    p_feedQuant = 0.
+
+    CAPRI's GAMS, FEDUSES_ (l. 813-819):
+
+        * ---------- fix sectoral feed use or use of non-tradeable feed (needed in calibration step) --
+        *
+            FEDUSES_(RUNR,FEED %addtimedim%) $  (p_feedQuant(RUNR,FEED %addtimedim%) GT 1.E-6)..
+        *
+              v_feedQuantReg(RUNR,FEED %addtimedim%)
+
+            =E= p_feedQuant(RUNR,FEED %addtimedim%);
+
+    Departures from CAPRI: none."""
+    return v_feedQuantReg - p_feedQuant
+
+
+def FEDAGGR_(v_feedInpCoeff_aggr, drma):
+    r"""FEDAGGR_(r, a, A, FeedAggr) (l. 823-827): the aggregate's coefficient is its feeds' dry matter (the caller's
+    SUM over the aggregate's feeds of v_feedInpCoeff x the member state's DRMA), as v_feedInpCoeff(FeedAggr) - drma = 0.
+
+    CAPRI's GAMS, FEDAGGR_ (l. 821-827):
+
+        * ---------- aggregate to roughage, concentrate feed, etc (in DRMA, needed in calibration step) ------------------------
+        *
+            FEDAGGR_(RUNR,MAACT,A,FeedAggr %addtimedim%) $ p_technFact(RUNR,MAACT,"LEVL",A) ..
+        *
+              v_feedInpCoeff(RUNR,MAACT,A,FeedAggr %addtimedim%)
+                =E= SUM(Feed_FeedAggr(Feed,FeedAggr), v_feedInpCoeff(RUNR,MAACT,A,FEED %addtimedim%)
+                                                    * SUM(R_RAGG(RUNR,MSACT),%data%(MSACT,"DRMA",FEED,%timedim%)));
+
+    Departures from CAPRI: none."""
+    return v_feedInpCoeff_aggr - drma

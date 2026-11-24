@@ -25,16 +25,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-#: CAPRI's sets (sets.gms, feed/feed_decl.gms)
-DCOW = ("DCOL", "DCOH")
-CALF = ("CAMF", "CAFF")
-CALR = ("CAMR", "CAFR")
-BULF = ("BULL", "BULH")
-HEIF = ("HEIL", "HEIH")
-NRUMI = ("PIGF", "SOWS", "POUF", "HENS")
+from capri_mod.data.definitions import capri_set
+
+#: CAPRI's sets (sets.gms, feed/feed_decl.gms; capri_data/codes/capri, in CAPRI's order)
+DCOW = capri_set("DCOW")
+CALF = capri_set("CALF")
+CALR = capri_set("CALR")
+BULF = capri_set("BULF")
+HEIF = capri_set("HEIF")
+NRUMI = capri_set("NRUMI")
 #: the manure rows (FOUT) and those 'man' mode assigns together (curRows: FOUT less MANN, l. 117-121)
-FOUT = ("MANN", "MANP", "MANK")
-curRows = ("MANP", "MANK")
+FOUT = capri_set("FOUT")
+curRows = tuple(r for r in FOUT if r != "MANN")
 
 
 @dataclass

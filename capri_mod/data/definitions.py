@@ -355,6 +355,20 @@ def _load_capri_set(name):
         return tuple(r["code"] for r in csv.DictReader(f))
 
 
+def capri_set(name):
+    """One of CAPRI's one-dimensional sets (capri_data/codes/capri/<name>.csv, tools/build/build_code_lists.py), its
+    codes in CAPRI's order."""
+    return _load_capri_set(name)
+
+
+def capri_pairs(name):
+    """One of CAPRI's two-dimensional sets (capri_data/codes/capri/<name>.csv), its pairs in the file's order."""
+    import csv
+    from pathlib import Path
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "capri" / f"{name}.csv", newline="") as f:
+        return tuple(tuple(r) for r in list(csv.reader(f))[1:])
+
+
 #: CAPRI's traded feed bulks (FEED_TRD), in CAPRI's order
 CAPRI_FEED_TRD = _load_capri_set("FEED_TRD")
 #: CAPRI's permanent crop groups for the fertiliser distribution (supply/define_ngrp_sets.gms PERM_NGRP: GRAS, PERM)

@@ -3437,6 +3437,206 @@
     ]
    }
   },
+  "capri_a": {
+   "file": "capri_data/codes/capri/A.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI A: the technologies: the mean T and the high- and low-yield variants T1, T2 (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_aact": {
+   "file": "capri_data/codes/capri/AACT.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI AACT: the animal activities, the data base's included (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_acattle": {
+   "file": "capri_data/codes/capri/ACATTLE.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI ACATTLE: the adult cattle activities (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_bulf": {
+   "file": "capri_data/codes/capri/BULF.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI BULF: the fattened bulls (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_cact": {
+   "file": "capri_data/codes/capri/CACT.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI CACT: the crop activities, the data base's included (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_cact_to_ngrp": {
    "file": "capri_data/codes/capri/CACT_TO_NGRP.csv",
    "declared_in": "00_codes.sql",
@@ -3513,6 +3713,86 @@
      "build_young_animals_2030"
     ],
     "checks": [],
+    "tests": []
+   }
+  },
+  "capri_calf": {
+   "file": "capri_data/codes/capri/CALF.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI CALF: the calves fattened (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_calr": {
+   "file": "capri_data/codes/capri/CALR.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI CALR: the calves raised (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": []
    }
   },
@@ -3684,6 +3964,129 @@
     "tests": []
    }
   },
+  "capri_dcow": {
+   "file": "capri_data/codes/capri/DCOW.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI DCOW: the dairy cows (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_feed": {
+   "file": "capri_data/codes/capri/FEED.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI FEED: the feeds (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_supports.py"
+    ]
+   }
+  },
+  "capri_feed_feedaggr": {
+   "file": "capri_data/codes/capri/Feed_FeedAggr.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI Feed_FeedAggr: the feeds of each feed aggregate (sets.gms)",
+   "columns": [
+    {
+     "name": "feed",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "feedaggr",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "feed",
+    "feedaggr"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_feed_to_o": {
    "file": "capri_data/codes/capri/FEED_TO_O.csv",
    "declared_in": "00_codes.sql",
@@ -3805,6 +4208,86 @@
     "tests": []
    }
   },
+  "capri_feedaggr": {
+   "file": "capri_data/codes/capri/FeedAggr.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI FeedAggr: the feed aggregates FeedRough, FeedCons, FeedOth, FeedTotal (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_fibrerichfeed": {
+   "file": "capri_data/codes/capri/fibreRichFeed.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI fibreRichFeed: the fibre-rich feeds (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_fodcrp": {
    "file": "capri_data/codes/capri/FODCRP.csv",
    "declared_in": "00_codes.sql",
@@ -3840,6 +4323,246 @@
     "model": [],
     "builders": [],
     "checks": [],
+    "tests": []
+   }
+  },
+  "capri_foddi": {
+   "file": "capri_data/codes/capri/FODDI.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI FODDI: the fodder feeds, straw included (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_foddis": {
+   "file": "capri_data/codes/capri/FODDIS.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI FODDIS: the fodder feeds without straw (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_foddo": {
+   "file": "capri_data/codes/capri/FODDO.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI FODDO: the fodder outputs (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_fout": {
+   "file": "capri_data/codes/capri/FOUT.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI FOUT: the manure outputs (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_heif": {
+   "file": "capri_data/codes/capri/HEIF.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI HEIF: the fattened heifers (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_io": {
+   "file": "capri_data/codes/capri/IO.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI IO: the inputs and outputs (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": []
    }
   },
@@ -4117,6 +4840,47 @@
     "tests": []
    }
   },
+  "capri_maact_to_reqm": {
+   "file": "capri_data/codes/capri/MAACT_TO_REQM.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI MAACT_TO_REQM: the requirements of each animal activity (sets.gms)",
+   "columns": [
+    {
+     "name": "maact",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "reqm",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "maact",
+    "reqm"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_map_rr": {
    "file": "capri_data/codes/capri/MAP_RR.csv",
    "declared_in": "00_codes.sql",
@@ -4219,6 +4983,46 @@
     "tests": [
      "capri_mod/pipeline/tests/test_captrd_supports.py"
     ]
+   }
+  },
+  "capri_mnrumi": {
+   "file": "capri_data/codes/capri/MNRUMI.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI MNRUMI: the non-ruminants of the feed calibration (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
    }
   },
   "capri_mpact": {
@@ -4361,6 +5165,46 @@
     "origins": "CAPRI",
     "builder": "build_code_lists",
     "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/CFACTOR_ARAB.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/DACT_TO_PACT.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEDACT_TO_FODDI.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/MSAGG.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/NUTS0.csv; $REFERENCE/sets/simini_21730/NUTS1A.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/PSDPAY_<CC>.csv; $REFERENCE/sets/simini_21730/PSDPAY_cscs.csv; $REFERENCE/sets/simini_21730/PSDPAY_vcs.csv; $REFERENCE/sets/simini_21730/PSG_TO_A.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/REGAGGP.csv; $REFERENCE/sets/simini_21730/REGEU1015.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/R_RAGG.csv; $REFERENCE/sets/simini_21730/SRNUTS1.csv; $REFERENCE/sets/simini_21730/SRNUTS2.csv; $REFERENCE/sets/simini_21730/SRNUTS2_EXT.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_nrumi": {
+   "file": "capri_data/codes/capri/NRUMI.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI NRUMI: the non-ruminants of the requirement functions (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
    },
    "notes": [],
    "read_by": {
@@ -4753,6 +5597,92 @@
     ]
    }
   },
+  "capri_pact_to_io": {
+   "file": "capri_data/codes/capri/PACT_TO_IO.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI PACT_TO_IO: the inputs and outputs of each production activity (sets.gms)",
+   "columns": [
+    {
+     "name": "pact",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "io",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "pact",
+    "io"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_pact_to_o": {
+   "file": "capri_data/codes/capri/PACT_TO_O.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI PACT_TO_O: the outputs of each production activity (sets.gms)",
+   "columns": [
+    {
+     "name": "pact",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "o",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "pact",
+    "o"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/check_requirements_2030.py",
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_expert_support.py",
+     "capri_mod/pipeline/tests/test_captrd_longrun_supports.py"
+    ]
+   }
+  },
   "capri_perm_ngrp": {
    "file": "capri_data/codes/capri/PERM_NGRP.csv",
    "declared_in": "00_codes.sql",
@@ -5034,6 +5964,46 @@
     "tests": []
    }
   },
+  "capri_r_levl": {
+   "file": "capri_data/codes/capri/R_LEVL.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI R_LEVL: the regional levels of the baseline feed calibration (feed/fedtrm_cal_pw.gms), in the set's order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_r_ragg": {
    "file": "capri_data/codes/capri/R_RAGG.csv",
    "declared_in": "00_codes.sql",
@@ -5186,6 +6156,326 @@
     "origins": "CAPRI",
     "builder": "build_code_lists",
     "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/CFACTOR_ARAB.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/DACT_TO_PACT.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEDACT_TO_FODDI.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/MSAGG.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/NUTS0.csv; $REFERENCE/sets/simini_21730/NUTS1A.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/PSDPAY_<CC>.csv; $REFERENCE/sets/simini_21730/PSDPAY_cscs.csv; $REFERENCE/sets/simini_21730/PSDPAY_vcs.csv; $REFERENCE/sets/simini_21730/PSG_TO_A.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/REGAGGP.csv; $REFERENCE/sets/simini_21730/REGEU1015.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/R_RAGG.csv; $REFERENCE/sets/simini_21730/SRNUTS1.csv; $REFERENCE/sets/simini_21730/SRNUTS2.csv; $REFERENCE/sets/simini_21730/SRNUTS2_EXT.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_req_feed": {
+   "file": "capri_data/codes/capri/REQ_FEED.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI REQ_FEED: the feeds' rows of p_animReq (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_reqc": {
+   "file": "capri_data/codes/capri/REQC.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI REQC: the requirements of the feed calibration's deliveries ratio (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_reqmse": {
+   "file": "capri_data/codes/capri/REQMSE.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI REQMSE: the equality requirements, energy and protein (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_reqmsn": {
+   "file": "capri_data/codes/capri/REQMSN.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI REQMSN: the inequality requirements (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_reqsc": {
+   "file": "capri_data/codes/capri/REQSC.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI REQSC: the requirements with a nutrient content per feed (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_reqse": {
+   "file": "capri_data/codes/capri/REQSE.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI REQSE: the energy requirements (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_reqsr": {
+   "file": "capri_data/codes/capri/REQSR.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI REQSR: the requirements of the requirement functions, the feeds' rows included (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_reqsr_m": {
+   "file": "capri_data/codes/capri/REQSR_M.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI REQSR_M: the requirements aggregated by supply/aggreg.gms (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
    },
    "notes": [],
    "read_by": {
@@ -5538,6 +6828,86 @@
     ]
    }
   },
+  "capri_rseu": {
+   "file": "capri_data/codes/capri/RSEU.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI RSEU: the European regions of the regional hierarchy (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_s_tact": {
+   "file": "capri_data/codes/capri/S_TACT.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI S_TACT: the single, standard technology T (capmod.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_srnuts1": {
    "file": "capri_data/codes/capri/SRNUTS1.csv",
    "declared_in": "00_codes.sql",
@@ -5651,6 +7021,46 @@
     "origins": "CAPRI",
     "builder": "build_code_lists",
     "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/CFACTOR_ARAB.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/DACT_TO_PACT.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEDACT_TO_FODDI.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/MSAGG.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/NUTS0.csv; $REFERENCE/sets/simini_21730/NUTS1A.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/PSDPAY_<CC>.csv; $REFERENCE/sets/simini_21730/PSDPAY_cscs.csv; $REFERENCE/sets/simini_21730/PSDPAY_vcs.csv; $REFERENCE/sets/simini_21730/PSG_TO_A.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/REGAGGP.csv; $REFERENCE/sets/simini_21730/REGEU1015.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/R_RAGG.csv; $REFERENCE/sets/simini_21730/SRNUTS1.csv; $REFERENCE/sets/simini_21730/SRNUTS2.csv; $REFERENCE/sets/simini_21730/SRNUTS2_EXT.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_subene": {
+   "file": "capri_data/codes/capri/SUBENE.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI SUBENE: the energy requirement's components (feed/feed_decl.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
    },
    "notes": [],
    "read_by": {
@@ -22399,6 +23809,96 @@
      "build_noneu_feed_nq"
     ],
     "checks": [],
+    "tests": []
+   }
+  },
+  "feed_fedtrm_params": {
+   "file": "capri_data/2017/feed/fedtrm_params.csv",
+   "declared_in": "25_feed.sql",
+   "layout": [],
+   "comment": "CAPRI's literal table of the baseline feed calibration's priors, star 3.0: feed/fedtrm_prior_pw.gms's p_FeedAggrPrior (l. 39-59: the expected shares of FeedCons and FeedOth in an animal's dry matter intake, shInAact, and the bounds of the corrections in the priors' rounds, maxCorrUp and maxCorrDown); tools/build/build_fedtrm_params.py; read by capri_mod/feed/equations/fedtrm_prior_pw.py",
+   "columns": [
+    {
+     "name": "symbol",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "key1",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "key2",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "key3",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "symbol",
+    "key1",
+    "key2",
+    "key3"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "key1"
+     ],
+     "references": "capri_maact",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "key2"
+     ],
+     "references": "capri_feedaggr",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(symbol IN ('p_FeedAggrPrior'))",
+    "(key3 IN ('shInAact', 'maxCorrUp', 'maxCorrDown'))",
+    "(\"value\" >= 0)"
+   ],
+   "units": [
+    {
+     "item": "value",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "shares of the dry matter intake and correction factors, CAPRI's table as written (feed/fedtrm_prior_pw.gms l. 39-59)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_fedtrm_params (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/feed/equations/fedtrm_prior_pw.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": []
    }
   },
@@ -62934,12 +64434,12 @@
   }
  ],
  "code_data": {
-  "capri/keep": 959,
+  "capri/keep": 991,
   "capri-mod/keep": 1,
   "literature/keep": 11,
-  "numerical/keep": 37,
+  "numerical/keep": 39,
   "physical/keep": 15,
-  "technical/keep": 37
+  "technical/keep": 39
  },
  "other_notes": {}
 }

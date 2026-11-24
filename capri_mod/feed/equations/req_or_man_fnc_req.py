@@ -21,22 +21,21 @@ from dataclasses import dataclass, field
 
 from capri_mod.feed.equations.req_or_man_fnc import (BULF, CALF, CALR, DCOW, HEIF, NRUMI, DATA_AGGR_YCOW,  # noqa: F401
                                                      p_stockingRate)
+from capri_mod.data.definitions import capri_set
 
-#: CAPRI's sets (sets.gms; feed/feed_decl.gms)
-SUBENE = ("NEL", "NEM", "NEA", "NEP", "NEG")
-REQSE = ("ENNE", "ENMR", "ENMC", "ENMH", "ENMP")
-FEED = ("FGRA", "FMAI", "FOFA", "FROO", "FCOM", "FSGM", "FSTR", "FCER", "FPRO", "FENE", "FMIL", "FOTH")
-REQSR = FEED + ("ENNE", "CRPR", "LISI", "DRMN", "DRMX", "FIDI", "FILG", "FICO", "FICT", "FISM", "FISF", "TotFAT",
-                "WADR", "WASE")
-REQSC = ("ENNE", "CRPR", "LISI", "DRMN", "DRMX", "FIDI", "FILG", "FICO", "FICT", "FISM", "FISF", "TotFAT", "DRMA",
-         "ENMR", "ENMC", "ENMH", "ENMP")
-REQMSE = ("ENNE", "CRPR")
-FODDI = ("FGRA", "FMAI", "FOFA", "FROO", "FCOM", "FSGM", "FSTR")
-fibreRichFeed = ("FOFA", "FGRA", "FMAI")
-ACATTLE = ("DCOL", "DCOH", "BULL", "BULH", "HEIL", "HEIH", "HEIR")
-FeedAggr = ("FeedRough", "FeedCons", "FeedOth", "FeedTotal")
+#: CAPRI's sets (sets.gms; feed/feed_decl.gms; capri_data/codes/capri, in CAPRI's order)
+SUBENE = capri_set("SUBENE")
+REQSE = capri_set("REQSE")
+FEED = capri_set("FEED")
+REQSR = capri_set("REQSR")
+REQSC = capri_set("REQSC")
+REQMSE = capri_set("REQMSE")
+FODDI = capri_set("FODDI")
+fibreRichFeed = capri_set("fibreRichFeed")
+ACATTLE = capri_set("ACATTLE")
+FeedAggr = capri_set("FeedAggr")
 #: CAPRI's technologies A (sets.gms): the mean technology and the high- and low-yield variants
-A_ALL = ("T", "T1", "T2")
+A_ALL = capri_set("A")
 
 
 @dataclass
