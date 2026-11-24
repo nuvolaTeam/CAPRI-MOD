@@ -249,6 +249,72 @@ def bounds_cases(E, EB, S, data_all, read_csv, res_dir, _P):
                 lo, up = EB.bounds(D, B, E.REQS_EFF ** (y - E.REQS_YEAR0), artif_as_coded=False)
                 out["regions"][(r, y)] = (hexd(lo), hexd(up))
     out.update(nuts2_bounds_cases(E, EB, S, B, case, mp, by_reg, tab_reg, year_tab, read_csv, _P, hexd))
+    out["ms_retries"] = ms_retries_cases(E, EB, B, case, by_reg, hexd)
+    return out
+
+
+MS_RETRY_STATES = ("AT000000", "BG000000", "DE000000", "DK000000", "ES000000", "PL000000")
+MS_RETRY_YEARS = (2018, 2030, 2050)
+MS_RETRY_TRIES = (3, 6, 24, 26, 29, 31)     # nRepeatedSolves around the thresholds 5, 25 and 30
+
+
+def ms_retries_cases(E, EB, B, case, by_reg, hexd):
+    """estimate_nlp's bound-widening after an infeasible solve (estimate_ms.gms l. 252-420, comi_bounds.gms,
+    release_comi_yields.gms, biofuel_bounds.gms): _widen, _oind_ocro and _again from estimate_bounds.bounds' bounds at
+    a synthetic solve state, for each try count of MS_RETRY_TRIES, at MS_RETRY_STATES and MS_RETRY_YEARS, plain and
+    with the extra inputs of bounds_cases. The state: the positions the bounds, the data and the supports name; the
+    levels the bounds' midpoints (0 where one is infinite); every third bounded position at its lower bound and the next
+    at its upper; OIND and OCRO at their lower level bounds without production; expert calorie bounds (INCE) for half
+    the activities with calorie data. SHA-256 of the exact bounds."""
+    from capri_mod.pipeline.captrd import estimate_nlp as NLP
+    out = {}
+    for ms in MS_RETRY_STATES:
+        for y in MS_RETRY_YEARS:
+            for extra in (False, True):
+                D = case(ms, y, ms, extra=extra)
+                eff = E.REQS_EFF ** (y - E.REQS_YEAR0)
+                lo, up = EB.bounds(D, B, eff, artif_as_coded=False)
+                g = by_reg[ms]
+                g = g[(g.t == "nObs") & (g.value.astype(float) != 0)]
+                nobs = set(zip(g.col, g.row))
+                if extra:
+                    nobs |= {("OIND", "LEVL"), ("OCRO", "LEVL"), ("GROF", "OIND")}
+                ince = sorted(k for k in nobs if k[1] == "INCE")
+                expertlo = dict(D.res.get("expertlo", {}))
+                expertup = dict(D.res.get("expertup", {}))
+                for i, k in enumerate(ince):
+                    if i % 2 == 0:
+                        expertlo[k], expertup[k] = 0.5, 2.0
+                        lo.setdefault(k, 1.0)
+                        up.setdefault(k, 3.0)
+                if extra:
+                    for c in ("OIND", "OCRO"):
+                        lo.setdefault((c, "LEVL"), 2.0)
+                p = E.Point(V={}, nobs=nobs, bas={}, basm={}, const={}, slope={}, pdata=D.res["p_data"],
+                            coco=set(D.res["coco"]), support=D.res["Support"], lo={}, up={}, year=y,
+                            exante_d=D.exante_d)
+                keys = sorted(set(lo) | set(up) | nobs | set(D.res["Support"]))
+                x, at_lo, at_up = [], {}, {}
+                for i, k in enumerate(keys):
+                    a_, b_ = lo.get(k, -float("inf")), up.get(k, float("inf"))
+                    v = 0.5 * a_ + 0.5 * b_ if abs(a_) < float("inf") and abs(b_) < float("inf") else 0.0
+                    if k in (("OIND", "LEVL"), ("OCRO", "LEVL")) and k in lo:
+                        v = lo[k]
+                        at_lo[k] = v
+                    elif k[0] == "GROF" and k[1] in ("OIND", "OCRO"):
+                        v = 0.0
+                    elif i % 3 == 0 and k in lo:
+                        at_lo[k] = lo[k]
+                    elif i % 3 == 1 and k in up:
+                        at_up[k] = up[k]
+                    x.append(v)
+                basm = lambda c, w, D=D: D.pd(c, w, "BASM")                                     # noqa: E731
+                for ntry in MS_RETRY_TRIES:
+                    lo_, up_ = dict(lo), dict(up)
+                    NLP._widen(ntry, keys, x, at_lo, at_up, lo_, up_, B, p, expertlo, expertup, basm)
+                    NLP._oind_ocro(ntry, keys, x, at_lo, lo_)
+                    NLP._again(ntry, D, B, lo_, up_, expertup, at_lo, at_up)
+                    out[(ms, y, extra, ntry)] = _digest(hexd(lo_), hexd(up_))
     return out
 
 

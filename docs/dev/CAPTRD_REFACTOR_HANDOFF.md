@@ -15,21 +15,23 @@ Nothing is merged into dev; the main session decides the merge.
   fix_est.gms, comi_bounds.gms, biofuel_bounds.gms), 81 functions in equations/fix_est.py, comi_bounds.py,
   biofuel_bounds.py, estimate_ms.py. C4b: the NUTS 2 estimation's bounds and its retries' (estimate_nuts2.bounds,
   _open_bounds, _grid_again), 54 functions in equations/estimate_nuts2.py, est_nuts2_grid_openbound.py,
-  est_nuts2_grid.py.
+  est_nuts2_grid.py. C4c: the member state's bound-widening after an infeasible solve (estimate_nlp._widen,
+  _oind_ocro, _again, _release_comi), 22 functions in equations/estimate_ms.py and release_comi_yields.py. The
+  bound statements of estimate_bounds, estimate_nuts2 and estimate_nlp are now all named functions.
 - **Checked:** exactly (hex floats and CasADi text) against the starting commit 9c69ab7b, with
   tools/check/captrd_parity_dump.py on CAPTRD's own Step 2 points; the pipeline tests unchanged; the static checks.
 - **Not checked here, and why:** a full CAPTRD run's outputs. The published raw set has no capreg_base (CAPREG's base
   year for the EU's countries), which the estimation's bounds, the NLP and the NUTS 2 solves read: those 14 pipeline
   tests fail or error here, before and after the refactor alike. The main session's environment has it: run the
   pipeline's outputs bit for bit there against 9c69ab7b before the merge (section 4).
-- **Next:** C4c the NLP's bound-widening (estimate_nlp: estimate_ms.gms l. 222-420, release_comi_yields.gms,
-  biofuel_bounds' relaxations), C5 the supports and trends modules (an inventory first), then C6, the sort of the 81
-  hash-order places, **a commit of its own** (it changes last digits).
+- **Next:** C5 the supports and trends modules (an inventory first), then C6, the sort of the 81 hash-order places,
+  **a commit of its own** (it changes last digits).
 - **Findings (listed, not fixed: a move changes nothing):** est_nuts2_grid.gms l. 121 (the set-aside levels' floor) is
   inside `if (p_farmModelisRunning eq 1, ...)`: CAPRI applies it to the farm types only, the port to the NUTS 2 regions
   too; CAPRI's `/ 1000` is the port's `x 0.001` in the NUTS 2 production and area bounds (may differ in the last
   digit); CAPRI's statements on ARTIF divide by the member state's base unconditionally, the port only where it is
-  nonzero.
+  nonzero; estimate_ms.gms l. 302, 315's share for the secondary products' processing yields is CAPRI's 0.9 - .89
+  (0.010000000000000009 in floating point), the port's 0.01.
 - **The main session's notes (24 November):** moves must leave results identical, and the pipeline's outputs are to be
   compared bit for bit against the starting commit; the 81 places' sort is a separate commit, not mixed with moves; the
   heavy pipeline tests reach about 5.4 GB each, run them one at a time on a small container; the CAPTRD-MOD stage 2e
@@ -45,10 +47,12 @@ Nothing is merged into dev; the main session decides the merge.
 | 0132882e | tools | tools/check/captrd_parity_dump.py (the check), tools/build/build_reference_from_raw.py (the reference from the published Parquet), tools/check/scan_set_order.py (step 1's scan) and docs/dev/captrd_set_order_places.csv (its 81 CAPTRD places), this handoff | the parity tool reproduces the dumps of C1-C3; the builder reproduces the reference built for them (section 3) |
 | f0942fc1 | C4 | estimate_bounds.bounds, _comi, _biofuel: every statement's arithmetic a function named after the bounded symbol (V_EstV_IO, V_EstV_NoYieldDrop, p_data_LEVL_facs, V_EstV_COMI, ...) quoting its lines; bounds() keeps the domains, the loops and the statements' order. The constants STD_UP, LO_SUPPORT_SHARE, WINE_PLANTING, MAX_YIELDS, CERE_MAX_YIELD, GRAS_MAX(_NL), STRA_MAX and _phys went into the functions; REF_MILK_YIELD and PROC_YIELDS (captrd.gms's parameters) stay. The expert bounds' citation corrected: estimate_ms.gms l. 159-162 (the port's l. 146-151 is the aglinkTightLink block, off); the member state's own bounds l. 78-162 | the bounds at every member state and year with both readings of ARTIF's bound (680 cases), at three member states with synthetic data reaching the branches the reference does not (6), and at the NUTS 2 regions of AT, DE, ES, IR (198): 2.2 million bounds, identical in value and order; 99% of the bound code reached |
 | 8480e8cc | C4b | estimate_nuts2.bounds (estimate_nuts2.gms l. 92-400), _open_bounds (est_Nuts2_grid_openbound.gms l. 40-292) and _grid_again (est_nuts2_grid.gms l. 53-121): each statement's arithmetic a function (V_EstV_up_LEVL, V_EstV_GROF with the shared _grof_sums and _gmul, V_EstV_lo_coef, V_EstV_SUGB_LEVL, ...); the callers keep the domains, the loops and the order. Constants that were arithmetic went into the functions; those that are conditions (FEED_FIX_TRIES, NYD_OPEN_TRIES, REQS_TRIES, LEVL_TRIES_OPEN, UAAR_TRIES_OPEN, LEVL_OPEN_FLOOR, PROD_OPEN_TRIES, RSET_LO_MIN, SUGB_FROM, SUGB_TRUST) and the sets (MEAT_EGGS, LOSF_EXTRA) stay. The openbound citations corrected (the port's l. 40-50, 53-61, ... 202-210 were another version's; the true lines in each function) | estimate_nuts2.bounds at the regions of AT, DE, ES, IR in three years, with and without a sugar quota, regional experts and a milk quota (24 cases), and _open_bounds + _grid_again from those bounds at a synthetic solve state for five try counts (84 cases, every threshold crossed): identical (SHA-256 of the exact bounds and levels); 99% of the new modules reached |
+| (C4c commit) | C4c | estimate_nlp._widen (estimate_ms.gms l. 256-321), _oind_ocro (l. 335-346), _again (l. 328-418) and _release_comi (release_comi_yields.gms l. 24-45): 19 functions appended to equations/estimate_ms.py (V_EstV_lo_widen, V_EstV_lo_INCE_try, V_EstV_UAAR_again, ...) and 3 in equations/release_comi_yields.py; the callers keep the binding bounds, the conditions and the order. LEVL_UP_FAC, LEVL_LO_FAC, WIDEN_*, PRCY_FLOOR, PRCY_RANGE, INCE_STEP, COMI_STEP, LOSF_UP / LOSF_LO and EB_* went into the functions; the try thresholds (LEVL_TRIES, OIND_OCRO_TRIES, BIOFUEL_TRIES) stay; their citations corrected (l. 256, 335, 376-378) | the four functions from estimate_bounds.bounds' bounds at a synthetic solve state (every third bounded position at its lower bound, the next at its upper, OIND and OCRO at theirs without production, expert calorie bounds) for six try counts around 5, 25 and 30, at six member states in three years, plain and with bounds_cases' extra inputs (216 cases): identical; 99% of the new functions reached (the one line left a bound kind no caller passes) |
 
 The pipeline tests (`python -m pytest -q -p no:randomly -n 0 capri_mod/pipeline/tests`, about 4.5 minutes here):
-at edb882ca **51 passed, 21 skipped, 7 failed, 7 errors**, at C4 **53 passed**, at C4b **55 passed**, and the rest
-the same; at 9c69ab7b 43 passed of 78, the same skips, failures and errors (C1 added 5 tests, C2 1, C3 2, C4 2, C4b 2, in
+at edb882ca **51 passed, 21 skipped, 7 failed, 7 errors**, at C4 **53 passed**, at C4b **55 passed**, at C4c **56
+passed**, and the rest the same; at 9c69ab7b 43 passed of 78, the same skips, failures and errors (C1 added 5 tests, C2 1,
+C3 2, C4 2, C4b 2, C4c 1, in
 capri_mod/pipeline/tests/test_captrd_equations.py). Every failure and error is
 `capreg_base/17/<CC>.csv.gz missing` (test_captrd_estimate_ms's step2 checks for DK, AT, ES, IT, NL, PL, NO;
 estimate_bounds, estimate_nlp and estimate_nuts2's solves).
@@ -88,7 +92,7 @@ estimate_bounds, estimate_nlp and estimate_nuts2's solves).
    capri_sources/reference to the checkout's (the package finds its reference next to itself).
 3. `PYTHONPATH=../captrd_ref python tools/check/captrd_parity_dump.py ref.pkl` (the checkout's tool, the worktree's
    package: the tool is not in 9c69ab7b), `PYTHONPATH=. python tools/check/captrd_parity_dump.py new.pkl`, then
-   `python tools/check/captrd_parity_dump.py --compare ref.pkl new.pkl`: IDENTICAL, 16 parts. About five minutes
+   `python tools/check/captrd_parity_dump.py --compare ref.pkl new.pkl`: IDENTICAL, 17 parts. About five minutes
    each: run the two dumps one after the other (two at once ran out of memory here).
 4. The pipeline tests one at a time (`-n 0`), the counts of section 1 plus the block's new tests.
 5. The static checks: tools/check/check_gams_quotes.py with `--expect supply/supply_model.gms=5557 --expect
@@ -103,8 +107,8 @@ its BAS; BSY BAS x 1.05; EXTRA_DATA / EXTRA_RES add, at three member states, the
 the tests pass it. The NUTS 2 part (nuts2_bounds_cases) runs estimate_nuts2.bounds for those regions, the member
 state's result its stored step3, and then the retries at a synthetic solve state (the bounds' midpoints as levels,
 every third bounded position at its lower bound, the next at its upper, every fifth with a multiplier); it keeps the
-SHA-256 of each region's exact bounds (the whole would be 570 MB). For a block outside these (C4c, C5) the tool is
-extended first with that block's functions at given points; coverage (`python -m coverage run ...`) shows what the
+SHA-256 of each region's exact bounds (the whole would be 570 MB). The member state's retries (ms_retries_cases) do
+the same from estimate_bounds.bounds' bounds. For a block outside these (C5) the tool is extended first with that block's functions at given points; coverage (`python -m coverage run ...`) shows what the
 inputs reach.
 
 ## 4. What this container cannot check
@@ -112,17 +116,12 @@ inputs reach.
 - **The pipeline's outputs bit for bit** (the main session's first note). A CAPTRD-MOD run needs CAPREG's base data
   for the EU's countries (capreg_base/17), which the published set does not hold. Before the merge, in an environment
   with it: run the pipeline at 9c69ab7b and at the branch's head with the same PYTHONHASHSEED and compare the outputs
-  with tools/check/compare_pickles_exact.py (`--rtol 0`) or byte for byte. C1-C4b change no arithmetic and no order of
+  with tools/check/compare_pickles_exact.py (`--rtol 0`) or byte for byte. C1-C4c change no arithmetic and no order of
   evaluation, so the outputs should be identical under any one seed.
 - The 14 pipeline tests of section 1 (the same reason), and the FAO aggregates' parts (FAO_agg not published).
 
 ## 5. Next blocks
 
-- **C4c: the NLP's bound-widening.** estimate_nlp.py (531 lines): the member state's retries after an infeasible
-  solve (estimate_ms.gms l. 222-420), _release_comi (release_comi_yields.gms, which estimate_nuts2._grid_again also
-  calls), the biofuel relaxations; as C4 and C4b (V_EstV_<what> returning the bound, None where a statement leaves it
-  as it is), one module per GAMS file; the check the parity tool extended at synthetic solve states as
-  nuts2_bounds_cases does.
 - **C5: the supports and trends.** biofuel_trends (778 lines), national_supports (695), globiom (696), aglink (845),
   eu_supports (539), prepare (679), longrun_supports, dairy_supports, final_supports and the rest (the GAMS file each
   cites is in its docstring). Start with an inventory of their GAMS statements (as docs/dev/assignments_inventory.csv),

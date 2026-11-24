@@ -121,3 +121,17 @@ def test_the_nuts2_retries():
     assert OB.V_EstV_lo_LEVL_open(1.0, True) == 0.9 and OB.V_EstV_lo_LEVL_open(5.0e-6, False) == 0.0
     assert GR.V_EstV_up_GROF_tries(100.0, 5) == 100.0 * 1.05 ** 5
     assert GR.V_EstV_SUGB_LEVL(50.0, 60.0, 55.0, 70000.0) == (50.0 / 70.0, 60.0 / 70.0, 55.0 / 70.0)
+
+
+def test_the_bound_widening_after_an_infeasible_solve():
+    from capri_mod.pipeline.captrd.equations import estimate_ms as EM
+    from capri_mod.pipeline.captrd.equations import release_comi_yields as RC
+    assert EM.V_EstV_up_LEVL_try(3.0) == 6.0 and EM.V_EstV_lo_LEVL_try(3.0) == 1.5
+    # 90% of the bound's size, at least 0.001; 1% for PRCY of the secondary products
+    assert EM.V_EstV_lo_widen(10.0, False) == 10.0 - 9.0 and EM.V_EstV_up_widen(10.0, True) == 10.0 + max(0.001, 0.1)
+    assert EM.V_EstV_lo_widen(0.0, False) == -0.001
+    assert EM.V_EstV_lo_widen_floor(-float("inf"), 50.0, True) == 0.5     # GAMS's MAX(0, -inf, .01 x support)
+    assert EM.V_EstV_lo_INCE_try(100.0, 10) == 100.0 * (1 - 1.0e-4) ** 10
+    assert EM.V_EstV_UAAR_again(1000.0, 13) == (1000.0 * 0.998 ** 13, 1000.0)
+    assert RC.V_EstV_up_COMI_release(7000.0, 6) == 7000.0 * (1 + 6.0e-4) ** 6
+    assert RC.V_EstV_LOSF_COMI_release(2.0, 3.0, 7) == (2.0 * 0.995 ** 7, 3.0 * 1.005 ** 7)
