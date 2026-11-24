@@ -24,6 +24,7 @@ docs/dev/MARKET_EQUATION_REFACTOR_PLAN.md sections 2 and 4 with the plan's chang
 | A2 | the premium rules: capri_mod/policy/equations/, one module per CAPRI file (policy.py, prmcut.py, aggreg_ppepay.py, implement_bps.py, mtr_until2013.py, calc_mtr_top.py, calc_mtr.py, extend_rd_baseline.py, cap_2014_2020.py, cap_2013_2020_transfers.py, cap_2013_2020_vcs.py, cap_2013_2020_cndp.py, def_policy.py, def_endcut.py, def_no_policy.py, nordicaid.py; _gams.py: GAMS's EPS, NA, $-conditions), 104 functions; called by policy/declared.py, premium_cut.py, premiums.py, mtr.py, bps.py, rd.py, cap14_premiums.py, nordic_aid.py, norway.py and supply/entitlements.py. The literal values data read (section 8 of the plan); the 120 inventory rows "moved in A2" | the functions' tests (capri_mod/tests/test_assignments_a2.py) and the moved modules' (test_bps, test_declared, test_mtr, test_premiums, test_premium_cut, test_premium_baseline_2030, test_rd, test_nordic_aid, test_norway, test_entitlement_money); the premium chain's outputs for every EU unit identical, bit for bit and in order (section 7); the five-unit Green Deal run (NO060000, FI130000, FR720000, PL510000, DE210000) and the coupled-support check (tools/run/run_vcs_2030.py --regions, the same five) identical; the full suite at 24a69fd8 (section 7) |
 | A4 | the coupling's and the market's assignments: capri_mod/coupling/equations/ (new: price_forecast.py, the stop rule; define_stepweights.py; simu_calibration_to_supply.py; sol_simy.py), capri_mod/market/equations/ (welfare.py extended: the GL money metric, the processing's and the feed industry's profits; new: sol_market.py, set_start_val.py, def_biofuel_params.py; manuremarket/simu_manure_market.py extended), capri_mod/supply/equations/impose_upper_bound_on_elasticity.py; called by utils/capri_stop.py, coupling/price_step.py, bridge.py, young_animals.py, manure.py, reporting.py, market/welfare.py, demand.py, market_bounds.py, biofuel.py and supply/capri_pmp.py. 35 inventory rows "moved in A4" | the functions' tests (capri_mod/tests/test_assignments_a4.py) and the moved modules' (test_capri_stop, test_welfare, test_manure_pool_nlp, test_norway_market, test_biofuel_ad, test_demand_ad, test_trade_ad, test_market_layers, test_capri.py's PMP tests); the stop rule old and new on random tables (300 runs of 20 steps: identical verdicts, changes and drift); the five-unit Green Deal run (NL230000, RO020000, NO060000, DE210000, ES420000) identical. No full suite (the project lead, 23 November 2026) |
 | A5 | the supply side's assignments, after merging dev at 565669aa (K196, DEP-21 closed; DEP-10 item 1b): capri_mod/supply/equations/greendeal/ (new: conventional_io.py, organic_io.py, organic_area.py, load_organic_targets.py, landscape.py, minfert_redu_by_crop.py, surptot.py), supply/equations/ (new: set_fert_priors.py, define_objc.py, define_greening_limits.py, define_manure_trade_costs.py, define_const_pmp_param.py, prep_cal.py, prep_sim_luc.py; extended: ghgmiti.py, define_inputs.py, set_supply_bounds.py), projection/equations/breeding.py, market/equations/set_prices.py and welfare.py, coupling/equations/price_forecast.py, policy/equations/def_endcut.py and market/equations/manuremarket/simu_manure_market.py (the rows of two blocks); called by supply/policy.py, supply_module.py, fertilisation.py, abatement.py, livestock.py, land.py, entitlements.py, fert/inner_fert_dist.py, feed/ration.py, policy/endotech.py, environmental/nitrogen.py, coupling/price_step.py, manure.py, market/welfare.py and model.py. 92 rows "moved in A5"; rd_logic.gms left (section 9) | the functions' tests (capri_mod/tests/test_assignments_a5.py); the five-unit Green Deal run (DE210000, ES420000, FR520000, NL230000, IT120000) identical to the run at A5's start (8d5d2818, dev merged); the full-EU Green Deal run identical to dev's 565669aa (the phase's start with the main line's changes) at `--rtol 0` with the Hessian read from the cache in both (a measured Hessian moves the run's last digits: section 9); the full suite (section 9) |
+| A6 | policy/rd_logic.gms (the project lead, 24 November 2026): capri_mod/policy/equations/rd_logic.py (new, 22 functions: the money summed up, the land partition and its shares, FADN completed, the ceilings and their split by farm type, the LFA, Natura 2000 and agri-environment rates, the heavy animals' weights, the scaling); called by policy/rd.py's rd_declarations, its comments citing rd_logic.gms by line. 42 rows "moved in A6" (section 10) | the functions' tests (capri_mod/tests/test_assignments_a6.py) and test_rd.py; rd_declarations' whole output equal to the unchanged code's at `--rtol 0`, in the same order and to the bit (section 10); the five-unit Green Deal run (NO060000, FI130000, FR720000, PL510000, DE210000) PENDING |
 
 A0 approved by the project lead (23 November 2026; the plan's section 8): A1 and A3 one block with A1's five units;
 in A2 only the rules become functions, the literal values "data read: <the CSV and its builder>" (3 rows of
@@ -307,8 +308,8 @@ file); a CAPRI name on a citing line can match a statement the code does not por
   welfare total, the entitlement limit, the fertiliser slack's bounds, ghgMiti.gms l. 552-565 A1 deferred). 28 of them
   are copies, constant bounds, flags or sets kept where they are with the status saying so.
 - **Left to move**: policy/rd_logic.gms (file row, "A2; context"): rd.py's rd_declarations ports its steps 5-10 in
-  about 330 lines without line citations, so its statements need the file read against the code; for the main session
-  to schedule (a block of its own).
+  about 330 lines without line citations, so its statements need the file read against the code. Moved in A6 (the
+  project lead, 24 November 2026; section 10).
 - **Reclassified**: supply/prep_sim.gms l. 253-255 (ISET's technology factor) "not ported" (the ISET column is
   substituted by SETA_'s r / (1 - r)); supply/calibrate_supply.gms l. 446-478 (the market supply Hessian's rows)
   "not ported" (measured by finite differences); fert/ferttrm_years.gms l. 284-295 and set_fert_priors.gms l. 297-306
@@ -392,3 +393,36 @@ file); a CAPRI name on a citing line can match a statement the code does not por
   supply solve 82 s instead of 257 s (the market phase's run) and the Hessian 1,351 s instead of 2,518 s. Whether the
   results depend on the thread count is not checked here: both runs of A5's full-EU comparison ran with the limits. For the main session: set the three limits before NumPy
   is first imported (the entry points or capri_mod/__init__.py) and log them in the Hessian step's start line.
+
+## 10. What A6 found (for the main line; nothing fixed)
+
+- **Moved**: policy/rd_logic.gms, read against rd.py's rd_declarations: 22 functions in
+  capri_mod/policy/equations/rd_logic.py, each quoting its statement; rd_declarations keeps its loops and calls
+  them, its comments now citing rd_logic.gms by line (the file was cited without lines: 5 rows; now 57). The
+  inventory: 42 rows "moved in A6", 18 of them kept in the caller's loop with the status saying so (the region and
+  year sets, the application types perLevl, the default agri-environment rate, the livestock units' copies, Sweden's
+  expert constants and copy); 8 "not ported" (the technology factors, l. 237-244, 330-334, 392-393: supply/techn_mix.py's
+  prem_diff_share; article 68's 2010 payments, l. 413-425); 1 "data read" (rd_sweden_expert.csv); 6 context (a
+  declaration, the loops' ends, the option kill). 1,158 rows in all, none without a status.
+- **The gate**: rd_declarations' whole output (2,607 declarations and ceilings, 16,705 entitlement weights) at 2007,
+  2010, 2013, 2014, 2017, 2020, 2025, 2030 and at 2030 with Praha's levels dropped, from the unchanged code (a worktree
+  at aa274e10) and the moved one: equal at `--rtol 0`, every dict in the same order, the rates equal to the bit. The
+  output does not depend on Python's hash seed (seeds 0 and 7 equal), though the measures of a scheme are a set.
+- **Code data**: the literals of the moved statements (2000 EUR, 1.5) are the functions' own, as in A2; the status rows
+  re-keyed: rd.py's AE_RATE_MAX to rd_logic.py's p_premDataE_ae (l. 270) and p_premDataE_scaled (l. 319),
+  SCALE_OVER_CEILING to p_premDataE_scaled; EXTENSIVE_SHARE's row dropped (the scan does not list p_entlWght1_heavy's
+  0.5). AE_DEFAULT_RATE and SE_EXPERT_RATE stay in rd.py (constants assigned in its loops).
+- **Citation fixed** (comments only): rd.py's docstring cited the technology factors as "rd_logic l. 235-241,
+  340-346"; they are l. 237-244, 330-334 and 392-393.
+- **Porting differences** (in the functions' docstrings):
+  - rd_logic.gms l. 99-100: a member state without levels at the call takes its NUTS 2 regions' sum too; the regions'
+    types (l. 88-92) not ported.
+  - l. 108-109: the shares kept apart from the areas (CAPRI overwrites the areas with them).
+  - l. 155-159: the scheme's farm types' euros summed (CAPRI multiplies by each type's share in turn; one farm type per
+    scheme in rd_sets.csv, so the same).
+  - l. 255-256: p_aeLfa computed for "Tot" too (not used by the rates).
+  - l. 315-316: the scaling factor 0 where the payment is not above 0 (CAPRI keeps the sum, then 0).
+- **An error path moved** (not reached by the data): the share of FADN's hectares outside LFA (l. 166-172) is now
+  divided inside the regions' loop, as the euros' share was; a member state with hectares only in its "Total" farm
+  type would have raised a division by zero before even without a ceiling, now only with one.
+

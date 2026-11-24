@@ -53,6 +53,7 @@ of results; a newer CAPRI release.
 | A3 | The baseline projection rules | projection/prices.py, projection_module.py, trajectory.py, reconcile.py, captrd_import.py | those A0 finds; the modules cite capmod/load_base_data_and_trends.gms, supply/prep_sim.gms, envind/breeding.gms, fert/calc_nexport.gms (the yield and input rules of capmod/define_inputs.gms and shift_yields.gms are partly in supply/equations/fertned.py already) |
 | A4 | The coupling's and the market's assignments | coupling/price_step.py, hessian.py, bridge.py, young_animals.py, feed.py, manure.py (what the P block left), reporting.py; market/welfare.py, market_bounds.py, the assignments of market/supply.py, demand.py, feed.py, bilateral.py not moved in M1-M5 | capmod/define_stepWeights.gms, price_forecast.gms, supply/calibrate_supply.gms, arm/simu_calibration_to_supply.gms, arm/set_start_val.gms, widen_bounds.gms, reports/welfare.gms, reports/sol_simy.gms |
 | A5 | The rest, after the main line's current fixes (K196, DEP-21, DEP-10, DEP-13; the main session says when) | policy/greendeal.py, supply/policy.py, policy/endotech.py, fert/inner_fert_dist.py, fert/npk.py, supply/abatement.py, supply/supply_module.py, supply/livestock.py, supply/land.py, supply/fertilisation.py, feed/ration.py, data/loaders.py, model.py | pol_input/greendeal/*.gms (conventional_io, organic_io, pesticides, landscape, minfert_redu_*), envind/ghgMiti.gms, cover_crops.gms, tillage.gms, ammo_tech.gms, low_n_feed.gms, fert/set_fert_priors.gms, fert/endoManAvail.gms, supply/prep_sim.gms, arm/set_prices.gms l. 43-89 |
+| A6 | policy/rd_logic.gms, left by A2 and A5 (the project lead, 24 November 2026: "go on with rd_logic.gms") | policy/rd.py's rd_declarations (its steps 5-10, about 330 lines without line citations) | policy/rd_logic.gms |
 
 The order inside the phase may change where code is shared; each block's commit says which statements moved and which
 gate it passed. A0 may move a module from one block to another (it is the inventory that decides).
@@ -127,3 +128,12 @@ A0 approved (docs/dev/assignments_inventory.csv, docs/dev/ASSIGNMENTS_REFACTOR_H
 
 No full suite after A4: it runs once at the end, before the phase's merge (with the full-EU run after A5). A4's gate is
 its functions' and moved modules' tests and the five-unit Green Deal run.
+
+## 10. Block A6 (24 November 2026)
+
+The project lead asked for policy/rd_logic.gms after A5 ("go on with rd_logic.gms"): its statements as functions
+of capri_mod/policy/equations/rd_logic.py, called by rd.py's rd_declarations. Its gate: rd_declarations' whole
+output (every region, scheme and entitlement weight at eight years and with Praha's levels dropped) equal to the
+unchanged code's at --rtol 0, in the same order and to the bit, under two hash seeds; the functions' tests and
+test_rd.py; the five-unit Green Deal run on A2's units. No full-EU run: the chain's output is the gate, the run
+only uses it.
