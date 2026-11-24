@@ -340,7 +340,12 @@ file); a CAPRI name on a citing line can match a statement the code does not por
   - welfare.gms l. 872-885: the market's agents' components (the supply models' added by coupling/reporting.py).
 - **Citations**: the two A0 listed in supply/policy.py were corrected by the main line (merged); two stale "citation
   wrong" rows updated; the two in runlog.py (capmod.gms l. 81, 1425-1428) are in no block's files, left to the main
-  session.
+  session. Corrected on 24 November 2026 (the project lead: "go on with the runlog.py citations"), comments only:
+  runlog.py's caplog lines are capmod.gms l. 75, 203, 1235, 1391-1392, 1664 (not 81, 229, 1276, 1427-1428, 1705),
+  capmod/report_supply_model.gms l. 304 (not 302), arm/simu_market.gms l. 121-123, 280-298 and 280-282 (not 122-124,
+  283-301 and 283-285); the same drift in model.py, CAPRI's last-step market warning, arm/simu_market.gms l. 289-300
+  (not 288-301). Checked against star 3.0's lines (the drift of 2-41 lines looks like another CAPRI copy's). The
+  inventory: no "citation wrong" row left; the 9 caplog lines' new rows context only (1,164 rows).
 - **The full-EU Green Deal run** (the thread limits below; runs/asg/): dev's 565669aa (eu_ref, its Hessian read from
   the cache the run before the container's restart measured) against A5's head 27789968 (eu_new, its Hessian
   measured: the cache key holds the supply code, below) differed in 78,105 values at `--rtol 0` (75,608 at 1e-10;

@@ -1347,7 +1347,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         # (arm/simu_calibration_to_supply.gms:360-368). (Until 8 November 2026 the "supply" form measured it after the
         # baseline, when a scenario needed it: the decision of 28 October 2026, superseded by CAPRI's market calibration, 8 November 2026.)
 
-        # CAPRI's warning when the market of the last step is not solved (arm/simu_market.gms l. 288-301)
+        # CAPRI's warning when the market of the last step is not solved (arm/simu_market.gms l. 289-300)
         if not bool(getattr(market_eq, "converged", True)):
             _rl.log("WARNING: Market model not solved to its tolerance in the last iteration! The solution cannot be "
                     "considered as an equilibrium")

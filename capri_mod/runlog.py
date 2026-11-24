@@ -3,8 +3,8 @@
 CAPRI writes two kinds of lines while CAPMOD runs:
   - a title per section (util/title.gms): "title CAPMOD: <section> Last: <previous section> - ( <s> sec. <min> min. )",
     the seconds since the previous title and the minutes since the start;
-  - the run log caplog (capmod.gms l. 81, 229, 1276, 1427-1428, 1705; supply/simu_supply.gms l. 18, 217-221;
-    capmod/report_supply_model.gms l. 126-128, 302; arm/simu_market.gms l. 22, 122-124, 283-301): "*** CAPRI run
+  - the run log caplog (capmod.gms l. 75, 203, 1235, 1391-1392, 1664; supply/simu_supply.gms l. 18, 217-221;
+    capmod/report_supply_model.gms l. 126-128, 304; arm/simu_market.gms l. 22, 121-123, 280-298): "*** CAPRI run
     started", "*** Data preparation", "*** CAPRI enters simulation loop Nr. 5 of 30", "*** --- Solve supply side of
     simulation loop Nr. 5", "*** --- Supply side of simulation loop Nr. 5 properly solved", "*** --- Global market model
     of simulation loop Nr. 5 solved", its number and sum of infeasibilities, "*** CAPRI went through all steps and is
@@ -149,7 +149,7 @@ class RunLog:
     def since_start(self) -> float:
         return time.time() - self.t0
 
-    # --- the simulation loop's lines (capmod.gms l. 1425-1428, supply/simu_supply.gms, arm/simu_market.gms)
+    # --- the simulation loop's lines (capmod.gms l. 1391-1392, supply/simu_supply.gms, arm/simu_market.gms)
     def loop_start(self, n: int, n_max: int, label: str, year=None) -> None:
         self.title(f"Working for {label}{f', year {year}' if year else ''}, iteration number {n}")
         self.log(f"{PROGRAM} enters simulation loop Nr. {n} of at most {n_max}")
@@ -157,7 +157,7 @@ class RunLog:
         self.sub(f"Solve supply side of simulation loop Nr. {n}")
 
     def supply_solved(self, n: int, supply_results: Dict) -> Dict:
-        """The supply side's line (capmod/report_supply_model.gms l. 126-128, 302). CAPRI aborts when a supply model
+        """The supply side's line (capmod/report_supply_model.gms l. 126-128, 304). CAPRI aborts when a supply model
         is not solved; this model keeps IPOPT's last point (supply_module, a departure) and names the regions."""
         res = supply_results or {}
         self.supply_solves(res)
@@ -175,7 +175,7 @@ class RunLog:
         return {"supply_regions": len(res), "supply_not_optimal": len(bad)}
 
     def market_solved(self, n: int, market_eq, market=None, tol: Optional[float] = None) -> Dict:
-        """The market's lines (arm/simu_market.gms l. 22, 283-285). CAPRI reports its solver's number and sum of
+        """The market's lines (arm/simu_market.gms l. 22, 280-282). CAPRI reports its solver's number and sum of
         infeasibilities; this market's counterpart is its balance residuals, the largest relative residual of each
         product's equations at the solution (market._bilat_errs; its stop test: every one below market.tol): the
         number of products above the tolerance and the largest, with its region."""
