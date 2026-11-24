@@ -334,7 +334,10 @@ class DemandMixin(MarketStateMixin):
             if i is None or not fb or _reg not in (self.ev.sup_active or ()):
                 continue
             f0r = (fb.get("feed0_sup") or {}).get(_reg, {})
-            feed = self.sup_feed_use(_reg, {c: float(PR[i, Cc[c]]) for c in f0r if c in Cc})
+            # the bulks' response to the region's market prices within the solve (CAPRI's feedBlk_ for every RMSSUP;
+            # register DEP-54)
+            bf_ = self.feed_bulk_market_factor({c: float(PR[i, j_]) for c, j_ in Cc.items()}, region=_reg)
+            feed = self.sup_feed_use(_reg, {c: float(PR[i, Cc[c]]) for c in f0r if c in Cc}, bulk_factor=bf_)
             self.ev.sup_feed_now[_reg] = feed
             for c, q in feed.items():
                 j = Cc.get(c)

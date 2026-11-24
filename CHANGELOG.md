@@ -441,6 +441,25 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   and without (1)); the inhibitor on mineral N moves towards CAPRI's in four units (ES51 0.257 -> 0.141, CAPRI 0.039;
   NL22 0.536 -> 0.459, 0.292), away in FR52 (0.575 -> 0.482, 0.575); the inhibitor on manure stays where CAPRI has none
   (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
+- **DEP-54, the non-EU supply countries' feed bulks within the market solve (24 November 2026; K199):** CAPRI's
+  feedBlk_ (arm/market_model.gms l. 972) is defined for every RMSSUP; the model's market left the non-EU countries with
+  supply models out of the bulks' price responses (market/feed.py `_feed_bulk_elas`; `sup_feed_use` had no response
+  term), so their bulks moved only between supply-market iterations. With CAPRI's non-EU supply models (plan item D2)
+  this made a cobweb on the UK's and Serbia's energy-rich feed (FENE rows changing by 18-26% between Green Deal
+  iterations; Serbia's is all FENI, 147.9 of the Western Balkans' 150 kt FENI their own), and the run did not converge.
+  Their bulks now respond within the solve as the member states' (`feed_bulk_market_factor` with the region's prices
+  against `seen.sup_price_seen`; market/use_ad.py the same; test_feed_ad.py). With D2 the baseline converges in 7 loops
+  and a full Green Deal run capped at 24 iterations follows the step reports of the run without D2 (9867411). With the
+  default (Norway only), a Green Deal probe of six EU units and Norway's six with and without the fix (30 iterations):
+  the EU units within 0.005%, Norway within 0.07% at the same baseline loop; the baseline meets CAPRI's stop rule one
+  loop earlier, so Norway's final levels differ by up to 0.7% (baseline) and 0.9% (Green Deal).
+- **D2, CAPRI's non-EU supply models (24 November 2026, an option, not the default):** with
+  `run.supply_countries_outside_eu` set to CAPRI's list (Norway, the UK, Turkey, the Western Balkans), the full Green
+  Deal run capped at 24 iterations (6,874 s; 9867411 met the stop rule at 29) brings the non-EU countries' activity
+  changes to within a mean 0.47 points of CAPRI's for Turkey, 1.04 for the UK and 0.67 for the Western Balkans (1.36,
+  3.64 and 1.63 without their supply models). Their largest gaps are shared: fallow land falls where CAPRI's barely moves
+  (Turkey -3.8% against 0.0, the UK -8.1 against -3.9), fodder maize rises more (the UK +11.3 against +7.7). The EU's
+  effect is not yet measured on the same code (9867411 predates DEP-21 and K189).
 - **DEP-23 closed, no departure (23 November 2026):** the activities held at their level for lack of a positive CAPRI
   own PMP term (SupplyModule._uncalibrated) are all at 0 at the 2030 market year: the 388 crop and 3 animal cells with a
   base-year level and no own term have a 2030 trajectory factor of 0, and in CAPRI's 2030 data they have no level and no

@@ -63,7 +63,13 @@ The supply models buy feed as bulks; the market splits each member state's bulk 
   CAPRI's 2030 FEED and ARM1P of NO000000, and its use HCOM + FEDM + INDM + BIOF + LOSM + PRCM per product) give its
   supply models' bulk prices at Norway's prices and its feed use per product at Norway's Arm1 price ratios (`MarketModule.sup_feed_use`),
   following its herds (`_feed_bulk_index` of NO000000, its own FMIL index `_fmil_index_sup`), on CAPRI's feed share of
-  Norway's use; none of it is in the EU's feed demand.
+  Norway's use; none of it is in the EU's feed demand. The same for every non-EU country with supply models
+  (`run.supply_countries_outside_eu`: the UK, Turkey and the Western Balkans with D2). Their bulks respond within the
+  market solve as the member states', CAPRI's `feedBlk_` for every RMSSUP: their market region's prices against those
+  their supply models saw (`seen.sup_price_seen`), with their countries' measured responses (the Hessian's
+  `FEEDBLK:<bulk>` rows). Until 24 November 2026 their bulks were fixed within a solve (register DEP-54). With D2's
+  supply models this made a cobweb on Serbia's energy-rich feed, all of it FENI, the Western Balkans' FENI market,
+  147.9 of whose 150 kt are its own: the UK's and Serbia's FENE rows changed by 18-26% between Green Deal iterations.
 - FENI and FPRI markets (`tools/build/build_bilateral_market.py`, `tools/build/build_feed_byproducts.py`): CAPRI's bilateral flows,
   regional market prices and Armington elasticities (FENI 4 / 8 from `special_ch/market1_ch.gms`, FPRI 8 / 10, CAPRI's
   default); world prices FENI 312.77 EUR/t (FAO_agg World PMRK, base period), FPRI 252.74 EUR/t (FAO_agg has none:

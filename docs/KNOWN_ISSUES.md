@@ -50,7 +50,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K196](#k196) | The Green Deal's N-surplus dual is below CAPRI's (CAPRI's recovered from its own results): median 0.856 of CAPRI's in the standing check at 9867411 (0.89 at bb3b592), 0.83 at CAPRI's prices; the suckler cows' and the technology shift's remaining gaps follow it | open (21 November 2026) |
 | [K198](#k198) | The assignments refactor's findings for the main line (its inventory of the CAPRI statements the model ports or cites, block A0): porting differences in the market supply Hessian, the price transmission, the stop rule, the welfare, the premiums and the accounts, and 14 wrong line citations; sorted 23 November 2026 by where they act, not measured | open (23 November 2026) |
 
-## Resolved (128)
+## Resolved (129)
 
 | # | Issue | Status |
 |---|---|---|
@@ -86,6 +86,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K190](#k190) | The grassland need took CAPRI's SQRT(1 +/- 0.2) split twice: the data's need per ha (CAPRI's reported 2030 need per crop) already carries it, and K160 applied it again; ES41's base manure K on grassland 53.6 against CAPRI's 42.0 kt | fixed (20 November 2026); the intensive grassland's weaker Green Deal response that followed traced to K191 (the grassland's removal and fixation in the N-surplus row) |
 | [K186](#k186) | The catch crops' winter cover option scales with the fixed base crop area; CAPRI's catcMiti_ and GHG_Mit_Cost_ scale it with the current land (landTypesNoSlak, uaaEqu). Not active in CAPRI's Green Deal step (its winter cover share fixed at 1e-6, CATC a free activity) | fixed (21 November 2026): the option's catch crops and cost on the current land, as CAPRI |
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | closed (21 November 2026), explained: the young-animal block is CAPRI's (values, coefficients, premiums' response, clearing); the female calves' gap is the suckler cows' smaller Green Deal fall, which follows the N-surplus dual below CAPRI's (K196) |
+| [K199](#k199) | The feed bulks of the non-EU countries with supply models did not respond within the market solve (CAPRI's feedBlk_ is defined for every RMSSUP): with CAPRI's non-EU supply models (D2) a cobweb on the Western Balkans' FENI and the UK's energy-rich feed, their FENE rows changing by 18-26% between Green Deal iterations | fixed (24 November 2026), as CAPRI (register DEP-54) |
 | [K197](#k197) | The purchased feed bulks' prices were not CAPRI's: the 2030 baseline took a CES of the products' 2030 prices (FENE and FMIL at 1), where CAPRI's 2030 bulk prices are its 2017 ones; a scenario took the market's feedBlkPrice_ CES, where CAPRI's supply models read set_prices.gms's Laspeyres | fixed (23 November 2026), as CAPRI (the project lead's decision; our view of CAPRI's 2030 level in DEPARTURES_FROM_CAPRI.md) |
 | [K195](#k195) | The comparison switch's CAPRI step valued each crop's plant protection at dataOut's regional UVAG(PLAP); CAPRI's p_linObjeCont takes the member state's UVAP of the simulation year | fixed (21 November 2026), as CAPRI |
 | [K194](#k194) | The low-N feeding option was built on CAPREG's 2017 requirement correction (and res_17's MANN, CRPR_EXPT and levels), where CAPRI's 2030 simulation uses the 2030 requirements sim_ini_21730 holds | fixed (21 November 2026), as CAPRI |
@@ -4154,6 +4155,42 @@ the main line measures and ranks. Where each acts, from the code (no runs):
   main line those in its own.
 - **In 9t:** -
 - **Status:** open (23 November 2026).
+
+<a id="k199"></a>
+### K199: The non-EU supply countries' feed bulks within the market solve (found 24 November 2026, fixed the same day; register DEP-54)
+
+Found when the full Green Deal run with CAPRI's non-EU supply models (register DEP-7, plan item D2: the UK, Turkey and
+the Western Balkans besides Norway) did not converge.
+
+- **CAPRI.** feedBlk_ (arm/market_model.gms l. 972) is defined for every RMSSUP, the EU's member states and the
+  non-EU countries with supply models alike: within the market solve each bulk moves with the prices of its market
+  ingredients through p_feedBlkElas, measured from the supply models.
+- **The model before.** The market measured these responses for the member states only (market/feed.py
+  `_feed_bulk_elas` skipped every country with a non-EU market region), and `sup_feed_use` had no response term: the
+  non-EU countries' bulks stayed at their supply models' within a solve and moved only between supply-market
+  iterations. With Norway alone the loop still converged.
+- **What it did with D2.** On a thin feed market the market's price and the supply models' bulks answered each
+  other one iteration late, a cobweb. Serbia's energy-rich feed is all FENI (148.5 kt), and 147.9 of the Western
+  Balkans' 150 kt FENI use are their own. The UK's and Serbia's FENE rows changed by 18-26% between Green Deal
+  iterations (CAPRI's stop-rule measure, iterations 10-12) without settling, and the run was stopped by hand at its
+  12th Green Deal iteration. CAPRI's Green Deal step moves the Western
+  Balkans' FENI feed by +0.9% (150.1 -> 151.5 kt) at a market price +4.8%.
+- **Fix (as CAPRI).** The non-EU countries' bulks respond within the solve as the member states': their measured
+  responses (the market supply Hessian's FEEDBLK rows, per country), at their market region's prices against those
+  their supply models saw (`feed_bulk_market_factor(..., region)` with `seen.sup_price_seen`), as `sup_feed_use`'s
+  bulk factor; market/use_ad.py the same in CasADi (docs/FEED_MARKETS.md). Test: test_feed_ad.py
+  `test_feed_bulks_of_the_noneu_supply_countries_respond_inside_the_market` (Norway).
+- **Check.** With D2: the baseline converges in 7 loops without swings; the full Green Deal run, capped at 24
+  iterations for the 2-hour limit here, follows the step reports of the run without D2 (9867411) to the 24th (Spain's
+  maize 0.291% in both); every regional solve optimal. With the default (Norway only), a Green Deal probe of six EU
+  units (FR52, IT20, NL22, ES51, DE21, ES41) and Norway's six, 30 iterations, with and without the fix on the same
+  code: the EU units' levels within 0.005% in both the baseline and the Green Deal, and Norway's within 0.07% at the
+  same baseline loop. With the fix the baseline meets CAPRI's stop rule one loop earlier (two rows still above 0.05%,
+  Norway's beef 0.64% and barley 0.15%; without it five, among them Norway's protein-rich feed bulk at 0.28%), so
+  Norway's final baseline levels differ by up to 0.7% (bulls) and its Green Deal levels by up to 0.9% (suckler cows in
+  NO08). Neither probe met the stop rule in the Green Deal (Spain's maize still moving by 0.60% at the 30th iteration,
+  in both).
+- **Status:** fixed (24 November 2026).
 
 <a id="k195"></a>
 ### K195: CAPRI's Green Deal step's plant protection at the member state's UVAP (found and fixed 21 November 2026)
