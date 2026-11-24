@@ -35,9 +35,9 @@ NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), (
 
 #: --parts: the parts to dump (None: all): estimation, bounds, nuts2, ms_retries, step3_copies, labour, policy,
 #: clean_tiny, and
-#: the light ones (no reference data read): step1
+#: the light ones (no reference data read, or one or two tables): step1, scale_dgagri
 PARTS = None
-LIGHT = {"step1"}
+LIGHT = {"step1", "scale_dgagri"}
 
 
 def step1_cases():
@@ -67,7 +67,37 @@ def step1_cases():
     return out
 
 
-LIGHT_CASES = {"step1": step1_cases}
+def scale_dgagri_cases():
+    """scale_dgagri.scale (scale_DG_AGRI_baseline.gms) on CAPTRD's stored P_Data as p_data (the member states; the
+    population after 2018 left out, as its test) and the stored DGAgri as the Aglink stage's outlook, with the test's
+    sets and time sets. SHA-256 of the exact DGAgri1, DGAgri and p_data it returns."""
+    import pandas as pd
+    from capri_mod.external_paths import REFERENCE
+    from capri_mod.pipeline.captrd import prepare as P
+    from capri_mod.pipeline.captrd import scale_dgagri as SD
+    from capri_mod.pipeline.captrd import timesets as TS
+    R, G = REFERENCE / "captrd_results" / "1770", REFERENCE / "sets" / "simini_21730"
+    s = P.read_sets()
+    sd = lambda n: pd.read_csv(P.SETS_DIR / f"{n}.csv", keep_default_na=False, dtype=str).d0   # noqa: E731
+    pdata = pd.read_csv(R / "P_Data.csv.gz", dtype={"t": str})
+    pdata = pdata[pdata.region.isin(set(s.ms))]
+    yr = pd.to_numeric(pdata.t, errors="coerce")
+    pdata = pdata[~((pdata.col == "INHA") & (pdata.row == "LEVL") & (yr > 2018))]
+    dg = pd.read_csv(R / "DGAgri.csv.gz", dtype={"t": str})
+    resy = [2018, 2020, 2025, 2030, 2035, 2040, 2045, 2050, 2060, 2070]
+    T = TS.build(1984, 2070, resy, 2017, TS.lst_dgagri_for("aglink2023dgAgri"), uaar_years_any=range(1984, 2019),
+                 uaar_years_all=range(1995, 2019), expostt_extra=[2019])
+    rto = pd.read_csv(G / "R_T_OAGG.csv", keep_default_na=False, dtype=str)
+    D1, D, Pd = SD.scale(pdata, dg, ms=s.ms, ragg=["EU014000", "EU013000"], top=["EU27yr19"], west=["EU014000"],
+                         map_rr=s.map_rr, pact=pd.read_csv(G / "PACT.csv", keep_default_na=False, dtype=str).d0,
+                         pact_to_y=s.pact_to_y, cols_est=s.s_colsest, rows_est=s.s_rowsest, mrkbalee=sd("mrkbalee"),
+                         dompos=sd("dompos"), fuels=sd("fuels"), meas=rto[rto.d0 == "MEAS"].d1,
+                         basyrst=T.basyrst, exante=T.exante, years_cur=T.years_cur, years=range(1984, 2071))
+    dig = lambda q: _digest(sorted((k, float(v).hex()) for k, v in q.items()))      # noqa: E731
+    return {"DGAgri1": dig(D1), "DGAgri": dig(D), "p_data": dig(Pd)}
+
+
+LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases}
 
 
 def want(part):
@@ -637,7 +667,7 @@ if __name__ == "__main__":
     ap.add_argument("out", nargs="?")
     ap.add_argument("--compare", nargs=2, metavar=("REF", "NEW"))
     ap.add_argument("--parts", help="comma-separated parts to dump (a block's own check): estimation, bounds, nuts2, "
-                                    "ms_retries, step3_copies, labour, policy, clean_tiny, step1; default all")
+                                    "ms_retries, step3_copies, labour, policy, clean_tiny, step1, scale_dgagri; default all")
     a = ap.parse_args()
     if a.parts:
         PARTS = set(a.parts.split(","))
