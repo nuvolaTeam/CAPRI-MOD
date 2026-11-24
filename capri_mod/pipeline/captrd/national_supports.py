@@ -566,6 +566,7 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
                  for y in after_t if sp(cy, "GROF", "PORK", y)})
     trust_if(cy, ["GROF"], ["PORK"], exantet, 8.01, only_new=True)
     # ---- l. 946-987 CS (Serbia): the dairy herds' support floored (as expert_support.gms l. 794-807), then dampened
+    #      (the lines cited below are national_supports.gms's)
     cs = "CS000000"
     new = {}
     for c in dcow:

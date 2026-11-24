@@ -1,6 +1,6 @@
 """CAPTRD's supports after the first estimation (Solve1): DG AGRI's information brought into the member states' supports,
 for one ex-ante year (captrd/define_eu_supports.gms, CAPRI star 3.0; captrd.gms l. 1064-1072, between Solve1 and
-Solve2 of the ex-ante loop).
+Solve2 of the ex-ante loop). The lines cited below are define_eu_supports.gms's.
 
   l. 43-45     Step2: Solve1's results (input here: CAPTRD's stored step2 of the member states)
   l. 63-191    beyond %lst_dgagri%: DGAgri1 extrapolated from Step3 by a logistic from its growth rate between the
@@ -152,6 +152,7 @@ def _assign(d: Dict, new: Dict) -> None:
 def eu_supports(P: Pos, y: int, S: Sets, T: Years, *, bast: Dict[K3, float], basm: Dict[K3, float],
                 bas: Dict[K3, float], nobs: Set[K3], prd_adj: Dict, low_lim: Dict, upp_lim: Dict) -> None:
     """define_eu_supports.gms for the ex-ante year y, in place on P."""
+    # the lines cited below are captrd/define_eu_supports.gms's
     ms, msset = list(S.ms), set(S.ms)
     cols, rows = list(S.s_colsest), list(S.s_rowsest)
     colset, rowset = set(cols), set(rows)
@@ -295,7 +296,7 @@ def eu_supports(P: Pos, y: int, S: Sets, T: Years, *, bast: Dict[K3, float], bas
                 g(P.dgagri1, a, c, "LEVL"), [g(P.dgagri1, m, c, "LEVL") for m in mem_of[a] if g(P.dgagri, m, c, "LEVL")])
     _assign(P.dgagri1, new)
 
-    # ---- l. 387: adjust_to_biof_supports.gms on DGAgri1
+    # ---- l. 387: adjust_to_biof_supports.gms on DGAgri1 (the lines cited below are define_eu_supports.gms's)
     F.biof_adjust(P.dgagri1, P.expert, y=y, ms=ms, S=S.biof, basm=basm, bast=bast, bas=bas, nobs=nobs, quts=P.quts,
                   prcy=P.support, lst_dgagri=L, fst_exante=T.fst_for_biof, bas_year=T.bas_year,
                   bast_year=T.bast_year, prd_adj=prd_adj, low_lim=low_lim, upp_lim=upp_lim)

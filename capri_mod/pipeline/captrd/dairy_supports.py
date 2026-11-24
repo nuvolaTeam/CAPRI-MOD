@@ -52,9 +52,9 @@ LST_DAITAR = 2020
 GRATE_FROM = 2015
 #: l. 376: years around the base year for the tables' base (yrbas)
 YRBAS_HALF = 1
-#: l. 444-445, 458, 482, 669-670: smallest value a growth rate's end points need
+#: expert_support.gms l. 444-445, 458, 482, 669-670: smallest value a growth rate's end points need
 MIN_ABS = 1e-4
-#: l. 691-705: the regions whose milk production's trust grows after 2020
+#: expert_support.gms l. 691-705: the regions whose milk production's trust grows after 2020
 STABLE = ["HR000000", "IR000000", "RO000000", "LT000000", "LV000000", "HU000000", "SI000000", "SK000000", "IT000000",
           "MT000000", "PT000000", "FR000000", "SE000000", "FI000000", "TUR"]
 TABLES = ["p_nrcows", "p_cowmilkprod", "p_milkdeliveries", "p_dairycowyield"]

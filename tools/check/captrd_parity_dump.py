@@ -38,7 +38,7 @@ NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), (
 #: the light ones (no reference data read, or one or two tables): step1, scale_dgagri
 PARTS = None
 LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod", "longrun", "eu_supports",
-         "expert_support", "national", "stats", "prep", "coco"}
+         "expert_support", "national", "stats", "prep", "coco", "captrd_gms"}
 
 
 def step1_cases():
@@ -751,10 +751,44 @@ def coco_cases():
     return out
 
 
+def captrd_gms_cases():
+    """captrd.gms's data statements: prepare.load_fixes, load_basm and labour_household on seeded random CAPREG series
+    and base-year data over CAPTRD's sets, for two densities of zeros. SHA-256 of the exact p_data returned."""
+    import random
+    import pandas as pd
+    from capri_mod.pipeline.captrd import prepare as P
+    s = P.read_sets()
+    regs = ["AT000000", "AT310000", "PL000000"]
+    lus = sorted(s.landusearto)
+    cols = ["GROF", "ARTO", "UAAR", "SWHE", "DCOL", "BULL", "STCM", "HOLD"] + lus + sorted(s.aact)[:4]
+    rows = ["LEVL", "LABO", "LABN", "LABH", "DAYS", "DRMN", "DRMX", "EDAYS", "N_EXPT", "SETR", "MILK", "YCOW"] + \
+        sorted(s.secom)[:3] + sorted(s.seco)[:2]
+    out = {}
+    for seed, z in ((1, 0.3), (2, 0.6)):
+        rng = random.Random(seed)
+        recs = [(r, c, w, t, rng.uniform(-5.0, 100.0)) for r in regs for c in cols for w in rows
+                for t in [str(y) for y in range(2010, 2019)] + ["BASM"] if rng.random() > z]
+        recs += [(r, "ARTO", "LEVL", t, rng.uniform(50.0, 100.0)) for r in regs for t in [str(y) for y in range(2010, 2019)]]
+        recs += [(r, c, "LEVL", t, rng.uniform(-5.0, 20.0)) for r in regs for c in lus for t in [str(y) for y in range(2010, 2019)]]
+        p = pd.DataFrame(recs, columns=["region", "col", "row", "t", "value"]).drop_duplicates(["region", "col", "row", "t"],
+                                                                                            keep="last")
+        d2 = pd.DataFrame([(r, c, w, "Y", rng.uniform(0.1, 100.0)) for r in regs for c in cols for w in rows
+                           if rng.random() > z] + [(r, c, "LEVL", "Y", 50.0) for r in regs for c in ("UAAR", "ARTO")],
+                          columns=["region", "col", "row", "t", "value"]).drop_duplicates(["region", "col", "row"],
+                                                                                         keep="last")
+        key = lambda d: _digest(sorted((a, b, c, t, float(v).hex()) for a, b, c, t, v in   # noqa: E731
+                                       d[["region", "col", "row", "t", "value"]].itertuples(index=False)))
+        q = P.load_fixes(p, s)
+        out[(seed, "fixes")] = key(q)
+        out[(seed, "basm")] = key(P.load_basm(q, d2, s))
+        out[(seed, "labh")] = key(P.labour_household(q))
+    return out
+
+
 LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases, "final_supports": final_supports_cases,
                "agriprod": agriprod_cases, "longrun": longrun_cases, "eu_supports": eu_supports_cases,
                "expert_support": expert_support_cases, "national": national_cases, "stats": stats_cases,
-               "prep": prep_cases, "coco": coco_cases}
+               "prep": prep_cases, "coco": coco_cases, "captrd_gms": captrd_gms_cases}
 
 
 def want(part):

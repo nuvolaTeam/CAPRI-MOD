@@ -4,7 +4,7 @@ baseline/aglink2023dgAgri_mappings.gms,41-44,declaration,context,capri_mod/pipel
 baseline/labour_ageline.gms,,file,context,capri_mod/pipeline/captrd/equations/labour_ageline.py,(module),1,named,,
 baseline/labour_ageline.gms,,file,context,capri_mod/pipeline/captrd/labour.py,(module),2,named,,
 baseline/labour_ageline.gms,,file,context,capri_mod/pipeline/captrd/labour.py,apply,119,named,,
-baseline/labour_ageline.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets,116,named,,
+baseline/labour_ageline.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets,117,named,,
 baseline/labour_ageline.gms,,file,context,capri_mod/pipeline/captrd/prepare_run.py,(module),10,named,,
 baseline/labour_ageline.gms,33,assignment,in style,capri_mod/pipeline/captrd/equations/labour_ageline.py,AGELINE_GROF_SRNUTS1,18,named,"AGELINE(SRNUTS1,""GROF"",YEARS) = SUM(W_AGE, AGELINE(SRNUTS1,W_AGE,YEARS));",
 baseline/labour_ageline.gms,33,assignment,moved,capri_mod/pipeline/captrd/labour.py,ageline_bounds,53,module's file,"AGELINE(SRNUTS1,""GROF"",YEARS) = SUM(W_AGE, AGELINE(SRNUTS1,W_AGE,YEARS));",the statement is in capri_mod/pipeline/captrd/equations; this cites it
@@ -250,58 +250,51 @@ biofuel/biofuel_trends.gms,1424-1452,assignment,to move,capri_mod/pipeline/captr
 biofuel/biofuel_trends.gms,1455-1470,assignment,to move,capri_mod/pipeline/captrd/biofuel_trends.py,trends,767,module's file,"p_expertSupprt(MSIncl,""NTRD"",""DDGS"",exAnte,""TrustLevl"") $ ( p_expertSupprt(MSIncl,""NTRD"",""DDGS"",exAnte,""Absolute"")",
 biofuel_data.gms,,,check,capri_mod/pipeline/captrd/biofuel_trends.py,(module),26,named,,file not in the copy
 captrd.gms,,file,context,capri_mod/pipeline/captrd/__init__.py,(module),1,named,,
+captrd.gms,,file,context,capri_mod/pipeline/captrd/equations/captrd.py,(module),1,named,,
+captrd.gms,,file,context,capri_mod/pipeline/captrd/equations/captrd.py,(module),7,named,,
 captrd.gms,,file,context,capri_mod/pipeline/captrd/equations/fix_est.py,V_EstV_PRCY,1197,named,,
 captrd.gms,20-21,other,context,capri_mod/pipeline/captrd/final_supports.py,(module),15,same block,4) Years selected in the ex-post pariod are much more difficulter to solve as the bounds are very close in the values,
-captrd.gms,26-28,other,context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,498,module's file,"/ 1940*1999,2000*2085,Y,BAS,BASM,CUR,CAL,TRD,SRT,MEAN,S1*S50/;",
+captrd.gms,26-28,other,context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,499,module's file,"/ 1940*1999,2000*2085,Y,BAS,BASM,CUR,CAL,TRD,SRT,MEAN,S1*S50/;",
 captrd.gms,27-49,control ($),context,capri_mod/pipeline/captrd/final_supports.py,(module),16,same block,$STARS $$$$,
-captrd.gms,34-39,comment,context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,505,module's file,*,
+captrd.gms,34-39,comment,context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,506,module's file,*,
 captrd.gms,39-55,control ($),context,capri_mod/pipeline/captrd/labour.py,(module),7,same block,$INCLUDE 'util\global_settings.gms',
-captrd.gms,41-43,comment,context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,517,module's file,*,
-captrd.gms,43-45,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,(module),5,same block,$SETGLOBAL PGMNAME CAPTRD,
-captrd.gms,46-55,comment,context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,521,module's file,*,
+captrd.gms,41-43,comment,context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,518,module's file,*,
+captrd.gms,46-55,comment,context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,522,module's file,*,
 captrd.gms,56,comment,context,capri_mod/pipeline/captrd/final_supports.py,(module),17,same block,*,
 captrd.gms,59-60,control ($),context,capri_mod/pipeline/captrd/labour.py,(module),7,same block,$INCLUDE 'fortrd.gms',
-captrd.gms,59-63,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,534,module's file,$INCLUDE 'fortrd.gms',
+captrd.gms,59-63,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,535,module's file,$INCLUDE 'fortrd.gms',
 captrd.gms,61-156,control ($),context,capri_mod/pipeline/captrd/final_supports.py,(module),18,same block,"$call ""rmDir /S /Q %scrdir%"";",
-captrd.gms,63-191,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,(module),6,same block,"$call ""rmDir /S /Q %scrdir%"";",
 captrd.gms,66,control ($),context,capri_mod/pipeline/captrd/labour.py,(module),8,same block,"$call ""mkDir %scrdir%"";",
-captrd.gms,73-76,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports.cond,177,module's file,$setglobal sim %lastSimulationYear_lst2%,
+captrd.gms,73-76,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports.cond,178,module's file,$setglobal sim %lastSimulationYear_lst2%,
 captrd.gms,74-87,control ($),context,capri_mod/pipeline/captrd/labour.py,(module),8,same block,$SETGLOBAL runoveryears off,
-captrd.gms,81,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,551,module's file,$endif.ggig,
-captrd.gms,83-86,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,551,module's file,"$include ""util\ensure_that_optional_result_directories_are_set.gms""",
-captrd.gms,88-96,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,557,module's file,$SETGLOBAL agmip off,
+captrd.gms,81,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,552,module's file,$endif.ggig,
+captrd.gms,83-86,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,552,module's file,"$include ""util\ensure_that_optional_result_directories_are_set.gms""",
+captrd.gms,88-96,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,558,module's file,$SETGLOBAL agmip off,
 captrd.gms,92-189,control ($),context,capri_mod/pipeline/captrd/labour.py,(module),11,same block,$ifi %agmip%==on $SETGLOBAL WaterModule on,
 captrd.gms,97,control ($),context,capri_mod/pipeline/captrd/biofuel_trends.py,(module),44,named,"$ifi ""%SelecScen%""==""globiom_eu_bright_s0_2023+REFERENCE+REFERENCE"" $setglobal constBionergy on",
-captrd.gms,99-136,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,565,module's file,$setlocal IntegrateCapregFiles off,
+captrd.gms,99-136,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,566,module's file,$setlocal IntegrateCapregFiles off,
 captrd.gms,116,control ($),context,capri_mod/pipeline/captrd/policy.py,(module),7,named,$setglobal mlkQutExpiry 2009,
 captrd.gms,127-184,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,(module),49,same line,$include 'baseline\aglink_versions.gms',
-captrd.gms,140-145,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,580,module's file,$if not SETGLOBAL GlobiomAact $SETGLOBAL GlobiomAact off,
-captrd.gms,147-148,blank,context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,586,module's file,,
-captrd.gms,150-156,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,591,module's file,$setglobal consBioTrends Off,
+captrd.gms,140-145,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,581,module's file,$if not SETGLOBAL GlobiomAact $SETGLOBAL GlobiomAact off,
+captrd.gms,147-148,blank,context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,587,module's file,,
+captrd.gms,150-156,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,592,module's file,$setglobal consBioTrends Off,
 captrd.gms,151-152,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,(module),52,same function,$setglobal consBioTrends Off,
-captrd.gms,154-198,control ($),context,capri_mod/pipeline/captrd/national_supports.py,(module),9,module's file,"$ifi %consBioTrends%%scaleToDGAGRI% == onon $abort ""the consBioTrends switch is not compatible with ScaleToDGAGRI being ON (please switch of",
-captrd.gms,157-160,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,599,module's file,"$ifi ""%SelecScen%""==""SSP1+GHG000_BIO00+ScenBASE"" $SETGLOBAL FixExogenFactGlobiom ON",
+captrd.gms,157-160,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,600,module's file,"$ifi ""%SelecScen%""==""SSP1+GHG000_BIO00+ScenBASE"" $SETGLOBAL FixExogenFactGlobiom ON",
 captrd.gms,159-236,control ($),context,capri_mod/pipeline/captrd/final_supports.py,(module),19,same block,"$ifi ""%SelecScen%""==""SSP3+GHG000_BIO00+ScenBASE"" $SETGLOBAL FixExogenFactGlobiom ON",
-captrd.gms,160-162,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,632,module's file,"$ifi ""%FixExogenFactGlobiom%""==""ON"" $SETGLOBAL GlobiomAact ON",
-captrd.gms,161-162,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,605,module's file,"$ifi ""%FixExogenFactGlobiom%""==""ON"" $SETGLOBAL GlobiomAact ON",
-captrd.gms,162-163,blank,context,capri_mod/pipeline/captrd/national_supports.py,(module),41,module's file,,
-captrd.gms,163-165,comment,context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,609,module's file,* --- phaseInYr<2020 is used when longrun should receive more weight,
+captrd.gms,160-162,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,633,module's file,"$ifi ""%FixExogenFactGlobiom%""==""ON"" $SETGLOBAL GlobiomAact ON",
+captrd.gms,161-162,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,606,module's file,"$ifi ""%FixExogenFactGlobiom%""==""ON"" $SETGLOBAL GlobiomAact ON",
+captrd.gms,163-165,comment,context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,610,module's file,* --- phaseInYr<2020 is used when longrun should receive more weight,
 captrd.gms,166,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,Years,103,named,$SETGLOBAL phaseInYr 2025,
-captrd.gms,169-172,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,612,module's file,"$ifi ""%FixExogenFactGlobiom%""==""ON"" $SETGLOBAL phaseInYr 2010",
+captrd.gms,169-172,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,613,module's file,"$ifi ""%FixExogenFactGlobiom%""==""ON"" $SETGLOBAL phaseInYr 2010",
 captrd.gms,173,control ($),context,capri_mod/pipeline/captrd/final_supports.py,(module),14,named,$if not SETGLOBAL use_KWS_supports $setGLOBAL use_KWS_supports off,
-captrd.gms,173-178,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,618,module's file,$if not SETGLOBAL use_KWS_supports $setGLOBAL use_KWS_supports off,
-captrd.gms,189,declaration,context,capri_mod/pipeline/captrd/eu_supports.py,_set_extrap,482,module's file,"ALIAS(BIOFINDM,BIOFINDM1);",
+captrd.gms,173-178,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,619,module's file,$if not SETGLOBAL use_KWS_supports $setGLOBAL use_KWS_supports off,
+captrd.gms,189,declaration,context,capri_mod/pipeline/captrd/eu_supports.py,_set_extrap,483,module's file,"ALIAS(BIOFINDM,BIOFINDM1);",
 captrd.gms,198-205,control ($),context,capri_mod/pipeline/captrd/labour.py,(module),14,same block,"$ifi ""%regLevel%""==""NUTS2"" scalar ntslvl / 2 /;",
 captrd.gms,203,declaration,context,capri_mod/pipeline/captrd/step1.py,(module),4,named,SET YEARS / %FirstYear% * %lastSimulationYear% /;,
 captrd.gms,203,declaration,context,capri_mod/pipeline/captrd/step1.py,trend_variable,47,named,SET YEARS / %FirstYear% * %lastSimulationYear% /;,
 captrd.gms,203-271,declaration,context,capri_mod/pipeline/captrd/__init__.py,(module),4,named,SET YEARS / %FirstYear% * %lastSimulationYear% /;,
 captrd.gms,203-271,declaration,context,capri_mod/pipeline/captrd/timesets.py,(module),1,named,SET YEARS / %FirstYear% * %lastSimulationYear% /;,
 captrd.gms,203-812,declaration,context,capri_mod/pipeline/captrd/prepare_run.py,(module),13,named,SET YEARS / %FirstYear% * %lastSimulationYear% /;,
-captrd.gms,205,declaration,context,capri_mod/pipeline/captrd/national_supports.py,(module),37,module's file,SET BASY(YEARS) / %BaseYear% /;,
-captrd.gms,205-268,declaration,context,capri_mod/pipeline/captrd/national_supports.py,(module),10,module's file,SET BASY(YEARS) / %BaseYear% /;,
-captrd.gms,214-223,declaration,context,capri_mod/pipeline/captrd/eu_supports.py,(module),9,same block,SET MSINCL(RMS);,
-captrd.gms,231-234,control ($),context,capri_mod/pipeline/captrd/national_supports.py,(module),39,module's file,$INCLUDE 'util\title1.gms',
-captrd.gms,238-262,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,(module),10,same block,$INCLUDE 'captrd\sets_captrd.gms',
 captrd.gms,241,comment,context,capri_mod/pipeline/captrd/eu_supports.py,(module),54,same function,*,
 captrd.gms,246-249,control ($),context,capri_mod/pipeline/captrd/prepare_run.py,run,60,named,$ifi %AGLINK%==aglink2022dgAgri $SETGLOBAL lst_dgagri 2040,
 captrd.gms,246-249,control ($),context,capri_mod/pipeline/captrd/timesets.py,(module),43,named,$ifi %AGLINK%==aglink2022dgAgri $SETGLOBAL lst_dgagri 2040,
@@ -310,7 +303,6 @@ captrd.gms,260,control ($),context,capri_mod/pipeline/captrd/national_supports.p
 captrd.gms,260,control ($),context,capri_mod/pipeline/captrd/national_supports.py,(module),43,named,$SETGLOBAL lst_daitar 2020,
 captrd.gms,261,comment,context,capri_mod/pipeline/captrd/dairy_supports.py,(module),49,named,*,
 captrd.gms,266,assignment,to move,capri_mod/pipeline/captrd/timesets.py,(module),3,named,OrdT(YEARS) = CALYEA(YEARS);,
-captrd.gms,271-343,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,(module),12,same block,p_trend(YEARS) = ORD(YEARS)/10;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd.gms,289,comment,context,capri_mod/pipeline/captrd/estimate_bounds.py,(module),33,named,*,
 captrd.gms,317,assignment,in style,capri_mod/pipeline/captrd/equations/longrun_supports.py,P_Result_INHA_pdata,371,named,"p_globiomTightLink(Rall,COLS,ROWS,longScen,Exante) = 0;",
 captrd.gms,317,assignment,moved,capri_mod/pipeline/captrd/macro.py,(module),20,named,"p_globiomTightLink(Rall,COLS,ROWS,longScen,Exante) = 0;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
@@ -318,115 +310,90 @@ captrd.gms,327,declaration,context,capri_mod/pipeline/captrd/longrun_supports.py
 captrd.gms,336-337,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,(module),9,named,"p_exTrapMinMax(""max"") = 2. - p_exTrapMinMax(""min"");",
 captrd.gms,336-337,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,(module),49,named,"p_exTrapMinMax(""max"") = 2. - p_exTrapMinMax(""min"");",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd.gms,340-341,control ($),context,capri_mod/pipeline/captrd/coco.py,(module),21,named,$iftheni %NewBiofuelModule%==ON,
-captrd.gms,355-364,declaration,context,capri_mod/pipeline/captrd/eu_supports.py,(module),14,same block,"PARAMETER Proc_Yields(rows) ""Processing yields of oil seeds"" /",
 captrd.gms,356-362,other,context,capri_mod/pipeline/captrd/estimate_bounds.py,(module),35,named,Soyc .80,
-captrd.gms,368-376,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,(module),15,same block,$include 'feed\feed_decl.gms';,
 captrd.gms,376,control,context,capri_mod/pipeline/captrd/dairy_supports.py,(module),53,same function,option kill = p_animReq ;,
 captrd.gms,380,control,context,capri_mod/pipeline/captrd/dairy_supports.py,(module),51,same function,option kill = p_animProdDays ;,
-captrd.gms,387,control,context,capri_mod/pipeline/captrd/eu_supports.py,(module),16,same block,option kill = p_femWgt ;,
 captrd.gms,400-509,control,context,capri_mod/pipeline/captrd/eu_supports.py,(module),17,module's file,option kill = p_convFactEnergyUnitsToEnne;,
-captrd.gms,400-509,control,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,303,module's file,option kill = p_convFactEnergyUnitsToEnne;,
 captrd.gms,413-469,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,(module),18,module's file,"$BATINCLUDE 'util\title.gms' ""'Load CAPREG time series'""",
 captrd.gms,418-478,declaration,context,capri_mod/pipeline/captrd/prepare.py,(module),17,named,SET COLS_LOAD(DB_COLS);,
-captrd.gms,444-445,assignment,to move,capri_mod/pipeline/captrd/dairy_supports.py,(module),55,same function,"COLS_LOAD(""QUTE"") = NO;",
 captrd.gms,486-898,declaration,context,capri_mod/pipeline/captrd/prepare.py,(module),3,named,"PARAMETER DATA1(NUTS0_and_2ext,db_cols,db_rows,Years) ""Temporary container for reading CAPREG"";",
 captrd.gms,486-937,declaration,context,capri_mod/pipeline/captrd/prepare_run.py,(module),1,named,"PARAMETER DATA1(NUTS0_and_2ext,db_cols,db_rows,Years) ""Temporary container for reading CAPREG"";",
-captrd.gms,504,assignment,to move,capri_mod/pipeline/captrd/prepare.py,load,187,named,"p_data(NUTS0_and_2ext,COLS_LOAD,ROWS_LOAD,Years) $ Rest(NUTS0_and_2ext) = DATA1(NUTS0_and_2ext,COLS_LOAD,ROWS_LOAD,Years);",
-captrd.gms,504-580,assignment,to move,capri_mod/pipeline/captrd/prepare_run.py,(module),4,named,"p_data(NUTS0_and_2ext,COLS_LOAD,ROWS_LOAD,Years) $ Rest(NUTS0_and_2ext) = DATA1(NUTS0_and_2ext,COLS_LOAD,ROWS_LOAD,Years);",
-captrd.gms,509-517,assignment,to move,capri_mod/pipeline/captrd/prepare.py,(module),18,named,"p_data(Rest,""GROF"",SECOM,YEARS) = 0;",
-captrd.gms,511,assignment,to move,capri_mod/pipeline/captrd/prepare.py,load_fixes,201,named,"p_data(Rest,""GROF"",SECOM,YEARS) = 0;",
-captrd.gms,514-516,assignment,to move,capri_mod/pipeline/captrd/prepare.py,load_fixes,202,same block,"p_data(Rest,LanduseARTO,""LEVL"",Years) $ (SUM(LanduseARTO1,MAX(0,p_data(REst,LanduseARTO1,""LEVL"",Years))) $ p_data(REst,""ARTO"",""LEVL"",Years))",
+captrd.gms,504,assignment,to move,capri_mod/pipeline/captrd/prepare.py,load,188,named,"p_data(NUTS0_and_2ext,COLS_LOAD,ROWS_LOAD,Years) $ Rest(NUTS0_and_2ext) = DATA1(NUTS0_and_2ext,COLS_LOAD,ROWS_LOAD,Years);",
+captrd.gms,504-580,assignment,moved,capri_mod/pipeline/captrd/prepare_run.py,(module),4,named,"p_data(NUTS0_and_2ext,COLS_LOAD,ROWS_LOAD,Years) $ Rest(NUTS0_and_2ext) = DATA1(NUTS0_and_2ext,COLS_LOAD,ROWS_LOAD,Years);",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd.gms,509-517,assignment,moved,capri_mod/pipeline/captrd/prepare.py,(module),18,named,"p_data(Rest,""GROF"",SECOM,YEARS) = 0;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd.gms,511,assignment,to move,capri_mod/pipeline/captrd/prepare.py,load_fixes,202,named,"p_data(Rest,""GROF"",SECOM,YEARS) = 0;",
+captrd.gms,514-516,assignment,in style,capri_mod/pipeline/captrd/equations/captrd.py,p_data_LanduseARTO,19,named,"p_data(Rest,LanduseARTO,""LEVL"",Years) $ (SUM(LanduseARTO1,MAX(0,p_data(REst,LanduseARTO1,""LEVL"",Years))) $ p_data(REst,""ARTO"",""LEVL"",Years))",
+captrd.gms,514-516,assignment,moved,capri_mod/pipeline/captrd/prepare.py,load_fixes,203,same block,"p_data(Rest,LanduseARTO,""LEVL"",Years) $ (SUM(LanduseARTO1,MAX(0,p_data(REst,LanduseARTO1,""LEVL"",Years))) $ p_data(REst,""ARTO"",""LEVL"",Years))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd.gms,518-536,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,(module),19,module's file,"$ifi %IntegrateCapregFiles%==on execute_unload '%results_out%\capreg\chk_time_series_%BAS%.gdx' DATA1, rall, cols, rows;",
-captrd.gms,518-536,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,324,module's file,"$ifi %IntegrateCapregFiles%==on execute_unload '%results_out%\capreg\chk_time_series_%BAS%.gdx' DATA1, rall, cols, rows;",
 captrd.gms,528-580,declaration,context,capri_mod/pipeline/captrd/prepare.py,(module),19,named,"SET Y ""Dummy set used in order to be able to read data"" / Y /;",
 captrd.gms,535,other,context,capri_mod/pipeline/captrd/prepare_run.py,_cc_base,47,named,put_utilities batch 'gdxin' / '%results_in%\capreg\res_%BAS%' MS.tl:2 '%addfile%.gdx';,
 captrd.gms,540-558,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,(module),20,module's file,$include 'meta\update_meta_capreg_base_year.GMS',
-captrd.gms,540-558,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,337,module's file,$include 'meta\update_meta_capreg_base_year.GMS',
-captrd.gms,549-580,assignment,to move,capri_mod/pipeline/captrd/prepare.py,load_basm,220,named,"S_ColsEst(""HOLD"") = YES;",
-captrd.gms,552-559,assignment,to move,capri_mod/pipeline/captrd/prepare.py,load_basm,222,same block,"p_data(Rest,db_Cols,db_rows,""BASM"") $ ((S_ColsEst(db_Cols) OR REQSC(db_cols)) $ S_rowsEst(db_rows))",
+captrd.gms,549-580,assignment,moved,capri_mod/pipeline/captrd/prepare.py,load_basm,221,named,"S_ColsEst(""HOLD"") = YES;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd.gms,552-559,assignment,to move,capri_mod/pipeline/captrd/prepare.py,load_basm,223,same block,"p_data(Rest,db_Cols,db_rows,""BASM"") $ ((S_ColsEst(db_Cols) OR REQSC(db_cols)) $ S_rowsEst(db_rows))",
 captrd.gms,559,blank,context,capri_mod/pipeline/captrd/eu_supports.py,(module),60,named,,
-captrd.gms,565-568,assignment,to move,capri_mod/pipeline/captrd/prepare.py,load_basm,223,same block,"empty(Rest) $ ( (NOT (p_data(Rest,""UAAR"",""LEVL"",""BASM"") or urbanNUTS(Rest)))",
-captrd.gms,565-604,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,(module),21,module's file,"empty(Rest) $ ( (NOT (p_data(Rest,""UAAR"",""LEVL"",""BASM"") or urbanNUTS(Rest)))",
-captrd.gms,565-604,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,354,module's file,"empty(Rest) $ ( (NOT (p_data(Rest,""UAAR"",""LEVL"",""BASM"") or urbanNUTS(Rest)))",
+captrd.gms,565-568,assignment,to move,capri_mod/pipeline/captrd/prepare.py,load_basm,224,same block,"empty(Rest) $ ( (NOT (p_data(Rest,""UAAR"",""LEVL"",""BASM"") or urbanNUTS(Rest)))",
+captrd.gms,565-604,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,(module),21,module's file,"empty(Rest) $ ( (NOT (p_data(Rest,""UAAR"",""LEVL"",""BASM"") or urbanNUTS(Rest)))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd.gms,568,control,context,capri_mod/pipeline/captrd/prepare_run.py,run,56,named,"if ( card(empty) ne 0, display empty; abort ""Missing base year data for agricultural or total area for some regions, %system.fn%, line %syst",
 captrd.gms,572-573,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,(module),56,same function,"p_data(Rest,""GROF"",SECO,""BASM"") = 0;",
-captrd.gms,572-579,assignment,to move,capri_mod/pipeline/captrd/prepare.py,load_basm,226,same block,"p_data(Rest,""GROF"",SECO,""BASM"") = 0;",
+captrd.gms,572-579,assignment,moved,capri_mod/pipeline/captrd/prepare.py,load_basm,227,same block,"p_data(Rest,""GROF"",SECO,""BASM"") = 0;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd.gms,579,assignment,in style,capri_mod/pipeline/captrd/equations/captrd.py,p_data_DRMN_DRMX_BASM,33,named,"p_data(Rest,AACT,""DRMN"",""BASM"") = DATA2(Rest,AACT,""DRMN"",""Y"") * DATA2(Rest,AACT,""DAYS"",""Y"");",
+captrd.gms,580,assignment,in style,capri_mod/pipeline/captrd/equations/captrd.py,p_data_DRMN_DRMX_BASM,37,named,"p_data(Rest,AACT,""DRMX"",""BASM"") = DATA2(Rest,AACT,""DRMX"",""Y"") * DATA2(Rest,AACT,""DAYS"",""Y"");",
 captrd.gms,593,comment,context,capri_mod/pipeline/captrd/aglink.py,(module),1,named,* (ESIM would have been included above already),
 captrd.gms,608,comment,context,capri_mod/pipeline/captrd/eu_supports.py,(module),22,module's file,* --- Load projections for population (US census agency) as a fall back option for population data and forecasts,
-captrd.gms,608,comment,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,372,module's file,* --- Load projections for population (US census agency) as a fall back option for population data and forecasts,
 captrd.gms,613-617,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,(module),23,module's file,"$IF NOT EXIST ..\dat\arm\allpop.gdx $ABORT ..\dat\arm\allpop.gdx is missing in %system.fn%, line %system.incline%",
-captrd.gms,613-617,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,377,module's file,"$IF NOT EXIST ..\dat\arm\allpop.gdx $ABORT ..\dat\arm\allpop.gdx is missing in %system.fn%, line %system.incline%",
 captrd.gms,624-629,other,context,capri_mod/pipeline/captrd/eu_supports.py,(module),24,module's file,"p_nutrientCont(rows,usda_cont) ""nutrient content per kg (mainly from USDA)""",
-captrd.gms,624-629,other,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,386,module's file,"p_nutrientCont(rows,usda_cont) ""nutrient content per kg (mainly from USDA)""",
 captrd.gms,641-684,declaration,context,capri_mod/pipeline/captrd/eu_supports.py,(module),25,module's file,"SET CurEUAgg(RALL) ""current EU aggragtes used in the aglink data"";",
-captrd.gms,641-684,declaration,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,399,module's file,"SET CurEUAgg(RALL) ""current EU aggragtes used in the aglink data"";",
 captrd.gms,644-652,declaration,context,capri_mod/pipeline/captrd/scale_dgagri.py,scale,53,module's file,"SET CurEUSubAgg(RALL) ""Subdivisions (10,11,12,13,02) used in the aglink data "";",
 captrd.gms,646-655,declaration,context,capri_mod/pipeline/captrd/eu_supports.py,Sets,75,named,"SET CurEUWestAgg(RALL) ""Western European aggragte used in the aglink data "";",
-captrd.gms,673,assignment,to move,capri_mod/pipeline/captrd/prepare.py,expost_years,423,named,"ExPost(YEARS) $ SUM( MS $ p_data(MS,""UAAR"",""LEVL"",YEARS), 1.) = YES;",
+captrd.gms,673,assignment,to move,capri_mod/pipeline/captrd/prepare.py,expost_years,424,named,"ExPost(YEARS) $ SUM( MS $ p_data(MS,""UAAR"",""LEVL"",YEARS), 1.) = YES;",
 captrd.gms,673,assignment,to move,capri_mod/pipeline/captrd/prepare_run.py,(module),4,same line,"ExPost(YEARS) $ SUM( MS $ p_data(MS,""UAAR"",""LEVL"",YEARS), 1.) = YES;",
 captrd.gms,673,assignment,to move,capri_mod/pipeline/captrd/timesets.py,(module),4,same block,"ExPost(YEARS) $ SUM( MS $ p_data(MS,""UAAR"",""LEVL"",YEARS), 1.) = YES;",
 captrd.gms,673,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,59,module's file,"ExPost(YEARS) $ SUM( MS $ p_data(MS,""UAAR"",""LEVL"",YEARS), 1.) = YES;",
 captrd.gms,673,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,71,module's file,"ExPost(YEARS) $ SUM( MS $ p_data(MS,""UAAR"",""LEVL"",YEARS), 1.) = YES;",
 captrd.gms,689-706,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,(module),26,module's file,"Lst_DGAgri(YEARS) $ (CALYEA(YEARS) EQ CALYEA(""%lst_dgagri%"")) = YES;",
-captrd.gms,691-705,assignment,to move,capri_mod/pipeline/captrd/dairy_supports.py,(module),57,same function,"Lst_exAnte(YEARS) $ (ORDT(YEARS) EQ SMAX(ExAnte, ORDT(ExAnte))) = YES;",
 captrd.gms,703,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,63,module's file,"BASYRS5(ExPost) $ ( ABS(ordT(ExPost) - OrdT(""Bas"")) LE 3) = YES;",
 captrd.gms,703,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,97,module's file,"BASYRS5(ExPost) $ ( ABS(ordT(ExPost) - OrdT(""Bas"")) LE 3) = YES;",
 captrd.gms,704,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,98,module's file,"BASYRSM(ExPost) $ ( ABS(ordT(ExPost) - OrdT(""Bas"")) LE 1) = YES;",
 captrd.gms,705,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,99,module's file,"EIGHTLST(ExPost) $ ( (SUM(Lst_ExPost, ORDT(Lst_ExPost)) - ORDT(ExPost)) LE 7) = YES;",
 captrd.gms,710-711,comment,context,capri_mod/pipeline/captrd/eu_supports.py,(module),27,module's file,*-------------------------------------------------------------------------------,
-captrd.gms,710-711,comment,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,412,module's file,*-------------------------------------------------------------------------------,
 captrd.gms,715,control ($),context,capri_mod/pipeline/captrd/prepare.py,(module),27,named,$ifi %COCO1% == ON $include 'captrd\load_coco1_data.gms',
-captrd.gms,719-731,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,424,module's file,ExPostT(YEARS) = NO;,
 captrd.gms,719-864,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,(module),28,module's file,ExPostT(YEARS) = NO;,
-captrd.gms,719-864,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,416,module's file,ExPostT(YEARS) = NO;,
 captrd.gms,721-722,assignment,to move,capri_mod/pipeline/captrd/timesets.py,(module),5,same block,ExPostT(YEARS) = NO;,
 captrd.gms,721-722,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,73,module's file,ExPostT(YEARS) = NO;,
 captrd.gms,733-737,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,76,module's file,"Fst_exAnte(Years) $ ( (OrdT(YEARS) EQ SMIN(ExAnte, OrdT(ExAnte)))",
-captrd.gms,735-749,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,427,module's file,"$ (ExPostT(YEARS) or (ordT(""Lst_exAnte"") LE ordT(""%lst_dgagri%""))) ) = yes;",
 captrd.gms,742-751,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,81,module's file,"Sec_ExAnte(YEARS) $ ( (ordT(""Lst_exAnte"") GT ordT(""%lst_dgagri%""))",
-captrd.gms,752-761,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,428,module's file,ExAnte(YEARS) $ Fst_exAnte(Years) = YES;,
 captrd.gms,755-757,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,90,module's file,"ordT(""StartpointExtrap"") $ (ordT(""Lst_exAnte"") GT ordT(""%lst_dgagri%""))",
 captrd.gms,760-761,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,93,module's file,ExAnteD(YEARS) = NO;,
 captrd.gms,764,assignment,to move,capri_mod/pipeline/captrd/national_supports.py,Context,118,named,"OrdT(""BAST"") = OrdT(""Lst_exPostT"") - 1;",
 captrd.gms,764,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,94,module's file,"OrdT(""BAST"") = OrdT(""Lst_exPostT"") - 1;",
-captrd.gms,767-770,declaration,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,430,module's file,"set BASYRST(years) ""3 last expostT years entering BAST avg"";",
 captrd.gms,768,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,95,module's file,"BASYRST(years) $( ABS(ORDT(""BAST"") - ORDT(years)) LE 1) = YES;",
-captrd.gms,774-785,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,434,module's file,ExAnteT(ExAnte) $( not ExAnteD(ExAnte) ) = YES;,
 captrd.gms,775,comment,context,capri_mod/pipeline/captrd/timesets.py,build,96,module's file,* --- Define exante years without given MS data,
 captrd.gms,777,blank,context,capri_mod/pipeline/captrd/timesets.py,build,60,module's file,,
 captrd.gms,783-785,comment,context,capri_mod/pipeline/captrd/timesets.py,build,100,module's file,* in order to define the stock changes for this first ex ante year,
 captrd.gms,787,assignment,to move,capri_mod/pipeline/captrd/prepare_run.py,run,92,same function,"ALL_last_Expost(YEARS) $ (SUM( MS $ p_data(MS,""UAAR"",""LEVL"",YEARS), 1.) eq CARD(MS)) = YES $ (OrdT(YEARS) LT OrdT(""Fst_exAnte""));",
 captrd.gms,788-790,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,103,module's file,"all_Last_Expost(YEARS) = YES $ ( OrdT(YEARS) EQ SMAX(all_last_Expost, OrdT(all_last_Expost)));",
-captrd.gms,791-793,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,441,module's file,exAnte(All_Last_Expost) = YES;,
 captrd.gms,798-799,comment,context,capri_mod/pipeline/captrd/timesets.py,build,104,module's file,*pw NOTE: Before 280812 this was called yearsEst = expost (not expostT!) + exante,
-captrd.gms,798-803,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,443,module's file,YearsCur(ExPostT) = YES;,
 captrd.gms,806-810,assignment,to move,capri_mod/pipeline/captrd/step1.py,run,201,named,"YearsEst(""1985"") = YES;",
 captrd.gms,806-810,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,105,module's file,"YearsEst(""1985"") = YES;",
-captrd.gms,809-816,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,445,module's file,"YearsEst(""2000"") = YES;",
 captrd.gms,815,comment,context,capri_mod/pipeline/captrd/eu_supports.py,(module),58,same function,*-------------------------------------------------------------------------------,
-captrd.gms,829-835,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,449,module's file,S_ColsEst(REQSC) = YES;,
 captrd.gms,830-850,assignment,to move,capri_mod/pipeline/captrd/prepare_run.py,(module),7,named,S_ColsEst(REQSC) = YES;,
 captrd.gms,833-839,assignment,to move,capri_mod/pipeline/captrd/prepare.py,(module),21,named,S_ColsEst(REQSC) = YES;,
-captrd.gms,833-839,assignment,to move,capri_mod/pipeline/captrd/prepare.py,delete_unestimated,277,named,S_ColsEst(REQSC) = YES;,
-captrd.gms,838-843,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,416,module's file,S_Colsest(REQSC) = NO;,
+captrd.gms,833-839,assignment,to move,capri_mod/pipeline/captrd/prepare.py,delete_unestimated,278,named,S_ColsEst(REQSC) = YES;,
 captrd.gms,841-850,assignment,to move,capri_mod/pipeline/captrd/prepare.py,(module),22,named,"p_data(MS,COLS,ROWS,YEARS) $ (MAP_RR(""EU_EAST"",MS) $ (ORDt(YEARS) LT ORDt(""1992""))) = 0;",
-captrd.gms,841-850,assignment,to move,capri_mod/pipeline/captrd/prepare.py,delete_early_years,283,named,"p_data(MS,COLS,ROWS,YEARS) $ (MAP_RR(""EU_EAST"",MS) $ (ORDt(YEARS) LT ORDt(""1992""))) = 0;",
-captrd.gms,847-850,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,452,module's file,"p_data(""DE000000"",COLS,ROWS,YEARS) $ (ORDt(YEARS) LT ORDt(""1992"")) = 0;",
+captrd.gms,841-850,assignment,to move,capri_mod/pipeline/captrd/prepare.py,delete_early_years,284,named,"p_data(MS,COLS,ROWS,YEARS) $ (MAP_RR(""EU_EAST"",MS) $ (ORDt(YEARS) LT ORDt(""1992""))) = 0;",
 captrd.gms,852-860,control ($),context,capri_mod/pipeline/captrd/prepare.py,(module),23,named,"$ (NOT p_data(MS,""UVAD"",ROWS,ExpostT)))",
-captrd.gms,852-860,control ($),context,capri_mod/pipeline/captrd/prepare.py,fill_uvad,295,named,"$ (NOT p_data(MS,""UVAD"",ROWS,ExpostT)))",
+captrd.gms,852-860,control ($),context,capri_mod/pipeline/captrd/prepare.py,fill_uvad,296,named,"$ (NOT p_data(MS,""UVAD"",ROWS,ExpostT)))",
 captrd.gms,852-860,control ($),context,capri_mod/pipeline/captrd/prepare_run.py,(module),8,same block,"$ (NOT p_data(MS,""UVAD"",ROWS,ExpostT)))",
-captrd.gms,853-857,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,454,module's file,"= SUM(MAP_RR(rmAggSup,RMS) $ MAP_RR(rmAggSup,MS), p_data(RMS,""UVAD"",ROWS,ExpostT))",
-captrd.gms,862-864,declaration,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,456,module's file,SET RDel(rall);,
 captrd.gms,862-888,declaration,context,capri_mod/pipeline/captrd/prepare.py,(module),24,named,SET RDel(rall);,
-captrd.gms,862-888,declaration,context,capri_mod/pipeline/captrd/prepare.py,clean_regions,343,named,SET RDel(rall);,
+captrd.gms,862-888,declaration,context,capri_mod/pipeline/captrd/prepare.py,clean_regions,344,named,SET RDel(rall);,
 captrd.gms,862-944,declaration,context,capri_mod/pipeline/captrd/prepare_run.py,(module),10,same block,SET RDel(rall);,
 captrd.gms,869-881,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,(module),29,module's file,"p_data(RDel,Cols,Rows,ExPost) = 0;",
-captrd.gms,869-881,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,459,module's file,"p_data(RDel,Cols,Rows,ExPost) = 0;",
-captrd.gms,872-876,assignment,to move,capri_mod/pipeline/captrd/prepare.py,clean_regions,347,same block,"p_data(NT2ext,Cols,Rows,Years) $ ( (NOT SUM(SAMEAS(Cols,MPACT),1 ))",
+captrd.gms,872-876,assignment,to move,capri_mod/pipeline/captrd/prepare.py,clean_regions,348,same block,"p_data(NT2ext,Cols,Rows,Years) $ ( (NOT SUM(SAMEAS(Cols,MPACT),1 ))",
 captrd.gms,883-895,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,(module),31,module's file,"p_data(NT2,MAACT,IYANI,Years) $ ( (NOT SUM(SAMEAS(MS,NT2), 1))",
-captrd.gms,883-895,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,473,module's file,"p_data(NT2,MAACT,IYANI,Years) $ ( (NOT SUM(SAMEAS(MS,NT2), 1))",
-captrd.gms,897-898,assignment,to move,capri_mod/pipeline/captrd/prepare.py,(module),25,named,"p_data(Rest,""GROF"",""LABH"",YEARS) = p_data(Rest,""GROF"",""LABO"",YEARS) - p_data(Rest,""GROF"",""LABN"",YEARS);",
-captrd.gms,897-898,assignment,to move,capri_mod/pipeline/captrd/prepare.py,labour_household,390,named,"p_data(Rest,""GROF"",""LABH"",YEARS) = p_data(Rest,""GROF"",""LABO"",YEARS) - p_data(Rest,""GROF"",""LABN"",YEARS);",
+captrd.gms,897,assignment,in style,capri_mod/pipeline/captrd/equations/captrd.py,p_data_LABH,48,named,"p_data(Rest,""GROF"",""LABH"",YEARS) = p_data(Rest,""GROF"",""LABO"",YEARS) - p_data(Rest,""GROF"",""LABN"",YEARS);",
+captrd.gms,897-898,assignment,moved,capri_mod/pipeline/captrd/prepare.py,(module),25,named,"p_data(Rest,""GROF"",""LABH"",YEARS) = p_data(Rest,""GROF"",""LABO"",YEARS) - p_data(Rest,""GROF"",""LABN"",YEARS);",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd.gms,897-898,assignment,moved,capri_mod/pipeline/captrd/prepare.py,labour_household,391,named,"p_data(Rest,""GROF"",""LABH"",YEARS) = p_data(Rest,""GROF"",""LABO"",YEARS) - p_data(Rest,""GROF"",""LABN"",YEARS);",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd.gms,898,assignment,in style,capri_mod/pipeline/captrd/equations/captrd.py,p_data_LABH,52,named,"p_data(Rest,""GROF"",""LABH"",""BASM"") = p_data(Rest,""GROF"",""LABO"",""BASM"") - p_data(Rest,""GROF"",""LABN"",""BASM"");",
 captrd.gms,902,control ($),in style,capri_mod/pipeline/captrd/equations/labour_ageline.py,(module),1,named,$INCLUDE 'baseline\labour_ageline.gms',
 captrd.gms,902,control ($),context,capri_mod/pipeline/captrd/labour.py,(module),2,named,$INCLUDE 'baseline\labour_ageline.gms',
 captrd.gms,902,control ($),context,capri_mod/pipeline/captrd/prepare_run.py,run,128,same function,$INCLUDE 'baseline\labour_ageline.gms',
@@ -437,26 +404,18 @@ captrd.gms,954,comment,in style,capri_mod/pipeline/captrd/equations/scale_DG_AGR
 captrd.gms,954,comment,context,capri_mod/pipeline/captrd/scale_dgagri.py,(module),1,named,*,
 captrd.gms,965,blank,context,capri_mod/pipeline/captrd/macro.py,(module),30,same function,,
 captrd.gms,965,blank,context,capri_mod/pipeline/captrd/macro.py,(module),36,same function,,
-captrd.gms,988-1014,declaration,context,capri_mod/pipeline/captrd/national_supports.py,supports,581,module's file,parameter p_activateStep(iSolve);,
-captrd.gms,1015-1089,bound,moved,capri_mod/pipeline/captrd/national_supports.py,supports,590,module's file,"sV_EstV.L(Rest,S_ColsEst,S_RowsEst,exAnte) = 0;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd.gms,1035,control,context,capri_mod/pipeline/captrd/macro.py,(module),32,same function,"LOOP(iSolve $ p_activateStep(iSolve),",
 captrd.gms,1058-1060,control ($),context,capri_mod/pipeline/captrd/estimate_ms.py,(module),2,named,$include 'captrd\estimate_MSnogrid.gms';,
 captrd.gms,1064-1072,control ($),in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,(module),1,named,$include 'captrd\define_EU_supports.gms';,
 captrd.gms,1064-1072,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,(module),2,named,$include 'captrd\define_EU_supports.gms';,
-captrd.gms,1090-1190,control,context,capri_mod/pipeline/captrd/national_supports.py,supports,610,module's file,option kill=Rest;,
-captrd.gms,1097-1122,control ($),context,capri_mod/pipeline/captrd/national_supports.py,supports,610,module's file,$IF NOT %NTSLVL%==0 $include 'captrd\estimate_NUTS2.gms';,
-captrd.gms,1191-1225,assignment,to move,capri_mod/pipeline/captrd/national_supports.py,supports,617,module's file,"p_result(Rest,MPACT,""Yild"",Copy,TrdDat) = SUM(PACT_TO_Y(MPACT,O), p_result(Rest,MPACT,O,Copy,TrdDat));",
-captrd.gms,1195-1216,assignment,to move,capri_mod/pipeline/captrd/estimate_ms.py,requirement_factor,388,named,TrdDat(Respos) = no;,
-captrd.gms,1205-1216,assignment,to move,capri_mod/pipeline/captrd/estimate_ms.py,requirements_relative,395,named,"p_result(Rest,AACT,ReqsT,exAnte,TrdDat) $ ( (p_data(Rest,AACT,ReqsT,""Const"") + p_data(Rest,AACT,ReqsT,""Slope""))",
-captrd.gms,1226-1266,assignment,to move,capri_mod/pipeline/captrd/national_supports.py,supports,625,module's file,"or (abs(P_data(rEst,S_ColsEst,S_RowsEst,""wAve"")) gt 1.E-15)",
-captrd.gms,1267-1326,assignment,to move,capri_mod/pipeline/captrd/national_supports.py,supports,633,module's file,"p_data(Rest,MPACT,ILAB,""BASM"") = SUM(MAP_RR(MS,REST), p_data(MS,MPACT,ILAB,""BASM""));",
-captrd.gms,1327-1375,assignment,to move,capri_mod/pipeline/captrd/national_supports.py,supports,648,module's file,"execute_load ""%results_out%\baseline\results_%BAS%%SIM%%addfile%%ResId%.gdx"" p_resultCopy=p_result,meta1=meta;;",
-captrd.gms,1376-1416,assignment,to move,capri_mod/pipeline/captrd/national_supports.py,supports,656,module's file,"= P_RESULT(rAll,cols,RESIMP,resy,""Step3"");",
+captrd.gms,1195-1216,assignment,moved,capri_mod/pipeline/captrd/estimate_ms.py,requirement_factor,388,named,TrdDat(Respos) = no;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd.gms,1205-1216,assignment,moved,capri_mod/pipeline/captrd/estimate_ms.py,requirements_relative,395,named,"p_result(Rest,AACT,ReqsT,exAnte,TrdDat) $ ( (p_data(Rest,AACT,ReqsT,""Const"") + p_data(Rest,AACT,ReqsT,""Slope""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd.gms,1206-1217,assignment,in style,capri_mod/pipeline/captrd/equations/captrd.py,(module),9,same block,"p_result(Rest,AACT,ReqsT,exAnte,TrdDat) $ ( (p_data(Rest,AACT,ReqsT,""Const"") + p_data(Rest,AACT,ReqsT,""Slope""))",
 captrd/adjust_to_biof_supports.gms,,file,context,capri_mod/pipeline/captrd/equations/adjust_to_biof_supports.py,(module),1,named,,
 captrd/adjust_to_biof_supports.gms,,file,context,capri_mod/pipeline/captrd/eu_supports.py,(module),16,named,,
 captrd/adjust_to_biof_supports.gms,,file,context,capri_mod/pipeline/captrd/eu_supports.py,Sets,96,named,,
 captrd/adjust_to_biof_supports.gms,,file,context,capri_mod/pipeline/captrd/eu_supports.py,Years,111,named,,
-captrd/adjust_to_biof_supports.gms,,file,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,298,named,,
+captrd/adjust_to_biof_supports.gms,,file,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,299,named,,
 captrd/adjust_to_biof_supports.gms,,file,context,capri_mod/pipeline/captrd/expert_support.py,(module),13,named,,
 captrd/adjust_to_biof_supports.gms,,file,context,capri_mod/pipeline/captrd/final_supports.py,(module),6,named,,
 captrd/adjust_to_biof_supports.gms,,file,context,capri_mod/pipeline/captrd/final_supports.py,(module),14,named,,
@@ -641,7 +600,7 @@ captrd/captrd_policy.gms,,file,context,capri_mod/pipeline/captrd/equations/captr
 captrd/captrd_policy.gms,,file,context,capri_mod/pipeline/captrd/policy.py,(module),1,named,,
 captrd/captrd_policy.gms,,file,context,capri_mod/pipeline/captrd/policy.py,apply,304,named,,
 captrd/captrd_policy.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,(module),27,named,,
-captrd/captrd_policy.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets,118,named,,
+captrd/captrd_policy.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets,119,named,,
 captrd/captrd_policy.gms,,file,context,capri_mod/pipeline/captrd/prepare_run.py,(module),10,named,,
 captrd/captrd_policy.gms,28,other,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,55,named,"QDel ""Deliveries to dairies""",
 captrd/captrd_policy.gms,32,other,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,61,same function,"DirS ""Direct sales as observed"" /;",
@@ -683,10 +642,10 @@ captrd/captrd_policy.gms,186-193,assignment,in style,capri_mod/pipeline/captrd/e
 captrd/captrd_policy.gms,186-193,assignment,moved,capri_mod/pipeline/captrd/policy.py,set_aside,284,same function,"p_data(""EU015000"",""CERE"",""SETR"",YEARS) $ ((CALYEA(YEARS) GT CALYEA(""2007"")) $ ExAnte(YEARS)) = 0;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/captrd_policy.gms,195-200,assignment,to move,capri_mod/pipeline/captrd/policy.py,set_aside,291,same function,"p_data(MS,RSET,""SETR"",YearsCur) = 0;",
 captrd/check_and_cor_capreg.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,(module),20,named,,
-captrd/check_and_cor_capreg.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,check_and_cor,258,named,,
-captrd/check_and_cor_capreg.gms,27-28,assignment,to move,capri_mod/pipeline/captrd/prepare.py,check_and_cor,258,same line,"p_data(""NO000000"",BIOREPCOLS,seco_biof,simyy_ybas) = 0;",
-captrd/check_and_cor_capreg.gms,32-33,comment,context,capri_mod/pipeline/captrd/prepare.py,check_and_cor,259,same block,"* $ (sameas(cols,""SHGT"") or sameas(cols,""SHGM"") or sameas(cols,""SHEP""))) = 0;",
-captrd/check_and_cor_capreg.gms,35-39,declaration,context,capri_mod/pipeline/captrd/prepare.py,check_and_cor,259,same block,SET ALLNUTS2inclUrban(RALL);,
+captrd/check_and_cor_capreg.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,check_and_cor,259,named,,
+captrd/check_and_cor_capreg.gms,27-28,assignment,to move,capri_mod/pipeline/captrd/prepare.py,check_and_cor,259,same line,"p_data(""NO000000"",BIOREPCOLS,seco_biof,simyy_ybas) = 0;",
+captrd/check_and_cor_capreg.gms,32-33,comment,context,capri_mod/pipeline/captrd/prepare.py,check_and_cor,260,same block,"* $ (sameas(cols,""SHGT"") or sameas(cols,""SHGM"") or sameas(cols,""SHEP""))) = 0;",
+captrd/check_and_cor_capreg.gms,35-39,declaration,context,capri_mod/pipeline/captrd/prepare.py,check_and_cor,260,same block,SET ALLNUTS2inclUrban(RALL);,
 captrd/clean_tiny.gms,,file,context,capri_mod/pipeline/captrd/clean_tiny.py,(module),1,named,,
 captrd/clean_tiny.gms,,file,context,capri_mod/pipeline/captrd/clean_tiny.py,(module),1,named,,
 captrd/clean_tiny.gms,,file,context,capri_mod/pipeline/captrd/clean_tiny.py,(module),4,named,,
@@ -802,50 +761,62 @@ captrd/copy_labour_biofuel_on_presult.gms,63-64,assignment,moved,capri_mod/pipel
 captrd/define_eu_supports.gms,,file,context,capri_mod/pipeline/captrd/equations/define_eu_supports.py,(module),1,named,,
 captrd/define_eu_supports.gms,,file,context,capri_mod/pipeline/captrd/equations/longrun_supports.py,p_ExpertSupprt_PercentChange_Longrun1,497,named,,
 captrd/define_eu_supports.gms,,file,context,capri_mod/pipeline/captrd/eu_supports.py,(module),2,named,,
+captrd/define_eu_supports.gms,,file,context,capri_mod/pipeline/captrd/eu_supports.py,(module),3,named,,
 captrd/define_eu_supports.gms,,file,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,154,named,,
+captrd/define_eu_supports.gms,,file,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,155,named,,
+captrd/define_eu_supports.gms,,file,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,299,named,,
 captrd/define_eu_supports.gms,,file,context,capri_mod/pipeline/captrd/final_supports.py,biof_adjust,83,named,,
 captrd/define_eu_supports.gms,38-39,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,(module),61,named,S_ColsEst(S_ColsEst1) = YES;,
-captrd/define_eu_supports.gms,63-191,control,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,172,same function,"IF((OrdT(exAnte) GT OrdT(""%lst_dgagri%"")),",
+captrd/define_eu_supports.gms,43-45,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,(module),5,same block,"p_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""Step2"")",
+captrd/define_eu_supports.gms,63-191,control,context,capri_mod/pipeline/captrd/eu_supports.py,(module),6,same block,"IF((OrdT(exAnte) GT OrdT(""%lst_dgagri%"")),",
+captrd/define_eu_supports.gms,63-191,control,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,173,same function,"IF((OrdT(exAnte) GT OrdT(""%lst_dgagri%"")),",
 captrd/define_eu_supports.gms,67-68,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,ordT_StartpointExtrap,19,named,"ordT(""StartpointExtrap"") = SUM(years $ (Fst_exAnte(Years) or Sec_exAnte(Years)),ordT(years))",
-captrd/define_eu_supports.gms,67-68,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,175,same function,"ordT(""StartpointExtrap"") = SUM(years $ (Fst_exAnte(Years) or Sec_exAnte(Years)),ordT(years))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,67-68,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,176,same function,"ordT(""StartpointExtrap"") = SUM(years $ (Fst_exAnte(Years) or Sec_exAnte(Years)),ordT(years))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,72-81,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_StartpointExtrap_Step3,35,named,"P_Result(MS,S_ColsEst,S_RowsEst,""StartpointExtrap"",""Step3"")",
-captrd/define_eu_supports.gms,72-81,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,189,same function,"P_Result(MS,S_ColsEst,S_RowsEst,""StartpointExtrap"",""Step3"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,72-81,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,190,same function,"P_Result(MS,S_ColsEst,S_RowsEst,""StartpointExtrap"",""Step3"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,149-156,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_BAS_Extrap,57,named,"P_Result(MS,S_ColsEst,S_RowsEst,""BAS"",""Extrap"")",
-captrd/define_eu_supports.gms,149-165,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,192,same function,"P_Result(MS,S_ColsEst,S_RowsEst,""BAS"",""Extrap"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,149-165,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,193,same function,"P_Result(MS,S_ColsEst,S_RowsEst,""BAS"",""Extrap"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,161-165,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_BSY_Extrap,76,named,"P_Result(MS,S_ColsEst,S_RowsEst,""BSY"",""Extrap"")",
 captrd/define_eu_supports.gms,170-184,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_DGAgri1_Extrap,93,named,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"")",
-captrd/define_eu_supports.gms,170-184,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,195,same function,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,170-184,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,196,same function,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,175,comment,context,capri_mod/pipeline/captrd/final_supports.py,biof_adjust,83,same line,* - Special case PRCI (for HFCS) has been entered as an expert support => no DG agri support on MS level,
 captrd/define_eu_supports.gms,189,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_Extrap,121,named,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""Extrap"") = P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"");",
-captrd/define_eu_supports.gms,189,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,197,same function,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""Extrap"") = P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"");",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,189,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,198,same function,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""Extrap"") = P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"");",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,214-217,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_rmAggSup_Step2,139,named,"P_Result(rmAggSup,MrkBalee,S_RowsEst,ExAnte,""Step2"")",
-captrd/define_eu_supports.gms,214-223,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,199,same function,"P_Result(rmAggSup,MrkBalee,S_RowsEst,ExAnte,""Step2"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,214-223,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,(module),9,same block,"P_Result(rmAggSup,MrkBalee,S_RowsEst,ExAnte,""Step2"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,214-223,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,200,same function,"P_Result(rmAggSup,MrkBalee,S_RowsEst,ExAnte,""Step2"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,220-223,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_rmAggSup_Step2,146,named,"P_Result(rmAggSup,S_ColsEst,""LEVL"",ExAnte,""Step2"")",
 captrd/define_eu_supports.gms,238-245,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_DGAgri1_from_rmAggSup,174,named,"P_Result(MS,MrkBalee,S_RowsEst,ExAnte,""DGAgri1"")",
-captrd/define_eu_supports.gms,238-262,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,213,same function,"P_Result(MS,MrkBalee,S_RowsEst,ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,238-262,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,(module),10,same block,"P_Result(MS,MrkBalee,S_RowsEst,ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,238-262,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,214,same function,"P_Result(MS,MrkBalee,S_RowsEst,ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,248-255,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_DGAgri1_from_rmAggSup,185,named,"P_Result(MS,S_ColsEst,""LEVL"",ExAnte,""DGAgri1"")",
 captrd/define_eu_supports.gms,259-262,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_DGAgri1_HERD,204,named,"P_Result(MS,S_ColsEst,""HERD"",ExAnte,""DGAgri1"") $ ( (NOT P_Result(MS,S_ColsEst,""HERD"",ExAnte,""DGAgri1""))",
-captrd/define_eu_supports.gms,271-343,control,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,236,same function,"IF(((OrdT(""Lst_exAnte"") GT OrdT(""%lst_dgagri%"")) $ (OrdT(exAnte) GT OrdT(""%phaseInYr%""))) ,",
+captrd/define_eu_supports.gms,271-343,control,context,capri_mod/pipeline/captrd/eu_supports.py,(module),12,same block,"IF(((OrdT(""Lst_exAnte"") GT OrdT(""%lst_dgagri%"")) $ (OrdT(exAnte) GT OrdT(""%phaseInYr%""))) ,",
+captrd/define_eu_supports.gms,271-343,control,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,237,same function,"IF(((OrdT(""Lst_exAnte"") GT OrdT(""%lst_dgagri%"")) $ (OrdT(exAnte) GT OrdT(""%phaseInYr%""))) ,",
 captrd/define_eu_supports.gms,275-285,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_Longrun1,220,named,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""Longrun1"") $ ( (ORDT(ExAnte) GT ORDT(""%phaseInYr%""))",
 captrd/define_eu_supports.gms,291-298,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_Longrun1_DOMM,244,named,"P_Result(MS,DOMM,S_RowsEst,ExAnte,""Longrun1"") $ ( (ORDT(ExAnte) GT ORDT(""%phaseInYr%""))",
-captrd/define_eu_supports.gms,291-298,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,243,same function,"P_Result(MS,DOMM,S_RowsEst,ExAnte,""Longrun1"") $ ( (ORDT(ExAnte) GT ORDT(""%phaseInYr%""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,291-298,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,244,same function,"P_Result(MS,DOMM,S_RowsEst,ExAnte,""Longrun1"") $ ( (ORDT(ExAnte) GT ORDT(""%phaseInYr%""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,303-305,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_Longrun1_group,264,named,"P_Result(MS,GRPC,""LEVL"",ExAnte,""Longrun1"") $ ( (ORDT(ExAnte) GT ORDT(""%lst_dgagri%""))",
-captrd/define_eu_supports.gms,303-309,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,253,same function,"P_Result(MS,GRPC,""LEVL"",ExAnte,""Longrun1"") $ ( (ORDT(ExAnte) GT ORDT(""%lst_dgagri%""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,303-309,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,254,same function,"P_Result(MS,GRPC,""LEVL"",ExAnte,""Longrun1"") $ ( (ORDT(ExAnte) GT ORDT(""%lst_dgagri%""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,307-309,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_Longrun1_group,270,named,"P_Result(MS,MrkBaleE,GRPR,ExAnte,""Longrun1"") $ ( (ORDT(ExAnte) GT ORDT(""%lst_dgagri%""))",
 captrd/define_eu_supports.gms,314-318,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_Longrun1_COMI,285,named,"P_Result(MS,DCOW,""COMI"",ExAnte,""Longrun1"") $ ( (ORDT(ExAnte) GT ORDT(""%lst_dgagri%"")) $ P_Result(MS,DCOW,""COMI"",ExAnte,""Longrun1""))",
-captrd/define_eu_supports.gms,314-318,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,261,same function,"P_Result(MS,DCOW,""COMI"",ExAnte,""Longrun1"") $ ( (ORDT(ExAnte) GT ORDT(""%lst_dgagri%"")) $ P_Result(MS,DCOW,""COMI"",ExAnte,""Longrun1""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,314-318,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,262,same function,"P_Result(MS,DCOW,""COMI"",ExAnte,""Longrun1"") $ ( (ORDT(ExAnte) GT ORDT(""%lst_dgagri%"")) $ P_Result(MS,DCOW,""COMI"",ExAnte,""Longrun1""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,331-332,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_Extrap,125,named,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""Extrap"") $ (ORDT(ExAnte) GE ORDT(""%lst_dgagri%""))",
-captrd/define_eu_supports.gms,331-332,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,272,same function,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""Extrap"") $ (ORDT(ExAnte) GE ORDT(""%lst_dgagri%""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,331-332,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,273,same function,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""Extrap"") $ (ORDT(ExAnte) GE ORDT(""%lst_dgagri%""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,335-341,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_DGAgri1_Longrun1,301,named,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"") $ ( (ORDT(ExAnte) GT ORDT(""%phaseInYr%""))",
-captrd/define_eu_supports.gms,335-341,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,274,same function,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"") $ ( (ORDT(ExAnte) GT ORDT(""%phaseInYr%""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,335-341,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,275,same function,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"") $ ( (ORDT(ExAnte) GT ORDT(""%phaseInYr%""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,355-364,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_UAAR_DGAgri1,320,named,"P_Result(Rest,""UAAR"",""LEVL"",ExAnte,""DGAgri1"")",
-captrd/define_eu_supports.gms,355-364,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,277,same function,"P_Result(Rest,""UAAR"",""LEVL"",ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,355-364,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,(module),14,same block,"P_Result(Rest,""UAAR"",""LEVL"",ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,355-364,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,278,same function,"P_Result(Rest,""UAAR"",""LEVL"",ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,368-371,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_rmAggSup_DGAgri1,342,named,"P_Result(rmAggSup,MrkBalee,S_RowsEst,ExAnte,""DGAgri1"")",
-captrd/define_eu_supports.gms,368-376,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,286,same function,"P_Result(rmAggSup,MrkBalee,S_RowsEst,ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,368-376,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,(module),15,same block,"P_Result(rmAggSup,MrkBalee,S_RowsEst,ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,368-376,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,287,same function,"P_Result(rmAggSup,MrkBalee,S_RowsEst,ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,373-376,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_rmAggSup_DGAgri1,349,named,"P_Result(rmAggSup,S_ColsEst,""LEVL"",ExAnte,""DGAgri1"")",
 captrd/define_eu_supports.gms,387,control ($),in style,capri_mod/pipeline/captrd/equations/adjust_to_biof_supports.py,(module),2,named,"$batinclude 'captrd\adjust_to_biof_supports.gms' '""DGAgri1""'",
-captrd/define_eu_supports.gms,387,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,298,same function,"$batinclude 'captrd\adjust_to_biof_supports.gms' '""DGAgri1""'",
+captrd/define_eu_supports.gms,387,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,(module),16,same block,"$batinclude 'captrd\adjust_to_biof_supports.gms' '""DGAgri1""'",
+captrd/define_eu_supports.gms,387,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,299,same function,"$batinclude 'captrd\adjust_to_biof_supports.gms' '""DGAgri1""'",
 captrd/define_eu_supports.gms,400-403,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_Support_DGAgri1,365,named,"P_Result(MS,MrkBalee,S_RowsEst,ExAnte,""Support"")",
+captrd/define_eu_supports.gms,400-509,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,304,same function,"P_Result(MS,MrkBalee,S_RowsEst,ExAnte,""Support"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,406-409,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_Support_DGAgri1,372,named,"P_Result(MS,""PRCI"",S_RowsEst,ExAnte,""Support"")",
 captrd/define_eu_supports.gms,473-476,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_Support_DGAgri1,379,named,"P_Result(MS,S_ColsEst,""LEVL"",ExAnte,""Support"")",
 captrd/define_eu_supports.gms,478-481,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_Support_DGAgri1,386,named,"P_Result(MS,S_ColsEst,""HERD"",ExAnte,""Support"")",
@@ -854,12 +825,15 @@ captrd/define_eu_supports.gms,491-493,assignment,in style,capri_mod/pipeline/cap
 captrd/define_eu_supports.gms,497-500,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_Support_DGAgri1,405,named,"P_Result(MS,S_ColsEst,S_RowsEst,exAnte,""Support"") $ ( P_Result(MS,S_ColsEst,S_RowsEst,exAnte,""DgAgri1"")",
 captrd/define_eu_supports.gms,505-508,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_EAAG_Support,421,named,"P_Result(MS,""EAAG"",S_RowsEst,exAnte,""Support"") $ ( P_Result(MS,""UVAG"",S_RowsEst,exAnte,""DgAgri1"")",
 captrd/define_eu_supports.gms,518-536,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_NTRD_Support,447,named,"P_Result(MS,""NTRD"",S_RowsEst,ExAnte,""Support"")",
+captrd/define_eu_supports.gms,518-536,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,325,same function,"P_Result(MS,""NTRD"",S_RowsEst,ExAnte,""Support"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,540-541,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_rmAggSup_Step2,153,named,"P_Result(rmAggSup,""NTRD"",""DDGS"",ExAnte,""Step2"")",
+captrd/define_eu_supports.gms,540-558,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,338,same function,"P_Result(rmAggSup,""NTRD"",""DDGS"",ExAnte,""Step2"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,542-543,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_rmAggSup_Step2,158,named,"P_Result(rmAGGSup,""GROF"",""FPRO"",ExAnte,""Step2"")",
 captrd/define_eu_supports.gms,545-551,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_NTRD_DDGS_Support,486,named,"P_Result(MS,""NTRD"",""DDGS"",ExAnte,""Support"")",
 captrd/define_eu_supports.gms,553-555,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_FEDM_DDGS_Support,504,named,"P_Result(MS,""FEDM"",""DDGS"",ExAnte,""Support"") $ P_Result(MS,""FEDM"",""DDGS"",ExAnte,""Support1"")",
 captrd/define_eu_supports.gms,557-558,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_DOMM_DDGS_Support,518,named,"P_Result(MS,""DOMM"",""DDGS"",ExAnte,""Support"") $ P_Result(MS,""FEDM"",""DDGS"",ExAnte,""Support"")",
 captrd/define_eu_supports.gms,565,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_trade_series,531,named,"P_Result(MS,""IMPT"",S_RowsEst,ExAnte,""series"") = P_Result(MS,""IMPT"",S_RowsEst,ExAnte,""Support"");",
+captrd/define_eu_supports.gms,565-604,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,355,same function,"P_Result(MS,""IMPT"",S_RowsEst,ExAnte,""series"") = P_Result(MS,""IMPT"",S_RowsEst,ExAnte,""Support"");",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,566,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_trade_series,535,named,"P_Result(MS,""EXPT"",S_RowsEst,ExAnte,""series"") = P_Result(MS,""EXPT"",S_RowsEst,ExAnte,""Support"");",
 captrd/define_eu_supports.gms,567-569,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_NTRD_series,547,named,"P_Result(MS,""NTRD"",S_RowsEst,ExAnte,""series"")",
 captrd/define_eu_supports.gms,572-577,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_IMPT_Support,562,named,"P_Result(MS,""IMPT"",S_RowsEst,ExAnte,""Support"") $ (( P_Result(MS,""EXPT"",S_RowsEst,ExAnte,""series"")",
@@ -869,9 +843,13 @@ captrd/define_eu_supports.gms,591-593,assignment,in style,capri_mod/pipeline/cap
 captrd/define_eu_supports.gms,596-598,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_EXPT_series,626,named,"P_Result(MS,""EXPT"",S_RowsEst,ExAnte,""series"") $ P_Result(MS,""NTRD"",S_RowsEst,ExAnte,""series"")",
 captrd/define_eu_supports.gms,600-601,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_trade_Support,640,named,"P_Result(MS,""IMPT"",S_RowsEst,ExAnte,""Support"") = P_Result(MS,""IMPT"",S_RowsEst,ExAnte,""series"");",
 captrd/define_eu_supports.gms,608,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_tradeEst_SUGB,653,named,"P_Result(MS,tradeEst,""SUGB"",ExAnte,""support"") = P_Result(MS,tradeEst,""SUGB"",ExAnte,""expert"") ;",
+captrd/define_eu_supports.gms,608,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,373,same function,"P_Result(MS,tradeEst,""SUGB"",ExAnte,""support"") = P_Result(MS,tradeEst,""SUGB"",ExAnte,""expert"") ;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,613-617,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_EAAG_Support,428,named,"P_Result(MS,""EAAG"",S_RowsEst,exAnte,""Support"") $ ( P_Result(MS,""UVAG"",S_RowsEst,exAnte,""Expert"")",
+captrd/define_eu_supports.gms,613-617,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,378,same function,"P_Result(MS,""EAAG"",S_RowsEst,exAnte,""Support"") $ ( P_Result(MS,""UVAG"",S_RowsEst,exAnte,""Expert"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,624-629,other,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_MCACT_LEVL_Support,667,named,"P_Result(MS,S_ColsEst,""LEVL"",ExAnte,""Support"") $ ( SUM(SAMEAS(MCACT,S_ColsEst),",
+captrd/define_eu_supports.gms,624-629,other,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,387,same function,"P_Result(MS,S_ColsEst,""LEVL"",ExAnte,""Support"") $ ( SUM(SAMEAS(MCACT,S_ColsEst),",
 captrd/define_eu_supports.gms,641-646,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_GROF_young,685,named,"P_Result(MS,""GROF"",""IPIG"",ExAnte,""Support"")",
+captrd/define_eu_supports.gms,641-684,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,400,same function,"P_Result(MS,""GROF"",""IPIG"",ExAnte,""Support"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,648-652,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_GROF_young_Y,721,named,"P_Result(MS,""GROF"",""YPIG"",ExAnte,""Support"")",
 captrd/define_eu_supports.gms,657-662,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_GROF_young,694,named,"P_Result(MS,""GROF"",""ICHI"",ExAnte,""Support"")",
 captrd/define_eu_supports.gms,664-668,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_GROF_young_Y,729,named,"P_Result(MS,""GROF"",""YCHI"",ExAnte,""Support"")",
@@ -879,22 +857,39 @@ captrd/define_eu_supports.gms,673-678,assignment,in style,capri_mod/pipeline/cap
 captrd/define_eu_supports.gms,680-684,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_GROF_young_Y,737,named,"P_Result(MS,""GROF"",""YLAM"",ExAnte,""Support"")",
 captrd/define_eu_supports.gms,693,assignment,to move,capri_mod/pipeline/captrd/supports.py,supports,70,named,"= .1*min(1,P_Result(MS,""GROF"",OIYANIcattle,ExAnte,""Support"")*0.05/3*10/sqrt(P_Result(MS,""GROF"",OIYANIcattle,exAnte,""wVarErr"")))",
 captrd/define_eu_supports.gms,710-711,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,p_result_MrkBalee_nonneg,753,named,"p_result(MS,MrkBalee,s_rowsEst,exante,""Support"") $ (NOT SAMEAS(MrkBaleE,""NTRD""))",
+captrd/define_eu_supports.gms,710-711,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,413,same function,"p_result(MS,MrkBalee,s_rowsEst,exante,""Support"") $ (NOT SAMEAS(MrkBaleE,""NTRD""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,719-731,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_TrustLevl_DGAgri,767,named,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""TrustLevl"") $ ( P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri"")",
+captrd/define_eu_supports.gms,719-731,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,425,same function,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""TrustLevl"") $ ( P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,719-864,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,417,same function,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""TrustLevl"") $ ( P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,735-749,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_TrustLevl_rmAggSup,792,named,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""TrustLevl"") $ ( (NOT P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri""))",
+captrd/define_eu_supports.gms,735-749,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,428,same function,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""TrustLevl"") $ ( (NOT P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,752-761,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_TrustLevl_trade,818,named,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""TrustLevl"") $ ( P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"")",
+captrd/define_eu_supports.gms,752-761,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,429,same function,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""TrustLevl"") $ ( P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,767-770,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_TrustLevl_groups,839,named,"P_Result(MS,S_ColsEst,""LEVL"",ExAnte,""TrustLevl"") $ ( P_Result(MS,S_ColsEst,""LEVL"",ExAnte,""DGAgri1"")",
+captrd/define_eu_supports.gms,767-770,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,431,same function,"P_Result(MS,S_ColsEst,""LEVL"",ExAnte,""TrustLevl"") $ ( P_Result(MS,S_ColsEst,""LEVL"",ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,774-785,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_TrustLevl_MAACT,855,named,"P_Result(MS,MAACT,""LEVL"",ExAnte,""TrustLevl"") $ ( P_Result(MS,MAACT,""LEVL"",ExAnte,""DGAgri1"")",
+captrd/define_eu_supports.gms,774-785,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,435,same function,"P_Result(MS,MAACT,""LEVL"",ExAnte,""TrustLevl"") $ ( P_Result(MS,MAACT,""LEVL"",ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,791-793,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_TrustLevl_quota,879,named,"P_Result(MS,""EXPE"",S_RowsEst,exAnte,""TrustLevl"") $ ( P_Result(MS,""UVAG"",S_RowsEst,exAnte,""Expert"")",
+captrd/define_eu_supports.gms,791-793,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,442,same function,"P_Result(MS,""EXPE"",S_RowsEst,exAnte,""TrustLevl"") $ ( P_Result(MS,""UVAG"",S_RowsEst,exAnte,""Expert"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,798-803,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_TrustLevl_yield,904,named,"P_Result(MS,S_ColsEst,S_RowsEst,exAnte,""TrustLevl"") $ ( ( P_Result(MS,S_ColsEst,S_RowsEst,exAnte,""DgAgri1"")",
+captrd/define_eu_supports.gms,798-803,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,444,same function,"P_Result(MS,S_ColsEst,S_RowsEst,exAnte,""TrustLevl"") $ ( ( P_Result(MS,S_ColsEst,S_RowsEst,exAnte,""DgAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,809-816,other,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_TrustLevl_quota,885,named,"P_Result(MS,""GROF"",S_RowsEst,ExAnte,""TrustLevl"") $ ( SUM(PRCD(SECOD,S_RowsEst) $ S_RowsEst(SECOD),",
+captrd/define_eu_supports.gms,809-816,other,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,446,same function,"P_Result(MS,""GROF"",S_RowsEst,ExAnte,""TrustLevl"") $ ( SUM(PRCD(SECOD,S_RowsEst) $ S_RowsEst(SECOD),",
 captrd/define_eu_supports.gms,829-835,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_TrustLevl_Longrun1,922,named,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""TrustLevl"") $ ( P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"")",
+captrd/define_eu_supports.gms,829-835,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,450,same function,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""TrustLevl"") $ ( P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_eu_supports.gms,838-843,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,417,same function,"P_Result(MS,s_ColsEst,rows,ExAnte,""trustlevl"") $ (P_T_ActAgg(s_ColsEst,""CATO"")",
 captrd/define_eu_supports.gms,847-850,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_TrustLevl_UVAG,940,named,"P_Result(MS,""UVAG"",S_RowsEst,exAnte,""TrustLevl"") $ ( P_Result(MS,""UVAG"",S_RowsEst,exAnte,""DgAgri"")",
+captrd/define_eu_supports.gms,847-850,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,453,same function,"P_Result(MS,""UVAG"",S_RowsEst,exAnte,""TrustLevl"") $ ( P_Result(MS,""UVAG"",S_RowsEst,exAnte,""DgAgri"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,853-857,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_TrustLevl_UVAG_agg,955,named,"P_Result(MS,""UVAG"",S_RowsEst,ExAnte,""TrustLevl"") $ ( (NOT P_Result(MS,""UVAG"",S_RowsEst,exAnte,""DgAgri""))",
+captrd/define_eu_supports.gms,853-857,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,455,same function,"P_Result(MS,""UVAG"",S_RowsEst,ExAnte,""TrustLevl"") $ ( (NOT P_Result(MS,""UVAG"",S_RowsEst,exAnte,""DgAgri""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,862-864,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_TrustLevl_UVAD,971,named,"P_Result(MS,""UVAD"",S_RowsEst,exAnte,""TrustLevl"") $ ( P_Result(MS,""UVAD"",S_RowsEst,exAnte,""DgAgri1"")",
+captrd/define_eu_supports.gms,862-864,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,457,same function,"P_Result(MS,""UVAD"",S_RowsEst,exAnte,""TrustLevl"") $ ( P_Result(MS,""UVAD"",S_RowsEst,exAnte,""DgAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,869-871,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_DGAgri_removed,986,named,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri"") $ ( P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"")",
+captrd/define_eu_supports.gms,869-881,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,460,same function,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri"") $ ( P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,873-875,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_DGAgri_removed,992,named,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"") $ ( P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"")",
 captrd/define_eu_supports.gms,877-881,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_DGAgri_removed,998,named,"P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"") $ ( P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""DGAgri1"")",
 captrd/define_eu_supports.gms,883-886,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_wVarErr,1015,named,"P_Result(MS,S_ColsEst,S_RowsEst,exAnte,""wVarErr"") $ ( (Not P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""Expert""))",
+captrd/define_eu_supports.gms,883-895,assignment,moved,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,474,same function,"P_Result(MS,S_ColsEst,S_RowsEst,exAnte,""wVarErr"") $ ( (Not P_Result(MS,S_ColsEst,S_RowsEst,ExAnte,""Expert""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,891-892,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_wVarErr_trade,1030,named,"P_Result(MS,""IMPT"",S_RowsEst,ExAnte,""wVarErr"") $ P_Result(MS,""NTRD"",S_RowsEst,ExAnte,""Support"")",
 captrd/define_eu_supports.gms,894-895,assignment,in style,capri_mod/pipeline/captrd/equations/define_eu_supports.py,P_Result_wVarErr_trade,1035,named,"P_Result(MS,""EXPT"",S_RowsEst,ExAnte,""wVarErr"") $ P_Result(MS,""NTRD"",S_RowsEst,ExAnte,""Support"")",
 captrd/define_stats_and_supports.gms,,file,context,capri_mod/pipeline/captrd/dairy_supports.py,(module),3,named,,
@@ -969,21 +964,17 @@ captrd/define_stats_and_supports.gms,355-356,assignment,in style,capri_mod/pipel
 captrd/define_stats_and_supports.gms,355-356,assignment,moved,capri_mod/pipeline/captrd/supports.py,uvag_from_dgagri1,168,named,"p_result(MS,""UVAG"",S_RowsEst,exAnte,""Support"") $ p_result(MS,""UVAG"",S_RowsEst,exAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_stats_and_supports.gms,358-365,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_result_UVAG_Support,338,same block,"p_result(MS,""UVAG"",S_RowsEst,exAnte,""wVarErr"") $ p_result(MS,""UVAG"",S_RowsEst,exAnte,""DGAgri1"")",
 captrd/define_stats_and_supports.gms,358-365,assignment,moved,capri_mod/pipeline/captrd/supports.py,uvag_from_dgagri1,169,same block,"p_result(MS,""UVAG"",S_RowsEst,exAnte,""wVarErr"") $ p_result(MS,""UVAG"",S_RowsEst,exAnte,""DGAgri1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
-captrd/define_stats_and_supports.gms,377-381,comment,context,capri_mod/pipeline/captrd/dairy_supports.py,dairy,107,module's file,*,
 captrd/define_stats_and_supports.gms,377-455,declaration,context,capri_mod/pipeline/captrd/coco_supports.py,(module),1,named,"parameter p_cocoSupport(*,*,*,*,*);",
 captrd/define_stats_and_supports.gms,380-676,declaration,context,capri_mod/pipeline/captrd/supports.py,(module),5,module's file,"parameter p_cocoSupport(*,*,*,*,*);",
 captrd/define_stats_and_supports.gms,386-394,declaration,context,capri_mod/pipeline/captrd/coco_supports.py,(module),5,same block,"parameter p_dataPositionIsOk(*,*,*,*,*) ""Evaluate data to see if it is good enough in some way, capable of debugging"";",
-captrd/define_stats_and_supports.gms,387-431,declaration,context,capri_mod/pipeline/captrd/dairy_supports.py,dairy,122,module's file,"parameter p_dataPositionIsOk(*,*,*,*,*) ""Evaluate data to see if it is good enough in some way, capable of debugging"";",
 captrd/define_stats_and_supports.gms,392-394,blank,context,capri_mod/pipeline/captrd/coco_supports.py,(module),6,same block,,
 captrd/define_stats_and_supports.gms,392-394,blank,context,capri_mod/pipeline/captrd/coco_supports.py,coco_supports,54,module's file,,
 captrd/define_stats_and_supports.gms,395-403,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_cocoSupport_Absolute,363,same block,"p_dataPositionIsOk(""devFromBas"",Rest,S_ColsEst,S_RowsEst,ExAnteD)",
 captrd/define_stats_and_supports.gms,396-410,control ($),context,capri_mod/pipeline/captrd/coco_supports.py,(module),10,same block,"$ p_result(Rest,S_ColsEst,S_RowsEst,exAnteD,""P_Data"")",
 captrd/define_stats_and_supports.gms,406-419,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_cocoSupport_Absolute,346,named,"p_cocoSupport(Rest,S_ColsEst,S_RowsEst,ExAnteD,""Absolute"")",
 captrd/define_stats_and_supports.gms,406-456,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,(module),8,same block,"p_cocoSupport(Rest,S_ColsEst,S_RowsEst,ExAnteD,""Absolute"")",
-captrd/define_stats_and_supports.gms,424,comment,context,capri_mod/pipeline/captrd/dairy_supports.py,dairy,110,module's file,* Reset the error(s) so that we can debug before termination,
 captrd/define_stats_and_supports.gms,424-454,assignment,moved,capri_mod/pipeline/captrd/coco_supports.py,(module),13,same block,execError = 0;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_stats_and_supports.gms,437-439,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_cocoSupport_TrustLevl,371,named,"p_cocoSupport(Rest,S_ColsEst,S_RowsEst,exAnteD,""TrustLevl"")",
-captrd/define_stats_and_supports.gms,439-440,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,dairy,215,module's file,= 7 ;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_stats_and_supports.gms,444-447,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_cocoSupport_TrustLevl_derived,384,named,"p_cocoSupport(Rest,S_ColsEst,S_RowsEst,exAnteD,""TrustLevl"")",
 captrd/define_stats_and_supports.gms,449-451,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_cocoSupport_TrustLevl_levl_yield,398,named,"p_cocoSupport(Rest,S_ColsEst,""LEVL"",exAnteD,""TrustLevl"")",
 captrd/define_stats_and_supports.gms,453-456,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_cocoSupport_TrustLevl_levl_yield,404,named,"p_cocoSupport(Rest,S_ColsEst,S_RowsEst,exAnteD,""TrustLevl"")",
@@ -1001,7 +992,6 @@ captrd/define_stats_and_supports.gms,511-519,assignment,in style,capri_mod/pipel
 captrd/define_stats_and_supports.gms,517-519,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_ExpertSupprt_HCOM_COMI_TrustLevl,490,named,"p_ExpertSupprt(Rest,""HCOM"",""COMI"",exAnteT,""TrustLevl"")",
 captrd/define_stats_and_supports.gms,522-534,assignment,moved,capri_mod/pipeline/captrd/coco_supports.py,(module),14,same block,"P_Result(rAll,""share"",""COMI"",exanteT,""support1"")=0;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_stats_and_supports.gms,530-537,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_result_coco,419,named,"p_result(rest,S_ColsEst,S_RowsEst,ExAnteD,""coco"")",
-captrd/define_stats_and_supports.gms,567-580,control ($),context,capri_mod/pipeline/captrd/dairy_supports.py,dairy,199,module's file,"$ ( p_result(MS,mAACT,""LEVL"",exanteD,""coco"") )",
 captrd/define_stats_and_supports.gms,589-598,control ($),in style,capri_mod/pipeline/captrd/equations/adjust_to_biof_supports.py,(module),2,named,$endif.herds,
 captrd/define_stats_and_supports.gms,589-598,control ($),context,capri_mod/pipeline/captrd/expert_support.py,(module),13,same block,$endif.herds,
 captrd/define_stats_and_supports.gms,589-598,control ($),context,capri_mod/pipeline/captrd/final_supports.py,(module),6,same block,$endif.herds,
@@ -1009,9 +999,7 @@ captrd/define_stats_and_supports.gms,600-605,assignment,moved,capri_mod/pipeline
 captrd/define_stats_and_supports.gms,600-605,assignment,moved,capri_mod/pipeline/captrd/final_supports.py,overwrite,209,named,"p_result(Rest,S_ColsEst,S_RowsEst,exAnte,""Support"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_stats_and_supports.gms,604-606,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_result_Support_Expert,503,named,"p_result(Rest,S_ColsEst,S_RowsEst,exAnte,""Support"")",
 captrd/define_stats_and_supports.gms,604-663,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,(module),9,same block,"p_result(Rest,S_ColsEst,S_RowsEst,exAnte,""Support"")",
-captrd/define_stats_and_supports.gms,606-609,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,dairy,226,module's file,"= p_result(Rest,S_ColsEst,S_RowsEst,exAnte,""Expert"");",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_stats_and_supports.gms,608-610,assignment,moved,capri_mod/pipeline/captrd/final_supports.py,(module),8,module's file,"p_data(Rest,""STCM"",OYANI,""nObs"") $ ( sum(exante, p_result(Rest,""GROF"",OYANI,exAnte,""support""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
-captrd/define_stats_and_supports.gms,615-664,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,dairy,231,module's file,"p_result(Rest,MCACT,""LEVL"",ExAnte,""Support"") $ ( (p_result(Rest,MCACT,""LEVL"",ExAnte,""Support"") GT 1.E-12)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_stats_and_supports.gms,618,assignment,moved,capri_mod/pipeline/captrd/final_supports.py,(module),43,named,"p_result(Rest,MCACT,""LEVL"",ExAnte,""Support"") $ ( (p_result(Rest,MCACT,""LEVL"",ExAnte,""Support"") GT 1.E-12)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_stats_and_supports.gms,618-622,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_result_MCACT_LEVL_Support,519,named,"p_result(Rest,MCACT,""LEVL"",ExAnte,""Support"") $ ( (p_result(Rest,MCACT,""LEVL"",ExAnte,""Support"") GT 1.E-12)",
 captrd/define_stats_and_supports.gms,618-622,assignment,moved,capri_mod/pipeline/captrd/final_supports.py,(module),9,module's file,"p_result(Rest,MCACT,""LEVL"",ExAnte,""Support"") $ ( (p_result(Rest,MCACT,""LEVL"",ExAnte,""Support"") GT 1.E-12)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
@@ -1092,7 +1080,7 @@ captrd/equations.gms,490-495,assignment,in style,capri_mod/pipeline/captrd/equat
 captrd/equations.gms,490-495,assignment,moved,capri_mod/pipeline/captrd/estimate_nuts2.py,(module),16,same block,"MSindmMaif_(MSEst,exAnteY) $ ( SUM(MAP_RR(MSEst,Rest) $ p_data(rEst,""INDM"",""MAIF"",""nObs""),1)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/equations.gms,500-507,assignment,moved,capri_mod/pipeline/captrd/estimate_nuts2.py,(module),18,same block,"EFED_(rest,FODDO,exAnteY) $ ( SUM(FEED_TO_O(FEED,FODDO) , p_data(Rest,""GROF"",FEED,""nObs"")) $(not sum(sameas(Foddo,ex_endofodderUse),1))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/equations.gms,500-508,assignment,in style,capri_mod/pipeline/captrd/equations/nuts2.py,EFED_,167,named,"EFED_(rest,FODDO,exAnteY) $ ( SUM(FEED_TO_O(FEED,FODDO) , p_data(Rest,""GROF"",FEED,""nObs"")) $(not sum(sameas(Foddo,ex_endofodderUse),1))",
-captrd/equations.gms,503,assignment,moved,capri_mod/pipeline/captrd/prepare.py,clean_regions,355,named,"V_EstV(Rest,""GROF"",FODDO,exAnteY) - V_EstV(Rest,""LOSF"",FODDO,exAnteY) $ p_data(Rest,""LOSF"",FODDO,""nObs"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/equations.gms,503,assignment,moved,capri_mod/pipeline/captrd/prepare.py,clean_regions,356,named,"V_EstV(Rest,""GROF"",FODDO,exAnteY) - V_EstV(Rest,""LOSF"",FODDO,exAnteY) $ p_data(Rest,""LOSF"",FODDO,""nObs"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/equations.gms,514-535,assignment,in style,capri_mod/pipeline/captrd/equations/equations.py,REQS_,484,named,"REQS_(Rest,MAACT,ReqsT,exAnteY) $ ( (p_data(Rest,MAACT,ReqsT,""Const"") + p_data(Rest,MAACT,ReqsT,""Slope""))",
 captrd/equations.gms,514-535,assignment,moved,capri_mod/pipeline/captrd/estimate_ms.py,(module),35,named,"REQS_(Rest,MAACT,ReqsT,exAnteY) $ ( (p_data(Rest,MAACT,ReqsT,""Const"") + p_data(Rest,MAACT,ReqsT,""Slope""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/equations.gms,514-535,assignment,moved,capri_mod/pipeline/captrd/estimate_ms.py,residuals,277,module's file,"REQS_(Rest,MAACT,ReqsT,exAnteY) $ ( (p_data(Rest,MAACT,ReqsT,""Const"") + p_data(Rest,MAACT,ReqsT,""Slope""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
@@ -1284,10 +1272,10 @@ captrd/estimate_nuts2.gms,,file,context,capri_mod/pipeline/captrd/estimate_nuts2
 captrd/estimate_nuts2.gms,,file,context,capri_mod/pipeline/captrd/estimate_nuts2.py,bounds,198,named,,
 captrd/estimate_nuts2.gms,,file,context,capri_mod/pipeline/captrd/estimate_nuts2.py,bounds,207,named,,
 captrd/estimate_nuts2.gms,,file,context,capri_mod/pipeline/captrd/estimate_nuts2.py,(module),779,named,,
-captrd/estimate_nuts2.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,clean_regions,352,named,,
+captrd/estimate_nuts2.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,clean_regions,353,named,,
 captrd/estimate_nuts2.gms,19-20,comment,context,capri_mod/pipeline/captrd/estimate_nuts2.py,(module),780,same block,********************************************************************************,
 captrd/estimate_nuts2.gms,31-48,assignment,to move,capri_mod/pipeline/captrd/estimate_nuts2.py,nuts2_bound_sets,183,same line,S_ColsEst(S_ColsEst) = NO;,
-captrd/estimate_nuts2.gms,33-41,assignment,to move,capri_mod/pipeline/captrd/prepare.py,clean_regions,353,same block,S_ColsEst(S_ColsEst) = NO;,
+captrd/estimate_nuts2.gms,33-41,assignment,to move,capri_mod/pipeline/captrd/prepare.py,clean_regions,354,same block,S_ColsEst(S_ColsEst) = NO;,
 captrd/estimate_nuts2.gms,35-38,assignment,to move,capri_mod/pipeline/captrd/estimate_nuts2.py,(module),782,same function,S_ColsEst(GRPC) = YES;,
 captrd/estimate_nuts2.gms,53-69,control,context,capri_mod/pipeline/captrd/estimate_nuts2.py,_grid_again,580,module's file,"LOOP( MS $ (MSINCL(MS) and (NOT isInfes(MS)) and (NTSLVL NE 0)),",
 captrd/estimate_nuts2.gms,55,comment,context,capri_mod/pipeline/captrd/estimate_nuts2.py,nuts2_bound_sets,183,same line,* --- include INDM in S_ColsEst for Germany because this is where energy maize is entered for eqs MSindmMaif_ and EFED_,
@@ -1340,7 +1328,7 @@ captrd/estimate_nuts2.gms,265-268,assignment,in style,capri_mod/pipeline/captrd/
 captrd/estimate_nuts2.gms,273-274,assignment,moved,capri_mod/pipeline/captrd/estimate_nuts2.py,(module),176,same function,"losfFromCoco2(""COMF"") = yes;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/estimate_nuts2.gms,273-285,assignment,moved,capri_mod/pipeline/captrd/estimate_nuts2.py,bounds,335,same function,"losfFromCoco2(""COMF"") = yes;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/estimate_nuts2.gms,276-279,assignment,in style,capri_mod/pipeline/captrd/equations/estimate_nuts2.py,V_EstV_lo_LOSF,390,named,"v_estV.LO(Rest,""LOSF"",losfFromCoco2,exAnte) $ ((v_estV.LO(Rest,""GROF"",losfFromCoco2,exAnte) gt 0))",
-captrd/estimate_nuts2.gms,276-285,assignment,moved,capri_mod/pipeline/captrd/prepare.py,clean_regions,355,same block,"v_estV.LO(Rest,""LOSF"",losfFromCoco2,exAnte) $ ((v_estV.LO(Rest,""GROF"",losfFromCoco2,exAnte) gt 0))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_nuts2.gms,276-285,assignment,moved,capri_mod/pipeline/captrd/prepare.py,clean_regions,356,same block,"v_estV.LO(Rest,""LOSF"",losfFromCoco2,exAnte) $ ((v_estV.LO(Rest,""GROF"",losfFromCoco2,exAnte) gt 0))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/estimate_nuts2.gms,281-285,assignment,in style,capri_mod/pipeline/captrd/equations/estimate_nuts2.py,V_EstV_up_LOSF,406,named,"v_estV.UP(Rest,""LOSF"",losfFromCoco2,exAnte) $ ( (v_estV.UP(Rest,""GROF"",losfFromCoco2,exAnte) gt 0)",
 captrd/estimate_nuts2.gms,290-345,bound,moved,capri_mod/pipeline/captrd/estimate_nuts2.py,bounds,343,same function,"v_estV.L(Rest,""SUGB"",""SUGB"",exAnte) = 0.5*v_estV.Lo(Rest,""SUGB"",""SUGB"",exAnte)+0.5*v_estV.UP(Rest,""SUGB"",""SUGB"",exAnte) ;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/estimate_nuts2.gms,292,bound,in style,capri_mod/pipeline/captrd/equations/estimate_nuts2.py,V_EstV_l_SUGB_SUGB,423,named,"v_estV.L(Rest,""SUGB"",""SUGB"",exAnte) = 0.5*v_estV.Lo(Rest,""SUGB"",""SUGB"",exAnte)+0.5*v_estV.UP(Rest,""SUGB"",""SUGB"",exAnte) ;",
@@ -1462,21 +1450,26 @@ captrd/expert_support.gms,365-757,declaration,in style,capri_mod/pipeline/captrd
 captrd/expert_support.gms,365-760,declaration,context,capri_mod/pipeline/captrd/dairy_supports.py,(module),1,named,"set expertdairy_map(cols,rows) ""cols - rows pairs where we have dairy expert data to assign"";",
 captrd/expert_support.gms,368-389,control ($),in style,capri_mod/pipeline/captrd/equations/longrun_supports.py,(module),7,same block,"$BATINCLUDE 'util\title.gms' ""'DG Agri expert dairy data'""",
 captrd/expert_support.gms,372-431,control,context,capri_mod/pipeline/captrd/dairy_supports.py,(module),7,same block,option kill =runr;,
+captrd/expert_support.gms,377-381,declaration,context,capri_mod/pipeline/captrd/dairy_supports.py,dairy,107,module's file,"set exanteT1(simyy_ybas) ""exanteT years as subset of simyy_ybas unlike the existing set exanteT"";",
 captrd/expert_support.gms,387,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_dairy_BASM,412,named,"p_nrCows(ms_agri,""BASM"") = sum(yrbas,p_nrCows(ms_agri,yrbas))/card(yrbas);",
+captrd/expert_support.gms,387-431,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,dairy,122,module's file,"p_nrCows(ms_agri,""BASM"") = sum(yrbas,p_nrCows(ms_agri,yrbas))/card(yrbas);",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/expert_support.gms,388-393,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_ExpertSupprt_dairy,450,named,"p_ExpertSupprt(runr,DCOW,rows,EXANTET1,""absolute"") $ ( P_Result(runr,DCOW,rows,""%lastSimulationYear%"",""BASM"")",
 captrd/expert_support.gms,396,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_dairy_BASM,416,named,"p_CowMilkProd(ms_agri,""BASM"") = sum(yrbas,p_CowMilkProd(ms_agri,yrbas))/card(yrbas);",
 captrd/expert_support.gms,397-402,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_ExpertSupprt_dairy,459,named,"p_ExpertSupprt(runr,cols,""COMI"",EXANTET1,""absolute"") $ ( P_Result(runr,cols,""COMI"",""%lastSimulationYear%"",""BASM"")",
 captrd/expert_support.gms,406-411,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_ExpertSupprt_EAAG_COMI,493,named,"p_ExpertSupprt(runr,""EAAG"",""COMI"",EXANTET1,""absolute"") $ ( P_Result(runr,""UVAG"",""COMI"",""%lastSimulationYear%"",""BASM"")",
 captrd/expert_support.gms,414,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_dairy_BASM,420,named,"p_milkDeliveries(ms_agri,""BASM"") = sum(yrbas,p_milkDeliveries(ms_agri,yrbas))/card(yrbas);",
 captrd/expert_support.gms,415-420,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_ExpertSupprt_dairy,468,named,"p_ExpertSupprt(runr,cols,""COMI"",EXANTET1,""absolute"") $ ( P_Result(runr,cols,""COMI"",""%lastSimulationYear%"",""BASM"")",
+captrd/expert_support.gms,424,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,dairy,110,module's file,"p_dairyCowYield(""PL"",simyy) $ p_nrCows(""PL"",simyy) = p_CowMilkProd(""PL"",simyy) / p_nrCows(""PL"",simyy) * 1000 ;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/expert_support.gms,424,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_dairyCowYield_PL,435,named,"p_dairyCowYield(""PL"",simyy) $ p_nrCows(""PL"",simyy) = p_CowMilkProd(""PL"",simyy) / p_nrCows(""PL"",simyy) * 1000 ;",
 captrd/expert_support.gms,425,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_dairy_BASM,424,named,"p_dairyCowYield(ms_agri,""BASM"") = sum(yrbas,p_dairyCowYield(ms_agri,yrbas))/card(yrbas);",
 captrd/expert_support.gms,426-430,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_ExpertSupprt_dairy,477,named,"p_ExpertSupprt(runr,dcow,""COMI"",EXANTET1,""absolute"") $ ( P_Result(runr,dcow,""COMI"",""%lastSimulationYear%"",""BASM"")",
 captrd/expert_support.gms,433-435,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,184,named,"expertdairy_map(cols,rows) $ (P_T_ActAgg(cols,""DCOW"") $ (sameas(rows,""LEVL"") or sameas(rows,""HERD"") or sameas(rows,""COMI""))) = yes;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/expert_support.gms,434-436,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,(module),13,same block,"expertdairy_map(cols,""COMI"") $ ( sameas(cols,""GROF"") or sameas(cols,""DOMM"") or sameas(cols,""EAAG"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/expert_support.gms,439-440,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,dairy,215,module's file,"p_exTrapMinMax(""min"") = 0.75;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/expert_support.gms,439-440,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_exTrapMinMax,509,named,"p_exTrapMinMax(""min"") = 0.75;",
 captrd/expert_support.gms,442-545,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,(module),14,same block,"P_expertSupprt(RUNR,S_ColsEst,S_RowsEst,""grate"",""absolute"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/expert_support.gms,443-450,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,P_expertSupprt_grate,527,named,"P_expertSupprt(RUNR,S_ColsEst,S_RowsEst,""grate"",""absolute"")",
+captrd/expert_support.gms,444-445,control ($),context,capri_mod/pipeline/captrd/dairy_supports.py,(module),55,named,"$ ( (P_expertSupprt(RUNR,S_ColsEst,S_RowsEst,""2015"",""absolute"") GT 1.E-4)",
 captrd/expert_support.gms,456-471,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,P_expertSupprt_grate_yield,549,named,"P_expertSupprt(RUNR,S_ColsEst,S_RowsEst,""grate"",""absolute"")",
 captrd/expert_support.gms,480-486,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,P_expertSupprt_grate_recent,578,named,"P_expertSupprt(RUNR,S_ColsEst,""COMI"",""grate"",""absolute"")",
 captrd/expert_support.gms,494-501,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,P_expertSupprt_grate_EUSubAgg,596,named,"P_expertSupprt(curEUSUbAgg,S_ColsEst,S_RowsEst,""grate"",""absolute"")",
@@ -1494,14 +1487,17 @@ captrd/expert_support.gms,559,assignment,in style,capri_mod/pipeline/captrd/equa
 captrd/expert_support.gms,561,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_maxmin_EU14_comi,734,named,"p_maxmin(ms,cols,""comi"") $ (expertdairy_map(cols,""comi"") $ MS_TO_RMSAGG(ms,""EU014000"")) = 0.1 ;",
 captrd/expert_support.gms,563,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_maxmin_EU14_levl,745,named,"p_maxmin(ms,cols,""levl"") $ (expertdairy_map(cols,""levl"") $ MS_TO_RMSAGG(ms,""EU014000"")) = -0.2;",
 captrd/expert_support.gms,565,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_maxmin_DK_levl,756,named,"p_maxmin(ms,cols,""levl"") $ (expertdairy_map(cols,""levl"") $ sameas(ms,""DK000000"")) = 0.1;",
+captrd/expert_support.gms,567-580,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,dairy,199,module's file,"P_expertSupprt(RUNR,S_ColsEst,S_RowsEst,""gpar"",""absolute"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/expert_support.gms,567-597,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,(module),22,same block,"P_expertSupprt(RUNR,S_ColsEst,S_RowsEst,""gpar"",""absolute"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/expert_support.gms,568-580,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,P_expertSupprt_gpar,768,named,"P_expertSupprt(RUNR,S_ColsEst,S_RowsEst,""gpar"",""absolute"")",
 captrd/expert_support.gms,585-597,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,P_expertSupprt_extrap,794,named,"P_expertSupprt(RUNR,S_ColsEst,S_RowsEst,ExAnteT,""absolute"")",
 captrd/expert_support.gms,600-601,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_exTrapMinMax,514,named,"p_exTrapMinMax(""min"") = 0.75;",
 captrd/expert_support.gms,604-609,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,(module),25,same block,"p_ExpertSupprt(runr,""GROF"",""COMI"",EXANTET,""absolute"") $ (sum(P_T_ActAgg(s_colsEst,""DCOW""),p_ExpertSupprt(runr,s_colsEst,""COMI"",EXANTET,""abso",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/expert_support.gms,606-609,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,dairy,226,module's file,"p_ExpertSupprt(runr,""GROF"",""COMI"",EXANTET,""absolute"") $ (sum(P_T_ActAgg(s_colsEst,""DCOW""),p_ExpertSupprt(runr,s_colsEst,""COMI"",EXANTET,""abso",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/expert_support.gms,606-609,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_ExpertSupprt_GROF_COMI,822,named,"p_ExpertSupprt(runr,""GROF"",""COMI"",EXANTET,""absolute"") $ (sum(P_T_ActAgg(s_colsEst,""DCOW""),p_ExpertSupprt(runr,s_colsEst,""COMI"",EXANTET,""abso",
 captrd/expert_support.gms,614-697,control ($),in style,capri_mod/pipeline/captrd/equations/agriprod_supports.py,(module),8,same block,$iftheni.aglinkcor2 not %correctdairyaglink%==off,
 captrd/expert_support.gms,615-664,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,(module),26,same block,"p_ExpertSupprt(runr,""GROF"",""COMI"",EXpost,""absolute"") =P_Result(runr,""GROF"",""COMI"",exPost,""p_data"");",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/expert_support.gms,615-664,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,dairy,231,module's file,"p_ExpertSupprt(runr,""GROF"",""COMI"",EXpost,""absolute"") =P_Result(runr,""GROF"",""COMI"",exPost,""p_data"");",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/expert_support.gms,618,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_ExpertSupprt_expost,836,named,"p_ExpertSupprt(runr,""GROF"",""COMI"",EXpost,""absolute"") =P_Result(runr,""GROF"",""COMI"",exPost,""p_data"");",
 captrd/expert_support.gms,619-621,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_ExpertSupprt_expost,840,named,"p_ExpertSupprt(runr,S_ColsEst,S_RowsEst,EXpost,""absolute"")",
 captrd/expert_support.gms,624-630,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,P_expertSupprt_EU_yield,856,named,"P_expertSupprt(""A_EU_WEST"",S_ColsEst,S_RowsEst,yearsCur,""absolute"")",
@@ -1520,6 +1516,7 @@ captrd/expert_support.gms,679-683,assignment,in style,capri_mod/pipeline/captrd/
 captrd/expert_support.gms,685-710,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,(module),28,same block,"expertdairy_map(""MAPR"",""MILK"") = yes;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/expert_support.gms,685-710,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,dairy,260,module's file,"expertdairy_map(""MAPR"",""MILK"") = yes;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/expert_support.gms,687-707,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_ExpertSupprt_dairy_Trustlevl,955,named,"p_ExpertSupprt(runr,Cols,Rows,exanteT,""Trustlevl"") $ ( p_ExpertSupprt(runr,Cols,Rows,EXANTET,""absolute"")",
+captrd/expert_support.gms,691-705,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,(module),57,named,"*(.99+.02 $ (sameas(cols,""grof"") $ sameas(rows,""comi"") $ ( map_rr(""HR000000"",runr)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/expert_support.gms,710,assignment,in style,capri_mod/pipeline/captrd/equations/expert_support.py,p_ExpertSupprt_EXPE_Trustlevl,986,named,"p_ExpertSupprt(runr,""EXPE"",""COMI"",exanteT,""Trustlevl"") $ p_ExpertSupprt(runr,""EXPE"",""COMI"",EXANTET,""absolute"") = .1;",
 captrd/expert_support.gms,712-757,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,(module),30,same block,"P_Result(CurEuropAgg,""share"",""COMI"",yearscur,""support1"") $ P_Result(CurEuropAgg,""GROF"",""COMI"",yearscur,""dgagri"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/expert_support.gms,712-757,assignment,moved,capri_mod/pipeline/captrd/dairy_supports.py,dairy,270,module's file,"P_Result(CurEuropAgg,""share"",""COMI"",yearscur,""support1"") $ P_Result(CurEuropAgg,""GROF"",""COMI"",yearscur,""dgagri"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
@@ -1675,7 +1672,7 @@ captrd/load_coco1_data.gms,,file,context,capri_mod/pipeline/captrd/coco.py,(modu
 captrd/load_coco1_data.gms,,file,context,capri_mod/pipeline/captrd/coco.py,(module),37,named,,
 captrd/load_coco1_data.gms,,file,context,capri_mod/pipeline/captrd/equations/load_coco1_data.py,(module),1,named,,
 captrd/load_coco1_data.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,(module),27,named,,
-captrd/load_coco1_data.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets,97,named,,
+captrd/load_coco1_data.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets,98,named,,
 captrd/load_coco1_data.gms,,file,context,capri_mod/pipeline/captrd/timesets.py,(module),5,named,,
 captrd/load_coco1_data.gms,20,assignment,to move,capri_mod/pipeline/captrd/coco.py,(module),43,same function,"ROWS_LOAD(""CERE"") = YES;",
 captrd/load_coco1_data.gms,29,blank,context,capri_mod/pipeline/captrd/coco.py,(module),38,same block,,
@@ -1886,6 +1883,7 @@ captrd/national_supports.gms,,file,context,capri_mod/pipeline/captrd/expert_supp
 captrd/national_supports.gms,,file,context,capri_mod/pipeline/captrd/national_supports.py,(module),1,named,,
 captrd/national_supports.gms,,file,context,capri_mod/pipeline/captrd/national_supports.py,(module),5,named,,
 captrd/national_supports.gms,,file,context,capri_mod/pipeline/captrd/national_supports.py,supports,185,named,,
+captrd/national_supports.gms,,file,context,capri_mod/pipeline/captrd/national_supports.py,supports,569,named,,
 captrd/national_supports.gms,28-45,control ($),context,capri_mod/pipeline/captrd/national_supports.py,(module),6,same block,$iftheni.ti31 not %aglinkTightLink%==on,
 captrd/national_supports.gms,28-45,control ($),context,capri_mod/pipeline/captrd/national_supports.py,supports,206,same function,$iftheni.ti31 not %aglinkTightLink%==on,
 captrd/national_supports.gms,31-34,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_PercentChange_dairy,16,named,"p_ExpertSupprt(runr,cols,rows,EXANTET,""PercentChange"") $ ( P_Result(runr,cols,rows,ExanteT,""BASM"")",
@@ -1895,6 +1893,8 @@ captrd/national_supports.gms,49-152,declaration,context,capri_mod/pipeline/captr
 captrd/national_supports.gms,144-152,control ($),context,capri_mod/pipeline/captrd/national_supports.py,supports,217,same function,$iftheni.nt1 not %aglinkTightLink%==on,
 captrd/national_supports.gms,150,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_natExpert_NECP,50,named,"p_natExpert(nuts0,xpCols,""LEV1"",simyy) $ sum(Expert_to_cols(xpCOLS,COLS),1) = p_fromNECP(NUTS0,xpCols,simyy);",
 captrd/national_supports.gms,154-194,control,context,capri_mod/pipeline/captrd/national_supports.py,supports,230,same function,OPTION KILL = MSest;,
+captrd/national_supports.gms,154-198,control,context,capri_mod/pipeline/captrd/national_supports.py,(module),9,module's file,OPTION KILL = MSest;,
+captrd/national_supports.gms,162-163,declaration,context,capri_mod/pipeline/captrd/national_supports.py,(module),41,module's file,"set neededYears(years) ""years to be completed with national expert information"" / 2000*%lastSimulationYear% /;",
 captrd/national_supports.gms,168-169,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_NatExpert_AVGDAT,62,named,"p_NatExpert(MS,xpCOLS,xpROWS,years) $ ( (NOT p_NatExpert(MS,xpCOLS,xpROWS,years) ) $ (not basYrsM(years)) $ neededYears(years))",
 captrd/national_supports.gms,168-169,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,236,same function,"p_NatExpert(MS,xpCOLS,xpROWS,years) $ ( (NOT p_NatExpert(MS,xpCOLS,xpROWS,years) ) $ (not basYrsM(years)) $ neededYears(years))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/national_supports.gms,171-175,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_NatExpert_AVGDAT,67,named,"p_NatExpert(MS,xpCOLS,xpROWS,basYrsM) $ ( sum(expostT $ (p_NatExpert(MS,xpCOLS,xpROWS,expostT) $ (ordT(expostT) LE ordT(""BAS""))),1)",
@@ -1903,10 +1903,13 @@ captrd/national_supports.gms,179-193,assignment,in style,capri_mod/pipeline/capt
 captrd/national_supports.gms,180-194,control ($),context,capri_mod/pipeline/captrd/national_supports.py,supports,257,same function,"$ sum(expostT $ (p_NatExpert(MS,xpCOLS,xpROWS,expostT) $ (ordT(expostT) GT ordT(""BAS""))),1))",
 captrd/national_supports.gms,197-198,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_NatExpert_BAS,111,named,"p_NatExpert(MSest,xpCOLS,xpROWS,""20%BAS%"") $ (SUM(BASYRSM $ p_NatExpert(MSest,xpCOLS,xpROWS,BASYRSM),1.) EQ CARD(BASYRSM))",
 captrd/national_supports.gms,197-198,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,272,same function,"p_NatExpert(MSest,xpCOLS,xpROWS,""20%BAS%"") $ (SUM(BASYRSM $ p_NatExpert(MSest,xpCOLS,xpROWS,BASYRSM),1.) EQ CARD(BASYRSM))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/national_supports.gms,205,declaration,context,capri_mod/pipeline/captrd/national_supports.py,(module),37,module's file,"scalar p_trustNat ""default trust level for national sources"" / 7.01 /;",
+captrd/national_supports.gms,205-268,declaration,context,capri_mod/pipeline/captrd/national_supports.py,(module),10,module's file,"scalar p_trustNat ""default trust level for national sources"" / 7.01 /;",
 captrd/national_supports.gms,205-268,declaration,context,capri_mod/pipeline/captrd/national_supports.py,supports,279,same function,"scalar p_trustNat ""default trust level for national sources"" / 7.01 /;",
 captrd/national_supports.gms,209-215,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_Trustlevl_nat,124,named,"p_ExpertSupprt(MSest,cols,rows,exanteT,""Trustlevl"")",
 captrd/national_supports.gms,216,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_Trustlevl_CACT_HERD,141,named,"p_ExpertSupprt(MSest,CACT,""HERD"",exanteT,""Trustlevl"") =0;",
 captrd/national_supports.gms,218-228,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_PercentChange_nat,155,named,"p_ExpertSupprt(MSest,cols,rows,exanteT,""PercentChange"")",
+captrd/national_supports.gms,231-234,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,(module),39,module's file,"p_ExpertSupprt(MS,CACT,rows,exanteT,""Trustlevl"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/national_supports.gms,232-235,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_Trustlevl_CACT_yield,178,named,"p_ExpertSupprt(MS,CACT,rows,exanteT,""Trustlevl"")",
 captrd/national_supports.gms,232-235,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,311,same function,"p_ExpertSupprt(MS,CACT,rows,exanteT,""Trustlevl"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/national_supports.gms,237-239,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_Absolute_CACT,192,named,"p_ExpertSupprt(MS,CACT,rows,exanteT,""Absolute"")",
@@ -2034,10 +2037,12 @@ captrd/national_supports.gms,946-987,assignment,moved,capri_mod/pipeline/captrd/
 captrd/national_supports.gms,952-966,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,P_Result_support_CS,1694,named,"P_Result(""CS000000"",DCOW,HerdLevl,ExAnteT,""support"")",
 captrd/national_supports.gms,971-979,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_CS_Absolute,1727,named,"p_ExpertSupprt(""CS000000"",cols,rows,exanteT,""Absolute"")",
 captrd/national_supports.gms,981-984,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,747,named,"p_ExpertSupprt(""CS000000"",cols,rows,exante,""trustlevl"")",
+captrd/national_supports.gms,988-1014,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,582,same function,"p_ExpertSupprt(""BA000000"",""pouf"",HerdLevl,exanteT,""Absolute"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/national_supports.gms,992-995,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_BA_POUF,1747,named,"p_ExpertSupprt(""BA000000"",""pouf"",HerdLevl,exanteT,""Absolute"")",
 captrd/national_supports.gms,997-998,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,754,named,"p_ExpertSupprt(""BA000000"",""pouf"",HerdLevl,exanteT,""trustLevl"") $ p_ExpertSupprt(""BA000000"",""pouf"",HerdLevl,exanteT,""Absolute"")",
 captrd/national_supports.gms,1006-1008,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_Absolute_Support,434,named,"p_ExpertSupprt(""KO000000"",""hens"",herdLevl,exanteT,""Absolute"")",
 captrd/national_supports.gms,1010-1011,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,759,named,"p_ExpertSupprt(""KO000000"",""hens"",herdLevl,exanteT,""Trustlevl"")",
+captrd/national_supports.gms,1015-1089,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,591,same function,"p_ExpertSupprt(""EE000000"",DCOW,""COMI"",exante,""Absolute"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/national_supports.gms,1021-1024,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_EE_COMI,1761,named,"p_ExpertSupprt(""EE000000"",DCOW,""COMI"",exante,""Absolute"")",
 captrd/national_supports.gms,1028-1030,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_result_expert_bound,982,named,"p_result(""EE000000"",DCOW,""COMI"",exanteT,""expertLo"") $ ( p_ExpertSupprt(""EE000000"",DCOW,""COMI"",exanteT,""Absolute"")",
 captrd/national_supports.gms,1031-1033,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_result_expert_bound,988,named,"p_result(""EE000000"",DCOW,""COMI"",exanteT,""expertUp"") $ ( p_ExpertSupprt(""EE000000"",DCOW,""COMI"",exanteT,""Absolute"")",
@@ -2050,7 +2055,9 @@ captrd/national_supports.gms,1060-1064,assignment,in style,capri_mod/pipeline/ca
 captrd/national_supports.gms,1066-1069,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,777,named,"p_ExpertSupprt(""EE000000"",cols,""COMI"",exante,""trustlevl"")",
 captrd/national_supports.gms,1074-1078,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_Absolute_SHGM,1325,named,"p_ExpertSupprt(""EE000000"",mrkKeyPos,rows,exante,""Absolute"")",
 captrd/national_supports.gms,1080-1083,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,784,named,"p_ExpertSupprt(""EE000000"",mrkKeyPos,rows,exante,""trustlevl"")",
+captrd/national_supports.gms,1090-1190,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,611,same function,"p_ExpertSupprt(""HR000000"",""PIGF"",herdLevl,exanteT,""Trustlevl"") $ p_ExpertSupprt(""HR000000"",""PIGF"",herdLevl,exanteT,""Percentchange"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/national_supports.gms,1093-1094,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,791,named,"p_ExpertSupprt(""HR000000"",""PIGF"",herdLevl,exanteT,""Trustlevl"") $ p_ExpertSupprt(""HR000000"",""PIGF"",herdLevl,exanteT,""Percentchange"")",
+captrd/national_supports.gms,1097-1122,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,611,same function,"p_ExpertSupprt(""HR000000"",DCOW,herdLevl,exante,""PercentChange"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/national_supports.gms,1101-1104,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_PercentChange_natDCOW,1210,named,"p_ExpertSupprt(""HR000000"",DCOW,herdLevl,exante,""PercentChange"")",
 captrd/national_supports.gms,1106-1109,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,796,named,"p_ExpertSupprt(""HR000000"",DCOW,herdLevl,exante,""trustlevl"")",
 captrd/national_supports.gms,1111-1115,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_PercentChange_natCOMI,1286,named,"p_ExpertSupprt(""HR000000"",cols,""COMI"",exante,""PercentChange"")",
@@ -2065,10 +2072,12 @@ captrd/national_supports.gms,1169-1172,assignment,in style,capri_mod/pipeline/ca
 captrd/national_supports.gms,1174-1177,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,831,named,"p_ExpertSupprt(""LT000000"",DCOW,herdLevl,exante,""trustlevl"")",
 captrd/national_supports.gms,1179-1183,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_PercentChange_natCOMI,1302,named,"p_ExpertSupprt(""LT000000"",cols,""COMI"",exante,""PercentChange"")",
 captrd/national_supports.gms,1185-1188,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,838,named,"p_ExpertSupprt(""LT000000"",cols,""COMI"",exante,""trustlevl"")",
+captrd/national_supports.gms,1191-1225,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,618,same function,"p_ExpertSupprt(""MT000000"",Cols,rows,exante,""PercentChange"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/national_supports.gms,1196-1202,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_PercentChange_blend,351,named,"p_ExpertSupprt(""MT000000"",Cols,rows,exante,""PercentChange"")",
 captrd/national_supports.gms,1207-1210,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_PercentChange_support,1594,named,"p_ExpertSupprt(""MT000000"",""GROF"",""SGMT"",exAnteT,""PercentChange"")",
 captrd/national_supports.gms,1212-1214,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,845,named,"p_ExpertSupprt(""MT000000"",""GROF"",""SGMT"",exAnteT,""trustlevl"")",
 captrd/national_supports.gms,1221-1222,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,851,named,"p_ExpertSupprt(""PL000000"",""PIGF"",herdLevl,exanteT,""Trustlevl"") $ p_ExpertSupprt(""PL000000"",""PIGF"",herdLevl,exanteT,""Percentchange"")",
+captrd/national_supports.gms,1226-1266,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,626,same function,"p_ExpertSupprt(""RO000000"",DCOW,herdLevl,exante,""PercentChange"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/national_supports.gms,1231-1234,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_PercentChange_natDCOW,1231,named,"p_ExpertSupprt(""RO000000"",DCOW,herdLevl,exante,""PercentChange"")",
 captrd/national_supports.gms,1236-1239,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,856,named,"p_ExpertSupprt(""RO000000"",DCOW,herdLevl,exante,""trustlevl"")",
 captrd/national_supports.gms,1241-1245,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_PercentChange_natCOMI,1310,named,"p_ExpertSupprt(""RO000000"",cols,""COMI"",exante,""PercentChange"")",
@@ -2076,6 +2085,7 @@ captrd/national_supports.gms,1247-1250,assignment,in style,capri_mod/pipeline/ca
 captrd/national_supports.gms,1255-1256,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,870,named,"p_ExpertSupprt(""RO000000"",""PIGF"",herdLevl,exanteT,""Trustlevl"") $ p_ExpertSupprt(""RO000000"",""PIGF"",herdLevl,exanteT,""Percentchange"")",
 captrd/national_supports.gms,1260-1261,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_RO_MAIF,1775,named,"p_ExpertSupprt(""RO000000"",""MAIF"",""LEVL"",EXANTET,""PercentChange"") $ P_DATA(""RO000000"",""MAIF"",""LEVL"",""BASM"")",
 captrd/national_supports.gms,1263,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,875,named,"p_ExpertSupprt(""RO000000"",""MAIF"",""LEVL"",exanteT,""Trustlevl"") $ p_ExpertSupprt(""RO000000"",""MAIF"",""LEVL"",exanteT,""PercentChange"") = .5;",
+captrd/national_supports.gms,1267-1326,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,634,same function,"p_ExpertSupprt(""SI000000"",cols,herdLevl,exanteT,""Absolute"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/national_supports.gms,1271-1276,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_Absolute_Support,440,named,"p_ExpertSupprt(""SI000000"",cols,herdLevl,exanteT,""Absolute"")",
 captrd/national_supports.gms,1278-1281,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,879,named,"p_ExpertSupprt(""SI000000"",cols,herdLevl,exanteT,""trustlevl"")",
 captrd/national_supports.gms,1285-1288,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_result_expert_bound,1006,named,"p_result(""SI000000"",cols,herdlevl,exanteT,""expertLo"") $ ( p_ExpertSupprt(""SI000000"",cols,herdlevl,exanteT,""Absolute"")",
@@ -2085,6 +2095,7 @@ captrd/national_supports.gms,1307-1309,assignment,in style,capri_mod/pipeline/ca
 captrd/national_supports.gms,1311,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,886,named,"p_ExpertSupprt(""SI000000"",""SCOW"",herdLevl,exanteT,""Trustlevl"") $ p_ExpertSupprt(""SI000000"",""SCOW"",herdLevl,exanteT,""absolute"") = 9.01;",
 captrd/national_supports.gms,1316-1320,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_Absolute_base,521,named,"p_ExpertSupprt(""SI000000"",""GROF"",""PORK"",exanteT,""Absolute"")",
 captrd/national_supports.gms,1322-1324,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,890,named,"p_ExpertSupprt(""SI000000"",""GROF"",""PORK"",exanteT,""trustlevl"")",
+captrd/national_supports.gms,1327-1375,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,649,same function,"p_ExpertSupprt(""SK000000"",Cols,rows,exante,""PercentChange"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/national_supports.gms,1334-1340,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_PercentChange_blend,371,named,"p_ExpertSupprt(""SK000000"",Cols,rows,exante,""PercentChange"")",
 captrd/national_supports.gms,1343-1344,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_result_expert_bound_percent,1126,named,"p_result(""SK000000"",DCOW,herdLEVL,exanteT,""expertLo"") $ p_ExpertSupprt(""SK000000"",DCOW,herdLEVL,exanteT,""PercentChange"")",
 captrd/national_supports.gms,1345-1346,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_result_expert_bound_percent,1131,named,"p_result(""SK000000"",DCOW,herdLEVL,exanteT,""expertUp"") $ p_ExpertSupprt(""SK000000"",DCOW,herdLEVL,exanteT,""PercentChange"")",
@@ -2093,12 +2104,13 @@ captrd/national_supports.gms,1353-1355,assignment,in style,capri_mod/pipeline/ca
 captrd/national_supports.gms,1357-1359,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,896,named,"p_ExpertSupprt(""SK000000"",DCOW,""COMI"",exanteT,""trustlevl"") $ ( p_ExpertSupprt(""SK000000"",DCOW,""COMI"",exanteT,""Absolute"")",
 captrd/national_supports.gms,1363-1366,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_PercentChange_copy,1380,named,"p_ExpertSupprt(""SK000000"",mrkKeyPos,rows,exante,""PercentChange"")",
 captrd/national_supports.gms,1368-1371,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,902,named,"p_ExpertSupprt(""SK000000"",mrkKeyPos,rows,exante,""trustlevl"")",
+captrd/national_supports.gms,1376-1416,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,657,same function,"p_ExpertSupprt(""CZ000000"",Cols,rows,exante,""PercentChange"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/national_supports.gms,1382-1388,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_PercentChange_blend,381,named,"p_ExpertSupprt(""CZ000000"",Cols,rows,exante,""PercentChange"")",
 captrd/national_supports.gms,1393-1398,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_Absolute_Support,449,named,"p_ExpertSupprt(""CZ000000"",cols,herdLevl,exanteT,""Absolute"")",
 captrd/national_supports.gms,1400-1402,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,909,named,"p_ExpertSupprt(""CZ000000"",cols,herdLevl,exanteT,""trustlevl"")",
 captrd/national_supports.gms,1406-1409,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_result_expert_bound,1032,named,"p_result(""CZ000000"",cols,herdlevl,exanteT,""expertLo"") $ ( p_ExpertSupprt(""CZ000000"",cols,herdlevl,exanteT,""Absolute"")",
 captrd/national_supports.gms,1410-1413,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_result_expert_bound,1039,named,"p_result(""CZ000000"",cols,herdlevl,exanteT,""expertUp"") $ ( p_ExpertSupprt(""CZ000000"",cols,herdlevl,exanteT,""Absolute"")",
-captrd/national_supports.gms,1417-1468,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,664,module's file,"p_ExpertSupprt(""NO000000"",cols,""COMI"",ExAnteT,""Absolute"") $ ((ORDT(ExAnteT) gt OrdT(""2020"")) $ expertdairy_map(cols,""COMI"") $ (not P_T_ActAg",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/national_supports.gms,1417-1468,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,665,same function,"p_ExpertSupprt(""NO000000"",cols,""COMI"",ExAnteT,""Absolute"") $ ((ORDT(ExAnteT) gt OrdT(""2020"")) $ expertdairy_map(cols,""COMI"") $ (not P_T_ActAg",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/national_supports.gms,1421-1427,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_NO_COMI,1788,named,"p_ExpertSupprt(""NO000000"",cols,""COMI"",ExAnteT,""Absolute"") $ ((ORDT(ExAnteT) gt OrdT(""2020"")) $ expertdairy_map(cols,""COMI"") $ (not P_T_ActAg",
 captrd/national_supports.gms,1429-1432,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,915,named,"p_ExpertSupprt(""NO000000"",cols,""COMI"",ExAnteT,""TRustlevl"")",
 captrd/national_supports.gms,1436-1437,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_Absolute_Support,458,named,"p_ExpertSupprt(""NO000000"",dcow,""COMI"",ExAnteT,""Absolute"") $ (ORDT(ExAnteT) ge OrdT(""2020""))",
@@ -2107,15 +2119,15 @@ captrd/national_supports.gms,1444-1448,assignment,in style,capri_mod/pipeline/ca
 captrd/national_supports.gms,1450-1453,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,927,named,"p_ExpertSupprt(""NO000000"",mrkKeyPos,rows,ExAnteT,""TRustlevl"")",
 captrd/national_supports.gms,1457-1462,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_Absolute_Support,463,named,"p_ExpertSupprt(""NO000000"",cols,herdLevl,exanteT,""Absolute"")",
 captrd/national_supports.gms,1464-1466,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,934,named,"p_ExpertSupprt(""NO000000"",cols,herdLevl,exanteT,""trustlevl"")",
-captrd/national_supports.gms,1469-1513,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,689,module's file,"p_ExpertSupprt(""TUR"",mrkKeyPos,rows,ExAnteT,""Absolute"") $ ((ORDT(ExAnteT) gt OrdT(""2020"")) $ (sameas(rows,""POUM"") or sameas(rows,""SGMT"") ) )",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/national_supports.gms,1469-1513,assignment,moved,capri_mod/pipeline/captrd/national_supports.py,supports,690,same function,"p_ExpertSupprt(""TUR"",mrkKeyPos,rows,ExAnteT,""Absolute"") $ ((ORDT(ExAnteT) gt OrdT(""2020"")) $ (sameas(rows,""POUM"") or sameas(rows,""SGMT"") ) )",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/national_supports.gms,1473-1479,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_TUR,1826,named,"p_ExpertSupprt(""TUR"",mrkKeyPos,rows,ExAnteT,""Absolute"") $ ((ORDT(ExAnteT) gt OrdT(""2020"")) $ (sameas(rows,""POUM"") or sameas(rows,""SGMT"") ) )",
-captrd/national_supports.gms,1481-1484,assignment,to move,capri_mod/pipeline/captrd/national_supports.py,supports,694,module's file,"p_ExpertSupprt(""TUR"",mrkKeyPos,rows,ExAnteT,""TRustlevl"")",
+captrd/national_supports.gms,1481-1484,assignment,to move,capri_mod/pipeline/captrd/national_supports.py,supports,695,same function,"p_ExpertSupprt(""TUR"",mrkKeyPos,rows,ExAnteT,""TRustlevl"")",
 captrd/national_supports.gms,1488-1489,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_Absolute_Support,472,named,"p_ExpertSupprt(""TUR"",cols,""POUM"",ExAnteT,""Absolute"") $ ((ORDT(ExAnteT) gt OrdT(""2020"")) $ P_T_ActAgg(COLS,""POUL""))",
 captrd/national_supports.gms,1491-1492,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,940,named,"p_ExpertSupprt(""TUR"",cols,""POUM"",ExAnteT,""TRustlevl"") $ ((ORDT(ExAnteT) gt OrdT(""2020"")) $ P_T_ActAgg(COLS,""POUL""))",
 captrd/national_supports.gms,1496-1501,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_Absolute_Support,477,named,"p_ExpertSupprt(""TUR"",cols,herdLevl,exanteT,""Absolute"")",
 captrd/national_supports.gms,1503-1505,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_trustlevl_rule,945,named,"p_ExpertSupprt(""TUR"",cols,herdLevl,exanteT,""trustlevl"")",
 captrd/national_supports.gms,1514-1565,control ($),context,capri_mod/pipeline/captrd/national_supports.py,(module),15,module's file,$iftheni.ti31a not %aglinkTightLink%==on,
-captrd/national_supports.gms,1514-1565,control ($),context,capri_mod/pipeline/captrd/national_supports.py,supports,703,module's file,$iftheni.ti31a not %aglinkTightLink%==on,
+captrd/national_supports.gms,1514-1565,control ($),context,capri_mod/pipeline/captrd/national_supports.py,supports,704,same function,$iftheni.ti31a not %aglinkTightLink%==on,
 captrd/national_supports.gms,1538-1542,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_dairy_PercentChange_removed,246,named,"p_ExpertSupprt(NUTS0_and_2,S_ColsEst,S_RowsEst,exanteT,""PercentChange"")",
 captrd/national_supports.gms,1545-1550,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_dairy_Absolute,270,named,"p_ExpertSupprt(NUTS0_and_2,S_ColsEst,S_RowsEst,exanteT,""Absolute"")",
 captrd/national_supports.gms,1553-1557,assignment,in style,capri_mod/pipeline/captrd/equations/national_supports.py,p_ExpertSupprt_dairy_PercentChange_removed,254,named,"p_ExpertSupprt(NUTS0_and_2,S_ColsEst,S_RowsEst,exanteT,""PercentChange"")",
@@ -2124,16 +2136,16 @@ captrd/national_supports.gms,1569-1572,assignment,to move,capri_mod/pipeline/cap
 captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,(module),1,named,,
 captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/policy.py,(module),3,named,,
 captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,(module),5,named,,
-captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,(module),429,named,,
+captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,(module),430,named,,
 captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/step1.py,prestats,96,named,,
 captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/step1.py,run,202,named,,
 captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/supports.py,(module),3,named,,
 captrd/prep_data_for_estimation.gms,15-162,declaration,context,capri_mod/pipeline/captrd/prepare.py,(module),26,named,SET YEARS_BASM(*);,
 captrd/prep_data_for_estimation.gms,15-320,declaration,context,capri_mod/pipeline/captrd/prepare_run.py,(module),11,named,SET YEARS_BASM(*);,
-captrd/prep_data_for_estimation.gms,22-162,assignment,moved,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,479,named,S_RowsEst1(S_RowsEst) = YES;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,22-162,assignment,moved,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,480,named,S_RowsEst1(S_RowsEst) = YES;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/prep_data_for_estimation.gms,25,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,(module),61,named,S_RowsEst1(S_RowsEst) = YES;,
 captrd/prep_data_for_estimation.gms,34,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,P_DATA_PADM_SUGA_expost,68,named,"P_DATA(MS,""PADM"",""SUGA"",ExpostT) $ P_DATA(MS,""QUTS"",""SUGA"",ExpostT)= 631;",
-captrd/prep_data_for_estimation.gms,34-39,assignment,moved,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,482,same block,"P_DATA(MS,""PADM"",""SUGA"",ExpostT) $ P_DATA(MS,""QUTS"",""SUGA"",ExpostT)= 631;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,34-39,assignment,moved,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,483,same block,"P_DATA(MS,""PADM"",""SUGA"",ExpostT) $ P_DATA(MS,""QUTS"",""SUGA"",ExpostT)= 631;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/prep_data_for_estimation.gms,34-203,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,(module),8,same block,"P_DATA(MS,""PADM"",""SUGA"",ExpostT) $ P_DATA(MS,""QUTS"",""SUGA"",ExpostT)= 631;",
 captrd/prep_data_for_estimation.gms,35,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,P_DATA_PADM_SUGA_2008,79,named,"P_DATA(MS,""PADM"",""SUGA"",""2008"") $ P_DATA(MS,""QUTS"",""SUGA"",""2008"")= 541.5;",
 captrd/prep_data_for_estimation.gms,36,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,P_DATA_PADM_SUGA_2009,90,named,"P_DATA(MS,""PADM"",""SUGA"",ExpostT) $ (P_DATA(MS,""QUTS"",""SUGA"",ExpostT) and (ORDT(ExpostT) GE ORDT(""2009""))) = 404.4;",
@@ -2156,7 +2168,7 @@ captrd/prep_data_for_estimation.gms,98-102,assignment,in style,capri_mod/pipelin
 captrd/prep_data_for_estimation.gms,104-106,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_SLGW_BASM,253,named,"p_data(Rest,breedAct,""SLGW"",""BASM"") $ SUM(BASYRSM $ p_data(Rest,breedAct,""SLGW"",BASYRSM),1)",
 captrd/prep_data_for_estimation.gms,111-112,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_SHGM_SLGW_mean,269,named,"p_data(Rest,""SHGM"",""SLGW"",""mean"") $ SUM(ExpostT $ p_data(Rest,""SHGM"",""SLGW"",ExpostT),1)",
 captrd/prep_data_for_estimation.gms,119-122,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_SHGM_SLGW_low,281,named,"p_data(Rest,""SHGM"",""SLGW"",BASYRSM)",
-captrd/prep_data_for_estimation.gms,120-131,control ($),context,capri_mod/pipeline/captrd/prepare.py,_shgm_basm,660,named,"$ ((p_data(Rest,""SHGM"",""SLGW"",""mean"") gt 0)",
+captrd/prep_data_for_estimation.gms,120-131,control ($),context,capri_mod/pipeline/captrd/prepare.py,_shgm_basm,661,named,"$ ((p_data(Rest,""SHGM"",""SLGW"",""mean"") gt 0)",
 captrd/prep_data_for_estimation.gms,129-132,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_SHGM_BASM,299,named,"p_data(Rest,""SHGM"",""SLGW"",""BASM"")",
 captrd/prep_data_for_estimation.gms,134-139,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_SHGM_BASM,306,named,"p_data(Rest,cols,rows,""BASM"")",
 captrd/prep_data_for_estimation.gms,141-142,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_removed,178,named,"p_data(Rest,cols,rows,BASYRSM)",
@@ -2165,7 +2177,7 @@ captrd/prep_data_for_estimation.gms,149-150,assignment,in style,capri_mod/pipeli
 captrd/prep_data_for_estimation.gms,152-153,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_EAAG,340,named,"p_data(Rest,""EAAG"",S_RowsEst,YEARS_BASM)",
 captrd/prep_data_for_estimation.gms,157-158,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_group_sum,211,named,"p_data(MS,MrkBaleE,GRPR,YEARS_BASM)",
 captrd/prep_data_for_estimation.gms,161-167,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_DOMM,355,named,"p_data(MS,""DOMM"",ROWS,YEARS_BASM) $ ( ( SUM(DOMPOS $ (p_data(MS,DOMPOS,ROWS,YEARS_BASM) GE 1.E-12), p_data(MS,DOMPOS,ROWS,YEARS_BASM))",
-captrd/prep_data_for_estimation.gms,164-198,assignment,moved,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,480,same block,"or ((p_data(MS,""DOMM"",ROWS,YEARS_BASM) lt 0) $ (not OYANI_ROWS(rows))))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,164-198,assignment,moved,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,481,same block,"or ((p_data(MS,""DOMM"",ROWS,YEARS_BASM) lt 0) $ (not OYANI_ROWS(rows))))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/prep_data_for_estimation.gms,169-170,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_UVAG,328,named,"p_data(Rest,""UVAG"",GRPR ,YEARS_BASM) $ p_data(Rest,""GROF"",GRPR,YEARS_BASM)",
 captrd/prep_data_for_estimation.gms,172-173,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_UVAD,372,named,"p_data(MS,""UVAD"",GRPR ,YEARS_BASM) $ p_data(MS,""HCOM"",GRPR,YEARS_BASM)",
 captrd/prep_data_for_estimation.gms,175-176,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_TOOU,386,named,"p_data(MS,MPACT,""TOOU"",YEARS_BASM) =",
@@ -2180,7 +2192,7 @@ captrd/prep_data_for_estimation.gms,202-203,assignment,in style,capri_mod/pipeli
 captrd/prep_data_for_estimation.gms,205-247,assignment,moved,capri_mod/pipeline/captrd/__init__.py,(module),7,named,Rest(EstTypes) = NO;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/prep_data_for_estimation.gms,205-247,assignment,moved,capri_mod/pipeline/captrd/step1.py,(module),5,named,Rest(EstTypes) = NO;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/prep_data_for_estimation.gms,205-247,assignment,moved,capri_mod/pipeline/captrd/step1.py,PreStats,83,named,Rest(EstTypes) = NO;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
-captrd/prep_data_for_estimation.gms,205-252,assignment,moved,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,480,same block,Rest(EstTypes) = NO;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,205-252,assignment,moved,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,481,same block,Rest(EstTypes) = NO;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/prep_data_for_estimation.gms,205-320,assignment,moved,capri_mod/pipeline/captrd/prepare_run.py,run,132,named,Rest(EstTypes) = NO;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/prep_data_for_estimation.gms,205-320,assignment,moved,capri_mod/pipeline/captrd/statistics.py,(module),1,named,Rest(EstTypes) = NO;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/prep_data_for_estimation.gms,209-210,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_nObs_nW,21,named,"p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") = SUM(ExpostT $ p_data(Rest,S_ColsEst,S_RowsEst,ExpostT), 1.);",
@@ -2246,7 +2258,7 @@ captrd/prep_data_for_estimation.gms,309-325,assignment,moved,capri_mod/pipeline/
 captrd/prep_data_for_estimation.gms,311-314,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_BSY,610,named,"p_data(Rest,MPACT,S_RowsEst,""3"") $ ( S_ColsEst(MPACT) $ p_data(Rest,MPACT,""LEVL"",""BAS"") $ PACT_TO_Y(MPACT,S_RowsEst))",
 captrd/prep_data_for_estimation.gms,316-317,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_BSY,617,named,"p_data(Rest,MPACT,S_RowsEst,""BSY"") $ (p_data(Rest,MPACT,S_RowsEst,""1"") $ PACT_TO_Y(MPACT,S_RowsEst))",
 captrd/prep_data_for_estimation.gms,319-321,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_BSY,622,same block,"p_data(Rest,MPACT,S_RowsEst,""1"") $ p_data(Rest,MPACT,S_RowsEst,""1"") = 0;",
-captrd/prep_requirement_estimation.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets,135,named,,
+captrd/prep_requirement_estimation.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets,136,named,,
 captrd/prep_requirement_estimation.gms,,file,context,capri_mod/pipeline/captrd/prepare_run.py,(module),12,named,,
 captrd/prep_requirement_estimation.gms,,file,context,capri_mod/pipeline/captrd/prepare_run.py,run,133,named,,
 captrd/prep_requirement_estimation.gms,,file,context,capri_mod/pipeline/captrd/requirements.py,(module),1,named,,
@@ -2354,10 +2366,10 @@ captrd/sets_captrd.gms,,file,context,capri_mod/pipeline/captrd/labour.py,(module
 captrd/sets_captrd.gms,,file,context,capri_mod/pipeline/captrd/supports.py,(module),12,named,,
 captrd/sets_captrd.gms,31,other,context,capri_mod/pipeline/captrd/labour.py,(module),35,same function,dynamic set MSEST is used to single out individual countries or groups to,
 captrd/sets_captrd.gms,39-55,other,context,capri_mod/pipeline/captrd/labour.py,(module),36,same function,TYPES is the set of all farm types. The dynamic set EstTypes contains the,
-captrd/sets_captrd.gms,54-56,declaration,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets,63,named,"SET MS(RMS) ""Countries (not just member states!) potentially in estimation""",
-captrd/sets_captrd.gms,69,declaration,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets,66,same function,"ALIAS(NT2,SRNUTS2);",
-captrd/sets_captrd.gms,76-78,declaration,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets.nt2ext,140,named,"SET NT2ext(Rall) ""extended set of NUTS2 regions including urban NUTS"";",
-captrd/sets_captrd.gms,159-161,assignment,to move,capri_mod/pipeline/captrd/prepare.py,CaptrdSets.rest,145,named,Rest(MS) = YES;,
+captrd/sets_captrd.gms,54-56,declaration,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets,64,named,"SET MS(RMS) ""Countries (not just member states!) potentially in estimation""",
+captrd/sets_captrd.gms,69,declaration,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets,67,same function,"ALIAS(NT2,SRNUTS2);",
+captrd/sets_captrd.gms,76-78,declaration,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets.nt2ext,141,named,"SET NT2ext(Rall) ""extended set of NUTS2 regions including urban NUTS"";",
+captrd/sets_captrd.gms,159-161,assignment,to move,capri_mod/pipeline/captrd/prepare.py,CaptrdSets.rest,146,named,Rest(MS) = YES;,
 captrd/sets_captrd.gms,183,blank,context,capri_mod/pipeline/captrd/aglink.py,Sets.__init__,164,same function,,
 captrd/sets_captrd.gms,184,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,Sets,71,named,"rmAggSup(""%EU_EASTBUR%"") = YES;",
 captrd/sets_captrd.gms,186,comment,context,capri_mod/pipeline/captrd/aglink.py,Sets.__init__,165,same function,* For Aglink prior to 2013,
@@ -2387,7 +2399,7 @@ coco/time_avg.gms,,file,context,capri_mod/pipeline/captrd/national_supports.py,_
 dat/baseline/necp_expert.gms,,,check,capri_mod/pipeline/captrd/national_supports.py,(module),8,named,,file not in the copy
 dat/biofuel/biofuel_technology_params.gms,,,check,capri_mod/pipeline/captrd/coco.py,(module),21,named,,file not in the copy
 dat/coco/milk_quota_dat.gms,,,check,capri_mod/pipeline/captrd/policy.py,(module),16,named,,file not in the copy
-dat/policy/livestock_units.gms,,,check,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,484,named,,file not in the copy
+dat/policy/livestock_units.gms,,,check,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,485,named,,file not in the copy
 dat/policy/smal_pshar.gms,,,check,capri_mod/pipeline/captrd/policy.py,(module),18,named,,file not in the copy
 feed/feed_decl.gms,284-310,declaration,context,capri_mod/pipeline/captrd/supports.py,(module),13,named,"Table p_reqfcnlim(COLS,ROWS,*) ""Absolute limits on days and daily growth (in g) imposed in requirement functions (and COCO)""",
 global/convert_globiom.gms,,file,context,capri_mod/pipeline/captrd/globiom.py,(module),4,named,,

@@ -38,6 +38,7 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 import pandas as pd
 
 from capri_mod.csvio import read_csv
+from capri_mod.pipeline.captrd.equations import captrd as CG
 from capri_mod.pipeline.captrd.equations import prep_data_for_estimation as PD
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -210,9 +211,9 @@ def load_fixes(p: pd.DataFrame, sets: CaptrdSets) -> pd.DataFrame:
     arto = p[(p["col"] == "ARTO") & (p["row"] == "LEVL")].set_index(["region", "t"])["value"]
     f = pd.concat([pos.rename("pos"), arto.rename("arto")], axis=1).dropna()
     f = f[(f["pos"] != 0) & (f["arto"] != 0)]
-    lu = lu.join((f["arto"] / f["pos"]).rename("f"), on=["region", "t"])
-    lu = lu[lu["f"].notna()]
-    lu = lu.assign(value=lu["value"].clip(lower=0.0) * lu["f"])
+    lu = lu.join(f[["arto", "pos"]], on=["region", "t"])
+    lu = lu[lu["arto"].notna()]
+    lu = lu.assign(value=CG.p_data_LanduseARTO(lu["value"], lu["arto"], lu["pos"]))
     return _assign(p, lu)
 
 
@@ -245,7 +246,7 @@ def load_basm(p: pd.DataFrame, data2: pd.DataFrame, sets: CaptrdSets) -> pd.Data
               | (d["col"].isin(sets.aact) & (d["row"] == "EDAYS"))][["region", "col", "row", "value"]]
     days = d[d["col"].isin(sets.aact) & (d["row"] == "DAYS")].set_index(["region", "col"])["value"]
     dr = d[d["col"].isin(sets.aact) & d["row"].isin({"DRMN", "DRMX"})].copy()
-    dr["value"] = dr["value"] * [days.get((r, c), 0.0) for r, c in zip(dr["region"], dr["col"])]
+    dr["value"] = CG.p_data_DRMN_DRMX_BASM(dr["value"], [days.get((r, c), 0.0) for r, c in zip(dr["region"], dr["col"])])
     out = pd.concat([basm, extra, dr[["region", "col", "row", "value"]]], ignore_index=True)
     out = out.drop_duplicates(["region", "col", "row"], keep="last")
     out["t"] = "BASM"
@@ -393,7 +394,7 @@ def labour_household(p: pd.DataFrame) -> pd.DataFrame:
     if lab.empty:
         return p[~old].reset_index(drop=True)
     w = lab.pivot_table(index=["region", "t"], columns="row", values="value", aggfunc="sum").fillna(0.0)
-    h = (w.get("LABO", 0.0) - w.get("LABN", 0.0)).rename("value").reset_index()
+    h = CG.p_data_LABH(w.get("LABO", 0.0), w.get("LABN", 0.0)).rename("value").reset_index()
     h["col"], h["row"] = "GROF", "LABH"
     return pd.concat([p[~old], h[h["value"] != 0][KEYS + ["value"]]], ignore_index=True)
 
