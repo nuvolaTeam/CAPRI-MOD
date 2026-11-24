@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](dev/KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (36)
+## Open (37)
 
 | # | Issue | Status |
 |---|---|---|
@@ -49,8 +49,9 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences; sorted 20 November 2026: most are in the accounts only or have no effect in the step; ARTIF held fixed had one (small for the EU, a few thousand ha in some Spanish and French units) | open: ARTIF, the milk for feeding and the yield factors of the crops' N and P terms ported 20 November 2026 (as CAPRI's); the animals' per-head terms ported 21 November 2026 (the members' INPO difference under the Green Deal's input change); fertned's two items left closed 23 November 2026 (the price-driven O_HP needs no port; the residues' variant factor at the moved MANN ported) |
 | [K196](#k196) | The Green Deal's N-surplus dual is below CAPRI's (CAPRI's recovered from its own results): median 0.856 of CAPRI's in the standing check at 9867411 (0.89 at bb3b592), 0.83 at CAPRI's prices; the suckler cows' and the technology shift's remaining gaps follow it | open (21 November 2026) |
 | [K198](#k198) | The assignments refactor's findings for the main line (its inventory of the CAPRI statements the model ports or cites, block A0): porting differences in the market supply Hessian, the price transmission, the stop rule, the welfare, the premiums and the accounts, and 14 wrong line citations; sorted 23 November 2026 by where they act, not measured | open (23 November 2026) |
+| [K201](#k201) | The 2030 rations of the bulls and heifers are not CAPRI's 2030: the 2030 ration builder takes the 2017 aggregates BULF and HEIF, which have no DAYS in CAPRI's 2030 reference, so the bulls get no 2030 factor (their requirements and feeds 2017 x the yield factor f; their energy requirement's 2030/2017 factor 5.8% above CAPRI's at the median) and the heifers' 2030 total is the replacement heifers' (HEIR) alone | open (24 November 2026): the fix is CAPRI's elementary activities in both years (BULL, BULH; HEIL, HEIH, HEIR) |
 
-## Resolved (129)
+## Resolved (130)
 
 | # | Issue | Status |
 |---|---|---|
@@ -86,6 +87,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K190](#k190) | The grassland need took CAPRI's SQRT(1 +/- 0.2) split twice: the data's need per ha (CAPRI's reported 2030 need per crop) already carries it, and K160 applied it again; ES41's base manure K on grassland 53.6 against CAPRI's 42.0 kt | fixed (20 November 2026); the intensive grassland's weaker Green Deal response that followed traced to K191 (the grassland's removal and fixation in the N-surplus row) |
 | [K186](#k186) | The catch crops' winter cover option scales with the fixed base crop area; CAPRI's catcMiti_ and GHG_Mit_Cost_ scale it with the current land (landTypesNoSlak, uaaEqu). Not active in CAPRI's Green Deal step (its winter cover share fixed at 1e-6, CATC a free activity) | fixed (21 November 2026): the option's catch crops and cost on the current land, as CAPRI |
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | closed (21 November 2026), explained: the young-animal block is CAPRI's (values, coefficients, premiums' response, clearing); the female calves' gap is the suckler cows' smaller Green Deal fall, which follows the N-surplus dual below CAPRI's (K196) |
+| [K200](#k200) | The milk sheep and goats' (SHGM) output per head at 2030 was not the sum of its products: the projection scaled it by the value-weighted mix of its milk and meat factors (right for its revenue, not for a quantity), and the market bridge splits an animal's output at its products' shares, so SHGM's milk and meat passed to the market were 0.979 of their projected sum in the EU at the 2030 base (Spain 0.937; the member states 0.872-1.178) | fixed (24 November 2026): the output is the sum of its products, as SUPBAL_'s |
 | [K199](#k199) | The feed bulks of the non-EU countries with supply models did not respond within the market solve (CAPRI's feedBlk_ is defined for every RMSSUP): with CAPRI's non-EU supply models (D2) a cobweb on the Western Balkans' FENI and the UK's energy-rich feed, their FENE rows changing by 18-26% between Green Deal iterations | fixed (24 November 2026), as CAPRI (register DEP-54) |
 | [K197](#k197) | The purchased feed bulks' prices were not CAPRI's: the 2030 baseline took a CES of the products' 2030 prices (FENE and FMIL at 1), where CAPRI's 2030 bulk prices are its 2017 ones; a scenario took the market's feedBlkPrice_ CES, where CAPRI's supply models read set_prices.gms's Laspeyres | fixed (23 November 2026), as CAPRI (the project lead's decision; our view of CAPRI's 2030 level in DEPARTURES_FROM_CAPRI.md) |
 | [K195](#k195) | The comparison switch's CAPRI step valued each crop's plant protection at dataOut's regional UVAG(PLAP); CAPRI's p_linObjeCont takes the member state's UVAP of the simulation year | fixed (21 November 2026), as CAPRI |
@@ -4191,6 +4193,54 @@ the Western Balkans besides Norway) did not converge.
   NO08). Neither probe met the stop rule in the Green Deal (Spain's maize still moving by 0.60% at the 30th iteration,
   in both).
 - **Status:** fixed (24 November 2026).
+
+<a id="k201"></a>
+### K201: The bulls' and heifers' 2030 rations and requirements (found 24 November 2026; register DEP-13)
+
+Found by the DEP-13 check of the ration model's 2030 requirements against CAPRI's.
+
+- **CAPRI.** The simulation's requirement rows REQSN_ and REQSE_ (supply/supply_model.gms l. 521-590) take
+  p_animReq x p_animProdDays of each elementary activity (BULL, BULH, HEIL, HEIH, HEIR, ...), which sim_ini_21730 holds
+  for the simulation year. The 2030 reference's dataOut reports the same requirements per day: its ENNE, CRPR, DRMN
+  and DRMX of every regional activity equal sim_ini_21730's p_animReq(T) (16,828 cells, ratio 1 to the last digit).
+- **The model.** tools/build/build_ration_trajectory_2030.py takes, per region group and model animal, CAPRI's
+  LEVL-weighted feeds and requirements x DAYS of 2030 over 2017, with the CAPRI activities of the 2017 ration builder
+  (build_feed_ration.CAPRI_TO_MODEL: BULF for the bulls, HEIF and HEIR for the heifers). In the 2030 reference the
+  aggregates BULF and HEIF have no DAYS (DE21: BULL 203 and BULH 305 days, BULF none), and the builder skips an
+  activity without DAYS. So:
+  - the bulls have no 2030 factor in any of the 249 region x animal pairs; their 2030 requirements and ration are the
+    2017 ones x the yield factor f (ProjectionModule._project_livestock, median 1.013). With CAPRI's elementary
+    activities in both years CAPRI's energy factor is 0.957 at the median (10-90%: 0.874-1.028), so the model's
+    2030/2017 energy factor is 5.8% above CAPRI's at the median (10-90%: -0.2% to +13.9%); CAPRI's 2030 bull ration
+    has less cereal (FCER 0.887 at the median), energy-rich feed (FENE 0.757) and other feed (FOTH 0.773) and more
+    protein-rich feed (FPRO 1.117) than its 2017 one, where the model scales the 2017 mix uniformly; the bulls' methane
+    per head stays at 2017 (CAPRI's factors: CH4ENT 0.968, CH4MAN 1.048 at the median).
+  - the heifers' 2030 total is HEIR's alone against HEIF + HEIR in 2017: the energy and protein factors are close to
+    the consistent ones (1.002 at the median), the dry-matter bounds' not (DMIN 0.938, DMAX 0.960 of the current at
+    the median; DMIN 0.848-1.001 over 10-90%).
+- **Fix (to do).** The 2030 factors from CAPRI's elementary bull and heifer activities in both years (BULL, BULH;
+  HEIL, HEIH, HEIR), whose DAYS both years have; the other animals' factors unchanged (identical in a test build).
+- **Status:** open (24 November 2026).
+
+<a id="k200"></a>
+### K200: The milk sheep and goats' output per head at 2030 against the sum of its products (found and fixed 24 November 2026; register DEP-13)
+
+Found by a test of DEP-13 step 2 (each animal's projected output per head against the sum of its products per head).
+
+- **CAPRI.** SUPBAL_'s total output sums v_actLevl x DATA(r, act, OMS, "Y") over the activity's final products OMS
+  (supply/supply_model.gms l. 4585-4595): an activity's output is the sum of its products.
+- **The model before.** ProjectionModule._project_livestock scales SHGM's milk (SGMI) by SHGM's yield factor and its
+  meat (SGMT) by SHGF's (K12), and SHGM's totals by the two factors' mix weighted by the products' values. That mix
+  is right for the value totals (revenue, product value), not for the quantity, livestock_output_coef. The market
+  bridge (coupling/bridge.py) splits each animal's gross output, its level x livestock_output_coef, at its products'
+  shares, so SHGM's milk and meat passed to the market were the sum of its products x the ratio of the value-weighted
+  factor to the quantity-weighted one: at the 2030 base 0.979 of the sum in the EU, Spain 0.937, France 0.973, the
+  member states 0.872-1.178 (df7a08c, CAPRI's 2030 reference as the trajectory). Every other animal's output was the
+  sum of its products (to 6e-16 relative).
+- **Fix (as CAPRI).** ProjectionModule.SUPBAL_animalOutputSum: an animal's output per head is the sum of its products
+  per head, after the projection's scaling (SHGM) and after DEP-13 step 2's 2030 outputs (each animal they change).
+  Test: test_livestock_output_2030.py `test_the_projection_to_capris_2030_reference_takes_its_outputs_per_head`.
+- **Status:** fixed (24 November 2026), with DEP-13 step 2.
 
 <a id="k195"></a>
 ### K195: CAPRI's Green Deal step's plant protection at the member state's UVAP (found and fixed 21 November 2026)

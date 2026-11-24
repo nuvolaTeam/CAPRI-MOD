@@ -53981,7 +53981,156 @@
     ],
     "checks": [],
     "tests": [
+     "capri_mod/tests/test_livestock_output_2030.py",
      "capri_mod/tests/test_norway_market.py"
+    ]
+   }
+  },
+  "sup_livestock_output_by_product_coef_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/livestock_output_by_product_coef_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [
+    "unnamed",
+    "wide"
+   ],
+   "comment": "CAPRI's 2030 final-product output per model head (columns ACT.PRODUCT): CAPRI's 2030 production, LEVL x DATA at 2030 of the 2030 reference over the animal's CAPRI activities, over the model's 2030 base heads; the 2030 market year's outputs per head (register DEP-13 step 2; tools/build/build_livestock_output_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity_product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity_product"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    }
+   ],
+   "checks": [],
+   "units": [
+    {
+     "item": "BCOW.BEEF",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "BROI.POUM",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "BULL.BEEF",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "CALV.BEEF",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "DCOW.BEEF",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "DCOW.COMI",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "HFRS.BEEF",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "LAYS.EGGS",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "LAYS.POUM",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "PIGF.PORK",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "PIGS.PORK",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "SHGF.SGMT",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "SHGM.SGMI",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "SHGM.SGMT",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_livestock_output_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_livestock_output_2030.py"
     ]
    }
   },

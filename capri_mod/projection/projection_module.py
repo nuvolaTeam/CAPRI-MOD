@@ -254,6 +254,12 @@ class ProjectionModule:
                 young_table_base=young_animal_table(year=getattr(self.model, "base_year", None) or _base_year()))
 
         self._project_livestock(data, self.model.data, year)
+        # the outputs per head of the simulation year where CAPRI's are in the data (2030: register DEP-13 step 2), with
+        # CAPRI's 2030 reference as the trajectory, as its rations below: a trend projection (CAPTRD) keeps its own
+        # yields, which the outputs per head follow (_project_livestock)
+        if str(getattr(traj, "name", "")).startswith("capri_ref"):
+            self.SUPBAL_outputsPerHead_Y(data, year, data.get("livestock_output_by_product_coef"),
+                                         data.get("livestock_product_value_by_market_coef"))
         # CAPRI's own 2030 rations and requirements with its 2030 reference (the port of CAPRI's 2030 rations and fodder): factors per region, animal and
         # feed on the 2017 rations (tools/build/build_ration_trajectory_2030.py); where present they replace the uniform
         # requirement scaling of _project_livestock for that ration
@@ -401,6 +407,11 @@ class ProjectionModule:
                             tab.at[r, col] = float(tab.at[r, col]) * f_
                     continue
                 tab.loc[idx, col] = tab.loc[idx, col] * F.loc[idx, a]
+        # SHGM's two products follow two factors (milk SHGM's, meat SHGF's): its output is their sum, not its output
+        # x the value-weighted factor above (the revenue's; until 24 November 2026 the output's too, up to 15% off the
+        # sum of its products at 2030, KNOWN_ISSUES K200)
+        if prod_f:
+            self.SUPBAL_animalOutputSum(data, bp, {(r, "SHGM") for (r, _a, _p) in prod_f})
         scale = {}
         nexp = data.get("livestock_n_export_coef")
         for r in F.index:
@@ -434,6 +445,81 @@ class ProjectionModule:
                             and pd.notna(nexp.at[r, a]):
                         nexp.at[r, a] = float(nexp.at[r, a]) * f
         data["ration_scale"] = scale
+
+    @staticmethod
+    def SUPBAL_outputsPerHead_Y(data: Dict, year: Optional[int], bp, pv) -> None:
+        """CAPRI's outputs per head of the simulation year: the final products in SUPBAL_'s total output, v_actLevl x
+        DATA(r, act, OMS, "Y") (supply/supply_model.gms l. 4585-4595), at the 2030 market year CAPRI's 2030 production
+        over the model's 2030 base heads (livestock_output_by_product_coef_2030.csv, tools/build/
+        build_livestock_output_2030.py), in place of the base year's per head x the projected yield factor f
+        (_project_livestock; exact for an animal's main output, not for its second outputs and the cattle's beef). So the
+        model's 2030 base production of each product is CAPRI's 2030 production. Called by project_data with CAPRI's
+        2030 reference as the trajectory (capri_ref, as CAPRI's 2030 rations); a trend projection keeps its own yields. Each product's value per head
+        (livestock_product_value_by_market_coef: what its market price moves) follows its quantity, and the animal's
+        totals take the change: livestock_output_coef the quantities' (their sum), livestock_product_value_coef,
+        livestock_revenue_coef and livestock_output_value_coef the products' value (the young animals' part of the
+        revenue and output value unchanged). A cell without CAPRI's 2030 output keeps the projected one. Register DEP-13
+        step 2 (23 November 2026; until then all products per head followed f).
+
+        CAPRI's GAMS, supply/supply_model.gms SUPBAL_'s total output (l. 4585-4595; the equation from l. 4551):
+
+                SUM( (MPACT,A) $ (PACT_TO_O(MPACT,OMS) $ p_technFact(RUNR,MPACT,"LEVL",A)),
+                    v_actLevl(RUNR,MPACT,A) * (%data%(RUNR,MPACT,OMS,"Y")
+        $iftheni.till6 %ghgAbatement%==on
+        *      --- mitigation effect on yield considered
+                     * v_yldMit(RUNR,MPACT)
+        $endif.till6
+        *      --- endogenous pesticide use considered
+        $iftheni.Pes1 %PEST_DISAGG%==ON
+                     * (1 +(v_yldPestFac(RUNR,mPact,A)-1) $ (v_yldPestFac.range(RUNR,mPact,A) $ cact(mpact)))
+        $endif.Pes1
+                     * (p_technFact(RUNR,MPACT,OMS,A)+1.) * 0.001)
+        """
+        t = data.get(f"livestock_output_by_product_coef_{year}") if year is not None else None
+        if not isinstance(t, pd.DataFrame) or not isinstance(bp, pd.DataFrame):
+            return
+        from capri_mod.model import CAPRIModel
+        mkt = CAPRIModel.LIVESTOCK_PRODUCT_MARKET
+        dq, dv = {}, {}
+        for col in bp.columns.intersection(t.columns):
+            a, prod = col.split(".", 1)
+            mcol = f"{a}.{mkt.get(prod, prod)}"
+            for r in bp.index.intersection(t.index):
+                new, old = t.at[r, col], bp.at[r, col]
+                if not (pd.notna(new) and float(new) > 0):
+                    continue
+                old = float(old) if pd.notna(old) else 0.0
+                if old > 0 and isinstance(pv, pd.DataFrame) and mcol in pv.columns and r in pv.index \
+                        and pd.notna(pv.at[r, mcol]):
+                    v0 = float(pv.at[r, mcol])
+                    pv.at[r, mcol] = v0 * float(new) / old
+                    dv[(r, a)] = dv.get((r, a), 0.0) + v0 * (float(new) / old - 1.0)
+                bp.at[r, col] = float(new)
+                dq[(r, a)] = dq.get((r, a), 0.0) + float(new) - old
+        ProjectionModule.SUPBAL_animalOutputSum(data, bp, set(dq))
+        for key in ("livestock_product_value_coef", "livestock_revenue_coef", "livestock_output_value_coef"):
+            tab = data.get(key)
+            if not isinstance(tab, pd.DataFrame):
+                continue
+            for (r, a), x in dv.items():
+                if r in tab.index and a in tab.columns and pd.notna(tab.at[r, a]):
+                    tab.at[r, a] = float(tab.at[r, a]) + x
+
+    @staticmethod
+    def SUPBAL_animalOutputSum(data: Dict, bp, cells) -> None:
+        """An animal's output per head (livestock_output_coef, which the market bridge splits into its products at their
+        shares, coupling/bridge.py) as the sum of its final products per head, as SUPBAL_'s total output sums
+        v_actLevl x DATA(r, act, OMS, "Y") over the products OMS of the activity (supply/supply_model.gms l. 4585-4595,
+        quoted at SUPBAL_outputsPerHead_Y); for the (region, animal) cells given. KNOWN_ISSUES K200."""
+        tab = data.get("livestock_output_coef")
+        if not isinstance(tab, pd.DataFrame) or not isinstance(bp, pd.DataFrame):
+            return
+        parts = {}
+        for c in bp.columns:
+            parts.setdefault(c.split(".", 1)[0], []).append(c)
+        for (r, a) in cells:
+            if r in tab.index and a in tab.columns and r in bp.index and a in parts and pd.notna(tab.at[r, a]):
+                tab.at[r, a] = float(sum(float(bp.at[r, c]) for c in parts[a] if pd.notna(bp.at[r, c])))
 
     # -------------------------------------------------------------------- run
     def run(self,
