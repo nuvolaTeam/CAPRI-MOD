@@ -122,10 +122,42 @@ inputs reach.
 
 ## 5. Next blocks
 
-- **C5: the supports and trends.** biofuel_trends (778 lines), national_supports (695), globiom (696), aglink (845),
-  eu_supports (539), prepare (679), longrun_supports, dairy_supports, final_supports and the rest (the GAMS file each
-  cites is in its docstring). Start with an inventory of their GAMS statements (as docs/dev/assignments_inventory.csv),
-  then a block per GAMS file.
+- **C5: the supports and trends** (the rest of the pipeline). The inventory, docs/dev/captrd_inventory.csv
+  (`python tools/check/captrd_inventory.py GAMS_DIR --out docs/dev/captrd_inventory.csv`, to rebuild after each
+  block): 1,725 citations of CAPRI's lines in capri_mod/pipeline/captrd, 658 of them statements still to move (an
+  assignment or a bound cited outside equations/), 243 in the style, 136 the callers' comments of moved statements,
+  681 context (declarations, control statements, comments, whole files), 7 to check (data files outside the GAMS copy).
+  A bare "l. a-b" is given the first of the candidate files (the same line's, block's, function's, then the module's
+  by frequency) the range fits in: the attribution column says which, and the module's file is a guess to confirm
+  when the block is done. The blocks, one per CAPRI file, the small and self-contained first (statements to move,
+  the modules):
+
+  | block | CAPRI file | to move | modules |
+  |---|---|---|---|
+  | C5.1 | captrd/copy_labour_biofuel_on_presult.gms | 7 | step3_copies |
+  | C5.2 | baseline/labour_ageline.gms | 7 | labour |
+  | C5.3 | captrd/captrd_policy.gms (and sugar/load_quotas.gms) | 9 | policy |
+  | C5.4 | captrd/estimate_trends.gms | 7 | step1 |
+  | C5.5 | captrd/clean_tiny.gms | 27 | clean_tiny |
+  | C5.6 | captrd/scale_DG_AGRI_baseline.gms | 25 | scale_dgagri |
+  | C5.7 | captrd/adjust_to_biof_supports.gms, adjust_trade_supports.gms | 14 | final_supports |
+  | C5.8 | captrd/agriprod_supports.gms | 27 | agriprod_supports |
+  | C5.9 | captrd/longrun_supports.gms | 30 | longrun_supports, macro |
+  | C5.10 | captrd/define_eu_supports.gms | 29 | eu_supports, final_supports, supports |
+  | C5.11 | captrd/expert_support.gms, national_supports.gms | 54 | national_supports, dairy_supports, expert_rules, expert_support |
+  | C5.12 | captrd/define_stats_and_supports.gms | 51 | step1, final_supports, requirements, supports, expert_support, dairy_supports, coco_supports |
+  | C5.13 | captrd/prep_data_for_estimation.gms | 29 | statistics, step1, prepare, supports |
+  | C5.14 | captrd/load_coco1_data.gms | 51 | coco, estimate_nuts2 (the statements beside the bounds), statistics, timesets |
+  | C5.15 | captrd.gms | 86 | eu_supports, timesets, prepare, national_supports, dairy_supports, prepare_run |
+  | C5.16 | biofuel/biofuel_trends.gms | 59 | biofuel_trends |
+  | C5.17 | global/convert_globiom.gms (and fao_codes_new.gms) | 58 | globiom |
+  | C5.18 | baseline/load_aglink2023dgAgri.gms (and its mappings) | 70 | aglink, macro |
+
+  The few left (estimate_ms.gms, estimate_nuts2.gms, rem_tiny.gms, aggreg_and_report.gms, check_and_cor_capreg.gms:
+  a statement beside the ones moved) go with the block of their module. Each block: the module's functions'
+  outputs dumped at the reference's inputs before and after (the parity tool extended, as for C4), the statements
+  into capri_mod/pipeline/captrd/equations/<capri file>.py (one function per statement block, named after the
+  assigned symbol), the inventory rebuilt.
 - **C6: the hash order.** docs/dev/captrd_set_order_places.csv: 81 places in 17 modules (globiom 19,
   national_supports 13, prepare 8, aglink 7, longrun_supports 7, policy 5, biofuel_trends 4, scale_dgagri 4, coco 3,
   expert_support 2, macro 2, requirements 2, dairy_supports, estimate_nuts2, eu_supports, statistics, timesets 1 each;
