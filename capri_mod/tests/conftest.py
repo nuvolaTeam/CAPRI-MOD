@@ -20,6 +20,8 @@ from pathlib import Path
 
 import pytest
 
+import capri_mod  # noqa: F401  (first: its thread limits before a test module imports NumPy, capri_mod/__init__.py)
+
 DATA_DIR = Path(__file__).resolve().parents[2] / "capri_data"
 
 NO_HESSIAN = {"market.market_supply_nq": False}

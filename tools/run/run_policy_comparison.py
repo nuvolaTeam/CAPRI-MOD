@@ -26,6 +26,11 @@ not JRC121368's scenario (the project lead's decision: removed, the script uses 
 
 from __future__ import annotations
 
+import os as _os
+# one BLAS / OpenMP thread per process unless the environment sets more (capri_mod/__init__.py THREAD_LIMITS),
+# before pandas imports NumPy
+for _v in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
+    _os.environ.setdefault(_v, "1")
 import argparse
 import sys
 import time

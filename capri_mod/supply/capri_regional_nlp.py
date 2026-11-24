@@ -169,7 +169,8 @@ def linear_solver_options() -> dict:
     # CoinHSL is compiled with OpenMP (MA86, MA97, and the BLAS it may carry): its OpenMP runtime starts when IPOPT
     # first loads the library and reads OMP_NUM_THREADS then. The regional solves fork worker processes, and GNU
     # OpenMP hangs a forked child of a process that has run on several threads (capri_mod/utils/ipopt_library.py), so
-    # one thread unless the user set the variable (2 November 2026, with MA27 the project lead's solver for his runs)
+    # one thread unless the user set the variable (2 November 2026, with MA27 the project lead's solver for his runs;
+    # since 24 November 2026 capri_mod/__init__.py sets it on import, with OpenBLAS's and MKL's, so this is a fallback)
     os.environ.setdefault("OMP_NUM_THREADS", "1")
     return {"ipopt.linear_solver": ls, "ipopt.hsllib": lib}
 

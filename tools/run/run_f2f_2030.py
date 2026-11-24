@@ -14,6 +14,11 @@ Any setting of capri_mod/settings/defaults.toml is changed with --set (e.g. --se
 """
 import os as _os
 import sys as _sys
+# one BLAS / OpenMP thread per process unless the environment sets more: the regional solves fork a worker per
+# core and each started one thread per core in every library (capri_mod/__init__.py THREAD_LIMITS; KNOWN_ISSUES
+# K198); the libraries read the variables when they load, so before this script imports NumPy
+for _v in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
+    _os.environ.setdefault(_v, "1")
 # reproducible runs: the model iterates sets of names in a few places, and Python randomises string hashing per
 # process, which changed results by up to ~0.2% between two runs of the same scenario (degenerate regions more).
 # A fixed hash seed makes a run repeat exactly (the milk price re-check).

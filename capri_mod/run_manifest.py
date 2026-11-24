@@ -131,7 +131,9 @@ def finish() -> dict:
         "software": _versions(),
         "environment": {"platform": platform.platform(), "cpus": os.cpu_count(),
                         **{k: os.environ.get(k) for k in ("PYTHONHASHSEED", "OMP_CANCELLATION",
-                                                           "OMP_PROC_BIND", "OMP_NUM_THREADS") if k in os.environ}},
+                                                           "OMP_PROC_BIND", "OMP_NUM_THREADS",
+                                                           "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS")
+                           if k in os.environ}},
         "command": list(sys.argv),
         "inputs": inputs,
         "external_inputs": external,
