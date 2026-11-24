@@ -441,6 +441,21 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   and without (1)); the inhibitor on mineral N moves towards CAPRI's in four units (ES51 0.257 -> 0.141, CAPRI 0.039;
   NL22 0.536 -> 0.459, 0.292), away in FR52 (0.575 -> 0.482, 0.575); the inhibitor on manure stays where CAPRI has none
   (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
+- **CAPRI's manure output functions ported (24 November 2026; K179):** feed/req_or_man_fnc.gms in its manure mode
+  (%1 = man, PART I and PART III), as capri_mod/feed/equations/req_or_man_fnc.py: one function per CAPRI statement
+  block with its GAMS quote (the stocking rate; per animal activity the mean live weight, the days, the daily gain,
+  MANP and MANK from CAPRI's fixed manure contents, the literature crude-protein requirement p_crprReq; MANN =
+  max(0, p_crprReq x p_animExcrProtCorrFact / 6 - CRPR_EXPT) by technology). Its literal tables (feed/feed_decl.gms:
+  p_NutContManureKgM3, p_addExcrPerkgMilk, p_carcassShare, p_startWgt, p_reqfcnlim; CAPRI's p_LUUnits) in
+  capri_data/2017/feed/manure_output_params.csv (tools/build/build_manure_output_params.py). Checked on the 2030
+  Green Deal reference run's start (sim_ini_21730 at "Y"; tools/check/check_manure_output_2030.py): CAPRI's 2030
+  MANN, MANP and MANK in every unit (but the member states' sum rows) and all 18 animal activities, relative
+  differences below 3e-14; on CAPREG's 2017 data the 2017 MANP and MANK of the NUTS 2 units to 3e-7. The fattened pigs'
+  requirement tables p_pigsReqHighWgt and p_pigsReqLowWgt from CAPRI's dat/feed/porkreq.gms (the project lead's file
+  of 24 November 2026, capri_sources/dat/feed; in the raw set as capri/dat/feed/porkreq/). For a baseline other than
+  CAPRI's; not yet called by the projection (its year's correction factor is open: K179). The text of K179 and
+  three comments said CAPRI computes the manure "from the rations" or MANP and MANK "from the feed's P and K":
+  corrected (MANN from the requirement, MANP and MANK from the yields, days and weights).
 - **D2 the default (24 November 2026, the project lead's decision; register DEP-7 in its history):**
   `run.supply_countries_outside_eu` defaults to CAPRI's list of its 2030 Green Deal runs, Norway, the UK, Turkey and
   the Western Balkans (250 units; until now Norway alone, 221). Measured like for like before the switch (full Green

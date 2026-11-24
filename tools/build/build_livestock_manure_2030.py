@@ -1,9 +1,10 @@
 """CAPRI's 2030 manure N, P2O5 and K2O per head, per model region and model head (KNOWN_ISSUES K179): the excretion
 coefficients the model's manure terms use at the 2030 market year.
 
-In a simulation CAPRI computes each animal activity's manure output per head from its ration at the simulation year
-(capmod.gms l. 1090: $BATINCLUDE 'feed\\req_or_man_fnc.gms' man '"Y"', when not in baseline mode; MANN from the crude
-protein intake, MANP and MANK from the P and K content of the feed) before it solves; its supply model then multiplies
+In a simulation CAPRI computes each animal activity's manure output per head from its herd data at the simulation year
+(capmod.gms l. 1090: $BATINCLUDE 'feed\\req_or_man_fnc.gms' man '"Y"', when not in baseline mode; MANN from the
+literature crude-protein requirement less the N in products, MANP and MANK from the milk yield, days and live weights
+with CAPRI's fixed manure contents; capri_mod/feed/equations/req_or_man_fnc.py) before it solves; its supply model then multiplies
 that DATA(r, act, MANN/MANP/MANK, "Y") by the activity level (e_EXCRET, ManureNPK_ with manExportOrAppl_ and InclEmiAppl_,
 supply_model.gms l. 927-1036 and 1305-1338, with the mitigation options' factors). The 2030 Green Deal baseline the model's 2030 base is taken from
 (res_2_1730greendeal_refdefaulta, tools/lib/paths.BASELINE_REF) reports those coefficients in dataOut (MANN, MANP, MANK

@@ -66,6 +66,8 @@ EXTERNAL_ORIGIN = "CAPRI"
 #: files written by builders that the trace has not run yet (added after the last retrace), by file or folder prefix:
 #: builder, origins (from the builder's docstring); a retrace moves them into builders.json
 UNTRACED = {
+    # CAPRI's literal tables of its manure output functions (feed/feed_decl.gms; CAPRI's p_LUUnits; KNOWN_ISSUES K179)
+    "capri_data/2017/feed/manure_output_params.csv": ("build_manure_output_params", "CAPRI"),
     # CAPRI's 2030 N in products per model head (calc_nexport.gms at 2030, KNOWN_ISSUES K202)
     "capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_n_export_coef_2030.csv": ("build_livestock_n_export_2030", "CAPRI"),
     # CAPRI's 2030 outputs per model head (register DEP-13 step 2)

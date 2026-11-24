@@ -153,8 +153,9 @@ class ProjectionModule:
         # "<column>_<year>" (CAPRI's own terms of that year, tools/build/build_dairy_intensity.py) replace the base
         # year's (9 November 2026)
         _split_terms_at_year(data, int(year))
-        # manure N per head: CAPRI's coefficients of the year, which CAPRI computes from the year's rations before it
-        # solves (capmod.gms l. 1090; tools/build/build_livestock_manure_2030.py, KNOWN_ISSUES K179); the base year's at
+        # manure N per head: CAPRI's coefficients of the year, which CAPRI computes from the year's herd data before it
+        # solves (capmod.gms l. 1090: MANN from the crude-protein requirement, feed/req_or_man_fnc.gms, ported in
+        # capri_mod/feed/equations/req_or_man_fnc.py; tools/build/build_livestock_manure_2030.py, K179); the base year's at
         # the base year (manure P2O5 and K2O: capri_mod/fert/npk.manure_coef_table at the run's market year). Until
         # 18 November 2026 the 2017 coefficients at 2030, the dairy cows' raised by 0.0086 kg N per kg of extra milk
         # (breeding.gms; CAPRI's own 2030 dairy coefficient is 6% below its 2017 one in the EU)

@@ -4997,9 +4997,12 @@ CAPRI's 7,774, the heifers 3,007 against 20,279.
 <a id="k179"></a>
 ### K179: The 2030 runs took the 2017 manure per head (found 18 November 2026)
 
-In a simulation CAPRI computes each animal activity's manure N (MANN, from the crude-protein intake), P2O5 (MANP)
-and K2O (MANK) per head from the simulation year's rations before it solves (capmod.gms l. 1090, $BATINCLUDE
-'feed\req_or_man_fnc.gms' man '"Y"' when not in baseline mode); e_EXCRET and ManureNPK_ multiply them by the level
+In a simulation CAPRI computes each animal activity's manure N (MANN), P2O5 (MANP) and K2O (MANK) per head from the
+simulation year's herd data before it solves (capmod.gms l. 1090, $BATINCLUDE 'feed\req_or_man_fnc.gms' man '"Y"'
+when not in baseline mode: MANN from the literature crude-protein requirement at the year's yields, times
+p_animExcrProtCorrFact over 6, less the N in products; MANP and MANK from the milk yield, the days and the live weights
+with CAPRI's fixed manure contents; not from the rations: until 24 November 2026 this entry said "from the rations");
+e_EXCRET and ManureNPK_ multiply them by the level
 (ManureNPK_ with manExportOrAppl_ and InclEmiAppl_, supply_model.gms l. 927-1036; e_EXCRET, l. 1305-1338; with the mitigation options' factors). Its 2030 Green Deal baseline reports
 them (dataOut MANN, MANP, MANK of every animal activity at 2030; LEVL x MANN over a region's activities is its
 EXCRET); sim_ini_21730 still holds the 2017 values at "Y". The model's 2030 runs took the 2017 coefficients
@@ -5038,8 +5041,19 @@ manure N per head the duals implied by CAPRI's animals were consistent across an
   baseline's solution, mitigation factors included; dataOut does not report the options' adoption, so a reference
   adoption of low-nitrogen feeding or breeding, if any, cannot be told apart (the model's options start from no
   adoption at its 2030 base). With a trajectory other than CAPRI's (captrd_2030) the manure per head is CAPRI's 2030
-  one while the milk yields are the trajectory's: the port of req_or_man_fnc.gms (decisions plan, after Bonn) gives such
-  a baseline its own. Test: test_capri.py::test_manure_per_head_takes_capris_2030_coefficients_at_the_2030_market_year
+  one while the milk yields are the trajectory's: the port of req_or_man_fnc.gms gives such a baseline its own. The
+  port exists since 24 November 2026 (capri_mod/feed/equations/req_or_man_fnc.py, 'man' mode, one function per CAPRI
+  statement block; its literal tables capri_data/2017/feed/manure_output_params.csv, tools/build/
+  build_manure_output_params.py): on the reference run's start (sim_ini_21730 at "Y", CRPR_EXPT by the calc_nexport
+  port) it gives CAPRI's 2030 MANN, MANP and MANK in every unit but the member states' sum rows, for all 18 animal
+  activities, at relative differences below 3e-14 (tools/check/check_manure_output_2030.py; the fattened pigs with
+  CAPRI's dat/feed/porkreq.gms, the project lead's file of 24 November 2026); on CAPREG's 2017 data
+  (capri_sources/reference/capreg_base/17) the 2017 MANP and MANK of the NUTS 2 units to 3e-7. Open: CAPRI's
+  correction factor at a year of the model's own baseline (CAPRI's is CAPREG's base-year factor times its baseline's
+  feed trimming, baseline/fedtrm_fin.gms l. 52; CAPREG's 2017 factor is not in this project's material: backed out of
+  CAPREG's 2017 MANN and CRPR_EXPT with the port it differs by region and animal, 0.42-3.09); not yet called by the
+  projection. Tests: test_capri.py::
+  test_manure_per_head_takes_capris_2030_coefficients_at_the_2030_market_year, test_req_or_man_fnc.py
 
 <a id="k178"></a>
 ### K178: The 2030 runs took the 2017 young-animal coefficients (found 18 November 2026)
