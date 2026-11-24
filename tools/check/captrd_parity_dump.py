@@ -18,6 +18,7 @@ supports, Lo, up, BASM, wVarErr):
 The values are read in the order the code evaluates them, so the hash seed does not matter (the estimation sorts its
 sets). About two minutes and 2 GB.
     PYTHONPATH=CHECKOUT python tools/check/captrd_parity_dump.py OUT.pkl      # run in each checkout (git worktree)
+    PYTHONPATH=CHECKOUT python tools/check/captrd_parity_dump.py OUT.pkl --parts policy   # one block's part only
     python tools/check/captrd_parity_dump.py --compare REF.pkl NEW.pkl
 """
 import argparse
@@ -32,6 +33,14 @@ NT2_RES_REGIONS = ("AT000000", "DE000000", "DK000000", "NL000000")
 NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), ("2018", "2030")
 
 
+#: --parts: the parts to dump (None: all): estimation, bounds, nuts2, ms_retries, step3_copies, labour, policy
+PARTS = None
+
+
+def want(part):
+    return PARTS is None or part in PARTS
+
+
 def dump(path):
     import casadi as ca
     from capri_mod.csvio import read_csv
@@ -44,6 +53,12 @@ def dump(path):
     res_dir = REFERENCE / "captrd_results" / "1770"
     S = E.read_sets()
     data_all = read_csv(res_dir / "data.csv.gz", dtype={"t": str}, keep_default_na=False)
+    if PARTS is not None and "estimation" not in PARTS:        # --parts without the estimation's: those parts only
+        out = {"bounds": bounds_cases(E, EB, S, data_all, read_csv, res_dir, _P)}
+        with open(path, "wb") as fh:
+            pickle.dump(out, fh)
+        print(f"parts {sorted(PARTS)}: {dict((k, len(v)) for k, v in out['bounds'].items())} -> {path}")
+        return
     tabs_all = {n: read_csv(res_dir / f"{n}.csv.gz", dtype={"t": str}, keep_default_na=False)
                 for n in ("step2", "P_Data", "COCO", "support", "Lo", "up", "BASM", "wVarErr")}
     regions = sorted(r for r in set(tabs_all["step2"].region) if r.endswith("000000") and not r.startswith(("EU", "A_")))
@@ -226,6 +241,25 @@ def bounds_cases(E, EB, S, data_all, read_csv, res_dir, _P):
                             nuts2_with_data=nuts2 if r == ms else {}, **ORD)
 
     hexd = lambda m: [(k, float(v).hex()) for k, v in m.items()]          # noqa: E731
+    out = {}
+    if want("bounds"):
+        out.update(bound_parts(E, EB, B, case, mp, by_reg, tab_reg, hexd))
+    if want("nuts2"):
+        out.update(nuts2_bounds_cases(E, EB, S, B, case, mp, by_reg, tab_reg, year_tab, read_csv, _P, hexd))
+    if want("ms_retries"):
+        out["ms_retries"] = ms_retries_cases(E, EB, B, case, by_reg, hexd)
+    if want("step3_copies"):
+        out["step3_copies"] = step3_copies_cases(E, S, B, case, tab_reg, year_tab, read_csv, _P, hexd)
+    if want("labour"):
+        out["labour"] = labour_cases(by_reg, tab_reg, hexd)
+    if want("policy"):
+        out["policy"] = policy_cases(by_reg, tab_reg, mp, hexd)
+    return out
+
+
+def bound_parts(E, EB, B, case, mp, by_reg, tab_reg, hexd):
+    """estimate_bounds.bounds at the member states (both readings of ARTIF's bound, the extra inputs) and the NUTS 2
+    regions."""
     out = {"ms": {}, "regions": {}}
     states = sorted(r for r in by_reg if r.endswith("000000") and not r.startswith(("EU", "A_")) and r in tab_reg["Support"])
     for ms in states:
@@ -248,10 +282,65 @@ def bounds_cases(E, EB, S, data_all, read_csv, res_dir, _P):
                 D = dataclasses.replace(case(r, y, ms), region_of=ms, ms_pd=Dm.pd, ms_res=Dm.res)
                 lo, up = EB.bounds(D, B, E.REQS_EFF ** (y - E.REQS_YEAR0), artif_as_coded=False)
                 out["regions"][(r, y)] = (hexd(lo), hexd(up))
-    out.update(nuts2_bounds_cases(E, EB, S, B, case, mp, by_reg, tab_reg, year_tab, read_csv, _P, hexd))
-    out["ms_retries"] = ms_retries_cases(E, EB, B, case, by_reg, hexd)
-    out["step3_copies"] = step3_copies_cases(E, S, B, case, tab_reg, year_tab, read_csv, _P, hexd)
-    out["labour"] = labour_cases(by_reg, tab_reg, hexd)
+    return out
+
+
+POLICY_STATES = ("AT000000", "BG000000", "DE000000", "IR000000", "MT000000", "PL000000")
+
+
+def policy_cases(by_reg, tab_reg, mp, hexd):
+    """policy.apply (captrd_policy.gms with mquota_update.gms, load_quotas.gms, reformsugarquotas.gms) for POLICY_STATES
+    and their NUTS 2 regions, p_data synthetic: the stored exogenous series (P_Data) of the years and data.csv's BAS as
+    BASM, the years 1984-2070, the ex-ante years 2018-2070 (2018-2019 with data), the base year 2017, the run's Aglink
+    version and milk quota expiry. SHA-256 of the exact frame."""
+    import pandas as pd
+    from capri_mod.pipeline.captrd import policy as Pol
+    from capri_mod.pipeline.captrd import prepare as P
+    from capri_mod.settings import current as _settings
+    sets = P.read_sets()
+    dat = Pol.read_policy_dat()
+    years, exante = list(range(1984, 2071)), list(range(2018, 2071))
+    exantet = [y for y in exante if y > 2019]
+    aglink = str(_settings().get("captrd.aglink"))
+    expiry = int(_settings().get("captrd.milk_quota_expiry"))
+    pdat = tab_reg["p_data"]
+    out = {}
+    for variant in ("", "early"):
+        # early: the ex-ante years from 2005 (the milk quotas' and the set-aside's years), base beet quotas for the
+        # NUTS 2 regions and base set-aside rates
+        exa = exante if not variant else list(range(2005, 2071))
+        ext = exantet if not variant else list(range(2007, 2071))
+        base, bm, lex = (2017, [2016, 2017], 2017) if not variant else (2004, [2003, 2004], 2004)
+        for ms in POLICY_STATES:
+            regs = [ms] + sorted(q for a, q in mp if a == ms and q != ms and q in by_reg)
+            parts = []
+            for r in regs:
+                g = by_reg[r]
+                g = g[g.t == "BAS"]
+                parts.append(pd.DataFrame({"region": r, "col": g.col.values, "row": g.row.values, "t": "BASM",
+                                           "value": g.value.astype(float).values}))
+                if r in pdat:
+                    h = pdat[r]
+                    h = h[h.t.str.fullmatch(r"\d{4}")]
+                    parts.append(pd.DataFrame({"region": r, "col": h.col.values, "row": h.row.values, "t": h.t.values,
+                                               "value": h.value.astype(float).values}))
+            if variant:
+                for i, r in enumerate(regs[1:]):
+                    if i % 2 == 0:
+                        parts.append(pd.DataFrame([{"region": r, "col": "QUTS", "row": "SUGB", "t": "BASM",
+                                                    "value": 10.0 + i}]))
+                    parts.append(pd.DataFrame([{"region": r, "col": "GROF", "row": "SUGB", "t": "BASM",
+                                                "value": 50.0 + i}]))
+                parts.append(pd.DataFrame([{"region": ms, "col": "QUTS", "row": "SUGB", "t": "BASM", "value": 99.0}]))
+                parts.append(pd.DataFrame([{"region": r, "col": "BARL", "row": "SETR", "t": "BASM", "value": 6.0}
+                                           for r in regs]))
+            p = pd.concat(parts, ignore_index=True)
+            p = p[p.value != 0].drop_duplicates(["region", "col", "row", "t"])
+            p["eps"] = 0
+            q = Pol.apply(p, sets, [ms], years, exa, ext, years, bm, lex, base, aglink, dat=dat,
+                          expiry=expiry if not variant else 2015)
+            q = q.sort_values(["region", "col", "row", "t"]).reset_index(drop=True)
+            out[(ms, variant)] = _digest(q.to_csv(index=False))
     return out
 
 
@@ -470,7 +559,11 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("out", nargs="?")
     ap.add_argument("--compare", nargs=2, metavar=("REF", "NEW"))
+    ap.add_argument("--parts", help="comma-separated parts to dump (a block's own check): estimation, bounds, nuts2, "
+                                    "ms_retries, step3_copies, labour, policy; default all")
     a = ap.parse_args()
+    if a.parts:
+        PARTS = set(a.parts.split(","))
     if a.compare:
         sys.exit(compare(*a.compare))
     if not a.out:

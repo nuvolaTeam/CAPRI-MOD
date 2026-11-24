@@ -552,32 +552,51 @@ captrd/biofuel_bounds.gms,46-47,bound,in style,capri_mod/pipeline/captrd/equatio
 captrd/biofuel_bounds.gms,51-55,bound,in style,capri_mod/pipeline/captrd/equations/biofuel_bounds.py,V_EstV_NECR,102,named,"V_EstV.LO(REST,""NECR"",""LEVL"",exAnte) $ (P_DATA(Rest,""NECR"",""LEVL"",""nObs"") ) = P_Result(Rest,""NECR"",""LEVL"",Exante,""SUPPORT"") * 0.95;",
 captrd/biofuel_bounds.gms,59-61,assignment,in style,capri_mod/pipeline/captrd/equations/biofuel_bounds.py,V_EstV_fx_BIOF_tiny,118,named,"V_EstV.FX(REST,cols,rows,exAnte) $ ( (ABS(P_Result(Rest,cols,rows,Exante,""SUPPORT"")) LE 1e-14)",
 captrd/biofuel_bounds.gms,64-65,bound,in style,capri_mod/pipeline/captrd/equations/biofuel_bounds.py,V_EstV_fx_BIOF_CERE_MAPR_BIOE,132,named,"V_EstV.FX(REST,""BIOF"",""CERE"",exAnte) $ (P_Result(Rest,""BIOF"",""CERE"",Exante,""SUPPORT"") LT 1e-13) = 0;",
+captrd/captrd_policy.gms,,file,context,capri_mod/pipeline/captrd/equations/captrd_policy.py,(module),1,named,,
 captrd/captrd_policy.gms,,file,context,capri_mod/pipeline/captrd/policy.py,(module),1,named,,
-captrd/captrd_policy.gms,,file,context,capri_mod/pipeline/captrd/policy.py,apply,309,named,,
+captrd/captrd_policy.gms,,file,context,capri_mod/pipeline/captrd/policy.py,apply,304,named,,
 captrd/captrd_policy.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,(module),27,named,,
 captrd/captrd_policy.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,CaptrdSets,117,named,,
 captrd/captrd_policy.gms,,file,context,capri_mod/pipeline/captrd/prepare_run.py,(module),10,named,,
-captrd/captrd_policy.gms,28,other,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,52,named,"QDel ""Deliveries to dairies""",
-captrd/captrd_policy.gms,28,other,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,118,named,"QDel ""Deliveries to dairies""",
-captrd/captrd_policy.gms,31,other,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,58,same function,"Deli ""Deliveries as observed""",
-captrd/captrd_policy.gms,46-59,control ($),context,capri_mod/pipeline/captrd/policy.py,(module),31,named,"$if setglobal mlkQutExpiry p_data(MS,Quotas,""COMI"",exAnte) $ (ORDT(exAnte) GT ORDT(""%mlkQutExpiry%"")) = 0;",
-captrd/captrd_policy.gms,61,other,context,capri_mod/pipeline/captrd/policy.py,sugar_beet,210,same function,EE000000,
-captrd/captrd_policy.gms,61-108,other,context,capri_mod/pipeline/captrd/policy.py,(module),11,named,EE000000,
-captrd/captrd_policy.gms,61-108,other,context,capri_mod/pipeline/captrd/policy.py,sugar_beet,206,named,EE000000,
-captrd/captrd_policy.gms,63-67,other,context,capri_mod/pipeline/captrd/policy.py,sugar_beet,214,same function,MT000000,
-captrd/captrd_policy.gms,69-93,other,context,capri_mod/pipeline/captrd/policy.py,sugar_beet,224,same function,KO000000,
-captrd/captrd_policy.gms,70-71,other,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,70,same function,NO000000,
-captrd/captrd_policy.gms,88-89,assignment,to move,capri_mod/pipeline/captrd/policy.py,milk_quotas,79,same function,"p_dataCopy(RALL,""QUTS"",""SUGB"",""BASM"") = p_data(RALL,""QUTS"",""SUGB"",""BASM"");",
-captrd/captrd_policy.gms,108-110,assignment,to move,capri_mod/pipeline/captrd/policy.py,milk_quotas,88,same function,"p_dataCopy(runr,""QUTS"",""SUGB"",YEARS) $ ( p_dataCopy(MS,""QUTS"",""SUGB"",YEARS)",
-captrd/captrd_policy.gms,126-136,control,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,99,same function,option kill=runr;,
-captrd/captrd_policy.gms,138-145,assignment,to move,capri_mod/pipeline/captrd/policy.py,milk_quotas,103,same function,"p_dataCopy(runr,""QUTS"",""SUGB"",YEARS) $ ( p_dataCopy(NT2Est,""QUTS"",""SUGB"",YEARS)",
-captrd/captrd_policy.gms,150-151,assignment,to move,capri_mod/pipeline/captrd/policy.py,milk_quotas,106,same function,"p_data(RALL,""QUTS"",""SUGB"",Years) = p_dataCopy(RALL,""QUTS"",""SUGB"",Years);",
-captrd/captrd_policy.gms,154,comment,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,106,same function,*,
-captrd/captrd_policy.gms,158-202,assignment,to move,capri_mod/pipeline/captrd/policy.py,(module),13,named,"p_data(CurEUWestAgg,GRCU,""SETR"",BASY) = 10;",
-captrd/captrd_policy.gms,158-202,assignment,to move,capri_mod/pipeline/captrd/policy.py,set_aside,254,named,"p_data(CurEUWestAgg,GRCU,""SETR"",BASY) = 10;",
-captrd/captrd_policy.gms,172,comment,context,capri_mod/pipeline/captrd/policy.py,set_aside,261,same function,* *** set-aside: keep small producer percentage constant as in base years,
-captrd/captrd_policy.gms,187-189,assignment,to move,capri_mod/pipeline/captrd/policy.py,set_aside,290,same function,"p_data(""EU012000"",""CERE"",""SETR"",YEARS) $ ((CALYEA(YEARS) GT CALYEA(""2007"")) $ ExAnte(YEARS)) = 0;",
-captrd/captrd_policy.gms,195-200,assignment,to move,capri_mod/pipeline/captrd/policy.py,set_aside,296,same function,"p_data(MS,RSET,""SETR"",YearsCur) = 0;",
+captrd/captrd_policy.gms,28,other,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,55,named,"QDel ""Deliveries to dairies""",
+captrd/captrd_policy.gms,32,other,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,61,same function,"DirS ""Direct sales as observed"" /;",
+captrd/captrd_policy.gms,40,control ($),in style,capri_mod/pipeline/captrd/equations/mquota_update.py,(module),1,named,$batinclude 'pol_input\mquota_update.gms' Years ORDT p_data BASM,
+captrd/captrd_policy.gms,46,control ($),context,capri_mod/pipeline/captrd/policy.py,milk_quotas,116,named,"$if setglobal mlkQutExpiry p_data(MS,Quotas,""COMI"",exAnte) $ (ORDT(exAnte) GT ORDT(""%mlkQutExpiry%"")) = 0;",
+captrd/captrd_policy.gms,51,control ($),in style,capri_mod/pipeline/captrd/equations/load_quotas.py,(module),1,named,"$BATINCLUDE ""sugar\load_quotas.gms"" years p_data",
+captrd/captrd_policy.gms,52,control ($),in style,capri_mod/pipeline/captrd/equations/reformsugarquotas.py,(module),1,named,"$BATINCLUDE ""policy\reformsugarquotas.gms"" years p_data",
+captrd/captrd_policy.gms,58-71,declaration,context,capri_mod/pipeline/captrd/policy.py,(module),37,named,"set MSnoSugb(MS) ""MS that should not pick up sugar beet production in projection period""/",
+captrd/captrd_policy.gms,67,other,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,68,same function,MO000000,
+captrd/captrd_policy.gms,70-71,other,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,74,same function,NO000000,
+captrd/captrd_policy.gms,73,assignment,in style,capri_mod/pipeline/captrd/equations/captrd_policy.py,p_data_quotas_SUGA_MSnoSugb,17,named,"p_data(MSnoSugb,quotas,""SUGA"",exanteT) $ ((not p_data(MSnoSugb,quotas,""SUGA"",exanteT)) $ msincl(MSnoSugb)) = 1.E-6;",
+captrd/captrd_policy.gms,73,assignment,moved,capri_mod/pipeline/captrd/policy.py,milk_quotas,76,same function,"p_data(MSnoSugb,quotas,""SUGA"",exanteT) $ ((not p_data(MSnoSugb,quotas,""SUGA"",exanteT)) $ msincl(MSnoSugb)) = 1.E-6;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,73,assignment,moved,capri_mod/pipeline/captrd/policy.py,sugar_beet,206,same function,"p_data(MSnoSugb,quotas,""SUGA"",exanteT) $ ((not p_data(MSnoSugb,quotas,""SUGA"",exanteT)) $ msincl(MSnoSugb)) = 1.E-6;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,73-151,assignment,moved,capri_mod/pipeline/captrd/policy.py,(module),11,named,"p_data(MSnoSugb,quotas,""SUGA"",exanteT) $ ((not p_data(MSnoSugb,quotas,""SUGA"",exanteT)) $ msincl(MSnoSugb)) = 1.E-6;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,73-151,assignment,moved,capri_mod/pipeline/captrd/policy.py,sugar_beet,202,named,"p_data(MSnoSugb,quotas,""SUGA"",exanteT) $ ((not p_data(MSnoSugb,quotas,""SUGA"",exanteT)) $ msincl(MSnoSugb)) = 1.E-6;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,78-82,assignment,in style,capri_mod/pipeline/captrd/equations/captrd_policy.py,p_data_QUTS_SUGB,30,named,"p_data(MS,""QUTS"",""SUGB"",YEARS) $ (p_data(MS,""QUTS"",""SUGA"",""BASM""))",
+captrd/captrd_policy.gms,78-82,assignment,moved,capri_mod/pipeline/captrd/policy.py,sugar_beet,210,same function,"p_data(MS,""QUTS"",""SUGB"",YEARS) $ (p_data(MS,""QUTS"",""SUGA"",""BASM""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,83-87,control,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,78,same function,option kill=p_dataCopy;,
+captrd/captrd_policy.gms,86-116,control,context,capri_mod/pipeline/captrd/policy.py,sugar_beet,219,same function,option kill=p_dataCopy;,
+captrd/captrd_policy.gms,90-91,control,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,81,same function,"LOOP(MS $ SUM(YEARS,p_data(MS,""QUTS"",""SUGB"",YEARS)),",
+captrd/captrd_policy.gms,97-98,assignment,moved,capri_mod/pipeline/captrd/policy.py,milk_quotas,83,same function,"p_dataCopy(runr,""QUTS"",""SUGB"",YEARS) $ ( p_dataCopy(MS,""QUTS"",""SUGB"",""BASM"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,97-105,assignment,in style,capri_mod/pipeline/captrd/equations/captrd_policy.py,p_dataCopy_QUTS_SUGB_share,52,named,"p_dataCopy(runr,""QUTS"",""SUGB"",YEARS) $ ( p_dataCopy(MS,""QUTS"",""SUGB"",""BASM"")",
+captrd/captrd_policy.gms,102-124,assignment,moved,capri_mod/pipeline/captrd/policy.py,milk_quotas,92,same function,"p_dataCopy(runr,""QUTS"",""SUGB"",""BASM"") / SUM(runr1, p_dataCopy(runr1,""QUTS"",""SUGB"",""BASM""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,109-115,assignment,in style,capri_mod/pipeline/captrd/equations/captrd_policy.py,p_dataCopy_QUTS_SUGB_grof,73,named,"p_dataCopy(runr,""QUTS"",""SUGB"",YEARS) $ ( p_dataCopy(MS,""QUTS"",""SUGB"",YEARS)",
+captrd/captrd_policy.gms,129-145,assignment,in style,capri_mod/pipeline/captrd/equations/reformsugarquotas.py,(module),8,same block,"p_dataCopy(runr,""QUTS"",""SUGB"",YEARS) $ ( p_dataCopy(NT2Est,""QUTS"",""SUGB"",""BASM"")",
+captrd/captrd_policy.gms,133-148,assignment,moved,capri_mod/pipeline/captrd/policy.py,milk_quotas,99,same function,=,the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,151-163,assignment,moved,capri_mod/pipeline/captrd/policy.py,milk_quotas,102,same function,"p_data(RALL,""QUTS"",""SUGB"",Years) = p_dataCopy(RALL,""QUTS"",""SUGB"",Years);",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,161-164,assignment,in style,capri_mod/pipeline/captrd/equations/captrd_policy.py,p_data_SETR_EU15,94,named,"p_data(CurEUWestAgg,GRCU,""SETR"",BASY) = 10;",
+captrd/captrd_policy.gms,161-164,assignment,moved,capri_mod/pipeline/captrd/policy.py,set_aside,260,same function,"p_data(CurEUWestAgg,GRCU,""SETR"",BASY) = 10;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,161-201,assignment,moved,capri_mod/pipeline/captrd/policy.py,(module),13,named,"p_data(CurEUWestAgg,GRCU,""SETR"",BASY) = 10;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,161-201,assignment,moved,capri_mod/pipeline/captrd/policy.py,set_aside,249,named,"p_data(CurEUWestAgg,GRCU,""SETR"",BASY) = 10;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,166-167,blank,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,105,same function,,
+captrd/captrd_policy.gms,169,comment,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,105,same function,*,
+captrd/captrd_policy.gms,170,assignment,in style,capri_mod/pipeline/captrd/equations/captrd_policy.py,p_smallProdShare_fill,109,named,"p_smallProdShare(exante,MS) $ (NOT p_smallProdShare(exante,MS)) = p_smallProdShare(""2009"",MS);",
+captrd/captrd_policy.gms,170,assignment,moved,capri_mod/pipeline/captrd/policy.py,set_aside,256,same function,"p_smallProdShare(exante,MS) $ (NOT p_smallProdShare(exante,MS)) = p_smallProdShare(""2009"",MS);",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,175-181,assignment,in style,capri_mod/pipeline/captrd/equations/captrd_policy.py,p_data_SETR,126,named,"p_data(Rest,GRCU,""SETR"",exAnte) $ (p_data(""EU015000"",GRCU,""SETR"",exAnte) $ p_data(Rest,GRCU,""SETR"",""BASM""))",
+captrd/captrd_policy.gms,175-181,assignment,moved,capri_mod/pipeline/captrd/policy.py,set_aside,279,same function,"p_data(Rest,GRCU,""SETR"",exAnte) $ (p_data(""EU015000"",GRCU,""SETR"",exAnte) $ p_data(Rest,GRCU,""SETR"",""BASM""))",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,186-193,assignment,in style,capri_mod/pipeline/captrd/equations/captrd_policy.py,p_data_SETR_EU12_HR,148,named,"p_data(""EU015000"",""CERE"",""SETR"",YEARS) $ ((CALYEA(YEARS) GT CALYEA(""2007"")) $ ExAnte(YEARS)) = 0;",
+captrd/captrd_policy.gms,186-193,assignment,moved,capri_mod/pipeline/captrd/policy.py,set_aside,284,same function,"p_data(""EU015000"",""CERE"",""SETR"",YEARS) $ ((CALYEA(YEARS) GT CALYEA(""2007"")) $ ExAnte(YEARS)) = 0;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/captrd_policy.gms,195-200,assignment,to move,capri_mod/pipeline/captrd/policy.py,set_aside,291,same function,"p_data(MS,RSET,""SETR"",YearsCur) = 0;",
 captrd/check_and_cor_capreg.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,(module),20,named,,
 captrd/check_and_cor_capreg.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,check_and_cor,257,named,,
 captrd/check_and_cor_capreg.gms,27-28,assignment,to move,capri_mod/pipeline/captrd/prepare.py,check_and_cor,257,same line,"p_data(""NO000000"",BIOREPCOLS,seco_biof,simyy_ybas) = 0;",
@@ -1630,9 +1649,9 @@ coco/time_avg.gms,,file,context,capri_mod/pipeline/captrd/national_supports.py,(
 coco/time_avg.gms,,file,context,capri_mod/pipeline/captrd/national_supports.py,_time_avg,137,named,,
 dat/baseline/necp_expert.gms,,,check,capri_mod/pipeline/captrd/national_supports.py,(module),8,named,,file not in the copy
 dat/biofuel/biofuel_technology_params.gms,,,check,capri_mod/pipeline/captrd/coco.py,(module),21,named,,file not in the copy
-dat/coco/milk_quota_dat.gms,,,check,capri_mod/pipeline/captrd/policy.py,(module),14,named,,file not in the copy
+dat/coco/milk_quota_dat.gms,,,check,capri_mod/pipeline/captrd/policy.py,(module),16,named,,file not in the copy
 dat/policy/livestock_units.gms,,,check,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,482,named,,file not in the copy
-dat/policy/smal_pshar.gms,,,check,capri_mod/pipeline/captrd/policy.py,(module),16,named,,file not in the copy
+dat/policy/smal_pshar.gms,,,check,capri_mod/pipeline/captrd/policy.py,(module),18,named,,file not in the copy
 feed/feed_decl.gms,284-310,declaration,context,capri_mod/pipeline/captrd/supports.py,(module),13,named,"Table p_reqfcnlim(COLS,ROWS,*) ""Absolute limits on days and daily growth (in g) imposed in requirement functions (and COCO)""",
 global/convert_globiom.gms,,file,context,capri_mod/pipeline/captrd/globiom.py,(module),4,named,,
 global/convert_globiom.gms,,file,context,capri_mod/pipeline/captrd/globiom.py,Sets,74,named,,
@@ -1732,22 +1751,48 @@ global/fao_codes_new.gms,1236,other,context,capri_mod/pipeline/captrd/globiom.py
 global/fao_codes_new.gms,1239-1243,declaration,context,capri_mod/pipeline/captrd/globiom.py,region_map,203,same function,"SET AT2030Rows ""Products in AT2030""",
 global/fao_codes_new.gms,1305-1618,other,context,capri_mod/pipeline/captrd/globiom.py,(module),9,same block,"DOMI,HAIT,JAMA,TRIN,ARGE,BOLI,BRAZ,CHIL,COLO,",
 global/globiom_to_fao_reg.gms,,file,context,capri_mod/pipeline/captrd/globiom.py,(module),6,named,,
+pol_input/mquota_update.gms,,file,context,capri_mod/pipeline/captrd/equations/mquota_update.py,(module),1,named,,
 pol_input/mquota_update.gms,,file,context,capri_mod/pipeline/captrd/policy.py,(module),6,named,,
-pol_input/mquota_update.gms,,file,context,capri_mod/pipeline/captrd/policy.py,(module),14,named,,
-pol_input/mquota_update.gms,,file,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,52,named,,
-pol_input/mquota_update.gms,112-124,other,context,capri_mod/pipeline/captrd/policy.py,(module),34,named,"SAMEAS(MS,""UK000000"") Or",
+pol_input/mquota_update.gms,,file,context,capri_mod/pipeline/captrd/policy.py,(module),16,named,,
+pol_input/mquota_update.gms,,file,context,capri_mod/pipeline/captrd/policy.py,milk_quotas,55,named,,
+pol_input/mquota_update.gms,32,assignment,in style,capri_mod/pipeline/captrd/equations/mquota_update.py,p_MQuotaDat_BL,15,named,"p_MQuotaDat(""BL000000"",MQuotaInfo,simyy) = p_MQuotaDat(""BE000000"",MQuotaInfo,simyy) + p_MQuotaDat(""LU000000"",MQuotaInfo,simyy) ;",
+pol_input/mquota_update.gms,67,assignment,in style,capri_mod/pipeline/captrd/equations/mquota_update.py,PMquotaReg_QUTtot,27,named,"PMquotaReg(MS,""QUTtot"",%1) = PMquotaReg(MS,""QUTtot"",%1) * 1000;",
+pol_input/mquota_update.gms,70-71,assignment,in style,capri_mod/pipeline/captrd/equations/mquota_update.py,PMquotaReg_QUTtot_before2004,39,named,"PMquotaReg(MS,""QUTtot"",%1) $ (%2(%1) LT %2(""2004""))",
+pol_input/mquota_update.gms,73,assignment,in style,capri_mod/pipeline/captrd/equations/mquota_update.py,PPQuotas_QTot,52,named,"PPQuotas(MS,""QTot"",%1) = PMquotaReg(MS,""QUTtot"",%1);",
+pol_input/mquota_update.gms,83-87,assignment,in style,capri_mod/pipeline/captrd/equations/mquota_update.py,PPQuotas_QDel_QDir,65,named,"PPQuotas(MS,""QDel"",%1) $ (p_MQuotaDat(MS,""QUTdel"",%1)+p_MQuotaDat(MS,""QUTdir"",%1))",
+pol_input/mquota_update.gms,90-91,assignment,in style,capri_mod/pipeline/captrd/equations/mquota_update.py,PPQuotas_Deli_DirS,82,named,"PPQuotas(MS,""Deli"",%1)= p_MQuotaDat(MS,""Delivs"",%1);",
+pol_input/mquota_update.gms,97-98,assignment,in style,capri_mod/pipeline/captrd/equations/mquota_update.py,PPQuotas_BASM,97,named,"PPQuotas(MS,PSQTYPE,""BASM"") $ SUM(BASYRSM $ PPQuotas(MS,PSQTYPE,BASYRSM),1)",
+pol_input/mquota_update.gms,102-103,assignment,in style,capri_mod/pipeline/captrd/equations/mquota_update.py,PPQuotas_QdelFac,113,named,"PPQuotas(MS,""QdelFac"",exAnte_temp) $ (PPQuotas(MS,""QDel"",""BASM"") AND PPQuotas(MS,""Deli"",""BASM""))",
+pol_input/mquota_update.gms,107-119,other,in style,capri_mod/pipeline/captrd/equations/mquota_update.py,PPQuotas_QdelFac,118,named,"PPQuotas(MS,""QdelFac"",exAnte_temp) $ (",
+pol_input/mquota_update.gms,123-124,assignment,in style,capri_mod/pipeline/captrd/equations/mquota_update.py,PPQuotas_QdelFac,134,named,"PPQuotas(MS,""QdelFac"",exAnte_temp) $ ( (SAMEAS(MS,""MT000000"")) and PPQuotas(MS,""Deli"",""BASM""))",
+pol_input/mquota_update.gms,133-148,assignment,in style,capri_mod/pipeline/captrd/equations/mquota_update.py,p_data_QUTA_COMI,158,named,"%3(MS,""QUTA"",""COMI"",exAnte_temp) $ (PPQuotas(MS,""Qtot"",exAnte_temp) and %3(MS,""PRCM"",""COMI"",""%4""))",
+pol_input/mquota_update.gms,151-163,assignment,in style,capri_mod/pipeline/captrd/equations/mquota_update.py,p_data_QUTB_COMI,187,named,"%3(MS,""QUTB"",""COMI"",exAnte_temp) $ (PPQuotas(MS,""Qtot"",exAnte_temp) and %3(MS,""HCOM"",""COMI"",""%4""))",
+pol_input/mquota_update.gms,166-167,assignment,in style,capri_mod/pipeline/captrd/equations/mquota_update.py,p_data_Quotas_COMI_BASM,214,named,"%3(MS,Quotas,""COMI"",""BASM"") $ SUM(BASYRSM $ %3(MS,Quotas,""COMI"",BASYRSM),1)",
+pol_input/mquota_update.gms,169,assignment,in style,capri_mod/pipeline/captrd/equations/mquota_update.py,p_data_QUTS_COMI,229,named,"%3(MS,""QUTS"",""COMI"",exAnte_temp) = %3(MS,""QUTA"",""COMI"",exAnte_temp) + %3(MS,""QUTB"",""COMI"",exAnte_temp);",
+policy/reformsugarquotas.gms,,file,context,capri_mod/pipeline/captrd/equations/reformsugarquotas.py,(module),1,named,,
 policy/reformsugarquotas.gms,,file,context,capri_mod/pipeline/captrd/policy.py,(module),8,named,,
-policy/reformsugarquotas.gms,,file,context,capri_mod/pipeline/captrd/policy.py,sugar_quotas,130,named,,
-policy/reformsugarquotas.gms,64-66,control,context,capri_mod/pipeline/captrd/policy.py,sugar_quotas,158,named,"ABORT$(SUM((msall,quotas,simyy), p_squotas(msall,quotas,simyy))=0)",
-policy/reformsugarquotas.gms,68-77,control ($),context,capri_mod/pipeline/captrd/policy.py,sugar_quotas,174,same function,$LABEL CalculateQuotas,
-policy/reformsugarquotas.gms,80-83,control ($),context,capri_mod/pipeline/captrd/policy.py,sugar_quotas,185,same function,"$if %SIMY% == 2004 simyy1(""2006"") = yes;",
-policy/reformsugarquotas.gms,85-90,control,context,capri_mod/pipeline/captrd/policy.py,sugar_quotas,192,same function,"loop(simyy1,",
+policy/reformsugarquotas.gms,,file,context,capri_mod/pipeline/captrd/policy.py,sugar_quotas,128,named,,
+policy/reformsugarquotas.gms,82-84,assignment,in style,capri_mod/pipeline/captrd/equations/reformsugarquotas.py,p_squotas_reform,17,named,"p_squotas(msall,""quta"",simyy) $ (calyea(simyy) GE calyea(""2006"")) = p_squotas(msall,""quta"",simyy) + p_squotas(msall,""qutb"",simyy);",
+policy/reformsugarquotas.gms,82-84,assignment,moved,capri_mod/pipeline/captrd/policy.py,sugar_quotas,155,named,"p_squotas(msall,""quta"",simyy) $ (calyea(simyy) GE calyea(""2006"")) = p_squotas(msall,""quta"",simyy) + p_squotas(msall,""qutb"",simyy);",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+policy/reformsugarquotas.gms,84,assignment,in style,capri_mod/pipeline/captrd/equations/reformsugarquotas.py,p_squotas_quts,32,named,"p_squotas(MSALL,""quts"",simyy1) = p_squotas(MSALL,""quta"",simyy1) + p_squotas(MSALL,""qutb"",simyy1);",
+policy/reformsugarquotas.gms,87-107,control,context,capri_mod/pipeline/captrd/policy.py,sugar_quotas,171,same function,"loop(simyy1,",
+policy/reformsugarquotas.gms,89-90,assignment,in style,capri_mod/pipeline/captrd/equations/reformsugarquotas.py,p_PPSQ_cumulated,46,named,"p_PPSQRenounce(MSALL,%lY%) = SUM(simyy $ (calyea(simyy) LE calyea(simyy1)), p_PPSQRenounce(MSALL,simyy));",
+policy/reformsugarquotas.gms,92-107,assignment,in style,capri_mod/pipeline/captrd/equations/reformsugarquotas.py,p_data_quotas_suga,60,named,"%2(MSALL,quotas,""suga"",simyy1) $ p_squotas(MSALL,""quts"",simyy1) = max(0.0001,",
+policy/reformsugarquotas.gms,133-134,assignment,in style,capri_mod/pipeline/captrd/equations/reformsugarquotas.py,p_data_quotas_suga_small,88,named,"%2(MSALL,quotas,""suga"",simyy1) $ (%2(MSALL,quotas,""suga"",simyy1) Le 1)",
+policy/reformsugarquotas.gms,133-134,assignment,moved,capri_mod/pipeline/captrd/policy.py,sugar_quotas,181,same function,"%2(MSALL,quotas,""suga"",simyy1) $ (%2(MSALL,quotas,""suga"",simyy1) Le 1)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+policy/reformsugarquotas.gms,138-143,control ($),context,capri_mod/pipeline/captrd/policy.py,sugar_quotas,188,same function,$iftheni.expo not %expost%==on,
+policy/reformsugarquotas.gms,139-142,assignment,in style,capri_mod/pipeline/captrd/equations/reformsugarquotas.py,p_data_quotas_suga_no_quota,102,named,"%2(MSALL,quotas,""suga"",simyy1) $ ((calyea(simyy1) ge calyea(""2017"")) $ sum(sameas(curAglinkVersion,noSugQuotaAglinkVersion),1))",
+policy/reformsugarquotas.gms,141,control ($),in style,capri_mod/pipeline/captrd/equations/reformsugarquotas.py,p_data_quotas_suga_no_quota,109,same block,$ifi %MODE%==CAPMOD + eps,
 sets.gms,,file,context,capri_mod/pipeline/captrd/estimate_bounds.py,BoundSets,41,named,,
 sets.gms,,file,context,capri_mod/pipeline/captrd/estimate_ms.py,Sets,43,named,,
 sets.gms,,file,context,capri_mod/pipeline/captrd/supports.py,(module),12,named,,
 sets.gms,8524-8527,declaration,context,capri_mod/pipeline/captrd/eu_supports.py,Sets,114,named,set RMTP_not_RM(RMTP);,
+sugar/load_quotas.gms,,file,context,capri_mod/pipeline/captrd/equations/load_quotas.py,(module),1,named,,
 sugar/load_quotas.gms,,file,context,capri_mod/pipeline/captrd/policy.py,(module),8,named,,
-sugar/load_quotas.gms,,file,context,capri_mod/pipeline/captrd/policy.py,sugar_quotas,130,named,,
-sugar/load_quotas.gms,39,comment,context,capri_mod/pipeline/captrd/policy.py,sugar_quotas,137,named,*** Fill time series backward with 1999 and forward with most recent available value,
-sugar/load_quotas.gms,41-43,assignment,to move,capri_mod/pipeline/captrd/policy.py,sugar_quotas,147,same function,"p_SQuotas(MSALL,Quotas,%1) $ (CALYEA(%1) LT CALYEA(""1999"")) = p_SQuotas(MSALL,Quotas,""1999"");",
-sugar/load_quotas.gms,45,other,context,capri_mod/pipeline/captrd/policy.py,sugar_quotas,154,same function,);,
+sugar/load_quotas.gms,,file,context,capri_mod/pipeline/captrd/policy.py,sugar_quotas,128,named,,
+sugar/load_quotas.gms,41,assignment,in style,capri_mod/pipeline/captrd/equations/load_quotas.py,p_SQuotas_before1999,15,named,"p_SQuotas(MSALL,Quotas,%1) $ (CALYEA(%1) LT CALYEA(""1999"")) = p_SQuotas(MSALL,Quotas,""1999"");",
+sugar/load_quotas.gms,41,assignment,moved,capri_mod/pipeline/captrd/policy.py,sugar_quotas,135,named,"p_SQuotas(MSALL,Quotas,%1) $ (CALYEA(%1) LT CALYEA(""1999"")) = p_SQuotas(MSALL,Quotas,""1999"");",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+sugar/load_quotas.gms,43-45,control,in style,capri_mod/pipeline/captrd/equations/load_quotas.py,p_SQuotas_fill,28,named,"LOOP(SIMYY $ (CALYEA(SIMYY) LE SMAX(%1, CALYEA(%1))),",
+sugar/load_quotas.gms,43-45,control,context,capri_mod/pipeline/captrd/policy.py,sugar_quotas,145,same function,"LOOP(SIMYY $ (CALYEA(SIMYY) LE SMAX(%1, CALYEA(%1))),",
+sugar/load_quotas.gms,49,assignment,in style,capri_mod/pipeline/captrd/equations/load_quotas.py,p_SQuotas_QUTS,42,named,"p_SQuotas(MSALL,""QUTS"",%1) = p_SQuotas(MSALL,""QutB"",%1) +p_SQuotas(MSALL,""QutA"",%1) ;",
+sugar/load_quotas.gms,49,assignment,moved,capri_mod/pipeline/captrd/policy.py,sugar_quotas,152,same function,"p_SQuotas(MSALL,""QUTS"",%1) = p_SQuotas(MSALL,""QutB"",%1) +p_SQuotas(MSALL,""QutA"",%1) ;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
