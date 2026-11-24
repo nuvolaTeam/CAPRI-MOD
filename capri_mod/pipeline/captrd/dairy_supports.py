@@ -43,6 +43,7 @@ from __future__ import annotations
 
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
+from capri_mod.pipeline.captrd.equations import define_stats_and_supports as DS
 from capri_mod.pipeline.captrd.equations import expert_support as XE
 
 #: %lst_daitar% (captrd.gms l. 261): the last year of DG AGRI's dairy data
@@ -53,10 +54,6 @@ GRATE_FROM = 2015
 YRBAS_HALF = 1
 #: l. 444-445, 458, 482, 669-670: smallest value a growth rate's end points need
 MIN_ABS = 1e-4
-#: define_stats_and_supports.gms l. 517-519: HCOM.COMI's trust, and the share it needs
-TRUST_HCOM = 5.0
-TRUST_HCOM_LOW = 1.0
-SHARE_MIN = 1e-4
 #: l. 691-705: the regions whose milk production's trust grows after 2020
 STABLE = ["HR000000", "IR000000", "RO000000", "LT000000", "LV000000", "HU000000", "SI000000", "SK000000", "IT000000",
           "MT000000", "PT000000", "FR000000", "SE000000", "FI000000", "TUR"]
@@ -317,6 +314,7 @@ def hcom_expert(share: Dict[Tuple[str, int], float], expert: Dict[Key, float], s
     for r in rest:
         for y in exante_t:
             s = share.get((r, y), 0.0)
-            g = expert.get((r, "GROF", "COMI", str(y)), 0.0) or support.get((r, "GROF", "COMI", str(y)), 0.0)
-            out[(r, "HCOM", "COMI", str(y))] = (s * g, TRUST_HCOM if s > SHARE_MIN else TRUST_HCOM_LOW)
+            k = (r, "GROF", "COMI", str(y))
+            out[(r, "HCOM", "COMI", str(y))] = (DS.P_Result_HCOM_COMI_expert(s, expert.get(k, 0.0), support.get(k, 0.0)),
+                                                DS.p_ExpertSupprt_HCOM_COMI_TrustLevl(s))
     return out

@@ -38,7 +38,7 @@ NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), (
 #: the light ones (no reference data read, or one or two tables): step1, scale_dgagri
 PARTS = None
 LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod", "longrun", "eu_supports",
-         "expert_support", "national"}
+         "expert_support", "national", "stats"}
 
 
 def step1_cases():
@@ -555,9 +555,90 @@ def national_cases():
     return out
 
 
+def stats_cases():
+    """define_stats_and_supports.gms's supports and their storage on seeded random inputs over CAPTRD's sets:
+    supports.supports (both settings of the variance floor) and uvag_from_dgagri1, final_supports.overwrite,
+    mcact_scale, wvarerr and domm_wvarerr, expert_support.expert, sugb_trade and trust, coco_supports.coco_supports,
+    for two densities of zeros. SHA-256 of the exact results."""
+    import random
+    import pandas as pd
+    from capri_mod.external_paths import REFERENCE
+    from capri_mod.pipeline.captrd import coco_supports as CO
+    from capri_mod.pipeline.captrd import expert_support as XS
+    from capri_mod.pipeline.captrd import final_supports as F
+    from capri_mod.pipeline.captrd import national_supports as NS
+    from capri_mod.pipeline.captrd import prepare as P
+    from capri_mod.pipeline.captrd import supports as SU
+    G = REFERENCE / "sets" / "simini_21730"
+    g_ = lambda n: set(pd.read_csv(G / f"{n}.csv").d0)                    # noqa: E731
+    s = P.read_sets()
+    C = P.SETS_DIR
+    pty = set(map(tuple, pd.read_csv(G / "PACT_TO_Y.csv")[["d0", "d1"]].values))
+    sets = SU.SupportSets(pact_to_y=pty, mcact=g_("MCACT"), no_yield_drop=set(pd.read_csv(C / "noyielddrop.csv").d0),
+                          breed_act={"DCOL", "DCOH", "SCOW", "SHGM", "SOWS", "HENS"}, grs_act=g_("GRSACT"),
+                          reqst={"ENNE", "CRPR", "FILG", "FICT", "FISM", "FISF"}, feed=g_("FEED"), mpact=g_("MPACT"),
+                          reqfcnlim={("DCOL", "DAYS"): (300.0, 400.0), ("PIGF", "DAILY"): (0.5, None),
+                                     ("BULL", "DAYS"): (None, 500.0), ("SOWS", "DAYS"): (-5.0, 380.0),
+                                     ("HENS", "DAYS"): (30.0, 40.0)})
+    regs = ["AT000000", "DE000000", "FR000000", "PL000000"]
+    cols = ["NTRD", "GROF", "CSSP", "UAAR", "SWHE", "MAIZ", "GRAS", "DCOL", "PIGF", "BULL", "SOWS", "DOMM", "FEDM",
+            "HCOM", "UVAG", "IMPT", "EXPT", "SUGB", "DCOH", "EAAG", "LOSM", "SEDM", "TOOU"]
+    rows = ["LEVL", "SWHE", "MAIZ", "SLGW", "DAYS", "DAILY", "FCER", "ENNE", "COMI", "SUGB", "TOOU", "GRAS", "MILK",
+            "IPIG", "CSSP"]
+    years = [2018, 2020, 2025, 2030, 2035, 2040, 2045, 2050, 2060, 2070]
+    out = {}
+    for seed, z in ((1, 0.2), (2, 0.6)):
+        rng = random.Random(seed)
+        val = lambda lo=0.1, hi=100.0: 0.0 if rng.random() < z else rng.uniform(lo, hi)   # noqa: E731
+        idx = pd.MultiIndex.from_tuples([(r, c, w) for r in regs for c in cols for w in rows
+                                         if w not in ("DAYS", "DAILY") or rng.random() < 0.5],   # some without data
+                                        names=["region", "col", "row"])
+        n = len(idx)
+        col = lambda lo=0.1, hi=100.0: [val(lo, hi) for _ in range(n)]   # noqa: E731
+        st = pd.DataFrame({"nobs": [float(rng.choice([0, 1, 2, 5, 20])) for _ in range(n)], "wr2": col(-0.2, 1.0),
+                           "wave": col(-50.0, 100.0), "wvarerr": col(), "basm": col(-10.0, 100.0), "bast": col(),
+                           "bas": col(), "bsy": col(), "wvar": col(), "const": col(), "slope": col()}, index=idx)
+        step1 = pd.DataFrame({y: col(-10.0, 120.0) for y in years}, index=idx)
+        dig = lambda q: _digest(sorted((k, float(v).hex()) for k, v in q.items()))      # noqa: E731
+        res = {}
+        for fs in (False, True):
+            sup, wv = SU.supports(st, step1, years, 2017, 2018, sets, floor_squared=fs)
+            res[fs] = [_digest(sorted((k, tuple(float(x).hex() for x in v)) for k, v in zip(sup.index, sup.values))),
+                       _digest(sorted((k, float(v).hex()) for k, v in wv.items()))]
+        D4 = lambda share=0.5, lo=0.1: {(r, c, w, y): v for r in regs for c in cols for w in rows for y in years   # noqa: E731
+                                         for v in [val(lo)] if v and rng.random() < share}
+        R = D4(0.7)
+        SU.uvag_from_dgagri1(R, D4(0.3), ms=regs, s_rowsest=rows, exante=years)
+        E = D4(0.3)
+        F.overwrite(R, E, rest=regs, s_colsest=cols, s_rowsest=rows, exante=years)
+        F.mcact_scale(R, rest=regs, mcact=["SWHE", "MAIZ", "SUGB"], exante=years)
+        TL = D4(0.3, 1.0)
+        W = F.wvarerr(E, TL)
+        F.domm_wvarerr(W, R, [D4(0.2), E, D4(0.2)], ms=regs, s_colsest=cols, s_rowsest=rows, exante=years,
+                       dompos=list(s.dompos))
+        S = NS.Expert(ab=D4(0.2), pc=D4(0.2, -20.0), tr=D4(0.2, 1.0))
+        b3 = lambda: {(r, c, w): val(-5.0) for r in regs for c in cols for w in rows}   # noqa: E731
+        basm, bast = b3(), b3()
+        Ex = XS.expert(S, basm=basm, s_colsest=cols, s_rowsest=rows, rest=regs[:3], rmaggsup=regs[3:])
+        XS.sugb_trade(Ex, R, ms=regs, exante=years, bast=bast, basm=basm)
+        TR = XS.trust(Ex, coco_trust=D4(0.2, 1.0), expert_trust=S.tr, s_colsest=cols, s_rowsest=rows, rest=regs)
+        long = [(r, c, w, t, v) for r in regs for c in cols for w in rows for t in ["BASM", "2016", "2017", "2018", "2019"]
+                for v in [val(-5.0)] if v]
+        pdata = pd.DataFrame(long, columns=["region", "col", "row", "t", "value"])
+        nobs = pd.DataFrame([(r, c, w, float(rng.choice([0, 3]))) for r in regs for c in cols for w in rows],
+                            columns=["region", "col", "row", "value"])
+        co = CO.coco_supports(pdata, nobs, [2018, 2019], 2018, reqst=["ENNE"], mlko=["COMI", "MILK"],
+                              bio_cols=["SUGB"], bio_rows=["SUGB"], pact_to_y=pty, cols_est=cols, rows_est=rows,
+                              regions=regs)
+        out[seed] = {"supports": res, "R": dig(R), "W": dig(W), "expert": dig(Ex), "trust": dig(TR),
+                     "coco": _digest(sorted((a, b, c, d, float(e).hex(), float(f).hex(), float(g).hex())
+                                            for a, b, c, d, e, f, g in co.itertuples(index=False)))}
+    return out
+
+
 LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases, "final_supports": final_supports_cases,
                "agriprod": agriprod_cases, "longrun": longrun_cases, "eu_supports": eu_supports_cases,
-               "expert_support": expert_support_cases, "national": national_cases}
+               "expert_support": expert_support_cases, "national": national_cases, "stats": stats_cases}
 
 
 def want(part):

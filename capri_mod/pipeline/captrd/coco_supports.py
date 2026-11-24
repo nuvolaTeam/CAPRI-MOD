@@ -20,13 +20,12 @@ from typing import Dict, Iterable, Tuple
 
 import pandas as pd
 
+from capri_mod.pipeline.captrd.equations import define_stats_and_supports as DS
+
 #: load_coco1_data.gms l. 32-37 (REQST added by the caller), l. 316-317
 COLS_NO_COCO = {"LOSF", "LOSM", "SEDM", "SEDF"}
 ROWS_NO_COCO_EXTRA = {"IPIG", "ICHI"}
-#: l. 425-449 trust levels
-TRUST_COCO = 7.0
-TRUST_DERIVED = 0.5
-TRUST_LEVL_YIELD = 10.0
+#: l. 441-442: the positions only derived from COCO's data
 DERIVED_COLS, DERIVED_ROWS = {"EAAG"}, {"TOOU"}
 #: l. 391: the nowcast's relative deviation from BASM below which it is "close to BAS" (the flag is never set, above)
 CLOSE_TO_BAS = 1.2
@@ -55,17 +54,17 @@ def coco_supports(pdata: pd.DataFrame, nobs: pd.DataFrame, exanted: Iterable[int
             close = False                        # l. 392-394 as coded: never set
             ok = ((c not in COLS_NO_COCO or (y <= lst_expost and close) or w in mlko) and w not in rows_no
                   and ((r, c, w) in have_obs or c in bio_cols or w in bio_rows))
-            absolute = v if ok else 0.0
+            absolute = DS.p_cocoSupport_Absolute(v) if ok else 0.0
             trust = 0.0
             if absolute:
-                trust = TRUST_COCO
+                trust = DS.p_cocoSupport_TrustLevl()
                 if c in DERIVED_COLS or w in DERIVED_ROWS:
-                    trust = TRUST_DERIVED
+                    trust = DS.p_cocoSupport_TrustLevl_derived()
                 if w == "LEVL":
-                    trust = TRUST_LEVL_YIELD
+                    trust = DS.p_cocoSupport_TrustLevl_levl_yield()
                 if (c, w) in pty:
-                    trust = TRUST_LEVL_YIELD
+                    trust = DS.p_cocoSupport_TrustLevl_levl_yield()
             coco_ok = (c not in COLS_NO_COCO or y <= lst_expost or w in mlko) and w not in rows_no
-            coco = absolute if coco_ok else 0.0
+            coco = DS.p_result_coco(absolute) if coco_ok else 0.0
             out.append((r, c, w, str(y), absolute, trust, coco))
     return pd.DataFrame(out, columns=["region", "col", "row", "t", "absolute", "trust", "coco"])

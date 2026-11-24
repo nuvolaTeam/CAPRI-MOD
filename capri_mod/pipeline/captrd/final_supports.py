@@ -31,6 +31,7 @@ from typing import Dict, Iterable, List, Sequence, Set, Tuple
 
 from capri_mod.pipeline.captrd.equations import adjust_to_biof_supports as AB
 from capri_mod.pipeline.captrd.equations import adjust_trade_supports as AT
+from capri_mod.pipeline.captrd.equations import define_stats_and_supports as DS
 
 K3 = Tuple[str, str, str]
 K4 = Tuple[str, str, str, int]
@@ -39,20 +40,10 @@ K4 = Tuple[str, str, str, int]
 TINY = 1.E-13
 #: l. 151: the lower limits' yearly decline in the condition of the crops' LEVL
 LOW_DECLINE = 0.98
-#: define_stats_and_supports.gms l. 618-622: the share of the gap to UAAR closed, and the smallest area scaled
-UAAR_SHARE = 0.67
+#: define_stats_and_supports.gms l. 618: the smallest area scaled
 MCACT_MIN = 1.E-12
 #: adjust_trade_supports.gms l. 142-143, 150-151: the gross trade above which IMPT and EXPT are rescaled
 TRADE_MIN = 1.E-6
-#: define_stats_and_supports.gms l. 646-663: wVarErr = (max(0.1, |Expert|) x 0.05 / 3 x 10 / TrustLevl)^2; the DOMM
-#: components' x 10, between trust levels 1 and 1e-4
-WVAR_FLOOR = 0.1
-WVAR_CV = 0.05
-WVAR_SIGMAS = 3.0
-WVAR_SCALE = 10.0
-DOMM_WVAR_FACTOR = 10.0
-DOMM_TRUST_HIGH = 1.0
-DOMM_TRUST_LOW = 1.E-4
 
 
 @dataclass
@@ -219,7 +210,7 @@ def overwrite(R: Dict[K4, float], expert: Dict[K4, float], *, rest: Iterable[str
     rest, cols, rows, yrs = set(rest), set(s_colsest), set(s_rowsest), set(exante)
     for k, v in expert.items():
         if k[0] in rest and k[1] in cols and k[2] in rows and k[3] in yrs and v:
-            R[k] = v
+            R[k] = DS.p_result_Support_Expert(v)
 
 
 def mcact_scale(R: Dict[K4, float], *, rest: Iterable[str], mcact: Iterable[str], exante: Sequence[int]) -> None:
@@ -231,11 +222,10 @@ def mcact_scale(R: Dict[K4, float], *, rest: Iterable[str], mcact: Iterable[str]
             if not u:
                 continue
             tot = sum(R.get((r, a, "LEVL", y), 0.0) for a in mc)
-            f = (UAAR_SHARE * u + (1 - UAAR_SHARE) * tot) / tot if tot else None
             for a in mc:
                 v = R.get((r, a, "LEVL", y), 0.0)
                 if v > MCACT_MIN:
-                    _put(R, (r, a, "LEVL", y), v * f)
+                    _put(R, (r, a, "LEVL", y), DS.p_result_MCACT_LEVL_Support(v, u, tot))
 
 
 def adjust_trade(R: Dict[K4, float], expert: Dict[K4, float], *, ms: Iterable[str], s_rowsest: Iterable[str],
@@ -271,8 +261,7 @@ def adjust_trade(R: Dict[K4, float], expert: Dict[K4, float], *, ms: Iterable[st
 
 def wvarerr(expert: Dict[K4, float], trust: Dict[K4, float]) -> Dict[K4, float]:
     """define_stats_and_supports.gms l. 646-650: wVarErr of the positions with a TrustLevl."""
-    return {k: (max(WVAR_FLOOR, abs(expert.get(k, 0.0))) * WVAR_CV / WVAR_SIGMAS * (WVAR_SCALE / t)) ** 2
-            for k, t in trust.items() if t}
+    return {k: DS.p_result_wVarErr_TrustLevl(expert.get(k, 0.0), t) for k, t in trust.items() if t}
 
 
 def domm_wvarerr(w: Dict[K4, float], R: Dict[K4, float], externals: Sequence[Dict[K4, float]], *, ms: Iterable[str],
@@ -290,8 +279,6 @@ def domm_wvarerr(w: Dict[K4, float], R: Dict[K4, float], externals: Sequence[Dic
                     k = (r, c, row, y)
                     s = R.get(k, 0.0)
                     if s and not has(k) and has((r, "DOMM", row, y)):
-                        up[k] = min(max(w.get(k, 0.0) * DOMM_WVAR_FACTOR,
-                                        (s * WVAR_CV / WVAR_SIGMAS * (WVAR_SCALE / DOMM_TRUST_HIGH)) ** 2),
-                                    (s * WVAR_CV / WVAR_SIGMAS * (WVAR_SCALE / DOMM_TRUST_LOW)) ** 2)
+                        up[k] = DS.p_result_wVarErr_DOMPOS(w.get(k, 0.0), s)
     for k, v in up.items():
         _put(w, k, v)

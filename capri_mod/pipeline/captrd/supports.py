@@ -20,6 +20,8 @@ from typing import Dict, Iterable, Optional, Sequence, Set, Tuple
 import numpy as np
 import pandas as pd
 
+from capri_mod.pipeline.captrd.equations import define_stats_and_supports as DS
+
 
 @dataclass
 class SupportSets:
@@ -66,7 +68,8 @@ def supports(st: pd.DataFrame, step1: pd.DataFrame, years: Sequence[int], bas_ye
     in CAPRI's own code (a sum of squared residuals, l. 118-123; the fall-back for 1-2 observations is
     SQR(wAve) x 0.25, l. 130) and is used as one later (sqrt(wVarErr) as a standard deviation,
     define_eu_supports.gms l. 693, 705). False reproduces CAPRI as coded. The lines cited below are
-    define_stats_and_supports.gms's."""
+    define_stats_and_supports.gms's, whose statements are named functions in
+    capri_mod/pipeline/captrd/equations/define_stats_and_supports.py."""
     if floor_squared is None:
         from capri_mod.settings import current as _settings
         floor_squared = bool(_settings().get("captrd.variance_floor_squared"))
@@ -86,33 +89,31 @@ def supports(st: pd.DataFrame, step1: pd.DataFrame, years: Sequence[int], bas_ye
         S = np.full(len(idx), np.nan)
         # l. 195-199: NTRD
         ntrd = has & (cols == "NTRD")
-        S[ntrd] = (B * (1.0 - wr2) + s1 * wr2)[ntrd]
+        S[ntrd] = DS.p_result_NTRD_Support(B, wr2, s1)[ntrd]
         # l. 203-212: all others, at least 0.001 x B (1 x B for CSSP with a negative base)
         oth = has & (cols != "NTRD")
-        floor = B * np.where((cols == "CSSP") & (basm < 0.0), 1.0, 0.001)
-        S[oth] = np.maximum(floor, B * (1.0 - wr2) + s1 * wr2)[oth]
+        S[oth] = DS.p_result_Support(B, wr2, s1, (cols == "CSSP") & (basm < 0.0))[oth]
         # l. 217-221: crop yields with BSY and sqrt(wR2)
         isy = np.array([(c, r) in sets.pact_to_y for c, r in zip(cols, rows)])
         cy = has & isy & np.isin(cols, list(sets.mcact))
         bsy = st["bsy"].to_numpy(float)
-        sq = np.sqrt(np.clip(wr2, 0.0, None))
-        S[cy] = np.maximum(B * 0.001, bsy * (1.0 - sq) + s1 * sq)[cy]
+        S[cy] = DS.p_result_Support_MCACT_yield(B, bsy, wr2, s1)[cy]
         # l. 226-238: yields within 2.5 % a year of B
         y_ = has & isy
-        S[y_] = np.maximum(np.minimum(S, B * 1.025 ** dt), B * 0.975 ** dt)[y_]
+        S[y_] = DS.p_result_Support_yield(S, B, dt)[y_]
         # l. 242-246: no yield drop below B
         nyd = has & isy & np.isin(cols, list(sets.no_yield_drop))
-        S[nyd] = np.maximum(S, B)[nyd]
+        S[nyd] = DS.p_result_Support_NoYieldDrop(S, B)[nyd]
         # l. 252-266: breeding animals' slaughter weight within 0.2 % a year of BASM (p_useBAST = 0)
         br = has & (rows == "SLGW") & np.isin(cols, list(sets.breed_act))
         d0 = t - bas_year
-        S[br] = np.maximum(np.minimum(S, basm * 1.002 ** d0), basm * 0.998 ** d0)[br]
+        S[br] = DS.p_result_Support_SLGW(S, basm, d0)[br]
         # l. 272-281: UAAR at most B, at least B x 0.998^(t - BAST) (the global BAST year)
         ua = (cols == "UAAR") & (rows == "LEVL") & (B != 0.0) & ~np.isnan(S) & (S != 0.0)
-        S[ua] = np.maximum(np.minimum(B, S), B * 0.998 ** (t - bast_year))[ua]
+        S[ua] = DS.p_result_Support_UAAR(S, B, t - bast_year)[ua]
         # l. 285-286: grassland at least 0.9 x BASM (no nObs condition)
         gr = (rows == "LEVL") & np.isin(cols, list(sets.grs_act))
-        S[gr] = np.maximum(basm * 0.9, np.nan_to_num(S))[gr]
+        S[gr] = DS.p_result_Support_GRSACT(S, basm)[gr]
         # l. 290-293: DAYS / DAILY within the requirement functions' limits, where the activity has observations
         for (c, r), (lo, up) in sets.reqfcnlim.items():
             m = (cols == c) & (rows == r)
@@ -122,21 +123,21 @@ def supports(st: pd.DataFrame, step1: pd.DataFrame, years: Sequence[int], bas_ye
                                                         ["LEVL"] * int(m.sum())]))["nobs"].fillna(0.0).to_numpy()
             mm = np.where(m)[0][lev != 0.0]
             if lo is not None:
-                S[mm] = np.maximum(np.nan_to_num(S[mm]), 0.99 * lo)
+                S[mm] = DS.p_result_Support_reqfcnlim_lo(S[mm], lo)
             if up is not None:
-                S[mm] = np.minimum(S[mm], 1.01 * up)
+                S[mm] = DS.p_result_Support_reqfcnlim_up(S[mm], up)
         # l. 298-301: feed input coefficients at BASM (0.1 x the member state's BASM where missing: not ported here,
         # the regional rows need the member-state values)
         fe = has & np.isin(cols, list(sets.mpact)) & np.isin(rows, list(sets.feed))
-        S[fe] = basm[fe]
-        # l. 312-313: GROF of the feed aggregates at BASM where the series has no variance
+        S[fe] = DS.p_result_Support_feed(basm)[fe]
+        # l. 314-315: GROF of the feed aggregates at BASM where the series has no variance
         wvar = st["wvar"].to_numpy(float) if "wvar" in st.columns else np.zeros(len(idx))
         gf = has & (cols == "GROF") & np.isin(rows, list(sets.feed)) & (wvar == 0.0)
-        S[gf] = basm[gf]
+        S[gf] = DS.p_result_Support_feed(basm)[gf]
         # l. 318-319: requirement scalers
         rq = np.isin(rows, list(sets.reqst)) & has & (st.get("const", 0) + st.get("slope", 0) != 0) \
             if "const" in st.columns else np.zeros(len(idx), bool)
-        S[rq] = 1.0
+        S[rq] = DS.p_result_Support_ReqsT()
         out[t] = S
     sup = pd.DataFrame(out, index=idx)
     # l. 290-293 also give a support to the DAYS / DAILY series without observations of their own where the activity's
@@ -147,7 +148,7 @@ def supports(st: pd.DataFrame, step1: pd.DataFrame, years: Sequence[int], bas_ye
     for (c, r), (lo, up) in sets.reqfcnlim.items():
         if not lo:
             continue
-        v = 0.99 * lo if up is None else min(0.99 * lo, 1.01 * up)
+        v = DS.p_result_Support_reqfcnlim_new(lo, up)
         for (reg, cc, _), nn in lev_n.items():
             if cc == c and nn != 0.0 and (reg, c, r) not in known:
                 extra[(reg, c, r)] = v
@@ -158,10 +159,7 @@ def supports(st: pd.DataFrame, step1: pd.DataFrame, years: Sequence[int], bas_ye
     # l. 327-329: the stored error variance with its floor, except for requirements and feed: CAPRI's 0.05 x |wAve|
     # (a level against a variance; CAPTRD_MOD.md section 12.4), or its square (floor_squared)
     no_floor = np.isin(rows, list(sets.reqst)) | np.isin(rows, list(sets.feed))
-    fl = np.abs(st["wave"].to_numpy(float)) * 0.05
-    if floor_squared:
-        fl = fl * fl
-    wv = np.where(no_floor, st["wvarerr"].to_numpy(float), np.maximum(fl, st["wvarerr"].to_numpy(float)))
+    wv = DS.p_result_wVarErr(st["wave"].to_numpy(float), st["wvarerr"].to_numpy(float), no_floor, floor_squared)
     return sup, pd.Series(np.where(has, wv, np.nan), index=idx)
 
 
@@ -172,4 +170,4 @@ def uvag_from_dgagri1(support: Dict[Tuple[str, str, str, int], float], dgagri1: 
     msset, rows, yrs = set(ms), set(s_rowsest), set(exante)
     for (r, c, w, y), v in dgagri1.items():
         if c == "UVAG" and r in msset and w in rows and y in yrs and v:
-            support[(r, c, w, y)] = v
+            support[(r, c, w, y)] = DS.p_result_UVAG_Support(v)

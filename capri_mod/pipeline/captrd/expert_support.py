@@ -20,13 +20,12 @@ from __future__ import annotations
 
 from typing import Dict, Iterable, Sequence, Set, Tuple
 
+from capri_mod.pipeline.captrd.equations import define_stats_and_supports as DS
 from capri_mod.pipeline.captrd.equations import expert_support as XE
 
 K3 = Tuple[str, str, str]
 K4 = Tuple[str, str, str, int]
 
-#: define_stats_and_supports.gms l. 643: the trust level of an expert support without one
-DEFAULT_TRUST = 10.0
 
 
 def herd_floor(support: Dict[K4, float], *, ms: Iterable[str], maact: Iterable[str], bas: Dict[K3, float],
@@ -88,14 +87,14 @@ def expert(S, *, basm: Dict[K3, float], s_colsest: Iterable[str], s_rowsest: Ite
     out: Dict[K4, float] = {}
     for k, v in S.ab.items():                                                  # l. 485-487 (rmAggSup)
         if k[0] in agg and k[1] in cols and k[2] in rows and v:
-            out[k] = v
+            out[k] = DS.p_result_Expert_rmAggSup(v)
     for k in set(S.ab) | set(S.pc):                                            # l. 489-500 (Rest)
         r, c, w, y = k
         if r not in rest or c not in cols or w not in rows:
             continue
         a, p = S.ab.get(k, 0.0), S.pc.get(k, 0.0)
         if a or p:
-            v = (a if a else 0.0) + ((1 + p / 100) * basm.get((r, c, w), 0.0) if p else 0.0)
+            v = DS.p_result_Expert(a, p, basm.get((r, c, w), 0.0))
             if v:
                 out[k] = v
             else:
@@ -109,7 +108,7 @@ def sugb_trade(expert_: Dict[K4, float], support: Dict[K4, float], *, ms: Iterab
     = BAST, else BASM (tradeEst: IMPT, EXPT, NTRD; sets_captrd.gms l. 314-316)."""
     for r in ms:
         for c in ("IMPT", "EXPT", "NTRD"):
-            v = bast.get((r, c, "SUGB"), 0.0) or basm.get((r, c, "SUGB"), 0.0)
+            v = DS.P_Result_SUGB_trade(bast.get((r, c, "SUGB"), 0.0), basm.get((r, c, "SUGB"), 0.0))
             for y in exante:
                 for d in (expert_, support):
                     if v:
@@ -125,5 +124,5 @@ def trust(expert_: Dict[K4, float], *, coco_trust: Dict[K4, float], expert_trust
     out: Dict[K4, float] = {}
     for k in expert_:
         if k[0] in rest and k[1] in cols and k[2] in rows:
-            out[k] = coco_trust.get(k) or expert_trust.get(k) or DEFAULT_TRUST
+            out[k] = DS.p_result_TrustLevl(coco_trust.get(k), expert_trust.get(k))
     return out

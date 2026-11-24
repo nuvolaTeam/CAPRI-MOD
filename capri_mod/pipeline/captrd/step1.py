@@ -33,7 +33,7 @@ years, the BASM exclusion of prep_data_for_estimation.gms l. 214-218) is the cal
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, Mapping, Optional, Sequence
+from typing import Iterable, Optional, Sequence
 
 import numpy as np
 
@@ -92,7 +92,8 @@ def prestats(x, w, nobs: Optional[np.ndarray] = None, nw: Optional[np.ndarray] =
     """nObs, nW, wAve and wVar of each series.
 
     x: (series, ex-post years); w: p_trend of those years. nobs / nw may be passed when the caller has changed them
-    (CAPRI zeroes both where BASM is zero, l. 214-218, and for INHA.LEVL and DOMM of young animals, l. 221-227).
+    (CAPRI zeroes both where BASM is zero, l. 214-218, and for INHA.LEVL and DOMM of young animals, l. 221-227). The
+    lines cited here are prep_data_for_estimation.gms's.
     """
     x, obs = observed(x, zeros_as_missing)
     w = np.asarray(w, dtype=float)
