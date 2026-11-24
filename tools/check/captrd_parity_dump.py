@@ -33,7 +33,8 @@ NT2_RES_REGIONS = ("AT000000", "DE000000", "DK000000", "NL000000")
 NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), ("2018", "2030")
 
 
-#: --parts: the parts to dump (None: all): estimation, bounds, nuts2, ms_retries, step3_copies, labour, policy, and
+#: --parts: the parts to dump (None: all): estimation, bounds, nuts2, ms_retries, step3_copies, labour, policy,
+#: clean_tiny, and
 #: the light ones (no reference data read): step1
 PARTS = None
 LIGHT = {"step1"}
@@ -293,6 +294,43 @@ def bounds_cases(E, EB, S, data_all, read_csv, res_dir, _P):
         out["labour"] = labour_cases(by_reg, tab_reg, hexd)
     if want("policy"):
         out["policy"] = policy_cases(by_reg, tab_reg, mp, hexd)
+    if want("clean_tiny"):
+        out["clean_tiny"] = clean_tiny_cases(E, EB, S, B, case, by_reg, year_tab, hexd)
+    return out
+
+
+def clean_tiny_cases(E, EB, S, B, case, by_reg, year_tab, hexd):
+    """clean_tiny.clean (clean_tiny.gms) at eight member states in 2030 and 2050: Solve2's levels the stored step3,
+    its bounds estimate_bounds.bounds', its variances 1; the cleaning solve stubbed (estimate_nlp.solve returns its
+    start), so the check is of what clean hands it (the supports, bounds, variances and levels) and of its result.
+    SHA-256 of the exact dictionaries."""
+    from capri_mod.pipeline.captrd import clean_tiny as CT
+    from capri_mod.pipeline.captrd import estimate_nlp as NLP
+    seen = []
+
+    def stub(pc, S_, B_, d_, lo, up, wv, start, log=None, opts=None, widen=True):
+        seen.append(_digest(hexd(pc.support), hexd(lo), hexd(up), hexd(wv), hexd(start)))
+        return NLP.Result(dict(start), 0.0, True, 1, "Solve_Succeeded", dict(lo), dict(up))
+    real = CT.N.solve
+    CT.N.solve = stub
+    out = {}
+    try:
+        T = CT.tiny_sets()
+        for ms in ("AT000000", "BG000000", "DE000000", "DK000000", "ES000000", "IR000000", "NL000000", "PL000000"):
+            for y in (2030, 2050):
+                D = case(ms, y, ms)
+                lo, up = EB.bounds(D, B, E.REQS_EFF ** (y - E.REQS_YEAR0), artif_as_coded=False)
+                g = by_reg[ms]
+                g = g[(g.t == "nObs") & (g.value.astype(float) != 0)]
+                p = E.Point(V={}, nobs=set(zip(g.col, g.row)), bas={}, basm={}, const={}, slope={},
+                            pdata=D.res["p_data"], coco=set(D.res["coco"]), support=D.res["Support"], lo={}, up={},
+                            year=y, exante_d=D.exante_d)
+                r2 = NLP.Result(year_tab("step3", ms, y), 0.0, True, 1, "Solve_Succeeded", lo, up)
+                seen.clear()
+                r = CT.clean(p, S, B, D, r2, {k: 1.0 for k in D.res["Support"]}, T=T)
+                out[(ms, y)] = (list(seen), _digest(hexd(r.x), hexd(r.lo), hexd(r.up)))
+    finally:
+        CT.N.solve = real
     return out
 
 
@@ -599,7 +637,7 @@ if __name__ == "__main__":
     ap.add_argument("out", nargs="?")
     ap.add_argument("--compare", nargs=2, metavar=("REF", "NEW"))
     ap.add_argument("--parts", help="comma-separated parts to dump (a block's own check): estimation, bounds, nuts2, "
-                                    "ms_retries, step3_copies, labour, policy, step1; default all")
+                                    "ms_retries, step3_copies, labour, policy, clean_tiny, step1; default all")
     a = ap.parse_args()
     if a.parts:
         PARTS = set(a.parts.split(","))
