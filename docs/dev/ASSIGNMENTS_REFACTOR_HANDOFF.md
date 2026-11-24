@@ -454,4 +454,12 @@ file); a CAPRI name on a citing line can match a statement the code does not por
   before). The five-unit Green Deal run without and with the limits: equal at `--rtol 0` but for the metadata. The
   sentence of the Threads item above ("Whether the results depend on the thread count is not checked here") is
   answered: they do not, on this run.
+- **The measured and the cached Hessian, diagnosed and fixed** (24 November 2026; the project lead: "go on with the
+  Hessian cached vs measured diagnosis"; 113df867, K198): the regional models' manure value was left from the last
+  price shock and read by the baseline's manure pool market; RegionalSupplyModel.COUPLING_READS, restored with
+  SOLVE_STATE. Found by fingerprinting the model's state before and after the measurement (the probe: a script in
+  the session's scratchpad, not in the repository; 78 values changed, one read by the coupling). Five-unit runs:
+  measured and cached 1,172 values apart before, equal after (and equal to the old code's cached run); the Hessian
+  unchanged. Section 9's "two runs compare exactly only with the Hessian from the same source" no longer holds:
+  they compare exactly whatever its source. A run that measures its Hessian moves in its last digits with this fix.
 

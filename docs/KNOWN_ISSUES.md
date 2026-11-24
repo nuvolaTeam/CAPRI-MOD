@@ -48,7 +48,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K150](#k150) | The non-EU regions' raw milk at the market's base is FAO_agg's production, not CAPRI's market data (milk delivered to the dairies): Turkey 20,173 kt against CAPRI's 13,145 | fixed (14 November 2026), validated (15 November 2026, the full Green Deal pair) |
 | [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences; sorted 20 November 2026: most are in the accounts only or have no effect in the step; ARTIF held fixed had one (small for the EU, a few thousand ha in some Spanish and French units) | open: ARTIF, the milk for feeding and the yield factors of the crops' N and P terms ported 20 November 2026 (as CAPRI's); the animals' per-head terms ported 21 November 2026 (the members' INPO difference under the Green Deal's input change); fertned's two items left closed 23 November 2026 (the price-driven O_HP needs no port; the residues' variant factor at the moved MANN ported) |
 | [K196](#k196) | The Green Deal's N-surplus dual is below CAPRI's (CAPRI's recovered from its own results): median 0.856 of CAPRI's in the standing check at 9867411 (0.89 at bb3b592), 0.83 at CAPRI's prices; the suckler cows' and the technology shift's remaining gaps follow it | open (21 November 2026) |
-| [K198](#k198) | The assignments refactor's findings for the main line (its inventory of the CAPRI statements the model ports or cites, blocks A0-A6): porting differences in the market supply Hessian, the price transmission, the stop rule, the welfare, the premiums, the Green Deal's regional rules and the accounts, sorted by where they act, not measured; A0's 14 wrong line citations corrected; from the phase's runs, a measured and a cached Hessian moving a run's last digits (1e-5 after the scenario), the thread oversubscription and the Hessian step's log | open (updated 24 November 2026) |
+| [K198](#k198) | The assignments refactor's findings for the main line (its inventory of the CAPRI statements the model ports or cites, blocks A0-A6): porting differences in the market supply Hessian, the price transmission, the stop rule, the welfare, the premiums, the Green Deal's regional rules and the accounts, sorted by where they act, not measured; A0's 14 wrong line citations corrected; from the phase's runs, a measured and a cached Hessian moving a run's last digits (1e-5 after the scenario; diagnosed and fixed: the manure value left by the last shock), the thread oversubscription (fixed) and the Hessian step's log (done) | open (updated 24 November 2026) |
 
 ## Resolved (128)
 
@@ -4196,9 +4196,19 @@ the main line measures and ranks. Where each acts, from the code (no runs):
   - *The market supply Hessian's source moves a run's last digits:* a run that measures the Hessian ends its
     baseline about 1e-12 away from a run that reads the same Hessian (byte-identical) from the cache; the Green Deal
     scenario amplifies it to about 1e-5 (78,105 values of the full-EU pickle, e.g. OFAR 208,393.57 against
-    208,395.31). The restore after the measurement (K76) leaves a trace. Two runs compare exactly only with the
-    Hessian from the same source. The cache key holds the supply code's hash, so a change of that code measures it
-    again (1,909 s on the full EU).
+    208,395.31). The restore after the measurement (K76) leaves a trace. The cache key holds the supply code's hash,
+    so a change of that code measures it again (1,909 s on the full EU). Diagnosed and fixed on 24 November 2026: a
+    probe of the model's state just before and just after the measurement (five units, 1.24 million leaves; floats
+    exact, arrays and tables by hash) found 78 values changed; read against their readers, one mattered: the
+    regional models' manure value (res.manure_value, up to 8.9e-6 relative), left from the last price shock and read
+    by the baseline's manure pool market from the models (coupling/manure.py), not from the solve's result. The
+    restore's lists held the state a solve leaves for the next solve, not the outputs the coupling reads.
+    RegionalSupplyModel.COUPLING_READS now lists them (the manure value and the manure pools' columns, bounds and
+    vectors), restored with SOLVE_STATE; none is an input of a solve, so the shocks are as before. Five-unit Green
+    Deal runs (NO06, FI13, FR72, PL51, DE21): before the fix, measured against cached 1,172 values apart (the last
+    digits); with it, measured equals cached and equals the old code's cached run at `--rtol 0` but for the metadata,
+    and the Hessian equals the old one. A run that measures its Hessian now ends where one that reads it ends (its
+    last digits move with the fix; a cached run's do not); two runs compare exactly whatever their Hessian's source.
   - *Threads:* OpenBLAS and OpenMP start one thread per core in each worker process; only OMP_NUM_THREADS is set
     (capri_regional_nlp.py, after NumPy's import, too late for OpenBLAS). On a 4-core machine the workers ran 7-10
     threads each; with OPENBLAS_NUM_THREADS, OMP_NUM_THREADS and MKL_NUM_THREADS at 1 before the run, the first
