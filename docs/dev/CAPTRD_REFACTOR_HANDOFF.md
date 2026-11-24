@@ -17,21 +17,24 @@ Nothing is merged into dev; the main session decides the merge.
   _open_bounds, _grid_again), 54 functions in equations/estimate_nuts2.py, est_nuts2_grid_openbound.py,
   est_nuts2_grid.py. C4c: the member state's bound-widening after an infeasible solve (estimate_nlp._widen,
   _oind_ocro, _again, _release_comi), 22 functions in equations/estimate_ms.py and release_comi_yields.py. The
-  bound statements of estimate_bounds, estimate_nuts2 and estimate_nlp are now all named functions.
+  bound statements of estimate_bounds, estimate_nuts2 and estimate_nlp are now all named functions. C5 (C5.1-C5.18):
+  the supports and trends modules, every assignment with arithmetic of the CAPRI files they port: 832 functions in
+  36 modules of capri_mod/pipeline/captrd/equations/ altogether (section 1's C5 rows); what is left in the callers is
+  listed in section 5.
 - **Checked:** exactly (hex floats and CasADi text) against the starting commit 9c69ab7b, with
   tools/check/captrd_parity_dump.py on CAPTRD's own Step 2 points; the pipeline tests unchanged; the static checks.
 - **Not checked here, and why:** a full CAPTRD run's outputs. The published raw set has no capreg_base (CAPREG's base
   year for the EU's countries), which the estimation's bounds, the NLP and the NUTS 2 solves read: those 14 pipeline
   tests fail or error here, before and after the refactor alike. The main session's environment has it: run the
   pipeline's outputs bit for bit there against 9c69ab7b before the merge (section 4).
-- **Next:** C5 the supports and trends modules (an inventory first), then C6, the sort of the 81 hash-order places,
-  **a commit of its own** (it changes last digits).
+- **Next:** C6, the sort of the hash-order places (scan again: C4-C5 moved lines), **a commit of its own** (it
+  changes last digits).
 - **Findings (listed, not fixed: a move changes nothing):** est_nuts2_grid.gms l. 121 (the set-aside levels' floor) is
   inside `if (p_farmModelisRunning eq 1, ...)`: CAPRI applies it to the farm types only, the port to the NUTS 2 regions
   too; CAPRI's `/ 1000` is the port's `x 0.001` in the NUTS 2 production and area bounds (may differ in the last
   digit); CAPRI's statements on ARTIF divide by the member state's base unconditionally, the port only where it is
   nonzero; estimate_ms.gms l. 302, 315's share for the secondary products' processing yields is CAPRI's 0.9 - .89
-  (0.010000000000000009 in floating point), the port's 0.01.
+  (0.010000000000000009 in floating point), the port's 0.01. C5's findings: section 5, "C5's findings".
 - **The main session's notes (24 November):** moves must leave results identical, and the pipeline's outputs are to be
   compared bit for bit against the starting commit; the 81 places' sort is a separate commit, not mixed with moves; the
   heavy pipeline tests reach about 5.4 GB each, run them one at a time on a small container; the CAPTRD-MOD stage 2e
@@ -48,6 +51,29 @@ Nothing is merged into dev; the main session decides the merge.
 | f0942fc1 | C4 | estimate_bounds.bounds, _comi, _biofuel: every statement's arithmetic a function named after the bounded symbol (V_EstV_IO, V_EstV_NoYieldDrop, p_data_LEVL_facs, V_EstV_COMI, ...) quoting its lines; bounds() keeps the domains, the loops and the statements' order. The constants STD_UP, LO_SUPPORT_SHARE, WINE_PLANTING, MAX_YIELDS, CERE_MAX_YIELD, GRAS_MAX(_NL), STRA_MAX and _phys went into the functions; REF_MILK_YIELD and PROC_YIELDS (captrd.gms's parameters) stay. The expert bounds' citation corrected: estimate_ms.gms l. 159-162 (the port's l. 146-151 is the aglinkTightLink block, off); the member state's own bounds l. 78-162 | the bounds at every member state and year with both readings of ARTIF's bound (680 cases), at three member states with synthetic data reaching the branches the reference does not (6), and at the NUTS 2 regions of AT, DE, ES, IR (198): 2.2 million bounds, identical in value and order; 99% of the bound code reached |
 | 8480e8cc | C4b | estimate_nuts2.bounds (estimate_nuts2.gms l. 92-400), _open_bounds (est_Nuts2_grid_openbound.gms l. 40-292) and _grid_again (est_nuts2_grid.gms l. 53-121): each statement's arithmetic a function (V_EstV_up_LEVL, V_EstV_GROF with the shared _grof_sums and _gmul, V_EstV_lo_coef, V_EstV_SUGB_LEVL, ...); the callers keep the domains, the loops and the order. Constants that were arithmetic went into the functions; those that are conditions (FEED_FIX_TRIES, NYD_OPEN_TRIES, REQS_TRIES, LEVL_TRIES_OPEN, UAAR_TRIES_OPEN, LEVL_OPEN_FLOOR, PROD_OPEN_TRIES, RSET_LO_MIN, SUGB_FROM, SUGB_TRUST) and the sets (MEAT_EGGS, LOSF_EXTRA) stay. The openbound citations corrected (the port's l. 40-50, 53-61, ... 202-210 were another version's; the true lines in each function) | estimate_nuts2.bounds at the regions of AT, DE, ES, IR in three years, with and without a sugar quota, regional experts and a milk quota (24 cases), and _open_bounds + _grid_again from those bounds at a synthetic solve state for five try counts (84 cases, every threshold crossed): identical (SHA-256 of the exact bounds and levels); 99% of the new modules reached |
 | fd0a4801 | C4c | estimate_nlp._widen (estimate_ms.gms l. 256-321), _oind_ocro (l. 335-346), _again (l. 328-418) and _release_comi (release_comi_yields.gms l. 24-45): 19 functions appended to equations/estimate_ms.py (V_EstV_lo_widen, V_EstV_lo_INCE_try, V_EstV_UAAR_again, ...) and 3 in equations/release_comi_yields.py; the callers keep the binding bounds, the conditions and the order. LEVL_UP_FAC, LEVL_LO_FAC, WIDEN_*, PRCY_FLOOR, PRCY_RANGE, INCE_STEP, COMI_STEP, LOSF_UP / LOSF_LO and EB_* went into the functions; the try thresholds (LEVL_TRIES, OIND_OCRO_TRIES, BIOFUEL_TRIES) stay; their citations corrected (l. 256, 335, 376-378) | the four functions from estimate_bounds.bounds' bounds at a synthetic solve state (every third bounded position at its lower bound, the next at its upper, OIND and OCRO at theirs without production, expert calorie bounds) for six try counts around 5, 25 and 30, at six member states in three years, plain and with bounds_cases' extra inputs (216 cases): identical; 99% of the new functions reached (the one line left a bound kind no caller passes) |
+
+| c72430bf, 0b54ebf8 | C5.0 | the handoff's C4c row; the inventory docs/dev/captrd_inventory.csv and its builder tools/check/captrd_inventory.py (section 5) | - |
+| 1a18795c | C5.1 | copy_labour_biofuel_on_presult.gms: 10 functions (step3_copies.copy) | part step3_copies (340 cases) |
+| 08b06cb6 | C5.2 | labour_ageline.gms: 12 functions (labour.ageline_bounds, labour_bounds) | part labour (35 cases) |
+| affe5bbe | C5.3 | mquota_update, load_quotas, reformsugarquotas, captrd_policy.gms: 29 functions (policy.apply); the tool's `--parts` | part policy |
+| 1de49137 | C5.4 | estimate_trends.gms (7) and Step 1's statistics of define_stats_and_supports.gms (3) and prep_data_for_estimation.gms (3) (step1) | light part step1 (3,000 synthetic series) |
+| abb29618 | C5.5 | clean_tiny.gms: 16 functions (clean_tiny.clean, the solve stubbed) | part clean_tiny (16 cases) |
+| 68cd6e0d | C5.6 | scale_DG_AGRI_baseline.gms: 18 functions (scale_dgagri.scale) | light part scale_dgagri |
+| bff808fd | C5.7 | adjust_to_biof_supports.gms (25), adjust_trade_supports.gms (9) (final_supports) | light part final_supports |
+| d2226295 | C5.8 | agriprod_supports.gms: 22 functions | light part agriprod (reference data) |
+| d64e6aef | C5.9 | longrun_supports.gms: 26 functions (longrun_supports, macro.inha_pdata) | light part longrun (a synthetic long-run scenario) |
+| 665bb5d8 | C5.10 | define_eu_supports.gms: 49 functions (eu_supports) | light part eu_supports |
+| 893afa25, 1b360331, 2fcc0a18 | C5.11 | expert_support.gms (58: expert_rules, dairy_supports, expert_support), national_supports.gms (16 general, 38 country rules) | light parts expert_support, national |
+| a13835f9 | C5.12 | define_stats_and_supports.gms: 33 functions in all (supports, coco_supports, expert_support, dairy_supports, final_supports) | light part stats |
+| 5ce1ec05 | C5.13 | prep_data_for_estimation.gms: 33 in all (prepare.prep_for_estimation, statistics) | light part prep |
+| 50a6340a | C5.14 | load_coco1_data.gms: 27 functions (coco) | light part coco |
+| e72a8f61 | C5.15 | captrd.gms's 3 data statements with arithmetic (prepare.load_fixes, load_basm, labour_household) | light part captrd_gms |
+| 3e076e53 | C5.16 | biofuel_trends.gms: 92 functions (biofuel_trends.trends) | light part biofuel |
+| 5310df2c | C5.17 | convert_globiom.gms (33) and create_longrun_info.gms (3) (globiom) | light part globiom (synthetic GLOBIOM tables) |
+| 3d24e884 | C5.18 | load_aglink2023dgAgri.gms: 60 functions (aglink, macro.inha) | light part aglink (a synthetic Aglink cube) |
+
+Every C5 block: identical to 9c69ab7b on its part, with the light checks of section 3; the full dump and the pipeline
+tests once, at the end of C5 (the end-of-C5 gate: its result is added here when it has run).
 
 The pipeline tests (`python -m pytest -q -p no:randomly -n 0 capri_mod/pipeline/tests`, about 4.5 minutes here):
 at edb882ca **51 passed, 21 skipped, 7 failed, 7 errors**, at C4 **53 passed**, at C4b **55 passed**, at C4c **56
@@ -111,6 +137,19 @@ SHA-256 of each region's exact bounds (the whole would be 570 MB). The member st
 the same from estimate_bounds.bounds' bounds. For a block outside these (C5) the tool is extended first with that block's functions at given points; coverage (`python -m coverage run ...`) shows what the
 inputs reach.
 
+**C5's light checks.** A C5 block is checked on its own part only: `--parts NAME` dumps that part alone (tools/check/
+captrd_parity_dump.py: LIGHT and LIGHT_CASES name the parts that read no estimation inputs; 2-40 seconds each), at the
+reference worktree and at the checkout, then `--compare`. **Both sides with PYTHONHASHSEED=0**: some sums run in set
+order (C6) and would differ between two processes. Most parts run the block's functions on seeded random inputs over
+CAPRI's real sets (with the divisors nonzero where real data have them so); agriprod, prep, coco and biofuel read one or
+two reference tables. The GLOBIOM and Aglink source files are not in this copy (their slow tests skip): globiom's and
+aglink's parts are synthetic cubes written as Parquet over the real sets. Then the static checks of step 5, the
+inventory rebuilt, and test_captrd_equations.py. The full dump and the pipeline tests run once, at the end of C5.
+
+Two traps met in C5: a function that replaces a `+=` accumulation adds its values one at a time (Python's `sum()` of
+floats is compensated since 3.12 and changes last digits); and GAMS evaluates an assignment's right side on the values
+from before the statement, so a caller that loops keeps the old values where the port did.
+
 ## 4. What this container cannot check
 
 - **The pipeline's outputs bit for bit** (the main session's first note). A CAPTRD-MOD run needs CAPREG's base data
@@ -122,46 +161,51 @@ inputs reach.
 
 ## 5. Next blocks
 
-- **C5: the supports and trends** (the rest of the pipeline). The inventory, docs/dev/captrd_inventory.csv
-  (`python tools/check/captrd_inventory.py GAMS_DIR --out docs/dev/captrd_inventory.csv`, to rebuild after each
-  block): 1,725 citations of CAPRI's lines in capri_mod/pipeline/captrd, 658 of them statements still to move (an
-  assignment or a bound cited outside equations/), 243 in the style, 136 the callers' comments of moved statements,
-  681 context (declarations, control statements, comments, whole files), 7 to check (data files outside the GAMS copy).
-  A bare "l. a-b" is given the first of the candidate files (the same line's, block's, function's, then the module's
-  by frequency) the range fits in: the attribution column says which, and the module's file is a guess to confirm
-  when the block is done. The blocks, one per CAPRI file, the small and self-contained first (statements to move,
-  the modules):
-
-  | block | CAPRI file | to move | modules |
-  |---|---|---|---|
-  | C5.1 | captrd/copy_labour_biofuel_on_presult.gms | 7 | step3_copies |
-  | C5.2 | baseline/labour_ageline.gms | 7 | labour |
-  | C5.3 | captrd/captrd_policy.gms (and sugar/load_quotas.gms) | 9 | policy |
-  | C5.4 | captrd/estimate_trends.gms | 7 | step1 |
-  | C5.5 | captrd/clean_tiny.gms | 27 | clean_tiny |
-  | C5.6 | captrd/scale_DG_AGRI_baseline.gms | 25 | scale_dgagri |
-  | C5.7 | captrd/adjust_to_biof_supports.gms, adjust_trade_supports.gms | 14 | final_supports |
-  | C5.8 | captrd/agriprod_supports.gms | 27 | agriprod_supports |
-  | C5.9 | captrd/longrun_supports.gms | 30 | longrun_supports, macro |
-  | C5.10 | captrd/define_eu_supports.gms | 29 | eu_supports, final_supports, supports |
-  | C5.11 | captrd/expert_support.gms, national_supports.gms | 54 | national_supports, dairy_supports, expert_rules, expert_support |
-  | C5.12 | captrd/define_stats_and_supports.gms | 51 | step1, final_supports, requirements, supports, expert_support, dairy_supports, coco_supports |
-  | C5.13 | captrd/prep_data_for_estimation.gms | 29 | statistics, step1, prepare, supports |
-  | C5.14 | captrd/load_coco1_data.gms | 51 | coco, estimate_nuts2 (the statements beside the bounds), statistics, timesets |
-  | C5.15 | captrd.gms | 86 | eu_supports, timesets, prepare, national_supports, dairy_supports, prepare_run |
-  | C5.16 | biofuel/biofuel_trends.gms | 59 | biofuel_trends |
-  | C5.17 | global/convert_globiom.gms (and fao_codes_new.gms) | 58 | globiom |
-  | C5.18 | baseline/load_aglink2023dgAgri.gms (and its mappings) | 70 | aglink, macro |
-
-  The few left (estimate_ms.gms, estimate_nuts2.gms, rem_tiny.gms, aggreg_and_report.gms, check_and_cor_capreg.gms:
-  a statement beside the ones moved) go with the block of their module. Each block: the module's functions'
-  outputs dumped at the reference's inputs before and after (the parity tool extended, as for C4), the statements
-  into capri_mod/pipeline/captrd/equations/<capri file>.py (one function per statement block, named after the
-  assigned symbol), the inventory rebuilt.
+- **C5, done.** The inventory, docs/dev/captrd_inventory.csv (`python tools/check/captrd_inventory.py GAMS_DIR --out
+  docs/dev/captrd_inventory.csv`, rebuilt after each block): at C5.0 1,725 citations, 658 statements to move; after
+  C5.18 2,905 citations: 1,433 in the style (an equations module quoting the lines), 808 the callers' citations of
+  moved statements, 562 context, 7 to check (data files outside the GAMS copy), **95 still "to move"**, none an
+  assignment with arithmetic left in a caller:
+  - set and time-set definitions, left as code (about 70): captrd.gms (38: timesets.py, prepare.py, prepare_run),
+    convert_globiom.gms's region mapping and years kept and fao_codes_new.gms l. 559 (9), load_aglink2023dgAgri.gms's
+    BasYrsT and FAOreg_AGMacroreg (6), and the S_ColsEst / S_RowsEst, Rest, RaggEst, rmAggSup, ROWS_LOAD and
+    yrAgriProd sets of sets_captrd, estimate_ms, estimate_nuts2, define_eu_supports, prep_data_for_estimation,
+    scale_DG_AGRI_baseline, load_coco1_data, agriprod_supports and the mappings;
+  - the solves' side: solver options (equations.gms l. 896-902, estimate_ms.gms l. 222-229, estimate_nuts2.gms
+    l. 404-430, clean_tiny.gms l. 270-284), the tries' count (estimate_ms.gms l. 452-456), the results' copies after a
+    solve (clean_tiny.gms l. 296-327, rem_tiny.gms l. 35-53, estimate_nuts2.gms l. 500-508, aggreg_and_report.gms
+    l. 293-294), fix_est.gms l. 196-200 and prep_requirement_estimation.gms l. 44-49: they need the heavy estimation
+    parity, not a light part;
+  - deletions and checks kept as such: agriprod's PercentChange deletions (Result.no_percent, l. 420-421, 486),
+    captrd_policy l. 195-200, check_and_cor_capreg l. 27-28, expert_support's check_duplicates (l. 841-848),
+    define_eu_supports l. 693 and 838-843 (single citations beside moved statements), labour_ageline l. 180;
+  - not ported (findings below): national_supports l. 1481-1484 and 1569-1572, define_stats_and_supports' Support1
+    (l. 673-675).
+  `python - ` over the CSV with status == "to move" lists them with their module, function and line.
+- **C5's findings** (listed, not fixed; each in its function's "Departures from CAPRI" where it is arithmetic):
+  - the order of operations differs (the last digit may differ): labour_ageline l. 177 (0.995 raised to a power,
+    CAPRI once a year); estimate_trends' t^(c+1) as t^c x t; clean_tiny's support x (0.05 / 3) x 10 / 2;
+    adjust_to_biof_supports' DOMM additions before the subtractions (l. 86-91, 127-131, 221-225); national_supports'
+    factor x ((1 + p/100) x BASM) (12 statements); the crop areas' scaling with 1 - 0.67 for 0.33 (define_eu_supports
+    l. 628, final_supports.mcact_scale) and multiplied where CAPRI multiplies then divides; load_coco1_data's FEDM less
+    the uses' sum and the split activities' 2 x the sum; captrd.gms's land uses by ARTO's share;
+  - a division GAMS makes unguarded is guarded (0 where the divisor is 0): expert_support's nutrient means and
+    isoglucose shares, biofuel_trends' UVAG ratio, load_aglink's parts' OU (l. 747-748);
+  - not ported, no effect in the reference run: longrun_supports' B2000 HCOM condition (l. 53-54, taken for every
+    scenario) and Longrun population (l. 362-366); national_supports' TUR trust (l. 1481-1484) and 2015/2020 resets
+    (l. 1569-1572); define_stats_and_supports l. 301-323, 358-365 (the estimation's); load_coco1_data's
+    p_result_MSnoEU, the aggregates, BAS and NT2excl; biofuel_trends l. 248-252, 464, 468, 1077-1103 (KWS, the port
+    raises), 1269; convert_globiom's Q (l. 1613-1618); load_aglink's WORLD prices, p_aglinkUVAG and checks, macro GDP;
+  - other: biofuel_trends' nObs of PRCB / PRCBY needs a PRCB support (CAPRI the feedstock use's); convert_globiom adds
+    the perennial area where CAPRI assigns it (none in GLOBIOM-EU's files); supports.best_three_yields differs from
+    statistics.bsy for fewer than three distinct yields; Support1 (define_stats_and_supports l. 673-675) is the tests'
+    copy; several modules' citations were 1-40 lines off this GAMS copy and are re-cited (policy, biofuel_trends,
+    aglink, create_longrun_info: l. 91-102, not 74-90).
 - **C6: the hash order.** docs/dev/captrd_set_order_places.csv: 81 places in 17 modules (globiom 19,
   national_supports 13, prepare 8, aglink 7, longrun_supports 7, policy 5, biofuel_trends 4, scale_dgagri 4, coco 3,
   expert_support 2, macro 2, requirements 2, dairy_supports, estimate_nuts2, eu_supports, statistics, timesets 1 each;
-  `python tools/check/scan_set_order.py capri_mod` again after C4-C5, the lines move). Some are harmless (the
+  `python tools/check/scan_set_order.py capri_mod` again: C4-C5 moved the lines, and the eu_supports part shows one
+  such sum). Some are harmless (the
   estimate_nuts2 one is a list sorted on the next line); the rest are sorted with `sorted(...)`. **A commit of its own,
   after the moves**, since it changes last digits; its check is the pipeline under two seeds giving the same outputs.
 - **The citations.** check_gams_citations.py checks only an equation's name next to its lines; the citations of the
