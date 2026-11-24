@@ -38,7 +38,7 @@ NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), (
 #: the light ones (no reference data read, or one or two tables): step1, scale_dgagri
 PARTS = None
 LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod", "longrun", "eu_supports",
-         "expert_support", "national", "stats", "prep", "coco", "captrd_gms"}
+         "expert_support", "national", "stats", "prep", "coco", "captrd_gms", "biofuel"}
 
 
 def step1_cases():
@@ -751,6 +751,49 @@ def coco_cases():
     return out
 
 
+def biofuel_cases():
+    """biofuel_trends.trends (biofuel/biofuel_trends.gms) on the inputs of test_captrd_biofuel_trends.py (CAPTRD's
+    stored P_Data, nObs and BASM, the member states and their NUTS 2 regions), with seeded random Aglink fuel prices and
+    feedstock yields in place of the Aglink stage's, the real p_data and one scaled by random factors, and
+    %constBionergy% off and on. SHA-256 of the exact expert supports, trust levels, EPS, p_data, nObs and p_primesResults."""
+    import numpy as np
+    from capri_mod.pipeline.captrd import biofuel_trends as B
+    from capri_mod.pipeline.tests import test_captrd_biofuel_trends as TB
+
+    class Ag(dict):
+        pass
+    I = B.read_inputs(TB.P.SETS_DIR, TB.DAT)
+    srcs = sorted({(a, f) for a, f, _ in B.PRCB_YIELDS} | {B.PRCB_YIELD_OILS})
+    codes = sorted({a for _, a in I.fuel_map})
+    dig = lambda q: _digest(sorted((k, float(v).hex()) for k, v in q.items()))      # noqa: E731
+    out = {}
+    ref = TB._ref
+    for seed in (1, 2):
+        rng = np.random.default_rng(20261124 + seed)
+        ag = Ag()
+        for a in codes:
+            base = rng.lognormal(6.0, 0.3)
+            for y in range(1984, 2071):
+                ag[(B.AG_EU_TOT, "PP", a, str(y))] = base * rng.lognormal(0.0, 0.1)
+        ag.bfyld = {(s, f, str(y)): rng.lognormal(0.0, 0.1) for s, f in srcs for y in range(1984, 2071)}
+        pdd = ref("P_Data")
+        if seed == 2:
+            pdd["value"] = pdd.value * rng.lognormal(0.0, 0.2, len(pdd))
+        for cb in (False, True):
+            TB._ref = lambda n: pdd.copy() if n == "P_Data" else ref(n)               # noqa: E731
+            try:
+                res, T = TB.run(ag, cb)
+            finally:
+                TB._ref = ref
+            out[(seed, cb, "absolute")] = dig({k: v[0] for k, v in res.expert.items()})
+            out[(seed, cb, "trust")] = dig({k: v[1] for k, v in res.expert.items()})
+            out[(seed, cb, "eps")] = _digest(sorted(res.eps))
+            out[(seed, cb, "pdata")] = dig(res.pdata)
+            out[(seed, cb, "nobs")] = _digest(sorted(res.nobs))
+            out[(seed, cb, "primes")] = dig(res.primes)
+    return out
+
+
 def captrd_gms_cases():
     """captrd.gms's data statements: prepare.load_fixes, load_basm and labour_household on seeded random CAPREG series
     and base-year data over CAPTRD's sets, for two densities of zeros. SHA-256 of the exact p_data returned."""
@@ -788,7 +831,8 @@ def captrd_gms_cases():
 LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases, "final_supports": final_supports_cases,
                "agriprod": agriprod_cases, "longrun": longrun_cases, "eu_supports": eu_supports_cases,
                "expert_support": expert_support_cases, "national": national_cases, "stats": stats_cases,
-               "prep": prep_cases, "coco": coco_cases, "captrd_gms": captrd_gms_cases}
+               "prep": prep_cases, "coco": coco_cases, "captrd_gms": captrd_gms_cases,
+               "biofuel": biofuel_cases}
 
 
 def want(part):
