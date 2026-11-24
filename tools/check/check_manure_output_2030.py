@@ -1,6 +1,6 @@
 """Check the port of CAPRI's manure output functions (capri_mod/feed/equations/req_or_man_fnc.py) against CAPRI's 2030
 Green Deal reference run: the port on the run's start (sim_ini_21730: DATA at "Y", the technologies' shares, the
-correction factor p_animExcrProtCorrFact at "Y"; the literal tables, capri_data/2017/feed/manure_output_params.csv), with CAPRI's N in products at the year from the port of
+correction factor p_animExcrProtCorrFact at "Y"; the literal tables, capri_data/2017/feed/req_or_man_params.csv), with CAPRI's N in products at the year from the port of
 fert/calc_nexport.gms (tools/build/build_livestock_n_export_2030.calc_nexport_CRPR_EXPT, as CAPRI's PART III runs it
 first), against the run's MANN, MANP and MANK at 2030 (dataOut of
 res_2_1730greendeal_refdefaulta, tools/lib/paths.BASELINE_REF). CAPRI's results serve as the check only.
@@ -30,7 +30,7 @@ from capri_mod.feed.equations import req_or_man_fnc as rm  # noqa: E402
 
 SIMINI = REFERENCE / "simini" / "simini_21730"
 SETS = REFERENCE / "sets" / "simini_21730"
-PARAMS = ROOT / "capri_data" / "2017" / "feed" / "manure_output_params.csv"
+PARAMS = ROOT / "capri_data" / "2017" / "feed" / "req_or_man_params.csv"
 ANIMALS = ("DCOL", "DCOH", "SCOW", "BULL", "BULH", "HEIL", "HEIH", "HEIR", "CAMF", "CAFF", "CAMR", "CAFR", "SOWS", "PIGF",
            "HENS", "POUF", "SHGM", "SHGF")
 #: DATA columns the functions read besides the animals (the stocking rate's area, the sheep's and goats' herds)
@@ -49,13 +49,13 @@ def _set(name: str) -> list[str]:
 
 
 def params(path: Path = PARAMS) -> dict:
-    """{symbol: {key tuple or key: value}} of capri_data/2017/feed/manure_output_params.csv."""
-    t = pd.read_csv(path, dtype={"key1": str, "key2": str, "key3": str}, keep_default_na=False,
-                    float_precision="round_trip")
+    """{symbol: {key tuple or key: value}} of capri_data/2017/feed/req_or_man_params.csv."""
+    keys = ["key1", "key2", "key3", "key4", "key5"]
+    t = pd.read_csv(path, dtype={k: str for k in keys}, keep_default_na=False, float_precision="round_trip")
     out = defaultdict(dict)
-    for s, k1, k2, k3, v in t.itertuples(index=False):
-        key = tuple(k for k in (k1, k2, k3) if k)
-        out[s][key if len(key) > 1 else key[0]] = float(v)
+    for row in t.itertuples(index=False):
+        key = tuple(getattr(row, k) for k in keys if getattr(row, k))
+        out[row.symbol][key if len(key) > 1 else key[0]] = float(row.value)
     return out
 
 

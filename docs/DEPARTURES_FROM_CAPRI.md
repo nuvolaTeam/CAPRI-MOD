@@ -449,8 +449,10 @@ first-order step of the KKT conditions from the base solution (CapriRegionalNLP.
 theorem with the base's active set, solved in the active rows' null space); IPOPT only where a shock changes the
 problem's structure. It is the exact derivative where CAPRI's is a 1% difference quotient: they differ where the
 active set changes within the shock (a crop leaving its bound) and in second order. Test: activity levels within 2% of
-the largest move of IPOPT's re-solves at 0.1% shocks (DE110000). To be compared on the full Hessian and a run before
-any change of the default.
+the largest move of IPOPT's re-solves at 0.1% shocks (DE110000). Compared on the full Hessian on 24 November 2026
+(the full EU, the 2030 Green Deal baseline): 2,748 s against CAPRI's method's 2,811 s; the entries above 1e-3 a median
+4.4% apart, some cross-price entries of the cereals of opposite sign; the EU's own-price responses within 1-3% but
+oats (-19%), pulses and rye (-13%). No gain in time, so the default stays "capri" (the project lead, 24 November 2026).
 
 ## DEPARTURE (to be removed)
 

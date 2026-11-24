@@ -163,7 +163,7 @@ added on 11 November 2026: `baseline/data_SSPV3_update/` (SSP_DATA), `arm/allpop
   which differs only in path separators and the encoding of two comments; the builder's outputs are unchanged.
 - Added on 24 November 2026 (the project lead's file): `feed/porkreq.gms`, CAPRI's pig-fattening requirements by
   weight class (TABLE p_pigsReqHighWgt and p_pigsReqLowWgt; included by feed/feed_decl.gms l. 191), read by
-  build_manure_output_params (its `--dat`) for the fattened pigs' manure (capri_mod/feed/equations/req_or_man_fnc.py,
+  build_req_or_man_params (its `--dat`) for the fattened pigs' manure (capri_mod/feed/equations/req_or_man_fnc.py,
   KNOWN_ISSUES K179). Published the same day as Parquet in the raw set below (`capri/dat/feed/porkreq/`). The
   project lead's fedcof.gms of the same day is the file the builders already read (capri_sources/exports/fedcof.gms,
   build_mitigation_inputs's p_nutCont): the same table, one comment's encoding apart.
@@ -194,6 +194,12 @@ tools/pipeline/capri_raw_manifest.json, which also names the dataset commit the 
 of the uploads; uploads are no longer tagged, each file is pinned by its SHA-256 (the project lead, 12 November 2026; tags
 v2026.11.10 to v2026.11.11.2 were used until then, of which v2026.11.11.2 remains). First upload 10 November 2026: the six GDX files received that day
 (exports/ and results/ above).
+Added on 24 November 2026: `capri/results/capreg/reqrel_17<CC>/` of all 35 countries (CAPREG's 2017 requirement
+corrections p_animReqCorrFac1, which capmod/load_feed.gms l. 56-60 loads as p_animReqCorrFac; 27 added to the 8 non-EU
+ones already there, the project lead's reqrel_17XX.zip of that day) and `capri/results/baseline/
+fedtrm_21730<CC>defaulta/` of 34 countries (AL not among them; the baseline feed calibration's p_animReqCorrFac,
+calyeaCal and v_lossQuant, load_feed.gms l. 71-76; the project lead's files delivered 21 November 2026). Read by
+tools/check/check_sim_ini_requirements_2030.py (the fedtrm files as CAPRI's results, for the check only).
 
 **`gdxlib/`**: GAMS's GDX library, `libgdxcclib64.so`. This is software, not data.
 - From: built from the open-source GDX library (MIT; README section 3). No GAMS installation or licence is needed.
