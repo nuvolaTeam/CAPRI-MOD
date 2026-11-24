@@ -251,6 +251,33 @@ def bounds_cases(E, EB, S, data_all, read_csv, res_dir, _P):
     out.update(nuts2_bounds_cases(E, EB, S, B, case, mp, by_reg, tab_reg, year_tab, read_csv, _P, hexd))
     out["ms_retries"] = ms_retries_cases(E, EB, B, case, by_reg, hexd)
     out["step3_copies"] = step3_copies_cases(E, S, B, case, tab_reg, year_tab, read_csv, _P, hexd)
+    out["labour"] = labour_cases(by_reg, tab_reg, hexd)
+    return out
+
+
+def labour_cases(by_reg, tab_reg, hexd):
+    """labour.ageline_bounds (labour_ageline.gms l. 33-87) for CAPTRD's MS set from the published age lines, the years
+    1984-2070, the ex-ante years 2018-2070 and the base year 2017; then labour_bounds (l. 156-205) for every member
+    state of the reference run, its p_data synthetic: the BAS of data.csv's LABT and LEVL as BASM, and a MAXS / MINS
+    record to replace. SHA-256 of the exact bounds and frames."""
+    import pandas as pd
+    from capri_mod.pipeline.captrd import labour as Lab
+    from capri_mod.pipeline.captrd import prepare as P
+    sets = P.read_sets()
+    dat = Lab.read_labour_dat()
+    years, exante = list(range(1984, 2071)), list(range(2018, 2071))
+    bounds = Lab.ageline_bounds(dat["ageline"], sets, years, exante, 2017)
+    out = {"ageline": _digest(*[hexd(bounds[k]) for k in ("expt", "min", "max")])}
+    states = sorted(r for r in tab_reg["step3"] if r.endswith("000000") and not r.startswith(("EU", "A_")))
+    for ms in states:
+        g = by_reg[ms]
+        g = g[(g.t == "BAS") & g.row.isin(["LABT", "LEVL"])]
+        p = pd.DataFrame({"region": ms, "col": g.col.values, "row": g.row.values, "t": "BASM",
+                          "value": g.value.astype(float).values})
+        p = pd.concat([p, pd.DataFrame([{"region": ms, "col": "MAXS", "row": "LABO", "t": "2030", "value": 9.0}])],
+                      ignore_index=True)
+        q = Lab.labour_bounds(p, ms, sets, bounds, dat["min_labour"], exante, years, 2017)
+        out[ms] = _digest(q.to_csv(index=False, float_format=None))
     return out
 
 
