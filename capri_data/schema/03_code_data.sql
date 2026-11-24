@@ -28,6 +28,7 @@ INSERT INTO code_data VALUES
   ('capri_mod/feed/equations/def_requirements.py', 'technical_progress', 0.998, 5, '220,220,220,220,223', 'rates = [("ENNE", 0.998), ("CRPR", 0.998), ("LISI", 0.997)] + [(x, 0.998) for x in reqdrm] + [("FIDI", 0.998)] \'),
   ('capri_mod/feed/equations/def_requirements.py', 'technical_progress', 1.002, 1, '221', '+ [(f, 1.005) for f in rq.FEED] + [("DRMN", 0.995), ("DRMX", 1.002)]'),
   ('capri_mod/feed/equations/def_requirements.py', 'technical_progress', 1.005, 1, '221', '+ [(f, 1.005) for f in rq.FEED] + [("DRMN", 0.995), ("DRMX", 1.002)]'),
+  ('capri_mod/feed/equations/fedtrm_cal_pw.py', 'v_animReq_DRMX', 1.2, 1, '79', 'c.v_animReq_L[(r, a, t, item)] = min(v, -(c.v_animReq_L.get((r, a, t, "DRMN"), 0.0) * 1.2))'),
   ('capri_mod/feed/equations/req_or_man_fnc.py', 'CALR_80_150', 80.0, 3, '813,814,815', 'st.p_meanLiveWgt[(r, a)] = (80. + 150.) / 2.'),
   ('capri_mod/feed/equations/req_or_man_fnc.py', 'CALR_80_150', 125.0, 1, '814', 'st.p_dailyWgtIncrease[(r, a)] = (150. - 80.) / 125.'),
   ('capri_mod/feed/equations/req_or_man_fnc.py', 'CALR_80_150', 150.0, 3, '813,814,815', 'st.p_meanLiveWgt[(r, a)] = (80. + 150.) / 2.'),

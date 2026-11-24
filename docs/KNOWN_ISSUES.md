@@ -5055,9 +5055,13 @@ manure N per head the duals implied by CAPRI's animals were consistent across an
   correction (baseline/adjust.gms l. 31-32): ported with the requirement functions on the same day
   (capri_mod/feed/equations/req_or_man_fnc_req.py, def_requirements.py, adjust.py, create_sim_ini_gdx.py) and equal to
   sim_ini_21730's factor in 249 of the 250 units (tools/check/check_sim_ini_requirements_2030.py, the calibration's
-  corrections read from CAPRI's fedtrm_21730<CC>defaulta; AL has no such file). Open: the baseline feed calibration
-  itself (baseline/fedtrm_*), which a baseline other than CAPRI's needs for its own corrections
-  (claude/feed_calibration_port_plan_2026-11-24.md, S3); not yet called by the projection (S4). Tests: test_capri.py::
+  corrections read from CAPRI's fedtrm_21730<CC>defaulta; AL has no such file). The corrections follow from the
+  calibration's solution by CAPRI's statements after its solve (feed/fedtrm_cal_pw.gms l. 762-812, baseline/
+  fedtrm_fin.gms l. 47-52; fedtrm_cal_pw.py, fedtrm_fin.py): with CAPRI's calibrated feed input coefficients they are
+  CAPRI's in 249 of the 250 units (tools/check/check_fedtrm_after_solve_2030.py). Open: the calibration's solution
+  itself (m_hpdFeed and its priors, baseline/fedtrm_prep.gms, feed/fedtrm_prior_pw.gms, fedtrm_mod_pw.gms), which a
+  baseline other than CAPRI's needs (claude/feed_calibration_port_plan_2026-11-24.md, S3b); not yet called by the
+  projection (S4). Tests: test_capri.py::
   test_manure_per_head_takes_capris_2030_coefficients_at_the_2030_market_year, test_req_or_man_fnc.py,
   test_req_or_man_fnc_req.py, test_def_requirements.py
 

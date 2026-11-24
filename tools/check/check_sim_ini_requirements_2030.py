@@ -70,8 +70,9 @@ def _sym(name: str, folder: Path, dims: int, value: str = "value") -> dict:
     return {tuple(row[:-1]): float(row[-1]) for row in t[keys + [value]].itertuples(index=False, name=None)}
 
 
-def run(raw: Path | None = None):
-    """The port on sim_ini_21730's inputs. Returns (st, d, a, s, covered regions, regions left out)."""
+def def_requirements_inputs(raw: Path | None = None):
+    """The requirement call's state at "Y" and def_requirements' inputs from sim_ini_21730 and the raw set. Returns (st,
+    d, extra, the baseline calibration's corrections, {region: its calibration file}, the raw set's folder)."""
     extra: dict = {}
     st = req.state_2030(extra)
     ru = tuple(man._set("RU"))
@@ -83,6 +84,21 @@ def run(raw: Path | None = None):
     d = dr.DefReqInputs(RU=ru, MPACT=tuple(man._set("MPACT")), PACT_TO_Y=frozenset(zip(pt.d0, pt.d1)),
                         DATA_BAS=st.DATA_BAS, p_animReqCorrFac=capreg, SIMY=2030, BAS=2017,
                         FODDO=tuple(man._set("FODDO")), DATA_TRD=trd)
+    return st, d, extra, fedtrm, fed_where, rawp
+
+
+def covered_units(st, ms: tuple, ru: tuple, fed_where: dict) -> tuple[set, list]:
+    """The regional units of the member states with a calibration file (a unit without animals counts as covered), and
+    the units left out."""
+    ms_cov = {st.R_RAGG_MS.get(r, r) for r in fed_where}
+    covered = {r for r in set(ru) | set(ms) if r in fed_where or st.R_RAGG_MS.get(r, r) in ms_cov}
+    return covered, sorted(r for r in ru if r not in covered)
+
+
+def run(raw: Path | None = None):
+    """The port on sim_ini_21730's inputs. Returns (st, d, a, s, covered regions, regions left out, extra)."""
+    st, d, extra, fedtrm, fed_where, rawp = def_requirements_inputs(raw)
+    ru, trd = d.RU, d.DATA_TRD
     fic = _sym("v_feedInpCoeff", req.SIMINI, 4, "level")
     a = adj.AdjustInputs(RU=ru, p_animReqCorrFac1=fedtrm, p_animExcrProtCorrFact_Y={}, p_feedInpCoeffLoad=fic,
                          DATA_TRD=trd)
@@ -91,10 +107,7 @@ def run(raw: Path | None = None):
     bas_grof = {(r, f): v for (r, c, f), v in st.DATA_BAS.items() if c == "GROF" and r in ms}
     s = csi.SimIniInputs(MS=ms, MAP_RR=frozenset(zip(mr.d0, mr.d1)), DATA_BAS_GROF=bas_grof)
     csi.create_sim_ini_gdx_feed(st, d, a, s)
-    # the regional units of the member states with a calibration file (a unit without animals counts as covered)
-    ms_cov = {st.R_RAGG_MS.get(r, r) for r in fed_where}
-    covered = {r for r in set(ru) | set(ms) if r in fed_where or st.R_RAGG_MS.get(r, r) in ms_cov}
-    left = sorted(r for r in ru if r not in covered)
+    covered, left = covered_units(st, ms, ru, fed_where)
     return st, d, a, s, covered, left, extra
 
 

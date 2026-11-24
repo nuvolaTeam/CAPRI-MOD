@@ -74,3 +74,58 @@ def test_every_region_and_animal_gives_capris_2030_simulation_start():
         assert chk.main() == 0
     finally:
         sys.argv = argv
+
+
+def test_calibration_corrections_follow_capris_statements_after_the_solve():
+    """feed/fedtrm_cal_pw.gms l. 762-812 and baseline/fedtrm_fin.gms l. 47-52 on one animal and two feeds: the energy
+    requirement recomputed from the ration (correction = ration / requirement), an inequality requirement at the lower
+    of the requirement and the ration (FILG 2.0 against a ration of 0.5: correction 4), the maximum dry matter at most
+    -1.2 x the minimum, the feeds' rows 1, the protein factor times the crude protein's correction."""
+    from capri_mod.feed.equations import fedtrm_cal_pw as cal
+    from capri_mod.feed.equations import fedtrm_fin as fin
+    r, a, t = "XX110000", "DCOL", "T"
+    req = {(r, a, t, "ENNE"): 100.0, (r, a, t, "CRPR"): 2.0, (r, a, t, "DRMN"): 15.0, (r, a, t, "DRMX"): -17.0,
+           (r, a, t, "FILG"): 2.0, (r, a, t, "FGRA"): 1.067}
+    fic = {(r, a, t, "FGRA"): 10000.0, (r, a, t, "FCER"): 1000.0}
+    cont = {("XX000000", "ENNE", "FGRA"): 3.0, ("XX000000", "ENNE", "FCER"): 9.0,
+            ("XX000000", "CRPR", "FGRA"): 0.05, ("XX000000", "CRPR", "FCER"): 0.1,
+            ("XX000000", "DRMN", "FGRA"): 0.5, ("XX000000", "DRMN", "FCER"): 0.9,
+            ("XX000000", "DRMX", "FGRA"): -0.5, ("XX000000", "DRMX", "FCER"): -0.9,
+            ("XX000000", "FILG", "FGRA"): 0.01, ("XX000000", "FILG", "FCER"): 0.08}
+    c = cal.CalState(RUNR=(r,), MAACT=(a,), p_animReq=dict(req), v_feedInpCoeff_L=fic,
+                     p_animProdDays={(r, a, t): 365.0}, p_maxFeedShare={k: 1.0 for k in fic},
+                     DATA_content=cont, R_RAGG_MS={r: "XX000000"}, DATA_LEVL={(r, a): 10.0})
+    cal.v_animReq_start(c)
+    cal.after_solve(c)
+    corr = fin.p_animReqCorrFac((r,), (a,), c.p_animReq, c.v_animReq_L)
+    enne = (10000 * 3.0 + 1000 * 9.0) / 365
+    assert corr[(r, a, t, "ENNE")] == pytest.approx(enne / 100.0, rel=1e-14)
+    assert c.p_animReq[(r, a, t, "ENNE")] == pytest.approx(enne, rel=1e-14)
+    assert corr[(r, a, t, "FILG")] == pytest.approx(2.0 / ((10000 * 0.01 + 1000 * 0.08) / 365), rel=1e-14)
+    # DRMX: min(-17, -1.2 x 15 = -18) = -18, then min(-18, the ration's -15.15...) = -18: correction -17 / -18
+    assert corr[(r, a, t, "DRMX")] == pytest.approx(17.0 / 18.0, rel=1e-14)
+    assert corr[(r, a, t, "DRMN")] == pytest.approx(1.0, rel=1e-14)
+    assert corr[(r, a, t, "FGRA")] == 1.0
+    prot = {(r, a, t): 1.1}
+    fin.p_animExcrProtCorrFact_calibrated((r,), (a,), {(r, a, "LEVL", t): 1.0}, prot, corr)
+    assert prot[(r, a, t)] == pytest.approx(1.1 * ((10000 * 0.05 + 1000 * 0.1) / 365) / 2.0, rel=1e-14)
+
+
+def test_every_region_gives_capris_2030_calibration_corrections_from_its_solution():
+    """tools/check/check_fedtrm_after_solve_2030.py: with CAPRI's calibrated feed input coefficients, the corrections
+    of every regional unit with a calibration file equal CAPRI's fedtrm_21730<CC>defaulta at 1e-6, the calibrated
+    energy and protein requirements and the protein factor sim_ini_21730's."""
+    from paths import REFERENCE
+    if not (REFERENCE / "simini" / "simini_21730" / "v_feedInpCoeff.csv.gz").exists():
+        pytest.skip("CAPRI's reference run is not available")
+    import check_fedtrm_after_solve_2030 as chk
+    try:
+        chk.sim._raw(None)
+    except Exception as e:        # no access to the gated raw dataset
+        pytest.skip(f"the raw dataset is not available: {e}")
+    argv = sys.argv
+    sys.argv = ["check_fedtrm_after_solve_2030.py", "--rtol", "1e-6"]
+    try:
+        assert chk.main() == 0
+    finally:
+        sys.argv = argv

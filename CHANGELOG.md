@@ -480,6 +480,16 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   minimum -0.0106), ported as CAPRI has it. The raw set: CAPREG's reqrel_17<CC> of all 35 countries (27 added) and the
   baseline calibration's fedtrm_21730<CC>defaulta of 34 countries (added; CAPRI results, for the checks). Not yet the
   calibration itself (baseline/fedtrm_*, S3) nor the projection's use (S4).
+- **The baseline feed calibration's corrections from its solution ported (24 November 2026; the feed calibration
+  plan's S3a):** the statements after CAPRI's m_hpdFeed solve (feed/fedtrm_cal_pw.gms l. 762-812: the energy and
+  protein requirements recomputed from the solution's ration, the inequality requirements at the lower of the
+  requirement and the ration, DRMX at most -1.2 x DRMN) and baseline/fedtrm_fin.gms l. 47-52 (the corrections
+  p_animReqCorrFac, the protein factor) as capri_mod/feed/equations/fedtrm_cal_pw.py (after_solve) and fedtrm_fin.py.
+  Checked with CAPRI's calibrated feed input coefficients (sim_ini_21730's v_feedInpCoeff) and the port's
+  requirements before the calibration (tools/check/check_fedtrm_after_solve_2030.py): every correction of
+  fedtrm_21730<CC>defaulta in 249 of 250 units (all requirements and the feeds' rows), the calibrated energy and
+  protein requirements and the protein factor of sim_ini_21730, relative differences below 4e-15. What the
+  calibration still has to produce is its solution, the feed input coefficients (m_hpdFeed and its priors: S3b).
 - **The KKT market supply Hessian measured (24 November 2026):** `market.hessian_method = "kkt"` against CAPRI's
   re-solves on the full EU (the 2030 Green Deal baseline's Hessian): 2,748 s against 2,811 s; the entries above 1e-3 a
   median 4.4% apart (the 90th percentile 94%; some cross-price entries of the cereals of opposite sign); the EU's
