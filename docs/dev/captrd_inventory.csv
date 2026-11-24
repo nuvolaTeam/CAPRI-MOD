@@ -292,7 +292,7 @@ captrd.gms,173-178,control ($),context,capri_mod/pipeline/captrd/prepare.py,prep
 captrd.gms,189,declaration,context,capri_mod/pipeline/captrd/eu_supports.py,_set_extrap,534,module's file,"ALIAS(BIOFINDM,BIOFINDM1);",
 captrd.gms,198-205,control ($),context,capri_mod/pipeline/captrd/labour.py,(module),14,same block,"$ifi ""%regLevel%""==""NUTS2"" scalar ntslvl / 2 /;",
 captrd.gms,203,declaration,context,capri_mod/pipeline/captrd/step1.py,(module),4,named,SET YEARS / %FirstYear% * %lastSimulationYear% /;,
-captrd.gms,203,declaration,context,capri_mod/pipeline/captrd/step1.py,trend_variable,42,named,SET YEARS / %FirstYear% * %lastSimulationYear% /;,
+captrd.gms,203,declaration,context,capri_mod/pipeline/captrd/step1.py,trend_variable,47,named,SET YEARS / %FirstYear% * %lastSimulationYear% /;,
 captrd.gms,203-271,declaration,context,capri_mod/pipeline/captrd/__init__.py,(module),4,named,SET YEARS / %FirstYear% * %lastSimulationYear% /;,
 captrd.gms,203-271,declaration,context,capri_mod/pipeline/captrd/timesets.py,(module),1,named,SET YEARS / %FirstYear% * %lastSimulationYear% /;,
 captrd.gms,203-812,declaration,context,capri_mod/pipeline/captrd/prepare_run.py,(module),13,named,SET YEARS / %FirstYear% * %lastSimulationYear% /;,
@@ -418,7 +418,7 @@ captrd.gms,793,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,(modu
 captrd.gms,798-799,comment,context,capri_mod/pipeline/captrd/timesets.py,build,104,module's file,*pw NOTE: Before 280812 this was called yearsEst = expost (not expostT!) + exante,
 captrd.gms,798-803,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,493,module's file,YearsCur(ExPostT) = YES;,
 captrd.gms,803,blank,context,capri_mod/pipeline/captrd/eu_supports.py,(module),91,same function,,
-captrd.gms,806-810,assignment,to move,capri_mod/pipeline/captrd/step1.py,run,246,named,"YearsEst(""1985"") = YES;",
+captrd.gms,806-810,assignment,to move,capri_mod/pipeline/captrd/step1.py,run,200,named,"YearsEst(""1985"") = YES;",
 captrd.gms,806-810,assignment,to move,capri_mod/pipeline/captrd/timesets.py,build,105,module's file,"YearsEst(""1985"") = YES;",
 captrd.gms,809-816,assignment,to move,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,495,module's file,"YearsEst(""2000"") = YES;",
 captrd.gms,815,comment,context,capri_mod/pipeline/captrd/eu_supports.py,(module),89,same function,*-------------------------------------------------------------------------------,
@@ -741,42 +741,39 @@ captrd/define_eu_supports.gms,368-376,assignment,to move,capri_mod/pipeline/capt
 captrd/define_eu_supports.gms,387,control ($),context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,341,same function,"$batinclude 'captrd\adjust_to_biof_supports.gms' '""DGAgri1""'",
 captrd/define_eu_supports.gms,693,assignment,to move,capri_mod/pipeline/captrd/supports.py,supports,68,named,"= .1*min(1,P_Result(MS,""GROF"",OIYANIcattle,ExAnte,""Support"")*0.05/3*10/sqrt(P_Result(MS,""GROF"",OIYANIcattle,exAnte,""wVarErr"")))",
 captrd/define_stats_and_supports.gms,,file,context,capri_mod/pipeline/captrd/dairy_supports.py,(module),3,named,,
+captrd/define_stats_and_supports.gms,,file,context,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,(module),1,named,,
 captrd/define_stats_and_supports.gms,,file,context,capri_mod/pipeline/captrd/expert_support.py,(module),10,named,,
 captrd/define_stats_and_supports.gms,,file,context,capri_mod/pipeline/captrd/final_supports.py,(module),1,named,,
 captrd/define_stats_and_supports.gms,,file,context,capri_mod/pipeline/captrd/final_supports.py,(module),5,named,,
 captrd/define_stats_and_supports.gms,,file,context,capri_mod/pipeline/captrd/requirements.py,(module),1,named,,
-captrd/define_stats_and_supports.gms,44-49,assignment,to move,capri_mod/pipeline/captrd/__init__.py,(module),7,named,"p_result(Rest,S_ColsEst,S_RowsEst,YearsEst,""Step1"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",
-captrd/define_stats_and_supports.gms,44-49,assignment,to move,capri_mod/pipeline/captrd/step1.py,(module),8,named,"p_result(Rest,S_ColsEst,S_RowsEst,YearsEst,""Step1"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",
-captrd/define_stats_and_supports.gms,44-49,assignment,to move,capri_mod/pipeline/captrd/step1.py,step1_values,198,named,"p_result(Rest,S_ColsEst,S_RowsEst,YearsEst,""Step1"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",
-captrd/define_stats_and_supports.gms,80-85,assignment,to move,capri_mod/pipeline/captrd/step1.py,_fit_block,150,module's file,"p_result(CurEuropAgg,S_ColsEst,""LEVL"",ExAnte,""Step1"")",
+captrd/define_stats_and_supports.gms,44-49,assignment,moved,capri_mod/pipeline/captrd/__init__.py,(module),7,named,"p_result(Rest,S_ColsEst,S_RowsEst,YearsEst,""Step1"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_stats_and_supports.gms,47-49,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_result_Step1,18,named,"p_result(Rest,S_ColsEst,S_RowsEst,YearsEst,""Step1"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",
+captrd/define_stats_and_supports.gms,47-49,assignment,moved,capri_mod/pipeline/captrd/step1.py,(module),8,named,"p_result(Rest,S_ColsEst,S_RowsEst,YearsEst,""Step1"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_stats_and_supports.gms,47-49,assignment,moved,capri_mod/pipeline/captrd/step1.py,step1_values,160,named,"p_result(Rest,S_ColsEst,S_RowsEst,YearsEst,""Step1"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_stats_and_supports.gms,86-93,assignment,to move,capri_mod/pipeline/captrd/requirements.py,(module),2,same block,"p_result(Rest,MAACT,ReqsT,ExAnte,""Step1"") $ p_data(Rest,MAACT,ReqsT,""nObs"")",
 captrd/define_stats_and_supports.gms,86-93,assignment,to move,capri_mod/pipeline/captrd/requirements.py,(module),23,named,"p_result(Rest,MAACT,ReqsT,ExAnte,""Step1"") $ p_data(Rest,MAACT,ReqsT,""nObs"")",
 captrd/define_stats_and_supports.gms,86-93,assignment,to move,capri_mod/pipeline/captrd/requirements.py,step1,152,named,"p_result(Rest,MAACT,ReqsT,ExAnte,""Step1"") $ p_data(Rest,MAACT,ReqsT,""nObs"")",
 captrd/define_stats_and_supports.gms,91,assignment,to move,capri_mod/pipeline/captrd/requirements.py,(module),25,same block,"* SUM(PACT_TO_Y(MAACT,O), p_result(Rest,MAACT,O,ExAnte,""Step1"")))",
 captrd/define_stats_and_supports.gms,91-92,assignment,to move,capri_mod/pipeline/captrd/requirements.py,(module),44,named,"* SUM(PACT_TO_Y(MAACT,O), p_result(Rest,MAACT,O,ExAnte,""Step1"")))",
-captrd/define_stats_and_supports.gms,94-123,assignment,to move,capri_mod/pipeline/captrd/step1.py,_fit_block,161,module's file,"p_result(Rest,""INHA"",""LEVL"",SIMYY_YBAS,""p_data"") = p_data(Rest,""INHA"",""LEVL"",SIMYY_YBAS);",
-captrd/define_stats_and_supports.gms,113-132,assignment,to move,capri_mod/pipeline/captrd/step1.py,(module),9,named,Rest(EstTypes) = NO;,
-captrd/define_stats_and_supports.gms,113-132,assignment,to move,capri_mod/pipeline/captrd/step1.py,error_variance,205,named,Rest(EstTypes) = NO;,
-captrd/define_stats_and_supports.gms,118-123,assignment,to move,capri_mod/pipeline/captrd/supports.py,supports,66,module's file,"p_data(Rest,S_ColsEst,S_RowsEst,""wVarErr"") $ (p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") GT 2)",
-captrd/define_stats_and_supports.gms,127-132,assignment,to move,capri_mod/pipeline/captrd/step1.py,error_variance,208,same block,"p_data(Rest,S_ColsEst,S_RowsEst,""wVarErr"")",
-captrd/define_stats_and_supports.gms,128-142,assignment,to move,capri_mod/pipeline/captrd/step1.py,_fit_block,168,module's file,"p_data(Rest,S_ColsEst,S_RowsEst,""wVarErr"")",
+captrd/define_stats_and_supports.gms,118-123,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_data_wVarErr,38,named,"p_data(Rest,S_ColsEst,S_RowsEst,""wVarErr"") $ (p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") GT 2)",
+captrd/define_stats_and_supports.gms,118-123,assignment,moved,capri_mod/pipeline/captrd/supports.py,supports,66,module's file,"p_data(Rest,S_ColsEst,S_RowsEst,""wVarErr"") $ (p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") GT 2)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_stats_and_supports.gms,118-132,assignment,moved,capri_mod/pipeline/captrd/step1.py,(module),9,named,"p_data(Rest,S_ColsEst,S_RowsEst,""wVarErr"") $ (p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") GT 2)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_stats_and_supports.gms,118-132,assignment,moved,capri_mod/pipeline/captrd/step1.py,error_variance,165,named,"p_data(Rest,S_ColsEst,S_RowsEst,""wVarErr"") $ (p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") GT 2)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_stats_and_supports.gms,127-132,assignment,moved,capri_mod/pipeline/captrd/step1.py,error_variance,168,same block,"p_data(Rest,S_ColsEst,S_RowsEst,""wVarErr"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_stats_and_supports.gms,129-132,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_data_wVarErr,47,named,"p_data(Rest,S_ColsEst,S_RowsEst,""wVarErr"")",
 captrd/define_stats_and_supports.gms,130,control ($),context,capri_mod/pipeline/captrd/supports.py,supports,67,module's file,"$ ((p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") eq 1)",
 captrd/define_stats_and_supports.gms,138-150,assignment,to move,capri_mod/pipeline/captrd/prepare.py,(module),5,named,"p_result(Rest,S_ColsEst,S_RowsEst,Years,""p_data"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",
-captrd/define_stats_and_supports.gms,146-155,assignment,to move,capri_mod/pipeline/captrd/step1.py,_fit_block,174,module's file,"p_result(Rest,S_ColsEst,""SETR"",Years,""p_data"") = P_DATA(Rest,S_ColsEst,""SETR"",years) ;",
-captrd/define_stats_and_supports.gms,160,comment,context,capri_mod/pipeline/captrd/step1.py,_fit_block,177,module's file,*,
-captrd/define_stats_and_supports.gms,168-171,control ($),context,capri_mod/pipeline/captrd/step1.py,_fit_block,187,module's file,$include 'util\kill_model1.gms',
-captrd/define_stats_and_supports.gms,173-175,comment,context,capri_mod/pipeline/captrd/step1.py,_fit_block,192,module's file,*-------------------------------------------------------------------------------,
-captrd/define_stats_and_supports.gms,177-179,assignment,to move,capri_mod/pipeline/captrd/step1.py,(module),10,named,"p_data(Rest,S_ColsEst,S_RowsEst,""wR2"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",
-captrd/define_stats_and_supports.gms,177-179,assignment,to move,capri_mod/pipeline/captrd/step1.py,_fit_block,191,module's file,"p_data(Rest,S_ColsEst,S_RowsEst,""wR2"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",
-captrd/define_stats_and_supports.gms,177-179,assignment,to move,capri_mod/pipeline/captrd/step1.py,r_squared,220,named,"p_data(Rest,S_ColsEst,S_RowsEst,""wR2"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",
-captrd/define_stats_and_supports.gms,181-183,comment,context,capri_mod/pipeline/captrd/step1.py,_fit_block,193,module's file,*,
+captrd/define_stats_and_supports.gms,177-179,assignment,in style,capri_mod/pipeline/captrd/equations/define_stats_and_supports.py,p_data_wR2,67,named,"p_data(Rest,S_ColsEst,S_RowsEst,""wR2"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",
+captrd/define_stats_and_supports.gms,177-179,assignment,moved,capri_mod/pipeline/captrd/step1.py,(module),10,named,"p_data(Rest,S_ColsEst,S_RowsEst,""wR2"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/define_stats_and_supports.gms,177-179,assignment,moved,capri_mod/pipeline/captrd/step1.py,r_squared,176,named,"p_data(Rest,S_ColsEst,S_RowsEst,""wR2"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_stats_and_supports.gms,186-330,control ($),context,capri_mod/pipeline/captrd/__init__.py,(module),8,named,"$BATINCLUDE 'util\title.gms' ""'Define supports'""",
 captrd/define_stats_and_supports.gms,186-330,control ($),context,capri_mod/pipeline/captrd/supports.py,(module),3,named,"$BATINCLUDE 'util\title.gms' ""'Define supports'""",
 captrd/define_stats_and_supports.gms,195-212,assignment,to move,capri_mod/pipeline/captrd/supports.py,(module),9,module's file,"p_result(Rest,""NTRD"",S_RowsEst,ExAnte,""Support"") $ P_Data(Rest,""NTRD"",S_RowsEst,""nObs"")",
-captrd/define_stats_and_supports.gms,214-218,assignment,to move,capri_mod/pipeline/captrd/step1.py,prestats,90,module's file,"p_result(Rest,MCACT,O,ExAnte,""Support"") $ (PACT_TO_Y(MCACT,O) $ p_data(Rest,MCACT,O,""nObs""))",
-captrd/define_stats_and_supports.gms,221-227,other,context,capri_mod/pipeline/captrd/step1.py,prestats,90,module's file,"+ p_result(Rest,MCACT,O,Exante,""STEP1"") * SQRT(p_data(Rest,MCACT,O,""wR2"")) );",
-captrd/define_stats_and_supports.gms,233-234,other,context,capri_mod/pipeline/captrd/step1.py,prestats,96,module's file,"-OrdT(""BAS"") $ (NOT P_DATA(Rest,S_ColsEst,S_RowsEst,""BAST"")))),",
-captrd/define_stats_and_supports.gms,241-246,assignment,to move,capri_mod/pipeline/captrd/step1.py,prestats,98,module's file,"p_result(Rest,NoYieldDrop,S_RowsEst,ExAnte,""Support"")",
+captrd/define_stats_and_supports.gms,209-210,assignment,to move,capri_mod/pipeline/captrd/step1.py,prestats,99,module's file,"( P_Data(Rest,S_ColsEst,S_RowsEst,""BAST"")",
+captrd/define_stats_and_supports.gms,214-218,assignment,to move,capri_mod/pipeline/captrd/step1.py,prestats,95,module's file,"p_result(Rest,MCACT,O,ExAnte,""Support"") $ (PACT_TO_Y(MCACT,O) $ p_data(Rest,MCACT,O,""nObs""))",
+captrd/define_stats_and_supports.gms,221-227,other,context,capri_mod/pipeline/captrd/step1.py,prestats,95,module's file,"+ p_result(Rest,MCACT,O,Exante,""STEP1"") * SQRT(p_data(Rest,MCACT,O,""wR2"")) );",
+captrd/define_stats_and_supports.gms,233-234,other,context,capri_mod/pipeline/captrd/step1.py,prestats,102,module's file,"-OrdT(""BAS"") $ (NOT P_DATA(Rest,S_ColsEst,S_RowsEst,""BAST"")))),",
+captrd/define_stats_and_supports.gms,241-246,assignment,to move,capri_mod/pipeline/captrd/step1.py,prestats,103,module's file,"p_result(Rest,NoYieldDrop,S_RowsEst,ExAnte,""Support"")",
 captrd/define_stats_and_supports.gms,327-329,assignment,to move,capri_mod/pipeline/captrd/supports.py,supports,65,module's file,"p_result(Rest,S_ColsEst,S_RowsEst,exAnte,""wVarErr"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",
 captrd/define_stats_and_supports.gms,355-356,assignment,to move,capri_mod/pipeline/captrd/supports.py,uvag_from_dgagri1,169,named,"p_result(MS,""UVAG"",S_RowsEst,exAnte,""Support"") $ p_result(MS,""UVAG"",S_RowsEst,exAnte,""DGAgri1"")",
 captrd/define_stats_and_supports.gms,358-365,assignment,to move,capri_mod/pipeline/captrd/supports.py,uvag_from_dgagri1,170,same block,"p_result(MS,""UVAG"",S_RowsEst,exAnte,""wVarErr"") $ p_result(MS,""UVAG"",S_RowsEst,exAnte,""DGAgri1"")",
@@ -1141,16 +1138,33 @@ captrd/estimate_nuts2.gms,490-495,control ($),context,capri_mod/pipeline/captrd/
 captrd/estimate_nuts2.gms,500-508,assignment,to move,capri_mod/pipeline/captrd/estimate_nuts2.py,residuals,122,module's file,"p_result(Rest,S_ColsEst,S_RowsEst,ExAnte,""penalty"") $ ( p_result(REST,S_ColsEst,S_RowsEst,ExAnte,""Support"")",
 captrd/estimate_nuts2.gms,535,control,context,capri_mod/pipeline/captrd/estimate_nuts2.py,regional_basm,57,module's file,option kill=NT2GROF_;,
 captrd/estimate_trends.gms,,file,context,capri_mod/pipeline/captrd/__init__.py,(module),6,named,,
+captrd/estimate_trends.gms,,file,context,capri_mod/pipeline/captrd/equations/estimate_trends.py,(module),1,named,,
 captrd/estimate_trends.gms,,file,context,capri_mod/pipeline/captrd/step1.py,(module),6,named,,
-captrd/estimate_trends.gms,,file,context,capri_mod/pipeline/captrd/step1.py,fit,117,named,,
-captrd/estimate_trends.gms,76-123,assignment,to move,capri_mod/pipeline/captrd/step1.py,(module),21,named,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,""cPar"") $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") GT 4)",
-captrd/estimate_trends.gms,80-82,assignment,to move,capri_mod/pipeline/captrd/step1.py,c_grid,51,named,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,""cPar"") $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") GT 4)",
-captrd/estimate_trends.gms,158,comment,context,capri_mod/pipeline/captrd/step1.py,fit,123,same block,* --- With less than 5 obs C is restricted to 1 and perhaps B is restricted to 0 (if less than 3 obs) => only C1 entry is relevant,
-captrd/estimate_trends.gms,160,assignment,to move,capri_mod/pipeline/captrd/step1.py,(module),25,same block,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,res) $ ((NOT SAMEAS(CValues,""c1"")) $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") LE 4)) = 0.;",
-captrd/estimate_trends.gms,160,assignment,to move,capri_mod/pipeline/captrd/step1.py,fit,121,same block,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,res) $ ((NOT SAMEAS(CValues,""c1"")) $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") LE 4)) = 0.;",
-captrd/estimate_trends.gms,166,assignment,to move,capri_mod/pipeline/captrd/step1.py,(module),25,same block,"p_trendRes(Rest,s_colsEst,s_rowsEst,""cOpt"",""wESS"") $ p_data(Rest,s_colsEst,s_rowsEst,""nObs"")",
-captrd/estimate_trends.gms,166,assignment,to move,capri_mod/pipeline/captrd/step1.py,fit,120,same block,"p_trendRes(Rest,s_colsEst,s_rowsEst,""cOpt"",""wESS"") $ p_data(Rest,s_colsEst,s_rowsEst,""nObs"")",
-captrd/estimate_trends.gms,168-185,assignment,to move,capri_mod/pipeline/captrd/step1.py,fit,122,same block,"p_trendRes(Rest,s_colsEst,s_rowsEst,""cOpt"",""ordOpt"") $ p_data(Rest,s_colsEst,s_rowsEst,""nObs"")",
+captrd/estimate_trends.gms,,file,context,capri_mod/pipeline/captrd/step1.py,fit,118,named,,
+captrd/estimate_trends.gms,76-123,assignment,moved,capri_mod/pipeline/captrd/step1.py,(module),23,named,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,""cPar"") $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") GT 4)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_trends.gms,80-82,assignment,moved,capri_mod/pipeline/captrd/step1.py,c_grid,56,named,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,""cPar"") $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") GT 4)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_trends.gms,80-85,assignment,in style,capri_mod/pipeline/captrd/equations/estimate_trends.py,p_trendRes_cPar,21,named,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,""cPar"") $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") GT 4)",
+captrd/estimate_trends.gms,80-85,assignment,moved,capri_mod/pipeline/captrd/step1.py,_fit_block,148,same function,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,""cPar"") $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") GT 4)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_trends.gms,80-183,assignment,moved,capri_mod/pipeline/captrd/step1.py,_fit_block,146,named,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,""cPar"") $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") GT 4)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_trends.gms,94-123,assignment,in style,capri_mod/pipeline/captrd/equations/estimate_trends.py,p_trendRes_sums,46,named,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,""trddep"") $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") GT 2)",
+captrd/estimate_trends.gms,94-123,assignment,moved,capri_mod/pipeline/captrd/step1.py,_fit_block,149,same function,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,""trddep"") $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") GT 2)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_trends.gms,128-142,assignment,in style,capri_mod/pipeline/captrd/equations/estimate_trends.py,p_trendRes_slope_const,102,named,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,""slope"")",
+captrd/estimate_trends.gms,128-142,assignment,moved,capri_mod/pipeline/captrd/step1.py,_fit_block,150,same function,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,""slope"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_trends.gms,146-155,assignment,in style,capri_mod/pipeline/captrd/equations/estimate_trends.py,p_trendRes_wESS,133,named,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,""wESS"") $ p_data(Rest,s_colsEst,s_rowsEst,""nObs"")",
+captrd/estimate_trends.gms,146-155,assignment,moved,capri_mod/pipeline/captrd/step1.py,_fit_block,151,same function,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,""wESS"") $ p_data(Rest,s_colsEst,s_rowsEst,""nObs"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_trends.gms,158,comment,in style,capri_mod/pipeline/captrd/equations/estimate_trends.py,p_trendRes_cOpt_wESS_ordOpt,185,same block,* --- With less than 5 obs C is restricted to 1 and perhaps B is restricted to 0 (if less than 3 obs) => only C1 entry is relevant,
+captrd/estimate_trends.gms,158,comment,context,capri_mod/pipeline/captrd/step1.py,fit,124,same block,* --- With less than 5 obs C is restricted to 1 and perhaps B is restricted to 0 (if less than 3 obs) => only C1 entry is relevant,
+captrd/estimate_trends.gms,160,assignment,in style,capri_mod/pipeline/captrd/equations/estimate_trends.py,p_trendRes_short_zero,158,named,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,res) $ ((NOT SAMEAS(CValues,""c1"")) $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") LE 4)) = 0.;",
+captrd/estimate_trends.gms,160,assignment,moved,capri_mod/pipeline/captrd/step1.py,(module),27,same block,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,res) $ ((NOT SAMEAS(CValues,""c1"")) $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") LE 4)) = 0.;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_trends.gms,160,assignment,moved,capri_mod/pipeline/captrd/step1.py,fit,122,same block,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,res) $ ((NOT SAMEAS(CValues,""c1"")) $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") LE 4)) = 0.;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_trends.gms,160,assignment,moved,capri_mod/pipeline/captrd/step1.py,_fit_block,152,same function,"p_trendRes(Rest,s_colsEst,s_rowsEst,cValues,res) $ ((NOT SAMEAS(CValues,""c1"")) $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") LE 4)) = 0.;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_trends.gms,166,assignment,moved,capri_mod/pipeline/captrd/step1.py,(module),27,same block,"p_trendRes(Rest,s_colsEst,s_rowsEst,""cOpt"",""wESS"") $ p_data(Rest,s_colsEst,s_rowsEst,""nObs"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_trends.gms,166,assignment,moved,capri_mod/pipeline/captrd/step1.py,fit,121,same block,"p_trendRes(Rest,s_colsEst,s_rowsEst,""cOpt"",""wESS"") $ p_data(Rest,s_colsEst,s_rowsEst,""nObs"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_trends.gms,166-171,assignment,in style,capri_mod/pipeline/captrd/equations/estimate_trends.py,p_trendRes_cOpt_wESS_ordOpt,176,named,"p_trendRes(Rest,s_colsEst,s_rowsEst,""cOpt"",""wESS"") $ p_data(Rest,s_colsEst,s_rowsEst,""nObs"")",
+captrd/estimate_trends.gms,166-171,assignment,moved,capri_mod/pipeline/captrd/step1.py,_fit_block,153,same function,"p_trendRes(Rest,s_colsEst,s_rowsEst,""cOpt"",""wESS"") $ p_data(Rest,s_colsEst,s_rowsEst,""nObs"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_trends.gms,168-185,assignment,moved,capri_mod/pipeline/captrd/step1.py,fit,123,same block,"p_trendRes(Rest,s_colsEst,s_rowsEst,""cOpt"",""ordOpt"") $ p_data(Rest,s_colsEst,s_rowsEst,""nObs"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/estimate_trends.gms,173-183,assignment,in style,capri_mod/pipeline/captrd/equations/estimate_trends.py,p_trendRes_cOpt,201,named,"p_trendRes(Rest,s_colsEst,s_rowsEst,""cOpt"",""Slope"") $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") GT 2)",
+captrd/estimate_trends.gms,173-183,assignment,moved,capri_mod/pipeline/captrd/step1.py,_fit_block,154,same function,"p_trendRes(Rest,s_colsEst,s_rowsEst,""cOpt"",""Slope"") $ (p_data(Rest,s_colsEst,s_rowsEst,""nObs"") GT 2)",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/expert_support.gms,,file,context,capri_mod/pipeline/captrd/dairy_supports.py,(module),6,named,,
 captrd/expert_support.gms,,file,context,capri_mod/pipeline/captrd/expert_rules.py,(module),1,named,,
 captrd/expert_support.gms,,file,context,capri_mod/pipeline/captrd/expert_rules.py,(module),6,named,,
@@ -1502,10 +1516,11 @@ captrd/national_supports.gms,1481-1484,assignment,to move,capri_mod/pipeline/cap
 captrd/national_supports.gms,1514-1565,control ($),context,capri_mod/pipeline/captrd/national_supports.py,(module),15,module's file,$iftheni.ti31a not %aglinkTightLink%==on,
 captrd/national_supports.gms,1514-1565,control ($),context,capri_mod/pipeline/captrd/national_supports.py,supports,683,module's file,$iftheni.ti31a not %aglinkTightLink%==on,
 captrd/national_supports.gms,1569-1572,assignment,to move,capri_mod/pipeline/captrd/national_supports.py,(module),16,module's file,"p_ExpertSupprt(rall,Cols,Rows,""2015"",ScenShifterPos_COLS) $ (not exante(""2015"")) = 0;",
+captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,(module),1,named,,
 captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/policy.py,(module),3,named,,
 captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,(module),5,named,,
 captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/prepare.py,(module),428,named,,
-captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/step1.py,run,247,named,,
+captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/step1.py,run,201,named,,
 captrd/prep_data_for_estimation.gms,,file,context,capri_mod/pipeline/captrd/supports.py,(module),3,named,,
 captrd/prep_data_for_estimation.gms,15-162,declaration,context,capri_mod/pipeline/captrd/prepare.py,(module),26,named,SET YEARS_BASM(*);,
 captrd/prep_data_for_estimation.gms,15-320,declaration,context,capri_mod/pipeline/captrd/prepare_run.py,(module),11,named,SET YEARS_BASM(*);,
@@ -1514,18 +1529,22 @@ captrd/prep_data_for_estimation.gms,25,assignment,to move,capri_mod/pipeline/cap
 captrd/prep_data_for_estimation.gms,34-39,assignment,to move,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,480,same block,"P_DATA(MS,""PADM"",""SUGA"",ExpostT) $ P_DATA(MS,""QUTS"",""SUGA"",ExpostT)= 631;",
 captrd/prep_data_for_estimation.gms,120-131,control ($),context,capri_mod/pipeline/captrd/prepare.py,_shgm_basm,663,named,"$ ((p_data(Rest,""SHGM"",""SLGW"",""mean"") gt 0)",
 captrd/prep_data_for_estimation.gms,164-198,assignment,to move,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,478,same block,"or ((p_data(MS,""DOMM"",ROWS,YEARS_BASM) lt 0) $ (not OYANI_ROWS(rows))))",
-captrd/prep_data_for_estimation.gms,205-247,assignment,to move,capri_mod/pipeline/captrd/__init__.py,(module),7,named,Rest(EstTypes) = NO;,
-captrd/prep_data_for_estimation.gms,205-247,assignment,to move,capri_mod/pipeline/captrd/step1.py,(module),5,named,Rest(EstTypes) = NO;,
-captrd/prep_data_for_estimation.gms,205-247,assignment,to move,capri_mod/pipeline/captrd/step1.py,PreStats,78,named,Rest(EstTypes) = NO;,
-captrd/prep_data_for_estimation.gms,205-252,assignment,to move,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,478,same block,Rest(EstTypes) = NO;,
-captrd/prep_data_for_estimation.gms,205-320,assignment,to move,capri_mod/pipeline/captrd/prepare_run.py,run,132,named,Rest(EstTypes) = NO;,
-captrd/prep_data_for_estimation.gms,205-320,assignment,to move,capri_mod/pipeline/captrd/statistics.py,(module),1,named,Rest(EstTypes) = NO;,
-captrd/prep_data_for_estimation.gms,209-210,assignment,to move,capri_mod/pipeline/captrd/statistics.py,(module),6,same block,"p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") = SUM(ExpostT $ p_data(Rest,S_ColsEst,S_RowsEst,ExpostT), 1.);",
-captrd/prep_data_for_estimation.gms,214-218,assignment,to move,capri_mod/pipeline/captrd/statistics.py,statistics,87,module's file,"p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") $ (NOT ( p_data(Rest,S_ColsEst,S_RowsEst,""BASM"")",
-captrd/prep_data_for_estimation.gms,214-218,assignment,to move,capri_mod/pipeline/captrd/step1.py,(module),29,named,"p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") $ (NOT ( p_data(Rest,S_ColsEst,S_RowsEst,""BASM"")",
-captrd/prep_data_for_estimation.gms,214-218,assignment,to move,capri_mod/pipeline/captrd/step1.py,PreStats,78,same line,"p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") $ (NOT ( p_data(Rest,S_ColsEst,S_RowsEst,""BASM"")",
-captrd/prep_data_for_estimation.gms,214-227,assignment,to move,capri_mod/pipeline/captrd/step1.py,run,248,same block,"p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") $ (NOT ( p_data(Rest,S_ColsEst,S_RowsEst,""BASM"")",
-captrd/prep_data_for_estimation.gms,221-227,assignment,to move,capri_mod/pipeline/captrd/statistics.py,statistics,88,module's file,"p_data(Rest,""INHA"",""LEVL"",""nObs"") = 0;",
+captrd/prep_data_for_estimation.gms,205-247,assignment,moved,capri_mod/pipeline/captrd/__init__.py,(module),7,named,Rest(EstTypes) = NO;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,205-247,assignment,moved,capri_mod/pipeline/captrd/step1.py,(module),5,named,Rest(EstTypes) = NO;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,205-247,assignment,moved,capri_mod/pipeline/captrd/step1.py,PreStats,83,named,Rest(EstTypes) = NO;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,205-252,assignment,moved,capri_mod/pipeline/captrd/prepare.py,prep_for_estimation,478,same block,Rest(EstTypes) = NO;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,205-320,assignment,moved,capri_mod/pipeline/captrd/prepare_run.py,run,132,named,Rest(EstTypes) = NO;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,205-320,assignment,moved,capri_mod/pipeline/captrd/statistics.py,(module),1,named,Rest(EstTypes) = NO;,the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,209-210,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_nObs_nW,17,named,"p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") = SUM(ExpostT $ p_data(Rest,S_ColsEst,S_RowsEst,ExpostT), 1.);",
+captrd/prep_data_for_estimation.gms,209-210,assignment,moved,capri_mod/pipeline/captrd/statistics.py,(module),6,same block,"p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") = SUM(ExpostT $ p_data(Rest,S_ColsEst,S_RowsEst,ExpostT), 1.);",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,214-218,assignment,moved,capri_mod/pipeline/captrd/statistics.py,statistics,87,module's file,"p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") $ (NOT ( p_data(Rest,S_ColsEst,S_RowsEst,""BASM"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,214-218,assignment,moved,capri_mod/pipeline/captrd/step1.py,(module),31,named,"p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") $ (NOT ( p_data(Rest,S_ColsEst,S_RowsEst,""BASM"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,214-218,assignment,moved,capri_mod/pipeline/captrd/step1.py,PreStats,83,same line,"p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") $ (NOT ( p_data(Rest,S_ColsEst,S_RowsEst,""BASM"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,214-227,assignment,moved,capri_mod/pipeline/captrd/step1.py,run,202,same block,"p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") $ (NOT ( p_data(Rest,S_ColsEst,S_RowsEst,""BASM"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,215-227,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_nObs_nW,22,same block,"p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") $ (NOT ( p_data(Rest,S_ColsEst,S_RowsEst,""BASM"")",
+captrd/prep_data_for_estimation.gms,221-227,assignment,moved,capri_mod/pipeline/captrd/statistics.py,statistics,88,module's file,"p_data(Rest,""INHA"",""LEVL"",""nObs"") = 0;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/prep_data_for_estimation.gms,233-234,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_WAve,30,named,"p_data(Rest,S_ColsEst,S_RowsEst,""WAve"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nW"") =",
+captrd/prep_data_for_estimation.gms,241-246,assignment,in style,capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py,p_data_wVar,44,named,"p_data(Rest,S_ColsEst,S_RowsEst,""wVar"") $ (p_data(Rest,S_ColsEst,S_RowsEst,""nObs"") GT 2)",
 captrd/prep_data_for_estimation.gms,254-258,assignment,to move,capri_mod/pipeline/captrd/statistics.py,statistics,93,module's file,"p_data(Rest,S_ColsEst,S_RowsEst,""BAS"") $ p_data(Rest,S_ColsEst,S_RowsEst,""nObs"")",
 captrd/prep_data_for_estimation.gms,263-264,assignment,to move,capri_mod/pipeline/captrd/statistics.py,statistics,97,module's file,"p_data(Rest,MPACT,S_RowsEst,""BAS"") $ ( S_ColsEst(MPACT) $ p_data(Rest,MPACT,""LEVL"",""BAS"") $ PACT_TO_IO(MPACT,S_RowsEst)) =",
 captrd/prep_data_for_estimation.gms,274,comment,context,capri_mod/pipeline/captrd/statistics.py,statistics,124,module's file,*,

@@ -33,8 +33,40 @@ NT2_RES_REGIONS = ("AT000000", "DE000000", "DK000000", "NL000000")
 NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), ("2018", "2030")
 
 
-#: --parts: the parts to dump (None: all): estimation, bounds, nuts2, ms_retries, step3_copies, labour, policy
+#: --parts: the parts to dump (None: all): estimation, bounds, nuts2, ms_retries, step3_copies, labour, policy, and
+#: the light ones (no reference data read): step1
 PARTS = None
+LIGHT = {"step1"}
+
+
+def step1_cases():
+    """step1.run (estimate_trends.gms, define_stats_and_supports.gms l. 47-179, prep_data_for_estimation.gms l. 209-246)
+    on 3,000 synthetic series over the ex-post years 1984-2017 (a fixed seed: every count of observations from 0 to 34,
+    missing values as NaN and as zeros), evaluated at 1984-2070, with both readings of the short series' grid and of the
+    zeros. SHA-256 of every array of the result."""
+    import hashlib
+    import numpy as np
+    from capri_mod.pipeline.captrd import step1 as S1
+    rng = np.random.default_rng(20261124)
+    S, years = 3000, list(range(1984, 2018))
+    T = len(years)
+    t = np.arange(1, T + 1) / 10.0
+    x = rng.lognormal(3.0, 1.0, (S, 1)) * (1.0 + rng.normal(0.02, 0.05, (S, 1)) * t[None, :] * 10) \
+        * rng.lognormal(0.0, 0.1, (S, T))
+    keep = rng.random((S, T)) < (np.arange(S) % (T + 1) / T)[:, None]      # every count of observations
+    x = np.where(keep, x, np.nan)
+    x[rng.random((S, T)) < 0.03] = 0.0
+    out = {}
+    for coded in (False, True):
+        for zm in (False, True):
+            r = S1.run(x, years, list(range(1984, 2071)), first_year=1984, as_coded=coded, zeros_as_missing=zm)
+            arrs = [r.pre.nobs, r.pre.nw, r.pre.wave, r.pre.wvar, r.fit.a, r.fit.b, r.fit.c, r.fit.wess, r.fit.k_opt,
+                    r.wvarerr, r.wr2, r.step1]
+            out[(coded, zm)] = [hashlib.sha256(np.ascontiguousarray(a).tobytes()).hexdigest() for a in arrs]
+    return out
+
+
+LIGHT_CASES = {"step1": step1_cases}
 
 
 def want(part):
@@ -54,10 +86,15 @@ def dump(path):
     S = E.read_sets()
     data_all = read_csv(res_dir / "data.csv.gz", dtype={"t": str}, keep_default_na=False)
     if PARTS is not None and "estimation" not in PARTS:        # --parts without the estimation's: those parts only
-        out = {"bounds": bounds_cases(E, EB, S, data_all, read_csv, res_dir, _P)}
+        out = {}
+        if PARTS - LIGHT:
+            out["bounds"] = bounds_cases(E, EB, S, data_all, read_csv, res_dir, _P)
+        for name, fn in LIGHT_CASES.items():
+            if name in PARTS:
+                out[name] = fn()
         with open(path, "wb") as fh:
             pickle.dump(out, fh)
-        print(f"parts {sorted(PARTS)}: {dict((k, len(v)) for k, v in out['bounds'].items())} -> {path}")
+        print(f"parts {sorted(PARTS)}: {dict((k, len(v)) for k, v in out.get('bounds', out).items())} -> {path}")
         return
     tabs_all = {n: read_csv(res_dir / f"{n}.csv.gz", dtype={"t": str}, keep_default_na=False)
                 for n in ("step2", "P_Data", "COCO", "support", "Lo", "up", "BASM", "wVarErr")}
@@ -140,6 +177,8 @@ def dump(path):
             res = N.residuals(points, ms_nobs, ms_V, S, B.foddi, rset, sal, var=sym2())
             out["nt2_res"]["sym"][y] = [(a, b, c, str(r)) for a, b, c, r in res]
     out["bounds"] = bounds_cases(E, EB, S, data_all, read_csv, res_dir, _P)
+    for name, fn in LIGHT_CASES.items():
+        out[name] = fn()
     with open(path, "wb") as fh:
         pickle.dump(out, fh)
     nt2_blocks = Counter(x[0] for x in out["nt2_res"]["num"][("2030", "")] if x[0] not in N.SHARED_BLOCKS)
@@ -560,7 +599,7 @@ if __name__ == "__main__":
     ap.add_argument("out", nargs="?")
     ap.add_argument("--compare", nargs=2, metavar=("REF", "NEW"))
     ap.add_argument("--parts", help="comma-separated parts to dump (a block's own check): estimation, bounds, nuts2, "
-                                    "ms_retries, step3_copies, labour, policy; default all")
+                                    "ms_retries, step3_copies, labour, policy, step1; default all")
     a = ap.parse_args()
     if a.parts:
         PARTS = set(a.parts.split(","))
