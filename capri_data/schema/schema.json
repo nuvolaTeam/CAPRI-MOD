@@ -22406,6 +22406,7 @@
     "checks": [],
     "tests": [
      "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_ration_2030.py",
      "capri_mod/tests/test_supplement_fat.py"
     ]
    }
@@ -60059,7 +60060,9 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_ration_2030.py"
+    ]
    }
   },
   "trends_milk_yield_1730": {

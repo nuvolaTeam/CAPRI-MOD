@@ -4854,7 +4854,7 @@
   "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_ref_ration_2030.csv": {
    "description": "CAPRI's 2030 rations and requirements as factors on the model's 2017 rations (Sprint 9q). (tools/build/build_ration_trajectory_2030.py)",
    "kind": "reference",
-   "rows": 31476,
+   "rows": 35173,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [

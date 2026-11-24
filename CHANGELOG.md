@@ -441,6 +441,17 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   and without (1)); the inhibitor on mineral N moves towards CAPRI's in four units (ES51 0.257 -> 0.141, CAPRI 0.039;
   NL22 0.536 -> 0.459, 0.292), away in FR52 (0.575 -> 0.482, 0.575); the inhibitor on manure stays where CAPRI has none
   (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
+- **K201, the bulls' and heifers' 2030 rations (24 November 2026; register DEP-13):** the 2030 ration factors
+  (tools/build/build_ration_trajectory_2030.py, CAPRI's 2030 over 2017 per feed and requirement) took the 2017 ration
+  builder's CAPRI aggregates BULF and HEIF, which have no DAYS in CAPRI's 2030 reference: the bulls had no 2030 factor
+  (their 2030 ration and requirements the 2017 ones x the yield factor, the energy factor 5.8% above CAPRI's at the
+  median), the heifers' 2030 total was HEIR's alone. The factors now take CAPRI's elementary activities in both years
+  (BULL, BULH; HEIL, HEIH, HEIR), as its requirement rows REQSN_ and REQSE_ (whose p_animReq equals dataOut's
+  requirements in all 16,828 regional cells). The EU bulls' 2030 base feed: cereals -15%, energy-rich feed -27%, other
+  feed -35%, protein-rich feed -6.5%, silage maize +12.5%; their energy requirement -3.5%. The six-unit Green Deal
+  probe at CAPRI's prices against 27ff806: the baseline unchanged, the Green Deal changes 0.03 points on average, the
+  N-surplus dual 0.881 -> 0.882 of CAPRI's (the probe fixes the prices: the feed markets' response is not in it).
+  Test: capri_mod/tests/test_ration_2030.py.
 - **DEP-13 step 2, CAPRI's 2030 outputs per head (24 November 2026; K200, K201):** with CAPRI's 2030 reference as
   the trajectory each animal's final products per head are CAPRI's 2030 (tools/build/build_livestock_output_2030.py:
   CAPRI's 2030 production, LEVL x DATA at 2030 of the reference's dataOut over the animal's CAPRI activities, over the
@@ -456,7 +467,7 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   PL52; 12 iterations), against df7a08c: the baseline's levels within 0.061%; the Green Deal changes move by 0.19 points
   on average for the animals (largest the suckler cows, ES41 -33.7 -> -35.1%, CAPRI -22.4) and 0.10 for the crops; the
   mean gap to CAPRI's step 2.78 -> 2.77 points (animals), 5.20 -> 5.24 (crops); the N-surplus dual 0.884 -> 0.881 of
-  CAPRI's at the median. Found on the way (K201, open): the bulls' 2030 rations and requirements are not CAPRI's (the
+  CAPRI's at the median. Found on the way (K201, fixed the same day): the bulls' 2030 rations and requirements are not CAPRI's (the
   ration builder reads the aggregate BULF, which has no DAYS in the 2030 reference), nor fully the heifers'.
 - **DEP-54, the non-EU supply countries' feed bulks within the market solve (24 November 2026; K199):** CAPRI's
   feedBlk_ (arm/market_model.gms l. 972) is defined for every RMSSUP; the model's market left the non-EU countries with

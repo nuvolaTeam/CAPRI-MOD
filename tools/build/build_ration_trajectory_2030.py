@@ -7,7 +7,8 @@ Upper Bavaria a dairy cow (DCOL) eats 6% more grass, 12% less silage maize and 2
 its projected area in some regions, silage maize 2-6%).
 
 Per group of CAPRI and model regions (tools/lib/_model_regions.capri_groups) and model animal (the CAPRI activities of
-tools/build/build_feed_ration.CAPRI_TO_MODEL), per feed and per requirement:
+tools/build/build_feed_ration.CAPRI_TO_MODEL, the bulls' and heifers' elementary ones in both years: ELEMENTARY,
+KNOWN_ISSUES K201), per feed and per requirement:
 
     factor = (sum_a LEVL_a,2030 x item_a,2030 / sum_a LEVL_a,2030) / (same in 2017)
 
@@ -40,6 +41,21 @@ OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "traj
 OUT_FODDER = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "trajectories" / "capri_ref_fodder_2030.csv"
 REF = BASELINE_REF
 ITEMS = ("LEVL", "DAYS", "ENNE", "CRPR", "DRMN", "DRMX", "CH4MAN", "CH4ENT")
+#: the bulls' and heifers' CAPRI activities of the factors (KNOWN_ISSUES K201): CAPRI's elementary activities in both
+#: years, as its requirement rows take them (REQSN_ and REQSE_: p_animReq x p_animProdDays of each activity,
+#: supply/supply_model.gms l. 521-590). The 2017 ration builder's aggregates BULF and HEIF have no DAYS in CAPRI's
+#: 2030 reference, so until 24 November 2026 the bulls had no 2030 factor (their 2030 ration and requirements the
+#: 2017 ones x the projected yield factor) and the heifers' 2030 total was HEIR's alone against HEIF + HEIR in 2017
+ELEMENTARY = {"BULL": ("BULL", "BULH"), "HFRS": ("HEIL", "HEIH", "HEIR")}
+
+
+def capri_activities(c2m: dict) -> dict:
+    """The CAPRI activity -> model animal map of the factors: the 2017 ration builder's (build_feed_ration
+    .CAPRI_TO_MODEL) with the bulls' and heifers' elementary activities (ELEMENTARY) in place of theirs."""
+    out = {ca: ma for ca, ma in c2m.items() if ma not in ELEMENTARY}
+    for ma, acts in ELEMENTARY.items():
+        out.update({ca: ma for ca in acts})
+    return out
 
 
 def _load(name):
@@ -56,7 +72,7 @@ def main():
     a = ap.parse_args()
     fr = _load("build_feed_ration")
     mr = _load("_model_regions")
-    FEEDS, C2M = fr.FEEDS, fr.CAPRI_TO_MODEL
+    FEEDS, C2M = fr.FEEDS, capri_activities(fr.CAPRI_TO_MODEL)
     want = set(FEEDS) | set(ITEMS)
     data = {"2017": collections.defaultdict(dict), "2030": collections.defaultdict(dict)}
     acts_alt = "|".join(C2M)
