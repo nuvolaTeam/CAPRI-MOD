@@ -430,4 +430,11 @@ file); a CAPRI name on a citing line can match a statement the code does not por
 - **An error path moved** (not reached by the data): the share of FADN's hectares outside LFA (l. 166-172) is now
   divided inside the regions' loop, as the euros' share was; a member state with hectares only in its "Total" farm
   type would have raised a division by zero before even without a ceiling, now only with one.
+- **KNOWN_ISSUES K198 updated** (24 November 2026; the project lead: "go on with the KNOWN_ISSUES entry"): the plan's
+  one entry (section 5, point 4 of section 8) is K198, which the main line registered from A0's inventory on 23
+  November (bd00c3a0); it now holds the blocks A1-A6's porting differences by where they act, the phase's
+  findings (the Hessian's source, the threads, the Hessian step's log, the two pre-existing test failures, the
+  container's memory, the exactness rules, A6's error path) and the citations' state (A0's 14 all corrected; three
+  left as they are, named). Not ranked by measurement: the main line's to do. At the merge: dev has edited
+  KNOWN_ISSUES.md since 565669aa (K199-K202), so its Open table may conflict next to K198's row.
 

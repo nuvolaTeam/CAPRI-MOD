@@ -48,7 +48,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K150](#k150) | The non-EU regions' raw milk at the market's base is FAO_agg's production, not CAPRI's market data (milk delivered to the dairies): Turkey 20,173 kt against CAPRI's 13,145 | fixed (14 November 2026), validated (15 November 2026, the full Green Deal pair) |
 | [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences; sorted 20 November 2026: most are in the accounts only or have no effect in the step; ARTIF held fixed had one (small for the EU, a few thousand ha in some Spanish and French units) | open: ARTIF, the milk for feeding and the yield factors of the crops' N and P terms ported 20 November 2026 (as CAPRI's); the animals' per-head terms ported 21 November 2026 (the members' INPO difference under the Green Deal's input change); fertned's two items left closed 23 November 2026 (the price-driven O_HP needs no port; the residues' variant factor at the moved MANN ported) |
 | [K196](#k196) | The Green Deal's N-surplus dual is below CAPRI's (CAPRI's recovered from its own results): median 0.856 of CAPRI's in the standing check at 9867411 (0.89 at bb3b592), 0.83 at CAPRI's prices; the suckler cows' and the technology shift's remaining gaps follow it | open (21 November 2026) |
-| [K198](#k198) | The assignments refactor's findings for the main line (its inventory of the CAPRI statements the model ports or cites, block A0): porting differences in the market supply Hessian, the price transmission, the stop rule, the welfare, the premiums and the accounts, and 14 wrong line citations; sorted 23 November 2026 by where they act, not measured | open (23 November 2026) |
+| [K198](#k198) | The assignments refactor's findings for the main line (its inventory of the CAPRI statements the model ports or cites, blocks A0-A6): porting differences in the market supply Hessian, the price transmission, the stop rule, the welfare, the premiums, the Green Deal's regional rules and the accounts, sorted by where they act, not measured; A0's 14 wrong line citations corrected; from the phase's runs, a measured and a cached Hessian moving a run's last digits (1e-5 after the scenario), the thread oversubscription and the Hessian step's log | open (updated 24 November 2026) |
 
 ## Resolved (128)
 
@@ -4152,8 +4152,80 @@ the main line measures and ranks. Where each acts, from the code (no runs):
   (simu_calibration_to_supply.gms: the grofNEprod-off branch cited, the on branch holds the same statements),
   supply/ghg_tax.py (GWPCH4ENT_ is supply_model.gms l. 3074). The refactor corrects those in the files it moves; the
   main line those in its own.
+- **The blocks A1-A6** (24 November 2026; the handoff's sections 6-10, each function's "Departures from CAPRI"): 303
+  inventory rows moved into named functions (A1+A3 14, A2 120, A4 35, A5 92, A6 42: policy/rd_logic.gms, which A0
+  had left unscheduled), none left to move, the 1,164 rows all reviewed. The results stayed identical: each block's
+  five-unit Green Deal run at `--rtol 0`; A2's whole premium chain for the 215 EU units and A6's RD declarations at
+  eight years, value by value and key order by key order; the full-EU Green Deal run after A5 (with the Hessian from
+  the same source in both runs, below). Found in the moves, besides A0's list:
+  - *In the market and its coupling:* the stop rule's change as 200 a / b (CAPRI's 2 (a / b) x 100), the absolute
+    value for quantities too, an aggregate's price over the members with a price and production in both sums, the
+    price forecast divided by the weights available (price_forecast.gms l. 376-383); the special step weights'
+    normalisation on the weighted average; the young animals' net supply summed unit by unit without CAPRI's EPS; the
+    start bounds per market region's cell, the price bounds in ratios, the PMrk_ cells' 1e-3 floor; the biofuel CES
+    share as q / X (mu_x / mu_b)^rho; a negative elasticity's root at 0 in the dampening; the manure market's
+    fall-back value from the region's price history (CAPRI's step number and lagged UVAG); the prices to the supply
+    models as relative changes with the trend point's factor (set_prices.gms; the chickens' and young animals'
+    inputs not covered).
+  - *In the premiums:* prmcut.gms's CEILACV with x 0.001 on each term, CEILACL and CEILACV for every region with a
+    ceiling (CAPRI's above EPS), a unit's cut from the nearest level with one; a member state's PRME its units'
+    level-weighted average directly; the BPS key summed over the schemes at once; the decoupled budget without the
+    greening share's factor; the RD rest to NUTS 2 in the NUTS 1 order; the area schemes' type where the ceiling is
+    above 0 (CAPRI's nonzero); the transfers filled from their table's first year, the transfer from pillar 2 left
+    out; the end-cut schemes' ceilings summed before the division; the Nordic aid's type on a ceiling's presence;
+    the RD declarations (rd_logic.gms): a member state without levels takes its NUTS 2 regions' sum, the farm
+    types' agri-environment euros summed (one type per scheme in the data), the scaling factor 0 where the payment
+    is not above 0.
+  - *In the regional models:* the Green Deal's input changes as closed forms of the shares, the yield loss scaled
+    with the cut without CAPRI's remainingTarget factor, the organic top-up valued at the fuel cost (CAPRI-ERROR-FIX
+    organic_topup_at_fuel_cost), the organic area's gap without the 0.45 factor (pest_disagg off), VEGE always the
+    UAA target; the landscape floors and the mineral N and surplus limits on the model's own base and calibration
+    point (kg per ha, no 2090 relaxations); PLAP's cost at the mean technology; the fertiliser priors' gamma beta as
+    (m + sqrt) / (2 var); ghgMiti's pmpParsqr terms each divided by (m1 - m0), the inhibitor's side effect as the
+    accounts' multiplier, EmiCalmin with the cascade's losses; the breeding options per eligible head, their
+    curvature floor without abs; the greening dual's multiplier fixed in the calibration's fit; prep_sim_luc.gms's
+    land class bounds (l. 578-584) not ported; the manure supply net of the base trade; the feeds' PMP slope over
+    the feeding itself; NEM of a fixed 600 kg cow (CAPRI's p_meanLiveWgt); the milk's N export added as 0.0054 x the
+    yield change; the loss shares clipped at the solution.
+  - *In the accounts and reports only:* RUNANI without CAPRI's p_emiLoss fallback; ProfitAgr without the outputs and
+    inputs no activity is assigned; AComLN as a product on the two options' overlap; the welfare's consumer price the
+    GL demand's own, G without x 1e-6, the processing and feed profits as straight-path integrals; the TRQ rent from
+    the flows' rates under the sigmoid regime, NaN rates as 0; the land rent per land type with its own dual, the
+    non-agricultural part not computed.
+- **Found by the phase's runs and checks (pre-existing; for the main line):**
+  - *The market supply Hessian's source moves a run's last digits:* a run that measures the Hessian ends its
+    baseline about 1e-12 away from a run that reads the same Hessian (byte-identical) from the cache; the Green Deal
+    scenario amplifies it to about 1e-5 (78,105 values of the full-EU pickle, e.g. OFAR 208,393.57 against
+    208,395.31). The restore after the measurement (K76) leaves a trace. Two runs compare exactly only with the
+    Hessian from the same source. The cache key holds the supply code's hash, so a change of that code measures it
+    again (1,909 s on the full EU).
+  - *Threads:* OpenBLAS and OpenMP start one thread per core in each worker process; only OMP_NUM_THREADS is set
+    (capri_regional_nlp.py, after NumPy's import, too late for OpenBLAS). On a 4-core machine the workers ran 7-10
+    threads each; with OPENBLAS_NUM_THREADS, OMP_NUM_THREADS and MKL_NUM_THREADS at 1 before the run, the first
+    supply solve took 38 s instead of 123 s (the run reached the Hessian after 82 s instead of 257 s) and the Hessian
+    1,351 s instead of 2,518 s. To set before NumPy is first imported.
+  - *The Hessian step's log:* the full-EU run's longest step (22-42 minutes) writes two lines at the default level;
+    its progress line needs the "detailed" level. It should report the cache hit, the shocks done with an estimated
+    end, the regional solves done and skipped, the base re-solve's deviation and the columns with a response.
+  - *Tests:* test_capri.py::test_capri_land_rents_at_the_2030_calibration_point (the calibration NLP's residual
+    4.7279502897182036e-4, the test wants 1e-6) and test_exact_io.py::test_csv_float_reads_are_exact
+    (tools/build/build_feed_bulk_grof.py:45, DEP-14) fail at the phase's start 259edec too. A full suite and a
+    full-EU run do not fit in a container's memory together (a pytest worker killed; the test passed alone).
+  - *Exactness:* Python 3.12's sum() of floats is compensated, so it differs from a += loop in the last digit; the
+    refactor kept each caller's form. tools/check/compare_pickles_exact.py reports a DataFrame with NaN cells as
+    different from itself.
+  - *An error path* (rd_logic.gms l. 166-172; not reached by the data): the hectares' share is now divided inside
+    the regions' loop; a member state with hectares only in its "Total" farm type raised a division by zero before
+    even without a ceiling, now only with one.
+- **The wrong line citations:** A0's 14 rows are all corrected: runlog.py's (with four more of the same drift and
+  one in model.py, 24 November 2026), coupling/reporting.py's and market/welfare.py's (A4), policy/mtr.py's (A2),
+  supply/policy.py's (the main line). More were corrected in the moved code (A1: line_nitr.gms, fertned.gms,
+  breeding.gms; A6: rd.py's technology factors, l. 237-244, 330-334, 392-393). Left as they are: young_animals.py
+  and market/supply.py cite simu_calibration_to_supply.gms's grofNEprod-off branch (the on branch holds the same
+  statements); supply/ghg_tax.py and environmental/ghg.py name GWPCH4ENT_ with envind/gases.gms, which holds the
+  coefficient it uses (the equation is supply_model.gms l. 3074).
 - **In 9t:** -
-- **Status:** open (23 November 2026).
+- **Status:** open (23 November 2026; updated 24 November 2026 with the blocks A1-A6, the phase not merged yet).
 
 <a id="k195"></a>
 ### K195: CAPRI's Green Deal step's plant protection at the member state's UVAP (found and fixed 21 November 2026)
