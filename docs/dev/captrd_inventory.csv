@@ -626,18 +626,29 @@ captrd/comi_bounds.gms,232-247,control ($),in style,capri_mod/pipeline/captrd/eq
 captrd/comi_bounds.gms,252-268,other,in style,capri_mod/pipeline/captrd/equations/comi_bounds.py,V_EstV_COMI_corridor,275,named,"v_estV.LO(Rest,S_ColsEst,""COMI"",exAnte) $ (",
 captrd/comi_bounds.gms,273-287,assignment,in style,capri_mod/pipeline/captrd/equations/comi_bounds.py,V_EstV_COMI_prev,312,named,"V_EstV.lo(Rest,S_ColsEst,""COMI"",exAnte) $ (P_DATA(Rest,S_ColsEst,""COMI"",""nObs"")",
 captrd/comi_bounds.gms,278,other,in style,capri_mod/pipeline/captrd/equations/comi_bounds.py,V_EstV_COMI_prev,309,module's file,"*(1+.0025 $ sameas(Rest,MS))**(ordt(exante)-ordt(years))),",
+captrd/copy_labour_biofuel_on_presult.gms,,file,context,capri_mod/pipeline/captrd/equations/copy_labour_biofuel_on_presult.py,(module),1,named,,
 captrd/copy_labour_biofuel_on_presult.gms,,file,context,capri_mod/pipeline/captrd/step3_copies.py,(module),1,named,,
-captrd/copy_labour_biofuel_on_presult.gms,,file,context,capri_mod/pipeline/captrd/step3_copies.py,copy,29,named,,
-captrd/copy_labour_biofuel_on_presult.gms,24,blank,context,capri_mod/pipeline/captrd/step3_copies.py,copy,33,same function,,
-captrd/copy_labour_biofuel_on_presult.gms,29,comment,context,capri_mod/pipeline/captrd/step3_copies.py,copy,34,same function,*,
-captrd/copy_labour_biofuel_on_presult.gms,31-33,assignment,to move,capri_mod/pipeline/captrd/step3_copies.py,copy,36,same function,"p_result(rEst,""GROF"",""LABP"",exAnte,""Step3"")",
-captrd/copy_labour_biofuel_on_presult.gms,35-37,assignment,to move,capri_mod/pipeline/captrd/step3_copies.py,copy,37,same function,"p_result(rEst,""GROF"",""LABT"",exAnte,""Step3"")",
-captrd/copy_labour_biofuel_on_presult.gms,39,blank,context,capri_mod/pipeline/captrd/step3_copies.py,copy,38,same function,,
-captrd/copy_labour_biofuel_on_presult.gms,44-45,assignment,to move,capri_mod/pipeline/captrd/step3_copies.py,copy,39,same function,"p_result(rEst,""GROF"",ILAB,exAnte,""Step1"")",
-captrd/copy_labour_biofuel_on_presult.gms,49-50,assignment,to move,capri_mod/pipeline/captrd/step3_copies.py,copy,40,same function,"p_result(rEst,PACT,ILAB,exAnte,""Step3"") $ p_result(rEst,""GROF"",ILAB,exAnte,""Step1"")",
-captrd/copy_labour_biofuel_on_presult.gms,54,assignment,to move,capri_mod/pipeline/captrd/step3_copies.py,copy,44,same function,"p_result(rEst,PACT,""LABT"",exAnte,""Step3"") = p_result(rEst,PACT,""LABF"",exAnte,""Step3"") + p_result(rEst,PACT,""LABP"",exAnte,""Step3"");",
-captrd/copy_labour_biofuel_on_presult.gms,58-59,assignment,to move,capri_mod/pipeline/captrd/step3_copies.py,copy,46,same function,"p_result(rEst,cols,fossilFuels,exAnte,""Step3"") $ p_result(rEst,cols,fossilFuels,exAnte,""Expert"")",
-captrd/copy_labour_biofuel_on_presult.gms,63-64,assignment,to move,capri_mod/pipeline/captrd/step3_copies.py,copy,49,same function,"p_result(rEst,""INHA"",""LEVL"",exAnte,""Step3"") $ p_result(rEst,""INHA"",""LEVL"",exAnte,""p_data"")",
+captrd/copy_labour_biofuel_on_presult.gms,,file,context,capri_mod/pipeline/captrd/step3_copies.py,copy,31,named,,
+captrd/copy_labour_biofuel_on_presult.gms,25,assignment,in style,capri_mod/pipeline/captrd/equations/copy_labour_biofuel_on_presult.py,p_data_GROF_ILAB_BASM,19,named,"p_data(rEst,""GROF"",ILAB,""BASM"") = SUM(MPACT, p_data(rEst,MPACT,ILAB,""BASM"") * p_data(rEst,MPACT,""LEVL"",""BASM"")) * 0.001;",
+captrd/copy_labour_biofuel_on_presult.gms,25,assignment,moved,capri_mod/pipeline/captrd/step3_copies.py,copy,36,same function,"p_data(rEst,""GROF"",ILAB,""BASM"") = SUM(MPACT, p_data(rEst,MPACT,ILAB,""BASM"") * p_data(rEst,MPACT,""LEVL"",""BASM"")) * 0.001;",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/copy_labour_biofuel_on_presult.gms,30,assignment,in style,capri_mod/pipeline/captrd/equations/copy_labour_biofuel_on_presult.py,p_data_GROF_LABP_BASM,31,named,"p_data(rEst,""GROF"",""LABP"",""BASM"") = p_data(rEst,""GROF"",""LABT"",""BASM"") - p_data(rEst,""GROF"",""LABF"",""BASM"");",
+captrd/copy_labour_biofuel_on_presult.gms,30,assignment,moved,capri_mod/pipeline/captrd/step3_copies.py,copy,37,same function,"p_data(rEst,""GROF"",""LABP"",""BASM"") = p_data(rEst,""GROF"",""LABT"",""BASM"") - p_data(rEst,""GROF"",""LABF"",""BASM"");",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/copy_labour_biofuel_on_presult.gms,32-34,assignment,in style,capri_mod/pipeline/captrd/equations/copy_labour_biofuel_on_presult.py,p_result_GROF_LABP_Step3,46,named,"p_result(rEst,""GROF"",""LABP"",exAnte,""Step3"")",
+captrd/copy_labour_biofuel_on_presult.gms,32-34,assignment,moved,capri_mod/pipeline/captrd/step3_copies.py,copy,39,same function,"p_result(rEst,""GROF"",""LABP"",exAnte,""Step3"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/copy_labour_biofuel_on_presult.gms,36-38,assignment,in style,capri_mod/pipeline/captrd/equations/copy_labour_biofuel_on_presult.py,p_result_GROF_LABT_Step3,60,named,"p_result(rEst,""GROF"",""LABT"",exAnte,""Step3"")",
+captrd/copy_labour_biofuel_on_presult.gms,36-38,assignment,moved,capri_mod/pipeline/captrd/step3_copies.py,copy,40,same function,"p_result(rEst,""GROF"",""LABT"",exAnte,""Step3"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/copy_labour_biofuel_on_presult.gms,40,assignment,in style,capri_mod/pipeline/captrd/equations/copy_labour_biofuel_on_presult.py,p_result_GROF_LABF_Step3,74,named,"p_result(rEst,""GROF"",""LABF"",exAnte,""Step3"") = p_result(rEst,""GROF"",""LABT"",exAnte,""Step3"") - p_result(rEst,""GROF"",""LABP"",exAnte,""Step3"");",
+captrd/copy_labour_biofuel_on_presult.gms,40,assignment,moved,capri_mod/pipeline/captrd/step3_copies.py,copy,41,same function,"p_result(rEst,""GROF"",""LABF"",exAnte,""Step3"") = p_result(rEst,""GROF"",""LABT"",exAnte,""Step3"") - p_result(rEst,""GROF"",""LABP"",exAnte,""Step3"");",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/copy_labour_biofuel_on_presult.gms,44-45,assignment,in style,capri_mod/pipeline/captrd/equations/copy_labour_biofuel_on_presult.py,p_result_GROF_ILAB_Step1,88,named,"p_result(rEst,""GROF"",ILAB,exAnte,""Step1"")",
+captrd/copy_labour_biofuel_on_presult.gms,44-45,assignment,moved,capri_mod/pipeline/captrd/step3_copies.py,copy,43,same function,"p_result(rEst,""GROF"",ILAB,exAnte,""Step1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/copy_labour_biofuel_on_presult.gms,49-50,assignment,in style,capri_mod/pipeline/captrd/equations/copy_labour_biofuel_on_presult.py,p_result_PACT_ILAB_Step3,102,named,"p_result(rEst,PACT,ILAB,exAnte,""Step3"") $ p_result(rEst,""GROF"",ILAB,exAnte,""Step1"")",
+captrd/copy_labour_biofuel_on_presult.gms,49-50,assignment,moved,capri_mod/pipeline/captrd/step3_copies.py,copy,44,same function,"p_result(rEst,PACT,ILAB,exAnte,""Step3"") $ p_result(rEst,""GROF"",ILAB,exAnte,""Step1"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/copy_labour_biofuel_on_presult.gms,54,assignment,in style,capri_mod/pipeline/captrd/equations/copy_labour_biofuel_on_presult.py,p_result_PACT_LABT_Step3,115,named,"p_result(rEst,PACT,""LABT"",exAnte,""Step3"") = p_result(rEst,PACT,""LABF"",exAnte,""Step3"") + p_result(rEst,PACT,""LABP"",exAnte,""Step3"");",
+captrd/copy_labour_biofuel_on_presult.gms,54,assignment,moved,capri_mod/pipeline/captrd/step3_copies.py,copy,48,same function,"p_result(rEst,PACT,""LABT"",exAnte,""Step3"") = p_result(rEst,PACT,""LABF"",exAnte,""Step3"") + p_result(rEst,PACT,""LABP"",exAnte,""Step3"");",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/copy_labour_biofuel_on_presult.gms,58-59,assignment,in style,capri_mod/pipeline/captrd/equations/copy_labour_biofuel_on_presult.py,p_result_fossilFuels_Step3,127,named,"p_result(rEst,cols,fossilFuels,exAnte,""Step3"") $ p_result(rEst,cols,fossilFuels,exAnte,""Expert"")",
+captrd/copy_labour_biofuel_on_presult.gms,58-59,assignment,moved,capri_mod/pipeline/captrd/step3_copies.py,copy,50,same function,"p_result(rEst,cols,fossilFuels,exAnte,""Step3"") $ p_result(rEst,cols,fossilFuels,exAnte,""Expert"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
+captrd/copy_labour_biofuel_on_presult.gms,63-64,assignment,in style,capri_mod/pipeline/captrd/equations/copy_labour_biofuel_on_presult.py,p_result_INHA_LEVL_Step3,140,named,"p_result(rEst,""INHA"",""LEVL"",exAnte,""Step3"") $ p_result(rEst,""INHA"",""LEVL"",exAnte,""p_data"")",
+captrd/copy_labour_biofuel_on_presult.gms,63-64,assignment,moved,capri_mod/pipeline/captrd/step3_copies.py,copy,53,same function,"p_result(rEst,""INHA"",""LEVL"",exAnte,""Step3"") $ p_result(rEst,""INHA"",""LEVL"",exAnte,""p_data"")",the statement is in capri_mod/pipeline/captrd/equations; this cites it
 captrd/define_eu_supports.gms,,file,context,capri_mod/pipeline/captrd/eu_supports.py,(module),2,named,,
 captrd/define_eu_supports.gms,,file,context,capri_mod/pipeline/captrd/eu_supports.py,eu_supports,201,named,,
 captrd/define_eu_supports.gms,,file,context,capri_mod/pipeline/captrd/final_supports.py,biof_adjust,108,named,,
@@ -1590,14 +1601,14 @@ captrd/sets_captrd.gms,466,declaration,context,capri_mod/pipeline/captrd/eu_supp
 captrd/sets_captrd.gms,471,declaration,context,capri_mod/pipeline/captrd/clean_tiny.py,(module),37,named,"SCALAR p_tiny ""quantities and areas should be zero or attain at least a lower amount at MS level"" / .1/;",
 captrd/sets_captrd.gms,486-487,declaration,context,capri_mod/pipeline/captrd/national_supports.py,(module),133,named,"SET herdLevl(Rows) ""herd or levl"" /",
 captrd/sets_captrd.gms,537,declaration,context,capri_mod/pipeline/captrd/eu_supports.py,(module),107,named,"SET External(respos) ""Positions with external supports"" / DgAgri1,Expert,Longrun1/;",
-captrdfrm.gms,22-24,control ($),context,capri_mod/pipeline/captrd/step3_copies.py,(module),4,same block,$setglobal java ON,
-captrdfrm.gms,24,control ($),context,capri_mod/pipeline/captrd/step3_copies.py,(module),23,same function,$setglobal java ON,
-captrdfrm.gms,29,comment,context,capri_mod/pipeline/captrd/step3_copies.py,(module),6,same block,*----------------------------------------,
-captrdfrm.gms,31-40,control ($),context,capri_mod/pipeline/captrd/step3_copies.py,(module),7,same block,$INCLUDE 'fortrdfrm.gms',
+captrdfrm.gms,23-25,control ($),context,capri_mod/pipeline/captrd/step3_copies.py,(module),4,same block,$setglobal java ON,
+captrdfrm.gms,30,comment,context,capri_mod/pipeline/captrd/step3_copies.py,(module),6,same block,* 1.0 Declarations: General sets and settings of global variables,
+captrdfrm.gms,32-40,control ($),context,capri_mod/pipeline/captrd/step3_copies.py,(module),7,same block,$INCLUDE 'fortrdfrm.gms',
 captrdfrm.gms,44-50,control ($),context,capri_mod/pipeline/captrd/step3_copies.py,(module),8,same block,$setglobal sim %lastSimulationYear_lst2%,
 captrdfrm.gms,54,comment,context,capri_mod/pipeline/captrd/step3_copies.py,(module),10,same block,*,
 captrdfrm.gms,58-59,comment,context,capri_mod/pipeline/captrd/step3_copies.py,(module),11,same block,* --- flags for long run scenario (=> expert_support.gms) should be selected from the following:,
 captrdfrm.gms,63-64,control ($),context,capri_mod/pipeline/captrd/step3_copies.py,(module),12,same block,$ifi not setglobal use_KWS_supports $setGLOBAL use_KWS_supports off,
+captrdfrm.gms,68-69,blank,context,capri_mod/pipeline/captrd/step3_copies.py,(module),15,same block,,
 captrdfrm.gms,778,control ($),context,capri_mod/pipeline/captrd/step3_copies.py,(module),1,named,$INCLUDE 'captrd\copy_labour_biofuel_on_presult.gms',
 coco/time_avg.gms,,file,context,capri_mod/pipeline/captrd/national_supports.py,(module),9,named,,
 coco/time_avg.gms,,file,context,capri_mod/pipeline/captrd/national_supports.py,_time_avg,137,named,,

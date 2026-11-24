@@ -495,7 +495,6 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/pipeline/captrd/clean_tiny.py', '<module>', 0.9, 'capri', 'keep', 'gams/captrd/clean_tiny.gms l. 250', 'clean_tiny: the flagged LEVL variances x (1 - 0.9)'),
   ('capri_mod/pipeline/captrd/clean_tiny.py', '<module>', 1.01, 'capri', 'keep', 'gams/captrd/clean_tiny.gms l. 199-224', 'clean_tiny: the aggregates'' bounds +1% of the level'),
   ('capri_mod/pipeline/captrd/clean_tiny.py', '<module>', 0.99, 'capri', 'keep', 'gams/captrd/clean_tiny.gms l. 199-224', 'clean_tiny: the aggregates'' bounds -1% of the level'),
-  ('capri_mod/pipeline/captrd/step3_copies.py', 'PER_1000', 0.001, 'physical', 'keep', 'gams/captrd/copy_labour_biofuel_on_presult.gms l. 24, 45', 'labour per 1000 units of the activity level'),
   ('capri_mod/pipeline/captrd/estimate_nlp.py', '<module>', 0.25, 'numerical', 'keep', NULL, 'phase1_slp''s trust region: shrink to a quarter on a rejected step (the port''s sequential LP, a solver departure)'),
   ('capri_mod/pipeline/captrd/estimate_nlp.py', '<module>', 0.75, 'numerical', 'keep', NULL, 'phase1_slp''s trust region: doubled when the step achieves 75% of the predicted reduction'),
   ('capri_mod/pipeline/captrd/estimate_nlp.py', 'TIE_BREAK_BAND', 0.1, 'numerical', 'keep', NULL, 'the tie-break''s equations as a band of a tenth of captrd.nlp_tolinfeas'),

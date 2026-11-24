@@ -992,7 +992,6 @@ INSERT INTO code_data VALUES
   ('capri_mod/pipeline/captrd/scale_dgagri.py', 'TINY', 1e-10, 1, '32', 'TINY = 1e-10'),
   ('capri_mod/pipeline/captrd/step1.py', '_CHUNK', 4000.0, 1, '141', '_CHUNK = 4000'),
   ('capri_mod/pipeline/captrd/step1.py', 'error_variance', 0.25, 1, '216', 'return np.where((pre.nobs == 1) | (pre.nobs == 2), 0.25 * pre.wave ** 2, v)'),
-  ('capri_mod/pipeline/captrd/step3_copies.py', 'PER_1000', 0.001, 1, '24', 'PER_1000 = 0.001'),
   ('capri_mod/pipeline/captrd/supports.py', 'supports', 0.05, 1, '160', 'fl = np.abs(st["wave"].to_numpy(float)) * 0.05'),
   ('capri_mod/pipeline/captrd/supports.py', 'supports', 0.9, 1, '114', 'S[gr] = np.maximum(basm * 0.9, np.nan_to_num(S))[gr]'),
   ('capri_mod/pipeline/captrd/supports.py', 'supports', 0.975, 1, '101', 'S[y_] = np.maximum(np.minimum(S, B * 1.025 ** dt), B * 0.975 ** dt)[y_]'),

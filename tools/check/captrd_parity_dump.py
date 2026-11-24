@@ -250,6 +250,25 @@ def bounds_cases(E, EB, S, data_all, read_csv, res_dir, _P):
                 out["regions"][(r, y)] = (hexd(lo), hexd(up))
     out.update(nuts2_bounds_cases(E, EB, S, B, case, mp, by_reg, tab_reg, year_tab, read_csv, _P, hexd))
     out["ms_retries"] = ms_retries_cases(E, EB, B, case, by_reg, hexd)
+    out["step3_copies"] = step3_copies_cases(E, S, B, case, tab_reg, year_tab, read_csv, _P, hexd)
+    return out
+
+
+def step3_copies_cases(E, S, B, case, tab_reg, year_tab, read_csv, _P, hexd):
+    """step3_copies.copy (copy_labour_biofuel_on_presult.gms) at every member state and year of the reference run: the
+    stored step3, the BoundData's BASM (synthetic as bounds_cases'), the stored Expert supports and p_data's INHA.
+    SHA-256 of the exact result."""
+    from capri_mod.pipeline.captrd import step3_copies as SC
+    fos = set(read_csv(_P.SETS_DIR / "fosfuels.csv", keep_default_na=False, dtype=str).d0)
+    pact = set(S.mpact) | {a for a, _o in S.pact_to_io}
+    out = {}
+    states = sorted(r for r in tab_reg["step3"] if r.endswith("000000") and not r.startswith(("EU", "A_")))
+    for ms in states:
+        for y in BOUND_YEARS:
+            D = case(ms, y, ms)
+            x = SC.copy(year_tab("step3", ms, y), lambda c, w, D=D: D.pd(c, w, "BASM"), S.mpact, pact, fos,
+                        D.res["Expert"], D.res.get("p_data", {}).get(("INHA", "LEVL"), 0.0))
+            out[(ms, y)] = _digest(hexd(x))
     return out
 
 

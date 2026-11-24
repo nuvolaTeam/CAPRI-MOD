@@ -12512,7 +12512,9 @@
    "read_by": {
     "model": [],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/captrd_parity_dump.py"
+    ],
     "tests": [
      "capri_mod/pipeline/tests/test_captrd_estimate_nlp.py"
     ]
@@ -62940,7 +62942,7 @@
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 37,
-  "physical/keep": 16,
+  "physical/keep": 15,
   "technical/keep": 37
  },
  "other_notes": {}
