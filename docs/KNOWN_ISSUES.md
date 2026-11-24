@@ -4204,9 +4204,13 @@ the main line measures and ranks. Where each acts, from the code (no runs):
     threads each; with OPENBLAS_NUM_THREADS, OMP_NUM_THREADS and MKL_NUM_THREADS at 1 before the run, the first
     supply solve took 38 s instead of 123 s (the run reached the Hessian after 82 s instead of 257 s) and the Hessian
     1,351 s instead of 2,518 s. To set before NumPy is first imported.
-  - *The Hessian step's log:* the full-EU run's longest step (22-42 minutes) writes two lines at the default level;
-    its progress line needs the "detailed" level. It should report the cache hit, the shocks done with an estimated
-    end, the regional solves done and skipped, the base re-solve's deviation and the columns with a response.
+  - *The Hessian step's log:* the full-EU run's longest step (22-42 minutes) wrote two lines at the default level;
+    its progress line needed the "detailed" level. Done on 24 November 2026 (coupling/hessian.py, the log only): at
+    the default level the step now writes the cache hit (the file, the prices, the columns with a response) or what
+    it measures (the cache key, the price shocks by kind, the regional models, the thread limits), the base re-solve's
+    time and deviation, every diagnostics.hessian_progress_every shocks the shocks done, the last one, the time and
+    an estimated end with the regional solves skipped, and at its end the columns with a response, the entries kept,
+    the base's deviation, the skipped and verified solves and the cache file written.
   - *Tests:* test_capri.py::test_capri_land_rents_at_the_2030_calibration_point (the calibration NLP's residual
     4.7279502897182036e-4, the test wants 1e-6) and test_exact_io.py::test_csv_float_reads_are_exact
     (tools/build/build_feed_bulk_grof.py:45, DEP-14) fail at the phase's start 259edec too. The second fixed on 24

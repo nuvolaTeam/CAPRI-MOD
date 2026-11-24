@@ -368,8 +368,8 @@ file); a CAPRI name on a citing line can match a statement the code does not por
   killed by the container's memory limit (the kernel's OOM log: a 3.2 GB Python process), with the full-EU run
   alongside; run alone it passed (5 min 40 s; runs/asg/a5_ad_alone.log). A suite and a full-EU run do not fit
   together in the container's memory, though `free` shows 16 GB.
-- **To do: a more verbose market supply Hessian step** (coupling/hessian.py, HessianBlock; for the main session;
-  nothing changed here). The step is the full-EU run's longest single step (1,351 s in A5's reference run with the
+- **Done (24 November 2026): a more verbose market supply Hessian step** (coupling/hessian.py, HessianBlock; the
+  project lead: "go on with the Hessian log"; the lines it writes now: K198). Before the change: the step is the full-EU run's longest single step (1,351 s in A5's reference run with the
   thread limits below; 2,518 s in the market phase's, 4,689 s with the container shared), yet at the default log
   level it writes two lines: the title at its start and "measured: N s" at its end (runs/asg/eu_ref.log l. 19-20).
   The progress line every `diagnostics.hessian_progress_every` (5) shocks is the run log's level "detailed" and only
