@@ -448,4 +448,10 @@ file); a CAPRI name on a citing line can match a statement the code does not por
   the off-branch row (A4's) merged into the on branch's rows (l. 208-243, 245-255, both "moved in A4"), so A4 has 34
   rows and the phase 302; 1,159 rows; a new row for GWPCH4ENT_'s standard form ("equation (phases 1-2)"); the four
   EMISCALC and DATA CH4ENT rows ghg_tax.py's symbol citation had matched are gone (no longer cited).
+- **The thread limits, fixed** (24 November 2026; the project lead: "go on with the thread limits fix"; 2d8d0fcd,
+  K198): OPENBLAS_NUM_THREADS, OMP_NUM_THREADS and MKL_NUM_THREADS 1 by default (capri_mod/__init__.py, tools/run/'s
+  model scripts, the tests' conftest; the environment's value kept); a forked worker 1 thread after a BLAS call (7
+  before). The five-unit Green Deal run without and with the limits: equal at `--rtol 0` but for the metadata. The
+  sentence of the Threads item above ("Whether the results depend on the thread count is not checked here") is
+  answered: they do not, on this run.
 

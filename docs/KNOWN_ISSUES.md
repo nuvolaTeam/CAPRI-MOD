@@ -4203,7 +4203,13 @@ the main line measures and ranks. Where each acts, from the code (no runs):
     (capri_regional_nlp.py, after NumPy's import, too late for OpenBLAS). On a 4-core machine the workers ran 7-10
     threads each; with OPENBLAS_NUM_THREADS, OMP_NUM_THREADS and MKL_NUM_THREADS at 1 before the run, the first
     supply solve took 38 s instead of 123 s (the run reached the Hessian after 82 s instead of 257 s) and the Hessian
-    1,351 s instead of 2,518 s. To set before NumPy is first imported.
+    1,351 s instead of 2,518 s. Fixed on 24 November 2026: capri_mod/__init__.py sets the three to 1 on import (a
+    value the environment sets is kept; a warning when NumPy came first), tools/run/'s model scripts before their
+    imports, the tests' conftest imports capri_mod first, the run manifest records them
+    (tests/test_thread_limits.py: one thread in a forked worker, 7 before). The results do not depend on it: the
+    five-unit Green Deal run (NO06, FI13, FR72, PL51, DE21) without the limits (8e6a5dc3) and with them (2d8d0fcd)
+    equal at `--rtol 0` but for the run's metadata, both converged in 21 iterations, each measuring its Hessian (the
+    workers 4-7 threads against 1; 1,226 s against 1,121 s with both runs sharing the 4 cores).
   - *The Hessian step's log:* the full-EU run's longest step (22-42 minutes) wrote two lines at the default level;
     its progress line needed the "detailed" level. Done on 24 November 2026 (coupling/hessian.py, the log only): at
     the default level the step now writes the cache hit (the file, the prices, the columns with a response) or what
