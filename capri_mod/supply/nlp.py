@@ -607,8 +607,13 @@ class NLPBlock:
             self.sv.wc_solved = float(ab["catc"])
             # the catch crop area, catcMiti_ (with the option a choice on the current land, K186)
             _area = float(ab.get("catc_area", self.sv.wc_solved * _c["uaa"]))
+            # the catch crops' BioFix N the regional model counts (t N; fertDistCres_ and e_BIOFIX, K204): none in
+            # CAPRI's reference form (K188), else on the whole area ("capri") or above the base share ("increment")
+            _inc = str(_settings().get("supply.catch_crop_biofix_area")) == "increment"
+            _bfn = (0.0 if _c.get("ref_form")
+                    else float(_c["biofix"]) * 1000.0 * (_area - (_c["m0"] * _c["uaa"] if _inc else 0.0)))
             self.res.cover_solved = {"req": _area, "uaa": _c["uaa"], "base": _c["m0"] * _c["uaa"],
-                                  "delta": _area - _c["m0"] * _c["uaa"], "biofix": _c["biofix"],
+                                  "delta": _area - _c["m0"] * _c["uaa"], "biofix": _c["biofix"], "biofix_n": _bfn,
                                   "share": self.sv.wc_solved, "lb_share": float(_c.get("lb", 0.0)),
                                   "max_share": float(_c["ub"]), "endogenous": True,
                                   "cascade_share": float(_c["m0"]) if _c.get("fixmiti") else self.sv.wc_solved,

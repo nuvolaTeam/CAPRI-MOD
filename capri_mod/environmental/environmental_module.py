@@ -95,6 +95,8 @@ class EnvironmentalIndicators:
     n_mineral_input: float = 0.0
     n_organic_input: float = 0.0
     n_fixation: float = 0.0
+    #: of which the catch crops' BioFix N (CAPRI's e_BIOFIX CATC term, supply_model.gms l. 1442), t N
+    n_fixation_catch_crops: float = 0.0
     n_deposition: float = 0.0
     n_crop_uptake: float = 0.0
     n_animal_products: float = 0.0
@@ -393,11 +395,17 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             _d = float(_ma) - float(nb["n_mineral_input"])
             nb["n_mineral_input"] = float(_ma)
             nb["n_surplus"] = float(nb["n_surplus"]) + _d
-        # CAPRI's catch crops beyond the base share (the Farm-to-Fork requirement, or the share the NLP form chose:
-        # supply result's cover_crops): their N (BioFix x area) is an input of the balance and supplies crop need;
-        # with mineral N allocated in the supply model it is already net of it, else it replaces mineral N here
+        # CAPRI's catch crops (the share the NLP form chose, or the Farm-to-Fork requirement: supply result's
+        # cover_crops): their N (BioFix x area) is an input of the balance and supplies crop need; with mineral N
+        # allocated in the supply model it is already net of it, else it replaces mineral N here. The NLP form
+        # reports the BioFix N its rows count (biofix_n: none in CAPRI's reference form, K188; on the whole area,
+        # e_BIOFIX l. 1442, K204); the requirement's form the N of the area above the base share
         _cv = getattr(supply_result, "cover_crops", None) or {}
-        _cn = float(_cv.get("delta", 0.0) or 0.0) * float(_cv.get("biofix", 0.0) or 0.0) * 1000.0
+        if "biofix_n" in _cv:
+            _cn = float(_cv.get("biofix_n", 0.0) or 0.0)
+        else:
+            _cn = float(_cv.get("delta", 0.0) or 0.0) * float(_cv.get("biofix", 0.0) or 0.0) * 1000.0
+        nb["n_fixation_catch_crops"] = _cn
         # CAPRI's legume share in temporary grassland (envind/leg_share.gms): OFAR's fixation x othImpact x v more
         # (e_BIOFIX, supply_model.gms l. 1456-1457), an input of the balance; its N need is the regional model's (the
         # mineral N allocated there is net of it)
@@ -489,7 +497,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
                 if _f > 0:
                     _n2o_t -= _n2o.GWPN2OHIS_idle(_f, float(_h.get(f"ef_n2o_{_c}", 0.0) or 0.0))
             ghg["N2O_HIS"] = max(0.0, _n2o_t) * GWP_N2O      # 1000 ha x t N2O/ha = kt N2O -> kt CO2-eq
-        # crop-residue N2O of the added catch crops (CAPRI gases.gms N2OCRO: BioFix x area x EF1)
+        # crop-residue N2O of the catch crops' BioFix N counted above (CAPRI gases.gms N2OCRO: BioFix x area x EF1)
         if _cn != 0:
             ghg["N2O_CRO"] = ghg.get("N2O_CRO", 0.0) + _n2o.GWPN2OCRO_(_cn / 1e3, EF_SOIL_N2O_DIRECT, GWP_N2O)   # t N -> kt
         # CAPRI's technology effects on manure N2O (v_emiLoss in gases.gms; manure_n2o_tech.csv):
@@ -673,6 +681,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             n_mineral_input=nb["n_mineral_input"],
             n_organic_input=nb["n_organic_input"],
             n_fixation=nb["n_fixation"],
+            n_fixation_catch_crops=float(nb.get("n_fixation_catch_crops", 0.0) or 0.0),
             n_deposition=nb["n_deposition"],
             n_crop_uptake=nb["n_crop_uptake"],
             n_animal_products=nb["n_animal_products"],

@@ -14,8 +14,8 @@ the file computes, animal by animal:
 One function per CAPRI statement block, in CAPRI's order; ManState holds CAPRI's symbols of the block (p_dataCopy,
 p_meanLiveWgt, p_fatngDays, ...) as dictionaries; req_or_man_fnc_man runs the blocks in order. CAPRI's %yr_A% and %yr%
 are both "Y" in 'man' mode, so the per-head parameters carry no technology index; p_crprReq and p_MANN_A carry CAPRI's
-technology A. The literal tables of feed/feed_decl.gms are data (capri_data/2017/feed/manure_output_params.csv,
-tools/build/build_manure_output_params.py), with the pig-fattening requirement tables of CAPRI's dat/feed/porkreq.gms
+technology A. The literal tables of feed/feed_decl.gms are data (capri_data/2017/feed/req_or_man_params.csv,
+tools/build/build_req_or_man_params.py), with the pig-fattening requirement tables of CAPRI's dat/feed/porkreq.gms
 (p_pigsReqLowWgt, p_pigsReqHighWgt); a call without them leaves the fattened pigs out (ManState.not_computed, see
 p_finalLiveWgt_PIGF).
 

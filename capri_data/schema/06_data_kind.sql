@@ -120,7 +120,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/2017/feed/fodder_balance_2017.csv', 'coefficients', 'by file: fodder per ha and its base value'),
   ('capri_data/2017/feed/fodder_balance_2017_use.csv', 'coefficients', 'by file: feed per head'),
   ('capri_data/2017/feed/livestock_feed_coef.csv', 'coefficients', 'by file: feed per head'),
-  ('capri_data/2017/feed/manure_output_params.csv', 'parameters', 'by file: CAPRI''s literal parameters of its manure output functions'),
+  ('capri_data/2017/feed/req_or_man_params.csv', 'parameters', 'by file: CAPRI''s literal parameters of its manure output functions'),
   ('capri_data/2017/market/armington_rho.csv', 'coefficients', 'by file: CAPRI''s market parameters'),
   ('capri_data/2017/market/bilateral_flows_2017.csv', 'base', 'by file: 2017 market data'),
   ('capri_data/baselines/capri_greendeal_ref/1730/market/bilateral_flows_2030.csv', 'reference', 'by file: CAPRI''s 2030 market'),

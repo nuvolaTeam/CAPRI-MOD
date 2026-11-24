@@ -57,16 +57,18 @@ SELECT DISTINCT animal_bulk FROM feed_livestock_feed_coef
 WHERE split_part(animal_bulk, '_', 1) NOT IN (SELECT code FROM model_activities WHERE kind = 'animal')
    OR split_part(animal_bulk, '_', 2) NOT IN ('cereals', 'protein', 'energy');
 
--- file: capri_data/2017/feed/manure_output_params.csv
-CREATE TABLE feed_manure_output_params (
-    symbol VARCHAR NOT NULL CHECK (symbol IN ('p_NutContManureKgM3', 'p_addExcrPerkgMilk', 'p_carcassShare', 'p_startWgt', 'p_reqfcnlim', 'p_LUUnits', 'p_pigsReqHighWgt', 'p_pigsReqLowWgt')),
-    key1 VARCHAR NOT NULL,                   -- CAPRI's first key (manure type ANTYP, manure row, CAPRI activity)
-    key2 VARCHAR,                            -- CAPRI's second key (manure row MANN/MANP/MANK; DAYS/DAILY of p_reqfcnlim; the pig tables' item)
-    key3 VARCHAR,                            -- p_reqfcnlim's bound (up, lo)
-    value DOUBLE NOT NULL                    -- one row per symbol and key (key2, key3 empty where the symbol has fewer)
+-- file: capri_data/2017/feed/req_or_man_params.csv
+CREATE TABLE feed_req_or_man_params (
+    symbol VARCHAR NOT NULL CHECK (symbol IN ('p_NutContManureKgM3', 'p_addExcrPerkgMilk', 'p_carcassShare', 'p_startWgt', 'p_reqfcnlim', 'p_LUUnits', 'p_pigsReqHighWgt', 'p_pigsReqLowWgt', 'p_NutContFeedRef', 'p_convFactEnergyUnitsToEnne', 'p_coeffEnergyForGrowth')),
+    key1 VARCHAR NOT NULL,                   -- CAPRI's first key (manure type ANTYP, manure row, CAPRI activity, energy unit REQSE)
+    key2 VARCHAR,                            -- CAPRI's second key (manure row MANN/MANP/MANK; DAYS/DAILY of p_reqfcnlim; the pig tables' item; p_NutContFeedRef's technology A)
+    key3 VARCHAR,                            -- p_reqfcnlim's bound (up, lo); p_NutContFeedRef's requirement
+    key4 VARCHAR,                            -- p_NutContFeedRef's feed aggregate (FeedRough, FeedCons, FeedOth, FeedTotal)
+    key5 VARCHAR,                            -- p_NutContFeedRef's MIN, MEAN or MAX
+    value DOUBLE NOT NULL                    -- one row per symbol and key (the keys after the symbol's last empty)
 );
-COMMENT ON TABLE feed_manure_output_params IS 'CAPRI''s literal parameters of its manure output functions, star 3.0: feed/feed_decl.gms''s p_NutContManureKgM3 (kg N, P2O5, K2O per m3 of cattle, swine and poultry manure), p_addExcrPerkgMilk (kg per kg of milk), p_carcassShare (carcass over live weight), p_startWgt (kg live weight at the start of fattening or raising), p_reqfcnlim (the requirement functions'' limits on days and daily gains, g per day), CAPRI''s p_LUUnits (livestock units per head, dat/policy/livestock_units.gms), and the fattened pigs'' requirements by weight class p_pigsReqHighWgt and p_pigsReqLowWgt (key1 the class, key2 the item: XDUF days, XALW kg live weight, CRPR kg crude protein, ...; dat/feed/porkreq.gms); read by capri_mod/feed/equations/req_or_man_fnc.py (feed/req_or_man_fnc.gms with %1 = man; tools/build/build_manure_output_params.py)';
-INSERT INTO value_units VALUES ('feed_manure_output_params', 'value', NULL, 'open', 'the unit of its symbol (the comment)');
+COMMENT ON TABLE feed_req_or_man_params IS 'CAPRI''s literal parameters of its requirement and manure output functions, star 3.0: feed/feed_decl.gms''s p_NutContManureKgM3 (kg N, P2O5, K2O per m3 of cattle, swine and poultry manure), p_addExcrPerkgMilk (kg per kg of milk), p_carcassShare (carcass over live weight), p_startWgt (kg live weight at the start of fattening or raising), p_reqfcnlim (the requirement functions'' limits on days and daily gains, g per day), p_NutContFeedRef (the rations'' typical nutrient densities per kg dry matter by activity, technology, requirement and feed aggregate: MIN, MEAN, MAX), p_convFactEnergyUnitsToEnne (an energy unit over net energy for lactation), p_coeffEnergyForGrowth (IPCC''s coefficient of the energy for growth, by animal), CAPRI''s p_LUUnits (livestock units per head, dat/policy/livestock_units.gms), and the fattened pigs'' requirements by weight class p_pigsReqHighWgt and p_pigsReqLowWgt (key1 the class, key2 the item: XDUF days, XALW kg live weight, CRPR kg crude protein, ...; dat/feed/porkreq.gms); read by capri_mod/feed/equations/req_or_man_fnc.py and req_or_man_fnc_req.py (feed/req_or_man_fnc.gms with %1 = man and req; tools/build/build_req_or_man_params.py)';
+INSERT INTO value_units VALUES ('feed_req_or_man_params', 'value', NULL, 'open', 'the unit of its symbol (the comment)');
 
 -- file: capri_data/2017/feed/feed_ration_2017.csv
 CREATE TABLE feed_feed_ration_2017 (

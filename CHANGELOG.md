@@ -447,7 +447,7 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   MANP and MANK from CAPRI's fixed manure contents, the literature crude-protein requirement p_crprReq; MANN =
   max(0, p_crprReq x p_animExcrProtCorrFact / 6 - CRPR_EXPT) by technology). Its literal tables (feed/feed_decl.gms:
   p_NutContManureKgM3, p_addExcrPerkgMilk, p_carcassShare, p_startWgt, p_reqfcnlim; CAPRI's p_LUUnits) in
-  capri_data/2017/feed/manure_output_params.csv (tools/build/build_manure_output_params.py). Checked on the 2030
+  capri_data/2017/feed/req_or_man_params.csv (tools/build/build_req_or_man_params.py). Checked on the 2030
   Green Deal reference run's start (sim_ini_21730 at "Y"; tools/check/check_manure_output_2030.py): CAPRI's 2030
   MANN, MANP and MANK in every unit (but the member states' sum rows) and all 18 animal activities, relative
   differences below 3e-14; on CAPREG's 2017 data the 2017 MANP and MANK of the NUTS 2 units to 3e-7. The fattened pigs'
@@ -456,6 +456,64 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   CAPRI's; not yet called by the projection (its year's correction factor is open: K179). The text of K179 and
   three comments said CAPRI computes the manure "from the rations" or MANP and MANK "from the feed's P and K":
   corrected (MANN from the requirement, MANP and MANK from the yields, days and weights).
+- **CAPRI's requirement functions and a simulation's start requirements ported (24 November 2026; K179; the feed
+  calibration plan's S1 and S2, claude/feed_calibration_port_plan_2026-11-24.md):** feed/req_or_man_fnc.gms in its
+  requirement mode (%1 = req) as capri_mod/feed/equations/req_or_man_fnc_req.py (per animal activity the days, weights,
+  gains and yields, the energy, protein, dry matter, fibre and lysine requirements, the energy components, the feed
+  shares and the rations' nutrient densities); capmod/def_requirements.gms (CAPREG's 2017 corrections, the yearly
+  technical progress in feeding, the shares shifted with the yield growth), baseline/adjust.gms (the baseline feed
+  calibration's corrections, the baseline's feed coefficients as the start) and the requirement blocks of
+  capmod/create_sim_ini_gdx.gms (l. 421-461: the shares widened by the feeds' rows, the member states' days) as
+  def_requirements.py, adjust.py and create_sim_ini_gdx.py; one function per CAPRI statement block with its GAMS quote.
+  The literal tables in capri_data/2017/feed/req_or_man_params.csv (renamed from manure_output_params.csv, the builder
+  to build_req_or_man_params.py; added p_NutContFeedRef, p_convFactEnergyUnitsToEnne, p_coeffEnergyForGrowth and the
+  columns key4, key5). Checked on sim_ini_21730: the requirement call's literature requirements, days, energy
+  components, crude protein and nutrient densities in every regional unit (tools/check/check_requirements_2030.py) and,
+  with CAPREG's corrections (reqrel_17<CC>) and the baseline calibration's (fedtrm_21730<CC>defaulta), the start's
+  p_animReq, the manure's protein factor, the minimum and maximum feed shares, the production days and DATA's days in
+  249 of the 250 units (AL has no calibration file; tools/check/check_sim_ini_requirements_2030.py), relative
+  differences below 4e-15. Found on the way: the member states' days at the requirement call are CAPTRD's (DATA
+  "TRD"; sim_ini's "Y" days are their regions' aggregates); sim_ini's requirements are def_requirements' times the
+  baseline calibration's corrections (DE21's dairy cows: FILG x 2.961, FICO x 0.726, DRMX x 0.991); the feeds' rows of
+  p_animReq, 1 from the requirement function times 1.005 a year (about 1.067 at 2030), turn CAPRI's minimum feed
+  shares slightly negative and double its maximum shares at the start (sim_ini_21730: DE21's dairy cows' cereals
+  minimum -0.0106), ported as CAPRI has it (kept: the project lead, 24 November 2026). The raw set: CAPREG's reqrel_17<CC> of all 35 countries (27 added) and the
+  baseline calibration's fedtrm_21730<CC>defaulta of 34 countries (added; CAPRI results, for the checks). Not yet the
+  calibration itself (baseline/fedtrm_*, S3) nor the projection's use (S4).
+- **K204, the catch crops' BioFix N on their whole area (24 November 2026; from the project lead's comparison of the
+  N fixation with CAPRI):** in the runs where the catch crops' BioFix is on (the Green Deal group, an emission tax) the
+  regional model counted it on the area above the base share; CAPRI's e_BIOFIX (supply_model.gms l. 1442) and
+  fertDistCres_ (l. 1073-1079) count the whole CATC area, and its 2030 reference has none of it (K188), so the base's
+  2.0 Mha (about 61 kt N in the EU) were missing from the Green Deal's N inputs, residue pool and N2OCRO. Now CAPRI's
+  term (`supply.catch_crop_biofix_area = "capri"`; "increment" the former form). The reported fixation takes the N the
+  regional model counts and splits it (n_fixation_catch_crops); the runs' results hold the regional catch crops
+  (cover_crops_regional). On the comparison itself: CAPRI's per-crop dataOut BIOFIX leaves the catch crops out (EU
+  -28.5% in the Green Deal); with them, as e_BIOFIX has them, CAPRI's fixation moves -0.1%, as the model's did. The
+  regional spread of the catch crops is open. A five-region Green Deal probe (PL41, RO04, BG03, ES41, IR02): the
+  baseline unchanged; IR02, at its requirement, +2,079 t BioFix N and -1,968 t mineral N; PL41's catch crops 642 ->
+  494 thousand ha (CAPRI 318); the requirement is CAPRI's in all five, and the model takes catch crops above it in
+  PL41, RO04 and BG03 where CAPRI does in BG03 and IR02 (K204, item 2: the value of the residue N per region). The
+  results' item list declares n_fixation_catch_crops (capri_data/codes/results_items.csv).
+- **The projection test's EU units (24 November 2026):** test_projection_starts_from_capri_reference_and_calibrates
+  summed the EU's 2030 areas over every unit but Norway's; since CAPRI's non-EU supply countries became the default
+  the same day (e95681c: the UK, Turkey, the Western Balkans), its soft wheat was 30,462 thousand ha against CAPRI's
+  EU27 21,476. The EU's units now by capri_mod.data.definitions.is_eu; the test passes. The model was not affected.
+- **The baseline feed calibration's corrections from its solution ported (24 November 2026; the feed calibration
+  plan's S3a):** the statements after CAPRI's m_hpdFeed solve (feed/fedtrm_cal_pw.gms l. 762-812: the energy and
+  protein requirements recomputed from the solution's ration, the inequality requirements at the lower of the
+  requirement and the ration, DRMX at most -1.2 x DRMN) and baseline/fedtrm_fin.gms l. 47-52 (the corrections
+  p_animReqCorrFac, the protein factor) as capri_mod/feed/equations/fedtrm_cal_pw.py (after_solve) and fedtrm_fin.py.
+  Checked with CAPRI's calibrated feed input coefficients (sim_ini_21730's v_feedInpCoeff) and the port's
+  requirements before the calibration (tools/check/check_fedtrm_after_solve_2030.py): every correction of
+  fedtrm_21730<CC>defaulta in 249 of 250 units (all requirements and the feeds' rows), the calibrated energy and
+  protein requirements and the protein factor of sim_ini_21730, relative differences below 4e-15. What the
+  calibration still has to produce is its solution, the feed input coefficients (m_hpdFeed and its priors: S3b).
+- **The KKT market supply Hessian measured (24 November 2026):** `market.hessian_method = "kkt"` against CAPRI's
+  re-solves on the full EU (the 2030 Green Deal baseline's Hessian): 2,748 s against 2,811 s; the entries above 1e-3 a
+  median 4.4% apart (the 90th percentile 94%; some cross-price entries of the cereals of opposite sign); the EU's
+  own-price responses within 1-3% but oats (-19%), pulses and rye (-13%). Both are far from symmetric (median
+  |H - H'| / |H| 0.96 and 0.92). The default stays CAPRI's method (the project lead, 24 November 2026;
+  docs/DEPARTURES_FROM_CAPRI.md).
 - **D2 the default (24 November 2026, the project lead's decision; register DEP-7 in its history):**
   `run.supply_countries_outside_eu` defaults to CAPRI's list of its 2030 Green Deal runs, Norway, the UK, Turkey and
   the Western Balkans (250 units; until now Norway alone, 221). Measured like for like before the switch (full Green

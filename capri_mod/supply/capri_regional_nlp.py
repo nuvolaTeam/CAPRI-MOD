@@ -1003,13 +1003,15 @@ class CapriRegionalNLP:
                 ie = self.cap_rows["ecoSetAside"]
                 sce = max(float(eco.get("scale", 1.0)), 1e-6)
                 g_rows[ie] = ecoSetAside_catc(g_rows[ie], self._pv(float(eco["catc_w"]) / sce) * uaaEqu, m)
-            # fertDistCres_'s winter cover term, from the base share (t N; nutrients.py): the catch crops' BioFix N in
-            # the arable residue pool and the gross balance only with CAPRI's %ghgAbatement% on
-            # (supply_model.gms l. 1073-1079), so not in its reference form (K188)
+            # fertDistCres_'s winter cover term (t N; nutrients.py): the catch crops' BioFix N in the arable residue
+            # pool and the gross balance only with CAPRI's %ghgAbatement% on (supply_model.gms l. 1073-1079), so not
+            # in its reference form (K188); on the whole catch-crop area as CAPRI's (supply.catch_crop_biofix_area
+            # "capri", K204), or on the area above the base share ("increment", the form until 24 November 2026)
             self._catc_ncoef = uaa * 1000.0 * float(cs["biofix"])                        # t N per unit share at base
+            _catc0 = m0 * uaa if str(_settings().get("supply.catch_crop_biofix_area")) == "increment" else 0.0
             self.catc_n = (None if cs.get("ref_form")
                            else fertDistCres_catcBioFix(self._pv(1000.0 * float(cs["biofix"])), catc_lev,
-                                                        self._pv(m0 * uaa)))
+                                                        self._pv(_catc0)))
             gt_ = spec.get("ghg_min")
             if gt_ and self.catc_n is not None:
                 # CAPRI's emission tax on the catch crops' crop-residue N2O (N2OCRO: BioFix x CATC x EF1 x 44/28, in

@@ -82,10 +82,11 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K176](#k176) | Since K167 the land columns of the N-surplus row took the row's right-hand side per ha as the target per ha, which holds the region's base manure trade (a level of the region): importers' land earned too little, exporters' too much | fixed (18 November 2026) |
 | [K177](#k177) | The NLP calibration put minus the entitlement cut into the overshoot column's linear term where the QP's start held the base's rounding above the trend area: the overshoot was free in BG01, HU32, LV, PL11, PL31, PL41 and RO05 (about 199,000 thousand ha, a zero dual) | fixed (18 November 2026) |
 | [K178](#k178) | The 2030 runs took the young-animal coefficients of 2017 (calves per cow, replacements, piglets per sow): CAPRI's INPANI_ takes the simulation year's, DATA(.., "Y"); Spain's suckler cows 0.83 calves per head against CAPRI's 2030 0.90, the EU's piglet balance 6.6% short at the 2030 base | fixed (18 November 2026) |
-| [K179](#k179) | The 2030 runs took the 2017 manure N, P2O5 and K2O per head (dairy cows' N raised with the milk yield): CAPRI computes them from the simulation year's rations before it solves; the EU's N excretion at the 2030 base 5.4% above CAPRI's 2030 EXCRET (dairy cows +13%) | fixed (18 November 2026) |
+| [K179](#k179) | The 2030 runs took the 2017 manure N, P2O5 and K2O per head (dairy cows' N raised with the milk yield): CAPRI computes them from the simulation year's herd data (its requirement functions) before it solves; the EU's N excretion at the 2030 base 5.4% above CAPRI's 2030 EXCRET (dairy cows +13%) | fixed (18 November 2026) |
 | [K190](#k190) | The grassland need took CAPRI's SQRT(1 +/- 0.2) split twice: the data's need per ha (CAPRI's reported 2030 need per crop) already carries it, and K160 applied it again; ES41's base manure K on grassland 53.6 against CAPRI's 42.0 kt | fixed (20 November 2026); the intensive grassland's weaker Green Deal response that followed traced to K191 (the grassland's removal and fixation in the N-surplus row) |
 | [K186](#k186) | The catch crops' winter cover option scales with the fixed base crop area; CAPRI's catcMiti_ and GHG_Mit_Cost_ scale it with the current land (landTypesNoSlak, uaaEqu). Not active in CAPRI's Green Deal step (its winter cover share fixed at 1e-6, CATC a free activity) | fixed (21 November 2026): the option's catch crops and cost on the current land, as CAPRI |
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | closed (21 November 2026), explained: the young-animal block is CAPRI's (values, coefficients, premiums' response, clearing); the female calves' gap is the suckler cows' smaller Green Deal fall, which follows the N-surplus dual below CAPRI's (K196) |
+| [K204](#k204) | The catch crops' biological N fixation counted only the area above the base share in the runs where it is on (the Green Deal group, an emission tax), where CAPRI's e_BIOFIX and fertDistCres_ count the whole catch-crop area: the base's 2.0 Mha (about 61 kt N in the EU) left out of the Green Deal's N inputs, residue pool and N2OCRO; the reported fixation not split, so CAPRI's per-crop dataOut BIOFIX (without the catch crops) looked 28 points apart | fixed (24 November 2026): the count; the regional allocation open (the value of the residue N per region) |
 | [K203](#k203) | The low-N feeding option's manure N effect took CAPRI's 2017 manure N and N in products (sim_ini_21730's MANN at BAS and CRPR_EXPT at Y, both 2017 values), where CAPRI's low_n_feed.gms runs on the values its simulation has just recomputed for 2030 (req_or_man_fnc.gms in its manure mode) | fixed (24 November 2026): the 2030 reference's MANN and calc_nexport.gms's CRPR_EXPT on its 2030 items |
 | [K202](#k202) | The N in livestock products (the report item n_animal_products) at 2030 was the 2017 value per head x the yield factor, where CAPRI's simulation recomputes it with calc_nexport.gms on its 2030 items; and the 2017 value of the bulls and the fattening heifers came from CAPRI's aggregates BULF and HEIF, whose CRPR_EXPT in res_17 does not add up (LEVL x CRPR_EXPT 0.606 and 0.617 of their members' sum at the median) | fixed (24 November 2026): calc_nexport.gms on CAPRI's 2030 items at 2030; the elementary activities in 2017 |
 | [K201](#k201) | The 2030 rations of the bulls and heifers were not CAPRI's 2030: the 2030 ration builder takes the 2017 aggregates BULF and HEIF, which have no DAYS in CAPRI's 2030 reference, so the bulls got no 2030 factor (their requirements and feeds 2017 x the yield factor f; their energy requirement's 2030/2017 factor 5.8% above CAPRI's at the median) and the heifers' 2030 total is the replacement heifers' (HEIR) alone | fixed (24 November 2026): the factors from CAPRI's elementary activities in both years (BULL, BULH; HEIL, HEIH, HEIR) |
@@ -4307,6 +4308,75 @@ the Western Balkans besides Norway) did not converge.
   in both).
 - **Status:** fixed (24 November 2026).
 
+<a id="k204"></a>
+### K204: The catch crops' BioFix N on the area above the base share (found 24 November 2026)
+
+Found from the project lead's comparison of the full-EU Green Deal run of 23 November (runs/full_gd_9867411.pkl, and
+the same in runs/full_gd_d2fix24.pkl) with CAPRI: the EU's N fixation -0.1% in the model against -28.5% in CAPRI's
+dataOut. CAPRI's per-crop rows DATA(crop, "BIOFIX") (GRAE, GRAI, OFAR, PULS, SOYA) times their levels give 1,653,746 t N
+in its 2030 reference and 1,183,146 t in the Green Deal (res_2_1730greendeal_refdefaulta,
+res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA); the model's crops give the same at the
+base (1,653,853 t) and its areas move as CAPRI's (GRAE +47.5%, CAPRI +51.8%; GRAI -50.7%, -54.8%; OFAR -29.2%,
+-28.9%; at CAPRI's reference rates per ha its Green Deal areas give -25.8%). The rest is the catch crops: CAPRI's
+e_BIOFIX has their term,
+
+```gams
+       + (p_ghgMiti(RUNR,"CATC","WinterCov","othImpact","BioFix") * v_actLevl(RUNR,"catc","T")) $ SAMEAS(FNUT,"NITF")
+                                                                        (supply/supply_model.gms l. 1442, e_BIOFIX)
+```
+
+with %ghgAbatement% on (the Green Deal; not CAPRI's reference, K188, which reports no WinterCov and no N2OCRO for
+CATC), and the catch crops rise tenfold in both (CAPRI 1,997 -> 20,461 thousand ha, the model 1,996 -> 19,834). With
+the catch crops at the model's BioFix per ha (cover_crops.csv biofix_t_n_ha, CAPRI's p_ghgMiti) CAPRI's fixation is
+1,714,404 -> 1,713,043 t N (-0.1%), the model's 1,653,853 -> 1,651,501 (-0.1%). Two differences remained:
+
+1. **The base's catch crops.** The model counted the BioFix N of the catch crops above the base share only
+   (nutrients.py fertDistCres_catcBioFix: CATC - CATC0, "the base's catch crops are in the residue pool's data"), in the
+   residue pool, the N-surplus row, the reported fixation and N2OCRO. CAPRI's 2030 reference has no catch crops' BioFix
+   in its residue pool (K188), so a run that switches it on counts the base's catch crops too: about 61 kt N in the EU
+   (PL41 5.7 kt, IR02 2.1) the Green Deal's N balance left out.
+2. **Their regions.** The EU totals are close, the regions are not: from the reported fixation, the model's Green Deal
+   catch crops are about 630 thousand ha in PL41 (CAPRI 318), 700 in RO04 (160), 450 in BG03 (621), 170 in IR02 (310);
+   the results held the EU totals only.
+
+- **Effect:** the Green Deal's N inputs and residue pool (the base's catch crops' BioFix in its N-surplus row and in the
+  crops' N supply), the reported fixation and the catch crops' N2OCRO. The baseline does not change (no catch crops'
+  BioFix in CAPRI's reference form). Measured on a probe of 24 November 2026 (CAPRI's Green Deal 2030 step,
+  capri_comparison.toml, PL41, RO04, BG03, ES41 and IR02 as the EU, 12 outer iterations, not converged: a five-region
+  market, so the levels are indicative), the two forms side by side:
+
+  | Unit | base catch crops | requirement | area "capri" | area "increment" | CAPRI's Green Deal | BioFix N "capri" / "increment", t | mineral N "capri" / "increment", t |
+  |---|---|---|---|---|---|---|---|
+  | PL41 | 147.6 | 316.6 | 494.1 | 641.7 | 318.1 | 18,866 / 18,866 | 67,116 / 67,116 |
+  | RO04 | 0 | 160.0 | 680.4 | 680.4 | 160.0 | 13,185 / 13,185 | 20,033 / 20,034 |
+  | BG03 | 15.7 | 106.1 | 470.6 | 470.6 | 621.4 | 9,410 / 9,096 | 71,932 / 72,231 |
+  | ES41 | 0 | 545.5 | 545.5 | 545.5 | 545.5 | 11,583 / 11,583 | 112,729 / 112,726 |
+  | IR02 | 57.8 | 209.2 | 209.2 | 209.2 | 310.2 | 7,522 / 5,443 | 100,698 / 102,666 |
+
+  (thousand ha; t N.) Where the catch crops stay at the requirement (IR02) the base's catch crops add their BioFix N
+  (IR02 +2,079 t) and the crops take about as much less mineral N (-1,968 t). Where the model takes catch crops above
+  the requirement, PL41 stops at the same BioFix N in both forms (18,866 t: 494 thousand ha counted whole, 642 counted
+  above the base), so counting the base's catch crops lowers its area (642 -> 494, CAPRI 318); RO04 and BG03 stop at
+  the same area in both forms, 42.5% and 52.0% of their UAAR, which looks like the land the winterCover_ row leaves
+  (to confirm). The requirement itself is CAPRI's in all five (PL41 316.6 against CAPRI's level 318.1, RO04 and ES41
+  equal).
+- **The regions (item 2), traced so far:** the requirement is not the cause. CAPRI keeps PL41, RO04 and ES41 at the
+  requirement and takes more than it in BG03 (621 against 106) and IR02 (310 against 209); the model takes more in
+  PL41, RO04 and BG03 and keeps IR02 and ES41 at it. Above the requirement a catch crop's value is its BioFix N in the
+  residue pool against its input cost (the Green Deal group fixes the winter cover option, so no cost curve: K170; the
+  reported mitiPMP of CATC is the fixed option's cost, reports/sol_simy.gms l. 1314-1319, not a term on CATC). In
+  PL41 the area stops where more residue N is no longer worth its cost; in RO04 and BG03 the model takes about all the
+  land it can, where CAPRI keeps RO04 at the requirement. So the gap is in the value of the residue pool's N per region
+  (the N-surplus row's dual and the residues' availability against CAPRI's), to trace on the full-EU Green Deal run.
+- **In 9t:** -
+- **Status:** fixed 24 November 2026: `supply.catch_crop_biofix_area = "capri"` (BioFix x the whole catch-crop area
+  wherever it is on, CAPRI's term; "increment" the former form): capri_regional_nlp.py's catc_n, nlp.py's cover_solved
+  (biofix_n, the N the regional model counts), environmental_module.py's fixation from it (and n_fixation_catch_crops,
+  the catch crops' part of n_fixation); the runs' results hold the regional catch crops (cover_crops_regional: the
+  base's and the run's area, the BioFix N, UAAR and the requirement's share). The regional allocation (item 2) is
+  open: the value of the residue N per region, to trace on the next full-EU Green Deal run. The requirement's form (abatement.py _cover_n_increment, the conic form's
+  rows) keeps the area above the base share.
+
 <a id="k203"></a>
 ### K203: The low-N feeding option's manure N effect at 2030 (found and fixed 24 November 2026; KNOWN_ISSUES K194, K202)
 
@@ -5154,17 +5224,27 @@ manure N per head the duals implied by CAPRI's animals were consistent across an
   adoption at its 2030 base). With a trajectory other than CAPRI's (captrd_2030) the manure per head is CAPRI's 2030
   one while the milk yields are the trajectory's: the port of req_or_man_fnc.gms gives such a baseline its own. The
   port exists since 24 November 2026 (capri_mod/feed/equations/req_or_man_fnc.py, 'man' mode, one function per CAPRI
-  statement block; its literal tables capri_data/2017/feed/manure_output_params.csv, tools/build/
-  build_manure_output_params.py): on the reference run's start (sim_ini_21730 at "Y", CRPR_EXPT by the calc_nexport
+  statement block; its literal tables capri_data/2017/feed/req_or_man_params.csv, tools/build/
+  build_req_or_man_params.py): on the reference run's start (sim_ini_21730 at "Y", CRPR_EXPT by the calc_nexport
   port) it gives CAPRI's 2030 MANN, MANP and MANK in every unit but the member states' sum rows, for all 18 animal
   activities, at relative differences below 3e-14 (tools/check/check_manure_output_2030.py; the fattened pigs with
   CAPRI's dat/feed/porkreq.gms, the project lead's file of 24 November 2026); on CAPREG's 2017 data
-  (capri_sources/reference/capreg_base/17) the 2017 MANP and MANK of the NUTS 2 units to 3e-7. Open: CAPRI's
-  correction factor at a year of the model's own baseline (CAPRI's is CAPREG's base-year factor times its baseline's
-  feed trimming, baseline/fedtrm_fin.gms l. 52; CAPREG's 2017 factor is not in this project's material: backed out of
-  CAPREG's 2017 MANN and CRPR_EXPT with the port it differs by region and animal, 0.42-3.09); not yet called by the
-  projection. Tests: test_capri.py::
-  test_manure_per_head_takes_capris_2030_coefficients_at_the_2030_market_year, test_req_or_man_fnc.py
+  (capri_sources/reference/capreg_base/17) the 2017 MANP and MANK of the NUTS 2 units to 3e-7. The correction factor
+  p_animExcrProtCorrFact at a simulation year is CAPREG's 2017 crude-protein correction plus 1 (capmod/
+  def_requirements.gms l. 55; CAPREG's reqrel_17<CC>, p_animReqCorrFac1, in the raw set since 24 November 2026; it
+  differs by region and animal, 0.42-3.09) times 0.998 a year and the baseline feed calibration's crude-protein
+  correction (baseline/adjust.gms l. 31-32): ported with the requirement functions on the same day
+  (capri_mod/feed/equations/req_or_man_fnc_req.py, def_requirements.py, adjust.py, create_sim_ini_gdx.py) and equal to
+  sim_ini_21730's factor in 249 of the 250 units (tools/check/check_sim_ini_requirements_2030.py, the calibration's
+  corrections read from CAPRI's fedtrm_21730<CC>defaulta; AL has no such file). The corrections follow from the
+  calibration's solution by CAPRI's statements after its solve (feed/fedtrm_cal_pw.gms l. 762-812, baseline/
+  fedtrm_fin.gms l. 47-52; fedtrm_cal_pw.py, fedtrm_fin.py): with CAPRI's calibrated feed input coefficients they are
+  CAPRI's in 249 of the 250 units (tools/check/check_fedtrm_after_solve_2030.py). Open: the calibration's solution
+  itself (m_hpdFeed and its priors, baseline/fedtrm_prep.gms, feed/fedtrm_prior_pw.gms, fedtrm_mod_pw.gms), which a
+  baseline other than CAPRI's needs (claude/feed_calibration_port_plan_2026-11-24.md, S3b); not yet called by the
+  projection (S4). Tests: test_capri.py::
+  test_manure_per_head_takes_capris_2030_coefficients_at_the_2030_market_year, test_req_or_man_fnc.py,
+  test_req_or_man_fnc_req.py, test_def_requirements.py
 
 <a id="k178"></a>
 ### K178: The 2030 runs took the 2017 young-animal coefficients (found 18 November 2026)

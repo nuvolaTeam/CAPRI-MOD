@@ -1034,20 +1034,20 @@
    },
    "catalogue_note": "Feed per head (t): cereals, protein-rich and energy-rich feed - CAPRI 2017 regional totals (FCER/FPRO/FENE x LEVL) divided by this model's herd | Rebuilt 2026-10 with the corrected NUTS correspondence (73 regions now regional CAPRI values). | Norway's pig cells rebuilt 21 October 2026 (tools/build/build_norway_pigs.py --rebuild) (not re-checked)"
   },
-  "capri_data/2017/feed/manure_output_params.csv": {
-   "description": "CAPRI's literal parameters of its manure output functions, star 3.0: feed/feed_decl.gms's p_NutContManureKgM3 (kg N, P2O5, K2O per m3 of cattle, swine and poultry manure), p_addExcrPerkgMilk (kg per kg of milk), p_carcassShare (carcass over live weight), p_startWgt (kg live weight at the start of fattening or raising), p_reqfcnlim (the requirement functions' limits on days and daily gains, g per day), CAPRI's p_LUUnits (livestock units per head, dat/policy/livestock_units.gms), and the fattened pigs' requirements by weight class p_pigsReqHighWgt and p_pigsReqLowWgt (key1 the class, key2 the item: XDUF days, XALW kg live weight, CRPR kg crude protein, ...; dat/feed/porkreq.gms); read by capri_mod/feed/equations/req_or_man_fnc.py (feed/req_or_man_fnc.gms with %1 = man; tools/build/build_manure_output_params.py)",
+  "capri_data/2017/feed/req_or_man_params.csv": {
+   "description": "CAPRI's literal parameters of its requirement and manure output functions, star 3.0: feed/feed_decl.gms's p_NutContManureKgM3 (kg N, P2O5, K2O per m3 of cattle, swine and poultry manure), p_addExcrPerkgMilk (kg per kg of milk), p_carcassShare (carcass over live weight), p_startWgt (kg live weight at the start of fattening or raising), p_reqfcnlim (the requirement functions' limits on days and daily gains, g per day), p_NutContFeedRef (the rations' typical nutrient densities per kg dry matter by activity, technology, requirement and feed aggregate: MIN, MEAN, MAX), p_convFactEnergyUnitsToEnne (an energy unit over net energy for lactation), p_coeffEnergyForGrowth (IPCC's coefficient of the energy for growth, by animal), CAPRI's p_LUUnits (livestock units per head, dat/policy/livestock_units.gms), and the fattened pigs' requirements by weight class p_pigsReqHighWgt and p_pigsReqLowWgt (key1 the class, key2 the item: XDUF days, XALW kg live weight, CRPR kg crude protein, ...; dat/feed/porkreq.gms); read by capri_mod/feed/equations/req_or_man_fnc.py and req_or_man_fnc_req.py (feed/req_or_man_fnc.gms with %1 = man and req; tools/build/build_req_or_man_params.py)",
    "kind": "parameters",
    "vintage": "CAPRI star 3.0",
    "domain": "feed",
    "status": "live",
-   "rows": 2886,
-   "columns": 5,
+   "rows": 3010,
+   "columns": 7,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
-    "builder": "build_manure_output_params (not in the trace yet)"
+    "builder": "build_req_or_man_params (not in the trace yet)"
    },
-   "catalogue_note": "CAPRI's literal parameters of its manure output functions (feed/feed_decl.gms: p_NutContManureKgM3, p_addExcrPerkgMilk, p_carcassShare, p_startWgt, p_reqfcnlim; CAPRI's p_LUUnits), one row per symbol and key; read by capri_mod/feed/equations/req_or_man_fnc.py (tools/build/build_manure_output_params.py; KNOWN_ISSUES K179). (not re-checked)"
+   "catalogue_note": "CAPRI's literal parameters of its manure output functions (feed/feed_decl.gms: p_NutContManureKgM3, p_addExcrPerkgMilk, p_carcassShare, p_startWgt, p_reqfcnlim; CAPRI's p_LUUnits), one row per symbol and key; read by capri_mod/feed/equations/req_or_man_fnc.py (tools/build/build_req_or_man_params.py; KNOWN_ISSUES K179). (not re-checked)"
   },
   "capri_data/2017/market/armington_rho.csv": {
    "description": "CAPRI's Armington substitution elasticities per market commodity: rho1 between domestic sales and the import aggregate, rho2 among the import origins (arm/market1.gms, special_ch/market1_ch.gms; tools/build/build_bilateral_market.py)",
@@ -5535,7 +5535,7 @@
   "capri_data/codes/results_items.csv": {
    "description": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
    "kind": "structure",
-   "rows": 187,
+   "rows": 188,
    "columns": 8,
    "read_by_model": [
     "capri_mod/io_results.py"

@@ -361,6 +361,11 @@ greendeal_winter_cover = "capri"
 # option with its cost curve, calibrated from the same base; the default since 20 November 2026, K188) or "option"
 # (capri-mod's form until then: the option with its cost curve in every run, the rule's multiplier zero at the base)
 reference_winter_cover = "capri"
+# The catch crops' biological N fixation where it is on (the Green Deal group, a run with an emission tax; not CAPRI's
+# reference form, K188): "capri" (BioFix x the whole catch-crop area, CAPRI's e_BIOFIX l. 1442 and fertDistCres_
+# l. 1073-1079: the base's catch crops too; the default since 24 November 2026, K204) or "increment" (capri-mod's form
+# until then: BioFix x the area above the base share)
+catch_crop_biofix_area = "capri"
 # Green Deal organic and pesticide targets: CAPRI's regional input changes (define_inputs.gms l. 66-73).
 # CAPRI-ERROR-FIX. conventional_io.gms l. 361 sets scenAugmentsTechChange off at compile time, after organic_io.gms
 # l. 94 and conventional_io.gms l. 171 set it on, so the scenario's input change REPLACES the 2017-2030 input-saving
