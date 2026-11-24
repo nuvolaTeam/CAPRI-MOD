@@ -246,7 +246,9 @@ class HessianBlock:
             nlp_ = tuple(getattr(type(mo_), "NLP_STATE", ()))
             if not skip:                                   # the measurement as before (cached Hessians keep their keys)
                 return nlp_
-            return nlp_ + tuple(getattr(type(mo_), "SOLVE_STATE", ()))
+            # with the solve's outputs the coupling reads from the model (COUPLING_READS, 24 November 2026: the last
+            # shock's manure value was left for the baseline's manure pool market)
+            return nlp_ + tuple(getattr(type(mo_), "SOLVE_STATE", ())) + tuple(getattr(type(mo_), "COUPLING_READS", ()))
 
         def _snapshot():
             _c = _cp.deepcopy if skip else _cp.copy

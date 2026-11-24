@@ -584,6 +584,14 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                    "res.last_hist_fallow", "res.last_mix_z", "res.last_npk", "ev.last_req_duals",
                    "ev.manure_ni_nh3", "ev.manure_ni_relief", "res.manure_tech_shares", "ev.price_shock_now",
                    "sv.wc_solved", "seen.feed_rations", "sv.n_relax_sticky")
+    #: a solve's outputs the coupling reads from the model itself after the supply side (not from the solve's result):
+    #: the manure pools' columns, bounds and vectors and the manure value (coupling/manure.py). The market supply
+    #: Hessian restores them after its shocks too (24 November 2026, KNOWN_ISSUES K198): its last shock's manure value
+    #: was left for the baseline's manure pool market, so a run that measured the Hessian ended its baseline about
+    #: 1e-12 from one that read it from the cache (1e-5 after the Green Deal scenario). Not inputs of a solve: restoring
+    #: them before each shock leaves the shocks as they were
+    COUPLING_READS = ("res.manure_value", "res.pool_manure_vec", "res.pool_manure_vec_pk", "res.pool_manure_x0",
+                      "ev.pool_cols", "ev.pool_cols_pk", "ev.pool_lb")
     #: the regional NLP's fields (warm starts, calibration, fallbacks and their diagnostics): what the market supply
     #: Hessian restored by the prefix "_nlp" until 2 November 2026 (the refactor of the supply's parameters and state: the same set, declared). An
     #: entry is an attribute name or, for a field moved into the state objects, its path ("sv.nlp_prev"; both
