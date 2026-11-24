@@ -441,6 +441,21 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   and without (1)); the inhibitor on mineral N moves towards CAPRI's in four units (ES51 0.257 -> 0.141, CAPRI 0.039;
   NL22 0.536 -> 0.459, 0.292), away in FR52 (0.575 -> 0.482, 0.575); the inhibitor on manure stays where CAPRI has none
   (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
+- **D2 the default (24 November 2026, the project lead's decision; register DEP-7 in its history):**
+  `run.supply_countries_outside_eu` defaults to CAPRI's list of its 2030 Green Deal runs, Norway, the UK, Turkey and
+  the Western Balkans (250 units; until now Norway alone, 221). Measured like for like before the switch (full Green
+  Deal runs capped at 24 iterations): the non-EU countries' activities move to within a mean 0.47 (Turkey), 1.04 (the
+  UK) and 0.67 (the Western Balkans) points of CAPRI's changes, from 1.36, 3.64 and 1.63; the EU27 results within 0.13
+  points (activities) and 0.17 (prices); the run about 5% longer. The market solve stays the fixed point until the
+  chain's full-run comparison with D2 (docs/DEPARTURES_FROM_CAPRI.md). Found by the fast suite with the new default:
+  MarketModule.sup_region_of_country did not take a non-EU market region's own code (UK000000, TUR, WBA), so the
+  market's own base supply rows (capri_base_supply_rows) stopped the solve; it does now. Tests updated for the default:
+  the setting's and the units' tests (test_norway_market.py, test_capri.py: 250 units), and the tests that meant the
+  EU's totals now take the EU's units by membership (is_eu; they took every unit but Norway's): dairy output, manure
+  CH4, olives, textile crops, the elasticities' provenance; the NUTS 2024 reporting's test on the units its mapping
+  covers (the EU's and Norway's); the water accounts' coverage (no irrigation share for Bosnia's and Serbia's units).
+  Also: two CSV float reads made exact (build_livestock_n_export_2030.py, of K202; build_feed_bulk_grof.py). README
+  §10.4.
 - **K203, the low-N feeding option's manure N effect at 2030 (24 November 2026; K194):** CAPRI's low_n_feed.gms
   scales the option's manure N effect by (MANN + CRPR_EXPT) / MANN of the simulation year, which its simulation has
   just recomputed for 2030 (feed/req_or_man_fnc.gms in its manure mode, capmod.gms l. 1090); the builder

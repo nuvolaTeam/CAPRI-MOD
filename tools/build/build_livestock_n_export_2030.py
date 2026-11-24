@@ -147,7 +147,8 @@ def capri_2030(ref: Path, acts: dict) -> dict:
 def check_on_simini_2017(acts) -> tuple[int, float]:
     """calc_nexport_CRPR_EXPT on sim_ini_21730's 2017 items ("BAS") against its CRPR_EXPT ("BAS"), the regional cells
     with a level: (cells, the largest relative difference)."""
-    t = pd.read_csv(SIMINI, usecols=["d0", "d1", "d2", "d3", "value"], keep_default_na=False, na_values=[""])
+    t = pd.read_csv(SIMINI, usecols=["d0", "d1", "d2", "d3", "value"], keep_default_na=False, na_values=[""],
+                    float_precision="round_trip")
     t = t[(t.d3 == "BAS") & t.d1.isin(list(acts)) & t.d2.isin(("LEVL", "CRPR_EXPT") + ITEMS)
           & ~t.d0.str.endswith("000000")]
     worst, n = 0.0, 0

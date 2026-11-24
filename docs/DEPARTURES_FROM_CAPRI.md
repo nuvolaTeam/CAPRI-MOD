@@ -437,7 +437,9 @@ market_chain.py, docs/dev/MARKET_SYSTEM.md), with its exact sparse Jacobian from
 (MKL PARDISO), then a continuation on the quotas' sigmoid slope as CAPRI's trim_trqs.gms, then IPOPT with MUMPS;
 "ipopt" is IPOPT alone. On seven supply shocks from the solved base the chain reached the fixed point's prices within
 2.5e-8. The chain becomes the default with D2 (CAPRI's full list of non-EU supply countries; the project lead's
-decision of 14 November 2026); until then the fixed point stays the default.
+decision of 14 November 2026). D2 is the default since 24 November 2026; the switch of the solve waits for a full D2
+Green Deal run with the chain against the fixed point's (the project lead, 24 November 2026), so the fixed point stays
+the default until then.
 
 ### `market.hessian_method = "kkt"` (29 October 2026; the project lead's decision; default `"capri"`)
 

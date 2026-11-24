@@ -48,8 +48,11 @@ nlp_derivative_cache_size = 16
 # the countries outside the EU whose supply models are in the run, by CAPRI member-state code (CAPRI's per-country
 # switches, %CountriesNO000000% ... %CountriesTUR%, capmod/define_regional_sets.gms l. 40-77). Each must have regional
 # units (capri_data/codes/regional_units.csv). Their market region takes its supply from their models; a country
-# left out keeps its market region's supply functions. The EU's member states are always in.
-supply_countries_outside_eu = ["NO000000"]
+# left out keeps its market region's supply functions. The EU's member states are always in. Default: CAPRI's list in
+# its 2030 Green Deal runs, Norway, the UK, Turkey and the Western Balkans (250 units; the project lead's decision of
+# 24 November 2026, register DEP-7 in its history); ["NO000000"] the setting until then (221 units)
+supply_countries_outside_eu = ["NO000000", "UK000000", "TUR", "AL000000", "BA000000", "CS000000", "KO000000", "MK000000",
+                               "MO000000"]
 # a folder of the user's own scenarios, looked in before capri_data/scenarios; "" = none. A scenario
 # there may name a reference or group of the repository's (python -m capri_mod.scenarios new / check)
 scenarios_dir = ""
