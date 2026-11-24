@@ -25,6 +25,8 @@ import csv
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
+from capri_mod.pipeline.captrd.equations import longrun_supports as LS
+
 #: l. 965, 984: the base year of the growth factors
 B2000 = 2000
 #: l. 1035: the SSP years (steps of 5 from 2025 to 2100)
@@ -145,14 +147,14 @@ def inha_pdata(macro: Dict[Tuple[str, object], float], *, ms: Iterable[str], bas
     for r in ms:
         b, m0 = basm.get(r, 0.0), macro.get((r, "BAS"), 0.0)
         for y in cur:
-            if y > bast_year and macro.get((r, y)) and m0 and b:
-                out[(r, y)] = macro[(r, y)] / m0 * b
+            if y > bast_year and macro.get((r, y)) and m0 and b:                    # l. 368-376
+                out[(r, y)] = LS.P_Result_INHA_pdata(macro[(r, y)], m0, b)
     if world_pop is not None:                                                       # l. 386-389
         for r in ms:
             w0 = world_pop.get((basy, r), 0.0)
             for y in exante:
                 if not out.get((r, y)) and w0:
-                    v = basm.get(r, 0.0) * world_pop.get((y, r), 0.0) / w0
+                    v = LS.P_Result_INHA_pdata_WorldPop(basm.get(r, 0.0), world_pop.get((y, r), 0.0), w0)
                     if v:
                         out[(r, y)] = v
     return out

@@ -37,7 +37,7 @@ NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), (
 #: clean_tiny, and
 #: the light ones (no reference data read, or one or two tables): step1, scale_dgagri
 PARTS = None
-LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod"}
+LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod", "longrun"}
 
 
 def step1_cases():
@@ -196,8 +196,89 @@ def agriprod_cases():
             "no_percent": _digest(sorted(res.no_percent))}
 
 
+def longrun_cases():
+    """longrun_supports.supports (longrun_supports.gms) and macro.inha_pdata (its l. 368-389) on seeded random p_data,
+    nObs, BASM, BAST, supports, DG AGRI outlook, population, national expert supports and long-run information of a
+    scenario (the reference run's has none in the long-run file, so its Longrun branches act only here) over CAPTRD's
+    sets, for four member states (Ireland's weights, Poland's and Norway's corrections) and the scenarios bright, cv50
+    and another, with two densities of zeros. SHA-256 of the exact results and expert supports."""
+    import copy
+    import random
+    from capri_mod.pipeline.captrd import longrun_supports as LR
+    from capri_mod.pipeline.captrd import macro as MA
+    from capri_mod.pipeline.captrd import national_supports as NS
+    from capri_mod.pipeline.captrd import prepare as P
+    s = P.read_sets()
+    ms = ["IR000000", "PL000000", "FR000000", "NO000000"]
+    cols = ["UVAG", "DOMM", "GROF", "MAPR", "HCOM", "PRCM", "SWHE", "BARL", "DCOL", "SUGB", "INHA", "FORE", "OLND"]
+    rows = ["LEVL", "HERD", "SWHE", "BARL", "SUGA", "COMI", "MILK", "EGGS", "SGMT", "SGMI", "RAPE", "SOYA", "DCOL"]
+    exante = [2018, 2020, 2025, 2030, 2035, 2040, 2045, 2050, 2060, 2070]
+    expostt = list(range(1995, 2019))
+    out = {}
+    for seed, z in ((1, 0.3), (2, 0.6)):
+        for scen in (LR.BRIGHT, LR.CV50, "OTHER_SCEN"):
+            rng = random.Random(seed)
+            val = lambda lo=0.1, hi=100.0: 0.0 if rng.random() < z else rng.uniform(lo, hi)   # noqa: E731
+            pdata, basm, bast, support, dg, inha, info = {}, {}, {}, {}, {}, {}, {}
+            for r in ms:
+                for c in cols:
+                    for w in rows:
+                        for y in (1999, 2000, 2001):
+                            pdata[(r, c, w, y)] = val()
+                        basm[(r, c, w)], bast[(r, c, w)] = val(), val()
+                        dg[(r, c, w, 2035)] = val() if rng.random() < 0.3 else 0.0
+                        for y in exante:
+                            support[(r, c, w, y)] = val()
+                for y in exante:
+                    inha[(r, y)] = rng.uniform(1.0, 50.0)               # the population and its BASM: always given
+                basm[(r, "HCOM", "SUGA")], basm[(r, "INHA", "LEVL")] = rng.uniform(1.0, 50.0), rng.uniform(1.0, 50.0)
+                for c in cols + ["PROD", "UVAP", "BIOF"]:
+                    for w in rows:
+                        for y in LR.LONG_YEARS:
+                            info[(r, c, w, "factorB2000", scen, y)] = val(0.5, 1.5)
+                            info[(r, c, w, "share", scen, y)] = val(0.1, 1.0)
+                        info[(r, c, w, "share", scen, "B2000")] = val(0.1, 1.0)
+                        info[(r, c, w, "data", scen, "B2000")] = val(0.1, 100.0)
+            for y in LR.LONG_YEARS:
+                info[("World", "UVAP", "SOYA", "factorB2000", scen, y)] = val(0.5, 1.5)
+            S = NS.Expert()
+            for r in ms:
+                for c in cols:
+                    for w in rows:
+                        for y in exante:
+                            if rng.random() < 0.15:
+                                S.ab[(r, c, w, y)] = val()
+                            if rng.random() < 0.15:
+                                S.pc[(r, c, w, y)] = val(-20.0, 20.0)
+            nobs = {(r, c, w) for r in ms for c in cols for w in rows if rng.random() > z}
+            C = LR.Context(
+                ms=ms, msincl=ms, pdata={k: v for k, v in pdata.items() if v}, nobs=nobs,
+                basm={k: v for k, v in basm.items() if v}, bast={k: v for k, v in bast.items() if v},
+                s_colsest=s.s_colsest, s_rowsest=s.s_rowsest, pact=["SWHE", "BARL", "DCOL", "SUGB"],
+                req_feed=["SWHE"], reqst=list(s.reqst), pact_to_y=list(s.pact_to_y), pact_to_o=list(s.pact_to_o),
+                mrkbalee=list(s.mrkbalee), mlk_pro=["MILK"], cows_act=["DCOL"], exante=exante, exantet=exante,
+                expostt=expostt, years_cur=sorted(set(expostt) | set(exante)), base_year=2017, bast_year=2018,
+                lst_expost=2018, lst_exante=2070, lst_dgagri=2035, phase_in=2025, infl=1.019,
+                support={k: v for k, v in support.items() if v}, dgagri1={k: v for k, v in dg.items() if v},
+                map_rr=list(s.map_rr), cur_europ_agg=["EU014000", "EU013000", "EU27yr19"], inha=inha, scenario=scen,
+                longrun_info_all={k: v for k, v in info.items() if v})
+            S1 = copy.deepcopy(S)
+            res = LR.supports(S1, C)
+            dig = lambda q: _digest(sorted((k, float(v).hex()) for k, v in q.items()))      # noqa: E731
+            out[(seed, scen)] = [dig(res.b2000), dig(res.longrun), dig(res.longrun1), dig(S1.ab), dig(S1.pc),
+                                 dig(S1.tr)]
+            macro = {(r, y): val(1.0, 50.0) for r in ms for y in exante + [2016, 2017]}
+            macro.update({(r, "BAS"): val(1.0, 50.0) for r in ms})
+            wp = {(y, r): val(1.0, 50.0) for r in ms for y in exante + [2017]}
+            ip = MA.inha_pdata({k: v for k, v in macro.items() if v}, ms=ms, basm={r: val() for r in ms},
+                               years_cur=C.years_cur, bast_year=2018, exante=exante,
+                               world_pop={k: v for k, v in wp.items() if v}, basy=2017)
+            out[(seed, scen, "inha")] = dig(ip)
+    return out
+
+
 LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases, "final_supports": final_supports_cases,
-               "agriprod": agriprod_cases}
+               "agriprod": agriprod_cases, "longrun": longrun_cases}
 
 
 def want(part):
