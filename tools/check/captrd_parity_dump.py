@@ -38,7 +38,7 @@ NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), (
 #: the light ones (no reference data read, or one or two tables): step1, scale_dgagri
 PARTS = None
 LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod", "longrun", "eu_supports",
-         "expert_support", "national", "stats", "prep", "coco", "captrd_gms", "biofuel"}
+         "expert_support", "national", "stats", "prep", "coco", "captrd_gms", "biofuel", "globiom"}
 
 
 def step1_cases():
@@ -794,6 +794,118 @@ def biofuel_cases():
     return out
 
 
+def globiom_cases():
+    """globiom.py (convert_globiom.gms, create_longrun_info.gms l. 74-90) on seeded random GLOBIOM tables (30 of the
+    countries of FAO's map in six GLOBIOM regions, one of them USAREG; two scenarios, the other's records to drop; the
+    macro, trade, price, processing, demand, supply, feed, herd, crop, land and perennial tables with zeros and the
+    records outside the filters), CAPREG time series, p_dataMarket and world population over CAPRI's sets, two seeds.
+    SHA-256 of the exact results of each stage (collect, mapped, factors, the prepares, base_factors)."""
+    import numpy as np
+    import pandas as pd
+    from capri_mod.pipeline.captrd import globiom as GL
+    from capri_mod.pipeline.captrd import prepare as P
+    S = GL.read_sets(P.SETS_DIR / "globiom", P.SETS_DIR / "globiom")
+    fm = {f for r, f in S.faoregions_map}
+    countries = sorted({c for _, c, f in S.faoregmap if f in fm})[:30]
+    ragg = ["G_EUW", "G_EUE", "G_ASIA", "G_AFR", "G_LAM", "USAREG"]
+    cmap = [(ragg[i % len(ragg)], c) for i, c in enumerate(countries)]
+    scen, other = ("M1", "B1", "I1"), ("M2", "B1", "I1")
+    years = list(S.longyr)
+    rows = sorted(S.globiomrows - {"LEVEL"})
+    animals = ["BOVD", "BOVO", "PIGS", "SGTD", "SGTO", "PTRB", "PTRH", "PTRX"]
+    crops = ["BARL", "CORN", "WHEA", "SWHT", "DWHT", "RAPE", "SOYA", "SUNF", "SUGB", "SUGC", "POTA", "OATS", "RYE",
+             "CSIL", "OGRF", "PEAS", "FALW"]
+    lcs = ["CRPLND", "GRSLND", "PLTFOR", "NATLND", "MNGFOR", "PRIFOR", "DFRLND", "G4MAFR"]
+    digest = lambda q: _digest(sorted((k, float(v).hex()) for k, v in q.items()))      # noqa: E731
+    out = {}
+    for seed in (1, 2):
+        rng = np.random.default_rng(20261124 + seed)
+
+        def val(n=None):
+            v = rng.lognormal(3.0, 1.0, n)
+            return np.where(rng.random(n) < 0.15, 0.0, v)
+
+        def table(recs, ndim):
+            d = pd.DataFrame(recs, columns=[f"d{i}" for i in range(1, ndim + 1)])
+            d["value"] = val(len(d))
+            return d
+        sc = lambda: scen if rng.random() < 0.9 else other                             # noqa: E731
+        T = {}
+        T["MACROSCEN_DATA"] = table([(sc()[0], r, it, y) for r in ragg
+                                     for it in ("POP", "GDP", "GDPPCAP_RELCHNG", "POP_RELCHNG", "OTHER") for y in years], 4)
+        T["Trade_Compare"] = table([(it, a, b, "LEVEL", *sc(), y) for it in rows[:25] for a in ragg for b in ragg
+                                    if a != b and rng.random() < 0.3 for y in years], 8)
+        T["Price_Compare2"] = table([(it, r, *sc(), y) for it in rows for r in ragg for y in years], 6)
+        procs = sorted(GL.TO_FAME) + ["CORNTOETHOL", "WHEATOETHOL", "OTHERPROC"]
+        T["Process_Compare2"] = table([(r, pr, it, *sc(), y) for r in ragg for pr in procs
+                                       for it in (sorted(S.vegoil) + sorted(S.procpr)[:10] + ["CORN", "WHEA"])
+                                       if rng.random() < 0.25 for y in years], 7)
+        for n in ("DemQuantity_Compare", "SupQuantity_Compare", "FeedQuantity_Compare"):
+            T[n] = table([(it, r, "LEVEL" if rng.random() < 0.95 else "MARGINAL", *sc(), y) for it in rows
+                          for r in ragg for y in years], 7)
+        T["ProcessData"] = table([(r, pr, it) for r in ragg for pr, it in (("CORNTOETHOL", "CORN_DG"),
+                                                                           ("WHEATOETHOL", "WHEA_DG"))], 3)
+        geo = lambda: ("ALTI_ANY" if rng.random() < 0.9 else "ALTI1", "SLP_ANY", "SOIL_ANY")    # noqa: E731
+        aez = ["AEZ_ANY", "AEZ1", "AEZ2"]
+        T["LIVE_COMPARE"] = table([(c, cr, *geo(), z, "X", a, *sc(), y) for c in countries
+                                   for cr in ("ANYCOLROW", "COLROW1") for z in aez for a in animals
+                                   if rng.random() < 0.4 for y in years], 12)
+        T["ACR_COMPARE"] = table([(c, "COLROW1", *geo(), z, cp, t, *sc(), y) for c in countries for z in aez
+                                  for cp in crops for t in ("HI", "LI", "OTHERTECH") if rng.random() < 0.3
+                                  for y in years], 12)
+        T["Land_Compare2"] = table([(c, "COLROW1", *geo(), z, lc, *sc(), y) for c in countries for z in aez
+                                    for lc in lcs if rng.random() < 0.5 for y in years], 11)
+        T["Perennial_COMPARE"] = table([(c, "COLROW1", *geo(), z, *sc(), y) for c in countries + ["G_EUW"]
+                                        for z in aez if rng.random() < 0.5 for y in years], 10)
+        G = GL.Globiom(region58=ragg, allcountry=countries, region58_country_map=cmap, animal=set(animals[:-1]),
+                       eu_crop=set(crops[:-2]) | {"LIGHERBA"}, alllc_type=set(lcs[:-1]), aezclass={"AEZ1", "AEZ_ANY"},
+                       scenyear=years, tables=T)
+        rmap = GL.region_map(S, G)
+        out[(seed, "rmap")] = _digest(sorted(rmap))
+        Pg = GL.collect(G, S, scen, S.longyr)
+        out[(seed, "collect")] = digest(Pg)
+        M, sel, wo = GL.mapped(Pg, S, rmap, G.region58)
+        out[(seed, "mapped")] = (digest(M), tuple(sel), tuple(wo))
+        I, M2 = GL.factors(M, S, "SC", sel, wo)
+        out[(seed, "factors")] = (digest(I), digest(M2))
+        fac = {(k[1], k[2]) for k in I if k[3] == "FACTORB2000"}
+        cols = {c for c, w in fac} | {"UVAD", "PRII", "UVAP", "GROF", "MAPR"}
+        rws = {w for c, w in fac} | {"LEVL", "YILD"}
+        cy = [str(y) for y in range(1999, 2019)]
+        cap = {}
+        for r in S.nuts0:
+            for c in sorted(cols):
+                for w in sorted(rws):
+                    if rng.random() < 0.3:
+                        for y in cy:
+                            v = float(val())
+                            if v:
+                                cap[(r, c, w, y)] = v
+        GL.prepare_capreg(cap, S.secom, ("2016", "2017", "2018"))
+        out[(seed, "capreg")] = digest(cap)
+        dm = {}
+        for r in S.rmall:
+            for y in ("1999", "2000", "2001", "2016", "2017", "2018"):
+                dm[(r, "GDP", "LEVL", y)] = float(rng.lognormal(5.0, 1.0))
+            for c, w in sorted(fac):
+                if rng.random() < 0.3:
+                    for y in ("1999", "2000", "2001", "2016", "2017", "2018"):
+                        if y != "1999" or rng.random() < 0.7:
+                            v = float(val())
+                            if v:
+                                dm[(r, c, w, y)] = v
+            if rng.random() < 0.5:
+                dm[(r, "MAPR", "SUGA", "2017")] = float(rng.lognormal(3.0, 1.0))
+        GL.prepare_datamarket(dm)
+        out[(seed, "datamarket")] = digest(dm)
+        wp = {(y, r): float(rng.lognormal(8.0, 1.0)) for r in S.rmall for y in ("1999", "2000", "2001", "2016",
+                                                                                 "2017", "2018")
+              if rng.random() < 0.9}
+        B = GL.base_factors(I, S, "SC", wo, cap, dm, wp)
+        out[(seed, "base_factors")] = (digest(B), digest(I), digest(dm))
+    return out
+
+
 def captrd_gms_cases():
     """captrd.gms's data statements: prepare.load_fixes, load_basm and labour_household on seeded random CAPREG series
     and base-year data over CAPTRD's sets, for two densities of zeros. SHA-256 of the exact p_data returned."""
@@ -832,7 +944,7 @@ LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases, "final_
                "agriprod": agriprod_cases, "longrun": longrun_cases, "eu_supports": eu_supports_cases,
                "expert_support": expert_support_cases, "national": national_cases, "stats": stats_cases,
                "prep": prep_cases, "coco": coco_cases, "captrd_gms": captrd_gms_cases,
-               "biofuel": biofuel_cases}
+               "biofuel": biofuel_cases, "globiom": globiom_cases}
 
 
 def want(part):
