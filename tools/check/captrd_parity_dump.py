@@ -38,7 +38,7 @@ NT2_RES_YEARS, NT2_RES_SYM = ("2018", "2020", "2030", "2040", "2050", "2070"), (
 #: the light ones (no reference data read, or one or two tables): step1, scale_dgagri
 PARTS = None
 LIGHT = {"step1", "scale_dgagri", "final_supports", "agriprod", "longrun", "eu_supports",
-         "expert_support", "national", "stats"}
+         "expert_support", "national", "stats", "prep"}
 
 
 def step1_cases():
@@ -636,9 +636,56 @@ def stats_cases():
     return out
 
 
+def prep_cases():
+    """prep_data_for_estimation.gms: prepare.prep_for_estimation and statistics.statistics (both settings of
+    captrd.zeros_as_missing) on seeded random p_data of three member states and two NUTS 2 regions over the positions
+    the statements name, with CAPTRD's sets, for two densities of zeros. SHA-256 of the exact p_data they return."""
+    import random
+    import pandas as pd
+    from capri_mod.pipeline.captrd import prepare as P
+    from capri_mod.pipeline.captrd import statistics as STA
+    s = P.read_sets()
+    regs = ["AT000000", "DE000000", "PL000000", "AT310000", "AT120000"]
+    cols = ["GROF", "MAPR", "IMPT", "EXPT", "DOMM", "FEDM", "HCOM", "INHA", "UVAG", "EAAG", "PADM", "QUTS", "UAAR",
+            "SWHE", "MAIZ", "BARL", "DCOL", "DCOH", "SHGM", "PIGF", "SOWS", "BULL", "UVAD", "EXPE", "foodSh", "NTRD",
+            "CSSP", "LOSF", "LOSM", "PRCY", "N_CAL", "N_FAT", "BIOF", "INDM", "SEDM", "CERE", "OILS", "TOOU"]
+    rows = ["SUGA", "SWHE", "MAIZ", "BARL", "LEVL", "SLGW", "ILAM", "YLAM", "CATT", "COMI", "BEEF", "PORK", "CERE",
+            "MEAS", "ICOW", "FCER", "FGRA", "INCE", "MILK", "MOLA", "MANK", "SGMT", "IBUL", "YCOW", "TOOU", "DAYS"]
+    years = [str(y) for y in range(1995, 2020)] + ["BASM"]
+    ex = list(range(1995, 2020))
+    out = {}
+    for seed, z in ((1, 0.3), (2, 0.7)):
+        rng = random.Random(seed)
+        recs = []
+        for r in regs:
+            for c in cols:
+                for w in rows:
+                    if rng.random() < 0.35:
+                        continue
+                    lo = -20.0 if c in ("DOMM", "NTRD", "CSSP") else 0.0
+                    f = rng.uniform(lo, 100.0)
+                    for t in years:
+                        if rng.random() >= z:
+                            recs.append((r, c, w, t, f * rng.uniform(0.8, 1.2) if rng.random() > 0.05 else 1e-5))
+        p = pd.DataFrame(recs, columns=["region", "col", "row", "t", "value"])
+        p["eps"] = 0
+        q = P.prep_for_estimation(p, s, ex, [y for y in ex if abs(y - 2017) <= 3], [2016, 2017, 2018],
+                                  range(1984, 2071), luunits={"DCOL": 1.0, "DCOH": 1.0, "PIGF": 0.3, "BULL": 0.8,
+                                                              "SHGM": 0.1, "SOWS": 0.5})
+        key = lambda d: _digest(sorted((a, b, c, t, float(v).hex()) for a, b, c, t, v in   # noqa: E731
+                                       d[["region", "col", "row", "t", "value"]].itertuples(index=False)))
+        out[(seed, "prep")] = key(q)
+        for zm in (False, True):
+            st = STA.statistics(q, s, ex, [y for y in ex if abs(y - 2017) <= 2], range(2011, 2019), first_year=1984,
+                                zeros_as_missing=zm)
+            out[(seed, "statistics", zm)] = key(st)
+    return out
+
+
 LIGHT_CASES = {"step1": step1_cases, "scale_dgagri": scale_dgagri_cases, "final_supports": final_supports_cases,
                "agriprod": agriprod_cases, "longrun": longrun_cases, "eu_supports": eu_supports_cases,
-               "expert_support": expert_support_cases, "national": national_cases, "stats": stats_cases}
+               "expert_support": expert_support_cases, "national": national_cases, "stats": stats_cases,
+               "prep": prep_cases}
 
 
 def want(part):
