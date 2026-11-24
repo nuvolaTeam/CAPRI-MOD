@@ -161,6 +161,12 @@ added on 11 November 2026: `baseline/data_SSPV3_update/` (SSP_DATA), `arm/allpop
   (`capri/dat/policy/<file>/`, `capri/dat/baseline/<file>/`). build_captrd_biofuel reads `biofuel/biofuel_data.gms` (above;
   the name star 3.0 includes, biofuel/biofuel_trends.gms l. 1344), until then the course copy's `Biofuel_data.gms`,
   which differs only in path separators and the encoding of two comments; the builder's outputs are unchanged.
+- Added on 24 November 2026 (the project lead's file): `feed/porkreq.gms`, CAPRI's pig-fattening requirements by
+  weight class (TABLE p_pigsReqHighWgt and p_pigsReqLowWgt; included by feed/feed_decl.gms l. 191), read by
+  build_manure_output_params (its `--dat`) for the fattened pigs' manure (capri_mod/feed/equations/req_or_man_fnc.py,
+  KNOWN_ISSUES K179). Published the same day as Parquet in the raw set below (`capri/dat/feed/porkreq/`). The
+  project lead's fedcof.gms of the same day is the file the builders already read (capri_sources/exports/fedcof.gms,
+  build_mitigation_inputs's p_nutCont): the same table, one comment's encoding apart.
 
 **`results_local/capreg/`**: CAPREG's time series `res_time_series_17<CC>.gdx` (35; DATA1, RALL, DB_COLS, DB_ROWS,
 META; upload res_time_series_17ES.zip), read by create_longrun_info.gms l. 66-70 (through dat_parquet/capreg).

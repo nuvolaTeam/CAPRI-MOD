@@ -1,7 +1,7 @@
 {
  "repo": "nuvolaTeam/capri-mod-raw",
  "repo_type": "dataset",
- "revision": "d6e5a441b59255ab68fa3ecee098f00ff5e47e9a",
+ "revision": "e998ae4d1c5895c2256c12f82abbadbb8bd147a2",
  "revision_note": "the dataset commit these files are at; uploads are no longer tagged, each file is pinned by its SHA-256 (the project lead, 12 November 2026)",
  "history": [
   {
@@ -29,6 +29,11 @@
    "date": "2026-11-20",
    "note": "the four rural-development GDX files build_rd_inputs reads (dat/policy: rdNewMeasuresRegDist, rd_spend_2007_2013_se; dat/baseline: clueLandPartition, ae_lfa_fes), from the project lead's CAPRI star 3.0 installation (upload of 20 November 2026), as Parquet, each checked record by record",
    "files_added": 12
+  },
+  {
+   "date": "2026-11-24",
+   "note": "dat/feed/porkreq.gms: CAPRI's pig-fattening requirements by weight class (p_pigsReqHighWgt, p_pigsReqLowWgt), the project lead's file of 24 November 2026, as Parquet, each record checked against a second reading of the file",
+   "files_added": 3
   }
  ],
  "layout": "capri/<CAPRI folder: dat/<subfolder>, results/<module>>/<file name>/<symbol>.parquet and _symbols.csv; no originals (11 November 2026)",
@@ -492,6 +497,18 @@
   "capri/dat/envind/waterMetersPerHa/p_waterTMeters.parquet": {
    "sha256": "f9fac3df1e7d50bae84b105a9c98e79f04a4d54b9cd677f12f8df7ec3fd38cb0",
    "size": 3720
+  },
+  "capri/dat/feed/porkreq/_symbols.csv": {
+   "sha256": "ff2add08f356ff9eb1dac7610c8c09adecb7ea3511b12b6564c28d9dbd46b9a9",
+   "size": 117
+  },
+  "capri/dat/feed/porkreq/p_pigsReqHighWgt.parquet": {
+   "sha256": "e1ec31a1d076dedb98406860f7d68d82ce80835d876268ecbee3bd8032c8ddfd",
+   "size": 4504
+  },
+  "capri/dat/feed/porkreq/p_pigsReqLowWgt.parquet": {
+   "sha256": "bcd38e38614c71de4ec19901ac2c0b61a651db9b5af3f5b2db4f6e775aee5431",
+   "size": 4246
   },
   "capri/dat/global/GLOBIOM-EU_EUCLIMIT6_S2_50CV/ACR_COMPARE.parquet": {
    "sha256": "8a91cb5c3a8cc8201bdeff60b4719cf2e4c4bf93f7f2458ef5d1ec6c2508c592",
@@ -44527,6 +44544,13 @@
    "sha256": "4b16994a7e5542a3d78103dbeb59b715b2ec8ffbef5448346006ee7ad6c4b837",
    "size": 2428,
    "location": "code: %datdir%/envind/<file>.gdx",
+   "trusted": true
+  },
+  "capri/dat/feed/porkreq": {
+   "file": "porkreq.gms",
+   "sha256": "4f6bd37979bbed4b4b03e74fb1ad47895ea7bb5633256615325ab3b0e23d065d",
+   "size": 29033,
+   "location": "code: $INCLUDE '%datdir%\\feed\\porkreq.gms' (feed/feed_decl.gms l. 191)",
    "trusted": true
   },
   "capri/dat/global/GLOBIOM-EU_EUCLIMIT6_S2_50CV": {

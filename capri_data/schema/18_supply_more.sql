@@ -631,6 +631,17 @@ CREATE TABLE sup_livestock_output_by_product_coef (
 COMMENT ON TABLE sup_livestock_output_by_product_coef IS 'CAPRI''s output per model head by CAPRI product (columns ACT.PRODUCT) (tools/build/build_livestock_products.py)';
 INSERT INTO value_units SELECT 'sup_livestock_output_by_product_coef', c, NULL, 'open', 'livestock_output_by_product_coef: output per model head by CAPRI product (columns ACT.PRODUCT)' FROM (VALUES ('BCOW.BEEF'), ('BROI.POUM'), ('BULL.BEEF'), ('CALV.BEEF'), ('DCOW.BEEF'), ('DCOW.COMI'), ('HFRS.BEEF'), ('LAYS.EGGS'), ('LAYS.POUM'), ('PIGF.PORK'), ('PIGS.PORK'), ('SHGF.SGMT'), ('SHGM.SGMI'), ('SHGM.SGMT')) x(c);
 
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/livestock_output_by_product_coef_2030.csv
+-- layout: wide, unnamed
+CREATE TABLE sup_livestock_output_by_product_coef_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    activity_product VARCHAR NOT NULL,
+    value DOUBLE,
+    PRIMARY KEY (region, activity_product)
+);
+COMMENT ON TABLE sup_livestock_output_by_product_coef_2030 IS 'CAPRI''s 2030 final-product output per model head (columns ACT.PRODUCT): CAPRI''s 2030 production, LEVL x DATA at 2030 of the 2030 reference over the animal''s CAPRI activities, over the model''s 2030 base heads; the 2030 market year''s outputs per head (register DEP-13 step 2; tools/build/build_livestock_output_2030.py)';
+INSERT INTO value_units SELECT 'sup_livestock_output_by_product_coef_2030', c, 'U_TonPerHd', 'builder', 'CAPRI''s 2030 production over the model''s 2030 heads (kt per 1000 head, t per head)' FROM (VALUES ('BCOW.BEEF'), ('BROI.POUM'), ('BULL.BEEF'), ('CALV.BEEF'), ('DCOW.BEEF'), ('DCOW.COMI'), ('HFRS.BEEF'), ('LAYS.EGGS'), ('LAYS.POUM'), ('PIGF.PORK'), ('PIGS.PORK'), ('SHGF.SGMT'), ('SHGM.SGMI'), ('SHGM.SGMT')) x(c);
+
 -- file: capri_data/2017/supply/livestock_output_coef.csv
 -- layout: wide, unnamed
 CREATE TABLE sup_livestock_output_coef (

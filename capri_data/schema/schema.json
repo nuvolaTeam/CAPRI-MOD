@@ -3027,7 +3027,8 @@
     ],
     "tests": [
      "capri_mod/tests/test_capri.py",
-     "capri_mod/tests/test_norway_market.py"
+     "capri_mod/tests/test_norway_market.py",
+     "capri_mod/tests/test_pmp_held_cells.py"
     ]
    }
   },
@@ -3431,7 +3432,8 @@
     ],
     "tests": [
      "capri_mod/tests/test_capri.py",
-     "capri_mod/tests/test_nuts_reporting.py"
+     "capri_mod/tests/test_nuts_reporting.py",
+     "capri_mod/tests/test_pmp_held_cells.py"
     ]
    }
   },
@@ -5068,6 +5070,7 @@
     ],
     "builders": [],
     "checks": [
+     "tools/check/check_manure_output_2030.py",
      "tools/check/make_provenance.py"
     ],
     "tests": []
@@ -20161,6 +20164,153 @@
     "tests": []
    }
   },
+  "env_livestock_n_export_coef_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_n_export_coef_2030.csv",
+   "declared_in": "17_environment.sql",
+   "layout": [
+    "unnamed",
+    "wide"
+   ],
+   "comment": "CAPRI's 2030 N exported in animal products per model head: fert/calc_nexport.gms on the 2030 reference's items of each activity (CAPRI's simulation recomputes CRPR_EXPT at \"Y\" before it solves, feed/req_or_man_fnc.gms l. 1814-1817), LEVL x CRPR_EXPT over the model's 2030 base heads, read at the 2030 market year (KNOWN_ISSUES K202; tools/build/build_livestock_n_export_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "animal"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(\"value\" >= 0)"
+   ],
+   "units": [
+    {
+     "item": "BCOW",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "BROI",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "BULL",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "CALV",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "DCOW",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "HFRS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "LAYS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "OANI",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "PIGF",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "PIGS",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "SHGF",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    },
+    {
+     "item": "SHGM",
+     "unit": "U_kgperhd",
+     "status": "builder",
+     "basis": "kg N per head"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_livestock_n_export_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_livestock_n_export_2030.py"
+    ]
+   }
+  },
   "env_luc_2030": {
    "file": "capri_data/baselines/capri_greendeal_ref/1730/environment/luc_2030.csv",
    "declared_in": "17_environment.sql",
@@ -22404,6 +22554,7 @@
     "checks": [],
     "tests": [
      "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_ration_2030.py",
      "capri_mod/tests/test_supplement_fat.py"
     ]
    }
@@ -22925,6 +23076,69 @@
     ],
     "builders": [],
     "checks": [],
+    "tests": []
+   }
+  },
+  "feed_manure_output_params": {
+   "file": "capri_data/2017/feed/manure_output_params.csv",
+   "declared_in": "25_feed.sql",
+   "layout": [],
+   "comment": "CAPRI's literal parameters of its manure output functions, star 3.0: feed/feed_decl.gms's p_NutContManureKgM3 (kg N, P2O5, K2O per m3 of cattle, swine and poultry manure), p_addExcrPerkgMilk (kg per kg of milk), p_carcassShare (carcass over live weight), p_startWgt (kg live weight at the start of fattening or raising), p_reqfcnlim (the requirement functions' limits on days and daily gains, g per day), CAPRI's p_LUUnits (livestock units per head, dat/policy/livestock_units.gms), and the fattened pigs' requirements by weight class p_pigsReqHighWgt and p_pigsReqLowWgt (key1 the class, key2 the item: XDUF days, XALW kg live weight, CRPR kg crude protein, ...; dat/feed/porkreq.gms); read by capri_mod/feed/equations/req_or_man_fnc.py (feed/req_or_man_fnc.gms with %1 = man; tools/build/build_manure_output_params.py)",
+   "columns": [
+    {
+     "name": "symbol",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "key1",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "key2",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "key3",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(symbol IN ('p_NutContManureKgM3', 'p_addExcrPerkgMilk', 'p_carcassShare', 'p_startWgt', 'p_reqfcnlim', 'p_LUUnits', 'p_pigsReqHighWgt', 'p_pigsReqLowWgt'))"
+   ],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "the unit of its symbol (the comment)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_manure_output_params (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/check_manure_output_2030.py",
+     "tools/check/make_provenance.py"
+    ],
     "tests": []
    }
   },
@@ -32143,7 +32357,9 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_pmp_held_cells.py"
+    ]
    }
   },
   "pmp_capri_2030_animals": {
@@ -32254,7 +32470,8 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_base_year.py"
+     "capri_mod/tests/test_base_year.py",
+     "capri_mod/tests/test_pmp_held_cells.py"
     ]
    }
   },
@@ -37463,7 +37680,8 @@
     ],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_capri.py"
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_pmp_held_cells.py"
     ]
    }
   },
@@ -37607,7 +37825,8 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_capri.py"
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_pmp_held_cells.py"
     ]
    }
   },
@@ -53974,7 +54193,156 @@
     ],
     "checks": [],
     "tests": [
+     "capri_mod/tests/test_livestock_output_2030.py",
      "capri_mod/tests/test_norway_market.py"
+    ]
+   }
+  },
+  "sup_livestock_output_by_product_coef_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/livestock_output_by_product_coef_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [
+    "unnamed",
+    "wide"
+   ],
+   "comment": "CAPRI's 2030 final-product output per model head (columns ACT.PRODUCT): CAPRI's 2030 production, LEVL x DATA at 2030 of the 2030 reference over the animal's CAPRI activities, over the model's 2030 base heads; the 2030 market year's outputs per head (register DEP-13 step 2; tools/build/build_livestock_output_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity_product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity_product"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    }
+   ],
+   "checks": [],
+   "units": [
+    {
+     "item": "BCOW.BEEF",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "BROI.POUM",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "BULL.BEEF",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "CALV.BEEF",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "DCOW.BEEF",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "DCOW.COMI",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "HFRS.BEEF",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "LAYS.EGGS",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "LAYS.POUM",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "PIGF.PORK",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "PIGS.PORK",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "SHGF.SGMT",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "SHGM.SGMI",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    },
+    {
+     "item": "SHGM.SGMT",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "CAPRI's 2030 production over the model's 2030 heads (kt per 1000 head, t per head)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_livestock_output_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_livestock_output_2030.py"
     ]
    }
   },
@@ -59903,7 +60271,9 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_ration_2030.py"
+    ]
    }
   },
   "trends_milk_yield_1730": {
@@ -62551,7 +62921,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 526,
+  "capri/keep": 665,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 37,

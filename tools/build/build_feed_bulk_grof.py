@@ -42,8 +42,7 @@ BULKS = ("FCER", "FPRO", "FENE", "FMIL", "FOTH")
 def main(check: bool = False):
     pairs = set()
     for f in ("feed_bulks_eu.csv", "feed_bulks_noneu.csv"):
-        # the code pairs only, read as text (no float of these files is used; test_exact_io.py)
-        t = pd.read_csv(M / f, keep_default_na=False, dtype=str)
+        t = pd.read_csv(M / f, keep_default_na=False, float_precision="round_trip")
         pairs |= {(r.ms, r.bulk) for r in t.itertuples() if r.bulk in BULKS}
     grof = {}
     with gzip.open(need(SIMINI, "CAPRI's simulation data"), "rt", newline="") as fh:

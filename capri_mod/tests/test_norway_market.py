@@ -50,19 +50,24 @@ def test_norway_is_a_trade_region_of_its_own():
     from _market_regions import model_region          # the market's grouping step (tools/lib)
     assert len(ALL_TRADE_REGIONS) == 44 and "ROW" not in ALL_TRADE_REGIONS and "NO000000" in ALL_TRADE_REGIONS
     assert TRADE_REGION_OF_CAPRI["NO000000"] == "NO000000" and "NO000000" in ALL_TRADE_REGIONS
-    assert sup_noneu() == {"NO000000": ("NO", "NO000000")} and "NO000000" not in EU_MS_BLOCK
+    assert sup_noneu()["NO000000"] == ("NO", "NO000000") and "NO000000" not in EU_MS_BLOCK
     assert model_region("NO000000") == "NO000000"
 
 
 def test_supply_countries_outside_eu_setting():
     """run.supply_countries_outside_eu decides the run's supply-model countries outside the EU (CAPRI's per-country
-    switches): Norway by default; none when empty, Norway's units then out of the run; a country without regional
-    units is refused."""
+    switches): CAPRI's list by default (Norway, the UK, Turkey and the Western Balkans; since 24 November 2026, before
+    Norway alone); none when empty, the non-EU units then out of the run; a country without regional units is
+    refused."""
     import pytest
     from capri_mod import settings
     from capri_mod.data.definitions import sup_noneu, in_run, SUP_NONEU_ALL
     assert "NO000000" in SUP_NONEU_ALL
-    assert list(sup_noneu()) == ["NO000000"] and in_run("NO020000") and in_run("DE110000")
+    assert list(sup_noneu()) == ["NO000000", "UK000000", "TUR", "AL000000", "BA000000", "CS000000", "KO000000",
+                                 "MK000000", "MO000000"]
+    assert in_run("NO020000") and in_run("UKC00000") and in_run("DE110000")
+    with settings.override({"run.supply_countries_outside_eu": ["NO000000"]}):
+        assert list(sup_noneu()) == ["NO000000"] and in_run("NO020000") and not in_run("UKC00000")
     with settings.override({"run.supply_countries_outside_eu": []}):
         assert sup_noneu() == {} and not in_run("NO020000") and in_run("DE110000")
     with settings.override({"run.supply_countries_outside_eu": ["XX000000"]}):
@@ -106,7 +111,8 @@ def test_eu_and_norway_rows_are_split(data):
     """Norway's supply-model rows go to NO000000, not to the EU's market region(s)."""
     from capri_mod.market.market_module import MarketModule
     mm = MarketModule(data)
-    assert mm.SUP == ("NO000000",) and "NO000000" in mm.regions
+    # the default countries outside the EU (CAPRI's list since 24 November 2026): their market regions
+    assert mm.SUP == ("NO000000", "UK000000", "TUR", "WBA") and "NO000000" in mm.regions
     assert mm.eu_region_of_ms("NO000000") is None and mm.eu_region_of_ms("DE000000") in mm.EU
     assert mm.sup_region_of_country("NO090000") == "NO000000" and mm.sup_region_of_country("DE") is None
     exo = pd.DataFrame({"BARL": [10.0, 3.0, 2.0]}, index=["DE", "DK", "NO"])

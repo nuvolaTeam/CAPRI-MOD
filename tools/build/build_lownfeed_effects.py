@@ -14,8 +14,12 @@ than the requirement function asks (p_animReq > p_animReqLit). CAPRI's definitio
           l. 88-96)
   effects crude protein (and lysine) requirement x (1 - cut x share); manure N x (1 - cut x (MANN + CRPR_EXPT) /
           MANN x share) (the protein not fed is not excreted; CRPR_EXPT = N leaving in products; l. 98-120), with
-          the simulation year's DATA: sim_ini_21730's MANN (at BAS, which CAPRI's 2030 MANN equals, K179) and
-          CRPR_EXPT at Y
+          the simulation year's DATA as CAPRI's simulation has them when low_n_feed.gms runs: recomputed for "Y" by
+          feed/req_or_man_fnc.gms in its manure mode just before (capmod.gms l. 1090), MANN from the 2030 rations and
+          CRPR_EXPT by fert/calc_nexport.gms on the 2030 items. Here the 2030 reference's MANN (dataOut, as the
+          2030 manure coefficients, K179) and CRPR_EXPT by tools/build/build_livestock_n_export_2030.py's
+          calc_nexport_CRPR_EXPT on its 2030 items (K202). Until 24 November 2026 sim_ini_21730's MANN at BAS and
+          CRPR_EXPT at Y, both CAPRI's 2017 values (KNOWN_ISSUES K203)
   cost    costParLin = feed cost per place and year x 0.06 x cut / max(0.001, p_animExcrProtCorrFact - 1 - cut)
           (l. 129-142), p_animExcrProtCorrFact sim_ini_21730's (the 2030 trend and feed calibration in it)
   shares  MaxShare: monogastrics 1, dairy cows 1 - grazing share, other ruminants 0.5 x (1 - grazing share), capped
@@ -89,6 +93,31 @@ def _simini(symbol: str) -> dict:
     return {tuple(r[:-1]): float(r[-1]) for r in t[dims + ["value"]].itertuples(index=False)}
 
 
+def mann_crpr_expt_2030(acts, ref: Path = None) -> dict:
+    """{(CAPRI region, activity, MANN | CRPR_EXPT): value} of the simulation year, as CAPRI's simulation has them when
+    low_n_feed.gms runs (the module docstring): the 2030 reference's MANN per activity unit (dataOut at 2030) and
+    CRPR_EXPT by calc_nexport.gms on its 2030 items (build_livestock_n_export_2030.calc_nexport_CRPR_EXPT; the
+    reference does not report it); the regional and the member state rows (KNOWN_ISSUES K203)."""
+    spec = importlib.util.spec_from_file_location("bne", ROOT / "tools" / "build" / "build_livestock_n_export_2030.py")
+    bne = importlib.util.module_from_spec(spec); spec.loader.exec_module(bne)
+    from paths import BASELINE_REF
+    from _grep import grep
+    txt = grep(rf"^'[A-Z]{{2}}[A-Z0-9]{{6}}'\.''\.'({'|'.join(sorted(acts))})'\.'(LEVL|MANN|{'|'.join(bne.ITEMS)})'\.'2030'",
+               str(ref or BASELINE_REF))
+    v = defaultdict(dict)
+    for line in txt.splitlines():
+        m = bne._ROW.match(line)
+        if m:
+            v[(m.group(1), m.group(2))][m.group(3)] = bne._num(m.group(4))
+    out = {}
+    for (r, a), d in v.items():
+        if d.get("LEVL", 0.0) > 0:
+            if d.get("MANN"):
+                out[(r, a, "MANN")] = d["MANN"]
+            out[(r, a, "CRPR_EXPT")] = bne.calc_nexport_CRPR_EXPT(a, d)
+    return out
+
+
 def lowNFeed_cut(animReq_CRPR, animReqLit_CRPR, animReq_ENNE, animReqLit_ENNE, ghgTechLowNFeed=1.0):
     """low_n_feed.gms l. 88-96:
 
@@ -149,10 +178,8 @@ def main():
     REQ = {(k[0], k[1], k[3]): v for k, v in R.items() if k[1] in acts and k[2] == "T" and k[3] in ("CRPR", "ENNE")}
     LIT = {(k[0], k[1], k[3]): v for k, v in L.items() if k[1] in acts and k[2] == "T" and k[3] in ("CRPR", "ENNE")}
     EXC = {(k[0], k[1]): v for k, v in X.items() if k[1] in acts and k[2] == "T" and k[3] == "Y"}
-    D = {}
-    for (r, c, i, t), v in DATA.items():
-        if c in acts and ((i in ("LEVL", "CRPR_EXPT") and t == "Y") or (i == "MANN" and t == "BAS")):
-            D[(r, c, i)] = v
+    D = {(r, c, i): v for (r, c, i, t), v in DATA.items() if c in acts and i == "LEVL" and t == "Y"}
+    D.update(mann_crpr_expt_2030(acts))
     cs = read_source(ROOT / "capri_data" / "sources" / "intermediate" / "ghgtech" / "capri_costsavings_2030.parquet")
     cs = cs[cs.technology.str.lower() == "lownfeed"]
     MX = {(r.region, r.activity): float(r.level) for r in cs[cs.run == "max"].itertuples() if pd.notna(r.level)}

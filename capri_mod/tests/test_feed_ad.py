@@ -189,3 +189,45 @@ def test_feed_bulk_market_factor_equals_the_loop(market, monkeypatch):
             if r > 0 and sv > 0:
                 s += e * np.log(float(r) / sv)
         assert abs(new[k] - np.exp(s)) <= 1e-13 * np.exp(s), (k, new[k], np.exp(s))
+
+
+def test_feed_bulks_of_the_noneu_supply_countries_respond_inside_the_market(market, monkeypatch):
+    """CAPRI's feedBlk_ holds for every country with supply models (RMSSUP; arm/market_model.gms l. 972-995): a non-EU
+    market region's bulks respond within the market solve at its own prices against those its supply models saw
+    (seen.sup_price_seen), only its countries' bulks; sup_feed_use takes the factor on its supply models' bulk
+    (register DEP-54; until 24 November 2026 these bulks were fixed within a solve)."""
+    mm = market
+    fb = mm._feed_bulk_params()
+    bsup = fb.get("bulks_sup") or {}
+    reg = "NO000000"
+    mss = mm.SUP_NONEU_MS.get(reg, ())
+    keys = [k for k in bsup if k[0] in mss]
+    assert keys and reg in mm.SUP
+    comm = sorted({c for k in keys for c in bsup[k]["comm"] if c})
+    rng = np.random.default_rng(7)
+    E = {k: {y: float(rng.uniform(-0.5, 0.5)) for y in comm[:4]} for k in keys}
+    E[("FR000000", "FCER")] = {comm[0]: 0.3}                     # an EU member state's: not in Norway's factor
+    monkeypatch.setattr(mm, "_feed_bulk_elas", lambda: E)
+    seen = {c: float(np.exp(0.2 * rng.standard_normal())) for c in comm}
+    monkeypatch.setattr(mm.seen, "sup_price_seen", {reg: seen})
+    prices = {c: float(np.exp(0.3 * rng.standard_normal())) for c in comm}
+    f = mm.feed_bulk_market_factor(prices, region=reg)
+    assert set(f) == set(keys)
+    for k in keys:
+        s = sum(e * np.log(prices[y] / seen[y]) for y, e in E[k].items())
+        assert abs(f[k] - np.exp(s)) <= 1e-13 * np.exp(s)
+    old = mm.seen.feed_bulk_index
+    mm.seen.feed_bulk_index = {k: 1.0 for k in bsup}
+    try:
+        q1, q0 = mm.sup_feed_use(reg, prices, bulk_factor=f), mm.sup_feed_use(reg, prices)
+        ref = {}
+        for k in keys:
+            for c, x in zip(bsup[k]["comm"], _bulk_loop(bsup[k], prices, f[k])[1]):
+                if c:
+                    ref[c] = ref.get(c, 0.0) + float(x)
+        assert ref.keys() == q1.keys()
+        for c in ref:
+            assert abs(q1[c] - ref[c]) <= 1e-12 * max(1.0, abs(ref[c]))
+        assert any(abs(q1[c] - q0[c]) > 1e-9 for c in q0)
+    finally:
+        mm.seen.feed_bulk_index = old

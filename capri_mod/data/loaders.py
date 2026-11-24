@@ -48,7 +48,7 @@ _FILE_CATEGORY = {
     "base_areas.csv": "supply", "yields.csv": "supply", "animal_numbers.csv": "supply",
     "cap_premium_activity.csv": "supply", "producer_prices_regional.csv": "supply",
     "livestock_output_coef.csv": "supply", "nutrients_regional.csv": "supply",
-    "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "market_prod_grof_2030.csv": "market", "bilateral_flows_{BY}.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_{BY}.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_{BY}.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.csv": "market", "world_market_baseline_products.csv": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "techn_mix_2030.csv": "supply", "price_transmission_2030.csv": "supply", "plant_protection_capri_step_2030.csv": "supply", "input_coefs_2030.csv": "supply", "pmp_capri_2030_mix.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_{BY}.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
+    "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "livestock_output_by_product_coef_2030.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "market_prod_grof_2030.csv": "market", "bilateral_flows_{BY}.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_{BY}.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_{BY}.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.csv": "market", "world_market_baseline_products.csv": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "techn_mix_2030.csv": "supply", "price_transmission_2030.csv": "supply", "plant_protection_capri_step_2030.csv": "supply", "input_coefs_2030.csv": "supply", "pmp_capri_2030_mix.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_{BY}.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
     "livestock_feed_coef.csv": "feed",
     "eu_cake_feed_bas.csv": "market",
     "biofuel_feedstock_{BY}.csv": "market", "biofuel_use_share_{BY}.csv": "market", "biofuel_market_{BY}.csv": "market", "biofuel_feedstock_2030.csv": "market", "biofuel_use_share_2030.csv": "market", "biofuel_market_2030.csv": "market", "crushing_parameters_{BY}.csv": "market", "crushing_parameters_2030.csv": "market", "feed_bulks_eu.csv": "market", "feed_bulks_eu_share.csv": "market", "dairy_processing.csv": "market",
@@ -74,6 +74,7 @@ _FILE_CATEGORY = {
     "fertiliser_substitution_2030.csv": "environment",
     "livestock_manure_n_coef.csv": "environment", "livestock_manure_n_coef_2030.csv": "environment",
     "livestock_n_export_coef.csv": "environment",
+    "livestock_n_export_coef_2030.csv": "environment",
     "livestock_ch4man_coef.csv": "environment", "livestock_ch4ent_coef.csv": "environment",
     "crop_co2_coef.csv": "environment",
     # CAPRI's inner fertiliser distribution model and mineRedu (read by capri_mod.fert.inner_fert_dist)
@@ -659,6 +660,9 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # livestock output by CAPRI final product, 'ACT.PRODUCT' (kt per 1000 head; sums to
         # livestock_output_coef): the market bridge splits each animal's output into its products
         "livestock_output_by_product_coef": _load_optional_csv(data_dir, "livestock_output_by_product_coef.csv"),
+        # CAPRI's 2030 final-product output per model head, the same layout: CAPRI's 2030 production over the model's
+        # 2030 base heads (tools/build/build_livestock_output_2030.py, register DEP-13 step 2), for the 2030 market year
+        "livestock_output_by_product_coef_2030": _load_optional_csv(data_dir, "livestock_output_by_product_coef_2030.csv"),
         "livestock_premium_coef": _load_optional_csv(data_dir, "livestock_premium_coef.csv"),
         # model herd units per unit of CAPRI's LEVL (tools/build/build_capri_level_ratio.py): CAPRI's activity bounds in model units
         "capri_level_ratio": _load_optional_csv(data_dir, "capri_level_ratio.csv"),
@@ -722,6 +726,9 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "livestock_manure_n_coef": _load_optional_csv(data_dir, "livestock_manure_n_coef.csv"),
         # CAPRI's N exported in animal products per model head (CRPR_EXPT, tools/build/build_livestock_n_export_coef.py)
         "livestock_n_export_coef": _load_optional_csv(data_dir, "livestock_n_export_coef.csv"),
+        # CAPRI's 2030 N in products per model head: calc_nexport.gms on its 2030 items, as its simulation recomputes it
+        # (tools/build/build_livestock_n_export_2030.py, KNOWN_ISSUES K202), for the 2030 market year
+        "livestock_n_export_coef_2030": _load_optional_csv(data_dir, "livestock_n_export_coef_2030.csv"),
         # CAPRI's manure and enteric CH4 per head, CO2 from liming and urea (tools/build/build_ghg_coefs_2017.py)
         "livestock_ch4man_coef": _load_optional_csv(data_dir, "livestock_ch4man_coef.csv"),
         "livestock_ch4ent_coef": _load_optional_csv(data_dir, "livestock_ch4ent_coef.csv"),

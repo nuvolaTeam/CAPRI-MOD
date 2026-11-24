@@ -155,8 +155,12 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         """The non-EU market region of a supply-model country (its country code, as REGION_TO_COUNTRY, or one of its
         regional units): NO000000 for Norway, WBA for Serbia (RS, CS000000); None for the EU's countries. A unit's code
         is read through REGION_TO_COUNTRY (until 4 November 2026 its first two letters, which are not the country code
-        for the UK, UKC00000 / GB, or Serbia, Montenegro and Kosovo)."""
+        for the UK, UKC00000 / GB, or Serbia, Montenegro and Kosovo); the market region's own code gives itself."""
         cc = str(cc)
+        if cc in getattr(self, "SUP", ()):
+            # the market region itself (capri_base_supply_rows names its rows so: NO000000, UK000000, TUR, WBA); only
+            # NO000000 was read through its first two letters before the full list became the default (24 November 2026)
+            return cc
         cc = _defs.REGION_TO_COUNTRY.get(cc, cc[:2])
         r = self.SUP_NONEU_COUNTRY.get(cc)
         return r if r in getattr(self, "SUP", ()) else None

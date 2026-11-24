@@ -39,9 +39,10 @@ def manure_coef_table(nut: str, year=None) -> pd.DataFrame:
     such animal) at a calibration year: the base year's (<stem>.csv: CAPRI's base-year totals over the model's heads,
     tools/build/build_livestock_output_coef.py, build_npk_balance_2030.py) or, at another market year, CAPRI's
     coefficients of that year in the baseline's folder (<stem>_<year>.csv; 2030: tools/build/
-    build_livestock_manure_2030.py: CAPRI computes them from the simulation year's rations before it solves,
-    capmod.gms l. 1090, KNOWN_ISSUES K179). year: by default the run's (RunInputs.market_year, set by SupplyModule; the
-    base year where unset). A year without its table is an error (no fall back to the base year's)."""
+    build_livestock_manure_2030.py: CAPRI computes them from the simulation year's herd data before it solves,
+    capmod.gms l. 1090, feed/req_or_man_fnc.gms, KNOWN_ISSUES K179). year: by default the run's
+    (RunInputs.market_year, set by SupplyModule; the base year where unset). A year without its table is an error (no
+    fall back to the base year's)."""
     from capri_mod.data import inputs as _inputs
     by = str(_inputs.base_year())
     yr = year if year is not None else getattr(_inputs.current(), "market_year", None)

@@ -655,7 +655,8 @@ the **same method and structure** as CAPRI, not simplifications of it:
   its base ration from CAPRI's feeding data supplies (`capri_regional_nlp.py`).
 - **Environmental coefficients.** CAPRI's `MANN` manure-nitrogen coefficients
   and IPCC emission factors.
-- **Regional resolution.** CAPRI's own regional units: 221 for EU27 + Norway, under CAPRI's codes; see §10.4.
+- **Regional resolution.** CAPRI's own regional units: 250 for EU27, Norway, the UK, Turkey and the Western Balkans,
+  under CAPRI's codes; see §10.4.
 
 The differences from CAPRI are recorded, not hidden. The defaults that are not CAPRI's are listed in
 `docs/DEPARTURES_FROM_CAPRI.md` and summarised in [§10](#10-differences-from-capri):
@@ -1423,15 +1424,18 @@ bilaterally with each other and the other regions; trade between member states i
 a block is not resolved, as in CAPRI. "EU27" in the reports is the two blocks' sum. Member states keep
 their own raw milk prices through the dairy block.
 
-### 10.4 CAPRI's regional units, EU27 + Norway
+### 10.4 CAPRI's regional units, EU27 and the non-EU supply countries
 
 The model's regions are CAPRI's regional units, the units CAPRI solves one supply model for
-(RU(SRNUTS2) $ MAP_RR, capmod/define_regional_sets.gms l. 230): 221 for EU27 + Norway (215 + 6), under CAPRI's
+(RU(SRNUTS2) $ MAP_RR, capmod/define_regional_sets.gms l. 230): 250, 215 for EU27, 6 for Norway and 29 for the UK,
+Turkey and the Western Balkans, under CAPRI's
 8-character codes (DE110000, FR240000, BL400000, DK000000; capri_data/codes/regional_units.csv,
 tools/build/build_regional_units.py). Every CAPRI file is read without a translation, and every region carries its own
 CAPRI data. The units follow CAPRI's own NUTS vintages (France's 22 regions, Italy's numeric codes, Poland's 16, Ireland's
 two); Denmark, Estonia, Lithuania, Latvia, Slovenia, Cyprus, Malta and Croatia are one unit each, as in CAPRI. The UK,
-Turkey and the Western Balkans (29 units in CAPRI's 2030 runs) are not covered yet.
+Turkey and the Western Balkans (29 units in CAPRI's 2030 runs) have their supply models in the run by default since
+24 November 2026, as in CAPRI's 2030 Green Deal runs: 250 units (`run.supply_countries_outside_eu`; with Norway alone,
+the setting until then, 221).
 
 Results on current NUTS regions are a
 reporting step, not regional detail of their own: `capri_mod/nuts_reporting.to_nuts2024` maps the units to NUTS 2024

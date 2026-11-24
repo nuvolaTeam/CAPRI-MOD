@@ -2749,7 +2749,8 @@ def test_livestock_gross_output_is_marketed_product(de4_baseline):
     # in this model) - milk ~140,000 kt, pork ~22,500 kt.
     herds = model.data["animal_numbers"]
     coef = pd.read_csv(coef_path, index_col=0)
-    eu = [r for r in coef.index if not r.startswith("NO")]
+    from capri_mod.data.definitions import is_eu
+    eu = [r for r in coef.index if is_eu(r)]                      # the EU's units (not the non-EU supply countries')
     milk = float((herds.reindex(eu)["DCOW"].fillna(0)
                   * coef.loc[eu, "DCOW"].fillna(0)).sum())
     # pigs are CAPRI's two activities since the pig split: sows (PIGS) and fattening pigs (PIGF)
@@ -3328,11 +3329,11 @@ def test_model_regions_are_capris_regional_units(data):
     from capri_mod import settings as S
     from capri_mod.data.definitions import is_eu
     units = pd.read_csv(DATA_DIR / "codes" / "regional_units.csv")
-    # all of CAPRI's 250 supply-model units are listed (SUPPLY_NONEU_DESIGN, 4 November 2026); the data are built for
-    # the EU's and the default countries outside it (Norway) until the design's step 4 builds the other 29
+    # all of CAPRI's 250 supply-model units are listed (SUPPLY_NONEU_DESIGN, 4 November 2026); the run loads the EU's and
+    # the default countries outside it: CAPRI's list since 24 November 2026, all 250 (Norway alone until then, 221)
     noneu = set(S.defaults().get("run.supply_countries_outside_eu"))
     built = units[[is_eu(m) or m in noneu for m in units.capri_ms]]
-    assert len(units) == 250 and len(built) == 221 and set(data["areas"].index) == set(built.region)
+    assert len(units) == 250 and len(built) == 250 and set(data["areas"].index) == set(built.region)
     # in the same order: the builders take the unit list from regional_units.csv (tools/lib/_model_regions.py)
     assert list(data["areas"].index) == list(built.region)
     assert {"DK000000", "EE000000", "LT000000", "LV000000", "SI000000", "CY000000", "MT000000", "HR000000"} <= set(units.region)
@@ -3507,7 +3508,8 @@ def test_ghg_accounts_take_capris_methane_and_co2(data):
     assert abs(co2.at["DE110000", "co2lim_kg_ha"] - 115.616) < 0.01 and abs(co2.at["DE110000", "urea_share"] - 0.158) < 0.001
     assert abs(co2.at["CZ010000", "urea_share"] - 0.016) < 1e-12
     h = data["animal_numbers"]
-    eu = [r for r in h.index if not r.startswith("NO")]
+    from capri_mod.data.definitions import is_eu
+    eu = [r for r in h.index if is_eu(r)]                          # the EU's units (not the non-EU supply countries')
     cols = [c for c in m4.columns if c in h.columns]
     man = float((h.loc[eu, cols] * m4.reindex(eu)[cols]).sum().sum()) / 1000.0      # kt CH4
     assert 1350 < man < 1450                                       # CAPRI 2017: 1,396 kt (the old flat factors: 1,072)
@@ -3772,7 +3774,9 @@ def test_table_olives_are_a_market_of_their_own(model, data):
     table olives in the member state)."""
     from capri_mod.data.definitions import MARKET_COMMODITIES, CROPS
     assert "TABO" in CROPS and "TABO" in MARKET_COMMODITIES
+    from capri_mod.data.definitions import is_eu
     ar = data["areas"]
+    ar = ar.loc[[r for r in ar.index if is_eu(r)]]                                  # the EU's units: CAPRI 2017's EU figures
     assert 4500 < ar["OLIV"].sum() < 4900 and 250 < ar["TABO"].sum() < 350          # kha: CAPRI 2017 4,703 and 307
     for k in ("yields", "variable_costs"):
         assert pd.read_csv(DATA_DIR / "2017" / "supply" / f"{k}.csv", index_col=0)["TABO"].notna().all()
@@ -3791,7 +3795,9 @@ def test_textile_crops_are_one_activity_and_market(model, data):
     import json
     from capri_mod.data.definitions import MARKET_COMMODITIES, CROPS
     assert "TEXT" in CROPS and "TEXT" in MARKET_COMMODITIES and not {"COTT", "OFIB"} & set(CROPS)
+    from capri_mod.data.definitions import is_eu
     ar = data["areas"]
+    ar = ar.loc[[r for r in ar.index if is_eu(r)]]                                  # the EU's units: CAPRI 2017's EU figure
     assert 520 < ar["TEXT"].sum() < 550                                              # kha, CAPRI 2017: 534.7
     assert ar.loc[[r for r in ar.index if r.startswith("EL")], "TEXT"].sum() > 300  # Greek cotton
     agg = pd.DataFrame({"TEXT": [3.0]}, index=["EL000000"])
@@ -3913,7 +3919,10 @@ def test_supply_elasticities_reach_every_region_from_capri(data):
     for r in ("DK000000", "DED00000"):
         assert prov.at[r, "SWHE"] in ("PMP_CAPRI", "REGIONAL_CAPRI"), r
     assert (prov["OFAR"] != "NO_CAPRI_VALUE").sum() > 200
-    grown_default = sum(A.at[r, a] for r in A.index for a in ("SWHE", "BARL", "CORN", "RAPE")
+    from capri_mod.data.definitions import is_eu
+    # the EU's units (K30, K32); the non-EU supply countries' units have no regional CAPRI elasticity in these sources
+    # (their supply models take CAPRI's 2030 PMP terms, pmp_capri_2030.csv)
+    grown_default = sum(A.at[r, a] for r in A.index if is_eu(r) for a in ("SWHE", "BARL", "CORN", "RAPE")
                         if prov.at[r, a] == "NO_CAPRI_VALUE" and A.at[r, a] > 0)
     assert grown_default < 800                                                      # kha (before K32: 7,900)
 

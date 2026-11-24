@@ -2344,9 +2344,10 @@ class SupplyModule(ModuleStateMixin):
         """Activities of the region held at their level: those of the parts calibrated with PMP terms (pmp_capri_parts:
         crops, animals) without a positive own term at the calibration point, and those without any CAPRI value (no
         elasticity, no term: OOIL, OIND in every member state). CAPRI calibrates every activity with a level; where
-        its calibration has no term for an activity of the model region (its level there zero or negligible: tobacco,
-        pulses in the Netherlands, durum wheat at 2030, 71 cells and at most 2% of an activity's EU level, r166), the
-        activity is held, as CAPRI holds what it does not calibrate. Until 28 October 2026 those cells took a curvature
+        its calibration has no term for an activity of the model region, the activity is held. At the 2030 market year
+        all such cells are at 0, as CAPRI's, where they have no level and no yield at "Y" and stay at 0 in its reference
+        and Green Deal runs (register DEP-23, closed 23 November 2026; capri_mod/tests/test_pmp_held_cells.py; in the run
+        of 28 October, r166, 71 cells still had a level, at most 2% of an activity's EU level). Until 28 October 2026 those cells took a curvature
         from their CAPRI elasticity (the elasticity calibration; the supply audit's finding S13, ARCHITECTURE_REFACTOR.md section 5.2)."""
         pmp = self._pmp_terms_for(d, region) or {}
         parts = tuple(getattr(self, "pmp_capri_parts", ()))
