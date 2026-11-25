@@ -1,0 +1,42 @@
+code,text
+FGRA,Gras
+FMAI,Fodder maize
+FOFA,Fodder other on arable land
+FROO,Fodder root crops
+FCOM,Milk for feeding
+FSGM,Sheep and Goat Milk for feeding
+FSTR,Straw
+FCER,Feed cereals
+FPRO,Feed rich protein
+FENE,Feed rich energy
+FMIL,Feed from milk product
+FOTH,Feed other
+WADR,Livestock drinking water
+WASE,Livestock service water
+WATR,Water balance or deficit
+WIRR,Gross irrigation water use by crop (m3/ha)
+NITF,Nitrogen in fertiliser
+PHOF,Phospate in fertiliser [P2O5]
+POTF,Potassium in fertiliser [K2O]
+ICAM,Male calves
+ICAF,Female calves
+IHEI,Young heifers
+ICOW,Young cows
+IPIG,Piglets
+IBUL,Young bulls
+ILAM,Lambs
+ICHI,Chicken
+CAOF,Calcium in fertiliser
+SEED,Seed
+PLAP,Plant protection
+REPM,Maintenance materials
+REPB,Maintenance buildings
+ELEC,Electricity
+EGAS,Heating gas and oil
+EFUL,Fuels
+ELUB,Lubricants
+IRRO,Irrigation (other than water use)
+INPO,Other inputs
+SERI,Services input
+mitiI,efforts for GHG mitigation may be negative in case of benefits [Quantity measure in constant prices of 2005]
+IPHA,Pharmaceutical inputs

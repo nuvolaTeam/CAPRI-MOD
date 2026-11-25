@@ -4454,6 +4454,46 @@
     "tests": []
    }
   },
+  "capri_fert_dist": {
+   "file": "capri_data/codes/capri/FERT_DIST.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI FERT_DIST: the fertiliser distribution rows (N, P, K from residues, crops, manure and minerals) (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_fibrerichfeed": {
    "file": "capri_data/codes/capri/fibreRichFeed.csv",
    "declared_in": "00_codes.sql",
@@ -4579,6 +4619,46 @@
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI FNUT: the mineral fertilisers' nutrients NITF, PHOF, POTF (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_fnut_cols": {
+   "file": "capri_data/codes/capri/FNUT_COLS.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI FNUT_COLS: the mineral fertilisers' columns NITF, PHOF, POTF (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI's set order",
    "columns": [
     {
      "name": "code",
@@ -4977,6 +5057,46 @@
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI HEIF: the fattened heifers (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_i": {
+   "file": "capri_data/codes/capri/I.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI I: the inputs (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI's set order",
    "columns": [
     {
      "name": "code",
@@ -5802,6 +5922,46 @@
     ]
    }
   },
+  "capri_mrkbal": {
+   "file": "capri_data/codes/capri/MRKBAL.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI MRKBAL: the market balance positions deleted from the member states at Y (but FEDM) (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_ms": {
    "file": "capri_data/codes/capri/MS.csv",
    "declared_in": "00_codes.sql",
@@ -5982,6 +6142,46 @@
     "tests": []
    }
   },
+  "capri_nonend": {
+   "file": "capri_data/codes/capri/NONEND.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI NONEND: the products without a market, whose balance positions are kept (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_nrumi": {
    "file": "capri_data/codes/capri/NRUMI.csv",
    "declared_in": "00_codes.sql",
@@ -6107,6 +6307,46 @@
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI O: the outputs (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_oaggr": {
+   "file": "capri_data/codes/capri/OAGGR.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI OAGGR: the aggregate output columns deleted from the member states at Y (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI's set order",
    "columns": [
     {
      "name": "code",

@@ -538,6 +538,30 @@ COMMENT ON TABLE capri_mlk IS 'CAPRI MLK: the raw milk and the dairy products (s
 CREATE TABLE capri_fatsprot (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_fatsprot IS 'CAPRI FATSPROT: the milk''s fat and protein, FATS and PROT (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms), in CAPRI''s set order';
 
+-- file: capri_data/codes/capri/OAGGR.csv
+CREATE TABLE capri_oaggr (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_oaggr IS 'CAPRI OAGGR: the aggregate output columns deleted from the member states at Y (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/MRKBAL.csv
+CREATE TABLE capri_mrkbal (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_mrkbal IS 'CAPRI MRKBAL: the market balance positions deleted from the member states at Y (but FEDM) (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/NONEND.csv
+CREATE TABLE capri_nonend (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_nonend IS 'CAPRI NONEND: the products without a market, whose balance positions are kept (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/FERT_DIST.csv
+CREATE TABLE capri_fert_dist (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_fert_dist IS 'CAPRI FERT_DIST: the fertiliser distribution rows (N, P, K from residues, crops, manure and minerals) (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/FNUT_COLS.csv
+CREATE TABLE capri_fnut_cols (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_fnut_cols IS 'CAPRI FNUT_COLS: the mineral fertilisers'' columns NITF, PHOF, POTF (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/I.csv
+CREATE TABLE capri_i (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_i IS 'CAPRI I: the inputs (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI''s set order';
+
 -- file: capri_data/codes/capri/STOCK_TO_FUEL.csv
 CREATE TABLE capri_stock_to_fuel (xx VARCHAR NOT NULL, seco_biof VARCHAR NOT NULL, PRIMARY KEY (xx, seco_biof));
 COMMENT ON TABLE capri_stock_to_fuel IS 'CAPRI STOCK_TO_FUEL: each biofuel feedstock and its biofuel (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms)';

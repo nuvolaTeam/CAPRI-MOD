@@ -5123,6 +5123,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/FERT_DIST.csv": {
+   "description": "CAPRI FERT_DIST: the fertiliser distribution rows (N, P, K from residues, crops, manure and minerals) (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 13,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/FIX_YAI.csv": {
    "description": "CAPRI FIX_YAI: the activities with a fixed young-animal input (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
    "kind": "structure",
@@ -5145,6 +5155,16 @@
   },
   "capri_data/codes/capri/FNUT.csv": {
    "description": "CAPRI FNUT: the mineral fertilisers' nutrients NITF, PHOF, POTF (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/FNUT_COLS.csv": {
+   "description": "CAPRI FNUT_COLS: the mineral fertilisers' columns NITF, PHOF, POTF (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI's set order",
    "kind": "structure",
    "rows": 3,
    "columns": 2,
@@ -5267,6 +5287,16 @@
    "description": "CAPRI HEIF: the fattened heifers (sets.gms), in CAPRI's set order",
    "kind": "structure",
    "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/I.csv": {
+   "description": "CAPRI I: the inputs (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 41,
    "columns": 2,
    "origin": {
     "nature": "capri",
@@ -5404,6 +5434,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/MRKBAL.csv": {
+   "description": "CAPRI MRKBAL: the market balance positions deleted from the member states at Y (but FEDM) (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 9,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/MS.csv": {
    "description": "CAPRI MS: the member states and the other national units (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
    "kind": "structure",
@@ -5444,6 +5484,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/NONEND.csv": {
+   "description": "CAPRI NONEND: the products without a market, whose balance positions are kept (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 13,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/NRUMI.csv": {
    "description": "CAPRI NRUMI: the non-ruminants of the requirement functions (sets.gms), in CAPRI's set order",
    "kind": "structure",
@@ -5478,6 +5528,16 @@
    "description": "CAPRI O: the outputs (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
    "kind": "structure",
    "rows": 63,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/OAGGR.csv": {
+   "description": "CAPRI OAGGR: the aggregate output columns deleted from the member states at Y (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 8,
    "columns": 2,
    "origin": {
     "nature": "capri",

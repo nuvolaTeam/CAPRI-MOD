@@ -10,9 +10,14 @@ them into the port.
 
     python3 tools/check/check_year_data_2030.py --ms DK [--rtol 1e-9] [--show 20] [--bas capreg] [--items feed]
 
---cells CSV compares only the cells of the file at "Y" (check_fedtrm_cal_2030.py --record writes the cells the feed chain
-reads); --items feed only the cells the feed chain reads (the activities' columns, the feeds' contents, balance
-positions, unit values and losses: feed_cells).
+--sim-ini applies create_sim_ini_gdx.gms l. 311-369 too (capri_mod/projection/equations/create_sim_ini_gdx_data.py),
+the deletions before CAPRI writes sim_ini. --cells CSV compares only the cells of the file at "Y"
+(check_fedtrm_cal_2030.py --record writes the cells the feed chain reads); --items feed only the cells the feed chain
+reads (the activities' columns, the feeds' contents, balance positions, unit values and losses: feed_cells).
+
+With --sim-ini, on the cells the feed chain reads, the differences left are the five pairs CAPRI sets later: the
+stocking rate AGGR.YCOW (feed/req_or_man_fnc.gms l. 100) and the data activities' levels GRAS, DCOW, BULF, HEIF
+(inflation_and_trend_interpolation.gms l. 146): Denmark 5 of 1,153 cells, Germany 169 of 40,052 (34 units).
 
 With --bas capreg the base year itself is rebuilt too: CAPREG's results (capri_sources/reference/capreg_base/17, CAPREG's
 DATA2 at "Y") through CAPRI's base year loading (base_year_data), compared with sim_ini_21730's "BAS" first; the year's
@@ -121,6 +126,8 @@ def main(argv=None) -> int:
     ap.add_argument("--bas", choices=("simini", "capreg"), default="simini")
     ap.add_argument("--items", choices=("all", "feed"), default="all",
                     help="feed: only the cells the feed chain reads (feed_cells)")
+    ap.add_argument("--sim-ini", action="store_true",
+                    help="apply create_sim_ini_gdx.gms l. 311-369 after the year's data (create_sim_ini_gdx_data)")
     ap.add_argument("--cells", type=Path, default=None,
                     help="only the cells of this CSV (position, column, row), as check_fedtrm_cal_2030.py --record "
                          "writes the cells the feed chain reads")
@@ -147,6 +154,9 @@ def main(argv=None) -> int:
     print(f"{a.ms}: {len(mine)} regions; BAS {sum(len(v) for (t, *_), v in D.c.items() if t == 'BAS')} cells, "
           f"trends {sum(len(v) for v in D2.c.values())} cells")
     fc = ly.year_data(D, D2, S, check=False)
+    if a.sim_ini:
+        from capri_mod.projection.equations import create_sim_ini_gdx_data as csd
+        csd.create_sim_ini_gdx_data(D, S)
     print(f"FROM_CAPTRD: {len(fc)} positions")
     try:
         ly.assert_year_data(D, S)

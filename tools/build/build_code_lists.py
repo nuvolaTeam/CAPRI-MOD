@@ -364,6 +364,9 @@ def main():
     # the year's biofuel, cake and milk statements and biofuel/resids.gms (load_base_data_and_trends.gms l. 713-795)
     for s in ("RMS", "SECO_BIOF", "XXBiof", "CAK", "SED", "MLK", "FATSPROT"):
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    # the deletions before CAPRI writes sim_ini (create_sim_ini_gdx.gms l. 311-369)
+    for s in ("OAGGR", "MRKBAL", "NONEND", "FERT_DIST", "FNUT_COLS", "I"):
+        write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
     for s, cols in (("STOCK_TO_FUEL", ("xx", "seco_biof")), ("STOCK_TO_BY", ("xx", "byprod")),
                     ("SED_TO_CAK", ("sed", "cak")), ("PACT_TO_Y", ("pact", "o"))):
         write(OUT / "capri" / f"{s}.csv", cols, pairs(s))

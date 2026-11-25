@@ -204,6 +204,12 @@ UNTRACED = {
     "capri_data/codes/capri/fibreRichFeed.csv": ("build_code_lists", "CAPRI"),
     "capri_data/2017/feed/fedtrm_params.csv": ("build_fedtrm_params", "CAPRI"),
     # the year's data (capmod/load_base_data_and_trends.gms): its code lists
+    "capri_data/codes/capri/OAGGR.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/MRKBAL.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/NONEND.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/FERT_DIST.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/FNUT_COLS.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/I.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/RMS.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/SECO_BIOF.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/XXBiof.csv": ("build_code_lists", "CAPRI"),
