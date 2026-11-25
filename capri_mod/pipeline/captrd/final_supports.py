@@ -166,7 +166,7 @@ def biof_adjust(R: Dict[K4, float], expert: Dict[K4, float], *, y: int, ms: Iter
     stmt(up)
     outs: Dict[str, List[str]] = {}
     cropo = set(S.cropo)
-    for a, o in S.pact_to_y:
+    for a, o in sorted(S.pact_to_y):
         if a in set(S.grcu) and o in cropo:
             outs.setdefault(a, []).append(o)
     up = {}

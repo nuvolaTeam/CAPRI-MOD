@@ -239,11 +239,11 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
     exp = list(X.expostt)
     trip = {k[:3] for k in nat if k[0] in msset}
     newn = {}
-    for t3 in trip:                                                             # l. 171-176
+    for t3 in sorted(trip):                                                     # l. 171-176
         if (any(nat.get((*t3, y)) for y in exp if y <= X.base_year)
                 and any(nat.get((*t3, y)) for y in exp if y > X.base_year)
                 and any(nat.get((*t3, y)) for y in need if y > X.lst_expost)):
-            for y in bym:
+            for y in sorted(bym):
                 if not nat.get((*t3, y)) and (*t3, y) in avg:
                     newn[(*t3, y)] = NE.p_NatExpert_AVGDAT(avg[(*t3, y)])
     nat.update(newn)
@@ -254,7 +254,7 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
     def mapped(r, xc, xr, y):
         return sum(pd_(r, c, w, y) for c in x2c.get(xc, []) for w in x2r.get(xr, []))
     newn = {}
-    for t3 in trip:                                                             # l. 180-194
+    for t3 in sorted(trip):                                                     # l. 180-194
         r, xc, xr = t3
         a = any(nat.get((*t3, y)) for y in exp if y <= X.base_year)
         b = any(nat.get((*t3, y)) for y in exp if y > X.base_year)
@@ -263,15 +263,15 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
             nat_both = [nat[(*t3, y)] for y in both]
             mapped_both = [mapped(r, xc, xr, y) for y in both]
             den = sum(mapped_both)
-            for y in bym:
+            for y in sorted(bym):
                 if not nat.get((*t3, y)) and den:
                     newn[(*t3, y)] = NE.p_NatExpert_from_pdata(mapped(r, xc, xr, y), nat_both, mapped_both)
     nat.update({k: v for k, v in newn.items() if v})
     msest = ms + ["ISR"]
     base = X.base_year
-    for t3 in {k[:3] for k in nat if k[0] in set(msest)}:                      # l. 197-198
+    for t3 in sorted({k[:3] for k in nat if k[0] in set(msest)}):              # l. 197-198
         if all(nat.get((*t3, y)) for y in bym):
-            nat[(*t3, base)] = NE.p_NatExpert_BAS([nat[(*t3, y)] for y in bym])
+            nat[(*t3, base)] = NE.p_NatExpert_BAS([nat[(*t3, y)] for y in sorted(bym)])
 
     def n_(r, xc, xr, y):
         return nat.get((r, xc, xr, y), 0.0)
@@ -287,7 +287,7 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
     cand = {(r, c, w) for (r, xc, xr, y) in nat for c in x2c.get(xc, []) for w in x2r.get(xr, [])
             if r in set(msest)}
     new = {}
-    for (r, c, w) in cand:
+    for (r, c, w) in sorted(cand):
         for y in exantet:
             if (sum(n_(r, xc, xr, y) * n_(r, xc, xr, base) for xc, xr in pairs(c, w))
                     and not (g(ab, r, c, w, y) or g(pc, r, c, w, y))):
@@ -308,7 +308,8 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
     S.apply(pc, new)
     cact = set(X.cact)
     new = {(r, a, w, y): NE.p_ExpertSupprt_Trustlevl_CACT_yield() for (r, c, w, y) in keys(tr) if r in msset
-           and c == "GROF" and y in exantet and tr[(r, c, w, y)] == TRUST_NAT for a in cact if (a, w) in pty}   # l. 232-235
+           and c == "GROF" and y in exantet and tr[(r, c, w, y)] == TRUST_NAT
+           for a in sorted(cact) if (a, w) in pty}                                     # l. 232-235
     S.apply(tr, new)
     S.apply(ab, {k: NE.p_ExpertSupprt_Absolute_CACT(sp(*k)) for k in keys(tr) if k[0] in msset and k[1] in cact
                  and k[3] in exantet and tr[k] == TRUST_YIELD})                                 # l. 237-239
@@ -351,7 +352,7 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
                          for c in dcow for w in HL for y in years if y > AFTER})
             S.apply(tr, {(r, c, w, y): NE.p_ExpertSupprt_trustlevl_rule(trust) for c in dcow for w in HL for y in years
                          if y > AFTER and g(pc, r, c, w, y)})
-        cols = [c for (c, w) in emap if w == "COMI" and not is_(c, "DCOW")]
+        cols = [c for (c, w) in sorted(emap) if w == "COMI" and not is_(c, "DCOW")]
         new = {}
         for c in cols:
             for y in years:
@@ -413,7 +414,7 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
                                                                        g(pc, lu, "DCOH", "LEVL", y))
                  for y in exantet if y > LST_DAITAR})
     S.apply(tr, {k: NE.p_ExpertSupprt_trustlevl_rule(10.01) for k in keys(pc, lu, lambda k: k[3] in exante)})
-    bounds(lu, dcow, [w for (c, w) in emap if c == dcow[0]], exantet, .99, 1.01, src="pc")
+    bounds(lu, dcow, [w for (c, w) in sorted(emap) if c == dcow[0]], exantet, .99, 1.01, src="pc")
     new_lo, new_up = {}, {}
     for (r, c, w, y), s in list(sup.items()):                                                     # l. 403-415
         if r == lu and c in maact and w == "LEVL" and y in exantet and s and bm(r, c, w):
@@ -577,7 +578,7 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
     for k, v in new.items():
         Expert.put(sup, k, v)
     S.apply(ab, {(cs, c, w, y): NE.p_ExpertSupprt_CS_Absolute(sp(cs, c, w, y), bm(cs, c, w), y, X.lst_exante)
-                 for (c, w) in emap for y in exantet if y > 2040 and sp(cs, c, w, y) and bm(cs, c, w)})
+                 for (c, w) in sorted(emap) for y in exantet if y > 2040 and sp(cs, c, w, y) and bm(cs, c, w)})
     S.apply(tr, {k: NE.p_ExpertSupprt_trustlevl_rule(9.01) for k in keys(ab, cs, lambda k: k[3] in exante and (k[1], k[2]) in emap)})
     # ---- l. 988-1014 BA, KO
     ba = "BA000000"
@@ -667,15 +668,15 @@ def supports(S: Expert, I: Inputs, X: Context) -> Dict[Tuple[str, str, str, int]
 
     def d1(r, c, w, y):
         return X.dgagri1.get((r, c, w, y), 0.0)
-    cols = [c for (c, w) in emap if w == "COMI" and not is_(c, "DCOW")]
+    cols = [c for (c, w) in sorted(emap) if w == "COMI" and not is_(c, "DCOW")]
     new = {}
     for c in cols:
         for y in after_t:
             new[(no, c, "COMI", y)] = NE.p_ExpertSupprt_NO_COMI(d1(no, c, "COMI", y), d1(no, c, "COMI", L),
                                                                 bm(no, c, "COMI"), y, L, base)
     S.apply(ab, new)
-    S.apply(tr, {(no, c, "COMI", y): NE.p_ExpertSupprt_trustlevl_rule(TRUST_NAT, 1) for (c, w) in emap if w == "COMI" for y in after_t
-                 if g(ab, no, c, "COMI", y)})
+    S.apply(tr, {(no, c, "COMI", y): NE.p_ExpertSupprt_trustlevl_rule(TRUST_NAT, 1)
+                 for (c, w) in sorted(emap) if w == "COMI" for y in after_t if g(ab, no, c, "COMI", y)})
     S.apply(ab, {(no, c, "COMI", y): NE.p_ExpertSupprt_Absolute_Support(sp(no, c, "COMI", y)) for c in dcow
                  for y in exantet if y >= AFTER})
     S.apply(tr, {(no, c, "COMI", y): NE.p_ExpertSupprt_trustlevl_rule(TRUST_NAT, -2) for c in dcow for y in exantet})

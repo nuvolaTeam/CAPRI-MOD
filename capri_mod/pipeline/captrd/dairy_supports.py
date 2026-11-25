@@ -113,7 +113,7 @@ def dairy(*, runr: Sequence[str], ms: Sequence[str], ms_no_eu28: Iterable[str], 
     agri_of: Dict[str, List[str]] = {}
     for a, m in ms_agri_to_ms:
         agri_of.setdefault(m, []).append(a)
-    bas_of = {n: {a: XE.p_dairy_BASM([t.get((a, y), 0.0) for y in yrbas]) for a in {k[0] for k in t}}
+    bas_of = {n: {a: XE.p_dairy_BASM([t.get((a, y), 0.0) for y in yrbas]) for a in sorted({k[0] for k in t})}
               for n, t in tabs.items()}
 
     def change(n, r, y):

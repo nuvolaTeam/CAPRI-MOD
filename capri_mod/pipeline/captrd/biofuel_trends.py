@@ -741,7 +741,7 @@ def trends(I: Inputs, *, ms: Sequence[str], msincl: Sequence[str], msall: Iterab
     cols_seen = {k[1] for k in list(E) + list(E.eps)}
     for r in msincl:                                                         # l. 1428-1459: trust levels
         for y in exante:
-            for c in cols_seen:
+            for c in sorted(cols_seen):
                 for f in seco:
                     if E.nz(r, c, f, y):
                         T.put((r, c, f, y), BT.P_expertSupprt_TrustLevl_7())
@@ -749,7 +749,7 @@ def trends(I: Inputs, *, ms: Sequence[str], msincl: Sequence[str], msall: Iterab
                 for c in ("IMPT", "EXPT"):
                     if E.nz(r, c, f, y):
                         T.put((r, c, f, y), BT.P_expertSupprt_TrustLevl_1())
-            for c in cols_seen:
+            for c in sorted(cols_seen):
                 for f in fos:
                     if E.nz(r, c, f, y):
                         T.put((r, c, f, y), BT.P_expertSupprt_TrustLevl_7())
@@ -781,6 +781,6 @@ def trends(I: Inputs, *, ms: Sequence[str], msincl: Sequence[str], msall: Iterab
             if BT.P_DATA_nObs(True, (r, c, w) in nobs):
                 out.nobs.add((r, c, w))
     keys = set(E) | E.eps | set(T)
-    out.expert = {k: (E.g(*k), T.g(*k)) for k in keys}
+    out.expert = {k: (E.g(*k), T.g(*k)) for k in sorted(keys)}
     out.eps = set(E.eps)
     return out

@@ -237,9 +237,9 @@ def eu_data(ori: P4, sets: Sets, pdata: pd.DataFrame, density: Dict[str, float],
     def sum_parts(c, w, y):
         return GE.p_aglink_sum([p.g(e, c, w, y) for e in S.agEUparts])
 
-    summ = [c for c in S.summable]
+    summ = sorted(S.summable)
     # l. 246-247
-    for (r, c, w, y) in {(("EUN",) + k[1:]) for k in keys_of(S.agEUparts, summ, S.agRows)}:
+    for (r, c, w, y) in sorted({(("EUN",) + k[1:]) for k in keys_of(S.agEUparts, summ, S.agRows)}):
         if not _nz(p.g(r, c, w, y)):
             p.put((r, c, w, y), sum_parts(c, w, y))
     # l. 250-254 (FOA, every agRegs region with data: the European ones)
@@ -280,7 +280,7 @@ def eu_data(ori: P4, sets: Sets, pdata: pd.DataFrame, density: Dict[str, float],
     copy_rows("OOS", ["RP"], non_eu, S.agCols)
     copy_rows("OOS", ["SF"], non_eu, S.agCols)
     # l. 298-299 (wheat, EUN from its parts)
-    for (r, c, w, y) in {(("EUN",) + k[1:]) for k in keys_of(S.agEUparts, summ, WT)}:
+    for (r, c, w, y) in sorted({(("EUN",) + k[1:]) for k in keys_of(S.agEUparts, summ, WT)}):
         if not _nz(p.g(r, c, w, y)):
             p.put((r, c, w, y), sum_parts(c, w, y))
     # l. 303-304 (WT where missing)
@@ -312,7 +312,7 @@ def eu_data(ori: P4, sets: Sets, pdata: pd.DataFrame, density: Dict[str, float],
         for y in S.agYears:
             if not _nz(p.g(r, "DEL", "MK", y)):
                 p.put((r, "DEL", "MK", y), GE.p_aglink_difference(p.g(r, "QC", "MK", y), p.g(r, "FU", "MK", y)))
-    for (r, c, w, y) in {(("EUN",) + k[1:]) for k in keys_of(S.agEUparts, summ, ["MK"])}:   # l. 343-344
+    for (r, c, w, y) in sorted({(("EUN",) + k[1:]) for k in keys_of(S.agEUparts, summ, ["MK"])}):   # l. 343-344
         if not _nz(p.g(r, c, w, y)):
             p.put((r, c, w, y), sum_parts(c, w, y))
     # l. 349 (beef feed), l. 353-356 (biofuels), l. 359 (fossil fuels)
@@ -599,11 +599,11 @@ def to_capri(p: P4, ori: P4, sets: Sets, pdata: pd.DataFrame) -> P4:
         return GE.p_aglinkTrd_sum([p.g(a, c, w, y) for a in emap[er]])
     # l. 878-880 (direct links)
     for er in eurr:
-        for col in S.colsMappedAglink:
+        for col in sorted(S.colsMappedAglink):
             ac = [c for c in cmap.get(col, []) if c in S.cols_mapped]
             if not ac:
                 continue
-            for row in S.rowsMappedAglink:
+            for row in sorted(S.rowsMappedAglink):
                 ar = [w for x, w in S.rows_map if x == row and w in S.rows_mapped]
                 if not ar:
                     continue
@@ -650,7 +650,7 @@ def to_capri(p: P4, ori: P4, sets: Sets, pdata: pd.DataFrame) -> P4:
 
     def shares(er, cs, tot_cs):
         out = {}
-        for w in S.rowsMappedAglink:
+        for w in sorted(S.rowsMappedAglink):
             den = bsum(er, tot_cs, w)
             if den != 0:
                 for c in cs:
@@ -677,7 +677,7 @@ def to_capri(p: P4, ori: P4, sets: Sets, pdata: pd.DataFrame) -> P4:
         old = [k for k in T if k[0] == "EU27yr19" and k[1] in set(cs)]
         for k in old:
             T.put(k, 0.0)
-        for c, w, y in keys:
+        for c, w, y in sorted(keys):
             T.put(("EU27yr19", c, w, y), GE.p_aglinkTrd_sum([T.g(e, c, w, y) for e in S.EUparts]))
     eu27_sum(colsGrof)                                                        # l. 1132
     for er in eurr:                                                           # l. 1149-1160
@@ -734,9 +734,9 @@ def to_capri(p: P4, ori: P4, sets: Sets, pdata: pd.DataFrame) -> P4:
         for c in S.cols:
             for y in S.agYears:
                 vm, vo = T.g(er, c, "OILM", y), T.g(er, c, "OILO", y)
-                for w in cakes:
+                for w in sorted(cakes):
                     T.put((er, c, w, y), GE.p_aglinkTrd_copy(vm))
-                for w in oils:
+                for w in sorted(oils):
                     T.put((er, c, w, y), GE.p_aglinkTrd_copy(vo))
     # l. 1225-1248 (raw milk, milk)
     for er in eurr:

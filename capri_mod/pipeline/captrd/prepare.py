@@ -268,7 +268,7 @@ def check_and_cor(p: pd.DataFrame, sets: CaptrdSets, msincl: Optional[Iterable[s
     here = set(p["region"])
     new = []
     for c in sorted(incl & here):
-        new.append((c, "ARTIF", "LEVL", "BASM", float(sum(art.get(r, 0.0) for a, r in sub if a == c))))
+        new.append((c, "ARTIF", "LEVL", "BASM", float(sum(art.get(r, 0.0) for a, r in sorted(sub) if a == c))))
     if not new:
         return p.reset_index(drop=True)
     return _assign(p, pd.DataFrame(new, columns=KEYS + ["value"]))
@@ -308,14 +308,14 @@ def fill_uvad(uvad: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int]) -> p
     pairs = {(a, r) for a, r in sets.map_rr if a in sets.rmaggsup}
     peers: Dict[str, List[str]] = {}
     for m in ms:
-        aggs = [a for a, r in pairs if r == m]
-        peers[m] = [r for a in aggs for (a2, r) in pairs if a2 == a and r in msset]
+        aggs = [a for a, r in sorted(pairs) if r == m]
+        peers[m] = [r for a in aggs for (a2, r) in sorted(pairs) if a2 == a and r in msset]
     keys = {(rw, t) for (_r, rw, t) in cur}
     added = {}
     for m in ms:
         if not peers[m]:
             continue
-        for rw, t in keys:
+        for rw, t in sorted(keys):
             if (m, rw, t) in cur:
                 continue
             vals = [cur.get((r, rw, t), 0.0) for r in peers[m]]
@@ -328,7 +328,7 @@ def fill_uvad(uvad: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int]) -> p
         for m in ms:
             if m not in sets.members(agg):
                 continue
-            for rw, t in keys:
+            for rw, t in sorted(keys):
                 v = cur.get(("PT000000", rw, t), 0.0)
                 if (m, rw, t) not in cur and v != 0:
                     new[(m, rw, t)] = v
@@ -506,9 +506,9 @@ def prep_for_estimation(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int
     # l. 34-39: a loop over the ex-post years (sequential): the sugar price carried forward with the change of PADM
     for y in sorted(int(v) for v in exp):
         uv, pa = w("UVAG", "SUGA"), w("PADM", "SUGA")
-        prev = {(r, str(y - 1)): (uv.get((r, str(y - 1)), 0.0), pa.get((r, str(y - 1)), 0.0)) for r in ms}
+        prev = {(r, str(y - 1)): (uv.get((r, str(y - 1)), 0.0), pa.get((r, str(y - 1)), 0.0)) for r in sorted(ms)}
         new = uv.copy()
-        for r in ms:
+        for r in sorted(ms):
             if (r, str(y)) not in new.index:
                 continue
             u1, p1 = prev[(r, str(y - 1))] if (r, str(y - 1)) in uv.index else (0.0, 0.0)

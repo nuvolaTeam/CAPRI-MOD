@@ -182,9 +182,9 @@ def supports(S, X: Context) -> Result:
         if sc.upper() == scen and v and (r in set(ms) or r.upper() == "WORLD") and (
                 y in LONG_YEARS or (i == "share" and y == "B2000")):
             info[(r, c, w, i, y)] = LS.p_longrunInfo(v)
-    for (r, c, w) in {(k[0], k[1], k[2]) for k in info if k[3] == "factorB2000"}:     # l. 113-114, 119
+    for (r, c, w) in sorted({(k[0], k[1], k[2]) for k in info if k[3] == "factorB2000"}):   # l. 113-114, 119
         info[(r, c, w, "factorB2000", 2000)] = LS.p_longrunInfo_2000()
-    world = [r for r in {k[0] for k in info} if r.upper() == "WORLD"]
+    world = [r for r in sorted({k[0] for k in info}) if r.upper() == "WORLD"]
     for wr in world:                                                                    # l. 117-118
         for y in LONG_YEARS:
             for o in ("RAPE", "SUNF"):
@@ -245,7 +245,7 @@ def supports(S, X: Context) -> Result:
                 data_b2000(r, "PROD", w):
             put(k, LS.P_Result_Longrun_small())
     for r in ms:                                                                        # l. 228-236
-        for (c, w) in pty:
+        for (c, w) in sorted(pty):
             if w not in ofrom or bm.get((r, c, "HERD")):
                 continue
             for y in LONG_YEARS:
@@ -269,7 +269,8 @@ def supports(S, X: Context) -> Result:
                                                                      y - X.base_year))
             for w in ("MILK", "COMI"):
                 put((r, "PRCM", w, y), LS.P_Result_Longrun(f(r, "PROD", w, y), b2.get((r, "PRCM", w), 0.0)))
-            for w in {k[2] for k in info if k[0] == r and k[1] == "HCOM" and k[3] == "share" and k[4] == "B2000"}:
+            for w in sorted({k[2] for k in info if k[0] == r and k[1] == "HCOM" and k[3] == "share"
+                             and k[4] == "B2000"}):
                 put((r, "HCOM", w, y), LS.P_Result_Longrun_HCOM(f(r, "HCOM", w, y, "share"),
                                                                 f(r, "HCOM", w, "B2000", "share"), f(r, "DOMM", w, y),
                                                                 b2.get((r, "HCOM", w), 0.0)))
@@ -283,8 +284,8 @@ def supports(S, X: Context) -> Result:
             if ly > last or i + 1 >= len(LONG_YEARS):
                 break
             nx = LONG_YEARS[i + 1]
-            fill = [y for y in fill_base if ly < y < nx]
-            for s3 in series:
+            fill = [y for y in sorted(fill_base) if ly < y < nx]
+            for s3 in sorted(series):
                 for y in fill:
                     put((*s3, y), LS.P_Result_Longrun_fill(L.get((*s3, ly), 0.0), L.get((*s3, nx), 0.0), y, ly, nx))
     cur, expt = set(X.years_cur), set(X.expostt)
@@ -294,7 +295,7 @@ def supports(S, X: Context) -> Result:
             put(k, LS.P_Result_Longrun_dropped())
         elif y in expt and not (y in (2000, X.bast_year, X.base_year) or (c == "INHA" and w == "LEVL")):
             put(k, LS.P_Result_Longrun_dropped())
-    for s3 in {k[:3] for k in L}:                                                       # l. 342-354
+    for s3 in sorted({k[:3] for k in L}):                                               # l. 342-354
         bt = X.bast.get(s3, 0.0)
         ref = bt if bt else bm.get(s3, 0.0)
         v = L.get((*s3, X.bast_year), 0.0) if bt else L.get((*s3, X.base_year), 0.0)

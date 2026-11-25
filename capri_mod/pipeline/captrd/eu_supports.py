@@ -133,7 +133,7 @@ class Pos:
 
 def est_sets(s_colsest, s_rowsest) -> Tuple[List[str], List[str]]:
     """S_ColsEst1 and S_RowsEst1 from the transcribed S_ColsEst and S_RowsEst (ROWS_OUT, COLS_OUT)."""
-    return [c for c in s_colsest if c not in COLS_OUT], [w for w in s_rowsest if w not in ROWS_OUT]
+    return [c for c in sorted(s_colsest) if c not in COLS_OUT], [w for w in sorted(s_rowsest) if w not in ROWS_OUT]
 
 
 def _put(d: Dict, k, v: float) -> None:
@@ -183,7 +183,7 @@ def eu_supports(P: Pos, y: int, S: Sets, T: Years, *, bast: Dict[K3, float], bas
         cand = {(r, c, w) for (r, c, w, t) in P.dgagri1 if t == L and r in msset and c in colset and w in rowset}
         cand |= {(r, c, "MAIZ") for r in ms for c in ("PRCI", "INDM") if c in colset and "MAIZ" in rowset}
         new = {}
-        for (r, c, w) in cand:
+        for (r, c, w) in sorted(cand):
             if not cond(r, c, w):
                 continue
             s3 = [g(P.step3, r, c, w, t) for t in ends]
@@ -316,7 +316,7 @@ def eu_supports(P: Pos, y: int, S: Sets, T: Years, *, bast: Dict[K3, float], bas
                         if D1(m, c, w) and not E(m, c, w)})
     _assign(P.support, {(m, c, "TOOU", y): EQ.P_Result_Support_DGAgri1(D1(m, c, "TOOU")) for m in ms for c in cols
                         if D1(m, c, "TOOU") and not E(m, c, "TOOU")})
-    pty = [(a, o) for a, o in S.pact_to_y if a in colset and o in rowset]
+    pty = [(a, o) for a, o in sorted(S.pact_to_y) if a in colset and o in rowset]
     _assign(P.support, {(m, a, o, y): EQ.P_Result_Support_DGAgri1(D1(m, a, o)) for m in ms for a, o in pty
                         if D1(m, a, o) and not E(m, a, o)})
     _assign(P.support, {(m, "EAAG", w, y): EQ.P_Result_EAAG_Support() for m in ms for w in rows
@@ -433,7 +433,7 @@ def eu_supports(P: Pos, y: int, S: Sets, T: Years, *, bast: Dict[K3, float], bas
     icow = {a for a, i in S.pact_to_io if i == "ICOW"}
     new = {}
     for m in ms:                                                         # l. 774-785
-        for c in S.maact:
+        for c in sorted(S.maact):
             d = D1(m, c, "LEVL")
             if d and d == sp(m, c, "LEVL"):
                 ex_ = d == g(P.extrap, m, c, "LEVL")

@@ -64,7 +64,7 @@ def statistics(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int], basyrs
     w = trend_variable([int(y) for y in ex], first_year)
     p = p.copy()
     wide = p.pivot_table(index=KEYS, columns="t", values="value", aggfunc="first")
-    for c in set(ex) | set(b5) | set(e8) | {"BASM"}:
+    for c in sorted(set(ex) | set(b5) | set(e8) | {"BASM"}):
         if c not in wide.columns:
             wide[c] = np.nan
     raw = wide                                                      # NaN: absent (missing unless zm reads it as 0)

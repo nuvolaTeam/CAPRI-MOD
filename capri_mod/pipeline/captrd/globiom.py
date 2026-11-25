@@ -192,7 +192,7 @@ def region_map(S: Sets, G: Globiom) -> Set[Tuple[str, str]]:
                 if r in rmall:
                     out.add((r, c))
     for ragg, c in G.region58_country_map:                                         # l. 1228-1229
-        for r in [r for r, cc in out if cc == c]:
+        for r in sorted(r for r, cc in out if cc == c):
             out.add((r, ragg))
     out.discard(("RSA", "USAREG"))                                                 # l. 1236
     return {(r, g) for r, g in out if not (r in S.rw and r not in S.euallagg and r != "EU")}   # l. 1239-1243
@@ -277,7 +277,7 @@ def collect(G: Globiom, S: Sets, scen: Tuple[str, str, str], longyr: Sequence[st
         else:
             notany[(c, a, y)].append(v)
     live = {}
-    for k in set(any_) | set(notany):
+    for k in sorted(set(any_) | set(notany)):
         v = GE.p_LIVESTOCK(any_.get(k, []), notany.get(k, []))
         if v:
             live[k] = v
@@ -352,17 +352,17 @@ def collect(G: Globiom, S: Sets, scen: Tuple[str, str, str], longyr: Sequence[st
         if it in grows:
             put((r, "FTN", it, y), GE.p_GLOBIOM(v))
     for r in ragg:
-        for y in years:                                                            # l. 1599-1606
+        for y in sorted(years):                                                    # l. 1599-1606
             put((r, "PRODQ", "ALMILK", y), GE.p_GLOBIOM_ALMILK(P.get((r, "PRODQ", "BVMILK", y), 0.0),
                                                                P.get((r, "PRODQ", "SGMILK", y), 0.0)))
-            for it in S.procpr:
+            for it in sorted(S.procpr):
                 if it in grows:
                     put((r, "PRODQ", it, y), GE.p_GLOBIOM(P.get((r, "BIOM", it, y), 0.0)))
                 put((r, "BIOM", it, y), GE.p_GLOBIOM_BIOM_PROCPR())
     pdat = T["ProcessData"]
     pdd = {(r, p, it): v for r, p, it, v in zip(pdat.d1, pdat.d2, pdat.d3, pdat.value)}
     for r in ragg:
-        for y in years:
+        for y in sorted(years):
             put((r, "PRODQ", "CORN_DG", y), GE.p_GLOBIOM_DG(P.get((r, "BIOM", "CORN", y), 0.0),
                                                             pdd.get((r, "CORNTOETHOL", "CORN_DG"), 0.0)))
             put((r, "PRODQ", "WHEA_DG", y), GE.p_GLOBIOM_DG(P.get((r, "BIOM", "WHEA", y), 0.0),
@@ -384,7 +384,7 @@ def mapped(P: Dict[Tuple[str, str, str, str], float], S: Sets, rmap: Set[Tuple[s
     gcm = {g for g, c in S.globiom_to_cols}
     grm = {g for g, w in S.globiom_to_rows}
     regs = defaultdict(list)
-    for r, g in rmap:
+    for r, g in sorted(rmap):
         if g in ragg:
             regs[r].append(g)
     selset = set(sel)
@@ -414,7 +414,7 @@ def mapped(P: Dict[Tuple[str, str, str, str], float], S: Sets, rmap: Set[Tuple[s
                 MC[(r, *k)] = v
         pq = defaultdict(list)                                                     # l. 1748-1755
         for ga in gs:
-            for w in grm:
+            for w in sorted(grm):
                 for y in sel:
                     q = P.get((ga, "PRODQ", w, y), 0.0)
                     if q:
@@ -455,18 +455,18 @@ def factors(M: Dict[Tuple[str, str, str, str], float], S: Sets, scen_name: str, 
     regs = {k[0] for k in M}
     cols_m = {c for g, c in S.globiom_to_cols} | {"DOMM"}
     rows_m = {w for g, w in S.globiom_to_rows}
-    for r in regs:
+    for r in sorted(regs):
         for y in sel:
             for c in S.mrkpos:                                                     # l. 1884-1889
                 put(M, (r, c, "SUGA", y), GE.p_GLOBIOMmapped_SUGA(M.get((r, c, "SUGA", y), 0.0),
                                                                   M.get((r, c, "SUGB", y), 0.0)))
                 if c != "PROD":
                     put(M, (r, c, "SUGB", y), GE.p_GLOBIOMmapped_removed())
-            for w in rows_m:                                                       # l. 1894-1903
+            for w in sorted(rows_m):                                               # l. 1894-1903
                 put(M, (r, "DOMM", w, y), GE.p_GLOBIOMmapped_DOMM(M.get((r, "HCOM", w, y), 0.0),
                                                                   M.get((r, "BIOF", w, y), 0.0),
                                                                   M.get((r, "FEDM", w, y), 0.0)))
-            for w in DOMM_IS_PROD:
+            for w in sorted(DOMM_IS_PROD):
                 if w in rows_m:
                     put(M, (r, "DOMM", w, y), GE.p_GLOBIOMmapped_DOMM_PROD(M.get((r, "PROD", w, y), 0.0)))
             for w in YOUNG_HEIF:                                                   # l. 1908-1911
@@ -478,7 +478,7 @@ def factors(M: Dict[Tuple[str, str, str, str], float], S: Sets, scen_name: str, 
         if c in cols_m and w in rows_m and y in selset and v:
             I[(r, c, w, "DATA", scen_name, y)] = GE.p_GLOBIOMmapped_B2000(v)
     world = [rm for rw, rm in S.rw_to_rm if rw == "WORLD"]
-    for w in rows_m:                                                               # l. 1919-1927
+    for w in sorted(rows_m):                                                       # l. 1919-1927
         for y in sel:
             den = sum(M.get((rm, "PROD", w, y), 0.0) + M.get((rm, "DOMM", w, y), 0.0) for rm in world)
             if den:
@@ -487,7 +487,7 @@ def factors(M: Dict[Tuple[str, str, str, str], float], S: Sets, scen_name: str, 
                      for rm in world]))
     nonempty = {(c, w) for (r, c, w, y), v in M.items() if c in cols_m and w in rows_m and y in selset and v}
     for r in S.rmall:                                                              # l. 1938-1956
-        for (c, w) in nonempty:
+        for (c, w) in sorted(nonempty):
             if c == "BIOF":
                 continue
             b = M.get((r, c, w, "B2000"), 0.0)
@@ -501,7 +501,7 @@ def factors(M: Dict[Tuple[str, str, str, str], float], S: Sets, scen_name: str, 
     parts = defaultdict(list)
     for rms, rm in S.rms_to_rm:
         parts[rm].append(rms)
-    for rm in S.rm:                                                                # l. 1969-1973
+    for rm in sorted(S.rm):                                                        # l. 1969-1973
         for c in S.macro:
             for y in wo:
                 k = (rm, c, "LEVL", "FACTORB2000", scen_name, y)
@@ -519,8 +519,8 @@ def factors(M: Dict[Tuple[str, str, str, str], float], S: Sets, scen_name: str, 
                 put(I, (r, d, w, "SHARE", scen_name, y), GE.p_globiomInfo_share_DemPosDis(M.get((r, d, w, y), 0.0), v))
     for k in [k for k in I if k[1] in set(S.demposdis) and k[3] == "FACTORB2000"]:
         put(I, k, GE.p_GLOBIOMmapped_removed())
-    for r in regs:
-        for w in {k[2] for k in M if k[0] == r}:
+    for r in sorted(regs):
+        for w in sorted({k[2] for k in M if k[0] == r}):
             for y in sel:
                 den = M.get((r, "DOMM", w, y), 0.0) + M.get((r, "PROD", w, y), 0.0)
                 if den:
@@ -578,20 +578,20 @@ def base_factors(I: Dict, S: Sets, scen_name: str, wo: Sequence[str], capreg: Di
     B: Dict[Tuple[str, str, str, str], float] = {}
     for bas in ("B2000", base_year):                                               # l. 2042-2104
         cur = ["1999", "2000", "2001"] if bas == "B2000" else list(base_years)
-        for r in nuts0:
-            for (c, w) in proj_cr:
+        for r in sorted(nuts0):
+            for (c, w) in sorted(proj_cr):
                 if c in proj_cols and w in proj_rows:                              # l. 2053-2055
                     v = GE.p_baseDat_mean([capreg.get((r, c, w, y), 0.0) for y in cur])
                     if v:
                         B[(r, c, w, bas)] = v
-            for c in proj_cols:                                                    # l. 2058-2061
+            for c in sorted(proj_cols):                                            # l. 2058-2061
                 lv = sum(capreg.get((r, c, "LEVL", y), 0.0) for y in cur)
                 if lv:
                     v = GE.p_baseDat_YILD([capreg.get((r, c, "YILD", y), 0.0) for y in cur],
                                           [capreg.get((r, c, "LEVL", y), 0.0) for y in cur])
                     if v:
                         B[(r, c, "YILD", bas)] = v
-            for w in proj_rows:                                                    # l. 2064-2067
+            for w in sorted(proj_rows):                                            # l. 2064-2067
                 v = GE.p_baseDat_UVAP([capreg.get((r, "UVAP", w, y), 0.0) for y in cur],
                                       [capreg.get((r, "GROF", w, y), 0.0) for y in cur])
                 if v:
@@ -628,7 +628,7 @@ def base_factors(I: Dict, S: Sets, scen_name: str, wo: Sequence[str], capreg: Di
                 B.pop((r, "INHA", "LEVL", bas), None)
     proj_cols |= {"UVAP"}                                                          # l. 2111-2112
     proj_rows |= {"YILD"}
-    for c in S.landusearto:                                                        # l. 2125-2126
+    for c in sorted(S.landusearto):                                                # l. 2125-2126
         for r in S.msall:
             d = I.get((r, c, "LEVL", "DATA", scen_name, "B2000"), 0.0)
             v = GE.p_globiomInfo_share_landuse(d, B.get((r, c, "LEVL", "B2000"), 0.0))
@@ -638,7 +638,7 @@ def base_factors(I: Dict, S: Sets, scen_name: str, wo: Sequence[str], capreg: Di
             else:
                 I.pop(k, None)
     has = {(k[0], k[1], k[2]) for k in fac}
-    for (r, c, w) in has:                                                          # l. 2131-2140
+    for (r, c, w) in sorted(has):                                                  # l. 2131-2140
         if c in proj_cols and w in proj_rows:
             b0, b1 = B.get((r, c, w, "B2000"), 0.0), B.get((r, c, w, base_year), 0.0)
             I[(r, c, w, "FACTORB2000", scen_name, base_year)] = GE.p_globiomInfo_factorB2000_BAS(b1, b0)

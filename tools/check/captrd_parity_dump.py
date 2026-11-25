@@ -175,7 +175,7 @@ def agriprod_cases():
                  uaar_years_all=range(1995, 2019), expostt_extra=[2019])
     I = A.read_inputs(P.SETS_DIR, P.SETS_DIR.parent / "dat")
     meat = set(pd.read_csv(P.SETS_DIR / "meat.csv", dtype=str).d0)
-    pty = list(s.pact_to_y)
+    pty = sorted(s.pact_to_y)
     meat_act = sorted({a for a, m in pty if m in meat and a in set(s.maact)})
     cols = set(I.one("agriprodaact")) | {"DCOL", "DCOH", "GROF"} | set(meat_act)
     pdd = ref("P_Data")
@@ -256,12 +256,12 @@ def longrun_cases():
                 ms=ms, msincl=ms, pdata={k: v for k, v in pdata.items() if v}, nobs=nobs,
                 basm={k: v for k, v in basm.items() if v}, bast={k: v for k, v in bast.items() if v},
                 s_colsest=s.s_colsest, s_rowsest=s.s_rowsest, pact=["SWHE", "BARL", "DCOL", "SUGB"],
-                req_feed=["SWHE"], reqst=list(s.reqst), pact_to_y=list(s.pact_to_y), pact_to_o=list(s.pact_to_o),
-                mrkbalee=list(s.mrkbalee), mlk_pro=["MILK"], cows_act=["DCOL"], exante=exante, exantet=exante,
+                req_feed=["SWHE"], reqst=sorted(s.reqst), pact_to_y=sorted(s.pact_to_y), pact_to_o=sorted(s.pact_to_o),
+                mrkbalee=sorted(s.mrkbalee), mlk_pro=["MILK"], cows_act=["DCOL"], exante=exante, exantet=exante,
                 expostt=expostt, years_cur=sorted(set(expostt) | set(exante)), base_year=2017, bast_year=2018,
                 lst_expost=2018, lst_exante=2070, lst_dgagri=2035, phase_in=2025, infl=1.019,
                 support={k: v for k, v in support.items() if v}, dgagri1={k: v for k, v in dg.items() if v},
-                map_rr=list(s.map_rr), cur_europ_agg=["EU014000", "EU013000", "EU27yr19"], inha=inha, scenario=scen,
+                map_rr=sorted(s.map_rr), cur_europ_agg=["EU014000", "EU013000", "EU27yr19"], inha=inha, scenario=scen,
                 longrun_info_all={k: v for k, v in info.items() if v})
             S1 = copy.deepcopy(S)
             res = LR.supports(S1, C)
@@ -310,16 +310,16 @@ def eu_supports_cases():
     py = pd.read_csv(P.SETS_DIR.parent / "dat" / "biofuel_proc_yields.csv")
     FS = F.Sets(biostock=one("biostock"), biostock_oilp=one("biostockoilp"), oseeds=one("oseeds"), seco=one("seco"),
                 grcu=one("grcu"), cropo=one("cropo"), prcd=two("prcd"), sed_to_oil=two("sed_to_oil"),
-                oil_to_cak=two("oil_to_cak"), bio_prcd=two("bio_prcd"), pact_to_y=list(s.pact_to_y),
+                oil_to_cak=two("oil_to_cak"), bio_prcd=two("bio_prcd"), pact_to_y=sorted(s.pact_to_y),
                 shift_sugb=one("shiftsugbpos"), dompos=one("dompos"), mcact=one("mcact"), s_colsest=cols,
                 s_rowsest=rows, proc_yields=dict(zip(py.row, py.value)))
     ms = ["AT000000", "DE000000", "PL000000", "BG000000"]
     rto = simg("R_T_OAGG")
     S = EU.Sets(ms=ms, rmaggsup=sorted(set(one("rmaggsup")) | {"EU013000", "EU014000"}),
-                ms_to_agg=[(b, a) for a, b in s.map_rr if a in set(gl)], euparts=["EU014000", "EU013000"],
+                ms_to_agg=[(b, a) for a, b in sorted(s.map_rr) if a in set(gl)], euparts=["EU014000", "EU013000"],
                 cur_europ_agg=["EU014000", "EU013000", "EU27yr19"], s_colsest=cols, s_rowsest=rows,
-                mrkbalee=one("mrkbalee"), dompos=one("dompos"), pric=["UVAG"], pact_to_y=list(s.pact_to_y),
-                pact_to_io=two("pact_to_io"), maact=list(s.maact), mcact=one("mcact"), cact=list(s.cact),
+                mrkbalee=one("mrkbalee"), dompos=one("dompos"), pric=["UVAG"], pact_to_y=sorted(s.pact_to_y),
+                pact_to_io=two("pact_to_io"), maact=sorted(s.maact), mcact=one("mcact"), cact=sorted(s.cact),
                 grpc=one("grpc"), grpr=one("grpr"), cropc_to_g=[(b, a) for a, b in two("cropc_to_g")],
                 rows_to_g=[(b, a) for a, b in two("rows_to_g")],
                 aact_365=["DCOW", "DCOL", "DCOH", "SCOW", "SOWS", "SHGM", "HENS"],
@@ -420,9 +420,9 @@ def expert_support_cases():
                    for y in T.years_cur})                              # the aggregates' outlook: always given
         basm3 = {(r, c, w): v for (r, c, w, y), v in pos([2070], 0.8).items()}
         bast3 = {(r, c, w): v for (r, c, w, y), v in pos([2070], 0.5).items()}
-        E = ER.rules(ms=ms, ms_no_eu=list(s.msnoeu28), exante=exante, bas_year=2017, support=support, basm=basm3,
+        E = ER.rules(ms=ms, ms_no_eu=sorted(s.msnoeu28), exante=exante, bas_year=2017, support=support, basm=basm3,
                      bast=bast3, pdata_years=pdata, dgagri=dg, dgagri1=pos(exante, 0.4),
-                     ms_to_agg=[(b, a) for a, b in s.map_rr], europ_aggs=europ, breed_act=breed[:3], ncnc=ncnc,
+                     ms_to_agg=[(b, a) for a, b in sorted(s.map_rr)], europ_aggs=europ, breed_act=breed[:3], ncnc=ncnc,
                      coef_hfcs={"SUGA": 0.9, "MAIZ": 0.6})
         dig = lambda q: _digest(sorted((k, repr(v)) for k, v in q.items()))      # noqa: E731
         out[(seed, "rules")] = dig(E)
@@ -445,14 +445,14 @@ def expert_support_cases():
                         d[(r, c, w, str(y))] = f * 1.01 ** (y - 2015) * rng.uniform(0.999, 1.001)
             return d
         dbasm = {k[:3]: v for k, v in series([2070]).items()}
-        Ed, share = D.dairy(runr=runr, ms=ms, ms_no_eu28=list(s.msnoeu28), dcow=["DCOL", "DCOH"], base_year=2017,
+        Ed, share = D.dairy(runr=runr, ms=ms, ms_no_eu28=sorted(s.msnoeu28), dcow=["DCOL", "DCOH"], base_year=2017,
                             exante_t=T.exantet, expost=T.expost, expostt=T.expostt, years_cur=T.years_cur,
                             sim_years=exante, fst_exante=T.fst_exante, lst_exante=2070, lst_dgagri=T.lst_dgagri,
                             tables=tables, ms_agri_to_ms=list(zip(m2.ms_agri, m2.region)),
                             recent={r: rng.uniform(-0.01, 0.03) for r in runr}, basm=dbasm,
                             support=series(sorted(set(exante) | {2015, 2020})), pdata=series(years),
                             dgagri=series(sorted(set(T.years_cur) | {2015})),
-                            map_rr=list(s.map_rr) + [(r, r) for r in runr],
+                            map_rr=sorted(s.map_rr) + [(r, r) for r in runr],
                             europ_aggs=europ, sub_aggs=["EU014000", "EU013000"], eu13="EU013000", eu14="EU014000",
                             west="A_EU_WEST", east="A_EU_EAST")
         out[(seed, "dairy")] = [dig(Ed), dig(share)]
@@ -527,7 +527,7 @@ def national_cases():
         X = NS.Context(
             ms=ms, runr=runr, nuts0=g_("NUTS0"), nuts0_and_2=g_("NUTS0_and_2"), nt2est=nt2est, nt2=s.srnuts2,
             map_rr=s.map_rr, s_colsest=s.s_colsest, s_rowsest=s.s_rowsest, cact=s.cact, maact=s.maact,
-            oiyani=g_("OIYANI"), pact_to_y=list(s.pact_to_y), p_t_actagg=s.p_t_actagg, exante=exante,
+            oiyani=g_("OIYANI"), pact_to_y=sorted(s.pact_to_y), p_t_actagg=s.p_t_actagg, exante=exante,
             exantet=T.exantet, expostt=T.expostt, basyrsm=T.basyrsm, base_year=2017, bast_year=T.lst_expostt - 1,
             lst_expost=T.lst_expost, lst_expostt=T.lst_expostt, lst_exante=2070, lst_dgagri=T.lst_dgagri,
             support=pos(regs, exante, 0.6), basm=k3(pos(regs, [0], 0.8)), bast=k3(pos(regs, [0], 0.6)),
@@ -615,7 +615,7 @@ def stats_cases():
         TL = D4(0.3, 1.0)
         W = F.wvarerr(E, TL)
         F.domm_wvarerr(W, R, [D4(0.2), E, D4(0.2)], ms=regs, s_colsest=cols, s_rowsest=rows, exante=years,
-                       dompos=list(s.dompos))
+                       dompos=sorted(s.dompos))
         S = NS.Expert(ab=D4(0.2), pc=D4(0.2, -20.0), tr=D4(0.2, 1.0))
         b3 = lambda: {(r, c, w): val(-5.0) for r in regs for c in cols for w in rows}   # noqa: E731
         basm, bast = b3(), b3()
@@ -1599,6 +1599,10 @@ def compare(a, b):
                 print(f"{sec}.{part}: identical ({len(x or {})} entries)")
                 continue
             bad += 1
+            if not (isinstance(x, (dict, type(None))) and isinstance(y, (dict, type(None)))):
+                n = sum(1 for u, v in zip(x, y) if u != v) if isinstance(x, tuple) and isinstance(y, tuple) else 1
+                print(f"{sec}.{part}: differs ({n} of the digests)")
+                continue
             keys = sorted(set(x or {}) | set(y or {}), key=str)
             diff = [k for k in keys if (x or {}).get(k) != (y or {}).get(k)]
             print(f"{sec}.{part}: {len(diff)} of {len(keys)} entries differ, e.g. {diff[:3]}")

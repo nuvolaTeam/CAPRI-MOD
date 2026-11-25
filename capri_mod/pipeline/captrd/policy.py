@@ -58,8 +58,8 @@ def milk_quotas(w: Wide, ms: Iterable[str], dat: Dict[str, pd.DataFrame], years:
     bm = _years(basyrsm)
     md = dat["p_mquotadat"]
     q: Dict[tuple, float] = {(r, i.upper(), y): v for r, i, y, v in zip(md["region"], md["info"], md["year"], md["value"])}
-    for i in {k[1] for k in q}:                       # l. 32: BL000000 = BE + LU
-        for y in {k[2] for k in q}:
+    for i in sorted({k[1] for k in q}):               # l. 32: BL000000 = BE + LU
+        for y in sorted({k[2] for k in q}):
             v = MQ.p_MQuotaDat_BL(q.get(("BE000000", i, y), 0.0), q.get(("LU000000", i, y), 0.0))
             if v:
                 q[("BL000000", i, y)] = v
@@ -227,14 +227,14 @@ def sugar_beet(w: Wide, sets: CaptrdSets, ms: Iterable[str], years: Iterable[int
         if not runr:
             continue
         mb = float(cur.get((m, "BASM"), 0.0))
-        rb = {r: float(cur.get((r, "BASM"), 0.0)) for r in runr}
+        rb = {r: float(cur.get((r, "BASM"), 0.0)) for r in sorted(runr)}
         srb = sum(rb.values())
         mg = float(grb.get((m, "BASM"), 0.0))
         for y in sorted(ys):
             my = float(cur.get((m, y), 0.0))
             if not my:
                 continue
-            for r in runr:
+            for r in sorted(runr):
                 if (r, y) not in cur.index:
                     continue
                 if mb and rb[r]:
@@ -294,7 +294,7 @@ def set_aside(w: Wide, sets: CaptrdSets, ms: Iterable[str], dat: Dict[str, pd.Da
 
 def _region_value(w: Wide, c: str, r: str, t: str) -> pd.Series:
     v = w(c, r)
-    m = {reg: float(v.get((reg, t), 0.0)) for reg in set(w.region)}
+    m = {reg: float(v.get((reg, t), 0.0)) for reg in sorted(set(w.region))}
     return pd.Series(w.region.map(m).fillna(0.0).values, index=w.idx)
 
 

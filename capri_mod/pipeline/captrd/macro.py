@@ -136,7 +136,7 @@ def inha(sets, macro_eu: Dict[Tuple[str, str, int], float], ssp: Dict[tuple, flo
                         acc.setdefault((r, y), []).append(v)
     out: Dict[Tuple[str, object], float] = {k: GE.p_aglinkMacro(vs) for k, vs in acc.items()}
     regs = {r for r, _ in out}
-    for r in regs:                                                                  # l. 1064-1067
+    for r in sorted(regs):                                                          # l. 1064-1067
         vals = [out[(r, y)] for y in range(base_year - 1, base_year + 2) if out.get((r, y))]
         if vals:
             out[(r, "BAS")] = GE.p_aglinkMacro_BAS(vals)
@@ -152,7 +152,7 @@ def inha_pdata(macro: Dict[Tuple[str, object], float], *, ms: Iterable[str], bas
     cur = set(years_cur)
     for r in ms:
         b, m0 = basm.get(r, 0.0), macro.get((r, "BAS"), 0.0)
-        for y in cur:
+        for y in sorted(cur):
             if y > bast_year and macro.get((r, y)) and m0 and b:                    # l. 368-376
                 out[(r, y)] = LS.P_Result_INHA_pdata(macro[(r, y)], m0, b)
     if world_pop is not None:                                                       # l. 386-389

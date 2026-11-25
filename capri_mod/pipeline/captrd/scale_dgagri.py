@@ -69,7 +69,7 @@ def scale(pdata: pd.DataFrame, dgagri: pd.DataFrame, *, ms: Iterable[str], ragg:
         return [k for k in src if k[0] in regs and (cs is None or k[1] in cs) and (ws is None or k[2] in ws)
                 and (ts is None or k[3] in ts)]
     # l. 53-57: p_data's BAST
-    for (r, c, w) in {k[:3] for k in keys(P, rest, cols_est, rows_est, set(bas))}:
+    for (r, c, w) in sorted({k[:3] for k in keys(P, rest, cols_est, rows_est, set(bas))}):
         v = SG.P_Data_BAST([P.g(r, c, w, y) for y in bas])
         if v is not None:
             P.put((r, c, w, "BAST"), v)
@@ -82,7 +82,7 @@ def scale(pdata: pd.DataFrame, dgagri: pd.DataFrame, *, ms: Iterable[str], ragg:
     # l. 69-72: DGAgri's BAST
 
     def dg_bast(regs, cs, ws):
-        for (r, c, w) in {k[:3] for k in keys(D, regs, cs, ws, set(bas))}:
+        for (r, c, w) in sorted({k[:3] for k in keys(D, regs, cs, ws, set(bas))}):
             v = SG.p_result_BAST_DGAgri([D.g(r, c, w, y) for y in bas])
             if v is not None:
                 D.put((r, c, w, "BAST"), v)
@@ -95,7 +95,7 @@ def scale(pdata: pd.DataFrame, dgagri: pd.DataFrame, *, ms: Iterable[str], ragg:
                     D.put((r, "UVAG", w, y), SG.p_result_UVAG_EU([D.g(x, "UVAG", w, y) for x in west]))
     dg_bast(europ, {"UVAG"}, rows_est)
     # l. 98-128: prices (Pric = UVAG; PADM is not in Pric)
-    for (r, c, w) in {k[:3] for k in keys(D, rest, {"UVAG"}, rows_est) if k[3] == "BAST"}:
+    for (r, c, w) in sorted({k[:3] for k in keys(D, rest, {"UVAG"}, rows_est) if k[3] == "BAST"}):
         for y in ex:
             D1.put((r, c, w, y), SG.p_result_DGAgri1(P.g(r, c, w, "BAST"), D.g(r, c, w, y), D.g(r, c, w, "BAST")))
     for agg in ragg + top:                                               # l. 108-115, then l. 121-128

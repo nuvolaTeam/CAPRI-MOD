@@ -55,7 +55,7 @@ def toou(S, *, support: Dict[K4, float], basm: Dict[K3, float], ms: Iterable[str
     cols = set(s_colsest)
     new_ab, new_tr = {}, {}
     for r in ms:
-        for c in cols:
+        for c in sorted(cols):
             for y in exante:
                 k = (r, c, "TOOU", y)
                 s = support.get(k, 0.0)
@@ -88,7 +88,7 @@ def expert(S, *, basm: Dict[K3, float], s_colsest: Iterable[str], s_rowsest: Ite
     for k, v in S.ab.items():                                                  # l. 485-487 (rmAggSup)
         if k[0] in agg and k[1] in cols and k[2] in rows and v:
             out[k] = DS.p_result_Expert_rmAggSup(v)
-    for k in set(S.ab) | set(S.pc):                                            # l. 489-500 (Rest)
+    for k in sorted(set(S.ab) | set(S.pc)):                                            # l. 489-500 (Rest)
         r, c, w, y = k
         if r not in rest or c not in cols or w not in rows:
             continue

@@ -119,7 +119,7 @@ def prepare_country(coco: pd.DataFrame, p: pd.DataFrame, ms: str, sets: CaptrdSe
         d.put(*k, d.zero + LC.dataMS_removed(), where=is_y & ~us)
     # l. 66-67: no MAPR where a raw product has no PRCM (milk excepted)
     raws: Dict[str, List[str]] = {}
-    for out, raw in sets.prcd:
+    for out, raw in sorted(sets.prcd):
         raws.setdefault(out, []).append(raw)
     for k in d.keys(cols={"MAPR"}):
         r = k[1]
@@ -144,11 +144,11 @@ def prepare_country(coco: pd.DataFrame, p: pd.DataFrame, ms: str, sets: CaptrdSe
         d.put("FEDM", o, fedm, where=in_expt & (g != 0))
         netf = LC.dataMS_NETF(g, d("SEDF", o), d("LOSF", o))
         d.put("NETF", o, netf, where=in_expt & (g != 0))
-        domm = LC.dataMS_DOMM([d(x, o) for x in sets.domm_set], d.zero)
+        domm = LC.dataMS_DOMM([d(x, o) for x in sorted(sets.domm_set)], d.zero)
         d.put("DOMM", o, domm, where=in_expt & (g != 0))
     # l. 112-120: MAPR from NETF where p_data has MAPR around the base year
     for (cc, r) in d.keys(cols={"NETF"}, rows=rows_load):
-        if sum(pv("MAPR", r, tt) for tt in b5) == 0:
+        if sum(pv("MAPR", r, tt) for tt in sorted(b5)) == 0:
             continue
         d.put("MAPR", r, LC.dataMS_MAPR(d("NETF", r)), where=in_expt & (d("MAPR", r) == 0) & (d("NETF", r) != 0))
     # l. 124-140: near-zero flags in ExAnteD
@@ -172,7 +172,7 @@ def prepare_country(coco: pd.DataFrame, p: pd.DataFrame, ms: str, sets: CaptrdSe
     _basm([k for k in d.keys(cols=sets.cols_load, rows=rows_load)])
     # l. 157-175: the split activities from their aggregate (DACT)
     parts: Dict[str, List[str]] = {}
-    for da, pa in sets.dact_to_pact:
+    for da, pa in sorted(sets.dact_to_pact):
         parts.setdefault(pa, []).append(da)
     for sa in sorted(sets.splitacts):
         dacts = parts.get(sa, [])
@@ -206,7 +206,7 @@ def prepare_country(coco: pd.DataFrame, p: pd.DataFrame, ms: str, sets: CaptrdSe
     for (cc, r) in d.keys(cols={"UVAP"}, rows=rows_load):
         ub = float(d("UVAP", r).get("BASM", 0.0))
         pB = pb("UVAG", r)
-        if ub == 0 or pB == 0 or sum(pv("UVAG", r, tt) for tt in b5) == 0:
+        if ub == 0 or pB == 0 or sum(pv("UVAG", r, tt) for tt in sorted(b5)) == 0:
             continue
         d.put("UVAG", r, LC.dataMS_UVAG(d("UVAP", r), ub, pB), where=is_y & us)
     # l. 208-217: BASM again for the split and set-aside activities and UVAG
@@ -224,7 +224,7 @@ def prepare_country(coco: pd.DataFrame, p: pd.DataFrame, ms: str, sets: CaptrdSe
                 d.put(a, r_, d.zero + LC.dataMS_removed(), where=late)
     # l. 239-247: the flags of positions other than GROF removed where GROF is given (as coded: the inner sum tests the
     # position itself, so every position at most 1e-12 goes)
-    g_all = {r: d("GROF", r) for r in {k[1] for k in d.keys(cols={"GROF"})}}
+    g_all = {r: d("GROF", r) for r in sorted({k[1] for k in d.keys(cols={"GROF"})})}
     for (cc, r) in d.keys(cols=sets.mrkbalee - COLS_NO_COCO - {"GROF"}, rows=rows_load):
         if total.get((cc, r), 0.0) == 0 or r not in g_all:
             continue
@@ -292,7 +292,7 @@ def apply_country(p: pd.DataFrame, d: Series, usable: Set[str], ms: str, sets: C
         w.put(c, r, LC.p_data_from_COCO(dd, pB, db), where=late & (dd != 0))
     # l. 290-295: GROF only with some producing activity; l. 299-302: EAAG with GROF's 1e-13
     acts_of: Dict[str, List[str]] = {}
-    for a, o in sets.pact_to_o:
+    for a, o in sorted(sets.pact_to_o):
         if a in sets.mpact:
             acts_of.setdefault(o, []).append(a)
     for o in sorted(sets.o):
@@ -306,7 +306,7 @@ def apply_country(p: pd.DataFrame, d: Series, usable: Set[str], ms: str, sets: C
     # l. 304-310: LEVL only with some output (set-aside excepted)
     setf = {a for a, g in sets.p_t_actagg if g == "SETF"}
     outs_of: Dict[str, List[str]] = {}
-    for a, o in sets.pact_to_o:
+    for a, o in sorted(sets.pact_to_o):
         outs_of.setdefault(a, []).append(o)
     for a in sorted(sets.mpact - setf):
         lv = w(a, "LEVL")
@@ -343,7 +343,7 @@ def apply_country(p: pd.DataFrame, d: Series, usable: Set[str], ms: str, sets: C
         for c, r, t_, v in zip(bf["d1"], bf["d2"], bf["d3"], bf["value"]):
             bfs.setdefault((c, r), {})[str(t_)] = float(v)
         if ms in sets.msnoeu28:                                           # l. 364-365: EXOG to NAGR
-            for b in sets.biofuels:
+            for b in sorted(sets.biofuels):
                 ex = bfs.get(("EXOG", b), {})
                 if ex:
                     na = bfs.setdefault(("NAGR", b), {})
@@ -393,7 +393,7 @@ def apply_country(p: pd.DataFrame, d: Series, usable: Set[str], ms: str, sets: C
         w.put("DOMM", r, pd.Series(LC.p_data_default(), index=w.idx), where=cond & (w("DOMM", r) == 0))
         w.put("BIOF", r, pd.Series(LC.p_data_default(), index=w.idx), where=cond & (w("BIOF", r) == 0))
     # l. 524-537: default biostocks; l. 545-548: DDGS (need P_ExtrRates and p_ByProduct)
-    stocks_of = {f: [s_ for s_, f2 in sets.stock_to_fuel if f2 == f and s_ in POTENTIAL_STOCKS] for f in ("BIOE", "BIOD")}
+    stocks_of = {f: [s_ for s_, f2 in sorted(sets.stock_to_fuel) if f2 == f and s_ in POTENTIAL_STOCKS] for f in ("BIOE", "BIOD")}
     if extr is not None:
         er = extr["extr_rates"]
         for f, s_ in (("BIOE", "SWHE"), ("BIOD", "RAPO")):
@@ -410,7 +410,7 @@ def apply_country(p: pd.DataFrame, d: Series, usable: Set[str], ms: str, sets: C
         byp = extr["byproduct"]
         used = sum((w("BIOF", x) for x in stocks_of["BIOE"]), w.zero)
         ddgs = LC.p_data_MAPR_DDGS([(w("BIOF", s_), byp.get(("DDGS", s_), 0.0))
-                                    for s_, b in sets.stock_to_by if b == "DDGS" and s_ in POTENTIAL_STOCKS], w.zero)
+                                    for s_, b in sorted(sets.stock_to_by) if b == "DDGS" and s_ in POTENTIAL_STOCKS], w.zero)
         w.put("MAPR", "DDGS", ddgs, where=dflt & (used < 1e-12) & (w("MAPR", "DDGS") == 0))
     else:
         skipped.append("l. 545-548 DDGS from the default biostocks (p_ByProduct not given)")
