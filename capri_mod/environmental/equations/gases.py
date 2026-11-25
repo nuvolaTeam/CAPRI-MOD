@@ -7,12 +7,16 @@ substitution's effect on the CO2 from urea (CO2UREA); and the methane per head o
 management (sections (1) and (2), l. 302-443: the conversion ratios NEG and GENE, the gross energy intake, IPCC's tier 2
 and tier 1 CH4ENT and CH4MAN, the volatile solids, the ammonia techniques' factor), which CAPRI computes at "Y" where
 %ghgAbatement% is on (capmod.gms l. 1139) and in the reports (reports/sol_simy.gms). Their digestibility comes from
-envind/digestibility.gms (capri_mod/supply/equations/digestibility.py). Not ported: CH4ENTfromFEED's p_emisFeed
-(l. 364-377, off in CAPRI's runs) and l. 411, which sets p_animReq(GENE) back to 0 (the caller's).
+envind/digestibility.gms (capri_mod/supply/equations/digestibility.py). With %CH4ENTfromFEED% on, as capmod and CAPREG
+set it (capmod/set_global_variables.gms l. 226, capreg/set_global_variables.gms l. 143), the cattle's enteric CH4 per
+head reported in DATA is the ration's, from p_emisFeed (l. 364-377, 845-856: p_emisFeed_CH4ENT, DATA_CH4ENT_fromFEED),
+the tier 2 value kept as CH4ENTstd; DATA_GHGS writes the per-head values to DATA (l. 841-842). Until 25 November 2026
+this docstring said the switch was off in CAPRI's runs, which was wrong. Not ported: l. 411, which sets
+p_animReq(GENE) back to 0 (the caller's).
 
 EMISCALC_CO2UREA is used by capri_mod/environmental/environmental_module.py (EnvironmentalModule.compute_indicators);
-the methane functions are not called by the model's run yet (they are to give the 2030 methane per head from the
-feed chain, capri_mod/feed/chain.py).
+the methane functions are not called by the model's run: capri_mod/environmental/methane_per_head.py feeds them in
+CAPRI's order (checked against CAPREG's 2017 results, tools/check/check_methane_2017.py).
 """
 from __future__ import annotations
 
@@ -229,3 +233,75 @@ def EMISCALC_CH4MAN_NH3_techs(CH4MAN, LossHous_Solid, LossStor_Solid, TypeShare_
     f = lambda x: float(x or 0.0)                                            # noqa: E731
     return f(CH4MAN) * ((1. - f(LossHous_Solid) - f(LossStor_Solid)) * f(TypeShare_Solid)
                         + (1. - f(LossHous_Liquid) - f(LossStor_Liquid)) * f(TypeShare_Liquid))
+
+
+def p_emisFeed_CH4ENT(YM, YM_EU, GE_T, DM):
+    r"""p_emisFeed(RU, MAACT, A, FEED, "CH4ENT"): kg CH4 per kg of a feed fed (%CH4ENTfromFEED% on, capmod/
+    set_global_variables.gms l. 226, capreg/set_global_variables.gms l. 143), the share YM (the region's or the EU's)
+    of the feed's gross energy, Mcal per kg dry matter (p_emisFeed(RU, MAACT, "T", FEED, "GE"), the bulk's of
+    digestibility.gms l. 257) x 4.1868 MJ per Mcal x the feed's dry-matter content, over 55.65 MJ per kg CH4 (l. 367-
+    376). The caller applies the condition (a YM and a share).
+
+    CAPRI's GAMS (envind/gases.gms l. 364-377):
+
+        $iftheni %CH4ENTfromFEED%==on
+        $batinclude 'util\title.gms' "'p_emisFeed definition '"
+
+          p_emisFeed(RU,MAACT,A,FEED,"CH4ENT") $ ((EMISCALC(RU,MAACT,A,"YM",%1) or EMISCALC("EU000000",MAACT,A,"YM",%1)) and p_technFact(RU,MAACT,"LEVL",A))
+        *                        YM: percentage of gross feed energy lost as methane (energy)
+                          = (EMISCALC(RU,MAACT,A,"YM",%1) + EMISCALC("EU000000",MAACT,A,"YM",%1) $ (NOT EMISCALC(RU,MAACT,A,"YM",%1)))
+        *                        dividing by energy content of methane [MJ/kg CH4] => kg CH4 lost per MJ of feed energy
+                                / 55.65
+        *                         Gross energy per kg FEED in MCal   * MJ/MCal
+                                * p_emisFeed(RU,MAACT,"T",FEED,"GE") * 4.1868
+        *                        GE is given per dry matter whereas our FEED quantities are in fresh matter =>
+                                * p_DryMatterContent(RU,FEED)
+          ;
+        $endif
+
+    Departures from CAPRI: none."""
+    return _reg_or_eu(YM, YM_EU) / 55.65 * float(GE_T or 0.0) * 4.1868 * float(DM or 0.0)
+
+
+def DATA_GHGS(EMISCALC_A, p_technFact_A):
+    r"""DATA(RU, MPACT, GHGS, "Y") of an activity with a level and no value yet: its emission per unit, the
+    technologies' EMISCALC weighted by their shares (l. 841-842).
+
+    CAPRI's GAMS (envind/gases.gms l. 837-842):
+
+        *----------------------------------------
+        *   Write emissions to DATA for further processing/aggregation
+        *----------------------------------------
+
+        DATA(RU,MPACT,GHGS,%1) $ ((NOT DATA(RU,MPACT,GHGS,%1)) AND DATA(RU,MPACT,"LEVL",%1))
+            = SUM(A $ p_technFact(RU,MPACT,"LEVL",A), EMISCALC(RU,MPACT,A,GHGS,%1) * p_technFact(RU,MPACT,"LEVL",A));
+
+    EMISCALC_A, p_technFact_A: {A: value}. The caller applies the condition. Departures from CAPRI: none."""
+    return sum(float(EMISCALC_A.get(t, 0.0) or 0.0) * float(s) for t, s in p_technFact_A.items() if s)
+
+
+def DATA_CH4ENT_fromFEED(ration, p_emisFeed_A, p_technFact_A):
+    r"""DATA(RU, MAACT, "CH4ENT", "Y") of a cattle activity with a level and a p_emisFeed (%CH4ENTfromFEED% on): its
+    ration's methane, sum over the feeds of DATA(RU, MAACT, FEED, "Y") x p_emisFeed, the technologies weighted by their
+    shares (l. 853-855); the tier 2 value is kept as CH4ENTstd (l. 850).
+
+    CAPRI's GAMS (envind/gases.gms l. 845-856):
+
+        * --- CH4ENT - updated calculation   !!!problematic for calculation of values based on capmod results (there is no DRMA value=> CH4ENT ends up being 0)
+
+        $iftheni %CH4ENTfromFEED%==on
+        *
+        *              store standard result from above for comparisons
+          DATA(RU,MAACT,"CH4ENTstd",%1) = DATA(RU,MAACT,"CH4ENT",%1) ;
+        *
+        *              revised calculation used information on feed intake   (ADDITIONAL CONDITIONALItY for p_emisFeed to allow for smooth calculation in 2013,2014 => QUICK FIX!)
+          DATA(RU,MAACT,"CH4ENT",%1) $ (DATA(RU,MAACT,"LEVL",%1) $ CATACT(MAACT) $ SUM((FEED,A),  p_emisFeed(RU,MAACT,A,FEED,"CH4ENT")))
+            = SUM(A $ p_technFact(RU,MAACT,"LEVL",A),p_technFact(RU,MAACT,"LEVL",A)
+                        *  SUM(FEED,DATA(RU,MAACT,FEED,%1) * p_emisFeed(RU,MAACT,A,FEED,"CH4ENT")) );
+        $endif
+
+    ration: {FEED: DATA(RU, MAACT, FEED, "Y")}; p_emisFeed_A: {A: {FEED: p_emisFeed(RU, MAACT, A, FEED, "CH4ENT")}};
+    p_technFact_A: {A: share}. The caller applies the condition. Departures from CAPRI: none."""
+    return sum(float(s) * sum(float(q or 0.0) * float(p_emisFeed_A.get(t, {}).get(f, 0.0) or 0.0)
+                              for f, q in ration.items())
+               for t, s in p_technFact_A.items() if s)

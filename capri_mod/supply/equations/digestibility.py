@@ -15,8 +15,10 @@ The rest of the file, for the methane of enteric fermentation and manure (envind
 equations/gases.py): CAPRI's own fibre and crude protein where they agree with the table (l. 64-94), the NRC 2001
 energy chain to the digestible and gross energy (l. 97-143), the discount for the intake above maintenance (l. 146-170)
 and the ration's digestibility, ash and gross energy per cattle activity (l. 241-253). Not ported: the GHGLCA path
-(l. 174-196, off in CAPRI's runs), CH4ENTfromFEED's p_emisFeed (l. 255-258, off), the items stored for checking
-(l. 260-284) and clean_digestibility.gms (l. 286, off where capmod calls the file).
+(l. 174-196, off in CAPRI's runs), the items stored for checking (l. 260-284) and clean_digestibility.gms (l. 286, off
+where capmod calls the file). p_emisFeed's gross energy (l. 255-258) is ported: %CH4ENTfromFEED% is on in capmod and
+CAPREG (capmod/set_global_variables.gms l. 226, capreg/set_global_variables.gms l. 143); until 25 November 2026 this
+docstring said it was off, which was wrong.
 """
 from __future__ import annotations
 
@@ -503,3 +505,20 @@ def EMISCALC_DE_ASH_GE(ration, DM, DE, GE, ASH):
     ash = sum(float(ASH[f]) * x for f, x in w.items() if float(ASH.get(f, 0.0) or 0.0)) / tot
     ge = sum(float(GE[f]) * x for f, x in w.items() if float(GE.get(f, 0.0) or 0.0)) / tot
     return de, ash, ge
+
+
+def p_emisFeed_GE(GE_FEED):
+    r"""p_emisFeed(RU, CATACT, "T", FEED, "GE"): the feed bulk's gross energy, Mcal per kg dry matter, for the methane
+    of enteric fermentation from the feeds (%CH4ENTfromFEED% on: capmod/set_global_variables.gms l. 226, capreg/
+    set_global_variables.gms l. 143; gases.gms l. 367-376, capri_mod/environmental/equations/gases.py p_emisFeed_CH4ENT)
+    (l. 255-258).
+
+    CAPRI's GAMS (envind/digestibility.gms l. 255-258):
+
+        $iftheni.emisfeed1 %CH4ENTfromFEED%==on
+        *  gross energy content of bulk FEED is used in calculation of CH4ENT of cattle activities:
+           p_emisFeed(RU,CATACT,"T",FEED,"GE") = p_digestPar(RU,CATACT,FEED,"GE") ;
+        $endif.emisfeed1
+
+    GE_FEED: p_digestPar(RU, CATACT, FEED, "GE") (p_digestPar_FEED). Departures from CAPRI: none."""
+    return float(GE_FEED or 0.0)

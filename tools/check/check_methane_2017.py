@@ -9,7 +9,7 @@ req_or_man_fnc_req.py) on that data, the year being its own base and trend; CAPR
 (tools/build/build_gascoeff_tables.py), its digestibility table (capri_digestpar) and its grass N fixation
 (fert/fertpar.gms). CAPREG's results are for the check only.
 
-    python tools/check/check_methane_2017.py [CC ...]       (default DK)
+    python tools/check/check_methane_2017.py [--scen-year=2000] [CC ...]       (default DK; 0: CAPREG's p_NemiDAT)
 """
 from __future__ import annotations
 
@@ -61,8 +61,9 @@ def year_2017(cc: str):
     return ci, ms, mine, D, tf, st
 
 
-def inputs(cc: str) -> tuple:
-    """(MethaneInputs, CAPREG's DATA2 at "Y") of the country."""
+def inputs(cc: str, scen_year: int = 2000) -> tuple:
+    """(MethaneInputs, CAPREG's DATA2 at "Y") of the country; MITERRA's shares and CH4 losses of the scenario
+    year (CAPREG's 2000; 0: CAPREG's time-series p_NemiDAT)."""
     import _capri_digest as cd
     import pandas as pd
     ci, ms, mine, D, tf, st = year_2017(cc)
@@ -74,8 +75,11 @@ def inputs(cc: str) -> tuple:
     RU = tuple(sorted(r for r in mine if r in set(capri_set("RU"))))
     mr = set(capri_pairs("MAP_RR"))
     MS_of = {r: ms for r in RU if r == ms or (ms, r) in mr}
-    nemi = pd.read_parquet(fci_folder(cc) / "p_NemiDAT.parquet")
-    p_nemi = mph.normalise_nemidat(zip(nemi.d1, nemi.d2, nemi.d3, nemi.d4, nemi.d5, nemi.value))
+    if scen_year:
+        p_nemi = mph.miterra_nemidat(scen_year, (ms,), tuple(capri_set("AACT")), miterra_tables(), miterra_sets())
+    else:                                       # CAPREG's time-series run's (inventory shares, storgrazInv on)
+        nemi = pd.read_parquet(fci_folder(cc) / "p_NemiDAT.parquet")
+        p_nemi = mph.normalise_nemidat(zip(nemi.d1, nemi.d2, nemi.d3, nemi.d4, nemi.d5, nemi.value))
     rates, biofix = cd.nfix_rates()
     T = raw_tables()
     m = mph.MethaneInputs(
@@ -92,35 +96,66 @@ def inputs(cc: str) -> tuple:
     return m, DATA
 
 
+AMMO = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
+
+
+def miterra_tables() -> dict:
+    """MITERRA's tables (capri_data/2017/abatement/ammonia), keyed as CAPRI's parameters."""
+    import csv
+    spec = {"RCEmissions": ("region", "animal_mitt", "item"), "bNumAniRAINS": ("region", "animal_mitt", "year"),
+            "ControlStrategies": ("region", "animal_mitt", "strategy", "item"),
+            "reducEmHouse": ("region", "animal_mitt", "gas", "tech_class"),
+            "reducEmStorage": ("region", "animal_mitt", "gas", "tech_class")}
+    out = {}
+    for name, keys in spec.items():
+        with open(AMMO / f"{name}.csv", newline="") as f:
+            out[name] = {tuple(r[k] for k in keys): float(r["value"]) for r in csv.DictReader(f)}
+    return out
+
+
+def miterra_sets() -> dict:
+    """CAPRI's sets of MITERRA's types (capri_data/codes/capri)."""
+    one = ("atGrazingExtra", "ani_Liq", "POULTRY", "MDACT", "ManuType", "MACT")
+    two = ("ms_to_country", "pact_to_atModel", "atModel_to_PACT", "manuType_to_atModel", "DACT_TO_PACT")
+    return {**{s: tuple(capri_set(s)) for s in one}, **{s: tuple(capri_pairs(s)) for s in two}}
+
+
 def fci_folder(cc: str) -> Path:
     import feed_chain_inputs as fci
     return fci.capreg_folder(cc)
 
 
-def compare(cc: str) -> list:
-    """[(region, activity, item, port, CAPREG)] of CH4ENT and CH4MAN per head (the technology "T")."""
-    m, DATA = inputs(cc)
-    res = mph.methane_per_head(copy.deepcopy(m))
+def compare(cc: str, scen_year: int = 2000) -> list:
+    """[(region, activity, item, port, CAPREG, per head of "T")] of CH4ENT (the ration's), CH4ENTstd (tier 2, else tier
+    1) and CH4MAN per head of the activities with a level, as gases.gms writes them to DATA (methane_per_head.
+    data_per_activity), against CAPREG's DATA2 at "Y"."""
+    m, DATA = inputs(cc, scen_year)
+    per_head = mph.methane_per_head(copy.deepcopy(m))
+    res = mph.data_per_activity(m, per_head)
     rows = []
-    for (ru, act, t), v in sorted(res.items()):
-        if t != "T":
-            continue
-        for item in ("CH4ENT", "CH4MAN"):
+    for (ru, act), rec in sorted(res.items()):
+        for item in ("CH4ENT", "CH4ENTstd", "CH4MAN"):
             ref = DATA.get((ru, act, item), 0.0)
-            if v[item] or ref:
-                rows.append((ru, act, item, v[item], ref, v))
+            if rec.get(item) or ref:
+                rows.append((ru, act, item, rec.get(item, 0.0), ref, per_head.get((ru, act, "T"), {})))
     return rows
 
 
 def main() -> None:
-    for cc in sys.argv[1:] or ["DK"]:
-        rows = compare(cc)
-        print(f"{cc}: {len(rows)} rows (CH4ENT, CH4MAN per head, kg; port against CAPREG 2017)")
+    args = sys.argv[1:]
+    year = 2000
+    if args and args[0].startswith("--scen-year="):
+        year = int(args.pop(0).split("=")[1])
+    for cc in args or ["DK"]:
+        rows = compare(cc, year)
+        rel = [abs(a - b) / abs(b) for _, _, _, a, b, _ in rows if b]
+        print(f"{cc}: {len(rows)} rows (CH4ENT, CH4ENTstd, CH4MAN; kg per head; port against CAPREG 2017)"
+              f": largest relative difference {max(rel):.2e}, {sum(r < 1e-6 for r in rel)} of {len(rel)} within 1e-6")
         for ru, act, item, mine, ref, v in rows:
             rel = (mine - ref) / ref if ref else float("nan")
-            extra = f"DE {v['DE']:.2f} GE {v['GE']:.3f} ASH {v['ASH']:.2f} GENE_req {v['GENE_req']:.1f} " \
-                    f"VSER {v['VSER']:.3f} MCFMS {v['MCFMS']:.4f}"
-            print(f"  {ru} {act:5s} {item:6s} {mine:10.3f} {ref:10.3f} {rel:+8.4f}  {extra}")
+            extra = f"DE {v.get('DE', 0):.2f} GE {v.get('GE', 0):.3f} ASH {v.get('ASH', 0):.2f} " \
+                    f"GENE_req {v.get('GENE_req', 0):.1f} VSER {v.get('VSER', 0):.3f} MCFMS {v.get('MCFMS', 0):.4f}"
+            print(f"  {ru} {act:5s} {item:6s} {mine:12.5f} {ref:12.5f} {rel:+10.2e}  {extra}")
 
 
 if __name__ == "__main__":

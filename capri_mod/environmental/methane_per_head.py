@@ -80,6 +80,26 @@ def normalise_nemidat(rows) -> dict:
     return {(m, a, g.upper(), i.upper(), s.upper()): float(v) for m, a, g, i, s, v in rows}
 
 
+def miterra_nemidat(ScenYear: int, MS: tuple, AACT: tuple, M: dict, S: dict) -> dict:
+    """MITERRA's p_Nemidat of the methane (envind/ammo.gms, %storgrazInv% off; capri_mod/environmental/equations/
+    ammo_ch4.py) for the scenario year: the grazing, liquid and solid shares, the housing and storage measures' CH4
+    losses, copied to the split activities. M: MITERRA's tables {RCEmissions, bNumAniRAINS, ControlStrategies,
+    reducEmHouse, reducEmStorage}; S: CAPRI's sets {ms_to_country, pact_to_atModel, atModel_to_PACT,
+    manuType_to_atModel, atGrazingExtra, ani_Liq, POULTRY, MDACT, ManuType, DACT_TO_PACT, MACT}."""
+    from capri_mod.environmental.equations import ammo_ch4 as am
+    p = am.p_Nemidat_GRAZ(MS, AACT, S["ms_to_country"], S["pact_to_atModel"], S["atGrazingExtra"], S["ani_Liq"],
+                          S["POULTRY"], M["RCEmissions"])
+    p.update(am.p_Nemidat_Liquid_Solid(MS, AACT, S["MDACT"], S["ms_to_country"], S["atModel_to_PACT"],
+                                       M["bNumAniRAINS"], ScenYear))
+    fh = am.FracToepHouse(M["ControlStrategies"], ScenYear)
+    fs = am.FracToepStorage(M["ControlStrategies"], ScenYear)
+    p.update(am.p_Nemidat_CH4_LossHous(MS, AACT, S["ManuType"], S["ms_to_country"], S["pact_to_atModel"],
+                                       S["manuType_to_atModel"], M["reducEmHouse"], fh))
+    p.update(am.p_Nemidat_CH4_LossStor(MS, AACT, S["ManuType"], S["ms_to_country"], S["pact_to_atModel"],
+                                       S["manuType_to_atModel"], M["reducEmStorage"], fs))
+    return am.p_Nemidat_split_activities(p, S["DACT_TO_PACT"], S["MACT"])
+
+
 def labels_as(codes, spelt) -> tuple:
     """The codes with the spelling of the same labels in spelt: GAMS compares labels without case and writes each in
     the case of its first use, so a set read from one GDX (ManSys: liquid, solid) and CAPRI's tables (Liquid, Solid)
@@ -168,8 +188,8 @@ def products(m: MethaneInputs, ru: str, act: str) -> tuple:
 
 
 def ration(m: MethaneInputs, ru: str, act: str) -> tuple:
-    """digestibility.gms l. 197-253 for the unit and cattle activity: (DE, ASH, GE) of its ration, EMISCALC(RU, act,
-    "T", ...), from the products' values and the member state's feed use."""
+    """digestibility.gms l. 197-258 for the unit and cattle activity: ((DE, ASH, GE) of its ration, EMISCALC(RU, act,
+    "T", ...), from the products' values and the member state's feed use; {FEED: (p_emisFeed GE, dry matter)})."""
     D, ms = m.DATA, m.MS_of[ru]
     P, DM = products(m, ru, act)
     rows_of = _rows_of(m.FEED_TO_O)
@@ -181,7 +201,8 @@ def ration(m: MethaneInputs, ru: str, act: str) -> tuple:
         for it in vals:
             vals[it][feed] = dg.p_digestPar_FEED([P.get(r, {}).get(it, 0.0) for r in rows], sh)
     rat = {f: D.get((ru, act, f), 0.0) for f in rows_of}
-    return dg.EMISCALC_DE_ASH_GE(rat, {f: DM.get(f, 0.0) for f in rows_of}, vals["DE"], vals["GE"], vals["ASH"])
+    feed = {f: (dg.p_emisFeed_GE(vals["GE"][f]), DM.get(f, 0.0)) for f in rows_of}
+    return dg.EMISCALC_DE_ASH_GE(rat, {f: DM.get(f, 0.0) for f in rows_of}, vals["DE"], vals["GE"], vals["ASH"]), feed
 
 
 def methane_per_head(m: MethaneInputs) -> dict:
@@ -198,9 +219,10 @@ def methane_per_head(m: MethaneInputs) -> dict:
         for act in m.CATACT:
             if not any(m.p_technFact.get((ru, act, t)) for t in m.A):
                 continue
-            de, ash, ge = ration(m, ru, act)
+            (de, ash, ge), feed = ration(m, ru, act)
             if de:
                 reg[(ru, act, "T")] = {"DE": de, "ASH": ash, "GE": ge}
+            reg.setdefault(("feed", ru, act), feed)
     out = {}
     for ru in m.RU:
         ms = m.MS_of[ru]
@@ -229,6 +251,9 @@ def methane_per_head(m: MethaneInputs) -> dict:
                     gene_req = m.p_animReq.get((ru, act, t, "GENE"), 0.0)
                     ch4ent = 0.0
                 ch4ent = gs.EMISCALC_CH4ENT_tier1(ch4ent, own("CH4EN"), eu("CH4EN"), days, True)
+                # p_emisFeed (gases.gms l. 367-376) where the activity has a YM; the "T" GE of its feed bulks
+                ef = {f: gs.p_emisFeed_CH4ENT(own("YM"), eu("YM"), ge_t, dm)
+                      for f, (ge_t, dm) in reg.get(("feed", ru, act), {}).items()} if has_ym else {}
                 ash_r = r.get("ASH", 0.0) or own("ASH")
                 vser = gs.EMISCALC_VSER(gene_req, r.get("GE", 0.0), de_r, de_eu, ash_r, eu("ASH")) if (de_r or de_eu) else 0.0
                 mcf = gcs["MCFMS"].get((ru, act, t), 0.0)
@@ -245,5 +270,30 @@ def methane_per_head(m: MethaneInputs) -> dict:
                         n("CH4", "LossHous", "Liquid"), n("CH4", "LossStor", "Liquid"), n("N", "TypeShare", "Liquid"))
                 out[(ru, act, t)] = {"DE": de_r, "ASH": r.get("ASH", 0.0), "GE": r.get("GE", 0.0), "NEG": neg,
                                      "GENE": gene, "GENE_req": gene_req, "CH4ENT": ch4ent, "VSER": vser, "MCFMS": mcf,
-                                     "CH4MAN": ch4man}
+                                     "CH4MAN": ch4man, "p_emisFeed": ef}
+    return out
+
+
+def data_per_activity(m: MethaneInputs, per_head: dict, CH4ENTfromFEED: bool = True) -> dict:
+    """DATA(RU, MAACT, CH4ENT | CH4ENTstd | CH4MAN, "Y") of the activities with a level DATA(RU, MAACT, "LEVL"), as
+    gases.gms writes them (l. 841-842 DATA_GHGS; with %CH4ENTfromFEED% on, as capmod and CAPREG set it, l. 850-855:
+    the tier 2 value as CH4ENTstd and the cattle's CH4ENT from their ration). Returns {(RU, MAACT): {item: value}}."""
+    out = {}
+    catact = set(m.CATACT)
+    for ru in m.RU:
+        for act in m.MAACT:
+            if not m.DATA.get((ru, act, "LEVL")):
+                continue
+            sh = {t: m.p_technFact.get((ru, act, t), 0.0) for t in m.A if m.p_technFact.get((ru, act, t))}
+            if not sh:
+                continue
+            rec = {it: gs.DATA_GHGS({t: per_head.get((ru, act, t), {}).get(it, 0.0) for t in sh}, sh)
+                   for it in ("CH4ENT", "CH4MAN")}
+            if CH4ENTfromFEED:
+                rec["CH4ENTstd"] = rec["CH4ENT"]
+                ef = {t: per_head.get((ru, act, t), {}).get("p_emisFeed", {}) for t in sh}
+                if act in catact and any(v for e in ef.values() for v in e.values()):
+                    ration_ = {f: m.DATA.get((ru, act, f), 0.0) for f, _ in m.FEED_TO_O}
+                    rec["CH4ENT"] = gs.DATA_CH4ENT_fromFEED(ration_, ef, sh)
+            out[(ru, act)] = rec
     return out
