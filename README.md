@@ -93,8 +93,8 @@ equation book (`docs/equations/`) sets CAPRI's GAMS equations beside their Pytho
 | Base year | 2017 (parameterised); scenarios solved in 2030 on CAPRI star 3.0's Green Deal baseline |
 | Supply | CAPRI's regional models as non-linear programs with CAPRI's 2030 PMP terms |
 | Market | CAPRI's market model as ported, in CAPRI's 45 market regions (the EU as its two blocks): bilateral Armington trade, tariffs, TRQs, entry prices, GL demand, processing, dairy, biofuels, feed bulks, young animals, non-EU land markets |
-| Data validator | 904 declared data files (CSV inputs, Parquet sources), 0 violations |
-| Test suite | 674 tests, 108 of them slow; the last full run (25 November 2026, 665 tests, one test file per process): 661 passed, 3 skipped, 1 xpassed |
+| Data validator | 930 declared data files (CSV inputs, Parquet sources), 0 violations |
+| Test suite | 680 tests, 109 of them slow; the last full run (25 November 2026, 665 tests, one test file per process): 661 passed, 3 skipped, 1 xpassed |
 | Full-EU 2030 runs | 4 to 8 minutes per supply-market iteration on 2 cores (Green Deal, 24 November 2026: 12 iterations in 73 minutes), plus about 50 minutes once per new baseline for the market supply Hessian |
 | Solvers | IPOPT (CasADi) for the supply models and the manure pool market; the market's fixed point or the whole-market chain (Newton with MKL PARDISO, a continuation, IPOPT); Clarabel (the manure pools' alternative form), HiGHS (linear side problems) (§6) |
 

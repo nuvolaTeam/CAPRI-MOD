@@ -529,6 +529,30 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   covers (the EU's and Norway's); the water accounts' coverage (no irrigation share for Bosnia's and Serbia's units).
   Also: two CSV float reads made exact (build_livestock_n_export_2030.py, of K202; build_feed_bulk_grof.py). README
   §10.4.
+- **The 2030 rations, requirements, methane and fodder from the ported chain (25 November 2026; the project lead's
+  order of 25 November, item 5):** `projection.ration_source` defaults to "chain": with CAPRI's 2030 reference as the
+  trajectory the projection takes its 2030 factors on 2017 from the ported feed chain's start (capri_mod/feed/chain.py;
+  tools/build/build_ration_trajectory_2030.py --source chain: chain_ration_2030.csv, chain_fodder_2030.csv), not from
+  CAPRI's solved 2030 results (capri_ref_*, kept for comparison and rebuilt byte-identical). The methane per head in
+  CAPRI's order (capri_mod/environmental/methane_per_head.py: envind/gascoeff.gms, digestibility.gms, gases.gms, and
+  MITERRA's shares and CH4 losses of envind/ammo.gms with %storgrazInv% off in equations/gascoeff.py and ammo_ch4.py;
+  CAPRI's raw methane tables from its code, tools/build/build_gascoeff_tables.py), %CH4ENTfromFEED% on (two docstrings
+  said off: corrected), on the rations of CAPRI's report at the solution (reports/sol_simy.gms l. 254-257,
+  capri_mod/coupling/equations/sol_simy.DATA_FEED_SIMY: the start's feed input coefficients, which the calibrated
+  reference reproduces; the year's data at "Y" carry the trend rations, in Alentejo's dairy cows 9.3 t of grass per
+  head against 27.1 t). The fodder fed per ha from the start's feed use of the fodder bulks (adjust.gms l. 72-73).
+  Checked: the 2017 methane per head of all 35 countries with CAPREG's base year equals CAPREG's DATA2 within 1.8e-7
+  (tools/check/check_methane_2017.py); against the factors from CAPRI's solved reference, the rations and requirements
+  within 1.6% (but DE91's bulls), the fodder per ha within 3e-5 (1,106 rows; CAPRI's file has 14 more, member-state
+  copies), the enteric CH4 within 1.4% (2,246 rows), the manure CH4 96.6% within 5% (2,746 rows; largest -13%, cattle
+  in ES53 and Swedish regions: the products' mix within the feed bulks, the start's against the solution's). Norway's
+  MITERRA data from the project lead's installation (docs/EXTERNAL_SOURCES.md, dat_local/miterra; tools/build/
+  extract_capri_dat.py): the dat mirror's p_NO_ControlStrategies had the hens' and other poultry's low-emission housing
+  shares of 2000 swapped and none for 2020; with them Norway's poultry methane equals CAPREG's in 2017 and CAPRI's in
+  2030, and Norway's ammonia technologies start with low-emission housing at 54% (hens) and 85% (other poultry),
+  concrete storage at 0 (CAPRI's rule, ammo_tech.gms l. 2054-2067; until now 0 and 50%). Tests:
+  test_methane_chain.py (the shares, MCFMS and the report's rations by hand, the raw tables' counts, Denmark's 2017
+  values), test_ration_2030.py on both files.
 - **K203, the low-N feeding option's manure N effect at 2030 (24 November 2026; K194):** CAPRI's low_n_feed.gms
   scales the option's manure N effect by (MANN + CRPR_EXPT) / MANN of the simulation year, which its simulation has
   just recomputed for 2030 (feed/req_or_man_fnc.gms in its manure mode, capmod.gms l. 1090); the builder
