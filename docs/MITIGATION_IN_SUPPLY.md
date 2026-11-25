@@ -2,7 +2,7 @@
 
 Status: revised 20 October 2026 against the code. Run results of the sprints in which the options were built were
 removed (they predate the NLP form, the N loss cascade and anaerobic digestion); current results are in README section
-11, adoption against JRC121368 Table 17 is printed by `tools/check/compare_runs.py --capri`, changes are in CHANGELOG.md.
+8 (Validation), adoption against JRC121368 Table 17 is printed by `tools/check/compare_runs.py --capri`, changes are in CHANGELOG.md.
 
 CAPRI chooses its mitigation options inside the regional supply model (supply/supply_model.gms, ghgAbatement block):
 in JRC121368's Farm-to-Fork run they were adopted without a carbon price, because the nitrogen target and the prices

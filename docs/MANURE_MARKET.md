@@ -1,7 +1,7 @@
 # Manure market
 
 Status: revised 20 October 2026 against the code. Run results of the sprints in which the market was built (conic
-form, before the NLP form) were removed; current results are in README section 9 (Validation) and CHANGELOG.md.
+form, before the NLP form) were removed; current results are in README section 8 (Validation) and CHANGELOG.md.
 
 Manure trade is on by default, as in CAPRI star 3.0's GUI (`New_Manure_Trade_fromGUI = true`, CAPRI's
 `manureTradeNew`): `CAPRIModel.use_manure_market = True`. It is a scenario setting (`PolicyScenario.manure_trade`,

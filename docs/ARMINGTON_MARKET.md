@@ -182,4 +182,4 @@ Until the port of CAPRI's bilateral market and 2030 baseline (October 2026) the 
 (1 + tariff), and the EU alone had an Armington premium cleared on its gross extra-EU trade. That structure was
 removed from the code on 20 October 2026 (no run path used it; KNOWN_ISSUES K54-2). Its development and the results of that period (including the fixes to the
 reported EU price and to the demand reference price) are recorded in CHANGELOG.md (sections up to "the port of CAPRI's bilateral market and 2030 baseline") and
-`docs/dev/archive/MARKET_STRUCTURE_PLAN.md`. Current results: README section 9 (Validation).
+`docs/dev/archive/MARKET_STRUCTURE_PLAN.md`. Current results: README section 8 (Validation).

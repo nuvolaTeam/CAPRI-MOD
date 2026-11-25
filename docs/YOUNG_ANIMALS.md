@@ -2,7 +2,7 @@
 
 Status: revised 20 October 2026 against the code. Both are always on (the young-animal markets' switch was removed on 27 October 2026;
 livestock elasticities in `capri_pmp.build_elasticity_table`). Earlier run results (October 2026) are left to
-CHANGELOG.md; current results: README section 9 (Validation) and KNOWN_ISSUES K47, K48.
+CHANGELOG.md; current results: README section 8 (Validation) and KNOWN_ISSUES K47, K48.
 
 ## Young animals, as CAPRI
 

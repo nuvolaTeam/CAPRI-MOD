@@ -1,11 +1,11 @@
 # CAPRI-mod validation: the early checks and where validation stands now
 
-Status: revised 20 October 2026 against the code. The current validation is README section 9 (Validation) (mechanisms against
+Status: revised 20 October 2026 against the code. The current validation is README section 8 (Validation) (mechanisms against
 CAPRI, the 2030 baseline against CAPRI's 2030 reference, Farm-to-Fork against JRC121368, Green Deal 2030). This file
 documents the three early checks (data files of 8 October 2026 in this folder) and corrects what they were said to
 show; their numbers are historical.
 
-## Current references (README section 9 (Validation))
+## Current references (README section 8 (Validation))
 
 1. CAPRI's own data and code: inputs reproduce CAPRI's symbols; mechanisms reproduce CAPRI's per-unit results from
    its own inputs (N loss cascade, ammonia options' initial shares, anaerobic digestion, leaching, fertiliser

@@ -5,7 +5,7 @@ Status: revised 20 October 2026 against the code.
 Rule: **capri-mod is built as CAPRI star 3.0 is; every scenario carries its own settings; a setting a scenario does
 not state takes capri-mod's (star 3.0's) default.** The star 3.0 defaults are those of the installation's GUI
 (`GUI/capri_gui_definition.xml`, task "Run scenario with market model") and of its scenario files
-(`pol_input/greendeal/*.gms`). Interface: README sections 8.1-8.4; code: `capri_mod/policy/greendeal.py`,
+(`pol_input/greendeal/*.gms`). Interface: README sections 6.2-6.4 and 8 (the Green Deal switchboard); code: `capri_mod/policy/greendeal.py`,
 `capri_mod/policy/endotech.py`, `capri_mod/policy/policy_module.py` (`PolicyScenario`).
 
 ## Settings that differ between scenarios

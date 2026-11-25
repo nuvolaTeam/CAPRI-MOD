@@ -2,7 +2,7 @@
 
 *Status: revised 20 October 2026 against the code. The NLP form is the default since 20 October 2026 (the user's
 decision: CAPRI's own form); the conic form stays as an option. The "Scenario results" section is a dated record of the
-port; current results are in README section 9 (Validation). Equations from docs/SUPPLY_MODEL_MAP.md.*
+port; current results are in README section 8 (Validation). Equations from docs/SUPPLY_MODEL_MAP.md.*
 
 ## Principle
 

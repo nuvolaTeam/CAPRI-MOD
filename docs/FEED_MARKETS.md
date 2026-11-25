@@ -1,7 +1,7 @@
 # Feed bulks and residual feed markets
 
 Status: revised 21 October 2026 against the code (Norway's bulks: K56; built in Sprints 9d and 9h, October 2026). The Farm-to-Fork effect
-reported at the time is in CHANGELOG.md ("Sprint 9h") and is not current; current results: README section 9 (Validation).
+reported at the time is in CHANGELOG.md ("Sprint 9h") and is not current; current results: README section 8 (Validation).
 
 ## CAPRI's structure (`arm/market_model.gms`, `global/fromimpact/sets.gms`)
 
