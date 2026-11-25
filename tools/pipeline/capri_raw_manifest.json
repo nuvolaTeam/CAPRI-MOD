@@ -1,7 +1,7 @@
 {
  "repo": "nuvolaTeam/capri-mod-raw",
  "repo_type": "dataset",
- "revision": "3195cd20385c9f8c8d186e4e4240c845d735353f",
+ "revision": "958cfc8a203324f0e5718950de45eb7af4e06ca6",
  "revision_note": "the dataset commit these files are at; uploads are no longer tagged, each file is pinned by its SHA-256 (the project lead, 12 November 2026)",
  "history": [
   {
@@ -44,6 +44,11 @@
    "date": "2026-11-24",
    "note": "results/baseline: CAPRI's baseline feed calibration results fedtrm_21730<CC>defaulta (p_animReqCorrFac, calyeaCal, v_lossQuant: capmod/load_feed.gms l. 74-75) of 34 countries (AL not among them), the project lead's files delivered 21 November 2026, as Parquet, each checked record by record against the GDX; CAPRI results, for checks only",
    "files_added": 136
+  },
+  {
+   "date": "2026-11-25",
+   "note": "results/capreg: CAPREG's 2017 results res_17<CC> of the 27 countries not yet in the set (the EU, Norway), the project lead's res_17.zip of 25 November 2026 (35 countries; the 8 already published identical by SHA-256), as Parquet, each checked record by record against the GDX",
+   "files_added": 81
   }
  ],
  "layout": "capri/<CAPRI folder: dat/<subfolder>, results/<module>>/<file name>/<symbol>.parquet and _symbols.csv; no originals (11 November 2026)",
@@ -9500,6 +9505,18 @@
    "sha256": "fb80c0f075950f277b50726aab26cce7dfb96a2370cf6d9b5f71155a8dac60fa",
    "size": 89
   },
+  "capri/results/capreg/res_17AT/DATA2.parquet": {
+   "sha256": "1a2b1e4f8e4568110d80702cf276142e45718c8b1141e053e007498016eecec8",
+   "size": 733781
+  },
+  "capri/results/capreg/res_17AT/META.parquet": {
+   "sha256": "4dc089822e79b0fa88ff5157499810985c065459a30c64f7869fb4a3c565fece",
+   "size": 5304
+  },
+  "capri/results/capreg/res_17AT/_symbols.csv": {
+   "sha256": "439a443b7b5866a909878fc1918a92d2fa502e15be2f6d36852ac2b573770a54",
+   "size": 89
+  },
   "capri/results/capreg/res_17BA/DATA2.parquet": {
    "sha256": "7fe1480a82fe0dec96c98c9a88d0413d249ea06a4e86b211498407600f464313",
    "size": 86467
@@ -9511,6 +9528,30 @@
   "capri/results/capreg/res_17BA/_symbols.csv": {
    "sha256": "5dee03be0150c45fb4b05755ccbeaefa5b32eb7f8e4b44214fe653986fe965f9",
    "size": 88
+  },
+  "capri/results/capreg/res_17BG/DATA2.parquet": {
+   "sha256": "a2e2a32a0250c1a2bdc2ab9ca2a035aa8180b9f3863f69428ab4c7c819fbfbb1",
+   "size": 496158
+  },
+  "capri/results/capreg/res_17BG/META.parquet": {
+   "sha256": "d2965ae811fbed475195556daf05ac6ec957774ef6cdd28a940b0c4016d066c6",
+   "size": 5180
+  },
+  "capri/results/capreg/res_17BG/_symbols.csv": {
+   "sha256": "9e86aa05a01310178e5eef88a5351ce18d131051f9ba77c98fd2eeb0f0732e25",
+   "size": 89
+  },
+  "capri/results/capreg/res_17BL/DATA2.parquet": {
+   "sha256": "91700f8493c4c20cef4fd0da0fb701a55f8acec021db8bebb91a77e02b66093e",
+   "size": 899717
+  },
+  "capri/results/capreg/res_17BL/META.parquet": {
+   "sha256": "7eab5a61ca0fcbcf1d27b34b9dd164bc1ef30a667660c5373c89d386af1ef673",
+   "size": 5302
+  },
+  "capri/results/capreg/res_17BL/_symbols.csv": {
+   "sha256": "d07d10db214d757798cb3ffa2ee44592b9527e2badd9447e51955ce8d86d34c4",
+   "size": 90
   },
   "capri/results/capreg/res_17CS/DATA2.parquet": {
    "sha256": "510372ccfad6bf37f20a304211bb41284a7968d54e55aec17c6df05f321c0d9b",
@@ -9524,6 +9565,162 @@
    "sha256": "94242a8adf7dc042226c65284c56bcad88e4c45b8270ede56982d59d65c6a544",
    "size": 88
   },
+  "capri/results/capreg/res_17CY/DATA2.parquet": {
+   "sha256": "a0dc339f55e3f2ac96791e468d1c65cd7c054a4fe0f21109e81f0af8b305a9dd",
+   "size": 95317
+  },
+  "capri/results/capreg/res_17CY/META.parquet": {
+   "sha256": "1f18bf2f59bf05915c24109069b4e40a333b3a60591e71a001a2745f91d64696",
+   "size": 5176
+  },
+  "capri/results/capreg/res_17CY/_symbols.csv": {
+   "sha256": "d33c5f6cefc76a4d142b538745e4e85d61712441b18637b28382d164a1e9db7e",
+   "size": 89
+  },
+  "capri/results/capreg/res_17CZ/DATA2.parquet": {
+   "sha256": "3ba013d8d4caa9e4f14c5d9367e4beec85c96fc6468acf62d9dc006c11d480ec",
+   "size": 609256
+  },
+  "capri/results/capreg/res_17CZ/META.parquet": {
+   "sha256": "45b994d72644c293cd65def8764635b5b34b0212dccf90fe48a1485371f362d8",
+   "size": 5183
+  },
+  "capri/results/capreg/res_17CZ/_symbols.csv": {
+   "sha256": "89b123a5b5d0a97fe966d0b7bcbcb00771876068083aa0db31957ee5c8ad61dd",
+   "size": 89
+  },
+  "capri/results/capreg/res_17DE/DATA2.parquet": {
+   "sha256": "793c01972f1ee3111beab7498f4a865c5707aa9aeb8c00cb7f1a87ec42496d02",
+   "size": 2308049
+  },
+  "capri/results/capreg/res_17DE/META.parquet": {
+   "sha256": "63aa810db33b09e3c55f01bfd61075d4bbd667bc30151739d5b9da8555f8b71b",
+   "size": 5301
+  },
+  "capri/results/capreg/res_17DE/_symbols.csv": {
+   "sha256": "7e103f7ff451554b8e9b6159cde4df47af99c8d94fbce469755e22fbc4db537d",
+   "size": 90
+  },
+  "capri/results/capreg/res_17DK/DATA2.parquet": {
+   "sha256": "baa8399958ab66808825db9bba3d580d9cfa81853adcd46186d101bba0873af5",
+   "size": 97490
+  },
+  "capri/results/capreg/res_17DK/META.parquet": {
+   "sha256": "81fc82d379ea5d0f42fd6927028103d496b867afa7bdb92886d9821ccee14689",
+   "size": 5294
+  },
+  "capri/results/capreg/res_17DK/_symbols.csv": {
+   "sha256": "40578f3c907348b4d4a24b359d70972362bffc5f462a35b15f17b03081a677f4",
+   "size": 89
+  },
+  "capri/results/capreg/res_17EE/DATA2.parquet": {
+   "sha256": "9f7212b662d2e8dfc61d7ac12a1ad2049ba2b68256e98dc654d018d4fb77ec6a",
+   "size": 96489
+  },
+  "capri/results/capreg/res_17EE/META.parquet": {
+   "sha256": "bf20f4bbd52f4ad2c4b988dc1a80d9cfcd9fa19dfd33af681d4bafc4756a87b5",
+   "size": 5181
+  },
+  "capri/results/capreg/res_17EE/_symbols.csv": {
+   "sha256": "5e37af192315128e586ea6e0ff209b3552f9363ae60938a874f23e71eb1f590c",
+   "size": 89
+  },
+  "capri/results/capreg/res_17EL/DATA2.parquet": {
+   "sha256": "4aa254010afd7e227881c55c70e1215c24818f29f38ac259f87c729f87c3c3be",
+   "size": 1121285
+  },
+  "capri/results/capreg/res_17EL/META.parquet": {
+   "sha256": "c4736be2ca39ec40ea00bb3fa375867591e8395541d4a555590cb62d433f43f6",
+   "size": 5295
+  },
+  "capri/results/capreg/res_17EL/_symbols.csv": {
+   "sha256": "a99041a5efdd7882f051ff8158dde50efa0dedad6fa84812980bbbb923624268",
+   "size": 90
+  },
+  "capri/results/capreg/res_17ES/DATA2.parquet": {
+   "sha256": "1c7153a925ca4110da57b0066767ed93a53e4a0ef41ed12e4c1abe223083e902",
+   "size": 1518360
+  },
+  "capri/results/capreg/res_17ES/META.parquet": {
+   "sha256": "f27103d12a07d64fb7337f3231b569ab8d11d70692eddd71181fe90bcc2a8899",
+   "size": 5295
+  },
+  "capri/results/capreg/res_17ES/_symbols.csv": {
+   "sha256": "9da08b27da846172e08640cbef2c7229509f6358b8cd3502728cecae96c678d0",
+   "size": 90
+  },
+  "capri/results/capreg/res_17FI/DATA2.parquet": {
+   "sha256": "0acba501807c6a2f38271b0e54111e94398655f0941700bdeb14881fadc7f0e6",
+   "size": 423606
+  },
+  "capri/results/capreg/res_17FI/META.parquet": {
+   "sha256": "2e578c044fd0c240a2f73d3053bcdfdac45745ca2491cef83d663e7040c050ad",
+   "size": 5301
+  },
+  "capri/results/capreg/res_17FI/_symbols.csv": {
+   "sha256": "fcbbda57da680587c9ab45ad02f826bbedb82d9cfa4dd635e754c54d9eeb5b6a",
+   "size": 89
+  },
+  "capri/results/capreg/res_17FR/DATA2.parquet": {
+   "sha256": "be318eee23d2c541e9908f518419d3edba14bc51b99110301e0a29b6c2290329",
+   "size": 1840958
+  },
+  "capri/results/capreg/res_17FR/META.parquet": {
+   "sha256": "4f4831561544c973062b301299c949c12725ea20f113771a2966c20690c994f0",
+   "size": 5294
+  },
+  "capri/results/capreg/res_17FR/_symbols.csv": {
+   "sha256": "7156c987e91da59c5af527517d39445b3006738fc3b11a8b03d431d8fb269c80",
+   "size": 90
+  },
+  "capri/results/capreg/res_17HR/DATA2.parquet": {
+   "sha256": "17eb451fd780327d1324181193af1662a9710950b0b9cc0154d58efecd66a45a",
+   "size": 102776
+  },
+  "capri/results/capreg/res_17HR/META.parquet": {
+   "sha256": "1266e7ba10a92739fd2325775a1323e8f81b9ae6c3d6e1e28d0f94502c96711e",
+   "size": 5174
+  },
+  "capri/results/capreg/res_17HR/_symbols.csv": {
+   "sha256": "625c9e3c5e55de1df55a8cd90661b4671cc8de0986e3f25614bb48c3d1ffb114",
+   "size": 89
+  },
+  "capri/results/capreg/res_17HU/DATA2.parquet": {
+   "sha256": "185f2595424d4c1def8bd15f1a6ada953be6f3ee52c8c8d95bde97ab115342d5",
+   "size": 664492
+  },
+  "capri/results/capreg/res_17HU/META.parquet": {
+   "sha256": "9ecafb87dfc543aa86cd51817e186daa3d863947cc66303bd54bc234d4c0e3c8",
+   "size": 5179
+  },
+  "capri/results/capreg/res_17HU/_symbols.csv": {
+   "sha256": "148ccabaf54d4da1dbff571fda3d9151c85c639586c9b3f32602d097bae18cb6",
+   "size": 89
+  },
+  "capri/results/capreg/res_17IR/DATA2.parquet": {
+   "sha256": "9871e686ae05bde1c0b85416dc14de6325d27b949a6ed3965155ac26b603c718",
+   "size": 209621
+  },
+  "capri/results/capreg/res_17IR/META.parquet": {
+   "sha256": "d3be64c3ce2984ac844b8fb908f7c51c3d32cb4980a8886670b3c17d2d75f942",
+   "size": 5297
+  },
+  "capri/results/capreg/res_17IR/_symbols.csv": {
+   "sha256": "cfb02072862fe38687b5d3c8d6c1584648821d6185cb2f4856c3edded132cbb1",
+   "size": 89
+  },
+  "capri/results/capreg/res_17IT/DATA2.parquet": {
+   "sha256": "f19ecd13bd1fa54ecbf5d4ec4be1984d72ac4e33e94299952203754c5c70ec26",
+   "size": 1685990
+  },
+  "capri/results/capreg/res_17IT/META.parquet": {
+   "sha256": "f1161b0e2aa5b5959a7b1a5ffa4d1aa03377c6f2c6e89f06669b404e56292276",
+   "size": 5295
+  },
+  "capri/results/capreg/res_17IT/_symbols.csv": {
+   "sha256": "887764d217315ec9180aef9362cf5fdadef9529839b6335e3bc31921f5a287b9",
+   "size": 90
+  },
   "capri/results/capreg/res_17KO/DATA2.parquet": {
    "sha256": "7d47685770863851e15c9b2a7c50db525638e0a3e28d9121347a1e3a9d025e67",
    "size": 78213
@@ -9535,6 +9732,30 @@
   "capri/results/capreg/res_17KO/_symbols.csv": {
    "sha256": "8589d24a9c63812a76d4bc23df547f81f3247282cce10b7ff3fb44046f008728",
    "size": 88
+  },
+  "capri/results/capreg/res_17LT/DATA2.parquet": {
+   "sha256": "0ff210b2ce7475cd1084a3f661945732a7fe162b8e8b33c23f7cb20d4a078e08",
+   "size": 99646
+  },
+  "capri/results/capreg/res_17LT/META.parquet": {
+   "sha256": "3d98032d467b08137fdff7871f8dc33c0d79a08b8a935f932f8371721e88f4b6",
+   "size": 5180
+  },
+  "capri/results/capreg/res_17LT/_symbols.csv": {
+   "sha256": "96fc00f8b75c30bda5832ea9e3502bb5c0ba11a1d5cdc1e0ec930cb39b48104d",
+   "size": 89
+  },
+  "capri/results/capreg/res_17LV/DATA2.parquet": {
+   "sha256": "82aa3f67a778381c902a52037619a4e47cd7d7dc804d492dfd5b37904bc7f488",
+   "size": 96069
+  },
+  "capri/results/capreg/res_17LV/META.parquet": {
+   "sha256": "0a3faa15d30157eac43182b8034dd4aedd67b4db35b9e7a0e3befeb5f40d7b74",
+   "size": 5176
+  },
+  "capri/results/capreg/res_17LV/_symbols.csv": {
+   "sha256": "63e590d5af5d1fe6db304161ada5dab3aa124b26c421a4c6c75e8ce58c8c2498",
+   "size": 89
   },
   "capri/results/capreg/res_17MK/DATA2.parquet": {
    "sha256": "385837e751db66de127d667db6e09d97425e013ea6e8ba56d3496bbcd2a33959",
@@ -9559,6 +9780,114 @@
   "capri/results/capreg/res_17MO/_symbols.csv": {
    "sha256": "f45c2645c3ad520e4783c5e53af93e41c13a107b45583990005451b1c7ba7963",
    "size": 88
+  },
+  "capri/results/capreg/res_17MT/DATA2.parquet": {
+   "sha256": "9b4287a110528b995e118db8146f15987b91421b870e8dd8f4566596d384b2cc",
+   "size": 78778
+  },
+  "capri/results/capreg/res_17MT/META.parquet": {
+   "sha256": "24b40239f65408840915a7ea155045b9543d9abe667c6eca6d01c92e696e35ad",
+   "size": 5176
+  },
+  "capri/results/capreg/res_17MT/_symbols.csv": {
+   "sha256": "996df261cde725b794c88270ef63d8c46b31358c4ed2a57c6a131f696a108818",
+   "size": 88
+  },
+  "capri/results/capreg/res_17NL/DATA2.parquet": {
+   "sha256": "eba6b965346e1ceb99897133fcc49eb800672a896ebd43a3e681b9f02f20f29a",
+   "size": 1025536
+  },
+  "capri/results/capreg/res_17NL/META.parquet": {
+   "sha256": "923faef7d72dcf8d42ea36c6ddc6c05b0fb072add31584a630ce471cd8a4c546",
+   "size": 5308
+  },
+  "capri/results/capreg/res_17NL/_symbols.csv": {
+   "sha256": "28d9bc772ff62cb65d122cc50ab8b23ff79020d5d1bbd7f8fd1bbab815481a32",
+   "size": 90
+  },
+  "capri/results/capreg/res_17NO/DATA2.parquet": {
+   "sha256": "7c583d788319542062655f8cc8dc2e8d6a890d3a5314eedffb0a95654f30b121",
+   "size": 364585
+  },
+  "capri/results/capreg/res_17NO/META.parquet": {
+   "sha256": "444eb03b82bae35ee90cbd35a53a2bd29a21d04056266196cfa34029cd333e6f",
+   "size": 4953
+  },
+  "capri/results/capreg/res_17NO/_symbols.csv": {
+   "sha256": "c8140365882e02e524c18ec792ebc8c667faa0e0ef0e5ec228f3e0b5f6c5aa0b",
+   "size": 89
+  },
+  "capri/results/capreg/res_17PL/DATA2.parquet": {
+   "sha256": "a68959b98ca298e42147b3dc15a65dd30d49746eb642364021c524432aa6eead",
+   "size": 1410010
+  },
+  "capri/results/capreg/res_17PL/META.parquet": {
+   "sha256": "240721266f0a15175cb875ee88bb23f1d749b0c80f826708b505d50f4bbcb657",
+   "size": 5178
+  },
+  "capri/results/capreg/res_17PL/_symbols.csv": {
+   "sha256": "950304add2d4c7a806cabb8c039e8e39f71aa00f079c79fceb64de3bffa5ab97",
+   "size": 90
+  },
+  "capri/results/capreg/res_17PT/DATA2.parquet": {
+   "sha256": "bd00273f6bd5dd60068e35fe5d530f17fc3f74384444adefe20a025172d97b50",
+   "size": 598274
+  },
+  "capri/results/capreg/res_17PT/META.parquet": {
+   "sha256": "261cdd6a5445411d73fed41ea57d62d549d013839eeac6ce661661ab7f7f877b",
+   "size": 5302
+  },
+  "capri/results/capreg/res_17PT/_symbols.csv": {
+   "sha256": "389cf1c451d71558d94d41acf983f0402a28bb7729a350c8ebef2e8d4450f6b6",
+   "size": 89
+  },
+  "capri/results/capreg/res_17RO/DATA2.parquet": {
+   "sha256": "e1267c0abba31945798e5dc29cdfd5094ee0b101c5adaac36807ca34fdb9f8ca",
+   "size": 648342
+  },
+  "capri/results/capreg/res_17RO/META.parquet": {
+   "sha256": "5565a13840f1a00d1876de5a63cf03bac2ac2328b45b04b45b00c4d3885f3362",
+   "size": 5180
+  },
+  "capri/results/capreg/res_17RO/_symbols.csv": {
+   "sha256": "ed9f3eb21e53aee29aea485c241472f74645611145bd34aec4b39d6daba86823",
+   "size": 89
+  },
+  "capri/results/capreg/res_17SE/DATA2.parquet": {
+   "sha256": "5e94c228e24a37cbe9f38632443c7fcf8e3dfe6cbd6751817786e55b43a54961",
+   "size": 550985
+  },
+  "capri/results/capreg/res_17SE/META.parquet": {
+   "sha256": "9a826af87e3c23f56381cb91ed998d490ce771834bef4e302d5ed9b2ff43ce9d",
+   "size": 5292
+  },
+  "capri/results/capreg/res_17SE/_symbols.csv": {
+   "sha256": "35a2a877914a2d472adabcc34933f60ce3ad7d1a3080fc213d6b10a54e98ba0f",
+   "size": 89
+  },
+  "capri/results/capreg/res_17SI/DATA2.parquet": {
+   "sha256": "3c6aa5716b66d3c46a439de9413797d70d598f49da8d742c1037bcf6ae8d9027",
+   "size": 99677
+  },
+  "capri/results/capreg/res_17SI/META.parquet": {
+   "sha256": "672054e2668fd007f522fbe4a3fd6d1023b9cc3c1e8e3de1d94c5947e9f33a64",
+   "size": 5179
+  },
+  "capri/results/capreg/res_17SI/_symbols.csv": {
+   "sha256": "18c0d45cedb36546d63f7397d5eab27bed506a74e78fb107fdd4c09c4451bb47",
+   "size": 89
+  },
+  "capri/results/capreg/res_17SK/DATA2.parquet": {
+   "sha256": "18cae726ca756b7f862191326fe32fabd5b5a29069b4e355ed947975b9357cc2",
+   "size": 355544
+  },
+  "capri/results/capreg/res_17SK/META.parquet": {
+   "sha256": "6224f551379dafdab5ea1ce9a00d42c1304008a00ebc8a74ac498a700dd1fd84",
+   "size": 5183
+  },
+  "capri/results/capreg/res_17SK/_symbols.csv": {
+   "sha256": "6500f2e4f317e8f684393cf937a1c85cfb20a58a9d716b7f478a42cb29fb7b58",
+   "size": 89
   },
   "capri/results/capreg/res_17TU/DATA2.parquet": {
    "sha256": "2323bc23c15b90bf0f2761ac8d641aaba98779149b13b523996f76a504abc0fc",
@@ -46658,10 +46987,31 @@
    "location": "code: %results_in%/capreg/<file>.gdx",
    "trusted": true
   },
+  "capri/results/capreg/res_17AT": {
+   "file": "res_17AT.gdx",
+   "sha256": "1450eb85b4c7c2f3a4e590afec0b685e25a58c92f8656c2260c2b3e80a1e324f",
+   "size": 759716,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
   "capri/results/capreg/res_17BA": {
    "file": "res_17BA.gdx",
    "sha256": "825957f91e9e9dd6a78303ce284daee64c16696e005792391927034260f6b905",
    "size": 85819,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17BG": {
+   "file": "res_17BG.gdx",
+   "sha256": "8948eba5888cd65b15b10c4335243bbcecbba4f4b7d6c83d21a53d37cea80160",
+   "size": 511085,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17BL": {
+   "file": "res_17BL.gdx",
+   "sha256": "32c3be600e09be4898d46b703a48fdd972948d613aaa005bfde805468ae1a7dc",
+   "size": 927859,
    "location": "code: %results_in%/capreg/<file>.gdx",
    "trusted": true
   },
@@ -46672,10 +47022,115 @@
    "location": "code: %results_in%/capreg/<file>.gdx",
    "trusted": true
   },
+  "capri/results/capreg/res_17CY": {
+   "file": "res_17CY.gdx",
+   "sha256": "4c7d7a2ee781a457f2262acf45b81e202e782366a3b8516c90c743cfdec878f1",
+   "size": 92684,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17CZ": {
+   "file": "res_17CZ.gdx",
+   "sha256": "f6f4ea0645f161cb421bb545c7e0dca4ffc87d7638721ccbbfb6a554505182e7",
+   "size": 633820,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17DE": {
+   "file": "res_17DE.gdx",
+   "sha256": "5243ea98641fa71a80d8b16df322c44621375ba40d3227c2083716f8b4d8d9cf",
+   "size": 2584557,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17DK": {
+   "file": "res_17DK.gdx",
+   "sha256": "22abe43c608c8f93ec039d6d4b59d13c663e023f616f6aa9bd40db4ff4d74c80",
+   "size": 94791,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17EE": {
+   "file": "res_17EE.gdx",
+   "sha256": "81ad07de17d6852db070f1e5034784ec4638d3c96aef50d934742813cd509f70",
+   "size": 93371,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17EL": {
+   "file": "res_17EL.gdx",
+   "sha256": "413ef0fe2b577502ab9e8931777f385a8ac8feececf4cb24b0d1279ac3e38416",
+   "size": 1146557,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17ES": {
+   "file": "res_17ES.gdx",
+   "sha256": "62e87fdc64c44a20a16b8c646709aded9003f49be704faee53a22bc112993eb4",
+   "size": 1562196,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17FI": {
+   "file": "res_17FI.gdx",
+   "sha256": "4980a1247bf5d8d4000517203c844b6316ca55afd54e9d8b173c44339249c4f7",
+   "size": 439985,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17FR": {
+   "file": "res_17FR.gdx",
+   "sha256": "2fa68cc23ba28758cf79684ad13398b1737be13ef157e2eb253aef503fca6da7",
+   "size": 1974360,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17HR": {
+   "file": "res_17HR.gdx",
+   "sha256": "dac03cc2f58ba343c86a94bf3307e519156c9a501e4e2ed8cc82d1404c228350",
+   "size": 99735,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17HU": {
+   "file": "res_17HU.gdx",
+   "sha256": "323a2904a11cfb1acf35fb2b1cbdf0e4c5610ce71768dd57f0833ce1f7409403",
+   "size": 685691,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17IR": {
+   "file": "res_17IR.gdx",
+   "sha256": "4fef1a7c7afa20728220638a2231897fc4e0ebf7aa0c8213caf214bedc236e74",
+   "size": 213594,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17IT": {
+   "file": "res_17IT.gdx",
+   "sha256": "e853c10336f643eb3606be643858910ffbd6ae2e632a91e323dfa39ff870d584",
+   "size": 1774246,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
   "capri/results/capreg/res_17KO": {
    "file": "res_17KO.gdx",
    "sha256": "98c691f39d4c9b9b7cd85544762f8493085ae2770c8b842c83b26cfe94b25c67",
    "size": 76863,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17LT": {
+   "file": "res_17LT.gdx",
+   "sha256": "d6f4e2eb44ce84c8fbf327f661b43a97f23d826d8238dbe45360f84358fa0bd3",
+   "size": 96816,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17LV": {
+   "file": "res_17LV.gdx",
+   "sha256": "f5459ec7d70246344b39cc4831e7850f98f080b942ab3209ad0d57ed0f1164fe",
+   "size": 93824,
    "location": "code: %results_in%/capreg/<file>.gdx",
    "trusted": true
   },
@@ -46690,6 +47145,69 @@
    "file": "res_17MO.gdx",
    "sha256": "816a3b2b3ef73d8360dcc5ce65e38d299e41b91e61350a174e2db65c3c483c52",
    "size": 80408,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17MT": {
+   "file": "res_17MT.gdx",
+   "sha256": "ca0a76e4dade68fe7cf60efcb7162613909bf5292560a77cf01e3ab5c8a09099",
+   "size": 77427,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17NL": {
+   "file": "res_17NL.gdx",
+   "sha256": "07314184d3d7c7e466f4be608a7224ae165b5d5a1917c97f1551644c89bdce98",
+   "size": 1055731,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17NO": {
+   "file": "res_17NO.gdx",
+   "sha256": "d2c6a6265a673ae926a40ea695af0aeb96883dd8e04b0764fc3ce6f3152f0b13",
+   "size": 380722,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17PL": {
+   "file": "res_17PL.gdx",
+   "sha256": "960a3acb9d45bd5d4f591cdb6c98dff7eaa4c35fca21e639b702e49e6dd549cd",
+   "size": 1450553,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17PT": {
+   "file": "res_17PT.gdx",
+   "sha256": "6b076eda4d2e403a0d8af5d75ed282ba97deb3e6646539f0442b8a8500e5e462",
+   "size": 623986,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17RO": {
+   "file": "res_17RO.gdx",
+   "sha256": "1ba971f1ba63c4f4fd752829a613df373e0005e321293fa0fc0d5012a647e0ae",
+   "size": 666724,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17SE": {
+   "file": "res_17SE.gdx",
+   "sha256": "9607c36fe276e92b3f9c5bb7c5539f50470a9161581756d2a9679a3445e20252",
+   "size": 579689,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17SI": {
+   "file": "res_17SI.gdx",
+   "sha256": "5f3c2fa9cef3e586a1892c3ba279046df779b9d24169178eb4b16d04f0912197",
+   "size": 97943,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/res_17SK": {
+   "file": "res_17SK.gdx",
+   "sha256": "86c394a18d1eebe400971e67ff9a48f8e752ae0987a16a736e47d1a42476434e",
+   "size": 364597,
    "location": "code: %results_in%/capreg/<file>.gdx",
    "trusted": true
   },

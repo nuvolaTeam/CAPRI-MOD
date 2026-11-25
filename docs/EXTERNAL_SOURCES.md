@@ -36,7 +36,10 @@ copies of the area table are identical in levels: one kept).
 
 **`capreg/`**: CAPREG's 2017 results, `res_17<MS>.txt`.
 - From: the gdxdump listings of `output/results/capreg/res_17<MS>.gdx`, in `res_17zip.zip` (27 member states) plus single
-  files. `tools/gams/dump_capreg_explicit.gms` makes them.
+  files. `tools/gams/dump_capreg_explicit.gms` makes them. Since 25 November 2026 written again from the GDX files
+  (`results/capreg/` below) by tools/build/restore_capreg_listings.py, at the listings' 15 digits (the earlier copies
+  had been lost): with --check every value equals capreg_base's (the 27 countries it took from the listings exactly,
+  the 8 from the GDX at 15 digits), and build_ration_trajectory_2030 rebuilds its committed files byte for byte.
 - Read by: about 40 builders, e.g. build_capri_base, build_crop_economics_2017, build_land_rents and build_world_prices.
 
 **`capri_export/`**: CAPREG's DATA2 per country, `DATA2_<CC>.txt`, and the PMP terms `quadTechn_<CC>.txt` and
@@ -200,6 +203,10 @@ ones already there, the project lead's reqrel_17XX.zip of that day) and `capri/r
 fedtrm_21730<CC>defaulta/` of 34 countries (AL not among them; the baseline feed calibration's p_animReqCorrFac,
 calyeaCal and v_lossQuant, load_feed.gms l. 71-76; the project lead's files delivered 21 November 2026). Read by
 tools/check/check_sim_ini_requirements_2030.py (the fedtrm files as CAPRI's results, for the check only).
+Added on 25 November 2026: `capri/results/capreg/res_17<CC>/` of the 27 countries not yet there (CAPREG's 2017
+results, all symbols: DATA2, META), the project lead's res_17.zip of that day (35 countries; the 8 already there
+identical by SHA-256), each checked record by record against the GDX. The GDX files are kept in
+`capri_sources/results/capreg/`.
 
 **`gdxlib/`**: GAMS's GDX library, `libgdxcclib64.so`. This is software, not data.
 - From: built from the open-source GDX library (MIT; README section 3). No GAMS installation or licence is needed.
