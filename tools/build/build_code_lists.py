@@ -367,6 +367,9 @@ def main():
     # the deletions before CAPRI writes sim_ini (create_sim_ini_gdx.gms l. 311-369)
     for s in ("OAGGR", "MRKBAL", "NONEND", "FERT_DIST", "FNUT_COLS", "I"):
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    # the requirement call's grassland and ruminant activities (feed/req_or_man_fnc.gms; capri_mod/feed/chain.py)
+    for s in ("GRSACT", "RUMI"):
+        write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
     for s, cols in (("STOCK_TO_FUEL", ("xx", "seco_biof")), ("STOCK_TO_BY", ("xx", "byprod")),
                     ("SED_TO_CAK", ("sed", "cak")), ("PACT_TO_Y", ("pact", "o"))):
         write(OUT / "capri" / f"{s}.csv", cols, pairs(s))

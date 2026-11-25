@@ -1,12 +1,14 @@
 r"""CAPRI's data of the simulation year as capmod/create_sim_ini_gdx.gms leaves them before the requirements
-(l. 309-369; CAPRI star 3.0, baseline mode): the animals' feed and the activities' levels at "Y" taken from the trends, energy
-maize's industrial use moved to the exogenous demand, and the positions not needed later deleted ("delete temp. data
-to spare memory").
+(l. 309-369; CAPRI star 3.0, baseline mode): the animals' feed and the activities' levels at "Y" taken from the
+trends, energy maize's industrial use moved to the exogenous demand, and the positions not needed later deleted
+("delete temp. data to spare memory").
 
 It follows capri_mod/projection/equations/load_base_data_and_trends.py (create_sim_ini_gdx.gms l. 34 includes
 capmod/load_base_data_and_trends.gms), on its Data and YearSets. Between the two, create_sim_ini_gdx.gms l. 35-305 run
 the farm types, the technical factors, the policy agenda, the milk quotas, MITERRA's emission factors and the market
-model's calibration; their statements on DATA are not ported here. Not ported either:
+model's calibration; their statements on DATA are not ported here. Of them, l. 146-149 (the technologies' factors of
+the activities without data, p_technFact_without_data) are, as the requirements read p_technFact; the caller runs it
+first, on the year's data as load_base_data_and_trends.gms leaves them. Not ported either:
 - l. 246-247 (the animals' feed and the levels at "Y" set to the base year's for the market model's calibration): l.
   311-312 overwrite every cell they set;
 - l. 309, policy/mtr_market_del.gms: the EU_West market's policy positions (PADM, INTM, CSEi, CSEd, FSEi), the EU
@@ -45,6 +47,31 @@ def _zero(D: Data, t: str, keep) -> None:
         for r in list(D.at(c, w, t)):
             if keep(r, c, w):
                 D.set(r, c, w, t, 0)
+
+
+def p_technFact_without_data(p_technFact: dict, D: Data, S: YearSets) -> None:
+    r"""The technologies' factors of an activity without a level at "Y" or "BAS" deleted, and those of an input or
+    output (but the feeds) the activity has no data of; NECR keeps its own. Changes p_technFact {(region, activity,
+    item, A): factor} in place.
+
+    CAPRI's GAMS (capmod/create_sim_ini_gdx.gms l. 146-149):
+
+          p_technFact(RS,MPACT,ROWS,A)   $ ( (NOT (DATA(RS,MPACT,"LEVL","Y") or DATA(RS,MPACT,"LEVL","BAS"))) and (NOT SAMEAS(MPACT,"NECR"))) = 0;
+        *
+          p_technFact(RS,MPACT,IO,A)     $ (       (NOT (DATA(RS,MPACT,IO,"Y") or DATA(RS,MPACT,IO,"BAS")))
+                                         and (NOT SUM(FEED $ SAMEAS(IO,FEED),1)) and (NOT SAMEAS(MPACT,"NECR")))  = 0;
+
+    CAPRI runs them before the requirement functions (l. 417-423) and before l. 311-369, on the year's data as
+    load_base_data_and_trends.gms leaves them. Departures from CAPRI: none."""
+    feed = set(S.FEED)
+    for k in list(p_technFact):
+        r, a, item, t = k
+        if r not in S.RS or a not in S.MPACT or a == "NECR":
+            continue
+        if item in S.ROWS and not (D.get(r, a, "LEVL", "Y") or D.get(r, a, "LEVL", "BAS")):
+            del p_technFact[k]
+        elif item in S.IO and item not in feed and not (D.get(r, a, item, "Y") or D.get(r, a, item, "BAS")):
+            del p_technFact[k]
 
 
 def DATA_Y_feed_and_levels_from_TRD(D: Data, S: YearSets) -> None:

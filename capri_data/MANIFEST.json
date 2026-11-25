@@ -1057,6 +1057,9 @@
    "rows": 3010,
    "columns": 7,
    "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/feed/chain.py"
+   ],
    "origin": {
     "nature": "capri",
     "builder": "build_req_or_man_params (not in the trace yet)"
@@ -5283,6 +5286,16 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/GRSACT.csv": {
+   "description": "CAPRI GRSACT: the grassland activities of the requirement functions' stocking rate (sets.gms, feed/req_or_man_fnc.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 4,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/HEIF.csv": {
    "description": "CAPRI HEIF: the fattened heifers (sets.gms), in CAPRI's set order",
    "kind": "structure",
@@ -5908,6 +5921,16 @@
    "description": "CAPRI RU: the regional units with a supply model (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
    "kind": "structure",
    "rows": 250,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/RUMI.csv": {
+   "description": "CAPRI RUMI: the ruminants (sets.gms, feed/req_or_man_fnc.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 18,
    "columns": 2,
    "origin": {
     "nature": "capri",

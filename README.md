@@ -168,8 +168,8 @@ files record how they map to this model's names.
 | Base year | 2017 (parameterised); scenarios usually solved in 2030 |
 | Supply method | CAPRI's regional models as NLPs, PMP-calibrated (CAPRI's 2030 terms) |
 | Market method | CAPRI's market model (m_globMarket) as ported: 45 market regions (the EU as CAPRI's two blocks), bilateral Armington trade, transport costs, tariffs, bilateral and global TRQs, entry prices and flexible levies; GL food demand, processing and crushing, dairy blocks, biofuels, feed bulks, young animals, non-EU land markets, CAPRI's market supply functions; calibrated once per run at CAPRI's 2030 market data |
-| Data validator | 902 declared data files (CSV inputs, Parquet sources), 0 violations |
-| Test suite | 665 tests, 107 of them slow (full-EU or multi-solve); the last full run (25 November 2026, 665 tests, one test file per process) passed: 661, 3 skipped, 1 xpassed |
+| Data validator | 904 declared data files (CSV inputs, Parquet sources), 0 violations |
+| Test suite | 674 tests, 108 of them slow (full-EU or multi-solve); the last full run (25 November 2026, 665 tests, one test file per process) passed: 661, 3 skipped, 1 xpassed |
 | Full-EU 2030 runs | 4 to 8 minutes per supply-market iteration on 2 cores (Green Deal, 24 November 2026: 12 iterations in 73 minutes), plus about 50 minutes once per new baseline for the market supply Hessian (2,934 s, 52 price shocks on the 250 units); regions solved in parallel (setting `run.n_workers`), same results |
 | Solvers | IPOPT via CasADi (supply, CAPRI's manure pool market), the market's fixed point (Newton per commodity) or the whole-market chain (Newton with MKL PARDISO, a continuation on the quotas' slope, IPOPT with MUMPS), Clarabel (the manure pools' alternative form), HiGHS (LP checks) |
 

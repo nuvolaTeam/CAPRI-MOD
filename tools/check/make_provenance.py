@@ -210,6 +210,8 @@ UNTRACED = {
     "capri_data/codes/capri/FERT_DIST.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/FNUT_COLS.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/I.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/GRSACT.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/RUMI.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/RMS.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/SECO_BIOF.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/XXBiof.csv": ("build_code_lists", "CAPRI"),

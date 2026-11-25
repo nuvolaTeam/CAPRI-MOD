@@ -408,6 +408,8 @@ INSERT INTO data_kind VALUES
   ('capri_data/codes/capri/FERT_DIST.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/codes/capri/FNUT_COLS.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/codes/capri/I.csv', 'structure', 'by rule: codes, sets, correspondences'),
+  ('capri_data/codes/capri/GRSACT.csv', 'structure', 'by rule: codes, sets, correspondences'),
+  ('capri_data/codes/capri/RUMI.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/codes/capri/RMS.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/codes/capri/SECO_BIOF.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/codes/capri/XXBiof.csv', 'structure', 'by rule: codes, sets, correspondences'),

@@ -562,6 +562,14 @@ COMMENT ON TABLE capri_fnut_cols IS 'CAPRI FNUT_COLS: the mineral fertilisers'' 
 CREATE TABLE capri_i (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_i IS 'CAPRI I: the inputs (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI''s set order';
 
+-- file: capri_data/codes/capri/GRSACT.csv
+CREATE TABLE capri_grsact (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_grsact IS 'CAPRI GRSACT: the grassland activities of the requirement functions'' stocking rate (sets.gms, feed/req_or_man_fnc.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/RUMI.csv
+CREATE TABLE capri_rumi (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_rumi IS 'CAPRI RUMI: the ruminants (sets.gms, feed/req_or_man_fnc.gms), in CAPRI''s set order';
+
 -- file: capri_data/codes/capri/STOCK_TO_FUEL.csv
 CREATE TABLE capri_stock_to_fuel (xx VARCHAR NOT NULL, seco_biof VARCHAR NOT NULL, PRIMARY KEY (xx, seco_biof));
 COMMENT ON TABLE capri_stock_to_fuel IS 'CAPRI STOCK_TO_FUEL: each biofuel feedstock and its biofuel (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms)';

@@ -5052,6 +5052,48 @@
     "tests": []
    }
   },
+  "capri_grsact": {
+   "file": "capri_data/codes/capri/GRSACT.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI GRSACT: the grassland activities of the requirement functions' stocking rate (sets.gms, feed/req_or_man_fnc.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_supports.py"
+    ]
+   }
+  },
   "capri_heif": {
    "file": "capri_data/codes/capri/HEIF.csv",
    "declared_in": "00_codes.sql",
@@ -8368,6 +8410,46 @@
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI RU: the regional units with a supply model (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_rumi": {
+   "file": "capri_data/codes/capri/RUMI.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI RUMI: the ruminants (sets.gms, feed/req_or_man_fnc.gms), in CAPRI's set order",
    "columns": [
     {
      "name": "code",
@@ -26664,7 +26746,9 @@
    },
    "notes": [],
    "read_by": {
-    "model": [],
+    "model": [
+     "capri_mod/feed/chain.py"
+    ],
     "builders": [],
     "checks": [
      "tools/check/check_manure_output_2030.py",
@@ -66407,12 +66491,12 @@
   }
  ],
  "code_data": {
-  "capri/keep": 1014,
+  "capri/keep": 1051,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 39,
   "physical/keep": 14,
-  "technical/keep": 39
+  "technical/keep": 40
  },
  "other_notes": {}
 }
