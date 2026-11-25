@@ -17,7 +17,7 @@ keywords:
   - Python
   - scenario analysis
 version: 0.1.0
-license: GPL-3.0-only
+license: AGPL-3.0-only
 references:
   - type: software
     title: "CAPRI - Agricultural Economic modelling system"

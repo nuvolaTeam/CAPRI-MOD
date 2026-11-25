@@ -1215,7 +1215,7 @@ and review), and statistical or machine-learning methods that learn from its inp
 
 ### 9.1 Reusability
 
-- **Open and self-contained.** GPL-3.0, Python, open solvers (IPOPT, Clarabel; MKL PARDISO, under Intel's free
+- **Open and self-contained.** AGPL-3.0, Python, open solvers (IPOPT, Clarabel; MKL PARDISO, under Intel's free
   licence, optional for the chain); no GAMS licence. The calibrated
   base-year data ships with the repository, so running the model needs no CAPRI installation (§1).
 - **Parts that work on their own.** The supply side (`SupplyModule`, and each region's problem as
@@ -1535,8 +1535,10 @@ are its own and should not be attributed to CAPRI.
 ## Licence
 
 CAPRI-mod is free software: you can redistribute it and/or modify it under the terms of the
-[GNU General Public License, version 3](LICENSE) (GPL-3.0-only), as published by the Free Software Foundation.
+[GNU Affero General Public License, version 3](LICENSE) (AGPL-3.0-only), as published by the Free Software
+Foundation; under its section 13, a modified version offered to users over a network (the Gradio interface, a hosted
+Space) must offer them its source.
 It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the licence for details. (Earlier releases were under
-the Apache License 2.0 and, before that, MIT.) Third-party packages it uses keep their own licences (e.g. Clarabel,
-Apache-2.0, which is compatible with GPLv3).
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the licence for details. (Releases until 25 November 2026
+were under the GNU GPL version 3, earlier ones under the Apache License 2.0 and, before that, MIT.) Third-party
+packages it uses keep their own licences (e.g. Clarabel, Apache-2.0, which may be combined with the AGPLv3).
