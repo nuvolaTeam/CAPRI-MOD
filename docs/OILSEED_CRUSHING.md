@@ -2,7 +2,7 @@
 
 Status: revised 20 October 2026 against the code. Crushing, the oil and cake markets, cakes as feed and the biofuel
 feedstock demand are all inside the market (built in four stages in October 2026, then moved onto CAPRI's processing
-functions; the staging is summarised under "History"). There is no proxy price: oil and cake prices are formed in
+functions; the staging is recorded in CHANGELOG.md). There is no proxy price: oil and cake prices are formed in
 their own markets, as in CAPRI (the earlier soybean-meal proxy, 0.89 × the soybean price, is gone).
 
 ## CAPRI's mechanism (`arm/market_model.gms`)
@@ -68,15 +68,3 @@ the changes are formed on (docs/dev/ARCHITECTURE_REFACTOR.md 5.1, M1).
 FAO_agg base period (the former `crushing_parameters.csv`, `world_prices.csv`): EU crush rapeseed 21.0 Mt, sunflower
 8.3 Mt, soybeans 14.7 Mt; world prices (EUR/t) rapeseed oil 737, sunflower oil 665, soybean oil 700, rapeseed cake 213,
 sunflower cake 204, soybean cake 354.
-
-## History (October 2026)
-
-1. Six oil and cake market commodities with CAPRI's base balances.
-2. Crushing on the margin with p_ElasProc; oil and cake supply from crush.
-3. Cakes as feed; the soybean-meal proxy removed.
-4. Biofuel feedstock demand inside the market (CAPRI's CES at fixed biofuel output, as CAPRI runs without
-   `BIOF_M`); since Sprint 9c the biofuel output is endogenous ([BIOFUEL_MARKET.md](BIOFUEL_MARKET.md)).
-
-Later: CAPRI's processing Hessian (ProcNQ_) for crushing and oil processing, with the INPE correction of K39
-(19 October 2026); the cake feed demand through CAPRI's feed bulks (Sprints 9d, 9h). The results of each stage are in
-CHANGELOG.md and are not current.
