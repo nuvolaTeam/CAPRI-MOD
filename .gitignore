@@ -51,3 +51,7 @@ capri_sources
 /user_runs/
 # the tools' run outputs written to the relative runs/ (pickles, logs, step reports): not data
 /runs/
+
+# The development notes (docs/dev/): kept in the project's private repository, not here (the project lead,
+# 25 November 2026); a clone of it, or a link to one, at docs/dev
+/docs/dev

@@ -17,7 +17,7 @@ final classes are CAPRI's 2030 classes moved by the change in the model's land t
 
 Solved after the regional supply model, not inside it: without a price on LULUCF emissions the block enters neither
 the objective nor any other equation of the regional model, so its solution given the land types is the same
-(docs/NLP_PORT_DESIGN.md).
+(docs/dev/NLP_PORT_DESIGN.md).
 """
 from __future__ import annotations
 

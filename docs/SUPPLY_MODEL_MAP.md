@@ -2,10 +2,10 @@
 
 Status: revised 20 October 2026 against the code. Sections 1-3 map CAPRI's model; the capri-mod column describes the
 NLP form (`capri_mod/supply/capri_regional_nlp.py`); notes on the conic form (Clarabel, removed 26 October 2026)
-are history. Section 5 is the record of the decisions taken before the port (historical).
+are history.
 
 This map was step 1 of the rewrite of the regional model in CAPRI's NLP form (docs/dev/archive/HANDOFF_NLP_PORT.md); the
-design and the registered departures of the port are in `docs/NLP_PORT_DESIGN.md` and `docs/KNOWN_ISSUES.md` (K50,
+design and the registered departures of the port are in `docs/dev/NLP_PORT_DESIGN.md` and `docs/KNOWN_ISSUES.md` (K50,
 K51). File:line references are to the star 3.0 source (`gams/`) unless they name a Python file. Points not verified are
 marked "unsure".
 
@@ -98,7 +98,7 @@ Feed bounds: 0 <= per-head feed <= 10 x DRMX / dry-matter content (set_supply_bo
 
 | Group | Decision-relevant? | Form | capri-mod (NLP form) |
 |---|---|---|---|
-| Loss cascade: GRAZN_, HOUSN_, STORN_, APPLN_, RUNHOUSN_, RUNSURFN_, RUNTOTN_, GASRUNTOTN_ (manure); RUNTOTNETF_, GASTOTNETF_, GASRUNTOTNETF_ (mineral) | yes: feeds ManureNPK_ and NUTNED_ | non-convex (v_emiLoss x v_Miti x v_Miti) | same (`capri_mod/supply/equations/supply_model/n_flow.py`, p_Nemidat from the MITERRA tables via `supply/n_cascade.py`; `docs/N_CASCADE_SPEC.md`), in both forms (the conic form takes its tangent at the previous solve); the N kept enters ManureNPK_. The fertiliser options' N2OSYN/N2OMAN terms of APPLN_ and GASTOTNETF_ act outside the cascade (REGISTERED) |
+| Loss cascade: GRAZN_, HOUSN_, STORN_, APPLN_, RUNHOUSN_, RUNSURFN_, RUNTOTN_, GASRUNTOTN_ (manure); RUNTOTNETF_, GASTOTNETF_, GASRUNTOTNETF_ (mineral) | yes: feeds ManureNPK_ and NUTNED_ | non-convex (v_emiLoss x v_Miti x v_Miti) | same (`capri_mod/supply/equations/supply_model/n_flow.py`, p_Nemidat from the MITERRA tables via `supply/n_cascade.py`; `docs/dev/N_CASCADE_SPEC.md`), in both forms (the conic form takes its tangent at the previous solve); the N kept enters ManureNPK_. The fertiliser options' N2OSYN/N2OMAN terms of APPLN_ and GASTOTNETF_ act outside the cascade (REGISTERED) |
 | GHG_Mit_Cost_, TotMit_, TotMitFertMin_/Man_, Tot_MitFert_, Tot_LineNitr_ | yes (objective, share limits) | non-convex (v_Miti x levels, squares) | same for the options built: ammonia options (housing and storage group, application group), anaerobic digestion, fertiliser options PRECFARM, VRT_SRUC, FERTTIME, NITR_INH (one regional share each; the conic form: one share per crop, REGISTERED), inhibitor on manure, breeding, low-N feed, linseed and nitrate. Missing: legume share, tillage (ConsTill, NoTill), urea substitution, 3-NOP, buffer strips, biodiversity options, biochar |
 | catcMiti_, idleHisto_, ADMax_, SupplementPerc_, LANDSHARE_ | yes | non-convex (shares x levels, ratios) | winter cover: the share is the catch-crop share (CAPRI's 2030 value, or the requirement's), not a choice; histosol fallowing: a linear column bounded by MaxShare x share x the current land (K158), its curvature at the base area (approximated); AD: CAPRI's maximum shares; SupplementPerc_ and LANDSHARE_ missing |
 | Emission totals (GWP*, NH3*, NOX*, NO3*, LEACHN_, nmin/nmanInputSh_, AMMOAGG_, CO2SEQ, CARBERO_, LULUCF) | accounting only (no tax in GD) | non-convex products | computed after the solve. LEACHN_ in CAPRI's form in the accounts (`equations/supply_model/n_flow.py` LEACHN_, AMMOAGG_), with the sign of the application options changed (the user's decision, README 5.2); tillage, buffer-strip, biodiversity and biochar terms held at CAPRI's reference. Under an emission tax the purchases carry the indirect N2O of their runoff and leaching at the reference leaching share |
@@ -131,32 +131,7 @@ their data:
 5. Options not built (2.4), LscpFeatArea_, entitlement ceilings; winter cover not a choice (SupplementPerc_ ported 21 November 2026).
 6. Emission tax with coefficients at the baseline solution.
 
-## 5. Decisions taken before the port (historical record, project lead, 20 October 2026)
-
-Questions raised by the map, and the decisions:
-
-1. Emissions and abatement block (`ghgAbatement`): as CAPRI, off by default, on in the Green Deal configuration.
-   In the code (20 October 2026) the options are on by default (section 1).
-2. Scope: the default configuration and the Green Deal block together in the first version. Done.
-3. P and K: in the crop need (NUTNED_ per nutrient), as CAPRI. Done (`tools/build/build_npk_balance_2030.py`, CAPRI's 2030
-   reference).
-4. LUC transition model, ecological set-aside and crop diversification: in the first version. Done in the NLP form
-   (`tools/build/build_luc_2030.py`, `tools/build/build_cap_greening.py`).
-5. PMP and land-market matrices: capri-mod's own calibration for now. As decided (superseded 22 October 2026: CAPRI's
-   own 2030 terms by default, K61).
-
-The data the map listed as needed (P and K needs and excretion, LUC transition matrix, greening limits, the Green Deal
-abatement block's inputs) were supplied from the CAPRI installation; each builder in `tools/` names its source.
-
-## 6. Documentation corrections found while mapping
-
-- KNOWN_ISSUES K49: "CAPRI allows manure beyond the need" was wrong (over-fertilisation fixed at the base); corrected
-  in K49.
-- docs/dev/archive/FEED_IN_SUPPLY.md: its share and dry-matter rows are not in CAPRI's `_pw` simulation (the document is
-  archived; the NLP form has none).
-- docs/FERTILISER_ALLOCATION.md: NUTMAX_ is in no equation list; corrected there.
-
-## 7. Not determined
+## 5. Not determined
 
 Policy file of a "default" star 3.0 scenario; whether set-aside, sugar quota and entitlement data are zero in 2030;
 whether the LUC FOC system binds land without a carbon price; PSD of CAPRI's group PMP matrix; whether the fertiliser

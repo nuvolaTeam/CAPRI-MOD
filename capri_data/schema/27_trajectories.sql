@@ -211,6 +211,31 @@ COMMENT ON TABLE traj_capri_ref_ration_2030 IS 'CAPRI''s 2030 rations and requir
 INSERT INTO value_units VALUES
   ('traj_capri_ref_ration_2030', 'factor', NULL, 'open', 'capri_ref_ration_2030.factor: unit to be established');
 
+-- file: capri_data/baselines/capri_greendeal_ref/1730/trajectories/chain_fodder_2030.csv
+CREATE TABLE traj_chain_fodder_2030 (
+    region VARCHAR NOT NULL,
+    crop VARCHAR NOT NULL,
+    factor DOUBLE NOT NULL,
+    "level" VARCHAR NOT NULL,
+    PRIMARY KEY (region, crop, "level")
+);
+COMMENT ON TABLE traj_chain_fodder_2030 IS 'The fodder fed per ha of the fodder crops, 2030 over 2017, the 2030 side from the ported feed chain''s start (the start''s feed use of the fodder bulks, adjust.gms l. 72-73; capri_mod/feed/chain.py on CAPREG''s base year and CAPRI''s trends), the 2017 side CAPREG''s (tools/build/build_ration_trajectory_2030.py --source chain)';
+INSERT INTO value_units VALUES
+  ('traj_chain_fodder_2030', 'factor', 'U_ratio', 'builder', 'chain_fodder_2030.factor: (FEDM / LEVL) 2030 over 2017');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/trajectories/chain_ration_2030.csv
+CREATE TABLE traj_chain_ration_2030 (
+    region VARCHAR NOT NULL,
+    animal VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL,
+    factor DOUBLE NOT NULL,
+    "level" VARCHAR NOT NULL,
+    PRIMARY KEY (region, animal, "item", "level")
+);
+COMMENT ON TABLE traj_chain_ration_2030 IS 'The 2030 rations, requirements and methane per head as factors on the model''s 2017 ones, the 2030 side from the ported feed chain''s start (capri_mod/feed/chain.py on CAPREG''s base year and CAPRI''s trends; the methane per head of capri_mod/environmental/methane_per_head.py), the 2017 side CAPREG''s (tools/build/build_ration_trajectory_2030.py --source chain)';
+INSERT INTO value_units VALUES
+  ('traj_chain_ration_2030', 'factor', 'U_ratio', 'builder', 'chain_ration_2030.factor: the item per head (or per head and day x DAYS) 2030 over 2017');
+
 -- file: capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_livestock_premium_ratio_2030.csv
 -- layout: wide, unnamed
 CREATE TABLE traj_capri_livestock_premium_ratio_2030 (

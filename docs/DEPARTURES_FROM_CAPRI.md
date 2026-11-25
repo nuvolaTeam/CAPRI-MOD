@@ -29,7 +29,7 @@ sets every GainsTech's CH4MAN_3k entry to zero, NOC included.
   formula.
 
 **What capri-mod does.** It applies CAPRI's CH4 factor to dairy cows as it does to the other animals. This was the
-project lead's decision of 20 October 2026; details are in docs/AD_SPEC.md.
+project lead's decision of 20 October 2026; details are in docs/dev/AD_SPEC.md.
 
 ### `environment.ammapp_sign = "consistent"` (CAPRI as coded: `"capri"`)
 
@@ -223,7 +223,7 @@ price inside the market, through the Hessian's member-state rows and columns.
 ### The supply audit's findings S5-S10 (24 October 2026; ARCHITECTURE_REFACTOR.md section 5.2)
 
 All of the following are CAPRI's rules (their switches back to the previous model were removed on 27 October 2026,
-with the other switches whose alternative was never run; docs/dev/SETTINGS_INVENTORY.md):
+with the other switches whose alternative was never run; docs/SETTINGS_INVENTORY.md):
 - crop need follows yield as in fertned.gms, not the square root;
 - input costs follow yields, as in define_inputs.gms;
 - the grassland rule's calibration dual from prep_cal.gms;

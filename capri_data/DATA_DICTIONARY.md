@@ -235,9 +235,9 @@ prices and slopes).
 
 | File | Builder |
 |---|---|
-| `2017/abatement/ammonia/n_cascade_factors.csv`, `n_cascade_region.csv`, `n_cascade_effects.csv` (CAPRI's N loss cascade, docs/N_CASCADE_SPEC.md) | `tools/build/build_n_cascade.py` |
+| `2017/abatement/ammonia/n_cascade_factors.csv`, `n_cascade_region.csv`, `n_cascade_effects.csv` (CAPRI's N loss cascade, docs/dev/N_CASCADE_SPEC.md) | `tools/build/build_n_cascade.py` |
 | `2017/abatement/ammonia/n_leaching_region.csv` (leaching share, LEACHN_) | `tools/build/build_n_leaching.py` |
-| `2017/abatement/ammonia/ad_option.csv` (anaerobic digestion, docs/AD_SPEC.md) | `tools/build/build_ad_option.py` |
+| `2017/abatement/ammonia/ad_option.csv` (anaerobic digestion, docs/dev/AD_SPEC.md) | `tools/build/build_ad_option.py` |
 | `2017/market/gl_demand_b.csv`, `gl_demand_goods.csv`, `gl_demand_regions.csv` (Generalised Leontief food demand) | `tools/build/build_gl_demand.py` |
 | `2017/market/processing_nq_base.csv`, `processing_nq_hessian.csv` (ProcNQ_) | `tools/build/build_processing_nq.py` |
 | `2030/market/welfare_base_2030.csv` (CAPRI's welfare base values, reports/welfare.gms) | `tools/build/build_welfare_base.py` |

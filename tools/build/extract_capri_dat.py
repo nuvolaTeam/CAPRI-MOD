@@ -6,9 +6,13 @@ every record (4 November 2026).
       -> capri_data/sources/raw/capri/dat/envind/fao_peatland/fao_peatland_P.parquet  (fao_code, value)
   dat/miterra/mirror_non_changeable_parameters_norway.gdx, mirror_miterra_inputs_norway.gdx  p_NO_<symbol>: CAPRI's
       Norwegian MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (the 13 symbols whose targets the model
-      reads) -> capri_data/sources/raw/capri/dat/miterra/<gdx>/<gdx>_p_NO_<symbol>.csv
+      reads) -> capri_data/sources/raw/capri/dat/miterra/<gdx>/<gdx>_p_NO_<symbol>.csv. Since 25 November 2026 from the
+      project lead's installation, the version of CAPRI's 2030 Green Deal reference run (capri_sources/dat_local/
+      miterra, as Parquet in capri_sources/dat_parquet/miterra by tools/build/convert_capri_gdx.py); until then from
+      the dat mirror, whose p_NO_ControlStrategies differed in four records: the hens' and other poultry's
+      low-emission housing shares (SA) of 2000 swapped (54 and 85 against 85 and 54) and none for 2020 (54 and 85).
 
-    python tools/build/extract_capri_dat.py [capri_sources/dat]
+    python tools/build/extract_capri_dat.py [capri_sources/dat] [--only=PREFIX]
 """
 from __future__ import annotations
 
@@ -47,9 +51,29 @@ SYMBOLS = (("envind/fao_peatland/P.parquet", "envind/fao_peatland_P.parquet", ["
                (_MI, "bNumAniRains", ["animal_mitt", "year"]))))
 
 
-def main(src: Path) -> None:
+#: the symbols read from the project lead's installation (capri_sources/dat_parquet: convert_capri_gdx.py's layout,
+#: d1..dN, value, special) instead of the dat mirror
+FROM_INSTALLATION = ("miterra/",)
+
+
+def _read(src: Path, rel: str) -> pd.DataFrame:
+    """The symbol's records, its index columns then "value"; from dat_parquet for FROM_INSTALLATION (its special values
+    refused: none in these files)."""
+    if not rel.startswith(FROM_INSTALLATION):
+        return pd.read_parquet(src / rel)
+    df = pd.read_parquet(src.parent / "dat_parquet" / rel)
+    if "special" in df.columns:
+        if (df["special"].astype(str) != "").any():
+            raise ValueError(f"{rel}: special values {sorted(set(df['special']))}")
+        df = df.drop(columns="special")
+    return df
+
+
+def main(src: Path, only: str | None = None) -> None:
     for rel, out, cols in SYMBOLS:
-        df = pd.read_parquet(src / rel)
+        if only and not rel.startswith(only):
+            continue
+        df = _read(src, rel)
         dims, val = list(df.columns[:-1]), df.columns[-1]
         if len(dims) != len(cols) - 1 or val != "value":  # noqa: SIM102
             raise ValueError(f"{rel}: columns {list(df.columns)}, expected {len(cols) - 1} dimensions and 'value'")
@@ -64,4 +88,6 @@ def main(src: Path) -> None:
 
 
 if __name__ == "__main__":
-    main(Path(sys.argv[1]) if len(sys.argv) > 1 else SOURCES / "dat")
+    args = [a for a in sys.argv[1:] if not a.startswith("--only")]
+    only = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--only=")), None)
+    main(Path(args[0]) if args else SOURCES / "dat", only)

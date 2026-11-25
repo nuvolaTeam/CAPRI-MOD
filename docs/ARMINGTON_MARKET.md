@@ -1,6 +1,6 @@
 # The bilateral Armington market
 
-Status: revised 21 October 2026 against the code (Norway as its own market region, K56). The last section ("Before the bilateral market") is historical.
+Status: revised 21 October 2026 against the code (Norway as its own market region, K56).
 
 The market is CAPRI's market model (`arm/market_model.gms`, simulation model m_globmarket) for every traded product:
 a market price per region, total use an Armington aggregate of domestic sales and imports, imports a CES over
@@ -177,11 +177,3 @@ world ratio × premium, i.e. the EU market price ratio. "Premium" is only this b
   approximation to the supply models (available as `market_supply_nq`, off).
 - No global TRQs (above); p_arm2Commit is 0 in CAPRI's runs as well.
 - Solver: Newton per product with Anderson acceleration instead of CONOPT ([MARKET_SOLVE_CHECK.md](dev/MARKET_SOLVE_CHECK.md)).
-
-## Before the bilateral market (historical)
-
-Until the port of CAPRI's bilateral market and 2030 baseline (October 2026) the market had one world price per commodity, each region's price was world price ×
-(1 + tariff), and the EU alone had an Armington premium cleared on its gross extra-EU trade. That structure was
-removed from the code on 20 October 2026 (no run path used it; KNOWN_ISSUES K54-2). Its development and the results of that period (including the fixes to the
-reported EU price and to the demand reference price) are recorded in CHANGELOG.md (sections up to "the port of CAPRI's bilateral market and 2030 baseline") and
-`docs/dev/archive/MARKET_STRUCTURE_PLAN.md`. Current results: README section 8 (Validation).

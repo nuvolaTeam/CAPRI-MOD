@@ -370,6 +370,19 @@ def main():
     # the requirement call's grassland and ruminant activities (feed/req_or_man_fnc.gms; capri_mod/feed/chain.py)
     for s in ("GRSACT", "RUMI"):
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    # the methane per head's sets (envind/def_gascoeff.gms l. 115-203, sets.gms l. 3103; capri_mod/environmental/
+    # equations/gascoeff.py, gases.py, capri_mod/supply/equations/digestibility.py): the climate zones and temperature
+    # cells, the EU groups of the tier 1 factors, the manure management systems, the cattle activities
+    for s in ("CLIMALL", "CLIM", "CLIMCELS", "CLIMCOOL", "CLIMTEMP", "CLIMWARM", "EUGR", "ManSys", "CATACT"):
+        write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    write(OUT / "capri" / "EUGR_TO_MS.csv", ("eugr", "region"), pairs("EUGR_TO_MS"))
+    # MITERRA's types of CAPRI's animal activities and their manure systems, for its shares and CH4 losses
+    # (envind/ammo.gms with %storgrazInv% off; capri_mod/environmental/equations/ammo_ch4.py)
+    for s in ("MDACT", "MACT", "ManuType", "POULTRY", "ani_Liq", "atGrazingExtra"):
+        write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    for s, cols in (("pact_to_atModel", ("pact", "atmodel")), ("atModel_to_PACT", ("atmodel", "pact")),
+                    ("manuType_to_atModel", ("manutype", "atmodel")), ("ms_to_country", ("ms", "country"))):
+        write(OUT / "capri" / f"{s}.csv", cols, pairs(s))
     for s, cols in (("STOCK_TO_FUEL", ("xx", "seco_biof")), ("STOCK_TO_BY", ("xx", "byprod")),
                     ("SED_TO_CAK", ("sed", "cak")), ("PACT_TO_Y", ("pact", "o"))):
         write(OUT / "capri" / f"{s}.csv", cols, pairs(s))

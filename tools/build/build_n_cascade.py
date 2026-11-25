@@ -1,5 +1,5 @@
 """CAPRI's nitrogen loss factors of the supply model's N cascade (p_Nemidat, ghgAbatement on) from the MITERRA /
-literature-review inputs (docs/N_CASCADE_SPEC.md has every formula with its GAMS file and line).
+literature-review inputs (docs/dev/N_CASCADE_SPEC.md has every formula with its GAMS file and line).
 
 CAPRI (capmod, ghgAbatement on, endoLeach on, ammoLitRev on, ScenYear 2020 for SIMY > 2010) solves the loss cascade
 inside the regional supply model (supply/supply_model.gms GRAZN_, HOUSN_, STORN_, RUNHOUSN_, RUNSURFN_, APPLN_,
@@ -92,7 +92,7 @@ def _effects(pairs, _unused, rows_a, frs):
     l. 2305-2324), runoff from housing and storage no3runh (l. 2268-2281) and from application no3mrun (l. 2285-2291).
     Anaerobic digestion: the literature value as it stands, for a share defined as CAPRI reports it (v_Miti x liquid
     share x (1 - grazing share), sol_simy.gms l. 990-992; CAPRI's v_Miti takes the effect rescaled by that factor,
-    l. 2330-2345: the same per head; docs/AD_SPEC.md)."""
+    l. 2330-2345: the same per head; docs/dev/AD_SPEC.md)."""
     F = defaultdict(dict)
     for r in rows_a:
         F[(r[0], r[1])][r[2]] = r[3]

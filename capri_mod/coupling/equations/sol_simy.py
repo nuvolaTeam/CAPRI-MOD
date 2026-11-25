@@ -27,3 +27,20 @@ def DATA_ProfitLandUse(d_area, d_area_lo, area):
     land type with its own dual (CAPRI's UAAR x one d_area); the non-agricultural part (INPE, l. 184-190) not
     computed; the caller's units (EUR 1000, CAPRI's million EUR x 0.001)."""
     return sum((d - lo) * a for d, lo, a in zip(d_area, d_area_lo, area))
+
+
+def DATA_FEED_SIMY(v_feedInpCoeff_A, v_actLevl_A, LEVL):
+    r"""DATA(RU, MAACT, FEED, SIMY) of an activity with a level: the feed per head of the solution, the technologies'
+    feed input coefficients weighted by their levels over the activity's level (kg per head). The report's
+    digestibility and gases (l. 1627 on) take their rations from here.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 254-257):
+
+        *
+           DATA(RU,MAACT,FEED,"%SIMY%") $ DATA(RU,MAACT,"LEVL","%SIMY%")
+                    = SUM(A $ p_maxFeedShare(RU,MAACT,A,FEED), v_feedInpCoeff.L(RU,MAACT,A,FEED)*v_actLevl.L(RU,MAACT,A))
+                              / DATA(RU,MAACT,"LEVL","%SIMY%");
+
+    v_feedInpCoeff_A, v_actLevl_A: {A: value} of the technologies with a p_maxFeedShare for the feed (the caller
+    applies that condition and DATA's LEVL one). Departures from CAPRI: none."""
+    return sum(float(v_feedInpCoeff_A.get(t, 0.0) or 0.0) * float(lv or 0.0) for t, lv in v_actLevl_A.items()) / LEVL

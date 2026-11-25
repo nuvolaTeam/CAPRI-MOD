@@ -1,4 +1,4 @@
-"""CAPRI's regional supply model in its own form, solved as a non-convex NLP with IPOPT (docs/NLP_PORT_DESIGN.md).
+"""CAPRI's regional supply model in its own form, solved as a non-convex NLP with IPOPT (docs/dev/NLP_PORT_DESIGN.md).
 
 CAPRI solves m_capModQ (supply/supply_model.gms) with CONOPT; this module writes the same equations block by block and
 solves them with IPOPT (CasADi). What capri-mod already builds as data and calibration is taken over as it is: the
@@ -1780,7 +1780,7 @@ class CapriRegionalNLP:
                 "ipopt.max_cpu_time": float(_st.get("supply.nlp_max_cpu_time")), **linear_solver_options()}
         warm = lam is not None and len(lam[0]) == len(self.lbx) and len(lam[1]) == len(self.lbg)
         if warm:
-            # a warm start normally takes 14-23 iterations (docs/NLP_PORT_DESIGN.md "Speed"); one from a point whose
+            # a warm start normally takes 14-23 iterations (docs/dev/NLP_PORT_DESIGN.md "Speed"); one from a point whose
             # active set no longer fits can take over a thousand (DEB2 1,252 in the Green Deal baseline), where the
             # cold start from the same point (the caller's next start) takes a few hundred at most
             opts["ipopt.max_iter"] = min(int(max_iter), int(_st.get("supply.nlp_warm_max_iter")))

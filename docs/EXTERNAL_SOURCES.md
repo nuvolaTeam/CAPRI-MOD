@@ -36,7 +36,10 @@ copies of the area table are identical in levels: one kept).
 
 **`capreg/`**: CAPREG's 2017 results, `res_17<MS>.txt`.
 - From: the gdxdump listings of `output/results/capreg/res_17<MS>.gdx`, in `res_17zip.zip` (27 member states) plus single
-  files. `tools/gams/dump_capreg_explicit.gms` makes them.
+  files. `tools/gams/dump_capreg_explicit.gms` makes them. Since 25 November 2026 written again from the GDX files
+  (`results/capreg/` below) by tools/build/restore_capreg_listings.py, at the listings' 15 digits (the earlier copies
+  had been lost): with --check every value equals capreg_base's (the 27 countries it took from the listings exactly,
+  the 8 from the GDX at 15 digits), and build_ration_trajectory_2030 rebuilds its committed files byte for byte.
 - Read by: about 40 builders, e.g. build_capri_base, build_crop_economics_2017, build_land_rents and build_world_prices.
 
 **`capri_export/`**: CAPREG's DATA2 per country, `DATA2_<CC>.txt`, and the PMP terms `quadTechn_<CC>.txt` and
@@ -120,7 +123,8 @@ NA and UNDF named in the column `special`), one folder per file and one file per
 `baseline/aglink2023dgAgri_oriEUdata/` (all 29 symbols) and `baseline/AGLINK2019dgagri_oridata/p_aglinkOri.parquet`;
 added on 11 November 2026: `baseline/data_SSPV3_update/` (SSP_DATA), `arm/allpop/` (worldPop),
 `global/longrun_info_fac_defaulta/` (of results/global) and `global/globiom_eu_bright_s0_2023+REFERENCE+REFERENCE/`
-(the 36 symbols of the GLOBIOM file below).
+(the 36 symbols of the GLOBIOM file below); added on 25 November 2026: `miterra/mirror_non_changeable_parameters_norway/`
+(8 symbols) and `miterra/mirror_miterra_inputs_norway/` (20 symbols), of dat_local/miterra.
 - Read by: capri_mod/pipeline/captrd/aglink.py (CAPTRD's Aglink stage; c, m, p, m_eq, p_dbvar and the 2019 fish data)
   and tools/build/build_captrd_aglink_sets.py (c, m, p, m_eq).
 
@@ -130,6 +134,12 @@ added on 11 November 2026: `baseline/data_SSPV3_update/` (SSP_DATA), `arm/allpop
 - From: the project lead's CAPRI installation (4 November 2026).
 - Read by: extract_capri_dat_local (p_PEATSH_def); convert_sources_to_csv (p_LUUnits). holdingsLSU.gdx confirms
   capri_data/2017/abatement/ammonia/p_holdLSU.csv (identical records), built from a dump before.
+- Added on 25 November 2026: `miterra/mirror_non_changeable_parameters_norway.gdx` (SHA-256 bd47a801...) and
+  `miterra/mirror_miterra_inputs_norway.gdx` (c1d4a7d6...), CAPRI's Norwegian MITERRA data as the project lead's
+  installation holds them (the version of the 2030 Green Deal reference run), converted to `dat_parquet/miterra/` by
+  tools/build/convert_capri_gdx.py; read by tools/build/extract_capri_dat.py in place of the dat mirror's copies, whose
+  p_NO_ControlStrategies differed in four records (the hens' and other poultry's low-emission housing shares of 2000
+  swapped, none for 2020); the other twelve symbols read are identical.
 - Goes to the Hugging Face set with the rest of capri_sources (MODEL_CONTENT_PLAN §12b).
 - Added on 10 November 2026 (the project lead's installation; CAPTRD's inputs for Steps 2-3, docs/dev/CAPTRD_MOD.md
   section 12.1), under their paths in `dat`:
@@ -200,6 +210,10 @@ ones already there, the project lead's reqrel_17XX.zip of that day) and `capri/r
 fedtrm_21730<CC>defaulta/` of 34 countries (AL not among them; the baseline feed calibration's p_animReqCorrFac,
 calyeaCal and v_lossQuant, load_feed.gms l. 71-76; the project lead's files delivered 21 November 2026). Read by
 tools/check/check_sim_ini_requirements_2030.py (the fedtrm files as CAPRI's results, for the check only).
+Added on 25 November 2026: `capri/results/capreg/res_17<CC>/` of the 27 countries not yet there (CAPREG's 2017
+results, all symbols: DATA2, META), the project lead's res_17.zip of that day (35 countries; the 8 already there
+identical by SHA-256), each checked record by record against the GDX. The GDX files are kept in
+`capri_sources/results/capreg/`.
 
 **`gdxlib/`**: GAMS's GDX library, `libgdxcclib64.so`. This is software, not data.
 - From: built from the open-source GDX library (MIT; README section 3). No GAMS installation or licence is needed.

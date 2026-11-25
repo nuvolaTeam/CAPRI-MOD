@@ -570,6 +570,86 @@ COMMENT ON TABLE capri_grsact IS 'CAPRI GRSACT: the grassland activities of the 
 CREATE TABLE capri_rumi (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_rumi IS 'CAPRI RUMI: the ruminants (sets.gms, feed/req_or_man_fnc.gms), in CAPRI''s set order';
 
+-- file: capri_data/codes/capri/CLIMALL.csv
+CREATE TABLE capri_climall (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_climall IS 'CAPRI CLIMALL: the climate zones and temperature cells of the manure methane (envind/def_gascoeff.gms l. 115), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/CLIM.csv
+CREATE TABLE capri_clim (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_clim IS 'CAPRI CLIM: the climate zones cool, temperate, warm (envind/def_gascoeff.gms l. 116), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/CLIMCELS.csv
+CREATE TABLE capri_climcels (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_climcels IS 'CAPRI CLIMCELS: the temperature cells 10-28 (envind/def_gascoeff.gms l. 117), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/CLIMCOOL.csv
+CREATE TABLE capri_climcool (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_climcool IS 'CAPRI CLIMCOOL: the cool temperature cells 10-14 (envind/def_gascoeff.gms l. 118), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/CLIMTEMP.csv
+CREATE TABLE capri_climtemp (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_climtemp IS 'CAPRI CLIMTEMP: the temperate cells 15-25 (envind/def_gascoeff.gms l. 119), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/CLIMWARM.csv
+CREATE TABLE capri_climwarm (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_climwarm IS 'CAPRI CLIMWARM: the warm cells 26-28 (envind/def_gascoeff.gms l. 120), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/EUGR.csv
+CREATE TABLE capri_eugr (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_eugr IS 'CAPRI EUGR: the EU groups of the tier 1 manure factors, west and east (envind/def_gascoeff.gms l. 122), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/ManSys.csv
+CREATE TABLE capri_mansys (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_mansys IS 'CAPRI ManSys: the manure management systems (envind/def_gascoeff.gms l. 203), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/CATACT.csv
+CREATE TABLE capri_catact (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_catact IS 'CAPRI CATACT: the cattle activities of the supply model and the GHG accounts (sets.gms l. 3103), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/MACT.csv
+CREATE TABLE capri_mact (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_mact IS 'CAPRI MACT: the high and low yield animal activities (sets.gms l. 2308), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/MDACT.csv
+CREATE TABLE capri_mdact (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_mdact IS 'CAPRI MDACT: the animal activities of the data with MITERRA shares (sets.gms, envind/ammo.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/ManuType.csv
+CREATE TABLE capri_manutype (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_manutype IS 'CAPRI ManuType: MITERRA''s manure types liquid and solid (envind/sets_ammo.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/POULTRY.csv
+CREATE TABLE capri_poultry (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_poultry IS 'CAPRI POULTRY: the poultry activities (sets.gms, envind/ammo.gms l. 613), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/ani_Liq.csv
+CREATE TABLE capri_ani_liq (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_ani_liq IS 'CAPRI ani_Liq: MITERRA''s animal types with liquid manure (envind/Miterra/sets_miterra.gms), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/atGrazingExtra.csv
+CREATE TABLE capri_atgrazingextra (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_atgrazingextra IS 'CAPRI atGrazingExtra: MITERRA''s animal types that graze (envind/Miterra/sets_miterra.gms l. 475-485), in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/EUGR_TO_MS.csv
+CREATE TABLE capri_eugr_to_ms (eugr VARCHAR NOT NULL, region VARCHAR NOT NULL, PRIMARY KEY (eugr, region));
+COMMENT ON TABLE capri_eugr_to_ms IS 'CAPRI EUGR_TO_MS: each EU group of the tier 1 manure factors and its member states and their regions (envind/def_gascoeff.gms l. 124-188)';
+
+-- file: capri_data/codes/capri/pact_to_atModel.csv
+CREATE TABLE capri_pact_to_atmodel (pact VARCHAR NOT NULL, atmodel VARCHAR NOT NULL, PRIMARY KEY (pact, atmodel));
+COMMENT ON TABLE capri_pact_to_atmodel IS 'CAPRI pact_to_atModel: each animal activity and its MITERRA animal types (envind/ammo.gms l. 197-198)';
+
+-- file: capri_data/codes/capri/atModel_to_PACT.csv
+CREATE TABLE capri_atmodel_to_pact (atmodel VARCHAR NOT NULL, pact VARCHAR NOT NULL, PRIMARY KEY (atmodel, pact));
+COMMENT ON TABLE capri_atmodel_to_pact IS 'CAPRI atModel_to_PACT: each MITERRA animal type and its animal activities (envind/Miterra/sets_miterra.gms)';
+
+-- file: capri_data/codes/capri/manuType_to_atModel.csv
+CREATE TABLE capri_manutype_to_atmodel (manutype VARCHAR NOT NULL, atmodel VARCHAR NOT NULL, PRIMARY KEY (manutype, atmodel));
+COMMENT ON TABLE capri_manutype_to_atmodel IS 'CAPRI manuType_to_atModel: each MITERRA manure type and its animal types (envind/ammo.gms l. 202-203)';
+
+-- file: capri_data/codes/capri/ms_to_country.csv
+CREATE TABLE capri_ms_to_country (ms VARCHAR NOT NULL, country VARCHAR NOT NULL, PRIMARY KEY (ms, country));
+COMMENT ON TABLE capri_ms_to_country IS 'CAPRI ms_to_country: each member state and its MITERRA country (envind/sets_ammo.gms)';
+
 -- file: capri_data/codes/capri/STOCK_TO_FUEL.csv
 CREATE TABLE capri_stock_to_fuel (xx VARCHAR NOT NULL, seco_biof VARCHAR NOT NULL, PRIMARY KEY (xx, seco_biof));
 COMMENT ON TABLE capri_stock_to_fuel IS 'CAPRI STOCK_TO_FUEL: each biofuel feedstock and its biofuel (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms)';

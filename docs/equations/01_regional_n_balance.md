@@ -106,7 +106,7 @@ CAPRI-MOD: the herd's coefficient in the row, manure N per model head of the yea
 (2030: CAPRI's 2030 coefficients, `tools/build/build_livestock_manure_2030.py`, KNOWN_ISSUES K179), read by
 `capri_mod/environmental/ghg.py` (`_n_excretion`); the options' factors on the herd's coefficient
 (`capri_mod/supply/livestock.py`, `_genetics_columns`: d_mann_rel); the losses and the manure applied: the N cascade
-(`capri_mod/supply/equations/supply_model/n_flow.py`, docs/N_CASCADE_SPEC.md) and the fertilisation block
+(`capri_mod/supply/equations/supply_model/n_flow.py`, docs/dev/N_CASCADE_SPEC.md) and the fertilisation block
 (ManureNPK_: `capri_mod/supply/equations/supply_model/nutrients.py`, `ManureNPK_trade`, `ManureNPK_ammKept`).
 
 Status: ported (per model head; K179 since 18 November 2026; the heads of bulls and heifers CAPRI's full herds, K180).

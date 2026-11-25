@@ -603,6 +603,13 @@ base_cal_tol = 0.002
 base_cal_stall_ratio = 0.95
 # the simulation year of CAPRI's 2030 reference (year-dependent exemptions of the fertiliser caps)
 sim_year = 2030
+# the 2030 rations, requirements, methane per head and usable fodder per ha the projection takes with CAPRI's 2030
+# reference as the trajectory, as factors on 2017 (tools/build/build_ration_trajectory_2030.py --source): "chain" (the
+# default since 25 November 2026), from the ported feed chain's 2030 start, the point CAPRI's model starts from
+# (chain_ration_2030.csv, chain_fodder_2030.csv; capri_mod/feed/chain.py; the methane per head by
+# capri_mod/environmental/methane_per_head.py); "capri_ref", from CAPRI's solved 2030 reference results
+# (capri_ref_ration_2030.csv, capri_ref_fodder_2030.csv), kept for comparison
+ration_source = "chain"
 # growth factors outside these bands are rejected (CAPTRD import; trajectories)
 captrd_factor_bounds = [0.2, 5.0]
 trajectory_factor_bounds = [0.1, 10.0]

@@ -1,4 +1,4 @@
-"""CAPRI's anaerobic digestion option AD_AnCh (envind/ad_data_and_cali.gms, %ad_type% = anch; docs/AD_SPEC.md) per
+"""CAPRI's anaerobic digestion option AD_AnCh (envind/ad_data_and_cali.gms, %ad_type% = anch; docs/dev/AD_SPEC.md) per
 CAPRI region and animal activity, for the supply models.
 
 CAPRI's variable v_Miti(AD_AnCh, CH4MAN) is the share of the housed liquid manure that is digested; every per-head
@@ -28,7 +28,7 @@ Items (ad_data_and_cali.gms lines):
 
 VSER: pigs CAPRI's table (AD_basedata p_VSER), as CAPRI's own fallback gives them; cattle CAPRI computes from the
 feed, energy and requirement data of the run (l. 49-116), not in hand: the table value is used and recorded as
-vser_source = "table" (REGISTERED, docs/AD_SPEC.md; CAPRI's run dump p_VSER will replace it).
+vser_source = "table" (REGISTERED, docs/dev/AD_SPEC.md; CAPRI's run dump p_VSER will replace it).
 
 The Western Balkans and Turkey's units (since 4 November 2026): heads and farm sizes from CAPRI's estimate
 (farm_size_noneu*.csv, tools/build/build_farm_size_noneu.py); VSER, HousShar and SharLiq CAPRI's fallback_Balkan

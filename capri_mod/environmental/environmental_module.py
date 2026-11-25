@@ -215,7 +215,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
 
     #: anaerobic digestion on dairy cows' manure CH4: "fix" applies CAPRI's CH4 factor to DCOL/DCOH as to the other
     #: animals (the user's decision, 20 October 2026); "capri" reproduces CAPRI as coded, where ad_data_and_cali.gms
-    #: l. 588 zeroes the NOC CH4MAN_3k factor the dairy macro needs, so dairy AD has no CH4 effect (docs/AD_SPEC.md)
+    #: l. 588 zeroes the NOC CH4MAN_3k factor the dairy macro needs, so dairy AD has no CH4 effect (docs/dev/AD_SPEC.md)
     ad_dairy_ch4 = setting("environment.ad_dairy_ch4")
 
 
