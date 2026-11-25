@@ -731,6 +731,5 @@ its own and should not be attributed to CAPRI. CAPRI itself is available from th
 
 **Licence.** CAPRI-mod is free software under the [GNU Affero General Public License, version 3](LICENSE)
 (AGPL-3.0-only); under its section 13, a modified version offered to users over a network (the Gradio interface, a
-hosted Space) must offer them its source. It is distributed WITHOUT ANY WARRANTY; see the licence. (Releases until 25
-November 2026 were under the GNU GPL version 3, earlier ones under the Apache License 2.0 and, before that, MIT.)
-Third-party packages keep their own licences (e.g. Clarabel, Apache-2.0).
+hosted Space) must offer them its source. It is distributed WITHOUT ANY WARRANTY; see the licence. Third-party
+packages keep their own licences (e.g. Clarabel, Apache-2.0).
