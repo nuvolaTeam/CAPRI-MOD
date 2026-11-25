@@ -6551,7 +6551,9 @@
    "read_by": {
     "model": [],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/captrd_parity_dump.py"
+    ],
     "tests": [
      "capri_mod/pipeline/tests/test_captrd_scale_dgagri.py"
     ]
@@ -6720,6 +6722,7 @@
     "model": [],
     "builders": [],
     "checks": [
+     "tools/check/captrd_parity_dump.py",
      "tools/check/check_sim_ini_requirements_2030.py",
      "tools/check/make_provenance.py"
     ],
@@ -14198,6 +14201,7 @@
     ],
     "builders": [],
     "checks": [
+     "tools/check/captrd_parity_dump.py",
      "tools/check/make_provenance.py"
     ],
     "tests": [
@@ -14366,7 +14370,9 @@
    "read_by": {
     "model": [],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/captrd_parity_dump.py"
+    ],
     "tests": [
      "capri_mod/pipeline/tests/test_captrd_expert_rules.py",
      "capri_mod/pipeline/tests/test_captrd_national_supports.py"
@@ -14895,6 +14901,7 @@
     "model": [],
     "builders": [],
     "checks": [
+     "tools/check/captrd_parity_dump.py",
      "tools/check/make_provenance.py"
     ],
     "tests": [
@@ -15573,7 +15580,9 @@
    "read_by": {
     "model": [],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/captrd_parity_dump.py"
+    ],
     "tests": [
      "capri_mod/pipeline/tests/test_captrd_estimate_nlp.py"
     ]
@@ -15740,7 +15749,9 @@
    "read_by": {
     "model": [],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/captrd_parity_dump.py"
+    ],
     "tests": [
      "capri_mod/pipeline/tests/test_captrd_eu_supports.py"
     ]
@@ -17533,6 +17544,7 @@
     "model": [],
     "builders": [],
     "checks": [
+     "tools/check/captrd_parity_dump.py",
      "tools/check/make_provenance.py"
     ],
     "tests": [
@@ -17575,7 +17587,9 @@
    "read_by": {
     "model": [],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/captrd_parity_dump.py"
+    ],
     "tests": [
      "capri_mod/pipeline/tests/test_captrd_estimate_bounds.py"
     ]
@@ -17690,7 +17704,9 @@
    "read_by": {
     "model": [],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/captrd_parity_dump.py"
+    ],
     "tests": [
      "capri_mod/pipeline/tests/test_captrd_agriprod_supports.py",
      "capri_mod/pipeline/tests/test_captrd_national_supports.py"
@@ -18416,7 +18432,9 @@
    "read_by": {
     "model": [],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/captrd_parity_dump.py"
+    ],
     "tests": [
      "capri_mod/pipeline/tests/captrd_pre_expert.py",
      "capri_mod/pipeline/tests/test_captrd_supports.py"
@@ -66143,11 +66161,11 @@
   }
  ],
  "code_data": {
-  "capri/keep": 995,
+  "capri/keep": 1014,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 39,
-  "physical/keep": 15,
+  "physical/keep": 14,
   "technical/keep": 39
  },
  "other_notes": {}

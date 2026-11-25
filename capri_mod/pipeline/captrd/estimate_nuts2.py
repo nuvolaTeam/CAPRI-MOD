@@ -33,6 +33,11 @@ import numpy as np
 from capri_mod.pipeline.captrd import estimate_bounds as EB
 from capri_mod.pipeline.captrd import estimate_ms as E
 from capri_mod.pipeline.captrd import estimate_nlp as NLP
+from capri_mod.pipeline.captrd.equations import equations as EQ
+from capri_mod.pipeline.captrd.equations import est_nuts2_grid as GR
+from capri_mod.pipeline.captrd.equations import est_nuts2_grid_openbound as OB
+from capri_mod.pipeline.captrd.equations import estimate_nuts2 as NB
+from capri_mod.pipeline.captrd.equations import nuts2 as NT
 from capri_mod.settings import current as current_settings
 
 K2 = Tuple[str, str]
@@ -40,8 +45,8 @@ K3 = Tuple[str, str, str]
 INF = float("inf")
 #: equations.gms l. 909-912: m_trendNT2's blocks that estimate_ms.residuals has
 SHARED_BLOCKS = ("AREAB_", "LANDUSEB_", "OSET_", "GROF_", "REQS_", "GRPLVL_", "STRA_", "LU_", "SplitFix_")
-#: l. 230-240: MSFEEDI_'s scaling (10 kg per head, in t)
-FEED_SCALE, PER_1000 = 10.0, 0.001
+#: kg to t (rem_tiny's production from the levels)
+PER_1000 = 0.001
 #: l. 820-833: the regional weight's floor and its regularisation
 WEIGHT_FLOOR, WEIGHT_EPS = 0.001, 1.0e-5
 #: MSLANDUSE_'s land uses (l. 219)
@@ -86,15 +91,16 @@ def residuals(points: Dict[str, E.Point], ms_nobs: set, ms_V: Dict[K2, float], S
         if not any(n(r, a, "LEVL") and lo(r, (a, w)) != up(r, (a, w)) for r in regs
                    for a, o in S.pact_to_io if o == w and a in S.mpact):
             continue
-        add("MSGROF_", (w,), "E", sum(V(r, "GROF", w) for r in regs if n(r, "GROF", w)) - M("GROF", w))
+        add("MSGROF_", (w,), "E", NT.MSGROF_((V(r, "GROF", w) for r in regs if n(r, "GROF", w)), M("GROF", w)))
     # MSLEVL_ (l. 199-210)
     for a in sorted(S.mpact):
         if nm(a, "LEVL") and a not in rset and a in S.cols_est and a not in sal and regs:
-            add("MSLEVL_", (a,), "E", sum(V(r, a, "LEVL") for r in regs if n(r, a, "LEVL")) - M(a, "LEVL"))
+            add("MSLEVL_", (a,), "E", NT.MSLEVL_((V(r, a, "LEVL") for r in regs if n(r, a, "LEVL")), M(a, "LEVL")))
     # MSLANDUSE_ (l. 218-224)
     for c in MS_LANDUSE:
         if c in S.cols_est and nm(c, "LEVL") and regs:
-            add("MSLANDUSE_", (c,), "E", sum(V(r, c, "LEVL") for r in regs if n(r, c, "LEVL")) - M(c, "LEVL"))
+            add("MSLANDUSE_", (c,), "E", NT.MSLANDUSE_((V(r, c, "LEVL") for r in regs if n(r, c, "LEVL")),
+                                                       M(c, "LEVL")))
     # MSFEEDI_ (l. 230-240)
     for a in sorted(S.mpact):
         for f in sorted(feed - foddi):
@@ -103,30 +109,31 @@ def residuals(points: Dict[str, E.Point], ms_nobs: set, ms_V: Dict[K2, float], S
             rr = [r for r in regs if n(r, a, "LEVL") and n(r, a, f)]
             if not rr:
                 continue
-            lhs = sum(V(r, a, "LEVL") * V(r, a, f) * PER_1000 for r in rr) \
-                + sum(V(r, a, "LEVL") * FEED_SCALE * PER_1000 for r in regs if n(r, a, "LEVL"))
-            add("MSFEEDI_", (a, f), "E", lhs - M(a, "LEVL") * (M(a, f) + FEED_SCALE) * PER_1000)
+            add("MSFEEDI_", (a, f), "E", NT.MSFEEDI_(((V(r, a, "LEVL"), V(r, a, f)) for r in rr),
+                                                     (V(r, a, "LEVL") for r in regs if n(r, a, "LEVL")),
+                                                     M(a, "LEVL"), M(a, f)))
     foddo = sorted({o for f, o in S.feed_to_o if f in foddi})
     for r in regs:
         for o in foddo:
             # MSlosfFoddo_ (l. 474-485): the member state's loss rate (its estP)
             if n(r, "GROF", o) and o != "STRA":
-                rate = M("LOSF", o) / M("GROF", o) if M("GROF", o) else 0.0
-                add("MSlosfFoddo_", (r, o), "E", V(r, "LOSF", o) - V(r, "GROF", o) * rate)
-            # EFED_ (l. 500-507; ex_endofodderUse is empty outside the farm types)
+                add("MSlosfFoddo_", (r, o), "E", NT.MSlosfFoddo_(V(r, "LOSF", o), V(r, "GROF", o), M("LOSF", o),
+                                                                 M("GROF", o)))
+            # EFED_ (l. 500-508; ex_endofodderUse is empty outside the farm types)
             fs = [f for f, oo in S.feed_to_o if oo == o]
             if any(n(r, "GROF", f) for f in fs) and n(r, "GROF", o):
-                lhs = V(r, "GROF", o) - V(r, "LOSF", o) * n(r, "LOSF", o) - V(r, "INDM", o) * n(r, "INDM", o)
-                add("EFED_", (r, o), "E", lhs - sum(V(r, "GROF", f) for f in fs if n(r, "GROF", f)))
+                add("EFED_", (r, o), "E", NT.EFED_(V(r, "GROF", o), V(r, "LOSF", o), n(r, "LOSF", o), V(r, "INDM", o),
+                                                   n(r, "INDM", o), (V(r, "GROF", f) for f in fs if n(r, "GROF", f))))
     # MSindmMaif_ (l. 490-495)
     if nm("INDM", "MAIF") and any(n(r, "INDM", "MAIF") for r in regs):
-        add("MSindmMaif_", (), "E", sum(V(r, "INDM", "MAIF") for r in regs if n(r, "INDM", "MAIF")) - M("INDM", "MAIF"))
+        add("MSindmMaif_", (), "E", NT.MSindmMaif_((V(r, "INDM", "MAIF") for r in regs if n(r, "INDM", "MAIF")),
+                                                   M("INDM", "MAIF")))
     return out
 
 
 def objective(points: Dict[str, E.Point], S: E.Sets, var: Callable, wvar: Dict[str, Dict[K2, float]],
               basm_levl: Dict[str, Dict[str, float]]):
-    """SSQS_ (l. 803-878) for CARD(Rest) > 1: each region's squared deviations from its supports over their standard
+    """SSQS_ (l. 801-875; equations.SSQS_) for CARD(Rest) > 1: each region's squared deviations from its supports over their standard
     errors, as estimate_ms.objective, weighted by the region's share: for an activity column its LEVL BASM over the
     regions' (each + 1e-5), for any other column the summed LEVL BASM of the activities producing or using the row
     (PACT_TO_IO) over the regions'; at least 0.001; over the same sum at 10% of the supports, plus 1. basm_levl:
@@ -145,47 +152,31 @@ def objective(points: Dict[str, E.Point], S: E.Sets, var: Callable, wvar: Dict[s
             return max(WEIGHT_FLOOR, (basm_levl.get(r, {}).get(c, 0.0) + WEIGHT_EPS) / act_tot[c])
         return max(WEIGHT_FLOOR, (row_b(r, w) + WEIGHT_EPS) / sum(row_b(q, w) + WEIGHT_EPS for q in regs))
 
-    num, den = 0.0, 1.0
-    for r in regs:
-        p, wv = points[r], wvar.get(r, {})
-        for k, sv in sorted(p.support.items()):
-            if not sv or not wv.get(k, 0.0) or k[0] not in S.cols_est or k[1] not in S.rows_est:
-                continue
-            if p.lo.get(k, -INF) == p.up.get(k, INF):
-                continue
-            sig = max(wv[k] ** 0.5, E.WEIGHT_STD_ERR * sv) + E.SSQ_EPS
-            g = weight(r, *k)
-            num = num + ((var(r, *k) - sv) / sig) ** 2 * g * E.SSQ_WEIGHT
-            den += (E.SSQ_SCALE_DEV * sv / sig) ** 2 * g
-        # l. 838-842: STCM of the young animals pulled to zero in the years without data (unweighted)
-        if not p.exante_d:
-            for o in sorted(S.oyani):
-                sg = p.support.get(("GROF", o), 0.0)
-                if ("STCM", o) in p.nobs and sg:
-                    num = num + (var(r, "STCM", o) / max(E.STCM_SCALE * sg, E.SSQ_EPS)) ** 2 * E.SSQ_WEIGHT
-    return num / den
+    def terms():
+        for r in regs:
+            p, wv = points[r], wvar.get(r, {})
+            for k, sv in sorted(p.support.items()):
+                if not sv or not wv.get(k, 0.0) or k[0] not in S.cols_est or k[1] not in S.rows_est:
+                    continue
+                if p.lo.get(k, -INF) == p.up.get(k, INF):
+                    continue
+                yield var(r, *k), sv, wv[k], weight(r, *k)
+            # l. 838-841: STCM of the young animals pulled to zero in the years without data (unweighted)
+            if not p.exante_d:
+                for o in sorted(S.oyani):
+                    sg = p.support.get(("GROF", o), 0.0)
+                    if ("STCM", o) in p.nobs and sg:
+                        yield var(r, "STCM", o), sg
+    return EQ.SSQS_(terms())
 
 
-# --- the bounds (estimate_nuts2.gms l. 86-380) --------------------------------------------------------------------------
-#: l. 92-115: activity levels within the national change x 1.015^n / 0.985^n (n: years since the base); BASM +- 0.01
-LEVL_UP, LEVL_LO, LEVL_PAD, LEVL_FLOOR = 1.015, 0.985, 0.01, 1.0e-10
-#: l. 117-125: the crop groups' levels from their members'
-GRPC_UP, GRPC_LO = 1.01, 0.99
-#: l. 131-166: input and output coefficients: the national change x 1.02^n above, x 0.8 below, the step 0.1
-IO_UP, IO_LO, IO_STEP, IO_SAFE_UP, IO_SAFE_LO = 1.02, 0.8, 0.1, 1.001, 0.999
-#: l. 170-178: NoYieldDrop yields: x min(0.98, 0.995^n), x max(1.02, 1.005^n) of the national change
-NYD_LO, NYD_LO_YR, NYD_UP, NYD_UP_YR = 0.98, 0.995, 1.02, 1.005
-#: l. 193-222: meat and egg outputs almost fixed at the national change (x 0.999 - 0.1, x 1.001 + 0.1)
+# --- the bounds (estimate_nuts2.gms l. 86-400; the statements in equations/estimate_nuts2.py) -----------------
+#: l. 192-220: the meat and egg outputs almost fixed at the national change
 MEAT_EGGS = ("PORK", "BEEF", "POUM", "SGMT", "EGGS")
-#: l. 235-254: production bounds from the levels' and coefficients' bounds (x 0.99, x 1.01; + 1 above)
-GROF_SHRINK, GROF_WIDEN, GROF_UP_ADD = 0.99, 1.01, 1.0
-#: l. 273-284: fodder losses within 0.9 / 1.1 of the national loss rate; COMF and SGMF besides losfFromCoco2
-LOSF_LO, LOSF_UP, LOSF_EXTRA = 0.9, 1.1, ("COMF", "SGMF")
-#: l. 290-311: sugar beet production within the quota share x the national production x 0.95 / 1.05, or the regional
-#: expert support x 0.9 / 1.1 with a trust level above 4, from 2006
-SUGB_LO, SUGB_UP, SUGB_EXP_LO, SUGB_EXP_UP, SUGB_TRUST, SUGB_FROM = 0.95, 1.05, 0.9, 1.1, 4.0, 2006
-#: l. 356-363: ARTIF's lower bound x 0.99 of the scaled base
-ARTIF_SHRINK = 0.99
+#: l. 273-274: COMF and SGMF besides losfFromCoco2
+LOSF_EXTRA = ("COMF", "SGMF")
+#: l. 294-311: sugar beet's quota shares from 2006; the regional expert's above a trust level of 4
+SUGB_FROM, SUGB_TRUST = 2006, 4.0
 
 
 def nuts2_bound_sets(B: EB.BoundSets, ms: str, landuse_arto: Iterable[str]) -> EB.BoundSets:
@@ -206,12 +197,14 @@ def bounds(regions: Dict[str, EB.BoundData], B: EB.BoundSets, eff: float, ms_ste
            regional_trust: Optional[Dict[str, Dict[K2, float]]] = None):
     """lo, up per region ({region: {(col, row): bound}}) and the observation flags estimate_nuts2.gms adds
     ({region: set of (col, row)}): fix_est.gms for each region (estimate_bounds.bounds with region_of set and B's
-    S_ColsEst / S_RowsEst those of l. 31-48), then l. 92-380. ms_step3: the member state's result (relative
+    S_ColsEst / S_RowsEst those of l. 31-48), then l. 92-400. ms_step3: the member state's result (relative
     requirements, as the bounds); ms_pd: its p_data; ms_estp: its estP (the fodder loss rates); losf_coco2: the products
     whose losses COCO2 sets (load_coco1_data.gms l. 84-85); fodf_map: FEED_TO_O pairs (FODDI, FODDO); cropc_to_g:
     CROPC_TO_G pairs (crop, crop group);
     regional_expert / regional_trust: the regions' Expert supports and trust levels (P_Result "Expert",
-    p_ExpertSupprt "TrustLevl")."""
+    p_ExpertSupprt "TrustLevl"). The statements' arithmetic is in capri_mod/pipeline/captrd/equations/estimate_nuts2.py,
+    each function quoting its GAMS; this function holds their domains and their order. The lines cited below are
+    estimate_nuts2.gms's."""
     out_lo, out_up, add_nobs = {}, {}, {}
     fodf_map = sorted(set(fodf_map))
     c2g = sorted((c, g) for c, g in set(cropc_to_g) if c in B.mcact)
@@ -227,37 +220,33 @@ def bounds(regions: Dict[str, EB.BoundData], B: EB.BoundSets, eff: float, ms_ste
         M3 = lambda c, w: ms_step3.get((c, w), 0.0)                                         # noqa: E731
         nyr = d.year - d.ord_bas
         new_nobs = set()
-
-        def ratio(c, w):
-            """the national change applied to the region's base: Step3(MS) / BASM(MS) x BASM(region)."""
-            mb = ms_pd(c, w, "BASM")
-            return M3(c, w) / mb * pd(c, w, "BASM") if mb else 0.0
+        chg = lambda c, w: (M3(c, w), ms_pd(c, w, "BASM"), pd(c, w, "BASM"))               # noqa: E731
 
         cols, rows = sorted(B.cols_est), sorted(B.rows_est)
 
-        # l. 92-115: activity levels
+        # l. 92-125: activity levels
         for c in cols:
             k = (c, "LEVL")
             if pd(c, "LEVL", "BASM") and rng(k) and ms_pd(c, "LEVL", "BASM"):
-                up[k] = max(ratio(c, "LEVL") * LEVL_UP ** nyr, pd(c, "LEVL", "BASM") + LEVL_PAD)
+                up[k] = NB.V_EstV_up_LEVL(*chg(c, "LEVL"), nyr)
         for g in sorted(B.grpc):
             if pd(g, "LEVL", "BASM"):
-                up[(g, "LEVL")] = sum(UP((c, "LEVL")) for c, gg in c2g if gg == g and nobs(c, "LEVL")) * GRPC_UP
+                up[(g, "LEVL")] = NB.V_EstV_up_GRPC([UP((c, "LEVL")) for c, gg in c2g if gg == g and nobs(c, "LEVL")])
         for c in cols:
             k = (c, "LEVL")
             if pd(c, "LEVL", "BASM") and rng(k) and R("Expert", c, "LEVL"):
-                up[k] = max(UP(k), R("Expert", c, "LEVL") + LEVL_PAD)
+                up[k] = NB.V_EstV_up_LEVL_expert(UP(k), R("Expert", c, "LEVL"))
         for c in cols:
             k = (c, "LEVL")
             if pd(c, "LEVL", "BASM") and rng(k) and ms_pd(c, "LEVL", "BASM"):
-                lo[k] = min(max(LEVL_FLOOR, pd(c, "LEVL", "BASM") - LEVL_PAD), ratio(c, "LEVL") * LEVL_LO ** nyr)
+                lo[k] = NB.V_EstV_lo_LEVL(*chg(c, "LEVL"), nyr)
         for c in cols:
             k = (c, "LEVL")
             if pd(c, "LEVL", "BASM") and rng(k) and R("Expert", c, "LEVL"):
-                lo[k] = min(LO(k), R("Expert", c, "LEVL") - LEVL_PAD)
+                lo[k] = NB.V_EstV_lo_LEVL_expert(LO(k), R("Expert", c, "LEVL"))
         for g in sorted(B.grpc):
             if pd(g, "LEVL", "BASM"):
-                lo[(g, "LEVL")] = sum(LO((c, "LEVL")) for c, gg in c2g if gg == g and nobs(c, "LEVL")) * GRPC_LO
+                lo[(g, "LEVL")] = NB.V_EstV_lo_GRPC([LO((c, "LEVL")) for c, gg in c2g if gg == g and nobs(c, "LEVL")])
         io = {(a, w) for a, w in B.pact_to_io if a in B.mpact}
         feed = set(B.feed)
 
@@ -265,97 +254,91 @@ def bounds(regions: Dict[str, EB.BoundData], B: EB.BoundSets, eff: float, ms_ste
         for a, w in sorted(io):
             if w in B.rows_est and ms_pd(a, w, "BASM") and pd(a, w, "BASM") and w not in feed and w != "STRA":
                 k = (a, w)
-                up[k] = max(LO(k) + IO_STEP, min(max(UP(k) + IO_STEP, ratio(a, w) * IO_SAFE_UP), ratio(a, w) * IO_UP ** nyr))
+                up[k] = NB.V_EstV_up_IO(LO(k), UP(k), *chg(a, w), nyr)
 
         # l. 145-155: straw feed
         for a in sorted(B.maact):
             if (ms_pd(a, "FSTR", "BAS") or M3(a, "FSTR")) and pd("GROF", "STRA", "BAS"):
                 new_nobs.add((a, "FSTR"))
-                u0 = UP((a, "FSTR"))
-                up[(a, "FSTR")] = max(ms_pd(a, "FSTR", "BAS"), M3(a, "FSTR"), pd(a, "FSTR", "BAS"), u0 if u0 < INF else 0.0)
-                lo[(a, "FSTR")] = 0.0
+                lo_f, up_f = NB.V_EstV_FSTR(ms_pd(a, "FSTR", "BAS"), M3(a, "FSTR"), pd(a, "FSTR", "BAS"), UP((a, "FSTR")))
+                up[(a, "FSTR")] = up_f
+                lo[(a, "FSTR")] = lo_f
 
-        # l. 160-166: the coefficients' lower bounds
+        # l. 160-165: the coefficients' lower bounds
         for a, w in sorted(io):
             if w in B.rows_est and ms_pd(a, w, "BASM") and pd(a, w, "BASM") and w not in feed:
                 k = (a, w)
-                lo[k] = min(UP(k) - IO_STEP, max(min(LO(k) - IO_STEP, ratio(a, w) * IO_SAFE_LO), ratio(a, w) * IO_LO))
+                lo[k] = NB.V_EstV_lo_IO(LO(k), UP(k), *chg(a, w))
 
-        # l. 170-178: NoYieldDrop yields
+        # l. 169-177: NoYieldDrop yields
         for a, w in sorted(B.pact_to_y):
             if a in B.mpact and a in B.noyielddrop and w in B.rows_est and ms_pd(a, w, "BASM") and pd(a, w, "BASM"):
-                lo[(a, w)] = ratio(a, w) * min(NYD_LO, NYD_LO_YR ** nyr)
-                up[(a, w)] = ratio(a, w) * max(NYD_UP, NYD_UP_YR ** nyr)
+                lo[(a, w)], up[(a, w)] = NB.V_EstV_NoYieldDrop(*chg(a, w), nyr)
         nob = lambda c, w: nobs(c, w) or (c, w) in new_nobs                                 # noqa: E731
 
-        # l. 183-189
+        # l. 182-187
         for a in sorted(B.mpact):
             for w in rows:
                 k = (a, w)
                 if ms_pd(a, w, "BASM") > 0 and nob(a, w):
-                    lo[k] = max(LEVL_FLOOR, LO(k))
+                    lo[k] = NB.V_EstV_lo_floor(LO(k))
             for f in sorted(feed):
                 if ms_pd(a, f, "BAS") > 0 and not pd(a, f, "BAS"):
-                    lo[(a, f)] = 0.0
+                    lo[(a, f)] = NB.V_EstV_lo_zero()
             for w in rows:
                 if M3(a, w) == 0:
-                    lo[(a, w)] = 0.0
+                    lo[(a, w)] = NB.V_EstV_lo_zero()
 
-        # l. 193-222: meat and eggs
+        # l. 192-220: meat and eggs
         for a in sorted(B.maact):
             for o in MEAT_EGGS:
                 if nob(a, o):
-                    lo[(a, o)] = ratio(a, o) * IO_SAFE_LO - IO_STEP
-                    up[(a, o)] = ratio(a, o) * IO_SAFE_UP + IO_STEP
+                    lo[(a, o)], up[(a, o)] = NB.V_EstV_MEAT_EGGS(*chg(a, o))
 
-        # l. 224-228
+        # l. 222-225
         for a in sorted(B.mpact):
             for w in rows:
                 if ms_pd(a, w, "BASM") > 0 and M3(a, w) and nob(a, w):
-                    lo[(a, w)] = max(LEVL_FLOOR, LO((a, w)))
+                    lo[(a, w)] = NB.V_EstV_lo_floor(LO((a, w)))
 
-        # l. 230-231: inputs and levels fixed where the member state has no level
+        # l. 229-230: inputs and levels fixed where the member state has no level
         for a in sorted(B.mpact):
             if not M3(a, "LEVL"):
                 for w in rows:
                     if nob(a, w):
-                        lo[(a, w)] = up[(a, w)] = 0.0
+                        lo[(a, w)] = up[(a, w)] = NB.V_EstV_fx_no_ms_level()
 
-        # l. 235-254: production from the levels' and coefficients' bounds
+        # l. 234-253: production from the levels' and coefficients' bounds
         for w in rows:
             acts = [a for a, ww in io if ww == w and nob(a, w) and nob(a, "LEVL")]
             if not acts:
                 continue
-            lsum, usum = 0.0, 0.0
-            for a in sorted(acts):
-                ll, ul, lc, uc = LO((a, "LEVL")), UP((a, "LEVL")), LO((a, w)), UP((a, w))
-                lv = (min(ll, ul) if lc > 0 else 0.0) + (max(ll, ul) if lc < 0 else 0.0)
-                lsum += _gmul(_gmul(lv, lc), (GROF_SHRINK if lc > 0 else 0.0) + (GROF_WIDEN if lc < 0 else 0.0))
-                uv = (max(ll, ul) if lc > 0 else 0.0) + (min(ll, ul) if lc < 0 else 0.0)
-                usum += _gmul(_gmul(uv, uc), (GROF_SHRINK if lc < 0 else 0.0) + (GROF_WIDEN if lc > 0 else 0.0))
-            lo[("GROF", w)] = lsum * PER_1000
-            up[("GROF", w)] = usum * PER_1000 + GROF_UP_ADD
+            lo[("GROF", w)], up[("GROF", w)] = NB.V_EstV_GROF(
+                [(LO((a, "LEVL")), UP((a, "LEVL")), LO((a, w)), UP((a, w))) for a in sorted(acts)])
 
         # l. 260-268: fodder production and use linked
         fi_s = sorted({fi for fi, _fo in fodf_map})
         fo_s = sorted({fo for _fi, fo in fodf_map})
         for fi in fi_s:
-            up[("GROF", fi)] = max(UP(("GROF", fi)), sum(UP(("GROF", fo)) for ii, fo in fodf_map if ii == fi))
+            up[("GROF", fi)] = NB.V_EstV_up_GROF_fodder(UP(("GROF", fi)),
+                                                        [UP(("GROF", fo)) for ii, fo in fodf_map if ii == fi])
         for fo in fo_s:
-            up[("GROF", fo)] = max(UP(("GROF", fo)), sum(UP(("GROF", fi)) for fi, oo in fodf_map if oo == fo))
+            up[("GROF", fo)] = NB.V_EstV_up_GROF_fodder(UP(("GROF", fo)),
+                                                        [UP(("GROF", fi)) for fi, oo in fodf_map if oo == fo])
         for fi in fi_s:
-            lo[("GROF", fi)] = min(LO(("GROF", fi)), sum(LO(("GROF", fo)) for ii, fo in fodf_map if ii == fi))
+            lo[("GROF", fi)] = NB.V_EstV_lo_GROF_fodder(LO(("GROF", fi)),
+                                                        [LO(("GROF", fo)) for ii, fo in fodf_map if ii == fi])
         for fo in fo_s:
-            lo[("GROF", fo)] = min(LO(("GROF", fo)), sum(LO(("GROF", fi)) for fi, oo in fodf_map if oo == fo))
+            lo[("GROF", fo)] = NB.V_EstV_lo_GROF_fodder(LO(("GROF", fo)),
+                                                        [LO(("GROF", fi)) for fi, oo in fodf_map if oo == fo])
 
-        # l. 273-284: fodder losses at the national loss rate (the member state's estP)
+        # l. 273-285: fodder losses at the national loss rate (the member state's estP)
         for x in sorted(set(losf_coco2) | set(LOSF_EXTRA)):
-            g_ = ms_estp.get(("GROF", x), 0.0)
-            rate = ms_estp.get(("LOSF", x), 0.0) / g_ if g_ else 0.0
+            ms_lg = (ms_estp.get(("LOSF", x), 0.0), ms_estp.get(("GROF", x), 0.0))
             if LO(("GROF", x)) > 0:
-                lo[("LOSF", x)] = LOSF_LO * LO(("GROF", x)) * rate
+                lo[("LOSF", x)] = NB.V_EstV_lo_LOSF(LO(("GROF", x)), *ms_lg)
             if 0 < UP(("GROF", x)) < INF:
-                up[("LOSF", x)] = LOSF_UP * UP(("GROF", x)) * rate
+                up[("LOSF", x)] = NB.V_EstV_up_LOSF(UP(("GROF", x)), *ms_lg)
 
         # l. 290-345: sugar beet (the quota shares; the expert levels' rule not ported: it needs p_ExpertSupprt
         # "Absolute", not in the stored results)
@@ -363,70 +346,61 @@ def bounds(regions: Dict[str, EB.BoundData], B: EB.BoundSets, eff: float, ms_ste
         if mq and nob("GROF", "SUGB") and d.year >= SUGB_FROM:
             ex = (regional_expert or {}).get(r, {}).get(("GROF", "SUGB"), 0.0)
             tl = (regional_trust or {}).get(r, {}).get(("GROF", "SUGB"), 0.0)
-            share = R("p_data", "QUTS", "SUGB") * M3("GROF", "SUGB") / mq
-            up[("GROF", "SUGB")] = max(share * SUGB_UP, (ex * SUGB_EXP_UP) if tl > SUGB_TRUST else 0.0)
-            lo[("GROF", "SUGB")] = min(share * SUGB_LO, (ex * SUGB_EXP_LO) if tl > SUGB_TRUST else 0.0)
-            yl = 0.5 * LO(("SUGB", "SUGB")) + 0.5 * UP(("SUGB", "SUGB"))
+            lo_s, up_s = NB.V_EstV_GROF_SUGB(R("p_data", "QUTS", "SUGB"), M3("GROF", "SUGB"), mq, ex, tl)
+            up[("GROF", "SUGB")] = up_s
+            lo[("GROF", "SUGB")] = lo_s
+            yl = NB.V_EstV_l_SUGB_SUGB(LO(("SUGB", "SUGB")), UP(("SUGB", "SUGB")))
             if nob("SUGB", "LEVL") and yl and abs(yl) < INF:
-                up[("SUGB", "LEVL")] = UP(("GROF", "SUGB")) / (yl * PER_1000)
-                lo[("SUGB", "LEVL")] = LO(("GROF", "SUGB")) / (yl * PER_1000)
+                lo_l, up_l = NB.V_EstV_SUGB_LEVL(LO(("GROF", "SUGB")), UP(("GROF", "SUGB")), yl)
+                up[("SUGB", "LEVL")] = up_l
+                lo[("SUGB", "LEVL")] = lo_l
             if (regional_trust or {}).get(r, {}).get(("SUGB", "SUGB"), 0.0) > SUGB_TRUST:
                 raise NotImplementedError(f"estimate_nuts2.gms l. 336-345 for {r}: the expert sugar beet yield "
                                           f"(p_ExpertSupprt 'Absolute') is not in the port")
 
-        # l. 350-363: ARTIF
+        # l. 350-366: ARTIF
         mb = ms_pd("ARTIF", "LEVL", "BASM")
         if mb:
-            lo[("ARTIF", "LEVL")] = pd("ARTIF", "LEVL", "BASM") * M3("ARTIF", "LEVL") / mb
-            lo[("ARTIF", "LEVL")] = ARTIF_SHRINK * min(
-                pd("ARTIF", "LEVL", "BASM") * M3("ARTIF", "LEVL") / mb,
-                pd("ARTO", "LEVL", "BASM") - pd("INLW", "LEVL", "BASM") - LO(("UAAR", "LEVL")))
+            first, second = NB.V_EstV_lo_ARTIF(pd("ARTIF", "LEVL", "BASM"), M3("ARTIF", "LEVL"), mb,
+                                               pd("ARTO", "LEVL", "BASM"), pd("INLW", "LEVL", "BASM"),
+                                               LO(("UAAR", "LEVL")))
+            lo[("ARTIF", "LEVL")] = first
+            lo[("ARTIF", "LEVL")] = second
 
-        # l. 365-366: again
+        # l. 368-369: again
         for a in sorted(B.mpact):
             if not M3(a, "LEVL"):
                 for w in rows:
                     if nob(a, w):
-                        lo[(a, w)] = up[(a, w)] = 0.0
+                        lo[(a, w)] = up[(a, w)] = NB.V_EstV_fx_no_ms_level()
 
-        # l. 375-380: the expert bounds as a last resort
+        # l. 377-380: the expert bounds as a last resort
         for k, v in d.res.get("expertlo", {}).items():
             if v and k[0] in B.cols_est and k[1] in B.rows_est:
-                lo[k] = v
+                lo[k] = NB.V_EstV_expert(v)
         for k, v in d.res.get("expertup", {}).items():
             if v and k[0] in B.cols_est and k[1] in B.rows_est:
-                up[k] = v
+                up[k] = NB.V_EstV_expert(v)
 
-        # l. 400-402: LOSF.STRA with data, free above zero
+        # l. 398-400: LOSF.STRA with data, free above zero
         new_nobs.add(("LOSF", "STRA"))
-        lo[("LOSF", "STRA")], up[("LOSF", "STRA")] = 0.0, INF
+        lo[("LOSF", "STRA")], up[("LOSF", "STRA")] = NB.V_EstV_LOSF_STRA()
         out_lo[r], out_up[r], add_nobs[r] = lo, up, new_nobs
     return out_lo, out_up, add_nobs
 
 
 # --- the solve (estimate_nuts2.gms l. 404-430) and its retries (est_nuts2_grid.gms, est_Nuts2_grid_openbound.gms) -----
 #: est_nuts2_grid.gms l. 37: the tries with opened bounds before the estimation stops: setting captrd.nuts2_max_tries
-#: openbound l. 40-44: after 60 tries the feed coefficients the member-state feed balance blocks are fixed at the support
+#: openbound l. 40-43: after 60 tries the feed coefficients the member-state feed balance blocks are fixed at the support
 FEED_FIX_TRIES = 60
-#: l. 46-50: a fixed feed coefficient so blocking opened to max(1.5 x, + 1)
-FEED_OPEN_FAC, FEED_OPEN_ADD = 1.5, 1.0
-#: l. 53-61, 64-79: a coefficient's bound moved by max(0.1, 25% of its value); 5% for the yields, 100% for the feed
-COEF_STEP, COEF_SHARE, COEF_SHARE_Y, COEF_SHARE_FEED = 0.1, 0.25, 0.20, 0.75
-#: l. 64: from 30 tries the lower bounds of the NoYieldDrop yields are opened too
+#: l. 81-113: from 30 tries the lower bounds of the NoYieldDrop yields are opened too
 NYD_OPEN_TRIES = 30
-#: l. 82-86: below 25 tries the requirement functions' bounds within [min(0.1, up), 10]
-REQS_TRIES, REQS_CAP, REQS_MIN = 25, 10.0, 0.1
-#: l. 89-115: activity levels opened after 10 tries (UAAR after 20) by x 1.25 / x 0.75 (UAAR 0.99), at least 0.1; the
-#: floor 1e-5, dropped to zero after 20 tries
-LEVL_TRIES_OPEN, UAAR_TRIES_OPEN, LEVL_OPEN_UP, LEVL_OPEN_LO, UAAR_OPEN_LO, LEVL_OPEN_FLOOR = 10, 20, 1.25, 0.75, 0.99, 1.0e-5
-#: l. 118-133: the regions' level bounds at least / at most the member state's level over the regions x 0.8 / 1.2
-LEVL_MS_LO, LEVL_MS_UP = 0.8, 1.2
-#: l. 136-150: production bounds opened to x 2 / x 0.5, at least 0.1
-GROF_OPEN_UP, GROF_OPEN_LO = 2.0, 0.5
-#: l. 252-258: the young animals' coefficients fixed at 1000 per 1000 heads
-YOUNG_PER_1000 = 1000.0
-#: est_nuts2_grid.gms l. 58-110: sugar beet and milk production opened by (1 -/+ 0.01 n)^n after 3 tries
-PROD_OPEN_TRIES, PROD_OPEN_STEP = 3, 0.01
+#: l. 118-124: below 25 tries the requirement functions' bounds within [min(0.1, up), 10]
+REQS_TRIES = 25
+#: l. 132-181: activity levels opened after 10 tries (UAAR after 20); the floor 1e-5, dropped to zero after 20 tries
+LEVL_TRIES_OPEN, UAAR_TRIES_OPEN, LEVL_OPEN_FLOOR = 10, 20, 1.0e-5
+#: est_nuts2_grid.gms l. 57-106: sugar beet and milk production opened after 3 tries
+PROD_OPEN_TRIES = 3
 #: est_nuts2_grid.gms l. 121: the set-aside activities' lower level bounds below 0.01 to zero
 RSET_LO_MIN = 0.01
 
@@ -436,7 +410,8 @@ def _open_bounds(n, r, d, B, lo_, up_, x, at_lo, at_up, mx, reqs_m, feed_m, ms_V
     """est_Nuts2_grid_openbound.gms for region r after the n-th failed solve (nRepeatedSolves = n). x: the levels of the
     solve; at_lo / at_up: the positions at a bound with a nonzero multiplier; mx: those with a nonzero multiplier;
     reqs_m: (activity, requirement) with REQS_'s multiplier nonzero; feed_m: the member state's (activity, feed) with
-    MSFEEDI_'s nonzero; lo_all / up_all: {region: bounds} (the levels' sums over the regions)."""
+    MSFEEDI_'s nonzero; lo_all / up_all: {region: bounds} (the levels' sums over the regions). The statements'
+    arithmetic is in capri_mod/pipeline/captrd/equations/est_nuts2_grid_openbound.py."""
     pd = d.pd
     LO = lambda k: lo_.get(k, -INF)                                                        # noqa: E731
     UP = lambda k: up_.get(k, INF)                                                         # noqa: E731
@@ -448,24 +423,24 @@ def _open_bounds(n, r, d, B, lo_, up_, x, at_lo, at_up, mx, reqs_m, feed_m, ms_V
     def fx(k, v):
         lo_[k] = up_[k] = v
 
-    # l. 40-50: the feed the member state's feed balance blocks
+    # l. 40-54: the feed the member state's feed balance blocks
     for a, f in sorted(feed_m):
         if a in B.mpact and ob(a, f):
             if n > FEED_FIX_TRIES:
-                fx((a, f), support.get((a, f), 0.0))
+                fx((a, f), OB.V_EstV_fx_FEED(support.get((a, f), 0.0)))
             if LO((a, f)) == UP((a, f)):
-                up_[(a, f)] = max(LO((a, f)) * FEED_OPEN_FAC, LO((a, f)) + FEED_OPEN_ADD)
+                up_[(a, f)] = OB.V_EstV_up_FEED_fixed(LO((a, f)))
 
-    # l. 53-61: the coefficients' upper bounds
+    # l. 58-79: the coefficients' upper bounds
     for a in sorted(B.mpact):
         for w in sorted(B.rows_est):
             k = (a, w)
             if not ob(a, w) or not ((a, w) in io or w in reqst) or k not in mx:
                 continue
             if k in at_up or (w in reqst and (a, w) in reqs_m):
-                up_[k] = UP(k) + max(COEF_STEP, COEF_SHARE * abs(UP(k)))
+                up_[k] = OB.V_EstV_up_coef(UP(k))
 
-    # l. 64-79: the coefficients' lower bounds
+    # l. 81-113: the coefficients' lower bounds
     for a in sorted(B.mpact):
         for w in sorted(B.rows_est):
             k = (a, w)
@@ -475,139 +450,121 @@ def _open_bounds(n, r, d, B, lo_, up_, x, at_lo, at_up, mx, reqs_m, feed_m, ms_V
             if not (n > NYD_OPEN_TRIES or not y or a not in B.noyielddrop or w == "COMI"):
                 continue
             if k in at_lo or (w in reqst and (a, w) in reqs_m):
-                lk = LO(k)
-                if pd(a, w, "BASM") >= 0 or w in reqst:
-                    share = COEF_SHARE - (COEF_SHARE_Y if y else 0.0) + (COEF_SHARE_FEED if w in feed else 0.0)
-                    lo_[k] = max(0.0, lk - max(COEF_STEP, share * abs(lk)))
-                else:
-                    lo_[k] = lk - max(COEF_STEP, COEF_SHARE * abs(lk))
+                lo_[k] = OB.V_EstV_lo_coef(LO(k), pd(a, w, "BASM"), w in reqst, y, w in feed)
 
-    # l. 82-86: the requirement functions
+    # l. 118-124: the requirement functions
     if n < REQS_TRIES:
         for a in sorted(B.mpact):
             for w in sorted(reqst):
                 if ob(a, w):
-                    lo_[(a, w)] = min(REQS_CAP, max(min(REQS_MIN, UP((a, w))), LO((a, w))))
-                    up_[(a, w)] = min(REQS_CAP, UP((a, w)))
+                    lo_[(a, w)], up_[(a, w)] = OB.V_EstV_REQST(LO((a, w)), UP((a, w)))
 
-    # l. 89-104: the activity levels
+    # l. 132-151: the activity levels
     cols = sorted(B.cols_est)
     for c in cols:
         k = (c, "LEVL")
         if ob(c, "LEVL") and k in mx and n > LEVL_TRIES_OPEN and k in at_up:
-            up_[k] = max(UP(k) * LEVL_OPEN_UP, UP(k) + COEF_STEP)
+            up_[k] = OB.V_EstV_up_LEVL_open(UP(k))
     for c in cols:
         k = (c, "LEVL")
         if ob(c, "LEVL") and k in mx and n > LEVL_TRIES_OPEN and (c != "UAAR" or n > UAAR_TRIES_OPEN) and k in at_lo:
-            fac = UAAR_OPEN_LO if c == "UAAR" else LEVL_OPEN_LO
-            lo_[k] = max(LEVL_OPEN_FLOOR if LO(k) >= LEVL_OPEN_FLOOR else 0.0, min(LO(k) * fac, LO(k) - COEF_STEP))
+            lo_[k] = OB.V_EstV_lo_LEVL_open(LO(k), c == "UAAR")
 
-    # l. 106-109: the levels' floor
+    # l. 153-156: the levels' floor
     for c in cols:
         k = (c, "LEVL")
         if ob(c, "LEVL"):
-            lo_[k] = min(UP(k), max(LEVL_OPEN_FLOOR if LO(k) >= LEVL_OPEN_FLOOR else 0.0, LO(k)))
+            lo_[k] = OB.V_EstV_lo_LEVL_floor(LO(k), UP(k))
 
-    # l. 118-133: the regions' level bounds against the member state's level
+    # l. 160-174: the regions' level bounds against the member state's level
     for c in cols:
         k = (c, "LEVL")
         if not ob(c, "LEVL"):
             continue
         slo = sum(lo_all[q].get(k, -INF) for q in regs if lo_all[q].get(k, -INF) != 0)
         if M3(c, "LEVL") < slo:
-            lo_[k] = min(LO(k), M3(c, "LEVL") / len(regs) * LEVL_MS_LO)
+            lo_[k] = OB.V_EstV_lo_LEVL_ms(LO(k), M3(c, "LEVL"), len(regs))
         sup_ = sum(up_all[q].get(k, INF) for q in regs if up_all[q].get(k, INF) != 0)
         if M3(c, "LEVL") > sup_:
-            up_[k] = max(UP(k), M3(c, "LEVL") / len(regs) * LEVL_MS_UP)
+            up_[k] = OB.V_EstV_up_LEVL_ms(UP(k), M3(c, "LEVL"), len(regs))
 
-    # l. 134-137: the floor dropped after 20 tries
+    # l. 178-181: the floor dropped after 20 tries
     for c in cols:
         k = (c, "LEVL")
         if LO(k) == LEVL_OPEN_FLOOR and n > UAAR_TRIES_OPEN and ob(c, "LEVL"):
-            lo_[k] = 0.0
+            lo_[k] = OB.V_EstV_lo_LEVL_zero()
 
-    # l. 138-150: production opened where blocking
+    # l. 186-199: production opened where blocking
     rows = sorted(B.rows_est)
     for w in rows:
         k = ("GROF", w)
         if ob("GROF", w) and k in mx and k in at_up:
-            up_[k] = max(UP(k) * GROF_OPEN_UP, UP(k) + COEF_STEP)
+            up_[k] = OB.V_EstV_up_GROF_open(UP(k))
         if ob("GROF", w) and k in mx and k in at_lo:
-            lo_[k] = max(0.0, min(LO(k) * GROF_OPEN_LO, LO(k) - COEF_STEP))
+            lo_[k] = OB.V_EstV_lo_GROF_open(LO(k))
 
-    # l. 152-176: production at least the levels' and coefficients' range where not blocking
+    # l. 204-237: production at least the levels' and coefficients' range where not blocking
     for w in rows:
         k = ("GROF", w)
         acts = [a for a in sorted(B.mpact) if (a, w) in io and ob(a, w) and ob(a, "LEVL")]
         if not ob("GROF", w) or k in mx or not acts:
             continue
-        lsum = usum = 0.0
-        for a in acts:
-            ll, ul, lc, uc = LO((a, "LEVL")), UP((a, "LEVL")), LO((a, w)), UP((a, w))
-            lv = (min(ll, ul) if lc > 0 else 0.0) + (max(ll, ul) if lc < 0 else 0.0)
-            lsum += _gmul(_gmul(lv, lc), (GROF_SHRINK if lc > 0 else 0.0) + (GROF_WIDEN if lc < 0 else 0.0))
-            uv = (max(ll, ul) if lc > 0 else 0.0) + (min(ll, ul) if lc < 0 else 0.0)
-            usum += _gmul(_gmul(uv, uc), (GROF_SHRINK if lc < 0 else 0.0) + (GROF_WIDEN if lc > 0 else 0.0))
-        lo_[k] = min(LO(k), lsum * PER_1000)
-        up_[k] = max(UP(k), usum * PER_1000 + GROF_UP_ADD)
+        lo_[k], up_[k] = OB.V_EstV_GROF_range(LO(k), UP(k), [(LO((a, "LEVL")), UP((a, "LEVL")), LO((a, w)), UP((a, w)))
+                                                             for a in acts])
 
-    # l. 177-184: fodder production and use linked
+    # l. 243-253: fodder production and use linked
     fpairs = sorted((i, o) for i, o in B.feed_to_o if i in B.foddi)
     for i in sorted({i for i, _o in fpairs}):
         if ob("GROF", i):
-            up_[("GROF", i)] = max(UP(("GROF", i)), sum(UP(("GROF", o)) for ii, o in fpairs if ii == i))
+            up_[("GROF", i)] = OB.V_EstV_up_GROF_fodder(UP(("GROF", i)), [UP(("GROF", o)) for ii, o in fpairs if ii == i])
     for o in sorted({o for _i, o in fpairs}):
         if ob("GROF", o):
-            up_[("GROF", o)] = max(UP(("GROF", o)), sum(UP(("GROF", i)) for i, oo in fpairs if oo == o))
+            up_[("GROF", o)] = OB.V_EstV_up_GROF_fodder(UP(("GROF", o)), [UP(("GROF", i)) for i, oo in fpairs if oo == o])
     for i in sorted({i for i, _o in fpairs}):
         if ob("GROF", i):
-            lo_[("GROF", i)] = min(LO(("GROF", i)), sum(LO(("GROF", o)) for ii, o in fpairs if ii == i))
+            lo_[("GROF", i)] = OB.V_EstV_lo_GROF_fodder(LO(("GROF", i)), [LO(("GROF", o)) for ii, o in fpairs if ii == i])
     for o in sorted({o for _i, o in fpairs}):
         if ob("GROF", o):
-            lo_[("GROF", o)] = min(LO(("GROF", o)), sum(LO(("GROF", i)) for i, oo in fpairs if oo == o))
+            lo_[("GROF", o)] = OB.V_EstV_lo_GROF_fodder(LO(("GROF", o)), [LO(("GROF", i)) for i, oo in fpairs if oo == o])
 
-    # l. 185-188: the young animals at 1000 per 1000 heads; nothing where the member state has no level
+    # l. 255-261: the young animals at 1000 per 1000 heads; nothing where the member state has no level
     for a, i in sorted(B.pact_to_i):
         if a in B.fix_yai and i in B.iyani and ob(a, "LEVL"):
-            fx((a, i), YOUNG_PER_1000)
+            fx((a, i), OB.V_EstV_fx_young_animals())
     for a, o in sorted(B.pact_to_o):
         if a in B.fix_yao and o in B.oyani and ob(a, "LEVL"):
-            fx((a, o), YOUNG_PER_1000)
+            fx((a, o), OB.V_EstV_fx_young_animals())
     for a in sorted(B.mpact):
         if not M3(a, "LEVL"):
             for w in rows:
                 if ob(a, w):
-                    fx((a, w), 0.0)
+                    fx((a, w), OB.V_EstV_fx_no_ms_level())
 
-    # l. 189-201: fodder losses at the member state's rate
+    # l. 265-276: fodder losses at the member state's rate
     rng = lambda k: UP(k) - LO(k)                                                          # noqa: E731
     for o in sorted(losf_coco2):
-        g_ = ms_V.get(("GROF", o), 0.0)
-        rate = ms_V.get(("LOSF", o), 0.0) / g_ if g_ else 0.0
+        ms_lg = (ms_V.get(("LOSF", o), 0.0), ms_V.get(("GROF", o), 0.0))
         kg = ("GROF", o)
         if LO(kg) >= 0 and rng(kg) > 0:
-            lo_[("LOSF", o)] = LOSF_LO * LO(kg) * rate
+            lo_[("LOSF", o)] = OB.V_EstV_lo_LOSF(LO(kg), *ms_lg)
         if 0 <= UP(kg) < INF and rng(kg) > 0:
-            up_[("LOSF", o)] = LOSF_UP * UP(kg) * rate
+            up_[("LOSF", o)] = OB.V_EstV_up_LOSF(UP(kg), *ms_lg)
 
-    # l. 202-210: the fixed land, ARTIF
+    # l. 281-292: the fixed land, ARTIF
     for c in ("ARTO", "INLW", "KITC"):
-        fx((c, "LEVL"), pd(c, "LEVL", "BASM"))
+        fx((c, "LEVL"), OB.V_EstV_fx_land(pd(c, "LEVL", "BASM")))
     mb = d.ms_pd("ARTIF", "LEVL", "BASM")
     if mb:
-        lo_[("ARTIF", "LEVL")] = ARTIF_SHRINK * min(
-            pd("ARTIF", "LEVL", "BASM") * M3("ARTIF", "LEVL") / mb,
-            pd("ARTO", "LEVL", "BASM") - pd("INLW", "LEVL", "BASM") - LO(("UAAR", "LEVL")))
-
-
-def _gmul(x, y):
-    """GAMS's product: zero if either factor is zero (also against an infinite bound)."""
-    return 0.0 if (x == 0 or y == 0) else x * y
+        lo_[("ARTIF", "LEVL")] = OB.V_EstV_lo_ARTIF(pd("ARTIF", "LEVL", "BASM"), M3("ARTIF", "LEVL"), mb,
+                                                    pd("ARTO", "LEVL", "BASM"), pd("INLW", "LEVL", "BASM"),
+                                                    LO(("UAAR", "LEVL")))
 
 
 def _grid_again(n, r, d, B, lo_, up_, x, at_lo, at_up, mx, nobs, support, ms_V):
     """est_nuts2_grid.gms l. 42-121 after the bounds are opened: comi_bounds.gms, release_comi_yields.gms, the sugar beet
-    and milk production, LOSF.STRA free, the set-aside levels' floor. x is updated where CAPTRD sets levels."""
+    and milk production, LOSF.STRA free, the set-aside levels' floor. x is updated where CAPTRD sets levels. The
+    statements' arithmetic is in capri_mod/pipeline/captrd/equations/est_nuts2_grid.py (comi_bounds.py for
+    comi_bounds.gms; release_comi_yields.gms is estimate_nlp._release_comi's)."""
     pd, res, t = d.pd, d.res, d.year
     R = lambda rp, c, w: res.get(rp, {}).get((c, w), 0.0)                                  # noqa: E731
     ob = lambda c, w: (c, w) in nobs                                                       # noqa: E731
@@ -620,42 +577,40 @@ def _grid_again(n, r, d, B, lo_, up_, x, at_lo, at_up, mx, nobs, support, ms_V):
     EB._comi(d, B, lo_, up_, LO, UP, ob, pd, R, lambda c, w: R("Support", c, w), fx, t)
     NLP._release_comi(n, B, lo_, up_, ob, at_lo, at_up)
 
-    # l. 48-56: the sugar beet yield's level mid-range; sugar beet production opened after 3 tries
+    # l. 53-69: the sugar beet yield's level mid-range; sugar beet production opened after 3 tries
     if ob("SUGB", "SUGB"):
-        x[("SUGB", "SUGB")] = 0.5 * LO(("SUGB", "SUGB")) + 0.5 * UP(("SUGB", "SUGB"))
-    grow = lambda: (1 + PROD_OPEN_STEP * n) ** n                                           # noqa: E731
-    shrink = lambda: (1 - PROD_OPEN_STEP * n) ** n                                         # noqa: E731
+        x[("SUGB", "SUGB")] = GR.V_EstV_l_SUGB_SUGB(LO(("SUGB", "SUGB")), UP(("SUGB", "SUGB")))
     k = ("GROF", "SUGB")
     if x.get(("SUGB", "SUGB")) and ob(*k) and n > PROD_OPEN_TRIES and k in mx:
         if k in at_lo:
-            lo_[k] = LO(k) * shrink()
+            lo_[k] = GR.V_EstV_lo_GROF_tries(LO(k), n)
         if k in at_up:
-            up_[k] = UP(k) * grow()
+            up_[k] = GR.V_EstV_up_GROF_tries(UP(k), n)
 
-    # l. 70-95: sugar beet production at the quota share, its area from production over the yield
+    # l. 71-94: sugar beet production at the quota share, its area from production over the yield
     mq = (d.ms_res or {}).get("p_data", {}).get(("QUTS", "SUGB"), 0.0)
     yl = x.get(("SUGB", "SUGB"), 0.0)
     if mq and t >= SUGB_FROM and yl and ob("GROF", "SUGB"):
-        x[k] = R("p_data", "QUTS", "SUGB") * ms_V.get(k, 0.0) / mq
+        x[k] = GR.V_EstV_l_GROF_SUGB(R("p_data", "QUTS", "SUGB"), ms_V.get(k, 0.0), mq)
     if mq and t >= SUGB_FROM and yl and ob("SUGB", "LEVL"):
-        up_[("SUGB", "LEVL")] = UP(k) / (yl * PER_1000)
-        lo_[("SUGB", "LEVL")] = LO(k) / (yl * PER_1000)
-        x[("SUGB", "LEVL")] = x.get(k, 0.0) / (yl * PER_1000)
+        lo_l, up_l, l_l = GR.V_EstV_SUGB_LEVL(LO(k), UP(k), x.get(k, 0.0), yl)
+        up_[("SUGB", "LEVL")] = up_l
+        lo_[("SUGB", "LEVL")] = lo_l
+        x[("SUGB", "LEVL")] = l_l
 
-    # l. 96-110: milk production opened after 3 tries
+    # l. 96-106: milk production opened after 3 tries
     k = ("GROF", "COMI")
     if ob(*k) and n > PROD_OPEN_TRIES and k in mx:
         if k in at_lo:
-            lo_[k] = LO(k) * shrink()
+            lo_[k] = GR.V_EstV_lo_GROF_tries(LO(k), n)
         if k in at_up:
-            up_[k] = UP(k) * grow()
+            up_[k] = GR.V_EstV_up_GROF_tries(UP(k), n)
 
-    # l. 112-113, 120-121
-    lo_[("LOSF", "STRA")], up_[("LOSF", "STRA")] = 0.0, INF
+    # l. 109-110, 121
+    lo_[("LOSF", "STRA")], up_[("LOSF", "STRA")] = GR.V_EstV_LOSF_STRA()
     for a in sorted(B.rset):
         if LO((a, "LEVL")) < RSET_LO_MIN:
-            lo_[(a, "LEVL")] = 0.0
-
+            lo_[(a, "LEVL")] = GR.V_EstV_lo_RSET()
 
 
 def _phase1_ipopt(ph1, x, gv, lb, ub, lbg, ubg, m, nk, regs, log):
