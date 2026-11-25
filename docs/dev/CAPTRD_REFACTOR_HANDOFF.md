@@ -73,7 +73,12 @@ Nothing is merged into dev; the main session decides the merge.
 | 3d24e884 | C5.18 | load_aglink2023dgAgri.gms: 60 functions (aglink, macro.inha) | light part aglink (a synthetic Aglink cube) |
 
 Every C5 block: identical to 9c69ab7b on its part, with the light checks of section 3; the full dump and the pipeline
-tests once, at the end of C5 (the end-of-C5 gate: its result is added here when it has run).
+tests once, at the end of C5. **The end-of-C5 gate** (25 November, at 3d24e884, PYTHONHASHSEED=0 on both sides): the
+full dump IDENTICAL to 9c69ab7b, every part (the 340 points' residuals, objectives, bounds and retries, and all C5
+parts); the pipeline tests 55 passed, 21 skipped, 8 failed, 7 errors: the same 14 capreg_base tests as at C4, and one
+new failure, test_captrd_coco_supports.py's use of coco_supports.TRUST_COCO, a constant C5.12 had made the literal of
+DS.p_cocoSupport_TrustLevl (the test now reads it there; 56 passed, as at C4c). A scan of every `X.NAME` and import
+of the captrd modules' names removed since 9c69ab7b found no other use (tests that skip here included).
 
 The pipeline tests (`python -m pytest -q -p no:randomly -n 0 capri_mod/pipeline/tests`, about 4.5 minutes here):
 at edb882ca **51 passed, 21 skipped, 7 failed, 7 errors**, at C4 **53 passed**, at C4b **55 passed**, at C4c **56
