@@ -27,8 +27,9 @@ Nothing is merged into dev; the main session decides the merge.
   year for the EU's countries), which the estimation's bounds, the NLP and the NUTS 2 solves read: those 14 pipeline
   tests fail or error here, before and after the refactor alike. The main session's environment has it: run the
   pipeline's outputs bit for bit there against 9c69ab7b before the merge (section 4).
-- **Next:** C6, the sort of the hash-order places (scan again: C4-C5 moved lines), **a commit of its own** (it
-  changes last digits).
+- **C6, done:** the hash-order places sorted, a commit of its own (cbfc688e): the pipeline's parts are the same
+  under PYTHONHASHSEED 0 and 1 (section 1's C6 row). **Next:** the main session's merge decision and its bit-for-bit
+  run of the pipeline's outputs against 9c69ab7b (section 4); the C6 commit's last-digit changes are expected there.
 - **Findings (listed, not fixed: a move changes nothing):** est_nuts2_grid.gms l. 121 (the set-aside levels' floor) is
   inside `if (p_farmModelisRunning eq 1, ...)`: CAPRI applies it to the farm types only, the port to the NUTS 2 regions
   too; CAPRI's `/ 1000` is the port's `x 0.001` in the NUTS 2 production and area bounds (may differ in the last
@@ -71,6 +72,7 @@ Nothing is merged into dev; the main session decides the merge.
 | 3e076e53 | C5.16 | biofuel_trends.gms: 92 functions (biofuel_trends.trends) | light part biofuel |
 | 5310df2c | C5.17 | convert_globiom.gms (33) and create_longrun_info.gms (3) (globiom) | light part globiom (synthetic GLOBIOM tables) |
 | 3d24e884 | C5.18 | load_aglink2023dgAgri.gms: 60 functions (aglink, macro.inha) | light part aglink (a synthetic Aglink cube) |
+| cbfc688e | C6 | the hash order: of the scan's 81 places (docs/dev/captrd_set_order_places.csv now lists the 6 left, each order free, with a note) 75 iterate sorted; 19 more the scan cannot see, sets of CaptrdSets, aglink.Sets and globiom.Sets iterated under other names (coco's DOMM sums and mappings, globiom.mapped's region lists, aglink's mapped columns and rows, eu_supports.est_sets, eu_supports' and final_supports' pact_to_y and maact), sorted where iterated. The parity tool: --compare reports digest parts; its inputs built from sets are sorted | the full dump under PYTHONHASHSEED 0 and 1: IDENTICAL (before: 12 parts differed: coco, eu_supports, globiom's collect, mapped, factors, base_factors). Against 9c69ab7b at seed 0: those 12 parts differ, every other identical; coco 28 of 160,451 values (at most 2.1e-16 relative), globiom 17,331 of 2.4 million records (at most 6.7e-16), eu_supports' inputs reordered (est_sets sorted). Pipeline tests 56 passed, the same 14 capreg_base failures and errors |
 
 Every C5 block: identical to 9c69ab7b on its part, with the light checks of section 3; the full dump and the pipeline
 tests once, at the end of C5. **The end-of-C5 gate** (25 November, at 3d24e884, PYTHONHASHSEED=0 on both sides): the
@@ -206,13 +208,12 @@ from before the statement, so a caller that loops keeps the old values where the
     statistics.bsy for fewer than three distinct yields; Support1 (define_stats_and_supports l. 673-675) is the tests'
     copy; several modules' citations were 1-40 lines off this GAMS copy and are re-cited (policy, biofuel_trends,
     aglink, create_longrun_info: l. 91-102, not 74-90).
-- **C6: the hash order.** docs/dev/captrd_set_order_places.csv: 81 places in 17 modules (globiom 19,
-  national_supports 13, prepare 8, aglink 7, longrun_supports 7, policy 5, biofuel_trends 4, scale_dgagri 4, coco 3,
-  expert_support 2, macro 2, requirements 2, dairy_supports, estimate_nuts2, eu_supports, statistics, timesets 1 each;
-  `python tools/check/scan_set_order.py capri_mod` again: C4-C5 moved the lines, and the eu_supports part shows one
-  such sum). Some are harmless (the
-  estimate_nuts2 one is a list sorted on the next line); the rest are sorted with `sorted(...)`. **A commit of its own,
-  after the moves**, since it changes last digits; its check is the pipeline under two seeds giving the same outputs.
+- **C6, done** (section 1). A new set iteration in capri_mod/pipeline/captrd should be sorted, or written order free;
+  `python tools/check/scan_set_order.py capri_mod` finds the plain ones, not those of sets passed to other functions:
+  the check that finds those is the parity tool's dump under two seeds (`PYTHONHASHSEED=0` and `=1`, `--compare`).
+  prepare.read_sets returns Python sets; estimate_ms.read_sets returns OSet (sorted iteration), which is why the
+  estimation was seed-free before C6. Two lint findings in policy.py (an unused import, an unused local) date from
+  9c69ab7b and are left.
 - **The citations.** check_gams_citations.py checks only an equation's name next to its lines; the citations of the
   assignment modules (gams files other than equations.gms) are not checked by a tool yet: a block's own.
 
