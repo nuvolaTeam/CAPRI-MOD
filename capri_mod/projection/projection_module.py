@@ -17,7 +17,7 @@ Baseline and policy are kept separate
 -------------------------------------
 ``run()`` solves the trajectory **twice** when a policy scenario is supplied:
 once under the baseline policy and once under the scenario. The reported result
-carries both, plus their difference. This is the README §10.2 commitment made
+carries both, plus their difference. This is the README §7 (the projection layer) commitment made
 concrete: a reader can always see how much of a projected figure is "the world
 changing anyway" (baseline drift) versus the policy (the increment). The
 increment is the model's validated strength; the drift is an adopted external

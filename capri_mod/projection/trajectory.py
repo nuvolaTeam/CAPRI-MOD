@@ -1,6 +1,6 @@
 """Baseline trajectory — the projection's external, versioned driver.
 
-Design principle (README §10.2): the trajectory is *not* a forecast CAPRI-mod
+Design principle (README §7, the projection layer): the trajectory is *not* a forecast CAPRI-mod
 makes. It is an adopted external assumption set, versioned and swappable, whose
 provenance is recorded like any other data source. A projection is defended not
 by claiming the trajectory is right, but by showing which conclusions hold across

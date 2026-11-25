@@ -3,7 +3,7 @@
 Which of the model's outputs can be relied on, which cannot, and the hazards in reading them. Read this before using a
 number from the model. The same findings are in machine-readable form in `capri_data/FITNESS_FOR_USE.json`, queried
 with `capri_mod/fitness.py`. The comparisons with CAPRI's runs (the Green Deal 2030 step and Farm-to-Fork 2030) are in
-README2.md, §2.
+README.md, §2.
 
 > **The figures here are those of the runs each paragraph names.** Most predate the changes of late November 2026
 > (the non-EU supply countries in the run, the default since 24 November; CAPRI's 2030 livestock outputs per head).
@@ -35,7 +35,7 @@ within 25% (the regression anchor, `capri_data/validation/REGRESSION_ANCHORS.jso
   budgets). Magnitudes are of the right order against CAPRI.
 - **The Green Deal 2030 step**, at the comparison settings (`capri_mod/settings/capri_comparison.toml`): EU activity
   changes within a mean 1.0 points of CAPRI's step, EU producer prices within 0.6 points, median ratio 0.97 (23
-  November 2026; README2.md §2.2).
+  November 2026; README.md §2.2).
 - **Nitrogen targets**: CAPRI's tiered surplus rule on the gross N balance inside the regional models; pesticide
   instruments (with plant-protection costs derived from all 27 member states); organic area targets (CAPRI's
   input/output adjustment with its FADN yield gaps).
@@ -48,7 +48,7 @@ within 25% (the regression anchor, `capri_data/validation/REGRESSION_ANCHORS.jso
 
 - **Price magnitudes under Farm-to-Fork.** Against JRC121368, cereal prices rise too far (+12.5% against +8.2%), the
   pork price far too little (+21% against +43%) and the milk price far too much (+22% against +1%). Directions and
-  rankings are usable. JRC121368 is another CAPRI release with another baseline (README2.md §2.3).
+  rankings are usable. JRC121368 is another CAPRI release with another baseline (README.md §2.3).
 - **The Green Deal's N-surplus dual**, the price of its nitrogen target: 0.856 of CAPRI's in the median unit (CAPRI's
   dual recovered from its results' marginal terms, `tools/build/extract_capri_marginal_terms.py`). The herds' response
   and the grassland split follow it.
