@@ -529,6 +529,22 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   covers (the EU's and Norway's); the water accounts' coverage (no irrigation share for Bosnia's and Serbia's units).
   Also: two CSV float reads made exact (build_livestock_n_export_2030.py, of K202; build_feed_bulk_grof.py). README
   §10.4.
+- **The animals' costs in CAPRI's objective form (25 November 2026; register DEP-13 step 3, the project lead's choice
+  of CAPRI's objective form):** CAPRI's p_linObjeCont (capmod/define_objc.gms l. 39-44) and IobjCont (sets.gms
+  l. 5059-5067: the inputs but IS's, the chicks, water and the mitigation input) in supply/equations/define_objc.py.
+  The animals' input costs by item (tools/build/build_livestock_input_cost.py): livestock_input_cost.csv, 2017, the
+  inputs of IobjCont at the member state's UVAP, the young animals and the feed, adding up to CAPREG's TOIN in all
+  4,677 rows (7.7e-15); livestock_input_cost_2030.csv, the inputs at CAPRI's 2030 start, which times TF_I equal
+  CAPRI's 2030 coefficients in all 24,238 regional rows (5e-15). At 2030 the herd's cost takes the year's inputs in
+  place of 2017's (x_Y x TF_I / deflator; projection_module.p_linObjeCont_animals_Y), and the young animals' and
+  feeds' price changes go to the table's YOUNG and FEED (projection/prices.py). In the regional NLP the herd's linear
+  term leaves out the table's FEED, which QUADRF_ charges (supply.animal_cost_form "capri", the new default; "toin"
+  is the former subtraction of the base ration's cost). The Green Deal's INPO change acts on the table's INPO
+  (supply/policy.py). Measured on the mini-EU Green Deal pair (20 units) against dev 62c2474: the 2030 baseline's
+  levels equal (largest relative difference 2.1e-7); the Green Deal's indicators equal to 0.1 percentage point, the
+  herds within 0.62% (NL22 suckler cows +0.62%, the bulls -0.2 to -0.3%); the reported MGVA +0.28% at the baseline
+  (+93.5 of 32,975 EUR million over the 20 units) and +0.24% in the scenario, from the year's inputs. The income's
+  TOIN at the solution follows with income I1. Tests: capri_mod/tests/test_livestock_input_cost.py (4).
 - **The 2030 rations, requirements, methane and fodder from the ported chain (25 November 2026; the project lead's
   order of 25 November, item 5):** `projection.ration_source` defaults to "chain": with CAPRI's 2030 reference as the
   trajectory the projection takes its 2030 factors on 2017 from the ported feed chain's start (capri_mod/feed/chain.py;
