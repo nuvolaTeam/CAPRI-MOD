@@ -61,7 +61,6 @@ CAPTRD_MOD.md §12.4).
 
 | ID | What | CAPRI | Setting (default; CAPRI) | Status | Details |
 |---|---|---|---|---|---|
-| DEP-1 | Outer-loop iteration cap of 60. | GUI STEPS 99 (gui/capri_gui_definition.xml l. 2891-2897, verified) | `outer_loop.max_outer_iter = 60`; 99 | the project lead's choice, 28 Oct 2026 | DEPARTURES_FROM_CAPRI.md |
 | DEP-2 | Fertiliser-option curvature without the saving term. | envind/ghgMiti.gms l. 1016-1050 | `supply.fert_slope_with_saving = false`; `true` | kept with DEP-30 (K77, decision 31 Oct 2026) | DEPARTURES_FROM_CAPRI.md; KNOWN_ISSUES K77 |
 
 ### 3.2 Departures without a setting (parts not built, or a different form)
@@ -139,6 +138,8 @@ ones known to be stale.
 
 The settings switched to CAPRI's form are described in DEPARTURES_FROM_CAPRI.md, "Switched to CAPRI's setting". Also
 switched to CAPRI's form:
+- DEP-1, the outer loop's iteration cap of 60: CAPRI's 99 (%STEPS%) since 25 November 2026 (the project lead's rule
+  of 24 November, follow CAPRI; DEPARTURES_FROM_CAPRI.md).
 - DEP-32, regions without supply of a bilateral commodity held at their price ratio: CAPRI's PMrk_ (arm/market_model.gms
   l. 3074-3080), the market price = the Armington price + the calibrated margin PMrkMrg = PMrk - arm1P
   (data_fit.gms l. 955), in the default solve (bilateral_solve.py `_bilateral_eval`) and in the whole-market system (in place of

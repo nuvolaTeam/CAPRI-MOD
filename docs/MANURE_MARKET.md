@@ -98,7 +98,7 @@ when it rises. Full-EU Green Deal 2030 (12 November 2026): "capri" with "capri" 
 "damped" 16; "schedules" with "capri" not converged after 36; the equilibria within 0.1-0.4 points.
 
 Convergence: every pool within `manure_pool_tolerance` (0.03) of its manure supply and EU-wide conservation within the
-same tolerance; with trade on, the outer-iteration cap is raised to `manure_max_outer_iter` (60) when it is 25 or more.
+same tolerance; with trade on, the outer-iteration cap is raised to `manure_max_outer_iter` (60) when it is 25 or more (so not at the default cap, CAPRI's 99).
 
 The N-surplus target with trade is per hectare of current farmland (CAPRI's e_SURTOTHa; always on since
 27 October 2026, when its switch was removed).

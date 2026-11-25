@@ -599,7 +599,7 @@ post-equilibrium accounts, and one results dictionary (see [§7](#7-running-the-
   young-animal markets, the manure pools between regions, CAPRI's premium cut and the N-balance prices settle inside
   the same loop.
 - **Stopping.** CAPRI's stop rule (no more than two items still changing by more than 0.05%), with the model's inner
-  balances settled; at most 60 iterations. The items still drifting at the end are reported.
+  balances settled; at most 99 iterations (CAPRI's %STEPS%). The items still drifting at the end are reported.
 - **What a run records.** Each regional solve's status (as CAPRI's `p_INFES`) and any fallback, every iteration's
   prices and changes, the effective settings, and a run manifest with the code version and the hash of every input
   file read. Results are stored under CAPRI's naming of result files.
@@ -858,7 +858,7 @@ Arguments left at None take the run's settings (§7.6).
 |---|---|---|
 | `scenario` | `"BASELINE"` | named scenario (see `list_scenarios()`) |
 | `world_price_shock` | `None` | `{commodity: relative_change}`; the run is a scenario against the unshocked baseline |
-| `max_outer_iter` | setting `outer_loop.max_outer_iter` (60) | supply-market iterations |
+| `max_outer_iter` | setting `outer_loop.max_outer_iter` (99, CAPRI's %STEPS%) | supply-market iterations |
 | `market_max_iter` | setting `market.max_iter` (100) | Newton rounds of the bilateral market solve |
 | `custom_scenario` | `None` | a `PolicyScenario` object |
 | `run_environmental` | setting `run.run_environmental` (True) | also compute environmental indicators |
