@@ -541,10 +541,13 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   term leaves out the table's FEED, which QUADRF_ charges (supply.animal_cost_form "capri", the new default; "toin"
   is the former subtraction of the base ration's cost). The Green Deal's INPO change acts on the table's INPO
   (supply/policy.py). Measured on the mini-EU Green Deal pair (20 units) against dev 62c2474: the 2030 baseline's
-  levels equal (largest relative difference 2.1e-7); the Green Deal's indicators equal to 0.1 percentage point, the
-  herds within 0.62% (NL22 suckler cows +0.62%, the bulls -0.2 to -0.3%); the reported MGVA +0.28% at the baseline
-  (+93.5 of 32,975 EUR million over the 20 units) and +0.24% in the scenario, from the year's inputs. The income's
-  TOIN at the solution follows with income I1. Tests: capri_mod/tests/test_livestock_input_cost.py (4).
+  levels equal (largest relative difference 2.1e-7); the Green Deal's indicators equal to 0.1 percentage point, its
+  regional levels within 0.08% (NL22 calves -0.08%, the suckler cows -0.05 to -0.07%); the reported MGVA +0.28% at
+  the baseline (+93.5 of 32,975 EUR million over the 20 units) and +0.24% in the scenario, from the year's inputs. A
+  first gate found the herds' change not reaching their intensity splits' columns in this form (livestock.py
+  dinpo_rel: herds up to 0.62% off, DE940000's Farm-to-Fork solve non-optimal in test_p_balance); fixed. The
+  income's TOIN at the solution follows with income I1. Tests: capri_mod/tests/test_livestock_input_cost.py (4);
+  the two Green Deal input tests on the input cost table's INPO, the former form under animal_cost_form "toin".
 - **The 2030 rations, requirements, methane and fodder from the ported chain (25 November 2026; the project lead's
   order of 25 November, item 5):** `projection.ration_source` defaults to "chain": with CAPRI's 2030 reference as the
   trajectory the projection takes its 2030 factors on 2017 from the ported feed chain's start (capri_mod/feed/chain.py;
