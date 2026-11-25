@@ -266,10 +266,15 @@ class ProjectionModule:
             self.req_or_man_fnc_CRPR_EXPT_Y(data, year)
         # CAPRI's own 2030 rations and requirements with its 2030 reference (the port of CAPRI's 2030 rations and fodder): factors per region, animal and
         # feed on the 2017 rations (tools/build/build_ration_trajectory_2030.py); where present they replace the uniform
-        # requirement scaling of _project_livestock for that ration
+        # requirement scaling of _project_livestock for that ration. projection.ration_source picks the files: CAPRI's
+        # solved reference (capri_ref_*) or the ported feed chain's start (chain_*)
         if str(getattr(traj, "name", "")).startswith("capri_ref") and self.capri_prices_dir:
             from pathlib import Path as _P
-            f_ = _P(self.capri_prices_dir) / "capri_ref_ration_2030.csv"
+            from capri_mod.settings import current as _settings
+            src_ = str(_settings().get("projection.ration_source"))
+            if src_ not in ("capri_ref", "chain"):
+                raise ValueError(f"projection.ration_source: {src_!r}, not capri_ref or chain")
+            f_ = _P(self.capri_prices_dir) / f"{src_}_ration_2030.csv"
             if f_.exists():
                 t_ = read_input(f_)
                 rf = {}
@@ -291,7 +296,7 @@ class ProjectionModule:
                                 tab_.at[reg_, an_] = float(tab_.at[reg_, an_]) * f
                         data[key_] = tab_
             # usable fodder per ha of the fodder balances (FEDM / LEVL of CAPRI's fodder crops, 2030 over 2017)
-            f2 = _P(self.capri_prices_dir) / "capri_ref_fodder_2030.csv"
+            f2 = _P(self.capri_prices_dir) / f"{src_}_fodder_2030.csv"
             fb = data.get("fodder_balance")
             if f2.exists() and isinstance(fb, dict):
                 uf = {(r_.region, r_.crop): float(r_.factor) for r_ in read_input(f2).itertuples(index=False)}
