@@ -117,6 +117,10 @@ def _lhs_symbol(text: str):
         return "option", t[w.end():].strip()[:40]
     if first in ("display", "abort", "put", "putclose", "execute_unload", "execute_load", "execute"):
         return "other", first
+    if first == "else":
+        # else has no condition: its first statement starts after the keyword
+        kd, sy = _lhs_symbol(t[w.end():])
+        return (kd, sy) if kd in ("assignment", "equation") else ("control", first)
     if first in CONTROL:
         # the first statement inside the control: after the control's condition or domain, up to its first comma
         depth, k = 0, w.end()
@@ -134,7 +138,8 @@ def _lhs_symbol(text: str):
             k += 1
         return "control", first
     # an equation: name(domain) $ cond .. ; an assignment: target(...) $ cond = ...
-    if re.search(r"\.\.(?!\.)", t.split("=")[0]) and not re.match(r"[A-Za-z_]\w*\.[A-Za-z]", t):
+    if (re.search(r"\.\.(?!\.)", re.sub(r"'[^']*'|\"[^\"]*\"", "''", t).split("=")[0])
+            and not re.match(r"[A-Za-z_]\w*\.[A-Za-z]", t)):
         return "equation", w.group(1)
     m = re.search(r"(?<![=<>!])=(?![=eElLgGnN]?=)(?![eElLgGnN]=)", t)
     if m:
@@ -146,17 +151,53 @@ def _lhs_symbol(text: str):
     return "other", first
 
 
+def _inner_offset(text: str) -> int:
+    """The offset in text (stripped) where a control statement's first inner statement starts (after its condition's
+    first comma at depth 1; after the keyword for else); 0 for any other statement."""
+    t = text.strip()
+    w = re.match(r"([A-Za-z_]\w*)", t)
+    if not w or w.group(1).lower() not in CONTROL:
+        return 0
+    if w.group(1).lower() == "else":
+        return w.end() + _inner_offset(t[w.end():]) + (len(t[w.end():]) - len(t[w.end():].lstrip()))
+    depth = 0
+    for k in range(w.end(), len(t)):
+        if t[k] == "(":
+            depth += 1
+        elif t[k] == ")":
+            depth -= 1
+            if depth == 0:
+                return 0
+        elif t[k] == "," and depth == 1:
+            rest = t[k + 1:]
+            return k + 1 + (len(rest) - len(rest.lstrip())) + _inner_offset(rest)
+    return 0
+
+
 def statements(G: Path, rel: str) -> list:
     """[(first line, last line, kind, symbol)] of a star 3.0 file's statements, in order (a statement ends at ';' or
-    is a $ control line)."""
-    out, cur, start = [], "", None
+    is a $ control line). An assignment or equation that is a control statement's first inner statement (if (c, x =
+    ...;) starts on its own line, not the control's."""
+    out, cur, start, marks = [], "", None, []
+
+    def first_line(text):
+        lead = len(text) - len(text.lstrip())
+        at = lead + _inner_offset(text)
+        return max((ln_ for off, ln_ in marks if off <= at), default=start)
     for ln, s in _strip_gms((G / rel).read_text(errors="replace")):
         st = s.strip()
         if st.startswith("$") and not cur:
             # an inline condition with its statement ($ifi %x% == y  p(...) = ...;): the statement after the condition
             m = re.match(r"\$\s*if[ie]?\s+(?:not\s+)?(?:%[\w.]+%|\S+)\s*==\s*\S+\s+(\S.*)$", st, re.I)
-            if not m:
+            if not m or m.group(1).startswith("$"):
                 out.append((ln, ln, "control", st.split()[0]))
+                continue
+            s = m.group(1)
+        elif re.match(r"\$[A-Za-z]", s):
+            # a $ control line inside a statement (an if's $include): not the statement's text, but an inline
+            # condition's statement
+            m = re.match(r"\$\s*if[ie]?\s+(?:not\s+)?(?:%[\w.]+%|\S+)\s*==\s*\S+\s+(\S.*)$", st, re.I)
+            if not m or m.group(1).startswith("$"):
                 continue
             s = m.group(1)
         parts = re.split(r";", s)
@@ -164,11 +205,13 @@ def statements(G: Path, rel: str) -> list:
             if part.strip():
                 if start is None:
                     start = ln
+                marks.append((len(cur) + 1, ln))
                 cur += " " + part
             if j < len(parts) - 1:
                 if cur.strip():
-                    out.append((start, ln, *_lhs_symbol(cur)))
-                cur, start = "", None
+                    kd, sy = _lhs_symbol(cur)
+                    out.append((first_line(cur) if kd in ("assignment", "equation") else start, ln, kd, sy))
+                cur, start, marks = "", None, []
     if cur.strip():
         out.append((start, start, *_lhs_symbol(cur)))
     return out

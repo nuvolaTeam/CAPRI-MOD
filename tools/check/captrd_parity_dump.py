@@ -294,11 +294,11 @@ def eu_supports_cases():
     from capri_mod.pipeline.captrd import timesets as TS
     G = REFERENCE / "sets" / "simini_21730"
     s = P.read_sets()
-    rd = lambda n: pd.read_csv(P.SETS_DIR / f"{n}.csv", keep_default_na=False)    # noqa: E731
+    rd = lambda n: pd.read_csv(P.SETS_DIR / f"{n}.csv", keep_default_na=False, float_precision="round_trip")    # noqa: E731
     one = lambda n: rd(n).d0.tolist()                                            # noqa: E731
     two = lambda n: list(zip(rd(n).d0, rd(n).d1))                                # noqa: E731
-    simg = lambda n: pd.read_csv(G / f"{n}.csv", keep_default_na=False)          # noqa: E731
-    gl = pd.read_csv(P.SETS_DIR / "globiom" / "euallagg.csv").d0.tolist()
+    simg = lambda n: pd.read_csv(G / f"{n}.csv", keep_default_na=False, float_precision="round_trip")          # noqa: E731
+    gl = pd.read_csv(P.SETS_DIR / "globiom" / "euallagg.csv", float_precision="round_trip").d0.tolist()
     cols1, rows1 = EU.est_sets(s.s_colsest, s.s_rowsest)
     want_c = {"GROF", "MAPR", "IMPT", "EXPT", "NTRD", "DOMM", "FEDM", "HCOM", "PRCM", "INDM", "PRCI", "BIOF", "UVAG",
               "UVAD", "EAAG", "EXPE", "LOSM", "SEDM", "UAAR", "SWHE", "MAIZ", "RAPE", "SUGB", "SOWS", "PIGF", "HENS",
@@ -307,7 +307,7 @@ def eu_supports_cases():
               "ICHI", "YCHI", "ILAM", "YLAM", "PORK", "BEEF", "SGMI", "CERE", "OILS", "RAPO", "RAPC", "MILK", "OILS"}
     cols = [c for c in cols1 if c in want_c]
     rows = [w for w in rows1 if w in want_r]
-    py = pd.read_csv(P.SETS_DIR.parent / "dat" / "biofuel_proc_yields.csv")
+    py = pd.read_csv(P.SETS_DIR.parent / "dat" / "biofuel_proc_yields.csv", float_precision="round_trip")
     FS = F.Sets(biostock=one("biostock"), biostock_oilp=one("biostockoilp"), oseeds=one("oseeds"), seco=one("seco"),
                 grcu=one("grcu"), cropo=one("cropo"), prcd=two("prcd"), sed_to_oil=two("sed_to_oil"),
                 oil_to_cak=two("oil_to_cak"), bio_prcd=two("bio_prcd"), pact_to_y=sorted(s.pact_to_y),
@@ -389,7 +389,7 @@ def expert_support_cases():
     europ = ["EU014000", "EU013000", "EU27yr19"]
     breed = pd.read_csv(P.SETS_DIR / "breedact.csv", keep_default_na=False, dtype=str).d0.tolist()
     ncnc = sorted(s.ncnc)[:6]
-    m2 = pd.read_csv(DAT / "dairy_ms_agri_to_ms.csv", keep_default_na=False)
+    m2 = pd.read_csv(DAT / "dairy_ms_agri_to_ms.csv", keep_default_na=False, float_precision="round_trip")
     agri = sorted(set(m2.ms_agri))
     cols = ["GROF", "DOMM", "EAAG", "PRCM", "EXPE", "UVAG", "HCOM", "IMPT", "EXPT", "FEDM", "LOSM", "PRCY", "INDM",
             "PRCI", "UAAR", "SHGM", "DCOL", "DCOH", "HCOS", "S1COM", "MAPR"] + breed[:3] + ncnc
@@ -487,7 +487,7 @@ def national_cases():
     from capri_mod.pipeline.captrd import prepare as P
     from capri_mod.pipeline.captrd import timesets as TS
     G = REFERENCE / "sets" / "simini_21730"
-    g_ = lambda n: pd.read_csv(G / f"{n}.csv", keep_default_na=False).d0.str.upper().tolist()   # noqa: E731
+    g_ = lambda n: pd.read_csv(G / f"{n}.csv", keep_default_na=False, float_precision="round_trip").d0.str.upper().tolist()   # noqa: E731
     s = P.read_sets()
     I0 = NS.read_inputs(P.SETS_DIR, P.SETS_DIR.parent / "dat")
     I = NS.read_inputs(P.SETS_DIR, P.SETS_DIR.parent / "dat")
@@ -570,11 +570,11 @@ def stats_cases():
     from capri_mod.pipeline.captrd import prepare as P
     from capri_mod.pipeline.captrd import supports as SU
     G = REFERENCE / "sets" / "simini_21730"
-    g_ = lambda n: set(pd.read_csv(G / f"{n}.csv").d0)                    # noqa: E731
+    g_ = lambda n: set(pd.read_csv(G / f"{n}.csv", float_precision="round_trip").d0)                    # noqa: E731
     s = P.read_sets()
     C = P.SETS_DIR
-    pty = set(map(tuple, pd.read_csv(G / "PACT_TO_Y.csv")[["d0", "d1"]].values))
-    sets = SU.SupportSets(pact_to_y=pty, mcact=g_("MCACT"), no_yield_drop=set(pd.read_csv(C / "noyielddrop.csv").d0),
+    pty = set(map(tuple, pd.read_csv(G / "PACT_TO_Y.csv", float_precision="round_trip")[["d0", "d1"]].values))
+    sets = SU.SupportSets(pact_to_y=pty, mcact=g_("MCACT"), no_yield_drop=set(pd.read_csv(C / "noyielddrop.csv", float_precision="round_trip").d0),
                           breed_act={"DCOL", "DCOH", "SCOW", "SHGM", "SOWS", "HENS"}, grs_act=g_("GRSACT"),
                           reqst={"ENNE", "CRPR", "FILG", "FICT", "FISM", "FISF"}, feed=g_("FEED"), mpact=g_("MPACT"),
                           reqfcnlim={("DCOL", "DAYS"): (300.0, 400.0), ("PIGF", "DAILY"): (0.5, None),
@@ -993,7 +993,7 @@ def aglink_cases():
         m = M.inha(sets, mac, ssp, aglink_pop=pop, ag_eu_regs=S.agEUreg, ag_years=[int(y) for y in S.agYears],
                    years=years, lst_dgagri=2035, last_sim_year=2070, fao_map=list(zip(fao.d0, fao.d1)), base_year=2017)
         out[(seed, "macro")] = _digest(sorted(((k, float(v).hex()) for k, v in m.items()), key=repr))
-        wp = pd.read_csv(P.SETS_DIR.parent / "dat" / "macro_worldpop.csv")
+        wp = pd.read_csv(P.SETS_DIR.parent / "dat" / "macro_worldpop.csv", float_precision="round_trip")
         basm = {r: float(rng.lognormal(8.0, 1.0)) for r in S.ms}
         ip = M.inha_pdata(m, ms=S.ms, basm=basm, years_cur=range(1984, 2071), bast_year=2017,
                           exante=[2018, 2020, 2025, 2030, 2040, 2050, 2070],

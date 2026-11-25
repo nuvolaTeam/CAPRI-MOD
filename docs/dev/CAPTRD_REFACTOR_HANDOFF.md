@@ -37,10 +37,28 @@ Nothing is merged into dev; the main session decides the merge.
   exactly (floats as hex, data frames with their index and order):
   - 9c69ab7b and C5: every output identical;
   - C6 against C5: one value, Austria's ARTIF LEVL at BASM (check_and_cor's sum over its regions, now in sorted
-    order), 1.4e-16 relative, and with it the two ARTIF LEVL entries of Austria's 2030 bounds; nothing else;
+    order), 1.4e-16 relative, and with it the two ARTIF LEVL entries of Austria's 2030 bounds and Austria's 2030
+    member-state solve: both solves succeed after 21 tries, the objectives agree to 2.1e-8, 472 of the 1,709 values
+    differ beyond 1e-6 relative, the largest among values of 1 or more 0.5% (CAMF's FROO), the larger relative ones
+    on values below 1 (the solve is flat in those directions); nothing else;
   - C6 under seeds 0 and 1: the prepared data and the statistics (prepare.prep_for_estimation, statistics.statistics)
     differ in their rows' order only (equal when sorted); 9c69ab7b has the same order dependence (the same two
     hashes). Everything computed from them is identical under both seeds.
+- **Merged into dev (25 November 2026), with a follow-up for dev's checks**, which the branch had not met (they came
+  after it forked):
+  - dev's naming rule (one function per assigned symbol, docs/dev/ASSIGNMENTS_REFACTOR_PLAN.md section 1):
+    p_GLOBIOM_compare_sum split into p_globiomTrade, p_PRICE, p_PROCESS, p_DEMAND, p_SUPPLY, p_FEED, p_CROP_AREA,
+    p_LAND; p_GLOBIOM_ragg into p_LIVESTOCK_ragg, p_CROP_AREA_ragg, p_LAND_ragg; p_GLOBIOMmappedCols's second
+    statement to p_GLOBIOMmapped_rows; p_GLOBIOMmapped_removed's p_globiomInfo statements to
+    p_globiomInfo_factorB2000_removed; p_aglink_sum's p_aglinkTrd statements to p_aglinkTrd_sum; p_result's statements
+    from p_aglinkTrd_copy and p_aglinkTrd_removed to p_result_DGAgri and p_result_DGAgri_EXPT_IMPT. The parity dump's
+    globiom, aglink, biofuel and stats parts identical before and after;
+  - the citation check's statement parser (tools/refactor/assignments_inventory.py) read 14 of the branch's correct
+    citations wrongly: a quoted label with ".." ('QP..NAGR') as an equation, a `$ifi ... $include` line as the start
+    of the next statement, `else` and a control's `$include` lines as part of the statement, a control's first inner
+    statement as starting on the control's line. Fixed; 0 citations fail;
+  - tools/check/captrd_parity_dump.py's CSV reads made exact (test_exact_io); its Aglink macro case reads
+    macro_worldpop.csv exactly now, so a dump made with the earlier tool differs there (compare dumps of one tool).
 - **Findings (listed, not fixed: a move changes nothing):** est_nuts2_grid.gms l. 121 (the set-aside levels' floor) is
   inside `if (p_farmModelisRunning eq 1, ...)`: CAPRI applies it to the farm types only, the port to the NUTS 2 regions
   too; CAPRI's `/ 1000` is the port's `x 0.001` in the NUTS 2 production and area bounds (may differ in the last

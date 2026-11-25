@@ -198,13 +198,13 @@ def region_map(S: Sets, G: Globiom) -> Set[Tuple[str, str]]:
     return {(r, g) for r, g in out if not (r in S.rw and r not in S.euallagg and r != "EU")}   # l. 1239-1243
 
 
-def _sums(records):
-    """The records' (key, value) summed per key (GE.p_GLOBIOM_compare_sum), the keys in the order of their first
-    record."""
+def _sums(records, f):
+    """The records' (key, value) summed per key by f (GE.p_globiomTrade, p_PRICE, ...), the keys in the order of
+    their first record."""
     acc = defaultdict(list)
     for k, v in records:
         acc[k].append(v)
-    return {k: GE.p_GLOBIOM_compare_sum(vs) for k, vs in acc.items()}
+    return {k: f(vs) for k, vs in acc.items()}
 
 
 def _scen_filter(d: pd.DataFrame, cols: Sequence[str], scen: Tuple[str, str, str]) -> pd.DataFrame:
@@ -253,18 +253,20 @@ def collect(G: Globiom, S: Sets, scen: Tuple[str, str, str], longyr: Sequence[st
         return d
     tr = level(T["Trade_Compare"], "d1", "d2", "d8", ["d5", "d6", "d7"])
     tr = tr[tr.d3.isin(ragg) & (tr.d4 == "LEVEL")]
-    trade = _sums(((b, a, it, y), v) for it, a, b, y, v in zip(tr.d1, tr.d2, tr.d3, tr.d8, tr.value))
+    trade = _sums((((b, a, it, y), v) for it, a, b, y, v in zip(tr.d1, tr.d2, tr.d3, tr.d8, tr.value)),
+                  GE.p_globiomTrade)
     #                                                                              l. 1385-1387: TRADE(item, r2, r1)
     pr = level(T["Price_Compare2"], "d1", "d2", "d6", ["d3", "d4", "d5"])
-    price = _sums(((r, it, y), v) for it, r, y, v in zip(pr.d1, pr.d2, pr.d6, pr.value))     # l. 1390-1392
+    price = _sums((((r, it, y), v) for it, r, y, v in zip(pr.d1, pr.d2, pr.d6, pr.value)), GE.p_PRICE)   # l. 1390-1392
     pc = level(T["Process_Compare2"], "d3", "d1", "d7", ["d4", "d5", "d6"])
-    proc = _sums(((r, it, y), v) for r, p, it, y, v in zip(pc.d1, pc.d2, pc.d3, pc.d7, pc.value)   # l. 1394-1400
-                 if not (p in TO_FAME and it in S.vegoil))
+    proc = _sums((((r, it, y), v) for r, p, it, y, v in zip(pc.d1, pc.d2, pc.d3, pc.d7, pc.value)   # l. 1394-1400
+                  if not (p in TO_FAME and it in S.vegoil)), GE.p_PROCESS)
     q = {}
-    for n in ("DemQuantity_Compare", "SupQuantity_Compare", "FeedQuantity_Compare"):   # l. 1402-1412
+    for n, f in (("DemQuantity_Compare", GE.p_DEMAND), ("SupQuantity_Compare", GE.p_SUPPLY),   # l. 1402-1412
+                 ("FeedQuantity_Compare", GE.p_FEED)):
         d = level(T[n], "d1", "d2", "d7", ["d4", "d5", "d6"])
         d = d[d.d3 == "LEVEL"]
-        q[n] = _sums(((r, it, y), v) for it, r, y, v in zip(d.d1, d.d2, d.d7, d.value))
+        q[n] = _sums((((r, it, y), v) for it, r, y, v in zip(d.d1, d.d2, d.d7, d.value)), f)
     lv = _scen_filter(T["LIVE_COMPARE"], ["d9", "d10", "d11"], scen)
     lv = lv[lv.d1.isin(country) & lv.d8.isin(G.animal) & lv.d12.isin(years) & (lv.d3 == "ALTI_ANY")
             & (lv.d4 == "SLP_ANY") & (lv.d5 == "SOIL_ANY") & lv.d6.isin(G.aezclass)]
@@ -284,11 +286,12 @@ def collect(G: Globiom, S: Sets, scen: Tuple[str, str, str], longyr: Sequence[st
     ac = _scen_filter(T["ACR_COMPARE"], ["d9", "d10", "d11"], scen)
     ac = ac[ac.d1.isin(country) & ac.d7.isin(G.eu_crop) & ac.d8.isin(CROPTECH) & ac.d12.isin(years)
             & (ac.d3 == "ALTI_ANY") & (ac.d4 == "SLP_ANY") & (ac.d5 == "SOIL_ANY") & ac.d6.isin(G.aezclass)]
-    crop = _sums(((c, cp, y), v) for c, cp, y, v in zip(ac.d1, ac.d7, ac.d12, ac.value))   # l. 1460-1462
+    crop = _sums((((c, cp, y), v) for c, cp, y, v in zip(ac.d1, ac.d7, ac.d12, ac.value)),   # l. 1460-1462
+                 GE.p_CROP_AREA)
     ln = _scen_filter(T["Land_Compare2"], ["d8", "d9", "d10"], scen)
     ln = ln[ln.d1.isin(country) & ln.d7.isin(G.alllc_type) & ln.d11.isin(years) & (ln.d3 == "ALTI_ANY")
             & (ln.d4 == "SLP_ANY") & (ln.d5 == "SOIL_ANY") & ln.d6.isin(G.aezclass)]
-    land = _sums(((c, lc, y), v) for c, lc, y, v in zip(ln.d1, ln.d7, ln.d11, ln.value))   # l. 1464-1466
+    land = _sums((((c, lc, y), v) for c, lc, y, v in zip(ln.d1, ln.d7, ln.d11, ln.value)), GE.p_LAND)   # l. 1464-1466
     pe = _scen_filter(T["Perennial_COMPARE"], ["d7", "d8", "d9"], scen)
     pe = pe[pe.d10.isin(years) & (pe.d3 == "ALTI_ANY") & (pe.d4 == "SLP_ANY") & (pe.d5 == "SOIL_ANY")
             & pe.d6.isin(G.aezclass)]
@@ -301,7 +304,7 @@ def collect(G: Globiom, S: Sets, scen: Tuple[str, str, str], longyr: Sequence[st
     for ra, c in G.region58_country_map:
         members[ra].append(c)
 
-    def up(d):                                                                     # l. 1474-1479
+    def up(d, f):                                                                  # l. 1474-1479
         out = dict(d)
         for k in [k for k in out if k[0] in ragg]:
             out.pop(k)
@@ -311,9 +314,9 @@ def collect(G: Globiom, S: Sets, scen: Tuple[str, str, str], longyr: Sequence[st
             for (c, it, y), v in d.items():
                 if c in cs:
                     acc[(ra, it, y)].append(v)
-        out.update({k: v for k, v in ((k, GE.p_GLOBIOM_ragg(vs)) for k, vs in acc.items()) if v})
+        out.update({k: v for k, v in ((k, f(vs)) for k, vs in acc.items()) if v})
         return out
-    live, crop, land = up(live), up(crop), up(land)
+    live, crop, land = up(live, GE.p_LIVESTOCK_ragg), up(crop, GE.p_CROP_AREA_ragg), up(land, GE.p_LAND_ragg)
     gcols, grows = S.globiomcols, S.globiomrows
     for (r, lc, y), v in land.items():                                             # l. 1586
         if r in ragg and lc in gcols:
@@ -436,7 +439,7 @@ def mapped(P: Dict[Tuple[str, str, str, str], float], S: Sets, rmap: Set[Tuple[s
     for (r, c, gw, y), v in MC.items():                                            # l. 1757-1759
         for w in g2w[gw]:
             Ml[(r, c, w, y)].append(v)
-    M = {k: GE.p_GLOBIOMmappedCols(vs) for k, vs in Ml.items()}
+    M = {k: GE.p_GLOBIOMmapped_rows(vs) for k, vs in Ml.items()}
     return {k: v for k, v in M.items() if v}, sel, wo
 
 
@@ -510,7 +513,7 @@ def factors(M: Dict[Tuple[str, str, str, str], float], S: Sets, scen_name: str, 
                 if not I.get(k) and n:
                     put(I, k, GE.p_globiomInfo_factorB2000_RM(vs))
     for k in [k for k in I if k[1] == "NECR" and k[3] == "FACTORB2000"]:          # l. 1976
-        put(I, k, GE.p_GLOBIOMmapped_removed())
+        put(I, k, GE.p_globiomInfo_factorB2000_removed())
     for (r, c, w, y), v in list(M.items()):                                        # l. 1989-2006
         if y not in selset:
             continue
@@ -518,7 +521,7 @@ def factors(M: Dict[Tuple[str, str, str, str], float], S: Sets, scen_name: str, 
             for d in S.demposdis:
                 put(I, (r, d, w, "SHARE", scen_name, y), GE.p_globiomInfo_share_DemPosDis(M.get((r, d, w, y), 0.0), v))
     for k in [k for k in I if k[1] in set(S.demposdis) and k[3] == "FACTORB2000"]:
-        put(I, k, GE.p_GLOBIOMmapped_removed())
+        put(I, k, GE.p_globiomInfo_factorB2000_removed())
     for r in sorted(regs):
         for w in sorted({k[2] for k in M if k[0] == r}):
             for y in sel:
@@ -528,7 +531,7 @@ def factors(M: Dict[Tuple[str, str, str, str], float], S: Sets, scen_name: str, 
                         put(I, (r, t, w, "SHARE", scen_name, y), GE.p_globiomInfo_share_TradePos(
                             M.get((r, t, w, y), 0.0), M.get((r, "DOMM", w, y), 0.0), M.get((r, "PROD", w, y), 0.0)))
     for k in [k for k in I if k[1] in set(S.tradepos) and k[3] == "FACTORB2000"]:
-        put(I, k, GE.p_GLOBIOMmapped_removed())
+        put(I, k, GE.p_globiomInfo_factorB2000_removed())
     return I, M
 
 

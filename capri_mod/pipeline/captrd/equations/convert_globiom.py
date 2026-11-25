@@ -61,10 +61,18 @@ def p_MACRO_GDP_RelChng(gdppcap, pop):
     return gdppcap * pop
 
 
-def p_GLOBIOM_compare_sum(values):
-    r"""p_globiomTrade, p_PRICE, p_PROCESS (without the vegetable oils going to FAME), p_DEMAND, p_SUPPLY, p_FEED of
-    GLOBIOM's regions, p_CROP_AREA and p_LAND of its countries: the scenario's records summed (over the processes, the
-    cells, the AEZ classes and the crop technologies).
+def _added(values):
+    """The values added one at a time in their order (as the port accumulated them; Python's sum() is
+    compensated)."""
+    t = 0.0
+    for v in values:
+        t += v
+    return t
+
+
+def p_globiomTrade(values):
+    r"""p_globiomTrade(GLOBIOMragg, GLOBIOMragg1, ALLITEM, SelecScen, ScenYear): the scenario's trade
+    records (TRADE_COMPARE) summed.
 
     values: the records in the file's order.
 
@@ -74,11 +82,33 @@ def p_GLOBIOM_compare_sum(values):
         = SUM(SelecScen_map(selecScen,macroScen,bioEnScen,IEAscen) ,
            TRADE_COMPARE(ALLITEM,GLOBIOMragg1,GLOBIOMragg,"Level",macroScen,BioenScen,IEAscen,ScenYear));
 
+    Departures from CAPRI: the values are added one at a time in their order (as the port accumulated them; Python's sum() is compensated);
+    the domain condition and the loops in the caller (globiom.py)."""
+    return _added(values)
+
+
+def p_PRICE(values):
+    r"""p_PRICE(GLOBIOMragg, ALLITEM, SelecScen, ScenYear): the scenario's price records (PRICE_COMPARE2)
+    summed.
+
+    values: the records in the file's order.
+
     CAPRI's GAMS (global/convert_globiom.gms l. 1390-1392):
 
         p_PRICE(GLOBIOMragg,ALLITEM,SelecScen,ScenYear)
         = SUM(SelecScen_map(selecScen,macroScen,bioEnScen,IEAscen) ,
               PRICE_COMPARE2(ALLITEM,GLOBIOMragg,macroScen,BioenScen,IEAscen,ScenYear));
+
+    Departures from CAPRI: the values are added one at a time in their order (as the port accumulated them; Python's sum() is compensated);
+    the domain condition and the loops in the caller (globiom.py)."""
+    return _added(values)
+
+
+def p_PROCESS(values):
+    r"""p_PROCESS(GLOBIOMragg, ALLITEM, SelecScen, ScenYear): the scenario's processing records
+    (PROCESS_COMPARE2) summed over the processes, without the vegetable oils going to FAME.
+
+    values: the records in the file's order.
 
     CAPRI's GAMS (global/convert_globiom.gms l. 1394-1400):
 
@@ -90,11 +120,33 @@ def p_GLOBIOM_compare_sum(values):
         $endif.gf23
               ,PROCESS_COMPARE2(GLOBIOMragg,ALLPROCESS,ALLITEM,macroScen,BioenScen,IEAscen,ScenYear));
 
+    Departures from CAPRI: the values are added one at a time in their order (as the port accumulated them; Python's sum() is compensated);
+    the domain condition and the loops in the caller (globiom.py)."""
+    return _added(values)
+
+
+def p_DEMAND(values):
+    r"""p_DEMAND(GLOBIOMragg, ALLITEM, SelecScen, ScenYear): the scenario's demand records
+    (DemQuantity_Compare) summed.
+
+    values: the records in the file's order.
+
     CAPRI's GAMS (global/convert_globiom.gms l. 1402-1404):
 
         p_DEMAND(GLOBIOMragg,ALLITEM,SelecScen,ScenYear)
         = SUM(SelecScen_map(selecScen,macroScen,bioEnScen,IEAscen) ,
              DemQuantity_Compare(ALLITEM,GLOBIOMragg,"Level",macroScen,BioenScen,IEAscen,ScenYear));
+
+    Departures from CAPRI: the values are added one at a time in their order (as the port accumulated them; Python's sum() is compensated);
+    the domain condition and the loops in the caller (globiom.py)."""
+    return _added(values)
+
+
+def p_SUPPLY(values):
+    r"""p_SUPPLY(GLOBIOMragg, ALLITEM, SelecScen, ScenYear): the scenario's supply records
+    (SupQuantity_Compare) summed.
+
+    values: the records in the file's order.
 
     CAPRI's GAMS (global/convert_globiom.gms l. 1406-1408):
 
@@ -102,17 +154,50 @@ def p_GLOBIOM_compare_sum(values):
         = SUM(SelecScen_map(selecScen,macroScen,bioEnScen,IEAscen) ,
              SupQuantity_Compare(ALLITEM,GLOBIOMragg,"Level",macroScen,BioenScen,IEAscen,ScenYear));
 
+    Departures from CAPRI: the values are added one at a time in their order (as the port accumulated them; Python's sum() is compensated);
+    the domain condition and the loops in the caller (globiom.py)."""
+    return _added(values)
+
+
+def p_FEED(values):
+    r"""p_FEED(GLOBIOMragg, ALLITEM, SelecScen, ScenYear): the scenario's feed records (FeedQuantity_Compare)
+    summed.
+
+    values: the records in the file's order.
+
     CAPRI's GAMS (global/convert_globiom.gms l. 1410-1412):
 
         p_FEED(GLOBIOMragg,ALLITEM,SelecScen,ScenYear)
         = SUM(SelecScen_map(selecScen,macroScen,bioEnScen,IEAscen) ,
              FeedQuantity_Compare(ALLITEM,GLOBIOMragg,"Level",macroScen,BioenScen,IEAscen,ScenYear));
 
+    Departures from CAPRI: the values are added one at a time in their order (as the port accumulated them; Python's sum() is compensated);
+    the domain condition and the loops in the caller (globiom.py)."""
+    return _added(values)
+
+
+def p_CROP_AREA(values):
+    r"""p_CROP_AREA(GLOBIOMcountry, CRP, SelecScen, ScenYear): GLOBIOM's countries' crop area records
+    (ACR_COMPARE) summed over the cells, the AEZ classes and the crop technologies.
+
+    values: the records in the file's order.
+
     CAPRI's GAMS (global/convert_globiom.gms l. 1460-1462):
 
         p_CROP_AREA(GLOBIOMcountry,%CRP%,SelecScen,ScenYear)
         = sum((allcolrow,AEZCLASS,CROPTECH,SelecScen_map(selecScen,macroScen,bioEnScen,IEAscen)),
               ACR_COMPARE(GLOBIOMcountry,allcolrow,"Alti_Any","Slp_Any","Soil_Any",AEZCLASS,%CRP%,CROPTECH,macroScen,BioenScen,IEAscen,ScenYear));
+
+    Departures from CAPRI: the values are added one at a time in their order (as the port accumulated them; Python's sum() is compensated);
+    the domain condition and the loops in the caller (globiom.py)."""
+    return _added(values)
+
+
+def p_LAND(values):
+    r"""p_LAND(GLOBIOMcountry, allLC_TYPE, SelecScen, ScenYear): GLOBIOM's countries' land records summed over
+    the cells and the AEZ classes.
+
+    values: the records in the file's order.
 
     CAPRI's GAMS (global/convert_globiom.gms l. 1464-1466):
 
@@ -122,10 +207,7 @@ def p_GLOBIOM_compare_sum(values):
 
     Departures from CAPRI: the values are added one at a time in their order (as the port accumulated them; Python's sum() is compensated);
     the domain condition and the loops in the caller (globiom.py)."""
-    t = 0.0
-    for v in values:
-        t += v
-    return t
+    return _added(values)
 
 
 def p_LIVESTOCK(any_values, cell_values):
@@ -173,19 +255,43 @@ def p_CROP_AREA_ligherba(area, values):
     return area
 
 
-def p_GLOBIOM_ragg(values):
-    r"""p_LIVESTOCK, p_CROP_AREA, p_LAND(GLOBIOMragg, ...): GLOBIOM's countries summed to its regions
-    (REGION58_COUNTRY_MAP).
+def p_LIVESTOCK_ragg(values):
+    r"""p_LIVESTOCK(GLOBIOMragg, ANIMAL, SelecScen, ScenYear): GLOBIOM's countries' herds summed
+    to its regions (REGION58_COUNTRY_MAP).
+
+    values: the records in the file's order.
 
     CAPRI's GAMS (global/convert_globiom.gms l. 1474-1475):
 
         p_LIVESTOCK(GLOBIOMragg,ANIMAL,SelecScen,ScenYear)
         = sum(REGION%Nragg%_COUNTRY_MAP(GLOBIOMragg,GLOBIOMCOUNTRY),p_LIVESTOCK(GLOBIOMcountry,ANIMAL,SelecScen,ScenYear));
 
+    Departures from CAPRI: the values are added one at a time in their order (as the port accumulated them; Python's sum() is compensated);
+    the domain condition and the loops in the caller (globiom.py)."""
+    return _added(values)
+
+
+def p_CROP_AREA_ragg(values):
+    r"""p_CROP_AREA(GLOBIOMragg, CRP, SelecScen, ScenYear): GLOBIOM's countries' crop areas summed to
+    its regions (REGION58_COUNTRY_MAP).
+
+    values: the records in the file's order.
+
     CAPRI's GAMS (global/convert_globiom.gms l. 1476-1477):
 
         p_CROP_AREA(GLOBIOMragg,%CRP%,SelecScen,ScenYear)
         = sum(REGION%Nragg%_COUNTRY_MAP(GLOBIOMragg,GLOBIOMCOUNTRY),p_CROP_AREA(GLOBIOMcountry,%CRP%,SelecScen,ScenYear));
+
+    Departures from CAPRI: the values are added one at a time in their order (as the port accumulated them; Python's sum() is compensated);
+    the domain condition and the loops in the caller (globiom.py)."""
+    return _added(values)
+
+
+def p_LAND_ragg(values):
+    r"""p_LAND(GLOBIOMragg, allLC_TYPE, SelecScen, ScenYear): GLOBIOM's countries' land summed to its
+    regions (REGION58_COUNTRY_MAP).
+
+    values: the records in the file's order.
 
     CAPRI's GAMS (global/convert_globiom.gms l. 1478-1479):
 
@@ -194,10 +300,7 @@ def p_GLOBIOM_ragg(values):
 
     Departures from CAPRI: the values are added one at a time in their order (as the port accumulated them; Python's sum() is compensated);
     the domain condition and the loops in the caller (globiom.py)."""
-    t = 0.0
-    for v in values:
-        t += v
-    return t
+    return _added(values)
 
 
 def p_GLOBIOM(value):
@@ -317,8 +420,9 @@ def p_GLOBIOM_DG(biom, process_yield):
 
 def p_GLOBIOMmappedCols(values):
     r"""p_GLOBIOMmappedCols(RMall, COLSMappedToGlobiom, GLOBIOMROWSmapped, SelecScen, longYrSel) but UVAP: GLOBIOM's
-    regions' values summed over the region's GLOBIOM regions and the columns mapped; p_GLOBIOMmapped(RMall, ., ROWS,
-    ., .): the mapped columns' values summed over the GLOBIOM rows mapped to CAPRI's row.
+    regions' values summed over the region's GLOBIOM regions and the columns mapped.
+
+    values: the records in the file's order.
 
     CAPRI's GAMS (global/convert_globiom.gms l. 1743-1746):
 
@@ -326,6 +430,17 @@ def p_GLOBIOMmappedCols(values):
                              $ (not sameas(colsMappedToGlobiom,"UVAP"))
                              = SUM((rmAll_to_GLOBIOM(RMALL,GLOBIOMragg),COLS_TO_GLOBIOM(COLSMappedToGlobiom,GLOBIOMCOLSMapped)),
                                     p_GLOBIOM(GLOBIOMragg,GLOBIOMcolsMapped,GLOBIOMrowsMapped,SelecScen,longYrSel));
+
+    Departures from CAPRI: the values are added one at a time in their order (as the port accumulated them; Python's sum() is compensated);
+    the domain condition and the loops in the caller (globiom.py)."""
+    return _added(values)
+
+
+def p_GLOBIOMmapped_rows(values):
+    r"""p_GLOBIOMmapped(RMall, COLSMappedToGlobiom, ROWSMappedToGlobiom, SelecScen, longYrSel): the mapped columns'
+    values summed over the GLOBIOM rows mapped to CAPRI's row.
+
+    values: the records in the file's order.
 
     CAPRI's GAMS (global/convert_globiom.gms l. 1757-1759):
 
@@ -335,10 +450,7 @@ def p_GLOBIOMmappedCols(values):
 
     Departures from CAPRI: the values are added one at a time in their order (as the port accumulated them; Python's sum() is compensated);
     the domain condition and the loops in the caller (globiom.py)."""
-    t = 0.0
-    for v in values:
-        t += v
-    return t
+    return _added(values)
 
 
 def p_GLOBIOMmappedCols_UVAP(pairs):
@@ -404,7 +516,7 @@ def p_GLOBIOMmapped_SUGA(suga, sugb):
 
 def p_GLOBIOMmapped_removed():
     r"""p_GLOBIOMmapped(., '2000') once copied to B2000; p_GLOBIOMmapped(RMALL, MrkPos, "SUGB", ., .) but PROD once in
-    SUGA; p_globiomInfo's factorB2000 of NECR and of the demand and trade positions (shares instead): removed.
+    SUGA: removed.
 
     CAPRI's GAMS (global/convert_globiom.gms l. 1874-1874):
 
@@ -413,6 +525,14 @@ def p_GLOBIOMmapped_removed():
     CAPRI's GAMS (global/convert_globiom.gms l. 1889-1889):
 
              p_GLOBIOMmapped(RMALL,MrkPos,"SUGB",SelecScen,longYrSel) $ (NOT SAMEAS(MrkPos,"PROD")) = 0;
+
+    Departures from CAPRI: none in the arithmetic; the domain condition and the loops over the sets in the
+    caller (globiom (collect, mapped, factors, base_factors))."""
+    return 0.0
+
+
+def p_globiomInfo_factorB2000_removed():
+    r"""p_globiomInfo's factorB2000 of NECR and of the demand and trade positions (shares instead): removed.
 
     CAPRI's GAMS (global/convert_globiom.gms l. 1976-1976):
 

@@ -777,9 +777,9 @@ def to_capri(p: P4, ori: P4, sets: Sets, pdata: pd.DataFrame) -> P4:
             for y in S.agYears:
                 for bp in S.balPos:
                     if not _nz(T.g(er, bp, g, y)):
-                        T.put((er, bp, g, y), GE.p_aglink_sum([T.g(er, bp, w, y) for w in mem]))
+                        T.put((er, bp, g, y), GE.p_aglinkTrd_sum([T.g(er, bp, w, y) for w in mem]))
                 if not _nz(T.g(er, g, "LEVL", y)):
-                    T.put((er, g, "LEVL", y), GE.p_aglink_sum([T.g(er, c, "LEVL", y) for c in cmem]))
+                    T.put((er, g, "LEVL", y), GE.p_aglinkTrd_sum([T.g(er, c, "LEVL", y) for c in cmem]))
         for y in S.agYears:
             for bp in S.balPos:
                 if not _nz(T.g(er, bp, "WHEA", y)):
@@ -850,8 +850,9 @@ def dgagri(T: P4, sets: Sets) -> pd.DataFrame:
         if r not in eur or math.isnan(v) or c.upper() not in cols or w.upper() not in rws:
             continue
         if r in eu and c in ("EXPT", "IMPT"):
-            continue
-        v = GE.p_aglinkTrd_copy(v)
+            v = GE.p_result_DGAgri_EXPT_IMPT()                    # l. 1441-1442
+        else:
+            v = GE.p_result_DGAgri(v)                             # l. 1436-1437
         if c != "NTRD":
             v = GE.p_result_DGAgri_max0(v)
         if v != 0.0:

@@ -88,8 +88,7 @@ def p_aglink_sum(values):
     r"""p_aglink('EUN', agColsSummable, ., .) without a value: its parts' (agEUparts) for all rows, wheat and raw milk;
     p_aglink(agEUreg, ., 'CG', .) the coarse grains, (., ., 'WT', .) the wheats, ('FE', 'OM') the meals,
     ('BF', 'CG') the coarse grains' biofuel use, ('QP..NAGR', agBioF) the non-agricultural sources (bioORES),
-    ('QP', agBioF) the biofuel sources without duplicates; p_aglinkTrd(EuropReg, balPos / GRPC, CERE / OILS, .) of
-    the groups without a value: the members' summed.
+    ('QP', agBioF) the biofuel sources without duplicates: the parts' or members' summed.
 
     CAPRI's GAMS (baseline/load_aglink2023dgAgri.gms l. 246-247):
 
@@ -135,6 +134,15 @@ def p_aglink_sum(values):
 
            p_aglink(agEurop,'QP',agBiof,agYears)
               = sum(bioSrcNoDupl, p_aglink(agEurop,bioSrcNoDupl,agBiof,agYears));
+
+    Departures from CAPRI: none in the arithmetic; the domain condition and the loops over the sets in the
+    caller (aglink.py and macro.py)."""
+    return sum(values)
+
+
+def p_aglinkTrd_sum(values):
+    r"""p_aglinkTrd(EuropReg, balPos / GRPC, CERE / OILS, .) of the groups without a value: the members'
+    summed.
 
     CAPRI's GAMS (baseline/load_aglink2023dgAgri.gms l. 1298-1300):
 
@@ -1080,8 +1088,7 @@ def p_aglinkTrd_colsInd(share, quads):
 
 
 def p_aglinkTrd_removed():
-    r"""p_aglinkTrd(EuropReg, 'LOSM', 'BIOE', .), (., 'MILK', .), (pric, 'RICE', .) once copied to PARI; the EU
-    regions' imports and exports in p_result's DGAgri: removed.
+    r"""p_aglinkTrd(EuropReg, 'LOSM', 'BIOE', .), (., 'MILK', .), (pric, 'RICE', .) once copied to PARI: removed.
 
     CAPRI's GAMS (baseline/load_aglink2023dgAgri.gms l. 1169-1169):
 
@@ -1094,6 +1101,15 @@ def p_aglinkTrd_removed():
     CAPRI's GAMS (baseline/load_aglink2023dgAgri.gms l. 1375-1375):
 
           p_aglinkTrd(EuropReg,pric,'RICE',agYears) = 0.;
+
+    Departures from CAPRI: none in the arithmetic; the domain condition and the loops over the sets in the
+    caller (aglink.py and macro.py)."""
+    return 0.0
+
+
+def p_result_DGAgri_EXPT_IMPT():
+    r"""p_result(EUreg, 'EXPT' / 'IMPT', ., ., 'DGAgri'): the EU regions' exports and imports removed (they
+    do not include the EU's internal trade).
 
     CAPRI's GAMS (baseline/load_aglink2023dgAgri.gms l. 1441-1441):
 
@@ -1168,7 +1184,7 @@ def p_aglinkTrd_plus(a, b):
 
 def p_aglinkTrd_copy(value):
     r"""p_aglinkTrd(EuropReg, cols, ., agYears) outside the EU: the oilseeds' cakes and oils from OILM and OILO; MILK's
-    MAPR = PRCM of COMI, DOMM = MAPR, PRCM = DOMM; PARI's prices: RICE's; p_result(., 'DGAgri') where not NA.
+    MAPR = PRCM of COMI, DOMM = MAPR, PRCM = DOMM; PARI's prices: RICE's.
 
     CAPRI's GAMS (baseline/load_aglink2023dgAgri.gms l. 1218-1219):
 
@@ -1195,6 +1211,14 @@ def p_aglinkTrd_copy(value):
     CAPRI's GAMS (baseline/load_aglink2023dgAgri.gms l. 1374-1374):
 
           p_aglinkTrd(EuropReg,pric,'PARI',agYears) = p_aglinkTrd(EuropReg,pric,'RICE',agYears) ;
+
+    Departures from CAPRI: none in the arithmetic; the domain condition and the loops over the sets in the
+    caller (aglink.py and macro.py)."""
+    return value
+
+
+def p_result_DGAgri(value):
+    r"""p_result(EuropReg, cols, rows, years, 'DGAgri'): p_aglinkTrd where not NA.
 
     CAPRI's GAMS (baseline/load_aglink2023dgAgri.gms l. 1436-1437):
 
