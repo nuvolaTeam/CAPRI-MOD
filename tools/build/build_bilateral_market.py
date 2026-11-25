@@ -34,7 +34,7 @@ oilseeds have no CAPRI bilateral trade (MILK: 31 cells of a few tonnes; OOIL: no
 Outputs (capri_data/2017/market/):
   bilateral_flows_<year>.csv    commodity, importer, exporter, q_kt, a, b, a0, ta_pct, tc
   bilateral_regions_<year>.csv  commodity, region, pmrk, prod_kt
-  armington_rho.csv             commodity, capri, rho1, rho2
+  armington_rho.csv             commodity, capri, region, rho1, rho2 (CAPRI's p_rhoArm1/2 per market region)
 
     python tools/build/build_bilateral_market.py   (CAPRI's two EU market regions; the one-EU form, EU27yr19, and
                                                     its *_eu2.csv twin names were removed on 3 November 2026)
@@ -403,10 +403,25 @@ def main():
         build_trq_global(y)             # its global quotas
         build_raw_milk_prices(y)        # raw milk's market price (the reference price levels)
     build_border_measures(2030)         # entry prices and flexible levies (CAPRI's 2030 restart file only)
+    write_rho()
+
+
+def write_rho():
+    """armington_rho.csv: CAPRI's p_rhoArm1(RM, XX) and p_rhoArm2(RM, XX) per market region and commodity (CAPRI's
+    statements assign each commodity's value over all of RM: arm/market1.gms's default, special_ch/market1_ch.gms);
+    the EU's two blocks under the model's names (EU_WEST, EU_EAST). Per region since 25 November 2026 (register
+    DEP-40, removed): one value per commodity before.
+
+        python -c "import sys; sys.path.insert(0, 'tools/build'); import build_bilateral_market as b; b.write_rho()"
+    """
+    from paths import REFERENCE
     rt = rho_table()
-    rows = [dict(commodity=m, capri=cs[0], rho1=rt[cs[0]][1], rho2=rt[cs[0]][2]) for m, cs in MODEL.items()]
+    rm = [EU_BLOCKS.get(r, r) for r in _read_csv(REFERENCE / "sets" / "simini_21730" / "RM.csv",
+                                                 keep_default_na=False).d0]
+    rows = [dict(commodity=m, capri=cs[0], region=r, rho1=rt[cs[0]][1], rho2=rt[cs[0]][2])
+            for m, cs in MODEL.items() for r in rm]
     pd.DataFrame(rows).to_csv(ROOT / "capri_data" / "2017" / "market" / "armington_rho.csv", index=False)
-    print(pd.DataFrame(rows).to_string(index=False))
+    print(f"wrote armington_rho.csv: {len(rows)} rows ({len(MODEL)} commodities x {len(rm)} market regions)")
 
 
 if __name__ == "__main__":

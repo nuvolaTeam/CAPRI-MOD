@@ -3036,7 +3036,7 @@
    "file": "capri_data/2017/market/armington_rho.csv",
    "declared_in": "21_market_inputs.sql",
    "layout": [],
-   "comment": "CAPRI's Armington substitution elasticities per market commodity: rho1 between domestic sales and the import aggregate, rho2 among the import origins (arm/market1.gms, special_ch/market1_ch.gms; tools/build/build_bilateral_market.py)",
+   "comment": "CAPRI's Armington substitution elasticities per market commodity and market region, p_rhoArm1(RM, XX) and p_rhoArm2(RM, XX): rho1 between domestic sales and the import aggregate, rho2 among the import origins, of the importing region (arm/market1.gms, special_ch/market1_ch.gms; tools/build/build_bilateral_market.py write_rho; per region since 25 November 2026)",
    "columns": [
     {
      "name": "commodity",
@@ -3045,6 +3045,11 @@
     },
     {
      "name": "capri",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "region",
      "type": "VARCHAR",
      "not_null": true
     },
@@ -3060,7 +3065,8 @@
     }
    ],
    "primary_key": [
-    "commodity"
+    "commodity",
+    "region"
    ],
    "unique": [],
    "foreign_keys": [

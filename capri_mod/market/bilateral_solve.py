@@ -45,7 +45,10 @@ class BilateralSolveMixin(MarketStateMixin):
             return {}
         fl = inp.csv(f"bilateral_flows_{year}{sfx}.csv")
         rg = inp.csv(f"bilateral_regions_{year}{sfx}.csv")
-        rho = inp.csv("armington_rho.csv").set_index("commodity")
+        # CAPRI's p_rhoArm1 and p_rhoArm2 per market region and commodity (the importing region's; arm/market1.gms's
+        # 8 and 10 where CAPRI sets none)
+        rho = {(t.commodity, t.region): (float(t.rho1), float(t.rho2))
+               for t in inp.csv("armington_rho.csv", keep_default_na=False).itertuples(index=False)}
         R = list(self.regions)
         ix = {r: i for i, r in enumerate(R)}
         n = len(R)
@@ -70,8 +73,8 @@ class BilateralSolveMixin(MarketStateMixin):
             has_p = np.isfinite(Pd0) & (Pd0 > 0)
             Pd0 = np.where(has_p, Pd0, fill)
             out[c] = BilateralCommodity(c, R, X0, a, b, a0, Pd0,
-                                        float(rho.at[c, "rho1"]) if c in rho.index else 8.0,
-                                        float(rho.at[c, "rho2"]) if c in rho.index else 10.0, tc=tc, pmrk_data=has_p)
+                                        np.array([rho.get((c, r), (8.0, 10.0))[0] for r in R]),
+                                        np.array([rho.get((c, r), (8.0, 10.0))[1] for r in R]), tc=tc, pmrk_data=has_p)
         # CAPRI's bilateral tariff-rate quotas of every importer, per pair of policy blocks (tools/build/
         # build_bilateral_market.py build_trq; docs/dev/MARKET_TRQ_PORT.md)
         if inp.exists(f"bilateral_trq_{year}.csv"):

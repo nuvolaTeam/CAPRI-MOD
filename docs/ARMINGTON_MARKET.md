@@ -62,7 +62,9 @@ adds points of ad valorem tariff to the EU's imports (`import_prices`; flows bet
 - `bilateral_flows_<year>[_eu2].csv`: per importer, exporter and product the flow (ImportQ) and a, b, a0;
 - `bilateral_regions_<year>[_eu2].csv`: market prices (PMRK) and production per region;
 - `bilateral_trq_<year>.csv`, `bilateral_trq_global_<year>.csv`: CAPRI's bilateral and global TRQs (below);
-- `armington_rho.csv`: s1 (rho1) and s2 (rho2) per product. CAPRI's defaults are 8 and 10 (`arm/market1.gms`
+- `armington_rho.csv`: s1 (rho1) and s2 (rho2) per product and market region, CAPRI's p_rhoArm1(RM, XX) and
+  p_rhoArm2(RM, XX) of the importing region (per region since 25 November 2026; CAPRI's statements assign each
+  product's value over all of RM, so the regions have the same). CAPRI's defaults are 8 and 10 (`arm/market1.gms`
   l. 108-109; 3 and 5 for biofuels, l. 119-120), overridden by `special_ch/market1_ch.gms` (CEPII; Fontagné,
   Guimbard and Orefice 2019) as CAPRI includes it, e.g. wheat 3.9 / 7.8, beef 3.5 / 7.1, pork 6.7 / 13.4, butter
   2.1 / 4.3, biofuels 2.2 / 4.5, DDGS 1.2 / 2.4. A product missing from the file would take 8 / 10 (code default).

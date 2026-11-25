@@ -1157,7 +1157,7 @@ def test_trq_tariff_follows_quota_fill():
     sc.trq_solve(X, p, r)
     o = sc.trq_offset[0, 1]
     assert 20.0 < o < 750.0                                  # past the quota: toward the out-of-quota tariffs
-    x_o = 130.0 * (p[0, 1] / (p[0, 1] + o)) ** sc.s2         # ... which pushes the flow back to about the quota
+    x_o = 130.0 * (p[0, 1] / (p[0, 1] + o)) ** sc.s2[0]      # ... which pushes the flow back to about the quota
     assert 90.0 < x_o < 105.0
 
 
@@ -1321,7 +1321,7 @@ def test_trq_volume_change_moves_the_quota_not_the_base():
     sc.trq_solve(sc.X0, p, r)
     o = sc.trq_offset[0, 1]
     assert o < -10.0                                         # the quota no longer binds: the import price falls ...
-    assert 99.0 * (p[0, 1] / (p[0, 1] + o)) ** sc.s2 > 110.0  # ... and imports rise past the old quota
+    assert 99.0 * (p[0, 1] / (p[0, 1] + o)) ** sc.s2[0] > 110.0  # ... and imports rise past the old quota
     mm.trq_volume_changes = {}
     MarketModule._apply_trq_volumes(mm, {"T": sc})
     assert abs(sc.trq_quotas[0]["Q"] - 100.0) < 1e-12        # a later baseline restores the base quota
@@ -3763,8 +3763,8 @@ def test_table_grapes_and_tobacco_are_markets(model):
     ms = model._bridge_supply_to_market(agg)
     assert ms.at["IT000000", "TAGR"] == 2.0 * _marketed("IT000000", "TAGR")
     assert ms.at["IT000000", "TOBA"] == 0.5 * _marketed("IT000000", "TOBA")
-    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv", index_col=0)
-    assert arm.at["TAGR", "rho1"] == 3.7 and arm.at["TOBA", "rho1"] == 1.8
+    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv").groupby("commodity").rho1
+    assert set(arm.get_group("TAGR")) == {3.7} and set(arm.get_group("TOBA")) == {1.8}  # every market region
     h = pd.read_csv(DATA_DIR / "2017" / "market" / "processing_nq_hessian.csv")
     eu = h[(h.model_region == "EU27") & (h.x == "TOBA") & (h.y == "TOBA")]
     assert len(eu) > 0 and (eu.h > 0).all() and (eu.arm1p_y > 0).all()
@@ -3787,8 +3787,8 @@ def test_table_olives_are_a_market_of_their_own(model, data):
     ms = model._bridge_supply_to_market(agg)
     assert ms.at["IT000000", "TABO"] == 2.0 * _marketed("IT000000", "TABO")
     assert 0.0 < ms.at["IT000000", "OLIV"] < 10.0 * 0.5                              # olive oil, not olives
-    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv", index_col=0)
-    assert arm.at["TABO", "rho1"] == 4.1                                            # p_rhoArm1 (market1_ch.gms)
+    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv").groupby("commodity").rho1
+    assert set(arm.get_group("TABO")) == {4.1}                                      # p_rhoArm1 (market1_ch.gms)
 
 
 def test_textile_crops_are_one_activity_and_market(model, data):
@@ -3805,8 +3805,8 @@ def test_textile_crops_are_one_activity_and_market(model, data):
     assert ar.loc[[r for r in ar.index if r.startswith("EL")], "TEXT"].sum() > 300  # Greek cotton
     agg = pd.DataFrame({"TEXT": [3.0]}, index=["EL000000"])
     assert model._bridge_supply_to_market(agg).at["EL000000", "TEXT"] == 3.0 * _marketed("EL000000", "TEXT")
-    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv", index_col=0)
-    assert arm.at["TEXT", "rho1"] == 8.2                                            # p_rhoArm1 (market1_ch.gms)
+    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv").groupby("commodity").rho1
+    assert set(arm.get_group("TEXT")) == {8.2}                                      # p_rhoArm1 (market1_ch.gms)
     h = pd.read_csv(DATA_DIR / "2017" / "market" / "processing_nq_hessian.csv")
     assert len(h[(h.model_region == "EU27") & (h.x == "TEXT") & (h.y == "TEXT") & (h.h > 0)]) > 0
 

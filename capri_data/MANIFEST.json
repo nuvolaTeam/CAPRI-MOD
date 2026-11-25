@@ -1064,13 +1064,13 @@
    "catalogue_note": "CAPRI's literal parameters of its manure output functions (feed/feed_decl.gms: p_NutContManureKgM3, p_addExcrPerkgMilk, p_carcassShare, p_startWgt, p_reqfcnlim; CAPRI's p_LUUnits), one row per symbol and key; read by capri_mod/feed/equations/req_or_man_fnc.py (tools/build/build_req_or_man_params.py; KNOWN_ISSUES K179). (not re-checked)"
   },
   "capri_data/2017/market/armington_rho.csv": {
-   "description": "CAPRI's Armington substitution elasticities per market commodity: rho1 between domestic sales and the import aggregate, rho2 among the import origins (arm/market1.gms, special_ch/market1_ch.gms; tools/build/build_bilateral_market.py)",
+   "description": "CAPRI's Armington substitution elasticities per market commodity and market region, p_rhoArm1(RM, XX) and p_rhoArm2(RM, XX): rho1 between domestic sales and the import aggregate, rho2 among the import origins, of the importing region (arm/market1.gms, special_ch/market1_ch.gms; tools/build/build_bilateral_market.py write_rho; per region since 25 November 2026)",
    "kind": "coefficients",
    "vintage": "code",
    "domain": "market",
    "status": "live",
-   "rows": 57,
-   "columns": 4,
+   "rows": 2565,
+   "columns": 5,
    "units": "U_Elasticity",
    "read_by_model": [
     "capri_mod/data/loaders.py",

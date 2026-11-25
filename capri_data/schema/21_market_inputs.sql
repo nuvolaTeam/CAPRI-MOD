@@ -92,12 +92,14 @@ INSERT INTO value_units VALUES
 
 -- file: capri_data/2017/market/armington_rho.csv
 CREATE TABLE armington_rho (
-    commodity VARCHAR PRIMARY KEY REFERENCES model_commodities (code),
+    commodity VARCHAR NOT NULL REFERENCES model_commodities (code),
     capri VARCHAR NOT NULL REFERENCES capri_xx (code),
+    region VARCHAR NOT NULL,        -- CAPRI's market region (RM), the EU's blocks as EU_WEST and EU_EAST
     rho1 DOUBLE NOT NULL CHECK (rho1 > 0),
-    rho2 DOUBLE NOT NULL CHECK (rho2 > 0)
+    rho2 DOUBLE NOT NULL CHECK (rho2 > 0),
+    PRIMARY KEY (commodity, region)
 );
-COMMENT ON TABLE armington_rho IS 'CAPRI''s Armington substitution elasticities per market commodity: rho1 between domestic sales and the import aggregate, rho2 among the import origins (arm/market1.gms, special_ch/market1_ch.gms; tools/build/build_bilateral_market.py)';
+COMMENT ON TABLE armington_rho IS 'CAPRI''s Armington substitution elasticities per market commodity and market region, p_rhoArm1(RM, XX) and p_rhoArm2(RM, XX): rho1 between domestic sales and the import aggregate, rho2 among the import origins, of the importing region (arm/market1.gms, special_ch/market1_ch.gms; tools/build/build_bilateral_market.py write_rho; per region since 25 November 2026)';
 INSERT INTO value_units VALUES
   ('armington_rho', 'rho1', 'U_Elasticity', 'capri', 'CAPRI''s first-stage Armington substitution elasticity'),
   ('armington_rho', 'rho2', 'U_Elasticity', 'capri', 'CAPRI''s second-stage Armington substitution elasticity');

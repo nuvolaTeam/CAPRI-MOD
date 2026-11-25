@@ -55,7 +55,8 @@ def trade_system_function(sc, slope_input: bool = False):
     cl = cells(sc)
     pv = import_price_function(sc)(r, sB, sW, S, D)       # S, D: MarketPriceAgg_'s weights
     beta = np.asarray(sc.beta, float)
-    s1, s2 = float(sc.s1), float(sc.s2)
+    # CAPRI's p_rhoArm1 and p_rhoArm2 of each region as importer (BilateralCommodity.s1, s2)
+    s1, s2 = [float(v) for v in sc.s1], [float(v) for v in sc.s2]
     p = {}
     for m, (i, j) in enumerate(cl):
         p[i, j] = ca.fmax(pv[m], 1e-9)
@@ -68,24 +69,24 @@ def trade_system_function(sc, slope_input: bool = False):
         if sc._has_imp[i] and i in by_imp:
             pm = 0
             for j in by_imp[i]:
-                pm = pm + arm2PriceAgg_term(beta[i, j], p[i, j], s2)
-            PM.append(arm2PriceAgg_(pm, s2))
+                pm = pm + arm2PriceAgg_term(beta[i, j], p[i, j], s2[i])
+            PM.append(arm2PriceAgg_(pm, s2[i]))
         else:
             PM.append(float(sc.PM0[i]))
         if sc._has_dom[i] or sc._has_imp[i]:
             pa = 0
             if sc._has_dom[i]:
-                pa = pa + arm1PriceAgg_term(float(sc.dd[i]), Pd[i], s1)
+                pa = pa + arm1PriceAgg_term(float(sc.dd[i]), Pd[i], s1[i])
             if sc._has_imp[i]:
-                pa = pa + arm1PriceAgg_term(float(sc.dm[i]), PM[i], s1)
-            PA.append(arm1PriceAgg_(pa, s1))
+                pa = pa + arm1PriceAgg_term(float(sc.dm[i]), PM[i], s1[i])
+            PA.append(arm1PriceAgg_(pa, s1[i]))
         else:
             PA.append(float(sc.PA0[i]))
-    DS = [domSalesShares_(D[i], float(sc.dd[i]), PA[i], Pd[i], s1) if sc._has_dom[i] else 0 for i in range(n)]
-    M = [arm2QuantShares_(D[i], float(sc.dm[i]), PA[i], PM[i], s1) if sc._has_imp[i] else 0 for i in range(n)]
+    DS = [domSalesShares_(D[i], float(sc.dd[i]), PA[i], Pd[i], s1[i]) if sc._has_dom[i] else 0 for i in range(n)]
+    M = [arm2QuantShares_(D[i], float(sc.dm[i]), PA[i], PM[i], s1[i]) if sc._has_imp[i] else 0 for i in range(n)]
     X = {}
     for (i, j) in cl:
-        X[i, j] = DS[j] if i == j else importShares_(M[i], beta[i, j], PM[i], p[i, j], s2)
+        X[i, j] = DS[j] if i == j else importShares_(M[i], beta[i, j], PM[i], p[i, j], s2[i])
     for i in range(n):
         if (i, i) not in X:
             X[i, i] = DS[i]
