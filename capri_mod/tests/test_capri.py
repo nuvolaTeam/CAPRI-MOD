@@ -5269,8 +5269,22 @@ def test_greendeal_input_changes_follow_capri(monkeypatch):
     d_plap = plap * (1 - 0.5) * tf - plap * tf                         # PLAP -50% overall
     d_inpo = (inpo + topup) * (1 + 0.5 - o_R) * tf - inpo * tf         # INPO +(r - o_R), with the top-up
     assert abs((nr0[crop] - mo.net_revenues[crop]) - (d_plap + d_inpo)) < 1e-6
+    # an animal's INPO in CAPRI's objective form (register DEP-13 step 3): the input cost table's INPO per head,
+    # x_Y x TF_I, whose coefficient the change moves: (x_Y x TF_I / TF_I) x ((1 + r - o_R) TF_I - TF_I) = INPO (r - o_R)
+    inpo_ = mo._animal_inpo_cost(ani)
+    assert inpo_ is not None and inpo_ > 0, "the default animal_cost_form 'capri' takes the input cost table's INPO"
+    assert abs((nr0[ani] - mo.net_revenues[ani]) - inpo_ * (0.5 - o_R)) < 1e-6
+    # the split columns take the same change per head (livestock.py dinpo_rel)
+    assert abs(mo.ev.greendeal_animal_inpo[ani] - inpo_ * (0.5 - o_R)) < 1e-6
+    # the former form, TOIN's INPO share (supply.animal_cost_form "toin")
+    from capri_mod import settings as S
     sh = mo._input_row(ani, "inpo_toin_share") * mo._animal_cost_per_head(ani)
-    assert abs((nr0[ani] - mo.net_revenues[ani]) - sh * (0.5 - o_R) * tf) < 1e-6
+    with S.override({"supply.animal_cost_form": "toin"}):
+        mo.net_revenues = nr0.copy()
+        mo._apply_greendeal_input_changes(0.25, 0.50)
+        assert abs((nr0[ani] - mo.net_revenues[ani]) - sh * (0.5 - o_R) * tf) < 1e-6
+    mo.net_revenues = nr0.copy()
+    mo._apply_greendeal_input_changes(0.25, 0.50)
 
     # organic target alone: plant protection -o_R on every crop, the top-up, no change for animals
     mo.net_revenues = nr0.copy()
@@ -5282,7 +5296,7 @@ def test_greendeal_input_changes_follow_capri(monkeypatch):
     monkeypatch.setattr(RegionalSupplyModel, "greendeal_inputs_keep_tech_change", False)
     mo.net_revenues = nr0.copy()
     mo._apply_greendeal_input_changes(0.25, 0.50)
-    assert abs((nr0[ani] - mo.net_revenues[ani]) - sh * ((1 + 0.5 - o_R) - tf)) < 1e-6
+    assert abs((nr0[ani] - mo.net_revenues[ani]) - inpo_ / tf * ((1 + 0.5 - o_R) - tf)) < 1e-6
 
 
 def test_greendeal_plap_crop_level_capri_step_moves_the_mean_cost_to_capris_step(monkeypatch):

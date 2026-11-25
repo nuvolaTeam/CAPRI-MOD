@@ -518,8 +518,9 @@ class PolicyBlock:
                     # the per-head basis is the model's, DEP-13)
                     yf = self._input_row_2030(a, "inpo_yield_factor") or 1.0
                     d = delta(sh * self._animal_cost_per_head(a) * yf, 0.0, pc_inpo)
-                    # the change per head of the animal's average; its split columns move heads between CAPRI
-                    # activities whose INPO differs (livestock.py, dinpo_rel; K189's per-head terms)
+                if d:
+                    # the change per head of the animal's average, in either form; its split columns move heads
+                    # between CAPRI activities whose INPO differs (livestock.py, dinpo_rel; K189's per-head terms)
                     if getattr(self.ev, "greendeal_animal_inpo", None) is None:
                         self.ev.greendeal_animal_inpo = {}
                     self.ev.greendeal_animal_inpo[a] = d
