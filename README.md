@@ -76,7 +76,7 @@ baseline construction as a mix of trend analysis, model runs and expert consulta
 **The base year is a parameter.** Inputs are organised under `capri_data/<base_year>/`; the only populated base year
 is **2017**, CAPRI star 3.0's. A base year without a data folder stops with an error. Re-basing needs CAPRI's data
 steps (COCO, CAPREG, the market database) for the new year, from a newer CAPRI release or from their port in the data
-pipeline (`docs/dev/CAPTRD_MOD.md`).
+pipeline (`capri_mod/pipeline`).
 
 **What you need.** No CAPRI installation, no GAMS licence and no proprietary solver: the calibrated data ship with
 the repository. Re-deriving the validation, or rebuilding the data from CAPRI's exports, needs CAPRI's files
@@ -312,7 +312,7 @@ capri_data/
                      schema.json (the same, generated)
 ```
 
-- **No synthetic data reaches the model** (`docs/dev/SYNTHETIC_DATA_AUDIT.md`): a missing file or region raises, and a
+- **No synthetic data reaches the model**: a missing file or region raises, and a
   test checks that every region with a herd or crops has CAPRI's coefficients.
 - **Every data file is declared and its provenance traced.** `capri_data/schema/*.sql` declares each CSV's types, key,
   code lists, ranges and units; `tools/check/validate_data.py` enforces them. `01_provenance.sql`, generated from the
@@ -324,7 +324,7 @@ capri_data/
 - **Inputs come from CAPRI's GDX files**, never from Excel exports. CAPRI's raw files are published, converted value for
   value to Parquet, on Hugging Face (nuvolaTeam/capri-mod-raw); `docs/EXTERNAL_SOURCES.md` lists them.
 
-**Rebuilding.** The data are rebuilt with doit (`dodo.py`; docs/dev/DATA_PIPELINE_DOIT.md): each of the 146 builder
+**Rebuilding.** The data are rebuilt with doit (`dodo.py`): each of the 146 builder
 invocations is a task with the files it reads and writes, as traced (`tools/pipeline/builders.json`). The rebuild from
 blank (`tools/check/rebuild_from_blank.py`) reproduces 380 of the 381 builder-written files byte for byte; the one
 difference is a CAPTRD trajectory file the default runs do not use (`capri_data/scenarios/captrd_2030/regional.csv`).
@@ -374,12 +374,13 @@ with CAPRI's own 2030 terms (`supply.pmp_source = "capri2030"`; the option `"rec
 define_pmp_terms.gms); the Armington market; CAPRI's premiums; CAPRI's requirement rows (`REQSE_`, `REQSN_`,
 `MAXSHR_`), the rations chosen in the same optimisation as the herds; CAPRI's `MANN` and IPCC factors as CAPRI uses
 them; CAPRI's mitigation options as columns of the supply models with CAPRI's costs and calibration, and its emission
-tax inside the same optimisation (`capri_mod/supply/ghg_tax.py`). The market's port, equation by equation, is listed in
-docs/dev/MARKET_EQUATIONS_INVENTORY.md; the supply model's in docs/SUPPLY_MODEL_MAP.md.
+tax inside the same optimisation (`capri_mod/supply/ghg_tax.py`). The supply model's port is mapped in
+docs/SUPPLY_MODEL_MAP.md; the market's blocks are described in docs/ARMINGTON_MARKET.md and the files beside it.
 
 **Documentation.** `docs/` holds one file per block (market, supply, feed, fertiliser, manure, environment, scenarios,
 welfare), the departure registers (`DEPARTURES_FROM_CAPRI.md`, `CAPRI_DEPARTURES_REGISTER.md`) and the equation book
-(`docs/equations/`); `docs/dev/` the development notes; `CHANGELOG.md` the record of changes.
+(`docs/equations/`), the settings with CAPRI's equivalents (`docs/SETTINGS_INVENTORY.md`) and the known issues
+(`docs/KNOWN_ISSUES.md`); `CHANGELOG.md` the record of changes. The development notes are kept in a private repository.
 
 ---
 
@@ -419,12 +420,12 @@ CONOPT, finds a local optimum; neither guarantees a global one. Our settings (`c
   status as CAPRI's `p_INFES`).
 
 **The market: a system of equations, not an optimisation.** By default each commodity's prices take Newton steps on
-its exact derivatives, accelerated by Anderson mixing across commodities. As an option (`market.solver = "chain"`,
-docs/dev/MARKET_SYSTEM.md), the whole market is one system in CAPRI's form: 3,166 unknowns, 2,624 once the empty
+its exact derivatives, accelerated by Anderson mixing across commodities. As an option (`market.solver = "chain"`),
+the whole market is one system in CAPRI's form: 3,166 unknowns, 2,624 once the empty
 balances are removed, 2,621 of which form one strongly connected block, so the market has to be solved at once.
 The chain tries Newton, then a continuation on the quotas' sigmoid slope (CAPRI's own way in `trim_trqs.gms`), then
 IPOPT. Newton's linear solver was chosen on one factorisation of the market's Jacobian at a solve of a mini-EU run,
-and the methods compared on seven supply shocks from CAPRI's base market (docs/dev/MARKET_SYSTEM.md):
+and the methods compared on seven supply shocks from CAPRI's base market:
 
 | Linear solver: one factorisation (10,409 rows, 288,023 non-zeros) | Time |
 |---|---|
@@ -491,7 +492,7 @@ Key `run()` arguments: `scenario`, `custom_scenario` (a `PolicyScenario`), `worl
 Arguments left at None take the run's settings.
 
 **Settings.** Every switch, tolerance, iteration limit and algorithm choice is in `capri_mod/settings/defaults.toml`,
-each commented with what it does and CAPRI's equivalent; `docs/dev/SETTINGS_INVENTORY.md` lists them with their
+each commented with what it does and CAPRI's equivalent; `docs/SETTINGS_INVENTORY.md` lists them with their
 homes. A run writes its effective settings (`OUT.settings.toml`) and a run manifest (`OUT.manifest.json`: the commit,
 the software versions, every input file read with its SHA-256).
 
@@ -582,7 +583,7 @@ review), and statistical or machine-learning methods that learn from its inputs 
 
 - **Declared inputs**: every input a CSV declared in DuckDB SQL (`capri_data/schema`, as JSON in `schema.json`).
 - **One settings file**: `capri_mod/settings/defaults.toml`, read through one validated interface;
-  `docs/dev/SETTINGS_INVENTORY.csv` lists each setting with CAPRI's equivalent and whether the default is CAPRI's.
+  `docs/SETTINGS_INVENTORY.csv` lists each setting with CAPRI's equivalent and whether the default is CAPRI's.
 - **CAPRI's vocabulary**: `capri_mod/data/capri_symbol_dictionary.json` describes 2,429 symbols of CAPRI's GAMS code.
   The code cites the CAPRI file and lines each equation follows, and the equation functions quote CAPRI's GAMS
   verbatim (`tools/refactor/check_gams_quotes.py` checks the quotes against CAPRI's code).
@@ -625,14 +626,14 @@ the bounded market, §6.)
 
 - Each equation follows CAPRI's code and documentation, with the GAMS quoted. Where the model departs from CAPRI, the
   departure is registered, explained and switchable back to CAPRI's behaviour; the author decides each one.
-- No proxies, synthetic data or hard-coded values unless necessary, and then listed (`docs/dev/PROXY_AUDIT.md`).
+- No proxies, synthetic data or hard-coded values unless necessary, and then listed.
 - Claims are checked against runs, not asserted. AI tools make mistakes like any developer: a coding error once made
   a full run proceed without CAPRI's market supply function, behind a warning the run script hid (CHANGELOG.md). It
   was found from the run's metadata; such failures are now recorded and tested for.
 
 **Machine learning inside the model:** none. Supply, market and environment come from CAPRI's optimisation and
 equilibrium equations. It is considered only for the statistical trends of CAPTRD-MOD, and only if it beats CAPRI's
-own estimator in back-casting (`docs/dev/CAPTRD_MOD.md`, section 8.2).
+own estimator in back-casting.
 
 ### 9.6 Limits
 
@@ -640,8 +641,7 @@ own estimator in back-casting (`docs/dev/CAPTRD_MOD.md`, section 8.2).
   market Hessian. Large ensembles, and emulators trained on them, are expensive.
 - **Pickles**: full runs are saved as Python pickles, not a stable exchange format; the results store and
   `Experiment` write tables.
-- **The orchestration is still large**: much of the loop is in `capri_mod/model.py`; splitting it is under way
-  (`docs/dev/ARCHITECTURE_REFACTOR.md`).
+- **The orchestration is still large**: much of the loop is in `capri_mod/model.py`; splitting it is under way.
 - **Convergence must be checked**: a tool must read `outer_converged` and `capri_stop` before using a result.
 
 ---

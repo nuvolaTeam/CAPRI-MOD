@@ -22120,7 +22120,7 @@
     {
      "kind": "origin",
      "note": "Climate-zone shares (pct) by CAPRI region code (145 codes, 521 rows; zones Cool/Temperate and climate cells 10-19). 520 of the 521 rows equal CAPRI's p_shareClimZone0 (dat/envind/climdat_gascoeff.gdx, loaded in gascoeff.gms:522) and AD_basedata p_Clima value for value. The extra row DK000000 zone 10 = 100 matches CAPRI's completion rule (gascoeff.gms:545). No builder; it arrived with the repository's first commit. Read only by tools/build/build_ad_option.py, which keeps the numeric cells; not by the model.",
-     "evidence": "git log --follow: only c7d3dd5 '0.2' (2026-10-15); tools/build/build_ad_option.py:49, :97-100, :133-134; capri_mod/data/loaders.py:92 (folder map only, no loader); capri_sources/gams/envind/gascoeff.gms:119, :522, :544-545; comparison with capri_sources/dat/envind/climdat_gascoeff/p_shareClimZone0.parquet (520 matched, max |diff| 0) and hf_capri/dat/scen/ghgtech/AD_basedata/p_Clima.parquet (520 matched; p_Clima has LU000000 cool, the CSV has DK000000 10 instead); docs/AD_SPEC.md:305",
+     "evidence": "git log --follow: only c7d3dd5 '0.2' (2026-10-15); tools/build/build_ad_option.py:49, :97-100, :133-134; capri_mod/data/loaders.py:92 (folder map only, no loader); capri_sources/gams/envind/gascoeff.gms:119, :522, :544-545; comparison with capri_sources/dat/envind/climdat_gascoeff/p_shareClimZone0.parquet (520 matched, max |diff| 0) and hf_capri/dat/scen/ghgtech/AD_basedata/p_Clima.parquet (520 matched; p_Clima has LU000000 cool, the CSV has DK000000 10 instead); docs/dev/AD_SPEC.md:305",
      "checked": "2026-10-29"
     }
    ],
@@ -42741,7 +42741,7 @@
    "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_B0.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
-   "comment": "CAPRI's p_B0 (m3 CH4 per kg VS, per docs/AD_SPEC.md) per region (EU000000) and animal group, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
+   "comment": "CAPRI's p_B0 (m3 CH4 per kg VS, per docs/dev/AD_SPEC.md) per region (EU000000) and animal group, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
    "columns": [
     {
      "name": "dim1",
@@ -43004,7 +43004,7 @@
    "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_sf.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
-   "comment": "CAPRI's p_sf, farm size (LSU per farm, per docs/AD_SPEC.md) per region and farm-size class, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
+   "comment": "CAPRI's p_sf, farm size (LSU per farm, per docs/dev/AD_SPEC.md) per region and farm-size class, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
    "columns": [
     {
      "name": "dim1",
@@ -43133,7 +43133,7 @@
    "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_VSER.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
-   "comment": "CAPRI's p_VSER (kg VS per head and day, per docs/AD_SPEC.md) per country and AD animal activity, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
+   "comment": "CAPRI's p_VSER (kg VS per head and day, per docs/dev/AD_SPEC.md) per country and AD animal activity, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
    "columns": [
     {
      "name": "dim1",
@@ -51092,7 +51092,7 @@
    "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/gains_ad_p_gainsdata.parquet",
    "declared_in": "30_sources.sql",
    "layout": [],
-   "comment": "CAPRI's p_gainsdata (dim1-dim3: GAINS country, sector, item; level, marginal) from dat/scen/ghgtech/gains_ad.gdx (loaded at envind/ad_data_and_cali.gms l. 265); no builder; tools/build/build_ad_option.py reads its energy prices (EUR/kWh, per docs/AD_SPEC.md).",
+   "comment": "CAPRI's p_gainsdata (dim1-dim3: GAINS country, sector, item; level, marginal) from dat/scen/ghgtech/gains_ad.gdx (loaded at envind/ad_data_and_cali.gms l. 265); no builder; tools/build/build_ad_option.py reads its energy prices (EUR/kWh, per docs/dev/AD_SPEC.md).",
    "columns": [
     {
      "name": "dim1",

@@ -2,7 +2,7 @@
 use for one CAPRI region and animal activity (activity_losses) and for the accounts (mineral_n2o_n). CAPRI's equations
 of the cascade (GRAZN_, HOUSN_, STORN_, RUNHOUSN_, RUNSURFN_, APPLN_, RUNTOTN_, GASRUNTOTN_, GASTOTNETF_, RUNTOTNETF_,
 GASRUNTOTNETF_) are in capri_mod/supply/equations/supply_model/n_flow.py (until 19 November 2026 here);
-docs/N_CASCADE_SPEC.md has the factors with their sources.
+docs/dev/N_CASCADE_SPEC.md has the factors with their sources.
 """
 from __future__ import annotations
 

@@ -1,7 +1,7 @@
 r"""CAPRI's nitrogen flow (supply/supply_model.gms l. 3189-3454, ghgAbatement on): the loss cascade of the manure N of
 each animal activity (GRAZN_, HOUSN_, STORN_, RUNHOUSN_, RUNSURFN_, APPLN_, RUNTOTN_, GASRUNTOTN_) and of mineral
 fertiliser (GASTOTNETF_, RUNTOTNETF_, GASRUNTOTNETF_), CAPRI's v_emiLoss as fractions of the N excreted or of the
-mineral N bought; docs/N_CASCADE_SPEC.md has the factors (p_Nemidat) with their sources; and the leaching of the soil
+mineral N bought; docs/dev/N_CASCADE_SPEC.md has the factors (p_Nemidat) with their sources; and the leaching of the soil
 surplus (LEACHN_ with AMMOAGG_). Written so far: the cascade (moved from capri_mod/supply/n_cascade.py on 19 November
 2026, unchanged); LEACHN_, its first factor LEACHN_B1 and AMMOAGG_ (moved the same day from capri_mod/supply/
 n_leaching.py and the accounts, capri_mod/environmental/nitrogen.py, unchanged). e_nitrBal_ (l. 3447-3449: leaching,
@@ -63,7 +63,7 @@ Every function takes plain arithmetic, so it evaluates with floats (accounts, ch
 regional NLP) alike.
 
 Departures from CAPRI: none in the equations. CAPRI's own code is kept where it reads oddly (REGISTERED,
-docs/N_CASCADE_SPEC.md section 4):
+docs/dev/N_CASCADE_SPEC.md section 4):
   * HOUSN_ sums only LowEmHous, AirPur, AirPurCovLow, AirPurCovLowC, AirPurCovHigh and ManAcid, so the storage covers'
     N2O effect, moved by ammo_tech.gms (l. 2236) from N2OSTO to N2OHOU, does not act;
   * STORN_ takes NH3 + NOX off before N2 only (N2O at storage is 0 by data);

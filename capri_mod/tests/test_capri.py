@@ -4254,7 +4254,7 @@ def test_n_cascade_reproduces_capri():
 
 
 def test_ad_option_reproduces_capri():
-    """CAPRI's anaerobic digestion option (tools/build/build_ad_option.py, docs/AD_SPEC.md) against CAPRI's Green Deal "ini"
+    """CAPRI's anaerobic digestion option (tools/build/build_ad_option.py, docs/dev/AD_SPEC.md) against CAPRI's Green Deal "ini"
     reference run: the reported initial share (MitiShar0 x SharLiq x HousShar; CAPRI's run 1e-6 x L(1-G) below it)
     and the maximum share (farms of 200 LSU and more, per-class NUTS1/NUTS0 fallback) for every animal checked, the
     cost curve for pigs, whose volatile solids CAPRI takes from its table as we do (cattle: computed by CAPRI from the

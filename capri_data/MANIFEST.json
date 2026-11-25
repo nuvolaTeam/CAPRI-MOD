@@ -11116,7 +11116,7 @@
    }
   },
   "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_B0.parquet": {
-   "description": "CAPRI's p_B0 (m3 CH4 per kg VS, per docs/AD_SPEC.md) per region (EU000000) and animal group, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
+   "description": "CAPRI's p_B0 (m3 CH4 per kg VS, per docs/dev/AD_SPEC.md) per region (EU000000) and animal group, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
    "kind": "coefficients",
    "rows": 6,
    "columns": 4,
@@ -11166,7 +11166,7 @@
    }
   },
   "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_VSER.parquet": {
-   "description": "CAPRI's p_VSER (kg VS per head and day, per docs/AD_SPEC.md) per country and AD animal activity, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
+   "description": "CAPRI's p_VSER (kg VS per head and day, per docs/dev/AD_SPEC.md) per country and AD animal activity, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
    "kind": "coefficients",
    "rows": 162,
    "columns": 4,
@@ -11176,7 +11176,7 @@
    }
   },
   "capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_sf.parquet": {
-   "description": "CAPRI's p_sf, farm size (LSU per farm, per docs/AD_SPEC.md) per region and farm-size class, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
+   "description": "CAPRI's p_sf, farm size (LSU per farm, per docs/dev/AD_SPEC.md) per region and farm-size class, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
    "kind": "coefficients",
    "rows": 2498,
    "columns": 4,
@@ -11207,7 +11207,7 @@
    }
   },
   "capri_data/sources/raw/capri/dat/scen/ghgtech/gains_ad_p_gainsdata.parquet": {
-   "description": "CAPRI's p_gainsdata (dim1-dim3: GAINS country, sector, item; level, marginal) from dat/scen/ghgtech/gains_ad.gdx (loaded at envind/ad_data_and_cali.gms l. 265); no builder; tools/build/build_ad_option.py reads its energy prices (EUR/kWh, per docs/AD_SPEC.md).",
+   "description": "CAPRI's p_gainsdata (dim1-dim3: GAINS country, sector, item; level, marginal) from dat/scen/ghgtech/gains_ad.gdx (loaded at envind/ad_data_and_cali.gms l. 265); no builder; tools/build/build_ad_option.py reads its energy prices (EUR/kWh, per docs/dev/AD_SPEC.md).",
    "kind": "coefficients",
    "rows": 2114,
    "columns": 5,

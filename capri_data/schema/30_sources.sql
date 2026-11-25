@@ -1148,7 +1148,7 @@ CREATE TABLE src_ad_basedata_p_b0 (
     marginal DOUBLE NOT NULL,
     PRIMARY KEY (dim1, dim2)
 );
-COMMENT ON TABLE src_ad_basedata_p_b0 IS 'CAPRI''s p_B0 (m3 CH4 per kg VS, per docs/AD_SPEC.md) per region (EU000000) and animal group, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.';
+COMMENT ON TABLE src_ad_basedata_p_b0 IS 'CAPRI''s p_B0 (m3 CH4 per kg VS, per docs/dev/AD_SPEC.md) per region (EU000000) and animal group, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.';
 INSERT INTO value_units VALUES
   ('src_ad_basedata_p_b0', 'level', NULL, 'open', 'AD_basedata_p_B0.level: unit to be established'),
   ('src_ad_basedata_p_b0', 'marginal', NULL, 'open', 'AD_basedata_p_B0.marginal: unit to be established');
@@ -1214,7 +1214,7 @@ CREATE TABLE src_ad_basedata_p_vser (
     marginal DOUBLE NOT NULL,
     PRIMARY KEY (dim1, dim2)
 );
-COMMENT ON TABLE src_ad_basedata_p_vser IS 'CAPRI''s p_VSER (kg VS per head and day, per docs/AD_SPEC.md) per country and AD animal activity, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.';
+COMMENT ON TABLE src_ad_basedata_p_vser IS 'CAPRI''s p_VSER (kg VS per head and day, per docs/dev/AD_SPEC.md) per country and AD animal activity, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.';
 INSERT INTO value_units VALUES
   ('src_ad_basedata_p_vser', 'level', NULL, 'open', 'AD_basedata_p_VSER.level: unit to be established'),
   ('src_ad_basedata_p_vser', 'marginal', NULL, 'open', 'AD_basedata_p_VSER.marginal: unit to be established');
@@ -1227,7 +1227,7 @@ CREATE TABLE src_ad_basedata_p_sf (
     marginal DOUBLE NOT NULL,
     PRIMARY KEY (dim1, dim2)
 );
-COMMENT ON TABLE src_ad_basedata_p_sf IS 'CAPRI''s p_sf, farm size (LSU per farm, per docs/AD_SPEC.md) per region and farm-size class, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.';
+COMMENT ON TABLE src_ad_basedata_p_sf IS 'CAPRI''s p_sf, farm size (LSU per farm, per docs/dev/AD_SPEC.md) per region and farm-size class, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.';
 INSERT INTO value_units VALUES
   ('src_ad_basedata_p_sf', 'level', NULL, 'open', 'AD_basedata_p_sf.level: unit to be established'),
   ('src_ad_basedata_p_sf', 'marginal', NULL, 'open', 'AD_basedata_p_sf.marginal: unit to be established');
@@ -1241,7 +1241,7 @@ CREATE TABLE src_gains_ad_p_gainsdata (
     marginal DOUBLE NOT NULL,
     PRIMARY KEY (dim1, dim2, dim3)
 );
-COMMENT ON TABLE src_gains_ad_p_gainsdata IS 'CAPRI''s p_gainsdata (dim1-dim3: GAINS country, sector, item; level, marginal) from dat/scen/ghgtech/gains_ad.gdx (loaded at envind/ad_data_and_cali.gms l. 265); no builder; tools/build/build_ad_option.py reads its energy prices (EUR/kWh, per docs/AD_SPEC.md).';
+COMMENT ON TABLE src_gains_ad_p_gainsdata IS 'CAPRI''s p_gainsdata (dim1-dim3: GAINS country, sector, item; level, marginal) from dat/scen/ghgtech/gains_ad.gdx (loaded at envind/ad_data_and_cali.gms l. 265); no builder; tools/build/build_ad_option.py reads its energy prices (EUR/kWh, per docs/dev/AD_SPEC.md).';
 INSERT INTO value_units VALUES
   ('src_gains_ad_p_gainsdata', 'level', NULL, 'open', 'gains_ad_p_gainsdata.level: unit to be established'),
   ('src_gains_ad_p_gainsdata', 'marginal', NULL, 'open', 'gains_ad_p_gainsdata.marginal: unit to be established');

@@ -1,6 +1,6 @@
 """CAPRI's crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_,
 fertDistCres_, ManureNPK_), from CAPRI's 2030 reference results, for the regional supply model in CAPRI's form
-(capri_mod/supply/capri_regional_nlp.py, docs/NLP_PORT_DESIGN.md).
+(capri_mod/supply/capri_regional_nlp.py, docs/dev/NLP_PORT_DESIGN.md).
 
 Source: res_2_1730greendeal_refdefaulta (dataOut, 2030), the same dump the nitrogen data come from
 (tools/build/build_fert_dist_priors.py, tools/build/build_capri_gnb_components.py). CAPRI reports, per region, crop and nutrient

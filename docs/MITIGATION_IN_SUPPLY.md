@@ -17,7 +17,7 @@ columns of the regional QP).
 | Option (CAPRI) | CAPRI file | capri-mod | Data |
 |---|---|---|---|
 | Ammonia options: LowEmHous, CovStorLow, CovStorLowCon, CovStorHigh, ManStorCon, AirPur, AirPurCovLow, AirPurCovLowC, AirPurCovHigh, ManAcid, AmmAppLE, AmmAppHE | envind/ammo_tech.gms | in, with CAPRI's N loss cascade (`n_cascade.py`, K51) | `tools/build/build_ammonia_tech_model.py` |
-| Anaerobic digestion (AD_AnCh) | envind/ad_data_and_cali.gms | in (`docs/AD_SPEC.md`); CH4 effect also for dairy cows (the user's decision, README 5.2) | `tools/build/build_ad_option.py` |
+| Anaerobic digestion (AD_AnCh) | envind/ad_data_and_cali.gms | in (`docs/dev/AD_SPEC.md`); CH4 effect also for dairy cows (the user's decision, README 5.2) | `tools/build/build_ad_option.py` |
 | Fertiliser options PRECFARM, VRT_SRUC, FERTTIME, NITR_INH; inhibitor on manure | ghgMiti.gms, miti_data | in | `fert_options_jul15.csv` (`tools/build/build_fert_options_jul15.py`, CAPRI's miti_data_jul15) |
 | Breeding: milk yield (genet_yld), feed efficiency (genet_eff) | envind/breeding.gms | in | `tools/build/build_genetics_effects.py` |
 | Low-N feed (LowNFeed) | envind/low_n_feed.gms | in | `tools/build/build_lownfeed_effects.py` |
@@ -69,7 +69,7 @@ sub-activity (DCOL/DCOH, BULL/BULH, PIGF/SOWS, ..., weighted by heads) and optio
    cost curves: CAPRI's "VERSION B" bounds the share that S1 reaches to [max(0.5 m1, 1.1 m0), min(1.5 m1, 1)]. In the
    NLP form the calibration of the regional model then sets each option's linear term so that its base share is a
    first-order point.
-3. Effects: CAPRI's loss cascade (GRAZN_ ... GASRUNTOTN_; `docs/N_CASCADE_SPEC.md`). The N the options keep from
+3. Effects: CAPRI's loss cascade (GRAZN_ ... GASRUNTOTN_; `docs/dev/N_CASCADE_SPEC.md`). The N the options keep from
    losses enters the manure applied (ManureNPK_) and so displaces purchased mineral N in NUTNED_; the NH3 part goes to
    the ammonia accounts, the N2O by stage to manure N2O. In the conic form the cascade enters as its tangent at the
    previous solve (K1). Where a region has no cascade factors, `ammonia_techs` falls back to an NH3-only cascade.
