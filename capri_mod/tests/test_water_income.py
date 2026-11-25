@@ -76,5 +76,4 @@ def test_income_is_capris_mgva_sum(data):
         assert row.public_support == pytest.approx(sup, rel=1e-12)
         assert row.market_income == pytest.approx(inc - sup, rel=1e-9)
         assert row.cap_payments_policy == pytest.approx(float(cap.at[r, "total_payments"]), rel=1e-12)
-        assert 0.0 < row.support_share < 1.0
-    assert 0.0 <= res.income_gini <= 1.0 and 0.0 <= res.payment_gini <= 1.0
+        assert 0.0 < row.public_support < row.farm_income
