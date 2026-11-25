@@ -60,7 +60,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("convert_sources", [], []),
     # CAPRI's dat GDX symbols (as Parquet in capri_sources/dat) and the dat files of the project lead's installation
     # (capri_sources/dat_local), to CSV (added to this list 6 November 2026; written by hand into builders.json before)
-    ("extract_capri_dat", [], [SOURCES / "dat"]),
+    ("extract_capri_dat", [], [SOURCES / "dat", SOURCES / "dat_parquet" / "miterra"]),
     ("extract_capri_dat_local", [], [SOURCES / "dat_local"]),
     ("extract_gd2030_nbalance", [], [INI]),
     # before its readers (build_cover_crops, build_histosol, build_price_trajectory_2030, ...): a chain rebuild runs

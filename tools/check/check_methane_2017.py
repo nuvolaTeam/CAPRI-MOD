@@ -9,9 +9,11 @@ req_or_man_fnc_req.py) on that data, the year being its own base and trend; CAPR
 (tools/build/build_gascoeff_tables.py), its digestibility table (capri_digestpar) and its grass N fixation
 (fert/fertpar.gms); the readers in tools/lib/methane_inputs.py. CAPREG's results are for the check only.
 
-Result (25 November 2026, MITERRA's scenario year 2000 as CAPREG's): Denmark's 50 values (CH4ENT from the ration,
-CH4ENTstd, CH4MAN of its activities with a level) within 1.4e-14 of CAPREG's; Germany, France and Spain within 6e-9.
-With CAPREG's time-series p_NemiDAT (--scen-year=0; the inventory shares) Denmark's dairy CH4MAN is 39% higher.
+Result (25 November 2026, MITERRA's scenario year 2000 as CAPREG's): the values of all 35 countries with CAPREG's base
+year (CH4ENT from the ration, CH4ENTstd, CH4MAN of the activities with a level) within 1.8e-7 of CAPREG's, Denmark's
+50 within 1.4e-14, Norway's 300 within 6.3e-12 (with CAPRI's Norwegian MITERRA data of the project lead's
+installation: until then its hens' and other poultry's housing shares of 2000 were swapped). With CAPREG's
+time-series p_NemiDAT (--scen-year=0; the inventory shares) Denmark's dairy CH4MAN is 39% higher.
 
     python tools/check/check_methane_2017.py [--scen-year=2000] [CC ...]       (default DK; 0: CAPREG's p_NemiDAT)
 """

@@ -17,7 +17,7 @@
   "capri_data/2017/abatement/ammonia/ControlStrategies.csv": {
    "description": "MITERRA control strategies by year (LitRev_non_changeable_parameters ControlStrat_TS), percent of animals (tools/build/build_ammonia_tech_inputs.py)",
    "kind": "coefficients",
-   "rows": 2479,
+   "rows": 2481,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -145,7 +145,7 @@
   "capri_data/2017/abatement/ammonia/ammonia_technologies.csv": {
    "description": "CAPRI's ammonia technologies p_ghgMiti per CAPRI region and activity (envind/ammo_tech.gms; build_ammonia_technologies.py) (tools/build/build_ammonia_technologies.py)",
    "kind": "coefficients",
-   "rows": 33094,
+   "rows": 33093,
    "columns": 12,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -4908,9 +4908,6 @@
    "rows": 1120,
    "columns": 4,
    "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/projection/projection_module.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_ration_trajectory_2030"
@@ -4922,12 +4919,37 @@
    "rows": 35173,
    "columns": 5,
    "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_ration_trajectory_2030"
+   }
+  },
+  "capri_data/baselines/capri_greendeal_ref/1730/trajectories/chain_fodder_2030.csv": {
+   "description": "The fodder fed per ha of the fodder crops, 2030 over 2017, the 2030 side from the ported feed chain's start (the start's feed use of the fodder bulks, adjust.gms l. 72-73; capri_mod/feed/chain.py on CAPREG's base year and CAPRI's trends), the 2017 side CAPREG's (tools/build/build_ration_trajectory_2030.py --source chain)",
+   "kind": "reference",
+   "rows": 1106,
+   "columns": 4,
+   "units": "U_ratio",
    "read_by_model": [
     "capri_mod/projection/projection_module.py"
    ],
    "origin": {
     "nature": "capri",
-    "builder": "build_ration_trajectory_2030"
+    "builder": "build_ration_trajectory_2030 (not in the trace yet)"
+   }
+  },
+  "capri_data/baselines/capri_greendeal_ref/1730/trajectories/chain_ration_2030.csv": {
+   "description": "The 2030 rations, requirements and methane per head as factors on the model's 2017 ones, the 2030 side from the ported feed chain's start (capri_mod/feed/chain.py on CAPREG's base year and CAPRI's trends; the methane per head of capri_mod/environmental/methane_per_head.py), the 2017 side CAPREG's (tools/build/build_ration_trajectory_2030.py --source chain)",
+   "kind": "reference",
+   "rows": 35173,
+   "columns": 5,
+   "units": "U_ratio",
+   "read_by_model": [
+    "capri_mod/projection/projection_module.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_ration_trajectory_2030 (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/A.csv": {
@@ -5023,6 +5045,16 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/CATACT.csv": {
+   "description": "CAPRI CATACT: the cattle activities of the supply model and the GHG accounts (sets.gms l. 3103), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 12,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/CFACTOR_ARAB.csv": {
    "description": "CAPRI CFACTOR_ARAB(COLS): \"Arable crops for C factor Calculation\" (capdis/spat_soillos_sets.gms l. 32), the crops envind/tillage.gms takes as the tillage crops (TILLSET, l. 324-327), as sim_ini_21730 instantiated the set",
    "kind": "structure",
@@ -5031,6 +5063,66 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/CLIM.csv": {
+   "description": "CAPRI CLIM: the climate zones cool, temperate, warm (envind/def_gascoeff.gms l. 116), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/CLIMALL.csv": {
+   "description": "CAPRI CLIMALL: the climate zones and temperature cells of the manure methane (envind/def_gascoeff.gms l. 115), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 22,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/CLIMCELS.csv": {
+   "description": "CAPRI CLIMCELS: the temperature cells 10-28 (envind/def_gascoeff.gms l. 117), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 19,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/CLIMCOOL.csv": {
+   "description": "CAPRI CLIMCOOL: the cool temperature cells 10-14 (envind/def_gascoeff.gms l. 118), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 5,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/CLIMTEMP.csv": {
+   "description": "CAPRI CLIMTEMP: the temperate cells 15-25 (envind/def_gascoeff.gms l. 119), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 11,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/CLIMWARM.csv": {
+   "description": "CAPRI CLIMWARM: the warm cells 26-28 (envind/def_gascoeff.gms l. 120), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/COLS.csv": {
@@ -5080,6 +5172,26 @@
    "description": "CAPRI DCOW: the dairy cows (sets.gms), in CAPRI's set order",
    "kind": "structure",
    "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/EUGR.csv": {
+   "description": "CAPRI EUGR: the EU groups of the tier 1 manure factors, west and east (envind/def_gascoeff.gms l. 122), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/EUGR_TO_MS.csv": {
+   "description": "CAPRI EUGR_TO_MS: each EU group of the tier 1 manure factors and its member states and their regions (envind/def_gascoeff.gms l. 124-188)",
+   "kind": "structure",
+   "rows": 315,
    "columns": 2,
    "origin": {
     "nature": "capri",
@@ -5376,6 +5488,16 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/MACT.csv": {
+   "description": "CAPRI MACT: the high and low yield animal activities (sets.gms l. 2308), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 6,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/MAPP.csv": {
    "description": "CAPRI MAPP: the unit values deleted below the member states (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
    "kind": "structure",
@@ -5415,6 +5537,16 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/MDACT.csv": {
+   "description": "CAPRI MDACT: the animal activities of the data with MITERRA shares (sets.gms, envind/ammo.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 16,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/MLK.csv": {
@@ -5495,6 +5627,26 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/ManSys.csv": {
+   "description": "CAPRI ManSys: the manure management systems (envind/def_gascoeff.gms l. 203), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 11,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/ManuType.csv": {
+   "description": "CAPRI ManuType: MITERRA's manure types liquid and solid (envind/sets_ammo.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/NONEND.csv": {
@@ -5645,6 +5797,16 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/POULTRY.csv": {
+   "description": "CAPRI POULTRY: the poultry activities (sets.gms, envind/ammo.gms l. 613), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/PSDPAY_AE.csv": {
@@ -6129,10 +6291,40 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/ani_Liq.csv": {
+   "description": "CAPRI ani_Liq: MITERRA's animal types with liquid manure (envind/Miterra/sets_miterra.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/arbAct.csv": {
    "description": "CAPRI arbAct: the arable activities (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
    "kind": "structure",
    "rows": 40,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/atGrazingExtra.csv": {
+   "description": "CAPRI atGrazingExtra: MITERRA's animal types that graze (envind/Miterra/sets_miterra.gms l. 475-485), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 8,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/atModel_to_PACT.csv": {
+   "description": "CAPRI atModel_to_PACT: each MITERRA animal type and its animal activities (envind/Miterra/sets_miterra.gms)",
+   "kind": "structure",
+   "rows": 27,
    "columns": 2,
    "origin": {
     "nature": "capri",
@@ -6183,6 +6375,36 @@
    "description": "CAPRI losfItem: the items whose losses are put at the member state's share of gross production (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
    "kind": "structure",
    "rows": 14,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/manuType_to_atModel.csv": {
+   "description": "CAPRI manuType_to_atModel: each MITERRA manure type and its animal types (envind/ammo.gms l. 202-203)",
+   "kind": "structure",
+   "rows": 10,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/ms_to_country.csv": {
+   "description": "CAPRI ms_to_country: each member state and its MITERRA country (envind/sets_ammo.gms)",
+   "kind": "structure",
+   "rows": 35,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/pact_to_atModel.csv": {
+   "description": "CAPRI pact_to_atModel: each animal activity and its MITERRA animal types (envind/ammo.gms l. 197-198)",
+   "kind": "structure",
+   "rows": 27,
    "columns": 2,
    "origin": {
     "nature": "capri",
@@ -10408,6 +10630,66 @@
    },
    "catalogue_note": "CAPRI's feed digestibility table p_digestPar(EU, DCOL, feed, item) as written in envind/def_digestibility.gms (NRC 2001, INRA 2002), read as GAMS reads it (tools/build/build_digestibility_table.py); 3-NOP's CH4 effect (K93) (not re-checked)"
   },
+  "capri_data/sources/intermediate/envind/capri_emiscalc0.parquet": {
+   "description": "CAPRI's raw methane coefficients EMISCALC0(Rall, COLS, A, emisParGdx): CH4AN, CH4EN, YM, DE, ASH, B0, NRET per animal (EU rows; IPCC 2006 Vol 4 Ch 10), from the table in envind/create_rawdat_gascoeff_gdx.gms l. 44-75 (tools/build/build_gascoeff_tables.py).",
+   "kind": "coefficients",
+   "vintage": "CAPRI star 3.0 code",
+   "domain": "environment",
+   "status": "live",
+   "rows": 129,
+   "columns": 5,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_gascoeff_tables (not in the trace yet)"
+   },
+   "catalogue_note": "CAPRI's raw methane coefficients EMISCALC0(Rall, COLS, A, emisParGdx): CH4AN, CH4EN, YM, DE, ASH, B0, NRET per animal (EU rows; IPCC 2006 Vol 4 Ch 10), from the table in envind/create_rawdat_gascoeff_gdx.gms l. 44-75 (tools/build/build_gascoeff_tables.py); the methane per head (capri_mod/environmental/methane_per_head.py) (not re-checked)"
+  },
+  "capri_data/sources/intermediate/envind/capri_manure_mgt_share.parquet": {
+   "description": "CAPRI's manure management parameters p_manureMgtShare0(emisRegGdx, COLS, A, EMISPAR, CLIMALL, ManSys): the systems' shares MANAG and their CH4 conversion factors CH4CONV by climate zone (l. 363-509) and temperature cell (l. 512-696) of envind/create_rawdat_gascoeff_gdx.gms (IPCC 2006 Tables 10.17, 10A.4-10A.8; tools/build/build_gascoeff_tables.py).",
+   "kind": "coefficients",
+   "vintage": "CAPRI star 3.0 code",
+   "domain": "environment",
+   "status": "live",
+   "rows": 1341,
+   "columns": 7,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_gascoeff_tables (not in the trace yet)"
+   },
+   "catalogue_note": "CAPRI's manure management parameters p_manureMgtShare0(emisRegGdx, COLS, A, EMISPAR, CLIMALL, ManSys): the systems' shares MANAG and their CH4 conversion factors CH4CONV by climate zone (l. 363-509) and temperature cell (l. 512-696) of envind/create_rawdat_gascoeff_gdx.gms (IPCC 2006 Tables 10.17, 10A.4-10A.8; tools/build/build_gascoeff_tables.py). (tools/build/build_gascoeff_tables.py); the methane per head (capri_mod/environmental/methane_per_head.py) (not re-checked)"
+  },
+  "capri_data/sources/intermediate/envind/capri_share_clim_zone.parquet": {
+   "description": "CAPRI's climate shares p_shareClimZone0(Rall, CLIMALL): the cool, temperate and warm shares per member state (l. 161-228) and the temperature cells 10-20 per regional unit (l. 231-354) of envind/create_rawdat_gascoeff_gdx.gms (tools/build/build_gascoeff_tables.py).",
+   "kind": "coefficients",
+   "vintage": "CAPRI star 3.0 code",
+   "domain": "environment",
+   "status": "live",
+   "rows": 1390,
+   "columns": 3,
+   "units": "U_percent",
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_gascoeff_tables (not in the trace yet)"
+   },
+   "catalogue_note": "CAPRI's climate shares p_shareClimZone0(Rall, CLIMALL): the cool, temperate and warm shares per member state (l. 161-228) and the temperature cells 10-20 per regional unit (l. 231-354) of envind/create_rawdat_gascoeff_gdx.gms (tools/build/build_gascoeff_tables.py); the methane per head (capri_mod/environmental/methane_per_head.py) (not re-checked)"
+  },
+  "capri_data/sources/intermediate/envind/capri_tier1_manure_ef.parquet": {
+   "description": "CAPRI's tier 1 manure management CH4 factors p_tier1EmFactManMgt0(emisRegGdx, COLS, A, CLIMALL) per EU group, climate zone and temperature cell (IPCC 2006 Tables 10.14, 10.15, 10A.9), from envind/create_rawdat_gascoeff_gdx.gms l. 77-122 (tools/build/build_gascoeff_tables.py).",
+   "kind": "coefficients",
+   "vintage": "CAPRI star 3.0 code",
+   "domain": "environment",
+   "status": "live",
+   "rows": 798,
+   "columns": 5,
+   "units": "U_kgperhd",
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_gascoeff_tables (not in the trace yet)"
+   },
+   "catalogue_note": "CAPRI's tier 1 manure management CH4 factors p_tier1EmFactManMgt0(emisRegGdx, COLS, A, CLIMALL) per EU group, climate zone and temperature cell (IPCC 2006 Tables 10.14, 10.15, 10A.9), from envind/create_rawdat_gascoeff_gdx.gms l. 77-122 (tools/build/build_gascoeff_tables.py); the methane per head (capri_mod/environmental/methane_per_head.py) (not re-checked)"
+  },
   "capri_data/sources/intermediate/envind/res17_mann_crpr_expt.parquet": {
    "description": "CAPRI's LEVL, MANN and CRPR_EXPT per region and animal activity from the 2017 dumps res_17*.txt, column Y, used for the low-N feeding option (tools/build/build_lownfeed_effects.py).",
    "kind": "base",
@@ -10738,7 +11020,7 @@
   "capri_data/sources/raw/capri/dat/miterra/mirror_non_changeable_parameters_norway/mirror_non_changeable_parameters_norway_p_NO_ControlStrategies.parquet": {
    "description": "CAPRI's p_NO_ControlStrategies of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
    "kind": "coefficients",
-   "rows": 67,
+   "rows": 69,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {

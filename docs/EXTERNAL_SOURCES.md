@@ -123,7 +123,8 @@ NA and UNDF named in the column `special`), one folder per file and one file per
 `baseline/aglink2023dgAgri_oriEUdata/` (all 29 symbols) and `baseline/AGLINK2019dgagri_oridata/p_aglinkOri.parquet`;
 added on 11 November 2026: `baseline/data_SSPV3_update/` (SSP_DATA), `arm/allpop/` (worldPop),
 `global/longrun_info_fac_defaulta/` (of results/global) and `global/globiom_eu_bright_s0_2023+REFERENCE+REFERENCE/`
-(the 36 symbols of the GLOBIOM file below).
+(the 36 symbols of the GLOBIOM file below); added on 25 November 2026: `miterra/mirror_non_changeable_parameters_norway/`
+(8 symbols) and `miterra/mirror_miterra_inputs_norway/` (20 symbols), of dat_local/miterra.
 - Read by: capri_mod/pipeline/captrd/aglink.py (CAPTRD's Aglink stage; c, m, p, m_eq, p_dbvar and the 2019 fish data)
   and tools/build/build_captrd_aglink_sets.py (c, m, p, m_eq).
 
@@ -133,6 +134,12 @@ added on 11 November 2026: `baseline/data_SSPV3_update/` (SSP_DATA), `arm/allpop
 - From: the project lead's CAPRI installation (4 November 2026).
 - Read by: extract_capri_dat_local (p_PEATSH_def); convert_sources_to_csv (p_LUUnits). holdingsLSU.gdx confirms
   capri_data/2017/abatement/ammonia/p_holdLSU.csv (identical records), built from a dump before.
+- Added on 25 November 2026: `miterra/mirror_non_changeable_parameters_norway.gdx` (SHA-256 bd47a801...) and
+  `miterra/mirror_miterra_inputs_norway.gdx` (c1d4a7d6...), CAPRI's Norwegian MITERRA data as the project lead's
+  installation holds them (the version of the 2030 Green Deal reference run), converted to `dat_parquet/miterra/` by
+  tools/build/convert_capri_gdx.py; read by tools/build/extract_capri_dat.py in place of the dat mirror's copies, whose
+  p_NO_ControlStrategies differed in four records (the hens' and other poultry's low-emission housing shares of 2000
+  swapped, none for 2020); the other twelve symbols read are identical.
 - Goes to the Hugging Face set with the rest of capri_sources (MODEL_CONTENT_PLAN §12b).
 - Added on 10 November 2026 (the project lead's installation; CAPTRD's inputs for Steps 2-3, docs/dev/CAPTRD_MOD.md
   section 12.1), under their paths in `dat`:

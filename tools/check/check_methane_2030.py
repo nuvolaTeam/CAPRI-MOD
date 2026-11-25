@@ -14,10 +14,10 @@ techniques' factor on CH4MAN) and %CH4ENTfromFEED% on. The products' mix within 
 report's comes from the solution's feed use).
 
 Result (25 November 2026): the tier 1 values (pigs, poultry, sheep and goats) equal CAPRI's; Denmark's 50 values within
-1.7% (40 within 1%), Portugal's 347 within 9.3% (329 within 5%; the largest the cattle's CH4MAN in PT16, -8 to -9%).
-Norway's poultry differs: the raw set's MITERRA control strategies of Norway (mirror_non_changeable_parameters_norway)
-have no low-emission housing share for 2020; CAPRI's 2030 values match the shares of 2010 (54% for hens, 85% for the
-other poultry).
+1.7% (40 within 1%), Portugal's 347 within 9.3% (329 within 5%; the largest the cattle's CH4MAN in PT16, -8 to -9%),
+Norway's 299 within 0.05%. Norway's poultry with CAPRI's Norwegian MITERRA data of the project lead's installation
+(tools/build/extract_capri_dat.py): the dat mirror's had no low-emission housing share of 2020 for hens and other
+poultry (no CH4 loss: 18 times CAPRI's CH4MAN for the other poultry).
 
     python tools/check/check_methane_2030.py [CC ...]       (default DK)
 """
