@@ -1,0 +1,64 @@
+code,text
+SWHE,Soft wheat
+DWHE,Durum wheat
+RYEM,Rye and meslin
+BARL,Barley
+OATS,Oats
+MAIZ,Grain maize
+OCER,Other cereals
+RAPE,Rape seed
+SUNF,Sunflower seed
+SOYA,Soya seed
+OOIL,Other oil
+OIND,Other industrial crops
+NURS,Nurseries
+FLOW,Flowers
+OCRO,Other crops
+NECR,New energy crops
+MAIF,Fodder maize
+ROOF,Fodder root crops
+OFAR,Fodder other on from arable land
+PARI,Paddy rice
+OLIV,Olive oil
+PULS,Pulses
+POTA,Potatoes
+SUGB,Sugar beet
+TEXT,Flax and hemp
+TOBA,Tobacco
+TOMA,Tomatoes
+OVEG,Other vegetables
+APPL,Apples  pears and peaches
+OFRU,Other fruits
+CITR,Citrus fruits
+TAGR,Table grapes
+TABO,Table olives
+TWIN,Table wine
+GRAS,Gras
+OANI,Other animals output
+STRA,Straw
+ARES,Agricultural residuals usable for biofuels
+YCOW,Young cow
+YBUL,Young bull
+YHEI,Young heifer
+YCAM,Young male calf
+YCAF,Young female calf
+YPIG,Young piglet
+YLAM,Young lamb
+YCHI,Young chicken
+COMI,Milk for sales
+COMF,Milk for feeding
+BEEF,Beef
+PORK,Pork meat
+SGMI,Sheep and goat milk
+SGMF,Sheep and goat milk feeding
+SGMT,Sheep and goat meat
+EGGS,Eggs
+POUM,Poultry meat
+MANN,Nitrogen in manure
+MANP,Phospate in manure
+MANK,Potassium in manure
+LRES,Livestock residues usable for biofuels
+RQUO,Renting of milk quota
+SERO,Agricultural Services Output
+NASA,Non Agricultural Secondary Activities
+mitiO,Service output from GHG mitigation [Quantity measure in constant prices of 2005]

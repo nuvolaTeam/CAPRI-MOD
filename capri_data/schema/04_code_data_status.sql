@@ -13,6 +13,10 @@ CREATE TABLE code_data_status (
 );
 INSERT INTO code_data_status VALUES
   ('capri_mod/feed/equations/aggreg.py', 'EPS', 1e-300, 'technical', 'keep', NULL, 'GAMS''s EPS in a comparison (supply/aggreg.gms l. 31: DATA le eps), the smallest value that counts as not zero'),
+  ('capri_mod/projection/equations/load_base_data_and_trends.py', 'DATA_TRD_FALL_invented', 0.02, 'capri', 'keep', 'gams/capmod/load_base_data_and_trends.gms l. 350-352', 'CAPRI''s number in its statement, as written there (the other fodder''s level kept, 20 ha)'),
+  ('capri_mod/projection/equations/load_base_data_and_trends.py', 'DATA_TRD_FALL_invented', 0.05, 'capri', 'keep', 'gams/capmod/load_base_data_and_trends.gms l. 350-361', 'CAPRI''s number in its statement, as written there (the fallow invented, 50 ha)'),
+  ('capri_mod/projection/equations/load_base_data_and_trends.py', 'DATA_NECR_LEVL_1_2', 0.9, 'capri', 'keep', 'gams/biofuel/resids.gms l. 72', 'CAPRI''s number in its statement, as written there (the new energy crops for the second generation at most 90% of their area)'),
+  ('capri_mod/projection/equations/load_base_data_and_trends.py', 'DATA_TRD_small_areas', 0.02, 'capri', 'keep', 'gams/capmod/load_base_data_and_trends.gms l. 331', 'CAPRI''s number in its statement, as written there (Greece''s soya below 20 ha deleted)'),
   ('capri_mod/feed/equations/fedtrm_cal_pw.py', 'p_aprDistAnimReq_TOP', 0.06, 'capri', 'keep', 'gams/feed/fedtrm_cal_pw.gms l. 171-175', 'CAPRI''s number in its statement, as written there (the requirements'' mark-up at the TOP level)'),
   ('capri_mod/feed/equations/fedtrm_cal_pw.py', 'p_aprDistAnimReq_TOP', 0.35, 'capri', 'keep', 'gams/feed/fedtrm_cal_pw.gms l. 171-175', 'CAPRI''s number in its statement, as written there (the requirements'' mark-up at the TOP level)'),
   ('capri_mod/feed/equations/fedtrm_cal_pw.py', 'p_aprDistAnimReq_TOP', 1.06, 'capri', 'keep', 'gams/feed/fedtrm_cal_pw.gms l. 171-175', 'CAPRI''s number in its statement, as written there (the requirements'' mark-up at the TOP level)'),

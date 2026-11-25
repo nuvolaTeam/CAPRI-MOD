@@ -2998,6 +2998,20 @@
    ],
    "catalogue_note": "Specialty-crop columns (TOMA, OVEG, and formerly COTT/OLIV/WINE) contain synthetic placeholder values, not observations. COTT and OLIV corrected to real geography. TOMA/OVEG still placeholder — replace with Eurostat apro_cpshr. (not re-checked)"
   },
+  "capri_data/2017/supply/biofuel_resids_params.csv": {
+   "description": "CAPRI's literal parameters of biofuel/resids.gms, star 3.0: p_residYield (l. 24-35, the crop residues' yield relative to the main yield, dry weight), p_newEnergyCropYield (l. 49-57, the new energy crops' biomass yield per member state, REST for the others), p_secgConv (l. 64-67, biomass to second-generation biofuel); tools/build/build_resids_params.py; read by capri_mod/projection/equations/load_base_data_and_trends.py (ResidsParams)",
+   "kind": "coefficients",
+   "rows": 21,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/projection/equations/load_base_data_and_trends.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_resids_params (not in the trace yet)"
+   }
+  },
   "capri_data/2017/supply/cap_premium_activity.csv": {
    "description": "CAPRI's CAP premium PRME per regional unit and activity (per ha or per head): the crop columns from crop_premium.csv (every region, model codes), the others from CAPREG's DATA2 extract sources/capreg/capreg_cap_premium.parquet (tools/build/build_model_premium_prices.py; the model read the extract and joined them at run time until 31 October 2026)",
    "kind": "coefficients",
@@ -4976,6 +4990,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/CAK.csv": {
+   "description": "CAPRI CAK: the oilseed cakes made from SED (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/CALF.csv": {
    "description": "CAPRI CALF: the calves fattened (sets.gms), in CAPRI's set order",
    "kind": "structure",
@@ -5016,6 +5040,26 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/ColsRead.csv": {
+   "description": "CAPRI ColsRead: the columns of DATA read in capmod (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 514,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/DACT.csv": {
+   "description": "CAPRI DACT: the data base activities that have variants (DCOW, BULF, HEIF, GRAS and the set-aside codes) (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 7,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/DACT_TO_PACT.csv": {
    "description": "CAPRI DACT_TO_PACT: the data base activities and their high / low variants (sets.gms: DCOW = DCOL + DCOH, BULF, HEIF, GRAS, the set-aside codes)",
    "kind": "structure",
@@ -5031,6 +5075,16 @@
   },
   "capri_data/codes/capri/DCOW.csv": {
    "description": "CAPRI DCOW: the dairy cows (sets.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/FATSPROT.csv": {
+   "description": "CAPRI FATSPROT: the milk's fat and protein, FATS and PROT (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms), in CAPRI's set order",
    "kind": "structure",
    "rows": 2,
    "columns": 2,
@@ -5069,6 +5123,36 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/FIX_YAI.csv": {
+   "description": "CAPRI FIX_YAI: the activities with a fixed young-animal input (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 14,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/FIX_YAO.csv": {
+   "description": "CAPRI FIX_YAO: the activities with a fixed young-animal output (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/FNUT.csv": {
+   "description": "CAPRI FNUT: the mineral fertilisers' nutrients NITF, PHOF, POTF (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/FODCRP.csv": {
    "description": "CAPRI FODCRP: the fodder crops (sets.gms)",
    "kind": "structure",
@@ -5083,6 +5167,16 @@
    "description": "CAPRI FODDI: the fodder feeds, straw included (sets.gms), in CAPRI's set order",
    "kind": "structure",
    "rows": 7,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/FODDIO.csv": {
+   "description": "CAPRI FODDIO: the fodder crops, straw, the milk for feeding and their feeds (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 14,
    "columns": 2,
    "origin": {
     "nature": "capri",
@@ -5139,6 +5233,36 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/GASAGG.csv": {
+   "description": "CAPRI GASAGG: the aggregate greenhouse gases (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/GAS_EMIS.csv": {
+   "description": "CAPRI GAS_EMIS: the emission rows taken from the trends (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 26,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/GHGSDEL_ROWS.csv": {
+   "description": "CAPRI GHGSDEL_ROWS: the greenhouse gas rows taken from the trends (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 77,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/HEIF.csv": {
    "description": "CAPRI HEIF: the fattened heifers (sets.gms), in CAPRI's set order",
    "kind": "structure",
@@ -5149,10 +5273,40 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/ILAB.csv": {
+   "description": "CAPRI ILAB: the labour inputs (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/IO.csv": {
    "description": "CAPRI IO: the inputs and outputs (sets.gms), in CAPRI's set order",
    "kind": "structure",
    "rows": 124,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/IOP.csv": {
+   "description": "CAPRI IOP: the inputs and outputs of the production activities (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 104,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/IYANI.csv": {
+   "description": "CAPRI IYANI: the young animals as inputs (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 8,
    "columns": 2,
    "origin": {
     "nature": "capri",
@@ -5173,6 +5327,16 @@
    "description": "CAPRI MAACT_TO_REQM: the requirements of each animal activity (sets.gms)",
    "kind": "structure",
    "rows": 72,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/MAPP.csv": {
+   "description": "CAPRI MAPP: the unit values deleted below the member states (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
    "columns": 2,
    "origin": {
     "nature": "capri",
@@ -5210,6 +5374,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/MLK.csv": {
+   "description": "CAPRI MLK: the raw milk and the dairy products (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 10,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/MNRUMI.csv": {
    "description": "CAPRI MNRUMI: the non-ruminants of the feed calibration (sets.gms), in CAPRI's set order",
    "kind": "structure",
@@ -5230,6 +5404,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/MS.csv": {
+   "description": "CAPRI MS: the member states and the other national units (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 35,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/MSAGG.csv": {
    "description": "CAPRI MSAGG: the member states (policy.gms)",
    "kind": "structure",
@@ -5238,6 +5422,16 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/MSALL.csv": {
+   "description": "CAPRI MSALL: the member states and national units (MS) and the EU aggregates (EU013000 to EU27yr19), whose trends define FROM_CAPTRD (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 41,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/MS_RU.csv": {
@@ -5280,6 +5474,46 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/O.csv": {
+   "description": "CAPRI O: the outputs (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 63,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/OIYANI.csv": {
+   "description": "CAPRI OIYANI: the young animals as outputs and inputs (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 16,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/OSECO.csv": {
+   "description": "CAPRI OSECO: the outputs and secondary products whose feed contents are deleted (but CRPR and DRMA) (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 92,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/OYANI.csv": {
+   "description": "CAPRI OYANI: the young animals as outputs (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 8,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/PACT.csv": {
    "description": "CAPRI PACT, all production activities (sets.gms; CAPMOD restart file sim_ini_21730)",
    "kind": "structure",
@@ -5288,6 +5522,16 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/PACT_TO_I.csv": {
+   "description": "CAPRI PACT_TO_I: the inputs of each production activity (sets.gms)",
+   "kind": "structure",
+   "rows": 1148,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/PACT_TO_IO.csv": {
@@ -5304,6 +5548,16 @@
    "description": "CAPRI PACT_TO_O: the outputs of each production activity (sets.gms)",
    "kind": "structure",
    "rows": 280,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/PACT_TO_Y.csv": {
+   "description": "CAPRI PACT_TO_Y: each production activity and its main output (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms)",
+   "kind": "structure",
+   "rows": 68,
    "columns": 2,
    "origin": {
     "nature": "capri",
@@ -5484,6 +5738,16 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/RESIMP.csv": {
+   "description": "CAPRI RESIMP: FPRI and FENI, whose feed use is deleted without the traded feeds' base-year use (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/RM.csv": {
    "description": "CAPRI RM: the market regions of the global market model, in CAPRI's set order (sets.gms; the market's move onto CAPRI's regions, MARKET_REGIONS_INVENTORY.md stage 1)",
    "kind": "structure",
@@ -5505,6 +5769,16 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/RMS.csv": {
+   "description": "CAPRI RMS: the member states and other countries with a market balance in DATA (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 80,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/RMTP.csv": {
@@ -5540,10 +5814,40 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/RS.csv": {
+   "description": "CAPRI RS: the regional units with data of the run (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 271,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/RSET.csv": {
+   "description": "CAPRI RSET: the set-aside activities whose levels are taken from the trends (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/RSEU.csv": {
    "description": "CAPRI RSEU: the European regions of the regional hierarchy (sets.gms), in CAPRI's set order",
    "kind": "structure",
    "rows": 323,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/RU.csv": {
+   "description": "CAPRI RU: the regional units with a supply model (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 250,
    "columns": 2,
    "origin": {
     "nature": "capri",
@@ -5571,6 +5875,59 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/RowsRead.csv": {
+   "description": "CAPRI RowsRead: the rows of DATA read in capmod (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 541,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/SCEN.csv": {
+   "description": "CAPRI SCEN: the positions Y and BAS (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/SECO_BIOF.csv": {
+   "description": "CAPRI SECO_BIOF: the biofuels BIOE and BIOD (Seco_BioF) (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/SED.csv": {
+   "description": "CAPRI SED: the oilseeds crushed into the cakes CAK (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/SED_TO_CAK.csv": {
+   "description": "CAPRI SED_TO_CAK: each oilseed and its cake (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms)",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 2,
+   "read_by_model": [
+    "capri_mod/pipeline/captrd/aglink.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/SRNUTS1.csv": {
@@ -5609,6 +5966,26 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/STOCK_TO_BY.csv": {
+   "description": "CAPRI STOCK_TO_BY: each biofuel feedstock and its by-product (DDGS, cakes) (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms)",
+   "kind": "structure",
+   "rows": 12,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/STOCK_TO_FUEL.csv": {
+   "description": "CAPRI STOCK_TO_FUEL: each biofuel feedstock and its biofuel (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms)",
+   "kind": "structure",
+   "rows": 14,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/SUBENE.csv": {
    "description": "CAPRI SUBENE: the energy requirement's components (feed/feed_decl.gms), in CAPRI's set order",
    "kind": "structure",
@@ -5623,6 +6000,16 @@
    "description": "CAPRI S_TACT: the single, standard technology T (capmod.gms), in CAPRI's set order",
    "kind": "structure",
    "rows": 1,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/SplitActs.csv": {
+   "description": "CAPRI SplitActs: the variant activities of DACT (DCOL, DCOH, BULL, BULH, HEIL, HEIH, GRAE, GRAI) (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 8,
    "columns": 2,
    "origin": {
     "nature": "capri",
@@ -5647,6 +6034,26 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/XXBiof.csv": {
+   "description": "CAPRI XXBiof: the biofuels BIOE and BIOD of the second generation's sources (XXBIOF) (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/arbAct.csv": {
+   "description": "CAPRI arbAct: the arable activities (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 40,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/cropDivGrps_mCact.csv": {
@@ -5687,6 +6094,26 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/losfItem.csv": {
+   "description": "CAPRI losfItem: the items whose losses are put at the member state's share of gross production (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 14,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/setfPact.csv": {
+   "description": "CAPRI setfPact: the set-aside and fallow activities (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 5,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri_member_state_codes.csv": {

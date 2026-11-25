@@ -1140,3 +1140,13 @@ CREATE TABLE sup_young_animals_by_sex_2030_coef (
 COMMENT ON TABLE sup_young_animals_by_sex_2030_coef IS 'young animals produced or used per model head of an activity at CAPRI''s 2030 calibration point (sim_ini_21730''s DATA at "Y", LEVL x coefficient / 1000 over the model''s 2030 base heads), the balances of young_animals_by_sex_2030.csv (tools/build/build_young_animals_2030.py, KNOWN_ISSUES K178)';
 INSERT INTO value_units VALUES
   ('sup_young_animals_by_sex_2030_coef', 'coefficient', 'U_HdPerHd', 'builder', 'young_animals_by_sex_2030_coef.coefficient: head per head (the builder)');
+
+-- file: capri_data/2017/supply/biofuel_resids_params.csv
+CREATE TABLE sup_biofuel_resids_params (
+    symbol VARCHAR NOT NULL CHECK (symbol IN ('p_residYield', 'p_newEnergyCropYield', 'p_secgConv')),
+    item VARCHAR NOT NULL,   -- the activity (p_residYield), the member state or REST (p_newEnergyCropYield), the biofuel (p_secgConv)
+    value DOUBLE NOT NULL CHECK (value > 0),
+    PRIMARY KEY (symbol, item)
+);
+COMMENT ON TABLE sup_biofuel_resids_params IS 'CAPRI''s literal parameters of biofuel/resids.gms, star 3.0: p_residYield (l. 24-35, the crop residues'' yield relative to the main yield, dry weight), p_newEnergyCropYield (l. 49-57, the new energy crops'' biomass yield per member state, REST for the others), p_secgConv (l. 64-67, biomass to second-generation biofuel); tools/build/build_resids_params.py; read by capri_mod/projection/equations/load_base_data_and_trends.py (ResidsParams)';
+INSERT INTO value_units VALUES ('sup_biofuel_resids_params', 'value', NULL, 'open', 'three parameters in one column: p_residYield a ratio (CAPRI: relative to main yield, dry weight); p_newEnergyCropYield and p_secgConv without a unit stated in CAPRI''s file');

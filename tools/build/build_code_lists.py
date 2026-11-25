@@ -22,6 +22,9 @@ throughout may follow later). This builder writes:
                                        CAPRI's market regions, trade-policy blocks, the block of each market region
                                               and the EU's two market blocks, in CAPRI's set order (the market's move
                                               onto CAPRI's regions, MARKET_REGIONS_INVENTORY.md)
+  capri_data/codes/capri/RS.csv, RU.csv, MS.csv, ... RMS.csv, STOCK_TO_FUEL.csv, PACT_TO_Y.csv, ...
+                                       the sets of the year's data (capmod/load_base_data_and_trends.gms, biofuel/
+                                              resids.gms; capri_mod/projection/equations/load_base_data_and_trends.py)
   capri_data/codes/model_commodities.csv the model's 58 market commodities (MARKET_COMMODITIES): code,
                                               capri_code, mapping_source
 
@@ -347,6 +350,23 @@ def main():
               "REQ_FEED", "S_TACT", "A", "ACATTLE", "BULF", "CALF", "CALR", "DCOW", "HEIF", "NRUMI", "SUBENE", "REQSE",
               "fibreRichFeed", "FOUT", "IO", "FODDO", "CACT", "AACT", "RSEU", "R_LEVL"):
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    # the sets of the year's data (capmod/load_base_data_and_trends.gms; capri_mod/projection/equations/
+    # load_base_data_and_trends.py), in CAPRI's order; since 24 November 2026
+    for s in ("RS", "RU", "MS", "MSALL", "DACT", "SplitActs", "FODDIO", "RESIMP", "FIX_YAI", "FIX_YAO", "IYANI", "OYANI",
+              "OIYANI", "IOP", "O", "ColsRead", "RowsRead", "losfItem", "OSECO", "RSET", "GASAGG", "GAS_EMIS",
+              "GHGSDEL_ROWS", "MAPP", "SCEN", "ILAB", "setfPact", "arbAct", "FNUT"):
+        items = read_set(a.sets, s)
+        # ColsRead = DB_COLS less some (load_base_data_and_trends.gms l. 65-80) keeps COLS's blank element: dropped
+        # as from COLS above (not an item)
+        items.pop("", None)
+        write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(items.items()))
+    write(OUT / "capri" / "PACT_TO_I.csv", ("pact", "i"), pairs("PACT_TO_I"))
+    # the year's biofuel, cake and milk statements and biofuel/resids.gms (load_base_data_and_trends.gms l. 713-795)
+    for s in ("RMS", "SECO_BIOF", "XXBiof", "CAK", "SED", "MLK", "FATSPROT"):
+        write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    for s, cols in (("STOCK_TO_FUEL", ("xx", "seco_biof")), ("STOCK_TO_BY", ("xx", "byprod")),
+                    ("SED_TO_CAK", ("sed", "cak")), ("PACT_TO_Y", ("pact", "o"))):
+        write(OUT / "capri" / f"{s}.csv", cols, pairs(s))
     write(OUT / "capri" / "Feed_FeedAggr.csv", ("feed", "feedaggr"), pairs("Feed_FeedAggr"))
     write(OUT / "capri" / "MAACT_TO_REQM.csv", ("maact", "reqm"), pairs("MAACT_TO_REQM"))
     write(OUT / "capri" / "PACT_TO_IO.csv", ("pact", "io"), pairs("PACT_TO_IO"))

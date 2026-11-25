@@ -1,0 +1,81 @@
+code,text
+BL000000,Belgium and Luxembourg
+DK000000,Denmark
+DE000000,Germany
+EL000000,Greece
+ES000000,Spain
+FR000000,France
+IR000000,Irland
+IT000000,Italy
+NL000000,The Netherlands
+AT000000,Austria
+PT000000,Portugal
+SE000000,Sweden
+FI000000,Finland
+UK000000,United Kingdom
+CZ000000,Czech Republic
+HU000000,Hungary
+PL000000,Poland
+SI000000,Slovenia
+SK000000,Slovak Republic
+EE000000,Estonia
+LT000000,Lithuania
+LV000000,Latvia
+CY000000,Cyprus
+MT000000,Malta
+BG000000,Bulgaria
+RO000000,Romania
+NO000000,Norway
+TUR,Turkey
+AL000000,Albania
+MK000000,Macedonia
+CS000000,Serbia
+MO000000,Montenegro
+HR000000,Croatia
+BA000000,Bosnia and Herzegovina
+KO000000,Kosovo
+CH,Switzerland
+REU,Rest of Europe
+RUS,Russia
+UKR,Ukraine
+BEL,Belarus
+KAZ,Kazathan
+FSU,Former Soviet Union without Russia
+MOR,Morocco
+MIDEAST,Middle East
+NGA,Nigeria
+ETH,Ethiopia
+ZAF,South Africa
+AFR_LDC,Africcan LDCs
+AFR_REST,Africa Rest (practically ACP)
+IND,India
+PAK,Pakistan
+BGD,Bangladesh
+CHN,China
+JAP,Japan
+MAL,Malaysia
+INDO,Indonesia
+TAW,Taiwan
+SKOR,South Korea
+VIET,
+THAI,
+ASOCE_LDC,"Asian and Ociania LDC (Afghanistan, Bhutan, Cambodia, Laos, Maldives, Myanmar, Nepal, Timor Este, Kiribati, Solomones, Samoa, Tuvalu, Vanuatu"
+ASOCE_REST,Rest of Asia
+AUS,Australia
+NZL,New Zealand
+USA,USA
+CAN,Canada
+MEX,Mexico
+ARG,Argentina
+BRA,Brazil
+MSA_ACP,Middle and South America ACP
+RSA,Rest of South and Middle America
+TUN,Tunesia
+ALG,Algeria
+EGY,Egypt
+ISR,Israel
+VEN,Venezuela
+CHL,Chile
+URU,Uruguay
+PAR,Paraguay
+BOL,Bolivia
