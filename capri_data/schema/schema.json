@@ -58673,6 +58673,174 @@
     ],
     "builders": [],
     "checks": [],
+    "tests": [
+     "capri_mod/tests/test_livestock_input_cost.py"
+    ]
+   }
+  },
+  "sup_livestock_input_cost": {
+   "file": "capri_data/2017/supply/livestock_input_cost.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "The animals' input costs per model head in CAPRI's objective form (register DEP-13 step 3), CAPREG's 2017 data: per input of IobjCont (sets.gms l. 5059-5067) DATA(r, act, I, \"Y\") x the member state's UVAP / 1000 (-p_linObjeCont, capmod/define_objc.gms l. 39-44); YOUNG the young animals bought and FEED the feeds at the region's UVAG (TOIN's other parts, reports/calc_inc_indic.gms l. 34-37); LEVL x value over CAPRI's activities of the model animal over the model's heads",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "eur_head",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "animal",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(eur_head >= 0)"
+   ],
+   "units": [
+    {
+     "item": "eur_head",
+     "unit": "U_EuPerHd",
+     "status": "capri",
+     "basis": "CAPREG 2017 DATA2 at \"Y\" x UVAP (inputs) or UVAG (YOUNG, FEED) / 1000, LEVL-weighted, over the model's 2017 heads"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_livestock_input_cost (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_livestock_input_cost.py"
+    ]
+   }
+  },
+  "sup_livestock_input_cost_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/livestock_input_cost_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "The animals' inputs of IobjCont per model head at CAPRI's 2030 simulation start (sim_ini_21730): DATA(BAS) x (1 - f + f G) (capmod/define_inputs.gms l. 107-112, before TF_I) x the member state's UVAP(2030) = UVAP(BAS) x p_infl^(2030 - BAS), CAPRI's 2030 money (the model deflates), over the model's 2030 base heads (register DEP-13 step 3)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "eur_head",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "animal",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(eur_head >= 0)"
+   ],
+   "units": [
+    {
+     "item": "eur_head",
+     "unit": "U_EuPerHd",
+     "status": "capri",
+     "basis": "sim_ini_21730 DATA at BAS, the main output's yield growth, p_inputDemandFactor, UVAP(BAS) x p_infl^13 / 1000, LEVL(2030)-weighted, over the model's 2030 heads"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_livestock_input_cost (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": []
    }
   },
@@ -67674,7 +67842,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 1057,
+  "capri/keep": 1058,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 39,
