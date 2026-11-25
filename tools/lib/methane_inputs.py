@@ -92,3 +92,28 @@ def data_at(D, regions: set, t: str = "Y") -> dict:
                 if r in regions:
                     out[(r, c, w)] = v
     return out
+
+
+def with_report_rations(DATA: dict, v_feedInpCoeff: dict, p_maxFeedShare: dict, p_technFact: dict) -> dict:
+    """DATA {(region, col, row): value} with the rations DATA(RU, MAACT, FEED) of the report at the solution
+    (reports/sol_simy.gms l. 254-257: capri_mod/coupling/equations/sol_simy.DATA_FEED_SIMY), from the feed input
+    coefficients v_feedInpCoeff {(RU, MAACT, A, FEED)} and the levels v_actLevl = LEVL x p_technFact(RU, MAACT, "LEVL",
+    A) (capmod/create_sim_ini_gdx.gms l. 201), for every activity with a level and coefficients. At the start of a
+    calibrated baseline these are the start's coefficients, which the solution reproduces (CAPRI's 2030 reference:
+    tools/build/build_ration_trajectory_2030.py). The year's data at "Y" carry the trend rations ("TRD",
+    create_sim_ini_gdx.gms l. 311), which CAPRI's supply model's methane rests on with %ghgAbatement% on (envind/
+    gases.gms l. 400-403, its NOTE1 and NOTE2); the reports' methane takes the solution's."""
+    from capri_mod.coupling.equations.sol_simy import DATA_FEED_SIMY
+    feeds = tuple(capri_set("FEED"))
+    acts = {(r, a) for (r, a, _t, _f) in v_feedInpCoeff}
+    out = dict(DATA)
+    for r, a in acts:
+        lv = DATA.get((r, a, "LEVL"), 0.0)
+        if not lv:
+            continue
+        act = {t: lv * s for (rr, aa, i, t), s in p_technFact.items() if rr == r and aa == a and i == "LEVL" and s}
+        for f in feeds:
+            act_f = {t: x for t, x in act.items() if p_maxFeedShare.get((r, a, t, f))}
+            fic = {t: v_feedInpCoeff.get((r, a, t, f), 0.0) for t in act_f}
+            out[(r, a, f)] = DATA_FEED_SIMY(fic, act_f, lv)
+    return out

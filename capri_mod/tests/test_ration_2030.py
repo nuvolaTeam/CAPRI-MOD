@@ -1,21 +1,25 @@
-"""CAPRI's 2030 rations and requirements as factors on the 2017 rations (tools/build/build_ration_trajectory_2030.py,
-capri_ref_ration_2030.csv), KNOWN_ISSUES K201: the bulls' and heifers' factors from CAPRI's elementary activities."""
+"""CAPRI's 2030 rations and requirements as factors on the 2017 rations (tools/build/build_ration_trajectory_2030.py:
+capri_ref_ration_2030.csv from CAPRI's solved reference, chain_ration_2030.csv from the ported chain's start, the
+projection's default), KNOWN_ISSUES K201: the bulls' and heifers' factors from CAPRI's elementary activities."""
 from pathlib import Path
 
 import pandas as pd
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-F30 = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "trajectories" / "capri_ref_ration_2030.csv"
+TRAJ = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "trajectories"
+F30 = TRAJ / "capri_ref_ration_2030.csv"
 
 
-def test_every_2017_ration_has_capris_2030_requirements():
-    """Every region x animal ration of 2017 has CAPRI's 2030 requirement factors (until K201 none of the 249 bull
-    rations had one: the builder read CAPRI's aggregate BULF, which has no DAYS in the 2030 reference)."""
+@pytest.mark.parametrize("name", ["capri_ref_ration_2030.csv", "chain_ration_2030.csv"])
+def test_every_2017_ration_has_capris_2030_requirements(name):
+    """Every region x animal ration of 2017 has CAPRI's 2030 requirement and methane factors in both files (until K201
+    none of the 249 bull rations had one: the builder read CAPRI's aggregate BULF, which has no DAYS in the 2030
+    reference)."""
     from capri_mod.data.nested_tables import read_feed_rations
     raw = read_feed_rations(ROOT / "capri_data" / "2017" / "feed" / "feed_ration_2017.csv")
-    t = pd.read_csv(F30, keep_default_na=False, float_precision="round_trip")
-    for q in ("req_ENNE", "req_CRPR", "req_DMIN", "req_DMAX"):
+    t = pd.read_csv(TRAJ / name, keep_default_na=False, float_precision="round_trip")
+    for q in ("req_ENNE", "req_CRPR", "req_DMIN", "req_DMAX", "ghg_CH4MAN"):
         cov = set(map(tuple, t[t["item"] == q][["region", "animal"]].values))
         miss = {(r, a) for r, acts in raw.items() for a in acts} - cov
         assert not miss, (q, sorted(miss)[:5])

@@ -1327,6 +1327,58 @@ CREATE TABLE src_capri_digest_default_prd (
 );
 COMMENT ON TABLE src_capri_digest_default_prd IS 'CAPRI''s set DEF_PRD: per row, a feed and the default product whose values fill the feed''s missing digestibility items, from envind/def_digestibility.gms (tools/build/build_digestibility_table.py).';
 
+-- file: capri_data/sources/intermediate/envind/capri_emiscalc0.parquet
+CREATE TABLE src_capri_emiscalc0 (
+    region VARCHAR NOT NULL,
+    act VARCHAR NOT NULL,
+    tech VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, act, tech, "item")
+);
+COMMENT ON TABLE src_capri_emiscalc0 IS 'CAPRI''s raw methane coefficients EMISCALC0(Rall, COLS, A, emisParGdx): CH4AN, CH4EN, YM, DE, ASH, B0, NRET per animal (EU rows; IPCC 2006 Vol 4 Ch 10), from the table in envind/create_rawdat_gascoeff_gdx.gms l. 44-75 (tools/build/build_gascoeff_tables.py).';
+INSERT INTO value_units VALUES
+  ('src_capri_emiscalc0', 'value', NULL, 'open', 'capri_emiscalc0.value: CH4AN, CH4EN: kg CH4 per head and year; YM: share of the gross energy; DE, ASH: percent; B0: m3 CH4 per kg volatile solids; NRET: share');
+
+-- file: capri_data/sources/intermediate/envind/capri_tier1_manure_ef.parquet
+CREATE TABLE src_capri_tier1_manure_ef (
+    region VARCHAR NOT NULL,
+    act VARCHAR NOT NULL,
+    tech VARCHAR NOT NULL,
+    clim VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, act, tech, clim)
+);
+COMMENT ON TABLE src_capri_tier1_manure_ef IS 'CAPRI''s tier 1 manure management CH4 factors p_tier1EmFactManMgt0(emisRegGdx, COLS, A, CLIMALL) per EU group, climate zone and temperature cell (IPCC 2006 Tables 10.14, 10.15, 10A.9), from envind/create_rawdat_gascoeff_gdx.gms l. 77-122 (tools/build/build_gascoeff_tables.py).';
+INSERT INTO value_units VALUES
+  ('src_capri_tier1_manure_ef', 'value', 'U_kgperhd', 'capri', 'capri_tier1_manure_ef.value: kg CH4 per head and year (IPCC 2006 Tables 10.14, 10.15, 10A.9)');
+
+-- file: capri_data/sources/intermediate/envind/capri_share_clim_zone.parquet
+CREATE TABLE src_capri_share_clim_zone (
+    region VARCHAR NOT NULL,
+    clim VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, clim)
+);
+COMMENT ON TABLE src_capri_share_clim_zone IS 'CAPRI''s climate shares p_shareClimZone0(Rall, CLIMALL): the cool, temperate and warm shares per member state (l. 161-228) and the temperature cells 10-20 per regional unit (l. 231-354) of envind/create_rawdat_gascoeff_gdx.gms (tools/build/build_gascoeff_tables.py).';
+INSERT INTO value_units VALUES
+  ('src_capri_share_clim_zone', 'value', 'U_percent', 'capri', 'capri_share_clim_zone.value: percent of the region (create_rawdat_gascoeff_gdx.gms l. 161)');
+
+-- file: capri_data/sources/intermediate/envind/capri_manure_mgt_share.parquet
+CREATE TABLE src_capri_manure_mgt_share (
+    region VARCHAR NOT NULL,
+    act VARCHAR NOT NULL,
+    tech VARCHAR NOT NULL,
+    par VARCHAR NOT NULL,
+    clim VARCHAR NOT NULL,
+    mansys VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, act, tech, par, clim, mansys)
+);
+COMMENT ON TABLE src_capri_manure_mgt_share IS 'CAPRI''s manure management parameters p_manureMgtShare0(emisRegGdx, COLS, A, EMISPAR, CLIMALL, ManSys): the systems'' shares MANAG and their CH4 conversion factors CH4CONV by climate zone (l. 363-509) and temperature cell (l. 512-696) of envind/create_rawdat_gascoeff_gdx.gms (IPCC 2006 Tables 10.17, 10A.4-10A.8; tools/build/build_gascoeff_tables.py).';
+INSERT INTO value_units VALUES
+  ('src_capri_manure_mgt_share', 'value', NULL, 'open', 'capri_manure_mgt_share.value: MANAG: share of the manure in the system; CH4CONV: kg CH4 emitted per kg CH4 the manure can produce at most');
+
 -- file: capri_data/sources/intermediate/envind/capri_digestpar.parquet
 CREATE TABLE src_capri_digestpar (
     feed VARCHAR NOT NULL,

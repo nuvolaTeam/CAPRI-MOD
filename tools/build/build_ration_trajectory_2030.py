@@ -23,9 +23,13 @@ their member state's factor (national rows). The 2017 side is CAPRI's 2017 resul
   capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_ref_ration_2030.csv and capri_ref_fodder_2030.csv;
 - chain: CAPRI's feed chain of 2030 as ported (capri_mod/feed/chain.py, on CAPREG's base year and CAPRI's trends:
   tools/lib/feed_chain_inputs.py), the simulation's start that CAPRI writes to sim_ini, per regional unit and CAPRI
-  activity (read_2030_chain). The national rows are the member state's regional units together, in both years. Its
-  methane per head and the fodder are not in the chain yet: only the ration file, without the ghg_ items. Output:
-  chain_ration_2030.csv beside CAPRI's.
+  activity (read_2030_chain), with the methane per head (capri_mod/environmental/methane_per_head.py: DATA's CH4MAN
+  and CH4ENT as gascoeff, digestibility and gases give them, the ration's CH4ENT for the cattle; tools/check/
+  check_methane_2017.py reproduces CAPREG's 2017 values with it) on the rations of CAPRI's report at the solution,
+  the start's feed input coefficients (reports/sol_simy.gms l. 254-257; tools/lib/methane_inputs.
+  with_report_rations), not the trend rations of the year's data at "Y". The national rows are the member
+  state's regional units together, in both years. The fodder fed per ha from the start's feed use of the fodder bulks
+  (read_2030_chain). Output: chain_ration_2030.csv and chain_fodder_2030.csv beside CAPRI's.
 
 (region, animal, item, factor, level); factors in [0, 5] (feeds) and [0.2, 5] (requirements).
 
@@ -50,6 +54,7 @@ TRAJ = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "tra
 OUT = TRAJ / "capri_ref_ration_2030.csv"
 OUT_FODDER = TRAJ / "capri_ref_fodder_2030.csv"
 OUT_CHAIN = TRAJ / "chain_ration_2030.csv"
+OUT_CHAIN_FODDER = TRAJ / "chain_fodder_2030.csv"
 REF = BASELINE_REF
 ITEMS = ("LEVL", "DAYS", "ENNE", "CRPR", "DRMN", "DRMX", "CH4MAN", "CH4ENT")
 #: the bulls' and heifers' CAPRI activities of the factors (KNOWN_ISSUES K201): CAPRI's elementary activities in both
@@ -107,20 +112,41 @@ def read_2030_chain(C2M: dict, FEEDS, raw: Path | None = None) -> tuple:
     regional unit and CAPRI activity: LEVL and DAYS at "Y", the feeds per head (the start's v_feedInpCoeff) and ENNE,
     CRPR, DRMN, DRMX per day (p_animReq), each over the activity's technologies weighted by their shares p_technFact,
     as CAPRI's DATA(RU, activity, FEED, "Y") sums them (fedtrm_cal_pw.gms's DATA_feeding). Returns ({(region,
-    activity): {item: value}}, {member state: its regional units})."""
+    activity): {item: value}}, {member state: its regional units}, the fodder's 2030 side {(region, CAPRI fodder
+    product, FEDM | LEVL): value}). The fodder fed, FEDM, is the start's feed use of the fodder bulk, DATA(RU, "GROF",
+    FODDI, "TRD") as adjust.gms l. 72-73 recomputes it from the start's coefficients (the start's analogue of the
+    reports' FEDM, reports/sol_simy.gms l. 269-273: v_feedQuantReg at the solution), mapped to its product by
+    FEED_TO_O; LEVL the crop's level at "Y" (GRAS: GRAE and GRAI together where GRAS has none)."""
     from capri_mod.data.definitions import capri_set
+    from capri_mod.environmental import methane_per_head
+    from capri_mod.environmental.equations import ammo_ch4
     from capri_mod.feed import chain
     import feed_chain_inputs as fci
-    out, units = collections.defaultdict(dict), {}
+    import methane_inputs
+    from capri_mod.data.definitions import capri_pairs
+    out, units, fod = collections.defaultdict(dict), {}, {}
     A = capri_set("A")
+    prods = set(FCROP.values())
+    bulk_of = {o: f for f, o in capri_pairs("FEED_TO_O") if o in prods}
     for ms in capri_set("MS"):
         cc = ms[:2]
         if not (fci.CAPREG_BASE / f"{cc}.csv.gz").exists():
             print(f"  {ms}: no CAPREG base year, left out")
             continue
-        res = chain.feed_chain(fci.chain_inputs(cc, raw))
+        ci = fci.chain_inputs(cc, raw)
+        res = chain.feed_chain(ci)
         st, fic, days = res.st, res.a.v_feedInpCoeff_L, res.si.DATA_DAYS_Y
         units[ms] = list(res.d.RU)
+        # the methane per head (capri_mod/environmental/methane_per_head.py: gascoeff, digestibility and gases) as
+        # CAPRI's report at the solution computes it (reports/sol_simy.gms l. 254-257 and 1627 on): the rations from
+        # the start's feed input coefficients, which the calibrated reference reproduces (the year's data at "Y" carry
+        # the trend rations, create_sim_ini_gdx.gms l. 311); MITERRA's scenario year of the simulation year,
+        # %ghgAbatement% off (the reference run's), %CH4ENTfromFEED% on; DATA's CH4ENT and CH4MAN per head
+        DATA_ = methane_inputs.with_report_rations(methane_inputs.data_at(res.D, res.regions), fic,
+                                                   st.p_maxFeedShare, st.p_technFact)
+        mi_ = methane_inputs.methane_inputs(DATA_, res.regions, ms, st.p_technFact, st,
+                                            scen_year=ammo_ch4.ScenYear(ci.SIMY))
+        ch4 = methane_per_head.data_per_activity(mi_, methane_per_head.methane_per_head(mi_))
         for r in res.d.RU:
             for ca in C2M:
                 lv = res.D.get(r, ca, "LEVL", "Y")
@@ -132,9 +158,20 @@ def read_2030_chain(C2M: dict, FEEDS, raw: Path | None = None) -> tuple:
                     d[fe] = sum(fic.get((r, ca, t, fe), 0.0) * s for t, s in sh.items() if s)
                 for q in ("ENNE", "CRPR", "DRMN", "DRMX"):
                     d[q] = sum(st.p_animReq.get((r, ca, t, q), 0.0) * s for t, s in sh.items() if s)
+                for q in ("CH4MAN", "CH4ENT"):
+                    d[q] = ch4.get((r, ca), {}).get(q, 0.0)
                 out[(r, ca)] = d
+        for r in res.d.RU:
+            for o, f in bulk_of.items():
+                fe = res.a.DATA_TRD.get((r, "GROF", f), 0.0)
+                lv = res.D.get(r, o, "LEVL", "Y") or (sum(res.D.get(r, c, "LEVL", "Y") for c in ("GRAE", "GRAI"))
+                                                      if o == "GRAS" else 0.0)
+                if fe:
+                    fod[(r, o, "FEDM")] = fe
+                if lv:
+                    fod[(r, o, "LEVL")] = lv
         print(f"  {ms}: {len(res.d.RU)} units, {sum(1 for k in out if k[0] in set(res.d.RU))} activities")
-    return out, units
+    return out, units, fod
 
 
 def totals(data: dict, yr: str, codes, animal: str, C2M: dict, FEEDS) -> dict | None:
@@ -194,22 +231,30 @@ def ration_rows(data: dict, groups: dict, herds, C2M: dict, FEEDS, national) -> 
     return rows
 
 
-def fodder_rows(ref: Path, dump_dir: Path, groups: dict, herds) -> list:
+#: the model's fodder crops and CAPRI's fodder products whose use per ha they take: GRAE and GRAI take CAPRI's whole
+#: grassland GRAS's (CAPRI's FEDM of grass is not split by activity)
+FCROP = {"GRAE": "GRAS", "GRAI": "GRAS", "MAIF": "MAIF", "OFAR": "OFAR", "ROOF": "ROOF"}
+
+
+def fodder_rows(ref: Path, dump_dir: Path, groups: dict, herds, fdat30: dict | None = None) -> list:
     """FODDER per ha (the fodder balance's usable fodder, u = fed quantity / area): CAPRI's FEDM over LEVL of the fodder
     crop, 2030 over 2017 (yield, losses and the non-feed use, e.g. silage maize for biogas in Germany: INDM 3.6 of 6.9
     Mt in Upper Bavaria's 2030 reference); per group, else member state. The model's fodder crop -> CAPRI's: GRAE and
     GRAI take the use per ha of CAPRI's whole grassland GRAS (CAPRI's FEDM of grass is not split by activity); (OFOD:
     OFAR alone until 7 November 2026)."""
-    fcrop = {"GRAE": "GRAS", "GRAI": "GRAS", "MAIF": "MAIF", "OFAR": "OFAR", "ROOF": "ROOF"}
+    fcrop = FCROP
     fdat = {"2017": {}, "2030": {}}
+    if fdat30 is not None:                               # the chain's start (read_2030_chain)
+        fdat["2030"] = dict(fdat30)
+        ref = None
     pf30 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'(FEDM|LEVL)'\.'(GRAS|MAIF|OFAR|ROOF)'\.'2030'\s+(-?[\d.Ee+\-]+)")
-    txt = grep(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(FEDM|LEVL)'\.'(GRAS|MAIF|OFAR|ROOF)'\.'2030'", str(ref))
+    txt = grep(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(FEDM|LEVL)'\.'(GRAS|MAIF|OFAR|ROOF)'\.'2030'", str(ref)) if ref else ""
     for line in txt.splitlines():
         m = pf30.match(line)
         if m:
             fdat["2030"][(m.group(1), m.group(3), m.group(2))] = float(m.group(4))
     pl30 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'(GRAS|MAIF|OFAR|ROOF)'\.'LEVL'\.'2030'\s+(-?[\d.Ee+\-]+)")
-    txt = grep(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(GRAS|MAIF|OFAR|ROOF)'\.'LEVL'\.'2030'", str(ref))
+    txt = grep(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(GRAS|MAIF|OFAR|ROOF)'\.'LEVL'\.'2030'", str(ref)) if ref else ""
     for line in txt.splitlines():
         m = pl30.match(line)
         if m:
@@ -265,7 +310,7 @@ def main():
     want = set(FEEDS) | set(ITEMS)
     data = {"2017": read_2017(a.dump_dir, C2M, want, fr)}
     if a.source == "chain":
-        data["2030"], units = read_2030_chain(C2M, FEEDS, a.raw)
+        data["2030"], units, fod30 = read_2030_chain(C2M, FEEDS, a.raw)
         national = lambda ms: units.get(ms, [ms])                    # noqa: E731
         out_path = OUT_CHAIN
     else:
@@ -275,12 +320,11 @@ def main():
     herds = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "animal_numbers.csv", index_col=0)
     c2g, groups = mr.capri_groups(list(herds.index))
     rows = ration_rows(data, groups, herds, C2M, FEEDS, national)
-    if a.source == "chain":                              # the chain has no methane per head yet (module docstring)
-        rows = [row for row in rows if not row[2].startswith("ghg_")]
-    if a.source == "capri_ref":
-        fo = pd.DataFrame(fodder_rows(a.ref, a.dump_dir, groups, herds), columns=["region", "crop", "factor", "level"])
-        fo.to_csv(OUT_FODDER, index=False)
-        print(f"wrote {OUT_FODDER.relative_to(ROOT)}: {len(fo)} rows; median {fo.groupby('crop')['factor'].median().round(3).to_dict()}")
+    fo_path = OUT_FODDER if a.source == "capri_ref" else OUT_CHAIN_FODDER
+    fo = pd.DataFrame(fodder_rows(a.ref, a.dump_dir, groups, herds, fod30 if a.source == "chain" else None),
+                      columns=["region", "crop", "factor", "level"])
+    fo.to_csv(fo_path, index=False)
+    print(f"wrote {fo_path.relative_to(ROOT)}: {len(fo)} rows; median {fo.groupby('crop')['factor'].median().round(3).to_dict()}")
     out = pd.DataFrame(rows, columns=["region", "animal", "item", "factor", "level"])
     out.to_csv(out_path, index=False)
     med = out.groupby("item")["factor"].median().to_dict()

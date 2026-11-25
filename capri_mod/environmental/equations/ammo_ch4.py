@@ -280,3 +280,18 @@ def p_Nemidat_split_activities(p_Nemidat, DACT_TO_PACT, MACT):
             if a in ds:
                 out[(m, p, g, i, s)] = out.get((m, p, g, i, s), 0.0) + v
     return out
+
+
+def ScenYear(SIMY):
+    r"""%ScenYear%, the MITERRA scenario year of a capmod run: 2000, 2020 for a simulation year after 2010
+    (create_sim_ini_gdx.gms l. 176-178; the five-year steps of %finEC4MACS%, l. 183-192, are off). CAPREG's is 2000
+    (envind/Miterra/scenario_settings.gms l. 90).
+
+    CAPRI's GAMS (capmod/create_sim_ini_gdx.gms l. 176-178):
+
+        $SetGlobal ScenYear   2000
+        $eval after2010 %simy% > 2010
+        $if %after2010%==1 $setglobal scenYear 2020
+
+    Departures from CAPRI: none."""
+    return 2020 if int(SIMY) > 2010 else 2000

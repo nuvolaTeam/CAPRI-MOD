@@ -1,14 +1,23 @@
-"""The 2030 methane per head of a country's activities at the simulation's start, from the port (capri_mod/environmental/
-methane_per_head.py) on the ported feed chain (capri_mod/feed/chain.py: CAPREG's base year and CAPRI's trends), against
-CAPRI's 2030 reference results (tools/lib/paths.BASELINE_REF), as a check only.
+"""The 2030 methane per head of a country's activities, from the port (capri_mod/environmental/methane_per_head.py) on
+the ported feed chain (capri_mod/feed/chain.py: CAPREG's base year and CAPRI's trends), as CAPRI's report at the
+solution computes it, against CAPRI's 2030 reference results (tools/lib/paths.BASELINE_REF), as a check only.
 
-At "Y" of the start, as capmod's gascoeff, digestibility and gases run there (capmod.gms l. 778, 1106, 1139): the
-year's data of create_sim_ini_gdx.gms (the rations DATA(RU, MAACT, FEED, "Y") at "TRD", l. 311), the start's
-requirements and days (the requirement call after def_requirements and adjust), the technologies' shares, MITERRA's
-shares and CH4 losses of its 2020 scenario year (create_sim_ini_gdx.gms l. 176-178), %ghgAbatement% off (the
-reference run's: the ammonia techniques' factor on CH4MAN) and %CH4ENTfromFEED% on. CAPRI's reference reports its
-values at the solution (reports/sol_simy.gms l. 1669-1716), with the solution's rations: the two differ by the rations,
-the tier 1 values and the per-head factors not at all.
+CAPRI's report (reports/sol_simy.gms l. 254-257 and 1627 on) runs gascoeff, digestibility and gases on the solution's
+rations, the feed input coefficients over the technologies' levels; the calibrated reference reproduces the start's
+coefficients (tools/build/build_ration_trajectory_2030.py), so the check takes them (tools/lib/methane_inputs.
+with_report_rations). The year's data at "Y" carry the trend rations instead (create_sim_ini_gdx.gms l. 311: in
+Alentejo's dairy cows 9.3 t of grass per head against the coefficients' 27.1 t), which CAPRI's supply model's methane
+rests on with %ghgAbatement% on (envind/gases.gms l. 400-403). The rest at "Y" of the start: the requirements and days
+(the requirement call after def_requirements and adjust), the technologies' shares, MITERRA's shares and CH4 losses of
+its 2020 scenario year (create_sim_ini_gdx.gms l. 176-178), %ghgAbatement% off (the reference run's: the ammonia
+techniques' factor on CH4MAN) and %CH4ENTfromFEED% on. The products' mix within each feed bulk stays the start's (the
+report's comes from the solution's feed use).
+
+Result (25 November 2026): the tier 1 values (pigs, poultry, sheep and goats) equal CAPRI's; Denmark's 50 values within
+1.7% (40 within 1%), Portugal's 347 within 9.3% (329 within 5%; the largest the cattle's CH4MAN in PT16, -8 to -9%).
+Norway's poultry differs: the raw set's MITERRA control strategies of Norway (mirror_non_changeable_parameters_norway)
+have no low-emission housing share for 2020; CAPRI's 2030 values match the shares of 2010 (54% for hens, 85% for the
+other poultry).
 
     python tools/check/check_methane_2030.py [CC ...]       (default DK)
 """
@@ -33,10 +42,13 @@ def chain_methane(cc: str, raw=None) -> tuple:
     2030 start."""
     import feed_chain_inputs as fci
     import methane_inputs as mi
-    res = chain.feed_chain(fci.chain_inputs(cc, raw=raw))
+    from capri_mod.environmental.equations import ammo_ch4
+    ci = fci.chain_inputs(cc, raw=raw)
+    res = chain.feed_chain(ci)
     ms = next(r for r in res.regions if r in res.S.MS)
-    DATA = mi.data_at(res.D, res.regions)
-    m = mi.methane_inputs(DATA, res.regions, ms, res.st.p_technFact, res.st, scen_year=2020)
+    DATA = mi.with_report_rations(mi.data_at(res.D, res.regions), res.a.v_feedInpCoeff_L, res.st.p_maxFeedShare,
+                                  res.st.p_technFact)
+    m = mi.methane_inputs(DATA, res.regions, ms, res.st.p_technFact, res.st, scen_year=ammo_ch4.ScenYear(ci.SIMY))
     per_head = mph.methane_per_head(copy.deepcopy(m))
     return res, mph.data_per_activity(m, per_head), per_head
 
