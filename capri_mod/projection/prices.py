@@ -245,6 +245,15 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
 
     _add(toou, d_out, (d_yo,))          # total output: final products and young animals sold
     _add(toin, None, (d_yi, d_feed))    # total inputs: young animals and feed cereals bought
+    # the same changes in TOIN's parts of the input cost table (CAPRI's objective form, register DEP-13 step 3): the
+    # young animals bought and the feeds, which the regional NLP takes out of the herd's linear term
+    ic = data.get("livestock_input_cost")
+    if isinstance(ic, dict):
+        for item, dd in (("YOUNG", d_yi), ("FEED", d_feed)):
+            for (reg, act), v in dd.items():
+                f = ic.get(reg)
+                if f is not None and act in f.index and item in f.columns and pd.notna(f.at[act, item]):
+                    f.at[act, item] = float(f.at[act, item]) + v
 
     # --- purchased feed bulks in the rations (the projection layer at CAPRI's reference): the rations hold the bulks'
     # 2017 prices (the member state's UVAG, feed_ration_2017.csv); the 2030 baseline takes CAPRI's 2030 UVAG of each

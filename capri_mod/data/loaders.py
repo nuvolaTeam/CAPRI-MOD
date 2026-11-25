@@ -48,7 +48,7 @@ _FILE_CATEGORY = {
     "base_areas.csv": "supply", "yields.csv": "supply", "animal_numbers.csv": "supply",
     "cap_premium_activity.csv": "supply", "producer_prices_regional.csv": "supply",
     "livestock_output_coef.csv": "supply", "nutrients_regional.csv": "supply",
-    "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "livestock_output_by_product_coef_2030.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "market_prod_grof_2030.csv": "market", "bilateral_flows_{BY}.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_{BY}.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_{BY}.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.csv": "market", "world_market_baseline_products.csv": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "techn_mix_2030.csv": "supply", "price_transmission_2030.csv": "supply", "plant_protection_capri_step_2030.csv": "supply", "input_coefs_2030.csv": "supply", "pmp_capri_2030_mix.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_{BY}.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
+    "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "livestock_output_by_product_coef_2030.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "market_prod_grof_2030.csv": "market", "bilateral_flows_{BY}.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_{BY}.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_{BY}.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.csv": "market", "world_market_baseline_products.csv": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "techn_mix_2030.csv": "supply", "price_transmission_2030.csv": "supply", "plant_protection_capri_step_2030.csv": "supply", "input_coefs_2030.csv": "supply", "pmp_capri_2030_mix.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_input_cost.csv": "supply", "livestock_input_cost_2030.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_{BY}.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
     "livestock_feed_coef.csv": "feed",
     "eu_cake_feed_bas.csv": "market",
     "biofuel_feedstock_{BY}.csv": "market", "biofuel_use_share_{BY}.csv": "market", "biofuel_market_{BY}.csv": "market", "biofuel_feedstock_2030.csv": "market", "biofuel_use_share_2030.csv": "market", "biofuel_market_2030.csv": "market", "crushing_parameters_{BY}.csv": "market", "crushing_parameters_2030.csv": "market", "feed_bulks_eu.csv": "market", "feed_bulks_eu_share.csv": "market", "dairy_processing.csv": "market",
@@ -453,6 +453,15 @@ def _load_optional_csv(data_dir, filename):
         return None
     return read_input(path, index_col=0)
 
+def _input_cost_table(t):
+    """{region: DataFrame animal x item} of a long table (region, animal, item, eur_head); None without the table."""
+    if t is None:
+        return None
+    t = t.reset_index()
+    return {r: g.pivot_table(index="animal", columns="item", values="eur_head", aggfunc="sum")
+            for r, g in t.groupby("region")}
+
+
 def _load_pmp_capri_2030(d: Path, stem: str = "pmp_capri_2030"):
     """{region: {(act_i, act_j): g}} of a set of PMP terms in the model's form: the crops' matrix (<stem>.csv) and the
     animals' herd terms (<stem>_animals.csv, (animal, animal) entries). stem: pmp_capri_2030 (CAPRI's exported 2030
@@ -670,6 +679,12 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # weights of the reported adoption shares (reporting only)
         "livestock_units": _load_optional_csv(data_dir, "livestock_units.csv"),
         "livestock_cost_coef": _load_optional_csv(data_dir, "livestock_cost_coef.csv"),
+        # the animals' input costs per model head in CAPRI's objective form (tools/build/build_livestock_input_cost.py,
+        # register DEP-13 step 3): {region: DataFrame animal x item, EUR per head}. 2017: each input of IobjCont at the
+        # member state's UVAP (-p_linObjeCont), YOUNG and FEED at the region's UVAG (TOIN's parts); 2030: the inputs at
+        # CAPRI's 2030 start, before TF_I, in CAPRI's 2030 money
+        "livestock_input_cost": _input_cost_table(_load_optional_csv(data_dir, "livestock_input_cost.csv")),
+        "livestock_input_cost_2030": _input_cost_table(_load_optional_csv(data_dir, "livestock_input_cost_2030.csv")),
         "livestock_revenue_coef": _load_optional_csv(
             data_dir, "livestock_revenue_coef.csv"),
         # CAPRI land market (docs/LAND_USE_FLEXIBILITY.md)

@@ -1150,3 +1150,27 @@ CREATE TABLE sup_biofuel_resids_params (
 );
 COMMENT ON TABLE sup_biofuel_resids_params IS 'CAPRI''s literal parameters of biofuel/resids.gms, star 3.0: p_residYield (l. 24-35, the crop residues'' yield relative to the main yield, dry weight), p_newEnergyCropYield (l. 49-57, the new energy crops'' biomass yield per member state, REST for the others), p_secgConv (l. 64-67, biomass to second-generation biofuel); tools/build/build_resids_params.py; read by capri_mod/projection/equations/load_base_data_and_trends.py (ResidsParams)';
 INSERT INTO value_units VALUES ('sup_biofuel_resids_params', 'value', NULL, 'open', 'three parameters in one column: p_residYield a ratio (CAPRI: relative to main yield, dry weight); p_newEnergyCropYield and p_secgConv without a unit stated in CAPRI''s file');
+
+-- file: capri_data/2017/supply/livestock_input_cost.csv
+CREATE TABLE sup_livestock_input_cost (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    animal VARCHAR NOT NULL REFERENCES model_activities (code),
+    item VARCHAR NOT NULL,
+    eur_head DOUBLE NOT NULL CHECK (eur_head >= 0),
+    PRIMARY KEY (region, animal, item)
+);
+COMMENT ON TABLE sup_livestock_input_cost IS 'The animals'' input costs per model head in CAPRI''s objective form (register DEP-13 step 3), CAPREG''s 2017 data: per input of IobjCont (sets.gms l. 5059-5067) DATA(r, act, I, "Y") x the member state''s UVAP / 1000 (-p_linObjeCont, capmod/define_objc.gms l. 39-44); YOUNG the young animals bought and FEED the feeds at the region''s UVAG (TOIN''s other parts, reports/calc_inc_indic.gms l. 34-37); LEVL x value over CAPRI''s activities of the model animal over the model''s heads';
+INSERT INTO value_units VALUES
+  ('sup_livestock_input_cost', 'eur_head', 'U_EuPerHd', 'capri', 'CAPREG 2017 DATA2 at "Y" x UVAP (inputs) or UVAG (YOUNG, FEED) / 1000, LEVL-weighted, over the model''s 2017 heads');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/livestock_input_cost_2030.csv
+CREATE TABLE sup_livestock_input_cost_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    animal VARCHAR NOT NULL REFERENCES model_activities (code),
+    item VARCHAR NOT NULL,
+    eur_head DOUBLE NOT NULL CHECK (eur_head >= 0),
+    PRIMARY KEY (region, animal, item)
+);
+COMMENT ON TABLE sup_livestock_input_cost_2030 IS 'The animals'' inputs of IobjCont per model head at CAPRI''s 2030 simulation start (sim_ini_21730): DATA(BAS) x (1 - f + f G) (capmod/define_inputs.gms l. 107-112, before TF_I) x the member state''s UVAP(2030) = UVAP(BAS) x p_infl^(2030 - BAS), CAPRI''s 2030 money (the model deflates), over the model''s 2030 base heads (register DEP-13 step 3)';
+INSERT INTO value_units VALUES
+  ('sup_livestock_input_cost_2030', 'eur_head', 'U_EuPerHd', 'capri', 'sim_ini_21730 DATA at BAS, the main output''s yield growth, p_inputDemandFactor, UVAP(BAS) x p_infl^13 / 1000, LEVL(2030)-weighted, over the model''s 2030 heads');

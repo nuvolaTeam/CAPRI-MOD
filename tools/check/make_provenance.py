@@ -214,6 +214,9 @@ UNTRACED = {
     "capri_data/codes/capri/RUMI.csv": ("build_code_lists", "CAPRI"),
     "capri_data/baselines/capri_greendeal_ref/1730/trajectories/chain_ration_2030.csv": ("build_ration_trajectory_2030", "CAPRI"),
     "capri_data/baselines/capri_greendeal_ref/1730/trajectories/chain_fodder_2030.csv": ("build_ration_trajectory_2030", "CAPRI"),
+    # the animals' input costs in CAPRI's objective form (register DEP-13 step 3)
+    "capri_data/2017/supply/livestock_input_cost.csv": ("build_livestock_input_cost", "CAPRI"),
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/livestock_input_cost_2030.csv": ("build_livestock_input_cost", "CAPRI"),
     "capri_data/codes/capri/CLIMALL.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/CLIM.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/CLIMCELS.csv": ("build_code_lists", "CAPRI"),

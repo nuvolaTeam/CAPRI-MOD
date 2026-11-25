@@ -298,6 +298,10 @@ class RegionData:
     cover_crops: Optional[pd.Series] = None
     winter_cover_share: Optional[pd.DataFrame] = None
     livestock_cost_coef: Optional[pd.Series] = None
+    #: the animals' input costs per model head by item (livestock_input_cost.csv, register DEP-13 step 3: the inputs of
+    #: IobjCont, YOUNG, FEED; at the 2030 market year the year's inputs, projection_module.p_linObjeCont_animals_Y),
+    #: animal x item, EUR per head
+    livestock_input_cost: Optional[pd.DataFrame] = None
     livestock_output_value_coef: Optional[pd.Series] = None
     livestock_premium_coef: Optional[pd.Series] = None     # CAPRI PRME per model head
     capri_level_ratio: Optional[pd.Series] = None          # model herd units per CAPRI LEVL unit (activity bounds)
@@ -2494,6 +2498,7 @@ class SupplyModule(ModuleStateMixin):
                 d["livestock_cost_coef"].loc[region]
                 if d.get("livestock_cost_coef") is not None
                 and region in d["livestock_cost_coef"].index else None),
+            livestock_input_cost=(d.get("livestock_input_cost") or {}).get(region),
             livestock_output_value_coef=(
                 d["livestock_output_value_coef"].loc[region]
                 if d.get("livestock_output_value_coef") is not None

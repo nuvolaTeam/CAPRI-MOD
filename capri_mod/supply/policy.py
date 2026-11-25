@@ -440,6 +440,18 @@ class PolicyBlock:
             return float(v)
         return float(v) / _inputs.money_deflator(int(sim))
 
+    def _animal_inpo_cost(self, animal: str) -> Optional[float]:
+        """The animal's INPO cost per model head in CAPRI's objective form (the input cost table's INPO: register DEP-13
+        step 3), with supply.animal_cost_form "capri"; None with "toin" or without the table (the caller takes TOIN's
+        INPO share)."""
+        from capri_mod.settings import current as _settings
+        if str(_settings().get("supply.animal_cost_form")) != "capri":
+            return None
+        ic = getattr(self.data, "livestock_input_cost", None)
+        if ic is None or "INPO" not in ic.columns or animal not in ic.index or not pd.notna(ic.at[animal, "INPO"]):
+            return None
+        return float(ic.at[animal, "INPO"])
+
     def _sim_input_cost(self, activity: str, col: str) -> Optional[float]:
         """The cost row the Green Deal's input changes and the yields' input update act on: CAPRI's simulation-year
         coefficient at the 2030 market year (_input_row_2030, register DEP-21), else CAPRI's 2017 coefficient at the
@@ -494,8 +506,14 @@ class PolicyBlock:
         for a in self.acts:
             d = 0.0
             if a in ANIMALS:
+                inpo_ = self._animal_inpo_cost(a)
                 sh = self._input_row(a, "inpo_toin_share")
-                if sh is not None and pc_inpo != 0.0:
+                if inpo_ is not None and pc_inpo != 0.0:
+                    # CAPRI's INPO term of p_linObjeCont per model head (capmod/define_objc.gms l. 39-44, register DEP-13
+                    # step 3): the input cost table's INPO, the year's coefficient x TF_I at the member state's UVAP;
+                    # the change acts on its coefficient before TF_I
+                    d = delta(inpo_ / tf, 0.0, pc_inpo)
+                elif sh is not None and pc_inpo != 0.0:
                     # the INPO coefficient's yield-growth part at the 2030 market year (define_inputs.gms l. 107-112;
                     # the per-head basis is the model's, DEP-13)
                     yf = self._input_row_2030(a, "inpo_yield_factor") or 1.0

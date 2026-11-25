@@ -275,6 +275,8 @@ INSERT INTO data_kind VALUES
   ('capri_data/2017/supply/land_rents_2017.csv', 'base', 'by file: 2017 CAPREG data'),
   ('capri_data/baselines/capri_greendeal_ref/1730/supply/land_rents_2030.csv', 'reference', 'by file: CAPRI''s 2030 land rents'),
   ('capri_data/2017/supply/livestock_cost_coef.csv', 'coefficients', 'by file: per-unit coefficients (per ha, per head, shares, conversion)'),
+  ('capri_data/2017/supply/livestock_input_cost.csv', 'coefficients', 'by file: per-unit coefficients (per ha, per head, shares, conversion)'),
+  ('capri_data/baselines/capri_greendeal_ref/1730/supply/livestock_input_cost_2030.csv', 'coefficients', 'by file: per-unit coefficients (per ha, per head, shares, conversion)'),
   ('capri_data/2017/supply/livestock_output_by_product_coef.csv', 'coefficients', 'by file: per-unit coefficients (per ha, per head, shares, conversion)'),
   ('capri_data/2017/supply/livestock_output_coef.csv', 'coefficients', 'by file: per-unit coefficients (per ha, per head, shares, conversion)'),
   ('capri_data/2017/supply/livestock_output_value_coef.csv', 'coefficients', 'by file: per-unit coefficients (per ha, per head, shares, conversion)'),

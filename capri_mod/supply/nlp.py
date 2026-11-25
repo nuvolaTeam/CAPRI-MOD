@@ -99,6 +99,19 @@ class NLPBlock:
             out.append((g_["g"], need - sup))
         return sorted(out, key=lambda t: -t[1])
 
+    def _feed_in_linear_term(self, rats) -> Optional[dict]:
+        """{animal: EUR per head} of the feeds in each herd's linear term (the FEED item of the input cost table:
+        CAPRI's 2017 feed value per model head, TOIN's part, with the projection's price changes) for the animals whose
+        feeding is in the regional NLP, with supply.animal_cost_form "capri"; None with "toin" (the NLP takes the base
+        ration's cost out instead) or without the table."""
+        from capri_mod.settings import current as _settings
+        if str(_settings().get("supply.animal_cost_form")) != "capri":
+            return None
+        ic = getattr(self.data, "livestock_input_cost", None)
+        if ic is None or "FEED" not in ic.columns:
+            return None
+        return {a: float(ic.at[a, "FEED"]) for a in rats if a in ic.index and pd.notna(ic.at[a, "FEED"])}
+
     def _capri_nlp_solve(self, Q, c, A, b, x_start):
         """The regional problem in CAPRI's form (capri_regional_nlp.CapriRegionalNLP), solved with IPOPT from the
         region's previous solution (CAPRI's CONOPT starts from the last solution; then without the duals, then cold from
@@ -157,6 +170,9 @@ class NLPBlock:
                     fodder_out=dict(getattr(self.ev, "fodder_out", None) or {}),
                     fodder_le=set(getattr(self.ev, "fodder_le", None) or ()),
                     prices=getattr(self.seen, "feed_prices", None), req_extra=_rx, feed_ghg=self._ghg_feed_cost(),
+                    # CAPRI's objective form (supply.animal_cost_form "capri", register DEP-13 step 3): the feeds' part
+                    # of each herd's linear term, which the NLP takes out (QUADRF_ charges the feed)
+                    feed_lin=self._feed_in_linear_term(rats),
                     npk=npk, drop_labels=drop, cap_rules=self._cap_rules_spec(), ghg_min=ghg_min,
                     land_rent_rows=dict(getattr(self.ev, "land_rent_rows", None) or {}),
                     mix_cols=sorted(int(k_) for k_ in (getattr(self.ev, "mix_cols", None) or {}).values()),

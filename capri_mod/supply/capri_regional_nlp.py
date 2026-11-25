@@ -382,9 +382,16 @@ class CapriRegionalNLP:
         # ---------------- objective ----------------
         q0 = c.copy()
         obj = 0
+        feed_lin = spec.get("feed_lin")
         for a, r in rats.items():
             cn = cal[a][0]
             fl = np.asarray(r.flex, bool)
+            if feed_lin is not None and a in feed_lin:
+                # CAPRI's objective form (supply.animal_cost_form "capri", register DEP-13 step 3): the herd's linear term
+                # holds CAPRI's feed value per head (TOIN's FEED part); it is taken out, and QUADRF_ below alone charges
+                # the feed, as CAPRI's objective (LINEAR_ has no feed, supply_model.gms l. 4752-4763)
+                q0[act_idx[a]] -= float(feed_lin[a])
+                continue
             # the herd's linear term carries the base ration's cost per head (CNST, 0.5 SLOP, tradable feeds at base
             # prices; fodder through its balance); it is taken out here and charged through QUADRF_ below, exactly as
             # the feed block's compensation, with the calibrated CNST
