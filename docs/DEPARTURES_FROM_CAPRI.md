@@ -232,6 +232,14 @@ with the other switches whose alternative was never run; docs/dev/SETTINGS_INVEN
 - Idled histosols count on the landscape floor, and the diversification limit is lowered as in landscape.gms; these
   two have no switch.
 
+### `outer_loop.max_outer_iter = 99` (25 November 2026; register DEP-1)
+
+CAPRI's number of iterations of a scenario run, its GUI's %STEPS% 99 (gui/capri_gui_definition.xml l. 2891-2897).
+From 28 October 2026 the cap was 60 (the project lead's choice then, to keep a run within its run time; CAPRI's stop
+rule needed 30 iterations in the Green Deal 2030 scenario, r168, and 12 in Farm-to-Fork). Switched back by the project
+lead's rule of 24 November 2026 (follow CAPRI). A run that stops by CAPRI's stop rule before iteration 60 is unchanged;
+only a run that has not met it by then goes on, up to 99.
+
 ### `outer_loop.price_update = "capri"` (26 October 2026)
 
 CAPRI's price forecast for every price passed to the supply models (EU signal, member-state milk, EU blocks, Norway,
@@ -259,19 +267,19 @@ CAPRI's form, home-grown fodder carries no purchase price and enters through its
 feed use (capri_regional_nlp.py QUADRF_ and the fodder rows), so its value is that equality's dual, as in CAPRI. The
 setting, its ratio bounds and damping, and the outside ration solve were removed with the conic form.
 
-### `market.noneu_supply_nq = true` (29 October 2026; K54-3, step D)
+### The non-EU market supply functions (29 October 2026; K54-3, step D; setting `market.noneu_supply_nq`, retired 23 November 2026)
 
 The non-EU market regions' supply as CAPRI's market supply functions (arm/market_model.gms ProdNQ_: p_hessNQSupp at
 the 2030 calibration point with its cross-price terms and raw milk's, tools/build/build_noneu_market_supply_nq.py);
 before, one own-price constant elasticity per region and product (CAPRI's p_elasSupp of 2017).
 
-### `market.feed_bulk_in_market = true` (29 October 2026; audit M4, batch 6)
+### The feed bulks inside the market (29 October 2026; audit M4, batch 6; setting `market.feed_bulk_in_market`, retired 23 November 2026)
 
 CAPRI's feed bulk demand inside the market (feedBlk_): the member states' bulks respond to the prices within a market
 solve, from the supply models' bulks at the prices they saw, with the elasticities measured on the supply models (the
 market supply Hessian's FEEDBLK rows); before, fixed within a solve. Same fixed point, another path.
 
-### `market.noneu_feed_nq = true` (29 October 2026; audit M3, batch 6)
+### The non-EU feed demand (29 October 2026; audit M3, batch 6; setting `market.noneu_feed_nq`, retired 23 November 2026)
 
 CAPRI's non-EU feed demand FeedNQ_ with the feed energy balance FeedBal_ (arm/market_model.gms l. 1018-1048), the
 feed conversion factors of arm/feed_conv.gms and the calorie contents of nutrient_cont_usda; before, constant
@@ -285,7 +293,7 @@ October 2026 (Farm-to-Fork deviation 4.22 -> 4.65 when first tried); the market 
 young-animal markets inside the market per block since 29 October 2026. Mini-EU Farm-to-Fork, two blocks against one
 EU on the same code: both converged in 6 iterations, EU indicators within 0.4 points.
 
-### `market.sup_milk_in_market = true` (29 October 2026; step F, batch 8)
+### Norway's raw milk in the market (29 October 2026; step F, batch 8; setting `market.sup_milk_in_market`, retired 23 November 2026)
 
 Norway's raw milk (RMSSUP) stays in the market as CAPRI's ProdNQ_ MILK, re-anchored to its supply models' milk
 (arm/simu_calibration_to_supply.gms l. 198-201, 423-427: v_prodQuant MILK at the models' level with bounds 0.1 to
@@ -303,8 +311,43 @@ solve.
 - The mineral N's losses in NUTNED_ as CAPRI's variables (GASTOTNETF_, RUNTOTNETF_, GASRUNTOTNETF_ with the fertiliser
   options and winter cover); the inner model's residue factor in its first-order conditions as CAPRI writes it.
   Until then the base efficiency was kept. No setting: CAPRI's form only.
-- The 2030 base mineral N per crop from CAPRI's 2030 reference: `environment.base_mineral_n = "capri2030"`
-  ("capri2017", CAPRI's 2017 NMIN on the 2030 levels, the former base).
+- The 2030 base mineral N per crop from CAPRI's 2030 reference (the setting `environment.base_mineral_n`, whose
+  "capri2017" kept CAPRI's 2017 NMIN on the 2030 levels, the former base, retired 23 November 2026).
+
+### The purchased feed bulks' prices as CAPRI's, with our view that its 2030 level is an artefact (23 November 2026; DEP-14, KNOWN_ISSUES K197)
+
+The project lead's decision: follow CAPRI, and record where we think CAPRI is wrong. No setting: CAPRI's form only.
+
+- **What CAPRI does.** Its supply models price the five purchased bulks at the member state's unit value (supply_model.gms
+  LINEAR_ l. 4641-4643). Its trend has no bulk prices, so the 2030 baseline keeps the base year's
+  (capmod/load_base_data_and_trends.gms l. 693). In a simulation, arm/set_prices.gms (l. 376-412) moves that price by
+  the Laspeyres index of the bulk's market ingredients' Armington prices, times the share of the bulk's feed they cover.
+- **What the model does now.** The same: the 2030 baseline's bulk prices are CAPRI's 2030 unit values (in every EU
+  member state its 2017 ones, 0.783 in the model's 2017 money), and a scenario moves them with that Laspeyres index
+  (projection/prices.py ration_bulk_price_index; market/equations/set_prices.py; MarketModule.feed_bulk_uvag_ratio).
+  Until then the baseline took a CES of the products' 2030 member-state unit values, and a scenario the market's
+  feedBlkPrice_ CES.
+- **Why we think CAPRI's 2030 level is wrong.** Between 2017 and 2030 the bulks' ingredients' prices rise with CAPRI's
+  projections (cereals, oilcakes, dairy products: about 28% in nominal terms, near 0% in real terms), while the bulks'
+  own prices stay at their nominal 2017 value. So in CAPRI's 2030 baseline a bulk of cereals costs 22% less in real
+  terms than in 2017, while each cereal in it costs about the same. CAPRI's own comment at set_prices.gms l. 382-387
+  treats the bulk price as following its ingredients. In our reading the frozen level comes from the trend step having
+  no bulk prices, not from an intended projection.
+- **What would change it.** A trend for the bulks' prices (CAPTRD), or the 2030 level from the ingredients as the model
+  had it. That would be a CAPRI-ERROR-FIX setting; it is not built.
+- **A report difference.** CAPRI's results report FENE's price as moving with FCER's (reports/sol_simy.gms l. 764-768,
+  after the solve). The supply models solved with set_prices.gms's FENE, which the model ports.
+
+### Settings of older forms retired (23 November 2026; the project lead's decision)
+
+Nine settings whose other value only reproduced an earlier form of the model were removed with that form's code; the
+model keeps CAPRI's form each chose: `market.noneu_supply_nq`, `market.noneu_land_market` (CAPRI's land block outside
+the EU, since 4 November 2026), `market.feed_bulk_in_market`, `market.noneu_feed_nq`, `market.sup_milk_in_market`,
+`market.trq_joint` (the tariff-rate quotas solved with the prices in the default solve, since 5 November 2026; the
+Newton-Krylov solve keeps its own sequential form), `outer_loop.manure_pool_solver` (the pool market as CAPRI's NLP,
+its convex QP form now the tests' cross-check), `supply.fert_option_cal_relsubs0` (DEP-30's calibration with CAPRI's
+relSubs0 x costParLin, K196) and `environment.base_mineral_n`. A settings file that still names one stops the run
+(unknown setting).
 
 ### `supply.use_cattle_member_splits = true` (17 November 2026; K65, register DEP-4)
 
@@ -402,7 +445,9 @@ market_chain.py, docs/dev/MARKET_SYSTEM.md), with its exact sparse Jacobian from
 (MKL PARDISO), then a continuation on the quotas' sigmoid slope as CAPRI's trim_trqs.gms, then IPOPT with MUMPS;
 "ipopt" is IPOPT alone. On seven supply shocks from the solved base the chain reached the fixed point's prices within
 2.5e-8. The chain becomes the default with D2 (CAPRI's full list of non-EU supply countries; the project lead's
-decision of 14 November 2026); until then the fixed point stays the default.
+decision of 14 November 2026). D2 is the default since 24 November 2026; the switch of the solve waits for a full D2
+Green Deal run with the chain against the fixed point's (the project lead, 24 November 2026), so the fixed point stays
+the default until then.
 
 ### `market.hessian_method = "kkt"` (29 October 2026; the project lead's decision; default `"capri"`)
 
@@ -412,16 +457,17 @@ first-order step of the KKT conditions from the base solution (CapriRegionalNLP.
 theorem with the base's active set, solved in the active rows' null space); IPOPT only where a shock changes the
 problem's structure. It is the exact derivative where CAPRI's is a 1% difference quotient: they differ where the
 active set changes within the shock (a crop leaving its bound) and in second order. Test: activity levels within 2% of
-the largest move of IPOPT's re-solves at 0.1% shocks (DE110000). To be compared on the full Hessian and a run before
-any change of the default.
+the largest move of IPOPT's re-solves at 0.1% shocks (DE110000). Compared on the full Hessian on 24 November 2026
+(the full EU, the 2030 Green Deal baseline): 2,748 s against CAPRI's method's 2,811 s; the entries above 1e-3 a median
+4.4% apart, some cross-price entries of the cereals of opposite sign; the EU's own-price responses within 1-3% but
+oats (-19%), pulses and rye (-13%). No gain in time, so the default stays "capri" (the project lead, 24 November 2026).
 
 ## DEPARTURE (to be removed)
 
 | Setting | CAPRI star 3.0 | Default now | Why it differs (recorded at the time) | What switching needs |
 |---|---|---|---|---|
-| `outer_loop.max_outer_iter` | 99 (the GUI's number of iterations for a scenario run, %STEPS%) | 60 | the project lead's choice (28 October 2026): CAPRI's stop rule needs 30 iterations in the Green Deal 2030 scenario (r168), 12 in Farm-to-Fork; 60 keeps a run within the run time | none; a run that does not converge in 60 is reported as such |
 | `supply.fert_slope_with_saving` | the fertiliser options' pmpParSqr with the fertiliser-saving term (envind/ghgMiti.gms l. 1016-1035), and the inhibitor on manure's with the manure-saving term at p_manureShadVal (l. 1036-1050; with this switch since 28 October 2026) | false (the curvature without it) | K77, 25 October 2026: with it and the cost on the N purchases, the 2030 baseline leaves the options' initial shares (FR10 precision farming 0.44; EU 9.6%, run r128); the saving runs through the NLP's fertilisation block, so the base becomes a saddle | kept: the project lead's decision of 31 October 2026 (K77; CAPRI_DEPARTURES_REGISTER DEP-30) keeps the model's calibration of the fertiliser options, each initial share exactly optimal with the model's own value of N, so this entry is no longer to be removed |
 | (no setting) the market's demand at the baseline | the market model and the supply models calibrated to the same baseline before the run (the market model in the baseline calibration, arm/market1.gms; the supply models to the same CAPTRD baseline); during a run only the market supply functions are recalibrated to the supply models (simu_calibration_to_supply.gms), the demand functions are not | in the baseline run, every iteration recalibrates the market's demand at the supply models' supply, prices at the reference (market/bilateral_solve.py _bilateral_calibrate: the EU's use rescaled to the supply models' herds and crush, the non-EU use of pooled products scaled within [0.2, 5]); scenarios inherit the calibration frozen at the converged baseline | the model's supply models do not reproduce CAPRI's market baseline exactly (their data and calibration differ from CAPRI's CAPTRD baseline), so without it the reference prices would not clear the baseline market; recorded 29 October 2026 (step F; the code comment had called it CAPRI's) | supply models that reproduce CAPRI's 2030 market baseline quantities at its prices, then the recalibration can be dropped and the baseline run checked against CAPRI's prices. **Done**: the recalibration removed 8 November 2026 (KNOWN_ISSUES K120), the raw milk pool's non-EU use factor 17 November 2026 (K165) |
 | (no setting) irrigated shares of the water indicator (capri_mod/water, tools/build/build_irrigation_2017.py) | crop-specific irrigated areas per EU region from a highest-posterior-density fit to the FSS crop data (p_wdata_fss) and the regional irrigated area IRR2, survey gaps filled by trend estimates (water_database.gms l. 325-640) | the region's IRR2 irrigated area (latest survey up to 2017, the member state's where no regional value) on its irrigable crops: rice entirely, one share for the others; Ireland none (no share in CAPRI's data) | the FSS crop-specific irrigated areas and the CAPREG time series for the trends are not among our sources; 27 October 2026. The adding-up to IRR2 is kept from CAPRI's fit; CAPRI's own rule where crop data are missing (Turkey, Western Balkans) puts the IRR2 share on every crop without it, which leaves about a third of the FSS irrigated area out (7.0 against 11.2 Mha) | the FSS irrigated areas by crop (Eurostat ef_poirrig / ef_mp_irri, as CSV) and CAPRI's HPD fit; CAPRI's water module in supply (irrigated and rainfed activities) is a further step |
 | (no setting) the UK, Turkey and the Western Balkans in the non-EU market supply functions | ProdNQ_'s land columns (the rents of TCRP, FRUN, FODFAL, CAPRI's market land use: p_aLU, p_bLu); for the UK, Turkey and the Western Balkans supply models (RMSSUP) to which the function is recalibrated every iteration | the function at CAPRI's 2030 calibration point (`market.noneu_supply_nq`, 29 October 2026) with no recalibration (no supply models there); the land rents clear CAPRI's market land block since 4 November 2026 (`market.noneu_land_market`: LandSupplyMNL_ with p_aLU, p_bLu against ProdNQ_'s land rows; MARKET_TRQ_PORT.md, the market land block), before held; the FEDE column moves with CAPRI's FeedBal_ since 29 October 2026 (`market.noneu_feed_nq`, audit M3) | the supply models of the 29 non-EU units are not built (scoping note of 27 October 2026) | the 29 units' supply models |
-| (no setting) mitigation options not built (KNOWN_ISSUES K93) | legume share (LegSh), tillage (ConsTill, NoTill), urea substitution (UreaSubst), buffer strips, biodiversity options and biochar as options of the supply model (envind/, ghgMiti.gms), and the ration-fat constraint SupplementPerc_ | not built: their leaching and runoff terms are held at CAPRI's reference; linseed and nitrate are in | not built yet (registered 29 October 2026 in the registry migration; before, recorded only in K50 and K51) | each option's data (CAPRI's miti_data and envind files) and its columns in the regional model, one gate |
+| (no setting) mitigation options not built (KNOWN_ISSUES K93) | buffer strips, biodiversity options and biochar as options of the supply model (tillage, the urea substitution, the legume share and the ration-fat constraint SupplementPerc_ built 21 November 2026; the latter's departures: register DEP-53) (envind/, ghgMiti.gms) | not built: their leaching and runoff terms are held at CAPRI's reference; linseed and nitrate are in | not built yet (registered 29 October 2026 in the registry migration; before, recorded only in K50 and K51) | each option's data (CAPRI's miti_data and envind files) and its columns in the regional model, one gate |

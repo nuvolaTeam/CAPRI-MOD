@@ -29,12 +29,16 @@ from __future__ import annotations
 
 from typing import Dict, Iterable, List, Mapping, Optional, Set
 
+from capri_mod.coupling.equations.price_forecast import (
+    p_iterChg, p_iterChg_NO000000, p_iterChg_quantity, p_iterChg_TOT, p_iterChg_TOT_MAX, p_iterChg_TOT_MAX_CUR,
+    p_iterChg_UVAG, p_itemsInIters_UVAG)
+
 Table = Mapping[str, Mapping[str, float]]          # {member state or aggregate: {row: value}}
 
 
 def _chg(x1: float, x0: float) -> float:
-    s = abs(x1 + x0)
-    return 200.0 * abs(x1 - x0) / s if s > 0 else 0.0
+    """CAPRI's p_iterChg (capri_mod/coupling/equations/price_forecast.py)."""
+    return p_iterChg(x1, x0)
 
 
 def _schg(x1: float, x0: float) -> float:
@@ -75,12 +79,11 @@ class CapriStopRule:
                     if vals:
                         d[r] = sum(vals) / len(vals)
                     continue
-                w = [(float((prod1.get(ms) or {}).get(r, 0.0)), float((price.get(ms) or {}).get(r, 0.0))) for ms in mss
-                     if float((prod.get(ms) or {}).get(r, 0.0)) and float((prod1.get(ms) or {}).get(r, 0.0)) > 10 * self.min_abs_prod
-                     and (price.get(ms) or {}).get(r) is not None]
-                sw = sum(x for x, _ in w)
-                if sw > 0:
-                    d[r] = sum(x * p for x, p in w) / sw
+                v = p_itemsInIters_UVAG([(prod.get(ms) or {}).get(r, 0.0) for ms in mss],
+                                        [(prod1.get(ms) or {}).get(r, 0.0) for ms in mss],
+                                        [(price.get(ms) or {}).get(r) for ms in mss], self.min_abs_prod)
+                if v is not None:
+                    d[r] = v
             out[a] = d
         return out
 
@@ -108,43 +111,43 @@ class CapriStopRule:
                         if p and p0:
                             chg.setdefault(a, {})[r] = _chg(p, p0)
                             sgn[("price", a, r)] = _schg(p, p0)
-                    elif p and p0 and gprod.get(r, 0.0) > 10 * self.min_abs_prod and abs(p - p0) > self.min_abs_price:
-                        chg.setdefault(a, {})[r] = _chg(p, p0)
-                        sgn[("price", a, r)] = _schg(p, p0)
+                    else:
+                        c = p_iterChg_UVAG(p, p0, gprod.get(r, 0.0), self.min_abs_prod, self.min_abs_price)
+                        if c is not None:
+                            chg.setdefault(a, {})[r] = c
+                            sgn[("price", a, r)] = _schg(p, p0)
             # production per member state (l. 127-141)
             for ms, d in prod.items():
                 d0 = prev["prod"].get(ms, {})
                 for r, x in d.items():
                     x0 = float(d0.get(r, 0.0))
-                    if x and x0 and abs(x - x0) > self.min_abs_prod:
-                        c = chg.setdefault(ms, {})
-                        c[r] = max(c.get(r, 0.0), _chg(x, x0))
+                    v = p_iterChg_quantity(x, x0, (chg.get(ms) or {}).get(r, 0.0), self.min_abs_prod)
+                    if v is not None:
+                        chg.setdefault(ms, {})[r] = v
                         sgn[("prod", ms, r)] = _schg(x, x0)
             # feed per member state (l. 143-159)
             for ms, d in feed.items():
                 d0 = prev["feed"].get(ms, {})
                 for r, x in d.items():
                     x0 = float(d0.get(r, 0.0))
-                    if x and x0 and abs(x - x0) > self.min_abs_feed:
-                        c = chg.setdefault(ms, {})
-                        c[r] = max(c.get(r, 0.0), _chg(x, x0))
+                    v = p_iterChg_quantity(x, x0, (chg.get(ms) or {}).get(r, 0.0), self.min_abs_feed)
+                    if v is not None:
+                        chg.setdefault(ms, {})[r] = v
                         sgn[("feed", ms, r)] = _schg(x, x0)
             # Norway and Turkey out from the 15th step (l. 316-318)
             for who, last in self.late_out.items():
-                if k >= last:
+                if p_iterChg_NO000000(k, last):
                     chg.pop(who, None)
                     sgn = {key: v for key, v in sgn.items() if key[1] != who}
         rec["signed"] = sgn
         # per row: the largest over member states and aggregates (l. 321, 354-355)
-        rows: Dict[str, float] = {}
+        by_row: Dict[str, List[float]] = {}
         for _who, d in chg.items():
             for r, v in d.items():
-                rows[r] = max(rows.get(r, 0.0), v)
-        mx = max((v for r, v in rows.items() if r not in self.yani_rows), default=0.0)
-        if k == 1:
-            mx = max(1.0, mx)                                  # l. 363
-        count = sum(1 for v in rows.values() if v > self.min_iter_chg)
-        cur = mx if (k == 1 or count > 2) else 0.0             # l. 366-371 (the first step always goes on)
+                by_row.setdefault(r, []).append(v)
+        rows: Dict[str, float] = {r: p_iterChg_TOT(v) for r, v in by_row.items()}
+        mx = p_iterChg_TOT_MAX((v for r, v in rows.items() if r not in self.yani_rows), k)       # l. 328-346, 363
+        cur, count = p_iterChg_TOT_MAX_CUR(mx, rows.values(), self.min_iter_chg, k)  # l. 366-371 (step 1 goes on)
         top = sorted(((v, r, w) for w, d in chg.items() for r, v in d.items() if r not in self.yani_rows),
                      reverse=True)[:5]
         verdict = {"step": k, "max": mx, "cur": cur, "count": count, "go_on": cur > self.min_iter_chg,

@@ -21,9 +21,11 @@ def m():
 
 @pytest.fixture(scope="module")
 def areas():
-    from capri_mod.data.definitions import in_run
+    from capri_mod.data.definitions import in_run, is_eu
     a = read_csv(SUPPLY / "base_areas.csv", index_col=0)
-    return a.loc[[r for r in a.index if in_run(r)]]      # the run's units (the default countries outside the EU: Norway)
+    # the run's units the reporting covers: the EU's and Norway's (the UK's, Turkey's and the Western Balkans' are not
+    # in the NUTS 2024 mapping, test_mapping_covers_units_and_current_nuts)
+    return a.loc[[r for r in a.index if in_run(r) and (is_eu(r) or r.startswith("NO"))]]
 
 
 def test_mapping_covers_units_and_current_nuts(m):

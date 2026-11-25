@@ -23,16 +23,18 @@ from typing import Dict, Optional
 
 import pandas as pd
 from capri_mod.data.definitions import capri_ms  # noqa: E402  (TUR for Turkey's units)
+from capri_mod.environmental.equations.calc_nbalance import DATA_IMPORT, DATA_SURSOI, DATA_SURTOT
 
 ITEMS = ("EXCRET", "MTRADE", "MINFER", "CRESID", "EXPPRD", "RUNANI", "IMPORT", "SURTOT", "SURSOI")
 
 
 def balance(excret: float, mtrade: float, minfer: float, cresid: float, expprd: float, runani: float) -> Dict[str, float]:
-    """CAPRI's P balance from its items (calc_nbalance.gms with FNUT = PHOF; units as given)."""
-    imp = excret - mtrade + minfer + cresid
-    surtot = imp - expprd
+    """CAPRI's P balance from its items (calc_nbalance.gms with FNUT = PHOF; units as given): its sums IMPORT, SURTOT,
+    SURSOI (environmental/equations/calc_nbalance.py)."""
+    imp = DATA_IMPORT(excret, mtrade, minfer, cresid)
+    surtot = DATA_SURTOT(imp, expprd)
     return {"EXCRET": excret, "MTRADE": mtrade, "MINFER": minfer, "CRESID": cresid, "EXPPRD": expprd,
-            "RUNANI": runani, "IMPORT": imp, "SURTOT": surtot, "SURSOI": surtot - runani}
+            "RUNANI": runani, "IMPORT": imp, "SURTOT": surtot, "SURSOI": DATA_SURSOI(surtot, runani)}
 
 
 class PCropCoefs:

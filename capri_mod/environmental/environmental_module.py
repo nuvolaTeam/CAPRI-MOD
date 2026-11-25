@@ -24,6 +24,8 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional
 
 from capri_mod.params import param, param_table
+from capri_mod.environmental.equations.gases import EMISCALC_CO2UREA
+from capri_mod.supply.equations.line_nitr import p_ghgMiti_AComLN
 from capri_mod.data.definitions import CROPS_ON_LAND as _CROPS_ON_LAND
 from capri_mod.settings import setting
 from capri_mod.settings import current as _settings
@@ -93,6 +95,8 @@ class EnvironmentalIndicators:
     n_mineral_input: float = 0.0
     n_organic_input: float = 0.0
     n_fixation: float = 0.0
+    #: of which the catch crops' BioFix N (CAPRI's e_BIOFIX CATC term, supply_model.gms l. 1442), t N
+    n_fixation_catch_crops: float = 0.0
     n_deposition: float = 0.0
     n_crop_uptake: float = 0.0
     n_animal_products: float = 0.0
@@ -255,10 +259,11 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             for _ga, _l in _sh.items():
                 _f = 1.0 + sum(s_ * r_ for s_, r_ in _l.values())
                 # linseed and nitrate on the same animals (CAPRI's AComLN): their effects multiply; 3-NOP adds
-                # (line_nitr.gms l. 107-121, 124-134; ghgMiti.gms sums the options' QEmitt changes)
+                # (line_nitr.gms l. 110-122, 124-134: supply/equations/line_nitr.py p_ghgMiti_AComLN; ghgMiti.gms sums
+                # the options' QEmitt changes)
                 if "LINE_Tot" in _l and "Nitr_Tot" in _l:
                     (sL, rL), (sN, rN) = _l["LINE_Tot"], _l["Nitr_Tot"]
-                    _f += rL * rN * min(sL, sN)
+                    _f += p_ghgMiti_AComLN(rL, rN, sL, sN)
                 _supp[_ga] = max(0.0, _f)
         if not hasattr(self.ev, "supp_ch4"):
             self.ev.supp_ch4 = {}
@@ -390,11 +395,26 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             _d = float(_ma) - float(nb["n_mineral_input"])
             nb["n_mineral_input"] = float(_ma)
             nb["n_surplus"] = float(nb["n_surplus"]) + _d
-        # CAPRI's catch crops beyond the base share (the Farm-to-Fork requirement, or the share the NLP form chose:
-        # supply result's cover_crops): their N (BioFix x area) is an input of the balance and supplies crop need;
-        # with mineral N allocated in the supply model it is already net of it, else it replaces mineral N here
+        # CAPRI's catch crops (the share the NLP form chose, or the Farm-to-Fork requirement: supply result's
+        # cover_crops): their N (BioFix x area) is an input of the balance and supplies crop need; with mineral N
+        # allocated in the supply model it is already net of it, else it replaces mineral N here. The NLP form
+        # reports the BioFix N its rows count (biofix_n: none in CAPRI's reference form, K188; on the whole area,
+        # e_BIOFIX l. 1442, K204); the requirement's form the N of the area above the base share
         _cv = getattr(supply_result, "cover_crops", None) or {}
-        _cn = float(_cv.get("delta", 0.0) or 0.0) * float(_cv.get("biofix", 0.0) or 0.0) * 1000.0
+        if "biofix_n" in _cv:
+            _cn = float(_cv.get("biofix_n", 0.0) or 0.0)
+        else:
+            _cn = float(_cv.get("delta", 0.0) or 0.0) * float(_cv.get("biofix", 0.0) or 0.0) * 1000.0
+        nb["n_fixation_catch_crops"] = _cn
+        # CAPRI's legume share in temporary grassland (envind/leg_share.gms): OFAR's fixation x othImpact x v more
+        # (e_BIOFIX, supply_model.gms l. 1456-1457), an input of the balance; its N need is the regional model's (the
+        # mineral N allocated there is net of it)
+        _lv_, _lo_ = self.legsh_effect(region, supply_result) if supply_result is not None else (0.0, 0.0)
+        if _lv_ > 0 and _lo_ > 0 and float(acts.get("OFAR", 0.0) or 0.0) > 0:
+            from capri_mod.supply.equations.supply_model.n_surplus import e_BIOFIX_legSh
+            _fx = float(self.unit_nitrogen_balance("OFAR", yields, region, mint, yields_scen=_ysc).get("n_fixation", 0.0)
+                        or 0.0) * float(acts.get("OFAR", 0.0))
+            _cn = _cn + e_BIOFIX_legSh(_fx, _lo_, _lv_)
         if _cn != 0:
             nb["n_fixation"] = float(nb["n_fixation"]) + _cn
             nb["n_surplus"] = float(nb["n_surplus"]) + _cn
@@ -451,6 +471,14 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         from capri_mod.supply.equations.supply_model.gwp import GWPCO2UREA_, GWPTOT_
         ghg["CO2_UREA"] = GWPCO2UREA_(max(0.0, float(nb.get("n_mineral_input", 0.0))) / 1000.0,
                                       self._co2_coefs(region)[1])
+        # with the urea substitution, CAPRI's NMIN x max(urea share - v, 0) x 44/28 (gases.gms l. 833-835:
+        # environmental/equations/gases.py EMISCALC_CO2UREA): the urea share less the share switched, over the urea
+        # share (both LitRev's p_fracUseFert since 29 October 2026, K93)
+        _uv = self.urea_effect(region, supply_result)[0] if region else 0.0
+        if _uv > 0 and ghg.get("CO2_UREA"):
+            _fu = self.urea_effect(region, supply_result, frac=True)
+            if _fu and _fu > 0:
+                ghg["CO2_UREA"] = EMISCALC_CO2UREA(ghg["CO2_UREA"], _fu, _uv)
 
         # CAPRI's N2O from drained organic soils (gases.gms N2OHIS, agriculture): per ha of the land-use
         # class, its organic-soil share x the climate-weighted IPCC 2013 factor (tools/build/build_histosol.py),
@@ -469,7 +497,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
                 if _f > 0:
                     _n2o_t -= _n2o.GWPN2OHIS_idle(_f, float(_h.get(f"ef_n2o_{_c}", 0.0) or 0.0))
             ghg["N2O_HIS"] = max(0.0, _n2o_t) * GWP_N2O      # 1000 ha x t N2O/ha = kt N2O -> kt CO2-eq
-        # crop-residue N2O of the added catch crops (CAPRI gases.gms N2OCRO: BioFix x area x EF1)
+        # crop-residue N2O of the catch crops' BioFix N counted above (CAPRI gases.gms N2OCRO: BioFix x area x EF1)
         if _cn != 0:
             ghg["N2O_CRO"] = ghg.get("N2O_CRO", 0.0) + _n2o.GWPN2OCRO_(_cn / 1e3, EF_SOIL_N2O_DIRECT, GWP_N2O)   # t N -> kt
         # CAPRI's technology effects on manure N2O (v_emiLoss in gases.gms; manure_n2o_tech.csv):
@@ -544,6 +572,14 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             _dir = _dn[0] / (_dn[0] + _dn[1]) if (_dn[0] + _dn[1]) > 0 else 1.0
             _old = ghg["N2O_SOIL"]
             ghg["N2O_SOIL"] = _old * (_dir * f_side["N2OSYN"] + (1.0 - _dir) * f_side["NH3SYN"])
+        # the tillage options on the direct N2O of mineral N (GASTOTNETF_, supply_model.gms l. 3392-3393: - sum over
+        # ConsTill and NoTill of othImpact N2OSYN x share; envind/tillage.gms l. 579-582), at their shares against the
+        # initial shares (the base is CAPRI's reference, as the regional model's loss cascade)
+        _tl = self.till_effects(region, supply_result) if region else None
+        if _tl is not None and "N2O_SOIL" in ghg and 1.0 - _tl["n2o"][0] > 0:
+            _dir = _dn[0] / (_dn[0] + _dn[1]) if (_dn[0] + _dn[1]) > 0 else 1.0
+            ghg["N2O_SOIL"] = ghg["N2O_SOIL"] * (
+                _dir * (1.0 - _tl["n2o"][1]) / (1.0 - _tl["n2o"][0]) + (1.0 - _dir))
         # CAPRI's leaching of the soil surplus (LEACHN_) and the indirect N2O of leached and run-off N allocated to
         # crops (gases.gms N2OLEA; capri_mod/supply/n_leaching.py)
         _lea = self.leaching(region, acts, nb, supply_result)
@@ -562,6 +598,14 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         if f_side and nh3.get("nh3_soils"):
             nh3 = dict(nh3)
             _d = float(nh3["nh3_soils"]) * (f_side["NH3SYN"] - 1.0)
+            nh3["nh3_soils"] = float(nh3["nh3_soils"]) + _d
+            nh3["nh3_total"] = float(nh3["nh3_total"]) + _d
+        # CAPRI's urea substitution on the NH3 of mineral N (GASTOTNETF_, supply_model.gms l. 3372-3377: x (1 - v x
+        # othImpact NH3SYN); envind/ammo_tech.gms l. 2358-2361), its initial share 0
+        _uv, _ue = self.urea_effect(region, supply_result) if region else (0.0, 0.0)
+        if _uv > 0 and nh3.get("nh3_soils"):
+            nh3 = dict(nh3)
+            _d = -float(nh3["nh3_soils"]) * _uv * _ue
             nh3["nh3_soils"] = float(nh3["nh3_soils"]) + _d
             nh3["nh3_total"] = float(nh3["nh3_total"]) + _d
         # CAPRI's inhibitors on applied manure raise application NH3 (p_litRevFertTechs NH3APP,
@@ -637,6 +681,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             n_mineral_input=nb["n_mineral_input"],
             n_organic_input=nb["n_organic_input"],
             n_fixation=nb["n_fixation"],
+            n_fixation_catch_crops=float(nb.get("n_fixation_catch_crops", 0.0) or 0.0),
             n_deposition=nb["n_deposition"],
             n_crop_uptake=nb["n_crop_uptake"],
             n_animal_products=nb["n_animal_products"],

@@ -48,6 +48,10 @@ from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
+from capri_mod.market.equations.sol_market import DATA_ProcMarg_XXBIOF, p_trqBilat_Rent
+from capri_mod.market.equations.welfare import (
+    PS_Y, p_welfareRes_CSSP, p_welfareRes_ProfitFeed, p_welfareRes_ProfitProc, p_welfareRes_ProfitProc_RESIMPX,
+    p_welfareRes_ProfitProc_XXBIOF, p_welfareRes_Welfare)
 
 
 class WelfareMixin:
@@ -70,12 +74,11 @@ class WelfareMixin:
         B, d, Y = e["B"], e["d"], e["Y"]
         ps_cal = e["p0"].astype(float).copy()
         ps_y = ps_cal.copy()
-        G = lambda p: float(np.sqrt(p) @ B @ np.sqrt(p))
         ev = np.zeros(len(ps_cal))
         for k in range(len(ps_cal)):
             ps_y[k] = p_sim[k]
             if B[k, k] != 0.0:
-                ev[k] = G(ps_cal) / G(ps_y) * (Y - float(d @ ps_y)) - (Y - float(d @ ps_cal))
+                ev[k] = p_welfareRes_CSSP(B, d, Y, ps_cal, ps_y)
             ps_cal[k] = ps_y[k]
         return ev
 
@@ -89,10 +92,8 @@ class WelfareMixin:
             i = Rr[mr]
             for e in ents:
                 col = e["col"]
-                p = e["p0"].copy()
                 m = col >= 0
-                p[m] = p[m] + (PR[i, col[m]] - 1.0) * e["arm1p"][m]
-                p = np.maximum(p, 0.05 * e["p0"])
+                p = PS_Y(e["p0"], PR[i, col[m]], e["arm1p"], m)
                 ev = self._gl_money_metric(e, p)
                 out[mr] = out.get(mr, 0.0) + float(ev.sum()) * e["inha"] / 1000.0
         return out
@@ -176,7 +177,7 @@ class WelfareMixin:
                 else:
                     q0 = P0[i, Cc[x]] * tb["q"].get((rms, x), 0.0) / tot[(R, x)]
                 dq = -sum(h * dp.get(y, 0.0) for (x_, y), h in Hr.items() if x_ == x)
-                val -= (q0 + 0.5 * dq) * dp.get(x, 0.0)
+                val -= p_welfareRes_ProfitProc(q0, dq, dp.get(x, 0.0))
             out[R] = out.get(R, 0.0) + val / 1000.0
         return out
 
@@ -213,9 +214,9 @@ class WelfareMixin:
                     continue
                 mub0 = self._biofuel_feed_group(g, {}, 1.0, 1.0)[1]
                 x0 = g["X0"] * float(scale.get(g["fuel"], 1.0))
-                m1 = float(d["ppri"]) * float(r.at[reg, g["fuel"]]) - float(st["mub"][key])
-                m0 = float(d["ppri"]) - mub0
-                out[reg] = out.get(reg, 0.0) + (m1 * float(st["X"][key]) - m0 * x0) / 1000.0
+                m1 = DATA_ProcMarg_XXBIOF(float(d["ppri"]), float(r.at[reg, g["fuel"]]), float(st["mub"][key]))
+                m0 = DATA_ProcMarg_XXBIOF(float(d["ppri"]), 1.0, mub0)
+                out[reg] = out.get(reg, 0.0) + p_welfareRes_ProfitProc_XXBIOF(m1, float(st["X"][key]), m0, x0)
         fp = self._feed_byproduct_params() or {}
         dom0 = self._dom0()
         for reg in self.EU:
@@ -226,7 +227,8 @@ class WelfareMixin:
                     continue
                 p0 = float(dom0.at[reg, p])
                 q0 = float(self.par.base_production.at[reg, p])
-                out[reg] = out.get(reg, 0.0) + (float(S.at[reg, p]) * p0 * float(r.at[reg, p]) - q0 * p0) / 1000.0
+                out[reg] = out.get(reg, 0.0) + p_welfareRes_ProfitProc_RESIMPX(float(S.at[reg, p]), p0,
+                                                                                float(r.at[reg, p]), q0)
         return out
 
     # ------------------------------------------------------------------
@@ -285,13 +287,13 @@ class WelfareMixin:
                           REF: np.ndarray) -> Dict[str, Dict[str, float]]:
         """ProfitAgr and ProfitFeed of the market regions without supply models (CAPRI: not RMSSUP).
 
-        ProfitAgr: with CAPRI's market supply functions (market.noneu_supply_nq) the integral of the linear supply
+        ProfitAgr: with CAPRI's market supply functions (ProdNQ_) the integral of the linear supply
         over the price changes, p0 (rr - 1) (q0 + dq / 2) per product; otherwise the integral of the model's
         constant-elasticity supply S = S0 rr^e over the region's own price,
         S0 p0 (rr^(e+1) - 1) / (e + 1), for the cells whose supply is that function at the solution (crushing, the
         dairy blocks, raw milk, biofuels and residual feeds have their own blocks: their supply differs from it).
         ProfitFeed: minus the integral of the feed demand F = F0 prod_j PR_j^e_cj (p_ElasFeed), good by good in the
-        model's commodity order; with CAPRI's feed functions (market.noneu_feed_nq, audit M3) the integral of the linear
+        model's commodity order; with CAPRI's feed functions (FeedNQ_, audit M3) the integral of the linear
         functions as reports/welfare.gms l. 500-515 (path-independent for a symmetric Hessian): minus REF (PR - 1)
         (F0 + dF / 2) per product, plus each behavioural region's feed energy, FEDE0 (phi - 1) (E0 + dE / 2), dE the
         change of the energy fed (CAPRI integrates the FEDE row of its Hessian; REGISTERED: the energy fed stands for
@@ -330,39 +332,38 @@ class WelfareMixin:
         Cc = {c: j for j, c in enumerate(self.commodities)}
         fdp = self._feed_demand_params() or {}
         covered = set()
-        if getattr(self, "noneu_feed_nq", False) and getattr(self, "noneu_supply_nq", False):
-            P_ = self._noneu_feed_params()
-            covered = {d.get("tr") for d in P_["rms"].values()}
-            PRd = pd.DataFrame(PR, index=self.regions, columns=self.commodities)
-            _wl = self.ev.dairy_world_last or {}
-            _wp = self._dairy_world_params() or {}
-            _mr = {g: 1.0 + float(v["z"][_wp[g]["iM"]]) for g, v in _wl.items() if g in _wp and "z" in v}
-            fede = self.noneu_fede(PRd, r, _mr, self.land_by_type(self.ev.land_now))
-            g = self.noneu_feed_change(PRd, fede)
-            dairy_fed = set(self.DAIRY_TRADED.values())
-            en = {}
-            for t in self._inp().csv("noneu_feed_energy.csv").itertuples(index=False):
-                en[t.rms] = (float(t.fede_kcal), float(t.fede_price))
-            for reg in covered:
-                if reg in skip or reg not in Rr:
+        P_ = self._noneu_feed_params()
+        covered = {d.get("tr") for d in P_["rms"].values()}
+        PRd = pd.DataFrame(PR, index=self.regions, columns=self.commodities)
+        _wl = self.ev.dairy_world_last or {}
+        _wp = self._dairy_world_params() or {}
+        _mr = {g: 1.0 + float(v["z"][_wp[g]["iM"]]) for g, v in _wl.items() if g in _wp and "z" in v}
+        fede = self.noneu_fede(PRd, r, _mr, self.land_by_type(self.ev.land_now))
+        g = self.noneu_feed_change(PRd, fede)
+        dairy_fed = set(self.DAIRY_TRADED.values())
+        en = {}
+        for t in self._inp().csv("noneu_feed_energy.csv").itertuples(index=False):
+            en[t.rms] = (float(t.fede_kcal), float(t.fede_price))
+        for reg in covered:
+            if reg in skip or reg not in Rr:
+                continue
+            i = Rr[reg]
+            v = 0.0
+            for c, j in Cc.items():
+                if c in dairy_fed or not (F0[i, j] > 0 and REF[i, j] > 0):
                     continue
-                i = Rr[reg]
-                v = 0.0
-                for c, j in Cc.items():
-                    if c in dairy_fed or not (F0[i, j] > 0 and REF[i, j] > 0):
-                        continue
-                    dF = F0[i, j] * g.get((reg, c), 0.0)
-                    v -= REF[i, j] * (PR[i, j] - 1.0) * (F0[i, j] + 0.5 * dF)
-                for rms, d in P_["rms"].items():
-                    if d.get("tr") != reg or rms not in en:
-                        continue
-                    ph = float(fede.get(rms, 1.0))
-                    dE = sum(d["kcal"].get(x, 0.0) * sum(h * ((ph if y == "FEDE" else float(PRd.at[reg, y])) - 1.0)
-                                                          for y, h in d["terms"].get(x, {}).items()
-                                                          if y == "FEDE" or y in PRd.columns)
-                             for x in d["feed0"])
-                    v += en[rms][1] * (ph - 1.0) * (en[rms][0] + 0.5 * dE)
-                out["feed"][reg] = v / 1000.0
+                dF = F0[i, j] * g.get((reg, c), 0.0)
+                v -= p_welfareRes_ProfitFeed(REF[i, j], PR[i, j], F0[i, j], dF)
+            for rms, d in P_["rms"].items():
+                if d.get("tr") != reg or rms not in en:
+                    continue
+                ph = float(fede.get(rms, 1.0))
+                dE = sum(d["kcal"].get(x, 0.0) * sum(h * ((ph if y == "FEDE" else float(PRd.at[reg, y])) - 1.0)
+                                                      for y, h in d["terms"].get(x, {}).items()
+                                                      if y == "FEDE" or y in PRd.columns)
+                         for x in d["feed0"])
+                v += p_welfareRes_ProfitFeed(en[rms][1], ph, en[rms][0], dE)
+            out["feed"][reg] = v / 1000.0
         by_reg: Dict[str, list] = {}
         _dairy = set(self.DAIRY_TRADED.values())
         for (reg, c), prm in fdp.items():
@@ -402,7 +403,7 @@ class WelfareMixin:
         plus, under an EU quota, the quota rent: CAPRI's rent = (import price - in-quota price) x min(imports under
         the quota, quota) (reports/sol_market.gms l. 1127), here gap x sigmoid(fill) x min(share x imports, quota),
         the import price under the sigmoid regime being the in-quota price plus sigmoid x gap. The rent goes half to
-        the importer, half to the exporter (welfare.gms l. 614-620); tariffs to the importer."""
+        the importer, half to the exporter (welfare.gms l. 646-659); tariffs to the importer."""
         tar: Dict[str, float] = {}
         rent: Dict[str, float] = {}
         R = list(self.regions)
@@ -429,15 +430,14 @@ class WelfareMixin:
                     fill = float(X[ixq].sum())
                     if fill <= 0 or q["Q"] <= 0:
                         continue
-                    u = (np.nan_to_num(base[ixq] * (ta[ixq] - q["ta_pref"]) / 100.0)
-                         + np.nan_to_num(ts[ixq] - q["ts_pref"]))
-                    rent_ij[ixq] = np.maximum(u, 0.0) * X[ixq] * min(1.0, q["Q"] / fill)
+                    rent_ij[ixq] = p_trqBilat_Rent(base[ixq], ta[ixq], q["ta_pref"], ts[ixq], q["ts_pref"], X[ixq],
+                                                   q["Q"], fill)
                 for g in sc.trq_globals or ():
                     imp = float(X[g["cover"]].sum())
                     if imp <= 0 or g["Q"] <= 0:
                         continue
-                    u = (np.nan_to_num(base * (ta - g["ta_pref"]) / 100.0) + np.nan_to_num(ts - g["ts_pref"]))
-                    rent_ij[g["cover"]] = (np.maximum(u, 0.0) * X * min(1.0, g["Q"] / imp))[g["cover"]]
+                    rent_ij[g["cover"]] = p_trqBilat_Rent(base, ta, g["ta_pref"], ts, g["ts_pref"], X, g["Q"],
+                                                          imp)[g["cover"]]
             for i, imp in enumerate(R):
                 for j, exp in enumerate(R):
                     if i == j or X[i, j] <= 0 or (imp in eu and exp in eu):
@@ -508,6 +508,6 @@ class WelfareMixin:
                     if comp in rows[reg]:
                         rows[reg][comp] += float(v)
         df = pd.DataFrame.from_dict(rows, orient="index")
-        df["Welfare"] = df[list(self.WELFARE_COMPONENTS)].sum(axis=1)
+        df["Welfare"] = p_welfareRes_Welfare(df[list(self.WELFARE_COMPONENTS)])
         df.index.name = "region"
         return df

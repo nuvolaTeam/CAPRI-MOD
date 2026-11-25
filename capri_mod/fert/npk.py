@@ -4,7 +4,8 @@ distribution model; capri_mod/supply/capri_regional_nlp.py).
 
 Data (tools/build/build_npk_balance_2030.py, from CAPRI's 2030 reference results):
   npk_crop_coefs_2030.csv        per CAPRI region, model crop and nutrient: need, contribution to the arable residue
-                                 pool, permanent crops' own residues, CAPRI's mineral flow (kg/ha)
+                                 pool, permanent crops' own residues, CAPRI's mineral flow (kg/ha), and the need's
+                                 additive part's share (add_share: v_cropNutNeedAddFact's, which the yields do not move)
   capri_crop_fertned_parts_2030.csv  fert/fertned.gms's arguments per CAPRI region, crop and nutrient in CAPRI's 2030
                                  simulation data (tools/build/build_capri_crop_n_coefs.py), for the need's yield factor
                                  (need_yield_factor)
@@ -38,9 +39,10 @@ def manure_coef_table(nut: str, year=None) -> pd.DataFrame:
     such animal) at a calibration year: the base year's (<stem>.csv: CAPRI's base-year totals over the model's heads,
     tools/build/build_livestock_output_coef.py, build_npk_balance_2030.py) or, at another market year, CAPRI's
     coefficients of that year in the baseline's folder (<stem>_<year>.csv; 2030: tools/build/
-    build_livestock_manure_2030.py: CAPRI computes them from the simulation year's rations before it solves,
-    capmod.gms l. 1090, KNOWN_ISSUES K179). year: by default the run's (RunInputs.market_year, set by SupplyModule; the
-    base year where unset). A year without its table is an error (no fall back to the base year's)."""
+    build_livestock_manure_2030.py: CAPRI computes them from the simulation year's herd data before it solves,
+    capmod.gms l. 1090, feed/req_or_man_fnc.gms, KNOWN_ISSUES K179). year: by default the run's
+    (RunInputs.market_year, set by SupplyModule; the base year where unset). A year without its table is an error (no
+    fall back to the base year's)."""
     from capri_mod.data import inputs as _inputs
     by = str(_inputs.base_year())
     yr = year if year is not None else getattr(_inputs.current(), "market_year", None)
@@ -251,13 +253,22 @@ def fout_yield_change(region: Optional[str], crop: str, y0: float, y: float, y_s
     the straw left, which the scenario's yield shifts move and the price-driven updates do not; as need_yield_factor).
     AtmDep: the region's deposition (kg N/ha; N only, as in CAPRI's MANN). None where CAPRI's data have no arguments
     for the crop (fallow and set-aside, without a main output)."""
+    fy = fout_at_yields(region, crop, y0, y, y_scen, nut, AtmDep)
+    return None if fy is None else fy[1][1] - fy[0][1]
+
+
+def fout_at_yields(region: Optional[str], crop: str, y0: float, y: float, y_scen: Optional[float] = None,
+                   nut: str = "N", AtmDep: float = 0.0) -> Optional[tuple]:
+    """((DATA(crop, FNUT), DATA(crop, FOUT)) at the base yield y0, the same at yield y): fert/fertned.gms rerun at
+    the yields (fertned_at_yields), kg/ha. y_scen, AtmDep: as fout_yield_change. None where CAPRI's data have no
+    arguments for the crop."""
     parts = _fertned_parts(region, nut, crop)
     if parts is None or not y0 > 0:
         return None
     ys = y if (y_scen is None or not y_scen > 0) else float(y_scen)
     n_ = nut == "N"
-    return (fertned_at_yields(*parts, max(y, 0.0) / y0, ys / y0, AtmDep=AtmDep, nitrogen=n_)[1]
-            - fertned_at_yields(*parts, 1.0, 1.0, AtmDep=AtmDep, nitrogen=n_)[1])
+    return (fertned_at_yields(*parts, 1.0, 1.0, AtmDep=AtmDep, nitrogen=n_),
+            fertned_at_yields(*parts, max(y, 0.0) / y0, ys / y0, AtmDep=AtmDep, nitrogen=n_))
 
 
 def _fertned_parts(region: Optional[str], nut: str, crop: str) -> Optional[tuple]:

@@ -170,7 +170,14 @@ class HessianBlock:
                         + ((("linear-solver", str(_settings().get("supply.nlp_linear_solver")).lower()),)
                            if str(_settings().get("supply.nlp_linear_solver")).lower() != "mumps" else ())
                         # 29 October 2026: the shocks' solutions from the KKT conditions (beyond CAPRI)
-                        + (("kkt-step",) if kkt else ()))
+                        + (("kkt-step",) if kkt else ())
+                        # 21 November 2026 (K196): the fertiliser options' calibration leaves CAPRI's relSubs0 x
+                        # costParLin at their initial share (the only form since its setting was retired on
+                        # 23 November 2026; the key part kept, so the Hessians measured since 21 November stay valid)
+                        + ("fert-option-relsubs0",)
+                        # 23 November 2026 (DEP-14): the supply models' bulk prices as CAPRI's arm/set_prices.gms (the
+                        # Laspeyres index; the code sits partly in the market package, outside supply_code_fingerprint)
+                        + ("bulk-uvag-laspeyres",))
                    # at a scenario's state (market.hessian_scenario_iter): its young-animal and member-state milk
                    # prices too (a baseline's key is unchanged)
                    + (repr((sorted((getattr(sm.seen, "yani_price_ratio", None) or {}).items()),
@@ -195,10 +202,22 @@ class HessianBlock:
             self.res.market_supply_hessian_info = {"source": "cache", "file": str(cfile), "products": len(eu.columns),
                                                "prices_shocked": len(cols_y), "columns_with_response": len(eu.columns)}
             _cst.setdefault(self.res, "market_supply_hessian_log", []).append(dict(self.res.market_supply_hessian_info))
+            _runlog.current().sub(f"Market supply Hessian read from the cache ({cfile.name}): {len(cols_y)} prices, "
+                                  f"{len(eu.columns)} columns with a response")
             return {"eu": eu, "ms": ms_h, "sup": sup, "blocks": blocks}
         import time as _t
         import copy as _cp
         t0 = _t.time()
+        # the step's log at the default level (the project lead, 24 November 2026: the step is a full-EU run's longest,
+        # 22-42 minutes, and wrote two lines): what is measured, the base re-solve, the progress, the result
+        _rl = _runlog.current()
+        _n_yani = sum(1 for c in cols_y if c.startswith("YANI:"))
+        _n_feed = sum(1 for c in cols_y if c in self.MARKET_SUPPLY_FEED_COLS)
+        from capri_mod import THREAD_LIMITS as _thr
+        _rl.sub(f"Market supply Hessian not in the cache (key {key}): measuring {len(cols_y)} price shocks "
+                f"({len(cols_y) - _n_yani - _n_feed} products, {_n_feed} feed prices, {_n_yani} young animals) on "
+                f"{len(regs)} regional models; threads " + ", ".join(f"{v} {__import__('os').environ.get(v, 'unset')}"
+                                                                    for v in _thr))
         fb0 = getattr(sm.seen, "feed_bulk_ratio", None)
         # the rations' feed prices inside the regional models (seen.feed_prices, CAPRIModel._update_rations: the member
         # states' bulk price ratios on the feeds' base prices). Each shock sets them from its bulk ratios as the outer
@@ -227,7 +246,9 @@ class HessianBlock:
             nlp_ = tuple(getattr(type(mo_), "NLP_STATE", ()))
             if not skip:                                   # the measurement as before (cached Hessians keep their keys)
                 return nlp_
-            return nlp_ + tuple(getattr(type(mo_), "SOLVE_STATE", ()))
+            # with the solve's outputs the coupling reads from the model (COUPLING_READS, 24 November 2026: the last
+            # shock's manure value was left for the baseline's manure pool market)
+            return nlp_ + tuple(getattr(type(mo_), "SOLVE_STATE", ())) + tuple(getattr(type(mo_), "COUPLING_READS", ()))
 
         def _snapshot():
             _c = _cp.deepcopy if skip else _cp.copy
@@ -273,6 +294,7 @@ class HessianBlock:
                     _st.discard(mo_.sv, "kkt_base")
                     _st.pop(mo_.res, "kkt_ipopt", None)
                 _crn_h.KKT_MODE = "record"
+            _t_b = time.time()
             try:
                 res_b = sm.run(price_signals=sig0, policy_scenario=pol, regions=regs, verbose=False)
             finally:
@@ -280,13 +302,17 @@ class HessianBlock:
                 _crn_h.KKT_MODE = None
             q_ref = bridged(res_b)
             sm.seen.hess_base_res = res_b
+            _rl.sub(f"Market supply Hessian: the base re-solved in {time.time() - _t_b:.0f} s, its largest deviation "
+                    f"from the baseline {float((q_ref - q0).abs().max().max()):.3g} kt")
         try:
             _t_h0 = time.time()
             _h_floor = float(_settings().get("market.hessian_entry_floor"))   # Hessian entries below it are dropped
             for _k_y, y in enumerate(cols_y):
                 if _k_y and _k_y % int(_settings().get("diagnostics.hessian_progress_every")) == 0:
-                    self._progress(f"  market supply Hessian: {_k_y}/{len(cols_y)} price shocks, "
-                                   f"{time.time() - _t_h0:.0f} s; {n_skipped} of {n_solved} regional solves skipped")
+                    _el = time.time() - _t_h0
+                    _rl.sub(f"Market supply Hessian: {_k_y} of {len(cols_y)} price shocks done (last {cols_y[_k_y - 1]}), "
+                            f"{_el:.0f} s, about {_el / _k_y * (len(cols_y) - _k_y):.0f} s to go; {n_skipped} of "
+                            f"{n_solved} regional solves skipped (inputs unchanged)")
                 sig = sig0.copy()
                 if y.startswith("YANI:"):
                     # a young animal's price raised by the shock in every regional model (EU and Norway), the products'
@@ -387,6 +413,11 @@ class HessianBlock:
                     warnings.warn(f"market supply Hessian: {len(bad)} region solves with the base's inputs gave "
                                   f"another result, e.g. {bad[:5]}", RuntimeWarning)
         _cst.setdefault(self.res, "market_supply_hessian_log", []).append(dict(self.res.market_supply_hessian_info))
+        _rl.sub(f"Market supply Hessian: {len(eu.columns)} of {len(cols_y)} columns with a response, {len(t)} entries "
+                f"above {_h_floor:g}; the base's deviation {dev:.3g} kt"
+                + (f"; {n_skipped} of {n_solved} regional solves skipped" if skip else "")
+                + (f"; {len(bad)} of {n_ver} skips verified wrong" if verify else "")
+                + f"; written to the cache ({cfile.name})")
         return {"eu": eu, "ms": ms_h, "sup": sup, "blocks": blocks}
 
     def _split_hessian(self, ms_h):

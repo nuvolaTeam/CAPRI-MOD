@@ -274,13 +274,11 @@ def test_eu_fish_and_other_oils_supply_as_capri_prodnq():
 def test_feed_bulks_respond_inside_the_market_as_capris_feedblk():
     """Audit M4: a member state's feed bulk responds to the prices within the market solve, log-linear from the supply
     models' bulk at the prices they saw (CAPRI's feedBlk_, its constant at the supply models' bulk), the elasticities
-    from the market supply Hessian's FEEDBLK rows over the bulk at base; at the prices the models saw nothing moves,
-    and the switch off keeps the bulks fixed within the solve."""
+    from the market supply Hessian's FEEDBLK rows over the bulk at base; at the prices the models saw nothing moves."""
     import numpy as np
     import pandas as pd
     from capri_mod.data.loaders import load_all_data
     from capri_mod.market.market_module import MarketModule
-    from capri_mod.settings import override
     m = MarketModule(load_all_data("capri_data"))
     fb = m._feed_bulk_params()
     (ms, b), d = next(((k, v) for k, v in fb["bulks"].items() if k[1] == "FCER"))
@@ -296,8 +294,6 @@ def test_feed_bulks_respond_inside_the_market_as_capris_feedblk():
     q1 = m.eu_feed_use({"SWHE": 1.1}, bulk_factor=f)
     c0 = next(c for c in d["comm"] if c)
     assert q1[c0] < q0[c0]
-    with override({"market.feed_bulk_in_market": False}):
-        assert m.feed_bulk_market_factor({"SWHE": 1.1}) == {}
 
 
 def test_switzerlands_supply_terms_take_its_support_per_tonne_off_the_producer_price():

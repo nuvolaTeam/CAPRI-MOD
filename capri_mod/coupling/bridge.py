@@ -7,6 +7,7 @@ module once model is loaded (capri_mod.coupling.inject); the annotations are not
 from __future__ import annotations
 
 from capri_mod.data.definitions import CROPS, MARKET_COMMODITIES, COMMODITY_CAPRI_CODE, CAPRI_MEMBERS
+from capri_mod.coupling.equations.simu_calibration_to_supply import p_itemsInIters_prod
 
 
 class BridgeBlock:
@@ -200,7 +201,7 @@ class BridgeBlock:
                          else float(out.at[ctry, mc]))
                 if f == 0.0 and gross > 0.0:
                     left[(ctry, mc)] = gross
-                out.at[ctry, mc] = gross * f
+                out.at[ctry, mc] = p_itemsInIters_prod(gross, f)
         self.ev.unmarketed_supply = left
         return out
 

@@ -65,6 +65,17 @@ INSERT INTO value_units VALUES
   ('feed_bulks_noneu', 'rho', 'U_Elasticity', 'capri', 'CAPRI''s p_rhoFeed'),
   ('feed_bulks_noneu', 'use_kt', 'U_1000t', 'capri', 'CAPRI''s HCOM + FEDM + INDM + BIOF + LOSM + PRCM (1000 t)');
 
+-- file: capri_data/2017/market/feed_bulks_grof.csv
+CREATE TABLE feed_bulks_grof (
+    ms VARCHAR NOT NULL REFERENCES capri_rall (code),
+    bulk VARCHAR NOT NULL CHECK (bulk IN ('FCER', 'FPRO', 'FENE', 'FOTH', 'FMIL')),
+    grof_kt DOUBLE NOT NULL CHECK (grof_kt > 0),
+    PRIMARY KEY (ms, bulk)
+);
+COMMENT ON TABLE feed_bulks_grof IS 'CAPRI''s 2030 total feed use of each purchased feed bulk per member state, DATA(MS, "GROF", bulk, "TRD") of sim_ini_21730 (every row of the bulk, the market''s products and the others), the denominator of the covered share in CAPRI''s supply-side bulk price (arm/set_prices.gms l. 412; tools/build/build_feed_bulk_grof.py)';
+INSERT INTO value_units VALUES
+  ('feed_bulks_grof', 'grof_kt', 'U_1000t', 'capri', 'CAPRI''s GROF of the bulk at TRD (1000 t)');
+
 -- file: capri_data/2017/market/feed_bulks_eu_share.csv
 CREATE TABLE feed_bulks_eu_share (
     commodity VARCHAR PRIMARY KEY REFERENCES model_commodities (code),
@@ -81,12 +92,14 @@ INSERT INTO value_units VALUES
 
 -- file: capri_data/2017/market/armington_rho.csv
 CREATE TABLE armington_rho (
-    commodity VARCHAR PRIMARY KEY REFERENCES model_commodities (code),
+    commodity VARCHAR NOT NULL REFERENCES model_commodities (code),
     capri VARCHAR NOT NULL REFERENCES capri_xx (code),
+    region VARCHAR NOT NULL,        -- CAPRI's market region (RM), the EU's blocks as EU_WEST and EU_EAST
     rho1 DOUBLE NOT NULL CHECK (rho1 > 0),
-    rho2 DOUBLE NOT NULL CHECK (rho2 > 0)
+    rho2 DOUBLE NOT NULL CHECK (rho2 > 0),
+    PRIMARY KEY (commodity, region)
 );
-COMMENT ON TABLE armington_rho IS 'CAPRI''s Armington substitution elasticities per market commodity: rho1 between domestic sales and the import aggregate, rho2 among the import origins (arm/market1.gms, special_ch/market1_ch.gms; tools/build/build_bilateral_market.py)';
+COMMENT ON TABLE armington_rho IS 'CAPRI''s Armington substitution elasticities per market commodity and market region, p_rhoArm1(RM, XX) and p_rhoArm2(RM, XX): rho1 between domestic sales and the import aggregate, rho2 among the import origins, of the importing region (arm/market1.gms, special_ch/market1_ch.gms; tools/build/build_bilateral_market.py write_rho; per region since 25 November 2026)';
 INSERT INTO value_units VALUES
   ('armington_rho', 'rho1', 'U_Elasticity', 'capri', 'CAPRI''s first-stage Armington substitution elasticity'),
   ('armington_rho', 'rho2', 'U_Elasticity', 'capri', 'CAPRI''s second-stage Armington substitution elasticity');

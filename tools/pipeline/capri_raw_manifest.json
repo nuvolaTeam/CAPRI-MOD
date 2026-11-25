@@ -1,7 +1,7 @@
 {
  "repo": "nuvolaTeam/capri-mod-raw",
  "repo_type": "dataset",
- "revision": "d6e5a441b59255ab68fa3ecee098f00ff5e47e9a",
+ "revision": "3195cd20385c9f8c8d186e4e4240c845d735353f",
  "revision_note": "the dataset commit these files are at; uploads are no longer tagged, each file is pinned by its SHA-256 (the project lead, 12 November 2026)",
  "history": [
   {
@@ -29,6 +29,21 @@
    "date": "2026-11-20",
    "note": "the four rural-development GDX files build_rd_inputs reads (dat/policy: rdNewMeasuresRegDist, rd_spend_2007_2013_se; dat/baseline: clueLandPartition, ae_lfa_fes), from the project lead's CAPRI star 3.0 installation (upload of 20 November 2026), as Parquet, each checked record by record",
    "files_added": 12
+  },
+  {
+   "date": "2026-11-24",
+   "note": "dat/feed/porkreq.gms: CAPRI's pig-fattening requirements by weight class (p_pigsReqHighWgt, p_pigsReqLowWgt), the project lead's file of 24 November 2026, as Parquet, each record checked against a second reading of the file",
+   "files_added": 3
+  },
+  {
+   "date": "2026-11-24",
+   "note": "results/capreg: CAPREG's 2017 requirement corrections reqrel_17<CC> (p_animReqCorrFac1) of the 27 countries not yet in the set (the EU, Norway), the project lead's files of 24 November 2026 (reqrel_17XX.zip, 35 countries; the 8 already published identical by SHA-256), as Parquet, each checked record by record against the GDX",
+   "files_added": 162
+  },
+  {
+   "date": "2026-11-24",
+   "note": "results/baseline: CAPRI's baseline feed calibration results fedtrm_21730<CC>defaulta (p_animReqCorrFac, calyeaCal, v_lossQuant: capmod/load_feed.gms l. 74-75) of 34 countries (AL not among them), the project lead's files delivered 21 November 2026, as Parquet, each checked record by record against the GDX; CAPRI results, for checks only",
+   "files_added": 136
   }
  ],
  "layout": "capri/<CAPRI folder: dat/<subfolder>, results/<module>>/<file name>/<symbol>.parquet and _symbols.csv; no originals (11 November 2026)",
@@ -492,6 +507,18 @@
   "capri/dat/envind/waterMetersPerHa/p_waterTMeters.parquet": {
    "sha256": "f9fac3df1e7d50bae84b105a9c98e79f04a4d54b9cd677f12f8df7ec3fd38cb0",
    "size": 3720
+  },
+  "capri/dat/feed/porkreq/_symbols.csv": {
+   "sha256": "ff2add08f356ff9eb1dac7610c8c09adecb7ea3511b12b6564c28d9dbd46b9a9",
+   "size": 117
+  },
+  "capri/dat/feed/porkreq/p_pigsReqHighWgt.parquet": {
+   "sha256": "e1ec31a1d076dedb98406860f7d68d82ce80835d876268ecbee3bd8032c8ddfd",
+   "size": 4504
+  },
+  "capri/dat/feed/porkreq/p_pigsReqLowWgt.parquet": {
+   "sha256": "bcd38e38614c71de4ec19901ac2c0b61a651db9b5af3f5b2db4f6e775aee5431",
+   "size": 4246
   },
   "capri/dat/global/GLOBIOM-EU_EUCLIMIT6_S2_50CV/ACR_COMPARE.parquet": {
    "sha256": "8a91cb5c3a8cc8201bdeff60b4719cf2e4c4bf93f7f2458ef5d1ec6c2508c592",
@@ -2452,6 +2479,550 @@
   "capri/results/baseline/data_market_1750defaulta/v_tarSpec.parquet": {
    "sha256": "3ef72191b81c6147d82ace77bdd85c39ba1f2f815be959976e1fee8ad093d1e0",
    "size": 20137
+  },
+  "capri/results/baseline/fedtrm_21730ATdefaulta/CalYeaCal.parquet": {
+   "sha256": "f474e0b0229867c92eb5f9a6ca6477dbba88c6508f9b83c296d9c60cc8830c05",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730ATdefaulta/_symbols.csv": {
+   "sha256": "5b299be0f5ab43f936e7d99a7f14a334e5eaf8138c834479b4312a8f4b6de588",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730ATdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "b327b71a93e5cb032145ae92a3f297820178e8c7e85c064ba76bd83a147f1544",
+   "size": 9113
+  },
+  "capri/results/baseline/fedtrm_21730ATdefaulta/v_lossQuant.parquet": {
+   "sha256": "2b30d18ae8067209c15092e87935c6eb0e53b48c3494a9f86a7cef823eff3872",
+   "size": 3615
+  },
+  "capri/results/baseline/fedtrm_21730BAdefaulta/CalYeaCal.parquet": {
+   "sha256": "a098f9b42ea590ecdf926b0d6e3d9fb516b3b7b9dfc1d9d8b25d84b851b54572",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730BAdefaulta/_symbols.csv": {
+   "sha256": "5cbad4a477d1d40458c7728fe42ae0d36caaed21177df1389226551e9873487c",
+   "size": 285
+  },
+  "capri/results/baseline/fedtrm_21730BAdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "56e56d1781f260302344f8be0d8cf90896770e4e33526692532066c51b9c7c99",
+   "size": 3362
+  },
+  "capri/results/baseline/fedtrm_21730BAdefaulta/v_lossQuant.parquet": {
+   "sha256": "b283ae2719deea8a4be7c30f1aebffd1aee2580893356004fdf532f46e3b1dbf",
+   "size": 3207
+  },
+  "capri/results/baseline/fedtrm_21730BGdefaulta/CalYeaCal.parquet": {
+   "sha256": "7a116aba010dce9229c3fe32bb71675658bf8088dca1e74ee00a4dd446981090",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730BGdefaulta/_symbols.csv": {
+   "sha256": "dca9d0c73594d2d38b8c0aaa3943cab6027a905d2b4a7829591607231734d613",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730BGdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "a791c3506dea1a09d63f1d4b0038ca469352ec405c678772a29ea9b21a530cfb",
+   "size": 6420
+  },
+  "capri/results/baseline/fedtrm_21730BGdefaulta/v_lossQuant.parquet": {
+   "sha256": "1afe3e50f710efa171d29b850d7122c144537042693130a7e2099300dcbf3163",
+   "size": 3413
+  },
+  "capri/results/baseline/fedtrm_21730BLdefaulta/CalYeaCal.parquet": {
+   "sha256": "84c83093c786fee3b04bd0fe735a61150d1c6580586c086ac4fcc71aa502bdff",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730BLdefaulta/_symbols.csv": {
+   "sha256": "d2fc2703dc52987ab7e2b25332a5e7a9bc9503d814b24054aebc0ebbd400d6dc",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730BLdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "4972d270f121de861b7fc7c589f5b12969287efabba539256bd6171486203e05",
+   "size": 9772
+  },
+  "capri/results/baseline/fedtrm_21730BLdefaulta/v_lossQuant.parquet": {
+   "sha256": "147efd5139b6ad4e3df417fd4ec6480accdb32ca64cbab8f0551337129b179a7",
+   "size": 3661
+  },
+  "capri/results/baseline/fedtrm_21730CSdefaulta/CalYeaCal.parquet": {
+   "sha256": "1c16916de974d369a2004599a12d3cf447a9e590036b47cb9c71ad17681bc86b",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730CSdefaulta/_symbols.csv": {
+   "sha256": "e08fb7892ae151aebfcf394c6666c8432da1bd8f0d3104f2b136232c88e05f8a",
+   "size": 285
+  },
+  "capri/results/baseline/fedtrm_21730CSdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "6bddee5cdfc4a24667a3837504509750d9f71b092971eaba1426a61b68e3be65",
+   "size": 3490
+  },
+  "capri/results/baseline/fedtrm_21730CSdefaulta/v_lossQuant.parquet": {
+   "sha256": "09c12f8539eed94a6cab89e4c93266a5230210534acbcfe29f814b510f41a425",
+   "size": 3207
+  },
+  "capri/results/baseline/fedtrm_21730CYdefaulta/CalYeaCal.parquet": {
+   "sha256": "ab175981091b3912da4d1e0b38431dd2ae51c0d0e5e84d3c6fab8a7188e42218",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730CYdefaulta/_symbols.csv": {
+   "sha256": "e08fb7892ae151aebfcf394c6666c8432da1bd8f0d3104f2b136232c88e05f8a",
+   "size": 285
+  },
+  "capri/results/baseline/fedtrm_21730CYdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "34c1fb15b9513cde827c6636a4a6d18493c88aae950a2714c0d7b0819e7e89cd",
+   "size": 3531
+  },
+  "capri/results/baseline/fedtrm_21730CYdefaulta/v_lossQuant.parquet": {
+   "sha256": "35f7b27a26141307112724196eef265201e9a3aa83a76d604156ac3b3c747fd9",
+   "size": 3207
+  },
+  "capri/results/baseline/fedtrm_21730CZdefaulta/CalYeaCal.parquet": {
+   "sha256": "6af4e4c8000bfea50047f57e25ec6268cca60826442eb70b11cc231c77a76291",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730CZdefaulta/_symbols.csv": {
+   "sha256": "10d6a0ec69bf5408c9b782878afa0577f08b59dedec12f14e20c5ee6fb2fec5f",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730CZdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "4509b050cb6ffa961b30c25dac1fb1cea09f136cc185edbca70d0beb5e639f42",
+   "size": 6925
+  },
+  "capri/results/baseline/fedtrm_21730CZdefaulta/v_lossQuant.parquet": {
+   "sha256": "cb6e8a3c73940757363a5c0c6f6c557f1aec9762abbd02562d4047b4d036d872",
+   "size": 3483
+  },
+  "capri/results/baseline/fedtrm_21730DEdefaulta/CalYeaCal.parquet": {
+   "sha256": "1181e0883a66eaee5b89f826a84f7c1c8abe70ba0966d68f730df2bc49480255",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730DEdefaulta/_symbols.csv": {
+   "sha256": "74cb04edd888920b861de5a9349f5e9050739244cff10cb08af79e989ea119b3",
+   "size": 288
+  },
+  "capri/results/baseline/fedtrm_21730DEdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "df1316159bbe88337c1a75c568b78cd3af20c074faddc8c4938c3e22c86dfbfb",
+   "size": 22925
+  },
+  "capri/results/baseline/fedtrm_21730DEdefaulta/v_lossQuant.parquet": {
+   "sha256": "868bbb3a1f971270fffe630d4f814c2a8fe98a4dfec20b674d35983d7ce05626",
+   "size": 4621
+  },
+  "capri/results/baseline/fedtrm_21730DKdefaulta/CalYeaCal.parquet": {
+   "sha256": "410df9151f66b9f37b5e2419dae0c89ec8a3a6e15f97e6e50687e8e0f8121a83",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730DKdefaulta/_symbols.csv": {
+   "sha256": "e08fb7892ae151aebfcf394c6666c8432da1bd8f0d3104f2b136232c88e05f8a",
+   "size": 285
+  },
+  "capri/results/baseline/fedtrm_21730DKdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "0d439ddeeb1d7c57cd8a440045b93cd0b26e6dd83890d7f1439565500317b07e",
+   "size": 3437
+  },
+  "capri/results/baseline/fedtrm_21730DKdefaulta/v_lossQuant.parquet": {
+   "sha256": "23a4575a63615367fd862ff21a7d2cc8a32456cdd66c3736719c36d79f715b69",
+   "size": 3207
+  },
+  "capri/results/baseline/fedtrm_21730EEdefaulta/CalYeaCal.parquet": {
+   "sha256": "6f327577bdbeaf3762fcc1d8b67ceedcc2c682d3bebe7b83d4b517956952d673",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730EEdefaulta/_symbols.csv": {
+   "sha256": "e08fb7892ae151aebfcf394c6666c8432da1bd8f0d3104f2b136232c88e05f8a",
+   "size": 285
+  },
+  "capri/results/baseline/fedtrm_21730EEdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "f671e947c466ea1a4bdb6eb1e2b26cd7995e952d75702fa3633875cef7bcd8ed",
+   "size": 3475
+  },
+  "capri/results/baseline/fedtrm_21730EEdefaulta/v_lossQuant.parquet": {
+   "sha256": "272afed59fe9cf9c36d1d18e304ff71d3add34b2c7b4dca3b722bd29f3784a23",
+   "size": 3207
+  },
+  "capri/results/baseline/fedtrm_21730ELdefaulta/CalYeaCal.parquet": {
+   "sha256": "b5b9153bc044f03eeffc3f8cfd8471a093427570774cf84404a738bb7ebbee13",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730ELdefaulta/_symbols.csv": {
+   "sha256": "10c93eb440d6a7439461537142728e5ce2aebc8a0f0b6b841ddd44256095b71f",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730ELdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "6a294f9416a896fd6eb7f6cd42c16b7f61d42a8f5547fc63549d5f54e85de819",
+   "size": 11745
+  },
+  "capri/results/baseline/fedtrm_21730ELdefaulta/v_lossQuant.parquet": {
+   "sha256": "6aade023fad252283982d433960a930cfa11ca454537e8754acddb9ee01d461c",
+   "size": 3825
+  },
+  "capri/results/baseline/fedtrm_21730ESdefaulta/CalYeaCal.parquet": {
+   "sha256": "b42aa99163a406c05aaf33eee02216a8a23f00d11d10f302db5da801d605bdcc",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730ESdefaulta/_symbols.csv": {
+   "sha256": "c06e323b3d159f507f2b9187c00ab3d077effeb0e08a53de270e5c824d2089c8",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730ESdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "ceb7abab673e8c927e43c26efa6fd036153541386d757495032dde4fa89fb94e",
+   "size": 15008
+  },
+  "capri/results/baseline/fedtrm_21730ESdefaulta/v_lossQuant.parquet": {
+   "sha256": "8d6f797a1cfd599b483140d4becf80188776d430c19c61a5ff63b0ab04eb85f7",
+   "size": 3999
+  },
+  "capri/results/baseline/fedtrm_21730FIdefaulta/CalYeaCal.parquet": {
+   "sha256": "943e3eb5c20dbb19f1d5bed8b30ac4ebb8f0e4e7ba4089fb7458dd4c0fbfa6d8",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730FIdefaulta/_symbols.csv": {
+   "sha256": "c2ab199d152ca993f4c7f1914d7527c3b614af1f02a25836fa0f22fdc91c30ab",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730FIdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "10ddad175fef0ea451918c745c9b5f85030642dedebe3a094b4474c4bdbe9ad0",
+   "size": 6414
+  },
+  "capri/results/baseline/fedtrm_21730FIdefaulta/v_lossQuant.parquet": {
+   "sha256": "a237e9ae81cc57d114509905ac1cc20448f9269fde8b02425ca4af7d70c1422a",
+   "size": 3412
+  },
+  "capri/results/baseline/fedtrm_21730FRdefaulta/CalYeaCal.parquet": {
+   "sha256": "5562ad0e43107c4921bb524c1fb363dd689ae06d646ffe44ea9569508477fff4",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730FRdefaulta/_symbols.csv": {
+   "sha256": "a7bacd98ff3207f1b1fcf803ca130015b9023ef69540a56a18c71fcf6cdaaa9e",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730FRdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "20a0416b99f07052b3244ff6553e0d823cea41f367ed7590bde10f9105a491d9",
+   "size": 17461
+  },
+  "capri/results/baseline/fedtrm_21730FRdefaulta/v_lossQuant.parquet": {
+   "sha256": "b8c464b8c823b96b0315c69dafb0b022ef4eddae3e4738a93763cffb349f18d4",
+   "size": 4191
+  },
+  "capri/results/baseline/fedtrm_21730HRdefaulta/CalYeaCal.parquet": {
+   "sha256": "fb9ebad8dd940644aeca23e929d54a27cef5d3117929aadf7db7459488f06738",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730HRdefaulta/_symbols.csv": {
+   "sha256": "e08fb7892ae151aebfcf394c6666c8432da1bd8f0d3104f2b136232c88e05f8a",
+   "size": 285
+  },
+  "capri/results/baseline/fedtrm_21730HRdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "89be29d4daea79fdc26b9a4433056cfe0f65f37e7ed5319d5d09c548f4d71f4b",
+   "size": 3487
+  },
+  "capri/results/baseline/fedtrm_21730HRdefaulta/v_lossQuant.parquet": {
+   "sha256": "d2fabe8bf00642635dbcadaff050b4a017c38f860ce944eee1065283d701dce8",
+   "size": 3207
+  },
+  "capri/results/baseline/fedtrm_21730HUdefaulta/CalYeaCal.parquet": {
+   "sha256": "e1108187b52c03db536738b337b7cb9bd9ce25e58201f294f80578fcc8122aa8",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730HUdefaulta/_symbols.csv": {
+   "sha256": "d4cb571400faca0ac74510638ed6d2a7849d3019cfb78a989da66b49ad6963b3",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730HUdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "6ca52bec18a4c9b59fb7d0fbc680dae8e9b5453a0949d0773b1735aa1848c72e",
+   "size": 8117
+  },
+  "capri/results/baseline/fedtrm_21730HUdefaulta/v_lossQuant.parquet": {
+   "sha256": "35e7e09ad3a24830926f064f613b9a5d673dc882f1c2ead42cdf025d34cf7565",
+   "size": 3512
+  },
+  "capri/results/baseline/fedtrm_21730IRdefaulta/CalYeaCal.parquet": {
+   "sha256": "d8d5c7d9fd45a6cbaf12099e648637f50e1e90c79e09f7acd09225bcc528487a",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730IRdefaulta/_symbols.csv": {
+   "sha256": "7f23f92c5cb2a678b5cdac632fcc6817138894b99327d56237ac4cee1f9702de",
+   "size": 285
+  },
+  "capri/results/baseline/fedtrm_21730IRdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "f70a2c85357e690c4087f1e78455e464b36cb986605997d8ccb7cd1ab4777004",
+   "size": 4488
+  },
+  "capri/results/baseline/fedtrm_21730IRdefaulta/v_lossQuant.parquet": {
+   "sha256": "9aeb712ec7055aba22aa04ce6562ec64dfa530ee5de1f91040365dad066623ea",
+   "size": 3270
+  },
+  "capri/results/baseline/fedtrm_21730ITdefaulta/CalYeaCal.parquet": {
+   "sha256": "ba0b00fa3f6a10067e7a0a9f7f5a31d5c5752e1e76cf85a80c38b9be80e85af4",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730ITdefaulta/_symbols.csv": {
+   "sha256": "e6806eed10cd916f9baf49454999debca860d46e65ef5e00a5d298b9dd0c9d47",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730ITdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "142bfa7e97d2b1aa7662117091b34e9e86f6d7edf54773ab621c9afcdc050005",
+   "size": 16081
+  },
+  "capri/results/baseline/fedtrm_21730ITdefaulta/v_lossQuant.parquet": {
+   "sha256": "c1f9ed67628b57e13aa077291dbb14f7671d4875e29d795280cdf979c2a45fb9",
+   "size": 4117
+  },
+  "capri/results/baseline/fedtrm_21730KOdefaulta/CalYeaCal.parquet": {
+   "sha256": "ab5b62a8e4ee0c557156a51bb3e412e035f69b163541aa0622a776a6efd7527f",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730KOdefaulta/_symbols.csv": {
+   "sha256": "e08fb7892ae151aebfcf394c6666c8432da1bd8f0d3104f2b136232c88e05f8a",
+   "size": 285
+  },
+  "capri/results/baseline/fedtrm_21730KOdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "aba1daba23b90877fa6977c90dc39f3cea846f2b6c3296e13b77e333da0528a0",
+   "size": 3455
+  },
+  "capri/results/baseline/fedtrm_21730KOdefaulta/v_lossQuant.parquet": {
+   "sha256": "cc29282c68796a299f8d773b2464743b1cca2063bd21ca5c2377ac41b4e6e8f3",
+   "size": 3207
+  },
+  "capri/results/baseline/fedtrm_21730LTdefaulta/CalYeaCal.parquet": {
+   "sha256": "5d1b27b78fa3f870e16e1b52ee5dd6ee42a666c15aca6eca95f774187a6d6f49",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730LTdefaulta/_symbols.csv": {
+   "sha256": "e08fb7892ae151aebfcf394c6666c8432da1bd8f0d3104f2b136232c88e05f8a",
+   "size": 285
+  },
+  "capri/results/baseline/fedtrm_21730LTdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "1703adc38333004fc11fefcb0bd820d8a3659ae827cf43085c76ea05ce1f3995",
+   "size": 3447
+  },
+  "capri/results/baseline/fedtrm_21730LTdefaulta/v_lossQuant.parquet": {
+   "sha256": "390ba165dc3278c59e206bb11afbc4b92e6b977df1639e6e1affd5be163a06e4",
+   "size": 3207
+  },
+  "capri/results/baseline/fedtrm_21730LVdefaulta/CalYeaCal.parquet": {
+   "sha256": "596258237a0c8135607360a34416fe6494d2ad75a10912917a1318834b16883f",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730LVdefaulta/_symbols.csv": {
+   "sha256": "e08fb7892ae151aebfcf394c6666c8432da1bd8f0d3104f2b136232c88e05f8a",
+   "size": 285
+  },
+  "capri/results/baseline/fedtrm_21730LVdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "7272ce0c3f7ece4c7886bb52b4a5f20c9234cabb07ecc3b11203857a1099ea47",
+   "size": 3510
+  },
+  "capri/results/baseline/fedtrm_21730LVdefaulta/v_lossQuant.parquet": {
+   "sha256": "b81d1546e1bf2f7bd1ac2f1327ea236ed16d134f29dd5540e72e9aa2ba34ad1f",
+   "size": 3207
+  },
+  "capri/results/baseline/fedtrm_21730MKdefaulta/CalYeaCal.parquet": {
+   "sha256": "c44998271ccb504e6bd58bed8f815212efb1e3ee433092d7181aab66708f46eb",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730MKdefaulta/_symbols.csv": {
+   "sha256": "e08fb7892ae151aebfcf394c6666c8432da1bd8f0d3104f2b136232c88e05f8a",
+   "size": 285
+  },
+  "capri/results/baseline/fedtrm_21730MKdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "94d601ba2bac53bbffa660b663a6f4e10a3f51a5f456b1de948dbefac547765c",
+   "size": 3470
+  },
+  "capri/results/baseline/fedtrm_21730MKdefaulta/v_lossQuant.parquet": {
+   "sha256": "f5f49bd1c2b79a3ea4a4a8e250417914e54ccc7c3085b76304da81df6428adb1",
+   "size": 3207
+  },
+  "capri/results/baseline/fedtrm_21730MOdefaulta/CalYeaCal.parquet": {
+   "sha256": "3bbc577fd52c11635fe47e8b2149173e3c637715e8680fe3ad3b9ea1a942fa9c",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730MOdefaulta/_symbols.csv": {
+   "sha256": "5cbad4a477d1d40458c7728fe42ae0d36caaed21177df1389226551e9873487c",
+   "size": 285
+  },
+  "capri/results/baseline/fedtrm_21730MOdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "cee452e72cdbd03d75fb8b6ff2a79068bf86c597c5bf68d8fc86644909509329",
+   "size": 3376
+  },
+  "capri/results/baseline/fedtrm_21730MOdefaulta/v_lossQuant.parquet": {
+   "sha256": "974e02d08b606a39d7ba6946d7a80dda70a9652146371e5b6338d74680a3dd11",
+   "size": 3215
+  },
+  "capri/results/baseline/fedtrm_21730MTdefaulta/CalYeaCal.parquet": {
+   "sha256": "57144c614cdff7647e0021d1befdffabe64e1561255b83f97b2e1952578e16b6",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730MTdefaulta/_symbols.csv": {
+   "sha256": "e08fb7892ae151aebfcf394c6666c8432da1bd8f0d3104f2b136232c88e05f8a",
+   "size": 285
+  },
+  "capri/results/baseline/fedtrm_21730MTdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "9b43ca16f44eb2d5d1a04b4e1772ef981f4dc9a35d049d5a15fd96991a1e555a",
+   "size": 3531
+  },
+  "capri/results/baseline/fedtrm_21730MTdefaulta/v_lossQuant.parquet": {
+   "sha256": "59988966dca723a35350b8a354b704869a17b382782e8143744721243f31ac21",
+   "size": 3207
+  },
+  "capri/results/baseline/fedtrm_21730NLdefaulta/CalYeaCal.parquet": {
+   "sha256": "e3317903f731329544bc37c91a966724abb497c280a9ff55c5384d29002a9d55",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730NLdefaulta/_symbols.csv": {
+   "sha256": "9e26a723d8f48810295ff05d8faa4117c6a262fa4a838a92669f52b7fb46e368",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730NLdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "71c8ea46981167c9f1c403adfbecdbe77914cc70d4dd5e06990c62eb29fc8b48",
+   "size": 11588
+  },
+  "capri/results/baseline/fedtrm_21730NLdefaulta/v_lossQuant.parquet": {
+   "sha256": "edd45f86eee6d39cccce2f353807cf42e000feebac288d8559e678c9cb14264f",
+   "size": 3799
+  },
+  "capri/results/baseline/fedtrm_21730NOdefaulta/CalYeaCal.parquet": {
+   "sha256": "81a992d41609a707c56cf578d4c3e3372230264c4c7a07270ff8cedbbbcef212",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730NOdefaulta/_symbols.csv": {
+   "sha256": "4139b344dca6bf5bc132a63b90c2b06389285996aad732200ceafe02aa928570",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730NOdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "1520bcf255ca45d192013f85620d0e0f47cc4dfb47684e52f2825f6835bbd686",
+   "size": 6471
+  },
+  "capri/results/baseline/fedtrm_21730NOdefaulta/v_lossQuant.parquet": {
+   "sha256": "d1a84101eac21ea0ac985a3b28c333294f4ab0316067628e83157467d74ce768",
+   "size": 3422
+  },
+  "capri/results/baseline/fedtrm_21730PLdefaulta/CalYeaCal.parquet": {
+   "sha256": "33fb62fb992ae97a98e29a912f457b4305b4bb0d7dcc45cc13b79acce9ae3309",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730PLdefaulta/_symbols.csv": {
+   "sha256": "450b90cd3d0e79f168a2d10ddc085675837f6a243da33f48bcc42282869353b7",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730PLdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "4d6d59f9a23705f2e0bbd8833be5ee8ca0eae9554bcb7e3ba4108baff0738085",
+   "size": 14840
+  },
+  "capri/results/baseline/fedtrm_21730PLdefaulta/v_lossQuant.parquet": {
+   "sha256": "78d85d25aab6665b8150fc04012654be660fe565b75fd86b1ce7bc90c530f885",
+   "size": 3955
+  },
+  "capri/results/baseline/fedtrm_21730PTdefaulta/CalYeaCal.parquet": {
+   "sha256": "9323d138a170654b4c29d77a1db8bf812055daa78caa7ac7113526564db80b77",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730PTdefaulta/_symbols.csv": {
+   "sha256": "a2035b0bbcbedba83e5e4ca76d9559feafb4f2869260522a2b3774de9a183e92",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730PTdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "c21146859e6dc0a40036f3bb3ea356a4bd52d16c26456242c0ca2c74e8873f78",
+   "size": 7906
+  },
+  "capri/results/baseline/fedtrm_21730PTdefaulta/v_lossQuant.parquet": {
+   "sha256": "210fb16823aba33d9b868740887764700a0449748ca4561d5deb5fa408d797ba",
+   "size": 3502
+  },
+  "capri/results/baseline/fedtrm_21730ROdefaulta/CalYeaCal.parquet": {
+   "sha256": "d5359252063934a9746847f3a6443170ac29c4818af6f3d6f3054e8bf5f1de09",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730ROdefaulta/_symbols.csv": {
+   "sha256": "10d6a0ec69bf5408c9b782878afa0577f08b59dedec12f14e20c5ee6fb2fec5f",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730ROdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "a53d9a87b928c93e4fbee6db8de77041c3add4f7159917714bcd04be7cb69452",
+   "size": 7176
+  },
+  "capri/results/baseline/fedtrm_21730ROdefaulta/v_lossQuant.parquet": {
+   "sha256": "8cd8e72fceb213a2fb3c2533a440098732f6c81b1117e0ead4d17993ae120991",
+   "size": 3536
+  },
+  "capri/results/baseline/fedtrm_21730SEdefaulta/CalYeaCal.parquet": {
+   "sha256": "580a59c6cd5d3f1d9392a529d4e8eac15bfe28c297873b81a80ef9d17f53ba6c",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730SEdefaulta/_symbols.csv": {
+   "sha256": "10d6a0ec69bf5408c9b782878afa0577f08b59dedec12f14e20c5ee6fb2fec5f",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730SEdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "e262a90908f621cb9463d5a44ebca9e490a87017ead8e123b1a1717be7c7b2cb",
+   "size": 7156
+  },
+  "capri/results/baseline/fedtrm_21730SEdefaulta/v_lossQuant.parquet": {
+   "sha256": "4845e9c8edd064cb70a395029efd1872f83b960a0d18303e5b8f2ba75904cbdc",
+   "size": 3545
+  },
+  "capri/results/baseline/fedtrm_21730SIdefaulta/CalYeaCal.parquet": {
+   "sha256": "bc158468be019c5a4ee806bbf8c6c1a7b865a1cdacee97bb6d144e6c753735b5",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730SIdefaulta/_symbols.csv": {
+   "sha256": "e08fb7892ae151aebfcf394c6666c8432da1bd8f0d3104f2b136232c88e05f8a",
+   "size": 285
+  },
+  "capri/results/baseline/fedtrm_21730SIdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "8653a404c65d71b6e630c614df81de0c9de5a96c93298115feea4d8be4df7091",
+   "size": 3430
+  },
+  "capri/results/baseline/fedtrm_21730SIdefaulta/v_lossQuant.parquet": {
+   "sha256": "cd837cdc40d28d701390b86ba85a7c950afdf6c27f058653ce3eecc90fc7c80e",
+   "size": 3207
+  },
+  "capri/results/baseline/fedtrm_21730SKdefaulta/CalYeaCal.parquet": {
+   "sha256": "665fb961103658b3e2a8a42e4ff098f03eec9a89a4b75d554683fc2dbee9f771",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730SKdefaulta/_symbols.csv": {
+   "sha256": "0a4a0a99a73eacb268e97b7cf753340210c41772406268bcb2263db17981992a",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730SKdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "f98658ccc1dfbd952360df6e0e7b17763e7fb81a22f00df918f8f0133c974acd",
+   "size": 5293
+  },
+  "capri/results/baseline/fedtrm_21730SKdefaulta/v_lossQuant.parquet": {
+   "sha256": "ff1c4e6615c43be8c16586fb5e3f8eb27dbe2ddef7dd08501d29becf12c5d7e1",
+   "size": 3351
+  },
+  "capri/results/baseline/fedtrm_21730TUdefaulta/CalYeaCal.parquet": {
+   "sha256": "e5d7b20886a94a269ee4c25c9b1e0dbca6c0ac3846a372a39573ac47e1e82c3b",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730TUdefaulta/_symbols.csv": {
+   "sha256": "2249dc642a6a746b96f60174d0f3bb999a65a6afeea57c48450053167c7ad86a",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730TUdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "1210fad80bfd8499d303c30adf27648b57ebea578e330e8de752956aa8219e2e",
+   "size": 8797
+  },
+  "capri/results/baseline/fedtrm_21730TUdefaulta/v_lossQuant.parquet": {
+   "sha256": "654b25d6d582301fc15c57b111af82bb62936ba2e4652c9a3fa5b97e3b6fcf5c",
+   "size": 3624
+  },
+  "capri/results/baseline/fedtrm_21730UKdefaulta/CalYeaCal.parquet": {
+   "sha256": "49d47edeab104dcd1aea0e57eb211cb5c0f2584b878c9ee47b3a64472f8d2d76",
+   "size": 1348
+  },
+  "capri/results/baseline/fedtrm_21730UKdefaulta/_symbols.csv": {
+   "sha256": "806a63f65be5e0208794cb24fdf90485ba35ae7086c113194f064cd830daef15",
+   "size": 287
+  },
+  "capri/results/baseline/fedtrm_21730UKdefaulta/p_animReqCorrFac.parquet": {
+   "sha256": "ccbb2132e74f6c1bedc288cf8b32c8817496294eee6a425451393732bfe458fa",
+   "size": 8821
+  },
+  "capri/results/baseline/fedtrm_21730UKdefaulta/v_lossQuant.parquet": {
+   "sha256": "0bdbd1c3112aa710a4183ca1a47f3e27c3b3ad64f064d4ef895c8fdd116d4512",
+   "size": 3605
   },
   "capri/results/baseline/results_1770/COLS.parquet": {
    "sha256": "9703d6814cafedff036dcaf7488de259018ea755dc2e9f261dde73faa443e75b",
@@ -8101,6 +8672,30 @@
    "sha256": "0f7219dd9ef107f7e69841fd51be9af699cfdc76708f2164e8e0472c2cd99864",
    "size": 2932
   },
+  "capri/results/capreg/reqrel_17AT/COLS.parquet": {
+   "sha256": "ec5f3396a9a3825ab175ed6ecb8df8900137058a8d367ff4482224b2d2150d9b",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17AT/META.parquet": {
+   "sha256": "8be8f85d65f12a1eed88173af80c57a572cdcaa896ef729bb6a892c5e1a30707",
+   "size": 5648
+  },
+  "capri/results/capreg/reqrel_17AT/RALL.parquet": {
+   "sha256": "96b5f693b5cca8ba586a40983eb5e8d6ca9724b7114be09ace474eacce43cc10",
+   "size": 7296
+  },
+  "capri/results/capreg/reqrel_17AT/ROWS.parquet": {
+   "sha256": "c8b8b6c736d286ceac98cc6f45c9599104f56fac8885e7b73f9a0b3744ad1d7f",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17AT/_symbols.csv": {
+   "sha256": "7f2b81658ef7181feb70bd80a60e1e8fe7f11dea00f072d733fb9b2d9f97eaf6",
+   "size": 342
+  },
+  "capri/results/capreg/reqrel_17AT/p_animReqCorrFac1.parquet": {
+   "sha256": "d92b611526a6b1fd261a9cbc4313eef623a323cf2a1498f1e27e49b8b6415a53",
+   "size": 8981
+  },
   "capri/results/capreg/reqrel_17BA/COLS.parquet": {
    "sha256": "f2b64ab2c17feed1d2481baf17f51ee30b1cab8b68d44b692f1652f11272a27e",
    "size": 18096
@@ -8124,6 +8719,54 @@
   "capri/results/capreg/reqrel_17BA/p_animReqCorrFac1.parquet": {
    "sha256": "5062ad18a0e50f71e747c7c74b6411705399fa2816b349a620115464cc0a302a",
    "size": 2863
+  },
+  "capri/results/capreg/reqrel_17BG/COLS.parquet": {
+   "sha256": "c49207c7ad4a2a0b6fb60d7bdef4bb95c5cc35d52a34e5e271a818f5dc0ed6c6",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17BG/META.parquet": {
+   "sha256": "a65e4c1e6b6e1c83d22e38bec27589f491f1f31d229bc3ab61e04b9edfb7687f",
+   "size": 5527
+  },
+  "capri/results/capreg/reqrel_17BG/RALL.parquet": {
+   "sha256": "1f8df6e15952e866a70a0f2690579b89c80ded15de8872223f1b065f5d7f6874",
+   "size": 7294
+  },
+  "capri/results/capreg/reqrel_17BG/ROWS.parquet": {
+   "sha256": "a0c8c6c3fd2a1467b510c84cf82d40c0fd1473d9f2b1f91ac081d70c18f8c4b3",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17BG/_symbols.csv": {
+   "sha256": "44f6440a068054ae831de660d6ef5eaa99486d717161a3668a1733e186186212",
+   "size": 342
+  },
+  "capri/results/capreg/reqrel_17BG/p_animReqCorrFac1.parquet": {
+   "sha256": "381c06e5db084f48eef5d4db13b7326c74b4aaa03c16fe7e847c7407ff88c0f2",
+   "size": 6126
+  },
+  "capri/results/capreg/reqrel_17BL/COLS.parquet": {
+   "sha256": "3ba9b772418c2e613ec5abd8383eda2d6bfc6e647be531176d39dac313ecc3ab",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17BL/META.parquet": {
+   "sha256": "7ca10975994f1a9210e682541d7bc145d32655cb4d7b8e876be2017bdc217e80",
+   "size": 5641
+  },
+  "capri/results/capreg/reqrel_17BL/RALL.parquet": {
+   "sha256": "5c794378eaa582884e16372b1d3cd3b54cb2b925ac50aa130c7b9744650fd03a",
+   "size": 7292
+  },
+  "capri/results/capreg/reqrel_17BL/ROWS.parquet": {
+   "sha256": "bfafe1ed5f1ccf7018319417772c6603b313cb78ad337bed98856c8089e70cf9",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17BL/_symbols.csv": {
+   "sha256": "7df2030e0e91d88f89511b52ecacfc7f41a6ce8d777ec8170a40f493e173869b",
+   "size": 342
+  },
+  "capri/results/capreg/reqrel_17BL/p_animReqCorrFac1.parquet": {
+   "sha256": "94dc0e795d6676a21cfc360599c7530b1f97d91660e7f3623b690536a3ad1bc4",
+   "size": 9790
   },
   "capri/results/capreg/reqrel_17CS/COLS.parquet": {
    "sha256": "51afb43850254dd0a796b96bf620ceb1c0f36737f69e5f55c951c9500bb7e582",
@@ -8149,6 +8792,318 @@
    "sha256": "e7e15a6cebc9dc3b2e204bedcf54264be3799d9034d373de5e9185d7f7e8fab5",
    "size": 2964
   },
+  "capri/results/capreg/reqrel_17CY/COLS.parquet": {
+   "sha256": "e56b22c2e3656613fbfd94f736d0d10008d1eca8cfe91a0db63e78a19fb0b52c",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17CY/META.parquet": {
+   "sha256": "01ea8aa2c81b9d22d34eb6cd4ae5dd1992d072fedb18270506cae8cd3e2f5fa2",
+   "size": 5525
+  },
+  "capri/results/capreg/reqrel_17CY/RALL.parquet": {
+   "sha256": "4cc2c562ccaf1b92ec3daa2f8ddd92e6a51f967b0942e5df2dfe771c62ac003a",
+   "size": 7292
+  },
+  "capri/results/capreg/reqrel_17CY/ROWS.parquet": {
+   "sha256": "542a2b29fdbca77a7ad2c1b4de8091f1fcc5c899da9e9f21fc5da21694aa10d6",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17CY/_symbols.csv": {
+   "sha256": "dd03c6d6d39f95b14a6089a3fb409a087c88e2b1e4901795a62afa8e2db2413f",
+   "size": 341
+  },
+  "capri/results/capreg/reqrel_17CY/p_animReqCorrFac1.parquet": {
+   "sha256": "f693c2e8665fbba65cbb792a5b6112c0038c77f12724b50a6b5d457b9edbf066",
+   "size": 3043
+  },
+  "capri/results/capreg/reqrel_17CZ/COLS.parquet": {
+   "sha256": "f871fc322d0733a827f2c8223a33cfa6184c26b197104cb4b250e25d149e1231",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17CZ/META.parquet": {
+   "sha256": "773402d89e3ac807b15672bfa6b2010baafb71bf83ec443027fc0348e2fcc605",
+   "size": 5530
+  },
+  "capri/results/capreg/reqrel_17CZ/RALL.parquet": {
+   "sha256": "16f4f4a7d82590aab18f57c64b6f143b14f549b7617dbfda3401d7d36fd784dd",
+   "size": 7302
+  },
+  "capri/results/capreg/reqrel_17CZ/ROWS.parquet": {
+   "sha256": "eaaacca0a65a7ecc3edef7a2a029643864da8e429a94274b23e0fcdb5efbf2ca",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17CZ/_symbols.csv": {
+   "sha256": "56135e9436f8dbe7468589a66d375961c5438f595bb5a69b2318bee2d876625a",
+   "size": 342
+  },
+  "capri/results/capreg/reqrel_17CZ/p_animReqCorrFac1.parquet": {
+   "sha256": "6ee470ecaca8e799803eb74307f68c34789f85cd23dcf5be7d12229b4b507f5a",
+   "size": 7060
+  },
+  "capri/results/capreg/reqrel_17DE/COLS.parquet": {
+   "sha256": "2c46c467779a02480c8aecb4147c2f07cde4966b69ddfd10405a7138648ea50d",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17DE/META.parquet": {
+   "sha256": "23eb25c0e04d2b6b449c78b0798807005074a31586ab09866b0810116c9d7677",
+   "size": 5646
+  },
+  "capri/results/capreg/reqrel_17DE/RALL.parquet": {
+   "sha256": "8ce660ff437e56b0614b525a3f2ca05f562bb5ef9ac531178559b829f0af93b2",
+   "size": 7428
+  },
+  "capri/results/capreg/reqrel_17DE/ROWS.parquet": {
+   "sha256": "dbe3143cf3b758ad56e302338aa05e7df36c704328e26a9c8cc40dd89ad73681",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17DE/_symbols.csv": {
+   "sha256": "748206f338cbd8af58da2818d0a51fa8f4e47bf299c03f137e829218101e1907",
+   "size": 343
+  },
+  "capri/results/capreg/reqrel_17DE/p_animReqCorrFac1.parquet": {
+   "sha256": "213ce7ff8a894590821eca2340a29427cbb7cc8ce843405361ad16a5cbda3044",
+   "size": 23357
+  },
+  "capri/results/capreg/reqrel_17DK/COLS.parquet": {
+   "sha256": "71df7566a330d24f34a1f2bd587c9de76a167e7269d655240d804ca5f5b13415",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17DK/META.parquet": {
+   "sha256": "8978572bf1003de7788d34fbd50a0595d869f4bbd243ac5f49860656d07b07e1",
+   "size": 5637
+  },
+  "capri/results/capreg/reqrel_17DK/RALL.parquet": {
+   "sha256": "244fa94283a14538d350d663fce5274d5997f00ebe244c34c9a0e7ea26d0ff03",
+   "size": 7425
+  },
+  "capri/results/capreg/reqrel_17DK/ROWS.parquet": {
+   "sha256": "eec36735a8b220241516983acba47b49817893956ea7a4b949bd01ad58493550",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17DK/_symbols.csv": {
+   "sha256": "9bd663166ad0d84257136ca11d01e559d3c2582fd30f3e18c654fc53689839d6",
+   "size": 341
+  },
+  "capri/results/capreg/reqrel_17DK/p_animReqCorrFac1.parquet": {
+   "sha256": "98e9c2915b0c0629e189e865099633c96f0462216ebb45e16464fe0eddd95492",
+   "size": 2943
+  },
+  "capri/results/capreg/reqrel_17EE/COLS.parquet": {
+   "sha256": "a4802d2926cfda529dba1f5983c41a00abc7f91fc68d6e9c4c92d44cd0a24fee",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17EE/META.parquet": {
+   "sha256": "902371781c258cc143c6e4b08e3b3bc2376692ba8db106b942e407ab4f904c71",
+   "size": 5526
+  },
+  "capri/results/capreg/reqrel_17EE/RALL.parquet": {
+   "sha256": "e835fab1cfc2d1656b3146d503dc7f346e0a729bd7ff3453c2a2c38bd341fd57",
+   "size": 7297
+  },
+  "capri/results/capreg/reqrel_17EE/ROWS.parquet": {
+   "sha256": "c82088d3ba77360cdf5afb6950da14460ec1e0d4744bab89b8428ed7322f807f",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17EE/_symbols.csv": {
+   "sha256": "152a97e0dd3b2091ec50e6bad79040672622746f3e349cd966ee520d02e979bf",
+   "size": 341
+  },
+  "capri/results/capreg/reqrel_17EE/p_animReqCorrFac1.parquet": {
+   "sha256": "12e7a4ab1bb524b71e3e9576c0c5f81cd8b1c37132a95a9576ef6cce616add4c",
+   "size": 3006
+  },
+  "capri/results/capreg/reqrel_17EL/COLS.parquet": {
+   "sha256": "b0130af3fc8e9a160847196ba0156ae7cd4f01924044c4b6b1bdb2cc17429f41",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17EL/META.parquet": {
+   "sha256": "81bad809f61f080c545ab1f5661a94902e5d1dc9e2b5c7e1b0e163b0c8d88529",
+   "size": 5636
+  },
+  "capri/results/capreg/reqrel_17EL/RALL.parquet": {
+   "sha256": "1f2a0084b0722f93482d27b5c42e246007f048b8580691f7ebe96bbbb59e5dc5",
+   "size": 7295
+  },
+  "capri/results/capreg/reqrel_17EL/ROWS.parquet": {
+   "sha256": "818ff9c8ce50fbf217374fcd46d0fe95bfad15f481469b2f7792ff11543a7cda",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17EL/_symbols.csv": {
+   "sha256": "61d39dc61c88a1ffd7ec2567cc64037de730eba23d27f16010cc4b5a2c0fd9e3",
+   "size": 343
+  },
+  "capri/results/capreg/reqrel_17EL/p_animReqCorrFac1.parquet": {
+   "sha256": "8fa9522004ca13b6ee187c9596be3afe0a47b1f2a3cd546e70e0c3d0bf86eee0",
+   "size": 11700
+  },
+  "capri/results/capreg/reqrel_17ES/COLS.parquet": {
+   "sha256": "295b0e0447ce8d7053e8b066900af29c6857287014b909b921c407f7e77a0042",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17ES/META.parquet": {
+   "sha256": "a5f779362013cbc980fcee9d5bc454b6b47c6e3d40d37591c597a7dbb22f2212",
+   "size": 5642
+  },
+  "capri/results/capreg/reqrel_17ES/RALL.parquet": {
+   "sha256": "e12ec16486d90de7572ff5bf2d8ac1dcb8862239ef1e2eed8325ae738eff157c",
+   "size": 7293
+  },
+  "capri/results/capreg/reqrel_17ES/ROWS.parquet": {
+   "sha256": "f7b8afc37aa38f656b183eb89d9a06be01318d398dce602d4d228c6ff958b46f",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17ES/_symbols.csv": {
+   "sha256": "92f368eeb03653496ec72da6453aa36c45e18db2badf8ea109875b674a25332c",
+   "size": 343
+  },
+  "capri/results/capreg/reqrel_17ES/p_animReqCorrFac1.parquet": {
+   "sha256": "92ff2d74893d2c7319b3d933eda4d45795be4c4dfd8f085bc0d8ba2839a59e95",
+   "size": 14882
+  },
+  "capri/results/capreg/reqrel_17FI/COLS.parquet": {
+   "sha256": "aa9562ef7bded7f16bab624e29080ef9ca7c8054c111b11a60c0bbe4a2de132d",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17FI/META.parquet": {
+   "sha256": "5a2951e2e136111f3d674f831329c9f42810ab5cee7a0c14b03c6f2ad835c2b5",
+   "size": 5648
+  },
+  "capri/results/capreg/reqrel_17FI/RALL.parquet": {
+   "sha256": "c15f023d9e02f1de3f58d77d87510b941fddd6bc91e2cf5a6be79cf946b1771d",
+   "size": 7291
+  },
+  "capri/results/capreg/reqrel_17FI/ROWS.parquet": {
+   "sha256": "9d5284b0169bfb716dab58659c81485c5814f9b5456f2e1478450ae8f31a9bc8",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17FI/_symbols.csv": {
+   "sha256": "24032c8e9202821f614162c92e724c0db965920e861a5af40f90093f28572d39",
+   "size": 342
+  },
+  "capri/results/capreg/reqrel_17FI/p_animReqCorrFac1.parquet": {
+   "sha256": "c210f0b555438b820bfbdfecce9a9cd12387ab8d2a577556a186a2b143fedfcb",
+   "size": 6322
+  },
+  "capri/results/capreg/reqrel_17FR/COLS.parquet": {
+   "sha256": "be7a0dd72bbe482822da1e2b2bb0cf5341ca5854b27b53bc95df56bd32161918",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17FR/META.parquet": {
+   "sha256": "e6ef8a0da0bf4a3bbe5d816f85ef96187d221e26b6684903c9adf3a22b707926",
+   "size": 5641
+  },
+  "capri/results/capreg/reqrel_17FR/RALL.parquet": {
+   "sha256": "dc3302c98045996b0082f4162d14b212580291b0d5f561ed06c23f228182dc27",
+   "size": 7292
+  },
+  "capri/results/capreg/reqrel_17FR/ROWS.parquet": {
+   "sha256": "719896b892a96dfc60768e8249edd198cd8738a5caf8ac47e77b535452ff14ff",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17FR/_symbols.csv": {
+   "sha256": "c46d1bae541e0249eab52f92063786c627bc569ef156579b36ef91ebda820db9",
+   "size": 343
+  },
+  "capri/results/capreg/reqrel_17FR/p_animReqCorrFac1.parquet": {
+   "sha256": "f7634371bfbe5278e6b7012e1a1c0effcbe449f88f26965189886b3b711c4d40",
+   "size": 17886
+  },
+  "capri/results/capreg/reqrel_17HR/COLS.parquet": {
+   "sha256": "e224756459e909be6942418924925b79060201727aa4ae5ce2fb4dc3fa8f5be9",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17HR/META.parquet": {
+   "sha256": "fd40dcf251d47a75c6e797079288ec08218db99af9e541c7ed9b25fc01f36585",
+   "size": 5523
+  },
+  "capri/results/capreg/reqrel_17HR/RALL.parquet": {
+   "sha256": "752a611a4eac9000ce175afebda4a2303df50431177a13c631814d285f64503c",
+   "size": 7298
+  },
+  "capri/results/capreg/reqrel_17HR/ROWS.parquet": {
+   "sha256": "51a1de5e3ff2606b22bcc3ed9a3321dfa05f9c1ebbbbfe765db1ddce8d8dd9fd",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17HR/_symbols.csv": {
+   "sha256": "b4443d756d2267d3f5789ba554712b16fec67fb88ca7dfc9081f48fb1fff61e3",
+   "size": 341
+  },
+  "capri/results/capreg/reqrel_17HR/p_animReqCorrFac1.parquet": {
+   "sha256": "ff6a0e4f5aaf163b5d6be87c91539b401f846297a487b268262895fdc332fff5",
+   "size": 2962
+  },
+  "capri/results/capreg/reqrel_17HU/COLS.parquet": {
+   "sha256": "82923fd1b2540062a89ddf0aebbbb3184b0868aebf6950971eefc32f0e95838e",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17HU/META.parquet": {
+   "sha256": "19823caed0be153af0dbdb628a01ec4547216370e9a41c035d8a1a874c766d34",
+   "size": 5527
+  },
+  "capri/results/capreg/reqrel_17HU/RALL.parquet": {
+   "sha256": "86cd4f9f13924e58b039b2b60f6c2379472bcf7a3f068b7201172a2c3e06dfeb",
+   "size": 7296
+  },
+  "capri/results/capreg/reqrel_17HU/ROWS.parquet": {
+   "sha256": "cbc0405993f30fed0ee1419d7e860f45ad19652623244675426453dc3cff0df2",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17HU/_symbols.csv": {
+   "sha256": "f70b87ae77b0b297a7692808b84d8d42f7d8938b08dbeed16c6673842f80a254",
+   "size": 342
+  },
+  "capri/results/capreg/reqrel_17HU/p_animReqCorrFac1.parquet": {
+   "sha256": "064a68963943976d8ae22052a00a10245e0e8636e9db857acce89525357274ad",
+   "size": 8096
+  },
+  "capri/results/capreg/reqrel_17IR/COLS.parquet": {
+   "sha256": "1edb51445e2b790f68f5d243ce7545f20a3a4ecd1876a4e87f64b62bf1e6c287",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17IR/META.parquet": {
+   "sha256": "eef6742d4a6af2d092e84623c1e30d12e6c1d2333cf8ec97fbb697435a5236aa",
+   "size": 5643
+  },
+  "capri/results/capreg/reqrel_17IR/RALL.parquet": {
+   "sha256": "b0c8d2e2e78baca358472c4bba2f1411c56faf75df5f19f5c3361aed00f81422",
+   "size": 7291
+  },
+  "capri/results/capreg/reqrel_17IR/ROWS.parquet": {
+   "sha256": "4ec83b890b22ac3039551e9bf37dc37784adb16f3f8c72b6e810c46a28dcbdd5",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17IR/_symbols.csv": {
+   "sha256": "720e9dbd8467d68c4ab43c0e0dbf00198fd959ca7b4dbfb88c93ee039a11e710",
+   "size": 342
+  },
+  "capri/results/capreg/reqrel_17IR/p_animReqCorrFac1.parquet": {
+   "sha256": "af500db1b0ef0a34d5f0ed1dd5eb1e166753eaf18696ecae840d648abe55d1c2",
+   "size": 4448
+  },
+  "capri/results/capreg/reqrel_17IT/COLS.parquet": {
+   "sha256": "f241ecebca1f52ee9e2107f339e67a20451784f7ed46beb0d3084f1ded946a37",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17IT/META.parquet": {
+   "sha256": "b842f4646376f0823daaed12c0b994177ad334f073274644848ca407ff653d56",
+   "size": 5644
+  },
+  "capri/results/capreg/reqrel_17IT/RALL.parquet": {
+   "sha256": "c78b02bf0d656c35470b62d7b59ed161b998cad4e16a3780b2e7e1a7acc58fde",
+   "size": 7293
+  },
+  "capri/results/capreg/reqrel_17IT/ROWS.parquet": {
+   "sha256": "1de0962b6d77fab43ee807448e5c407223a3218ef951970798aaed9b94d0f35b",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17IT/_symbols.csv": {
+   "sha256": "7e0b90b81ee5f41c63ac9728867a9992baefaa719a436c65c127f442b2a5a644",
+   "size": 343
+  },
+  "capri/results/capreg/reqrel_17IT/p_animReqCorrFac1.parquet": {
+   "sha256": "2ec3855871a806ba16bb97acc756f39c4270582981f21a27c483dc7a9a7f36c1",
+   "size": 15943
+  },
   "capri/results/capreg/reqrel_17KO/COLS.parquet": {
    "sha256": "171dcaebc96f353ed4775be92a3df2063f54ceee28020340065e6b6691c72593",
    "size": 18096
@@ -8172,6 +9127,54 @@
   "capri/results/capreg/reqrel_17KO/p_animReqCorrFac1.parquet": {
    "sha256": "7d79ed211aa192b221817069bab644736b921a73f8bea867e9115c1d0afed1aa",
    "size": 2973
+  },
+  "capri/results/capreg/reqrel_17LT/COLS.parquet": {
+   "sha256": "bcdf501f00bc545f8ef51fbe243e4f35103d459e8714c1ce325e44c264ed5e90",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17LT/META.parquet": {
+   "sha256": "5142f1a0aec4dd2c0475cc99a1e925895392bf624fb51b742f305d1f5a734249",
+   "size": 5525
+  },
+  "capri/results/capreg/reqrel_17LT/RALL.parquet": {
+   "sha256": "6fa4872f0c039a7b2bf58440daa70d46ee51d090370f6445cb26b2b296de642e",
+   "size": 7296
+  },
+  "capri/results/capreg/reqrel_17LT/ROWS.parquet": {
+   "sha256": "24a675a686a40048ad5ee73867d85a0e1cdf57dab33deda6e1f323e1668a1329",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17LT/_symbols.csv": {
+   "sha256": "4adb6de04bb5df8bb196af90dc1f191c946935da3411d9a3c0cd79399886a15a",
+   "size": 341
+  },
+  "capri/results/capreg/reqrel_17LT/p_animReqCorrFac1.parquet": {
+   "sha256": "9b526c839bb18aaddeee25a4d5403a522cf5de2e5ce24036fac48378f0650d49",
+   "size": 2935
+  },
+  "capri/results/capreg/reqrel_17LV/COLS.parquet": {
+   "sha256": "d035767e772c36c3b15d35f7c67998c6e9cc36755c6224683228d9ac94c2d9ce",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17LV/META.parquet": {
+   "sha256": "4763080ef1ff1ea054080e5e2bb26eed8aab697a2d5797867c4ff8ee6022434e",
+   "size": 5525
+  },
+  "capri/results/capreg/reqrel_17LV/RALL.parquet": {
+   "sha256": "ddd13c22b1f63d9f3be42ad2ab12fbfc432719867ec721dbada684658759b142",
+   "size": 7296
+  },
+  "capri/results/capreg/reqrel_17LV/ROWS.parquet": {
+   "sha256": "bab0385e08ab4667e93ad74b717fcd80d47286a898e26582d7f3fd8bb353b327",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17LV/_symbols.csv": {
+   "sha256": "d425b84b91f3752ef7989e5d0b6e7e92ca163680f0c3d20ff5d9567c89eab6ad",
+   "size": 341
+  },
+  "capri/results/capreg/reqrel_17LV/p_animReqCorrFac1.parquet": {
+   "sha256": "6b28049b1b8ec0bba9a3908bbc81b9e1b170ab9544be3d70ac21c59b7404562a",
+   "size": 3009
   },
   "capri/results/capreg/reqrel_17MK/COLS.parquet": {
    "sha256": "7ffad6f7211aab456a0d601b338644d7c3d4e62ee7363bf4d4a31b4dc323df81",
@@ -8220,6 +9223,222 @@
   "capri/results/capreg/reqrel_17MO/p_animReqCorrFac1.parquet": {
    "sha256": "6beb61e503e27d3d0944d8019bc6a94dda441dc678a5b7c455678a6e903ba9bc",
    "size": 2908
+  },
+  "capri/results/capreg/reqrel_17MT/COLS.parquet": {
+   "sha256": "bcb6c99b1781ab7b33fd945443851bef6c54e81234aee7fe44ffd28095b47553",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17MT/META.parquet": {
+   "sha256": "e6beb37fd1bb57309614109445c7237c1ec0377fb0279e5898181f30940f120b",
+   "size": 5525
+  },
+  "capri/results/capreg/reqrel_17MT/RALL.parquet": {
+   "sha256": "ca9c305f01558f272fe63a4a90f5e4627b8c92b5b1ef4ef84dfc083df6e4ee9e",
+   "size": 7294
+  },
+  "capri/results/capreg/reqrel_17MT/ROWS.parquet": {
+   "sha256": "3cd1b1d181c97fe39254ad41fc2c3494bdb36bfa2f1e402b74e322394a408583",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17MT/_symbols.csv": {
+   "sha256": "cd9fc6c2e3d95e82a0e2f4008b2d6b5a4c310bb06baf9e6d2c966c08297abd8d",
+   "size": 341
+  },
+  "capri/results/capreg/reqrel_17MT/p_animReqCorrFac1.parquet": {
+   "sha256": "f40f0904835beddde2e6abbc7ca6b052f08d30906552b8f8746bb9de7214af4a",
+   "size": 3035
+  },
+  "capri/results/capreg/reqrel_17NL/COLS.parquet": {
+   "sha256": "a5004ba63948c50f7f32c73a60fa2447e497cb8d42ee81d68e455b0b851e140b",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17NL/META.parquet": {
+   "sha256": "91999b089188b19470ac48cfd974fd5766b0e76e5629e98a825ebda4abbbcee7",
+   "size": 5649
+  },
+  "capri/results/capreg/reqrel_17NL/RALL.parquet": {
+   "sha256": "4bf1962570c6f9ae668cb978f77181c594e160d2c9c63456a1dcdef1854a3eff",
+   "size": 7292
+  },
+  "capri/results/capreg/reqrel_17NL/ROWS.parquet": {
+   "sha256": "3254e13ab72b01ce975497f020caf9318b86196cbcd88b57ee53b2ab21f0374a",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17NL/_symbols.csv": {
+   "sha256": "f3dc967f42afb83e8c767e4fe05243a5de6b7d1edbd876ec60a22db16905ae7b",
+   "size": 343
+  },
+  "capri/results/capreg/reqrel_17NL/p_animReqCorrFac1.parquet": {
+   "sha256": "feab5894369d943cad1a2520533fa9cd32343d46d87f6eab29879dc0d8aa314c",
+   "size": 11460
+  },
+  "capri/results/capreg/reqrel_17NO/COLS.parquet": {
+   "sha256": "c139154d25924b0797ba93bd1646131bb1fb2622a7309fc539b64e24e6666c32",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17NO/META.parquet": {
+   "sha256": "94bc1b0f358319d9db29faabd12f648623f694bd6f255dde707892d97d3d52c4",
+   "size": 5477
+  },
+  "capri/results/capreg/reqrel_17NO/RALL.parquet": {
+   "sha256": "e33d8f7934f3127c3c99b43ff14fc9d0fc0e61dc9efd91d78501c6d003ec6f32",
+   "size": 7293
+  },
+  "capri/results/capreg/reqrel_17NO/ROWS.parquet": {
+   "sha256": "aa250a7840d8885185cd1157f4b2de2c6ba6d1a589689ff7ca4892f43705fc4b",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17NO/_symbols.csv": {
+   "sha256": "149b430242590738ec8a1e23561b60445710f43549cf37b856fc2542b406f8ac",
+   "size": 342
+  },
+  "capri/results/capreg/reqrel_17NO/p_animReqCorrFac1.parquet": {
+   "sha256": "4ef9614f8708858ceda7c9c2364a462031cd2386ae6e44bb7897b019f67dbccd",
+   "size": 6160
+  },
+  "capri/results/capreg/reqrel_17PL/COLS.parquet": {
+   "sha256": "5e1cc6a8b91980e780feaf935c56a4e65b9c51486e48f9716ea22778a1fdfbb7",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17PL/META.parquet": {
+   "sha256": "151ade6f8e8660d3e67ab5876e8c38440a660a374026edb02289cd1d011171db",
+   "size": 5522
+  },
+  "capri/results/capreg/reqrel_17PL/RALL.parquet": {
+   "sha256": "797fe1f0440ae53b8bd58db59d115776c171658df09d19916715f73087bc412a",
+   "size": 7293
+  },
+  "capri/results/capreg/reqrel_17PL/ROWS.parquet": {
+   "sha256": "eeec202655b7463919876ca9715da5c91d6abdf4741896ac129ba2e884c71403",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17PL/_symbols.csv": {
+   "sha256": "1ebf0282ce14c06f3ad2879ecbfb64af1199f3fb71f940c8155c224b05e5c747",
+   "size": 343
+  },
+  "capri/results/capreg/reqrel_17PL/p_animReqCorrFac1.parquet": {
+   "sha256": "f2d399d2e47733f4f48ace94459652aa4645dcb09371ae9980183060acba01d1",
+   "size": 14641
+  },
+  "capri/results/capreg/reqrel_17PT/COLS.parquet": {
+   "sha256": "455b6339ac3aea1e274925ed524eb044b4326839b837cb5da9a51a8128c91362",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17PT/META.parquet": {
+   "sha256": "8a01f657834d1c6309acd7209893bbbec2e64d9cdafdb4fcfc63ac8b0a84948f",
+   "size": 5648
+  },
+  "capri/results/capreg/reqrel_17PT/RALL.parquet": {
+   "sha256": "5151cf887162232a2203b617f0aa91a12616e5cfbdc44686aa87c6d652f2eec5",
+   "size": 7295
+  },
+  "capri/results/capreg/reqrel_17PT/ROWS.parquet": {
+   "sha256": "bd5338f22ddeff1f318a54ceb7d0e1e65511df3ff793874b1345fde709c3bda2",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17PT/_symbols.csv": {
+   "sha256": "2073234b22a2db674a62388b8f8bb300dc01d947ad87a6925e96206c51206c62",
+   "size": 342
+  },
+  "capri/results/capreg/reqrel_17PT/p_animReqCorrFac1.parquet": {
+   "sha256": "866ce6e745f3b1ae1e9913c62c07b8c64cde6a3daa7d5a197b2ace4b52857e41",
+   "size": 7509
+  },
+  "capri/results/capreg/reqrel_17RO/COLS.parquet": {
+   "sha256": "c56ac4eaf7d6296c2c7fb9d902f48d8fbb5ea7d2ed14924a1421b947e2528611",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17RO/META.parquet": {
+   "sha256": "392efe5750e6741694dc93deb5f7393a14410422383bd13dd35c2f2e583740bf",
+   "size": 5527
+  },
+  "capri/results/capreg/reqrel_17RO/RALL.parquet": {
+   "sha256": "28644b558aa988bac6c46bd50339f5937c3bcc4f2a4089faf6a2db8fe47271d1",
+   "size": 7290
+  },
+  "capri/results/capreg/reqrel_17RO/ROWS.parquet": {
+   "sha256": "8968d6bcb12ad8aea6c2e3f9e4281387986369824c0b1a8a4ecb96a5a8c6a371",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17RO/_symbols.csv": {
+   "sha256": "d937f68f17e556a9c961cc39d56af4bea5a441f50832f8a93bb4cacf3e8be2ec",
+   "size": 342
+  },
+  "capri/results/capreg/reqrel_17RO/p_animReqCorrFac1.parquet": {
+   "sha256": "15cebd5c2cbb3b39115066223473c840f1467d1e75cac2df365f9e733e05c6d9",
+   "size": 7273
+  },
+  "capri/results/capreg/reqrel_17SE/COLS.parquet": {
+   "sha256": "c06d6aecb5a5d8dfb83b85ebf58e852a304c61f516ab797173ec1a902fcb14fd",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17SE/META.parquet": {
+   "sha256": "07b1c3b4091e7f63bc7b07c22e7c5ea0321234695a09bfa163de800e7802f2cb",
+   "size": 5637
+  },
+  "capri/results/capreg/reqrel_17SE/RALL.parquet": {
+   "sha256": "c8aff6044946f62e333a3de0aaff9808153b3fd2586d43848c61859f464c74b7",
+   "size": 7293
+  },
+  "capri/results/capreg/reqrel_17SE/ROWS.parquet": {
+   "sha256": "9d87dc94c2de17354b3457f7ea1a9a1180f4a1ae46f6a4a9541d7b265a0563d2",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17SE/_symbols.csv": {
+   "sha256": "8684c6bfd404ba47510978aa5c880f3c6e3aee0e3cb9e76b5491886df0ccc007",
+   "size": 342
+  },
+  "capri/results/capreg/reqrel_17SE/p_animReqCorrFac1.parquet": {
+   "sha256": "c3a849c32a60a8cb64a4fbf6eb992a1614f778a7b7b65797bd743d07ab33a02f",
+   "size": 7064
+  },
+  "capri/results/capreg/reqrel_17SI/COLS.parquet": {
+   "sha256": "3999b7432b94aedb01b9d1496a227ad056ba7ae8b8a8c3da2258aee8c81d6d51",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17SI/META.parquet": {
+   "sha256": "273d50e2a13c1d83002eaefc64f359962fd564858e2dfe5ffbef25b23ab97b3e",
+   "size": 5527
+  },
+  "capri/results/capreg/reqrel_17SI/RALL.parquet": {
+   "sha256": "0d20890f9074a253e2ad15f902c55ecf03d404fbf20a55af4d82c38e39e54faf",
+   "size": 7295
+  },
+  "capri/results/capreg/reqrel_17SI/ROWS.parquet": {
+   "sha256": "ddf6f46bde2d2970e60d34dc5d86d8b86d26bc3ef37cde6bb4e4706232ea19dd",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17SI/_symbols.csv": {
+   "sha256": "7df2dd9f053bb8db23407c4a622d1d492e6ef1ba9cf0d98b4212d462a7233efb",
+   "size": 341
+  },
+  "capri/results/capreg/reqrel_17SI/p_animReqCorrFac1.parquet": {
+   "sha256": "28078907f71ebb247a06a9001e3ac5d34647d8956a1f9c890795d13da85f068d",
+   "size": 2934
+  },
+  "capri/results/capreg/reqrel_17SK/COLS.parquet": {
+   "sha256": "4f15d5ac18e9782d18495760fca8f67ac4e37b0e8297020211c0d405bb8614aa",
+   "size": 18096
+  },
+  "capri/results/capreg/reqrel_17SK/META.parquet": {
+   "sha256": "668dbe8c1c7c1876ab98cb7ec136fd70f1ba8c1066fe917a21dea55b0037383e",
+   "size": 5527
+  },
+  "capri/results/capreg/reqrel_17SK/RALL.parquet": {
+   "sha256": "c572cc84c9935ab4c66f4de16b64074effc50acc13a896d61232650c8ecb2574",
+   "size": 7295
+  },
+  "capri/results/capreg/reqrel_17SK/ROWS.parquet": {
+   "sha256": "b530d8f69232afd10e512167cea8a34b267861b7e70c8516429e00be1c33b3a8",
+   "size": 18705
+  },
+  "capri/results/capreg/reqrel_17SK/_symbols.csv": {
+   "sha256": "64fcb014d38dcadffd98ed8bc29c42909c1f2e11184c03f9812810887139db55",
+   "size": 342
+  },
+  "capri/results/capreg/reqrel_17SK/p_animReqCorrFac1.parquet": {
+   "sha256": "bba0471e7f52af83952d486619ce78e7754ac3d0f824ff1caad75885fffa6b58",
+   "size": 5050
   },
   "capri/results/capreg/reqrel_17TU/COLS.parquet": {
    "sha256": "d03a45a252da4223aaf37cad80d47496243f6a182d9f6efe0edbe728d4a95b56",
@@ -44529,6 +45748,13 @@
    "location": "code: %datdir%/envind/<file>.gdx",
    "trusted": true
   },
+  "capri/dat/feed/porkreq": {
+   "file": "porkreq.gms",
+   "sha256": "4f6bd37979bbed4b4b03e74fb1ad47895ea7bb5633256615325ab3b0e23d065d",
+   "size": 29033,
+   "location": "code: $INCLUDE '%datdir%\\feed\\porkreq.gms' (feed/feed_decl.gms l. 191)",
+   "trusted": true
+  },
   "capri/dat/global/GLOBIOM-EU_EUCLIMIT6_S2_50CV": {
    "file": "GLOBIOM-EU_EUCLIMIT6_S2_50CV.gdx",
    "sha256": "ea2fe95a1aefe9cf6568add9d4cc1fb6d5c72c021fd338565316311283ebe622",
@@ -44646,6 +45872,244 @@
    "sha256": "dd9810e08279c10c0b2763965a58cf26d0e6cebdf00e095548ee4840fae4893e",
    "size": 7237361,
    "location": "code: %results_in%/baseline/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730ATdefaulta": {
+   "file": "fedtrm_21730ATdefaulta.gdx",
+   "sha256": "37c9f97a6667c58563c380c48f283f99659c7dfcd5d208b96f1b0005d24ee65c",
+   "size": 6695,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730BAdefaulta": {
+   "file": "fedtrm_21730BAdefaulta.gdx",
+   "sha256": "b90fa8c4bd6b2b5709f2e5a7b4046a5a5dfd3c1a2659e1ec80a1518ec5355496",
+   "size": 1279,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730BGdefaulta": {
+   "file": "fedtrm_21730BGdefaulta.gdx",
+   "sha256": "09f63096b2d1050552dc70bfebbfd58da5ac3f3065533f42523959ebfed7fd80",
+   "size": 4203,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730BLdefaulta": {
+   "file": "fedtrm_21730BLdefaulta.gdx",
+   "sha256": "400d03e33c346872f8ad60703022ae27b46e7ea45c2b127d5acce3468b7a3d96",
+   "size": 7422,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730CSdefaulta": {
+   "file": "fedtrm_21730CSdefaulta.gdx",
+   "sha256": "7bd39bec38392b00755fa1bb30a2a217b89e42938f887889873a1cdca861305e",
+   "size": 1395,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730CYdefaulta": {
+   "file": "fedtrm_21730CYdefaulta.gdx",
+   "sha256": "422458fe1bde55f740d75d81209575ba71f7ce26ab1559c9470caea09ef71ee8",
+   "size": 1445,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730CZdefaulta": {
+   "file": "fedtrm_21730CZdefaulta.gdx",
+   "sha256": "c89655811894b6f77adf63ae6d3e0705b8187546949f12ee5e5bf6e8a5d6b456",
+   "size": 4783,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730DEdefaulta": {
+   "file": "fedtrm_21730DEdefaulta.gdx",
+   "sha256": "83498bf1fa77579c8ffd48c76f54c256d0eab75a7e74bf2c4ac80b4488b236bf",
+   "size": 19955,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730DKdefaulta": {
+   "file": "fedtrm_21730DKdefaulta.gdx",
+   "sha256": "58a62ae09c775ff9d712794225ece46adf1174492317f78b5b6786f40425ce28",
+   "size": 1336,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730EEdefaulta": {
+   "file": "fedtrm_21730EEdefaulta.gdx",
+   "sha256": "2a9d6f524d8fea52ed3fcc282946a72b49a299792a81a1b182f99f7a7f7bed45",
+   "size": 1367,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730ELdefaulta": {
+   "file": "fedtrm_21730ELdefaulta.gdx",
+   "sha256": "8bd8c78435e2cf2d4f41b6fada5d42d8516ab19b24aae841e63169f691ff27b4",
+   "size": 9382,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730ESdefaulta": {
+   "file": "fedtrm_21730ESdefaulta.gdx",
+   "sha256": "cf834c90eb9fddf1a918bb7efa51455d9513e7ffe88c678e5d3fe1d9c14ca280",
+   "size": 12326,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730FIdefaulta": {
+   "file": "fedtrm_21730FIdefaulta.gdx",
+   "sha256": "e1d1bbfa122e360904f8101f1b0b72e858f52d87859542a257d463afd8c1131d",
+   "size": 4095,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730FRdefaulta": {
+   "file": "fedtrm_21730FRdefaulta.gdx",
+   "sha256": "6cad49b4c5c402caed5dcfd873d93c487a1efca04170fa8d029dc47f33d0c6cf",
+   "size": 14719,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730HRdefaulta": {
+   "file": "fedtrm_21730HRdefaulta.gdx",
+   "sha256": "7e60aadfed6ab12cb9afd84d1babb869d0dc3edec613fe1e630ca91077258259",
+   "size": 1382,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730HUdefaulta": {
+   "file": "fedtrm_21730HUdefaulta.gdx",
+   "sha256": "8b7fbd13d41ed1d6194ca6d7404aec61e80ea69f5394811a3eac79aaccb4b9e7",
+   "size": 5808,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730IRdefaulta": {
+   "file": "fedtrm_21730IRdefaulta.gdx",
+   "sha256": "44fc5e089435dd02d2310e4af5429745b304dbe8e6e8ade11fb45fca44a75bb7",
+   "size": 2361,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730ITdefaulta": {
+   "file": "fedtrm_21730ITdefaulta.gdx",
+   "sha256": "f3b2b26d485df37fdc71bd6994d6a412c7d7b4f9fc2249285dea4a16e579d92a",
+   "size": 13369,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730KOdefaulta": {
+   "file": "fedtrm_21730KOdefaulta.gdx",
+   "sha256": "51acb071aaedcdebb53f24b5bbfe4de90fe27bc52133c1228044e94968f76289",
+   "size": 1349,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730LTdefaulta": {
+   "file": "fedtrm_21730LTdefaulta.gdx",
+   "sha256": "c2589b5459724f624c3596e59d8b682b021bb195b392e096760e44d84dd5ad52",
+   "size": 1341,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730LVdefaulta": {
+   "file": "fedtrm_21730LVdefaulta.gdx",
+   "sha256": "e2be111f7baeaca984ab9dc0130f2408171eaff0e1609cb42eb49b8241f5ee35",
+   "size": 1399,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730MKdefaulta": {
+   "file": "fedtrm_21730MKdefaulta.gdx",
+   "sha256": "51ea95fae06501cbec7ef57bb6a04af0568e18d51f688ccf170bc728cf18616d",
+   "size": 1366,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730MOdefaulta": {
+   "file": "fedtrm_21730MOdefaulta.gdx",
+   "sha256": "58eae05b44fbbc238b4383bdedbdf76baeeaa287feb8c47c07087a6efb9b1288",
+   "size": 1297,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730MTdefaulta": {
+   "file": "fedtrm_21730MTdefaulta.gdx",
+   "sha256": "dbce6c78f24d23a8b7bce6c8df79e29379623b2d440fe6fa6d82eba73eb6d62f",
+   "size": 1446,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730NLdefaulta": {
+   "file": "fedtrm_21730NLdefaulta.gdx",
+   "sha256": "1fad1385c146bda8f04ca41e4e455ae80da664a8259234328c74b1acc2cf116f",
+   "size": 9081,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730NOdefaulta": {
+   "file": "fedtrm_21730NOdefaulta.gdx",
+   "sha256": "171609dfaca62614652ca2572ca1879df84d97f1b297c0fa2b5ee08c3c67df66",
+   "size": 4299,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730PLdefaulta": {
+   "file": "fedtrm_21730PLdefaulta.gdx",
+   "sha256": "b2951b14f209db402d46f2b35a984e8b09ce7b7a2dc0a682148edaed82c1a96e",
+   "size": 12021,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730PTdefaulta": {
+   "file": "fedtrm_21730PTdefaulta.gdx",
+   "sha256": "b1c808710f8ec9fbff5decd6507fabbcd1109482edd46c7d92ba57742186d9b5",
+   "size": 5610,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730ROdefaulta": {
+   "file": "fedtrm_21730ROdefaulta.gdx",
+   "sha256": "0b36e55a18736098cfbcd087fa4f00cd47738997ff7c1b4023a0b3152d50b9d5",
+   "size": 5025,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730SEdefaulta": {
+   "file": "fedtrm_21730SEdefaulta.gdx",
+   "sha256": "5825207a477375e3a1b0a55157dbdd84167c584856c9b7afd8a3f06da8cc6125",
+   "size": 4993,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730SIdefaulta": {
+   "file": "fedtrm_21730SIdefaulta.gdx",
+   "sha256": "181bc052834b0e8b45d7a3c18ca85e68fb4834405548bddf78acd2f307d50bec",
+   "size": 1318,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730SKdefaulta": {
+   "file": "fedtrm_21730SKdefaulta.gdx",
+   "sha256": "ccc4d7bde6527651d8e94a7a4ebbe7cda577092bd67192627fbae5fae152efa5",
+   "size": 3108,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730TUdefaulta": {
+   "file": "fedtrm_21730TUdefaulta.gdx",
+   "sha256": "7ee15e93aaffc8e3e33dedf884cf08e269819f9230c489940c837aeaca9fd3fe",
+   "size": 6495,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
+   "trusted": true
+  },
+  "capri/results/baseline/fedtrm_21730UKdefaulta": {
+   "file": "fedtrm_21730UKdefaulta.gdx",
+   "sha256": "e3341c2a920c1972e31f42016d0aa631f6fb4369b41579b239dc585a962dbfde",
+   "size": 6606,
+   "location": "code: %results_in%/baseline/fedtrm_%NTSLVL%%BAS%%SIM%<country>%reg_agg%%modId%%inputDataId%%ntm%.gdx (capmod/load_feed.gms l. 74)",
    "trusted": true
   },
   "capri/results/baseline/results_1770": {
@@ -44949,10 +46413,31 @@
    "location": "code: %results_in%/capreg/<file>.gdx",
    "trusted": true
   },
+  "capri/results/capreg/reqrel_17AT": {
+   "file": "reqrel_17AT.gdx",
+   "sha256": "2010aea25e7f823d9dd463069046f247d53a8f58acc676eea30377ecca502b75",
+   "size": 37993,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
   "capri/results/capreg/reqrel_17BA": {
    "file": "reqrel_17BA.gdx",
    "sha256": "f972db9bea9d077e2461e036d0349f9eb2434dbc436fd35d91b57542f200c581",
    "size": 32583,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17BG": {
+   "file": "reqrel_17BG.gdx",
+   "sha256": "23d0020f0ffd7b61d04830d949ebbd28676ad3e2cb4b1a70c03b68832f5c26dc",
+   "size": 35485,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17BL": {
+   "file": "reqrel_17BL.gdx",
+   "sha256": "f8f7a6eb0830c89396e5f1d7e73a773f73a2b8aed7f6e55b7d684457c59a1ece",
+   "size": 38728,
    "location": "code: %results_in%/capreg/<file>.gdx",
    "trusted": true
   },
@@ -44963,10 +46448,115 @@
    "location": "code: %results_in%/capreg/<file>.gdx",
    "trusted": true
   },
+  "capri/results/capreg/reqrel_17CY": {
+   "file": "reqrel_17CY.gdx",
+   "sha256": "3f517176193ce5a680a8cf1a55b1ed40be7ef1741318163288872d94098263ed",
+   "size": 32810,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17CZ": {
+   "file": "reqrel_17CZ.gdx",
+   "sha256": "355391b7601de6d62dac30adfc4c5ee0ec0edd9c2cc00cf1c7d247b84ff501aa",
+   "size": 36337,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17DE": {
+   "file": "reqrel_17DE.gdx",
+   "sha256": "08e6eed8c3059dd1222d77becacb8debf32ea0d8a530bbc7743ae3d760f15134",
+   "size": 50792,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17DK": {
+   "file": "reqrel_17DK.gdx",
+   "sha256": "9475bd77a395d0323657d95d87dc5b03f0e4f631f23c6781659a8a2693def759",
+   "size": 32815,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17EE": {
+   "file": "reqrel_17EE.gdx",
+   "sha256": "a4f981a787c1e6596ed5b5158f05be4752a2d023dc572b0482a249b8a5c857dc",
+   "size": 32751,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17EL": {
+   "file": "reqrel_17EL.gdx",
+   "sha256": "1daba90470b155fda479589f2bc195bc4253e28b87b9e7811abff69c612f7b0e",
+   "size": 40444,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17ES": {
+   "file": "reqrel_17ES.gdx",
+   "sha256": "9f1feefa356bae19c0d2833e3bde9cdba160d48c4fbc7c15b42546bdce750966",
+   "size": 43255,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17FI": {
+   "file": "reqrel_17FI.gdx",
+   "sha256": "8905265214c9b7dcdc98709356fb84a072528c00af8aa9f70e497791eb0cf751",
+   "size": 35698,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17FR": {
+   "file": "reqrel_17FR.gdx",
+   "sha256": "af392f50dc1412105af0dfa912ff37accf8aef0d323a82e275d37d9a82b05e50",
+   "size": 45868,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17HR": {
+   "file": "reqrel_17HR.gdx",
+   "sha256": "d5066bbb4b100003ea80d5f41e117a8d3d3d62d67e7691cf99a898964aa88e04",
+   "size": 32727,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17HU": {
+   "file": "reqrel_17HU.gdx",
+   "sha256": "92104aaface5777c9a8004ce39dfc356b56ad26122892f5d8faeda5fbdaac371",
+   "size": 37088,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17IR": {
+   "file": "reqrel_17IR.gdx",
+   "sha256": "1546b1361748dbb52c2ee5c8dbf363b0aab2395d8b75553e26b7fb127a82a108",
+   "size": 34017,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17IT": {
+   "file": "reqrel_17IT.gdx",
+   "sha256": "81b4a40d0339d67e909644146b1200b98e3f6701a146f943f6837aa00d4b44f2",
+   "size": 44178,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
   "capri/results/capreg/reqrel_17KO": {
    "file": "reqrel_17KO.gdx",
    "sha256": "de75e4d9d6c6b56df2fd452ce7fe91cb1120ccdd6ebc44acece1333941f2b153",
    "size": 32663,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17LT": {
+   "file": "reqrel_17LT.gdx",
+   "sha256": "c37cf9090b6cc205b8cadb4baf8d74f8e72de547f1d193061dad4b1cc223ba75",
+   "size": 32701,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17LV": {
+   "file": "reqrel_17LV.gdx",
+   "sha256": "e26048c0131f8324162a37b65371908758c529672b48ef14fd5a5bfd4826c83e",
+   "size": 32772,
    "location": "code: %results_in%/capreg/<file>.gdx",
    "trusted": true
   },
@@ -44981,6 +46571,69 @@
    "file": "reqrel_17MO.gdx",
    "sha256": "81a88d560f9a52986642002f74388be2eb66883d4fab42055dad353608503e1d",
    "size": 32613,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17MT": {
+   "file": "reqrel_17MT.gdx",
+   "sha256": "6eb77b3064eef453220940b530b31c2beec300d5c9f0d86e8021ab1aad3e9676",
+   "size": 32801,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17NL": {
+   "file": "reqrel_17NL.gdx",
+   "sha256": "9bdc374ce414a95e164331b454ee9de6c6f7c9f2efe47fc679e4228da41fa42f",
+   "size": 40245,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17NO": {
+   "file": "reqrel_17NO.gdx",
+   "sha256": "59c75fddfea12e81c738ec300c49db853d0e61b27c8f674ce266637f8303fe95",
+   "size": 35466,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17PL": {
+   "file": "reqrel_17PL.gdx",
+   "sha256": "c9503f5a5a533938d827a655532a64d4b93e98cb9def4b086ef4bc9bed14a051",
+   "size": 42936,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17PT": {
+   "file": "reqrel_17PT.gdx",
+   "sha256": "a3034635668ad8f5704a2357a459471f5c64b1519ddd7a6fcc5f3461e39a6226",
+   "size": 36830,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17RO": {
+   "file": "reqrel_17RO.gdx",
+   "sha256": "dbd03e3017ca23958520c0e9d197c508b24c727f5e03e0dcd56469e1cd896faa",
+   "size": 36429,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17SE": {
+   "file": "reqrel_17SE.gdx",
+   "sha256": "56d4352b78dd49c0d06b3f1a1907691d8b479d51cb23e25ec2db2a8cadf248cf",
+   "size": 36454,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17SI": {
+   "file": "reqrel_17SI.gdx",
+   "sha256": "5c8244974393cecb50d0aaf5825db244aac08e76377690c8b8e34fac2fa5fb07",
+   "size": 32706,
+   "location": "code: %results_in%/capreg/<file>.gdx",
+   "trusted": true
+  },
+  "capri/results/capreg/reqrel_17SK": {
+   "file": "reqrel_17SK.gdx",
+   "sha256": "e451d815c23595d0df9fb98232b1e16668698851c193bf59aae7174e1d07f2d2",
+   "size": 34577,
    "location": "code: %results_in%/capreg/<file>.gdx",
    "trusted": true
   },

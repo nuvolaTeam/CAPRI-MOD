@@ -28,6 +28,8 @@ from capri_mod.policy import mtr as _mtr
 from capri_mod.policy import nordic_aid as _noa
 from capri_mod.policy import rd as _rd
 from capri_mod.policy.declared import PolicyRegions, declared_premiums
+from capri_mod.policy.equations.aggreg_ppepay import p_premPaym_PREMDATA_MS
+from capri_mod.policy.equations.prmcut import DATA_PRME
 from capri_mod.policy.premium_cut import EPS, CeilingRegions, premiums
 
 
@@ -160,18 +162,20 @@ def prme_table(year: int, base_year: int, levels: dict = None, units=None) -> di
     levels = levels if levels is not None else trend_levels()
     units = units if units is not None else eu_units(levels)
     yp = year_premiums(units, levels, year, base_year)
-    out = defaultdict(float)
+    terms = defaultdict(list)
     for (u, a, s), v in yp.cut(levels).items():
         if v and v != EPS:
-            out[(u, a)] += v
-    num, den = defaultdict(float), defaultdict(float)
+            terms[(u, a)].append(v)
+    out = {k: DATA_PRME(v) for k, v in terms.items()}
+    prme, lev = defaultdict(list), defaultdict(list)
     for u in units:
         m = capri_ms(u)
         for (r, a), L in levels.items():
             if r == u and L > 0:
-                num[(m, a)] += out.get((u, a), 0.0) * L
-                den[(m, a)] += L
-    for k, L in den.items():
-        if L > 0 and num[k]:
-            out[k] = num[k] / L
+                prme[(m, a)].append(out.get((u, a), 0.0))
+                lev[(m, a)].append(L)
+    for k in lev:
+        v = p_premPaym_PREMDATA_MS(prme[k], lev[k])
+        if v is not None:
+            out[k] = v
     return dict(out)

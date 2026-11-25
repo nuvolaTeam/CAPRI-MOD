@@ -33,7 +33,7 @@
   "scenario": {
    "status": "use_with_care",
    "note": "Compare on PRODUCTION, as CAPRI reports it, not on area. Must be run to convergence: max_outer_iter=1 gives a partial answer.",
-   "evidence": "README section 9"
+   "evidence": "README section 8"
   },
   "scenario.cereals": {
    "status": "validated",

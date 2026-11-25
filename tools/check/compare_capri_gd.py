@@ -12,7 +12,7 @@ definition; where the units are the same (dairy cows, sows, breeding sheep) the 
                produces none), as the model's EU row weights its blocks; raw milk against CAPRI's EU27yr19 UVAP
                (CAPRI's PMRK of MILK is a constant of its market data). Until 18 November 2026 every product against
                CAPRI's EU27yr19 UVAP, another price (K171: pulses PMRK +3.1% against UVAP +0.1% in CAPRI's Green Deal)
-EU27 = CAPRI's EU27yr19; the model's EU: its regions outside Norway (NO..), as the run script sums them.
+EU27 = CAPRI's EU27yr19; the model's EU: its EU regions (definitions.is_eu), as the run script sums them.
 
     python tools/check/compare_capri_gd.py RUN.pkl [--ms] [--csv OUT.csv]
 """
@@ -58,7 +58,8 @@ def activity_table(run: dict, capri: pd.DataFrame, by_ms: bool = False) -> pd.Da
     if by_ms:
         ar = run.get("act_regional")
         if ar is not None:
-            ms = sorted({str(r)[:2] for r in ar[0] if not str(r).startswith("NO")})
+            from capri_mod.data.definitions import is_eu as _is_eu
+            ms = sorted({str(r)[:2] for r in ar[0] if _is_eu(str(r))})
             groups += [(m, f"{m}000000", m) for m in ms]
     for label, creg, prefix in groups:
         c = lev[lev["region"] == creg].set_index("activity")

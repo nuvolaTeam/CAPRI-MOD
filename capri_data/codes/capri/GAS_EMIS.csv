@@ -1,0 +1,27 @@
+code,text
+NOXGRA,NOX emissions from grazing
+NOXAPP,NOX emissions from manure application without grazing
+NH3GRA,Ammonia emissions from grazing
+NH3APP,Ammonia emissions from manure application without grazing
+GNH3,Ammonia emissions
+GCH4,Methane emissions
+GCO2,Carbon dioxide emissions
+GN2O,Nitrous oxide emissions
+CH4A,Methane from animals
+CH4F,Methane linked to fertiliser use
+CO2F,CO2 linked to fertiliser use
+N2OF,N20 linked to fertiliser use
+NH3MAN,Ammonia emissions from manure management
+NH3APL,Ammonia emissions from manure application without grazing due to livestock production
+NH3SYN,Ammonia emissions from application of mineral fertilizers
+NH3SYL,Ammonia emissions from application of mineral fertilizers due to livestock production
+NH3SYS,Ammonia emissions from anorganic fertilizers production saved due to the application of manure
+NH3CRO,Ammonia emissions from crop residues
+NH3CRL,Ammonia emissions from crop residues due to livestock production
+NOXMAN,NOX emissions from manure management
+NOXAPL,NOX emissions from manure application without grazing due to livestock production
+NOXSYN,NOX emissions from application of mineral fertilizers
+NOXSYL,NOX emissions from application of mineral fertilizers due to livestock production
+NOXSYS,NOX emissions from anorganic fertilizers production saved due to the application of manure
+NOXCRO,NOX emissions from crop residues
+NOXCRL,NOX emissions from crop residues due to livestock production

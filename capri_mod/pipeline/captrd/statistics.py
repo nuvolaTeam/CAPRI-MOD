@@ -5,7 +5,7 @@ For every estimated series (S_ColsEst x S_RowsEst) of every region (Rest; CAPTRD
 so their statements are left out):
   nObs, nW       the ex-post years ExPostT with an observation, and the sum of their trend values p_trend (l. 209-210);
                  0 where the series has no base-period value BASM, unless it is a COCO biofuel column or row
-                 (bioColsCoco, bioRowsCoco, load_coco1_data.gms l. 316-317; l. 214-218), and for INHA.LEVL and DOMM of
+                 (bioColsCoco, bioRowsCoco of load_coco1_data.gms l. 316-317; prep_data_for_estimation.gms l. 214-218), and for INHA.LEVL and DOMM of
                  the young animals (l. 221-227)
   WAve, wVar     the weighted mean (l. 233-234) and variance (l. 241-246; step1.prestats)
   BAS            the mean of the nonzero values of the base years BASYRS5 (l. 254-258); for an activity's
@@ -29,7 +29,9 @@ observation; that changes, on CAPRI's own data:
 Where the data have no recorded zeros (CAPREG's series as GAMS writes them), nObs, nW, WAve, wVar and the plain BAS
 are the same under both.
 
-Returns p_data with the positions nObs, nW, WAve, wVar, BAS, BSY added (as t values) and the feed BASM changed.
+Returns p_data with the positions nObs, nW, WAve, wVar, BAS, BSY added (as t values) and the feed BASM changed. Each
+statement's arithmetic is a named function quoting its GAMS in
+capri_mod/pipeline/captrd/equations/prep_data_for_estimation.py.
 """
 from __future__ import annotations
 
@@ -39,26 +41,17 @@ import numpy as np
 import pandas as pd
 
 from capri_mod.pipeline.captrd.coco import BIO_COLS_COCO, BIO_ROWS_COCO
+from capri_mod.pipeline.captrd.equations import prep_data_for_estimation as PD
 from capri_mod.pipeline.captrd.prepare import CaptrdSets
 from capri_mod.pipeline.captrd.step1 import observed, prestats, trend_variable, zeros_missing
 
 KEYS = ["region", "col", "row"]
 
 
-def _gmax(values: np.ndarray) -> float:
-    """GAMS SMAX: -INF over an empty set."""
-    return float(values.max()) if values.size else -np.inf
-
-
 def bsy(yields: np.ndarray, bas: float) -> float:
-    """l. 309-325 for one series: yields over EIGHTLST (CAPRI: every year of the set, a missing one as 0, as GAMS's SMAX
-    runs over the set; with the fix the caller passes the observed years only)."""
-    first = _gmax(yields)
-    if not first:                                                   # l. 321: BSY $ "1"
-        return 0.0
-    second = _gmax(yields[yields != first])
-    third = _gmax(yields[(yields != first) & (yields != second)])
-    return max((first + second + third) / 3.0, bas)
+    """l. 305-317 for one series (equations' p_data_BSY): yields over EIGHTLST (CAPRI: every year of the set, a missing
+    one as 0, as GAMS's SMAX runs over the set; with the fix the caller passes the observed years only)."""
+    return PD.p_data_BSY(yields, bas)
 
 
 def statistics(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int], basyrs5: Iterable[int],
@@ -71,7 +64,7 @@ def statistics(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int], basyrs
     w = trend_variable([int(y) for y in ex], first_year)
     p = p.copy()
     wide = p.pivot_table(index=KEYS, columns="t", values="value", aggfunc="first")
-    for c in set(ex) | set(b5) | set(e8) | {"BASM"}:
+    for c in sorted(set(ex) | set(b5) | set(e8) | {"BASM"}):
         if c not in wide.columns:
             wide[c] = np.nan
     raw = wide                                                      # NaN: absent (missing unless zm reads it as 0)
@@ -86,14 +79,14 @@ def statistics(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int], basyrs
     rows = est.index.get_level_values("row")
     keep = (est["BASM"].to_numpy() != 0.0) | cols.isin(BIO_COLS_COCO) | rows.isin(BIO_ROWS_COCO)   # l. 214-218
     zero = ~keep | ((cols == "INHA") & (rows == "LEVL")) | ((cols == "DOMM") & rows.isin(sets.oyani))  # l. 221-227
-    nobs = np.where(zero, 0.0, nobs)
-    nw = np.where(zero, 0.0, nw)
+    nobs = PD.p_data_nObs_excluded(nobs, zero)                      # l. 215-227
+    nw = PD.p_data_nObs_excluded(nw, zero)
     pre = prestats(raw[in_est][ex].to_numpy(float), w, nobs, nw, zeros_as_missing=zm)
     st = pd.DataFrame({"nObs": pre.nobs, "nW": pre.nw, "WAve": pre.wave, "wVar": pre.wvar}, index=est.index)
     # l. 254-258: BAS $ nObs = the mean of the observed BASYRS5 values
     B5, ob5 = observed(raw[in_est][b5].to_numpy(float), zm)
     nb = ob5.sum(axis=1)
-    st["BAS"] = np.where((st["nObs"].to_numpy() != 0) & (nb > 0), B5.sum(axis=1) / np.maximum(nb, 1), 0.0)
+    st["BAS"] = PD.p_data_BAS(B5.sum(axis=1), nb, st["nObs"].to_numpy())
     # l. 263-264: an activity's inputs and outputs weighted by its levels, where its LEVL has a BAS
     levl_bas = st["BAS"].xs("LEVL", level="row", drop_level=False) if "LEVL" in set(rows) else None
     io = {(a, r) for a, r in sets.pact_to_io}
@@ -113,8 +106,7 @@ def statistics(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int], basyrs
                 new_bas[k] = 0.0
                 continue
             lv = np.where(ob, lv, 0.0)
-        den = lv.sum()
-        new_bas[k] = float((est.loc[k, b5].to_numpy(float) * lv).sum() / den) if den else np.nan
+        new_bas[k] = PD.p_data_BAS_PACT_TO_IO(est.loc[k, b5].to_numpy(float), lv)
     for k, v in new_bas.items():
         st.at[k, "BAS"] = v                                         # (a zero level sum: GAMS division by zero)
     # l. 274-297: the feed input coefficients of the animals
@@ -123,14 +115,14 @@ def statistics(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int], basyrs
     feed_keys = [k for k in wide.index if k[1] in sets.maact and k[2] in sets.feed]
     for k in feed_keys:                                             # l. 274: BASM <= 1e-4 deleted
         if basm[k] <= 1e-4:
-            basm[k] = 0.0
+            basm[k] = PD.p_data_feed_removed()
     ms_basm = {(ms_of.get(reg), a, f): basm[(reg, a, f)] for reg, a, f in feed_keys if ms_of.get(reg) == reg}
 
     def ms_val(reg, a, f):
         return ms_basm.get((ms_of.get(reg), a, f), 0.0)
     for k in feed_keys:                                             # l. 275: none in the country
         if not ms_val(*k):
-            basm[k] = 0.0
+            basm[k] = PD.p_data_feed_removed()
     for k in feed_keys:
         reg, a, f = k
         mv = ms_val(reg, a, f)
@@ -140,12 +132,12 @@ def statistics(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int], basyrs
         if k not in st.index:
             st.loc[k] = 0.0
         if lv_nobs:
-            st.at[k, "nObs"] = 1.0                                  # l. 278
-        st.at[k, "BAS"] = basm[k]                                   # l. 279
+            st.at[k, "nObs"] = PD.p_data_feed_nObs()                # l. 279
+        st.at[k, "BAS"] = PD.p_data_feed_BAS(basm[k])               # l. 280
         if st.at[k, "nObs"] and not st.at[k, "BAS"]:
-            st.at[k, "BAS"] = mv * 0.001                            # l. 280-281
+            st.at[k, "BAS"] = PD.p_data_feed_small(mv)              # l. 281-282
         if st.at[k, "nObs"] and not basm[k]:
-            basm[k] = mv * 0.001                                    # l. 282-283
+            basm[k] = PD.p_data_feed_small(mv)                      # l. 283-284
     # l. 302-305: GROF's feed
     feed_nobs = st[st.index.get_level_values("col").isin(sets.maact)
                    & st.index.get_level_values("row").isin(sets.feed)]["nObs"]
@@ -155,9 +147,9 @@ def statistics(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int], basyrs
         if k not in st.index:
             st.loc[k] = 0.0
         if not st.at[k, "nObs"]:
-            st.at[k, "nObs"] = 1.0
+            st.at[k, "nObs"] = PD.p_data_feed_nObs()
         if not st.at[k, "BAS"]:
-            st.at[k, "BAS"] = basm.get(k, 0.0)
+            st.at[k, "BAS"] = PD.p_data_feed_BAS(basm.get(k, 0.0))
     # l. 309-325: BSY of the yields
     pty = {(a, r) for a, r in sets.pact_to_y} if hasattr(sets, "pact_to_y") else set()
     st["BSY"] = 0.0

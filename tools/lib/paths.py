@@ -67,6 +67,8 @@ LAYOUT = {
     "exports": "CAPRI's exports as delivered, one file each (res_2_1730*.csv/.zip, markmarket_*.txt, elas_*.csv, "
                "data_market_*.csv, fao_agg_17_*.txt, LitRev*.csv, ...)",
     "gams": "CAPRI's GAMS source tree (gams.zip)",
+    "gui": "files of CAPRI's GUI folder: the GUI definition capri_gui_definition.xml and the batch file "
+           "batchfiles/greendeal_scen2.txt (GUI.zip)",
     "capreg": "CAPREG's 2017 results res_17<MS>.txt, gdxdump listings (res_17zip.zip)",
     "capri_export": "CAPREG's DATA2 per country, DATA2_<CC>.txt (capri_export_zip.zip)",
     "pmp2030": "CAPRI's 2030 PMP terms pmppar_21730<CC>defaulta.txt and estnlp_results_*.txt "

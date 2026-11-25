@@ -14,6 +14,11 @@ Any setting of capri_mod/settings/defaults.toml is changed with --set (e.g. --se
 """
 import os as _os
 import sys as _sys
+# one BLAS / OpenMP thread per process unless the environment sets more: the regional solves fork a worker per
+# core and each started one thread per core in every library (capri_mod/__init__.py THREAD_LIMITS; KNOWN_ISSUES
+# K198); the libraries read the variables when they load, so before this script imports NumPy
+for _v in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
+    _os.environ.setdefault(_v, "1")
 # reproducible runs: the model iterates sets of names in a few places, and Python randomises string hashing per
 # process, which changed results by up to ~0.2% between two runs of the same scenario (degenerate regions more).
 # A fixed hash seed makes a run repeat exactly (the milk price re-check).
@@ -54,9 +59,9 @@ def main():
                          "36%% cap, no manure trade, milk-yield genomics 0.2: policy.greendeal.farm_to_fork_scenario); "
                          "'greendeal': CAPRI star 3.0's Green Deal group as its files set it (surptot.gms: every "
                          "region's surplus/ha cut by surpRedu%%, manure trade on, genomics 0), with --targets values "
-                         "(default: the series' full targets lnds10 org25 pest50 surp50 applied in 2030); "
+                         "(default: greendeal_scenario's defaults lnds10 org25 pest50 mine00 surp50 applied in 2030); "
                          "'greendeal2030': CAPRI's own 2030 step of its Green Deal series (lnds8 org18 pest20 "
-                         "mine13crp surp30, policy.greendeal.GREENDEAL_2030_TARGETS); or a scenario folder's name "
+                         "mine13crp surp30, CAPRI's batch: policy.greendeal.greendeal_targets(2030)); or a scenario folder's name "
                          "(capri_data/scenarios/<name>/; f2f, greendeal2030 and carbontax without --targets are "
                          "read from their folders)")
     ap.add_argument("--pesticide-rule", default="", choices=("", "jrc121368", "star3"),
@@ -220,15 +225,18 @@ def main():
     _pmm = (getattr(pmod, "_last_projected_model", None) or m).market_module
     db, ds = b["market"].domestic_prices.loc["EU27"], s["market"].domestic_prices.loc["EU27"]
 
-    # the adoption shares below are EU27 shares: Norway's regions (no EU mitigation options, msNoEU) left out (K56)
-    sEU = {r_: v_ for r_, v_ in s["supply"].items() if not str(r_).startswith("NO")}
-    bEU = {r_: v_ for r_, v_ in b["supply"].items() if not str(r_).startswith("NO")}
+    # the adoption shares below are EU27 shares: the regions outside the EU (Norway's, no EU mitigation options, msNoEU;
+    # the UK's, Turkey's and the Western Balkans' where run.supply_countries_outside_eu selects them) left out (K56)
+    from capri_mod.data.definitions import is_eu as _is_eu
+    sEU = {r_: v_ for r_, v_ in s["supply"].items() if _is_eu(str(r_))}
+    bEU = {r_: v_ for r_, v_ in b["supply"].items() if _is_eu(str(r_))}
     def agg(r, f):
-        """EU27 totals of the regional results: Norway's regions (NO..) left out, as in CAPRI's EU27 figures
-        (KNOWN_ISSUES K56)."""
+        """EU27 totals of the regional results: the regions outside the EU left out (CAPRI's EU27 figures, KNOWN_ISSUES
+        K56; until 23 November 2026 Norway's alone, which put the other countries' units into the EU's totals when
+        their supply models were in the run)."""
         o = {}
         for reg_, v in r["supply"].items():
-            if str(reg_).startswith("NO"):
+            if not _is_eu(str(reg_)):
                 continue
             for k, x in getattr(v, f).items():
                 if np.isfinite(x):
@@ -420,18 +428,28 @@ def main():
                             for k in ("BULL", "HFRS", "HFRS:rep", "CALV:male", "CALV:female")},
            # CAPRI's labour accounts (million hours: LABT, LABF, LABP) and set-aside split (1000 ha; premiums million
            # EUR), EU27 sums (Norway out), baseline and scenario
-           "labour": tuple((lambda t: {k: float(t.loc[[r_ for r_ in t.index if not str(r_).startswith("NO")], k].sum())
+           "labour": tuple((lambda t: {k: float(t.loc[[r_ for r_ in t.index if _is_eu(str(r_))], k].sum())
                                        for k in t.columns} if t is not None else None)(x.get("labour")) for x in (b, s)),
-           "set_aside": tuple((lambda t: {k: float(t.loc[[r_ for r_ in t.index if not str(r_).startswith("NO")], k].sum())
+           "set_aside": tuple((lambda t: {k: float(t.loc[[r_ for r_ in t.index if _is_eu(str(r_))], k].sum())
                                           for k in t.columns} if t is not None else None)(x.get("set_aside")) for x in (b, s)),
            "cover_crops": {k: sum(float((getattr(v, "cover_crops", None) or {}).get(f, 0.0) or 0.0)
                                   for v in sEU.values())
                            for k, f in (("base", "base"), ("scenario", "req"), ("eligible", "potential"))},
+           # per region (1000 ha; t N; shares of UAAR): the base share's area, the run's area, the BioFix N the regional
+           # model counts (K204), UAAR and the requirement's share (e_minCoverCrops), baseline and scenario
+           "cover_crops_regional": tuple({reg: {k: float((getattr(v, "cover_crops", None) or {}).get(f, 0.0) or 0.0)
+                                                for k, f in (("base", "base"), ("area", "req"), ("biofix_n", "biofix_n"),
+                                                             ("uaa", "uaa"), ("lb_share", "lb_share"))}
+                                          for reg, v in x["supply"].items()} for x in (b, s)),
            # per region: N-balance price (EUR/kg N), technology shares (diagnostics)
            "act_regional": tuple({reg: {k: float(x_) for k, x_ in v.activities.items() if np.isfinite(x_)}
                                   for reg, v in x["supply"].items()} for x in (b, s)),
            "regional": {reg: {"lam": float((getattr(v, "shadow_prices", {}) or {}).get("N_balance", 0.0) or 0.0),
                               "fert": dict(getattr(v, "fert_tech_shares", None) or {}),
+                              # the tillage options' and the urea substitution's shares (21 November 2026)
+                              "till": dict(getattr(v, "till_shares", None) or {}),
+                              "urea": getattr(v, "urea_share", None),
+                              "legsh": getattr(v, "legsh_share", None),
                               "amm": {f"{a_}|{t_}": float(x_) for (a_, t_), x_ in (getattr(v, "manure_tech_shares", None) or {}).items()},
                               # every constraint's shadow price, the manure trade and the land types
                               "duals": {k_: float(x_) for k_, x_ in (getattr(v, "shadow_prices", {}) or {}).items()

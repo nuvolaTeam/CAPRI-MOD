@@ -20,6 +20,7 @@ from capri_mod.external_paths import REFERENCE
 from capri_mod.pipeline.captrd import coco_supports as C
 from capri_mod.pipeline.captrd import prepare as P
 from capri_mod.pipeline.captrd.coco import BIO_COLS_COCO, BIO_ROWS_COCO
+from capri_mod.pipeline.captrd.equations import define_stats_and_supports as DS
 
 R = REFERENCE / "captrd_results" / "1770"
 need = pytest.mark.skipif(not (R / "Expert.csv.gz").exists(), reason="CAPRI reference files not built")
@@ -36,7 +37,7 @@ def test_the_close_to_base_flag_is_never_set_as_coded():
     c = C.coco_supports(p, nobs, [2018], 2018, ["ENNE"], ["COMI"], set(), set(), set(), {"LOSF", "GROF"},
                         {"SWHE", "COMI"}, ["DK000000"]).set_index(["col", "row"])
     assert c.loc[("LOSF", "SWHE"), "coco"] == 0.0 and c.loc[("LOSF", "COMI"), "coco"] == 3.0
-    assert c.loc[("GROF", "SWHE"), "coco"] == 9.0 and c.loc[("GROF", "SWHE"), "trust"] == C.TRUST_COCO
+    assert c.loc[("GROF", "SWHE"), "coco"] == 9.0 and c.loc[("GROF", "SWHE"), "trust"] == DS.p_cocoSupport_TrustLevl()
 
 
 @pytest.mark.slow

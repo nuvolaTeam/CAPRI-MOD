@@ -7,7 +7,8 @@ each module to its CAPRI block and lines). A module is added when its first equa
     supply_model/   supply/supply_model.gms: nutrients.py (the pools, NUTNED_), n_surplus.py (the N surplus's terms, the
                     input shares, SURTOT_REST_), inner_fert.py (the inner fertiliser model), n_flow.py (the N loss
                     cascade, the leaching), fert_limits.py (e_synNMax), objective.py (LINEAR_'s terms, QUADRF_, QUADRA_,
-                    OBJEQF_), mitigation.py (GHG_Mit_Cost_), feeding.py (REQSE_, FEDUSE_), markets.py (SUPBAL_),
+                    OBJEQF_), mitigation.py (GHG_Mit_Cost_), feeding.py (REQSE_, FEDUSE_; the feed
+                    calibration's NutContFeed_, FeedAggrShare_, FEDUSEA_, FEDUSES_, FEDAGGR_), markets.py (SUPBAL_),
                     premiums.py (the catch crops, the entitlements, the permanent grassland), set_aside.py (the
                     landscape floor, the idled histosols), land.py (the land balances, the land market, the LUC
                     estimation), methane.py, n2o.py, air_water.py and gwp.py (the emission rows, which the accounts
@@ -16,6 +17,15 @@ each module to its CAPRI block and lines). A module is added when its first equa
                     data in the simulation year, DATA(crop, FNUT | FOUT, "Y") (K191)
     fertpar.py      fert/fertpar.gms: p_nitrFact(crop, BioFix), the fixation rates (K191)
     def_gascoeff.py envind/def_gascoeff.gms: Resid, the crop residues' nutrient content (K191)
+    impose_upper_bound_on_elasticity.py
+                    supply/pmp_terms/impose_upper_bound_on_elasticity.gms: the dampened supply elasticities (block A4)
+    greendeal/      pol_input/greendeal/: the Green Deal's pesticide, organic, landscape, mineral fertiliser and surplus
+                    targets (block A5; its __init__ lists the modules)
+    set_fert_priors.py, define_objc.py, define_greening_limits.py, define_manure_trade_costs.py,
+    define_const_pmp_param.py, prep_cal.py, prep_sim_luc.py
+                    the fertiliser priors, the plant protection's linear term, the permanent grassland limit, the manure
+                    trade cost slope, the feeds' PMP slope, the greening dual at calibration and the land types' bounds
+                    (block A5); ghgmiti.py, define_inputs.py and set_supply_bounds.py extended in A5
 
 Each function's docstring, or its module's, gives CAPRI's GAMS statement and its domain, the CAPRI star 3.0 file and
 lines it follows, the equation in this project's notation, how the model's quantities map to CAPRI's symbols, and the

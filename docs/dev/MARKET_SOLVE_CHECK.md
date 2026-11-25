@@ -1,7 +1,7 @@
 # The market solve against CAPRI's
 
 Status: revised 20 October 2026 against the code. The step counts and timings quoted are from October 2026 runs, as
-stated; current run times are in README sections 1 and 11.
+stated; current run times are in README sections 1 and 9.6.
 
 Question: is the market solved with the right method? `MarketModule._solve_bilateral` against CAPRI's market solve
 (CAPRI documentation, January 2022, sections 5.5-5.6; GUI documentation 2014; `arm/simu_prestep.gms`,
@@ -52,7 +52,7 @@ acceleration off (damped steps alone, same equations and stopping rule).
 | market supply between supply solves | the market's supply functions are recalibrated to the supply models' output each iteration (`arm/simu_calibration_to_supply.gms`) | EU supply anticipated as output × (price / price seen)^ε (`_eu_price_seen`), exact at a converged point |
 | supply elasticities in the market | measured on the regional programming models at the baseline (`supply/calibrate_supply.gms`) | CAPRI's own market-model elasticities (p_elasSupp, `supply_elas_eu.csv`, the EU rows only), fixed. CAPRI's measured Hessian is available as `CAPRIModel.market_supply_nq` (off: tested on Farm-to-Fork, 18 October 2026, it gave no gain in speed and moved results only within the outer loop's tolerance; `docs/dev/archive/MARKET_STRUCTURE_PLAN.md` section 1) |
 | price passed to supply | weighted average of the last iterations (0.55 / 0.30 / 0.15; `capmod/define_stepWeights.gms`) | damped per product: step 0.5 (`PRICE_SIGNAL_RELAXATION`), halved where the gap changes sign (floor 0.1), raised by 1.25 otherwise; member-state milk prices likewise (floor 0.02) |
-| iterations | "usually 5-20" | README section 9 (Validation) (Farm-to-Fork 12, Green Deal 2030 15 outer iterations in runs r48 and r47, 20 October 2026) |
+| iterations | "usually 5-20" | README section 8 (Validation) (Farm-to-Fork 12, Green Deal 2030 15 outer iterations in runs r48 and r47, 20 October 2026) |
 
 Departure, kept: the market's EU supply elasticities are CAPRI's market-model values, not measured on capri-mod's own
 regional models (the option exists, see above). Results at convergence do not depend on them; the path does.

@@ -34,35 +34,28 @@ rd_logic.gms:
 The year's values are then each item's last one up to the year (def_policy.gms); the years before it are deleted
 (del_policy.gms).
 
-Not here: the technology factors of the Natura 2000 and agri-environment payments (rd_logic l. 235-241, 340-346: T2
-paid more than T1), which the model carries as prem_diff_share of capri_mod/supply/techn_mix.py; the mitigation
-measures of PSDPAY_RD (no RDP measure, so no ceiling); article 68's 2010 payments (scheme dp68*, not RD).
+Not here: the technology factors of the Natura 2000 and agri-environment payments (rd_logic.gms l. 237-244, 330-334,
+392-393: T2 paid more than T1), which the model carries as prem_diff_share of capri_mod/supply/techn_mix.py; the
+mitigation measures of PSDPAY_RD (no RDP measure, so no ceiling); article 68's 2010 payments (rd_logic.gms l. 413-425,
+schemes dp68*, not RD). The statements: capri_mod/policy/equations/extend_rd_baseline.py and rd_logic.py.
 """
 from __future__ import annotations
 
 from collections import defaultdict
 
+from capri_mod.policy.equations.extend_rd_baseline import (  # noqa: F401 (_nz, _num, _div, _gsum: GAMS's EPS arithmetic)
+    _div, _gsum, _num, _nz, p_rdBudget_plan, p_rdBudget_spend, p_rdBudget_spend_from_above, p_rdSpendingPeriod_abs,
+    p_rdSpendingPeriod_ave, p_rdSpendingPeriod_nobs, p_rdSpendingPeriod_rest, p_rdSpendingPeriod_weight,
+    p_rdSpendingPeriod_weight_scaled, p_rdSpendingPeriod_weight_shock, p_rdSpendingPeriod_weight_sum)
+from capri_mod.policy.equations import rd_logic as RL
 from capri_mod.policy.premium_cut import EPS
 from capri_mod.supply import inputs as _inputs
 
-#: rd_logic.gms's caps and factors (l. 259, 270, 298-305, 319, 368-389)
-AE_RATE_MAX = 2000.0          # EUR per ha: the agri-environment rate and the scaled rates at most
-SCALE_OVER_CEILING = 1.5      # the rates are scaled to pay 1.5 times the ceiling at the levels (prmcut cuts them)
-EXTENSIVE_SHARE = 0.5         # the heavy variants' share of the animals' agri-environment entitlement
+#: the constants and the animals of rd_logic.gms l. 259, 298-305, 369-390, assigned in rd_declarations' loops; the caps
+#: and factors of its statements (2000 EUR, 1.5, 0.5) are in capri_mod/policy/equations/rd_logic.py
 EXTENSIVE_ANIMALS = ("DCOH", "BULH", "HEIH")
 AE_DEFAULT_RATE = 100.0       # EUR per ha where FADN has no agri-environment payment of the member state
 SE_EXPERT_RATE = 300.0        # EUR per ha of Sweden's expert measures
-
-
-def _mul(x, f):
-    """GAMS's product with a value that may be EPS (EPS times a number stays EPS)."""
-    if x == EPS:
-        return EPS
-    return x * f
-
-
-def _nz(x) -> bool:
-    return x == EPS or bool(x)
 
 
 def _load(inp):
@@ -102,18 +95,6 @@ def data(inp=None) -> dict:
 # extend_rd_baseline.gms
 # ------------------------------------------------------------------------------------------------------------------
 
-def _num(x) -> float:
-    """A value in GAMS's arithmetic and comparisons: EPS is zero."""
-    return 0.0 if x == EPS or x is None else x
-
-
-def _div(a, b):
-    """GAMS's a / b with EPS (EPS / b stays EPS)."""
-    if a == EPS:
-        return EPS
-    return a / b if a else None
-
-
 def extend_budget(d: dict, target_year: int) -> dict:
     """The public RD money per (region, year, measure, "plan" or "spend") after extend_rd_baseline.gms (steps 1-4 of
     the module docstring), in million EUR; EPS where CAPRI's data or arithmetic gives EPS (a spend recorded as
@@ -136,8 +117,9 @@ def extend_budget(d: dict, target_year: int) -> dict:
     for y in range(max(2006, min(years_all) + 1), target_year + 2):
         for r in runr:
             for m in measures:
-                if not _nz(B.get((r, y, m, "plan"))) and _nz(B.get((r, y - 1, m, "plan"))):
-                    B[(r, y, m, "plan")] = B[(r, y - 1, m, "plan")]
+                v = p_rdBudget_plan(B.get((r, y, m, "plan")), B.get((r, y - 1, m, "plan")))
+                if v is not None:
+                    B[(r, y, m, "plan")] = v
 
     # the sums and counts per programme
     Sp, nobs = {}, {}
@@ -145,10 +127,10 @@ def extend_budget(d: dict, target_year: int) -> dict:
         for p, ys in rdp_years.items():
             for m in measures:
                 for ps in ("plan", "spend"):
-                    v = _gsum(B.get((r, y, m, ps)) for y in ys)
+                    v = p_rdSpendingPeriod_abs(B.get((r, y, m, ps)) for y in ys)
                     if v is not None:
                         Sp[(r, p, m, ps)] = v
-                n = sum(1 for y in ys if _num(B.get((r, y, m, "spend"))) > 0)
+                n = p_rdSpendingPeriod_nobs(B.get((r, y, m, "spend")) for y in ys)
                 if n:
                     nobs[(r, p, m)] = n
 
@@ -160,7 +142,7 @@ def extend_budget(d: dict, target_year: int) -> dict:
     for n in nuts0:
         for p in rdp_years:
             for m in measures:
-                v = _gsum(Sp.get((s, p, m, "spend")) for s in below[n])
+                v = p_rdSpendingPeriod_abs(Sp.get((s, p, m, "spend")) for s in below[n])
                 if v is not None:
                     Sp[(n, p, m, "spend")] = v
                 else:
@@ -171,7 +153,7 @@ def extend_budget(d: dict, target_year: int) -> dict:
             tot = _num(Sp.get((n, p07, m, "spend")))
             if tot > 0:
                 for s in below[n]:
-                    v = _div(Sp.get((s, p07, m, "spend")), tot) if _nz(Sp.get((s, p07, m, "spend"))) else None
+                    v = p_rdSpendingPeriod_weight(Sp.get((s, p07, m, "spend")), tot)
                     if v is not None:
                         W[(s, m)] = v
     # rules 3 and 4, by member state and policy shock, where a region has no weight (EPS is one)
@@ -187,38 +169,29 @@ def extend_budget(d: dict, target_year: int) -> dict:
                 for m in old & set(measures):
                     if _nz(W.get((s, m))):
                         continue
-                    if _nz(tot):
-                        num = _gsum(Sp.get((s, p00, m1, "spend")) for m1 in old)
-                        if tot == EPS:
-                            if num not in (None, EPS):
-                                raise ValueError(f"extend_rd_baseline rule 3: {n} {sh} a share over EPS")
-                            v = EPS if num == EPS else None
-                        else:
-                            v = _div(num, tot) if num is not None else None
-                        if v is not None:
-                            W[(s, m)] = v
-                            continue
-                    if key.get((s, sh)):
-                        W[(s, m)] = key[(s, sh)]
+                    num = _gsum(Sp.get((s, p00, m1, "spend")) for m1 in old) if _nz(tot) else None
+                    v = p_rdSpendingPeriod_weight_shock(num, tot, key.get((s, sh)), f"{n} {sh}")
+                    if v is not None:
+                        W[(s, m)] = v
     # rescaled by member state; the member state keeps the sum before the rescaling (CAPRI's p_rdSpendingPeriod)
     Wsum = {}
     for n in nuts0:
         for m in measures:
-            t = _gsum(W.get((s, m)) for s in below[n])
+            t = p_rdSpendingPeriod_weight_sum(W.get((s, m)) for s in below[n])
             if t is None:
                 continue
             Wsum[(n, m)] = t
             if t != EPS:
                 for s in below[n]:
                     if (s, m) in W:
-                        W[(s, m)] = _div(W[(s, m)], t)
+                        W[(s, m)] = p_rdSpendingPeriod_weight_scaled(W[(s, m)], t)
 
     # 3. the money not spent in 2007-2013, spread over its years without spend (CAPRI writes their number "7 - nobs")
     y07 = rdp_years[p07]
     YEARS_OF_RDP = len(y07)
 
     def rest(r, m):
-        return max(0.0, _num(Sp.get((r, p07, m, "plan"))) - _num(Sp.get((r, p07, m, "spend"))))
+        return p_rdSpendingPeriod_rest(Sp.get((r, p07, m, "plan")), Sp.get((r, p07, m, "spend")))
 
     def nob(r, m):
         return nobs.get((r, p07, m), 0)
@@ -229,7 +202,7 @@ def extend_budget(d: dict, target_year: int) -> dict:
             if _nz(W.get((s, m))) and rs and nob(s, m) < YEARS_OF_RDP:
                 for y in y07:
                     if _num(B.get((s, y, m, "spend"))) == 0:
-                        B[(s, y, m, "spend")] = rs / (YEARS_OF_RDP - nob(s, m))
+                        B[(s, y, m, "spend")] = p_rdBudget_spend(rs, nob(s, m), YEARS_OF_RDP)
     n1s = sorted(r for r in d["srnuts1"] if any(r in in0[n] for n in nuts0)
                  and _num(_gsum(Sp.get((r, p07, m, "plan")) for m in measures)))
     ms_with_plan = [n for n in nuts0 if _num(_gsum(Sp.get((n, p07, m, "plan")) for m in measures))]
@@ -238,12 +211,12 @@ def extend_budget(d: dict, target_year: int) -> dict:
             sub = [s for s in members.get(r, []) if s in ext]
             for m in measures:
                 if not _nz(Sp.get((r, p07, m, "spend"))):
-                    v = _gsum(Sp.get((s, p07, m, "spend")) for s in sub)
+                    v = p_rdSpendingPeriod_abs(Sp.get((s, p07, m, "spend")) for s in sub)
                     if v is not None:
                         Sp[(r, p07, m, "spend")] = v
                 rs = rest(r, m)
                 if not _nz(Wsum.get((r, m))):
-                    v = _gsum(W.get((s, m)) for s in sub)
+                    v = p_rdSpendingPeriod_weight_sum(W.get((s, m)) for s in sub)
                     if v is not None:
                         Wsum[(r, m)] = v
                 wr = _num(Wsum.get((r, m)))
@@ -255,14 +228,14 @@ def extend_budget(d: dict, target_year: int) -> dict:
                         continue
                     for y in y07:
                         if _num(B.get((s, y, m, "spend"))) == 0:
-                            B[(s, y, m, "spend")] = rs * ws / wr / (YEARS_OF_RDP - nob(s, m))
+                            B[(s, y, m, "spend")] = p_rdBudget_spend_from_above(rs, ws, wr, nob(s, m), YEARS_OF_RDP)
 
     # 4. after 2013: the NUTS 2 regions' average spend of 2007-2013
     s2 = [s for n in nuts0 for s in in0[n] if s in d["srnuts2"]]
     for s in s2:
         for m in measures:
-            tot = _gsum(B.get((s, y, m, "spend")) for y in y07)
-            ave = EPS if tot == EPS else (tot / len(y07) if tot else None)
+            tot = p_rdSpendingPeriod_abs(B.get((s, y, m, "spend")) for y in y07)
+            ave = p_rdSpendingPeriod_ave(tot, len(y07))
             for y in range(2014, target_year + 2):
                 if ave is not None:
                     B[(s, y, m, "spend")] = ave
@@ -274,17 +247,6 @@ def extend_budget(d: dict, target_year: int) -> dict:
 # ------------------------------------------------------------------------------------------------------------------
 # rd_logic.gms
 # ------------------------------------------------------------------------------------------------------------------
-
-def _gsum(values):
-    """GAMS's sum with EPS terms: the sum of the numbers, EPS where only EPS and zeros, None for nothing."""
-    tot, eps = 0.0, False
-    for v in values:
-        if v == EPS:
-            eps = True
-        elif v:
-            tot += v
-    return tot if tot else (EPS if eps else None)
-
 
 def rd_declarations(levels: dict, year: int, groups: dict, d: dict = None, budget: dict = None,
                     base_weights: dict = None) -> dict:
@@ -327,7 +289,8 @@ def rd_declarations(levels: dict, year: int, groups: dict, d: dict = None, budge
     ae = [s for s in d["ae_schemes"] if s in ae_tf8]
     rd_schemes = d["rd_schemes"]
 
-    # 5. the regions with RD money and their money summed up where they have none
+    # 5. the regions with RD money (rd_logic.gms l. 50-61: rdMS, runr, rdYear) and their money summed up where they
+    # have none (rd_logic.gms l. 66-68, 73-75)
     money = defaultdict(float)
     for (r, y, m, ps), v in B.items():
         if v:
@@ -342,37 +305,41 @@ def rd_declarations(levels: dict, year: int, groups: dict, d: dict = None, budge
         for r in sorted(runr & d["srnuts1"]):
             sub = [s for s in members.get(r, []) if s in d["srnuts2"] and s in runr]
             for m, ps in keys:
-                if not _nz(B.get((r, y, m, ps))):
-                    v = _gsum(B.get((s, y, m, ps)) for s in sub)
-                    if v is not None:
-                        B[(r, y, m, ps)] = v
+                v = RL.p_rdBudget_SRNUTS1(B.get((r, y, m, ps)), (B.get((s, y, m, ps)) for s in sub))
+                if v is not None:
+                    B[(r, y, m, ps)] = v
         for r in rd_ms:
             sub = [s for s in members.get(r, []) if s in d["srnuts1"] and s in runr]
             for m, ps in keys:
-                if not _nz(B.get((r, y, m, ps))):
-                    v = _gsum(B.get((s, y, m, ps)) for s in sub)
-                    if v is not None:
-                        B[(r, y, m, ps)] = v
+                v = RL.p_rdBudget_MS(B.get((r, y, m, ps)), (B.get((s, y, m, ps)) for s in sub))
+                if v is not None:
+                    B[(r, y, m, ps)] = v
 
-    # the land partition summed to NUTS 1 and the member states, then the policy areas' shares of each land cover
+    # the land partition summed to NUTS 1 and the member states (rd_logic.gms l. 96-97, 103-104), then the policy
+    # areas' shares of each land cover (rd_logic.gms l. 108-109)
     LP = defaultdict(float)
     for r, lc, t, v in zip(d["land"].region, d["land"].land_cover, d["land"].area_type, d["land"].kha):
         LP[(str(r), str(lc), str(t))] = float(v)
     lcs = {(lc, t) for (_, lc, t) in LP}
+    rd_ms_set = set(rd_ms)
     for r in sorted(runr & d["srnuts1"]) + rd_ms:
         sub = [s for s in members.get(r, []) if s in d["srnuts2"]]
+        lp_sum = RL.p_landPartition_MS if r in rd_ms_set else RL.p_landPartition_SRNUTS1
         for lc, t in lcs:
-            v = sum(LP.get((s, lc, t), 0.0) for s in sub)
+            v = lp_sum(LP.get((s, lc, t), 0.0) for s in sub)
             if v:
                 LP[(r, lc, t)] = v
             else:
                 LP.pop((r, lc, t), None)
     share = {}
     for (r, lc, t), v in LP.items():
-        if r in runr and t != "Total" and LP.get((r, lc, "Total")):
-            share[(r, lc, t)] = v / LP[(r, lc, "Total")]
+        if r in runr and t != "Total":
+            x = RL.p_landPartition_share(v, LP.get((r, lc, "Total")))
+            if x is not None:
+                share[(r, lc, t)] = x
 
     # the levels of the regions run: the units', the NUTS 1 regions' and member states' sums
+    # (rd_logic.gms l. 99-100)
     lev = defaultdict(float)
     for (u, a), v in levels.items():
         lev[(u, a)] += v
@@ -381,32 +348,35 @@ def rd_declarations(levels: dict, year: int, groups: dict, d: dict = None, budge
         if (r in d["nuts1a"] or r in d["ms"]) and not any((r, a) in levels for a in acts):
             sub = [s for s in members.get(r, []) if s in d["srnuts2"]]
             for a in acts:
-                v = sum(levels.get((s, a), 0.0) for s in sub)
+                v = RL.DATA_LEVL_nuts1a(levels.get((s, a), 0.0) for s in sub)
                 if v:
                     lev[(r, a)] = v
 
-    # FADN completed: Belgium-Luxembourg, the totals over the farm types and over in / out of LFA
+    # FADN completed (rd_logic.gms l. 117-124): Belgium-Luxembourg (BL400000 Luxembourg's copy), the totals over the farm
+    # types and over in / out of LFA
     F = defaultdict(float)
     for ms, t, lfa, aes, unit, v in zip(d["fadn"].ms, d["fadn"].farm_type, d["fadn"].lfa, d["fadn"].ae,
                                        d["fadn"].unit, d["fadn"].value):
         F[(str(ms), str(t), str(lfa), str(aes), str(unit))] = float(v)
     for k in [k for k in F if k[0] in ("BE000000", "LU000000")]:
-        F[("BL000000",) + k[1:]] += F[k]
+        c = k[1:]
+        if ("BL000000",) + c not in F:
+            F[("BL000000",) + c] = RL.p_fadn_BL000000(F.get(("BE000000",) + c, 0.0), F.get(("LU000000",) + c, 0.0))
         if k[0] == "LU000000":
-            F[("BL400000",) + k[1:]] = F[k]
+            F[("BL400000",) + c] = F[k]
     regions_f = {k[0] for k in F}
     tf8 = sorted({k[1] for k in F if k[1] != "Total"})
     for r in regions_f:
         for lfa in ("LFA", "NoLFA"):
             for aes in ("AE", "NoAE"):
                 for unit in ("Ha", "EUR"):
-                    v = sum(F.get((r, t, lfa, aes, unit), 0.0) for t in tf8)
+                    v = RL.p_fadn_Total(F.get((r, t, lfa, aes, unit), 0.0) for t in tf8)
                     if v:
                         F[(r, "Total", lfa, aes, unit)] = v
         for t in tf8 + ["Total"]:
             for aes in ("AE", "NoAE"):
                 for unit in ("Ha", "EUR"):
-                    v = F.get((r, t, "LFA", aes, unit), 0.0) + F.get((r, t, "NoLFA", aes, unit), 0.0)
+                    v = RL.p_fadn_Tot(F.get((r, t, "LFA", aes, unit), 0.0), F.get((r, t, "NoLFA", aes, unit), 0.0))
                     if v:
                         F[(r, t, "Tot", aes, unit)] = v
 
@@ -419,16 +389,16 @@ def rd_declarations(levels: dict, year: int, groups: dict, d: dict = None, budge
         return sum(lev.get((r, a), 0.0) for t in tfs for g in pg_tf8.get(t, []) for a in groups.get(g, [])
                    if a in mcact)
 
-    # the agri-environment payments' expected rate per ha in and out of LFA (FADN; 100 EUR without any)
+    # the agri-environment payments' expected rate per ha in and out of LFA (FADN, rd_logic.gms l. 255-256; 100 EUR
+    # without any, rd_logic.gms l. 258-260)
     ae_lfa = {}
     for ms in rd_ms:
         for t in tf8 + ["Total"]:
             for lfa in ("LFA", "NoLFA", "Tot"):
-                ha = F.get((ms, t, lfa, "AE", "Ha"), 0.0) + F.get((ms, t, lfa, "NoAE", "Ha"), 0.0)
-                if ha:
-                    v = F.get((ms, t, lfa, "AE", "EUR"), 0.0) / ha
-                    if v:
-                        ae_lfa[(ms, t, lfa)] = v
+                v = RL.p_aeLfa(F.get((ms, t, lfa, "AE", "EUR"), 0.0), F.get((ms, t, lfa, "AE", "Ha"), 0.0),
+                               F.get((ms, t, lfa, "NoAE", "Ha"), 0.0))
+                if v is not None:
+                    ae_lfa[(ms, t, lfa)] = v
         if not any(k[0] == ms for k in ae_lfa):
             for t in tf8 + ["Total"]:
                 for lfa in ("LFA", "NoLFA", "Tot"):
@@ -440,33 +410,29 @@ def rd_declarations(levels: dict, year: int, groups: dict, d: dict = None, budge
         ceil = {}
         for r in runr:
             for s in rd_schemes:
-                terms = []
-                for p in rdp_of[y]:
-                    for m in measures_of.get(s, {}).get(p, ()):
-                        sp = B.get((r, y, m, "spend"))
-                        terms.append(sp if _nz(sp) else B.get((r, y, m, "plan")))
-                        terms.append(EPS)
-                v = _gsum(terms)
+                v = RL.p_premDataE_ceilval([(B.get((r, y, m, "spend")), B.get((r, y, m, "plan")))
+                                            for p in rdp_of[y] for m in measures_of.get(s, {}).get(p, ())])
                 if v is not None:
                     ceil[(r, s)] = v
-        # the agri-environment money split by farm type
+        # the agri-environment money split by farm type: FADN's euros (rd_logic.gms l. 155-159), else its hectares
+        # (rd_logic.gms l. 166-172), else the levels (rd_logic.gms l. 178-186)
         for ms in rd_ms:
             tot = F.get((ms, "Total", "Tot", "AE", "EUR"), 0.0)
             if tot:
                 for s in ae:
-                    f = sum(F.get((ms, t, "Tot", "AE", "EUR"), 0.0) for t in ae_tf8[s]) / tot
+                    eur = sum(F.get((ms, t, "Tot", "AE", "EUR"), 0.0) for t in ae_tf8[s])
                     for r in in_ms(ms):
                         if (r, s) in ceil:
-                            ceil[(r, s)] = _mul(ceil[(r, s)], f) if f else None
+                            ceil[(r, s)] = RL.p_premDataE_ceilval_ae_fadn(ceil[(r, s)], eur, tot)
             if sum(F.get((ms, t, "Tot", "AE", "EUR"), 0.0) for t in tf8 + ["Total"]) == 0:
                 ha_any = sum(F.get((ms, t, "NoLFA", "NoAE", "Ha"), 0.0) for t in tf8 + ["Total"])
                 ha_all = sum(F.get((ms, t, "NoLFA", "NoAE", "Ha"), 0.0) for t in tf8)
                 if ha_any:
                     for s in d["ae_schemes"]:
-                        f = sum(F.get((ms, t, "NoLFA", "NoAE", "Ha"), 0.0) for t in ae_tf8.get(s, [])) / ha_all
+                        ha = sum(F.get((ms, t, "NoLFA", "NoAE", "Ha"), 0.0) for t in ae_tf8.get(s, []))
                         for r in in_ms(ms):
                             if ceil.get((r, s)) is not None:
-                                ceil[(r, s)] = _mul(ceil[(r, s)], f) if f else None
+                                ceil[(r, s)] = RL.p_premDataE_ceilval_ae_area(ceil[(r, s)], ha, ha_all)
                 if sum(F.get((ms, t, "Tot", "AE", "EUR"), 0.0) + F.get((ms, t, "NoLFA", "NoAE", "Ha"), 0.0)
                        for t in tf8 + ["Total"]) == 0:
                     for r in in_ms(ms):
@@ -474,30 +440,30 @@ def rd_declarations(levels: dict, year: int, groups: dict, d: dict = None, budge
                         if tot_l:
                             for s in d["ae_schemes"]:
                                 if ceil.get((r, s)) is not None:
-                                    f = crop_level(r, ae_tf8.get(s, [])) / tot_l
-                                    ceil[(r, s)] = _mul(ceil[(r, s)], f) if f else None
+                                    ceil[(r, s)] = RL.p_premDataE_ceilval_ae_levels(
+                                        ceil[(r, s)], crop_level(r, ae_tf8.get(s, [])), tot_l)
         Py = {}
         for (r, s), v in ceil.items():
             if v is not None:
                 Py[(r, s, "CEILVAL")] = v
-        # LFA and Natura 2000
+        # LFA (rd_logic.gms l. 208-212) and Natura 2000 (rd_logic.gms l. 225-230, 246-247)
         for r in runr:
             if _nz(Py.get((r, "DPRD_LFA", "CEILVAL"))):
                 for lc in ("PGANNC", "PGGRAS", "PGPERM"):
-                    v = rdmax["LFA"] * share.get((r, lc, "LFA"), 0.0)
-                    if v:
+                    v = RL.p_premDataE_DPRD_LFA(rdmax["LFA"], share.get((r, lc, "LFA"), 0.0))
+                    if v is not None:
                         Py[(r, "DPRD_LFA", lc)] = v
                 Py[(r, "DPRD_LFA", "APPTYPE")] = "perLevl"
             if _nz(Py.get((r, "DPRD_N2K", "CEILVAL"))):
                 for lc in ("PGANNC", "PGPERM"):
-                    v = rdmax["N2K"] * share.get((r, lc, "N2K"), 0.0)
-                    if v:
+                    v = RL.p_premDataE_DPRD_N2K(rdmax["N2K"], share.get((r, lc, "N2K"), 0.0))
+                    if v is not None:
                         Py[(r, "DPRD_N2K", lc)] = v
-                v = rdmax["N2K"] * share.get((r, "PGGRAS", "N2K"), 0.0)
-                if v:
+                v = RL.p_premDataE_DPRD_N2K_PGGRZE(rdmax["N2K"], share.get((r, "PGGRAS", "N2K"), 0.0))
+                if v is not None:
                     Py[(r, "DPRD_N2K", "PGGRZE")] = v
                 Py[(r, "DPRD_N2K", "APPTYPE")] = "perLevl"
-        # agri-environment by farm type
+        # agri-environment by farm type (rd_logic.gms l. 265-278)
         for ms in rd_ms:
             for s in ae:
                 for t in ae_tf8[s]:
@@ -506,10 +472,8 @@ def rd_declarations(levels: dict, year: int, groups: dict, d: dict = None, budge
                     for r in in_ms(ms):
                         if not _nz(Py.get((r, s, "CEILVAL"))):
                             continue
-                        v = min(AE_RATE_MAX, sum(
-                            share.get((r, lc, "LFA"), 0.0) * ae_lfa.get((ms, t, "LFA"), 0.0)
-                            + (1 - share.get((r, lc, "LFA"), 0.0)) * ae_lfa.get((ms, t, "NoLFA"), 0.0)
-                            for lc in tf8_lc.get(t, [])))
+                        v = RL.p_premDataE_ae([share.get((r, lc, "LFA"), 0.0) for lc in tf8_lc.get(t, [])],
+                                              ae_lfa.get((ms, t, "LFA"), 0.0), ae_lfa.get((ms, t, "NoLFA"), 0.0))
                         for g in pg_tf8.get(t, []):
                             if v:
                                 Py[(r, s, g)] = v
@@ -520,9 +484,9 @@ def rd_declarations(levels: dict, year: int, groups: dict, d: dict = None, budge
         P[y] = Py
 
     # 8. the entitlement weights, over the restart file's (CAPRI does not reset p_entlWght1): Natura 2000 the
-    # livestock units of every animal in the supply model's regions (RS: the member states and units, not NUTS 1);
-    # agri-environment those of the animals of a group with a rate
-    # in any year, the heavy dairy cows, bulls and heifers half
+    # livestock units of every animal in the supply model's regions (rd_logic.gms l. 232; RS: the member states and
+    # units, not NUTS 1); agri-environment those of the animals of a group with a rate in any year (rd_logic.gms
+    # l. 292-294), the heavy dairy cows, bulls and heifers half (rd_logic.gms l. 298-305)
     W1 = dict(base_weights or {})
     for r in set(d["ms"]) | d["srnuts2"]:
         for a, v in lu.items():
@@ -535,9 +499,9 @@ def rd_declarations(levels: dict, year: int, groups: dict, d: dict = None, budge
                     W1[(r, a, s)] = lu[a]
     for k in list(W1):
         if k[2] in d["ae_schemes"] and k[1] in EXTENSIVE_ANIMALS and k[0] in runr and _nz(W1[k]):
-            W1[k] = _mul(W1[k], EXTENSIVE_SHARE)
+            W1[k] = RL.p_entlWght1_heavy(W1[k])
 
-    # 9. the rates scaled to pay 1.5 times the ceiling at the levels
+    # 9. the rates scaled to pay 1.5 times the ceiling at the levels (rd_logic.gms l. 309-319)
     for y in rd_years:
         Py = P[y]
         by_rs = defaultdict(dict)
@@ -548,26 +512,26 @@ def rd_declarations(levels: dict, year: int, groups: dict, d: dict = None, budge
             c = Py.get((r, s, "CEILVAL"))
             f = 0.0
             if r in runr and _nz(c):
-                tot = 0.0
+                terms = []
                 for g, v in rr.items():
                     if not _nz(v):
                         continue
                     for a in groups.get(g, []):
                         lv = lev.get((r, a), 0.0)
-                        w = W1.get((r, a, s))
                         if lv:
-                            tot += lv * (1.0 if not _nz(w) else (0.0 if w == EPS else w)) * (0.0 if v == EPS else v) * 0.001
-                f = (EPS if c == EPS else c / tot) if tot > 0 else 0.0
+                            terms.append((lv, W1.get((r, a, s)), v))
+                f = RL.p_scaleRdPpePay(c, RL.p_scaleRdPpePay_sum(terms))
             for g, v in rr.items():
-                x = EPS if (f == EPS and _nz(v)) or (v == EPS and f) else ((v * f) if f else 0.0)
-                if x == EPS:
-                    Py[(r, s, g)] = EPS
-                elif x:
-                    Py[(r, s, g)] = min(AE_RATE_MAX, x * SCALE_OVER_CEILING)
+                x = RL.p_premDataE_scaled(v, f)
+                if x is not None:
+                    Py[(r, s, g)] = x
                 else:
                     Py.pop((r, s, g), None)
 
-    # 10. Sweden's expert data from 2007 to the simulation year (its years from 2014 not trusted, deleted)
+    # 10. Sweden's expert data from 2007 to the simulation year (rd_logic.gms l. 351-356; its years from 2014 not
+    # trusted, set to zero: rd_logic.gms l. 359): the agri-environment payments and the LFA rates removed
+    # (rd_logic.gms l. 362-367), the expert schemes' rates (rd_logic.gms l. 369-390), application types
+    # (rd_logic.gms l. 397-400) and the copy to p_premDataE (rd_logic.gms l. 404-406)
     se_regions = {"SE000000"} | {s for s in members.get("SE000000", []) if s in d["srnuts2"]}
     se = defaultdict(dict)
     for r, yy, s, v in zip(d["sweden"].region, d["sweden"].year, d["sweden"].scheme, d["sweden"].ceiling_meur):
@@ -595,7 +559,9 @@ def rd_declarations(levels: dict, year: int, groups: dict, d: dict = None, budge
                 for g in expert_rates.get(s, ()):
                     Py[(r, s, g)] = SE_EXPERT_RATE
 
-    # def_policy.gms: each item its last nonzero value (EPS counts) up to the year; del_policy.gms deletes the rest
+    # def_policy.gms l. 57-62: each item its last nonzero value (EPS counts) up to the year (the rule of
+    # capri_mod/policy/equations/def_policy.py's p_premDataE_last, applied in the loop over the records);
+    # del_policy.gms deletes the rest
     items = {}
     for y in rd_years:
         if y <= year:

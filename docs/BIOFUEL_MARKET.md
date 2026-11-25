@@ -2,7 +2,7 @@
 
 Status: revised 20 October 2026 against the code. On by default, as star 3.0's GUI sets "Endogenous bio-fuel markets"
 (`BIOF_M`) to true. Run results of Sprints 9c and 9d (October 2026) are no longer current and are left to
-CHANGELOG.md; current results: README section 9 (Validation).
+CHANGELOG.md; current results: README section 8 (Validation).
 
 Switches: `CAPRIModel.biofuel_markets` (True), `PolicyScenario.biofuel_markets`, `CAPRIModel.run(biofuel_markets=)`,
 `run_f2f_2030.py --no-biofuel-markets`; the setting holds for the scenario and its baseline.

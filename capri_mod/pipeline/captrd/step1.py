@@ -5,9 +5,11 @@ Ported from CAPRI star 3.0:
   - prep_data_for_estimation.gms l. 205-247: nObs, nW, wAve, wVar (pre-statistics over the ex-post years ExPostT);
   - estimate_trends.gms (whole file): weighted least squares with weights t on the transformed regressor t^c, for a
     grid of 30 values of c in [0.02, 1.2], keeping the c with the smallest weighted error sum of squares;
-  - define_stats_and_supports.gms l. 44-49: the trend value Step1(t) = a + b * t^c for the years YearsEst;
-  - define_stats_and_supports.gms l. 113-132: the error variance wVarErr;
+  - define_stats_and_supports.gms l. 47-49: the trend value Step1(t) = a + b * t^c for the years YearsEst;
+  - define_stats_and_supports.gms l. 118-132: the error variance wVarErr;
   - define_stats_and_supports.gms l. 177-179: wR2 = max(0, 1 - wVarErr/wVar), the term dropped where wVar = 0.
+The statements' arithmetic is in capri_mod/pipeline/captrd/equations (estimate_trends.py, define_stats_and_supports.py,
+prep_data_for_estimation.py), named functions quoting their GAMS.
 
 Conventions of the GAMS code kept here:
   - which values are observations (setting captrd.zeros_as_missing; CAPRI-ERROR-FIX, register FIX-8):
@@ -31,10 +33,13 @@ years, the BASM exclusion of prep_data_for_estimation.gms l. 214-218) is the cal
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, Mapping, Optional, Sequence
+from typing import Iterable, Optional, Sequence
 
 import numpy as np
 
+from capri_mod.pipeline.captrd.equations import define_stats_and_supports as DS
+from capri_mod.pipeline.captrd.equations import estimate_trends as ET
+from capri_mod.pipeline.captrd.equations import prep_data_for_estimation as PD
 from capri_mod.settings import current as _settings
 
 
@@ -87,19 +92,16 @@ def prestats(x, w, nobs: Optional[np.ndarray] = None, nw: Optional[np.ndarray] =
     """nObs, nW, wAve and wVar of each series.
 
     x: (series, ex-post years); w: p_trend of those years. nobs / nw may be passed when the caller has changed them
-    (CAPRI zeroes both where BASM is zero, l. 214-218, and for INHA.LEVL and DOMM of young animals, l. 221-227).
+    (CAPRI zeroes both where BASM is zero, l. 214-218, and for INHA.LEVL and DOMM of young animals, l. 221-227). The
+    lines cited here are prep_data_for_estimation.gms's.
     """
     x, obs = observed(x, zeros_as_missing)
     w = np.asarray(w, dtype=float)
-    n = obs.sum(axis=1).astype(float) if nobs is None else np.asarray(nobs, dtype=float)
-    nW = (obs * w).sum(axis=1) if nw is None else np.asarray(nw, dtype=float)
-    # l. 233-234: wAve $ nW = sum over all ExPostT of x*t / nW (zeros add nothing)
-    wave = np.where(nW != 0.0, (x * w).sum(axis=1) / np.where(nW != 0.0, nW, 1.0), 0.0)
-    # l. 241-246: wVar $ (nObs > 2) over the observations, divided by nW - 1; |wVar| <= 1E-20 -> 0
-    dev = np.where(obs, (x - wave[:, None]) ** 2 * w, 0.0).sum(axis=1)
-    with np.errstate(divide="ignore", invalid="ignore"):
-        wvar = np.where(n > 2, dev / (nW - 1.0), 0.0)
-    wvar = np.where(np.abs(wvar) <= 1e-20, 0.0, wvar)
+    n0, nw0 = PD.p_data_nObs_nW(obs, w) if (nobs is None or nw is None) else (None, None)   # l. 209-210
+    n = n0 if nobs is None else np.asarray(nobs, dtype=float)
+    nW = nw0 if nw is None else np.asarray(nw, dtype=float)
+    wave = PD.p_data_WAve(x, w, nW)                                       # l. 233-234 (zeros add nothing)
+    wvar = PD.p_data_wVar(x, obs, w, n, nW, wave)                         # l. 241-246
     return PreStats(n, nW, wave, wvar)
 
 
@@ -142,78 +144,33 @@ _CHUNK = 4000
 
 
 def _fit_block(x, obs, w, n, grid, as_coded) -> Fit:
-    S, K = x.shape[0], len(grid)
-    long_ = n > 4
-    mid = (n > 2) & (n <= 4)
-    some = n >= 1
-
-    # l. 80-85: cPar; unassigned (0) for nObs <= 2 and for grid points 2..30 when nObs is 3 or 4
-    cpar = np.zeros((S, K))
-    cpar[long_, :] = grid[None, :]
-    cpar[mid, 0] = 1.0
-
-    wk = w[None, None, :]                     # (1, 1, T)
-    ck = cpar[:, :, None]                     # (S, K, 1)
-    xo = x[:, None, :]                        # (S, 1, T)
-    ob = obs[:, None, :]
-    t_c = wk ** ck                            # t^c
-    t_c1 = t_c * wk                           # t^(c+1)
-    # l. 94-123
-    gt2 = (n > 2)[:, None]
-    trddep = np.where(gt2, (t_c1 * xo).sum(axis=2), 0.0)
-    onedep = np.where(some, (w[None, :] * x).sum(axis=1), 0.0)[:, None] * np.ones((1, K))
-    onetrd = np.where(gt2, np.where(ob, t_c1, 0.0).sum(axis=2), 0.0)
-    oneone = np.where(some, np.where(obs, w[None, :], 0.0).sum(axis=1), 0.0)[:, None] * np.ones((1, K))
-    trdtrd = np.where(some[:, None], np.where(ob, wk ** (2.0 * ck + 1.0), 0.0).sum(axis=2), 0.0)
-    # l. 128-142: assigned only where oneone*trdtrd > onetrd^2
-    lhs, rhs = oneone * trdtrd, onetrd ** 2
-    ok = lhs > rhs
-    den = np.where(ok, lhs - rhs, 1.0)
-    slope = np.where(ok, (trddep * oneone - onedep * onetrd) / den, 0.0)
-    const = np.where(ok, (onedep * trdtrd - trddep * onetrd) / den, 0.0)
-    # l. 146-155: wESS $ nObs over the observations
-    resid = xo - const[:, :, None] - slope[:, :, None] * t_c
-    wess = np.where((n != 0)[:, None], np.where(ob, resid ** 2 * wk, 0.0).sum(axis=2), 0.0)
-    # l. 160: grid points 2..30 set to zero for nObs <= 4
-    short = (n <= 4)
-    for arr in (cpar, slope, const, wess):
-        arr[short, 1:] = 0.0
-
-    if as_coded:
-        cand = wess
-    else:
-        cand = np.where(short[:, None] & (np.arange(K)[None, :] > 0), np.inf, wess)
-    wmin = cand.min(axis=1)
-    # l. 168-171: the first grid point with wESS equal to the minimum
-    k_opt = np.argmax(cand == wmin[:, None], axis=1)
-    rows = np.arange(S)
+    """estimate_trends.gms l. 80-183 for a block of series; the statements' arithmetic in
+    capri_mod/pipeline/captrd/equations/estimate_trends.py."""
+    cpar = ET.p_trendRes_cPar(n, grid)                                                 # l. 80-85
+    trddep, onedep, onetrd, oneone, trdtrd = ET.p_trendRes_sums(x, obs, w, n, cpar)    # l. 94-123
+    slope, const = ET.p_trendRes_slope_const(trddep, onedep, onetrd, oneone, trdtrd)  # l. 128-142
+    wess = ET.p_trendRes_wESS(x, obs, w, n, cpar, slope, const)                       # l. 146-155
+    ET.p_trendRes_short_zero(n, (cpar, slope, const, wess))                           # l. 160
+    wmin, k_opt = ET.p_trendRes_cOpt_wESS_ordOpt(wess, n, as_coded)                   # l. 166-171
+    a, b, c = ET.p_trendRes_cOpt(n, cpar, slope, const, k_opt)                        # l. 173-183
     has = n != 0
-    a = np.where(has, const[rows, k_opt], 0.0)                     # l. 177-179 ($ nObs)
-    b = np.where(n > 2, slope[rows, k_opt], 0.0)                  # l. 173-175 ($ nObs > 2)
-    c = np.where(n > 2, cpar[rows, k_opt], 0.0)                   # l. 181-183 ($ nObs > 2)
     return Fit(a, b, c, np.where(has, wmin, 0.0), np.where(has, k_opt, -1))
 
 
 def step1_values(f: Fit, nobs, t_est) -> np.ndarray:
-    """define_stats_and_supports.gms l. 44-49: Step1(t) = a + b * t^c for the years YearsEst, where nObs > 0."""
-    t = np.asarray(t_est, dtype=float)[None, :]
-    v = f.a[:, None] + f.b[:, None] * t ** f.c[:, None]
-    return np.where((np.asarray(nobs) != 0)[:, None], v, 0.0)
+    """define_stats_and_supports.gms l. 47-49: Step1(t) = a + b * t^c for the years YearsEst, where nObs > 0."""
+    return DS.p_result_Step1(f.a, f.b, f.c, nobs, t_est)
 
 
 def error_variance(x, w, f: Fit, pre: PreStats, zeros_as_missing: Optional[bool] = None) -> np.ndarray:
-    """define_stats_and_supports.gms l. 113-132.
+    """define_stats_and_supports.gms l. 118-132.
 
     nObs > 2: sum over the observations of (x - a - b t^c)^2 * t, divided by nW - 1;
     nObs in {1, 2}: 0.25 * wAve^2 (the fall-back of l. 127-132).
     """
     x, obs = observed(x, zeros_as_missing)
     w = np.asarray(w, dtype=float)
-    r = x - f.a[:, None] - f.b[:, None] * w[None, :] ** f.c[:, None]
-    ess = np.where(obs, r ** 2 * w[None, :], 0.0).sum(axis=1)
-    with np.errstate(divide="ignore", invalid="ignore"):
-        v = np.where(pre.nobs > 2, ess / (pre.nw - 1.0), 0.0)
-    return np.where((pre.nobs == 1) | (pre.nobs == 2), 0.25 * pre.wave ** 2, v)
+    return DS.p_data_wVarErr(x, obs, w, f.a, f.b, f.c, pre.nobs, pre.nw, pre.wave)
 
 
 def r_squared(wvarerr: np.ndarray, pre: PreStats) -> np.ndarray:
@@ -221,9 +178,7 @@ def r_squared(wvarerr: np.ndarray, pre: PreStats) -> np.ndarray:
 
     GAMS binds the $ to the ratio: where wVar = 0 (constant series, nObs <= 2) wR2 is 1.
     """
-    with np.errstate(divide="ignore", invalid="ignore"):
-        ratio = np.where(pre.wvar != 0.0, wvarerr / np.where(pre.wvar != 0.0, pre.wvar, 1.0), 0.0)
-    return np.where(pre.nobs != 0, np.maximum(0.0, 1.0 - ratio), 0.0)
+    return DS.p_data_wR2(wvarerr, pre.wvar, pre.nobs)
 
 
 @dataclass

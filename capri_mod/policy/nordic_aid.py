@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from capri_mod.policy.equations.nordicaid import p_premDataE_appType, p_premDataE_psGroup
 from capri_mod.supply import inputs as _inputs
 
 
@@ -43,17 +44,20 @@ def nordic_declarations(year: int, d: dict = None):
     rate = defaultdict(float)
     for s, g, n, v in zip(d["rates"].scheme, d["rates"].group, d["rates"].nordic_region, d["rates"].rate):
         rate[(str(s), str(g), str(n))] += float(v)
-    decl = {}
+    terms = {}
     for r, by_n in share.items():
         for (s, g, n), v in rate.items():
             if n in by_n:
-                x = decl.setdefault((r, s), {"rates": {}})
-                x["rates"][g] = x["rates"].get(g, 0.0) + by_n[n] * v
+                t = terms.setdefault((r, s), {}).setdefault(g, ([], []))
+                t[0].append(by_n[n])
+                t[1].append(v)
+    decl = {k: {"rates": {g: p_premDataE_psGroup(sh, am) for g, (sh, am) in by_g.items()}} for k, by_g in terms.items()}
     ceilings = {(str(m), str(s)): {"CEILVAL": float(v)}
                 for s, m, v in zip(d["ceilings"].scheme, d["ceilings"].ms, d["ceilings"].ceiling_meur)}
     for (m, s) in ceilings:
         decl.setdefault((m, s), {"rates": {}})
     for (r, s), x in decl.items():
-        if (r, s) in ceilings or any(x["rates"].values()):
-            x["APPTYPE"] = apptype[s]
+        t = p_premDataE_appType((r, s) in ceilings, x["rates"].values(), apptype[s])
+        if t is not None:
+            x["APPTYPE"] = t
     return decl, ceilings

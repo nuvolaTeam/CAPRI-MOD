@@ -89,6 +89,13 @@ copies of the area table are identical in levels: one kept).
 - The equation refactor's checks (tools/refactor/check_gams_quotes.py, check_gams_citations.py and
   capri_mod/tests/test_refactor_checks.py) read it and skip when it is not star 3.0.
 
+**`gui/`**: files of CAPRI's GUI folder (the project lead's copy): `capri_gui_definition.xml` (the GUI's controls, their
+titles, GAMS names and options) and `batchfiles/greendeal_scen2.txt` (the batch of CAPRI's Green Deal production runs,
+author P. Witzke; its section "f2f" phases the Green Deal group's targets in by simulation year).
+- From: `GUI.zip`, the project lead's copy of CAPRI's GUI folder (uploaded 7 November 2026); the two files unpacked
+  as they are (the batch with its Windows line ends).
+- Read by: build_greendeal_batch_targets (with `gams/pol_input/greendeal/greendeal_scenarios.gms`).
+
 **`dat/`**: CAPRI's `dat` folder as parquet, the project's mirror of it.
 - From: the project lead; and, on 10 November 2026, from the public mirror of CAPRI's dat folder on Hugging Face
   (dataset jrc-ai/capri, an older dat vintage): `arm/allpop/worldPop.parquet`, `arm/nutrient_cont_usda/
@@ -154,6 +161,12 @@ added on 11 November 2026: `baseline/data_SSPV3_update/` (SSP_DATA), `arm/allpop
   (`capri/dat/policy/<file>/`, `capri/dat/baseline/<file>/`). build_captrd_biofuel reads `biofuel/biofuel_data.gms` (above;
   the name star 3.0 includes, biofuel/biofuel_trends.gms l. 1344), until then the course copy's `Biofuel_data.gms`,
   which differs only in path separators and the encoding of two comments; the builder's outputs are unchanged.
+- Added on 24 November 2026 (the project lead's file): `feed/porkreq.gms`, CAPRI's pig-fattening requirements by
+  weight class (TABLE p_pigsReqHighWgt and p_pigsReqLowWgt; included by feed/feed_decl.gms l. 191), read by
+  build_req_or_man_params (its `--dat`) for the fattened pigs' manure (capri_mod/feed/equations/req_or_man_fnc.py,
+  KNOWN_ISSUES K179). Published the same day as Parquet in the raw set below (`capri/dat/feed/porkreq/`). The
+  project lead's fedcof.gms of the same day is the file the builders already read (capri_sources/exports/fedcof.gms,
+  build_mitigation_inputs's p_nutCont): the same table, one comment's encoding apart.
 
 **`results_local/capreg/`**: CAPREG's time series `res_time_series_17<CC>.gdx` (35; DATA1, RALL, DB_COLS, DB_ROWS,
 META; upload res_time_series_17ES.zip), read by create_longrun_info.gms l. 66-70 (through dat_parquet/capreg).
@@ -181,6 +194,12 @@ tools/pipeline/capri_raw_manifest.json, which also names the dataset commit the 
 of the uploads; uploads are no longer tagged, each file is pinned by its SHA-256 (the project lead, 12 November 2026; tags
 v2026.11.10 to v2026.11.11.2 were used until then, of which v2026.11.11.2 remains). First upload 10 November 2026: the six GDX files received that day
 (exports/ and results/ above).
+Added on 24 November 2026: `capri/results/capreg/reqrel_17<CC>/` of all 35 countries (CAPREG's 2017 requirement
+corrections p_animReqCorrFac1, which capmod/load_feed.gms l. 56-60 loads as p_animReqCorrFac; 27 added to the 8 non-EU
+ones already there, the project lead's reqrel_17XX.zip of that day) and `capri/results/baseline/
+fedtrm_21730<CC>defaulta/` of 34 countries (AL not among them; the baseline feed calibration's p_animReqCorrFac,
+calyeaCal and v_lossQuant, load_feed.gms l. 71-76; the project lead's files delivered 21 November 2026). Read by
+tools/check/check_sim_ini_requirements_2030.py (the fedtrm files as CAPRI's results, for the check only).
 
 **`gdxlib/`**: GAMS's GDX library, `libgdxcclib64.so`. This is software, not data.
 - From: built from the open-source GDX library (MIT; README section 3). No GAMS installation or licence is needed.
@@ -282,7 +301,7 @@ named below.
 | `fao_agg/17/<symbol>.csv.gz` | text listing `FAO_agg_17_defaulta.csv` of the global database `fao_agg_17_defaulta.gdx` (upload FAO_agg_17_defaulta.zip) | `p_biofuelData`, `p_aglinkGrowthFactor` (load_coco1_data.gms l. 360); columns d0…dn, value, eps | `tools/build/build_fao_agg_reference.py --src FAO_agg_17_defaulta.zip` |
 | `captrd_results/1770/<respos>.csv.gz` | `results_1770.gdx` (base 2017, simulation years 2018–2070) | CAPTRD's `p_result(region, col, row, t, respos)`, one file per result position (Step1, support, support1, wVarErr, step2, step3, series, P_Data, data statistics, …); `respos_counts.csv` lists all positions and `settings.csv` the run settings | `tools/build_captrd_results_reference.py --src results_1770.gdx --tag 1770` |
 | `sets/simini_21730/<SET>.csv` | `sim_ini_21730.gdx` (CAPMOD restart file of the endotech Green Deal 2030 run) | the 1,972 CAPRI sets of that run (global sets.gms and loaded modules, with the run's switches applied), one file per set with `_index.csv`; sets defined only in CAPTRD (sets_captrd.gms) are not among them | `tools/build_capri_sets_reference.py --src sim_ini_21730.gdx --tag simini_21730` |
-| `simini/simini_21730/<symbol>.csv.gz` | `sim_ini_21730.gdx` (the same restart file as `sets/simini_21730`) | CAPRI's calibrated 2030 market state for the move onto CAPRI's market regions and the ports' checks, and the per-technology terms of CAPRI's crop technologies (p_pmpCnst, p_technFact, since 7 November 2026), and the inputs of the crops' nutrient data that fert/fertned.gms rebuilds in the simulation year (DATA at "Y": yields, straw, the outputs' nutrient contents, the fodder losses, the fodder legume share; build_capri_crop_n_coefs, 20 November 2026, K191): the symbols listed with their use in `tools/build/simini_reference_symbols.csv` (DATA, the trade flows and prices, TRQs, levies, entry prices, Armington and CES parameters, the GL demand and NQ Hessians, the market variables' levels and bounds), with `_index.csv`; parameters `d0…dn, value, eps`, variables `d0…dn, level, eps, lower, upper, marginal`; +INF/-INF as inf/-inf, NA as nan. `--check sim_ini_21730_1.gdx` found the 37 symbols identical in the second upload (2 November 2026), and all 51 on 7 November 2026 | `tools/build/build_simini_reference.py --src sim_ini_21730.gdx --tag simini_21730` |
+| `simini/simini_21730/<symbol>.csv.gz` | `sim_ini_21730.gdx` (the same restart file as `sets/simini_21730`) | CAPRI's calibrated 2030 market state for the move onto CAPRI's market regions and the ports' checks, and the per-technology terms of CAPRI's crop technologies (p_pmpCnst, p_technFact, since 7 November 2026), and the inputs of the crops' nutrient data that fert/fertned.gms rebuilds in the simulation year (DATA at "Y": yields, straw, the outputs' nutrient contents, the fodder losses, the fodder legume share; build_capri_crop_n_coefs, 20 November 2026, K191), the animals' 2030 requirements and places (p_animReq, DATA LEVL and DAYS at Y: build_lownfeed_effects, K194; build_supplement_effects, DEP-53) and the feed bulks' GROF at TRD (build_feed_bulk_grof, K197; 23 November 2026): the symbols listed with their use in `tools/build/simini_reference_symbols.csv` (DATA, the trade flows and prices, TRQs, levies, entry prices, Armington and CES parameters, the GL demand and NQ Hessians, the market variables' levels and bounds), with `_index.csv`; parameters `d0…dn, value, eps`, variables `d0…dn, level, eps, lower, upper, marginal`; +INF/-INF as inf/-inf, NA as nan. `--check sim_ini_21730_1.gdx` found the 37 symbols identical in the second upload (2 November 2026), and all 51 on 7 November 2026 | `tools/build/build_simini_reference.py --src sim_ini_21730.gdx --tag simini_21730` |
 | `datam_mirror_2040/<table>.csv` | the project lead's extracts of the JRC DataM dashboard MRL_TO_LOQ_2 (`capri_sources/datam_mirror_2040/*.xlsx`, uploaded 5 November 2026; data valid as of February 2026 per the dashboard) | CAPRI's 2040 results of the JRC study on aligning import production standards (pesticide active substances not approved in the EU), four scenarios (Baseline, switchX-scaleEFSA_5, switchX-scaleEFSA+min20, noadapt-noscale): utilised area per member state, EU production change per product (scenario not stated in the extract), producer prices per trade region and product, bilateral trade per reporter, product and partner (variable and unit not stated). Not read by the model or the pipeline: a future 2040 check for CAPTRD-MOD (MODEL_CONTENT_PLAN §14 item 19); the shock inputs and CAPRI's scenario code are not in the extracts | `tools/build/build_datam_mirror_2040_reference.py` |
 
 Columns of the data files: `region, col, row, t, value, eps`.

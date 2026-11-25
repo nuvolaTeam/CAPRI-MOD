@@ -19,6 +19,7 @@ from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
 from capri_mod.market.state import MarketStateMixin
 from capri_mod.market.demand_ad import gl_eval, gl_block_function
 from capri_mod.market.processing_ad import proc_nq_function
+from capri_mod.market.equations.welfare import p_pbGL
 
 
 class DemandMixin(MarketStateMixin):
@@ -63,6 +64,7 @@ class DemandMixin(MarketStateMixin):
                     if i_ in idx and j_ in idx:
                         B[idx[i_], idx[j_]] = v
                         B[idx[j_], idx[i_]] = v
+                B = p_pbGL(B)                    # welfare.gms l. 100 (the reading has set both halves already)
                 p0 = g["cpri"].to_numpy(dtype=float) / 1000.0
                 if not np.all(p0 > 0):
                     continue
@@ -282,10 +284,10 @@ class DemandMixin(MarketStateMixin):
         fb = self._feed_bulk_params()
         fdp = self._feed_demand_params()
         # other regions: CAPRI's FeedNQ_ with the feed energy price of FeedBal_ (audit M3), each trade region's feed
-        # changing by its behavioural regions' feed changes over its CAPRI base feed; else (market.noneu_feed_nq off, or
-        # outside a bilateral evaluation) one constant-elasticity function per region and product (p_ElasFeed)
+        # changing by its behavioural regions' feed changes over its CAPRI base feed; else (outside a bilateral
+        # evaluation) one constant-elasticity function per region and product (p_ElasFeed)
         fnq, fnq_regs = None, set()
-        if self.noneu_feed_nq and self.ev.fede_now is not None:
+        if self.ev.fede_now is not None:
             fnq = self.noneu_feed_change(pd.DataFrame(PR, index=self.regions, columns=self.commodities), self.ev.fede_now)
             fnq_regs = {d.get("tr") for d in self._noneu_feed_params()["rms"].values()}
         _dairy_fed = set(self.DAIRY_TRADED.values())
@@ -334,7 +336,10 @@ class DemandMixin(MarketStateMixin):
             if i is None or not fb or _reg not in (self.ev.sup_active or ()):
                 continue
             f0r = (fb.get("feed0_sup") or {}).get(_reg, {})
-            feed = self.sup_feed_use(_reg, {c: float(PR[i, Cc[c]]) for c in f0r if c in Cc})
+            # the bulks' response to the region's market prices within the solve (CAPRI's feedBlk_ for every RMSSUP;
+            # register DEP-54)
+            bf_ = self.feed_bulk_market_factor({c: float(PR[i, j_]) for c, j_ in Cc.items()}, region=_reg)
+            feed = self.sup_feed_use(_reg, {c: float(PR[i, Cc[c]]) for c in f0r if c in Cc}, bulk_factor=bf_)
             self.ev.sup_feed_now[_reg] = feed
             for c, q in feed.items():
                 j = Cc.get(c)

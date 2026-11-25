@@ -88,7 +88,7 @@ def coefficients(p: pd.DataFrame, sets: CaptrdSets, expost: Iterable[int],
             xk = [(m, a, o) for o in sorted(outs) if (m, a, o) in wide.index]
             X = sum((wide.loc[k, ex].to_numpy(float) for k in xk), np.zeros(len(ex)))
             X = np.nan_to_num(X)
-            for q in reqst:
+            for q in sorted(reqst):
                 k = (m, a, q)
                 if k not in wide.index:
                     continue
@@ -110,7 +110,7 @@ def coefficients(p: pd.DataFrame, sets: CaptrdSets, expost: Iterable[int],
             lv_basm = val(r, a, "LEVL", "BASM")
             lv_nobs = val(r, a, "LEVL", "nObs")
             y_basm = sum(val(r, a, o, "BASM") for o in sorted(outs))
-            for q in reqst:
+            for q in sorted(reqst):
                 c0, s0, n0 = reg.get((r, a, q), (0.0, 0.0, 0.0)) if r in ms_set else (0.0, 0.0, 0.0)
                 cm, sm, _ = reg.get((m, a, q), (0.0, 0.0, 0.0))
                 slope = sm if lv_basm else s0

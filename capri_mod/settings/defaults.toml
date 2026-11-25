@@ -48,8 +48,11 @@ nlp_derivative_cache_size = 16
 # the countries outside the EU whose supply models are in the run, by CAPRI member-state code (CAPRI's per-country
 # switches, %CountriesNO000000% ... %CountriesTUR%, capmod/define_regional_sets.gms l. 40-77). Each must have regional
 # units (capri_data/codes/regional_units.csv). Their market region takes its supply from their models; a country
-# left out keeps its market region's supply functions. The EU's member states are always in.
-supply_countries_outside_eu = ["NO000000"]
+# left out keeps its market region's supply functions. The EU's member states are always in. Default: CAPRI's list in
+# its 2030 Green Deal runs, Norway, the UK, Turkey and the Western Balkans (250 units; the project lead's decision of
+# 24 November 2026, register DEP-7 in its history); ["NO000000"] the setting until then (221 units)
+supply_countries_outside_eu = ["NO000000", "UK000000", "TUR", "AL000000", "BA000000", "CS000000", "KO000000", "MK000000",
+                               "MO000000"]
 # a folder of the user's own scenarios, looked in before capri_data/scenarios; "" = none. A scenario
 # there may name a reference or group of the repository's (python -m capri_mod.scenarios new / check)
 scenarios_dir = ""
@@ -61,10 +64,9 @@ scenarios_dir = ""
 results_dir = "results"
 
 [outer_loop]
-# the supply-market iterations at most (CAPRI's %STEPS%: 99 in its GUI for a scenario run, gui/capri_gui_definition.xml
-# l. 2891-2897); 60 since 28 October 2026 (the project lead's decision; 25 before): CAPRI's stop rule needs 30 in the
-# Green Deal 2030 scenario (r168)
-max_outer_iter = 60
+# the supply-market iterations at most: CAPRI's %STEPS%, 99 in its GUI for a scenario run (gui/capri_gui_definition.xml
+# l. 2891-2897); since 25 November 2026 (the project lead, 24 November: follow CAPRI; 60 from 28 October, 25 before)
+max_outer_iter = 99
 # convergence of the outer loop: largest relative price change between iterations (CAPRI p_minIterChg 0.05%, on
 # a different metric)
 outer_tolerance = 0.005
@@ -136,11 +138,9 @@ manure_pool_omega_up = 1.25
 manure_pool_omega_down = 0.5
 manure_pool_omega_min = 0.25
 manure_pool_qp_tol = 1e-8
-# the "capri" form's solver of CAPRI's pool market m_mPoolMarket: "nlp" (as CAPRI, "using nlp maximizing
-# v_mPoolBenefits", simu_manure_market.gms l. 160: its variables and four rows, IPOPT for CAPRI's CONOPT, started from the
-# clearing before) or "qp" (the same problem as a convex QP, Clarabel; until 20 November 2026 the only form); IPOPT's
-# tolerance and iteration limit for "nlp" (not CAPRI parameters)
-manure_pool_solver = "nlp"
+# (outer_loop.manure_pool_solver retired 23 November 2026: the "capri" form's pool market m_mPoolMarket is solved as
+# CAPRI solves it, "using nlp maximizing v_mPoolBenefits", simu_manure_market.gms l. 160, with IPOPT for CAPRI's CONOPT;
+# its convex QP form, the only one until 20 November 2026, is the tests' cross-check, test_manure_pool_nlp.py)
 # the "capri" form's trade cost constants of the regions (CAPRI's p_manureSellCostConst, p_manureBuyCostConst):
 # "solution" (recomputed at each clearing from the regions' reduced costs, so the market's first-order conditions hold
 # at the regions' solutions; they carry the regions' N-surplus dual, DEP-17) or "capri" (as CAPRI: those of the first
@@ -360,6 +360,11 @@ greendeal_winter_cover = "capri"
 # option with its cost curve, calibrated from the same base; the default since 20 November 2026, K188) or "option"
 # (capri-mod's form until then: the option with its cost curve in every run, the rule's multiplier zero at the base)
 reference_winter_cover = "capri"
+# The catch crops' biological N fixation where it is on (the Green Deal group, a run with an emission tax; not CAPRI's
+# reference form, K188): "capri" (BioFix x the whole catch-crop area, CAPRI's e_BIOFIX l. 1442 and fertDistCres_
+# l. 1073-1079: the base's catch crops too; the default since 24 November 2026, K204) or "increment" (capri-mod's form
+# until then: BioFix x the area above the base share)
+catch_crop_biofix_area = "capri"
 # Green Deal organic and pesticide targets: CAPRI's regional input changes (define_inputs.gms l. 66-73).
 # CAPRI-ERROR-FIX. conventional_io.gms l. 361 sets scenAugmentsTechChange off at compile time, after organic_io.gms
 # l. 94 and conventional_io.gms l. 171 set it on, so the scenario's input change REPLACES the 2017-2030 input-saving
@@ -390,6 +395,9 @@ greendeal_plap_mix_capri_step = false
 # leaves the base share (FR10 precision farming 0.44 at the 2030 baseline, run r128: EU 9.6%); either part alone
 # keeps the base. Open (KNOWN_ISSUES K77)
 fert_slope_with_saving = false
+# (supply.fert_option_cal_relsubs0 retired 23 November 2026: DEP-30's calibration of the fertiliser options and the
+# inhibitor on manure leaves CAPRI's relSubs0 x costParLin at their initial share, with the saving at the model's own
+# value of N, equations/ghgmiti.py pmpParlin_fertTech_DEP30; the form of before 21 November 2026 is gone, KNOWN_ISSUES K196)
 
 [fertiliser]
 # the inner model's duals widened to +-1000 where CAPRI's +-10 admit no allocation (REGISTERED, CAPRI's own
@@ -453,17 +461,10 @@ biofuel_markets = true
 # iteration by simu_calibration_to_supply.gms); CAPRI's setting since 24 October 2026 (K75). The Hessian is measured
 # once per baseline by price shocks on the supply models and cached on disk (.cache/market_supply_hessian)
 market_supply_nq = true
-# the non-EU market regions' supply as CAPRI's market supply functions (arm/market_model.gms ProdNQ_: p_hessNQSupp at
-# the 2030 calibration point with its cross-price terms and raw milk's, tools/build/build_noneu_market_supply_nq.py;
-# KNOWN_ISSUES K54-3); false: one own-price constant elasticity per region and product (CAPRI's p_elasSupp of 2017),
-# the form until 29 October 2026
-noneu_supply_nq = true
-# CAPRI's market land block outside the EU (arm/market_model.gms LandSupplyMNL_, LndSupplyEqualsDemand_,
-# rentFromProdpriceLand_; supremaMrk on): the rents of TCRP, FODFAL and FRUN clear each non-EU region's land market,
-# the MNL land supply against ProdNQ_'s land demand, and move its market supply functions (noneu_land_market.csv,
-# noneu_land_mnl.csv; tools/build/build_noneu_market_supply_nq.py); false: the rents held at calibration (until
-# 4 November 2026). Needs noneu_supply_nq
-noneu_land_market = true
+# (retired 23 November 2026, the old forms gone: market.noneu_supply_nq, market.noneu_land_market,
+# market.feed_bulk_in_market, market.noneu_feed_nq, market.sup_milk_in_market, market.trq_joint. The market always
+# takes CAPRI's forms they chose: ProdNQ_ outside the EU, its land block, feedBlk_ inside the market, FeedNQ_ with
+# FeedBal_, Norway's raw milk in the market, the quotas solved with the prices; KNOWN_ISSUES K54-3, M3, M4, K117)
 # the young-animal markets and the member states' raw milk inside each market evaluation (CAPRI: yaniMarket_ and DairyNQ_
 # in one system, m_globMarket), cleared in alternating rounds until the milk prices change by less than yani_milk_tol,
 # at most yani_milk_rounds (a message when the rounds stop first). 4 rounds until 14 November 2026 (the project lead's
@@ -474,29 +475,13 @@ yani_milk_tol = 1e-10
 # capmod/set_global_variables.gms l. 395; arm/market_model.gms LinkLuWithShares_, luClassInitial_, luClassFinal_,
 # FocLUC_): the transitions between the UNFCCC land classes of each non-EU region with the land block, reported with the
 # market's solution (luc_market_*.csv, tools/build/build_luc_market.py; capri_mod/market/luc.py). No feedback on the
-# market (CAPRI's only one is the LULUCF cost under a carbon price, lulucf_market, not ported). Needs noneu_land_market
+# market (CAPRI's only one is the LULUCF cost under a carbon price, lulucf_market, not ported)
 luc_market = true
 # luc_market's Newton on the duals of its balances (capri_mod/market/luc.py solve_region): the iteration limit, the
 # tolerance on the balances (relative to the largest initial class) and the residual above which a market solve stops
 luc_max_iter = 200
 luc_tol = 1e-10
 luc_accept_tol = 1e-6
-# CAPRI's feed bulk demand inside the market (feedBlk_, audit M4): the member states' bulks respond to the prices within a
-# market solve from the supply models' bulks at the prices they saw, with the elasticities measured on the supply models
-# (the market supply Hessian's FEEDBLK rows); false: fixed within a solve (until 29 October 2026). Same fixed point
-feed_bulk_in_market = true
-# CAPRI's non-EU feed demand (FeedNQ_ with the feed energy balance FeedBal_, audit M3): each non-EU behavioural region
-# without supply models feeds by its normalised-quadratic feed function of the Arm1 prices and its feed energy price FEDE,
-# which clears its feed energy against its animal output; FEDE also moves its market supply functions
-# (tools/build/build_feed_energy.py, build_noneu_feed_nq.py); false: p_ElasFeed constant elasticities, FEDE held (until
-# 29 October 2026)
-noneu_feed_nq = true
-# CAPRI's raw milk of the non-EU regions with supply models (Norway, RMSSUP): ProdNQ_ MILK stays in the market
-# (arm/simu_calibration_to_supply.gms l. 423-427: v_prodQuant MILK at the supply models' level, bounds 0.1 to 10 x, the
-# constant re-anchored there), so the milk delivered responds to the region's dairy-block milk price and to the other
-# prices with the market supply Hessian's MILK row, and the products to the milk price with its MILK column (step F,
-# 29 October 2026); false: Norway's milk fixed at its supply models' within a market solve (until 29 October 2026)
-sup_milk_in_market = true
 # price shock of the market supply Hessian (calibrate_supply.gms)
 nq_price_shock = 0.01
 # bilateral market solve: acceleration ("anderson" or "none"), memory, chord step for trade, Newton rounds,
@@ -504,11 +489,6 @@ nq_price_shock = 0.01
 acceleration = "anderson"
 aa_memory = 5
 trade_chord = true
-# CAPRI's tariff-rate quotas solved together with the prices in each commodity's trade system (trqSigmoidFunc_ and
-# TRQImports_ in the same system, as m_globMarket; MARKET_IPOPT_DESIGN §7.1 step 2); false: the quotas' sigmas as an
-# outer fixed point one market step behind the prices (BilateralCommodity.trq_solve, the default until 5 November 2026;
-# KNOWN_ISSUES K117)
-trq_joint = true
 # the non-EU land markets' Newton (MarketModule land rents, supply.py): the residual, relative to each land use's
 # base area (floor 1 kha), below which the solve is accepted when 100 Newton steps have not met the 1e-13 target (the
 # line search no longer reduces it: round-off); otherwise the run stops as before. 1e-8: the order of CONOPT's
@@ -601,12 +581,9 @@ max_step = 0.3
 small_market_scale = 0.1
 
 [environment]
-# the base mineral N per ha of each crop (the accounts' and the supply models' base, CAPRI's NMIN in data["mineral_n_regional"]
-# for 2017): "capri2030", CAPRI's 2030 reference (its inner model's mineral flow per crop, fertDist_mine, whose sum is
-# CAPRI's purchases MINFER; npk_crop_coefs_2030.csv), as the accounts' other 2030 coefficients (capri_crop_n_coefs_2030);
-# "capri2017", CAPRI's 2017 NMIN on the 2030 levels (the model's base until 14 November 2026: Romania's mineral N 32%
-# below CAPRI's 2030 reference, France's 24% above)
-base_mineral_n = "capri2030"
+# (environment.base_mineral_n retired 23 November 2026: the base mineral N per ha of each crop is CAPRI's 2030 reference,
+# its inner model's mineral flow per crop, npk_crop_coefs_2030.csv; the 2017 NMIN form, the base until 14 November 2026,
+# is gone: EnvironmentalModule._base_mineral_rate)
 # CAPRI-ERROR-FIX: CAPRI's ad_data_and_cali.gms l. 588 zeroes the factor dairy AD needs; "fix" applies CAPRI's CH4 factor
 # to dairy cows as to the other animals, "capri" reproduces CAPRI as coded
 ad_dairy_ch4 = "fix"

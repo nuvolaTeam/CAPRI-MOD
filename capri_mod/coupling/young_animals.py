@@ -9,6 +9,9 @@ from __future__ import annotations
 
 from capri_mod import statekit as _cst   # the state objects' helpers
 from capri_mod import statekit as _cst   # the state objects' helpers
+from capri_mod.coupling.equations.simu_calibration_to_supply import DATA_Prod_OMYANI
+
+
 class YoungAnimalBlock:
     def _yani_market_region(self, reg: str) -> str:
         """The young-animal market of a supply region: CAPRI clears young animals per market region (yaniMarket_ per
@@ -57,7 +60,7 @@ class YoungAnimalBlock:
                     # the intensity pairs alone (the port of CAPRI's bull and heifer splits), as in the validated runs r86 / r87
                     u_ += sum(float(c) * float(cz.get(a, 0.0)) * float(ct[a]["dyoung_rel"])
                               for a, c in r.get("use", {}).items() if a in cz and a in ct)
-                    net[(mr, g)] = net.get((mr, g), 0.0) + p_ - u_
+                    net[(mr, g)] = DATA_Prod_OMYANI(net.get((mr, g), 0.0), p_, u_)
                     prod[(mr, g)] = prod.get((mr, g), 0.0) + p_
                     continue
                 for k_, z_ in cz.items():
@@ -73,7 +76,7 @@ class YoungAnimalBlock:
                     dp = ct[k_].get(f"dprod_{g}_rel")
                     if cp_ and dp is not None and dp == dp:
                         p_ += float(cp_) * float(z_) * float(dp)
-                net[(mr, g)] = net.get((mr, g), 0.0) + p_ - u_
+                net[(mr, g)] = DATA_Prod_OMYANI(net.get((mr, g), 0.0), p_, u_)
                 prod[(mr, g)] = prod.get((mr, g), 0.0) + p_
         return net, prod
 
@@ -200,7 +203,7 @@ class YoungAnimalBlock:
 
     def _young_animal_state_to_market(self, supply_results, ref) -> None:
         """The supply models' young-animal state for the market's clearing (CAPRI simu_calibration_to_supply.gms
-        l. 166-175, 360-368: the market's young-animal net supply recalibrated to the supply models' latest solution):
+        l. 208-217, 254-255, 360-368: the market's young-animal net supply recalibrated to the supply models' latest solution):
         per market, each good's net balance now, its reference (the baseline's) and the price ratio those models saw;
         also the imbalance reported by the outer loop (net - reference over the market's production)."""
         net, prod = self._young_animal_balance(supply_results)

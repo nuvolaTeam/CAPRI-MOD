@@ -98,12 +98,15 @@ def test_every_item_the_supply_module_writes_is_declared():
     """Every field of SupplyResult and every attribute the supply module sets on a regional result is declared in
     results_items.csv, whatever the scenario's options: an item filled only under an option (manure trade's P and K,
     the mineral caps, the nitrate rule) otherwise passes the runs without it and stops the writing of one with it
-    (the Green Deal 2030 gate, 3 November 2026: supply.manure_trade_pk)."""
+    (the Green Deal 2030 gate, 3 November 2026: supply.manure_trade_pk). The attributes set on the result as
+    `result.x =` or `res.x =` (not `self.res.x`, the regional model's state): the ration fat limit's supp_fat, set as
+    res.supp_fat, passed the check written for `result.` only and stopped the writing of a Green Deal run (23 November
+    2026)."""
     import dataclasses
     import re
     import capri_mod.supply.supply_module as SM
     src = Path(SM.__file__).read_text()
-    written = set(re.findall(r"\bresult\.([a-z_][a-z0-9_]*)\s*=(?!=)", src))
+    written = set(re.findall(r"(?<![.\w])(?:result|res)\.([a-z_][a-z0-9_]*)\s*=(?!=)", src))
     fields = {f.name for f in dataclasses.fields(SupplyResult)}
     it = IO.results_items()
     declared = set(it.loc[it.block == "supply", "item"])

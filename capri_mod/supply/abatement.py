@@ -7,6 +7,9 @@ this module once supply_module is loaded (capri_mod.utils.mixins.inject_names); 
 """
 from __future__ import annotations
 
+from capri_mod.supply.equations.ghgmiti import (
+    p_ghgMiti_maxShare_N2OMAN, p_ghgMiti_pmpParsqr, p_ghgMiti_pmpParsqr_saving, p_ghgMiti_QEmitt_NITR_INH)
+
 
 class AbatementBlock:
     def _techs_inside(self) -> bool:
@@ -97,6 +100,125 @@ class AbatementBlock:
                 "sqr": float(opt.at[reg, "pmp_sqr"]), "biofix": bf, "row": row, "rhs": rhs,
                 "potential": max(0.0, uaa - cov0)}
 
+    def _till_spec(self):
+        """CAPRI's conservation and no tillage options of this region for the NLP form (envind/tillage.gms; the table
+        tillage_options.csv, tools/build/build_tillage_options.py), or None: outside the EU (CAPRI's %TillInAllRmssup%
+        off, tillage.gms l. 586-587), not among the run's active technologies, no data, no tillage crop.
+        {"cols": the tillage crops' columns, "techs": [{"name", "m0", "ub", "k1", "lin", "sqr", "n2osyn"}]}: the shares
+        v_Miti(cropMiti, tech, CO2SEQ) of the tillage area (the levels of the tillage crops, CAPRI's CFACTOR_ARAB, whose
+        DATA(ru, crop, TILLSET, Y) is 1, l. 324), between 0 and MaxShare (1); the cost per ha of tillage area
+        costParLin, pmpParLin and pmpParSqr (l. 401-402, 605-849); NoTill's othImpact on the N2O of mineral N
+        (l. 579-582)."""
+        if not is_eu(self.data.region_id):
+            return None
+        act_ = active_technologies()
+        from capri_mod.data.definitions import TILLAGE_CROPS
+        opt = _inputs.current().cached(                                   # a missing file is an error (K74)
+            "tillage_options", lambda inp: inp.csv("tillage_options.csv", "abatement/mitigation"))
+        rows = opt[opt["region"] == self.data.region_id]
+        cols = [j for j, a in enumerate(self.acts) if a in TILLAGE_CROPS]
+        if rows.empty or not cols:
+            return None
+        techs = []
+        for r in rows.itertuples(index=False):
+            if act_ is not None and str(r.technology).upper() not in {str(t).upper() for t in act_}:
+                continue
+            techs.append({"name": str(r.technology), "m0": float(r.ini_share), "ub": float(r.max_share),
+                          "k1": float(r.cost_lin_eur_ha), "lin": float(r.pmp_lin), "sqr": float(r.pmp_sqr),
+                          "subs0": float(r.subs0), "n2osyn": float(r.n2osyn)})
+        return {"cols": cols, "techs": techs} if techs else None
+
+    def _urea_spec(self):
+        """CAPRI's urea substitution of this region for the NLP form (envind/ammo_tech.gms; urea_subst_option.csv,
+        tools/build/build_urea_subst_option.py, per member state), or None: not among the run's active technologies, no
+        data for the member state. {"m1", "eff", "c1", "c2", "subs0"}: the share v of the mineral N bought that is
+        switched from urea, 0 <= v <= MaxShare (the member state's urea share, l. 2354); GASTOTNETF_'s othImpact NH3SYN
+        (l. 2358-2361); the cost per t of N bought, costParLin + pmpParLin (Subs0 at IniShare 0) and pmpParSqr (l. 2372,
+        3041-3047, 3100-3107). CAPRI's ammonia options carry no restriction to the EU (no InAllRmssup switch in
+        ammo_tech.gms): every region whose member state has data."""
+        act_ = active_technologies()
+        if act_ is not None and "UREASUBST" not in act_:
+            return None
+        opt = _inputs.current().cached(                                   # a missing file is an error (K74)
+            "urea_subst_option", lambda inp: inp.csv("urea_subst_option.csv", "abatement/mitigation").set_index("ms"))
+        ms = capri_ms(self.data.region_id)
+        if ms not in opt.index:
+            return None
+        r = opt.loc[ms]
+        return {"m1": float(r["max_share"]), "eff": float(r["nh3_othimpact"]),
+                "c1": float(r["cost_lin_eur_t"]) + float(r["pmp_lin"]), "c2": float(r["pmp_sqr"]),
+                "subs0": float(r["subs0"])}
+
+    def _legsh_spec(self):
+        """CAPRI's increased legume share in temporary grassland of this region for the NLP form (envind/leg_share.gms;
+        legsh_option.csv, tools/build/build_legsh_option.py), or None: not among the run's active technologies, no data
+        for the region (the option has no effect there), no OFAR column. {"col", "mix", "m1", "oi", "need_share",
+        "fix", "ydiff", "c1", "c2", "subs0", "x0"}: the share v of OFAR (v_Miti(OFAR, LegSh, BioFix)), 0 <= v <=
+        MaxShare; othImpact BioFix (the member state's, l. 33-47); the part of OFAR's N need in NUTNED_ it removes at
+        v = 1; OFAR's fixation per 1000 ha at this solve's yields (e_BIOFIX, t N: the accounts' unit balance, as the
+        N-surplus row's coefficients) and the technology mix column's factor on it (p_technFact(NITF, T1) -
+        p_technFact(NITF, T2), which fertned.gms l. 205-206 sets to the main output's, techn_mix_2030.csv yield_diff);
+        the cost per ha of OFAR, costParLin + pmpParLin (Subs0 at v = 0) and pmpParSqr (l. 40-42); OFAR's base level."""
+        act_ = active_technologies()
+        if act_ is not None and "LEGSH" not in act_:
+            return None
+        if "OFAR" not in self.acts:
+            return None
+        opt = _inputs.current().cached(                                   # a missing file is an error (K74)
+            "legsh_option", lambda inp: inp.csv("legsh_option.csv", "abatement/mitigation").set_index("region"))
+        rid = self.data.region_id
+        if rid not in opt.index:
+            return None
+        r = opt.loc[rid]
+        j = self.acts.index("OFAR")
+        env_ = getattr(self.seen, "env_for_surplus", None)
+        if env_ is None:
+            return None
+        mint = dict(getattr(self.ev, "n_intensity", {}) or {})
+        _mi = {k_: v_ for k_, v_ in mint.items() if k_ in ("OFAR", "__credit__")}
+        fix = float(env_.unit_nitrogen_balance("OFAR", self.data.yields, rid, _mi,
+                                               yields_scen=self._yields_scen_now()).get("n_fixation", 0.0) or 0.0)
+        mixc = dict(getattr(self.ev, "mix_cols", None) or {})
+        tm_ = getattr(self.data, "techn_mix", None)
+        kz = mixc.get("OFAR")
+        ydiff = float(tm_.at["OFAR", "yield_diff"]) if (kz is not None and tm_ is not None and "OFAR" in tm_.index) else 0.0
+        xb = self._base_levels()
+        return {"col": j, "mix": kz, "m1": float(r["max_share"]), "oi": float(r["othimpact_biofix"]),
+                "need_share": float(r["need_share"]), "fix": fix, "ydiff": ydiff,
+                "c1": float(r["cost_lin_eur_ha"]) + float(r["pmp_lin"]), "c2": float(r["pmp_sqr"]),
+                "subs0": float(r["subs0"]), "x0": float(xb.get("OFAR", 0.0) or 0.0)}
+
+    def _supp_fat_spec(self):
+        """CAPRI's ration fat limit with linseed for the NLP form (SupplementPerc_, supply/supply_model.gms l. 608-633;
+        capri_regional_nlp._supplement_fat_block): per cattle animal with the linseed column (LINE_Tot,
+        supplement_effects.csv; supply/livestock.py _genetics_columns), {"col": the column, "shr": ShrOfDM (linseed's fat
+        as a share of the dry matter), "D": the dry-matter intake per head and year, CAPRI's 2030 p_animReq(DRMA) x 365
+        of the animal's activities (supplement_effects.csv dm_intake, the basis of the column's dosage and cost too;
+        until 23 November 2026 breeding.gms's estimate at the run's requirements, register DEP-53), "fat": {feed: kg of
+        fat per kg as fed} (supplement_fat.csv, tools/build/build_supplement_fat.py)}; {} without a linseed column."""
+        gc = {a: j for (a, o), j in (getattr(self.ev, "genet_cols", None) or {}).items() if o == "LINE_Tot"}
+        if not gc:
+            return {}
+        tab = getattr(self.data, "genetics_effects", None) or {}
+        rats = getattr(self.seen, "feed_rations", None) or {}
+        fat = _inputs.current().cached(                                   # a missing file is an error (K74)
+            "supplement_fat", lambda inp: {k: dict(zip(g["feed"], g["tot_fat"].astype(float)))
+                                           for k, g in inp.csv("supplement_fat.csv", "abatement/mitigation")
+                                           .groupby(["region", "animal"])})
+        rid = self.data.region_id
+        out = {}
+        for a, j in gc.items():
+            e, r = tab.get((a, "LINE_Tot")), rats.get(a)
+            f_ = fat.get((rid, a))
+            if e is None or r is None or f_ is None:
+                continue
+            D = float(e.get("dm_intake", float("nan")))
+            if not D > 0:
+                raise ValueError(f"{rid} {a}: no dry-matter intake (dm_intake) in supplement_effects.csv for the linseed "
+                                 "column (tools/build/build_supplement_effects.py)")
+            out[a] = {"col": int(j), "shr": float(e["shr_of_dm"]), "D": D, "fat": f_}
+        return out
+
     def _nlp_abatement_spec(self, labels):
         """CAPRI's abatement options for the NLP form (ghgAbatement; capri-mod: the manure techniques with feeding inside):
         the ammonia options with their loss cascade, the fertiliser options (regional shares) on the crops' mineral N,
@@ -107,6 +229,15 @@ class AbatementBlock:
         _cs = self._catc_spec()
         if _cs is not None:
             out["catc"] = _cs
+        _ts = self._till_spec()
+        if _ts is not None:
+            out["till"] = _ts
+        _us = self._urea_spec()
+        if _us is not None:
+            out["urea"] = _us
+        _ls = self._legsh_spec()
+        if _ls is not None:
+            out["legsh"] = _ls
         ctx = self._amm_context()
         techs = self._tech_list()
         if ctx is not None and techs:
@@ -444,17 +575,23 @@ class AbatementBlock:
         if sub <= 0:
             return
         q0, k1 = float(ni.QEmitt_noc), float(ni.costParLin)
-        q = param("NITR_INH_EMISSION_FACTOR") * q0    # ghgMiti.gms l. 110: 0.9 x QEmitt(NOC), also for N2OMAN
+        q = p_ghgMiti_QEmitt_NITR_INH(q0, param("NITR_INH_EMISSION_FACTOR"))   # ghgMiti.gms l. 110: also for N2OMAN
         if not (q > 0 and q0 > q and k1 > 0):
             return
         nman = (q0 / q - 1.0) ** param("P_FERT_EFF_COR")
+        # CAPRI's availability of excreted manure N at the calibration point (v_nutAvailFactExcr.l(ru, "mann"),
+        # npk_region_2030.csv excr_avail): the restriction (restMitFert) and p_manureShadVal take it
+        from capri_mod.fert.npk import NPKData as _NPK
+        from capri_mod.supply.equations.ghgmiti import othImpact_NMAN_restMitFert, p_manureShadVal
+        _npk = _NPK.get()
+        _t = _npk.region(_npk.capri_region(self.data.region_id) or self.data.region_id, "N")
+        _av = getattr(_t, "excr_avail", None) if _t is not None else None
+        _av = float(_av) if _av is not None and _av == _av else None
         x = overfert_factor(self.data.region_id)
-        if x is not None:
-            cap = x + param("OVERFERT_MARKUP")
-            if cap <= sub:
+        if x is not None and _av is not None:
+            nman = othImpact_NMAN_restMitFert(nman, x, param("OVERFERT_MARKUP"), _av, param("P_FERT_EFF_COR"))
+            if nman <= 0:
                 return
-            if cap < (nman ** (1.0 / param("P_FERT_EFF_COR")) + 1.0) * sub:
-                nman = (cap / sub - 1.0) ** param("P_FERT_EFF_COR")
         # maximum share: manure N not dropped on pasture (grazing shares of the ammonia data)
         base = self._base_levels()
         tot = graz = 0.0
@@ -464,24 +601,20 @@ class AbatementBlock:
             mn = float(man_d.get(a, 0.0) or 0.0) * float(base.get(a, 0.0) or 0.0)
             g = sum(s_["w"] * s_["g"] for s_ in subs)
             tot += mn; graz += mn * g
-        smax = 1.0 - graz / tot if tot > 0 else 0.0
+        smax = p_ghgMiti_maxShare_N2OMAN(graz, tot)
         if smax <= 0:
             return
         r0, r1 = param("MITI_RELSUBS0"), param("MITI_RELSUBS1")              # ghgMiti.gms l. 885-887, 904-906
-        S0, slope = r0 * k1, k1 * (r1 - r0) / smax
+        S0, slope = r0 * k1, p_ghgMiti_pmpParsqr(k1, r1, r0, smax, 0.0)
         if SupplyModule.fert_slope_with_saving:
             # CAPRI's pmpParSqr of the inhibitor on manure (envind/ghgMiti.gms l. 1036-1050), as the mineral options'
             # (_fert_techs, the same switch): + nmE x p_manureShadVal x ((1 + nmE m1)^-2 - (1 + nmE m0)^-2) / (m1 - m0),
             # m0 = IniShare 0, m1 = MaxShare; nmE = NMAN (EmiCalman is commented out in CAPRI, l. 945-958);
             # p_manureShadVal = the member state's unit value of mineral N x the region's availability of excreted
             # manure N (v_nutAvailFactExcr, l. 871; npk_region_2030.csv excr_avail)
-            from capri_mod.fert.npk import NPKData as _NPK
-            _npk = _NPK.get()
-            _t = _npk.region(_npk.capri_region(self.data.region_id) or self.data.region_id, "N")
-            _av = getattr(_t, "excr_avail", None) if _t is not None else None
             _pf = SupplyModule._nitf_price_ms(_ms)
-            if _pf and _av is not None and _av == _av:
-                slope += saving_slope(nman, _pf * float(_av), 0.0, smax)
+            if _pf and _av is not None:
+                slope += p_ghgMiti_pmpParsqr_saving(nman, p_manureShadVal(_pf, _av), 0.0, smax)
         # application NH3 side effect (ghgMiti.gms l. 557-563, p_litRevFertTechs NH3APP): on
         # treated manure the application emission factor is (1 - lit) x (1 + NMAN) times
         # NOC's; base = the cascade's application loss at the ammonia options' latest shares

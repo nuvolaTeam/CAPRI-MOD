@@ -38,6 +38,9 @@ Settings (refpol_endotech_all_sup.gms):
                histosols in CAPRI's data) have the fallowing option where CAPRI's calibration has it.
 """
 from __future__ import annotations
+
+from capri_mod.projection.equations.breeding import (
+    p_ghgMiti_costParLin_genet, p_ghgMiti_maxShare_genet, p_ghgMiti_othImpact_genet)
 from typing import Dict, Mapping, Optional
 
 import pandas as pd
@@ -93,14 +96,14 @@ def scale_genetics(unit: Optional[dict], settings: Mapping[str, float]) -> Optio
             s = e.copy()
             for c in _SCALED:
                 if c in s.index:
-                    s[c] = float(s[c]) * p
-            s["cost_eur_head"] = max(float(s["cost_floor"]), float(s["cost_per_unit"]) * p)
+                    s[c] = p_ghgMiti_othImpact_genet(float(s[c]), p)                 # breeding.gms l. 306-329
+            s["cost_eur_head"] = p_ghgMiti_costParLin_genet(float(s["cost_floor"]), float(s["cost_per_unit"]), p)
             # CAPRI's cost-saving drop between its calibration runs (per unit of the parameter, like the effects)
             if "dsav" in s.index:
                 s["dsav"] = float(s["dsav"]) * p if pd.notna(s["dsav"]) else 0.0
             # CAPRI's MaxShare of the breeding options (fixGenetToIni): the eligible share times the cap
             if "max_share" in s.index and pd.notna(s["max_share"]) and float(settings.get("fixGenetToIni", 0.0) or 0.0) > 0:
-                s["elig_share"] = float(s["elig_share"]) * float(s["max_share"])
+                s["elig_share"] = p_ghgMiti_maxShare_genet(float(s["elig_share"]), float(s["max_share"]))
             d[k] = s
         if d:
             out[r] = d

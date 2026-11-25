@@ -1,7 +1,7 @@
 # Manure market
 
 Status: revised 20 October 2026 against the code. Run results of the sprints in which the market was built (conic
-form, before the NLP form) were removed; current results are in README section 9 (Validation) and CHANGELOG.md.
+form, before the NLP form) were removed; current results are in README section 8 (Validation) and CHANGELOG.md.
 
 Manure trade is on by default, as in CAPRI star 3.0's GUI (`New_Manure_Trade_fromGUI = true`, CAPRI's
 `manureTradeNew`): `CAPRIModel.use_manure_market = True`. It is a scenario setting (`PolicyScenario.manure_trade`,
@@ -83,9 +83,9 @@ nutrient. Each outer iteration the pools clear in the form `outer_loop.manure_po
   the trade costs between them is maximised as CAPRI writes and solves it, "using nlp maximizing v_mPoolBenefits"
   (simu_manure_market.gms l. 160): its variables and four rows (e_mPoolExcessSupply, e_mPoolSurplus, e_mPoolClear,
   e_mPoolBenefits) with IPOPT for CAPRI's CONOPT, started from the clearing before, the prices the duals of
-  e_mPoolExcessSupply (`outer_loop.manure_pool_solver` "nlp", the default since 20 November 2026; "qp" the same problem
-  as a convex QP with Clarabel, the form before, which needs the problem convex). On convex problems the two give the
-  same clearing (prices within 1e-9, shipments 1e-7; capri_mod/tests/test_manure_pool_nlp.py).
+  e_mPoolExcessSupply (since 20 November 2026; the same problem as a convex QP with Clarabel, the form before and a
+  setting, `outer_loop.manure_pool_solver` "qp", until 23 November 2026, is now the tests' cross-check). On convex
+  problems the two give the same clearing (prices within 1e-9, shipments 1e-7; capri_mod/tests/test_manure_pool_nlp.py).
 - "schedules" (capri-mod's own, the default before): each region's exact piecewise-linear schedule from the reduced
   costs of its trade columns at its solution, the primal spatial equilibrium on those schedules (Clarabel), a
   Broyden-type correction of each pool's response.
@@ -98,7 +98,7 @@ when it rises. Full-EU Green Deal 2030 (12 November 2026): "capri" with "capri" 
 "damped" 16; "schedules" with "capri" not converged after 36; the equilibria within 0.1-0.4 points.
 
 Convergence: every pool within `manure_pool_tolerance` (0.03) of its manure supply and EU-wide conservation within the
-same tolerance; with trade on, the outer-iteration cap is raised to `manure_max_outer_iter` (60) when it is 25 or more.
+same tolerance; with trade on, the outer-iteration cap is raised to `manure_max_outer_iter` (60) when it is 25 or more (so not at the default cap, CAPRI's 99).
 
 The N-surplus target with trade is per hectare of current farmland (CAPRI's e_SURTOTHa; always on since
 27 October 2026, when its switch was removed).

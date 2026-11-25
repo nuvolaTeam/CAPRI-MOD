@@ -31,6 +31,12 @@ from __future__ import annotations
 from collections import defaultdict
 
 from capri_mod.data.definitions import CAPRI_MEMBERS, capri_ms
+from capri_mod.policy.equations.cap_2013_2020_transfers import (
+    p_cap_2013_2020_transfers_dp_rd, p_cap_2013_2020_transfers_dp_rd_fill, p_premDataE_natCeilCAP14)
+from capri_mod.policy.equations.cap_2013_2020_vcs import p_premDataE_CEILVAL
+from capri_mod.policy.equations.cap_2014_2020 import (
+    p_2013_1307_AnnexII, p_premDataE_DPGREEN_CEILVAL, p_premDataE_dp_bps_CEILVAL, p_premDataE_share_CEILVAL)
+from capri_mod.policy.equations.def_endcut import p_entlLimit_cut, p_entlLimit_Limit
 from capri_mod.supply import inputs as _inputs
 
 #: the shares' payment schemes of the national ceiling (cap14_ceiling_shares.csv)
@@ -67,16 +73,15 @@ def data():
     return _inputs.current().cached("cap14_entitlements", _load)
 
 
-def _filled(values: dict, years, keep=()) -> dict:
+def _filled(values: dict, years, keep=(), fill=p_2013_1307_AnnexII) -> dict:
     """values {year: v} with each year of `years` (ascending) that has none taking the year before's, as GAMS's
     loop(y, p(y) $ (not p(y)) = p(y-1)); a present zero (a cell written EPS) is a value. The years in `keep` before
-    the loop keep their values."""
+    the loop keep their values. fill: the statement's function (Annex II's, the transfers', the coupled ceilings')."""
     out = {y: v for y, v in values.items() if y in set(keep)}
     for y in years:
-        if y in values:
-            out[y] = values[y]
-        elif y - 1 in out:
-            out[y] = out[y - 1]
+        v = fill(values.get(y), out.get(y - 1))
+        if v is not None:
+            out[y] = v
     return out
 
 
@@ -101,9 +106,9 @@ def ms_ceilings(year: int, d=None) -> dict:
     after = {}
     for ms, n in nat.items():
         rel = dict(zip(tr.year[tr.ms == ms].astype(int), tr.pct[tr.ms == ms].astype(float)))
-        a = {y: n.get(y, 0.0) * rel[y] / 100.0 for y in t_years if y in rel}
-        a = _filled(a, range(min(t_years, default=year), year + 1))
-        after[ms] = {y: max(0.0, v - a.get(y, 0.0)) for y, v in n.items()}
+        a = {y: p_cap_2013_2020_transfers_dp_rd(n.get(y, 0.0), rel[y]) for y in t_years if y in rel}
+        a = _filled(a, range(min(t_years, default=year), year + 1), fill=p_cap_2013_2020_transfers_dp_rd_fill)
+        after[ms] = {y: p_premDataE_natCeilCAP14(v, a.get(y, 0.0)) for y, v in n.items()}
 
     # 3. the coupled support of the member state's regions (map_rr: Luxembourg's in Belgium's), each scheme's
     #    ceiling from the base year on taking the year before's where it has none
@@ -114,7 +119,7 @@ def ms_ceilings(year: int, d=None) -> dict:
         if str(_scheme).strip().lower() not in d["deducted"]:
             continue
         v = dict(zip(g.year.astype(int), g.ceiling_meur.astype(float)))
-        for y, x in _filled(v, range(base, year + 1), keep=[y for y in v if y < base]).items():
+        for y, x in _filled(v, range(base, year + 1), keep=[y for y in v if y < base], fill=p_premDataE_CEILVAL).items():
             cp[capri_ms(reg)][y] += x
 
     sh = defaultdict(dict)
@@ -126,10 +131,11 @@ def ms_ceilings(year: int, d=None) -> dict:
         per_year = defaultdict(dict)
         for y in bps_years:
             c = n.get(y, 0.0)
-            per_year[y]["DPGREEN"] = green * c
+            per_year[y]["DPGREEN"] = p_premDataE_DPGREEN_CEILVAL(green, c)
             for s in SHARE_SCHEMES:
-                per_year[y][s] = sh[(ms, s)].get(y, 0.0) / 100.0 * c
-            rest = c - cp[ms].get(y, 0.0) - per_year[y]["DPGREEN"] - sum(per_year[y][s] for s in SHARE_SCHEMES)
+                per_year[y][s] = p_premDataE_share_CEILVAL(sh[(ms, s)].get(y, 0.0), c)
+            rest = p_premDataE_dp_bps_CEILVAL(c, cp[ms].get(y, 0.0), per_year[y]["DPGREEN"],
+                                              (per_year[y][s] for s in SHARE_SCHEMES))
             per_year[y]["DPBPS_SAPS" if ms in saps else "dp_bps"] = rest
         if year in per_year:
             out[ms] = {s: v for s, v in per_year[year].items() if v != 0.0}
@@ -152,12 +158,12 @@ def ms_cuts(year: int, d=None) -> dict:
     cut_schemes = {s.lower() for s in d["settings"].get("cut_scheme", {})}
     limits = defaultdict(float)
     for r, v in d["levels"].items():
-        limits[capri_ms(r)] += sum(v.values())
+        limits[capri_ms(r)] += p_entlLimit_Limit(v.values())
     out = {}
     for ms, ceil in ms_ceilings(year, d).items():
         total = sum(v for s, v in ceil.items() if s.lower() in cut_schemes)
         if total > 0.0 and limits.get(ms, 0.0) > 0.0:
-            out[ms] = total * 1000.0 / limits[ms]
+            out[ms] = p_entlLimit_cut(total, limits[ms])
     return out
 
 
@@ -182,5 +188,5 @@ def region_limit(region: str, acts, year: int):
         codes = [c for c in CAPRI_MEMBERS.get(a, (a,)) if c in lev]
         if codes:
             cols.append(j)
-            limit += sum(lev[c] for c in codes)
+            limit += p_entlLimit_Limit(lev[c] for c in codes)
     return cut, limit, cols

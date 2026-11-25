@@ -131,15 +131,14 @@ def supply_system(mm, exogenous_supply):
     import pandas as pd
     el = pd.Series({c: (float(real[c]) if c in real else 0.0) for c in comms})
     EV = mm._region_supply_elas(regions, cols, el)
-    if mm.noneu_supply_nq:
-        EV = EV.copy()
-        for i_, r_ in enumerate(regions):
-            if r_ in mm.EU:
-                continue
-            sc_ = sup_cols.get(r_, set())
-            for j_, c_ in enumerate(cols):
-                if c_ not in sc_:
-                    EV[i_, j_] = 0.0
+    EV = EV.copy()
+    for i_, r_ in enumerate(regions):
+        if r_ in mm.EU:
+            continue
+        sc_ = sup_cols.get(r_, set())
+        for j_, c_ in enumerate(cols):
+            if c_ not in sc_:
+                EV[i_, j_] = 0.0
     ev = el.reindex(cols).to_numpy(dtype=float)
     E_, SV_ = EV.copy(), np.ones((nR, nC))
     sv_eu = {}
@@ -305,7 +304,7 @@ def supply_system(mm, exogenous_supply):
             if c in ci:
                 dP[ci[c]] = 0.0
         mk = None
-        if mm.sup_milk_in_market and "MILK" in xs and "MILK" in ci and "MILK" in Hs.columns:
+        if "MILK" in xs and "MILK" in ci and "MILK" in Hs.columns:
             k = float(Hs.at["MILK", "MILK"])
             if k > 0:
                 L = float(sv_sup[reg][ci["MILK"]])
@@ -497,7 +496,7 @@ def supply_system(mm, exogenous_supply):
 
     # the other regions' DAIRY blocks: raw milk from CAPRI's supply function inside the block
     res_W = []
-    nfp = mm._noneu_feed_params() if mm.noneu_feed_nq else {"rms": {}}
+    nfp = mm._noneu_feed_params()
     frms = [s for s, d in nfp["rms"].items() if d.get("tr") in R]
     fede = ca.SX.sym("fede", len(frms))
 
@@ -566,14 +565,13 @@ def supply_system(mm, exogenous_supply):
                                               ci[c], _dairy_base(r, c))
             continue
         shift = ca.SX(0.0)
-        if mm.noneu_supply_nq:
-            d_ = nqp.get(r) or {}
-            for s, t in (d_.get("milk") or {}).items():
-                shift = shift + sum((h * (rr[i, ci[y]] - 1.0) for y, h in t.items() if y in ci), ca.SX(0.0))
-            for s, h in (d_.get("milk_fede") or {}).items():
-                shift = shift + h * (fede_of(s) - 1.0)
-            for s, v in land_shift(r, by_rms=True).get("MILK", {}).items():
-                shift = shift + v
+        d_ = nqp.get(r) or {}
+        for s, t in (d_.get("milk") or {}).items():
+            shift = shift + sum((h * (rr[i, ci[y]] - 1.0) for y, h in t.items() if y in ci), ca.SX(0.0))
+        for s, h in (d_.get("milk_fede") or {}).items():
+            shift = shift + h * (fede_of(s) - 1.0)
+        for s, v in land_shift(r, by_rms=True).get("MILK", {}).items():
+            shift = shift + v
         res, _, z, q, dproc = mm._dairy_fn(prm)(ca.vertcat(*z_), u, float(prm["SM"]), shift, 0.0, 0.0)
         res_W.append(res)
         milkW[r] = 1.0 + u[2]
@@ -588,23 +586,22 @@ def supply_system(mm, exogenous_supply):
                                           ci[c], _dairy_base(r, c))
 
     # the non-EU regions' ProdNQ_ (prices, their dairy block's raw milk price, FEDE, the land rents)
-    if mm.noneu_supply_nq:
-        for reg, d in nqp.items():
-            if reg not in R:
-                continue
-            fr = mm._nq_rows(("noneu", reg), d["rows"], None, cols, d.get("fede") or {})
-            if fr is None:
-                continue
-            f, rows, rms_f = fr
-            q0 = mm._nq_q0(reg, rows)
-            ls = land_shift(reg)
-            dq = f(ca.DM(q0), rr[R[reg], :].T, milkW.get(reg, ca.SX(1.0)),
-                   ca.vertcat(*[fede_of(s) for s in rms_f]) if rms_f else ca.DM.zeros(0),
-                   ca.vertcat(*[ls.get(x, ca.SX(0.0)) for x in rows]))[1]
-            skip = sup_cols.get(reg, set())
-            for k, x in enumerate(rows):
-                if x in ci and q0[k] > 0 and x not in skip:
-                    S[R[reg]][ci[x]] = prodnq_cell(q0[k] + dq[k], R[reg], ci[x], q0[k])
+    for reg, d in nqp.items():
+        if reg not in R:
+            continue
+        fr = mm._nq_rows(("noneu", reg), d["rows"], None, cols, d.get("fede") or {})
+        if fr is None:
+            continue
+        f, rows, rms_f = fr
+        q0 = mm._nq_q0(reg, rows)
+        ls = land_shift(reg)
+        dq = f(ca.DM(q0), rr[R[reg], :].T, milkW.get(reg, ca.SX(1.0)),
+               ca.vertcat(*[fede_of(s) for s in rms_f]) if rms_f else ca.DM.zeros(0),
+               ca.vertcat(*[ls.get(x, ca.SX(0.0)) for x in rows]))[1]
+        skip = sup_cols.get(reg, set())
+        for k, x in enumerate(rows):
+            if x in ci and q0[k] > 0 and x not in skip:
+                S[R[reg]][ci[x]] = prodnq_cell(q0[k] + dq[k], R[reg], ci[x], q0[k])
     if "MILK" in ci:
         for r in regions:
             if r not in mm.EU and r not in mm.SUP and r not in milkW:

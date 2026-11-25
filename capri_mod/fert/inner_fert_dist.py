@@ -38,6 +38,10 @@ import numpy as np
 import pandas as pd
 from capri_mod.params import param, param_table
 from capri_mod.data.definitions import capri_ms
+from capri_mod.supply.equations.greendeal.minfert_redu_by_crop import (
+    p_checkSmallMine, p_nMaxPerHa_MIN, p_priFertDistRegu_limCres)
+from capri_mod.supply.equations.set_fert_priors import (
+    p_priFertDist_alpha, p_priFertDist_beta, p_priFertDist_var, p_priFertDistRegu_beta1, p_priFertDistRegu_beta2)
 
 SOURCES = ("MINE", "EXCR", "CRES")
 from capri_mod.data.definitions import CAPRI_PERM_NGRP as PERM_NGRP   # noqa: E402  CAPRI's set
@@ -45,9 +49,9 @@ from capri_mod.data.definitions import CAPRI_PERM_NGRP as PERM_NGRP   # noqa: E4
 
 def gamma_params(mode: float, accuracy: float) -> Tuple[float, float]:
     """(alpha, beta) of CAPRI's gamma prior (set_fert_priors.gms, non-normalised)."""
-    var = (mode / accuracy) ** 2
-    beta = (mode + sqrt(mode * mode + 4.0 * var)) / (2.0 * var)
-    return beta * beta * var, beta
+    var = p_priFertDist_var(mode, accuracy)
+    beta = p_priFertDist_beta(mode, var)
+    return p_priFertDist_alpha(beta, var), beta
 
 
 def beta_regulation(accuracy: float = 0.25, mode_share: float = 0.75) -> Tuple[float, float]:
@@ -55,8 +59,8 @@ def beta_regulation(accuracy: float = 0.25, mode_share: float = 0.75) -> Tuple[f
     (set_fert_priors.gms: beta1 = priModePerHa / priMaxPerHa x accuracy + 1, beta2 = accuracy + 2 - beta1).
     Defaults: CAPRI's generic regulation ("f2f": mode 0.75 x max, accuracy 0.25). "limCres": mode = the baseline's
     residues per ha, max = (1.3 + relaxation) x that, accuracy 10."""
-    b1 = mode_share * accuracy + 1.0
-    return b1, accuracy + 2.0 - b1
+    b1 = p_priFertDistRegu_beta1(mode_share, accuracy)
+    return b1, p_priFertDistRegu_beta2(accuracy, b1)
 
 
 #: the model's simulation year (CAPRI's 2030 reference); CAPRI's year-dependent exemptions apply for simy > year
@@ -310,10 +314,7 @@ class InnerFertDist:
         for (g, s_), v in base["per_ha"].items():
             if s_ != "MINE" or v <= 0:
                 continue
-            if g in small:
-                caps[g] = fx.get(g, 1.0) * v
-            else:
-                caps[g] = v * (1.0 - reduction)
+            caps[g] = p_nMaxPerHa_MIN(v, reduction, g in small, fx.get(g, 1.0))
         return caps
 
     def small_mine_groups(self, region: str, base: dict, year: Optional[int] = None) -> set:
@@ -330,7 +331,7 @@ class InnerFertDist:
         ex = exm[(exm.capri_region == r) & (exm.after_year < year) & (exm.othpol_high == 0)]
         listed = set(ex.ngrp)
         return {g for (g, s_), v in base["per_ha"].items()
-                if s_ == "MINE" and v > 0 and (g in listed or v < SMALL_MINE_KG_HA)}
+                if s_ == "MINE" and p_checkSmallMine(v, g in listed, SMALL_MINE_KG_HA)}
 
     def limcres_caps(self, region: str, base: dict, year: Optional[int] = None,
                      nutrient: str = "N") -> Dict[str, Tuple[float, float, float]]:
@@ -360,7 +361,7 @@ class InnerFertDist:
         for (g, s_), v in base["per_ha"].items():
             if s_ == "CRES" and v > 0:
                 f = LIMCRES_FACTOR + add_g.get(g, 0.0) + add_all
-                out[g] = (v * f, 10.0, 1.0 / f)
+                out[g] = (p_priFertDistRegu_limCres(v, f), 10.0, 1.0 / f)
         return out
 
     def efficiencies(self, region: str) -> Tuple[float, float]:

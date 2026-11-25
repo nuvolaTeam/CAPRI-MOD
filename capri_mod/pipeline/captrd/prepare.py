@@ -24,7 +24,7 @@ Stages (each a function, with the GAMS lines it ports):
   clean_regions      captrd.gms l. 862-888        regions never estimated; the NUTS 2 rows reduced
   labour_household   captrd.gms l. 897-898        LABH = LABO - LABN
   prep_for_estimation prep_data_for_estimation.gms l. 15-162
-The COCO nowcasts (load_coco1_data.gms, l. 715), the policy data (captrd_policy.gms) and the labour agelines follow as
+The COCO nowcasts (load_coco1_data.gms, at captrd.gms l. 715), the policy data (captrd_policy.gms) and the labour agelines follow as
 they are ported (docs/dev/CAPTRD_MOD.md section 12.2).
 The COCO stage is in coco.py; prepare_run.py runs every stage over the country files in CAPTRD's order (fill_uvad and the
 COCO flags need every country).
@@ -38,6 +38,8 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 import pandas as pd
 
 from capri_mod.csvio import read_csv
+from capri_mod.pipeline.captrd.equations import captrd as CG
+from capri_mod.pipeline.captrd.equations import prep_data_for_estimation as PD
 
 ROOT = Path(__file__).resolve().parents[3]
 SETS_DIR = ROOT / "capri_data" / "pipeline" / "captrd" / "sets"
@@ -209,9 +211,9 @@ def load_fixes(p: pd.DataFrame, sets: CaptrdSets) -> pd.DataFrame:
     arto = p[(p["col"] == "ARTO") & (p["row"] == "LEVL")].set_index(["region", "t"])["value"]
     f = pd.concat([pos.rename("pos"), arto.rename("arto")], axis=1).dropna()
     f = f[(f["pos"] != 0) & (f["arto"] != 0)]
-    lu = lu.join((f["arto"] / f["pos"]).rename("f"), on=["region", "t"])
-    lu = lu[lu["f"].notna()]
-    lu = lu.assign(value=lu["value"].clip(lower=0.0) * lu["f"])
+    lu = lu.join(f[["arto", "pos"]], on=["region", "t"])
+    lu = lu[lu["arto"].notna()]
+    lu = lu.assign(value=CG.p_data_LanduseARTO(lu["value"], lu["arto"], lu["pos"]))
     return _assign(p, lu)
 
 
@@ -244,7 +246,7 @@ def load_basm(p: pd.DataFrame, data2: pd.DataFrame, sets: CaptrdSets) -> pd.Data
               | (d["col"].isin(sets.aact) & (d["row"] == "EDAYS"))][["region", "col", "row", "value"]]
     days = d[d["col"].isin(sets.aact) & (d["row"] == "DAYS")].set_index(["region", "col"])["value"]
     dr = d[d["col"].isin(sets.aact) & d["row"].isin({"DRMN", "DRMX"})].copy()
-    dr["value"] = dr["value"] * [days.get((r, c), 0.0) for r, c in zip(dr["region"], dr["col"])]
+    dr["value"] = CG.p_data_DRMN_DRMX_BASM(dr["value"], [days.get((r, c), 0.0) for r, c in zip(dr["region"], dr["col"])])
     out = pd.concat([basm, extra, dr[["region", "col", "row", "value"]]], ignore_index=True)
     out = out.drop_duplicates(["region", "col", "row"], keep="last")
     out["t"] = "BASM"
@@ -266,7 +268,7 @@ def check_and_cor(p: pd.DataFrame, sets: CaptrdSets, msincl: Optional[Iterable[s
     here = set(p["region"])
     new = []
     for c in sorted(incl & here):
-        new.append((c, "ARTIF", "LEVL", "BASM", float(sum(art.get(r, 0.0) for a, r in sub if a == c))))
+        new.append((c, "ARTIF", "LEVL", "BASM", float(sum(art.get(r, 0.0) for a, r in sorted(sub) if a == c))))
     if not new:
         return p.reset_index(drop=True)
     return _assign(p, pd.DataFrame(new, columns=KEYS + ["value"]))
@@ -306,14 +308,14 @@ def fill_uvad(uvad: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int]) -> p
     pairs = {(a, r) for a, r in sets.map_rr if a in sets.rmaggsup}
     peers: Dict[str, List[str]] = {}
     for m in ms:
-        aggs = [a for a, r in pairs if r == m]
-        peers[m] = [r for a in aggs for (a2, r) in pairs if a2 == a and r in msset]
+        aggs = [a for a, r in sorted(pairs) if r == m]
+        peers[m] = [r for a in aggs for (a2, r) in sorted(pairs) if a2 == a and r in msset]
     keys = {(rw, t) for (_r, rw, t) in cur}
     added = {}
     for m in ms:
         if not peers[m]:
             continue
-        for rw, t in keys:
+        for rw, t in sorted(keys):
             if (m, rw, t) in cur:
                 continue
             vals = [cur.get((r, rw, t), 0.0) for r in peers[m]]
@@ -326,7 +328,7 @@ def fill_uvad(uvad: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int]) -> p
         for m in ms:
             if m not in sets.members(agg):
                 continue
-            for rw, t in keys:
+            for rw, t in sorted(keys):
                 v = cur.get(("PT000000", rw, t), 0.0)
                 if (m, rw, t) not in cur and v != 0:
                     new[(m, rw, t)] = v
@@ -392,7 +394,7 @@ def labour_household(p: pd.DataFrame) -> pd.DataFrame:
     if lab.empty:
         return p[~old].reset_index(drop=True)
     w = lab.pivot_table(index=["region", "t"], columns="row", values="value", aggfunc="sum").fillna(0.0)
-    h = (w.get("LABO", 0.0) - w.get("LABN", 0.0)).rename("value").reset_index()
+    h = CG.p_data_LABH(w.get("LABO", 0.0), w.get("LABN", 0.0)).rename("value").reset_index()
     h["col"], h["row"] = "GROF", "LABH"
     return pd.concat([p[~old], h[h["value"] != 0][KEYS + ["value"]]], ignore_index=True)
 
@@ -454,9 +456,10 @@ class Wide:
         else:
             self.s.pop((c, r), None)
 
-    def drop(self, c: str, r: str, where: pd.Series) -> None:
+    def drop(self, c: str, r: str, where: pd.Series, value: float = 0.0) -> None:
+        """p_data(c, r) $ where = value (a statement that removes: value 0)."""
         if (c, r) in self.s:
-            self.put(c, r, self.zero, where)
+            self.put(c, r, self.zero + value, where)
 
     def long(self) -> pd.DataFrame:
         parts = []
@@ -492,26 +495,25 @@ def prep_for_estimation(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int
     t_exp = w.t.isin(exp)
     t_yrs = w.t.isin(yrs)
     t_yb = t_yrs | (w.t == "BASM")
-    one = pd.Series(1.0, index=w.idx)
 
     # l. 26-28: the sugar administrative price (PADM) where a sugar quota exists
     q = w("QUTS", "SUGA") != 0
     padm = w("PADM", "SUGA")
-    padm = padm.where(~(is_ms & t_exp & q), 631.0)
-    padm = padm.where(~(is_ms & (w.t == "2008") & q), 541.5)
-    padm = padm.where(~(is_ms & t_exp & q & (pd.to_numeric(w.t, errors="coerce") >= 2009)), 404.4)
+    padm = padm.where(~(is_ms & t_exp & q), PD.P_DATA_PADM_SUGA_expost())
+    padm = padm.where(~(is_ms & (w.t == "2008") & q), PD.P_DATA_PADM_SUGA_2008())
+    padm = padm.where(~(is_ms & t_exp & q & (pd.to_numeric(w.t, errors="coerce") >= 2009)), PD.P_DATA_PADM_SUGA_2009())
     w.put("PADM", "SUGA", padm)
     # l. 34-39: a loop over the ex-post years (sequential): the sugar price carried forward with the change of PADM
     for y in sorted(int(v) for v in exp):
         uv, pa = w("UVAG", "SUGA"), w("PADM", "SUGA")
-        prev = {(r, str(y - 1)): (uv.get((r, str(y - 1)), 0.0), pa.get((r, str(y - 1)), 0.0)) for r in ms}
+        prev = {(r, str(y - 1)): (uv.get((r, str(y - 1)), 0.0), pa.get((r, str(y - 1)), 0.0)) for r in sorted(ms)}
         new = uv.copy()
-        for r in ms:
+        for r in sorted(ms):
             if (r, str(y)) not in new.index:
                 continue
             u1, p1 = prev[(r, str(y - 1))] if (r, str(y - 1)) in uv.index else (0.0, 0.0)
             if new[(r, str(y))] == 0 and u1 != 0 and p1 != 0:
-                new[(r, str(y))] = pa[(r, str(y))] + (u1 - p1)
+                new[(r, str(y))] = PD.p_data_UVAG_SUGA(pa[(r, str(y))], u1, p1)
         w.put("UVAG", "SUGA", new)
     # l. 41-43: BASM sugar price, MAPR-weighted over BASYRSM
     if (w.t == "BASM").any():
@@ -519,20 +521,20 @@ def prep_for_estimation(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int
 
     # l. 46-55: series CAPTRD does not use
     for o in sets.o:
-        w.drop("MAPR", o, t_yrs & (w("GROF", o) != 0))
+        w.drop("MAPR", o, t_yrs & (w("GROF", o) != 0), value=PD.p_data_removed())
     for k in w.keys(rows={"CATT"}):
-        w.drop(*k, where=t_yrs)
+        w.drop(*k, where=t_yrs, value=PD.p_data_removed())
     for k in w.keys(cols={"UAAR"}):
-        w.drop(*k, where=t_yrs)
+        w.drop(*k, where=t_yrs, value=PD.p_data_removed())
     for k in w.keys(rows=sets.fout):
-        w.drop(*k, where=t_yrs)
+        w.drop(*k, where=t_yrs, value=PD.p_data_removed())
     for k in w.keys(cols=sets.ncnc):
         if k[1] != "INCE":
-            w.drop(*k, where=t_yb)
-    w.drop("LOSF", "ICOW", t_yrs)
+            w.drop(*k, where=t_yb, value=PD.p_data_removed())
+    w.drop("LOSF", "ICOW", t_yrs, value=PD.p_data_removed())
     # l. 59-63: feed rows only on GROF; market balances of products without production or imports around the base year
     for k in w.keys(cols=sets.mrkbalee - {"GROF"}, rows=sets.feed):
-        w.drop(*k, where=t_yrs)
+        w.drop(*k, where=t_yrs, value=PD.p_data_removed())
     in5 = w.t.isin(b5)
 
     def _b5sum(c1, c2, r):
@@ -540,57 +542,57 @@ def prep_for_estimation(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int
         return v.groupby(level="region").transform("sum")
     none_o = {o: _b5sum("GROF", "IMPT", o) == 0 for o in sets.o}
     for k in w.keys(cols=sets.mrkbale, rows=sets.o):
-        w.drop(*k, where=t_yrs & none_o[k[1]])
+        w.drop(*k, where=t_yrs & none_o[k[1]], value=PD.p_data_removed())
     none_s = {s_: _b5sum("MAPR", "IMPT", s_) == 0 for s_ in sets.seco}
     for k in w.keys(cols=sets.mrkbale, rows=sets.seco):
-        w.drop(*k, where=t_yrs & none_s[k[1]])
+        w.drop(*k, where=t_yrs & none_s[k[1]], value=PD.p_data_removed())
     for s_ in sets.seco:
-        w.drop("PRCY", s_, t_yrs & (w("MAPR", s_) == 0))
+        w.drop("PRCY", s_, t_yrs & (w("MAPR", s_) == 0), value=PD.p_data_removed())
 
     # l. 81: UAAR from the crop activities; l. 83-86: the crop groups' areas
-    w.put("UAAR", "LEVL", sum((w(c, "LEVL") for c in sorted(sets.mcact)), w.zero), where=t_exp)
+    w.put("UAAR", "LEVL", PD.p_data_group_sum([w(c, "LEVL") for c in sorted(sets.mcact)], w.zero), where=t_exp)
     for g in sets.grpc:
         mem = sorted(c for c, g2 in sets.cropc_to_g if g2 == g and c in sets.cact)
-        tot = sum((w(c, "LEVL") for c in mem), w.zero)
+        tot = PD.p_data_group_sum([w(c, "LEVL") for c in mem], w.zero)
         w.put(g, "LEVL", tot, where=t_exp | (w.t == "BASM"))
     # l. 88-96: slaughter weight of the female breeding animals
     for b in sorted(sets.breedact):
         yani = sum((w(b, i) for a, i in sorted(sets.pact_to_i) if a == b and i in sets.iyani), w.zero)
         meat = sum((w(b, m) for a, m in sorted(sets.pact_to_o) if a == b and m in sets.meat), w.zero)
         cond = t_exp & (yani != 0) & (w(b, "LEVL") != 0)
-        w.put(b, "SLGW", (meat / yani.where(yani != 0, 1.0)) * 1000.0, where=cond)
+        w.put(b, "SLGW", PD.p_data_SLGW(meat, yani), where=cond)
         if (w.t == "BASM").any():
             _basm_mean(w, b, "SLGW", bm)
     # l. 99-136: the outliers of SHGM.SLGW in the base years
     sl = w("SHGM", "SLGW")
     n = (sl != 0) & t_exp
-    mean = (sl.where(n, 0.0).groupby(level="region").transform("sum")
-            / n.groupby(level="region").transform("sum").where(lambda v: v != 0, 1.0))
-    mean = mean.where(n.groupby(level="region").transform("any"), 0.0)
+    mean = PD.p_data_SHGM_SLGW_mean(sl.where(n, 0.0).groupby(level="region").transform("sum"),
+                                    n.groupby(level="region").transform("sum"),
+                                    n.groupby(level="region").transform("any"))
     inbm = w.t.isin(bm)
-    sl = sl.where(~(inbm & (mean > 0) & (sl < 0.15 * mean)), mean)
+    sl = sl.where(~(inbm & (mean > 0) & (sl < 0.15 * mean)), PD.p_data_SHGM_SLGW_low(mean))
     flag = inbm & ((sl > 6.0 * mean) | (sl < 0.167 * mean))
     if (w.t == "BASM").any():
         _shgm_basm(w, sl, flag, inbm)
     for k in w.keys(rows={"ILAM", "YLAM"}):
-        w.drop(*k, where=flag)
-    w.put("SHGM", "SLGW", sl.where(~flag, 0.0))
+        w.drop(*k, where=flag, value=PD.p_data_removed())
+    w.put("SHGM", "SLGW", sl.where(~flag, PD.p_data_removed()))
 
     # l. 140-145: unit values and production values
     for r in sets.s_rowsest:
         g, e = w("GROF", r), w("EAAG", r)
-        w.put("UVAG", r, e / g.where(g != 0, 1.0) * 1000.0, where=t_yb & (g != 0) & (e != 0))
+        w.put("UVAG", r, PD.p_data_UVAG(e, g), where=t_yb & (g != 0) & (e != 0))
     for r in sets.s_rowsest:
-        w.put("EAAG", r, w("UVAG", r) * w("GROF", r) * 0.001, where=t_yb)
+        w.put("EAAG", r, PD.p_data_EAAG(w("UVAG", r), w("GROF", r)), where=t_yb)
     # l. 147-148: market balances of the product groups (countries)
     for c in sets.mrkbalee:
         for g in sets.grpr:
             mem = sorted(r for r, g2 in sets.rows_to_g if g2 == g)
-            w.put(c, g, sum((w(c, r) for r in mem), w.zero), where=is_ms & t_yb)
+            w.put(c, g, PD.p_data_group_sum([w(c, r) for r in mem], w.zero), where=is_ms & t_yb)
     # l. 150-156: DOMM as the sum of the domestic uses of at least 1e-12
     rows_all = {k[1] for k in w.s}
     for r in sorted(rows_all):
-        dsum = sum((w(c, r).where(w(c, r) >= 1e-12, 0.0) for c in sorted(sets.dompos)), w.zero)
+        dsum = PD.p_data_DOMM([w(c, r) for c in sorted(sets.dompos)], w.zero)
         dm = w("DOMM", r)
         cond = is_ms & t_yb & (((dsum != 0) & (dm != 0)) | ((dm < 0) & (r not in sets.oyani_rows)))
         if cond.any():
@@ -598,42 +600,40 @@ def prep_for_estimation(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int
     # l. 157-160: unit values of the groups
     for g in sets.grpr:
         gr = w("GROF", g)
-        w.put("UVAG", g, w("EAAG", g) / gr.where(gr != 0, 1.0) * 1000.0, where=t_yb & (gr != 0))
+        w.put("UVAG", g, PD.p_data_UVAG(w("EAAG", g), gr), where=t_yb & (gr != 0))
         hc = w("HCOM", g)
-        w.put("UVAD", g, w("EXPE", g) / hc.where(hc != 0, 1.0) * 1000.0, where=is_ms & t_yb & (hc != 0))
+        w.put("UVAD", g, PD.p_data_UVAD(w("EXPE", g), hc), where=is_ms & t_yb & (hc != 0))
     # l. 161-162: the activities' output value
     for a in sets.mpact:
-        tot = sum((w(a, r) * w("UVAG", r) for a2, r in sorted(sets.pact_to_o) if a2 == a and r in sets.s_rowsest),
-                  w.zero)
-        w.put(a, "TOOU", tot * 0.001, where=is_ms & t_yb)
+        w.put(a, "TOOU", PD.p_data_TOOU([(w(a, r), w("UVAG", r)) for a2, r in sorted(sets.pact_to_o)
+                                         if a2 == a and r in sets.s_rowsest], w.zero), where=is_ms & t_yb)
     # l. 163-165: net trade
     for r in sets.s_rowsest:
-        w.put("NTRD", r, w("EXPT", r) - w("IMPT", r), where=is_ms & t_yb)
+        w.put("NTRD", r, PD.p_data_NTRD(w("EXPT", r), w("IMPT", r)), where=is_ms & t_yb)
     # l. 169-172: per capita consumption of cereals and meat, food shares
     for g in ("CERE", "MEAS"):
         mem = sorted(r for r, g2 in sets.rows_to_g if g2 == g)
-        w.put("INHA", g, sum((w("INHA", r) for r in mem), w.zero), where=is_ms & t_yb)
-    w.put("foodSh", "CERE", w("foodSh", "SWHE"), where=is_ms & t_yb)
-    w.put("foodSh", "MEAS", w("foodSh", "BEEF"), where=is_ms & t_yb)
+        w.put("INHA", g, PD.p_data_group_sum([w("INHA", r) for r in mem], w.zero), where=is_ms & t_yb)
+    w.put("foodSh", "CERE", PD.p_data_foodSh(w("foodSh", "SWHE")), where=is_ms & t_yb)
+    w.put("foodSh", "MEAS", PD.p_data_foodSh(w("foodSh", "BEEF")), where=is_ms & t_yb)
     # l. 173-178: consumer subsidy equivalent and expenditure per head
     rows_all = {k[1] for k in w.s}
     for r in sorted(rows_all):
         ud, ug = w("UVAD", r), w("UVAG", r)
-        w.put("CSSP", r, ud - ug, where=is_ms & t_yb & (ud != 0) & (ug != 0))
+        w.put("CSSP", r, PD.p_data_CSSP(ud, ug), where=is_ms & t_yb & (ud != 0) & (ug != 0))
     inha = w("INHA", "LEVL")
     for r in sorted(rows_all):
         hc = w("HCOM", r)
         cond = is_ms & t_yb & (hc != 0) & (inha != 0)
         if cond.any():
-            w.put("EXPE", r, w("UVAD", r) * hc / inha.where(inha != 0, 1.0), where=cond)
+            w.put("EXPE", r, PD.p_data_EXPE(w("UVAD", r), hc, inha), where=cond)
     expe_rows = sorted({k[1] for k in w.keys(cols={"EXPE"})})
-    tot = sum((w("EXPE", r) for r in expe_rows if r != "LEVL" and r not in sets.grpr),
-              w.zero)
+    tot = PD.p_data_group_sum([w("EXPE", r) for r in expe_rows if r != "LEVL" and r not in sets.grpr], w.zero)
     w.put("EXPE", "LEVL", tot, where=is_ms & t_yb)
     # l. 160-162: stocking density, livestock units per hectare of UAAR
     ua = w("UAAR", "LEVL")
-    lus = sum((w(a, "LEVL") * float(luunits.get(a, 0.0)) for a in sorted(sets.maact)), w.zero)
-    w.put("LU", "LEVL", lus / ua.where(ua != 0, 1.0), where=t_yb & (ua != 0))
+    w.put("LU", "LEVL", PD.p_data_LU([(w(a, "LEVL"), luunits.get(a, 0.0)) for a in sorted(sets.maact)], ua, w.zero),
+          where=t_yb & (ua != 0))
     return w.long()
 
 
@@ -641,9 +641,7 @@ def _basm_weighted(w: Wide, c: str, r: str, weight: Tuple[str, str], bm: Set[str
     """p_data(c, r, BASM) $ SUM(BASYRSM, weight) = SUM(BASYRSM, value * weight) / SUM(BASYRSM, weight)."""
     inb = w.t.isin(bm)
     wt = w(*weight).where(inb, 0.0)
-    num = (w(c, r) * wt).groupby(level="region").sum()
-    den = wt.groupby(level="region").sum()
-    val = (num / den.where(den != 0, 1.0)).where(den != 0, 0.0)
+    val, den = PD.p_data_BASM_weighted(w(c, r), wt)
     v = pd.Series(w.region.map(val).fillna(0.0).values, index=w.idx)
     w.put(c, r, v, where=mask & (w.t == "BASM") & (pd.Series(w.region.map(den).fillna(0.0).values, index=w.idx) != 0))
 
@@ -654,7 +652,7 @@ def _basm_mean(w: Wide, c: str, r: str, bm: Set[str]) -> None:
     nz = w.t.isin(bm) & (v != 0)
     s = v.where(nz, 0.0).groupby(level="region").sum()
     n = nz.groupby(level="region").sum()
-    m = pd.Series(w.region.map((s / n.where(n != 0, 1.0)).where(n != 0, 0.0)).values, index=w.idx)
+    m = pd.Series(w.region.map(PD.p_data_SLGW_BASM(s, n)).values, index=w.idx)
     has = pd.Series(w.region.map(n).values, index=w.idx) != 0
     w.put(c, r, m, where=has & (w.t == "BASM"))
 
@@ -671,7 +669,7 @@ def _shgm_basm(w: Wide, sl: pd.Series, flag: pd.Series, inbm: pd.Series) -> None
 
     def _avg(v):
         s = v.where(ok, 0.0).groupby(level="region").sum()
-        return pd.Series(w.region.map(s).values, index=w.idx) / n_r.where(n_r != 0, 1.0)
+        return PD.p_data_SHGM_BASM(pd.Series(w.region.map(s).values, index=w.idx), n_r)
     cond = basm & region_flagged & (w("SHGM", "SLGW") != 0)
     targets = [("SHGM", "SLGW")] + w.keys(rows={"ILAM", "YLAM"})
     vals = {k: _avg(sl if k == ("SHGM", "SLGW") else w(*k)) for k in targets}

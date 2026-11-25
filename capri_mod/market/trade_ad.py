@@ -43,7 +43,8 @@ def _system(sc, act, ca, z, A, B, Sk, Dk, rk, PAk, es, ed, offsets=None):
     import prices (BilateralCommodity.import_prices' quota offsets), or None."""
     n = len(sc.regions)
     pos = {i: j for j, i in enumerate(act)}
-    s1, s2 = float(sc.s1), float(sc.s2)
+    # CAPRI's p_rhoArm1 and p_rhoArm2 of each region as importer (BilateralCommodity.s1, s2)
+    s1, s2 = [float(v) for v in sc.s1], [float(v) for v in sc.s2]
     r = [ca.exp(z[pos[i]]) if i in pos else rk[i] for i in range(n)]
     beta = np.asarray(sc.beta, float)
     Pd = [float(sc.Pd0[i]) * r[i] for i in range(n)]
@@ -58,31 +59,31 @@ def _system(sc, act, ca, z, A, B, Sk, Dk, rk, PAk, es, ed, offsets=None):
                 p[i, j] = ca.fmax(pij, 1e-9)
     PM, PA = [], []
     for i in range(n):
-        terms = [arm2PriceAgg_term(beta[i, j], p[i, j], s2) for j in range(n) if beta[i, j] > 0]
-        PM.append(arm2PriceAgg_(ca.sum1(ca.vertcat(*terms)), s2) if (sc._has_imp[i] and terms)
+        terms = [arm2PriceAgg_term(beta[i, j], p[i, j], s2[i]) for j in range(n) if beta[i, j] > 0]
+        PM.append(arm2PriceAgg_(ca.sum1(ca.vertcat(*terms)), s2[i]) if (sc._has_imp[i] and terms)
                   else float(sc.PM0[i]))
         pa = 0
         if sc._has_dom[i]:
-            pa = pa + arm1PriceAgg_term(float(sc.dd[i]), Pd[i], s1)
+            pa = pa + arm1PriceAgg_term(float(sc.dd[i]), Pd[i], s1[i])
         if sc._has_imp[i]:
-            pa = pa + arm1PriceAgg_term(float(sc.dm[i]), PM[i], s1)
-        PA.append(arm1PriceAgg_(pa, s1) if (sc._has_dom[i] or sc._has_imp[i]) else float(sc.PA0[i]))
+            pa = pa + arm1PriceAgg_term(float(sc.dm[i]), PM[i], s1[i])
+        PA.append(arm1PriceAgg_(pa, s1[i]) if (sc._has_dom[i] or sc._has_imp[i]) else float(sc.PA0[i]))
     S = [Sk[i] * (r[i] / rk[i]) ** es[i] for i in range(n)]
     D = [Dk[i] * (PA[i] / PAk[i]) ** ed[i] for i in range(n)]
-    DS = [domSalesShares_(D[i], float(sc.dd[i]), PA[i], Pd[i], s1) if sc._has_dom[i] else 0 for i in range(n)]
-    M = [arm2QuantShares_(D[i], float(sc.dm[i]), PA[i], PM[i], s1) if sc._has_imp[i] else 0 for i in range(n)]
+    DS = [domSalesShares_(D[i], float(sc.dd[i]), PA[i], Pd[i], s1[i]) if sc._has_dom[i] else 0 for i in range(n)]
+    M = [arm2QuantShares_(D[i], float(sc.dm[i]), PA[i], PM[i], s1[i]) if sc._has_imp[i] else 0 for i in range(n)]
 
     def flow(i, j):
         if i == j:
             return DS[j]
-        return importShares_(M[i], beta[i, j], PM[i], p[i, j], s2) if beta[i, j] > 0 else 0
+        return importShares_(M[i], beta[i, j], PM[i], p[i, j], s2[i]) if beta[i, j] > 0 else 0
 
     res = []
     for j in act:
         sold = DS[j]
         for i in range(n):
             if i != j and beta[i, j] > 0:
-                sold = sold + importShares_(M[i], beta[i, j], PM[i], p[i, j], s2)
+                sold = sold + importShares_(M[i], beta[i, j], PM[i], p[i, j], s2[i])
         res.append(SupBalM_(S[j], sold))
     return res, flow
 

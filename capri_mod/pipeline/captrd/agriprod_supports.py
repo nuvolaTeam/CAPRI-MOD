@@ -19,7 +19,8 @@ In GAMS's order (line numbers of agriprod_supports.gms):
 The PercentChange supports of the earlier sources this file deletes are returned as positions (Result.no_percent).
 
 A statement whose right side reads the parameter it assigns takes the values from before the statement (the means
-around the base years, l. 333-337), as GAMS does (found in the biofuel trends, biofuel_trends.py).
+around the base years, l. 333-337), as GAMS does (found in the biofuel trends, biofuel_trends.py). Each statement's
+arithmetic is a named function quoting its GAMS in capri_mod/pipeline/captrd/equations/agriprod_supports.py.
 """
 from __future__ import annotations
 
@@ -28,11 +29,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
+from capri_mod.pipeline.captrd.equations import agriprod_supports as AG
+
 #: l. 290-292: Malta's milk series of 2017 shifted by one position
 MT_SHIFT_YEAR = 2017
-#: l. 304-305: yields in kg from 1000 t and 1000 heads
-KG_PER_T = 1000.0
-#: l. 333-337: three years around each base year
+#: l. 333-335: three years around each base year, all given
 MEAN_YEARS = 3
 #: the last year of p_AgriProd's nowcasts (l. 211, 224)
 LAST_NOWCAST = 2020
@@ -42,16 +43,6 @@ SE_SHGT_FROM = 2018
 FILL_YEARS = [2018, 2019, 2020]
 #: l. 407-411, 468-474: the fallback base year (p_data of 2018 x the factor on 2018)
 NOWCAST_BASE = 2018
-#: l. 413-418: trust levels, by the value's size
-TRUST_HIGH = 9.02
-TRUST_LOW = 3.02
-TRUST_LIMIT = 1.0
-#: l. 423-443: bounds of days and daily growth (x the last ex-post year) and of meat yields
-DAYS_LO = 0.7
-DAYS_UP = 1.5
-#: l. 446-454: the dairy herds' bounds
-HERD_LO = 0.99
-HERD_UP = 1.01
 
 K4 = Tuple[str, str, str, int]
 
@@ -128,42 +119,42 @@ def supports(I: Inputs, *, runr: Sequence[str], s_colsest: Iterable[str], s_rows
         for i in items:
             for y in yr:
                 if y >= SE_SHGT_FROM:
-                    put(("SE000", a, i, y), 0.0)
+                    put(("SE000", a, i, y), AG.p_AgriProd_SE_shepGoat())
     for y in FILL_YEARS:                                                   # l. 236-246
         for k in [k for k in list(P) if k[3] == y - 1]:
             m, a, i, _ = k
             if not g(m, a, i, y):
-                put((m, a, i, y), g(m, a, i, y - 1))
-    for m in msag:                                                         # l. 248-285
+                put((m, a, i, y), AG.p_AgriProd_fill(g(m, a, i, y - 1)))
+    for m in msag:                                                         # l. 250-283
         for y in yr:
             c, d, cv = g(m, "CATA", "SUR4", y), g(m, "DCOW", "SUR4", y), g(m, "CALV", "SUR4", y)
-            put((m, "ADNONDAI", "SUR4", y), (c - d - cv) if (c and d and cv) else 0.0)
+            put((m, "ADNONDAI", "SUR4", y), AG.p_AgriProd_adNonDai(c, d, cv))
         for y in yr:
             a, b = g(m, "PIGL20", "SUR4", y), g(m, "PIGF50", "SUR4", y)
-            put((m, "PIGF", "SUR4", y), (a + b) if (a and b) else 0.0)
+            put((m, "PIGF", "SUR4", y), AG.p_AgriProd_pigf(a, b))
         for y in yr:
             if not g(m, "PIGF", "SUR4", y):
                 ps, p0, bo, so = (g(m, x, "SUR4", y) for x in ("PIGS", "PIGL00", "BOAR", "SOWS"))
-                put((m, "PIGF", "SUR4", y), (ps - p0 - bo - so) if (ps and p0 and so) else 0.0)
+                put((m, "PIGF", "SUR4", y), AG.p_AgriProd_pigf_rest(ps, p0, bo, so))
         for y in yr:
             a, b = g(m, "SHEPS", "SUR4", y), g(m, "GOATS", "SUR4", y)
-            put((m, "SHGT", "SUR4", y), (a + b) if (a and b) else 0.0)
+            put((m, "SHGT", "SUR4", y), AG.p_AgriProd_shgt(a, b))
         for y in yr:
             a, b = g(m, "SHEP", "SUR4", y), g(m, "GOAT", "SUR4", y)
-            put((m, "SHGM", "SUR4", y), (a + b) if (a and b) else 0.0)
-    put(("MT000", "GROF", "GMLK", MT_SHIFT_YEAR), g("MT000", "GROF", "EMLK", MT_SHIFT_YEAR))    # l. 290-292
-    put(("MT000", "GROF", "EMLK", MT_SHIFT_YEAR), g("MT000", "GROF", "CMLK", MT_SHIFT_YEAR))
-    put(("MT000", "GROF", "CMLK", MT_SHIFT_YEAR), g("MT000", "GROF", "RMLK", MT_SHIFT_YEAR))
-    for m in msag:                                                         # l. 294-306
+            put((m, "SHGM", "SUR4", y), AG.p_AgriProd_shgm(a, b))
+    for a, b in (("GMLK", "EMLK"), ("EMLK", "CMLK"), ("CMLK", "RMLK")):     # l. 290-292
+        put(("MT000", "GROF", a, MT_SHIFT_YEAR), AG.p_AgriProd_MT000_2017(g("MT000", "GROF", b, MT_SHIFT_YEAR)))
+    for m in msag:                                                         # l. 294-305
         any_e = any(g(m, "GROF", "EMLK", y) for y in yr)
         any_g = any(g(m, "GROF", "GMLK", y) for y in yr)
         for y in yr:
             if (not g(m, "GROF", "CMLK", y) and g(m, "GROF", "RMLK", y)
                     and (g(m, "GROF", "EMLK", y) or not any_e) and (g(m, "GROF", "GMLK", y) or not any_g)):
-                put((m, "GROF", "CMLK", y), g(m, "GROF", "RMLK", y) - g(m, "GROF", "EMLK", y) - g(m, "GROF", "GMLK", y))
+                put((m, "GROF", "CMLK", y), AG.p_AgriProd_grof_cmlk(g(m, "GROF", "RMLK", y), g(m, "GROF", "EMLK", y),
+                                                                    g(m, "GROF", "GMLK", y)))
         for y in yr:
             if g(m, "DCOW", "SUR4", y):
-                put((m, "YILD", "CMLK", y), g(m, "GROF", "CMLK", y) / g(m, "DCOW", "SUR4", y) * KG_PER_T)
+                put((m, "YILD", "CMLK", y), AG.p_AgriProd_yild_cmlk(g(m, "GROF", "CMLK", y), g(m, "DCOW", "SUR4", y)))
     snap = dict(P)                                                         # l. 333-337, on the values before it
     for m in msag:
         for a in aps:
@@ -171,7 +162,7 @@ def supports(I: Inputs, *, runr: Sequence[str], s_colsest: Iterable[str], s_rows
                 for f in facyr:
                     win = [y for y in yr if abs(y - f) <= 1]
                     if sum(1 for y in win if snap.get((m, a, i, y), 0.0)) == MEAN_YEARS:
-                        put((m, a, i, f), sum(snap.get((m, a, i, y), 0.0) for y in win) / MEAN_YEARS)
+                        put((m, a, i, f), AG.p_AgriProd_facYr([snap.get((m, a, i, y), 0.0) for y in win]))
     a2i: Dict[str, List[str]] = {}
     for a, i in I.sets["agriprod_to_item"]:
         a2i.setdefault(a, []).append(i)
@@ -180,9 +171,9 @@ def supports(I: Inputs, *, runr: Sequence[str], s_colsest: Iterable[str], s_rows
         for m in msag:
             for a in aps:
                 for f in facyr:
-                    den = sum(g(m, a, i, f) for i in a2i.get(a, []))
-                    if den:
-                        put((m, a, fac, f), sum(g(m, a, i, fy) for i in a2i.get(a, [])) / den)
+                    base = [g(m, a, i, f) for i in a2i.get(a, [])]
+                    if sum(base):
+                        put((m, a, fac, f), AG.p_AgriProd_fac([g(m, a, i, fy) for i in a2i.get(a, [])], base))
     c2a: Dict[str, List[str]] = {}
     for c, a in I.sets["cols_to_agriprod"]:
         c2a.setdefault(c, []).append(a)
@@ -193,7 +184,8 @@ def supports(I: Inputs, *, runr: Sequence[str], s_colsest: Iterable[str], s_rows
                 for c in one("agriprodaact"):
                     for f in facyr:
                         if not g(m, c, fac, f):
-                            put((m, c, fac, f), sum(g(m, a, fac, f) for a in c2a.get(c, []) if a in grp))
+                            put((m, c, fac, f), AG.p_AgriProd_fac_AgriProdAact(
+                                [g(m, a, fac, f) for a in c2a.get(c, []) if a in grp]))
     agmap = I.sets["msagriprod_map"]
     of_r: Dict[str, List[str]] = {}
     for a, r in agmap:
@@ -215,42 +207,43 @@ def supports(I: Inputs, *, runr: Sequence[str], s_colsest: Iterable[str], s_rows
             for c in one("agriprodaact"):
                 for w in hl:
                     if basm.get((r, c, w), 0.0):
-                        assign((r, c, w, y), sum(g(a, c, fac, base_year) for a in of_r.get(r, [])) * basm[(r, c, w)])
+                        assign((r, c, w, y), AG.p_ExpertSupprt_absolute([g(a, c, fac, base_year) for a in of_r.get(r, [])],
+                                                                        basm[(r, c, w)]))
                 for w in hl:
                     if pd_(r, c, w, NOWCAST_BASE) and not E.get((r, c, w, y), 0.0):
-                        assign((r, c, w, y), sum(g(a, c, fac, NOWCAST_BASE) for a in of_r.get(r, []))
-                               * pd_(r, c, w, NOWCAST_BASE))
+                        assign((r, c, w, y), AG.p_ExpertSupprt_absolute(
+                            [g(a, c, fac, NOWCAST_BASE) for a in of_r.get(r, [])], pd_(r, c, w, NOWCAST_BASE)))
                 for w in hl:
                     v = E.get((r, c, w, y), 0.0)
                     if v:
-                        out.trust[(r, c, w, y)] = TRUST_HIGH if v > TRUST_LIMIT else TRUST_LOW
-                        out.no_percent.add((r, c, w, y))
+                        out.trust[(r, c, w, y)] = AG.p_ExpertSupprt_Trustlevl(v)
+                        out.no_percent.add((r, c, w, y))                    # l. 421 (PercentChange deleted)
         _bounds(out, I, E, runr, y, lst_expostt, pd_, bast, meat_act, pact_to_y, dcow, hl)
         cs = [c for c in s_colsest if c in dcow or c == "GROF"]
         for r in runr:
             for c in cs:
                 src = "YILD" if c in dcow else "GROF"
                 if basm.get((r, c, "COMI"), 0.0):
-                    assign((r, c, "COMI", y), sum(g(a, src, fac, base_year) for a in of_r.get(r, []))
-                           * basm[(r, c, "COMI")])
+                    assign((r, c, "COMI", y), AG.p_ExpertSupprt_absolute(
+                        [g(a, src, fac, base_year) for a in of_r.get(r, [])], basm[(r, c, "COMI")]))
                 if pd_(r, c, "COMI", NOWCAST_BASE) and not E.get((r, c, "COMI", y), 0.0):
-                    assign((r, c, "COMI", y), sum(g(a, src, fac, NOWCAST_BASE) for a in of_r.get(r, []))
-                           * pd_(r, c, "COMI", NOWCAST_BASE))
+                    assign((r, c, "COMI", y), AG.p_ExpertSupprt_absolute(
+                        [g(a, src, fac, NOWCAST_BASE) for a in of_r.get(r, [])], pd_(r, c, "COMI", NOWCAST_BASE)))
                 v = E.get((r, c, "COMI", y), 0.0)
                 if v:
-                    out.trust[(r, c, "COMI", y)] = TRUST_HIGH if v > TRUST_LIMIT else TRUST_LOW
-                    out.no_percent.add((r, c, "COMI", y))
+                    out.trust[(r, c, "COMI", y)] = AG.p_ExpertSupprt_Trustlevl(v)
+                    out.no_percent.add((r, c, "COMI", y))                   # l. 486 (PercentChange deleted)
             if E.get((r, "GROF", "COMI", y), 0.0):
                 v = E[(r, "GROF", "COMI", y)]
-                out.bounds[(r, "GROF", "COMI", y)] = (v * HERD_LO, v * HERD_UP)
+                out.bounds[(r, "GROF", "COMI", y)] = (AG.p_result_expertLo_herd(v), AG.p_result_expertUp_herd(v))
     if NOWCAST_BASE in exantet:
         raise NotImplementedError("agriprod supports for 2018 (l. 614-697) are not ported: 2018 is no ExAnteT year in "
                                   "the reference run")
     cols_est, rows_est = set(s_colsest), set(s_rowsest)
     for (r, c, w, y), v in list(E.items()):                                # l. 701-704
         if y == LAST_NOWCAST and v and r in set(runr) and c in cols_est and w in rows_est:
-            assign((r, c, w, base_year), basm.get((r, c, w), 0.0))
-            assign((r, c, w, base_year - 1), pd_(r, c, w, base_year - 1))
+            assign((r, c, w, base_year), AG.p_ExpertSupprt_BAS(basm.get((r, c, w), 0.0)))
+            assign((r, c, w, base_year - 1), AG.p_ExpertSupprt_BAS(pd_(r, c, w, base_year - 1)))
     return out
 
 
@@ -264,15 +257,15 @@ def _bounds(out, I, E, runr, y, lst, pd_, bast, meat_act, pact_to_y, dcow, hl):
             if not E.get((r, a, "HERD", y), 0.0):
                 continue
             for w in ("DAYS", "DAILY"):
-                lo = max(DAYS_LO * pd_(r, a, w, lst), I.reqfcnlim.get((a, w, "lo"), 0.0))
-                up = min(DAYS_UP * pd_(r, a, w, lst), I.reqfcnlim.get((a, w, "up"), 0.0))
+                lo = AG.p_result_expertLo_DAYS(pd_(r, a, w, lst), I.reqfcnlim.get((a, w, "lo"), 0.0))
+                up = AG.p_result_expertUp_DAYS(pd_(r, a, w, lst), I.reqfcnlim.get((a, w, "up"), 0.0))
                 out.bounds[(r, a, w, y)] = (lo, up)
             for m in meat_of.get(a, []):
                 p, b = pd_(r, a, m, lst), bast.get((r, a, m), 0.0)
                 if p and b:
-                    out.bounds[(r, a, m, y)] = (DAYS_LO * min(p, b), DAYS_UP * max(p, b))
+                    out.bounds[(r, a, m, y)] = (AG.p_result_expertLo_meat(p, b), AG.p_result_expertUp_meat(p, b))
         for c in dcow:
             for w in hl:
                 v = E.get((r, c, w, y), 0.0)
                 if v:
-                    out.bounds[(r, c, w, y)] = (v * HERD_LO, v * HERD_UP)
+                    out.bounds[(r, c, w, y)] = (AG.p_result_expertLo_herd(v), AG.p_result_expertUp_herd(v))

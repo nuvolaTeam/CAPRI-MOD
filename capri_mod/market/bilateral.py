@@ -13,8 +13,11 @@ Per market region i (the model's trade regions) and product:
   ArmBal1_          D_i = total use at the consumer (Armington) price PA_i
 
 with Pd_i = Pd0_i r_i the region's market price. Share parameters are calibrated so that base flows and base
-prices are reproduced exactly (the price indices equal the value-weighted base prices). CAPRI's second nest
-carries "commitment" terms (p_arm2Commit, augmented CES); the plain CES is used here (REGISTERED).
+prices are reproduced exactly (the price indices equal the value-weighted base prices). The plain CES is CAPRI's
+form in its runs: the "commitment" terms of the augmented CES (p_arm2Commit) are set to 0 (arm/market_model.gms
+l. 225) and are empty in sim_ini_21730, and with %modArmington% off (the 2030 reference and the Green Deal step:
+"Calibrate non-homothetic Armington-system: off [default]" in their META) arm/cal_armington.gms l. 82-90 fixes
+v_gammaCES, v_Hicks and pv_theta at 1, which gives back the standard CES (register history, DEP-12).
 """
 from __future__ import annotations
 from dataclasses import dataclass
@@ -44,8 +47,10 @@ class BilateralCommodity:
     b: np.ndarray           # n x n fixed part (transport, specific tariffs, TRQ effects)
     a0: np.ndarray          # n x n exporter price without ad valorem tariff
     Pd0: np.ndarray         # n market prices (EUR/t)
-    s1: float
-    s2: float
+    #: n: CAPRI's p_rhoArm1(RM, XX) and p_rhoArm2(RM, XX) of each region as importer (its Armington nests: domestic
+    #: sales against the import aggregate, and among the origins); a number is taken for every region
+    s1: np.ndarray
+    s2: np.ndarray
     # calibrated
     beta: Optional[np.ndarray] = None
     dd: Optional[np.ndarray] = None
@@ -61,6 +66,26 @@ class BilateralCommodity:
     #: (S, D): the supply and use (1000 t) the policy blocks' average market prices are weighted with
     #: (MarketPriceAgg_, mpagg_weights): the calibration point's, then each evaluation's (_bilateral_eval)
     mpagg_SD: Optional[tuple] = None
+
+    def __post_init__(self):
+        n = len(self.regions)
+        self.s1 = np.broadcast_to(np.asarray(self.s1, dtype=float), (n,)).copy()
+        self.s2 = np.broadcast_to(np.asarray(self.s2, dtype=float), (n,)).copy()
+
+    @staticmethod
+    def _s(v: np.ndarray, col: bool = False):
+        """An elasticity as the formulas take it: one number where every region has the same (numpy's power of an
+        array by a number takes exact paths for the exponents 2, 0.5 and -1, square, sqrt and reciprocal, that its
+        power by an array does not, and the results stay those of the form before 25 November 2026), else per region
+        (a column for the n x n flows, the importer's)."""
+        if len(v) and bool(np.all(v == v[0])):
+            return float(v[0])
+        return v[:, None] if col else v
+
+    def __setstate__(self, state):
+        """A commodity pickled before 25 November 2026 (a captured market solve) carries one s1 and s2: per region."""
+        self.__dict__.update(state)
+        self.__post_init__()
 
     def pmrk_cells(self) -> np.ndarray:
         """CAPRI's PMrk_ cells (arm/market_model.gms l. 3074-3080): the regions without production of the commodity (no
@@ -121,11 +146,11 @@ class BilateralCommodity:
             PM0 = np.where(M > 0, v_arm2Price((X * off * P).sum(axis=1), np.where(M > 0, M, 1.0)), 1.0)
             PA0 = np.where(self.D0 > 0, arm1Price_(DS, self.Pd0, M, PM0, np.where(self.D0 > 0, self.D0, 1.0)), self.Pd0)
             self.beta = np.where(off & (X > 0), p_dpCESTrade_bilateral(X, np.where(M > 0, M, 1.0)[:, None], P,
-                                                                       PM0[:, None], self.s2), 0.0)
+                                                                       PM0[:, None], self._s(self.s2, True)), 0.0)
             self.dd = np.where(self.D0 > 0, p_dpCESTrade_domestic(DS, np.where(self.D0 > 0, self.D0, 1.0), self.Pd0,
-                                                                  PA0, self.s1), 0.0)
+                                                                  PA0, self._s(self.s1)), 0.0)
             self.dm = np.where(self.D0 > 0, p_dpCESTrade_RW(M, np.where(self.D0 > 0, self.D0, 1.0), PM0, PA0,
-                                                            self.s1), 0.0)
+                                                            self._s(self.s1)), 0.0)
         self.PM0, self.PA0 = PM0, PA0
         self._off = off
         self._has_imp = M > 0
@@ -326,7 +351,7 @@ class BilateralCommodity:
             if D is not None:
                 return self.flows(D, r, np.maximum(p + off - off_now, 1e-9))[0]
             with np.errstate(divide="ignore", invalid="ignore"):
-                return np.where(X > 0, X * (p / np.maximum(p + off - off_now, 1e-6)) ** self.s2, X)
+                return np.where(X > 0, X * (p / np.maximum(p + off - off_now, 1e-6)) ** self._s(self.s2, True), X)
 
         def bisect(fn):
             lo, hi = 0.0, 1.0
@@ -534,9 +559,10 @@ class BilateralCommodity:
         if p is None:
             p = self.import_prices(r)
         Pd = self.Pd0 * r
-        s1, s2 = self.s1, self.s2
+        s1, s2, s2c = self._s(self.s1), self._s(self.s2), self._s(self.s2, True)
         with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
-            pm = np.where(self.beta > 0, arm2PriceAgg_term(self.beta, np.maximum(p, 1e-9), s2), 0.0).sum(axis=1)
+            pm = np.where(self.beta > 0, arm2PriceAgg_term(self.beta, np.maximum(p, 1e-9), s2c),
+                          0.0).sum(axis=1)
             PM = np.where(self._has_imp, arm2PriceAgg_(pm, s2), self.PM0)
             pa = (np.where(self._has_dom, arm1PriceAgg_term(self.dd, Pd, s1), 0.0)
                   + np.where(self._has_imp, arm1PriceAgg_term(self.dm, PM, s1), 0.0))
@@ -548,10 +574,11 @@ class BilateralCommodity:
         (Pd, PM, PA, p) of prices(r, p) when the caller has them already (same values, computed once)."""
         Pd, PM, PA, p = pre if pre is not None else self.prices(r, p)
         with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
-            DS = np.where(self._has_dom, domSalesShares_(D, self.dd, PA, Pd, self.s1), 0.0)
-            M = np.where(self._has_imp, arm2QuantShares_(D, self.dm, PA, PM, self.s1), 0.0)
-            X = np.where(self.beta > 0, importShares_(M[:, None], self.beta, PM[:, None], np.maximum(p, 1e-9), self.s2),
-                         0.0)
+            s1 = self._s(self.s1)
+            DS = np.where(self._has_dom, domSalesShares_(D, self.dd, PA, Pd, s1), 0.0)
+            M = np.where(self._has_imp, arm2QuantShares_(D, self.dm, PA, PM, s1), 0.0)
+            X = np.where(self.beta > 0, importShares_(M[:, None], self.beta, PM[:, None], np.maximum(p, 1e-9),
+                                                      self._s(self.s2, True)), 0.0)
         X[np.arange(len(D)), np.arange(len(D))] = DS
         return X, PA
 
@@ -600,6 +627,8 @@ class _TrqCells:
             if q["dts"] != 0 or (g is not None and g["has_ts"]):
                 ws[ixq] = k
         self.wa, self.ws = wa, ws
+        s2c = sc._s(sc.s2, True)                                    # each cell's p_rhoArm2, its importer's
+        self.s2c = s2c if np.ndim(s2c) == 0 else np.broadcast_to(s2c, (n, n))
 
     def _bil_rates(self, k: int, sb_k, sw_g):
         """_trq_rates' (tb, sb) of bilateral quota k at its sigma sb_k and its global quota's sigma sw_g."""
@@ -618,18 +647,18 @@ class _TrqCells:
     def _cells(self, I) -> tuple:
         """The constant inputs of _xat on the cells I, extracted once per quota's bisection."""
         return (self.base[I], self.ta0n[I], self.ts0n[I], None if self.kind2 is None else self.kind2[I],
-                self.X[I], self.p[I], self.off_now[I])
+                self.X[I], self.p[I], self.off_now[I], self.s2c if np.ndim(self.s2c) == 0 else self.s2c[I])
 
     def _xat(self, C: tuple, ta_c: np.ndarray, ts_c: np.ndarray) -> np.ndarray:
         """_trq_off then Xat on the cells C (_cells)."""
-        base, ta0n, ts0n, kind2, Xc, pc, onow = C
+        base, ta0n, ts0n, kind2, Xc, pc, onow, s2c = C
         off = np.where(np.isnan(ta_c), 0.0, base * (ta_c - ta0n) / 100.0)
         sp = np.where(np.isnan(ts_c), 0.0, ts_c - ts0n)
         if kind2 is not None:
             sp = np.where(kind2, 0.0, sp)
         off = off + sp
         with np.errstate(divide="ignore", invalid="ignore"):
-            return np.where(Xc > 0, Xc * (pc / np.maximum(pc + off - onow, 1e-6)) ** self.sc.s2, Xc)
+            return np.where(Xc > 0, Xc * (pc / np.maximum(pc + off - onow, 1e-6)) ** s2c, Xc)
 
     def bilateral_trial(self, k: int):
         """h(s) = s - Sigmoid(fill / Q) of bilateral quota k at the trial sigma s."""

@@ -1,0 +1,10 @@
+code,text
+FEDM,Feed use on market
+SEDM,Seed use on market
+INDM,Industrial use market
+PRCM,Processing to derived products market
+BIOF,Processing to biofuels
+HCOM,Human consumption market
+LOSM,Losses on market
+STCM,Stock changes on market
+SADM,Statistical adjustment on markets (difference USAP and GROF)

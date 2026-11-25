@@ -7,6 +7,8 @@ this module once supply_module is loaded (capri_mod.utils.mixins.inject_names); 
 """
 from __future__ import annotations
 
+from capri_mod.projection.equations.breeding import p_ghgMiti_pmpParsqr_genet
+
 
 class LivestockBlock:
     def _young_animal_coefs(self) -> dict:
@@ -390,7 +392,7 @@ class LivestockBlock:
             gf = (float(e["gamma_floor"]) if ("gamma_floor" in e and pd.notna(e["gamma_floor"]))
                   else param("GENET_GAMMA_FLOOR"))      # breeding.gms l. 452
             ds_ = float(e.get("dsav", 0.0) or 0.0)
-            gamma = max(gf * c, c * (r1 - r0) - (ds_ if np.isfinite(ds_) else 0.0))
+            gamma = p_ghgMiti_pmpParsqr_genet(c, r1, r0, ds_ if np.isfinite(ds_) else 0.0, gf)
             el_ = max(float(e["elig_share"]), 1e-6)
             Aa = np.hstack([Aa, col[:, None]])
             lo = np.zeros(Aa.shape[1]); lo[-1] = -1.0

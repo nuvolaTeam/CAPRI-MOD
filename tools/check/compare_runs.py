@@ -66,9 +66,11 @@ def indicators(o):
         if pb.get("BEEF"):
             out["beef production"] = (ps["BEEF"] / pb["BEEF"] - 1) * 100
     eb, es = o["environmental"]
-    # EU totals: Norway's regions (NO..) are not in JRC121368's EU27 figures (KNOWN_ISSUES K56)
-    eb = eb[[not str(r).startswith("NO") for r in eb.index]]
-    es = es[[not str(r).startswith("NO") for r in es.index]]
+    # EU totals: the regions outside the EU (Norway's; the UK's, Turkey's, the Western Balkans' when in the run) are not
+    # in JRC121368's EU27 figures (KNOWN_ISSUES K56)
+    from capri_mod.data.definitions import is_eu as _is_eu
+    eb = eb[[_is_eu(str(r)) for r in eb.index]]
+    es = es[[_is_eu(str(r)) for r in es.index]]
     for lab, c in [("N surplus", "n_surplus"), ("fertiliser N2O", "ghg_soil_n2o"), ("enteric CH4", "ghg_enteric"),
                    ("manure CH4", "ghg_manure_ch4"), ("GHG total", "ghg_total"), ("ammonia", "nh3_total"),
                    ("manure N2O", "ghg_manure_n2o"), ("UAA", "uaa_total")]:

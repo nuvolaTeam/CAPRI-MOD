@@ -167,7 +167,9 @@ class NLPBlock:
                     # the manure trade columns' lower bounds (supply.manure_trade_form "capri": minus the gross trade
                     # at CAPRI's calibration point; a region can cut its exports or imports to zero)
                     col_lb={int(j_): float(v_) for d_ in (getattr(self.ev, "pool_lb", None) or {}).values()
-                            for j_, v_ in d_.items()}, **abat)
+                            for j_, v_ in d_.items()},
+                    # CAPRI's ration fat limit with linseed (SupplementPerc_; abatement._supp_fat_spec)
+                    supp_fat={a_: d_ for a_, d_ in self._supp_fat_spec().items() if d_["col"] < Q.shape[0]}, **abat)
         if npk is not None and getattr(self.ev, "alloc_cols", 0):
             spec["fix_cols"] = {n + len(getattr(self.ev, "land_types_used", [])): 0.0}
         self.res.last_feed_dm = None
@@ -597,15 +599,21 @@ class NLPBlock:
                     print("YANI response failed", self.data.region_id, repr(_exc), flush=True)
                 self.res.yani_dnet = None
         self.res.last_npk = nlp.fert_outputs(res["x"]) if nlp.fert else None
-        ab = nlp.abatement_outputs(res["x"]) if getattr(nlp, "abat", None) else {}
+        ab = (nlp.abatement_outputs(res["x"]) if (getattr(nlp, "abat", None) or getattr(nlp, "supp_fat", None))
+              else {})
         if "catc" in ab:
             # the winter cover share chosen, for the cascade's accounts and the supply result (cover_crops)
             _c = spec["catc"]
             self.sv.wc_solved = float(ab["catc"])
             # the catch crop area, catcMiti_ (with the option a choice on the current land, K186)
             _area = float(ab.get("catc_area", self.sv.wc_solved * _c["uaa"]))
+            # the catch crops' BioFix N the regional model counts (t N; fertDistCres_ and e_BIOFIX, K204): none in
+            # CAPRI's reference form (K188), else on the whole area ("capri") or above the base share ("increment")
+            _inc = str(_settings().get("supply.catch_crop_biofix_area")) == "increment"
+            _bfn = (0.0 if _c.get("ref_form")
+                    else float(_c["biofix"]) * 1000.0 * (_area - (_c["m0"] * _c["uaa"] if _inc else 0.0)))
             self.res.cover_solved = {"req": _area, "uaa": _c["uaa"], "base": _c["m0"] * _c["uaa"],
-                                  "delta": _area - _c["m0"] * _c["uaa"], "biofix": _c["biofix"],
+                                  "delta": _area - _c["m0"] * _c["uaa"], "biofix": _c["biofix"], "biofix_n": _bfn,
                                   "share": self.sv.wc_solved, "lb_share": float(_c.get("lb", 0.0)),
                                   "max_share": float(_c["ub"]), "endogenous": True,
                                   "cascade_share": float(_c["m0"]) if _c.get("fixmiti") else self.sv.wc_solved,
@@ -648,6 +656,14 @@ class NLPBlock:
             self._amm_record(sh)
         if ab.get("fert"):
             self.res.fert_tech_shares = {k_: float(v_) for k_, v_ in ab["fert"].items()}
+        self.res.till_shares = {k_: float(v_) for k_, v_ in (ab.get("till") or {}).items()}
+        self.res.urea_share = float(ab["urea"]) if ab.get("urea") is not None else None
+        self.res.legsh_share = float(ab["legsh"]) if ab.get("legsh") is not None else None
+        # the ration fat limit with linseed (SupplementPerc_): {animal: {"perc": v_supplementPerc, "slack":
+        # v_supplementSlack, "share": the ration's fat share}}
+        self.res.supp_fat = ({a_: {"perc": float(p_), "slack": float(s_),
+                                   "share": float(nlp.supplement_fat_share(res["x"], a_))}
+                              for a_, (p_, s_) in ab["supp_fat"].items()} if ab.get("supp_fat") else None)
         if ab.get("mni") is not None and getattr(self.ev, "nlp_nip", None):
             _sh = float(ab["mni"]); _nip = self.ev.nlp_nip
             if _sh > 1e-9:

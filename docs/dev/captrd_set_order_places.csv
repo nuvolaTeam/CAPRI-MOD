@@ -1,0 +1,7 @@
+module,line,function,kind,code,note
+capri_mod/pipeline/captrd/biofuel_trends.py,498,trends,update(set),"out.nobs.update({(r, ""NECR"", ""LEVL""), (r, ""NECR"", ""OCRO"")})",a set updated with a set: order free
+capri_mod/pipeline/captrd/estimate_nuts2.py,313,bounds,for/comprehension over a set,"acts = [a for a, ww in io if ww == w and nob(a, w) and nob(a, ""LEVL"")]",acts is sorted where it is used (sorted(acts))
+capri_mod/pipeline/captrd/globiom.py,175,region_map,for/comprehension over a set,"for r, f in fmap:",builds sets of sets: order free
+capri_mod/pipeline/captrd/globiom.py,184,region_map,for/comprehension over a set,"for r, f in fmap:",builds sets of sets: order free
+capri_mod/pipeline/captrd/prepare.py,373,clean_regions,for/comprehension over a set,if not as_coded or sum(1 for m in ms if m in sets.srnuts2) == 0:,a count: order free
+capri_mod/pipeline/captrd/timesets.py,84,build,for/comprehension over a set,cand = [y for y in exante if y != fst_exante and (y in expostt or y <= fst_exante + 2)],max() of the list: order free

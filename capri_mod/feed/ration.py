@@ -34,6 +34,7 @@ from capri_mod.params import param_table
 from capri_mod.data.definitions import capri_ms
 from capri_mod.tableio import read_input
 from capri_mod.data.inputs import base_year as _base_year, market_year as _market_year   # K52f
+from capri_mod.supply.equations.define_const_pmp_param import p_pmpFeedInpCoeff_SLOP
 
 #: CAPRI supply/pmp_elas.gms: FODDI (incl. straw, overridden) and named feeds
 FEED_ELAS = {"FGRA": -10.0, "FMAI": -10.0, "FOFA": -10.0, "FROO": -10.0, "FCOM": -10.0,
@@ -189,9 +190,8 @@ class Ration:
         # (l. 111-114: max of 10% of the dry-matter requirement and the feeding) is not reconstructed here; this slope
         # is used only where CAPRI's own calibrated slope is missing (135 cells of FSTR, FCOM, FROO, FSGM and FGRA in
         # 14 regions; PROXY_AUDIT S209)
-        peff = np.maximum(p0, 0.1 * cereal_price)
         xref = np.maximum(x0, 1e-9)
-        own = peff / (eps * xref)
+        own = p_pmpFeedInpCoeff_SLOP(p0, cereal_price, eps, xref)
         # CAPRI's OWN calibrated slope where available (pmppar p_pmpFeedInpCoeff,
         # aggregated by tools/build/build_feed_ration.py); the reconstruction of its
         # formula above is the fallback

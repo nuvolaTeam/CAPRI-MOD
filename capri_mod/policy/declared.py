@@ -31,35 +31,10 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass, field
 
-from capri_mod.policy.premium_cut import EPS
-
-#: CAPRI's application types and the numbers policy.gms gives them to sum them over the levels above (l. 166-173)
-APPTYPES = {"perLevl": 1, "perSlgthd": 2, "perYield": 3, "perHistY": 4, "perLiveStockUnit": 5}
-_APPTYPE_CI = {k.lower(): v for k, v in APPTYPES.items()}    # GAMS's identifiers ignore case (perLivestockUnit)
-
-
-def nonzero(x) -> bool:
-    """A GAMS $-condition on a value: true for EPS and any number but zero."""
-    return x == EPS or (x is not None and x != 0)
-
-
-def above_eps(x) -> bool:
-    """GAMS's "x gt eps": a positive number (EPS and zero are not)."""
-    return x is not None and x != EPS and x > 0
-
-
-def gams_sum(values):
-    """GAMS's sum of values that may be EPS: the sum of the numbers; EPS where the terms are EPS and zeros only; None
-    (no record) for no term or a zero sum."""
-    total, eps = 0.0, False
-    for v in values:
-        if v == EPS:
-            eps = True
-        elif v:
-            total += v
-    if total != 0.0:
-        return total
-    return EPS if eps else None
+from capri_mod.policy.equations._gams import EPS, above_eps, gams_sum, nonzero  # noqa: F401 (re-exported)
+from capri_mod.policy.equations.policy import (  # noqa: F401 (APPTYPES re-exported)
+    APPTYPES, p_dataCopy_LEVL, p_entlWght, p_entlWght1, p_premPaym_APPTYPE, p_premPaym_APPTYPE_inherit,
+    p_premPaym_ApFact, p_premPaym_PRMD, p_premPaym_PRMD_reaggregate, p_premPaym_PRMR)
 
 
 def _need(table, name):
@@ -112,19 +87,19 @@ def _levels(regions: PolicyRegions, levels: dict, acts) -> dict:
     for n in regions.nuts1:
         below = [u for u in regions.members.get(n, []) if u in units] + ([n] if n in units else [])
         for a in acts:
-            v = sum(levels.get((u, a), 0.0) for u in set(below))
+            v = p_dataCopy_LEVL(levels.get((u, a), 0.0) for u in set(below))
             if v:
                 out[(n, a)] = v
     for m in regions.member_states:
         below = [u for u in regions.members.get(m, []) if u in units]
         for a in acts:
-            v = sum(levels.get((u, a), 0.0) for u in below)
+            v = p_dataCopy_LEVL(levels.get((u, a), 0.0) for u in below)
             if v:
                 out[(m, a)] = v
     for g in regions.aggregates:
         below = [m for m in regions.members.get(g, []) if m in regions.member_states]
         for a in acts:
-            v = sum(out.get((m, a), 0.0) for m in below)
+            v = p_dataCopy_LEVL(out.get((m, a), 0.0) for m in below)
             if v:
                 out[(g, a)] = v
     return out
@@ -178,7 +153,7 @@ def declared_premiums(declarations: dict, groups: dict, regions: PolicyRegions, 
                 prmr[(r, a, s)] = v
                 t = d.get("APPTYPE")
                 if above_eps(v) and t:
-                    app[(r, a, s)] = _APPTYPE_CI[t.lower()] if isinstance(t, str) else int(t)
+                    app[(r, a, s)] = p_premPaym_APPTYPE(t)
     for (r, a, s), v in entl_weight.items():
         w1[(r, a, s)] = v
 
@@ -197,24 +172,21 @@ def declared_premiums(declarations: dict, groups: dict, regions: PolicyRegions, 
 
     def inherit_rates(targets, parents):
         for k, ups in each(targets, parents):
-            if not nonzero(prmr.get(k)):
-                v = gams_sum(prmr.get(u) for u in ups)
-                if v is not None:
-                    prmr[k] = v
+            v = p_premPaym_PRMR(prmr.get(k), (prmr.get(u) for u in ups))
+            if v is not None:
+                prmr[k] = v
 
     def inherit_apptypes(targets, parents):
         for k, ups in each(targets, parents):
-            if above_eps(prmr.get(k)) and not app.get(k):
-                t = sum(app.get(u, 0) for u in ups)
-                if t:
-                    app[k] = t
+            t = p_premPaym_APPTYPE_inherit(prmr.get(k), app.get(k), (app.get(u, 0) for u in ups))
+            if t:
+                app[k] = t
 
     def inherit_weights(targets, parents):
         for k, ups in each(targets, parents):
-            if above_eps(prmr.get(k)) and not nonzero(w1.get(k)):
-                v = gams_sum(w1.get(u) for u in ups)
-                if v is not None:
-                    w1[k] = v
+            v = p_entlWght1(prmr.get(k), w1.get(k), (w1.get(u) for u in ups))
+            if v is not None:
+                w1[k] = v
 
     # 3. down the levels (policy.gms l. 194-278, in its order): the member states' rates from REGEU1015, then from
     # REGAGGP, their application types and weights the same way; NUTS 1 from the member states; NUTS 2 from NUTS 1
@@ -232,27 +204,17 @@ def declared_premiums(declarations: dict, groups: dict, regions: PolicyRegions, 
             continue
         r, a, s = k
         t = app.get(k, 0)
-        f = 0.0
-        if t in (1, 2):
-            f = 1.0
-        elif t > 2:
-            if t == 3:
-                f += _need(yields, "yields").get((r, a), 0.0) * 0.001
-            elif t == 4:
-                h = _need(hist_yields, "hist_yields")
-                f += h.get((r, a)) or h.get((r, "CERE"), 0.0)
-            elif t == 5:
-                f += _need(lu_units, "lu_units").get(a, 0.0)
-            if s == "DPNONCAP":
-                f += _need(noncap_factor, "noncap_factor").get((r, a), 0.0)
+        # the inputs of the application factor the type needs (a missing table stops)
+        y_ = _need(yields, "yields").get((r, a), 0.0) if t == 3 else 0.0
+        h = _need(hist_yields, "hist_yields") if t == 4 else {}
+        lu = _need(lu_units, "lu_units").get(a, 0.0) if t == 5 else 0.0
+        nc = _need(noncap_factor, "noncap_factor").get((r, a), 0.0) if (t > 2 and s == "DPNONCAP") else None
+        f = p_premPaym_ApFact(t, y_, h.get((r, a)), h.get((r, "CERE"), 0.0), lu, nc)
         if f:
-            prmd[k] = v * f
+            prmd[k] = p_premPaym_PRMD(v, f)
         # 6. the entitlement weight
-        w = w1.get(k)
-        base = 1.0 if not nonzero(w) else (w if above_eps(w) else 0.0)
-        if t == 2:
-            base *= _need(slaughter, "slaughter").get((r, a), 0.0) * 0.001
-        weight[k] = base
+        sl = _need(slaughter, "slaughter").get((r, a), 0.0) if t == 2 else 0.0
+        weight[k] = p_entlWght(w1.get(k), t, sl)
 
     # 5. re-aggregation to NUTS 1, the member states and the EU aggregates, weighted by the levels
     units = set(regions.units)
@@ -264,9 +226,10 @@ def declared_premiums(declarations: dict, groups: dict, regions: PolicyRegions, 
             for a in acts_s:
                 lv = levl.get((r, a), 0.0)
                 if lv > 0:
-                    v = sum(prmd.get((b, a, s), 0.0) * levl.get((b, a), 0.0) for b in below if prmd.get((b, a, s)))
-                    if v:
-                        prmd[(r, a, s)] = v / lv
+                    v = p_premPaym_PRMD_reaggregate([prmd.get((b, a, s), 0.0) for b in below],
+                                                    [levl.get((b, a), 0.0) for b in below], lv)
+                    if v is not None:
+                        prmd[(r, a, s)] = v
                     else:
                         prmd.pop((r, a, s), None)
                 else:

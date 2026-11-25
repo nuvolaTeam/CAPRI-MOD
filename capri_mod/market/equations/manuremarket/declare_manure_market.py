@@ -5,13 +5,13 @@ pool market (e_mPoolSurplus) and the autarky buffer of the trade links unused at
 CAPRI's GAMS statement of each equation is in the docstring of the function that writes it (the project lead's
 decision of 19 November 2026, the supply phase); this docstring keeps the overview, notation and departures.
 
-Written: CAPRIModel._clear_pool_capri (capri_mod/coupling/manure.py), the market m_mPoolMarket for one nutrient. By
-default (outer_loop.manure_pool_solver "nlp") as CAPRI writes and solves it, "using nlp maximizing v_mPoolBenefits"
-(simu_manure_market.gms l. 160): CAPRI's variables and its four rows e_mPoolExcessSupply, e_mPoolSurplus,
-e_mPoolClear, e_mPoolBenefits (the functions below), with IPOPT for CAPRI's CONOPT, the pool price the dual of
-e_mPoolExcessSupply (simu_manure_market.gms l. 217, PMRK). With "qp" the same problem as a convex QP (Clarabel): the minimum of minus the
-benefits under one balance row per pool (the excess supply and the surplus substituted; e_mPoolSurplus's
-coefficients), the pool price that row's dual.
+Written: CAPRIModel._clear_pool_capri (capri_mod/coupling/manure.py), the market m_mPoolMarket for one nutrient, as
+CAPRI writes and solves it, "using nlp maximizing v_mPoolBenefits" (simu_manure_market.gms l. 160): CAPRI's variables
+and its four rows e_mPoolExcessSupply, e_mPoolSurplus, e_mPoolClear, e_mPoolBenefits (the functions below), with IPOPT
+for CAPRI's CONOPT, the pool price the dual of e_mPoolExcessSupply (simu_manure_market.gms l. 217, PMRK). The same
+problem as a convex QP (Clarabel: the minimum of minus the benefits under one balance row per pool, the excess supply
+and the surplus substituted, e_mPoolSurplus's coefficients; the model's form until 20 November 2026, a setting until
+23 November 2026) is the cross-check of capri_mod/tests/test_manure_pool_nlp.py.
 
 In this project's notation, per region r (e its exports to its pool, i its imports, z = e - i its net export; the
 excess supply ES = a + b P, P the nutrient's value; cs0, cs1 and cb0, cb1 the sell and buy costs' constants and

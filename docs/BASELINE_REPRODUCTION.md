@@ -1,6 +1,6 @@
 # Baseline reproduction: the 2030 baseline against CAPRI star 3.0's own 2030 reference
 
-Status: revised 20 October 2026 against the code. The current result is that of run r48 (README section 9 (Validation)); the
+Status: revised 20 October 2026 against the code. The current result is that of run r48 (README section 8 (Validation)); the
 section "How the 2030 baseline is built" describes the code as it is; "Findings" are kept from the October 2026
 checks and dated where they carry numbers. The development history is in CHANGELOG.md and docs/dev/COUPLING_SPRINTS.md.
 
@@ -72,9 +72,10 @@ Each step is what CAPRI does; the code is in `capri_mod/projection/` and `capri_
    Denmark's crops 4.1% and Croatia's 2.3% above CAPRI's levels; KNOWN_ISSUES K120).
 4. **CAPRI's 2030 market**: bilateral market with CAPRI's 2030 flows and the non-EU world of CAPRI's 2030 reference
    (docs/ARMINGTON_MARKET.md); CAPRI's 2030 prices and premiums in 2017 money (`capri_mod/projection/prices.py`).
-5. **Purchased feed at CAPRI's 2030 bulk prices** (`projection/prices.py`): the rations' FCER, FPRO and FOTH prices
-   take CAPRI's feedBlkPrice_ CES index of the member state's feed products at their 2030 prices; FENE and FMIL at 1
-   (their products have no CAPRI unit value: registered).
+5. **Purchased feed at CAPRI's 2030 bulk prices** (`projection/prices.py`): the rations' five bulks take CAPRI's 2030
+   unit value of the bulk over its 2017 one over the deflator; CAPRI's 2030 reference holds them at their 2017 values
+   in every EU member state (no bulk price in its trend), so 0.783 in the model's money (KNOWN_ISSUES K197; until 23
+   November 2026 a CES of the products' 2030 prices, FENE and FMIL at 1).
 6. **CAPRI's 2030 rations and fodder** (`tools/build/build_ration_trajectory_2030.py`): rations and requirements per
    region group and model animal by CAPRI's 2030/2017 per-head factor (`capri_ref_ration_2030.csv`; LEVL-weighted
    over CAPRI's activities; member state where there are no regional rows; the ration is lifted uniformly only where

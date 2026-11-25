@@ -20,7 +20,8 @@ def data():
 def test_irrigation_table_adds_up_to_fss_irrigated_area(data):
     t = read_csv(DATA_DIR / "2017" / "environment" / "irrigation_2017.csv")
     t = t[t.region.isin(data["areas"].index)]                  # the run's units (data: the default countries' only)
-    assert set(t.region) == set(data["areas"].index) - {"IR010000", "IR020000"}   # no Irish share in CAPRI's data
+    # no Irish, Bosnian or Serbian share in the data
+    assert set(t.region) == set(data["areas"].index) - {"IR010000", "IR020000", "BA000000", "CS000000"}
     assert (t[t.activity == "PARI"].irrigated_share == 1.0).all()
     assert t.irrigated_share.between(0.001, 1.0).all()
     assert not t.activity.isin(["GRAE", "GRAI", "RYEM", "OATS", "OCER", "TOBA"]).any()      # not irrigable in CAPRI
@@ -38,11 +39,12 @@ def test_water_demand_geography(data):
     from capri_mod.water import WaterDemandModule
     res = WaterDemandModule(data).compute()
     df = res.by_region
-    assert res.n_regions_covered == 213                        # 221 units without Ireland (2) and Norway (6)
+    from capri_mod.data.definitions import is_eu
+    assert sum(1 for r in df.index if is_eu(r)) == 213        # the EU's 215 units without Ireland's two
     south = df[df.index.str[:2].isin(["ES", "IT", "EL", "PT"])].water_demand_Mm3.sum()
     assert south / res.total_demand_Mm3 > 0.7                 # irrigation concentrates in the Mediterranean
     assert df.loc["ES610000", "water_demand_m3_per_ha"] > 3 * df.loc["DE110000", "water_demand_m3_per_ha"]
-    assert set(res.notes["regions_without_irrigation_data"]) == {"IR010000", "IR020000"}
+    assert set(res.notes["regions_without_irrigation_data"]) == {"IR010000", "IR020000", "BA000000", "CS000000"}
     # solved areas move the indicator: doubling every area doubles the requirement
     from types import SimpleNamespace
     sr = {r: SimpleNamespace(activities=2.0 * data["areas"].loc[r]) for r in ["ES610000", "IT400000"]}
@@ -74,5 +76,4 @@ def test_income_is_capris_mgva_sum(data):
         assert row.public_support == pytest.approx(sup, rel=1e-12)
         assert row.market_income == pytest.approx(inc - sup, rel=1e-9)
         assert row.cap_payments_policy == pytest.approx(float(cap.at[r, "total_payments"]), rel=1e-12)
-        assert 0.0 < row.support_share < 1.0
-    assert 0.0 <= res.income_gini <= 1.0 and 0.0 <= res.payment_gini <= 1.0
+        assert 0.0 < row.public_support < row.farm_income

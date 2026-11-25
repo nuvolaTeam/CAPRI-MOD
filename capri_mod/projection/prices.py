@@ -246,13 +246,10 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
     _add(toou, d_out, (d_yo,))          # total output: final products and young animals sold
     _add(toin, None, (d_yi, d_feed))    # total inputs: young animals and feed cereals bought
 
-    # --- purchased feed bulks in the rations (the projection layer at CAPRI's reference): CAPRI's 2030 bulk prices are its feedBlkPrice_ CES indices of
-    # the member state's feed products at their 2030 prices; the rations were priced at 2017 bulk prices, so the 2030
-    # baseline's ration choice used 2017 relative prices of purchased feed against fodder (whose 2030 values are
-    # CAPRI's). Index per (member state, bulk): sum_i s_i r_i^(1-rho) ^ (1/(1-rho)), s_i the value shares of
-    # tools/build/build_feed_bulks.py, r_i CAPRI's 2030/2017 real price ratio; products without a CAPRI unit value
-    # (by-products, dairy products, fish meal, oils, sugar) at 1 (REGISTERED).
-    data["ration_bulk_price"] = ration_bulk_price_index(r)
+    # --- purchased feed bulks in the rations (the projection layer at CAPRI's reference): the rations hold the bulks'
+    # 2017 prices (the member state's UVAG, feed_ration_2017.csv); the 2030 baseline takes CAPRI's 2030 UVAG of each
+    # bulk over the deflator (ration_bulk_price_index; register DEP-14)
+    data["ration_bulk_price"] = ration_bulk_price_index(ratio)
     summary["ration_bulk_price"] = {k: round(v, 3) for k, v in sorted(data["ration_bulk_price"].items())
                                     if k[0] in ("DE000000", "FR000000")}
 
@@ -274,32 +271,33 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
     return summary
 
 
-#: CAPRI feed products -> price-ratio products (the ratio table's codes)
-_BULK_PRODUCT = {"WHEA": "SWHE", "RICE": "PARI"}
+#: CAPRI's purchased feed bulks, in its supply models' objective at the member state's unit value (sets.gms OM_OBJE
+#: l. 5135-5136)
+FEED_BULKS = ("FCER", "FPRO", "FENE", "FMIL", "FOTH")
 
 
-def ration_bulk_price_index(ratio_fn) -> Dict:
-    """{(member state, bulk): CAPRI's 2030/2017 real price index of the feed bulk} (feedBlkPrice_ CES, rho of the
-    bulk) from the run's <base year>/market/feed_bulks_eu.csv and CAPRI's product price ratios (K52f: a fixed
-    capri_data/2017 path next to the package before)."""
-    import numpy as np
-    from capri_mod.data.inputs import current as _current
-    f = _current().path("feed_bulks_eu.csv", "market")
-    if not f.exists():
-        return {}
-    t = read_input(f, keep_default_na=False)
+def ration_bulk_price_index(ratio: Dict) -> Dict:
+    r"""{(member state, bulk): the purchased feed bulk's 2030 price over its 2017 price, in the model's money}.
+
+    CAPRI's supply model prices the bulks at the member state's unit value (supply/supply_model.gms l. 4641-4643, LINEAR_):
+
+          SUM(  RUNR_OMOBJE(RUNR,OM_OBJE),
+                v_netPutQuant(RUNR,OM_OBJE) * ( SUM(R_RAGG(RUNR,MSACT), (%data%(MSACT,"UVAG",OM_OBJE,"Y") ...
+
+    and its 2030 baseline holds that unit value at the trend's, the base year's where the trend has none
+    (capmod/load_base_data_and_trends.gms l. 693):
+
+          DATA(RS,"UVAG",FEED,"TRD")   $ (NOT DATA(RS,"UVAG",FEED,"TRD")) = DATA(RS,"UVAG",FEED,"Y");
+
+    The index is CAPRI's 2030 UVAG of the bulk (its 2030 reference) over its 2017 UVAG (CAPREG's, the rations' 2017
+    price) over CAPRI's inflation: the price-ratio table's rows of the bulks (tools/build/build_price_trajectory_2030.py).
+    In every EU member state CAPRI's 2030 UVAG is its 2017 one (no bulk price in the trend), so the index is
+    1 / 1.2772 = 0.783; Norway's trend has the bulks' prices. A bulk without a row keeps its 2017 price (the rations'
+    default factor 1). The scenarios move it from there: coupling/feed.py, CAPRI's arm/set_prices.gms. In our view
+    CAPRI's 2030 bulk prices are an artefact of its trend step (the bulks' ingredients' prices rise, theirs do not),
+    followed as CAPRI's form (docs/DEPARTURES_FROM_CAPRI.md, KNOWN_ISSUES K197)."""
     out = {}
-    for (ms, b), g in t.groupby(["ms", "bulk"], sort=True):
-        v = g["feed_kt"].astype(float).values * g["arm1p"].astype(float).values
-        if not (v.sum() > 0):
-            continue
-        s_ = v / v.sum()
-        rho = float(g["rho"].iloc[0])
-        reg = ms[:2]
-        rr = []
-        for prod in g["product"].astype(str):
-            x = ratio_fn(reg, _BULK_PRODUCT.get(prod, prod))
-            rr.append(float(x) if x else 1.0)
-        rr = np.maximum(np.array(rr), 1e-6)
-        out[(ms, b)] = float((s_ * rr ** (1.0 - rho)).sum()) ** (1.0 / (1.0 - rho))
+    for (ms2, prod), x in ratio.items():
+        if prod in FEED_BULKS and x:
+            out[("TUR" if ms2 == "TU" else f"{ms2}000000", prod)] = float(x)
     return out

@@ -1157,7 +1157,7 @@ def test_trq_tariff_follows_quota_fill():
     sc.trq_solve(X, p, r)
     o = sc.trq_offset[0, 1]
     assert 20.0 < o < 750.0                                  # past the quota: toward the out-of-quota tariffs
-    x_o = 130.0 * (p[0, 1] / (p[0, 1] + o)) ** sc.s2         # ... which pushes the flow back to about the quota
+    x_o = 130.0 * (p[0, 1] / (p[0, 1] + o)) ** sc.s2[0]      # ... which pushes the flow back to about the quota
     assert 90.0 < x_o < 105.0
 
 
@@ -1268,8 +1268,8 @@ def test_import_prices_at_trial_sigmas_equal_the_stored_offsets():
 
 
 def test_joint_trade_solve_meets_the_market_and_the_quota_equations():
-    """market.trq_joint: one commodity's trade system solved with its quotas (MarketModule._bilateral_inner_trq) after a
-    supply shock: every supplying region's balance and every quota's trqSigmoidFunc_ / TRQImports_ equation hold at the
+    """The default solve's quotas: one commodity's trade system solved with its quotas
+    (MarketModule._bilateral_inner_trq) after a supply shock: every supplying region's balance and every quota's trqSigmoidFunc_ / TRQImports_ equation hold at the
     solution (supply and use log-linear around the start, as the step's linearisation), with the stored offsets."""
     import numpy as np
     from capri_mod.market.market_module import MarketModule
@@ -1321,7 +1321,7 @@ def test_trq_volume_change_moves_the_quota_not_the_base():
     sc.trq_solve(sc.X0, p, r)
     o = sc.trq_offset[0, 1]
     assert o < -10.0                                         # the quota no longer binds: the import price falls ...
-    assert 99.0 * (p[0, 1] / (p[0, 1] + o)) ** sc.s2 > 110.0  # ... and imports rise past the old quota
+    assert 99.0 * (p[0, 1] / (p[0, 1] + o)) ** sc.s2[0] > 110.0  # ... and imports rise past the old quota
     mm.trq_volume_changes = {}
     MarketModule._apply_trq_volumes(mm, {"T": sc})
     assert abs(sc.trq_quotas[0]["Q"] - 100.0) < 1e-12        # a later baseline restores the base quota
@@ -2239,7 +2239,7 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
     2017 results, levels, yields and land types per region: capri_data/scenarios/capri_ref_2030), not its trend projection, and the
     baseline is calibrated as CAPRI calibrates its supply models: the linear cost terms move until each region's
     solution is its projected levels (fodder crops excepted: the fodder balances hold them). The purchased feed bulks
-    in the rations take CAPRI's 2030 bulk prices (feedBlkPrice_ CES of the products' 2030 prices)."""
+    in the rations take CAPRI's 2030 bulk prices (its 2030 UVAG of the bulk; DEP-14)."""
     import os, json
     import pandas as pd
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
@@ -2256,12 +2256,17 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
     pm = ProjectionModule(model, traj, capri_prices_dir=str(trajectories_dir(DATA_DIR, 2030)))
     data, _ = pm.project_data(2030)
     cap = pd.read_csv(os.path.join(str(DATA_DIR), "validation", "capri_eu27_levels_2030_ref.csv"), index_col=0).iloc[:, 0]
-    eu = [r for r in data["areas"].index if not r.startswith("NO")]
+    # the EU's units: since 24 November 2026 (e95681c) the data also hold CAPRI's non-EU supply countries (the UK,
+    # Turkey, the Western Balkans, Norway: run.supply_countries_outside_eu)
+    from capri_mod.data.definitions import is_eu
+    eu = [r for r in data["areas"].index if is_eu(str(r))]
     for a in ("SWHE", "BARL", "RAPE", "GRAS"):
         cols = ["GRAE", "GRAI"] if a == "GRAS" else [a]         # CAPRI's GRAS row = GRAE + GRAI (the model's own)
         assert abs(float(data["areas"].loc[eu, cols].sum().sum()) / float(cap[a]) - 1.0) < 0.015, a
     rb = data["ration_bulk_price"]
-    assert rb[("DE000000", "FCER")] < 1.0 < rb[("DE000000", "FPRO")]
+    # CAPRI's 2030 bulk prices: its 2017 ones in 2030 money in every EU member state (DEP-14, K197)
+    assert all(rb[("DE000000", b_)] == pytest.approx(1.0 / 1.2772161, rel=1e-5)
+               for b_ in ("FCER", "FPRO", "FENE", "FMIL", "FOTH"))
     # the port of CAPRI's 2030 rations and fodder: CAPRI's 2030 rations (Upper Bavaria's dairy cows: more other fodder, less silage maize) and usable
     # fodder per ha (silage maize for biogas in Germany)
     rf = data["ration_factor"][("DE210000", "DCOW")]
@@ -2747,7 +2752,8 @@ def test_livestock_gross_output_is_marketed_product(de4_baseline):
     # in this model) - milk ~140,000 kt, pork ~22,500 kt.
     herds = model.data["animal_numbers"]
     coef = pd.read_csv(coef_path, index_col=0)
-    eu = [r for r in coef.index if not r.startswith("NO")]
+    from capri_mod.data.definitions import is_eu
+    eu = [r for r in coef.index if is_eu(r)]                      # the EU's units (not the non-EU supply countries')
     milk = float((herds.reindex(eu)["DCOW"].fillna(0)
                   * coef.loc[eu, "DCOW"].fillna(0)).sum())
     # pigs are CAPRI's two activities since the pig split: sows (PIGS) and fattening pigs (PIGF)
@@ -3326,11 +3332,11 @@ def test_model_regions_are_capris_regional_units(data):
     from capri_mod import settings as S
     from capri_mod.data.definitions import is_eu
     units = pd.read_csv(DATA_DIR / "codes" / "regional_units.csv")
-    # all of CAPRI's 250 supply-model units are listed (SUPPLY_NONEU_DESIGN, 4 November 2026); the data are built for
-    # the EU's and the default countries outside it (Norway) until the design's step 4 builds the other 29
+    # all of CAPRI's 250 supply-model units are listed (SUPPLY_NONEU_DESIGN, 4 November 2026); the run loads the EU's and
+    # the default countries outside it: CAPRI's list since 24 November 2026, all 250 (Norway alone until then, 221)
     noneu = set(S.defaults().get("run.supply_countries_outside_eu"))
     built = units[[is_eu(m) or m in noneu for m in units.capri_ms]]
-    assert len(units) == 250 and len(built) == 221 and set(data["areas"].index) == set(built.region)
+    assert len(units) == 250 and len(built) == 250 and set(data["areas"].index) == set(built.region)
     # in the same order: the builders take the unit list from regional_units.csv (tools/lib/_model_regions.py)
     assert list(data["areas"].index) == list(built.region)
     assert {"DK000000", "EE000000", "LT000000", "LV000000", "SI000000", "CY000000", "MT000000", "HR000000"} <= set(units.region)
@@ -3505,7 +3511,8 @@ def test_ghg_accounts_take_capris_methane_and_co2(data):
     assert abs(co2.at["DE110000", "co2lim_kg_ha"] - 115.616) < 0.01 and abs(co2.at["DE110000", "urea_share"] - 0.158) < 0.001
     assert abs(co2.at["CZ010000", "urea_share"] - 0.016) < 1e-12
     h = data["animal_numbers"]
-    eu = [r for r in h.index if not r.startswith("NO")]
+    from capri_mod.data.definitions import is_eu
+    eu = [r for r in h.index if is_eu(r)]                          # the EU's units (not the non-EU supply countries')
     cols = [c for c in m4.columns if c in h.columns]
     man = float((h.loc[eu, cols] * m4.reindex(eu)[cols]).sum().sum()) / 1000.0      # kt CH4
     assert 1350 < man < 1450                                       # CAPRI 2017: 1,396 kt (the old flat factors: 1,072)
@@ -3756,8 +3763,8 @@ def test_table_grapes_and_tobacco_are_markets(model):
     ms = model._bridge_supply_to_market(agg)
     assert ms.at["IT000000", "TAGR"] == 2.0 * _marketed("IT000000", "TAGR")
     assert ms.at["IT000000", "TOBA"] == 0.5 * _marketed("IT000000", "TOBA")
-    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv", index_col=0)
-    assert arm.at["TAGR", "rho1"] == 3.7 and arm.at["TOBA", "rho1"] == 1.8
+    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv").groupby("commodity").rho1
+    assert set(arm.get_group("TAGR")) == {3.7} and set(arm.get_group("TOBA")) == {1.8}  # every market region
     h = pd.read_csv(DATA_DIR / "2017" / "market" / "processing_nq_hessian.csv")
     eu = h[(h.model_region == "EU27") & (h.x == "TOBA") & (h.y == "TOBA")]
     assert len(eu) > 0 and (eu.h > 0).all() and (eu.arm1p_y > 0).all()
@@ -3770,7 +3777,9 @@ def test_table_olives_are_a_market_of_their_own(model, data):
     table olives in the member state)."""
     from capri_mod.data.definitions import MARKET_COMMODITIES, CROPS
     assert "TABO" in CROPS and "TABO" in MARKET_COMMODITIES
+    from capri_mod.data.definitions import is_eu
     ar = data["areas"]
+    ar = ar.loc[[r for r in ar.index if is_eu(r)]]                                  # the EU's units: CAPRI 2017's EU figures
     assert 4500 < ar["OLIV"].sum() < 4900 and 250 < ar["TABO"].sum() < 350          # kha: CAPRI 2017 4,703 and 307
     for k in ("yields", "variable_costs"):
         assert pd.read_csv(DATA_DIR / "2017" / "supply" / f"{k}.csv", index_col=0)["TABO"].notna().all()
@@ -3778,8 +3787,8 @@ def test_table_olives_are_a_market_of_their_own(model, data):
     ms = model._bridge_supply_to_market(agg)
     assert ms.at["IT000000", "TABO"] == 2.0 * _marketed("IT000000", "TABO")
     assert 0.0 < ms.at["IT000000", "OLIV"] < 10.0 * 0.5                              # olive oil, not olives
-    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv", index_col=0)
-    assert arm.at["TABO", "rho1"] == 4.1                                            # p_rhoArm1 (market1_ch.gms)
+    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv").groupby("commodity").rho1
+    assert set(arm.get_group("TABO")) == {4.1}                                      # p_rhoArm1 (market1_ch.gms)
 
 
 def test_textile_crops_are_one_activity_and_market(model, data):
@@ -3789,13 +3798,15 @@ def test_textile_crops_are_one_activity_and_market(model, data):
     import json
     from capri_mod.data.definitions import MARKET_COMMODITIES, CROPS
     assert "TEXT" in CROPS and "TEXT" in MARKET_COMMODITIES and not {"COTT", "OFIB"} & set(CROPS)
+    from capri_mod.data.definitions import is_eu
     ar = data["areas"]
+    ar = ar.loc[[r for r in ar.index if is_eu(r)]]                                  # the EU's units: CAPRI 2017's EU figure
     assert 520 < ar["TEXT"].sum() < 550                                              # kha, CAPRI 2017: 534.7
     assert ar.loc[[r for r in ar.index if r.startswith("EL")], "TEXT"].sum() > 300  # Greek cotton
     agg = pd.DataFrame({"TEXT": [3.0]}, index=["EL000000"])
     assert model._bridge_supply_to_market(agg).at["EL000000", "TEXT"] == 3.0 * _marketed("EL000000", "TEXT")
-    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv", index_col=0)
-    assert arm.at["TEXT", "rho1"] == 8.2                                            # p_rhoArm1 (market1_ch.gms)
+    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv").groupby("commodity").rho1
+    assert set(arm.get_group("TEXT")) == {8.2}                                      # p_rhoArm1 (market1_ch.gms)
     h = pd.read_csv(DATA_DIR / "2017" / "market" / "processing_nq_hessian.csv")
     assert len(h[(h.model_region == "EU27") & (h.x == "TEXT") & (h.y == "TEXT") & (h.h > 0)]) > 0
 
@@ -3836,7 +3847,6 @@ def test_noneu_supply_is_capris_market_supply_function(model):
     dearer US maize raises US maize and lowers US wheat and soya (CAPRI's cross terms; the constant elasticity of
     before moved maize only). The terms reproduce CAPRI's p_elasSupp at the calibration point (the builder's check)."""
     import numpy as np
-    from capri_mod import settings
     mm = model.market_module
     cols = list(mm.commodities)
     b = mm.par.base_production
@@ -3854,9 +3864,6 @@ def test_noneu_supply_is_capris_market_supply_function(model):
         assert abs(float(s.at["USA", x]) - exp) < 1e-3 * abs(P["rows"][x]["CORN"] * 0.10) + 1.0, x
     assert float(s.at["USA", "SWHE"]) < float(b.at["USA", "SWHE"])
     assert mm._noneu_milk_shift("USA", cols, rr.loc["USA", cols].to_numpy())["USA"] != 0.0
-    with settings.override({"market.noneu_supply_nq": False}):
-        s0 = mm.supply_response(mm.world_prices_base, None, region_ratio=rr)
-    assert float(s0.at["USA", "SWHE"]) == float(b.at["USA", "SWHE"])
 
 
 def test_noneu_feed_energy_balance_is_capris(model):
@@ -3915,7 +3922,10 @@ def test_supply_elasticities_reach_every_region_from_capri(data):
     for r in ("DK000000", "DED00000"):
         assert prov.at[r, "SWHE"] in ("PMP_CAPRI", "REGIONAL_CAPRI"), r
     assert (prov["OFAR"] != "NO_CAPRI_VALUE").sum() > 200
-    grown_default = sum(A.at[r, a] for r in A.index for a in ("SWHE", "BARL", "CORN", "RAPE")
+    from capri_mod.data.definitions import is_eu
+    # the EU's units (K30, K32); the non-EU supply countries' units have no regional CAPRI elasticity in these sources
+    # (their supply models take CAPRI's 2030 PMP terms, pmp_capri_2030.csv)
+    grown_default = sum(A.at[r, a] for r in A.index if is_eu(r) for a in ("SWHE", "BARL", "CORN", "RAPE")
                         if prov.at[r, a] == "NO_CAPRI_VALUE" and A.at[r, a] > 0)
     assert grown_default < 800                                                      # kha (before K32: 7,900)
 
@@ -4429,12 +4439,43 @@ def test_winter_cover_is_chosen_in_the_nlp_form(model):
     mo = model.supply_module._models["DE110000"]
     cs = mo.res.cover_solved
     assert cs and cs["endogenous"] and abs(cs["share"] - cs["base"] / cs["uaa"]) < 2e-3
+    # K188: no catch crops' BioFix in CAPRI's reference form (%ghgAbatement% off)
+    assert cs["biofix_n"] == 0.0 and float(b["environmental"].loc["DE110000", "n_fixation_catch_crops"]) == 0.0
     s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=1)
     cs = model.supply_module._models["DE110000"].res.cover_solved
     assert cs["lb_share"] > cs["base"] / cs["uaa"] + 0.01          # the requirement raises the floor
     assert cs["share"] >= cs["lb_share"] - 1e-6 and cs["share"] <= cs["max_share"] + 1e-6
     w0, w1 = model.env_module._winter_cover_now("DE110000", s["supply"]["DE110000"])
     assert abs(w1 - cs["base"] / cs["uaa"]) < 1e-9 and abs(cs["cascade_share"] - w1) < 1e-12 and abs(w0 - w1) < 1e-9
+    # K204: with it on, BioFix x the whole catch-crop area, the base's catch crops too (CAPRI's e_BIOFIX, l. 1442), in
+    # the reported fixation as its catch crops' part (DE11 has no catch crops at this base, so the former form, the
+    # area above the base share, would give the same here)
+    bfn = cs["biofix"] * 1000.0 * cs["req"]
+    assert bfn > 0 and abs(cs["biofix_n"] - bfn) <= 1e-9 * bfn, (cs["biofix_n"], bfn)
+    e1 = s["environmental"].loc["DE110000"]
+    assert abs(float(e1["n_fixation_catch_crops"]) - bfn) <= 1e-9 * bfn
+    assert float(e1["n_fixation"]) >= float(e1["n_fixation_catch_crops"])
+
+
+@pytest.mark.slow
+@pytest.mark.no_market_hessian
+def test_tillage_urea_substitution_and_legume_share_keep_the_base_in_the_baseline(model):
+    """CAPRI's tillage options, urea substitution and legume share in temporary grassland as choices of the regional
+    model (envind/tillage.gms, envind/ammo_tech.gms, envind/leg_share.gms; KNOWN_ISSUES K93): the calibration makes
+    the base point their first-order point, so the baseline keeps ConsTill and NoTill at their initial shares (case 2,
+    the residual at Subs0 = 0), the urea substitution at 0 (case 3, Subs0 > 0 above the model's value of the NH3 saved)
+    and the legume share at 0 (Subs0 left at zero, DEP-30's rule)."""
+    regs = ["DE210000"]
+    b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
+    mo = model.supply_module._models["DE210000"]
+    ts, us = mo._till_spec(), mo._urea_spec()
+    assert ts is not None and {t["name"] for t in ts["techs"]} == {"ConsTill", "NoTill"} and us is not None
+    sr = b["supply"]["DE210000"]                    # the solve's shares (the regional model's own are reset after it)
+    for t in ts["techs"]:
+        assert abs(sr.till_shares[t["name"]] - t["m0"]) < 2e-3, (t, sr.till_shares)
+    assert sr.urea_share is not None and -1e-6 <= sr.urea_share < 1e-3, sr.urea_share
+    assert mo._legsh_spec() is not None
+    assert sr.legsh_share is not None and -1e-6 <= sr.legsh_share < 1e-3, sr.legsh_share
 
 
 def test_catch_crops_take_capris_reference_form(model):
@@ -4685,6 +4726,47 @@ def test_fallow_and_set_aside_have_no_nutrient_need(model):
         cols = {j for g in d["groups"] for j, _v in g["need"]}
         assert acts.index("FALL") not in cols and acts.index("VSET") not in cols, nut
         assert acts.index("BARL") in cols, nut
+
+
+def test_the_blocks_need_columns_hold_the_additive_part(model):
+    """Register DEP-10 item 1b (capri_mod/tests/test_nutned_add_factor.py has the factor and its data): the fertilisation
+    block's NUTNED_ need columns (SupplyModel._npk_spec): at the base yields the data's need, at
+    other yields the need x (1 - s) r + s with r = DATA's factor of the yields (_need_yf) and s the crop's add_share; the
+    groups' need_yf (r over the column's factor) for the legume share's term, which acts on DATA alone."""
+    from capri_mod.fert.npk import NPKData
+    from capri_mod.supply.equations.supply_model.nutrients import NUTNED_needYieldFactor
+    region = "FI190000"
+    model.run(scenario="BASELINE", regions=[region], max_outer_iter=1)
+    mo = model.supply_module._models[region]
+    acts = list(mo.acts)
+    D = NPKData.get()
+    cr = D.capri_region(region)
+    Q, c, A, b, y = mo.res.last_aug
+    lab = list(mo.ev.aug_labels)
+    j = acts.index("BARL")
+
+    def barl(spec):
+        out = {}
+        for nut, d in spec["nutrients"].items():
+            out[nut] = (sum(v for g in d["groups"] for jj, v in g["need"] if jj == j),
+                        [g["need_yf"][j] for g in d["groups"] if j in g.get("need_yf", {})])
+        return out
+    b0 = barl(mo._npk_spec(A.shape[1], y, A, lab))
+    yl = mo.data.yields
+    y0 = float(yl["BARL"])
+    try:
+        yl["BARL"] = 0.9 * y0
+        b1 = barl(mo._npk_spec(A.shape[1], y, A, lab))
+        for nut in b0:
+            r = mo._need_yf("BARL", y0, 0.9 * y0, nut)
+            s = D.crop_coef(cr, nut, "BARL", "add_share")
+            assert 0.0 < s < 0.2 and r < 0.97, nut
+            F = NUTNED_needYieldFactor(r, s)
+            assert b1[nut][0] == pytest.approx(b0[nut][0] * F, rel=1e-12), nut
+            assert b1[nut][1] and all(v == pytest.approx(r / F, rel=1e-12) for v in b1[nut][1]), nut
+            assert all(v == pytest.approx(1.0, rel=1e-12) for v in b0[nut][1]), nut
+    finally:
+        yl["BARL"] = y0
 
 
 def test_forest_and_other_land_keep_capris_bounds(model):

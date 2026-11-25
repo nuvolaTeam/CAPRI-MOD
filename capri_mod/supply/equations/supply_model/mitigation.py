@@ -29,7 +29,9 @@ function:
 
 Written so far: the manure options' part (K183): the fertiliser options aimed at applied manure (mitiTarget in
 targFertMan: the nitrification inhibitor on manure, NITR_INH with target N2OMAN); and the mineral fertiliser options'
-base (targFertSyn: the purchases, K175), on which the regional NLP's fertilisation block charges their cost.
+base (targFertSyn: the purchases, K175), on which the regional NLP's fertilisation block charges their cost; the
+tillage options' base (the tillage area, GHG_Mit_Cost_till) and the urea substitution's (the purchases,
+GHG_Mit_Cost_ureaSubst; 21 November 2026).
 
 """
 from __future__ import annotations
@@ -227,3 +229,80 @@ def GHG_Mit_Cost_catc(uaaEqu, c1, c2_half, v_Miti):
                                                   or (sameas(PACT,"cropMiti") and sum(mitiTechBiod $ sameas(allMitiTech,mitiTechBiod),1)))
     """
     return uaaEqu * (c1 * v_Miti + c2_half * v_Miti * v_Miti)
+
+
+def GHG_Mit_Cost_till(tillset_levl, c1, c2_half, v_Miti):
+    r"""The tillage options' part of GHG_Mit_Cost_(r) (l. 4984-5116, the tillage base l. 5077-5080), kEUR: the tillage
+    area (1000 ha) x (c1 m + c2_half m^2), c1 = costParLin + pmpParLin (+ the calibration's linear term), c2_half =
+    0.5 pmpParSqr (envind/tillage.gms; tools/build/build_tillage_options.py), m = v_Miti(cropMiti, tech, CO2SEQ).
+
+    CAPRI's GAMS, GHG_Mit_Cost_'s tillage base (l. 5077-5080; the parts per share: GHG_Mit_Cost_targFertMan's
+    docstring):
+
+    *           ... or in case of tillage measures and biochar by arable land use
+
+                 + (sum((A,MCACT) $ (%data%(runr,mcact,"tillset","y") and p_technFact(RUNR,mcact,"LEVL",A)),v_actLevl(RUNR,MCACT,A)))
+                  $ (sameas(PACT,"cropMiti") and sum(mitiTechTill $ sameas(allMitiTech,mitiTechTill),1))
+
+    In this project's notation, L = sum over the tillage crops c (CFACTOR_ARAB; DATA(r, c, TILLSET, Y) = 1, envind/
+    tillage.gms l. 324) of their levels x_c:
+
+        cost_r = L x sum_o [c1_o m_o + 0.5 c2_o m_o^2]
+
+    Departures from CAPRI: none (the model's crops are CAPRI's crops of the set, definitions.TILLAGE_CROPS)."""
+    return tillset_levl * (c1 * v_Miti + c2_half * v_Miti * v_Miti)
+
+
+def GHG_Mit_Cost_ureaSubst(v_netPutQuant, inv_1000, cost_perShare):
+    r"""The urea substitution's part of GHG_Mit_Cost_(r) (l. 4984-5116, its base l. 5063), kEUR: the mineral N bought
+    (t) / 1000 x (c1 v + 0.5 c2 v^2), c1 = costParLin + pmpParLin (+ the calibration's linear term), c2 = pmpParSqr
+    (envind/ammo_tech.gms; tools/build/build_urea_subst_option.py), v = v_Miti(cropMiti, UreaSubst, NH3SYN).
+
+    CAPRI's GAMS, GHG_Mit_Cost_'s UreaSubst base (l. 5063; the parts per share: GHG_Mit_Cost_targFertMan's docstring):
+
+                - v_netPutQuant(RUNR,"NITF")                                                        $ (sameas(PACT,"cropMiti") and sameas(allMitiTech,"UreaSubst"))
+
+    In this project's notation, P = - v_netPutQuant(NITF) the purchases (t): cost_r = P / 1000 x [c1 v + 0.5 c2 v^2].
+    Departures from CAPRI: none (the base is the purchases alone, without the fertiliser options' factor of their
+    targFertSyn base, l. 5064-5069)."""
+    return v_netPutQuant * inv_1000 * cost_perShare
+
+
+def GHG_Mit_Cost_legSh(v_actLevl_OFAR, c1, c2_half, v_Miti):
+    r"""The legume share's part of GHG_Mit_Cost_(r) (l. 4984-5116, its base l. 5058-5059), kEUR: OFAR's level (1000 ha)
+    x (c1 v + c2_half v^2), c1 = costParLin + pmpParLin (+ the calibration's linear term), c2_half = 0.5 pmpParSqr
+    (envind/leg_share.gms; tools/build/build_legsh_option.py), v = v_Miti(OFAR, LegSh, BioFix).
+
+    CAPRI's GAMS, GHG_Mit_Cost_'s OFAR base (l. 5058-5059; the parts per share: GHG_Mit_Cost_targFertMan's docstring):
+
+    *           ... or simply the activity level for increased legume share in temporary grasland or rice measures
+                + sum(A $ p_technFact(RUNR,PACT,"LEVL",A),v_actLevl(RUNR,PACT,A))                   $ (sameas(PACT,"OFAR") or sameas(PACT,"PARI"))
+
+    In this project's notation, X the level of OFAR (its technologies summed; the technology mix column moves area
+    between them, not the level): cost_r = X x [c1 v + 0.5 c2 v^2]. Departures from CAPRI: none."""
+    return v_actLevl_OFAR * (c1 * v_Miti + c2_half * v_Miti * v_Miti)
+
+
+def GHG_Mit_Cost_supplementSlack(v_Miti_heads_sq_over_X, DRMA_days, v_supplementSlack):
+    r"""The penalty on the ration fat limit's slack in GHG_Mit_Cost_(r) (l. 5103-5112), kEUR: 999999 x the linseed's
+    share squared x the herd x the dry-matter intake per head (t) x the slack (SupplementPerc_, equations/supply_model/
+    feeding.py; only where linseed is used: 0 at v = 0).
+
+    CAPRI's GAMS, GHG_Mit_Cost_ (l. 5103-5112):
+
+    *         - special penalty part to control total fat content of feed intake
+    *
+       + sum{(R_RAGG(RUNR,MSACT),mitiTech_map(MSACT,AACT,"Line_Tot",mitiTarget),A) $ p_technFact(RUNR,AACT,"LEVL",A),
+    *                   soft constraint shall only be active if Line_Tot is used (e.g. not in reference scenario):
+                        sqr(v_Miti(RUNR,AACT,"Line_Tot",mitiTarget))
+                       * v_actLevl(RUNR,AACT,A)
+                       * p_animReq(RUNR,AACT,"T","DRMA" %addtimedim%) * p_animProdDays(RUNR,AACT,"T") / 1000
+                       * v_supplementSlack(RUNR,AACT,"Line_Tot")
+                       * 999999}
+
+    In this project's notation, z the heads adopting linseed (1000 head; the model's linseed column, supply/livestock.py
+    _genetics_columns), X the herd, D the dry-matter intake per head and year (kg; CAPRI's p_animReq(DRMA) x
+    p_animProdDays), s the slack: CAPRI's v_Miti^2 v_actLevl = (z / X)^2 X = z^2 / X, which the caller passes (at the
+    current herd since 23 November 2026; before, z^2 / X0 at the herd's base level, register DEP-53):
+    penalty = 999999 z^2 / X x D / 1000 x s."""
+    return 999999.0 * v_Miti_heads_sq_over_X * DRMA_days / 1000.0 * v_supplementSlack

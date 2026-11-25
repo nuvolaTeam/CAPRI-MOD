@@ -21,23 +21,26 @@ refpol_endotech_all_sup.gms: ghgTechLineNitr 1 includes envind/line_nitr.gms; gh
            (costsaving0 - costsaving1)) / MaxShare (the drop from CAPRI's two runs, column dsav per model head:
            tools/lib/_capri_costsavings.py)
 
-DRMA (CAPRI's dry-matter intake per head and day of the requirement functions) is not in the results; the model
-uses CAPRI's own estimate from breeding.gms: DRMN + (|DRMX| - DRMN) / 4, here per model head and year from the
-ration requirements (DMIN, DMAX). Per model animal the CAPRI activities are aggregated with weights LEVL x MaxShare
-(res_17, as lownfeed_effects.csv): DCOW = DCOL + DCOH, BCOW = SCOW, BULL = BULL + BULH, HFRS = HEIL + HEIH + HEIR,
-CALV = CAMF + CAFF + CAMR + CAFR.
+The requirements are CAPRI's of the simulation year, per activity: p_animReq(RU, act, "T", DRMA | ENNE | CRPR | DRMN |
+DRMX) of sim_ini_21730 (CAPRI's 2030 simulation loads them from it, capmod/load_sim_ini_gdx.gms l. 100-111, as for
+the low-N feed, KNOWN_ISSUES K194), per head and day; the dosage, the cost and the effects relative to the
+requirements are computed per activity with them (the days cancel in the ratios; the cost per head and year is
+x 365, a model head being a place on the census, K180). Until 23 November 2026 the intake was breeding.gms's estimate
+DRMN + (|DRMX| - DRMN) / 4 from the model's 2017 ration requirements (register DEP-53). Per model animal the CAPRI
+activities are aggregated with weights LEVL x MaxShare (res_17, as lownfeed_effects.csv): DCOW = DCOL + DCOH,
+BCOW = SCOW, BULL = BULL + BULH, HFRS = HEIL + HEIH + HEIR, CALV = CAMF + CAFF + CAMR + CAFR. dm_intake: the model
+animal's dry-matter intake per head and year, 365 x CAPRI's DRMA of its activities weighted by their places on the
+census at 2030 (DATA LEVL x DAYS / 365 at Y), the intake of the ration fat limit SupplementPerc_
+(abatement._supp_fat_spec).
 
 3-NOP (since 29 October 2026, KNOWN_ISSUES K93; nop_rows below): dairy and suckler cows, 0.09% of dry matter, enteric
 CH4 cut by CAPRI's formula in the ration's fibre and fat (tools/lib/_capri_digest.py from CAPRI's digestibility
 table, tools/build/build_digestibility_table.py), no cost saving and no effect on the requirements; without an
 emission price its share stays 0 (CAPRI's calibration: its marginals are 0 in both calibration runs).
 
-Not carried (REGISTERED): CAPRI's soft constraint on total fat in the ration (SupplementPerc_, which needs the fat
-of every feed in the ration as it changes; its effect on the maximum shares is in the max-run levels).
-
 Output: capri_data/2017/abatement/mitigation/supplement_effects.csv, the schema of genetics_effects.csv (options
 LINE_Tot, Nitr_Tot and 3NOP_Tot, tech_param ghgTechLineNitr, a switch: param_switch 1) plus ch4ent_rel, the change of enteric
-CH4 per head adopting, and shr_of_dm.
+CH4 per head adopting, shr_of_dm and dm_intake.
 
     python tools/build/build_supplement_effects.py
 """
@@ -51,7 +54,7 @@ import pandas as pd
 
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
-from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import REFERENCE, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 from _sources_io import read_source, source_records, write_source  # noqa: E402  (capri_data/sources: Parquet)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
@@ -61,6 +64,9 @@ LEV = ROOT / "capri_data" / "sources" / "intermediate" / "envind" / "res17_mann_
 DUMPS = SOURCES / "capreg"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
+sys.path.insert(0, str(ROOT))
+#: CAPRI's 2030 simulation data (tools/build/build_simini_reference.py): p_animReq and DATA
+SIMINI = REFERENCE / "simini" / "simini_21730"
 MAP = {a: _MC.ANIMALS[a] for a in ("DCOW", "BCOW", "BULL", "HFRS", "CALV")}
 #: line_nitr.gms: ShrOfDM, CH4ENT change per unit of ShrOfDM (x100 points), halved costParLin (EUR per t)
 OPT = {"LINE_Tot": dict(shr=0.05, ch4=-0.05 * 100, cost=0.5 * 674 * 89.9 / 40.5),
@@ -77,7 +83,36 @@ NOP_MAP = {a: _MC.ANIMALS[a] for a in ("DCOW", "BCOW")}
 NOP_SHR, NOP_COST, NOP_DAYS = 0.0009, 17500.0 / 1.019 ** (2022 - 2017), 305.0 / 365.0
 
 
-def nop_rows(mr, to_c8, L, rations):
+def capri_req_2030(acts):
+    """CAPRI's 2030 requirements and places per regional unit and activity: ({(unit, act): {item: value per head and
+    day}} of sim_ini_21730's p_animReq at "T" (DRMA, ENNE, CRPR, DRMN, DRMX), {(unit, act): LEVL x DAYS / 365} of its
+    DATA at Y, the places on the census)."""
+    import gzip as _gz
+    import csv as _csv
+    acts = set(acts)
+    R = defaultdict(dict)
+    with _gz.open(SIMINI / "p_animReq.csv.gz", "rt", newline="") as fh:
+        for r in _csv.DictReader(fh):
+            if r["d1"] in acts and r["d2"] == "T" and r["d3"] in ("DRMA", "ENNE", "CRPR", "DRMN", "DRMX"):
+                R[(r["d0"], r["d1"])][r["d3"]] = float(r["value"])
+    LD = defaultdict(dict)
+    with _gz.open(SIMINI / "DATA.csv.gz", "rt", newline="") as fh:
+        for r in _csv.DictReader(fh):
+            if r["d1"] in acts and r["d2"] in ("LEVL", "DAYS") and r["d3"] == "Y":
+                LD[(r["d0"], r["d1"])][r["d2"]] = float(r["value"])
+    places = {k: v.get("LEVL", 0.0) * v.get("DAYS", 0.0) / 365.0 for k, v in LD.items()}
+    return dict(R), places
+
+
+def dm_intake(c8, members, R, places):
+    """The model animal's dry-matter intake per head and year: 365 x CAPRI's 2030 DRMA of its activities weighted by
+    their places on the census (a model head is a place, K180); None without CAPRI's intake."""
+    w = [(places.get((c8, x), 0.0), R.get((c8, x), {}).get("DRMA", 0.0)) for x in members]
+    sw = sum(h for h, d in w if d > 0)
+    return 365.0 * sum(h * d for h, d in w if d > 0) / sw if sw > 0 else None
+
+
+def nop_rows(mr, to_c8, L, rations, R, places):
     """3-NOP per model region and animal (KNOWN_ISSUES K93; envind/line_nitr.gms):
 
       MaxShare  (1 - GRAZ) x 305/365 of the member state (the stable days of the milking period; GRAZ CAPRI's grazing
@@ -123,12 +158,7 @@ def nop_rows(mr, to_c8, L, rations):
             r_ = ra.get(an)
             if not r_:
                 continue
-            req = r_["req"]
-            DMIN, DMAX = float(req.get("DMIN", 0)), float(req.get("DMAX", 0) or 0)
-            if DMIN <= 0:
-                continue
-            drma = DMIN + (max(DMAX, DMIN) - DMIN) / 4.0
-            wall = wsum = ch4 = 0.0
+            wall = wsum = ch4 = cost = 0.0
             for x in mem:
                 lvl = L.get((c8, x)) or L.get((ms, x)) or 0.0
                 if lvl <= 0:
@@ -136,17 +166,20 @@ def nop_rows(mr, to_c8, L, rations):
                 wall += lvl
                 m_ = mx.get((ms, x), 0.0)
                 nf = comp.get(ms, {}).get(x)
-                if m_ <= 0 or nf is None:
+                drma = R.get((c8, x), {}).get("DRMA", 0.0)          # CAPRI's 2030 intake per head and day
+                if m_ <= 0 or nf is None or drma <= 0:
                     continue
                 wsum += lvl * m_
                 ch4 += lvl * m_ * G.nop_ch4_rel(*nf, NOP_SHR)
+                cost += lvl * m_ * NOP_COST * drma * 365.0 / 1000.0 * NOP_SHR
             if wsum <= 0 or wall <= 0:
                 continue
             rows.append(dict(region=reg, animal=an, option="3NOP_Tot", tech_param="ghgTechLineNitr", param_switch=1,
                              elig_share=wsum / wall, d_milk_rel=0.0, d_ener_rel=0.0, d_crpr_rel=0.0, d_drmn_rel=0.0,
                              d_drmx_rel=0.0, d_mann_rel=0.0, cost_floor=0.0,
-                             cost_per_unit=NOP_COST * drma / 1000.0 * NOP_SHR, relsubs0=0.05, relsubs1=1.2,
-                             gamma_floor=0.1, ch4ent_rel=ch4 / wsum, shr_of_dm=NOP_SHR))
+                             cost_per_unit=cost / wsum, relsubs0=0.05, relsubs1=1.2,
+                             gamma_floor=0.1, ch4ent_rel=ch4 / wsum, shr_of_dm=NOP_SHR,
+                             dm_intake=dm_intake(c8, mem, R, places)))
     return rows
 
 
@@ -165,6 +198,7 @@ def main():
     sys.path.insert(0, str(ROOT))
     from capri_mod.data.nested_tables import read_feed_rations
     rations = read_feed_rations(ROOT / "capri_data" / "2017" / "feed" / "feed_ration_2017.csv")
+    R, places = capri_req_2030({x for v in MAP.values() for x in v})
 
     rows, nskip = [], 0
     for reg in mr.model_regions():
@@ -175,48 +209,49 @@ def main():
             ra = rr.get(an)
             if not ra:
                 continue
-            req = ra["req"]
-            E, P, DMIN = float(req.get("ENNE", 0)), float(req.get("CRPR", 0)), float(req.get("DMIN", 0))
-            DMAX = float(req.get("DMAX", 0) or 0)
-            if E <= 0 or P <= 0 or DMIN <= 0:
-                continue
-            drma = DMIN + (max(DMAX, DMIN) - DMIN) / 4.0          # breeding.gms: kg DM per head and year
+            dmi = dm_intake(c8, acts, R, places)
             for opt, o in OPT.items():
                 wall = wsum = 0.0
-                shr = 0.0
+                acc = defaultdict(float)
                 for x in acts:
                     lvl = L.get((c8, x)) or L.get((ms, x)) or 0.0
                     if lvl <= 0:
                         continue
                     wall += lvl
                     mx = MX.get((c8, x, opt), MX.get((ms, x, opt)))
-                    if mx is None or mx <= 2e-6:
+                    q = R.get((c8, x), {})
+                    if mx is None or mx <= 2e-6 or not (q.get("DRMA", 0) > 0 and q.get("ENNE", 0) > 0
+                                                         and q.get("CRPR", 0) > 0 and q.get("DRMN", 0) > 0):
                         continue
                     mx = min(1.0, mx + 2e-6)
                     s_ = SHR_HEIR_NITR if (opt == "Nitr_Tot" and x == "HEIR") else o["shr"]
-                    wsum += lvl * mx
-                    shr += lvl * mx * s_
+                    w = lvl * mx
+                    wsum += w
+                    # per activity, CAPRI's 2030 requirements per head and day (supply_model.gms REQSE_ / REQSN_,
+                    # GHG_Mit_Cost_; line_nitr.gms)
+                    acc["shr"] += w * s_
+                    acc["cost"] += w * o["cost"] * q["DRMA"] * 365.0 / 1000.0 * s_      # per head and year
+                    if opt == "Nitr_Tot":
+                        acc["crpr"] += w * -q["DRMA"] * 0.0154 * s_ * 100.0 / q["CRPR"]
+                    else:
+                        fm = q["DRMA"] * s_ / tot_fat                   # kg linseed (fresh matter) per head and day
+                        acc["ener"] += w * -fm * ooil["ENNE"] / q["ENNE"]
+                        acc["crpr"] += w * -fm * ooil["CRPR"] / q["CRPR"]
+                        acc["drmn"] += w * -fm * ooil["DRMA"] / q["DRMN"]
+                        if abs(q.get("DRMX", 0.0)) > 0:
+                            acc["drmx"] += w * -fm * ooil["DRMA"] / abs(q["DRMX"])
                 if wsum <= 0 or wall <= 0:
                     nskip += 1
                     continue
-                shr /= wsum
+                shr = acc["shr"] / wsum
                 d = dict(region=reg, animal=an, option=opt, tech_param="ghgTechLineNitr", param_switch=1,
-                         elig_share=wsum / wall, d_milk_rel=0.0, d_ener_rel=0.0, d_crpr_rel=0.0, d_drmn_rel=0.0,
-                         d_drmx_rel=0.0, d_mann_rel=0.0, cost_floor=0.0,
-                         cost_per_unit=o["cost"] * drma / 1000.0 * shr,
+                         elig_share=wsum / wall, d_milk_rel=0.0, d_ener_rel=acc["ener"] / wsum,
+                         d_crpr_rel=acc["crpr"] / wsum, d_drmn_rel=acc["drmn"] / wsum, d_drmx_rel=acc["drmx"] / wsum,
+                         d_mann_rel=0.0, cost_floor=0.0, cost_per_unit=acc["cost"] / wsum,
                          relsubs0=0.05, relsubs1=1.2, gamma_floor=0.1,
-                         ch4ent_rel=o["ch4"] * shr, shr_of_dm=shr)
-                if opt == "Nitr_Tot":
-                    d["d_crpr_rel"] = -drma * 0.0154 * shr * 100.0 / P
-                else:
-                    fm = drma * shr / tot_fat                       # kg linseed (fresh matter) per head and year
-                    d["d_ener_rel"] = -fm * ooil["ENNE"] / E
-                    d["d_crpr_rel"] = -fm * ooil["CRPR"] / P
-                    d["d_drmn_rel"] = -fm * ooil["DRMA"] / DMIN
-                    if DMAX > 0:
-                        d["d_drmx_rel"] = -fm * ooil["DRMA"] / DMAX
+                         ch4ent_rel=o["ch4"] * shr, shr_of_dm=shr, dm_intake=dmi)
                 rows.append(d)
-    rows += nop_rows(mr, to_c8, L, rations)
+    rows += nop_rows(mr, to_c8, L, rations, R, places)
     out = pd.DataFrame(rows)
     # CAPRI's cost-saving drop between its ini and max calibration runs (line_nitr.gms l. 289-332 with breeding.gms's
     # formula), EUR per model head adopting (ghgTechLineNitr a switch)

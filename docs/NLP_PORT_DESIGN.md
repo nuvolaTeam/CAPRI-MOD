@@ -2,7 +2,7 @@
 
 *Status: revised 20 October 2026 against the code. The NLP form is the default since 20 October 2026 (the user's
 decision: CAPRI's own form); the conic form stays as an option. The "Scenario results" section is a dated record of the
-port; current results are in README section 9 (Validation). Equations from docs/SUPPLY_MODEL_MAP.md.*
+port; current results are in README section 8 (Validation). Equations from docs/SUPPLY_MODEL_MAP.md.*
 
 ## Principle
 
@@ -135,6 +135,9 @@ Added since (KNOWN_ISSUES K51; docs/N_CASCADE_SPEC.md, docs/AD_SPEC.md): CAPRI's
 digestion, winter cover in the cascade, leaching (LEACHN_) and the indirect N2O of leached and run-off N.
 Not yet in CAPRI's form (Green Deal block, decision 5a.1): legume share, tillage, buffer strips, biodiversity options,
 biochar, urea substitution, 3-NOP cost, linseed fat penalty, SupplementPerc_.
+Since: 3-NOP (29 October 2026); tillage (ConsTill, NoTill), the urea substitution and the legume share as columns of
+the regional model, and SupplementPerc_ with its slack's penalty (the linseed fat penalty) as its rows (21 November
+2026, KNOWN_ISSUES K93).
 
 
 ## Scenario results (20 October 2026)

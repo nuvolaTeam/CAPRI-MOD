@@ -98,13 +98,13 @@ def use_function(mm, lift: bool = False):
     # FEED: non-EU FeedNQ_ (with FEDE), p_ElasFeed elsewhere, the EU's and Norway's bulks, the FMIL block
     fb = mm._feed_bulk_params()
     fdp = mm._feed_demand_params()
-    nfp = mm._noneu_feed_params() if mm.noneu_feed_nq else {"rms": {}, "totals": {}}
+    nfp = mm._noneu_feed_params()
     rms = [s for s, d in nfp["rms"].items() if d.get("tr") in R]
     fede = ca.SX.sym("fede", len(rms))
     dairy_fed = set(mm.DAIRY_TRADED.values())
     fnq_regs = set()
     lcells: List[tuple] = []                       # lift: (kind, i, j, base, value in the model's form, CAPRI's row)
-    if mm.noneu_feed_nq and nfp["rms"] and mm.ev.fede_now is not None:
+    if nfp["rms"] and mm.ev.fede_now is not None:
         from capri_mod.market.feed_ad import feednq_arrays, feednq_function
         fnq_regs = {d.get("tr") for d in nfp["rms"].values()}
         dF: Dict[tuple, object] = {}
@@ -138,7 +138,7 @@ def use_function(mm, lift: bool = False):
     seen = mm.seen.eu_price_seen
     bix = mm.seen.feed_bulk_index or {}
     eu_feed: Dict[str, Dict[str, object]] = {}
-    E = mm._feed_bulk_elas() if (fb and mm.feed_bulk_in_market) else {}
+    E = mm._feed_bulk_elas() if fb else {}
     for reg in mm.EU:
         ie = R.get(reg)
         if ie is None or not fb:
@@ -176,12 +176,23 @@ def use_function(mm, lift: bool = False):
             continue
         f0r = (fb.get("feed0_sup") or {}).get(reg, {})
         ms0 = mm.SUP_NONEU_MS.get(reg, ())
+        sv_sup = (mm.seen.sup_price_seen or {}).get(reg)
         feed = {}
         for (ms, b), d in (fb.get("bulks_sup") or {}).items():
             if ms not in ms0:
                 continue
+            k = float(bix.get((ms, b), 1.0))
+            # the bulk's response within the market solve at the region's prices against those its models saw
+            # (CAPRI's feedBlk_ for every RMSSUP; register DEP-54), as the EU's above
+            el = E.get((ms, b))
+            if el is not None:
+                ys, ff = mm._feedblk_factor_fn(el)
+                rv = ca.vertcat(*[PR[i, Cc[y]] if y in Cc else ca.SX(1.0) for y in ys])
+                sv = np.array([float(sv_sup.get(y, 1.0)) if sv_sup is not None else 1.0 for y in ys])
+                w = np.array([1.0 if (y in Cc and s_ > 0) else 0.0 for y, s_ in zip(ys, sv)])
+                k = k * ff(rv, sv, w)
             rr = ca.vertcat(*[PR[i, Cc[c]] if (c and c in Cc and c in f0r) else ca.SX(1.0) for c in d["comm"]])
-            q = mm._feedblk_fn(d)(rr, float(bix.get((ms, b), 1.0)))[1]
+            q = mm._feedblk_fn(d)(rr, k)[1]
             for n, c in enumerate(d["comm"]):
                 if c:
                     feed[c] = feed.get(c, 0.0) + q[n]

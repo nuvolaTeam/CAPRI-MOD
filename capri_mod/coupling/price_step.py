@@ -5,6 +5,8 @@ docs/dev/ARCHITECTURE_REFACTOR.md); the module-level names they use are model's,
 module once model is loaded (capri_mod.coupling.inject); the annotations are not evaluated.
 """
 from __future__ import annotations
+from capri_mod.coupling.equations.define_stepweights import p_stepWgtSpecial
+from capri_mod.coupling.equations.price_forecast import DATA_UVAG_forecast
 
 
 class PriceStepBlock:
@@ -111,12 +113,7 @@ class PriceStepBlock:
         w = tuple(st.get("outer_loop.capri_step_weights")
                   if outer_iter + 1 < int(st.get("outer_loop.capri_step_weights_late_from"))
                   else st.get("outer_loop.capri_step_weights_late"))
-        use = list(reversed(hist))[:len(w)]
-        tot = sum(w[:len(use)])
-        out = None
-        for w_, v_ in zip(w, use):
-            out = w_ * v_ if out is None else out + w_ * v_
-        return out / tot
+        return DATA_UVAG_forecast(w, reversed(hist))          # price_forecast.gms l. 376-383
 
     @staticmethod
     def _capri_special_forecast(hist, srt):
@@ -125,7 +122,7 @@ class PriceStepBlock:
         0) to k, normalised; hist holds the market's prices of steps 1..k, newest last (floats or Series)."""
         k = len(hist)
         vals = [0.0 * hist[0]] + list(hist)
-        w = [max(0.0, 1.0 - float(srt) * (k + 1 - j)) for j in range(k + 1)]
+        w = p_stepWgtSpecial(srt, k)                    # capri_mod/coupling/equations/define_stepweights.py
         tot = sum(w)
         out = None
         for w_, v_ in zip(w, vals):

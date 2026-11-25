@@ -109,6 +109,64 @@ def NUTNED_(need, supply, inv_sc):
     return need - supply * inv_sc
 
 
+def NUTNED_needYieldFactor(needYieldFact, addShare):
+    """NUTNED_'s need per ha of a crop at the current yields relative to the base (l. 1095-1125): the additive need
+    factor v_cropNutNeedAddFact is outside the yields' reach, so only the part that follows DATA(crop, FNUT) moves,
+
+        (1 - addShare) x needYieldFact + addShare,
+
+    with needYieldFact = DATA(crop, FNUT) at the current yields / at the base (fert/fertned.gms rerun:
+    capri_mod.fert.npk.need_yield_factor) and addShare = v_cropNutNeedAddFact x DEFR x SQRT(...) x (1 + p_technFact)
+    / the crop's need per ha at CAPRI's 2030 solution (npk_crop_coefs_2030.csv add_share,
+    tools/build/build_npk_balance_2030.py add_share_parts). The multiplier v_cropNutNeedMultFact, DEFR and the
+    technology terms are fixed in simulation (supply/prep_sim.gms l. 30-31), so they cancel in the ratio. The other
+    factors inside the bracket multiply DATA's part alone and are not in this factor: v_yldMit and v_yldPestFac, and
+    the legume share's (NUTNED_legSh, on the part that follows DATA: fertilisation.py's need_yf). Without
+    DATA(crop, FNUT) (needYieldFact 0: no main-output yield, K185) the SQRT term's $ %data%(RUNR,MCACT,FNUT,"Y") takes
+    the additive part too: 0. Until 23 November 2026 the whole need moved with DATA(crop, FNUT) (register DEP-10 item
+    1b).
+
+    CAPRI's GAMS, NUTNED_'s left-hand side (l. 1097-1122; the whole equation: NUTNED_'s docstring):
+
+             SUM( (CACT_TO_NGRP(MCACT,NGRP),A) $ p_technFact(RUNR,MCACT,"LEVL",A), v_actLevl(RUNR,MCACT,A)
+                * (%data%(RUNR,MCACT,FNUT,"Y")
+        $iftheni.till1 %ghgAbatement%==on
+                * v_yldMit(RUNR,MCACT)
+        $endif.till1
+        $iftheni.Pes5 %PEST_DISAGG%==ON
+                * (1 +(v_yldPestFac(RUNR,mCact,A)-1) $ v_yldPestFac.range(RUNR,mCact,A))
+        $endif.Pes5
+                   * (1-p_nitrFact(RUNR,MCACT,"BioFix") $ SAMEAS(FNUT,"NITF")
+        $iftheni.fertn1 %ghgAbatement%==on
+                   * sum(R_RAGG(RUNR,MSACT),1. + (  p_ghgMiti(MSACT,MCACT,"LegSh","othImpact","BioFix")
+                                                  * v_Miti(RUNR,MCACT,"LegSh","BioFix")) $ SAMEAS(MCACT,"OFAR"))
+        $endif.fertn1
+                   )
+                    * v_cropNutNeedMultFact(RUNR,FNUT,A)
+                    + v_cropNutNeedAddFact(RUNR,FNUT))
+                   * (p_nitrFact(RUNR,"ALL","DEFR") $ SAMEAS(FNUT,"NITF") + 1 $ (NOT SAMEAS(FNUT,"NITF")))
+                                     * SQRT(
+                                            [1.+p_technFact(RUNR,MCACT,"Yield",A)
+                                                + 0.2 $ SAMEAS(MCACT,"GRAI") - 0.2 $ SAMEAS(MCACT,"GRAE")
+                                            ] $ %data%(RUNR,MCACT,FNUT,"Y")
+                                           )
+                                    *(p_technFact(RUNR,MCACT,FNUT,A)+1.)
+               ) =E=
+    """
+    return (1.0 - addShare) * needYieldFact + addShare if needYieldFact > 0 else 0.0
+
+
+def NUTNED_legSh(need, need_OFAR, needShare, v_Miti):
+    """NUTNED_'s legume share term (l. 1111-1112) on the need of other arable fodder's group: need - need_OFAR x share x
+    v, with need_OFAR OFAR's need columns (its level and technology mix columns, as the group's need writes them),
+    share the part of OFAR's need the option removes at v = 1 (equations/leg_share.py NUTNED_LegSh_needShare), v the
+    option's share of OFAR (CAPRI's v_Miti of OFAR, LegSh, BioFix).
+
+    CAPRI's GAMS of NUTNED_: NUTNED_'s docstring.
+    """
+    return need - need_OFAR * needShare * v_Miti
+
+
 def NUTNED_ownCres(need, own, availFactCres):
     """NUTNED_'s delivery from a permanent group's own harvest residues and deposition (l. 1198-1211), moved to the
     need side: need - own x v_nutAvailFactCRes x (1 - N2O GasTot).
@@ -310,9 +368,11 @@ def NUTNED_mitiExcr(NMAN, v_Miti):
 
 def fertDistCres_catcBioFix(biofix, v_actLevl_CATC, v_actLevl_CATC0):
     """fertDistCres_'s winter cover term (l. 1073-1079), p_ghgMiti(CATC, WinterCov, othImpact, BioFix) x v_actLevl(CATC)
-    x 1000, written from the base level (the base's catch crops are in the residue pool's data): biofix x (CATC - CATC0),
-    biofix = BioFix x 1000 (t N per 1000 ha of catch crops), CATC the catch crop area (catcMiti_, premiums.py: the share
-    times the land; with the share held, the CATC level). CAPRI's GAMS of fertDistCres_: fertDistCres_'s docstring."""
+    x 1000: biofix x (CATC - CATC0), biofix = BioFix x 1000 (t N per 1000 ha of catch crops), CATC the catch crop area
+    (catcMiti_, premiums.py: the share times the land; with the share held, the CATC level). CATC0 = 0 is CAPRI's term
+    (supply.catch_crop_biofix_area "capri", K204: CAPRI's 2030 reference, %ghgAbatement% off, has no catch crops' BioFix
+    in its residue pool, so a run that switches it on adds the base's catch crops too); CATC0 the base's catch crops is
+    the form until 24 November 2026 ("increment"). CAPRI's GAMS of fertDistCres_: fertDistCres_'s docstring."""
     return biofix * (v_actLevl_CATC - v_actLevl_CATC0)
 
 

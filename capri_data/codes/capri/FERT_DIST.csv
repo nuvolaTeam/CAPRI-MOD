@@ -1,0 +1,14 @@
+code,text
+NRET,N retained by crop
+NCRD,N from crops residues and atmospheric deposition in kg/ha
+NMIN,N from mineral fertilizer in kg/ha
+NMAN,N at tail applied per kg/ha
+PRET,P2O5 retained by crop
+PMAN,P2O5 at tail applied per kg/ha
+PMIN,P2O5 from mineral fertilizer in kg/ha
+PCRD,P2O5 from crop residueskg/ha
+KRET,P2O retained by crop
+KMAN,K2O at tail applied per kg/ha
+KMIN,K2O from mineral fertilizer in kg/ha
+KCRD,K2O from crop residueskg/ha
+MINR,Mineral application rate

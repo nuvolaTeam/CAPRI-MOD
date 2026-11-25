@@ -7,6 +7,8 @@ module once environmental_module is loaded (capri_mod.utils.mixins.inject_names)
 from __future__ import annotations
 from capri_mod import statekit as _est   # the state objects' helpers
 from capri_mod.data.definitions import capri_ms  # noqa: E402  (TUR for Turkey's units)
+from capri_mod.environmental.equations.calc_nbalance import DATA_RUNANI
+from capri_mod.supply.equations.set_supply_bounds import v_emiLoss_bounds
 
 
 class PhosphorusBlock:
@@ -57,9 +59,10 @@ class PhosphorusBlock:
                 f, rsurf, eff = cd
                 L = _nf.losses(f, rsurf, s_, eff, m_runsurf=(1.0 - param("WINTERCOV_NO3_REDUCTION") * wc - fert_mrun, 1.0),
                                m_appl_run=1.0 - param("WINTERCOV_NO3_REDUCTION") * wc)
-                # CAPRI bounds every loss share to [0, 1] (supply/set_supply_bounds.gms l. 240-243, v_emiLoss.lo/up), so
-                # options cannot drive the runoff below zero; the cascade evaluated at the solution's shares can
-                R += w * (min(max(float(L[("N", "RunHous")]), 0.0), 1.0) + min(max(float(L[("N", "RunSurf")]), 0.0), 1.0))
+                # CAPRI bounds every loss share to [0, 1] (supply/set_supply_bounds.gms l. 240-243, v_emiLoss.lo/up:
+                # supply/equations/set_supply_bounds.py v_emiLoss_bounds), so options cannot drive the runoff below
+                # zero; the cascade evaluated at the solution's shares can
+                R += w * (v_emiLoss_bounds(L[("N", "RunHous")]) + v_emiLoss_bounds(L[("N", "RunSurf")]))
             if W > 0:
                 out[a_] = R / W
         return out
@@ -159,7 +162,10 @@ class PhosphorusBlock:
             from capri_mod.supply.equations.fertned import DATA_FNUT
             need = {c: DATA_FNUT(v, float(y0.get(c, 0.0) or 0.0)) for c, v in need.items()}
             own_perm = {c: own[c] * sum(v for g, v in (sh.get(c) or {}).items() if g in PERM_NGRP) for c in CROPS}
-            sq = nfp
+            # NUTNED_'s need factor of the yields: the additive need factor held (NUTNED_needYieldFactor; DEP-10 item 1b),
+            # as the block's need (fertilisation.py); EXPPRD's removal keeps DATA(crop, PHOF)'s own factor nfp
+            from capri_mod.supply.equations.supply_model.nutrients import NUTNED_needYieldFactor
+            sq = {c: NUTNED_needYieldFactor(nfp[c], D.crop_coef(cr, "P", c, "add_share")) for c in CROPS}
             # the own residues and the pool at the current yields, as the block's (fertilisation.py; K189): the change of
             # DATA(crop, MANP) on the base coefficients, the pool's scaled as its base (npk_region's pool_scale)
             kp = float(D.region(cr, "P").pool_scale) if D.region(cr, "P") is not None else 1.0
@@ -185,7 +191,7 @@ class PhosphorusBlock:
                 nm_ = float((getattr(supply_result, "fert_nmin", None) or {}).get("NITR_INH_MAN", 0.0) or 0.0)
                 fmr = s_nim * (_nl.fert_effect(v_, nm_) if v_ is not None else 0.0)
         rt = self._p_runtot(region, ms, wc, fmr)
-        runani = sum(h[a] * manp[a] * float(rt.get(a, 0.0)) for a in ANIMALS)
+        runani = sum(DATA_RUNANI(h[a], manp[a], float(rt.get(a, 0.0))) for a in ANIMALS)
         b = _pb.balance(excret, excret - applied, minfer, cresid, expprd, runani)
         b["mineral_source"] = src
         return b

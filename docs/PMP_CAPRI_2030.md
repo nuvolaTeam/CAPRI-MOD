@@ -169,9 +169,10 @@ installation with the export script and the two builders.
 
 `supply.pmp_source = "elasticity"` is gone. With CAPRI's terms (or the recipe's), an activity of a calibrated part
 (crops, animals) without a positive own term is held at its level (SupplyModule._uncalibrated), as the activities
-without any CAPRI value already were. At the 2030 baseline (r166) that is 71 region-activity cells in 63 regions, at
+without any CAPRI value already were. At the 2030 baseline (r166) that was 71 region-activity cells in 63 regions, at
 most 2% of an activity's EU level: tobacco 0.76 of 38 kha, pulses 23 of 1,809 kha (mostly Dutch regions), durum wheat
-3.5 of 2,115 kha; everything else 0.07% or less. Until then they took a curvature from their CAPRI elasticity (capped at
+3.5 of 2,115 kha; everything else 0.07% or less. Since the 2030 trajectory took their levels to CAPRI's 0, all such
+cells are at 0 at 2030, as CAPRI's, which has no level and no yield there (register DEP-23, closed 23 November 2026). Until then they took a curvature from their CAPRI elasticity (capped at
 8, with CAPRI's share term). At the 2017 market year the recipe had no term for nurseries (NURS, 181 kha in 213
 regions); CAPRI's 2030 terms do cover NURS. Fixed 28 October 2026: NURS was missing from the recipe builder's activity
 list (tools/build/build_pmp_recipe.py ACTS); with it the recipe gives CAPRI's NURS term in all 224 regions at 2030 and

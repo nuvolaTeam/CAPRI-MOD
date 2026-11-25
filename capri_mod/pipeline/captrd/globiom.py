@@ -1,5 +1,5 @@
 """CAPRI's conversion of GLOBIOM-EU's projections into long-run change factors for CAPRI's regions and codes:
-p_globiomInfo(region, col, row, info, scenario, year), info = data, factorB2000, share.
+p_globiomInfo by region, column, row, information (data, factorB2000, share), scenario and year.
 
   global/convert_globiom.gms (--GlobiomVersion=Globiom_EU; the branch selected for the GLOBIOM-EU files of 2023-2025,
   tools/build/build_captrd_globiom_sets.py)
@@ -17,9 +17,13 @@ p_globiomInfo(region, col, row, info, scenario, year), info = data, factorB2000,
     l. 2017-2145  the change factors from B2000 to the base year 2017 from CAPREG's time series (member states) and
                   the global database (p_dataMarket, the other regions), population from p_worldPop; the land use
                   shares; GDP's factor in real terms (base_factors)
-  global/create_longrun_info.gms l. 74-90: the CAPREG time series' UVAP of the base years filled from 2002 with
+  global/create_longrun_info.gms l. 91-102: the CAPREG time series' UVAP of the base years filled from 2002 with
   UVAD + PRII's growth; PROD = GROF (MAPR for the secondary products) where missing, p_dataMarket's PROD = MAPR
   (prepare_capreg, prepare_datamarket)
+
+CAPRI's GAMS statements with arithmetic are quoted by the functions that compute them, in
+capri_mod/pipeline/captrd/equations/convert_globiom.py and create_longrun_info.py; the functions here keep the loops,
+the records' grouping, the filters and the set statements (the region mapping, the years kept), and call them.
 
 GAMS's semantics kept: execute_load drops the records outside a parameter's declared domain (the scenario's macroScen,
 bioEnScen, IEAscen; longYr; CROPTECH); labels compare without case (all upper case here); an assignment's right side
@@ -35,19 +39,9 @@ from typing import Dict, Iterable, List, Sequence, Set, Tuple
 
 import pandas as pd
 
-#: convert_globiom.gms l. 1880-1882: the sugar content of sugar cane and of sugar beet
-SUGAR_CANE = 0.094
-SUGAR_BEET = 0.15
-#: l. 1944: the factor of a year without data where B2000 has data
-NO_DATA_FACTOR = 1e-6
-#: l. 2134: the smallest change factor from B2000 to the base year
-MIN_BAS_FACTOR = 0.1
-#: l. 2126: the smallest B2000 land use of CAPRI dividing GLOBIOM's
-MIN_LAND = 0.001
-#: l. 2145: CAPRI's default inflation, to put GDP's factor in real terms
-INFLATION = 1.019
-#: l. 2055, 2098, 2102: the three years averaged
-N_AVG = 3.0
+from capri_mod.pipeline.captrd.equations import convert_globiom as GE
+from capri_mod.pipeline.captrd.equations import create_longrun_info as CL
+
 #: the calendar year of B2000 (CAPRI's calyea: the average of 1999-2001) and GLOBIOM's projection years
 B2000_YEAR = 2000
 #: l. 1702-1708: the years after it are kept only where GLOBIOM projects milk production that far
@@ -184,7 +178,8 @@ def region_map(S: Sets, G: Globiom) -> Set[Tuple[str, str]]:
         if rw in S.rw:
             for rms in parts.get(rm, ()):
                 fmap |= {(rw, f) for f in by_reg.get(rms, ())}
-    fmap |= set(FAO_ADDED)
+    fmap |= set(FAO_ADDED)                                                         # l. 1213-1218
+    # the lines cited below are convert_globiom.gms's
     by_fao = defaultdict(set)
     for r, f in fmap:
         by_fao[f].add(r)
@@ -197,10 +192,19 @@ def region_map(S: Sets, G: Globiom) -> Set[Tuple[str, str]]:
                 if r in rmall:
                     out.add((r, c))
     for ragg, c in G.region58_country_map:                                         # l. 1228-1229
-        for r in [r for r, cc in out if cc == c]:
+        for r in sorted(r for r, cc in out if cc == c):
             out.add((r, ragg))
     out.discard(("RSA", "USAREG"))                                                 # l. 1236
     return {(r, g) for r, g in out if not (r in S.rw and r not in S.euallagg and r != "EU")}   # l. 1239-1243
+
+
+def _sums(records, f):
+    """The records' (key, value) summed per key by f (GE.p_globiomTrade, p_PRICE, ...), the keys in the order of
+    their first record."""
+    acc = defaultdict(list)
+    for k, v in records:
+        acc[k].append(v)
+    return {k: f(vs) for k, vs in acc.items()}
 
 
 def _scen_filter(d: pd.DataFrame, cols: Sequence[str], scen: Tuple[str, str, str]) -> pd.DataFrame:
@@ -229,17 +233,17 @@ def collect(G: Globiom, S: Sets, scen: Tuple[str, str, str], longyr: Sequence[st
     pm: Dict[Tuple[str, str, str], float] = {}                                    # p_MACRO(region, item, year)
     for (r, it, y), v in md.items():                                              # l. 1364-1365
         if it in ("POP", "GDP") and v:
-            pm[(r, it, y)] = v
+            pm[(r, it, y)] = GE.p_MACRO(v)
     for r in ragg:                                                                 # l. 1377-1381
         for y in longyr:
             if pm.get((r, "POP", y)):
-                pm[(r, "POP", y)] = 1000 * pm[(r, "POP", y)]
+                pm[(r, "POP", y)] = GE.p_MACRO_POP_1000(pm[(r, "POP", y)])
             if not pm.get((r, "GDP", y)):
-                v = md.get((r, "GDPPCAP_RELCHNG", y), 0.0) * md.get((r, "POP_RELCHNG", y), 0.0)
+                v = GE.p_MACRO_GDP_RelChng(md.get((r, "GDPPCAP_RELCHNG", y), 0.0), md.get((r, "POP_RELCHNG", y), 0.0))
                 if v:
                     pm[(r, "GDP", y)] = v
             if not pm.get((r, "POP", y)):
-                v = md.get((r, "POP_RELCHNG", y), 0.0)
+                v = GE.p_MACRO(md.get((r, "POP_RELCHNG", y), 0.0))
                 if v:
                     pm[(r, "POP", y)] = v
 
@@ -249,126 +253,123 @@ def collect(G: Globiom, S: Sets, scen: Tuple[str, str, str], longyr: Sequence[st
         return d
     tr = level(T["Trade_Compare"], "d1", "d2", "d8", ["d5", "d6", "d7"])
     tr = tr[tr.d3.isin(ragg) & (tr.d4 == "LEVEL")]
-    trade: Dict[Tuple[str, str, str, str], float] = defaultdict(float)            # p_globiomTrade(r1, r2, item, y)
-    for it, a, b, y, v in zip(tr.d1, tr.d2, tr.d3, tr.d8, tr.value):              # l. 1385-1387: TRADE(item, r2, r1)
-        trade[(b, a, it, y)] += v
+    trade = _sums((((b, a, it, y), v) for it, a, b, y, v in zip(tr.d1, tr.d2, tr.d3, tr.d8, tr.value)),
+                  GE.p_globiomTrade)
+    #                                                                              l. 1385-1387: TRADE(item, r2, r1)
     pr = level(T["Price_Compare2"], "d1", "d2", "d6", ["d3", "d4", "d5"])
-    price = defaultdict(float)
-    for it, r, y, v in zip(pr.d1, pr.d2, pr.d6, pr.value):                        # l. 1390-1392
-        price[(r, it, y)] += v
+    price = _sums((((r, it, y), v) for it, r, y, v in zip(pr.d1, pr.d2, pr.d6, pr.value)), GE.p_PRICE)   # l. 1390-1392
     pc = level(T["Process_Compare2"], "d3", "d1", "d7", ["d4", "d5", "d6"])
-    proc = defaultdict(float)
-    for r, p, it, y, v in zip(pc.d1, pc.d2, pc.d3, pc.d7, pc.value):              # l. 1394-1400
-        if not (p in TO_FAME and it in S.vegoil):
-            proc[(r, it, y)] += v
+    proc = _sums((((r, it, y), v) for r, p, it, y, v in zip(pc.d1, pc.d2, pc.d3, pc.d7, pc.value)   # l. 1394-1400
+                  if not (p in TO_FAME and it in S.vegoil)), GE.p_PROCESS)
     q = {}
-    for n in ("DemQuantity_Compare", "SupQuantity_Compare", "FeedQuantity_Compare"):   # l. 1402-1412
+    for n, f in (("DemQuantity_Compare", GE.p_DEMAND), ("SupQuantity_Compare", GE.p_SUPPLY),   # l. 1402-1412
+                 ("FeedQuantity_Compare", GE.p_FEED)):
         d = level(T[n], "d1", "d2", "d7", ["d4", "d5", "d6"])
         d = d[d.d3 == "LEVEL"]
-        acc = defaultdict(float)
-        for it, r, y, v in zip(d.d1, d.d2, d.d7, d.value):
-            acc[(r, it, y)] += v
-        q[n] = acc
+        q[n] = _sums((((r, it, y), v) for it, r, y, v in zip(d.d1, d.d2, d.d7, d.value)), f)
     lv = _scen_filter(T["LIVE_COMPARE"], ["d9", "d10", "d11"], scen)
     lv = lv[lv.d1.isin(country) & lv.d8.isin(G.animal) & lv.d12.isin(years) & (lv.d3 == "ALTI_ANY")
             & (lv.d4 == "SLP_ANY") & (lv.d5 == "SOIL_ANY") & lv.d6.isin(G.aezclass)]
-    any_ = defaultdict(float)
-    notany = defaultdict(float)
+    any_ = defaultdict(list)
+    notany = defaultdict(list)
     for c, cr, aez, a, y, v in zip(lv.d1, lv.d2, lv.d6, lv.d8, lv.d12, lv.value):   # l. 1451-1458
         if aez == "AEZ_ANY":
             if cr == "ANYCOLROW":
-                any_[(c, a, y)] += v
+                any_[(c, a, y)].append(v)
         else:
-            notany[(c, a, y)] += v
+            notany[(c, a, y)].append(v)
     live = {}
-    for k in set(any_) | set(notany):
-        v = any_.get(k, 0.0) + (notany.get(k, 0.0) if not any_.get(k, 0.0) else 0.0)
+    for k in sorted(set(any_) | set(notany)):
+        v = GE.p_LIVESTOCK(any_.get(k, []), notany.get(k, []))
         if v:
             live[k] = v
     ac = _scen_filter(T["ACR_COMPARE"], ["d9", "d10", "d11"], scen)
     ac = ac[ac.d1.isin(country) & ac.d7.isin(G.eu_crop) & ac.d8.isin(CROPTECH) & ac.d12.isin(years)
             & (ac.d3 == "ALTI_ANY") & (ac.d4 == "SLP_ANY") & (ac.d5 == "SOIL_ANY") & ac.d6.isin(G.aezclass)]
-    crop = defaultdict(float)
-    for c, cp, y, v in zip(ac.d1, ac.d7, ac.d12, ac.value):                       # l. 1460-1462
-        crop[(c, cp, y)] += v
+    crop = _sums((((c, cp, y), v) for c, cp, y, v in zip(ac.d1, ac.d7, ac.d12, ac.value)),   # l. 1460-1462
+                 GE.p_CROP_AREA)
     ln = _scen_filter(T["Land_Compare2"], ["d8", "d9", "d10"], scen)
     ln = ln[ln.d1.isin(country) & ln.d7.isin(G.alllc_type) & ln.d11.isin(years) & (ln.d3 == "ALTI_ANY")
             & (ln.d4 == "SLP_ANY") & (ln.d5 == "SOIL_ANY") & ln.d6.isin(G.aezclass)]
-    land = defaultdict(float)
-    for c, lc, y, v in zip(ln.d1, ln.d7, ln.d11, ln.value):                       # l. 1464-1466
-        land[(c, lc, y)] += v
+    land = _sums((((c, lc, y), v) for c, lc, y, v in zip(ln.d1, ln.d7, ln.d11, ln.value)), GE.p_LAND)   # l. 1464-1466
     pe = _scen_filter(T["Perennial_COMPARE"], ["d7", "d8", "d9"], scen)
     pe = pe[pe.d10.isin(years) & (pe.d3 == "ALTI_ANY") & (pe.d4 == "SLP_ANY") & (pe.d5 == "SOIL_ANY")
             & pe.d6.isin(G.aezclass)]
+    peren = defaultdict(list)
     for c, y, v in zip(pe.d1, pe.d10, pe.value):                                  # l. 1469-1471 (any region)
-        crop[(c, "LIGHERBA", y)] = crop.get((c, "LIGHERBA", y), 0.0) + v
+        peren[(c, "LIGHERBA", y)].append(v)
+    for k, vs in peren.items():
+        crop[k] = GE.p_CROP_AREA_ligherba(crop.get(k, 0.0), vs)
     members = defaultdict(list)
     for ra, c in G.region58_country_map:
         members[ra].append(c)
 
-    def up(d):                                                                     # l. 1474-1479
+    def up(d, f):                                                                  # l. 1474-1479
         out = dict(d)
         for k in [k for k in out if k[0] in ragg]:
             out.pop(k)
-        acc = defaultdict(float)
+        acc = defaultdict(list)
         for ra, cs in members.items():
             cs = set(cs)
             for (c, it, y), v in d.items():
                 if c in cs:
-                    acc[(ra, it, y)] += v
-        out.update({k: v for k, v in acc.items() if v})
+                    acc[(ra, it, y)].append(v)
+        out.update({k: v for k, v in ((k, f(vs)) for k, vs in acc.items()) if v})
         return out
-    live, crop, land = up(live), up(crop), up(land)
+    live, crop, land = up(live, GE.p_LIVESTOCK_ragg), up(crop, GE.p_CROP_AREA_ragg), up(land, GE.p_LAND_ragg)
     gcols, grows = S.globiomcols, S.globiomrows
     for (r, lc, y), v in land.items():                                             # l. 1586
         if r in ragg and lc in gcols:
-            put((r, lc, "LEVEL", y), v)
+            put((r, lc, "LEVEL", y), GE.p_GLOBIOM(v))
     for (r, it, y), v in pm.items():                                               # l. 1588-1589
         if it in S.globiommacro:
-            put((r, it, "LEVEL", y), v)
+            put((r, it, "LEVEL", y), GE.p_GLOBIOM(v))
     for (r, a, y), v in live.items():                                              # l. 1590
         if r in ragg and a in gcols:
-            put((r, a, "LEVEL", y), v)
+            put((r, a, "LEVEL", y), GE.p_GLOBIOM(v))
     for (r, cp, y), v in crop.items():                                             # l. 1591
         if r in ragg and cp in gcols:
-            put((r, cp, "LEVEL", y), v)
+            put((r, cp, "LEVEL", y), GE.p_GLOBIOM(v))
     for (r, it, y), v in price.items():                                            # l. 1592
         if it in grows:
-            put((r, "PRICE", it, y), v)
+            put((r, "PRICE", it, y), GE.p_GLOBIOM(v))
     for (r, it, y), v in q["SupQuantity_Compare"].items():                         # l. 1593
         if it in grows:
-            put((r, "PRODQ", it, y), v)
+            put((r, "PRODQ", it, y), GE.p_GLOBIOM(v))
     for (r, it, y), v in q["DemQuantity_Compare"].items():                         # l. 1594
         if it in grows:
-            put((r, "DN", it, y), v)
-    ex, im = defaultdict(float), defaultdict(float)
+            put((r, "DN", it, y), GE.p_GLOBIOM(v))
+    ex, im = defaultdict(list), defaultdict(list)
     for (a, b, it, y), v in trade.items():                                         # l. 1595-1596
         if it in grows:
-            ex[(b, it, y)] += v
-            im[(a, it, y)] += v
-    for (r, it, y), v in ex.items():
-        put((r, "EXPTA", it, y), v)
-    for (r, it, y), v in im.items():
-        put((r, "IMPTA", it, y), v)
+            ex[(b, it, y)].append(v)
+            im[(a, it, y)].append(v)
+    for (r, it, y), vs in ex.items():
+        put((r, "EXPTA", it, y), GE.p_GLOBIOM_trade(vs))
+    for (r, it, y), vs in im.items():
+        put((r, "IMPTA", it, y), GE.p_GLOBIOM_trade(vs))
     for (r, it, y), v in proc.items():                                             # l. 1597
         if it in grows:
-            put((r, "BIOM", it, y), v)
+            put((r, "BIOM", it, y), GE.p_GLOBIOM(v))
     for (r, it, y), v in q["FeedQuantity_Compare"].items():                        # l. 1598
         if it in grows:
-            put((r, "FTN", it, y), v)
+            put((r, "FTN", it, y), GE.p_GLOBIOM(v))
     for r in ragg:
-        for y in years:                                                            # l. 1599-1606
-            put((r, "PRODQ", "ALMILK", y), P.get((r, "PRODQ", "BVMILK", y), 0.0) + P.get((r, "PRODQ", "SGMILK", y), 0.0))
-            for it in S.procpr:
+        for y in sorted(years):                                                    # l. 1599-1606
+            put((r, "PRODQ", "ALMILK", y), GE.p_GLOBIOM_ALMILK(P.get((r, "PRODQ", "BVMILK", y), 0.0),
+                                                               P.get((r, "PRODQ", "SGMILK", y), 0.0)))
+            for it in sorted(S.procpr):
                 if it in grows:
-                    put((r, "PRODQ", it, y), P.get((r, "BIOM", it, y), 0.0))
-                P.pop((r, "BIOM", it, y), None)
+                    put((r, "PRODQ", it, y), GE.p_GLOBIOM(P.get((r, "BIOM", it, y), 0.0)))
+                put((r, "BIOM", it, y), GE.p_GLOBIOM_BIOM_PROCPR())
     pdat = T["ProcessData"]
     pdd = {(r, p, it): v for r, p, it, v in zip(pdat.d1, pdat.d2, pdat.d3, pdat.value)}
     for r in ragg:
-        for y in years:
-            put((r, "PRODQ", "CORN_DG", y), P.get((r, "BIOM", "CORN", y), 0.0) * pdd.get((r, "CORNTOETHOL", "CORN_DG"), 0.0))
-            put((r, "PRODQ", "WHEA_DG", y), P.get((r, "BIOM", "WHEA", y), 0.0) * pdd.get((r, "WHEATOETHOL", "WHEA_DG"), 0.0))
+        for y in sorted(years):
+            put((r, "PRODQ", "CORN_DG", y), GE.p_GLOBIOM_DG(P.get((r, "BIOM", "CORN", y), 0.0),
+                                                            pdd.get((r, "CORNTOETHOL", "CORN_DG"), 0.0)))
+            put((r, "PRODQ", "WHEA_DG", y), GE.p_GLOBIOM_DG(P.get((r, "BIOM", "WHEA", y), 0.0),
+                                                            pdd.get((r, "WHEATOETHOL", "WHEA_DG"), 0.0)))
     return P
 
 
@@ -386,7 +387,7 @@ def mapped(P: Dict[Tuple[str, str, str, str], float], S: Sets, rmap: Set[Tuple[s
     gcm = {g for g, c in S.globiom_to_cols}
     grm = {g for g, w in S.globiom_to_rows}
     regs = defaultdict(list)
-    for r, g in rmap:
+    for r, g in sorted(rmap):
         if g in ragg:
             regs[r].append(g)
     selset = set(sel)
@@ -404,26 +405,29 @@ def mapped(P: Dict[Tuple[str, str, str, str], float], S: Sets, rmap: Set[Tuple[s
         g2c[g].append(c)
     for r in rmall:                                                                # l. 1741-1760
         gs = regs[r]
-        acc = defaultdict(float)
+        acc = defaultdict(list)
         for ga in gs:
             for c2, w2, y2, v in by_g.get(ga, ()):
                 for col in g2c[c2]:
                     if col != "UVAP":                                              # l. 1744
-                        acc[(col, w2, y2)] += v
-        for k, v in acc.items():
+                        acc[(col, w2, y2)].append(v)
+        for k, vs in acc.items():
+            v = GE.p_GLOBIOMmappedCols(vs)
             if v:
                 MC[(r, *k)] = v
-        num, den = defaultdict(float), defaultdict(float)                         # l. 1748-1755
+        pq = defaultdict(list)                                                     # l. 1748-1755
         for ga in gs:
-            for w in grm:
+            for w in sorted(grm):
                 for y in sel:
                     q = P.get((ga, "PRODQ", w, y), 0.0)
                     if q:
-                        num[(w, y)] += P.get((ga, "PRICE", w, y), 0.0) * q
-                        den[(w, y)] += q
-        for (w, y), d in den.items():
+                        pq[(w, y)].append((P.get((ga, "PRICE", w, y), 0.0), q))
+        for (w, y), pairs in pq.items():
+            d = 0.0
+            for _, q in pairs:
+                d += q
             if d:
-                v = num[(w, y)] / d
+                v = GE.p_GLOBIOMmappedCols_UVAP(pairs)
                 if v:
                     MC[(r, "UVAP", w, y)] = v
                 else:
@@ -431,10 +435,11 @@ def mapped(P: Dict[Tuple[str, str, str, str], float], S: Sets, rmap: Set[Tuple[s
     g2w = defaultdict(list)
     for g, w in S.globiom_to_rows:
         g2w[g].append(w)
-    M: Dict[Tuple[str, str, str, str], float] = defaultdict(float)
+    Ml: Dict[Tuple[str, str, str, str], List[float]] = defaultdict(list)
     for (r, c, gw, y), v in MC.items():                                            # l. 1757-1759
         for w in g2w[gw]:
-            M[(r, c, w, y)] += v
+            Ml[(r, c, w, y)].append(v)
+    M = {k: GE.p_GLOBIOMmapped_rows(vs) for k, vs in Ml.items()}
     return {k: v for k, v in M.items() if v}, sel, wo
 
 
@@ -449,41 +454,43 @@ def factors(M: Dict[Tuple[str, str, str, str], float], S: Sets, scen_name: str, 
         else:
             d.pop(k, None)
     for k in [k for k in M if k[3] == "2000"]:                                     # l. 1872-1874
-        M[(k[0], k[1], k[2], "B2000")] = M.pop(k)
+        M[(k[0], k[1], k[2], "B2000")] = GE.p_GLOBIOMmapped_B2000(M.pop(k))
     regs = {k[0] for k in M}
     cols_m = {c for g, c in S.globiom_to_cols} | {"DOMM"}
     rows_m = {w for g, w in S.globiom_to_rows}
-    for r in regs:
+    for r in sorted(regs):
         for y in sel:
             for c in S.mrkpos:                                                     # l. 1884-1889
-                put(M, (r, c, "SUGA", y), M.get((r, c, "SUGA", y), 0.0) * SUGAR_CANE
-                    + M.get((r, c, "SUGB", y), 0.0) * SUGAR_BEET)
+                put(M, (r, c, "SUGA", y), GE.p_GLOBIOMmapped_SUGA(M.get((r, c, "SUGA", y), 0.0),
+                                                                  M.get((r, c, "SUGB", y), 0.0)))
                 if c != "PROD":
-                    M.pop((r, c, "SUGB", y), None)
-            for w in rows_m:                                                       # l. 1894-1903
-                put(M, (r, "DOMM", w, y), M.get((r, "HCOM", w, y), 0.0) + M.get((r, "BIOF", w, y), 0.0)
-                    + M.get((r, "FEDM", w, y), 0.0))
-            for w in DOMM_IS_PROD:
+                    put(M, (r, c, "SUGB", y), GE.p_GLOBIOMmapped_removed())
+            for w in sorted(rows_m):                                               # l. 1894-1903
+                put(M, (r, "DOMM", w, y), GE.p_GLOBIOMmapped_DOMM(M.get((r, "HCOM", w, y), 0.0),
+                                                                  M.get((r, "BIOF", w, y), 0.0),
+                                                                  M.get((r, "FEDM", w, y), 0.0)))
+            for w in sorted(DOMM_IS_PROD):
                 if w in rows_m:
-                    put(M, (r, "DOMM", w, y), M.get((r, "PROD", w, y), 0.0))
+                    put(M, (r, "DOMM", w, y), GE.p_GLOBIOMmapped_DOMM_PROD(M.get((r, "PROD", w, y), 0.0)))
             for w in YOUNG_HEIF:                                                   # l. 1908-1911
-                put(M, (r, "PROD", w, y), M.get((r, "HEIR", "LEVL", y), 0.0))
+                put(M, (r, "PROD", w, y), GE.p_GLOBIOMmapped_DOMM_PROD(M.get((r, "HEIR", "LEVL", y), 0.0)))
     rows_m |= set(YOUNG_HEIF)
     selset = set(sel)
     I: Dict[Tuple[str, str, str, str, str, str], float] = {}
     for (r, c, w, y), v in M.items():                                              # l. 1913-1914
         if c in cols_m and w in rows_m and y in selset and v:
-            I[(r, c, w, "DATA", scen_name, y)] = v
+            I[(r, c, w, "DATA", scen_name, y)] = GE.p_GLOBIOMmapped_B2000(v)
     world = [rm for rw, rm in S.rw_to_rm if rw == "WORLD"]
-    for w in rows_m:                                                               # l. 1919-1927
+    for w in sorted(rows_m):                                                       # l. 1919-1927
         for y in sel:
             den = sum(M.get((rm, "PROD", w, y), 0.0) + M.get((rm, "DOMM", w, y), 0.0) for rm in world)
             if den:
-                put(M, ("WORLD", "UVAP", w, y), sum(M.get((rm, "UVAP", w, y), 0.0) * (
-                    M.get((rm, "PROD", w, y), 0.0) + M.get((rm, "DOMM", w, y), 0.0)) for rm in world) / den)
+                put(M, ("WORLD", "UVAP", w, y), GE.p_GLOBIOMmapped_World_UVAP(
+                    [(M.get((rm, "UVAP", w, y), 0.0), M.get((rm, "PROD", w, y), 0.0), M.get((rm, "DOMM", w, y), 0.0))
+                     for rm in world]))
     nonempty = {(c, w) for (r, c, w, y), v in M.items() if c in cols_m and w in rows_m and y in selset and v}
     for r in S.rmall:                                                              # l. 1938-1956
-        for (c, w) in nonempty:
+        for (c, w) in sorted(nonempty):
             if c == "BIOF":
                 continue
             b = M.get((r, c, w, "B2000"), 0.0)
@@ -491,71 +498,74 @@ def factors(M: Dict[Tuple[str, str, str, str], float], S: Sets, scen_name: str, 
                 v = M.get((r, c, w, y), 0.0)
                 k = (r, c, w, "FACTORB2000", scen_name, y)
                 if b > 0:
-                    put(I, k, v / b if v else NO_DATA_FACTOR)
+                    put(I, k, GE.p_globiomInfo_factorB2000(v, b))
                 elif v <= 0 and not I.get(k) and (r in S.rm or r in S.rms or r in S.rw):
-                    I[k] = 1.0
+                    I[k] = GE.p_globiomInfo_factorB2000_one()
     parts = defaultdict(list)
     for rms, rm in S.rms_to_rm:
         parts[rm].append(rms)
-    for rm in S.rm:                                                                # l. 1969-1973
+    for rm in sorted(S.rm):                                                        # l. 1969-1973
         for c in S.macro:
             for y in wo:
                 k = (rm, c, "LEVL", "FACTORB2000", scen_name, y)
                 vs = [I.get((p, c, "LEVL", "FACTORB2000", scen_name, y), 0.0) for p in parts.get(rm, [])]
                 n = sum(1 for v in vs if v)
                 if not I.get(k) and n:
-                    put(I, k, sum(vs) / n)
+                    put(I, k, GE.p_globiomInfo_factorB2000_RM(vs))
     for k in [k for k in I if k[1] == "NECR" and k[3] == "FACTORB2000"]:          # l. 1976
-        I.pop(k)
+        put(I, k, GE.p_globiomInfo_factorB2000_removed())
     for (r, c, w, y), v in list(M.items()):                                        # l. 1989-2006
         if y not in selset:
             continue
         if c == "DOMM" and v:
             for d in S.demposdis:
-                put(I, (r, d, w, "SHARE", scen_name, y), M.get((r, d, w, y), 0.0) / v)
+                put(I, (r, d, w, "SHARE", scen_name, y), GE.p_globiomInfo_share_DemPosDis(M.get((r, d, w, y), 0.0), v))
     for k in [k for k in I if k[1] in set(S.demposdis) and k[3] == "FACTORB2000"]:
-        I.pop(k)
-    for r in regs:
-        for w in {k[2] for k in M if k[0] == r}:
+        put(I, k, GE.p_globiomInfo_factorB2000_removed())
+    for r in sorted(regs):
+        for w in sorted({k[2] for k in M if k[0] == r}):
             for y in sel:
                 den = M.get((r, "DOMM", w, y), 0.0) + M.get((r, "PROD", w, y), 0.0)
                 if den:
                     for t in S.tradepos:
-                        put(I, (r, t, w, "SHARE", scen_name, y), M.get((r, t, w, y), 0.0) / den)
+                        put(I, (r, t, w, "SHARE", scen_name, y), GE.p_globiomInfo_share_TradePos(
+                            M.get((r, t, w, y), 0.0), M.get((r, "DOMM", w, y), 0.0), M.get((r, "PROD", w, y), 0.0)))
     for k in [k for k in I if k[1] in set(S.tradepos) and k[3] == "FACTORB2000"]:
-        I.pop(k)
+        put(I, k, GE.p_globiomInfo_factorB2000_removed())
     return I, M
 
 
 def prepare_capreg(capreg: Dict[Tuple[str, str, str, str], float], secom: Set[str], base_years: Sequence[str]) -> None:
-    """create_longrun_info.gms l. 74-90, in place on P_capregData(NUTS0, col, row, year)."""
+    """create_longrun_info.gms l. 91-102, in place on P_capregData(NUTS0, col, row, year)."""
     rows_by = defaultdict(set)
     for (r, c, w, y) in capreg:
         rows_by[r].add(w)
     up = {}
-    for r, ws in rows_by.items():                                                  # l. 78-82
+    for r, ws in rows_by.items():                                                  # l. 91-95
         for w in ws:
             d02 = capreg.get((r, "UVAD", w, "2002"), 0.0) + capreg.get((r, "PRII", w, "2002"), 0.0)
             if not d02:
                 continue
             for y in base_years:
                 if not capreg.get((r, "UVAP", w, y)):
-                    v = capreg.get((r, "UVAP", w, "2002"), 0.0) * (
-                        capreg.get((r, "UVAD", w, y), 0.0) + capreg.get((r, "PRII", w, y), 0.0)) / d02
+                    v = CL.P_capregData_UVAP(capreg.get((r, "UVAP", w, "2002"), 0.0),
+                                             capreg.get((r, "UVAD", w, y), 0.0), capreg.get((r, "PRII", w, y), 0.0),
+                                             d02)
                     if v:
                         up[(r, "UVAP", w, y)] = v
     capreg.update(up)
     up = {}
-    for (r, c, w, y), v in capreg.items():                                        # l. 88-90
+    for (r, c, w, y), v in capreg.items():                                        # l. 100-102
         if (c == "GROF" and w not in secom) or (c == "MAPR" and w in secom):
             if not capreg.get((r, "PROD", w, y)) and v:
-                up[(r, "PROD", w, y)] = v
+                up[(r, "PROD", w, y)] = CL.P_capregData_PROD(v)
     capreg.update(up)
 
 
 def prepare_datamarket(dm: Dict[Tuple[str, str, str, str], float]) -> None:
-    """create_longrun_info.gms l. 85: p_dataMarket's PROD = MAPR where missing, in place."""
-    up = {(r, "PROD", w, y): v for (r, c, w, y), v in dm.items() if c == "MAPR" and v and not dm.get((r, "PROD", w, y))}
+    """create_longrun_info.gms l. 98: p_dataMarket's PROD = MAPR where missing, in place."""
+    up = {(r, "PROD", w, y): CL.p_dataMarket_PROD(v) for (r, c, w, y), v in dm.items()
+          if c == "MAPR" and v and not dm.get((r, "PROD", w, y))}
     dm.update(up)
 
 
@@ -571,29 +581,29 @@ def base_factors(I: Dict, S: Sets, scen_name: str, wo: Sequence[str], capreg: Di
     B: Dict[Tuple[str, str, str, str], float] = {}
     for bas in ("B2000", base_year):                                               # l. 2042-2104
         cur = ["1999", "2000", "2001"] if bas == "B2000" else list(base_years)
-        for r in nuts0:
-            for (c, w) in proj_cr:
+        for r in sorted(nuts0):
+            for (c, w) in sorted(proj_cr):
                 if c in proj_cols and w in proj_rows:                              # l. 2053-2055
-                    v = sum(capreg.get((r, c, w, y), 0.0) for y in cur) / N_AVG
+                    v = GE.p_baseDat_mean([capreg.get((r, c, w, y), 0.0) for y in cur])
                     if v:
                         B[(r, c, w, bas)] = v
-            for c in proj_cols:                                                    # l. 2058-2061
+            for c in sorted(proj_cols):                                            # l. 2058-2061
                 lv = sum(capreg.get((r, c, "LEVL", y), 0.0) for y in cur)
                 if lv:
-                    v = sum(capreg.get((r, c, "YILD", y), 0.0) * capreg.get((r, c, "LEVL", y), 0.0) for y in cur) / lv
+                    v = GE.p_baseDat_YILD([capreg.get((r, c, "YILD", y), 0.0) for y in cur],
+                                          [capreg.get((r, c, "LEVL", y), 0.0) for y in cur])
                     if v:
                         B[(r, c, "YILD", bas)] = v
-            for w in proj_rows:                                                    # l. 2064-2067
-                g = [capreg.get((r, "GROF", w, y), 0.0) for y in cur]
-                wts = [x if x else 1.0 for x in g]
-                v = sum(capreg.get((r, "UVAP", w, y), 0.0) * wt for y, wt in zip(cur, wts)) / sum(wts)
+            for w in sorted(proj_rows):                                            # l. 2064-2067
+                v = GE.p_baseDat_UVAP([capreg.get((r, "UVAP", w, y), 0.0) for y in cur],
+                                      [capreg.get((r, "GROF", w, y), 0.0) for y in cur])
                 if v:
                     B[(r, "UVAP", w, bas)] = v
         if bas == "B2000":                                                         # l. 2075-2080
             for (r, c, w, y), v in list(datamarket.items()):
                 if y == "2000" and v and (r not in nuts0 or c == "GDP") and (c, w) in proj_cr and c in proj_cols \
                         and w in proj_rows and not datamarket.get((r, c, w, "1999")):
-                    datamarket[(r, c, w, "1999")] = v
+                    datamarket[(r, c, w, "1999")] = GE.p_dataMarket_1999(v)
         gdp_gap = [r for r in S.rmall if 0 < sum(1 for y in cur if datamarket.get((r, "GDP", "LEVL", y))) < 3
                    and ("GDP", "LEVL") in proj_cr]
         if gdp_gap:                                                                # l. 2083-2093
@@ -601,43 +611,42 @@ def base_factors(I: Dict, S: Sets, scen_name: str, wo: Sequence[str], capreg: Di
         rmall = set(S.rmall)
         ok = lambda r, c, w: ((r not in nuts0 or c == "GDP") and c in proj_cols and w in proj_rows    # noqa: E731
                               and (c, w) in proj_cr and r in rmall)
-        acc = defaultdict(float)
+        acc = defaultdict(list)
         for (r, c, w, y), v in datamarket.items():                                 # l. 2096-2098
             if y in cur and ok(r, c, w):
-                acc[(r, c, w, bas)] += v
+                acc[(r, c, w, bas)].append(v)
         for k in [k for k in B if k[3] == bas and ok(k[0], k[1], k[2]) and k not in acc]:
             B.pop(k)
-        for k, v in acc.items():
-            v = v / N_AVG
+        for k, vs in acc.items():
+            v = GE.p_baseDat_dataMarket(vs)
             if v:
                 B[k] = v
             else:
                 B.pop(k, None)
         for r in S.rmall:                                                          # l. 2102
-            v = sum(worldpop.get((y, r), 0.0) for y in cur) / N_AVG
+            v = GE.p_baseDat_mean([worldpop.get((y, r), 0.0) for y in cur])
             if v:
                 B[(r, "INHA", "LEVL", bas)] = v
             else:
                 B.pop((r, "INHA", "LEVL", bas), None)
     proj_cols |= {"UVAP"}                                                          # l. 2111-2112
     proj_rows |= {"YILD"}
-    for c in S.landusearto:                                                        # l. 2125-2126
+    for c in sorted(S.landusearto):                                                # l. 2125-2126
         for r in S.msall:
             d = I.get((r, c, "LEVL", "DATA", scen_name, "B2000"), 0.0)
-            v = d / max(MIN_LAND, B.get((r, c, "LEVL", "B2000"), 0.0))
+            v = GE.p_globiomInfo_share_landuse(d, B.get((r, c, "LEVL", "B2000"), 0.0))
             k = (r, c, "LEVL", "SHARE", scen_name, "B2000")
             if v:
                 I[k] = v
             else:
                 I.pop(k, None)
     has = {(k[0], k[1], k[2]) for k in fac}
-    for (r, c, w) in has:                                                          # l. 2131-2140
+    for (r, c, w) in sorted(has):                                                  # l. 2131-2140
         if c in proj_cols and w in proj_rows:
             b0, b1 = B.get((r, c, w, "B2000"), 0.0), B.get((r, c, w, base_year), 0.0)
-            I[(r, c, w, "FACTORB2000", scen_name, base_year)] = max(
-                MIN_BAS_FACTOR, 1. + ((b1 / b0 - 1) if (b1 > 0 and b0 > 0) else 0.0))
+            I[(r, c, w, "FACTORB2000", scen_name, base_year)] = GE.p_globiomInfo_factorB2000_BAS(b1, b0)
     for k in [k for k in I if k[1] == "GDP" and k[2] == "LEVL" and k[3] == "FACTORB2000" and k[5] == base_year]:
-        I[k] = I[k] / INFLATION ** (int(base_year) - B2000_YEAR)                         # l. 2144-2145
+        I[k] = GE.p_globiomInfo_GDP_real(I[k], int(base_year) - B2000_YEAR)                # l. 2144-2145
     return B
 
 

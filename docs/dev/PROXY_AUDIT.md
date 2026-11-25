@@ -261,7 +261,7 @@ captrd`), S278 (trajectory plausibility check: raises an error, it does not subs
 | S271 | rebase code maps | data-rebuild tool |
 | S274 | _BLOCK_TARGETS | block -> data key |
 | S279 | projection price maps | model -> CAPRI product |
-| S283 | income top decile 0.10 | indicator definition |
+| S283 | income top decile 0.10 | indicator definition (removed 24 November 2026 with the measure, capri_mod/income/income_module.py) |
 | S308 | SCENARIO_REGISTRY | name -> constructor |
 | S358 | trajectory file map | run-tool option map |
 

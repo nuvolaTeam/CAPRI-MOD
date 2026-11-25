@@ -8,6 +8,8 @@ throughout may follow later). This builder writes:
                                               products, XX1 the market model's products with the non-agricultural good, income,
                                               land and feed energy, RALL all regional units)
   capri_data/codes/capri/FEED_TO_O.csv  CAPRI's feed bulks and their products: feed, row
+  capri_data/codes/capri/CFACTOR_ARAB.csv CAPRI's tillage crops (capdis/spat_soillos_sets.gms; envind/tillage.gms
+                                       l. 324): code, text
   capri_data/codes/capri/MS_RU.csv     CAPRI's member states and their regional units (MAP_RR x MS x RU)
   capri_data/codes/capri/MAP_RR.csv, R_RAGG.csv, REGAGGP.csv, REGEU1015.csv, MSAGG.csv, NUTS1A.csv, SRNUTS1.csv
                                        the region hierarchy of policy/policy.gms (the premium module)
@@ -20,6 +22,9 @@ throughout may follow later). This builder writes:
                                        CAPRI's market regions, trade-policy blocks, the block of each market region
                                               and the EU's two market blocks, in CAPRI's set order (the market's move
                                               onto CAPRI's regions, MARKET_REGIONS_INVENTORY.md)
+  capri_data/codes/capri/RS.csv, RU.csv, MS.csv, ... RMS.csv, STOCK_TO_FUEL.csv, PACT_TO_Y.csv, ...
+                                       the sets of the year's data (capmod/load_base_data_and_trends.gms, biofuel/
+                                              resids.gms; capri_mod/projection/equations/load_base_data_and_trends.py)
   capri_data/codes/model_commodities.csv the model's 58 market commodities (MARKET_COMMODITIES): code,
                                               capri_code, mapping_source
 
@@ -309,6 +314,9 @@ def main():
     # and of each activity, crop-diversification groups, fodder crops
     write(OUT / "capri" / "landTypesMrk.csv", ("code", "text"), sorted(read_set(a.sets, "landTypesMrk").items()))
     write(OUT / "capri" / "FODCRP.csv", ("code", "text"), sorted(read_set(a.sets, "FODCRP").items()))
+    # CAPRI's tillage crops, the arable crops of the C factor (capdis/spat_soillos_sets.gms CFACTOR_ARAB): the tillage
+    # options' area, DATA(ru, crop, TILLSET, Y) = 1 (envind/tillage.gms l. 324)
+    write(OUT / "capri" / "CFACTOR_ARAB.csv", ("code", "text"), sorted(read_set(a.sets, "CFACTOR_ARAB").items()))
     # CAPRI's permanent crop groups and the crop -> nutrient group map (fertiliser distribution)
     write(OUT / "capri" / "PERM_NGRP.csv", ("code", "text"), list(read_set(a.sets, "PERM_NGRP").items()))
     write(OUT / "capri" / "CACT_TO_NGRP.csv", ("cact", "ngrp"), pairs("CACT_TO_NGRP"))
@@ -334,6 +342,41 @@ def main():
     for s in ("REGAGGP", "REGEU1015", "MSAGG", "NUTS1A", "SRNUTS1", "NUTS0", "SRNUTS2", "SRNUTS2_EXT", "PSDPAY_RD",
               "PSDPAY_AE", "PSDPAY_vcs", "PSDPAY_cscs"):
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    # the feed sets of the requirement functions and the baseline feed calibration (sets.gms; feed/req_or_man_fnc.gms,
+    # baseline/fedtrm_prep.gms, feed/fedtrm_*_pw.gms, supply/aggreg.gms), in CAPRI's order; since 24 November 2026
+    # (until then tuples in capri_mod/feed/equations); with the calibration's driver's (feed/fedtrm_cal_pw.gms: the
+    # crop and animal activities CACT and AACT, the regions RSEU, the regional levels R_LEVL)
+    for s in ("FEED", "FODDI", "FODDIS", "FeedAggr", "MNRUMI", "REQC", "REQSC", "REQMSE", "REQMSN", "REQSR", "REQSR_M",
+              "REQ_FEED", "S_TACT", "A", "ACATTLE", "BULF", "CALF", "CALR", "DCOW", "HEIF", "NRUMI", "SUBENE", "REQSE",
+              "fibreRichFeed", "FOUT", "IO", "FODDO", "CACT", "AACT", "RSEU", "R_LEVL"):
+        write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    # the sets of the year's data (capmod/load_base_data_and_trends.gms; capri_mod/projection/equations/
+    # load_base_data_and_trends.py), in CAPRI's order; since 24 November 2026
+    for s in ("RS", "RU", "MS", "MSALL", "DACT", "SplitActs", "FODDIO", "RESIMP", "FIX_YAI", "FIX_YAO", "IYANI", "OYANI",
+              "OIYANI", "IOP", "O", "ColsRead", "RowsRead", "losfItem", "OSECO", "RSET", "GASAGG", "GAS_EMIS",
+              "GHGSDEL_ROWS", "MAPP", "SCEN", "ILAB", "setfPact", "arbAct", "FNUT"):
+        items = read_set(a.sets, s)
+        # ColsRead = DB_COLS less some (load_base_data_and_trends.gms l. 65-80) keeps COLS's blank element: dropped
+        # as from COLS above (not an item)
+        items.pop("", None)
+        write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(items.items()))
+    write(OUT / "capri" / "PACT_TO_I.csv", ("pact", "i"), pairs("PACT_TO_I"))
+    # the year's biofuel, cake and milk statements and biofuel/resids.gms (load_base_data_and_trends.gms l. 713-795)
+    for s in ("RMS", "SECO_BIOF", "XXBiof", "CAK", "SED", "MLK", "FATSPROT"):
+        write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    # the deletions before CAPRI writes sim_ini (create_sim_ini_gdx.gms l. 311-369)
+    for s in ("OAGGR", "MRKBAL", "NONEND", "FERT_DIST", "FNUT_COLS", "I"):
+        write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    # the requirement call's grassland and ruminant activities (feed/req_or_man_fnc.gms; capri_mod/feed/chain.py)
+    for s in ("GRSACT", "RUMI"):
+        write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    for s, cols in (("STOCK_TO_FUEL", ("xx", "seco_biof")), ("STOCK_TO_BY", ("xx", "byprod")),
+                    ("SED_TO_CAK", ("sed", "cak")), ("PACT_TO_Y", ("pact", "o"))):
+        write(OUT / "capri" / f"{s}.csv", cols, pairs(s))
+    write(OUT / "capri" / "Feed_FeedAggr.csv", ("feed", "feedaggr"), pairs("Feed_FeedAggr"))
+    write(OUT / "capri" / "MAACT_TO_REQM.csv", ("maact", "reqm"), pairs("MAACT_TO_REQM"))
+    write(OUT / "capri" / "PACT_TO_IO.csv", ("pact", "io"), pairs("PACT_TO_IO"))
+    write(OUT / "capri" / "PACT_TO_O.csv", ("pact", "o"), pairs("PACT_TO_O"))
     write(OUT / "capri" / "RM.csv", ("code", "text"), list(rm.items()))
     write(OUT / "capri" / "RMTP.csv", ("code", "text"), list(rmtp.items()))
     write(OUT / "capri" / "RM_TO_RMTP.csv", ("rm", "rmtp"), rm_to_rmtp)

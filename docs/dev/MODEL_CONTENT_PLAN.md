@@ -723,8 +723,8 @@ Updated 12 November 2026 (the table of 4 November was stale). Status from the co
 |---|---|---|---|---|
 | Market on 45 RM (stages 1-3, 2017 year, TARV, young-animal timing) | — | **done** 3-4 November 2026 | — | MRI |
 | Ports (stages 4-7: TRQs, levies, entry prices, land and yield block) | market stages 1-3 | **done** 4 November 2026 in the current market code; market time per solve higher than before (open) | — | MRI §5; G3I |
-| 29 non-EU units | market move | **built** 4 November 2026 (SND steps 1-9); off by default (run.supply_countries_outside_eu = Norway only): D2 below | — | SND |
-| D2: CAPRI's full list of non-EU supply countries the default | 29 units; G3 | not started (after G3, before the end of CAPTRD-MOD; the project lead, 9 November 2026) | — | VALIDATION_PLAN §2 |
+| 29 non-EU units | market move | **built** 4 November 2026 (SND steps 1-9); on by default since 24 November 2026 (D2 below) | — | SND |
+| D2: CAPRI's full list of non-EU supply countries the default | 29 units; G3 | **done** 24 November 2026 (the project lead's decision; measured like for like, register DEP-7 in its history); the market chain's switch after its own full-run comparison | — | VALIDATION_PLAN §2 |
 | S1/S2 (and DEP-42) | — | **done** 7-8 November 2026 (OFAR/ROOF, VSET/FALL, GRAE/GRAI, CAPRI's technologies at 2030; DEP-42 closed) | — | S12 |
 | Step G (G2b, G2d, G2f, G2g) | — | **done** 4 November 2026 | — | MID; GR |
 | G3: the whole market as one IPOPT system | market move | not started (before the end of CAPTRD-MOD; decisions 7-10 of section 14) | the CAPRI market dump for the external check (GR Q5.2) | MID §7.2; G3I |

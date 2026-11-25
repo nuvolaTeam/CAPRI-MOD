@@ -390,6 +390,7 @@ CREATE TABLE env_npk_crop_coefs_2030 (
     pool_kg_ha DOUBLE NOT NULL,
     own_kg_ha DOUBLE NOT NULL,
     mine_kg_ha DOUBLE NOT NULL,
+    add_share DOUBLE NOT NULL,
     PRIMARY KEY (capri_region, model_crop, nutrient)
 );
 COMMENT ON TABLE env_npk_crop_coefs_2030 IS 'CAPRI''s crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_, (tools/build/build_npk_balance_2030.py)';
@@ -398,7 +399,8 @@ INSERT INTO value_units VALUES
   ('env_npk_crop_coefs_2030', 'need_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.need_kg_ha: unit to be established'),
   ('env_npk_crop_coefs_2030', 'pool_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.pool_kg_ha: unit to be established'),
   ('env_npk_crop_coefs_2030', 'own_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.own_kg_ha: unit to be established'),
-  ('env_npk_crop_coefs_2030', 'mine_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.mine_kg_ha: unit to be established');
+  ('env_npk_crop_coefs_2030', 'mine_kg_ha', NULL, 'open', 'npk_crop_coefs_2030.mine_kg_ha: unit to be established'),
+  ('env_npk_crop_coefs_2030', 'add_share', 'U_ratio', 'capri', 'the additive need factor''s share of the crop''s NUTNED_ need at CAPRI''s 2030 solution: v_cropNutNeedAddFact x DEFR x SQRT(...) x (1 + p_technFact) / need_kg_ha (supply/supply_model.gms l. 1095-1125; sim_ini_21730, supply/prep_sim.gms l. 30-31), at most 1');
 
 -- file: capri_data/baselines/capri_greendeal_ref/1730/environment/npk_region_2030.csv
 CREATE TABLE env_npk_region_2030 (
@@ -560,6 +562,17 @@ CREATE TABLE env_livestock_n_export_coef (
 );
 COMMENT ON TABLE env_livestock_n_export_coef IS 'CAPRI''s N exported in animal products CRPR_EXPT per model head (fert/calc_nexport.gms; tools/build/build_livestock_n_export_coef.py)';
 INSERT INTO value_units SELECT 'env_livestock_n_export_coef', code, 'U_kgperhd', 'builder', 'kg N per head' FROM model_activities WHERE kind = 'animal';
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_n_export_coef_2030.csv
+-- layout: wide, unnamed
+CREATE TABLE env_livestock_n_export_coef_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    animal VARCHAR NOT NULL REFERENCES model_activities (code),
+    value DOUBLE CHECK (value >= 0),        -- empty: the animal has no herd in the region
+    PRIMARY KEY (region, animal)
+);
+COMMENT ON TABLE env_livestock_n_export_coef_2030 IS 'CAPRI''s 2030 N exported in animal products per model head: fert/calc_nexport.gms on the 2030 reference''s items of each activity (CAPRI''s simulation recomputes CRPR_EXPT at "Y" before it solves, feed/req_or_man_fnc.gms l. 1814-1817), LEVL x CRPR_EXPT over the model''s 2030 base heads, read at the 2030 market year (KNOWN_ISSUES K202; tools/build/build_livestock_n_export_2030.py)';
+INSERT INTO value_units SELECT 'env_livestock_n_export_coef_2030', code, 'U_kgperhd', 'builder', 'kg N per head' FROM model_activities WHERE kind = 'animal';
 
 -- file: capri_data/2017/environment/manure_pool_centres.csv
 CREATE TABLE env_manure_pool_centres (

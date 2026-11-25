@@ -5,7 +5,7 @@ Status: revised 20 October 2026 against the code.
 Rule: **capri-mod is built as CAPRI star 3.0 is; every scenario carries its own settings; a setting a scenario does
 not state takes capri-mod's (star 3.0's) default.** The star 3.0 defaults are those of the installation's GUI
 (`GUI/capri_gui_definition.xml`, task "Run scenario with market model") and of its scenario files
-(`pol_input/greendeal/*.gms`). Interface: README sections 8.1-8.4; code: `capri_mod/policy/greendeal.py`,
+(`pol_input/greendeal/*.gms`). Interface: README sections 6.2-6.4 and 8 (the Green Deal switchboard); code: `capri_mod/policy/greendeal.py`,
 `capri_mod/policy/endotech.py`, `capri_mod/policy/policy_module.py` (`PolicyScenario`).
 
 ## Settings that differ between scenarios
@@ -41,17 +41,28 @@ Policy shocks, not configurations (scenario only, not its baseline):
 
 ## CAPRI's Green Deal targets by simulation year
 
-From P. Witzke's production batch for the star 3.0 Green Deal group (section "f2f"); the batch also sets manure
-trade, the inner fertiliser model, Trustee land, endogenous biofuel markets and the policy blocks on. Only the 2030 row
-is a constant in the code (`GREENDEAL_2030_TARGETS`; its scenario folder: capri_data/scenarios/
-greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00); the 2040 constant, unused, was removed on 3 November 2026.
+From the batch of CAPRI's Green Deal production runs (GUI/batchfiles/greendeal_scen2.txt, author P. Witzke), section
+"f2f"; the batch also sets manure trade, the inner fertiliser model, Trustee land, endogenous biofuel markets and the
+policy blocks on. The table is data: capri_data/scenarios/greendeal_group/greendeal_targets_by_year.csv, built from
+the batch by tools/build/build_greendeal_batch_targets.py (the GUI settings by their GAMS names from
+GUI/capri_gui_definition.xml; each year's reference for carbon accounting checked to be the year before's scenario
+name). `policy.greendeal.greendeal_targets(year)` reads a year's row, `greendeal_series_scenario(year)` makes its
+scenario (manure trade on, as the batch); the 2030 step also has its scenario folder (capri_data/scenarios/
+greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00, checked against the table by test_scenario_folders.py).
+Until 23 November 2026 the 2030 row was a constant in the code (`GREENDEAL_2030_TARGETS`, its source not in the
+workspace: register DEP-20).
 
 | Year | lndscpTarg | orgTarg | pestRedu | mineRedu | surpRedu | capri-mod |
 |---|---|---|---|---|---|---|
-| 2025 | 7 | 15 | 13 | 10crp | 20 | `greendeal_scenario(...)` with these values |
+| 2025 | 7 | 15 | 13 | 10crp | 20 | `greendeal_series_scenario(2025)` |
 | 2030 | 8 | 18 | 20 | 13crp | 30 | `greendeal_2030_scenario()`; `run_f2f_2030.py --scenario greendeal2030` |
-| 2035 | 9 | 22 | 26 | 17crp | 40 | `greendeal_scenario(...)` with these values |
-| 2040+ | 10 | 25 | 32 | 20crp | 50 | `greendeal_scenario(...)` with these values |
+| 2035 | 9 | 22 | 26 | 17crp | 40 | `greendeal_series_scenario(2035)` |
+| 2040 | 10 | 25 | 32 | 20crp | 50 | `greendeal_series_scenario(2040)` |
+| 2050 | 10 | 25 | 32 | 20crp | 50 | `greendeal_series_scenario(2050)` |
+
+dietShift and othPol are 00 in every year. The batch's blocks for 2060 and 2070 set no targets: in its loop over the
+years they keep the values set last, 2050's (the 2070 block's reference for carbon accounting, the 2060 result, is
+named lnds10_org25_pest32_mine20crp_surp50); they are not rows of the table.
 
 `greendeal_scenario()` with its defaults (and `run_f2f_2030.py --scenario greendeal`) applies lnds10 org25 pest50
 mine00 surp50 in 2030: stronger than any year of the batch (pestRedu 50 against 32 at the end point). The comparison
@@ -76,7 +87,7 @@ implemented (an error if not 0): dietShift, othPol. The JRC121368 surplus rule a
 | Stock changes (`stockChg`) | nost | none |
 | Allow minimum shares of anorganic fertilizers (`useMinimumAnorganicShares`) | false; NUTMIN_ is in the regional model only with the inner fertiliser model off | as star 3.0: NUTMIN_ off, the inner model being always on (K40; the switches of the conic form were removed on 26 October 2026) |
 | Water module, crop inputs in market | false | false (capri-mod's water module is standalone, not part of `run()`) |
-| Iterations (`STEPS`) / lower weights after (`LOWSTEPS`) | 99 / 20 | `outer_loop.max_outer_iter` 60 (the project lead's choice of 28 October 2026, register DEP-1), CAPRI's price forecast (`outer_loop.price_update = "capri"`, its step weights from iteration `capri_step_weights_late_from` 20) |
+| Iterations (`STEPS`) / lower weights after (`LOWSTEPS`) | 99 / 20 | `outer_loop.max_outer_iter` 99 (CAPRI's, since 25 November 2026; 60 from 28 October), CAPRI's price forecast (`outer_loop.price_update = "capri"`, its step weights from iteration `capri_step_weights_late_from` 20) |
 
 Outside the GUI table: CAPRI solves its regional supply models as NLPs with CONOPT; capri-mod solves the same form
 with IPOPT (a conic reformulation with Clarabel was an option until 26 October 2026).

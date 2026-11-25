@@ -407,6 +407,336 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   the purchase price (0.568 EUR/kg, base and Green Deal; 0.142 in the Green Deal before), PT18's other arable fodder
   -7.7% (CAPRI -5.7; -19.0 in the Bonn-settings run of 20 November). Left: ES42's rye area +17.6% against CAPRI's +0.7% (its shift -8.5 against
   -11.4%), with the N-surplus dual (K196).
+- **The Green Deal standing check at b30fa20 (21 November 2026):** the full-EU Green Deal with capri_comparison.toml
+  (runs/full_gd_b30fa20.pkl, converged in 29 iterations, 5,156 s; the baseline's market supply Hessian read from the
+  cache of the identical baseline), against the run at bb3b592 with the same file (the changes between them that act
+  in the Green Deal: K194, K189's per-head terms, DEP-51's T1 - T2 switch, K195; K192 and K186 do not act there; their
+  shares not separated). Against CAPRI's step:
+  EU producer prices' mean gap 0.8 -> 0.5 points, model / CAPRI median 0.93 -> 0.97 (the cereals within 0.4 points:
+  barley +11.1%, CAPRI +10.8; rye +14.6, +14.7; beef +18.4, +20.0; milk +10.6, +11.2); EU activities' mean gap 0.7 ->
+  1.0 points (closer: soft wheat -2.1%, CAPRI -1.9; barley -3.8, -3.8; rye -11.0, -11.9; sugar beet -0.3, +0.1;
+  further: intensive grassland -49.7, -54.8 (-51.9 before), extensive +46.6, +51.8 (+48.8), set-aside +75.4, +79.5
+  (+76.9), pulses -3.3, -0.8 (-1.7), oats -2.9, -0.9 (-1.3)); herds within 0.3 points of before (suckler cows -28.1,
+  CAPRI -28.8); member states' median gaps 1.10 -> 1.08 points on average. The N-surplus dual 0.889 -> 0.849 of
+  CAPRI's at the median (K196; the changes not separated, the T1 - T2 switch the likeliest part: it lowered the dual
+  in the probe of 19 November); the grassland split's larger gap goes with it.
+- **K192 measured in the full Farm-to-Fork run (21 November 2026):** the full-EU Farm-to-Fork with capri_comparison.toml
+  at 6eff275 (runs/full_f2f_6eff275.pkl, converged in 16 iterations, 4,569 s; 6eff275 is bb3b592 with the K192 fix
+  alone, so the difference is K192's), against the run at bb3b592 and JRC121368. The ammonia options are choices now (JRC121368's ghgTechAmmEndog 1): covered manure
+  storage 8.6 -> 30.0% (Table 17: 34), air purification 0 -> 10.0 (10), low-emission housing 16.4 -> 18.8 (12),
+  low-emission spreading 42.2 -> 89.3. EU ammonia -19.5 -> -42.6% (JRC121368 -33.0: now 9.6 points beyond it), manure
+  N2O -28.6 -> -22.3 (-3.2). The options' N kept lowers the N-surplus dual (median over the 214 units with a binding
+  target 6.63 -> 5.48 EUR per kg N), and the livestock side moves towards JRC121368: beef price +44.5 -> +38.5 (+24.1),
+  pork +35.7 -> +30.3 (+43.0), poultry +33.6 -> +28.3 (+18.0), milk +29.9 -> +26.6 (+1.1); beef animals -23.4 -> -21.1
+  (-17.7), pigs -18.0 -> -16.9 (-14.3), dairy cows -4.3 -> -3.9 (-10.1); N surplus -34.6 -> -34.9 (-33.5). Mean
+  absolute deviation from JRC121368, 20 indicators, 7.06 -> 6.45 (with ammonia 7.36 -> 6.60).
+- **K196, the N-surplus dual's port check (21 November 2026):** the options acting on the N-surplus row checked
+  against CAPRI's code; two parts were not CAPRI's form. (1) The fertiliser options' calibration (DEP-30, K77): the
+  first-order condition at the initial share of 0 now leaves CAPRI's relSubs0 x costParLin (the early adopters'
+  subsidy, envind/ghgMiti.gms l. 731, 900-906) with the model's own value of N; the form of 31 October set it to zero
+  (`supply.fert_option_cal_relsubs0`, default true; false the former form; equations/ghgmiti.py). (2) The inhibitor
+  on manure's over-fertilisation restriction (restMitFert, l. 531-543) and the value of the manure N it saves
+  (p_manureShadVal, l. 870-877) on CAPRI's availability of excreted manure N; the restriction binds in no region. In
+  two six-unit Green Deal probes at CAPRI's prices (12 iterations) the dual does not move (median 0.966 of CAPRI's with
+  and without (1)); the inhibitor on mineral N moves towards CAPRI's in four units (ES51 0.257 -> 0.141, CAPRI 0.039;
+  NL22 0.536 -> 0.459, 0.292), away in FR52 (0.575 -> 0.482, 0.575); the inhibitor on manure stays where CAPRI has none
+  (FR52 0.862, IT20 0.965). The dual's gap stays open (K196).
+- **CAPRI's manure output functions ported (24 November 2026; K179):** feed/req_or_man_fnc.gms in its manure mode
+  (%1 = man, PART I and PART III), as capri_mod/feed/equations/req_or_man_fnc.py: one function per CAPRI statement
+  block with its GAMS quote (the stocking rate; per animal activity the mean live weight, the days, the daily gain,
+  MANP and MANK from CAPRI's fixed manure contents, the literature crude-protein requirement p_crprReq; MANN =
+  max(0, p_crprReq x p_animExcrProtCorrFact / 6 - CRPR_EXPT) by technology). Its literal tables (feed/feed_decl.gms:
+  p_NutContManureKgM3, p_addExcrPerkgMilk, p_carcassShare, p_startWgt, p_reqfcnlim; CAPRI's p_LUUnits) in
+  capri_data/2017/feed/req_or_man_params.csv (tools/build/build_req_or_man_params.py). Checked on the 2030
+  Green Deal reference run's start (sim_ini_21730 at "Y"; tools/check/check_manure_output_2030.py): CAPRI's 2030
+  MANN, MANP and MANK in every unit (but the member states' sum rows) and all 18 animal activities, relative
+  differences below 3e-14; on CAPREG's 2017 data the 2017 MANP and MANK of the NUTS 2 units to 3e-7. The fattened pigs'
+  requirement tables p_pigsReqHighWgt and p_pigsReqLowWgt from CAPRI's dat/feed/porkreq.gms (the project lead's file
+  of 24 November 2026, capri_sources/dat/feed; in the raw set as capri/dat/feed/porkreq/). For a baseline other than
+  CAPRI's; not yet called by the projection (its year's correction factor is open: K179). The text of K179 and
+  three comments said CAPRI computes the manure "from the rations" or MANP and MANK "from the feed's P and K":
+  corrected (MANN from the requirement, MANP and MANK from the yields, days and weights).
+- **CAPRI's requirement functions and a simulation's start requirements ported (24 November 2026; K179; the feed
+  calibration plan's S1 and S2, claude/feed_calibration_port_plan_2026-11-24.md):** feed/req_or_man_fnc.gms in its
+  requirement mode (%1 = req) as capri_mod/feed/equations/req_or_man_fnc_req.py (per animal activity the days, weights,
+  gains and yields, the energy, protein, dry matter, fibre and lysine requirements, the energy components, the feed
+  shares and the rations' nutrient densities); capmod/def_requirements.gms (CAPREG's 2017 corrections, the yearly
+  technical progress in feeding, the shares shifted with the yield growth), baseline/adjust.gms (the baseline feed
+  calibration's corrections, the baseline's feed coefficients as the start) and the requirement blocks of
+  capmod/create_sim_ini_gdx.gms (l. 421-461: the shares widened by the feeds' rows, the member states' days) as
+  def_requirements.py, adjust.py and create_sim_ini_gdx.py; one function per CAPRI statement block with its GAMS quote.
+  The literal tables in capri_data/2017/feed/req_or_man_params.csv (renamed from manure_output_params.csv, the builder
+  to build_req_or_man_params.py; added p_NutContFeedRef, p_convFactEnergyUnitsToEnne, p_coeffEnergyForGrowth and the
+  columns key4, key5). Checked on sim_ini_21730: the requirement call's literature requirements, days, energy
+  components, crude protein and nutrient densities in every regional unit (tools/check/check_requirements_2030.py) and,
+  with CAPREG's corrections (reqrel_17<CC>) and the baseline calibration's (fedtrm_21730<CC>defaulta), the start's
+  p_animReq, the manure's protein factor, the minimum and maximum feed shares, the production days and DATA's days in
+  249 of the 250 units (AL has no calibration file; tools/check/check_sim_ini_requirements_2030.py), relative
+  differences below 4e-15. Found on the way: the member states' days at the requirement call are CAPTRD's (DATA
+  "TRD"; sim_ini's "Y" days are their regions' aggregates); sim_ini's requirements are def_requirements' times the
+  baseline calibration's corrections (DE21's dairy cows: FILG x 2.961, FICO x 0.726, DRMX x 0.991); the feeds' rows of
+  p_animReq, 1 from the requirement function times 1.005 a year (about 1.067 at 2030), turn CAPRI's minimum feed
+  shares slightly negative and double its maximum shares at the start (sim_ini_21730: DE21's dairy cows' cereals
+  minimum -0.0106), ported as CAPRI has it (kept: the project lead, 24 November 2026). The raw set: CAPREG's reqrel_17<CC> of all 35 countries (27 added) and the
+  baseline calibration's fedtrm_21730<CC>defaulta of 34 countries (added; CAPRI results, for the checks). Not yet the
+  calibration itself (baseline/fedtrm_*, S3) nor the projection's use (S4).
+- **K204, the catch crops' BioFix N on their whole area (24 November 2026; from the project lead's comparison of the
+  N fixation with CAPRI):** in the runs where the catch crops' BioFix is on (the Green Deal group, an emission tax) the
+  regional model counted it on the area above the base share; CAPRI's e_BIOFIX (supply_model.gms l. 1442) and
+  fertDistCres_ (l. 1073-1079) count the whole CATC area, and its 2030 reference has none of it (K188), so the base's
+  2.0 Mha (about 61 kt N in the EU) were missing from the Green Deal's N inputs, residue pool and N2OCRO. Now CAPRI's
+  term (`supply.catch_crop_biofix_area = "capri"`; "increment" the former form). The reported fixation takes the N the
+  regional model counts and splits it (n_fixation_catch_crops); the runs' results hold the regional catch crops
+  (cover_crops_regional). On the comparison itself: CAPRI's per-crop dataOut BIOFIX leaves the catch crops out (EU
+  -28.5% in the Green Deal); with them, as e_BIOFIX has them, CAPRI's fixation moves -0.1%, as the model's did. The
+  regional spread of the catch crops is open. A five-region Green Deal probe (PL41, RO04, BG03, ES41, IR02): the
+  baseline unchanged; IR02, at its requirement, +2,079 t BioFix N and -1,968 t mineral N; PL41's catch crops 642 ->
+  494 thousand ha (CAPRI 318); the requirement is CAPRI's in all five, and the model takes catch crops above it in
+  PL41, RO04 and BG03 where CAPRI does in BG03 and IR02 (K204, item 2: the value of the residue N per region). The
+  results' item list declares n_fixation_catch_crops (capri_data/codes/results_items.csv).
+- **The projection test's EU units (24 November 2026):** test_projection_starts_from_capri_reference_and_calibrates
+  summed the EU's 2030 areas over every unit but Norway's; since CAPRI's non-EU supply countries became the default
+  the same day (e95681c: the UK, Turkey, the Western Balkans), its soft wheat was 30,462 thousand ha against CAPRI's
+  EU27 21,476. The EU's units now by capri_mod.data.definitions.is_eu; the test passes. The model was not affected.
+- **The baseline feed calibration's corrections from its solution ported (24 November 2026; the feed calibration
+  plan's S3a):** the statements after CAPRI's m_hpdFeed solve (feed/fedtrm_cal_pw.gms l. 762-812: the energy and
+  protein requirements recomputed from the solution's ration, the inequality requirements at the lower of the
+  requirement and the ration, DRMX at most -1.2 x DRMN) and baseline/fedtrm_fin.gms l. 47-52 (the corrections
+  p_animReqCorrFac, the protein factor) as capri_mod/feed/equations/fedtrm_cal_pw.py (after_solve) and fedtrm_fin.py.
+  Checked with CAPRI's calibrated feed input coefficients (sim_ini_21730's v_feedInpCoeff) and the port's
+  requirements before the calibration (tools/check/check_fedtrm_after_solve_2030.py): every correction of
+  fedtrm_21730<CC>defaulta in 249 of 250 units (all requirements and the feeds' rows), the calibrated energy and
+  protein requirements and the protein factor of sim_ini_21730, relative differences below 4e-15. What the
+  calibration still has to produce is its solution, the feed input coefficients (m_hpdFeed and its priors: S3b).
+- **The KKT market supply Hessian measured (24 November 2026):** `market.hessian_method = "kkt"` against CAPRI's
+  re-solves on the full EU (the 2030 Green Deal baseline's Hessian): 2,748 s against 2,811 s; the entries above 1e-3 a
+  median 4.4% apart (the 90th percentile 94%; some cross-price entries of the cereals of opposite sign); the EU's
+  own-price responses within 1-3% but oats (-19%), pulses and rye (-13%). Both are far from symmetric (median
+  |H - H'| / |H| 0.96 and 0.92). The default stays CAPRI's method (the project lead, 24 November 2026;
+  docs/DEPARTURES_FROM_CAPRI.md).
+- **D2 the default (24 November 2026, the project lead's decision; register DEP-7 in its history):**
+  `run.supply_countries_outside_eu` defaults to CAPRI's list of its 2030 Green Deal runs, Norway, the UK, Turkey and
+  the Western Balkans (250 units; until now Norway alone, 221). Measured like for like before the switch (full Green
+  Deal runs capped at 24 iterations): the non-EU countries' activities move to within a mean 0.47 (Turkey), 1.04 (the
+  UK) and 0.67 (the Western Balkans) points of CAPRI's changes, from 1.36, 3.64 and 1.63; the EU27 results within 0.13
+  points (activities) and 0.17 (prices); the run about 5% longer. The market solve stays the fixed point until the
+  chain's full-run comparison with D2 (docs/DEPARTURES_FROM_CAPRI.md). Found by the fast suite with the new default:
+  MarketModule.sup_region_of_country did not take a non-EU market region's own code (UK000000, TUR, WBA), so the
+  market's own base supply rows (capri_base_supply_rows) stopped the solve; it does now. Tests updated for the default:
+  the setting's and the units' tests (test_norway_market.py, test_capri.py: 250 units), and the tests that meant the
+  EU's totals now take the EU's units by membership (is_eu; they took every unit but Norway's): dairy output, manure
+  CH4, olives, textile crops, the elasticities' provenance; the NUTS 2024 reporting's test on the units its mapping
+  covers (the EU's and Norway's); the water accounts' coverage (no irrigation share for Bosnia's and Serbia's units).
+  Also: two CSV float reads made exact (build_livestock_n_export_2030.py, of K202; build_feed_bulk_grof.py). README
+  §10.4.
+- **K203, the low-N feeding option's manure N effect at 2030 (24 November 2026; K194):** CAPRI's low_n_feed.gms
+  scales the option's manure N effect by (MANN + CRPR_EXPT) / MANN of the simulation year, which its simulation has
+  just recomputed for 2030 (feed/req_or_man_fnc.gms in its manure mode, capmod.gms l. 1090); the builder
+  (tools/build/build_lownfeed_effects.py) took sim_ini_21730's 2017 values of both. It now takes the 2030 reference's
+  MANN and CRPR_EXPT by calc_nexport.gms on its 2030 items (K202). The dairy cows' manure N effect 2.8% larger at the
+  median, the other animals' within 1%. Six-unit Green Deal probe at CAPRI's prices, with K202, against 08330ab: the
+  baseline unchanged, the Green Deal changes 0.03-0.04 points on average, the N-surplus dual 0.882 -> 0.880 of CAPRI's.
+- **K202, the N in livestock products (24 November 2026; register DEP-13):** the report item n_animal_products at
+  2030 takes CAPRI's 2030 values: CAPRI's simulation recomputes the N in products before it solves (capmod.gms l. 1090,
+  feed/req_or_man_fnc.gms in its manure mode runs fert/calc_nexport.gms for "Y"), so tools/build/
+  build_livestock_n_export_2030.py ports calc_nexport.gms (calc_nexport_CRPR_EXPT, which gives sim_ini_21730's 2017
+  CRPR_EXPT from its 2017 items in all 4,232 regional cells) and applies it to the 2030 reference's items, over the
+  model's 2030 heads (ProjectionModule.req_or_man_fnc_CRPR_EXPT_Y), in place of 2017 x the yield factor. The 2017
+  value of the bulls and fattening heifers from CAPRI's elementary activities: res_17's aggregates BULF and HEIF carry a
+  CRPR_EXPT that does not add up (0.606 and 0.617 of their members' sum). EU N in products 2017 2,598 -> 2,628 kt
+  (bulls 41.0 -> 62.6), 2030 base 2,626 -> 2,650 kt. Reporting only (the N in products enters no row of the regional
+  model). Test: capri_mod/tests/test_livestock_n_export_2030.py.
+- **K201, the bulls' and heifers' 2030 rations (24 November 2026; register DEP-13):** the 2030 ration factors
+  (tools/build/build_ration_trajectory_2030.py, CAPRI's 2030 over 2017 per feed and requirement) took the 2017 ration
+  builder's CAPRI aggregates BULF and HEIF, which have no DAYS in CAPRI's 2030 reference: the bulls had no 2030 factor
+  (their 2030 ration and requirements the 2017 ones x the yield factor, the energy factor 5.8% above CAPRI's at the
+  median), the heifers' 2030 total was HEIR's alone. The factors now take CAPRI's elementary activities in both years
+  (BULL, BULH; HEIL, HEIH, HEIR), as its requirement rows REQSN_ and REQSE_ (whose p_animReq equals dataOut's
+  requirements in all 16,828 regional cells). The EU bulls' 2030 base feed: cereals -15%, energy-rich feed -27%, other
+  feed -35%, protein-rich feed -6.5%, silage maize +12.5%; their energy requirement -3.5%. The six-unit Green Deal
+  probe at CAPRI's prices against 27ff806: the baseline unchanged, the Green Deal changes 0.03 points on average, the
+  N-surplus dual 0.881 -> 0.882 of CAPRI's (the probe fixes the prices: the feed markets' response is not in it).
+  Test: capri_mod/tests/test_ration_2030.py.
+- **DEP-13 step 2, CAPRI's 2030 outputs per head (24 November 2026; K200, K201):** with CAPRI's 2030 reference as
+  the trajectory each animal's final products per head are CAPRI's 2030 (tools/build/build_livestock_output_2030.py:
+  CAPRI's 2030 production, LEVL x DATA at 2030 of the reference's dataOut over the animal's CAPRI activities, over the
+  model's 2030 base heads; ProjectionModule.SUPBAL_outputsPerHead_Y, quoting SUPBAL_'s total output), in place of the
+  2017 per head x the yield factor f, which was exact for the main outputs only (sows' pork 1.049 of CAPRI's at the
+  median, the suckler cows' beef 1.013, the dairy cows' cull beef 0.955-1.051 over 10-90%). Each product's value per
+  head follows its quantity. The 2030 base production of each product is now CAPRI's, region by region within 0.08%
+  of sim_ini_21730 DATA at "Y" (sim_ini's member state rows are not the sums of their regions, so the totals are
+  summed from the regions). A trend projection (CAPTRD) keeps its outputs following its own yields. K200 fixed with it:
+  the milk sheep and goats' output per head was the value-weighted mix of their milk and meat factors, so the market
+  bridge passed their milk and meat at 0.979 of their sum in the EU (Spain 0.937); an animal's output is now the sum
+  of its products (SUPBAL_animalOutputSum). Six-unit Green Deal probe at CAPRI's prices (FR52, DE21, IR01, NL22, ES41,
+  PL52; 12 iterations), against df7a08c: the baseline's levels within 0.061%; the Green Deal changes move by 0.19 points
+  on average for the animals (largest the suckler cows, ES41 -33.7 -> -35.1%, CAPRI -22.4) and 0.10 for the crops; the
+  mean gap to CAPRI's step 2.78 -> 2.77 points (animals), 5.20 -> 5.24 (crops); the N-surplus dual 0.884 -> 0.881 of
+  CAPRI's at the median. Found on the way (K201, fixed the same day): the bulls' 2030 rations and requirements are not CAPRI's (the
+  ration builder reads the aggregate BULF, which has no DAYS in the 2030 reference), nor fully the heifers'.
+- **DEP-54, the non-EU supply countries' feed bulks within the market solve (24 November 2026; K199):** CAPRI's
+  feedBlk_ (arm/market_model.gms l. 972) is defined for every RMSSUP; the model's market left the non-EU countries with
+  supply models out of the bulks' price responses (market/feed.py `_feed_bulk_elas`; `sup_feed_use` had no response
+  term), so their bulks moved only between supply-market iterations. With CAPRI's non-EU supply models (plan item D2)
+  this made a cobweb on the UK's and Serbia's energy-rich feed (FENE rows changing by 18-26% between Green Deal
+  iterations; Serbia's is all FENI, 147.9 of the Western Balkans' 150 kt FENI their own), and the run did not converge.
+  Their bulks now respond within the solve as the member states' (`feed_bulk_market_factor` with the region's prices
+  against `seen.sup_price_seen`; market/use_ad.py the same; test_feed_ad.py). With D2 the baseline converges in 7 loops
+  and a full Green Deal run capped at 24 iterations follows the step reports of the run without D2 (9867411). With the
+  default (Norway only), a Green Deal probe of six EU units and Norway's six with and without the fix (30 iterations):
+  the EU units within 0.005%, Norway within 0.07% at the same baseline loop; the baseline meets CAPRI's stop rule one
+  loop earlier, so Norway's final levels differ by up to 0.7% (baseline) and 0.9% (Green Deal).
+- **D2, CAPRI's non-EU supply models (24 November 2026, an option, not the default):** with
+  `run.supply_countries_outside_eu` set to CAPRI's list (Norway, the UK, Turkey, the Western Balkans), the full Green
+  Deal run capped at 24 iterations (6,874 s; 9867411 met the stop rule at 29) brings the non-EU countries' activity
+  changes to within a mean 0.47 points of CAPRI's for Turkey, 1.04 for the UK and 0.67 for the Western Balkans (1.36,
+  3.64 and 1.63 without their supply models). Their largest gaps are shared: fallow land falls where CAPRI's barely moves
+  (Turkey -3.8% against 0.0, the UK -8.1 against -3.9), fodder maize rises more (the UK +11.3 against +7.7). The EU's
+  effect, against the default run on the same code capped at 24 iterations too (9867411 predates DEP-21 and K189, so it
+  is not the comparison): the EU27 activities' changes differ by at most 0.13 points (soya and pulses), their mean gap
+  to CAPRI's is 1.03 points in both; the EU27 prices' changes differ by at most 0.17 points (soya cake). Neither run met
+  the stop rule at 24 iterations, and both end on the same rows (Spain's maize, sugar and pulses at 0.29-0.32%). The
+  run takes 6,874 s against 6,567 s, both with a cached market Hessian. The regional solves relaxed by the run's NLP
+  fallback (mineral caps, or DEP-49's retry) differ: ES13, ES51, HU23 and NL22 with D2, IT31 without.
+- **DEP-23 closed, no departure (23 November 2026):** the activities held at their level for lack of a positive CAPRI
+  own PMP term (SupplyModule._uncalibrated) are all at 0 at the 2030 market year: the 388 crop and 3 animal cells with a
+  base-year level and no own term have a 2030 trajectory factor of 0, and in CAPRI's 2030 data they have no level and no
+  main-output yield at "Y" (sim_ini_21730 DATA), are not bounded (set_supply_bounds.gms l. 27-37, levels above 1e-8
+  only) and are 0 in CAPRI's 2030 reference and Green Deal step. The register's "71 cells, at most 2% of an activity's EU
+  level" was the run of 28 October (r166), before the 2030 trajectory took those levels to 0. A data test guards it
+  (capri_mod/tests/test_pmp_held_cells.py); the row moved to the register's history.
+- **DEP-10 item 1b, NUTNED_'s additive need factor held when the yields move (23 November 2026):** CAPRI fixes
+  v_cropNutNeedMultFact and v_cropNutNeedAddFact in simulation (supply/prep_sim.gms l. 30-31), and fert/fertned.gms moves
+  DATA(crop, FNUT) alone, so the part of NUTNED_'s need that the additive factor carries does not follow the yields.
+  The model's need per crop moved as a whole with DATA's factor r; it now moves as (1 - s) r + s
+  (equations/supply_model/nutrients.py NUTNED_needYieldFactor), in the fertilisation block's need columns, the P
+  accounts' NUTNED_ and the accounts' fertiliser distribution; the legume share's term keeps acting on the part that
+  follows DATA (the groups' need_yf). s, npk_crop_coefs_2030.csv's new add_share, comes from CAPRI's 2030 report
+  (nutNed_lhs, nutNed_retention, nutNed_biofix, now extracted too) and sim_ini_21730's two factors (kept as
+  crop_nut_need_factors_2030.parquet; v_cropNutNeedMultFact added to the sim_ini reference export): median N 0.033,
+  P 0.057, K 0.049; 0 for fallow and set-aside, which have no DATA. The decomposition reproduces CAPRI's need per crop:
+  the factor left is DEFR x 1.015038 for every arable and permanent crop and DEFR x 1 for grassland (besides its
+  SQRT(1 +- 0.2)) in every unit, exact for P and K; where a group mixes crops with and without the 1.015038 (vegetables,
+  industrial crops) the group's factor is used, within 1.5% of a crop's additive part. Six-unit Green Deal probe at
+  CAPRI's prices (12 iterations, FR52, IT20, NL22, ES51, DE21, ES41): the baseline unchanged; in the Green Deal the units'
+  mineral N +0.02%, mineral P2O5 +0.06%, N surplus and its duals unchanged (within 0.2%), the six units' activity totals within 0.09%; ES51 now needs its potato
+  cap exempted by solving (DEP-10 item 11), where the probe before did not.
+- **The departures register brought up to date (23 November 2026):** DEP-14, DEP-20 and DEP-21, closed today, moved to
+  its history as the register's rule says (they had been marked closed in section 3.2); DEP-10's row rewritten with its 14
+  items measured at the 2030 base (all 221 units) and in the Green Deal at 9867411: items 1-3 and 7 act in no unit at the
+  base, item 5 makes no difference, 4 and 9 were removed; the need multiplier read again (CAPRI's two fixed factors are
+  inside the reported need; kappa a residual, 0.988-1.005). KNOWN_ISSUES K50 notes it. (8e54ffd had counted items 7 and
+  kappa on a supply module built at the 2017 levels; corrected the same evening from the projected 2030 model.)
+- **DEP-21 closed, the Green Deal's input changes on CAPRI's simulation-year coefficients (23 November 2026):** CAPRI
+  rebuilds its yield-dependent input coefficients from the base year's in the simulation, DATA(BAS) x (1 - f + f G) x
+  TF_I (capmod/define_inputs.gms; capri_mod/supply/equations/define_inputs.py TF_I, p_yieldGrowth, DATA_IY_Y; its 2030
+  reference coefficients equal the statement in all 15,449 EU rows), and the Green Deal's plant-protection and
+  other-input changes enter through TF_I, valued at the member state's UVAP of 2030. At the 2030 market year the
+  model's change now acts on CAPRI's coefficients (input_coefs_2030.csv, tools/build/build_input_coefs_2030.py;
+  supply/policy.py _sim_input_cost): 5.2% (PLAP) and 3.6% (INPO) above the 2017 basis at the median; the animals'
+  INPO with its yield factor; the yields' input update at UVAP. The organic target's fertiliser part was already on
+  CAPRI's crop groups (the register's row was out of date). Six-unit probe at CAPRI's prices: base unchanged; the mean
+  gap over 46 activity totals 1.61 -> 1.55 points (rye, potatoes, sugar beet, soya closer; oats, durum further); the
+  N-surplus duals within 0.05%. Tests: test_input_coefs_2030.py.
+- **K189's two fertned items closed (23 November 2026):** (1) the price-driven O_HP needs no port: in sim_ini_21730's
+  base data O_HP equals the main output's yield exactly in all 7,312 region x crop rows with a base level (the earlier
+  "within 0.3%" was over the animals too); NECR, without a base level, has no price-driven yield in CAPRI nor in the
+  model. (2) The residues' technology factor at the moved MANN (fertned.gms l. 324-335, run in the simulation year):
+  the mix columns' residue N in the pool and in the permanent crops' own residues at the solve's MANN
+  (FertilisationBlock._mix_res_diff, npk.fout_at_yields); the table's mann_diff at the base yields (5,228 rows within
+  5e-16). Six-unit probe: within 0.03 points everywhere (the price-driven yield updates leave the straw).
+- **The Green Deal standing check at dev 9867411 (23 November 2026; capri_comparison.toml):** converged in 29
+  iterations, all regional solves optimal (5,856 s with the baseline's market supply Hessian from the cache; the first
+  attempt measured it, 2,453 s, as the feed bulks' prices changed its key, and stopped at the 2-hour limit at
+  iteration 21 on the same path). Against CAPRI's step (tools/check/compare_capri_gd.py), b30fa20 -> 9867411: EU
+  activities' mean gap 0.99 -> 0.97 points (same sign 91%), the member states' median gaps 1.08 -> 1.02 on average;
+  EU producer prices' mean gap 0.45 -> 0.56 (model / CAPRI median ratio 0.97). Closer: fodder maize +18.6 -> +16.1%
+  (CAPRI +17.3), intensive grassland -49.7 -> -50.7 (-54.8), extensive +46.6 -> +47.5 (+51.8), oats -2.9 -> -2.2
+  (-0.9); further: the cereals' prices 0.3-0.6 points higher (barley +11.1 -> +11.5%, CAPRI +10.8; rye +14.6 -> +15.2,
+  +14.7; oats +11.0 -> +11.6, +10.8), maize -9.4 -> -8.7 (-10.0). The N-surplus dual 0.848 -> 0.856 of CAPRI's at
+  the median over 215 units (FR52 4.88 -> 4.90, CAPRI 6.20; PL52 1.90 -> 2.03, 2.89; K196). The changes since b30fa20
+  (DEP-14, DEP-53, the ration-fat limit, the legume share, tillage and urea substitution) are not separated. Run
+  e5aef880da34 (reference 69c929bd1b57) on nuvolaTeam/capri-mod-results and in the Space's store.
+- **DEP-14 closed, the purchased feed bulks' prices as CAPRI's (K197; 23 November 2026, the project lead's
+  decision):** the 2030 baseline's five bulks take CAPRI's 2030 unit value of the bulk over its 2017 one over the
+  deflator (its 2030 reference holds them at their 2017 values in every EU member state: 0.783 in the model's money;
+  before, a CES of the products' 2030 prices with FENE and FMIL at 1); a scenario moves them by CAPRI's
+  arm/set_prices.gms Laspeyres (market/equations/set_prices.py DATA_UVAG_FEED_TRD_Y, MarketModule.feed_bulk_uvag_ratio,
+  CAPRI's GROF from sim_ini_21730 in feed_bulks_grof.csv, tools/build/build_feed_bulk_grof.py) in place of the
+  market's feedBlkPrice_ CES. Applied to CAPRI's own step prices the statement reproduces its step's FCER, FOTH and
+  FMIL prices to the fourth digit and FPRO within 0.9%. Six-unit Green Deal probe at CAPRI's prices: the baseline
+  unchanged (0.002%), the scenario's changes 0.26 points apart on average, the mean gap to CAPRI 2.36 -> 2.39 points.
+  Our view that CAPRI's frozen 2030 level is an artefact of its trend step: DEPARTURES_FROM_CAPRI.md.
+- **DEP-53 narrowed, the ration fat limit and the supplements on CAPRI's 2030 intake (23 November 2026, the project
+  lead's decision):** linseed's, nitrate's and 3-NOP's dosage, cost and effects per activity on CAPRI's 2030
+  p_animReq of sim_ini_21730 (DRMA, ENNE, CRPR, DRMN, DRMX per head and day; tools/build/build_supplement_effects.py;
+  before breeding.gms's estimate from the model's 2017 requirements: the requirement effects 0.97-1.07 times
+  the former at the median, the costs the same at the median), the fat row's intake 365 x CAPRI's DRMA by the activities' places (supplement_effects.csv
+  dm_intake), and the slack's penalty at the current herd (CAPRI's v^2 X = z^2 / X; it was at the base level).
+  equations/breeding.py and the ration's req_DMIN, req_DMAX removed (no user left). The base fat share against
+  CAPRI's ini run: median 1.015 (quartiles 0.95-1.07), above 5% in 82 of 1,074 region-animals (93 before). At a tax
+  of 300 (six units, one iteration at the same prices) the row binds in none (FR52's dairy cows: fat 4.99% at 29.5%
+  linseed, before 27.2%).
+- **A run's results were not written since the fat limit (a32d763):** the regional result's supp_fat was not
+  declared in results_items.csv, so writing a run with linseed stopped (found by the probe above). Declared, with named
+  fields (perc, slack, share); test_results_long.py's check now reads `res.x =` as well as `result.x =`.
+- **DEP-20 closed, the Green Deal targets by year as CAPRI's data (23 November 2026):** the batch of CAPRI's Green
+  Deal production runs (GUI/batchfiles/greendeal_scen2.txt, P. Witzke; from the project lead's GUI.zip, now in
+  capri_sources/gui with the GUI definition) is read by tools/build/build_greendeal_batch_targets.py: its section
+  "f2f", the GUI settings by their GAMS names (capri_gui_definition.xml) and the settings of CAPRI's scenario name
+  (greendeal_scenarios.gms l. 192), the section's values and each year's block, each block's reference for carbon
+  accounting checked to be the year before's scenario name (5 checked). Output capri_data/scenarios/greendeal_group/
+  greendeal_targets_by_year.csv: 2025 lnds7 org15 pest13 mine10crp surp20, 2030 lnds8 org18 pest20 mine13crp surp30,
+  2035 lnds9 org22 pest26 mine17crp surp40, 2040 and 2050 lnds10 org25 pest32 mine20crp surp50 (diet00 oth00). The
+  constant GREENDEAL_2030_TARGETS is replaced by policy.greendeal.greendeal_targets(year) and
+  greendeal_series_scenario(year); greendeal_2030_scenario() is the 2030 row, unchanged. Test:
+  test_greendeal_series.py.
+- **Settings of older forms retired (23 November 2026; the project lead's decision):** nine settings whose other
+  value only reproduced an earlier form of the model are removed with that form's code, the model keeping the CAPRI
+  form each chose: `market.noneu_supply_nq`, `market.noneu_land_market`, `market.feed_bulk_in_market`,
+  `market.noneu_feed_nq`, `market.sup_milk_in_market`, `market.trq_joint` (the Newton-Krylov solve keeps its own
+  sequential quotas), `outer_loop.manure_pool_solver` (the pool market's convex QP form now only the tests'
+  cross-check of CAPRI's NLP, test_manure_pool_nlp.py), `supply.fert_option_cal_relsubs0` (the fertiliser options and
+  the mineral N inhibitor calibrated with CAPRI's relSubs0 x costParLin; urea substitution keeps its own form) and
+  `environment.base_mineral_n` (CAPRI's 2030 reference mineral N; the 2017 table only for a region outside it). A
+  settings file naming one stops the run (unknown setting). The defaults' results are unchanged (the removed branches
+  were the non-default ones). docs/DEPARTURES_FROM_CAPRI.md, docs/dev/SETTINGS_INVENTORY.csv. tools/run/
+  copy_store_runs.py: copies scenario runs with their references between results stores and recomputes their ids.
+- **K93, the ration-fat limit with linseed built (SupplementPerc_; 21-22 November 2026):** CAPRI's SupplementPerc_
+  (supply_model.gms l. 608-633) as rows of the regional model, per cattle animal with the linseed column: the ration's
+  fat (its feed bulks' per kg as fed and the linseed's) over the dry-matter intake equals a percentage of at most 5% plus
+  a slack (set_miti_bounds.gms l. 471-476), the slack penalised in GHG_Mit_Cost_ by 999999 x share^2 x herd x intake /
+  1000 (l. 5103-5112); written in the total form (the row times the herd over its base level, equations/supply_model/
+  feeding.py SupplementPerc_; mitigation.py GHG_Mit_Cost_supplementSlack). The feed bulks' fat: tools/build/
+  build_supplement_fat.py, supplement_fat.csv, CAPRI's TotFAT (line_nitr.gms l. 175-176) from digestibility.gms's ether
+  extract at the simulation's data (sim_ini_21730 at Y); digestibility.gms's statements as named functions
+  (equations/digestibility.py, now also under 3-NOP's fibre and fat: 26 values of supplement_effects.csv change in the
+  sixteenth digit) and breeding.gms's intake estimate (equations/breeding.py). Departures: register DEP-53 (the intake
+  estimate, one row per model animal, the penalty at the herd's base level); DEP-8 narrowed. The baseline is
+  unchanged; with an emission tax the row binds where the ration is already fatty (six units: at 100, NL22's bulls,
+  linseed 5.2% of the herd against 6.3% without it; at 300 and the same prices, FR52's dairy cows, 27.2% against 29.5%,
+  and NL22's cows and bulls through their rations). The model's base fat share is 1.04 times CAPRI's ini value at the
+  median (K93).
+- **K93, the legume share in temporary grassland built (21 November 2026):** CAPRI's LegSh (envind/leg_share.gms;
+  tools/build/build_legsh_option.py, legsh_option.csv from miti_data_jul15 and CAPRI's simulation data; equations/
+  leg_share.py): a share of other arable fodder, OFAR's fixation x (1 + othImpact x share) in NUTNED_ (the share of
+  OFAR's need removed, with v_cropNutNeedAddFact added to the sim_ini export), the N-surplus row and the accounts, the
+  cost per ha of OFAR on its temporary grassland part, calibrated with DEP-30's rule in place of CAPRI's
+  p_fertCostGains. The baseline keeps it at 0; at CAPRI's Green Deal prices CY 0.121 (CAPRI 0.095), 0 where CAPRI has
+  0 (DE21, FR52, ES41), ES62 0 against 0.927 on 0.07 thousand ha (the need's value there about the surplus dual, CAPRI's 1.16 times its own; K196).
+  DEP-8 narrowed; SupplementPerc_ remains (K93).
+- **K93, conservation and no tillage and the urea substitution built (21 November 2026):** CAPRI's ConsTill, NoTill
+  (envind/tillage.gms; tools/build/build_tillage_options.py, tillage_options.csv from CAPRI's tillage.gms statements,
+  its SAPM survey shares, its tillage regions and crops) and UreaSubst (envind/ammo_tech.gms;
+  tools/build/build_urea_subst_option.py, urea_subst_option.csv) as columns of the regional model with CAPRI's cost
+  curves (equations/tillage.py, equations/ammo_tech.py, GHG_Mit_Cost_), NoTill's N2O of mineral N in GASTOTNETF_ and
+  its leaching in LEACHN_ (LEACHN_B2), the urea substitution's NH3 in GASTOTNETF_; the accounts take the shares (direct
+  N2O, leaching, NH3 of mineral N, CO2 from urea). No yield effect (the Green Deal's NoYieldEffect 1). CAPRI leaves the
+  urea substitution's cost in base-year money (KEPT-9), reproduced. The baseline keeps the base; in a six-unit Green
+  Deal probe at CAPRI's prices the shares are CAPRI's within 0.006 (NoTill ES51 0.120, CAPRI 0.115; 0 in FR52, NL22,
+  IT20, DE21 as CAPRI's; UreaSubst DE21 0.019, 0.017; ES41 0.025, 0.025), the N-surplus dual unchanged. New code list
+  CFACTOR_ARAB, the raw source tillageCover.parquet; the pipeline's build_code_lists entry re-traced (it lacked 16
+  of the code lists the builder already wrote). LegSh and SupplementPerc_ remain (K93).
 - **The Bonn comparison run (measured 20 November 2026):** the full-EU 2030 Green Deal with
   capri_mod/settings/capri_comparison.toml (FIX-5 and FIX-6 as CAPRI codes them, the crop-level switch on, the
   greening rows on) at this batch's code, converged in 27 iterations (no non-optimal regional solve kept). Against

@@ -12,7 +12,7 @@
 Status: 5 November 2026, written at the project lead's request. The validation runs in five stages: the reference
 material, internal validation with its fixes until the model is complete, a first external phase with the University
 of Bonn, the fixes it brings, and the final external validation. One expert contract covers both external phases.
-What stands today is in README section 9 (Validation) and capri_data/validation/VALIDATION.md; this file is the plan.
+What stands today is in README section 8 (Validation) and capri_data/validation/VALIDATION.md; this file is the plan.
 
 | Stage | What | Who | Ends when |
 |---|---|---|---|
@@ -132,7 +132,7 @@ next to the Python module).
 | Our classification of every finding | Bonn's written assessment; a second reviewer's assessment of credibility |
 
 The final validation ends with: a validation report (the protocol, each test's result, each finding and how it was
-closed); README section 9 and FITNESS_FOR_USE.json updated; a tagged release that the report cites.
+closed); README section 8 and FITNESS_FOR_USE.json updated; a tagged release that the report cites.
 
 ## 6. Open questions
 

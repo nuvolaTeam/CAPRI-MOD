@@ -60,3 +60,60 @@ def p_stepWeights_average(wts, use):
                =  p_stepWeights(STEP1)/SUM(STEP2, p_stepWeights(STEP2));
     """
     return sum(w_ * x_ for w_, x_ in zip(wts, use)) / sum(wts[:len(use)])
+
+
+def p_itemsInIters_PSHW(PSHW, has_history, price_sent, p_dualValueManureCal):
+    r"""p_itemsInIters(RU, "PSHW", FOUT, STEP) of a region whose manure value is missing (CAPRI: EPS): the fall-back
+    price, the price sent to it the step before where it has one (has_history), else the calibration dual; its value
+    otherwise.
+
+    CAPRI's GAMS (manuremarket/simu_manure_market.gms l. 50-64):
+
+        *     1. Create a suitable fall-back price
+        if(ord(step) eq 1,
+            p_itemsInIters(RU,"PSHW",FOUT,"fallBack") = p_dualValueManureCal(ru,fout);
+        else
+            p_itemsInIters(RU,"PSHW",FOUT,"fallBack") = p_itemsInIters(RU,"UVAG",FOUT,step-1)
+        *                                               take the current value form supply models if lagged UVAG is missing
+                                                      + p_dualValueManureCal(ru,fout) $ (not p_itemsInIters(RU,"UVAG",FOUT,step-1) );
+        );
+
+        *     2. Apply fall-back price if needed and make a note for the user
+        loop((ru,fout) $ [p_itemsInIters(RU,"PSHW",FOUT,step) eq EPS],
+            p_itemsInIters(RU,"pshwReplaced",FOUT,step) = 1;
+            p_itemsInIters(RU,"PSHW",FOUT,step) = p_itemsInIters(RU,"PSHW",FOUT,"fallBack");
+            display "NOTE: Applied the fall-back manure price";
+        );
+
+    Departures from CAPRI: the region's price history decides (CAPRI's step number and lagged UVAG: the same where the
+    region took part from the first step); the price sent in the model's money (minus the fee, the caller's)."""
+    if PSHW is not None:
+        return PSHW
+    return price_sent if has_history else p_dualValueManureCal
+
+
+def p_mTradeReport_losf(v_netPutQuant, netf):
+    r"""p_mTradeReport(RU, "losf", curFout, step): the gap between the supply models' net trade of a pool and the pool
+    market's plan, the measure of their match (the caller takes it relative to the pool's supply, the largest over
+    the pools).
+
+    CAPRI's GAMS (manuremarket/simu_manure_market.gms l. 199-200):
+
+            p_mTradeReport(RU,"losf",curFout,step) = p_mTradeReport(RU,"v_netPutQuant",curFout,step)
+                                                   - p_mTradeReport(RU,"netf",curFout,step);
+
+    Departures from CAPRI: per pool (CAPRI's per region, summed to the member states and TOP, l. 202-204)."""
+    return v_netPutQuant - netf
+
+
+def p_excessSupplyFromSupMod(EXPT, IMPT):
+    r"""p_excessSupplyFromSupMod(ru, fout): a region's net export of manure at its last solve (the model's trade columns:
+    the deviation from CAPRI's base trade, which the accounts hold).
+
+    CAPRI's GAMS (manuremarket/simu_manure_market.gms l. 85):
+
+    p_excessSupplyFromSupMod(fout,ru) = v_netPutQuant.l(ru,fout);
+
+    In this project's notation: z = e - i (the export and import columns). Departures from CAPRI: the deviation from
+    the base trade (the model's columns)."""
+    return EXPT - IMPT

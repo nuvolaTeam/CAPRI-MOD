@@ -467,6 +467,17 @@ def LEACHN_B1(wc=0.0, agg=0.0, nmin_sh=0.0, nman_sh=0.0, fert_min=0.0, fert_man=
     return 1.0 - param("WINTERCOV_NO3_REDUCTION") * wc - nmin_sh * fert_min - nman_sh * fert_man + sign * agg
 
 
+def LEACHN_B2(nmin_sh=0.0, nman_sh=0.0, till_slea=0.0, till_mlea=0.0):
+    """LEACHN_'s second factor B2 (l. 3416-3425): 1 - nminSh x the tillage options' effect on soil and mineral N -
+    nmanSh x theirs on manure N; till_slea / till_mlea: sum over ConsTill and NoTill of othImpact no3slea / no3mlea
+    (x DATA(UAAR, TILLSET), envind/tillage.gms l. 563-564) x share. The buffer strips', biodiversity options' and
+    biochar's terms: options the model does not have.
+
+    CAPRI's GAMS of LEACHN_: LEACHN_'s docstring.
+    """
+    return 1.0 - nmin_sh * till_slea - nman_sh * till_mlea
+
+
 def LEACHN_(leach_ini, leach_base, b1_now, b1_ini):
     """v_nitrBalance(RUNR, "Leach") (LEACHN_, l. 3399-3425), the leaching share of the soil surplus, with B2 held at
     CAPRI's ini run: leach_ini x B1 / B1_ini (leach_ini where B1_ini is not positive); without CAPRI's ini share,

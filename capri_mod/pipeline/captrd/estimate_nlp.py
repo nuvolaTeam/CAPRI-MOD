@@ -41,36 +41,21 @@ import scipy.sparse as sps
 
 from capri_mod.pipeline.captrd import estimate_bounds as EB
 from capri_mod.pipeline.captrd import estimate_ms as E
+from capri_mod.pipeline.captrd.equations import estimate_ms as EM
+from capri_mod.pipeline.captrd.equations import release_comi_yields as RC
 
 K2 = Tuple[str, str]
 INF = float("inf")
-#: estimate_ms.gms l. 252: the first tries (nRepeatedSolves <= 5) widen the activity levels only
+#: estimate_ms.gms l. 256: the first tries (nRepeatedSolves <= 5) widen the activity levels only
 LEVL_TRIES = 5
-#: l. 262, 268: an activity level's bounds to twice and half the level
-LEVL_UP_FAC = 2.0
-LEVL_LO_FAC = 0.5
-#: l. 296-311: a bound moves by 90% of its absolute value, at least 0.001; 1% for PRCY of the secondary products
-WIDEN_SHARE = 0.9
-WIDEN_SHARE_PRCY = 0.01
-WIDEN_MIN = 0.001
-#: l. 304-305: the processing yields not below 1% of their support
-PRCY_FLOOR = 0.01
-#: l. 314-315: the processing yields' upper bound at least 1.1 x the lower
-PRCY_RANGE = 1.1
-#: l. 280-287: the calories' bounds by (1 -/+ 1e-5 n)^n
-INCE_STEP = 1.0e-5
 #: IPOPT's returns that are solver errors, not an infeasible model: CAPTRD aborts on a solver error (EXECERROR,
 #: estimate_ms.gms l. 230, 243), so the estimation stops rather than widen bounds after one
 SOLVER_ERRORS = ("Insufficient_Memory", "Internal_Error", "Invalid_Option", "Invalid_Problem_Definition",
                  "Unrecoverable_Exception", "NonIpopt_Exception_Thrown", "Not_Enough_Degrees_Of_Freedom")
-#: l. 330: the OIND / OCRO rule after 25 tries
+#: l. 335: the OIND / OCRO rule after 25 tries
 OIND_OCRO_TRIES = 25
-#: biofuel_bounds.gms is applied again below 30 tries (l. 381-384)
+#: biofuel_bounds.gms is applied again below 30 tries (l. 376-378)
 BIOFUEL_TRIES = 30
-#: release_comi_yields.gms: the milk yields' step, LOSF.COMI's factors
-COMI_STEP = 1.0e-4
-LOSF_UP = 1.005
-LOSF_LO = 0.995
 
 
 @dataclass
@@ -404,47 +389,46 @@ def _binding(keys, x, lam, lb, ub, tol_at, tol_m):
 
 
 def _widen(ntry, keys, x, at_lo, at_up, lo_, up_, B, p, expertlo, expertup, basm):
-    """estimate_ms.gms l. 252-321 (nRepeatedSolves = ntry)."""
+    """estimate_ms.gms l. 252-321 (nRepeatedSolves = ntry); the statements' arithmetic in
+    capri_mod/pipeline/captrd/equations/estimate_ms.py."""
     if ntry <= LEVL_TRIES:
         for k, v in at_up.items():
             if k[0] in B.mpact and k[1] == "LEVL" and up_.get(k) != expertup.get(k):
-                up_[k] = v * LEVL_UP_FAC
+                up_[k] = EM.V_EstV_up_LEVL_try(v)
         for k, v in at_lo.items():
             if k[0] in B.mpact and k[1] == "LEVL" and lo_.get(k) != expertlo.get(k):
-                lo_[k] = v * LEVL_LO_FAC
+                lo_[k] = EM.V_EstV_lo_LEVL_try(v)
         return
     cols = B.cols_est | {"STCM"}                    # l. 276, 321: STCM is opened with the rest
     moved = set()
     for k in sorted(at_lo):
         if k[1] == "INCE" and k[0] in _ncnc(p) and expertlo.get(k):
-            lo_[k] = lo_[k] * (1 - INCE_STEP * ntry) ** ntry
+            lo_[k] = EM.V_EstV_lo_INCE_try(lo_[k], ntry)
             moved.add(("lo", k))
     for k in sorted(at_up):
         if k[1] == "INCE" and k[0] in _ncnc(p) and expertup.get(k):
-            up_[k] = up_[k] * (1 + INCE_STEP * ntry) ** ntry
+            up_[k] = EM.V_EstV_up_INCE_try(up_[k], ntry)
             moved.add(("up", k))
     for k in sorted(at_lo):
         c, w = k
         if ("lo", k) not in moved and c in cols and w in B.rows_est:
-            sh = WIDEN_SHARE_PRCY if (c == "PRCY" and w in B.seco) else WIDEN_SHARE
-            lo_[k] = lo_[k] - max(WIDEN_MIN, sh * abs(lo_[k]))
+            lo_[k] = EM.V_EstV_lo_widen(lo_[k], c == "PRCY" and w in B.seco)
     for k in sorted(at_up):
         c, w = k
         if ("up", k) not in moved and c in cols and w in B.rows_est:
-            sh = WIDEN_SHARE_PRCY if (c == "PRCY" and w in B.seco) else WIDEN_SHARE
-            up_[k] = up_[k] + max(WIDEN_MIN, sh * abs(up_[k]))
+            up_[k] = EM.V_EstV_up_widen(up_[k], c == "PRCY" and w in B.seco)
     if ntry > LEVL_TRIES:
         for k in keys:
             c, w = k
             # a free position's lower bound is -inf in GAMS: MAX(0, -inf, ..) gives it the floor too
             if c in cols and w in B.rows_est and basm(c, w) > 0 and c not in ("NTRD", "INTP"):
-                lo_[k] = max(0.0, lo_.get(k, -INF), PRCY_FLOOR * p.support.get(k, 0.0) if c == "PRCY" else 0.0)
+                lo_[k] = EM.V_EstV_lo_widen_floor(lo_.get(k, -INF), p.support.get(k, 0.0), c == "PRCY")
             if c == "PRCY" and k in lo_ and lo_.get(k, -INF) != up_.get(k, INF):
-                up_[k] = max(up_.get(k, INF), PRCY_RANGE * lo_[k])
+                up_[k] = EM.V_EstV_up_PRCY_range(up_.get(k, INF), lo_[k])
 
 
 def _oind_ocro(ntry, keys, x, at_lo, lo_):
-    """estimate_ms.gms l. 330-346: after 25 tries the lower bounds of OIND and OCRO's levels at a binding bound go to
+    """estimate_ms.gms l. 335-346: after 25 tries the lower bounds of OIND and OCRO's levels at a binding bound go to
     zero where the solution has no production (GROF) of them."""
     if ntry <= OIND_OCRO_TRIES:                     # nRepeatedSolves > 25 (nRepeatedSolves = ntry here)
         return
@@ -452,7 +436,7 @@ def _oind_ocro(ntry, keys, x, at_lo, lo_):
     for c in ("OIND", "OCRO"):
         k = (c, "LEVL")
         if k in at_lo and lev.get(("GROF", c), 0.0) == 0.0:
-            lo_[k] = 0.0
+            lo_[k] = EM.V_EstV_lo_OIND_OCRO()
 
 
 def _ncnc(p):
@@ -460,7 +444,9 @@ def _ncnc(p):
 
 
 def _again(ntry, d, B, lo_, up_, expertup, at_lo, at_up):
-    """estimate_ms.gms l. 322-420: the bounds CAPTRD sets again after widening."""
+    """estimate_ms.gms l. 328-418: the bounds CAPTRD sets again after widening; the statements' arithmetic in
+    capri_mod/pipeline/captrd/equations/estimate_ms.py (comi_bounds.py, release_comi_yields.py, biofuel_bounds.py for
+    the files it includes)."""
     pd, res, t = d.pd, d.res, d.year
     R = lambda rp, c, w: res.get(rp, {}).get((c, w), 0.0)                  # noqa: E731
     n = lambda c, w: pd(c, w, "nObs") != 0                                  # noqa: E731
@@ -469,15 +455,15 @@ def _again(ntry, d, B, lo_, up_, expertup, at_lo, at_up):
     for a in sorted(B.mpact):
         k = (a, "LEVL")
         if n(a, "LEVL") and LO(k) != 0:
-            lo_[k] = max(EB_LEVL_FLOOR * d.nuts2_with_data.get(a, 0), LO(k))
+            lo_[k] = EM.V_EstV_lo_MPACT_LEVL_again(LO(k), d.nuts2_with_data.get(a, 0))
     for a in sorted(B.mpact):
         k = (a, "LEVL")
         if n(a, "LEVL") and LO(k) != UP(k) and UP(k) != expertup.get(k):
-            up_[k] = max(LO(k) * PRCY_RANGE, UP(k))
+            up_[k] = EM.V_EstV_up_MPACT_LEVL_again(LO(k), UP(k))
     pop = R("p_data", "INHA", "LEVL")
-    lo_[("INHA", "LEVL")] = up_[("INHA", "LEVL")] = pop
+    lo_[("INHA", "LEVL")] = up_[("INHA", "LEVL")] = EM.V_EstV_fx_INHA_LEVL_again(pop)
     if pd("QUTS", "SUGB", "BASM") and t >= 2006:
-        lo_[("GROF", "SUGB")] = min(R("p_data", "QUTS", "SUGB"), LO(("GROF", "SUGB")))
+        lo_[("GROF", "SUGB")] = EM.V_EstV_lo_GROF_SUGB_again(R("p_data", "QUTS", "SUGB"), LO(("GROF", "SUGB")))
 
     def fx(k, v):
         lo_[k] = v
@@ -485,47 +471,45 @@ def _again(ntry, d, B, lo_, up_, expertup, at_lo, at_up):
     sup = lambda c, w: R("Support", c, w)                                  # noqa: E731
     EB._comi(d, B, lo_, up_, LO, UP, n, pd, R, sup, fx, t)
     _release_comi(ntry, B, lo_, up_, n, at_lo, at_up)
-    if ntry < BIOFUEL_TRIES:                        # nRepeatedSolves < 30 (the tries so far, l. 381)
+    if ntry < BIOFUEL_TRIES:                        # nRepeatedSolves < 30 (the tries so far, l. 376)
         EB._biofuel(d, B, lo_, up_, UP, n, R, fx)
     for (c, w), s_ in sorted(res.get("Support", {}).items()):
         cc = R("coco", c, w)
         if s_ and cc and w != "COMI" and abs(s_) < 1e-12 and abs(cc) < 1e-12:
-            fx((c, w), 0.0)
+            fx((c, w), EM.V_EstV_fx_tiny_again())
     if not R("coco", "UAAR", "LEVL") and not R("expertup", "UAAR", "LEVL"):
-        up_[("UAAR", "LEVL")] = pd("UAAR", "LEVL", "BASM")
-        lo_[("UAAR", "LEVL")] = pd("UAAR", "LEVL", "BASM") * EB_UAAR_DECLINE ** (t - d.ord_bas)
+        lo_u, up_u = EM.V_EstV_UAAR_again(pd("UAAR", "LEVL", "BASM"), t - d.ord_bas)
+        up_[("UAAR", "LEVL")] = up_u
+        lo_[("UAAR", "LEVL")] = lo_u
     for c in ("ARTO", "INLW", "KITC"):
-        fx((c, "LEVL"), pd(c, "LEVL", "BASM"))
-    lo_[("ARTIF", "LEVL")] = pd("ARTIF", "LEVL", "BASM")
+        fx((c, "LEVL"), EM.V_EstV_fx_land_again(pd(c, "LEVL", "BASM")))
+    lo_[("ARTIF", "LEVL")] = EM.V_EstV_lo_ARTIF_again(pd("ARTIF", "LEVL", "BASM"))
     for (a, w, bd), v in sorted(B.reqfcnlim.items()):
         if a in B.maact and w in B.rows_est and n(a, "LEVL") and v:
+            nb = EM.V_EstV_reqfcnlim_again(bd, LO((a, w)), UP((a, w)), v)
             if bd == "lo":
-                lo_[(a, w)] = max(LO((a, w)), v)
+                lo_[(a, w)] = nb
             elif bd == "up":
-                up_[(a, w)] = min(UP((a, w)), v)
+                up_[(a, w)] = nb
     for a in sorted(B.maact & B.aact365):
-        fx((a, "DAYS"), EB_DAYS)
+        fx((a, "DAYS"), EM.V_EstV_fx_DAYS_again())
 
 
 def _release_comi(ntry, B, lo_, up_, n, at_lo, at_up):
-    """release_comi_yields.gms (estimate_ms.gms l. 378, after comi_bounds.gms): the milk yields at a binding bound of
+    """release_comi_yields.gms (estimate_ms.gms l. 371, after comi_bounds.gms): the milk yields at a binding bound of
     the last solve by (1 -/+ 1e-4 n)^n; LOSF.COMI with a multiplier, after five tries, by 0.995^n and 1.005^n (n: the
-    tries so far, nRepeatedSolves before its increment)."""
+    tries so far, nRepeatedSolves before its increment). The statements' arithmetic in
+    capri_mod/pipeline/captrd/equations/release_comi_yields.py."""
     for c in sorted(B.cols_est):
         k = (c, "COMI")
         if (c, "COMI") not in B.pact_to_y or not n(c, "COMI"):
             continue
         if k in at_lo:
-            lo_[k] = lo_.get(k, -INF) * (1 - COMI_STEP * ntry) ** ntry
+            lo_[k] = RC.V_EstV_lo_COMI_release(lo_.get(k, -INF), ntry)
         if k in at_up:
-            up_[k] = up_.get(k, INF) * (1 + COMI_STEP * ntry) ** ntry
+            up_[k] = RC.V_EstV_up_COMI_release(up_.get(k, INF), ntry)
     k = ("LOSF", "COMI")
     if n("LOSF", "COMI") and ntry > LEVL_TRIES and (k in at_lo or k in at_up):
-        up_[k] = up_.get(k, INF) * LOSF_UP ** ntry
-        lo_[k] = lo_.get(k, -INF) * LOSF_LO ** ntry
-
-
-#: estimate_ms.gms l. 336-337, 400-402, 418
-EB_LEVL_FLOOR = 1.0e-5
-EB_UAAR_DECLINE = 0.998
-EB_DAYS = 365.0
+        lo_l, up_l = RC.V_EstV_LOSF_COMI_release(lo_.get(k, -INF), up_.get(k, INF), ntry)
+        up_[k] = up_l
+        lo_[k] = lo_l

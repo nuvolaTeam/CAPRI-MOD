@@ -1,0 +1,78 @@
+code,text
+N2OAPP,Direct nitrous oxide emissions stemming from manure application on soils except grazings per animal activity (IPCC)
+N2OGRA,Direct nitrous oxide emissions stemming from manure managment on grazings (IPCC)
+N2OSYN,Direct nitrous oxide emissions from anorganic fertilizer application (IPCC)
+N2OHIS,Direct nitrous oxide emissions from cultivation of histosols (IPCC via Miterra)
+NRESIDN,N content of crop residues
+N2OCRO,Direct nitrous oxide emissions from crop residues (IPCC)
+N2OFIX,Direct nitrous oxide emissions from nitrogen fixing crops (IPCC)
+N2OLEA,Indirect nitrous oxide emissions from leaching (IPCC via Miterra)
+N2OAMM,Indirect nitrous oxide emissions from ammonia volatilisation (IPCC)
+N2OindMM,Indirect nitrous oxide emissions from ammonia volatilization (IPCC - manure management)
+N2OindAS,Indirect nitrous oxide emissions from ammonia volatilization (IPCC - agricultural soils)
+N2OPRD,Nitrous oxide emissions during fertilizer production (Expert Data)
+N2OBUR,Nitrous oxide emissions from land use change (IPCC)
+N2OMAN,Direct nitrous oxide emissions stemming from manure management (only housing and storage) (IPCC)
+N2OAPL,Direct nitrous oxide emissins from manure application on soils (except grazing) due to livestock production
+N2OSYL,Direct nitrous oxide emissions from anorganic fertilizer application due to livestock production
+N2OHIL,Direct nitrous oxide emissions from cultivation of histosols (IPCC via Miterra) due to livestock production
+N2OLEL,Indirect nitrous oxide emissions from leaching due to livestock production
+N2OCRL,Direct nitrous oxide emissions from crop residues due to livestock production
+N2OAML,Indirect nitrous oxide emissions from ammonia volatilisation due to livestock production
+N2OPRL,Nitrous oxide emissions during fertilizer production due to livestock production
+N2OBUL,Nitrous oxide emissions from land use change due to feed use of european livestock production (IPCC)
+N2OSYS,Direct nitrous oxide emissions from anorganic fertilizers application saved due to the application of manure
+N2OLES,Indirect mitrous oxide emissions from leaching of mineral fertilizer application saved due to the application of manure
+N2OPRS,Nitrous oxide emissions from anorganic fertilizers production saved due to the application of manure
+CH4EN1,Methane emissions from enteric fermentation (IPCC)
+CH4MA1,Methane emissions from manure management (IPCC)
+CH4ENT,Methane emissions from enteric fermentation (IPCC based on feed intake)
+CH4MAN,Methane emissions from manure management (IPCC)
+CH4ENTstd,Methane emissions from enteric fermentation (IPCC based on reqfcn = standard methodology)
+CH4RIC,Methane emissions from rice production (IPCC)
+CH4BUR,Methane emissions from land use change (IPCC)
+CH4BUL,Methane emissions from land use change due to feed use of european livestock production (IPCC)
+CH4HIS,Methane emissions from cultivation of histosol
+CO2HIS,Carbon dioxide emissions from the cultivation of histosols
+CO2LIM,Carbon dioxide emissions form limestone and dolomit
+CO2UREA,Carbon dioxide emissions from urea application
+N2OAPC,Direct nitrous oxide emissions from manure application not including grassland (IPCC)
+N2ODEP,Direct nitrous oxide emissions from atmospheric deposition (not included in IPCC methodology
+N2OSOI,N2O emissions from land use change due to soil carbon losses (IPCC)
+N2OSOL,N2O emissions from land use change due to soil carbon losses caused by feed use of european livestock production (IPCC)
+CO2PRD,Carbon Dioxide emissions during fertilizer production
+CO2DIE,Carbon Dioxide emissions from diesel consumption in machinery use
+CO2OFU,Carbon Dioxide emissions from consumption of other fuels
+CO2ELE,Carbon Dioxide emissions from electricity consumption
+CO2IND,Indirect Carbon Dioxide emissions from machinery and buildings
+CO2FTR,Carbon Dioxide emissions from feed transport
+CO2FPR,Carbon Dioxide emissions from feed processing
+CO2SEE,Carbon Dioxide emissions from seed production
+CO2PPT,Carbon Dioxide emissions from plant protection
+CO2BIO,Carbon dioxide emissions from land use change due to losses of carbon in biomass and litter (IPCC)
+CO2SOI,Carbon dioxide emissions from land use change due to soil carbon losses (IPCC)
+CO2SEQ,Carbon dioxide emissions due to lost carbon sequestration of grassland (for grassland negative)
+CO2FES,Carbon dioxide equivalents saved from burning fossile fuels (mitigation from anaerobic digestion)
+CO2TRA,Carbon Dioxide emissions from transport from farm gate to final consumer
+CO2PRC,Carbon Dioxide emissions from processing after farm gate (except feed processing)
+CO2PAC,Carbon Dioxide emissions from food packaging
+CO2RET,Carbon Dioxide emissions from retail
+CO2HHD,Carbon Dioxide emissions from final consumer (households)
+CO2PRL,Carbon Dioxide emissions during fertilizer production due to livestock production
+CO2DIL,Carbon Dioxide emissions from diesel consumption in machinery use due to livestock production
+CO2OFL,Carbon Dioxide emissions from consumption of other fuels due to livestock production
+CO2ELL,Carbon Dioxide emissions from electricity consumption due to livestock production
+CO2INL,Indirect Carbon Dioxide emissions from machinery and buildings due to livestock production
+CO2SEL,Carbon Dioxide emissions from seed production due to livestock production
+CO2PPL,Carbon Dioxide emissions from plant protection due to livestock production
+CO2BIL,Carbon dioxide emissions from land use change due to losses of carbon in biomass and litter caused by feed use of european livestock production(IPCC)
+CO2SOL,Carbon dioxide emissions from land use change due to soil carbon losses caused by feed use of european livestock production (IPCC)
+CO2SQL,Carbon dioxide emissions due to lost carbon sequestration of grassland (for grassland negative) caused by feed use of european livestock production
+CO2PRS,Carbon Dioxide emissions from anorganic fertilizers production saved due to the application of manure
+CO2HIL,Carbon dioxide emissions from the cultivation of histosols due to livestock production
+CO2BUR,Carbon dioxide emissions from burning related to land use change (IPCC)
+CO2BIOfrom,Carbon dioxide release (related to LUC) from carbon in earlier land use
+CO2BIOto,Carbon dioxide sequestration (related to LUC) in biomass of new (or remaining) landuse (Gives gains net of losses for remaining LU)
+N2OENER,N2O from energy use in agriculture as an aggregate
+CH4ENER,CH4 from energy use in agriculture as an aggregate
+CO2ENER,CO2 from energy use in agriculture as an aggregate

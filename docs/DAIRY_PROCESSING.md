@@ -2,7 +2,7 @@
 
 Status: revised 21 October 2026 against the code (Norway's block: K56). The block is on by default, as in CAPRI, where it is part of the
 market model. The development steps (October 2026, up to the switch-on of CAPRI's dairy block) and their run results are summarised in
-"History" and recorded in CHANGELOG.md; current results are in README section 9 (Validation).
+"History" and recorded in CHANGELOG.md; current results are in README section 8 (Validation).
 
 Always on (the switch `market.use_dairy_block` and the run option `--no-dairy-block` were removed on 27 October
 2026). Without the block's data the dairy products are raw milk × CAPRI's member-state 2030 yields (output less
@@ -81,7 +81,7 @@ and dairies' milk demand at given product prices is inelastic: in the October 20
 state's milk raised its milk price by 17-33% at fixed product prices, and the market's derived demand for EU raw milk
 was about −0.2 (KNOWN_ISSUES K13, `tools/check/milk_shock_check.py`).
 
-This is why the Farm-to-Fork milk price differs from JRC121368's (README section 9 (Validation): +31.1% in run r48 against
+This is why the Farm-to-Fork milk price differs from JRC121368's (README section 8 (Validation): +31.1% in run r48 against
 CAPRI's +1.5%; JRC121368 Figure 7 reads about +1.2%). With star 3.0's coefficients a 10% fall in EU milk supply
 cannot clear at +1.5%; JRC121368 was run with an older CAPRI whose dairy coefficients are not in the installation.
 No bug was found in the block or the market; the gap is recorded as open in K13 (CAPRI's Farm-to-Fork dairy market

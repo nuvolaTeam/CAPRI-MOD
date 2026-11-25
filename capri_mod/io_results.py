@@ -357,7 +357,7 @@ LONG_COLUMNS = ("point", "block", "region", "dim5", "cols", "rows", "value")
 LONG_EXCLUDED = ("scenario", "metadata", "convergence", "outer_history")
 #: SupplyResult fields not in the table: text (the solver's message, the region's own id) and the solves' logs
 #: (run.verbosity "solver", written to the run's log, not kept)
-_SUPPLY_TEXT = ("region_id", "solver_message", "solver_log")
+_SUPPLY_TEXT = ("region_id", "solver_message", "solver_log", "nlp_nonoptimal")
 #: the market tables of MarketEquilibrium (trade region x commodity)
 _MARKET_TABLES = ("production", "consumption", "net_exports", "domestic_prices", "wedge_prices")
 #: the environmental accounts summed over the EU's regions (additive ones: flatten_outputs' list)
@@ -414,11 +414,13 @@ def _key(parts):
 
 def _eu_sum(sup: dict, field: str) -> dict:
     """EU totals of a supply field, as the run script sums them (tools/run/run_f2f_2030.py agg): the regions in the
-    results' order, Norway's (NO..) left out (KNOWN_ISSUES K56), non-finite values skipped."""
+    results' order, the regions outside the EU left out (definitions.is_eu; KNOWN_ISSUES K56), non-finite values
+    skipped."""
     import numpy as _np
+    from capri_mod.data.definitions import is_eu as _is_eu
     o: dict = {}
     for reg, v in sup.items():
-        if str(reg).startswith("NO"):
+        if not _is_eu(str(reg)):
             continue
         for k, x in getattr(v, field).items():
             if _np.isfinite(x):
@@ -492,7 +494,8 @@ def to_long(results: dict, point: str) -> pd.DataFrame:
                 add((point, b_, str(reg), "", str(it), "", val))
             else:
                 add((point, b_, str(reg), "", "", str(it), val))
-        eu = [r_ for r_ in t.index if not str(r_).startswith("NO")]
+        from capri_mod.data.definitions import is_eu as _is_eu
+        eu = [r_ for r_ in t.index if _is_eu(str(r_))]
         sums = ENV_EU_SUMS if blk == "environmental" else (t.columns if blk in ("labour", "set_aside") else ())
         for it in sums:
             if it in t.columns:

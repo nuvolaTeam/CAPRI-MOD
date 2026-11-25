@@ -7,6 +7,9 @@ this module once supply_module is loaded (capri_mod.utils.mixins.inject_names); 
 """
 from __future__ import annotations
 
+from capri_mod.supply.equations.define_manure_trade_costs import p_manureBuyCostSlope
+from capri_mod.supply.equations.prep_sim_luc import v_actLevl_bounds_foreOlndArtif, v_actLevl_lo_floor
+
 
 class LandBlock:
     def _manure_trade_terms(self, fout: str):
@@ -98,16 +101,18 @@ class LandBlock:
             if t not in li or arto is None:
                 continue
             j = li[t]; l0 = float(L0[j])
-            lo = l0 - min(tab(param_table("LUC_LO_OWN_SHARE")) * l0, tab(param_table("LUC_LO_ARTO_SHARE")) * arto)
-            up = l0 + min(param("LUC_UP_OWN_FACTOR") * l0, param("LUC_UP_ARTO_SHARE") * arto)
+            lo, up = v_actLevl_bounds_foreOlndArtif(l0, arto, tab(param_table("LUC_LO_OWN_SHARE")),
+                                                    tab(param_table("LUC_LO_ARTO_SHARE")), param("LUC_UP_OWN_FACTOR"),
+                                                    param("LUC_UP_ARTO_SHARE"))
             row(j, -1.0, -lo + 1e-9 * max(1.0, l0), f"{lab}_lo")
             row(j, 1.0, up + 1e-9 * max(1.0, l0), f"{lab}_up")
         if "FORE" in li and float(getattr(self.ev, "fall_floor", 0.0) or 0.0) > 0 and float(L0[li["FORE"]]) > 0:
             l0 = float(L0[li["FORE"]])
-            row(li["FORE"], -1.0, -param("LUC_FORE_FLOOR") * l0 + 1e-9 * max(1.0, l0), "forest_floor")
+            row(li["FORE"], -1.0, -v_actLevl_lo_floor(l0, param("LUC_FORE_FLOOR")) + 1e-9 * max(1.0, l0), "forest_floor")
         if "ARTIF" in li and float(getattr(self.ev, "fall_floor", 0.0) or 0.0) > 0 and float(L0[li["ARTIF"]]) > 0:
             l0 = float(L0[li["ARTIF"]])
-            row(li["ARTIF"], -1.0, -param("LUC_ARTIF_FLOOR") * l0 + 1e-9 * max(1.0, l0), "artificial_land_floor")
+            row(li["ARTIF"], -1.0, -v_actLevl_lo_floor(l0, param("LUC_ARTIF_FLOOR")) + 1e-9 * max(1.0, l0),
+                "artificial_land_floor")
         if new_r:
             Aa = np.vstack([Aa] + new_r); ba = np.concatenate([ba, new_b])
         return Aa, ba
@@ -335,7 +340,7 @@ class LandBlock:
                     # CAPRI supply/define_manure_trade_costs.gms l. 66-71: p_manureBuyCostSlope = 50 / (GROF / 100), EUR
                     # 50 per t N for each 1% of the region's manure N supply traded. man0 is in t N (kg N per unit x
                     # 1000 units) and the objective in EUR 1000, so CAPRI's 50 is 0.05 here (supply.manure_pool_slope)
-                    slope = float(_settings().get("supply.manure_pool_slope")) / (man0 / 100.0)
+                    slope = p_manureBuyCostSlope(float(_settings().get("supply.manure_pool_slope")), man0)
                     # emission tax: the mineral N bought (export) or saved (import), sub x the accounts' soil N2O
                     # factor and the indirect N2O of its runoff and leaching per t N (kt CO2-eq x EUR/t = 1000 EUR);
                     # the NLP form takes exactly this term out again (_nlp_tax_terms), mineral N being endogenous there
@@ -384,7 +389,7 @@ class LandBlock:
                     grof = float(exc @ xb)
                     if grof <= 1e-6:
                         continue
-                    slope_k = float(_settings().get("supply.manure_pool_slope")) / (grof / 100.0)
+                    slope_k = p_manureBuyCostSlope(float(_settings().get("supply.manure_pool_slope")), grof)
                     pp_k = float((getattr(self.seen, "manure_pool_price_pk", None) or {}).get(nut, 0.0) or 0.0)
                     tt_k = self._manure_trade_terms({"P": "MANP", "K": "MANK"}[nut])
                     cols_k = []

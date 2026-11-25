@@ -1,5 +1,6 @@
-"""The population of the Aglink load's macro data p_aglinkMacro(region, "INHA", year) (baseline/load_aglink2023dgAgri.gms
-l. 905-1068), which CAPTRD's long-run supports put on p_data (captrd/longrun_supports.gms l. 362-389).
+"""The population of the Aglink load's macro data p_aglinkMacro(region, "INHA", year)
+(baseline/load_aglink2023dgAgri.gms l. 905-1068), which CAPTRD's long-run supports put on p_data
+(captrd/longrun_supports.gms l. 362-389).
 
 In GAMS's order (line numbers of load_aglink2023dgAgri.gms):
   l. 965         the GLOBIOM countries' population of 2000: SSP2 (IIASA)
@@ -18,12 +19,18 @@ And longrun_supports.gms l. 368-389: INHA.LEVL p_data of the years after BAST = 
 p_aglinkMacro("BAS") x BASM; where none, the UN population (WorldPop) of the year over its base-year mean x BASM
 (the long-run sources' INHA and p_globiomTightLink, l. 371-376, add nothing: the first is empty in the reference run,
 the second zero for the ex-ante years, captrd.gms l. 317).
+
+CAPRI's GAMS statements are quoted by the functions that compute them, in
+capri_mod/pipeline/captrd/equations/load_aglink2023dgAgri.py and longrun_supports.py.
 """
 from __future__ import annotations
 
 import csv
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
+
+from capri_mod.pipeline.captrd.equations import load_aglink2023dgAgri as GE
+from capri_mod.pipeline.captrd.equations import longrun_supports as LS
 
 #: l. 965, 984: the base year of the growth factors
 B2000 = 2000
@@ -88,24 +95,25 @@ def inha(sets, macro_eu: Dict[Tuple[str, str, int], float], ssp: Dict[tuple, flo
         else:
             P.pop(k, None)
     for c in gc:                                                                    # l. 965
-        put((c, B2000), sp(c, B2000))
+        put((c, B2000), GE.p_SSPAglink_INHA_2000(sp(c, B2000)))
     for c in gc_taw:                                                                # l. 982-985
         for y in ag_years:
             if not P.get((c, y)):
-                s = sum(aglink_pop.get((a, y), 0.0) / aglink_pop[(a, B2000)]
-                        for f in g2f.get(c, []) for a in f2ag.get(f, []) if aglink_pop.get((a, B2000)))
-                put((c, y), P.get((c, B2000), 0.0) * s)
+                put((c, y), GE.p_SSPAglink_INHA_agYears(P.get((c, B2000), 0.0), [
+                    (aglink_pop.get((a, y), 0.0), aglink_pop[(a, B2000)])
+                    for f in g2f.get(c, []) for a in f2ag.get(f, []) if aglink_pop.get((a, B2000))]))
     for c in gc:                                                                    # l. 994-997
         for y in ag_years:
             if not P.get((c, y)):
-                s = sum(macro_eu.get((k, "POP", y), 0.0) / macro_eu[(k, "POP", B2000)]
-                        for f in g2f.get(c, []) for k in f2ctr.get(f, []) if macro_eu.get((k, "POP", B2000)))
-                put((c, y), P.get((c, B2000), 0.0) * s)
+                put((c, y), GE.p_SSPAglink_INHA_agYears(P.get((c, B2000), 0.0), [
+                    (macro_eu.get((k, "POP", y), 0.0), macro_eu[(k, "POP", B2000)])
+                    for f in g2f.get(c, []) for k in f2ctr.get(f, []) if macro_eu.get((k, "POP", B2000))]))
     for c in gc:                                                                    # l. 1006-1009
         if sp(c, lst_dgagri):
             for y in years:
                 if y > lst_dgagri:
-                    put((c, y), P.get((c, lst_dgagri), 0.0) * sp(c, y) / sp(c, lst_dgagri))
+                    put((c, y), GE.p_SSPAglink_INHA_after_lst_dgagri(P.get((c, lst_dgagri), 0.0), sp(c, y),
+                                                                     sp(c, lst_dgagri)))
     sspy = list(range(SSP_FIRST, SSP_LAST + 1, SSP_STEP))
     for i, s in enumerate(sspy[:-1]):                                               # l. 1038-1046
         if s >= last_sim_year:
@@ -115,23 +123,23 @@ def inha(sets, macro_eu: Dict[Tuple[str, str, int], float], ssp: Dict[tuple, flo
             if any(P.get((c, t)) for t in sspy):
                 for y in years:
                     if s < y < nxt:
-                        put((c, y), P.get((c, s), 0.0) + (y - s) * (P.get((c, nxt), 0.0) - P.get((c, s), 0.0))
-                            / (nxt - s))
+                        put((c, y), GE.p_SSPAglink_interpolated(P.get((c, s), 0.0), P.get((c, nxt), 0.0), s, nxt, y))
     f2r: Dict[str, List[str]] = {}
     for r, f in fao_map:
         f2r.setdefault(f, []).append(r)
-    out: Dict[Tuple[str, object], float] = {}
+    acc: Dict[Tuple[str, object], List[float]] = {}
     for c in gc_taw:                                                                # l. 1051-1052
         for f in g2f.get(c, []):
             for r in f2r.get(f, []):
                 for (cc, y), v in P.items():
                     if cc == c:
-                        out[(r, y)] = out.get((r, y), 0.0) + v
+                        acc.setdefault((r, y), []).append(v)
+    out: Dict[Tuple[str, object], float] = {k: GE.p_aglinkMacro(vs) for k, vs in acc.items()}
     regs = {r for r, _ in out}
-    for r in regs:                                                                  # l. 1064-1067
+    for r in sorted(regs):                                                          # l. 1064-1067
         vals = [out[(r, y)] for y in range(base_year - 1, base_year + 2) if out.get((r, y))]
         if vals:
-            out[(r, "BAS")] = sum(vals) / len(vals)
+            out[(r, "BAS")] = GE.p_aglinkMacro_BAS(vals)
     return out
 
 
@@ -144,15 +152,15 @@ def inha_pdata(macro: Dict[Tuple[str, object], float], *, ms: Iterable[str], bas
     cur = set(years_cur)
     for r in ms:
         b, m0 = basm.get(r, 0.0), macro.get((r, "BAS"), 0.0)
-        for y in cur:
-            if y > bast_year and macro.get((r, y)) and m0 and b:
-                out[(r, y)] = macro[(r, y)] / m0 * b
+        for y in sorted(cur):
+            if y > bast_year and macro.get((r, y)) and m0 and b:                    # l. 368-376
+                out[(r, y)] = LS.P_Result_INHA_pdata(macro[(r, y)], m0, b)
     if world_pop is not None:                                                       # l. 386-389
         for r in ms:
             w0 = world_pop.get((basy, r), 0.0)
             for y in exante:
                 if not out.get((r, y)) and w0:
-                    v = basm.get(r, 0.0) * world_pop.get((y, r), 0.0) / w0
+                    v = LS.P_Result_INHA_pdata_WorldPop(basm.get(r, 0.0), world_pop.get((y, r), 0.0), w0)
                     if v:
                         out[(r, y)] = v
     return out

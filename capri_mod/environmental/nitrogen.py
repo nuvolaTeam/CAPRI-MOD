@@ -234,7 +234,8 @@ class NitrogenBlock:
           NITF), at most 95% of it, plus the straw left, which only the scenario's shifts move), as a change on the
           base coefficient, scaled as the base's (CAPRI's CRESID);
         - with a technology variant's yield factor tf (p_technFact(crop, yield, A), the mix columns'), CAPRI's rows on
-          top: e_EXPPRD and e_BIOFIX x (1 + tf) (p_technFact(crop, NITF, A), fert/fertned.gms l. 205-206), e_CRESID
+          top: e_EXPPRD and e_BIOFIX x (1 + tf) (p_technFact(crop, NITF, A), fert/fertned.gms l. 206-207:
+          supply/equations/fertned.py p_technFact_FNUT), e_CRESID
           the residues x (1 + tf) (p_technFact(crop, MANN, A): the part that is not deposition or mineralisation,
           l. 326-335; mineralisation not set in CAPRI's 2030 data: fertned.py DATA_FOUT_dep).
 
@@ -252,18 +253,20 @@ class NitrogenBlock:
             if d is None:
                 raise RuntimeError(f"no fertned arguments for {crop} in {region} (capri_crop_fertned_parts_2030.csv)")
             res = res + kr * d
-        tf = 1.0 + float(techn_fact or 0.0)
+        from capri_mod.supply.equations.fertned import p_technFact_FNUT
+        tf = p_technFact_FNUT(techn_fact)
         return rem * tf, res * tf, fix * tf
 
     def _base_mineral_rate(self, region, crop):
-        """Base mineral N per ha of a crop. environment.base_mineral_n "capri2030": CAPRI's 2030 reference, its inner
-        model's mineral flow per ha of the crop (fertDist_mine, npk_crop_coefs_2030.csv; the region's sum is CAPRI's
-        purchases), 0 where CAPRI's reference has no flow; "capri2017": CAPRI's regional 2017 NMIN, none where CAPRI has
-        none (fallow, set-aside: CAPRI's 2017 results carry no NMIN for FALL, VSET, SETA; K100)."""
-        if str(_settings().get("environment.base_mineral_n")) == "capri2030":
-            t30 = self._mineral_2030()
-            if region in t30:
-                return float(t30[region].get(crop, 0.0))
+        """Base mineral N per ha of a crop: CAPRI's 2030 reference, its inner model's mineral flow per ha of the crop
+        (fertDist_mine, npk_crop_coefs_2030.csv; the region's sum is CAPRI's purchases), 0 where CAPRI's reference has
+        no flow; a region outside that table takes CAPRI's regional 2017 NMIN, none where CAPRI has none (fallow,
+        set-aside: CAPRI's 2017 results carry no NMIN for FALL, VSET, SETA; K100). The setting that chose the 2017 NMIN
+        for every region (environment.base_mineral_n "capri2017", the base until 14 November 2026) was retired on
+        23 November 2026."""
+        t30 = self._mineral_2030()
+        if region in t30:
+            return float(t30[region].get(crop, 0.0))
         _regn = self._cached_row("mineral_n_regional", region)
         rate = None
         if _regn is not None and crop in _regn:
@@ -651,7 +654,8 @@ class NitrogenBlock:
         """CAPRI's inner fertiliser distribution model for one region (capri_mod.fert.inner_fert_dist): mineral N
         (the balance's), manure N applied (the balance's own manure plus imports, after endogenous trade and the
         herd adjustments) and the arable residue pool, distributed over CAPRI's crop groups; needs at CAPRI's base
-        per ha x area x CAPRI's need factor of the yield (NUTNED_, fert/fertned.gms; need_yield_factor). With the crop-specific mineral fertiliser reduction the
+        per ha x area x NUTNED_'s need factor of the yield (fert/fertned.gms's on DATA, need_yield_factor, the additive
+        part held: NUTNED_needYieldFactor). With the crop-specific mineral fertiliser reduction the
         "f2f" (mineral N) and "limCres" (residues) regulations apply. Rows: region, capri_region, ngrp, area_kha,
         mine/excr/cres kg_ha, mine_cap_kg_ha, cap_scale (> 1 where the accounts' mineral N exceeds the caps'
         capacity and the caps were scaled to report an allocation), converged. mode_crops: the crop areas CAPRI's
@@ -669,12 +673,19 @@ class NitrogenBlock:
             acts = acts.to_dict()
         crops = {c: float(acts.get(c, 0.0) or 0.0) for c in CROPS if float(acts.get(c, 0.0) or 0.0) > 0}
         _yb = self._cached_row("yields", region) or {}
+        # NUTNED_'s need factor of the yields: DATA(crop, NITF)'s, with v_cropNutNeedAddFact's part held (register
+        # DEP-10 item 1b; the regional model's block, fertilisation.py)
+        from capri_mod.fert.npk import NPKData
+        from capri_mod.supply.equations.supply_model.nutrients import NUTNED_needYieldFactor
+        _D = NPKData.get()
+        _cr = _D.capri_region(region)
         fac = {}
         for c in crops:
             y0 = float(_yb.get(c, 0.0) or 0.0)
             y = float(yields.get(c, y0) or 0.0) if hasattr(yields, "get") else y0
             ys = yields_scen.get(c) if hasattr(yields_scen, "get") else None
-            fac[c] = need_yield_factor(region, c, y0, y, None if ys is None else float(ys), "N") \
+            fac[c] = NUTNED_needYieldFactor(need_yield_factor(region, c, y0, y, None if ys is None else float(ys), "N"),
+                                            _D.crop_coef(_cr, "N", c, "add_share") if _cr is not None else 0.0) \
                 if (y0 > 0 and y > 0) else 1.0
         M = float(nb.get("n_mineral_input", 0.0))
         E = float(nb_raw.get("n_manure_applied", 0.0)) + float(nb.get("n_organic_input", 0.0)) \
@@ -739,7 +750,55 @@ class NitrogenBlock:
         nm = float((nmin or {}).get("NITR_INH", 0.0) or 0.0)
         s = min(s, 1.0)
         w = (s / (1.0 + nm)) / (s / (1.0 + nm) + 1.0 - s)
-        return {i: 1.0 - w + w * (1.0 - v) * (1.0 + nm) for i, v in lit.items()}
+        from capri_mod.supply.equations.ghgmiti import p_ghgMiti_othImpact_mitisyn       # ghgMiti.gms l. 552-555
+        return {i: p_ghgMiti_othImpact_mitisyn(v, nm, w) for i, v in lit.items()}
+
+    def urea_effect(self, region, supply_result, frac=False):
+        """(share, othImpact NH3SYN) of CAPRI's urea substitution in the supply result (urea_subst_option.csv, the
+        region's member state), (0, 0) without; with frac, the member state's urea share (p_fracUseFert Ureum) or None."""
+        v = getattr(supply_result, "urea_share", None)
+        if v is None and not frac:
+            return 0.0, 0.0
+        t = _inputs.current().cached(
+            "urea_subst_option", lambda inp: inp.csv("urea_subst_option.csv", "abatement/mitigation").set_index("ms"))
+        from capri_mod.data.definitions import capri_ms
+        ms = capri_ms(region)
+        if ms not in t.index:
+            return None if frac else (0.0, 0.0)
+        if frac:
+            return float(t.at[ms, "frac_urea"])
+        return float(v), float(t.at[ms, "nh3_othimpact"])
+
+    def legsh_effect(self, region, supply_result):
+        """(share, othImpact BioFix) of CAPRI's legume share in temporary grassland in the supply result
+        (legsh_option.csv, the region's member state's othImpact; envind/leg_share.gms), (0, 0) without."""
+        v = getattr(supply_result, "legsh_share", None)
+        if v is None:
+            return 0.0, 0.0
+        t = _inputs.current().cached(
+            "legsh_option", lambda inp: inp.csv("legsh_option.csv", "abatement/mitigation").set_index("region"))
+        if region not in t.index:
+            return 0.0, 0.0
+        return float(v), float(t.at[region, "othimpact_biofix"])
+
+    def till_effects(self, region, supply_result):
+        """The tillage options' effects at their initial shares and at the supply result's (envind/tillage.gms;
+        tillage_options.csv): {"n2o": (sum othImpact N2OSYN x share at the initial shares, now), "slea": (... no3slea
+        ...), "mlea": (... no3mlea ...)}, or None where the result has no tillage shares."""
+        sh = getattr(supply_result, "till_shares", None) or {}
+        if not sh:
+            return None
+        t = _inputs.current().cached(
+            "tillage_options", lambda inp: inp.csv("tillage_options.csv", "abatement/mitigation"))
+        rows = t[t["region"] == region]
+        out = {"n2o": [0.0, 0.0], "slea": [0.0, 0.0], "mlea": [0.0, 0.0]}
+        for r in rows.itertuples(index=False):
+            s1 = float(sh.get(str(r.technology), r.ini_share))
+            for k_, c_ in (("n2o", "n2osyn"), ("slea", "no3slea"), ("mlea", "no3mlea")):
+                v = float(getattr(r, c_))
+                out[k_][0] += v * float(r.ini_share)
+                out[k_][1] += v * s1
+        return {k_: tuple(v) for k_, v in out.items()}
 
     def _winter_cover_now(self, region, supply_result):
         """(base, current) winter cover share (CAPRI's v_Miti(CATC, WinterCov)): the 2030 catch-crop share and, under
@@ -846,6 +905,14 @@ class NitrogenBlock:
         L = _nl.share(rs, b_now, b_ini)
         if L is None:
             return None
+        # LEACHN_'s second factor, the tillage options (envind/tillage.gms l. 563-564): at their shares against the
+        # initial shares, CAPRI's ini run having them there (REGISTERED: both with the current input shares)
+        tl_ = self.till_effects(region, supply_result)
+        if tl_ is not None:
+            b2_now = _nf.LEACHN_B2(nmin_sh, nman_sh, tl_["slea"][1], tl_["mlea"][1])
+            b2_ini = _nf.LEACHN_B2(nmin_sh, nman_sh, tl_["slea"][0], tl_["mlea"][0])
+            if b2_ini > 0:
+                L = max(0.0, L * b2_now / b2_ini)
         comp = _nl.crop_n(M, nf["RunTot"], nf["GasRunTot"], nf["N2O"], [(n, r_, gr) for n, r_, gr, _ in an1],
                           -float(nb.get("n_manure_import", 0.0) or 0.0),
                           float(nb.get("n_crop_residues", 0.0) or 0.0) + float(nb.get("n_deposition", 0.0) or 0.0),

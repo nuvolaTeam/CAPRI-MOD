@@ -45,6 +45,12 @@ from capri_mod.data.definitions import (
 from capri_mod.data.definitions import MS_CODE, capri_ms, IdentityMap, is_eu
 from capri_mod.tableio import read_input
 from capri_mod.supply import inputs as _inputs
+from capri_mod.market.equations.set_prices import DATA_UVAG_Y
+from capri_mod.supply.equations.greendeal.landscape import DATA_FALL_FLOOR
+from capri_mod.supply.equations.greendeal.surptot import data_SURTOT_MAXS
+from capri_mod.supply.equations.set_supply_bounds import v_actLevl_up_FALL
+from capri_mod.supply.equations.ghgmiti import (
+    p_ghgMiti_othImpact_EmiCalmin, p_ghgMiti_pmpParsqr, p_ghgMiti_pmpParsqr_saving, p_ghgMiti_relSubs)
 
 
 # ---------------------------------------------------------------------------
@@ -282,6 +288,10 @@ class RegionData:
     #: plant_protection_capri_step_2030.csv, at the 2030 market year only (the comparison switches
     #: supply.greendeal_plap_crop_level_capri_step and supply.greendeal_plap_mix_capri_step, DEP-51)
     plap_capri_step: Optional[pd.DataFrame] = None
+    #: CAPRI's simulation-year input coefficients of 2030 (input_coefs_2030.csv, CAPRI's 2030 money; the 2030 market
+    #: year only): the crops' PLAP, INPO and top-up bases and yield-dependent parts at the member state's UVAP, the
+    #: animals' INPO yield factor (register DEP-21)
+    input_coefs_2030: Optional[pd.DataFrame] = None
     #: the simulation year (the projection's market year; None: the base year)
     sim_year: Optional[int] = None
     #: CAPRI's catch crops (catc_share_2030, catc_cost_eur_ha, biofix_t_n_ha) and winter cover shares by crop
@@ -343,13 +353,9 @@ class SupplyResult:
 # PMP CALIBRATION
 # ---------------------------------------------------------------------------
 
-def saving_slope(nme: float, value: float, m0: float, m1: float) -> float:
-    """CAPRI's saving term of a fertiliser option's curvature (envind/ghgMiti.gms l. 1016-1050): nmE x value x ((1 + nmE
-    m1)^-2 - (1 + nmE m0)^-2) / (m1 - m0), the N saved valued at its price (mineral N: the member state's unit value;
-    manure N: p_manureShadVal); 0 where it is not defined (m1 <= m0, or 1 + nmE m <= 0)."""
-    if not m1 > m0 or 1.0 + nme * m0 <= 0 or 1.0 + nme * m1 <= 0:
-        return 0.0
-    return nme * value * ((1.0 + nme * m1) ** -2 - (1.0 + nme * m0) ** -2) / (m1 - m0)
+#: CAPRI's saving term of a fertiliser option's curvature, (nmE, value, m0, m1) (envind/ghgMiti.gms l. 1029-1045;
+#: capri_mod/supply/equations/ghgmiti.py p_ghgMiti_pmpParsqr_saving; the mixins call it by this name)
+saving_slope = p_ghgMiti_pmpParsqr_saving
 
 
 class PMPCalibrator:
@@ -578,6 +584,14 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                    "res.last_hist_fallow", "res.last_mix_z", "res.last_npk", "ev.last_req_duals",
                    "ev.manure_ni_nh3", "ev.manure_ni_relief", "res.manure_tech_shares", "ev.price_shock_now",
                    "sv.wc_solved", "seen.feed_rations", "sv.n_relax_sticky")
+    #: a solve's outputs the coupling reads from the model itself after the supply side (not from the solve's result):
+    #: the manure pools' columns, bounds and vectors and the manure value (coupling/manure.py). The market supply
+    #: Hessian restores them after its shocks too (24 November 2026, KNOWN_ISSUES K198): its last shock's manure value
+    #: was left for the baseline's manure pool market, so a run that measured the Hessian ended its baseline about
+    #: 1e-12 from one that read it from the cache (1e-5 after the Green Deal scenario). Not inputs of a solve: restoring
+    #: them before each shock leaves the shocks as they were
+    COUPLING_READS = ("res.manure_value", "res.pool_manure_vec", "res.pool_manure_vec_pk", "res.pool_manure_x0",
+                      "ev.pool_cols", "ev.pool_cols_pk", "ev.pool_lb")
     #: the regional NLP's fields (warm starts, calibration, fallbacks and their diagnostics): what the market supply
     #: Hessian restored by the prefix "_nlp" until 2 November 2026 (the refactor of the supply's parameters and state: the same set, declared). An
     #: entry is an attribute name or, for a field moved into the state objects, its path ("sv.nlp_prev"; both
@@ -619,7 +633,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         ps = price_shock.copy()
         for (a, c), f in t.items():
             if a == c and a in ps.index and a in CROPS:
-                ps[a] = float(ps[a]) * float(f)
+                ps[a] = DATA_UVAG_Y(float(ps[a]), float(f))           # set_prices.gms l. 44-47
         return ps
 
     def _market_revenue_change(self, act, mrev, price_shock) -> float:
@@ -1196,12 +1210,12 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 # has none (_capri_ms_targets). The requested share scales the
                 # ambition exactly as CAPRI's lndscpTarg does (10% = full).
                 _seta0 = sum(float(self._base_levels().get(a, 0.0)) for a in _seta_acts)   # CAPRI's SETF
-                floor = (set_aside_requirement / 0.10) * (_pp / 100.0) * uaa_total + _seta0
+                floor = DATA_FALL_FLOOR(set_aside_requirement, _pp, uaa_total, _seta0)   # pol_input/greendeal/landscape.gms
             else:
                 floor = set_aside_requirement * uaa_total
             self.ev.fall_floor = float(floor)
             if floor > 0:
-                _fall_up = self.FALL_FLOOR_UP_SHARE * _n_techn("FALL") * uaa_total
+                _fall_up = v_actLevl_up_FALL(self.FALL_FLOOR_UP_SHARE, _n_techn("FALL"), uaa_total)
             # CAPRI's e_setaLandscape (equations/supply_model/set_aside.py)
             from capri_mod.supply.equations.supply_model.set_aside import e_setaLandscape
             row_seta, b_seta = e_setaLandscape(n, acts_idx, _seta_acts, floor)
@@ -1587,6 +1601,10 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         self.ev.yield_price_factor = {}
         res.organic_conv = dict(getattr(self.ev, "organic_conv", {}) or {})   # conventional share per crop (accounts: organic area)
         res.fert_tech_shares = dict(getattr(self.res, "fert_tech_shares", {}) or {})   # before the reset below
+        res.till_shares = dict(getattr(self.res, "till_shares", {}) or {})             # the tillage options' shares
+        res.urea_share = getattr(self.res, "urea_share", None)                         # the urea substitution's share
+        res.legsh_share = getattr(self.res, "legsh_share", None)                       # the legume share's share
+        res.supp_fat = getattr(self.res, "supp_fat", None)                             # the ration fat limit
         # IPOPT's last point kept on the last attempt (non-optimal, as CAPRI; _nlp_last_point): IPOPT's status, else None
         res.nlp_nonoptimal = getattr(self.res, "nlp_nonoptimal", None)
         # CAPRI's crop-group allocation as the regional model solved it (inner model at its totals, or the coupled NLP)
@@ -1598,6 +1616,10 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             res.fert_dist_mode_crops = None
         self.ev.n_intensity = {}
         self.res.fert_tech_shares = {}
+        self.res.till_shares = {}
+        self.res.urea_share = None
+        self.res.legsh_share = None
+        self.res.supp_fat = None
         res.balance_shortfall = float(getattr(self, "balance_shortfall", 0.0))
         self.balance_shortfall = 0.0
         return res
@@ -2322,9 +2344,10 @@ class SupplyModule(ModuleStateMixin):
         """Activities of the region held at their level: those of the parts calibrated with PMP terms (pmp_capri_parts:
         crops, animals) without a positive own term at the calibration point, and those without any CAPRI value (no
         elasticity, no term: OOIL, OIND in every member state). CAPRI calibrates every activity with a level; where
-        its calibration has no term for an activity of the model region (its level there zero or negligible: tobacco,
-        pulses in the Netherlands, durum wheat at 2030, 71 cells and at most 2% of an activity's EU level, r166), the
-        activity is held, as CAPRI holds what it does not calibrate. Until 28 October 2026 those cells took a curvature
+        its calibration has no term for an activity of the model region, the activity is held. At the 2030 market year
+        all such cells are at 0, as CAPRI's, where they have no level and no yield at "Y" and stay at 0 in its reference
+        and Green Deal runs (register DEP-23, closed 23 November 2026; capri_mod/tests/test_pmp_held_cells.py; in the run
+        of 28 October, r166, 71 cells still had a level, at most 2% of an activity's EU level). Until 28 October 2026 those cells took a curvature
         from their CAPRI elasticity (the elasticity calibration; the supply audit's finding S13, ARCHITECTURE_REFACTOR.md section 5.2)."""
         pmp = self._pmp_terms_for(d, region) or {}
         parts = tuple(getattr(self, "pmp_capri_parts", ()))
@@ -2447,6 +2470,8 @@ class SupplyModule(ModuleStateMixin):
             input_costs_ha=(d.get("plant_protection_cost") or {}).get(region),
             plap_capri_step=((d.get("plant_protection_capri_step") or {}).get(region)
                              if _inputs.market_year(d) == 2030 else None),
+            input_coefs_2030=((d.get("input_coefs_2030") or {}).get(region)
+                              if _inputs.market_year(d) == 2030 else None),
             sim_year=(int(d["market_year"]) if d.get("market_year") else None),
             cover_crops=(d["cover_crops"].loc[region] if d.get("cover_crops") is not None
                          and region in d["cover_crops"].index else None),
@@ -2589,9 +2614,9 @@ class SupplyModule(ModuleStateMixin):
                     continue
                 out.append((name, nmin, rs0 * k1, slope, s0, smax))
             else:
-                rs1, rs0 = ((param("MITI_RELSUBS1_ADOPTED"), 0.0) if (smax < 1.0 and name != "NITR_INH")
-                            else (param("MITI_RELSUBS1"), param("MITI_RELSUBS0")))
-                slope = k1 * (rs1 - rs0) / (smax - s0)
+                rs1, rs0 = p_ghgMiti_relSubs(smax, name == "NITR_INH", param("MITI_RELSUBS1"), param("MITI_RELSUBS0"),
+                                             param("MITI_RELSUBS1_ADOPTED"))
+                slope = p_ghgMiti_pmpParsqr(k1, rs1, rs0, smax, s0)
                 if getattr(type(self), "fert_slope_with_saving", True):
                     # CAPRI's pmpParSqr (envind/ghgMiti.gms l. 1016-1035, the 'alternative approach'): the FOC is zero
                     # at the initial and the maximum share with the fertiliser saving valued at the member state's
@@ -2634,9 +2659,9 @@ class SupplyModule(ModuleStateMixin):
         if not g:
             return 0.0
         L = _nf.netf(g, float(g.get("run_surf", 0.0)))
-        v = (L["NH3"] * (sv["NH3SYN"] or 0.0) + L["NOX"] * (sv["NOXSYN"] or 0.0) + L["N2O"] * (sv["N2OSYN"] or 0.0)
-             + L["RunTot"] * (sv["NO3SRUN"] or 0.0))
-        return (abs(v) ** param("P_FERT_EFF_COR")) * (1.0 if v >= 0 else -1.0) if v else 0.0
+        return p_ghgMiti_othImpact_EmiCalmin([L["NH3"], L["NOX"], L["N2O"], L["RunTot"]],
+                                             [sv["NH3SYN"], sv["NOXSYN"], sv["N2OSYN"], sv["NO3SRUN"]],
+                                             param("P_FERT_EFF_COR"))
 
     def _manure_per_head(self, region, model):
         """Manure N per activity unit of the region's animals ({animal: the environmental module's organic N input
@@ -3089,7 +3114,8 @@ class SupplyModule(ModuleStateMixin):
                     if bc is not None and sp is not None and sp > 0 and _rule == "star3":
                         # CAPRI star 3.0 surptot.gms: data(srnuts2,"SURTOT","MAXS") = baseline surplus per ha
                         # x (1 - surpRedu/100), every EU NUTS2 region alike (relaxations only from 2090)
-                        target = sp * (1.0 - float(0.5 if policy_scenario.get("surplus_cut") is None else policy_scenario["surplus_cut"]))
+                        target = data_SURTOT_MAXS(sp, float(0.5 if policy_scenario.get("surplus_cut") is None
+                                                            else policy_scenario["surplus_cut"]))
                         surplus_row = (bc[0], target, bc[1], bc[2],
                                        self.data["yields"].loc[region],
                                        self._fert_techs(region),
@@ -3389,6 +3415,8 @@ class SupplyModule(ModuleStateMixin):
         from concurrent.futures import ProcessPoolExecutor
         from concurrent.futures.process import BrokenProcessPool
         done = set()
+        import capri_mod as _cm
+        _cm.warn_if_threads_late()           # NumPy loaded before the thread limits (capri_mod/__init__.py)
         pool = ProcessPoolExecutor(nw, mp_context=multiprocessing.get_context("fork"))
         broken = False
         try:

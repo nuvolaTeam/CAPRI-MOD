@@ -243,6 +243,16 @@ def e_BIOFIX(v_actLevl, BioFix, yldFac):
     return v_actLevl * BioFix * yldFac
 
 
+def e_BIOFIX_legSh(BIOFIX_OFAR, othImpact_BioFix, v_Miti):
+    r"""e_BIOFIX's legume share term (l. 1456-1457) for other arable fodder, t N: its fixation at v = 0 x othImpact x v,
+    BIOFIX_OFAR = sum over OFAR's technologies of v_actLevl x DATA(NITF) x (1 + p_technFact(NITF, A)) x BioFix
+    (e_BIOFIX above), othImpact the member state's (equations/leg_share.py othImpact_BioFix_LegSh), v = v_Miti(OFAR,
+    LegSh, BioFix). In the N-surplus row and the accounts' fixation.
+
+    CAPRI's GAMS of e_BIOFIX: e_BIOFIX's docstring. Departures from CAPRI: none."""
+    return BIOFIX_OFAR * othImpact_BioFix * v_Miti
+
+
 def nminInputSh_den(nminKept, ManureNPK, MANN, N2O):
     r"""The N input to the soil that nminInputSh_ and nmanInputSh_ (l. 1789-1851) share out (t N): the mineral N kept
     (-v_netPutQuant(NITF) x (1 - v_emiLoss(NETF, N, GasRunTot))), the manure applied (v_ManureNPK(NITF)), the crops'

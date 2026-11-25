@@ -3,8 +3,9 @@ sources (biofuel trends, DG AGRI's dairy data, Eurostat's recent production, nat
 projections) are separate stages. Each support is an absolute value with a trust level, p_ExpertSupprt(region, col,
 row, year, "Absolute" | "TrustLevl"), for the ex-ante years.
 
-In GAMS's order (line numbers of expert_support.gms):
-  l. 51-52    fresh milk products' net trade NTRD.FRMI: 0.1 (trust 10)
+In GAMS's order (line numbers of expert_support.gms; each statement's arithmetic is a named function quoting its GAMS
+in capri_mod/pipeline/captrd/equations/expert_support.py):
+  l. 53-54    fresh milk products' net trade NTRD.FRMI: 0.1 (trust 10)
   l. 64-104   sugar, for the EU's member states (MS without msNoEU): white sugar's price UVAG.SUGA 404.4 from 2009
               (trust 10); sugar beet's price UVAG.SUGB 26.29 + 75.94 x the molasses yield PRCY.MOLA's support x 0.5
               (trust 10); the beet and sugar balance positions IMPT, FEDM, LOSM, EXPT of SUGB and FEDM, LOSM of SUGA at
@@ -27,34 +28,10 @@ from __future__ import annotations
 
 from typing import Dict, Iterable, List, Sequence, Tuple
 
-import pandas as pd
+from capri_mod.pipeline.captrd.equations import expert_support as XE
 
-#: l. 51-52
-FRMI_NTRD = 0.1
-TRUST_FRMI = 10.0
-#: l. 64-73: white sugar's price from 2009 (EUR/t)
-SUGA_PRICE = 404.4
+#: l. 70-73, 83-86: the sugar prices' supports from this year
 SUGAR_FROM = 2009
-#: l. 74-86: beet price = 26.29 + 75.94 x molasses yield x 0.5 (EUR/t)
-SUGB_PRICE = 26.29
-MOLA_PRICE = 75.94
-MOLA_SHARE = 0.5
-TRUST_SUGAR_PRICE = 10.0
-TRUST_SUGAR_BALANCE = 8.0
-#: l. 145-171: the nutrient trend's horizon, convergence factor and trust levels
-NUTRIENT_HORIZON = 2050
-CONVERGENCE = 4.0
-TRUST_NUTRIENT = 10.0
-TRUST_FAT = 7.0
-#: l. 216: share of HFCS allocated by maize production (the rest by sugar consumption)
-HFCS_PROD_SHARE = 0.5
-TRUST_PRCI = 9.0
-INDM_OVER_PRCI = 1.05
-TRUST_INDM = 5.0
-#: l. 299-322
-TRUST_UAAR = 10.0
-TRUST_SLGW = 8.0
-TRUST_SGMI = 5.0
 
 
 def rules(*, ms: Sequence[str], ms_no_eu: Iterable[str], exante: Sequence[int], bas_year: int,
@@ -82,50 +59,47 @@ def rules(*, ms: Sequence[str], ms_no_eu: Iterable[str], exante: Sequence[int], 
 
     def tr(r, c, w, y):
         return E.get((r, c, w, y), [0.0, 0.0])[1]
-    for m in ms:                                                           # l. 51-52
+    for m in ms:                                                           # l. 53-54
         for y in ex:
-            put(m, "NTRD", "FRMI", y, FRMI_NTRD, TRUST_FRMI)
+            put(m, "NTRD", "FRMI", y, XE.p_ExpertSupprt_NTRD_FRMI(), XE.p_ExpertSupprt_NTRD_FRMI_trustlevl())
     no_eu = set(ms_no_eu)
     for m in [x for x in ms if x not in no_eu]:                            # l. 64-104
         for y in ex:
             if int(y) >= SUGAR_FROM:
-                put(m, "UVAG", "SUGA", y, SUGA_PRICE, TRUST_SUGAR_PRICE)
-                put(m, "UVAG", "SUGB", y, SUGB_PRICE + MOLA_PRICE * support.get((m, "PRCY", "MOLA", y), 0.0) * MOLA_SHARE,
-                    TRUST_SUGAR_PRICE)
+                put(m, "UVAG", "SUGA", y, XE.p_ExpertSupprt_uvag_suga(), XE.p_ExpertSupprt_uvag_trustlevl())
+                put(m, "UVAG", "SUGB", y, XE.p_ExpertSupprt_uvag_sugb(support.get((m, "PRCY", "MOLA", y), 0.0)),
+                    XE.p_ExpertSupprt_uvag_trustlevl())
         for y in ex:
             for c, w, cond in (("IMPT", "SUGB", ("DOMM", "SUGB")), ("FEDM", "SUGB", ("DOMM", "SUGB")),
                                ("LOSM", "SUGB", ("DOMM", "SUGB")), ("EXPT", "SUGB", ("GROF", "SUGB")),
                                ("FEDM", "SUGA", ("DOMM", "SUGA")), ("LOSM", "SUGA", ("DOMM", "SUGA"))):
                 if basm.get((m, *cond), 0.0):
-                    put(m, c, w, y, basm.get((m, c, w), 0.0))
+                    put(m, c, w, y, XE.p_ExpertSupprt_sugar_balance(basm.get((m, c, w), 0.0)))
         for y in ex:
             for c, w in (("IMPT", "SUGB"), ("FEDM", "SUGB"), ("LOSM", "SUGB"), ("EXPT", "SUGB"), ("FEDM", "SUGA"),
                          ("LOSM", "SUGA")):
                 if ab(m, c, w, y):
-                    put(m, c, w, y, t=TRUST_SUGAR_BALANCE)
-    # l. 132-176: nutrient intake
+                    put(m, c, w, y, t=XE.p_ExpertSupprt_sugar_balance_trustLevl())
+    # l. 164-198: nutrient intake
     ncnc = list(ncnc)
 
     def mean(m, n, centre):
         yrs = [str(y) for y in (centre - 1, centre, centre + 1)]
-        num = sum(pdata_years.get((m, n, "INCE", y), 0.0) for y in yrs)
-        k = sum(1 for y in yrs if pdata_years.get((m, n, "INCE", y), 0.0))
-        return num / k if k else 0.0
+        return XE.p_nutrientEU_mean([pdata_years.get((m, n, "INCE", y), 0.0) for y in yrs])
     for n in ncnc:
         m00 = {m: mean(m, n, 2000) for m in ms}
         m10 = {m: mean(m, n, 2010) for m in ms}
-        eu00, eu10 = sum(m00.values()) / len(ms), sum(m10.values()) / len(ms)
-        inc = (eu10 - eu00) / 10 if eu00 else 0.0
+        eu00, eu10 = XE.p_nutrientEU_EU(list(m00.values()), len(ms)), XE.p_nutrientEU_EU(list(m10.values()), len(ms))
+        inc = XE.p_nutrientEU_increase(eu10, eu00) if eu00 else 0.0
         for m in ms:
             b = basm.get((m, n, "INCE"), 0.0)
             if not b:
                 continue
             for y in ex:
-                t = min(NUTRIENT_HORIZON, int(y)) - bas_year
-                v = b + inc * t * (1 - 0.5 * t / (NUTRIENT_HORIZON - bas_year)) * (1 + CONVERGENCE * (eu10 - b) / eu10)
+                v = XE.p_ExpertSupprt_INCE(b, inc, int(y), bas_year, eu10)
                 put(m, n, "INCE", y, v)
                 if v:
-                    put(m, n, "INCE", y, t=TRUST_FAT if n == "N_FAT" else TRUST_NUTRIENT)
+                    put(m, n, "INCE", y, t=XE.p_ExpertSupprt_INCE_trustLevl(n == "N_FAT"))
     # l. 206-250: isoglucose
     aggs = list(europ_aggs)
     m2a: Dict[str, List[str]] = {}
@@ -140,16 +114,18 @@ def rules(*, ms: Sequence[str], ms_no_eu: Iterable[str], exante: Sequence[int], 
     for r in list(ms) + aggs:
         for y in ex:
             hcos = dgagri.get((r, "HCOS", "HFCS", y), 0.0)
-            prci[(r, y)] = (dgagri1.get((r, "HCOM", "SUGA", y), 0.0) * coef_hfcs["SUGA"] * hcos / (1 - hcos)
-                            * dgagri.get((r, "S1COM", "HFCS", y), 0.0) / coef_hfcs["MAIZ"])
+            prci[(r, y)] = XE.P_Result_PRCI_MAIZ_DGAgri1(dgagri1.get((r, "HCOM", "SUGA", y), 0.0), coef_hfcs["SUGA"],
+                                                         hcos, dgagri.get((r, "S1COM", "HFCS", y), 0.0),
+                                                         coef_hfcs["MAIZ"])
+    prod = XE.p_coefHFCS_PROD()                                         # l. 222
 
-    def alloc(m, y, base):
-        tot = sum(prci.get((a, y), 0.0) for a in m2a.get(m, []))
+    def alloc(m, y, base):                                              # l. 224-248
         peers = [m1 for a in m2a.get(m, []) for m1 in a2m.get(a, [])]
-        dg = sum(base.get((m1, "GROF", "MAIZ"), 0.0) for m1 in peers)
-        ds = sum(base.get((m1, "HCOM", "SUGA"), 0.0) for m1 in peers)
-        g, s_ = base.get((m, "GROF", "MAIZ"), 0.0), base.get((m, "HCOM", "SUGA"), 0.0)
-        return tot * (HFCS_PROD_SHARE * (g / dg if dg else 0.0) + (1 - HFCS_PROD_SHARE) * (s_ / ds if ds else 0.0))
+        return XE.p_ExpertSupprt_PRCI_MAIZ([prci.get((a, y), 0.0) for a in m2a.get(m, [])], prod,
+                                           base.get((m, "GROF", "MAIZ"), 0.0),
+                                           [base.get((m1, "GROF", "MAIZ"), 0.0) for m1 in peers],
+                                           base.get((m, "HCOM", "SUGA"), 0.0),
+                                           [base.get((m1, "HCOM", "SUGA"), 0.0) for m1 in peers])
     for m in ms:
         if not m2a.get(m):
             continue
@@ -161,18 +137,19 @@ def rules(*, ms: Sequence[str], ms_no_eu: Iterable[str], exante: Sequence[int], 
     for m in ms:
         for y in ex:
             if ab(m, "PRCI", "MAIZ", y):
-                put(m, "PRCI", "MAIZ", y, t=TRUST_PRCI)
+                put(m, "PRCI", "MAIZ", y, t=XE.p_ExpertSupprt_PRCI_MAIZ_trustLevl())
                 if not support.get((m, "INDM", "MAIZ", y), 0.0):
-                    put(m, "INDM", "MAIZ", y, INDM_OVER_PRCI * ab(m, "PRCI", "MAIZ", y))
+                    put(m, "INDM", "MAIZ", y, XE.p_ExpertSupprt_INDM_MAIZ(ab(m, "PRCI", "MAIZ", y)))
             if ab(m, "INDM", "MAIZ", y):
-                put(m, "INDM", "MAIZ", y, t=TRUST_INDM)
-    # l. 299-322
+                put(m, "INDM", "MAIZ", y, t=XE.p_ExpertSupprt_INDM_MAIZ_trustLevl())
+    # l. 310-338
     for m in ms:
         for y in ex:
-            for c, w, trust in [("UAAR", "LEVL", TRUST_UAAR)] + [(b, "SLGW", TRUST_SLGW) for b in breed_act] \
-                    + [("SHGM", "SGMI", TRUST_SGMI)]:
+            for c, w, trust in [("UAAR", "LEVL", XE.p_ExpertSupprt_UAAR_TRustlevl)] \
+                    + [(b, "SLGW", XE.p_ExpertSupprt_SLGW_TRustlevl) for b in breed_act] \
+                    + [("SHGM", "SGMI", XE.p_ExpertSupprt_SGMI_TRustlevl)]:
                 if not ab(m, c, w, y):
-                    put(m, c, w, y, support.get((m, c, w, y), 0.0))
+                    put(m, c, w, y, XE.p_ExpertSupprt_from_Support(support.get((m, c, w, y), 0.0)))
                 if ab(m, c, w, y) and not tr(m, c, w, y):
-                    put(m, c, w, y, t=trust)
+                    put(m, c, w, y, t=trust())
     return {k: (v[0], v[1]) for k, v in E.items() if v[0] or v[1]}

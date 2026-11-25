@@ -217,10 +217,13 @@ def O_HP_yieldGrowth(O_HP_BAS: float, p_yieldGrowth: float) -> float:
     In this project's notation O_HP(y) = O_HP_BAS x y / y_BAS. The model applies it to its own base, the simulation
     year's O_HP at CAPRI's 2030 reference yield y0 (O_HP above: the year's yield), with p_yieldGrowth = y / y0.
 
-    Departure from CAPRI (not ported, small): CAPRI's base here is the base period's O_HP and yield ("BAS"), whose ratio
-    in sim_ini_21730 is 1 within 0.3% (median 1.000, 10th-90th percentile 0.997-1.003, 12,750 crop rows); after the
-    scenario's yield shifts capmod/def_fert_and_requirements.gms l. 126 zeroes O_HP and fertned rebuilds it from the
-    shifted yield itself (O_HP above), so the ratio enters only CAPRI's price-driven yield updates."""
+    CAPRI's base here is the base period's O_HP and yield ("BAS"); after the scenario's yield shifts
+    capmod/def_fert_and_requirements.gms l. 126 zeroes O_HP and fertned rebuilds it from the shifted yield itself (O_HP
+    above), so the base enters only CAPRI's price-driven yield updates. There it is the same: in sim_ini_21730's DATA at
+    "BAS" O_HP equals the main output's yield exactly in all 7,312 region x crop rows of capri_crop_fertned_parts_2030.csv
+    with a base level (checked 23 November 2026, KNOWN_ISSUES K189; the rows off 1 are animals' O_HP). The other 128
+    rows, new energy crops (NECR) without a base level, have no price-driven yield in CAPRI (supply/yield_elas.gms
+    l. 30-37: cereals, oilseeds and potatoes) nor in the model. So O_HP(BAS) x y / y(BAS) = y, the model's O_HP."""
     return float(O_HP_BAS or 0.0) * float(p_yieldGrowth or 0.0)
 
 
@@ -324,3 +327,18 @@ def DATA_FNUT(need_data: float, O_HP: float) -> float:
     Departures from CAPRI: none in the rule; the need itself is CAPRI's reported 2030 value (its yield response is the
     NLP's: capri_mod/fert/npk.py, yield_shares)."""
     return float(need_data) if float(O_HP or 0.0) > 0.0 else 0.0
+
+
+def p_technFact_FNUT(techn_fact):
+    r"""p_technFact(RS, crop, FNUT, A): a technology variant's factor on the crop's nutrient rows (removal, fixation,
+    residues: e_EXPPRD, e_BIOFIX, e_CRESID), its yield factor's p_technFact(crop, yield, A) as 1 + tf, tf the variant's
+    relative change of the yield (the technology mix columns', 0 for the default variant).
+
+    CAPRI's GAMS (fert/fertned.gms l. 206-207):
+
+           p_technFact(RS,%pacts%,FNUT,A) $ p_technFact(RS,%pacts%,"LEVL",A)
+                = SUM(PACT_TO_Y(%pacts%,curRows), p_technFact(RS,%pacts%,curRows,A));
+
+    In this project's notation: the rows of variant A x (1 + tf_A). Departures from CAPRI: the SRNUTS1 fill of l. 213-214
+    (the NUTS1 regions without the factor) is not ported (the model's units carry their own)."""
+    return 1.0 + float(techn_fact or 0.0)

@@ -1,11 +1,5 @@
-"""Farm-income distribution module.
-
-Computes agricultural income by region and its distribution, combining market
-gross margin (from the supply module) with CAP payments (from the policy module).
-Answers the distributional questions CAP analysis turns on: how income is spread
-across regions, and how much of it comes from public support rather than the
-market.
-"""
+"""Farm income by region, as CAPRI's reports compute it (reports/welfare.gms ProfitAgr over the activities' MGVA),
+with the policy module's CAP payments reported beside it (capri_mod/income/income_module.py)."""
 from .income_module import IncomeDistributionModule, IncomeResult
 
 __all__ = ["IncomeDistributionModule", "IncomeResult"]

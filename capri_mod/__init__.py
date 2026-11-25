@@ -15,6 +15,42 @@ Structure mirrors the original GAMS-based CAPRI:
 Reference: Britz & Witzke (2012), CAPRI Model Documentation.
            https://www.capri-model.org
 """
+import os as _os
+import sys as _sys
+
+#: The BLAS and OpenMP thread limits, one thread per process unless the environment sets more (KNOWN_ISSUES K198).
+#: The regional solves fork one worker per core, and NumPy's and SciPy's OpenBLAS and the OpenMP runtime each start
+#: one thread per core in every worker: on 4 cores the workers ran 7-10 threads each and the run took about twice as
+#: long. The libraries read these variables when they load, so they are set here, before capri_mod imports NumPy;
+#: tools/run/'s scripts set them before their own imports.
+THREAD_LIMITS = ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS")
+
+
+_THREADS_LATE = False      # NumPy was loaded before the limits: warned once where the regional solves fork
+
+
+def _limit_threads():
+    global _THREADS_LATE
+    _THREADS_LATE = "numpy" in _sys.modules and "OPENBLAS_NUM_THREADS" not in _os.environ
+    for _v in THREAD_LIMITS:
+        _os.environ.setdefault(_v, "1")
+
+
+def warn_if_threads_late() -> None:
+    """Called where the regional solves fork their workers (supply_module.py): a process that imported NumPy before
+    capri_mod without the limits runs its BLAS on one thread per core in every worker. Once per process; a process
+    that forks no workers (a comparison script, a notebook reading results) is not warned."""
+    global _THREADS_LATE
+    if _THREADS_LATE:
+        _THREADS_LATE = False
+        import warnings
+        warnings.warn("NumPy was imported before capri_mod without OPENBLAS_NUM_THREADS: its BLAS keeps one thread per "
+                      "core in every regional-solve worker (slower runs). Set OPENBLAS_NUM_THREADS=1, "
+                      "OMP_NUM_THREADS=1 and MKL_NUM_THREADS=1 before starting Python, or import capri_mod first.",
+                      RuntimeWarning, stacklevel=2)
+
+
+_limit_threads()
 
 __version__ = "0.1.0"
 __all__ = ["CAPRIModel"]

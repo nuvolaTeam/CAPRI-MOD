@@ -28,12 +28,13 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from capri_mod.policy.equations.implement_bps import (
+    ord_bpsYear, p_bps_aiuv, p_bps_entitlements, p_bps_envelope, p_bps_envelopeOvershoot, p_bps_noConvergence,
+    p_bps_targetIUV, p_premData_ceilacv_MS, p_premData_ceillev, p_premDataE_ceilval, p_premDataE_ceilval_fill,
+    p_premDataE_pgsaps_linear, p_premDataE_pgsaps_lo, p_premDataE_pgsaps_lo_overshoot, p_premDataE_pgsaps_rest,
+    p_premDataE_pgsaps_rule30, rbpsLo, rbpsUp, rcur, ybpsPre)
 from capri_mod.supply import entitlements as _entl
 from capri_mod.supply import inputs as _inputs
-
-#: the 30% rule: an IUV above the average falls by at most 30% (implement_bps.gms l. 299-300)
-RULE_30_FLOOR = 0.70
-
 
 def _load(inp):
     def csv(name, where="policy"):
@@ -87,44 +88,42 @@ def _options(ms, b, d):
 
 
 def converge(ceil: dict, entl: dict, years, opts: dict) -> dict:
-    """{year: {unit: IUV}} of one BPS region (implement_bps.gms l. 196-326): ceil {year: {unit: million EUR}}, entl
-    {unit: entitlements}, opts the region's options."""
+    """{year: {unit: IUV}} of one BPS region (implement_bps.gms l. 196-326, the statements in
+    capri_mod/policy/equations/implement_bps.py): ceil {year: {unit: million EUR}}, entl {unit: entitlements}, opts the
+    region's options."""
     years = sorted(years)
-    pre = [y for y in years if y < opts["final"]]
-    units = [u for u in entl if entl[u]]
+    pre = ybpsPre(years, opts["final"])
+    units = rcur(entl, entl)
     out = {}
-    env = {y: sum(ceil[y].values()) for y in years}
-    tot_e = sum(entl.values())
-    aiuv = {y: env[y] * 1000.0 / tot_e if tot_e else 0.0 for y in years}
-    iuv0 = {y: {u: ceil[y].get(u, 0.0) * 1000.0 / entl[u] for u in units} for y in years}
+    env = {y: p_bps_envelope(ceil[y].values()) for y in years}
+    tot_e = p_bps_entitlements(entl.values())
+    aiuv = {y: p_bps_aiuv(env[y], tot_e) for y in years}
+    iuv0 = {y: {u: p_bps_noConvergence(ceil[y].get(u, 0.0), entl[u]) for u in units} for y in years}
     fin = opts["final"]
-    lo = [u for u in units if iuv0[fin][u] < aiuv[fin] * opts["target_share"]]
-    up = [u for u in units if iuv0[fin][u] > aiuv[fin]]
+    lo = [u for u in units if rbpsLo(iuv0[fin][u], p_bps_targetIUV(aiuv[fin], opts["target_share"]))]
+    up = [u for u in units if rbpsUp(iuv0[fin][u], aiuv[fin])]
     for y in years:
-        step = min(1.0, (y - 2014) / (1 + len(pre)))
-        target = aiuv[y] * opts["target_share"]
-        r = {u: iuv0[y][u] for u in units}
+        target = p_bps_targetIUV(aiuv[y], opts["target_share"])
+        r = {u: p_premDataE_pgsaps_rest(iuv0[y][u]) for u in units}
         for u in lo:
-            r[u] = iuv0[y][u] + (target - iuv0[y][u]) * opts["gap"] * step
+            r[u] = p_premDataE_pgsaps_lo(iuv0[y][u], target, opts["gap"], ord_bpsYear(y), len(pre))
 
         def overshoot():
-            return sum(entl[u] * r[u] / 1000.0 for u in units) - env[y]
+            return p_bps_envelopeOvershoot([entl[u] for u in units], [r[u] for u in units], env[y])
 
         if opts["linear"] and up:
-            den = sum(entl[u] * (iuv0[y][u] - aiuv[y]) / 1000.0 for u in up)
-            gap_up = sum(iuv0[y][u] - aiuv[y] for u in up)
-            f = (1.0 - overshoot() / den) if gap_up else 0.0
+            o = overshoot()
+            e_up, x_up = [entl[u] for u in up], [iuv0[y][u] for u in up]
             for u in up:
-                r[u] = aiuv[y] + (iuv0[y][u] - aiuv[y]) * f
+                r[u] = p_premDataE_pgsaps_linear(iuv0[y][u], aiuv[y], o, e_up, x_up)
         if opts["rule30"]:
             for u in up:
-                r[u] = max(r[u], iuv0[y][u] * RULE_30_FLOOR)
+                r[u] = p_premDataE_pgsaps_rule30(r[u], iuv0[y][u])
         if lo:
-            # implement_bps.gms l. 309: million EUR over thousand ha (a CAPRI bug kept as CAPRI computes it, K141)
-            e_lo = sum(entl[u] for u in lo)
             o = overshoot()
+            e_lo = [entl[u] for u in lo]
             for u in lo:
-                r[u] -= o / e_lo
+                r[u] = p_premDataE_pgsaps_lo_overshoot(r[u], o, e_lo)
         out[y] = r
     return out
 
@@ -148,22 +147,23 @@ def bps_rates(units, levels: dict, key: dict, year: int, d: dict = None, detail:
         if ms in saps or ms not in set(d["regions"].ms):
             continue
         entl = defaultdict(float)
-        for (u, a), v in levels.items():
-            if u in us and a in d["mcact"]:
-                entl[u] += v
+        for u in us:
+            lv = [v for (u_, a), v in levels.items() if u_ == u and a in d["mcact"]]
+            if lv:
+                entl[u] = p_premData_ceillev(lv)
         kms = {u: key.get(u, 0.0) for u in us}
         if not any(kms.values()):
             # no unit has MTR payments (Croatia: CAPRI's key for it is not found in the chain, KNOWN_ISSUES K142):
             # the entitlements as the key, a uniform IUV; for a member state of one unit CAPRI's result whatever its key
             kms = {u: entl[u] for u in us}
-        ksum = sum(kms.values())
+        ksum = p_premData_ceilacv_MS(kms.values())
         ceil = {}
         last = None
         for y in years:
             c = _entl.ms_ceilings(y, ent).get(ms, {}).get("dp_bps")
-            c = c if c else last
+            c = p_premDataE_ceilval_fill(c, last)
             last = c
-            ceil[y] = {u: kms[u] * c / ksum for u in us if kms.get(u) and ksum and c}
+            ceil[y] = {u: p_premDataE_ceilval(kms[u], c, ksum) for u in us if kms.get(u) and ksum and c}
         for b, bu in bps_regions(ms, us, d).items():
             conv = converge({y: {u: ceil[y].get(u, 0.0) for u in bu} for y in years}, {u: entl[u] for u in bu}, years,
                             _options(ms, b, d))
