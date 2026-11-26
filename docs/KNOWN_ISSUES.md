@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](dev/KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (20)
+## Open (19)
 
 | # | Issue | Status |
 |---|---|---|
@@ -32,12 +32,12 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K198](#k198) | The assignments refactor's findings for the main line (its inventory of the CAPRI statements the model ports or cites, blocks A0-A6): porting differences in the market supply Hessian, the price transmission, the stop rule, the welfare, the premiums, the Green Deal's regional rules and the accounts, sorted by where they act, not measured; A0's 14 wrong line citations corrected; from the phase's runs, a measured and a cached Hessian moving a run's last digits (1e-5 after the scenario; diagnosed and fixed: the manure value left by the last shock), the thread oversubscription (fixed) and the Hessian step's log (done) | open (updated 24 November 2026) |
 | [K206](#k206) | The ported baseline feed calibration ends at a slightly worse local optimum than CAPRI's in five countries (PT, TUR, BG, ES, CZ); every coefficient within 1% of CAPRI's | open (25 November 2026) |
 | [K211](#k211) | The model has no straw balance: CAPRI values the straw at zero at its 2030 reference too (its straw balance slack, the dual 0 in every region), so only a scenario in which the straw becomes scarce would differ | open (narrowed 26 November 2026): the balance's port, if a scenario needs it |
-| [K213](#k213) | The fodder activities' income is above CAPRI's at the 2030 reference (mini-EU baseline: other fodder, grassland and fodder maize 1,684 EUR million above, 4.4% of the income), found by K212's check | open (26 November 2026): to trace |
 
-## Resolved (192)
+## Resolved (193)
 
 | # | Issue | Status |
 |---|---|---|
+| [K213](#k213) | The fodder activities' income was above CAPRI's at the 2030 reference (mini-EU baseline: 1,684 EUR million, 4.4% of the income): the margin carries the fodder crops' output at the base year's price, CAPRI's simulations at PSHW x (1 - p_onFarmShare) | fixed (26 November 2026): the output at CAPRI's UVAG(FODDO), FODDMARKUP 0 as CAPRI's runs (the markups a question for Bonn); the 20 units' MGVA 38,386 against CAPRI's 38,358 |
 | [K212](#k212) | The crops' residue nutrients (MANN, MANP, MANK) were not in their output value: CAPRI's crop TOOU values them at UVAG (its secondary revenue SREV, first read as the straw's) | fixed (26 November 2026): the residues at the solve's yields at the member state's unit value in the crops' TOOU, as CAPRI |
 | [K210](#k210) | Croatia's and Sweden's animals and Greece's sheep and goats for fattening had no 2030 premium: CAPRI's 2017 data pay them none, and the model's 2030 animal premiums were the 2017 ones x CAPRI's 2030/2017 ratio | fixed (26 November 2026): CAPRI's 2030 premium per model head where the 2017 coefficient is empty |
 | [K209](#k209) | The Green Deal's yield changes (the pesticide loss, the organic yield gap) entered the crops' margins at the data's producer price, the rest of the revenue at the solve's price | fixed (26 November 2026): at the solve's price, as CAPRI |
@@ -4431,22 +4431,65 @@ unit).
 - **Status:** **fixed** (the straw: K211; the crops' residue nutrients: K212)
 
 <a id="k213"></a>
-### K213: The fodder activities' income above CAPRI's (found 26 November 2026)
+### K213: The fodder activities' income above CAPRI's (found and fixed 26 November 2026)
 
 Found by K212's check of the income by activity against CAPRI's 2030 reference (dataOut with the empty second key, MGVA
 x LEVL, deflated by 1.019^13; a check only), on the mini-EU baseline: over the 20 units other fodder 444.6 EUR million
 against CAPRI's -208.3, intensive grassland 273.0 against -310.4, extensive grassland 473.6 against 218.7, fodder maize
 161.4 against -31.3, 1,684 together; with the crops' residues in both (K212). In Denmark per ha (2017 money): other
 fodder 426.5 against -417.4 (CAPRI's TOOU 707.6, TOIN 1,359.9), intensive grassland -46.6 against -603.8 (578.2,
-1,419.7), extensive -52.1 against -292.8 (245.1, 775.6), fodder maize -22.7 against -497.8 (1,053.4, 1,796.2). The
-output is not the gap's source where checked: Denmark's other fodder at 38.9 EUR/t in the model is CAPRI's UVAG(OFAR,
-2030) of its baseline run (49.69 / 1.019^13). Income I2a's account showed the fodder crops' outputs above CAPRI's EAAG
-(fodder maize 753 against 560, other fodder 1,145 against 486). To trace: the fodder crops' outputs per ha and their
-inputs (TOIN) against CAPRI's.
+1,419.7), extensive -52.1 against -292.8 (245.1, 775.6), fodder maize -22.7 against -497.8 (1,053.4, 1,796.2).
 
-- **Effect:** the income by activity and the region's income level (4.4% of the mini-EU baseline's), not the solution
+The cause is the fodder output's unit value. CAPRI's simulation report values a fodder crop's output at the solution at
+UVAG(FODDO) = PSHW x (1 - p_onFarmShare) + FODDMARKUP (reports/sol_simy.gms l. 753): PSHW the dual of the fodder's
+balance per t fed, p_onFarmShare the member state's seed and losses over its production at the year (supply/pmp.gms
+l. 41-49). The model's margin carries the fodder crop's output at its producer price (producer_prices_regional.csv,
+the base year's unit value per t produced), which the projection does not move. At the base year CAPRI's form gives the
+margin's output in the median region and fodder crop (0.89 to 1.09 of it over 1,196 pairs); at 2030 it does not:
+Denmark's other fodder in CAPRI's reference at 49.69 x (1 - 0.6239) = 18.69 EUR/t produced (14.63 in 2017 money; its
+p_onFarmShare sim_ini_21730's LOSF / GROF, no seed in CAPRI's data of the fodders), in the model's margin at 38.91;
+per ha 34.93 t x 14.63 = 511.2 (CAPRI's MREV 511.2) against 1,359.0: 847.8 of the per-ha gap of 843.9.
+
+CAPRI's FODDMARKUP. CAPRI's baseline run computes it so that the baseline's UVAG(FODDO) is its data's (l. 747: the
+data's UVAG less PSHW x (1 - p_onFarmShare); Denmark's other fodder 31.0 = 49.69 x 0.6239) and stores one file per
+country (l. 748, FODDMARKUP_%NTSLVL%%BAS%%SIM%%countries_fst2%%reg_agg%...); the simulation loads a file named without
+the country code (capmod/create_sim_ini_gdx.gms l. 519), so its runs go without the markups: the 2030 reference's and
+the Green Deal step's UVAG(FODDO) are PSHW x (1 - p_onFarmShare) exactly (dataOut, a check only: Denmark's other fodder
+18.69 = 49.69 x 0.3761 in the reference and 19.93 = 52.99 x 0.3761 in the Green Deal step, FR24's other fodder 17.38
+= 37.55 x (1 - 0.5371) in the Green Deal step; DE11's other fodder and fodder maize in the same form). With the markups the baseline's output would be the data's value, the model's
+margin before this fix; CAPRI's comment at l. 750 ("The following should always be done - adding the baseline 'markup'
+to the dual values of fodder") says that was the intent.
+
+**Fixed** as CAPRI's simulations (the project lead, 26 November 2026: "do as capri does"; FODDMARKUP 0): a fodder
+crop's output in the income is YILD x UVAG(FODDO) (coupling/equations/sol_simy.py DATA_UVAG_FODDO; YILD the margin's
+yield in CAPRI's unit, fresh matter, the grassland's over CAPRI's dry-matter content of grass; PSHW the fodder
+balance's value per t fed, at 2030 CAPRI's 2030 reference value, fodder_value_2030.csv; IncomeDistributionModule.
+crop_fodder_output) in place of the output the margin carries (calc_inc_indic.py DATA_MGVA TOOU_FODDO, REV_lin_FODDO),
+the technology mix's output difference the same way, and the account by item's fodder output items at that value
+(income/eaa.py). p_onFarmShare from sim_ini_21730's DATA at "Y" for 2030 and "BAS" for the base year
+(capri_mod/supply/equations/pmp.py; tools/build/build_fodder_onfarm_share.py -> capri_data/baselines/capri_greendeal_ref/
+1730/feed/fodder_onfarm_share_2030.csv, capri_data/2017/feed/fodder_onfarm_share_2017.csv; the kept extract
+capri_data/sources/raw/capri/results/sim_ini_21730/fodder_onfarm_items.parquet). Not in the solution: the supply model
+values the fodder through its balance's dual, as CAPRI's. In a scenario PSHW stays the balance's base value where
+CAPRI's is the solution's dual (still to decide). Tests: test_water_income.py (2, and the income's sums with the
+fodder term).
+Measured on the mini-EU Green Deal pair (the run of the fix against K212's; EUR million, 2017 money): the solution identical (21
+iterations, every level as before). At the baseline the fodder activities' income falls by 1,648.3 (other fodder
+-658.6, intensive grassland -555.7, extensive -236.4, fodder maize -193.6, root crops for fodder -4.0); against CAPRI's
+2030 reference by activity (MGVA x LEVL, a check only) other fodder -214.0 against -208.3, intensive grassland -282.7
+against -310.4, extensive 237.3 against 218.7, fodder maize -32.3 against -31.3 (together -291.7 against -331.3, 1,684
+above it before); in Denmark per ha other fodder -421.4 against -417.4, intensive grassland -583.1 against -603.8,
+extensive -279.1 against -292.8, fodder maize -500.8 against -497.8. The account by item's fodder outputs are CAPRI's
+EAAG of the 20 units (fodder maize 559.6, other fodder 486.2, grass 673.3, root crops 10.6; 753 and 1,145 for the first
+two before). The baseline's MGVA 38,386 against CAPRI's 38,358 (1.0007; 40,034 before); by unit from -121.8 (Denmark)
+to +60.0 (ES61), the activities' sum per unit 0.990 to 1.053 of CAPRI's. The account by item equals the activity-based
+income within 0.026 (0.010 per unit at most). The Green Deal's change of MGVA -1,559 (-1,852 before): the fodder
+activities' income falls by 293 less in the scenario.
+
+- **Effect:** the income by activity and the region's income level, not the solution
 - **In 9t:** not checked
-- **Status:** **open**: to trace
+- **Status:** **fixed** as CAPRI's runs; the markups are not implemented, a question for Bonn (the project lead, 26
+  November 17:52: whether the file name is a bug; the 35 files of CAPRI's baseline run are in hand)
 
 <a id="k211"></a>
 ### K211: The straw: no straw balance in the model (found 26 November 2026; split from K207; narrowed the same day)

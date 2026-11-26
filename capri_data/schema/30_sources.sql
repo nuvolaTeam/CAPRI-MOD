@@ -1818,6 +1818,19 @@ COMMENT ON TABLE src_fout_uvag_bas IS 'CAPRI''s base year unit values of the nut
 INSERT INTO value_units VALUES
   ('src_fout_uvag_bas', 'uvag_bas', 'U_EuPerTon', 'capri', 'CAPRI DATA(MS, "UVAG", FOUT, "BAS"): EUR per t of N, P2O5, K2O in the base year''s money');
 
+-- file: capri_data/sources/raw/capri/results/sim_ini_21730/fodder_onfarm_items.parquet
+CREATE TABLE src_fodder_onfarm_items (
+    ms VARCHAR NOT NULL,
+    item VARCHAR NOT NULL CHECK (item IN ('GROF', 'LOSF', 'SEDF', 'SEDM')),
+    product VARCHAR NOT NULL CHECK (product IN ('GRAS', 'MAIF', 'OFAR', 'ROOF')),
+    year VARCHAR NOT NULL CHECK (year IN ('BAS', 'Y')),
+    value DOUBLE NOT NULL,
+    PRIMARY KEY (ms, item, product, year)
+);
+COMMENT ON TABLE src_fodder_onfarm_items IS 'CAPRI''s member states'' gross production, losses and seed of the fodder crops'' outputs, sim_ini_21730''s DATA(MS, GROF | LOSF | SEDF | SEDM, GRAS | MAIF | OFAR | ROOF, BAS | Y) (the reference export), written and read back by tools/build/build_fodder_onfarm_share.py (fodder_onfarm_share_2017.csv, fodder_onfarm_share_2030.csv; KNOWN_ISSUES K213)';
+INSERT INTO value_units VALUES
+  ('src_fodder_onfarm_items', 'value', 'U_1000t', 'capri', 'CAPRI DATA(MS, item, FODDO, year): 1000 t');
+
 -- file: capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_factors_2030.parquet
 CREATE TABLE src_crop_nut_need_factors_2030 (
     region VARCHAR NOT NULL,

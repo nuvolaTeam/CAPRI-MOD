@@ -27087,6 +27087,126 @@
     "tests": []
    }
   },
+  "feed_fodder_onfarm_share_2017": {
+   "file": "capri_data/2017/feed/fodder_onfarm_share_2017.csv",
+   "declared_in": "25_feed.sql",
+   "layout": [],
+   "comment": "CAPRI's on-farm share of the fodder crops' outputs per member state, p_onFarmShare (supply/pmp.gms l. 41-49): (SEDF + SEDM + LOSF) / GROF of sim_ini_21730's DATA at \"BAS\" (the base year); it values a fodder crop's output at UVAG(FODDO) = PSHW x (1 - p_onFarmShare) (reports/sol_simy.gms l. 753; capri_mod/income/income_module.py crop_fodder_output; KNOWN_ISSUES K213). (tools/build/build_fodder_onfarm_share.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "onfarm_share",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "product"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(product IN ('GRAS', 'MAIF', 'OFAR', 'ROOF'))",
+    "((onfarm_share >= 0) AND (onfarm_share < 1))"
+   ],
+   "units": [
+    {
+     "item": "onfarm_share",
+     "unit": "U_ratio",
+     "status": "builder",
+     "basis": "share of the production (SEDF + SEDM + LOSF over GROF, both in 1000 t; the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_fodder_onfarm_share (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/income/income_module.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_water_income.py"
+    ]
+   }
+  },
+  "feed_fodder_onfarm_share_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_onfarm_share_2030.csv",
+   "declared_in": "25_feed.sql",
+   "layout": [],
+   "comment": "CAPRI's on-farm share of the fodder crops' outputs per member state, p_onFarmShare (supply/pmp.gms l. 41-49): (SEDF + SEDM + LOSF) / GROF of sim_ini_21730's DATA at \"Y\" (CAPRI's \"CUR\" at 2030); it values a fodder crop's output at UVAG(FODDO) = PSHW x (1 - p_onFarmShare) (reports/sol_simy.gms l. 753; capri_mod/income/income_module.py crop_fodder_output; KNOWN_ISSUES K213). (tools/build/build_fodder_onfarm_share.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "onfarm_share",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "product"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(product IN ('GRAS', 'MAIF', 'OFAR', 'ROOF'))",
+    "((onfarm_share >= 0) AND (onfarm_share < 1))"
+   ],
+   "units": [
+    {
+     "item": "onfarm_share",
+     "unit": "U_ratio",
+     "status": "builder",
+     "basis": "share of the production (SEDF + SEDM + LOSF over GROF, both in 1000 t; the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_fodder_onfarm_share (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/income/income_module.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_water_income.py"
+    ]
+   }
+  },
   "feed_fodder_value_2030": {
    "file": "capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_value_2030.csv",
    "declared_in": "25_feed.sql",
@@ -51244,6 +51364,73 @@
     "tests": []
    }
   },
+  "src_fodder_onfarm_items": {
+   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/fodder_onfarm_items.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's member states' gross production, losses and seed of the fodder crops' outputs, sim_ini_21730's DATA(MS, GROF | LOSF | SEDF | SEDM, GRAS | MAIF | OFAR | ROOF, BAS | Y) (the reference export), written and read back by tools/build/build_fodder_onfarm_share.py (fodder_onfarm_share_2017.csv, fodder_onfarm_share_2030.csv; KNOWN_ISSUES K213)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "item",
+    "product",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(item IN ('GROF', 'LOSF', 'SEDF', 'SEDM'))",
+    "(product IN ('GRAS', 'MAIF', 'OFAR', 'ROOF'))",
+    "(\"year\" IN ('BAS', 'Y'))"
+   ],
+   "units": [
+    {
+     "item": "value",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, item, FODDO, year): 1000 t"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": "build_fodder_onfarm_share (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "src_fout_uvag_bas": {
    "file": "capri_data/sources/raw/capri/results/sim_ini_21730/fout_uvag_bas.parquet",
    "declared_in": "30_sources.sql",
@@ -58278,11 +58465,14 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py"
+     "capri_mod/data/loaders.py",
+     "capri_mod/income/income_module.py"
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_water_income.py"
+    ]
    }
   },
   "sup_input_coefs_2030": {
@@ -68296,7 +68486,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 1059,
+  "capri/keep": 1060,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 39,

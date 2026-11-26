@@ -1035,6 +1035,24 @@
    },
    "catalogue_note": "Fodder per head per animal of each fodder balance; converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
   },
+  "capri_data/2017/feed/fodder_onfarm_share_2017.csv": {
+   "description": "CAPRI's on-farm share of the fodder crops' outputs per member state, p_onFarmShare (supply/pmp.gms l. 41-49): (SEDF + SEDM + LOSF) / GROF of sim_ini_21730's DATA at \"BAS\" (the base year); it values a fodder crop's output at UVAG(FODDO) = PSHW x (1 - p_onFarmShare) (reports/sol_simy.gms l. 753; capri_mod/income/income_module.py crop_fodder_output; KNOWN_ISSUES K213). (tools/build/build_fodder_onfarm_share.py)",
+   "kind": "coefficients",
+   "vintage": "2017",
+   "domain": "feed",
+   "status": "live",
+   "rows": 132,
+   "columns": 3,
+   "units": "U_ratio",
+   "read_by_model": [
+    "capri_mod/income/income_module.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_fodder_onfarm_share (not in the trace yet)"
+   },
+   "catalogue_note": "tools/build/build_fodder_onfarm_share.py: CAPRI's p_onFarmShare at its base year (sim_ini_21730's DATA at \"BAS\"); KNOWN_ISSUES K213 (not re-checked)"
+  },
   "capri_data/2017/feed/livestock_feed_coef.csv": {
    "description": "CAPRI's purchased feed per model head by bulk: FCER (cereals), FPRO (protein), FENE (energy), LEVL x item over the model's heads / 1000 (tools/build/build_livestock_output_coef.py)",
    "kind": "coefficients",
@@ -3201,7 +3219,8 @@
    "columns": 2,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/data/loaders.py"
+    "capri_mod/data/loaders.py",
+    "capri_mod/income/income_module.py"
    ],
    "origin": {
     "nature": "capri",
@@ -4177,6 +4196,25 @@
     "nature": "capri",
     "builder": "build_feed_bulks"
    }
+  },
+  "capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_onfarm_share_2030.csv": {
+   "description": "CAPRI's on-farm share of the fodder crops' outputs per member state, p_onFarmShare (supply/pmp.gms l. 41-49): (SEDF + SEDM + LOSF) / GROF of sim_ini_21730's DATA at \"Y\" (CAPRI's \"CUR\" at 2030); it values a fodder crop's output at UVAG(FODDO) = PSHW x (1 - p_onFarmShare) (reports/sol_simy.gms l. 753; capri_mod/income/income_module.py crop_fodder_output; KNOWN_ISSUES K213). (tools/build/build_fodder_onfarm_share.py)",
+   "kind": "coefficients",
+   "vintage": "2030 reference",
+   "domain": "feed",
+   "status": "live",
+   "vintage_exception": "CAPRI's simulation start sim_ini_21730: the member states' seed and losses of the fodder crops' outputs over their production at 2030 (p_onFarmShare at \"CUR\")",
+   "rows": 119,
+   "columns": 3,
+   "units": "U_ratio",
+   "read_by_model": [
+    "capri_mod/income/income_module.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_fodder_onfarm_share (not in the trace yet)"
+   },
+   "catalogue_note": "tools/build/build_fodder_onfarm_share.py: KNOWN_ISSUES K213 (not re-checked)"
   },
   "capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_value_2030.csv": {
    "description": "CAPRI's 2030 unit value of the fed non-tradable fodders (UVAG, the dual of SUPBAL_ per t fed) as the fodder balance's base dual, in 2017 money (KNOWN_ISSUES K161; tools/build/build_fodder_value_2030.py)",
@@ -11881,6 +11919,21 @@
     "builder": "build_market_prod_grof_2030"
    },
    "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx DATA (PROD at CAL, GROF at TRD) written and read back by tools/build/build_market_prod_grof_2030.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
+  },
+  "capri_data/sources/raw/capri/results/sim_ini_21730/fodder_onfarm_items.parquet": {
+   "description": "CAPRI's member states' gross production, losses and seed of the fodder crops' outputs, sim_ini_21730's DATA(MS, GROF | LOSF | SEDF | SEDM, GRAS | MAIF | OFAR | ROOF, BAS | Y) (the reference export), written and read back by tools/build/build_fodder_onfarm_share.py (fodder_onfarm_share_2017.csv, fodder_onfarm_share_2030.csv; KNOWN_ISSUES K213)",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "feed",
+   "status": "source",
+   "rows": 489,
+   "columns": 5,
+   "units": "U_1000t",
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_fodder_onfarm_share (not in the trace yet)"
+   },
+   "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx DATA(MS, GROF | LOSF | SEDF | SEDM, GRAS | MAIF | OFAR | ROOF, BAS | Y) (the reference export) written and read back by tools/build/build_fodder_onfarm_share.py, kept so its input can be rebuilt without the reference export (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/raw/capri/results/sim_ini_21730/fout_uvag_bas.parquet": {
    "description": "CAPRI's base year unit values of the nutrients' outputs MANN, MANP, MANK per member state, sim_ini_21730's DATA(MS, \"UVAG\", FOUT, \"BAS\") (the reference export), written and read back by tools/build/build_npk_balance_2030.py (npk_region_2030.csv fout_uvag_eur_t; KNOWN_ISSUES K212)",
