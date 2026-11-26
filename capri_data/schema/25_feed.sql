@@ -24,6 +24,17 @@ INSERT INTO value_units VALUES
   ('feed_fodder_value_2030', 'value_eur_t', NULL, 'open', 'EUR of 2017 per t fed (CAPRI''s UVAG over its 2030 deflator; the builder; no unit code in the catalogue)'),
   ('feed_fodder_value_2030', 'uvag_capri_2030', NULL, 'open', 'CAPRI''s UVAG, EUR of 2030 per t fed (the builder; no unit code in the catalogue)');
 
+-- file: capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_onfarm_share_2030.csv
+CREATE TABLE feed_fodder_onfarm_share_2030 (
+    ms VARCHAR NOT NULL,
+    product VARCHAR NOT NULL CHECK (product IN ('GRAS', 'MAIF', 'OFAR', 'ROOF')),
+    onfarm_share DOUBLE NOT NULL CHECK (onfarm_share >= 0 AND onfarm_share < 1),
+    PRIMARY KEY (ms, product)
+);
+COMMENT ON TABLE feed_fodder_onfarm_share_2030 IS 'CAPRI''s on-farm share of the fodder crops'' outputs per member state, p_onFarmShare (supply/pmp.gms l. 41-49): (SEDF + SEDM + LOSF) / GROF of sim_ini_21730''s DATA at "Y" (CAPRI''s "CUR" at 2030); it values a fodder crop''s output at UVAG(FODDO) = PSHW x (1 - p_onFarmShare) (reports/sol_simy.gms l. 753; capri_mod/income/income_module.py crop_fodder_output; KNOWN_ISSUES K213). (tools/build/build_fodder_onfarm_share.py)';
+INSERT INTO value_units VALUES
+  ('feed_fodder_onfarm_share_2030', 'onfarm_share', 'U_ratio', 'builder', 'share of the production (SEDF + SEDM + LOSF over GROF, both in 1000 t; the builder)');
+
 -- file: capri_data/baselines/capri_greendeal_ref/1730/feed/milk_for_feeding_2030.csv
 CREATE TABLE feed_milk_for_feeding_2030 (
     region VARCHAR NOT NULL REFERENCES regional_units (region),
@@ -111,6 +122,17 @@ COMMENT ON TABLE feed_fodder_balance_2017 IS 'the regional balances of the non-t
 INSERT INTO value_units VALUES
   ('feed_fodder_balance_2017', 'u_t_per_ha', 'U_TonPerHa', 'builder', 'fodder_balance_2017.u_t_per_ha: t fresh fodder per ha (the builder)'),
   ('feed_fodder_balance_2017', 'value_eur_t', NULL, 'open', 'fodder_balance_2017.value_eur_t: EUR per t (the builder; no unit code in the catalogue)');
+
+-- file: capri_data/2017/feed/fodder_onfarm_share_2017.csv
+CREATE TABLE feed_fodder_onfarm_share_2017 (
+    ms VARCHAR NOT NULL,
+    product VARCHAR NOT NULL CHECK (product IN ('GRAS', 'MAIF', 'OFAR', 'ROOF')),
+    onfarm_share DOUBLE NOT NULL CHECK (onfarm_share >= 0 AND onfarm_share < 1),
+    PRIMARY KEY (ms, product)
+);
+COMMENT ON TABLE feed_fodder_onfarm_share_2017 IS 'CAPRI''s on-farm share of the fodder crops'' outputs per member state, p_onFarmShare (supply/pmp.gms l. 41-49): (SEDF + SEDM + LOSF) / GROF of sim_ini_21730''s DATA at "BAS" (the base year); it values a fodder crop''s output at UVAG(FODDO) = PSHW x (1 - p_onFarmShare) (reports/sol_simy.gms l. 753; capri_mod/income/income_module.py crop_fodder_output; KNOWN_ISSUES K213). (tools/build/build_fodder_onfarm_share.py)';
+INSERT INTO value_units VALUES
+  ('feed_fodder_onfarm_share_2017', 'onfarm_share', 'U_ratio', 'builder', 'share of the production (SEDF + SEDM + LOSF over GROF, both in 1000 t; the builder)');
 
 -- file: capri_data/2017/feed/fodder_balance_2017_use.csv
 CREATE TABLE feed_fodder_balance_2017_use (

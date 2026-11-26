@@ -5,7 +5,7 @@ calls on the supply models' regions (reports/sol_simy.gms l. 2533). capri_mod/in
 from __future__ import annotations
 
 
-def DATA_MGVA(r, FEED_lin, FEED_sol, TOIN_lin=0.0, TOIN_Y=None, TOOU_FOUT=0.0):
+def DATA_MGVA(r, FEED_lin, FEED_sol, TOIN_lin=0.0, TOIN_Y=None, TOOU_FOUT=0.0, REV_lin_FODDO=0.0, TOOU_FODDO=None):
     r"""DATA(RU, MPACT, "MGVA", SIMY) of an activity with a level, per ha or head (EUR): its outputs less its inputs at
     the solution, valued at the simulation year's unit values, plus its premiums.
 
@@ -38,9 +38,11 @@ def DATA_MGVA(r, FEED_lin, FEED_sol, TOIN_lin=0.0, TOIN_Y=None, TOOU_FOUT=0.0):
     value per unit the margin carries FEED_lin (CAPRI's TOIN takes the solution's feed, sol_simy.gms l. 254-257), and,
     for a crop at the simulation year, less the change of its other inputs, CAPRI's TOIN at the year's coefficients
     TOIN_Y (DATA_TOIN_Y) against the base cost the margin carries TOIN_lin, and, for a crop, plus its residues'
-    nutrients, the outputs MANN, MANP, MANK of its TOOU that its margin does not hold (TOOU_FOUT, DATA_TOOU_FOUT):
+    nutrients, the outputs MANN, MANP, MANK of its TOOU that its margin does not hold (TOOU_FOUT, DATA_TOOU_FOUT), and,
+    for a fodder crop, its fodder output at CAPRI's UVAG(FODDO) (TOOU_FODDO: YILD x DATA_UVAG_FODDO, sol_simy.py) in
+    place of the output its margin carries at its producer price (REV_lin_FODDO; KNOWN_ISSUES K213):
 
-        MGVA_a = r_a - (FEED_sol_a - FEED_lin_a) - (TOIN_Y_a - TOIN_lin_a) + TOOU_FOUT_a
+        MGVA_a = r_a - (FEED_sol_a - FEED_lin_a) - (TOIN_Y_a - TOIN_lin_a) + TOOU_FOUT_a + (TOOU_FODDO_a - REV_lin_FODDO_a)
 
     The margin's changes of the inputs within the run (the Green Deal's PLAP and INPO changes, the yields' input update,
     the organic top-up) act on CAPRI's year coefficients already (register DEP-21) and stay in r_a.
@@ -51,6 +53,8 @@ def DATA_MGVA(r, FEED_lin, FEED_sol, TOIN_lin=0.0, TOIN_Y=None, TOOU_FOUT=0.0):
     DATA_AGGT_MGVA), since the model has several of them per region only (the fertiliser options, urea substitution,
     the winter cover: capri_mod/income/mitigation_items.py); the region's total is the same (register DEP-54)."""
     v = float(r) - (float(FEED_sol) - float(FEED_lin)) + float(TOOU_FOUT)
+    if TOOU_FODDO is not None:
+        v += float(TOOU_FODDO) - float(REV_lin_FODDO)
     if TOIN_Y is not None:
         v -= float(TOIN_Y) - float(TOIN_lin)
     return v

@@ -62,9 +62,10 @@ class IncomeDistributionModule:
           MGVA      CAPRI's activity-based income AGGT: sum over the activities of their MGVA at the solution x level
                     (coupling/equations/calc_inc_indic.py DATA_MGVA: the linear margin with the solved ration in place
                     of the feed it carries, and a crop's residues' nutrients, the outputs MANN, MANP, MANK of its TOOU
-                    at the member state's unit value, DATA_TOOU_FOUT: KNOWN_ISSUES K212), with the technology mix's net
-                    revenue (and residues) on the area moved to T1, less the mitigation options' cost plus their
-                    revenue (coupling/equations/sol_simy.py DATA_AGGT_MGVA)
+                    at the member state's unit value, DATA_TOOU_FOUT: KNOWN_ISSUES K212, and a fodder crop's output at
+                    CAPRI's UVAG(FODDO), crop_fodder_output: K213), with the technology mix's net revenue (and
+                    residues, and fodder output at UVAG(FODDO)) on the area moved to T1, less the mitigation options'
+                    cost plus their revenue (coupling/equations/sol_simy.py DATA_AGGT_MGVA)
           PRME      the premiums x levels (CAPRI's PRME, with the technology mix's premium difference; mitiSubs is 0
                     in the model's runs, mitigation_items' module docstring)
           FEED      the solved ration at its report prices less the feed the margins carry (feed_term)
@@ -102,13 +103,27 @@ class IncomeDistributionModule:
         fo, fom = self.crop_residue_nutrients(m)
         tfo = {a: DATA_TOOU_FOUT([q for q, _u in d.values()], [u for _q, u in d.values()]) for a, d in fo.items()}
         tfz = {a: DATA_TOOU_FOUT(list(d.values()), [fo[a][k][1] for k in d]) for a, d in fom.items()}
+        # the fodder crops' output at CAPRI's UVAG(FODDO), the part fed (KNOWN_ISSUES K213)
+        fod = self.crop_fodder_output(region, m)
+
+        def _fodd(a):
+            return {"REV_lin_FODDO": fod[a][1], "TOOU_FODDO": fod[a][0]} if a in fod else {}
+        # and the technology mix's T1 - T2 output of a fodder crop the same way (its margin's term, ev.mix_parts)
+        mp = dict(getattr(getattr(m, "ev", None), "mix_parts", None) or {})
+
+        def _fodd_z(a):
+            if a not in fod or a not in mp:
+                return {}
+            v_ = float(mp[a]["O"][3])
+            return {"REV_lin_FODDO": v_, "TOOU_FODDO": v_ * self.fodder_output_ratio(fod[a])}
         mgva = {a: DATA_MGVA(float(nr[a]), fd[a][1] / lev[a], fd[a][0] / lev[a]) if a in fd else
-                DATA_MGVA(float(nr[a]), 0.0, 0.0, *toin[a], TOOU_FOUT=tfo.get(a, 0.0)) if a in toin else
-                DATA_MGVA(float(nr[a]), 0.0, 0.0, TOOU_FOUT=tfo.get(a, 0.0))
+                DATA_MGVA(float(nr[a]), 0.0, 0.0, *toin[a], TOOU_FOUT=tfo.get(a, 0.0), **_fodd(a)) if a in toin else
+                DATA_MGVA(float(nr[a]), 0.0, 0.0, TOOU_FOUT=tfo.get(a, 0.0), **_fodd(a))
                 for a in nr.index if lev[a] > 0}
         mi = self.mitigation_items(region, res, supply_module)
         out = {"MGVA": DATA_AGGT_MGVA([v for _a, v in mgva.items()]
-                                      + [float(dnr.get(a, 0.0)) + tfz.get(a, 0.0) for a in mz],
+                                      + [DATA_MGVA(float(dnr.get(a, 0.0)), 0.0, 0.0, TOOU_FOUT=tfz.get(a, 0.0),
+                                                   **_fodd_z(a)) for a in mz],
                                       [lev[a] for a in mgva] + [float(z) for z in mz.values()],
                                       mi["mitiI"], mi["mitiO"]),
                "PRME": float(sum(float(pr.get(a, 0.0)) * lev[a] for a in nr.index)) + prem_z,
@@ -118,6 +133,72 @@ class IncomeDistributionModule:
         ps = self.producer_surplus(region, m, out["MGVA"], toin)
         if ps is not None:
             out.update(ps)
+        return out
+
+    @staticmethod
+    def fodder_output_ratio(rec) -> float:
+        """A fodder crop's output at CAPRI's UVAG(FODDO) per EUR of the output its margin carries (crop_fodder_output's
+        record): UVAG(FODDO) over the margin's unit value per t of fresh matter; it applies to the technology mix's
+        output difference too, valued at the same price (supply/techn_mix.py _mix_linear)."""
+        return rec[0] / rec[1] if rec[1] else 1.0
+
+    @staticmethod
+    def crop_fodder_output(region, m) -> dict:
+        """{fodder crop: (its fodder output per ha at CAPRI's UVAG(FODDO), the output its margin carries per ha, PSHW,
+        p_onFarmShare)} (EUR, the model's money; KNOWN_ISSUES K213).
+
+        CAPRI values a fodder crop's output at the solution at YILD x UVAG(FODDO), UVAG(FODDO) = PSHW x (1 -
+        p_onFarmShare) (coupling/equations/sol_simy.py DATA_UVAG_FODDO, FODDMARKUP 0 as in CAPRI's simulations), with
+        YILD in CAPRI's unit (t of fresh matter per ha), PSHW the dual of the fodder's balance per t fed and
+        p_onFarmShare the member state's seed and losses over its production at the year. Here:
+          YILD  the yield the margin carries, its revenue over its producer price (supply_module._compute_net_revenues:
+                price x yield), in fresh matter: the grassland's dry-matter yield over CAPRI's dry-matter content of
+                grass (grass_dm_content.csv, data/loaders.py _reconcile_grass_yield_units);
+          PSHW  the fodder balance's value per t fed (data.fodder_balance value_eur_t, the balance's base dual; at the
+                2030 market year CAPRI's 2030 reference value, fodder_value_2030.csv);
+          p_onFarmShare  fodder_onfarm_share_<year>.csv (tools/build/build_fodder_onfarm_share.py; 0 where CAPRI's data
+                have no production, as CAPRI's statement).
+        The margin carries the output at the crop's producer price (producer_prices_regional.csv, per t produced; the
+        projection does not move the fodder crops' prices): at the base year CAPRI's form gives the margin's output in
+        the median region and fodder crop (between 0.89 and 1.09 of it; 1,196 pairs), at 2030 the price stays the base
+        year's in real terms while CAPRI's reference values the output at the 2030 dual (Denmark's other fodder: 38.91
+        EUR/t produced in the margin against 38.91 x (1 - 0.624) = 14.63). Empty without fodder balances.
+
+        Departures from CAPRI: PSHW is the balance's base dual in a scenario too, where CAPRI's is the dual at the
+        scenario's solution (SupplyResult.fodder_duals; the fodder's value at the scenario's dual is still to decide)."""
+        from capri_mod.coupling.equations.sol_simy import DATA_UVAG_FODDO
+        from capri_mod.data.definitions import capri_ms
+        from capri_mod.projection.prices import FODDER_PRODUCT
+        from capri_mod.supply import inputs as _inputs
+        fb = getattr(getattr(m, "data", None), "fodder_balance", None) or {}
+        rev = getattr(m, "revenues", None)
+        pp = getattr(getattr(m, "data", None), "producer_prices", None)
+        if not fb or rev is None or pp is None:
+            return {}
+        inp = _inputs.current()
+        year = getattr(m.data, "sim_year", None) or inp.base_year
+        name = f"fodder_onfarm_share_{int(year)}.csv"
+
+        def load(i):
+            t = i.csv(name, "feed")
+            return {(str(r.ms), str(r.product)): float(r.onfarm_share) for r in t.itertuples(index=False)}
+
+        def load_dm(i):
+            t = i.csv("grass_dm_content.csv", "supply")
+            return {str(r_): float(v_) for r_, v_ in zip(t.region, t.drma)}
+        share = inp.cached(f"income_{name}", load)
+        ms = capri_ms(region)
+        out = {}
+        for _f, rec in fb.items():
+            pshw = float(rec.get("value_eur_t", 0.0) or 0.0)
+            for c in (rec.get("crops") or {}):
+                r_ = float(rev.get(c, 0.0) or 0.0) if hasattr(rev, "get") else 0.0
+                p_ = float(pp.get(c, 0.0) or 0.0)
+                if pshw <= 0 or r_ <= 0 or p_ <= 0 or c in out:
+                    continue
+                dm = inp.cached("income_grass_dm_content", load_dm)[region] if FODDER_PRODUCT.get(c) == "GRAS" else 1.0
+                s = share.get((ms, FODDER_PRODUCT.get(c, c)), 0.0)
+                out[c] = (r_ / p_ / dm * DATA_UVAG_FODDO(pshw, s), r_, pshw, s)
         return out
 
     @staticmethod

@@ -57,8 +57,9 @@ def test_water_demand_geography(data):
 def test_income_is_capris_mgva_sum(data):
     """Farm income = CAPRI's activity-based income at the solution (income I1, AGGT): the activities' margins x levels
     with the technology mix's, less the change of the herds' feed (the solved ration against the feed the margins
-    carry), plus the crops' residues' nutrients (DATA_TOOU_FOUT, KNOWN_ISSUES K212), less the mitigation options' cost
-    plus their revenue; the premiums x levels its public support. The
+    carry), plus the crops' residues' nutrients (DATA_TOOU_FOUT, KNOWN_ISSUES K212), with the fodder crops' output at
+    CAPRI's UVAG(FODDO) in place of the margin's (K213), less the mitigation options' cost plus their revenue; the
+    premiums x levels its public support. The
     region's income is set by the regional solve (SupplyResult.income, gross_margin its MGVA). The policy module's
     payments are reported beside it, not added (until 27 October 2026 premiums were counted twice)."""
     from capri_mod.supply.supply_module import SupplyModule
@@ -85,9 +86,14 @@ def test_income_is_capris_mgva_sum(data):
                 + sum(DATA_TOOU_FOUT(list(d.values()), [fo[a][k][1] for k in d]) * float(mz.get(a, 0.0))
                       for a, d in fom.items()))
         assert res_ > 0
+        fod = IncomeDistributionModule.crop_fodder_output(r, m)
+        mp = dict(getattr(m.ev, "mix_parts", None) or {})
+        fodd_ = (sum((t_ - v_) * float(lev.get(a, 0.0)) for a, (t_, v_, _p, _s) in fod.items())
+                 + sum(float(mp[a]["O"][3]) * (fod[a][0] / fod[a][1] - 1.0) * z for a, z in mz.items()
+                       if a in fod and a in mp))
         inc = (sum(float(m.net_revenues[a]) * float(lev.get(a, 0.0)) for a in m.net_revenues.index)
                + sum(float(dnr.get(a, 0.0)) * z for a, z in mz.items())
-               - im.feed_term(sr[r]) - mi["mitiI"] + mi["mitiO"] + res_)
+               - im.feed_term(sr[r]) - mi["mitiI"] + mi["mitiO"] + res_ + fodd_)
         sup = (sum(float(m.premiums.get(a, 0.0)) * float(lev.get(a, 0.0)) for a in m.net_revenues.index)
                + sum(float(m.data.techn_mix.at[a, "prem_diff_share"]) * float(m.premiums.get(a, 0.0)) * z
                      for a, z in mz.items() if a in m.data.techn_mix.index))
@@ -157,13 +163,15 @@ def test_the_producer_surplus_at_the_regional_solution(solved3):
 def test_the_gross_account_by_item_at_the_regional_solution(solved3):
     """CAPRI's gross account by item at the regional solution (income I2, SupplyResult.eaa; reports/sol_simy.gms
     l. 2549-2566): the revenue by output item adds up to each activity's revenue; TOOU - TOIN + PRME is MGVA; each
-    crop product's value is its GROF (1000 t) x its price; and MGVA equals I1's AGGT but for the input cost table's
+    crop product's value is its GROF (1000 t) x its price (a fodder crop's at CAPRI's UVAG(FODDO), K213); and MGVA equals I1's AGGT but for the input cost table's
     items at the member state's UVAP against TOIN at the regional UVAG (about 1e-5 relative to a herd's input cost)."""
     from capri_mod.data.definitions import CROPS
+    from capri_mod.income import IncomeDistributionModule as I
     sm, sr, regs = solved3
     for r in regs:
         m, e = sm._models[r], sr[r].eaa
         assert e is not None, r
+        fod = I.crop_fodder_output(r, m)
         for a, it in m.output_items.items():
             assert sum(v for *_, v in it) == pytest.approx(float(m.revenues[a]), rel=1e-12, abs=1e-9), (r, a)
         assert e["MGVA"] == pytest.approx(e["TOOU"] - e["TOIN"] + e["PRME"], rel=1e-12)
@@ -174,6 +182,7 @@ def test_the_gross_account_by_item_at_the_regional_solution(solved3):
         for a in CROPS:
             if ("O", a) in it.index and float(L.get(a, 0.0)) > 0 and not (sr[r].technology_mix or {}).get(a):
                 kg, uv = m.output_items[a][0][1:3]
+                uv *= I.fodder_output_ratio(fod[a]) if a in fod else 1.0      # a fodder crop's at UVAG(FODDO), K213
                 assert it.loc[("O", a), "GROF"] == pytest.approx(0.001 * kg * float(L[a]), rel=1e-12), (r, a)
                 assert it.loc[("O", a), "EAAG"] == pytest.approx(it.loc[("O", a), "GROF"] * uv / 1000.0, rel=1e-12)
 
@@ -211,6 +220,67 @@ def test_the_crops_residue_nutrients_at_the_regional_solution(solved3):
         assert t_ha > 0 and L > 0
 
 
+def test_the_fodder_crops_output_at_capris_uvag_foddo(solved3):
+    """K213: a fodder crop's output at the solution is CAPRI's UVAG(FODDO) = PSHW x (1 - p_onFarmShare) per t produced
+    (reports/sol_simy.gms l. 753), p_onFarmShare the member state's (SEDF + SEDM + LOSF) / GROF of CAPRI's data
+    (supply/pmp.gms l. 41-49; fodder_onfarm_share_<year>.csv); the income's MGVA of the crop holds it in place of the
+    margin's output at its producer price, and the account's output item is the same value."""
+    from capri_mod.coupling.equations.calc_inc_indic import DATA_TOOU_FOUT
+    from capri_mod.data.definitions import capri_ms
+    from capri_mod.income import IncomeDistributionModule as I
+    from capri_mod.projection.prices import FODDER_PRODUCT
+    from capri_mod.supply import inputs as _inputs
+    t = _inputs.current().csv(f"fodder_onfarm_share_{_inputs.current().base_year}.csv", "feed")
+    share = {(str(a), str(b)): float(c) for a, b, c in zip(t.ms, t["product"], t.onfarm_share)}
+    g = _inputs.current().csv("grass_dm_content.csv", "supply").set_index("region")["drma"]
+    sm, sr, regs = solved3
+    n = 0
+    for r in regs:
+        m = sm._models[r]
+        fod = I.crop_fodder_output(r, m)
+        assert fod, r
+        it = sr[r].eaa["items"].set_index(["side", "item"])
+        for c, (tou, rev, pshw, s) in fod.items():
+            assert s == share.get((capri_ms(r), FODDER_PRODUCT.get(c, c)), 0.0)
+            assert rev == pytest.approx(float(m.revenues[c]), rel=1e-12)
+            y_ = float(m.data.yields[c])
+            assert rev == pytest.approx(y_ * float(m.data.producer_prices[c]), rel=1e-12)   # the margin's output
+            dm = float(g[r]) if FODDER_PRODUCT[c] == "GRAS" else 1.0                       # CAPRI's YILD, fresh
+            assert tou == pytest.approx(y_ / dm * pshw * (1.0 - s), rel=1e-9), (r, c)
+            # at the base year CAPRI's form is the margin's output to within 11% (crop_fodder_output's docstring)
+            assert 0.85 < tou / rev < 1.12, (r, c)
+            L = float(sr[r].activities.get(c, 0.0))
+            if L > 0 and not (sr[r].technology_mix or {}).get(c):
+                v = sr[r].income["MGVA_act"][c]
+                assert it.loc[("O", c), "EAAG"] == pytest.approx(tou * L / 1000.0, rel=1e-9), (r, c)
+                if c not in I.crop_toin_y(r, m):          # the margin with the residues and the fodder (DATA_MGVA)
+                    d_ = I.crop_residue_nutrients(m)[0].get(c) or {}
+                    t_ = DATA_TOOU_FOUT([q for q, _ in d_.values()], [u for _, u in d_.values()])
+                    assert v == pytest.approx(float(m.net_revenues[c]) + t_ + tou - rev, rel=1e-12), (r, c)
+                    n += 1
+    assert n > 3
+
+
+def test_DATA_UVAG_FODDO_and_p_onFarmShare_at_capris_2030_reference():
+    """CAPRI's 2030 reference (sim_ini_21730, dataOut: a check only): Denmark's other arable fodder, p_onFarmShare
+    (SEDF + SEDM + LOSF) / GROF = 0.62389 at 2030 (fodder_onfarm_share_2030.csv) and PSHW 49.6941 give UVAG(OFAR) =
+    18.690, CAPRI's 18.69; the straw's form 0.9 LOSF / GROF of the region."""
+    import pandas as pd
+    from pathlib import Path
+    from capri_mod.coupling.equations.sol_simy import DATA_UVAG_FODDO
+    from capri_mod.supply.equations.pmp import p_onFarmShare
+    root = Path(__file__).resolve().parents[2] / "capri_data"
+    t = pd.read_csv(root / "baselines" / "capri_greendeal_ref" / "1730" / "feed" / "fodder_onfarm_share_2030.csv")
+    s = float(t[(t.ms == "DK000000") & (t["product"] == "OFAR")].onfarm_share.iloc[0])
+    assert s == pytest.approx(0.62389, abs=5e-6)
+    assert DATA_UVAG_FODDO(49.6941, s) == pytest.approx(18.69, abs=5e-3)
+    assert DATA_UVAG_FODDO(49.6941, s, FODDMARKUP=1.0) == pytest.approx(DATA_UVAG_FODDO(49.6941, s) + 1.0)
+    assert p_onFarmShare("OFAR", 1.0, 2.0, 3.0, 12.0) == pytest.approx(0.5)
+    assert p_onFarmShare("OFAR", 1.0, 2.0, 3.0, 0.0) == 0.0
+    assert p_onFarmShare("STRA", 9.0, 9.0, 9.0, 9.0, LOSF_STRA_RS=2.0, GROF_STRA_RS=10.0) == pytest.approx(0.18)
+    assert ((t.onfarm_share >= 0) & (t.onfarm_share < 1)).all()
+
+
 @pytest.mark.slow
 def test_the_income_and_the_account_at_a_shocked_solution(data):
     """After a solve with a price shock and the Green Deal's organic and pesticide targets the income takes the
@@ -240,11 +310,13 @@ def test_the_income_and_the_account_at_a_shocked_solution(data):
     from capri_mod.income import IncomeDistributionModule as I
     toin = I.crop_toin_y(r, m)
     fo, _fom = I.crop_residue_nutrients(m)
+    fod = I.crop_fodder_output(r, m)
     n_crops = 0
     for a, v in ip["MGVA_act"].items():
         if a in CROPS and a not in toin:            # a crop's MGVA is its margin at the solve with its residues (DATA_MGVA)
             t_ = DATA_TOOU_FOUT([q for q, _ in (fo.get(a) or {}).values()], [u for _, u in (fo.get(a) or {}).values()])
-            assert v == pytest.approx(float(nr[a]) + t_, rel=1e-12), a
+            f_ = fod[a][0] - fod[a][1] if a in fod else 0.0      # and a fodder crop's output at UVAG(FODDO) (K213)
+            assert v == pytest.approx(float(nr[a]) + t_ + f_, rel=1e-12), a
             n_crops += 1
     assert n_crops > 5
     assert e["MGVA"] == pytest.approx(e["TOOU"] - e["TOIN"] + e["PRME"], rel=1e-12)

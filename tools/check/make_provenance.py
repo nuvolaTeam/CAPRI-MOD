@@ -84,6 +84,10 @@ UNTRACED = {
     "capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_factors_2030.parquet": ("build_npk_balance_2030", "CAPRI"),
     # sim_ini_21730's unit values of the nutrients' outputs at the base year (KNOWN_ISSUES K212)
     "capri_data/sources/raw/capri/results/sim_ini_21730/fout_uvag_bas.parquet": ("build_npk_balance_2030", "CAPRI"),
+    # CAPRI's on-farm share of the fodder crops' outputs, p_onFarmShare, and its kept extract (KNOWN_ISSUES K213)
+    "capri_data/2017/feed/fodder_onfarm_share_2017.csv": ("build_fodder_onfarm_share", "CAPRI"),
+    "capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_onfarm_share_2030.csv": ("build_fodder_onfarm_share", "CAPRI"),
+    "capri_data/sources/raw/capri/results/sim_ini_21730/fodder_onfarm_items.parquet": ("build_fodder_onfarm_share", "CAPRI"),
     "capri_data/pipeline/captrd/sets/biofuel/": ("build_captrd_biofuel", "CAPRI"),     # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/agriprod/": ("build_captrd_agriprod", "CAPRI"),   # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/national/": ("build_captrd_national", "CAPRI"),   # before sets/ (first match)

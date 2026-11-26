@@ -9,9 +9,11 @@ coupling/equations/sol_simy.py.
 What the model holds per activity at the solution, by item (EUR per ha or head, the model's money; levels in 1000 ha or
 heads):
   crops    outputs: the product, its yield x the solve's price (SupplyModule._output_items: a quantity and a unit value,
-                    so GROF and UVAG as CAPRI's); the residues' nutrients MANN, MANP, MANK in quantity at the member
-                    state's unit value (IncomeDistributionModule.crop_residue_nutrients, CAPRI's PACT_TO_O; their
-                    secondary revenue SREV: KNOWN_ISSUES K212). The straw (STRA) at zero, as CAPRI's 2030 (K211).
+                    so GROF and UVAG as CAPRI's; a fodder crop's at CAPRI's UVAG(FODDO), the fed fodder's value x (1 -
+                    p_onFarmShare), on the margin's quantity: IncomeDistributionModule.crop_fodder_output, K213); the
+                    residues' nutrients MANN, MANP, MANK in quantity at the member state's unit value
+                    (IncomeDistributionModule.crop_residue_nutrients, CAPRI's PACT_TO_O; their secondary revenue SREV:
+                    KNOWN_ISSUES K212). The straw (STRA) at zero, as CAPRI's 2030 (K211).
            inputs:  at the 2030 market year CAPRI's directly yield-dependent inputs item by item (crop_inputs_2030.csv,
                     x TF_I, in the model's money; their sum is DATA_TOIN_Y's first term), the 2030 NPK need per nutrient
                     at its unit value (NITF, PHOF, POTF; capri_mod/fert/npk.py); at the base year the margin's input
@@ -28,7 +30,7 @@ heads):
                     INPO and OTHER_I, the organic land's fertiliser saving on FERT, the young animals' price changes on
                     OTHER_O and YOUNG, the options' costs charged on the margins (outside the regional NLP) on mitiI.
   the technology mix  on the area moved to T1 (z), the terms of T1 less T2 (ev.mix_parts): the product's output
-                    difference, INPO, PLAP, the fertiliser (FERT, the margin's fertiliser cost basis, as I1 books it)
+                    difference (a fodder crop's at UVAG(FODDO), as the crop's), INPO, PLAP, the fertiliser (FERT, the margin's fertiliser cost basis, as I1 books it)
                     and the other inputs (OTHER_I), the residues' nutrients' difference; its premium difference in
                     PRME.
   region   the mitigation options' cost (mitiI, an input) and revenue (mitiO, an output) at the region (register DEP-54).
@@ -91,11 +93,14 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
     feed_lin = getattr(res, "feed_lin", None) or {}
     ic = getattr(data, "livestock_input_cost", None)
     fo, fom = IDM.crop_residue_nutrients(m)
+    fod = IDM.crop_fodder_output(region, m)
     for a, L in lev.items():
         if L <= 0:
             continue
+        # a fodder crop's output at CAPRI's UVAG(FODDO), the fed fodder's value on the part not lost (K213)
+        f_ = IDM.fodder_output_ratio(fod[a]) if a in fod else 1.0
         for it, kg, uv, v in oi.get(a, ()):
-            add(a, "O", it, v, L, kg if kg else None, uv)
+            add(a, "O", it, v * f_, L, kg if kg else None, uv * f_ if uv is not None else uv)
         # the solve's changes of the net revenue after its first computation, by item (SupplyModule._nr_item)
         for side, it, v, kg, uv in nri.get(a, ()):
             add(a, side, it, v, L, kg if kg else None, uv)
@@ -140,7 +145,8 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
         if pa is None or not z:
             continue
         it, kg, uv, v = pa["O"]
-        add(None, "O", it, v, z, kg if kg else None, uv)
+        f_ = IDM.fodder_output_ratio(fod[a]) if a in fod else 1.0         # a fodder crop's at UVAG(FODDO) (K213)
+        add(None, "O", it, v * f_, z, kg if kg else None, uv * f_ if uv is not None else uv)
         for i, v in pa["I"].items():
             add(None, "I", i, v, z)
         for it, q in (fom.get(a) or {}).items():

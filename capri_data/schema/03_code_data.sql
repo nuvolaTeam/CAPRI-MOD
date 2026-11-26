@@ -13,7 +13,7 @@ CREATE TABLE code_data (
 COMMENT ON TABLE code_data IS 'the numbers in the model code that may be data (tools/check/make_code_data.py)';
 INSERT INTO code_data VALUES
   ('capri_mod/coupling/equations/price_forecast.py', 'p_iterChg', 200.0, 1, '41', 'return 200.0 * abs(x1 - x0) / s if s > 0 else 0.0'),
-  ('capri_mod/coupling/equations/sol_simy.py', 'p_ghgMiti_emisAll_cost_scale', 365.0, 1, '121', 'return (float(DAYS) / 365.0 if not SupplTech else 0.0) + \'),
+  ('capri_mod/coupling/equations/sol_simy.py', 'p_ghgMiti_emisAll_cost_scale', 365.0, 1, '150', 'return (float(DAYS) / 365.0 if not SupplTech else 0.0) + \'),
   ('capri_mod/coupling/manure.py', '_T_PER_KT', 1000.0, 1, '19', '_T_PER_KT = 1000.0'),
   ('capri_mod/data/find_symbol.py', '<module>', 15.0, 1, '31', 'def search(keyword, limit=15):'),
   ('capri_mod/data/inputs.py', 'REPO_DATA', 2.0, 1, '32', 'REPO_DATA = Path(__file__).resolve().parents[2] / "capri_data"'),
@@ -1143,6 +1143,7 @@ INSERT INTO code_data VALUES
   ('capri_mod/supply/equations/fertned.py', 'DATA_FOUT_resid', 0.95, 1, '179', 'return min(float(DATA_FOUT or 0.0) + n * float(residRel or 0.0), 0.95 * n)'),
   ('capri_mod/supply/equations/leg_share.py', 'othImpact_BioFix_LegSh_full', 0.2, 1, '42', 'return max(0.2 * 0.75, float(nfixRate_gras_MS)) * (1.0 - s) + float(BioFix_FLEG) * s'),
   ('capri_mod/supply/equations/leg_share.py', 'othImpact_BioFix_LegSh_full', 0.75, 1, '42', 'return max(0.2 * 0.75, float(nfixRate_gras_MS)) * (1.0 - s) + float(BioFix_FLEG) * s'),
+  ('capri_mod/supply/equations/pmp.py', 'p_onFarmShare', 0.9, 1, '32', 'return 0.9 * float(LOSF_STRA_RS) / float(GROF_STRA_RS) if float(GROF_STRA_RS) else 0.0'),
   ('capri_mod/supply/equations/supply_model/mitigation.py', 'GHG_Mit_Cost_supplementSlack', 999999.0, 1, '308', 'return 999999.0 * v_Miti_heads_sq_over_X * DRMA_days / 1000.0 * v_supplementSlack'),
   ('capri_mod/supply/equations/tillage.py', 'relSubs_till', -0.5, 1, '163', 'r1 = -0.5 * sensFac; case = 4'),
   ('capri_mod/supply/equations/tillage.py', 'relSubs_till', -0.2, 1, '156', 'r1 = -0.2 * sensFac * MaxIncrease; case = 2'),
