@@ -58841,7 +58841,9 @@
     "checks": [
      "tools/check/make_provenance.py"
     ],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_input_coefs_2030.py"
+    ]
    }
   },
   "sup_livestock_output_by_product_coef": {
