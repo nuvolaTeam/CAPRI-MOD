@@ -82,6 +82,11 @@ class LivestockBlock:
                 if a in self.net_revenues.index:
                     n = float(rec.get("produce", {}).get(a, 0.0)) - float(rec.get("use", {}).get(a, 0.0))
                     self.net_revenues[a] = float(self.net_revenues[a]) + (r_ - 1.0) * v * n
+                    # the young animals sold (OTHER_O) or bought (YOUNG) at their price's change (income I2)
+                    if n > 0:
+                        self._nr_item(a, "O", "OTHER_O", (r_ - 1.0) * v * n)
+                    else:
+                        self._nr_item(a, "I", "YOUNG", -(r_ - 1.0) * v * n)
 
     def _split_manure_factors(self, n_cols, acts, nut="N"):
         """[(column, animal, manure per head of the column / the animal's)] of the animal split and option columns for

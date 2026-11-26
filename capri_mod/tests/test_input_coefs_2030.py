@@ -47,6 +47,21 @@ def test_the_2030_coefficients_reproduce_capris_reference():
     assert de["DCOW"] > 1.0 and de["BCOW"] == pytest.approx(1.0, abs=0.02)   # milk yield grows, the suckler cow's hardly
 
 
+def test_the_crops_inputs_item_by_item_add_up_to_the_yield_dependent_part():
+    """crop_inputs_2030.csv holds iy_uvag_eur_ha's terms, CAPRI's directly yield-dependent inputs of a crop at 2030 item
+    by item (income I2): they add up to the column in every crop row, and the items are CAPRI's IY of the crops."""
+    t = pd.read_csv(SUP30 / "input_coefs_2030.csv")
+    it = pd.read_csv(SUP30 / "crop_inputs_2030.csv")
+    # CAPRI's IY of the crops (sets.gms IY without water and mitigation; the builder's IY_CROP)
+    assert set(it.item) <= {"CAOF", "SEED", "PLAP", "REPM", "REPB", "ELEC", "EGAS", "EFUL", "ELUB", "IRRO", "INPO", "SERI"}
+    assert {"PLAP", "SEED", "INPO"} <= set(it.item)
+    s = it.groupby(["region", "activity"]).eur_ha.sum()
+    c = t[t.iy_uvag_eur_ha.notna()].set_index(["region", "activity"]).iy_uvag_eur_ha
+    c = c[c > 0]
+    assert set(s.index) == set(c.index)
+    assert ((s.reindex(c.index) - c).abs() <= 1e-9 * c.abs().clip(lower=1.0)).all()
+
+
 def test_the_green_deal_input_changes_act_on_the_2030_coefficients():
     """At the 2030 market year the Green Deal's PLAP and INPO changes and the organic top-up act on CAPRI's
     simulation-year coefficients (input_coefs_2030.csv, deflated), an animal's INPO cost per head carries its INPO's

@@ -85,7 +85,7 @@ def test_the_producer_surplus_of_a_region():
 
 def test_the_income_leaves_the_emission_tax_out():
     """CAPRI's MGVA holds no emission tax (calc_inc_indic.gms l. 30-49): the tax a scenario puts on the net revenues
-    (ev.ghg_applied) is added back."""
+    (ev.ghg_applied) is added back, to the solve's own net revenues where the model keeps them (res.nr_solve)."""
     import pandas as pd
     from types import SimpleNamespace
     from capri_mod.income.income_module import IncomeDistributionModule as I
@@ -94,6 +94,11 @@ def test_the_income_leaves_the_emission_tax_out():
     assert I.untaxed_net_revenues(m).to_dict() == {"SWHE": 600.0, "DCOW": 1540.0}
     m.ev.ghg_applied = {}
     assert I.untaxed_net_revenues(m) is m.net_revenues
+    # after a solve: the solve's own net revenues (res.nr_solve), not net_revenues, which the solve restores to their
+    # state before it; the tax recorded at that solve added back
+    m.res = SimpleNamespace(nr_solve=pd.Series({"SWHE": 650.0, "DCOW": 1460.0}))
+    m.ev.ghg_applied = {"DCOW": 40.0}
+    assert I.untaxed_net_revenues(m).to_dict() == {"SWHE": 650.0, "DCOW": 1500.0}
 
 
 def test_the_producer_surplus_at_the_years_coefficients(monkeypatch):

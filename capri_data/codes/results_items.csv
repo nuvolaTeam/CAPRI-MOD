@@ -1,5 +1,8 @@
 block,item,item_dim,capri_cols,capri_rows,applies_to,unit,capri_source
 abatement,carbon_tax,rows,,,,EUR per t CO2-eq,"the run's emission tax, CAPRI's p_carbonTax(ru, GGWP) = p_ghgEmisTax x p_ghgEmisTaxShift (pol_input/ecampa/carbtax50_endotech_set12.gms l. 224-226), a scenario setting, not a dataOut item"
+eaa,EAAG,cols,,,,EUR million,"the gross account's value of an output or input at the solution, GROF x UVAG / 1000 (reports/sol_simy.gms l. 2549; income I2, capri_mod/income/eaa.py, register DEP-56): the crops' products and the feeds bought in quantity, the other items in value; the items by the model's codes (a crop's activity code, the animals' market products and OTHER_O, CAPRI's input and feed codes), so no CAPRI code is given"
+eaa,GROF,cols,,,,1000 t or EUR million,"the activities' gross production or use of an item at the solution, the sum of coefficient x level x 0.001 (reports/sol_simy.gms l. 685-687; income I2): 1000 t for the crops' products and the feeds bought, the value in EUR million for the items the model holds in value per ha or head (register DEP-56)"
+eaa,UVAG,cols,,,,EUR per t or 1000,"the item's unit value in the gross account: the solve's price (EUR per t) for the crops' products and the feeds bought, 1000 for the items in value (register DEP-56; income I2)"
 environmental,arable_land,rows,,,,,
 environmental,ghg_enteric,rows,ImpactGwp,CH4ENT,,kt CO2-eq,"reports/def_indic.gms l. 68: DATA(R,'ImpactGwp',GHGS) = DATA(R,'Impact',GHGS) x p_globWarmPot (the model's GWP_CH4 25, GWP_N2O 298 are CAPRI's: model_parameters.csv); the model's CH4_ENT, CAPRI's GWPCH4ENT_ from the feed mix (environmental/ghg.py)"
 environmental,ghg_ggwp,rows,,,,,
@@ -55,6 +58,12 @@ feed,FPRO,rows,,,,,
 feed,FROO,rows,,,,,
 feed,FSGM,rows,,,,,
 feed,FSTR,rows,,,,,
+feoga,FEOP,cols,FEOP,=,,EUR million,"the premium outlays per member state (the run's units) and product: the premiums of the activities with the product as their main output (PACT_TO_Y) x their levels, with the fallow land's and the voluntary set-aside's premiums spread over the crops with a premium by area (reports/feoga.gms l. 87-98, 111-135, 151-154; income I4, capri_mod/income/feoga.py, register DEP-57)"
+feoga,budEU,cols,budEU,=,,EUR million,"the premium outlays paid from the EU budget: budPil1 + budPil2 + budRestEU (reports/feoga.gms l. 100-105, 151-159; policy/policy_sets.gms l. 1582-1593 (p_budToPsdPay); income I4, capri_mod/income/feoga.py, register DEP-57)"
+feoga,budNAT,cols,budNat,=,,EUR million,"the premium outlays paid from the national budgets: half of Pillar II and the national payments (reports/feoga.gms l. 100-105, 151-159; policy/policy_sets.gms l. 1582-1593 (p_budToPsdPay); income I4, capri_mod/income/feoga.py, register DEP-57)"
+feoga,budPil1,cols,budPil1,=,,EUR million,"the premium outlays paid from the EU's Pillar I budget (reports/feoga.gms l. 100-105, 151-159; policy/policy_sets.gms l. 1582-1593 (p_budToPsdPay); income I4, capri_mod/income/feoga.py, register DEP-57)"
+feoga,budPil2,cols,budPil2,=,,EUR million,"the premium outlays paid from the EU's Pillar II budget: half of Pillar II (reports/feoga.gms l. 100-105, 151-159; policy/policy_sets.gms l. 1582-1593 (p_budToPsdPay); income I4, capri_mod/income/feoga.py, register DEP-57)"
+feoga,budRestEU,cols,budRestEU,=,,EUR million,"the premium outlays of the payments in no pillar, from the EU budget: zero for the model's scheme aggregates (reports/feoga.gms l. 100-105, 151-159; policy/policy_sets.gms l. 1582-1593 (p_budToPsdPay); income I4, capri_mod/income/feoga.py, register DEP-57)"
 fert_dist,area_kha,rows,,,,,
 fert_dist,cap_scale,rows,,,,,
 fert_dist,converged,rows,,,,,
@@ -200,3 +209,7 @@ welfare_supply,ProfitAgr,cols,,,,,
 welfare_supply,ProfitLandUse,cols,,,,,
 welfare_supply,RENT,cols,,,,,
 welfare_supply,agProdSurplus,cols,EAAG,agProdSurplus,,EUR million,"the agricultural producer surplus, MGVA + PMPLevl + PMPFeed + PMPLandTrans (reports/sol_simy.gms l. 2590-2595; income I3)"
+welfare_supply,TOOU,cols,EAAG,TOOU,,EUR million,"the gross account's total output, the sum over its outputs (reports/sol_simy.gms l. 2557; income I2, capri_mod/income/eaa.py)"
+welfare_supply,TOIN,cols,EAAG,TOIN,,EUR million,"the gross account's total input, the sum over its inputs (reports/sol_simy.gms l. 2558; income I2)"
+welfare_supply,EAAG_MGVA,cols,EAAG,MGVA,,EUR million,"the gross account's modified gross value added, TOOU - TOIN + PRME (reports/sol_simy.gms l. 2564-2566; income I2)"
+welfare_supply,EAAG_DIFF,cols,,,,EUR million,"the gross account's MGVA less the activity-based MGVA, CAPRI's p_problem4D(RSS, 'EAAG', 'DIFF') (reports/sol_simy.gms l. 2600-2615; income I2): what the items do not hold of the margins (register DEP-56)"

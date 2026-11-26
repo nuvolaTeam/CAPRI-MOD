@@ -40375,6 +40375,117 @@
     "tests": []
    }
   },
+  "pol_premium_output_shares_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/policy/premium_output_shares_2030.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The share of a model activity's premium per unit paid under each scheme aggregate for each main output of its CAPRI members (CAPRI's PACT_TO_Y, sets.gms l. 5377-5445), CAPRI's 2030 reference, level-weighted over the members; over the outputs the shares are premium_scheme_shares_2030.csv's; for the premium outlays per product (reports/feoga.gms l. 85-109; income I4). (tools/build/build_cap_ceilings_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "capri_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "output",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "DPPIL1",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "DPRD_LFA",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "DPRD_N2K",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "DPAE",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "DPNAT",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "capri_region",
+    "output"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "DPAE",
+     "unit": null,
+     "status": "open",
+     "basis": "premium_output_shares_2030.DPAE: unit to be established"
+    },
+    {
+     "item": "DPNAT",
+     "unit": null,
+     "status": "open",
+     "basis": "premium_output_shares_2030.DPNAT: unit to be established"
+    },
+    {
+     "item": "DPPIL1",
+     "unit": null,
+     "status": "open",
+     "basis": "premium_output_shares_2030.DPPIL1: unit to be established"
+    },
+    {
+     "item": "DPRD_LFA",
+     "unit": null,
+     "status": "open",
+     "basis": "premium_output_shares_2030.DPRD_LFA: unit to be established"
+    },
+    {
+     "item": "DPRD_N2K",
+     "unit": null,
+     "status": "open",
+     "basis": "premium_output_shares_2030.DPRD_N2K: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_cap_ceilings_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "pol_premium_scheme_shares_2030": {
    "file": "capri_data/baselines/capri_greendeal_ref/1730/policy/premium_scheme_shares_2030.csv",
    "declared_in": "24_policy_more.sql",
@@ -41689,7 +41800,7 @@
    "file": "capri_data/codes/results_items.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
-   "comment": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
+   "comment": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows, \"=\": the row is CAPRI's code itself; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
    "columns": [
     {
      "name": "block",
@@ -57151,6 +57262,90 @@
     ]
    }
   },
+  "sup_crop_inputs_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/crop_inputs_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "The crops' directly yield-dependent inputs at CAPRI's 2030 simulation year, item by item (income I2): sim_ini_21730 DATA(BAS, I) x (1 - f + f G) (capmod/define_inputs.gms l. 108-112, before TF_I) x UVAG(MS, I, 2030) = UVAG(BAS) x p_infl^(2030 - BAS) / 1000 over the crop's inputs (PACT_TO_I), CAPRI's 2030 money (the model deflates), CAPRI's 2030 level-weighted where a model crop sums CAPRI activities; the items sum to input_coefs_2030.csv's iy_uvag_eur_ha (tools/build/build_input_coefs_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "eur_ha",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(eur_ha >= 0)"
+   ],
+   "units": [
+    {
+     "item": "eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "sim_ini_21730 DATA at BAS, the crop's yield growth G, p_inputDemandFactor f (inputs/yieldIY.gms), UVAG(MS, I, BAS) x p_infl^13 / 1000, LEVL(2030)-weighted"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_input_coefs_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_input_coefs_2030.py"
+    ]
+   }
+  },
   "sup_crop_premium": {
    "file": "capri_data/2017/supply/crop_premium.csv",
    "declared_in": "18_supply_more.sql",
@@ -67671,7 +67866,7 @@
   },
   {
    "file": "00_codes.sql",
-   "rule": "a results item's CAPRI codes are both given or both empty, are in CAPRI's COLS and ROWS (\"*\" apart), and cite"
+   "rule": "a results item's CAPRI codes are both given or both empty, are in CAPRI's COLS and ROWS (\"*\", \"act\", \"=\" apart), and cite"
   },
   {
    "file": "02_provenance_notes.sql",

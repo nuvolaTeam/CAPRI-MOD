@@ -18,11 +18,20 @@ Outputs
                                                     unit paid under DPPIL1, DPRD_LFA, DPRD_N2K, DPAE and DPNAT
                                                     (each over DPTOTAL), level-weighted over the activity's CAPRI members; region
                                                     as tools/lib/_model_regions.region_to_capri, else its member state
+  capri_data/baselines/capri_greendeal_ref/1730/policy/premium_output_shares_2030.csv
+                                                    model region x activity x main output: the share of the activity's
+                                                    premium per unit paid under each scheme for each main output of its
+                                                    CAPRI members (CAPRI's PACT_TO_Y, sets.gms l. 5377-5445; for the
+                                                    reports' premium outlays per product, reports/feoga.gms l. 85-109),
+                                                    level-weighted as above; over the outputs the shares are
+                                                    premium_scheme_shares_2030.csv's. The activities without a main
+                                                    output in PACT_TO_Y (FALL, VSET) are left out: the report spreads
+                                                    their premiums over the crops (feoga.gms l. 111-158)
 
 They replace, in the payments engine (capri_mod/policy/policy_module.py), the participation shares 30% (ANC),
 20% (agri-environment) and 8% (organic) and the "approximate 2023-2027" national envelopes (PROXY_AUDIT S289, S292).
 
-    python tools/build/build_cap_ceilings_2030.py [--src CSV]
+    python tools/build/build_cap_ceilings_2030.py [--src CSV] [--gams DIR]
 """
 from __future__ import annotations
 
@@ -35,13 +44,14 @@ from pathlib import Path
 
 import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
-from paths import BASELINE_REF  # noqa: E402  (CAPRI's material outside the repository)
+from paths import BASELINE_REF, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 from _grep import lines  # noqa: E402  (a listing's lines, plain or zipped)
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = BASELINE_REF
 OUT_CEIL = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "policy" / "cap_ceilings_2030.csv"
 OUT_SHARE = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "policy" / "premium_scheme_shares_2030.csv"
+OUT_OUTPUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "policy" / "premium_output_shares_2030.csv"
 SCHEMES = ("DPPIL1", "DPPIL2", "DPRD_LFA", "DPRD_N2K", "DPAE", "DPNAT", "DPTOTAL")
 SHARES = ("DPPIL1", "DPRD_LFA", "DPRD_N2K", "DPAE", "DPNAT")
 # model activity -> CAPRI activities (crops: tools/build/build_capri_base.CROP_MAP; animals: tools/build/build_livestock_units.ANIMALS)
@@ -80,10 +90,25 @@ def read(src: Path):
     return ceil, prme, levl
 
 
+def main_outputs(gams: Path) -> dict:
+    """{CAPRI activity: its main output} (CAPRI's PACT_TO_Y, sets.gms l. 5377-5445, read with tools/lib/gams_sets.py);
+    one main output per activity, checked."""
+    import gams_sets as G
+    gs = G.read(gams / "sets.gms", gams, {"BaseYear": "2017", "BAS": "17"})
+    p2y = defaultdict(set)
+    for act, out in gs.get("PACT_TO_Y"):
+        p2y[act.upper()].add(out.upper())
+    many = {k: v for k, v in p2y.items() if len(v) != 1}
+    assert not many, f"PACT_TO_Y: activities with several main outputs {many}"
+    return {k: next(iter(v)) for k, v in p2y.items()}
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", type=Path, default=SRC)
+    ap.add_argument("--gams", type=Path, default=SOURCES / "gams")
     a = ap.parse_args()
+    p2y = main_outputs(a.gams)
     ceil, prme, levl = read(a.src)
     # member states and their NUTS regions (not the EU aggregates EU, EU27yr19, EU_EAST, A_EU_WEST, ...)
     eu = sorted(r for r in ceil if re.fullmatch(r"[A-Z]{2}[0-9A-Z]{6}", r) and not r.startswith("EU"))
@@ -99,7 +124,7 @@ def main() -> None:
     sp = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(sp); sp.loader.exec_module(mr)
     to_c8 = mr.region_to_capri()
-    rows = []
+    rows, rows_o = [], []
     for reg in mr.model_regions():
         for act, mem in MEMBERS.items():
             for src in (to_c8.get(reg), mr.national_code(reg)):
@@ -113,14 +138,29 @@ def main() -> None:
                 for s in SHARES:
                     row[s] = sum(w[x] * prme[src].get((x, s), 0.0) for x in mem) / tot
                 rows.append(row)
+                # the same by the members' main outputs (feoga.gms l. 85-109: PACT_TO_Y)
+                for o in sorted({p2y[x] for x in mem if x in p2y}):
+                    ro = dict(region=reg, activity=act, capri_region=src, output=o)
+                    for s in SHARES:
+                        ro[s] = sum(w[x] * prme[src].get((x, s), 0.0) for x in mem if p2y.get(x) == o) / tot
+                    if any(ro[s] for s in SHARES):
+                        rows_o.append(ro)
                 break
     sh = pd.DataFrame(rows)
     sh.to_csv(OUT_SHARE, index=False)
+    so = pd.DataFrame(rows_o)
+    so.to_csv(OUT_OUTPUT, index=False)
+    # over the outputs, each activity with a main output gives back its scheme shares
+    back = so.groupby(["region", "activity"])[list(SHARES)].sum()
+    ref = sh.set_index(["region", "activity"])[list(SHARES)].reindex(back.index)
+    assert float((back - ref).abs().max().max()) < 1e-9, "premium_output_shares_2030: the outputs' shares do not add up"
     nat = int((sh.capri_region.str[2:] == "000000").sum())
     chk = (sh[list(SHARES)].sum(axis=1) - 1.0).abs()
     print(f"cap_ceilings_2030.csv: {len(c)} CAPRI regions; premium_scheme_shares_2030.csv: {len(sh)} region x activity "
           f"rows ({nat} from the member-state row); max |sum of shares - 1| = {chk.max():.2e} "
-          f"(rows not summing to 1: {int((chk > 1e-6).sum())})")
+          f"(rows not summing to 1: {int((chk > 1e-6).sum())}); premium_output_shares_2030.csv: {len(so)} region x "
+          f"activity x output rows, {int(so.groupby(['region', 'activity']).size().gt(1).sum())} region x activity "
+          f"with more than one main output")
 
 
 if __name__ == "__main__":

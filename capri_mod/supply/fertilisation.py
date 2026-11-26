@@ -891,6 +891,7 @@ class FertilisationBlock:
             if c in self.net_revenues.index:
                 need_t_ha = self._crop_mineral_rate(c) * (1.0 + e0) / 1000.0
                 self.net_revenues[c] = float(self.net_revenues[c]) - c_t * need_t_ha
+                self._nr_item(c, "I", "mitiI", c_t * need_t_ha)
         # the same factor on the manure and residue credits (environmental module, "__credit__")
         self.ev.n_intensity["__credit__"] = self.ev.n_intensity.get("__credit__", 1.0) * f
         shares = {k: (v,) for k, v in sh.items()}

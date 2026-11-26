@@ -129,6 +129,9 @@ class RegionalEvalState(_Slots):
         "entl_col",           # the entitlement overshoot's column (K136)
         "mix_cols",           # {crop: column} of the technology mix columns
         "mix_dnr",            # {crop: net revenue T1 - T2 per ha} of this solve
+        "mix_parts",          # {crop: mix_dnr's terms by item} (techn_mix._mix_linear; income I2's accounts by item)
+        "nr_items",           # {activity: [(side, item, EUR per unit, kg per unit, EUR per t)]}: the solve's changes of
+                              # the net revenues after _compute_net_revenues by item (SupplyModule._nr_item; income I2)
         "split_lin",          # {column: (margin, tax)} of the dairy and cattle split columns' explicit linear terms
                               # (EUR per head moved: the revenue and input changes, the emission tax; income I3)
         "nlp_lin_adj",        # {"fert": per column, "tax": per column}: the fertiliser cost the NLP form takes out of
@@ -193,6 +196,8 @@ class RegionalResults(_Slots):
         "kkt_ipopt",          # IPOPT solves in the Hessian's KKT mode (a counter)
         "last_feed_dm",       # the feed used, dry matter
         "last_feed_t",        # the feed used, tonnes
+        "nr_solve",           # the net revenues per unit as the solve's objective took them (before the solve's restore
+                              # of net_revenues; the income reports read them: capri_mod/income)
         "last_feed_lin",      # the feed value per head the herd's linear term left out (EUR/head; DEP-13 step 3)
         "last_feed_price",    # the feed's value in the report (EUR/kg): tradable feeds at the solve's prices, fodder
                               # at the ration's value

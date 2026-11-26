@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](dev/KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (19)
+## Open (21)
 
 | # | Issue | Status |
 |---|---|---|
@@ -31,12 +31,15 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K196](#k196) | The Green Deal's N-surplus dual is below CAPRI's (CAPRI's recovered from its own results): median 0.856 of CAPRI's in the standing check at 9867411 (0.89 at bb3b592), 0.83 at CAPRI's prices; the suckler cows' and the technology shift's remaining gaps follow it | open (21 November 2026) |
 | [K198](#k198) | The assignments refactor's findings for the main line (its inventory of the CAPRI statements the model ports or cites, blocks A0-A6): porting differences in the market supply Hessian, the price transmission, the stop rule, the welfare, the premiums, the Green Deal's regional rules and the accounts, sorted by where they act, not measured; A0's 14 wrong line citations corrected; from the phase's runs, a measured and a cached Hessian moving a run's last digits (1e-5 after the scenario; diagnosed and fixed: the manure value left by the last shock), the thread oversubscription (fixed) and the Hessian step's log (done) | open (updated 24 November 2026) |
 | [K206](#k206) | The ported baseline feed calibration ends at a slightly worse local optimum than CAPRI's in five countries (PT, TUR, BG, ES, CZ); every coefficient within 1% of CAPRI's | open (25 November 2026) |
+| [K210](#k210) | Croatia's animals have no premium in the model: CAPRI's 2017 data give them none, and the model's 2030 animal premiums are the 2017 ones moved by the projection; CAPRI's 2030 reference pays them 23.3 EUR million (2017 money) | open (26 November 2026): CAPRI's 2030 premiums per head proposed |
+| [K209](#k209) | The Green Deal's yield changes (the pesticide loss, the organic yield gap) enter the crops' margins at the data's producer price, the rest of the revenue at the solve's price | open (26 November 2026): CAPRI's form proposed, not applied |
 | [K207](#k207) | CAPRI's other animals (OANI) have no level in the model, so their income is missing: 1,305 of the 1,704 EUR million by which the mini-EU baseline's income is below CAPRI's 2030 reference | open (26 November 2026): the form of the fix is the project lead's |
 
-## Resolved (187)
+## Resolved (188)
 
 | # | Issue | Status |
 |---|---|---|
+| [K208](#k208) | The income at the solution took the regional model's net revenues after the solve had restored them to their state before it: the solve's prices and its changes of the margins were missing from a scenario's income | fixed (26 November 2026, before income I1 reached dev): the solve's own net revenues (res.nr_solve) |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | closed (17 November 2026): CAPRI's stop rule settles it (young-animal imbalance 0.0004); a 1e-05 price change leaves the beef price unchanged |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | fixed (17 November 2026): they converge on the full EU (14 iterations) and are on by default |
 | [K120](#k120) | CAPRI's market calibration ("capri"): the market supply Hessian measured after the first supply solve had lost most of its response; the baseline calibration's stall rule stopped it uncorrected | fixed: 20 and 37 units, full EU Farm-to-Fork and Green Deal (7 November 2026); open with CAPRI's market calibration: the baseline calibration's first-round drift (9 November 2026: not the ecological set-aside row; the baseline's prices move up to 1.3% from CAPRI's calibration point; at the baseline's end the crop levels are within a median 0.22% of CAPRI's 2030 levels, 7 region pairs above 5%; 9 November 2026, night: most of the remaining gap was the projection rescaling CAPRI's own 2030 levels to the 2017 crop-to-land ratio, fixed) |
@@ -4407,6 +4410,67 @@ Two forms of the fix:
   the model's solution
 - **In 9t:** -
 - **Status:** **open**: the form of the fix, (a) or (b), is the project lead's
+
+<a id="k210"></a>
+### K210: Croatia's animals without premiums (found 26 November 2026)
+
+Found by income I4's check of the premium outlays per product against CAPRI's 2030 reference (dataOut FEOP, a check
+only). For Croatia, one unit in the mini-EU, the crops' outlays are CAPRI's within 0.05% (but other crops: K138), the
+animals' are missing: CAPRI's 2030 reference pays cow milk 12.0, suckler calves (YCAM) 5.0, beef 2.8, sheep and goat
+milk 1.5, sheep and goat meat 1.3 and young cows 0.6, 23.3 EUR million in 2017 money (CAPRI's / 1.019^13), of Croatia's
+249.1 (the model's 221.2; other crops' 4.7 are K138's). The model's animal premiums per
+head are CAPRI's 2017 PRME per model head (livestock_premium_coef.csv) moved by the projection's factors
+(projection/prices.py); Croatia's 2017 row is empty (no animal premium in CAPRI's 2017 data), so its 2030 animal premiums
+are zero; the crops take CAPRI's 2030 premiums at the 2030 market year. Croatia is the only unit with an empty row.
+Proposed (CAPRI's): at the 2030 market year the animals' premiums per head from CAPRI's 2030 reference, as the crops';
+it changes the animals' margins in Croatia, so the supply solution, and the income's PRME.
+
+- **Effect:** Croatia's animal margins, supply and income at 2030 (its PRME 9% below CAPRI's by the animals); the
+  premium outlays
+- **In 9t:** not checked
+- **Status:** **open**: CAPRI's 2030 premiums per head proposed
+
+<a id="k209"></a>
+### K209: The Green Deal's yield changes valued at the data's price in the margins (found 26 November 2026)
+
+Found while itemising the margins for income I2 (SupplyModule._nr_item). A crop's revenue per ha is formed at the
+solve's price (supply_module._compute_net_revenues: the producer price x (1 + the transmitted price change) x the
+yield), and so is the yield's price response (policy.apply_yield_price_response). The organic yield gap
+(policy.apply_organic_area_target) and the pesticide yield loss (policy.apply_pesticide_reduction) change the margin
+by the data's producer price (data.producer_prices) x the yield change. CAPRI values the yield, its changes included,
+at the solution's price (its LINEAR_ takes the price times the yield coefficient of the solve). The margin's error is
+the price change x the yield change, a second-order term: for a crop whose price rises by 10% under a yield change of
+-5%, 0.5% of its revenue per ha. Proposed: the two changes at the solve's price (the price the revenue takes), which
+is CAPRI's form; it changes the supply solution slightly, so not applied with the income's work.
+
+- **Effect:** the crops' margins in a scenario with the organic or pesticide target and price changes, so the supply
+  solution and the income; second order
+- **In 9t:** not checked
+- **Status:** **open**: CAPRI's form proposed
+
+<a id="k208"></a>
+### K208: The income at the solution took the net revenues restored after the solve (found and fixed 26 November 2026)
+
+The regional model's solve restores net_revenues to their state before it (SupplyModule.solve's finally block: a solve
+leaves no state behind), and the region's income (IncomeDistributionModule.income_parts, income I1) was computed after
+the solve from net_revenues. So a scenario's income lacked the solve's own margins: the prices of the solve (its price
+shock), the Green Deal's input changes, the organic and pesticide yield changes, the yields' price response, the
+yield-dependent inputs' update and the young animals' prices; at the base nothing (the solve changes nothing). Found
+on the mini-EU Green Deal pair by income I2's account by item, whose outputs are the solve's: its MGVA was above the
+activity-based by 39.9 EUR million over the 20 units, by region from -49.8 to +46.0 (Denmark's dairy cows +116,
+Spain's olives +43), on DE110000 a soft wheat price +20% left the income's margin at the base's 451.2 EUR/ha with a
+revenue of 1,000.5. The producer surplus (income I3) took the same net revenues for its PMP terms' re-expression, and
+under an emission tax the income added the tax back to net revenues that held none.
+
+**Fixed:** the solve keeps its own net revenues before the restore (res.nr_solve); the income and the producer surplus
+take them (IncomeDistributionModule.untaxed_net_revenues). The figures of income I1 and I3 measured on the Green Deal
+pair before (K205's Green Deal change -1,578, the I3 changes) are replaced by the remeasured pair's (the solution identical): the baseline's income unchanged at 36,654 EUR million (its solves change the margins little), the Green Deal's change -1,520 (was -1,578), PMPLevl's -41,215 (was -41,157); agProdSurplus's change unchanged at -42,710, the re-expression's terms cancelling in it. Income I1 had not
+reached dev (test branches only).
+
+- **Effect:** a scenario's reported income, its producer surplus and the welfare table's MGVA, ProfitAgr and
+  agProdSurplus, on the test branches of income I1 and I3; not the model's solution
+- **In 9t:** no (income I1 is later)
+- **Status:** **fixed**
 
 <a id="k205"></a>
 ### K205: A scenario's income at the base unit margins (found 24 November 2026; fixed 26 November 2026)

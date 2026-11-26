@@ -113,10 +113,15 @@ class IncomeDistributionModule:
 
     @staticmethod
     def untaxed_net_revenues(m) -> pd.Series:
-        """The regional model's net revenues per unit without the emission tax a scenario charges on them (the tax
-        per unit recorded by supply/abatement.py _apply_ghg_tax, ev.ghg_applied; none outside an emission tax
-        scenario)."""
-        nr = m.net_revenues
+        """The regional model's net revenues per unit at its last solve without the emission tax a scenario charges on
+        them (the tax per unit recorded by supply/abatement.py _apply_ghg_tax, ev.ghg_applied; none outside an emission
+        tax scenario). The solve's own net revenues are res.nr_solve: the solve restores net_revenues to their state
+        before it (SupplyModule.solve), so net_revenues after a solve are not the solve's (until 26 November 2026 the
+        income took them: the solve's prices, its Green Deal input changes, organic and pesticide yields and
+        young-animal prices were missing from the margins)."""
+        nr = getattr(getattr(m, "res", None), "nr_solve", None)
+        if nr is None:
+            nr = m.net_revenues
         ga = dict(getattr(getattr(m, "ev", None), "ghg_applied", None) or {})
         if not ga:
             return nr

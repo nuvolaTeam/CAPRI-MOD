@@ -4486,6 +4486,24 @@
    },
    "catalogue_note": "tools/build/build_cap_ceilings_2030.py; national envelopes of the payments report (CAPRI member states; Norway has none) (not re-checked)"
   },
+  "capri_data/baselines/capri_greendeal_ref/1730/policy/premium_output_shares_2030.csv": {
+   "description": "The share of a model activity's premium per unit paid under each scheme aggregate for each main output of its CAPRI members (CAPRI's PACT_TO_Y, sets.gms l. 5377-5445), CAPRI's 2030 reference, level-weighted over the members; over the outputs the shares are premium_scheme_shares_2030.csv's; for the premium outlays per product (reports/feoga.gms l. 85-109; income I4). (tools/build/build_cap_ceilings_2030.py)",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 10409,
+   "columns": 9,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_cap_ceilings_2030 (not in the trace yet)"
+   },
+   "catalogue_note": "tools/build/build_cap_ceilings_2030.py; the premium outlays per product and their budgets (capri_mod/income/feoga.py: income I4) (not re-checked)"
+  },
   "capri_data/baselines/capri_greendeal_ref/1730/policy/premium_scheme_shares_2030.csv": {
    "description": "CAPRI's 2030 CAP budgets and the per-activity premium split by scheme (Pillar I, LFA, Natura 2000, agri-environment). (tools/build/build_cap_ceilings_2030.py)",
    "kind": "coefficients",
@@ -4503,6 +4521,25 @@
     "builder": "build_cap_ceilings_2030"
    },
    "catalogue_note": "tools/build/build_cap_ceilings_2030.py; Pillar II budget changes (PolicyScenario.lfa_/ae_/n2k_budget_change) and the payments report's split by scheme (not re-checked)"
+  },
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/crop_inputs_2030.csv": {
+   "description": "The crops' directly yield-dependent inputs at CAPRI's 2030 simulation year, item by item (income I2): sim_ini_21730 DATA(BAS, I) x (1 - f + f G) (capmod/define_inputs.gms l. 108-112, before TF_I) x UVAG(MS, I, 2030) = UVAG(BAS) x p_infl^(2030 - BAS) / 1000 over the crop's inputs (PACT_TO_I), CAPRI's 2030 money (the model deflates), CAPRI's 2030 level-weighted where a model crop sums CAPRI activities; the items sum to input_coefs_2030.csv's iy_uvag_eur_ha (tools/build/build_input_coefs_2030.py)",
+   "kind": "coefficients",
+   "vintage": "2030 reference",
+   "domain": "supply",
+   "status": "live",
+   "vintage_exception": "CAPRI's simulation start sim_ini_21730: the crops' directly yield-dependent inputs item by item at 2030 (define_inputs.gms before TF_I) at the member state's UVAG of 2030",
+   "rows": 56761,
+   "columns": 4,
+   "units": "U_EuPerHa",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_input_coefs_2030 (not in the trace yet)"
+   },
+   "catalogue_note": "tools/build/build_input_coefs_2030.py: income I2 (not re-checked)"
   },
   "capri_data/baselines/capri_greendeal_ref/1730/supply/input_coefs_2030.csv": {
    "description": "CAPRI's simulation-year input coefficients of 2030 that its Green Deal input changes and its yield updates act on, per regional unit and model activity: capmod/define_inputs.gms's DATA(BAS) x (1 - f + f G) before TF_I (DATA_IY_Y), the crops' at the member state's UVAP(2030) (capmod/define_objc.gms l. 40-44), the animals' INPO as its yield factor on the model's cost per head. Crops' columns empty for animals and the animals' for crops (register DEP-21; tools/build/build_input_coefs_2030.py)",
@@ -6671,9 +6708,9 @@
    }
   },
   "capri_data/codes/results_items.csv": {
-   "description": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
+   "description": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows, \"=\": the row is CAPRI's code itself; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
    "kind": "structure",
-   "rows": 201,
+   "rows": 214,
    "columns": 8,
    "read_by_model": [
     "capri_mod/io_results.py"

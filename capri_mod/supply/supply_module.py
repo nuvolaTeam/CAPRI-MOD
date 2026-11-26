@@ -292,6 +292,9 @@ class RegionData:
     #: year only): the crops' PLAP, INPO and top-up bases and yield-dependent parts at the member state's UVAP, the
     #: animals' INPO yield factor (register DEP-21)
     input_coefs_2030: Optional[pd.DataFrame] = None
+    #: the crops' yield-dependent inputs of 2030 item by item (crop_inputs_2030.csv: activity x item, EUR per ha before
+    #: TF_I, CAPRI's 2030 money; the 2030 market year only; the EAA by item, income I2)
+    crop_inputs_2030: Optional[pd.DataFrame] = None
     #: the simulation year (the projection's market year; None: the base year)
     sim_year: Optional[int] = None
     #: CAPRI's catch crops (catc_share_2030, catc_cost_eur_ha, biofix_t_n_ha) and winter cover shares by crop
@@ -361,6 +364,9 @@ class SupplyResult:
     #: the region's income at the solution in CAPRI's form (income I1, EUR 1000: MGVA, PRME, FEED, mitiI, mitiO,
     #: mitiPmp, the options' parts, MGVA per activity; IncomeDistributionModule.income_parts), set by the regional solve
     income: Dict = field(default_factory=dict)
+    #: the region's gross account by item at the solution (income I2, EUR million: items, TOOU, TOIN, PRME, MGVA, AGGT,
+    #: DIFF; capri_mod/income/eaa.py eaag_items), set by the regional solve; None where it could not be computed
+    eaa: Optional[Dict] = None
 
 
 # ---------------------------------------------------------------------------
@@ -670,6 +676,40 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                            for m, v in parts.items())
         return mrev * self._pt(act, own) * float(price_shock.get(act, 0.0))
 
+    def _nr_item(self, act, side, item, per_unit, kg=None, uv=None) -> None:
+        """Record a change of an activity's net revenue per unit made within the solve after _compute_net_revenues, by
+        item, for the economic accounts by item (income I2, capri_mod/income/eaa.py): side "O" an output's change (the
+        net revenue moves by per_unit, a quantity change kg per unit at the unit value uv in EUR per t where given),
+        side "I" an input's change (the net revenue moves by -per_unit). Kept in ev.nr_items for this solve."""
+        if not per_unit:
+            return
+        if getattr(self.ev, "nr_items", None) is None:
+            self.ev.nr_items = {}
+        self.ev.nr_items.setdefault(act, []).append((side, item, float(per_unit), kg, uv))
+
+    def _output_items(self, act, revenue, price, yld, tou, mrev, price_shock) -> list:
+        """The revenue per ha or head by output item, as _compute_net_revenues forms it: [(item, quantity per unit in kg or
+        None, unit value in EUR per t or None, value per unit in EUR)], the values adding up to the revenue. A crop: its
+        product, yield x price. An animal with CAPRI's output value per head (TOOU): its market products' values per
+        head with their price changes (_market_revenue_change) and the rest of TOOU (the young animals and the other
+        outputs, OTHER_O: one item); without it, its own product. Recorded for the economic accounts by item (income I2,
+        capri_mod/income/eaa.py)."""
+        if act not in ANIMALS:
+            return [(act, float(yld) * 1000.0, float(price), float(revenue))]
+        own = SupplyModule.ACTIVITY_PRICE_SOURCE.get(act) or act
+        pv = getattr(self.data, "livestock_product_value_by_market_coef", None)
+        parts = ({k.split(".", 1)[1]: float(v) for k, v in pv.items()
+                  if k.startswith(act + ".") and pd.notna(v) and float(v) != 0.0} if pv is not None else {})
+        if tou is None or not parts:
+            return [(own, None, None, float(revenue))]
+        items = []
+        for m_, v in parts.items():
+            sh = 0.0 if price_shock is None or not mrev > 0 else float(
+                price_shock.get(m_, price_shock.get(act, 0.0) if m_ == own else 0.0))
+            items.append((m_, None, None, v * (1.0 + self._pt(act, m_) * sh)))
+        items.append(("OTHER_O", None, None, float(revenue) - sum(v_ for *_, v_ in items)))
+        return items
+
 
     #: compute each region's response to the young-animal prices from its solved NLP (K65): None (default) with the
     #: cattle member splits only (CAPRIModel.use_yani_exact); True / False force it
@@ -848,6 +888,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         r = {}
         prem = {}
         rev = {}
+        out_items = {}
         for act in self.acts:
             price   = prices.get(act, 0.0)
             yld     = yields.get(act, 0.0)
@@ -970,6 +1011,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             r[act] = LINEAR_netRevenue(revenue, cost, payment)
             prem[act] = payment
             rev[act] = revenue
+            out_items[act] = self._output_items(act, revenue, price, yld, _tou, _mrev, price_shock)
 
         self.net_revenues = pd.Series(r)
         #: the premium part of each net revenue (CAPRI's PRME per ha or head), for income reports (capri_mod/income)
@@ -977,6 +1019,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         #: the revenue part of each net revenue (EUR per ha or head), for income reports (the fodder crops' output,
         #: which CAPRI's LINEAR_ does not hold: income I3)
         self.revenues = pd.Series(rev, dtype=float)
+        #: the revenue by output item (_output_items), for the economic accounts by item (income I2, capri_mod/income/eaa.py)
+        self.output_items = out_items
 
     # ------------------------------------------------------------------
     # Constraint matrix
@@ -1699,6 +1743,9 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             return self._solve_inner(price_shock, policy_shock, set_aside_requirement)
         finally:
             self.ev.yields_solve0 = None
+            # the solve's own net revenues, for the income reports (capri_mod/income: income_parts, eaa), before the
+            # restore below takes them back to the state before the solve
+            self.res.nr_solve = self.net_revenues.copy()
             self.net_revenues = _net_rev_backup
             for _f, _v in _backup.items():
                 setattr(self.data, _f, _v)
@@ -1711,6 +1758,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         set_aside_requirement: float = 0.0,
     ) -> SupplyResult:
         self.ev.cover = None              # catch-crop requirement: set by the pesticide/organic targets
+        self.ev.nr_items = {}             # the net revenues' changes by item within this solve (_nr_item)
         # Recompute net revenues under shocks
         if price_shock is not None or policy_shock is not None:
             if policy_shock:
@@ -2494,6 +2542,8 @@ class SupplyModule(ModuleStateMixin):
             plap_capri_step=((d.get("plant_protection_capri_step") or {}).get(region)
                              if _inputs.market_year(d) == 2030 else None),
             input_coefs_2030=((d.get("input_coefs_2030") or {}).get(region)
+                              if _inputs.market_year(d) == 2030 else None),
+            crop_inputs_2030=((d.get("crop_inputs_2030") or {}).get(region)
                               if _inputs.market_year(d) == 2030 else None),
             sim_year=(int(d["market_year"]) if d.get("market_year") else None),
             cover_crops=(d["cover_crops"].loc[region] if d.get("cover_crops") is not None
@@ -3387,6 +3437,13 @@ class SupplyModule(ModuleStateMixin):
             from capri_mod.income.income_module import IncomeDistributionModule
             result.income = IncomeDistributionModule(getattr(self, "data", None)).income_parts(region, result, self)
             result.gross_margin = float(result.income["MGVA"])
+            # CAPRI's gross account by item and its check against the activity-based income (income I2)
+            try:
+                from capri_mod.income.eaa import eaag_items
+                result.eaa = eaag_items(region, result, self, ip=result.income)
+            except Exception as exc:
+                warnings.warn(f"{region}: the gross account by item could not be computed ({exc!r})")
+                result.eaa = None
             return region, result, (0 if result.converged else 1), n_metric, "N price"
         except Exception as e:
             # a region whose solve raises stops the run (28 October 2026): an exception here is a fault of the code

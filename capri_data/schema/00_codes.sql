@@ -714,12 +714,12 @@ CREATE TABLE results_items (
     capri_source VARCHAR,
     PRIMARY KEY (block, item)
 );
-COMMENT ON TABLE results_items IS 'The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT''s cols and rows ("*": the model''s own coordinate translated, "act": the activity''s code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)';
+COMMENT ON TABLE results_items IS 'The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT''s cols and rows ("*": the model''s own coordinate translated, "act": the activity''s code in rows, "=": the row is CAPRI''s code itself; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)';
 
--- rule: a results item's CAPRI codes are both given or both empty, are in CAPRI's COLS and ROWS ("*" apart), and cite
+-- rule: a results item's CAPRI codes are both given or both empty, are in CAPRI's COLS and ROWS ("*", "act", "=" apart), and cite
 -- where CAPRI sets them
 SELECT block, item, capri_cols, capri_rows FROM results_items
 WHERE (capri_cols = '') <> (capri_rows = '')
    OR (capri_cols <> '' AND (capri_source IS NULL OR capri_source = ''))
    OR (capri_cols NOT IN ('', '*') AND capri_cols NOT IN (SELECT code FROM capri_cols))
-   OR (capri_rows NOT IN ('', '*', 'act') AND capri_rows NOT IN (SELECT code FROM capri_rows));
+   OR (capri_rows NOT IN ('', '*', 'act', '=') AND capri_rows NOT IN (SELECT code FROM capri_rows));

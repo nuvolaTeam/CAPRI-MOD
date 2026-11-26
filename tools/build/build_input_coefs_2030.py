@@ -46,7 +46,10 @@ p_inputDemandFactor (inputs/yieldIY.gms, capri_data/sources/raw/capri/gams/input
 sets.gms (PACT_TO_Y; IOE's members, to check none of the inputs has a price expectation); dataOut of
 res_2_1730greendeal_refdefaulta (tools/lib/paths.BASELINE_REF) for the check.
 
-Output: capri_data/baselines/capri_greendeal_ref/1730/supply/input_coefs_2030.csv
+Output: capri_data/baselines/capri_greendeal_ref/1730/supply/input_coefs_2030.csv and, beside it, crop_inputs_2030.csv
+(region, activity, item, eur_ha): iy_uvag_eur_ha item by item, DATA(BAS, I) x (1 - f + f G) x UVAG(MS, I, Y) / 1000
+LEVL(Y)-weighted over the model crop's CAPRI activities, before TF_I, the items' sum asserted equal to the column (the
+EAA's inputs by item, income I2; reports/sol_simy.gms l. 685-687, 2549)
 
     python tools/build/build_input_coefs_2030.py [--src ZIP] [--no-check]
 """
@@ -75,6 +78,8 @@ import gams_sets as G_  # noqa: E402  (CAPRI's sets from its GAMS files)
 from build_plant_protection_capri_step_2030 import UVAP_Y, p_inflationFactor, read_p_infl  # noqa: E402
 
 OUT = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "supply" / "input_coefs_2030.csv"
+#: the crops' yield-dependent inputs item by item (income I2): iy_uvag_eur_ha's terms
+OUT_ITEMS = OUT.with_name("crop_inputs_2030.csv")
 SIMINI = REFERENCE / "simini" / "simini_21730"
 YIELD_IY = ROOT / "capri_data" / "sources" / "raw" / "capri" / "gams" / "inputs" / "yieldIY_p_inputDemandFactor.parquet"
 SIM_YEAR = 2030
@@ -147,7 +152,7 @@ def main() -> None:
     def f(c, i):
         return fac.get((c, i), 1.0)
 
-    rows, check, missing_uv = [], [], set()
+    rows, check, missing_uv, items = [], [], set(), []
     for r in _MR.model_regions():
         ms = _MR.national_code(r)
         uv = {i: UVAP_Y(uvap_bas[(ms, i)], infl) for i in IY_CROP if (ms, i) in uvap_bas}
@@ -186,7 +191,11 @@ def main() -> None:
                                 if bas[i]:
                                     k = "yd_plap" if i == "PLAP" else "yd_inpo" if i == "INPO" else "yd_rest"
                                     s[k] += L * f(c, i) * bas[i] * G * uv.get(i, 0.0) / 1000.0
-                        # the yield-dependent inputs' part of TOIN at the year's coefficients and UVAG(Y)
+                        # the yield-dependent inputs' part of TOIN at the year's coefficients and UVAG(Y), item by
+                        # item (CROP_ITEMS, income I2) and summed
+                        for i in IY_CROP:
+                            if i in p2i.get(c, ()):
+                                s["item_" + i] += L * (DATA_IY_Y(bas[i], f(c, i), G, 1.0) or 0.0) * ug.get(i, 0.0) / 1000.0
                         s["iy_uvag"] += L * sum((DATA_IY_Y(bas[i], f(c, i), G, 1.0) or 0.0) * ug.get(i, 0.0)
                                                 for i in IY_CROP if i in p2i.get(c, ())) / 1000.0
                         yb = sum(D.get((r, c, o, "BAS"), 0.0) for o in p2y.get(c, []))
@@ -207,9 +216,17 @@ def main() -> None:
                     rows.append([r, model_act] + [s[k] / w for k in ("plap", "inpo", "eful", "eful_inpo", "yd_rest",
                                                                       "yd_plap", "yd_inpo")] + [g, float("nan"), w,
                                                                                                 s["iy_uvag"] / w])
+                    for i in IY_CROP:
+                        if s["item_" + i]:
+                            items.append([r, model_act, i, s["item_" + i] / w])
+                    tot = sum(s["item_" + i] for i in IY_CROP)
+                    assert abs(tot - s["iy_uvag"]) <= 1e-9 * max(1.0, abs(s["iy_uvag"])), (r, model_act)
     out = pd.DataFrame(rows, columns=COLS).sort_values(["region", "activity"])
     OUT.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(OUT, index=False)
+    it = pd.DataFrame(items, columns=["region", "activity", "item", "eur_ha"]).sort_values(["region", "activity", "item"])
+    it.to_csv(OUT_ITEMS, index=False)
+    print(f"{OUT_ITEMS.name}: {len(it)} rows, {it.region.nunique()} regions, items {sorted(it.item.unique())}")
     print(f"{OUT.name}: {len(out)} rows ({out.inpo_yield_factor.isna().sum()} crop, {out.inpo_yield_factor.notna().sum()} animal), "
           f"{out.region.nunique()} regions; member-state inputs without UVAP: {sorted(missing_uv)}")
     if not a.no_check:

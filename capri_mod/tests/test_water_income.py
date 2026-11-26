@@ -92,8 +92,19 @@ def test_income_is_capris_mgva_sum(data):
         assert 0.0 < row.public_support < row.farm_income
 
 
+@pytest.fixture(scope="module")
+def solved3(data):
+    """The base year's regional solutions of three units (SupplyModule at base prices): the supply module, its
+    results and the units."""
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+    regs = ["DE110000", "ES610000", "IR010000"]
+    sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
+    return sm, sm.run(price_signals=None, regions=regs), regs
+
+
 @pytest.mark.slow
-def test_the_producer_surplus_at_the_regional_solution(data):
+def test_the_producer_surplus_at_the_regional_solution(solved3):
     """CAPRI's producer surplus at the regional solution (income I3, IncomeDistributionModule.producer_surplus): the
     regional NLP's objective by part adds up to IPOPT's objective; each activity's linear PMP term on the income's cost
     basis is the supply model's PMP constant f, less the land rents its land use carries (land._land_augment), plus
@@ -103,10 +114,7 @@ def test_the_producer_surplus_at_the_regional_solution(data):
     from capri_mod.data.definitions import CROPS
     from capri_mod.income import IncomeDistributionModule as I
     from capri_mod.supply.supply_module import SupplyModule
-    from capri_mod.utils.utils import calibrate_supply_elasticities
-    regs = ["DE110000", "ES610000", "IR010000"]
-    sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
-    sr = sm.run(price_signals=None, regions=regs)
+    sm, sr, regs = solved3
     for r in regs:
         m, ip = sm._models[r], sr[r].income
         assert "agProdSurplus" in ip, r
@@ -134,3 +142,67 @@ def test_the_producer_surplus_at_the_regional_solution(data):
             assert ip["pmp_col"][a] == pytest.approx(want, rel=1e-9, abs=1e-6 * max(1.0, abs(want))), (r, a)
             n_checked += 1
         assert n_checked > 10, r
+
+
+@pytest.mark.slow
+def test_the_gross_account_by_item_at_the_regional_solution(solved3):
+    """CAPRI's gross account by item at the regional solution (income I2, SupplyResult.eaa; reports/sol_simy.gms
+    l. 2549-2566): the revenue by output item adds up to each activity's revenue; TOOU - TOIN + PRME is MGVA; each
+    crop product's value is its GROF (1000 t) x its price; and MGVA equals I1's AGGT but for the input cost table's
+    items at the member state's UVAP against TOIN at the regional UVAG (about 1e-5 relative to a herd's input cost)."""
+    from capri_mod.data.definitions import CROPS
+    sm, sr, regs = solved3
+    for r in regs:
+        m, e = sm._models[r], sr[r].eaa
+        assert e is not None, r
+        for a, it in m.output_items.items():
+            assert sum(v for *_, v in it) == pytest.approx(float(m.revenues[a]), rel=1e-12, abs=1e-9), (r, a)
+        assert e["MGVA"] == pytest.approx(e["TOOU"] - e["TOIN"] + e["PRME"], rel=1e-12)
+        assert e["PRME"] == pytest.approx(sr[r].income["PRME"] / 1000.0, rel=1e-12)
+        assert abs(e["DIFF"]) <= 1e-5 * abs(e["AGGT"]), r
+        it = e["items"].set_index(["side", "item"])
+        L = sr[r].activities
+        for a in CROPS:
+            if ("O", a) in it.index and float(L.get(a, 0.0)) > 0 and not (sr[r].technology_mix or {}).get(a):
+                kg, uv = m.output_items[a][0][1:3]
+                assert it.loc[("O", a), "GROF"] == pytest.approx(0.001 * kg * float(L[a]), rel=1e-12), (r, a)
+                assert it.loc[("O", a), "EAAG"] == pytest.approx(it.loc[("O", a), "GROF"] * uv / 1000.0, rel=1e-12)
+
+
+@pytest.mark.slow
+def test_the_income_and_the_account_at_a_shocked_solution(data):
+    """After a solve with a price shock and the Green Deal's organic and pesticide targets the income takes the
+    solve's own net revenues (res.nr_solve: the solve restores net_revenues to their state before it), and the gross
+    account by item holds the solve's changes of the margins (the yields' changes, the input changes: ev.nr_items), so
+    it equals the activity-based income but for the input cost table's unit values (as at the base)."""
+    from capri_mod.data.definitions import CROPS
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+    r = "DE110000"
+    sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
+    # twice at base: the regional NLP is calibrated at its second solve (test_capri.py
+    # test_solve_leaves_no_state_behind), so the shocked solve below responds to its shock
+    sm.run(price_signals=None, regions=[r])
+    sm.run(price_signals=None, regions=[r])
+    m = sm._models[r]
+    a0 = m.res.nr_solve.copy()
+    ps = pd.Series(0.0, index=m.net_revenues.index)
+    ps[[a for a in ("SWHE", "BARL", "MILK", "DCOW") if a in ps.index]] = 0.2
+    sr = sm.run(price_signals=ps, policy_scenario={"organic_area_target": 0.25, "pesticide_reduction": 0.5},
+                regions=[r])
+    ip, e = sr[r].income, sr[r].eaa
+    nr = m.res.nr_solve
+    assert not np.allclose(nr.values, m.net_revenues.values)            # the solve's margins are not the restored ones
+    assert float(nr["SWHE"]) > float(a0["SWHE"])                          # the price shock is in them
+    from capri_mod.income import IncomeDistributionModule as I
+    toin = I.crop_toin_y(r, m)
+    n_crops = 0
+    for a, v in ip["MGVA_act"].items():
+        if a in CROPS and a not in toin:            # a crop's MGVA is its margin at the solve (DATA_MGVA)
+            assert v == pytest.approx(float(nr[a]), rel=1e-12), a
+            n_crops += 1
+    assert n_crops > 5
+    assert e["MGVA"] == pytest.approx(e["TOOU"] - e["TOIN"] + e["PRME"], rel=1e-12)
+    assert abs(e["DIFF"]) <= 1e-5 * abs(e["AGGT"]), e["DIFF"]
+    assert max(abs(v) for v in e["DIFF_act"].values()) <= 1e-5 * abs(e["AGGT"])
+

@@ -62,6 +62,9 @@ class ReportingBlock:
           OBJE, PMPLevl, PMPFeed, PMPLandTrans, agProdSurplus  CAPRI's producer surplus rows of the region (income I3,
                     IncomeDistributionModule.producer_surplus; reports/sol_simy.gms l. 2578-2595): the supply model's
                     objective, its PMP terms and MGVA + the PMP terms; absent (NaN) where the solve recorded no parts
+          TOOU, TOIN, EAAG_MGVA, EAAG_DIFF  the gross account by item's total output and input, its MGVA (TOOU - TOIN +
+                    PRME) and its difference to MGVA (income I2, capri_mod/income/eaa.py; reports/sol_simy.gms l.
+                    2557-2566, 2600-2615); the items are in results["eaa"]
         The market's agents' components are in results["market"].welfare. A failure here does not stop the run: it
         is warned and the table is None."""
         if not supply_results:
@@ -88,6 +91,11 @@ class ReportingBlock:
                 for k_ in ("OBJE", "PMPLevl", "PMPFeed", "PMPLandTrans", "agProdSurplus"):
                     if k_ in ip:
                         rows[reg][k_] = float(ip[k_]) / 1000.0
+                # the gross account by item's totals (income I2, SupplyResult.eaa, EUR million)
+                ea = getattr(res, "eaa", None)
+                if ea:
+                    rows[reg].update({"TOOU": ea["TOOU"], "TOIN": ea["TOIN"], "EAAG_MGVA": ea["MGVA"],
+                                      "EAAG_DIFF": ea["DIFF"]})
             return pd.DataFrame.from_dict(rows, orient="index")
         except Exception as exc:
             warnings.warn(f"welfare: the supply models' components could not be computed ({exc!r})")

@@ -293,6 +293,7 @@ class PolicyBlock:
             # output. CAPRI reports production, so this is what is compared.
             new_ylds[a] = DATA_Yild(y, loss, conv)
             nr[a] = float(nr.get(a, 0.0)) - p * y * loss * conv
+            self._nr_item(a, "O", a, -p * y * loss * conv, kg=-y * loss * conv * 1000.0, uv=p)
         # plant protection and other inputs: CAPRI's regional input changes, set with the organic target's in
         # _apply_greendeal_input_changes (24 October 2026; before, per crop on the conventional share: KNOWN_ISSUES K74; the supply audit's findings S3 and S4, ARCHITECTURE_REFACTOR.md section 5.2)
         self.data.yields = new_ylds
@@ -352,6 +353,7 @@ class PolicyBlock:
             p = float(prices.get(a, 0.0)) * (1.0 + dp)
             # the extra revenue from the yield change alone
             nr[a] = float(nr.get(a, 0.0)) + p * y0 * (factor - 1.0)
+            self._nr_item(a, "O", a, p * y0 * (factor - 1.0), kg=y0 * (factor - 1.0) * 1000.0, uv=p)
         self.data.yields = new_ylds
         self.net_revenues = nr
         self.ev.yield_price_factor = pf
@@ -524,6 +526,7 @@ class PolicyBlock:
                     if getattr(self.ev, "greendeal_animal_inpo", None) is None:
                         self.ev.greendeal_animal_inpo = {}
                     self.ev.greendeal_animal_inpo[a] = d
+                    self._nr_item(a, "I", "INPO", d)
             else:
                 plap = self._sim_input_cost(a, "plap_eur_ha")
                 inpo = self._sim_input_cost(a, "inpo_eur_ha")
@@ -538,7 +541,10 @@ class PolicyBlock:
                         d_i = delta(inpo, topup, pc_inpo)
                 d += d_p
                 d += d_i
-                d += self._plap_crop_level_capri_step(a, pc_plap, tf, keep_tf, d_p)
+                step_ = self._plap_crop_level_capri_step(a, pc_plap, tf, keep_tf, d_p)
+                d += step_
+                self._nr_item(a, "I", "PLAP", d_p + step_)
+                self._nr_item(a, "I", "INPO", d_i)
                 if d_p or d_i:
                     # the crop's plant-protection and other-input costs of this solve (the mix columns' technology
                     # factors act on them, supply/techn_mix.py)
@@ -672,6 +678,10 @@ class PolicyBlock:
                 if nr is None:
                     nr = self.net_revenues.copy()
                 nr[a] = float(nr.get(a, 0.0)) - k * d
+                # by item: the yield-dependent plant protection and other inputs, the rest of them (OTHER_I)
+                self._nr_item(a, "I", "PLAP", (self._sim_input_cost(a, "yd_plap_eur_ha") or 0.0) * tf_p * d)
+                self._nr_item(a, "I", "INPO", (self._sim_input_cost(a, "yd_inpo_eur_ha") or 0.0) * tf_i * d)
+                self._nr_item(a, "I", "OTHER_I", (self._sim_input_cost(a, "yd_rest_eur_ha") or 0.0) * tf * d)
         if nr is not None:
             self.net_revenues = nr
 
@@ -774,6 +784,8 @@ class PolicyBlock:
             new_ylds[a] = y * yield_factor
             delta = (p * y * (yield_factor - 1.0)) - cost_change
             nr[a] = float(nr.get(a, 0.0)) + delta
+            self._nr_item(a, "O", a, p * y * (yield_factor - 1.0), kg=y * (yield_factor - 1.0) * 1000.0, uv=p)
+            self._nr_item(a, "I", "FERT", cost_change)
             # Converted land uses NO mineral fertiliser (CAPRI's
             # organic_minfert_redu.gms). Only its COST was removed here, so in
             # the nitrogen balance and the environmental accounts organic land

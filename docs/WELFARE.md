@@ -76,3 +76,10 @@ models' ProfitAgr, ProfitLandUse and PSEs.
    207-220), outside p_welfareRes: its welfare's ProfitAgr is MGVA less the rents. results["welfare_supply"] carries
    them per region (IncomeDistributionModule.producer_surplus, from the regional NLP's objective at the solution by
    part). Their levels hold the PMP constants, which are the model's own, so only their changes compare with CAPRI's.
+8. **CAPRI's gross account by item and the premium outlays per product** (income I2 and I4, register DEP-56 and
+   DEP-57). The welfare table's ProfitAgr takes CAPRI's product-based EAAG MGVA (welfare.gms l. 841-846); the model's
+   is the activity-based (AGGT), and results["welfare_supply"] carries the gross account's TOOU, TOIN, EAAG_MGVA and
+   their difference to MGVA (EAAG_DIFF, CAPRI's p_problem4D, reports/sol_simy.gms l. 2600-2615), with the items in
+   results["eaa"] (GROF, UVAG, EAAG by output and input; capri_mod/income/eaa.py). The premium outlays per member
+   state and product and their budgets (CAPRI's FEOP and budEU, budPil1, budPil2, budNAT, budRestEU; reports/feoga.gms
+   l. 62-162) are in results["feoga"] (capri_mod/income/feoga.py).

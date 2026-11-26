@@ -518,6 +518,7 @@ class AbatementBlock:
         for a, c in (getattr(self.ev, "amm_cost", None) or {}).items():
             if c and a in self.net_revenues.index:
                 self.net_revenues[a] = float(self.net_revenues[a]) - c
+                self._nr_item(a, "I", "mitiI", c)
 
     def _apply_manure_inhibitor(self, lam: float):
         """CAPRI's nitrification inhibitors on applied manure (target N2OMAN, envind/ghgMiti.gms):
@@ -556,6 +557,7 @@ class AbatementBlock:
                 # option cost; under the emission tax the tax saved per head at this share (the animal's own
                 # coefficient is taken at no adoption) - the N value reaches the animal through the N row instead
                 self.net_revenues[a] = float(self.net_revenues[a]) - (c_t - v_tax * sh) * mN / 1000.0
+                self._nr_item(a, "I", "mitiI", (c_t - v_tax * sh) * mN / 1000.0)
             if a in app_nh3:
                 self.ev.manure_ni_nh3[a] = sh * app_nh3[a]      # t NH3-N per activity unit
 

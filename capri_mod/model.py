@@ -1503,6 +1503,11 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
 
         results["labour"] = _labour_table(supply_results, self.data)
         results["welfare_supply"] = self._welfare_supply(supply_results)
+        # CAPRI's gross account by item per region (income I2, SupplyResult.eaa: GROF, UVAG and EAAG by output and
+        # input, TOOU, TOIN, PRME, MGVA and the difference to the activity-based income; EUR million)
+        results["eaa"] = {reg: res.eaa for reg, res in supply_results.items() if getattr(res, "eaa", None)} or None
+        # CAPRI's premium outlays per member state and product and their budgets (income I4, reports/feoga.gms)
+        results["feoga"] = self._feoga(supply_results)
         return results
 
 
@@ -1529,6 +1534,17 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
     #: model NUTS prefix -> CAPRI member-state code where they differ (Belgium and Luxembourg are one CAPRI
     #: member state, BL; Ireland IR; Greece EL in both)
     _MS_CODE = MS_CODE
+
+    def _feoga(self, supply_results):
+        """The premium outlays per member state and product at the solution and their budgets (income I4,
+        capri_mod/income/feoga.py feop_by_product; EUR million), or None where they could not be computed (warned)."""
+        try:
+            from capri_mod.income.feoga import feop_by_product
+            t = feop_by_product(supply_results, self.supply_module, self.data)
+            return t if len(t) else None
+        except Exception as exc:
+            warnings.warn(f"feoga: the premium outlays per product could not be computed ({exc!r})")
+            return None
 
     @classmethod
     def member_state_of(cls, region: str) -> str:

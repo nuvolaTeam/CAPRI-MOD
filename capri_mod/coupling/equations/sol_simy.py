@@ -1,6 +1,7 @@
 r"""CAPRI's simulation year's report (reports/sol_simy.gms, star 3.0): the land owners' profit, the solution's feed
-per head, the mitigation options' accounting cost per activity, the region's activity-based income (income I1), the
-supply model's objective and the producer surplus (income I3).
+per head, the activities' gross production or use, the mitigation options' accounting cost per activity, the gross
+account by item and its value added (income I2), the region's activity-based income (income I1), the supply model's
+objective and the producer surplus (income I3).
 
 capri_mod/coupling/reporting.py (ReportingBlock._welfare_supply) calls the land owners' profit; the methane chain
 (tools/lib/methane_inputs.py) the feed per head; capri_mod/income (mitigation_items.py, income_module.py
@@ -49,6 +50,21 @@ def DATA_FEED_SIMY(v_feedInpCoeff_A, v_actLevl_A, LEVL):
     applies that condition and DATA's LEVL one). Departures from CAPRI: none."""
     return sum(float(v_feedInpCoeff_A.get(t, 0.0) or 0.0) * float(lv or 0.0) for t, lv in v_actLevl_A.items()) / LEVL
 
+
+def DATA_GROF_IO(coef, LEVL):
+    r"""DATA(RUNR, "GROF", IO, SIMY): a regional unit's gross production or use of an item, the activities'
+    coefficients x their levels (sequences over the activities with the item, in the same order; 1000 t for a
+    coefficient in kg per ha or head x a level in 1000 ha or heads, EUR million for a value in EUR per ha or head).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 685-687):
+
+          DATA(RUNR,"GROF",IO,"%SIMY%") $ SUM(PACT_TO_IO(MPACT,IO),1)
+                  = SUM( PACT_TO_IO(MPACT,IO) $ p_dataCopy(RUNR,MPACT,IO,"%SIMY%"),
+                          p_dataCopy(RUNR,MPACT,IO,"%SIMY%") * p_DataCopy(RUNR,MPACT,"LEVL","%SIMY%")) * 0.001;
+
+    In this project's notation: GROF_i = 0.001 sum_a coef_a,i L_a. Departures from CAPRI: none in the statement; the
+    caller passes the model's coefficients at the solution (income I2, capri_mod/income/eaa.py)."""
+    return 0.001 * float(sum(float(c) * float(l_) for c, l_ in zip(coef, LEVL)))
 
 def p_ghgMiti_emisAll_cost(terms, scale):
     r"""p_ghgMiti(RU, PACT, allMitiTech, "emisAll", "cost") of an option other than NOC: its accounting cost per unit of
@@ -610,6 +626,54 @@ def p_ghgMiti_emisAll_pmpcost_catc(pmpcost_uaar, v_miti):
 
     Departures from CAPRI: none."""
     return float(pmpcost_uaar) / float(v_miti) if float(v_miti) else float(pmpcost_uaar)
+
+
+def DATA_EAAG_IO(GROF, UVAG):
+    r"""DATA(RSS, "EAAG", IO, SIMY): the gross account's value of an item, its gross production or use x its unit
+    value (EUR million for kt x EUR per t).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2549):
+
+          DATA(RSS,"EAAG",IO,"%SIMY%") $ DATA(RSS,"GROF",IO,"%SIMY%")  = DATA(RSS,"GROF",IO,"%SIMY%")*DATA(RSS,"UVAG",IO,"%SIMY%")/1000.;
+
+    In this project's notation: EAAG_i = GROF_i x UVAG_i / 1000. Departures from CAPRI: where the model holds an item's
+    value per unit of activity and not its quantity and unit value apart (the crops' main products and inputs, the
+    animals' outputs and inputs: capri_mod/income/eaa.py), GROF is that value (DATA_GROF_IO of the values per unit,
+    EUR million) and the caller passes UVAG = 1000, the value's own unit value, so that EAAG is the value."""
+    return float(GROF) * float(UVAG) / 1000.0
+
+
+def DATA_GEAAC_TOOU(EAA_O):
+    r"""DATA(RSS, GEAAC, "TOOU", SIMY): an account's total output, the sum over its outputs.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2557):
+
+          DATA(RSS,GEAAC,"TOOU","%SIMY%") = SUM(O, DATA(RSS,GEAAC,O,"%SIMY%"));
+    """
+    return float(sum(float(v) for v in EAA_O))
+
+
+def DATA_GEAAC_TOIN(EAA_I):
+    r"""DATA(RSS, GEAAC, "TOIN", SIMY): an account's total input, the sum over its inputs.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2558):
+
+          DATA(RSS,GEAAC,"TOIN","%SIMY%") = SUM(I, DATA(RSS,GEAAC,I,"%SIMY%"));
+    """
+    return float(sum(float(v) for v in EAA_I))
+
+
+def DATA_EAAG_MGVA(TOOU, TOIN, PRME):
+    r"""DATA(RSS, "EAAG", "MGVA", SIMY): the gross account's modified gross value added, its total output less its total
+    input plus the premiums.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2564-2566):
+
+          DATA(RSS,"EAAG","MGVA","%SIMY%") = DATA(RSS,"EAAG","TOOU","%SIMY%")
+                                        - DATA(RSS,"EAAG","TOIN","%SIMY%")
+                                        + DATA(RSS,"EAAG","PRME","%SIMY%");
+    """
+    return float(TOOU) - float(TOIN) + float(PRME)
 
 
 def DATA_AGGT_MGVA(MGVA, LEVL, mitiI_RU=0.0, mitiO_RU=0.0):
