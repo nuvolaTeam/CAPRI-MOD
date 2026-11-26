@@ -523,9 +523,15 @@ def to_long(results: dict, point: str) -> pd.DataFrame:
             for c in ("GROF", "NETF", "UVAG", "UVAP", "UVAB", "EAAG", "EAAP", "EAAB"):
                 if rec.get(c) is not None and rec[c] == rec[c]:
                     add((point, "eaa_ms", str(ms), "", c, str(rec["item"]), float(rec[c])))
-        for col in ("EAAP", "EAAB"):
+        for col in ("EAAG", "EAAP", "EAAB"):
             for c, v in (e.get(col) or {}).items():
                 add((point, "eaa_ms", str(ms), "", col, str(c), float(v)))
+        # the product and account aggregates (reports/aggreg_res_data.gms l. 50-91; income/eaa_aggregates.py)
+        ag = e.get("aggregates")
+        for rec in (ag.to_dict("records") if hasattr(ag, "to_dict") else (ag or [])):
+            for c in ("GROF", "NETF", "UVAG", "EAAG"):
+                if rec.get(c) is not None and rec[c] == rec[c]:
+                    add((point, "eaa_ms", str(ms), "", c, str(rec["item"]), float(rec[c])))
     known.add("feoga")
     fe = results.get("feoga")
     if fe is not None:

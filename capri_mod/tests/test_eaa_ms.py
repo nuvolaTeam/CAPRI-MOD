@@ -46,7 +46,8 @@ def _unit():
                            ("O", "OTHER_O", "DCOW", 10.0), ("O", "GRAE", "GRAE", 20.0), ("O", "mitiO", None, 1.0),
                            ("I", "YOUNG", "DCOW", 5.0), ("I", "NITF", "SWHE", 11.0), ("I", "FCER", "DCOW", 30.0)],
                           columns=["side", "item", "activity", "EAAG"])
-    other_o = pd.DataFrame([("DCOW", "MANN", 3.0), ("DCOW", "YCOW", 7.0)], columns=["activity", "item", "EAAG"])
+    other_o = pd.DataFrame([("DCOW", "O", "MANN", 3.0), ("DCOW", "O", "YCOW", 7.0)],
+                           columns=["activity", "side", "item", "EAAG"])
     items = pd.DataFrame([("NITF", "I", 10.0, 1100.0, 11.0), ("FCER", "I", 30.0, 1000.0, 30.0)],
                          columns=["item", "side", "GROF", "UVAG", "EAAG"])
     purchases = pd.DataFrame([("NITF", 6.0)], columns=["item", "NETF"])
@@ -99,7 +100,8 @@ def test_the_member_state_needs_all_its_units():
 def test_an_animals_other_outputs_by_capri_output():
     """OTHER_O split (eaa._other_output_parts): the manure per head x level x the member state's unit value, the milk
     for feeding per head x its value, the rest over the young animals the activity produces by value; the young
-    animals' heads produced and used at the levels."""
+    animals' heads produced and used at the levels; the young animals bought by CAPRI's IYANI over the categories used,
+    by value."""
     from capri_mod.data.inputs import current
     from capri_mod.fert.npk import manure_coef_table
     from capri_mod.income.eaa import _other_output_parts
@@ -109,8 +111,11 @@ def test_an_animals_other_outputs_by_capri_output():
     m = SimpleNamespace(_young_animal_coefs=lambda: yc,
                         data=SimpleNamespace(fodder_balance={"FCOM": {"producers": {"DCOW": 0.12}, "value_eur_t": 147.0}}))
     lev = {"DCOW": 500.0, "HFRS": 280.0, "CALV": 300.0}
-    oo, young = _other_output_parts("DK000000", m, lev, {("O", "OTHER_O", "DCOW"): 100.0, ("O", "BEEF", "DCOW"): 9.0})
-    oo = oo.set_index("item").EAAG
+    oo, young = _other_output_parts("DK000000", m, lev, {("O", "OTHER_O", "DCOW"): 100.0, ("O", "BEEF", "DCOW"): 9.0,
+                                                          ("I", "YOUNG", "CALV"): 12.0, ("I", "YOUNG", "DCOW"): 30.0})
+    yi = oo[oo.side == "I"].set_index(["activity", "item"]).EAAG
+    assert yi[("CALV", "ICAM")] == pytest.approx(12.0) and yi[("DCOW", "ICOW")] == pytest.approx(30.0)
+    oo = oo[oo.side == "O"].set_index("item").EAAG
     uv = current().csv("ms_unit_values_2017.csv", "supply").set_index(["ms", "item"]).uvag
     man = {it: manure_coef_table(n).at["DK000000", "DCOW"] * 500.0 * uv[("DK000000", it)] / 1e6
            for it, n in (("MANN", "N"), ("MANP", "P"), ("MANK", "K"))}

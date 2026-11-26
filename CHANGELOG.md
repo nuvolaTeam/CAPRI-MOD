@@ -642,6 +642,35 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   SREV), the market crops' income now CAPRI's within 5%; the baseline's MGVA 40,034 against CAPRI's 38,358, the fodder
   activities 1,684 above CAPRI's (KNOWN_ISSUES K213, open). K211 stays open for the straw balance alone, slack at
   CAPRI's reference. Tests: test_eaa.py (2), test_water_income.py (1, slow).
+- **The fodder at the solution's dual (26 November 2026, the project lead: "switch it to CAPRI's form"; KNOWN_ISSUES
+  K213, register DEP-54):** PSHW, the fodder crops' output value per t fed, is the fodder balance's dual at the solution
+  (SupplyResult.fodder_duals) in the baseline and in a scenario, as CAPRI's (reports/sol_simy.gms l. 737-757); the fed
+  fodder at the same dual (UVAG(FODDI, SIM) = PSHW with FODDMARKUP 0, l. 756-757; IncomeDistributionModule.
+  feed_by_animal), and the milk for feeding the animals produce (COMF, SGMF, CAPRI's FODDO) too (milk_for_feeding_output),
+  in the income and in the account by item. Until then the fodder kept the balance's reference value in a scenario.
+  Measured on the Denmark and Croatia Green Deal pair: the solution and each region's MGVA unchanged (an internal flow:
+  4,986.3 and 1,250.8 EUR million at the baseline), the accounts' DIFF 0; Denmark's fodder activities -307.9 against
+  -342.7, its herds 1,824.9 against 1,859.7 at the baseline (the model's duals there 4% above CAPRI's 2030 values, other
+  fodder 40.51 against 38.91 EUR/t). The account at producer prices moves with it (Denmark's EAAP TOOU 9,769.4, TOIN
+  5,931.9, MGVA 4,505.0: the fodder outputs count at (NETF / GROF)^2, the fed fodder in full). Tests:
+  test_sol_simy_mitigation.py (the fed fodder at the dual), test_water_income.py (slow).
+- **The accounts' and the welfare's aggregates (26 November 2026; registers DEP-56, DEP-58):** the product and account
+  aggregates of a member state's accounts (reports/aggreg_res_data.gms l. 50-91: OAGG, EAAGA, R_T_OAGG less CERE's WHEA
+  and OANP's MILK; coupling/equations/aggreg_res_data.py), the regional aggregates of the member states' accounts where
+  all their member states are in the run (REGAGG by MAP_RR: A_EU_WEST, A_EU_EAST, EU_WEST, EU_EAST, EU, EU27yr19;
+  sol_simy.gms l. 2317-2403; sol_simy_ms.py DATA_BALPOS_REGAGG, DATA_UVAG_REGAGG, DATA_UVAP_REGAGG, DATA_UVAB_REGAGG),
+  and the welfare by product's product aggregates and market and world regions (welfare.gms l. 864-868, 897, 901-902;
+  market/equations/welfare.py p_welfareRes_rmAgg, p_welfareRes_OAGG, p_welfareRes_RW): capri_mod/income/
+  eaa_aggregates.py, in results["eaa_ms"] and results["welfare_products"]. The young animals bought are now by CAPRI's
+  IYANI (over the categories each activity uses, by value; heads from the young-animal tables), the manure and the milk
+  for feeding of the animals' other outputs in quantity. CAPRI's sets as its run built them (build_code_lists.py: OAGG,
+  EAAGA, REGAGG, R_T_OAGG, RMS_TO_RM, RW_TO_RM). Denmark at the baseline against CAPRI's 2030 reference (EUR million,
+  2017 money, a check only): CERE 1,131.4 against 1,131.5 (GROF 8,809.6 and NETF 7,670.8 both CAPRI's), MEAS 3,777.3
+  both, VGPM 353.2 both, IANC 1,097.4 against 1,090.4 (heads 20,744 against 20,935), MANC 634.2 against 635.5, FODC
+  449.9 against 415.1 (the fodder at the model's duals; its GROF without CAPRI's straw, K211); the welfare's CERE -67.0
+  against -65.7, MEAS 2,059.4 against 2,028.3, ALLP 2,400.3 against 2,367.7. Not done: the welfare's market-model split
+  (MARRC); CAPRI's AGGA in its Danish reference is MGVA less the rents (not traced; the model's AGGA is MGVA). Tests:
+  test_eaa_aggregates.py (3).
 - **Income I2c, a member state's accounts at producer and basic prices (26 November 2026; register DEP-56):** where
   all of a member state's units are in the run, CAPRI's member-state row: the units' gross accounts by item summed in
   CAPRI's codes (the crops' products by PACT_TO_Y, the animals' market products, their other outputs split into

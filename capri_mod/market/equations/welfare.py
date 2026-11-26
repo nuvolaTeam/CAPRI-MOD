@@ -326,3 +326,48 @@ def p_welfareRes_Welfare(components):
     Departures from CAPRI: the market's agents' components (CSSP, ProfitProc, ProfitDairy, ProfitAgr, ProfitFeed,
     TariffRev, TRQRents); the supply models' ProfitLandUse and PSES are coupling/reporting.py's, added in its totals."""
     return components.sum(axis=1)
+
+
+def p_welfareRes_rmAgg(WelfPos_rmsAgg):
+    r"""p_welfareRes(rmAgg, WelfPos, ROWS1, SIMY): a market region's welfare position (ProfitAgr, PSEs) per row, the sum
+    over its member states (RMS_TO_RM: A_EU_WEST, A_EU_EAST).
+
+    CAPRI's GAMS (reports/welfare.gms l. 861-868):
+
+        *  --- aggregation to regional aggregates
+        *      NOTE: OAGG and INCE will be aggegated from components below
+
+           p_welfareRes(rmAgg,"EAAG",WelfPos_ROWS,"%SIMY%")
+              = SUM(RMS_TO_RM(rmsAgg,rmAgg), p_welfareRes(rmsAgg,"EAAG",WelfPos_ROWS,"%SIMY%"));
+
+           p_welfareRes(rmAgg,WelfPos,ROWS1,"%SIMY%")
+             = SUM(RMS_TO_RM(rmsAgg,rmAgg), p_welfareRes(rmsAgg,WelfPos,ROWS1,"%SIMY%"));
+
+    Departures from CAPRI: none (computed where all the region's member states are in the run:
+    capri_mod/income/eaa_aggregates.py)."""
+    return float(sum(float(v) for v in WelfPos_rmsAgg))
+
+
+def p_welfareRes_OAGG(WelfPos_XX):
+    r"""p_welfareRes(RMAll, WelfPos, OAGG, SIMY): a product aggregate's welfare position, the sum over its market
+    products (R_T_OAGG(OAGG, XX)).
+
+    CAPRI's GAMS (reports/welfare.gms l. 897):
+
+           p_welfareRes(RMAll,WelfPos,OAGG,"%SIMY%")        = SUM(R_T_OAGG(OAGG,XX),  p_welfareRes(RMAll,WelfPos,XX,"%SIMY%"));
+
+    Departures from CAPRI: none."""
+    return float(sum(float(v) for v in WelfPos_XX))
+
+
+def p_welfareRes_RW(WelfPos_RM):
+    r"""p_welfareRes(RW, WelfPos, Rows, SIMY): a world region's welfare position (EU, EU27yr19: A_EU_WEST and A_EU_EAST),
+    the sum over its market regions (RW_TO_RM).
+
+    CAPRI's GAMS (reports/welfare.gms l. 901-902):
+
+           p_welfareRes(RW,WelfPos,Rows,"%SIMY%")           = SUM(RW_TO_RM(RW,RM), p_welfareRes(RM,WelfPos,Rows,"%SIMY%"));
+           p_welfareRes(RW,WelfPos,"INCE","%SIMY%")         = SUM(RW_TO_RM(RW,RM), p_welfareRes(RM,WelfPos,"INCE","%SIMY%"));
+
+    Departures from CAPRI: none (computed where all the region's market regions are)."""
+    return float(sum(float(v) for v in WelfPos_RM))

@@ -101,7 +101,11 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
     feed_lin = getattr(res, "feed_lin", None) or {}
     ic = getattr(data, "livestock_input_cost", None)
     fo, fom = IDM.crop_residue_nutrients(m)
-    fod = IDM.crop_fodder_output(region, m)
+    fod = IDM.crop_fodder_output(region, m, res)
+    # the milk for feeding the animals produce at its balance's dual (income_parts, K213): the change against the value
+    # their output value per head carries is on OTHER_O
+    mff = IDM.milk_for_feeding_output(m, res)
+    fdual = getattr(res, "fodder_duals", None) or {}
     for a, L in lev.items():
         if L <= 0:
             continue
@@ -138,13 +142,17 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
             add(a, "I", "TOIN_lin", c0 if np.isfinite(c0) else 0.0, L)
         elif a in ANIMALS:
             fed = a in feed_lin
+            if a in mff:
+                add(a, "O", "OTHER_O", mff[a][0] - mff[a][1], L)
             if ic is not None and a in ic.index:
                 for i, v in ic.loc[a].items():
                     if pd.notna(v) and not (i == "FEED" and fed):
                         add(a, "I", i, float(v), L)
             if fed:
                 for f, t in (feed_t.get(a) or {}).items():
-                    p_ = float((feed_p.get(a) or {}).get(f, 0.0))
+                    # the fodder at its balance's dual at the solution (IncomeDistributionModule.feed_by_animal)
+                    p_ = (float(fdual[f"fodder_{f}"]) / 1000.0 if f"fodder_{f}" in fdual
+                          else float((feed_p.get(a) or {}).get(f, 0.0)))
                     # t and EUR per kg: per head kg = t / L (L in 1000 heads), EUR per t = 1000 x EUR per kg
                     add(a, "I", f, float(t) * p_ / L, L, kg=float(t) / L, uv=1000.0 * p_)
     # the technology mix on the area moved to T1 (z, 1000 ha): T1 - T2 per ha by item; its premium difference is in PRME
@@ -165,7 +173,7 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
     # the mitigation options at the region (EUR 1000; register DEP-54)
     for side, k in (("I", "mitiI"), ("O", "mitiO")):
         add(None, side, k, float(ip.get(k, 0.0) or 0.0), 1.0)
-    other_o, young = _other_output_parts(region, m, lev, by_act)
+    other_o, young = _other_output_parts(region, m, lev, by_act, fdual)
     products_t = _animal_products_t(region, getattr(supply_module, "data", None), lev)
     out = []
     for (side, item), r_ in rows.items():
@@ -314,14 +322,19 @@ def _young_codes():
     return {g: "/".join(v) for g, v in YOUNG_PRODUCTS.items()}
 
 
-def _other_output_parts(region, m, lev, by_act):
+def _other_output_parts(region, m, lev, by_act, fodder_duals=None):
     """An animal's other outputs (OTHER_O: its output value per head less its market products', SupplyModule.
     _output_items) by CAPRI output, for a member state's accounts at producer prices (income I2c), EUR million:
-    (DataFrame activity, item, EAAG; DataFrame item, iyani, GROF, USE: the young animals' heads, 1000).
+    (DataFrame activity, side, item, EAAG, GROF: the manure's and the milk for feeding's quantity, 1000 t, else None;
+    DataFrame item, iyani, GROF, USE: the young animals' heads, 1000). The
+    young animals an activity buys (YOUNG, an input: the input cost table's per head) by CAPRI's IYANI the same way,
+    over the categories it uses by their value per head x coefficient (side "I"); an activity that uses none keeps
+    YOUNG.
 
       MANN, MANP, MANK  the manure per head (capri_mod/fert/npk.py manure_coef_table, kg) x level x the member state's
                         unit value (ms_unit_values_2017.csv, CAPRI's UVAG at "BAS", tools/build/build_ms_farm_balance.py)
-      COMF, SGMF        the milk for feeding per head (the fodder balances' producers, t; FEED_TO_O) x its value
+      COMF, SGMF        the milk for feeding per head (the fodder balances' producers, t; FEED_TO_O) x its balance's
+                        dual at the solution (fodder_duals "fodder_<feed>"; the balance's value without it)
       the young animals the rest, over the categories the activity produces (the young-animal tables, SupplyModule
                         young_animal_table) by their value per head x coefficient; CAPRI's OYANI (projection/prices.py
                         YOUNG_PRODUCTS; the pooled tables' categories as "YBUL/YHEI", "YCAM/YCAF"); an activity that
@@ -331,8 +344,9 @@ def _other_output_parts(region, m, lev, by_act):
     from capri_mod.data.definitions import capri_ms, capri_pairs
     from capri_mod.fert.npk import manure_coef_table
     from capri_mod.supply import inputs as _inputs
-    cols_o, cols_y = ["activity", "item", "EAAG"], ["item", "iyani", "GROF", "USE"]
+    cols_o, cols_y = ["activity", "side", "item", "EAAG", "GROF"], ["item", "iyani", "GROF", "USE"]
     oth = {k[2]: v for k, v in by_act.items() if k[0] == "O" and k[1] == "OTHER_O" and k[2] is not None}
+    yin = {k[2]: v for k, v in by_act.items() if k[0] == "I" and k[1] == "YOUNG" and k[2] is not None}
     yc = m._young_animal_coefs() if hasattr(m, "_young_animal_coefs") else {}
     codes = _young_codes()
     o2i = {o: i for o, i in capri_pairs("O_TO_YANI")}
@@ -345,8 +359,16 @@ def _other_output_parts(region, m, lev, by_act):
         young.append({"item": codes[g], "iyani": "/".join(o2i.get(o, "") for o in codes[g].split("/")),
                       "GROF": pr, "USE": us})
     young = pd.DataFrame(young, columns=cols_y)
+    rows = []
+    for a, V in yin.items():
+        w = {young_i: float((r_.get("use") or {}).get(a, 0.0)) * float(r_.get("value_eur_head", 0.0) or 0.0)
+             for g, r_ in yc.items() if g in codes and (r_.get("use") or {}).get(a)
+             for young_i in ["/".join(o2i.get(o, "") for o in codes[g].split("/"))]}
+        if sum(w.values()) > 0:
+            rows += [{"activity": a, "side": "I", "item": it, "EAAG": float(V) * v / sum(w.values()), "GROF": None}
+                     for it, v in w.items()]
     if not oth:
-        return pd.DataFrame(columns=cols_o), young
+        return pd.DataFrame(rows, columns=cols_o), young
     inp = _inputs.current()
 
     def load(i):
@@ -357,17 +379,19 @@ def _other_output_parts(region, m, lev, by_act):
     man = {it: manure_coef_table(n) for it, n in (("MANN", "N"), ("MANP", "P"), ("MANK", "K"))}
     f2o = {f: o for f, o in capri_pairs("FEED_TO_O") if o in ("COMF", "SGMF")}
     fb = getattr(getattr(m, "data", None), "fodder_balance", None) or {}
-    rows = []
     for a, V in oth.items():
         L = lev.get(a, 0.0)
-        parts = {}
+        parts, qty = {}, {}
         for it, t in man.items():
             if L > 0 and region in t.index and a in t.columns and pd.notna(t.at[region, a]) and (ms, it) in uv:
                 parts[it] = float(t.at[region, a]) * L * uv[(ms, it)] / 1e6          # kg x 1000 heads x EUR/t
+                qty[it] = float(t.at[region, a]) * L / 1000.0                          # 1000 t
         for f, rec in fb.items():
             p_ = (rec or {}).get("producers") or {}
             if L > 0 and f in f2o and a in p_:
-                parts[f2o[f]] = parts.get(f2o[f], 0.0) + float(p_[a]) * L * float(rec["value_eur_t"]) / 1000.0
+                u_ = float((fodder_duals or {}).get(f"fodder_{f}", rec["value_eur_t"]))
+                parts[f2o[f]] = parts.get(f2o[f], 0.0) + float(p_[a]) * L * u_ / 1000.0
+                qty[f2o[f]] = qty.get(f2o[f], 0.0) + float(p_[a]) * L                  # t x 1000 heads: 1000 t
         w = {codes[g]: float((r_.get("produce") or {}).get(a, 0.0)) * float(r_.get("value_eur_head", 0.0) or 0.0)
              for g, r_ in yc.items() if g in codes and (r_.get("produce") or {}).get(a)}
         rest = float(V) - sum(parts.values())
@@ -376,7 +400,7 @@ def _other_output_parts(region, m, lev, by_act):
                 parts[it] = parts.get(it, 0.0) + rest * v / sum(w.values())
         else:
             parts["OTHER_O"] = rest
-        rows += [{"activity": a, "item": it, "EAAG": v} for it, v in parts.items()]
+        rows += [{"activity": a, "side": "O", "item": it, "EAAG": v, "GROF": qty.get(it)} for it, v in parts.items()]
     return pd.DataFrame(rows, columns=cols_o), young
 
 

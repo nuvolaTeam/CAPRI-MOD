@@ -187,16 +187,15 @@ def test_the_feed_term_of_income_i1():
 
 
 def test_the_fed_fodder_at_capris_scenario_value():
-    """CAPRI's UVAG(fodder, SIM) per t fed: the reference's value + PSHW(scenario) - PSHW(reference) (EUR/t, so
-    / 1000 per kg); without the reference's duals the ration's value."""
+    """CAPRI's UVAG(fodder, SIM) per t fed with FODDMARKUP 0 (K213): the fodder balance's dual at the solution (EUR/t,
+    so / 1000 per kg); a feed without a balance at the ration's price."""
     import pandas as pd
     from types import SimpleNamespace
     from capri_mod.income.income_module import IncomeDistributionModule as I
     res = SimpleNamespace(feed_lin={"DCOW": 0.0}, activities=pd.Series({"DCOW": 10.0}),
                           feed_t={"DCOW": {"FGRA": 500.0, "FCER": 100.0}},
                           feed_price={"DCOW": {"FGRA": 0.03, "FCER": 0.2}}, fodder_duals={"fodder_FGRA": 42.0})
-    assert I.feed_term(res) == pytest.approx(500 * 0.03 + 100 * 0.2)
-    assert I.feed_term(res, {"fodder_FGRA": 30.0}) == pytest.approx(500 * (0.03 + 0.012) + 100 * 0.2)
+    assert I.feed_term(res) == pytest.approx(500 * 0.042 + 100 * 0.2)
 
 
 def test_calc_inc_indic_mgva_and_the_regions_aggt():

@@ -160,13 +160,18 @@ def ms_accounts(supply_results, year=None) -> dict:
         qt, qv = defaultdict(float), defaultdict(float)  # (side, CAPRI item) -> GROF in quantity, the EAAG it covers
         fq, pur = defaultdict(float), defaultdict(list)  # FNUT: need kt; purchases kt by unit
         yh = defaultdict(lambda: [0.0, 0.0])           # OYANI: [heads produced, used]
+        yu = defaultdict(float)                        # IYANI: heads used
         prme = 0.0
         for e in es:
-            split = set(e["other_o"].activity) if isinstance(e.get("other_o"), pd.DataFrame) else set()
+            oo = e.get("other_o")
+            oo = oo if isinstance(oo, pd.DataFrame) else pd.DataFrame(columns=["activity", "side", "item", "EAAG"])
+            if "GROF" not in oo:
+                oo = oo.assign(GROF=None)
+            split = {(s_, a) for a, s_ in zip(oo.activity, oo.side)}
             pt = e.get("products_t")
             pt = ({(a, it): g for a, it, g in pt.itertuples(index=False)} if isinstance(pt, pd.DataFrame) else {})
             for side, it, a, v in e["by_act"].itertuples(index=False):
-                if side == "O" and it == "OTHER_O" and a in split:
+                if (side == "O" and it == "OTHER_O" or side == "I" and it == "YOUNG") and (side, a) in split:
                     continue
                 if side == "O" and (a, it) in ap:
                     it = ap[(a, it)]
@@ -176,9 +181,11 @@ def ms_accounts(supply_results, year=None) -> dict:
                 elif side == "O" and it in cp:
                     it = cp[it]
                 val[(side, it)] += float(v)
-            if split:
-                for a, it, v in e["other_o"].itertuples(index=False):
-                    val[("O", it)] += float(v)
+            for a, s_, it, v, g in oo[["activity", "side", "item", "EAAG", "GROF"]].itertuples(index=False):
+                val[(s_, it)] += float(v)
+                if g is not None and g == g:           # the manure and the milk for feeding in quantity (1000 t)
+                    qt[(s_, it)] += float(g)
+                    qv[(s_, it)] += float(v)
             for it, side, g, u, v in e["items"][["item", "side", "GROF", "UVAG", "EAAG"]].itertuples(index=False):
                 if it in FNUT and side == "I" and float(u) != 1000.0:
                     fq[it] += float(g)
@@ -192,9 +199,10 @@ def ms_accounts(supply_results, year=None) -> dict:
                     pur[it].append(float(n))
             y_ = e.get("young")
             if isinstance(y_, pd.DataFrame):
-                for it, g, u in zip(y_["item"], y_.GROF, y_.USE):
+                for it, ii, g, u in zip(y_["item"], y_["iyani"], y_.GROF, y_.USE):
                     yh[it][0] += float(g)
                     yh[it][1] += float(u)
+                    yu[ii] += float(u)
             prme += float(e["EAAP"]["PRME"])
         rows = []
         for (side, it), eaag in sorted(val.items()):
@@ -205,7 +213,10 @@ def ms_accounts(supply_results, year=None) -> dict:
                 grof = fq[it]
                 uvag = eaag * 1000.0 / grof
                 netf = DATA_NETF_MS(grof, INTF=DATA_INTF_FNUT(grof, DATA_NETF_FNUT_MSAGG(pur.get(it, []))))
-            elif side == "I" and it == "YOUNG":
+            elif side == "I" and (it == "YOUNG" or it in yu):
+                if yu.get(it):                         # the young animals bought in heads
+                    grof = yu[it]
+                    uvag = eaag * 1000.0 / grof
                 netf = DATA_NETF_MS(grof, INTF=DATA_INTF_IYANI(grof))
             elif side == "O" and it in yh and yh[it][0] > 0:
                 grof = yh[it][0]

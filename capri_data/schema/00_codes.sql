@@ -686,6 +686,30 @@ COMMENT ON TABLE capri_marr IS 'CAPRI MARR: the market model''s products with a 
 CREATE TABLE capri_o_to_yani (oyani VARCHAR NOT NULL, iyani VARCHAR NOT NULL, PRIMARY KEY (oyani, iyani));
 COMMENT ON TABLE capri_o_to_yani IS 'CAPRI O_TO_YANI: each young animal produced (OYANI) and bought (IYANI) (sets.gms; reports/sol_simy.gms l. 793-795), as CAPRI''s run built it';
 
+-- file: capri_data/codes/capri/OAGG.csv
+CREATE TABLE capri_oagg (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_oagg IS 'CAPRI OAGG: the product aggregates of the reports (reports/aggreg_sets.gms l. 150ff), as CAPRI''s run built them, in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/EAAGA.csv
+CREATE TABLE capri_eaaga (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_eaaga IS 'CAPRI EAAGA: the aggregates of the economic accounts (reports/aggreg_sets.gms l. 207), as CAPRI''s run built them, in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/REGAGG.csv
+CREATE TABLE capri_regagg (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_regagg IS 'CAPRI REGAGG: the regional aggregates of the simulation report (reports/sol_simy.gms l. 2317-2403), as CAPRI''s run built them, in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/R_T_OAGG.csv
+CREATE TABLE capri_r_t_oagg (oagg VARCHAR NOT NULL, "rows" VARCHAR NOT NULL, PRIMARY KEY (oagg, "rows"));
+COMMENT ON TABLE capri_r_t_oagg IS 'CAPRI R_T_OAGG: each aggregate and its rows (reports/aggreg_sets.gms l. 211-273), as CAPRI''s run built it';
+
+-- file: capri_data/codes/capri/RMS_TO_RM.csv
+CREATE TABLE capri_rms_to_rm (rms VARCHAR NOT NULL, rm VARCHAR NOT NULL, PRIMARY KEY (rms, rm));
+COMMENT ON TABLE capri_rms_to_rm IS 'CAPRI RMS_TO_RM: each market model country and its market region (arm/arm_sets.gms; reports/welfare.gms l. 864-868), as CAPRI''s run built it';
+
+-- file: capri_data/codes/capri/RW_TO_RM.csv
+CREATE TABLE capri_rw_to_rm (rw VARCHAR NOT NULL, rm VARCHAR NOT NULL, PRIMARY KEY (rw, rm));
+COMMENT ON TABLE capri_rw_to_rm IS 'CAPRI RW_TO_RM: each world region and its market regions (arm/arm_sets.gms; reports/welfare.gms l. 899-909), as CAPRI''s run built it';
+
 -- file: capri_data/codes/capri/CAP_TO_TRD.csv
 CREATE TABLE capri_cap_to_trd ("rows" VARCHAR NOT NULL, xx VARCHAR NOT NULL, PRIMARY KEY ("rows", xx));
 COMMENT ON TABLE capri_cap_to_trd IS 'CAPRI CAP_TO_TRD: the data base''s outputs and the market model''s products (arm/arm_sets.gms l. 683ff), as CAPRI''s run built it';

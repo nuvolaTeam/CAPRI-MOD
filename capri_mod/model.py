@@ -1551,24 +1551,27 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             return None
 
     def _eaa_ms(self, supply_results):
-        """The member states' accounts at producer prices at the solution (capri_mod/income/eaa_ms.py; EUR million),
-        or None where there is no complete member state or they could not be computed (warned)."""
+        """The member states' and the regional aggregates' accounts at producer and basic prices at the solution, with
+        their product aggregates (capri_mod/income/eaa_ms.py, eaa_aggregates.py; EUR million), or None where there is
+        no complete member state or they could not be computed (warned)."""
         try:
-            from capri_mod.income.eaa_ms import ms_accounts
-            return ms_accounts(supply_results) or None
+            from capri_mod.income.eaa_aggregates import accounts
+            return accounts(supply_results) or None
         except Exception as exc:
             warnings.warn(f"eaa_ms: the member states' accounts at producer prices could not be computed ({exc!r})")
             return None
 
     def _welfare_products(self, supply_results, feop, welfare_supply):
-        """The farms' profit and the domestic support per member state and market product at the solution
-        (capri_mod/income/welfare_products.py; EUR million), or None where they could not be computed (warned)."""
+        """The farms' profit and the domestic support per member state and market product at the solution, with the
+        product aggregates and the market and world regions' rows (capri_mod/income/welfare_products.py,
+        eaa_aggregates.py welfare_aggregates; EUR million), or None where they could not be computed (warned)."""
         try:
             from capri_mod.income.welfare_products import welfare_by_product
             rents = (welfare_supply["RENT"].to_dict() if welfare_supply is not None and "RENT" in welfare_supply
                      else None)
+            from capri_mod.income.eaa_aggregates import welfare_aggregates
             t = welfare_by_product(supply_results, feop, rents)
-            return t if len(t) else None
+            return welfare_aggregates(t) if len(t) else None
         except Exception as exc:
             warnings.warn(f"welfare_products: the profit and support per product could not be computed ({exc!r})")
             return None

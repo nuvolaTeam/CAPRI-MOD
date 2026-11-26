@@ -86,9 +86,11 @@ def test_income_is_capris_mgva_sum(data):
                 + sum(DATA_TOOU_FOUT(list(d.values()), [fo[a][k][1] for k in d]) * float(mz.get(a, 0.0))
                       for a, d in fom.items()))
         assert res_ > 0
-        fod = IncomeDistributionModule.crop_fodder_output(r, m)
+        fod = IncomeDistributionModule.crop_fodder_output(r, m, sr[r])
         mp = dict(getattr(m.ev, "mix_parts", None) or {})
+        mff = IncomeDistributionModule.milk_for_feeding_output(m, sr[r])
         fodd_ = (sum((t_ - v_) * float(lev.get(a, 0.0)) for a, (t_, v_, _p, _s) in fod.items())
+                 + sum((t_ - v_) * float(lev.get(a, 0.0)) for a, (t_, v_) in mff.items())
                  + sum(float(mp[a]["O"][3]) * (fod[a][0] / fod[a][1] - 1.0) * z for a, z in mz.items()
                        if a in fod and a in mp))
         inc = (sum(float(m.net_revenues[a]) * float(lev.get(a, 0.0)) for a in m.net_revenues.index)
@@ -173,7 +175,7 @@ def test_the_gross_account_by_item_at_the_regional_solution(solved3):
     for r in regs:
         m, e = sm._models[r], sr[r].eaa
         assert e is not None, r
-        fod = I.crop_fodder_output(r, m)
+        fod = I.crop_fodder_output(r, m, sr[r])
         for a, it in m.output_items.items():
             assert sum(v for *_, v in it) == pytest.approx(float(m.revenues[a]), rel=1e-12, abs=1e-9), (r, a)
         assert e["MGVA"] == pytest.approx(e["TOOU"] - e["TOIN"] + e["PRME"], rel=1e-12)
@@ -253,7 +255,7 @@ def test_the_fodder_crops_output_at_capris_uvag_foddo(solved3):
     n = 0
     for r in regs:
         m = sm._models[r]
-        fod = I.crop_fodder_output(r, m)
+        fod = I.crop_fodder_output(r, m, sr[r])
         assert fod, r
         it = sr[r].eaa["items"].set_index(["side", "item"])
         for c, (tou, rev, pshw, s) in fod.items():
@@ -326,7 +328,7 @@ def test_the_income_and_the_account_at_a_shocked_solution(data):
     from capri_mod.income import IncomeDistributionModule as I
     toin = I.crop_toin_y(r, m)
     fo, _fom = I.crop_residue_nutrients(m)
-    fod = I.crop_fodder_output(r, m)
+    fod = I.crop_fodder_output(r, m, sr[r])
     n_crops = 0
     for a, v in ip["MGVA_act"].items():
         if a in CROPS and a not in toin:            # a crop's MGVA is its margin at the solve with its residues (DATA_MGVA)

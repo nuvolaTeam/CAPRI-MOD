@@ -464,7 +464,10 @@ def main():
                                   for reg, v in x["supply"].items()} for x in (b, s)),
            # the member states' accounts at producer and basic prices (income I2c, results["eaa_ms"]: the items as
            # records, EAAP's and EAAB's totals; EUR million), base and scenario
-           "eaa_ms": tuple(({ms: {"items": v["items"].to_dict("records"), "EAAP": v["EAAP"], "EAAB": v.get("EAAB")}
+           "eaa_ms": tuple(({ms: {"items": v["items"].to_dict("records"), "EAAP": v["EAAP"], "EAAB": v.get("EAAB"),
+                                  "EAAG": v.get("EAAG"),
+                                  "aggregates": (v["aggregates"].to_dict("records")
+                                                 if v.get("aggregates") is not None else None)}
                              for ms, v in x["eaa_ms"].items()} if x.get("eaa_ms") else None) for x in (b, s)),
            # the premium outlays per member state and product and their budgets (income I4, results["feoga"], EUR
            # million), base and scenario

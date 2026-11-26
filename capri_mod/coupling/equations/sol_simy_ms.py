@@ -150,3 +150,72 @@ def DATA_LOSF_FOUT(GROF, INTF):
     In this project's notation: LOSF = GROF - INTF, so the manure's NETF = GROF - LOSF - INTF (DATA_NETF_MS) is 0 at
     any INTF. Departures from CAPRI: none (the split between INTF and LOSF does not enter the accounts)."""
     return float(GROF) - float(INTF)
+
+
+def DATA_BALPOS_REGAGG(BALPOS_MS):
+    r"""DATA(REGAGG, BALPOS, ROWS, SIMY): a regional aggregate's balance position (GROF, NETF), the sum over its member
+    states' (MAP_RR).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2317-2322):
+
+        $batinclude 'util\title.gms' "' Post model reporting: Member States aggregates of balance positions and other info'"
+        *
+        *----- Eu aggregation
+        *
+           DATA(REGAGG,BALPOS,ROWS,"%SIMY%")   $ (not DATA(REGAGG,BALPOS,ROWS,"%SIMY%")  )
+             = SUM(MAP_RR(REGAGG,MS) $ DATA(MS,BALPOS,ROWS,"%SIMY%"),   DATA(MS,BALPOS,ROWS,"%SIMY%"));
+
+    Departures from CAPRI: none (the model computes an aggregate only where all its member states have their accounts:
+    capri_mod/income/eaa_aggregates.py)."""
+    return float(sum(float(v) for v in BALPOS_MS))
+
+
+def DATA_UVAG_REGAGG(GROF_MS, UVAG_MS, GROF):
+    r"""DATA(REGAGG, "UVAG", ROWS, SIMY): a regional aggregate's unit value, its member states' weighted by their gross
+    production (where GROF is above eps; the MAPR term for the processed products not used); None otherwise.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2365-2368):
+
+           DATA(REGAGG,"UVAG",ROWS,SIMY_BAS) $ ( (DATA(REGAGG,"GROF",ROWS,SIMY_BAS) + DATA(REGAGG,"MAPR",ROWS,SIMY_BAS) $ (NOT DATA(REGAGG,"GROF",ROWS,SIMY_BAS))) GT EPS)
+              = SUM(MAP_RR(REGAGG,MS) $ p_dataCopy(MS,"UVAG",ROWS,SIMY_BAS),
+                      (p_dataCopy(MS,"GROF",ROWS,SIMY_BAS) + p_dataCopy(MS,"MAPR",ROWS,SIMY_BAS) $ (NOT p_dataCopy(MS,"GROF",ROWS,SIMY_BAS)))
+                             * p_dataCopy(MS,"UVAG",ROWS,SIMY_BAS))/(DATA(REGAGG,"GROF",ROWS,SIMY_BAS) + DATA(REGAGG,"MAPR",ROWS,SIMY_BAS) $ (NOT DATA(REGAGG,"GROF",ROWS,SIMY_BAS)));
+
+    Departures from CAPRI: none."""
+    if not float(GROF) > 1e-12:
+        return None
+    return float(sum(float(g) * float(u) for g, u in zip(GROF_MS, UVAG_MS) if u is not None)) / float(GROF)
+
+
+def DATA_UVAP_REGAGG(NETF_MS, UVAP_MS, NETF):
+    r"""DATA(REGAGG, "UVAP", ROWS, SIMY): a regional aggregate's unit value at producer prices, its member states'
+    weighted by their net production (where NETF is above eps; a member state without UVAP left out); None otherwise.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2394-2398):
+
+           p_dataCopy(MS,"UVAP",ROWS,"%SIMY%") = data(MS,"UVAP",ROWS,"%SIMY%");
+
+           DATA(REGAGG,"UVAP",ROWS,"%SIMY%") $ (DATA(REGAGG,"NETF",ROWS,"%SIMY%") GT eps)
+              = SUM(MAP_RR(REGAGG,MS) $ p_DataCopy(MS,"UVAP",ROWS,"%SIMY%"),
+                         p_dataCopy(MS,"NETF",ROWS,"%SIMY%") * p_DataCopy(MS,"UVAP",ROWS,"%SIMY%"))/DATA(REGAGG,"NETF",ROWS,"%SIMY%");
+
+    Departures from CAPRI: none."""
+    if not float(NETF) > 1e-12:
+        return None
+    return float(sum(float(n) * float(u) for n, u in zip(NETF_MS, UVAP_MS) if u is not None)) / float(NETF)
+
+
+def DATA_UVAB_REGAGG(NETF_MS, UVAB_MS, NETF):
+    r"""DATA(REGAGG, "UVAB", ROWS, SIMY): a regional aggregate's unit value at basic prices, as DATA_UVAP_REGAGG.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2400-2403):
+
+           p_dataCopy(MS,"UVAB",ROWS,"%SIMY%") = data(MS,"UVAB",ROWS,"%SIMY%");
+           DATA(REGAGG,"UVAB",ROWS,"%SIMY%") $ (DATA(REGAGG,"NETF",ROWS,"%SIMY%") GT eps)
+              = SUM(MAP_RR(REGAGG,MS) $ p_dataCopy(MS,"UVAB",ROWS,"%SIMY%"),
+                         p_dataCopy(MS,"NETF",ROWS,"%SIMY%") * p_dataCopy(MS,"UVAB",ROWS,"%SIMY%"))/DATA(REGAGG,"NETF",ROWS,"%SIMY%");
+
+    Departures from CAPRI: none."""
+    if not float(NETF) > 1e-12:
+        return None
+    return float(sum(float(n) * float(u) for n, u in zip(NETF_MS, UVAB_MS) if u is not None)) / float(NETF)

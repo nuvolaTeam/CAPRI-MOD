@@ -373,6 +373,13 @@ def main():
     for s in ("END", "IOE", "MARR"):
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
     write(OUT / "capri" / "O_TO_YANI.csv", ("oyani", "iyani"), pairs("O_TO_YANI"))
+    # the reports' aggregates (reports/aggreg_res_data.gms l. 49-91, sol_simy.gms l. 2321-2403, welfare.gms l. 864-903;
+    # capri_mod/income/eaa_aggregates.py): the product aggregates and their rows, the economic accounts' aggregates, the
+    # regional aggregates, the market's member states to its regions and those to the world's regions
+    for s in ("OAGG", "EAAGA", "REGAGG"):
+        write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    for s, cols in (("R_T_OAGG", ("oagg", "rows")), ("RMS_TO_RM", ("rms", "rm")), ("RW_TO_RM", ("rw", "rm"))):
+        write(OUT / "capri" / f"{s}.csv", cols, pairs(s))
     # the requirement call's grassland and ruminant activities (feed/req_or_man_fnc.gms; capri_mod/feed/chain.py)
     for s in ("GRSACT", "RUMI"):
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))

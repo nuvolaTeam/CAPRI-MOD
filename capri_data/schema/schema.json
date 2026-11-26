@@ -4640,6 +4640,46 @@
     "tests": []
    }
   },
+  "capri_eaaga": {
+   "file": "capri_data/codes/capri/EAAGA.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI EAAGA: the aggregates of the economic accounts (reports/aggreg_sets.gms l. 207), as CAPRI's run built them, in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_end": {
    "file": "capri_data/codes/capri/END.csv",
    "declared_in": "00_codes.sql",
@@ -7338,6 +7378,49 @@
     "tests": []
    }
   },
+  "capri_oagg": {
+   "file": "capri_data/codes/capri/OAGG.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI OAGG: the product aggregates of the reports (reports/aggreg_sets.gms l. 150ff), as CAPRI's run built them, in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_estimate_ms.py",
+     "capri_mod/pipeline/tests/test_captrd_prepare.py"
+    ]
+   }
+  },
   "capri_oaggr": {
    "file": "capri_data/codes/capri/OAGGR.csv",
    "declared_in": "00_codes.sql",
@@ -8462,6 +8545,50 @@
     "tests": []
    }
   },
+  "capri_r_t_oagg": {
+   "file": "capri_data/codes/capri/R_T_OAGG.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI R_T_OAGG: each aggregate and its rows (reports/aggreg_sets.gms l. 211-273), as CAPRI's run built it",
+   "columns": [
+    {
+     "name": "oagg",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "rows",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "oagg",
+    "rows"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/captrd_parity_dump.py",
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_scale_dgagri.py"
+    ]
+   }
+  },
   "capri_rall": {
    "file": "capri_data/codes/capri/RALL.csv",
    "declared_in": "00_codes.sql",
@@ -8497,6 +8624,46 @@
     "model": [],
     "builders": [],
     "checks": [],
+    "tests": []
+   }
+  },
+  "capri_regagg": {
+   "file": "capri_data/codes/capri/REGAGG.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI REGAGG: the regional aggregates of the simulation report (reports/sol_simy.gms l. 2317-2403), as CAPRI's run built them, in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": []
    }
   },
@@ -9189,6 +9356,47 @@
     "tests": []
    }
   },
+  "capri_rms_to_rm": {
+   "file": "capri_data/codes/capri/RMS_TO_RM.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI RMS_TO_RM: each market model country and its market region (arm/arm_sets.gms; reports/welfare.gms l. 864-868), as CAPRI's run built it",
+   "columns": [
+    {
+     "name": "rms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "rm",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "rms",
+    "rm"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_rmtp": {
    "file": "capri_data/codes/capri/RMTP.csv",
    "declared_in": "00_codes.sql",
@@ -9540,6 +9748,47 @@
    ],
    "primary_key": [
     "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_rw_to_rm": {
+   "file": "capri_data/codes/capri/RW_TO_RM.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI RW_TO_RM: each world region and its market regions (arm/arm_sets.gms; reports/welfare.gms l. 899-909), as CAPRI's run built it",
+   "columns": [
+    {
+     "name": "rw",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "rm",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "rw",
+    "rm"
    ],
    "unique": [],
    "foreign_keys": [],

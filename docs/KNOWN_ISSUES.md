@@ -4470,8 +4470,11 @@ the technology mix's output difference the same way, and the account by item's f
 (capri_mod/supply/equations/pmp.py; tools/build/build_fodder_onfarm_share.py -> capri_data/baselines/capri_greendeal_ref/
 1730/feed/fodder_onfarm_share_2030.csv, capri_data/2017/feed/fodder_onfarm_share_2017.csv; the kept extract
 capri_data/sources/raw/capri/results/sim_ini_21730/fodder_onfarm_items.parquet). Not in the solution: the supply model
-values the fodder through its balance's dual, as CAPRI's. In a scenario PSHW stays the balance's base value where
-CAPRI's is the solution's dual (still to decide). Tests: test_water_income.py (2, and the income's sums with the
+values the fodder through its balance's dual, as CAPRI's. PSHW is the fodder balance's dual at the solution, in the
+baseline and in a scenario, as CAPRI's (since 26 November 2026 evening, the project lead: "switch it to CAPRI's form";
+before, the balance's base value): the fodder crops' output, the fed fodder (UVAG(FODDI, SIM) = PSHW with FODDMARKUP 0,
+sol_simy.gms l. 756-757) and the milk for feeding the animals produce (COMF, SGMF, FODDO) at the dual, so the region's
+total moves only by the balance's slack. Tests: test_water_income.py (2, and the income's sums with the
 fodder term).
 Measured on the mini-EU Green Deal pair (the run of the fix against K212's; EUR million, 2017 money): the solution identical (21
 iterations, every level as before). At the baseline the fodder activities' income falls by 1,648.3 (other fodder
@@ -4679,9 +4682,9 @@ coupling/equations/calc_inc_indic.py DATA_TOIN_Y) in place of the margins' CAPRE
 32,917 against 32,944, the margin 29,420). Against CAPRI's 2030 reference income of the 20 units (EAAG MGVA, 38,358 in
 2017 money, a check only) the baseline's income is 0.862 of it in the margins' form, 0.946 with the solved feed and the
 options, 0.956 with the crops' inputs. What stays in the model's form is in register DEP-54: the activities' outputs and
-inputs are not kept item by item (TOOU, TOIN and GVAP not apart), the options' items are booked at the region, and the
-fodder keeps the reference's value in a scenario on both sides of its internal flow (CAPRI's UVAG(FODDO, SIM), sol_simy
-.gms l. 737-757), which leaves the region's income unchanged.
+inputs are not kept item by item (TOOU, TOIN and GVAP not apart), the options' items are booked at the region. (Until 26 November 2026 the fodder also kept the reference's value in a
+scenario on both sides of its internal flow; since then it is at the solution's dual, CAPRI's UVAG(FODDO, SIM),
+sol_simy.gms l. 737-757: K213.)
 
 Corrected on 26 November 2026: this entry said the solved fertiliser purchases belonged to the welfare table's total
 through CAPRI's product-based account. They do not. CAPRI's EAAG values GROF, which for the fertilisers is the

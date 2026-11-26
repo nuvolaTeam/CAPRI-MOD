@@ -5394,6 +5394,16 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/EAAGA.csv": {
+   "description": "CAPRI EAAGA: the aggregates of the economic accounts (reports/aggreg_sets.gms l. 207), as CAPRI's run built them, in CAPRI's set order",
+   "kind": "structure",
+   "rows": 10,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/END.csv": {
    "description": "CAPRI END: the final products, whose seed and losses on farm the simulation report sets in proportion to production (reports/sol_simy.gms l. 1889-1898), as CAPRI's run built it, in CAPRI's set order",
    "kind": "structure",
@@ -5945,6 +5955,16 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/OAGG.csv": {
+   "description": "CAPRI OAGG: the product aggregates of the reports (reports/aggreg_sets.gms l. 150ff), as CAPRI's run built them, in CAPRI's set order",
+   "kind": "structure",
+   "rows": 26,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/OAGGR.csv": {
    "description": "CAPRI OAGGR: the aggregate output columns deleted from the member states at Y (sets.gms, capmod/create_sim_ini_gdx.gms l. 311-369), in CAPRI's set order",
    "kind": "structure",
@@ -6139,6 +6159,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/REGAGG.csv": {
+   "description": "CAPRI REGAGG: the regional aggregates of the simulation report (reports/sol_simy.gms l. 2317-2403), as CAPRI's run built them, in CAPRI's set order",
+   "kind": "structure",
+   "rows": 10,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/REGAGGP.csv": {
    "description": "CAPRI REGAGGP: the EU aggregates with premium declarations (policy.gms)",
    "kind": "structure",
@@ -6282,6 +6312,16 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/RMS_TO_RM.csv": {
+   "description": "CAPRI RMS_TO_RM: each market model country and its market region (arm/arm_sets.gms; reports/welfare.gms l. 864-868), as CAPRI's run built it",
+   "kind": "structure",
+   "rows": 80,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/RMTP.csv": {
    "description": "CAPRI RMTP: the trade-policy blocks of the market model (tariffs and TRQs), in CAPRI's set order (sets.gms)",
    "kind": "structure",
@@ -6365,6 +6405,16 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/RW_TO_RM.csv": {
+   "description": "CAPRI RW_TO_RM: each world region and its market regions (arm/arm_sets.gms; reports/welfare.gms l. 899-909), as CAPRI's run built it",
+   "kind": "structure",
+   "rows": 185,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/R_LEVL.csv": {
    "description": "CAPRI R_LEVL: the regional levels of the baseline feed calibration (feed/fedtrm_cal_pw.gms), in the set's order",
    "kind": "structure",
@@ -6386,6 +6436,16 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/R_T_OAGG.csv": {
+   "description": "CAPRI R_T_OAGG: each aggregate and its rows (reports/aggreg_sets.gms l. 211-273), as CAPRI's run built it",
+   "kind": "structure",
+   "rows": 239,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/RowsRead.csv": {

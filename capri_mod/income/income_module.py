@@ -106,7 +106,11 @@ class IncomeDistributionModule:
         tfo = {a: DATA_TOOU_FOUT([q for q, _u in d.values()], [u for _q, u in d.values()]) for a, d in fo.items()}
         tfz = {a: DATA_TOOU_FOUT(list(d.values()), [fo[a][k][1] for k in d]) for a, d in fom.items()}
         # the fodder crops' output at CAPRI's UVAG(FODDO), the part fed (KNOWN_ISSUES K213)
-        fod = self.crop_fodder_output(region, m)
+        fod = self.crop_fodder_output(region, m, res)
+        # the milk for feeding the animals produce (COMF, SGMF, CAPRI's FODDO) at UVAG(FODDO) = its balance's dual at
+        # the solution (p_onFarmShare 0: CAPRI's data have no losses of it at "CUR") in place of the value per head
+        # their output value carries (CAPRI's UVAG at "BAS")
+        mff = self.milk_for_feeding_output(m, res)
 
         def _fodd(a):
             return {"REV_lin_FODDO": fod[a][1], "TOOU_FODDO": fod[a][0]} if a in fod else {}
@@ -118,9 +122,11 @@ class IncomeDistributionModule:
                 return {}
             v_ = float(mp[a]["O"][3])
             return {"REV_lin_FODDO": v_, "TOOU_FODDO": v_ * self.fodder_output_ratio(fod[a])}
-        mgva = {a: DATA_MGVA(float(nr[a]), fd[a][1] / lev[a], fd[a][0] / lev[a]) if a in fd else
+        def _mff(a):
+            return {"REV_lin_FODDO": mff[a][1], "TOOU_FODDO": mff[a][0]} if a in mff else {}
+        mgva = {a: DATA_MGVA(float(nr[a]), fd[a][1] / lev[a], fd[a][0] / lev[a], **_mff(a)) if a in fd else
                 DATA_MGVA(float(nr[a]), 0.0, 0.0, *toin[a], TOOU_FOUT=tfo.get(a, 0.0), **_fodd(a)) if a in toin else
-                DATA_MGVA(float(nr[a]), 0.0, 0.0, TOOU_FOUT=tfo.get(a, 0.0), **_fodd(a))
+                DATA_MGVA(float(nr[a]), 0.0, 0.0, TOOU_FOUT=tfo.get(a, 0.0), **(_fodd(a) or _mff(a)))
                 for a in nr.index if lev[a] > 0}
         mi = self.mitigation_items(region, res, supply_module)
         # the technology mix's MGVA per unit of the area moved to T1, by crop
@@ -145,7 +151,7 @@ class IncomeDistributionModule:
         return rec[0] / rec[1] if rec[1] else 1.0
 
     @staticmethod
-    def crop_fodder_output(region, m) -> dict:
+    def crop_fodder_output(region, m, res=None) -> dict:
         """{fodder crop: (its fodder output per ha at CAPRI's UVAG(FODDO), the output its margin carries per ha, PSHW,
         p_onFarmShare)} (EUR, the model's money; KNOWN_ISSUES K213).
 
@@ -156,8 +162,10 @@ class IncomeDistributionModule:
           YILD  the yield the margin carries, its revenue over its producer price (supply_module._compute_net_revenues:
                 price x yield), in fresh matter: the grassland's dry-matter yield over CAPRI's dry-matter content of
                 grass (grass_dm_content.csv, data/loaders.py _reconcile_grass_yield_units);
-          PSHW  the fodder balance's value per t fed (data.fodder_balance value_eur_t, the balance's base dual; at the
-                2030 market year CAPRI's 2030 reference value, fodder_value_2030.csv);
+          PSHW  the dual of the fodder's balance at the solution per t fed (res's SupplyResult.fodder_duals,
+                "fodder_<feed>", EUR per t), as CAPRI's (the dual of its own solution, sol_simy.gms l. 737-753); without
+                the solution's duals (res None) the balance's value (data.fodder_balance value_eur_t: at the 2030 market
+                year CAPRI's 2030 reference value, fodder_value_2030.csv);
           p_onFarmShare  fodder_onfarm_share_<year>.csv (tools/build/build_fodder_onfarm_share.py; 0 where CAPRI's data
                 have no production, as CAPRI's statement).
         The margin carries the output at the crop's producer price (producer_prices_regional.csv, per t produced; the
@@ -166,8 +174,8 @@ class IncomeDistributionModule:
         year's in real terms while CAPRI's reference values the output at the 2030 dual (Denmark's other fodder: 38.91
         EUR/t produced in the margin against 38.91 x (1 - 0.624) = 14.63). Empty without fodder balances.
 
-        Departures from CAPRI: PSHW is the balance's base dual in a scenario too, where CAPRI's is the dual at the
-        scenario's solution (SupplyResult.fodder_duals; the fodder's value at the scenario's dual is still to decide)."""
+        Departures from CAPRI: none (since 26 November 2026, the project lead: "switch it to CAPRI's form"; before,
+        PSHW was the balance's base value in a scenario too)."""
         from capri_mod.coupling.equations.sol_simy import DATA_UVAG_FODDO
         from capri_mod.data.definitions import capri_ms
         from capri_mod.projection.prices import FODDER_PRODUCT
@@ -190,9 +198,10 @@ class IncomeDistributionModule:
             return {str(r_): float(v_) for r_, v_ in zip(t.region, t.drma)}
         share = inp.cached(f"income_{name}", load)
         ms = capri_ms(region)
+        dual = getattr(res, "fodder_duals", None) or {}
         out = {}
         for _f, rec in fb.items():
-            pshw = float(rec.get("value_eur_t", 0.0) or 0.0)
+            pshw = float(dual.get(f"fodder_{_f}", rec.get("value_eur_t", 0.0)) or 0.0)
             for c in (rec.get("crops") or {}):
                 r_ = float(rev.get(c, 0.0) or 0.0) if hasattr(rev, "get") else 0.0
                 p_ = float(pp.get(c, 0.0) or 0.0)
@@ -449,7 +458,29 @@ class IncomeDistributionModule:
         return out
 
     @staticmethod
-    def feed_by_animal(res, ref_fodder_duals=None) -> dict:
+    def milk_for_feeding_output(m, res) -> dict:
+        """{animal: (its milk for feeding per head at the fodder balance's dual at the solution, at the value its output
+        value per head carries)} (EUR): the producers of the regional model's milk-for-feeding balances
+        (data.fodder_balance's FCOM, FSGM "producers", t per head; projection/prices.py) x the dual of the balance
+        ("fodder_<feed>", SupplyResult.fodder_duals) and x the balance's value (value_eur_t, CAPRI's UVAG of the milk for
+        feeding). CAPRI's COMF and SGMF are fodder outputs (FODDO): UVAG(FODDO, SIM) = PSHW x (1 - p_onFarmShare) (sol_simy.gms
+        l. 753), p_onFarmShare 0 for them in CAPRI's 2030 data. Empty without the solution's duals."""
+        dual = getattr(res, "fodder_duals", None) or {}
+        fb = getattr(getattr(m, "data", None), "fodder_balance", None) or {}
+        out = {}
+        for f, rec in fb.items():
+            pr = (rec or {}).get("producers") or {}
+            k = f"fodder_{f}"
+            if not pr or k not in dual:
+                continue
+            v0 = float(rec.get("value_eur_t", 0.0) or 0.0)
+            for a, t in pr.items():
+                o = out.get(a, (0.0, 0.0))
+                out[a] = (o[0] + float(t) * float(dual[k]), o[1] + float(t) * v0)
+        return out
+
+    @staticmethod
+    def feed_by_animal(res) -> dict:
         """The herds' feed in CAPRI's TOIN at the solution against the feed their margins carry (income I1; income
         inventory 8.3), EUR 1000 per animal whose feeding is in the regional model: (the solved ration at its report
         prices, the feed value per head the herd's linear term leaves out x the level). The solved ration is
@@ -458,33 +489,32 @@ class IncomeDistributionModule:
         takes the feed per head of the solution (reports/sol_simy.gms l. 254-257, DATA_FEED_SIMY) at the simulation's
         UVAG (calc_inc_indic.gms l. 34-38).
 
-        With ref_fodder_duals (the baseline's fodder balances' duals, {"fodder_<feed>": EUR/t}), the fed fodder takes
-        CAPRI's UVAG(fodder, SIM): FODDMARKUP = UVAG(BAS run) - PSHW(BAS run) x (1 - p_onFarmShare), UVAG(FODDO, SIM)
-        = PSHW(SIM) x (1 - p_onFarmShare) + FODDMARKUP and the fed fodder's UVAG(FODDO, SIM) / (1 - p_onFarmShare)
-        (sol_simy.gms l. 740-757), so per t fed the reference's value plus PSHW(SIM) - PSHW(reference) where the dual
-        is per t fed (CAPRI's note at l. 737). The reference's value is the ration's (fodder_value_2030.csv). The
-        region's income leaves that change out (income_parts): the fodder crops' output takes the same UVAG(FODDO,
-        SIM), so in the region's total it is an internal flow that cancels."""
+        The fed fodder (the feeds with a balance in the regional model, SupplyResult.fodder_duals "fodder_<feed>", the
+        milk for feeding too) takes CAPRI's UVAG(FODDI, SIM) = UVAG(FODDO, SIM) / (1 - p_onFarmShare) with UVAG(FODDO,
+        SIM) = PSHW x (1 - p_onFarmShare) + FODDMARKUP (sol_simy.gms l. 753-757), FODDMARKUP 0 as in CAPRI's simulations
+        (KNOWN_ISSUES K213): the balance's dual at the solution per t fed (EUR/t, so / 1000 per kg). The fodder crops'
+        output and the milk for feeding the animals produce take the same dual (crop_fodder_output,
+        milk_for_feeding_output), so in the region's total it is an internal flow. Since 26 November 2026 (the project
+        lead: "switch it to CAPRI's form"); before, the fed fodder kept the ration's reference value."""
         lin = getattr(res, "feed_lin", None) or {}
         ft, fp = getattr(res, "feed_t", None) or {}, getattr(res, "feed_price", None) or {}
         acts = getattr(res, "activities", None)
         dual = getattr(res, "fodder_duals", None) or {}
 
         def price(a, f):
-            p = float((fp.get(a) or {}).get(f, 0.0))
             k = f"fodder_{f}"
-            if ref_fodder_duals and k in ref_fodder_duals and k in dual:
-                p += (float(dual[k]) - float(ref_fodder_duals[k])) / 1000.0      # EUR/t -> EUR/kg
-            return p
+            if k in dual:
+                return float(dual[k]) / 1000.0                                    # EUR/t -> EUR/kg
+            return float((fp.get(a) or {}).get(f, 0.0))
         return {a: (sum(float(t) * price(a, f) for f, t in (ft.get(a) or {}).items()),
                     float(v) * float(acts.get(a, 0.0) if acts is not None else 0.0)) for a, v in lin.items()}
 
     @staticmethod
-    def feed_term(res, ref_fodder_duals=None) -> float:
+    def feed_term(res) -> float:
         """The herds' feed at the solution less the feed their margins carry, summed over the animals (EUR 1000;
         feed_by_animal)."""
         return float(sum(s_ - b_ for s_, b_ in
-                         IncomeDistributionModule.feed_by_animal(res, ref_fodder_duals).values()))
+                         IncomeDistributionModule.feed_by_animal(res).values()))
 
     def compute(self,
                 supply_results: Dict,
