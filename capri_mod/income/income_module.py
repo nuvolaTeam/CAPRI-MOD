@@ -61,8 +61,10 @@ class IncomeDistributionModule:
         l. 2586), EUR 1000 unless said:
           MGVA      CAPRI's activity-based income AGGT: sum over the activities of their MGVA at the solution x level
                     (coupling/equations/calc_inc_indic.py DATA_MGVA: the linear margin with the solved ration in place
-                    of the feed it carries), with the technology mix's net revenue on the area moved to T1, less the
-                    mitigation options' cost plus their revenue (coupling/equations/sol_simy.py DATA_AGGT_MGVA)
+                    of the feed it carries, and a crop's residues' nutrients, the outputs MANN, MANP, MANK of its TOOU
+                    at the member state's unit value, DATA_TOOU_FOUT: KNOWN_ISSUES K212), with the technology mix's net
+                    revenue (and residues) on the area moved to T1, less the mitigation options' cost plus their
+                    revenue (coupling/equations/sol_simy.py DATA_AGGT_MGVA)
           PRME      the premiums x levels (CAPRI's PRME, with the technology mix's premium difference; mitiSubs is 0
                     in the model's runs, mitigation_items' module docstring)
           FEED      the solved ration at its report prices less the feed the margins carry (feed_term)
@@ -73,7 +75,7 @@ class IncomeDistributionModule:
         Margins and premiums are per ha or per head in EUR; levels in 1000 ha or 1000 heads. The emission tax a
         scenario puts on the activities' net revenues (supply/abatement.py _apply_ghg_tax) is not an input: CAPRI's MGVA
         holds no tax (calc_inc_indic.gms l. 30-49), so it is added back."""
-        from capri_mod.coupling.equations.calc_inc_indic import DATA_MGVA
+        from capri_mod.coupling.equations.calc_inc_indic import DATA_MGVA, DATA_TOOU_FOUT
         from capri_mod.coupling.equations.sol_simy import DATA_AGGT_MGVA
         acts = getattr(res, "activities", None)
         m = getattr(supply_module, "_models", {}).get(region)
@@ -95,11 +97,18 @@ class IncomeDistributionModule:
         fd = self.feed_by_animal(res)
         # the crops' inputs at the simulation year's coefficients (CAPRI's TOIN at "Y") against the margins' base cost
         toin = self.crop_toin_y(region, m)
+        # the crops' residues' nutrients per ha at the solution (the regional model's nutrient block,
+        # supply/fertilisation.py: RegionalResults.last_fout, last_fout_mix for the mix column's T1 - T2)
+        fo, fom = self.crop_residue_nutrients(m)
+        tfo = {a: DATA_TOOU_FOUT([q for q, _u in d.values()], [u for _q, u in d.values()]) for a, d in fo.items()}
+        tfz = {a: DATA_TOOU_FOUT(list(d.values()), [fo[a][k][1] for k in d]) for a, d in fom.items()}
         mgva = {a: DATA_MGVA(float(nr[a]), fd[a][1] / lev[a], fd[a][0] / lev[a]) if a in fd else
-                DATA_MGVA(float(nr[a]), 0.0, 0.0, *toin[a]) if a in toin else float(nr[a])
+                DATA_MGVA(float(nr[a]), 0.0, 0.0, *toin[a], TOOU_FOUT=tfo.get(a, 0.0)) if a in toin else
+                DATA_MGVA(float(nr[a]), 0.0, 0.0, TOOU_FOUT=tfo.get(a, 0.0))
                 for a in nr.index if lev[a] > 0}
         mi = self.mitigation_items(region, res, supply_module)
-        out = {"MGVA": DATA_AGGT_MGVA([v for _a, v in mgva.items()] + [float(dnr.get(a, 0.0)) for a in mz],
+        out = {"MGVA": DATA_AGGT_MGVA([v for _a, v in mgva.items()]
+                                      + [float(dnr.get(a, 0.0)) + tfz.get(a, 0.0) for a in mz],
                                       [lev[a] for a in mgva] + [float(z) for z in mz.values()],
                                       mi["mitiI"], mi["mitiO"]),
                "PRME": float(sum(float(pr.get(a, 0.0)) * lev[a] for a in nr.index)) + prem_z,
@@ -110,6 +119,16 @@ class IncomeDistributionModule:
         if ps is not None:
             out.update(ps)
         return out
+
+    @staticmethod
+    def crop_residue_nutrients(m) -> tuple:
+        """({crop: {MANN | MANP | MANK: (kg per ha, EUR per t)}}, {crop: {MANN | MANP | MANK: kg per ha moved}}): the
+        crops' residues' nutrients at the region's last solve and the member state's unit value of each (CAPRI's outputs
+        of the crops, PACT_TO_O; KNOWN_ISSUES K212), and the technology mix's T1 - T2 of them; recorded by the regional
+        model's nutrient block (supply/fertilisation.py _npk_spec), empty where it is not built (outside CAPRI's EU
+        data)."""
+        r_ = getattr(m, "res", None)
+        return dict(getattr(r_, "last_fout", None) or {}), dict(getattr(r_, "last_fout_mix", None) or {})
 
     @staticmethod
     def untaxed_net_revenues(m) -> pd.Series:
@@ -159,7 +178,10 @@ class IncomeDistributionModule:
                          parts, as costs); obj_other (the other columns: manure trade, options, the entitlement
                          overshoot) and obj_blocks (the options', ration fat and fertilisation blocks), as costs
           obj_residual   the objective less its parts' sum (a check, 0 up to rounding)
+          obj_fixed      the fixed activities' columns' terms (CAPRI's FACT, which have no PMP terms: the model's
+                         calibration constants of those columns), as a cost (the objective's sign); not in PMPLevl
           pmp_col        {column: p_j} the linear PMP term per unit of each activity, technology-mix and split column
+                         (the fixed activities' not among them)
         None where the solve recorded no parts (no NLP solve) or the herds' feed is not in CAPRI's objective form
         (supply.animal_cost_form "toin": the NLP takes the base ration's PMP terms out of the herds' linear terms)."""
         from capri_mod.coupling.equations.report_supply_model import (
@@ -167,7 +189,7 @@ class IncomeDistributionModule:
         from capri_mod.coupling.equations.sol_simy import DATA_EAAG_OBJE, DATA_EAAG_agProdSurplus
         from capri_mod.data.definitions import CROPS
         from capri_mod.settings import current as _settings
-        from capri_mod.supply.supply_module import SupplyModule
+        from capri_mod.supply.supply_module import FIXED_ACTIVITIES, SupplyModule
         op = getattr(getattr(m, "res", None), "obj_parts", None)
         if not op:
             return None
@@ -192,7 +214,7 @@ class IncomeDistributionModule:
         toin = self.crop_toin_y(region, m) if toin is None else toin
         npk = self.crop_npk_y(region, m) if toin else {}
         fodder = set(SupplyModule.FODDER_ACTS)
-        pmp, linear, land, other = 0.0, 0.0, 0.0, 0.0
+        pmp, linear, land, other, fixed = 0.0, 0.0, 0.0, 0.0, 0.0
         pcol = {}
         for j, lab in enumerate(cols):
             if lab in nr.index:
@@ -215,8 +237,14 @@ class IncomeDistributionModule:
             else:
                 other += float(lin[j]) + float(quad[j])
                 continue
-            pmp += float(lin[j]) + L * float(y[j]) + float(quad[j])
             linear += L * float(y[j])
+            if lab in FIXED_ACTIVITIES:
+                # CAPRI's fixed activities (FACT: held at their data level) have no PMP terms (sim_ini_21730's
+                # p_pmpCnst has none for OANI, OOIL, FLOW...): the model's terms of their columns are its own
+                # calibration's constants, kept apart (obj_fixed), not in PMPLevl (register DEP-55)
+                fixed += float(lin[j]) + L * float(y[j]) + float(quad[j])
+                continue
+            pmp += float(lin[j]) + L * float(y[j]) + float(quad[j])
             pcol[lab] = float(op_q0[j]) + L if op_q0 is not None else float("nan")
         PMPLevl = DATA_EAAG_PMPLevl(pmp)
         PMPFeed = DATA_EAAG_PMPFeed(-float(op["feed_pmp"]))
@@ -226,7 +254,7 @@ class IncomeDistributionModule:
                 "agProdSurplus": DATA_EAAG_agProdSurplus(MGVA, PMPLevl, PMPFeed, PMPLandTrans),
                 "LINEAR_act": linear, "feed_price": float(op["feed_price"]), "feed_ghg": float(op["feed_ghg"]),
                 "obj_other": other, "obj_blocks": float(op["blocks"]), "obj_residual": float(op["residual"]),
-                "pmp_col": pcol}
+                "obj_fixed": fixed, "pmp_col": pcol}
 
     @staticmethod
     def crop_toin_y(region, m) -> dict:

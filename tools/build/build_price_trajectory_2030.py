@@ -39,6 +39,9 @@ Written (capri_data/baselines/capri_greendeal_ref/1730/trajectories/):
   capri_cap_premium_2030.csv           model region x CAPRI activity: PRME 2030 in 2017 money (per unit)
   capri_livestock_premium_ratio_2030.csv  model region x model animal: 2030/2017 premium ratio (real,
                                        2017 CAPRI activity levels as weights)
+  capri_livestock_premium_2030.csv     model region x model animal: CAPRI's 2030 premium per model head (2017
+                                       money; sum of LEVL 2017 x PRME 2030 over the model's 2017 heads), for the
+                                       animals CAPRI's 2017 data pay none (Croatia: KNOWN_ISSUES K210)
 
     python tools/build/build_price_trajectory_2030.py [--dump-dir capri_sources/capreg]
 """
@@ -225,6 +228,11 @@ def main() -> None:
     capn.to_csv(out / "capri_cap_premium_2030.csv")
 
     lsk = pd.DataFrame(index=herds.index, columns=sorted(set(c2m.values())), dtype=float)
+    # CAPRI's 2030 premium per model head itself (2017 money): sum over the members of L17 x PRME30 over the model's 2017
+    # head count, what the 2017 coefficient (LEVL17 x PRME17 / heads, build_livestock_premium_coef.py) x the ratio
+    # gives wherever the 2017 premium is not zero; used where it is (Croatia, whose animals CAPRI's 2017 data pay none:
+    # KNOWN_ISSUES K210)
+    lsk30 = pd.DataFrame(index=herds.index, columns=sorted(set(c2m.values())), dtype=float)
     for reg in herds.index:
         src = source(reg)
         df_ = defl.get(mr.national_code(reg))
@@ -246,7 +254,11 @@ def main() -> None:
         for ma in num:
             if den[ma] > 1e-9:
                 lsk.at[reg, ma] = num[ma] / den[ma]
+            h17 = float(herds.at[reg, ma]) if ma in herds.columns and pd.notna(herds.at[reg, ma]) else 0.0
+            if h17 > 0 and num[ma] > 0:
+                lsk30.at[reg, ma] = num[ma] / h17
     lsk.to_csv(out / "capri_livestock_premium_ratio_2030.csv")
+    lsk30.to_csv(out / "capri_livestock_premium_2030.csv")
     print(f"price ratios: {len(pr)} rows, deflator median {statistics.median(defl.values()):.4f} "
           f"(range {min(defl.values()):.4f}-{max(defl.values()):.4f}); cap premiums {int(capn.notna().sum().sum())} cells; "
           f"livestock premium ratios {int(lsk.notna().sum().sum())} cells")

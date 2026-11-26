@@ -60,7 +60,8 @@ def load_price_tables(traj_dir: Path):
     eu = pr[pr["ms"].map(is_eu)].groupby("product")["real_ratio"].median().to_dict()
     cap = read_input(traj_dir / "capri_cap_premium_2030.csv", index_col=0)
     lsk = read_input(traj_dir / "capri_livestock_premium_ratio_2030.csv", index_col=0)
-    return ratio, eu, cap, lsk
+    lsk30 = read_input(traj_dir / "capri_livestock_premium_2030.csv", index_col=0)
+    return ratio, eu, cap, lsk, lsk30
 
 
 def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_cereal_mix: Dict,
@@ -69,7 +70,7 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
     young-animal coefficients of the year (2030: CAPRI's, KNOWN_ISSUES K178); young_table_base: the base year's, whose
     young animals the base year's total output and inputs per head hold (None: the year's table, the change of the
     value alone)."""
-    ratio, eu, cap30, lsk = load_price_tables(traj_dir)
+    ratio, eu, cap30, lsk, lsk30 = load_price_tables(traj_dir)
     r = lambda reg, prod: ratio.get((_ms(reg), prod), eu.get(prod))
     summary = {}
 
@@ -272,10 +273,17 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
         for c in crops:
             cp[c] = new[c].combine_first(cp[c])
         summary["crop_premium_cells"] = int(new[crops].notna().sum().sum())
+    # --- the animals' premiums per head: the 2017 coefficient x CAPRI's 2030/2017 ratio; where the 2017 coefficient is
+    # empty or zero (CAPRI's 2017 data pay the animals none: Croatia's and Sweden's, Greece's SHGF) CAPRI's 2030 premium
+    # per model head itself (KNOWN_ISSUES K210)
     lp = data.get("livestock_premium_coef")
     if isinstance(lp, pd.DataFrame):
         f = lsk.reindex(index=lp.index, columns=lp.columns).fillna(1.0)
-        data["livestock_premium_coef"] = lp * f
+        new = lp * f
+        a30 = lsk30.reindex(index=lp.index, columns=lp.columns)
+        fill = (lp.isna() | (lp == 0)) & a30.notna()
+        data["livestock_premium_coef"] = new.mask(fill, a30)
+        summary["livestock_premium_2030_cells"] = int(fill.sum().sum())
     summary["young_regions"] = len(yfac)
     return summary
 

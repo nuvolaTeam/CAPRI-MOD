@@ -57,13 +57,15 @@ def test_water_demand_geography(data):
 def test_income_is_capris_mgva_sum(data):
     """Farm income = CAPRI's activity-based income at the solution (income I1, AGGT): the activities' margins x levels
     with the technology mix's, less the change of the herds' feed (the solved ration against the feed the margins
-    carry), less the mitigation options' cost plus their revenue; the premiums x levels its public support. The
+    carry), plus the crops' residues' nutrients (DATA_TOOU_FOUT, KNOWN_ISSUES K212), less the mitigation options' cost
+    plus their revenue; the premiums x levels its public support. The
     region's income is set by the regional solve (SupplyResult.income, gross_margin its MGVA). The policy module's
     payments are reported beside it, not added (until 27 October 2026 premiums were counted twice)."""
     from capri_mod.supply.supply_module import SupplyModule
     from capri_mod.utils.utils import calibrate_supply_elasticities
     from capri_mod.policy.policy_module import PolicyModule, PolicyScenario
     from capri_mod.income import IncomeDistributionModule
+    from capri_mod.coupling.equations.calc_inc_indic import DATA_TOOU_FOUT
     regs = ["DE110000", "ES610000", "IR010000"]
     sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
     sr = sm.run(price_signals=None, regions=regs)
@@ -76,9 +78,16 @@ def test_income_is_capris_mgva_sum(data):
         mz = dict(sr[r].technology_mix or {})
         dnr = dict(getattr(m.ev, "mix_dnr", None) or {})
         mi = im.mitigation_items(r, sr[r], sm)
+        fo, fom = IncomeDistributionModule.crop_residue_nutrients(m)
+        assert fo, r
+        res_ = (sum(DATA_TOOU_FOUT([q for q, _ in d.values()], [u for _, u in d.values()]) * float(lev.get(a, 0.0))
+                    for a, d in fo.items())
+                + sum(DATA_TOOU_FOUT(list(d.values()), [fo[a][k][1] for k in d]) * float(mz.get(a, 0.0))
+                      for a, d in fom.items()))
+        assert res_ > 0
         inc = (sum(float(m.net_revenues[a]) * float(lev.get(a, 0.0)) for a in m.net_revenues.index)
                + sum(float(dnr.get(a, 0.0)) * z for a, z in mz.items())
-               - im.feed_term(sr[r]) - mi["mitiI"] + mi["mitiO"])
+               - im.feed_term(sr[r]) - mi["mitiI"] + mi["mitiO"] + res_)
         sup = (sum(float(m.premiums.get(a, 0.0)) * float(lev.get(a, 0.0)) for a in m.net_revenues.index)
                + sum(float(m.data.techn_mix.at[a, "prem_diff_share"]) * float(m.premiums.get(a, 0.0)) * z
                      for a, z in mz.items() if a in m.data.techn_mix.index))
@@ -170,6 +179,39 @@ def test_the_gross_account_by_item_at_the_regional_solution(solved3):
 
 
 @pytest.mark.slow
+def test_the_crops_residue_nutrients_at_the_regional_solution(solved3):
+    """K212: the regional model's nutrient block records each crop's residues' nutrients at the solve's yields
+    (DATA(crop, MANN | MANP | MANK): the residue pool's per ha, unscaled, or a permanent crop's own; at the base yields
+    npk_crop_coefs_2030.csv's) with the member state's unit value of the output (npk_region_2030.csv
+    fout_uvag_eur_t); the income's MGVA of a crop holds their value (DATA_TOOU_FOUT) and the account books them as
+    the outputs MANN, MANP, MANK."""
+    from capri_mod.coupling.equations.calc_inc_indic import DATA_TOOU_FOUT
+    from capri_mod.fert.npk import NPKData
+    from capri_mod.income import IncomeDistributionModule as I
+    D = NPKData.get()
+    sm, sr, regs = solved3
+    for r in regs:
+        m = sm._models[r]
+        fo, _fom = I.crop_residue_nutrients(m)
+        assert fo, r
+        cr = D.capri_region(r)
+        a = "SWHE"
+        q, uv = fo[a]["MANN"]
+        R = D.region(cr, "N")
+        assert uv == pytest.approx(float(R.fout_uvag_eur_t), rel=1e-12)
+        assert q == pytest.approx(D.crop_coef(cr, "N", a, "pool_kg_ha") / float(R.pool_scale), rel=1e-9), r
+        it = sr[r].eaa["items"].set_index(["side", "item"])
+        L = float(sr[r].activities[a])
+        mann = sum(float(d["MANN"][0]) * float(sr[r].activities.get(c, 0.0)) for c, d in fo.items() if "MANN" in d)
+        z = sr[r].technology_mix or {}
+        _f, fom = I.crop_residue_nutrients(m)
+        mann += sum(float(d.get("MANN", 0.0)) * float(z.get(c, 0.0)) for c, d in fom.items())
+        assert it.loc[("O", "MANN"), "GROF"] == pytest.approx(0.001 * mann, rel=1e-12), r
+        t_ha = DATA_TOOU_FOUT([v[0] for v in fo[a].values()], [v[1] for v in fo[a].values()])
+        assert t_ha > 0 and L > 0
+
+
+@pytest.mark.slow
 def test_the_income_and_the_account_at_a_shocked_solution(data):
     """After a solve with a price shock and the Green Deal's organic and pesticide targets the income takes the
     solve's own net revenues (res.nr_solve: the solve restores net_revenues to their state before it), and the gross
@@ -194,12 +236,15 @@ def test_the_income_and_the_account_at_a_shocked_solution(data):
     nr = m.res.nr_solve
     assert not np.allclose(nr.values, m.net_revenues.values)            # the solve's margins are not the restored ones
     assert float(nr["SWHE"]) > float(a0["SWHE"])                          # the price shock is in them
+    from capri_mod.coupling.equations.calc_inc_indic import DATA_TOOU_FOUT
     from capri_mod.income import IncomeDistributionModule as I
     toin = I.crop_toin_y(r, m)
+    fo, _fom = I.crop_residue_nutrients(m)
     n_crops = 0
     for a, v in ip["MGVA_act"].items():
-        if a in CROPS and a not in toin:            # a crop's MGVA is its margin at the solve (DATA_MGVA)
-            assert v == pytest.approx(float(nr[a]), rel=1e-12), a
+        if a in CROPS and a not in toin:            # a crop's MGVA is its margin at the solve with its residues (DATA_MGVA)
+            t_ = DATA_TOOU_FOUT([q for q, _ in (fo.get(a) or {}).values()], [u for _, u in (fo.get(a) or {}).values()])
+            assert v == pytest.approx(float(nr[a]) + t_, rel=1e-12), a
             n_crops += 1
     assert n_crops > 5
     assert e["MGVA"] == pytest.approx(e["TOOU"] - e["TOIN"] + e["PRME"], rel=1e-12)

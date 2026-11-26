@@ -29,19 +29,19 @@ def test_the_objective_parts_of_a_regional_qp():
 def _region():
     """A hand-built region at the base year (the margins' own cost basis): a crop with a fertiliser cost and an
     emission tax, a fodder crop, a herd whose feed the NLP charges, a technology mix column, a dairy split column, a
-    land column and a manure trade column."""
+    land column, a manure trade column and a fixed activity (other oilseeds, CAPRI's FACT)."""
     import pandas as pd
     from types import SimpleNamespace
-    cols = ["SWHE", "GRAI", "DCOW", "land_ARAC", "mix_SWHE", "dairy_z", "manure_export"]
-    y = np.array([100.0, 20.0, 10.0, 130.0, 2.0, -0.5, 3.0])
-    q0 = np.array([-200.0, 400.0, -900.0, 50.0, -30.0, 15.0, 4.0])
-    quad = np.array([30.0, 10.0, 5.0, 60.0, 1.0, 0.2, 0.0])
+    cols = ["SWHE", "GRAI", "DCOW", "land_ARAC", "mix_SWHE", "dairy_z", "manure_export", "OOIL"]
+    y = np.array([100.0, 20.0, 10.0, 130.0, 2.0, -0.5, 3.0, 5.0])
+    q0 = np.array([-200.0, 400.0, -900.0, 50.0, -30.0, 15.0, 4.0, -50.0])
+    quad = np.array([30.0, 10.0, 5.0, 60.0, 1.0, 0.2, 0.0, 2.0])
     op = {"cols": cols, "y": y, "q0": q0, "lin": q0 * y, "quad": quad, "feed_price": 9000.0, "feed_ghg": 0.0,
           "feed_pmp": -700.0, "blocks": 2500.0, "obj": 0.0, "residual": 0.0,
-          "lin_adj": {"fert": np.array([100.0, 50.0, 0.0, 0.0, 10.0, 0.0, 0.0]),
-                      "tax": np.array([3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])},
+          "lin_adj": {"fert": np.array([100.0, 50.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0]),
+                      "tax": np.array([3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])},
           "feed_lin": {"DCOW": 800.0}, "split_lin": {5: (120.0, 2.0)}, "mix_cols": {"SWHE": 4}}
-    m = SimpleNamespace(net_revenues=pd.Series({"SWHE": 600.0, "GRAI": 300.0, "DCOW": 1500.0}),
+    m = SimpleNamespace(net_revenues=pd.Series({"SWHE": 600.0, "GRAI": 300.0, "DCOW": 1500.0, "OOIL": 300.0}),
                         premiums=pd.Series({"SWHE": 200.0, "GRAI": 100.0, "DCOW": 100.0}),
                         revenues=pd.Series({"SWHE": 1500.0, "GRAI": 900.0, "DCOW": 3000.0}),
                         ev=SimpleNamespace(ghg_applied={"SWHE": 5.0}, mix_dnr={"SWHE": 40.0}),
@@ -54,7 +54,8 @@ def test_the_producer_surplus_of_a_region():
     net revenue (5) and without its fertiliser cost (100), less its emission taxes (5 + 3); the fodder crop's margin
     without its fodder output (900); the herd's margin without the feed the NLP charges (800); the mix column's T1 - T2
     net revenue without its fertiliser cost (10); the split column's emission tax only. The land column is the land
-    market's, the manure trade column none of them."""
+    market's, the manure trade column none of them. The fixed activity has no PMP terms in CAPRI: its column's terms
+    are kept apart (obj_fixed), its margin in LINEAR_act."""
     from capri_mod.income.income_module import IncomeDistributionModule as I
     m, op = _region()
     L = {"SWHE": (600.0 + 5.0) + 100.0 - (5.0 + 3.0), "GRAI": 300.0 + 50.0 - 900.0, "DCOW": 1500.0 + 800.0,
@@ -62,11 +63,12 @@ def test_the_producer_surplus_of_a_region():
     y = dict(zip(op["cols"], op["y"]))
     pmp = sum(op["lin"][j] + L[c] * y[c] + op["quad"][j] for j, c in enumerate(op["cols"]) if c in L)
     out = I(None).producer_surplus("FR810000", m, 50000.0, toin={})
+    assert out["obj_fixed"] == pytest.approx(-50.0 * 5.0 + 300.0 * 5.0 + 2.0)
     assert out["PMPLevl"] == pytest.approx(-pmp)
     assert out["PMPFeed"] == pytest.approx(700.0)
     assert out["PMPLandTrans"] == pytest.approx(-(50.0 * 130.0 + 60.0))
     assert out["agProdSurplus"] == pytest.approx(50000.0 - pmp + 700.0 - (50.0 * 130.0 + 60.0))
-    assert out["LINEAR_act"] == pytest.approx(sum(L[c] * y[c] for c in L))
+    assert out["LINEAR_act"] == pytest.approx(sum(L[c] * y[c] for c in L) + 300.0 * 5.0)
     assert out["obj_other"] == pytest.approx(4.0 * 3.0)
     assert out["OBJE"] == 0.0 and out["obj_blocks"] == 2500.0
     assert out["pmp_col"] == pytest.approx({c: float(op["q0"][j]) + L[c] for j, c in enumerate(op["cols"]) if c in L})
@@ -77,7 +79,8 @@ def test_the_producer_surplus_of_a_region():
     op["obj"] = obj
     out = I(None).producer_surplus("FR810000", m, 50000.0, toin={})
     assert out["agProdSurplus"] - out["OBJE"] == pytest.approx(
-        50000.0 - out["LINEAR_act"] + out["obj_other"] + out["feed_price"] + out["feed_ghg"] + out["obj_blocks"])
+        50000.0 - out["LINEAR_act"] + out["obj_other"] + out["feed_price"] + out["feed_ghg"] + out["obj_blocks"]
+        + out["obj_fixed"])
     # no NLP parts, or the herds' feed in the "toin" form: no producer surplus
     m.res.obj_parts = None
     assert I(None).producer_surplus("FR810000", m, 50000.0, toin={}) is None

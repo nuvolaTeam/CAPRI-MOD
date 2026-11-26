@@ -9,8 +9,9 @@ coupling/equations/sol_simy.py.
 What the model holds per activity at the solution, by item (EUR per ha or head, the model's money; levels in 1000 ha or
 heads):
   crops    outputs: the product, its yield x the solve's price (SupplyModule._output_items: a quantity and a unit value,
-                    so GROF and UVAG as CAPRI's). Not valued: the straw (STRA), which CAPRI's crops sell at its unit
-                    value (their secondary revenue SREV; KNOWN_ISSUES K207, register DEP-54).
+                    so GROF and UVAG as CAPRI's); the residues' nutrients MANN, MANP, MANK in quantity at the member
+                    state's unit value (IncomeDistributionModule.crop_residue_nutrients, CAPRI's PACT_TO_O; their
+                    secondary revenue SREV: KNOWN_ISSUES K212). The straw (STRA) at zero, as CAPRI's 2030 (K211).
            inputs:  at the 2030 market year CAPRI's directly yield-dependent inputs item by item (crop_inputs_2030.csv,
                     x TF_I, in the model's money; their sum is DATA_TOIN_Y's first term), the 2030 NPK need per nutrient
                     at its unit value (NITF, PHOF, POTF; capri_mod/fert/npk.py); at the base year the margin's input
@@ -28,7 +29,8 @@ heads):
                     OTHER_O and YOUNG, the options' costs charged on the margins (outside the regional NLP) on mitiI.
   the technology mix  on the area moved to T1 (z), the terms of T1 less T2 (ev.mix_parts): the product's output
                     difference, INPO, PLAP, the fertiliser (FERT, the margin's fertiliser cost basis, as I1 books it)
-                    and the other inputs (OTHER_I); its premium difference in PRME.
+                    and the other inputs (OTHER_I), the residues' nutrients' difference; its premium difference in
+                    PRME.
   region   the mitigation options' cost (mitiI, an input) and revenue (mitiO, an output) at the region (register DEP-54).
 Where the model holds an item's value per unit and not its quantity and unit value apart, GROF is the value (EUR million)
 and UVAG 1000 (DATA_EAAG_IO's departure). PRME as I1's. DIFF = EAAG's MGVA - AGGT's, by activity too (DIFF_act): what the
@@ -88,6 +90,7 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
     feed_p = getattr(res, "feed_price", None) or {}
     feed_lin = getattr(res, "feed_lin", None) or {}
     ic = getattr(data, "livestock_input_cost", None)
+    fo, fom = IDM.crop_residue_nutrients(m)
     for a, L in lev.items():
         if L <= 0:
             continue
@@ -97,6 +100,9 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
         for side, it, v, kg, uv in nri.get(a, ()):
             add(a, side, it, v, L, kg if kg else None, uv)
         if a in CROPS:
+            # the residues' nutrients (MANN, MANP, MANK) in quantity at the member state's unit value
+            for it, (q, uv) in (fo.get(a) or {}).items():
+                add(a, "O", it, float(q) * float(uv) / 1000.0, L, kg=float(q), uv=float(uv))
             if a in toin:
                 # CAPRI's TOIN at the year's coefficients (DATA_TOIN_Y): the yield-dependent inputs item by item where
                 # the builder has them (else one item, IY), the NPK need per nutrient
@@ -111,6 +117,10 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
             else:
                 c0 = float(data.variable_costs.get(a, 0.0))
                 add(a, "I", "TOIN_lin", c0 if np.isfinite(c0) else 0.0, L)
+        elif a in getattr(m, "OTHER_ANIMALS", ()):
+            # the other animals: their inputs per unit in one item (TOIN_lin: variable_costs.csv, CAPRI's TOIN of OANI)
+            c0 = float(data.variable_costs.get(a, 0.0))
+            add(a, "I", "TOIN_lin", c0 if np.isfinite(c0) else 0.0, L)
         elif a in ANIMALS:
             fed = a in feed_lin
             if ic is not None and a in ic.index:
@@ -133,6 +143,9 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
         add(None, "O", it, v, z, kg if kg else None, uv)
         for i, v in pa["I"].items():
             add(None, "I", i, v, z)
+        for it, q in (fom.get(a) or {}).items():
+            uv = float(fo[a][it][1])
+            add(None, "O", it, float(q) * uv / 1000.0, z, kg=float(q), uv=uv)
     # the mitigation options at the region (EUR 1000; register DEP-54)
     for side, k in (("I", "mitiI"), ("O", "mitiO")):
         add(None, side, k, float(ip.get(k, 0.0) or 0.0), 1.0)

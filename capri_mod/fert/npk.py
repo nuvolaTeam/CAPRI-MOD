@@ -10,7 +10,8 @@ Data (tools/build/build_npk_balance_2030.py, from CAPRI's 2030 reference results
                                  simulation data (tools/build/build_capri_crop_n_coefs.py), for the need's yield factor
                                  (need_yield_factor)
   npk_region_2030.csv            per CAPRI region and nutrient: mineral efficiency, manure and residue availability,
-                                 CAPRI's unit value (EUR/t)
+                                 CAPRI's unit value (EUR/t) and its nutrient output's (MANN, MANP, MANK: fout_uvag_eur_t,
+                                 the crops' residues' value in their income, KNOWN_ISSUES K212)
   fert_dist_priors_npk_2030.csv  the inner model's priors per crop group, source and nutrient (posterior mode per ha)
   livestock_manure_p_coef.csv, livestock_manure_k_coef.csv   manure P2O5 / K2O per model head (kg) at the base year;
                                  at the 2030 market year CAPRI's 2030 ones (livestock_manure_p_coef_2030.csv,

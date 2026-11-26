@@ -1807,6 +1807,17 @@ COMMENT ON TABLE src_data_prod_grof_rmssup IS 'CAPRI''s DATA(RMSSUP, "PROD", row
 INSERT INTO value_units VALUES
   ('src_data_prod_grof_rmssup', 'value', 'U_1000t', 'capri', 'CAPRI''s production (1000 t)');
 
+-- file: capri_data/sources/raw/capri/results/sim_ini_21730/fout_uvag_bas.parquet
+CREATE TABLE src_fout_uvag_bas (
+    ms VARCHAR NOT NULL,
+    fout VARCHAR NOT NULL CHECK (fout IN ('MANN', 'MANP', 'MANK')),
+    uvag_bas DOUBLE NOT NULL CHECK (uvag_bas > 0),
+    PRIMARY KEY (ms, fout)
+);
+COMMENT ON TABLE src_fout_uvag_bas IS 'CAPRI''s base year unit values of the nutrients'' outputs MANN, MANP, MANK per member state, sim_ini_21730''s DATA(MS, "UVAG", FOUT, "BAS") (the reference export), written and read back by tools/build/build_npk_balance_2030.py (npk_region_2030.csv fout_uvag_eur_t; KNOWN_ISSUES K212)';
+INSERT INTO value_units VALUES
+  ('src_fout_uvag_bas', 'uvag_bas', 'U_EuPerTon', 'capri', 'CAPRI DATA(MS, "UVAG", FOUT, "BAS"): EUR per t of N, P2O5, K2O in the base year''s money');
+
 -- file: capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_factors_2030.parquet
 CREATE TABLE src_crop_nut_need_factors_2030 (
     region VARCHAR NOT NULL,

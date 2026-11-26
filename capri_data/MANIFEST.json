@@ -2963,14 +2963,14 @@
    "catalogue_note": "Sweden's RD expert data, the measures' money by NUTS 2 region and year (rd_spend_2007_2013_se.gdx). (not re-checked)"
   },
   "capri_data/2017/supply/animal_numbers.csv": {
-   "description": "herd sizes 2017: CAPRI's HERD item summed over the CAPRI activities each model animal holds (build_capri_base.py HERD_MAP; BULL = CAPRI's BULL + BULH, HEIF = HEIL + HEIH + HEIR, the model's HFRS, since 18 November 2026, KNOWN_ISSUES K180; COWS = DCOW + SCOW; PIGS = CAPRI's SOWS herd, PIGF = the PIGS census less the sows); the loader renames SCOW, HEIF, HENS, POUL (loaders.HERD_ALIASES)",
+   "description": "herd sizes 2017: CAPRI's HERD item summed over the CAPRI activities each model animal holds (build_capri_base.py HERD_MAP; BULL = CAPRI's BULL + BULH, HEIF = HEIL + HEIH + HEIR, the model's HFRS, since 18 November 2026, KNOWN_ISSUES K180; COWS = DCOW + SCOW; PIGS = CAPRI's SOWS herd, PIGF = the PIGS census less the sows; OANI = CAPRI's LEVL of the other animals, an index, the unit of their per-unit data, since 26 November 2026, KNOWN_ISSUES K207); the loader renames SCOW, HEIF, HENS, POUL (loaders.HERD_ALIASES)",
    "kind": "base",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
    "rows": 250,
-   "columns": 13,
-   "units": "U_1000hd, U_Miohd",
+   "columns": 14,
+   "units": "U_1000hd, U_1unit, U_Miohd",
    "read_by_model": [
     "capri_mod/data/loaders.py",
     "capri_mod/feed/ration.py"
@@ -4133,8 +4133,8 @@
    "description": "CAPRI's crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_, (tools/build/build_npk_balance_2030.py)",
    "kind": "coefficients",
    "rows": 810,
-   "columns": 14,
-   "units": "to be established (value_units: open)",
+   "columns": 15,
+   "units": "U_EuPerTon",
    "read_by_model": [
     "capri_mod/fert/npk.py"
    ],
@@ -4950,6 +4950,20 @@
    "origin": {
     "nature": "capri",
     "builder": "build_price_trajectory_2030"
+   }
+  },
+  "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_livestock_premium_2030.csv": {
+   "description": "CAPRI's 2030 premium per model head in 2017 money (sum of the members' LEVL 2017 x PRME 2030 over the model's 2017 heads; tools/build/build_price_trajectory_2030.py), taken where CAPRI's 2017 data pay the animal none (KNOWN_ISSUES K210)",
+   "kind": "coefficients",
+   "rows": 250,
+   "columns": 12,
+   "units": "U_EuPerHd",
+   "read_by_model": [
+    "capri_mod/projection/prices.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_price_trajectory_2030 (not in the trace yet)"
    }
   },
   "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_livestock_premium_ratio_2030.csv": {
@@ -11867,6 +11881,21 @@
     "builder": "build_market_prod_grof_2030"
    },
    "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx DATA (PROD at CAL, GROF at TRD) written and read back by tools/build/build_market_prod_grof_2030.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
+  },
+  "capri_data/sources/raw/capri/results/sim_ini_21730/fout_uvag_bas.parquet": {
+   "description": "CAPRI's base year unit values of the nutrients' outputs MANN, MANP, MANK per member state, sim_ini_21730's DATA(MS, \"UVAG\", FOUT, \"BAS\") (the reference export), written and read back by tools/build/build_npk_balance_2030.py (npk_region_2030.csv fout_uvag_eur_t; KNOWN_ISSUES K212)",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "environment",
+   "status": "source",
+   "rows": 105,
+   "columns": 3,
+   "units": "U_EuPerTon",
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_npk_balance_2030 (not in the trace yet)"
+   },
+   "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx DATA(MS, 'UVAG', MANN | MANP | MANK, 'BAS') (the reference export) written and read back by tools/build/build_npk_balance_2030.py, kept so its input can be rebuilt without the reference export (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/raw/capri/results/simini/sim_ini_21730/captrd_estimation_params.parquet": {
    "description": "CAPRI's p_carcassShare, p_startWgt and p_NCNC_CONT as in sim_ini_21730 (the raw dataset nuvolaTeam/capri-mod-raw, capri/results/simini/sim_ini_21730/), the records tools/build/build_captrd_estimation_params.py uses, kept so it rebuilds without the raw files; d1 only for p_NCNC_CONT.",

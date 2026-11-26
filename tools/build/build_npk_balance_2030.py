@@ -42,7 +42,10 @@ Outputs (capri_data/baselines/capri_greendeal_ref/1730/environment/; the two liv
   npk_region_2030.csv       capri_region, nutrient, mine_eff (1 + loss / mineral), excr_avail (1 + unavailable /
                             manure), cres_avail (1 + (unavailable + loss) / (pooled + own residues)), uvag_eur_t (CAPRI's
                             2030 unit value of NITF/PHOF/POTF over its inflation to 2030: the model's 2017 money,
-                            KNOWN_ISSUES K108), mine_kt, excr_kt, pool_kt, own_kt, need_kt, land_kha
+                            KNOWN_ISSUES K108), mine_kt, excr_kt, pool_kt, own_kt, need_kt, land_kha, pool_scale,
+                            fout_uvag_eur_t (CAPRI's unit value of the nutrient's output MANN/MANP/MANK at 2030, the
+                            member state's base year value x p_inflationFactor, capmod/inflation_and_trend_
+                            interpolation.gms, in the model's 2017 money: the crops' residues' value, KNOWN_ISSUES K212)
   fert_dist_priors_npk_2030.csv  as fert_dist_priors_2030.csv with a nutrient column (N, P, K): CAPRI's posterior
                             mode per ha of each crop group and source, accuracy 1 (tools/build/build_fert_dist_priors.py)
   manure_npk_applied_share_2030.csv  capri_region, nutrient (N, P, K), excret_kt, mtrade_kt, applied_share: CAPRI's
@@ -97,6 +100,9 @@ FLOWS = ("fertDist_mine", "fertDist_excr", "fertDist_cres", "perm_cres", "nutNed
 #: below where the reference export is not at hand
 SIMINI_DIR = REFERENCE / "simini" / "simini_21730"
 NEED_FACTORS = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "sim_ini_21730" / "crop_nut_need_factors_2030.parquet"
+#: CAPRI's base year unit values of the nutrients' outputs (MANN, MANP, MANK) per member state, sim_ini_21730's DATA
+#: (fout_uvag); the kept extract where the reference export is not at hand
+FOUT_UVAG = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "sim_ini_21730" / "fout_uvag_bas.parquet"
 BAL = ("EXCRET", "MTRADE", "GASANI", "RUNANI", "NETF", "UVAG")
 GMS = ROOT / "capri_data" / "sources" / "raw" / "capri" / "gams"
 
@@ -139,6 +145,23 @@ def need_factors() -> dict:
         write_source(t, NEED_FACTORS, index=False)
     t = read_source(NEED_FACTORS)
     return {(r, f): (float(m_), float(a_)) for r, f, m_, a_ in zip(t.region, t.fnut, t["mult"], t["add"])}
+
+
+def fout_uvag() -> dict:
+    """{(member state, FOUT): EUR per t}: CAPRI's base year unit values of the nutrients' outputs MANN, MANP, MANK,
+    sim_ini_21730's DATA(MS, "UVAG", FOUT, "BAS") (the reference export, tools/build/build_simini_reference.py), kept as
+    FOUT_UVAG for a build without it."""
+    f = SIMINI_DIR / "DATA.csv.gz"
+    if f.exists():
+        t = pd.read_csv(f, keep_default_na=False, float_precision="round_trip", dtype={"d0": str, "d1": str, "d2": str,
+                                                                                       "d3": str})
+        t = t[(t.d1 == "UVAG") & t.d2.isin(tuple(MANX.values())) & (t.d3 == "BAS")]
+        t = t[["d0", "d2", "value"]].rename(columns={"d0": "ms", "d2": "fout", "value": "uvag_bas"})
+        t = t.sort_values(["ms", "fout"], ignore_index=True)
+        FOUT_UVAG.parent.mkdir(parents=True, exist_ok=True)
+        write_source(t, FOUT_UVAG, index=False)
+    t = read_source(FOUT_UVAG)
+    return {(m_, f_): float(v_) for m_, f_, v_ in zip(t.ms, t.fout, t.uvag_bas)}
 
 
 def NUTNED_sqrtTerm(crop: str) -> float:
@@ -223,6 +246,11 @@ def main():
              any(x.startswith(r[:2]) and not x.endswith("000000") for x in regions)}
     rev = {c: mc for mc, cs in MODEL.items() for c in cs}
     nf = need_factors()
+    from capri_mod.coupling.equations.inflation_and_trend_interpolation import DATA_UVAG_IO_SIMY, p_inflationFactor
+    from capri_mod.data.definitions import capri_ms
+    fuv = fout_uvag()
+    infl = p_inflationFactor(1.019, 2030, 2017)       # CAPRI's p_infl (pol_input/agenda.gms l. 46)
+    assert abs(infl / money - 1.0) < 1e-9, (infl, money)
     # the crops with DATA(c, FNUT) at CAPRI's 2030 solution: fertned's crops with a main-output yield
     fp_ = _read_csv(ENV / "capri_crop_fertned_parts_2030.csv", usecols=["capri_region", "crop", "o_hp"])
     with_data = {(r_, c_) for r_, c_, o_ in zip(fp_.capri_region, fp_.crop, fp_.o_hp) if o_ > 0}
@@ -289,7 +317,9 @@ def main():
             rrow.append(dict(capri_region=r, level="nuts0" if r in nuts0 else "ru", nutrient=nut, mine_eff=meff,
                              excr_avail=eav, cres_avail=cav, uvag_eur_t=v.get((r, "", "UVAG", col), float("nan")) / money,
                              mine_kt=mine, excr_kt=excr, pool_kt=cres, own_kt=own, need_kt=tot["nutNed_lhs"],
-                             land_kha=land, pool_scale=kpool))
+                             land_kha=land, pool_scale=kpool,
+                             fout_uvag_eur_t=DATA_UVAG_IO_SIMY(fuv.get((capri_ms(r), MANX[col]), float("nan")), infl)
+                             / money))
             # the additive need factor's part per ha in each group (add_share_parts; register DEP-10 item 1b): the
             # group's crops with DATA(c, FNUT) at CAPRI's solution, those fertned gives a main-output yield
             # (capri_crop_fertned_parts_2030.csv)

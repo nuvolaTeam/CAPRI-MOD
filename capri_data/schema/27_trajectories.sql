@@ -246,3 +246,14 @@ CREATE TABLE traj_capri_livestock_premium_ratio_2030 (
 );
 COMMENT ON TABLE traj_capri_livestock_premium_ratio_2030 IS 'CAPRI''s 2030 / 2017 premium ratio per model animal, real, 2017 activity levels as weights (tools/build/build_price_trajectory_2030.py)';
 INSERT INTO value_units SELECT 'traj_capri_livestock_premium_ratio_2030', c, 'U_ratio', 'builder', 'premium 2030 over 2017, real' FROM (VALUES ('BCOW'), ('BROI'), ('BULL'), ('CALV'), ('DCOW'), ('HFRS'), ('LAYS'), ('PIGF'), ('PIGS'), ('SHGF'), ('SHGM')) x(c);
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_livestock_premium_2030.csv
+-- layout: wide, unnamed
+CREATE TABLE traj_capri_livestock_premium_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    animal VARCHAR NOT NULL REFERENCES model_activities (code),
+    value DOUBLE CHECK (value >= 0),
+    PRIMARY KEY (region, animal)
+);
+COMMENT ON TABLE traj_capri_livestock_premium_2030 IS 'CAPRI''s 2030 premium per model head in 2017 money (sum of the members'' LEVL 2017 x PRME 2030 over the model''s 2017 heads; tools/build/build_price_trajectory_2030.py), taken where CAPRI''s 2017 data pay the animal none (KNOWN_ISSUES K210)';
+INSERT INTO value_units SELECT 'traj_capri_livestock_premium_2030', c, 'U_EuPerHd', 'builder', 'CAPRI''s PRME 2030 per model head, 2017 money' FROM (VALUES ('BCOW'), ('BROI'), ('BULL'), ('CALV'), ('DCOW'), ('HFRS'), ('LAYS'), ('PIGF'), ('PIGS'), ('SHGF'), ('SHGM')) x(c);
