@@ -22,6 +22,11 @@ TF_I (the model applies TF_I with the scenario's changes, policy.py), in CAPRI's
                                sum over IY of f x DATA(BAS) x G x UVAP(MS, I, Y) / 1000: the coefficients' derivative in
                                the yield ratio at CAPRI's 2030 reference (before TF_I), 0 for an activity at G's bound
     yield_growth               G of the model crop (base-yield weighted)
+    iy_uvag_eur_ha             sum over IY of the crop's inputs (PACT_TO_I) of DATA(BAS) x (1 - f + f G) x UVAG(MS, I, Y)
+                               / 1000: the directly yield-dependent inputs' part of CAPRI's TOIN at the simulation year
+                               (reports/calc_inc_indic.gms l. 34-39 at the unit values UVAG(Y) = UVAG(BAS) x p_infl^(Y -
+                               BAS), inflation_and_trend_interpolation.gms l. 71), before TF_I; the income's TOIN adds
+                               the fertilisers' (their 2030 need at its unit value, capri_mod/fert/npk.py)
   animals
     inpo_yield_factor          sum LEVL(Y) DATA(BAS, INPO) (1 - f + f G) / sum LEVL(Y) DATA(BAS, INPO): the yield
                                growth's part of the animal's INPO coefficient (G its main output's, e.g. milk per cow),
@@ -61,6 +66,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT), str(ROOT / "tools" / "lib"), str(ROOT / "tools" / "build")]
 from paths import BASELINE_REF, BASE_YEAR, REFERENCE, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 from capri_mod.supply.equations.define_inputs import DATA_IY_Y, TF_I, p_yieldGrowth  # noqa: E402
+from capri_mod.data.definitions import capri_pairs  # noqa: E402  (CAPRI's PACT_TO_I, the code lists)
 from _grep import lines  # noqa: E402  (a listing's lines, plain or zipped)
 from _sources_io import source_records  # noqa: E402  (capri_data/sources: Parquet)
 import _model_codes as _MC  # noqa: E402  (the model's activities and their CAPRI activities)
@@ -76,13 +82,13 @@ SIM_YEAR = 2030
 #: build_plant_protection_cost.py)
 IY_CROP = ("CAOF", "SEED", "PLAP", "REPM", "REPB", "ELEC", "EGAS", "EFUL", "ELUB", "IRRO", "INPO", "SERI")
 COLS = ["region", "activity", "plap_eur_ha", "inpo_eur_ha", "eful_eur_ha", "eful_inpo_eur_ha", "yd_rest_eur_ha",
-        "yd_plap_eur_ha", "yd_inpo_eur_ha", "yield_growth", "inpo_yield_factor", "levl_capri"]
+        "yd_plap_eur_ha", "yd_inpo_eur_ha", "yield_growth", "inpo_yield_factor", "levl_capri", "iy_uvag_eur_ha"]
 
 
 def read_simini(acts: set) -> tuple:
-    """sim_ini_21730's DATA: {(region, activity, row, year): value} for the activities (BAS and Y), and
-    {(member state, input): UVAP at BAS}."""
-    d, uvap = {}, {}
+    """sim_ini_21730's DATA: {(region, activity, row, year): value} for the activities (BAS and Y),
+    {(member state, input): UVAP at BAS} and {(member state, input): UVAG at BAS}."""
+    d, uvap, uvag = {}, {}, {}
     with gzip.open(SIMINI / "DATA.csv.gz", "rt", newline="", encoding="utf-8") as fh:
         rd = csv.reader(fh)
         head = next(rd)
@@ -94,7 +100,9 @@ def read_simini(acts: set) -> tuple:
                 d[(d0, d1, d2, d3)] = float(v)
             elif d1 == "UVAP" and d3 == "BAS" and d2 in IY_CROP:
                 uvap[(d0, d2)] = float(v)
-    return d, uvap
+            elif d1 == "UVAG" and d3 == "BAS" and d2 in IY_CROP:
+                uvag[(d0, d2)] = float(v)
+    return d, uvap, uvag
 
 
 def read_reference_2030(src: Path, acts: set) -> dict:
@@ -125,7 +133,10 @@ def main() -> None:
     fac = {(r["activity"], r["input"]): float(r["value"]) for r in source_records(YIELD_IY)}
     crops, animals = dict(_MC.CROP_MAP_CAPMOD), dict(_MC.ANIMALS_CAPMOD)
     acts = {c for cs in list(crops.values()) + list(animals.values()) for c in cs}
-    D, uvap_bas = read_simini(acts)
+    D, uvap_bas, uvag_bas = read_simini(acts)
+    p2i = defaultdict(set)
+    for a_, i_ in capri_pairs("PACT_TO_I"):
+        p2i[a_].add(i_)
     infl = p_inflationFactor(read_p_infl(), SIM_YEAR, int(BASE_YEAR))
     TF = TF_I(1.0 - 0.005 * (SIM_YEAR - int(BASE_YEAR)))
 
@@ -140,6 +151,8 @@ def main() -> None:
     for r in _MR.model_regions():
         ms = _MR.national_code(r)
         uv = {i: UVAP_Y(uvap_bas[(ms, i)], infl) for i in IY_CROP if (ms, i) in uvap_bas}
+        # UVAG(MS, I, Y): the inputs' unit value of the simulation year, as UVAP's (no price expectation, asserted above)
+        ug = {i: UVAP_Y(uvag_bas[(ms, i)], infl) for i in IY_CROP if (ms, i) in uvag_bas}
         for kind, mp in (("crop", crops), ("animal", animals)):
             for model_act, members in mp.items():
                 s, w = defaultdict(float), 0.0
@@ -173,6 +186,9 @@ def main() -> None:
                                 if bas[i]:
                                     k = "yd_plap" if i == "PLAP" else "yd_inpo" if i == "INPO" else "yd_rest"
                                     s[k] += L * f(c, i) * bas[i] * G * uv.get(i, 0.0) / 1000.0
+                        # the yield-dependent inputs' part of TOIN at the year's coefficients and UVAG(Y)
+                        s["iy_uvag"] += L * sum((DATA_IY_Y(bas[i], f(c, i), G, 1.0) or 0.0) * ug.get(i, 0.0)
+                                                for i in IY_CROP if i in p2i.get(c, ())) / 1000.0
                         yb = sum(D.get((r, c, o, "BAS"), 0.0) for o in p2y.get(c, []))
                         s["yld"] += L * yb
                         s["yld_g"] += L * yb * G
@@ -184,11 +200,13 @@ def main() -> None:
                     continue
                 if kind == "animal":
                     if s["inpo_bas"] > 0:
-                        rows.append([r, model_act] + [float("nan")] * 8 + [s["inpo_yf"] / s["inpo_bas"], w])
+                        rows.append([r, model_act] + [float("nan")] * 8 + [s["inpo_yf"] / s["inpo_bas"], w,
+                                                                             float("nan")])
                 else:
                     g = s["yld_g"] / s["yld"] if s["yld"] > 0 else float("nan")
                     rows.append([r, model_act] + [s[k] / w for k in ("plap", "inpo", "eful", "eful_inpo", "yd_rest",
-                                                                      "yd_plap", "yd_inpo")] + [g, float("nan"), w])
+                                                                      "yd_plap", "yd_inpo")] + [g, float("nan"), w,
+                                                                                                s["iy_uvag"] / w])
     out = pd.DataFrame(rows, columns=COLS).sort_values(["region", "activity"])
     OUT.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(OUT, index=False)

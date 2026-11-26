@@ -4,8 +4,9 @@ What it computes
 ----------------
 For each region, agricultural income as CAPRI's reports compute it at the solution (reports/calc_inc_indic.gms, the
 activity-based income AGGT of reports/sol_simy.gms l. 2586): the sum over activities of the modified gross value
-added, MGVA = TOOU - TOIN + PRME, times the activity level, with the solved ration in the herds' inputs and the
-mitigation options' cost an input and their revenue an output (income I1, IncomeDistributionModule.income_parts):
+added, MGVA = TOOU - TOIN + PRME, times the activity level, with the solved ration in the herds' inputs, the crops'
+inputs at CAPRI's simulation-year coefficients (at the 2030 market year) and the mitigation options' cost an input and
+their revenue an output (income I1, IncomeDistributionModule.income_parts):
 
     farm income     = sum_a MGVA_a x level_a - mitiI + mitiO   [EUR 1000]
     public support  = sum_a premium_a x level_a          (CAPRI's PRME: the premiums attached to the activities)
@@ -87,7 +88,10 @@ class IncomeDistributionModule:
                      for a, z in mz.items() if tm is not None and a in tm.index)
         # the herds' feed at the solution (EUR 1000 per animal: the solved ration, the feed the margin carries)
         fd = self.feed_by_animal(res)
-        mgva = {a: DATA_MGVA(float(nr[a]), fd[a][1] / lev[a], fd[a][0] / lev[a]) if a in fd else float(nr[a])
+        # the crops' inputs at the simulation year's coefficients (CAPRI's TOIN at "Y") against the margins' base cost
+        toin = self.crop_toin_y(region, m)
+        mgva = {a: DATA_MGVA(float(nr[a]), fd[a][1] / lev[a], fd[a][0] / lev[a]) if a in fd else
+                DATA_MGVA(float(nr[a]), 0.0, 0.0, *toin[a]) if a in toin else float(nr[a])
                 for a in nr.index if lev[a] > 0}
         mi = self.mitigation_items(region, res, supply_module)
         return {"MGVA": DATA_AGGT_MGVA([v for _a, v in mgva.items()] + [float(dnr.get(a, 0.0)) for a in mz],
@@ -97,6 +101,40 @@ class IncomeDistributionModule:
                 "FEED": float(sum(s_ - b_ for s_, b_ in fd.values())),
                 "mitiI": mi["mitiI"], "mitiO": mi["mitiO"], "mitiPmp": mi["mitiPmp"], "parts": mi["parts"],
                 "MGVA_act": mgva}
+
+    @staticmethod
+    def crop_toin_y(region, m) -> dict:
+        """{crop: (the base cost per ha the margin carries, CAPRI's TOIN at the simulation year's coefficients)} (EUR per
+        ha, the model's money; coupling/equations/calc_inc_indic.py DATA_TOIN_Y) for the crops of a regional model at
+        the 2030 market year with CAPRI's year coefficients (input_coefs_2030.csv iy_uvag_eur_ha) and CAPRI's 2030
+        nutrient need (capri_mod/fert/npk.py); empty elsewhere (at the base year CAPRI's "Y" is the base year's data,
+        which the margins carry). The margin's base cost is the crop's input cost of the data (variable_costs.csv,
+        CAPRI's 2017 TOIN at the regions' 2017 unit values), as supply_module._compute_net_revenues takes it."""
+        from capri_mod.coupling.equations.calc_inc_indic import DATA_TOIN_Y
+        from capri_mod.data.definitions import CROPS
+        from capri_mod.fert.npk import NPKData, NUTRIENTS
+        if getattr(getattr(m, "data", None), "input_coefs_2030", None) is None or not hasattr(m, "_input_row_2030"):
+            return {}
+        D = NPKData.get()
+        cr = D.capri_region(region)
+        if cr is None:
+            return {}
+        regs = {n: D.region(cr, n) for n in NUTRIENTS}
+        if any(r_ is None for r_ in regs.values()):
+            return {}
+        uv = [float(regs[n].uvag_eur_t) if regs[n].uvag_eur_t == regs[n].uvag_eur_t else 0.0 for n in NUTRIENTS]
+        tf = float(m._greendeal_tech_progress())
+        vc = m.data.variable_costs
+        out = {}
+        for a in m.net_revenues.index:
+            if a not in CROPS:
+                continue
+            iy = m._input_row_2030(a, "iy_uvag_eur_ha")
+            c0 = vc.get(a) if hasattr(vc, "get") else None
+            if iy is None or c0 is None or not np.isfinite(float(c0)):
+                continue
+            out[a] = (float(c0), DATA_TOIN_Y(iy, tf, [D.crop_coef(cr, n, a, "need_kg_ha") for n in NUTRIENTS], uv))
+        return out
 
     def mitigation_items(self, region, res, supply_module) -> dict:
         """The mitigation options' items of a region's solution in CAPRI's report form (income I1;

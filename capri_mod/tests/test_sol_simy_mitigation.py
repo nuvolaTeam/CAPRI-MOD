@@ -233,3 +233,38 @@ def test_income_parts_of_a_region():
     assert ip["MGVA"] == pytest.approx(600 * 100 + (1500 - 6) * 10 + 40 * 2)
     assert ip["PRME"] == pytest.approx(200 * 100 + 100 * 10 + 0.1 * 200 * 2)
     assert ip["mitiI"] == 0.0 and ip["mitiO"] == 0.0
+
+
+def test_the_crops_toin_at_the_years_coefficients():
+    """CAPRI's TOIN of a crop at the simulation year: TF_I x the yield-dependent inputs at the year's coefficients plus
+    the fertilisers' need at their unit value (EUR per ha); DATA_MGVA swaps it for the margin's base cost."""
+    from capri_mod.coupling.equations.calc_inc_indic import DATA_MGVA, DATA_TOIN_Y
+    t = DATA_TOIN_Y(1000.0, 0.935, [200.0, 30.0, 50.0], [1000.0, 1500.0, 600.0])
+    assert t == pytest.approx(935.0 + 0.2 * 1000 + 0.03 * 1500 + 0.05 * 600)
+    assert DATA_MGVA(600.0, 0.0, 0.0, 1445.0, t) == pytest.approx(600.0 - (t - 1445.0))
+    assert DATA_MGVA(600.0, 0.0, 0.0) == 600.0
+
+
+def test_crop_toin_y_of_a_regional_model():
+    """crop_toin_y on a hand-built regional model at the 2030 market year: the crops with a year coefficient (SWHE)
+    get CAPRI's TOIN with CAPRI's 2030 need per crop and the nutrients' unit values of the region (DK000000, the
+    model's data); a crop without one (MAIZ) and the animals keep the margin's cost; no table, no swap."""
+    import pandas as pd
+    from types import SimpleNamespace
+    from capri_mod.fert.npk import NPKData, NUTRIENTS
+    from capri_mod.income.income_module import IncomeDistributionModule as I
+    model = SimpleNamespace(net_revenues=pd.Series({"SWHE": 600.0, "MAIZ": 500.0, "DCOW": 1500.0}),
+                            data=SimpleNamespace(input_coefs_2030=pd.DataFrame({"iy_uvag_eur_ha": [1300.0]},
+                                                                               index=["SWHE"]),
+                                                 variable_costs=pd.Series({"SWHE": 1445.6, "MAIZ": 1200.0})),
+                            _input_row_2030=lambda a, c: 1300.0 / 1.25 if a == "SWHE" else None,
+                            _greendeal_tech_progress=lambda: 0.935)
+    out = I.crop_toin_y("DK000000", model)
+    D = NPKData.get()
+    need = sum(D.crop_coef("DK000000", n, "SWHE", "need_kg_ha") * float(D.region("DK000000", n).uvag_eur_t)
+               for n in NUTRIENTS) / 1000.0
+    assert set(out) == {"SWHE"}
+    assert out["SWHE"] == pytest.approx((1445.6, 0.935 * 1300.0 / 1.25 + need))
+    assert 300.0 < need < 600.0
+    model.data.input_coefs_2030 = None
+    assert I.crop_toin_y("DK000000", model) == {}

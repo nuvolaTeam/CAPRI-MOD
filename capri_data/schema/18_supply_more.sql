@@ -520,6 +520,7 @@ CREATE TABLE sup_input_coefs_2030 (
     yield_growth DOUBLE CHECK (yield_growth > 0),
     inpo_yield_factor DOUBLE CHECK (inpo_yield_factor > 0),
     levl_capri DOUBLE NOT NULL CHECK (levl_capri > 0),
+    iy_uvag_eur_ha DOUBLE CHECK (iy_uvag_eur_ha >= 0),
     PRIMARY KEY (region, activity)
 );
 COMMENT ON TABLE sup_input_coefs_2030 IS 'CAPRI''s simulation-year input coefficients of 2030 that its Green Deal input changes and its yield updates act on, per regional unit and model activity: capmod/define_inputs.gms''s DATA(BAS) x (1 - f + f G) before TF_I (DATA_IY_Y), the crops'' at the member state''s UVAP(2030) (capmod/define_objc.gms l. 40-44), the animals'' INPO as its yield factor on the model''s cost per head. Crops'' columns empty for animals and the animals'' for crops (register DEP-21; tools/build/build_input_coefs_2030.py)';
@@ -533,7 +534,8 @@ INSERT INTO value_units VALUES
   ('sup_input_coefs_2030', 'yd_inpo_eur_ha', 'U_EuPerHa', 'capri', 'the same for INPO'),
   ('sup_input_coefs_2030', 'yield_growth', 'U_ratio', 'capri', 'G of the model crop, weighted by CAPRI''s 2030 level x base yield'),
   ('sup_input_coefs_2030', 'inpo_yield_factor', 'U_ratio', 'capri', 'sum LEVL(2030) DATA(BAS, INPO) (1 - f + f G) / sum LEVL(2030) DATA(BAS, INPO) over the model animal''s CAPRI activities, G its main output''s yield growth'),
-  ('sup_input_coefs_2030', 'levl_capri', 'U_1000ha', 'capri', 'sim_ini_21730 DATA(R, act, ''LEVL'', ''Y''): CAPRI''s 2030 level, the weights (1000 ha or 1000 head)');
+  ('sup_input_coefs_2030', 'levl_capri', 'U_1000ha', 'capri', 'sim_ini_21730 DATA(R, act, ''LEVL'', ''Y''): CAPRI''s 2030 level, the weights (1000 ha or 1000 head)'),
+  ('sup_input_coefs_2030', 'iy_uvag_eur_ha', 'U_EuPerHa', 'capri', 'sum over the crop''s directly yield-dependent inputs (IY within PACT_TO_I) of DATA(BAS) x (1 - f + f G) x UVAG(MS, I, 2030) / 1000, UVAG(2030) = UVAG(BAS) x p_infl^(2030 - 2017) (inflation_and_trend_interpolation.gms l. 71): their part of CAPRI''s TOIN at the simulation year (reports/calc_inc_indic.gms l. 34-39) before TF_I, EUR per ha in CAPRI''s 2030 money; empty for animals');
 
 -- file: capri_data/baselines/capri_greendeal_ref/1730/supply/plant_protection_capri_step_2030.csv
 CREATE TABLE sup_plant_protection_capri_step_2030 (

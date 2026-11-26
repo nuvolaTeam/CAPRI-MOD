@@ -4383,10 +4383,17 @@ prices 9,255 against the 12,803 their margins carried (Denmark's dairy cows 1,16
 2030 rations at its 2030 unit values deflated give about 1,165, the margins carried CAPREG's 2017 ration at 2017 unit
 values), the options' cost 340 and revenue 28; the Green Deal's change of the income -861 (-2.6%) in the margins' form,
 -1,623 (-4.5%) in CAPRI's (the solved feed falls by 388 less than the margins' feed, the options' net cost rises by
-375). What stays in the model's form is in register DEP-54: the activities' outputs and inputs are not kept item by item
-(TOOU, TOIN and GVAP not apart), the options' items are booked at the region, and the fodder keeps the reference's value
-in a scenario on both sides of its internal flow (CAPRI's UVAG(FODDO, SIM), sol_simy .gms l. 737-757), which leaves the
-region's income unchanged.
+375). The crops' inputs at CAPRI's simulation-year coefficients (CAPRI's TOIN at "Y": TF_I x the directly
+yield-dependent inputs at define_inputs.gms's coefficients at UVAG(2030), plus the 2030 NPK need at its unit value;
+coupling/equations/calc_inc_indic.py DATA_TOIN_Y) in place of the margins' CAPREG 2017 TOIN: the baseline's income
+36,654 (+349), the Green Deal's change -1,578 (-4.3%). Per crop they reproduce CAPRI's 2030 TOIN at its solution
+(dataOut, a check only) within about 2% (PT18 intensive grass 494.6 EUR/ha against 493.3, the margin 393.0; NL32 flowers
+32,917 against 32,944, the margin 29,420). Against CAPRI's 2030 reference income of the 20 units (EAAG MGVA, 38,358 in
+2017 money, a check only) the baseline's income is 0.862 of it in the margins' form, 0.946 with the solved feed and the
+options, 0.956 with the crops' inputs. What stays in the model's form is in register DEP-54: the activities' outputs and
+inputs are not kept item by item (TOOU, TOIN and GVAP not apart), the options' items are booked at the region, and the
+fodder keeps the reference's value in a scenario on both sides of its internal flow (CAPRI's UVAG(FODDO, SIM), sol_simy
+.gms l. 737-757), which leaves the region's income unchanged.
 
 Corrected on 26 November 2026: this entry said the solved fertiliser purchases belonged to the welfare table's total
 through CAPRI's product-based account. They do not. CAPRI's EAAG values GROF, which for the fertilisers is the

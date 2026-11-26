@@ -529,6 +529,18 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   covers (the EU's and Norway's); the water accounts' coverage (no irrigation share for Bosnia's and Serbia's units).
   Also: two CSV float reads made exact (build_livestock_n_export_2030.py, of K202; build_feed_bulk_grof.py). README
   §10.4.
+- **Income I1, the crops' inputs at CAPRI's simulation-year coefficients (26 November 2026; register DEP-54):** at the
+  2030 market year a crop's income takes CAPRI's TOIN at "Y" (coupling/equations/calc_inc_indic.py DATA_TOIN_Y,
+  IncomeDistributionModule.crop_toin_y): TF_I x its directly yield-dependent inputs at define_inputs.gms's coefficients
+  DATA(BAS) (1 - f + f G) (l. 108-112) at UVAG(2030) (input_coefs_2030.csv gains iy_uvag_eur_ha,
+  tools/build/build_input_coefs_2030.py; its other columns byte-identical), plus its 2030 NPK need at its unit value
+  (capri_mod/fert/npk.py), in place of the margin's 2017 cost (CAPREG's TOIN, variable_costs.csv). Per crop the rebuilt
+  TOIN reproduces CAPRI's 2030 TOIN at its solution (dataOut, a check only) within about 2% in the units checked
+  (Denmark's soft wheat 1,761.2 against 1,764.8 EUR/ha in CAPRI's 2030 money; PT18 intensive grass 494.6 against 493.3
+  in 2017 money, the margin 393.0), where the margins' 2017 cost was off by up to 25%. Measured on the mini-EU Green
+  Deal pair (20 units, EUR million; the solution identical): the baseline's income 36,305 -> 36,654, the Green Deal's
+  change -1,623 -> -1,578 (-4.3%); against CAPRI's 2030 reference income of the 20 units (EAAG MGVA in 2017 money, a
+  check only) 0.946 -> 0.956 of it (0.862 in the margins' form before I1). Tests: 2 more by hand.
 - **Income I1: the region's income at the solution in CAPRI's form (26 November 2026;
   claude/income_i1_progress_2026-11-25.md, KNOWN_ISSUES K205, register DEP-54):** each regional solve sets the region's
   income (SupplyResult.income, capri_mod/income/income_module.py income_parts; SupplyResult.gross_margin is its MGVA),

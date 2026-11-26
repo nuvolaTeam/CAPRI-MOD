@@ -58080,6 +58080,11 @@
      "name": "levl_capri",
      "type": "DOUBLE",
      "not_null": true
+    },
+    {
+     "name": "iy_uvag_eur_ha",
+     "type": "DOUBLE",
+     "not_null": false
     }
    ],
    "primary_key": [
@@ -58117,7 +58122,8 @@
     "(yd_inpo_eur_ha >= 0)",
     "(yield_growth > 0)",
     "(inpo_yield_factor > 0)",
-    "(levl_capri > 0)"
+    "(levl_capri > 0)",
+    "(iy_uvag_eur_ha >= 0)"
    ],
    "units": [
     {
@@ -58143,6 +58149,12 @@
      "unit": "U_ratio",
      "status": "capri",
      "basis": "sum LEVL(2030) DATA(BAS, INPO) (1 - f + f G) / sum LEVL(2030) DATA(BAS, INPO) over the model animal's CAPRI activities, G its main output's yield growth"
+    },
+    {
+     "item": "iy_uvag_eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "sum over the crop's directly yield-dependent inputs (IY within PACT_TO_I) of DATA(BAS) x (1 - f + f G) x UVAG(MS, I, 2030) / 1000, UVAG(2030) = UVAG(BAS) x p_infl^(2030 - 2017) (inflation_and_trend_interpolation.gms l. 71): their part of CAPRI's TOIN at the simulation year (reports/calc_inc_indic.gms l. 34-39) before TF_I, EUR per ha in CAPRI's 2030 money; empty for animals"
     },
     {
      "item": "levl_capri",
