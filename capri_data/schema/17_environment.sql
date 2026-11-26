@@ -488,6 +488,19 @@ CREATE TABLE env_livestock_ch4man_coef (
 COMMENT ON TABLE env_livestock_ch4man_coef IS 'CAPRI''s manure methane CH4MAN per model head (tools/build/build_ghg_coefs_2017.py)';
 INSERT INTO value_units SELECT 'env_livestock_ch4man_coef', code, 'U_kgperhd', 'builder', 'kg CH4 per head' FROM model_activities WHERE kind = 'animal';
 
+-- file: capri_data/2017/environment/fnut_unit_values_2017.csv
+CREATE TABLE env_fnut_unit_values_2017 (
+    ms VARCHAR NOT NULL,
+    fnut VARCHAR NOT NULL CHECK (fnut IN ('NITF', 'PHOF', 'POTF')),
+    uvap_eur_t DOUBLE NOT NULL CHECK (uvap_eur_t > 0),
+    uvab_eur_t DOUBLE NOT NULL CHECK (uvab_eur_t > 0),
+    PRIMARY KEY (ms, fnut)
+);
+COMMENT ON TABLE env_fnut_unit_values_2017 IS 'CAPRI''s base year unit values of the mineral fertilisers at producer and basic prices per member state, sim_ini_21730''s DATA(MS, "UVAP" | "UVAB", FNUT, "BAS"); the simulation year''s are these x the inflation (capmod/inflation_and_trend_interpolation.gms l. 69-70), the purchases'' account at producer and basic prices (income I2b, capri_mod/income/eaa.py eaap_eaab). (tools/build/build_fnut_unit_values.py)';
+INSERT INTO value_units VALUES
+  ('env_fnut_unit_values_2017', 'uvap_eur_t', 'U_EuPerTon', 'capri', 'CAPRI DATA(MS, "UVAP", FNUT, "BAS"): EUR per t of N, P2O5, K2O in the base year''s money'),
+  ('env_fnut_unit_values_2017', 'uvab_eur_t', 'U_EuPerTon', 'capri', 'CAPRI DATA(MS, "UVAB", FNUT, "BAS"): EUR per t of N, P2O5, K2O in the base year''s money');
+
 -- file: capri_data/2017/environment/livestock_manure_n_coef.csv
 -- layout: wide, unnamed
 CREATE TABLE env_livestock_manure_n_coef (

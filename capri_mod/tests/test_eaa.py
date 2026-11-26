@@ -166,3 +166,51 @@ def test_the_residues_unit_value_and_value():
                     "npk_crop_coefs_2030.csv").set_index(["capri_region", "model_crop", "nutrient"])
     kg = [float(c.at[("FR240000", "SWHE", n), "pool_kg_ha"]) for n in ("N", "P", "K")]
     assert DATA_TOOU_FOUT(kg, [capri_2030[n] for n in ("N", "P", "K")]) == pytest.approx(105.047816567923, rel=1e-6)
+
+
+def test_the_accounts_at_producer_and_basic_prices_statements():
+    """Income I2b's statements against CAPRI's 2030 reference (res_2_1730greendeal_refdefaulta dataOut, DE110000; a
+    check only): NETF = -v_netPutQuant (reports/sol_simy.gms l. 309), UVAP(2030) = Germany's UVAP(BAS) x 1.019^13
+    (capmod/inflation_and_trend_interpolation.gms l. 69; sim_ini_21730's 869.355, fnut_unit_values_2017.csv), EAAP =
+    NETF x UVAP / 1000 and EAAB (l. 2547-2548), TOIN the sum, GVAP = TOOU - TOIN, MGVA = GVAP + PRME (l. 2558-2562)."""
+    from capri_mod.coupling.equations.inflation_and_trend_interpolation import DATA_UVAB_IO_SIMY, DATA_UVAP_IO_SIMY
+    from capri_mod.coupling.equations.sol_simy import (DATA_EAAB_GVAB, DATA_EAAB_IO, DATA_EAAP_GVAP, DATA_EAAP_IO,
+                                                       DATA_EAAP_MGVA, DATA_EAAP_PRMDE, DATA_GEAAC_TOIN,
+                                                       DATA_GEAAC_TOOU, DATA_NETF_FNUT)
+    t = pd.read_csv(ROOT / "capri_data" / "2017" / "environment" / "fnut_unit_values_2017.csv").set_index(["ms", "fnut"])
+    uvp = DATA_UVAP_IO_SIMY(float(t.at[("DE000000", "NITF"), "uvap_eur_t"]), 1.019 ** 13)
+    assert uvp == pytest.approx(1110.35388516022, rel=1e-12)
+    assert DATA_UVAB_IO_SIMY(float(t.at[("DE000000", "NITF"), "uvab_eur_t"]), 1.019 ** 13) == pytest.approx(uvp)
+    netf = DATA_NETF_FNUT(-29.7578149598297)
+    assert netf == pytest.approx(29.7578149598297)
+    assert DATA_EAAP_IO(netf, uvp) == pytest.approx(33.0417054545258, rel=1e-12)
+    assert DATA_EAAB_IO(netf, uvp) == pytest.approx(33.0417054545258, rel=1e-12)
+    assert DATA_EAAP_IO(0.0, uvp) == 0.0
+    toin = DATA_GEAAC_TOIN([33.0417054545258, 14.0654098215211, 11.5333705832321])
+    assert toin == pytest.approx(58.6404858592789, rel=1e-12)
+    gvap = DATA_EAAP_GVAP(DATA_GEAAC_TOOU([]), toin)
+    assert gvap == pytest.approx(-58.6404858592789, rel=1e-12) and DATA_EAAB_GVAB(0.0, toin) == gvap
+    assert DATA_EAAP_MGVA(gvap, 168.687782389663) == pytest.approx(110.047296530384, rel=1e-12)
+    assert DATA_EAAP_PRMDE([329.0739811637, 0.0, 3.39], [89.33, 50.0, 1263.26]) == pytest.approx(
+        (329.0739811637 * 89.33 + 3.39 * 1263.26) / 1000)
+
+
+def test_the_accounts_at_producer_and_basic_prices_of_a_region():
+    """A regional unit's EAAP and EAAB (eaa.eaap_eaab): the regional NLP's purchases (t) as NETF in kt at the member
+    state's UVAP and UVAB of the base year (France's for FR810000), TOIN their sum, PRME I1's premiums (the technology
+    mix's premium difference included), MGVA = - TOIN + PRME; empty without the fertilisation block."""
+    from capri_mod.income.eaa import eaag_items
+    m, res, ip = _region()
+    assert "EAAP" not in eaag_items("FR810000", res, SimpleNamespace(_models={"FR810000": m}), ip=ip)
+    res.fert_npk = {"N": {"purchase": 30000.0}, "P": {"purchase": 9000.0}, "K": {"purchase": 0.0}}
+    m.data.techn_mix = pd.DataFrame({"prem_diff_share": [0.03]}, index=["SWHE"])      # 0.03 x 200 = the mix's 6 EUR/ha
+    e = eaag_items("FR810000", res, SimpleNamespace(_models={"FR810000": m}), ip=ip)
+    p = e["purchases"].set_index("item")
+    assert p.at["NITF", "NETF"] == pytest.approx(30.0) and p.at["PHOF", "NETF"] == pytest.approx(9.0)
+    assert p.at["NITF", "UVAP"] == pytest.approx(1163.0764543736054) and p.at["POTF", "EAAP"] == 0.0
+    tin = 30.0 * 1163.0764543736054 / 1000 + 9.0 * 1627.432623417394 / 1000
+    assert e["EAAP"]["TOIN"] == pytest.approx(tin) and e["EAAB"]["TOIN"] == pytest.approx(tin)
+    assert e["EAAP"]["TOOU"] == 0.0 and e["EAAP"]["GVAP"] == pytest.approx(-tin)
+    assert e["EAAP"]["PRME"] == pytest.approx(ip["PRME"] / 1000) == pytest.approx(e["PRME"])
+    assert e["EAAP"]["MGVA"] == pytest.approx(-tin + ip["PRME"] / 1000)
+    assert e["EAAB"]["GVAB"] == pytest.approx(-tin)

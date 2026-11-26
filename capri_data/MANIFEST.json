@@ -718,6 +718,24 @@
     "builder": "build_enteric_feed_factors"
    }
   },
+  "capri_data/2017/environment/fnut_unit_values_2017.csv": {
+   "description": "CAPRI's base year unit values of the mineral fertilisers at producer and basic prices per member state, sim_ini_21730's DATA(MS, \"UVAP\" | \"UVAB\", FNUT, \"BAS\"); the simulation year's are these x the inflation (capmod/inflation_and_trend_interpolation.gms l. 69-70), the purchases' account at producer and basic prices (income I2b, capri_mod/income/eaa.py eaap_eaab). (tools/build/build_fnut_unit_values.py)",
+   "kind": "coefficients",
+   "vintage": "2017",
+   "domain": "environment",
+   "status": "live",
+   "rows": 105,
+   "columns": 4,
+   "units": "U_EuPerTon",
+   "read_by_model": [
+    "capri_mod/income/eaa.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_fnut_unit_values (not in the trace yet)"
+   },
+   "catalogue_note": "tools/build/build_fnut_unit_values.py: CAPRI's base year UVAP and UVAB of the mineral fertilisers per member state (sim_ini_21730's DATA at \"BAS\"); income I2b (not re-checked)"
+  },
   "capri_data/2017/environment/histosol.csv": {
    "description": "CAPRI's histosols (drained organic soils) per model region: emission factors and the fallowing option. (tools/build/build_histosol.py)",
    "kind": "coefficients",
@@ -11919,6 +11937,21 @@
     "builder": "build_market_prod_grof_2030"
    },
    "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx DATA (PROD at CAL, GROF at TRD) written and read back by tools/build/build_market_prod_grof_2030.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
+  },
+  "capri_data/sources/raw/capri/results/sim_ini_21730/fnut_uvap_uvab_bas.parquet": {
+   "description": "CAPRI's member states' base year unit values of the mineral fertilisers at producer and basic prices, sim_ini_21730's DATA(MS, UVAP | UVAB, NITF | PHOF | POTF, \"BAS\") (the reference export), written and read back by tools/build/build_fnut_unit_values.py (fnut_unit_values_2017.csv; income I2b)",
+   "kind": "coefficients",
+   "vintage": "2017",
+   "domain": "environment",
+   "status": "source",
+   "rows": 210,
+   "columns": 4,
+   "units": "U_EuPerTon",
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_fnut_unit_values (not in the trace yet)"
+   },
+   "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx DATA(MS, 'UVAP' | 'UVAB', NITF | PHOF | POTF, 'BAS') (the reference export) written and read back by tools/build/build_fnut_unit_values.py, kept so its input can be rebuilt without the reference export (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/raw/capri/results/sim_ini_21730/fodder_onfarm_items.parquet": {
    "description": "CAPRI's member states' gross production, losses and seed of the fodder crops' outputs, sim_ini_21730's DATA(MS, GROF | LOSF | SEDF | SEDM, GRAS | MAIF | OFAR | ROOF, BAS | Y) (the reference export), written and read back by tools/build/build_fodder_onfarm_share.py (fodder_onfarm_share_2017.csv, fodder_onfarm_share_2030.csv; KNOWN_ISSUES K213)",

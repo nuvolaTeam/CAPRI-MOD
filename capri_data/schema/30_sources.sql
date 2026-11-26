@@ -1831,6 +1831,18 @@ COMMENT ON TABLE src_fodder_onfarm_items IS 'CAPRI''s member states'' gross prod
 INSERT INTO value_units VALUES
   ('src_fodder_onfarm_items', 'value', 'U_1000t', 'capri', 'CAPRI DATA(MS, item, FODDO, year): 1000 t');
 
+-- file: capri_data/sources/raw/capri/results/sim_ini_21730/fnut_uvap_uvab_bas.parquet
+CREATE TABLE src_fnut_uvap_uvab_bas (
+    ms VARCHAR NOT NULL,
+    item VARCHAR NOT NULL CHECK (item IN ('UVAP', 'UVAB')),
+    fnut VARCHAR NOT NULL CHECK (fnut IN ('NITF', 'PHOF', 'POTF')),
+    value DOUBLE NOT NULL CHECK (value > 0),
+    PRIMARY KEY (ms, item, fnut)
+);
+COMMENT ON TABLE src_fnut_uvap_uvab_bas IS 'CAPRI''s member states'' base year unit values of the mineral fertilisers at producer and basic prices, sim_ini_21730''s DATA(MS, UVAP | UVAB, NITF | PHOF | POTF, "BAS") (the reference export), written and read back by tools/build/build_fnut_unit_values.py (fnut_unit_values_2017.csv; income I2b)';
+INSERT INTO value_units VALUES
+  ('src_fnut_uvap_uvab_bas', 'value', 'U_EuPerTon', 'capri', 'CAPRI DATA(MS, item, FNUT, "BAS"): EUR per t of N, P2O5, K2O in the base year''s money');
+
 -- file: capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_factors_2030.parquet
 CREATE TABLE src_crop_nut_need_factors_2030 (
     region VARCHAR NOT NULL,

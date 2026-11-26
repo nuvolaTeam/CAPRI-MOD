@@ -88,6 +88,9 @@ UNTRACED = {
     "capri_data/2017/feed/fodder_onfarm_share_2017.csv": ("build_fodder_onfarm_share", "CAPRI"),
     "capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_onfarm_share_2030.csv": ("build_fodder_onfarm_share", "CAPRI"),
     "capri_data/sources/raw/capri/results/sim_ini_21730/fodder_onfarm_items.parquet": ("build_fodder_onfarm_share", "CAPRI"),
+    # CAPRI's base year UVAP and UVAB of the mineral fertilisers and their kept extract (income I2b)
+    "capri_data/2017/environment/fnut_unit_values_2017.csv": ("build_fnut_unit_values", "CAPRI"),
+    "capri_data/sources/raw/capri/results/sim_ini_21730/fnut_uvap_uvab_bas.parquet": ("build_fnut_unit_values", "CAPRI"),
     "capri_data/pipeline/captrd/sets/biofuel/": ("build_captrd_biofuel", "CAPRI"),     # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/agriprod/": ("build_captrd_agriprod", "CAPRI"),   # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/national/": ("build_captrd_national", "CAPRI"),   # before sets/ (first match)

@@ -164,7 +164,8 @@ def test_the_gross_account_by_item_at_the_regional_solution(solved3):
     """CAPRI's gross account by item at the regional solution (income I2, SupplyResult.eaa; reports/sol_simy.gms
     l. 2549-2566): the revenue by output item adds up to each activity's revenue; TOOU - TOIN + PRME is MGVA; each
     crop product's value is its GROF (1000 t) x its price (a fodder crop's at CAPRI's UVAG(FODDO), K213); and MGVA equals I1's AGGT but for the input cost table's
-    items at the member state's UVAP against TOIN at the regional UVAG (about 1e-5 relative to a herd's input cost)."""
+    items at the member state's UVAP against TOIN at the regional UVAG (about 1e-5 relative to a herd's input cost);
+    the accounts at producer and basic prices hold the regional model's fertiliser purchases and the premiums (I2b)."""
     from capri_mod.data.definitions import CROPS
     from capri_mod.income import IncomeDistributionModule as I
     sm, sr, regs = solved3
@@ -177,6 +178,14 @@ def test_the_gross_account_by_item_at_the_regional_solution(solved3):
         assert e["MGVA"] == pytest.approx(e["TOOU"] - e["TOIN"] + e["PRME"], rel=1e-12)
         assert e["PRME"] == pytest.approx(sr[r].income["PRME"] / 1000.0, rel=1e-12)
         assert abs(e["DIFF"]) <= 1e-5 * abs(e["AGGT"]), r
+        # income I2b: the purchases at the solution (kt) at the member state's UVAP of the base year, the premiums
+        pu = e["purchases"].set_index("item")
+        npk = sr[r].fert_npk
+        assert pu.at["NITF", "NETF"] == pytest.approx(npk["N"]["purchase"] / 1000.0, rel=1e-12)
+        assert pu.at["NITF", "NETF"] > 0
+        assert e["EAAP"]["TOIN"] == pytest.approx(float(pu.EAAP.sum()), rel=1e-12)
+        assert e["EAAP"]["PRME"] == pytest.approx(e["PRME"], rel=1e-12)
+        assert e["EAAP"]["MGVA"] == pytest.approx(e["PRME"] - e["EAAP"]["TOIN"], rel=1e-12)
         it = e["items"].set_index(["side", "item"])
         L = sr[r].activities
         for a in CROPS:

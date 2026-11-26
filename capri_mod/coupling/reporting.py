@@ -65,6 +65,9 @@ class ReportingBlock:
           TOOU, TOIN, EAAG_MGVA, EAAG_DIFF  the gross account by item's total output and input, its MGVA (TOOU - TOIN +
                     PRME) and its difference to MGVA (income I2, capri_mod/income/eaa.py; reports/sol_simy.gms l.
                     2557-2566, 2600-2615); the items are in results["eaa"]
+          EAAP_TOIN, EAAP_GVAP, EAAP_PRME, EAAP_MGVA, EAAB_TOIN, EAAB_GVAB  the accounts at producer and basic prices
+                    of a regional unit: the mineral fertilisers' purchases and the premiums (income I2b,
+                    capri_mod/income/eaa.py eaap_eaab; reports/sol_simy.gms l. 2547-2562)
         The market's agents' components are in results["market"].welfare. A failure here does not stop the run: it
         is warned and the table is None."""
         if not supply_results:
@@ -96,6 +99,11 @@ class ReportingBlock:
                 if ea:
                     rows[reg].update({"TOOU": ea["TOOU"], "TOIN": ea["TOIN"], "EAAG_MGVA": ea["MGVA"],
                                       "EAAG_DIFF": ea["DIFF"]})
+                    # the accounts at producer and basic prices (income I2b): the purchases and the premiums
+                    if ea.get("EAAP"):
+                        rows[reg].update({"EAAP_TOIN": ea["EAAP"]["TOIN"], "EAAP_GVAP": ea["EAAP"]["GVAP"],
+                                          "EAAP_PRME": ea["EAAP"]["PRME"], "EAAP_MGVA": ea["EAAP"]["MGVA"],
+                                          "EAAB_TOIN": ea["EAAB"]["TOIN"], "EAAB_GVAB": ea["EAAB"]["GVAB"]})
             return pd.DataFrame.from_dict(rows, orient="index")
         except Exception as exc:
             warnings.warn(f"welfare: the supply models' components could not be computed ({exc!r})")

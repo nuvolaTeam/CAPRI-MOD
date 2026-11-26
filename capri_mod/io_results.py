@@ -508,6 +508,12 @@ def to_long(results: dict, point: str) -> pd.DataFrame:
         for rec in e["items"].to_dict("records") if hasattr(e["items"], "to_dict") else e["items"]:
             for c in ("GROF", "UVAG", "EAAG"):
                 add((point, "eaa", str(reg), "", c, str(rec["item"]), float(rec[c])))
+        # CAPRI's DATA(RU, "NETF" / "UVAP" / "EAAP" / "UVAB" / "EAAB", FNUT): the mineral fertilisers' purchases at
+        # producer and basic prices (income I2b, eaa.eaap_eaab)
+        pur = e.get("purchases")
+        for rec in (pur.to_dict("records") if hasattr(pur, "to_dict") else (pur or [])):
+            for c in ("NETF", "UVAP", "EAAP", "UVAB", "EAAB"):
+                add((point, "eaa", str(reg), "", c, str(rec["item"]), float(rec[c])))
     known.add("feoga")
     fe = results.get("feoga")
     if fe is not None:

@@ -705,6 +705,98 @@ def DATA_EAAG_MGVA(TOOU, TOIN, PRME):
     return float(TOOU) - float(TOIN) + float(PRME)
 
 
+def DATA_NETF_FNUT(v_netPutQuant):
+    r"""DATA(RU, "NETF", FNUT, SIMY): a region's net trade of a mineral fertiliser at the solution, its purchases (kt of
+    N, P2O5, K2O).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 305-309):
+
+        *
+        *  ---- purchases of mineral fertilisers for current scenario
+        *       (netf for other scenarios and base year from data base in fortran.gms)
+        *
+           DATA(RU,"NETF",FNUT,"%SIMY%")       = -v_netPutQuant.L(RU,FNUT);
+
+    In this project's notation: NETF_n = - v_netPutQuant_n, v_netPutQuant negative for a purchase (CAPRI's sign); the
+    model's regional NLP holds the purchases as a non-negative column P (supply/capri_regional_nlp.py, fertDistMine_), so
+    the caller passes v_netPutQuant = - P / 1000 (t to kt). Departures from CAPRI: none."""
+    return -float(v_netPutQuant)
+
+
+def DATA_EAAP_IO(NETF, UVAP):
+    r"""DATA(RSS, "EAAP", IO, SIMY): the account at producer prices of an item with a net trade, its net trade x its
+    unit value at producer prices (EUR million for kt x EUR per t).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2547):
+
+          DATA(RSS,"EAAP",IO,"%SIMY%") $ DATA(RSS,"NETF",IO,"%SIMY%")  = DATA(RSS,"NETF",IO,"%SIMY%")*DATA(RSS,"UVAP",IO,"%SIMY%")/1000.;
+
+    In this project's notation: EAAP_i = NETF_i x UVAP_i / 1000 where NETF_i is not 0. Departures from CAPRI: none."""
+    return float(NETF) * float(UVAP) / 1000.0 if float(NETF) else 0.0
+
+
+def DATA_EAAB_IO(NETF, UVAB):
+    r"""DATA(RSS, "EAAB", IO, SIMY): the account at basic prices of an item with a net trade, its net trade x its unit
+    value at basic prices (EUR million for kt x EUR per t).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2548):
+
+          DATA(RSS,"EAAB",IO,"%SIMY%") $ DATA(RSS,"NETF",IO,"%SIMY%")  = DATA(RSS,"NETF",IO,"%SIMY%")*DATA(RSS,"UVAB",IO,"%SIMY%")/1000.;
+
+    In this project's notation: EAAB_i = NETF_i x UVAB_i / 1000 where NETF_i is not 0. Departures from CAPRI: none."""
+    return float(NETF) * float(UVAB) / 1000.0 if float(NETF) else 0.0
+
+
+def DATA_EAAP_PRMDE(PRMDE, LEVL):
+    r"""DATA(RSS, "EAAP", PRMDE, SIMY): the premiums in the account at producer prices, PRMD (declared) or PRME (paid),
+    the sum over the activities of the premium per unit x the level (sequences in the same order; EUR per ha or head x
+    1000 ha or heads; EUR million).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2552-2554):
+
+        * --- same for CAP premiums
+        *
+          DATA(RSS,"EAAP",PRMDE,"%SIMY%") = SUM(MPACT $ DATA(RSS,MPACT,PRMDE,"%SIMY%"), DATA(RSS,MPACT,PRMDE,"%SIMY%")*DATA(RSS,MPACT,"LEVL","%SIMY%")) * 0.001;
+
+    In this project's notation: EAAP_PRMDE = sum_a PRMDE_a L_a / 1000. Departures from CAPRI: none in the statement;
+    the caller passes the model's activities (the technology mix's premium difference on the area moved as a further
+    pair, as I1's PRME, capri_mod/income/income_module.py)."""
+    return float(sum(float(p) * float(l_) for p, l_ in zip(PRMDE, LEVL) if float(p))) * 0.001
+
+
+def DATA_EAAP_GVAP(TOOU, TOIN):
+    r"""DATA(RSS, "EAAP", "GVAP", SIMY): the account at producer prices' gross value added, its total output less its
+    total input.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2560):
+
+          DATA(RSS,"EAAP","GVAP","%SIMY%") = DATA(RSS,"EAAP","TOOU","%SIMY%") - DATA(RSS,"EAAP","TOIN","%SIMY%");
+    """
+    return float(TOOU) - float(TOIN)
+
+
+def DATA_EAAB_GVAB(TOOU, TOIN):
+    r"""DATA(RSS, "EAAB", "GVAB", SIMY): the account at basic prices' gross value added, its total output less its total
+    input.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2561):
+
+          DATA(RSS,"EAAB","GVAB","%SIMY%") = DATA(RSS,"EAAB","TOOU","%SIMY%") - DATA(RSS,"EAAB","TOIN","%SIMY%");
+    """
+    return float(TOOU) - float(TOIN)
+
+
+def DATA_EAAP_MGVA(GVAP, PRME):
+    r"""DATA(RSS, "EAAP", "MGVA", SIMY): the account at producer prices' modified gross value added, its gross value
+    added plus the premiums paid.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2562):
+
+          DATA(RSS,"EAAP","MGVA","%SIMY%") = DATA(RSS,"EAAP","GVAP","%SIMY%") + DATA(RSS,"EAAP","PRME","%SIMY%");
+    """
+    return float(GVAP) + float(PRME)
+
+
 def DATA_AGGT_MGVA(MGVA, LEVL, mitiI_RU=0.0, mitiO_RU=0.0):
     r"""DATA(RSS, "AGGT", "MGVA", SIMY): the region's activity-based income, sum over the activities of their MGVA x
     level (sequences in the same order; EUR per ha or head x 1000 ha or heads = EUR 1000).

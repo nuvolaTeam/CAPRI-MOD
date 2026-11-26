@@ -22744,6 +22744,78 @@
     "tests": []
    }
   },
+  "env_fnut_unit_values_2017": {
+   "file": "capri_data/2017/environment/fnut_unit_values_2017.csv",
+   "declared_in": "17_environment.sql",
+   "layout": [],
+   "comment": "CAPRI's base year unit values of the mineral fertilisers at producer and basic prices per member state, sim_ini_21730's DATA(MS, \"UVAP\" | \"UVAB\", FNUT, \"BAS\"); the simulation year's are these x the inflation (capmod/inflation_and_trend_interpolation.gms l. 69-70), the purchases' account at producer and basic prices (income I2b, capri_mod/income/eaa.py eaap_eaab). (tools/build/build_fnut_unit_values.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fnut",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "uvap_eur_t",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "uvab_eur_t",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "fnut"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(fnut IN ('NITF', 'PHOF', 'POTF'))",
+    "(uvap_eur_t > 0)",
+    "(uvab_eur_t > 0)"
+   ],
+   "units": [
+    {
+     "item": "uvab_eur_t",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"UVAB\", FNUT, \"BAS\"): EUR per t of N, P2O5, K2O in the base year's money"
+    },
+    {
+     "item": "uvap_eur_t",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"UVAP\", FNUT, \"BAS\"): EUR per t of N, P2O5, K2O in the base year's money"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_fnut_unit_values (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/income/eaa.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_eaa.py"
+    ]
+   }
+  },
   "env_histosol": {
    "file": "capri_data/2017/environment/histosol.csv",
    "declared_in": "17_environment.sql",
@@ -51360,6 +51432,67 @@
      "build_supplement_effects",
      "build_supplement_fat"
     ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_fnut_uvap_uvab_bas": {
+   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/fnut_uvap_uvab_bas.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's member states' base year unit values of the mineral fertilisers at producer and basic prices, sim_ini_21730's DATA(MS, UVAP | UVAB, NITF | PHOF | POTF, \"BAS\") (the reference export), written and read back by tools/build/build_fnut_unit_values.py (fnut_unit_values_2017.csv; income I2b)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fnut",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "item",
+    "fnut"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(item IN ('UVAP', 'UVAB'))",
+    "(fnut IN ('NITF', 'PHOF', 'POTF'))",
+    "(\"value\" > 0)"
+   ],
+   "units": [
+    {
+     "item": "value",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, item, FNUT, \"BAS\"): EUR per t of N, P2O5, K2O in the base year's money"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": "build_fnut_unit_values (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
     "checks": [],
     "tests": []
    }

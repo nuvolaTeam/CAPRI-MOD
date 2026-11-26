@@ -642,6 +642,23 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   SREV), the market crops' income now CAPRI's within 5%; the baseline's MGVA 40,034 against CAPRI's 38,358, the fodder
   activities 1,684 above CAPRI's (KNOWN_ISSUES K213, open). K211 stays open for the straw balance alone, slack at
   CAPRI's reference. Tests: test_eaa.py (2), test_water_income.py (1, slow).
+- **Income I2b, the accounts at producer and basic prices of a regional unit (26 November 2026; register DEP-56):**
+  CAPRI's EAAP = NETF x UVAP / 1000 and EAAB = NETF x UVAB / 1000 (reports/sol_simy.gms l. 2547-2548), a regional
+  unit's NETF its mineral fertilisers' purchases at the solution (NETF = - v_netPutQuant, l. 309), the premiums PRME
+  (l. 2552-2554), TOIN, GVAP, GVAB and EAAP's MGVA (l. 2558-2562); ported (coupling/equations/sol_simy.py
+  DATA_NETF_FNUT, DATA_EAAP_IO, DATA_EAAB_IO, DATA_EAAP_PRMDE, DATA_EAAP_GVAP, DATA_EAAB_GVAB, DATA_EAAP_MGVA) and
+  applied at each regional solution (capri_mod/income/eaa.py eaap_eaab: the regional NLP's purchases of N, P2O5,
+  K2O). UVAP and UVAB are the member state's base year values moved by inflation (capmod/
+  inflation_and_trend_interpolation.gms l. 69-70, DATA_UVAP_IO_SIMY, DATA_UVAB_IO_SIMY), from sim_ini_21730
+  (tools/build/build_fnut_unit_values.py -> capri_data/2017/environment/fnut_unit_values_2017.csv; the kept extract
+  fnut_uvap_uvab_bas.parquet). In results["eaa"] (the purchases' NETF, UVAP, EAAP, UVAB, EAAB) and the welfare
+  table (EAAP_TOIN, EAAP_GVAP, EAAP_PRME, EAAP_MGVA, EAAB_TOIN, EAAB_GVAB). Checked at the 2030 baseline of DE110000
+  (one unit's run) against CAPRI's 2030 reference (dataOut, a check only, 2017 money): NITF purchases 29.757 kt
+  against 29.758, EAAP TOIN 45.911 against 45.913 (58.640 in 2030 money), PRME 132.08 against 132.07, the unit values
+  CAPRI's (NITF 869.355 EUR/t, 1,110.354 in 2030 money). Not reported: EAAP's PRMD (the declared premiums; the
+  model's activities carry the paid ones), outside MGVA. Also: two tests of K207 left CAPRI's fixed other animals out
+  (OANI has no manure and no PMP terms; the cloud report of 5fc3c79). Tests: test_eaa.py (2), test_water_income.py
+  (the regional account).
 - **The fodder crops' output at CAPRI's UVAG(FODDO); a faster run (26 November 2026; KNOWN_ISSUES K213, register
   DEP-54):** CAPRI's report values a fodder crop's output at the solution at YILD x UVAG(FODDO), UVAG(FODDO) = PSHW x (1
   - p_onFarmShare) + FODDMARKUP (reports/sol_simy.gms l. 753; coupling/equations/sol_simy.py DATA_UVAG_FODDO), and its

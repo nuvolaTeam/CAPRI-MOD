@@ -47,7 +47,8 @@ import pandas as pd
 def eaag_items(region, res, supply_module, ip=None) -> dict:
     """The region's gross account at its solution (module docstring), EUR million: {"items": DataFrame (item, side "O"
     or "I", GROF: 1000 t or, value-only items, EUR million; UVAG: EUR per t or 1000; EAAG), "TOOU", "TOIN", "PRME",
-    "MGVA", "AGGT" (I1's MGVA), "DIFF" (MGVA - AGGT), "DIFF_act" {activity: EUR million}}."""
+    "MGVA", "AGGT" (I1's MGVA), "DIFF" (MGVA - AGGT), "DIFF_act" {activity: EUR million}, and the accounts at producer
+    and basic prices, "purchases", "EAAP", "EAAB" (eaap_eaab, income I2b)}."""
     from capri_mod.coupling.equations.sol_simy import (DATA_EAAG_IO, DATA_EAAG_MGVA, DATA_GEAAC_TOIN, DATA_GEAAC_TOOU,
                                                        DATA_GROF_IO)
     from capri_mod.data.definitions import ANIMALS, CROPS
@@ -170,8 +171,83 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
     mga = ip.get("MGVA_act") or {}
     diff_act = {a: (own.get(a, 0.0) + float(pr.get(a, 0.0) if pr is not None else 0.0) - float(v)) * lev[a] / 1000.0
                 for a, v in mga.items()}
-    return {"items": items, "TOOU": O_tot, "TOIN": I_tot, "PRME": prme, "MGVA": mg, "AGGT": float(ip["MGVA"]) / 1000.0,
-            "DIFF": mg - float(ip["MGVA"]) / 1000.0, "DIFF_act": diff_act}
+    out = {"items": items, "TOOU": O_tot, "TOIN": I_tot, "PRME": prme, "MGVA": mg, "AGGT": float(ip["MGVA"]) / 1000.0,
+           "DIFF": mg - float(ip["MGVA"]) / 1000.0, "DIFF_act": diff_act}
+    out.update(eaap_eaab(region, res, m, lev, int(sim) if sim else None))
+    return out
+
+
+#: the model's nutrients -> CAPRI's mineral fertilisers (FNUT)
+FNUT_OF = {"N": "NITF", "P": "PHOF", "K": "POTF"}
+
+
+def eaap_eaab(region, res, m, lev, sim=None) -> dict:
+    """CAPRI's accounts at producer and basic prices of a region at its solution (income I2b; reports/sol_simy.gms
+    l. 2547-2562), EUR million: {"purchases": DataFrame (item NITF | PHOF | POTF, NETF kt, UVAP and UVAB EUR per t,
+    EAAP, EAAB), "EAAP": {TOOU, TOIN, GVAP, PRME, MGVA}, "EAAB": {TOOU, TOIN, GVAB}}.
+
+    A regional unit's NETF is the mineral fertilisers' purchases at the solution alone (l. 309: the products' net trade
+    is a member state's balance, l. 1966-1970), so its EAAP and EAAB hold the purchases and the premiums, as CAPRI's
+    NUTS 2 rows (DE110000 at the 2030 reference: EAAP NITF = 29.758 kt x 1,110.35 EUR/t = 33.04, TOIN 58.64):
+      NETF      DATA_NETF_FNUT, the regional NLP's purchases (SupplyResult.fert_npk, t; supply/capri_regional_nlp.py)
+      UVAP, UVAB  the member state's base year unit values (fnut_unit_values_2017.csv, tools/build/
+                build_fnut_unit_values.py) at the simulation year by inflation (DATA_UVAP_IO_SIMY, DATA_UVAB_IO_SIMY;
+                p_inflationFactor the money deflator of the year, capri_mod/data/inputs.py money_deflator, CAPRI's
+                p_infl^(SIMY - BAS)), over the money deflator: the model's 2017 money
+      PRME      DATA_EAAP_PRMDE over the activities' premiums x levels and the technology mix's premium difference on the
+                area moved (as income I1's PRME)
+    Departures from CAPRI: EAAP's PRMD (the declared premiums, DATA(MPACT, PRMD) = the sum over the schemes of
+    p_premPaym's PRMD, policy/prmcut.gms l. 321-322) is not reported: the model's activities carry their paid premium
+    (PRME) only, the declared ones being in the premium module (capri_mod/policy); it does not enter MGVA (l. 2562).
+    Empty where the solve has no fertilisation block (outside CAPRI's EU data)."""
+    from capri_mod.coupling.equations.inflation_and_trend_interpolation import DATA_UVAB_IO_SIMY, DATA_UVAP_IO_SIMY
+    from capri_mod.coupling.equations.sol_simy import (DATA_EAAB_GVAB, DATA_EAAB_IO, DATA_EAAP_GVAP, DATA_EAAP_IO,
+                                                       DATA_EAAP_MGVA, DATA_EAAP_PRMDE, DATA_GEAAC_TOIN,
+                                                       DATA_GEAAC_TOOU, DATA_NETF_FNUT)
+    from capri_mod.data.definitions import capri_ms
+    from capri_mod.data.inputs import money_deflator
+    from capri_mod.supply import inputs as _inputs
+    npk = getattr(res, "fert_npk", None) or getattr(getattr(m, "res", None), "last_npk", None) or {}
+    if not npk:
+        return {}
+    inp = _inputs.current()
+
+    def load(i):
+        t = i.csv("fnut_unit_values_2017.csv", "environment")
+        return {(str(a), str(b)): (float(c), float(d)) for a, b, c, d in zip(t.ms, t.fnut, t.uvap_eur_t, t.uvab_eur_t)}
+    uv = inp.cached("income_fnut_unit_values", load)
+    defl = money_deflator(sim) if sim else 1.0
+    ms = capri_ms(region)
+    rows = []
+    for nut, rec in npk.items():
+        f = FNUT_OF.get(nut)
+        if f is None or (ms, f) not in uv:
+            continue
+        netf = DATA_NETF_FNUT(-float(rec.get("purchase", 0.0) or 0.0) / 1000.0)          # t -> kt
+        uvp = DATA_UVAP_IO_SIMY(uv[(ms, f)][0], defl) / defl
+        uvb = DATA_UVAB_IO_SIMY(uv[(ms, f)][1], defl) / defl
+        rows.append({"item": f, "NETF": netf, "UVAP": uvp, "EAAP": DATA_EAAP_IO(netf, uvp), "UVAB": uvb,
+                     "EAAB": DATA_EAAB_IO(netf, uvb)})
+    if not rows:
+        return {}
+    pur = pd.DataFrame(rows, columns=["item", "NETF", "UVAP", "EAAP", "UVAB", "EAAB"]).sort_values("item",
+                                                                                                  ignore_index=True)
+    pr = getattr(m, "premiums", None)
+    mz = dict(getattr(res, "technology_mix", None) or {})
+    tm = getattr(getattr(m, "data", None), "techn_mix", None)
+    prs = [float(pr.get(a, 0.0)) if pr is not None else 0.0 for a in lev]
+    lvs = [float(lev[a]) for a in lev]
+    for a, z in mz.items():
+        if tm is not None and a in tm.index and pr is not None:
+            prs.append(float(tm.at[a, "prem_diff_share"]) * float(pr.get(a, 0.0)))
+            lvs.append(float(z))
+    prme = DATA_EAAP_PRMDE(prs, lvs)
+    p_tou, p_tin = DATA_GEAAC_TOOU([]), DATA_GEAAC_TOIN(pur.EAAP)
+    b_tou, b_tin = DATA_GEAAC_TOOU([]), DATA_GEAAC_TOIN(pur.EAAB)
+    gvap = DATA_EAAP_GVAP(p_tou, p_tin)
+    return {"purchases": pur,
+            "EAAP": {"TOOU": p_tou, "TOIN": p_tin, "GVAP": gvap, "PRME": prme, "MGVA": DATA_EAAP_MGVA(gvap, prme)},
+            "EAAB": {"TOOU": b_tou, "TOIN": b_tin, "GVAB": DATA_EAAB_GVAB(b_tou, b_tin)}}
 
 
 def _crop_npk_parts(region, m, toin) -> dict:
