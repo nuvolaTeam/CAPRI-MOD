@@ -47,3 +47,22 @@ def p_trqBilat_Rent(base, ta, ta_pref, ts, ts_pref, X, Q, fill):
     change factor; NaN rates (no rate) read as 0."""
     u = np.nan_to_num(base * (ta - ta_pref) / 100.0) + np.nan_to_num(ts - ts_pref)
     return np.maximum(u, 0.0) * X * min(1.0, Q / fill)
+
+
+def DATA_UVAB_MARR(UVAG_SIMY, UVAB_BAS, UVAG_BAS):
+    r"""DATA(RMSSUP, "UVAB", MARR, SIMY): a market product's unit value at basic prices at the simulation, its unit
+    value in the gross account at the solution plus the base year's wedge between the two, where the base year has a
+    UVAB (the member states' accounts at basic prices, income I2c, capri_mod/income/eaa_ms.py).
+
+    CAPRI's GAMS (reports/sol_market.gms l. 1336-1337):
+
+           DATA(RMSSUP,"UVAB",MARR,"%SIMY%") $ DATA(RMSSUP,"UVAB",MARR,"BAS")
+               = DATA(RMSSUP,"UVAG",MARR,"%SIMY%") + DATA(RMSSUP,"UVAB",MARR,"BAS") - DATA(RMSSUP,"UVAG",MARR,"BAS");
+
+    In this project's notation: UVAB = UVAG(SIMY) + UVAB(BAS) - UVAG(BAS), EUR per t; the wedge in the base year's
+    money, as CAPRI's (divided by the money deflator, with UVAG(SIMY), for the model's 2017 money). None where the base
+    year has no UVAB (the statement's condition). Departures from CAPRI: none."""
+    if UVAB_BAS is None or UVAB_BAS != UVAB_BAS or not float(UVAB_BAS):
+        return None
+    g0 = float(UVAG_BAS) if UVAG_BAS is not None and UVAG_BAS == UVAG_BAS else 0.0       # GAMS: a missing value is 0
+    return float(UVAG_SIMY) + float(UVAB_BAS) - g0

@@ -1831,6 +1831,19 @@ COMMENT ON TABLE src_fodder_onfarm_items IS 'CAPRI''s member states'' gross prod
 INSERT INTO value_units VALUES
   ('src_fodder_onfarm_items', 'value', 'U_1000t', 'capri', 'CAPRI DATA(MS, item, FODDO, year): 1000 t');
 
+-- file: capri_data/sources/raw/capri/results/sim_ini_21730/ms_farm_balance_items.parquet
+CREATE TABLE src_ms_farm_balance_items (
+    ms VARCHAR NOT NULL,
+    item VARCHAR NOT NULL CHECK (item IN ('GROF', 'SEDF', 'LOSF', 'UVAG', 'UVAP', 'UVAB')),
+    product VARCHAR NOT NULL,
+    year VARCHAR NOT NULL CHECK (year IN ('BAS', 'Y')),
+    value DOUBLE NOT NULL,
+    PRIMARY KEY (ms, item, product, year)
+);
+COMMENT ON TABLE src_ms_farm_balance_items IS 'CAPRI''s member states'' farm balance of its outputs at "BAS" and "Y" and the unit values of its items at "BAS", sim_ini_21730''s DATA(MS, GROF | SEDF | LOSF, O, BAS | Y) and DATA(MS, UVAG | UVAP | UVAB, IO, BAS) (the reference export), written and read back by tools/build/build_ms_farm_balance.py (ms_farm_balance_2017.csv, ms_farm_balance_2030.csv, ms_unit_values_2017.csv; income I2c)';
+INSERT INTO value_units VALUES
+  ('src_ms_farm_balance_items', 'value', NULL, 'open', 'CAPRI DATA(MS, item, product, year): 1000 t (GROF, SEDF, LOSF) or EUR per t (UVAG, UVAP, UVAB); no single unit code');
+
 -- file: capri_data/sources/raw/capri/results/sim_ini_21730/fnut_uvap_uvab_bas.parquet
 CREATE TABLE src_fnut_uvap_uvab_bas (
     ms VARCHAR NOT NULL,

@@ -163,7 +163,8 @@ def test_the_producer_surplus_at_the_regional_solution(solved3):
 def test_the_gross_account_by_item_at_the_regional_solution(solved3):
     """CAPRI's gross account by item at the regional solution (income I2, SupplyResult.eaa; reports/sol_simy.gms
     l. 2549-2566): the revenue by output item adds up to each activity's revenue; TOOU - TOIN + PRME is MGVA; each
-    crop product's value is its GROF (1000 t) x its price (a fodder crop's at CAPRI's UVAG(FODDO), K213); and MGVA equals I1's AGGT but for the input cost table's
+    crop product's value is its GROF (1000 t) x its price (a fodder crop's in fresh matter at CAPRI's UVAG(FODDO),
+    K213); and MGVA equals I1's AGGT but for the input cost table's
     items at the member state's UVAP against TOIN at the regional UVAG (about 1e-5 relative to a herd's input cost);
     the accounts at producer and basic prices hold the regional model's fertiliser purchases and the premiums (I2b)."""
     from capri_mod.data.definitions import CROPS
@@ -190,8 +191,14 @@ def test_the_gross_account_by_item_at_the_regional_solution(solved3):
         L = sr[r].activities
         for a in CROPS:
             if ("O", a) in it.index and float(L.get(a, 0.0)) > 0 and not (sr[r].technology_mix or {}).get(a):
-                kg, uv = m.output_items[a][0][1:3]
-                uv *= I.fodder_output_ratio(fod[a]) if a in fod else 1.0      # a fodder crop's at UVAG(FODDO), K213
+                kg, uv, v = m.output_items[a][0][1:4]
+                if a in fod:
+                    # a fodder crop's in fresh matter at UVAG(FODDO), K213, CAPRI's unit (income I2c)
+                    from capri_mod.coupling.equations.sol_simy import DATA_UVAG_FODDO
+                    assert it.loc[("O", a), "UVAG"] == pytest.approx(DATA_UVAG_FODDO(fod[a][2], fod[a][3]), rel=1e-12)
+                    assert it.loc[("O", a), "EAAG"] == pytest.approx(
+                        0.001 * v * I.fodder_output_ratio(fod[a]) * float(L[a]), rel=1e-12), (r, a)
+                    continue
                 assert it.loc[("O", a), "GROF"] == pytest.approx(0.001 * kg * float(L[a]), rel=1e-12), (r, a)
                 assert it.loc[("O", a), "EAAG"] == pytest.approx(it.loc[("O", a), "GROF"] * uv / 1000.0, rel=1e-12)
 

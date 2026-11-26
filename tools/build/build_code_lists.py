@@ -367,6 +367,12 @@ def main():
     # the deletions before CAPRI writes sim_ini (create_sim_ini_gdx.gms l. 311-369)
     for s in ("OAGGR", "MRKBAL", "NONEND", "FERT_DIST", "FNUT_COLS", "I"):
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    # a member state's farm balance and unit values in the accounts at producer and basic prices (income I2c;
+    # reports/sol_simy.gms l. 791-799, 1891-1898, 1966-1970; capmod/inflation_and_trend_interpolation.gms l. 67-72;
+    # reports/sol_market.gms l. 1325-1337): the final products, the market part's items, the market's rows
+    for s in ("END", "IOE", "MARR"):
+        write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    write(OUT / "capri" / "O_TO_YANI.csv", ("oyani", "iyani"), pairs("O_TO_YANI"))
     # the requirement call's grassland and ruminant activities (feed/req_or_man_fnc.gms; capri_mod/feed/chain.py)
     for s in ("GRSACT", "RUMI"):
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))

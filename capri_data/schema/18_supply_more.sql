@@ -1039,6 +1039,51 @@ INSERT INTO value_units VALUES
   ('sup_producer_prices_regional', 'UAAR', NULL, 'open', 'producer_prices_regional.UAAR: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
   ('sup_producer_prices_regional', 'WINE', NULL, 'open', 'producer_prices_regional.WINE: EUR/t as CAPRI''s MPRI, to be confirmed per column');
 
+-- file: capri_data/2017/supply/ms_farm_balance_2017.csv
+CREATE TABLE sup_ms_farm_balance_2017 (
+    ms VARCHAR NOT NULL,
+    product VARCHAR NOT NULL,
+    grof DOUBLE NOT NULL,
+    sedf DOUBLE NOT NULL,
+    losf DOUBLE NOT NULL,
+    PRIMARY KEY (ms, product)
+);
+COMMENT ON TABLE sup_ms_farm_balance_2017 IS 'CAPRI''s member states'' farm balance of its outputs (O) at "CUR" (the base year): gross production, seed and losses on farm, sim_ini_21730''s DATA(MS, GROF | SEDF | LOSF, O, "BAS"); a final product''s seed and losses at the solution are in proportion to its production at "CUR" (reports/sol_simy.gms l. 1889-1898), a member state''s accounts at producer prices (income I2c, capri_mod/income/eaa_ms.py). (tools/build/build_ms_farm_balance.py)';
+INSERT INTO value_units VALUES
+  ('sup_ms_farm_balance_2017', 'grof', 'U_1000t', 'capri', 'CAPRI DATA(MS, "GROF", O, "BAS"): 1000 t (1000 head for the young animals, EUR million for the value items)'),
+  ('sup_ms_farm_balance_2017', 'sedf', 'U_1000t', 'capri', 'CAPRI DATA(MS, "SEDF", O, "BAS"): as grof; 0 where CAPRI''s data have none'),
+  ('sup_ms_farm_balance_2017', 'losf', 'U_1000t', 'capri', 'CAPRI DATA(MS, "LOSF", O, "BAS"): as grof; 0 where CAPRI''s data have none');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/ms_farm_balance_2030.csv
+CREATE TABLE sup_ms_farm_balance_2030 (
+    ms VARCHAR NOT NULL,
+    product VARCHAR NOT NULL,
+    grof DOUBLE NOT NULL,
+    sedf DOUBLE NOT NULL,
+    losf DOUBLE NOT NULL,
+    PRIMARY KEY (ms, product)
+);
+COMMENT ON TABLE sup_ms_farm_balance_2030 IS 'CAPRI''s member states'' farm balance of its outputs (O) at "CUR" (2030): gross production, seed and losses on farm, sim_ini_21730''s DATA(MS, GROF | SEDF | LOSF, O, "Y"); a final product''s seed and losses at the solution are in proportion to its production at "CUR" (reports/sol_simy.gms l. 1889-1898), a member state''s accounts at producer prices (income I2c, capri_mod/income/eaa_ms.py). (tools/build/build_ms_farm_balance.py)';
+INSERT INTO value_units VALUES
+  ('sup_ms_farm_balance_2030', 'grof', 'U_1000t', 'capri', 'CAPRI DATA(MS, "GROF", O, "Y"): 1000 t (1000 head for the young animals, EUR million for the value items)'),
+  ('sup_ms_farm_balance_2030', 'sedf', 'U_1000t', 'capri', 'CAPRI DATA(MS, "SEDF", O, "Y"): as grof; 0 where CAPRI''s data have none'),
+  ('sup_ms_farm_balance_2030', 'losf', 'U_1000t', 'capri', 'CAPRI DATA(MS, "LOSF", O, "Y"): as grof; 0 where CAPRI''s data have none');
+
+-- file: capri_data/2017/supply/ms_unit_values_2017.csv
+CREATE TABLE sup_ms_unit_values_2017 (
+    ms VARCHAR NOT NULL,
+    item VARCHAR NOT NULL,
+    uvag DOUBLE,
+    uvap DOUBLE,
+    uvab DOUBLE,
+    PRIMARY KEY (ms, item)
+);
+COMMENT ON TABLE sup_ms_unit_values_2017 IS 'CAPRI''s member states'' unit values of its items (IO) in the base year in the gross account, at producer and at basic prices, sim_ini_21730''s DATA(MS, UVAG | UVAP | UVAB, IO, "BAS"), empty where CAPRI''s data have none; the manure''s value in an animal''s other outputs (income I2c, capri_mod/income/eaa.py _other_output_parts). (tools/build/build_ms_farm_balance.py)';
+INSERT INTO value_units VALUES
+  ('sup_ms_unit_values_2017', 'uvag', 'U_EuPerTon', 'capri', 'CAPRI DATA(MS, "UVAG", IO, "BAS"): EUR per t (per head for the young animals) in the base year''s money'),
+  ('sup_ms_unit_values_2017', 'uvap', 'U_EuPerTon', 'capri', 'CAPRI DATA(MS, "UVAP", IO, "BAS"): as uvag'),
+  ('sup_ms_unit_values_2017', 'uvab', 'U_EuPerTon', 'capri', 'CAPRI DATA(MS, "UVAB", IO, "BAS"): as uvag');
+
 -- file: capri_data/2017/supply/young_animals_2017.csv
 CREATE TABLE sup_young_animals_2017 (
     region VARCHAR NOT NULL REFERENCES regional_units (region),

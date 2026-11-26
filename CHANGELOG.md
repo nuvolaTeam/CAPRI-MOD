@@ -642,6 +642,30 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   SREV), the market crops' income now CAPRI's within 5%; the baseline's MGVA 40,034 against CAPRI's 38,358, the fodder
   activities 1,684 above CAPRI's (KNOWN_ISSUES K213, open). K211 stays open for the straw balance alone, slack at
   CAPRI's reference. Tests: test_eaa.py (2), test_water_income.py (1, slow).
+- **Income I2c, a member state's accounts at producer and basic prices (26 November 2026; register DEP-56):** where
+  all of a member state's units are in the run, CAPRI's member-state row: the units' gross accounts by item summed in
+  CAPRI's codes (the crops' products by PACT_TO_Y, the animals' market products, their other outputs split into
+  manure, milk for feeding and young animals: income/eaa.py _other_output_parts), NETF = GROF - SEDF - LOSF - INTF
+  (reports/sol_simy.gms l. 1964-1970) with the final products' seed and losses in proportion to production at CUR
+  (l. 1889-1898; sim_ini_21730's DATA, tools/build/build_ms_farm_balance.py -> ms_farm_balance_2017.csv,
+  ms_farm_balance_2030.csv), the young animals' internal use (l. 789-799), the fertilisers' purchases summed over the
+  regions (l. 315, 866), the manure's NETF 0 (l. 874); UVAP = UVAG x NETF / GROF (l. 2389-2390); UVAB a market
+  product's UVAG plus the base year's wedge (reports/sol_market.gms l. 1336-1337), a good outside the market part its
+  base year UVAB by inflation (l. 70; ms_unit_values_2017.csv); EAAP, EAAB, TOOU, TOIN, GVAP, GVAB, MGVA (l. 2547-2562).
+  Ported (coupling/equations/sol_simy_ms.py, market/equations/sol_market.py DATA_UVAB_MARR) and applied in
+  capri_mod/income/eaa_ms.py (results["eaa_ms"], block "eaa_ms" of the long table). CAPRI's sets END, IOE, MARR and
+  O_TO_YANI as its run built them (build_code_lists.py). The regional account now holds the fodder crops' outputs in
+  fresh matter at UVAG(FODDO) (CAPRI's unit; the grassland's margin is in dry matter), the NPK need in quantity (kt)
+  and the animals' market products' tonnes (products_t). Measured on a Denmark and Croatia Green Deal pair (EUR
+  million, 2017 money; CAPRI's 2030 reference deflated by 1.019^13, a check only): Denmark's ratios NETF / GROF are
+  CAPRI's to the third decimal and its items at producer and basic prices within 0.5 of CAPRI's but where the gross
+  account differs already (other crops OCRO 34.0 below, INPO 3.7, PLAP 4.8, IPHA 2.3: income I2), the milk for feeding
+  (CAPRI's NETF twice its GROF in a member state of one unit: 46.7), the chicks in OTHER_O (15.3) and the options'
+  items (mitiO 23.1, mitiI 158.3, at the region: DEP-54); EAAP TOOU 9,757.5 against 9,799.6, TOIN 5,896.8 against
+  5,740.6, MGVA 4,528.2 against 4,749.8 (PRME 667.5 against 690.8, income I1); EAAB TOOU 8,157.2 against 8,175.8, TOIN
+  3,757.5 against 3,761.2, GVAB 4,399.7 against 4,414.7. The young animals' heads are CAPRI's (Denmark's bulls 118.03
+  against 118.03 thousand produced, piglets 19,871 against 19,869). Tests: test_eaa_ms.py (6), test_water_income.py
+  (the fodder's unit, slow).
 - **The farms' profit and the domestic support by market product (26 November 2026; register DEP-58):** CAPRI's
   ProfitAgr(XX1), the activities' MGVA x levels by their main product in PACT_TO_XX, INPE the activities and items
   outside the market's products, LAND minus the rents (reports/welfare.gms l. 441-460), and PSEs(XX1), minus the premium

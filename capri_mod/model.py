@@ -1506,6 +1506,8 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         # CAPRI's gross account by item per region (income I2, SupplyResult.eaa: GROF, UVAG and EAAG by output and
         # input, TOOU, TOIN, PRME, MGVA and the difference to the activity-based income; EUR million)
         results["eaa"] = {reg: res.eaa for reg, res in supply_results.items() if getattr(res, "eaa", None)} or None
+        # CAPRI's accounts at producer prices of the member states all of whose units are in the run (income I2c)
+        results["eaa_ms"] = self._eaa_ms(supply_results)
         # CAPRI's premium outlays per member state and product and their budgets (income I4, reports/feoga.gms)
         results["feoga"] = self._feoga(supply_results)
         # CAPRI's farm profit and domestic support per member state and market product (reports/welfare.gms)
@@ -1546,6 +1548,16 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             return t if len(t) else None
         except Exception as exc:
             warnings.warn(f"feoga: the premium outlays per product could not be computed ({exc!r})")
+            return None
+
+    def _eaa_ms(self, supply_results):
+        """The member states' accounts at producer prices at the solution (capri_mod/income/eaa_ms.py; EUR million),
+        or None where there is no complete member state or they could not be computed (warned)."""
+        try:
+            from capri_mod.income.eaa_ms import ms_accounts
+            return ms_accounts(supply_results) or None
+        except Exception as exc:
+            warnings.warn(f"eaa_ms: the member states' accounts at producer prices could not be computed ({exc!r})")
             return None
 
     def _welfare_products(self, supply_results, feop, welfare_supply):

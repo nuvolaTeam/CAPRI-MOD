@@ -670,6 +670,22 @@ COMMENT ON TABLE capri_pact_to_y IS 'CAPRI PACT_TO_Y: each production activity a
 CREATE TABLE capri_pact_to_xx (pact VARCHAR NOT NULL, xx VARCHAR NOT NULL, PRIMARY KEY (pact, xx));
 COMMENT ON TABLE capri_pact_to_xx IS 'CAPRI PACT_TO_XX: each production activity and its market product for the welfare report, INPE where none (reports/rep_sets.gms l. 105-122), as CAPRI''s run built it';
 
+-- file: capri_data/codes/capri/END.csv
+CREATE TABLE capri_end (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_end IS 'CAPRI END: the final products, whose seed and losses on farm the simulation report sets in proportion to production (reports/sol_simy.gms l. 1889-1898), as CAPRI''s run built it, in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/IOE.csv
+CREATE TABLE capri_ioe (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_ioe IS 'CAPRI IOE: the inputs and outputs of the economic accounts (sets.gms), as CAPRI''s run built it, in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/MARR.csv
+CREATE TABLE capri_marr (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_marr IS 'CAPRI MARR: the market model''s products with a farm-gate price (arm/arm_sets.gms; the basic-price unit values, reports/sol_market.gms l. 1325-1337), as CAPRI''s run built it, in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/O_TO_YANI.csv
+CREATE TABLE capri_o_to_yani (oyani VARCHAR NOT NULL, iyani VARCHAR NOT NULL, PRIMARY KEY (oyani, iyani));
+COMMENT ON TABLE capri_o_to_yani IS 'CAPRI O_TO_YANI: each young animal produced (OYANI) and bought (IYANI) (sets.gms; reports/sol_simy.gms l. 793-795), as CAPRI''s run built it';
+
 -- file: capri_data/codes/capri/CAP_TO_TRD.csv
 CREATE TABLE capri_cap_to_trd ("rows" VARCHAR NOT NULL, xx VARCHAR NOT NULL, PRIMARY KEY ("rows", xx));
 COMMENT ON TABLE capri_cap_to_trd IS 'CAPRI CAP_TO_TRD: the data base''s outputs and the market model''s products (arm/arm_sets.gms l. 683ff), as CAPRI''s run built it';

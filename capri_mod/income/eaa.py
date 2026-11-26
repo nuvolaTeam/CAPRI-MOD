@@ -10,14 +10,14 @@ What the model holds per activity at the solution, by item (EUR per ha or head, 
 heads):
   crops    outputs: the product, its yield x the solve's price (SupplyModule._output_items: a quantity and a unit value,
                     so GROF and UVAG as CAPRI's; a fodder crop's at CAPRI's UVAG(FODDO), the fed fodder's value x (1 -
-                    p_onFarmShare), on the margin's quantity: IncomeDistributionModule.crop_fodder_output, K213); the
+                    p_onFarmShare), in fresh matter, CAPRI's unit: IncomeDistributionModule.crop_fodder_output, K213); the
                     residues' nutrients MANN, MANP, MANK in quantity at the member state's unit value
                     (IncomeDistributionModule.crop_residue_nutrients, CAPRI's PACT_TO_O; their secondary revenue SREV:
                     KNOWN_ISSUES K212). The straw (STRA) at zero, as CAPRI's 2030 (K211).
            inputs:  at the 2030 market year CAPRI's directly yield-dependent inputs item by item (crop_inputs_2030.csv,
                     x TF_I, in the model's money; their sum is DATA_TOIN_Y's first term), the 2030 NPK need per nutrient
-                    at its unit value (NITF, PHOF, POTF; capri_mod/fert/npk.py); at the base year the margin's input
-                    cost in one item (TOIN_lin: variable_costs.csv, CAPRI's 2017 TOIN, not item by item).
+                    in quantity at its unit value (NITF, PHOF, POTF; capri_mod/fert/npk.py); at the base year the
+                    margin's input cost in one item (TOIN_lin: variable_costs.csv, CAPRI's 2017 TOIN, not item by item).
   animals  outputs: the market products' values per head with the solve's price changes and the rest of the output value
                     (the young animals and the other outputs, OTHER_O: one item; SupplyModule._output_items).
            inputs:  the input cost table's items per head (livestock_input_cost: ELEC, EGAS, INPO, IPHA, REPB, REPM and
@@ -47,8 +47,11 @@ import pandas as pd
 def eaag_items(region, res, supply_module, ip=None) -> dict:
     """The region's gross account at its solution (module docstring), EUR million: {"items": DataFrame (item, side "O"
     or "I", GROF: 1000 t or, value-only items, EUR million; UVAG: EUR per t or 1000; EAAG), "TOOU", "TOIN", "PRME",
-    "MGVA", "AGGT" (I1's MGVA), "DIFF" (MGVA - AGGT), "DIFF_act" {activity: EUR million}, and the accounts at producer
-    and basic prices, "purchases", "EAAP", "EAAB" (eaap_eaab, income I2b)}."""
+    "MGVA", "AGGT" (I1's MGVA), "DIFF" (MGVA - AGGT), "DIFF_act" {activity: EUR million}, "by_act" (DataFrame side,
+    item, activity, EAAG: the items by the activity holding them, the technology mix's with its crop, None the
+    region's), "other_o" and "young" (_other_output_parts: the animals' OTHER_O by CAPRI output, the young animals'
+    heads), "products_t" (_animal_products_t: the animals' market products in 1000 t), and the accounts at producer and basic prices, "purchases", "EAAP", "EAAB" (eaap_eaab, income I2b); a member
+    state's are income/eaa_ms.py's (I2c)}."""
     from capri_mod.coupling.equations.sol_simy import (DATA_EAAG_IO, DATA_EAAG_MGVA, DATA_GEAAC_TOIN, DATA_GEAAC_TOOU,
                                                        DATA_GROF_IO)
     from capri_mod.data.definitions import ANIMALS, CROPS
@@ -63,10 +66,13 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
     oi = getattr(m, "output_items", None) or {}
     rows = {}          # (side, item) -> {"q": [(kg or EUR per unit, level)], "uv": EUR per t or None}
     own = {}           # activity -> outputs - inputs per unit, EUR
+    by_act = {}        # (side, item, activity or None) -> EUR million: the item's value by the activity that holds it
 
-    def add(a, side, item, per_unit, L, kg=None, uv=None):
+    def add(a, side, item, per_unit, L, kg=None, uv=None, owner=None):
         if not per_unit or not L:
             return
+        k_ = (side, item, a if a is not None else owner)
+        by_act[k_] = by_act.get(k_, 0.0) + float(per_unit) * float(L) / 1000.0
         r_ = rows.setdefault((side, item), {"q": [], "uv": uv if kg is not None else None, "qform": kg is not None})
         if r_["qform"] and kg is not None and abs(float(uv) - float(r_["uv"])) <= 1e-9 * max(1.0, abs(float(uv))):
             r_["q"].append((float(kg), float(L)))
@@ -89,6 +95,7 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
     defl = money_deflator(int(sim)) if sim else 1.0
     nri = dict(getattr(getattr(m, "ev", None), "nr_items", None) or {})
     npk = _crop_npk_parts(region, m, toin)
+    npk_uv = _crop_npk_unit_values(region) if npk else {}
     feed_t = getattr(res, "feed_t", None) or {}
     feed_p = getattr(res, "feed_price", None) or {}
     feed_lin = getattr(res, "feed_lin", None) or {}
@@ -101,7 +108,7 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
         # a fodder crop's output at CAPRI's UVAG(FODDO), the fed fodder's value on the part not lost (K213)
         f_ = IDM.fodder_output_ratio(fod[a]) if a in fod else 1.0
         for it, kg, uv, v in oi.get(a, ()):
-            add(a, "O", it, v * f_, L, kg if kg else None, uv * f_ if uv is not None else uv)
+            add(a, "O", it, v * f_, L, *_fodder_q(fod.get(a), v * f_, kg, uv, f_))
         # the solve's changes of the net revenue after its first computation, by item (SupplyModule._nr_item)
         for side, it, v, kg, uv in nri.get(a, ()):
             add(a, side, it, v, L, kg if kg else None, uv)
@@ -119,7 +126,9 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
                 else:
                     add(a, "I", "IY", float(toin[a][1]) - sum(npk.get(a, {}).values()), L)
                 for n, v in npk.get(a, {}).items():
-                    add(a, "I", n, v, L)
+                    # in quantity (the need, kg per ha) at the nutrient's unit value where it has one (income I2c)
+                    u_ = npk_uv.get(n)
+                    add(a, "I", n, v, L, *((v * 1000.0 / u_, u_) if u_ else ()))
             else:
                 c0 = float(data.variable_costs.get(a, 0.0))
                 add(a, "I", "TOIN_lin", c0 if np.isfinite(c0) else 0.0, L)
@@ -147,15 +156,17 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
             continue
         it, kg, uv, v = pa["O"]
         f_ = IDM.fodder_output_ratio(fod[a]) if a in fod else 1.0         # a fodder crop's at UVAG(FODDO) (K213)
-        add(None, "O", it, v * f_, z, kg if kg else None, uv * f_ if uv is not None else uv)
+        add(None, "O", it, v * f_, z, *_fodder_q(fod.get(a), v * f_, kg, uv, f_), owner=a)
         for i, v in pa["I"].items():
-            add(None, "I", i, v, z)
+            add(None, "I", i, v, z, owner=a)
         for it, q in (fom.get(a) or {}).items():
             uv = float(fo[a][it][1])
-            add(None, "O", it, float(q) * uv / 1000.0, z, kg=float(q), uv=uv)
+            add(None, "O", it, float(q) * uv / 1000.0, z, kg=float(q), uv=uv, owner=a)
     # the mitigation options at the region (EUR 1000; register DEP-54)
     for side, k in (("I", "mitiI"), ("O", "mitiO")):
         add(None, side, k, float(ip.get(k, 0.0) or 0.0), 1.0)
+    other_o, young = _other_output_parts(region, m, lev, by_act)
+    products_t = _animal_products_t(region, getattr(supply_module, "data", None), lev)
     out = []
     for (side, item), r_ in rows.items():
         g = DATA_GROF_IO([k_ for k_, _ in r_["q"]], [l_ for _, l_ in r_["q"]])
@@ -172,7 +183,12 @@ def eaag_items(region, res, supply_module, ip=None) -> dict:
     diff_act = {a: (own.get(a, 0.0) + float(pr.get(a, 0.0) if pr is not None else 0.0) - float(v)) * lev[a] / 1000.0
                 for a, v in mga.items()}
     out = {"items": items, "TOOU": O_tot, "TOIN": I_tot, "PRME": prme, "MGVA": mg, "AGGT": float(ip["MGVA"]) / 1000.0,
-           "DIFF": mg - float(ip["MGVA"]) / 1000.0, "DIFF_act": diff_act}
+           "DIFF": mg - float(ip["MGVA"]) / 1000.0, "DIFF_act": diff_act,
+           # the items' values by the activity holding them (the technology mix's with its crop; None: the region's),
+           # for a member state's accounts at producer and basic prices (income I2c, capri_mod/income/eaa_ms.py)
+           "by_act": pd.DataFrame([{"side": k[0], "item": k[1], "activity": k[2], "EAAG": v} for k, v in by_act.items()],
+                                  columns=["side", "item", "activity", "EAAG"]),
+           "other_o": other_o, "young": young, "products_t": products_t}
     out.update(eaap_eaab(region, res, m, lev, int(sim) if sim else None))
     return out
 
@@ -248,6 +264,120 @@ def eaap_eaab(region, res, m, lev, sim=None) -> dict:
     return {"purchases": pur,
             "EAAP": {"TOOU": p_tou, "TOIN": p_tin, "GVAP": gvap, "PRME": prme, "MGVA": DATA_EAAP_MGVA(gvap, prme)},
             "EAAB": {"TOOU": b_tou, "TOIN": b_tin, "GVAB": DATA_EAAB_GVAB(b_tou, b_tin)}}
+
+
+def _fodder_q(rec, value, kg, uv, f_) -> tuple:
+    """(kg per unit, EUR per t) of a crop's output item: a fodder crop's (rec: IncomeDistributionModule.
+    crop_fodder_output's) in fresh matter at UVAG(FODDO) = PSHW x (1 - p_onFarmShare), CAPRI's unit (the grassland's
+    margin holds dry matter); another crop's as the margin's (kg None: the value form)."""
+    if rec is not None:
+        from capri_mod.coupling.equations.sol_simy import DATA_UVAG_FODDO
+        u_ = DATA_UVAG_FODDO(rec[2], rec[3])
+        if u_ > 0:
+            return float(value) * 1000.0 / u_, u_
+    return (kg if kg else None), (uv * f_ if uv is not None else uv)
+
+
+def _animal_products_t(region, data, lev) -> pd.DataFrame:
+    """The animals' market products in quantity at the levels, for a member state's accounts at basic prices (income
+    I2c): DataFrame activity, item (CAPRI's output), GROF (1000 t): the run's outputs per head (data
+    "livestock_output_by_product_coef", t; CAPRI's 2030 at the 2030 market year, projection_module
+    SUPBAL_outputsPerHead_Y) x level. Empty without the table."""
+    t = data.get("livestock_output_by_product_coef") if hasattr(data, "get") else None
+    rows = []
+    if isinstance(t, pd.DataFrame) and region in t.index:
+        for c, v in t.loc[region].items():
+            a, it = str(c).split(".", 1)
+            if pd.notna(v) and float(v) > 0 and lev.get(a, 0.0) > 0:
+                rows.append({"activity": a, "item": it, "GROF": float(v) * lev[a]})
+    return pd.DataFrame(rows, columns=["activity", "item", "GROF"])
+
+
+def _crop_npk_unit_values(region) -> dict:
+    """{NITF, PHOF, POTF: EUR per t}: the region's NPK unit values of _crop_npk_parts (capri_mod/fert/npk.py), the
+    ones it has."""
+    from capri_mod.fert.npk import NPKData, NUTRIENTS
+    D = NPKData.get()
+    cr = D.capri_region(region)
+    code = {"N": "NITF", "P": "PHOF", "K": "POTF"}
+    out = {}
+    for n in NUTRIENTS:
+        r_ = D.region(cr, n)
+        if r_ is not None and r_.uvag_eur_t == r_.uvag_eur_t and float(r_.uvag_eur_t) > 0:
+            out[code.get(n, n)] = float(r_.uvag_eur_t)
+    return out
+
+
+#: the farm balances' young animals per category of the young-animal tables -> CAPRI's outputs (OYANI)
+def _young_codes():
+    from capri_mod.projection.prices import YOUNG_PRODUCTS
+    return {g: "/".join(v) for g, v in YOUNG_PRODUCTS.items()}
+
+
+def _other_output_parts(region, m, lev, by_act):
+    """An animal's other outputs (OTHER_O: its output value per head less its market products', SupplyModule.
+    _output_items) by CAPRI output, for a member state's accounts at producer prices (income I2c), EUR million:
+    (DataFrame activity, item, EAAG; DataFrame item, iyani, GROF, USE: the young animals' heads, 1000).
+
+      MANN, MANP, MANK  the manure per head (capri_mod/fert/npk.py manure_coef_table, kg) x level x the member state's
+                        unit value (ms_unit_values_2017.csv, CAPRI's UVAG at "BAS", tools/build/build_ms_farm_balance.py)
+      COMF, SGMF        the milk for feeding per head (the fodder balances' producers, t; FEED_TO_O) x its value
+      the young animals the rest, over the categories the activity produces (the young-animal tables, SupplyModule
+                        young_animal_table) by their value per head x coefficient; CAPRI's OYANI (projection/prices.py
+                        YOUNG_PRODUCTS; the pooled tables' categories as "YBUL/YHEI", "YCAM/YCAF"); an activity that
+                        produces none keeps the rest as OTHER_O.
+    The young animals' heads produced (GROF) and used (USE, CAPRI's IYANI of O_TO_YANI) at the levels: the
+    categories' coefficients x level, the cattle member splits' columns not apart."""
+    from capri_mod.data.definitions import capri_ms, capri_pairs
+    from capri_mod.fert.npk import manure_coef_table
+    from capri_mod.supply import inputs as _inputs
+    cols_o, cols_y = ["activity", "item", "EAAG"], ["item", "iyani", "GROF", "USE"]
+    oth = {k[2]: v for k, v in by_act.items() if k[0] == "O" and k[1] == "OTHER_O" and k[2] is not None}
+    yc = m._young_animal_coefs() if hasattr(m, "_young_animal_coefs") else {}
+    codes = _young_codes()
+    o2i = {o: i for o, i in capri_pairs("O_TO_YANI")}
+    young = []
+    for g, rec in yc.items():
+        if g not in codes:
+            continue
+        pr = sum(float(v) * lev.get(a, 0.0) for a, v in (rec.get("produce") or {}).items())
+        us = sum(float(v) * lev.get(a, 0.0) for a, v in (rec.get("use") or {}).items())
+        young.append({"item": codes[g], "iyani": "/".join(o2i.get(o, "") for o in codes[g].split("/")),
+                      "GROF": pr, "USE": us})
+    young = pd.DataFrame(young, columns=cols_y)
+    if not oth:
+        return pd.DataFrame(columns=cols_o), young
+    inp = _inputs.current()
+
+    def load(i):
+        t = i.csv("ms_unit_values_2017.csv", "supply")
+        return {(str(a), str(b)): float(c) for a, b, c in zip(t.ms, t["item"], t.uvag) if c == c}
+    uv = inp.cached("income_ms_unit_values", load)
+    ms = capri_ms(region)
+    man = {it: manure_coef_table(n) for it, n in (("MANN", "N"), ("MANP", "P"), ("MANK", "K"))}
+    f2o = {f: o for f, o in capri_pairs("FEED_TO_O") if o in ("COMF", "SGMF")}
+    fb = getattr(getattr(m, "data", None), "fodder_balance", None) or {}
+    rows = []
+    for a, V in oth.items():
+        L = lev.get(a, 0.0)
+        parts = {}
+        for it, t in man.items():
+            if L > 0 and region in t.index and a in t.columns and pd.notna(t.at[region, a]) and (ms, it) in uv:
+                parts[it] = float(t.at[region, a]) * L * uv[(ms, it)] / 1e6          # kg x 1000 heads x EUR/t
+        for f, rec in fb.items():
+            p_ = (rec or {}).get("producers") or {}
+            if L > 0 and f in f2o and a in p_:
+                parts[f2o[f]] = parts.get(f2o[f], 0.0) + float(p_[a]) * L * float(rec["value_eur_t"]) / 1000.0
+        w = {codes[g]: float((r_.get("produce") or {}).get(a, 0.0)) * float(r_.get("value_eur_head", 0.0) or 0.0)
+             for g, r_ in yc.items() if g in codes and (r_.get("produce") or {}).get(a)}
+        rest = float(V) - sum(parts.values())
+        if sum(w.values()) > 0:
+            for it, v in w.items():
+                parts[it] = parts.get(it, 0.0) + rest * v / sum(w.values())
+        else:
+            parts["OTHER_O"] = rest
+        rows += [{"activity": a, "item": it, "EAAG": v} for it, v in parts.items()]
+    return pd.DataFrame(rows, columns=cols_o), young
 
 
 def _crop_npk_parts(region, m, toin) -> dict:

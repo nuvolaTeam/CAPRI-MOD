@@ -3370,7 +3370,8 @@
    "columns": 15,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/data/loaders.py"
+    "capri_mod/data/loaders.py",
+    "capri_mod/income/eaa_ms.py"
    ],
    "origin": {
     "nature": "capri",
@@ -3515,6 +3516,43 @@
     "No effect on a standard run. Its only effective reader is the fertiliser allocation (use_fert_allocation), which is off by default and switched off by the outer loop. The manure-pool path fetches the price but does not use it. (checked 2026-10-29)"
    ],
    "catalogue_note": "Mineral fertiliser N unit value per country (BL -> BE, LU; IR -> IE); for the fertiliser allocation (not yet used). (not re-checked)"
+  },
+  "capri_data/2017/supply/ms_farm_balance_2017.csv": {
+   "description": "CAPRI's member states' farm balance of its outputs (O) at \"CUR\" (the base year): gross production, seed and losses on farm, sim_ini_21730's DATA(MS, GROF | SEDF | LOSF, O, \"BAS\"); a final product's seed and losses at the solution are in proportion to its production at \"CUR\" (reports/sol_simy.gms l. 1889-1898), a member state's accounts at producer prices (income I2c, capri_mod/income/eaa_ms.py). (tools/build/build_ms_farm_balance.py)",
+   "kind": "base",
+   "vintage": "2017",
+   "domain": "supply",
+   "status": "live",
+   "rows": 1706,
+   "columns": 5,
+   "units": "U_1000t",
+   "read_by_model": [
+    "capri_mod/income/eaa_ms.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_ms_farm_balance (not in the trace yet)"
+   },
+   "catalogue_note": "tools/build/build_ms_farm_balance.py: CAPRI's member states' GROF, SEDF and LOSF of its outputs at \"BAS\" (sim_ini_21730's DATA); income I2c (not re-checked)"
+  },
+  "capri_data/2017/supply/ms_unit_values_2017.csv": {
+   "description": "CAPRI's member states' unit values of its items (IO) in the base year in the gross account, at producer and at basic prices, sim_ini_21730's DATA(MS, UVAG | UVAP | UVAB, IO, \"BAS\"), empty where CAPRI's data have none; the manure's value in an animal's other outputs (income I2c, capri_mod/income/eaa.py _other_output_parts). (tools/build/build_ms_farm_balance.py)",
+   "kind": "coefficients",
+   "vintage": "2017",
+   "domain": "supply",
+   "status": "live",
+   "rows": 3322,
+   "columns": 5,
+   "units": "U_EuPerTon",
+   "read_by_model": [
+    "capri_mod/income/eaa.py",
+    "capri_mod/income/eaa_ms.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_ms_farm_balance (not in the trace yet)"
+   },
+   "catalogue_note": "tools/build/build_ms_farm_balance.py: CAPRI's member states' UVAG, UVAP and UVAB of its items at \"BAS\" (sim_ini_21730's DATA); income I2c (not re-checked)"
   },
   "capri_data/2017/supply/nutrient_coefs_regional.csv": {
    "description": "CAPRI's fertiliser coefficients NITF, PHOF, POTF of res_17<MS> DATA2 per region and model crop, level-weighted over the crop's CAPRI activities (build_capri_base.CROP_MAP), the member state's for a crop the region does not grow (tools/build/build_nutrient_coefs_regional.py, K100)",
@@ -4706,6 +4744,25 @@
    },
    "catalogue_note": "tools/build/build_livestock_output_2030.py: register DEP-13 step 2 (not re-checked)"
   },
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/ms_farm_balance_2030.csv": {
+   "description": "CAPRI's member states' farm balance of its outputs (O) at \"CUR\" (2030): gross production, seed and losses on farm, sim_ini_21730's DATA(MS, GROF | SEDF | LOSF, O, \"Y\"); a final product's seed and losses at the solution are in proportion to its production at \"CUR\" (reports/sol_simy.gms l. 1889-1898), a member state's accounts at producer prices (income I2c, capri_mod/income/eaa_ms.py). (tools/build/build_ms_farm_balance.py)",
+   "kind": "base",
+   "vintage": "2030 reference",
+   "domain": "supply",
+   "status": "live",
+   "vintage_exception": "CAPRI's simulation start sim_ini_21730: the member states' farm balance of its outputs at 2030 (\"CUR\")",
+   "rows": 1657,
+   "columns": 5,
+   "units": "U_1000t",
+   "read_by_model": [
+    "capri_mod/income/eaa_ms.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_ms_farm_balance (not in the trace yet)"
+   },
+   "catalogue_note": "tools/build/build_ms_farm_balance.py: GROF, SEDF and LOSF at \"Y\"; income I2c (not re-checked)"
+  },
   "capri_data/baselines/capri_greendeal_ref/1730/supply/plant_protection_capri_step_2030.csv": {
    "description": "CAPRI's two valuations of each crop's plant protection at its 2030 reference, per regional unit and model crop: the Green Deal step's (pesticide disaggregation off: p_linObjeCont, DATA(PLAP) x the member state's UVAP(PLAP)) and the reference's and PMP calibration's (the pesticide module's aggregates, Plantp_cost). For the comparison switches supply.greendeal_plap_crop_level_capri_step and supply.greendeal_plap_mix_capri_step (DEP-51). (tools/build/build_plant_protection_capri_step_2030.py)",
    "kind": "coefficients",
@@ -5337,6 +5394,16 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/END.csv": {
+   "description": "CAPRI END: the final products, whose seed and losses on farm the simulation report sets in proportion to production (reports/sol_simy.gms l. 1889-1898), as CAPRI's run built it, in CAPRI's set order",
+   "kind": "structure",
+   "rows": 81,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/EUGR.csv": {
    "description": "CAPRI EUGR: the EU groups of the tier 1 manure factors, west and east (envind/def_gascoeff.gms l. 122), in CAPRI's set order",
    "kind": "structure",
@@ -5607,6 +5674,16 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/IOE.csv": {
+   "description": "CAPRI IOE: the inputs and outputs of the economic accounts (sets.gms), as CAPRI's run built it, in CAPRI's set order",
+   "kind": "structure",
+   "rows": 92,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/IOP.csv": {
    "description": "CAPRI IOP: the inputs and outputs of the production activities (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
    "kind": "structure",
@@ -5682,6 +5759,16 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/MARR.csv": {
+   "description": "CAPRI MARR: the market model's products with a farm-gate price (arm/arm_sets.gms; the basic-price unit values, reports/sol_market.gms l. 1325-1337), as CAPRI's run built it, in CAPRI's set order",
+   "kind": "structure",
+   "rows": 59,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
    }
   },
   "capri_data/codes/capri/MCACT.csv": {
@@ -5890,6 +5977,16 @@
   },
   "capri_data/codes/capri/OYANI.csv": {
    "description": "CAPRI OYANI: the young animals as outputs (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "kind": "structure",
+   "rows": 8,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/O_TO_YANI.csv": {
+   "description": "CAPRI O_TO_YANI: each young animal produced (OYANI) and bought (IYANI) (sets.gms; reports/sol_simy.gms l. 793-795), as CAPRI's run built it",
    "kind": "structure",
    "rows": 8,
    "columns": 2,
@@ -6800,7 +6897,7 @@
   "capri_data/codes/results_items.csv": {
    "description": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows, \"=\": the row is CAPRI's code itself; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
    "kind": "structure",
-   "rows": 227,
+   "rows": 235,
    "columns": 8,
    "read_by_model": [
     "capri_mod/io_results.py"
@@ -12002,6 +12099,22 @@
     "builder": "build_npk_balance_2030 (not in the trace yet)"
    },
    "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx DATA(MS, 'UVAG', MANN | MANP | MANK, 'BAS') (the reference export) written and read back by tools/build/build_npk_balance_2030.py, kept so its input can be rebuilt without the reference export (docs/EXTERNAL_SOURCES.md) (not re-checked)"
+  },
+  "capri_data/sources/raw/capri/results/sim_ini_21730/ms_farm_balance_items.parquet": {
+   "description": "CAPRI's member states' farm balance of its outputs at \"BAS\" and \"Y\" and the unit values of its items at \"BAS\", sim_ini_21730's DATA(MS, GROF | SEDF | LOSF, O, BAS | Y) and DATA(MS, UVAG | UVAP | UVAB, IO, BAS) (the reference export), written and read back by tools/build/build_ms_farm_balance.py (ms_farm_balance_2017.csv, ms_farm_balance_2030.csv, ms_unit_values_2017.csv; income I2c)",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "supply",
+   "status": "source",
+   "vintage_exception": "CAPRI's simulation start sim_ini_21730: its data at \"BAS\" and at 2030 (\"Y\")",
+   "rows": 12552,
+   "columns": 5,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_ms_farm_balance (not in the trace yet)"
+   },
+   "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx DATA(MS, GROF | SEDF | LOSF, O, BAS | Y) and DATA(MS, UVAG | UVAP | UVAB, IO, BAS) (the reference export) written and read back by tools/build/build_ms_farm_balance.py, kept so its input can be rebuilt without the reference export (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/raw/capri/results/simini/sim_ini_21730/captrd_estimation_params.parquet": {
    "description": "CAPRI's p_carcassShare, p_startWgt and p_NCNC_CONT as in sim_ini_21730 (the raw dataset nuvolaTeam/capri-mod-raw, capri/results/simini/sim_ini_21730/), the records tools/build/build_captrd_estimation_params.py uses, kept so it rebuilds without the raw files; d1 only for p_NCNC_CONT.",

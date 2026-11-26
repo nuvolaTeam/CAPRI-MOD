@@ -514,6 +514,18 @@ def to_long(results: dict, point: str) -> pd.DataFrame:
         for rec in (pur.to_dict("records") if hasattr(pur, "to_dict") else (pur or [])):
             for c in ("NETF", "UVAP", "EAAP", "UVAB", "EAAB"):
                 add((point, "eaa", str(reg), "", c, str(rec["item"]), float(rec[c])))
+    known.add("eaa_ms")
+    for ms, e in (results.get("eaa_ms") or {}).items():
+        # CAPRI's DATA(MS, "GROF" / "NETF" / "UVAG" / "UVAP" / "UVAB" / "EAAG" / "EAAP" / "EAAB", IO) and the totals
+        # of the member states all of whose units are in the run (income I2c, capri_mod/income/eaa_ms.py); CAPRI's
+        # item codes
+        for rec in e["items"].to_dict("records") if hasattr(e["items"], "to_dict") else e["items"]:
+            for c in ("GROF", "NETF", "UVAG", "UVAP", "UVAB", "EAAG", "EAAP", "EAAB"):
+                if rec.get(c) is not None and rec[c] == rec[c]:
+                    add((point, "eaa_ms", str(ms), "", c, str(rec["item"]), float(rec[c])))
+        for col in ("EAAP", "EAAB"):
+            for c, v in (e.get(col) or {}).items():
+                add((point, "eaa_ms", str(ms), "", col, str(c), float(v)))
     known.add("feoga")
     fe = results.get("feoga")
     if fe is not None:
@@ -567,7 +579,7 @@ def to_long(results: dict, point: str) -> pd.DataFrame:
 
 
 #: the blocks whose items are in cols (CAPRI's market convention); the others' items are in rows
-ITEM_IN_COLS = ("market", "welfare", "welfare_supply", "policy", "eaa", "feoga", "welfare_products")
+ITEM_IN_COLS = ("market", "welfare", "welfare_supply", "policy", "eaa", "eaa_ms", "feoga", "welfare_products")
 #: the table's columns after with_capri_codes
 TABLE_COLUMNS = ("point", "block", "region", "dim5", "cols", "rows", "capri_region", "capri_dim5", "capri_cols",
                  "capri_rows", "unit", "value")
