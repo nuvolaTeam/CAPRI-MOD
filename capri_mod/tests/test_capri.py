@@ -355,7 +355,8 @@ def test_durum_wheat_takes_half_of_the_wheat_price_change_as_capri():
     assert PRICE_FOLLOWS_SHARE["DWHE"] == 0.5 and PRICE_FOLLOWS_SHARE["SUGB"] == 1.0
     import inspect
     from capri_mod import model as M
-    src = inspect.getsource(M)
+    from capri_mod.coupling import run_scenario as RS          # the scenario's run, moved from model.py (26 November)
+    src = inspect.getsource(M) + inspect.getsource(RS)
     # every site that sets a follower's signal from its commodity's takes the share
     assert src.count("PRICE_FOLLOWS_SHARE[") == 4
 
@@ -5482,7 +5483,7 @@ def test_input_costs_follow_yields_as_capri(monkeypatch):
 def _dying_in_fr10(region):
     """A regional-solve worker that dies on FR10 (test_dead_worker_does_not_hang_the_regional_solves)."""
     import os
-    from capri_mod.supply import supply_module as smod
+    from capri_mod.supply.regional_supply import region_loop as smod   # the pool's module (supply_module.py's part)
     if region == "FR100000":
         os._exit(1)
     return smod.__dict__["_par_solve_region_orig"](region)
@@ -5495,7 +5496,7 @@ def test_dead_worker_does_not_hang_the_regional_solves(monkeypatch):
     the parent process, with a warning, and the results equal a run in one process (26 October 2026)."""
     import os
     import warnings
-    from capri_mod.supply import supply_module as smod
+    from capri_mod.supply.regional_supply import region_loop as smod   # the pool's module (supply_module.py's part)
     from capri_mod.settings import override
     from capri_mod.model import CAPRIModel
     regs = ["DE110000", "DE120000", "FR100000", "FR720000"]

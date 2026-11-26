@@ -7,7 +7,7 @@
    "rows": 30,
    "columns": 3,
    "read_by_model": [
-    "capri_mod/supply/supply_module.py"
+    "capri_mod/supply/regional_supply/tables.py"
    ],
    "origin": {
     "nature": "capri",
@@ -470,7 +470,8 @@
    "units": "U_ratio",
    "read_by_model": [
     "capri_mod/income/income_module.py",
-    "capri_mod/supply/supply_module.py"
+    "capri_mod/supply/regional_supply/region_build.py",
+    "capri_mod/supply/regional_supply/tables.py"
    ],
    "origin": {
     "nature": "capri",
@@ -488,7 +489,7 @@
    "units": "U_ratio",
    "read_by_model": [
     "capri_mod/environmental/nitrogen.py",
-    "capri_mod/supply/supply_module.py"
+    "capri_mod/supply/regional_supply/tables.py"
    ],
    "origin": {
     "nature": "capri",
@@ -3049,7 +3050,7 @@
    "columns": 3,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/projection/equations/load_base_data_and_trends.py"
+    "capri_mod/projection/equations/year_data/residues.py"
    ],
    "origin": {
     "nature": "capri",
@@ -3191,7 +3192,7 @@
    "columns": 2,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/supply/supply_module.py"
+    "capri_mod/supply/regional_supply/net_revenues.py"
    ],
    "origin": {
     "nature": "capri",
@@ -3832,7 +3833,7 @@
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/supply/supply_module.py"
+    "capri_mod/supply/regional_supply/tables.py"
    ],
    "origin": {
     "nature": "capri",
@@ -3868,7 +3869,7 @@
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/supply/supply_module.py"
+    "capri_mod/supply/regional_supply/tables.py"
    ],
    "origin": {
     "nature": "capri",
@@ -3961,7 +3962,7 @@
    "columns": 3,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/supply/supply_module.py"
+    "capri_mod/supply/regional_supply/tables.py"
    ],
    "origin": {
     "nature": "capri",
@@ -4163,7 +4164,7 @@
    "units": "U_1000EuPerTon, U_1000EuPerTonPerTon, U_1000t, U_1000tPerEuPerTon, U_EuPerTon, U_Ton, U_TonPer1000EuPerTon",
    "read_by_model": [
     "capri_mod/coupling/manure.py",
-    "capri_mod/supply/supply_module.py"
+    "capri_mod/supply/regional_supply/tables.py"
    ],
    "origin": {
     "nature": "capri",
@@ -4246,7 +4247,7 @@
    "columns": 2,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/supply/supply_module.py"
+    "capri_mod/supply/regional_supply/regional_model.py"
    ],
    "origin": {
     "nature": "capri",
@@ -4985,7 +4986,7 @@
    "units": "to be established (value_units: open)",
    "read_by_model": [
     "capri_mod/data/loaders.py",
-    "capri_mod/supply/supply_module.py"
+    "capri_mod/supply/regional_supply/tables.py"
    ],
    "origin": {
     "nature": "capri",
@@ -5024,7 +5025,7 @@
    "units": "to be established (value_units: open)",
    "read_by_model": [
     "capri_mod/data/loaders.py",
-    "capri_mod/supply/supply_module.py"
+    "capri_mod/supply/regional_supply/tables.py"
    ],
    "origin": {
     "nature": "capri",

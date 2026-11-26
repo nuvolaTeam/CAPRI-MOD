@@ -10,8 +10,12 @@ from capri_mod.coupling.price_step import PriceStepBlock  # noqa: F401
 from capri_mod.coupling.manure import ManureBlock  # noqa: F401
 from capri_mod.coupling.bridge import BridgeBlock  # noqa: F401
 from capri_mod.coupling.reporting import ReportingBlock  # noqa: F401
+# moved from model.py on 26 November 2026 (the refactor of the large modules)
+from capri_mod.coupling.run_scenario import RunScenarioBlock  # noqa: F401
+from capri_mod.coupling.result_tables import ResultTablesBlock  # noqa: F401
 
-MODULES = ("hessian", "feed", "young_animals", "price_step", "manure", "bridge", "reporting",)
+MODULES = ("hessian", "feed", "young_animals", "price_step", "manure", "bridge", "reporting", "run_scenario",
+           "result_tables")
 
 
 def inject(names: dict) -> None:

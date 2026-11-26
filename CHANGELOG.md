@@ -642,6 +642,24 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   SREV), the market crops' income now CAPRI's within 5%; the baseline's MGVA 40,034 against CAPRI's 38,358, the fodder
   activities 1,684 above CAPRI's (KNOWN_ISSUES K213, open). K211 stays open for the straw balance alone, slack at
   CAPRI's reference. Tests: test_eaa.py (2), test_water_income.py (1, slow).
+- **The split of the large modules (26 November 2026; the plan of 25 November, the project lead: modules over 1,000
+  lines into parts with names a reader understands):** each large file stays as the main file, slim, with its entry
+  points, and re-exports every name its parts define, so no import elsewhere changes; the code moved as it was (the
+  classes' methods into mixin blocks the class is composed of, ahead of its other bases, so the methods resolve as
+  before). supply/supply_module.py (3,690 lines -> 256) into supply/regional_supply/ (tables, pmp_calibrator,
+  regional_model, net_revenues, constraints, solve, region_build, n_balances, region_loop); supply/capri_regional_nlp.py
+  (2,096 -> 284) into supply/regional_nlp/ (solver_options, feed_terms, problem, fertilisation, abatement, calibration,
+  response; the switches other modules set, KKT_MODE and SOLVE_PROBE, and the solve stay in the main file);
+  feed/equations/req_or_man_fnc_req.py (2,739 -> 84) into feed/equations/requirements/ and req_or_man_fnc.py (1,949 ->
+  101) into feed/equations/manure_output/ (by animal group, in the GAMS file's order); the CAPTRD equation modules
+  national_supports.py (1,837 lines), biofuel_trends.py (1,651), fix_est.py (1,508) and load_aglink2023dgAgri.py (1,488) into national_support/,
+  biofuel_trend/, estimation_bounds/ and aglink2023/; projection/equations/load_base_data_and_trends.py (1,442) into
+  year_data/; model.py (1,722 -> 449) into coupling/run_scenario.py (CAPRIModel._run_scenario, 1,198 lines: one
+  function, its steps not yet apart) and coupling/result_tables.py. The parts get their parent module's names as the
+  earlier blocks do (capri_mod/utils/mixins.py inject_names, coupling/__init__.py inject); the code-number
+  classification follows the code (04_code_data_status.sql). Checked: a mini-EU Green Deal pair before and after
+  equal to the last digit (every number of the results equal; only the run's metadata, its times, differ); one file-relative path
+  in the moved year_data/residues.py corrected for the deeper folder (test_feed_chain); the tests that read the modules' source read the parts too.
 - **The fodder at the solution's dual (26 November 2026, the project lead: "switch it to CAPRI's form"; KNOWN_ISSUES
   K213, register DEP-54):** PSHW, the fodder crops' output value per t fed, is the fodder balance's dual at the solution
   (SupplyResult.fodder_duals) in the baseline and in a scenario, as CAPRI's (reports/sol_simy.gms l. 737-757); the fed

@@ -130,7 +130,9 @@ def test_every_item_the_supply_module_writes_is_declared():
     import dataclasses
     import re
     import capri_mod.supply.supply_module as SM
-    src = Path(SM.__file__).read_text()
+    # the supply module and its parts (capri_mod/supply/regional_supply, the refactor of 26 November 2026)
+    src = "\n".join(q.read_text() for q in [Path(SM.__file__)]
+                    + sorted((Path(SM.__file__).parent / "regional_supply").glob("*.py")))
     written = set(re.findall(r"(?<![.\w])(?:result|res)\.([a-z_][a-z0-9_]*)\s*=(?!=)", src))
     fields = {f.name for f in dataclasses.fields(SupplyResult)}
     it = IO.results_items()

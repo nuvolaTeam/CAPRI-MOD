@@ -41,7 +41,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [],
     "checks": [],
@@ -22761,7 +22761,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [
      "build_legsh_option"
@@ -25799,7 +25799,7 @@
    "read_by": {
     "model": [
      "capri_mod/coupling/manure.py",
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [],
     "checks": [],
@@ -27351,7 +27351,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/regional_model.py"
     ],
     "builders": [],
     "checks": [],
@@ -28454,7 +28454,8 @@
    "read_by": {
     "model": [
      "capri_mod/income/income_module.py",
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/region_build.py",
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [],
     "checks": [],
@@ -28585,7 +28586,7 @@
    "read_by": {
     "model": [
      "capri_mod/environmental/nitrogen.py",
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [],
     "checks": [],
@@ -56408,7 +56409,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/projection/equations/load_base_data_and_trends.py"
+     "capri_mod/projection/equations/year_data/residues.py"
     ],
     "builders": [],
     "checks": [
@@ -58206,7 +58207,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/net_revenues.py"
     ],
     "builders": [],
     "checks": [],
@@ -63611,7 +63612,7 @@
    ],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [
      "build_young_animals_2030"
@@ -63779,7 +63780,7 @@
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py",
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [],
     "checks": [],
@@ -63949,7 +63950,7 @@
    ],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [
      "build_young_animals_2030"
@@ -64117,7 +64118,7 @@
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py",
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [],
     "checks": [],
