@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](dev/KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (21)
+## Open (20)
 
 | # | Issue | Status |
 |---|---|---|
@@ -31,14 +31,17 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K196](#k196) | The Green Deal's N-surplus dual is below CAPRI's (CAPRI's recovered from its own results): median 0.856 of CAPRI's in the standing check at 9867411 (0.89 at bb3b592), 0.83 at CAPRI's prices; the suckler cows' and the technology shift's remaining gaps follow it | open (21 November 2026) |
 | [K198](#k198) | The assignments refactor's findings for the main line (its inventory of the CAPRI statements the model ports or cites, blocks A0-A6): porting differences in the market supply Hessian, the price transmission, the stop rule, the welfare, the premiums, the Green Deal's regional rules and the accounts, sorted by where they act, not measured; A0's 14 wrong line citations corrected; from the phase's runs, a measured and a cached Hessian moving a run's last digits (1e-5 after the scenario; diagnosed and fixed: the manure value left by the last shock), the thread oversubscription (fixed) and the Hessian step's log (done) | open (updated 24 November 2026) |
 | [K206](#k206) | The ported baseline feed calibration ends at a slightly worse local optimum than CAPRI's in five countries (PT, TUR, BG, ES, CZ); every coefficient within 1% of CAPRI's | open (25 November 2026) |
-| [K210](#k210) | Croatia's animals have no premium in the model: CAPRI's 2017 data give them none, and the model's 2030 animal premiums are the 2017 ones moved by the projection; CAPRI's 2030 reference pays them 23.3 EUR million (2017 money) | open (26 November 2026): CAPRI's 2030 premiums per head proposed |
-| [K209](#k209) | The Green Deal's yield changes (the pesticide loss, the organic yield gap) enter the crops' margins at the data's producer price, the rest of the revenue at the solve's price | open (26 November 2026): CAPRI's form proposed, not applied |
-| [K207](#k207) | CAPRI's other animals (OANI) have no level in the model, so their income is missing: 1,305 of the 1,704 EUR million by which the mini-EU baseline's income is below CAPRI's 2030 reference | open (26 November 2026): the form of the fix is the project lead's |
+| [K211](#k211) | The model has no straw balance: CAPRI values the straw at zero at its 2030 reference too (its straw balance slack, the dual 0 in every region), so only a scenario in which the straw becomes scarce would differ | open (narrowed 26 November 2026): the balance's port, if a scenario needs it |
+| [K213](#k213) | The fodder activities' income is above CAPRI's at the 2030 reference (mini-EU baseline: other fodder, grassland and fodder maize 1,684 EUR million above, 4.4% of the income), found by K212's check | open (26 November 2026): to trace |
 
-## Resolved (188)
+## Resolved (192)
 
 | # | Issue | Status |
 |---|---|---|
+| [K212](#k212) | The crops' residue nutrients (MANN, MANP, MANK) were not in their output value: CAPRI's crop TOOU values them at UVAG (its secondary revenue SREV, first read as the straw's) | fixed (26 November 2026): the residues at the solve's yields at the member state's unit value in the crops' TOOU, as CAPRI |
+| [K210](#k210) | Croatia's and Sweden's animals and Greece's sheep and goats for fattening had no 2030 premium: CAPRI's 2017 data pay them none, and the model's 2030 animal premiums were the 2017 ones x CAPRI's 2030/2017 ratio | fixed (26 November 2026): CAPRI's 2030 premium per model head where the 2017 coefficient is empty |
+| [K209](#k209) | The Green Deal's yield changes (the pesticide loss, the organic yield gap) entered the crops' margins at the data's producer price, the rest of the revenue at the solve's price | fixed (26 November 2026): at the solve's price, as CAPRI |
+| [K207](#k207) | CAPRI's other animals (OANI) had no level in the model, so their income was missing (1,305 of the 1,704 EUR million by which the mini-EU baseline's income was below CAPRI's) | fixed (26 November 2026): OANI at CAPRI's level, as CAPRI (the straw: K211; the crops' residue nutrients: K212) |
 | [K208](#k208) | The income at the solution took the regional model's net revenues after the solve had restored them to their state before it: the solve's prices and its changes of the margins were missing from a scenario's income | fixed (26 November 2026, before income I1 reached dev): the solve's own net revenues (res.nr_solve) |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | closed (17 November 2026): CAPRI's stop rule settles it (young-animal imbalance 0.0004); a 1e-05 price change leaves the beef price unchanged |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | fixed (17 November 2026): they converge on the full EU (14 iterations) and are on by default |
@@ -4366,7 +4369,7 @@ earlier baseline, p_fedtrmHasIniPoint) is not known; the material has none.
   (the module's departure). A multi-start, as the regional models' warm and jump checks (DEP-18), would be beyond CAPRI.
 
 <a id="k207"></a>
-### K207: CAPRI's other animals (OANI) are not in the model's income (found 26 November 2026)
+### K207: CAPRI's other animals (OANI) are not in the model's income (found and fixed 26 November 2026)
 
 Found by tracing income I1's level check per activity (the mini-EU baseline of 65e1e97, SupplyResult.income's MGVA per
 unit x level, against CAPRI's 2030 reference at its solution: dataOut with the empty second key, MGVA x LEVL per
@@ -4387,13 +4390,11 @@ below CAPRI's EAAG MGVA (36,654 against 38,358):
 - 35: the rest, the activities' net. Within it the crops' margins are lower (soft wheat -200, barley -126, maize -116,
   rape -69; FR24 soft wheat 440 EUR per ha against CAPRI's 527) and the fodder crops' (other fodder +335, fodder maize
   +104) and animals' higher (dairy cows +136, fattening pigs +79, calves +59). The crops' gap is about CAPRI's
-  secondary product revenue (SREV = TOOU - MREV, reports/aggreg_res_data.gms l. 281-282), for the cereals the straw
-  (STRA at its unit value; FR24 soft wheat 105 EUR per ha at 2030, 5.6 t of straw): over the 20 units soft wheat 192,
-  maize 113, barley 110, rape 72 EUR million. The model values the straw at zero on both sides, the crops' output and
-  the animals' feed (FSTR's report price 0; no straw balance, CAPRI's is slack), an internal flow like the fodder,
-  whose value the model keeps at the same price on both sides (Denmark's other fodder 38.9 EUR/t as a crop output and
-  as a feed). So the split by activity differs from CAPRI's, the region's total much less. The items behind the split
-  are income I2's.
+  secondary product revenue (SREV = TOOU - MREV, reports/aggreg_res_data.gms l. 281-282): over the 20 units soft wheat
+  192, maize 113, barley 110, rape 72 EUR million. It was first read here as the straw's value; it is the crop
+  residues' nutrients (MANN, MANP, MANK at their unit values: K212), CAPRI's straw being worth zero at its 2030
+  reference (K211). So the split by activity differs from CAPRI's, the region's total much less. The items behind the
+  split are income I2's.
 
 With OANI and the options' cost the 20 units' income would be 0.998 of CAPRI's (38,270 against 38,358).
 
@@ -4406,13 +4407,127 @@ Two forms of the fix:
   to be registered. A scenario moves OANI's income in CAPRI only through its input prices (its level is fixed); not
   checked on a CAPRI scenario run.
 
+**Fixed** with (a) (the project lead, 26 November 2026: "as capri"): OANI's level in the herd table (animal_numbers.csv,
+CAPRI's 2017 LEVL from CAPREG's dumps, tools/build/build_capri_base.py; the 2030 runs move it by the trajectory's
+herds factor, CAPRI's 2030 over 2017 LEVL, Denmark 0.883); the supply model holds it fixed (the fixed rows of
+FIXED_ACTIVITIES, as before at zero) with its revenue per unit as YILD x UVAG (SupplyModule.OTHER_ANIMALS: CAPRI's
+OANI has one output; no TOOU or MREV table), its input cost and premium per unit from the crop-style tables, no feed,
+manure or emissions (none of those tables has OANI), its output in gross_output (level x YILD). The producer surplus
+keeps the fixed activities' columns out of PMPLevl (CAPRI has no PMP terms for FACT; register DEP-55). The straw is
+K211, the crops' residue nutrients K212.
+
+Measured on the mini-EU Green Deal pair (20 units, EUR million, 2017 money; the run of the fix against 3e5eced's):
+OANI's income 1,304.4 at the baseline (Denmark 555.1, IR01 121.0, FI19 116.6, IT40 107.4, PT18 77.4, NL22 76.7),
+1,303.7 in the scenario; the baseline's MGVA 37,958 (36,654 before; CAPRI's 38,358), its other activities' levels
+unchanged. The baseline's PMPLevl +1,291 (54,491 to 55,782) and agProdSurplus +2,595: the other fixed activities'
+columns' terms (OCRO, OIND, NURS, FLOW, OOIL) now kept apart in obj_fixed, whose 2,595 are those 1,291 and OANI's
+margin. The Green Deal's changes: MGVA -1,524.4 (-1,519.7: K209 and OANI's -0.7), PMPLevl -41,207 (-41,215),
+agProdSurplus -42,707 (-42,710); the account by item's MGVA within 0.026 of the activity-based (0.010 at most per
+unit).
+
 - **Effect:** the reported income's level (3.4% of the mini-EU baseline's), the welfare table's MGVA and ProfitAgr; not
   the model's solution
 - **In 9t:** -
-- **Status:** **open**: the form of the fix, (a) or (b), is the project lead's
+- **Status:** **fixed** (the straw: K211; the crops' residue nutrients: K212)
+
+<a id="k213"></a>
+### K213: The fodder activities' income above CAPRI's (found 26 November 2026)
+
+Found by K212's check of the income by activity against CAPRI's 2030 reference (dataOut with the empty second key, MGVA
+x LEVL, deflated by 1.019^13; a check only), on the mini-EU baseline: over the 20 units other fodder 444.6 EUR million
+against CAPRI's -208.3, intensive grassland 273.0 against -310.4, extensive grassland 473.6 against 218.7, fodder maize
+161.4 against -31.3, 1,684 together; with the crops' residues in both (K212). In Denmark per ha (2017 money): other
+fodder 426.5 against -417.4 (CAPRI's TOOU 707.6, TOIN 1,359.9), intensive grassland -46.6 against -603.8 (578.2,
+1,419.7), extensive -52.1 against -292.8 (245.1, 775.6), fodder maize -22.7 against -497.8 (1,053.4, 1,796.2). The
+output is not the gap's source where checked: Denmark's other fodder at 38.9 EUR/t in the model is CAPRI's UVAG(OFAR,
+2030) of its baseline run (49.69 / 1.019^13). Income I2a's account showed the fodder crops' outputs above CAPRI's EAAG
+(fodder maize 753 against 560, other fodder 1,145 against 486). To trace: the fodder crops' outputs per ha and their
+inputs (TOIN) against CAPRI's.
+
+- **Effect:** the income by activity and the region's income level (4.4% of the mini-EU baseline's), not the solution
+- **In 9t:** not checked
+- **Status:** **open**: to trace
+
+<a id="k211"></a>
+### K211: The straw: no straw balance in the model (found 26 November 2026; split from K207; narrowed the same day)
+
+CAPRI values the straw at the solution both ways, in its activities' income and in its accounts: a crop's straw output
+(DATA(RU, crop, "STRA"), kg per ha) at UVAG(STRA) and the herds' fed straw (FSTR) at UVAG(FSTR) = UVAG(STRA) / (1 -
+p_onFarmShare) (reports/sol_simy.gms l. 753-757; reports/calc_inc_indic.gms TOOU and TOIN), with
+- UVAG(STRA) at the solution = PSHW(STRA) x (1 - p_onFarmShare) + FODDMARKUP (l. 753): PSHW the dual of the
+  supply model's straw balance (supply_model.gms SUPBAL_ with the straw fed and the loss variable v_lossQuant,
+  FEDUSE_ l. 800), FODDMARKUP the baseline run's UVAG less its PSHW x (1 - p_onFarmShare), stored by CAPRI's baseline
+  run (l. 747-748, results/BASELINE/FODDMARKUP_*.gdx);
+- p_onFarmShare(RS, STRA) = 0.9 x LOSF / GROF of the straw at the simulation year's data (supply/pmp.gms l. 41-49).
+
+CAPRI's 2030 data, a check only (its baseline run's FODDMARKUP_21730<CC>defaulta.gdx, 35 countries, 250 regions, with
+the DATA unloaded beside FODDMARKUP at l. 748; the project lead's upload of 26 November 2026): the straw balance's
+dual PSHW(STRA, "2030") is 0 in every region and FODDMARKUP(STRA) at most 1.6e-4 EUR/t, so UVAG(STRA, "2030") is at
+most 2e-4 EUR/t and UVAG(FSTR) at most 0.003 EUR/t (Denmark: 7,226 thousand t of straw, 1,048 fed); the 2030
+reference's export has no UVAG row of straw (zero). So CAPRI's straw is worth nothing at its 2030 reference, as in the
+model (the rations' FSTR at a report price of 0, no straw output value). The crops' secondary revenue, first read as
+the straw's (K207's trace), is their residues' nutrients (K212). The other fodders' markups are not zero (median
+GRAS 7.2, MAIF 4.4, OFAR 15.8, ROOF 15.7 EUR/t).
+
+What remains: the model has no straw balance (the crops' straw against the fed straw and the loss quantity). At
+CAPRI's reference it is slack in every region; its dual, and so the straw's value, becomes positive only in a scenario
+where the straw becomes scarce. Not checked on CAPRI's scenario runs.
+
+- **Effect:** none at the 2030 reference; a scenario in which the straw becomes scarce
+- **In 9t:** not checked
+- **Status:** **open** (narrowed): the straw balance's port, if a scenario needs it
+
+<a id="k212"></a>
+### K212: The crops' residue nutrients not in their output value (found and fixed 26 November 2026)
+
+Found with the straw's 2030 data (K211). CAPRI's crops list among their outputs the nutrients of their residues
+(global/fromimpact/sets.gms PACT_TO_O l. 2253ff: SWHE.(SWHE, STRA, MANN, MANP, MANK), and RAPE.(RAPE, MANN, MANP,
+MANK) without straw), and an activity's TOOU values each output at its UVAG (reports/calc_inc_indic.gms l. 30-31); the
+secondary revenue SREV = TOOU - MREV (reports/aggreg_res_data.gms l. 281-282) is, for the crops, the residues'
+nutrients: at the 2030 reference FR24's soft wheat 41.14 kg N x 631.55 + 16.56 kg P x 1,353.57 + 99.35 kg K x 570.25
+EUR/t = 105.05 EUR per ha, its SREV 105.05; Denmark's 105.14, its SREV 105.14; FR24's rape 103.6. CAPRI's crops'
+fertiliser inputs hold about the whole need (FR24's soft wheat NITF 167.7 kg against the model's need of 171.8, of
+which 41.1 the residues; npk_crop_coefs_2030.csv), as the model's TOIN at the market year (the NPK need at the mineral
+unit value, DATA_TOIN_Y). The model does not book the residues as an output, so the crops' income is below CAPRI's by
+about their SREV (K207's trace: soft wheat 192, maize 113, barley 110, rape 72 EUR million over the 20 units). The
+animals' revenue per head is CAPRI's TOOU per head (SupplyModule._output_items), whose outputs hold their manure's
+nutrients (PACT_TO_O DCOL.(COMI, COMF, BEEF, YCAM, YCAF, MANN, MANP, MANK)).
+
+CAPRI's unit values of the nutrients' outputs: MANN, MANP and MANK are not in the market part (NOT IOE), so at the
+simulation year their UVAG is the member state's base year value x p_inflationFactor (capmod/inflation_and_trend_
+interpolation.gms l. 22-23, 67-72): FR24's MANN 631.55 EUR/t at 2030 is France's sim_ini_21730 DATA(FR000000,
+"UVAG", "MANN", "BAS") 494.48 x 1.019^13, Denmark's 487.20 its 381.46 x 1.019^13. (The fertiliser distribution
+module, fert/ferttrm_cor.gms l. 1775-1780, values them at the mineral fertiliser's price of the nutrient used over the
+output; the simulation's report, reports/sol_simy.gms l. 2090-2092, has that statement commented out.)
+
+**Fixed** (the project lead, 26 November 2026: "do as capri does"): the crop's residues' nutrients per ha at the
+solution, the deliveries DATA(crop, MANN | MANP | MANK) the regional model's nutrient balance takes at the solve's
+yields (supply/fertilisation.py _npk_spec: the residue pool's per ha, unscaled, or a permanent crop's own; recorded in
+RegionalResults.last_fout, the technology mix column's T1 - T2 in last_fout_mix), at the member state's unit value
+(npk_region_2030.csv fout_uvag_eur_t, written by tools/build/build_npk_balance_2030.py from sim_ini_21730's base year
+values, kept in capri_data/sources/raw/capri/results/sim_ini_21730/fout_uvag_bas.parquet; coupling/equations/
+inflation_and_trend_interpolation.py DATA_UVAG_IO_SIMY), are outputs of the crop's TOOU in the income
+(coupling/equations/calc_inc_indic.py DATA_TOOU_FOUT in DATA_MGVA; IncomeDistributionModule.crop_residue_nutrients)
+and the items MANN, MANP, MANK of the account by item (income/eaa.py). Not in the solution: CAPRI's supply objective
+sells none of them (OM_OBJE, global/fromimpact/sets.gms l. 2197-2210). Tests: test_eaa.py (2), test_water_income.py
+(1, slow).
+Measured on the mini-EU Green Deal pair (the run of the fix against K210's; EUR million, 2017 money): the solution
+identical; the residues' value 2,051.5 at the baseline (MANN 833.2, MANP 587.2, MANK 631.2) and 1,726.4 in the scenario;
+at the baseline soft wheat 192.3, maize 113.1, barley 109.7 and rape 71.6 (K207's trace of CAPRI's SREV: 192, 113, 110,
+72), grassland 863.5 (intensive 601.9, extensive 261.6), other fodder 318.1, fodder maize 89.1. Against CAPRI's 2030
+reference by activity (MGVA x LEVL, a check only) the market crops are now CAPRI's within 5% (soft wheat 1,313.6 against
+1,321.6, barley 347.6 against 364.0, maize 699.7 against 702.2, rape 569.5 against 566.7). The baseline's MGVA 40,034
+against CAPRI's 38,358 (1.044; 37,983 before): the fodder activities are above CAPRI's by 1,684 (K213, found by this
+check). The account by item equals the activity-based income within 0.026 (0.010 per unit at most). The Green Deal's
+change of MGVA -1,852 (-1,527 before): the residues fall by 325 with the scenario's yields and the move from intensive
+to extensive grassland.
+
+- **Effect:** the income by crop and the region's income level, not the solution
+- **In 9t:** not checked
+- **Status:** **fixed**
 
 <a id="k210"></a>
-### K210: Croatia's animals without premiums (found 26 November 2026)
+### K210: Croatia's animals without premiums (found and fixed 26 November 2026)
 
 Found by income I4's check of the premium outlays per product against CAPRI's 2030 reference (dataOut FEOP, a check
 only). For Croatia, one unit in the mini-EU, the crops' outlays are CAPRI's within 0.05% (but other crops: K138), the
@@ -4421,17 +4536,30 @@ milk 1.5, sheep and goat meat 1.3 and young cows 0.6, 23.3 EUR million in 2017 m
 249.1 (the model's 221.2; other crops' 4.7 are K138's). The model's animal premiums per
 head are CAPRI's 2017 PRME per model head (livestock_premium_coef.csv) moved by the projection's factors
 (projection/prices.py); Croatia's 2017 row is empty (no animal premium in CAPRI's 2017 data), so its 2030 animal premiums
-are zero; the crops take CAPRI's 2030 premiums at the 2030 market year. Croatia is the only unit with an empty row.
-Proposed (CAPRI's): at the 2030 market year the animals' premiums per head from CAPRI's 2030 reference, as the crops';
-it changes the animals' margins in Croatia, so the supply solution, and the income's PRME.
+are zero; the crops take CAPRI's 2030 premiums at the 2030 market year. Croatia is the only unit with an empty row of
+the mini-EU.
 
-- **Effect:** Croatia's animal margins, supply and income at 2030 (its PRME 9% below CAPRI's by the animals); the
-  premium outlays
+**Fixed** (the project lead, 26 November 2026: "OK"): the trajectory builder writes CAPRI's 2030 premium per model head
+itself (capri_livestock_premium_2030.csv: the members' LEVL 2017 x PRME 2030 over the model's 2017 heads, 2017 money;
+tools/build/build_price_trajectory_2030.py, its other outputs byte-identical), and the projection takes it where the
+2017 coefficient is empty or zero (projection/prices.py; test_premium_baseline_2030.py). Where both exist it equals the
+2017 coefficient x the ratio within 0.31% (Finland's calves, whose 2017 coefficient comes from the res_17 dumps;
+elsewhere within 1e-12). The table found the same case beyond Croatia, 48 cells of the 250 regions: Sweden's cattle
+(its 2017 rows empty too; CAPRI's 2030 pays its dairy and suckler cows 65.6 EUR per head, its bulls 134 to 232) and
+Greece's sheep and goats for fattening (SHGF, 2.84 EUR per head in its 13 units).
+Measured on the mini-EU Green Deal pair (the run of the fix against K207's, EUR million, 2017 money): at the baseline
+Croatia's premiums +23.2 (its PRME 244.4) and EL14's +1.2 (its SHGF), the levels unchanged (the regional models are
+calibrated at the baseline); Croatia's premium outlays 244.4 against CAPRI's 249.1 (221.2 before): cow milk 11.99 and
+suckler calves 5.04 as CAPRI's, beef 2.79 against 2.81, young cows 0.59 against 0.60, the rest other crops (K138); in
+the scenario Croatia's suckler cows +1.6%, its sheep and goats +0.5%, its income +21.1. Sweden is not in the mini-EU.
+
+- **Effect:** the animal margins, supply and income at 2030 of Croatia, Sweden and Greece's SHGF (Croatia's PRME 9%
+  below CAPRI's by the animals); the premium outlays
 - **In 9t:** not checked
-- **Status:** **open**: CAPRI's 2030 premiums per head proposed
+- **Status:** **fixed**
 
 <a id="k209"></a>
-### K209: The Green Deal's yield changes valued at the data's price in the margins (found 26 November 2026)
+### K209: The Green Deal's yield changes valued at the data's price in the margins (found and fixed 26 November 2026)
 
 Found while itemising the margins for income I2 (SupplyModule._nr_item). A crop's revenue per ha is formed at the
 solve's price (supply_module._compute_net_revenues: the producer price x (1 + the transmitted price change) x the
@@ -4440,13 +4568,19 @@ yield), and so is the yield's price response (policy.apply_yield_price_response)
 by the data's producer price (data.producer_prices) x the yield change. CAPRI values the yield, its changes included,
 at the solution's price (its LINEAR_ takes the price times the yield coefficient of the solve). The margin's error is
 the price change x the yield change, a second-order term: for a crop whose price rises by 10% under a yield change of
--5%, 0.5% of its revenue per ha. Proposed: the two changes at the solve's price (the price the revenue takes), which
-is CAPRI's form; it changes the supply solution slightly, so not applied with the income's work.
+-5%, 0.5% of its revenue per ha.
+
+**Fixed** (the project lead, 26 November 2026: "as capri"): the two changes at the solve's price, the price the
+revenue takes (SupplyModule._solve_prices; test_capri.py test_the_green_deal_yield_changes_at_the_solves_price).
+Measured on the mini-EU Green Deal pair (the run of the fix, with K207's): the baseline unchanged (the yield changes
+are the scenario's); in the scenario 601 cells of the activity levels moved, the largest IR01's potatoes by -1.2%, the
+others within 0.34%; the market's price changes by at most 0.7% of their size (sunflower seed's +0.9% by 0.006
+points); the Green Deal's change of MGVA -4.1 EUR million (of -1,524.4).
 
 - **Effect:** the crops' margins in a scenario with the organic or pesticide target and price changes, so the supply
   solution and the income; second order
 - **In 9t:** not checked
-- **Status:** **open**: CAPRI's form proposed
+- **Status:** **fixed**
 
 <a id="k208"></a>
 ### K208: The income at the solution took the net revenues restored after the solve (found and fixed 26 November 2026)

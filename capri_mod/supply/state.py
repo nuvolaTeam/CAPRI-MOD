@@ -204,6 +204,9 @@ class RegionalResults(_Slots):
         "last_npk",           # the fertiliser outputs by nutrient
         "last_npk_cres",      # {nutrient: [(column, t per unit)]}: the residue pool's coefficients of the last block
         "last_npk_cres_yields",  # {crop: (base, current, scenario yield)}: where the pool's N factors moved (K189)
+        "last_fout",          # {crop: {MANN | MANP | MANK: (kg per ha, EUR per t)}}: the crops' residues' nutrients at the
+                              # last block's yields and their unit value (the income's TOOU, KNOWN_ISSUES K212)
+        "last_fout_mix",      # {crop: {MANN | MANP | MANK: kg}}: the technology mix's residues T1 - T2 per ha moved
         "n_solves",           # solves of the region (a counter)
         "nlp_fallback_log",   # the NLP form's fallbacks of the run (metadata nlp_fallback)
         "nlp_jump",           # the jump check's record (outer history's jump_check)

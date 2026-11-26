@@ -1,9 +1,12 @@
 """CAPRI's gross account by item at a region's solution (income I2; capri_mod/income/eaa.py, reports/sol_simy.gms l.
 685-687, 2549-2566, 2600-2615), by hand."""
+from pathlib import Path
 from types import SimpleNamespace
 
 import pandas as pd
 import pytest
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def _region():
@@ -116,3 +119,50 @@ def test_the_account_statements():
     assert DATA_EAAG_IO(g, 135.6) == pytest.approx(96.954)      # EUR million
     assert DATA_GEAAC_TOOU([1.0, 2.5]) == 3.5 and DATA_GEAAC_TOIN([]) == 0.0
     assert DATA_EAAG_MGVA(10.0, 4.0, 1.5) == 7.5
+
+
+def test_the_crops_residue_nutrients_in_the_account():
+    """K212: a crop's residues' nutrients (MANN, MANP, MANK; CAPRI's PACT_TO_O) are outputs in quantity at the member
+    state's unit value, the technology mix column's T1 - T2 of them on the area moved; I1's MGVA holds the same
+    (calc_inc_indic.py DATA_TOOU_FOUT), so the account still equals it."""
+    from capri_mod.coupling.equations.calc_inc_indic import DATA_TOOU_FOUT
+    from capri_mod.income.eaa import eaag_items
+    m, res, ip = _region()
+    fo = {"SWHE": {"MANN": (40.0, 500.0), "MANK": (100.0, 450.0)}}
+    fom = {"SWHE": {"MANN": 2.0}}
+    m.res = SimpleNamespace(last_fout=fo, last_fout_mix=fom)
+    t_ha = DATA_TOOU_FOUT([40.0, 100.0], [500.0, 450.0])
+    assert t_ha == pytest.approx(65.0)                                   # EUR per ha
+    ip["MGVA_act"]["SWHE"] += t_ha
+    ip["MGVA"] += t_ha * 100 + DATA_TOOU_FOUT([2.0], [500.0]) * 5
+    e = eaag_items("FR810000", res, SimpleNamespace(_models={"FR810000": m}), ip=ip)
+    it = e["items"].set_index(["side", "item"])
+    assert it.loc[("O", "MANN"), "GROF"] == pytest.approx(0.001 * (40.0 * 100 + 2.0 * 5))     # 1000 t
+    assert it.loc[("O", "MANN"), "UVAG"] == 500.0
+    assert it.loc[("O", "MANK"), "EAAG"] == pytest.approx(100.0 * 100 * 450.0 / 1e6)
+    assert abs(e["DIFF"]) < 1e-12 and abs(e["DIFF_act"]["SWHE"]) < 1e-12
+
+
+def test_the_residues_unit_value_and_value():
+    """CAPRI's unit value of the nutrients' outputs at 2030 is the member state's base year one x p_inflationFactor
+    (capmod/inflation_and_trend_interpolation.gms l. 22-23, 67-72): in the model's 2017 money its base year value
+    (npk_region_2030.csv fout_uvag_eur_t, sim_ini_21730's DATA(FR000000, "UVAG", MANN, "BAS") for FR24); with the
+    crop's residues per ha it gives the crop's secondary revenue, checked against CAPRI's 2030 reference for FR24's
+    soft wheat (dataOut UVAG MANN 631.55, MANP 1,353.57, MANK 570.25 EUR/t; SREV 105.05 EUR per ha; a check only)."""
+    from capri_mod.coupling.equations.calc_inc_indic import DATA_TOOU_FOUT
+    from capri_mod.coupling.equations.inflation_and_trend_interpolation import DATA_UVAG_IO_SIMY, p_inflationFactor
+    from capri_mod.data.inputs import money_deflator
+    f = p_inflationFactor(1.019, 2030, 2017)
+    assert f == pytest.approx(money_deflator(2030), rel=1e-9)
+    q = pd.read_csv(ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment" /
+                    "npk_region_2030.csv").set_index(["capri_region", "nutrient"])
+    assert q["fout_uvag_eur_t"].notna().all()
+    uv = {n: float(q.at[("FR240000", n), "fout_uvag_eur_t"]) for n in ("N", "P", "K")}
+    assert uv["N"] == pytest.approx(494.476435, rel=1e-8)
+    capri_2030 = {"N": 631.553275403158, "P": 1353.57092743057, "K": 570.246417311741}
+    for n, v in capri_2030.items():
+        assert DATA_UVAG_IO_SIMY(uv[n], f) == pytest.approx(v, rel=1e-9), n
+    c = pd.read_csv(ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / "1730" / "environment" /
+                    "npk_crop_coefs_2030.csv").set_index(["capri_region", "model_crop", "nutrient"])
+    kg = [float(c.at[("FR240000", "SWHE", n), "pool_kg_ha"]) for n in ("N", "P", "K")]
+    assert DATA_TOOU_FOUT(kg, [capri_2030[n] for n in ("N", "P", "K")]) == pytest.approx(105.047816567923, rel=1e-6)

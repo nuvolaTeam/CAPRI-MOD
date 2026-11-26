@@ -5,7 +5,7 @@ calls on the supply models' regions (reports/sol_simy.gms l. 2533). capri_mod/in
 from __future__ import annotations
 
 
-def DATA_MGVA(r, FEED_lin, FEED_sol, TOIN_lin=0.0, TOIN_Y=None):
+def DATA_MGVA(r, FEED_lin, FEED_sol, TOIN_lin=0.0, TOIN_Y=None, TOOU_FOUT=0.0):
     r"""DATA(RU, MPACT, "MGVA", SIMY) of an activity with a level, per ha or head (EUR): its outputs less its inputs at
     the solution, valued at the simulation year's unit values, plus its premiums.
 
@@ -37,9 +37,10 @@ def DATA_MGVA(r, FEED_lin, FEED_sol, TOIN_lin=0.0, TOIN_Y=None):
     prices) less the change of its feed, the solved ration per unit at its report prices FEED_sol against the feed
     value per unit the margin carries FEED_lin (CAPRI's TOIN takes the solution's feed, sol_simy.gms l. 254-257), and,
     for a crop at the simulation year, less the change of its other inputs, CAPRI's TOIN at the year's coefficients
-    TOIN_Y (DATA_TOIN_Y) against the base cost the margin carries TOIN_lin:
+    TOIN_Y (DATA_TOIN_Y) against the base cost the margin carries TOIN_lin, and, for a crop, plus its residues'
+    nutrients, the outputs MANN, MANP, MANK of its TOOU that its margin does not hold (TOOU_FOUT, DATA_TOOU_FOUT):
 
-        MGVA_a = r_a - (FEED_sol_a - FEED_lin_a) - (TOIN_Y_a - TOIN_lin_a)
+        MGVA_a = r_a - (FEED_sol_a - FEED_lin_a) - (TOIN_Y_a - TOIN_lin_a) + TOOU_FOUT_a
 
     The margin's changes of the inputs within the run (the Green Deal's PLAP and INPO changes, the yields' input update,
     the organic top-up) act on CAPRI's year coefficients already (register DEP-21) and stay in r_a.
@@ -49,7 +50,7 @@ def DATA_MGVA(r, FEED_lin, FEED_sol, TOIN_lin=0.0, TOIN_Y=None):
     activities' TOIN and TOOU (mitiI, mitiO), are booked at the region (coupling/equations/sol_simy.py
     DATA_AGGT_MGVA), since the model has several of them per region only (the fertiliser options, urea substitution,
     the winter cover: capri_mod/income/mitigation_items.py); the region's total is the same (register DEP-54)."""
-    v = float(r) - (float(FEED_sol) - float(FEED_lin))
+    v = float(r) - (float(FEED_sol) - float(FEED_lin)) + float(TOOU_FOUT)
     if TOIN_Y is not None:
         v -= float(TOIN_Y) - float(TOIN_lin)
     return v
@@ -87,3 +88,26 @@ def DATA_TOIN_Y(iy_uvag, TF_I, need_kg_ha, uvag_fnut):
     technology mix, sol_simy.gms l. 377-384; the model's mix column carries the difference T1 - T2 in its margin); WIRR
     (irrigation water, the water module off) not valued."""
     return float(TF_I) * float(iy_uvag) + sum(float(n) * float(u) for n, u in zip(need_kg_ha, uvag_fnut)) / 1000.0
+
+
+def DATA_TOOU_FOUT(FOUT_kg, UVAG_FOUT):
+    r"""The part of DATA(RU, MPACT, "TOOU", SIMY) of a crop that its residues' nutrients make (EUR per ha): its outputs
+    MANN, MANP, MANK (PACT_TO_O, global/fromimpact/sets.gms l. 2253ff: SWHE.(SWHE, STRA, MANN, MANP, MANK), RAPE.(RAPE,
+    MANN, MANP, MANK) ...) at their unit values. With the straw at zero (KNOWN_ISSUES K211) it is CAPRI's secondary
+    revenue SREV = TOOU - MREV (reports/aggreg_res_data.gms l. 281-282).
+
+    CAPRI's GAMS (reports/calc_inc_indic.gms l. 30-31):
+
+            DATA(%regions%,MPACT,"TOOU","%SIMY%")  $ p_dataCopy(%regions%,MPACT,"LEVL","%SIMY%")
+              = SUM( PACT_TO_O(MPACT,O), p_dataCopy(%regions%,MPACT,O,"%SIMY%") * p_dataCopy(%regions%,"UVAG",O,"%SIMY%"))   * 0.001;
+
+    In this project's notation: TOOU_FOUT_a = sum over FOUT of DATA(a, FOUT) x UVAG(FOUT) / 1000, DATA(a, FOUT) the
+    crop's residues' nutrient per ha at the solution (kg N, P2O5, K2O; the residue deliveries the regional model's
+    nutrient balance takes at the solve's yields, supply/fertilisation.py _npk_spec, RegionalResults.last_fout) and
+    UVAG(FOUT) the member state's unit value at the simulation year (EUR per t; npk_region_2030.csv fout_uvag_eur_t,
+    DATA_UVAG_IO_SIMY of CAPRI's base year value). Checked against CAPRI's 2030 reference (dataOut, a check only):
+    FR24's soft wheat 41.14 x 631.55 + 16.56 x 1,353.57 + 99.35 x 570.25 = 105.05 EUR per ha, its SREV 105.05.
+
+    Departures from CAPRI: the mean technology's coefficients (the model's technology mix column carries the residues'
+    difference T1 - T2 on the area moved; CAPRI's DATA(SIMY) weights them, sol_simy.gms l. 377-384), as DATA_TOIN_Y."""
+    return sum(float(q) * float(u) for q, u in zip(FOUT_kg, UVAG_FOUT)) / 1000.0

@@ -257,7 +257,7 @@ class PolicyBlock:
         # (a cap of the loss at 0.90 was removed 23 October 2026: unsourced and never reached - the loss is at most
         # 0.20, at a 100% cut)
 
-        prices = self.data.producer_prices
+        prices = self._solve_prices()
         ylds = self.data.yields
         new_ylds = ylds.copy()
         nr = self.net_revenues.copy()
@@ -734,7 +734,7 @@ class PolicyBlock:
         if share <= 0:
             return
 
-        prices = self.data.producer_prices
+        prices = self._solve_prices()
         ylds = self.data.yields
         new_ylds = ylds.copy()
         nr = self.net_revenues.copy()

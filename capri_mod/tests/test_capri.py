@@ -2842,6 +2842,34 @@ def test_pesticide_target_applies_to_conventional_area_only():
     assert comb_y < y0, "the pesticide yield loss vanished on conventional land"
 
 
+def test_the_green_deal_yield_changes_at_the_solves_price():
+    """The organic yield gap and the pesticide loss change a crop's margin at the solve's price, the price its revenue
+    takes (the data's price x (1 + the solve's transmitted price change), SupplyModule._solve_prices), as CAPRI values
+    the yields at the solution's prices (KNOWN_ISSUES K209; until 26 November 2026 at the data's price)."""
+    import pandas as pd
+    from capri_mod.data.loaders import load_all_data
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    d = load_all_data("capri_data")
+    region = "FR810000" if "FR810000" in d["areas"].index else str(d["areas"].index[0])
+    sm = SupplyModule(d, calibrate_supply_elasticities(d["areas"]))
+    sm.run(price_signals=None, regions=[region])
+    mo = sm._models[region]
+    crop = next(c for c in ("SWHE", "RAPE", "BARL") if c in mo.net_revenues.index)
+    p0 = float(mo.data.producer_prices[crop])
+    nr0 = float(mo.net_revenues[crop]); y0 = float(mo.data.yields[crop])
+    mo.ev.price_shock_now = None
+    assert float(mo._solve_prices()[crop]) == p0
+    mo.ev.price_shock_now = pd.Series({crop: 0.25})
+    assert float(mo._solve_prices()[crop]) == pytest.approx(1.25 * p0, rel=1e-14)
+    mo.apply_pesticide_reduction(0.50)
+    dy = float(mo.data.yields[crop]) - y0
+    assert dy < 0
+    assert float(mo.net_revenues[crop]) - nr0 == pytest.approx(1.25 * p0 * dy, rel=1e-12)
+    mo.data.yields[crop] = y0; mo.net_revenues[crop] = nr0; mo.ev.price_shock_now = None
+
+
 #: the land market off (CAPRI's p_landIsFixedinScenario): the two tests of fixed land and of the landscape floor's
 #: fitting check that path, so they run with it explicitly (CAPRI's land rules, the N target per current hectare and
 #: the ammonia techniques are always on since 27 October 2026)

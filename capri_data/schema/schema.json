@@ -2894,7 +2894,7 @@
     "unnamed",
     "wide"
    ],
-   "comment": "herd sizes 2017: CAPRI's HERD item summed over the CAPRI activities each model animal holds (build_capri_base.py HERD_MAP; BULL = CAPRI's BULL + BULH, HEIF = HEIL + HEIH + HEIR, the model's HFRS, since 18 November 2026, KNOWN_ISSUES K180; COWS = DCOW + SCOW; PIGS = CAPRI's SOWS herd, PIGF = the PIGS census less the sows); the loader renames SCOW, HEIF, HENS, POUL (loaders.HERD_ALIASES)",
+   "comment": "herd sizes 2017: CAPRI's HERD item summed over the CAPRI activities each model animal holds (build_capri_base.py HERD_MAP; BULL = CAPRI's BULL + BULH, HEIF = HEIL + HEIH + HEIR, the model's HFRS, since 18 November 2026, KNOWN_ISSUES K180; COWS = DCOW + SCOW; PIGS = CAPRI's SOWS herd, PIGF = the PIGS census less the sows; OANI = CAPRI's LEVL of the other animals, an index, the unit of their per-unit data, since 26 November 2026, KNOWN_ISSUES K207); the loader renames SCOW, HEIF, HENS, POUL (loaders.HERD_ALIASES)",
    "columns": [
     {
      "name": "region",
@@ -2929,7 +2929,7 @@
     }
    ],
    "checks": [
-    "(herd IN ('DCOW', 'SCOW', 'COWS', 'BULL', 'HEIF', 'CALV', 'PIGS', 'PIGF', 'HENS', 'POUL', 'SHGM', 'SHGF'))",
+    "(herd IN ('DCOW', 'SCOW', 'COWS', 'BULL', 'HEIF', 'CALV', 'PIGS', 'PIGF', 'HENS', 'POUL', 'SHGM', 'SHGF', 'OANI'))",
     "(\"value\" >= 0)"
    ],
    "units": [
@@ -2968,6 +2968,12 @@
      "unit": "U_Miohd",
      "status": "builder",
      "basis": "CAPRI's HERD item of poultry, read as million heads by the loader (loaders.POULTRY_MILLION_HEAD); CAPRI's unit table gives HENS and POUF LEVL in U_Miohd"
+    },
+    {
+     "item": "OANI",
+     "unit": "U_1unit",
+     "status": "builder",
+     "basis": "CAPRI's LEVL of the other animals (OANI): an index without a herd unit (Denmark 1.0), the unit of their yields, costs and prices per unit"
     },
     {
      "item": "PIGF",
@@ -25624,6 +25630,7 @@
     "checks": [],
     "tests": [
      "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_eaa.py",
      "capri_mod/tests/test_mineral_n_losses.py",
      "capri_mod/tests/test_nutned_add_factor.py",
      "capri_mod/tests/test_techn_mix.py"
@@ -25705,6 +25712,11 @@
      "name": "pool_scale",
      "type": "DOUBLE",
      "not_null": true
+    },
+    {
+     "name": "fout_uvag_eur_t",
+     "type": "DOUBLE",
+     "not_null": true
     }
    ],
    "primary_key": [
@@ -25714,7 +25726,9 @@
    ],
    "unique": [],
    "foreign_keys": [],
-   "checks": [],
+   "checks": [
+    "(fout_uvag_eur_t > 0)"
+   ],
    "units": [
     {
      "item": "cres_avail",
@@ -25733,6 +25747,12 @@
      "unit": null,
      "status": "open",
      "basis": "npk_region_2030.excr_kt: unit to be established"
+    },
+    {
+     "item": "fout_uvag_eur_t",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "CAPRI's UVAG of MANN, MANP, MANK at 2030 in 2017 money: the member state's DATA(MS, \"UVAG\", FOUT, \"BAS\") of sim_ini_21730 x p_inflationFactor / the deflator (capmod/inflation_and_trend_interpolation.gms l. 67-72)"
     },
     {
      "item": "land_kha",
@@ -25797,6 +25817,7 @@
     "builders": [],
     "checks": [],
     "tests": [
+     "capri_mod/tests/test_eaa.py",
      "capri_mod/tests/test_mineral_n_losses.py"
     ]
    }
@@ -51223,6 +51244,60 @@
     "tests": []
    }
   },
+  "src_fout_uvag_bas": {
+   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/fout_uvag_bas.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's base year unit values of the nutrients' outputs MANN, MANP, MANK per member state, sim_ini_21730's DATA(MS, \"UVAG\", FOUT, \"BAS\") (the reference export), written and read back by tools/build/build_npk_balance_2030.py (npk_region_2030.csv fout_uvag_eur_t; KNOWN_ISSUES K212)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fout",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "uvag_bas",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "fout"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(fout IN ('MANN', 'MANP', 'MANK'))",
+    "(uvag_bas > 0)"
+   ],
+   "units": [
+    {
+     "item": "uvag_bas",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"UVAG\", FOUT, \"BAS\"): EUR per t of N, P2O5, K2O in the base year's money"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": "build_npk_balance_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "src_gains_ad_p_gainsdata": {
    "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/gains_ad_p_gainsdata.parquet",
    "declared_in": "30_sources.sql",
@@ -59781,7 +59856,9 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_premium_baseline_2030.py"
+    ]
    }
   },
   "sup_livestock_product_value_by_market_coef": {
@@ -64924,6 +65001,147 @@
     "checks": [],
     "tests": [
      "capri_mod/tests/test_entitlement_money.py",
+     "capri_mod/tests/test_premium_baseline_2030.py"
+    ]
+   }
+  },
+  "traj_capri_livestock_premium_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_livestock_premium_2030.csv",
+   "declared_in": "27_trajectories.sql",
+   "layout": [
+    "unnamed",
+    "wide"
+   ],
+   "comment": "CAPRI's 2030 premium per model head in 2017 money (sum of the members' LEVL 2017 x PRME 2030 over the model's 2017 heads; tools/build/build_price_trajectory_2030.py), taken where CAPRI's 2017 data pay the animal none (KNOWN_ISSUES K210)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "animal"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(\"value\" >= 0)"
+   ],
+   "units": [
+    {
+     "item": "BCOW",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "BROI",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "BULL",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "CALV",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "DCOW",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "HFRS",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "LAYS",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "PIGF",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "PIGS",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "SHGF",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "SHGM",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_price_trajectory_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/projection/prices.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
      "capri_mod/tests/test_premium_baseline_2030.py"
     ]
    }

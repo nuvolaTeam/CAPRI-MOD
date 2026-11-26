@@ -676,6 +676,23 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                            for m, v in parts.items())
         return mrev * self._pt(act, own) * float(price_shock.get(act, 0.0))
 
+    #: CAPRI's other animals (OANI): one output per unit of their level (CAPRI's LEVL, an index), YILD x UVAG as a
+    #: crop's (yields.csv, producer_prices_regional.csv), their inputs TOIN per unit (variable_costs.csv) and their
+    #: premium PRME per unit (cap_premium_activity.csv); no feed, held at their data level (FACT, supply/prep_sim.gms l.
+    #: 250-251; KNOWN_ISSUES K207)
+    OTHER_ANIMALS = ("OANI",)
+
+    def _solve_prices(self) -> pd.Series:
+        """The crops' producer prices of this solve, as _compute_net_revenues forms their revenue: the data's price x
+        (1 + the solve's transmitted price change, ev.price_shock_now). The Green Deal's yield changes are valued at
+        them, as CAPRI values the yields at the solution's prices (KNOWN_ISSUES K209; before 26 November 2026 the
+        organic yield gap and the pesticide loss took the data's price)."""
+        prices = self.data.producer_prices
+        ps = getattr(self.ev, "price_shock_now", None)
+        if ps is None:
+            return prices
+        return prices * (1 + ps.reindex(prices.index).fillna(0))
+
     def _nr_item(self, act, side, item, per_unit, kg=None, uv=None) -> None:
         """Record a change of an activity's net revenue per unit made within the solve after _compute_net_revenues, by
         item, for the economic accounts by item (income I2, capri_mod/income/eaa.py): side "O" an output's change (the
@@ -796,8 +813,9 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                     and pd.notna(_rev[a]) and float(_rev[a]) > 0:
                 gross[a] = float(_rev[a])
                 continue
-            if a in ANIMALS:
+            if a in ANIMALS and a not in self.OTHER_ANIMALS:
                 # no stand-in from price x yield in guessed units (removed 23 October 2026): CAPRI's output value
+                # (the other animals, OTHER_ANIMALS, have theirs as YILD x UVAG per unit of CAPRI's level, below)
                 if float(self._base_levels().get(a, 0.0)) > 1e-8:
                     raise ValueError(f"{self.data.region_id} {a}: no CAPRI output value per head (TOOU / MREV)")
                 gross[a] = 0.0
@@ -925,7 +943,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             # Netherlands, Denmark and Sweden: no milk, output TOOU only): GAMS reads the absent item as 0
             if _mrev is None and _tou is not None:
                 _mrev = 0.0
-            if act in ANIMALS and not (_mrev is not None and (_mrev > 0 or _tou is not None)):
+            if act in ANIMALS and act not in self.OTHER_ANIMALS and not (_mrev is not None and (_mrev > 0 or _tou is not None)):
                 if float(self._base_levels().get(act, 0.0)) > 1e-8:
                     raise ValueError(f"{self.data.region_id} {act}: no CAPRI output value per head (TOOU / MREV)")
                 revenue = 0.0
@@ -2072,14 +2090,14 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # quantity is safer than reporting it wrongly.
         _coef = getattr(self.data, "livestock_output_coef", None)
         for _a in ANIMALS:
-            if _a not in gross_output.index:
+            if _a not in gross_output.index or _a in self.OTHER_ANIMALS:
+                # the other animals: their one output, level x YILD as above (CAPRI's OANI per unit of its level)
                 continue
             _c = (float(_coef.get(_a)) if _coef is not None
                   and _a in _coef.index and pd.notna(_coef.get(_a)) else None)
             # The output coefficient is per head at base intensity; the dairy split below moves milk with the
             # low-yield cows (a scaling by a dairy yield base, never set since 3a264a2, removed in the refactor of the supply's parameters and state)
-            # no output coefficient: unknown (NaN) where the activity has a level, none where it has none (other
-            # animals, OANI, held at 0 in every region, read NaN until 27 October 2026)
+            # no output coefficient: unknown (NaN) where the activity has a level, none where it has none
             _lv = float(activities.get(_a, 0.0))
             gross_output[_a] = (_lv * _c if _c is not None else (float("nan") if abs(_lv) > 1e-12 else 0.0))
             # CAPRI's dairy split: z heads at DCOL instead of DCOH change milk by

@@ -77,8 +77,13 @@ UNTRACED = {
     # CAPRI's directly yield-dependent crop inputs at 2030 item by item, the items of input_coefs_2030.csv's
     # iy_uvag_eur_ha (income I2)
     "capri_data/baselines/capri_greendeal_ref/1730/supply/crop_inputs_2030.csv": ("build_input_coefs_2030", "CAPRI"),
+    # CAPRI's 2030 premium per model head, for the animals CAPRI's 2017 data pay none (KNOWN_ISSUES K210)
+    "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_livestock_premium_2030.csv":
+        ("build_price_trajectory_2030", "CAPRI"),
     # sim_ini_21730's NUTNED_ need factors, kept by the nutrient balance builder (register DEP-10 item 1b)
     "capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_factors_2030.parquet": ("build_npk_balance_2030", "CAPRI"),
+    # sim_ini_21730's unit values of the nutrients' outputs at the base year (KNOWN_ISSUES K212)
+    "capri_data/sources/raw/capri/results/sim_ini_21730/fout_uvag_bas.parquet": ("build_npk_balance_2030", "CAPRI"),
     "capri_data/pipeline/captrd/sets/biofuel/": ("build_captrd_biofuel", "CAPRI"),     # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/agriprod/": ("build_captrd_agriprod", "CAPRI"),   # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/national/": ("build_captrd_national", "CAPRI"),   # before sets/ (first match)

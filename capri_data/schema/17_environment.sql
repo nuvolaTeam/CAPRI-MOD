@@ -418,6 +418,7 @@ CREATE TABLE env_npk_region_2030 (
     need_kt DOUBLE NOT NULL,
     land_kha DOUBLE NOT NULL,
     pool_scale DOUBLE NOT NULL,
+    fout_uvag_eur_t DOUBLE NOT NULL CHECK (fout_uvag_eur_t > 0),   -- the nutrient's output (MANN, MANP, MANK), K212
     PRIMARY KEY (capri_region, "level", nutrient)
 );
 COMMENT ON TABLE env_npk_region_2030 IS 'CAPRI''s crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_, (tools/build/build_npk_balance_2030.py)';
@@ -432,7 +433,8 @@ INSERT INTO value_units VALUES
   ('env_npk_region_2030', 'own_kt', NULL, 'open', 'npk_region_2030.own_kt: unit to be established'),
   ('env_npk_region_2030', 'need_kt', NULL, 'open', 'npk_region_2030.need_kt: unit to be established'),
   ('env_npk_region_2030', 'land_kha', NULL, 'open', 'npk_region_2030.land_kha: unit to be established'),
-  ('env_npk_region_2030', 'pool_scale', NULL, 'open', 'npk_region_2030.pool_scale: unit to be established');
+  ('env_npk_region_2030', 'pool_scale', NULL, 'open', 'npk_region_2030.pool_scale: unit to be established'),
+  ('env_npk_region_2030', 'fout_uvag_eur_t', 'U_EuPerTon', 'capri', 'CAPRI''s UVAG of MANN, MANP, MANK at 2030 in 2017 money: the member state''s DATA(MS, "UVAG", FOUT, "BAS") of sim_ini_21730 x p_inflationFactor / the deflator (capmod/inflation_and_trend_interpolation.gms l. 67-72)');
 
 -- file: capri_data/baselines/capri_greendeal_ref/1730/environment/manure_npk_applied_share_2030.csv
 CREATE TABLE env_manure_npk_applied_share_2030 (

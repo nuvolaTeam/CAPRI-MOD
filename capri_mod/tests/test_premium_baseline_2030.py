@@ -53,3 +53,33 @@ def test_an_activity_the_ports_give_no_premium_has_none_in_2030(built, port):
     for unit in ("EL110000", "EL120000", "EL140000"):
         assert not port.get((unit, "DCOL")) and not port.get((unit, "DCOH"))
         assert lsk.at[unit, "DCOW"] == 0.0
+
+
+def test_the_animals_capris_2017_data_pay_none_take_capris_2030_premium_per_head():
+    """K210: CAPRI's 2017 data pay Croatia's and Sweden's animals no premium (capreg_cap_premium: empty rows), so the
+    2017 coefficient x the 2030/2017 ratio gave them none in 2030, where CAPRI pays them (Croatia's dairy cows 108.7 EUR
+    per head, 2017 money). There the projection takes CAPRI's 2030 premium per model head itself
+    (capri_livestock_premium_2030.csv); elsewhere the coefficient x the ratio, which equals it within 0.4% (Finland's
+    calves: the 2017 coefficient from the res_17 dumps)."""
+    from capri_mod.projection.prices import apply_capri_prices_2030
+    lp = pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "livestock_premium_coef.csv", index_col=0)
+    lsk = pd.read_csv(TRAJ / "capri_livestock_premium_ratio_2030.csv", index_col=0)
+    a30 = pd.read_csv(TRAJ / "capri_livestock_premium_2030.csv", index_col=0)
+    both = (lp * lsk).reindex_like(a30)
+    m = both.notna() & a30.notna() & (both.abs() > 1e-9)
+    assert m.sum().sum() > 2000
+    assert ((a30[m] - both[m]) / both[m]).abs().max().max() < 4e-3
+    regs = ["HR000000", "SE020000", "DK000000", "EL110000"]
+    d = {"livestock_premium_coef": lp.loc[regs].copy()}
+    s = apply_capri_prices_2030(d, TRAJ, {}, {})
+    out = d["livestock_premium_coef"]
+    cattle = ["DCOW", "BCOW", "BULL", "HFRS"]
+    assert lp.loc["HR000000"].isna().all() and lp.loc["SE020000", cattle].isna().all()
+    assert out.at["HR000000", "DCOW"] == pytest.approx(a30.at["HR000000", "DCOW"], rel=1e-12)
+    assert out.at["HR000000", "DCOW"] == pytest.approx(108.721, abs=1e-3)
+    assert out.at["SE020000", "BULL"] == pytest.approx(a30.at["SE020000", "BULL"], rel=1e-12)
+    assert out.at["DK000000", "DCOW"] == pytest.approx(lp.at["DK000000", "DCOW"] * lsk.at["DK000000", "DCOW"], rel=1e-12)
+    assert out.at["EL110000", "DCOW"] == 0.0                     # the ratio's 0 kept (Greece's dairy cows, above)
+    assert out.at["EL110000", "SHGF"] == pytest.approx(a30.at["EL110000", "SHGF"], rel=1e-12)
+    l4 = lp.loc[regs]
+    assert s["livestock_premium_2030_cells"] == int(((l4.isna() | (l4 == 0)) & a30.reindex_like(l4).notna()).sum().sum())
