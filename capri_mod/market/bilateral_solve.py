@@ -759,7 +759,10 @@ class BilateralSolveMixin(MarketStateMixin):
             # where no bound binds and imposes the bounds where one does (CAPRI: CONOPT with widen_bounds.gms; a solver
             # departure, docs/dev/MARKET_BOUNDS_PLAN.md); the outputs evaluated at its prices
             from capri_mod.market.market_chain import chain_market_solve
-            r_ = chain_market_solve(self, r, exogenous_supply, trade_scenario, "ssn")
+            # the system reads the fixed point's equilibrium as its start (market_system_ad: sv.bilat_last_r), set
+            # here for the run's first solve too
+            self.sv.bilat_last_r = r.copy()
+            r_ = chain_market_solve(self, r, exogenous_supply, trade_scenario, "ssn", from_equilibrium=True)
             if r_ is None:
                 converged = False
             else:

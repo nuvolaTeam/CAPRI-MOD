@@ -254,7 +254,8 @@ def test_the_semismooth_newton_solves_the_bounded_market_from_the_fixed_point(so
 @pytest.mark.slow
 def test_the_market_under_capris_bounds_is_the_fixed_point_then_the_semismooth_newton(solved_base, capsys):
     """market.bounds = "capri" (the project lead's decision of 16 November 2026): MarketModule.solve runs the fixed
-    point, then the semismooth Newton from its equilibrium (bilateral_solve, market_chain "ssn"); on +5% soft wheat it
+    point, then the semismooth Newton from its equilibrium (bilateral_solve, market_chain "ssn"), skipped where the
+    equilibrium lies within CAPRI's start bounds (market_chain.within_capri_start_bounds); on +5% soft wheat it
     converges and its prices are the fixed point's within 1e-6 (no bound but the quotas' saturated sigmas binds)."""
     import pickle
     from capri_mod.settings import override
@@ -267,8 +268,70 @@ def test_the_market_under_capris_bounds_is_the_fixed_point_then_the_semismooth_n
     with override({"market.bounds": "capri"}):
         e_b = m_b.solve(exogenous_supply=exo2)
     out = capsys.readouterr().out
-    assert e_b.converged and "semismooth Newton" in out, out[-500:]
+    assert e_b.converged and ("semismooth Newton" in out or "within CAPRI's start bounds" in out), out[-500:]
     a, b = m_fp.sv.bilat_last_r, m_b.sv.bilat_last_r.reindex(index=m_fp.sv.bilat_last_r.index,
                                                             columns=m_fp.sv.bilat_last_r.columns)
     cols = list(m_fp.par.bilat)
     assert (np.abs(a[cols] - b[cols]) / np.maximum(np.abs(a[cols]), 1e-3)).to_numpy().max() <= 1e-6
+
+
+@pytest.mark.slow
+def test_capris_widening_after_the_bounded_solve_under_a_pork_cut(solved_base):
+    """CAPRI's second market solve (arm/simu_market.gms l. 95-145, market_chain.simu_market_widen): under -90% pork the
+    semismooth Newton from the fixed point's equilibrium leaves processing cells at CAPRI's start lower bound with their
+    equation unmet (CAPRI's infeasible solve); their bounds are widened by widen_bounds.gms's rule for v_procQuant
+    (l. 125-129: L - 10 x max(10, Proc, |L|), applied here by hand), ProcFudge_ switched on where the lower bound is then
+    at or below 0, and the second solve leaves no unknown at a bound with its equation unmet (SumInfes <= 1e-5), the
+    complementarity holding at the widened bounds."""
+    import pickle
+    from capri_mod.market import market_chain as MC
+    from capri_mod.settings import override
+    pytest.importorskip("pypardiso")
+    mm, exo = solved_base
+    exo2 = exo.copy()
+    exo2["PORK"] = exo2["PORK"] * 0.10
+    m = pickle.loads(pickle.dumps(mm))
+    assert m.solve(exogenous_supply=exo2).converged
+
+    def unmet(ctx, x, lb, ub, sgn, tol):
+        F = np.asarray(ctx["fF"](x, ctx["slope"]), float).ravel()
+        Fo = F / ctx["sc"] * sgn
+        free = lb < ub
+        bt = 1e-8 * np.maximum(1.0, np.abs(x))
+        atl = free & np.isfinite(lb) & (x - lb <= bt)
+        atu = free & np.isfinite(ub) & (ub - x <= bt)
+        return (atl & (Fo > tol)) | (atu & (Fo < -tol)), F, Fo, atl, atu, free
+
+    with override({"market.bounds": "capri", "market.widen_bounds_tries": 0}):
+        ctx = MC.build(m, m.sv.bilat_last_r.copy(), exo2, None)
+        x1, ok, msg = MC.solve(ctx, "ssn")
+        assert ok, msg
+        lb, ub = (v.copy() for v in MC._bounds(ctx))
+        x0 = ctx["x0"]
+        lb[ctx["empty"]], ub[ctx["empty"]] = x0[ctx["empty"]], x0[ctx["empty"]]
+        _, _, sgn = MC._mcp_system(ctx, lb, ub)
+        tol = 1e-10
+        bad, F1, _, _, _, _ = unmet(ctx, x1, lb, ub, sgn, tol)
+    assert bad.sum() > 0 and float(np.abs(F1[bad]).sum()) > 1e-5
+    o, offL = 0, None
+    for nm, n in ctx["lay"]["x"]:
+        if nm == "L":
+            offL = o
+        o += n
+    lc = ctx["lay"]["lift_cells"]
+    bad_L = [k for k in np.nonzero(bad)[0] if offL is not None and offL <= k < offL + len(lc)]
+    assert bad_L and all(lc[k - offL][0] == "proc" for k in bad_L)
+    with override({"market.bounds": "capri", "market.widen_bounds_tries": 1}):
+        x2, ok2, msg2 = MC.simu_market_widen(ctx, x1.copy(), lb.copy(), ub.copy(), sgn, tol,
+                                             200, ctx["slope"])
+        assert ok2 and "bounds widened" in msg2, msg2
+        lb2, ub2 = MC._bounds(ctx)
+        for k in bad_L:
+            b = float(lc[k - offL][3])
+            assert lb2[k] == pytest.approx(x1[k] - 10.0 * max(10.0, b, abs(x1[k])), rel=1e-12)
+            assert lb2[k] <= 0 and ctx["fmv"][len(ctx["lay"]["fudge_cells"]) + (k - offL)] == 1.0
+        _, _, sgn2 = MC._mcp_system(ctx, lb2, ub2)
+        bad2, F2, Fo2, atl, atu, free = unmet(ctx, x2, lb2, ub2, sgn2, tol)
+    assert float(np.abs(F2[bad2]).sum()) <= 1e-5
+    inside = free & ~atl & ~atu
+    assert float(np.abs(Fo2[inside]).max()) <= 1e-7

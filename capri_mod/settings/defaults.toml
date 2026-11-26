@@ -545,9 +545,12 @@ newton_step = "linesearch"
 ipopt_linear_solver = "mumps"
 # the Coin-HSL library (libcoinhsl.so) for an HSL solver; "" lets IPOPT look for it on the library path
 hsl_library = ""
-# the bounds on the market's unknowns (the port of CAPRI's bounds, their widening and the fudge equations): "none", or "capri" (CAPRI's start bounds of set_start_val.gms,
-# market_bounds.py: IPOPT takes them, a Newton or continuation solution outside them goes on to IPOPT)
-bounds = "none"
+# the bounds on the market's unknowns (the port of CAPRI's bounds, their widening and the fudge equations): "capri"
+# (CAPRI's start bounds of set_start_val.gms, market_bounds.py; with the fixed point the solve's equilibrium is kept
+# where it lies within them, else the semismooth Newton solves the bounded system and CAPRI's widening follows,
+# simu_market.gms; register DEP-50) or "none" (the fixed point alone, the default until 27 November 2026; the project
+# lead, 27 November 2026, 01:17: "yes", CAPRI's bounds as the default)
+bounds = "capri"
 # the widening (with bounds = "capri"): the solves after the first (CAPRI's simu_market.gms: two solves in
 # all, the bounds widened between), and the proximity term of the least-infeasibility solve that names the bounds to
 # widen (IPOPT has no CONOPT's infeasibility marginals; CAPTRD-MOD's DEP-45 the same)

@@ -642,6 +642,22 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   SREV), the market crops' income now CAPRI's within 5%; the baseline's MGVA 40,034 against CAPRI's 38,358, the fodder
   activities 1,684 above CAPRI's (KNOWN_ISSUES K213, open). K211 stays open for the straw balance alone, slack at
   CAPRI's reference. Tests: test_eaa.py (2), test_water_income.py (1, slow).
+- **CAPRI's market bounds as the default (26-27 November 2026; the project lead, 27 November 01:17: "yes"; register
+  DEP-50, DEP-38, DEP-39):** market.bounds = "capri". (1) CAPRI's second market solve after an infeasible one
+  (arm/simu_market.gms l. 95-145; market_chain.simu_market_widen): the unknowns the semismooth Newton holds at a bound
+  with their paired equation unmet are widened by widen_bounds.gms's rules, the fudge rows switched on where a widened
+  lower bound is at or below 0, and the bounded system solved again; under -90% pork from the fixed point 6 processing
+  cells, their widened lower bounds equal to widen_bounds.gms l. 125-129 by hand (test_supply_system_ad.py, new test).
+  (2) The bounded system's Jacobian from the system's own (each complementarity row depends on its unknown and its
+  equation only): the bounded solve 28.6 s -> 1.7 s. (3) The fixed point's equilibrium kept where it lies within
+  CAPRI's start bounds (market_chain.within_capri_start_bounds, about 8 s); the bounded solve only where a bound is
+  violated. (4) The system no longer kept on the market module after a solve (its CasADi graphs, some GB, were carried
+  by the regional solves' forked workers: a mini-EU run had a worker killed for memory) and sv.bilat_last_r set before
+  the run's first bounded solve. Mini-EU Green Deal pair: no bound violated in its 23 market solves, 920 s (about
+  1,030 s without the bounds; 2,231 s before (2)-(3)); activities, outputs, prices, the environmental tables and the
+  accounts within 4e-6 relative of the run without the bounds, welfare within 8e-5 (Norway's ProfitAgr: the check's
+  evaluation of the market's functions at the same prices moves their lagged state, K147); the inner fertiliser
+  distribution of one scenario region splits its totals differently across the crop groups (its optimum is not unique).
 - **The split of the large modules (26 November 2026; the plan of 25 November, the project lead: modules over 1,000
   lines into parts with names a reader understands):** each large file stays as the main file, slim, with its entry
   points, and re-exports every name its parts define, so no import elsewhere changes; the code moved as it was (the

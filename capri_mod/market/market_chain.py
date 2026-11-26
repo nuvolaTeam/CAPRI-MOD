@@ -245,22 +245,46 @@ def _newton(fF, fJ, x0, keep, sc, tol, max_iter, slope):
     return x, nk <= tol, it, nk
 
 
-def build(mm, r, exogenous_supply, trade_scenario):
-    """The lifted market system at the module's state after one evaluation at r, with the quotas' sigmoid slope as a
-    parameter: a dict with its Functions F(x, slope) and Jacobian, the start x0, the equations kept (the empty balances
-    out), the unknowns held (their prices), the row scales, CAPRI's slope; NotImplementedError where it cannot be
-    built."""
+def _lifted(mm, r, exogenous_supply, trade_scenario):
+    """The lifted market system at the module's state after one evaluation at r: (fn, lay, x, F, slope symbol, x0)."""
     import casadi as ca
     from capri_mod.market.market_system_ad import market_system, market_x0
-    t0 = time.time()
     mm._bilateral_eval(r, exogenous_supply, trade_scenario)
-    fs, _, _, _ = market_system(mm, exogenous_supply, trade_scenario)
     s = ca.SX.sym("slope")
     # with CAPRI's bounds the processing and non-EU feed cells are unknowns too (their bounds and fudge rows)
     fn, lay, x, F = market_system(mm, exogenous_supply, trade_scenario, lifted=True, slope=s, fudge=True,
                                   lift_use=str(_settings().get("market.bounds")) == "capri")
+    return fn, lay, x, F, s, market_x0(mm, lay)
+
+
+def within_capri_start_bounds(mm, lay, x0, tol=1e-9) -> bool:
+    """Whether x0 (the fixed point's equilibrium in the lifted system's unknowns) lies within CAPRI's start bounds
+    (set_start_val.gms; market_bounds.capri_start_bounds), each within tol x max(1, |bound|). The equilibrium solves
+    the system's equations, so inside the bounds it is the bounded problem's solution too (every paired equation met,
+    no bound active): the bounded solve can be skipped. Its equations are the model's form there (DEP-37's processing
+    fudge always on; the bounded system's rows within their bounds differ by it, 7e-6 at most in the mini-EU Green Deal
+    pair of 26 November 2026)."""
+    from capri_mod.market.market_bounds import capri_start_bounds
+    lb, ub = capri_start_bounds(mm, lay, x0)
+    lb, ub = np.asarray(lb, float), np.asarray(ub, float)
+    x0 = np.asarray(x0, float)
+    ok_lo = ~np.isfinite(lb) | (x0 >= lb - tol * np.maximum(1.0, np.abs(lb)))
+    ok_up = ~np.isfinite(ub) | (x0 <= ub + tol * np.maximum(1.0, np.abs(ub)))
+    return bool(np.all(ok_lo & ok_up))
+
+
+def build(mm, r, exogenous_supply, trade_scenario, lifted=None):
+    """The lifted market system at the module's state after one evaluation at r, with the quotas' sigmoid slope as a
+    parameter: a dict with its Functions F(x, slope) and Jacobian, the start x0, the equations kept (the empty balances
+    out), the unknowns held (their prices), the row scales, CAPRI's slope; NotImplementedError where it cannot be
+    built. lifted: _lifted's result at the same state, when already built."""
+    import casadi as ca
+    from capri_mod.market.market_system_ad import market_system
+    t0 = time.time()
+    fn, lay, x, F, s, x0 = lifted if lifted is not None else _lifted(mm, r, exogenous_supply, trade_scenario)
+    # the plain system's sparsity: its empty balances (rows without an entry), out of the lifted system's equations
+    fs, _, _, _ = market_system(mm, exogenous_supply, trade_scenario)
     fm = lay["fm"]
-    x0 = market_x0(mm, lay)
     sp = fs.jac_sparsity(0, 0)
     empty = np.nonzero(np.diff(np.asarray(sp.T.colind())) == 0)[0]
     keep = np.setdiff1d(np.arange(lay["n_F"]), empty)
@@ -321,10 +345,13 @@ def _mcp_system(ctx, lbx, ubx):
     bounds phi(x - l, F), -phi(u - x, -F); free F; fixed x - l: the cell's equation dropped, as CAPRI generates none
     for a fixed cell), on the scaled equations F / sc oriented per block so that each rises with its own unknown
     (the sign of the block's median Jacobian diagonal at the start). eps = market.ssn_fb_smoothing. Returns
-    (Phi(x, slope), its Jacobian) as Functions of (x, slope) at the current modes."""
-    import casadi as ca
-    x, F, sc = ctx["x"], ctx["F"], ctx["sc"]
-    n = int(x.shape[0])
+    (Phi(x, slope), its Jacobian, sgn): numerical functions of (x, slope) at the current modes, from the system's own
+    F and Jacobian (ctx["fF"], ctx["fJ"]): each Phi_i depends on x_i and F_i only, so its Jacobian is
+    diag(c) + diag(d) J_F with c, d the Fischer-Burmeister function's partial derivatives (until 27 November 2026 a
+    second symbolic Jacobian, the same numbers at about 20 s more per market solve)."""
+    import scipy.sparse as sps
+    sc = np.asarray(ctx["sc"], float)
+    n = int(sc.size)
     lay = ctx["lay"]
     J0 = ctx["fJ"](ctx["x0"], ctx["slope"]).sparse().tocsr()
     dg = np.asarray(J0.diagonal(), float)
@@ -337,30 +364,52 @@ def _mcp_system(ctx, lbx, ubx):
             sgn[o:o + k] = -1.0 if (d.size and np.median(d) < 0) else 1.0
         o += k
     eps = float(_settings().get("market.ssn_fb_smoothing"))
-    # the modes substituted, the slope kept as the continuation's parameter (_eqs fixes it at CAPRI's)
-    Fs = ca.substitute([F], [ctx["fm"]], [ca.SX(ca.DM(ctx["fmv"]))])[0] / ca.DM(sc) * ca.DM(sgn)
-
-    def phi(a, b):
-        return a + b - ca.sqrt(a * a + b * b + eps)
+    lbx, ubx = np.asarray(lbx, float), np.asarray(ubx, float)
     lo, up = np.isfinite(lbx), np.isfinite(ubx)
     fixed = lo & up & (lbx == ubx)
-    out = []
-    for i in range(n):
-        f = Fs[i]
-        if fixed[i]:
-            out.append(x[i] - lbx[i])
-        elif lo[i] and up[i]:
-            out.append(phi(x[i] - lbx[i], -phi(ubx[i] - x[i], -f)))
-        elif lo[i]:
-            out.append(phi(x[i] - lbx[i], f))
-        elif up[i]:
-            out.append(-phi(ubx[i] - x[i], -f))
-        else:
-            out.append(f)
-    P = ca.vertcat(*out)
-    s = ctx["s"]
-    fP = ca.Function("market_mcp_F", [x, s], [P])
-    fJP = ca.Function("market_mcp_J", [x, s], [ca.jacobian(P, x)])
+    both = lo & up & ~fixed
+    onlo, onup = lo & ~up, up & ~lo
+    w = sgn / sc
+
+    def _parts(x, slope):
+        """(Phi, c, d): Phi(x) and its partial derivatives in x_i (c) and in the scaled, oriented F_i (d)."""
+        x = np.asarray(x, float).ravel()
+        f = np.asarray(ctx["fF"](x, slope), float).ravel() * w
+        P, c, d = f.copy(), np.zeros(n), np.ones(n)
+
+        def phi(a, b):
+            s = np.sqrt(a * a + b * b + eps)
+            return a + b - s, 1.0 - a / s, 1.0 - b / s
+        if fixed.any():
+            P[fixed], c[fixed], d[fixed] = x[fixed] - lbx[fixed], 1.0, 0.0
+        if onlo.any():
+            v, pa, pb = phi(x[onlo] - lbx[onlo], f[onlo])
+            P[onlo], c[onlo], d[onlo] = v, pa, pb
+        if onup.any():
+            v, pa, pb = phi(ubx[onup] - x[onup], -f[onup])
+            P[onup], c[onup], d[onup] = -v, pa, pb
+        if both.any():
+            q, qa, qb = phi(ubx[both] - x[both], -f[both])
+            v, pa, pb = phi(x[both] - lbx[both], -q)
+            P[both] = v
+            c[both] = pa + pb * qa                 # d(-q)/dx_i = qa (through u - x), d(-q)/df = qb
+            d[both] = pb * qb
+        return P, c, d
+
+    class _J:
+        def __init__(self, A):
+            self._A = A
+
+        def sparse(self):
+            return self._A
+
+    def fP(x, slope):
+        return _parts(x, slope)[0]
+
+    def fJP(x, slope):
+        _, c, d = _parts(x, slope)
+        JF = ctx["fJ"](np.asarray(x, float).ravel(), slope).sparse().tocsr()
+        return _J((sps.diags(c) + sps.diags(d * w) @ JF).tocsr())
     return fP, fJP, sgn
 
 
@@ -426,16 +475,28 @@ def solve(ctx, method: str):
         steps = [float(v) for v in st.get("market.trq_slope_steps") if float(v) < slope] + [slope]
         x, done = np.clip(x0.copy(), lbx, ubx), []
         if method == "ssn":
-            fP, fJP, _ = _mcp_system(ctx, lbx, ubx)
+            fP, fJP, sgn = _mcp_system(ctx, lbx, ubx)
             allk = np.arange(int(x0.size))
             one = np.ones(int(x0.size))
+            if ctx.get("from_equilibrium"):
+                # started at the fixed point's equilibrium, which solves the system at CAPRI's slope: Newton there
+                # first; the continuation from the lower slopes only where it stalls
+                x1, ok, it, nk = _newton(fP, fJP, x, allk, one, tol, max_iter, slope)
+                if ok:
+                    x = x1
+                    steps, done = [], [f"{slope:g}: {it}"]
             for sl in steps:
                 x, ok, it, nk = _newton(fP, fJP, x, allk, one, tol, max_iter, sl)
                 done.append(f"{sl:g}: {it}")
                 if not ok:
                     return x, False, (f"semismooth Newton ({lin}) stalled at slope {sl:g} at {nk:.1e} "
                                       f"(steps {', '.join(done)})")
-            return x, True, f"semismooth Newton ({lin}) converged (steps per slope {', '.join(done)})"
+            msg = f"semismooth Newton ({lin}) converged (steps per slope {', '.join(done)})"
+            if str(st.get("market.bounds")) == "capri":
+                x, ok, wmsg = simu_market_widen(ctx, x, lbx, ubx, sgn, tol, max_iter, slope)
+                msg += wmsg
+                return x, ok, msg
+            return x, True, msg
         for sl in steps:
             x, ok, msg = _trf(ctx, x, lbx, ubx, tol, sl)
             done.append(f"{sl:g}: {msg}")
@@ -486,6 +547,117 @@ def solve(ctx, method: str):
                 break
         return x, ok, "; ".join(msgs)
     raise ValueError(f"unknown method of the market system {method!r}")
+
+
+def simu_market_widen(ctx, x, lbx, ubx, sgn, tol, max_iter, slope) -> tuple:
+    r"""CAPRI's GAMS (arm/simu_market.gms l. 95-145):
+
+          while ( ((m_globMarket.NumInfes > 0) and (Abs(m_globMarket.Suminfes) GT 1.E-5)) and (p_nRepeatedSolves LE 1),
+        *
+        *  v_prodQuant.l(RMS,"OTHO") = v_prodQuant.l(RMS,"OTHO") * uniform(0.90,1.1);
+
+
+        $batinclude 'util\title.gms' "'Solve market, year %SIMY%, step '" ORD(step):0:0 "'('" CARD(STEP):0:0 "'), try # '" p_nRepeatedSolves:0:0
+        *
+        *
+        *       --- on try # 3 during last iteration, print solution
+        *
+                if ( (p_nRepeatedSolves eq 1) and (ord(Step) eq card(step)), m_globMarket.solprint = 1);
+        *
+                SOLVE m_globMarket USING DNLP Minimizing V_dummy;
+
+        *       abort "stop";
+
+                if ( ord(step) eq card(step), m_globMarket.Reslim = m_globMarket.Reslim * 1.5;);
+
+                if ( m_globMarket.suminfes gt 1.E+6,
+        $include 'arm\treat_enormous_infes.gms'
+                );
+        *
+        $batinclude 'arm\check_square.gms' %system.fn% %system.incline%
+
+
+                if ( EXECERROR > 0,
+                           putclose caplog "*** --- Global market model of simulation loop Nr. ", step.pos, " could not been solved - CAPRI aborted" /;
+                           putclose caplog "*** --- Probably your scenario assumptions were too drastic. Try to use less dramatic changes" /;
+                           putclose caplog "*** --- If that doesn't help, contact CAPRI expert" /;
+                   abort "internal error");
+        *
+        *          --- some error in triangular part (zero iterations): try to switch it off ...
+                if (m_globMarket.iterusd eq 0,
+                   m_globMarket.Optfile = 103;
+                else
+                   m_globMarket.Optfile = 603;
+                );
+        *
+                if ( ((m_globMarket.solvestat eq 2) or (m_globMarket.solvestat eq 3) or (p_nRepeatedSolves > 0)),
+        *        --- ressource/iteration interrupt on last try or more then one solve: use pre-steps in next try again
+                     p_lstIters(XXGRPS) = 100;
+                );
+        *
+        *          --- infeasible: widen bounds
+                if ( (m_globMarket.numinfes gt 0),
+        *
+        $batinclude 'arm\widen_bounds.gms' FULL
+                );
+        *
+                p_nRepeatedSolves = P_nRepeatedSolves + 1;
+          );
+
+    The project's notation: x the lifted system's unknowns at the semismooth Newton's solution of the bounded MCP
+    (CAPRI's first SOLVE), lbx / ubx CAPRI's start bounds (set_start_val.gms; market_bounds.capri_start_bounds), F the
+    system's equations in their own units (ctx["fF"]) and Fo = F / sc x sgn the scaled, oriented ones the MCP pairs
+    with x. NumInfes / SumInfes: the unknowns at a bound whose paired equation is left unmet (Fo > 0 at a lower bound,
+    < 0 at an upper one, beyond the solve's tolerance tol) and the sum of |F| over them: the MCP's solution is CAPRI's
+    infeasible solve, the residual left where a bound holds. While SumInfes > 1e-5 and at most market.widen_bounds_tries
+    widenings (CAPRI: p_nRepeatedSolves LE 1, two solves, so one widening between them; the default 1): the bounds of
+    those unknowns widened by widen_bounds.gms FULL's rules (market_bounds.widen, the unknowns named by their unmet
+    equation as CAPRI's by CONOPT's marginals), the fudge rows switched on where a widened lower bound is at or below 0
+    (ProdFudge_, ProcFudge_, FeedFudge_: _fudge_modes), and the MCP solved again from x at CAPRI's slope. CAPRI's
+    widening after the last solve (the loop's body ends with it) is not repeated: its bounds are reset at the next
+    market solve (set_start_val.gms), so they act on nothing.
+
+    Not ported: the options and the solver's own handling (Reslim, Optfile 103/603, p_lstIters, treat_enormous_infes,
+    check_square), which are CONOPT's; the release of the trade flows fixed by the widening (l. 159-185), as the trade
+    flows are not unknowns of the lifted system.
+
+    Departures from CAPRI: the infeasible cells are named by the MCP's unmet equations at their bounds, not by CONOPT's
+    phase-1 marginals (register DEP-50); SumInfes is measured on the lifted system's equations in their own units.
+
+    Returns (x, ok, message suffix)."""
+    from capri_mod.market.market_bounds import widen
+    st = _settings()
+    x0 = ctx["x0"]
+    sc = ctx["sc"]
+    msg = ""
+    for _try in range(int(st.get("market.widen_bounds_tries"))):
+        F = np.asarray(ctx["fF"](x, slope), float).ravel()
+        Fo = F / sc * sgn
+        free = lbx < ubx
+        btol = 1e-8 * np.maximum(1.0, np.abs(x))
+        atl = free & np.isfinite(lbx) & (x - lbx <= btol)
+        atu = free & np.isfinite(ubx) & (ubx - x <= btol)
+        infes = (atl & (Fo > tol)) | (atu & (Fo < -tol))
+        num_infes = int(infes.sum())
+        sum_infes = float(np.abs(F[infes]).sum())
+        if num_infes == 0 or sum_infes <= 1e-5:
+            break
+        lam = np.where(infes, np.abs(Fo), 0.0)
+        lbx, ubx, moved = widen(ctx["mm"], ctx["lay"], x, lbx, ubx, lam, tol=1e-8, base=x0)
+        lbx[ctx["empty"]], ubx[ctx["empty"]] = x0[ctx["empty"]], x0[ctx["empty"]]
+        ctx["bounds"] = (lbx, ubx)
+        ctx["fmv"] = _fudge_modes(ctx, lbx)
+        if not moved:
+            msg += f"; {num_infes} unknowns held at a bound (SumInfes {sum_infes:.2e}), no bound to widen"
+            break
+        fP, fJP, sgn = _mcp_system(ctx, lbx, ubx)
+        n = int(x0.size)
+        x, ok, it, nk = _newton(fP, fJP, np.clip(x, lbx, ubx), np.arange(n), np.ones(n), tol, max_iter, slope)
+        msg += (f"; {num_infes} unknowns held at a bound (SumInfes {sum_infes:.2e}): {moved} bounds widened, "
+                f"semismooth Newton {'converged' if ok else 'stalled at %.1e' % nk} in {it} steps")
+        if not ok:
+            return x, False, msg
+    return x, True, msg
 
 
 def _bounds(ctx) -> tuple:
@@ -615,16 +787,31 @@ def apply(mm, ctx, xs, r, exogenous_supply, trade_scenario):
     return out
 
 
-def chain_market_solve(mm, r, exogenous_supply, trade_scenario, method: str = "chain"):
+def chain_market_solve(mm, r, exogenous_supply, trade_scenario, method: str = "chain", from_equilibrium=False):
     """The market system solved from the start r (and the module's state); method "chain" (Newton, then the
     continuation, then IPOPT: solve(ctx, "auto")), "ipopt" or "ssn" (the semismooth Newton on the MCP form, CAPRI's
-    bounds; after the fixed point with market.bounds = "capri"); the solution's price ratios as a frame like r, or None
-    (see the module's docstring)."""
+    bounds; after the fixed point with market.bounds = "capri"); from_equilibrium: r is the fixed point's equilibrium
+    (the semismooth Newton starts at CAPRI's slope); the solution's price ratios as a frame like r, or None (see the
+    module's docstring)."""
     try:
-        ctx = build(mm, r, exogenous_supply, trade_scenario)
+        if from_equilibrium and str(_settings().get("market.bounds")) == "capri":
+            t1 = time.time()
+            lifted = _lifted(mm, r, exogenous_supply, trade_scenario)
+            if within_capri_start_bounds(mm, lifted[1], lifted[5]):
+                print(f"    market solve by the chain: the fixed point's equilibrium within CAPRI's start bounds, kept "
+                      f"({time.time() - t1:.1f} s)", flush=True)
+                del lifted
+                import gc
+                gc.collect()
+                return r
+            ctx = build(mm, r, exogenous_supply, trade_scenario, lifted=lifted)
+            del lifted
+        else:
+            ctx = build(mm, r, exogenous_supply, trade_scenario)
     except NotImplementedError as e:
         print(f"    market solve by the chain not possible here ({e}); the fixed point solves it", flush=True)
         return None
+    ctx["from_equilibrium"] = bool(from_equilibrium)
     t1 = time.time()
     xs, ok, msg = solve(ctx, {"chain": "auto", "ipopt": "ipopt", "ssn": "ssn"}[method])
     worst, rr = residual(ctx, xs)
@@ -634,7 +821,18 @@ def chain_market_solve(mm, r, exogenous_supply, trade_scenario, method: str = "c
         msg += f" (largest at {names[int(keep[int(np.argmax(rr))])]})"
     print(f"    market solve by the chain: {msg}; largest scaled residual {worst:.1e}; {time.time() - t1:.1f} s (system "
           f"built in {ctx['built']:.1f} s)", flush=True)
-    mm._chain_last = (ctx, xs)              # for diagnostics (tools/check): the system and its solution
-    if not ok:
-        return None
-    return apply(mm, ctx, xs, r, exogenous_supply, trade_scenario)
+    # the system is not kept on the module: its CasADi graphs take some GB, which the regional solves' forked workers
+    # would carry (a mini-EU run with market.bounds = "capri" had a worker killed for memory, 26 November 2026)
+    try:
+        if not ok:
+            return None
+        return apply(mm, ctx, xs, r, exogenous_supply, trade_scenario)
+    finally:
+        ctx.clear()
+        import gc
+        gc.collect()
+        try:                                   # glibc keeps freed memory in the process unless asked to return it
+            import ctypes
+            ctypes.CDLL("libc.so.6").malloc_trim(0)
+        except (OSError, AttributeError):
+            pass
