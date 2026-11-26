@@ -642,6 +642,25 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   SREV), the market crops' income now CAPRI's within 5%; the baseline's MGVA 40,034 against CAPRI's 38,358, the fodder
   activities 1,684 above CAPRI's (KNOWN_ISSUES K213, open). K211 stays open for the straw balance alone, slack at
   CAPRI's reference. Tests: test_eaa.py (2), test_water_income.py (1, slow).
+- **The fodder crops' output at CAPRI's UVAG(FODDO); a faster run (26 November 2026; KNOWN_ISSUES K213, register
+  DEP-54):** CAPRI's report values a fodder crop's output at the solution at YILD x UVAG(FODDO), UVAG(FODDO) = PSHW x (1
+  - p_onFarmShare) + FODDMARKUP (reports/sol_simy.gms l. 753; coupling/equations/sol_simy.py DATA_UVAG_FODDO), and its
+  simulations run without the baseline run's markups (they are written per country, l. 748, and loaded by a name
+  without the country code, capmod/create_sim_ini_gdx.gms l. 519): Denmark's other fodder at 49.69 x 0.3761 = 18.69
+  EUR/t in the 2030 reference, where the model's margin carried the base year's price, 38.91 in 2017 money (14.63 at
+  CAPRI's). The income and the account by item now take YILD x UVAG(FODDO) with the fodder balance's value per t fed as
+  PSHW (IncomeDistributionModule.crop_fodder_output; the technology mix's output difference too), FODDMARKUP 0 as
+  CAPRI's runs (the project lead, 26 November: the markups a question for Bonn). p_onFarmShare, (SEDF + SEDM + LOSF) /
+  GROF of the member state (supply/pmp.gms l. 41-49, capri_mod/supply/equations/pmp.py), from sim_ini_21730's DATA at
+  "Y" and "BAS" (tools/build/build_fodder_onfarm_share.py -> fodder_onfarm_share_2030.csv, fodder_onfarm_share_2017.csv;
+  the kept extract fodder_onfarm_items.parquet). Measured on the mini-EU Green Deal pair (20 units, EUR million, 2017
+  money): the solution identical; the baseline's fodder activities' income -1,648 (other fodder -214.0 against CAPRI's
+  -208.3, intensive grassland -282.7 against -310.4, extensive 237.3 against 218.7, fodder maize -32.3 against -31.3);
+  the account's fodder outputs CAPRI's EAAG (fodder maize 559.6, other fodder 486.2, grass 673.3); the baseline's MGVA
+  38,386 against CAPRI's 38,358 (40,034 before); the Green Deal's change of MGVA -1,559 (-1,852). The money deflator is
+  read once per root, base year and year (capri_mod/data/inputs.py; it was read from its file at each call, about 20%
+  of a one-unit 2030 baseline's time in a profile; that run's results identical with the cache): the same pair in
+  1,013 s against 1,434 s, the market supply Hessian of the baseline in 209 s against 382 s. Tests: test_water_income.py (2, and the income's sums with the fodder term).
 - **Income I1, the crops' inputs at CAPRI's simulation-year coefficients (26 November 2026; register DEP-54):** at the
   2030 market year a crop's income takes CAPRI's TOIN at "Y" (coupling/equations/calc_inc_indic.py DATA_TOIN_Y,
   IncomeDistributionModule.crop_toin_y): TF_I x its directly yield-dependent inputs at define_inputs.gms's coefficients

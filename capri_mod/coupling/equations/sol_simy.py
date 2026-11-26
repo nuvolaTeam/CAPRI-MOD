@@ -110,6 +110,35 @@ def p_ghgMiti_emisAll_cost(terms, scale):
     return total * float(scale)
 
 
+def DATA_UVAG_FODDO(PSHW, p_onFarmShare, FODDMARKUP=0.0):
+    r"""DATA(RU, "UVAG", FODDO, SIMY): a fodder's unit value as a crop's output at the solution (EUR per t produced):
+    the dual of its balance per t fed less the share the farm loses or does not feed, plus the baseline run's markup.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 753, and l. 756-757 for the fed fodder):
+
+          DATA(RU,"UVAG",FODDO,"%SIMY%") = DATA(RU,"PSHW",FODDO,"%SIMY%") * (1-p_onFarmShare(RU,FODDO)) + FODDMARKUP(RU,FODDO);
+
+          DATA(RU,"UVAG",FODDI,"%SIMY%") $ SUM(FEED_TO_O(FODDI,FODDO), (1-p_onFarmShare(RU,FODDO)))
+            = SUM(FEED_TO_O(FODDI,FODDO), DATA(RU,"UVAG",FODDO,"%SIMY%") * 1/(1-p_onFarmShare(RU,FODDO)));
+
+    In this project's notation: UVAG(FODDO) = PSHW x (1 - p_onFarmShare) + FODDMARKUP, and the fed fodder's UVAG(FODDI)
+    = UVAG(FODDO) / (1 - p_onFarmShare); p_onFarmShare = (SEDF + SEDM + LOSF) / GROF of the member state at the year
+    (supply/pmp.gms l. 41-49, capri_mod/supply/equations/pmp.py). A fodder crop's output per ha is then YILD x
+    UVAG(FODDO) = YILD x (1 - p_onFarmShare) x PSHW + YILD x FODDMARKUP: where the member state feeds all the fodder it
+    does not lose or sow, YILD x (1 - p_onFarmShare) is the fed fodder per ha of the model's fodder balance (SUPBAL_,
+    u_t_per_ha; Denmark's other fodder at 2030: 34.93 t produced per ha, CAPRI's 1 - LOSF / GROF = 0.3761, 13.14 t not
+    lost); where part goes to other uses (Germany's fodder maize to biogas) the fed fodder is less.
+
+    Departures from CAPRI: none in the statement. FODDMARKUP is 0 in the model's runs, as in CAPRI's simulations that
+    the model reproduces: CAPRI's 2030 reference and Green Deal step value Denmark's fodders at PSHW x (1 - LOSF / GROF)
+    exactly (other fodder 18.69 = 49.69 x 0.3761 EUR/t in the reference, 19.93 = 52.99 x 0.3761 in the Green Deal
+    step; dataOut, a check only), while its baseline run stored markups of 31.0 (FODDMARKUP_21730DKdefaulta.gdx). The
+    simulation loads FODDMARKUP_<BAS><SIM><reg_agg>... without the country code (capmod/create_sim_ini_gdx.gms l. 519)
+    and the baseline writes one file per country (l. 748 above), so the simulations ran without them (KNOWN_ISSUES
+    K213)."""
+    return float(PSHW) * (1.0 - float(p_onFarmShare)) + float(FODDMARKUP)
+
+
 def p_ghgMiti_emisAll_cost_scale(AACT, SupplTech, SupplTechTot_CH4ENT, DAYS=0.0, DRMA=0.0, prodDays=0.0, ShrOfDM=0.0):
     r"""The scaling of p_ghgMiti_emisAll_cost (l. 1063-1071 of the statement quoted there): for an animal activity
     (AACT) its days over 365, or for a supplement option counted against enteric CH4 (SupplTechTot with a CH4ENT

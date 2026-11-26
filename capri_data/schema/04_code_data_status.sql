@@ -12,6 +12,7 @@ CREATE TABLE code_data_status (
     PRIMARY KEY (file, scope, value)
 );
 INSERT INTO code_data_status VALUES
+  ('capri_mod/supply/equations/pmp.py', 'p_onFarmShare', 0.9, 'capri', 'keep', 'gams/supply/pmp.gms l. 48', 'CAPRI''s number in its statement, as written there (the share of the straw''s losses counted on the farm)'),
   ('capri_mod/feed/equations/aggreg.py', 'EPS', 1e-300, 'technical', 'keep', NULL, 'GAMS''s EPS in a comparison (supply/aggreg.gms l. 31: DATA le eps), the smallest value that counts as not zero'),
   ('capri_mod/projection/equations/load_base_data_and_trends.py', 'DATA_TRD_FALL_invented', 0.02, 'capri', 'keep', 'gams/capmod/load_base_data_and_trends.gms l. 350-352', 'CAPRI''s number in its statement, as written there (the other fodder''s level kept, 20 ha)'),
   ('capri_mod/projection/equations/load_base_data_and_trends.py', 'DATA_TRD_FALL_invented', 0.05, 'capri', 'keep', 'gams/capmod/load_base_data_and_trends.gms l. 350-361', 'CAPRI''s number in its statement, as written there (the fallow invented, 50 ha)'),

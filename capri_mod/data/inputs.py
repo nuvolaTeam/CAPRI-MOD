@@ -185,6 +185,11 @@ def base_year() -> str:
     return current().base_year
 
 
+#: money_deflator's values by (data root, base year, year): the file read once per run's inputs (5 ms a call; the
+#: income's simulation-year coefficients called it per crop and solve, a quarter of a mini-EU run's time)
+_DEFLATORS: dict = {}
+
+
 def money_deflator(year, inputs: Optional["RunInputs"] = None) -> float:
     """CAPRI's money of `year` per unit of the model's (the base year's) money, at run time: the deflator of the
     baseline's capri_price_ratios_<year>.csv (trajectories_dir), the first EU member state's in the file's order, the
@@ -194,6 +199,9 @@ def money_deflator(year, inputs: Optional["RunInputs"] = None) -> float:
     inp = inputs if inputs is not None else current()
     if str(year) == str(inp.base_year):
         return 1.0
+    key = (str(inp.root), str(inp.base_year), int(year))
+    if key in _DEFLATORS:
+        return _DEFLATORS[key]
     from capri_mod.data.definitions import is_eu
     p = trajectories_dir(inp.root, year, inp.base_year) / f"capri_price_ratios_{int(year)}.csv"
     d = [float(r["deflator"]) for r in inp.rows_at(p) if is_eu(r["ms"])]
@@ -201,6 +209,7 @@ def money_deflator(year, inputs: Optional["RunInputs"] = None) -> float:
         raise ValueError(f"{p.name}: no EU member state")
     if max(d) - min(d) > 1e-12 * max(d):
         raise ValueError(f"{p.name}: the deflator is not one value ({min(d)} to {max(d)})")
+    _DEFLATORS[key] = d[0]
     return d[0]
 
 
