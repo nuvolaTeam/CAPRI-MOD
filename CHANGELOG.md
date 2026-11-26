@@ -529,6 +529,37 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   covers (the EU's and Norway's); the water accounts' coverage (no irrigation share for Bosnia's and Serbia's units).
   Also: two CSV float reads made exact (build_livestock_n_export_2030.py, of K202; build_feed_bulk_grof.py). README
   §10.4.
+- **Income I1: the region's income at the solution in CAPRI's form (26 November 2026;
+  claude/income_i1_progress_2026-11-25.md, KNOWN_ISSUES K205, register DEP-54):** each regional solve sets the region's
+  income (SupplyResult.income, capri_mod/income/income_module.py income_parts; SupplyResult.gross_margin is its MGVA),
+  and the welfare table's MGVA and ProfitAgr and the income module take it. CAPRI's indicators per activity at the
+  solution (reports/calc_inc_indic.gms l. 30-49: coupling/equations/calc_inc_indic.py DATA_MGVA) with the solved ration
+  at its report prices in place of the feed the herds' margins carry (sol_simy.gms l. 254-257), summed as CAPRI's
+  activity-based income AGGT (sol_simy.gms l. 2586-2587, coupling/equations/sol_simy.py DATA_AGGT_MGVA) with the
+  mitigation options' cost an input (mitiI) and their revenue an output (mitiO); ProfitAgr = MGVA - RENT (welfare.gms l.
+  841-846, market/equations/welfare.py p_welfareRes_EAAG_ProfitAgr). CAPRI's report of the options per activity ported
+  (reports/sol_simy.gms l. 1049-1465, one function per statement with the GAMS quoted: the cost, revenue, PMP cost and
+  subsidy per activity and their special cases, DATA's mitiSubs, PRME, the effort's price, mitiI and mitiO) and
+  evaluated per region at the solution (capri_mod/income/mitigation_items.py): the fertiliser options, the inhibitor on
+  manure, the ammonia options and anaerobic digestion (each sub-activity's shares, places per unit and CAPRI's
+  CostParLin, CostParSqr and revenue carried through the solve; ammonia_tech_model.csv gains kappa2 and AD's revenue,
+  its other columns byte-identical), the winter cover (the catch crops' input cost, which CAPRI books in CATC's own
+  inputs), tillage, the legume share, urea substitution, the histosols' fallowing (CAPRI's restoration cost, 216 EUR/ha,
+  no_histosols.gms l. 121-131) and the herd options. The subsidy is 0, as in CAPRI's runs without ghgMitiSubsidy. Urea
+  substitution on the N bought, as CAPRI's supply model charges it (register FIX-10, income.urea_cost_base; CAPRI's
+  report books the per-t cost per ha of each crop). The welfare table reports mitiI, mitiO and mitiPmp (the PMP cost,
+  apart) beside MGVA. The supply results keep the solved feed's report prices, the feed value the herds' linear terms
+  leave out and the fodder balances' duals unclipped (CAPRI's PSHW, for the fodder's scenario value per activity and the
+  product accounts of I2). Measured on the mini-EU Green Deal pair (20 units; EUR million: the baseline's income 33,068
+  in the margins' form, 36,305 in CAPRI's, the herds' solved rations at their report prices 9,255 against the 12,803
+  their margins carried, Denmark's dairy cows 1,162 EUR per head against 1,829, CAPRI's 2030 rations at its 2030 unit
+  values deflated about 1,165; the options' cost 340 and revenue 28; the Green Deal's change -861 (-2.6%) in the
+  margins' form, -1,623 (-4.5%) in CAPRI's; the new income equals the old less the feed gap and the options' net cost to
+  1e-12, RENT and PSEs unchanged). The solution is unchanged (the run's levels and prices identical to the gate's).
+  Found by the measurement: the first form of the welfare table stored the baseline's duals on the model's slotted
+  state, which refused the attribute, so the table was None in both runs, and the run script silenced the warning; the
+  store is gone and the run script shows the welfare table's warnings. Tests:
+  capri_mod/tests/test_sol_simy_mitigation.py (19, by hand).
 - **The animals' costs in CAPRI's objective form (25 November 2026; register DEP-13 step 3, the project lead's choice
   of CAPRI's objective form):** CAPRI's p_linObjeCont (capmod/define_objc.gms l. 39-44) and IobjCont (sets.gms
   l. 5059-5067: the inputs but IS's, the chicks, water and the mitigation input) in supply/equations/define_objc.py.

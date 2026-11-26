@@ -341,7 +341,9 @@ class SupplyResult:
     region_id: str
     activities: pd.Series          # optimal activity levels (1000 ha / heads)
     gross_output: pd.Series        # 1000 t
-    gross_margin: float            # EUR 1000
+    #: EUR 1000: the activities' margins x levels at the solve; the regional solve sets it to the region's income in
+    #: CAPRI's form, income["MGVA"] (capri_mod/income/income_module.py income_parts)
+    gross_margin: float
     shadow_prices: Dict[str, float] = field(default_factory=dict)
     nutrient_balance: pd.Series = None
     ghg_emissions: pd.Series = None
@@ -351,6 +353,14 @@ class SupplyResult:
     iset: float = 0.0
     #: run.verbosity "solver": each IPOPT solve of the region's model, its log, size and status (runlog.supply_solves)
     solver_log: list = field(default_factory=list)
+    #: the fodder balances' duals as the NLP returns them, not clipped at 0 (EUR/t; CAPRI's PSHW, the dual of SUPBAL_
+    #: for the fodder, reports/sol_simy.gms l. 737-757): the fodder's scenario value, CAPRI's UVAG(FODDO, SIM)
+    #: (IncomeDistributionModule.feed_by_animal; the product accounts of income I2); not in the region's income, where
+    #: it is an internal flow
+    fodder_duals: Dict[str, float] = field(default_factory=dict)
+    #: the region's income at the solution in CAPRI's form (income I1, EUR 1000: MGVA, PRME, FEED, mitiI, mitiO,
+    #: mitiPmp, the options' parts, MGVA per activity; IncomeDistributionModule.income_parts), set by the regional solve
+    income: Dict = field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
@@ -584,9 +594,11 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: identity reference: its deep copy could never match, and the tax's undo never acts across solves)
     SOLVE_STATE = ("ev.amm_cost", "sv.amm_last", "res.animal_n_kept", "ev.animal_n_relief", "res.animal_nh3_saved",
                    "res.cover_solved", "res.fd_model", "res.land_solution", "res.last_aug", "res.last_cattle_z",
-                   "res.last_dairy_z", "ev.last_duals", "res.last_feed_dm", "res.last_feed_t", "res.last_genet_z",
+                   "res.last_dairy_z", "ev.last_duals", "res.last_feed_dm", "res.last_feed_t", "res.last_feed_price",
+                   "res.last_feed_lin", "res.last_genet_z",
                    "res.last_hist_fallow", "res.last_mix_z", "res.last_npk", "ev.last_req_duals",
-                   "ev.manure_ni_nh3", "ev.manure_ni_relief", "res.manure_tech_shares", "ev.price_shock_now",
+                   "ev.manure_ni_nh3", "ev.manure_ni_relief", "res.manure_tech_shares", "res.amm_subs",
+                   "ev.price_shock_now",
                    "sv.wc_solved", "seen.feed_rations", "sv.n_relax_sticky")
     #: a solve's outputs the coupling reads from the model itself after the supply side (not from the solve's result):
     #: the manure pools' columns, bounds and vectors and the manure value (coupling/manure.py). The market supply
@@ -2107,6 +2119,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             solver_message=solver_message,
             iset=_iset,
             solver_log=list(getattr(self.res, "solver_log", None) or []),
+            fodder_duals=({lab: float(_zc[i]) for i, lab in enumerate(labels)
+                          if i < len(_zc) and str(lab).startswith("fodder_")} if _zc is not None else {}),
         )
 
 
@@ -3255,6 +3269,7 @@ class SupplyModule(ModuleStateMixin):
             result.animal_nh3_saved = dict(getattr(model.res, "animal_nh3_saved", None) or {})
             result.animal_n_kept = dict(getattr(model.res, "animal_n_kept", None) or {})
             result.manure_tech_shares = dict(getattr(model.res, "manure_tech_shares", None) or {})
+            result.amm_subs = dict(getattr(model.res, "amm_subs", None) or {})
             result.dairy_low_shift = float(getattr(model.res, "last_dairy_z", 0.0) or 0.0)
             result.cattle_shift = dict(getattr(model.res, "last_cattle_z", None) or {})
             result.yani_dnet = getattr(model.res, "yani_dnet", None)
@@ -3309,6 +3324,7 @@ class SupplyModule(ModuleStateMixin):
                 result.animal_nh3_saved = dict(getattr(model.res, "animal_nh3_saved", None) or {})
                 result.animal_n_kept = dict(getattr(model.res, "animal_n_kept", None) or {})
                 result.manure_tech_shares = dict(getattr(model.res, "manure_tech_shares", None) or {})
+                result.amm_subs = dict(getattr(model.res, "amm_subs", None) or {})
                 result.dairy_low_shift = float(getattr(model.res, "last_dairy_z", 0.0) or 0.0)
                 result.cattle_shift = dict(getattr(model.res, "last_cattle_z", None) or {})
                 result.yani_dnet = getattr(model.res, "yani_dnet", None)
@@ -3328,6 +3344,10 @@ class SupplyModule(ModuleStateMixin):
                                   if getattr(model.ev, "last_duals", None) is not None else None)
                 result.feed_t = (dict(getattr(model.res, "last_feed_t", None) or {})
                                  if getattr(model.ev, "last_duals", None) is not None else None)
+                result.feed_price = (dict(getattr(model.res, "last_feed_price", None) or {})
+                                     if getattr(model.ev, "last_duals", None) is not None else None)
+                result.feed_lin = (dict(getattr(model.res, "last_feed_lin", None) or {})
+                                   if getattr(model.ev, "last_duals", None) is not None else None)
                 # fertiliser technologies inside: each crop's reported intensity includes its
                 # inside factor m_c / (n_c area_c) (reporting only; the N row never sees it)
                 _ff = getattr(model.res, "fert_inside_factor", None) or {}
@@ -3356,6 +3376,12 @@ class SupplyModule(ModuleStateMixin):
                     result.n_substitution = 0.0
             except AttributeError:
                 pass
+            # CAPRI's income indicators at the solution (reports/calc_inc_indic.gms, sol_simy.gms l. 2586; income I1):
+            # the region's income with the solved ration and the mitigation options' items, from the final state
+            # attached above
+            from capri_mod.income.income_module import IncomeDistributionModule
+            result.income = IncomeDistributionModule(getattr(self, "data", None)).income_parts(region, result, self)
+            result.gross_margin = float(result.income["MGVA"])
             return region, result, (0 if result.converged else 1), n_metric, "N price"
         except Exception as e:
             # a region whose solve raises stops the run (28 October 2026): an exception here is a fault of the code

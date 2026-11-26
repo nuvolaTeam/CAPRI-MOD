@@ -339,6 +339,16 @@
      "name": "r_ch4",
      "type": "DOUBLE",
      "not_null": false
+    },
+    {
+     "name": "kappa2",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "revenue",
+     "type": "DOUBLE",
+     "not_null": true
     }
    ],
    "primary_key": [
@@ -395,6 +405,12 @@
      "basis": "ammonia_tech_model kappa1"
     },
     {
+     "item": "kappa2",
+     "unit": null,
+     "status": "open",
+     "basis": "ammonia_tech_model kappa2"
+    },
+    {
      "item": "lg",
      "unit": null,
      "status": "open",
@@ -435,6 +451,12 @@
      "unit": null,
      "status": "open",
      "basis": "ammonia_tech_model r_ch4"
+    },
+    {
+     "item": "revenue",
+     "unit": null,
+     "status": "open",
+     "basis": "ammonia_tech_model revenue"
     },
     {
      "item": "slope",
@@ -27726,6 +27748,7 @@
    "notes": [],
    "read_by": {
     "model": [
+     "capri_mod/income/income_module.py",
      "capri_mod/supply/supply_module.py"
     ],
     "builders": [],
@@ -28805,6 +28828,7 @@
    "read_by": {
     "model": [
      "capri_mod/environmental/nitrogen.py",
+     "capri_mod/income/income_module.py",
      "capri_mod/supply/abatement.py"
     ],
     "builders": [],
@@ -63779,6 +63803,7 @@
    "read_by": {
     "model": [
      "capri_mod/environmental/nitrogen.py",
+     "capri_mod/income/income_module.py",
      "capri_mod/supply/abatement.py"
     ],
     "builders": [],
@@ -65476,6 +65501,7 @@
    "read_by": {
     "model": [
      "capri_mod/environmental/nitrogen.py",
+     "capri_mod/income/income_module.py",
      "capri_mod/supply/abatement.py"
     ],
     "builders": [],
@@ -66825,6 +66851,7 @@
    "notes": [],
    "read_by": {
     "model": [
+     "capri_mod/income/income_module.py",
      "capri_mod/supply/abatement.py"
     ],
     "builders": [],
@@ -67844,7 +67871,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 1058,
+  "capri/keep": 1059,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 39,

@@ -189,6 +189,9 @@ class RegionalResults(_Slots):
         "kkt_ipopt",          # IPOPT solves in the Hessian's KKT mode (a counter)
         "last_feed_dm",       # the feed used, dry matter
         "last_feed_t",        # the feed used, tonnes
+        "last_feed_lin",      # the feed value per head the herd's linear term left out (EUR/head; DEP-13 step 3)
+        "last_feed_price",    # the feed's value in the report (EUR/kg): tradable feeds at the solve's prices, fodder
+                              # at the ration's value
         "last_npk",           # the fertiliser outputs by nutrient
         "last_npk_cres",      # {nutrient: [(column, t per unit)]}: the residue pool's coefficients of the last block
         "last_npk_cres_yields",  # {crop: (base, current, scenario yield)}: where the pool's N factors moved (K189)
@@ -225,6 +228,7 @@ class RegionalResults(_Slots):
         "animal_n_kept",      # the manure N kept by the ammonia options, by animal
         "animal_nh3_saved",   # the NH3 they save, by animal
         "manure_tech_shares", # the manure technologies' shares
+        "amm_subs",           # per (animal, sub-activity): its weight, places per unit and options' shares (income)
         # core
         "land_solution",      # the land types' levels
         "last_aug",           # the augmented problem the land-market solve used (Q, c, A, b, y)
@@ -343,6 +347,8 @@ MOVED_REGIONAL: dict = {
     "_kkt_ipopt": "res.kkt_ipopt",
     "_last_feed_dm": "res.last_feed_dm",
     "_last_feed_t": "res.last_feed_t",
+    "_last_feed_price": "res.last_feed_price",
+    "_last_feed_lin": "res.last_feed_lin",
     "_last_npk": "res.last_npk",
     "_n_solves": "res.n_solves",
     "_nlp_fallback_log": "res.nlp_fallback_log",
@@ -417,6 +423,7 @@ MOVED_REGIONAL: dict = {
     "_animal_n_kept": "res.animal_n_kept",
     "_animal_nh3_saved": "res.animal_nh3_saved",
     "_manure_tech_shares": "res.manure_tech_shares",
+    "_amm_subs": "res.amm_subs",
     # core and policy (net_revenues, premiums, f, Q and balance_shortfall stay on the model)
     "_base_cal_shift": "par.base_cal_shift",
     "_base_levels_cache": "par.base_levels_cache",

@@ -131,7 +131,7 @@
    "description": "the ammonia technologies on the model's animals: CAPRI's options, weights and the N cascade terms (build_ammonia_tech_model.py) (tools/build/build_ammonia_tech_model.py)",
    "kind": "coefficients",
    "rows": 35369,
-   "columns": 23,
+   "columns": 25,
    "units": "to be established (value_units: open)",
    "read_by_model": [
     "capri_mod/environmental/ghg.py",
@@ -469,6 +469,7 @@
    "columns": 12,
    "units": "U_ratio",
    "read_by_model": [
+    "capri_mod/income/income_module.py",
     "capri_mod/supply/supply_module.py"
    ],
    "origin": {
@@ -526,6 +527,7 @@
    "units": "U_EuPerHa, U_kgperha, U_ratio",
    "read_by_model": [
     "capri_mod/environmental/nitrogen.py",
+    "capri_mod/income/income_module.py",
     "capri_mod/supply/abatement.py"
    ],
    "origin": {
@@ -610,6 +612,7 @@
    "units": "U_1000ha, U_EuPerHa, U_ratio",
    "read_by_model": [
     "capri_mod/environmental/nitrogen.py",
+    "capri_mod/income/income_module.py",
     "capri_mod/supply/abatement.py"
    ],
    "origin": {
@@ -640,6 +643,7 @@
    "units": "U_EuPerTon, U_ratio",
    "read_by_model": [
     "capri_mod/environmental/nitrogen.py",
+    "capri_mod/income/income_module.py",
     "capri_mod/supply/abatement.py"
    ],
    "origin": {
@@ -658,6 +662,7 @@
    "columns": 11,
    "units": "U_1000ha, U_EuPerHa, U_ratio",
    "read_by_model": [
+    "capri_mod/income/income_module.py",
     "capri_mod/supply/abatement.py"
    ],
    "origin": {
@@ -6589,7 +6594,7 @@
   "capri_data/codes/model_parameters.csv": {
    "description": "model_parameters (no builder: a declared table)",
    "kind": "parameters",
-   "rows": 67,
+   "rows": 68,
    "columns": 7,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -6668,7 +6673,7 @@
   "capri_data/codes/results_items.csv": {
    "description": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
    "kind": "structure",
-   "rows": 188,
+   "rows": 196,
    "columns": 8,
    "read_by_model": [
     "capri_mod/io_results.py"

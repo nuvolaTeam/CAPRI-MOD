@@ -42,6 +42,9 @@ animal, sub-activity (CAPRI region|activity) and option:
   stock_factor  animal places per unit = DAYS / 365 (CAPRI: costs per place)
   mann_rel      the sub-activity's manure N per unit relative to the animal's (weighting)
   group         MAN or APP;  kappa1, slope, thresh (= S0), ini, max;  rH, rS, rA
+  kappa2        CAPRI's accounting cost's quadratic term (CostParSqr; the combinations' sums; AD's costParSqr) and
+  revenue       the option's revenue per place (AD's; 0 for the others): with kappa1 the income report's accounting
+                cost and revenue (reports/sol_simy.gms l. 1049-1072, 1169-1183; income I1)
   g, fG, fH, fS, fA   grazing share of excreted N, NH3 loss fractions at grazing, housing,
                       storage and application (MITERRA, liquid/solid weighted)
 REGISTERED: other N gases are not subtracted in the cascade; RAINS liquid shares of 2020.
@@ -228,7 +231,7 @@ def main():
                              tech, o["group"], o["k1"],
                              "" if o["slope"] is None else o["slope"], o["S0"],
                              o["ini"], o["max"], o["rH"], o["rS"], o["rA"],
-                             g, fl["G"], fl["H"], fl["S"], fl["A"], "", ""])
+                             g, fl["G"], fl["H"], fl["S"], fl["A"], "", "", o["k2"], 0.0])
             # anaerobic digestion (tools/build/build_ad_option.py): its own target CH4MAN (NOC + AD = 1, TotMit_), share as
             # CAPRI reports it (v L (1 - G)); cost per place thresh (s - s0) + 1/2 slope (s - s0)^2 at 2030 prices;
             # its N effects act through the cascade (n_cascade_effects.csv), its CH4 factor in the accounts
@@ -238,11 +241,13 @@ def main():
                              "AD_AnCh", "AD", float(o["costParLin"]), float(o["slope"]),
                              float(o["thresh"]), float(o["ini"]), float(o["max"]),
                              0.0, 0.0, 0.0, g, fl["G"], fl["H"], fl["S"],
-                             fl["A"], float(o["lg"]), float(o["r_ch4"])])
+                             fl["A"], float(o["lg"]), float(o["r_ch4"]), float(o["costParSqr"] or 0.0),
+                             float(o["revenue"] or 0.0)])
     with open(D / "ammonia_tech_model.csv", "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["region", "animal", "sub", "weight", "stock_factor", "mann_rel", "technology", "group", "kappa1",
-                    "slope", "thresh", "ini", "max", "rH", "rS", "rA", "g", "fG", "fH", "fS", "fA", "lg", "r_ch4"])
+                    "slope", "thresh", "ini", "max", "rH", "rS", "rA", "g", "fG", "fH", "fS", "fA", "lg", "r_ch4",
+                    "kappa2", "revenue"])
         w.writerows(rows)
     return rows
 

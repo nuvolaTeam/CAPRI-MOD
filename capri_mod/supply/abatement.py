@@ -446,6 +446,7 @@ class AbatementBlock:
         from capri_mod.supply import ammonia_techs as _at
         self.ev.animal_n_relief, self.res.animal_nh3_saved, self.res.manure_tech_shares = {}, {}, {}
         self.res.animal_n_kept = {}
+        self.res.amm_subs = {}
         self.ev.amm_cost = {}
         ctx = self._amm_context()
         if ctx is None:               # no N balance this solve: base shares, for reporting
@@ -469,6 +470,11 @@ class AbatementBlock:
                 ini = _at.initial(s)
                 sh = dict(ini); sh.update(shares.get((a, s["key"]), {}))
                 last[(a, s["key"])] = sh
+                # the income report's accounting cost (CAPRI's costParLin, costParSqr at the sub-activity's shares)
+                self.res.amm_subs[(a, s["key"])] = {
+                    "w": float(s["w"]), "stock": float(s["stock"]),
+                    "techs": {t["tech"]: (float(sh[t["tech"]]), float(t["k1"]), float(t.get("k2", 0.0)),
+                                          float(t.get("rev", 0.0))) for t in s["techs"]}}
                 # N kept in the manure (CAPRI's GasRunTot through the cascade) and the NH3 part of it
                 saved += s["w"] * sc * s["mrel"] * (_at.loss(s, ini, wc0) - _at.loss(s, sh, wc1))
                 nh3s += s["w"] * sc * s["mrel"] * (_at.nh3(s, ini, wc0) - _at.nh3(s, sh, wc1))

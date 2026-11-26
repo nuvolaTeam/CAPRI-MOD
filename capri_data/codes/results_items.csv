@@ -134,11 +134,15 @@ supply,animal_nh3_saved,rows,,,,,
 supply,balance_shortfall,rows,,,,,
 supply,cattle_shift,rows,,,,,
 supply,converged,rows,,,,,
+supply,amm_subs,rows,,,,,"per (animal, CAPRI sub-activity): its weight in the animal's units, its places per unit (DAYS / 365) and per option its share at the solution, CAPRI's CostParLin, CostParSqr and revenue per place; the income report's accounting cost of the options (CAPRI's costParLin, costParSqr, reports/sol_simy.gms l. 1049-1072)"
 supply,cover_crops,rows,,,,,
 supply,dairy_low_shift,rows,,,,,
 supply,entitlements,rows,,,,,"K136: CAPRI's entitlement limit (def_endCut.gms): cut (EUR/ha), limit and eligible area (1000 ha), overshoot (1000 ha), premium_lost (1000 EUR), dual (EUR/ha; CAPRI's D_sumEntl with the opposite sign)"
 supply,feed_dm,rows,,,,,
+supply,feed_lin,rows,,,,EUR per head,"the feed value per head the herd's linear term leaves out (DEP-13 step 3: CAPRI's LINEAR_ has no feed, supply_model.gms l. 4752-4763); the income's base feed term"
+supply,feed_price,rows,,,,EUR per kg,"the solved feed's value per kg in the income report: tradable feeds at the solve's prices, fodder at the ration's value (CAPRI's TOIN at the solution, reports/calc_inc_indic.gms l. 34-37, the feed of reports/sol_simy.gms l. 254-257)"
 supply,feed_t,rows,,,,,
+supply,fodder_duals,rows,,,,EUR per t,"the fodder balances' duals not clipped at 0, CAPRI's PSHW (the dual of SUPBAL_ for the fodder, reports/sol_simy.gms l. 737-757)"
 supply,fert_dist_mode_crops,rows,,,,,
 supply,fert_dist_model,rows,,,,,
 supply,fert_nmin,rows,,,,,
@@ -146,10 +150,11 @@ supply,fert_npk,rows,,,,,
 supply,fert_tech_shares,rows,,,,,
 supply,genetics_shift,rows,,,,,
 supply,ghg_emissions,rows,,,,,
-supply,gross_margin,rows,,,,EUR 1000,
+supply,gross_margin,rows,,,,EUR 1000,"the region's income at the solution in CAPRI's form, income's MGVA (CAPRI's AGGT, reports/sol_simy.gms l. 2586; income I1)"
 supply,gross_output,rows,GROF,act,SWHE;DWHE;RYEM;BARL;OATS;CORN;OCER;PARI;OCRO;OIND;NURS;FLOW;POTA;SUGB;SUNF;RAPE;SOYA;OOIL;PULS;TOMA;OVEG;APPL;OFRU;CITR;TAGR;WINE;OLIV;TABO;TOBA;TEXT;MAIF,1000 t,"DATA(RU,'GROF',product): the region's gross production (simini_21730 DATA DE110000.GROF.SWHE); the model's gross output of a crop activity is its product's (CAPRI's 2030 GD reference, DE110000: SWHE 545.4 vs the model's 544.9). Not GRAS (another measure: 4356 vs 970) nor the animals (their products are other codes)"
 supply,histosol_fallow,rows,,,,,
 supply,supp_fat,rows,,,,,
+supply,income,rows,,,,EUR 1000,"the region's income at the solution in CAPRI's form (income I1, IncomeDistributionModule.income_parts): MGVA (CAPRI's AGGT, reports/sol_simy.gms l. 2586), PRME, the feed term FEED, mitiI, mitiO, mitiPmp and the options' parts, and MGVA per activity in EUR per ha or head (reports/calc_inc_indic.gms l. 30-49)"
 supply,iset,rows,,,,,
 supply,land_types,rows,,,,,
 supply,legsh_share,rows,,,,share of other arable fodder,"K93: CAPRI's LegSh share, v_Miti(RU, OFAR, LegSh, BioFix) (envind/leg_share.gms)"
@@ -182,7 +187,10 @@ welfare,ProfitProc,cols,EAAG,PROFITPROC,,EUR million,"capmod/reports.gms l. 318:
 welfare,TRQRents,cols,EAAG,TRQRents,,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"
 welfare,TariffRev,cols,EAAG,TARIFFREV,,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"
 welfare,Welfare,cols,,,,EUR million,
-welfare_supply,MGVA,cols,,,,,
+welfare_supply,MGVA,cols,,,,EUR million,"the region's income at the solution in CAPRI's form: the activities' MGVA x levels with the solved ration, the mitigation options' cost and revenue inside (CAPRI's AGGT, reports/sol_simy.gms l. 2586, for its EAAG MGVA; reports/calc_inc_indic.gms l. 30-49)"
+welfare_supply,mitiI,cols,,,,EUR million,"the mitigation options' accounting cost, CAPRI's input mitiI valued (reports/sol_simy.gms l. 1049-1164, 1455-1461), inside MGVA (income I1)"
+welfare_supply,mitiO,cols,,,,EUR million,"the mitigation options' revenue, CAPRI's output mitiO valued (reports/sol_simy.gms l. 1169-1208, 1463-1465), inside MGVA (income I1)"
+welfare_supply,mitiPmp,cols,,,,EUR million,"the mitigation options' PMP cost, CAPRI's mitiPmp (reports/sol_simy.gms l. 1210-1319, 1431), not in MGVA; only the blocks whose data keep CAPRI's PMP parameters"
 welfare_supply,PSEs,cols,,,,,
 welfare_supply,ProfitAgr,cols,,,,,
 welfare_supply,ProfitLandUse,cols,,,,,

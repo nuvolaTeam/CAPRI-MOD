@@ -55,8 +55,11 @@ def test_water_demand_geography(data):
 
 @pytest.mark.slow
 def test_income_is_capris_mgva_sum(data):
-    """Farm income = sum of (revenue - input cost + premium) x level (CAPRI's ProfitAgr over MGVA); the policy
-    module's payments are reported beside it, not added (until 27 October 2026 premiums were counted twice)."""
+    """Farm income = CAPRI's activity-based income at the solution (income I1, AGGT): the activities' margins x levels
+    with the technology mix's, less the change of the herds' feed (the solved ration against the feed the margins
+    carry), less the mitigation options' cost plus their revenue; the premiums x levels its public support. The
+    region's income is set by the regional solve (SupplyResult.income, gross_margin its MGVA). The policy module's
+    payments are reported beside it, not added (until 27 October 2026 premiums were counted twice)."""
     from capri_mod.supply.supply_module import SupplyModule
     from capri_mod.utils.utils import calibrate_supply_elasticities
     from capri_mod.policy.policy_module import PolicyModule, PolicyScenario
@@ -66,13 +69,23 @@ def test_income_is_capris_mgva_sum(data):
     sr = sm.run(price_signals=None, regions=regs)
     cap = PolicyModule(data, PolicyScenario(name="BASELINE")).payments.compute_payments_by_region(
         data["cap_payments"], data["land"])
-    res = IncomeDistributionModule(data).compute(sr, sm, cap)
+    im = IncomeDistributionModule(data)
+    res = im.compute(sr, sm, cap)
     for r in regs:
         m, lev = sm._models[r], sr[r].activities
-        inc = sum(float(m.net_revenues[a]) * float(lev.get(a, 0.0)) for a in m.net_revenues.index)
-        sup = sum(float(m.premiums.get(a, 0.0)) * float(lev.get(a, 0.0)) for a in m.net_revenues.index)
+        mz = dict(sr[r].technology_mix or {})
+        dnr = dict(getattr(m.ev, "mix_dnr", None) or {})
+        mi = im.mitigation_items(r, sr[r], sm)
+        inc = (sum(float(m.net_revenues[a]) * float(lev.get(a, 0.0)) for a in m.net_revenues.index)
+               + sum(float(dnr.get(a, 0.0)) * z for a, z in mz.items())
+               - im.feed_term(sr[r]) - mi["mitiI"] + mi["mitiO"])
+        sup = (sum(float(m.premiums.get(a, 0.0)) * float(lev.get(a, 0.0)) for a in m.net_revenues.index)
+               + sum(float(m.data.techn_mix.at[a, "prem_diff_share"]) * float(m.premiums.get(a, 0.0)) * z
+                     for a, z in mz.items() if a in m.data.techn_mix.index))
         row = res.by_region.loc[r]
         assert row.farm_income == pytest.approx(inc, rel=1e-12)
+        assert sr[r].gross_margin == pytest.approx(inc, rel=1e-12)
+        assert mi["mitiI"] > 0
         assert row.public_support == pytest.approx(sup, rel=1e-12)
         assert row.market_income == pytest.approx(inc - sup, rel=1e-9)
         assert row.cap_payments_policy == pytest.approx(float(cap.at[r, "total_payments"]), rel=1e-12)

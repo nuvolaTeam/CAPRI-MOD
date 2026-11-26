@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](dev/KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (19)
+## Open (18)
 
 | # | Issue | Status |
 |---|---|---|
@@ -30,10 +30,9 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K189](#k189) | The equation refactor's findings for the main line: CAPRI rows of the Green Deal step not in the model (rice CH4, NOx, the LULUCF block, the histosols' CO2 and CH4) and about 25 porting differences; sorted 20 November 2026: most are in the accounts only or have no effect in the step; ARTIF held fixed had one (small for the EU, a few thousand ha in some Spanish and French units) | open: ARTIF, the milk for feeding and the yield factors of the crops' N and P terms ported 20 November 2026 (as CAPRI's); the animals' per-head terms ported 21 November 2026 (the members' INPO difference under the Green Deal's input change); fertned's two items left closed 23 November 2026 (the price-driven O_HP needs no port; the residues' variant factor at the moved MANN ported) |
 | [K196](#k196) | The Green Deal's N-surplus dual is below CAPRI's (CAPRI's recovered from its own results): median 0.856 of CAPRI's in the standing check at 9867411 (0.89 at bb3b592), 0.83 at CAPRI's prices; the suckler cows' and the technology shift's remaining gaps follow it | open (21 November 2026) |
 | [K198](#k198) | The assignments refactor's findings for the main line (its inventory of the CAPRI statements the model ports or cites, blocks A0-A6): porting differences in the market supply Hessian, the price transmission, the stop rule, the welfare, the premiums, the Green Deal's regional rules and the accounts, sorted by where they act, not measured; A0's 14 wrong line citations corrected; from the phase's runs, a measured and a cached Hessian moving a run's last digits (1e-5 after the scenario; diagnosed and fixed: the manure value left by the last shock), the thread oversubscription (fixed) and the Hessian step's log (done) | open (updated 24 November 2026) |
-| [K205](#k205) | A scenario's reported income (gross margin, income module, the welfare table's MGVA and ProfitAgr) values the activities at their base unit margins: the solved ration, the fodder's scenario value, the mitigation options' cost, revenue and subsidy are not in it | open (24 November 2026): to be fixed by CAPRI's form of the activity income (reports/calc_inc_indic.gms) |
 | [K206](#k206) | The ported baseline feed calibration ends at a slightly worse local optimum than CAPRI's in five countries (PT, TUR, BG, ES, CZ); every coefficient within 1% of CAPRI's | open (25 November 2026) |
 
-## Resolved (186)
+## Resolved (187)
 
 | # | Issue | Status |
 |---|---|---|
@@ -223,6 +222,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K117](#k117) | The full-EU market did not converge in Farm-to-Fork: the EU's sugar quotas switched on and off at every step | fixed |
 | [K118](#k118) | The market supply Hessian's cache key did not cover the supply data: a data change could reuse a stale Hessian | fixed |
 | [K119](#k119) | The CAPTRD trajectory took CAPRI's "Pigs total" aggregate for the model's PIGS (CAPRI's SOWS) since K116 | fixed |
+| [K205](#k205) | A scenario's reported income valued the activities at their base unit margins: the solved ration and the mitigation options' cost and revenue were not in it | fixed (26 November 2026, income I1): the region's income at the solution in CAPRI's form; the rest in register DEP-54 and income I2 |
 
 ## Details
 
@@ -4362,30 +4362,42 @@ earlier baseline, p_fedtrmHasIniPoint) is not known; the material has none.
   (the module's departure). A multi-start, as the regional models' warm and jump checks (DEP-18), would be beyond CAPRI.
 
 <a id="k205"></a>
-### K205: A scenario's income at the base unit margins (found 24 November 2026)
+### K205: A scenario's income at the base unit margins (found 24 November 2026; fixed 26 November 2026)
 
-The model's reported income has the same form in all three places: SupplyResult.gross_margin (supply_module.py,
-net_revenues @ x), income_module._income_parts, and so the welfare table's MGVA and ProfitAgr. Each is the sum over
+The model's reported income had the same form in all three places: SupplyResult.gross_margin (supply_module.py,
+net_revenues @ x), income_module._income_parts, and so the welfare table's MGVA and ProfitAgr. Each was the sum over
 activities of r_a x level_a, with r_a = LINEAR_netRevenue(revenue, cost, premium) per unit, from the base data
-(supply_module._compute_net_revenues). At the base point this is CAPRI's activity-based MGVA. In a scenario it misses
+(supply_module._compute_net_revenues). At the base point this is CAPRI's activity-based MGVA. In a scenario it missed
 what CAPRI's calc_inc_indic.gms values at the solution:
 
-- the solved ration (reports/sol_simy.gms l. 255-257), where the herds' r_a keeps the base ration's cost (the regional
-  NLP charges the solved ration through QUADRF_, capri_regional_nlp.py l. 385-406);
-- the fodder's scenario value, the fodder balance's dual plus the baseline's markup (sol_simy.gms l. 740-757);
+- the solved ration (reports/sol_simy.gms l. 255-257), where the herds' r_a keeps the feed it carries (the regional
+  NLP charges the solved ration through QUADRF_);
 - the mitigation options' accounting cost as an input (mitiI), their revenue as an output (mitiO) and their subsidy in
-  PRME (sol_simy.gms l. 1049-1146, 1427-1465).
+  PRME (sol_simy.gms l. 1049-1146, 1427-1473).
 
-CAPRI's per-activity indicators value each crop's fertiliser at the year's coefficients times the technology mix, not
-at the solved purchases (sol_simy.gms l. 377-384; calc_fert_dist.gms writes the distribution items, not NITF). The
-solved purchases are in the product-based account (NETF = -v_netPutQuant, l. 309), and so in the welfare table's total
-(welfare.gms l. 841-847): a later step of the fix.
+**Fixed (26 November 2026, income I1):** each regional solve sets the region's income in CAPRI's form
+(SupplyResult.income, IncomeDistributionModule.income_parts; gross_margin is its MGVA), and the welfare table and the
+income module take it. Measured on the mini-EU Green Deal pair (20 units; EUR million; the solution identical to the
+gate's): the baseline's income 33,068 in the margins' form, 36,305 in CAPRI's, the herds' solved rations at their report
+prices 9,255 against the 12,803 their margins carried (Denmark's dairy cows 1,162 EUR per head against 1,829: CAPRI's
+2030 rations at its 2030 unit values deflated give about 1,165, the margins carried CAPREG's 2017 ration at 2017 unit
+values), the options' cost 340 and revenue 28; the Green Deal's change of the income -861 (-2.6%) in the margins' form,
+-1,623 (-4.5%) in CAPRI's (the solved feed falls by 388 less than the margins' feed, the options' net cost rises by
+375). What stays in the model's form is in register DEP-54: the activities' outputs and inputs are not kept item by item
+(TOOU, TOIN and GVAP not apart), the options' items are booked at the region, and the fodder keeps the reference's value
+in a scenario on both sides of its internal flow (CAPRI's UVAG(FODDO, SIM), sol_simy .gms l. 737-757), which leaves the
+region's income unchanged.
 
-- **Effect:** the reported income of every scenario; not the model's solution
+Corrected on 26 November 2026: this entry said the solved fertiliser purchases belonged to the welfare table's total
+through CAPRI's product-based account. They do not. CAPRI's EAAG values GROF, which for the fertilisers is the
+activities' coefficients times their levels (sol_simy.gms l. 377-384, 685-687), as the activity-based income does; the
+purchases (NETF = -v_netPutQuant, l. 309) enter the account at producer prices, EAAP (l. 2547), which is not in the
+welfare table (welfare.gms l. 841-846 takes EAAG MGVA). They belong to income I2.
+
+- **Effect:** the reported income of the 2030 runs until 26 November 2026, the baseline's too (its herds' feed at
+  CAPREG's 2017 ration and unit values); not the model's solution
 - **In 9t:** -
-- **Status:** **open**. The fix is the activity income by CAPRI's form (TOIN = SUM(I, DATA(a, I, "Y") x UVAG)), after
-  the port of the year's data (capmod/load_base_data_and_trends.gms). The fodder's value follows CAPRI's rule (the project lead, 24 November 2026). The gap is to be
-  measured on a mini-EU run first (claude/income_inventory_2026-11-24.md section 8).
+- **Status:** **fixed** (26 November 2026); the rest is register DEP-54 and income I2
 
 <a id="k204"></a>
 ### K204: The catch crops' BioFix N on the area above the base share (found 24 November 2026)

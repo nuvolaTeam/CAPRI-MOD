@@ -190,6 +190,8 @@ class NLPBlock:
             spec["fix_cols"] = {n + len(getattr(self.ev, "land_types_used", [])): 0.0}
         self.res.last_feed_dm = None
         self.res.last_feed_t = None
+        self.res.last_feed_price = None
+        self.res.last_feed_lin = None
         self.res.nlp_ok = False
         # CAPRI's calibration: the base is a first-order point of the model it is simulated with. Once per region, at
         # the first solve (the baseline's base point and prices); the linear terms are kept by column and feed
@@ -691,18 +693,27 @@ class NLPBlock:
                             self.ev.manure_ni_nh3[a_] = _sh * _nip["app_nh3"][a_]
                 self.res.fert_tech_shares = dict(getattr(self.res, "fert_tech_shares", None) or {})
                 self.res.fert_tech_shares["NITR_INH_MAN"] = _sh
-        acts_ = list(self.acts); dm = {}; ft = {}
+        acts_ = list(self.acts); dm = {}; ft = {}; fp = {}
+        _fpr = getattr(self.seen, "feed_prices", None) or {}
+        _fod = set(fod)                               # the fodder feeds (their balances' rows)
         for a, r in rats.items():
             if a not in acts_:
                 continue
             herd = float(y[acts_.index(a)])
+            pv = _fpr.get(a)
             for j, f in enumerate(r.feeds):
                 amt = F.get((a, f)) if r.flex[j] else float(r.x0[j]) * herd
                 if amt is not None and amt > 0:
                     dm.setdefault(a, {})[f] = float(amt) * float(r.dm[j])
                     ft.setdefault(a, {})[f] = float(amt)
+                    # the feed's value in the report (income, CAPRI's TOIN at the solution, calc_inc_indic.gms): a
+                    # tradable feed at the solve's price, as the objective charges it (capri_regional_nlp QUADRF_);
+                    # fodder at the ration's value (the reference run's fodder value)
+                    fp.setdefault(a, {})[f] = float(r.p0[j] if (pv is None or f in _fod) else pv[j])
         self.res.last_feed_dm = dm
         self.res.last_feed_t = ft
+        self.res.last_feed_price = fp
+        self.res.last_feed_lin = dict(spec.get("feed_lin") or {})
         return y
 
     def _nlp_solve(self, Q, c, A, b, x_start):
@@ -714,6 +725,8 @@ class NLPBlock:
         self.res.nlp_rc = None
         self.res.last_feed_dm = None                  # never carry a previous solve's feed
         self.res.last_feed_t = None
+        self.res.last_feed_price = None
+        self.res.last_feed_lin = None
         self.res.nlp_ok = False
         self.ev.nlp_fb_last = False
         y = self._capri_nlp_solve(Q, c, A, b, x_start)

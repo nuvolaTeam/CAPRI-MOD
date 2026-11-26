@@ -37,6 +37,7 @@ FERT_CAL_MIN_NEED_SHARE,,0.1,share,capri,"CAPRI fert/ferttrm_years.gms: at least
 FERT_CAL_GRAS_MINE_TO_EXCR,,0.5,share,capri,CAPRI fert/ferttrm_years.gms: half of grassland's blanket mineral prior moved to manure,inner_fert_dist
 FERT_POST_ACCURACY,,1.0,ratio,capri,"CAPRI priFertDist results (postMode, 2030): accuracy of the posterior modes used as simulation priors, every region, group and source",inner_fert_dist
 NITR_INH_EMISSION_FACTOR,,0.9,share of NOC's emission,capri,"CAPRI envind/ghgMiti.gms l. 110-115: QEmitt of the nitrification inhibitor = 0.9 x QEmitt(NOC) for N2OSYN, copied to N2OMAN",supply_module; abatement
+HISTOSOL_FALLOW_COST,,216.0,EUR per ha idled (base-year money),capri,"CAPRI envind/no_histosols.gms l. 121-131: the accounting cost of restoring (rewetting) idled histosols, (4900 + 6240) / 2 over 30 years at 1%, inflated with p_infl to the simulation year (the model's money is the base year's: the same 216); costParLin of FALLOW, which CAPRI's report books as the input mitiI",income
 MITI_RELSUBS0,,0.2,share of costParLin,capri,CAPRI envind/ghgMiti.gms l. 904-906: relSubs0 of the fertiliser options = 0.2 x %sensFac% (default 1),supply_module; abatement
 MITI_RELSUBS1,,1.2,share of costParLin,capri,CAPRI envind/ghgMiti.gms l. 885-887: relSubs1 of the fertiliser options = 1.2 x %sensFac% (default 1),supply_module; abatement
 MITI_RELSUBS1_ADOPTED,,0.8,share of costParLin,capri,CAPRI envind/ghgMiti.gms l. 891-898: relSubs1 = 0.8 x %sensFac% where maxShare < 1 (option already adopted; relSubs0 0),supply_module

@@ -109,6 +109,8 @@ def main():
     warnings.filterwarnings("always", message="scenario market supply Hessian not measured")
     warnings.filterwarnings("always", message="bilateral market did not converge")
     warnings.filterwarnings("always", message="CAPRI's crop-group fertiliser allocation")
+    # the supply models' welfare table (coupling/reporting.py _welfare_supply): a failure leaves the table out
+    warnings.filterwarnings("always", message="welfare: ")
     sys.path.insert(0, str(ROOT))
     # the run manifest (capri_mod/run_manifest.py): the code, software and every input file the run reads, with its
     # SHA-256; recording starts before the data are read
@@ -444,6 +446,13 @@ def main():
            # per region: N-balance price (EUR/kg N), technology shares (diagnostics)
            "act_regional": tuple({reg: {k: float(x_) for k, x_ in v.activities.items() if np.isfinite(x_)}
                                   for reg, v in x["supply"].items()} for x in (b, s)),
+           # per region and animal: the solved feed (t) and its value per kg in the report (EUR/kg), baseline and
+           # scenario (income, CAPRI's TOIN at the solution: reports/calc_inc_indic.gms, sol_simy.gms l. 254-257)
+           "feed_regional": tuple({reg: {"t": dict(getattr(v, "feed_t", None) or {}),
+                                         "price": dict(getattr(v, "feed_price", None) or {}),
+                                         "lin": dict(getattr(v, "feed_lin", None) or {}),
+                                         "fodder_duals": dict(getattr(v, "fodder_duals", None) or {})}
+                                   for reg, v in x["supply"].items()} for x in (b, s)),
            "regional": {reg: {"lam": float((getattr(v, "shadow_prices", {}) or {}).get("N_balance", 0.0) or 0.0),
                               "fert": dict(getattr(v, "fert_tech_shares", None) or {}),
                               # the tillage options' and the urea substitution's shares (21 November 2026)

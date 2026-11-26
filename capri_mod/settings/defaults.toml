@@ -642,6 +642,13 @@ winterCovInAllRmssup = 1.0
 # free in the _max run (KNOWN_ISSUES K152)
 ghgTechAmmEndog = 0.0
 
+[income]
+# The urea substitution's cost in the income report (income I1, capri_mod/income/mitigation_items.py; register
+# FIX-10): "supply_model" (the default; the project lead, 25 November 2026) the cost per t of N bought x the N
+# bought, as CAPRI's supply model charges it (supply/supply_model.gms l. 5063), or "capri", CAPRI's report as coded
+# (reports/sol_simy.gms l. 1129-1132): the same per-t parameter as a cost per unit of every crop
+urea_cost_base = "supply_model"
+
 [diagnostics]
 verbose = true
 # outer-loop trace

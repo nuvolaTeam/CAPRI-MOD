@@ -19,10 +19,31 @@ def p_welfareRes_ProfitAgr(MGVA, LEVL):
               = SUM(PACT_TO_XX(MPACT,XX1), DATA(RMSSUP,MPACT,"MGVA","%SIMY%") * DATA(RMSSUP,MPACT,"LEVL","%SIMY%")*0.001);
 
     In this project's notation: ProfitAgr = sum_a MGVA_a L_a. Departures from CAPRI: the units (EUR 1000 from EUR per ha
-    or head and 1000 ha or heads; CAPRI's x 0.001 to million EUR); CAPRI's outputs and inputs not assigned to activities
-    (l. 451-456: EAAG of the outputs and inputs no activity produces or uses, NECR, ARES, LRES, SERI, mitiI, RQUO, SERO,
-    NASA, mitiO) not added; the technology mix's net revenue added by the caller (supply/techn_mix.py)."""
+    or head and 1000 ha or heads; CAPRI's x 0.001 to million EUR); one sum over the activities, not by product (income
+    I3); CAPRI's outputs and inputs no activity produces or uses (l. 451-456: the EAAG of NECR, ARES, LRES, SERI, RQUO,
+    SERO, NASA; mitiI and mitiO are the activities' since sol_simy.gms l. 1471-1473) not added: none of them is an item
+    of the model. Not called by the model's reports yet: the region's total is p_welfareRes_EAAG_ProfitAgr."""
     return float(sum(m * l_ for m, l_ in zip(MGVA, LEVL)))
+
+
+def p_welfareRes_EAAG_ProfitAgr(MGVA, RENT):
+    r"""p_welfareRes(RMSSUP, "EAAG", "ProfitAgr") and p_welfareRes(RMSSUP, "ProfitAgr", "INCE"): the farms' total
+    profit, the region's income less the land rents (CAPRI's land market, supremaMrk, as in its 2030 reference run).
+
+    CAPRI's GAMS (reports/welfare.gms l. 841-846):
+
+           p_welfareRes(RMSSUP,"EAAG","ProfitAgr","%SIMY%")   = DATA(RMSSUP,"EAAG","MGVA","%SIMY%")
+        $ifi %supremaMrk%==on                                 - DATA(RMSSUP,"EAAG","RENT","%SIMY%")
+        *                                                      - DATA(RMSSUP,"EAAG","EmiNetTaxAgr","%SIMY%")
+                                                              ;
+
+           p_welfareRes(RMSSUP,"ProfitAgr","INCE","%SIMY%")   = p_welfareRes(RMSSUP,"EAAG","ProfitAgr","%SIMY%")   ;
+
+    In this project's notation: ProfitAgr = MGVA - RENT. Departures from CAPRI: the region's activity-based income
+    (sol_simy.gms l. 2586, AGGT, coupling/equations/sol_simy.py DATA_AGGT_MGVA) in place of the product-based EAAG
+    MGVA, which CAPRI compares with it (sol_simy.gms l. 2600-2615: a difference above EUR 1,000 is reported) and the
+    model does not compute yet (income I2); the caller's units."""
+    return float(MGVA) - float(RENT)
 
 
 def p_pbGL(B):
