@@ -3508,9 +3508,11 @@ def test_no_synthetic_inputs_reach_the_model(data):
     # environmental coefficients present wherever they are needed
     env = EnvironmentalModule(data)
     mc, m4, e4 = data["livestock_manure_n_coef"], data["livestock_ch4man_coef"], data["livestock_ch4ent_coef"]
+    from capri_mod.supply.supply_module import FIXED_ACTIVITIES
     for r in herds.index:
         for a in ANIMALS:
-            if a in herds.columns and herds.at[r, a] > 0:
+            # CAPRI's other animals (OANI, fixed) have no feed, manure or emissions (K207)
+            if a in herds.columns and herds.at[r, a] > 0 and a not in FIXED_ACTIVITIES:
                 assert pd.notna(mc.at[r, a]) and mc.at[r, a] > 0, (r, a)
                 assert pd.notna(m4.at[r, a]), (r, a)
                 assert env._manure_n2o_factor(r, a) is not None, (r, a)

@@ -22,6 +22,7 @@ REF = (ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_17
 def test_the_cells_without_a_capri_term_are_zero_at_2030():
     from capri_mod.data.definitions import CAPRI_MEMBERS
     from capri_mod.data.loaders import HERD_ALIASES
+    from capri_mod.supply.supply_module import RegionalSupplyModel
     p = pd.read_csv(D30 / "pmp_capri_2030.csv", float_precision="round_trip")
     pa = pd.read_csv(D30 / "pmp_capri_2030_animals.csv", float_precision="round_trip")
     own = {(r, a) for r, a, b, g in zip(p.region, p.act_i, p.act_j, p.g) if a == b and g > 0}
@@ -41,7 +42,9 @@ def test_the_cells_without_a_capri_term_are_zero_at_2030():
                 if not (v == v and float(v) > 0):
                     continue
                 a = HERD_ALIASES.get(c, c)
-                if (r, a) in own:
+                # CAPRI's other animals, a fixed activity (FACT, held at its data level, supply/prep_sim.gms l. 250):
+                # no PMP terms, its 2030 level CAPRI's (K207); the fixed crops' cells here are 0 at 2030 in CAPRI
+                if (r, a) in own or a in RegionalSupplyModel.OTHER_ANIMALS:
                     continue
                 f = fac.get((r, c), fac.get((r, a)))
                 mem = CAPRI_MEMBERS.get(a, (a,))
