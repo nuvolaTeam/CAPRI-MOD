@@ -448,6 +448,8 @@ INSERT INTO data_kind VALUES
   ('capri_data/codes/capri/STOCK_TO_BY.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/codes/capri/SED_TO_CAK.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/codes/capri/PACT_TO_Y.csv', 'structure', 'by rule: codes, sets, correspondences'),
+  ('capri_data/codes/capri/PACT_TO_XX.csv', 'structure', 'by rule: codes, sets, correspondences'),
+  ('capri_data/codes/capri/CAP_TO_TRD.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/2017/supply/biofuel_resids_params.csv', 'coefficients', 'by file: CAPRI''s literal parameters of its crop residues and second-generation biofuel sources (biofuel/resids.gms)'),
   ('capri_data/codes/capri/FODCRP.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/codes/capri/cropDivGrps_mCact.csv', 'structure', 'by rule: codes, sets, correspondences'),

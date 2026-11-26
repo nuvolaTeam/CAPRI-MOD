@@ -384,7 +384,10 @@ def main():
                     ("manuType_to_atModel", ("manutype", "atmodel")), ("ms_to_country", ("ms", "country"))):
         write(OUT / "capri" / f"{s}.csv", cols, pairs(s))
     for s, cols in (("STOCK_TO_FUEL", ("xx", "seco_biof")), ("STOCK_TO_BY", ("xx", "byprod")),
-                    ("SED_TO_CAK", ("sed", "cak")), ("PACT_TO_Y", ("pact", "o"))):
+                    ("SED_TO_CAK", ("sed", "cak")), ("PACT_TO_Y", ("pact", "o")),
+                    # the welfare by product: CAPRI's activities to the market's products (reports/rep_sets.gms l.
+                    # 105-122) and its outputs to them (arm/arm_sets.gms l. 683ff), as CAPRI's run built them
+                    ("PACT_TO_XX", ("pact", "xx")), ("CAP_TO_TRD", ("rows", "xx"))):
         write(OUT / "capri" / f"{s}.csv", cols, pairs(s))
     write(OUT / "capri" / "Feed_FeedAggr.csv", ("feed", "feedaggr"), pairs("Feed_FeedAggr"))
     write(OUT / "capri" / "MAACT_TO_REQM.csv", ("maact", "reqm"), pairs("MAACT_TO_REQM"))

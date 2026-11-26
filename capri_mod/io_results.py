@@ -522,6 +522,15 @@ def to_long(results: dict, point: str) -> pd.DataFrame:
         for (ms, o), rec in fe.iterrows():
             for c, val in rec.items():
                 add((point, "feoga", str(ms), "", str(c), str(o), float(val)))
+    known.add("welfare_products")
+    wp = results.get("welfare_products")
+    if wp is not None:
+        # CAPRI's p_welfareRes(RMS, "ProfitAgr" / "PSEs", XX1): the farms' profit and the domestic support per member
+        # state and market product (capri_mod/income/welfare_products.py); the products are CAPRI's codes
+        for (ms, x), rec in wp.iterrows():
+            for c, val in rec.items():
+                if val == val:
+                    add((point, "welfare_products", str(ms), "", str(c), str(x), float(val)))
     known.add("fert_dist")
     fd = results.get("fert_dist")
     if fd is not None:
@@ -558,7 +567,7 @@ def to_long(results: dict, point: str) -> pd.DataFrame:
 
 
 #: the blocks whose items are in cols (CAPRI's market convention); the others' items are in rows
-ITEM_IN_COLS = ("market", "welfare", "welfare_supply", "policy", "eaa", "feoga")
+ITEM_IN_COLS = ("market", "welfare", "welfare_supply", "policy", "eaa", "feoga", "welfare_products")
 #: the table's columns after with_capri_codes
 TABLE_COLUMNS = ("point", "block", "region", "dim5", "cols", "rows", "capri_region", "capri_dim5", "capri_cols",
                  "capri_rows", "unit", "value")

@@ -93,8 +93,8 @@ equation book (`docs/equations/`) sets CAPRI's GAMS equations beside their Pytho
 | Base year | 2017 (parameterised); scenarios solved in 2030 on CAPRI star 3.0's Green Deal baseline |
 | Supply | CAPRI's regional models as non-linear programs with CAPRI's 2030 PMP terms |
 | Market | CAPRI's market model as ported, in CAPRI's 45 market regions (the EU as its two blocks): bilateral Armington trade, tariffs, TRQs, entry prices, GL demand, processing, dairy, biofuels, feed bulks, young animals, non-EU land markets |
-| Data validator | 941 declared data files (CSV inputs, Parquet sources), 0 violations |
-| Test suite | 728 tests, 112 of them slow; the last full run (25 November 2026, 680 tests, one test file per process): 677 passed, 2 skipped, 1 xpassed |
+| Data validator | 943 declared data files (CSV inputs, Parquet sources), 0 violations |
+| Test suite | 731 tests, 112 of them slow; the last full run (25 November 2026, 680 tests, one test file per process): 677 passed, 2 skipped, 1 xpassed |
 | Full-EU 2030 runs | 4 to 8 minutes per supply-market iteration on 2 cores (Green Deal, 24 November 2026: 12 iterations in 73 minutes), plus about 50 minutes once per new baseline for the market supply Hessian |
 | Solvers | IPOPT (CasADi) for the supply models and the manure pool market; the market's fixed point or the whole-market chain (Newton with MKL PARDISO, a continuation, IPOPT); Clarabel (the manure pools' alternative form), HiGHS (linear side problems) (§6) |
 
@@ -693,9 +693,10 @@ reporting step (`capri_mod/nuts_reporting.to_nuts2024`), not regional detail of 
   `capri_data/validation/HOW_TO_RUN_A_VALIDATION_SCENARIO.md`).
 - The reported income is CAPRI's activity-based income at the solution (`capri_mod/income`, register DEP-54) with its
   producer surplus (DEP-55), its gross account by item (EAAG, DEP-56) and the premium outlays per product and budget
-  (FEOGA's FEOP, DEP-57), but CAPRI's other animals (OANI) have no level in the model (KNOWN_ISSUES K207: 3.4% of the
-  mini-EU baseline's income) and the straw is valued at zero on both sides; the accounts at producer and basic prices
-  (EAAP, EAAB) are to be ported.
+  (FEOGA's FEOP, DEP-57), the farms' profit and the support by market product (DEP-58) and a regional unit's accounts
+  at producer and basic prices (EAAP, EAAB: the fertiliser purchases and the premiums); on the mini-EU baseline the
+  income is CAPRI's 2030 reference within 0.1% (38,386 against 38,358 EUR million of 2017); a whole member state's
+  full EAAP and EAAB are to be ported.
 - The feed chain of the simulation year (CAPRI's baseline feed calibration and its 2030 rations) is being ported
   (`capri_mod/feed/chain.py`); the 2030 rations are CAPRI's solved reference's until then.
 - The figures of §2 predate the latest changes (the 250 units, CAPRI's 2030 livestock outputs per head); they are to be

@@ -642,6 +642,16 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   SREV), the market crops' income now CAPRI's within 5%; the baseline's MGVA 40,034 against CAPRI's 38,358, the fodder
   activities 1,684 above CAPRI's (KNOWN_ISSUES K213, open). K211 stays open for the straw balance alone, slack at
   CAPRI's reference. Tests: test_eaa.py (2), test_water_income.py (1, slow).
+- **The farms' profit and the domestic support by market product (26 November 2026; register DEP-58):** CAPRI's
+  ProfitAgr(XX1), the activities' MGVA x levels by their main product in PACT_TO_XX, INPE the activities and items
+  outside the market's products, LAND minus the rents (reports/welfare.gms l. 441-460), and PSEs(XX1), minus the premium
+  outlays of the product's outputs over CAP_TO_TRD, INPE the others' (l. 714-749): ported (market/equations/welfare.py
+  p_welfareRes_ProfitAgr_INPE, p_welfareRes_ProfitAgr_LAND, p_welfareRes_PSEs_XX1, p_welfareRes_PSEs_INPE,
+  p_welfareRes_EAAG_PSEs; p_welfareRes_ProfitAgr now by product) and applied per member state of the run's units
+  (capri_mod/income/welfare_products.py; results["welfare_products"], block "welfare_products" of the long table). The
+  sets are CAPRI's as its run built them (sim_ini_21730: capri_data/codes/capri/PACT_TO_XX.csv, CAP_TO_TRD.csv,
+  tools/build/build_code_lists.py; its other outputs unchanged); the income gives the technology mix's MGVA per crop
+  (MGVA_mix). Measured on the mini-EU Green Deal pair (the solution identical; EUR million, 2017 money): in every member state the rows add up to its ProfitAgr and PSEs; Denmark's against CAPRI's 2030 reference (ref2030_welfare.parquet, a check only) dairy 1,758.1 against 1,738.5, pork 1,930.1 against 1,896.8, beef 100.2 against 92.6, wheat -9.7 against -11.1, barley -30.8 against -28.1, LAND -793.0 against -805.7; PSEs by market product within 0.5 (barley -167.9 against -167.4, wheat -131.2 against -130.8), INPE -245.8 against -270.3 (CAPRI's new energy crops, K138); ProfitAgr's INPE 838.4 against 1,024.3 (the options' net cost, -135.1, booked there; the model's Denmark 121.8 below CAPRI's). Tests: test_welfare_products.py (3).
 - **Income I2b, the accounts at producer and basic prices of a regional unit (26 November 2026; register DEP-56):**
   CAPRI's EAAP = NETF x UVAP / 1000 and EAAB = NETF x UVAB / 1000 (reports/sol_simy.gms l. 2547-2548), a regional
   unit's NETF its mineral fertilisers' purchases at the solution (NETF = - v_netPutQuant, l. 309), the premiums PRME

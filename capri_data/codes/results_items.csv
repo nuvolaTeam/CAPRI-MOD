@@ -3,6 +3,11 @@ abatement,carbon_tax,rows,,,,EUR per t CO2-eq,"the run's emission tax, CAPRI's p
 eaa,EAAG,cols,,,,EUR million,"the gross account's value of an output or input at the solution, GROF x UVAG / 1000 (reports/sol_simy.gms l. 2549; income I2, capri_mod/income/eaa.py, register DEP-56): the crops' products and the feeds bought in quantity, the other items in value; the items by the model's codes (a crop's activity code, the animals' market products and OTHER_O, CAPRI's input and feed codes), so no CAPRI code is given"
 eaa,GROF,cols,,,,1000 t or EUR million,"the activities' gross production or use of an item at the solution, the sum of coefficient x level x 0.001 (reports/sol_simy.gms l. 685-687; income I2): 1000 t for the crops' products and the feeds bought, the value in EUR million for the items the model holds in value per ha or head (register DEP-56)"
 eaa,UVAG,cols,,,,EUR per t or 1000,"the item's unit value in the gross account: the solve's price (EUR per t) for the crops' products and the feeds bought, 1000 for the items in value (register DEP-56; income I2)"
+eaa,NETF,cols,,,,1000 t,"a regional unit's mineral fertiliser purchases at the solution, NETF = - v_netPutQuant (reports/sol_simy.gms l. 309; income I2b, capri_mod/income/eaa.py eaap_eaab): the items NITF, PHOF, POTF"
+eaa,UVAP,cols,,,,EUR per t,"the fertiliser's unit value at producer prices, the member state's base year UVAP moved by inflation (capmod/inflation_and_trend_interpolation.gms l. 69; income I2b), in the model's 2017 money"
+eaa,EAAP,cols,,,,EUR million,"the purchases at producer prices, NETF x UVAP / 1000 (reports/sol_simy.gms l. 2547; income I2b)"
+eaa,UVAB,cols,,,,EUR per t,"the fertiliser's unit value at basic prices, the member state's base year UVAB moved by inflation (capmod/inflation_and_trend_interpolation.gms l. 70; income I2b), in the model's 2017 money"
+eaa,EAAB,cols,,,,EUR million,"the purchases at basic prices, NETF x UVAB / 1000 (reports/sol_simy.gms l. 2548; income I2b)"
 environmental,arable_land,rows,,,,,
 environmental,ghg_enteric,rows,ImpactGwp,CH4ENT,,kt CO2-eq,"reports/def_indic.gms l. 68: DATA(R,'ImpactGwp',GHGS) = DATA(R,'Impact',GHGS) x p_globWarmPot (the model's GWP_CH4 25, GWP_N2O 298 are CAPRI's: model_parameters.csv); the model's CH4_ENT, CAPRI's GWPCH4ENT_ from the feed mix (environmental/ghg.py)"
 environmental,ghg_ggwp,rows,,,,,
@@ -64,6 +69,8 @@ feoga,budNAT,cols,budNat,=,,EUR million,"the premium outlays paid from the natio
 feoga,budPil1,cols,budPil1,=,,EUR million,"the premium outlays paid from the EU's Pillar I budget (reports/feoga.gms l. 100-105, 151-159; policy/policy_sets.gms l. 1582-1593 (p_budToPsdPay); income I4, capri_mod/income/feoga.py, register DEP-57)"
 feoga,budPil2,cols,budPil2,=,,EUR million,"the premium outlays paid from the EU's Pillar II budget: half of Pillar II (reports/feoga.gms l. 100-105, 151-159; policy/policy_sets.gms l. 1582-1593 (p_budToPsdPay); income I4, capri_mod/income/feoga.py, register DEP-57)"
 feoga,budRestEU,cols,budRestEU,=,,EUR million,"the premium outlays of the payments in no pillar, from the EU budget: zero for the model's scheme aggregates (reports/feoga.gms l. 100-105, 151-159; policy/policy_sets.gms l. 1582-1593 (p_budToPsdPay); income I4, capri_mod/income/feoga.py, register DEP-57)"
+welfare_products,ProfitAgr,cols,,,,EUR million,"the farms' profit per member state (the run's units) and market product: the MGVA x levels of the activities whose CAPRI members have the product in PACT_TO_XX, INPE with the activities outside the market's products and the mitigation options' net revenue, LAND the rents with a minus sign (reports/welfare.gms l. 441-460; capri_mod/income/welfare_products.py, register DEP-58)"
+welfare_products,PSEs,cols,,,,EUR million,the budget's domestic support per member state and market product: minus the premium outlays to its outputs (FEOP over CAP_TO_TRD; INPE the outputs outside the market's products) (reports/welfare.gms l. 714-749; register DEP-58)
 fert_dist,area_kha,rows,,,,,
 fert_dist,cap_scale,rows,,,,,
 fert_dist,converged,rows,,,,,
@@ -213,3 +220,9 @@ welfare_supply,TOOU,cols,EAAG,TOOU,,EUR million,"the gross account's total outpu
 welfare_supply,TOIN,cols,EAAG,TOIN,,EUR million,"the gross account's total input, the sum over its inputs (reports/sol_simy.gms l. 2558; income I2)"
 welfare_supply,EAAG_MGVA,cols,EAAG,MGVA,,EUR million,"the gross account's modified gross value added, TOOU - TOIN + PRME (reports/sol_simy.gms l. 2564-2566; income I2)"
 welfare_supply,EAAG_DIFF,cols,,,,EUR million,"the gross account's MGVA less the activity-based MGVA, CAPRI's p_problem4D(RSS, 'EAAG', 'DIFF') (reports/sol_simy.gms l. 2600-2615; income I2): what the items do not hold of the margins (register DEP-56)"
+welfare_supply,EAAP_TOIN,cols,EAAP,TOIN,,EUR million,the account at producer prices' total input of a regional unit: its fertiliser purchases (reports/sol_simy.gms l. 2558; income I2b)
+welfare_supply,EAAP_GVAP,cols,EAAP,GVAP,,EUR million,"the account at producer prices' gross value added, TOOU - TOIN (reports/sol_simy.gms l. 2560; income I2b)"
+welfare_supply,EAAP_PRME,cols,EAAP,PRME,,EUR million,"the premiums paid, sum over the activities of PRME x level (reports/sol_simy.gms l. 2554; income I2b)"
+welfare_supply,EAAP_MGVA,cols,EAAP,MGVA,,EUR million,"the account at producer prices' modified gross value added, GVAP + PRME (reports/sol_simy.gms l. 2562; income I2b)"
+welfare_supply,EAAB_TOIN,cols,EAAB,TOIN,,EUR million,the account at basic prices' total input of a regional unit: its fertiliser purchases (reports/sol_simy.gms l. 2558; income I2b)
+welfare_supply,EAAB_GVAB,cols,EAAB,GVAB,,EUR million,"the account at basic prices' gross value added, TOOU - TOIN (reports/sol_simy.gms l. 2561; income I2b)"

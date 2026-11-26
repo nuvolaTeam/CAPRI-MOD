@@ -4031,6 +4031,47 @@
     "tests": []
    }
   },
+  "capri_cap_to_trd": {
+   "file": "capri_data/codes/capri/CAP_TO_TRD.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI CAP_TO_TRD: the data base's outputs and the market model's products (arm/arm_sets.gms l. 683ff), as CAPRI's run built it",
+   "columns": [
+    {
+     "name": "rows",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "xx",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "rows",
+    "xx"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_catact": {
    "file": "capri_data/codes/capri/CATACT.csv",
    "declared_in": "00_codes.sql",
@@ -7765,6 +7806,47 @@
      "capri_mod/pipeline/tests/test_captrd_expert_support.py",
      "capri_mod/pipeline/tests/test_captrd_longrun_supports.py"
     ]
+   }
+  },
+  "capri_pact_to_xx": {
+   "file": "capri_data/codes/capri/PACT_TO_XX.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI PACT_TO_XX: each production activity and its market product for the welfare report, INPE where none (reports/rep_sets.gms l. 105-122), as CAPRI's run built it",
+   "columns": [
+    {
+     "name": "pact",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "xx",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "pact",
+    "xx"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
    }
   },
   "capri_pact_to_y": {

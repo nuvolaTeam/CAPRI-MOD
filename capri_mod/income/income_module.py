@@ -71,6 +71,8 @@ class IncomeDistributionModule:
           FEED      the solved ration at its report prices less the feed the margins carry (feed_term)
           mitiI, mitiO, mitiPmp, parts   the mitigation options' items (mitigation_items)
           MGVA_act  {activity: DATA_MGVA} per ha or head (EUR), the activities with a level
+          MGVA_mix  {crop: the technology mix's MGVA per ha moved to T1} (EUR; the area moved is
+                    SupplyResult.technology_mix)
           (with the regional NLP's objective at the solution) OBJE, PMPLevl, PMPFeed, PMPLandTrans, agProdSurplus
                     and the objective's other parts: CAPRI's producer surplus (income I3, producer_surplus)
         Margins and premiums are per ha or per head in EUR; levels in 1000 ha or 1000 heads. The emission tax a
@@ -121,15 +123,15 @@ class IncomeDistributionModule:
                 DATA_MGVA(float(nr[a]), 0.0, 0.0, TOOU_FOUT=tfo.get(a, 0.0), **_fodd(a))
                 for a in nr.index if lev[a] > 0}
         mi = self.mitigation_items(region, res, supply_module)
-        out = {"MGVA": DATA_AGGT_MGVA([v for _a, v in mgva.items()]
-                                      + [DATA_MGVA(float(dnr.get(a, 0.0)), 0.0, 0.0, TOOU_FOUT=tfz.get(a, 0.0),
-                                                   **_fodd_z(a)) for a in mz],
+        # the technology mix's MGVA per unit of the area moved to T1, by crop
+        mgva_z = {a: DATA_MGVA(float(dnr.get(a, 0.0)), 0.0, 0.0, TOOU_FOUT=tfz.get(a, 0.0), **_fodd_z(a)) for a in mz}
+        out = {"MGVA": DATA_AGGT_MGVA([v for _a, v in mgva.items()] + [mgva_z[a] for a in mz],
                                       [lev[a] for a in mgva] + [float(z) for z in mz.values()],
                                       mi["mitiI"], mi["mitiO"]),
                "PRME": float(sum(float(pr.get(a, 0.0)) * lev[a] for a in nr.index)) + prem_z,
                "FEED": float(sum(s_ - b_ for s_, b_ in fd.values())),
                "mitiI": mi["mitiI"], "mitiO": mi["mitiO"], "mitiPmp": mi["mitiPmp"], "parts": mi["parts"],
-               "MGVA_act": mgva}
+               "MGVA_act": mgva, "MGVA_mix": mgva_z}
         ps = self.producer_surplus(region, m, out["MGVA"], toin)
         if ps is not None:
             out.update(ps)

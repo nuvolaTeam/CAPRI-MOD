@@ -666,6 +666,14 @@ COMMENT ON TABLE capri_sed_to_cak IS 'CAPRI SED_TO_CAK: each oilseed and its cak
 CREATE TABLE capri_pact_to_y (pact VARCHAR NOT NULL, o VARCHAR NOT NULL, PRIMARY KEY (pact, o));
 COMMENT ON TABLE capri_pact_to_y IS 'CAPRI PACT_TO_Y: each production activity and its main output (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms)';
 
+-- file: capri_data/codes/capri/PACT_TO_XX.csv
+CREATE TABLE capri_pact_to_xx (pact VARCHAR NOT NULL, xx VARCHAR NOT NULL, PRIMARY KEY (pact, xx));
+COMMENT ON TABLE capri_pact_to_xx IS 'CAPRI PACT_TO_XX: each production activity and its market product for the welfare report, INPE where none (reports/rep_sets.gms l. 105-122), as CAPRI''s run built it';
+
+-- file: capri_data/codes/capri/CAP_TO_TRD.csv
+CREATE TABLE capri_cap_to_trd ("rows" VARCHAR NOT NULL, xx VARCHAR NOT NULL, PRIMARY KEY ("rows", xx));
+COMMENT ON TABLE capri_cap_to_trd IS 'CAPRI CAP_TO_TRD: the data base''s outputs and the market model''s products (arm/arm_sets.gms l. 683ff), as CAPRI''s run built it';
+
 -- file: capri_data/codes/capri/Feed_FeedAggr.csv
 CREATE TABLE capri_feed_feedaggr (feed VARCHAR NOT NULL, feedaggr VARCHAR NOT NULL, PRIMARY KEY (feed, feedaggr));
 COMMENT ON TABLE capri_feed_feedaggr IS 'CAPRI Feed_FeedAggr: the feeds of each feed aggregate (sets.gms)';

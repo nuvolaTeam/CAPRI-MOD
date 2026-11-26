@@ -458,8 +458,8 @@ def main():
            "income_regional": tuple({reg: {k_: v_ for k_, v_ in (getattr(v, "income", None) or {}).items()}
                                      for reg, v in x["supply"].items()} for x in (b, s)),
            # the regions' gross account by item (income I2, SupplyResult.eaa, EUR million: the items as records,
-           # TOOU, TOIN, PRME, MGVA, AGGT, DIFF), base and scenario
-           "eaa_regional": tuple({reg: ({k_: (v_.to_dict("records") if k_ == "items" else v_)
+           # TOOU, TOIN, PRME, MGVA, AGGT, DIFF; income I2b's purchases as records, EAAP, EAAB), base and scenario
+           "eaa_regional": tuple({reg: ({k_: (v_.to_dict("records") if hasattr(v_, "columns") else v_)
                                          for k_, v_ in v.eaa.items()} if getattr(v, "eaa", None) else None)
                                   for reg, v in x["supply"].items()} for x in (b, s)),
            # the premium outlays per member state and product and their budgets (income I4, results["feoga"], EUR
@@ -467,6 +467,12 @@ def main():
            "feoga": tuple(({ms: {o: {c: float(v) for c, v in r_.items()} for (_m, o), r_ in g.iterrows()}
                             for ms, g in x["feoga"].groupby(level=0)} if x.get("feoga") is not None else None)
                           for x in (b, s)),
+           # the farms' profit and the domestic support per member state and market product (results
+           # ["welfare_products"], EUR million), base and scenario
+           "welfare_products": tuple(({ms: {o: {c: float(v) for c, v in r_.items() if v == v}
+                                            for (_m, o), r_ in g.iterrows()}
+                                       for ms, g in x["welfare_products"].groupby(level=0)}
+                                      if x.get("welfare_products") is not None else None) for x in (b, s)),
            "regional": {reg: {"lam": float((getattr(v, "shadow_prices", {}) or {}).get("N_balance", 0.0) or 0.0),
                               "fert": dict(getattr(v, "fert_tech_shares", None) or {}),
                               # the tillage options' and the urea substitution's shares (21 November 2026)

@@ -5194,6 +5194,16 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/CAP_TO_TRD.csv": {
+   "description": "CAPRI CAP_TO_TRD: the data base's outputs and the market model's products (arm/arm_sets.gms l. 683ff), as CAPRI's run built it",
+   "kind": "structure",
+   "rows": 59,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/CATACT.csv": {
    "description": "CAPRI CATACT: the cattle activities of the supply model and the GHG accounts (sets.gms l. 3103), in CAPRI's set order",
    "kind": "structure",
@@ -5922,6 +5932,16 @@
    "description": "CAPRI PACT_TO_O: the outputs of each production activity (sets.gms)",
    "kind": "structure",
    "rows": 280,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
+  "capri_data/codes/capri/PACT_TO_XX.csv": {
+   "description": "CAPRI PACT_TO_XX: each production activity and its market product for the welfare report, INPE where none (reports/rep_sets.gms l. 105-122), as CAPRI's run built it",
+   "kind": "structure",
+   "rows": 89,
    "columns": 2,
    "origin": {
     "nature": "capri",
@@ -6780,7 +6800,7 @@
   "capri_data/codes/results_items.csv": {
    "description": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows, \"=\": the row is CAPRI's code itself; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
    "kind": "structure",
-   "rows": 214,
+   "rows": 227,
    "columns": 8,
    "read_by_model": [
     "capri_mod/io_results.py"

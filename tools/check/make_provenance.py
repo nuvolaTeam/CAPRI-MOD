@@ -269,6 +269,8 @@ UNTRACED = {
     "capri_data/codes/capri/STOCK_TO_BY.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/SED_TO_CAK.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/PACT_TO_Y.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/PACT_TO_XX.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/CAP_TO_TRD.csv": ("build_code_lists", "CAPRI"),
     "capri_data/2017/supply/biofuel_resids_params.csv": ("build_resids_params", "CAPRI"),
     "capri_data/codes/capri/ColsRead.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/DACT.csv": ("build_code_lists", "CAPRI"),

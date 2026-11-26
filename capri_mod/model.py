@@ -1508,6 +1508,8 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         results["eaa"] = {reg: res.eaa for reg, res in supply_results.items() if getattr(res, "eaa", None)} or None
         # CAPRI's premium outlays per member state and product and their budgets (income I4, reports/feoga.gms)
         results["feoga"] = self._feoga(supply_results)
+        # CAPRI's farm profit and domestic support per member state and market product (reports/welfare.gms)
+        results["welfare_products"] = self._welfare_products(supply_results, results["feoga"], results["welfare_supply"])
         return results
 
 
@@ -1544,6 +1546,19 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             return t if len(t) else None
         except Exception as exc:
             warnings.warn(f"feoga: the premium outlays per product could not be computed ({exc!r})")
+            return None
+
+    def _welfare_products(self, supply_results, feop, welfare_supply):
+        """The farms' profit and the domestic support per member state and market product at the solution
+        (capri_mod/income/welfare_products.py; EUR million), or None where they could not be computed (warned)."""
+        try:
+            from capri_mod.income.welfare_products import welfare_by_product
+            rents = (welfare_supply["RENT"].to_dict() if welfare_supply is not None and "RENT" in welfare_supply
+                     else None)
+            t = welfare_by_product(supply_results, feop, rents)
+            return t if len(t) else None
+        except Exception as exc:
+            warnings.warn(f"welfare_products: the profit and support per product could not be computed ({exc!r})")
             return None
 
     @classmethod
