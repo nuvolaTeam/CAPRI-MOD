@@ -57,6 +57,8 @@ from capri_mod.settings import current as _settings   # the numerical settings
 _SOLVERS: "OrderedDict[tuple, object]" = OrderedDict()
 #: the Lagrangian's Hessian and the rows' Jacobian per graph, for CapriRegionalNLP.response
 _SENS: "OrderedDict[str, tuple]" = OrderedDict()
+#: the objective's blocks per graph, for CapriRegionalNLP.objective_parts (built once per structure, as the solvers)
+_BLOCKS: "OrderedDict[str, object]" = OrderedDict()
 # IPOPT's iteration limits, tolerances and CPU guard, and the solver cache size, are settings
 # (capri_mod/settings/defaults.toml [supply] nlp_*, [run] nlp_cache_size)
 CACHE_STATS = {"hit": 0, "miss": 0}
@@ -398,8 +400,10 @@ class CapriRegionalNLP:
             pz = np.array([0.0 if f in fod else float(r.p0[j]) for j, f in enumerate(r.feeds)])
             q0[act_idx[a]] -= float(np.sum(np.where(fl, r.x0 * (pz + cn + 0.5 * r.slope * r.x0), 0.0)))
         F = []
+        self._feed_np = None
         if nf:
             lin_c, half_s = np.zeros(nf), np.zeros(nf)
+            p_c, ghg_c, cn_c = np.zeros(nf), np.zeros(nf), np.zeros(nf)
             for k, (a, f, r, j, s) in enumerate(feeds):
                 cn = float(cal[a][0][j]) + float((spec.get("dcnst") or {}).get((a, f), 0.0))
                 p = 0.0
@@ -409,6 +413,10 @@ class CapriRegionalNLP:
                 ghg = float(fg.get((a, f), 0.0) or 0.0)       # emission tax per kg of feed, as the price
                 lin_c[k] = p + ghg + cn
                 half_s[k] = 0.5 * float(r.slope[j])
+                p_c[k], ghg_c[k], cn_c[k] = p, ghg, cn
+            # QUADRF_'s parts by CAPRI's category, for the report at the solution (objective_parts): the feeds' price
+            # and emission tax (CAPRI's LINEAR_) and the PMP terms CNST + 0.5 SLOP u (v_sumOfPmpTermsFeed)
+            self._feed_np = (p_c, ghg_c, cn_c, half_s.copy(), np.array([fe[4] for fe in feeds], float))
             herds = y[[act_idx[fe[0]] for fe in feeds]]
             Fv = FEDUSE_(herds, fhv)                           # t
             obj = obj + ca.sum1(QUADRF_(Fv, self._pv(lin_c), self._pv(half_s), fhv))
@@ -421,6 +429,9 @@ class CapriRegionalNLP:
         quad = QUADRA_(self._Qsx, y)
         obj = obj + ca.dot(self._pv(q0), y)
         self.q0 = q0
+        # the objective before the blocks below (the options, the ration fat limit, the fertilisation): what the blocks
+        # add is their difference to the objective at the end (objective_parts)
+        self._Qs_np, self._obj_base = Qs, obj
 
         # ---------------- rows of the regional QP ----------------
         # fodder balances: animal cells replaced by FEDUSE_ (per-head feed x herd / 1000, flexible and fixed feeds)
@@ -2002,6 +2013,47 @@ class CapriRegionalNLP:
         (applied - manure) / scale = 0: the value is lambda / scale."""
         lam = res["lam_g"]
         return {nut: float(lam[gi]) / sc for nut, (gi, sc) in (getattr(self, "excr_rows", None) or {}).items()}
+
+    def objective_parts(self, x) -> dict:
+        """The objective at a point by part (income I3: the PMP terms CAPRI reports with its producer surplus,
+        capmod/report_supply_model.gms l. 207-219), in the NLP's own terms (kEUR, the cost the model minimises):
+          y, q0       the columns' levels and the linear terms per unit
+          lin         per column of y: q0 x y (the linear term with the calibration's dq)
+          quad        per column of y: 0.5 y (Q y) (QUADRA_'s quadratic part, with the land market's LandMarket_quad)
+          feed_price, feed_ghg, feed_pmp   QUADRF_ split: sum F p (the tradable feeds at their price), sum F x the
+                      emission tax per kg, sum F (CNST + 0.5 SLOP u) (CAPRI's v_sumOfPmpTermsFeed, the model's sign)
+          blocks      what the options, the ration fat limit and the fertilisation blocks add (their CasADi expressions)
+          obj         the objective (f_obj), and residual = obj - the parts' sum (a check: 0 up to rounding)."""
+        import casadi as ca
+        xv = np.asarray(x, float).ravel()
+        y = np.asarray(self.f_y(xv), float).ravel()
+        lin = np.asarray(self.q0, float) * y
+        quad = 0.5 * y * (np.asarray(self._Qs_np, float) @ y)
+        out = {"y": y, "q0": np.asarray(self.q0, float), "lin": lin, "quad": quad, "feed_price": 0.0, "feed_ghg": 0.0,
+               "feed_pmp": 0.0}
+        if self.nf and self._feed_np is not None:
+            p_c, g_c, cn_c, hs_c, sc_c = self._feed_np
+            Fv = np.asarray(self.f_F(xv), float).ravel()
+            u = xv[self.n0:self.n0 + self.nf] * sc_c
+            out["feed_price"] = float(Fv @ p_c)
+            out["feed_ghg"] = float(Fv @ g_c)
+            out["feed_pmp"] = float(Fv @ (cn_c + hs_c * u))
+        if getattr(self, "_f_blocks", None) is None:
+            key = self.graph_key()
+            fb = _BLOCKS.get(key)
+            if fb is None:
+                fb = ca.Function("blocks", [self.X, self.p], [self._obj_rest - self._obj_base])
+                _BLOCKS[key] = fb
+                while len(_BLOCKS) > _cache_max():
+                    _BLOCKS.popitem(last=False)
+            else:
+                _BLOCKS.move_to_end(key)
+            self._f_blocks = _AtP(fb, self.pval)
+        out["blocks"] = float(self._f_blocks(xv))
+        out["obj"] = float(self.f_obj(xv))
+        out["residual"] = out["obj"] - (float(lin.sum()) + float(quad.sum()) + out["feed_price"] + out["feed_ghg"]
+                                        + out["feed_pmp"] + out["blocks"])
+        return out
 
     def outputs(self, res):
         """(y, F {(act, feed): t}, zA (dual of each row of A, >= 0 for A y <= b), info) - the fields the supply module

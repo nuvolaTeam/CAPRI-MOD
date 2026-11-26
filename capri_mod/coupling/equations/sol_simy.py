@@ -1,5 +1,6 @@
 r"""CAPRI's simulation year's report (reports/sol_simy.gms, star 3.0): the land owners' profit, the solution's feed
-per head, the mitigation options' accounting cost per activity and the region's activity-based income (income I1).
+per head, the mitigation options' accounting cost per activity, the region's activity-based income (income I1), the
+supply model's objective and the producer surplus (income I3).
 
 capri_mod/coupling/reporting.py (ReportingBlock._welfare_supply) calls the land owners' profit; the methane chain
 (tools/lib/methane_inputs.py) the feed per head; capri_mod/income (mitigation_items.py, income_module.py
@@ -626,3 +627,37 @@ def DATA_AGGT_MGVA(MGVA, LEVL, mitiI_RU=0.0, mitiO_RU=0.0):
     mix's net revenue on the area moved to T1, which the model keeps apart from the activities' margins
     (supply/techn_mix.py), enters as further pairs (the margin's difference per ha, the area moved)."""
     return float(sum(float(m) * float(l_) for m, l_ in zip(MGVA, LEVL))) - float(mitiI_RU) + float(mitiO_RU)
+
+
+def DATA_EAAG_OBJE(p_infes_OBJE):
+    r"""DATA(RU, "EAAG", "OBJE", SIMY): the regional supply model's objective at the solution, reported beside the
+    producer surplus for its validation (EUR 1000).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2578-2579):
+
+        * --- For validation of producer surplus, report also supply model objective function value
+          DATA(RU,"EAAG","OBJE","%SIMY%") = p_infes(RU,"OBJE","Y")/1000;
+
+    In this project's notation: OBJE = v_obje of the region (CAPRI's p_infes(RU, "OBJE", "Y"), stored from the solve).
+    Departures from CAPRI: the units (EUR 1000); the model minimises the cost, so the caller passes minus the NLP's
+    objective (capri_mod/supply/capri_regional_nlp.py objective_parts)."""
+    return float(p_infes_OBJE)
+
+
+def DATA_EAAG_agProdSurplus(MGVA, PMPLevl, PMPFeed, PMPLandTrans):
+    r"""DATA(RSS, "EAAG", "agProdSurplus", SIMY): the agricultural producer surplus, the income plus the PMP terms of
+    the supply model at the solution (EUR 1000).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2590-2595):
+
+          DATA(RSS,"EAAG","agProdSurplus","%SIMY%")
+            = DATA(RSS,"EAAG","MGVA","%SIMY%")
+            + DATA(RSS,"EAAG","PMPLevl","%SIMY%")
+            + DATA(RSS,"EAAG","PMPFeed","%SIMY%")
+            + DATA(RSS,"EAAG","PMPLandTrans","%SIMY%")
+            ;
+
+    In this project's notation: agProdSurplus = MGVA + PMPLevl + PMPFeed + PMPLandTrans (report_supply_model.py).
+    Departures from CAPRI: the units (EUR 1000); MGVA is the region's activity-based income (DATA_AGGT_MGVA, register
+    DEP-54), where CAPRI takes the product-based EAAG MGVA, which it compares with the activity-based (l. 2600-2615)."""
+    return float(MGVA) + float(PMPLevl) + float(PMPFeed) + float(PMPLandTrans)

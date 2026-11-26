@@ -70,3 +70,9 @@ models' ProfitAgr, ProfitLandUse and PSEs.
    models' land market: each land type's area x the dual of its land row (EUR/ha), CAPRI's UAAR x d_area
    (results["welfare_supply"]: MGVA, RENT, ProfitAgr, ProfitLandUse, PSEs). The rent is a transfer: the total is the
    same with or without the split.
+7. **CAPRI's producer surplus rows beside the welfare positions** (income I3, register DEP-55): CAPRI reports the
+   supply model's objective (OBJE) and its PMP terms (PMPLevl, PMPFeed, PMPLandTrans) with the producer surplus
+   agProdSurplus = EAAG MGVA + the PMP terms (reports/sol_simy.gms l. 2578-2595; capmod/report_supply_model.gms l.
+   207-220), outside p_welfareRes: its welfare's ProfitAgr is MGVA less the rents. results["welfare_supply"] carries
+   them per region (IncomeDistributionModule.producer_surplus, from the regional NLP's objective at the solution by
+   part). Their levels hold the PMP constants, which are the model's own, so only their changes compare with CAPRI's.

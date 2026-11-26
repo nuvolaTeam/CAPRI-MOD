@@ -68,16 +68,21 @@ class IncomeDistributionModule:
           FEED      the solved ration at its report prices less the feed the margins carry (feed_term)
           mitiI, mitiO, mitiPmp, parts   the mitigation options' items (mitigation_items)
           MGVA_act  {activity: DATA_MGVA} per ha or head (EUR), the activities with a level
-        Margins and premiums are per ha or per head in EUR; levels in 1000 ha or 1000 heads."""
+          (with the regional NLP's objective at the solution) OBJE, PMPLevl, PMPFeed, PMPLandTrans, agProdSurplus
+                    and the objective's other parts: CAPRI's producer surplus (income I3, producer_surplus)
+        Margins and premiums are per ha or per head in EUR; levels in 1000 ha or 1000 heads. The emission tax a
+        scenario puts on the activities' net revenues (supply/abatement.py _apply_ghg_tax) is not an input: CAPRI's MGVA
+        holds no tax (calc_inc_indic.gms l. 30-49), so it is added back."""
         from capri_mod.coupling.equations.calc_inc_indic import DATA_MGVA
         from capri_mod.coupling.equations.sol_simy import DATA_AGGT_MGVA
         acts = getattr(res, "activities", None)
         m = getattr(supply_module, "_models", {}).get(region)
         if m is None or acts is None:
             raise ValueError(f"{region}: no solved supply model (run the supply module for the region first)")
-        nr, pr = m.net_revenues, getattr(m, "premiums", None)
+        pr = getattr(m, "premiums", None)
         if pr is None:
             raise ValueError(f"{region}: the supply model carries no premiums")
+        nr = self.untaxed_net_revenues(m)
         lev = {a: float(acts.get(a, 0.0)) for a in nr.index}
         # CAPRI's crop technologies: the net revenue and premium of T1 less T2 on the area moved to T1 (z); the
         # premium difference is prem_diff_share x the crop's premium (supply/techn_mix.py)
@@ -94,13 +99,129 @@ class IncomeDistributionModule:
                 DATA_MGVA(float(nr[a]), 0.0, 0.0, *toin[a]) if a in toin else float(nr[a])
                 for a in nr.index if lev[a] > 0}
         mi = self.mitigation_items(region, res, supply_module)
-        return {"MGVA": DATA_AGGT_MGVA([v for _a, v in mgva.items()] + [float(dnr.get(a, 0.0)) for a in mz],
-                                       [lev[a] for a in mgva] + [float(z) for z in mz.values()],
-                                       mi["mitiI"], mi["mitiO"]),
-                "PRME": float(sum(float(pr.get(a, 0.0)) * lev[a] for a in nr.index)) + prem_z,
-                "FEED": float(sum(s_ - b_ for s_, b_ in fd.values())),
-                "mitiI": mi["mitiI"], "mitiO": mi["mitiO"], "mitiPmp": mi["mitiPmp"], "parts": mi["parts"],
-                "MGVA_act": mgva}
+        out = {"MGVA": DATA_AGGT_MGVA([v for _a, v in mgva.items()] + [float(dnr.get(a, 0.0)) for a in mz],
+                                      [lev[a] for a in mgva] + [float(z) for z in mz.values()],
+                                      mi["mitiI"], mi["mitiO"]),
+               "PRME": float(sum(float(pr.get(a, 0.0)) * lev[a] for a in nr.index)) + prem_z,
+               "FEED": float(sum(s_ - b_ for s_, b_ in fd.values())),
+               "mitiI": mi["mitiI"], "mitiO": mi["mitiO"], "mitiPmp": mi["mitiPmp"], "parts": mi["parts"],
+               "MGVA_act": mgva}
+        ps = self.producer_surplus(region, m, out["MGVA"], toin)
+        if ps is not None:
+            out.update(ps)
+        return out
+
+    @staticmethod
+    def untaxed_net_revenues(m) -> pd.Series:
+        """The regional model's net revenues per unit without the emission tax a scenario charges on them (the tax
+        per unit recorded by supply/abatement.py _apply_ghg_tax, ev.ghg_applied; none outside an emission tax
+        scenario)."""
+        nr = m.net_revenues
+        ga = dict(getattr(getattr(m, "ev", None), "ghg_applied", None) or {})
+        if not ga:
+            return nr
+        nr = nr.copy()
+        for a, d in ga.items():
+            if a in nr.index:
+                nr[a] = float(nr[a]) + float(d)
+        return nr
+
+    def producer_surplus(self, region, m, MGVA, toin=None):
+        """CAPRI's producer surplus at a region's solution (income I3; reports/sol_simy.gms l. 2578-2595,
+        capmod/report_supply_model.gms l. 207-220), EUR 1000, from the regional NLP's objective at the solution by part
+        (m.res.obj_parts: CapriRegionalNLP.objective_parts, with the columns' labels and the NLP form's linear
+        adjustments, supply/nlp.py) and the region's income MGVA (income_parts):
+          OBJE           minus the NLP's objective (sol_simy.py DATA_EAAG_OBJE)
+          PMPLevl        minus QUADRA_ over the activity, technology-mix and split columns (report_supply_model.py
+                         DATA_EAAG_PMPLevl): the quadratic part 0.5 y'Qy and each column's linear PMP term p_j y_j,
+                         p_j = q0_j + LIN_j, q0_j the NLP's linear term (with the calibration's dq), LIN_j the column's
+                         gain per unit in CAPRI's LINEAR_ (supply_model.gms l. 4635-4769) on the income's cost basis:
+                         - a crop: its margin without the fertiliser cost (the NLP buys the fertilisers in the
+                           fertilisation block), the inputs at the simulation year's coefficients where the income takes
+                           them (crop_toin_y: TOIN at "Y" less the NPK need's value), without the fodder crops' output
+                           (CAPRI's LINEAR_ sells no fodder; the fodder balances carry it);
+                         - an animal: its margin without the feed the NLP charges in QUADRF_ (feed_lin);
+                         - a technology-mix column: the net revenue of T1 less T2 without its fertiliser cost;
+                         - a split column: none but the emission tax (the margin's changes per head moved are in its
+                           linear term with the calibration term from the base duals, which holds the members' base
+                           margin difference; register DEP-54);
+                         less each column's emission tax. Register DEP-55: the re-expression on the income's basis.
+          PMPFeed        minus the feeds' PMP terms of QUADRF_, sum F (CNST + 0.5 SLOP u) (DATA_EAAG_PMPFeed)
+          PMPLandTrans   minus the land columns' terms, LandMarket_'s constant, rents and quadratic (DATA_EAAG_
+                         PMPLandTrans)
+          agProdSurplus  MGVA + PMPLevl + PMPFeed + PMPLandTrans (DATA_EAAG_agProdSurplus)
+          LINEAR_act     sum LIN_j y_j (the columns' part of CAPRI's LINEAR_); feed_price, feed_ghg (QUADRF_'s LINEAR_
+                         parts, as costs); obj_other (the other columns: manure trade, options, the entitlement
+                         overshoot) and obj_blocks (the options', ration fat and fertilisation blocks), as costs
+          obj_residual   the objective less its parts' sum (a check, 0 up to rounding)
+          pmp_col        {column: p_j} the linear PMP term per unit of each activity, technology-mix and split column
+        None where the solve recorded no parts (no NLP solve) or the herds' feed is not in CAPRI's objective form
+        (supply.animal_cost_form "toin": the NLP takes the base ration's PMP terms out of the herds' linear terms)."""
+        from capri_mod.coupling.equations.report_supply_model import (
+            DATA_EAAG_PMPLevl, DATA_EAAG_PMPFeed, DATA_EAAG_PMPLandTrans)
+        from capri_mod.coupling.equations.sol_simy import DATA_EAAG_OBJE, DATA_EAAG_agProdSurplus
+        from capri_mod.data.definitions import CROPS
+        from capri_mod.settings import current as _settings
+        from capri_mod.supply.supply_module import SupplyModule
+        op = getattr(getattr(m, "res", None), "obj_parts", None)
+        if not op:
+            return None
+        if (str(_settings().get("supply.animal_cost_form")) != "capri"
+                and (getattr(getattr(m, "seen", None), "feed_rations", None) or {})):
+            return None
+        cols, y, lin, quad = op["cols"], np.asarray(op["y"], float), np.asarray(op["lin"], float), \
+            np.asarray(op["quad"], float)
+        n = len(cols)
+        op_q0 = np.asarray(op["q0"], float) if op.get("q0") is not None else None
+        adj = op.get("lin_adj") or {}
+        a_fert = np.asarray(adj.get("fert", np.zeros(n)), float)
+        a_tax = np.asarray(adj.get("tax", np.zeros(n)), float)
+        if len(a_fert) != n or len(a_tax) != n or len(y) != n:
+            return None
+        nr = self.untaxed_net_revenues(m)
+        ga = dict(getattr(getattr(m, "ev", None), "ghg_applied", None) or {})
+        fl = op.get("feed_lin") or {}
+        rev = getattr(m, "revenues", None)
+        dnr = dict(getattr(getattr(m, "ev", None), "mix_dnr", None) or {})
+        sl = op.get("split_lin") or {}
+        toin = self.crop_toin_y(region, m) if toin is None else toin
+        npk = self.crop_npk_y(region, m) if toin else {}
+        fodder = set(SupplyModule.FODDER_ACTS)
+        pmp, linear, land, other = 0.0, 0.0, 0.0, 0.0
+        pcol = {}
+        for j, lab in enumerate(cols):
+            if lab in nr.index:
+                a = lab
+                if a in CROPS:
+                    L = float(nr[a]) + (float(toin[a][0]) - (float(toin[a][1]) - float(npk.get(a, 0.0)))
+                                        if a in toin else float(a_fert[j]))
+                    if a in fodder and rev is not None:
+                        L -= float(rev.get(a, 0.0) or 0.0)
+                else:
+                    L = float(nr[a]) + float(fl.get(a, 0.0) or 0.0)
+                L -= float(ga.get(a, 0.0) or 0.0) + float(a_tax[j])
+            elif str(lab).startswith("mix_"):
+                L = float(dnr.get(str(lab)[4:], 0.0)) + float(a_fert[j]) - float(a_tax[j])
+            elif lab == "dairy_z" or str(lab).startswith("cattle_z_"):
+                L = -float((sl.get(j) or (0.0, 0.0))[1]) - float(a_tax[j])
+            elif str(lab).startswith("land_"):
+                land += float(lin[j]) + float(quad[j])
+                continue
+            else:
+                other += float(lin[j]) + float(quad[j])
+                continue
+            pmp += float(lin[j]) + L * float(y[j]) + float(quad[j])
+            linear += L * float(y[j])
+            pcol[lab] = float(op_q0[j]) + L if op_q0 is not None else float("nan")
+        PMPLevl = DATA_EAAG_PMPLevl(pmp)
+        PMPFeed = DATA_EAAG_PMPFeed(-float(op["feed_pmp"]))
+        PMPLandTrans = DATA_EAAG_PMPLandTrans(land)
+        return {"OBJE": DATA_EAAG_OBJE(-float(op["obj"])), "PMPLevl": PMPLevl, "PMPFeed": PMPFeed,
+                "PMPLandTrans": PMPLandTrans,
+                "agProdSurplus": DATA_EAAG_agProdSurplus(MGVA, PMPLevl, PMPFeed, PMPLandTrans),
+                "LINEAR_act": linear, "feed_price": float(op["feed_price"]), "feed_ghg": float(op["feed_ghg"]),
+                "obj_other": other, "obj_blocks": float(op["blocks"]), "obj_residual": float(op["residual"]),
+                "pmp_col": pcol}
 
     @staticmethod
     def crop_toin_y(region, m) -> dict:
@@ -135,6 +256,21 @@ class IncomeDistributionModule:
                 continue
             out[a] = (float(c0), DATA_TOIN_Y(iy, tf, [D.crop_coef(cr, n, a, "need_kg_ha") for n in NUTRIENTS], uv))
         return out
+
+    @staticmethod
+    def crop_npk_y(region, m) -> dict:
+        """{crop: the value of CAPRI's 2030 NPK need per ha} (EUR, the model's money), the fertilisers' part of
+        crop_toin_y's TOIN (DATA_TOIN_Y with no yield-dependent inputs), for the crops crop_toin_y covers."""
+        from capri_mod.coupling.equations.calc_inc_indic import DATA_TOIN_Y
+        from capri_mod.fert.npk import NPKData, NUTRIENTS
+        toin = IncomeDistributionModule.crop_toin_y(region, m)
+        if not toin:
+            return {}
+        D = NPKData.get()
+        cr = D.capri_region(region)
+        regs = {n: D.region(cr, n) for n in NUTRIENTS}
+        uv = [float(regs[n].uvag_eur_t) if regs[n].uvag_eur_t == regs[n].uvag_eur_t else 0.0 for n in NUTRIENTS]
+        return {a: DATA_TOIN_Y(0.0, 1.0, [D.crop_coef(cr, n, a, "need_kg_ha") for n in NUTRIENTS], uv) for a in toin}
 
     def mitigation_items(self, region, res, supply_module) -> dict:
         """The mitigation options' items of a region's solution in CAPRI's report form (income I1;

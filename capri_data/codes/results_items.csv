@@ -191,7 +191,12 @@ welfare_supply,MGVA,cols,,,,EUR million,"the region's income at the solution in 
 welfare_supply,mitiI,cols,,,,EUR million,"the mitigation options' accounting cost, CAPRI's input mitiI valued (reports/sol_simy.gms l. 1049-1164, 1455-1461), inside MGVA (income I1)"
 welfare_supply,mitiO,cols,,,,EUR million,"the mitigation options' revenue, CAPRI's output mitiO valued (reports/sol_simy.gms l. 1169-1208, 1463-1465), inside MGVA (income I1)"
 welfare_supply,mitiPmp,cols,,,,EUR million,"the mitigation options' PMP cost, CAPRI's mitiPmp (reports/sol_simy.gms l. 1210-1319, 1431), not in MGVA; only the blocks whose data keep CAPRI's PMP parameters"
+welfare_supply,OBJE,cols,EAAG,OBJE,,EUR million,"the regional supply model's objective at the solution (reports/sol_simy.gms l. 2579, for the producer surplus's validation; income I3): minus the regional NLP's objective"
+welfare_supply,PMPFeed,cols,EAAG,PMPFeed,,EUR million,"the feeds' PMP terms at the solution (capmod/report_supply_model.gms l. 209: v_sumOfPmpTermsFeed; income I3)"
+welfare_supply,PMPLandTrans,cols,EAAG,PMPLandTrans,,EUR million,"minus the land market's PMP cost at the solution (capmod/report_supply_model.gms l. 210-220; income I3)"
+welfare_supply,PMPLevl,cols,EAAG,PMPLevl,,EUR million,"minus the PMP terms of the activity levels at the solution (capmod/report_supply_model.gms l. 208: QUADRA_), the linear terms on the income's cost basis (register DEP-55; income I3)"
 welfare_supply,PSEs,cols,,,,,
 welfare_supply,ProfitAgr,cols,,,,,
 welfare_supply,ProfitLandUse,cols,,,,,
 welfare_supply,RENT,cols,,,,,
+welfare_supply,agProdSurplus,cols,EAAG,agProdSurplus,,EUR million,"the agricultural producer surplus, MGVA + PMPLevl + PMPFeed + PMPLandTrans (reports/sol_simy.gms l. 2590-2595; income I3)"

@@ -847,6 +847,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
 
         r = {}
         prem = {}
+        rev = {}
         for act in self.acts:
             price   = prices.get(act, 0.0)
             yld     = yields.get(act, 0.0)
@@ -968,10 +969,14 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             # Crop gross margin (EUR/ha); animal gross margin (EUR/head)
             r[act] = LINEAR_netRevenue(revenue, cost, payment)
             prem[act] = payment
+            rev[act] = revenue
 
         self.net_revenues = pd.Series(r)
         #: the premium part of each net revenue (CAPRI's PRME per ha or head), for income reports (capri_mod/income)
         self.premiums = pd.Series(prem, dtype=float)
+        #: the revenue part of each net revenue (EUR per ha or head), for income reports (the fodder crops' output,
+        #: which CAPRI's LINEAR_ does not hold: income I3)
+        self.revenues = pd.Series(rev, dtype=float)
 
     # ------------------------------------------------------------------
     # Constraint matrix

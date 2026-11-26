@@ -529,6 +529,35 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   covers (the EU's and Norway's); the water accounts' coverage (no irrigation share for Bosnia's and Serbia's units).
   Also: two CSV float reads made exact (build_livestock_n_export_2030.py, of K202; build_feed_bulk_grof.py). README
   §10.4.
+- **Income I3, CAPRI's producer surplus at the regional solution (26 November 2026;
+  claude/income_i2_i4_plan_2026-11-26.md section 2, register DEP-55, KNOWN_ISSUES K207):** each regional solve records
+  the NLP's objective at the solution by part (supply/capri_regional_nlp.py CapriRegionalNLP.objective_parts: per
+  column the linear term q0 x y and the quadratic 0.5 y (Q y), QUADRF_ split into the feeds' price, their emission tax
+  and their PMP terms CNST + 0.5 SLOP u, and the blocks' (the options, the ration fat limit, the fertilisation) as
+  CasADi expressions; the parts add up to IPOPT's objective, a residual of 3e-7 EUR 1000 at most in the mini-EU pair),
+  with the NLP form's linear adjustments per column (the fertiliser cost taken out, the emission tax added:
+  supply/nlp.py) and the split columns' explicit terms (supply/livestock.py). The income module labels them by CAPRI's
+  categories (IncomeDistributionModule.producer_surplus; capmod/report_supply_model.gms l. 207-220 and
+  reports/sol_simy.gms l. 2578-2595 ported in the equation style, coupling/equations/report_supply_model.py
+  DATA_EAAG_PMPLevl, DATA_EAAG_PMPFeed, DATA_EAAG_PMPLandTrans, sol_simy.py DATA_EAAG_OBJE, DATA_EAAG_agProdSurplus):
+  OBJE, PMPLevl (minus QUADRA_ with each column's linear PMP term re-expressed on the income's cost basis, DEP-55),
+  PMPFeed, PMPLandTrans and agProdSurplus = MGVA + the three, in SupplyResult.income and the welfare table. Measured
+  on the mini-EU Green Deal pair (20 units, EUR million): the solution and the income identical to the previous run's;
+  the baseline's PMPLevl 54,491 against CAPRI's 2030 reference's 55,153 (2017 money, a check only; DE11 951 against
+  933, ES61 19,632 against 19,625), PMPFeed -1,294 against -726, PMPLandTrans 658,532 against 779,269 (the land
+  market's constants are the model's own: levels do not compare). The Green Deal's change against CAPRI's own Green
+  Deal run (res_2_1730greendeal_lnds8_..._oth00, the same 20 units, a check only): PMPLevl -41,157 against -43,586,
+  PMPFeed +309 against +189, agProdSurplus -42,710 against -44,074. Tirol (AT33) carries most of it in both, -40,790
+  against -44,117: the Green Deal's landscape target raises its fallow from 0.012 to 17.6 thousand ha in both runs
+  (CAPRI 17.626, the model 17.618) against PMP terms calibrated at 12 ha. The income's change does not compare on the
+  mini-EU: CAPRI's Green Deal raises the 20 units' MGVA by 1,491, the mini-EU lowers it by 1,578; the mini-EU is its
+  own small market (K83), so the full-EU pair is the check. The income without the emission tax a scenario puts on the
+  net revenues (CAPRI's MGVA holds no tax; IncomeDistributionModule.untaxed_net_revenues; no effect without an
+  emission tax). Found while tracing the income's level per activity (K207): CAPRI's other animals (OANI, 1,305 of the
+  20 units' 1,704 EUR million below CAPRI's 2030 income) have no level in the model; the straw is valued at zero on
+  both sides of its internal flow (DEP-54). Tests: capri_mod/tests/test_producer_surplus.py (4, by hand),
+  test_water_income.py (1, slow: the parts and each activity's PMP term against the supply model's constants on three
+  units).
 - **Income I1, the crops' inputs at CAPRI's simulation-year coefficients (26 November 2026; register DEP-54):** at the
   2030 market year a crop's income takes CAPRI's TOIN at "Y" (coupling/equations/calc_inc_indic.py DATA_TOIN_Y,
   IncomeDistributionModule.crop_toin_y): TF_I x its directly yield-dependent inputs at define_inputs.gms's coefficients

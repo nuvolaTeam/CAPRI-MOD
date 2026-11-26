@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](dev/KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (18)
+## Open (19)
 
 | # | Issue | Status |
 |---|---|---|
@@ -31,6 +31,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K196](#k196) | The Green Deal's N-surplus dual is below CAPRI's (CAPRI's recovered from its own results): median 0.856 of CAPRI's in the standing check at 9867411 (0.89 at bb3b592), 0.83 at CAPRI's prices; the suckler cows' and the technology shift's remaining gaps follow it | open (21 November 2026) |
 | [K198](#k198) | The assignments refactor's findings for the main line (its inventory of the CAPRI statements the model ports or cites, blocks A0-A6): porting differences in the market supply Hessian, the price transmission, the stop rule, the welfare, the premiums, the Green Deal's regional rules and the accounts, sorted by where they act, not measured; A0's 14 wrong line citations corrected; from the phase's runs, a measured and a cached Hessian moving a run's last digits (1e-5 after the scenario; diagnosed and fixed: the manure value left by the last shock), the thread oversubscription (fixed) and the Hessian step's log (done) | open (updated 24 November 2026) |
 | [K206](#k206) | The ported baseline feed calibration ends at a slightly worse local optimum than CAPRI's in five countries (PT, TUR, BG, ES, CZ); every coefficient within 1% of CAPRI's | open (25 November 2026) |
+| [K207](#k207) | CAPRI's other animals (OANI) have no level in the model, so their income is missing: 1,305 of the 1,704 EUR million by which the mini-EU baseline's income is below CAPRI's 2030 reference | open (26 November 2026): the form of the fix is the project lead's |
 
 ## Resolved (187)
 
@@ -4360,6 +4361,52 @@ earlier baseline, p_fedtrmHasIniPoint) is not known; the material has none.
 - **In 9t:** -
 - **Status:** **open**. Not a porting error found; IPOPT's local optimum against CONOPT's on a non-convex estimation
   (the module's departure). A multi-start, as the regional models' warm and jump checks (DEP-18), would be beyond CAPRI.
+
+<a id="k207"></a>
+### K207: CAPRI's other animals (OANI) are not in the model's income (found 26 November 2026)
+
+Found by tracing income I1's level check per activity (the mini-EU baseline of 65e1e97, SupplyResult.income's MGVA per
+unit x level, against CAPRI's 2030 reference at its solution: dataOut with the empty second key, MGVA x LEVL per
+activity, deflated by 1.019^13 to 2017 money; a check only). dataOut's "CUR" key is the yield decomposition's
+(reports/yield_change_decomp.gms l. 162-165, 274-280), not the solution's income. Of the 20 units' 1,704 EUR million
+below CAPRI's EAAG MGVA (36,654 against 38,358):
+
+- 1,305: CAPRI's other animals (OANI), in Denmark 555, IR01 121, FI19 117, IT40 107, PT18 77, NL22 77. CAPRI keeps
+  OANI fixed at its data level (sets.gms l. 2317-2320 FACT = MFCACT + OANI; supply/prep_sim.gms l. 250-251
+  v_actLevl.FX = DATA(FACT, "LEVL", "Y")), with no feed (feed/req_or_man_fnc.gms l. 1472: DATA(RS, "OANI", FOUT) = 0)
+  and few inputs: in Denmark at 2030 a level of 0.883 (an index), per unit TOOU 812,161, TOIN 9,865 (all RESTI) and
+  MGVA 802,296 EUR. The model lists OANI among CAPRI's fixed activities and holds its yields, costs and prices per unit
+  (yields.csv, variable_costs.csv, producer_prices_regional.csv), but no level: animal_numbers.csv has no OANI column,
+  so it is at 0 in every region.
+- 311: the mitigation options' net cost the model books at the base shares (mitiI - mitiO); CAPRI's reference has
+  ghgAbatement off, so it has none (claude/income_i1_progress_2026-11-25.md).
+- 53: CAPRI's EAAG MGVA above the sum of its activities' MGVA x LEVL (Denmark 51, Croatia 12).
+- 35: the rest, the activities' net. Within it the crops' margins are lower (soft wheat -200, barley -126, maize -116,
+  rape -69; FR24 soft wheat 440 EUR per ha against CAPRI's 527) and the fodder crops' (other fodder +335, fodder maize
+  +104) and animals' higher (dairy cows +136, fattening pigs +79, calves +59). The crops' gap is about CAPRI's
+  secondary product revenue (SREV = TOOU - MREV, reports/aggreg_res_data.gms l. 281-282), for the cereals the straw
+  (STRA at its unit value; FR24 soft wheat 105 EUR per ha at 2030, 5.6 t of straw): over the 20 units soft wheat 192,
+  maize 113, barley 110, rape 72 EUR million. The model values the straw at zero on both sides, the crops' output and
+  the animals' feed (FSTR's report price 0; no straw balance, CAPRI's is slack), an internal flow like the fodder,
+  whose value the model keeps at the same price on both sides (Denmark's other fodder 38.9 EUR/t as a crop output and
+  as a feed). So the split by activity differs from CAPRI's, the region's total much less. The items behind the split
+  are income I2's.
+
+With OANI and the options' cost the 20 units' income would be 0.998 of CAPRI's (38,270 against 38,358).
+
+Two forms of the fix:
+- (a) CAPRI's: OANI in the supply model at its data level (CAPREG's 2017 LEVL for the base year, sim_ini_21730's 2030
+  LEVL for the 2030 runs), with its revenue and input cost per unit, a constant in the objective; the animal code paths
+  that CAPRI does not apply to OANI (feed, manure, emissions, livestock units, the herd totals) skip it.
+- (b) The income report adds OANI's MGVA x LEVL from CAPRI's data at the simulation start, outside the supply model.
+  For the solution the two are the same (a fixed column adds a constant to the objective); (b) is a departure in form,
+  to be registered. A scenario moves OANI's income in CAPRI only through its input prices (its level is fixed); not
+  checked on a CAPRI scenario run.
+
+- **Effect:** the reported income's level (3.4% of the mini-EU baseline's), the welfare table's MGVA and ProfitAgr; not
+  the model's solution
+- **In 9t:** -
+- **Status:** **open**: the form of the fix, (a) or (b), is the project lead's
 
 <a id="k205"></a>
 ### K205: A scenario's income at the base unit margins (found 24 November 2026; fixed 26 November 2026)

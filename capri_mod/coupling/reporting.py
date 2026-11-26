@@ -59,6 +59,9 @@ class ReportingBlock:
                     without a market)
           mitiI, mitiO, mitiPmp  the mitigation options' accounting cost, revenue and PMP cost in CAPRI's report form
                     (reports/sol_simy.gms l. 1049-1465; mitiI and mitiO inside MGVA, mitiPmp apart)
+          OBJE, PMPLevl, PMPFeed, PMPLandTrans, agProdSurplus  CAPRI's producer surplus rows of the region (income I3,
+                    IncomeDistributionModule.producer_surplus; reports/sol_simy.gms l. 2578-2595): the supply model's
+                    objective, its PMP terms and MGVA + the PMP terms; absent (NaN) where the solve recorded no parts
         The market's agents' components are in results["market"].welfare. A failure here does not stop the run: it
         is warned and the table is None."""
         if not supply_results:
@@ -82,6 +85,9 @@ class ReportingBlock:
                              "ProfitLandUse": rent / 1000.0, "PSEs": -ip["PRME"] / 1000.0,
                              "mitiI": ip["mitiI"] / 1000.0, "mitiO": ip["mitiO"] / 1000.0,
                              "mitiPmp": ip["mitiPmp"] / 1000.0}
+                for k_ in ("OBJE", "PMPLevl", "PMPFeed", "PMPLandTrans", "agProdSurplus"):
+                    if k_ in ip:
+                        rows[reg][k_] = float(ip[k_]) / 1000.0
             return pd.DataFrame.from_dict(rows, orient="index")
         except Exception as exc:
             warnings.warn(f"welfare: the supply models' components could not be computed ({exc!r})")

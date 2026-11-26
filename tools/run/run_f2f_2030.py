@@ -453,6 +453,10 @@ def main():
                                          "lin": dict(getattr(v, "feed_lin", None) or {}),
                                          "fodder_duals": dict(getattr(v, "fodder_duals", None) or {})}
                                    for reg, v in x["supply"].items()} for x in (b, s)),
+           # the regions' income at the solution in CAPRI's form (income I1, SupplyResult.income, EUR 1000; MGVA per
+           # activity in EUR per ha or head), base and scenario
+           "income_regional": tuple({reg: {k_: v_ for k_, v_ in (getattr(v, "income", None) or {}).items()}
+                                     for reg, v in x["supply"].items()} for x in (b, s)),
            "regional": {reg: {"lam": float((getattr(v, "shadow_prices", {}) or {}).get("N_balance", 0.0) or 0.0),
                               "fert": dict(getattr(v, "fert_tech_shares", None) or {}),
                               # the tillage options' and the urea substitution's shares (21 November 2026)

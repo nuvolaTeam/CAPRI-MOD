@@ -90,3 +90,47 @@ def test_income_is_capris_mgva_sum(data):
         assert row.market_income == pytest.approx(inc - sup, rel=1e-9)
         assert row.cap_payments_policy == pytest.approx(float(cap.at[r, "total_payments"]), rel=1e-12)
         assert 0.0 < row.public_support < row.farm_income
+
+
+@pytest.mark.slow
+def test_the_producer_surplus_at_the_regional_solution(data):
+    """CAPRI's producer surplus at the regional solution (income I3, IncomeDistributionModule.producer_surplus): the
+    regional NLP's objective by part adds up to IPOPT's objective; each activity's linear PMP term on the income's cost
+    basis is the supply model's PMP constant f, less the land rents its land use carries (land._land_augment), plus
+    the NLP calibration's dq, less the fodder crops' fodder output (CAPRI's LINEAR_ does not sell it) and, at the
+    2030 market year, less the crops' cost difference to CAPRI's TOIN at the year's coefficients (DEP-55); and
+    agProdSurplus is MGVA plus the three PMP terms."""
+    from capri_mod.data.definitions import CROPS
+    from capri_mod.income import IncomeDistributionModule as I
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+    regs = ["DE110000", "ES610000", "IR010000"]
+    sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
+    sr = sm.run(price_signals=None, regions=regs)
+    for r in regs:
+        m, ip = sm._models[r], sr[r].income
+        assert "agProdSurplus" in ip, r
+        assert abs(ip["obj_residual"]) <= 1e-7 * max(1.0, abs(ip["OBJE"])), r
+        assert ip["agProdSurplus"] == pytest.approx(ip["MGVA"] + ip["PMPLevl"] + ip["PMPFeed"] + ip["PMPLandTrans"],
+                                                    rel=1e-12)
+        lab = list(m.ev.row_labels)
+        A = np.asarray(m.res.last_aug[2], float) if getattr(m.res, "last_aug", None) is not None else None
+        rents = dict(getattr(m.ev, "land_rent_rows", None) or {})
+        dq = dict((getattr(m.par, "nlp_cal", None) or {}).get("dq") or {})
+        toin, npk = I.crop_toin_y(r, m), I.crop_npk_y(r, m)
+        fert = np.asarray(m.ev.nlp_lin_adj["fert"], float)
+        acts = list(m.acts)
+        n_checked = 0
+        for j, a in enumerate(acts):
+            if a not in ip["pmp_col"] or float(sr[r].activities.get(a, 0.0)) <= 0:
+                continue
+            want = float(m.f[j]) + float(dq.get(a, 0.0))
+            if A is not None:
+                want -= sum(v * float(A[lab.index(k), j]) for k, v in rents.items() if k in lab and v)
+            if a in SupplyModule.FODDER_ACTS:
+                want -= float(m.revenues[a])
+            if a in CROPS and a in toin:
+                want -= (toin[a][1] - npk[a]) - (toin[a][0] - fert[j])
+            assert ip["pmp_col"][a] == pytest.approx(want, rel=1e-9, abs=1e-6 * max(1.0, abs(want))), (r, a)
+            n_checked += 1
+        assert n_checked > 10, r

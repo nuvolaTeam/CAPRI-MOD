@@ -129,6 +129,10 @@ class RegionalEvalState(_Slots):
         "entl_col",           # the entitlement overshoot's column (K136)
         "mix_cols",           # {crop: column} of the technology mix columns
         "mix_dnr",            # {crop: net revenue T1 - T2 per ha} of this solve
+        "split_lin",          # {column: (margin, tax)} of the dairy and cattle split columns' explicit linear terms
+                              # (EUR per head moved: the revenue and input changes, the emission tax; income I3)
+        "nlp_lin_adj",        # {"fert": per column, "tax": per column}: the fertiliser cost the NLP form takes out of
+                              # the linear terms and the emission tax it adds (nlp.py; income I3)
         "mix_n_min",          # {crop: mineral N input T1 - T2 per ha} of the N_balance row
         "manure_ni_nh3",      # NH3 of the manure inhibitors, by activity
         "manure_ni_relief",   # the manure N the inhibitors keep, by activity
@@ -239,6 +243,8 @@ class RegionalResults(_Slots):
         "last_manure_trade_pk",  # idem for P and K
         "last_mineral_n",     # the mineral N bought
         "last_plain",         # the plain problem (no land market), as last_aug
+        "obj_parts",          # the regional NLP's objective at the solution by part (CapriRegionalNLP.objective_parts,
+                              # with the columns' labels and linear adjustments; income I3)
     )
 
 
