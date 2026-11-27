@@ -1102,7 +1102,7 @@ INSERT INTO code_data VALUES
   ('capri_mod/run_manifest.py', '_git', 60.0, 1, '85', 'return subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True, timeout=60).stdout.strip()'),
   ('capri_mod/run_manifest.py', '_sha256', 20.0, 1, '93', 'for b in iter(lambda: fh.read(1 << 20), b""):'),
   ('capri_mod/scenarios/definition.py', 'ROOT', 2.0, 1, '26', 'ROOT = Path(__file__).resolve().parents[2] / "capri_data" / "scenarios"'),
-  ('capri_mod/scenarios/scenarios.py', '<module>', 50.0, 2, '65,92', 'def carbon_tax_scenario(carbon_price: float = 50.0) -> PolicyScenario:'),
+  ('capri_mod/scenarios/scenarios.py', '<module>', 50.0, 2, '65,93', 'def carbon_tax_scenario(carbon_price: float = 50.0) -> PolicyScenario:'),
   ('capri_mod/supply/capri_regional_nlp.py', 'CapriRegionalNLP.start', 0.05, 2, '117,118', 'x[d["off"]] = min(max(F, 0.0), 0.05)'),
   ('capri_mod/supply/equations/ammo_tech.py', 'costParLin_UreaSubst', 28.0, 1, '58', 'return (float(UVAG_NITF_BAS) - 289.0 * 60.0 / 28.0 * float(p_infl) ** int(years_BAS_2007)'),
   ('capri_mod/supply/equations/ammo_tech.py', 'costParLin_UreaSubst', 60.0, 1, '58', 'return (float(UVAG_NITF_BAS) - 289.0 * 60.0 / 28.0 * float(p_infl) ** int(years_BAS_2007)'),

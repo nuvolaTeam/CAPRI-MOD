@@ -484,7 +484,7 @@ base = model.run(scenario="BASELINE")
 scen = model.run(custom_scenario=greendeal_2030_scenario())
 delta = model.compare(base, scen)                         # activity, price and welfare changes
 model.run(scenario="BASELINE", world_price_shock={"SWHE": 0.10})   # +10% world wheat price
-model.run(scenario="CARBON_TAX_50")    # CAPRI's emission tax (pol_input/ecampa/carbtax50_endotech_set12.gms)
+model.run(scenario="CARBON_TAX_50")    # CAPRI's emission tax (pol_input/ecampa/carbtax50_endotech_set14td.gms)
 ```
 
 Key `run()` arguments: `scenario`, `custom_scenario` (a `PolicyScenario`), `world_price_shock`, `carbon_price`,

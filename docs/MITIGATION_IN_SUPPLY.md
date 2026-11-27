@@ -193,7 +193,8 @@ without an emission price its share stays zero; it acts under the emission tax. 
 ## CAPRI's emission tax in the supply models
 
 CAPRI prices emissions inside the supply model when a scenario switches `ghgTax` on (pol_input/ecampa/
-carbtax50_endotech_set12.gms: p_carbonTax(ru, "GGWP") on the EU regions; supply_model.gms objective
+carbtax50_endotech_set14td.gms l. 71, 238: p_carbonTax(ru, "GGWP") on the EU regions; the file the scenario
+CARBON_TAX_50 cites since 27 November 2026, on the Green Deal reference's CAP policy, cap_after_2014/ref.gms; supply_model.gms objective
 - p_carbonTax x (v_CO2EquEmis(GGWP) - reference)). capri-mod (`capri_mod/supply/ghg_tax.py`) gives each column of the
 regional problem tax x its emission per unit, taken at the baseline solution:
 

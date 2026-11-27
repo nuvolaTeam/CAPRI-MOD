@@ -63,8 +63,9 @@ SCENARIO_REGISTRY = {
 
 
 def carbon_tax_scenario(carbon_price: float = 50.0) -> PolicyScenario:
-    """CAPRI's emission tax (pol_input/ecampa/carbtax50_endotech_set12.gms: %ghgTax% on, p_carbonTax(ru, "GGWP") =
-    p_ghgEmisTax on the EU regions): EUR per t CO2-eq on agricultural emissions inside the supply models, with the
+    """CAPRI's emission tax (pol_input/ecampa/carbtax50_endotech_set14td.gms l. 71, 223-238: %ghgTax% on,
+    p_carbonTax(ru, "GGWP") = p_ghgEmisTax x p_ghgEmisTaxShift on the EU regions; the file on the Green Deal
+    reference's CAP policy, cap_after_2014/ref.gms, the scenario folder CARBON_TAX_50 names): EUR per t CO2-eq on agricultural emissions inside the supply models, with the
     mitigation options endogenous (capri_mod/supply/ghg_tax.py). The tax is the scenario's only shock, as in CAPRI's
     file (the earlier version stood in for it with agri-environment payments, a nitrate limit and an eco-scheme
     budget: retired in October 2026)."""
