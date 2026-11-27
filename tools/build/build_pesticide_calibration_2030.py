@@ -238,8 +238,7 @@ def main() -> None:
     ap.add_argument("--regions", default="")
     a = ap.parse_args()
     if a.test_only:
-        pesti_test(_read(OUT / "pesticide_par_2030.csv")).to_csv(OUT / "pesticide_par_2030.csv", index=False,
-                                                                 float_format="%.17g")
+        pesti_test(_read(OUT / "pesticide_par_2030.csv")).to_csv(OUT / "pesticide_par_2030.csv", index=False)
         return
     from capri_mod.coupling.equations.inflation_and_trend_interpolation import DATA_UVAG_IO_SIMY, p_inflationFactor
     from capri_mod.data.definitions import capri_ms
@@ -460,8 +459,8 @@ def main() -> None:
         p = pesti_test(p)
     if not a.regions:
         OUT.mkdir(parents=True, exist_ok=True)
-        m.to_csv(OUT / "pesticide_margins_2030.csv", index=False, float_format="%.17g")
-        p.to_csv(OUT / "pesticide_par_2030.csv", index=False, float_format="%.17g")
+        m.to_csv(OUT / "pesticide_margins_2030.csv", index=False)
+        p.to_csv(OUT / "pesticide_par_2030.csv", index=False)
     w = m[m.no_damage_yld > 0]
     sh = (w.marg_cost_ferc / w.no_damage_yld)
     print(f"{len(regions)} regions; margins {len(m)} rows ({len(w)} with a yield value); FERC over the yield's value: "

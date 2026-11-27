@@ -79,15 +79,15 @@ def main() -> None:
     apps = apps[apps.col.isin(mcact)]
     OUT.mkdir(parents=True, exist_ok=True)
     apps.rename(columns={"col": "activity", "row": "item", "value": "g_ha"})[["region", "activity", "item", "g_ha"]] \
-        .to_csv(OUT / "pesticides_2017.csv", index=False, float_format="%.17g")
+        .to_csv(OUT / "pesticides_2017.csv", index=False)
     p = prices.pivot_table(index=["region", "row"], columns="col", values="value", aggfunc="first").reset_index()
     p = p.rename(columns={"row": "item", "UVAG": "uvag", "UVAB": "uvab"})
     for c in ("uvag", "uvab"):
         if c not in p:
             p[c] = float("nan")
     p[["region", "item", "uvag", "uvab"]].sort_values(["region", "item"]).to_csv(
-        OUT / "pesticide_prices_2017.csv", index=False, float_format="%.17g")
-    dmg[dmg.max_damage != 0].to_csv(OUT / "pesticide_max_damage_2017.csv", index=False, float_format="%.17g")
+        OUT / "pesticide_prices_2017.csv", index=False)
+    dmg[dmg.max_damage != 0].to_csv(OUT / "pesticide_max_damage_2017.csv", index=False)
     print(f"pesticides_2017.csv {len(apps)} rows; pesticide_prices_2017.csv {len(p)}; "
           f"pesticide_max_damage_2017.csv {int((dmg.max_damage != 0).sum())}")
 

@@ -75,7 +75,7 @@ def main() -> None:
     dst = ROOT / "capri_data" / "baselines" / "capri_greendeal_ref" / f"1{year % 100 + 700}" / "supply" / \
         f"necr_{year}.csv"
     dst.parent.mkdir(parents=True, exist_ok=True)
-    out.to_csv(dst, index=False, float_format="%.17g")
+    out.to_csv(dst, index=False)
     print(f"{dst.name}: {len(out)} regional units, {out.levl_kha.sum():.1f} thousand ha "
           f"(EU {out[~out.region.str[:2].isin(['UK', 'NO', 'TU', 'AL', 'MK', 'CS', 'MO', 'BA', 'KO'])].levl_kha.sum():.1f})")
 
