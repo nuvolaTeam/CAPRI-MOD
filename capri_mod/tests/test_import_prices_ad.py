@@ -113,3 +113,32 @@ def test_trade_system_in_casadi_equals_the_numeric_one(market_2030):
                 worst["trq"] = max(worst["trq"], float(np.max(np.abs(np.asarray(out[1]).ravel() - trq_num))))
     print("worst", worst)
     assert worst["bal"] < 1e-11 and worst["X"] < 1e-11 and worst["trq"] < 1e-11, worst
+
+
+@pytest.mark.slow
+def test_a_freed_commoditys_cached_function_is_not_reused(market_2030):
+    """import_price_function and trade_system_function cache by (name, id): an id is reused once its object is freed,
+    so the entry keeps a weak reference to its commodity and an entry whose commodity is gone (or another object) is
+    rebuilt. Until 27 November 2026 a new commodity of the same name at a freed one's address took the stale function
+    with another set of flows (test_capri.py: Slice (start=266, stop=267) out of bounds, the cloud suite of 82c7797)."""
+    import copy
+    import weakref
+    from capri_mod.market import import_prices_ad as IP, trade_system_ad as TS
+    sc = next(s for s in market_2030.par.bilat.values() if len(IP.cells(s)) > 3)
+
+    class _Gone:
+        pass
+    dead = _Gone()
+    ref = weakref.ref(dead)
+    del dead                                                       # a freed object's reference: ref() is None
+    stale = object()
+    IP._CACHE[(sc.name, id(sc))] = (ref, stale)
+    f = IP.import_price_function(sc)
+    assert f is not stale and f.size1_out(0) == len(IP.cells(sc))
+    assert IP.import_price_function(sc) is f                       # its own entry is reused
+    other = copy.deepcopy(sc)                                      # another object of the same name: its own function
+    assert IP.import_price_function(other) is not f
+    key = (sc.name, id(sc), tuple(q["Q"] for q in (sc.trq_quotas or ())), tuple(g["Q"] for g in (sc.trq_globals or ())),
+           False)
+    TS._CACHE[key] = (ref, stale)
+    assert TS.trade_system_function(sc) is not stale

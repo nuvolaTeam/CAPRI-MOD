@@ -18,6 +18,8 @@ against BilateralCommodity.residual and trq_arguments (capri_mod/tests/test_impo
 """
 from __future__ import annotations
 
+import weakref
+
 import numpy as np
 
 from capri_mod.market.equations.market_model.armington import (SupBalM_, arm2QuantShares_, domSalesShares_,
@@ -40,9 +42,10 @@ def trade_system_function(sc, slope_input: bool = False):
     """See the module's docstring."""
     key = (sc.name, id(sc), tuple(q["Q"] for q in (sc.trq_quotas or ())), tuple(g["Q"] for g in (sc.trq_globals or ())),
            slope_input)
-    f = _CACHE.get(key)
-    if f is not None:
-        return f
+    ent = _CACHE.get(key)
+    # the entry holds a weak reference to its commodity: an id is reused once its object is freed (import_prices_ad.py)
+    if ent is not None and ent[0]() is sc:
+        return ent[1]
     import casadi as ca
     n = len(sc.regions)
     nb, ng = len(sc.trq_quotas or ()), len(sc.trq_globals or ())
@@ -120,5 +123,5 @@ def trade_system_function(sc, slope_input: bool = False):
                     [ca.vertcat(*bal), ca.vertcat(*trq) if trq else ca.SX(0, 1),
                      ca.vertcat(*[X[c] for c in cl]) if cl else ca.SX(0, 1), PAr],
                     ["r", "sB", "sW", "S", "D"] + (["slope"] if slope_input else []), ["bal", "trq", "X", "PAr"])
-    _CACHE[key] = f
+    _CACHE[key] = (weakref.ref(sc), f)
     return f

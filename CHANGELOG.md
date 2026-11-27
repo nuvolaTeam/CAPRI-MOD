@@ -658,6 +658,15 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   accounts within 4e-6 relative of the run without the bounds, welfare within 8e-5 (Norway's ProfitAgr: the check's
   evaluation of the market's functions at the same prices moves their lagged state, K147); the inner fertiliser
   distribution of one scenario region splits its totals differently across the crop groups (its optimum is not unique).
+  The cloud suite of 82c7797 (27 November 2026: 670 passed, 1 failed, one file stopped after 86 minutes) found two
+  faults, fixed in the commit after it: (5) the import prices' and the trade systems' CasADi functions were cached by
+  the commodity's name and Python id, which is reused once an object is freed; a new commodity of the same name at a
+  freed one's address took the stale function with another set of flows (test_capri.py, one region's baseline in a
+  long-lived worker: Slice (start=266, stop=267) out of bounds). The entry now keeps a weak reference to its
+  commodity and is rebuilt when that is gone (test_import_prices_ad.py, new test). (6) The test of the chain against
+  the fixed point compares the unbounded solves, as written before the default changed: market.bounds "none" there
+  (with the bounds, "ipopt" takes CAPRI's second solve, a least-infeasibility IPOPT solve of the whole market, over an
+  hour); 14 passed in 12 minutes on this machine.
 - **The split of the large modules (26 November 2026; the plan of 25 November, the project lead: modules over 1,000
   lines into parts with names a reader understands):** each large file stays as the main file, slim, with its entry
   points, and re-exports every name its parts define, so no import elsewhere changes; the code moved as it was (the

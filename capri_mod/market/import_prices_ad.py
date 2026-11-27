@@ -20,6 +20,8 @@ from __future__ import annotations
 from functools import partial
 from typing import List, Tuple
 
+import weakref
+
 import numpy as np
 
 from capri_mod.market.equations.market_model.border import (EntryPriceDriver_, FlexLevy_, FlexLevyNotCut_,
@@ -88,9 +90,11 @@ def import_price_function(sc):
     sig=(sB, sW)) without the scenario's tariff additions, with the border measures' average market price of an
     aggregate exporter block (MarketPriceAgg_) weighted at supply S and use D (the numpy code: at mpagg_SD)."""
     key = (sc.name, id(sc))
-    f = _CACHE.get(key)
-    if f is not None:
-        return f
+    ent = _CACHE.get(key)
+    # the entry holds a weak reference to its commodity: an id is reused once its object is freed (a new commodity of
+    # the same name at the same address took a stale function with another set of flows, 27 November 2026)
+    if ent is not None and ent[0]() is sc:
+        return ent[1]
     import casadi as ca
     n = len(sc.regions)
     nb, ng = len(sc.trq_quotas or ()), len(sc.trq_globals or ())
@@ -164,5 +168,5 @@ def import_price_function(sc):
         out.append(p)
     f = ca.Function("import_prices_" + sc.name, [r, sB, sW, S, D], [ca.vertcat(*out) if out else ca.SX(0, 1)],
                     ["r", "sB", "sW", "S", "D"], ["p"])
-    _CACHE[key] = f
+    _CACHE[key] = (weakref.ref(sc), f)
     return f

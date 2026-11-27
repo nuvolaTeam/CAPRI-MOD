@@ -131,7 +131,10 @@ def test_the_supply_system_equals_supply_response_at_its_block_solutions(solved_
 def test_the_market_solved_by_the_chain_is_the_fixed_points_equilibrium(solved_base, capsys, method, linsol):
     """Market.solver = "chain" / "ipopt" (capri_mod/market/market_chain.py): from the solved base, a supply change
     (+5% soft wheat everywhere) solved by the chain and by the fixed point gives the same prices; the fixed point confirms
-    the chain's solution in at most two evaluations."""
+    the chain's solution in at most two evaluations. Both without CAPRI's bounds (market.bounds "none"): the system's
+    solve is compared here; the bounded form has its own tests below (with the bounds, "ipopt" takes CAPRI's second
+    solve after its bounded IPOPT fails, a least-infeasibility solve of the whole market: over an hour, 27 November
+    2026)."""
     import pickle
     from capri_mod.settings import override
     if linsol == "pardiso":
@@ -140,8 +143,9 @@ def test_the_market_solved_by_the_chain_is_the_fixed_points_equilibrium(solved_b
     exo2 = exo.copy()
     exo2["SWHE"] = exo2["SWHE"] * 1.05
     m_fp, m_chain = pickle.loads(pickle.dumps(mm)), pickle.loads(pickle.dumps(mm))
-    e_fp = m_fp.solve(exogenous_supply=exo2)
-    with override({"market.solver": method, "market.newton_linear_solver": linsol}):
+    with override({"market.bounds": "none"}):
+        e_fp = m_fp.solve(exogenous_supply=exo2)
+    with override({"market.solver": method, "market.newton_linear_solver": linsol, "market.bounds": "none"}):
         e_chain = m_chain.solve(exogenous_supply=exo2)
     out = capsys.readouterr().out
     assert "market solve by the chain:" in out and ("converged" in out or "Solve_Succeeded" in out), out[-500:]
