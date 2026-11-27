@@ -67233,11 +67233,11 @@
     "tests": []
    }
   },
-  "val_capri_gd_effect_uk": {
-   "file": "capri_data/validation/greendeal_2030/capri_gd_effect_uk.csv",
+  "val_capri_gd_effect_outside_eu": {
+   "file": "capri_data/validation/greendeal_2030/capri_gd_effect_outside_eu.csv",
    "declared_in": "31_validation.sql",
    "layout": [],
-   "comment": "CAPRI's Green Deal 2030 step against its reference for the UK's regional units: the activity levels (LEVL) of the reference and the scenario and the % change (tools/build/extract_capri_gd_pair.py); apart from capri_gd_effect.csv, the UK not being a member state.",
+   "comment": "CAPRI's Green Deal 2030 step against its reference for the regional units outside the EU and Norway (the UK, the Western Balkans, Turkey): the activity levels (LEVL) of the reference and the scenario and the % change (tools/build/extract_capri_gd_pair.py); apart from capri_gd_effect.csv, which holds the member states.",
    "columns": [
     {
      "name": "region",
@@ -67289,13 +67289,13 @@
      "item": "ref",
      "unit": null,
      "status": "open",
-     "basis": "capri_gd_effect_uk.ref: the level of the activity, 1000 ha or 1000 heads"
+     "basis": "capri_gd_effect_outside_eu.ref: the level of the activity, 1000 ha or 1000 heads"
     },
     {
      "item": "scen",
      "unit": null,
      "status": "open",
-     "basis": "capri_gd_effect_uk.scen: the level of the activity, 1000 ha or 1000 heads"
+     "basis": "capri_gd_effect_outside_eu.scen: the level of the activity, 1000 ha or 1000 heads"
     }
    ],
    "provenance": {

@@ -466,32 +466,38 @@ def additive(unit: str) -> bool:
 
 
 @lru_cache(maxsize=1)
-def _uk_units() -> pd.DataFrame:
-    """CAPRI's UK units on the last NUTS with the UK (NUTS 2021, level 1; capri_gradio/geo/uk_nuts2021_level1.csv,
-    build_uk_geometry.py): nuts_id, country, name, capri_unit, nuts_codes, geometry. The UK is not in NUTS 2024."""
-    return pd.read_csv(Path(__file__).resolve().parent / "geo" / "uk_nuts2021_level1.csv")
+def _outside_units() -> pd.DataFrame:
+    """CAPRI's units the NUTS-2024 table does not link, one shape each (capri_gradio/geo/units_outside_nuts2024.csv,
+    build_units_outside_nuts2024.py): the UK on NUTS 2021 level 1, the Western Balkans' countries and Turkey's NUTS-1
+    regions on NUTS 2024; nuts_id, country, name, capri_unit, nuts_version, nuts_level, nuts_codes, geometry."""
+    return pd.read_csv(Path(__file__).resolve().parent / "geo" / "units_outside_nuts2024.csv", keep_default_na=False)
 
 
 def nuts_mapping() -> pd.DataFrame:
     """CAPRI's regional units linked to NUTS-2024 regions (capri_mod/nuts_reporting.py): capri_unit, nuts2024, group,
-    weight (the region's share of its group's utilised agricultural area); for the maps, with the UK's units on their
-    NUTS-2021 level-1 regions (_uk_units), one region per unit (column nuts2024 then holds a NUTS-2021 code)."""
+    weight (the region's share of its group's utilised agricultural area); for the maps, with the units outside that
+    table (_outside_units: the UK, the Western Balkans, Turkey), one shape per unit (column nuts2024 then holds the
+    shape's NUTS code: a NUTS-2021 level-1 code for the UK, a country or NUTS-1 code of NUTS 2024 for the others)."""
     from capri_mod import nuts_reporting as NR
     m = NR.load_mapping()
-    uk = _uk_units()
+    o = _outside_units()
+    o = o[~o["capri_unit"].isin(m["capri_unit"])]
     g0 = int(m["group"].max()) + 1
-    uk = pd.DataFrame({"capri_unit": uk["capri_unit"], "nuts2024": uk["nuts_id"],
-                       "group": range(g0, g0 + len(uk)), "uaa_ha": float("nan"), "weight": 1.0})
-    return pd.concat([m, uk[~uk["capri_unit"].isin(m["capri_unit"])]], ignore_index=True)
+    o = pd.DataFrame({"capri_unit": o["capri_unit"].to_numpy(), "nuts2024": o["nuts_id"].to_numpy(),
+                      "group": range(g0, g0 + len(o)), "uaa_ha": float("nan"), "weight": 1.0})
+    return pd.concat([m, o], ignore_index=True)
 
 
 @lru_cache(maxsize=1)
 def nuts_geometry() -> dict:
-    """The NUTS-2024 level-2 boundaries (capri_gradio/geo/nuts2024_level2.csv, Eurostat GISCO) and the UK's units'
-    NUTS-2021 level-1 ones (_uk_units) as a GeoJSON FeatureCollection with id = NUTS code."""
+    """The NUTS-2024 level-2 boundaries (capri_gradio/geo/nuts2024_level2.csv, Eurostat GISCO), with the units outside
+    the NUTS-2024 table one shape each (_outside_units), as a GeoJSON FeatureCollection with id = NUTS code."""
     g = pd.read_csv(Path(__file__).resolve().parent / "geo" / "nuts2024_level2.csv")
-    # the UK's units (not in NUTS 2024): their NUTS-2021 level-1 regions, London joined to the South East as in CAPRI
-    g = pd.concat([g, _uk_units()[["nuts_id", "country", "name", "geometry"]]], ignore_index=True)
+    # the units outside the NUTS-2024 table, one shape each, in place of the NUTS-2 regions they cover (the Western
+    # Balkans' and Turkey's; the UK is not in NUTS 2024)
+    o = _outside_units()
+    g = g[~g["country"].isin(set(o.loc[o["nuts_version"].astype(str) == "2024", "country"]))]
+    g = pd.concat([g, o[["nuts_id", "country", "name", "geometry"]]], ignore_index=True)
     return {"type": "FeatureCollection",
             "features": [{"type": "Feature", "id": r.nuts_id, "properties": {"name": r.name, "country": r.country},
                           "geometry": json.loads(r.geometry)} for r in g.itertuples()]}
@@ -626,13 +632,14 @@ def gd_capri_effect() -> pd.DataFrame:
     return _gd_tool().capri_effect()
 
 
-def gd_capri_effect_uk() -> pd.DataFrame:
-    """CAPRI's Green Deal 2030 step against its reference for the UK's regional units, their levels (LEVL;
-    capri_data/validation/greendeal_2030/capri_gd_effect_uk.csv, tools/build/extract_capri_gd_pair.py): region,
-    activity, item, ref, scen, pct_change. Apart from gd_capri_effect: the UK is not a member state."""
+def gd_capri_effect_outside_eu() -> pd.DataFrame:
+    """CAPRI's Green Deal 2030 step against its reference for the regional units outside the EU and Norway (the UK,
+    the Western Balkans, Turkey), their levels (LEVL; capri_data/validation/greendeal_2030/capri_gd_effect_outside_eu.csv,
+    tools/build/extract_capri_gd_pair.py): region, activity, item, ref, scen, pct_change. Apart from gd_capri_effect,
+    which holds the member states."""
     from capri_mod.tableio import read_input
     return read_input(Path(__file__).resolve().parents[1] / "capri_data" / "validation" / "greendeal_2030"
-                      / "capri_gd_effect_uk.csv")
+                      / "capri_gd_effect_outside_eu.csv")
 
 
 def _eu_regions(regions) -> list:
@@ -703,7 +710,7 @@ def gd_regional(root, scenario: str, run_id: str, activity: str) -> pd.DataFrame
     o = _loaded(root, scenario, run_id)
     b, s = o["act_regional"]
     cc = _gd_tool().ACTIVITIES.get(activity, [activity])
-    c = pd.concat([gd_capri_effect(), gd_capri_effect_uk()], ignore_index=True)     # the UK's units for the map too
+    c = pd.concat([gd_capri_effect(), gd_capri_effect_outside_eu()], ignore_index=True)  # the maps' other units
     c = c[(c["item"] == "LEVL") & c["activity"].isin(cc)].groupby("region")[["ref", "scen"]].sum()
     rows = []
     for r in _eu_regions(b):

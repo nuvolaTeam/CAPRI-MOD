@@ -860,7 +860,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/validation/farm_to_fork_2030/jrc121368_eu27.csv', 'validation', 'by rule: kept for comparison'),
   ('capri_data/validation/coupled_support_2030/capri_vcs_effect.csv', 'validation', 'by rule: kept for comparison'),
   ('capri_data/validation/greendeal_2030/capri_gd_effect.csv', 'validation', 'by rule: kept for comparison'),
-  ('capri_data/validation/greendeal_2030/capri_gd_effect_uk.csv', 'validation', 'by rule: kept for comparison'),
+  ('capri_data/validation/greendeal_2030/capri_gd_effect_outside_eu.csv', 'validation', 'by rule: kept for comparison'),
   ('capri_data/validation/greendeal_2030/capri_gd_market_2030.csv', 'validation', 'by rule: kept for comparison'),
   ('capri_data/validation/greendeal_2030/capri_marginal_terms_ref_2030.csv', 'validation', 'by rule: kept for comparison; also read by the 2030 builders as CAPRI''s 2030 levels and premiums'),
   ('capri_data/validation/greendeal_2030/capri_unit_values_ref_2030.csv', 'validation', 'by rule: kept for comparison'),

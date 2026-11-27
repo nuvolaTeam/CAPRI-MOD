@@ -97,19 +97,22 @@ def test_a_regional_item_is_drawn_on_its_nuts_regions(store):
     assert np.isclose(pc.at["DE11", "value"], 50.0)
 
 
-def test_the_uks_units_are_drawn_on_their_nuts_2021_regions():
-    """The UK is not in NUTS 2024: its 11 CAPRI units are drawn on their NUTS-2021 level-1 regions, London joined to
-    the South East (CAPRI's UKJ00000), and CAPRI's Green Deal pair holds their levels for the comparison's maps."""
+def test_the_units_outside_the_eu_are_drawn_one_shape_each():
+    """The UK (not in NUTS 2024: its NUTS-2021 level-1 regions, London joined to the South East as CAPRI's UKJ00000),
+    the Western Balkans' countries and Turkey's NUTS-1 regions: one shape per CAPRI unit, in place of the NUTS-2
+    regions they cover; CAPRI's Green Deal pair holds their levels for the comparison's maps."""
     import pandas as pd
     m = RD.nuts_mapping()
-    uk = m[m["capri_unit"].str.startswith("UK")]
-    assert len(uk) == 11 and set(uk["weight"]) == {1.0} and uk["group"].is_unique
-    assert not set(uk["group"]) & set(m.loc[~m["capri_unit"].str.startswith("UK"), "group"])
+    out = m[m["capri_unit"].str[:2].isin(["UK", "AL", "BA", "CS", "KO", "MK", "MO", "TR"])]
+    assert len(out) == 29 and set(out["weight"]) == {1.0} and out["group"].is_unique
+    assert not set(out["group"]) & set(m.loc[~m.index.isin(out.index), "group"])
     ids = {f["id"] for f in RD.nuts_geometry()["features"]}
-    assert set(uk["nuts2024"]) <= ids and "UKI" not in ids
-    v = pd.DataFrame({"capri_unit": ["UKJ00000"], "unit": "1000 ha", "baseline": [10.0], "scenario": [12.0]})
-    assert np.isclose(RD.map_frame(v, "% change").set_index("nuts2024").at["UKJ", "value"], 20.0)
-    assert RD.gd_capri_effect_uk()["region"].nunique() == 11
+    assert set(out["nuts2024"]) <= ids and not ids & {"UKI", "TR21", "RS11", "BA01"}
+    v = pd.DataFrame({"capri_unit": ["UKJ00000", "CS000000"], "unit": "1000 ha", "baseline": [10.0, 20.0],
+                      "scenario": [12.0, 25.0]})
+    pc = RD.map_frame(v, "% change").set_index("nuts2024")
+    assert np.isclose(pc.at["UKJ", "value"], 20.0) and np.isclose(pc.at["RS", "value"], 25.0)
+    assert RD.gd_capri_effect_outside_eu()["region"].nunique() == 29
 
 
 def test_member_states_sum_only_additive_items(store):

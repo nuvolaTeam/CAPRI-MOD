@@ -12350,20 +12350,20 @@
     "builder": "extract_capri_gd_pair"
    }
   },
-  "capri_data/validation/greendeal_2030/capri_gd_effect_uk.csv": {
-   "description": "CAPRI's Green Deal 2030 step against its reference for the UK's regional units: the activity levels (LEVL) of the reference and the scenario and the % change (tools/build/extract_capri_gd_pair.py); apart from capri_gd_effect.csv, the UK not being a member state.",
+  "capri_data/validation/greendeal_2030/capri_gd_effect_outside_eu.csv": {
+   "description": "CAPRI's Green Deal 2030 step against its reference for the regional units outside the EU and Norway (the UK, the Western Balkans, Turkey): the activity levels (LEVL) of the reference and the scenario and the % change (tools/build/extract_capri_gd_pair.py); apart from capri_gd_effect.csv, which holds the member states.",
    "kind": "validation",
    "vintage": "2030",
    "domain": "validation",
    "status": "validation",
-   "rows": 1448,
+   "rows": 3818,
    "columns": 6,
    "units": "U_percent",
    "origin": {
     "nature": "capri",
     "builder": "extract_capri_gd_pair"
    },
-   "catalogue_note": "The UK's regional units, apart from capri_gd_effect.csv (the UK is not a member state): the GUI's regional map of the comparison. (not re-checked)"
+   "catalogue_note": "The regional units outside the EU and Norway (the UK, the Western Balkans, Turkey), apart from capri_gd_effect.csv: the GUI's regional maps of the comparison. (not re-checked)"
   },
   "capri_data/validation/greendeal_2030/capri_gd_market_2030.csv": {
    "description": "CAPRI's 2030 market of its Green Deal step and its reference, per market region, item and commodity (tools/build/extract_capri_gd_market.py).",

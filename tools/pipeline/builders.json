@@ -6820,7 +6820,7 @@
    ],
    "outputs": [
     "capri_data/validation/greendeal_2030/capri_gd_effect.csv",
-    "capri_data/validation/greendeal_2030/capri_gd_effect_uk.csv"
+    "capri_data/validation/greendeal_2030/capri_gd_effect_outside_eu.csv"
    ]
   },
   {

@@ -25,7 +25,8 @@ production GROF of the member states and EU27yr19, for the check's market prices
 CAPRI's PMRK; UVAP is another price).
 
 Output: capri_data/validation/greendeal_2030/capri_gd_effect.csv (region, activity, item, ref, scen, pct_change); and
-capri_gd_effect_uk.csv, the same columns, the UK's regional units' levels (LEVL) apart (the UK is not a member state)
+capri_gd_effect_outside_eu.csv, the same columns, the levels (LEVL) of the regional units outside the EU and Norway
+(the UK, the Western Balkans, Turkey) apart
 
     python tools/build/extract_capri_gd_pair.py [REF.gdx SCEN.gdx] [--lib-dir DIR]
 """
@@ -47,9 +48,13 @@ from extract_capri_vcs_pair import read_gdx, _keep, REG, EU_MS  # noqa: E402  (t
 REF = EXPORTS / "res_2_1730greendeal_refdefaulta.gdx"
 SCEN = EXPORTS / "res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx"
 OUT = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_gd_effect.csv"
-#: the UK's regional units' levels (LEVL), apart: the UK is not a member state, and the files above hold the EU's
-#: (27 November 2026: for the GUI's regional map of the comparison, capri_gradio results_data.gd_regional)
-OUT_UK = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_gd_effect_uk.csv"
+#: the levels (LEVL) of CAPRI's regional units outside the EU and Norway (the UK, the Western Balkans, Turkey), apart:
+#: the file above holds the member states' (27 November 2026: for the GUI's regional maps of the comparison,
+#: capri_gradio results_data.gd_regional)
+OUT_OUT = ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_gd_effect_outside_eu.csv"
+#: those units (capri_data/codes/regional_units.csv: neither a member state's, by CAPRI's code, nor Norway's)
+OUTSIDE_UNITS = frozenset(u for u in pd.read_csv(ROOT / "capri_data" / "codes" / "regional_units.csv", dtype=str).region
+                          if u[:2] not in EU_MS and u[:2] != "NO")
 #: CAPRI's N balance items (dataOut '' . item . NITF, 1000 t N), as tools/build/extract_gd2030_nbalance.py reads them,
 #: and the total surplus SURTOT
 N_ITEMS = ("MINFER", "GASMIN", "RUNMIN", "NH3MIN", "EXPPRD", "IMPORT", "ATMOSD", "CRESID", "BIOFIX", "EXCRET",
@@ -70,9 +75,9 @@ def _keep_gd(r, q, a, i):
     return None
 
 
-def _keep_uk(r, q, a, i):
-    """The UK's regional units' activity levels (LEVL)."""
-    if q == "" and i == "LEVL" and REG.match(r) and r[:2] == "UK" and r != "UK000000":
+def _keep_outside(r, q, a, i):
+    """The activity levels (LEVL) of the regional units outside the EU and Norway."""
+    if q == "" and i == "LEVL" and r in OUTSIDE_UNITS:
         return (r, a, i)
     return None
 
@@ -97,9 +102,10 @@ def main():
     df = _pair(ref, scen)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(OUT, index=False)
-    uk = _pair(read_gdx(a.ref_gdx, a.lib_dir, keep=_keep_uk), read_gdx(a.scen_gdx, a.lib_dir, keep=_keep_uk))
-    uk.to_csv(OUT_UK, index=False)
-    print(f"wrote {OUT_UK.relative_to(ROOT)}: {len(uk)} rows, {uk.region.nunique()} UK units")
+    out = _pair(read_gdx(a.ref_gdx, a.lib_dir, keep=_keep_outside), read_gdx(a.scen_gdx, a.lib_dir, keep=_keep_outside))
+    out.to_csv(OUT_OUT, index=False)
+    print(f"wrote {OUT_OUT.relative_to(ROOT)}: {len(out)} rows, {out.region.nunique()} of the {len(OUTSIDE_UNITS)} units "
+          f"outside the EU and Norway")
     eu = df[(df.region == "EU27yr19") & (df.item == "LEVL")].set_index("activity")["pct_change"].dropna()
     print(f"wrote {OUT.relative_to(ROOT)}: {len(df)} rows ({len(ref)} reference, {len(scen)} scenario)")
     print("EU27 levels, % change:", eu.reindex(["SWHE", "DWHE", "BARL", "MAIZ", "RAPE", "PULS", "FALL", "GRAE", "GRAI",

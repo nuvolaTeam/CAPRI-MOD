@@ -726,8 +726,8 @@ def add_results(stores: list, app):
             lim = max(_saturation(fm["value"]), _saturation(fc["value"]))     # one scale for both maps
             mm = map_figure(fm, "% change", f"{name} · capri-mod", lim)
             mc = map_figure(fc, "% change", f"{name} · CAPRI", lim)
-            # the scatter and its correlation on the EU's units, as before the UK's were added to the maps
-            reg_eu = reg[~reg["capri_unit"].str.startswith("UK")]
+            # the scatter and its correlation on the EU's units, as before the units outside the EU were mapped
+            reg_eu = reg[~reg["capri_unit"].isin(set(RD.gd_capri_effect_outside_eu()["region"]))]
             ok = reg_eu.dropna(subset=["model_pct", "capri_pct"])
             corr = (f"correlation {np.corrcoef(ok['model_pct'], ok['capri_pct'])[0, 1]:.2f}" if len(ok) > 2
                     else "too few units for a correlation")
@@ -777,7 +777,7 @@ def add_results(stores: list, app):
             ms_fig = (bar_figure(msf["member_state"], msf["value"], f"{item} by member state · {measure}", measure)
                       if not msf.empty else None)
             regs = str((RD.read_meta(root, s_, r_).get("options") or {}).get("regions") or "")
-            msg = (f"{mf['value'].notna().sum()} of {len(mf)} regions with a value (NUTS 2024; the UK's units on NUTS 2021); "
+            msg = (f"{mf['value'].notna().sum()} of {len(mf)} regions with a value (NUTS 2024; the UK's units on NUTS 2021, the Western Balkans' and Turkey's one shape per unit); "
                    f"{'additive item' if rec['additive'] else 'not additive: no member-state sums'}")
             if regs:
                 msg += f". The run solved {len(regs.split(','))} regional units only: the others show the baseline's " \
