@@ -98,6 +98,9 @@ UNTRACED = {
     # the pesticide module (register DEP-51): CAPREG's base year data and its kept extracts, and the 2030 calibration
     # with the sim_ini_21730 extracts it keeps
     "capri_data/codes/capri/pesTSAgg.csv": ("build_code_lists", "CAPRI"),
+    # CAPRI's new energy crops at the simulation year and their kept extract (register DEP-9, KNOWN_ISSUES K138)
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/necr_2030.csv": ("build_necr_2030", "CAPRI"),
+    "capri_data/sources/raw/capri/results/sim_ini_21730/necr_items.parquet": ("build_necr_2030", "CAPRI"),
     "capri_data/2017/supply/pesticides_2017.csv": ("build_pesticides_2017", "CAPRI"),
     "capri_data/2017/supply/pesticide_prices_2017.csv": ("build_pesticides_2017", "CAPRI"),
     "capri_data/2017/supply/pesticide_max_damage_2017.csv": ("build_pesticides_2017", "CAPRI"),

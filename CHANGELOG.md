@@ -667,6 +667,25 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   the fixed point compares the unbounded solves, as written before the default changed: market.bounds "none" there
   (with the bounds, "ipopt" takes CAPRI's second solve, a least-infeasibility IPOPT solve of the whole market, over an
   hour); 14 passed in 12 minutes on this machine.
+- **CAPRI's new energy crops (NECR) as a model crop (27 November 2026; the project lead: "Do NECR now"; register DEP-9,
+  KNOWN_ISSUES K138):** a fixed crop on permanent land (CAPRI's MFCACT, sets.gms l. 131-143), with no base-year level
+  (CAPREG has none in any country) and its level and output at the simulation year CAPRI's, which its trend projection
+  sets (capmod/load_base_data_and_trends.gms l. 337-341, 598-599; sim_ini_21730's DATA(RU, NECR, LEVL | OCRO, "Y"):
+  tools/build/build_necr_2030.py -> necr_2030.csv, 119 units, 251.4 thousand ha in the EU; ProjectionModule.DATA_NECR_Y
+  with CAPRI's 2030 reference as the trajectory); its one output OCRO at OCRO's unit value (PACT_TO_Y NECR.OCRO,
+  sets.gms l. 5411; region_build.UVAG_PACT_TO_Y); no inputs (CAPRI's PACT_TO_I rows carry no data at "Y"); its nutrient
+  coefficients CAPRI's 2030 reference's, already in the 2030 environment data. Until now its area sat in the land data
+  as idle permanent-crop land, outside the UAA and the accounts. Denmark's 2030 baseline: the activities unchanged
+  (2e-7); the UAA 2,659.48 kha, CAPRI's UAAR (99.6 below before); OCRO's gross production 128.58 kt, CAPRI's (103.69
+  before); the EAA's gross output +35.2 EUR million. Seven units' Green Deal pair (DK, AT12, DE21, FR21, ES41, PL41,
+  IT32): the baseline's activities within 1.6e-6 of the run without NECR; the Green Deal step's activities within
+  0.15% and its prices within 1.1% (its targets are shares of the UAA, which now includes NECR: Denmark's organic
+  area +10.1 thousand ha). Test: test_necr.py (3).
+- **The carbon tax scenario cites CAPRI's carbtax50_endotech_set14td.gms (27 November 2026, the project lead):** the
+  file of CAPRI's EUR 50 tax on the Green Deal reference's CAP policy (pol_input/cap_after_2014/ref.gms, as
+  pol_input/greendeal/ref.gms l. 23); carbtax50_endotech_set12.gms builds on mtr_rd.gms. The tax is the same; the
+  scenario keeps the Green Deal reference's mitigation options, and its note records where the file's own list
+  differs (l. 188). No run changes.
 - **CAPRI's pesticide module, its agg5 stage (25-27 November 2026; register DEP-51, DEP-59 to DEP-62; the project
   lead's choice of 26 November: CAPREG's p_pestPar read, pest_cor.gms not ported):** setting supply.pest_disagg
   ("none", CAPRI's default; "agg5"). (1) The data: CAPREG's 2017 applications of the five aggregates (g per ha), their

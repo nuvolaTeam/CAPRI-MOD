@@ -61,7 +61,31 @@ def _region_prices(d: dict, region: str) -> pd.Series:
             v = row[act]
             if pd.notna(v) and v > 0:
                 prices[act] = float(v)
+    return UVAG_PACT_TO_Y(prices)
+
+
+def UVAG_PACT_TO_Y(prices: pd.Series) -> pd.Series:
+    """An activity whose main output is another model activity's product, and which has no price of its own, takes
+    that product's unit value: CAPRI values an activity's outputs at their UVAG (reports/calc_inc_indic.gms TOOU, the
+    supply model's revenue through SUPBAL_), and NECR's one output is OCRO (PACT_TO_Y NECR.OCRO, sets.gms l. 5411;
+    PACT_TO_O NECR.(OCRO, MANN, MANP, MANK), l. 5221), measured as OCRO in constant prices (l. 136-137). The model
+    keys its prices by activity: NECR takes OCRO's (the only model crop whose main output is another model crop's;
+    GRAE and GRAI produce GRAS, not a model activity, and keep their own). Returns prices."""
+    from capri_mod.data.definitions import CROPS
+    for a, o in _pact_to_y().items():
+        if a in CROPS and o in CROPS and a != o and o in prices.index and not (a in prices.index and pd.notna(prices[a])
+                                                                and prices[a] > 0):
+            prices[a] = float(prices[o])
     return prices
+
+
+def _pact_to_y() -> dict:
+    """CAPRI's PACT_TO_Y (capri_data/codes/capri/PACT_TO_Y.csv, build_code_lists): {activity: its main output}."""
+    import csv
+    from pathlib import Path
+    p = Path(__file__).resolve().parents[3] / "capri_data" / "codes" / "capri" / "PACT_TO_Y.csv"
+    with open(p, newline="") as fh:
+        return {r["pact"]: r["o"] for r in csv.DictReader(fh)}
 
 
 def _region_costs(data: Dict, region: str) -> pd.Series:

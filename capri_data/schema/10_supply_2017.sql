@@ -12,7 +12,8 @@ CREATE TABLE base_areas (
 );
 COMMENT ON TABLE base_areas IS 'crop areas 2017 per regional unit: CAPRI''s LEVL summed over the crop''s CAPRI activities (tools/build/build_capri_base.py, res_17* dumps)';
 INSERT INTO value_units SELECT 'base_areas', code, 'U_1000ha', 'capri', 'CAPRI''s LEVL of crop activities (CAPRIunits.gdx P_CAPRIunits: U_1000ha)'
-FROM model_activities WHERE kind = 'crop';
+FROM model_activities WHERE kind = 'crop' AND code <> 'NECR';
+-- (NECR has no base-year level in CAPREG: its level and output are the simulation year's, necr_2030.csv)
 
 -- file: capri_data/2017/supply/land_availability.csv
 -- layout: wide
@@ -52,7 +53,7 @@ CREATE TABLE yields (
 );
 COMMENT ON TABLE yields IS 'yields 2017: crops CAPRI''s YILD / 1000 level-weighted over the crop''s CAPRI activities (build_crop_economics_2017.py), GRAS CAPRI''s fresh-matter YILD unscaled, animals CAPRI''s YILD / 1000 per model head (build_animal_yields.py)';
 INSERT INTO value_units SELECT 'yields', code, 'U_TonPerHa', 'builder', 'CAPRI''s YILD / 1000 (build_crop_economics_2017.py: t/ha)'
-FROM model_activities WHERE kind = 'crop' AND code NOT IN ('GRAE', 'GRAI', 'OCRO', 'OIND', 'NURS', 'FLOW');
+FROM model_activities WHERE kind = 'crop' AND code NOT IN ('GRAE', 'GRAI', 'OCRO', 'OIND', 'NURS', 'FLOW', 'NECR');
 INSERT INTO value_units VALUES
   ('yields', 'GRAE', 'U_kgperha', 'builder', 'CAPRI''s grass output (GRAS) of GRAE, fresh matter (loaders: converted to dry matter with CAPRI''s DRMA)'),
   ('yields', 'GRAI', 'U_kgperha', 'builder', 'CAPRI''s grass output (GRAS) of GRAI, fresh matter (loaders: converted to dry matter with CAPRI''s DRMA)'),
@@ -83,7 +84,8 @@ CREATE TABLE variable_costs (
 );
 COMMENT ON TABLE variable_costs IS 'input costs 2017: crops CAPRI''s TOIN level-weighted per ha (build_crop_economics_2017.py); DCOW, BULL, PIGF, OANI CAPRI''s TOIN per CAPRI level unit (build_capri_base.intensive_values); SHGM, SHGF tools/lib/_sheep_goat.costs';
 INSERT INTO value_units SELECT 'variable_costs', code, 'U_EuPerHa', 'builder', 'CAPRI''s TOIN per ha (build_crop_economics_2017.py: EUR/ha)'
-FROM model_activities WHERE kind = 'crop';
+FROM model_activities WHERE kind = 'crop' AND code <> 'NECR';
+-- (NECR: no inputs, CAPRI's PACT_TO_I rows carry no data at the simulation year; no base-year level)
 INSERT INTO value_units SELECT 'variable_costs', a, 'U_EuPerHd', 'builder', 'CAPRI''s TOIN per head of CAPRI''s activity level (not per model head: capri_level_ratio)'
 FROM (VALUES ('DCOW'), ('BULL'), ('PIGF'), ('SHGM'), ('SHGF')) t(a);
 INSERT INTO value_units VALUES
@@ -99,13 +101,13 @@ CREATE TABLE producer_prices (
 );
 COMMENT ON TABLE producer_prices IS 'EU producer prices 2017 (build_eu_producer_prices.py): crops from CAPRI''s regional prices; SHGM, SHGF from tools/lib/_sheep_goat.eu_prices; VSET''s and FALL''s 0 (SETA''s until 7 November 2026) from sources/unsourced/producer_prices_no_builder.parquet';
 INSERT INTO value_units SELECT 'producer_prices', code, 'U_EuPerTon', 'builder', 'revenue over production of CAPRI''s YILD x MPRI (build_crop_economics_2017.py: EUR/t)'
-FROM model_activities WHERE kind = 'crop' AND code NOT IN ('GRAE', 'GRAI', 'VSET', 'FALL', 'OCRO', 'OIND', 'NURS', 'FLOW');
+FROM model_activities WHERE kind = 'crop' AND code NOT IN ('GRAE', 'GRAI', 'VSET', 'FALL', 'OCRO', 'OIND', 'NURS', 'FLOW', 'NECR');
 INSERT INTO value_units VALUES
   ('producer_prices', 'GRAE', 'U_EuPerTon', 'builder', 'CAPRI''s MREV over the dry-matter yield (build_crop_economics_2017.py): EUR per t of dry matter'),
   ('producer_prices', 'GRAI', 'U_EuPerTon', 'builder', 'CAPRI''s MREV over the dry-matter yield (build_crop_economics_2017.py): EUR per t of dry matter'),
   ('producer_prices', 'VSET', 'U_EuPerTon', 'builder', '0 by convention (producer_prices_no_builder.parquet)'),
   ('producer_prices', 'FALL', 'U_EuPerTon', 'builder', '0 by convention (producer_prices_no_builder.parquet)');
--- (OCRO, OIND, NURS, FLOW have no EU producer price row)
+-- (OCRO, OIND, NURS, FLOW have no EU producer price row; NECR takes OCRO's unit value, region_build.UVAG_PACT_TO_Y)
 INSERT INTO value_units VALUES
   ('producer_prices', 'SHGM', NULL, 'open', 'CAPREG''s regional prices of the activity weighted by the herds (tools/lib/_sheep_goat.py); the product and unit are to be checked'),
   ('producer_prices', 'SHGF', NULL, 'open', 'CAPREG''s regional prices of the activity weighted by the herds (tools/lib/_sheep_goat.py); the product and unit are to be checked');

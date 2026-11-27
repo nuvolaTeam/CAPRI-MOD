@@ -27,6 +27,7 @@ CROPS = [
     "OIND",  # Other industrial crops
     "NURS",  # Nursery plants
     "FLOW",  # Flowers
+    "NECR",  # New energy crops (CAPRI NECR: fixed, a level at the simulation year only, its output OCRO)
     "POTA",  # Potatoes
     "SUGB",  # Sugar beet
     "SUNF",  # Sunflower seed

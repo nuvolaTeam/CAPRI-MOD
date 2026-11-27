@@ -17,8 +17,8 @@ thousands against millions) cancel. Where the model splits an animal into CAPRI'
 DCOL / DCOH, the port of CAPRI's two dairy activities; the bulls' and heifers' intensity pairs, the port of CAPRI's bull and heifer splits; the replacement heifers and calves with
 supply.use_cattle_member_splits, K65), the change is the CAPRI activity's own: its stalls x_m = s_m X + sum_k E_mk z_k
 (s_m its stall share, z_k the split's shift, E_mk +1 for the activity gaining the stalls, -1 for the one giving them
-up; supply/livestock.py) now over the baseline's. The CAPRI activities no model activity holds (NECR, the idled
-histosols), and those of a model activity without a baseline level, stay at their trend levels. Only the EU units the ported schemes
+up; supply/livestock.py) now over the baseline's. The CAPRI activities no model activity holds (the idled
+histosols; NECR is fixed), and those of a model activity without a baseline level, stay at their trend levels. Only the EU units the ported schemes
 cover take factors (not Norway).
 """
 from __future__ import annotations

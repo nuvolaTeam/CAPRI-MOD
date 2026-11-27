@@ -261,6 +261,7 @@ class ProjectionModule:
         # CAPRI's 2030 reference as the trajectory, as its rations below: a trend projection (CAPTRD) keeps its own
         # yields, which the outputs per head follow (_project_livestock)
         if str(getattr(traj, "name", "")).startswith("capri_ref"):
+            self.DATA_NECR_Y(data, year)
             self.SUPBAL_outputsPerHead_Y(data, year, data.get("livestock_output_by_product_coef"),
                                          data.get("livestock_product_value_by_market_coef"))
             self.req_or_man_fnc_CRPR_EXPT_Y(data, year)
@@ -458,6 +459,42 @@ class ProjectionModule:
                             and pd.notna(nexp.at[r, a]):
                         nexp.at[r, a] = float(nexp.at[r, a]) * f
         data["ration_scale"] = scale
+
+    @staticmethod
+    def DATA_NECR_Y(data: Dict, year: Optional[int]) -> None:
+        r"""The new energy crops' level and output at the simulation year (register DEP-9, KNOWN_ISSUES K138): CAPRI's
+        year data take every item its trend projection holds from the trend (FROM_CAPTRD), the rest from the base
+        year; NECR has no base-year level in CAPREG, only the trend's, which the comment above it calls invented.
+
+        CAPRI's GAMS (capmod/load_base_data_and_trends.gms l. 337-341):
+
+        *TJ --- It seems as if NECR.OCRO yields and NECR.LEVL are invented in CAPTRD. If there is no OCRO.LEVL, then GROF is missing
+        *       This is inconsistent and needs to be fixed "somewhere", probably in CAPTRD.
+
+            DATA(RS,"GROF","OCRO","TRD")
+              = sum(MPACT $ pact_to_o(MPACT,"OCRO"), DATA(RS,MPACT,"OCRO","TRD")*DATA(RS,MPACT,"LEVL","TRD")) / 1000;
+
+        and (l. 598-599):
+
+            DATA(RS,ColsRead,RowsRead,"Y") = DATA(RS,ColsRead,RowsRead,"BAS") $ (NOT FROM_CAPTRD(ColsRead,RowsRead))
+                                           + DATA(RS,ColsRead,RowsRead,"TRD") $ FROM_CAPTRD(ColsRead,RowsRead);
+
+        In this project's notation: with CAPRI's 2030 reference as the trajectory, a regional unit's NECR area (data
+        "areas") and yield (data "yields", its output OCRO / 1000, the unit of the value-measured crops) are CAPRI's at
+        "Y" (sim_ini_21730, tools/build/build_necr_2030.py -> necr_2030.csv); 0 elsewhere and in the base year, as
+        CAPREG's. NECR is a fixed activity (MFCACT), held at that level. Departures from CAPRI: none (a trend
+        projection of the model's own, CAPTRD-MOD, carries NECR's trend itself once it feeds the year data)."""
+        t = data.get("necr_2030")
+        if t is None or int(year or 0) != 2030:
+            return
+        for key, col in (("areas", "levl_kha"), ("yields", "yield")):
+            tab = data.get(key)
+            if not isinstance(tab, pd.DataFrame):
+                continue
+            if "NECR" not in tab.columns:
+                tab["NECR"] = 0.0
+            for r in t.index.intersection(tab.index):
+                tab.at[r, "NECR"] = float(t.at[r, col])
 
     @staticmethod
     def p_linObjeCont_animals_Y(data: Dict, year: Optional[int]) -> None:

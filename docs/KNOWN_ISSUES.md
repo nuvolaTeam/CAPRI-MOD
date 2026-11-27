@@ -23,7 +23,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K127](#k127) | Under CAPRI's market calibration an emission tax leaves N manure trade at zero in a four-unit Belgian run where the former form traded 360 t | open (9 November 2026): cause not established |
 | [K128](#k128) | Farm-to-Fork's meat prices against JRC121368: beef +29.5% against +24.0%, poultry +20.4% against +18.0%, pork +20.5% against +43.0%, with EU production close to CAPRI's | open (9 November 2026): the market's inputs checked against CAPRI's (base, demand elasticities, Armington, quotas), no departure found; needs CAPRI's own scenario run on the same version |
 | [K129](#k129) | BG020000 under the Green Deal: the coupled iteration settles on one of two branches of the region's response (maize 169 or 16 thousand ha between two runs); each iteration's problem mostly has one solution the starts agree on | open (10 November 2026): the branch follows the market iteration's path; more starts per solve did not change it (tried and dropped) |
-| [K138](#k138) | CAPRI's new energy crops (NECR, 251 kha of the EU's 2030 crop area) are not a model activity | open (13 November 2026) |
+| [K138](#k138) | CAPRI's new energy crops (NECR, 251 kha of the EU's 2030 crop area) are not a model activity | fixed (27 November 2026): NECR a fixed model crop |
 | [K140](#k140) | The rural development port: 286 of 20,098 effective RD premiums differ from CAPRI's 2030 reference (Praha's rates, Ile-de-France's inherited LFA cut, Sweden's technology-differentiated extensification measure) | open (13 November 2026); in the model's 2030 premiums since 13 November 2026 |
 | [K142](#k142) | The BPS key (the MTR port): Croatia's key not found in CAPRI's chain (a uniform IUV used); sim_ini's NA sheep rates of 2002 taken as absent; France's Corsica 5% below CAPRI's 2030 BPS rate | open (13 November 2026) |
 | [K147](#k147) | The market solve's convergence test does not control a lag: the non-EU land and feed energy blocks read the previous evaluation's raw milk prices, so the balances re-evaluate above market.tol (1.3e-7 on the base market) | open: accepted; removed by the whole-market system |
@@ -3140,7 +3140,20 @@ same as leaving it out of both sides of sumEntl_.
 
 - **Effect:** 251 kha of the EU's 2030 crop area (0.15% of the sum of CAPRI's EU crop activities) without a response
 - **In 9t:** –
-- **Status:** open: to be checked where the area sits in the model's land data, and added as an activity if it matters
+- **Found (27 November 2026):** the area sat in the model's land data as idle permanent-crop land (FRUN: Denmark's
+  108.7 kha against 9.1 kha of the model's activities, the gap CAPRI's NECR, 99.6 kha), held by the land balance at
+  the base use, so no land decision depended on it; it was missing from the UAA (Denmark 2,559.9 against CAPRI's
+  UAAR 2,659.5 kha), from the targets the Green Deal sets as shares of the UAA, from the N and P balances and from the
+  accounts' other crops (OCRO: Denmark's gross production 103.7 against CAPRI's 128.6).
+- **Status:** fixed 27 November 2026 (register DEP-9): NECR a fixed crop of the model on permanent land (CAPRI's
+  MFCACT, sets.gms l. 131-143), with no base-year level as in CAPREG, its level and output OCRO at the simulation year
+  CAPRI's (sim_ini_21730's "Y", the trend projection's: tools/build/build_necr_2030.py -> necr_2030.csv,
+  projection_module.DATA_NECR_Y), valued at OCRO's unit value (PACT_TO_Y NECR.OCRO; region_build.UVAG_PACT_TO_Y),
+  its nutrient coefficients CAPRI's 2030 reference's (already in the 2030 environment data). Denmark's 2030 baseline:
+  the activities unchanged (2e-7), the UAA CAPRI's 2,659.48 kha, OCRO's gross production CAPRI's 128.58 kt, the EAA's
+  gross output +35.2 EUR million (2017 money). Seven units' Green Deal pair: the baseline's activities within 1.6e-6;
+  the Green Deal step's within 0.15% and its prices within 1.1% (the targets on the larger UAA; Denmark's organic
+  area +10.1 kha). Test: test_necr.py (3).
 
 <a id="k139"></a>
 ### K139: PL340000 converts all its forest to farmland in the Green Deal 2030 run (found 13 November 2026)

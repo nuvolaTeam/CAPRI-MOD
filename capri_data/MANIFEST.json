@@ -4806,6 +4806,24 @@
    },
    "catalogue_note": "tools/build/build_ms_farm_balance.py: GROF, SEDF and LOSF at \"Y\"; income I2c (not re-checked)"
   },
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/necr_2030.csv": {
+   "description": "CAPRI's new energy crops (NECR, a fixed crop activity of MFCACT, sets.gms l. 131-143) at its 2030 simulation start per regional unit: the level and the output OCRO per ha, sim_ini_21730's DATA(RU, \"NECR\", \"LEVL\" | \"OCRO\", \"Y\"), the trend projection's (no base-year level in CAPREG); the units with a level (tools/build/build_necr_2030.py; capri_mod/projection/projection_module.py DATA_NECR_Y)",
+   "kind": "reference",
+   "vintage": "2030 reference",
+   "domain": "supply",
+   "status": "live",
+   "vintage_exception": "CAPRI's 2030 simulation start: NECR has no base-year level",
+   "rows": 119,
+   "columns": 3,
+   "units": "U_1000ha, U_ValueUnitPerHa",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_necr_2030 (not in the trace yet)"
+   }
+  },
   "capri_data/baselines/capri_greendeal_ref/1730/supply/pesticide_margins_2030.csv": {
    "description": "CAPRI's pesticide calibration at 2030 (supply/cal_pesti.gms, ported in capri_mod/supply/equations/cal_pesti.py), per regional unit, crop and technology: the yield's value without damage, p_pestPar(..., \"yild\", A, \"NoDamageYld\"), and the marginal fertiliser cost of the avoided yield loss per nutrient and in total, p_pestPar(..., NITF | PHOF | POTF | FERC, A, \"margCostYld\"); negative_margin 1 where CAPRI's p_negMargWoPesti is set (the price-damage ratio is not defined there)",
    "kind": "calibrated",
@@ -6149,6 +6167,9 @@
    "kind": "structure",
    "rows": 68,
    "columns": 2,
+   "read_by_model": [
+    "capri_mod/supply/regional_supply/region_build.py"
+   ],
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists (not in the trace yet)"
@@ -6896,7 +6917,7 @@
   "capri_data/codes/model_activities.csv": {
    "description": "the model's activities (capri_mod/data/definitions.py CROPS, ANIMALS) and their CAPRI activities: a declared code list, a source per row (tools/lib/_model_codes.py reads it for the builders)",
    "kind": "structure",
-   "rows": 49,
+   "rows": 50,
    "columns": 5,
    "read_by_model": [
     "capri_mod/data/definitions.py",
@@ -6910,7 +6931,7 @@
   "capri_data/codes/model_activity_classes.csv": {
    "description": "the model's activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags, the organic target group and yield gap, the pesticide yield loss, the price source, the PMP share term's arable set, the young-animal outputs and the number of CAPRI technologies; a declared table, checked against CAPRI's sets by build_code_lists (a row that differs names its departure)",
    "kind": "structure",
-   "rows": 49,
+   "rows": 50,
    "columns": 13,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -12312,6 +12333,21 @@
     "builder": "build_ms_farm_balance (not in the trace yet)"
    },
    "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx DATA(MS, GROF | SEDF | LOSF, O, BAS | Y) and DATA(MS, UVAG | UVAP | UVAB, IO, BAS) (the reference export) written and read back by tools/build/build_ms_farm_balance.py, kept so its input can be rebuilt without the reference export (docs/EXTERNAL_SOURCES.md) (not re-checked)"
+  },
+  "capri_data/sources/raw/capri/results/sim_ini_21730/necr_items.parquet": {
+   "description": "sim_ini_21730's DATA(RU, \"NECR\", col, \"Y\") of the regional units (the reference export): the level, the output OCRO per ha and the level's split by use (LEVL_1 the area for fuel bioenergy, LEVL_2 the rest); written and read back by tools/build/build_necr_2030.py",
+   "kind": "reference",
+   "vintage": "2030",
+   "domain": "sources",
+   "status": "source",
+   "rows": 244,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_necr_2030 (not in the trace yet)"
+   },
+   "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx (the reference export) written and read back by its builder (not re-checked)"
   },
   "capri_data/sources/raw/capri/results/sim_ini_21730/oms.parquet": {
    "description": "sim_ini_21730's set OMS(OM), \"Goods with balances in the supply model\" (sets.gms l. 5143), its elements, written and read back by tools/build/build_pesticide_calibration_2030.py",

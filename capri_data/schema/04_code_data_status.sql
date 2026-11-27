@@ -1197,6 +1197,7 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/supply/equations/supply_model/pesticides.py', 'V_YLDPESTFAC_BOUNDS', 2.0, 'capri', 'keep', 'gams/supply/set_supply_bounds.gms l. 205-207', 'CAPRI''s number in its statement, as written there (the yield factor''s upper bound, times its level)'),
   ('capri_mod/supply/equations/supply_model/pesticides.py', 'insolve_yield_factors', -0.5, 'physical', 'keep', NULL, 'the technologies'' half difference: T1 and T2 at the mean +- half the T1 - T2 difference over the mean (techn_mix_2030.csv yield_diff, need_diff)'),
   ('capri_mod/supply/regional_nlp/pesticides.py', 'NLPPesticideBlock._pest_terms', -0.5, 'physical', 'keep', NULL, 'the technologies'' half difference: T1 and T2 at the mean +- half the T1 - T2 difference over the mean (techn_mix_2030.csv yield_diff, need_diff)'),
+  ('capri_mod/projection/projection_module.py', 'ProjectionModule.DATA_NECR_Y', 2030.0, 'capri-mod', 'check', NULL, 'the new energy crops'' year data are built for 2030 only (necr_2030.csv): one of the 2030-only paths to make year-general (the independence plan, stage 1 step 1.3)'),
   ('capri_mod/supply/regional_supply/region_build.py', 'RegionBuildBlock._pesticides_for', 2030.0, 'capri-mod', 'check', NULL, 'the pesticide calibration is built for 2030 only (pesticide_par_2030.csv): one of the 2030-only paths to make year-general (the independence plan, stage 1 step 1.3)');
 
 -- rule: every number in the model's code has its classification (run tools/check/make_code_data.py, then classify)

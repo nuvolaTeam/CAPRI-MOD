@@ -170,8 +170,9 @@ def ms_cuts(year: int, d=None) -> dict:
 def region_limit(region: str, acts, year: int):
     """CAPRI's entitlement limit of a regional unit in the model's columns: (Cut EUR/ha in the model's money, limit
     kha, columns), the columns the model activities that are CAPRI crop activities (MCACT, through their CAPRI codes).
-    The limit is the sum of those activities' trend levels: CAPRI's crop activities the model does not have (NECR,
-    ISET, GSET, TSET, FallGr) are held at their trend levels, which leave both sides of sumEntl_ (the idled histosols,
+    The limit is the sum of those activities' trend levels: CAPRI's crop activities the model does not have (ISET,
+    GSET, TSET, FallGr) are held at their trend levels, which leave both sides of sumEntl_ (NECR, a model activity since
+    27 November 2026, is fixed at its trend level, on both sides as before; the idled histosols,
     iHisCr and iHisGr, the caller adds as its histosol columns). None where the member state has no cut.
     The cut is CAPRI's (ms_cuts, in its money of the simulation year, the ceilings' nominal amounts as its objective
     takes them) over the year's money deflator (KNOWN_ISSUES K174): the model's objective is in base-year money, its

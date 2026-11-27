@@ -990,4 +990,6 @@ INSERT INTO data_kind VALUES
   ('capri_data/sources/raw/capri/results/capreg/pesticide_max_damage.parquet', 'coefficients', 'by file: CAPRI''s coefficients and elasticities'),
   ('capri_data/sources/raw/capri/results/sim_ini_21730/pesticide_cal_items.parquet', 'reference', 'by file: CAPRI''s 2030 data and prices'),
   ('capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_mult_fact_techn.parquet', 'calibrated', 'by file: the fertiliser calibration''s need multipliers'),
-  ('capri_data/sources/raw/capri/results/sim_ini_21730/oms.parquet', 'structure', 'by rule: codes, sets, correspondences');
+  ('capri_data/sources/raw/capri/results/sim_ini_21730/oms.parquet', 'structure', 'by rule: codes, sets, correspondences'),
+  ('capri_data/baselines/capri_greendeal_ref/1730/supply/necr_2030.csv', 'reference', 'by file: CAPRI''s 2030 data and prices'),
+  ('capri_data/sources/raw/capri/results/sim_ini_21730/necr_items.parquet', 'reference', 'by file: CAPRI''s 2030 data and prices');

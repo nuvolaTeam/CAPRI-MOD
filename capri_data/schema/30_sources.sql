@@ -2067,3 +2067,14 @@ INSERT INTO value_units VALUES
 -- file: capri_data/sources/raw/capri/results/sim_ini_21730/oms.parquet
 CREATE TABLE src_oms (code VARCHAR PRIMARY KEY);
 COMMENT ON TABLE src_oms IS 'sim_ini_21730''s set OMS(OM), "Goods with balances in the supply model" (sets.gms l. 5143), its elements, written and read back by tools/build/build_pesticide_calibration_2030.py';
+
+-- file: capri_data/sources/raw/capri/results/sim_ini_21730/necr_items.parquet
+CREATE TABLE src_necr_items (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    col VARCHAR NOT NULL CHECK (col IN ('LEVL', 'OCRO', 'LEVL_1', 'LEVL_2')),
+    value DOUBLE NOT NULL,
+    PRIMARY KEY (region, col)
+);
+COMMENT ON TABLE src_necr_items IS 'sim_ini_21730''s DATA(RU, "NECR", col, "Y") of the regional units (the reference export): the level, the output OCRO per ha and the level''s split by use (LEVL_1 the area for fuel bioenergy, LEVL_2 the rest); written and read back by tools/build/build_necr_2030.py';
+INSERT INTO value_units VALUES
+  ('src_necr_items', 'value', NULL, 'open', 'per column: 1000 ha for LEVL, LEVL_1, LEVL_2; CAPRI''s value units per ha for OCRO');

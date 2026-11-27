@@ -1340,3 +1340,15 @@ INSERT INTO value_units VALUES
   ('sup_pesticide_par_2030', 'appl_cal', 'U_kgperha', 'builder', 'CAPRI''s test of the calibration (m_pestiTest): the application the farmer chooses at the calibration point (ApplPerHaCal), kg per ha'),
   ('sup_pesticide_par_2030', 'appl_choke', 'U_kgperha', 'builder', 'CAPRI''s test of the calibration: the application at the price that would end the use at the prior elasticity (ApplPerHa2), kg per ha'),
   ('sup_pesticide_par_2030', 'yld_pest_fac_cal', 'U_ratio', 'builder', 'the yield factor at appl_cal (CAPRI flags it where it is off 1 by more than 1e-4)');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/necr_2030.csv
+CREATE TABLE sup_necr_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    levl_kha DOUBLE NOT NULL CHECK (levl_kha > 0),
+    yield DOUBLE NOT NULL CHECK (yield > 0),
+    PRIMARY KEY (region)
+);
+COMMENT ON TABLE sup_necr_2030 IS 'CAPRI''s new energy crops (NECR, a fixed crop activity of MFCACT, sets.gms l. 131-143) at its 2030 simulation start per regional unit: the level and the output OCRO per ha, sim_ini_21730''s DATA(RU, "NECR", "LEVL" | "OCRO", "Y"), the trend projection''s (no base-year level in CAPREG); the units with a level (tools/build/build_necr_2030.py; capri_mod/projection/projection_module.py DATA_NECR_Y)';
+INSERT INTO value_units VALUES
+  ('sup_necr_2030', 'levl_kha', 'U_1000ha', 'capri', 'DATA(RU, "NECR", "LEVL", "Y")'),
+  ('sup_necr_2030', 'yield', 'U_ValueUnitPerHa', 'builder', 'DATA(RU, "NECR", "OCRO", "Y") / 1000, the unit of the model''s yields of the value-measured crops (yields.csv OCRO)');
