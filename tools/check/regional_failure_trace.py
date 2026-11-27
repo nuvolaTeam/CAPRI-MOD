@@ -32,7 +32,9 @@ def _caller():
     chain, rid = [], None
     while f is not None:
         code = f.f_code
-        if code.co_filename.endswith(os.path.join("supply", "supply_module.py")):
+        # the supply module and its parts (supply/regional_supply, since 26 November 2026)
+        if (code.co_filename.endswith(os.path.join("supply", "supply_module.py"))
+                or os.path.join("supply", "regional_supply", "") in code.co_filename):
             chain.append(f"{code.co_name}:{f.f_lineno}")
             s = f.f_locals.get("self")
             if rid is None and s is not None and hasattr(s, "rid"):

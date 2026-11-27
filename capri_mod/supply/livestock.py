@@ -82,6 +82,11 @@ class LivestockBlock:
                 if a in self.net_revenues.index:
                     n = float(rec.get("produce", {}).get(a, 0.0)) - float(rec.get("use", {}).get(a, 0.0))
                     self.net_revenues[a] = float(self.net_revenues[a]) + (r_ - 1.0) * v * n
+                    # the young animals sold (OTHER_O) or bought (YOUNG) at their price's change (income I2)
+                    if n > 0:
+                        self._nr_item(a, "O", "OTHER_O", (r_ - 1.0) * v * n)
+                    else:
+                        self._nr_item(a, "I", "YOUNG", -(r_ - 1.0) * v * n)
 
     def _split_manure_factors(self, n_cols, acts, nut="N"):
         """[(column, animal, manure per head of the column / the animal's)] of the animal split and option columns for
@@ -143,6 +148,7 @@ class LivestockBlock:
     def _dairy_intensity_column(self, Qa, ca, Aa, ba, start, labels, n):
         """CAPRI's two-intensity cattle activities: dairy cows (DCOL/DCOH, the port of CAPRI's two dairy activities), then fattening
         bulls (BULL/BULH) and heifers (HEIL/HEIH) (the port of CAPRI's bull and heifer splits)."""
+        self.ev.split_lin = {}
         Qa, ca, Aa, ba, start = self._dairy_column_only(Qa, ca, Aa, ba, start, labels, n)
         Qa, ca, Aa, ba, start = self._cattle_columns(Qa, ca, Aa, ba, start, labels, n)
         return self._genetics_columns(Qa, ca, Aa, ba, start, labels, n)
@@ -251,10 +257,13 @@ class LivestockBlock:
                 dp = di.get(f"dprod_{g}_rel")
                 if p_ and dp is not None and dp == dp and float(dp):
                     dv += float(dp) * p_ * chg
-            ca = np.concatenate([ca, [cz_all[key] - dv + self._ghg_cost('cattle', key)
-                                      + self._split_inpo_change(a, di)]])
+            _tax, _dinpo = self._ghg_cost('cattle', key), self._split_inpo_change(a, di)
+            ca = np.concatenate([ca, [cz_all[key] - dv + _tax + _dinpo]])
             start = np.concatenate([start, [0.0]])
             self.ev.cattle_cols[key] = Aa.shape[1] - 1
+            _sl = getattr(self.ev, "split_lin", None)
+            if _sl is not None:                       # as the dairy split's (income I3)
+                _sl[Aa.shape[1] - 1] = (float(dv) - float(_dinpo), float(_tax))
             rx = dict(getattr(self.ev, "dairy_req_extra", None) or {})
             rx[a] = list(rx.get(a, [])) + [(Aa.shape[1] - 1, req)]
             self.ev.dairy_req_extra = rx
@@ -483,9 +492,16 @@ class LivestockBlock:
             mv = pv.get("DCOW.MILK")
             if mv is not None and pd.notna(mv):
                 dmilk = float(di["dcomi_rel"]) * float(mv) * self._pt("DCOW", "MILK") * float(ps.get("MILK", ps.get("DCOW", 0.0)) or 0.0)
-        ca = np.concatenate([ca, [cz - dmilk + self._ghg_cost('dairy') + self._split_inpo_change("DCOW", di)]])
+        _tax, _dinpo = self._ghg_cost('dairy'), self._split_inpo_change("DCOW", di)
+        ca = np.concatenate([ca, [cz - dmilk + _tax + _dinpo]])
         start = np.concatenate([start, [0.0]])
         self.ev.dairy_col = Aa.shape[1] - 1
+        # the column's explicit linear terms by CAPRI's category (income I3): the margin's change per head moved (the
+        # milk revenue's change, the other inputs' change) and the emission tax; cz, the calibration term from the
+        # base duals, holds the members' base margin difference with their PMP terms
+        _sl = getattr(self.ev, "split_lin", None)
+        if _sl is not None:
+            _sl[self.ev.dairy_col] = (float(dmilk) - float(_dinpo), float(_tax))
         self.ev.dairy_req_extra = {"DCOW": [(self.ev.dairy_col, req)]}
         return Qa, ca, Aa, ba, start
 

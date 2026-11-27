@@ -156,6 +156,8 @@ CREATE TABLE amm_ammonia_tech_model (
     fA DOUBLE NOT NULL,
     lg DOUBLE,
     r_ch4 DOUBLE,
+    kappa2 DOUBLE NOT NULL,
+    revenue DOUBLE NOT NULL,
     PRIMARY KEY (region, animal, "sub", technology, "group")
 );
 COMMENT ON TABLE amm_ammonia_tech_model IS 'the ammonia technologies on the model''s animals: CAPRI''s options, weights and the N cascade terms (build_ammonia_tech_model.py) (tools/build/build_ammonia_tech_model.py)';
@@ -177,7 +179,9 @@ INSERT INTO value_units VALUES
   ('amm_ammonia_tech_model', 'fS', NULL, 'open', 'ammonia_tech_model fS'),
   ('amm_ammonia_tech_model', 'fA', NULL, 'open', 'ammonia_tech_model fA'),
   ('amm_ammonia_tech_model', 'lg', NULL, 'open', 'ammonia_tech_model lg'),
-  ('amm_ammonia_tech_model', 'r_ch4', NULL, 'open', 'ammonia_tech_model r_ch4');
+  ('amm_ammonia_tech_model', 'r_ch4', NULL, 'open', 'ammonia_tech_model r_ch4'),
+  ('amm_ammonia_tech_model', 'kappa2', NULL, 'open', 'ammonia_tech_model kappa2'),
+  ('amm_ammonia_tech_model', 'revenue', NULL, 'open', 'ammonia_tech_model revenue');
 
 -- file: capri_data/2017/abatement/ammonia/ammonia_technologies.csv
 CREATE TABLE amm_ammonia_technologies (

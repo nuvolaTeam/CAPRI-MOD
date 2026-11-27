@@ -226,6 +226,8 @@ class FertilisationBlock:
         the base and fixed in simulation; here one per region and nutrient). None outside CAPRI's EU data."""
         from capri_mod.fert.npk import NPKData, NUTRIENTS, PERM_NGRP, endo_slope, fout_at_yields, need_multiplier
         from capri_mod.fert.inner_fert_dist import FERT_POST_ACCURACY
+        # the crops' residues' nutrients of this block (none where it is not built: outside CAPRI's EU data)
+        self.res.last_fout, self.res.last_fout_mix = {}, {}
         env_ = getattr(self.seen, "env_for_surplus", None)
         if env_ is None:
             return None
@@ -410,6 +412,20 @@ class FertilisationBlock:
                         ownl.append((kz, sh * k_own * own_y[j] * self._mix_res_diff(tm_, acts[j], nut, fout_y.get(j), _dep)))
                 groups.append({"g": gname, "perm": perm, "acc": acc, "modes": modes, "crops": crops,
                                "need": needl, "own": ownl, "Aref": Aref, "need_yf": need_yf})
+            # the crops' residues' nutrients at this solve's yields, DATA(crop, MANN | MANP | MANK) per ha (the pool's
+            # unscaled, the permanent crops' own), with the member state's unit value of the output: the crops' TOOU in
+            # the income (calc_inc_indic.py DATA_TOOU_FOUT; KNOWN_ISSUES K212); the mix column's T1 - T2 per ha moved
+            _fo = {"N": "MANN", "P": "MANP", "K": "MANK"}[nut]
+            _fuv = float(getattr(R, "fout_uvag_eur_t", float("nan")))
+            if _fuv == _fuv:
+                for j, a in enumerate(acts):
+                    q_ = float(own_y[j]) + (float(poolc_y[j]) / _kpool if _kpool else 0.0)
+                    if a in CROPS and q_ != 0.0:
+                        self.res.last_fout.setdefault(a, {})[_fo] = (q_, _fuv)
+                        if mixc.get(a) is not None and tm_ is not None and a in tm_.index:
+                            rd = self._mix_res_diff(tm_, a, nut, fout_y.get(j), _dep)
+                            if rd != 0.0:
+                                self.res.last_fout_mix.setdefault(a, {})[_fo] = q_ * rd
             if not groups:
                 continue
             # CAPRI's Green Deal group (set_fert_priors.gms l. 773-781, v_fertDistPartialSlack): in its listed regions
@@ -891,6 +907,7 @@ class FertilisationBlock:
             if c in self.net_revenues.index:
                 need_t_ha = self._crop_mineral_rate(c) * (1.0 + e0) / 1000.0
                 self.net_revenues[c] = float(self.net_revenues[c]) - c_t * need_t_ha
+                self._nr_item(c, "I", "mitiI", c_t * need_t_ha)
         # the same factor on the manure and residue credits (environmental module, "__credit__")
         self.ev.n_intensity["__credit__"] = self.ev.n_intensity.get("__credit__", 1.0) * f
         shares = {k: (v,) for k, v in sh.items()}

@@ -109,6 +109,8 @@ def main():
     warnings.filterwarnings("always", message="scenario market supply Hessian not measured")
     warnings.filterwarnings("always", message="bilateral market did not converge")
     warnings.filterwarnings("always", message="CAPRI's crop-group fertiliser allocation")
+    # the supply models' welfare table (coupling/reporting.py _welfare_supply): a failure leaves the table out
+    warnings.filterwarnings("always", message="welfare: ")
     sys.path.insert(0, str(ROOT))
     # the run manifest (capri_mod/run_manifest.py): the code, software and every input file the run reads, with its
     # SHA-256; recording starts before the data are read
@@ -444,6 +446,40 @@ def main():
            # per region: N-balance price (EUR/kg N), technology shares (diagnostics)
            "act_regional": tuple({reg: {k: float(x_) for k, x_ in v.activities.items() if np.isfinite(x_)}
                                   for reg, v in x["supply"].items()} for x in (b, s)),
+           # per region and animal: the solved feed (t) and its value per kg in the report (EUR/kg), baseline and
+           # scenario (income, CAPRI's TOIN at the solution: reports/calc_inc_indic.gms, sol_simy.gms l. 254-257)
+           "feed_regional": tuple({reg: {"t": dict(getattr(v, "feed_t", None) or {}),
+                                         "price": dict(getattr(v, "feed_price", None) or {}),
+                                         "lin": dict(getattr(v, "feed_lin", None) or {}),
+                                         "fodder_duals": dict(getattr(v, "fodder_duals", None) or {})}
+                                   for reg, v in x["supply"].items()} for x in (b, s)),
+           # the regions' income at the solution in CAPRI's form (income I1, SupplyResult.income, EUR 1000; MGVA per
+           # activity in EUR per ha or head), base and scenario
+           "income_regional": tuple({reg: {k_: v_ for k_, v_ in (getattr(v, "income", None) or {}).items()}
+                                     for reg, v in x["supply"].items()} for x in (b, s)),
+           # the regions' gross account by item (income I2, SupplyResult.eaa, EUR million: the items as records,
+           # TOOU, TOIN, PRME, MGVA, AGGT, DIFF; income I2b's purchases as records, EAAP, EAAB), base and scenario
+           "eaa_regional": tuple({reg: ({k_: (v_.to_dict("records") if hasattr(v_, "columns") else v_)
+                                         for k_, v_ in v.eaa.items()} if getattr(v, "eaa", None) else None)
+                                  for reg, v in x["supply"].items()} for x in (b, s)),
+           # the member states' accounts at producer and basic prices (income I2c, results["eaa_ms"]: the items as
+           # records, EAAP's and EAAB's totals; EUR million), base and scenario
+           "eaa_ms": tuple(({ms: {"items": v["items"].to_dict("records"), "EAAP": v["EAAP"], "EAAB": v.get("EAAB"),
+                                  "EAAG": v.get("EAAG"),
+                                  "aggregates": (v["aggregates"].to_dict("records")
+                                                 if v.get("aggregates") is not None else None)}
+                             for ms, v in x["eaa_ms"].items()} if x.get("eaa_ms") else None) for x in (b, s)),
+           # the premium outlays per member state and product and their budgets (income I4, results["feoga"], EUR
+           # million), base and scenario
+           "feoga": tuple(({ms: {o: {c: float(v) for c, v in r_.items()} for (_m, o), r_ in g.iterrows()}
+                            for ms, g in x["feoga"].groupby(level=0)} if x.get("feoga") is not None else None)
+                          for x in (b, s)),
+           # the farms' profit and the domestic support per member state and market product (results
+           # ["welfare_products"], EUR million), base and scenario
+           "welfare_products": tuple(({ms: {o: {c: float(v) for c, v in r_.items() if v == v}
+                                            for (_m, o), r_ in g.iterrows()}
+                                       for ms, g in x["welfare_products"].groupby(level=0)}
+                                      if x.get("welfare_products") is not None else None) for x in (b, s)),
            "regional": {reg: {"lam": float((getattr(v, "shadow_prices", {}) or {}).get("N_balance", 0.0) or 0.0),
                               "fert": dict(getattr(v, "fert_tech_shares", None) or {}),
                               # the tillage options' and the urea substitution's shares (21 November 2026)

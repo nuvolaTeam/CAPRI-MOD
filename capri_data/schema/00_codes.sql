@@ -666,6 +666,54 @@ COMMENT ON TABLE capri_sed_to_cak IS 'CAPRI SED_TO_CAK: each oilseed and its cak
 CREATE TABLE capri_pact_to_y (pact VARCHAR NOT NULL, o VARCHAR NOT NULL, PRIMARY KEY (pact, o));
 COMMENT ON TABLE capri_pact_to_y IS 'CAPRI PACT_TO_Y: each production activity and its main output (sets.gms, capmod/load_base_data_and_trends.gms l. 711-795, biofuel/resids.gms)';
 
+-- file: capri_data/codes/capri/PACT_TO_XX.csv
+CREATE TABLE capri_pact_to_xx (pact VARCHAR NOT NULL, xx VARCHAR NOT NULL, PRIMARY KEY (pact, xx));
+COMMENT ON TABLE capri_pact_to_xx IS 'CAPRI PACT_TO_XX: each production activity and its market product for the welfare report, INPE where none (reports/rep_sets.gms l. 105-122), as CAPRI''s run built it';
+
+-- file: capri_data/codes/capri/END.csv
+CREATE TABLE capri_end (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_end IS 'CAPRI END: the final products, whose seed and losses on farm the simulation report sets in proportion to production (reports/sol_simy.gms l. 1889-1898), as CAPRI''s run built it, in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/IOE.csv
+CREATE TABLE capri_ioe (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_ioe IS 'CAPRI IOE: the inputs and outputs of the economic accounts (sets.gms), as CAPRI''s run built it, in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/MARR.csv
+CREATE TABLE capri_marr (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_marr IS 'CAPRI MARR: the market model''s products with a farm-gate price (arm/arm_sets.gms; the basic-price unit values, reports/sol_market.gms l. 1325-1337), as CAPRI''s run built it, in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/O_TO_YANI.csv
+CREATE TABLE capri_o_to_yani (oyani VARCHAR NOT NULL, iyani VARCHAR NOT NULL, PRIMARY KEY (oyani, iyani));
+COMMENT ON TABLE capri_o_to_yani IS 'CAPRI O_TO_YANI: each young animal produced (OYANI) and bought (IYANI) (sets.gms; reports/sol_simy.gms l. 793-795), as CAPRI''s run built it';
+
+-- file: capri_data/codes/capri/OAGG.csv
+CREATE TABLE capri_oagg (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_oagg IS 'CAPRI OAGG: the product aggregates of the reports (reports/aggreg_sets.gms l. 150ff), as CAPRI''s run built them, in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/EAAGA.csv
+CREATE TABLE capri_eaaga (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_eaaga IS 'CAPRI EAAGA: the aggregates of the economic accounts (reports/aggreg_sets.gms l. 207), as CAPRI''s run built them, in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/REGAGG.csv
+CREATE TABLE capri_regagg (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_regagg IS 'CAPRI REGAGG: the regional aggregates of the simulation report (reports/sol_simy.gms l. 2317-2403), as CAPRI''s run built them, in CAPRI''s set order';
+
+-- file: capri_data/codes/capri/R_T_OAGG.csv
+CREATE TABLE capri_r_t_oagg (oagg VARCHAR NOT NULL, "rows" VARCHAR NOT NULL, PRIMARY KEY (oagg, "rows"));
+COMMENT ON TABLE capri_r_t_oagg IS 'CAPRI R_T_OAGG: each aggregate and its rows (reports/aggreg_sets.gms l. 211-273), as CAPRI''s run built it';
+
+-- file: capri_data/codes/capri/RMS_TO_RM.csv
+CREATE TABLE capri_rms_to_rm (rms VARCHAR NOT NULL, rm VARCHAR NOT NULL, PRIMARY KEY (rms, rm));
+COMMENT ON TABLE capri_rms_to_rm IS 'CAPRI RMS_TO_RM: each market model country and its market region (arm/arm_sets.gms; reports/welfare.gms l. 864-868), as CAPRI''s run built it';
+
+-- file: capri_data/codes/capri/RW_TO_RM.csv
+CREATE TABLE capri_rw_to_rm (rw VARCHAR NOT NULL, rm VARCHAR NOT NULL, PRIMARY KEY (rw, rm));
+COMMENT ON TABLE capri_rw_to_rm IS 'CAPRI RW_TO_RM: each world region and its market regions (arm/arm_sets.gms; reports/welfare.gms l. 899-909), as CAPRI''s run built it';
+
+-- file: capri_data/codes/capri/CAP_TO_TRD.csv
+CREATE TABLE capri_cap_to_trd ("rows" VARCHAR NOT NULL, xx VARCHAR NOT NULL, PRIMARY KEY ("rows", xx));
+COMMENT ON TABLE capri_cap_to_trd IS 'CAPRI CAP_TO_TRD: the data base''s outputs and the market model''s products (arm/arm_sets.gms l. 683ff), as CAPRI''s run built it';
+
 -- file: capri_data/codes/capri/Feed_FeedAggr.csv
 CREATE TABLE capri_feed_feedaggr (feed VARCHAR NOT NULL, feedaggr VARCHAR NOT NULL, PRIMARY KEY (feed, feedaggr));
 COMMENT ON TABLE capri_feed_feedaggr IS 'CAPRI Feed_FeedAggr: the feeds of each feed aggregate (sets.gms)';
@@ -714,12 +762,12 @@ CREATE TABLE results_items (
     capri_source VARCHAR,
     PRIMARY KEY (block, item)
 );
-COMMENT ON TABLE results_items IS 'The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT''s cols and rows ("*": the model''s own coordinate translated, "act": the activity''s code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)';
+COMMENT ON TABLE results_items IS 'The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT''s cols and rows ("*": the model''s own coordinate translated, "act": the activity''s code in rows, "=": the row is CAPRI''s code itself; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)';
 
--- rule: a results item's CAPRI codes are both given or both empty, are in CAPRI's COLS and ROWS ("*" apart), and cite
+-- rule: a results item's CAPRI codes are both given or both empty, are in CAPRI's COLS and ROWS ("*", "act", "=" apart), and cite
 -- where CAPRI sets them
 SELECT block, item, capri_cols, capri_rows FROM results_items
 WHERE (capri_cols = '') <> (capri_rows = '')
    OR (capri_cols <> '' AND (capri_source IS NULL OR capri_source = ''))
    OR (capri_cols NOT IN ('', '*') AND capri_cols NOT IN (SELECT code FROM capri_cols))
-   OR (capri_rows NOT IN ('', '*', 'act') AND capri_rows NOT IN (SELECT code FROM capri_rows));
+   OR (capri_rows NOT IN ('', '*', 'act', '=') AND capri_rows NOT IN (SELECT code FROM capri_rows));

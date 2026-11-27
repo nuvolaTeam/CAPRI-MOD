@@ -1807,6 +1807,55 @@ COMMENT ON TABLE src_data_prod_grof_rmssup IS 'CAPRI''s DATA(RMSSUP, "PROD", row
 INSERT INTO value_units VALUES
   ('src_data_prod_grof_rmssup', 'value', 'U_1000t', 'capri', 'CAPRI''s production (1000 t)');
 
+-- file: capri_data/sources/raw/capri/results/sim_ini_21730/fout_uvag_bas.parquet
+CREATE TABLE src_fout_uvag_bas (
+    ms VARCHAR NOT NULL,
+    fout VARCHAR NOT NULL CHECK (fout IN ('MANN', 'MANP', 'MANK')),
+    uvag_bas DOUBLE NOT NULL CHECK (uvag_bas > 0),
+    PRIMARY KEY (ms, fout)
+);
+COMMENT ON TABLE src_fout_uvag_bas IS 'CAPRI''s base year unit values of the nutrients'' outputs MANN, MANP, MANK per member state, sim_ini_21730''s DATA(MS, "UVAG", FOUT, "BAS") (the reference export), written and read back by tools/build/build_npk_balance_2030.py (npk_region_2030.csv fout_uvag_eur_t; KNOWN_ISSUES K212)';
+INSERT INTO value_units VALUES
+  ('src_fout_uvag_bas', 'uvag_bas', 'U_EuPerTon', 'capri', 'CAPRI DATA(MS, "UVAG", FOUT, "BAS"): EUR per t of N, P2O5, K2O in the base year''s money');
+
+-- file: capri_data/sources/raw/capri/results/sim_ini_21730/fodder_onfarm_items.parquet
+CREATE TABLE src_fodder_onfarm_items (
+    ms VARCHAR NOT NULL,
+    item VARCHAR NOT NULL CHECK (item IN ('GROF', 'LOSF', 'SEDF', 'SEDM')),
+    product VARCHAR NOT NULL CHECK (product IN ('GRAS', 'MAIF', 'OFAR', 'ROOF')),
+    year VARCHAR NOT NULL CHECK (year IN ('BAS', 'Y')),
+    value DOUBLE NOT NULL,
+    PRIMARY KEY (ms, item, product, year)
+);
+COMMENT ON TABLE src_fodder_onfarm_items IS 'CAPRI''s member states'' gross production, losses and seed of the fodder crops'' outputs, sim_ini_21730''s DATA(MS, GROF | LOSF | SEDF | SEDM, GRAS | MAIF | OFAR | ROOF, BAS | Y) (the reference export), written and read back by tools/build/build_fodder_onfarm_share.py (fodder_onfarm_share_2017.csv, fodder_onfarm_share_2030.csv; KNOWN_ISSUES K213)';
+INSERT INTO value_units VALUES
+  ('src_fodder_onfarm_items', 'value', 'U_1000t', 'capri', 'CAPRI DATA(MS, item, FODDO, year): 1000 t');
+
+-- file: capri_data/sources/raw/capri/results/sim_ini_21730/ms_farm_balance_items.parquet
+CREATE TABLE src_ms_farm_balance_items (
+    ms VARCHAR NOT NULL,
+    item VARCHAR NOT NULL CHECK (item IN ('GROF', 'SEDF', 'LOSF', 'UVAG', 'UVAP', 'UVAB')),
+    product VARCHAR NOT NULL,
+    year VARCHAR NOT NULL CHECK (year IN ('BAS', 'Y')),
+    value DOUBLE NOT NULL,
+    PRIMARY KEY (ms, item, product, year)
+);
+COMMENT ON TABLE src_ms_farm_balance_items IS 'CAPRI''s member states'' farm balance of its outputs at "BAS" and "Y" and the unit values of its items at "BAS", sim_ini_21730''s DATA(MS, GROF | SEDF | LOSF, O, BAS | Y) and DATA(MS, UVAG | UVAP | UVAB, IO, BAS) (the reference export), written and read back by tools/build/build_ms_farm_balance.py (ms_farm_balance_2017.csv, ms_farm_balance_2030.csv, ms_unit_values_2017.csv; income I2c)';
+INSERT INTO value_units VALUES
+  ('src_ms_farm_balance_items', 'value', NULL, 'open', 'CAPRI DATA(MS, item, product, year): 1000 t (GROF, SEDF, LOSF) or EUR per t (UVAG, UVAP, UVAB); no single unit code');
+
+-- file: capri_data/sources/raw/capri/results/sim_ini_21730/fnut_uvap_uvab_bas.parquet
+CREATE TABLE src_fnut_uvap_uvab_bas (
+    ms VARCHAR NOT NULL,
+    item VARCHAR NOT NULL CHECK (item IN ('UVAP', 'UVAB')),
+    fnut VARCHAR NOT NULL CHECK (fnut IN ('NITF', 'PHOF', 'POTF')),
+    value DOUBLE NOT NULL CHECK (value > 0),
+    PRIMARY KEY (ms, item, fnut)
+);
+COMMENT ON TABLE src_fnut_uvap_uvab_bas IS 'CAPRI''s member states'' base year unit values of the mineral fertilisers at producer and basic prices, sim_ini_21730''s DATA(MS, UVAP | UVAB, NITF | PHOF | POTF, "BAS") (the reference export), written and read back by tools/build/build_fnut_unit_values.py (fnut_unit_values_2017.csv; income I2b)';
+INSERT INTO value_units VALUES
+  ('src_fnut_uvap_uvab_bas', 'value', 'U_EuPerTon', 'capri', 'CAPRI DATA(MS, item, FNUT, "BAS"): EUR per t of N, P2O5, K2O in the base year''s money');
+
 -- file: capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_factors_2030.parquet
 CREATE TABLE src_crop_nut_need_factors_2030 (
     region VARCHAR NOT NULL,

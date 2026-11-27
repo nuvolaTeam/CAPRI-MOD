@@ -165,6 +165,7 @@ prices and slopes).
 | `2030/capri_price_ratios_2030.csv` | member state, CAPRI product: UVAG 2017 and 2030, input deflator, real ratio (2030 price in 2017 money / 2017 price) | `tools/build/build_price_trajectory_2030.py` |
 | `2030/capri_cap_premium_2030.csv` | model region × CAPRI activity: CAPRI's 2030 premium per unit in 2017 money | same |
 | `2030/capri_livestock_premium_ratio_2030.csv` | model region × model animal: 2030/2017 premium ratio (real, 2017 activity-level weights) | same |
+| `2030/capri_livestock_premium_2030.csv` | model region × model animal: CAPRI's 2030 premium per model head (2017 money), for the animals CAPRI's 2017 data pay none (K210) | same |
 | `validation/greendeal_2030/capri_marginal_terms_{ini,max}_2030.csv`, `capri_unit_values_{ini,max}_2030.csv` | CAPRI's Farm-to-Fork reference: per-activity marginal terms (D_*), LEVL, MREV, TOOU, TOIN, MANN, PRME; national unit values | `tools/build/extract_capri_marginal_terms.py` |
 | `sources/capri_baseline/capri_uvag_store_1730.csv` | CAPRI's calibrated 2030 unit values (p_uvagStore), member state × product | gdxdump of `data_uvag1730defaulta` |
 | `sources/capri_baseline/capri_market_prices_1730.csv` | CAPRI market baseline prices (PPRI, CPRI) at the 2017 (BAS) and 2030 (CAL) points, member state × product | gdxdump of `data_market_1730defaulta` |

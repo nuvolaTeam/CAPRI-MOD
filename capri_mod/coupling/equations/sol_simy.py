@@ -1,6 +1,11 @@
-r"""CAPRI's simulation year's report (reports/sol_simy.gms, star 3.0): the land owners' profit.
+r"""CAPRI's simulation year's report (reports/sol_simy.gms, star 3.0): the land owners' profit, the solution's feed
+per head, the activities' gross production or use, the mitigation options' accounting cost per activity, the gross
+account by item and its value added (income I2), the region's activity-based income (income I1), the supply model's
+objective and the producer surplus (income I3).
 
-capri_mod/coupling/reporting.py (ReportingBlock._welfare_supply) calls it.
+capri_mod/coupling/reporting.py (ReportingBlock._welfare_supply) calls the land owners' profit; the methane chain
+(tools/lib/methane_inputs.py) the feed per head; capri_mod/income (mitigation_items.py, income_module.py
+income_parts) the mitigation report and the region's income.
 """
 from __future__ import annotations
 
@@ -44,3 +49,800 @@ def DATA_FEED_SIMY(v_feedInpCoeff_A, v_actLevl_A, LEVL):
     v_feedInpCoeff_A, v_actLevl_A: {A: value} of the technologies with a p_maxFeedShare for the feed (the caller
     applies that condition and DATA's LEVL one). Departures from CAPRI: none."""
     return sum(float(v_feedInpCoeff_A.get(t, 0.0) or 0.0) * float(lv or 0.0) for t, lv in v_actLevl_A.items()) / LEVL
+
+
+def DATA_GROF_IO(coef, LEVL):
+    r"""DATA(RUNR, "GROF", IO, SIMY): a regional unit's gross production or use of an item, the activities'
+    coefficients x their levels (sequences over the activities with the item, in the same order; 1000 t for a
+    coefficient in kg per ha or head x a level in 1000 ha or heads, EUR million for a value in EUR per ha or head).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 685-687):
+
+          DATA(RUNR,"GROF",IO,"%SIMY%") $ SUM(PACT_TO_IO(MPACT,IO),1)
+                  = SUM( PACT_TO_IO(MPACT,IO) $ p_dataCopy(RUNR,MPACT,IO,"%SIMY%"),
+                          p_dataCopy(RUNR,MPACT,IO,"%SIMY%") * p_DataCopy(RUNR,MPACT,"LEVL","%SIMY%")) * 0.001;
+
+    In this project's notation: GROF_i = 0.001 sum_a coef_a,i L_a. Departures from CAPRI: none in the statement; the
+    caller passes the model's coefficients at the solution (income I2, capri_mod/income/eaa.py)."""
+    return 0.001 * float(sum(float(c) * float(l_) for c, l_ in zip(coef, LEVL)))
+
+def p_ghgMiti_emisAll_cost(terms, scale):
+    r"""p_ghgMiti(RU, PACT, allMitiTech, "emisAll", "cost") of an option other than NOC: its accounting cost per unit of
+    the activity at the solution, summed over the option's targets (EUR per ha or per head), which the report books as
+    the input mitiI (l. 1459-1461) and the income's TOIN counts.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1049-1072):
+
+        *  for animal activities and rice the costs follow from the cost function used in the supply model using the optimal implementation shares
+        *  NOTE: We use PACT, not MPACT to assign cropMiti and grasMiti in two steps, here the total ,and subsequently disaggreegated to crops
+           p_ghgMiti(RU,PACT,allMitiTech,"emisAll","cost") $ ((not sameas(allMitiTech,"NOC")))
+                    = sum((R_RAGG(RU,MS),mitiTech_map(MS,PACT,allMitiTech,mitiTarget)),
+                           [ (  p_ghgMiti(RU,PACT,allMitiTech,mitiTarget,"costParLin")
+                              + p_ghgMiti(MS,PACT,allMitiTech,mitiTarget,"costParLin")
+                             $ (NOT p_ghgMiti(RU,PACT,allMitiTech,mitiTarget,"costParLin"))) * v_miti.l(RU,PACT,allMitiTech,mitiTarget)
+        *                   special factor for option GENET_REP which is expressed relative to the young cow price, see envind\breeding.gms
+                           * (  1                      $ (NOT SAMEAS(allMitiTech,"Genet_rep"))
+                             +  p_uvagScen(MS,"YCOW")  $      SAMEAS(allMitiTech,"Genet_rep") )
+                           + (  p_ghgMiti(RU,PACT,allMitiTech,mitiTarget,"costParSqr")
+                             +  p_ghgMiti(MS,PACT,allMitiTech,mitiTarget,"costParSqr")
+                             $ (NOT p_ghgMiti(RU,PACT,allMitiTech,mitiTarget,"costParSqr")))*.5*v_miti.l(RU,PACT,allMitiTech,mitiTarget)**2]
+        *                   scaling factors where costs are not yet expressed per activity level
+                         * [ (  (DATA(RU,PACT,"DAYS","%SIMY%")/365)               $ (not SupplTech(allMitiTech))
+        *                 Dry Matter consumption times Fat share of Dry matter = Fat consumption
+                              + (  p_animReq(RU,PACT,"T","DRMA") * p_animProdDays(RU,PACT,"T") / 1000
+                                 * p_emisFeed(RU,PACT,"T",allMitiTech,"ShrOfDM")) $ (  SupplTechTot(allMitiTech)
+                                                                                      $ mitiTech_map(MS,PACT,allMitiTech,"CH4ENT"))
+                              )  $      AACT(PACT)
+
+                            + 1  $ (not AACT(PACT)) ]
+                             );
+           option kill = p_uvagScen;
+
+    terms: per target of the option (mitiTech_map), (costParLin of RU, costParLin of its member state, costParSqr of
+    RU, costParSqr of its member state, v_miti.l, the factor: 1, or p_uvagScen(MS, YCOW) for Genet_rep); scale: the
+    bracket's scaling of the activity (p_ghgMiti_emisAll_cost_scale). The member state's parameter applies where the
+    region has none (GAMS's "$ (NOT ...)"). Departures from CAPRI: none."""
+    total = 0.0
+    for lin_r, lin_ms, sqr_r, sqr_ms, v, fac in terms:
+        lin = float(lin_r) if lin_r else float(lin_ms or 0.0)
+        sqr = float(sqr_r) if sqr_r else float(sqr_ms or 0.0)
+        total += lin * float(v) * float(fac) + sqr * 0.5 * float(v) ** 2
+    return total * float(scale)
+
+
+def DATA_UVAG_FODDO(PSHW, p_onFarmShare, FODDMARKUP=0.0):
+    r"""DATA(RU, "UVAG", FODDO, SIMY): a fodder's unit value as a crop's output at the solution (EUR per t produced):
+    the dual of its balance per t fed less the share the farm loses or does not feed, plus the baseline run's markup.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 753, and l. 756-757 for the fed fodder):
+
+          DATA(RU,"UVAG",FODDO,"%SIMY%") = DATA(RU,"PSHW",FODDO,"%SIMY%") * (1-p_onFarmShare(RU,FODDO)) + FODDMARKUP(RU,FODDO);
+
+          DATA(RU,"UVAG",FODDI,"%SIMY%") $ SUM(FEED_TO_O(FODDI,FODDO), (1-p_onFarmShare(RU,FODDO)))
+            = SUM(FEED_TO_O(FODDI,FODDO), DATA(RU,"UVAG",FODDO,"%SIMY%") * 1/(1-p_onFarmShare(RU,FODDO)));
+
+    In this project's notation: UVAG(FODDO) = PSHW x (1 - p_onFarmShare) + FODDMARKUP, and the fed fodder's UVAG(FODDI)
+    = UVAG(FODDO) / (1 - p_onFarmShare); p_onFarmShare = (SEDF + SEDM + LOSF) / GROF of the member state at the year
+    (supply/pmp.gms l. 41-49, capri_mod/supply/equations/pmp.py). A fodder crop's output per ha is then YILD x
+    UVAG(FODDO) = YILD x (1 - p_onFarmShare) x PSHW + YILD x FODDMARKUP: where the member state feeds all the fodder it
+    does not lose or sow, YILD x (1 - p_onFarmShare) is the fed fodder per ha of the model's fodder balance (SUPBAL_,
+    u_t_per_ha; Denmark's other fodder at 2030: 34.93 t produced per ha, CAPRI's 1 - LOSF / GROF = 0.3761, 13.14 t not
+    lost); where part goes to other uses (Germany's fodder maize to biogas) the fed fodder is less.
+
+    Departures from CAPRI: none in the statement. FODDMARKUP is 0 in the model's runs, as in CAPRI's simulations that
+    the model reproduces: CAPRI's 2030 reference and Green Deal step value Denmark's fodders at PSHW x (1 - LOSF / GROF)
+    exactly (other fodder 18.69 = 49.69 x 0.3761 EUR/t in the reference, 19.93 = 52.99 x 0.3761 in the Green Deal
+    step; dataOut, a check only), while its baseline run stored markups of 31.0 (FODDMARKUP_21730DKdefaulta.gdx). The
+    simulation loads FODDMARKUP_<BAS><SIM><reg_agg>... without the country code (capmod/create_sim_ini_gdx.gms l. 519)
+    and the baseline writes one file per country (l. 748 above), so the simulations ran without them (KNOWN_ISSUES
+    K213)."""
+    return float(PSHW) * (1.0 - float(p_onFarmShare)) + float(FODDMARKUP)
+
+
+def p_ghgMiti_emisAll_cost_scale(AACT, SupplTech, SupplTechTot_CH4ENT, DAYS=0.0, DRMA=0.0, prodDays=0.0, ShrOfDM=0.0):
+    r"""The scaling of p_ghgMiti_emisAll_cost (l. 1063-1071 of the statement quoted there): for an animal activity
+    (AACT) its days over 365, or for a supplement option counted against enteric CH4 (SupplTechTot with a CH4ENT
+    target) the fat fed per head, DRMA x the production days / 1000 x the option's share of dry matter; 1 for the other
+    activities. An animal's supplement option outside that case scales to 0, as in CAPRI's sum of the two conditioned
+    terms. Departures from CAPRI: none."""
+    if not AACT:
+        return 1.0
+    return (float(DAYS) / 365.0 if not SupplTech else 0.0) + \
+        (float(DRMA) * float(prodDays) / 1000.0 * float(ShrOfDM) if SupplTechTot_CH4ENT else 0.0)
+
+
+def _lin_sqr(lin_r, lin_ms, sqr_r, sqr_ms, v):
+    """costParLin v + costParSqr 0.5 v^2 with the member state's parameter where the region has none (GAMS's
+    "$ (NOT ...)" in the statements of this module)."""
+    lin = float(lin_r) if lin_r else float(lin_ms or 0.0)
+    sqr = float(sqr_r) if sqr_r else float(sqr_ms or 0.0)
+    return lin * float(v) + sqr * 0.5 * float(v) ** 2
+
+
+def p_ghgMiti_emisAll_cost_GainsTechFert(syn_terms, NMIN, syn_othImpact, man_terms, NMAN, man_othImpact):
+    r"""p_ghgMiti(RU, MCACT, GainsTechFert, "emisAll", "cost") of a crop with a level: the fertiliser option's cost per
+    ha, its cost per t of mineral N times the crop's mineral N, and per t of manure N times its manure N, each on the
+    application before the options (EUR/ha).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1094-1126):
+
+
+        *
+        *  for crop activities the mitigation costs related to mineral fertiliser will be distributed according to the estimated distribution
+           p_ghgMiti(RU,MCACT,GainsTechFert,"emisAll","cost") $ DATA(RU,MCACT,"LEVL","%SIMY%")
+        *             cost per ton of mineral feriliser use
+                    = sum((R_RAGG(RU,MS),mitiTech_map(MS,"cropMiti",GainsTechFert,targFertSyn)),
+                           [ (  p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertSyn,"costParLin")
+                             +  p_ghgMiti(MS,"cropMiti",GainsTechFert,targFertSyn,"costParLin")
+                             $ (NOT p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertSyn,"costParLin"))) * v_miti.l(RU,"cropMiti",GainsTechFert,targFertSyn)
+                           + (  p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertSyn,"costParSqr")
+                             +  p_ghgMiti(MS,"cropMiti",GainsTechFert,targFertSyn,"costParSqr")
+                             $ (NOT p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertSyn,"costParSqr")))*.5*v_miti.l(RU,"cropMiti",GainsTechFert,targFertSyn)**2])
+        *             mineral fertiliser is given in kg/ha=>
+                    * DATA(RU,MCACT,"NMIN","%SIMY%")/1000
+        *             costs are calculated on the basis of ex-ante (without mitigation technologies) mineral fertilizer application
+                    * (1 + sum((gainsTechFert1,R_RAGG(RU,MS)), (p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMIN")
+                    + p_ghgMiti(MS,"cropMiti",gainsTechFert1,"othImpact","NMIN") $ (not p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMIN")))
+                    * v_Miti.l(RU,"cropmiti",gainsTechFert1,"N2OSYN")))
+        *             cost per ton of manure use
+                    + sum((R_RAGG(RU,MS),mitiTech_map(MS,"cropMiti",GainsTechFert,targFertMan)),
+                           [ (  p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertMan,"costParLin")
+                             +  p_ghgMiti(MS,"cropMiti",GainsTechFert,targFertMan,"costParLin")
+                             $ (NOT p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertMan,"costParLin"))) * v_miti.l(RU,"cropMiti",GainsTechFert,targFertMan)
+                           + (  p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertMan,"costParSqr")
+                             +  p_ghgMiti(MS,"cropMiti",GainsTechFert,targFertMan,"costParSqr")
+                             $ (NOT p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertMan,"costParSqr")))*.5*v_miti.l(RU,"cropMiti",GainsTechFert,targFertMan)**2])
+        *             manure is given in kg/head=>
+                    * DATA(RU,MCACT,"NMAN","%SIMY%")/1000
+        *             costs are calculated on the basis of ex-ante (without mitigation technologies) manure application
+                    * (1 + sum((gainsTechFert1,R_RAGG(RU,MS)), (p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMAN")
+                    + p_ghgMiti(MS,"cropMiti",gainsTechFert1,"othImpact","NMAN") $ (not p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMAN")))
+                    * v_Miti.l(RU,"cropmiti",gainsTechFert1,"N2OMAN")));
+
+
+    syn_terms, man_terms: per target of targFertSyn, targFertMan (lin_r, lin_ms, sqr_r, sqr_ms, v_miti.l);
+    syn_othImpact, man_othImpact: per option of gainsTechFert1 (othImpact of RU, of its member state, v_Miti.l on N2OSYN,
+    N2OMAN); NMIN, NMAN in kg/ha. Departures from CAPRI: none."""
+    syn = sum(_lin_sqr(*t) for t in syn_terms) * float(NMIN) / 1000.0 * \
+        (1.0 + sum((float(o_r) if o_r else float(o_ms or 0.0)) * float(v) for o_r, o_ms, v in syn_othImpact))
+    man = sum(_lin_sqr(*t) for t in man_terms) * float(NMAN) / 1000.0 * \
+        (1.0 + sum((float(o_r) if o_r else float(o_ms or 0.0)) * float(v) for o_r, o_ms, v in man_othImpact))
+    return syn + man
+
+
+def p_ghgMiti_emisAll_cost_UreaSubst(terms):
+    r"""p_ghgMiti(RU, MCACT, "UreaSubst", "emisAll", "cost") of a crop with a level: the urea substitution's cost, the
+    region's parameters at the share of cropMiti (EUR per unit of the crop).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1129-1132):
+
+           p_ghgMiti(RU,MCACT,"UreaSubst","emisAll","cost") $ DATA(RU,MCACT,"LEVL","%SIMY%")
+                    = sum(mitiTech_map(RU,MCACT,"UreaSubst",mitiTarget),
+                       p_ghgMiti(RU,"cropMiti","UreaSubst",mitiTarget,"costParLin") * v_miti.l(RU,"cropMiti","UreaSubst",mitiTarget)
+                     + p_ghgMiti(RU,"cropMiti","UreaSubst",mitiTarget,"costParSqr") *.5 * v_miti.l(RU,"cropMiti","UreaSubst",mitiTarget)**2);
+
+    terms: per target of the crop's mitiTech_map (costParLin, costParSqr, v_miti.l of cropMiti). Departures from CAPRI:
+    none."""
+    return sum(float(lin) * float(v) + float(sqr) * 0.5 * float(v) ** 2 for lin, sqr, v in terms)
+
+
+def p_ghgMiti_emisAll_cost_till(cost_cropMiti, LEVL, Tillset):
+    r"""p_ghgMiti(RU, MCACT, mitiTechTill, "emisAll", "cost") of a crop with a level and a tillage set: cropMiti's cost
+    of the tillage option (p_ghgMiti_emisAll_cost with PACT cropMiti), else none (0).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1134-1135):
+
+           p_ghgMiti(RU,MCACT,mitiTechTill,"emisAll","cost") $ (DATA(RU,MCACT,"LEVL","%SIMY%") and DATA(RU,MCACT,"Tillset","Y"))
+                    = p_ghgMiti(RU,"cropMiti",mitiTechTill,"emisAll","cost");
+
+    Departures from CAPRI: none."""
+    return float(cost_cropMiti) if (LEVL and Tillset) else 0.0
+
+
+def p_ghgMiti_emisAll_cost_catc(cost_uaar, v_miti):
+    r"""p_ghgMiti(RU, "catc", "WinterCov", "emisAll", "cost"): the winter cover's cost per ha of CATC, its cost per ha
+    of UAAR over the share v_miti (CATC's level is v_miti x UAAR's), 0 below a share of 1e-8.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1146-1153):
+
+        *  for winter cover crops the cost would have to be multiplied with the uaar (not the levl of catc).
+        *  The following holds: levl(catc) = v_miti * levl(uaar)
+        *  In order to treat the measure like the others (total cost = cost per levl * levl) we have to divide the cost per UAAR by v_miti.
+        *  totalCost(catc) = costPerLevl(UAAR)*levl(UAAR) = costPerlevl(UAAR)/v_miti(catc)*v_miti(catc)*levl(UAAR)
+        *                                                 =      costPerlevl(catc)        *    levl(catc)
+           p_ghgMiti(RU,"catc","WinterCov","emisAll","cost")
+                     = (p_ghgMiti(RU,"catc","WinterCov","emisAll","cost") / v_miti.l(RU,"catc","WinterCov","co2seq"))
+                     $ (v_miti.l(RU,"catc","WinterCov","co2seq") gt 1.e-8);
+
+    Departures from CAPRI: none."""
+    return float(cost_uaar) / float(v_miti) if float(v_miti) > 1e-8 else 0.0
+
+
+def p_ghgMiti_emisAll_cost_idlHis(cost_orgSoil, v_miti):
+    r"""p_ghgMiti(RU, idlHisAct, "Fallow", "emisAll", "cost"): the histosols' fallowing cost per ha of the idled
+    histosol activity, its cost per ha of organic soil over the share v_miti, 0 below a share of 1e-8.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1155-1164):
+
+        *
+        *  Same for histosol protection: the cost would have to be multiplied with the organic soil area (not the levl of IHISCR/IHISGR).
+        *  The following holds: levl(idlHisAct) = v_miti(idlHisAct) * orgSoilArea(idlHisAct)
+        *  In order to treat the measure like the others (total cost = cost per levl*levl) we have to divide the cost per orgSoilArea by v_miti:
+        *  totalCost(idlHisAct) = costPerLevl(orgSOilArea)                                    *orgSoilArea(idlHisAct)
+        *                       = costPerLevl(orgSOilArea)/v_miti(idlHisAct)*v_miti(idlHisAct)*orgSoilArea(idlHisAct)
+        *                       = costPerLevl(idlHisAct)                    *levl(idlHisAct)
+           p_ghgMiti(RU,idlHisAct,"Fallow","emisAll","cost")
+                     = (p_ghgMiti(RU,idlHisAct,"Fallow","emisAll","cost") / v_miti.l(RU,idlHisAct,"Fallow","n2ohis"))
+                     $ (v_miti.l(RU,idlHisAct,"Fallow","n2ohis") gt 1.e-8);
+
+    Departures from CAPRI: none."""
+    return float(cost_orgSoil) / float(v_miti) if float(v_miti) > 1e-8 else 0.0
+
+
+def _lin(par_r, par_ms, v):
+    """The parameter x v_miti, the member state's parameter where the region has none (GAMS's "$ (NOT ...)")."""
+    return (float(par_r) if par_r else float(par_ms or 0.0)) * float(v)
+
+
+def _fert_lin(syn_terms, NMIN, syn_othImpact, man_terms, NMAN, man_othImpact):
+    """The fertiliser options' revenue or subsidy per ha: per t of mineral and of manure N on the application before
+    the options, as their cost (p_ghgMiti_emisAll_cost_GainsTechFert) without the quadratic term."""
+    syn = sum(_lin(*t) for t in syn_terms) * float(NMIN) / 1000.0 * \
+        (1.0 + sum((float(o_r) if o_r else float(o_ms or 0.0)) * float(v) for o_r, o_ms, v in syn_othImpact))
+    man = sum(_lin(*t) for t in man_terms) * float(NMAN) / 1000.0 * \
+        (1.0 + sum((float(o_r) if o_r else float(o_ms or 0.0)) * float(v) for o_r, o_ms, v in man_othImpact))
+    return syn + man
+
+
+def p_ghgMiti_emisAll_revenue(terms, scale):
+    r"""p_ghgMiti(RU, PACT, allMitiTech, "emisAll", "revenue") of an option other than NOC: its revenue per unit of the
+    activity at the solution, which the report books as the output mitiO (l. 1464-1465) and the income's TOOU counts.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1169-1183):
+
+           p_ghgMiti(RU,PACT,allMitiTech,"emisAll","revenue") $ ((not sameas(allMitiTech,"NOC")))
+                    = sum((R_RAGG(RU,MS),mitiTech_map(MS,PACT,allMitiTech,mitiTarget)),
+                           [ (  p_ghgMiti(RU,PACT,allMitiTech,mitiTarget,"revenue")
+                             +  p_ghgMiti(MS,PACT,allMitiTech,mitiTarget,"revenue")
+                             $ (NOT p_ghgMiti(RU,PACT,allMitiTech,mitiTarget,"revenue"))) * v_miti.l(RU,PACT,allMitiTech,mitiTarget)]
+        *                   scaling factors where costs are not yet expressed per activity level
+                         * [  (  (DATA(RU,PACT,"DAYS","%SIMY%")/365)               $ (not SupplTech(allMitiTech))
+        *                 Dry Matter consumption times Fat share of Dry matter = Fat consumption
+                              + (  p_animReq(RU,PACT,"T","DRMA") * p_animProdDays(RU,PACT,"T") / 1000
+                                 * p_emisFeed(RU,PACT,"T",allMitiTech,"ShrOfDM")) $ (  SupplTechTot(allMitiTech)
+                                                                                      $ mitiTech_map(MS,PACT,allMitiTech,"CH4ENT"))
+                              )  $      AACT(PACT)
+
+                            + 1  $ (not AACT(PACT))]
+                             );
+
+    terms: per target (revenue of RU, of its member state, v_miti.l); scale: p_ghgMiti_emisAll_cost_scale. Departures
+    from CAPRI: none."""
+    return sum(_lin(*t) for t in terms) * float(scale)
+
+
+def p_ghgMiti_emisAll_revenue_GainsTechFert(syn_terms, NMIN, syn_othImpact, man_terms, NMAN, man_othImpact):
+    r"""p_ghgMiti(RU, MCACT, GainsTechFert, "emisAll", "revenue") of a crop with a level (EUR/ha).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1185-1208):
+
+        *  for crop activities the revenues are distributed justs as the observed components
+           p_ghgMiti(RU,MCACT,GainsTechFert,"emisAll","revenue") $ DATA(RU,MCACT,"LEVL","%SIMY%")
+        *             revenue per ton of mineral feriliser use
+                    = sum((R_RAGG(RU,MS),mitiTech_map(MS,"cropMiti",GainsTechFert,targFertSyn)),
+                           [ (  p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertSyn,"revenue")
+                             +  p_ghgMiti(MS,"cropMiti",GainsTechFert,targFertSyn,"revenue")
+                             $ (NOT p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertSyn,"revenue"))) * v_miti.l(RU,"cropMiti",GainsTechFert,targFertSyn)])
+        *             mineral fertiliser is given in kg/ha=>
+                    * DATA(RU,MCACT,"NMIN","%SIMY%")/1000
+        *             revenue is calculated on the basis of ex-ante (without mitigation technologies) mineral fertilizer application
+                    * (1 + sum((gainsTechFert1,R_RAGG(RU,MS)), (p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMIN")
+                    + p_ghgMiti(MS,"cropMiti",gainsTechFert1,"othImpact","NMIN") $ (not p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMIN")))
+                    * v_Miti.l(RU,"cropmiti",gainsTechFert1,"N2OSYN")))
+        *             revenue per ton of manure use
+                    + sum((R_RAGG(RU,MS),mitiTech_map(MS,"cropMiti",GainsTechFert,targFertMan)),
+                           [ (  p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertMan,"revenue")
+                             +  p_ghgMiti(MS,"cropMiti",GainsTechFert,targFertMan,"revenue")
+                             $ (NOT p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertMan,"revenue"))) * v_miti.l(RU,"cropMiti",GainsTechFert,targFertMan)])
+        *             manure is given in kg/head=>
+                    * DATA(RU,MCACT,"NMAN","%SIMY%")/1000
+        *             revenue is calculated on the basis of ex-ante (without mitigation technologies) mineral fertilizer application
+                    * (1 + sum((gainsTechFert1,R_RAGG(RU,MS)), (p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMAN")
+                    + p_ghgMiti(MS,"cropMiti",gainsTechFert1,"othImpact","NMAN") $ (not p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMAN")))
+                    * v_Miti.l(RU,"cropmiti",gainsTechFert1,"N2OMAN")));
+
+    The arguments as p_ghgMiti_emisAll_cost_GainsTechFert's, each term (revenue of RU, of its member state,
+    v_miti.l). Departures from CAPRI: none."""
+    return _fert_lin(syn_terms, NMIN, syn_othImpact, man_terms, NMAN, man_othImpact)
+
+
+def p_ghgMiti_emisAll_subsidy(terms, scale):
+    r"""p_ghgMiti(RU, PACT, allMitiTech, "emisAll", "subsidy") of an option other than NOC: its subsidy per unit of the
+    activity at the solution, which the report adds to the premiums (mitiSubs, l. 1429-1434).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1327-1341):
+
+           p_ghgMiti(RU,PACT,allMitiTech,"emisAll","subsidy") $ ((not sameas(allMitiTech,"NOC")))
+                    = sum((R_RAGG(RU,MS),mitiTech_map(MS,PACT,allMitiTech,mitiTarget)),
+                           [ (  p_ghgMiti(RU,PACT,allMitiTech,mitiTarget,"subsidy")
+                             +  p_ghgMiti(MS,PACT,allMitiTech,mitiTarget,"subsidy")
+                             $ (NOT p_ghgMiti(RU,PACT,allMitiTech,mitiTarget,"subsidy"))) * v_miti.l(RU,PACT,allMitiTech,mitiTarget)]
+        *                   scaling factors where costs are not yet expressed per activity level
+                         * [ (  (DATA(RU,PACT,"DAYS","%SIMY%")/365)               $ (not SupplTech(allMitiTech))
+        *                 Dry Matter consumption times Fat share of Dry matter = Fat consumption
+                              + (  p_animReq(RU,PACT,"T","DRMA") * p_animProdDays(RU,PACT,"T") / 1000
+                                 * p_emisFeed(RU,PACT,"T",allMitiTech,"ShrOfDM")) $ (  SupplTechTot(allMitiTech)
+                                                                                      $ mitiTech_map(MS,PACT,allMitiTech,"CH4ENT"))
+                              )  $      AACT(PACT)
+
+                            + 1  $ (not AACT(PACT)) ]
+                             );
+
+    terms: per target (subsidy of RU, of its member state, v_miti.l); scale: p_ghgMiti_emisAll_cost_scale.
+    Departures from CAPRI: none."""
+    return sum(_lin(*t) for t in terms) * float(scale)
+
+
+def p_ghgMiti_emisAll_subsidy_GainsTechFert(syn_terms, NMIN, syn_othImpact, man_terms, NMAN, man_othImpact):
+    r"""p_ghgMiti(RU, MCACT, GainsTechFert, "emisAll", "subsidy") of a crop with a level (EUR/ha).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1358-1381):
+
+        *  for crop activities the subsidies related to mineral fertiliser will be distributed according to the estimated distribution
+           p_ghgMiti(RU,MCACT,GainsTechFert,"emisAll","subsidy") $ DATA(RU,MCACT,"LEVL","%SIMY%")
+        *             cost per ton of mineral feriliser use
+                    = sum((R_RAGG(RU,MS),mitiTech_map(MS,"cropMiti",GainsTechFert,targFertSyn)),
+                           [ (  p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertSyn,"subsidy")
+                             +  p_ghgMiti(MS,"cropMiti",GainsTechFert,targFertSyn,"subsidy")
+                             $ (NOT p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertSyn,"subsidy"))) * v_miti.l(RU,"cropMiti",GainsTechFert,targFertSyn)])
+        *             mineral fertiliser is given in kg/ha=>
+                    * DATA(RU,MCACT,"NMIN","%SIMY%")/1000
+        *             costs are calculated on the basis of ex-ante (without mitigation technologies) mineral fertilizer application
+                    * (1 + sum((gainsTechFert1,R_RAGG(RU,MS)), (p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMIN")
+                    + p_ghgMiti(MS,"cropMiti",gainsTechFert1,"othImpact","NMIN") $ (not p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMIN")))
+                    * v_Miti.l(RU,"cropmiti",gainsTechFert1,"N2OSYN")))
+        *             subsidy per ton of manure use
+                    + sum((R_RAGG(RU,MS),mitiTech_map(MS,"cropMiti",GainsTechFert,targFertMan)),
+                           [ (  p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertMan,"subsidy")
+                             +  p_ghgMiti(MS,"cropMiti",GainsTechFert,targFertMan,"subsidy")
+                             $ (NOT p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertMan,"subsidy"))) * v_miti.l(RU,"cropMiti",GainsTechFert,targFertMan)])
+        *             manure is given in kg/head=>
+                    * DATA(RU,MCACT,"NMAN","%SIMY%")/1000
+        *             subsidies are calculated on the basis of ex-ante (without mitigation technologies) mineral fertilizer application
+                    * (1 + sum((gainsTechFert1,R_RAGG(RU,MS)), (p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMAN")
+                    + p_ghgMiti(MS,"cropMiti",gainsTechFert1,"othImpact","NMAN") $ (not p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMAN")))
+                    * v_Miti.l(RU,"cropmiti",gainsTechFert1,"N2OMAN")));
+
+    The arguments as p_ghgMiti_emisAll_cost_GainsTechFert's, each term (subsidy of RU, of its member state,
+    v_miti.l). Departures from CAPRI: none."""
+    return _fert_lin(syn_terms, NMIN, syn_othImpact, man_terms, NMAN, man_othImpact)
+
+
+def p_ghgMiti_emisAll_subsidy_UreaSubst(terms):
+    r"""p_ghgMiti(RU, MCACT, "UreaSubst", "emisAll", "subsidy") of a crop with a level: the region's subsidy at the
+    share of cropMiti.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1385-1387):
+
+           p_ghgMiti(RU,MCACT,"UreaSubst","emisAll","subsidy") $ DATA(RU,MCACT,"LEVL","%SIMY%")
+                    = sum(mitiTech_map(RU,MCACT,"UreaSubst",mitiTarget),
+                       p_ghgMiti(RU,"cropMiti","UreaSubst",mitiTarget,"subsidy") * v_miti.l(RU,"cropMiti","UreaSubst",mitiTarget));
+
+    terms: per target (subsidy, v_miti.l of cropMiti). Departures from CAPRI: none."""
+    return sum(float(s) * float(v) for s, v in terms)
+
+
+def p_ghgMiti_emisAll_subsidy_till(subsidy_cropMiti, LEVL, Tillset):
+    r"""p_ghgMiti(RU, MCACT, mitiTechTill, "emisAll", "subsidy") of a crop with a level and a tillage set: cropMiti's.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1389-1390):
+
+           p_ghgMiti(RU,MCACT,mitiTechTill,"emisAll","subsidy") $ (DATA(RU,MCACT,"LEVL","%SIMY%") and DATA(RU,MCACT,"Tillset","Y"))
+                    = p_ghgMiti(RU,"cropMiti",mitiTechTill,"emisAll","subsidy");
+
+    Departures from CAPRI: none."""
+    return float(subsidy_cropMiti) if (LEVL and Tillset) else 0.0
+
+
+def DATA_mitiSubs(subsidy_by_tech):
+    r"""DATA(RU, PACT, "mitiSubs", SIMY): the options' subsidies of the activity, summed over the options (EUR per unit
+    of the activity).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1429):
+
+           data(RU,PACT,"mitiSubs","%SIMY%")   = sum(allMitiTech,p_ghgMiti(RU,PACT,allMitiTech,"emisAll","subsidy")) ;
+
+    Departures from CAPRI: none."""
+    return float(sum(float(v or 0.0) for v in subsidy_by_tech))
+
+
+def DATA_PRME_mitiSubs(PRME, mitiSubs):
+    r"""DATA(RU, PACT, "PRME", SIMY) with the options' subsidies added: the premiums the income's MGVA counts.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1433-1434):
+
+           DATA(RU,PACT,"PRMEold","%SIMY%")    = DATA(RU,PACT,"PRME","%SIMY%")  ;
+           DATA(RU,PACT,"PRME","%SIMY%")       = DATA(RU,PACT,"PRME","%SIMY%") + DATA(RU,PACT,"mitiSubs","%SIMY%") ;
+
+    Departures from CAPRI: none."""
+    return float(PRME) + float(mitiSubs)
+
+
+def DATA_UVAG_mitiRepRowsQ(p_infl, Y, BAS):
+    r"""DATA(MS, "UVAG", mitiRepRowsQ, SIMY): the price of the mitigation effort and of its secondary output, 1000 x the
+    inflation since the base year, so that mitiI and mitiO are quantities in constant prices whose value at this price
+    is the options' cost and revenue.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1449-1453):
+
+        *
+        *      --- from mitigation cost to mitigation quantity (a service measured in constant prices)
+        *
+        *          First define the price of mitigation efforts to be used for deflation
+           DATA(MS,"UVAG",mitiRepRowsQ,"%SIMY%") = 1000* p_infl**(CALYEA("Y")-CALYEA("BAS"));
+
+    Departures from CAPRI: none."""
+    return 1000.0 * float(p_infl) ** (int(Y) - int(BAS))
+
+
+def DATA_mitiI(PACT, cost_by_tech, UVAG_mitiI):
+    r"""DATA(RU, PACT, "mitiI", SIMY): the options' cost of the activity as an input in constant prices; none for CATC,
+    whose costs are in its inputs already (define_greening_limits.gms).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1455-1461):
+
+        *          Deflate cost to obtain effort (=mitiI) in constant prices
+        *          Note: We skip CATC in this assignment because these costs are assigned to DATA in disaggregate form already
+        *                in capmod\define_greening_limits.gms (so SEED, REPM...). Hence they enter the EAA and income accounting
+        *                already and must not be counted twice. So we skip CATC:
+           DATA(RU,PACT,"mitiI","%SIMY%") $ (not sameas(PACT,"CATC"))
+                                          = sum(allMitiTech,p_ghgMiti(RU,PACT,allMitiTech,"emisAll","cost"))
+                                                / sum(R_RAGG(RU,MS),DATA(MS,"UVAG","mitiI","%SIMY%"))*1000 ;
+
+    Departures from CAPRI: none."""
+    if PACT == "CATC":
+        return None
+    return float(sum(float(v or 0.0) for v in cost_by_tech)) / float(UVAG_mitiI) * 1000.0
+
+
+def DATA_mitiO(revenue_by_tech, UVAG_mitiO):
+    r"""DATA(RU, PACT, "mitiO", SIMY): the options' revenue of the activity as a secondary output in constant prices.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1463-1465):
+
+        *          ... and deflate revenue to obtain secondary output (=mitiO) in constant prices
+           DATA(RU,PACT,"mitiO","%SIMY%") = sum(allMitiTech,p_ghgMiti(RU,PACT,allMitiTech,"emisAll","revenue"))
+                                                / sum(R_RAGG(RU,MS),DATA(MS,"UVAG","mitiO","%SIMY%"))*1000;
+
+    Departures from CAPRI: none."""
+    return float(sum(float(v or 0.0) for v in revenue_by_tech)) / float(UVAG_mitiO) * 1000.0
+
+
+def p_ghgMiti_emisAll_pmpcost(terms, scale):
+    r"""p_ghgMiti(RU, PACT, allMitiTech, "emisAll", "pmpcost") of an option other than NOC: its unobserved (PMP) cost
+    per unit of the activity at the solution, which the report keeps apart (mitiPmp, l. 1431), out of MGVA.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1210-1235):
+
+        *
+        *      --- unobserved mitigation cost (or pmp cost) per activity.
+        *
+        *  for animal activities and rice the costs follow from unobserved components in the supply model cost function
+           p_ghgMiti(RU,PACT,allMitiTech,"emisAll","pmpcost") $ ((not sameas(allMitiTech,"NOC")))
+                    =    sum((R_RAGG(RU,MS),mitiTech_map(MS,PACT,allMitiTech,mitiTarget)),
+                              [.5
+        *                        potentially we have regionalised parameters in case that option "lowNFeed" is active:
+                              * ( p_ghgMiti(RU,PACT,allMitiTech,mitiTarget,"pmpParSqr")
+                                +  p_ghgMiti(MS,PACT,allMitiTech,mitiTarget,"pmpParSqr")
+                                $ (NOT p_ghgMiti(RU,PACT,allMitiTech,mitiTarget,"pmpParSqr")))
+                              * sqr(v_miti.l(RU,PACT,allMitiTech,mitiTarget))
+                              + ( p_ghgMiti(RU,PACT,allMitiTech,mitiTarget,"pmpParLin")
+                                + p_ghgMiti(MS,PACT,allMitiTech,mitiTarget,"pmpParLin")
+                                $ (NOT p_ghgMiti(RU,PACT,allMitiTech,mitiTarget,"pmpParLin")))
+                              * v_miti.l(RU,PACT,allMitiTech,mitiTarget)]
+        *                   scaling factors where costs are not yet expressed per activity level
+                         * [ (  (DATA(RU,PACT,"DAYS","%SIMY%")/365)               $ (not SupplTech(allMitiTech))
+        *                 Dry Matter consumption times Fat share of Dry matter = Fat consumption
+                              + (  p_animReq(RU,PACT,"T","DRMA") * p_animProdDays(RU,PACT,"T") / 1000
+                                 * p_emisFeed(RU,PACT,"T",allMitiTech,"ShrOfDM")) $ (  SupplTechTot(allMitiTech)
+                                                                                      $ mitiTech_map(MS,PACT,allMitiTech,"CH4ENT"))
+                              )  $      AACT(PACT)
+
+                            + 1  $ (not AACT(PACT)) ]
+                            );
+
+    terms: per target (pmpParLin of RU, of its member state, pmpParSqr of RU, of its member state, v_miti.l); scale:
+    p_ghgMiti_emisAll_cost_scale. Departures from CAPRI: none."""
+    return sum(_lin_sqr(*t) for t in terms) * float(scale)
+
+
+def p_ghgMiti_emisAll_pmpcost_GainsTechFert(syn_terms, NMIN, syn_othImpact, man_terms, NMAN, man_othImpact):
+    r"""p_ghgMiti(RU, MCACT, GainsTechFert, "emisAll", "pmpcost") of a crop with a level (EUR/ha): the form of
+    p_ghgMiti_emisAll_cost_GainsTechFert on the PMP parameters.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1258-1287):
+
+        *  for crop activities the mitigation costs related to mineral fertiliser will be distributed according to the estimated distribution
+           p_ghgMiti(RU,MCACT,GainsTechFert,"emisAll","pmpcost") $ DATA(RU,MCACT,"LEVL","%SIMY%")
+        *             cost per ton of mineral feriliser use
+                    = sum((R_RAGG(RU,MS),mitiTech_map(MS,"cropMiti",GainsTechFert,targFertSyn)),
+                           [ (  p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertSyn,"pmpParLin")
+                             +  p_ghgMiti(MS,"cropMiti",GainsTechFert,targFertSyn,"pmpParLin")
+                             $ (NOT p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertSyn,"pmpParLin"))) * v_miti.l(RU,"cropMiti",GainsTechFert,targFertSyn)
+                           + (  p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertSyn,"pmpParSqr")
+                             +  p_ghgMiti(MS,"cropMiti",GainsTechFert,targFertSyn,"pmpParSqr")
+                             $ (NOT p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertSyn,"pmpParSqr")))*.5*v_miti.l(RU,"cropMiti",GainsTechFert,targFertSyn)**2])
+        *             mineral fertiliser is given in kg/ha=>
+                    * DATA(RU,MCACT,"NMIN","%SIMY%")/1000
+        *             costs are calculated on the basis of ex-ante (without mitigation technologies) mineral fertilizer application
+                    * (1 + sum((gainsTechFert1,R_RAGG(RU,MS)), (p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMIN")
+                    + p_ghgMiti(MS,"cropMiti",gainsTechFert1,"othImpact","NMIN") $ (not p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMIN")))
+                    * v_Miti.l(RU,"cropmiti",gainsTechFert1,"N2OSYN")))
+        *             cost per ton of manure use
+                    + sum((R_RAGG(RU,MS),mitiTech_map(MS,"cropMiti",GainsTechFert,targFertMan)),
+                           [ (  p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertMan,"pmpParLin")
+                             +  p_ghgMiti(MS,"cropMiti",GainsTechFert,targFertMan,"pmpParLin")
+                             $ (NOT p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertMan,"pmpParLin"))) * v_miti.l(RU,"cropMiti",GainsTechFert,targFertMan)
+                           + (  p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertMan,"pmpParSqr")
+                             +  p_ghgMiti(MS,"cropMiti",GainsTechFert,targFertMan,"pmpParSqr")
+                             $ (NOT p_ghgMiti(RU,"cropMiti",GainsTechFert,targFertMan,"pmpParSqr")))*.5*v_miti.l(RU,"cropMiti",GainsTechFert,targFertMan)**2])
+        *             mineral fertiliser is given in kg/head=>
+                    * DATA(RU,MCACT,"NMAN","%SIMY%")/1000
+        *             costs are calculated on the basis of ex-ante (without mitigation technologies) mineral fertilizer application
+                    * (1 + sum((gainsTechFert1,R_RAGG(RU,MS)), (p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMAN")
+                    + p_ghgMiti(MS,"cropMiti",gainsTechFert1,"othImpact","NMAN") $ (not p_ghgMiti(RU,"cropMiti",gainsTechFert1,"othImpact","NMAN")))
+                    * v_Miti.l(RU,"cropmiti",gainsTechFert1,"N2OMAN")));
+
+    Each term (pmpParLin of RU, of its member state, pmpParSqr of RU, of its member state, v_miti.l). Departures from
+    CAPRI: none."""
+    return p_ghgMiti_emisAll_cost_GainsTechFert(syn_terms, NMIN, syn_othImpact, man_terms, NMAN, man_othImpact)
+
+
+def p_ghgMiti_emisAll_pmpcost_UreaSubst(terms):
+    r"""p_ghgMiti(RU, MCACT, "UreaSubst", "emisAll", "pmpcost") of a crop with a level.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1291-1294):
+
+           p_ghgMiti(RU,MCACT,"UreaSubst","emisAll","pmpcost") $ DATA(RU,MCACT,"LEVL","%SIMY%")
+                    = sum(mitiTech_map(RU,MCACT,"UreaSubst",mitiTarget),
+                       p_ghgMiti(RU,"cropMiti","UreaSubst",mitiTarget,"pmpParLin") * v_miti.l(RU,"cropMiti","UreaSubst",mitiTarget)
+                     + p_ghgMiti(RU,"cropMiti","UreaSubst",mitiTarget,"pmpParSqr") *.5 * v_miti.l(RU,"cropMiti","UreaSubst",mitiTarget)**2);
+
+    terms: per target (pmpParLin, pmpParSqr, v_miti.l of cropMiti). Departures from CAPRI: none."""
+    return p_ghgMiti_emisAll_cost_UreaSubst(terms)
+
+
+def p_ghgMiti_emisAll_pmpcost_till(pmpcost_cropMiti, LEVL, Tillset):
+    r"""p_ghgMiti(RU, MCACT, mitiTechTill, "emisAll", "pmpcost") of a crop with a level and a tillage set: cropMiti's.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1296-1297):
+
+           p_ghgMiti(RU,MCACT,mitiTechTill,"emisAll","pmpcost") $ (DATA(RU,MCACT,"LEVL","%SIMY%") and DATA(RU,MCACT,"Tillset","Y"))
+                    = p_ghgMiti(RU,"cropMiti",mitiTechTill,"emisAll","pmpcost");
+
+    Departures from CAPRI: none."""
+    return float(pmpcost_cropMiti) if (LEVL and Tillset) else 0.0
+
+
+def p_ghgMiti_emisAll_pmpcost_idlHis(pmpcost_orgSoil, v_miti):
+    r"""p_ghgMiti(RU, idlHisAct, "fallow", "emisAll", "pmpCost"): per ha of the idled histosol activity, 0 below a share
+    of 1e-8.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1308-1313):
+
+        *  For histosol protection via ISET the above standard assignment needs modification, as pmp_cost is multiplied
+        *  with "share(histosol)*CROP/GRAS" in supply_model, not with ISET.LEVL = v_miti(fallow)*share(histosol)*CROP/GRAS
+        *  => We need to divide the earlier assignment by v_miti(fallow) to get the cost per ha of ISET/IHISGR:
+           p_ghgMiti(RU,idlHisAct,"fallow","emisAll","pmpCost")
+                    = (p_ghgMiti(RU,idlHisAct,"fallow","emisAll","pmpCost") / v_miti.l(RU,idlHisAct,"fallow","N2OHIS"))
+                    $ (v_miti.l(RU,idlHisAct,"fallow","N2OHIS") gt 1.e-8);
+
+    Departures from CAPRI: none."""
+    return float(pmpcost_orgSoil) / float(v_miti) if float(v_miti) > 1e-8 else 0.0
+
+
+def p_ghgMiti_emisAll_pmpcost_catc(pmpcost_uaar, v_miti):
+    r"""p_ghgMiti(RU, "catc", "WinterCov", "emisAll", "pmpCost"): per ha of CATC where the share is not 0; unchanged
+    where it is 0 (the statement's "$ v_miti" condition, unlike the cost's threshold of 1e-8).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 1315-1319):
+
+        *  for winter cover crops the cost would have to be multiplied with the uaar (not the levl of catc).
+        *  The following holds: levl(catc) = v_miti * levl(uaar)
+        *  In order to treat the measure like the others (multiplication with the levl of catc we have to divide the cost by v_miti.
+           p_ghgMiti(RU,"catc","WinterCov","emisAll","pmpCost") $ v_miti.l(RU,"catc","WinterCov","co2seq")
+                     = p_ghgMiti(RU,"catc","WinterCov","emisAll","pmpCost") / v_miti.l(RU,"catc","WinterCov","co2seq");
+
+    Departures from CAPRI: none."""
+    return float(pmpcost_uaar) / float(v_miti) if float(v_miti) else float(pmpcost_uaar)
+
+
+def DATA_EAAG_IO(GROF, UVAG):
+    r"""DATA(RSS, "EAAG", IO, SIMY): the gross account's value of an item, its gross production or use x its unit
+    value (EUR million for kt x EUR per t).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2549):
+
+          DATA(RSS,"EAAG",IO,"%SIMY%") $ DATA(RSS,"GROF",IO,"%SIMY%")  = DATA(RSS,"GROF",IO,"%SIMY%")*DATA(RSS,"UVAG",IO,"%SIMY%")/1000.;
+
+    In this project's notation: EAAG_i = GROF_i x UVAG_i / 1000. Departures from CAPRI: where the model holds an item's
+    value per unit of activity and not its quantity and unit value apart (the crops' main products and inputs, the
+    animals' outputs and inputs: capri_mod/income/eaa.py), GROF is that value (DATA_GROF_IO of the values per unit,
+    EUR million) and the caller passes UVAG = 1000, the value's own unit value, so that EAAG is the value."""
+    return float(GROF) * float(UVAG) / 1000.0
+
+
+def DATA_GEAAC_TOOU(EAA_O):
+    r"""DATA(RSS, GEAAC, "TOOU", SIMY): an account's total output, the sum over its outputs.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2557):
+
+          DATA(RSS,GEAAC,"TOOU","%SIMY%") = SUM(O, DATA(RSS,GEAAC,O,"%SIMY%"));
+    """
+    return float(sum(float(v) for v in EAA_O))
+
+
+def DATA_GEAAC_TOIN(EAA_I):
+    r"""DATA(RSS, GEAAC, "TOIN", SIMY): an account's total input, the sum over its inputs.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2558):
+
+          DATA(RSS,GEAAC,"TOIN","%SIMY%") = SUM(I, DATA(RSS,GEAAC,I,"%SIMY%"));
+    """
+    return float(sum(float(v) for v in EAA_I))
+
+
+def DATA_EAAG_MGVA(TOOU, TOIN, PRME):
+    r"""DATA(RSS, "EAAG", "MGVA", SIMY): the gross account's modified gross value added, its total output less its total
+    input plus the premiums.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2564-2566):
+
+          DATA(RSS,"EAAG","MGVA","%SIMY%") = DATA(RSS,"EAAG","TOOU","%SIMY%")
+                                        - DATA(RSS,"EAAG","TOIN","%SIMY%")
+                                        + DATA(RSS,"EAAG","PRME","%SIMY%");
+    """
+    return float(TOOU) - float(TOIN) + float(PRME)
+
+
+def DATA_NETF_FNUT(v_netPutQuant):
+    r"""DATA(RU, "NETF", FNUT, SIMY): a region's net trade of a mineral fertiliser at the solution, its purchases (kt of
+    N, P2O5, K2O).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 305-309):
+
+        *
+        *  ---- purchases of mineral fertilisers for current scenario
+        *       (netf for other scenarios and base year from data base in fortran.gms)
+        *
+           DATA(RU,"NETF",FNUT,"%SIMY%")       = -v_netPutQuant.L(RU,FNUT);
+
+    In this project's notation: NETF_n = - v_netPutQuant_n, v_netPutQuant negative for a purchase (CAPRI's sign); the
+    model's regional NLP holds the purchases as a non-negative column P (supply/capri_regional_nlp.py, fertDistMine_), so
+    the caller passes v_netPutQuant = - P / 1000 (t to kt). Departures from CAPRI: none."""
+    return -float(v_netPutQuant)
+
+
+def DATA_EAAP_IO(NETF, UVAP):
+    r"""DATA(RSS, "EAAP", IO, SIMY): the account at producer prices of an item with a net trade, its net trade x its
+    unit value at producer prices (EUR million for kt x EUR per t).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2547):
+
+          DATA(RSS,"EAAP",IO,"%SIMY%") $ DATA(RSS,"NETF",IO,"%SIMY%")  = DATA(RSS,"NETF",IO,"%SIMY%")*DATA(RSS,"UVAP",IO,"%SIMY%")/1000.;
+
+    In this project's notation: EAAP_i = NETF_i x UVAP_i / 1000 where NETF_i is not 0. Departures from CAPRI: none."""
+    return float(NETF) * float(UVAP) / 1000.0 if float(NETF) else 0.0
+
+
+def DATA_EAAB_IO(NETF, UVAB):
+    r"""DATA(RSS, "EAAB", IO, SIMY): the account at basic prices of an item with a net trade, its net trade x its unit
+    value at basic prices (EUR million for kt x EUR per t).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2548):
+
+          DATA(RSS,"EAAB",IO,"%SIMY%") $ DATA(RSS,"NETF",IO,"%SIMY%")  = DATA(RSS,"NETF",IO,"%SIMY%")*DATA(RSS,"UVAB",IO,"%SIMY%")/1000.;
+
+    In this project's notation: EAAB_i = NETF_i x UVAB_i / 1000 where NETF_i is not 0. Departures from CAPRI: none."""
+    return float(NETF) * float(UVAB) / 1000.0 if float(NETF) else 0.0
+
+
+def DATA_EAAP_PRMDE(PRMDE, LEVL):
+    r"""DATA(RSS, "EAAP", PRMDE, SIMY): the premiums in the account at producer prices, PRMD (declared) or PRME (paid),
+    the sum over the activities of the premium per unit x the level (sequences in the same order; EUR per ha or head x
+    1000 ha or heads; EUR million).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2552-2554):
+
+        * --- same for CAP premiums
+        *
+          DATA(RSS,"EAAP",PRMDE,"%SIMY%") = SUM(MPACT $ DATA(RSS,MPACT,PRMDE,"%SIMY%"), DATA(RSS,MPACT,PRMDE,"%SIMY%")*DATA(RSS,MPACT,"LEVL","%SIMY%")) * 0.001;
+
+    In this project's notation: EAAP_PRMDE = sum_a PRMDE_a L_a / 1000. Departures from CAPRI: none in the statement;
+    the caller passes the model's activities (the technology mix's premium difference on the area moved as a further
+    pair, as I1's PRME, capri_mod/income/income_module.py)."""
+    return float(sum(float(p) * float(l_) for p, l_ in zip(PRMDE, LEVL) if float(p))) * 0.001
+
+
+def DATA_EAAP_GVAP(TOOU, TOIN):
+    r"""DATA(RSS, "EAAP", "GVAP", SIMY): the account at producer prices' gross value added, its total output less its
+    total input.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2560):
+
+          DATA(RSS,"EAAP","GVAP","%SIMY%") = DATA(RSS,"EAAP","TOOU","%SIMY%") - DATA(RSS,"EAAP","TOIN","%SIMY%");
+    """
+    return float(TOOU) - float(TOIN)
+
+
+def DATA_EAAB_GVAB(TOOU, TOIN):
+    r"""DATA(RSS, "EAAB", "GVAB", SIMY): the account at basic prices' gross value added, its total output less its total
+    input.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2561):
+
+          DATA(RSS,"EAAB","GVAB","%SIMY%") = DATA(RSS,"EAAB","TOOU","%SIMY%") - DATA(RSS,"EAAB","TOIN","%SIMY%");
+    """
+    return float(TOOU) - float(TOIN)
+
+
+def DATA_EAAP_MGVA(GVAP, PRME):
+    r"""DATA(RSS, "EAAP", "MGVA", SIMY): the account at producer prices' modified gross value added, its gross value
+    added plus the premiums paid.
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2562):
+
+          DATA(RSS,"EAAP","MGVA","%SIMY%") = DATA(RSS,"EAAP","GVAP","%SIMY%") + DATA(RSS,"EAAP","PRME","%SIMY%");
+    """
+    return float(GVAP) + float(PRME)
+
+
+def DATA_AGGT_MGVA(MGVA, LEVL, mitiI_RU=0.0, mitiO_RU=0.0):
+    r"""DATA(RSS, "AGGT", "MGVA", SIMY): the region's activity-based income, sum over the activities of their MGVA x
+    level (sequences in the same order; EUR per ha or head x 1000 ha or heads = EUR 1000).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2586-2587):
+
+          DATA(RSS,"AGGT","MGVA","%SIMY%") = SUM(MPACT, DATA(RSS,MPACT,"MGVA","%SIMY%")*DATA(RSS,MPACT,"LEVL","%SIMY%"))/1000;
+          DATA(RSS,"EAAG","MGVAbyAct","%SIMY%") = DATA(RSS,"AGGT","MGVA","%SIMY%");
+
+    In this project's notation: AGGT = sum_a MGVA_a L_a - mitiI_RU + mitiO_RU. Departures from CAPRI: the units (EUR
+    1000; CAPRI's / 1000 to million EUR); the mitigation options' cost and revenue (EUR 1000) added at the region, where
+    CAPRI has them in the activities' MGVA (sol_simy.gms l. 1471-1473; calc_inc_indic.py DATA_MGVA); the technology
+    mix's net revenue on the area moved to T1, which the model keeps apart from the activities' margins
+    (supply/techn_mix.py), enters as further pairs (the margin's difference per ha, the area moved)."""
+    return float(sum(float(m) * float(l_) for m, l_ in zip(MGVA, LEVL))) - float(mitiI_RU) + float(mitiO_RU)
+
+
+def DATA_EAAG_OBJE(p_infes_OBJE):
+    r"""DATA(RU, "EAAG", "OBJE", SIMY): the regional supply model's objective at the solution, reported beside the
+    producer surplus for its validation (EUR 1000).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2578-2579):
+
+        * --- For validation of producer surplus, report also supply model objective function value
+          DATA(RU,"EAAG","OBJE","%SIMY%") = p_infes(RU,"OBJE","Y")/1000;
+
+    In this project's notation: OBJE = v_obje of the region (CAPRI's p_infes(RU, "OBJE", "Y"), stored from the solve).
+    Departures from CAPRI: the units (EUR 1000); the model minimises the cost, so the caller passes minus the NLP's
+    objective (capri_mod/supply/capri_regional_nlp.py objective_parts)."""
+    return float(p_infes_OBJE)
+
+
+def DATA_EAAG_agProdSurplus(MGVA, PMPLevl, PMPFeed, PMPLandTrans):
+    r"""DATA(RSS, "EAAG", "agProdSurplus", SIMY): the agricultural producer surplus, the income plus the PMP terms of
+    the supply model at the solution (EUR 1000).
+
+    CAPRI's GAMS (reports/sol_simy.gms l. 2590-2595):
+
+          DATA(RSS,"EAAG","agProdSurplus","%SIMY%")
+            = DATA(RSS,"EAAG","MGVA","%SIMY%")
+            + DATA(RSS,"EAAG","PMPLevl","%SIMY%")
+            + DATA(RSS,"EAAG","PMPFeed","%SIMY%")
+            + DATA(RSS,"EAAG","PMPLandTrans","%SIMY%")
+            ;
+
+    In this project's notation: agProdSurplus = MGVA + PMPLevl + PMPFeed + PMPLandTrans (report_supply_model.py).
+    Departures from CAPRI: the units (EUR 1000); MGVA is the region's activity-based income (DATA_AGGT_MGVA, register
+    DEP-54), where CAPRI takes the product-based EAAG MGVA, which it compares with the activity-based (l. 2600-2615)."""
+    return float(MGVA) + float(PMPLevl) + float(PMPFeed) + float(PMPLandTrans)

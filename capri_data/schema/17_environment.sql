@@ -418,6 +418,7 @@ CREATE TABLE env_npk_region_2030 (
     need_kt DOUBLE NOT NULL,
     land_kha DOUBLE NOT NULL,
     pool_scale DOUBLE NOT NULL,
+    fout_uvag_eur_t DOUBLE NOT NULL CHECK (fout_uvag_eur_t > 0),   -- the nutrient's output (MANN, MANP, MANK), K212
     PRIMARY KEY (capri_region, "level", nutrient)
 );
 COMMENT ON TABLE env_npk_region_2030 IS 'CAPRI''s crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_, (tools/build/build_npk_balance_2030.py)';
@@ -432,7 +433,8 @@ INSERT INTO value_units VALUES
   ('env_npk_region_2030', 'own_kt', NULL, 'open', 'npk_region_2030.own_kt: unit to be established'),
   ('env_npk_region_2030', 'need_kt', NULL, 'open', 'npk_region_2030.need_kt: unit to be established'),
   ('env_npk_region_2030', 'land_kha', NULL, 'open', 'npk_region_2030.land_kha: unit to be established'),
-  ('env_npk_region_2030', 'pool_scale', NULL, 'open', 'npk_region_2030.pool_scale: unit to be established');
+  ('env_npk_region_2030', 'pool_scale', NULL, 'open', 'npk_region_2030.pool_scale: unit to be established'),
+  ('env_npk_region_2030', 'fout_uvag_eur_t', 'U_EuPerTon', 'capri', 'CAPRI''s UVAG of MANN, MANP, MANK at 2030 in 2017 money: the member state''s DATA(MS, "UVAG", FOUT, "BAS") of sim_ini_21730 x p_inflationFactor / the deflator (capmod/inflation_and_trend_interpolation.gms l. 67-72)');
 
 -- file: capri_data/baselines/capri_greendeal_ref/1730/environment/manure_npk_applied_share_2030.csv
 CREATE TABLE env_manure_npk_applied_share_2030 (
@@ -485,6 +487,19 @@ CREATE TABLE env_livestock_ch4man_coef (
 );
 COMMENT ON TABLE env_livestock_ch4man_coef IS 'CAPRI''s manure methane CH4MAN per model head (tools/build/build_ghg_coefs_2017.py)';
 INSERT INTO value_units SELECT 'env_livestock_ch4man_coef', code, 'U_kgperhd', 'builder', 'kg CH4 per head' FROM model_activities WHERE kind = 'animal';
+
+-- file: capri_data/2017/environment/fnut_unit_values_2017.csv
+CREATE TABLE env_fnut_unit_values_2017 (
+    ms VARCHAR NOT NULL,
+    fnut VARCHAR NOT NULL CHECK (fnut IN ('NITF', 'PHOF', 'POTF')),
+    uvap_eur_t DOUBLE NOT NULL CHECK (uvap_eur_t > 0),
+    uvab_eur_t DOUBLE NOT NULL CHECK (uvab_eur_t > 0),
+    PRIMARY KEY (ms, fnut)
+);
+COMMENT ON TABLE env_fnut_unit_values_2017 IS 'CAPRI''s base year unit values of the mineral fertilisers at producer and basic prices per member state, sim_ini_21730''s DATA(MS, "UVAP" | "UVAB", FNUT, "BAS"); the simulation year''s are these x the inflation (capmod/inflation_and_trend_interpolation.gms l. 69-70), the purchases'' account at producer and basic prices (income I2b, capri_mod/income/eaa.py eaap_eaab). (tools/build/build_fnut_unit_values.py)';
+INSERT INTO value_units VALUES
+  ('env_fnut_unit_values_2017', 'uvap_eur_t', 'U_EuPerTon', 'capri', 'CAPRI DATA(MS, "UVAP", FNUT, "BAS"): EUR per t of N, P2O5, K2O in the base year''s money'),
+  ('env_fnut_unit_values_2017', 'uvab_eur_t', 'U_EuPerTon', 'capri', 'CAPRI DATA(MS, "UVAB", FNUT, "BAS"): EUR per t of N, P2O5, K2O in the base year''s money');
 
 -- file: capri_data/2017/environment/livestock_manure_n_coef.csv
 -- layout: wide, unnamed

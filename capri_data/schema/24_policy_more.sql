@@ -127,6 +127,27 @@ INSERT INTO value_units VALUES
   ('pol_premium_scheme_shares_2030', 'DPAE', NULL, 'open', 'premium_scheme_shares_2030.DPAE: unit to be established'),
   ('pol_premium_scheme_shares_2030', 'DPNAT', NULL, 'open', 'premium_scheme_shares_2030.DPNAT: unit to be established');
 
+-- file: capri_data/baselines/capri_greendeal_ref/1730/policy/premium_output_shares_2030.csv
+CREATE TABLE pol_premium_output_shares_2030 (
+    region VARCHAR NOT NULL,
+    activity VARCHAR NOT NULL,
+    capri_region VARCHAR NOT NULL,
+    output VARCHAR NOT NULL,
+    DPPIL1 DOUBLE NOT NULL,
+    DPRD_LFA DOUBLE NOT NULL,
+    DPRD_N2K DOUBLE NOT NULL,
+    DPAE DOUBLE NOT NULL,
+    DPNAT DOUBLE NOT NULL,
+    PRIMARY KEY (region, activity, capri_region, output)
+);
+COMMENT ON TABLE pol_premium_output_shares_2030 IS 'The share of a model activity''s premium per unit paid under each scheme aggregate for each main output of its CAPRI members (CAPRI''s PACT_TO_Y, sets.gms l. 5377-5445), CAPRI''s 2030 reference, level-weighted over the members; over the outputs the shares are premium_scheme_shares_2030.csv''s; for the premium outlays per product (reports/feoga.gms l. 85-109; income I4). (tools/build/build_cap_ceilings_2030.py)';
+INSERT INTO value_units VALUES
+  ('pol_premium_output_shares_2030', 'DPPIL1', NULL, 'open', 'premium_output_shares_2030.DPPIL1: unit to be established'),
+  ('pol_premium_output_shares_2030', 'DPRD_LFA', NULL, 'open', 'premium_output_shares_2030.DPRD_LFA: unit to be established'),
+  ('pol_premium_output_shares_2030', 'DPRD_N2K', NULL, 'open', 'premium_output_shares_2030.DPRD_N2K: unit to be established'),
+  ('pol_premium_output_shares_2030', 'DPAE', NULL, 'open', 'premium_output_shares_2030.DPAE: unit to be established'),
+  ('pol_premium_output_shares_2030', 'DPNAT', NULL, 'open', 'premium_output_shares_2030.DPNAT: unit to be established');
+
 INSERT INTO value_units VALUES ('pol_mineral_redu_exemptions', 'after_year', NULL, 'open', 'a calendar year (part of the key), no unit');
 
 -- CAPRI's CAP 2014-2020 ceilings and the endogenous entitlement limit (K136, 13 November 2026)

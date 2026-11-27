@@ -70,3 +70,28 @@ models' ProfitAgr, ProfitLandUse and PSEs.
    models' land market: each land type's area x the dual of its land row (EUR/ha), CAPRI's UAAR x d_area
    (results["welfare_supply"]: MGVA, RENT, ProfitAgr, ProfitLandUse, PSEs). The rent is a transfer: the total is the
    same with or without the split.
+7. **CAPRI's producer surplus rows beside the welfare positions** (income I3, register DEP-55): CAPRI reports the
+   supply model's objective (OBJE) and its PMP terms (PMPLevl, PMPFeed, PMPLandTrans) with the producer surplus
+   agProdSurplus = EAAG MGVA + the PMP terms (reports/sol_simy.gms l. 2578-2595; capmod/report_supply_model.gms l.
+   207-220), outside p_welfareRes: its welfare's ProfitAgr is MGVA less the rents. results["welfare_supply"] carries
+   them per region (IncomeDistributionModule.producer_surplus, from the regional NLP's objective at the solution by
+   part). Their levels hold the PMP constants, which are the model's own, so only their changes compare with CAPRI's.
+8. **CAPRI's gross account by item and the premium outlays per product** (income I2 and I4, register DEP-56 and
+   DEP-57). The welfare table's ProfitAgr takes CAPRI's product-based EAAG MGVA (welfare.gms l. 841-846); the model's
+   is the activity-based (AGGT), and results["welfare_supply"] carries the gross account's TOOU, TOIN, EAAG_MGVA and
+   their difference to MGVA (EAAG_DIFF, CAPRI's p_problem4D, reports/sol_simy.gms l. 2600-2615), with the items in
+   results["eaa"] (GROF, UVAG, EAAG by output and input; capri_mod/income/eaa.py). The premium outlays per member
+   state and product and their budgets (CAPRI's FEOP and budEU, budPil1, budPil2, budNAT, budRestEU; reports/feoga.gms
+   l. 62-162) are in results["feoga"] (capri_mod/income/feoga.py). A regional unit's accounts at producer and basic
+   prices (EAAP, EAAB: its mineral fertiliser purchases at UVAP and UVAB and the premiums; income I2b) are in
+   results["eaa"] (purchases) and results["welfare_supply"] (EAAP_TOIN, EAAP_GVAP, EAAP_PRME, EAAP_MGVA, EAAB_TOIN,
+   EAAB_GVAB); a whole member state's full accounts (CAPRI's UVAP of a member state is UVAG x NETF / GROF,
+   reports/sol_simy.gms l. 2389) are not built yet.
+9. **The farms' profit and the domestic support by market product** (register DEP-58): CAPRI's ProfitAgr(XX1), the
+   activities' MGVA x levels by their main product in PACT_TO_XX, with INPE and LAND, and PSEs(XX1), minus the premium
+   outlays over CAP_TO_TRD (reports/welfare.gms l. 441-468, 714-749), per member state of the run's units, in
+   results["welfare_products"] (capri_mod/income/welfare_products.py). The rows add up to the member state's ProfitAgr
+   and PSEs. On the mini-EU baseline Denmark's are CAPRI's 2030 reference by product within 1-4% for its main
+   products (dairy 1,758 against 1,739, pork 1,930 against 1,897 EUR million of 2017; the PSEs by market product
+   within 0.5), INPE apart (838 against 1,024: the options' net cost booked there, -135, and Denmark's income 122
+   below CAPRI's).

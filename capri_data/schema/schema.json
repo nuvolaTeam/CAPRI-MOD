@@ -41,7 +41,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [],
     "checks": [],
@@ -339,6 +339,16 @@
      "name": "r_ch4",
      "type": "DOUBLE",
      "not_null": false
+    },
+    {
+     "name": "kappa2",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "revenue",
+     "type": "DOUBLE",
+     "not_null": true
     }
    ],
    "primary_key": [
@@ -395,6 +405,12 @@
      "basis": "ammonia_tech_model kappa1"
     },
     {
+     "item": "kappa2",
+     "unit": null,
+     "status": "open",
+     "basis": "ammonia_tech_model kappa2"
+    },
+    {
      "item": "lg",
      "unit": null,
      "status": "open",
@@ -435,6 +451,12 @@
      "unit": null,
      "status": "open",
      "basis": "ammonia_tech_model r_ch4"
+    },
+    {
+     "item": "revenue",
+     "unit": null,
+     "status": "open",
+     "basis": "ammonia_tech_model revenue"
     },
     {
      "item": "slope",
@@ -2872,7 +2894,7 @@
     "unnamed",
     "wide"
    ],
-   "comment": "herd sizes 2017: CAPRI's HERD item summed over the CAPRI activities each model animal holds (build_capri_base.py HERD_MAP; BULL = CAPRI's BULL + BULH, HEIF = HEIL + HEIH + HEIR, the model's HFRS, since 18 November 2026, KNOWN_ISSUES K180; COWS = DCOW + SCOW; PIGS = CAPRI's SOWS herd, PIGF = the PIGS census less the sows); the loader renames SCOW, HEIF, HENS, POUL (loaders.HERD_ALIASES)",
+   "comment": "herd sizes 2017: CAPRI's HERD item summed over the CAPRI activities each model animal holds (build_capri_base.py HERD_MAP; BULL = CAPRI's BULL + BULH, HEIF = HEIL + HEIH + HEIR, the model's HFRS, since 18 November 2026, KNOWN_ISSUES K180; COWS = DCOW + SCOW; PIGS = CAPRI's SOWS herd, PIGF = the PIGS census less the sows; OANI = CAPRI's LEVL of the other animals, an index, the unit of their per-unit data, since 26 November 2026, KNOWN_ISSUES K207); the loader renames SCOW, HEIF, HENS, POUL (loaders.HERD_ALIASES)",
    "columns": [
     {
      "name": "region",
@@ -2907,7 +2929,7 @@
     }
    ],
    "checks": [
-    "(herd IN ('DCOW', 'SCOW', 'COWS', 'BULL', 'HEIF', 'CALV', 'PIGS', 'PIGF', 'HENS', 'POUL', 'SHGM', 'SHGF'))",
+    "(herd IN ('DCOW', 'SCOW', 'COWS', 'BULL', 'HEIF', 'CALV', 'PIGS', 'PIGF', 'HENS', 'POUL', 'SHGM', 'SHGF', 'OANI'))",
     "(\"value\" >= 0)"
    ],
    "units": [
@@ -2946,6 +2968,12 @@
      "unit": "U_Miohd",
      "status": "builder",
      "basis": "CAPRI's HERD item of poultry, read as million heads by the loader (loaders.POULTRY_MILLION_HEAD); CAPRI's unit table gives HENS and POUF LEVL in U_Miohd"
+    },
+    {
+     "item": "OANI",
+     "unit": "U_1unit",
+     "status": "builder",
+     "basis": "CAPRI's LEVL of the other animals (OANI): an index without a herd unit (Denmark 1.0), the unit of their yields, costs and prices per unit"
     },
     {
      "item": "PIGF",
@@ -4003,6 +4031,47 @@
     "tests": []
    }
   },
+  "capri_cap_to_trd": {
+   "file": "capri_data/codes/capri/CAP_TO_TRD.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI CAP_TO_TRD: the data base's outputs and the market model's products (arm/arm_sets.gms l. 683ff), as CAPRI's run built it",
+   "columns": [
+    {
+     "name": "rows",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "xx",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "rows",
+    "xx"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_catact": {
    "file": "capri_data/codes/capri/CATACT.csv",
    "declared_in": "00_codes.sql",
@@ -4536,6 +4605,86 @@
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI DCOW: the dairy cows (sets.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_eaaga": {
+   "file": "capri_data/codes/capri/EAAGA.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI EAAGA: the aggregates of the economic accounts (reports/aggreg_sets.gms l. 207), as CAPRI's run built them, in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_end": {
+   "file": "capri_data/codes/capri/END.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI END: the final products, whose seed and losses on farm the simulation report sets in proportion to production (reports/sol_simy.gms l. 1889-1898), as CAPRI's run built it, in CAPRI's set order",
    "columns": [
     {
      "name": "code",
@@ -5736,6 +5885,46 @@
     "tests": []
    }
   },
+  "capri_ioe": {
+   "file": "capri_data/codes/capri/IOE.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI IOE: the inputs and outputs of the economic accounts (sets.gms), as CAPRI's run built it, in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_iop": {
    "file": "capri_data/codes/capri/IOP.csv",
    "declared_in": "00_codes.sql",
@@ -6386,6 +6575,46 @@
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI MAPP: the unit values deleted below the member states (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_marr": {
+   "file": "capri_data/codes/capri/MARR.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI MARR: the market model's products with a farm-gate price (arm/arm_sets.gms; the basic-price unit values, reports/sol_market.gms l. 1325-1337), as CAPRI's run built it, in CAPRI's set order",
    "columns": [
     {
      "name": "code",
@@ -7108,6 +7337,90 @@
     "tests": []
    }
   },
+  "capri_o_to_yani": {
+   "file": "capri_data/codes/capri/O_TO_YANI.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI O_TO_YANI: each young animal produced (OYANI) and bought (IYANI) (sets.gms; reports/sol_simy.gms l. 793-795), as CAPRI's run built it",
+   "columns": [
+    {
+     "name": "oyani",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "iyani",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "oyani",
+    "iyani"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_oagg": {
+   "file": "capri_data/codes/capri/OAGG.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI OAGG: the product aggregates of the reports (reports/aggreg_sets.gms l. 150ff), as CAPRI's run built them, in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_estimate_ms.py",
+     "capri_mod/pipeline/tests/test_captrd_prepare.py"
+    ]
+   }
+  },
   "capri_oaggr": {
    "file": "capri_data/codes/capri/OAGGR.csv",
    "declared_in": "00_codes.sql",
@@ -7739,6 +8052,47 @@
     ]
    }
   },
+  "capri_pact_to_xx": {
+   "file": "capri_data/codes/capri/PACT_TO_XX.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI PACT_TO_XX: each production activity and its market product for the welfare report, INPE where none (reports/rep_sets.gms l. 105-122), as CAPRI's run built it",
+   "columns": [
+    {
+     "name": "pact",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "xx",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "pact",
+    "xx"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_pact_to_y": {
    "file": "capri_data/codes/capri/PACT_TO_Y.csv",
    "declared_in": "00_codes.sql",
@@ -8191,6 +8545,50 @@
     "tests": []
    }
   },
+  "capri_r_t_oagg": {
+   "file": "capri_data/codes/capri/R_T_OAGG.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI R_T_OAGG: each aggregate and its rows (reports/aggreg_sets.gms l. 211-273), as CAPRI's run built it",
+   "columns": [
+    {
+     "name": "oagg",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "rows",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "oagg",
+    "rows"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/captrd_parity_dump.py",
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/pipeline/tests/test_captrd_scale_dgagri.py"
+    ]
+   }
+  },
   "capri_rall": {
    "file": "capri_data/codes/capri/RALL.csv",
    "declared_in": "00_codes.sql",
@@ -8226,6 +8624,46 @@
     "model": [],
     "builders": [],
     "checks": [],
+    "tests": []
+   }
+  },
+  "capri_regagg": {
+   "file": "capri_data/codes/capri/REGAGG.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI REGAGG: the regional aggregates of the simulation report (reports/sol_simy.gms l. 2317-2403), as CAPRI's run built them, in CAPRI's set order",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": []
    }
   },
@@ -8918,6 +9356,47 @@
     "tests": []
    }
   },
+  "capri_rms_to_rm": {
+   "file": "capri_data/codes/capri/RMS_TO_RM.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI RMS_TO_RM: each market model country and its market region (arm/arm_sets.gms; reports/welfare.gms l. 864-868), as CAPRI's run built it",
+   "columns": [
+    {
+     "name": "rms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "rm",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "rms",
+    "rm"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_rmtp": {
    "file": "capri_data/codes/capri/RMTP.csv",
    "declared_in": "00_codes.sql",
@@ -9269,6 +9748,47 @@
    ],
    "primary_key": [
     "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "capri_rw_to_rm": {
+   "file": "capri_data/codes/capri/RW_TO_RM.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI RW_TO_RM: each world region and its market regions (arm/arm_sets.gms; reports/welfare.gms l. 899-909), as CAPRI's run built it",
+   "columns": [
+    {
+     "name": "rw",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "rm",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "rw",
+    "rm"
    ],
    "unique": [],
    "foreign_keys": [],
@@ -22241,7 +22761,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [
      "build_legsh_option"
@@ -22714,6 +23234,78 @@
     "builders": [],
     "checks": [],
     "tests": []
+   }
+  },
+  "env_fnut_unit_values_2017": {
+   "file": "capri_data/2017/environment/fnut_unit_values_2017.csv",
+   "declared_in": "17_environment.sql",
+   "layout": [],
+   "comment": "CAPRI's base year unit values of the mineral fertilisers at producer and basic prices per member state, sim_ini_21730's DATA(MS, \"UVAP\" | \"UVAB\", FNUT, \"BAS\"); the simulation year's are these x the inflation (capmod/inflation_and_trend_interpolation.gms l. 69-70), the purchases' account at producer and basic prices (income I2b, capri_mod/income/eaa.py eaap_eaab). (tools/build/build_fnut_unit_values.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fnut",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "uvap_eur_t",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "uvab_eur_t",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "fnut"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(fnut IN ('NITF', 'PHOF', 'POTF'))",
+    "(uvap_eur_t > 0)",
+    "(uvab_eur_t > 0)"
+   ],
+   "units": [
+    {
+     "item": "uvab_eur_t",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"UVAB\", FNUT, \"BAS\"): EUR per t of N, P2O5, K2O in the base year's money"
+    },
+    {
+     "item": "uvap_eur_t",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"UVAP\", FNUT, \"BAS\"): EUR per t of N, P2O5, K2O in the base year's money"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_fnut_unit_values (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/income/eaa.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_eaa.py"
+    ]
    }
   },
   "env_histosol": {
@@ -25207,7 +25799,7 @@
    "read_by": {
     "model": [
      "capri_mod/coupling/manure.py",
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [],
     "checks": [],
@@ -25602,6 +26194,7 @@
     "checks": [],
     "tests": [
      "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_eaa.py",
      "capri_mod/tests/test_mineral_n_losses.py",
      "capri_mod/tests/test_nutned_add_factor.py",
      "capri_mod/tests/test_techn_mix.py"
@@ -25683,6 +26276,11 @@
      "name": "pool_scale",
      "type": "DOUBLE",
      "not_null": true
+    },
+    {
+     "name": "fout_uvag_eur_t",
+     "type": "DOUBLE",
+     "not_null": true
     }
    ],
    "primary_key": [
@@ -25692,7 +26290,9 @@
    ],
    "unique": [],
    "foreign_keys": [],
-   "checks": [],
+   "checks": [
+    "(fout_uvag_eur_t > 0)"
+   ],
    "units": [
     {
      "item": "cres_avail",
@@ -25711,6 +26311,12 @@
      "unit": null,
      "status": "open",
      "basis": "npk_region_2030.excr_kt: unit to be established"
+    },
+    {
+     "item": "fout_uvag_eur_t",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "CAPRI's UVAG of MANN, MANP, MANK at 2030 in 2017 money: the member state's DATA(MS, \"UVAG\", FOUT, \"BAS\") of sim_ini_21730 x p_inflationFactor / the deflator (capmod/inflation_and_trend_interpolation.gms l. 67-72)"
     },
     {
      "item": "land_kha",
@@ -25775,6 +26381,7 @@
     "builders": [],
     "checks": [],
     "tests": [
+     "capri_mod/tests/test_eaa.py",
      "capri_mod/tests/test_mineral_n_losses.py"
     ]
    }
@@ -26744,7 +27351,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/regional_model.py"
     ],
     "builders": [],
     "checks": [],
@@ -27042,6 +27649,126 @@
     "builders": [],
     "checks": [],
     "tests": []
+   }
+  },
+  "feed_fodder_onfarm_share_2017": {
+   "file": "capri_data/2017/feed/fodder_onfarm_share_2017.csv",
+   "declared_in": "25_feed.sql",
+   "layout": [],
+   "comment": "CAPRI's on-farm share of the fodder crops' outputs per member state, p_onFarmShare (supply/pmp.gms l. 41-49): (SEDF + SEDM + LOSF) / GROF of sim_ini_21730's DATA at \"BAS\" (the base year); it values a fodder crop's output at UVAG(FODDO) = PSHW x (1 - p_onFarmShare) (reports/sol_simy.gms l. 753; capri_mod/income/income_module.py crop_fodder_output; KNOWN_ISSUES K213). (tools/build/build_fodder_onfarm_share.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "onfarm_share",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "product"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(product IN ('GRAS', 'MAIF', 'OFAR', 'ROOF'))",
+    "((onfarm_share >= 0) AND (onfarm_share < 1))"
+   ],
+   "units": [
+    {
+     "item": "onfarm_share",
+     "unit": "U_ratio",
+     "status": "builder",
+     "basis": "share of the production (SEDF + SEDM + LOSF over GROF, both in 1000 t; the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_fodder_onfarm_share (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/income/income_module.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_water_income.py"
+    ]
+   }
+  },
+  "feed_fodder_onfarm_share_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_onfarm_share_2030.csv",
+   "declared_in": "25_feed.sql",
+   "layout": [],
+   "comment": "CAPRI's on-farm share of the fodder crops' outputs per member state, p_onFarmShare (supply/pmp.gms l. 41-49): (SEDF + SEDM + LOSF) / GROF of sim_ini_21730's DATA at \"Y\" (CAPRI's \"CUR\" at 2030); it values a fodder crop's output at UVAG(FODDO) = PSHW x (1 - p_onFarmShare) (reports/sol_simy.gms l. 753; capri_mod/income/income_module.py crop_fodder_output; KNOWN_ISSUES K213). (tools/build/build_fodder_onfarm_share.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "onfarm_share",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "product"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(product IN ('GRAS', 'MAIF', 'OFAR', 'ROOF'))",
+    "((onfarm_share >= 0) AND (onfarm_share < 1))"
+   ],
+   "units": [
+    {
+     "item": "onfarm_share",
+     "unit": "U_ratio",
+     "status": "builder",
+     "basis": "share of the production (SEDF + SEDM + LOSF over GROF, both in 1000 t; the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_fodder_onfarm_share (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/income/income_module.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_water_income.py"
+    ]
    }
   },
   "feed_fodder_value_2030": {
@@ -27726,7 +28453,9 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/income/income_module.py",
+     "capri_mod/supply/regional_supply/region_build.py",
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [],
     "checks": [],
@@ -27857,7 +28586,7 @@
    "read_by": {
     "model": [
      "capri_mod/environmental/nitrogen.py",
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [],
     "checks": [],
@@ -28805,6 +29534,7 @@
    "read_by": {
     "model": [
      "capri_mod/environmental/nitrogen.py",
+     "capri_mod/income/income_module.py",
      "capri_mod/supply/abatement.py"
     ],
     "builders": [],
@@ -40351,6 +41081,117 @@
     "tests": []
    }
   },
+  "pol_premium_output_shares_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/policy/premium_output_shares_2030.csv",
+   "declared_in": "24_policy_more.sql",
+   "layout": [],
+   "comment": "The share of a model activity's premium per unit paid under each scheme aggregate for each main output of its CAPRI members (CAPRI's PACT_TO_Y, sets.gms l. 5377-5445), CAPRI's 2030 reference, level-weighted over the members; over the outputs the shares are premium_scheme_shares_2030.csv's; for the premium outlays per product (reports/feoga.gms l. 85-109; income I4). (tools/build/build_cap_ceilings_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "capri_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "output",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "DPPIL1",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "DPRD_LFA",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "DPRD_N2K",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "DPAE",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "DPNAT",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "capri_region",
+    "output"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "DPAE",
+     "unit": null,
+     "status": "open",
+     "basis": "premium_output_shares_2030.DPAE: unit to be established"
+    },
+    {
+     "item": "DPNAT",
+     "unit": null,
+     "status": "open",
+     "basis": "premium_output_shares_2030.DPNAT: unit to be established"
+    },
+    {
+     "item": "DPPIL1",
+     "unit": null,
+     "status": "open",
+     "basis": "premium_output_shares_2030.DPPIL1: unit to be established"
+    },
+    {
+     "item": "DPRD_LFA",
+     "unit": null,
+     "status": "open",
+     "basis": "premium_output_shares_2030.DPRD_LFA: unit to be established"
+    },
+    {
+     "item": "DPRD_N2K",
+     "unit": null,
+     "status": "open",
+     "basis": "premium_output_shares_2030.DPRD_N2K: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_cap_ceilings_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "pol_premium_scheme_shares_2030": {
    "file": "capri_data/baselines/capri_greendeal_ref/1730/policy/premium_scheme_shares_2030.csv",
    "declared_in": "24_policy_more.sql",
@@ -41665,7 +42506,7 @@
    "file": "capri_data/codes/results_items.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
-   "comment": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
+   "comment": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows, \"=\": the row is CAPRI's code itself; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
    "columns": [
     {
      "name": "block",
@@ -51088,6 +51929,188 @@
     "tests": []
    }
   },
+  "src_fnut_uvap_uvab_bas": {
+   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/fnut_uvap_uvab_bas.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's member states' base year unit values of the mineral fertilisers at producer and basic prices, sim_ini_21730's DATA(MS, UVAP | UVAB, NITF | PHOF | POTF, \"BAS\") (the reference export), written and read back by tools/build/build_fnut_unit_values.py (fnut_unit_values_2017.csv; income I2b)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fnut",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "item",
+    "fnut"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(item IN ('UVAP', 'UVAB'))",
+    "(fnut IN ('NITF', 'PHOF', 'POTF'))",
+    "(\"value\" > 0)"
+   ],
+   "units": [
+    {
+     "item": "value",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, item, FNUT, \"BAS\"): EUR per t of N, P2O5, K2O in the base year's money"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": "build_fnut_unit_values (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_fodder_onfarm_items": {
+   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/fodder_onfarm_items.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's member states' gross production, losses and seed of the fodder crops' outputs, sim_ini_21730's DATA(MS, GROF | LOSF | SEDF | SEDM, GRAS | MAIF | OFAR | ROOF, BAS | Y) (the reference export), written and read back by tools/build/build_fodder_onfarm_share.py (fodder_onfarm_share_2017.csv, fodder_onfarm_share_2030.csv; KNOWN_ISSUES K213)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "item",
+    "product",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(item IN ('GROF', 'LOSF', 'SEDF', 'SEDM'))",
+    "(product IN ('GRAS', 'MAIF', 'OFAR', 'ROOF'))",
+    "(\"year\" IN ('BAS', 'Y'))"
+   ],
+   "units": [
+    {
+     "item": "value",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, item, FODDO, year): 1000 t"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": "build_fodder_onfarm_share (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_fout_uvag_bas": {
+   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/fout_uvag_bas.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's base year unit values of the nutrients' outputs MANN, MANP, MANK per member state, sim_ini_21730's DATA(MS, \"UVAG\", FOUT, \"BAS\") (the reference export), written and read back by tools/build/build_npk_balance_2030.py (npk_region_2030.csv fout_uvag_eur_t; KNOWN_ISSUES K212)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fout",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "uvag_bas",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "fout"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(fout IN ('MANN', 'MANP', 'MANK'))",
+    "(uvag_bas > 0)"
+   ],
+   "units": [
+    {
+     "item": "uvag_bas",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"UVAG\", FOUT, \"BAS\"): EUR per t of N, P2O5, K2O in the base year's money"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": "build_npk_balance_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "src_gains_ad_p_gainsdata": {
    "file": "capri_data/sources/raw/capri/dat/scen/ghgtech/gains_ad_p_gainsdata.parquet",
    "declared_in": "30_sources.sql",
@@ -52434,6 +53457,72 @@
     "builders": [
      "build_captrd_dat"
     ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_ms_farm_balance_items": {
+   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/ms_farm_balance_items.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's member states' farm balance of its outputs at \"BAS\" and \"Y\" and the unit values of its items at \"BAS\", sim_ini_21730's DATA(MS, GROF | SEDF | LOSF, O, BAS | Y) and DATA(MS, UVAG | UVAP | UVAB, IO, BAS) (the reference export), written and read back by tools/build/build_ms_farm_balance.py (ms_farm_balance_2017.csv, ms_farm_balance_2030.csv, ms_unit_values_2017.csv; income I2c)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "item",
+    "product",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(item IN ('GROF', 'SEDF', 'LOSF', 'UVAG', 'UVAP', 'UVAB'))",
+    "(\"year\" IN ('BAS', 'Y'))"
+   ],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "CAPRI DATA(MS, item, product, year): 1000 t (GROF, SEDF, LOSF) or EUR per t (UVAG, UVAP, UVAB); no single unit code"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": "build_ms_farm_balance (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
     "checks": [],
     "tests": []
    }
@@ -55320,7 +56409,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/projection/equations/load_base_data_and_trends.py"
+     "capri_mod/projection/equations/year_data/residues.py"
     ],
     "builders": [],
     "checks": [
@@ -57118,12 +58207,96 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/net_revenues.py"
     ],
     "builders": [],
     "checks": [],
     "tests": [
      "capri_mod/tests/test_layers.py"
+    ]
+   }
+  },
+  "sup_crop_inputs_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/crop_inputs_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "The crops' directly yield-dependent inputs at CAPRI's 2030 simulation year, item by item (income I2): sim_ini_21730 DATA(BAS, I) x (1 - f + f G) (capmod/define_inputs.gms l. 108-112, before TF_I) x UVAG(MS, I, 2030) = UVAG(BAS) x p_infl^(2030 - BAS) / 1000 over the crop's inputs (PACT_TO_I), CAPRI's 2030 money (the model deflates), CAPRI's 2030 level-weighted where a model crop sums CAPRI activities; the items sum to input_coefs_2030.csv's iy_uvag_eur_ha (tools/build/build_input_coefs_2030.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "eur_ha",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(eur_ha >= 0)"
+   ],
+   "units": [
+    {
+     "item": "eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "sim_ini_21730 DATA at BAS, the crop's yield growth G, p_inputDemandFactor f (inputs/yieldIY.gms), UVAG(MS, I, BAS) x p_infl^13 / 1000, LEVL(2030)-weighted"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_input_coefs_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_input_coefs_2030.py"
     ]
    }
   },
@@ -57984,11 +59157,14 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py"
+     "capri_mod/data/loaders.py",
+     "capri_mod/income/income_module.py"
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_water_income.py"
+    ]
    }
   },
   "sup_input_coefs_2030": {
@@ -58056,6 +59232,11 @@
      "name": "levl_capri",
      "type": "DOUBLE",
      "not_null": true
+    },
+    {
+     "name": "iy_uvag_eur_ha",
+     "type": "DOUBLE",
+     "not_null": false
     }
    ],
    "primary_key": [
@@ -58093,7 +59274,8 @@
     "(yd_inpo_eur_ha >= 0)",
     "(yield_growth > 0)",
     "(inpo_yield_factor > 0)",
-    "(levl_capri > 0)"
+    "(levl_capri > 0)",
+    "(iy_uvag_eur_ha >= 0)"
    ],
    "units": [
     {
@@ -58119,6 +59301,12 @@
      "unit": "U_ratio",
      "status": "capri",
      "basis": "sum LEVL(2030) DATA(BAS, INPO) (1 - f + f G) / sum LEVL(2030) DATA(BAS, INPO) over the model animal's CAPRI activities, G its main output's yield growth"
+    },
+    {
+     "item": "iy_uvag_eur_ha",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "sum over the crop's directly yield-dependent inputs (IY within PACT_TO_I) of DATA(BAS) x (1 - f + f G) x UVAG(MS, I, 2030) / 1000, UVAG(2030) = UVAG(BAS) x p_infl^(2030 - 2017) (inflation_and_trend_interpolation.gms l. 71): their part of CAPRI's TOIN at the simulation year (reports/calc_inc_indic.gms l. 34-39) before TF_I, EUR per ha in CAPRI's 2030 money; empty for animals"
     },
     {
      "item": "levl_capri",
@@ -58673,7 +59861,177 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_livestock_input_cost.py"
+    ]
+   }
+  },
+  "sup_livestock_input_cost": {
+   "file": "capri_data/2017/supply/livestock_input_cost.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "The animals' input costs per model head in CAPRI's objective form (register DEP-13 step 3), CAPREG's 2017 data: per input of IobjCont (sets.gms l. 5059-5067) DATA(r, act, I, \"Y\") x the member state's UVAP / 1000 (-p_linObjeCont, capmod/define_objc.gms l. 39-44); YOUNG the young animals bought and FEED the feeds at the region's UVAG (TOIN's other parts, reports/calc_inc_indic.gms l. 34-37); LEVL x value over CAPRI's activities of the model animal over the model's heads",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "eur_head",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "animal",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(eur_head >= 0)"
+   ],
+   "units": [
+    {
+     "item": "eur_head",
+     "unit": "U_EuPerHd",
+     "status": "capri",
+     "basis": "CAPREG 2017 DATA2 at \"Y\" x UVAP (inputs) or UVAG (YOUNG, FEED) / 1000, LEVL-weighted, over the model's 2017 heads"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_livestock_input_cost (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_livestock_input_cost.py"
+    ]
+   }
+  },
+  "sup_livestock_input_cost_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/livestock_input_cost_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "The animals' inputs of IobjCont per model head at CAPRI's 2030 simulation start (sim_ini_21730): DATA(BAS) x (1 - f + f G) (capmod/define_inputs.gms l. 107-112, before TF_I) x the member state's UVAP(2030) = UVAP(BAS) x p_infl^(2030 - BAS), CAPRI's 2030 money (the model deflates), over the model's 2030 base heads (register DEP-13 step 3)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "eur_head",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "animal",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(eur_head >= 0)"
+   ],
+   "units": [
+    {
+     "item": "eur_head",
+     "unit": "U_EuPerHd",
+     "status": "capri",
+     "basis": "sim_ini_21730 DATA at BAS, the main output's yield growth, p_inputDemandFactor, UVAP(BAS) x p_infl^13 / 1000, LEVL(2030)-weighted, over the model's 2030 heads"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_livestock_input_cost (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_input_coefs_2030.py"
+    ]
    }
   },
   "sup_livestock_output_by_product_coef": {
@@ -58813,7 +60171,8 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py"
+     "capri_mod/data/loaders.py",
+     "capri_mod/income/eaa_ms.py"
     ],
     "builders": [
      "build_genetics_effects"
@@ -59380,7 +60739,9 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_premium_baseline_2030.py"
+    ]
    }
   },
   "sup_livestock_product_value_by_market_coef": {
@@ -59941,6 +61302,242 @@
     "builders": [],
     "checks": [],
     "tests": []
+   }
+  },
+  "sup_ms_farm_balance_2017": {
+   "file": "capri_data/2017/supply/ms_farm_balance_2017.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPRI's member states' farm balance of its outputs (O) at \"CUR\" (the base year): gross production, seed and losses on farm, sim_ini_21730's DATA(MS, GROF | SEDF | LOSF, O, \"BAS\"); a final product's seed and losses at the solution are in proportion to its production at \"CUR\" (reports/sol_simy.gms l. 1889-1898), a member state's accounts at producer prices (income I2c, capri_mod/income/eaa_ms.py). (tools/build/build_ms_farm_balance.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "grof",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "sedf",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "losf",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "product"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "grof",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"GROF\", O, \"BAS\"): 1000 t (1000 head for the young animals, EUR million for the value items)"
+    },
+    {
+     "item": "losf",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"LOSF\", O, \"BAS\"): as grof; 0 where CAPRI's data have none"
+    },
+    {
+     "item": "sedf",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"SEDF\", O, \"BAS\"): as grof; 0 where CAPRI's data have none"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_ms_farm_balance (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/income/eaa_ms.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "sup_ms_farm_balance_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/ms_farm_balance_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPRI's member states' farm balance of its outputs (O) at \"CUR\" (2030): gross production, seed and losses on farm, sim_ini_21730's DATA(MS, GROF | SEDF | LOSF, O, \"Y\"); a final product's seed and losses at the solution are in proportion to its production at \"CUR\" (reports/sol_simy.gms l. 1889-1898), a member state's accounts at producer prices (income I2c, capri_mod/income/eaa_ms.py). (tools/build/build_ms_farm_balance.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "grof",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "sedf",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "losf",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "product"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "grof",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"GROF\", O, \"Y\"): 1000 t (1000 head for the young animals, EUR million for the value items)"
+    },
+    {
+     "item": "losf",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"LOSF\", O, \"Y\"): as grof; 0 where CAPRI's data have none"
+    },
+    {
+     "item": "sedf",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"SEDF\", O, \"Y\"): as grof; 0 where CAPRI's data have none"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_ms_farm_balance (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/income/eaa_ms.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_eaa_ms.py"
+    ]
+   }
+  },
+  "sup_ms_unit_values_2017": {
+   "file": "capri_data/2017/supply/ms_unit_values_2017.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPRI's member states' unit values of its items (IO) in the base year in the gross account, at producer and at basic prices, sim_ini_21730's DATA(MS, UVAG | UVAP | UVAB, IO, \"BAS\"), empty where CAPRI's data have none; the manure's value in an animal's other outputs (income I2c, capri_mod/income/eaa.py _other_output_parts). (tools/build/build_ms_farm_balance.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "uvag",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "uvap",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "uvab",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "uvab",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"UVAB\", IO, \"BAS\"): as uvag"
+    },
+    {
+     "item": "uvag",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"UVAG\", IO, \"BAS\"): EUR per t (per head for the young animals) in the base year's money"
+    },
+    {
+     "item": "uvap",
+     "unit": "U_EuPerTon",
+     "status": "capri",
+     "basis": "CAPRI DATA(MS, \"UVAP\", IO, \"BAS\"): as uvag"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_ms_farm_balance (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/income/eaa.py",
+     "capri_mod/income/eaa_ms.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_eaa_ms.py"
+    ]
    }
   },
   "sup_nutrients_regional": {
@@ -62015,7 +63612,7 @@
    ],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [
      "build_young_animals_2030"
@@ -62183,7 +63780,7 @@
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py",
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [],
     "checks": [],
@@ -62353,7 +63950,7 @@
    ],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [
      "build_young_animals_2030"
@@ -62521,7 +64118,7 @@
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py",
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/regional_supply/tables.py"
     ],
     "builders": [],
     "checks": [],
@@ -63609,6 +65206,7 @@
    "read_by": {
     "model": [
      "capri_mod/environmental/nitrogen.py",
+     "capri_mod/income/income_module.py",
      "capri_mod/supply/abatement.py"
     ],
     "builders": [],
@@ -64526,6 +66124,147 @@
     ]
    }
   },
+  "traj_capri_livestock_premium_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_livestock_premium_2030.csv",
+   "declared_in": "27_trajectories.sql",
+   "layout": [
+    "unnamed",
+    "wide"
+   ],
+   "comment": "CAPRI's 2030 premium per model head in 2017 money (sum of the members' LEVL 2017 x PRME 2030 over the model's 2017 heads; tools/build/build_price_trajectory_2030.py), taken where CAPRI's 2017 data pay the animal none (KNOWN_ISSUES K210)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "animal"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(\"value\" >= 0)"
+   ],
+   "units": [
+    {
+     "item": "BCOW",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "BROI",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "BULL",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "CALV",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "DCOW",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "HFRS",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "LAYS",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "PIGF",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "PIGS",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "SHGF",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    },
+    {
+     "item": "SHGM",
+     "unit": "U_EuPerHd",
+     "status": "builder",
+     "basis": "CAPRI's PRME 2030 per model head, 2017 money"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_price_trajectory_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/projection/prices.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_premium_baseline_2030.py"
+    ]
+   }
+  },
   "traj_capri_livestock_premium_ratio_2030": {
    "file": "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_livestock_premium_ratio_2030.csv",
    "declared_in": "27_trajectories.sql",
@@ -65306,6 +67045,7 @@
    "read_by": {
     "model": [
      "capri_mod/environmental/nitrogen.py",
+     "capri_mod/income/income_module.py",
      "capri_mod/supply/abatement.py"
     ],
     "builders": [],
@@ -66655,6 +68395,7 @@
    "notes": [],
    "read_by": {
     "model": [
+     "capri_mod/income/income_module.py",
      "capri_mod/supply/abatement.py"
     ],
     "builders": [],
@@ -67462,7 +69203,7 @@
   },
   {
    "file": "00_codes.sql",
-   "rule": "a results item's CAPRI codes are both given or both empty, are in CAPRI's COLS and ROWS (\"*\" apart), and cite"
+   "rule": "a results item's CAPRI codes are both given or both empty, are in CAPRI's COLS and ROWS (\"*\", \"act\", \"=\" apart), and cite"
   },
   {
    "file": "02_provenance_notes.sql",
@@ -67674,7 +69415,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 1057,
+  "capri/keep": 1060,
   "capri-mod/keep": 1,
   "literature/keep": 11,
   "numerical/keep": 39,

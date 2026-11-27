@@ -47,6 +47,21 @@ def test_the_2030_coefficients_reproduce_capris_reference():
     assert de["DCOW"] > 1.0 and de["BCOW"] == pytest.approx(1.0, abs=0.02)   # milk yield grows, the suckler cow's hardly
 
 
+def test_the_crops_inputs_item_by_item_add_up_to_the_yield_dependent_part():
+    """crop_inputs_2030.csv holds iy_uvag_eur_ha's terms, CAPRI's directly yield-dependent inputs of a crop at 2030 item
+    by item (income I2): they add up to the column in every crop row, and the items are CAPRI's IY of the crops."""
+    t = pd.read_csv(SUP30 / "input_coefs_2030.csv")
+    it = pd.read_csv(SUP30 / "crop_inputs_2030.csv")
+    # CAPRI's IY of the crops (sets.gms IY without water and mitigation; the builder's IY_CROP)
+    assert set(it.item) <= {"CAOF", "SEED", "PLAP", "REPM", "REPB", "ELEC", "EGAS", "EFUL", "ELUB", "IRRO", "INPO", "SERI"}
+    assert {"PLAP", "SEED", "INPO"} <= set(it.item)
+    s = it.groupby(["region", "activity"]).eur_ha.sum()
+    c = t[t.iy_uvag_eur_ha.notna()].set_index(["region", "activity"]).iy_uvag_eur_ha
+    c = c[c > 0]
+    assert set(s.index) == set(c.index)
+    assert ((s.reindex(c.index) - c).abs() <= 1e-9 * c.abs().clip(lower=1.0)).all()
+
+
 def test_the_green_deal_input_changes_act_on_the_2030_coefficients():
     """At the 2030 market year the Green Deal's PLAP and INPO changes and the organic top-up act on CAPRI's
     simulation-year coefficients (input_coefs_2030.csv, deflated), an animal's INPO cost per head carries its INPO's
@@ -71,6 +86,13 @@ def test_the_green_deal_input_changes_act_on_the_2030_coefficients():
     plap, inpo, eful = row.plap_eur_ha / defl, row.inpo_eur_ha / defl, row.eful_eur_ha / defl
     assert mo._sim_input_cost(crop, "plap_eur_ha") == pytest.approx(plap)
     assert plap != pytest.approx(mo._input_row(crop, "plap_eur_ha"), rel=1e-3)
+    # the animal's INPO per head in CAPRI's objective form at 2030 (register DEP-13 step 3), as the projection sets it
+    # (projection_module.p_linObjeCont_animals_Y): CAPRI's 2030 coefficient x TF_I / the deflator
+    c30 = pd.read_csv(SUP30 / "livestock_input_cost_2030.csv")
+    x30 = float(c30[(c30.region == region) & (c30.animal == ani) & (c30["item"] == "INPO")].eur_head.iloc[0])
+    inpo30 = x30 * tf / defl
+    assert inpo30 != pytest.approx(float(mo.data.livestock_input_cost.at[ani, "INPO"]), rel=1e-3)
+    mo.data.livestock_input_cost.at[ani, "INPO"] = inpo30
     nr0 = mo.net_revenues.copy()
     o_R, o_a = mo._organic_region_target(0.25), mo._organic_crop_target(crop, 0.25)
     mo._apply_greendeal_input_changes(0.25, 0.50)
@@ -78,9 +100,15 @@ def test_the_green_deal_input_changes_act_on_the_2030_coefficients():
     d_plap = plap * (1 - 0.5) * tf - plap * tf
     d_inpo = (inpo + topup) * (1 + 0.5 - o_R) * tf - inpo * tf
     assert (nr0[crop] - mo.net_revenues[crop]) == pytest.approx(d_plap + d_inpo, abs=1e-6)
+    assert (nr0[ani] - mo.net_revenues[ani]) == pytest.approx(inpo30 * (0.5 - o_R), abs=1e-6)
+    # the former form (supply.animal_cost_form "toin"): TOIN's INPO share with its INPO's 2030 yield factor
+    from capri_mod import settings as S
     yf = float(mo.data.input_coefs_2030.at[ani, "inpo_yield_factor"])
     sh = mo._input_row(ani, "inpo_toin_share") * mo._animal_cost_per_head(ani) * yf
-    assert (nr0[ani] - mo.net_revenues[ani]) == pytest.approx(sh * (0.5 - o_R) * tf, abs=1e-6)
+    with S.override({"supply.animal_cost_form": "toin"}):
+        mo.net_revenues = nr0.copy()
+        mo._apply_greendeal_input_changes(0.25, 0.50)
+        assert (nr0[ani] - mo.net_revenues[ani]) == pytest.approx(sh * (0.5 - o_R) * tf, abs=1e-6)
     # the yields' input update takes the 2030 coefficients' derivative (yd_* at the member state's UVAP)
     mo.net_revenues = nr0.copy()
     y0 = mo.data.yields.copy()

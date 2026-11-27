@@ -99,6 +99,19 @@ class NLPBlock:
             out.append((g_["g"], need - sup))
         return sorted(out, key=lambda t: -t[1])
 
+    def _feed_in_linear_term(self, rats) -> Optional[dict]:
+        """{animal: EUR per head} of the feeds in each herd's linear term (the FEED item of the input cost table:
+        CAPRI's 2017 feed value per model head, TOIN's part, with the projection's price changes) for the animals whose
+        feeding is in the regional NLP, with supply.animal_cost_form "capri"; None with "toin" (the NLP takes the base
+        ration's cost out instead) or without the table."""
+        from capri_mod.settings import current as _settings
+        if str(_settings().get("supply.animal_cost_form")) != "capri":
+            return None
+        ic = getattr(self.data, "livestock_input_cost", None)
+        if ic is None or "FEED" not in ic.columns:
+            return None
+        return {a: float(ic.at[a, "FEED"]) for a in rats if a in ic.index and pd.notna(ic.at[a, "FEED"])}
+
     def _capri_nlp_solve(self, Q, c, A, b, x_start):
         """The regional problem in CAPRI's form (capri_regional_nlp.CapriRegionalNLP), solved with IPOPT from the
         region's previous solution (CAPRI's CONOPT starts from the last solution; then without the duals, then cold from
@@ -126,6 +139,8 @@ class NLPBlock:
         _rx = getattr(self.ev, "dairy_req_extra", None)
         _rx = _rx if (_rx and max(c_ for a_ in _rx for c_, _ in _rx[a_]) < Q.shape[0]) else None
         c = np.asarray(c, float).copy()
+        self.res.obj_parts = None
+        _c_in = c.copy()
         npk = self._npk_spec(Q.shape[0], x_start, A, labels)
         drop = []
         if npk is not None:
@@ -149,14 +164,21 @@ class NLPBlock:
             drop += ["alloc_mineral_N"]
         tax_ = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
         ghg_min = None
+        _c_fert = c.copy()
         if tax_ > 0 and npk is not None:
             ghg_min, c = self._nlp_tax_terms(tax_, c, abat)
+        # the linear terms' adjustments of the NLP form by CAPRI's category (income I3): the fertiliser cost taken out
+        # (the purchases are charged in the fertilisation block) and the emission tax added, per column
+        self.ev.nlp_lin_adj = {"fert": _c_in - _c_fert, "tax": np.asarray(c, float) - _c_fert}
         spec = dict(Q=Q, c=c, A=A, b=b, labels=labels, acts=list(self.acts), rations=rats, fodder=fod, x_base=xb,
                     # the animals' milk for feeding on the output side of its balances, and the balances with CAPRI's
                     # losses (use <= output; livestock.py _fodder_rows)
                     fodder_out=dict(getattr(self.ev, "fodder_out", None) or {}),
                     fodder_le=set(getattr(self.ev, "fodder_le", None) or ()),
                     prices=getattr(self.seen, "feed_prices", None), req_extra=_rx, feed_ghg=self._ghg_feed_cost(),
+                    # CAPRI's objective form (supply.animal_cost_form "capri", register DEP-13 step 3): the feeds' part
+                    # of each herd's linear term, which the NLP takes out (QUADRF_ charges the feed)
+                    feed_lin=self._feed_in_linear_term(rats),
                     npk=npk, drop_labels=drop, cap_rules=self._cap_rules_spec(), ghg_min=ghg_min,
                     land_rent_rows=dict(getattr(self.ev, "land_rent_rows", None) or {}),
                     mix_cols=sorted(int(k_) for k_ in (getattr(self.ev, "mix_cols", None) or {}).values()),
@@ -174,6 +196,8 @@ class NLPBlock:
             spec["fix_cols"] = {n + len(getattr(self.ev, "land_types_used", [])): 0.0}
         self.res.last_feed_dm = None
         self.res.last_feed_t = None
+        self.res.last_feed_price = None
+        self.res.last_feed_lin = None
         self.res.nlp_ok = False
         # CAPRI's calibration: the base is a first-order point of the model it is simulated with. Once per region, at
         # the first solve (the baseline's base point and prices); the linear terms are kept by column and feed
@@ -582,6 +606,18 @@ class NLPBlock:
             with open(_fn, "ab") as _fh:
                 _pk.dump(_rec, _fh)
         y, F, zA, info = nlp.outputs(res)
+        # the objective at the solution by part, with what CAPRI's categories need beside it (income I3,
+        # IncomeDistributionModule.producer_surplus): the columns' labels and the linear terms' adjustments
+        try:
+            self.res.obj_parts = dict(nlp.objective_parts(res["x"]), cols=list(cols),
+                                      lin_adj=dict(getattr(self.ev, "nlp_lin_adj", None) or {}),
+                                      feed_lin=dict(spec.get("feed_lin") or {}),
+                                      split_lin=dict(getattr(self.ev, "split_lin", None) or {}),
+                                      mix_cols=dict(getattr(self.ev, "mix_cols", None) or {}))
+        except Exception as _exc:                       # a report only: the solve stands without it
+            import warnings as _w
+            _w.warn(f"{self.data.region_id}: the objective's parts were not recorded ({_exc!r})", RuntimeWarning)
+            self.res.obj_parts = None
         # the region's value of manure applied, per nutrient (CAPRI's PSHW, the manure pool market's point)
         self.res.manure_value = nlp.manure_values(res)
         self.sv.nlp_y = np.asarray(y, float).ravel().copy()
@@ -675,18 +711,27 @@ class NLPBlock:
                             self.ev.manure_ni_nh3[a_] = _sh * _nip["app_nh3"][a_]
                 self.res.fert_tech_shares = dict(getattr(self.res, "fert_tech_shares", None) or {})
                 self.res.fert_tech_shares["NITR_INH_MAN"] = _sh
-        acts_ = list(self.acts); dm = {}; ft = {}
+        acts_ = list(self.acts); dm = {}; ft = {}; fp = {}
+        _fpr = getattr(self.seen, "feed_prices", None) or {}
+        _fod = set(fod)                               # the fodder feeds (their balances' rows)
         for a, r in rats.items():
             if a not in acts_:
                 continue
             herd = float(y[acts_.index(a)])
+            pv = _fpr.get(a)
             for j, f in enumerate(r.feeds):
                 amt = F.get((a, f)) if r.flex[j] else float(r.x0[j]) * herd
                 if amt is not None and amt > 0:
                     dm.setdefault(a, {})[f] = float(amt) * float(r.dm[j])
                     ft.setdefault(a, {})[f] = float(amt)
+                    # the feed's value in the report (income, CAPRI's TOIN at the solution, calc_inc_indic.gms): a
+                    # tradable feed at the solve's price, as the objective charges it (capri_regional_nlp QUADRF_);
+                    # fodder at the ration's value (the reference run's fodder value)
+                    fp.setdefault(a, {})[f] = float(r.p0[j] if (pv is None or f in _fod) else pv[j])
         self.res.last_feed_dm = dm
         self.res.last_feed_t = ft
+        self.res.last_feed_price = fp
+        self.res.last_feed_lin = dict(spec.get("feed_lin") or {})
         return y
 
     def _nlp_solve(self, Q, c, A, b, x_start):
@@ -698,6 +743,8 @@ class NLPBlock:
         self.res.nlp_rc = None
         self.res.last_feed_dm = None                  # never carry a previous solve's feed
         self.res.last_feed_t = None
+        self.res.last_feed_price = None
+        self.res.last_feed_lin = None
         self.res.nlp_ok = False
         self.ev.nlp_fb_last = False
         y = self._capri_nlp_solve(Q, c, A, b, x_start)

@@ -44,35 +44,66 @@ class ReportingBlock:
 
     def _welfare_supply(self, supply_results) -> Optional[pd.DataFrame]:
         """The welfare components CAPRI takes from the supply models for the regions that have them (RMSSUP: the EU,
-        Norway; reports/welfare.gms l. 416-467), per supply-model region, EUR million (levels):
-          MGVA      market gross value added including premiums, sum over activities of (revenue - input cost +
-                    premium) x level (CAPRI EAAG MGVA; capri_mod/income)
+        Norway; reports/welfare.gms l. 416-467, 841-846), per supply-model region, EUR million (levels):
+          MGVA      the region's income at the solution in CAPRI's form (income I1: SupplyResult.income, set by the
+                    regional solve; IncomeDistributionModule.income_parts): the activities' MGVA x levels with the
+                    solved ration, less the mitigation options' cost plus their revenue (CAPRI's AGGT, reports/
+                    sol_simy.gms l. 2586, for its EAAG MGVA)
           RENT      the land rents: each land type's area x its rent at the solution, the dual of its land row
                     (EUR/ha; CAPRI's UAAR x d_area, reports/sol_simy.gms l. 181)
           ProfitAgr      the farms' profit, MGVA - RENT, and ProfitLandUse the land owners', RENT: CAPRI's accounts
-                    with its land market (welfare.gms supremaMrk), as in CAPRI's 2030 reference run (EU27: MGVA
-                    302,113 - rents 58,994 = ProfitAgr 243,119; capri_data/sources/raw/capri/results/ref2030_welfare.parquet)
+                    with its land market (welfare.gms supremaMrk, l. 841-846), as in CAPRI's 2030 reference run (EU27:
+                    MGVA 302,113 - rents 58,994 = ProfitAgr 243,119; capri_data/sources/raw/capri/results/
+                    ref2030_welfare.parquet)
           PSEs      the budget's cost of the premiums, minus the premiums paid (CAPRI -FEOP, -FEOG of the products
                     without a market)
-        The market's agents' components are in results["market"].welfare. A failure here does not stop the run:
-        it is warned and the table is None."""
+          mitiI, mitiO, mitiPmp  the mitigation options' accounting cost, revenue and PMP cost in CAPRI's report form
+                    (reports/sol_simy.gms l. 1049-1465; mitiI and mitiO inside MGVA, mitiPmp apart)
+          OBJE, PMPLevl, PMPFeed, PMPLandTrans, agProdSurplus  CAPRI's producer surplus rows of the region (income I3,
+                    IncomeDistributionModule.producer_surplus; reports/sol_simy.gms l. 2578-2595): the supply model's
+                    objective, its PMP terms and MGVA + the PMP terms; absent (NaN) where the solve recorded no parts
+          TOOU, TOIN, EAAG_MGVA, EAAG_DIFF  the gross account by item's total output and input, its MGVA (TOOU - TOIN +
+                    PRME) and its difference to MGVA (income I2, capri_mod/income/eaa.py; reports/sol_simy.gms l.
+                    2557-2566, 2600-2615); the items are in results["eaa"]
+          EAAP_TOIN, EAAP_GVAP, EAAP_PRME, EAAP_MGVA, EAAB_TOIN, EAAB_GVAB  the accounts at producer and basic prices
+                    of a regional unit: the mineral fertilisers' purchases and the premiums (income I2b,
+                    capri_mod/income/eaa.py eaap_eaab; reports/sol_simy.gms l. 2547-2562)
+        The market's agents' components are in results["market"].welfare. A failure here does not stop the run: it
+        is warned and the table is None."""
         if not supply_results:
             return None
         try:
             from capri_mod.income.income_module import IncomeDistributionModule
+            from capri_mod.market.equations.welfare import p_welfareRes_EAAG_ProfitAgr
             im = IncomeDistributionModule(self.data)
             rows = {}
             rlab = {"arable_land": "ARAC", "grassland": "GRAS", "permanent_land": "FRUN"}
             for reg, res in supply_results.items():
-                inc, prem = im._income_parts(reg, res, self.supply_module)
+                ip = getattr(res, "income", None) or im.income_parts(reg, res, self.supply_module)
                 sp = getattr(res, "shadow_prices", None) or {}
                 lt = getattr(res, "land_types", None) or {}
                 # EUR/ha x 1000 ha = EUR 1000
                 rent = DATA_ProfitLandUse([float(sp.get(lab, 0.0)) for lab in rlab],
                                           [float(sp.get(lab + "_lo", 0.0)) for lab in rlab],
                                           [float(lt.get(t, 0.0)) for t in rlab.values()])
-                rows[reg] = {"MGVA": inc / 1000.0, "RENT": rent / 1000.0, "ProfitAgr": (inc - rent) / 1000.0,
-                             "ProfitLandUse": rent / 1000.0, "PSEs": -prem / 1000.0}
+                rows[reg] = {"MGVA": ip["MGVA"] / 1000.0, "RENT": rent / 1000.0,
+                             "ProfitAgr": p_welfareRes_EAAG_ProfitAgr(ip["MGVA"], rent) / 1000.0,
+                             "ProfitLandUse": rent / 1000.0, "PSEs": -ip["PRME"] / 1000.0,
+                             "mitiI": ip["mitiI"] / 1000.0, "mitiO": ip["mitiO"] / 1000.0,
+                             "mitiPmp": ip["mitiPmp"] / 1000.0}
+                for k_ in ("OBJE", "PMPLevl", "PMPFeed", "PMPLandTrans", "agProdSurplus"):
+                    if k_ in ip:
+                        rows[reg][k_] = float(ip[k_]) / 1000.0
+                # the gross account by item's totals (income I2, SupplyResult.eaa, EUR million)
+                ea = getattr(res, "eaa", None)
+                if ea:
+                    rows[reg].update({"TOOU": ea["TOOU"], "TOIN": ea["TOIN"], "EAAG_MGVA": ea["MGVA"],
+                                      "EAAG_DIFF": ea["DIFF"]})
+                    # the accounts at producer and basic prices (income I2b): the purchases and the premiums
+                    if ea.get("EAAP"):
+                        rows[reg].update({"EAAP_TOIN": ea["EAAP"]["TOIN"], "EAAP_GVAP": ea["EAAP"]["GVAP"],
+                                          "EAAP_PRME": ea["EAAP"]["PRME"], "EAAP_MGVA": ea["EAAP"]["MGVA"],
+                                          "EAAB_TOIN": ea["EAAB"]["TOIN"], "EAAB_GVAB": ea["EAAB"]["GVAB"]})
             return pd.DataFrame.from_dict(rows, orient="index")
         except Exception as exc:
             warnings.warn(f"welfare: the supply models' components could not be computed ({exc!r})")

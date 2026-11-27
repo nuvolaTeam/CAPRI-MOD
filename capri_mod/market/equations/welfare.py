@@ -18,11 +18,141 @@ def p_welfareRes_ProfitAgr(MGVA, LEVL):
            p_welfareRes(RMSSUP,"ProfitAgr",XX1,"%SIMY%")
               = SUM(PACT_TO_XX(MPACT,XX1), DATA(RMSSUP,MPACT,"MGVA","%SIMY%") * DATA(RMSSUP,MPACT,"LEVL","%SIMY%")*0.001);
 
-    In this project's notation: ProfitAgr = sum_a MGVA_a L_a. Departures from CAPRI: the units (EUR 1000 from EUR per ha
-    or head and 1000 ha or heads; CAPRI's x 0.001 to million EUR); CAPRI's outputs and inputs not assigned to activities
-    (l. 451-456: EAAG of the outputs and inputs no activity produces or uses, NECR, ARES, LRES, SERI, mitiI, RQUO, SERO,
-    NASA, mitiO) not added; the technology mix's net revenue added by the caller (supply/techn_mix.py)."""
+    In this project's notation: ProfitAgr_XX1 = sum over the activities a with PACT_TO_XX(a, XX1) of MGVA_a L_a; the
+    caller passes one product's activities (capri_mod/income/welfare_products.py: the model's activities by their CAPRI
+    members' PACT_TO_XX, the technology mix's MGVA on the area moved with its crop). Departures from CAPRI: the units
+    (EUR 1000 from EUR per ha or head and 1000 ha or heads; the caller's x 0.001 to million EUR); the outputs and inputs
+    no activity holds: p_welfareRes_ProfitAgr_INPE."""
     return float(sum(m * l_ for m, l_ in zip(MGVA, LEVL)))
+
+
+def p_welfareRes_ProfitAgr_INPE(INPE, EAAG_O, EAAG_I):
+    r"""p_welfareRes(RMSSUP, "ProfitAgr", "INPE"): the profit of the outputs and inputs no activity produces or uses,
+    added to the activities' assigned to INPE (EUR million).
+
+    CAPRI's GAMS (reports/welfare.gms l. 451-456):
+
+        *    --- add output/inputs not assigned to activities and deduct land rent from sol_simy.gms
+        *        (NECR ,    ARES ,    LRES ,    SERI ,    mitiI,    RQUO ,    SERO ,    NASA ,    mitiO)
+        *        of these probably only mitiI and mitiO have non-zero entries
+           p_welfareRes(RMSSUP,"ProfitAgr","INPE","%SIMY%") = p_welfareRes(RMSSUP,"ProfitAgr","INPE","%SIMY%")
+             + SUM( O $ (NOT SUM(PACT_TO_O(MPACT,O),1)), DATA(RMSSUP,"EAAG",O,"%SIMY%"))
+             - SUM( I $ (NOT SUM(PACT_TO_I(MPACT,I),1)), DATA(RMSSUP,"EAAG",I,"%SIMY%"));
+
+    In this project's notation: INPE += sum EAAG_O - sum EAAG_I over the items outside PACT_TO_O and PACT_TO_I.
+    Departures from CAPRI: the model's are the mitigation options' revenue and cost (mitiO, mitiI), booked at the
+    region (register DEP-54), where CAPRI's are the activities' (sol_simy.gms l. 1471-1473) and so in their product's
+    ProfitAgr."""
+    return float(INPE) + float(sum(float(v) for v in EAAG_O)) - float(sum(float(v) for v in EAAG_I))
+
+
+def p_welfareRes_ProfitAgr_LAND(RENT):
+    r"""p_welfareRes(RMSSUP, "ProfitAgr", "LAND"): the land rents, with CAPRI's land market (supremaMrk, as in its 2030
+    reference run), a cost of the farms (EUR million).
+
+    CAPRI's GAMS (reports/welfare.gms l. 459-460):
+
+        $iftheni.spam36 %supremaMrk%==on
+           p_welfareRes(RMSSUP,"ProfitAgr","LAND","%SIMY%") = - DATA(RMSSUP,"EAAG","RENT","%SIMY%");
+    """
+    return -float(RENT)
+
+
+def p_welfareRes_PSEs_XX1(FEOP, CSEi=0.0, CSEd=0.0, Hcon=0.0, PSEd=0.0, AREP=0.0, PSEi=0.0, Prod=0.0, FSEi=0.0,
+                          Feed=0.0, PrcA=0.0, Proc=0.0, FEOE=0.0, FEOS=0.0):
+    r"""p_welfareRes(RMS, "PSEs", XX1): the domestic support of a market product, the budget's cost: the premiums paid
+    to its outputs (FEOP over CAP_TO_TRD, a sequence), the market's support wedges times their quantities, the export
+    subsidies and the intervention costs, with a minus sign (EUR million).
+
+    CAPRI's GAMS (reports/welfare.gms l. 714-740):
+
+        *    ---- domestic support (using XX1 to cover land subsidies)
+        *
+           p_welfareRes(RMS,"PSEs",XX1,"%SIMY%") =
+        *
+        *    --- costs of EU premium schemes
+        *
+             - SUM(CAP_TO_TRD(MARR,XX1), DATA(RMS,"FEOP",MARR,"%SIMY%"))
+        *
+        *    --- PSEs
+        *
+        *      do not count here emission taxes on MILK as they are re-booked in sol_market on emiTaxOth. These are considered below
+        *      as a separate welfare effect after coment "gross emission tax revenues:"
+            - (DATA(RMS,"CSEi",XX1,"%SIMY%") $ (not DATA(RMS,"emiTaxOth",XX1,"%SIMY%") $ sameas(XX1,"MILK"))
+              +DATA(RMS,"CSEd",XX1,"%SIMY%"))                                            * DATA(RMS,"Hcon",XX1,"%SIMY%") * 0.001
+            - (DATA(RMS,"PSEd",XX1,"%SIMY%")+DATA(RMS,"AREP",XX1,"%SIMY%"))              * DATA(RMS,"Prod",XX1,"%SIMY%") * 0.001
+        *      do not count here emission taxes as they are re-booked in sol_market on emiTaxOth :
+            - (DATA(RMS,"PSEi",XX1,"%SIMY%") $ (not DATA(RMS,"emiTaxOth",XX1,"%SIMY%"))) * DATA(RMS,"Prod",XX1,"%SIMY%") * 0.001
+            - (DATA(RMS,"FSEi",XX1,"%SIMY%"))                                            * DATA(RMS,"Feed",XX1,"%SIMY%") * 0.001
+            - (DATA(RMS,"PrcA",XX1,"%SIMY%"))                                            * DATA(RMS,"Proc",XX1,"%SIMY%") * 0.001
+        *
+        *    --- plus export subsidies
+        *
+            -  SUM(CAP_TO_TRD(MARR,XX1), DATA(RMS,"FEOE",MARR,"%SIMY%"))
+        *
+        *    --- plus costs of market interventions
+        *
+            -  SUM(CAP_TO_TRD(MARR,XX1), DATA(RMS,"FEOS",MARR,"%SIMY%"));
+
+    In this project's notation: PSEs = - sum FEOP - (CSEi + CSEd) Hcon / 1000 - (PSEd + AREP + PSEi) Prod / 1000 -
+    FSEi Feed / 1000 - PrcA Proc / 1000 - FEOE - FEOS (the emission tax on milk and the emission taxes, re-booked by
+    CAPRI's market on emiTaxOth, are not in the wedges the caller passes). Departures from CAPRI: the model's member
+    states pass FEOP alone (capri_mod/income/feoga.py): the market's support wedges, export subsidies and intervention
+    are 0 for the EU member states at CAPRI's 2030 reference (Denmark's PSEs = - FEOP product by product, its total
+    -882.3 = - FEOP TOOA, EUR million of 2030; ref2030_welfare.parquet, dataOut)."""
+    return -(float(sum(float(v) for v in FEOP)) + (float(CSEi) + float(CSEd)) * float(Hcon) * 0.001
+             + (float(PSEd) + float(AREP) + float(PSEi)) * float(Prod) * 0.001 + float(FSEi) * float(Feed) * 0.001
+             + float(PrcA) * float(Proc) * 0.001 + float(FEOE) + float(FEOS))
+
+
+def p_welfareRes_PSEs_INPE(FEOG):
+    r"""p_welfareRes(RMSSUP, "PSEs", "INPE"): the support of the outputs outside the market's products (the fodder, the
+    young animals, raw milk ...), their FEOGA outlays with a minus sign (a sequence; EUR million).
+
+    CAPRI's GAMS (reports/welfare.gms l. 742-746):
+
+        *    --- show CAP subsidies to products not covered by market part (fodder production, young animals etc.)
+        *        on INPE
+        *
+           p_welfareRes(RMSSUP,"PSEs","INPE","%SIMY%") =
+                  - SUM(O $ (NOT SUM(CAP_TO_TRD(O,XX),1)), DATA(RMSSUP,"FEOG",O,"%SIMY%"));
+
+    In this project's notation: INPE = - sum FEOG over the outputs outside CAP_TO_TRD; FEOG = FEOP + FEOS + FEOE + FEOC +
+    FEOI + FEOF (reports/feoga.gms l. 326-332), in the model's member states FEOP (the others 0, as in the EU at CAPRI's
+    2030 reference). Departures from CAPRI: none in the statement."""
+    return -float(sum(float(v) for v in FEOG))
+
+
+def p_welfareRes_EAAG_PSEs(PSEs):
+    r"""p_welfareRes(RMS, "EAAG", "PSEs") and p_welfareRes(RMS, "PSEs", "INCE"): the domestic support, the sum over the
+    products (XX1, INPE included; EUR million).
+
+    CAPRI's GAMS (reports/welfare.gms l. 748-749):
+
+           p_welfareRes(RMS,"EAAG","PSEs","%SIMY%") = SUM(XX1, p_welfareRes(RMS,"PSEs",XX1,"%SIMY%"));
+           p_welfareRes(RMS,"PSEs","INCE","%SIMY%") = p_welfareRes(RMS,"EAAG","PSEs","%SIMY%");
+    """
+    return float(sum(float(v) for v in PSEs))
+
+
+def p_welfareRes_EAAG_ProfitAgr(MGVA, RENT):
+    r"""p_welfareRes(RMSSUP, "EAAG", "ProfitAgr") and p_welfareRes(RMSSUP, "ProfitAgr", "INCE"): the farms' total
+    profit, the region's income less the land rents (CAPRI's land market, supremaMrk, as in its 2030 reference run).
+
+    CAPRI's GAMS (reports/welfare.gms l. 841-846):
+
+           p_welfareRes(RMSSUP,"EAAG","ProfitAgr","%SIMY%")   = DATA(RMSSUP,"EAAG","MGVA","%SIMY%")
+        $ifi %supremaMrk%==on                                 - DATA(RMSSUP,"EAAG","RENT","%SIMY%")
+        *                                                      - DATA(RMSSUP,"EAAG","EmiNetTaxAgr","%SIMY%")
+                                                              ;
+
+           p_welfareRes(RMSSUP,"ProfitAgr","INCE","%SIMY%")   = p_welfareRes(RMSSUP,"EAAG","ProfitAgr","%SIMY%")   ;
+
+    In this project's notation: ProfitAgr = MGVA - RENT. Departures from CAPRI: the region's activity-based income
+    (sol_simy.gms l. 2586, AGGT, coupling/equations/sol_simy.py DATA_AGGT_MGVA) in place of the product-based EAAG
+    MGVA, which CAPRI compares with it (sol_simy.gms l. 2600-2615: a difference above EUR 1,000 is reported) and the
+    model does not compute yet (income I2); the caller's units."""
+    return float(MGVA) - float(RENT)
 
 
 def p_pbGL(B):
@@ -196,3 +326,48 @@ def p_welfareRes_Welfare(components):
     Departures from CAPRI: the market's agents' components (CSSP, ProfitProc, ProfitDairy, ProfitAgr, ProfitFeed,
     TariffRev, TRQRents); the supply models' ProfitLandUse and PSES are coupling/reporting.py's, added in its totals."""
     return components.sum(axis=1)
+
+
+def p_welfareRes_rmAgg(WelfPos_rmsAgg):
+    r"""p_welfareRes(rmAgg, WelfPos, ROWS1, SIMY): a market region's welfare position (ProfitAgr, PSEs) per row, the sum
+    over its member states (RMS_TO_RM: A_EU_WEST, A_EU_EAST).
+
+    CAPRI's GAMS (reports/welfare.gms l. 861-868):
+
+        *  --- aggregation to regional aggregates
+        *      NOTE: OAGG and INCE will be aggegated from components below
+
+           p_welfareRes(rmAgg,"EAAG",WelfPos_ROWS,"%SIMY%")
+              = SUM(RMS_TO_RM(rmsAgg,rmAgg), p_welfareRes(rmsAgg,"EAAG",WelfPos_ROWS,"%SIMY%"));
+
+           p_welfareRes(rmAgg,WelfPos,ROWS1,"%SIMY%")
+             = SUM(RMS_TO_RM(rmsAgg,rmAgg), p_welfareRes(rmsAgg,WelfPos,ROWS1,"%SIMY%"));
+
+    Departures from CAPRI: none (computed where all the region's member states are in the run:
+    capri_mod/income/eaa_aggregates.py)."""
+    return float(sum(float(v) for v in WelfPos_rmsAgg))
+
+
+def p_welfareRes_OAGG(WelfPos_XX):
+    r"""p_welfareRes(RMAll, WelfPos, OAGG, SIMY): a product aggregate's welfare position, the sum over its market
+    products (R_T_OAGG(OAGG, XX)).
+
+    CAPRI's GAMS (reports/welfare.gms l. 897):
+
+           p_welfareRes(RMAll,WelfPos,OAGG,"%SIMY%")        = SUM(R_T_OAGG(OAGG,XX),  p_welfareRes(RMAll,WelfPos,XX,"%SIMY%"));
+
+    Departures from CAPRI: none."""
+    return float(sum(float(v) for v in WelfPos_XX))
+
+
+def p_welfareRes_RW(WelfPos_RM):
+    r"""p_welfareRes(RW, WelfPos, Rows, SIMY): a world region's welfare position (EU, EU27yr19: A_EU_WEST and A_EU_EAST),
+    the sum over its market regions (RW_TO_RM).
+
+    CAPRI's GAMS (reports/welfare.gms l. 901-902):
+
+           p_welfareRes(RW,WelfPos,Rows,"%SIMY%")           = SUM(RW_TO_RM(RW,RM), p_welfareRes(RM,WelfPos,Rows,"%SIMY%"));
+           p_welfareRes(RW,WelfPos,"INCE","%SIMY%")         = SUM(RW_TO_RM(RW,RM), p_welfareRes(RM,WelfPos,"INCE","%SIMY%"));
+
+    Departures from CAPRI: none (computed where all the region's market regions are)."""
+    return float(sum(float(v) for v in WelfPos_RM))

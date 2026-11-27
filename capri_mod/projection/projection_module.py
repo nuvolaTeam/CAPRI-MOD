@@ -264,6 +264,7 @@ class ProjectionModule:
             self.SUPBAL_outputsPerHead_Y(data, year, data.get("livestock_output_by_product_coef"),
                                          data.get("livestock_product_value_by_market_coef"))
             self.req_or_man_fnc_CRPR_EXPT_Y(data, year)
+            self.p_linObjeCont_animals_Y(data, year)
         # CAPRI's own 2030 rations and requirements with its 2030 reference (the port of CAPRI's 2030 rations and fodder): factors per region, animal and
         # feed on the 2017 rations (tools/build/build_ration_trajectory_2030.py); where present they replace the uniform
         # requirement scaling of _project_livestock for that ration. projection.ration_source picks the files: CAPRI's
@@ -457,6 +458,50 @@ class ProjectionModule:
                             and pd.notna(nexp.at[r, a]):
                         nexp.at[r, a] = float(nexp.at[r, a]) * f
         data["ration_scale"] = scale
+
+    @staticmethod
+    def p_linObjeCont_animals_Y(data: Dict, year: Optional[int]) -> None:
+        r"""The animals' directly yield-dependent inputs per head of the simulation year in their costs (register DEP-13
+        step 3): CAPRI's objective charges an animal's inputs of IobjCont at the year's coefficients and the member
+        state's UVAP of the year, p_linObjeCont (capmod/define_objc.gms l. 39-44, capri_mod/supply/equations/
+        define_objc.p_linObjeCont), on DATA(Y) = DATA(BAS) x (1 - f + f G) x TF_I (capmod/define_inputs.gms l. 107-112,
+        define_inputs.DATA_IY_Y). The cost per head (livestock_cost_coef, CAPRI's 2017 TOIN per model head) carries
+        2017's; per region and animal they are replaced by the year's, in the model's money:
+
+            cost += sum_I (x_I,Y x TF_I / deflator - x_I,2017),   TF_I = 1 - 0.005 (Y - BAS) (define_inputs.TF_I_trend)
+
+        x_I,Y the inputs at CAPRI's 2030 start before TF_I in CAPRI's 2030 money (livestock_input_cost_2030), x_I,2017
+        the 2017 ones (livestock_input_cost; at the member state's UVAP, which TOIN's regional UVAG equals to about 1e-5).
+        The input cost table's items are set to the year's (x_I,Y x TF_I / deflator). Only where both years have the
+        animal; else the 2017 cost stays. Called by project_data with CAPRI's 2030 reference as the trajectory.
+        Departures from CAPRI: the cost per head keeps TOIN's young animals and feed (the regional NLP takes the feed
+        out in CAPRI's objective form, supply.animal_cost_form; the QP keeps it)."""
+        c17, c30 = data.get("livestock_input_cost"), data.get("livestock_input_cost_2030")
+        toin = data.get("livestock_cost_coef")
+        if not (isinstance(c17, dict) and isinstance(c30, dict) and isinstance(toin, pd.DataFrame) and year):
+            return
+        from capri_mod.supply import inputs as _inputs
+        from capri_mod.supply.equations.define_inputs import TF_I_trend
+        base = int(_inputs.base_year())
+        tf = TF_I_trend(param("INPUT_SAVING_PROGRESS"), int(year), base)
+        defl = _inputs.money_deflator(int(year))
+        for reg, f30 in c30.items():
+            f17 = c17.get(reg)
+            if f17 is None or reg not in toin.index:
+                continue
+            for a in f30.index:
+                if a not in f17.index or a not in toin.columns or not pd.notna(toin.at[reg, a]):
+                    continue
+                items = [i for i in f30.columns if pd.notna(f30.at[a, i])]
+                new = {i: float(f30.at[a, i]) * tf / defl for i in items}
+                old = sum(float(f17.at[a, i]) for i in f17.columns
+                          if i not in ("YOUNG", "FEED") and pd.notna(f17.at[a, i]))
+                toin.at[reg, a] = float(toin.at[reg, a]) + sum(new.values()) - old
+                for i in f17.columns:
+                    if i not in ("YOUNG", "FEED"):
+                        f17.at[a, i] = float("nan")
+                for i, v in new.items():
+                    f17.loc[a, i] = v
 
     @staticmethod
     def SUPBAL_outputsPerHead_Y(data: Dict, year: Optional[int], bp, pv) -> None:

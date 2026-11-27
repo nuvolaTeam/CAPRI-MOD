@@ -355,7 +355,8 @@ def test_durum_wheat_takes_half_of_the_wheat_price_change_as_capri():
     assert PRICE_FOLLOWS_SHARE["DWHE"] == 0.5 and PRICE_FOLLOWS_SHARE["SUGB"] == 1.0
     import inspect
     from capri_mod import model as M
-    src = inspect.getsource(M)
+    from capri_mod.coupling import run_scenario as RS          # the scenario's run, moved from model.py (26 November)
+    src = inspect.getsource(M) + inspect.getsource(RS)
     # every site that sets a follower's signal from its commodity's takes the share
     assert src.count("PRICE_FOLLOWS_SHARE[") == 4
 
@@ -2842,6 +2843,34 @@ def test_pesticide_target_applies_to_conventional_area_only():
     assert comb_y < y0, "the pesticide yield loss vanished on conventional land"
 
 
+def test_the_green_deal_yield_changes_at_the_solves_price():
+    """The organic yield gap and the pesticide loss change a crop's margin at the solve's price, the price its revenue
+    takes (the data's price x (1 + the solve's transmitted price change), SupplyModule._solve_prices), as CAPRI values
+    the yields at the solution's prices (KNOWN_ISSUES K209; until 26 November 2026 at the data's price)."""
+    import pandas as pd
+    from capri_mod.data.loaders import load_all_data
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    d = load_all_data("capri_data")
+    region = "FR810000" if "FR810000" in d["areas"].index else str(d["areas"].index[0])
+    sm = SupplyModule(d, calibrate_supply_elasticities(d["areas"]))
+    sm.run(price_signals=None, regions=[region])
+    mo = sm._models[region]
+    crop = next(c for c in ("SWHE", "RAPE", "BARL") if c in mo.net_revenues.index)
+    p0 = float(mo.data.producer_prices[crop])
+    nr0 = float(mo.net_revenues[crop]); y0 = float(mo.data.yields[crop])
+    mo.ev.price_shock_now = None
+    assert float(mo._solve_prices()[crop]) == p0
+    mo.ev.price_shock_now = pd.Series({crop: 0.25})
+    assert float(mo._solve_prices()[crop]) == pytest.approx(1.25 * p0, rel=1e-14)
+    mo.apply_pesticide_reduction(0.50)
+    dy = float(mo.data.yields[crop]) - y0
+    assert dy < 0
+    assert float(mo.net_revenues[crop]) - nr0 == pytest.approx(1.25 * p0 * dy, rel=1e-12)
+    mo.data.yields[crop] = y0; mo.net_revenues[crop] = nr0; mo.ev.price_shock_now = None
+
+
 #: the land market off (CAPRI's p_landIsFixedinScenario): the two tests of fixed land and of the landscape floor's
 #: fitting check that path, so they run with it explicitly (CAPRI's land rules, the N target per current hectare and
 #: the ammonia techniques are always on since 27 October 2026)
@@ -3480,9 +3509,11 @@ def test_no_synthetic_inputs_reach_the_model(data):
     # environmental coefficients present wherever they are needed
     env = EnvironmentalModule(data)
     mc, m4, e4 = data["livestock_manure_n_coef"], data["livestock_ch4man_coef"], data["livestock_ch4ent_coef"]
+    from capri_mod.supply.supply_module import FIXED_ACTIVITIES
     for r in herds.index:
         for a in ANIMALS:
-            if a in herds.columns and herds.at[r, a] > 0:
+            # CAPRI's other animals (OANI, fixed) have no feed, manure or emissions (K207)
+            if a in herds.columns and herds.at[r, a] > 0 and a not in FIXED_ACTIVITIES:
                 assert pd.notna(mc.at[r, a]) and mc.at[r, a] > 0, (r, a)
                 assert pd.notna(m4.at[r, a]), (r, a)
                 assert env._manure_n2o_factor(r, a) is not None, (r, a)
@@ -5269,8 +5300,22 @@ def test_greendeal_input_changes_follow_capri(monkeypatch):
     d_plap = plap * (1 - 0.5) * tf - plap * tf                         # PLAP -50% overall
     d_inpo = (inpo + topup) * (1 + 0.5 - o_R) * tf - inpo * tf         # INPO +(r - o_R), with the top-up
     assert abs((nr0[crop] - mo.net_revenues[crop]) - (d_plap + d_inpo)) < 1e-6
+    # an animal's INPO in CAPRI's objective form (register DEP-13 step 3): the input cost table's INPO per head,
+    # x_Y x TF_I, whose coefficient the change moves: (x_Y x TF_I / TF_I) x ((1 + r - o_R) TF_I - TF_I) = INPO (r - o_R)
+    inpo_ = mo._animal_inpo_cost(ani)
+    assert inpo_ is not None and inpo_ > 0, "the default animal_cost_form 'capri' takes the input cost table's INPO"
+    assert abs((nr0[ani] - mo.net_revenues[ani]) - inpo_ * (0.5 - o_R)) < 1e-6
+    # the split columns take the same change per head (livestock.py dinpo_rel)
+    assert abs(mo.ev.greendeal_animal_inpo[ani] - inpo_ * (0.5 - o_R)) < 1e-6
+    # the former form, TOIN's INPO share (supply.animal_cost_form "toin")
+    from capri_mod import settings as S
     sh = mo._input_row(ani, "inpo_toin_share") * mo._animal_cost_per_head(ani)
-    assert abs((nr0[ani] - mo.net_revenues[ani]) - sh * (0.5 - o_R) * tf) < 1e-6
+    with S.override({"supply.animal_cost_form": "toin"}):
+        mo.net_revenues = nr0.copy()
+        mo._apply_greendeal_input_changes(0.25, 0.50)
+        assert abs((nr0[ani] - mo.net_revenues[ani]) - sh * (0.5 - o_R) * tf) < 1e-6
+    mo.net_revenues = nr0.copy()
+    mo._apply_greendeal_input_changes(0.25, 0.50)
 
     # organic target alone: plant protection -o_R on every crop, the top-up, no change for animals
     mo.net_revenues = nr0.copy()
@@ -5282,7 +5327,7 @@ def test_greendeal_input_changes_follow_capri(monkeypatch):
     monkeypatch.setattr(RegionalSupplyModel, "greendeal_inputs_keep_tech_change", False)
     mo.net_revenues = nr0.copy()
     mo._apply_greendeal_input_changes(0.25, 0.50)
-    assert abs((nr0[ani] - mo.net_revenues[ani]) - sh * ((1 + 0.5 - o_R) - tf)) < 1e-6
+    assert abs((nr0[ani] - mo.net_revenues[ani]) - inpo_ / tf * ((1 + 0.5 - o_R) - tf)) < 1e-6
 
 
 def test_greendeal_plap_crop_level_capri_step_moves_the_mean_cost_to_capris_step(monkeypatch):
@@ -5438,7 +5483,7 @@ def test_input_costs_follow_yields_as_capri(monkeypatch):
 def _dying_in_fr10(region):
     """A regional-solve worker that dies on FR10 (test_dead_worker_does_not_hang_the_regional_solves)."""
     import os
-    from capri_mod.supply import supply_module as smod
+    from capri_mod.supply.regional_supply import region_loop as smod   # the pool's module (supply_module.py's part)
     if region == "FR100000":
         os._exit(1)
     return smod.__dict__["_par_solve_region_orig"](region)
@@ -5451,7 +5496,7 @@ def test_dead_worker_does_not_hang_the_regional_solves(monkeypatch):
     the parent process, with a warning, and the results equal a run in one process (26 October 2026)."""
     import os
     import warnings
-    from capri_mod.supply import supply_module as smod
+    from capri_mod.supply.regional_supply import region_loop as smod   # the pool's module (supply_module.py's part)
     from capri_mod.settings import override
     from capri_mod.model import CAPRIModel
     regs = ["DE110000", "DE120000", "FR100000", "FR720000"]

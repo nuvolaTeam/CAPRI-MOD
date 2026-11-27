@@ -356,8 +356,9 @@ LONG_COLUMNS = ("point", "block", "region", "dim5", "cols", "rows", "value")
 #: iterations' record (its own table), the scenario's name, the policy summary's text
 LONG_EXCLUDED = ("scenario", "metadata", "convergence", "outer_history")
 #: SupplyResult fields not in the table: text (the solver's message, the region's own id) and the solves' logs
-#: (run.verbosity "solver", written to the run's log, not kept)
-_SUPPLY_TEXT = ("region_id", "solver_message", "solver_log", "nlp_nonoptimal")
+#: (run.verbosity "solver", written to the run's log, not kept); the gross account by item, which the table holds in
+#: its own block (results["eaa"], block "eaa")
+_SUPPLY_TEXT = ("region_id", "solver_message", "solver_log", "nlp_nonoptimal", "eaa")
 #: the market tables of MarketEquilibrium (trade region x commodity)
 _MARKET_TABLES = ("production", "consumption", "net_exports", "domestic_prices", "wedge_prices")
 #: the environmental accounts summed over the EU's regions (additive ones: flatten_outputs' list)
@@ -500,6 +501,54 @@ def to_long(results: dict, point: str) -> pd.DataFrame:
         for it in sums:
             if it in t.columns:
                 add((point, b_, EU, "", "", str(it), float(t.loc[eu, it].sum())))
+    known.add("eaa")
+    for reg, e in (results.get("eaa") or {}).items():
+        # CAPRI's DATA(RU, "GROF" / "UVAG" / "EAAG", IO) by output and input (income I2, capri_mod/income/eaa.py); the
+        # account's totals are in welfare_supply
+        for rec in e["items"].to_dict("records") if hasattr(e["items"], "to_dict") else e["items"]:
+            for c in ("GROF", "UVAG", "EAAG"):
+                add((point, "eaa", str(reg), "", c, str(rec["item"]), float(rec[c])))
+        # CAPRI's DATA(RU, "NETF" / "UVAP" / "EAAP" / "UVAB" / "EAAB", FNUT): the mineral fertilisers' purchases at
+        # producer and basic prices (income I2b, eaa.eaap_eaab)
+        pur = e.get("purchases")
+        for rec in (pur.to_dict("records") if hasattr(pur, "to_dict") else (pur or [])):
+            for c in ("NETF", "UVAP", "EAAP", "UVAB", "EAAB"):
+                add((point, "eaa", str(reg), "", c, str(rec["item"]), float(rec[c])))
+    known.add("eaa_ms")
+    for ms, e in (results.get("eaa_ms") or {}).items():
+        # CAPRI's DATA(MS, "GROF" / "NETF" / "UVAG" / "UVAP" / "UVAB" / "EAAG" / "EAAP" / "EAAB", IO) and the totals
+        # of the member states all of whose units are in the run (income I2c, capri_mod/income/eaa_ms.py); CAPRI's
+        # item codes
+        for rec in e["items"].to_dict("records") if hasattr(e["items"], "to_dict") else e["items"]:
+            for c in ("GROF", "NETF", "UVAG", "UVAP", "UVAB", "EAAG", "EAAP", "EAAB"):
+                if rec.get(c) is not None and rec[c] == rec[c]:
+                    add((point, "eaa_ms", str(ms), "", c, str(rec["item"]), float(rec[c])))
+        for col in ("EAAG", "EAAP", "EAAB"):
+            for c, v in (e.get(col) or {}).items():
+                add((point, "eaa_ms", str(ms), "", col, str(c), float(v)))
+        # the product and account aggregates (reports/aggreg_res_data.gms l. 50-91; income/eaa_aggregates.py)
+        ag = e.get("aggregates")
+        for rec in (ag.to_dict("records") if hasattr(ag, "to_dict") else (ag or [])):
+            for c in ("GROF", "NETF", "UVAG", "EAAG"):
+                if rec.get(c) is not None and rec[c] == rec[c]:
+                    add((point, "eaa_ms", str(ms), "", c, str(rec["item"]), float(rec[c])))
+    known.add("feoga")
+    fe = results.get("feoga")
+    if fe is not None:
+        # CAPRI's DATA(MS, "FEOP" / psBudCols, O): the premium outlays per member state and product and their budgets
+        # (income I4, capri_mod/income/feoga.py); the products are CAPRI's codes
+        for (ms, o), rec in fe.iterrows():
+            for c, val in rec.items():
+                add((point, "feoga", str(ms), "", str(c), str(o), float(val)))
+    known.add("welfare_products")
+    wp = results.get("welfare_products")
+    if wp is not None:
+        # CAPRI's p_welfareRes(RMS, "ProfitAgr" / "PSEs", XX1): the farms' profit and the domestic support per member
+        # state and market product (capri_mod/income/welfare_products.py); the products are CAPRI's codes
+        for (ms, x), rec in wp.iterrows():
+            for c, val in rec.items():
+                if val == val:
+                    add((point, "welfare_products", str(ms), "", str(c), str(x), float(val)))
     known.add("fert_dist")
     fd = results.get("fert_dist")
     if fd is not None:
@@ -536,7 +585,7 @@ def to_long(results: dict, point: str) -> pd.DataFrame:
 
 
 #: the blocks whose items are in cols (CAPRI's market convention); the others' items are in rows
-ITEM_IN_COLS = ("market", "welfare", "welfare_supply", "policy")
+ITEM_IN_COLS = ("market", "welfare", "welfare_supply", "policy", "eaa", "eaa_ms", "feoga", "welfare_products")
 #: the table's columns after with_capri_codes
 TABLE_COLUMNS = ("point", "block", "region", "dim5", "cols", "rows", "capri_region", "capri_dim5", "capri_cols",
                  "capri_rows", "unit", "value")
@@ -555,7 +604,8 @@ def _item_of(df: pd.DataFrame) -> pd.Series:
 def with_capri_codes(long: pd.DataFrame) -> pd.DataFrame:
     """The long rows with CAPRI's codes and the unit (results_items.csv): an item's CAPRI cols and rows codes as given
     there, "*" taking the model's own coordinate in CAPRI's code (an activity: model_activities.csv capri_codes, when
-    one code; a product: model_commodities.csv), "act" the activity's code in rows (a crop's product), applies_to
+    one code; a product: model_commodities.csv), "act" the activity's code in rows (a crop's product), "=" the row's own
+    code (the rows are CAPRI's codes already: the premium outlays' products), applies_to
     restricting the mapping to the listed activities or products; the market region and the exporter from model_trade_regions.csv;
     regional units keep their code (they are CAPRI's). CAPRI's columns stay empty where a coordinate has no CAPRI code
     (an item CAPRI does not have or not determined, the model's ROW, an aggregated activity). An item not declared in
@@ -580,6 +630,7 @@ def with_capri_codes(long: pd.DataFrame) -> pd.DataFrame:
     cols = dc.where(dc != "*", act_c)
     rows = dr.where(dr != "*", long["rows"].map(lambda c: D.COMMODITY_CAPRI_CODE.get(c, "")))
     rows = rows.where(dr != "act", act_c)                # "act": the activity's own CAPRI code (its product)
+    rows = rows.where(dr != "=", long["rows"])            # "=": the row is CAPRI's code
     # applies_to: the model codes of the item's other coordinate the mapping holds for (empty: all)
     other = long["cols"].where(~long["block"].isin(ITEM_IN_COLS), long["rows"])
     ok = pd.Series([not decl[k][3] or o in decl[k][3] for k, o in zip(key, other)], index=long.index)

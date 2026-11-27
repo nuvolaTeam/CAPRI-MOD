@@ -529,6 +529,298 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   covers (the EU's and Norway's); the water accounts' coverage (no irrigation share for Bosnia's and Serbia's units).
   Also: two CSV float reads made exact (build_livestock_n_export_2030.py, of K202; build_feed_bulk_grof.py). README
   §10.4.
+- **Income I3, CAPRI's producer surplus at the regional solution (26 November 2026;
+  claude/income_i2_i4_plan_2026-11-26.md section 2, register DEP-55, KNOWN_ISSUES K207):** each regional solve records
+  the NLP's objective at the solution by part (supply/capri_regional_nlp.py CapriRegionalNLP.objective_parts: per
+  column the linear term q0 x y and the quadratic 0.5 y (Q y), QUADRF_ split into the feeds' price, their emission tax
+  and their PMP terms CNST + 0.5 SLOP u, and the blocks' (the options, the ration fat limit, the fertilisation) as
+  CasADi expressions; the parts add up to IPOPT's objective, a residual of 3e-7 EUR 1000 at most in the mini-EU pair),
+  with the NLP form's linear adjustments per column (the fertiliser cost taken out, the emission tax added:
+  supply/nlp.py) and the split columns' explicit terms (supply/livestock.py). The income module labels them by CAPRI's
+  categories (IncomeDistributionModule.producer_surplus; capmod/report_supply_model.gms l. 207-220 and
+  reports/sol_simy.gms l. 2578-2595 ported in the equation style, coupling/equations/report_supply_model.py
+  DATA_EAAG_PMPLevl, DATA_EAAG_PMPFeed, DATA_EAAG_PMPLandTrans, sol_simy.py DATA_EAAG_OBJE, DATA_EAAG_agProdSurplus):
+  OBJE, PMPLevl (minus QUADRA_ with each column's linear PMP term re-expressed on the income's cost basis, DEP-55),
+  PMPFeed, PMPLandTrans and agProdSurplus = MGVA + the three, in SupplyResult.income and the welfare table. Measured
+  on the mini-EU Green Deal pair (20 units, EUR million): the solution and the income identical to the previous run's;
+  the baseline's PMPLevl 54,491 against CAPRI's 2030 reference's 55,153 (2017 money, a check only; DE11 951 against
+  933, ES61 19,632 against 19,625), PMPFeed -1,294 against -726, PMPLandTrans 658,532 against 779,269 (the land
+  market's constants are the model's own: levels do not compare). The Green Deal's change against CAPRI's own Green
+  Deal run (res_2_1730greendeal_lnds8_..._oth00, the same 20 units, a check only): PMPLevl -41,157 against -43,586,
+  PMPFeed +309 against +189, agProdSurplus -42,710 against -44,074. Tirol (AT33) carries most of it in both, -40,790
+  against -44,117: the Green Deal's landscape target raises its fallow from 0.012 to 17.6 thousand ha in both runs
+  (CAPRI 17.626, the model 17.618) against PMP terms calibrated at 12 ha. The income's change does not compare on the
+  mini-EU: CAPRI's Green Deal raises the 20 units' MGVA by 1,491, the mini-EU lowers it by 1,578; the mini-EU is its
+  own small market (K83), so the full-EU pair is the check. The income without the emission tax a scenario puts on the
+  net revenues (CAPRI's MGVA holds no tax; IncomeDistributionModule.untaxed_net_revenues; no effect without an
+  emission tax). Found while tracing the income's level per activity (K207): CAPRI's other animals (OANI, 1,305 of the
+  20 units' 1,704 EUR million below CAPRI's 2030 income) have no level in the model; the straw is valued at zero on
+  both sides of its internal flow (DEP-54). Tests: capri_mod/tests/test_producer_surplus.py (4, by hand),
+  test_water_income.py (1, slow: the parts and each activity's PMP term against the supply model's constants on three
+  units).
+- **The income at the solve's own net revenues (26 November 2026; KNOWN_ISSUES K208, K209):** the regional model's
+  solve restores net_revenues to their state before it, and the region's income (income I1) and its producer surplus
+  (income I3) took them after the solve: a scenario's income lacked the solve's prices and its changes of the margins
+  (the Green Deal's input changes, the organic and pesticide yields, the young animals' prices). Found by income I2's
+  account by item (its outputs are the solve's). The solve keeps its own net revenues (res.nr_solve) and the income
+  takes them (IncomeDistributionModule.untaxed_net_revenues). Measured on the mini-EU Green Deal pair (20 units, EUR million, the solution identical to the previous run's): the baseline's income unchanged (36,654), the Green Deal's change -1,520 (it was -1,578), PMPLevl's change -41,215 (-41,157); agProdSurplus's change unchanged (-42,710), the re-expression's terms cancelling in it. Found with it, open: the organic yield
+  gap and the pesticide loss enter the margins at the data's producer price, the rest of the revenue at the solve's
+  (K209). Tests: test_producer_surplus.py (the untaxed margins at the solve's), test_water_income.py (1, slow: a shocked
+  solve's income and account).
+- **Income I2a, CAPRI's gross account by item at the regional solution (26 November 2026;
+  claude/income_i2_i4_plan_2026-11-26.md section 1b, register DEP-56):** each regional solve values its outputs and
+  inputs item by item (capri_mod/income/eaa.py eaag_items; reports/sol_simy.gms l. 685-687, 2549-2566 ported in the
+  equation style, coupling/equations/sol_simy.py DATA_GROF_IO, DATA_EAAG_IO, DATA_GEAAC_TOOU, DATA_GEAAC_TOIN,
+  DATA_EAAG_MGVA): the crops' products in quantity at the solve's price and the herds' solved rations by feed in
+  quantity at their report prices (GROF in 1000 t, UVAG in EUR per t, as CAPRI's), the animals' market products and the
+  rest of their output value, the crops' inputs (at the 2030 market year CAPRI's directly yield-dependent inputs item by
+  item and the NPK need per nutrient; at the base year the margin's cost in one item), the input cost table's items per
+  head, the Green Deal's input changes on PLAP and INPO, the technology mix's T1 - T2 terms on the area moved and the
+  mitigation options' items; TOOU, TOIN, MGVA = TOOU - TOIN + PRME and its difference to the activity-based income
+  (CAPRI's check, l. 2600-2615). The supply model records the revenue by output item (SupplyModule._output_items), the
+  mix's terms by item (techn_mix._mix_linear, ev.mix_parts) and the solve's later changes of the margins by item
+  (SupplyModule._nr_item, ev.nr_items: the yields' price response, the organic yield gap and the pesticide loss on the
+  crop's product, the Green Deal's input changes and the yield-dependent inputs' update on PLAP, INPO and OTHER_I, the
+  organic land's fertiliser saving, the young animals' price changes, the options' costs on the margins outside the
+  regional NLP); the crops' input builder writes the items it summed
+  (crop_inputs_2030.csv, tools/build/build_input_coefs_2030.py; input_coefs_2030.csv unchanged, byte for byte; the
+  items' sum asserted equal to iy_uvag_eur_ha, largest difference 8.4e-6 EUR/ha). In SupplyResult.eaa, results["eaa"]
+  (block "eaa" of the long table: GROF, UVAG, EAAG by item) and the welfare table (TOOU, TOIN, EAAG_MGVA, EAAG_DIFF).
+  Measured on the mini-EU Green Deal pair (20 units, EUR million): the baseline's TOOU 69,252, TOIN 38,608, PRME 6,009, MGVA 36,654, 0.03 above the activity-based (the input cost table's items at the member state's UVAP; at most 3e-4 of a unit's income, Norway's broilers), the scenario's 0.02. Against CAPRI's 2030 reference's EAAG on the same units (2017 money, a check only): the crops' products and the animals' market products equal (soft wheat 2,831.4, pork 6,913.7, beef 3,391.7), the inputs within 0.5% (fuel 2,069 against 2,072, cereal feed 2,939 against 2,938, NITF 3,307 against 3,314) but plant protection (1,510 against 1,624, DEP-51); the fodder crops' output at the model's fodder value (fodder maize 753 against 560, other fodder 1,145 against 486); TOOU 69,252 against 70,599 and TOIN 38,608 against 38,306 (the internal flows CAPRI books both ways: manure, straw, young animals by item). Not in the items: the straw (DEP-54, KNOWN_ISSUES K207). Tests: capri_mod/tests/test_eaa.py (3, by
+  hand), test_input_coefs_2030.py (1: the items add up), test_water_income.py (1, slow: on three units' solves the
+  revenue by item adds up to each activity's revenue, the account to MGVA within 1e-5), test_results_long.py (1).
+- **Income I4, CAPRI's premium outlays per product and their budgets (26 November 2026;
+  claude/income_i2_i4_plan_2026-11-26.md section 3, register DEP-57):** reports/feoga.gms l. 62-162 and
+  policy/policy_sets.gms l. 1582-1593 ported in the equation style (coupling/equations/feoga.py p_budToPsdPay,
+  DATA_MPACT_psBudRows, DATA_FEOP_O, DATA_psBudCols_O, DATA_FEOP_UAAR, DATA_FEOP_O_idle) and applied per member state to
+  the regional solutions (capri_mod/income/feoga.py feop_by_product): each activity's premium x level to its CAPRI
+  members' main outputs (PACT_TO_Y), the fallow land's and the voluntary set-aside's premiums spread over the crops with
+  a premium by area, and the same by budget (budEU, budPil1, budPil2, budNAT, budRestEU). The split of each model
+  activity's premium by main output and scheme is CAPRI's 2030 reference's (premium_output_shares_2030.csv, a new
+  output of tools/build/build_cap_ceilings_2030.py, PACT_TO_Y read from sets.gms; over the outputs it gives back
+  premium_scheme_shares_2030.csv, asserted). In results["feoga"] (block "feoga" of the long table; the long table's
+  CAPRI rows code "=" for rows that are CAPRI's codes already). Measured on the mini-EU pair: the outlays add up to the premiums (6,009 in the baseline). Against CAPRI's 2030 reference for the member states that are one unit (2017 money, a check only): Denmark 667.5 against 690.8, the animals' products and the national budget's crop rows equal (cow milk 27.57, soft wheat's budNAT 2.93), the crops 0.3% above, and other crops 7.1 against 32.0, CAPRI's new energy crops (NECR, in PACT_TO_Y with OCRO) not being a model activity (K138); Croatia's crops within 0.05% but other crops, its animals without premiums in the model (KNOWN_ISSUES K210: CAPRI's 23.3 of its 249.1). Tests: capri_mod/tests/test_feoga.py
+  (2, by hand), test_results_long.py (in the test above).
+- **CAPRI's other animals in the model, as CAPRI (26 November 2026; KNOWN_ISSUES K207, register DEP-55):** OANI
+  at CAPRI's level, held fixed as CAPRI's FACT (sets.gms l. 2317-2320, supply/prep_sim.gms l. 250-251): its level in the
+  herd table (animal_numbers.csv, CAPRI's 2017 LEVL from CAPREG's dumps, tools/build/build_capri_base.py; at 2030 the
+  trajectory's herds factor, Denmark 0.883), its revenue per unit YILD x UVAG (SupplyModule.OTHER_ANIMALS: one output,
+  no TOOU table), its input cost and premium per unit from the crop-style tables, no feed, manure or emissions; its
+  inputs in the account by item (TOIN_lin). The producer surplus keeps the fixed activities' columns (OANI, OCRO, OIND,
+  NURS, FLOW, OOIL) out of PMPLevl, in obj_fixed: CAPRI has no PMP terms for FACT. Measured on the mini-EU Green Deal
+  pair (20 units, EUR million, 2017 money): OANI's income 1,304.4 at the baseline (Denmark 555.1), the baseline's MGVA
+  37,958 (36,654 before; CAPRI's 38,358); the baseline's PMPLevl +1,291 by the other fixed activities' terms moved to
+  obj_fixed; the Green Deal's changes of MGVA -1,524.4 (-1,519.7), PMPLevl -41,207, agProdSurplus -42,707. Tests:
+  test_producer_surplus.py (the fixed column, by hand).
+- **The Green Deal's yield changes at the solve's price (26 November 2026; KNOWN_ISSUES K209):** the organic yield gap
+  and the pesticide yield loss change a crop's margin at the solve's price (SupplyModule._solve_prices), the price its
+  revenue takes, as CAPRI's LINEAR_. Measured on the same pair: the baseline unchanged; in the scenario 601 activity
+  cells moved, the largest by -1.2% (IR01's potatoes), the others within 0.34%; the Green Deal's MGVA change -4.1 EUR
+  million. Tests: test_capri.py test_the_green_deal_yield_changes_at_the_solves_price.
+- **The animals' 2030 premiums where CAPRI's 2017 data pay none (26 November 2026; KNOWN_ISSUES K210):** the trajectory
+  builder writes CAPRI's 2030 premium per model head (capri_livestock_premium_2030.csv: the members' LEVL 2017 x PRME
+  2030 over the model's 2017 heads, 2017 money; tools/build/build_price_trajectory_2030.py, its other outputs
+  byte-identical), and the projection takes it where the 2017 coefficient is empty or zero (projection/prices.py):
+  Croatia's animals, Sweden's cattle and Greece's sheep and goats for fattening, 48 cells of the 250 regions; elsewhere
+  the 2017 coefficient x CAPRI's 2030/2017 ratio, which equals it within 0.31%. Measured on the mini-EU pair: Croatia's
+  premium outlays 244.4 EUR million against CAPRI's 249.1 (221.2 before; its animals' as CAPRI's, the rest K138), the
+  baseline's levels unchanged. Tests: test_premium_baseline_2030.py (1).
+- **The crops' residue nutrients in their income; the straw at zero, as CAPRI's 2030 (26 November 2026; KNOWN_ISSUES
+  K211, K212):** CAPRI's crops list their residues' nutrients among their outputs (PACT_TO_O: MANN, MANP, MANK) and its
+  TOOU values them; their value is the crops' secondary revenue SREV, earlier read as the straw's (K207's trace), and
+  CAPRI's 2030 data value the straw at zero (its baseline run's FODDMARKUP files, the project lead's upload: the straw
+  balance's dual 0 in all 250 regions, UVAG(STRA) at most 2e-4 EUR/t). The crop's residues per ha at the solution (the
+  deliveries the regional model's nutrient balance takes at the solve's yields, supply/fertilisation.py _npk_spec,
+  RegionalResults.last_fout and last_fout_mix) at the member state's unit value of the output (CAPRI's base year value x
+  p_inflationFactor, capmod/inflation_and_trend_interpolation.gms l. 22-23, 67-72, ported in
+  coupling/equations/inflation_and_trend_interpolation.py; npk_region_2030.csv gains fout_uvag_eur_t,
+  tools/build/build_npk_balance_2030.py from sim_ini_21730, its other columns and outputs byte-identical; the kept
+  extract fout_uvag_bas.parquet) are outputs of the crop's TOOU in the income (calc_inc_indic.py DATA_TOOU_FOUT in
+  DATA_MGVA) and the items MANN, MANP, MANK of the account by item; not in the solution (CAPRI's objective sells none).
+  Checked against CAPRI's 2030 reference: FR24's soft wheat 105.05 EUR per ha, its SREV. Measured on the mini-EU pair:
+  the residues 2,051.5 EUR million at the baseline (soft wheat 192.3, maize 113.1, barley 109.7, rape 71.6: CAPRI's
+  SREV), the market crops' income now CAPRI's within 5%; the baseline's MGVA 40,034 against CAPRI's 38,358, the fodder
+  activities 1,684 above CAPRI's (KNOWN_ISSUES K213, open). K211 stays open for the straw balance alone, slack at
+  CAPRI's reference. Tests: test_eaa.py (2), test_water_income.py (1, slow).
+- **The split of the large modules (26 November 2026; the plan of 25 November, the project lead: modules over 1,000
+  lines into parts with names a reader understands):** each large file stays as the main file, slim, with its entry
+  points, and re-exports every name its parts define, so no import elsewhere changes; the code moved as it was (the
+  classes' methods into mixin blocks the class is composed of, ahead of its other bases, so the methods resolve as
+  before). supply/supply_module.py (3,690 lines -> 256) into supply/regional_supply/ (tables, pmp_calibrator,
+  regional_model, net_revenues, constraints, solve, region_build, n_balances, region_loop); supply/capri_regional_nlp.py
+  (2,096 -> 284) into supply/regional_nlp/ (solver_options, feed_terms, problem, fertilisation, abatement, calibration,
+  response; the switches other modules set, KKT_MODE and SOLVE_PROBE, and the solve stay in the main file);
+  feed/equations/req_or_man_fnc_req.py (2,739 -> 84) into feed/equations/requirements/ and req_or_man_fnc.py (1,949 ->
+  101) into feed/equations/manure_output/ (by animal group, in the GAMS file's order); the CAPTRD equation modules
+  national_supports.py (1,837 lines), biofuel_trends.py (1,651), fix_est.py (1,508) and load_aglink2023dgAgri.py (1,488) into national_support/,
+  biofuel_trend/, estimation_bounds/ and aglink2023/; projection/equations/load_base_data_and_trends.py (1,442) into
+  year_data/; model.py (1,722 -> 449) into coupling/run_scenario.py (CAPRIModel._run_scenario, 1,198 lines: one
+  function, its steps not yet apart) and coupling/result_tables.py. The parts get their parent module's names as the
+  earlier blocks do (capri_mod/utils/mixins.py inject_names, coupling/__init__.py inject); the code-number
+  classification follows the code (04_code_data_status.sql). Checked: a mini-EU Green Deal pair before and after
+  equal to the last digit (every number of the results equal; only the run's metadata, its times, differ); one file-relative path
+  in the moved year_data/residues.py corrected for the deeper folder (test_feed_chain); the tests that read the modules' source read the parts too.
+- **The fodder at the solution's dual (26 November 2026, the project lead: "switch it to CAPRI's form"; KNOWN_ISSUES
+  K213, register DEP-54):** PSHW, the fodder crops' output value per t fed, is the fodder balance's dual at the solution
+  (SupplyResult.fodder_duals) in the baseline and in a scenario, as CAPRI's (reports/sol_simy.gms l. 737-757); the fed
+  fodder at the same dual (UVAG(FODDI, SIM) = PSHW with FODDMARKUP 0, l. 756-757; IncomeDistributionModule.
+  feed_by_animal), and the milk for feeding the animals produce (COMF, SGMF, CAPRI's FODDO) too (milk_for_feeding_output),
+  in the income and in the account by item. Until then the fodder kept the balance's reference value in a scenario.
+  Measured on the Denmark and Croatia Green Deal pair: the solution and each region's MGVA unchanged (an internal flow:
+  4,986.3 and 1,250.8 EUR million at the baseline), the accounts' DIFF 0; Denmark's fodder activities -307.9 against
+  -342.7, its herds 1,824.9 against 1,859.7 at the baseline (the model's duals there 4% above CAPRI's 2030 values, other
+  fodder 40.51 against 38.91 EUR/t). The account at producer prices moves with it (Denmark's EAAP TOOU 9,769.4, TOIN
+  5,931.9, MGVA 4,505.0: the fodder outputs count at (NETF / GROF)^2, the fed fodder in full). Tests:
+  test_sol_simy_mitigation.py (the fed fodder at the dual), test_water_income.py (slow).
+- **The accounts' and the welfare's aggregates (26 November 2026; registers DEP-56, DEP-58):** the product and account
+  aggregates of a member state's accounts (reports/aggreg_res_data.gms l. 50-91: OAGG, EAAGA, R_T_OAGG less CERE's WHEA
+  and OANP's MILK; coupling/equations/aggreg_res_data.py), the regional aggregates of the member states' accounts where
+  all their member states are in the run (REGAGG by MAP_RR: A_EU_WEST, A_EU_EAST, EU_WEST, EU_EAST, EU, EU27yr19;
+  sol_simy.gms l. 2317-2403; sol_simy_ms.py DATA_BALPOS_REGAGG, DATA_UVAG_REGAGG, DATA_UVAP_REGAGG, DATA_UVAB_REGAGG),
+  and the welfare by product's product aggregates and market and world regions (welfare.gms l. 864-868, 897, 901-902;
+  market/equations/welfare.py p_welfareRes_rmAgg, p_welfareRes_OAGG, p_welfareRes_RW): capri_mod/income/
+  eaa_aggregates.py, in results["eaa_ms"] and results["welfare_products"]. The young animals bought are now by CAPRI's
+  IYANI (over the categories each activity uses, by value; heads from the young-animal tables), the manure and the milk
+  for feeding of the animals' other outputs in quantity. CAPRI's sets as its run built them (build_code_lists.py: OAGG,
+  EAAGA, REGAGG, R_T_OAGG, RMS_TO_RM, RW_TO_RM). Denmark at the baseline against CAPRI's 2030 reference (EUR million,
+  2017 money, a check only): CERE 1,131.4 against 1,131.5 (GROF 8,809.6 and NETF 7,670.8 both CAPRI's), MEAS 3,777.3
+  both, VGPM 353.2 both, IANC 1,097.4 against 1,090.4 (heads 20,744 against 20,935), MANC 634.2 against 635.5, FODC
+  449.9 against 415.1 (the fodder at the model's duals; its GROF without CAPRI's straw, K211); the welfare's CERE -67.0
+  against -65.7, MEAS 2,059.4 against 2,028.3, ALLP 2,400.3 against 2,367.7. Not done: the welfare's market-model split
+  (MARRC); CAPRI's AGGA in its Danish reference is MGVA less the rents (not traced; the model's AGGA is MGVA). Tests:
+  test_eaa_aggregates.py (3).
+- **Income I2c, a member state's accounts at producer and basic prices (26 November 2026; register DEP-56):** where
+  all of a member state's units are in the run, CAPRI's member-state row: the units' gross accounts by item summed in
+  CAPRI's codes (the crops' products by PACT_TO_Y, the animals' market products, their other outputs split into
+  manure, milk for feeding and young animals: income/eaa.py _other_output_parts), NETF = GROF - SEDF - LOSF - INTF
+  (reports/sol_simy.gms l. 1964-1970) with the final products' seed and losses in proportion to production at CUR
+  (l. 1889-1898; sim_ini_21730's DATA, tools/build/build_ms_farm_balance.py -> ms_farm_balance_2017.csv,
+  ms_farm_balance_2030.csv), the young animals' internal use (l. 789-799), the fertilisers' purchases summed over the
+  regions (l. 315, 866), the manure's NETF 0 (l. 874); UVAP = UVAG x NETF / GROF (l. 2389-2390); UVAB a market
+  product's UVAG plus the base year's wedge (reports/sol_market.gms l. 1336-1337), a good outside the market part its
+  base year UVAB by inflation (l. 70; ms_unit_values_2017.csv); EAAP, EAAB, TOOU, TOIN, GVAP, GVAB, MGVA (l. 2547-2562).
+  Ported (coupling/equations/sol_simy_ms.py, market/equations/sol_market.py DATA_UVAB_MARR) and applied in
+  capri_mod/income/eaa_ms.py (results["eaa_ms"], block "eaa_ms" of the long table). CAPRI's sets END, IOE, MARR and
+  O_TO_YANI as its run built them (build_code_lists.py). The regional account now holds the fodder crops' outputs in
+  fresh matter at UVAG(FODDO) (CAPRI's unit; the grassland's margin is in dry matter), the NPK need in quantity (kt)
+  and the animals' market products' tonnes (products_t). Measured on a Denmark and Croatia Green Deal pair (EUR
+  million, 2017 money; CAPRI's 2030 reference deflated by 1.019^13, a check only): Denmark's ratios NETF / GROF are
+  CAPRI's to the third decimal and its items at producer and basic prices within 0.5 of CAPRI's but where the gross
+  account differs already (other crops OCRO 34.0 below, INPO 3.7, PLAP 4.8, IPHA 2.3: income I2), the milk for feeding
+  (CAPRI's NETF twice its GROF in a member state of one unit: 46.7), the chicks in OTHER_O (15.3) and the options'
+  items (mitiO 23.1, mitiI 158.3, at the region: DEP-54); EAAP TOOU 9,757.5 against 9,799.6, TOIN 5,896.8 against
+  5,740.6, MGVA 4,528.2 against 4,749.8 (PRME 667.5 against 690.8, income I1); EAAB TOOU 8,157.2 against 8,175.8, TOIN
+  3,757.5 against 3,761.2, GVAB 4,399.7 against 4,414.7. The young animals' heads are CAPRI's (Denmark's bulls 118.03
+  against 118.03 thousand produced, piglets 19,871 against 19,869). Tests: test_eaa_ms.py (6), test_water_income.py
+  (the fodder's unit, slow).
+- **The farms' profit and the domestic support by market product (26 November 2026; register DEP-58):** CAPRI's
+  ProfitAgr(XX1), the activities' MGVA x levels by their main product in PACT_TO_XX, INPE the activities and items
+  outside the market's products, LAND minus the rents (reports/welfare.gms l. 441-460), and PSEs(XX1), minus the premium
+  outlays of the product's outputs over CAP_TO_TRD, INPE the others' (l. 714-749): ported (market/equations/welfare.py
+  p_welfareRes_ProfitAgr_INPE, p_welfareRes_ProfitAgr_LAND, p_welfareRes_PSEs_XX1, p_welfareRes_PSEs_INPE,
+  p_welfareRes_EAAG_PSEs; p_welfareRes_ProfitAgr now by product) and applied per member state of the run's units
+  (capri_mod/income/welfare_products.py; results["welfare_products"], block "welfare_products" of the long table). The
+  sets are CAPRI's as its run built them (sim_ini_21730: capri_data/codes/capri/PACT_TO_XX.csv, CAP_TO_TRD.csv,
+  tools/build/build_code_lists.py; its other outputs unchanged); the income gives the technology mix's MGVA per crop
+  (MGVA_mix). Measured on the mini-EU Green Deal pair (the solution identical; EUR million, 2017 money): in every member state the rows add up to its ProfitAgr and PSEs; Denmark's against CAPRI's 2030 reference (ref2030_welfare.parquet, a check only) dairy 1,758.1 against 1,738.5, pork 1,930.1 against 1,896.8, beef 100.2 against 92.6, wheat -9.7 against -11.1, barley -30.8 against -28.1, LAND -793.0 against -805.7; PSEs by market product within 0.5 (barley -167.9 against -167.4, wheat -131.2 against -130.8), INPE -245.8 against -270.3 (CAPRI's new energy crops, K138); ProfitAgr's INPE 838.4 against 1,024.3 (the options' net cost, -135.1, booked there; the model's Denmark 121.8 below CAPRI's). Tests: test_welfare_products.py (3).
+- **Income I2b, the accounts at producer and basic prices of a regional unit (26 November 2026; register DEP-56):**
+  CAPRI's EAAP = NETF x UVAP / 1000 and EAAB = NETF x UVAB / 1000 (reports/sol_simy.gms l. 2547-2548), a regional
+  unit's NETF its mineral fertilisers' purchases at the solution (NETF = - v_netPutQuant, l. 309), the premiums PRME
+  (l. 2552-2554), TOIN, GVAP, GVAB and EAAP's MGVA (l. 2558-2562); ported (coupling/equations/sol_simy.py
+  DATA_NETF_FNUT, DATA_EAAP_IO, DATA_EAAB_IO, DATA_EAAP_PRMDE, DATA_EAAP_GVAP, DATA_EAAB_GVAB, DATA_EAAP_MGVA) and
+  applied at each regional solution (capri_mod/income/eaa.py eaap_eaab: the regional NLP's purchases of N, P2O5,
+  K2O). UVAP and UVAB are the member state's base year values moved by inflation (capmod/
+  inflation_and_trend_interpolation.gms l. 69-70, DATA_UVAP_IO_SIMY, DATA_UVAB_IO_SIMY), from sim_ini_21730
+  (tools/build/build_fnut_unit_values.py -> capri_data/2017/environment/fnut_unit_values_2017.csv; the kept extract
+  fnut_uvap_uvab_bas.parquet). In results["eaa"] (the purchases' NETF, UVAP, EAAP, UVAB, EAAB) and the welfare
+  table (EAAP_TOIN, EAAP_GVAP, EAAP_PRME, EAAP_MGVA, EAAB_TOIN, EAAB_GVAB). Checked at the 2030 baseline of DE110000
+  (one unit's run) against CAPRI's 2030 reference (dataOut, a check only, 2017 money): NITF purchases 29.757 kt
+  against 29.758, EAAP TOIN 45.911 against 45.913 (58.640 in 2030 money), PRME 132.08 against 132.07, the unit values
+  CAPRI's (NITF 869.355 EUR/t, 1,110.354 in 2030 money). Not reported: EAAP's PRMD (the declared premiums; the
+  model's activities carry the paid ones), outside MGVA. Also: two tests of K207 left CAPRI's fixed other animals out
+  (OANI has no manure and no PMP terms; the cloud report of 5fc3c79). Tests: test_eaa.py (2), test_water_income.py
+  (the regional account).
+- **The fodder crops' output at CAPRI's UVAG(FODDO); a faster run (26 November 2026; KNOWN_ISSUES K213, register
+  DEP-54):** CAPRI's report values a fodder crop's output at the solution at YILD x UVAG(FODDO), UVAG(FODDO) = PSHW x (1
+  - p_onFarmShare) + FODDMARKUP (reports/sol_simy.gms l. 753; coupling/equations/sol_simy.py DATA_UVAG_FODDO), and its
+  simulations run without the baseline run's markups (they are written per country, l. 748, and loaded by a name
+  without the country code, capmod/create_sim_ini_gdx.gms l. 519): Denmark's other fodder at 49.69 x 0.3761 = 18.69
+  EUR/t in the 2030 reference, where the model's margin carried the base year's price, 38.91 in 2017 money (14.63 at
+  CAPRI's). The income and the account by item now take YILD x UVAG(FODDO) with the fodder balance's value per t fed as
+  PSHW (IncomeDistributionModule.crop_fodder_output; the technology mix's output difference too), FODDMARKUP 0 as
+  CAPRI's runs (the project lead, 26 November: the markups a question for Bonn). p_onFarmShare, (SEDF + SEDM + LOSF) /
+  GROF of the member state (supply/pmp.gms l. 41-49, capri_mod/supply/equations/pmp.py), from sim_ini_21730's DATA at
+  "Y" and "BAS" (tools/build/build_fodder_onfarm_share.py -> fodder_onfarm_share_2030.csv, fodder_onfarm_share_2017.csv;
+  the kept extract fodder_onfarm_items.parquet). Measured on the mini-EU Green Deal pair (20 units, EUR million, 2017
+  money): the solution identical; the baseline's fodder activities' income -1,648 (other fodder -214.0 against CAPRI's
+  -208.3, intensive grassland -282.7 against -310.4, extensive 237.3 against 218.7, fodder maize -32.3 against -31.3);
+  the account's fodder outputs CAPRI's EAAG (fodder maize 559.6, other fodder 486.2, grass 673.3); the baseline's MGVA
+  38,386 against CAPRI's 38,358 (40,034 before); the Green Deal's change of MGVA -1,559 (-1,852). The money deflator is
+  read once per root, base year and year (capri_mod/data/inputs.py; it was read from its file at each call, about 20%
+  of a one-unit 2030 baseline's time in a profile; that run's results identical with the cache): the same pair in
+  1,013 s against 1,434 s, the market supply Hessian of the baseline in 209 s against 382 s. Tests: test_water_income.py (2, and the income's sums with the fodder term).
+- **Income I1, the crops' inputs at CAPRI's simulation-year coefficients (26 November 2026; register DEP-54):** at the
+  2030 market year a crop's income takes CAPRI's TOIN at "Y" (coupling/equations/calc_inc_indic.py DATA_TOIN_Y,
+  IncomeDistributionModule.crop_toin_y): TF_I x its directly yield-dependent inputs at define_inputs.gms's coefficients
+  DATA(BAS) (1 - f + f G) (l. 108-112) at UVAG(2030) (input_coefs_2030.csv gains iy_uvag_eur_ha,
+  tools/build/build_input_coefs_2030.py; its other columns byte-identical), plus its 2030 NPK need at its unit value
+  (capri_mod/fert/npk.py), in place of the margin's 2017 cost (CAPREG's TOIN, variable_costs.csv). Per crop the rebuilt
+  TOIN reproduces CAPRI's 2030 TOIN at its solution (dataOut, a check only) within about 2% in the units checked
+  (Denmark's soft wheat 1,761.2 against 1,764.8 EUR/ha in CAPRI's 2030 money; PT18 intensive grass 494.6 against 493.3
+  in 2017 money, the margin 393.0), where the margins' 2017 cost was off by up to 25%. Measured on the mini-EU Green
+  Deal pair (20 units, EUR million; the solution identical): the baseline's income 36,305 -> 36,654, the Green Deal's
+  change -1,623 -> -1,578 (-4.3%); against CAPRI's 2030 reference income of the 20 units (EAAG MGVA in 2017 money, a
+  check only) 0.946 -> 0.956 of it (0.862 in the margins' form before I1). Tests: 2 more by hand.
+- **Income I1: the region's income at the solution in CAPRI's form (26 November 2026;
+  claude/income_i1_progress_2026-11-25.md, KNOWN_ISSUES K205, register DEP-54):** each regional solve sets the region's
+  income (SupplyResult.income, capri_mod/income/income_module.py income_parts; SupplyResult.gross_margin is its MGVA),
+  and the welfare table's MGVA and ProfitAgr and the income module take it. CAPRI's indicators per activity at the
+  solution (reports/calc_inc_indic.gms l. 30-49: coupling/equations/calc_inc_indic.py DATA_MGVA) with the solved ration
+  at its report prices in place of the feed the herds' margins carry (sol_simy.gms l. 254-257), summed as CAPRI's
+  activity-based income AGGT (sol_simy.gms l. 2586-2587, coupling/equations/sol_simy.py DATA_AGGT_MGVA) with the
+  mitigation options' cost an input (mitiI) and their revenue an output (mitiO); ProfitAgr = MGVA - RENT (welfare.gms l.
+  841-846, market/equations/welfare.py p_welfareRes_EAAG_ProfitAgr). CAPRI's report of the options per activity ported
+  (reports/sol_simy.gms l. 1049-1465, one function per statement with the GAMS quoted: the cost, revenue, PMP cost and
+  subsidy per activity and their special cases, DATA's mitiSubs, PRME, the effort's price, mitiI and mitiO) and
+  evaluated per region at the solution (capri_mod/income/mitigation_items.py): the fertiliser options, the inhibitor on
+  manure, the ammonia options and anaerobic digestion (each sub-activity's shares, places per unit and CAPRI's
+  CostParLin, CostParSqr and revenue carried through the solve; ammonia_tech_model.csv gains kappa2 and AD's revenue,
+  its other columns byte-identical), the winter cover (the catch crops' input cost, which CAPRI books in CATC's own
+  inputs), tillage, the legume share, urea substitution, the histosols' fallowing (CAPRI's restoration cost, 216 EUR/ha,
+  no_histosols.gms l. 121-131) and the herd options. The subsidy is 0, as in CAPRI's runs without ghgMitiSubsidy. Urea
+  substitution on the N bought, as CAPRI's supply model charges it (register FIX-10, income.urea_cost_base; CAPRI's
+  report books the per-t cost per ha of each crop). The welfare table reports mitiI, mitiO and mitiPmp (the PMP cost,
+  apart) beside MGVA. The supply results keep the solved feed's report prices, the feed value the herds' linear terms
+  leave out and the fodder balances' duals unclipped (CAPRI's PSHW, for the fodder's scenario value per activity and the
+  product accounts of I2). Measured on the mini-EU Green Deal pair (20 units; EUR million: the baseline's income 33,068
+  in the margins' form, 36,305 in CAPRI's, the herds' solved rations at their report prices 9,255 against the 12,803
+  their margins carried, Denmark's dairy cows 1,162 EUR per head against 1,829, CAPRI's 2030 rations at its 2030 unit
+  values deflated about 1,165; the options' cost 340 and revenue 28; the Green Deal's change -861 (-2.6%) in the
+  margins' form, -1,623 (-4.5%) in CAPRI's; the new income equals the old less the feed gap and the options' net cost to
+  1e-12, RENT and PSEs unchanged). The solution is unchanged (the run's levels and prices identical to the gate's).
+  Found by the measurement: the first form of the welfare table stored the baseline's duals on the model's slotted
+  state, which refused the attribute, so the table was None in both runs, and the run script silenced the warning; the
+  store is gone and the run script shows the welfare table's warnings. Tests:
+  capri_mod/tests/test_sol_simy_mitigation.py (19, by hand).
+- **The animals' costs in CAPRI's objective form (25 November 2026; register DEP-13 step 3, the project lead's choice
+  of CAPRI's objective form):** CAPRI's p_linObjeCont (capmod/define_objc.gms l. 39-44) and IobjCont (sets.gms
+  l. 5059-5067: the inputs but IS's, the chicks, water and the mitigation input) in supply/equations/define_objc.py.
+  The animals' input costs by item (tools/build/build_livestock_input_cost.py): livestock_input_cost.csv, 2017, the
+  inputs of IobjCont at the member state's UVAP, the young animals and the feed, adding up to CAPREG's TOIN in all
+  4,677 rows (7.7e-15); livestock_input_cost_2030.csv, the inputs at CAPRI's 2030 start, which times TF_I equal
+  CAPRI's 2030 coefficients in all 24,238 regional rows (5e-15). At 2030 the herd's cost takes the year's inputs in
+  place of 2017's (x_Y x TF_I / deflator; projection_module.p_linObjeCont_animals_Y), and the young animals' and
+  feeds' price changes go to the table's YOUNG and FEED (projection/prices.py). In the regional NLP the herd's linear
+  term leaves out the table's FEED, which QUADRF_ charges (supply.animal_cost_form "capri", the new default; "toin"
+  is the former subtraction of the base ration's cost). The Green Deal's INPO change acts on the table's INPO
+  (supply/policy.py). Measured on the mini-EU Green Deal pair (20 units) against dev 62c2474: the 2030 baseline's
+  levels equal (largest relative difference 2.1e-7); the Green Deal's indicators equal to 0.1 percentage point, its
+  regional levels within 0.08% (NL22 calves -0.08%, the suckler cows -0.05 to -0.07%); the reported MGVA +0.28% at
+  the baseline (+93.5 of 32,975 EUR million over the 20 units) and +0.24% in the scenario, from the year's inputs. A
+  first gate found the herds' change not reaching their intensity splits' columns in this form (livestock.py
+  dinpo_rel: herds up to 0.62% off, DE940000's Farm-to-Fork solve non-optimal in test_p_balance); fixed. The
+  income's TOIN at the solution follows with income I1. Tests: capri_mod/tests/test_livestock_input_cost.py (4);
+  the two Green Deal input tests on the input cost table's INPO, the former form under animal_cost_form "toin".
 - **The 2030 rations, requirements, methane and fodder from the ported chain (25 November 2026; the project lead's
   order of 25 November, item 5):** `projection.ration_source` defaults to "chain": with CAPRI's 2030 reference as the
   trajectory the projection takes its 2030 factors on 2017 from the ported feed chain's start (capri_mod/feed/chain.py;

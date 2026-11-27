@@ -341,6 +341,13 @@ manure_base_trade = "capri"
 # relative change, price_transmission_2030.csv, at the 2030 market year; the default since 17 November 2026, K169) or
 # "relative" (capri-mod's form until then: every output by the market's relative change)
 price_transmission = "capri"
+# the animals' costs in the regional NLP (register DEP-13 step 3): "capri" (CAPRI's objective form, LINEAR_ of
+# supply_model.gms l. 4752-4763 with p_linObjeCont of capmod/define_objc.gms: the herd's linear term without the feed,
+# the feed's value per head of the cost table taken out, QUADRF_ alone charging it; the default since 25 November 2026)
+# or "toin" (capri-mod's form until then: the base ration's cost at base prices and calibrated feed terms taken out, so
+# the herd's base margin is TOOU - TOIN + PRME). The cost per head carries the year's yield-dependent inputs in both
+# (projection_module.p_linObjeCont_animals_Y); the QP keeps the feed in the herd's term
+animal_cost_form = "capri"
 # The Green Deal / Farm-to-Fork minimum catch-crop area (e_minCoverCrops, pol_input/greendeal/organic_io.gms and
 # conventional_io.gms): "capri" (CAPRI's: the share of UAAR less the crops under winter cover by the shares as given,
 # p_winterCoverShare0, in practice the whole UAAR outside Austria and a few German units; capped at the land the
@@ -634,6 +641,13 @@ winterCovInAllRmssup = 1.0
 # _ini and _max calibration files set 1. Checked on the project lead's Green Deal runs: every option fixed at IniShare,
 # free in the _max run (KNOWN_ISSUES K152)
 ghgTechAmmEndog = 0.0
+
+[income]
+# The urea substitution's cost in the income report (income I1, capri_mod/income/mitigation_items.py; register
+# FIX-10): "supply_model" (the default; the project lead, 25 November 2026) the cost per t of N bought x the N
+# bought, as CAPRI's supply model charges it (supply/supply_model.gms l. 5063), or "capri", CAPRI's report as coded
+# (reports/sol_simy.gms l. 1129-1132): the same per-t parameter as a cost per unit of every crop
+urea_cost_base = "supply_model"
 
 [diagnostics]
 verbose = true

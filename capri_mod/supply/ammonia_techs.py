@@ -58,6 +58,8 @@ def load(path: Path) -> dict:
             # anaerobic digestion: L (1 - G) and the manure CH4 ratio QE_AD / QE_NOC (build_ad_option.py)
             s["ad"] = (float(r["lg"]), float(r["r_ch4"]))
         s["techs"].append(dict(tech=r["technology"], group=r["group"], k1=float(r["kappa1"]),
+                               # CAPRI's CostParSqr and the revenue per place, for the income report (income I1)
+                               k2=float(r.get("kappa2") or 0.0), rev=float(r.get("revenue") or 0.0),
                                slope=float(r["slope"]) if r["slope"] not in ("", None) else None,
                                th=float(r["thresh"] or 0.0), ini=float(r["ini"]), max=float(r["max"]),
                                rH=float(r["rH"]), rS=float(r["rS"]), rA=float(r["rA"])))

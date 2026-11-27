@@ -94,6 +94,31 @@ def test_an_emission_tax_runs_table_is_written():
     assert len(row) == 1 and float(row["value"].iloc[0]) == 50.0 and row["unit"].iloc[0] == "EUR per t CO2-eq"
 
 
+def test_the_accounts_by_item_and_the_premium_outlays_in_the_table():
+    """The gross account by item (results["eaa"], income I2) in block "eaa": GROF, UVAG and EAAG in cols, the item in
+    rows (the model's codes: no CAPRI code); the premium outlays (results["feoga"], income I4) in block
+    "feoga" by member state, the budgets in cols, the products (CAPRI's codes) in rows as they are. The account's
+    SupplyResult field is not written to the supply block again."""
+    r = _results()
+    items = pd.DataFrame([{"item": "SWHE", "side": "O", "GROF": 615.0, "UVAG": 135.6, "EAAG": 83.394},
+                          {"item": "ELEC", "side": "I", "GROF": 0.5, "UVAG": 1000.0, "EAAG": 0.5}])
+    r["supply"]["DE110000"].eaa = {"items": items, "TOOU": 83.394, "TOIN": 0.5, "PRME": 1.0, "MGVA": 83.894,
+                                   "AGGT": 83.894, "DIFF": 0.0}
+    r["eaa"] = {"DE110000": r["supply"]["DE110000"].eaa}
+    r["feoga"] = pd.DataFrame({"FEOP": [48.03, 0.2], "budEU": [45.5, 0.15], "budNAT": [3.0, 0.05]},
+                              index=pd.MultiIndex.from_tuples([("DE000000", "SWHE"), ("DE000000", "YCOW")]))
+    t = IO.with_capri_codes(IO.to_long(r, "base"))
+    e = t[t.block == "eaa"].set_index(["region", "cols", "rows"])
+    assert e.loc[("DE110000", "GROF", "SWHE"), "value"] == 615.0
+    assert e.loc[("DE110000", "EAAG", "SWHE"), ["capri_cols", "unit"]].tolist() == ["", "EUR million"]
+    assert e.loc[("DE110000", "UVAG", "ELEC"), "value"] == 1000.0
+    f = t[t.block == "feoga"].set_index(["region", "cols", "rows"])
+    assert f.loc[("DE000000", "budNAT", "YCOW"), "value"] == 0.05
+    assert f.loc[("DE000000", "FEOP", "YCOW"), ["capri_cols", "capri_rows", "unit"]].tolist() == [
+        "FEOP", "YCOW", "EUR million"]
+    assert not (t[t.block == "supply"].rows == "eaa").any()
+
+
 def test_every_item_the_supply_module_writes_is_declared():
     """Every field of SupplyResult and every attribute the supply module sets on a regional result is declared in
     results_items.csv, whatever the scenario's options: an item filled only under an option (manure trade's P and K,
@@ -105,7 +130,9 @@ def test_every_item_the_supply_module_writes_is_declared():
     import dataclasses
     import re
     import capri_mod.supply.supply_module as SM
-    src = Path(SM.__file__).read_text()
+    # the supply module and its parts (capri_mod/supply/regional_supply, the refactor of 26 November 2026)
+    src = "\n".join(q.read_text() for q in [Path(SM.__file__)]
+                    + sorted((Path(SM.__file__).parent / "regional_supply").glob("*.py")))
     written = set(re.findall(r"(?<![.\w])(?:result|res)\.([a-z_][a-z0-9_]*)\s*=(?!=)", src))
     fields = {f.name for f in dataclasses.fields(SupplyResult)}
     it = IO.results_items()
@@ -128,7 +155,7 @@ def test_every_capri_code_of_the_items_is_capris():
     for r in it[it.capri_cols != ""].itertuples():
         assert r.capri_rows != "" and r.capri_source, (r.block, r.item)
         assert r.capri_cols == "*" or r.capri_cols in sets["cols"], (r.block, r.item, r.capri_cols)
-        assert r.capri_rows in ("*", "act") or r.capri_rows in sets["rows"], (r.block, r.item, r.capri_rows)
+        assert r.capri_rows in ("*", "act", "=") or r.capri_rows in sets["rows"], (r.block, r.item, r.capri_rows)
 
 
 def test_the_reference_is_stored_once_and_the_pickles_blocks_come_back(tmp_path):

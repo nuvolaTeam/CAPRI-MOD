@@ -66,7 +66,18 @@ class TechnMixBlock:
         prem = float(self.premiums.get(a, 0.0) or 0.0) if getattr(self, "premiums", None) is not None else 0.0
         dnr = (float(r["yield_diff"]) * p * y - float(r["rest_cost_diff_eur_ha"]) - float(r["inpo_diff"]) * inpo
                - float(r["plap_diff"]) * plap - float(r["need_diff"]) * fert + float(r["prem_diff_share"]) * prem)
-        return -dnr + self._plap_mix_capri_step(a, float(r["plap_diff"]), d_p)
+        step = self._plap_mix_capri_step(a, float(r["plap_diff"]), d_p)
+        # the terms by item, for the economic accounts by item (income I2, capri_mod/income/eaa.py): the output (kg per
+        # ha, EUR per t, EUR per ha), the inputs (EUR per ha; the comparison switch's plant-protection step in PLAP) and
+        # the premium
+        if getattr(self.ev, "mix_parts", None) is None:
+            self.ev.mix_parts = {}
+        self.ev.mix_parts[a] = {"O": (a, float(r["yield_diff"]) * y * 1000.0, p, float(r["yield_diff"]) * p * y),
+                                "I": {"INPO": float(r["inpo_diff"]) * inpo, "PLAP": float(r["plap_diff"]) * plap + step,
+                                      "FERT": float(r["need_diff"]) * fert,
+                                      "OTHER_I": float(r["rest_cost_diff_eur_ha"])},
+                                "PRME": float(r["prem_diff_share"]) * prem}
+        return -dnr + step
 
     def _mix_fert_cost(self, a, r) -> float:
         """The column's fertiliser cost per unit (need_diff x the crop's), which the NLP form takes out of the linear
@@ -103,6 +114,7 @@ class TechnMixBlock:
         self.ev.mix_cols = {}
         self.ev.mix_n_min = {}
         self.ev.mix_dnr = {}
+        self.ev.mix_parts = {}
         rows = self._mix_rows(labels)
         if not rows:
             return Qa, ca, Aa, ba, start

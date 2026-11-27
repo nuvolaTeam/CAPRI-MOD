@@ -72,7 +72,7 @@ AREA_COLS = ["SWHE", "DWHE", "RYEM", "BARL", "OATS", "CORN", "OCER", "PARI", "PU
              "APPL", "OFRU", "CITR", "TAGR", "WINE", "OLIV", "TABO", "GRAE", "GRAI", "TOBA", "TEXT", "MAIF", "OFAR", "ROOF", "VSET", "FALL",
              "RAPE", "SUNF", "SOYA", "OOIL", "OCRO", "OIND", "NURS", "FLOW"]
 LAND_COLS = ["ARABLE", "PERMANENT", "GRASSLAND", "FALLOW"]
-HERD_COLS = ["DCOW", "SCOW", "COWS", "BULL", "HEIF", "CALV", "PIGS", "PIGF", "HENS", "POUL", "SHGM", "SHGF"]
+HERD_COLS = ["DCOW", "SCOW", "COWS", "BULL", "HEIF", "CALV", "PIGS", "PIGF", "HENS", "POUL", "SHGM", "SHGF", "OANI"]
 PRICES = _ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_producer_prices.parquet"
 
 # ---------------------------------------------------------------- crop map --
@@ -193,6 +193,11 @@ def main(dump_dir: Path):
                                          for c, w in sources)
         if "COWS" in herds.columns:
             herds.at[reg, "COWS"] = herds.at[reg, "DCOW"] + herds.at[reg, "SCOW"]
+        # the other animals: CAPRI's activity level (LEVL, an index: CAPRI has no census herd for them), the unit of
+        # their per-unit yields, costs and prices (intensive_values, by LEVL); CAPRI holds them at this level (FACT,
+        # supply/prep_sim.gms l. 250-251; KNOWN_ISSUES K207: until 26 November 2026 the column was absent, so the model
+        # had them at zero)
+        herds.at[reg, "OANI"] = sum(w * items(c, "LEVL").get("OANI", 0.0) for c, w in sources)
         # pigs: PIGS = sows (CAPRI SOWS), PIGF = the census total less the sows (CAPRI's 'PIGS' HERD - 'SOWS' HERD), as
         # tools/build_pig_split.py did (a one-off script, no longer in the repository); where CAPRI has no census total
         # (Norway, res_17NO.txt), CAPRI's own PIGF herd (as the removed tools/build/build_norway_pigs.py did for Norway)

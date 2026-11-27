@@ -72,8 +72,29 @@ UNTRACED = {
     "capri_data/baselines/capri_greendeal_ref/1730/environment/livestock_n_export_coef_2030.csv": ("build_livestock_n_export_2030", "CAPRI"),
     # CAPRI's 2030 outputs per model head (register DEP-13 step 2)
     "capri_data/baselines/capri_greendeal_ref/1730/supply/livestock_output_by_product_coef_2030.csv": ("build_livestock_output_2030", "CAPRI"),
+    # CAPRI's 2030 premiums per model activity by its members' main outputs and scheme (income I4)
+    "capri_data/baselines/capri_greendeal_ref/1730/policy/premium_output_shares_2030.csv": ("build_cap_ceilings_2030", "CAPRI"),
+    # CAPRI's directly yield-dependent crop inputs at 2030 item by item, the items of input_coefs_2030.csv's
+    # iy_uvag_eur_ha (income I2)
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/crop_inputs_2030.csv": ("build_input_coefs_2030", "CAPRI"),
+    # CAPRI's 2030 premium per model head, for the animals CAPRI's 2017 data pay none (KNOWN_ISSUES K210)
+    "capri_data/baselines/capri_greendeal_ref/1730/trajectories/capri_livestock_premium_2030.csv":
+        ("build_price_trajectory_2030", "CAPRI"),
     # sim_ini_21730's NUTNED_ need factors, kept by the nutrient balance builder (register DEP-10 item 1b)
     "capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_factors_2030.parquet": ("build_npk_balance_2030", "CAPRI"),
+    # sim_ini_21730's unit values of the nutrients' outputs at the base year (KNOWN_ISSUES K212)
+    "capri_data/sources/raw/capri/results/sim_ini_21730/fout_uvag_bas.parquet": ("build_npk_balance_2030", "CAPRI"),
+    # CAPRI's on-farm share of the fodder crops' outputs, p_onFarmShare, and its kept extract (KNOWN_ISSUES K213)
+    "capri_data/2017/feed/fodder_onfarm_share_2017.csv": ("build_fodder_onfarm_share", "CAPRI"),
+    "capri_data/baselines/capri_greendeal_ref/1730/feed/fodder_onfarm_share_2030.csv": ("build_fodder_onfarm_share", "CAPRI"),
+    "capri_data/sources/raw/capri/results/sim_ini_21730/fodder_onfarm_items.parquet": ("build_fodder_onfarm_share", "CAPRI"),
+    "capri_data/2017/supply/ms_farm_balance_2017.csv": ("build_ms_farm_balance", "CAPRI"),
+    "capri_data/2017/supply/ms_unit_values_2017.csv": ("build_ms_farm_balance", "CAPRI"),
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/ms_farm_balance_2030.csv": ("build_ms_farm_balance", "CAPRI"),
+    "capri_data/sources/raw/capri/results/sim_ini_21730/ms_farm_balance_items.parquet": ("build_ms_farm_balance", "CAPRI"),
+    # CAPRI's base year UVAP and UVAB of the mineral fertilisers and their kept extract (income I2b)
+    "capri_data/2017/environment/fnut_unit_values_2017.csv": ("build_fnut_unit_values", "CAPRI"),
+    "capri_data/sources/raw/capri/results/sim_ini_21730/fnut_uvap_uvab_bas.parquet": ("build_fnut_unit_values", "CAPRI"),
     "capri_data/pipeline/captrd/sets/biofuel/": ("build_captrd_biofuel", "CAPRI"),     # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/agriprod/": ("build_captrd_agriprod", "CAPRI"),   # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/national/": ("build_captrd_national", "CAPRI"),   # before sets/ (first match)
@@ -214,6 +235,9 @@ UNTRACED = {
     "capri_data/codes/capri/RUMI.csv": ("build_code_lists", "CAPRI"),
     "capri_data/baselines/capri_greendeal_ref/1730/trajectories/chain_ration_2030.csv": ("build_ration_trajectory_2030", "CAPRI"),
     "capri_data/baselines/capri_greendeal_ref/1730/trajectories/chain_fodder_2030.csv": ("build_ration_trajectory_2030", "CAPRI"),
+    # the animals' input costs in CAPRI's objective form (register DEP-13 step 3)
+    "capri_data/2017/supply/livestock_input_cost.csv": ("build_livestock_input_cost", "CAPRI"),
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/livestock_input_cost_2030.csv": ("build_livestock_input_cost", "CAPRI"),
     "capri_data/codes/capri/CLIMALL.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/CLIM.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/CLIMCELS.csv": ("build_code_lists", "CAPRI"),
@@ -249,6 +273,18 @@ UNTRACED = {
     "capri_data/codes/capri/STOCK_TO_BY.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/SED_TO_CAK.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/PACT_TO_Y.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/PACT_TO_XX.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/OAGG.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/EAAGA.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/REGAGG.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/R_T_OAGG.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/RMS_TO_RM.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/RW_TO_RM.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/END.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/IOE.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/MARR.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/O_TO_YANI.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/CAP_TO_TRD.csv": ("build_code_lists", "CAPRI"),
     "capri_data/2017/supply/biofuel_resids_params.csv": ("build_resids_params", "CAPRI"),
     "capri_data/codes/capri/ColsRead.csv": ("build_code_lists", "CAPRI"),
     "capri_data/codes/capri/DACT.csv": ("build_code_lists", "CAPRI"),
