@@ -287,6 +287,7 @@ class FertilisationBlock:
             gc = float(R.cres_avail) if R.cres_avail == R.cres_avail else 0.0
             need = np.zeros(n); own = np.zeros(n); poolc = np.zeros(n); mine0 = np.zeros(n)
             sqned = np.ones(n)     # NUTNED_'s need factor of the yields: DATA(crop, FNUT)'s, the additive part held
+            addsh = np.zeros(n)    # the additive part's share of the need at CAPRI's 2030 solution (add_share)
             from capri_mod.supply.equations.fertned import DATA_FNUT
             from capri_mod.supply.equations.supply_model.nutrients import NUTNED_needYieldFactor
             _yld = self.data.yields
@@ -300,7 +301,8 @@ class FertilisationBlock:
                 need[j] = DATA_FNUT(D.crop_coef(cr, nut, a, "need_kg_ha"), O_HP)
                 # the need's yield factor in NUTNED_: v_cropNutNeedAddFact does not move with DATA(crop, FNUT) (DEP-10
                 # item 1b; until 23 November 2026 the whole need moved, sq alone)
-                sqned[j] = NUTNED_needYieldFactor(sq.get(a, 1.0), D.crop_coef(cr, nut, a, "add_share"))
+                addsh[j] = float(D.crop_coef(cr, nut, a, "add_share") or 0.0)
+                sqned[j] = NUTNED_needYieldFactor(sq.get(a, 1.0), addsh[j])
                 own[j] = D.crop_coef(cr, nut, a, "own_kg_ha")
                 poolc[j] = D.crop_coef(cr, nut, a, "pool_kg_ha")
                 mine0[j] = float(env_._base_mineral_rate(rid, a)) if nut == "N" else D.crop_coef(cr, nut, a, "mine_kg_ha")
@@ -395,6 +397,11 @@ class FertilisationBlock:
                 # the part of each need column that follows DATA(crop, FNUT), as DATA's factor over NUTNED_'s (the
                 # legume share's term acts on DATA x (1 - BioFix) alone, l. 1100-1112: capri_regional_nlp's NUTNED_legSh)
                 need_yf = {j: (sq.get(acts[j], 1.0) / sqned[j] if sqned[j] > 0 else 1.0) for j, sh in crops if need[j] > 0}
+                # the share of each need column that is DATA(crop, FNUT)'s term, (1 - addShare) x needYieldFact over
+                # NUTNED_needYieldFactor: the part the in-solve factors multiply (v_yldPestFac, l. 1101-1107), not
+                # v_cropNutNeedAddFact
+                need_data = {j: ((1.0 - addsh[j]) * sq.get(acts[j], 1.0) / sqned[j] if sqned[j] > 0 else 0.0)
+                             for j, sh in crops if need[j] > 0}
                 # the technology mix columns: z ha moved from T2 to T1 need need_diff x the crop's need per ha
                 # (NUTNED_: SQRT(1 + y)(1 + y) per technology); in the group's need only, no area
                 for j, sh in crops:
@@ -411,7 +418,7 @@ class FertilisationBlock:
                     if kz is not None and own[j] > 0 and kz < n_cols:
                         ownl.append((kz, sh * k_own * own_y[j] * self._mix_res_diff(tm_, acts[j], nut, fout_y.get(j), _dep)))
                 groups.append({"g": gname, "perm": perm, "acc": acc, "modes": modes, "crops": crops,
-                               "need": needl, "own": ownl, "Aref": Aref, "need_yf": need_yf})
+                               "need": needl, "own": ownl, "Aref": Aref, "need_yf": need_yf, "need_data": need_data})
             # the crops' residues' nutrients at this solve's yields, DATA(crop, MANN | MANP | MANK) per ha (the pool's
             # unscaled, the permanent crops' own), with the member state's unit value of the output: the crops' TOOU in
             # the income (calc_inc_indic.py DATA_TOOU_FOUT; KNOWN_ISSUES K212); the mix column's T1 - T2 per ha moved

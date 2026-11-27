@@ -8216,6 +8216,46 @@
     "tests": []
    }
   },
+  "capri_pestsagg": {
+   "file": "capri_data/codes/capri/pesTSAgg.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI pesTSAgg, the five pesticide aggregates (sets.gms l. 1761-1767, 4605-4607; pestoAgg l. 4646-4655: under PESTDISAGGStage 5_aggregates pestoAgg = pesModDis = pesTSAgg), the items of the pesticide module (register DEP-51)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "capri_poultry": {
    "file": "capri_data/codes/capri/POULTRY.csv",
    "declared_in": "00_codes.sql",
@@ -50835,6 +50875,77 @@
     "tests": []
    }
   },
+  "src_crop_nut_need_mult_fact_techn": {
+   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_mult_fact_techn.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "sim_ini_21730's v_cropNutNeedMultFact(region, FNUT, technology), the fertiliser calibration's need multipliers per technology (the reference export), written and read back by tools/build/build_pesticide_calibration_2030.py",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fnut",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "technology",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "mult",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "fnut",
+    "technology"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(fnut IN ('NITF', 'PHOF', 'POTF'))",
+    "(technology IN ('T', 'T1', 'T2'))",
+    "(mult > 0)"
+   ],
+   "units": [
+    {
+     "item": "mult",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "v_cropNutNeedMultFact.L, a factor on the crops' nutrient need"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": "build_pesticide_calibration_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "src_cropwat_p_cropwatreq": {
    "file": "capri_data/sources/raw/capri/dat/water/cropwat_p_cropwatReq.parquet",
    "declared_in": "34_sources_csv.sql",
@@ -54610,6 +54721,39 @@
     "tests": []
    }
   },
+  "src_oms": {
+   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/oms.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "sim_ini_21730's set OMS(OM), \"Goods with balances in the supply model\" (sets.gms l. 5143), its elements, written and read back by tools/build/build_pesticide_calibration_2030.py",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": "build_pesticide_calibration_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "src_orgsoil_share_p_orgsoilori": {
    "file": "capri_data/sources/raw/capri/dat/envind/orgsoil_share_p_orgsoilori.parquet",
    "declared_in": "34_sources_csv.sql",
@@ -54860,6 +55004,250 @@
     "builders": [
      "build_supply_elasticities_regional"
     ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_pesticide_cal_items": {
+   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/pesticide_cal_items.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "sim_ini_21730's DATA items the 2030 pesticide calibration reads (the reference export): the crops' rows (yields, nutrients) and the unit values UVAG at \"BAS\" and \"Y\", the producer prices PPRI at \"BAS\" and \"CAL\", the balance items GROF, LOSF, SEDF, SEDM at \"TRD\" (and GROF, LOSF, SEDF at \"Y\"); written and read back by tools/build/build_pesticide_calibration_2030.py",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "col",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "row",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "col",
+    "row",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(\"year\" IN ('BAS', 'CAL', 'TRD', 'Y'))"
+   ],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "per item, CAPRI's DATA units (yields per ha, unit values EUR per t, balances 1000 t)"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": "build_pesticide_calibration_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_pesticide_data": {
+   "file": "capri_data/sources/raw/capri/results/capreg/pesticide_data.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPREG's 2017 DATA(region, col, PESTOF..PESTOO, \"Y\") of capreg/res_17<CC>.gdx (DATA2), every column with a value: the crops' applications (g per ha), the unit values (UVAG, UVAB: EUR per kg) and CAPREG's aggregates and accounts; written and read back by tools/build/build_pesticides_2017.py (a build without capri_sources)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "col",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "row",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "col",
+    "row"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "row"
+     ],
+     "references": "capri_pestsagg",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "per column: g per ha for a crop, EUR per kg for UVAG and UVAB, CAPREG's own units for its aggregates and accounts"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": "build_pesticides_2017 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_pesticide_max_damage": {
+   "file": "capri_data/sources/raw/capri/results/capreg/pesticide_max_damage.parquet",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPREG's p_pestPar(region, crop, aggregate, technology, \"maxDamage\") of capreg/pmppar_17<CC>.gdx, written and read back by tools/build/build_pesticides_2017.py",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "technology",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "max_damage",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "item",
+    "technology"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "capri_pact",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "item"
+     ],
+     "references": "capri_pestsagg",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(technology IN ('T', 'T1', 'T2'))"
+   ],
+   "units": [
+    {
+     "item": "max_damage",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"maxDamage\"), the share of the yield lost without the aggregate"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": "build_pesticides_2017 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
     "checks": [],
     "tests": []
    }
@@ -61991,6 +62379,690 @@
      "capri_mod/tests/test_capri.py",
      "capri_mod/tests/test_mineral_n_losses.py"
     ]
+   }
+  },
+  "sup_pesticide_margins_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/pesticide_margins_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPRI's pesticide calibration at 2030 (supply/cal_pesti.gms, ported in capri_mod/supply/equations/cal_pesti.py), per regional unit, crop and technology: the yield's value without damage, p_pestPar(..., \"yild\", A, \"NoDamageYld\"), and the marginal fertiliser cost of the avoided yield loss per nutrient and in total, p_pestPar(..., NITF | PHOF | POTF | FERC, A, \"margCostYld\"); negative_margin 1 where CAPRI's p_negMargWoPesti is set (the price-damage ratio is not defined there)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "technology",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "no_damage_yld",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "marg_cost_nitf",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "marg_cost_phof",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "marg_cost_potf",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "marg_cost_ferc",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "negative_margin",
+     "type": "INTEGER",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "technology"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "capri_pact",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(technology IN ('T', 'T1', 'T2'))",
+    "(no_damage_yld >= 0)",
+    "(negative_margin IN (0, 1))"
+   ],
+   "units": [
+    {
+     "item": "marg_cost_ferc",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"FERC\", A, \"margCostYld\"), the nutrients' sum, EUR per ha"
+    },
+    {
+     "item": "marg_cost_nitf",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"NITF\", A, \"margCostYld\"), EUR per ha (cal_pesti.gms l. 216-222)"
+    },
+    {
+     "item": "marg_cost_phof",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"PHOF\", A, \"margCostYld\"), EUR per ha"
+    },
+    {
+     "item": "marg_cost_potf",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"POTF\", A, \"margCostYld\"), EUR per ha"
+    },
+    {
+     "item": "negative_margin",
+     "unit": "U_1unit",
+     "status": "builder",
+     "basis": "a flag: 1 where p_negMargWoPesti is set"
+    },
+    {
+     "item": "no_damage_yld",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"yild\", A, \"NoDamageYld\"), EUR per ha in CAPRI's 2030 money (cal_pesti.gms l. 163: [kg/ha x Euro/t] x .001)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_pesticide_calibration_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "sup_pesticide_max_damage_2017": {
+   "file": "capri_data/2017/supply/pesticide_max_damage_2017.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPREG's maximum yield damage without the pesticide aggregate, p_pestPar(region, crop, aggregate, technology, \"maxDamage\") of capreg/pmppar_17<CC>.gdx (loaded by capmod/create_sim_ini_gdx.gms l. 400-410; CAPREG builds it from JKI's priors, inputs/pest_cor.gms, not ported), the nonzero cells",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "technology",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "max_damage",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "item",
+    "technology"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "capri_pact",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "item"
+     ],
+     "references": "capri_pestsagg",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(technology IN ('T', 'T1', 'T2'))",
+    "((max_damage > 0) AND (max_damage < 1))"
+   ],
+   "units": [
+    {
+     "item": "max_damage",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"maxDamage\"): the share of the yield lost without the aggregate"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_pesticides_2017 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "sup_pesticide_par_2030": {
+   "file": "capri_data/baselines/capri_greendeal_ref/1730/supply/pesticide_par_2030.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPRI's pesticide calibration at 2030, p_pestPar(region, crop, item, technology, ...) (supply/cal_pesti.gms, 5_aggregates stage, ported in capri_mod/supply/equations/cal_pesti.py and pesti_test.py), per regional unit, crop, aggregate and technology: the application per ha, maxDamage, the unit value, the price-damage ratio, the damage function's terms (slopFudg, SlopLin, SlopExpo, Expon), whether the cell is endogenous, CAPRI's powerInfes and curDamage, and CAPRI's test of the calibration (m_pestiTest: the application at the calibration and the choke point); on the item YILD the yield factor without damage NoDamageFac and the yield factor at the calibration (the other columns empty there)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "technology",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "appl_per_ha",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "max_damage",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "uvag",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "price_damage_ratio",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "slop_fudg",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "endogenous_start",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "slop_lin",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "slop_expo",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "expon",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "endogenous",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "power_infes",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "cur_damage",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "no_damage_fac",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "appl_cal",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "appl_choke",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "yld_pest_fac_cal",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "item",
+    "technology"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "capri_pact",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(item IN ('PESTOF', 'PESTOH', 'PESTOI', 'PESTOG', 'PESTOO', 'YILD'))",
+    "(technology IN ('T', 'T1', 'T2'))",
+    "(appl_per_ha > 0)",
+    "((max_damage > 0) AND (max_damage < 1))",
+    "(uvag > 0)",
+    "(price_damage_ratio >= 0)",
+    "(slop_fudg >= 0)",
+    "(endogenous_start IN (0, 1))",
+    "(slop_lin >= 0)",
+    "(slop_expo >= 0)",
+    "((expon = 0) OR ((expon > 1) AND (expon <= 10)))",
+    "(endogenous IN (0, 1))",
+    "(power_infes IN (0, 1))",
+    "(no_damage_fac > 0)",
+    "(appl_cal >= 0)",
+    "(appl_choke >= 0)",
+    "(yld_pest_fac_cal > 0)",
+    "((item = 'YILD') = (appl_per_ha IS NULL))",
+    "((item = 'YILD') = (no_damage_fac IS NOT NULL))"
+   ],
+   "units": [
+    {
+     "item": "appl_cal",
+     "unit": "U_kgperha",
+     "status": "builder",
+     "basis": "CAPRI's test of the calibration (m_pestiTest): the application the farmer chooses at the calibration point (ApplPerHaCal), kg per ha"
+    },
+    {
+     "item": "appl_choke",
+     "unit": "U_kgperha",
+     "status": "builder",
+     "basis": "CAPRI's test of the calibration: the application at the price that would end the use at the prior elasticity (ApplPerHa2), kg per ha"
+    },
+    {
+     "item": "appl_per_ha",
+     "unit": "U_kgperha",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"ApplPerHa\"): DATA(..., \"Y\") x .001 x (1 + p_technFact), kg per ha (cal_pesti.gms l. 28-31)"
+    },
+    {
+     "item": "cur_damage",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"curDamage\"): maxDamage x the damage function at the application (cal_pesti.gms l. 505-508)"
+    },
+    {
+     "item": "endogenous",
+     "unit": "U_1unit",
+     "status": "builder",
+     "basis": "a flag: 1 where the application is a variable of the supply model"
+    },
+    {
+     "item": "endogenous_start",
+     "unit": "U_1unit",
+     "status": "builder",
+     "basis": "a flag: 1 where the cell starts as endogenous in the calibration (cal_pesti.gms l. 262-272: 0 where slopFudg is below the price-damage ratio)"
+    },
+    {
+     "item": "expon",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"Expon\"), the power term's exponent, in (1.1, 10] or 0 for the linear form (cal_pesti.gms l. 315-317, 490)"
+    },
+    {
+     "item": "max_damage",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"maxDamage\"), the share of the yield lost without the aggregate"
+    },
+    {
+     "item": "no_damage_fac",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"yild\", A, \"NoDamageFac\") = 1 + the crop's total curDamage (cal_pesti.gms l. 512)"
+    },
+    {
+     "item": "power_infes",
+     "unit": "U_1unit",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"powerInfes\"), a flag (cal_pesti.gms l. 360)"
+    },
+    {
+     "item": "price_damage_ratio",
+     "unit": "U_haPerKg",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"priceDamagRatio\"): UVAG over the avoided maximum damage in EUR per ha (cal_pesti.gms l. 239-250; [ha/kg], l. 262-263)"
+    },
+    {
+     "item": "slop_expo",
+     "unit": null,
+     "status": "open",
+     "basis": "p_pestPar(..., \"SlopExpo\"), the power term's coefficient (cal_pesti.gms l. 402, 405-410): (ha per kg) to the power Expon, no catalogue unit"
+    },
+    {
+     "item": "slop_fudg",
+     "unit": "U_haPerKg",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"slopFudg\"), the linear damage function's slope in its smooth max (cal_pesti.gms l. 262-272)"
+    },
+    {
+     "item": "slop_lin",
+     "unit": "U_haPerKg",
+     "status": "capri",
+     "basis": "p_pestPar(..., \"SlopLin\"), the damage function's linear slope (cal_pesti.gms l. 401, 405-410, 502-503)"
+    },
+    {
+     "item": "uvag",
+     "unit": "U_EuPerKg",
+     "status": "capri",
+     "basis": "DATA(region, \"UVAG\", pestoAgg, \"Y\"): the member state's base value x CAPRI's inflation to 2030 (inflation_and_trend_interpolation.gms l. 71-72), EUR per kg (cal_pesti.gms l. 239)"
+    },
+    {
+     "item": "yld_pest_fac_cal",
+     "unit": "U_ratio",
+     "status": "builder",
+     "basis": "the yield factor at appl_cal (CAPRI flags it where it is off 1 by more than 1e-4)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_pesticide_calibration_2030 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_cal_pesti.py",
+     "capri_mod/tests/test_pesti_supply.py"
+    ]
+   }
+  },
+  "sup_pesticide_prices_2017": {
+   "file": "capri_data/2017/supply/pesticide_prices_2017.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPREG's 2017 unit values of the five pesticide aggregates: DATA(region, \"UVAG\" | \"UVAB\", PESTOF..PESTOO, \"Y\") of capreg/res_17<CC>.gdx; uvab empty where CAPREG has none",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "uvag",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "uvab",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "item"
+     ],
+     "references": "capri_pestsagg",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(uvag > 0)",
+    "(uvab > 0)"
+   ],
+   "units": [
+    {
+     "item": "uvab",
+     "unit": "U_EuPerKg",
+     "status": "capri",
+     "basis": "CAPREG DATA(region, \"UVAB\", pestoAgg, \"Y\"), EUR per kg in the base year's money"
+    },
+    {
+     "item": "uvag",
+     "unit": "U_EuPerKg",
+     "status": "capri",
+     "basis": "CAPREG DATA(region, \"UVAG\", pestoAgg, \"Y\"), EUR per kg in the base year's money (supply/cal_pesti.gms l. 239: \"Euro/kg for pesticides\")"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_pesticides_2017 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "sup_pesticides_2017": {
+   "file": "capri_data/2017/supply/pesticides_2017.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPREG's 2017 applications of the five pesticide aggregates per region (CAPREG's regions, member states and NUTS 1 included) and crop: DATA(region, crop, PESTOF..PESTOO, \"Y\") of capreg/res_17<CC>.gdx, the nonzero cells; the simulation year takes them as they are (CAPTRD projects no pesticide item)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "g_ha",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "capri_pact",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "item"
+     ],
+     "references": "capri_pestsagg",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(g_ha > 0)"
+   ],
+   "units": [
+    {
+     "item": "g_ha",
+     "unit": "U_gPerHa",
+     "status": "capri",
+     "basis": "CAPREG DATA(region, crop, pestoAgg, \"Y\"), g per ha (supply/cal_pesti.gms l. 28-31 converts g/ha to kg/ha)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_pesticides_2017 (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
    }
   },
   "sup_plant_protection_capri_step_2030": {
@@ -69494,11 +70566,12 @@
   }
  ],
  "code_data": {
-  "capri/keep": 1060,
+  "capri/keep": 1077,
+  "capri-mod/check": 1,
   "capri-mod/keep": 1,
   "literature/keep": 11,
-  "numerical/keep": 39,
-  "physical/keep": 14,
+  "numerical/keep": 40,
+  "physical/keep": 16,
   "technical/keep": 40
  },
  "other_notes": {}

@@ -59,6 +59,12 @@ class CalibrationBlock:
         for k_ in self.spec.get("mix_cols") or ():
             if k_ < nX:
                 free[k_] = False
+        # the pesticide applications (supply.pest_disagg "agg5") are not calibrated here: their first-order conditions
+        # are the pesticide calibration's (supply/cal_pesti.gms pestiOptimal_ at its margin); their residual at the base
+        # is reported (pest_residual), not a source of row multipliers
+        _pp = getattr(self, "pest", None)
+        if _pp and _pp["n"]:
+            free[_pp["off"]:_pp["off"] + _pp["n"] + _pp.get("n_lin", 0)] = False
         fu, fl_ = np.isfinite(ubx), np.isfinite(lbx)
         vb_u = free & fu & (np.abs(xb - np.where(fu, ubx, 0.0)) <= tol * np.maximum(1.0, np.abs(np.where(fu, ubx, 0.0))))
         vb_l = free & fl_ & (np.abs(xb - np.where(fl_, lbx, 0.0)) <= tol * np.maximum(1.0, np.abs(np.where(fl_, lbx, 0.0)))) & ~vb_u
@@ -288,7 +294,14 @@ class CalibrationBlock:
             if den > 0:
                 dabat[("legsh",)] = pmpParlin_fertTech_DEP30(float(lg_["subs0"]), res[j] / den, True)
             res[j] = 0.0
+        # the pesticide applications' first-order conditions at the base (scaled variables): a check of the pesticide
+        # calibration's margin against this model's, reported apart (CAPRI's check_cal.gms: v_yldPestFac = 1)
+        pest_res = None
+        if _pp and _pp["n"]:
+            o_ = _pp["off"]
+            pest_res = res[o_:o_ + _pp["n"]].copy()
+            res[o_:o_ + _pp["n"] + _pp.get("n_lin", 0)] = 0.0
         rest = np.abs(res[n0 + nf:]).max() if nX > n0 + nf else 0.0
         self.cal_point = xb
         return {"ok": True, "dq": dq, "dcnst": dcnst, "dabat": dabat, "residual": float(rest), "lam": lam,
-                "n_active": int(len(act)), "lsq_status": int(sol.status)}
+                "n_active": int(len(act)), "lsq_status": int(sol.status), "pest_residual": pest_res}

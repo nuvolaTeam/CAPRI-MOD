@@ -2013,3 +2013,57 @@ CREATE TABLE src_prme_schemes_2030 (
 COMMENT ON TABLE src_prme_schemes_2030 IS 'CAPRI''s 2030 reference premiums PRME per region, activity and scheme (the technology-factored rural-development schemes and DPTOTAL), extracted from res_2_1730greendeal_refdefaulta (CAPRI''s 2030 Green Deal baseline; its calibration run res_2_1730greendeal_refpol_endotech_all_inidefaulta until 9 November 2026) (tools/build/build_techn_mix_2030.py).';
 INSERT INTO value_units VALUES
   ('src_prme_schemes_2030', 'value', NULL, 'open', 'prme_schemes_2030.value: unit to be established');
+
+-- file: capri_data/sources/raw/capri/results/capreg/pesticide_data.parquet
+CREATE TABLE src_pesticide_data (
+    region VARCHAR NOT NULL REFERENCES capri_rall (code),
+    col VARCHAR NOT NULL,
+    "row" VARCHAR NOT NULL REFERENCES capri_pestsagg (code),
+    value DOUBLE NOT NULL,
+    PRIMARY KEY (region, col, "row")
+);
+COMMENT ON TABLE src_pesticide_data IS 'CAPREG''s 2017 DATA(region, col, PESTOF..PESTOO, "Y") of capreg/res_17<CC>.gdx (DATA2), every column with a value: the crops'' applications (g per ha), the unit values (UVAG, UVAB: EUR per kg) and CAPREG''s aggregates and accounts; written and read back by tools/build/build_pesticides_2017.py (a build without capri_sources)';
+INSERT INTO value_units VALUES
+  ('src_pesticide_data', 'value', NULL, 'open', 'per column: g per ha for a crop, EUR per kg for UVAG and UVAB, CAPREG''s own units for its aggregates and accounts');
+
+-- file: capri_data/sources/raw/capri/results/capreg/pesticide_max_damage.parquet
+CREATE TABLE src_pesticide_max_damage (
+    region VARCHAR NOT NULL REFERENCES capri_rall (code),
+    activity VARCHAR NOT NULL REFERENCES capri_pact (code),
+    item VARCHAR NOT NULL REFERENCES capri_pestsagg (code),
+    technology VARCHAR NOT NULL CHECK (technology IN ('T', 'T1', 'T2')),
+    max_damage DOUBLE NOT NULL,
+    PRIMARY KEY (region, activity, item, technology)
+);
+COMMENT ON TABLE src_pesticide_max_damage IS 'CAPREG''s p_pestPar(region, crop, aggregate, technology, "maxDamage") of capreg/pmppar_17<CC>.gdx, written and read back by tools/build/build_pesticides_2017.py';
+INSERT INTO value_units VALUES
+  ('src_pesticide_max_damage', 'max_damage', 'U_ratio', 'capri', 'p_pestPar(..., "maxDamage"), the share of the yield lost without the aggregate');
+
+-- file: capri_data/sources/raw/capri/results/sim_ini_21730/pesticide_cal_items.parquet
+CREATE TABLE src_pesticide_cal_items (
+    region VARCHAR NOT NULL REFERENCES capri_rall (code),
+    col VARCHAR NOT NULL,
+    "row" VARCHAR NOT NULL,
+    year VARCHAR NOT NULL CHECK (year IN ('BAS', 'CAL', 'TRD', 'Y')),
+    value DOUBLE NOT NULL,
+    PRIMARY KEY (region, col, "row", year)
+);
+COMMENT ON TABLE src_pesticide_cal_items IS 'sim_ini_21730''s DATA items the 2030 pesticide calibration reads (the reference export): the crops'' rows (yields, nutrients) and the unit values UVAG at "BAS" and "Y", the producer prices PPRI at "BAS" and "CAL", the balance items GROF, LOSF, SEDF, SEDM at "TRD" (and GROF, LOSF, SEDF at "Y"); written and read back by tools/build/build_pesticide_calibration_2030.py';
+INSERT INTO value_units VALUES
+  ('src_pesticide_cal_items', 'value', NULL, 'open', 'per item, CAPRI''s DATA units (yields per ha, unit values EUR per t, balances 1000 t)');
+
+-- file: capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_mult_fact_techn.parquet
+CREATE TABLE src_crop_nut_need_mult_fact_techn (
+    region VARCHAR NOT NULL REFERENCES capri_rall (code),
+    fnut VARCHAR NOT NULL CHECK (fnut IN ('NITF', 'PHOF', 'POTF')),
+    technology VARCHAR NOT NULL CHECK (technology IN ('T', 'T1', 'T2')),
+    mult DOUBLE NOT NULL CHECK (mult > 0),
+    PRIMARY KEY (region, fnut, technology)
+);
+COMMENT ON TABLE src_crop_nut_need_mult_fact_techn IS 'sim_ini_21730''s v_cropNutNeedMultFact(region, FNUT, technology), the fertiliser calibration''s need multipliers per technology (the reference export), written and read back by tools/build/build_pesticide_calibration_2030.py';
+INSERT INTO value_units VALUES
+  ('src_crop_nut_need_mult_fact_techn', 'mult', 'U_ratio', 'capri', 'v_cropNutNeedMultFact.L, a factor on the crops'' nutrient need');
+
+-- file: capri_data/sources/raw/capri/results/sim_ini_21730/oms.parquet
+CREATE TABLE src_oms (code VARCHAR PRIMARY KEY);
+COMMENT ON TABLE src_oms IS 'sim_ini_21730''s set OMS(OM), "Goods with balances in the supply model" (sets.gms l. 5143), its elements, written and read back by tools/build/build_pesticide_calibration_2030.py';

@@ -61,6 +61,8 @@ from capri_mod.supply.regional_nlp.calibration import (  # noqa: E402,F401  the 
     CalibrationBlock)
 from capri_mod.supply.regional_nlp.response import (  # noqa: E402,F401  the parts (moved as they were)
     ResponseBlock)
+from capri_mod.supply.regional_nlp.pesticides import (  # noqa: E402,F401  CAPRI's pesticide module
+    NLPPesticideBlock)
 
 
 # the ridge weight of the calibration's multiplier fit (CapriRegionalNLP.calibrate): the setting supply.nlp_cal_ridge
@@ -78,7 +80,7 @@ SOLVE_PROBE = None
 
 
 class CapriRegionalNLP(ProblemBlock, NLPFertilisationBlock, NLPAbatementBlock, CalibrationBlock,
-                       ResponseBlock):
+                       ResponseBlock, NLPPesticideBlock):
     """One region's supply model in CAPRI's form.
 
     spec: Q, c, A, b (the regional QP, A y <= b), labels (one per row of A), acts (activity names: the first len(acts)
@@ -101,6 +103,7 @@ class CapriRegionalNLP(ProblemBlock, NLPFertilisationBlock, NLPAbatementBlock, C
         if am:
             for k, t in enumerate(am["techs"]):
                 x[am["off"] + k] = float(t["s0"])                # the options at their base shares
+        x = self.pest_start(x)                                    # the applications at the calibration point
         cc_ = self.abat.get("catc") if getattr(self, "abat", None) else None
         if cc_:
             x[cc_["off"]] = cc_["m0"]                             # winter cover at its base share

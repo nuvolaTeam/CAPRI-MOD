@@ -52,6 +52,7 @@ from capri_mod.supply.policy import PolicyBlock  # noqa: E402
 from capri_mod.supply.land import LandBlock  # noqa: E402
 from capri_mod.supply.nlp import NLPBlock  # noqa: E402
 from capri_mod.supply.techn_mix import TechnMixBlock  # noqa: E402
+from capri_mod.supply.pesticides import PesticideBlock  # noqa: E402
 # the blocks moved out of the class (26 November 2026)
 from capri_mod.supply.regional_supply.net_revenues import NetRevenuesBlock  # noqa: E402
 from capri_mod.supply.regional_supply.constraints import ConstraintsBlock  # noqa: E402
@@ -59,7 +60,7 @@ from capri_mod.supply.regional_supply.solve import SolveBlock  # noqa: E402
 
 
 class RegionalSupplyModel(NetRevenuesBlock, ConstraintsBlock, SolveBlock, RegionalStateMixin, LivestockBlock, FertilisationBlock, AbatementBlock, PolicyBlock,
-                          LandBlock, NLPBlock, TechnMixBlock):
+                          LandBlock, NLPBlock, TechnMixBlock, PesticideBlock):
     """
     Single NUTS-2 regional agricultural programming model.
 

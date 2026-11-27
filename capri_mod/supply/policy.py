@@ -11,6 +11,8 @@ from capri_mod.supply import entitlements as _entl
 from capri_mod.supply.equations.define_greening_limits import p_DPGreeningLimits_permGras
 from capri_mod.supply.equations.define_objc import p_linObjeCont_PLAP
 from capri_mod.supply.equations.greendeal.conventional_io import DATA_GROF_percentageChange, DATA_Yild, p_yildReduction
+from capri_mod.supply.equations.greendeal.conventional_io import pest_change_factor_greendeal
+from capri_mod.supply.equations.greendeal.organic_io import DATA_GROF_PLAP_percentageChange as _organic_plap
 from capri_mod.supply.equations.greendeal.landscape import p_DPGreeningLimits_cropDiv
 from capri_mod.supply.equations.greendeal.load_organic_targets import p_organicAreaTarget, p_organicTargetScale
 from capri_mod.supply.equations.greendeal.organic_area import DATA_Yild_percentageChange
@@ -383,7 +385,8 @@ class PolicyBlock:
         if table is None or not group or region is None:
             return 0.0
         return DATA_Yild_percentageChange(*(table.at[reg_, group] if (reg_ in table.index and group in table.columns)
-                                            else None for reg_ in (region, "CEN")))
+                                            else None for reg_ in (region, "CEN")),
+                                          pest_disagg=bool(getattr(self.data, "pesticides", None)))
 
     @staticmethod
     def _organic_target_scale(share: float) -> float:
@@ -505,6 +508,13 @@ class PolicyBlock:
         topup_col = "eful_eur_ha" if getattr(type(self), "organic_topup_at_fuel_cost", True) else "eful_inpo_eur_ha"
         nr = self.net_revenues.copy()
         self.ev.greendeal_inputs = {"o_R": o_R, "pc_plap": pc_plap, "pc_inpo": pc_inpo, "tf": tf, "keep_tf": keep_tf}
+        if getattr(self.data, "pesticides", None):
+            # the pesticide module: PLAP is not an input (sets.gms, PACT_TO_I without PLAP), its change goes to every
+            # application as one factor (pest_change_factor_greendeal), and PLAP's own change is 0 (conventional_io.gms
+            # l. 132-133)
+            self.ev.pest_change_factor = pest_change_factor_greendeal(pc_plap, _organic_plap(o_R) if o_R > 0 else 0.0)
+            self.ev.greendeal_inputs["pc_plap_module"] = pc_plap
+            pc_plap = 0.0
         for a in self.acts:
             d = 0.0
             if a in ANIMALS:

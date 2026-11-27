@@ -103,10 +103,16 @@ class PhosphorusBlock:
             raise RuntimeError(f"no CAPRI fertilisation data for {region} (fert_dist_priors_2030.csv)")
         D, C = NPKData.get(), _pb.PCropCoefs.get()
         y0 = self._cached_row("yields", region) or {}
+        # CAPRI's in-solve yield factors (the technology mix, the pesticide module's; SupplyResult.insolve_yield): x (1 +
+        # tf) on the removal and the residues as CAPRI's e_EXPPRD and e_CRESID; fertned's rule on the data's yields, the
+        # realised yield over those factors (as the N accounts, environmental_module; until 27 November 2026 the
+        # realised yield went through fertned's rule whole)
+        _isf = dict(getattr(supply_result, "insolve_yield", None) or {}) if supply_result is not None else {}
+        fi = {c: 1.0 + float(_isf[c]["tf"]) if c in _isf else 1.0 for c in CROPS}
         yr = {}
         for c in CROPS:
             b, y = float(y0.get(c, 0.0) or 0.0), yields.get(c)
-            yr[c] = float(y) / b if (b > 0 and y is not None and float(y) >= 0) else 1.0
+            yr[c] = float(y) / fi[c] / b if (b > 0 and y is not None and float(y) >= 0 and fi[c] > 0) else 1.0
         x = {c: max(float(acts.get(c, 0.0) or 0.0), 0.0) for c in CROPS}
         h = {a: max(float(acts.get(a, 0.0) or 0.0), 0.0) for a in ANIMALS}
         # the split columns' manure P2O5 as manure-equivalent heads of their animal (z x dmanp_rel)
@@ -124,8 +130,8 @@ class PhosphorusBlock:
                       else (1.0 if yr[c] > 0 else 0.0))
             d_ = fout_yield_change(region, c, b_, b_ * yr[c], ys_, "P") if b_ > 0 else None
             dres[c] = 0.0 if d_ is None else d_
-        expprd = sum(e_EXPPRD(x[c], C.coef(cr, c)[0], nfp[c]) for c in CROPS)
-        cresid = sum(e_CRESID(x[c], C.coef(cr, c)[1] + dres[c], 1.0) for c in CROPS)
+        expprd = sum(e_EXPPRD(x[c], C.coef(cr, c)[0], nfp[c] * fi[c]) for c in CROPS)
+        cresid = sum(e_CRESID(x[c], C.coef(cr, c)[1] + dres[c], fi[c]) for c in CROPS)
         # excretion (EXCRET)
         manp = {a: D.manure_per_head(region, "P", a) for a in ANIMALS}
         excret = sum(e_EXCRET(h[a], manp[a]) for a in ANIMALS)

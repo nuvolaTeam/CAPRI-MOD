@@ -95,6 +95,20 @@ class NLPFertilisationBlock:
                 _L0 = _nf.netf(d["netf"]["fr"], float(d["netf"]["run_surf"]))
                 eF["CRES"] = pv(float(d["gc"]) / (1.0 - float(_L0["N2O"])) * float(d["eff"]))
             E = lin(d["E"]); C = lin(d["C"])
+            # the pesticide module's yield factor on the crops' residues (supply_model.gms l. 1060-1070: the residues'
+            # nutrients, for N net of the deposition, x (v_yldPestFac - 1) x (1 + p_technFact(FOUT, A))): the crop
+            # columns' residues x the share that follows the yield (N: (MANN - AtmDep) / MANN, techn_mix's mann_diff
+            # over yield_diff; P2O5, K2O: 1) x the change at the residues' technology factor
+            if getattr(self, "_pest_pre", None):
+                cd_ = {int(cr["col"]): cr for cr in self.spec["pest"]["crops"]}
+                for j_, c_ in d["C"]:
+                    cr_ = cd_.get(int(j_))
+                    sh_ = (cr_.get("res_share") or {}).get(nut) if cr_ else None
+                    if sh_ is None or not float(c_):
+                        continue
+                    dv_ = self.pest_dev(int(j_), float(cr_["res_diff"][nut]))
+                    if dv_ is not None:
+                        C = C + pv(float(c_) * float(sh_)) * dv_
             if float(d.get("E_const", 0.0) or 0.0) != 0.0:
                 # the region's base manure trade as a level (CAPRI's ManureNPK_ with v_manureExports /
                 # v_manureImports at the calibration point; supply.manure_base_trade "capri", K167): base imports - base
@@ -122,6 +136,16 @@ class NLPFertilisationBlock:
             for gi, g_ in enumerate(G):
                 sc_ = max(sum(m for (gj, s_, m, acc) in flows if gj == gi), 1.0)
                 need = self._lin(y, g_["need"], scale=sc_)
+                # the pesticide module's yield factor on the need (NUTNED_ l. 1106-1107: x (1 + (v_yldPestFac - 1)) per
+                # technology; need_diff, techn_mix_2030.csv): the crop columns' need x the change
+                if getattr(self, "_pest_pre", None):
+                    # on DATA(crop, FNUT)'s term alone, not on v_cropNutNeedAddFact (need_data, the column's share)
+                    nd_ = {int(cr["col"]): float(cr.get("need_diff", 0.0)) for cr in self.spec["pest"]["crops"]}
+                    _ndt = g_.get("need_data") or {}
+                    for j_, c_ in g_["need"]:
+                        d_ = self.pest_dev(int(j_), nd_.get(int(j_), 0.0))
+                        if d_ is not None and float(c_) != 0.0:
+                            need = need + pv(float(c_) * float(_ndt.get(j_, _ndt.get(int(j_), 1.0))) / sc_) * d_
                 ls_ = getattr(self, "_legsh", None) if nut == "N" else None
                 if ls_ is not None:
                     # the legume share's term (NUTNED_, l. 1111-1112) on OFAR's need columns of the group, the part
@@ -131,8 +155,20 @@ class NLPFertilisationBlock:
                     if _ofar:
                         need = NUTNED_legSh(need, self._lin(y, _ofar, scale=sc_), pv(ls_["need_share"]), ls_["v"])
                 if g_["perm"] and g_["own"]:
-                    need = NUTNED_ownCres(need, self._lin(y, [(c_, float(v_)) for c_, v_ in g_["own"]], scale=sc_),
-                                          effC)
+                    own_ = self._lin(y, [(c_, float(v_)) for c_, v_ in g_["own"]], scale=sc_)
+                    if getattr(self, "_pest_pre", None):
+                        # the pesticide module's yield factor on the permanent groups' own residues (NUTNED_ l.
+                        # 1200-1211): the residues' share that follows the yield x the change (as the pool's, above)
+                        cd_ = {int(cr["col"]): cr for cr in self.spec["pest"]["crops"]}
+                        for c_, v_ in g_["own"]:
+                            cr_ = cd_.get(int(c_))
+                            sh_ = (cr_.get("res_share") or {}).get(nut) if cr_ else None
+                            if sh_ is None or not float(v_):
+                                continue
+                            dv_ = self.pest_dev(int(c_), float(cr_["res_diff"][nut]))
+                            if dv_ is not None:
+                                own_ = own_ + pv(float(v_) * float(sh_) / sc_) * dv_
+                    need = NUTNED_ownCres(need, own_, effC)
                 # the flows' factors: fertiliser options (1 + sum v_Miti NMIN), inhibitor on manure (1 + v_Miti NMAN)
                 sup = NUTNED_supply([(NUTNED_availFact(s_, availE, effM, effC, e[s_],
                                                        self.fert_eff if nut == "N" else None,
@@ -253,6 +289,21 @@ class NLPFertilisationBlock:
                         # p_technFact(NITF, A)) (the mix column z: ydiff x z), x othImpact x v
                         _bf = y[ls_["col"]] + (pv(ls_["ydiff"]) * y[int(ls_["mix"])] if ls_.get("mix") is not None else 0)
                         _cn = _cn + e_BIOFIX_legSh(pv(ls_["fix"]) * _bf, pv(ls_["oi"]), ls_["v"]) * pv(1.0 / rs)
+                    # the pesticide module's yield factor on the crops' residues, removal and fixation (e_CRESID,
+                    # e_EXPPRD, e_BIOFIX): their change at the technologies' factors (MANN: mann_diff, NITF: yield_diff)
+                    _np = (npk.get("n_rows_pest") or {}).get(lab_) if getattr(self, "_pest_pre", None) else None
+                    if _np:
+                        from capri_mod.supply.equations.supply_model.pesticides import SURTOT_pestTerms
+                        for cr_ in self.spec["pest"]["crops"]:
+                            j_ = int(cr_["col"])
+                            if j_ not in _np:
+                                continue
+                            dM_ = self.pest_dev(j_, float(cr_["res_diff"]["N"]))
+                            dN_ = self.pest_dev(j_, float(cr_.get("yield_diff", 0.0)))
+                            if dM_ is None or dN_ is None:
+                                continue
+                            res_, rem_, fix_ = _np[j_]
+                            _cn = _cn + SURTOT_pestTerms(pv(res_), pv(rem_), pv(fix_), dM_, dN_) * pv(1.0 / rs)
                     g_rows.append(SURTOT_REST_(self._lin(y, nzA, scale=rs), P, pv(1.0 / rs), _cn))
                     _add = float((npk.get("n_rows_rhs_add") or {}).get(lab_, 0.0))
                     lbg.append(-np.inf); ubg.append((float(self._b[i_]) + _add) / rs)

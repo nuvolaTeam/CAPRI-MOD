@@ -290,3 +290,96 @@ def OBJEQF_(obj_rest, quad):
     written: the module's docstring).
     """
     return obj_rest + quad
+
+
+
+def LINEAR_carbonTax_pestYield(tax_e, dev):
+    r"""The emission tax on the change of the crops' residue and fixation N2O that the pesticide module's yield factor
+    moves: LINEAR_'s tax on the taxed GGWP, of which GWPN2OCRO_ and GWPN2OLEA_ carry the yield factor on the residues
+    and on the fixation.
+
+    CAPRI's GAMS (supply/supply_model.gms l. 4712-4723, the objective's tax term):
+
+        *      ---  carbon tax on selected GHG emission types
+        *           Note1: ghgs includes GWPA and GLUC => summation covers both the cases of specific carbon prices for some emission types
+        *                  but also a "general" price for the whole GWPA or even GWPT.
+        *           Note2: This means that p_carbonTax(RUNR,ghgs,"perton") needs to be assigned without double counting!
+        *           Note3: p_carbonTax(RUNR,"N2OSYN","perton") => farm level but p_carbonTax(RUNR,"NITF","perton") => fertiliser industry level
+                - sum(ghgs,p_carbonTax(RUNR,ghgs,"perton") * (
+
+        $ifi not %mitiTecPol%==on   (v_CO2EquEmis(RUNR,ghgs) $ (not sameas(ghgs,"GWPA")) + v_CO2EquEmis(RUNR,"GGWP") $ sameas(ghgs,"GWPA"))
+        *      ---  carbon tax on selected GHG emission types assuming constant baseline activities: incentivises technology choice only,
+        *           without (direct) impact on activity levels:
+        $ifi     %mitiTecPol%==on   (v_FxActEmis(RUNR,ghgs)  $ (not sameas(ghgs,"GWPA")) + v_FxActEmis(RUNR,"GGWP")  $ sameas(ghgs,"GWPA"))
+
+
+    CAPRI's GAMS (supply/supply_model.gms l. 3718-3741, GWPN2OCRO_):
+
+            GWPN2OCRO_(RUNR)  ..
+        *
+                v_CO2EquEmis(RUNR,"N2OCRO") =E=
+        *
+                  [SUM( (MCACT,A) $ (p_technFact(RUNR,MCACT,"LEVL",A)), v_actLevl(RUNR,MCACT,A)
+        *$ifi not %CropResi_IDEAG_NG% == on
+                * (%data%(RUNR,MCACT,"MANN","Y")-p_nitrBalance(RUNR,"AtmDep") - p_nitrBalance(RUNR,"Mineralis"))
+        *      --- mitigation effect on yield considered
+                * v_yldMit(RUNR,MCACT)
+        $iftheni.Pes13 %PEST_DISAGG%==ON
+                * (1 +(v_yldPestFac(RUNR,mCact,A)-1) $ v_yldPestFac.range(RUNR,mCact,A))
+        $endif.Pes13
+                * SUM(R_RAGG(RUNR,MSACT), 1 - N2OREGIO(MSACT,"CRBU") - N2OREGIO(MSACT,"CRFU") - N2OREGIO(MSACT,"CRFE")))
+        *$ifi %CropResi_IDEAG_NG% == on            * EMISCALC(RS,MCACT,A,"NRESIDN","Y"))
+                     * 0.001
+
+        *   --- nitrogen provided by winter cover crops have to be added
+
+                 + [p_ghgMiti(RUNR,"CATC","WinterCov","othImpact","BioFix") * v_actLevl(RUNR,"CATC","T")]
+        *            $ (  p_entlLimit(runr,"DPGREEN","DDGreen","Limit") $ p_DPGreeningLimits(runr,"ecoSetAside") )
+
+
+                     ] *  GHGEFS("EF1A") * 44/28;
+
+
+    CAPRI's GAMS (supply/supply_model.gms l. 3881-3907, GWPN2OLEA_'s fixation and residue terms):
+
+        *         --- f) Leaching from biological fixation
+
+                    + SUM ((MCACT,A) $ (p_technFact(RUNR,MCACT,"LEVL",A) $ %data%(RUNR,"IMPORT","NITF","Y")), v_actLevl(RUNR,MCACT,A)
+                          * (%data%(RUNR,MCACT,"NITF","Y") * p_nitrFact(RUNR,MCACT,"BioFix")
+        *         --- mitigation effect on yield considered
+                          * v_yldMit(RUNR,MCACT)
+        $iftheni.Pes15 %PEST_DISAGG%==ON
+                          * (1 +(v_yldPestFac(RUNR,mCact,A)-1) $ v_yldPestFac.range(RUNR,mCact,A))
+        $endif.Pes15
+                          * sum(R_RAGG(RUNR,MSACT),1. + (p_ghgMiti(MSACT,MCACT,"LegSh","othImpact","BioFix") * v_Miti(RUNR,MCACT,"LegSh","BioFix")) $ SAMEAS(MCACT,"OFAR")))
+                          * (1 - %data%(RUNR,"EXPPRD","NITF","Y") / %data%(RUNR,"IMPORT","NITF","Y")) * v_nitrBalance(RUNR,"Leach"))
+
+                    * GHGEFS("EF5") * 44/28 * 0.001
+
+        *         --- g) Leaching from crop residues from main crops
+
+                    + SUM ((MCACT,A) $ (p_technFact(RUNR,MCACT,"LEVL",A) $ %data%(RUNR,"IMPORT","NITF","Y")), v_actLevl(RUNR,MCACT,A)
+                          * (%data%(RUNR,MCACT,"MANN","Y") - p_nitrBalance(RUNR,"AtmDep") - p_nitrBalance(RUNR,"Mineralis"))
+        *         --- mitigation effect on yield considered
+                          * v_yldMit(RUNR,MCACT)
+        $iftheni.Pes16 %PEST_DISAGG%==ON
+                          * (1 +(v_yldPestFac(RUNR,mCact,A)-1) $ v_yldPestFac.range(RUNR,mCact,A))
+        $endif.Pes16
+                          * (1 - v_emiLoss(RUNR,"NETF","N2O","GasTot")
+                               - %data%(RUNR,"EXPPRD","NITF","Y") / %data%(RUNR,"IMPORT","NITF","Y")) * v_nitrBalance(RUNR,"Leach"))
+
+                    * GHGEFS("EF5") * 44/28 * 0.001
+
+    In this project's notation, per crop: tax_e = the tax x e, e the tax base's change per ha and unit of (y - 1) at
+    the baseline (capri_mod/supply/ghg_tax.py pest_yield_coefficients), dev = sum_T (1 + s_T yield_diff) x_T (y_T - 1)
+    (the NLP's pest_dev, as the accounts' in-solve factor):
+
+        cost = tax_e x dev
+
+    Departures from CAPRI: the coefficient is held at the baseline, as the model's other emission coefficients
+    (capri_mod/supply/ghg_tax.py); GWPN2OCRO_ and GWPN2OLEA_ write the yield factor without the technology factor, the
+    accounts' residues carry it (the coefficient and dev follow the accounts). GWPN2OFIX_ (l. 3743-3761) is not taxed, as
+    in CAPRI: GWPN2O_ leaves N2OFIX out of GN2O and GGWP (the accounts report it apart, ghg_fixation_n2o). With the
+    applications exogenous (supply.pest_applications, CAPRI's runs) the yield factor is a constant of the solve and the
+    term moves nothing."""
+    return tax_e * dev

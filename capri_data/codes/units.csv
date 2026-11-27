@@ -52,3 +52,6 @@ U_1000EuPerTon,"1000 Euro per metric ton (the model's money, EUR 1000 of 2017 pe
 U_1000tPerEuPerTon,1000 t per Euro per metric ton (CAPRI's p_mPoolSupSlope as its pool market uses it),no
 U_TonPer1000EuPerTon,"Metric ton per 1000 Euro (2017) per metric ton: a quantity's response to a price, in the model's units",no
 U_1000EuPerTonPerTon,"1000 Euro (2017) per metric ton per metric ton: a unit cost's change per t traded, in the model's units",no
+U_gPerHa,"Gram per hectare (CAPRI's pesticide applications in DATA, supply/cal_pesti.gms l. 28-31: g/ha, x .001 to kg/ha)",no
+U_EuPerKg,"Euro per kg (CAPRI's unit values of the pesticide aggregates, supply/cal_pesti.gms l. 239: Euro/kg for pesticides)",no
+U_haPerKg,"Hectare per kg: a damage share's change per kg per ha applied (supply/cal_pesti.gms l. 262: the slope 1 / pesto_obs [ha/kg], the price-damage ratio [ha/kg])",no

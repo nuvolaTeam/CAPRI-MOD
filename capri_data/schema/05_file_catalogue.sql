@@ -307,4 +307,15 @@ INSERT INTO file_catalogue VALUES
   ('capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/npk_dataout_2030.parquet', '2030', 'environment', 'source', 'as CAPRI''s', NULL, 'extract of CAPRI''s raw file written and read back by its builder'),
   ('capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/yild_2030_ref.parquet', '2030', 'sources', 'source', 'as CAPRI''s', NULL, 'extract of CAPRI''s raw file written and read back by its builder'),
   ('capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/capri_ref_levl_yild_2030_2017.parquet', '2030', 'sources', 'source', 'as CAPRI''s', NULL, 'extract of CAPRI''s raw file written and read back by its builder'),
-  ('capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/prme_schemes_2030.parquet', '2030', 'policy', 'source', 'as CAPRI''s', NULL, 'extract of CAPRI''s raw file written and read back by its builder');
+  ('capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/prme_schemes_2030.parquet', '2030', 'policy', 'source', 'as CAPRI''s', NULL, 'extract of CAPRI''s raw file written and read back by its builder'),
+  ('capri_data/2017/supply/pesticides_2017.csv', '2017', 'supply', 'live (builder input)', 'g/ha', NULL, NULL),
+  ('capri_data/2017/supply/pesticide_prices_2017.csv', '2017', 'supply', 'live (builder input)', 'EUR/kg', NULL, NULL),
+  ('capri_data/2017/supply/pesticide_max_damage_2017.csv', '2017', 'supply', 'live', 'share of the yield', NULL, NULL),
+  ('capri_data/baselines/capri_greendeal_ref/1730/supply/pesticide_margins_2030.csv', '2030 reference', 'supply', 'calibration', 'EUR/ha', 'CAPRI''s pesticide calibration at its 2030 simulation year (cal_pesti.gms), on CAPREG''s 2017 applications', NULL),
+  ('capri_data/baselines/capri_greendeal_ref/1730/supply/pesticide_par_2030.csv', '2030 reference', 'supply', 'live', 'as its columns', 'CAPRI''s pesticide calibration at its 2030 simulation year (cal_pesti.gms), on CAPREG''s 2017 applications', NULL),
+  ('capri_data/codes/capri/pesTSAgg.csv', '2017', 'codes', 'live', NULL, NULL, NULL),
+  ('capri_data/sources/raw/capri/results/capreg/pesticide_data.parquet', '2017', 'supply', 'source', 'as CAPRI''s', NULL, 'extract of CAPREG''s res_17<CC>.gdx written and read back by its builder'),
+  ('capri_data/sources/raw/capri/results/capreg/pesticide_max_damage.parquet', '2017', 'supply', 'source', 'share of the yield', NULL, 'extract of CAPREG''s pmppar_17<CC>.gdx written and read back by its builder'),
+  ('capri_data/sources/raw/capri/results/sim_ini_21730/pesticide_cal_items.parquet', '2030', 'sources', 'source', 'as CAPRI''s', NULL, 'extract of CAPRI''s sim_ini_21730.gdx (the reference export) written and read back by its builder'),
+  ('capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_mult_fact_techn.parquet', '2030', 'sources', 'source', 'ratio', NULL, 'extract of CAPRI''s sim_ini_21730.gdx (the reference export) written and read back by its builder'),
+  ('capri_data/sources/raw/capri/results/sim_ini_21730/oms.parquet', '2030', 'codes', 'source', NULL, NULL, 'extract of CAPRI''s sim_ini_21730.gdx (the reference export) written and read back by its builder');

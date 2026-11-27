@@ -66,8 +66,9 @@ def ghg_coefficients(env, region: str, res, rations: Optional[dict]) -> dict:
     """Emission per unit of each regional column at the baseline solution (t CO2-eq per unit).
 
     Returns {"act": {activity: e}, "grass": e, "dairy": e, "cattle": {animal: e}, "genet": {(animal, option): e},
-    "hist": {class: e}, "feed": {(animal, feed): e per t fresh matter of a flexible feed}}."""
-    out = {"act": {}, "grass": 0.0, "dairy": 0.0, "cattle": {}, "genet": {}, "hist": {}, "feed": {}}
+    "hist": {class: e}, "feed": {(animal, feed): e per t fresh matter of a flexible feed}, "pest": {crop: e per ha and
+    unit of the yield factor (pest_yield_coefficients)}}."""
+    out = {"act": {}, "grass": 0.0, "dairy": 0.0, "cattle": {}, "genet": {}, "hist": {}, "feed": {}, "pest": {}}
     g0 = _ghg_total(env, res)
     acts = res.activities
 
@@ -126,6 +127,7 @@ def ghg_coefficients(env, region: str, res, rations: Optional[dict]) -> dict:
                 d[(a, t)] = float(d.get((a, t), (s0.get(a) or {}).get(t, 0.0)) or 0.0) + h_
                 r1.manure_tech_shares = d
             out["mtech"][(a, t)] = diff(m, 0.01) / x
+    out["pest"] = pest_yield_coefficients(res, diff)
     # cattle feeding: flexible feeds per t fresh matter on the feed columns; the fixed feeds per head on the animal
     for a, r in (rations or {}).items():
         e_dm = _enteric_per_t_dm(env, region, a)
@@ -140,4 +142,35 @@ def ghg_coefficients(env, region: str, res, rations: Optional[dict]) -> dict:
                 fixed += e * float(r.x0[j]) / 1000.0                               # kg FM per head -> t
         if a in out["act"]:
             out["act"][a] += fixed
+    return out
+
+
+def pest_yield_coefficients(res, diff) -> dict:
+    r"""{crop: t CO2-eq per ha and unit of (v_yldPestFac - 1)}: the change of the tax base when the crop's in-solve
+    yield factor moves (the pesticide module), at the baseline solution as the other columns' coefficients, by a
+    finite difference of the accounts: the crop's output and its in-solve factor (SupplyResult.insolve_yield) moved
+    together, so the accounts' crop residues and fixation move by CAPRI's rows (GWPN2OCRO_ l. 3718-3740, GWPN2OLEA_'s
+    fixation and residue terms l. 3881-3905), the mineral N held (the regional model's purchases carry their own tax
+    term). Crops of the pesticide module only (res.insolve_yield with supply.pest_disagg "agg5"). Departures from
+    CAPRI: as the other coefficients, held at the baseline; GWPN2OFIX_ is outside the tax's base as in CAPRI (GWPN2O_ leaves N2OFIX out of GN2O and GGWP)."""
+    from capri_mod.settings import current as _settings
+    if str(_settings().get("supply.pest_disagg")) == "none":
+        return {}
+    isf = dict(getattr(res, "insolve_yield", None) or {})
+    acts, go = res.activities, res.gross_output
+    out = {}
+    for a, f in isf.items():
+        X = float(acts.get(a, 0.0) or 0.0)
+        if not X > 1e-6 or a not in go.index:
+            continue
+        tf0 = float(f["tf"])
+
+        def m(r1, h_, a=a, f=f, tf0=tf0):
+            d = {k: dict(v) for k, v in isf.items()}
+            d[a]["tf"] = tf0 + h_
+            r1.insolve_yield = d
+            g1 = go.copy()
+            g1[a] = float(go[a]) * (1.0 + tf0 + h_) / (1.0 + tf0)
+            r1.gross_output = g1
+        out[a] = diff(m, 0.01) / X
     return out

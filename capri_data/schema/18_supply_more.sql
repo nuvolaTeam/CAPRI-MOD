@@ -1233,3 +1233,110 @@ CREATE TABLE sup_livestock_input_cost_2030 (
 COMMENT ON TABLE sup_livestock_input_cost_2030 IS 'The animals'' inputs of IobjCont per model head at CAPRI''s 2030 simulation start (sim_ini_21730): DATA(BAS) x (1 - f + f G) (capmod/define_inputs.gms l. 107-112, before TF_I) x the member state''s UVAP(2030) = UVAP(BAS) x p_infl^(2030 - BAS), CAPRI''s 2030 money (the model deflates), over the model''s 2030 base heads (register DEP-13 step 3)';
 INSERT INTO value_units VALUES
   ('sup_livestock_input_cost_2030', 'eur_head', 'U_EuPerHd', 'capri', 'sim_ini_21730 DATA at BAS, the main output''s yield growth, p_inputDemandFactor, UVAP(BAS) x p_infl^13 / 1000, LEVL(2030)-weighted, over the model''s 2030 heads');
+
+-- The pesticide module (register DEP-51; tools/build/build_pesticides_2017.py, build_pesticide_calibration_2030.py)
+
+-- file: capri_data/2017/supply/pesticides_2017.csv
+CREATE TABLE sup_pesticides_2017 (
+    region VARCHAR NOT NULL REFERENCES capri_rall (code),
+    activity VARCHAR NOT NULL REFERENCES capri_pact (code),
+    item VARCHAR NOT NULL REFERENCES capri_pestsagg (code),
+    g_ha DOUBLE NOT NULL CHECK (g_ha > 0),
+    PRIMARY KEY (region, activity, item)
+);
+COMMENT ON TABLE sup_pesticides_2017 IS 'CAPREG''s 2017 applications of the five pesticide aggregates per region (CAPREG''s regions, member states and NUTS 1 included) and crop: DATA(region, crop, PESTOF..PESTOO, "Y") of capreg/res_17<CC>.gdx, the nonzero cells; the simulation year takes them as they are (CAPTRD projects no pesticide item)';
+INSERT INTO value_units VALUES
+  ('sup_pesticides_2017', 'g_ha', 'U_gPerHa', 'capri', 'CAPREG DATA(region, crop, pestoAgg, "Y"), g per ha (supply/cal_pesti.gms l. 28-31 converts g/ha to kg/ha)');
+
+-- file: capri_data/2017/supply/pesticide_prices_2017.csv
+CREATE TABLE sup_pesticide_prices_2017 (
+    region VARCHAR NOT NULL REFERENCES capri_rall (code),
+    item VARCHAR NOT NULL REFERENCES capri_pestsagg (code),
+    uvag DOUBLE NOT NULL CHECK (uvag > 0),
+    uvab DOUBLE CHECK (uvab > 0),
+    PRIMARY KEY (region, item)
+);
+COMMENT ON TABLE sup_pesticide_prices_2017 IS 'CAPREG''s 2017 unit values of the five pesticide aggregates: DATA(region, "UVAG" | "UVAB", PESTOF..PESTOO, "Y") of capreg/res_17<CC>.gdx; uvab empty where CAPREG has none';
+INSERT INTO value_units VALUES
+  ('sup_pesticide_prices_2017', 'uvag', 'U_EuPerKg', 'capri', 'CAPREG DATA(region, "UVAG", pestoAgg, "Y"), EUR per kg in the base year''s money (supply/cal_pesti.gms l. 239: "Euro/kg for pesticides")'),
+  ('sup_pesticide_prices_2017', 'uvab', 'U_EuPerKg', 'capri', 'CAPREG DATA(region, "UVAB", pestoAgg, "Y"), EUR per kg in the base year''s money');
+
+-- file: capri_data/2017/supply/pesticide_max_damage_2017.csv
+CREATE TABLE sup_pesticide_max_damage_2017 (
+    region VARCHAR NOT NULL REFERENCES capri_rall (code),
+    activity VARCHAR NOT NULL REFERENCES capri_pact (code),
+    item VARCHAR NOT NULL REFERENCES capri_pestsagg (code),
+    technology VARCHAR NOT NULL CHECK (technology IN ('T', 'T1', 'T2')),
+    max_damage DOUBLE NOT NULL CHECK (max_damage > 0 AND max_damage < 1),
+    PRIMARY KEY (region, activity, item, technology)
+);
+COMMENT ON TABLE sup_pesticide_max_damage_2017 IS 'CAPREG''s maximum yield damage without the pesticide aggregate, p_pestPar(region, crop, aggregate, technology, "maxDamage") of capreg/pmppar_17<CC>.gdx (loaded by capmod/create_sim_ini_gdx.gms l. 400-410; CAPREG builds it from JKI''s priors, inputs/pest_cor.gms, not ported), the nonzero cells';
+INSERT INTO value_units VALUES
+  ('sup_pesticide_max_damage_2017', 'max_damage', 'U_ratio', 'capri', 'p_pestPar(..., "maxDamage"): the share of the yield lost without the aggregate');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/pesticide_margins_2030.csv
+CREATE TABLE sup_pesticide_margins_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    activity VARCHAR NOT NULL REFERENCES capri_pact (code),
+    technology VARCHAR NOT NULL CHECK (technology IN ('T', 'T1', 'T2')),
+    no_damage_yld DOUBLE NOT NULL CHECK (no_damage_yld >= 0),
+    marg_cost_nitf DOUBLE NOT NULL,
+    marg_cost_phof DOUBLE NOT NULL,
+    marg_cost_potf DOUBLE NOT NULL,
+    marg_cost_ferc DOUBLE NOT NULL,
+    negative_margin INTEGER NOT NULL CHECK (negative_margin IN (0, 1)),
+    PRIMARY KEY (region, activity, technology)
+);
+COMMENT ON TABLE sup_pesticide_margins_2030 IS 'CAPRI''s pesticide calibration at 2030 (supply/cal_pesti.gms, ported in capri_mod/supply/equations/cal_pesti.py), per regional unit, crop and technology: the yield''s value without damage, p_pestPar(..., "yild", A, "NoDamageYld"), and the marginal fertiliser cost of the avoided yield loss per nutrient and in total, p_pestPar(..., NITF | PHOF | POTF | FERC, A, "margCostYld"); negative_margin 1 where CAPRI''s p_negMargWoPesti is set (the price-damage ratio is not defined there)';
+INSERT INTO value_units VALUES
+  ('sup_pesticide_margins_2030', 'no_damage_yld', 'U_EuPerHa', 'capri', 'p_pestPar(..., "yild", A, "NoDamageYld"), EUR per ha in CAPRI''s 2030 money (cal_pesti.gms l. 163: [kg/ha x Euro/t] x .001)'),
+  ('sup_pesticide_margins_2030', 'marg_cost_nitf', 'U_EuPerHa', 'capri', 'p_pestPar(..., "NITF", A, "margCostYld"), EUR per ha (cal_pesti.gms l. 216-222)'),
+  ('sup_pesticide_margins_2030', 'marg_cost_phof', 'U_EuPerHa', 'capri', 'p_pestPar(..., "PHOF", A, "margCostYld"), EUR per ha'),
+  ('sup_pesticide_margins_2030', 'marg_cost_potf', 'U_EuPerHa', 'capri', 'p_pestPar(..., "POTF", A, "margCostYld"), EUR per ha'),
+  ('sup_pesticide_margins_2030', 'marg_cost_ferc', 'U_EuPerHa', 'capri', 'p_pestPar(..., "FERC", A, "margCostYld"), the nutrients'' sum, EUR per ha'),
+  ('sup_pesticide_margins_2030', 'negative_margin', 'U_1unit', 'builder', 'a flag: 1 where p_negMargWoPesti is set');
+
+-- file: capri_data/baselines/capri_greendeal_ref/1730/supply/pesticide_par_2030.csv
+CREATE TABLE sup_pesticide_par_2030 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    activity VARCHAR NOT NULL REFERENCES capri_pact (code),
+    item VARCHAR NOT NULL CHECK (item IN ('PESTOF', 'PESTOH', 'PESTOI', 'PESTOG', 'PESTOO', 'YILD')),
+    technology VARCHAR NOT NULL CHECK (technology IN ('T', 'T1', 'T2')),
+    appl_per_ha DOUBLE CHECK (appl_per_ha > 0),
+    max_damage DOUBLE CHECK (max_damage > 0 AND max_damage < 1),
+    uvag DOUBLE CHECK (uvag > 0),
+    price_damage_ratio DOUBLE CHECK (price_damage_ratio >= 0),
+    slop_fudg DOUBLE CHECK (slop_fudg >= 0),
+    endogenous_start DOUBLE CHECK (endogenous_start IN (0, 1)),
+    slop_lin DOUBLE CHECK (slop_lin >= 0),
+    slop_expo DOUBLE CHECK (slop_expo >= 0),
+    expon DOUBLE CHECK (expon = 0 OR (expon > 1 AND expon <= 10)),
+    endogenous DOUBLE CHECK (endogenous IN (0, 1)),
+    power_infes DOUBLE CHECK (power_infes IN (0, 1)),
+    cur_damage DOUBLE,
+    no_damage_fac DOUBLE CHECK (no_damage_fac > 0),
+    appl_cal DOUBLE CHECK (appl_cal >= 0),
+    appl_choke DOUBLE CHECK (appl_choke >= 0),
+    yld_pest_fac_cal DOUBLE CHECK (yld_pest_fac_cal > 0),
+    PRIMARY KEY (region, activity, item, technology),
+    CHECK ((item = 'YILD') = (appl_per_ha IS NULL)),
+    CHECK ((item = 'YILD') = (no_damage_fac IS NOT NULL))
+);
+COMMENT ON TABLE sup_pesticide_par_2030 IS 'CAPRI''s pesticide calibration at 2030, p_pestPar(region, crop, item, technology, ...) (supply/cal_pesti.gms, 5_aggregates stage, ported in capri_mod/supply/equations/cal_pesti.py and pesti_test.py), per regional unit, crop, aggregate and technology: the application per ha, maxDamage, the unit value, the price-damage ratio, the damage function''s terms (slopFudg, SlopLin, SlopExpo, Expon), whether the cell is endogenous, CAPRI''s powerInfes and curDamage, and CAPRI''s test of the calibration (m_pestiTest: the application at the calibration and the choke point); on the item YILD the yield factor without damage NoDamageFac and the yield factor at the calibration (the other columns empty there)';
+INSERT INTO value_units VALUES
+  ('sup_pesticide_par_2030', 'appl_per_ha', 'U_kgperha', 'capri', 'p_pestPar(..., "ApplPerHa"): DATA(..., "Y") x .001 x (1 + p_technFact), kg per ha (cal_pesti.gms l. 28-31)'),
+  ('sup_pesticide_par_2030', 'max_damage', 'U_ratio', 'capri', 'p_pestPar(..., "maxDamage"), the share of the yield lost without the aggregate'),
+  ('sup_pesticide_par_2030', 'uvag', 'U_EuPerKg', 'capri', 'DATA(region, "UVAG", pestoAgg, "Y"): the member state''s base value x CAPRI''s inflation to 2030 (inflation_and_trend_interpolation.gms l. 71-72), EUR per kg (cal_pesti.gms l. 239)'),
+  ('sup_pesticide_par_2030', 'price_damage_ratio', 'U_haPerKg', 'capri', 'p_pestPar(..., "priceDamagRatio"): UVAG over the avoided maximum damage in EUR per ha (cal_pesti.gms l. 239-250; [ha/kg], l. 262-263)'),
+  ('sup_pesticide_par_2030', 'slop_fudg', 'U_haPerKg', 'capri', 'p_pestPar(..., "slopFudg"), the linear damage function''s slope in its smooth max (cal_pesti.gms l. 262-272)'),
+  ('sup_pesticide_par_2030', 'endogenous_start', 'U_1unit', 'builder', 'a flag: 1 where the cell starts as endogenous in the calibration (cal_pesti.gms l. 262-272: 0 where slopFudg is below the price-damage ratio)'),
+  ('sup_pesticide_par_2030', 'slop_lin', 'U_haPerKg', 'capri', 'p_pestPar(..., "SlopLin"), the damage function''s linear slope (cal_pesti.gms l. 401, 405-410, 502-503)'),
+  ('sup_pesticide_par_2030', 'slop_expo', NULL, 'open', 'p_pestPar(..., "SlopExpo"), the power term''s coefficient (cal_pesti.gms l. 402, 405-410): (ha per kg) to the power Expon, no catalogue unit'),
+  ('sup_pesticide_par_2030', 'expon', 'U_ratio', 'capri', 'p_pestPar(..., "Expon"), the power term''s exponent, in (1.1, 10] or 0 for the linear form (cal_pesti.gms l. 315-317, 490)'),
+  ('sup_pesticide_par_2030', 'endogenous', 'U_1unit', 'builder', 'a flag: 1 where the application is a variable of the supply model'),
+  ('sup_pesticide_par_2030', 'power_infes', 'U_1unit', 'capri', 'p_pestPar(..., "powerInfes"), a flag (cal_pesti.gms l. 360)'),
+  ('sup_pesticide_par_2030', 'cur_damage', 'U_ratio', 'capri', 'p_pestPar(..., "curDamage"): maxDamage x the damage function at the application (cal_pesti.gms l. 505-508)'),
+  ('sup_pesticide_par_2030', 'no_damage_fac', 'U_ratio', 'capri', 'p_pestPar(..., "yild", A, "NoDamageFac") = 1 + the crop''s total curDamage (cal_pesti.gms l. 512)'),
+  ('sup_pesticide_par_2030', 'appl_cal', 'U_kgperha', 'builder', 'CAPRI''s test of the calibration (m_pestiTest): the application the farmer chooses at the calibration point (ApplPerHaCal), kg per ha'),
+  ('sup_pesticide_par_2030', 'appl_choke', 'U_kgperha', 'builder', 'CAPRI''s test of the calibration: the application at the price that would end the use at the prior elasticity (ApplPerHa2), kg per ha'),
+  ('sup_pesticide_par_2030', 'yld_pest_fac_cal', 'U_ratio', 'builder', 'the yield factor at appl_cal (CAPRI flags it where it is off 1 by more than 1e-4)');

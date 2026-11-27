@@ -193,6 +193,24 @@ class RegionBuildBlock:
             return None
         return (d.get("techn_mix") or {}).get(region)
 
+    def _pesticides_for(self, d, region):
+        """The region's calibrated pesticide cells and NoDamageFac (pesticide_par_2030.csv) with supply.pest_disagg
+        "agg5" at the 2030 market year; None with "none". The module works on CAPRI's two technologies: with "agg5"
+        and the technologies off (supply.crop_technologies false) the build stops."""
+        mode = str(_settings().get("supply.pest_disagg"))
+        if mode == "none":
+            return None
+        if mode != "agg5":
+            raise ValueError(f"supply.pest_disagg {mode!r}: 'none' or 'agg5'")
+        if _inputs.market_year(d) != 2030:
+            raise ValueError("supply.pest_disagg 'agg5' needs the 2030 market year (pesticide_par_2030.csv)")
+        if not bool(_settings().get("supply.crop_technologies")):
+            raise ValueError("supply.pest_disagg 'agg5' needs CAPRI's two technologies (supply.crop_technologies)")
+        t = d.get("pesticides")
+        if t is None:
+            raise ValueError("supply.pest_disagg 'agg5' needs pesticide_par_2030.csv")
+        return t.get(region)
+
     def _pmp_capri_parts_of(self, g):
         """The region's CAPRI 2030 terms restricted to pmp_capri_parts (crops' matrix, animals' herd terms)."""
         if not g:
@@ -330,6 +348,7 @@ class RegionBuildBlock:
             # CAPRI's PMP terms of its 2030 baseline calibration (K61): at the 2030 market year, with pmp_source "capri2030"
             pmp_capri=self._pmp_terms_for(d, region),
             techn_mix=self._techn_mix_for(d, region),
+            pesticides=self._pesticides_for(d, region),
             uncalibrated=self._uncalibrated(d, region),
             livestock_feed_coef=(
                 d["livestock_feed_coef"].loc[region]

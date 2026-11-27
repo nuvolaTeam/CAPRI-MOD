@@ -91,3 +91,45 @@ def DATA_Yild(Yild, yildReduction, conventional_share):
     In this project's notation: Y' = Y (1 - loss (1 - o_a)). Departures from CAPRI: without the remainingTarget /
     %plapReduction% factor (the loss scaled with the cut instead, p_yildReduction)."""
     return Yild * (1.0 - yildReduction * conventional_share)
+
+
+def pest_change_factor_greendeal(pc_plap, pc_organic):
+    r"""The factor on every pesticide application of an EU region under the Green Deal's targets with the pesticide
+    module (DATA(RU, mCact, pestoAgg, "Y") after define_inputs.gms), from the plant protection's regional change:
+    conventional_io.gms sets the change factor from PLAP's total change (the organic target's and the remaining one),
+    organic_io.gms sets the aggregates' percentage change to the organic target's, and define_inputs.gms applies both.
+
+    CAPRI's GAMS (pol_input/greendeal/conventional_io.gms l. 128-134):
+
+        $iftheni.pes46  %pest_disagg%==on
+        *    Copied from pol_input\pesticides\pesti_regu50.gms:
+             DATA(RU,mCact,pestoAgg,"ChangeFactor") $ region_plap(ru)= DATA(RU,"GROF","PLAP","percentageChange")/100+1;
+             DATA(RU,mCact,pestoAgg,"AbsoluteChange") $ DATA(RU,mCact,pestoAgg,"ChangeFactor") =0;
+        *    Not needed anymore to pass on the planned changes for all pesticides:
+             DATA(RU,"GROF","PLAP","percentageChange")=0;
+        $endif.pes46
+
+    CAPRI's GAMS (pol_input/greendeal/organic_io.gms l. 74-76):
+
+           DATA(RU,"GROF","PLAP","percentageChange") $ (region_plap(ru) $ p_organicAreaTarget(ru))
+              =  -%plapReduction% * p_organicAreaTarget(ru);
+        $ifi %pest_disagg%==on   DATA(RU,mCact,pestoAgg,"percentageChange") = DATA(RU,"GROF","PLAP","percentageChange") ;
+
+    CAPRI's GAMS (capmod/define_inputs.gms l. 131-135):
+
+                DATA(RU,mCact,pestoAgg,"Y")  $ DATA(RU,mCact,pestoAgg,"ChangeFactor")
+                      = DATA(RU,mCact,pestoAgg,"Y") * DATA(RU,mCact,pestoAgg,"ChangeFactor");
+
+                DATA(RU,mCact,pestoAgg,"Y")  $ DATA(RU,mCact,pestoAgg,"PercentageChange")
+                  = DATA(RU,mCact,pestoAgg,"Y") * (1. + DATA(RU,mCact,pestoAgg,"PercentageChange")/100);
+
+    In this project's notation, as shares: pc_plap = DATA(RU, "GROF", "PLAP", "percentageChange") / 100 after
+    conventional_io.gms (DATA_GROF_percentageChange), pc_organic the organic target's (organic_io.gms l. 74; 0 without
+    an organic target):
+
+        factor = (1 + pc_plap) x (1 + pc_organic)
+
+    Departures from CAPRI: none (as CAPRI's code runs: the organic target's cut enters twice, once in PLAP's total and
+    once as the aggregates' percentage change, which looks unintended in CAPRI; the comment at organic_io.gms l. 67-71
+    guards PLAP against that double count, not the aggregates)."""
+    return (1.0 + float(pc_plap)) * (1.0 + float(pc_organic))

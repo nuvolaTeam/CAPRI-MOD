@@ -21,6 +21,7 @@ environmental,ghg_enteric,rows,ImpactGwp,CH4ENT,,kt CO2-eq,"reports/def_indic.gm
 environmental,ghg_ggwp,rows,,,,,
 environmental,ghg_histosol_n2o,rows,ImpactGwp,N2OHIS,,kt CO2-eq,"reports/def_indic.gms l. 68: DATA(R,'ImpactGwp',GHGS) = DATA(R,'Impact',GHGS) x p_globWarmPot (the model's GWP_CH4 25, GWP_N2O 298 are CAPRI's: model_parameters.csv); the model's N2O_HIS (environmental_module.py)"
 environmental,ghg_indirect_n2o,rows,,,,,
+environmental,ghg_fixation_n2o,rows,ImpactGwp,N2OFIX,,kt CO2-eq,"CAPRI's N2OFIX (supply_model.gms GWPN2OFIX_ l. 3743-3761): the crops' biological fixation x the need multiplier x EF1A x 44/28 x GWP; reported only, CAPRI's GWPN2O_ keeps it out of GN2O and GGWP, so out of ghg_total, ghg_ggwp and the emission tax (environmental_module.py)"
 environmental,ghg_leaching_n2o,rows,,,,,
 environmental,ghg_liming,rows,ImpactGwp,CO2LIM,,kt CO2-eq,"reports/def_indic.gms l. 68: DATA(R,'ImpactGwp',GHGS) = DATA(R,'Impact',GHGS) x p_globWarmPot (the model's GWP_CH4 25, GWP_N2O 298 are CAPRI's: model_parameters.csv); the model's CO2_LIME, kt CO2 (GWP 1)"
 environmental,ghg_manure_ch4,rows,ImpactGwp,CH4MAN,,kt CO2-eq,"reports/def_indic.gms l. 68: DATA(R,'ImpactGwp',GHGS) = DATA(R,'Impact',GHGS) x p_globWarmPot (the model's GWP_CH4 25, GWP_N2O 298 are CAPRI's: model_parameters.csv); the model's CH4_MAN (environmental/ghg.py)"
@@ -190,6 +191,7 @@ supply,manure_trade,rows,,,,,
 supply,manure_trade_pk,rows,,,,,
 supply,mineral_cap,rows,,,,,
 supply,mineral_n_alloc,rows,,,,,
+supply,insolve_yield,rows,,,,factor,"CAPRI's in-solve yield factors of a crop at the solution, its technologies summed (the technology mix's p_technFact and the pesticide module's v_yldPestFac): tf the output's change (SUPBAL_), ned the need's factor (NUTNED_); capri_mod/supply/equations/supply_model/pesticides.py insolve_yield_factors"
 supply,n_intensity,rows,,,,,
 supply,n_substitution,rows,,,,,
 supply,n_target_relaxed,rows,,,,,

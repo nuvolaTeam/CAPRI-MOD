@@ -402,6 +402,52 @@ differs, and each is meant to reproduce CONOPT's (CAPTRD_MOD.md §12.6, §12.9):
   1.11). The objective is unchanged.
 - **Positions in no equation and not in the objective** are held at their start. GAMS does not generate them.
 
+## Separable NLPs: the form handed to the solver (27 November 2026)
+
+**The view (adopted by the project lead, 27 November 2026).** Some of CAPRI's NLPs gather many independent blocks
+into one solve. CAPRI's joint form is a way of handing the problem to the solver, not part of the model. Where the
+blocks share no variable and no equation, and the objective is a sum over them, the joint problem and the set of the
+blocks' problems are the same mathematical problem: they have the same solutions. CAPRI probably writes such problems
+jointly because that is natural in GAMS with CONOPT; that is an interpretation, not documented by CAPRI.
+
+**Why it matters here.** CONOPT, a feasible-path active-set method, copes with the joint form. The solvers this
+project uses may not. IPOPT, an interior-point method, has one barrier parameter and one line search for the whole
+problem, so one difficult block can stall all the others. That is a reading of the algorithms, but the measurements
+below show it.
+
+**Where it applies: the pesticide module's calibration and its test** (supply/cal_pesti.gms; register DEP-59,
+DEP-60).
+- **The calibration, m_pestiCaliPower.** Each cell (region, crop, aggregate, technology) has its own five variables
+  and three equations. CAPRI solves a region's cells together at each pass of its loop, then all regions together.
+- **The test, m_pestiTest.** As an NLP it separates by crop and technology (the yield factor is a variable with its
+  own equation); once that equation is substituted (the yield factor is linear in the aggregates' damages, the
+  objective linear in the yield factor and the pesticides' cost) it separates by cell, each cell a problem in one
+  application. CAPRI solves all regions as one NLP.
+- **Measured** on Denmark and Austria (the comparison of solvers, 27 November 2026; the private trace
+  plans/SOLVER_BAKEOFF_PESTICIDES.md):
+
+  | Form | Calibration at 2017: cells within 1e-4 of CAPREG's terms | Test: yield factors within 1e-4 of 1 |
+  |---|---|---|
+  | Cell by cell, IPOPT (MUMPS), in CAPRI's loop | 708 of 713 | |
+  | One NLP per crop-technology, IPOPT (MUMPS) | | 334 of 397 |
+  | Cell by cell from the first-order condition (no solver) | | 397 of 397 |
+  | CAPRI's joint form, CONOPT 4.39.3 (demo licence: Austria's test by region, its last calibration solve in chunks) | 706 of 713 | 397 of 397 |
+  | CAPRI's joint form, IPOPT (MUMPS) | 229 of 713 | 150 of 397 |
+  | CAPRI's joint form, IPOPT (SPRAL) | not finished in 50 minutes | 397 of 397 with CasADi's defaults; 151 with another SPRAL scaling or build |
+  | CAPRI's joint form, Uno 0.4.17 (filtersqp; ipopt preset) | 398 of 713; 0 | 397 of 397 (at its iteration limit); 345 |
+  | CAPRI's joint form, other solvers (IPOPT with ma57 or ma97, blockSQP, CasADi's SQP method) | 0 to 142 | 106 to 387 |
+
+  The test's reference is its true optimum, checked on a grid and with a second solver (SciPy's SLSQP).
+  GALAHAD's EXPO (its Python interface's general NLP solver, beta) did not finish Denmark's test: it evaluates
+  outside the bounds, where the power has no value.
+- **Decided (the project lead, 27 November 2026): block by block**, without CONOPT, which solves CAPRI's joint form
+  but needs a licence. The calibration: CAPRI's loop with each cell its own NLP, solved by IPOPT (DEP-59). The test:
+  each cell's optimum from its first-order condition, exact and without a solver (DEP-60); IPOPT on the test's
+  blocks fails at the linear fall-back's kink (the 63 crop-technologies of the table, all at its iteration limit).
+  Where a non-convex cell of the calibration has several local optima the solver's path decides which it reaches:
+  of Denmark's 68 cells, CONOPT's joint solve reaches CAPREG's terms in two that IPOPT's cell solves miss, and the
+  reverse in one.
+
 ## Beyond CAPRI: reports only (results unchanged)
 
 ### The run manifest (29 October 2026; the project lead's decision)

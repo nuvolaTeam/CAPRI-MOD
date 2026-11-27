@@ -86,3 +86,72 @@ def DATA_UVAG_DWHE(share, price_change):
     In this project's notation: dUVAG / UVAG0 = s (P / P0 - 1). Departures from CAPRI: none (the shares,
     model_price_follows.csv, data read: capri_mod/data/definitions.py PRICE_FOLLOWS_SHARE)."""
     return share * price_change
+
+
+def DATA_UVAG_MARR_Y(UVAG_ref, v_prodPrice, PPri_ref):
+    r"""DATA(RMSSUP, "UVAG", MARR, "Y") as a level: an output's unit value of the reference point (%1) moved by its
+    market's producer price change, absolute. Called with %1 = "BAS" in a baseline (arm/prep_market.gms l. 1248-1250), which
+    gives the unit values the baseline's supply calibration works with (supply/cal_pesti.gms among it).
+
+    CAPRI's GAMS (arm/set_prices.gms l. 44-47):
+
+          DATA(RMSSUP,"UVAG",MARR,"Y") $ SUM(CAP_TO_TRD(MARR,XX), DATA(RMSSUP,"Ppri",XX,%1))
+            = DATA(RMSSUP,"UVAG",MARR,%1) +
+                  SUM(CAP_TO_TRD(MARR,XX),
+                          v_prodPrice.L(RMSSUP,XX)-DATA(RMSSUP,"PPri",XX,%1) $ DATA(RMSSUP,"UVAG",MARR,%1));
+
+    In this project's notation: UVAG = UVAG(%1) + P - P(%1), for an output whose market has a price at %1 (None
+    otherwise: the caller keeps its value); without a unit value at %1 the market's price itself (CAPRI's $ binds to
+    the price at %1 only). Departures from CAPRI: none."""
+    if not PPri_ref:
+        return None
+    return float(UVAG_ref) + float(v_prodPrice) - (float(PPri_ref) if UVAG_ref else 0.0)
+
+
+def DATA_UVAG_DWHE_Y(UVAG_ref, v_prodPrice, PPri_ref):
+    r"""DATA(RMSSUP, "UVAG", "DWHE", "Y") as a level: durum wheat takes half of the wheat aggregate's relative price
+    change.
+
+    CAPRI's GAMS (arm/set_prices.gms l. 59-61):
+
+          DATA(RMSSUP,"UVAG","DWHE","Y") $ SUM(CAP_TO_TRD("DWHE",XX), DATA(RMSSUP,"Ppri",XX,%1))
+            = DATA(RMSSUP,"UVAG","DWHE",%1) * (1. + 0.5 *
+                 SUM(CAP_TO_TRD("DWHE",XX), (v_prodPrice.L(RMSSUP,XX)/DATA(RMSSUP,"PPri",XX,%1) -1.) ));
+
+    In this project's notation: UVAG = UVAG(%1) (1 + 0.5 (P / P(%1) - 1)); None without the market's price at %1.
+    Departures from CAPRI: none."""
+    if not PPri_ref:
+        return None
+    return float(UVAG_ref) * (1.0 + 0.5 * (float(v_prodPrice) / float(PPri_ref) - 1.0))
+
+
+def DATA_UVAG_PARI_Y(UVAG_ref, v_prodPrice_RICE, PPri_RICE_ref, MAPR_RICE_ref, GROF_PARI_ref):
+    r"""DATA(RMSSUP, "UVAG", "PARI", "Y") as a level: paddy rice follows milled rice, by the milled rice per paddy.
+
+    CAPRI's GAMS (arm/set_prices.gms l. 81-84):
+
+          DATA(RMSSUP,"UVAG","PARI","Y") $ (DATA(RMSSUP,"PPRI","RICE",%1) $ DATA(RMSSUP,"GROF","PARI",%1))
+             =  DATA(RMSSUP,"UVAG","PARI",%1)
+                    + (v_prodPrice.L(RMSSUP,"RICE")-DATA(RMSSUP,"PPri","RICE",%1))
+                           * DATA(RMSSUP,"MAPR","RICE",%1)/DATA(RMSSUP,"GROF","PARI",%1);
+
+    In this project's notation: UVAG = UVAG(%1) + (P(RICE) - P(RICE, %1)) MAPR(RICE, %1) / GROF(PARI, %1); None without
+    the rice price or the paddy production at %1. Departures from CAPRI: none."""
+    if not (PPri_RICE_ref and GROF_PARI_ref):
+        return None
+    return float(UVAG_ref) + (float(v_prodPrice_RICE) - float(PPri_RICE_ref)) * float(MAPR_RICE_ref) / float(GROF_PARI_ref)
+
+
+def DATA_UVAG_OLIV_Y(UVAG_ref, v_prodPrice_OLIO, PPri_OLIO_ref):
+    r"""DATA(RMSSUP, "UVAG", "OLIV", "Y") as a level: olives follow olive oil, absolute.
+
+    CAPRI's GAMS (arm/set_prices.gms l. 88-89):
+
+          DATA(RMSSUP,"UVAG","OLIV","Y") $ DATA(RMSSUP,"PPRI","OLIO",%1)
+             =  DATA(RMSSUP,"UVAG","OLIV",%1) + (v_prodPrice.L(RMSSUP,"OLIO")-DATA(RMSSUP,"PPri","OLIO",%1));
+
+    In this project's notation: UVAG = UVAG(%1) + P(OLIO) - P(OLIO, %1); None without the oil's price at %1.
+    Departures from CAPRI: none."""
+    if not PPri_OLIO_ref:
+        return None
+    return float(UVAG_ref) + float(v_prodPrice_OLIO) - float(PPri_OLIO_ref)

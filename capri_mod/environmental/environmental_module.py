@@ -79,6 +79,9 @@ class EnvironmentalIndicators:
     #: indirect N2O of the N leached and run off from the fields (CAPRI gases.gms N2OLEA allocated to crops;
     #: capri_mod/supply/n_leaching.py); the housing runoff's is in ghg_manure_n2o
     ghg_leaching_n2o: float = 0.0
+    #: CAPRI's N2O of the crops' biological fixation (gases N2OFIX, supply_model.gms GWPN2OFIX_), kt CO2-eq: reported
+    #: only, as CAPRI keeps it out of GN2O and GGWP (GWPN2O_), so out of ghg_total, ghg_ggwp and the emission tax
+    ghg_fixation_n2o: float = 0.0
     #: CAPRI's leaching share of the soil surplus (v_nitrBalance(Leach)) and the N leached and run off from the
     #: fields that carries the indirect N2O (t N)
     leach_share: float = 0.0
@@ -303,11 +306,24 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         ghg = self.compute_ghg(acts, region, mint)
         ghg_total = sum(ghg.values())
 
+        # CAPRI's in-solve yield factors (the technology mix, the pesticide module's v_yldPestFac: SupplyResult.
+        # insolve_yield, {crop: {"tf", "ned"}}) multiply the crops' removal, residues, fixation and need as CAPRI's rows do
+        # (e_EXPPRD, e_CRESID, e_BIOFIX, NUTNED_ x (1 + tf), x (1 + (v_yldPestFac - 1))); fertned's rule on the yields
+        # (need_yield_factor) is for the data's yields, the realised yield over those factors. Until 27 November 2026
+        # the realised yield went through fertned's rule whole, the in-solve factors with it.
+        _isf = dict(getattr(supply_result, "insolve_yield", None) or {}) if supply_result is not None else {}
+        yields_n = yields
+        if _isf and hasattr(yields, "copy"):
+            yields_n = yields.copy()
+            for c, f_ in _isf.items():
+                if c in yields_n.index and 1.0 + float(f_["tf"]) > 0:
+                    yields_n[c] = float(yields_n[c]) / (1.0 + float(f_["tf"]))
+        _tfx = {c: (float(f_["tf"]), float(f_["ned"])) for c, f_ in _isf.items()} or None
         # Nitrogen (the straw part of crop need follows the yields before the price response: need_yield_factor)
         _pf = (getattr(supply_result, "yield_price_factor", None) or {}) if supply_result is not None else {}
-        _ysc = {c: float(yields.get(c)) / f for c, f in _pf.items()
-                if f > 0 and hasattr(yields, "get") and yields.get(c) is not None} or None
-        nb = self.compute_nitrogen_balance(acts, yields, region, mint, yields_scen=_ysc)
+        _ysc = {c: float(yields_n.get(c)) / f for c, f in _pf.items()
+                if f > 0 and hasattr(yields_n, "get") and yields_n.get(c) is not None} or None
+        nb = self.compute_nitrogen_balance(acts, yields_n, region, mint, yields_scen=_ysc, techn_fact=_tfx)
         _nb_raw = dict(nb)
         # the idled histosols keep their deposition (CAPRI's iHisCr, iHisGr: MANN = AtmDep, in e_ATMOSD / e_CRESID and in
         # the residue pool fertDistCres_; K184), as the supply model's histosol columns do
@@ -352,8 +368,8 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             _acts_k = dict(acts) if isinstance(acts, dict) else acts.copy()
             for _a, _v in _kk.items():
                 _acts_k[_a] = float(_acts_k.get(_a, 0.0)) + _v
-            _nb_k = self.compute_nitrogen_balance(_acts_k, yields, region, mint, yields_scen=_ysc)
-            _nb_0 = self.compute_nitrogen_balance(acts, yields, region, mint, yields_scen=_ysc)
+            _nb_k = self.compute_nitrogen_balance(_acts_k, yields_n, region, mint, yields_scen=_ysc, techn_fact=_tfx)
+            _nb_0 = self.compute_nitrogen_balance(acts, yields_n, region, mint, yields_scen=_ysc, techn_fact=_tfx)
             for _k in ("n_organic_input", "n_mineral_input", "n_mineral_plain", "n_surplus"):
                 if _k in nb and _k in _nb_k:
                     nb[_k] = float(nb[_k]) + float(_nb_k[_k]) - float(_nb_0[_k])
@@ -412,7 +428,8 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         _lv_, _lo_ = self.legsh_effect(region, supply_result) if supply_result is not None else (0.0, 0.0)
         if _lv_ > 0 and _lo_ > 0 and float(acts.get("OFAR", 0.0) or 0.0) > 0:
             from capri_mod.supply.equations.supply_model.n_surplus import e_BIOFIX_legSh
-            _fx = float(self.unit_nitrogen_balance("OFAR", yields, region, mint, yields_scen=_ysc).get("n_fixation", 0.0)
+            _fx = float(self.unit_nitrogen_balance("OFAR", yields_n, region, mint, yields_scen=_ysc,
+                                                   techn_fact=(_tfx or {}).get("OFAR")).get("n_fixation", 0.0)
                         or 0.0) * float(acts.get("OFAR", 0.0))
             _cn = _cn + e_BIOFIX_legSh(_fx, _lo_, _lv_)
         if _cn != 0:
@@ -467,6 +484,15 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
                                               _dn[0], _dn[1], GWP_N2O)
         ghg["N2O_CRO"] = _n2o.GWPN2OCRO_(max(0.0, float(nb.get("n_crop_residues", 0.0) or 0.0)) / 1000.0,
                                          EF_SOIL_N2O_DIRECT, GWP_N2O)
+        # CAPRI's N2O of the crops' biological fixation as its accounts report it (envind/gases.gms l. 600-616,
+        # EMISCALC N2OFIX; the supply model's GWPN2OFIX_ l. 3743-3761 the same on DATA(crop, NITF)): out of the N2O
+        # total GN2O (GWPN2O_ l. 3920-3941), so neither in GGWP nor in the emission tax's base; the accounts' crop
+        # fixation on the report's basis (n_fixation_n2o_basis: the reported NITF, the catch crops' and the legume
+        # share's out, as gases.gms) x CAPRI's v_cropNutNeedMultFact(NITF) of the region
+        from capri_mod.supply.regional_supply.tables import overfert_factor as _ovf
+        _mf = float(_ovf(region)) if region else 1.0         # every unit has one (an error otherwise, K74)
+        ghg_fix_n2o = _n2o.GWPN2OFIX_(max(0.0, float(nb.get("n_fixation_n2o_basis", 0.0) or 0.0)) / 1000.0, _mf,
+                                      EF_SOIL_N2O_DIRECT, GWP_N2O)
         # CO2 from urea on the same mineral N (CAPRI gases.gms (17): NMIN x urea share x 44/28)
         from capri_mod.supply.equations.supply_model.gwp import GWPCO2UREA_, GWPTOT_
         ghg["CO2_UREA"] = GWPCO2UREA_(max(0.0, float(nb.get("n_mineral_input", 0.0))) / 1000.0,
@@ -670,6 +696,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             ghg_residue_n2o=float(ghg.get("N2O_CRO", 0.0)),
             ghg_indirect_n2o=float(ghg.get("N2O_IND", 0.0)),
             ghg_leaching_n2o=float(ghg.get("N2O_LEA", 0.0)),
+            ghg_fixation_n2o=float(ghg_fix_n2o),
             leach_share=float(_lea["share"]) if _lea is not None else 0.0,
             n_runoff_leached=float(_lea["n_runoff_leached"]) if _lea is not None else 0.0,
             ghg_liming=ghg["CO2_LIME"],

@@ -48,7 +48,7 @@ _FILE_CATEGORY = {
     "base_areas.csv": "supply", "yields.csv": "supply", "animal_numbers.csv": "supply",
     "cap_premium_activity.csv": "supply", "producer_prices_regional.csv": "supply",
     "livestock_output_coef.csv": "supply", "nutrients_regional.csv": "supply",
-    "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "livestock_output_by_product_coef_2030.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "market_prod_grof_2030.csv": "market", "bilateral_flows_{BY}.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_{BY}.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_{BY}.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.csv": "market", "world_market_baseline_products.csv": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "techn_mix_2030.csv": "supply", "price_transmission_2030.csv": "supply", "plant_protection_capri_step_2030.csv": "supply", "input_coefs_2030.csv": "supply", "crop_inputs_2030.csv": "supply", "pmp_capri_2030_mix.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_input_cost.csv": "supply", "livestock_input_cost_2030.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_{BY}.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
+    "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "livestock_output_by_product_coef_2030.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "market_prod_grof_2030.csv": "market", "bilateral_flows_{BY}.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_{BY}.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_{BY}.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.csv": "market", "world_market_baseline_products.csv": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "techn_mix_2030.csv": "supply", "pesticide_par_2030.csv": "supply", "pesticide_margins_2030.csv": "supply", "price_transmission_2030.csv": "supply", "plant_protection_capri_step_2030.csv": "supply", "input_coefs_2030.csv": "supply", "crop_inputs_2030.csv": "supply", "pmp_capri_2030_mix.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_input_cost.csv": "supply", "livestock_input_cost_2030.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_{BY}.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
     "livestock_feed_coef.csv": "feed",
     "eu_cake_feed_bas.csv": "market",
     "biofuel_feedstock_{BY}.csv": "market", "biofuel_use_share_{BY}.csv": "market", "biofuel_market_{BY}.csv": "market", "biofuel_feedstock_2030.csv": "market", "biofuel_use_share_2030.csv": "market", "biofuel_market_2030.csv": "market", "crushing_parameters_{BY}.csv": "market", "crushing_parameters_2030.csv": "market", "feed_bulks_eu.csv": "market", "feed_bulks_eu_share.csv": "market", "dairy_processing.csv": "market",
@@ -453,6 +453,32 @@ def _load_optional_csv(data_dir, filename):
         return None
     return read_input(path, index_col=0)
 
+#: the columns of pesticide_par_2030.csv the supply model reads (CAPRI's p_pestPar items kept for the simulation,
+#: itemsPestiKeep, supply/declare_sets_pesti.gms; uvag: DATA(r, "UVAG", pestoAgg, "Y"))
+PESTICIDE_CELL_COLUMNS = ("appl_per_ha", "max_damage", "slop_lin", "slop_expo", "expon", "endogenous", "uvag")
+
+
+def _pesticide_tables(t, m=None):
+    """{region: {"cells": DataFrame (activity, item, technology) x PESTICIDE_CELL_COLUMNS, "no_damage_fac": {(activity,
+    technology): NoDamageFac}, "no_damage_yld": {(activity, technology): NoDamageYld, EUR per ha in CAPRI's money}}} of
+    pesticide_par_2030.csv and pesticide_margins_2030.csv (region-indexed); None without the first."""
+    if t is None:
+        return None
+    ndy = {}
+    if m is not None:
+        for r, g in m.reset_index().groupby("region"):
+            ndy[r] = {(a, tch): float(v) for a, tch, v in zip(g.activity, g.technology, g.no_damage_yld) if v > 0}
+    out = {}
+    for r, g in t.reset_index().groupby("region"):
+        yl = g[g["item"] == "YILD"]
+        cells = g[g["item"] != "YILD"].set_index(["activity", "item", "technology"])
+        cells = cells[list(PESTICIDE_CELL_COLUMNS)].apply(pd.to_numeric, errors="coerce").fillna(0.0)
+        ndf = {(a, tch): float(v) for a, tch, v in zip(yl.activity, yl.technology,
+                                                       pd.to_numeric(yl.no_damage_fac, errors="coerce").fillna(0.0))}
+        out[r] = {"cells": cells, "no_damage_fac": ndf, "no_damage_yld": ndy.get(r, {})}
+    return out
+
+
 def _input_cost_table(t):
     """{region: DataFrame animal x item} of a long table (region, animal, item, eur_head); None without the table."""
     if t is None:
@@ -643,6 +669,11 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
                                           on=["region", "activity"], how="inner", validate="one_to_one").groupby("region")}
                       if tm is not None and pm is not None else None)(
             _load_optional_csv(data_dir, "techn_mix_2030.csv"), _load_optional_csv(data_dir, "pmp_capri_2030_mix.csv")),
+        # CAPRI's pesticide module (supply/cal_pesti.gms, its agg5 stage; tools/build/build_pesticide_calibration_2030.py):
+        # per region the calibrated cells (crop, aggregate, technology: application per ha, maximum damage, the damage
+        # function's terms, endogenous, the aggregate's unit value) and NoDamageFac per crop and technology (item YILD)
+        "pesticides": _pesticide_tables(_load_optional_csv(data_dir, "pesticide_par_2030.csv"),
+                                        _load_optional_csv(data_dir, "pesticide_margins_2030.csv")),
         # CAPRI's transmission of the market prices to the outputs' unit values (arm/set_prices.gms: the absolute change;
         # tools/build/build_price_transmission_2030.py, K169): {member state: {(activity, commodity): factor}}
         "price_transmission": (lambda t: {ms: {(r.activity, r.commodity): float(r.factor) for r in g.itertuples()}

@@ -12,6 +12,18 @@ CREATE TABLE code_data_status (
     PRIMARY KEY (file, scope, value)
 );
 INSERT INTO code_data_status VALUES
+  ('capri_mod/supply/equations/cal_pesti.py', 'PESTI_ELA', -0.3, 'capri', 'keep', 'gams/supply/cal_pesti.gms l. 154', 'CAPRI''s number in its statement, as written there (the prior own-price elasticity of the pesticide demand)'),
+  ('capri_mod/supply/equations/cal_pesti.py', 'PESTI_ELA', 100.0, 'capri', 'keep', 'gams/supply/cal_pesti.gms l. 161', 'CAPRI''s number in its statement, as written there (the weight of a negative minimum damage in the calibration''s objective)'),
+  ('capri_mod/supply/equations/cal_pesti.py', 'PESTI_ELA_CHOICE', 1000.0, 'capri', 'keep', 'gams/supply/cal_pesti.gms l. 473', 'CAPRI''s number in its statement, as written there (the weight of a negative damage in the choice of form)'),
+  ('capri_mod/supply/equations/cal_pesti.py', 'POWER_UTILITY_MIN', 0.05, 'capri', 'keep', 'gams/supply/cal_pesti.gms l. 490', 'CAPRI''s number in its statement, as written there (the power form''s utility below which the linear form is kept)'),
+  ('capri_mod/supply/equations/cal_pesti.py', 'PRICE_DAMAGE_RATIO_MAX', 3000.0, 'capri', 'keep', 'gams/supply/cal_pesti.gms l. 254', 'CAPRI''s number in its statement, as written there (the largest price-damage ratio kept)'),
+  ('capri_mod/supply/equations/cal_pesti.py', 'P_PESTFUDGE', 1e-08, 'capri', 'keep', 'gams/supply/def_supply_model_par.gms l. 56', 'CAPRI''s number in its statement, as written there (p_pestFudge, the smooth max''s term of the linear damage function)'),
+  ('capri_mod/supply/equations/cal_pesti.py', 'p_pestPar_margCostYld', 0.2, 'capri', 'keep', 'gams/supply/cal_pesti.gms l. 194', 'CAPRI''s number in its statement, as written there (the grassland technologies'' yield terms in the fertiliser need (GRAI +0.2, GRAE -0.2))'),
+  ('capri_mod/supply/equations/cal_pesti.py', 'v_pestPar_start_and_bounds', -10000.0, 'capri', 'keep', 'gams/supply/cal_pesti.gms l. 301', 'CAPRI''s number in its statement, as written there (the lower bound of the implied price elasticity)'),
+  ('capri_mod/supply/equations/cal_pesti.py', 'v_pestPar_start_and_bounds', -2000.0, 'capri', 'keep', 'gams/supply/cal_pesti.gms l. 319', 'CAPRI''s number in its statement, as written there (the lower bound of the minimum damage)'),
+  ('capri_mod/supply/equations/cal_pesti.py', 'v_pestPar_start_and_bounds', 1.1, 'capri', 'keep', 'gams/supply/cal_pesti.gms l. 354', 'CAPRI''s number in its statement, as written there (the retry''s start of the exponent)'),
+  ('capri_mod/supply/equations/pesti_test.py', 'PESTI_CALI_TOL', 0.0001, 'capri', 'keep', 'gams/supply/cal_pesti.gms l. 556', 'CAPRI''s number in its statement, as written there (the yield factor''s tolerance at the calibration point)'),
+  ('capri_mod/supply/equations/pesti_test.py', 'PESTI_TEST_BOUNDS', 10.0, 'capri', 'keep', 'gams/supply/cal_pesti.gms l. 521', 'CAPRI''s number in its statement, as written there (the upper bound of an endogenous application in the test, times the observed one)'),
   ('capri_mod/supply/equations/pmp.py', 'p_onFarmShare', 0.9, 'capri', 'keep', 'gams/supply/pmp.gms l. 48', 'CAPRI''s number in its statement, as written there (the share of the straw''s losses counted on the farm)'),
   ('capri_mod/feed/equations/aggreg.py', 'EPS', 1e-300, 'technical', 'keep', NULL, 'GAMS''s EPS in a comparison (supply/aggreg.gms l. 31: DATA le eps), the smallest value that counts as not zero'),
   ('capri_mod/projection/equations/year_data/trends.py', 'DATA_TRD_FALL_invented', 0.02, 'capri', 'keep', 'gams/capmod/load_base_data_and_trends.gms l. 350-352', 'CAPRI''s number in its statement, as written there (the other fodder''s level kept, 20 ha)'),
@@ -1176,7 +1188,16 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/coupling/equations/price_forecast.py', 'p_iterChg', 200.0, 'capri', 'keep', 'gams/capmod/price_forecast.gms l. 136-141', '2 |x1 - x0| / (x1 + x0) x 100'),
   ('capri_mod/utils/capri_stop.py', '_schg', 200.0, 'capri', 'keep', 'gams/capmod/price_forecast.gms l. 136-141', 'signed form of CAPRI''s change measure (drift report)'),
   ('capri_mod/utils/utils.py', 'ConvergenceTracker', 50.0, 'numerical', 'keep', NULL, 'default iteration limit; the model passes outer_loop.max_outer_iter'),
-  ('capri_mod/water/water_module.py', 'MM_HA_TO_M3', 10.0, 'physical', 'keep', NULL, '1 mm over 1 ha = 10 m3');
+  ('capri_mod/water/water_module.py', 'MM_HA_TO_M3', 10.0, 'physical', 'keep', NULL, '1 mm over 1 ha = 10 m3'),
+  ('capri_mod/supply/equations/cal_pesti.py', 'PESTI_CALI_ROW_TOL', 1e-06, 'numerical', 'keep', NULL, 'the residual above which a failed IPOPT solve''s equation flags the cell as infeasible (CAPRI flags an equation''s level off its bound under CONOPT, cal_pesti.gms l. 357-367): the solver''s tolerance, not a model number'),
+  ('capri_mod/supply/equations/greendeal/organic_area.py', 'DATA_Yild_percentageChange', 0.45, 'capri', 'keep', 'gams/pol_input/greendeal/organic_area.gms l. 182-186', 'CAPRI''s number in its statement, as written there (the organic yield gap''s factor with the pesticide module on; a possible CAPRI error, the comment implies 0.55: reported to the project lead)'),
+  ('capri_mod/supply/equations/supply_model/pesticides.py', 'V_PESTIPERHA_BOUNDS', 10.0, 'capri', 'keep', 'gams/supply/set_supply_bounds.gms l. 186-189', 'CAPRI''s number in its statement, as written there (an endogenous application''s upper bound, times its level)'),
+  ('capri_mod/supply/equations/supply_model/pesticides.py', 'V_PESTIQUANTREG_BOUNDS', 10.0, 'capri', 'keep', 'gams/supply/set_supply_bounds.gms l. 194', 'CAPRI''s number in its statement, as written there (the regional use''s upper bound, times its level)'),
+  ('capri_mod/supply/equations/supply_model/pesticides.py', 'V_YLDPESTFAC_BOUNDS', 0.1, 'capri', 'keep', 'gams/supply/set_supply_bounds.gms l. 201-204', 'CAPRI''s number in its statement, as written there (the yield factor''s lower bound, times its level)'),
+  ('capri_mod/supply/equations/supply_model/pesticides.py', 'V_YLDPESTFAC_BOUNDS', 2.0, 'capri', 'keep', 'gams/supply/set_supply_bounds.gms l. 205-207', 'CAPRI''s number in its statement, as written there (the yield factor''s upper bound, times its level)'),
+  ('capri_mod/supply/equations/supply_model/pesticides.py', 'insolve_yield_factors', -0.5, 'physical', 'keep', NULL, 'the technologies'' half difference: T1 and T2 at the mean +- half the T1 - T2 difference over the mean (techn_mix_2030.csv yield_diff, need_diff)'),
+  ('capri_mod/supply/regional_nlp/pesticides.py', 'NLPPesticideBlock._pest_terms', -0.5, 'physical', 'keep', NULL, 'the technologies'' half difference: T1 and T2 at the mean +- half the T1 - T2 difference over the mean (techn_mix_2030.csv yield_diff, need_diff)'),
+  ('capri_mod/supply/regional_supply/region_build.py', 'RegionBuildBlock._pesticides_for', 2030.0, 'capri-mod', 'check', NULL, 'the pesticide calibration is built for 2030 only (pesticide_par_2030.csv): one of the 2030-only paths to make year-general (the independence plan, stage 1 step 1.3)');
 
 -- rule: every number in the model's code has its classification (run tools/check/make_code_data.py, then classify)
 SELECT d.file, d.scope, d.value, d.lines FROM code_data d LEFT JOIN code_data_status s USING (file, scope, value) WHERE s.file IS NULL;

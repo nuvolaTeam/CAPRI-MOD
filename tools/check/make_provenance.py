@@ -95,6 +95,23 @@ UNTRACED = {
     # CAPRI's base year UVAP and UVAB of the mineral fertilisers and their kept extract (income I2b)
     "capri_data/2017/environment/fnut_unit_values_2017.csv": ("build_fnut_unit_values", "CAPRI"),
     "capri_data/sources/raw/capri/results/sim_ini_21730/fnut_uvap_uvab_bas.parquet": ("build_fnut_unit_values", "CAPRI"),
+    # the pesticide module (register DEP-51): CAPREG's base year data and its kept extracts, and the 2030 calibration
+    # with the sim_ini_21730 extracts it keeps
+    "capri_data/codes/capri/pesTSAgg.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/2017/supply/pesticides_2017.csv": ("build_pesticides_2017", "CAPRI"),
+    "capri_data/2017/supply/pesticide_prices_2017.csv": ("build_pesticides_2017", "CAPRI"),
+    "capri_data/2017/supply/pesticide_max_damage_2017.csv": ("build_pesticides_2017", "CAPRI"),
+    "capri_data/sources/raw/capri/results/capreg/pesticide_data.parquet": ("build_pesticides_2017", "CAPRI"),
+    "capri_data/sources/raw/capri/results/capreg/pesticide_max_damage.parquet": ("build_pesticides_2017", "CAPRI"),
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/pesticide_margins_2030.csv":
+        ("build_pesticide_calibration_2030", "CAPRI"),
+    "capri_data/baselines/capri_greendeal_ref/1730/supply/pesticide_par_2030.csv":
+        ("build_pesticide_calibration_2030", "CAPRI"),
+    "capri_data/sources/raw/capri/results/sim_ini_21730/pesticide_cal_items.parquet":
+        ("build_pesticide_calibration_2030", "CAPRI"),
+    "capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_mult_fact_techn.parquet":
+        ("build_pesticide_calibration_2030", "CAPRI"),
+    "capri_data/sources/raw/capri/results/sim_ini_21730/oms.parquet": ("build_pesticide_calibration_2030", "CAPRI"),
     "capri_data/pipeline/captrd/sets/biofuel/": ("build_captrd_biofuel", "CAPRI"),     # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/agriprod/": ("build_captrd_agriprod", "CAPRI"),   # before sets/ (first match)
     "capri_data/pipeline/captrd/sets/national/": ("build_captrd_national", "CAPRI"),   # before sets/ (first match)

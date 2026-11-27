@@ -979,4 +979,15 @@ INSERT INTO data_kind VALUES
   ('capri_data/pipeline/captrd/sets/aglink2023dgAgri/wldAgg.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/pipeline/captrd/sets/aglink2023dgAgri/wldAgg1.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_density.parquet', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
-  ('capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_oilEqu.parquet', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)');
+  ('capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_oilEqu.parquet', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
+  ('capri_data/2017/supply/pesticides_2017.csv', 'base', 'by file: the base year''s applications per ha (CAPREG)'),
+  ('capri_data/2017/supply/pesticide_prices_2017.csv', 'base', 'by file: the base year''s unit values (CAPREG)'),
+  ('capri_data/2017/supply/pesticide_max_damage_2017.csv', 'coefficients', 'by file: per-unit coefficients (per ha, per head, shares, conversion)'),
+  ('capri_data/baselines/capri_greendeal_ref/1730/supply/pesticide_margins_2030.csv', 'calibrated', 'by file: the pesticide calibration''s terms (cal_pesti.gms)'),
+  ('capri_data/baselines/capri_greendeal_ref/1730/supply/pesticide_par_2030.csv', 'calibrated', 'by file: the pesticide calibration''s terms (cal_pesti.gms)'),
+  ('capri_data/codes/capri/pesTSAgg.csv', 'structure', 'by rule: codes, sets, correspondences'),
+  ('capri_data/sources/raw/capri/results/capreg/pesticide_data.parquet', 'base', 'by file: CAPREG''s base year data'),
+  ('capri_data/sources/raw/capri/results/capreg/pesticide_max_damage.parquet', 'coefficients', 'by file: CAPRI''s coefficients and elasticities'),
+  ('capri_data/sources/raw/capri/results/sim_ini_21730/pesticide_cal_items.parquet', 'reference', 'by file: CAPRI''s 2030 data and prices'),
+  ('capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_mult_fact_techn.parquet', 'calibrated', 'by file: the fertiliser calibration''s need multipliers'),
+  ('capri_data/sources/raw/capri/results/sim_ini_21730/oms.parquet', 'structure', 'by rule: codes, sets, correspondences');

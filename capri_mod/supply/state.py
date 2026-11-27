@@ -150,6 +150,8 @@ class RegionalEvalState(_Slots):
         "surplus_row",        # the N-surplus row of this solve
         "yields_solve0",      # the yields at the start of the solve (restored at its end)
         "greendeal_inputs",   # the Green Deal's input reductions of this solve
+        "pest_change_factor", # the pesticide applications' scenario change factor of this solve (define_inputs.gms)
+        "pest_quota_factor",  # the quota on the total pesticide use of this solve, over the base use (QUTS / GROF)
         "greendeal_crop_delta",   # {crop: (plant protection, other inputs)} cost changes of this solve, EUR/ha
         "greendeal_animal_inpo",  # {animal: other inputs' cost change per head} of this solve (the splits' members
                                   # differ by their base INPO, K189's per-head terms)
@@ -202,6 +204,7 @@ class RegionalResults(_Slots):
         "last_feed_price",    # the feed's value in the report (EUR/kg): tradable feeds at the solve's prices, fodder
                               # at the ration's value
         "last_npk",           # the fertiliser outputs by nutrient
+        "last_pest",          # the pesticide module's outputs: {(crop, technology): yield factor, applications, level}
         "last_npk_cres",      # {nutrient: [(column, t per unit)]}: the residue pool's coefficients of the last block
         "last_npk_cres_yields",  # {crop: (base, current, scenario yield)}: where the pool's N factors moved (K189)
         "last_fout",          # {crop: {MANN | MANP | MANK: (kg per ha, EUR per t)}}: the crops' residues' nutrients at the

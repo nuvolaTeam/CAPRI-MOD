@@ -262,6 +262,9 @@ class RegionData:
     #: CAPRI's crop technologies T1/T2: per crop with both, the T1 - T2 differences and CAPRI's 2030 technology
     #: block in the mix columns' variables (techn_mix_2030.csv, pmp_capri_2030_mix.csv); with CAPRI's 2030 PMP terms only
     techn_mix: Optional[pd.DataFrame] = None
+    #: CAPRI's pesticide module (supply.pest_disagg "agg5"): {"cells": DataFrame (activity, item, technology) of the
+    #: calibrated cells, "no_damage_fac": {(activity, technology): NoDamageFac}} (pesticide_par_2030.csv); None off
+    pesticides: Optional[dict] = None
     #: CAPRI's input costs the Green Deal targets change (build_plant_protection_cost.py): plap, inpo, fert, eful
     #: (EUR/ha by crop) and inpo_toin_share (animals)
     input_costs_ha: Optional[pd.DataFrame] = None

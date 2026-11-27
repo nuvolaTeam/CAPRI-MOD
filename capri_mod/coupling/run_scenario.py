@@ -411,6 +411,10 @@ class RunScenarioBlock:
                         getattr(pol_scenario, "pesticide_reduction", 0.0) or 0.0),
                     "organic_area_target": float(
                         getattr(pol_scenario, "organic_area_target", 0.0) or 0.0),
+                    # the pesticide module's scenarios: the applications' change factor and the quota on their total
+                    # (pol_input/pesticides/*.gms; used with supply.pest_disagg "agg5" only)
+                    "pest_change_factor": float(getattr(pol_scenario, "pest_change_factor", 1.0) or 1.0),
+                    "pest_quota_factor": float(getattr(pol_scenario, "pest_quota_factor", 0.0) or 0.0),
                     # CAPRI's Green Deal group: the fertiliser priors' partial-derivative slack in its listed regions
                     "greendeal_group": bool(getattr(pol_scenario, "greendeal_group", False)),
                     # CAPRI's obligatory set-aside rates, {region: {activity: pct}} (SETA_)

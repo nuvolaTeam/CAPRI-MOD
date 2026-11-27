@@ -42,7 +42,9 @@ from pathlib import Path
 
 #: the sources: (folder, git repository, tag)
 SOURCES = {
-    "GKlib": ("https://github.com/KarypisLab/GKlib", "METIS-v5.1.1-DistDGL-0.5"),
+    # a commit, not a tag: METIS 5.2.1 (December 2022) calls gk_GetProcVmPeak, which GKlib's only tag
+    # (METIS-v5.1.1-DistDGL-0.5) lacks; 8bd6bad (March 2023) is GKlib of METIS 5.2.1's time
+    "GKlib": ("https://github.com/KarypisLab/GKlib", "8bd6bad750b2b0d90800c632cf18e8ee93ad72d7"),
     "METIS": ("https://github.com/KarypisLab/METIS", "v5.2.1"),
     "OpenBLAS": ("https://github.com/OpenMathLib/OpenBLAS", "v0.3.30"),
     "spral": ("https://github.com/ralna/spral", "v2025.09.18"),
@@ -75,11 +77,20 @@ def done(prefix: Path, name: str):
 def fetch(src: Path, log: Path):
     for d, (url, tag) in SOURCES.items():
         if not (src / d).exists():
-            run(["git", "clone", "--depth", "1", "-b", tag, url, d], src, log)
+            if len(tag) == 40 and all(c in "0123456789abcdef" for c in tag):    # a commit
+                run(["git", "clone", "--filter=blob:none", "--no-checkout", url, d], src, log)
+                run(["git", "checkout", "--detach", tag], src / d, log)
+            else:
+                run(["git", "clone", "--depth", "1", "-b", tag, url, d], src, log)
 
 
 def build_metis(src: Path, prefix: Path, jobs: int, log: Path):
     if step(prefix, "gklib"):
+        conf = src / "GKlib" / "GKlibSystem.cmake"
+        t = conf.read_text()
+        native = '  set(GKlib_COPTIONS "${GKlib_COPTIONS} -march=native")'
+        assert native in t, "GKlib's -march=native line not found"
+        conf.write_text(t.replace(native, "  # -march=native left out (portable binaries)"))
         run(["make", "config", f"prefix={prefix}"], src / "GKlib", log)
         run(["make", f"-j{jobs}", "install"], src / "GKlib", log)
         done(prefix, "gklib")

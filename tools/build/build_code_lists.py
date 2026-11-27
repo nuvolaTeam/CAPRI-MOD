@@ -393,6 +393,9 @@ def main():
     # (envind/ammo.gms with %storgrazInv% off; capri_mod/environmental/equations/ammo_ch4.py)
     for s in ("MDACT", "MACT", "ManuType", "POULTRY", "ani_Liq", "atGrazingExtra"):
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), list(read_set(a.sets, s).items()))
+    # the pesticide module's aggregates (sets.gms l. 4646-4655: under the 5_aggregates stage the damage function's
+    # aggregates pestoAgg and the items bought pesModDis are both pesTSAgg; capri_mod/supply/equations/cal_pesti.py)
+    write(OUT / "capri" / "pesTSAgg.csv", ("code", "text"), list(read_set(a.sets, "pesTSAgg").items()))
     for s, cols in (("pact_to_atModel", ("pact", "atmodel")), ("atModel_to_PACT", ("atmodel", "pact")),
                     ("manuType_to_atModel", ("manutype", "atmodel")), ("ms_to_country", ("ms", "country"))):
         write(OUT / "capri" / f"{s}.csv", cols, pairs(s))

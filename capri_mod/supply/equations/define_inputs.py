@@ -96,3 +96,32 @@ def DATA_IY_Y(DATA_BAS: float, p_inputDemandFactor: float, p_yieldGrowth: float,
         return None
     f = float(p_inputDemandFactor)
     return float(DATA_BAS) * (1.0 - f + f * float(p_yieldGrowth)) * float(TF_I)
+
+
+def DATA_QUTS_pesTotal(GROF, ChangeFactor):
+    r"""DATA(RU, "QUTS", "pesTotal", "Y"): the quota on the region's total pesticide use (t), its change factor on the
+    use at the base levels GROF.
+
+    CAPRI's GAMS (capmod/define_inputs.gms l. 141-157):
+
+        *            -- Baseline total pesticide use
+
+                DATA(RU,"GROF","pesTotal","Y")
+                  = sum((mCACT,PESTOAGG,A), Data(ru,mCACT,PESTOAGG,"y")*(1+p_technFact(ru,MCACT,pestoAgg,A))*v_actLevl.l(ru,MCACT,A))*.001;
+
+        *               ... is partly used to determine the quota level by region
+
+                DATA(RU,"QUTS","pesTotal","Y") $ DATA(RU,"QUTS","pesTotal","AbsoluteLevel")
+                  = DATA(RU,"QUTS","pesTotal","AbsoluteLevel") $ (DATA(RU,"QUTS","pesTotal","AbsoluteLevel") ne eps);
+
+                DATA(RU,"QUTS","pesTotal","Y") $ DATA(RU,"QUTS","pesTotal","AbsoluteChange")
+                 = DATA(RU,"GROF","pesTotal","Y")
+                 + DATA(RU,"QUTS","pesTotal","AbsoluteChange") $ (DATA(RU,"QUTS","pesTotal","AbsoluteChange") ne eps);
+
+
+                DATA(RU,"QUTS","pesTotal","Y")  $ DATA(RU,"QUTS","pesTotal","ChangeFactor")
+                      = DATA(RU,"GROF","pesTotal","Y") * DATA(RU,"QUTS","pesTotal","ChangeFactor");
+
+    Departures from CAPRI: the change factor only (CAPRI's AbsoluteLevel, AbsoluteChange and PercentageChange forms
+    are the same quota written otherwise; the port's scenarios give the factor)."""
+    return float(GROF) * float(ChangeFactor)

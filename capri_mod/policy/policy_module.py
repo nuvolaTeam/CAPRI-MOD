@@ -151,6 +151,13 @@ class PolicyScenario:
     #: (pesticides.gms calls conventional_io.gms with the yield shock 'off'; pestDisaggStage none, so no
     #: endogenous pesticide yield response either): no pesticide yield loss, the full organic yield gap.
     pesticide_rule: str = "jrc121368"
+    #: The pesticide module's scenarios (setting supply.pest_disagg "agg5"): a change factor of every pesticide
+    #: application in the EU regions (CAPRI's pol_input/pesticides/pesti_regu50.gms 0.5, pesti_ban.gms 1e-3:
+    #: DATA(RU, mCact, pestoAgg, "ChangeFactor")), 1 = none; the yield follows the calibrated damage functions.
+    pest_change_factor: float = 1.0
+    #: ... and a quota on each EU region's total use, its factor on the use at the base levels (pesti_quts50.gms 0.5:
+    #: DATA(RU, "QUTS", "pesTotal", "ChangeFactor")), 0 = none.
+    pest_quota_factor: float = 0.0
 
     #: CAPRI's endogenous-technology settings for this run (capri_mod/policy/endotech.py), e.g.
     #: {"ghgTechMYld": 0.2}: scenario configuration parameters that, as in CAPRI (the scenario file loads

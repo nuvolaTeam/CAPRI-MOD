@@ -77,6 +77,8 @@ class SolveBlock:
         # (_compute_net_revenues, called only with a shock); a plain solve after a shocked one kept the old shock there
         self.ev.price_shock_now = None
         self.ev.yield_price_factor = {}           # the price response's yield factor per crop, THIS solve only
+        self.ev.pest_change_factor = None         # the pesticide applications' scenario factor, THIS solve only
+        self.ev.pest_quota_factor = None          # the quota on their total over the base use, THIS solve only
         try:
             res = self._solve_once(*args, **kwargs)
         finally:
@@ -289,13 +291,29 @@ class SolveBlock:
         if isinstance(policy_shock, dict):
             _org = float(policy_shock.get("organic_area_target", 0.0) or 0.0)
             _pest = float(policy_shock.get("pesticide_reduction", 0.0) or 0.0)
+            _pmod = bool(getattr(self.data, "pesticides", None))         # the pesticide module (supply.pest_disagg)
+            # a scenario's change factor of every pesticide application in an EU region (CAPRI's pol_input/
+            # pesticides/pesti_regu50.gms, pesti_ban.gms: DATA(RU, mCact, pestoAgg, "ChangeFactor")); the Green Deal's
+            # target sets its own below (conventional_io.gms l. 128-131)
+            _cf = float(policy_shock.get("pest_change_factor", 1.0) or 1.0)
+            from capri_mod.data.definitions import is_eu as _is_eu
+            if _pmod and _cf != 1.0 and _is_eu(self.data.region_id):
+                self.ev.pest_change_factor = _cf
+            # a quota on the total use, its factor on the base use (pesti_quts50.gms: DATA(RU, "QUTS", "pesTotal",
+            # "ChangeFactor"))
+            _qf = float(policy_shock.get("pest_quota_factor", 0.0) or 0.0)
+            if _pmod and _qf > 0 and _is_eu(self.data.region_id):
+                self.ev.pest_quota_factor = _qf
             if _org:
-                # the organic yield gap applies in full (no 0.45 factor: CAPRI uses it only with
-                # pest_disagg on, an endogenous pesticide yield response; see apply_organic_area_target)
+                # the organic yield gap: in full without the pesticide module; x 0.45 with it (organic_area.gms
+                # l. 182-186: its pesticide part is the module's yield factor; see apply_organic_area_target)
                 self.apply_organic_area_target(_org)
             if _pest:
                 _prule = str(policy_shock.get("pesticide_rule", "jrc121368") or "jrc121368")
-                self.apply_pesticide_reduction(_pest, organic_share=_org or None, yield_loss=(_prule == "jrc121368"))
+                # with the module, the yield follows the applications' damage functions: no yield loss here (CAPRI's
+                # Green Deal calls conventional_io.gms with the yield shock 'off', pesticides.gms l. 47)
+                self.apply_pesticide_reduction(_pest, organic_share=_org or None,
+                                               yield_loss=(_prule == "jrc121368" and not _pmod))
             if _org or _pest:
                 # CAPRI's regional plant-protection and other-input changes of both targets (define_inputs.gms)
                 self._apply_greendeal_input_changes(_org, _pest)
@@ -474,11 +492,13 @@ class SolveBlock:
         # GRAS is already dry-matter tonnes (converted at load time).
         yields = self.data.yields.reindex(self.acts).fillna(0.0)
         gross_output = activities * yields
-        # CAPRI's technologies: z ha moved from T2 to T1 add yield_diff x yield each (T1 = X/2 + z at
-        # yield (1 + d/2), T2 = X/2 - z at (1 - d/2))
-        _tm = getattr(self.data, "techn_mix", None)
-        for _a, _z in (getattr(self.res, "last_mix_z", None) or {}).items():
-            gross_output[_a] = float(gross_output[_a]) + float(_tm.at[_a, "yield_diff"]) * float(yields[_a]) * _z
+        # CAPRI's in-solve yield factors of the crops (the technology mix, the pesticide module's v_yldPestFac): per crop,
+        # their summed change of the output and of the fertiliser need over the level (_insolve_factors), CAPRI's
+        # SUPBAL_ output x (1 + tf) per technology and x (1 + (v_yldPestFac - 1)); the accounts take them as CAPRI's
+        # rows do (environmental_module: techn_fact), not through the yield
+        _isf = self._insolve_factors(activities)
+        for _a, (_tf, _ned) in _isf.items():
+            gross_output[_a] = float(gross_output[_a]) * (1.0 + _tf)
 
         # Livestock output comes from CAPRI's FINAL-PRODUCT coefficients, not
         # YILD. For breeding and suckler activities CAPRI's YILD measures
@@ -583,7 +603,7 @@ class SolveBlock:
         _iset = (float(np.asarray(_sv, float) @ activities.reindex(self.acts[:len(_sv)]).fillna(0.0).values)
                  if _sv is not None else 0.0)
 
-        return SupplyResult(
+        _res = SupplyResult(
             region_id=self.rid,
             activities=activities,
             gross_output=gross_output,
@@ -597,3 +617,5 @@ class SolveBlock:
             fodder_duals=({lab: float(_zc[i]) for i, lab in enumerate(labels)
                           if i < len(_zc) and str(lab).startswith("fodder_")} if _zc is not None else {}),
         )
+        _res.insolve_yield = {a: {"tf": float(tf_), "ned": float(ned_)} for a, (tf_, ned_) in _isf.items()}
+        return _res

@@ -3598,6 +3598,48 @@
    ],
    "catalogue_note": "Mineral nitrogen applied per hectare by region and crop. NITF is not an application rate; it equals NRET, a requirement. (not re-checked)"
   },
+  "capri_data/2017/supply/pesticide_max_damage_2017.csv": {
+   "description": "CAPREG's maximum yield damage without the pesticide aggregate, p_pestPar(region, crop, aggregate, technology, \"maxDamage\") of capreg/pmppar_17<CC>.gdx (loaded by capmod/create_sim_ini_gdx.gms l. 400-410; CAPREG builds it from JKI's priors, inputs/pest_cor.gms, not ported), the nonzero cells",
+   "kind": "coefficients",
+   "vintage": "2017",
+   "domain": "supply",
+   "status": "live",
+   "rows": 75791,
+   "columns": 5,
+   "units": "U_ratio",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_pesticides_2017 (not in the trace yet)"
+   }
+  },
+  "capri_data/2017/supply/pesticide_prices_2017.csv": {
+   "description": "CAPREG's 2017 unit values of the five pesticide aggregates: DATA(region, \"UVAG\" | \"UVAB\", PESTOF..PESTOO, \"Y\") of capreg/res_17<CC>.gdx; uvab empty where CAPREG has none",
+   "kind": "base",
+   "vintage": "2017",
+   "domain": "supply",
+   "status": "live (builder input)",
+   "rows": 1563,
+   "columns": 4,
+   "units": "U_EuPerKg",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_pesticides_2017 (not in the trace yet)"
+   }
+  },
+  "capri_data/2017/supply/pesticides_2017.csv": {
+   "description": "CAPREG's 2017 applications of the five pesticide aggregates per region (CAPREG's regions, member states and NUTS 1 included) and crop: DATA(region, crop, PESTOF..PESTOO, \"Y\") of capreg/res_17<CC>.gdx, the nonzero cells; the simulation year takes them as they are (CAPTRD projects no pesticide item)",
+   "kind": "base",
+   "vintage": "2017",
+   "domain": "supply",
+   "status": "live (builder input)",
+   "rows": 43182,
+   "columns": 4,
+   "units": "U_gPerHa",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_pesticides_2017 (not in the trace yet)"
+   }
+  },
   "capri_data/2017/supply/plant_protection_cost.csv": {
    "description": "CAPRI's input costs that the Green Deal organic and pesticide targets shock, per model region and activity (2017). (tools/build/build_plant_protection_cost.py)",
    "kind": "coefficients",
@@ -4763,6 +4805,42 @@
     "builder": "build_ms_farm_balance (not in the trace yet)"
    },
    "catalogue_note": "tools/build/build_ms_farm_balance.py: GROF, SEDF and LOSF at \"Y\"; income I2c (not re-checked)"
+  },
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/pesticide_margins_2030.csv": {
+   "description": "CAPRI's pesticide calibration at 2030 (supply/cal_pesti.gms, ported in capri_mod/supply/equations/cal_pesti.py), per regional unit, crop and technology: the yield's value without damage, p_pestPar(..., \"yild\", A, \"NoDamageYld\"), and the marginal fertiliser cost of the avoided yield loss per nutrient and in total, p_pestPar(..., NITF | PHOF | POTF | FERC, A, \"margCostYld\"); negative_margin 1 where CAPRI's p_negMargWoPesti is set (the price-damage ratio is not defined there)",
+   "kind": "calibrated",
+   "vintage": "2030 reference",
+   "domain": "supply",
+   "status": "calibration",
+   "vintage_exception": "CAPRI's pesticide calibration at its 2030 simulation year (cal_pesti.gms), on CAPREG's 2017 applications",
+   "rows": 12869,
+   "columns": 9,
+   "units": "U_1unit, U_EuPerHa",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_pesticide_calibration_2030 (not in the trace yet)"
+   }
+  },
+  "capri_data/baselines/capri_greendeal_ref/1730/supply/pesticide_par_2030.csv": {
+   "description": "CAPRI's pesticide calibration at 2030, p_pestPar(region, crop, item, technology, ...) (supply/cal_pesti.gms, 5_aggregates stage, ported in capri_mod/supply/equations/cal_pesti.py and pesti_test.py), per regional unit, crop, aggregate and technology: the application per ha, maxDamage, the unit value, the price-damage ratio, the damage function's terms (slopFudg, SlopLin, SlopExpo, Expon), whether the cell is endogenous, CAPRI's powerInfes and curDamage, and CAPRI's test of the calibration (m_pestiTest: the application at the calibration and the choke point); on the item YILD the yield factor without damage NoDamageFac and the yield factor at the calibration (the other columns empty there)",
+   "kind": "calibrated",
+   "vintage": "2030 reference",
+   "domain": "supply",
+   "status": "live",
+   "vintage_exception": "CAPRI's pesticide calibration at its 2030 simulation year (cal_pesti.gms), on CAPREG's 2017 applications",
+   "rows": 68560,
+   "columns": 20,
+   "units": "U_1unit, U_EuPerKg, U_haPerKg, U_kgperha, U_ratio",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_pesticide_calibration_2030 (not in the trace yet)"
+   }
   },
   "capri_data/baselines/capri_greendeal_ref/1730/supply/plant_protection_capri_step_2030.csv": {
    "description": "CAPRI's two valuations of each crop's plant protection at its 2030 reference, per regional unit and model crop: the Green Deal step's (pesticide disaggregation off: p_linObjeCont, DATA(PLAP) x the member state's UVAP(PLAP)) and the reference's and PMP calibration's (the pesticide module's aggregates, Plantp_cost). For the comparison switches supply.greendeal_plap_crop_level_capri_step and supply.greendeal_plap_mix_capri_step (DEP-51). (tools/build/build_plant_protection_capri_step_2030.py)",
@@ -6738,6 +6816,19 @@
     "builder": "build_code_lists (not in the trace yet)"
    }
   },
+  "capri_data/codes/capri/pesTSAgg.csv": {
+   "description": "CAPRI pesTSAgg, the five pesticide aggregates (sets.gms l. 1761-1767, 4605-4607; pestoAgg l. 4646-4655: under PESTDISAGGStage 5_aggregates pestoAgg = pesModDis = pesTSAgg), the items of the pesticide module (register DEP-51)",
+   "kind": "structure",
+   "vintage": "2017",
+   "domain": "codes",
+   "status": "live",
+   "rows": 5,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/setfPact.csv": {
    "description": "CAPRI setfPact: the set-aside and fallow activities (sets.gms, capmod/load_base_data_and_trends.gms), in CAPRI's set order",
    "kind": "structure",
@@ -6918,7 +7009,7 @@
   "capri_data/codes/model_units.csv": {
    "description": "The model's own units that CAPRI's unit catalogue (CAPRIunits.gms) lacks: code, description and the tables using it; hand-kept, no builder; tools/build/build_unit_catalogue.py adds them to units.csv with capri = no.",
    "kind": "structure",
-   "rows": 14,
+   "rows": 17,
    "columns": 3,
    "origin": {
     "nature": "declared"
@@ -6958,7 +7049,7 @@
   "capri_data/codes/results_items.csv": {
    "description": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows, \"=\": the row is CAPRI's code itself; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
    "kind": "structure",
-   "rows": 235,
+   "rows": 237,
    "columns": 8,
    "read_by_model": [
     "capri_mod/io_results.py"
@@ -6994,7 +7085,7 @@
   "capri_data/codes/units.csv": {
    "description": "the unit catalogue: CAPRI's set capri_u (gams/CAPRIunits.gms) and the model's own units (tools/build/build_unit_catalogue.py)",
    "kind": "structure",
-   "rows": 53,
+   "rows": 56,
    "columns": 3,
    "origin": {
     "nature": "capri",
@@ -11681,6 +11772,36 @@
     "builder": "convert_sources"
    }
   },
+  "capri_data/sources/raw/capri/results/capreg/pesticide_data.parquet": {
+   "description": "CAPREG's 2017 DATA(region, col, PESTOF..PESTOO, \"Y\") of capreg/res_17<CC>.gdx (DATA2), every column with a value: the crops' applications (g per ha), the unit values (UVAG, UVAB: EUR per kg) and CAPREG's aggregates and accounts; written and read back by tools/build/build_pesticides_2017.py (a build without capri_sources)",
+   "kind": "base",
+   "vintage": "2017",
+   "domain": "supply",
+   "status": "source",
+   "rows": 64994,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_pesticides_2017 (not in the trace yet)"
+   },
+   "catalogue_note": "extract of CAPREG's res_17<CC>.gdx written and read back by its builder (not re-checked)"
+  },
+  "capri_data/sources/raw/capri/results/capreg/pesticide_max_damage.parquet": {
+   "description": "CAPREG's p_pestPar(region, crop, aggregate, technology, \"maxDamage\") of capreg/pmppar_17<CC>.gdx, written and read back by tools/build/build_pesticides_2017.py",
+   "kind": "coefficients",
+   "vintage": "2017",
+   "domain": "supply",
+   "status": "source",
+   "rows": 75791,
+   "columns": 5,
+   "units": "U_ratio",
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_pesticides_2017 (not in the trace yet)"
+   },
+   "catalogue_note": "extract of CAPREG's pmppar_17<CC>.gdx written and read back by its builder (not re-checked)"
+  },
   "capri_data/sources/raw/capri/results/data_market_1730defaulta/feed_demand_nonEU_use_2030.parquet": {
    "description": "CAPRI's uses HCON, FEED, PROC, BIOF per market region (EU member states included) and product at the 2030 calibration point CAL, from data_market_1730defaulta (tools/build/build_feed_demand_nonEU.py).",
    "kind": "reference",
@@ -12101,6 +12222,21 @@
    },
    "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx v_cropNutNeedMultFact and v_cropNutNeedAddFact (the reference export) written and read back by tools/build/build_npk_balance_2030.py, kept so its input can be rebuilt without the reference export (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
+  "capri_data/sources/raw/capri/results/sim_ini_21730/crop_nut_need_mult_fact_techn.parquet": {
+   "description": "sim_ini_21730's v_cropNutNeedMultFact(region, FNUT, technology), the fertiliser calibration's need multipliers per technology (the reference export), written and read back by tools/build/build_pesticide_calibration_2030.py",
+   "kind": "calibrated",
+   "vintage": "2030",
+   "domain": "sources",
+   "status": "source",
+   "rows": 2250,
+   "columns": 4,
+   "units": "U_ratio",
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_pesticide_calibration_2030 (not in the trace yet)"
+   },
+   "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx (the reference export) written and read back by its builder (not re-checked)"
+  },
   "capri_data/sources/raw/capri/results/sim_ini_21730/data_prod_grof_rmssup.parquet": {
    "description": "CAPRI's DATA(RMSSUP, \"PROD\", row, \"CAL\") and DATA(RMSSUP, \"GROF\", row, \"TRD\") of the market products of the supply models and their gross rows, from sim_ini_21730.gdx (tools/build/build_market_prod_grof_2030.py).",
    "kind": "coefficients",
@@ -12176,6 +12312,35 @@
     "builder": "build_ms_farm_balance (not in the trace yet)"
    },
    "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx DATA(MS, GROF | SEDF | LOSF, O, BAS | Y) and DATA(MS, UVAG | UVAP | UVAB, IO, BAS) (the reference export) written and read back by tools/build/build_ms_farm_balance.py, kept so its input can be rebuilt without the reference export (docs/EXTERNAL_SOURCES.md) (not re-checked)"
+  },
+  "capri_data/sources/raw/capri/results/sim_ini_21730/oms.parquet": {
+   "description": "sim_ini_21730's set OMS(OM), \"Goods with balances in the supply model\" (sets.gms l. 5143), its elements, written and read back by tools/build/build_pesticide_calibration_2030.py",
+   "kind": "structure",
+   "vintage": "2030",
+   "domain": "codes",
+   "status": "source",
+   "rows": 52,
+   "columns": 1,
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_pesticide_calibration_2030 (not in the trace yet)"
+   },
+   "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx (the reference export) written and read back by its builder (not re-checked)"
+  },
+  "capri_data/sources/raw/capri/results/sim_ini_21730/pesticide_cal_items.parquet": {
+   "description": "sim_ini_21730's DATA items the 2030 pesticide calibration reads (the reference export): the crops' rows (yields, nutrients) and the unit values UVAG at \"BAS\" and \"Y\", the producer prices PPRI at \"BAS\" and \"CAL\", the balance items GROF, LOSF, SEDF, SEDM at \"TRD\" (and GROF, LOSF, SEDF at \"Y\"); written and read back by tools/build/build_pesticide_calibration_2030.py",
+   "kind": "reference",
+   "vintage": "2030",
+   "domain": "sources",
+   "status": "source",
+   "rows": 81485,
+   "columns": 5,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "source-extract",
+    "builder": "build_pesticide_calibration_2030 (not in the trace yet)"
+   },
+   "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx (the reference export) written and read back by its builder (not re-checked)"
   },
   "capri_data/sources/raw/capri/results/simini/sim_ini_21730/captrd_estimation_params.parquet": {
    "description": "CAPRI's p_carcassShare, p_startWgt and p_NCNC_CONT as in sim_ini_21730 (the raw dataset nuvolaTeam/capri-mod-raw, capri/results/simini/sim_ini_21730/), the records tools/build/build_captrd_estimation_params.py uses, kept so it rebuilds without the raw files; d1 only for p_NCNC_CONT.",

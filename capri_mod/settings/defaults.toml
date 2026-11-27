@@ -396,6 +396,23 @@ greendeal_plap_crop_level_capri_step = false
 # base; DEP-51); true: in the Green Deal group's solves each mix column's linear term adds plap_diff x (CAPRI's step's
 # cost less the model's change of the crop's cost) (policy._plap_mix_capri_step; capri_comparison.toml)
 greendeal_plap_mix_capri_step = false
+# CAPRI's pesticide module (capmod/set_global_variables.gms l. 66-82, pestDisaggStage; register DEP-51): "none", plant
+# protection as PLAP (CAPRI's default); "agg5", the five aggregates PESTOF, PESTOG, PESTOH, PESTOI, PESTOO per crop and
+# technology with the endogenous yield factor v_yldPestFac (pestDisaggStage 5_aggregates, PEST_DISAGG on; the
+# calibration supply/cal_pesti.gms in tools/build/build_pesticide_calibration_2030.py). Being ported (the supply model:
+# docs/dev plans PESTICIDE_P4_PLAN.md): "none" until the port is complete
+pest_disagg = "none"
+# The pesticide module's linear fall-back in the supply model (register DEP-61; the project lead, 27 November 2026):
+# "epigraph", its damage share as a variable D >= 1 - SlopLin x a, D >= 0 (the max without CAPRI's smoothing: the
+# calibration puts the cell at the kink, ApplPerHa = 1 / SlopLin, where IPOPT does not converge on the smooth form);
+# "capri", CAPRI's smooth max ((1 - s a) + sqrt((s a - 1)^2 + p_pestFudge)) / 2
+pest_linear_form = "epigraph"
+# The pesticide module's applications in the supply model: "exogenous", CAPRI's runs (the reference policy files fix
+# every application at its level, pol_input/cap_after_2023/ref.gms l. 21-23 and cap_after_2014/ref.gms l. 40-42:
+# "otherwise supply is unstable"; a scenario's change factor moves them, capmod/define_inputs.gms l. 117-136, and the
+# yield factor follows the damage functions); "endogenous", the applications as variables where no scenario shifter is
+# set (supply/set_supply_bounds.gms l. 180-189, the module as coded without the reference's fix: beyond CAPRI's runs)
+pest_applications = "exogenous"
 # CAPRI's fertiliser-option curvature with the fertiliser saving valued at the member state's NITF price (envind/
 # ghgMiti.gms l. 1016-1035, the supply audit's finding S5, ARCHITECTURE_REFACTOR.md section 5.2); false: without (this model before 24 October 2026). OFF by default (25 October
 # 2026): with it and the cost on the N purchases, the curvature turns negative where NMIN is large and the baseline

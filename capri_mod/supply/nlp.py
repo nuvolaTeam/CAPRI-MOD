@@ -191,7 +191,9 @@ class NLPBlock:
                     col_lb={int(j_): float(v_) for d_ in (getattr(self.ev, "pool_lb", None) or {}).values()
                             for j_, v_ in d_.items()},
                     # CAPRI's ration fat limit with linseed (SupplementPerc_; abatement._supp_fat_spec)
-                    supp_fat={a_: d_ for a_, d_ in self._supp_fat_spec().items() if d_["col"] < Q.shape[0]}, **abat)
+                    supp_fat={a_: d_ for a_, d_ in self._supp_fat_spec().items() if d_["col"] < Q.shape[0]},
+                    # CAPRI's pesticide module (supply.pest_disagg "agg5"; supply/pesticides.py)
+                    pest=self._nlp_pest_spec(A, labels), **abat)
         if npk is not None and getattr(self.ev, "alloc_cols", 0):
             spec["fix_cols"] = {n + len(getattr(self.ev, "land_types_used", [])): 0.0}
         self.res.last_feed_dm = None
@@ -338,6 +340,10 @@ class NLPBlock:
                     # the N-surplus target with the mineral N of the fertilisation block (CAPRI SURTOT_REST_ /
                     # e_SURTOTHa): the row's linear mineral parts out, the purchases in
                     npk["n_rows"] = [("N_balance", self._n_row_mineral_parts(A, labels))]
+                    if getattr(self.data, "pesticides", None):
+                        # the crops' residues, removal and fixation per unit, for the pesticide yield factor's terms
+                        # in the surplus (e_CRESID, e_EXPPRD, e_BIOFIX; SURTOT_pestTerms)
+                        npk["n_rows_pest"] = {"N_balance": self._n_row_pest_parts()}
                     # the row's constant without its mineral part (the base manure trade's displacement of mineral N,
                     # supply.manure_base_trade "capri"): the purchases carry the mineral N here (K167)
                     _nbc = getattr(self.ev, "nb_const", None)
@@ -635,6 +641,8 @@ class NLPBlock:
                     print("YANI response failed", self.data.region_id, repr(_exc), flush=True)
                 self.res.yani_dnet = None
         self.res.last_npk = nlp.fert_outputs(res["x"]) if nlp.fert else None
+        # CAPRI's pesticide module (supply.pest_disagg "agg5"): per crop and technology the yield factor and applications
+        self.res.last_pest = nlp.pest_outputs(res["x"]) if getattr(nlp, "pest", None) else None
         ab = (nlp.abatement_outputs(res["x"]) if (getattr(nlp, "abat", None) or getattr(nlp, "supp_fat", None))
               else {})
         if "catc" in ab:
@@ -740,6 +748,7 @@ class NLPBlock:
         target; with ev.nlp_accept_last set (the caller's last attempt), IPOPT's last point is kept, as CAPRI carries on
         with a non-optimal solve (supply/simu_supply.gms, widen_bounds.gms; p_INFES)."""
         self.res.last_npk = None
+        self.res.last_pest = None                     # nor its pesticide yield factors
         self.res.nlp_rc = None
         self.res.last_feed_dm = None                  # never carry a previous solve's feed
         self.res.last_feed_t = None

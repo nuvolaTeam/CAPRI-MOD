@@ -103,6 +103,8 @@ class ProblemBlock:
         X = ca.vertcat(z, u)
         self.feeds, self.nf = feeds, nf
         self._fhv = fhv
+        # the pesticide module's applications and yield factors (supply.pest_disagg "agg5"), before the rows they enter
+        self._pest_terms(spec, y)
 
         # ---------------- feed calibration (REQSE_ only) ----------------
         cal = {a: calibrate_feed_terms(r, fod) for a, r in rats.items()}
@@ -267,6 +269,19 @@ class ProblemBlock:
             else:
                 g_rows.append(ex); lbg.append(-np.inf); ubg.append(float(b[i]) / rs)
                 gmap.append(("le", i, None, rs))
+        # SUPBAL_'s fodder output with the pesticide module's yield factor (l. 4586-4594): each fodder crop's output
+        # coefficient x (1 + (v_yldPestFac - 1)) per technology (yield_diff, techn_mix_2030.csv)
+        if getattr(self, "_pest_pre", None):
+            yd_ = {int(cr["col"]): float(cr.get("yield_diff", 0.0)) for cr in spec["pest"]["crops"]}
+            for pos_, gm_ in enumerate(gmap):
+                i = gm_[1]
+                if i not in fod_rows:
+                    continue
+                for j_, act_ in self._pest_pre["by_col"].items():
+                    if A[i, j_] != 0.0:
+                        d_ = self.pest_dev(j_, yd_.get(j_, 0.0))
+                        if d_ is not None:
+                            g_rows[pos_] = g_rows[pos_] + self._pv(float(A[i, j_]) / gm_[3]) * d_
         self.n_lin = len(g_rows)
 
         # ---------------- REQSE_ ----------------
@@ -342,6 +357,8 @@ class ProblemBlock:
         X, obj = self._abatement_block(spec, X, y, obj, g_rows, lbg, ubg, lbx, ubx)
         # ---------------- the ration fat limit with linseed (SupplementPerc_) ----------------
         X, obj = self._supplement_fat_block(spec, X, y, obj, g_rows, lbg, ubg, lbx, ubx)
+        # ---------------- the pesticide module (supply.pest_disagg "agg5": v_pestiPerHa, yldPestFac_) ----------------
+        X, obj = self._pest_block(spec, X, y, obj, g_rows, lbg, ubg, lbx, ubx)
 
         # ---------------- fertilisation (NUTNED_, pools, inner model) ----------------
         self.fert = None

@@ -160,6 +160,7 @@ class NitrogenBlock:
             inp = _inputs.current()
             cls._CROP_N = {}
             cls._CROP_N_RES = {}
+            cls._CROP_N_FIXN2O = {}
             t = inp.csv("capri_crop_n_coefs_2030.csv", "environment")
             tot = inp.csv("capri_gnb_components_2030.csv", "environment").pivot_table(
                 index="capri_region", columns="item", values="kg_n_per_ha")
@@ -209,6 +210,13 @@ class NitrogenBlock:
                     res = sum(float(x.levl) * res_ha(x) for x in src) / L * kr
                     fix = sum(float(x.levl) * _dn(x) * _bf(x) for x in src) / L
                     out[mc] = (rem, res, fix)
+                    # CAPRI's report of the fixation's N2O (envind/gases.gms l. 600-616, EMISCALC N2OFIX) takes the
+                    # reported NITF (the need net of fixation, column nitf) where e_BIOFIX takes DATA(crop, NITF): the
+                    # ratio of the two bases per crop, on the accounts' fixation (fix_n2o_basis)
+                    _nt = lambda x: float(x.nitf) if x.nitf == x.nitf else 0.0               # noqa: E731
+                    fb = sum(float(x.levl) * _nt(x) * _bf(x) for x in src) / L
+                    if fix > 0:
+                        cls._CROP_N_FIXN2O.setdefault(r8, {})[mc] = fb / fix
                 cls._CROP_N[r8] = out
                 cls._CROP_N_RES[r8] = (kr, dep)       # residues' scale and deposition (_crop_n_at_yields)
         return cls._CROP_N.get(self._crop_n_region(region))
@@ -523,6 +531,8 @@ class NitrogenBlock:
         n_residues = 0.0
         _own_need = _own_res = 0.0
         n_crop_uptake_c = n_fix_c = 0.0
+        n_fix_n2o_basis = 0.0
+        _fxr = (getattr(type(self), "_CROP_N_FIXN2O", None) or {}).get(self._crop_n_region(region), {}) if _cn else {}
         if _cn:
             for crop in CROPS:
                 area = activities.get(crop, 0.0)
@@ -549,6 +559,7 @@ class NitrogenBlock:
                     _own_need += area * co[1] * _fc_ * _nf * float(_ned)
                     _own_res += _ns.e_CRESID(area, res_, 1.0)
                 n_fix_c += _ns.e_BIOFIX(area, fix_, 1.0)
+                n_fix_n2o_basis += _ns.e_BIOFIX(area, fix_, 1.0) * float(_fxr.get(crop, 1.0))
 
         # Biological N fixation: CAPRI's per crop and region (BIOFIX, _capri_crop_n)
         if not _cn and any(activities.get(c, 0.0) > 0 for c in CROPS):
@@ -632,6 +643,8 @@ class NitrogenBlock:
             "n_mineral_plain": n_mineral_plain,
             "n_organic_input": n_organic,
             "n_fixation": n_fixation,
+            # the base of CAPRI's reported fixation N2O (gases.gms N2OFIX: reported NITF x BioFix x the technology), t N
+            "n_fixation_n2o_basis": n_fix_n2o_basis,
             "n_crop_residues": n_residues,
             "n_deposition": n_deposition,
             "n_crop_uptake": n_crop_uptake,

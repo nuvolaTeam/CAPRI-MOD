@@ -19,6 +19,10 @@ COMMENT ON TABLE capri_mcact IS 'CAPRI MCACT(PACT), crop activities in the suppl
 CREATE TABLE capri_maact (code VARCHAR PRIMARY KEY REFERENCES capri_pact (code), text VARCHAR);
 COMMENT ON TABLE capri_maact IS 'CAPRI MAACT(PACT), animal activities in the supply model';
 
+-- file: capri_data/codes/capri/pesTSAgg.csv
+CREATE TABLE capri_pestsagg (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_pestsagg IS 'CAPRI pesTSAgg, the five pesticide aggregates (sets.gms l. 1761-1767, 4605-4607; pestoAgg l. 4646-4655: under PESTDISAGGStage 5_aggregates pestoAgg = pesModDis = pesTSAgg), the items of the pesticide module (register DEP-51)';
+
 -- file: capri_data/codes/capri/XX.csv
 CREATE TABLE capri_xx (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_xx IS 'CAPRI XX, the market model''s products (arm/arm_sets.gms)';

@@ -667,6 +667,32 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   the fixed point compares the unbounded solves, as written before the default changed: market.bounds "none" there
   (with the bounds, "ipopt" takes CAPRI's second solve, a least-infeasibility IPOPT solve of the whole market, over an
   hour); 14 passed in 12 minutes on this machine.
+- **CAPRI's pesticide module, its agg5 stage (25-27 November 2026; register DEP-51, DEP-59 to DEP-62; the project
+  lead's choice of 26 November: CAPREG's p_pestPar read, pest_cor.gms not ported):** setting supply.pest_disagg
+  ("none", CAPRI's default; "agg5"). (1) The data: CAPREG's 2017 applications of the five aggregates (g per ha), their
+  unit values (EUR per kg) and maxDamage (tools/build/build_pesticides_2017.py; code list pesTSAgg). (2) CAPRI's
+  calibration at 2030 (supply/cal_pesti.gms, capri_mod/supply/equations/cal_pesti.py): the yield's value without
+  damage, the marginal fertiliser cost, the price-damage ratio, the power and linear damage functions, cell by cell
+  in CAPRI's loop, with CAPRI's test of it (pesti_test.py; tools/build/build_pesticide_calibration_2030.py ->
+  pesticide_margins_2030.csv, pesticide_par_2030.csv). (3) The supply model: the yield factor yldPestFac_ on the
+  crops' output, the fodder balances, the nutrient need (on DATA(crop, FNUT)'s part), the residues and the N surplus
+  rows (CRESID, EXPPRD, BIOFIX), the regional use rows pestiUse_ and pestiTot_ with v_pestiQuantReg's bounds and the
+  quota of a quota scenario (define_inputs.gms l. 141-166), the emission tax on the residues' and fixation's N2O the
+  yield factor moves; the accounts take the solve's yield factors. (4) The applications as CAPRI's runs have them
+  (setting supply.pest_applications, "exogenous" the default): CAPRI's reference policy files fix them
+  (pol_input/cap_after_2023/ref.gms l. 21-23: "otherwise supply is unstable"; set_supply_bounds.gms l. 180-189), a
+  scenario moves them by a change factor (define_inputs.gms l. 117-136): the Green Deal's from PLAP's target and the
+  organic area's (conventional_io.gms l. 128-134, organic_io.gms l. 74-76), with no separate yield loss and PLAP's
+  change 0 under the module; "endogenous" leaves the calibrated cells free. (5) CAPRI's fixation N2O (GWPN2OFIX_) in
+  the accounts on CAPRI's report basis (envind/gases.gms l. 600-616: the reported NITF x BioFix x the need
+  multiplier), outside GN2O and the tax as in CAPRI (register DEP-8): Denmark's 139.41 kt CO2-eq at the base, CAPRI's.
+  Two possible CAPRI errors followed as coded and reported to the project lead: the organic cut to the pesticides
+  counted twice (20% target and 10% organic: x 0.72, not x 0.80), and the organic yield gap x 0.45 with the module
+  where the comment implies 0.55 (organic_area.gms l. 182-186). Checked on seven units' Green Deal pair (DK, AT12,
+  DE21, FR21, ES41, PL41, IT32; 24 iterations each, no non-optimal regional solve): the baseline with the module equals
+  the one without to 4e-8 (levels and outputs); in the Green Deal step, yields with the module against without: soft
+  wheat -7.6% against -5.6%, barley -10.5% against -8.8%, sugar beet -12.3% against -7.8%, grain maize -11.2% against
+  -11.7%. CAPRI's Green Deal result ran with the module off. Tests: test_pesti_supply.py and the calibration's tests.
 - **The UK, the Western Balkans and Turkey on the GUI's maps (27 November 2026, the project lead: the scenario
   comparison's map of the regional units did not show the UK; "do the same" for the Western Balkans and Turkey):** the
   NUTS-2024 table (capri_data/codes/capri_units_nuts2024.csv) links the EU's and Norway's units only, the UK is not in

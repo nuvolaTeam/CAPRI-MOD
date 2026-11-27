@@ -24,8 +24,9 @@ def p_onFarmShare(oms, SEDF_MS, SEDM_MS, LOSF_MS, GROF_MS, LOSF_STRA_RS=0.0, GRO
                                   /DATA(RS,"GROF","STRA","CUR")) $ (SAMEAS(OMS,"STRA") and DATA(RS,"GROF","STRA","CUR"));
 
     In this project's notation: s = (SEDF + SEDM + LOSF) / GROF of the member state (0 without its production), for
-    straw s = 0.9 LOSF / GROF of the region; the items at "CUR", the simulation year's data (2030: sim_ini_21730's DATA
-    at "Y"; the base year: at "BAS").
+    straw s = 0.9 LOSF / GROF of the region; the items at "CUR", the simulation year's data (the base year: at "BAS"; 2030:
+    sim_ini_21730's DATA at "TRD", from which the baseline's "CUR" starts: the seed bought, SEDM, has no value at "Y"
+    there, so "Y" serves only the outputs without it, the fodders).
 
     Departures from CAPRI: none."""
     if str(oms) == "STRA":
