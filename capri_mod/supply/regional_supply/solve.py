@@ -497,6 +497,15 @@ class SolveBlock:
         # SUPBAL_ output x (1 + tf) per technology and x (1 + (v_yldPestFac - 1)); the accounts take them as CAPRI's
         # rows do (environmental_module: techn_fact), not through the yield
         _isf = self._insolve_factors(activities)
+        if price_shock is None and not policy_shock and getattr(self.res, "last_pest", None):
+            # CAPRI's check of the yield factors after the calibrated model's solve at the base (baseline/check_cal.gms
+            # l. 315-324): a warning, the run goes on
+            from capri_mod.supply.equations.pesti_test import check_cal_pestiCaliProblems
+            _pcp = check_cal_pestiCaliProblems({k_: v_["y"] for k_, v_ in self.res.last_pest.items()})
+            if _pcp:
+                import warnings as _w
+                _w.warn(f"Pesticide calibration had problem cases in {self.data.region_id} after the base solve: "
+                        f"{_pcp}", RuntimeWarning)
         for _a, (_tf, _ned) in _isf.items():
             gross_output[_a] = float(gross_output[_a]) * (1.0 + _tf)
 

@@ -106,3 +106,25 @@ def test_the_green_deals_factor_on_the_applications_and_the_quota_are_capris_cod
     assert DATA_QUTS_pesTotal(120.0, 0.5) == pytest.approx(60.0)
     assert DATA_Yild_percentageChange(-20.0, None) == pytest.approx(0.20)
     assert DATA_Yild_percentageChange(-20.0, None, pest_disagg=True) == pytest.approx(0.09)
+
+
+def test_the_yield_factors_are_one_at_the_calibration_point():
+    """CAPRI's check of the calibration (baseline/check_cal.gms l. 36-45, 315-324; pesti_test.check_cal_pestiCaliProblems)
+    on the data of every region: at the applications per ha of the calibration, the supply model's yield factor
+    yldPestFac_ is 1 within 1e-4 in every crop-technology with NoDamageFac (NoDamageFac = 1 + the current damage,
+    cal_pesti.gms l. 505-512). So the fertiliser calibration's base (fertilisation.py's need multiplier) sees the yield
+    factor at 1, as CAPRI's fert/ferttrm_cor_tj.gms l. 438 fixes it."""
+    from collections import defaultdict
+    from capri_mod.supply.equations.pesti_test import check_cal_pestiCaliProblems, yldPestFac_
+    cells, ndf = defaultdict(list), {}
+    with open(PAR_2030, newline="") as fh:
+        for r in csv.DictReader(fh):
+            k = (r["region"], r["activity"], r["technology"])
+            if r["item"] == "YILD":
+                ndf[k] = float(r["no_damage_fac"])
+            else:
+                cells[k].append(tuple(float(r[c]) for c in ("max_damage", "appl_per_ha", "slop_lin", "slop_expo",
+                                                             "expon")))
+    y = {k: yldPestFac_(ndf[k], cells[k]) for k in ndf}
+    assert len(y) > 11000
+    assert check_cal_pestiCaliProblems(y) == []

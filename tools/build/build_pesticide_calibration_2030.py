@@ -37,7 +37,14 @@ Inputs, each CAPRI's own (claude/pesticide_p1_audit_2026-11-27.md):
   the fertiliser calibration's levels      v_cropNutNeedMultFact per technology (sim_ini_21730; kept extract
                                            crop_nut_need_mult_fact_techn.parquet); the residues' availability net of the
                                            N2O loss and the mineral fertiliser's efficiency (npk_region_2030.csv
-                                           cres_avail, mine_eff: CAPRI's 2030 reference)
+                                           cres_avail, mine_eff: CAPRI's 2030 reference). The coupling CAPRI has (cal_pesti
+                                           reads its fertiliser calibration's levels; supply/prep_cal.gms l. 28): the
+                                           supply model's fertiliser block takes the same levels (its need per ha is
+                                           CAPRI's reported need, with these factors in it, closed at the model's base by
+                                           one multiplier per region and nutrient, 0.988-1.005, register DEP-10 item 1b;
+                                           cres_avail and mine_eff from the same npk_region_2030.csv), and its base sees
+                                           the yield factor at 1, as fert/ferttrm_cor_tj.gms l. 438 fixes it
+                                           (test_pesti_supply.py)
   p_nitrFact(RUNR, "ALL", "DEFR")          CAPRI's soil factor of the N need (fert/fertpar.gms l. 246, from CAPREG's
                                            fert_out, which is not at hand): recovered from CAPRI's 2030 reference, the
                                            reported need of each crop group over its crops' need (NUTNED_'s left side;

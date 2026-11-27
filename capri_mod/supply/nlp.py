@@ -274,13 +274,24 @@ class NLPBlock:
                     spec["npk"] = npk
                     nlp0 = CapriRegionalNLP(spec)
                     out = nlp0.calibrate(yb)
+                if out.get("ok") and getattr(nlp0, "pest", None):
+                    # CAPRI's check of the yield factors at the calibration point (baseline/check_cal.gms l. 36-45):
+                    # a warning, the calibration goes on
+                    from capri_mod.supply.equations.pesti_test import check_cal_pestiCaliProblems
+                    _pcp = check_cal_pestiCaliProblems({k_: v_["y"] for k_, v_ in nlp0.pest_outputs(nlp0.cal_point).items()})
+                    if _pcp:
+                        import warnings as _w
+                        _w.warn(f"Pesticide calibration had problem cases in {self.data.region_id} at the calibration "
+                                f"point: {_pcp}", RuntimeWarning)
+                    out["pest_cali_problems"] = _pcp
                 if out.get("ok"):
                     cal = {"dq": {cols[j]: float(v) for j, v in enumerate(out["dq"]) if v != 0.0},
                            "dcnst": dict(out["dcnst"]), "dabat": dict(out.get("dabat") or {}),
                            "residual": out["residual"],
                            "purchase0": {k_: v_["purchase"] for k_, v_ in nlp0.fert_outputs(nlp0.cal_point).items()},
                            "base_alloc": self._npk_base_alloc(nlp0, npk, yb),
-                           "obj0": float(nlp0.f_obj(nlp0.cal_point)), "cols": list(cols)}
+                           "obj0": float(nlp0.f_obj(nlp0.cal_point)), "cols": list(cols),
+                           "pest_cali_problems": out.get("pest_cali_problems")}
                 else:
                     cal = {"dq": {}, "dcnst": {}, "failed": out.get("why")}
                     import warnings as _w

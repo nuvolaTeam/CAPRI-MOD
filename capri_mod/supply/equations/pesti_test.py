@@ -192,3 +192,38 @@ def pestiCaliProblems_map(v_yldPestFac):
 
     In this project's notation: |v_yldPestFac - 1| > 1e-4 at the calibration point. Departures from CAPRI: none."""
     return abs(float(v_yldPestFac) - 1.0) > PESTI_CALI_TOL
+
+
+def check_cal_pestiCaliProblems(v_yldPestFac):
+    r"""The calibration's check of the yield factors: the crop-technologies whose yield factor is off 1 by more than
+    1e-4 at the calibrated model's base point, reported as a warning (CAPRI displays them and goes on).
+
+    CAPRI's GAMS (baseline/check_cal.gms l. 36-45):
+
+        * --- If disaggregate pesticides are active test if pmp step 1 gave as expected all v_yldPestFac close to 1
+        *
+        $iftheni.pes39 %pest_disagg%==on
+          option kill = pestiCaliProblems_map;
+          pestiCaliProblems_map(runr,mCACT,A) $ (abs(v_yldPestFac.l(runr,MCACT,A)-1) gt 1e-4) = yes;
+          if(card(pestiCaliProblems_map),
+             display "#####  WARNING: Pesticide calibration had problem cases in %system.fn%, line %system.incline%. #####";
+             display "#####  Inspect listing from pmp step 1 model m_capmod and perhaps an earlier warning from cal_pesti.gms  #####";
+             display "#####  Problem cases identified:",pestiCaliProblems_map ;
+            );
+
+    and after the calibrated model's solve (l. 315-324):
+
+        * --- If disaggregate pesticides are active test if calibrated model gave as expected all v_yldPestFac close to 1
+        *
+        $iftheni.pes40 %pest_disagg%==on
+          option kill = pestiCaliProblems_map;
+          pestiCaliProblems_map(runr,mCACT,A) $ (abs(v_yldPestFac.l(runr,MCACT,A)-1) gt 1e-4) = yes;
+          if(card(pestiCaliProblems_map),
+             display "#####  WARNING: Pesticide calibration had problem cases in %system.fn%, line %system.incline%. #####";
+             display "#####  Inspect listing from model m_capmodQ and perhaps an earlier warning from cal_pesti.gms  #####";
+             display "#####  Problem cases identified:",pestiCaliProblems_map ;
+            );
+
+    In this project's notation: v_yldPestFac {(crop, technology): y}; returns the sorted keys with |y - 1| > 1e-4
+    (pestiCaliProblems_map). Departures from CAPRI: none."""
+    return sorted(k for k, y in v_yldPestFac.items() if pestiCaliProblems_map(y))
