@@ -667,6 +667,17 @@ subsidised exports, LULUCF in the market, the market regions' crop areas and yie
   the fixed point compares the unbounded solves, as written before the default changed: market.bounds "none" there
   (with the bounds, "ipopt" takes CAPRI's second solve, a least-infeasibility IPOPT solve of the whole market, over an
   hour); 14 passed in 12 minutes on this machine.
+- **The UK on the GUI's maps (27 November 2026, the project lead: the scenario comparison's map of the regional units
+  did not show the UK):** the UK is not in NUTS 2024, so its 11 CAPRI units had neither a shape nor a link to one, and
+  CAPRI's Green Deal extract kept only the member states (so the comparison's regional table dropped the UK's units on
+  both sides). Now: the units on the last NUTS with the UK, NUTS 2021 level 1 (Eurostat GISCO, 1:20 million;
+  capri_gradio/geo/build_uk_geometry.py -> uk_nuts2021_level1.csv), London joined to the South East as CAPRI's UKJ00000
+  holds both (capdis/sets/sets.gms l. 2640-2641); the GUI's mapping and boundaries add them (results_data.nuts_mapping,
+  nuts_geometry; capri_mod/nuts_reporting.py and the NUTS-2024 table unchanged); CAPRI's UK levels of the same Green
+  Deal pair in capri_data/validation/greendeal_2030/capri_gd_effect_uk.csv (tools/build/extract_capri_gd_pair.py; the
+  member states' file unchanged to the byte). The comparison's scatter and correlation stay on the EU's units. A check
+  on the Space's Green Deal run (88c2e99e3db9): the 11 UK units on both maps; GRAI +4.1% to +5.4% here against CAPRI's
+  +8.0% to +11.0%. Turkey and the Western Balkans are still not on the maps. Test: test_results_browser.py (1).
 - **The split of the large modules (26 November 2026; the plan of 25 November, the project lead: modules over 1,000
   lines into parts with names a reader understands):** each large file stays as the main file, slim, with its entry
   points, and re-exports every name its parts define, so no import elsewhere changes; the code moved as it was (the

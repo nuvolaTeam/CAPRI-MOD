@@ -128,6 +128,22 @@ INSERT INTO value_units VALUES
   ('val_capri_gd_effect', 'scen', NULL, 'open', 'capri_gd_effect.scen: the unit of the item'),
   ('val_capri_gd_effect', 'pct_change', 'U_percent', 'builder', '% change from the reference');
 
+-- file: capri_data/validation/greendeal_2030/capri_gd_effect_uk.csv
+CREATE TABLE val_capri_gd_effect_uk (
+    region VARCHAR NOT NULL,
+    activity VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL,
+    ref DOUBLE,
+    scen DOUBLE,
+    pct_change DOUBLE,
+    PRIMARY KEY (region, activity, "item")
+);
+COMMENT ON TABLE val_capri_gd_effect_uk IS 'CAPRI''s Green Deal 2030 step against its reference for the UK''s regional units: the activity levels (LEVL) of the reference and the scenario and the % change (tools/build/extract_capri_gd_pair.py); apart from capri_gd_effect.csv, the UK not being a member state.';
+INSERT INTO value_units VALUES
+  ('val_capri_gd_effect_uk', 'ref', NULL, 'open', 'capri_gd_effect_uk.ref: the level of the activity, 1000 ha or 1000 heads'),
+  ('val_capri_gd_effect_uk', 'scen', NULL, 'open', 'capri_gd_effect_uk.scen: the level of the activity, 1000 ha or 1000 heads'),
+  ('val_capri_gd_effect_uk', 'pct_change', 'U_percent', 'builder', '% change from the reference');
+
 -- file: capri_data/validation/greendeal_2030/capri_gd_market_2030.csv
 CREATE TABLE val_capri_gd_market_2030 (
     region VARCHAR NOT NULL,

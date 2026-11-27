@@ -67233,6 +67233,85 @@
     "tests": []
    }
   },
+  "val_capri_gd_effect_uk": {
+   "file": "capri_data/validation/greendeal_2030/capri_gd_effect_uk.csv",
+   "declared_in": "31_validation.sql",
+   "layout": [],
+   "comment": "CAPRI's Green Deal 2030 step against its reference for the UK's regional units: the activity levels (LEVL) of the reference and the scenario and the % change (tools/build/extract_capri_gd_pair.py); apart from capri_gd_effect.csv, the UK not being a member state.",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "ref",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "scen",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "pct_change",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "pct_change",
+     "unit": "U_percent",
+     "status": "builder",
+     "basis": "% change from the reference"
+    },
+    {
+     "item": "ref",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_gd_effect_uk.ref: the level of the activity, 1000 ha or 1000 heads"
+    },
+    {
+     "item": "scen",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_gd_effect_uk.scen: the level of the activity, 1000 ha or 1000 heads"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_gd_pair",
+    "sources": "$EXPORTS/res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA.gdx; $EXPORTS/res_2_1730greendeal_refdefaulta.gdx"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "val_capri_gd_market_2030": {
    "file": "capri_data/validation/greendeal_2030/capri_gd_market_2030.csv",
    "declared_in": "31_validation.sql",

@@ -35,7 +35,7 @@ CONV_COLOURS = dict(zip(RD.CONV_MEASURES,
 DIVERGING = [[0.0, "#e34948"], [0.5, "#f0efec"], [1.0, "#2a78d6"]]      # decrease red, no change grey, increase blue
 SEQUENTIAL = [[0.0, "#cde2fb"], [0.5, "#3987e5"], [1.0, "#0d366b"]]
 SERIES = ("#2a78d6", "#eb6834")
-GISCO_NOTE = "Boundaries: Eurostat GISCO, NUTS 2024 (c) EuroGeographics"
+GISCO_NOTE = "Boundaries: Eurostat GISCO, NUTS 2024 (the UK: NUTS 2021) (c) EuroGeographics"
 
 
 
@@ -726,10 +726,12 @@ def add_results(stores: list, app):
             lim = max(_saturation(fm["value"]), _saturation(fc["value"]))     # one scale for both maps
             mm = map_figure(fm, "% change", f"{name} · capri-mod", lim)
             mc = map_figure(fc, "% change", f"{name} · CAPRI", lim)
-            ok = reg.dropna(subset=["model_pct", "capri_pct"])
+            # the scatter and its correlation on the EU's units, as before the UK's were added to the maps
+            reg_eu = reg[~reg["capri_unit"].str.startswith("UK")]
+            ok = reg_eu.dropna(subset=["model_pct", "capri_pct"])
             corr = (f"correlation {np.corrcoef(ok['model_pct'], ok['capri_pct'])[0, 1]:.2f}" if len(ok) > 2
                     else "too few units for a correlation")
-            sc = scatter_figure(reg, f"{name}: {len(ok)} regional units, {corr}")
+            sc = scatter_figure(reg_eu, f"{name}: {len(ok)} EU regional units, {corr}")
             return f_ms, mm, mc, sc
 
         gd_go.click(gd_show, [store, gd_run, gd_kind], [gd_msg, gd_act, gd_pri, gd_yld, gd_nbal, gd_table, gd_file,
@@ -775,7 +777,7 @@ def add_results(stores: list, app):
             ms_fig = (bar_figure(msf["member_state"], msf["value"], f"{item} by member state · {measure}", measure)
                       if not msf.empty else None)
             regs = str((RD.read_meta(root, s_, r_).get("options") or {}).get("regions") or "")
-            msg = (f"{mf['value'].notna().sum()} of {len(mf)} NUTS-2024 regions with a value; "
+            msg = (f"{mf['value'].notna().sum()} of {len(mf)} regions with a value (NUTS 2024; the UK's units on NUTS 2021); "
                    f"{'additive item' if rec['additive'] else 'not additive: no member-state sums'}")
             if regs:
                 msg += f". The run solved {len(regs.split(','))} regional units only: the others show the baseline's " \
