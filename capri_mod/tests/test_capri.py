@@ -3555,7 +3555,7 @@ def test_ghg_accounts_take_capris_methane_and_co2(data):
 @pytest.mark.no_market_hessian
 def test_fixed_activities_land_market_and_grass_as_capri(model):
     """The removal of synthetic data, the audit's open items: CAPRI's fixed activities (FACT: other oilseeds, other industrial crops,
-    other animals) stay at their data level and other oilseeds have no market (CAPRI nonXX_CROPS; the pooled world
+    the new energy crops NECR since 27 November 2026, other animals) stay at their data level and other oilseeds have no market (CAPRI nonXX_CROPS; the pooled world
     market rested on an invented world total); every region with farmland has CAPRI's land market (Ireland's three
     NUTS-2016 regions from IE01 + IE02, so the rent-elasticity fallback serves only a land market switched off);
     grass yields are CAPRI's fresh matter (the GRAS output) at CAPRI's dry-matter content 0.22."""
@@ -3563,7 +3563,7 @@ def test_fixed_activities_land_market_and_grass_as_capri(model):
     from capri_mod.data.definitions import MARKET_COMMODITIES
     from capri_mod.supply.supply_module import FIXED_ACTIVITIES
     from capri_mod.policy.greendeal import farm_to_fork_scenario
-    assert "OOIL" not in MARKET_COMMODITIES and set(FIXED_ACTIVITIES) == {"OOIL", "OIND", "NURS", "FLOW", "OCRO", "OANI"}
+    assert "OOIL" not in MARKET_COMMODITIES and set(FIXED_ACTIVITIES) == {"OOIL", "OIND", "NURS", "FLOW", "OCRO", "NECR", "OANI"}
     lm = model.data["land_market"]
     a = model.data["areas"]
     assert [r for r in a.index if a.loc[r].sum() > 0 and r not in lm] == []

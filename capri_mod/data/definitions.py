@@ -315,6 +315,19 @@ def _load_crosswalks():
 CAPRI_TO_MODEL_ACTIVITY, COMMODITY_CAPRI_CODE, CAPRI_MEMBERS, CAPMOD_MEMBERS = _load_crosswalks()
 
 
+def _load_pact_to_y():
+    """CAPRI's PACT_TO_Y (capri_data/codes/capri/PACT_TO_Y.csv, written by tools/build/build_code_lists.py from
+    sets.gms): {activity: its main output}."""
+    import csv
+    from pathlib import Path
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "capri" / "PACT_TO_Y.csv", newline="") as f:
+        return {r["pact"]: r["o"] for r in csv.DictReader(f)}
+
+
+#: CAPRI's activity -> its main output (PACT_TO_Y, sets.gms l. 5411 for NECR.OCRO)
+PACT_TO_Y = _load_pact_to_y()
+
+
 
 def _load_cattle_splits():
     """CAPRI's cattle activities inside the model's animals (capri_data/codes/model_cattle_splits.csv, declared):

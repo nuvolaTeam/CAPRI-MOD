@@ -8127,7 +8127,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/supply/regional_supply/region_build.py"
+     "capri_mod/data/definitions.py"
     ],
     "builders": [],
     "checks": [

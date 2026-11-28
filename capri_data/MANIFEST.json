@@ -6168,7 +6168,7 @@
    "rows": 68,
    "columns": 2,
    "read_by_model": [
-    "capri_mod/supply/regional_supply/region_build.py"
+    "capri_mod/data/definitions.py"
    ],
    "origin": {
     "nature": "capri",
